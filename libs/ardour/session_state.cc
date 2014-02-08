@@ -137,7 +137,7 @@ Session::pre_engine_init (string fullpath)
 	/* discover canonical fullpath */
 
 	_path = canonical_path(fullpath);
-	
+
 	/* we require _path to end with a dir separator */
 
 	if (_path[_path.length()-1] != G_DIR_SEPARATOR) {
@@ -2736,19 +2736,23 @@ Session::cleanup_sources (CleanupReport& rep)
                 ++tmp;
 
 		if ((fs = boost::dynamic_pointer_cast<FileSource> (i->second)) != 0) {
-                        if (playlists->source_use_count (fs) != 0) {
-                                all_sources.insert (fs->path());
-                        } else {
 
-                                /* we might not remove this source from disk, because it may be used
-                                   by other snapshots, but its not being used in this version
-                                   so lets get rid of it now, along with any representative regions
-                                   in the region list.
-                                */
+			if (!fs->is_stub()) {
 
-                                RegionFactory::remove_regions_using_source (i->second);
-                                sources.erase (i);
-                        }
+				if (playlists->source_use_count (fs) != 0) {
+					all_sources.insert (fs->path());
+				} else {
+					
+					/* we might not remove this source from disk, because it may be used
+					   by other snapshots, but its not being used in this version
+					   so lets get rid of it now, along with any representative regions
+					   in the region list.
+					*/
+					
+					RegionFactory::remove_regions_using_source (i->second);
+					sources.erase (i);
+				}
+			}
 		}
 
                 i = tmp;

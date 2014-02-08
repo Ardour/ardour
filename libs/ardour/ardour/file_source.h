@@ -74,6 +74,7 @@ public:
 
 	void inc_use_count ();
 	bool removable () const;
+        bool is_stub () const;
 
 	const std::string& origin() const { return _origin; }
 

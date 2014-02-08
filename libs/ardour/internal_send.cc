@@ -129,7 +129,7 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 	// we have to copy the input, because we may alter the buffers with the amp
 	// in-place, which a send must never do.
 
-	if (_panshell && !_panshell->bypassed()) {
+	if (_panshell && !_panshell->bypassed() && role() != Listen) {
 		_panshell->run (bufs, mixbufs, start_frame, end_frame, nframes);
 	} else {
 		if (role() == Listen) {
