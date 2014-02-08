@@ -647,7 +647,8 @@ PluginManager::lxvst_refresh ()
 
 	if (lxvst_path.length() == 0) {
 		lxvst_path = "/usr/local/lib64/lxvst:/usr/local/lib/lxvst:/usr/lib64/lxvst:/usr/lib/lxvst:"
-			"/usr/local/lib64/linux_vst:/usr/local/lib/linux_vst:/usr/lib64/linux_vst:/usr/lib/linux_vst";
+			"/usr/local/lib64/linux_vst:/usr/local/lib/linux_vst:/usr/lib64/linux_vst:/usr/lib/linux_vst:"
+			"/usr/lib/vst:/usr/local/lib/vst";
 	}
 
 	lxvst_discover_from_path (lxvst_path);
