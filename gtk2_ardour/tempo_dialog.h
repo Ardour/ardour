@@ -52,9 +52,12 @@ private:
 	bool bpm_button_release (GdkEventButton* );
 	bool entry_key_release (GdkEventKey* );
 	void pulse_change ();
+	void tap_tempo ();
 
 	typedef std::map<std::string,float> NoteTypes;
 	NoteTypes note_types;
+
+	struct timeval last_tap;
 
 	Gtk::ComboBoxText pulse_selector;
 	Gtk::Adjustment   bpm_adjustment;
@@ -64,6 +67,7 @@ private:
 	Gtk::Label   when_bar_label;
 	Gtk::Label   when_beat_label;
 	Gtk::Label   pulse_selector_label;
+	Gtk::Button  tap_tempo_button;
 };
 
 class MeterDialog : public ArdourDialog
