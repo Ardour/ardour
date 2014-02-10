@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-05 11:11-0500\n"
+"POT-Creation-Date: 2014-02-10 12:05+0100\n"
 "PO-Revision-Date: 2013-01-01 20:30+0100\n"
 "Last-Translator: Eivind Ødegård <meinmycell-lists@yahoo.no>\n"
 "Language-Team: Nynorsk <i18n-nn@lister.ping.uio.no>\n"
@@ -20,7 +20,7 @@ msgstr ""
 "X-Poedit-Country: NORWAY\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: actions.cc:386
+#: actions.cc:387
 msgid "Unknown action name: %1"
 msgstr ""
 
@@ -32,22 +32,22 @@ msgstr ""
 msgid "button cannot watch state of non-existing Controllable\n"
 msgstr ""
 
-#: gtk_ui.cc:107
+#: gtk_ui.cc:108
 msgid "Log"
 msgstr ""
 
-#: gtk_ui.cc:363
+#: gtk_ui.cc:364
 msgid ""
 "\n"
 "\n"
 "Shortcut: "
 msgstr ""
 
-#: gtk_ui.cc:635
+#: gtk_ui.cc:636
 msgid "Press To Exit"
 msgstr ""
 
-#: gtk_ui.cc:671
+#: gtk_ui.cc:672
 msgid "I'm sorry %1, I can't do that"
 msgstr ""
 

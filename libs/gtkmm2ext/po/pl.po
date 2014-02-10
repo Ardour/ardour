@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libgtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-05 11:11-0500\n"
+"POT-Creation-Date: 2014-02-10 12:05+0100\n"
 "PO-Revision-Date: 2008-04-10 10:54+0100\n"
 "Last-Translator: Piotr Zaryk <pzaryk@gmail.com>\n"
 "Language-Team: Polish <pl@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: actions.cc:386
+#: actions.cc:387
 msgid "Unknown action name: %1"
 msgstr ""
 
@@ -28,22 +28,22 @@ msgstr "Teraz operuj kontrolerem"
 msgid "button cannot watch state of non-existing Controllable\n"
 msgstr ""
 
-#: gtk_ui.cc:107
+#: gtk_ui.cc:108
 msgid "Log"
 msgstr "Log"
 
-#: gtk_ui.cc:363
+#: gtk_ui.cc:364
 msgid ""
 "\n"
 "\n"
 "Shortcut: "
 msgstr ""
 
-#: gtk_ui.cc:635
+#: gtk_ui.cc:636
 msgid "Press To Exit"
 msgstr "Wciśnij by zakończyć"
 
-#: gtk_ui.cc:671
+#: gtk_ui.cc:672
 msgid "I'm sorry %1, I can't do that"
 msgstr ""
 

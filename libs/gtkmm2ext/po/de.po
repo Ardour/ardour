@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-05 11:11-0500\n"
+"POT-Creation-Date: 2014-02-10 12:05+0100\n"
 "PO-Revision-Date: 2013-02-05 19:50+0100\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.5\n"
 
-#: actions.cc:386
+#: actions.cc:387
 msgid "Unknown action name: %1"
 msgstr "Unbekannter Aktionsname: %1"
 
@@ -31,11 +31,11 @@ msgstr ""
 "Schaltfläche kann den Status des nichtexistenten Kontrollzieles nicht "
 "verfolgen\n"
 
-#: gtk_ui.cc:107
+#: gtk_ui.cc:108
 msgid "Log"
 msgstr "Log"
 
-#: gtk_ui.cc:363
+#: gtk_ui.cc:364
 msgid ""
 "\n"
 "\n"
@@ -45,11 +45,11 @@ msgstr ""
 "\n"
 "Kurzbefehl: "
 
-#: gtk_ui.cc:635
+#: gtk_ui.cc:636
 msgid "Press To Exit"
 msgstr "Zum Beenden drücken"
 
-#: gtk_ui.cc:671
+#: gtk_ui.cc:672
 msgid "I'm sorry %1, I can't do that"
 msgstr "Leider kann ich das nicht tun, %1"
 

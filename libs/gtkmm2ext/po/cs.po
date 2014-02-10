@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-05 11:11-0500\n"
+"POT-Creation-Date: 2014-02-10 12:05+0100\n"
 "PO-Revision-Date: 2013-06-13 22:33+0200\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.5\n"
 
-#: actions.cc:386
+#: actions.cc:387
 msgid "Unknown action name: %1"
 msgstr "Neznámý název pro činnost: %1"
 
@@ -29,11 +29,11 @@ msgstr "Obsluhovat ovladač nyní"
 msgid "button cannot watch state of non-existing Controllable\n"
 msgstr "Tlačítko nemůže sledovat stav neexistujícího ovladatelného cíle\n"
 
-#: gtk_ui.cc:107
+#: gtk_ui.cc:108
 msgid "Log"
 msgstr "Zápis"
 
-#: gtk_ui.cc:363
+#: gtk_ui.cc:364
 msgid ""
 "\n"
 "\n"
@@ -43,11 +43,11 @@ msgstr ""
 "\n"
 "Kurzbefehl: "
 
-#: gtk_ui.cc:635
+#: gtk_ui.cc:636
 msgid "Press To Exit"
 msgstr "Stisknout pro ukončení"
 
-#: gtk_ui.cc:671
+#: gtk_ui.cc:672
 msgid "I'm sorry %1, I can't do that"
 msgstr "Bohužel to nelze udělat, %1"
 

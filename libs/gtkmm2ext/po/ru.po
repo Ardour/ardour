@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-05 11:11-0500\n"
+"POT-Creation-Date: 2014-02-10 12:05+0100\n"
 "PO-Revision-Date: 2013-10-15 21:54+0300\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
@@ -20,7 +20,7 @@ msgstr ""
 "%100>=20) ? 1 : 2);\n"
 "X-Generator: Poedit 1.5.4\n"
 
-#: actions.cc:386
+#: actions.cc:387
 msgid "Unknown action name: %1"
 msgstr "Неизвестное название действия: %1"
 
@@ -32,11 +32,11 @@ msgstr ""
 msgid "button cannot watch state of non-existing Controllable\n"
 msgstr ""
 
-#: gtk_ui.cc:107
+#: gtk_ui.cc:108
 msgid "Log"
 msgstr "Журнал"
 
-#: gtk_ui.cc:363
+#: gtk_ui.cc:364
 msgid ""
 "\n"
 "\n"
@@ -46,11 +46,11 @@ msgstr ""
 "\n"
 "Комбинация клавиш: "
 
-#: gtk_ui.cc:635
+#: gtk_ui.cc:636
 msgid "Press To Exit"
 msgstr "Нажмите для выхода"
 
-#: gtk_ui.cc:671
+#: gtk_ui.cc:672
 msgid "I'm sorry %1, I can't do that"
 msgstr ""
 
