@@ -436,7 +436,7 @@ FileSource::find_2X (Session& s, DataType type, const string& path, bool must_ex
 
 			if (must_exist) {
 				error << string_compose(
-						_("Filesource: cannot find required file (%1) while searching"), pathstr) << endmsg;
+						_("Filesource: cannot find required file (%1)"), pathstr) << endmsg;
 				goto out;
 			} else {
 				isnew = true;
