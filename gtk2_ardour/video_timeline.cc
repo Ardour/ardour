@@ -583,7 +583,7 @@ VideoTimeLine::check_server_docroot ()
 			|| lines.at(0).empty()
 			|| lines.at(0).at(0) != video_get_docroot(Config)) {
 		warning << string_compose(
-				_("Video-server docroot mismatch. %1: '%2', video-server: '%3'. This usually means that the video server was not started by ardour and uses a different document-root."),
+				_("Video-server docroot mismatch. %1: '%2', video-server: '%3'. This usually means that the video server was not started by %1 and uses a different document-root."),
 				PROGRAM_NAME, video_get_docroot(Config), lines.at(0).at(0))
 		<< endmsg;
 		ok = false; // TODO allow to override

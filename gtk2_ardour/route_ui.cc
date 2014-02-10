@@ -1816,13 +1816,14 @@ RouteUI::open_remote_control_id_dialog ()
 						       (_route->is_master() ? _("the master bus") : _("the monitor bus"))));
 		} else {
 			l->set_markup (string_compose (_("The remote control ID of %5 is: %2\n\n\n"
-							 "Remote Control IDs are currently determined by track/bus ordering in Ardour.\n\n"
+							 "Remote Control IDs are currently determined by track/bus ordering in %6.\n\n"
 							 "%3Use the User Interaction tab of the Preferences window if you want to change this%4"),
 						       (is_track() ? _("track") : _("bus")),
 						       _route->remote_control_id(),
 						       "<span size=\"small\" style=\"italic\">",
 						       "</span>",
-						       Glib::Markup::escape_text (_route->name())));
+						       Glib::Markup::escape_text (_route->name()),
+						       PROGRAM_NAME));
 		}
 		dialog.get_vbox()->pack_start (*l);
 		dialog.add_button (Stock::OK, RESPONSE_CANCEL);

@@ -3393,7 +3393,7 @@ void
 ARDOUR_UI::stop_video_server (bool ask_confirm)
 {
 	if (!video_server_process && ask_confirm) {
-		warning << _("Video-Server was not launched by Ardour. The request to stop it is ignored.") << endmsg;
+		warning << string_compose (_("Video-Server was not launched by %1. The request to stop it is ignored."), PROGRAM_NAME) << endmsg;
 	}
 	if (video_server_process) {
 		if(ask_confirm) {

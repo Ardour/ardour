@@ -21,9 +21,12 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#include <boost/algorithm/string.hpp>    
+
 #include <gtkmm/liststore.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/scale.h>
+
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/gtk_ui.h>
@@ -1519,7 +1522,9 @@ RCOptionEditor::RCOptionEditor ()
                 mm->add (HardwareMonitoring, _("via Audio Driver"));
         }
 
-	mm->add (SoftwareMonitoring, _("ardour"));
+	string prog (PROGRAM_NAME);
+	boost::algorithm::to_lower (prog);
+	mm->add (SoftwareMonitoring, string_compose (_("%1"), prog));
 	mm->add (ExternalMonitoring, _("audio hardware"));
 
 	add_option (_("Audio"), mm);
