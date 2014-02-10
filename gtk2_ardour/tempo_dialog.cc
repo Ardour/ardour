@@ -42,6 +42,7 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	, when_bar_label (_("bar:"), ALIGN_LEFT, ALIGN_CENTER)
 	, when_beat_label (_("beat:"), ALIGN_LEFT, ALIGN_CENTER)
 	, pulse_selector_label (_("Pulse note"), ALIGN_LEFT, ALIGN_CENTER)
+	, tap_tempo_button (_("Tap tempo"))
 {
 	Timecode::BBT_Time when;
 	Tempo tempo (map.tempo_at (frame));
@@ -57,6 +58,7 @@ TempoDialog::TempoDialog (TempoSection& section, const string&)
 	, when_bar_label (_("bar:"), ALIGN_LEFT, ALIGN_CENTER)
 	, when_beat_label (_("beat:"), ALIGN_LEFT, ALIGN_CENTER)
 	, pulse_selector_label (_("Pulse note"), ALIGN_LEFT, ALIGN_CENTER)
+	, tap_tempo_button (_("Tap tempo"))
 {
 	init (section.start(), section.beats_per_minute(), section.note_type(), section.movable());
 }
@@ -162,6 +164,8 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	set_default_response (RESPONSE_ACCEPT);
 
 	bpm_spinner.show ();
+	tap_tempo_button.show ();
+	get_vbox()->pack_end (tap_tempo_button);
 
 	set_name ("MetricDialog");
 
@@ -174,6 +178,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	when_beat_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
 	when_beat_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TempoDialog::entry_key_release), false);
 	pulse_selector.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::pulse_change));
+	tap_tempo_button.signal_clicked().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo));
 }
 
 void
@@ -249,6 +254,27 @@ TempoDialog::pulse_change ()
         set_response_sensitive (RESPONSE_ACCEPT, true);
 }
 
+void
+TempoDialog::tap_tempo ()
+{
+	struct timeval now;
+	gettimeofday (&now, NULL);
+
+	if (last_tap.tv_sec >= 0 || last_tap.tv_usec > 0) {
+		struct timeval diff;
+		double interval, bpm;
+		timersub (&now, &last_tap, &diff);
+		interval = diff.tv_sec + diff.tv_usec * 1.0e-6;
+	
+		bpm = 60.0 / interval;
+		if (bpm >= 20) {
+			bpm_spinner.set_value (bpm);
+		}
+	}
+	last_tap = now;
+
+	
+}
 
 MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
 	: ArdourDialog (_("New Meter"))
