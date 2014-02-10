@@ -706,7 +706,7 @@ Playlist::flush_notifications (bool from_undo)
 		 }
 	 }
 
-	 possibly_splice_unlocked (position, (pos + length) - position, boost::shared_ptr<Region>());
+	 possibly_splice_unlocked (position, (pos + length) - position, region);
  }
 
  void
