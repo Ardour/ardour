@@ -496,8 +496,9 @@ ARDOUR_UI::post_engine ()
 
 		vector<string>::iterator n;
 		vector<string>::iterator k;
-		for (n = names.begin(), k = keys.begin(); n != names.end(); ++n, ++k) {
-			cout << "Action: " << (*n) << " bound to " << (*k) << endl;
+		vector<string>::iterator p;
+		for (n = names.begin(), k = keys.begin(), p = paths.begin(); n != names.end(); ++n, ++k, ++p) {
+			cout << "Action: '" << (*n) << "' bound to '" << (*k) << "' Path: '" << (*p) << "'" << endl;
 		}
 
 		halt_connection.disconnect ();
