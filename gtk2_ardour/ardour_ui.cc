@@ -500,6 +500,8 @@ ARDOUR_UI::post_engine ()
 			cout << "Action: " << (*n) << " bound to " << (*k) << endl;
 		}
 
+		halt_connection.disconnect ();
+		AudioEngine::instance()->stop ();
 		exit (0);
 	}
 
