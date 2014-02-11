@@ -992,18 +992,11 @@ MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR
 void
 MixerStrip::update_diskstream_display ()
 {
-	if (is_track()) {
+        if (is_track() && input_selector) {
+                        input_selector->hide_all ();
+        }
 
-		if (input_selector) {
-			input_selector->hide_all ();
-		}
-
-		route_color_changed ();
-
-	} else {
-
-		show_passthru_color ();
-	}
+        route_color_changed ();
 }
 
 void
