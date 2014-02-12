@@ -42,19 +42,19 @@ class EditorCursor {
 	}
 
 	ArdourCanvas::Line& track_canvas_item () {
-		return _track_canvas_item;
+		return *_track_canvas_item;
 	}
 
 	ArdourCanvas::Arrow& time_bar_canvas_item () {
-		return _time_bars_canvas_item;
+		return *_time_bars_canvas_item;
 	}
 
 	PBD::Signal1<void, framepos_t> PositionChanged;
 
   private:	
 	Editor&               _editor;
-	ArdourCanvas::Arrow   _time_bars_canvas_item;
-	ArdourCanvas::Line    _track_canvas_item;
+	ArdourCanvas::Arrow*  _time_bars_canvas_item;
+	ArdourCanvas::Line*   _track_canvas_item;
 	framepos_t            _current_frame;
 	double		      _length;
 };
