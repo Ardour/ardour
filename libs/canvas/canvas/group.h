@@ -68,6 +68,7 @@ private:
 	Group (Group const &);
 	void ensure_lut () const;
 	void invalidate_lut () const;
+	void clear_items (bool with_delete);
 
 	/* our items, from lowest to highest in the stack */
 	std::list<Item*> _items;

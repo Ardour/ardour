@@ -58,7 +58,7 @@ Group::Group (Group* parent, Duple position)
 
 Group::~Group ()
 {
-	clear (true);
+	clear_items (true);
 }
 
 /** @param area Area to draw in this group's coordinates.
@@ -199,7 +199,17 @@ Group::remove (Item* i)
 		return;
 	}
 
-	begin_change ();
+	/* we cannot call bounding_box() here because that will iterate over
+	   _items, one of which (the argument, i) may be in the middle of
+	   deletion, making it impossible to call compute_bounding_box()
+	   on it.
+	*/
+
+	if (_bounding_box) {
+		_pre_change_bounding_box = _bounding_box;
+	} else {
+		_pre_change_bounding_box = Rect();
+	}
 
 	i->unparent ();
 	_items.remove (i);
@@ -214,21 +224,38 @@ Group::clear (bool with_delete)
 {
 	begin_change ();
 
-	for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
-
-		(*i)->unparent ();
-
-		if (with_delete) {
-			delete *i;
-		}
-	}
-
-	_items.clear ();
+	clear_items (with_delete);
 
 	invalidate_lut ();
 	_bounding_box_dirty = true;
 
 	end_change ();
+}
+
+void
+Group::clear_items (bool with_delete)
+{
+	for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ) {
+
+		list<Item*>::iterator tmp = i;
+		Item *item = *i;
+
+		++tmp;
+
+		/* remove from list before doing anything else, because we
+		 * don't want to find the item in _items during any activity
+		 * driven by unparent-ing or deletion.
+		 */
+
+		_items.erase (i);
+		item->unparent ();
+		
+		if (with_delete) {
+			delete item;
+		}
+
+		i = tmp;
+	}
 }
 
 void
