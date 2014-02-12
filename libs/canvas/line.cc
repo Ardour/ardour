@@ -60,11 +60,17 @@ Line::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) cons
 	Duple p0 = item_to_window (Duple (_points[0].x, _points[0].y));
 	Duple p1 = item_to_window (Duple (_points[1].x, _points[1].y));
 
-	/* See Cairo FAQ on single pixel lines to understand why we add 0.5
-	 */
+	if (_outline_width <= 1.0) {
+		/* See Cairo FAQ on single pixel lines to understand why we add 0.5
+		 */
+		
+		const Duple half_a_pixel (0.5, 0.5);
+		p0 = p0.translate (half_a_pixel);
+		p1 = p1.translate (half_a_pixel);
+	}
 
-	context->move_to (p0.x + 0.5, p0.y + 0.5);
-	context->line_to (p1.x + 0.5, p1.y + 0.5);
+	context->move_to (p0.x, p0.y);
+	context->line_to (p1.x, p1.y);
 	context->stroke ();
 }
 
