@@ -506,20 +506,24 @@ GtkCanvas::deliver_event (GdkEvent* event)
 {
 	/* Point in in canvas coordinate space */
 
+	const Item* event_item;
+
 	if (_grabbed_item) {
 		/* we have a grabbed item, so everything gets sent there */
 		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("%1 %2 (%3) was grabbed, send event there\n",
 								       _grabbed_item, _grabbed_item->whatami(), _grabbed_item->name));
-		return _grabbed_item->Event (event);
+		event_item = _grabbed_item;
+	} else {
+		event_item = _current_item;
 	}
 
-	if (!_current_item) {
+	if (!event_item) {
 		return false;
 	}
 
 	/* run through the items from child to parent, until one claims the event */
 
-	Item* item = const_cast<Item*> (_current_item);
+	Item* item = const_cast<Item*> (event_item);
 	
 	while (item) {
 
@@ -676,15 +680,6 @@ GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 	*/
 
 	// DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas motion @ %1, %2\n", ev->x, ev->y));
-
-	if (_grabbed_item) {
-		/* if we have a grabbed item, it gets just the motion event,
-		   since no enter/leave events can have happened.
-		*/
-		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("%1 %2 (%3) was grabbed, send MOTION event there\n",
-								       _grabbed_item, _grabbed_item->whatami(), _grabbed_item->name));
-		return _grabbed_item->Event (reinterpret_cast<GdkEvent*> (&copy));
-	}
 
 	pick_current_item (where, ev->state);
 
