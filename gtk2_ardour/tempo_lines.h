@@ -29,8 +29,7 @@ public:
 	void tempo_map_changed();
 
 	void draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin, 
-		   const ARDOUR::TempoMap::BBTPointList::const_iterator& end, 
-		   double frames_per_unit);
+		   const ARDOUR::TempoMap::BBTPointList::const_iterator& end);
 
 	void show();
 	void hide();

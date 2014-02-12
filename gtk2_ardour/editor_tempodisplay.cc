@@ -179,7 +179,7 @@ Editor::draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 		tempo_lines = new TempoLines (*_track_canvas, time_line_group, ArdourCanvas::COORD_MAX);
 	}
 	
-	tempo_lines->draw (begin, end, samples_per_pixel);
+	tempo_lines->draw (begin, end);
 }
 
 void

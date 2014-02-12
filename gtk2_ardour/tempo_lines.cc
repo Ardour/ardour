@@ -17,11 +17,15 @@
 
 */
 
+#include "pbd/compose.h"
+
 #include "canvas/line.h"
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
+
 #include "tempo_lines.h"
 #include "ardour_ui.h"
+#include "public_editor.h"
 
 using namespace std;
 
@@ -58,8 +62,7 @@ TempoLines::hide ()
 
 void
 TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin, 
-		  const ARDOUR::TempoMap::BBTPointList::const_iterator& end, 
-		  double samples_per_pixel)
+		  const ARDOUR::TempoMap::BBTPointList::const_iterator& end)
 {
 	ARDOUR::TempoMap::BBTPointList::const_iterator i;
 	ArdourCanvas::Rect const visible = _canvas.visible_area ();
@@ -97,7 +100,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			color = ARDOUR_UI::config()->get_canvasvar_MeasureLineBeat();
 		}
 
-		ArdourCanvas::Coord xpos = rint(((framepos_t)(*i).frame) / (double)samples_per_pixel);
+		ArdourCanvas::Coord xpos = PublicEditor::instance().sample_to_pixel_unrounded ((*i).frame);
 
 		ArdourCanvas::Line* line;
 
@@ -107,16 +110,12 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			line->reparent (_group);
 		} else {
 			line = new ArdourCanvas::Line (_group);
-			CANVAS_DEBUG_NAME (line, "tempo measure line");
+			CANVAS_DEBUG_NAME (line, string_compose ("tempo measure line @ %1", (*i).frame));
 			line->set_ignore_events (true);
 		}
 
-		/* move to 0.5 offset to ensure single pixel lines (see Cairo
-		 * FAQ for info on why we do this).
-		 */
-
-		line->set_x0 (xpos + 0.5);
-		line->set_x1 (xpos + 0.5);
+		line->set_x0 (xpos);
+		line->set_x1 (xpos);
 		line->set_y0 (0.0);
 		line->set_y1 (_height);
 		line->set_outline_color (color);
