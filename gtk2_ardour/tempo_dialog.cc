@@ -263,17 +263,28 @@ TempoDialog::tap_tempo ()
 	if (last_tap.tv_sec >= 0 || last_tap.tv_usec > 0) {
 		struct timeval diff;
 		double interval, bpm;
+		static const double decay = 0.5;
+
 		timersub (&now, &last_tap, &diff);
 		interval = diff.tv_sec + diff.tv_usec * 1.0e-6;
-	
-		bpm = 60.0 / interval;
-		if (bpm >= 20) {
+		if (interval <= 0.25) {
+			// >= 15 bpm, say
+			if (average_interval > 0) {
+				average_interval = interval * decay
+					+ average_interval * (1.0-decay);
+			} else {
+				average_interval = interval;
+			}
+
+			bpm = 60.0 / average_interval;
 			bpm_spinner.set_value (bpm);
+		} else {
+			average_interval = 0;
 		}
+	} else {
+		average_interval = 0;
 	}
 	last_tap = now;
-
-	
 }
 
 MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)

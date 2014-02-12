@@ -58,6 +58,7 @@ private:
 	NoteTypes note_types;
 
 	struct timeval last_tap;
+	double average_interval;
 
 	Gtk::ComboBoxText pulse_selector;
 	Gtk::Adjustment   bpm_adjustment;
