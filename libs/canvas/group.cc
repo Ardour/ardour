@@ -58,11 +58,7 @@ Group::Group (Group* parent, Duple position)
 
 Group::~Group ()
 {
-	for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
-		(*i)->unparent ();
-	}
-
-	_items.clear ();
+	clear (true);
 }
 
 /** @param area Area to draw in this group's coordinates.
@@ -219,10 +215,11 @@ Group::clear (bool with_delete)
 	begin_change ();
 
 	for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
+
+		(*i)->unparent ();
+
 		if (with_delete) {
 			delete *i;
-		} else {
-			(*i)->unparent ();
 		}
 	}
 
