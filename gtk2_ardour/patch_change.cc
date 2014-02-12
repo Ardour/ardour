@@ -24,7 +24,12 @@
 #include <glibmm/regex.h>
 
 #include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/utils.h"
+
 #include "ardour/midi_patch_manager.h"
+
+#include "canvas/debug.h"
+
 #include "ardour_ui.h"
 #include "midi_region_view.h"
 #include "patch_change.h"
@@ -58,12 +63,15 @@ PatchChange::PatchChange(
 		ArdourCanvas::Duple (x, y)
 		);
 	
+	CANVAS_DEBUG_NAME (_flag, text);
+
 	_flag->Event.connect (sigc::mem_fun (*this, &PatchChange::event_handler));
 	_flag->set_text(text);
 }
 
 PatchChange::~PatchChange()
 {
+	delete _flag;
 }
 
 void
@@ -147,11 +155,11 @@ PatchChange::on_patch_menu_selected(const PatchPrimaryKey& key)
 bool
 PatchChange::event_handler (GdkEvent* ev)
 {
+	/* XXX: icky dcast */
+	Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
+
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-	{
-		/* XXX: icky dcast */
-		Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
 		if (e->current_mouse_mode() == Editing::MouseObject && e->internal_editing()) {
 
 			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
@@ -179,7 +187,6 @@ PatchChange::event_handler (GdkEvent* ev)
 			return true;
 		}
 		break;
-	}
 
 	case GDK_KEY_PRESS:
 		switch (ev->key.keyval) {
