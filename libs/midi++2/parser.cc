@@ -132,7 +132,7 @@ Parser::Parser ()
 Parser::~Parser ()
 
 {
-	delete msgbuf;
+	free (msgbuf);
 }
 
 void
