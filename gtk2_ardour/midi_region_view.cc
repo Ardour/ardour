@@ -650,9 +650,13 @@ MidiRegionView::motion (GdkEventMotion* ev)
 
 	default:
 		break;
+
 	}
 
-	return false;
+	/* we may be dragging some non-note object (eg. patch-change, sysex) 
+	 */
+
+	return editor.drags()->motion_handler ((GdkEvent *) ev, false);
 }
 
 
