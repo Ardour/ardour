@@ -181,6 +181,10 @@ Item::item_to_window (ArdourCanvas::Rect const & r) const
 void
 Item::set_position (Duple p)
 {
+	if (p == _position) {
+		return;
+	}
+
 	boost::optional<ArdourCanvas::Rect> bbox = bounding_box ();
 	boost::optional<ArdourCanvas::Rect> pre_change_parent_bounding_box;
 
