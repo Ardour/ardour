@@ -78,24 +78,18 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 
 		setup_outline_context (context);
 		
+		/* see the cairo FAQ on single pixel lines to see why we do
+		 * the 0.5 pixel additions.
+		 */
+
 		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
 			
-			/* outline must be on pixels (hence 0.5 offset) and
-			   must be WITHIN coordinates of rect, not outside it
-			   (hence the -2.0 size adjustment, since we use 1
-			   pixel on each side for the outline)
-			*/
-
 			context->rectangle (self.x0 + 0.5, self.y0 + 0.5, self.width() - 1.0, self.height() - 1.0);
 
 		} else {
 
 			// context->set_line_cap (Cairo::LINE_CAP_SQUARE);
 			
-			/* see the cairo FAQ on single pixel lines to see why we do
-			 * this expansion of the perimeter.
-			 */
-
 			if (_outline_what & LEFT) {
 				/* vertical line: move x-coordinate by 0.5 pixels */
 				context->move_to (self.x0 + 0.5, self.y0);
@@ -104,14 +98,14 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 			
 			if (_outline_what & BOTTOM) {
 				/* horizontal line: move y-coordinate by 0.5 pixels */
-				context->move_to (self.x0, self.y1 - 0.5);
-				context->line_to (self.x1, self.y1 - 0.5);
+				context->move_to (self.x0, self.y1 + 0.5);
+				context->line_to (self.x1, self.y1 + 0.5);
 			}
 			
 			if (_outline_what & RIGHT) {
 				/* vertical line: move x-coordinate by 0.5 pixels */
-				context->move_to (self.x1 - 0.5, self.y0);
-				context->line_to (self.x1 - 0.5, self.y1);
+				context->move_to (self.x1 + 0.5, self.y0);
+				context->line_to (self.x1 + 0.5, self.y1);
 			}
 			
 			if (_outline_what & TOP) {
