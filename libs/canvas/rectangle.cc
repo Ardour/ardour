@@ -55,7 +55,9 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 	boost::optional<Rect> r = self.intersection (area);
 
 	if (!r) {
+#ifdef CANVAS_DEBUG
 		std::cerr << whatami() << '/' << name << " not covered by render area! ... " << self << " vs. " << area << std::endl;
+#endif
 		return;
 	}
 
