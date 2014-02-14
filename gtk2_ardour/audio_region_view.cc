@@ -616,10 +616,13 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 	width = std::max ((framecnt_t) 64, width);
 
-	/* round here to prevent little visual glitches with sub-pixel placement */
-	double const pwidth = rint (width / samples_per_pixel);
+	double const pwidth = trackview.editor().sample_to_pixel (width);
 
-	double const handle_right = (_region->length() / samples_per_pixel) - pwidth;
+	/* the right edge should be right on the region frame is the pixel
+	 * width is zero. Hence the additional + 1.0 at the end.
+	 */
+
+	double const handle_right = trackview.editor().sample_to_pixel (_region->length()) + TimeAxisViewItem::RIGHT_EDGE_SHIFT - pwidth + 1.0;
 
 	/* Put the fade out handle so that its right side is at the end-of-fade line;
 	 */
