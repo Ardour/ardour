@@ -644,6 +644,7 @@ ExportProfileManager::get_new_format (ExportFormatSpecPtr original)
 	ExportFormatSpecPtr format;
 	if (original) {
 		format.reset (new ExportFormatSpecification (*original));
+		std::cerr << "After new format created from original, format has id [" << format->id().to_s() << ']' << std::endl;
 	} else {
 		format = handler->add_format();
 		format->set_name (_("empty format"));
