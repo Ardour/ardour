@@ -1150,8 +1150,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	wave->set_y_position (yoff);
 	wave->set_height (ht);
 	wave->set_samples_per_pixel (samples_per_pixel);
-	wave->set_show_zero_line (false);
-
+	wave->set_show_zero_line (true);
+	
 	switch (Config->get_waveform_shape()) {
 	case Rectified:
 		wave->set_shape (WaveView::Rectified);
