@@ -95,6 +95,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	bool on_button_release_event (GdkEventButton*);
 
 	void set_image (const Glib::RefPtr<Gdk::Pixbuf>&);
+        void set_bg_colors (uint32_t color_active, uint32_t color_inactive);
 
   protected:
 	void render (cairo_t *);
@@ -126,8 +127,17 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	uint32_t bg_color;
 	uint32_t border_color;
-	uint32_t fill_color_active;
-	uint32_t fill_color_inactive;
+
+        uint32_t fill_color_active;
+        uint32_t fill_color_active_start;
+	uint32_t fill_color_active_end;
+        uint32_t fill_color_inactive_start;
+	uint32_t fill_color_inactive_end;
+        uint32_t text_color_inactive;
+        uint32_t text_color_active;
+        uint32_t led_color_inactive;
+	uint32_t led_color_active;
+
 	cairo_pattern_t* fill_pattern;
 	cairo_pattern_t* fill_pattern_active;
 	cairo_pattern_t* shine_pattern;
@@ -161,6 +171,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	void setup_led_rect ();
 	void set_colors ();
+        void build_patterns ();
 	void color_handler ();
 
 	void action_toggled ();
