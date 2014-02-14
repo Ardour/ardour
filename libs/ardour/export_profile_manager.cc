@@ -724,8 +724,20 @@ ExportProfileManager::load_formats ()
 void
 ExportProfileManager::load_format_from_disk (std::string const & path)
 {
-	XMLTree const tree (path);
-	ExportFormatSpecPtr format = handler->add_format (*tree.root());
+	XMLTree tree;
+
+	if (!tree.read (path)) {
+		error << string_compose (_("Cannot load export format from %1"), path) << endmsg;
+		return;
+	}
+
+	XMLNode* root = tree.root();
+	if (!root) {
+		error << string_compose (_("Cannot export format read from %1"), path) << endmsg;
+		return;
+	}
+
+	ExportFormatSpecPtr format = handler->add_format (*root);
 
 	/* Handle id to filename mapping and don't add duplicates to list */
 
