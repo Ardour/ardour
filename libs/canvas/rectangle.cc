@@ -85,14 +85,24 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 
 		} else {
 
-			// context->set_line_cap (Cairo::LINE_CAP_SQUARE);
-			
 			if (_outline_what & LEFT) {
 				/* vertical line: move x-coordinate by 0.5 pixels */
 				context->move_to (self.x0 + 0.5, self.y0);
 				context->line_to (self.x0 + 0.5, self.y1);
 			}
 			
+			if (_outline_what & TOP) {
+				/* horizontal line: move y-coordinate by 0.5 pixels */
+				context->move_to (self.x0, self.y0 + 0.5);
+				context->line_to (self.x1, self.y0 + 0.5);
+			}
+
+			/* in theory, you'd expect us to adjust these two by
+			 * MINUS 0.5 pixels. But the way that Cairo apparently
+			 * does rounding can lead that approach to draw on the
+			 * wrong pixel coordinate. So we add 0.5 even here.
+			 */
+
 			if (_outline_what & BOTTOM) {
 				/* horizontal line: move y-coordinate by 0.5 pixels */
 				context->move_to (self.x0, self.y1 + 0.5);
@@ -105,11 +115,6 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 				context->line_to (self.x1 + 0.5, self.y1);
 			}
 			
-			if (_outline_what & TOP) {
-				/* horizontal line: move y-coordinate by 0.5 pixels */
-				context->move_to (self.x0, self.y0 + 0.5);
-				context->line_to (self.x1, self.y0 + 0.5);
-			}
 		}
 		
 		context->stroke ();
@@ -121,15 +126,14 @@ Rectangle::compute_bounding_box () const
 {
 	if (!_rect.empty()) {
 		Rect r = _rect.fix ();
+		/* take into acount the 0.5 addition to the bounding
+		   box for the right and bottom edges, see ::render() above
+		*/
 
-		/* our outlines are always inside our coordinates, but we have
-		 * to ensure that our bounding box fully *contains* the
-		 * rectangle
-		 *
-		 * XXX: or something like that, waffle.
-		 *
-		 */
-		_bounding_box = _rect.fix ();
+		r.x1 += 0.5;
+		r.y1 += 0.5;
+
+		_bounding_box = r;
 	}
 
 	_bounding_box_dirty = false;
