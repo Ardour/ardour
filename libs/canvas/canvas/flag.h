@@ -38,7 +38,6 @@ public:
         bool covers (Duple const &) const;
 	
 private:
-	Distance _height;
 	Color _outline_color;
 	Color _fill_color;
 	Text* _text;

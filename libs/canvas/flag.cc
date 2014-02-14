@@ -27,7 +27,6 @@ using namespace ArdourCanvas;
 
 Flag::Flag (Group* parent, Distance height, Color outline_color, Color fill_color, Duple position)
 	: Group (parent)
-	, _height (height)
 	, _outline_color (outline_color)
 	, _fill_color (fill_color)
 {
@@ -37,7 +36,7 @@ Flag::Flag (Group* parent, Distance height, Color outline_color, Color fill_colo
 
 	_line = new Line (this);
 	_line->set_outline_color (_outline_color);
-	set_height (_height);
+	set_height (height);
 
 	_rectangle = new Rectangle (this);
 	_rectangle->set_outline_color (_outline_color);
@@ -62,9 +61,9 @@ Flag::set_text (string const & text)
 }
 
 void
-Flag::set_height (Distance)
+Flag::set_height (Distance h)
 {
-	_line->set (Duple (0, 0), Duple (0, _height));
+	_line->set (Duple (0, 0), Duple (0, h));
 }
 
 bool
