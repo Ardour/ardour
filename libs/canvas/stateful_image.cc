@@ -1,14 +1,28 @@
 #include <string>
 
+#include <pangomm/fontdescription.h>
+#include <pangomm/layout.h>
+
+#include "pbd/error.h"
+#include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
+#include "pbd/xml++.h"
 
-std::string StatefulImage::_image_search_path;
-StatefulImage::ImageCache StatefulImage::_image_cache;
+#include "canvas/stateful_image.h"
+#include "canvas/utils.h"
+
+#include "i18n.h"
+
+using namespace ArdourCanvas;
+using PBD::error;
+
 PBD::Searchpath StatefulImage::_image_search_path;
+StatefulImage::ImageCache StatefulImage::_image_cache;
 
-StatefulImage::StatefulImage (const XMLNode& node)
-	: _state (0)
-	, font_description (0)
+StatefulImage::StatefulImage (Group* group, const XMLNode& node)
+	: Item (group)
+	, _state (0)
+	, _font (0)
 	, _text_x (0)
 	, _text_y (0)
 {
@@ -19,7 +33,7 @@ StatefulImage::StatefulImage (const XMLNode& node)
 
 StatefulImage::~StatefulImage()
 {
-	delete font_description;
+	delete _font;
 }
 
 void
@@ -41,16 +55,16 @@ StatefulImage::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 	   ("window" coordinates) and render it.
 	*/
 	context->set_source (image, self.x0, self.y0);
-	context.rectangle (draw->x0, draw->y0, draw->width(), draw->height());
+	context->rectangle (draw->x0, draw->y0, draw->width(), draw->height());
 	context->fill ();
 
-	if (_text) {
+	if (!_text.empty()) {
 		Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 
 		layout->set_text (_text);
 
-		if (_font_description) {
-			layout->set_font_description (*_font_description);
+		if (_font) {
+			layout->set_font_description (*_font);
 		}
 
 		// layout->set_alignment (_alignment);
@@ -80,13 +94,14 @@ StatefulImage::load_states (const XMLNode& node)
 	
 	for (XMLNodeList::const_iterator i = nodes.begin(); i != nodes.end(); ++i) {
 		State s;
+		States::size_type id;
 		const XMLProperty* prop;
 		
 		if ((prop = (*i)->property ("id")) == 0) {
 			error << _("no ID for state") << endmsg;
 			continue;
 		}
-		sscanf (prop->value().c_str(), "%ud", &s.id);
+		sscanf (prop->value().c_str(), "%zd", &id);
 
 		if ((prop = (*i)->property ("image")) == 0) {
 			error << _("no image for state") << endmsg;
@@ -98,14 +113,14 @@ StatefulImage::load_states (const XMLNode& node)
 			continue;
 		}
 		
-		if (_states.size() < s.id) {
-			_states.reserve (s.id);
+		if (_states.size() < id) {
+			_states.reserve (id);
 		}
 
-		_states[s.id] = s;
+		_states[id] = s;
 	}
 
-
+	return 0;
 }
 
 StatefulImage::ImageHandle
@@ -114,7 +129,7 @@ StatefulImage::find_image (const std::string& name)
 	ImageCache::iterator i;
 
 	if ((i = _image_cache.find (name)) != _image_cache.end()) {
-		return *i;
+		return i->second;
 	}
 
 	std::string path;
@@ -125,13 +140,13 @@ StatefulImage::find_image (const std::string& name)
 		return ImageHandle();
 	}
 	
-	return Cairo::Image::create_from_file (path);
+	return Cairo::ImageSurface::create_from_png (path);
 }
 
 void
 StatefulImage::set_image_search_path (const std::string& path)
 {
-	_image_search_path = SearchPath (path);
+	_image_search_path = PBD::Searchpath (path);
 }
 
 void
@@ -144,14 +159,15 @@ StatefulImage::set_text (const std::string& text)
 	redraw ();
 }
 
-void
+bool
 StatefulImage::set_state (States::size_type n)
 {
-	begin_change ();
+	if (n >= _states.size()) {
+		return false;
+	}
 
 	_state = n;
-	_need_redraw = true;
-	_bounding_box_dirty = true;
+	redraw ();
 
-	end_change ();
+	return true;
 }

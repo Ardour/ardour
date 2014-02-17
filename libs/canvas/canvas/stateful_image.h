@@ -1,3 +1,24 @@
+/*
+    Copyright (C) 2014 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+#ifndef __canvas_stateful_image_h__
+#define __canvas_stateful_image_h__
+
 #include <string>
 #include <vector>
 #include <map>
@@ -6,19 +27,29 @@
 
 #include "canvas/item.h"
 
-class StatefulImage : public class Item
+class XMLNode;
+
+namespace Pango {
+	class FontDescription;
+}
+
+namespace ArdourCanvas {
+
+class StatefulImage : public Item
 {
   private:
+    typedef Cairo::RefPtr<Cairo::ImageSurface> ImageHandle;
+
     class State {
+      public:
 	ImageHandle image;
     };
     
-    typedef Cairo::RefPtr<Cairo::ImageSurface> ImageHandle;
-    typedef std::vector<State> Images;
+    typedef std::vector<State> States;
 
   public:
 
-    StatefulImage (const XMLNode&);
+    StatefulImage (Group*, const XMLNode&);
     ~StatefulImage ();
 
     bool set_state (States::size_type);
@@ -31,7 +62,7 @@ class StatefulImage : public class Item
 
   private:
     States                  _states;
-    Images::size_type       _state;
+    States::size_type       _state;
     std::string             _text;
     Pango::FontDescription* _font;
     uint32_t                _text_color;
@@ -46,3 +77,7 @@ class StatefulImage : public class Item
 
     static ImageHandle find_image (const std::string&);
 };
+
+}
+
+#endif /* __canvas_stateful_image_h__ */

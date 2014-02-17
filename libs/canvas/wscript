@@ -50,6 +50,7 @@ canvas_sources = [
         'polygon.cc',
         'rectangle.cc',
         'root_group.cc',
+        'stateful_image.cc',
         'text.cc',
         'types.cc',
         'utils.cc',
