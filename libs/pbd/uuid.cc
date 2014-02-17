@@ -18,6 +18,7 @@
 
 */
 
+#include <boost/uuid/uuid_io.hpp>
 #include "pbd/uuid.h"
 
 PBD::UUID&
@@ -31,5 +32,5 @@ PBD::UUID::operator= (std::string const & str)
 std::string
 PBD::UUID::to_s () const
 {
-        return std::string ((const char*) data, size());
+        return boost::uuids::to_string (*this);
 }
