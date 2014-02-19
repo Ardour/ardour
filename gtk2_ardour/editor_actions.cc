@@ -1158,7 +1158,7 @@ Editor::prev_snap_choice ()
 		set_snap_to (Editing::SnapToTimecodeSeconds);
 		break;
 	case Editing::SnapToSeconds:
-		set_snap_to (Editing::SnapToSeconds);
+		set_snap_to (Editing::SnapToTimecodeMinutes);
 		break;
 	case Editing::SnapToMinutes:
 		set_snap_to (Editing::SnapToSeconds);
