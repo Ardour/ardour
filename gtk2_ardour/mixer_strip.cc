@@ -37,6 +37,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/internal_send.h"
+#include "ardour/meter.h"
 #include "ardour/midi_track.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
@@ -1870,6 +1871,7 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 
 	set_current_delivery (send);
 
+	send->meter()->set_type(_route->shared_peak_meter()->get_type());
 	send->set_metering (true);
 	_current_delivery->DropReferences.connect (send_gone_connection, invalidator (*this), boost::bind (&MixerStrip::revert_to_default_display, this), gui_context());
 
