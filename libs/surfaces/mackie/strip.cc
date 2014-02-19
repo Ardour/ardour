@@ -627,12 +627,21 @@ Strip::do_parameter_display (AutomationType type, float val)
 }
 
 void
+Strip::handle_fader_touch (Fader& fader, bool touch_on)
+{
+	if (touch_on) {
+		fader.start_touch (_surface->mcp().transport_frame());
+	} else {
+		fader.stop_touch (_surface->mcp().transport_frame(), false);
+	}
+}
+
+void
 Strip::handle_fader (Fader& fader, float position)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader to %1\n", position));
 
 	fader.set_value (position);
-	fader.start_touch (_surface->mcp().transport_frame());
 	queue_display_reset (2000);
 
 	// must echo bytes back to slider now, because

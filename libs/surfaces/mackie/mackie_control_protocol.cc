@@ -344,7 +344,9 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 	if (_current_initial_bank <= sorted.size()) {
 
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to %1, %2, available routes %3\n", _current_initial_bank, strip_cnt, sorted.size()));
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to %1, %2, available routes %3 on %4 surfaces\n", 
+								   _current_initial_bank, strip_cnt, sorted.size(),
+								   surfaces.size()));
 
 		// link routes to strips
 
@@ -520,11 +522,23 @@ MackieControlProtocol::update_global_led (int id, LedState ls)
 	}
 }
 
+void
+MackieControlProtocol::device_ready ()
+{
+	/* this is not required to be called, but for devices which do
+	 * handshaking, it can be called once the device has verified the
+	 * connection.
+	 */
+	 
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("device ready init (active=%1)\n", active()));
+	update_surfaces ();
+}
+
 // send messages to surface to set controls to correct values
 void 
 MackieControlProtocol::update_surfaces()
 {
-	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::update_surfaces() init\n");
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieControlProtocol::update_surfaces() init (active=%1)\n", active()));
 	if (!active()) {
 		return;
 	}
