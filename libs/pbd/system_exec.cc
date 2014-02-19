@@ -1,7 +1,7 @@
 /*
     Copyright (C) 2010 Paul Davis
-    Copyright 2005-2008 Lennart Poettering
-    Author: Robin Gareus <robin@gareus.org>
+    Copyright (C) 2010-2014 Robin Gareus <robin@gareus.org>
+    Copyright (C) 2005-2008 Lennart Poettering
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,11 +43,12 @@
 #endif
 
 
-#include "system_exec.h"
+#include "pbd/system_exec.h"
 
 using namespace std;
-void * interposer_thread (void *arg);
+using namespace PBD;
 
+static void * interposer_thread (void *arg);
 static void close_fd (int& fd) { if (fd >= 0) ::close (fd); fd = -1; }
 
 #ifndef PLATFORM_WINDOWS
@@ -206,7 +207,7 @@ SystemExec::~SystemExec ()
 	pthread_mutex_destroy(&write_lock);
 }
 
-void *
+static void *
 interposer_thread (void *arg) {
 	SystemExec *sex = static_cast<SystemExec *>(arg);
 	sex->output_interposer();

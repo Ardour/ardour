@@ -52,6 +52,7 @@
 #include "pbd/openuri.h"
 #include "pbd/file_utils.h"
 #include "pbd/localtime_r.h"
+#include "pbd/system_exec.h"
 
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/bindings.h"
@@ -127,7 +128,6 @@ typedef uint64_t microseconds_t;
 #include "video_server_dialog.h"
 #include "add_video_dialog.h"
 #include "transcode_video_dialog.h"
-#include "system_exec.h"
 
 #include "i18n.h"
 

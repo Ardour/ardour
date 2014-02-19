@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2010 Paul Davis
-    Author: Robin Gareus <robin@gareus.org>
+    Copyright (C) 2010-2014 Robin Gareus <robin@gareus.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifndef __ardour_system_exec_h__
-#define __ardour_system_exec_h__
+#ifndef _libpbd_system_exec_h_
+#define _libpbd_system_exec_h_
 
 #ifndef STDIN_FILENO
 #define STDIN_FILENO 0
@@ -42,12 +42,14 @@
 #include <string>
 #include <pthread.h>
 #include <signal.h>
-#ifdef NOPBD  /* outside ardour */
+#ifdef NOPBD  /* unit-test outside ardour */
 #include <sigc++/bind.h>
 #include <sigc++/signal.h>
 #else
-#include <pbd/signals.h>
+#include "pbd/signals.h"
 #endif
+
+namespace PBD {
 
 /** @class: SystemExec
  *  @brief execute an external command
@@ -63,7 +65,7 @@
  * \ref Terminated is sent if the child application exits.
  *
  */
-class SystemExec
+class LIBPBD_API SystemExec
 {
 	public:
 		/** prepare execution of a program with 'execve'
@@ -205,6 +207,9 @@ class SystemExec
 
 		pthread_t      thread_id_tt;
 		bool           thread_active;
-};
 
-#endif /* __ardour_system_exec_h__ */
+}; /* end class */
+
+}; /* end namespace */
+
+#endif /* _libpbd_system_exec_h_ */

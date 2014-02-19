@@ -21,8 +21,8 @@
 #define __ardour_transcode_ffmpeg_h__
 
 #include <string>
+#include "pbd/system_exec.h"
 #include "ardour/types.h"
-#include "system_exec.h"
 
 
 /** @class TranscodeFfmpeg
@@ -128,7 +128,7 @@ class TranscodeFfmpeg : public sigc::trackable
 #endif
 	protected:
 		std::string infile;
-		SystemExec  *ffcmd;
+		PBD::SystemExec  *ffcmd;
 
 		bool probe ();
 

@@ -38,6 +38,7 @@
 
 #include "pbd/xml++.h"
 #include "pbd/controllable.h"
+#include "pbd/system_exec.h"
 #include <gtkmm/box.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
@@ -92,7 +93,6 @@
 #include "theme_manager.h"
 
 class VideoTimeLine;
-class SystemExec;
 class ArdourKeyboard;
 class AudioClock;
 class ButtonJoiner;
@@ -626,7 +626,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	static UIConfiguration *ui_config;
 
-	SystemExec *video_server_process;
+	PBD::SystemExec *video_server_process;
 
 	void handle_locations_change (ARDOUR::Location*);
 
