@@ -124,7 +124,7 @@ AutomationWatch::timer ()
 
 		for (AutomationWatches::iterator aw = automation_watches.begin(); aw != automation_watches.end(); ++aw) {
 			if ((*aw)->alist()->automation_write()) {
-				(*aw)->list()->add (time, (*aw)->user_double());
+				(*aw)->list()->add (time, (*aw)->user_double(), true);
 			}
 		}
 	}
