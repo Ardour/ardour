@@ -3318,7 +3318,7 @@ LineDrag::motion (GdkEvent* event, bool)
 }
 
 void
-LineDrag::finished (GdkEvent* event, bool)
+LineDrag::finished (GdkEvent* event, bool movement_occured)
 {
 	if (movement_occured) {
 		motion (event, false);
