@@ -342,21 +342,25 @@ ControlList::start_write_pass (double when)
 {
 	Glib::Threads::Mutex::Lock lm (_lock);
 
+	DEBUG_TRACE (DEBUG::ControlList, string_compose ("%1: setup write pass @ %2\n", this, when));
+
 	new_write_pass = true;
 	did_write_during_pass = false;
 	insert_position = when;
-
+	
 	/* leave the insert iterator invalid, so that we will do the lookup
 	   of where it should be in a "lazy" way - deferring it until
 	   we actually add the first point (which may never happen).
 	*/
-
+	
 	unlocked_invalidate_insert_iterator ();
 }
 
 void
 ControlList::write_pass_finished (double /*when*/)
 {
+	DEBUG_TRACE (DEBUG::ControlList, "write pass finished\n");
+
 	if (did_write_during_pass) {
 		thin ();
 		did_write_during_pass = false;
@@ -367,7 +371,9 @@ ControlList::write_pass_finished (double /*when*/)
 
 void
 ControlList::set_in_write_pass (bool yn, bool add_point, double when)
-{
+{	
+	DEBUG_TRACE (DEBUG::ControlList, string_compose ("now in write pass @ %1, add point ? %2\n", when, add_point));
+	
 	_in_write_pass = yn;
 
 	if (yn && add_point) {
@@ -381,8 +387,6 @@ ControlList::add_guard_point (double when)
 	ControlEvent cp (when, 0.0);
 	most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
-	DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 ADD GUARD POINT @ %2looked up insert iterator for new write pass\n", this, when));
-	
 	double eval_value = unlocked_eval (insert_position);
 	
 	if (most_recent_insert_iterator == _events.end()) {
@@ -437,7 +441,7 @@ ControlList::in_write_pass () const
 }
 
 void
-ControlList::add (double when, double value)
+ControlList::add (double when, double value, bool with_guards)
 {
 	/* this is for making changes from some kind of user interface or
 	   control surface (GUI, MIDI, OSC etc)
@@ -447,8 +451,8 @@ ControlList::add (double when, double value)
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 add %2 at %3 w/erase = %4 at end ? %5\n", 
-							 this, value, when, _in_write_pass, (most_recent_insert_iterator == _events.end())));
+	DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 add %2 at %3 w/erase = %4 (new ? %6) at end ? %5\n", 
+							 this, value, when, _in_write_pass, (most_recent_insert_iterator == _events.end()), new_write_pass));
 	{
 		Glib::Threads::Mutex::Lock lm (_lock);
 		ControlEvent cp (when, 0.0f);
@@ -460,7 +464,7 @@ ControlList::add (double when, double value)
 			 * add an "anchor" point there.
 			 */
 
-			if (when > 1) {
+			if (when >= 1) {
 				_events.insert (_events.end(), new ControlEvent (0, _default_value));
 				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added default value %2 at zero\n", this, _default_value));
 			}
@@ -468,8 +472,10 @@ ControlList::add (double when, double value)
 
 		if (_in_write_pass && new_write_pass) {
 
-			add_guard_point (insert_position);
-			did_write_during_pass = true;
+			if (with_guards) {
+				add_guard_point (insert_position);
+				did_write_during_pass = true;
+			}
 
 		} else if (most_recent_insert_iterator == _events.end() || when > (*most_recent_insert_iterator)->when) {
 			
@@ -492,7 +498,7 @@ ControlList::add (double when, double value)
 					++most_recent_insert_iterator;
 				}
 
-				if (most_recent_insert_iterator != _events.end()) {
+				if (with_guards && most_recent_insert_iterator != _events.end()) {
 					if ((*most_recent_insert_iterator)->when - when > 64) {
 						/* next control point is some
 						 * distance from where our new
@@ -631,7 +637,7 @@ ControlList::add (double when, double value)
 				}
 			}
 
-			if (most_recent_insert_iterator != _events.end()) {
+			if (with_guards && most_recent_insert_iterator != _events.end()) {
 				if ((*most_recent_insert_iterator)->when - when > 64) {
 					/* next control point is some
 					 * distance from where our new
@@ -1729,7 +1735,7 @@ ControlList::dump (ostream& o)
 	/* NOT LOCKED ... for debugging only */
 
 	for (EventList::iterator x = _events.begin(); x != _events.end(); ++x) {
-		o << (*x)->value << " @ " << (*x)->when << endl;
+		o << (*x)->value << " @ " << (uint64_t) (*x)->when << endl;
 	}
 }
 
