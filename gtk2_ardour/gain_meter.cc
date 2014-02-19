@@ -274,18 +274,24 @@ void
 GainMeterBase::setup_meters (int len)
 {
 	int meter_width = 5;
+	uint32_t meter_channels = 0;
+	if (_meter) {
+		meter_channels = _meter->input_streams().n_total();
+	} else if (_route) {
+		meter_channels = _route->shared_peak_meter()->input_streams().n_total();
+	}
 
 	switch (_width) {
 		case Wide:
 			//meter_ticks1_area.show();
 			//meter_ticks2_area.show();
 			meter_metric_area.show();
-			if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+			if (meter_channels == 1) {
 				meter_width = 10;
 			}
 			break;
 		case Narrow:
-			if (_route && _route->shared_peak_meter()->input_streams().n_total() > 1) {
+			if (meter_channels > 1) {
 				meter_width = 4;
 			}
 			//meter_ticks1_area.hide();
