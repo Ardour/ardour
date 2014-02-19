@@ -3318,25 +3318,10 @@ LineDrag::motion (GdkEvent* event, bool)
 }
 
 void
-LineDrag::finished (GdkEvent* event, bool movement_occured)
+LineDrag::finished (GdkEvent* event, bool)
 {
-	if (movement_occured) {
-		motion (event, false);
-		_line->end_drag (false, 0);
-	} else {
-		/* add a new control point on the line */
-
-		AutomationTimeAxisView* atv;
-
-		_line->end_drag (false, 0);
-
-		if ((atv = dynamic_cast<AutomationTimeAxisView*>(_editor->clicked_axisview)) != 0) {
-			framepos_t where = _editor->event_frame (event, 0, 0);
-			std::cerr << "Add new point @ " << where << ", " << _drags->current_pointer_y() << std::endl;
-			atv->add_automation_event (event, where, _drags->current_pointer_y(), false);
-		}
-	}
-
+	motion (event, false);
+	_line->end_drag (false, 0);
 	_editor->session()->commit_reversible_command ();
 }
 
