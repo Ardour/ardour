@@ -1,0 +1,5 @@
+#!/bin/sh
+. `dirname "$0"`/../build/gtk2_ardour/ardev_common_waf.sh
+export UBUNTU_MENUPROXY=""
+export LD_LIBRARY_PATH=$TOP/build/gtk2_ardour/:$LD_LIBRARY_PATH
+exec wine $TOP/$EXECUTABLE-vst.exe.so "$@"
