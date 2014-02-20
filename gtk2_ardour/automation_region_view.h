@@ -65,7 +65,7 @@ protected:
 	bool set_position(framepos_t pos, void* src, double* ignored);
 	void region_resized (const PBD::PropertyChange&);
 	bool canvas_event(GdkEvent* ev);
-	void add_automation_event (GdkEvent* event, framepos_t when, double y);
+        void add_automation_event (GdkEvent* event, framepos_t when, double y, bool with_guard_points);
 	void entered (bool);
 	void exited();
 

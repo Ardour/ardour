@@ -543,7 +543,7 @@ AutomationTimeAxisView::build_display_menu ()
 }
 
 void
-AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, double y)
+AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, double y, bool with_guard_points)
 {
 	if (!_line) {
 		return;
@@ -576,7 +576,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
 	_session->begin_reversible_command (_("add automation event"));
 	XMLNode& before = list->get_state();
 
-	list->add (when, y);
+	list->add (when, y, with_guard_points);
 
 	XMLNode& after = list->get_state();
 	_session->commit_reversible_command (new MementoCommand<ARDOUR::AutomationList> (*list, &before, &after));
