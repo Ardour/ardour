@@ -82,7 +82,7 @@ PolyLine::covers (Duple const & point) const
 		double d = distance_to_segment_squared (p, a, b, t, at);
 		
 		if (t < 0.0 || t > 1.0) {
-			return false;
+			continue;
 		}
 		
 		if (d < threshold) {
