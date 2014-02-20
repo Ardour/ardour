@@ -51,7 +51,10 @@ tags
 /gtk2_ardour/po/*.mo
 /gtk2_ardour/*.pot
 /libs/ardour/po/*.mo
+/libs/ardour/ardour3.pot
 /libs/ardour/libardour.pot
+/libs/gtkmm2ext/po/*.mo
+/libs/gtkmm2ext/libgtkmm2ext.pot
 
 # /gtk2_ardour/
 /gtk2_ardour/ardour.sh
