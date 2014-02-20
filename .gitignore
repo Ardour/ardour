@@ -31,6 +31,7 @@ depcomp
 *.kdev4
 .gdb_history
 core
+core.*
 cscope.files
 cscope.out
 tags
