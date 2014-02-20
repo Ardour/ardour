@@ -70,6 +70,10 @@ tags
 /libs/ardour/revision.cc
 /libs/ardour/config_text.cc
 
+# /libs/canvas
+/libs/canvas/version.cc
+/libs/canvas/canvas/version.h
+
 # /libs/gtkmm2ext/
 /libs/gtkmm2ext/*.pot
 /libs/gtkmm2ext/*.mo
