@@ -2155,8 +2155,8 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	_suspend_menu_callbacks = true;
 	add_level_meter_item_point (items, group, _("Input"), MeterInput);
-	add_level_meter_item_point (items, group, _("Pre-fader"), MeterPreFader);
-	add_level_meter_item_point (items, group, _("Post-fader"), MeterPostFader);
+	add_level_meter_item_point (items, group, _("Pre Fader"), MeterPreFader);
+	add_level_meter_item_point (items, group, _("Post Fader"), MeterPostFader);
 	add_level_meter_item_point (items, group, _("Output"), MeterOutput);
 	add_level_meter_item_point (items, group, _("Custom"), MeterCustom);
 
