@@ -32,6 +32,7 @@ depcomp
 .gdb_history
 core
 core.*
+vgcore.*
 cscope.files
 cscope.out
 tags
