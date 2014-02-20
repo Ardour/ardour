@@ -28,6 +28,7 @@ using namespace ArdourCanvas;
 PolyLine::PolyLine (Group* parent)
 	: Item (parent)
 	, PolyItem (parent)
+	, _threshold (1.0)
 {
 
 }
@@ -59,7 +60,6 @@ PolyLine::covers (Duple const & point) const
 	/* repeat for each line segment */
 
 	const Rect visible (_canvas->visible_area());
-	static const double threshold = 2.0;
 
 	for (i = 1, j = 0; i < npoints; ++i, ++j) {
 
@@ -85,11 +85,17 @@ PolyLine::covers (Duple const & point) const
 			continue;
 		}
 		
-		if (d < threshold) {
+		if (d < _threshold + _outline_width) {
 			return true;
 		}
 		
 	}
 	
 	return false;
+}
+
+void
+PolyLine::set_covers_threshold (double t)
+{
+	_threshold = t;
 }
