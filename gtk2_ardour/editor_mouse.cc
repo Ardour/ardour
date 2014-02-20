@@ -1702,7 +1702,8 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				*/
 				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (clicked_regionview);
 				if (!were_dragging && arv) {
-					arv->add_gain_point_event (item, event);
+					bool with_guard_points = !Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
+					arv->add_gain_point_event (item, event, with_guard_points);
 				}
 				return true;
 				break;

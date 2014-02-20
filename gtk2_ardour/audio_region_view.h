@@ -84,7 +84,7 @@ class AudioRegionView : public RegionView
 
 	void update_envelope_visibility ();
 
-	void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
+        void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event, bool with_guard_points);
 	void remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
 
 	boost::shared_ptr<AudioRegionGainLine> get_gain_line() const { return gain_line; }
