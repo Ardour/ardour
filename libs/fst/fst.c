@@ -3,7 +3,7 @@
 
 #include "fst.h"
 
-void 
+void
 fst_error (const char *fmt, ...)
 {
 	va_list ap;
@@ -15,7 +15,7 @@ fst_error (const char *fmt, ...)
 	va_end (ap);
 }
 
-void 
+void
 default_fst_error_callback (const char *desc)
 {
 	fprintf(stderr, "%s\n", desc);

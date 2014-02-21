@@ -62,6 +62,7 @@ struct LIBARDOUR_API _VSTHandle
 	void*        dll;
 	char*        name;
 	char*        nameptr;
+	char*        path;
 	
 	main_entry_t main_entry;
 
@@ -90,13 +91,16 @@ struct LIBARDOUR_API _VSTState
 	void  (* eventProc) (void * event);
 	
 	VSTHandle*  handle;
-	
-	int	    width;
-	int 	    height;
-	int	    wantIdle;
-	int	    destroy;
-	int	    vst_version;
-	int 	    has_editor;
+
+	int width;
+	int height;
+	int wantIdle;
+
+	int voffset;
+	int gui_shown;
+	int destroy;
+	int vst_version;
+	int has_editor;
 	
 	int	    program_set_without_editor;
 	

@@ -34,7 +34,7 @@ using namespace PBD;
 WindowsVSTPluginUI::WindowsVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<VSTPlugin> vp)
 	: VSTPluginUI (pi, vp)
 {
-	fst_run_editor (_vst->state());
+	fst_run_editor (_vst->state(), NULL);
 
 	pack_start (plugin_analysis_expander, true, true);
 }

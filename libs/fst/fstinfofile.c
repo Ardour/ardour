@@ -248,14 +248,14 @@ fst_get_info (char* dllpath)
 
 	if( !(h = fst_load( dllpath )) ) return NULL;
 	if( !(fst = fst_instantiate( h, simple_master_callback, NULL )) ) {
-	    fst_unload( h );
+	    fst_unload( &h );
 	    fst_error( "instantiate failed\n" );
 	    return NULL;
 	}
 	fstpath = fst_dllpath_to_infopath( dllpath );
 	if( !fstpath ) {
 	    fst_close( fst );
-	    fst_unload( h );
+	    fst_unload( &h );
 	    fst_error( "get fst filename failed\n" );
 	    return NULL;
 	}
@@ -264,7 +264,7 @@ fst_get_info (char* dllpath)
 
 	free( fstpath );
 	fst_close( fst );
-	fst_unload( h );
+	fst_unload( &h );
 	return info;
     }
 }

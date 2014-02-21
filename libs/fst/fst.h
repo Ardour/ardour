@@ -33,36 +33,21 @@ extern "C" {
 #endif
 
 extern int        fst_init (void* possible_hmodule);
-extern void       fst_exit ();
+extern void       fst_exit (void);
 
 extern VSTHandle* fst_load (const char*);
-extern int        fst_unload (VSTHandle*);
+extern int        fst_unload (VSTHandle**);
 
 extern VSTState * fst_instantiate (VSTHandle *, audioMasterCallback amc, void* userptr);
 extern void       fst_close (VSTState *);
 
-extern int  fst_create_editor (VSTState* fst);
-extern int  fst_run_editor (VSTState *);
+extern int  fst_run_editor (VSTState *, void* window_parent);
 extern void fst_destroy_editor (VSTState *);
 extern void fst_move_window_into_view (VSTState *);
 
 extern VSTInfo *fst_get_info (char *dllpathname);
 extern void fst_free_info (VSTInfo *info);
 extern void fst_event_loop_remove_plugin (VSTState* fst);
-extern int fst_call_dispatcher (VSTState *, int, int, int, void *, float);
-
-/**
- * Load a plugin state from a file.
- */
-extern int fst_load_state (VSTState *, char *);
-
-/**
- * Save a plugin state to a file.
- */
-extern int fst_save_state (VSTState *, char *);
-
-extern int wine_pthread_create (pthread_t* thread_id, const pthread_attr_t* attr, void *(*function)(void*), void* arg);
-
 
 #ifdef __cplusplus
 }

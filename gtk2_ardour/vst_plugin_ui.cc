@@ -79,6 +79,21 @@ VSTPluginUI::package (Gtk::Window& win)
 }
 
 bool
+VSTPluginUI::on_window_show(const std::string& title)
+{
+	_vst->state()->gui_shown = 1;
+	return PlugUIBase::on_window_show(title);
+}
+
+void
+VSTPluginUI::on_window_hide()
+{
+	_vst->state()->gui_shown = 0;
+	PlugUIBase::on_window_hide();
+}
+
+
+bool
 VSTPluginUI::configure_handler (GdkEventConfigure*)
 {
 	XEvent event;
