@@ -122,9 +122,9 @@ AutomationRegionView::canvas_event (GdkEvent* ev)
 		y = std::max (y, 0.0);
 		y = std::min (y, _height - NAME_HIGHLIGHT_SIZE);
 
-		/* no guard points if primary modifier is used */
+		/* guard points only if primary modifier is used */
 
-		bool with_guard_points = !Gtkmm2ext::Keyboard::modifier_state_equals (ev->button.state, Gtkmm2ext::Keyboard::PrimaryModifier);
+		bool with_guard_points = Gtkmm2ext::Keyboard::modifier_state_equals (ev->button.state, Gtkmm2ext::Keyboard::PrimaryModifier);
 
 		add_automation_event (ev, trackview.editor().pixel_to_frame (x) - _region->position() + _region->start(), y, with_guard_points);
 	}
