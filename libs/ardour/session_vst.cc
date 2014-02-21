@@ -60,7 +60,7 @@ intptr_t Session::vst_callback (
 	}
 
 	if (effect && effect->user) {
-	        plug = (VSTPlugin *) (effect->user);
+		plug = (VSTPlugin *) (effect->user);
 		session = &plug->session();
 #ifdef COMPILER_MSVC
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (int) pthread_self().p, opcode, plug->name());
@@ -155,7 +155,7 @@ intptr_t Session::vst_callback (
 
 			_timeInfo.samplePos = now;
 			_timeInfo.sampleRate = session->frame_rate();
-			
+
 			const TempoMetric& tm (session->tempo_map().metric_at (now));
 
 			if (value & (kVstTempoValid)) {
@@ -174,22 +174,21 @@ intptr_t Session::vst_callback (
 
 				try {
 					session->tempo_map().bbt_time_rt (now, bbt);
-					
-					/* PPQ = pulse per quarter
-					   VST's "pulse" is our "division".
 
-					   8 divisions per bar, 1 division = quarter, so 8 quarters per bar, ppq = 1
-					   8 divisions per bar, 1 division = eighth, so  4 quarters per bar, ppq = 2
-					   4 divisions per bar, 1 division = quarter, so  4 quarters per bar, ppq = 1
-					   4 divisions per bar, 1 division = half, so 8 quarters per bar, ppq = 0.5
-					   4 divisions per bar, 1 division = fifth, so (4 * 5/4) quarters per bar, ppq = 5/4
-					   
-					   general: divs_per_bar / (note_type / 4.0)
-					*/
+					/* PPQ = pulse per quarter
+					 * VST's "pulse" is our "division".
+					 *
+					 * 8 divisions per bar, 1 division = quarter, so 8 quarters per bar, ppq = 1
+					 * 8 divisions per bar, 1 division = eighth, so  4 quarters per bar, ppq = 2
+					 * 4 divisions per bar, 1 division = quarter, so  4 quarters per bar, ppq = 1
+					 * 4 divisions per bar, 1 division = half, so 8 quarters per bar, ppq = 0.5
+					 * 4 divisions per bar, 1 division = fifth, so (4 * 5/4) quarters per bar, ppq = 5/4
+					 *
+					 * general: divs_per_bar / (note_type / 4.0)
+					 */
 					double ppq_scaling =  tm.meter().note_divisor() / 4.0;
 
-					/* Note that this assumes constant meter/tempo throughout the session. Stupid VST
-					*/
+					/* Note that this assumes constant meter/tempo throughout the session. Stupid VST */
 					double ppqBar = double(bbt.bars - 1) * tm.meter().divisions_per_bar();
 					double ppqBeat = double(bbt.beats - 1);
 					double ppqTick = double(bbt.ticks) / Timecode::BBT_Time::ticks_per_beat;
@@ -197,17 +196,17 @@ intptr_t Session::vst_callback (
 					ppqBar *= ppq_scaling;
 					ppqBeat *= ppq_scaling;
 					ppqTick *= ppq_scaling;
-					
+
 					if (value & (kVstPpqPosValid)) {
 						_timeInfo.ppqPos = ppqBar + ppqBeat + ppqTick;
 						_timeInfo.flags |= (kVstPpqPosValid);
 					}
-					
+
 					if (value & (kVstBarsValid)) {
 						_timeInfo.barStartPos = ppqBar;
 						_timeInfo.flags |= (kVstBarsValid);
 					}
-					
+
 				} catch (...) {
 					/* relax */
 				}
@@ -215,13 +214,13 @@ intptr_t Session::vst_callback (
 
 			if (value & (kVstSmpteValid)) {
 				Timecode::Time t;
-				
+
 				session->timecode_time (now, t);
-				
-				_timeInfo.smpteOffset = (t.hours * t.rate * 60.0 * 60.0) + 
-					(t.minutes * t.rate * 60.0) + 
-					(t.seconds * t.rate) + 
-					(t.frames) + 
+
+				_timeInfo.smpteOffset = (t.hours * t.rate * 60.0 * 60.0) +
+					(t.minutes * t.rate * 60.0) +
+					(t.seconds * t.rate) +
+					(t.frames) +
 					(t.subframes);
 
 				_timeInfo.smpteOffset *= 80.0; /* VST spec is 1/80th frames */
@@ -257,7 +256,7 @@ intptr_t Session::vst_callback (
 			_timeInfo.samplePos = 0;
 			_timeInfo.sampleRate = AudioEngine::instance()->sample_rate();
 		}
-		
+
 		return (intptr_t) &_timeInfo;
 
 	case audioMasterProcessEvents:
@@ -286,14 +285,14 @@ intptr_t Session::vst_callback (
 
 	case audioMasterGetParameterQuantization:
 		SHOW_CALLBACK ("amc: audioMasterGetParameterQuantization\n");
-               // returns the integer value for +1.0 representation,
-	       // or 1 if full single float precision is maintained
-               // in automation. parameter index in <value> (-1: all, any)
+		// returns the integer value for +1.0 representation,
+		// or 1 if full single float precision is maintained
+		// in automation. parameter index in <value> (-1: all, any)
 		return 0;
 
 	case audioMasterIOChanged:
 		SHOW_CALLBACK ("amc: audioMasterIOChanged\n");
-	       // numInputs and/or numOutputs has changed
+		// numInputs and/or numOutputs has changed
 		return 0;
 
 	case audioMasterNeedIdle:
@@ -333,16 +332,16 @@ intptr_t Session::vst_callback (
 
 	case audioMasterGetPreviousPlug:
 		SHOW_CALLBACK ("amc: audioMasterGetPreviousPlug\n");
-	       // input pin in <value> (-1: first to come), returns cEffect*
+		// input pin in <value> (-1: first to come), returns cEffect*
 		return 0;
 
 	case audioMasterGetNextPlug:
 		SHOW_CALLBACK ("amc: audioMasterGetNextPlug\n");
-	       // output pin in <value> (-1: first to come), returns cEffect*
+		// output pin in <value> (-1: first to come), returns cEffect*
 
 	case audioMasterWillReplaceOrAccumulate:
 		SHOW_CALLBACK ("amc: audioMasterWillReplaceOrAccumulate\n");
-	       // returns: 0: not supported, 1: replace, 2: accumulate
+		// returns: 0: not supported, 1: replace, 2: accumulate
 		return 0;
 
 	case audioMasterGetCurrentProcessLevel:
@@ -364,10 +363,10 @@ intptr_t Session::vst_callback (
 	case audioMasterOfflineStart:
 		SHOW_CALLBACK ("amc: audioMasterOfflineStart\n");
 		return 0;
-		
+
 	case audioMasterOfflineRead:
 		SHOW_CALLBACK ("amc: audioMasterOfflineRead\n");
-	       // ptr points to offline structure, see below. return 0: error, 1 ok
+		// ptr points to offline structure, see below. return 0: error, 1 ok
 		return 0;
 
 	case audioMasterOfflineWrite:
@@ -378,7 +377,7 @@ intptr_t Session::vst_callback (
 	case audioMasterOfflineGetCurrentPass:
 		SHOW_CALLBACK ("amc: audioMasterOfflineGetCurrentPass\n");
 		return 0;
-		
+
 	case audioMasterOfflineGetCurrentMetaPass:
 		SHOW_CALLBACK ("amc: audioMasterOfflineGetCurrentMetaPass\n");
 		return 0;

@@ -46,12 +46,12 @@ VSTPlugin::VSTPlugin (AudioEngine& engine, Session& session, VSTHandle* handle)
 	, _state (0)
 	, _plugin (0)
 {
-	
+
 }
 
 VSTPlugin::~VSTPlugin ()
 {
-	
+
 }
 
 void
@@ -78,7 +78,7 @@ VSTPlugin::activate ()
 	_plugin->dispatcher (_plugin, effMainsChanged, 0, 1, NULL, 0.0f);
 }
 
-int 
+int
 VSTPlugin::set_block_size (pframes_t nframes)
 {
 	deactivate ();
@@ -93,13 +93,13 @@ VSTPlugin::default_value (uint32_t)
 	return 0;
 }
 
-float 
+float
 VSTPlugin::get_parameter (uint32_t which) const
 {
 	return _plugin->getParameter (_plugin, which);
 }
 
-void 
+void
 VSTPlugin::set_parameter (uint32_t which, float newval)
 {
 	float oldval = get_parameter (which);
@@ -109,7 +109,7 @@ VSTPlugin::set_parameter (uint32_t which, float newval)
 	}
 
 	_plugin->setParameter (_plugin, which, newval);
-	
+
 	float curval = get_parameter (which);
 
 	if (!PBD::floateq (curval, oldval, 1)) {
@@ -215,8 +215,8 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 		for (n = child->children ().begin (); n != child->children ().end (); ++n) {
 			if ((*n)->is_content ()) {
 				/* XXX: this may be dubious for the same reasons that we delay
-				   execution of load_preset.
-				*/
+					 execution of load_preset.
+					 */
 				ret = set_chunk ((*n)->content().c_str(), false);
 			}
 		}
@@ -301,7 +301,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 		memset (label, 0, sizeof (label));
 
 		_plugin->dispatcher (_plugin, effGetParamName, which, 0, label, 0);
-		
+
 		desc.label = label;
 		desc.integer_step = false;
 		desc.lower = 0.0f;
@@ -335,7 +335,7 @@ VSTPlugin::load_preset (PresetRecord r)
 	return s;
 }
 
-bool 
+bool
 VSTPlugin::load_plugin_preset (PresetRecord r)
 {
 	/* This is a plugin-provided preset.
@@ -348,7 +348,7 @@ VSTPlugin::load_plugin_preset (PresetRecord r)
 #ifndef NDEBUG
 	int const p = sscanf (r.uri.c_str(), "VST:%d:%d", &id, &index);
 	assert (p == 2);
-#else 
+#else
 	sscanf (r.uri.c_str(), "VST:%d:%d", &id, &index);
 #endif
 
@@ -372,13 +372,12 @@ VSTPlugin::load_plugin_preset (PresetRecord r)
 	}
 
 #else
-	
 	_state->want_program = index;
 #endif
 	return true;
 }
 
-bool 
+bool
 VSTPlugin::load_user_preset (PresetRecord r)
 {
 	/* This is a user preset; we load it, and this code also knows about the
@@ -424,7 +423,7 @@ VSTPlugin::load_user_preset (PresetRecord r)
 			return false;
 
 		} else {
-			
+
 			for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
 				if ((*j)->name() == X_("Parameter")) {
 						XMLProperty* index = (*j)->property (X_("index"));
@@ -442,7 +441,7 @@ VSTPlugin::load_user_preset (PresetRecord r)
 	return false;
 }
 
-string 
+string
 VSTPlugin::do_save_preset (string name)
 {
 	boost::shared_ptr<XMLTree> t (presets_tree ());
@@ -488,7 +487,7 @@ VSTPlugin::do_save_preset (string name)
 	return uri;
 }
 
-void 
+void
 VSTPlugin::do_remove_preset (string name)
 {
 	boost::shared_ptr<XMLTree> t (presets_tree ());
@@ -504,7 +503,7 @@ VSTPlugin::do_remove_preset (string name)
 	t->write (f);
 }
 
-string 
+string
 VSTPlugin::describe_parameter (Evoral::Parameter param)
 {
 	char name[64];
@@ -521,7 +520,7 @@ VSTPlugin::describe_parameter (Evoral::Parameter param)
 	return name;
 }
 
-framecnt_t 
+framecnt_t
 VSTPlugin::signal_latency () const
 {
 	if (_user_latency) {
@@ -531,7 +530,7 @@ VSTPlugin::signal_latency () const
 	return *((int32_t *) (((char *) &_plugin->flags) + 12)); /* initialDelay */
 }
 
-set<Evoral::Parameter> 
+set<Evoral::Parameter>
 VSTPlugin::automatable () const
 {
 	set<Evoral::Parameter> ret;
@@ -545,8 +544,8 @@ VSTPlugin::automatable () const
 
 int
 VSTPlugin::connect_and_run (BufferSet& bufs,
-			    ChanMapping in_map, ChanMapping out_map,
-			    pframes_t nframes, framecnt_t offset)
+		ChanMapping in_map, ChanMapping out_map,
+		pframes_t nframes, framecnt_t offset)
 {
 	Plugin::connect_and_run (bufs, in_map, out_map, nframes, offset);
 
@@ -557,14 +556,14 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	BufferSet& silent_bufs  = _session.get_silent_buffers(bufs_count);
 	BufferSet& scratch_bufs = _session.get_scratch_buffers(bufs_count);
 
-	/* VC++ doesn't support the C99 extension that allows 
+	/* VC++ doesn't support the C99 extension that allows
 
 	   typeName foo[variableDefiningSize];
-	   
+
 	   Use alloca instead of dynamic array (rather than std::vector which
 	   allocs on the heap) because this is realtime code.
 	*/
-	   
+
 	float** ins = (float**)alloca(_plugin->numInputs*sizeof(float*));
 	float** outs = (float**)alloca(_plugin->numInputs*sizeof(float*));
 
@@ -601,48 +600,48 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	return 0;
 }
 
-string 
+string
 VSTPlugin::unique_id () const
 {
 	char buf[32];
 
 	snprintf (buf, sizeof (buf), "%d", _plugin->uniqueID);
-	
+
 	return string (buf);
 }
 
 
-const char * 
+const char *
 VSTPlugin::name () const
 {
 	return _handle->name;
 }
 
-const char * 
+const char *
 VSTPlugin::maker () const
 {
 	return _info->creator.c_str();
 }
 
-const char * 
+const char *
 VSTPlugin::label () const
 {
 	return _handle->name;
 }
 
-uint32_t 
+uint32_t
 VSTPlugin::parameter_count () const
 {
 	return _plugin->numParams;
 }
 
-bool 
+bool
 VSTPlugin::has_editor () const
 {
 	return _plugin->flags & effFlagsHasEditor;
 }
 
-void 
+void
 VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t /*len*/) const
 {
 	char *first_nonws;
