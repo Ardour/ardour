@@ -106,11 +106,28 @@
 #define effGetProductString 48
 #define effGetVendorVersion 49
 #define effCanDo 51 // currently unused
+/* from http://asseca.com/vst-24-specs/efIdle.html */
+#define effIdle 53
 /* from http://asseca.com/vst-24-specs/efGetParameterProperties.html */
 #define effGetParameterProperties 56
 #define effGetVstVersion 58 // currently unused
+/* http://asseca.com/vst-24-specs/efShellGetNextPlugin.html */
+#define effShellGetNextPlugin  70
+/* The next two were gleaned from http://www.kvraudio.com/forum/printview.php?t=143587&start=0 */
+#define effStartProcess 71
+#define effStopProcess 72
 
-#define kEffectMagic (CCONST( 'V', 's', 't', 'P' ))
+#define effBeginSetProgram 67
+#define effEndSetProgram 68
+
+#ifdef WORDS_BIGENDIAN
+// "VstP"
+#define kEffectMagic 0x50747356
+#else
+// "PtsV"
+#define kEffectMagic 0x56737450
+#endif
+
 #define kVstLangEnglish 1
 #define kVstMidiType 1
 
