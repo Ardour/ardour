@@ -39,7 +39,9 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost:
 	bypass_button.set_active (!insert->active ());
 
 	pack_start (*box, false, false);
+#ifdef GDK_WINDOWING_X11
 	pack_start (_socket, true, true);
+#endif
 }
 
 VSTPluginUI::~VSTPluginUI ()
@@ -50,14 +52,18 @@ VSTPluginUI::~VSTPluginUI ()
 void
 VSTPluginUI::preset_selected ()
 {
+#ifdef GDK_WINDOWING_X11
 	_socket.grab_focus ();
+#endif
 	PlugUIBase::preset_selected ();
 }
 
 int
 VSTPluginUI::get_preferred_height ()
 {
-	return _vst->state()->height;
+	int preferred_height = _vst->state()->height;
+	preferred_height += _vst->state()->voffset;
+	return preferred_height;
 }
 
 int
@@ -69,11 +75,13 @@ VSTPluginUI::get_preferred_width ()
 int
 VSTPluginUI::package (Gtk::Window& win)
 {
+#ifdef GDK_WINDOWING_X11
 	/* Forward configure events to plugin window */
 	win.signal_configure_event().connect (sigc::mem_fun (*this, &VSTPluginUI::configure_handler), false);
 
 	/* This assumes that the window's owner understands the XEmbed protocol */
 	_socket.add_id (get_XID ());
+#endif
 	
 	return 0;
 }
@@ -96,6 +104,7 @@ VSTPluginUI::on_window_hide()
 bool
 VSTPluginUI::configure_handler (GdkEventConfigure*)
 {
+#ifdef GDK_WINDOWING_X11
 	XEvent event;
 	gint x, y;
 	GdkWindow* w;
@@ -129,6 +138,7 @@ VSTPluginUI::configure_handler (GdkEventConfigure*)
 	XSendEvent (GDK_WINDOW_XDISPLAY (w), GDK_WINDOW_XWINDOW (w), False, StructureNotifyMask, &event);
 	gdk_error_trap_pop ();
 
+#endif
 	return false;
 }
 

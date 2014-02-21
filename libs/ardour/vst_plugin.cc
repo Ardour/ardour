@@ -351,8 +351,30 @@ VSTPlugin::load_plugin_preset (PresetRecord r)
 #else 
 	sscanf (r.uri.c_str(), "VST:%d:%d", &id, &index);
 #endif
+
+#ifdef PLATFORM_WINDOWS
+	int const vst_version = _plugin->dispatcher (_plugin, effGetVstVersion, 0, 0, NULL, 0);
+	if (vst_version >= 2) {
+		_plugin->dispatcher (_plugin, effBeginSetProgram, 0, 0, NULL, 0);
+	}
+
+	_plugin->dispatcher (_plugin, effSetProgram, 0, index, NULL, 0);
+
+	if (vst_version >= 2) {
+		_plugin->dispatcher (_plugin, effEndSetProgram, 0, 0, NULL, 0);
+	}
+
+	//unfortunately, we don't get any opcodes back from the plugin when this happens  (?!)
+	//so we have to manually update param values from the plugin to our listeners
+	for (int n = 0; n < parameter_count(); n++ ) {
+		float p = get_parameter(n);  //ask the plugin what its new setting is
+		Plugin::set_parameter (which, newval);
+	}
+
+#else
 	
 	_state->want_program = index;
+#endif
 	return true;
 }
 

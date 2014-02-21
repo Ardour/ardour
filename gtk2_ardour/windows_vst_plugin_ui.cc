@@ -25,7 +25,13 @@
 
 #include "windows_vst_plugin_ui.h"
 
+#ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
+#elif defined GDK_WINDOWING_WIN32
+#include <gdk/gdkwin32.h>
+#elif defined GDK_WINDOWING_QUARTZ
+/* not yet supported */
+#endif
 
 using namespace Gtk;
 using namespace ARDOUR;
@@ -34,7 +40,17 @@ using namespace PBD;
 WindowsVSTPluginUI::WindowsVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<VSTPlugin> vp)
 	: VSTPluginUI (pi, vp)
 {
+
+#ifdef GDK_WINDOWING_WIN32
+	GtkWindow* wobj = win->gobj();
+	gtk_widget_realize(GTK_WIDGET(wobj));
+	void* hWndHost = gdk_win32_drawable_get_handle(GTK_WIDGET(wobj)->window);
+
+	fst_run_editor (_vst->state(), hWndHost);
+#else
 	fst_run_editor (_vst->state(), NULL);
+#endif
+
 
 	pack_start (plugin_analysis_expander, true, true);
 }
@@ -108,6 +124,7 @@ WindowsVSTPluginUI::get_XID ()
 	return _vst->state()->xid;
 }
 
+#ifdef GDK_WINDOWING_X11
 typedef int (*error_handler_t)( Display *, XErrorEvent *);
 static Display *the_gtk_display;
 static error_handler_t wine_error_handler;
@@ -124,13 +141,17 @@ fst_xerror_handler (Display* disp, XErrorEvent* ev)
 		return wine_error_handler (disp, ev);
 	}
 }
+#endif
 
 void
 windows_vst_gui_init (int *argc, char **argv[])
 {
-	wine_error_handler = XSetErrorHandler (NULL);
 	gtk_init (argc, argv);
+
+#ifdef GDK_WINDOWING_X11
+	wine_error_handler = XSetErrorHandler (NULL);
 	the_gtk_display = gdk_x11_display_get_xdisplay (gdk_display_get_default());
 	gtk_error_handler = XSetErrorHandler (fst_xerror_handler);
+#endif
 }
 
