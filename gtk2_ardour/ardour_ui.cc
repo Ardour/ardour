@@ -81,6 +81,10 @@
 #include "ardour/session_utils.h"
 #include "ardour/slave.h"
 
+#ifdef WINDOWS_VST_SUPPORT
+#include <fst.h>
+#endif
+
 #include "timecode/time.h"
 
 typedef uint64_t microseconds_t;
@@ -1008,6 +1012,9 @@ If you still wish to quit, please use the\n\n\
 
 	halt_connection.disconnect ();
 	AudioEngine::instance()->stop ();
+#ifdef WINDOWS_VST_SUPPORT
+	fst_stop_threading();
+#endif
 	quit ();
 }
 
@@ -2916,7 +2923,13 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		_session->set_clean ();
 	}
 
+#ifdef WINDOWS_VST_SUPPORT
+	fst_stop_threading();
+#endif
 	flush_pending ();
+#ifdef WINDOWS_VST_SUPPORT
+	fst_start_threading();
+#endif
 	retval = 0;
 
   out:
@@ -3342,10 +3355,6 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	setup_order_hint();
 
 	PBD::ScopedConnection idle_connection;
-
-	if (count > 8) {
-		ARDOUR::GUIIdle.connect (idle_connection, MISSING_INVALIDATOR, boost::bind (&Gtkmm2ext::UI::flush_pending, this), gui_context());
-	}
 
 	string template_path = add_route_dialog->track_template();
 

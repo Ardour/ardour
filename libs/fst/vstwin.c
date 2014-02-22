@@ -16,6 +16,7 @@ static UINT_PTR idle_timer_id   = 0;
 #include <wine/exception.h>
 #include <pthread.h>
 static int gui_quit = 0;
+static unsigned int idle_id = 0;
 
 #endif
 
@@ -249,12 +250,14 @@ fst_handle_new (void)
 #ifndef PLATFORM_WINDOWS /* linux + wine */
 static gboolean
 g_idle_call (gpointer ignored) {
+	if (gui_quit) return FALSE;
 	MSG msg;
 	if (PeekMessageA (&msg, NULL, 0, 0, 1)) {
 		TranslateMessage (&msg);
 		DispatchMessageA (&msg);
 	}
 	idle_hands(NULL, 0, 0, 0);
+	g_main_context_iteration(NULL, FALSE);
 	return gui_quit ? FALSE : TRUE;
 }
 #endif
@@ -311,12 +314,31 @@ fst_init (void* possible_hmodule)
 		fst_error ("Error in fst_init(): (class registration failed");
 		return -1;
 	}
-#ifndef PLATFORM_WINDOWS /* linux + wine */
-	gui_quit = 0;
-	g_idle_add (g_idle_call, NULL); // XXX too early ?
-	//g_timeout_add(40, g_idle_call, NULL);
-#endif
 	return 0;
+}
+
+void
+fst_start_threading(void)
+{
+#ifndef PLATFORM_WINDOWS /* linux + wine */
+	if (idle_id == 0) {
+		gui_quit = 0;
+		idle_id = g_idle_add (g_idle_call, NULL);
+	}
+#endif
+}
+
+void
+fst_stop_threading(void) {
+#ifndef PLATFORM_WINDOWS /* linux + wine */
+	if (idle_id != 0) {
+		gui_quit = 1;
+		PostQuitMessage (0);
+		g_main_context_iteration(NULL, FALSE);
+		//g_source_remove(idle_id);
+		idle_id = 0;
+	}
+#endif
 }
 
 void
@@ -333,8 +355,10 @@ fst_exit (void)
 		KillTimer(NULL, idle_timer_id);
 	}
 #else /* linux + wine */
-	gui_quit = 1;
-	PostQuitMessage (0);
+	if (idle_id) {
+		gui_quit = 1;
+		PostQuitMessage (0);
+	}
 #endif
 
 	host_initialized = FALSE;
@@ -560,6 +584,10 @@ fst_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 	fst->wantIdle = 0;
 
 	return fst;
+}
+
+void fst_audio_master_idle(void) {
+	while(g_main_context_iteration(NULL, FALSE)) ;
 }
 
 void

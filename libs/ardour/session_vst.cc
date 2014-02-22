@@ -28,6 +28,9 @@
 #include "ardour/windows_vst_plugin.h"
 #include "ardour/vestige/aeffectx.h"
 #include "ardour/vst_types.h"
+#ifdef WINDOWS_VST_SUPPORT
+#include <fst.h>
+#endif
 
 #include "i18n.h"
 
@@ -100,26 +103,9 @@ intptr_t Session::vst_callback (
 
 	case audioMasterIdle:
 		SHOW_CALLBACK ("amc: audioMasterIdle\n");
-		// call application idle routine (this will
-		// call effEditIdle for all open editors too)
-
-#if 0 // TODO -> emit to GUI OR better delegete to fst/fst
-
-		// This allows the main GUI window to update if needed.
-		// Some plugins take over the GUI event loop
-		// which causes the main GUI to freeze while the plugin GUI continues to run. This code
-		// prevents the main GUI from being frozen.
-
-		do {
-#ifdef GDK_WINDOWING_X11
-			gtk_main_iteration_do(false);
-#else
-			gtk_main_iteration()
+#ifdef WINDOWS_VST_SUPPORT
+		fst_audio_master_idle();
 #endif
-		} while (gtk_events_pending());
-#endif
-		printf("audioMasterIdle\n");
-
 		if (effect) {
 			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
 		}

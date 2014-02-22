@@ -632,7 +632,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 				goto out;
 			}
 
-			ARDOUR_UI::instance()->flush_pending ();
+			gtk_main_iteration();
 		}
 	}
 

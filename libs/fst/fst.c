@@ -15,7 +15,7 @@ fst_error (const char *fmt, ...)
 	va_end (ap);
 }
 
-void
+static void
 default_fst_error_callback (const char *desc)
 {
 	fprintf(stderr, "%s\n", desc);
