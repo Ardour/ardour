@@ -61,15 +61,13 @@ VSTPluginUI::preset_selected ()
 int
 VSTPluginUI::get_preferred_height ()
 {
-	int preferred_height = _vst->state()->height;
-	preferred_height += _vst->state()->voffset;
-	return preferred_height;
+	return _vst->state()->height + _vst->state()->voffset;
 }
 
 int
 VSTPluginUI::get_preferred_width ()
 {
-	return _vst->state()->width;
+	return _vst->state()->width + _vst->state()->hoffset;
 }
 
 int

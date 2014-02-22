@@ -97,6 +97,7 @@ struct LIBARDOUR_API _VSTState
 	int wantIdle;
 
 	int voffset;
+	int hoffset;
 	int gui_shown;
 	int destroy;
 	int vst_version;
