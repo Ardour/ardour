@@ -383,7 +383,7 @@ def build(bld):
                              ]
         obj.target = 'ardour-' + bld.env['VERSION'] + '-vst.exe.so'
         obj.includes  = [ '../libs/fst', '.' ]
-        obj.linkflags = ['-mwindows', '-Wl,--export-dynamic', '-L/usr/lib/i386-linux-gnu/wine-unstable/']
+        obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
         obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
         obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
         # end of the wine executable
