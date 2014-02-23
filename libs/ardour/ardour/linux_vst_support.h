@@ -53,8 +53,6 @@ LIBARDOUR_API extern int          vstfx_create_editor (VSTState *);
 LIBARDOUR_API extern int          vstfx_run_editor (VSTState *);
 LIBARDOUR_API extern void         vstfx_destroy_editor (VSTState *);
 
-LIBARDOUR_API extern VSTInfo *    vstfx_get_info (char *);
-LIBARDOUR_API extern void         vstfx_free_info (VSTInfo *);
 LIBARDOUR_API extern void         vstfx_event_loop_remove_plugin (VSTState *);
 LIBARDOUR_API extern int          vstfx_call_dispatcher (VSTState *, int, int, int, void *, float);
 
@@ -65,6 +63,5 @@ LIBARDOUR_API extern int vstfx_load_state (VSTState* vstfx, char * filename);
 /** Save a plugin state to a file.**/
 
 LIBARDOUR_API extern bool vstfx_save_state (VSTState* vstfx, char * filename);
-
 
 #endif /* __vstfx_h__ */

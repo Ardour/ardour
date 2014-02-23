@@ -45,8 +45,6 @@ extern int  fst_run_editor (VSTState *, void* window_parent);
 extern void fst_destroy_editor (VSTState *);
 extern void fst_move_window_into_view (VSTState *);
 
-extern VSTInfo *fst_get_info (char *dllpathname);
-extern void fst_free_info (VSTInfo *info);
 extern void fst_event_loop_remove_plugin (VSTState* fst);
 extern void fst_start_threading(void);
 extern void fst_stop_threading(void);

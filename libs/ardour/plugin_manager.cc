@@ -33,12 +33,14 @@
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
+#include "ardour/vst_info_file.h"
 #include "fst.h"
 #include "pbd/basename.h"
 #include <cstring>
 #endif // WINDOWS_VST_SUPPORT
 
 #ifdef LXVST_SUPPORT
+#include "ardour/vst_info_file.h"
 #include "ardour/linux_vst_support.h"
 #include "pbd/basename.h"
 #include <cstring>
@@ -558,7 +560,7 @@ PluginManager::windows_vst_discover (string path)
 	VSTInfo* finfo;
 	char buf[32];
 
-	if ((finfo = fst_get_info (const_cast<char *> (path.c_str()))) == 0) {
+	if ((finfo = vstfx_get_info_fst (const_cast<char *> (path.c_str()))) == 0) {
 		warning << "Cannot get Windows VST information from " << path << endmsg;
 		return -1;
 	}
@@ -592,7 +594,7 @@ PluginManager::windows_vst_discover (string path)
 	info->type = ARDOUR::Windows_VST;
 
 	_windows_vst_plugin_info->push_back (info);
-	fst_free_info (finfo);
+	vstfx_free_info(finfo);
 
 	return 0;
 }
@@ -672,7 +674,7 @@ PluginManager::lxvst_discover (string path)
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("checking apparent LXVST plugin at %1\n", path));
 
-	if ((finfo = vstfx_get_info (const_cast<char *> (path.c_str()))) == 0) {
+	if ((finfo = vstfx_get_info_lx (const_cast<char *> (path.c_str()))) == 0) {
 		return -1;
 	}
 

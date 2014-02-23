@@ -608,7 +608,7 @@ fst_close (VSTState* fst)
 			if (fst->handle->plugincnt && --fst->handle->plugincnt == 0) {
 
 				fst->handle->main_entry = NULL;
-				fst_unload (&fst->handle);
+				fst_unload (&fst->handle); // XXX
 			}
 		}
 

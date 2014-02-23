@@ -363,8 +363,6 @@ def build(bld):
         obj = bld (features = 'cxx c cxxprogram wine')
         obj.source = (
             '../libs/fst/fst.c',
-            '../libs/fst/fstinfofile.c',
-            '../libs/fst/vsti.c',
             '../libs/fst/vstwin.c',
             '../vst/winmain.c',
             )
