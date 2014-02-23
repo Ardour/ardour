@@ -756,6 +756,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* VST support */
 
+	static int  vst_current_loading_id;
+	static const char* vst_can_do_strings[];
+	static const int vst_can_do_string_count;
+
 	static intptr_t vst_callback (
 		AEffect* effect,
 		int32_t opcode,

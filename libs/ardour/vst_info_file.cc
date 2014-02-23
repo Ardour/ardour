@@ -84,51 +84,89 @@ read_int (FILE* fp, int* n)
 	return (sscanf (p, "%d", n) != 1);
 }
 
-static VSTInfo *
-load_vstfx_info_file (FILE* fp)
+static void
+vstfx_clear_info_list (vector<VSTInfo *> *infos)
 {
-	VSTInfo *info;
-
-	if ((info = (VSTInfo*) malloc (sizeof (VSTInfo))) == 0) {
-		return 0;
+	for (vector<VSTInfo *>::iterator i = infos->begin(); i != infos->end(); ++i) {
+		vstfx_free_info(*i);
 	}
+	infos->clear();
+}
 
-	if ((info->name = read_string(fp)) == 0) goto error;
-	if ((info->creator = read_string(fp)) == 0) goto error;
-	if (read_int (fp, &info->UniqueID)) goto error;
-	if ((info->Category = read_string(fp)) == 0) goto error;
-	if (read_int (fp, &info->numInputs)) goto error;
-	if (read_int (fp, &info->numOutputs)) goto error;
-	if (read_int (fp, &info->numParams)) goto error;
-	if (read_int (fp, &info->wantMidi)) goto error;
-	if (read_int (fp, &info->hasEditor)) goto error;
-	if (read_int (fp, &info->canProcessReplacing)) goto error;
+static bool
+vstfx_load_info_block(FILE* fp, VSTInfo *info)
+{
+	if ((info->name = read_string(fp)) == 0) return false;
+	if ((info->creator = read_string(fp)) == 0) return false;
+	if (read_int (fp, &info->UniqueID)) return false;
+	if ((info->Category = read_string(fp)) == 0) return false;
+	if (read_int (fp, &info->numInputs)) return false;
+	if (read_int (fp, &info->numOutputs)) return false;
+	if (read_int (fp, &info->numParams)) return false;
+	if (read_int (fp, &info->wantMidi)) return false;
+	if (read_int (fp, &info->hasEditor)) return false;
+	if (read_int (fp, &info->canProcessReplacing)) return false;
 
 	if ((info->ParamNames = (char **) malloc(sizeof(char*)*info->numParams)) == 0) {
-		goto error;
+		return false;
 	}
 
 	for (int i = 0; i < info->numParams; ++i) {
-		if ((info->ParamNames[i] = read_string(fp)) == 0) goto error;
+		if ((info->ParamNames[i] = read_string(fp)) == 0) return false;
 	}
 
 	if ((info->ParamLabels = (char **) malloc(sizeof(char*)*info->numParams)) == 0) {
-		goto error;
+		return false;
 	}
 
 	for (int i = 0; i < info->numParams; ++i) {
-		if ((info->ParamLabels[i] = read_string(fp)) == 0) goto error;
+		if ((info->ParamLabels[i] = read_string(fp)) == 0) {
+			return false;
+		}
 	}
-
-	return info;
-
-error:
-	free (info);
-	return 0;
+	return true;
 }
 
-static int
-save_vstfx_info_file (VSTInfo *info, FILE* fp)
+static bool
+vstfx_load_info_file (FILE* fp, vector<VSTInfo*> *infos)
+{
+	VSTInfo *info;
+	if ((info = (VSTInfo*) calloc (1, sizeof (VSTInfo))) == 0) {
+		return false;
+	}
+	if (vstfx_load_info_block(fp, info)) {
+		if (strncmp (info->Category, "Shell", 5)) {
+			infos->push_back(info);
+		} else {
+			int plugin_cnt = 0;
+			vstfx_free_info(info);
+			if (read_int (fp, &plugin_cnt)) {
+				for (int i = 0; i < plugin_cnt; i++) {
+					if ((info = (VSTInfo*) calloc (1, sizeof (VSTInfo))) == 0) {
+						vstfx_clear_info_list(infos);
+						return false;
+					}
+					if (vstfx_load_info_block(fp, info)) {
+						infos->push_back(info);
+					} else {
+						vstfx_free_info(info);
+						vstfx_clear_info_list(infos);
+						return false;
+					}
+				}
+			} else {
+				return false; /* Bad file */
+			}
+		}
+		return true;
+	}
+	vstfx_free_info(info);
+	vstfx_clear_info_list(infos);
+	return false;
+}
+
+static void
+vstfx_write_info_block (FILE* fp, VSTInfo *info)
 {
 	assert (info);
 	assert (fp);
@@ -151,8 +189,31 @@ save_vstfx_info_file (VSTInfo *info, FILE* fp)
 	for (int i = 0; i < info->numParams; i++) {
 		fprintf (fp, "%s\n", info->ParamLabels[i]);
 	}
+}
 
-	return 0;
+static void
+vstfx_write_info_file (FILE* fp, vector<VSTInfo *> *infos)
+{
+	assert(infos);
+	assert(fp);
+
+	if (infos->size() > 1) {
+		vector<VSTInfo *>::iterator x = infos->begin();
+		/* write out the shell info first along with count of the number of
+		 * plugins contained in this shell
+		 */
+		vstfx_write_info_block(fp, *x);
+		fprintf( fp, "%d\n", infos->size() - 1 );
+		++x;
+		/* Now write out the info for each plugin */
+		for (; x != infos->end(); ++x) {
+			vstfx_write_info_block(fp, *x);
+		}
+	} else if (infos->size() == 1) {
+		vstfx_write_info_block(fp, infos->front());
+	} else {
+		PBD::warning << "Zero plugins in VST." << endmsg; // XXX here?
+	}
 }
 
 static string
@@ -351,28 +412,49 @@ vstfx_info_from_plugin (VSTState* vstfx)
 static intptr_t
 simple_master_callback (AEffect *, int32_t opcode, int32_t, intptr_t, void *, float)
 {
+#if 0
+	static const char* can_do_strings[] = {
+		X_("supportShell"),
+		X_("shellCategory")
+	};
+	static const int can_do_string_count = sizeof (can_do_strings) / sizeof (char*);
+	static int current_loading_id = 0;
+#endif
+
 	if (opcode == audioMasterVersion) {
 		return 2;
-	} else {
+	}
+#if 0
+	else if (opcode == audioMasterCanDo) {
+		for (int i = 0; i < can_do_string_count; i++) {
+			if (! strcmp(can_do_strings[i], (const char*)ptr)) {
+				return 1;
+			}
+		}
+		return 0;
+	}
+	else if (opcode == audioMasterCurrentId) {
+		return current_loading_id;
+	}
+#endif
+	else {
 		return 0;
 	}
 }
 
-static VSTInfo *
-vstfx_get_info_from_file(char* dllpath, bool &found)
+static bool
+vstfx_get_info_from_file(char* dllpath, vector<VSTInfo*> *infos)
 {
 	FILE* infofile;
-	VSTInfo *info = 0;
-	found = false;
+	bool rv = false;
 	if ((infofile = vstfx_infofile_for_read (dllpath)) != 0) {
-		found = true;
-		info = load_vstfx_info_file (infofile);
+		rv = vstfx_load_info_file(infofile, infos);
 		fclose (infofile);
-		if (info == 0) {
+		if (!rv) {
 			PBD::warning << "Cannot get LinuxVST information form " << dllpath << ": info file load failed." << endmsg;
 		}
 	}
-	return info;
+	return rv;
 }
 
 void
@@ -391,35 +473,46 @@ vstfx_free_info (VSTInfo *info)
 	free (info);
 }
 
+void
+vstfx_free_info_list (vector<VSTInfo *> *infos)
+{
+	for (vector<VSTInfo *>::iterator i = infos->begin(); i != infos->end(); ++i) {
+		vstfx_free_info(*i);
+	}
+	delete infos;
+}
+
 #ifdef LXVST_SUPPORT
 /** Try to get plugin info - first by looking for a .fsi cache of the
     data, and if that doesn't exist, load the plugin, get its data and
     then cache it for future ref
 */
 
-VSTInfo *
+vector<VSTInfo *> *
 vstfx_get_info_lx (char* dllpath)
 {
 	FILE* infofile;
 	VSTHandle* h;
 	VSTState* vstfx;
+	vector<VSTInfo*> *infos = new vector<VSTInfo*>;
 
-	bool used_cache;
-	VSTInfo* info = vstfx_get_info_from_file(dllpath, used_cache);
-	if (used_cache) {
+	// TODO check blacklist
+	// TODO pre-check file extension ?
+
+	if (vstfx_get_info_from_file(dllpath, infos)) {
 		PBD::info << "using cache for LinuxVST plugin '" << dllpath << "'" << endmsg;
-		return info;
+		return infos;
 	}
 
 	if (!(h = vstfx_load(dllpath))) {
 		PBD::warning << "Cannot get LinuxVST information from " << dllpath << ": load failed." << endmsg;
-		return 0;
+		return infos;
 	}
 
 	if (!(vstfx = vstfx_instantiate(h, simple_master_callback, 0))) {
 		vstfx_unload(h);
 		PBD::warning << "Cannot get LinuxVST information from " << dllpath << ": instantiation failed." << endmsg;
-		return 0;
+		return infos;
 	}
 
 	infofile = vstfx_infofile_for_write (dllpath);
@@ -431,44 +524,46 @@ vstfx_get_info_lx (char* dllpath)
 		return 0;
 	}
 
-	info = vstfx_info_from_plugin (vstfx);
+	VSTInfo* info = vstfx_info_from_plugin (vstfx);
+	infos->push_back(info); //XXX
 
-	save_vstfx_info_file (info, infofile);
+	vstfx_write_info_file (infofile, infos);
 	fclose (infofile);
 
 	vstfx_close (vstfx);
 	vstfx_unload (h);
-
-	return info;
+	return infos;
 }
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
 
-VSTInfo *
+vector<VSTInfo *> *
 vstfx_get_info_fst (char* dllpath)
 {
 	FILE* infofile;
 	VSTHandle* h;
 	VSTState* vstfx;
+	vector<VSTInfo*> *infos = new vector<VSTInfo*>;
 
-	bool used_cache;
-	VSTInfo* info = vstfx_get_info_from_file(dllpath, used_cache);
-	if (used_cache) {
+	// TODO check blacklist
+	// TODO pre-check file extension ?
+
+	if (vstfx_get_info_from_file(dllpath, infos)) {
 		PBD::info << "using cache for VST plugin '" << dllpath << "'" << endmsg;
-		return info;
+		return infos;
 	}
 
 	if(!(h = fst_load(dllpath))) {
 		PBD::warning << "Cannot get VST information from " << dllpath << ": load failed." << endmsg;
-		return 0;
+		return infos;
 	}
 
 	if(!(vstfx = fst_instantiate(h, simple_master_callback, 0))) {
 		fst_unload(&h);
 		PBD::warning << "Cannot get VST information from " << dllpath << ": instantiation failed." << endmsg;
-		return 0;
+		return infos;
 	}
 
 	infofile = vstfx_infofile_for_write (dllpath);
@@ -480,13 +575,14 @@ vstfx_get_info_fst (char* dllpath)
 		return 0;
 	}
 
-	info = vstfx_info_from_plugin(vstfx);
-	save_vstfx_info_file (info, infofile);
+	VSTInfo* info = vstfx_info_from_plugin(vstfx);
+	infos->push_back(info); //XXX
+
+	vstfx_write_info_file (infofile, infos);
 	fclose (infofile);
 
 	fst_close(vstfx);
 	//fst_unload(&h); // XXX -> fst_close()
-
-	return info;
+	return infos;
 }
 #endif

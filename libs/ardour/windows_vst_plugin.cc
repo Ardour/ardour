@@ -31,9 +31,11 @@ using namespace PBD;
 WindowsVSTPlugin::WindowsVSTPlugin (AudioEngine& e, Session& session, VSTHandle* h)
 	: VSTPlugin (e, session, h)
 {
+	Session::vst_current_loading_id = 0; // TODO
 	if ((_state = fst_instantiate (_handle, Session::vst_callback, this)) == 0) {
 		throw failed_constructor();
 	}
+	Session::vst_current_loading_id = 0;
 
 	set_plugin (_state->plugin);
 }
@@ -43,9 +45,11 @@ WindowsVSTPlugin::WindowsVSTPlugin (const WindowsVSTPlugin &other)
 {
 	_handle = other._handle;
 
+	Session::vst_current_loading_id = PBD::atoi(other.unique_id());
 	if ((_state = fst_instantiate (_handle, Session::vst_callback, this)) == 0) {
 		throw failed_constructor();
 	}
+	Session::vst_current_loading_id = 0;
 	
 	_plugin = _state->plugin;
 }

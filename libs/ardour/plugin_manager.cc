@@ -94,7 +94,7 @@ using namespace std;
 PluginManager* PluginManager::_instance = 0;
 
 PluginManager&
-PluginManager::instance() 
+PluginManager::instance()
 {
 	if (!_instance) {
 		_instance = new PluginManager;
@@ -215,7 +215,7 @@ PluginManager::ladspa_refresh ()
 	/* Only add standard locations to ladspa_path if it doesn't
 	 * already contain them. Check for trailing G_DIR_SEPARATOR too.
 	 */
-	
+
 	vector<string> ladspa_modules;
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("LADSPA: search along: [%1]\n", ladspa_search_path().to_string()));
@@ -229,7 +229,7 @@ PluginManager::ladspa_refresh ()
 
 	find_matching_files_in_search_path (ladspa_search_path (),
 					    dylib_extension_pattern, ladspa_modules);
- 
+
 	find_matching_files_in_search_path (ladspa_search_path (),
 					    dll_extension_pattern, ladspa_modules);
 
@@ -288,7 +288,7 @@ PluginManager::add_presets(string domain)
 				warning << string_compose(_("Could not parse rdf file: %1"), *x) << endmsg;
 			}
 		}
-		
+
 		vector_delete (presets);
 	}
 #endif
@@ -557,46 +557,72 @@ PluginManager::windows_vst_discover_from_path (string path)
 int
 PluginManager::windows_vst_discover (string path)
 {
-	VSTInfo* finfo;
-	char buf[32];
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("windows_vst_discover '%1'\n", path));
 
-	if ((finfo = vstfx_get_info_fst (const_cast<char *> (path.c_str()))) == 0) {
+	vector<VSTInfo*> * finfos = vstfx_get_info_fst (const_cast<char *> (path.c_str()));
+
+	if (finfos->empty()) {
+		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot get Windows VST information from '%1'\n", path));
 		warning << "Cannot get Windows VST information from " << path << endmsg;
 		return -1;
 	}
 
-	if (!finfo->canProcessReplacing) {
-		warning << string_compose (_("VST plugin %1 does not support processReplacing, and so cannot be used in %2 at this time"),
-					   finfo->name, PROGRAM_NAME)
-			<< endl;
+	uint32_t discovered = 0;
+	for (vector<VSTInfo *>::iterator x = finfos->begin(); x != finfos->end(); ++x) {
+		VSTInfo* finfo = *x;
+		char buf[32];
+
+		if (!finfo->canProcessReplacing) {
+			warning << string_compose (_("VST plugin %1 does not support processReplacing, and so cannot be used in %2 at this time"),
+							 finfo->name, PROGRAM_NAME)
+				<< endl;
+			continue;
+		}
+
+		PluginInfoPtr info (new WindowsVSTPluginInfo);
+
+		/* what a joke freeware VST is */
+
+		if (!strcasecmp ("The Unnamed plugin", finfo->name)) {
+			info->name = PBD::basename_nosuffix (path);
+		} else {
+			info->name = finfo->name;
+		}
+
+
+		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
+		info->unique_id = buf;
+		info->category = "VST";
+		info->path = path;
+		info->creator = finfo->creator;
+		info->index = 0;
+		info->n_inputs.set_audio (finfo->numInputs);
+		info->n_outputs.set_audio (finfo->numOutputs);
+		info->n_inputs.set_midi (finfo->wantMidi ? 1 : 0);
+		info->type = ARDOUR::Windows_VST;
+
+		// TODO: check dup-IDs (lxvst AND windows vst)
+		bool duplicate = false;
+
+		if (!_windows_vst_plugin_info->empty()) {
+			for (PluginInfoList::iterator i =_windows_vst_plugin_info->begin(); i != _windows_vst_plugin_info->end(); ++i) {
+				if ((info->type == (*i)->type)&&(info->unique_id == (*i)->unique_id)) {
+					warning << "Ignoring duplicate Windows VST plugin " << info->name << "\n";
+					duplicate = true;
+					break;
+				}
+			}
+		}
+
+		if (!duplicate) {
+			DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Windows VST plugin ID '%1'\n", info->unique_id));
+			_windows_vst_plugin_info->push_back (info);
+			discovered++;
+		}
 	}
 
-	PluginInfoPtr info (new WindowsVSTPluginInfo);
-
-	/* what a joke freeware VST is */
-
-	if (!strcasecmp ("The Unnamed plugin", finfo->name)) {
-		info->name = PBD::basename_nosuffix (path);
-	} else {
-		info->name = finfo->name;
-	}
-
-
-	snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
-	info->unique_id = buf;
-	info->category = "VST";
-	info->path = path;
-	info->creator = finfo->creator;
-	info->index = 0;
-	info->n_inputs.set_audio (finfo->numInputs);
-	info->n_outputs.set_audio (finfo->numOutputs);
-	info->n_inputs.set_midi (finfo->wantMidi ? 1 : 0);
-	info->type = ARDOUR::Windows_VST;
-
-	_windows_vst_plugin_info->push_back (info);
-	vstfx_free_info(finfo);
-
-	return 0;
+	vstfx_free_info_list (finfos);
+	return discovered > 0 ? 0 : -1;
 }
 
 #endif // WINDOWS_VST_SUPPORT
@@ -669,62 +695,75 @@ PluginManager::lxvst_discover_from_path (string path)
 int
 PluginManager::lxvst_discover (string path)
 {
-	VSTInfo* finfo;
-	char buf[32];
-
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("checking apparent LXVST plugin at %1\n", path));
 
-	if ((finfo = vstfx_get_info_lx (const_cast<char *> (path.c_str()))) == 0) {
+	vector<VSTInfo*> * finfos = vstfx_get_info_lx (const_cast<char *> (path.c_str()));
+
+	if (finfos->empty()) {
+		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot get Linux VST information from '%1'\n", path));
+		warning << "Cannot get Linux VST information from " << path << endmsg;
 		return -1;
 	}
 
-	if (!finfo->canProcessReplacing) {
-		warning << string_compose (_("linuxVST plugin %1 does not support processReplacing, and so cannot be used in %2 at this time"),
-					   finfo->name, PROGRAM_NAME)
-			<< endl;
-	}
+	uint32_t discovered = 0;
+	for (vector<VSTInfo *>::iterator x = finfos->begin(); x != finfos->end(); ++x) {
+		VSTInfo* finfo = *x;
+		char buf[32];
 
-	PluginInfoPtr info(new LXVSTPluginInfo);
+		if (!finfo->canProcessReplacing) {
+			warning << string_compose (_("linuxVST plugin %1 does not support processReplacing, and so cannot be used in %2 at this time"),
+							 finfo->name, PROGRAM_NAME)
+				<< endl;
+			continue;
+		}
 
-	if (!strcasecmp ("The Unnamed plugin", finfo->name)) {
-		info->name = PBD::basename_nosuffix (path);
-	} else {
-		info->name = finfo->name;
-	}
+		PluginInfoPtr info(new LXVSTPluginInfo);
 
-	
-	snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
-	info->unique_id = buf;
-	info->category = "linuxVSTs";
-	info->path = path;
-	info->creator = finfo->creator;
-	info->index = 0;
-	info->n_inputs.set_audio (finfo->numInputs);
-	info->n_outputs.set_audio (finfo->numOutputs);
-	info->n_inputs.set_midi (finfo->wantMidi ? 1 : 0);
-	info->type = ARDOUR::LXVST;
+		if (!strcasecmp ("The Unnamed plugin", finfo->name)) {
+			info->name = PBD::basename_nosuffix (path);
+		} else {
+			info->name = finfo->name;
+		}
 
-        /* Make sure we don't find the same plugin in more than one place along
-	   the LXVST_PATH We can't use a simple 'find' because the path is included
-	   in the PluginInfo, and that is the one thing we can be sure MUST be
-	   different if a duplicate instance is found.  So we just compare the type
-	   and unique ID (which for some VSTs isn't actually unique...)
-	*/
-	
-	if (!_lxvst_plugin_info->empty()) {
-		for (PluginInfoList::iterator i =_lxvst_plugin_info->begin(); i != _lxvst_plugin_info->end(); ++i) {
-			if ((info->type == (*i)->type)&&(info->unique_id == (*i)->unique_id)) {
-				warning << "Ignoring duplicate Linux VST plugin " << info->name << "\n";
-				vstfx_free_info(finfo);
-				return 0;
+
+		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
+		info->unique_id = buf;
+		info->category = "linuxVSTs";
+		info->path = path;
+		info->creator = finfo->creator;
+		info->index = 0;
+		info->n_inputs.set_audio (finfo->numInputs);
+		info->n_outputs.set_audio (finfo->numOutputs);
+		info->n_inputs.set_midi (finfo->wantMidi ? 1 : 0);
+		info->type = ARDOUR::LXVST;
+
+					/* Make sure we don't find the same plugin in more than one place along
+			 the LXVST_PATH We can't use a simple 'find' because the path is included
+			 in the PluginInfo, and that is the one thing we can be sure MUST be
+			 different if a duplicate instance is found.  So we just compare the type
+			 and unique ID (which for some VSTs isn't actually unique...)
+		*/
+
+		// TODO: check dup-IDs with windowsVST, too
+		bool duplicate = false;
+		if (!_lxvst_plugin_info->empty()) {
+			for (PluginInfoList::iterator i =_lxvst_plugin_info->begin(); i != _lxvst_plugin_info->end(); ++i) {
+				if ((info->type == (*i)->type)&&(info->unique_id == (*i)->unique_id)) {
+					warning << "Ignoring duplicate Linux VST plugin " << info->name << "\n";
+					duplicate = true;
+					break;
+				}
 			}
 		}
-	}
-	
-	_lxvst_plugin_info->push_back (info);
-	vstfx_free_info (finfo);
 
-	return 0;
+		if (!duplicate) {
+			_lxvst_plugin_info->push_back (info);
+			discovered++;
+		}
+	}
+
+	vstfx_free_info_list (finfos);
+	return discovered > 0 ? 0 : -1;
 }
 
 #endif // LXVST_SUPPORT

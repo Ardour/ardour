@@ -23,15 +23,17 @@
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/vst_types.h"
+#include <vector>
 
-LIBARDOUR_API extern void         vstfx_free_info (VSTInfo *);
+LIBARDOUR_API extern void vstfx_free_info (VSTInfo *);
+LIBARDOUR_API extern void vstfx_free_info_list (std::vector<VSTInfo *> *infos);
 
 #ifdef LXVST_SUPPORT
-LIBARDOUR_API extern VSTInfo *    vstfx_get_info_lx (char *);
+LIBARDOUR_API extern std::vector<VSTInfo*> * vstfx_get_info_lx (char *);
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
-LIBARDOUR_API extern VSTInfo *    vstfx_get_info_fst (char *);
+LIBARDOUR_API extern std::vector<VSTInfo*> * vstfx_get_info_fst (char *);
 #endif
 
 #endif /* __vstfx_h__ */

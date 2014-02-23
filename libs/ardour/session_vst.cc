@@ -45,6 +45,15 @@ static int debug_callbacks = -1;
 
 using namespace ARDOUR;
 
+int Session::vst_current_loading_id = 0;
+const char* Session::vst_can_do_strings[] = {
+	X_("supplyIdle"),
+	X_("sendVstTimeInfo"),
+	X_("supportShell"),
+	X_("shellCategory")
+};
+const int Session::vst_can_do_string_count = sizeof (vst_can_do_strings) / sizeof (char*);
+
 intptr_t Session::vst_callback (
 	AEffect* effect,
 	int32_t opcode,
@@ -97,9 +106,8 @@ intptr_t Session::vst_callback (
 
 	case audioMasterCurrentId:
 		SHOW_CALLBACK ("amc: audioMasterCurrentId\n");
-		// returns the unique id of a plug that's currently
-		// loading
-		return 0;
+		// returns the unique id of a plug that's currently loading
+		return vst_current_loading_id;
 
 	case audioMasterIdle:
 		SHOW_CALLBACK ("amc: audioMasterIdle\n");
@@ -408,6 +416,11 @@ intptr_t Session::vst_callback (
 	case audioMasterCanDo:
 		SHOW_CALLBACK ("amc: audioMasterCanDo\n");
 		// string in ptr,  (const char*)ptr
+		for (int i = 0; i < vst_can_do_string_count; i++) {
+			if (! strcmp(vst_can_do_strings[i], (const char*)ptr)) {
+				return 1;
+			}
+		}
 		return 0;
 
 	case audioMasterGetLanguage:
