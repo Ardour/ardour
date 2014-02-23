@@ -33,7 +33,7 @@ class Session;
 class LIBARDOUR_API WindowsVSTPlugin : public VSTPlugin
 {
 public:
-	WindowsVSTPlugin (AudioEngine &, Session &, VSTHandle *);
+	WindowsVSTPlugin (AudioEngine &, Session &, VSTHandle *, int unique_id);
 	WindowsVSTPlugin (const WindowsVSTPlugin &);
 	~WindowsVSTPlugin ();
 

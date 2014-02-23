@@ -25,7 +25,6 @@
 #include "ardour/vst_types.h"
 #include <vector>
 
-LIBARDOUR_API extern void vstfx_free_info (VSTInfo *);
 LIBARDOUR_API extern void vstfx_free_info_list (std::vector<VSTInfo *> *infos);
 
 #ifdef LXVST_SUPPORT

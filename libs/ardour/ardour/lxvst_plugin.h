@@ -33,7 +33,7 @@ class Session;
 class LIBARDOUR_API LXVSTPlugin : public VSTPlugin
 {
   public:
-	LXVSTPlugin (AudioEngine &, Session &, VSTHandle *);
+	LXVSTPlugin (AudioEngine &, Session &, VSTHandle *, int unique_id);
 	LXVSTPlugin (const LXVSTPlugin &);
 	~LXVSTPlugin ();
 
