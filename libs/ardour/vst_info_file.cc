@@ -320,7 +320,7 @@ vstfx_blacklist (const char *dllpath)
 	return false;
 }
 
-static bool
+static void
 vstfx_un_blacklist (const char *dllpath)
 {
 	::g_unlink(vstfx_blacklist_path (dllpath, 0).c_str());
@@ -712,7 +712,7 @@ vstfx_get_info (const char* dllpath, int type)
 
 	bool ok;
 	/* blacklist in case instantiation fails */
-	vstfx_blacklist_file(dllpath);
+	vstfx_blacklist(dllpath);
 
 	switch (type) { // TODO use lib ardour's type
 #ifdef WINDOWS_VST_SUPPORT
