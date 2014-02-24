@@ -46,6 +46,7 @@
 #include <cstring>
 #endif //LXVST_SUPPORT
 
+#include <glib/gstdio.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/pattern.h>
 
@@ -108,6 +109,7 @@ PluginManager::PluginManager ()
 	, _ladspa_plugin_info(0)
 	, _lv2_plugin_info(0)
 	, _au_plugin_info(0)
+	, cancel_scan(false)
 {
 	char* s;
 	string lrdf_path;
@@ -201,6 +203,69 @@ PluginManager::refresh ()
 
 	PluginListChanged (); /* EMIT SIGNAL */
 	PluginScanMessage(X_("closeme"), "");
+}
+
+void
+PluginManager::cancel_plugin_scan ()
+{
+	// TODO
+}
+
+void
+PluginManager::clear_vst_cache ()
+{
+	// see also libs/ardour/vst_info_file.cc - vstfx_infofile_path()
+#ifdef WINDOWS_VST_SUPPORT
+	{
+		PathScanner scanner;
+		vector<string *> *fsi_files;
+
+		fsi_files = scanner (windows_vst_path, "\\.fsi$", true, true, -1, false);
+		if (fsi_files) {
+			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
+				::g_unlink((*i)->c_str());
+			}
+		}
+		vector_delete(fsi_files);
+	}
+#endif
+
+#ifdef LXVST_SUPPORT
+	{
+		PathScanner scanner;
+		vector<string *> *fsi_files;
+		fsi_files = scanner (lxvst_path, "\\.fsi$", true, true, -1, false);
+		if (fsi_files) {
+			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
+				::g_unlink((*i)->c_str());
+			}
+		}
+		vector_delete(fsi_files);
+	}
+#endif
+
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+	{
+		string personal;
+		personal = Glib::build_filename (Glib::get_home_dir (), ".fst");
+
+		PathScanner scanner;
+		vector<string *> *fsi_files;
+		fsi_files = scanner (personal, "\\.fsi$", true, true, -1, false);
+		if (fsi_files) {
+			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
+				::g_unlink((*i)->c_str());
+			}
+		}
+		vector_delete(fsi_files);
+	}
+#endif
+}
+
+void
+PluginManager::clear_vst_blacklist ()
+{
+	// TODO ->  libs/ardour/vst_info_file.cc
 }
 
 void
@@ -567,7 +632,6 @@ PluginManager::windows_vst_discover (string path)
 
 	if (finfos->empty()) {
 		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot get Windows VST information from '%1'\n", path));
-		warning << "Cannot get Windows VST information from " << path << endmsg;
 		return -1;
 	}
 
@@ -706,7 +770,6 @@ PluginManager::lxvst_discover (string path)
 
 	if (finfos->empty()) {
 		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot get Linux VST information from '%1'\n", path));
-		warning << "Cannot get Linux VST information from " << path << endmsg;
 		return -1;
 	}
 

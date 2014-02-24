@@ -168,8 +168,6 @@ CONFIG_VARIABLE (bool, replicate_missing_region_channels, "replicate-missing-reg
 CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "hiding-groups-deactivates-groups", true)
 CONFIG_VARIABLE (bool, verify_remove_last_capture, "verify-remove-last-capture", true)
 CONFIG_VARIABLE (bool, no_new_session_dialog, "no-new-session-dialog", false)
-CONFIG_VARIABLE (bool, use_windows_vst, "use-windows-vst", true)
-CONFIG_VARIABLE (bool, use_lxvst, "use-lxvst", true)
 CONFIG_VARIABLE (bool, save_history, "save-history", true)
 CONFIG_VARIABLE (int32_t, saved_history_depth, "save-history-depth", 20)
 CONFIG_VARIABLE (int32_t, history_depth, "history-depth", 20)
@@ -179,7 +177,6 @@ CONFIG_VARIABLE (uint32_t, periodic_safety_backup_interval, "periodic-safety-bac
 CONFIG_VARIABLE (float, automation_interval_msecs, "automation-interval-msecs", 30)
 CONFIG_VARIABLE (bool, only_copy_imported_files, "only-copy-imported-files", false)
 CONFIG_VARIABLE (bool, keep_tearoffs, "keep-tearoffs", false)
-CONFIG_VARIABLE (bool, new_plugins_active, "new-plugins-active", true)
 CONFIG_VARIABLE (std::string, keyboard_layout, "keyboard-layout", "ansi")
 CONFIG_VARIABLE (std::string, default_bindings, "default-bindings", "ardour")
 CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)
@@ -197,10 +194,17 @@ CONFIG_VARIABLE (gain_t, max_gain, "max-gain", 2.0) /* +6.0dB */
 CONFIG_VARIABLE (bool, update_editor_during_summary_drag, "update-editor-during-summary-drag", true)
 CONFIG_VARIABLE (bool, never_display_periodic_midi, "never-display-periodic-midi", true)
 CONFIG_VARIABLE (bool, sound_midi_notes, "sound-midi-notes", false)
-CONFIG_VARIABLE (bool, use_plugin_own_gui, "use-plugin-own-gui", true)
 CONFIG_VARIABLE (uint32_t, max_recent_sessions, "max-recent-sessions", 10)
 CONFIG_VARIABLE (double, automation_thinning_factor, "automation-thinning-factor", 20.0)
 CONFIG_VARIABLE (std::string, freesound_download_dir, "freesound-download-dir", Glib::get_home_dir() + "/Freesound/snd")
+
+/* plugin related */
+
+CONFIG_VARIABLE (bool, new_plugins_active, "new-plugins-active", true)
+CONFIG_VARIABLE (bool, use_plugin_own_gui, "use-plugin-own-gui", true)
+CONFIG_VARIABLE (bool, use_windows_vst, "use-windows-vst", true)
+CONFIG_VARIABLE (bool, use_lxvst, "use-lxvst", true)
+CONFIG_VARIABLE (bool, show_plugin_scan_window, "show-plugin-scan-window", true)
 
 /* denormal management */
 

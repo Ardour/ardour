@@ -993,6 +993,69 @@ private:
 	CheckButton _video_advanced_setup_button;
 };
 
+class PluginOptions : public OptionEditorBox
+{
+public:
+	PluginOptions (RCConfiguration* c)
+		: _rc_config (c)
+		, _display_plugin_scan_progress (_("Display Plugin Scan Progress"))
+	{
+		Table* t = manage (new Table (2, 6));
+		t->set_spacings (4);
+		Button* b;
+
+		b = manage (new Button (_("Clear VST Cache")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_vst_cache_clicked));
+		t->attach (*b, 0, 2, 0, 1, FILL);
+
+		b = manage (new Button (_("Clear VST Blacklist")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_vst_blacklist_clicked));
+		t->attach (*b, 0, 2, 1, 2, FILL);
+
+		b = manage (new Button (_("Refresh Plugin List")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::refresh_clicked));
+		t->attach (*b, 0, 2, 2, 3, FILL);
+
+		t->attach (_display_plugin_scan_progress, 0, 2, 3, 4);
+		_display_plugin_scan_progress.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::display_plugin_scan_progress_toggled));
+		Gtkmm2ext::UI::instance()->set_tip (_display_plugin_scan_progress,
+					    _("<b>When enabled</b> a popup window details plugin-scan."));
+
+		_box->pack_start (*t,true,true);
+	}
+
+	void parameter_changed (string const & p) {
+		if (p == "show-plugin-scan-window") {
+			bool const x = _rc_config->get_show_plugin_scan_window();
+			_display_plugin_scan_progress.set_active (x);
+		}
+	}
+	void set_state_from_config () {
+		parameter_changed ("show-plugin-scan-window");
+	}
+
+private:
+	RCConfiguration* _rc_config;
+	CheckButton _display_plugin_scan_progress;
+
+	void display_plugin_scan_progress_toggled () {
+		bool const x = _display_plugin_scan_progress.get_active ();
+		_rc_config->set_show_plugin_scan_window (x);
+	}
+	void clear_vst_cache_clicked () {
+		PluginManager::instance().clear_vst_cache();
+	}
+
+	void clear_vst_blacklist_clicked () {
+		PluginManager::instance().clear_vst_blacklist();
+	}
+
+	void refresh_clicked () {
+		PluginManager::instance().refresh();
+	}
+};
+
+
 /** A class which allows control of visibility of some editor components usign
  *  a VisibilityGroup.  The caller should pass in a `dummy' VisibilityGroup
  *  which has the correct members, but with null widget pointers.  This
@@ -1928,6 +1991,11 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* VIDEO Timeline */
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
+
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+	/* Plugin options (currrently VST only) */
+	add_option (_("Plugin"), new PluginOptions (_rc_config));
+#endif
 
 	/* INTERFACE */
 

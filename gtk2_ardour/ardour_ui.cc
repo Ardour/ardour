@@ -72,6 +72,7 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/port.h"
+#include "ardour/plugin_manager.h"
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
 #include "ardour/recent_sessions.h"
@@ -303,6 +304,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	/* and ambiguous files */
 
 	ARDOUR::FileSource::AmbiguousFileName.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::ambiguous_file, this, _1, _2));
+
+	/* also plugin scan messages */
+	ARDOUR::PluginScanMessage.connect (forever_connections, MISSING_INVALIDATOR, boost::bind(&ARDOUR_UI::plugin_scan_dialog, this, _1, _2), gui_context());
 
 	/* lets get this party started */
 
@@ -3788,6 +3792,41 @@ quickly enough to keep up with recording.\n"), PROGRAM_NAME));
 		msg->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::disk_speed_dialog_gone), msg));
 		msg->show ();
 	}
+}
+
+void
+ARDOUR_UI::cancel_plugin_scan ()
+{
+	PluginManager::instance().cancel_plugin_scan();
+}
+
+static MessageDialog *scan_dlg = NULL;
+
+void
+ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin)
+{
+	if (!Config->get_show_plugin_scan_window()) { return; }
+	if (!scan_dlg) {
+		scan_dlg = new MessageDialog("", false, MESSAGE_INFO, BUTTONS_NONE);
+		VBox* vbox = scan_dlg->get_vbox();
+		vbox->set_size_request(400,-1);
+		scan_dlg->set_title (_("Scanning for plugins"));
+
+		Gtk::Button *cancel_button = manage(new Gtk::Button(_("Cancel plugin scan")));
+		cancel_button->set_name ("EditorGTKButton");
+		cancel_button->signal_clicked().connect ( mem_fun (*this, &ARDOUR_UI::cancel_plugin_scan) );
+
+		scan_dlg->get_vbox()->pack_start ( *cancel_button, PACK_SHRINK);
+	}
+
+	if (type == X_("closeme")) {
+		scan_dlg->hide();
+	} else {
+		scan_dlg->set_message(type + ": " + Glib::path_get_basename(plugin));
+		scan_dlg->show_all();
+	}
+
+	gtk_main_iteration ();
 }
 
 void

@@ -610,7 +610,7 @@ vstfx_instantiate_and_get_info_fst (
 	VSTHandle* h;
 	VSTState* vstfx;
 	if(!(h = fst_load(dllpath))) {
-		PBD::warning << "Cannot get VST information from " << dllpath << ": load failed." << endmsg;
+		PBD::warning << "Cannot get Windows VST information from " << dllpath << ": load failed." << endmsg;
 		return false;
 	}
 
@@ -619,7 +619,7 @@ vstfx_instantiate_and_get_info_fst (
 	if(!(vstfx = fst_instantiate(h, simple_master_callback, 0))) {
 		fst_unload(&h);
 		vstfx_current_loading_id = 0;
-		PBD::warning << "Cannot get VST information from " << dllpath << ": instantiation failed." << endmsg;
+		PBD::warning << "Cannot get Windows VST information from " << dllpath << ": instantiation failed." << endmsg;
 		return false;
 	}
 	vstfx_current_loading_id = 0;
@@ -642,7 +642,6 @@ vstfx_get_info (const char* dllpath, int type)
 	// TODO pre-check file extension ?
 
 	if (vstfx_get_info_from_file(dllpath, infos)) {
-		PBD::info << "using cache for VST plugin '" << dllpath << "'" << endmsg;
 		return infos;
 	}
 
@@ -659,7 +658,6 @@ vstfx_get_info (const char* dllpath, int type)
 	}
 
 	if (!ok) {
-		PBD::warning << "Cannot get VST information for " << dllpath << "." << endmsg;
 		return infos;
 	}
 
