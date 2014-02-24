@@ -102,7 +102,7 @@ intptr_t Session::vst_callback (
 	case audioMasterVersion:
 		SHOW_CALLBACK ("amc: audioMasterVersion\n");
 		// vst version, currently 2 (0 for older)
-		return 2; // XXX 2400
+		return 2400;
 
 	case audioMasterCurrentId:
 		SHOW_CALLBACK ("amc: audioMasterCurrentId\n");

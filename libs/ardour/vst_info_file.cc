@@ -520,16 +520,6 @@ vstfx_info_from_plugin (const char *dllpath, VSTState* vstfx, vector<VSTInfo *> 
 					}
 				}
 			}
-		} else {
-			switch(type) {
-#ifdef WINDOWS_VST_SUPPORT
-				case 1: fst_close(vstfx); break;
-#endif
-#ifdef LXVST_SUPPORT
-				case 2: vstfx_close (vstfx); break;
-#endif
-				default: assert(0); break;
-			}
 		}
 #endif
 	}
@@ -549,7 +539,7 @@ simple_master_callback (AEffect *, int32_t opcode, int32_t, intptr_t, void *ptr,
 	const int vstfx_can_do_string_count = 2;
 
 	if (opcode == audioMasterVersion) {
-		return 2;
+		return 2400;
 	}
 	else if (opcode == audioMasterCanDo) {
 		for (int i = 0; i < vstfx_can_do_string_count; i++) {
