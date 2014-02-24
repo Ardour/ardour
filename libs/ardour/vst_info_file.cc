@@ -251,6 +251,83 @@ vstfx_write_info_file (FILE* fp, vector<VSTInfo *> *infos)
 }
 
 static string
+vstfx_blacklist_path (const char* dllpath, int personal)
+{
+	string dir;
+	if (personal) {
+		dir = get_personal_vst_blacklist_dir();
+	} else {
+		dir = Glib::path_get_dirname (std::string(dllpath));
+	}
+
+	stringstream s;
+	s << "." << Glib::path_get_basename (dllpath) << ".fsb";
+	return Glib::build_filename (dir, s.str ());
+}
+
+/* return true if plugin is blacklisted or has an invalid file extension */
+static bool
+vstfx_blacklist_stat (const char *dllpath, int personal)
+{
+	if (strstr (dllpath, ".so" ) == 0 && strstr(dllpath, ".dll") == 0) {
+		return true;
+	}
+	string const path = vstfx_blacklist_path (dllpath, personal);
+
+	if (Glib::file_test (path, Glib::FileTest (Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR))) {
+		struct stat dllstat;
+		struct stat fsbstat;
+
+		if (stat (dllpath, &dllstat) == 0 && stat (path.c_str(), &fsbstat) == 0) {
+			if (dllstat.st_mtime > fsbstat.st_mtime) {
+				/* plugin is newer than blacklist file */
+				return true;
+			}
+		}
+		/* stat failed or plugin is older than blacklist file */
+		return true;
+	}
+	/* blacklist file does not exist */
+	return false;
+}
+
+static bool
+vstfx_check_blacklist (const char *dllpath)
+{
+	if (vstfx_blacklist_stat(dllpath, 0)) return true;
+	if (vstfx_blacklist_stat(dllpath, 1)) return true;
+	return false;
+}
+
+static FILE *
+vstfx_blacklist_file (const char *dllpath)
+{
+	FILE *f;
+	if ((f = fopen (vstfx_blacklist_path (dllpath, 0).c_str(), "w"))) {
+		return f;
+	}
+	return fopen (vstfx_blacklist_path (dllpath, 1).c_str(), "w");
+}
+
+static bool
+vstfx_blacklist (const char *dllpath)
+{
+	FILE *f = vstfx_blacklist_file(dllpath);
+	if (f) {
+		fclose(f);
+		return true;
+	}
+	return false;
+}
+
+static bool
+vstfx_un_blacklist (const char *dllpath)
+{
+	::g_unlink(vstfx_blacklist_path (dllpath, 0).c_str());
+	::g_unlink(vstfx_blacklist_path (dllpath, 1).c_str());
+}
+
+static string
 vstfx_infofile_path (const char* dllpath, int personal)
 {
 	string dir;
@@ -275,11 +352,6 @@ vstfx_infofile_stat (const char *dllpath, struct stat* statbuf, int personal)
 	string const path = vstfx_infofile_path (dllpath, personal);
 
 	if (Glib::file_test (path, Glib::FileTest (Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR))) {
-
-		/* info file exists in same location as the shared object, so
-		   check if its current and up to date
-		*/
-
 
 		struct stat dllstat;
 
@@ -630,15 +702,18 @@ vstfx_get_info (const char* dllpath, int type)
 	FILE* infofile;
 	vector<VSTInfo*> *infos = new vector<VSTInfo*>;
 
-	// TODO check blacklist
-	// TODO pre-check file extension ?
+	if (vstfx_check_blacklist(dllpath)) {
+		return infos;
+	}
 
 	if (vstfx_get_info_from_file(dllpath, infos)) {
 		return infos;
 	}
 
 	bool ok;
-	// TODO blacklist (in case instantiat fails)
+	/* blacklist in case instantiation fails */
+	vstfx_blacklist_file(dllpath);
+
 	switch (type) { // TODO use lib ardour's type
 #ifdef WINDOWS_VST_SUPPORT
 		case 1:  ok = vstfx_instantiate_and_get_info_fst(dllpath, infos, 0); break;
@@ -653,8 +728,10 @@ vstfx_get_info (const char* dllpath, int type)
 		return infos;
 	}
 
-	// TODO un-blacklist
+	/* remove from blacklist */
+	vstfx_un_blacklist(dllpath);
 
+	/* crate cache/whitelist */
 	infofile = vstfx_infofile_for_write (dllpath);
 	if (!infofile) {
 		PBD::warning << "Cannot cache VST information for " << dllpath << ": cannot create new FST info file." << endmsg;
