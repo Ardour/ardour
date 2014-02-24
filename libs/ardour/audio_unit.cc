@@ -2278,6 +2278,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		}
 
 		AUPluginInfo::get_names (temp, info->name, info->creator);
+		ARDOUR::PluginScanMessage(_("AU"), info->name);
 
 		info->type = ARDOUR::AudioUnit;
 		info->unique_id = stringify_descriptor (*info->descriptor);

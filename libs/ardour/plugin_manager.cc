@@ -177,6 +177,7 @@ void
 PluginManager::refresh ()
 {
 	DEBUG_TRACE (DEBUG::PluginManager, "PluginManager::refresh\n");
+	BootMessage (_("Discovering Plugins"));
 
 	ladspa_refresh ();
 #ifdef LV2_SUPPORT
@@ -199,6 +200,7 @@ PluginManager::refresh ()
 #endif
 
 	PluginListChanged (); /* EMIT SIGNAL */
+	PluginScanMessage(X_("closeme"), "");
 }
 
 void
@@ -234,6 +236,7 @@ PluginManager::ladspa_refresh ()
 					    dll_extension_pattern, ladspa_modules);
 
 	for (vector<std::string>::iterator i = ladspa_modules.begin(); i != ladspa_modules.end(); ++i) {
+		ARDOUR::PluginScanMessage(_("LADSPA"), *i);
 		ladspa_discover (*i);
 	}
 }
@@ -524,7 +527,7 @@ PluginManager::add_windows_vst_directory (string path)
 	return -1;
 }
 
-static bool windows_vst_filter (const string& str, void *arg)
+static bool windows_vst_filter (const string& str, void * /*arg*/)
 {
 	/* Not a dotfile, has a prefix before a period, suffix is "dll" */
 
@@ -545,6 +548,7 @@ PluginManager::windows_vst_discover_from_path (string path)
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
+			ARDOUR::PluginScanMessage(_("VST"), **x);
 			windows_vst_discover (**x);
 		}
 
@@ -683,6 +687,7 @@ PluginManager::lxvst_discover_from_path (string path)
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
+			ARDOUR::PluginScanMessage(_("LXVST"), **x);
 			lxvst_discover (**x);
 		}
 

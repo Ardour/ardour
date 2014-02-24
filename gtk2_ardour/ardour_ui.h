@@ -667,6 +667,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void disk_overrun_handler ();
 	void disk_underrun_handler ();
 
+	void cancel_plugin_scan ();
+	void plugin_scan_dialog (std::string type, std::string plugin);
+
         void session_format_mismatch (std::string, std::string);
 
 	void session_dialog (std::string);

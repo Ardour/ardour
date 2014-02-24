@@ -50,6 +50,7 @@ namespace ARDOUR {
 	class AudioEngine;
 
 	extern LIBARDOUR_API PBD::Signal1<void,std::string> BootMessage;
+	extern LIBARDOUR_API PBD::Signal2<void,std::string,std::string> PluginScanMessage;
 	extern LIBARDOUR_API PBD::Signal0<void> GUIIdle;
 
 	/**
