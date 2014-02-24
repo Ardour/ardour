@@ -41,7 +41,7 @@
 class CAComponent;
 class CAAudioUnit;
 class CAComponentDescription;
-struct LIBARDOUR_API AudioBufferList;
+struct AudioBufferList;
 
 namespace ARDOUR {
 
