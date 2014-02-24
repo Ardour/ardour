@@ -6,7 +6,7 @@ import os
 top = '.'
 out = 'build'
 
-backends = [ 'jack' ]
+backends = [ 'jack', 'wavesaudio' ]
 
 def options(opt):
     autowaf.set_options(opt)
