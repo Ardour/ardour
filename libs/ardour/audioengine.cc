@@ -492,16 +492,20 @@ AudioEngine::discover_backends ()
 	find_matching_files_in_search_path (backend_search_path (),
 	                                    dll_extension_pattern, backend_modules);
 
-	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for backends in %1\n"), backend_search_path().to_string()));
+	DEBUG_TRACE (DEBUG::AudioEngine, string_compose ("looking for backends in %1\n", backend_search_path().to_string()));
 
 	for (vector<std::string>::iterator i = backend_modules.begin(); i != backend_modules.end(); ++i) {
 
 		AudioBackendInfo* info;
 
+		DEBUG_TRACE (DEBUG::AudioEngine, string_compose ("Checking possible backend in %1\n", *i));
+
 		if ((info = backend_discover (*i)) != 0) {
 			_backends.insert (make_pair (info->name, info));
 		}
 	}
+
+	DEBUG_TRACE (DEBUG::AudioEngine, string_compose ("Found %1 backends\n", _backends.size()));
 
 	return _backends.size();
 }
