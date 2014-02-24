@@ -73,6 +73,7 @@ children = [
         'midi_maps',
         'mcp',
         'patchfiles',
+        'headless',
 ]
 
 i18n_children = [
