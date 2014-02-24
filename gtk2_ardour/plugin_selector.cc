@@ -73,6 +73,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	in_row_change = false;
 
 	manager.PluginListChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::build_plugin_menu, this), gui_context());
+	manager.PluginListChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::refill, this), gui_context());
 	build_plugin_menu ();
 
 	plugin_model = Gtk::ListStore::create (plugin_columns);
@@ -433,7 +434,6 @@ void
 PluginSelector::btn_update_clicked()
 {
 	manager.refresh ();
-	refill();
 }
 
 void
