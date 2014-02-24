@@ -30,6 +30,8 @@ def configure(conf):
 def build(bld):
 
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
+    if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
+        return
     
     # just the normal executable version of the GTK GUI
     obj = bld (features = 'cxx c cxxprogram')
@@ -66,7 +68,7 @@ def build(bld):
     obj.includes += ['../libs']
 
     if bld.env['build_target'] == 'mingw':
-	if bld.env['DEBUG'] == False:
+        if bld.env['DEBUG'] == False:
             obj.linkflags = ['-mwindows']
 
     if bld.is_defined('NEED_INTL'):
