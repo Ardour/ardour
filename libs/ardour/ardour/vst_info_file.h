@@ -25,6 +25,8 @@
 #include "ardour/vst_types.h"
 #include <vector>
 
+LIBARDOUR_API extern std::string get_personal_vst_info_cache_dir ();
+LIBARDOUR_API extern std::string get_personal_vst_blacklist_dir ();
 LIBARDOUR_API extern void vstfx_free_info_list (std::vector<VSTInfo *> *infos);
 
 #ifdef LXVST_SUPPORT

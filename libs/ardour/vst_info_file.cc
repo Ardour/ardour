@@ -42,6 +42,7 @@
 
 #include "pbd/error.h"
 
+#include "ardour/filesystem_paths.h"
 #include "ardour/linux_vst_support.h"
 #include "ardour/vst_info_file.h"
 
@@ -254,16 +255,7 @@ vstfx_infofile_path (const char* dllpath, int personal)
 {
 	string dir;
 	if (personal) {
-		// TODO use XDG_CACHE_HOME
-		dir = Glib::build_filename (Glib::get_home_dir (), ".fst");
-
-		/* If the directory doesn't exist, try to create it */
-		if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
-			if (g_mkdir (dir.c_str (), 0700)) {
-				return 0;
-			}
-		}
-
+		dir = get_personal_vst_info_cache_dir();
 	} else {
 		dir = Glib::path_get_dirname (std::string(dllpath));
 	}
@@ -683,6 +675,32 @@ vstfx_free_info_list (vector<VSTInfo *> *infos)
 		vstfx_free_info(*i);
 	}
 	delete infos;
+}
+
+string
+get_personal_vst_blacklist_dir() {
+	string dir = Glib::build_filename (ARDOUR::user_cache_directory(), "fst_blacklist");
+	/* if the directory doesn't exist, try to create it */
+	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
+		if (g_mkdir (dir.c_str (), 0700)) {
+			PBD::error << "Cannt create VST cache folder '" << dir << "'" << endmsg;
+			//exit(1);
+		}
+	}
+	return dir;
+}
+
+string
+get_personal_vst_info_cache_dir() {
+	string dir = Glib::build_filename (ARDOUR::user_cache_directory(), "fst_info");
+	/* if the directory doesn't exist, try to create it */
+	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
+		if (g_mkdir (dir.c_str (), 0700)) {
+			PBD::error << "Cannt create VST info folder '" << dir << "'" << endmsg;
+			//exit(1);
+		}
+	}
+	return dir;
 }
 
 #ifdef LXVST_SUPPORT

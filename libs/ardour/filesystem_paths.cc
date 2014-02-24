@@ -84,6 +84,53 @@ user_config_directory ()
 }
 
 std::string
+user_cache_directory ()
+{
+	static std::string p;
+
+	if (!p.empty()) return p;
+
+#ifdef __APPLE__
+	p = Glib::build_filename (Glib::get_home_dir(), "Library/Caches");
+#else
+	const char* c = 0;
+
+	/* adopt freedesktop standards, and put .ardour3 into $XDG_CONFIG_HOME or ~/.config
+	 */
+
+	if ((c = getenv ("XDG_CACHE_HOME")) != 0) {
+		p = c;
+	} else {
+		const string home_dir = Glib::get_home_dir();
+
+		if (home_dir.empty ()) {
+			error << "Unable to determine home directory" << endmsg;
+			exit (1);
+		}
+
+		p = home_dir;
+		p = Glib::build_filename (p, ".cache");
+	}
+#endif
+
+	p = Glib::build_filename (p, user_config_dir_name);
+
+	if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
+		if (g_mkdir_with_parents (p.c_str(), 0755)) {
+			error << string_compose (_("Cannot create cache directory %1 - cannot run"),
+						   p) << endmsg;
+			exit (1);
+		}
+	} else if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
+		error << string_compose (_("Cache directory %1 already exists and is not a directory/folder - cannot run"),
+					   p) << endmsg;
+		exit (1);
+	}
+
+	return p;
+}
+
+std::string
 ardour_dll_directory ()
 {
 #ifdef PLATFORM_WINDOWS

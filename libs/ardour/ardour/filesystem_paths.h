@@ -34,6 +34,14 @@ namespace ARDOUR {
 	LIBARDOUR_API std::string user_config_directory ();
 
 	/**
+	 * @return the path to the directory used to store user specific
+	 * caches (e.g. plugin indices, blacklist/whitelist)
+	 * it defaults to XDG_CACHE_HOME
+	 */
+	LIBARDOUR_API std::string user_cache_directory ();
+
+
+	/**
 	 * @return the path to the directory that contains the system wide ardour
 	 * modules.
 	 */

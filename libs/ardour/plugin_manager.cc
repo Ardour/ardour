@@ -246,9 +246,7 @@ PluginManager::clear_vst_cache ()
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
 	{
-		string personal;
-		personal = Glib::build_filename (Glib::get_home_dir (), ".fst");
-
+		string personal = get_personal_vst_info_cache_dir();
 		PathScanner scanner;
 		vector<string *> *fsi_files;
 		fsi_files = scanner (personal, "\\.fsi$", true, true, -1, false);
@@ -265,7 +263,50 @@ PluginManager::clear_vst_cache ()
 void
 PluginManager::clear_vst_blacklist ()
 {
-	// TODO ->  libs/ardour/vst_info_file.cc
+#ifdef WINDOWS_VST_SUPPORT
+	{
+		PathScanner scanner;
+		vector<string *> *fsi_files;
+
+		fsi_files = scanner (windows_vst_path, "\\.fsb$", true, true, -1, false);
+		if (fsi_files) {
+			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
+				::g_unlink((*i)->c_str());
+			}
+		}
+		vector_delete(fsi_files);
+	}
+#endif
+
+#ifdef LXVST_SUPPORT
+	{
+		PathScanner scanner;
+		vector<string *> *fsi_files;
+		fsi_files = scanner (lxvst_path, "\\.fsb$", true, true, -1, false);
+		if (fsi_files) {
+			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
+				::g_unlink((*i)->c_str());
+			}
+		}
+		vector_delete(fsi_files);
+	}
+#endif
+
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+	{
+		string personal = get_personal_vst_blacklist_dir();
+
+		PathScanner scanner;
+		vector<string *> *fsi_files;
+		fsi_files = scanner (personal, "\\.fsb$", true, true, -1, false);
+		if (fsi_files) {
+			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
+				::g_unlink((*i)->c_str());
+			}
+		}
+		vector_delete(fsi_files);
+	}
+#endif
 }
 
 void
