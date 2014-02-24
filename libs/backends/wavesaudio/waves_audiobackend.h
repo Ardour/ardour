@@ -107,8 +107,6 @@ class WavesMidiPort;
 
     virtual int set_buffer_size (uint32_t);
 
-    virtual int set_sample_format (SampleFormat);
-
     virtual int set_interleaved (bool yn);
     
     virtual int set_input_channels (uint32_t);
@@ -124,8 +122,6 @@ class WavesMidiPort;
     virtual float sample_rate () const;
     
     virtual uint32_t buffer_size () const;
-    
-    virtual SampleFormat sample_format () const;
     
     virtual bool interleaved () const;
     
@@ -279,7 +275,6 @@ class WavesMidiPort;
     WavesMidiDeviceManager _midi_device_manager;
 
     WCMRAudioDevice *_device;
-    SampleFormat _sample_format;
     bool _interleaved;
     static std::string __instantiated_name;
     uint32_t _input_channels;

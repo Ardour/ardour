@@ -77,7 +77,6 @@ WavesAudioBackend::WavesAudioBackend (AudioEngine& e)
     , _audio_device_manager (this)
     , _midi_device_manager (*this)
     , _device (NULL)
-    , _sample_format (FormatFloat)
     , _interleaved (true)
     , _input_channels (0)
     , _max_input_channels (0)
@@ -409,16 +408,6 @@ WavesAudioBackend::set_buffer_size (uint32_t buffer_size)
 
 
 int 
-WavesAudioBackend::set_sample_format (SampleFormat sample_format)
-{
-    /* COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::set_sample_format (): " << sample_format << std::endl;
-
-    _sample_format = sample_format;
-    return 0;
-}
-
-
-int 
 WavesAudioBackend::set_interleaved (bool yn)
 {
     /*you can ignore them totally*/
@@ -492,14 +481,6 @@ WavesAudioBackend::buffer_size () const
     /* COMMENTED DBG LOGS */ std::cout << "\t[" << _device->DeviceName () << "]->CurrentBufferSize () returned " << size << std::endl;
 
     return (uint32_t)size;
-}
-
-
-SampleFormat 
-WavesAudioBackend::sample_format () const
-{
-    /* COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::sample_format ()" << std::endl;
-    return _sample_format;
 }
 
 
