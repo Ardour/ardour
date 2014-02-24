@@ -68,7 +68,6 @@ class JACKAudioBackend : public AudioBackend {
     int set_device_name (const std::string&);
     int set_sample_rate (float);
     int set_buffer_size (uint32_t);
-    int set_sample_format (SampleFormat);
     int set_interleaved (bool yn);
     int set_input_channels (uint32_t);
     int set_output_channels (uint32_t);
@@ -78,7 +77,6 @@ class JACKAudioBackend : public AudioBackend {
     std::string  device_name () const;
     float        sample_rate () const;
     uint32_t     buffer_size () const;
-    SampleFormat sample_format () const;
     bool         interleaved () const;
     uint32_t     input_channels () const;
     uint32_t     output_channels () const;

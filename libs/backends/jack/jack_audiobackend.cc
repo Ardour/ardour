@@ -57,7 +57,6 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, boost::shared_ptr<JackConnec
 	, _freewheeling (false)
 	, _target_sample_rate (48000)
 	, _target_buffer_size (1024)
-	, _target_sample_format (FormatFloat)
 	, _target_interleaved (false)
 	, _target_input_channels (0)
 	, _target_output_channels (0)
@@ -268,18 +267,6 @@ JACKAudioBackend::set_buffer_size (uint32_t nframes)
 }
 
 int
-JACKAudioBackend::set_sample_format (SampleFormat sf)
-{
-	/* as far as JACK clients are concerned, the hardware is always
-	 * floating point format.
-	 */
-	if (sf == FormatFloat) {
-		return 0;
-	}
-	return -1;
-}
-
-int
 JACKAudioBackend::set_interleaved (bool yn)
 {
 	/* as far as JACK clients are concerned, the hardware is always
@@ -395,12 +382,6 @@ JACKAudioBackend::buffer_size () const
 		}
 	}
 	return _target_buffer_size;
-}
-
-SampleFormat
-JACKAudioBackend::sample_format () const
-{
-	return FormatFloat;
 }
 
 bool
