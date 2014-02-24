@@ -57,12 +57,6 @@ AudioBuffer::resize (size_t size)
 
 	if (_data && size < _capacity) {
 		/* buffer is already large enough */
-		
-		if (size < _size) {
-			/* truncate */
-			_size = size;
-		}
-
 		return;
 	}
 
@@ -71,14 +65,13 @@ AudioBuffer::resize (size_t size)
 	cache_aligned_malloc ((void**) &_data, sizeof (Sample) * size);
 
 	_capacity = size;
-	_size = 0;
 	_silent = false;
 }
 
 bool
-AudioBuffer::check_silence (pframes_t nframes, bool wholebuffer, pframes_t& n) const
+AudioBuffer::check_silence (pframes_t nframes, pframes_t& n) const
 {
-	for (n = 0; (wholebuffer || n < _size) &&  n < nframes; ++n) {
+	for (n = 0; n < nframes; ++n) {
 		if (_data[n] != Sample (0)) {
 			return false;
 		}

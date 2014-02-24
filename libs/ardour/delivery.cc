@@ -397,7 +397,7 @@ Delivery::reset_panner ()
 	if (panners_legal) {
 		if (!_no_panner_reset) {
 
-			if (_panshell && _role != Insert) {
+			if (_panshell && _role != Insert && _role != Listen) {
 				_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, pan_outs()));
 			}
 		}

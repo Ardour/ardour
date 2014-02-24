@@ -61,6 +61,7 @@ public:
 
 	void handle_button (Button&, ButtonState bs);
 	void handle_fader (Fader&, float position);
+	void handle_fader_touch (Fader&, bool touch_on);
 	void handle_pot (Pot&, float delta);
 
 	void periodic (uint64_t now_usecs);

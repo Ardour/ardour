@@ -372,19 +372,9 @@ Amp::inc_gain (gain_t factor, void *src)
 }
 
 void
-Amp::set_gain (gain_t val, void *src)
+Amp::set_gain (gain_t val, void *)
 {
-	val = min (val, max_gain_coefficient);
-
-	if (src != _gain_control.get()) {
-		_gain_control->set_value (val);
-		// bit twisty, this will come back and call us again
-		// (this keeps control in sync with reality)
-		return;
-	}
-
-	_gain_control->set_double (val);
-	_session.set_dirty();
+	_gain_control->set_value (val);
 }
 
 XMLNode&
@@ -414,13 +404,8 @@ Amp::set_state (const XMLNode& node, int version)
 void
 Amp::GainControl::set_value (double val)
 {
-	if (val > max_gain_coefficient) {
-		val = max_gain_coefficient;
-	}
-
-	_amp->set_gain (val, this);
-
-	AutomationControl::set_value(val);
+	AutomationControl::set_value (min (val, (double) max_gain_coefficient));
+	_amp->session().set_dirty ();
 }
 
 double

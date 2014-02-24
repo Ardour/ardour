@@ -96,6 +96,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	bool in_pan_update;
 	int _current_nouts;
 	int _current_nins;
+	std::string _current_uri;
 
 	static const int pan_bar_height;
 

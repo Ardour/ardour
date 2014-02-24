@@ -27,6 +27,8 @@
 #include "ardour/midi_region.h"
 #include "ardour/session.h"
 
+#include "gtkmm2ext/keyboard.h"
+
 #include "automation_region_view.h"
 #include "editing.h"
 #include "editor.h"
@@ -120,7 +122,11 @@ AutomationRegionView::canvas_event (GdkEvent* ev)
 		y = std::max (y, 0.0);
 		y = std::min (y, _height - NAME_HIGHLIGHT_SIZE);
 
-		add_automation_event (ev, trackview.editor().pixel_to_frame (x) - _region->position() + _region->start(), y);
+		/* guard points only if primary modifier is used */
+
+		bool with_guard_points = Gtkmm2ext::Keyboard::modifier_state_equals (ev->button.state, Gtkmm2ext::Keyboard::PrimaryModifier);
+
+		add_automation_event (ev, trackview.editor().pixel_to_frame (x) - _region->position() + _region->start(), y, with_guard_points);
 	}
 
 	return false;
@@ -130,7 +136,7 @@ AutomationRegionView::canvas_event (GdkEvent* ev)
  *  @param y y position, relative to our TimeAxisView.
  */
 void
-AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double y)
+AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double y, bool with_guard_points)
 {
 	if (!_line) {
 		boost::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
@@ -160,7 +166,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 	view->session()->begin_reversible_command (_("add automation event"));
 	XMLNode& before = _line->the_list()->get_state();
 
-	_line->the_list()->add (when_d, y);
+	_line->the_list()->add (when_d, y, with_guard_points);
 
 	XMLNode& after = _line->the_list()->get_state();
 

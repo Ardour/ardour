@@ -203,7 +203,7 @@ lv2_evbuf_get(LV2_Evbuf_Iterator iter,
 	switch (iter.evbuf->type) {
 	case LV2_EVBUF_EVENT:
 		ebuf = &iter.evbuf->buf.event;
-		ev = (LV2_Event*)ebuf->data + iter.offset;
+		ev = (LV2_Event*)((char*)ebuf->data + iter.offset);
 		*frames    = ev->frames;
 		*subframes = ev->subframes;
 		*type      = ev->type;

@@ -270,8 +270,6 @@ typedef struct _VstTimeInfo
 
 } VstTimeInfo;
 
-typedef struct _VstTimeInfo VstTimeInfo;
-
 typedef intptr_t (* audioMasterCallback) (AEffect *, int32_t, int32_t, intptr_t, void *, float);
 
 #endif

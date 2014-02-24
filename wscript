@@ -177,10 +177,6 @@ def set_compiler_flags (conf,opt):
     if opt.gprofile:
         debug_flags = [ '-pg' ]
 
-    if opt.backtrace:
-        if platform != 'darwin' and not is_clang:
-            debug_flags = [ '-rdynamic' ]
-
     # Autodetect
     if opt.dist_target == 'auto':
         if platform == 'darwin':
@@ -414,6 +410,10 @@ def set_compiler_flags (conf,opt):
     else:
         conf.env.append_value('CFLAGS', optimization_flags)
         conf.env.append_value('CXXFLAGS', optimization_flags)
+
+    if opt.backtrace:
+        if platform != 'darwin' and not is_clang:
+            linker_flags += [ '-rdynamic' ]
 
     conf.env.append_value('CFLAGS', compiler_flags)
     conf.env.append_value('CFLAGS', c_flags)

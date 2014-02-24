@@ -99,6 +99,7 @@ StereoPanner::StereoPanner (boost::shared_ptr<PannerShell> p)
 	width_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
 
 	_panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&StereoPanner::bypass_handler, this), gui_context());
+	_panner_shell->PannableChanged.connect (panshell_connections, invalidator (*this), boost::bind (&StereoPanner::pannable_handler, this), gui_context());
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &StereoPanner::color_handler));
 

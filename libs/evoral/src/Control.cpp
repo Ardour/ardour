@@ -17,6 +17,9 @@
  */
 
 #include <iostream>
+
+#include "pbd/stacktrace.h"
+
 #include "evoral/Control.hpp"
 #include "evoral/ControlList.hpp"
 
@@ -49,9 +52,13 @@ void
 Control::set_double (double value, double frame, bool to_list)
 {
 	_user_value = value;
+	
+	/* if we're in a write pass, the automation watcher will determine the
+	   values and add them to the list, so we we don't need to bother.
+	*/
 
-	if (to_list) {
-		_list->add (frame, value);
+	if (to_list && !_list->in_write_pass()) {
+		_list->add (frame, value, false);
 	}
 }
 

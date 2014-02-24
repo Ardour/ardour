@@ -1682,7 +1682,8 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case AutomationTrackItem:
 				atv = dynamic_cast<AutomationTimeAxisView*>(clicked_axisview);
 				if (atv) {
-					atv->add_automation_event (event, where, event->button.y);
+					bool with_guard_points = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
+					atv->add_automation_event (event, where, event->button.y, with_guard_points);
 				}
 				return true;
 				break;
@@ -1701,17 +1702,20 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				*/
 				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (clicked_regionview);
 				if (!were_dragging && arv) {
-					arv->add_gain_point_event (item, event);
+					bool with_guard_points = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
+					arv->add_gain_point_event (item, event, with_guard_points);
 				}
 				return true;
 				break;
 			}
 
-			case AutomationTrackItem:
+			case AutomationTrackItem: {
+				bool with_guard_points = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
 				dynamic_cast<AutomationTimeAxisView*>(clicked_axisview)->
-					add_automation_event (event, where, event->button.y);
+					add_automation_event (event, where, event->button.y, with_guard_points);
 				return true;
 				break;
+			}
 			default:
 				break;
 			}
