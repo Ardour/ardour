@@ -200,12 +200,6 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      * doesn't directly expose the concept).
      */
     virtual int set_buffer_size (uint32_t) = 0;
-    /** Set the preferred underlying hardware sample format
-     *
-     * This does not change the sample format (32 bit float) read and
-     * written to the device via the Port API.
-     */
-    virtual int set_sample_format (SampleFormat) = 0;
     /** Set the preferred underlying hardware data layout.
      * If @param yn is true, then the hardware will interleave
      * samples for successive channels; otherwise, the hardware will store
@@ -237,7 +231,6 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     virtual std::string  device_name () const = 0;
     virtual float        sample_rate () const = 0;
     virtual uint32_t     buffer_size () const = 0;
-    virtual SampleFormat sample_format () const = 0;
     virtual bool         interleaved () const = 0;
     virtual uint32_t     input_channels () const = 0;
     virtual uint32_t     output_channels () const = 0;

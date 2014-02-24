@@ -895,15 +895,6 @@ AudioEngine::set_buffer_size (uint32_t bufsiz)
 }
 
 int
-AudioEngine::set_sample_format (SampleFormat sf)
-{
-	if (!_backend) {
-		return -1;
-	}
-	return _backend->set_sample_format  (sf);
-}
-
-int
 AudioEngine::set_interleaved (bool yn)
 {
 	if (!_backend) {

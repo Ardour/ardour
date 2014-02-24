@@ -113,7 +113,6 @@ public:
     int set_device_name (const std::string&);
     int set_sample_rate (float);
     int set_buffer_size (uint32_t);
-    int set_sample_format (SampleFormat);
     int set_interleaved (bool yn);
     int set_input_channels (uint32_t);
     int set_output_channels (uint32_t);
