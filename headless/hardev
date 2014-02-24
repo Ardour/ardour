@@ -1,0 +1,4 @@
+#!/bin/sh
+. `dirname "$0"`/../build/headless/hardev_common_waf.sh
+export UBUNTU_MENUPROXY=""
+exec $TOP/$EXECUTABLE "$@"
