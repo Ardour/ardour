@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+import sys
+import re
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+WAVESAUDIOBACKEND_VERSION = '0.0.1'
+I18N_PACKAGE = 'wavesaudio-backend'
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    autowaf.configure(conf)
+    
+def build(bld):
+    obj = bld(features = 'cxx cxxshlib')
+    if bld.env['build_target'] == 'mountain_lion':
+        obj.framework = 'CoreMidi'
+    else:
+        obj.framework = 'CoreMIDI'
+    obj.source = [
+            'waves_audiobackend.cc',
+            'waves_audiobackend.latency.cc',
+            'waves_audiobackend.midi.cc',
+            'waves_audiobackend.port_engine.cc',
+            'waves_dataport.cc',
+            'waves_audioport.cc',
+            'waves_midiport.cc',
+            'waves_midi_device_manager.cc',
+            'waves_midi_device.cc',
+            'waves_midi_event.cc',
+            'waves_midi_buffer.cc',
+            'wavesapi/refmanager/WCRefManager.cpp',
+            'wavesapi/devicemanager/WCMRAudioDeviceManager.cpp',
+            'wavesapi/devicemanager/WCMRCoreAudioDeviceManager.cpp',
+            'wavesapi/devicemanager/WCMRNativeAudio.cpp',
+            'wavesapi/threads/WCThreadSafe.cpp',
+			'portmidi/src/pm_common/pmutil.c',
+			'portmidi/src/pm_common/portmidi.c',
+			'portmidi/src/pm_mac/pmmac.c',
+			'portmidi/src/pm_mac/pmmacosxcm.c',
+			'portmidi/src/pm_mac/finddefault.c',
+			'portmidi/src/pm_mac/readbinaryplist.c',
+			'portmidi/src/porttime/ptmacosx_mach.c'
+            ]
+    obj.includes = ['.',
+           'wavesapi',
+           'wavesapi/refmanager',
+           'wavesapi/wavespublicapi',
+           'wavesapi/devicemanager',
+           'wavesapi/miscutils',
+           'portmidi',
+           'portmidi/src/pm_common'
+            ]
+    obj.cxxflags = [ '-fPIC' ]
+    obj.name     = 'waves_audiobackend'
+    obj.target   = 'waves_audiobackend'
+    obj.use      = [ 'libardour', 'libpbd' ]
+    obj.vnum     = WAVESAUDIOBACKEND_VERSION
+    obj.install_path  = os.path.join(bld.env['LIBDIR'], 'ardour3', 'backends')
+    obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
+            '__MACOS__',
+            'ARDOURBACKEND_DLL_EXPORTS'
+            ]
