@@ -39,13 +39,13 @@ int main (int argc, char **argv) {
 	char *dllpath = argv[1];
 	std::vector<VSTInfo *> *infos;
 #ifdef LXVST_SUPPORT
-	if (strstr (dllpath, ".so" ) == 0) {
+	if (strstr (dllpath, ".so")) {
 		infos = vstfx_get_info_lx(dllpath);
 	}
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
-	if (strstr (dllpath, ".dll" ) == 0) {
+	if (strstr (dllpath, ".dll")) {
 		infos = vstfx_get_info_fst(dllpath);
 	}
 #endif
