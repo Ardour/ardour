@@ -817,7 +817,7 @@ get_personal_vst_blacklist_dir() {
 	/* if the directory doesn't exist, try to create it */
 	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
 		if (g_mkdir (dir.c_str (), 0700)) {
-			PBD::error << "Cannt create VST cache folder '" << dir << "'" << endmsg;
+			PBD::error << "Cannot create VST blacklist folder '" << dir << "'" << endmsg;
 			//exit(1);
 		}
 	}
@@ -830,7 +830,7 @@ get_personal_vst_info_cache_dir() {
 	/* if the directory doesn't exist, try to create it */
 	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
 		if (g_mkdir (dir.c_str (), 0700)) {
-			PBD::error << "Cannt create VST info folder '" << dir << "'" << endmsg;
+			PBD::error << "Cannot create VST info folder '" << dir << "'" << endmsg;
 			//exit(1);
 		}
 	}
