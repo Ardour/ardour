@@ -42,6 +42,11 @@
 
 #include "pbd/error.h"
 
+#ifndef VST_SCANNER_APP
+#include "pbd/system_exec.h"
+#include "pbd/file_utils.h"
+#endif
+
 #include "ardour/filesystem_paths.h"
 #include "ardour/linux_vst_support.h"
 #include "ardour/vst_info_file.h"
@@ -50,7 +55,6 @@
 
 using namespace std;
 
-// TODO: make static parts of this file re-usable for standalone app
 // TODO: namespace public API into ARDOUR, ::Session or ::PluginManager
 //       consolidate vstfx_get_info_lx() and vstfx_get_info_fst()
 
@@ -696,8 +700,16 @@ vstfx_instantiate_and_get_info_fst (
 }
 #endif
 
+#ifndef VST_SCANNER_APP
+static void parse_scanner_output (std::string msg, size_t /*len*/)
+{
+	// TODO write to blacklist or error file..?
+	PBD::error << "VST scanner: " << msg;
+}
+#endif
+
 static vector<VSTInfo *> *
-vstfx_get_info (const char* dllpath, int type)
+vstfx_get_info (const char* dllpath, int type, enum VSTScanMode mode)
 {
 	FILE* infofile;
 	vector<VSTInfo*> *infos = new vector<VSTInfo*>;
@@ -709,6 +721,53 @@ vstfx_get_info (const char* dllpath, int type)
 	if (vstfx_get_info_from_file(dllpath, infos)) {
 		return infos;
 	}
+
+#ifndef VST_SCANNER_APP
+	if (mode == VST_SCAN_CACHE_ONLY) {
+		/* never scan explicitly, use cache only */
+		return infos;
+	}
+	else if (mode == VST_SCAN_USE_APP) {
+		/* use external scanner app -- TODO resolve path only once use static
+		 * ARDOUR::PluginManager::scanner_bin_path
+		 */
+		std::string scanner_bin_path; //= "/home/rgareus/src/git/ardourCairoCanvas/build/libs/fst/ardour-vst-scanner"; // XXX
+		if (!PBD::find_file_in_search_path (
+					PBD::Searchpath(Glib::build_filename(ARDOUR::ardour_dll_directory(), "fst")),
+					"ardour-vst-scanner", scanner_bin_path)) {
+			PBD::error << "VST scanner app not found.'" << endmsg;
+			// TODO: fall-through !?
+			return infos;
+		}
+		/* note: these are free()d in the dtor of PBD::SystemExec */
+		char **argp= (char**) calloc(3,sizeof(char*));
+		argp[0] = strdup(scanner_bin_path.c_str());
+		argp[1] = strdup(dllpath);
+		argp[2] = 0;
+
+		PBD::SystemExec scanner (scanner_bin_path, argp);
+		PBD::ScopedConnectionList cons;
+		// TODO timeout.., and honor user-terminate
+		//scanner->Terminated.connect_same_thread (cons, boost::bind (&scanner_terminated))
+		scanner.ReadStdout.connect_same_thread (cons, boost::bind (&parse_scanner_output, _1 ,_2));
+		if (scanner.start (2 /* send stderr&stdout via signal */)) {
+			PBD::error << "Cannot launch VST scanner app '" << scanner_bin_path << "': "<< strerror(errno) << endmsg;
+			return infos;
+		} else {
+			// TODO idle loop (emit signal to GUI to call gtk_main_iteration()) check cancel.
+			scanner.wait();
+		}
+		/* re-read index */
+		vstfx_clear_info_list(infos);
+		if (!vstfx_check_blacklist(dllpath)) {
+			vstfx_get_info_from_file(dllpath, infos);
+		}
+		return infos;
+	}
+	/* else .. instantiate and check in in ardour process itself */
+#else
+	(void) mode; // unused parameter
+#endif
 
 	bool ok;
 	/* blacklist in case instantiation fails */
@@ -782,16 +841,16 @@ get_personal_vst_info_cache_dir() {
 
 #ifdef LXVST_SUPPORT
 vector<VSTInfo *> *
-vstfx_get_info_lx (char* dllpath)
+vstfx_get_info_lx (char* dllpath, enum VSTScanMode mode)
 {
-	return vstfx_get_info(dllpath, 2);
+	return vstfx_get_info(dllpath, 2, mode);
 }
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
 vector<VSTInfo *> *
-vstfx_get_info_fst (char* dllpath)
+vstfx_get_info_fst (char* dllpath, enum VSTScanMode mode)
 {
-	return vstfx_get_info(dllpath, 1);
+	return vstfx_get_info(dllpath, 1, mode);
 }
 #endif

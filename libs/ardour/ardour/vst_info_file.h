@@ -25,16 +25,22 @@
 #include "ardour/vst_types.h"
 #include <vector>
 
+enum VSTScanMode {
+	VST_SCAN_CACHE_ONLY,
+	VST_SCAN_USE_APP,
+	VST_SCAN_INTERNAL
+};
+
 LIBARDOUR_API extern std::string get_personal_vst_info_cache_dir ();
 LIBARDOUR_API extern std::string get_personal_vst_blacklist_dir ();
 LIBARDOUR_API extern void vstfx_free_info_list (std::vector<VSTInfo *> *infos);
 
 #ifdef LXVST_SUPPORT
-LIBARDOUR_API extern std::vector<VSTInfo*> * vstfx_get_info_lx (char *);
+LIBARDOUR_API extern std::vector<VSTInfo*> * vstfx_get_info_lx (char *, enum VSTScanMode mode = VST_SCAN_USE_APP);
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
-LIBARDOUR_API extern std::vector<VSTInfo*> * vstfx_get_info_fst (char *);
+LIBARDOUR_API extern std::vector<VSTInfo*> * vstfx_get_info_fst (char *, enum VSTScanMode mode = VST_SCAN_USE_APP);
 #endif
 
 #endif /* __vstfx_h__ */
