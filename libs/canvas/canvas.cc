@@ -351,6 +351,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 	if (within_items.empty()) {
 
 		/* no items at point, just send leave event below */
+		_new_current_item = 0;
 
 	} else {
 
