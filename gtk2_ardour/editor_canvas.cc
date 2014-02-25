@@ -142,20 +142,23 @@ Editor::initialize_canvas ()
 	
 	_time_markers_group = new ArdourCanvas::Group (_time_bars_canvas->root());
 
-	meter_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height * 5.0));
-	CANVAS_DEBUG_NAME (meter_group, "meter group");
-	tempo_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height * 4.0));
-	CANVAS_DEBUG_NAME (tempo_group, "tempo group");
-	range_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height * 3.0));
-	CANVAS_DEBUG_NAME (range_marker_group, "range marker group");
-	transport_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height * 2.0));
-	CANVAS_DEBUG_NAME (transport_marker_group, "transport marker group");
-	marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height));
-	CANVAS_DEBUG_NAME (marker_group, "marker group");
 	cd_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
 	CANVAS_DEBUG_NAME (cd_marker_group, "cd marker group");
+	/* the vide is temporarily placed a the same location as the
+	   cd_marker_group, but is moved later.
+	*/
 	videotl_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple(0.0, 0.0));
 	CANVAS_DEBUG_NAME (videotl_group, "videotl group");
+	marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height + 1.0));
+	CANVAS_DEBUG_NAME (marker_group, "marker group");
+	transport_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 2.0) + 1.0));
+	CANVAS_DEBUG_NAME (transport_marker_group, "transport marker group");
+	range_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 3.0) + 1.0));
+	CANVAS_DEBUG_NAME (range_marker_group, "range marker group");
+	tempo_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 4.0) + 1.0));
+	CANVAS_DEBUG_NAME (tempo_group, "tempo group");
+	meter_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
+	CANVAS_DEBUG_NAME (meter_group, "meter group");
 
 	ARDOUR_UI::instance()->video_timeline = new VideoTimeLine(this, videotl_group, (timebar_height * videotl_bar_height));
 
