@@ -189,7 +189,7 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 
 	if (visibility & ShowFrame) {
 		frame = new ArdourCanvas::Rectangle (group, 
-						     ArdourCanvas::Rect (0.0, 1.0, 
+						     ArdourCanvas::Rect (0.0, 0.0, 
 									 trackview.editor().sample_to_pixel(duration) + RIGHT_EDGE_SHIFT, 
 									 trackview.current_height() - 1.0));
 
@@ -203,13 +203,13 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 			frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame());
 		}
 
-		// frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::LEFT));
+		frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::LEFT));
 
 	} else {
 
 		frame = 0;
 	}
-
+	
 	if (visibility & ShowNameHighlight) {
 
 		double width;
@@ -227,7 +227,7 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 							      ArdourCanvas::Rect (start, 
 										  trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, 
 										  width - 2.0 + RIGHT_EDGE_SHIFT,
-										  trackview.current_height()));
+										  trackview.current_height() - 1.0));
 		CANVAS_DEBUG_NAME (name_highlight, string_compose ("name highlight for %1", get_item_name()));
 		name_highlight->set_data ("timeaxisviewitem", this);
                 name_highlight->set_outline_what (ArdourCanvas::Rectangle::TOP);
@@ -610,7 +610,7 @@ TimeAxisViewItem::manage_name_highlight ()
 		name_highlight->show();
 
 		name_highlight->set_y0 ((double) _height - NAME_HIGHLIGHT_SIZE);
-		name_highlight->set_y1 ((double) _height);
+		name_highlight->set_y1 ((double) _height - 1.0);
 		
 		if (visibility & FullWidthNameHighlight) {
 			/* x0 is always 0.0 */
@@ -755,7 +755,7 @@ TimeAxisViewItem::set_colors()
 	set_frame_color();
 
 	if (name_highlight) {
-		name_highlight->set_fill_color (fill_color);
+                name_highlight->set_fill_color (fill_color);
 	}
 
 	if (name_text) {

@@ -449,7 +449,7 @@ void
 AudioRegionView::setup_fade_handle_positions()
 {
 	/* position of fade handle offset from the top of the region view */
-	double const handle_pos = 1.0;
+	double const handle_pos = 0.0;
 
 	if (fade_in_handle) {
 		fade_in_handle->set_y0 (handle_pos);
@@ -572,6 +572,8 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 		effective_height = _height;
 	}
 
+	effective_height -= 1.0;
+
 	Points points;
 
 	points.assign (npoints, Duple());
@@ -583,7 +585,7 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 
 	for (pi = 0, pc = 0; pc < npoints; ++pc) {
 		points[pi].x = 1.0 + (pc * xdelta);
-		points[pi++].y = 1.0 + effective_height - (curve[pc] * effective_height);
+		points[pi++].y =  1.0 + effective_height - (curve[pc] * effective_height);
 	}
 
 	/* draw the line */
@@ -652,6 +654,8 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 	} else {
 		effective_height = _height;
 	}
+
+	effective_height -= 1.0;
 
 	/* points *MUST* be in anti-clockwise order */
 	
@@ -739,7 +743,7 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 		start_xfade_rect->set_data ("regionview", this);
 	}
 
-	start_xfade_rect->set (ArdourCanvas::Rect (1.0, 1.0, rect_width, effective_height));
+	start_xfade_rect->set (ArdourCanvas::Rect (1.0, 0.0, rect_width, effective_height));
 	start_xfade_rect->show ();
 
 	start_xfade_in->set (points);
@@ -829,7 +833,7 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 		end_xfade_rect->set_data ("regionview", this);
 	}
 
-	end_xfade_rect->set (ArdourCanvas::Rect (rect_edge, 1.0, rect_edge + rect_width + TimeAxisViewItem::RIGHT_EDGE_SHIFT, effective_height));
+	end_xfade_rect->set (ArdourCanvas::Rect (rect_edge, 0.0, rect_edge + rect_width + TimeAxisViewItem::RIGHT_EDGE_SHIFT, effective_height));
 	end_xfade_rect->show ();
 
 	end_xfade_in->set (points);
@@ -1373,6 +1377,7 @@ AudioRegionView::envelope_active_changed ()
 		gain_line->set_line_color (audio_region()->envelope_active() ? 
 					   ARDOUR_UI::config()->get_canvasvar_GainLine() : 
 					   ARDOUR_UI::config()->get_canvasvar_GainLineInactive());
+		update_envelope_visibility ();
 	}
 }
 

@@ -49,8 +49,8 @@ GhostRegion::GhostRegion (ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxi
 	base_rect = new ArdourCanvas::Rectangle (group);
 	CANVAS_DEBUG_NAME (base_rect, "ghost region rect");
 	base_rect->set_x0 (0);
-	base_rect->set_y0 (1.0);
-	base_rect->set_y1 (trackview.current_height());
+	base_rect->set_y0 (0.0);
+	base_rect->set_y1 (trackview.current_height() - 1.0);
 	base_rect->set_outline_what (0);
 
 	if (!is_automation_ghost()) {

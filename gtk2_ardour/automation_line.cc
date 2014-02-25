@@ -1007,9 +1007,9 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 		line->set (line_points);
 
-		if (_visible && alist->interpolation() != AutomationList::Discrete) {
-			line->show();
-		}
+		/* despite the name, this may show or hide things */
+
+		show();
 	}
 
 	set_selected_points (trackview.editor().get_selection().points);
