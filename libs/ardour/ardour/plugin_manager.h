@@ -50,7 +50,7 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	ARDOUR::PluginInfoList &lv2_plugin_info ();
 	ARDOUR::PluginInfoList &au_plugin_info ();
 
-	void refresh ();
+	void refresh (bool cache_only = false);
 	void cancel_plugin_scan();
 	void clear_vst_cache ();
 	void clear_vst_blacklist ();
@@ -112,8 +112,8 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	bool cancel_scan;
 
 	void ladspa_refresh ();
-	void windows_vst_refresh ();
-	void lxvst_refresh ();
+	void windows_vst_refresh (bool cache_only = false);
+	void lxvst_refresh (bool cache_only = false);
 
 	void add_lrdf_data (const std::string &path);
 	void add_ladspa_presets ();
@@ -125,11 +125,11 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 
 	void lv2_refresh ();
 
-	int windows_vst_discover_from_path (std::string path);
-	int windows_vst_discover (std::string path);
+	int windows_vst_discover_from_path (std::string path, bool cache_only = false);
+	int windows_vst_discover (std::string path, bool cache_only = false);
 	
-	int lxvst_discover_from_path (std::string path);
-	int lxvst_discover (std::string path);
+	int lxvst_discover_from_path (std::string path, bool cache_only = false);
+	int lxvst_discover (std::string path, bool cache_only = false);
 
 	int ladspa_discover (std::string path);
 

@@ -176,7 +176,7 @@ PluginManager::~PluginManager()
 
 
 void
-PluginManager::refresh ()
+PluginManager::refresh (bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, "PluginManager::refresh\n");
 	BootMessage (_("Discovering Plugins"));
@@ -607,7 +607,7 @@ PluginManager::au_refresh ()
 #ifdef WINDOWS_VST_SUPPORT
 
 void
-PluginManager::windows_vst_refresh ()
+PluginManager::windows_vst_refresh (bool cache_only)
 {
 	if (_windows_vst_plugin_info) {
 		_windows_vst_plugin_info->clear ();
@@ -619,7 +619,7 @@ PluginManager::windows_vst_refresh ()
 		windows_vst_path = "/usr/local/lib/vst:/usr/lib/vst";
 	}
 
-	windows_vst_discover_from_path (windows_vst_path);
+	windows_vst_discover_from_path (windows_vst_path, cache_only);
 }
 
 int
@@ -641,7 +641,7 @@ static bool windows_vst_filter (const string& str, void * /*arg*/)
 }
 
 int
-PluginManager::windows_vst_discover_from_path (string path)
+PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 {
 	PathScanner scanner;
 	vector<string *> *plugin_objects;
@@ -655,7 +655,7 @@ PluginManager::windows_vst_discover_from_path (string path)
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
 			ARDOUR::PluginScanMessage(_("VST"), **x);
-			windows_vst_discover (**x);
+			windows_vst_discover (**x, cache_only);
 		}
 
 		vector_delete (plugin_objects);
@@ -665,11 +665,12 @@ PluginManager::windows_vst_discover_from_path (string path)
 }
 
 int
-PluginManager::windows_vst_discover (string path)
+PluginManager::windows_vst_discover (string path, bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("windows_vst_discover '%1'\n", path));
 
-	vector<VSTInfo*> * finfos = vstfx_get_info_fst (const_cast<char *> (path.c_str()));
+	vector<VSTInfo*> * finfos = vstfx_get_info_fst (const_cast<char *> (path.c_str()),
+			cache_only ? VST_SCAN_CACHE_ONLY : VST_SCAN_USE_APP);
 
 	if (finfos->empty()) {
 		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot get Windows VST information from '%1'\n", path));
@@ -739,7 +740,7 @@ PluginManager::windows_vst_discover (string path)
 #ifdef LXVST_SUPPORT
 
 void
-PluginManager::lxvst_refresh ()
+PluginManager::lxvst_refresh (bool cache_only)
 {
 	if (_lxvst_plugin_info) {
 		_lxvst_plugin_info->clear ();
@@ -753,7 +754,7 @@ PluginManager::lxvst_refresh ()
 			"/usr/lib/vst:/usr/local/lib/vst";
 	}
 
-	lxvst_discover_from_path (lxvst_path);
+	lxvst_discover_from_path (lxvst_path, cache_only);
 }
 
 int
@@ -775,7 +776,7 @@ static bool lxvst_filter (const string& str, void *)
 }
 
 int
-PluginManager::lxvst_discover_from_path (string path)
+PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 {
 	PathScanner scanner;
 	vector<string *> *plugin_objects;
@@ -793,7 +794,7 @@ PluginManager::lxvst_discover_from_path (string path)
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
 			ARDOUR::PluginScanMessage(_("LXVST"), **x);
-			lxvst_discover (**x);
+			lxvst_discover (**x, cache_only);
 		}
 
 		vector_delete (plugin_objects);
@@ -803,11 +804,12 @@ PluginManager::lxvst_discover_from_path (string path)
 }
 
 int
-PluginManager::lxvst_discover (string path)
+PluginManager::lxvst_discover (string path, bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("checking apparent LXVST plugin at %1\n", path));
 
-	vector<VSTInfo*> * finfos = vstfx_get_info_lx (const_cast<char *> (path.c_str()));
+	vector<VSTInfo*> * finfos = vstfx_get_info_lx (const_cast<char *> (path.c_str()),
+			cache_only ? VST_SCAN_CACHE_ONLY : VST_SCAN_USE_APP);
 
 	if (finfos->empty()) {
 		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot get Linux VST information from '%1'\n", path));
