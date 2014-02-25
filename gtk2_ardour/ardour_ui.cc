@@ -3826,7 +3826,11 @@ ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin)
 		scan_dlg->show_all();
 	}
 
-	gtk_main_iteration ();
+	/* due to idle calls, gtk_events_pending() may always return true */
+	int timeout = 30;
+	while (gtk_events_pending() && --timeout) {
+		gtk_main_iteration ();
+	}
 }
 
 void
