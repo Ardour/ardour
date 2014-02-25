@@ -312,6 +312,20 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 	vector<Item const *> items;
 	_root.add_items_at_point (point, items);
 
+	DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("%1 covers %2 items\n", point, items.size()));
+
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(PBD::DEBUG::CanvasEnterLeave)) {
+		for (vector<Item const*>::const_iterator it = items.begin(); it != items.end(); ++it) {
+#ifdef CANVAS_DEBUG
+			std::cerr << "\tItem " << (*it)->whatami() << '/' << (*it)->name << std::endl;
+#else
+			std::cerr << "\tItem " << (*it)->whatami() << std::endl;
+#endif
+		}
+	}
+#endif
+
 	/* put all items at point that are event-sensitive and visible and NOT
 	   groups into within_items. Note that items is sorted from bottom to
 	   top, but we're going to reverse that for within_items so that its
@@ -344,7 +358,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 			/* uppermost item at point is already _current_item */
 			return;
 		}
-		
+	
 		_new_current_item = const_cast<Item*> (within_items.front());
 	}
 
@@ -466,7 +480,7 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 	if (_current_item && !_current_item->ignore_events ()) {
 		leave_event.detail = leave_detail;
 		_current_item->Event ((GdkEvent*)&leave_event);
-		// std::cerr << "LEAVE " << _current_item->whatami() << '/' << _current_item->name << std::endl;
+		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("LEAVE %1/%2\n", _current_item->whatami(), _current_item->name));
 	}
 
 	leave_event.detail = GDK_NOTIFY_VIRTUAL;
@@ -474,13 +488,14 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 
 	for (vector<Item*>::iterator it = items_to_leave_virtual.begin(); it != items_to_leave_virtual.end(); ++it) {
 		if (!(*it)->ignore_events()) {
+			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("leave %1/%2\n", (*it)->whatami(), (*it)->name));
 			(*it)->Event ((GdkEvent*)&leave_event);
-			// std::cerr << "leave " << (*it)->whatami() << '/' << (*it)->name << std::endl;
 		}
 	}
 
 	for (vector<Item*>::iterator it = items_to_enter_virtual.begin(); it != items_to_enter_virtual.end(); ++it) {
 		if (!(*it)->ignore_events()) {
+			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("enter %1/%2\n", (*it)->whatami(), (*it)->name));
 			(*it)->Event ((GdkEvent*)&enter_event);
 			// std::cerr << "enter " << (*it)->whatami() << '/' << (*it)->name << std::endl;
 		}
@@ -488,8 +503,8 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 
 	if (_new_current_item && !_new_current_item->ignore_events()) {
 		enter_event.detail = enter_detail;
+		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("ENTER %1/%2\n", _new_current_item->whatami(), _new_current_item->name));
 		_new_current_item->Event ((GdkEvent*)&enter_event);
-		// std::cerr << "ENTER " << _new_current_item->whatami() << '/' << _new_current_item->name << std::endl;
 	}
 
 	_current_item = _new_current_item;

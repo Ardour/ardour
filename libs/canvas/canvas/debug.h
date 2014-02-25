@@ -32,6 +32,7 @@ namespace PBD {
 		LIBCANVAS_API extern uint64_t CanvasItemsDirtied;
 		LIBCANVAS_API extern uint64_t CanvasEvents;
 		LIBCANVAS_API extern uint64_t CanvasRender;
+		LIBCANVAS_API extern uint64_t CanvasEnterLeave;
 	}
 }
 
