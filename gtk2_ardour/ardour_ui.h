@@ -666,6 +666,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void disk_speed_dialog_gone (int ignored_response, Gtk::MessageDialog*);
 	void disk_overrun_handler ();
 	void disk_underrun_handler ();
+	void gui_idle_handler ();
 
 	void cancel_plugin_scan ();
 	void plugin_scan_dialog (std::string type, std::string plugin);

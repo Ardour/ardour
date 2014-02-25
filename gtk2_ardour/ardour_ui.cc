@@ -308,6 +308,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	/* also plugin scan messages */
 	ARDOUR::PluginScanMessage.connect (forever_connections, MISSING_INVALIDATOR, boost::bind(&ARDOUR_UI::plugin_scan_dialog, this, _1, _2), gui_context());
 
+	ARDOUR::GUIIdle.connect (forever_connections, MISSING_INVALIDATOR, boost::bind(&ARDOUR_UI::gui_idle_handler, this), gui_context());
+
 	/* lets get this party started */
 
 	setup_gtk_ardour_enums ();
@@ -3827,6 +3829,15 @@ ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin)
 	}
 
 	/* due to idle calls, gtk_events_pending() may always return true */
+	int timeout = 30;
+	while (gtk_events_pending() && --timeout) {
+		gtk_main_iteration ();
+	}
+}
+
+void
+ARDOUR_UI::gui_idle_handler ()
+{
 	int timeout = 30;
 	while (gtk_events_pending() && --timeout) {
 		gtk_main_iteration ();
