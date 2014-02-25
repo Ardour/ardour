@@ -1489,6 +1489,7 @@ Editor::select_all_within (framepos_t start, framepos_t end, double top, double 
 	}
 
 	if (found.empty()) {
+		selection->clear ();
 		return;
 	}
 
