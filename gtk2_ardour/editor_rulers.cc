@@ -805,12 +805,12 @@ Editor::update_ruler_visibility ()
 		tbpos += timebar_height * videotl_bar_height;
 		tbgpos += timebar_height * videotl_bar_height;
 		visible_timebars+=videotl_bar_height;
-	  queue_visual_videotimeline_update();
+		queue_visual_videotimeline_update();
 	} else {
 		videotl_group->hide();
 		videotl_group->hide();
 		videotl_label.hide();
-	  update_video_timeline(true);
+		update_video_timeline(true);
 	}
 
 	ruler_label_vbox.set_size_request (-1, (int)(timebar_height * visible_rulers));
