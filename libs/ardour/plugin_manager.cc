@@ -93,6 +93,7 @@ using namespace PBD;
 using namespace std;
 
 PluginManager* PluginManager::_instance = 0;
+std::string PluginManager::scanner_bin_path = "";
 
 PluginManager&
 PluginManager::instance()
@@ -113,6 +114,12 @@ PluginManager::PluginManager ()
 {
 	char* s;
 	string lrdf_path;
+
+	if (!PBD::find_file_in_search_path (
+				PBD::Searchpath(Glib::build_filename(ARDOUR::ardour_dll_directory(), "fst")),
+				"ardour-vst-scanner", scanner_bin_path)) {
+		PBD::warning << "VST scanner app not found.'" << endmsg;
+	}
 
 	load_statuses ();
 

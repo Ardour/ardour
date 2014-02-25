@@ -44,7 +44,7 @@
 
 #ifndef VST_SCANNER_APP
 #include "pbd/system_exec.h"
-#include "pbd/file_utils.h"
+#include "ardour/plugin_manager.h" // scanner_bin_path
 #endif
 
 #include "ardour/filesystem_paths.h"
@@ -723,23 +723,15 @@ vstfx_get_info (const char* dllpath, int type, enum VSTScanMode mode)
 	}
 
 #ifndef VST_SCANNER_APP
+	std::string scanner_bin_path = ARDOUR::PluginManager::scanner_bin_path;
+
 	if (mode == VST_SCAN_CACHE_ONLY) {
 		/* never scan explicitly, use cache only */
 		return infos;
 	}
-	else if (mode == VST_SCAN_USE_APP) {
-		/* use external scanner app -- TODO resolve path only once use static
-		 * ARDOUR::PluginManager::scanner_bin_path
-		 */
-		std::string scanner_bin_path; //= "/home/rgareus/src/git/ardourCairoCanvas/build/libs/fst/ardour-vst-scanner"; // XXX
-		if (!PBD::find_file_in_search_path (
-					PBD::Searchpath(Glib::build_filename(ARDOUR::ardour_dll_directory(), "fst")),
-					"ardour-vst-scanner", scanner_bin_path)) {
-			PBD::error << "VST scanner app not found.'" << endmsg;
-			// TODO: fall-through !?
-			return infos;
-		}
-		/* note: these are free()d in the dtor of PBD::SystemExec */
+	else if (mode == VST_SCAN_USE_APP && scanner_bin_path != "") {
+		/* use external scanner app */
+
 		char **argp= (char**) calloc(3,sizeof(char*));
 		argp[0] = strdup(scanner_bin_path.c_str());
 		argp[1] = strdup(dllpath);

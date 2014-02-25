@@ -41,6 +41,7 @@ class Plugin;
 class LIBARDOUR_API PluginManager : public boost::noncopyable {
   public:
 	static PluginManager& instance();
+	static std::string scanner_bin_path;
 
 	~PluginManager ();
 
