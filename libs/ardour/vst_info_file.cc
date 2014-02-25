@@ -237,7 +237,7 @@ vstfx_write_info_file (FILE* fp, vector<VSTInfo *> *infos)
 		 * plugins contained in this shell
 		 */
 		vstfx_write_info_block(fp, *x);
-		fprintf( fp, "%d\n", infos->size() - 1 );
+		fprintf( fp, "%d\n", (int)infos->size() - 1 );
 		++x;
 		/* Now write out the info for each plugin */
 		for (; x != infos->end(); ++x) {

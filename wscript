@@ -74,6 +74,7 @@ children = [
         'mcp',
         'patchfiles',
         'headless',
+        'libs/fst',
 ]
 
 i18n_children = [
