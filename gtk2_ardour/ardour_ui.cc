@@ -306,7 +306,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	ARDOUR::FileSource::AmbiguousFileName.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::ambiguous_file, this, _1, _2));
 
 	/* also plugin scan messages */
-	ARDOUR::PluginScanMessage.connect (forever_connections, MISSING_INVALIDATOR, boost::bind(&ARDOUR_UI::plugin_scan_dialog, this, _1, _2), gui_context());
+	ARDOUR::PluginScanMessage.connect (forever_connections, MISSING_INVALIDATOR, boost::bind(&ARDOUR_UI::plugin_scan_dialog, this, _1, _2, _3), gui_context());
 
 	ARDOUR::GUIIdle.connect (forever_connections, MISSING_INVALIDATOR, boost::bind(&ARDOUR_UI::gui_idle_handler, this), gui_context());
 
@@ -3805,16 +3805,17 @@ ARDOUR_UI::cancel_plugin_scan ()
 static MessageDialog *scan_dlg = NULL;
 
 void
-ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin)
+ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin, bool can_cancel)
 {
 	if (!Config->get_show_plugin_scan_window()) { return; }
+	static Gtk::Button *cancel_button;
 	if (!scan_dlg) {
 		scan_dlg = new MessageDialog("", false, MESSAGE_INFO, BUTTONS_NONE);
 		VBox* vbox = scan_dlg->get_vbox();
 		vbox->set_size_request(400,-1);
 		scan_dlg->set_title (_("Scanning for plugins"));
 
-		Gtk::Button *cancel_button = manage(new Gtk::Button(_("Cancel plugin scan")));
+		cancel_button = manage(new Gtk::Button(_("Cancel plugin scan")));
 		cancel_button->set_name ("EditorGTKButton");
 		cancel_button->signal_clicked().connect ( mem_fun (*this, &ARDOUR_UI::cancel_plugin_scan) );
 
@@ -3827,6 +3828,7 @@ ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin)
 		scan_dlg->set_message(type + ": " + Glib::path_get_basename(plugin));
 		scan_dlg->show_all();
 	}
+	cancel_button->set_sensitive(can_cancel);
 
 	/* due to idle calls, gtk_events_pending() may always return true */
 	int timeout = 30;

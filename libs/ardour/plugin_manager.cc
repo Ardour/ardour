@@ -210,7 +210,7 @@ PluginManager::refresh (bool cache_only)
 #endif
 
 	PluginListChanged (); /* EMIT SIGNAL */
-	PluginScanMessage(X_("closeme"), "");
+	PluginScanMessage(X_("closeme"), "", false);
 	cancel_scan = false;
 }
 
@@ -351,7 +351,7 @@ PluginManager::ladspa_refresh ()
 					    dll_extension_pattern, ladspa_modules);
 
 	for (vector<std::string>::iterator i = ladspa_modules.begin(); i != ladspa_modules.end(); ++i) {
-		ARDOUR::PluginScanMessage(_("LADSPA"), *i);
+		ARDOUR::PluginScanMessage(_("LADSPA"), *i, false);
 		ladspa_discover (*i);
 	}
 }
@@ -664,7 +664,7 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
 			if (cancelled()) break;
-			ARDOUR::PluginScanMessage(_("VST"), **x);
+			ARDOUR::PluginScanMessage(_("VST"), **x, !cache_only);
 			windows_vst_discover (**x, cache_only);
 		}
 
@@ -804,7 +804,7 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
 			if (cancelled()) break;
-			ARDOUR::PluginScanMessage(_("LXVST"), **x);
+			ARDOUR::PluginScanMessage(_("LXVST"), **x, !cache_only);
 			lxvst_discover (**x, cache_only);
 		}
 

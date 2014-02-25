@@ -2110,7 +2110,7 @@ LV2PluginInfo::discover()
 
 		info->name = string(lilv_node_as_string(name));
 		lilv_node_free(name);
-		ARDOUR::PluginScanMessage(_("LV2"), info->name);
+		ARDOUR::PluginScanMessage(_("LV2"), info->name, false);
 
 		const LilvPluginClass* pclass = lilv_plugin_get_class(p);
 		const LilvNode*        label  = lilv_plugin_class_get_label(pclass);
