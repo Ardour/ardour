@@ -364,7 +364,7 @@ ARDOUR::init_post_engine ()
 
 	/* find plugins */
 
-	ARDOUR::PluginManager::instance().refresh ();
+	ARDOUR::PluginManager::instance().refresh (!Config->get_discover_vst_on_start());
 }
 
 void

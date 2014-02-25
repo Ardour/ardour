@@ -999,27 +999,34 @@ public:
 	PluginOptions (RCConfiguration* c)
 		: _rc_config (c)
 		, _display_plugin_scan_progress (_("Display Plugin Scan Progress"))
+		, _discover_vst_on_start (_("Scan for new VST Plugin on Application Start"))
 	{
 		Table* t = manage (new Table (2, 6));
 		t->set_spacings (4);
 		Button* b;
 
+		b = manage (new Button (_("Refresh Plugin List")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::refresh_clicked));
+		t->attach (*b, 0, 2, 0, 1, FILL);
+
 		b = manage (new Button (_("Clear VST Cache")));
 		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_vst_cache_clicked));
-		t->attach (*b, 0, 2, 0, 1, FILL);
+		t->attach (*b, 0, 2, 1, 2, FILL);
 
 		b = manage (new Button (_("Clear VST Blacklist")));
 		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_vst_blacklist_clicked));
-		t->attach (*b, 0, 2, 1, 2, FILL);
-
-		b = manage (new Button (_("Refresh Plugin List")));
-		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::refresh_clicked));
 		t->attach (*b, 0, 2, 2, 3, FILL);
 
-		t->attach (_display_plugin_scan_progress, 0, 2, 3, 4);
+		t->attach (_discover_vst_on_start, 0, 2, 3, 4);
+		_discover_vst_on_start.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::discover_vst_on_start_toggled));
+		Gtkmm2ext::UI::instance()->set_tip (_discover_vst_on_start,
+					    _("<b>When enabled</b> VST plugins are searched and tested on application start. When disabled they a Refresh will have to be tiggered manually"));
+
+		t->attach (_display_plugin_scan_progress, 0, 2, 4, 5);
 		_display_plugin_scan_progress.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::display_plugin_scan_progress_toggled));
 		Gtkmm2ext::UI::instance()->set_tip (_display_plugin_scan_progress,
-					    _("<b>When enabled</b> a popup window details plugin-scan."));
+					    _("<b>When enabled</b> display a popup window showing plugin scan progress."));
+
 
 		_box->pack_start (*t,true,true);
 	}
@@ -1029,19 +1036,32 @@ public:
 			bool const x = _rc_config->get_show_plugin_scan_window();
 			_display_plugin_scan_progress.set_active (x);
 		}
+		else if (p == "discover-vst-on-start") {
+			bool const x = _rc_config->get_discover_vst_on_start();
+			_discover_vst_on_start.set_active (x);
+		}
 	}
+
 	void set_state_from_config () {
 		parameter_changed ("show-plugin-scan-window");
+		parameter_changed ("discover-vst-on-start");
 	}
 
 private:
 	RCConfiguration* _rc_config;
 	CheckButton _display_plugin_scan_progress;
+	CheckButton _discover_vst_on_start;
 
 	void display_plugin_scan_progress_toggled () {
-		bool const x = _display_plugin_scan_progress.get_active ();
-		_rc_config->set_show_plugin_scan_window (x);
+		bool const x = _display_plugin_scan_progress.get_active();
+		_rc_config->set_show_plugin_scan_window(x);
 	}
+
+	void discover_vst_on_start_toggled () {
+		bool const x = _discover_vst_on_start.get_active();
+		_rc_config->set_discover_vst_on_start(x);
+	}
+
 	void clear_vst_cache_clicked () {
 		PluginManager::instance().clear_vst_cache();
 	}

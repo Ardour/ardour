@@ -195,13 +195,13 @@ PluginManager::refresh (bool cache_only)
 #endif
 #ifdef WINDOWS_VST_SUPPORT
 	if (Config->get_use_windows_vst()) {
-		windows_vst_refresh ();
+		windows_vst_refresh (cache_only);
 	}
 #endif // WINDOWS_VST_SUPPORT
 
 #ifdef LXVST_SUPPORT
 	if(Config->get_use_lxvst()) {
-		lxvst_refresh();
+		lxvst_refresh(cache_only);
 	}
 #endif //Native linuxVST SUPPORT
 

@@ -205,6 +205,7 @@ CONFIG_VARIABLE (bool, use_plugin_own_gui, "use-plugin-own-gui", true)
 CONFIG_VARIABLE (bool, use_windows_vst, "use-windows-vst", true)
 CONFIG_VARIABLE (bool, use_lxvst, "use-lxvst", true)
 CONFIG_VARIABLE (bool, show_plugin_scan_window, "show-plugin-scan-window", true)
+CONFIG_VARIABLE (bool, discover_vst_on_start, "discover-vst-on-start", false)
 
 /* denormal management */
 
