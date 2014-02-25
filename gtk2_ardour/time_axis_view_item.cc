@@ -59,8 +59,8 @@ using namespace Gtkmm2ext;
 
 Pango::FontDescription TimeAxisViewItem::NAME_FONT;
 const double TimeAxisViewItem::NAME_X_OFFSET = 15.0;
-const double TimeAxisViewItem::GRAB_HANDLE_TOP = 6;
-const double TimeAxisViewItem::GRAB_HANDLE_WIDTH = 5;
+const double TimeAxisViewItem::GRAB_HANDLE_TOP = 0.0;
+const double TimeAxisViewItem::GRAB_HANDLE_WIDTH = 10.0;
 const double TimeAxisViewItem::RIGHT_EDGE_SHIFT = 1.0;
 
 int    TimeAxisViewItem::NAME_HEIGHT;
