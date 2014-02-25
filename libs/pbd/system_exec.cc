@@ -728,7 +728,7 @@ SystemExec::start (int stderr_mode)
 	signal(SIGPIPE, SIG_DFL);
 #endif
 
-	int good_fds[1] = { -1 };
+	int good_fds[2] = { pok[1],  -1 };
 	close_allv(good_fds);
 
 	::execve(argp[0], argp, envp);
