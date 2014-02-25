@@ -187,6 +187,7 @@ PluginManager::refresh (bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, "PluginManager::refresh\n");
 	BootMessage (_("Discovering Plugins"));
+	cancel_scan = false;
 
 	ladspa_refresh ();
 #ifdef LV2_SUPPORT
@@ -210,12 +211,13 @@ PluginManager::refresh (bool cache_only)
 
 	PluginListChanged (); /* EMIT SIGNAL */
 	PluginScanMessage(X_("closeme"), "");
+	cancel_scan = false;
 }
 
 void
 PluginManager::cancel_plugin_scan ()
 {
-	// TODO
+	cancel_scan = true;
 }
 
 void
@@ -661,6 +663,7 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
+			if (cancelled()) break;
 			ARDOUR::PluginScanMessage(_("VST"), **x);
 			windows_vst_discover (**x, cache_only);
 		}
@@ -800,6 +803,7 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
+			if (cancelled()) break;
 			ARDOUR::PluginScanMessage(_("LXVST"), **x);
 			lxvst_discover (**x, cache_only);
 		}

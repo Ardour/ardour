@@ -52,6 +52,7 @@
 #include "ardour/vst_info_file.h"
 
 #define MAX_STRING_LEN 256
+#define PLUGIN_SCAN_TIMEOUT (600) // in deciseconds
 
 using namespace std;
 
@@ -746,8 +747,13 @@ vstfx_get_info (const char* dllpath, int type, enum VSTScanMode mode)
 			PBD::error << "Cannot launch VST scanner app '" << scanner_bin_path << "': "<< strerror(errno) << endmsg;
 			return infos;
 		} else {
-			// TODO idle loop (emit signal to GUI to call gtk_main_iteration()) check cancel.
-			scanner.wait();
+			int timeout = PLUGIN_SCAN_TIMEOUT;
+			while (scanner.is_running() && --timeout) {
+				ARDOUR::GUIIdle();
+				Glib::usleep (100000);
+				if (ARDOUR::PluginManager::instance().cancelled()) break;
+			}
+			scanner.terminate();
 		}
 		/* re-read index */
 		vstfx_clear_info_list(infos);
