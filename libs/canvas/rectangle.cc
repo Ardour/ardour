@@ -97,16 +97,10 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 				context->line_to (self.x1, self.y0 + 0.5);
 			}
 
-			/* in theory, you'd expect us to adjust these two by
-			 * MINUS 0.5 pixels. But the way that Cairo apparently
-			 * does rounding can lead that approach to draw on the
-			 * wrong pixel coordinate. So we add 0.5 even here.
-			 */
-
 			if (_outline_what & BOTTOM) {
 				/* horizontal line: move y-coordinate by 0.5 pixels */
-				context->move_to (self.x0, self.y1 + 0.5);
-				context->line_to (self.x1, self.y1 + 0.5);
+				context->move_to (self.x0, self.y1 - 0.5);
+				context->line_to (self.x1, self.y1 - 0.5);
 			}
 			
 			if (_outline_what & RIGHT) {
