@@ -3788,16 +3788,9 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	framecnt_t length = 0;
 	framecnt_t distance = 0;
 
-	pair<TimeAxisView*, int> const pending_time_axis = _editor->trackview_by_y_position (_drags->current_pointer_y ());
-	if (pending_time_axis.first == 0) {
-		return;
-	}
-
 	framepos_t const pending_position = adjusted_current_frame (event);
 
-	/* only alter selection if things have changed */
-
-	if (pending_time_axis.first->order() == _last_pointer_time_axis && pending_position == last_pointer_frame()) {
+	if (pending_position == last_pointer_frame()) {
 		return;
 	}
 
@@ -3830,51 +3823,49 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		if (first_move) {
 
 			if (_add) {
+
 				/* adding to the selection */
 				_editor->set_selected_track_as_side_effect (Selection::Add);
-				//_editor->selection->add (_editor->clicked_axisview);
 				_editor->clicked_selection = _editor->selection->add (start, end);
 				_add = false;
+				
 			} else {
+
 				/* new selection */
 
 				if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
-					//_editor->selection->set (_editor->clicked_axisview);
 					_editor->set_selected_track_as_side_effect (Selection::Set);
 				}
 
 				_editor->clicked_selection = _editor->selection->set (start, end);
 			}
 		}
+		
+		/* select all tracks within the rectangle that we've marked out so far */
+		TrackViewList to_be_added_to_selection;
+		TrackViewList to_be_removed_from_selection;
+		TrackViewList& all_tracks (_editor->track_views);
 
-		/* select the track that we're in */
-		if (find (_added_time_axes.begin(), _added_time_axes.end(), pending_time_axis.first) == _added_time_axes.end()) {
-			// _editor->set_selected_track_as_side_effect (Selection::Add);
-			_editor->selection->add (pending_time_axis.first);
-			_added_time_axes.push_back (pending_time_axis.first);
-		}
-
-		/* deselect any tracks that this drag no longer includes, being careful to only deselect
-		   tracks that we selected in the first place.
-		*/
-
-		int min_order = min (_original_pointer_time_axis, pending_time_axis.first->order());
-		int max_order = max (_original_pointer_time_axis, pending_time_axis.first->order());
-
-		list<TimeAxisView*>::iterator i = _added_time_axes.begin();
-		while (i != _added_time_axes.end()) {
-
-			list<TimeAxisView*>::iterator tmp = i;
-			++tmp;
-
-			if ((*i)->order() < min_order || (*i)->order() > max_order) {
-				_editor->selection->remove (*i);
-				_added_time_axes.remove (*i);
+		for (TrackViewList::const_iterator i = all_tracks.begin(); i != all_tracks.end(); ++i) {
+			
+			if ((*i)->covered_by_y_range (grab_y(), _drags->current_pointer_y())) {
+				if (!(*i)->get_selected()) {
+					to_be_added_to_selection.push_back (*i);
+				}
+			} else {
+				if ((*i)->get_selected()) {
+					to_be_removed_from_selection.push_back (*i);
+				}
 			}
-
-			i = tmp;
 		}
 
+		if (!to_be_added_to_selection.empty()) {
+			_editor->selection->add (to_be_added_to_selection);
+		}
+
+		if (!to_be_removed_from_selection.empty()) {
+			_editor->selection->remove (to_be_removed_from_selection);
+		}
 	}
 	break;
 
