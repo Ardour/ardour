@@ -95,9 +95,12 @@ user_cache_directory ()
 #else
 	const char* c = 0;
 
-	/* adopt freedesktop standards, and put .ardour3 into $XDG_CONFIG_HOME or ~/.config
+	/* adopt freedesktop standards, and put .ardour3 into $XDG_CACHE_HOME
+	 * defaulting to or ~/.config
+	 *
+	 * NB this should work on windows, too, but we may want to prefer
+	 * PBD::get_platform_fallback_folder (PBD::FOLDER_VST) or someplace
 	 */
-
 	if ((c = getenv ("XDG_CACHE_HOME")) != 0) {
 		p = c;
 	} else {
