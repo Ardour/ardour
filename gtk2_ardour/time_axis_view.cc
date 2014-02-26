@@ -1177,7 +1177,7 @@ TimeAxisView::color_handler ()
  * and is in stacked or expanded * region display mode, otherwise 0.
  */
 std::pair<TimeAxisView*, double>
-TimeAxisView::covers_y_position (double y)
+TimeAxisView::covers_y_position (double y) const
 {
 	if (hidden()) {
 		return std::make_pair ((TimeAxisView *) 0, 0);
@@ -1212,7 +1212,7 @@ TimeAxisView::covers_y_position (double y)
 			break;
 		}
 
-		return std::make_pair (this, l);
+		return std::make_pair (const_cast<TimeAxisView*>(this), l);
 	}
 
 	for (Children::const_iterator i = children.begin(); i != children.end(); ++i) {
@@ -1226,6 +1226,30 @@ TimeAxisView::covers_y_position (double y)
 	return std::make_pair ((TimeAxisView *) 0, 0);
 }
 
+bool
+TimeAxisView::covered_by_y_range (double y0, double y1) const
+{
+	if (hidden()) {
+		return false;
+	}
+
+	/* if either the top or bottom of the axisview is in the vertical
+	 * range, we cover it.
+	 */
+	
+	if ((y0 < _y_position && y1 < _y_position) ||
+	    (y0 >= _y_position + height && y1 >= _y_position + height)) {
+		return false;
+	}
+
+	for (Children::const_iterator i = children.begin(); i != children.end(); ++i) {
+		if ((*i)->covered_by_y_range (y0, y1)) {
+			return true;
+		}
+	}
+
+	return true;
+}
 
 uint32_t
 TimeAxisView::preset_height (Height h)

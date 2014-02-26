@@ -144,7 +144,8 @@ class TimeAxisView : public virtual AxisView
 
 	virtual void reset_visual_state ();
 
-	std::pair<TimeAxisView*, double> covers_y_position (double);
+	std::pair<TimeAxisView*, double> covers_y_position (double) const;
+        bool covered_by_y_range (double y0, double y1) const;
 
 	virtual void step_height (bool);
 
