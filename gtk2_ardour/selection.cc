@@ -125,6 +125,9 @@ void
 Selection::clear_tracks ()
 {
 	if (!tracks.empty()) {
+		for (TrackViewList::iterator x = tracks.begin(); x != tracks.end(); ++x) {
+			(*x)->set_selected (false);
+		}
 		tracks.clear ();
 		if (!_no_tracks_changed) {
 			TracksChanged();
@@ -249,8 +252,10 @@ Selection::toggle (TimeAxisView* track)
 	TrackSelection::iterator i;
 
 	if ((i = find (tracks.begin(), tracks.end(), track)) == tracks.end()) {
+		track->set_selected (true);
 		tracks.push_back (track);
 	} else {
+		track->set_selected (false);
 		tracks.erase (i);
 	}
 
@@ -392,6 +397,9 @@ Selection::add (const TrackViewList& track_list)
 	TrackViewList added = tracks.add (track_list);
 
 	if (!added.empty()) {
+		for (TrackViewList::iterator x = added.begin(); x != added.end(); ++x) {
+			(*x)->set_selected (true);
+		}
 		if (!_no_tracks_changed) {
 			TracksChanged ();
 		}
@@ -402,6 +410,7 @@ void
 Selection::add (TimeAxisView* track)
 {
 	TrackViewList tr;
+	track->set_selected (true);
 	tr.push_back (track);
 	add (tr);
 }
@@ -589,19 +598,11 @@ Selection::remove (TimeAxisView* track)
 {
 	list<TimeAxisView*>::iterator i;
 	if ((i = find (tracks.begin(), tracks.end(), track)) != tracks.end()) {
+		track->set_selected (false);
 		tracks.erase (i);
 		if (!_no_tracks_changed) {
 			TracksChanged();
 		}
-	}
-}
-
-void
-Selection::remove (ControlPoint* p)
-{
-	PointSelection::iterator i = find (points.begin(), points.end(), p);
-	if (i != points.end ()) {
-		points.erase (i);
 	}
 }
 
@@ -614,6 +615,7 @@ Selection::remove (const TrackViewList& track_list)
 
 		TrackViewList::iterator x = find (tracks.begin(), tracks.end(), *i);
 		if (x != tracks.end()) {
+			(*i)->set_selected (false);
 			tracks.erase (x);
 			changed = true;
 		}
@@ -623,6 +625,15 @@ Selection::remove (const TrackViewList& track_list)
 		if (!_no_tracks_changed) {
 			TracksChanged();
 		}
+	}
+}
+
+void
+Selection::remove (ControlPoint* p)
+{
+	PointSelection::iterator i = find (points.begin(), points.end(), p);
+	if (i != points.end ()) {
+		points.erase (i);
 	}
 }
 
@@ -924,7 +935,7 @@ Selection::selected (Marker* m)
 bool
 Selection::selected (TimeAxisView* tv)
 {
-	return find (tracks.begin(), tracks.end(), tv) != tracks.end();
+	return tv->get_selected ();
 }
 
 bool
