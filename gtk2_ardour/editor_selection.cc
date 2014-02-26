@@ -1489,7 +1489,8 @@ Editor::select_all_within (framepos_t start, framepos_t end, double top, double 
 	}
 
 	if (found.empty()) {
-		selection->clear ();
+		selection->clear_objects();
+		selection->clear_time ();
 		return;
 	}
 
