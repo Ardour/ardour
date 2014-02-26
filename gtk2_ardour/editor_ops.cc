@@ -1976,7 +1976,7 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 	event.button.x = x;
 	event.button.y = y;
 
-	where = window_event_frame (&event, &cx, &cy);
+	where = window_event_sample (&event, &cx, &cy);
 
 	if (where < leftmost_frame || where > leftmost_frame + current_page_samples()) {
 		/* clearly outside canvas area */
@@ -2017,7 +2017,7 @@ Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y)
 	event.button.x = x;
 	event.button.y = y;
 
-	window_event_frame (&event, &cx, &cy);
+	window_event_sample (&event, &cx, &cy);
 
 	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (cy);
 	if (tv.first == 0) {

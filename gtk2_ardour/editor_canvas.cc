@@ -431,7 +431,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		ev.button.x = x;
 		ev.button.y = y;
 
-		frame = window_event_frame (&ev, 0, &cy);
+		frame = window_event_sample (&ev, 0, &cy);
 
 		snap_to (frame);
 

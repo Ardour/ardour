@@ -1031,7 +1031,7 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 	/* assume we're dragging with button 1 */
 	event.motion.state = Gdk::BUTTON1_MASK;
 
-	(void) window_event_frame (&event, &px, &py);
+	(void) window_event_sample (&event, &px, &py);
 
 	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
 	bool can_drop = false;
@@ -1114,7 +1114,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	/* assume we're dragging with button 1 */
 	event.motion.state = Gdk::BUTTON1_MASK;
 
-	framepos_t const pos = window_event_frame (&event, &px, &py);
+	framepos_t const pos = window_event_sample (&event, &px, &py);
 
 	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
 

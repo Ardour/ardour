@@ -127,7 +127,7 @@ DragManager::start_grab (GdkEvent* e, Gdk::Cursor* c)
 	_old_follow_playhead = _editor->follow_playhead ();
 	_editor->set_follow_playhead (false);
 
-	_current_pointer_frame = _editor->canvas_event_frame (e, &_current_pointer_x, &_current_pointer_y);
+	_current_pointer_frame = _editor->canvas_event_sample (e, &_current_pointer_x, &_current_pointer_y);
 
 	for (list<Drag*>::const_iterator i = _drags.begin(); i != _drags.end(); ++i) {
 		(*i)->start_grab (e, c);
@@ -173,7 +173,7 @@ DragManager::motion_handler (GdkEvent* e, bool from_autoscroll)
 {
 	bool r = false;
 
-	_current_pointer_frame = _editor->canvas_event_frame (e, &_current_pointer_x, &_current_pointer_y);
+	_current_pointer_frame = _editor->canvas_event_sample (e, &_current_pointer_x, &_current_pointer_y);
 
 	for (list<Drag*>::iterator i = _drags.begin(); i != _drags.end(); ++i) {
 		bool const t = (*i)->motion_handler (e, from_autoscroll);
@@ -191,7 +191,7 @@ DragManager::window_motion_handler (GdkEvent* e, bool from_autoscroll)
 {
 	bool r = false;
 
-	_current_pointer_frame = _editor->canvas_event_frame (e, &_current_pointer_x, &_current_pointer_y);
+	_current_pointer_frame = _editor->canvas_event_sample (e, &_current_pointer_x, &_current_pointer_y);
 
 	for (list<Drag*>::iterator i = _drags.begin(); i != _drags.end(); ++i) {
 		bool const t = (*i)->motion_handler (e, from_autoscroll);
@@ -259,7 +259,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 		_y_constrained = false;
 	}
 
-	_raw_grab_frame = _editor->canvas_event_frame (event, &_grab_x, &_grab_y);
+	_raw_grab_frame = _editor->canvas_event_sample (event, &_grab_x, &_grab_y);
 	setup_pointer_frame_offset ();
 	_grab_frame = adjusted_frame (_raw_grab_frame, event);
 	_last_pointer_frame = _grab_frame;
@@ -2428,7 +2428,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 
 	_grab_zoom = _editor->samples_per_pixel;
 
-	framepos_t where = _editor->canvas_event_frame (event);
+	framepos_t where = _editor->canvas_event_sample (event);
 
 	_editor->snap_to_with_modifier (where, event);
 
@@ -3331,7 +3331,7 @@ LineDrag::finished (GdkEvent* event, bool movement_occured)
 		_line->end_drag (false, 0);
 
 		if ((atv = dynamic_cast<AutomationTimeAxisView*>(_editor->clicked_axisview)) != 0) {
-			framepos_t where = _editor->window_event_frame (event, 0, 0);
+			framepos_t where = _editor->window_event_sample (event, 0, 0);
 			atv->add_automation_event (event, where, event->button.y, false);
 		}
 	}

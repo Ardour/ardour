@@ -288,7 +288,7 @@ Editor::ruler_button_release (GdkEventButton* ev)
 		
 		stop_canvas_autoscroll();
 
-		framepos_t where = window_event_frame ((GdkEvent*) ev);
+		framepos_t where = window_event_sample ((GdkEvent*) ev);
 
 		snap_to (where);
 		popup_ruler_menu (where);

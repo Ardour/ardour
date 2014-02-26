@@ -126,13 +126,13 @@ Editor::mouse_frame (framepos_t& where, bool& in_track_canvas) const
 	event.button.x = x;
 	event.button.y = y;
 
-	where = window_event_frame (&event, 0, 0);
+	where = window_event_sample (&event, 0, 0);
 
 	return true;
 }
 
 framepos_t
-Editor::window_event_frame (GdkEvent const * event, double* pcx, double* pcy) const
+Editor::window_event_sample (GdkEvent const * event, double* pcx, double* pcy) const
 {
 	double x;
 	double y;
@@ -159,7 +159,7 @@ Editor::window_event_frame (GdkEvent const * event, double* pcx, double* pcy) co
 }
 
 framepos_t
-Editor::canvas_event_frame (GdkEvent const * event, double* pcx, double* pcy) const
+Editor::canvas_event_sample (GdkEvent const * event, double* pcx, double* pcy) const
 {
 	double x;
 	double y;
@@ -346,9 +346,11 @@ Editor::mouse_mode_object_range_toggled()
 	assert (act);
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 	assert (tact);
-	if (tact->get_active())
+
+	if (tact->get_active()) {
 		m = MouseObject;  //Smart mode turned to ON, force editing to Object mode
-	
+	}
+
 	set_mouse_mode(m, true);  //call this so the button styles can get updated
 }
 
@@ -1063,7 +1065,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 						_drags->set (new RegionCreateDrag (this, item, parent), event);
 					} else {
 						/* See if there's a region before the click that we can extend, and extend it if so */
-						framepos_t const t = canvas_event_frame (event);
+						framepos_t const t = canvas_event_sample (event);
 						boost::shared_ptr<Region> prev = pl->find_next_region (t, End, -1);
 						if (!prev) {
 							_drags->set (new RegionCreateDrag (this, item, parent), event);
@@ -1101,7 +1103,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 								boost::shared_ptr<Playlist> pl = t->playlist ();
 								if (pl) {
 
-									boost::shared_ptr<Region> r = pl->top_region_at (canvas_event_frame (event));
+									boost::shared_ptr<Region> r = pl->top_region_at (canvas_event_sample (event));
 									if (r) {
 										RegionView* rv = rtv->view()->find_view (r);
 										clicked_selection = select_range (rv->region()->position(), 
@@ -1268,9 +1270,9 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case MouseZoom:
 		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			temporal_zoom_to_frame (false, canvas_event_frame (event));
+			temporal_zoom_to_frame (false, canvas_event_sample (event));
 		} else {
-			temporal_zoom_to_frame (true, canvas_event_frame(event));
+			temporal_zoom_to_frame (true, canvas_event_sample(event));
 		}
 		return true;
 		break;
@@ -1369,7 +1371,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 	//not rolling, range mode click + join_play_range :  locate the PH here
 	if ( !_drags->active () && !_session->transport_rolling() && ( effective_mouse_mode() == MouseRange ) && Config->get_always_play_range() ) {
-		framepos_t where = canvas_event_frame (event);
+		framepos_t where = canvas_event_sample (event);
 		snap_to(where);
 		_session->request_locate (where, false);
 	}
@@ -1418,7 +1420,7 @@ Editor::button_release_dispatch (GdkEventButton* ev)
 bool
 Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	framepos_t where = canvas_event_frame (event);
+	framepos_t where = canvas_event_sample (event);
 	AutomationTimeAxisView* atv = 0;
 
         if (pre_press_cursor) {

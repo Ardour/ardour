@@ -1837,12 +1837,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         /** computes the timeline frame (sample) of an event whose coordinates
 	 * are in canvas units (pixels, scroll offset included).
 	 */
-	framepos_t canvas_event_frame (GdkEvent const *, double* px = 0, double* py = 0) const;
+	framepos_t canvas_event_sample (GdkEvent const *, double* px = 0, double* py = 0) const;
 
         /** computes the timeline frame (sample) of an event whose coordinates
 	 * are in window units (pixels, no scroll offset).
 	 */
-	framepos_t window_event_frame (GdkEvent const *, double* px = 0, double* py = 0) const;
+	framepos_t window_event_sample (GdkEvent const *, double* px = 0, double* py = 0) const;
 
 	/* returns false if mouse pointer is not in track or marker canvas
 	 */
