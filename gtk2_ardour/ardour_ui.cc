@@ -560,11 +560,6 @@ ARDOUR_UI::~ARDOUR_UI ()
 		ui_config->save_state();
 	}
 
-	delete keyboard;
-	delete editor;
-	delete mixer;
-	delete meterbridge;
-
 	stop_video_server();
 }
 
