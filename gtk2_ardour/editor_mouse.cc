@@ -499,8 +499,30 @@ Editor::mouse_mode_toggled (MouseMode m)
 	
 	set_canvas_cursor ();
 	set_gain_envelope_visibility ();
+	
+	update_time_selection_display ();
 
 	MouseModeChanged (); /* EMIT SIGNAL */
+}
+
+void
+Editor::update_time_selection_display ()
+{
+	if (smart_mode_action->get_active()) {
+		/* not sure what to do here */
+		if (mouse_mode == MouseObject) {
+		} else {
+		}
+	} else {
+		switch (mouse_mode) {
+		case MouseRange:
+			selection->clear_objects ();
+			break;
+		default:
+			selection->clear_time ();
+			break;
+		}
+	}
 }
 
 void
