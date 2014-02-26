@@ -3790,7 +3790,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 	framepos_t const pending_position = adjusted_current_frame (event);
 
-	if (pending_position == last_pointer_frame()) {
+	if (_operation != CreateSelection && pending_position == last_pointer_frame()) {
 		return;
 	}
 
