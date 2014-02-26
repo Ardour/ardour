@@ -47,6 +47,7 @@
 #include "ardour_dialog.h"
 #include "gui_thread.h"
 #include "midi_tracer.h"
+#include "paths_dialog.h"
 #include "rc_option_editor.h"
 #include "utils.h"
 #include "midi_port_dialog.h"
@@ -996,37 +997,68 @@ private:
 class PluginOptions : public OptionEditorBox
 {
 public:
-	PluginOptions (RCConfiguration* c)
+	PluginOptions (Session *s, RCConfiguration* c)
 		: _rc_config (c)
+		, _session(s)
 		, _display_plugin_scan_progress (_("Display Plugin Scan Progress"))
-		, _discover_vst_on_start (_("Scan for new VST Plugin on Application Start"))
+		, _discover_vst_on_start (_("Scan for new VST Plugins on Application Start"))
 	{
+		Label *l;
+		std::stringstream ss;
 		Table* t = manage (new Table (2, 6));
 		t->set_spacings (4);
 		Button* b;
+		int n = 0;
+
+		ss << "<b>" << _("General") << "</b>";
+		l = manage (left_aligned_label (ss.str()));
+		l->set_use_markup (true);
+		t->attach (*manage (new Label ("")), 0, 3, n, n+1, FILL | EXPAND); ++n;
+		t->attach (*l, 0, 2, n, n+1, FILL | EXPAND); ++n;
 
 		b = manage (new Button (_("Refresh Plugin List")));
 		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::refresh_clicked));
-		t->attach (*b, 0, 2, 0, 1, FILL);
+		t->attach (*b, 0, 2, n, n+1, FILL); ++n;
 
-		b = manage (new Button (_("Clear VST Cache")));
-		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_vst_cache_clicked));
-		t->attach (*b, 0, 2, 1, 2, FILL);
-
-		b = manage (new Button (_("Clear VST Blacklist")));
-		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_vst_blacklist_clicked));
-		t->attach (*b, 0, 2, 2, 3, FILL);
-
-		t->attach (_discover_vst_on_start, 0, 2, 3, 4);
-		_discover_vst_on_start.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::discover_vst_on_start_toggled));
-		Gtkmm2ext::UI::instance()->set_tip (_discover_vst_on_start,
-					    _("<b>When enabled</b> VST plugins are searched and tested on application start. When disabled they a Refresh will have to be tiggered manually"));
-
-		t->attach (_display_plugin_scan_progress, 0, 2, 4, 5);
+		t->attach (_display_plugin_scan_progress, 0, 2, n, n+1); ++n;
 		_display_plugin_scan_progress.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::display_plugin_scan_progress_toggled));
 		Gtkmm2ext::UI::instance()->set_tip (_display_plugin_scan_progress,
 					    _("<b>When enabled</b> display a popup window showing plugin scan progress."));
 
+
+		ss << "<b>" << _("VST") << "</b>";
+		l = manage (left_aligned_label (ss.str()));
+		l->set_use_markup (true);
+		t->attach (*manage (new Label ("")), 0, 3, n, n+1, FILL | EXPAND); ++n;
+		t->attach (*l, 0, 2, n, n+1, FILL | EXPAND); ++n;
+
+		b = manage (new Button (_("Clear VST Cache")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_vst_cache_clicked));
+		t->attach (*b, 0, 1, n, n+1, FILL);
+
+		b = manage (new Button (_("Clear VST Blacklist")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_vst_blacklist_clicked));
+		t->attach (*b, 1, 2, n, n+1, FILL);
+		++n;
+
+		t->attach (_discover_vst_on_start, 0, 2, n, n+1); ++n;
+		_discover_vst_on_start.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::discover_vst_on_start_toggled));
+		Gtkmm2ext::UI::instance()->set_tip (_discover_vst_on_start,
+					    _("<b>When enabled</b> VST plugins are searched and tested on application start. When disabled they a Refresh will have to be tiggered manually"));
+
+#ifdef WINDOWS_VST_SUPPORT
+		t->attach (*manage (left_aligned_label (_("Windows VST Path:"))), 0, 1, n, n+1);
+		b = manage (new Button (_("Edit")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::edit_vst_path_clicked));
+		t->attach (*b, 1, 2, n, n+1, FILL); ++n;
+#endif
+
+#ifdef LXVST_SUPPORT
+		t->attach (*manage (left_aligned_label (_("Linux VST:"))), 0, 1, n, n+1);
+		b = manage (new Button (_("Edit")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::edit_lxvst_path_clicked));
+		t->attach (*b, 1, 2, n, n+1, FILL); ++n;
+#endif
 
 		_box->pack_start (*t,true,true);
 	}
@@ -1049,6 +1081,7 @@ public:
 
 private:
 	RCConfiguration* _rc_config;
+	Session* _session;
 	CheckButton _display_plugin_scan_progress;
 	CheckButton _discover_vst_on_start;
 
@@ -1068,6 +1101,33 @@ private:
 
 	void clear_vst_blacklist_clicked () {
 		PluginManager::instance().clear_vst_blacklist();
+	}
+
+	void edit_vst_path_clicked () {
+		PathsDialog *pd = new PathsDialog(_session,
+				_rc_config->get_plugin_path_vst(),
+				PluginManager::instance().get_windows_vst_path()
+				);
+		ResponseType r = (ResponseType) pd->run ();
+		pd->hide();
+		if (r == RESPONSE_ACCEPT) {
+			_rc_config->set_plugin_path_vst(pd->get_serialized_paths());
+		}
+		delete pd;
+	}
+
+	// todo consolidate with edit_vst_path_clicked..
+	void edit_lxvst_path_clicked () {
+		PathsDialog *pd = new PathsDialog(_session,
+				_rc_config->get_plugin_path_lxvst(),
+				PluginManager::instance().get_lxvst_path()
+				);
+		ResponseType r = (ResponseType) pd->run ();
+		pd->hide();
+		if (r == RESPONSE_ACCEPT) {
+			printf("%s", pd->get_serialized_paths().c_str());
+		}
+		delete pd;
 	}
 
 	void refresh_clicked () {
@@ -2014,7 +2074,7 @@ RCOptionEditor::RCOptionEditor ()
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
 	/* Plugin options (currrently VST only) */
-	add_option (_("Plugin"), new PluginOptions (_rc_config));
+	add_option (_("Plugins"), new PluginOptions (_session, _rc_config));
 #endif
 
 	/* INTERFACE */
