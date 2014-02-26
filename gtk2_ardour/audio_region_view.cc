@@ -43,6 +43,7 @@
 #include "canvas/poly_line.h"
 #include "canvas/line.h"
 #include "canvas/text.h"
+#include "canvas/curve.h"
 #include "canvas/debug.h"
 #include "canvas/utils.h"
 
@@ -78,8 +79,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 				  Gdk::Color const & basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, sync_mark(0)
-	, fade_in_shape(0)
-	, fade_out_shape(0)
 	, fade_in_handle(0)
 	, fade_out_handle(0)
 	, start_xfade_in (0)
@@ -100,8 +99,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 				  Gdk::Color const & basic_color, bool recording, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, recording, visibility)
 	, sync_mark(0)
-	, fade_in_shape(0)
-	, fade_out_shape(0)
 	, fade_in_handle(0)
 	, fade_out_handle(0)
 	, start_xfade_in (0)
@@ -120,8 +117,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 
 AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_ptr<AudioRegion> other_region)
 	: RegionView (other, boost::shared_ptr<Region> (other_region))
-	, fade_in_shape(0)
-	, fade_out_shape(0)
 	, fade_in_handle(0)
 	, fade_out_handle(0)
 	, start_xfade_in (0)
@@ -159,16 +154,6 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	compute_colors (basic_color);
 
 	create_waves ();
-
-	fade_in_shape = new ArdourCanvas::PolyLine (group);
-	CANVAS_DEBUG_NAME (fade_in_shape, string_compose ("fade in shape for %1", region()->name()));
-	fade_in_shape->set_outline_color (fade_color);
-	fade_in_shape->set_data ("regionview", this);
-
-	fade_out_shape = new ArdourCanvas::PolyLine (group);
-	CANVAS_DEBUG_NAME (fade_out_shape, string_compose ("fade out shape for %1", region()->name()));
-	fade_out_shape->set_outline_color (fade_color);
-	fade_out_shape->set_data ("regionview", this);
 
 	if (!_recregion) {
 		fade_in_handle = new ArdourCanvas::Rectangle (group);
@@ -219,12 +204,9 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	reset_width_dependent_items (_pixel_width);
 
-	fade_in_shape->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_event), fade_in_shape, this));
 	if (fade_in_handle) {
 		fade_in_handle->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_handle_event), fade_in_handle, this));
 	}
-
-	fade_out_shape->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_event), fade_out_shape, this));
 
 	if (fade_out_handle) {
 		fade_out_handle->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_handle_event), fade_out_handle, this));
@@ -314,24 +296,24 @@ AudioRegionView::fade_out_changed ()
 void
 AudioRegionView::fade_in_active_changed ()
 {
-	if (audio_region()->fade_in_active()) {
-		/* XXX: make a themable colour */
-		fade_in_shape->set_outline_color (RGBA_TO_UINT (45, 45, 45, 90));
-	} else {
-		/* XXX: make a themable colour */
-		fade_in_shape->set_outline_color (RGBA_TO_UINT (45, 45, 45, 20));
+	if (start_xfade_rect) {
+		if (audio_region()->fade_in_active()) {
+			start_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
+		} else {
+			start_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_InactiveCrossfade());
+		}
 	}
 }
 
 void
 AudioRegionView::fade_out_active_changed ()
 {
-	if (audio_region()->fade_out_active()) {
-		/* XXX: make a themable colour */
-		fade_out_shape->set_outline_color (RGBA_TO_UINT (45, 45, 45, 90));
-	} else {
-		/* XXX: make a themable colour */
-		fade_out_shape->set_outline_color (RGBA_TO_UINT (45, 45, 45, 20));
+	if (end_xfade_rect) {
+		if (audio_region()->fade_out_active()) {
+			end_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
+		} else {	
+			end_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_InactiveCrossfade());
+		}
 	}
 }
 
@@ -552,19 +534,15 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 
 	if (pwidth < 5) {
 		hide_start_xfade();
-		fade_in_shape->hide();
 		return;
 	}
 
-	if (trackview.session()->config.get_show_region_fades()) {
-		fade_in_shape->show();
+	if (!trackview.session()->config.get_show_region_fades()) {
+		hide_start_xfade ();
+		return;
 	}
-
-	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
+	
 	double effective_height;
-	std::vector<float> curve(npoints);
-
-	audio_region()->fade_in()->curve().get_vector (0, audio_region()->fade_in()->back()->when, &curve[0], npoints);
 
 	if (_height >= NAME_HIGHLIGHT_THRESH) {
 		effective_height = _height - NAME_HIGHLIGHT_SIZE;
@@ -572,33 +550,31 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 		effective_height = _height;
 	}
 
-	effective_height -= 1.0;
-
-	Points points;
-
-	points.assign (npoints, Duple());
-
 	/* points *MUST* be in anti-clockwise order */
 
-	uint32_t pi, pc;
-	double xdelta = pwidth/npoints;
+	Points points;
+	Points::size_type npoints;
+	Points::size_type pi;
+	boost::shared_ptr<const Evoral::ControlList> list (audio_region()->fade_in());
+	Evoral::ControlList::const_iterator x;
+	double length = list->length();
+	npoints = list->size();
 
-	for (pi = 0, pc = 0; pc < npoints; ++pc) {
-		points[pi].x = 1.0 + (pc * xdelta);
-		points[pi++].y =  1.0 + effective_height - (curve[pc] * effective_height);
+	points.assign (list->size(), Duple());
+
+	for (x = list->begin(), pi = 0; x != list->end(); ++x, ++pi) {
+		points[pi].x = 1.0 + (pwidth * ((*x)->when/length));
+		points[pi].y = effective_height - ((*x)->value * effective_height);
 	}
 
 	/* draw the line */
 
 	redraw_start_xfade_to (ar, width, points, effective_height, handle_left);
 
-	// fade_in_shape->set (points);
-
 	/* ensure trim handle stays on top */
 	if (frame_handle_start) {
 		frame_handle_start->raise_to_top();
 	}
-
 }
 
 void
@@ -624,7 +600,7 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 	 * width is zero. Hence the additional + 1.0 at the end.
 	 */
 
-	double const handle_right = trackview.editor().sample_to_pixel (_region->length()) + TimeAxisViewItem::RIGHT_EDGE_SHIFT - pwidth + 1.0;
+	double const handle_right = trackview.editor().sample_to_pixel (_region->length()) + TimeAxisViewItem::RIGHT_EDGE_SHIFT - pwidth;
 
 	/* Put the fade out handle so that its right side is at the end-of-fade line;
 	 */
@@ -635,19 +611,15 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 	if (pwidth < 5) {
 		hide_end_xfade();
-		fade_out_shape->hide();
 		return;
 	}
 
-	if (trackview.session()->config.get_show_region_fades()) {
-		fade_out_shape->show();
+	if (!trackview.session()->config.get_show_region_fades()) {
+		hide_end_xfade();
+		return;
 	}
 
-	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
 	double effective_height;
-	std::vector<float> curve(npoints);
-
-	audio_region()->fade_out()->curve().get_vector (0, audio_region()->fade_out()->back()->when, &curve[0], npoints);
 
 	if (_height >= NAME_HIGHLIGHT_THRESH) {
 		effective_height = _height - NAME_HIGHLIGHT_SIZE;
@@ -655,33 +627,31 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 		effective_height = _height;
 	}
 
-	effective_height -= 1.0;
-
 	/* points *MUST* be in anti-clockwise order */
 	
 	Points points;
-	
-	uint32_t pi, pc;
-	double xdelta = pwidth/npoints;
-	
-	points.assign (npoints, Duple ());
-	
-	for (pi = 0, pc = 0; pc < npoints; ++pc, ++pi) {
-		points[pi].x = 1.0 + _pixel_width - pwidth + (pc * xdelta);
-		points[pi].y = 1.0 + effective_height - (curve[pc] * effective_height);
+	Points::size_type npoints;
+	Points::size_type pi;
+	boost::shared_ptr<const Evoral::ControlList> list (audio_region()->fade_out());
+	Evoral::ControlList::const_iterator x;
+	double length = list->length();
+	npoints = list->size();
+
+	points.assign (list->size(), Duple());
+
+	for (x = list->begin(), pi = 0; x != list->end(); ++x, ++pi) {
+		points[pi].x = 1.0 + _pixel_width - pwidth + (pwidth * ((*x)->when/length));
+		points[pi].y = effective_height - ((*x)->value * effective_height);
 	}
 
 	/* draw the line */
 
-	redraw_end_xfade_to (ar, width, points, effective_height, handle_right, pwidth-1);
-
-	// fade_out_shape->set (points);
+	redraw_end_xfade_to (ar, width, points, effective_height, handle_right, pwidth);
 
 	/* ensure trim handle stays on top */
 	if (frame_handle_end) {
 		frame_handle_end->raise_to_top();
 	}
-
 }
 
 framepos_t
@@ -714,23 +684,25 @@ void
 AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, framecnt_t /*width*/, Points& points, double effective_height,
 					double rect_width)
 {
-	if (points.size() < 3) {
+	if (points.size() < 2) {
 		return;
 	}
 
 	if (!start_xfade_in) {
-		start_xfade_in = new ArdourCanvas::PolyLine (group);
+		start_xfade_in = new ArdourCanvas::Curve (group);
 		CANVAS_DEBUG_NAME (start_xfade_in, string_compose ("xfade start in line for %1", region()->name()));
 		start_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 		start_xfade_in->set_outline_width (1.5);
+		start_xfade_in->set_ignore_events (true);
 	}
 
 	if (!start_xfade_out) {
-		start_xfade_out = new ArdourCanvas::PolyLine (group);
+		start_xfade_out = new ArdourCanvas::Curve (group);
 		CANVAS_DEBUG_NAME (start_xfade_out, string_compose ("xfade start out line for %1", region()->name()));
 		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128);
 		start_xfade_out->set_outline_color (col);
 		start_xfade_out->set_outline_width (2.0);
+		start_xfade_out->set_ignore_events (true);
 	}
 
 	if (!start_xfade_rect) {
@@ -744,44 +716,53 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	}
 
 	start_xfade_rect->set (ArdourCanvas::Rect (1.0, 0.0, rect_width, effective_height));
-	start_xfade_rect->show ();
 
 	start_xfade_in->set (points);
-	start_xfade_in->show ();
 
 	/* fade out line */
 
-	boost::shared_ptr<AutomationList> inverse = ar->inverse_fade_in();
+	boost::shared_ptr<AutomationList> inverse = ar->inverse_fade_in ();
 	Points ipoints;
-	Points::size_type npoints = points.size();
-
-	ipoints.assign (npoints, Duple());
+	Points::size_type npoints;
 
 	if (!inverse) {
 
-		/* no inverse curve defined, show the inverse of the normal one */
+		/* there is no explicit inverse fade in curve, so take the
+		 * regular fade in curve given to use as "points" (already a
+		 * set of coordinates), and convert to the inverse shape.
+		 */
+
+		npoints = points.size();
+		ipoints.assign (npoints, Duple());
 
 		for (Points::size_type i = 0, pci = 0; i < npoints; ++i, ++pci) {
 			ArdourCanvas::Duple &p (ipoints[pci]);
-			p.x = 1.0 + i;
-			/* invert with respect to y-axis */
-			p.y = 1.0 + effective_height - points[pci].y;
+			/* leave x-axis alone but invert with respect to y-axis */
+			p.y = effective_height - points[pci].y;
 		}
 
 	} else {
 
-		std::vector<float> vec(npoints);
-		inverse->curve().get_vector (0, inverse->back()->when, &vec[0], npoints);
+		/* there is an explicit inverse fade in curve. Grab the points
+		   and convert them into coordinates for the inverse fade in
+		   line.
+		*/
+
+		npoints = inverse->size();
+		ipoints.assign (npoints, Duple());
 		
-		for (Points::size_type i = 0, pci = 0; i < npoints; ++i, ++pci) {
-			ArdourCanvas::Duple &p (ipoints[pci]);
-			p.x = 1.0 + i;
-			p.y = 1.0 + effective_height - (effective_height * vec[i]);
+		Evoral::ControlList::const_iterator x;
+		Points::size_type pi;
+		double length = inverse->length();
+
+		for (x = inverse->begin(), pi = 0; x != inverse->end(); ++x, ++pi) {
+			ArdourCanvas::Duple& p (ipoints[pi]);
+			p.x = 1.0 + (rect_width * ((*x)->when/length));
+			p.y = effective_height - ((*x)->value * effective_height);
 		}
 	}
 
 	start_xfade_out->set (ipoints);
-	start_xfade_out->show ();
 
 	show_start_xfade();
 }
@@ -804,23 +785,25 @@ void
 AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecnt_t width, Points& points, double effective_height,
 				      double rect_edge, double rect_width)
 {
-	if (points.size() < 3) {
+	if (points.size() < 2) {
 		return;
 	}
 
 	if (!end_xfade_in) {
-		end_xfade_in = new ArdourCanvas::PolyLine (group);
+		end_xfade_in = new ArdourCanvas::Curve (group);
 		CANVAS_DEBUG_NAME (end_xfade_in, string_compose ("xfade end in line for %1", region()->name()));
 		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128);
 		end_xfade_in->set_outline_color (col);
-		end_xfade_in->set_outline_width (1.5);
-	}
+		end_xfade_in->set_outline_width (1.5);	
+		end_xfade_in->set_ignore_events (true);
+}
 
 	if (!end_xfade_out) {
-		end_xfade_out = new ArdourCanvas::PolyLine (group);
+		end_xfade_out = new ArdourCanvas::Curve (group);
 		CANVAS_DEBUG_NAME (end_xfade_out, string_compose ("xfade end out line for %1", region()->name()));
 		end_xfade_out->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 		end_xfade_out->set_outline_width (2.0);
+		end_xfade_out->set_ignore_events (true);
 	}
 
 	if (!end_xfade_rect) {
@@ -834,51 +817,57 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	}
 
 	end_xfade_rect->set (ArdourCanvas::Rect (rect_edge, 0.0, rect_edge + rect_width + TimeAxisViewItem::RIGHT_EDGE_SHIFT, effective_height));
-	end_xfade_rect->show ();
 
 	end_xfade_in->set (points);
-	end_xfade_in->show ();
-	end_xfade_in->raise_to_top ();
 
 	/* fade in line */
 
 	boost::shared_ptr<AutomationList> inverse = ar->inverse_fade_out ();
 	Points ipoints;
-	Points::size_type npoints = points.size();
-
-	ipoints.assign (npoints, Duple());
+	Points::size_type npoints;
 
 	if (!inverse) {
 
-		const double rend = trackview.editor().sample_to_pixel (_region->length() - points.back().y);
+		/* there is no explicit inverse fade out curve, so take the
+		 * regular fade out curve given to use as "points" (already a
+		 * set of coordinates), and convert to the inverse shape.
+		 */
 
-		for (Points::size_type i = 0, pci = 0; i < npoints; ++i, ++pci) {
+		npoints = points.size();
+		ipoints.assign (npoints, Duple());
+
+		Points::size_type pci;
+
+		for (pci = 0; pci < npoints; ++pci) {
 			ArdourCanvas::Duple &p (ipoints[pci]);
-			p.x = 1.0 + rend + i;
-			p.y = 1.0 + effective_height - points[pci].y;
+			p.y = effective_height - points[pci].y;
 		}
 
 	} else {
 
-		boost::scoped_array<float> vec (new float[npoints]);
-		inverse->curve().get_vector (inverse->front()->when, inverse->back()->when, vec.get(), npoints);
+		/* there is an explicit inverse fade out curve. Grab the points
+		   and convert them into coordinates for the inverse fade out
+		   line.
+		*/
 
+		npoints = inverse->size();
+		ipoints.assign (npoints, Duple());
+		
 		const double rend = trackview.editor().sample_to_pixel (_region->length() - width);
+		
+		Evoral::ControlList::const_iterator x;
+		Points::size_type i;
+		Points::size_type pi;
+		double length = inverse->length();
 
-		float* vp = vec.get();
-
-		for (Points::size_type i = 0, pci = 0; i < npoints; ++i) {
-			ArdourCanvas::Duple& p (ipoints[pci++]);
-			p.x = 1.0 + rend + i;
-			p.y = 1.0 + effective_height - (effective_height * vp[i]);
+		for (x = inverse->begin(), i = 0, pi = 0; x != inverse->end(); ++x, ++pi, ++i) {
+			ArdourCanvas::Duple& p (ipoints[pi]);
+			p.x = 1.0 + (rect_width * ((*x)->when/length)) + rend;
+			p.y = effective_height - ((*x)->value * effective_height);
 		}
 	}
 
 	end_xfade_out->set (ipoints);
-	end_xfade_out->show ();
-	end_xfade_out->raise_to_top ();
-
-	end_xfade_rect->raise_to_top ();  //this needs to be topmost so the lines don't steal mouse focus
 
 	show_end_xfade();
 }
@@ -1475,12 +1464,6 @@ void
 AudioRegionView::set_fade_visibility (bool yn)
 {
 	if (yn) {
-		if (fade_in_shape) {
-			fade_in_shape->show();
-		}
-		if (fade_out_shape) {
-			fade_out_shape->show ();
-		}
 		if (fade_in_handle) {
 			fade_in_handle->show ();
 		}
@@ -1488,12 +1471,6 @@ AudioRegionView::set_fade_visibility (bool yn)
 			fade_out_handle->show ();
 		}
 	} else {
-		if (fade_in_shape) {
-			fade_in_shape->hide();
-		}
-		if (fade_out_shape) {
-			fade_out_shape->hide ();
-		}
 		if (fade_in_handle) {
 			fade_in_handle->hide ();
 		}
