@@ -58,37 +58,38 @@
 #include "canvas/canvas.h"
 
 #include "ardour_ui.h"
-#include "debug.h"
-#include "editor.h"
-#include "time_axis_view.h"
-#include "route_time_axis.h"
+#include "audio_region_view.h"
+#include "audio_streamview.h"
 #include "audio_time_axis.h"
 #include "automation_time_axis.h"
 #include "control_point.h"
-#include "streamview.h"
-#include "audio_streamview.h"
-#include "audio_region_view.h"
-#include "midi_region_view.h"
-#include "rgb_macros.h"
-#include "selection_templates.h"
-#include "selection.h"
+#include "debug.h"
 #include "editing.h"
+#include "editor.h"
+#include "editor_cursors.h"
+#include "editor_drag.h"
+#include "editor_regions.h"
+#include "editor_routes.h"
 #include "gtk-custom-hruler.h"
 #include "gui_thread.h"
-#include "keyboard.h"
-#include "utils.h"
-#include "editor_drag.h"
-#include "strip_silence_dialog.h"
-#include "editor_routes.h"
-#include "editor_regions.h"
-#include "quantize_dialog.h"
-#include "interthread_progress_window.h"
 #include "insert_time_dialog.h"
-#include "normalize_dialog.h"
-#include "editor_cursors.h"
+#include "interthread_progress_window.h"
+#include "keyboard.h"
+#include "midi_region_view.h"
 #include "mouse_cursors.h"
+#include "normalize_dialog.h"
 #include "patch_change_dialog.h"
+#include "quantize_dialog.h"
+#include "region_gain_line.h"
+#include "rgb_macros.h"
+#include "route_time_axis.h"
+#include "selection.h"
+#include "selection_templates.h"
+#include "streamview.h"
+#include "strip_silence_dialog.h"
+#include "time_axis_view.h"
 #include "transpose_dialog.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -3719,110 +3720,96 @@ Editor::cut_copy (CutCopyOp op)
 		switch (effective_mouse_mode()) {
 		case MouseObject:
 		case MouseRange:
+			begin_reversible_command (opname + ' ' + X_("MIDI"));
 			cut_copy_midi (op);
+			commit_reversible_command ();
 			break;
 		default:
 			break;
 		}
 
-	} else {
-
-	RegionSelection rs; 
-
-	/* we only want to cut regions if some are selected */
-
-	if (!selection->regions.empty()) {
-		rs = selection->regions;
+		return;
 	}
 
+	bool did_edit = false;
+
 	switch (effective_mouse_mode()) {
-/*
- * 		case MouseGain: {
-			//find regions's gain line
-			AudioRegionView *rview = dynamic_cast<AudioRegionView*>(clicked_regionview);
-				AutomationTimeAxisView *tview = dynamic_cast<AutomationTimeAxisView*>(clicked_trackview);
-			if (rview) {
-				AudioRegionGainLine *line = rview->get_gain_line();
-				if (!line) break;
+	case MouseGain:
+		if (!selection->points.empty()) {
+			begin_reversible_command (opname + _(" points"));
+			did_edit = true;
+			cut_copy_points (op);
+			if (op == Cut || op == Delete) {
+				selection->clear_points ();
+			}
+		}
+		break;
+		
+	case MouseObject: 
+
+		if (!selection->regions.empty() || !selection->points.empty()) {
+
+			string thing_name;
+
+			if (selection->regions.empty()) {
+				thing_name = _("points");
+			} else if (selection->points.empty()) {
+				thing_name = _("regions");
+			} else {
+				thing_name = _("objects");
+			}
+		
+			begin_reversible_command (opname + ' ' + thing_name);
+			did_edit = true;
+
+			if (!selection->regions.empty()) {
+				cut_copy_regions (op, selection->regions);
 				
-				//cut region gain points in the selection
-				AutomationList& alist (line->the_list());
-				XMLNode &before = alist.get_state();
-				AutomationList* what_we_got = 0;
-				if ((what_we_got = alist.cut (selection->time.front().start - rview->audio_region()->position(), selection->time.front().end - rview->audio_region()->position())) != 0) {
-					session->add_command(new MementoCommand<AutomationList>(alist, &before, &alist.get_state()));
-					delete what_we_got;
-					what_we_got = 0;
+				if (op == Cut || op == Delete) {
+					selection->clear_regions ();
 				}
-				
-				rview->set_envelope_visible(true);
-				rview->audio_region()->set_envelope_active(true);
-				
-			} else if (tview) {
-				AutomationLine *line = *(tview->lines.begin());
-				if (!line) break;
-				
-				//cut auto points in the selection
-				AutomationList& alist (line->the_list());
-				XMLNode &before = alist.get_state();
-				AutomationList* what_we_got = 0;
-				if ((what_we_got = alist.cut (selection->time.front().start, selection->time.front().end)) != 0) {
-					session->add_command(new MementoCommand<AutomationList>(alist, &before, &alist.get_state()));
-					delete what_we_got;
-					what_we_got = 0;
-				}		
-			} else
-				break;
-		} break;
-*/			
-		case MouseObject: 
-		case MouseRange:
-			if (!rs.empty() || !selection->points.empty()) {
-				begin_reversible_command (opname + _(" objects"));
-
-				if (!rs.empty()) {
-					cut_copy_regions (op, rs);
-					
-					if (op == Cut || op == Delete) {
-						selection->clear_regions ();
-					}
-				}
-
-				if (!selection->points.empty()) {
-					cut_copy_points (op);
-
-					if (op == Cut || op == Delete) {
-						selection->clear_points ();
-					}
-				}
-
-				commit_reversible_command ();	
-				break;
-			} 
+			}
 			
-			if (selection->time.empty()) {
-				framepos_t start, end;
-				if (!get_edit_op_range (start, end)) {
-					return;
+			if (!selection->points.empty()) {
+				cut_copy_points (op);
+				
+				if (op == Cut || op == Delete) {
+					selection->clear_points ();
 				}
+			}
+		} 
+		break;
+			
+	case MouseRange:
+		if (selection->time.empty()) {
+			framepos_t start, end;
+			/* no time selection, see if we can get an edit range
+			   and use that.
+			*/
+			if (get_edit_op_range (start, end)) {
 				selection->set (start, end);
 			}
-				
+		}
+		if (!selection->time.empty()) {
 			begin_reversible_command (opname + _(" range"));
+
+			did_edit = true;
 			cut_copy_ranges (op);
-			commit_reversible_command ();
 			
 			if (op == Cut || op == Delete) {
 				selection->clear_time ();
 			}
-
-			break;
-			
-		default:
-			break;
 		}
+		break;
+		
+	default:
+		break;
 	}
-
+	
+	if (did_edit) {
+		commit_reversible_command ();	
+	}
+	
 	if (op == Delete || op == Cut || op == Clear) {
 		_drags->abort ();
 	}
