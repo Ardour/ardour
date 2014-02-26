@@ -973,6 +973,22 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 	boost::shared_ptr<Plugin> plugin = find_plugin (_session, prop->value(), type);
 
+	/* treat linux and windows VST plugins equivalent if they have the same uniqeID
+	 * allow to move sessions windows <> linux */
+#ifdef LXVST_SUPPORT
+	if (plugin == 0 && type == ARDOUR::Windows_VST) {
+		type = ARDOUR::LXVST;
+		plugin = find_plugin (_session, prop->value(), type);
+	}
+#endif
+
+#ifdef WINDOWS_VST_SUPPORT
+	if (plugin == 0 && type == ARDOUR::LXVST) {
+		type = ARDOUR::Windows_VST;
+		plugin = find_plugin (_session, prop->value(), type);
+	}
+#endif
+
 	if (plugin == 0) {
 		error << string_compose(
 			_("Found a reference to a plugin (\"%1\") that is unknown.\n"
