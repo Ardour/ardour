@@ -672,9 +672,8 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
-			if (cancelled()) break;
-			ARDOUR::PluginScanMessage(_("VST"), **x, !cache_only);
-			windows_vst_discover (**x, cache_only);
+			ARDOUR::PluginScanMessage(_("VST"), **x, !cache_only && !cancelled());
+			windows_vst_discover (**x, cache_only || cancelled());
 		}
 
 		vector_delete (plugin_objects);
@@ -795,9 +794,8 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
-			if (cancelled()) break;
-			ARDOUR::PluginScanMessage(_("LXVST"), **x, !cache_only);
-			lxvst_discover (**x, cache_only);
+			ARDOUR::PluginScanMessage(_("LXVST"), **x, !cache_only && !cancelled());
+			lxvst_discover (**x, cache_only || cancelled());
 		}
 
 		vector_delete (plugin_objects);
