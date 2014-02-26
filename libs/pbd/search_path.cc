@@ -25,16 +25,6 @@
 
 using namespace std;
 
-namespace {
-
-#ifdef PLATFORM_WINDOWS
-const char * const path_delimiter = ";";
-#else
-const char * const path_delimiter = ":";
-#endif
-
-}
-
 namespace PBD {
 
 Searchpath::Searchpath ()
@@ -46,7 +36,7 @@ Searchpath::Searchpath (const string& path)
 {
 	vector<std::string> tmp;
 
-	if (tokenize (path, string(path_delimiter), std::back_inserter (tmp))) {
+	if (tokenize (path, string(G_SEARCHPATH_SEPARATOR_S), std::back_inserter (tmp))) {
 		add_directories (tmp);
 	}
 }
@@ -79,7 +69,7 @@ Searchpath::to_string () const
 
 	for (vector<std::string>::const_iterator i = begin(); i != end(); ++i) {
 		path += *i;
-		path += path_delimiter;
+		path += G_SEARCHPATH_SEPARATOR;
 	}
 
 	path = path.substr (0, path.length() - 1); // drop final separator

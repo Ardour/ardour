@@ -106,7 +106,7 @@ PathScanner::run_scan_internal (vector<string *> *result,
 	string *newstr;
 	long nfound = 0;
 
-	if ((thisdir = strtok (pathcopy, ":")) == 0 ||
+	if ((thisdir = strtok (pathcopy, G_SEARCHPATH_SEPARATOR_S)) == 0 ||
 	    strlen (thisdir) == 0) {
 		free (pathcopy);
 		return 0;
