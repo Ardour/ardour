@@ -207,6 +207,12 @@ CONFIG_VARIABLE (bool, use_lxvst, "use-lxvst", true)
 CONFIG_VARIABLE (bool, show_plugin_scan_window, "show-plugin-scan-window", true)
 CONFIG_VARIABLE (bool, discover_vst_on_start, "discover-vst-on-start", false)
 
+/* custom user plugin paths */
+CONFIG_VARIABLE (std::string, plugin_path_ladspa, "plugin-path-ladspa,", "")
+CONFIG_VARIABLE (std::string, plugin_path_lv2, "plugin-path-lv2,", "")
+CONFIG_VARIABLE (std::string, plugin_path_vst, "plugin-path-vst,", "")
+CONFIG_VARIABLE (std::string, plugin_path_lxvst, "plugin-path-lxvst,", "")
+
 /* denormal management */
 
 CONFIG_VARIABLE (bool, denormal_protection, "denormal-protection", false)

@@ -83,6 +83,7 @@
 
 #include "pbd/error.h"
 #include "pbd/stl_delete.h"
+#include "pbd/fallback_folders.h"
 
 #include "i18n.h"
 
@@ -151,26 +152,28 @@ PluginManager::PluginManager ()
 		windows_vst_path = s;
 	}
 
+	if (windows_vst_path.length() == 0) {
+#ifdef PLATFORM_WINDOWS
+		windows_vst_path = PBD::get_platform_fallback_folder (PBD::FOLDER_VST);
+#else
+		windows_vst_path = "/usr/local/lib/vst:/usr/lib/vst";
+#endif
+	}
+
 	if ((s = getenv ("LXVST_PATH"))) {
 		lxvst_path = s;
 	} else if ((s = getenv ("LXVST_PLUGINS"))) {
 		lxvst_path = s;
 	}
 
-	if (_instance == 0) {
-		_instance = this;
+	if (lxvst_path.length() == 0) {
+		lxvst_path = "/usr/local/lib64/lxvst:/usr/local/lib/lxvst:/usr/lib64/lxvst:/usr/lib/lxvst:"
+			"/usr/local/lib64/linux_vst:/usr/local/lib/linux_vst:/usr/lib64/linux_vst:/usr/lib/linux_vst:"
+			"/usr/lib/vst:/usr/local/lib/vst";
 	}
 
-	/* the plugin manager is constructed too early to use Profile */
-
-	if (getenv ("ARDOUR_SAE")) {
-		ladspa_plugin_whitelist.push_back (1203); // single band parametric
-		ladspa_plugin_whitelist.push_back (1772); // caps compressor
-		ladspa_plugin_whitelist.push_back (1913); // fast lookahead limiter
-		ladspa_plugin_whitelist.push_back (1075); // simple RMS expander
-		ladspa_plugin_whitelist.push_back (1061); // feedback delay line (max 5s)
-		ladspa_plugin_whitelist.push_back (1216); // gverb
-		ladspa_plugin_whitelist.push_back (2150); // tap pitch shifter
+	if (_instance == 0) {
+		_instance = this;
 	}
 
 	BootMessage (_("Discovering Plugins"));
@@ -181,6 +184,27 @@ PluginManager::~PluginManager()
 {
 }
 
+const std::string
+PluginManager::lxvst_search_path() const
+{
+	std::string searchpath = lxvst_path;
+	if (!Config->get_plugin_path_lxvst().empty()) {
+		searchpath += G_SEARCHPATH_SEPARATOR;
+		searchpath += Config->get_plugin_path_lxvst();
+	}
+	return searchpath;
+}
+
+const std::string
+PluginManager::windows_vst_search_path() const
+{
+	std::string searchpath = windows_vst_path;
+	if (!Config->get_plugin_path_vst().empty()) {
+		searchpath += G_SEARCHPATH_SEPARATOR;
+		searchpath += Config->get_plugin_path_vst();
+	}
+	return searchpath;
+}
 
 void
 PluginManager::refresh (bool cache_only)
@@ -229,7 +253,7 @@ PluginManager::clear_vst_cache ()
 		PathScanner scanner;
 		vector<string *> *fsi_files;
 
-		fsi_files = scanner (windows_vst_path, "\\.fsi$", true, true, -1, false);
+		fsi_files = scanner (windows_vst_search_path(), "\\.fsi$", true, true, -1, false);
 		if (fsi_files) {
 			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
 				::g_unlink((*i)->c_str());
@@ -243,7 +267,7 @@ PluginManager::clear_vst_cache ()
 	{
 		PathScanner scanner;
 		vector<string *> *fsi_files;
-		fsi_files = scanner (lxvst_path, "\\.fsi$", true, true, -1, false);
+		fsi_files = scanner (lxvst_search_path(), "\\.fsi$", true, true, -1, false);
 		if (fsi_files) {
 			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
 				::g_unlink((*i)->c_str());
@@ -277,7 +301,7 @@ PluginManager::clear_vst_blacklist ()
 		PathScanner scanner;
 		vector<string *> *fsi_files;
 
-		fsi_files = scanner (windows_vst_path, "\\.fsb$", true, true, -1, false);
+		fsi_files = scanner (windows_vst_search_path(), "\\.fsb$", true, true, -1, false);
 		if (fsi_files) {
 			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
 				::g_unlink((*i)->c_str());
@@ -291,7 +315,7 @@ PluginManager::clear_vst_blacklist ()
 	{
 		PathScanner scanner;
 		vector<string *> *fsi_files;
-		fsi_files = scanner (lxvst_path, "\\.fsb$", true, true, -1, false);
+		fsi_files = scanner (lxvst_search_path(), "\\.fsb$", true, true, -1, false);
 		if (fsi_files) {
 			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
 				::g_unlink((*i)->c_str());
@@ -624,22 +648,7 @@ PluginManager::windows_vst_refresh (bool cache_only)
 		_windows_vst_plugin_info = new ARDOUR::PluginInfoList();
 	}
 
-	if (windows_vst_path.length() == 0) {
-		windows_vst_path = "/usr/local/lib/vst:/usr/lib/vst";
-	}
-
-	windows_vst_discover_from_path (windows_vst_path, cache_only);
-}
-
-int
-PluginManager::add_windows_vst_directory (string path)
-{
-	if (windows_vst_discover_from_path (path) == 0) {
-		windows_vst_path += ':';
-		windows_vst_path += path;
-		return 0;
-	}
-	return -1;
+	windows_vst_discover_from_path (windows_vst_search_path(), cache_only);
 }
 
 static bool windows_vst_filter (const string& str, void * /*arg*/)
@@ -659,7 +668,7 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("detecting Windows VST plugins along %1\n", path));
 
-	plugin_objects = scanner (windows_vst_path, windows_vst_filter, 0, false, true);
+	plugin_objects = scanner (windows_vst_search_path(), windows_vst_filter, 0, false, true);
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
@@ -758,24 +767,7 @@ PluginManager::lxvst_refresh (bool cache_only)
 		_lxvst_plugin_info = new ARDOUR::PluginInfoList();
 	}
 
-	if (lxvst_path.length() == 0) {
-		lxvst_path = "/usr/local/lib64/lxvst:/usr/local/lib/lxvst:/usr/lib64/lxvst:/usr/lib/lxvst:"
-			"/usr/local/lib64/linux_vst:/usr/local/lib/linux_vst:/usr/lib64/linux_vst:/usr/lib/linux_vst:"
-			"/usr/lib/vst:/usr/local/lib/vst";
-	}
-
-	lxvst_discover_from_path (lxvst_path, cache_only);
-}
-
-int
-PluginManager::add_lxvst_directory (string path)
-{
-	if (lxvst_discover_from_path (path) == 0) {
-		lxvst_path += ':';
-		lxvst_path += path;
-		return 0;
-	}
-	return -1;
+	lxvst_discover_from_path (lxvst_search_path(), cache_only);
 }
 
 static bool lxvst_filter (const string& str, void *)
@@ -799,7 +791,7 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Discovering linuxVST plugins along %1\n", path));
 
-	plugin_objects = scanner (lxvst_path, lxvst_filter, 0, false, true);
+	plugin_objects = scanner (lxvst_search_path(), lxvst_filter, 0, false, true);
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
