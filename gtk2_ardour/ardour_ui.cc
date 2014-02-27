@@ -3802,7 +3802,22 @@ static MessageDialog *scan_dlg = NULL;
 void
 ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin, bool can_cancel)
 {
-	if (!Config->get_show_plugin_scan_window()) { return; }
+	if (type == X_("closeme") && !(scan_dlg && scan_dlg->is_mapped())) {
+		return;
+	}
+
+	const bool cancelled = PluginManager::instance().cancelled();
+	if (type != X_("closeme") && !Config->get_show_plugin_scan_window()) {
+		if (cancelled && scan_dlg->is_mapped()) {
+			scan_dlg->hide();
+			gui_idle_handler();
+			return;
+		}
+		if (cancelled || !can_cancel) {
+			return;
+		}
+	}
+
 	static Gtk::Button *cancel_button;
 	if (!scan_dlg) {
 		scan_dlg = new MessageDialog("", false, MESSAGE_INFO, BUTTONS_NONE);
@@ -3823,19 +3838,16 @@ ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin, bool can_ca
 		scan_dlg->set_message(type + ": " + Glib::path_get_basename(plugin));
 		scan_dlg->show_all();
 	}
-	cancel_button->set_sensitive(can_cancel);
+	cancel_button->set_sensitive(can_cancel && !cancelled);
 
-	/* due to idle calls, gtk_events_pending() may always return true */
-	int timeout = 30;
-	while (gtk_events_pending() && --timeout) {
-		gtk_main_iteration ();
-	}
+	gui_idle_handler();
 }
 
 void
 ARDOUR_UI::gui_idle_handler ()
 {
 	int timeout = 30;
+	/* due to idle calls, gtk_events_pending() may always return true */
 	while (gtk_events_pending() && --timeout) {
 		gtk_main_iteration ();
 	}

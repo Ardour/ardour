@@ -999,7 +999,7 @@ class PluginOptions : public OptionEditorBox
 public:
 	PluginOptions (RCConfiguration* c)
 		: _rc_config (c)
-		, _display_plugin_scan_progress (_("Display Plugin Scan Progress"))
+		, _display_plugin_scan_progress (_("Always Display Plugin Scan Progress"))
 		, _discover_vst_on_start (_("Scan for new VST Plugins on Application Start"))
 	{
 		Label *l;
@@ -1015,16 +1015,17 @@ public:
 		t->attach (*manage (new Label ("")), 0, 3, n, n+1, FILL | EXPAND); ++n;
 		t->attach (*l, 0, 2, n, n+1, FILL | EXPAND); ++n;
 
-		b = manage (new Button (_("Refresh Plugin List")));
+		b = manage (new Button (_("Scan for Plugins")));
 		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::refresh_clicked));
 		t->attach (*b, 0, 2, n, n+1, FILL); ++n;
 
 		t->attach (_display_plugin_scan_progress, 0, 2, n, n+1); ++n;
 		_display_plugin_scan_progress.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::display_plugin_scan_progress_toggled));
 		Gtkmm2ext::UI::instance()->set_tip (_display_plugin_scan_progress,
-					    _("<b>When enabled</b> display a popup window showing plugin scan progress."));
+					    _("<b>When enabled</b> a popup window showing plugin scan progress is displayed for indexing (cache load) and discovery (detect new plugins)"));
 
 
+		ss.str("");
 		ss << "<b>" << _("VST") << "</b>";
 		l = manage (left_aligned_label (ss.str()));
 		l->set_use_markup (true);
@@ -1043,7 +1044,7 @@ public:
 		t->attach (_discover_vst_on_start, 0, 2, n, n+1); ++n;
 		_discover_vst_on_start.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::discover_vst_on_start_toggled));
 		Gtkmm2ext::UI::instance()->set_tip (_discover_vst_on_start,
-					    _("<b>When enabled</b> VST plugins are searched and tested on application start. When disabled they a Refresh will have to be tiggered manually"));
+					    _("<b>When enabled</b> new VST plugins are searched, tested and added to the cache index on application start. When disabled new plugins will only be available after triggering a 'Scan' manually"));
 
 #ifdef WINDOWS_VST_SUPPORT
 		t->attach (*manage (left_aligned_label (_("Windows VST Path:"))), 0, 1, n, n+1);
