@@ -36,10 +36,6 @@ public:
 
     bool covers (Duple const &) const;
 
-  protected:
-    void render_path (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
-    void render_curve (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
-    
   private:
     Points first_control_points;
     Points second_control_points;

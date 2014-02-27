@@ -95,15 +95,9 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	if (_outline) {
 		setup_outline_context (context);
-		render_path (area, context);
+		PolyItem::render_curve (area, context, first_control_points, second_control_points);
 		context->stroke ();
 	}
-}
-
-void 
-Curve::render_path (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
-{
-	PolyItem::render_curve (area, context, first_control_points, second_control_points);
 }
 
 void 
