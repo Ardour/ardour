@@ -18,33 +18,26 @@
 */
 #include <cstdio>
 
-#include "pbd/tokenizer.h"
-#include "ardour/session.h"
-
-#include "ardour_ui.h"
 #include "i18n.h"
-#include "paths_dialog.h"
+#include "pbd/pathexpand.h"
+#include "gtkmm2ext/paths_dialog.h"
 
 using namespace Gtk;
 using namespace std;
-using namespace ARDOUR;
+using namespace Gtkmm2ext;
 
-PathsDialog::PathsDialog (Session* s, std::string user_paths, std::string fixed_paths)
-	: ArdourDialog (_("Set Paths"), true)
+PathsDialog::PathsDialog (std::string title, std::string user_paths, std::string fixed_paths)
+	: Dialog (title, true)
 	, paths_list_view(2, false, Gtk::SELECTION_SINGLE)
 	, add_path_button(_("Add"))
 	, remove_path_button(_("Delete"))
 {
-	set_session (s);
 	set_name ("PathsDialog");
 	set_skip_taskbar_hint (true);
 	set_resizable (true);
 	set_size_request (400, -1);
 
 	paths_list_view.set_border_width (4);
-
-	ARDOUR_UI::instance()->set_tip (add_path_button, _("Add a new search path"));
-	ARDOUR_UI::instance()->set_tip (remove_path_button, _("Remove selected search path"));
 
 	add_path_button.signal_clicked().connect (sigc::mem_fun (*this, &PathsDialog::add_path));
 	remove_path_button.signal_clicked().connect (sigc::mem_fun (*this, &PathsDialog::remove_path));
@@ -54,12 +47,12 @@ PathsDialog::PathsDialog (Session* s, std::string user_paths, std::string fixed_
 	paths_list_view.set_column_title(1,"Path");
 
 	/* TODO fill in Text View */
-	std::vector <std::string> a = parse_path(user_paths);
+	std::vector <std::string> a = PBD::parse_path(user_paths);
 	for(vector<std::string>::const_iterator i = a.begin(); i != a.end(); ++i) {
 		int row = paths_list_view.append(_("user"));
 		paths_list_view.set_text(row, 1, *i);
 	}
-	a = parse_path(fixed_paths);
+	a = PBD::parse_path(fixed_paths);
 	for(vector<std::string>::const_iterator i = a.begin(); i != a.end(); ++i) {
 		int row = paths_list_view.append( _("sys"));
 		paths_list_view.set_text(row, 1, *i);
@@ -149,30 +142,4 @@ PathsDialog::remove_path() {
 		refLStore->erase(row_it);
 		return;
 	}
-}
-
-const std::vector <std::string>
-PathsDialog::parse_path(std::string path, bool check_if_exists) const
-{
-	vector <std::string> pathlist;
-	vector <std::string> tmp;
-	PBD::tokenize (path, string(G_SEARCHPATH_SEPARATOR_S), std::back_inserter (tmp));
-
-	for(vector<std::string>::const_iterator i = tmp.begin(); i != tmp.end(); ++i) {
-		if ((*i).empty()) continue;
-		std::string dir;
-#ifndef PLATFORM_WINDOWS
-		if ((*i).substr(0,1) == "~") {
-			dir = Glib::build_filename(Glib::get_home_dir(), (*i).substr(1));
-		}
-		else
-#endif
-		{
-			dir = *i;
-		}
-		if (!check_if_exists || Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
-			pathlist.push_back(dir);
-		}
-	}
-  return pathlist;
 }

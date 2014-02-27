@@ -16,19 +16,19 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifndef __gtk_ardour_paths_dialog_h__
-#define __gtk_ardour_paths_dialog_h__
+#ifndef __gtkmmext_paths_dialog_h__
+#define __gtkmmext_paths_dialog_h__
 
 #include <string>
 #include <vector>
 #include <gtkmm.h>
 
-#include "ardour_dialog.h"
+namespace Gtkmm2ext {
 
-class PathsDialog : public ArdourDialog
+class PathsDialog : public Gtk::Dialog
 {
   public:
-	PathsDialog (ARDOUR::Session*, std::string, std::string);
+	PathsDialog (std::string, std::string, std::string);
 	~PathsDialog ();
 
 	std::string get_serialized_paths (bool include_fixed = false);
@@ -44,10 +44,8 @@ class PathsDialog : public ArdourDialog
 	void selection_changed();
 	void add_path();
 	void remove_path();
-
-	// TODO move to PBD ?
-	const std::vector <std::string> parse_path(std::string path, bool check_if_exists = false) const;
-
 };
 
-#endif /* __gtk_ardour_paths_dialog_h__ */
+} /* namespace */
+
+#endif /* __gtkmmext_paths_dialog_h__ */

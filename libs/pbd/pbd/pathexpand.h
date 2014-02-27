@@ -20,6 +20,7 @@
 #define __libpbd_path_expand_h__
 
 #include <string>
+#include <vector>
 
 #include "pbd/libpbd_visibility.h"
 
@@ -27,6 +28,7 @@ namespace PBD {
 	LIBPBD_API std::string canonical_path (const std::string& path);
 	LIBPBD_API std::string path_expand (std::string path);
 	LIBPBD_API std::string search_path_expand (std::string path);
+	LIBPBD_API std::vector<std::string> parse_path(std::string path, bool check_if_exists = false);
 }
 
 #endif /* __libpbd_path_expand_h__ */

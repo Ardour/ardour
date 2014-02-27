@@ -30,6 +30,7 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/paths_dialog.h>
 
 #include "pbd/fpu.h"
 #include "pbd/cpus.h"
@@ -47,7 +48,6 @@
 #include "ardour_dialog.h"
 #include "gui_thread.h"
 #include "midi_tracer.h"
-#include "paths_dialog.h"
 #include "rc_option_editor.h"
 #include "utils.h"
 #include "midi_port_dialog.h"
@@ -997,9 +997,8 @@ private:
 class PluginOptions : public OptionEditorBox
 {
 public:
-	PluginOptions (Session *s, RCConfiguration* c)
+	PluginOptions (RCConfiguration* c)
 		: _rc_config (c)
-		, _session(s)
 		, _display_plugin_scan_progress (_("Display Plugin Scan Progress"))
 		, _discover_vst_on_start (_("Scan for new VST Plugins on Application Start"))
 	{
@@ -1081,7 +1080,6 @@ public:
 
 private:
 	RCConfiguration* _rc_config;
-	Session* _session;
 	CheckButton _display_plugin_scan_progress;
 	CheckButton _discover_vst_on_start;
 
@@ -1104,7 +1102,8 @@ private:
 	}
 
 	void edit_vst_path_clicked () {
-		PathsDialog *pd = new PathsDialog(_session,
+		Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
+				_("Set Windows VST Search Path"),
 				_rc_config->get_plugin_path_vst(),
 				PluginManager::instance().get_windows_vst_path()
 				);
@@ -1118,7 +1117,8 @@ private:
 
 	// todo consolidate with edit_vst_path_clicked..
 	void edit_lxvst_path_clicked () {
-		PathsDialog *pd = new PathsDialog(_session,
+		Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
+				_("Set Linux VST Search Path"),
 				_rc_config->get_plugin_path_lxvst(),
 				PluginManager::instance().get_lxvst_path()
 				);
@@ -2074,7 +2074,7 @@ RCOptionEditor::RCOptionEditor ()
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
 	/* Plugin options (currrently VST only) */
-	add_option (_("Plugins"), new PluginOptions (_session, _rc_config));
+	add_option (_("Plugins"), new PluginOptions (_rc_config));
 #endif
 
 	/* INTERFACE */
