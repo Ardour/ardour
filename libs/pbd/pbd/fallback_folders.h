@@ -20,7 +20,7 @@
 #define __platform_fallback_folders_h__
 
 #include <pbd/msvc_pbd.h>
-#include <glib/gtypes.h>
+#include <glib.h>
 
 #ifdef PLATFORM_WINDOWS // Would not be relevant for Cygwin!!
 	LIBPBD_API gchar* PBD_APICALLTYPE get_win_special_folder (int csidl);
@@ -28,7 +28,7 @@
 
 namespace PBD {
 
-	typedef enum fallback_folder_t {
+	enum fallback_folder_t {
 		FOLDER_LOCALE,
 		FOLDER_GTK,
 		FOLDER_CONFIG,
