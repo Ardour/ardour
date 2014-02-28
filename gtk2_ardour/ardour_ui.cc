@@ -1001,8 +1001,6 @@ If you still wish to quit, please use the\n\n\
 
 	close_all_dialogs ();
 
-	loading_message (string_compose (_("Please wait while %1 cleans up..."), PROGRAM_NAME));
-
 	if (_session) {
 		// _session->set_deletion_in_progress ();
 		_session->set_clean ();
