@@ -973,7 +973,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 	boost::shared_ptr<Plugin> plugin = find_plugin (_session, prop->value(), type);
 
-	/* treat linux and windows VST plugins equivalent if they have the same uniqeID
+	/* treat linux and windows VST plugins equivalent if they have the same uniqueID
 	 * allow to move sessions windows <> linux */
 #ifdef LXVST_SUPPORT
 	if (plugin == 0 && type == ARDOUR::Windows_VST) {
