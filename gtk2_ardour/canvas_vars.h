@@ -232,6 +232,7 @@ BUTTON_VARS(RouteButton, "route button")
 BUTTON_VARS(MixerStripButton, "mixer strip button")
 BUTTON_VARS(MixerStripNameButton, "mixer strip name button")
 BUTTON_VARS(MidiInputButton, "midi input button")
+BUTTON_VARS(GenericButton, "generic button")
 
 #define CLOCK_VARS(root,name) \
 	CANVAS_VARIABLE(canvasvar_ ## root ## Background, name ": background") \
