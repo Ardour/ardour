@@ -38,6 +38,7 @@
 #include "evoral/Range.hpp"
 
 #include "ardour/chan_count.h"
+#include "ardour/plugin_types.h"
 
 #include <map>
 
@@ -467,14 +468,6 @@ namespace ARDOUR {
 
 		PeakDatum min;
 		PeakDatum max;
-	};
-
-	enum PluginType {
-		AudioUnit,
-		LADSPA,
-		LV2,
-		Windows_VST,
-		LXVST,
 	};
 
 	enum RunContext {

@@ -49,6 +49,7 @@
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/linux_vst_support.h"
+#include "ardour/plugin_types.h"
 #include "ardour/vst_info_file.h"
 
 #define MAX_STRING_LEN 256
@@ -532,7 +533,7 @@ vstfx_parse_vst_state (VSTState* vstfx)
 }
 
 static void
-vstfx_info_from_plugin (const char *dllpath, VSTState* vstfx, vector<VSTInfo *> *infos, int type)
+vstfx_info_from_plugin (const char *dllpath, VSTState* vstfx, vector<VSTInfo *> *infos, enum ARDOUR::PluginType type)
 {
 	assert(vstfx);
 	VSTInfo *info;
@@ -574,10 +575,10 @@ vstfx_info_from_plugin (const char *dllpath, VSTState* vstfx, vector<VSTInfo *> 
 				bool ok;
 				switch (type) { // TODO use lib ardour's type
 #ifdef WINDOWS_VST_SUPPORT
-					case 1:  ok = vstfx_instantiate_and_get_info_fst(dllpath, infos, id); break;
+					case ARDOUR::Windows_VST:  ok = vstfx_instantiate_and_get_info_fst(dllpath, infos, id); break;
 #endif
 #ifdef LXVST_SUPPORT
-					case 2:  ok = vstfx_instantiate_and_get_info_lx(dllpath, infos, id); break;
+					case ARDOUR::LXVST:  ok = vstfx_instantiate_and_get_info_lx(dllpath, infos, id); break;
 #endif
 					default: ok = false;
 				}
@@ -670,7 +671,7 @@ vstfx_instantiate_and_get_info_lx (
 
 	vstfx_current_loading_id = 0;
 
-	vstfx_info_from_plugin(dllpath, vstfx, infos, 2);
+	vstfx_info_from_plugin(dllpath, vstfx, infos, ARDOUR::LXVST);
 
 	vstfx_close (vstfx);
 	vstfx_unload (h);
@@ -700,7 +701,7 @@ vstfx_instantiate_and_get_info_fst (
 	}
 	vstfx_current_loading_id = 0;
 
-	vstfx_info_from_plugin(dllpath, vstfx, infos, 1);
+	vstfx_info_from_plugin(dllpath, vstfx, infos, ARDOUR::Windows_VST);
 
 	fst_close(vstfx);
 	//fst_unload(&h); // XXX -> fst_close()
@@ -717,7 +718,7 @@ static void parse_scanner_output (std::string msg, size_t /*len*/)
 #endif
 
 static vector<VSTInfo *> *
-vstfx_get_info (const char* dllpath, int type, enum VSTScanMode mode)
+vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanMode mode)
 {
 	FILE* infofile;
 	vector<VSTInfo*> *infos = new vector<VSTInfo*>;
@@ -784,12 +785,12 @@ vstfx_get_info (const char* dllpath, int type, enum VSTScanMode mode)
 	/* blacklist in case instantiation fails */
 	vstfx_blacklist(dllpath);
 
-	switch (type) { // TODO use lib ardour's type
+	switch (type) {
 #ifdef WINDOWS_VST_SUPPORT
-		case 1:  ok = vstfx_instantiate_and_get_info_fst(dllpath, infos, 0); break;
+		case ARDOUR::Windows_VST:  ok = vstfx_instantiate_and_get_info_fst(dllpath, infos, 0); break;
 #endif
 #ifdef LXVST_SUPPORT
-		case 2:  ok = vstfx_instantiate_and_get_info_lx(dllpath, infos, 0); break;
+		case ARDOUR::LXVST:  ok = vstfx_instantiate_and_get_info_lx(dllpath, infos, 0); break;
 #endif
 		default: ok = false;
 	}
@@ -854,7 +855,7 @@ get_personal_vst_info_cache_dir() {
 vector<VSTInfo *> *
 vstfx_get_info_lx (char* dllpath, enum VSTScanMode mode)
 {
-	return vstfx_get_info(dllpath, 2, mode);
+	return vstfx_get_info(dllpath, ARDOUR::LXVST, mode);
 }
 #endif
 
@@ -862,6 +863,6 @@ vstfx_get_info_lx (char* dllpath, enum VSTScanMode mode)
 vector<VSTInfo *> *
 vstfx_get_info_fst (char* dllpath, enum VSTScanMode mode)
 {
-	return vstfx_get_info(dllpath, 1, mode);
+	return vstfx_get_info(dllpath, ARDOUR::Windows_VST, mode);
 }
 #endif
