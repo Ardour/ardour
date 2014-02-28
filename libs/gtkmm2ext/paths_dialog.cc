@@ -116,8 +116,17 @@ PathsDialog::add_path() {
 	if (r == Gtk::RESPONSE_OK) {
 		std::string dir = d.get_filename();
 		if (Glib::file_test (dir, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
-			paths_list_view.prepend(_("user"));
-			paths_list_view.set_text(0, 1, dir);
+			bool dup = false;
+			for (unsigned int i = 0; i < paths_list_view.size(); ++i) {
+				if (paths_list_view.get_text(i, 1) == dir) {
+					dup = true;
+					break;
+				}
+			}
+			if (!dup) {
+				paths_list_view.prepend(_("user"));
+				paths_list_view.set_text(0, 1, dir);
+			}
 		}
 	}
 }
