@@ -22,10 +22,11 @@
 #include "canvas/visibility.h"
 
 #include "canvas/poly_item.h"
+#include "canvas/fill.h"
 
 namespace ArdourCanvas {
 
-class LIBCANVAS_API Curve : public PolyItem
+class LIBCANVAS_API Curve : public PolyItem, public Fill
 {
 public:
     Curve (Group *);
@@ -34,16 +35,20 @@ public:
     void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
     void set (Points const &);
 
+    void set_n_segments (uint32_t n);
+    void set_n_samples (Points::size_type);
+
     bool covers (Duple const &) const;
 
   private:
-    Points first_control_points;
-    Points second_control_points;
+    Points samples;
+    Points::size_type n_samples;
+    uint32_t n_segments;
 
-    
-    static void compute_control_points (Points const &,
-					Points&, Points&);
-    static double* solve (std::vector<double> const&);
+    void smooth (Points::size_type p1, Points::size_type p2, Points::size_type p3, Points::size_type p4, 
+		 double xfront, double xextent);
+    double map_value (double) const;
+    void interpolate ();
 };
 	
 }
