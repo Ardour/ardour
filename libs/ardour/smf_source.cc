@@ -31,6 +31,7 @@
 #include "pbd/strsplit.h"
 
 #include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
 
 #include "evoral/Control.hpp"
 
@@ -463,7 +464,14 @@ SMFSource::safe_midi_file_extension (const string& file)
 	const int nmatches = 2;
 	regmatch_t matches[nmatches];
 	
-	if (compile && regcomp (&compiled_pattern, "[mM][iI][dD][iI]?$", REG_EXTENDED)) {
+	if (Glib::file_test (file, Glib::FILE_TEST_EXISTS)) {
+		if (!Glib::file_test (file, Glib::FILE_TEST_IS_REGULAR)) {
+			/* exists but is not a regular file */
+			return false;
+		}
+	}
+
+	if (compile && regcomp (&compiled_pattern, "\\.[mM][iI][dD][iI]?$", REG_EXTENDED)) {
 		return false;
 	} else {
 		compile = false;
