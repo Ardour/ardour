@@ -709,7 +709,7 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 bool
 ArdourButton::on_button_release_event (GdkEventButton *ev)
 {
-	if ((_elements & Indicator) && _led_rect && _distinct_led_click) {
+	if (_hovering && (_elements & Indicator) && _led_rect && _distinct_led_click) {
 		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width && 
 		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
 			signal_led_clicked(); /* EMIT SIGNAL */
@@ -721,15 +721,16 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 		unset_active_state ();
 	}
 
-	signal_clicked ();
-
-	if (_act_on_release) {
-		if (_action) {
-			_action->activate ();
-			return true;
+	if (_hovering) {
+		signal_clicked ();
+		
+		if (_act_on_release) {
+			if (_action) {
+				_action->activate ();
+				return true;
+			}
 		}
 	}
-
 
 	return false;
 }
