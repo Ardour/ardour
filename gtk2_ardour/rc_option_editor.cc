@@ -1126,7 +1126,7 @@ private:
 		ResponseType r = (ResponseType) pd->run ();
 		pd->hide();
 		if (r == RESPONSE_ACCEPT) {
-			printf("%s", pd->get_serialized_paths().c_str());
+			_rc_config->set_plugin_path_lxvst(pd->get_serialized_paths());
 		}
 		delete pd;
 	}
