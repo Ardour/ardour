@@ -1051,8 +1051,7 @@ ARDOUR::PluginInfoList&
 PluginManager::lxvst_plugin_info ()
 {
 #ifdef LXVST_SUPPORT
-	if (!_lxvst_plugin_info)
-		lxvst_refresh();
+	assert(_lxvst_plugin_info);
 	return *_lxvst_plugin_info;
 #else
 	return _empty_plugin_info;
@@ -1062,8 +1061,7 @@ PluginManager::lxvst_plugin_info ()
 ARDOUR::PluginInfoList&
 PluginManager::ladspa_plugin_info ()
 {
-	if (!_ladspa_plugin_info)
-		ladspa_refresh();
+	assert(_ladspa_plugin_info);
 	return *_ladspa_plugin_info;
 }
 
@@ -1071,8 +1069,7 @@ ARDOUR::PluginInfoList&
 PluginManager::lv2_plugin_info ()
 {
 #ifdef LV2_SUPPORT
-	if (!_lv2_plugin_info)
-		lv2_refresh();
+	assert(_lv2_plugin_info);
 	return *_lv2_plugin_info;
 #else
 	return _empty_plugin_info;
@@ -1083,8 +1080,7 @@ ARDOUR::PluginInfoList&
 PluginManager::au_plugin_info ()
 {
 #ifdef AUDIOUNIT_SUPPORT
-	if (!_au_plugin_info)
-		au_refresh();
+	assert(_au_plugin_info);
 	return *_au_plugin_info;
 #else
 	return _empty_plugin_info;
