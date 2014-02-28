@@ -336,7 +336,7 @@ EngineControl::EngineControl ()
 	 basic_packer.attach (backend_combo, 1, 2, 0, 1, xopt, (AttachOptions) 0);
 
 	 lm_button.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_latency));
-	 lm_button.set_name ("record enable button");
+	 lm_button.set_name ("generic button");
 	 if (_have_control) {
 		 build_full_control_notebook ();
 	 } else {
