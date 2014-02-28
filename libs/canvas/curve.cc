@@ -362,7 +362,7 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		double last_x = 0;
 		double xoffset = (x-xfront)/xextent;
 
-		std::cerr << " draw " << nsegs << " segments\n";
+		// std::cerr << " draw " << nsegs << " segments\n";
 
 		for (uint32_t n = 1; n < nsegs; ++n) {
 
@@ -373,7 +373,7 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 
 			x += xfront + (xextent * x);
 
-			std::cerr << "hspan @ " << x << ' ' << x - last_x << std::endl;
+			// std::cerr << "hspan @ " << x << ' ' << x - last_x << std::endl;
 			last_x = x;
 
 			window_space = item_to_window (Duple (x, y));
