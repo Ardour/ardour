@@ -28,10 +28,10 @@ namespace Gtkmm2ext {
 class PathsDialog : public Gtk::Dialog
 {
   public:
-	PathsDialog (std::string, std::string, std::string);
+	PathsDialog (std::string, std::string current_paths = "", std::string default_paths = "");
 	~PathsDialog ();
 
-	std::string get_serialized_paths (bool include_fixed = false);
+	std::string get_serialized_paths ();
 
   private:
 	void on_show ();
@@ -40,10 +40,14 @@ class PathsDialog : public Gtk::Dialog
 
 	Gtk::Button    add_path_button;
 	Gtk::Button    remove_path_button;
+	Gtk::Button    set_default_button;
 
 	void selection_changed();
 	void add_path();
 	void remove_path();
+	void set_default();
+
+	std::string _default_paths;
 };
 
 } /* namespace */

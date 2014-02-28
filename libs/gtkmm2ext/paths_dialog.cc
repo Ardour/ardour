@@ -26,11 +26,13 @@ using namespace Gtk;
 using namespace std;
 using namespace Gtkmm2ext;
 
-PathsDialog::PathsDialog (std::string title, std::string user_paths, std::string fixed_paths)
+PathsDialog::PathsDialog (std::string title, std::string current_paths, std::string default_paths)
 	: Dialog (title, true)
-	, paths_list_view(2, false, Gtk::SELECTION_SINGLE)
+	, paths_list_view(1, false, Gtk::SELECTION_SINGLE)
 	, add_path_button(_("Add"))
 	, remove_path_button(_("Delete"))
+	, set_default_button(_("Reset to Default"))
+	, _default_paths(default_paths)
 {
 	set_name ("PathsDialog");
 	set_skip_taskbar_hint (true);
@@ -41,35 +43,34 @@ PathsDialog::PathsDialog (std::string title, std::string user_paths, std::string
 
 	add_path_button.signal_clicked().connect (sigc::mem_fun (*this, &PathsDialog::add_path));
 	remove_path_button.signal_clicked().connect (sigc::mem_fun (*this, &PathsDialog::remove_path));
+	set_default_button.signal_clicked().connect (sigc::mem_fun (*this, &PathsDialog::set_default));
 	remove_path_button.set_sensitive(false);
 
-	paths_list_view.set_column_title(0,"Type");
-	paths_list_view.set_column_title(1,"Path");
+	paths_list_view.set_column_title(0,"Path");
 
-	/* TODO fill in Text View */
-	std::vector <std::string> a = PBD::parse_path(user_paths);
+	std::vector <std::string> a = PBD::parse_path(current_paths);
 	for(vector<std::string>::const_iterator i = a.begin(); i != a.end(); ++i) {
-		int row = paths_list_view.append(_("user"));
-		paths_list_view.set_text(row, 1, *i);
-	}
-	a = PBD::parse_path(fixed_paths);
-	for(vector<std::string>::const_iterator i = a.begin(); i != a.end(); ++i) {
-		int row = paths_list_view.append( _("sys"));
-		paths_list_view.set_text(row, 1, *i);
+		paths_list_view.append(*i);
 	}
 
 	paths_list_view.get_selection()->signal_changed().connect (mem_fun (*this, &PathsDialog::selection_changed));
 
+	VBox *vbox = manage (new VBox);
+	vbox->pack_start (add_path_button, false, false);
+	vbox->pack_start (remove_path_button, false, false);
+	vbox->pack_start (set_default_button, false, false);
+
 	/* Overall layout */
 	HBox *hbox = manage (new HBox);
-	hbox->pack_start (paths_list_view, true, true);
+	hbox->pack_start (*vbox, false, false);
+	hbox->pack_start (paths_list_view, true, true); // TODO, wrap in scroll-area ?!
+	hbox->set_spacing (4);
+
 	get_vbox()->set_spacing (4);
 	get_vbox()->pack_start (*hbox, true, true);
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::OK, RESPONSE_ACCEPT);
-	get_action_area()->pack_start (add_path_button, false, false);
-	get_action_area()->pack_start (remove_path_button, false, false);
 
 	show_all_children ();
 }
@@ -84,12 +85,11 @@ PathsDialog::on_show() {
 }
 
 std::string
-PathsDialog::get_serialized_paths(bool include_fixed) {
+PathsDialog::get_serialized_paths() {
 	std::string path;
 	for (unsigned int i = 0; i < paths_list_view.size(); ++i) {
-		if (!include_fixed && paths_list_view.get_text(i, 0) != _("user")) continue;
 		if (i > 0) path += G_SEARCHPATH_SEPARATOR;
-		path += paths_list_view.get_text(i, 1);
+		path += paths_list_view.get_text(i, 0);
 	}
 	return path;
 }
@@ -98,13 +98,10 @@ void
 PathsDialog::selection_changed () {
 	std::vector<int> selection = paths_list_view.get_selected();
 	if (selection.size() > 0) {
-		const int row = selection.at(0);
-		if (paths_list_view.get_text(row, 0) == _("user")) {
-			remove_path_button.set_sensitive(true);
-			return;
-		}
+		remove_path_button.set_sensitive(true);
+	} else {
+		remove_path_button.set_sensitive(false);
 	}
-	remove_path_button.set_sensitive(false);
 }
 
 void
@@ -118,14 +115,13 @@ PathsDialog::add_path() {
 		if (Glib::file_test (dir, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
 			bool dup = false;
 			for (unsigned int i = 0; i < paths_list_view.size(); ++i) {
-				if (paths_list_view.get_text(i, 1) == dir) {
+				if (paths_list_view.get_text(i, 0) == dir) {
 					dup = true;
 					break;
 				}
 			}
 			if (!dup) {
-				paths_list_view.prepend(_("user"));
-				paths_list_view.set_text(0, 1, dir);
+				paths_list_view.prepend(dir);
 			}
 		}
 	}
@@ -134,9 +130,7 @@ PathsDialog::add_path() {
 void
 PathsDialog::remove_path() {
 	std::vector<int> selection = paths_list_view.get_selected();
-	if (selection.size() != 1) { return ; }
-	const int row = selection.at(0);
-	if (paths_list_view.get_text(row, 0) != _("user")) { return ; }
+	if (selection.size() == 0 ) { return ; }
 
 	/* Gtk::ListViewText internals to delete row(s) */
 	Gtk::TreeModel::iterator row_it = paths_list_view.get_selection()->get_selected();
@@ -150,5 +144,15 @@ PathsDialog::remove_path() {
 	if(refLStore){
 		refLStore->erase(row_it);
 		return;
+	}
+}
+
+void
+PathsDialog::set_default() {
+
+	paths_list_view.clear_items();
+	std::vector <std::string> a = PBD::parse_path(_default_paths);
+	for(vector<std::string>::const_iterator i = a.begin(); i != a.end(); ++i) {
+		paths_list_view.append(*i);
 	}
 }

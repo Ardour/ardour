@@ -1106,7 +1106,7 @@ private:
 		Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
 				_("Set Windows VST Search Path"),
 				_rc_config->get_plugin_path_vst(),
-				PluginManager::instance().get_windows_vst_path()
+				PluginManager::instance().get_default_windows_vst_path()
 				);
 		ResponseType r = (ResponseType) pd->run ();
 		pd->hide();
@@ -1121,7 +1121,7 @@ private:
 		Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
 				_("Set Linux VST Search Path"),
 				_rc_config->get_plugin_path_lxvst(),
-				PluginManager::instance().get_lxvst_path()
+				PluginManager::instance().get_default_lxvst_path()
 				);
 		ResponseType r = (ResponseType) pd->run ();
 		pd->hide();

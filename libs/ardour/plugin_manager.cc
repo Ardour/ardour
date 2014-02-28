@@ -172,6 +172,14 @@ PluginManager::PluginManager ()
 			"/usr/lib/vst:/usr/local/lib/vst";
 	}
 
+	/* first time setup, use 'default' path */
+	if (Config->get_plugin_path_lxvst() == X_("@default@")) {
+		Config->set_plugin_path_lxvst(get_default_lxvst_path());
+	}
+	if (Config->get_plugin_path_vst() == X_("@default@")) {
+		Config->set_plugin_path_vst(get_default_windows_vst_path());
+	}
+
 	if (_instance == 0) {
 		_instance = this;
 	}
@@ -184,55 +192,38 @@ PluginManager::~PluginManager()
 {
 }
 
-const std::string
-PluginManager::lxvst_search_path() const
-{
-	std::string searchpath = lxvst_path;
-	if (!Config->get_plugin_path_lxvst().empty()) {
-		searchpath += G_SEARCHPATH_SEPARATOR;
-		searchpath += Config->get_plugin_path_lxvst();
-	}
-	return searchpath;
-}
-
-const std::string
-PluginManager::windows_vst_search_path() const
-{
-	std::string searchpath = windows_vst_path;
-	if (!Config->get_plugin_path_vst().empty()) {
-		searchpath += G_SEARCHPATH_SEPARATOR;
-		searchpath += Config->get_plugin_path_vst();
-	}
-	return searchpath;
-}
-
 void
 PluginManager::refresh (bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, "PluginManager::refresh\n");
-	BootMessage (_("Discovering Plugins"));
 	cancel_scan = false;
 
+	BootMessage (_("Scanning LADSPA Plugins"));
 	ladspa_refresh ();
 #ifdef LV2_SUPPORT
+	BootMessage (_("Scanning LV2 Plugins"));
 	lv2_refresh ();
 #endif
 #ifdef WINDOWS_VST_SUPPORT
 	if (Config->get_use_windows_vst()) {
+		BootMessage (_("Scanning Windows VST Plugins"));
 		windows_vst_refresh (cache_only);
 	}
 #endif // WINDOWS_VST_SUPPORT
 
 #ifdef LXVST_SUPPORT
 	if(Config->get_use_lxvst()) {
+		BootMessage (_("Scanning Linux VST Plugins"));
 		lxvst_refresh(cache_only);
 	}
 #endif //Native linuxVST SUPPORT
 
 #ifdef AUDIOUNIT_SUPPORT
+	BootMessage (_("Scanning AU Plugins"));
 	au_refresh ();
 #endif
 
+	BootMessage (_("Plugin Scan Complete..."));
 	PluginListChanged (); /* EMIT SIGNAL */
 	PluginScanMessage(X_("closeme"), "", false);
 	cancel_scan = false;
@@ -253,7 +244,7 @@ PluginManager::clear_vst_cache ()
 		PathScanner scanner;
 		vector<string *> *fsi_files;
 
-		fsi_files = scanner (windows_vst_search_path(), "\\.fsi$", true, true, -1, false);
+		fsi_files = scanner (Config->get_plugin_path_vst(), "\\.fsi$", true, true, -1, false);
 		if (fsi_files) {
 			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
 				::g_unlink((*i)->c_str());
@@ -267,7 +258,7 @@ PluginManager::clear_vst_cache ()
 	{
 		PathScanner scanner;
 		vector<string *> *fsi_files;
-		fsi_files = scanner (lxvst_search_path(), "\\.fsi$", true, true, -1, false);
+		fsi_files = scanner (Config->get_plugin_path_lxvst(), "\\.fsi$", true, true, -1, false);
 		if (fsi_files) {
 			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
 				::g_unlink((*i)->c_str());
@@ -301,7 +292,7 @@ PluginManager::clear_vst_blacklist ()
 		PathScanner scanner;
 		vector<string *> *fsi_files;
 
-		fsi_files = scanner (windows_vst_search_path(), "\\.fsb$", true, true, -1, false);
+		fsi_files = scanner (Config->get_plugin_path_vst(), "\\.fsb$", true, true, -1, false);
 		if (fsi_files) {
 			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
 				::g_unlink((*i)->c_str());
@@ -315,7 +306,7 @@ PluginManager::clear_vst_blacklist ()
 	{
 		PathScanner scanner;
 		vector<string *> *fsi_files;
-		fsi_files = scanner (lxvst_search_path(), "\\.fsb$", true, true, -1, false);
+		fsi_files = scanner (Config->get_plugin_path_lxvst(), "\\.fsb$", true, true, -1, false);
 		if (fsi_files) {
 			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
 				::g_unlink((*i)->c_str());
@@ -648,7 +639,7 @@ PluginManager::windows_vst_refresh (bool cache_only)
 		_windows_vst_plugin_info = new ARDOUR::PluginInfoList();
 	}
 
-	windows_vst_discover_from_path (windows_vst_search_path(), cache_only);
+	windows_vst_discover_from_path (Config->get_plugin_path_vst(), cache_only);
 }
 
 static bool windows_vst_filter (const string& str, void * /*arg*/)
@@ -668,7 +659,7 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("detecting Windows VST plugins along %1\n", path));
 
-	plugin_objects = scanner (windows_vst_search_path(), windows_vst_filter, 0, false, true);
+	plugin_objects = scanner (Config->get_plugin_path_vst(), windows_vst_filter, 0, false, true);
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
@@ -766,7 +757,7 @@ PluginManager::lxvst_refresh (bool cache_only)
 		_lxvst_plugin_info = new ARDOUR::PluginInfoList();
 	}
 
-	lxvst_discover_from_path (lxvst_search_path(), cache_only);
+	lxvst_discover_from_path (Config->get_plugin_path_lxvst(), cache_only);
 }
 
 static bool lxvst_filter (const string& str, void *)
@@ -790,7 +781,7 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Discovering linuxVST plugins along %1\n", path));
 
-	plugin_objects = scanner (lxvst_search_path(), lxvst_filter, 0, false, true);
+	plugin_objects = scanner (Config->get_plugin_path_lxvst(), lxvst_filter, 0, false, true);
 
 	if (plugin_objects) {
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
