@@ -38,13 +38,13 @@ namespace PBD {
  * The Searchpath class does not test whether the paths exist
  * or are directories. It is basically just a container.
  */
-class /*LIBPBD_API*/ Searchpath : public std::vector<std::string>
+class LIBPBD_API Searchpath : public std::vector<std::string>
 {
 public:
 	/**
 	 * Create an empty Searchpath.
 	 */
-	LIBPBD_API Searchpath ();
+	Searchpath ();
 
 	/**
 	 * Initialize Searchpath from a string where the string contains
@@ -57,7 +57,7 @@ public:
 	 * 
 	 * @param search_path A path string.
 	 */
-	LIBPBD_API Searchpath (const std::string& search_path);
+	Searchpath (const std::string& search_path);
 
 	/**
 	 * Initialize Searchpath from a vector of paths that may or may
@@ -65,9 +65,9 @@ public:
 	 *
 	 * @param paths A vector of paths.
 	 */
-	LIBPBD_API Searchpath (const std::vector<std::string>& paths);
+	Searchpath (const std::vector<std::string>& paths);
 
-	LIBPBD_API ~Searchpath () {};
+	~Searchpath () {};
 
 	/**
 	 * @return a search path string.
@@ -75,39 +75,39 @@ public:
 	 * The string that is returned contains the platform specific
 	 * path separator.
 	 */
-	LIBPBD_API const std::string to_string () const;
+	const std::string to_string () const;
 
 	/**
 	 * Add all the directories in path to this.
 	 */
-	LIBPBD_API Searchpath& operator+= (const Searchpath& spath);
+	Searchpath& operator+= (const Searchpath& spath);
 
 	/**
 	 * Add another directory path to the search path.
 	 */
-	LIBPBD_API Searchpath& operator+= (const std::string& directory_path);
+	Searchpath& operator+= (const std::string& directory_path);
 	
 	/**
 	 * Concatenate another Searchpath onto this.
 	 */
-	LIBPBD_API Searchpath& operator+ (const Searchpath& other);
+	Searchpath& operator+ (const Searchpath& other);
 	
 	/**
 	 * Add another path to the search path.
 	 */
-	LIBPBD_API Searchpath& operator+ (const std::string& directory_path);
+	Searchpath& operator+ (const std::string& directory_path);
 
 	/**
 	 * Add a sub-directory to each path in the search path.
 	 * @param subdir The directory name, it should not contain 
 	 * any path separating tokens.
 	 */
-	LIBPBD_API Searchpath& add_subdirectory_to_paths (const std::string& subdir);
+	Searchpath& add_subdirectory_to_paths (const std::string& subdir);
 
 protected:
 
-	LIBPBD_API void add_directory (const std::string& directory_path);
-	LIBPBD_API void add_directories (const std::vector<std::string>& paths);
+	void add_directory (const std::string& directory_path);
+	void add_directories (const std::vector<std::string>& paths);
 };
 
 } // namespace PBD
