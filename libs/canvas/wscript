@@ -86,7 +86,7 @@ def build(bld):
     obj.target       = 'canvas'
     obj.vnum         = CANVAS_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-    obj.defines      = [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+    obj.defines      += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
     
     if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
 
