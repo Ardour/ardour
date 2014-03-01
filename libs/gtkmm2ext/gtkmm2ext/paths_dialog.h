@@ -23,9 +23,11 @@
 #include <vector>
 #include <gtkmm.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-class PathsDialog : public Gtk::Dialog
+class LIBGTKMM2EXT_API PathsDialog : public Gtk::Dialog
 {
   public:
 	PathsDialog (std::string, std::string current_paths = "", std::string default_paths = "");
