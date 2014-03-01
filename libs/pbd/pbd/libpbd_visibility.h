@@ -24,10 +24,14 @@
   #define LIBPBD_DLL_IMPORT __declspec(dllimport)
   #define LIBPBD_DLL_EXPORT __declspec(dllexport)
   #define LIBPBD_DLL_LOCAL
+  #define LIBPBD_TEMPLATE_DLL_IMPORT
+  #define LIBPBD_TEMPLATE_DLL_EXPORT
 #else
   #define LIBPBD_DLL_IMPORT __attribute__ ((visibility ("default")))
   #define LIBPBD_DLL_EXPORT __attribute__ ((visibility ("default")))
   #define LIBPBD_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+  #define LIBPDB_TEMPLATE_DLL_IMPORT __attribute__ ((visibility ("default")))
+  #define LIBPBD_TEMPLATE_DLL_EXPORT __attribute__ ((visibility ("default")))
 #endif
 
 #ifdef LIBPBD_STATIC // libpbd is a DLL
@@ -36,8 +40,10 @@
 #else
   #ifdef LIBPBD_DLL_EXPORTS // defined if we are building the libpbd DLL (instead of using it)
     #define LIBPBD_API LIBPBD_DLL_EXPORT
+    #define LIBEVORAL_TEMPLATE_API LIBEVORAL_TEMPLATE_DLL_EXPORT
   #else
     #define LIBPBD_API LIBPBD_DLL_IMPORT
+    #define LIBEVORAL_TEMPLATE_API LIBEVORAL_TEMPLATE_DLL_IMPORT
   #endif 
   #define LIBPBD_LOCAL LIBPBD_DLL_LOCAL
 #endif
