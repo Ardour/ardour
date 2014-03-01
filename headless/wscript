@@ -35,6 +35,8 @@ def build(bld):
     
     # just the normal executable version of the GTK GUI
     obj = bld (features = 'cxx c cxxprogram')
+    # this program does not do the whole hidden symbols thing
+    obj.cxxflags = [ '-fvisibility=default' ]
     obj.source    = hardour_sources
     obj.target = 'hardour-' + bld.env['VERSION']
     obj.includes = ['.']
