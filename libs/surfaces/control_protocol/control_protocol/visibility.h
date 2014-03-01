@@ -20,7 +20,7 @@
 #ifndef __libcontrolcp_visibility_h__
 #define __libcontrolcp_visibility_h__
 
-#if defined(COMPILER_MSVC)
+#if defined(COMPILER_MSVC) || defined(__MINGW64__)
   #define LIBCONTROLCP_DLL_IMPORT __declspec(dllimport)
   #define LIBCONTROLCP_DLL_EXPORT __declspec(dllexport)
   #define LIBCONTROLCP_DLL_LOCAL

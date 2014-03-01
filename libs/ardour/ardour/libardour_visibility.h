@@ -20,7 +20,7 @@
 #ifndef __libardour_libardour_visibility_h__
 #define __libardour_libardour_visibility_h__
 
-#if defined(COMPILER_MSVC)
+#if defined(COMPILER_MSVC) || defined(__MINGW64__)
   #define LIBARDOUR_DLL_IMPORT __declspec(dllimport)
   #define LIBARDOUR_DLL_EXPORT __declspec(dllexport)
   #define LIBARDOUR_DLL_LOCAL

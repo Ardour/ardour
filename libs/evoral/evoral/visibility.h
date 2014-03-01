@@ -20,7 +20,7 @@
 #ifndef __libevoral_visibility_h__
 #define __libevoral_visibility_h__
 
-#if defined(COMPILER_MSVC)
+#if defined(COMPILER_MSVC) || defined(__MINGW64__)
   #define LIBEVORAL_DLL_IMPORT __declspec(dllimport)
   #define LIBEVORAL_DLL_EXPORT __declspec(dllexport)
   #define LIBEVORAL_DLL_LOCAL
