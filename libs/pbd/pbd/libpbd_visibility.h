@@ -20,7 +20,7 @@
 #ifndef __libpbd_libpbd_visibility_h__
 #define __libpbd_libpbd_visibility_h__
 
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW64)
+#if defined(COMPILER_MSVC) || defined(__MINGW64__)
   #define LIBPBD_DLL_IMPORT __declspec(dllimport)
   #define LIBPBD_DLL_EXPORT __declspec(dllexport)
   #define LIBPBD_DLL_LOCAL
