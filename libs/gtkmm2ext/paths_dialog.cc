@@ -50,7 +50,7 @@ PathsDialog::PathsDialog (std::string title, std::string current_paths, std::str
 
 	std::vector <std::string> a = PBD::parse_path(current_paths);
 	for(vector<std::string>::const_iterator i = a.begin(); i != a.end(); ++i) {
-		paths_list_view.append(*i);
+		paths_list_view.append_text(*i);
 	}
 
 	paths_list_view.get_selection()->signal_changed().connect (mem_fun (*this, &PathsDialog::selection_changed));
@@ -121,7 +121,7 @@ PathsDialog::add_path() {
 				}
 			}
 			if (!dup) {
-				paths_list_view.prepend(dir);
+				paths_list_view.prepend_text(dir);
 			}
 		}
 	}
