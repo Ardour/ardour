@@ -20,7 +20,7 @@
 #ifndef __libaudiographer_visibility_h__
 #define __libaudiographer_visibility_h__
 
-#if defined(COMPILER_MSVC) || defined(__MINGW64__)
+#if defined(COMPILER_MSVC)
   #define LIBAUDIOGRAPHER_DLL_IMPORT __declspec(dllimport)
   #define LIBAUDIOGRAPHER_DLL_EXPORT __declspec(dllexport)
   #define LIBAUDIOGRAPHER_DLL_LOCAL

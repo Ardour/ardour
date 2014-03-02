@@ -20,7 +20,7 @@
 #ifndef __libcanvas_visibility_h__
 #define __libcanvas_visibility_h__
 
-#if defined(COMPILER_MSVC) || defined(__MINGW64__)
+#if defined(COMPILER_MSVC)
   #define LIBCANVAS_DLL_IMPORT __declspec(dllimport)
   #define LIBCANVAS_DLL_EXPORT __declspec(dllexport)
   #define LIBCANVAS_DLL_LOCAL

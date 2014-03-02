@@ -20,7 +20,7 @@
 #ifndef __libtimecode_visibility_h__
 #define __libtimecode_visibility_h__
 
-#if defined(COMPILER_MSVC) || defined(__MINGW64__)
+#if defined(COMPILER_MSVC)
   #define LIBTIMECODE_DLL_IMPORT __declspec(dllimport)
   #define LIBTIMECODE_DLL_EXPORT __declspec(dllexport)
   #define LIBTIMECODE_DLL_LOCAL

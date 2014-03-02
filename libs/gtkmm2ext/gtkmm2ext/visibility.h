@@ -20,7 +20,7 @@
 #ifndef __libgtkmm2ext_visibility_h__
 #define __libgtkmm2ext_visibility_h__
 
-#if defined(COMPILER_MSVC) || defined(__MINGW64__)
+#if defined(COMPILER_MSVC)
   #define LIBGTKMM2EXT_DLL_IMPORT __declspec(dllimport)
   #define LIBGTKMM2EXT_DLL_EXPORT __declspec(dllexport)
   #define LIBGTKMM2EXT_DLL_LOCAL

@@ -20,7 +20,7 @@
 #ifndef __libmidi_libmidi_visibility_h__
 #define __libmidi_libmidi_visibility_h__
 
-#if defined(COMPILER_MSVC) || defined(__MINGW64__)
+#if defined(COMPILER_MSVC)
   #define LIBMIDIPP_DLL_IMPORT __declspec(dllimport)
   #define LIBMIDIPP_DLL_EXPORT __declspec(dllexport)
   #define LIBMIDIPP_DLL_LOCAL
