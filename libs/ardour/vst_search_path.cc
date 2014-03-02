@@ -28,7 +28,7 @@
 
 namespace ARDOUR {
 
-char*
+const char*
 vst_search_path ()
 {
 	DWORD dwType = REG_SZ;  
