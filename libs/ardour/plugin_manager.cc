@@ -63,6 +63,7 @@
 #include "ardour/rc_configuration.h"
 
 #include "ardour/ladspa_search_path.h"
+#include "ardour/vst_search_path.h"
 
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
@@ -83,7 +84,6 @@
 
 #include "pbd/error.h"
 #include "pbd/stl_delete.h"
-#include "pbd/fallback_folders.h"
 
 #include "i18n.h"
 
@@ -153,11 +153,7 @@ PluginManager::PluginManager ()
 	}
 
 	if (windows_vst_path.length() == 0) {
-#ifdef PLATFORM_WINDOWS
-		windows_vst_path = PBD::get_platform_fallback_folder (PBD::FOLDER_VST);
-#else
-		windows_vst_path = "/usr/local/lib/vst:/usr/lib/vst";
-#endif
+		windows_vst_path = vst_search_path ();
 	}
 
 	if ((s = getenv ("LXVST_PATH"))) {
