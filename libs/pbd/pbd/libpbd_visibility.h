@@ -20,7 +20,7 @@
 #ifndef __libpbd_libpbd_visibility_h__
 #define __libpbd_libpbd_visibility_h__
 
-#if defined(COMPILER_MSVC) || defined(__MINGW64__)
+#if defined(COMPILER_MSVC)
   #define LIBPBD_DLL_IMPORT __declspec(dllimport)
   #define LIBPBD_DLL_EXPORT __declspec(dllexport)
   #define LIBPBD_DLL_LOCAL
@@ -30,7 +30,7 @@
   #define LIBPBD_DLL_IMPORT __attribute__ ((visibility ("default")))
   #define LIBPBD_DLL_EXPORT __attribute__ ((visibility ("default")))
   #define LIBPBD_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
-  #define LIBPDB_TEMPLATE_DLL_IMPORT __attribute__ ((visibility ("default")))
+  #define LIBPBD_TEMPLATE_DLL_IMPORT __attribute__ ((visibility ("default")))
   #define LIBPBD_TEMPLATE_DLL_EXPORT __attribute__ ((visibility ("default")))
 #endif
 
