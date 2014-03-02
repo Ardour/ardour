@@ -552,6 +552,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	ChanCount bufs_count;
 	bufs_count.set(DataType::AUDIO, 1);
 	bufs_count.set(DataType::MIDI, 1);
+	_midi_out_buf = 0;
 
 	BufferSet& silent_bufs  = _session.get_silent_buffers(bufs_count);
 	BufferSet& scratch_bufs = _session.get_scratch_buffers(bufs_count);
@@ -590,12 +591,28 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	}
 
 	if (bufs.count().n_midi() > 0) {
-		VstEvents* v = bufs.get_vst_midi (0);
-		_plugin->dispatcher (_plugin, effProcessEvents, 0, 0, v, 0);
+		VstEvents* v = 0;
+		bool valid = false;
+		const uint32_t buf_index_in = in_map.get(DataType::MIDI, 0, &valid);
+		if (valid) {
+			v = bufs.get_vst_midi (0);
+		}
+		valid = false;
+		const uint32_t buf_index_out = out_map.get(DataType::MIDI, 0, &valid);
+		if (valid) {
+			_midi_out_buf = &bufs.get_midi(buf_index_out);
+			_midi_out_buf->silence(0, 0);
+		} else {
+			_midi_out_buf = 0;
+		}
+		if (v) {
+			_plugin->dispatcher (_plugin, effProcessEvents, 0, 0, v, 0);
+		}
 	}
 
 	/* we already know it can support processReplacing */
 	_plugin->processReplacing (_plugin, &ins[0], &outs[0], nframes);
+	_midi_out_buf = 0;
 
 	return 0;
 }

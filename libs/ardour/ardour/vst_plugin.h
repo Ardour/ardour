@@ -73,6 +73,7 @@ public:
 	
 	AEffect * plugin () const { return _plugin; }
 	VSTState * state () const { return _state; }
+	MidiBuffer * midi_buffer () const { return _midi_out_buf; }
 
 	int set_state (XMLNode const &, int);
 
@@ -94,6 +95,8 @@ protected:
 	VSTHandle* _handle;
 	VSTState*  _state;
 	AEffect*   _plugin;
+
+	MidiBuffer* _midi_out_buf;
 };
 
 }

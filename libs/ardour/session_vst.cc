@@ -49,6 +49,8 @@ int Session::vst_current_loading_id = 0;
 const char* Session::vst_can_do_strings[] = {
 	X_("supplyIdle"),
 	X_("sendVstTimeInfo"),
+	X_("sendVstEvents"),
+	X_("sendVstMidiEvent"),
 	X_("supportShell"),
 	X_("shellCategory")
 };
@@ -256,6 +258,15 @@ intptr_t Session::vst_callback (
 	case audioMasterProcessEvents:
 		SHOW_CALLBACK ("amc: audioMasterProcessEvents\n");
 		// VstEvents* in <ptr>
+		if (plug->midi_buffer()) {
+			VstEvents* v = (VstEvents*)ptr;
+			for (int n = 0 ; n < v->numEvents; ++n) {
+				VstMidiEvent *vme = (VstMidiEvent*) (v->events[n]->dump);
+				if (vme->type == kVstMidiType) {
+					plug->midi_buffer()->push_back(vme->deltaFrames, 3, (uint8_t*)vme->midiData);
+				}
+			}
+		}
 		return 0;
 
 	case audioMasterSetTime:
