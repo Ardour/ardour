@@ -706,6 +706,7 @@ def build(bld):
     bld.install_files('${DATADIR}/ardour3/icons', bld.path.ant_glob('icons/*.png'))
     bld.install_files('${DATADIR}/ardour3/pixmaps', bld.path.ant_glob('pixmaps/*.xpm'))
     bld.install_files('${DATADIR}/ardour3', 'splash.png')
+    bld.install_files('${DATADIR}/ardour3', 'small-splash.png')
     bld.install_files('${DATADIR}/ardour3', 'ArdourMono.ttf')
 
     # Default UI configuration
