@@ -439,6 +439,12 @@ def build(bld):
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX GTKOSX'
         obj.use    += ' libappleutility'
+        obj.source += [ 'cocoacarbon.mm', 'bundle_env_cocoa.cc' ]
+    elif sys.platform == 'mingw':
+        obj.source += [ 'bundle_env_mingw.cc' ]
+    else:
+        obj.source += [ 'bundle_env_linux.cc' ]
+
     obj.includes += ['../libs']
 
     if bld.env['build_target'] == 'mingw':
@@ -470,7 +476,6 @@ def build(bld):
 
     if bld.is_defined('HAVE_COREAUDIO'):
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
-        obj.source += [ 'cocoacarbon.mm' ]
         obj.use += ' libappleutility '
 
     if bld.is_defined('AUDIOUNIT_SUPPORT'):
