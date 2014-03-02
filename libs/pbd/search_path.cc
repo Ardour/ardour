@@ -17,6 +17,9 @@
 
 */
 
+#include <string>
+
+#include <glib.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/tokenizer.h"
@@ -116,6 +119,28 @@ Searchpath::add_subdirectory_to_paths (const string& subdir)
 	}
 	
 	return *this;
+}
+
+/* This is not part of the Searchpath object, but is closely related to the
+ * whole idea, and we put it here for convenience.
+ */
+
+void 
+export_search_path (const string& base_dir, const char* varname, const char* dir)
+{
+	string path;
+	const char * cstr = g_getenv (varname);
+
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	} else {
+		path = "";
+	}
+	path += base_dir;
+	path += dir;
+
+	g_setenv (varname, path.c_str(), 1);
 }
 
 } // namespace PBD

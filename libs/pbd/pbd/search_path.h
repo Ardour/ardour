@@ -110,6 +110,9 @@ protected:
 	void add_directories (const std::vector<std::string>& paths);
 };
 
+void export_search_path (const std::string& base_dir, const char* varname, const char* dir);
+
+
 } // namespace PBD
 
 #endif /* __libpbd_search_path_h__ */
