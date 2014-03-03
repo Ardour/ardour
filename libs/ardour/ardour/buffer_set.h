@@ -189,7 +189,7 @@ private:
 	LV2Buffers _lv2_buffers;
 #endif
 
-#if defined VST_SUPPORT || defined LXVST_SUPPORT
+#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
 	class VSTBuffer {
 	public:
 		VSTBuffer (size_t);
