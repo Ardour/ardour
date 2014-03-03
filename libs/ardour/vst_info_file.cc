@@ -147,6 +147,11 @@ vstfx_load_info_block(FILE* fp, VSTInfo *info)
 	if (read_int (fp, &info->hasEditor)) return false;
 	if (read_int (fp, &info->canProcessReplacing)) return false;
 
+	/* backwards compatibility with old .fsi files */
+	if (info->wantMidi == -1) {
+		info->wantMidi = 1;
+	}
+
 	if ((info->ParamNames = (char **) malloc(sizeof(char*)*info->numParams)) == 0) {
 		return false;
 	}
@@ -434,7 +439,7 @@ vstfx_infofile_for_write (const char* dllpath)
 }
 
 static
-int vstfx_can_midi (VSTState* vstfx)
+bool vstfx_midi_input (VSTState* vstfx)
 {
 	AEffect* plugin = vstfx->plugin;
 
@@ -444,7 +449,27 @@ int vstfx_can_midi (VSTState* vstfx)
 		/* should we send it VST events (i.e. MIDI) */
 
 		if ((plugin->flags & effFlagsIsSynth) || (plugin->dispatcher (plugin, effCanDo, 0, 0,(void*) "receiveVstEvents", 0.0f) > 0)) {
-			return -1;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static
+bool vstfx_midi_output (VSTState* vstfx)
+{
+	AEffect* plugin = vstfx->plugin;
+
+	int const vst_version = plugin->dispatcher (plugin, effGetVstVersion, 0, 0, 0, 0.0f);
+
+	if (vst_version >= 2) {
+		/* should we send it VST events (i.e. MIDI) */
+
+		if (   (plugin->dispatcher (plugin, effCanDo, 0, 0,(void*) "sendVstEvents", 0.0f) > 0)
+				|| (plugin->dispatcher (plugin, effCanDo, 0, 0,(void*) "sendVstMidiEvent", 0.0f) > 0)
+			 ) {
+			return true;
 		}
 	}
 
@@ -507,7 +532,7 @@ vstfx_parse_vst_state (VSTState* vstfx)
 	info->numInputs = plugin->numInputs;
 	info->numOutputs = plugin->numOutputs;
 	info->numParams = plugin->numParams;
-	info->wantMidi = vstfx_can_midi(vstfx);
+	info->wantMidi = (vstfx_midi_input(vstfx) ? 1 : 0) | (vstfx_midi_output(vstfx) ? 2 : 0);
 	info->hasEditor = plugin->flags & effFlagsHasEditor ? true : false;
 	info->canProcessReplacing = plugin->flags & effFlagsCanReplacing ? true : false;
 	info->ParamNames = (char **) malloc(sizeof(char*)*info->numParams);

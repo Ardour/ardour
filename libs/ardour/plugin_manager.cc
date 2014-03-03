@@ -713,7 +713,8 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 		info->index = 0;
 		info->n_inputs.set_audio (finfo->numInputs);
 		info->n_outputs.set_audio (finfo->numOutputs);
-		info->n_inputs.set_midi (finfo->wantMidi ? 1 : 0);
+		info->n_inputs.set_midi ((finfo->wantMidi&1) ? 1 : 0);
+		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
 		info->type = ARDOUR::Windows_VST;
 
 		// TODO: check dup-IDs (lxvst AND windows vst)
@@ -833,7 +834,8 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 		info->index = 0;
 		info->n_inputs.set_audio (finfo->numInputs);
 		info->n_outputs.set_audio (finfo->numOutputs);
-		info->n_inputs.set_midi (finfo->wantMidi ? 1 : 0);
+		info->n_inputs.set_midi ((finfo->wantMidi&1) ? 1 : 0);
+		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
 		info->type = ARDOUR::LXVST;
 
 					/* Make sure we don't find the same plugin in more than one place along
