@@ -30,7 +30,7 @@
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
-#if defined VST_SUPPORT || defined LXVST_SUPPORT
+#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
 #include "evoral/MIDIEvent.hpp"
 struct _VstEvents;
 typedef struct _VstEvents VstEvents;
@@ -130,7 +130,7 @@ public:
 	void forward_lv2_midi(LV2_Evbuf*, size_t, bool purge_ardour_buffer = true);
 #endif
 
-#if defined VST_SUPPORT || defined LXVST_SUPPORT
+#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
 	VstEvents* get_vst_midi (size_t);
 #endif
 
