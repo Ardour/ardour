@@ -35,7 +35,8 @@ vst_search_path ()
 	HKEY hKey;
 	DWORD dwSize = PATH_MAX;  
 	char* p = 0;
-	gchar  *user_home = 0;
+	char* user_home = 0;
+	char tmp[PATH_MAX+1];
 
 	if (ERROR_SUCCESS == RegOpenKeyExA (HKEY_CURRENT_USER, "Software\\VST", 0, KEY_READ, &hKey)) {
 		// Look for the user's VST Registry entry
