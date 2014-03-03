@@ -407,7 +407,7 @@ def set_compiler_flags (conf,opt):
         conf.env.append_value('CXXFLAGS', optimization_flags)
 
     if opt.backtrace:
-        if platform != 'darwin' and not is_clang:
+        if platform != 'darwin' and not is_clang and not Options.options.dist_target == 'mingw':
             linker_flags += [ '-rdynamic' ]
 
     conf.env.append_value('CFLAGS', compiler_flags)

@@ -403,8 +403,6 @@ def build(bld):
         # Windows VST support mingw
             obj.source += (
                 '../libs/fst/fst.c',
-                '../libs/fst/fstinfofile.c',
-                '../libs/fst/vsti.c',
                 '../libs/fst/vstwin.c',
                 '../vst/winmain.c',
                 )
