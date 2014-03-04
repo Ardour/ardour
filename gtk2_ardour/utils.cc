@@ -64,6 +64,10 @@ using Gtkmm2ext::Keyboard;
 
 sigc::signal<void>  DPIReset;
 
+#ifdef PLATFORM_WINDOWS
+#define random() rand()
+#endif
+
 
 /** Add an element to a menu, settings its sensitivity.
  * @param m Menu to add to.

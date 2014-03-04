@@ -16,6 +16,10 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+#ifdef PLATFORM_WINDOWS
+#define sleep(X) Sleep((X) * 1000)
+#endif
+
 static const char* localedir = LOCALEDIR;
 
 TestReceiver test_receiver;

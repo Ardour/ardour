@@ -4,9 +4,9 @@
 
 #ifdef PLATFORM_WINDOWS
 
-#include <ardourext/misc.h>
-#include <ardourext/pthread.h>
+#include <pthread.h>
 static UINT_PTR idle_timer_id   = 0;
+extern char *basename(char *path);
 
 #else /* linux + wine */
 
@@ -116,9 +116,9 @@ idle_hands(
 			}
 		}
 
+		pthread_mutex_lock (&fst->lock);
 #ifndef PLATFORM_WINDOWS /* linux + wine */
 		/* Dispatch messages to send keypresses to the plugin */
-		pthread_mutex_lock (&fst->lock);
 		int i;
 
 		for (i = 0; i < fst->n_pending_keys; ++i) {
@@ -141,6 +141,7 @@ idle_hands(
 		}
 
 		fst->n_pending_keys = 0;
+#endif
 
 		/* See comment for maybe_set_program call below */
 		maybe_set_program (fst);
@@ -158,7 +159,6 @@ idle_hands(
 			maybe_set_program (fst);
 			fst->program_set_without_editor = 1;
 		}
-#endif
 
 		pthread_mutex_unlock (&fst->lock);
 	}

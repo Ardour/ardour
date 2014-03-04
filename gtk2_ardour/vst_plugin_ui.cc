@@ -17,10 +17,18 @@
 
 */
 
+#include <gtkmm.h>
 #include "ardour/vst_plugin.h"
 #include "ardour/vst_types.h"
 #include "vst_plugin_ui.h"
+
+#ifdef PLATFORM_WINDOWS
+#include <gdk/gdkwin32.h>
+#elif defined __APPLE__
+// TODO
+#else
 #include <gdk/gdkx.h>
+#endif
 
 VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost::shared_ptr<ARDOUR::VSTPlugin> plugin)
 	: PlugUIBase (insert)

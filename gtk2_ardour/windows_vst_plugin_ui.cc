@@ -18,6 +18,7 @@
 */
 
 #include <fst.h>
+#include <gtkmm.h>
 #include <gtk/gtk.h>
 #include <gtk/gtksocket.h>
 #include "ardour/plugin_insert.h"
@@ -25,12 +26,12 @@
 
 #include "windows_vst_plugin_ui.h"
 
-#ifdef GDK_WINDOWING_X11
-#include <gdk/gdkx.h>
-#elif defined GDK_WINDOWING_WIN32
+#ifdef PLATFORM_WINDOWS
 #include <gdk/gdkwin32.h>
-#elif defined GDK_WINDOWING_QUARTZ
-/* not yet supported */
+#elif defined __APPLE__
+// TODO
+#else
+#include <gdk/gdkx.h>
 #endif
 
 using namespace Gtk;
@@ -42,17 +43,21 @@ WindowsVSTPluginUI::WindowsVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boos
 {
 
 #ifdef GDK_WINDOWING_WIN32
-	GtkWindow* wobj = win->gobj();
+
+#if 0 // TODO verify window vs vbox-widget WRT to plugin_analysis_expander
+	GtkWindow* wobj = GTK_WINDOW(gtk_widget_get_toplevel(this->gobj()));
+#else
+	GtkVBox* wobj = this->gobj();
+#endif
+
 	gtk_widget_realize(GTK_WIDGET(wobj));
 	void* hWndHost = gdk_win32_drawable_get_handle(GTK_WIDGET(wobj)->window);
 
 	fst_run_editor (_vst->state(), hWndHost);
 #else
 	fst_run_editor (_vst->state(), NULL);
-#endif
-
-
 	pack_start (plugin_analysis_expander, true, true);
+#endif
 }
 
 WindowsVSTPluginUI::~WindowsVSTPluginUI ()

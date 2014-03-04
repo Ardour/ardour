@@ -18,19 +18,17 @@
 
 */
 
+#include <math.h>
 #include <iostream>
-#include <cmath>
 
 #ifdef COMPILER_MSVC
 #include <float.h>
 /* isinf() & isnan() are C99 standards, which older MSVC doesn't provide */
-#define isinf(val) !((bool)_finite((double)val))
-#define isnan(val) (bool)_isnan((double)val)
-#endif
-
-#ifdef __APPLE__
-#define isinf(val) std::isinf((val))
-#define isnan(val) std::isnan((val))
+#define ISINF(val) !((bool)_finite((double)val))
+#define ISNAN(val) (bool)_isnan((double)val)
+#else
+#define ISINF(val) std::isinf((val))
+#define ISNAN(val) std::isnan((val))
 #endif
 
 #include <gtkmm/box.h>
@@ -777,13 +775,13 @@ PluginEqGui::plot_signal_amplitude_difference(Gtk::Widget *w, cairo_t *cr)
 		}
 		*/
 
-		if (isinf(power)) {
+		if (ISINF(power)) {
 			if (power < 0) {
 				power = _min_dB - 1.0;
 			} else {
 				power = _max_dB - 1.0;
 			}
-		} else if (isnan(power)) {
+		} else if (ISNAN(power)) {
 			power = _min_dB - 1.0;
 		}
 

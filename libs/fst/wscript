@@ -27,6 +27,11 @@ def configure(conf):
     conf.load('misc')
     conf.load('compiler_cxx')
     autowaf.configure(conf)
+    if conf.env['WINDOWS_VST_SUPPORT'] == True and bld.env['build_target'] == 'mingw':
+        conf.check(compiler='cxx',
+                   lib='gdi32',
+                   mandatory=True,
+                   uselib_store='GDI32')
 
 # Add a waf `feature' to allow compilation of things using winegcc
 from waflib.TaskGen import feature
@@ -59,9 +64,15 @@ def build(bld):
             )
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
         obj.target = 'ardour-vst-scanner.exe.so'
+        obj.uselib = ['GIOMM', 'DL']
     else:
         obj = bld (features = 'cxx c cxxprogram')
-        obj.source = ( 'scanner.cc' )
+        if bld.is_defined('WINDOWS_VST_SUPPORT'):
+            obj.source = ( 'scanner.cc', 'fst.c', 'vstwin.c' )
+            obj.uselib = ['GIOMM', 'DL', 'GDI32']
+        else:
+            obj.source = ( 'scanner.cc' )
+            obj.uselib = ['GIOMM', 'DL']
         obj.target = 'ardour-vst-scanner'
 
     obj.includes  = [ '../pbd/', '../ardour/', '.' ]
@@ -72,4 +83,3 @@ def build(bld):
         'PACKAGE="' + I18N_PACKAGE + '"',
         ]
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3/fst')
-    obj.uselib       = ['GIOMM', 'DL']

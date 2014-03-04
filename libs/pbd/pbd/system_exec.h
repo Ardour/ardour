@@ -30,7 +30,7 @@
 #define STDERR_FILENO 2
 #endif
 
-#if defined (__MINGW64__)
+#ifdef PLATFORM_WINDOWS
 #include <windows.h>
 
 #ifdef interface

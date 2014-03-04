@@ -40,7 +40,7 @@
 //
 
 char *
-get_win_special_folder (int csidl)
+PBD::get_win_special_folder (int csidl)
 {
 	wchar_t path[PATH_MAX+1];
 	HRESULT hr;

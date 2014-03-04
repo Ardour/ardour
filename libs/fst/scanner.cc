@@ -4,7 +4,9 @@
 #include <vector>
 
 #include "ardour/filesystem_paths.h"
+#ifdef LXVST_SUPPORT
 #include "ardour/linux_vst_support.h"
+#endif
 #include "ardour/vst_info_file.h"
 
 /* make stupid waf happy.
@@ -16,7 +18,9 @@
  * ...but waf does track include dependencies.
  */
 #include "../ardour/vst_info_file.cc"
+#ifdef LXVST_SUPPORT
 #include "../ardour/linux_vst_support.cc"
+#endif
 #include "../ardour/filesystem_paths.cc"
 #include "../ardour/directory_names.cc"
 #include "../pbd/error.cc"

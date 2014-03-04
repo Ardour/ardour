@@ -20,6 +20,7 @@
 #ifndef __ardour_vst_types_h__
 #define __ardour_vst_types_h__
 
+#include <pthread.h>
 #include "ardour/libardour_visibility.h"
 #include "ardour/vestige/aeffectx.h"
 

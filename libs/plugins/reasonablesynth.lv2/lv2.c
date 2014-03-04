@@ -100,7 +100,7 @@ instantiate(const LV2_Descriptor*     descriptor,
   self->synth = synth_alloc();
   synth_init(self->synth, rate);
 
-
+#ifndef PLATFORM_WINDOWS // easter egg is for sane platforms with native support for localtime_r only
   struct tm date;
   time_t now;
   time(&now);
@@ -109,6 +109,7 @@ instantiate(const LV2_Descriptor*     descriptor,
     printf("reasonable synth.lv2 says: happy holidays!\n");
     self->xmas = true;
   }
+#endif
 
   return (LV2_Handle)self;
 }

@@ -740,9 +740,10 @@ def configure(conf):
     if opts.windows_vst:
         conf.define('WINDOWS_VST_SUPPORT', 1)
         conf.env['WINDOWS_VST_SUPPORT'] = True
-        conf.env.append_value('CFLAGS', '-I' + Options.options.wine_include)
-        conf.env.append_value('CXXFLAGS', '-I' + Options.options.wine_include)
-        autowaf.check_header(conf, 'cxx', 'windows.h', mandatory = True)
+        if not Options.options.dist_target == 'mingw':
+            conf.env.append_value('CFLAGS', '-I' + Options.options.wine_include)
+            conf.env.append_value('CXXFLAGS', '-I' + Options.options.wine_include)
+            autowaf.check_header(conf, 'cxx', 'windows.h', mandatory = True)
     if opts.lxvst:
         if sys.platform == 'darwin':
             conf.env['LXVST_SUPPORT'] = False

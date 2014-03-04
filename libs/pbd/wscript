@@ -106,9 +106,14 @@ def configure(conf):
     # Boost headers
     autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
     autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
+    if conf.env['WINDOWS_VST_SUPPORT'] == True and Options.options.dist_target == 'mingw':
+        conf.check(compiler='cxx',
+                   lib='ole32',
+                   mandatory=True,
+                   uselib_store='OLE')
 
 def build(bld):
-    
+
     # Make signals_generated.h using signals.py
     bld(rule = 'python ${SRC} ${TGT}', source = 'pbd/signals.py', target = 'pbd/signals_generated.h')
 
@@ -143,14 +148,14 @@ def build(bld):
     obj.vnum         = LIBPBD_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.defines     += [ 'PACKAGE="' + I18N_PACKAGE + '"',
-                         'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"' 
+                         'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"'
                          ]
-    
+
     if bld.env['build_target'] == 'x86_64':
         obj.defines += [ 'USE_X86_64_ASM' ]
     if bld.env['build_target'] == 'mingw':
         obj.source += [ 'windows_special_dirs.cc' ]
-        obj.linkflags = ['-lole']
+        obj.uselib += ' OLE'
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Unit tests

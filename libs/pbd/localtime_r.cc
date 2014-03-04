@@ -39,3 +39,19 @@ localtime_r(const time_t *const timep, struct tm *p_tm)
 }
 
 #endif
+
+#ifdef __MINGW64__
+	struct tm *
+__cdecl localtime(const long int *_Time)
+{
+	if (_Time == NULL)
+	{
+		return localtime((const time_t *const)NULL); // Unpredictable behavior in case of _Time == NULL;
+	}
+	else
+	{
+		const time_t tempTime = *_Time;
+		return localtime(&tempTime);
+	}
+}
+#endif

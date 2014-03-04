@@ -58,6 +58,7 @@ ArdourCanvas::checkpoint (string group, string message)
 	map<string, struct timeval>::iterator last = last_time.find (group);
 
 	if (last != last_time.end ()) {
+#if 0
 		time_t seconds = now.tv_sec - last->second.tv_sec;
 		suseconds_t useconds = now.tv_usec - last->second.tv_usec;
 		if (useconds < 0) {
@@ -65,6 +66,7 @@ ArdourCanvas::checkpoint (string group, string message)
 			--seconds;
 		}
 		cout << (now.tv_sec + ((double) now.tv_usec / 1e6)) << " [" << (seconds + ((double) useconds / 1e6)) << "]: " << message << "\n";
+#endif
 	} else {
 		cout << message << "\n";
 	}

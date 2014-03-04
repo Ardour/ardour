@@ -24,7 +24,6 @@
 #include <cerrno>
 #include <algorithm>
 
-#include <sys/poll.h>
 #include <unistd.h>
 #include <fcntl.h>
 

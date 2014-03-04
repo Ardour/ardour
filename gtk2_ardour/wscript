@@ -398,14 +398,11 @@ def build(bld):
         obj.source    = gtk2_ardour_sources
         obj.target = 'ardour-' + bld.env['VERSION']
         obj.includes = ['.']
+        obj.ldflags = ['-no-undefined']
 
         if bld.is_defined('WINDOWS_VST_SUPPORT'):
         # Windows VST support mingw
-            obj.source += (
-                '../libs/fst/fst.c',
-                '../libs/fst/vstwin.c',
-                '../vst/winmain.c',
-                )
+            obj.source += [ '../vst/winmain.c' ]
             obj.includes += [ '../libs/fst' ]
 
     # at this point, "obj" refers to either the normal native executable
@@ -459,7 +456,8 @@ def build(bld):
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         obj.source += [ 'windows_vst_plugin_ui.cc' ]
         obj.defines += [ 'WINDOWS_VST_SUPPORT' ]
-        obj.use += [ 'X11' ]
+        if bld.env['build_target'] != 'mingw':
+            obj.use += [ 'X11' ]
         
     if bld.is_defined('LXVST_SUPPORT'):
         obj.source += [ 'linux_vst_gui_support.cc', 'lxvst_plugin_ui.cc' ]
