@@ -607,9 +607,20 @@ bool
 GtkCanvas::on_expose_event (GdkEventExpose* ev)
 {
 	Cairo::RefPtr<Cairo::Context> cairo_context = get_window()->create_cairo_context ();
-	Rect area (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height);
 
-	render (area, cairo_context);
+	/* break into regions */
+
+	GdkRectangle *rects;
+	gint n_rects;
+
+	gdk_region_get_rectangles (ev->region, &rects, &n_rects);
+
+	for (gint i = 0; i < n_rects; ++i) {
+		Rect area (rects[i].x, rects[i].y, rects[i].x + rects[i].width, rects[i].y + rects[i].height);
+		render (area, cairo_context);
+	}
+
+	g_free (rects);
 
 	return true;
 }
