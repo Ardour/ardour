@@ -654,7 +654,9 @@ def configure(conf):
     if Options.options.boost_sp_debug:
         conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
 
-    conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
+    # executing a test program is n/a when cross-compiling
+    if Options.options.dist_target != 'mingw':
+        conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
                   execute = "1",
                   mandatory = True,
                   msg = 'Checking for boost library >= 1.39',

@@ -27,7 +27,7 @@ def configure(conf):
     conf.load('misc')
     conf.load('compiler_cxx')
     autowaf.configure(conf)
-    if conf.env['WINDOWS_VST_SUPPORT'] == True and bld.env['build_target'] == 'mingw':
+    if conf.env['WINDOWS_VST_SUPPORT'] == True and Options.options.dist_target == 'mingw':
         conf.check(compiler='cxx',
                    lib='gdi32',
                    mandatory=True,
