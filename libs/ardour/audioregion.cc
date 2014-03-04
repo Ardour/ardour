@@ -987,7 +987,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 	boost::shared_ptr<Evoral::ControlList> c2 (new Evoral::ControlList (FadeInAutomation));
 	boost::shared_ptr<Evoral::ControlList> c3 (new Evoral::ControlList (FadeInAutomation));
 
-	const int num_steps = min ((framecnt_t) 64, len);
+	const int num_steps = min ((framecnt_t) 16, len);
 
 	_fade_in->freeze ();
 	_fade_in->clear ();
