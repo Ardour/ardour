@@ -252,7 +252,7 @@ Curve::smooth (Points::size_type p1, Points::size_type p2, Points::size_type p3,
 	}
 }
 
-/** Given a position within the x-axis range of the
+/** Given a fractional position within the x-axis range of the
  * curve, return the corresponding y-axis value
  */
 
@@ -294,15 +294,21 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	 * with this.
 	 */
 	
-	double x;
 	double y;
 
-	context->save ();
-	context->rectangle (area.x0, area.y0, area.width(),area.height());
-	context->clip ();
+	if (!_bounding_box) {
+		return;
+	}
+	Rect draw = area;
 
 	setup_outline_context (context);
-
+/*
+	double r, g, b;
+	r = (random() % 255) /  255.0;
+	g = (random() % 255) /  255.0;
+	b = (random() % 255) /  255.0;
+	context->set_source_rgb (r, g, b);
+*/
 	if (_points.size() == 2) {
 
 		/* straight line */
@@ -317,77 +323,68 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	} else {
 
 		/* curve of at least 3 points */
-
-		const double xfront = _points.front().x;
-		const double xextent = _points.back().x - xfront;
-
-		/* move through points to find the first one inside the
-		 * rendering area 
-		 */
 		
-		Points::const_iterator edge = _points.end();
-		bool edge_found = false;
+		/* clamp actual draw to area bound by points, rather than our bounding box which is slightly different */
 
-		for (Points::const_iterator p = _points.begin(); p != _points.end(); ++p) {
-			Duple w (item_to_window (Duple ((*p).x, 0.0)));
-			if (w.x >= area.x0) {
-				edge_found = true;
-				break;
-			}
-			edge = p;
-			
+		Duple w1 = item_to_window (Duple (_points.front().x, 0.0));
+		Duple w2 = item_to_window (Duple (_points.back().x, 0.0));
+
+		if (draw.x0 < w1.x) {
+			draw.x0 = w1.x;
 		}
 
-		if (edge == _points.end()) {
-			if (edge_found) {
-				edge = _points.begin();
+		if (draw.x1 >= w2.x) {
+			draw.x1 = w2.x;
+		}
+
+		std::cerr << "Draw " << draw << " win-x = " << w1 << " .. " << w2 << std::endl;
+
+		/* full width of the curve */
+		const double xextent = _points.back().x - _points.front().x;
+		/* Determine where the first drawn point will be */
+		Duple item_space = window_to_item (Duple (draw.x0, 0)); /* y value is irrelevant */
+		/* determine the fractional offset of this location into the overall extent of the curve */
+		const double xfract_offset = (item_space.x - _points.front().x)/xextent;
+		const uint32_t pixels = draw.width ();
+		Duple window_space;
+
+#if 1
+		std::cerr << "begin draw at " << draw.x0 << " (" << item_space.x << ") which is " << xfract_offset << " into " << w1.x << " .. " << w2.x 
+			  << " I = " << _points.front().x << " .. " << _points.back().x 
+			  << std::endl;
+#endif
+
+		/* draw the first point */
+
+		std::cerr << this << " redraw " << pixels << " pixels from " << draw.x0 << " .. " << draw.x0 + pixels << std::endl;
+		
+		for (uint32_t pixel = 0; pixel < pixels; ++pixel) {
+
+			/* fractional distance into the total horizontal extent of the curve */
+			double xfract = xfract_offset + (pixel / xextent);
+			/* compute vertical coordinate (item-space) at that location */
+			y = map_value (xfract);
+			
+			/* convert to window space for drawing */
+			window_space = item_to_window (Duple (0.0, y)); /* x-value is irrelevant */
+
+			/* we are moving across the draw area pixel-by-pixel */
+			window_space.x = draw.x0 + pixel;
+			
+			/* plot this point */
+			if (pixel == 0) {
+				context->move_to (window_space.x, window_space.y);
 			} else {
-				return;
+				context->line_to (window_space.x, window_space.y);
 			}
+			std::cerr << window_space << ' ';
 		}
-
-		std::cerr << "Start drawing " << distance (_points.begin(), edge) << " into points\n";
-		
-		x = (*edge).x;
-		y = map_value (0.0);
-		
-		Duple window_space = item_to_window (Duple (x, y));
-		context->move_to (window_space.x, window_space.y);
-		
-		/* if the extent of this curve (in pixels) is small, then we don't need
-		 * many segments.
-		 */
-		
-		uint32_t nsegs = area.width();
-		double last_x = 0;
-		double xoffset = (x-xfront)/xextent;
-
-		// std::cerr << " draw " << nsegs << " segments\n";
-
-		for (uint32_t n = 1; n < nsegs; ++n) {
-
-			/* compute item space x coordinate of the start of this segment */
-			
-			x = xoffset + (n / (double) nsegs);
-			y = map_value (x);
-
-			x += xfront + (xextent * x);
-
-			// std::cerr << "hspan @ " << x << ' ' << x - last_x << std::endl;
-			last_x = x;
-
-			window_space = item_to_window (Duple (x, y));
-			context->line_to (window_space.x, window_space.y);
-
-			if (window_space.x > area.x1) {
-				/* we're done - the last point was outside the redraw area along the x-axis */
-				break;
-			}
-		}
+		std::cerr << std::endl;
 	}
 
 	context->stroke ();
 
+#if 0
 	/* add points */
 	
 	setup_fill_context (context);
@@ -396,8 +393,7 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		context->arc (window_space.x, window_space.y, 5.0, 0.0, 2 * M_PI);
 		context->stroke ();
 	}
-
-	context->restore ();
+#endif
 }
 
 bool
