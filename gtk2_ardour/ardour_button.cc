@@ -25,6 +25,7 @@
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
+#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
@@ -64,16 +65,16 @@ ArdourButton::ArdourButton (Element e)
 	, _angle(0)
 	, _xalign(.5)
 	, _yalign(.5)
+	, bg_color (0)
 	, border_color (0)
-	, fill_color_active (0)
-	, fill_color_active_start(0)
-	, fill_color_active_end(0)
-	, fill_color_inactive_start(0)
-	, fill_color_inactive_end(0)
-	, text_color_inactive(0)
-	, text_color_active(0)
-	, led_color_inactive(0)
-	, led_color_active(0)
+	, fill_start_inactive_color (0)
+	, fill_end_inactive_color (0)
+	, fill_start_active_color (0)
+	, fill_end_active_color (0)
+	, text_active_color(0)
+	, text_inactive_color(0)
+	, led_active_color(0)
+	, led_inactive_color(0)
 	, fill_pattern (0)
 	, fill_pattern_active (0)
 	, shine_pattern (0)
@@ -100,16 +101,16 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _angle(0)
 	, _xalign(.5)
 	, _yalign(.5)
+	, bg_color (0)
 	, border_color (0)
-	, fill_color_active (0)
-	, fill_color_active_start(0)
-	, fill_color_active_end(0)
-	, fill_color_inactive_start(0)
-	, fill_color_inactive_end(0)
-	, text_color_inactive(0)
-	, text_color_active(0)
-	, led_color_inactive(0)
-	, led_color_active(0)
+	, fill_start_inactive_color (0)
+	, fill_end_inactive_color (0)
+	, fill_start_active_color (0)
+	, fill_end_active_color (0)
+	, text_active_color(0)
+	, text_inactive_color(0)
+	, led_active_color(0)
+	, led_inactive_color(0)
 	, fill_pattern (0)
 	, fill_pattern_active (0)
 	, shine_pattern (0)
@@ -244,7 +245,7 @@ ArdourButton::render (cairo_t* cr)
 			
 			if (!(_tweaks & ImplicitUsesSolidColor)) {
 				//border
-				UINT_TO_RGBA (fill_color_active, &r, &g, &b, &a);
+				UINT_TO_RGBA (fill_end_active_color, &r, &g, &b, &a);
 				cairo_set_line_width (cr, 1.0);
 				rounded_function (cr, 2, 2, get_width()-4, get_height()-4, _corner_radius - 1.5);
 				cairo_set_source_rgba (cr, r/255.0, g/255.0, b/255.0, a/255.0);
@@ -277,7 +278,7 @@ ArdourButton::render (cairo_t* cr)
 
 		if (active_state() == Gtkmm2ext::ExplicitActive) {
 
-			UINT_TO_RGBA (fill_color_active, &r, &g, &b, &a);
+			UINT_TO_RGBA (fill_start_active_color, &r, &g, &b, &a);
 			cairo_set_line_width (cr, 2.0);
 			rounded_function (cr, 2, 2, get_width()-4, get_height()-4, _corner_radius - 2.0);
 			cairo_set_source_rgba (cr, r/255.0, g/255.0, b/255.0, a/255.0);
@@ -285,7 +286,7 @@ ArdourButton::render (cairo_t* cr)
 
 		} else {
 
-			UINT_TO_RGBA (fill_color_inactive_end, &r, &g, &b, &a);
+			UINT_TO_RGBA (fill_start_inactive_color, &r, &g, &b, &a);
 			cairo_set_line_width (cr, 2.0);
 			rounded_function (cr, 2, 2, get_width()-4, get_height()-4, _corner_radius - 2.0);
 			cairo_set_source_rgba (cr, r/255.0, g/255.0, b/255.0, a/255.0);
@@ -495,68 +496,33 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 void
 ArdourButton::set_colors ()
 {
-	Glib::ustring button_name = get_name();
+	std::string name = get_name();
 
-	if (button_name == "") {
-		return;
-	}
-	
-	border_color = ARDOUR_UI::config()->color_by_name ("button border");
-	
-	fill_color_active_start = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start active", button_name));
-	fill_color_active_end = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", button_name));
-	
-	fill_color_inactive_start = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start", button_name));
-	fill_color_inactive_end = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end", button_name));
-	
-	text_color_active = ARDOUR_UI::config()->color_by_name (string_compose ("%1: text active", button_name));
-	text_color_inactive = ARDOUR_UI::config()->color_by_name (string_compose ("%1: text", button_name));
-    
-	led_color_active = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led active", button_name));
-	led_color_inactive = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led", button_name));
-}
+	border_color = ARDOUR_UI::config()->color_by_name ( "button border" );
 
-void ArdourButton::set_bg_colors (const uint32_t color_active, const uint32_t color_inactive)
-{
-	set_colors ();
-	set_name ("");
-	fill_color_active_start = fill_color_active_end = color_active;
+	fill_start_active_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start active", name));
+	fill_end_active_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", name));
+	
+	fill_start_inactive_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start", name));
+        fill_end_inactive_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end", name));
 
-	unsigned char r, g, b, a;
-	UINT_TO_RGBA(color_active, &r, &g, &b, &a);
-	
-	double white_contrast = (max (double(r), 255.) - min (double(r), 255.)) +
-		(max (double(g), 255.) - min (double(g), 255.)) +
-		(max (double(b), 255.) - min (double(b), 255.));
-	
-	double black_contrast = (max (double(r), 0.) - min (double(r), 0.)) +
-		(max (double(g), 0.) - min (double(g), 0.)) +
-		(max (double(b), 0.) - min (double(b), 0.));
-	
-	text_color_active =
-		text_color_inactive = (white_contrast > black_contrast) ?
-		RGBA_TO_UINT(255, 255, 255, 255) : /* use white */
-		RGBA_TO_UINT(  0,   0,   0,   255);  /* use black */
-	
-	fill_color_inactive_start = fill_color_inactive_end = color_inactive;
+	text_active_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: text active", name));
+	text_inactive_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: text", name));
+
+	led_active_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led active", name));
+	led_inactive_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led", name));
 
 	build_patterns ();
 }
 
 void
-ArdourButton::build_patterns()
+ArdourButton::build_patterns ()
 {
 	uint32_t start_color;
 	uint32_t end_color;
-	uint32_t r, g, b, a;
 	uint32_t text_color;
 	uint32_t led_color;
-
-	if (active_state() == Gtkmm2ext::ImplicitActive && (_tweaks & ImplicitUsesSolidColor)) {
-		fill_color_active = led_color_active;
-	} else {
-		fill_color_active = fill_color_active_end;
-	}
+	uint32_t r, g, b, a;
 
 	if (shine_pattern) {
 		cairo_pattern_destroy (shine_pattern);
@@ -575,13 +541,11 @@ ArdourButton::build_patterns()
 
 	if (_elements & Body) {
 
-		start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start active", get_name()));
-		start_color = fill_color_active_start;
-		
 		if (_flat_buttons) {
-			end_color = start_color;
+			end_color = start_color = fill_start_active_color;
 		} else {
-			end_color = fill_color_active;
+			start_color = fill_start_active_color;
+			end_color = fill_end_active_color;
 		}
 		UINT_TO_RGBA (start_color, &r, &g, &b, &a);
 
@@ -598,10 +562,10 @@ ArdourButton::build_patterns()
 
 		fill_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height()-3);
 		if (_flat_buttons) {
-			end_color = start_color = fill_color_inactive_end;
+			end_color = start_color = fill_start_inactive_color;
 		} else {
-			start_color = fill_color_inactive_start;
-			end_color = fill_color_inactive_end;
+			start_color = fill_start_inactive_color;
+			end_color = fill_end_inactive_color;
 		}
 		UINT_TO_RGBA (start_color, &r, &g, &b, &a);
 		cairo_pattern_add_color_stop_rgba (fill_pattern, 0, r/255.0,g/255.0,b/255.0, a/255.0);
@@ -611,17 +575,16 @@ ArdourButton::build_patterns()
 		fill_pattern_active = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height()-3);
 		if (_flat_buttons) {
 			if (active_state() == Gtkmm2ext::ImplicitActive && (_tweaks & ImplicitUsesSolidColor)) {
-				end_color = start_color = led_color_active;
+				end_color = start_color = led_active_color;
 			} else {
-				end_color = start_color = fill_color_active_end;
+				end_color = start_color = fill_end_active_color;
 			}
 		} else {
 			if (active_state() == Gtkmm2ext::ImplicitActive && (_tweaks & ImplicitUsesSolidColor)) {
-				start_color = led_color_inactive;
-				end_color = led_color_active;
+				end_color = start_color = led_active_color;
 			} else {
-				start_color = fill_color_active_start;
-				end_color = fill_color_active_end;
+				start_color = fill_start_active_color;
+				end_color = fill_end_active_color;
 			}
 		}
 		UINT_TO_RGBA (start_color, &r, &g, &b, &a);
@@ -647,17 +610,15 @@ ArdourButton::build_patterns()
 		cairo_pattern_add_color_stop_rgba (reflection_pattern, 0, 1,1,1, active_state() ? 0.4 : 0.2);
 		cairo_pattern_add_color_stop_rgba (reflection_pattern, 1, 1,1,1, 0.0);
 	}
-	
-	/* text and LED colors */
 
 	if (active_state() == Gtkmm2ext::ExplicitActive || ((_tweaks & ImplicitUsesSolidColor) && active_state() == Gtkmm2ext::ImplicitActive)) {
-		text_color = text_color_active;
-		led_color = led_color_active;
+		text_color = text_active_color;
+		led_color = led_active_color;
 	} else {
-		text_color = text_color_inactive;
-		led_color = led_color_inactive;
+		text_color = text_inactive_color;
+		led_color = led_inactive_color;
 	}
-
+	
 	UINT_TO_RGBA (text_color, &r, &g, &b, &a);
 	text_r = r/255.0;
 	text_g = g/255.0;
@@ -746,7 +707,6 @@ void
 ArdourButton::color_handler ()
 {
 	set_colors ();
-	build_patterns ();
 	set_dirty ();
 }
 
@@ -755,7 +715,7 @@ ArdourButton::on_size_allocate (Allocation& alloc)
 {
 	CairoWidget::on_size_allocate (alloc);
 	setup_led_rect ();
-	build_patterns ();
+	set_colors ();
 }
 
 void
@@ -829,7 +789,6 @@ void
 ArdourButton::on_style_changed (const RefPtr<Gtk::Style>&)
 {
 	set_colors ();
-	build_patterns ();
 }
 
 void
@@ -880,7 +839,7 @@ ArdourButton::set_active_state (Gtkmm2ext::ActiveState s)
 	bool changed = (_active_state != s);
 	CairoWidget::set_active_state (s);
 	if (changed) {
-		build_patterns ();
+		set_colors ();
 	}
 }
 	
@@ -890,7 +849,7 @@ ArdourButton::set_visual_state (Gtkmm2ext::VisualState s)
 	bool changed = (_visual_state != s);
 	CairoWidget::set_visual_state (s);
 	if (changed) {
-		build_patterns ();
+		set_colors ();
 	}
 }
 	
@@ -938,6 +897,7 @@ ArdourButton::action_sensitivity_changed ()
 	
 }
 
+
 void
 ArdourButton::action_visibility_changed ()
 {
@@ -966,14 +926,14 @@ void
 ArdourButton::set_elements (Element e)
 {
 	_elements = e;
-	build_patterns ();
+	set_colors ();
 }
 
 void
 ArdourButton::add_elements (Element e)
 {
 	_elements = (ArdourButton::Element) (_elements | e);
-	build_patterns ();
+	set_colors ();
 }
 
 void
