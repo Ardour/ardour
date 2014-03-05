@@ -61,7 +61,11 @@
 #define EXT_ERRORFILE ".err"
 #define EXT_INFOFILE  ".fsi"
 
+#ifdef PLATFORM_WINDOWS
+#define PFX_DOTFILE   ""
+#else
 #define PFX_DOTFILE   "."
+#endif
 
 
 using namespace std;
