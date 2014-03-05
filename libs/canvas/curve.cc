@@ -283,9 +283,14 @@ Curve::map_value (double x) const
 void
 Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	if (!_outline || _points.size() < 2) {
+	if (!_outline || _points.size() < 2 || !_bounding_box) {
 		return;
 	}
+
+	Rect self = item_to_window (_bounding_box.get());
+	boost::optional<Rect> d = self.intersection (area);
+	assert (d);
+	Rect draw = d.get ();
 
 	/* Our approach is to always draw n_segments across our total size.
 	 *
@@ -294,21 +299,9 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	 * with this.
 	 */
 	
-	double y;
-
-	if (!_bounding_box) {
-		return;
-	}
-	Rect draw = area;
 
 	setup_outline_context (context);
-/*
-	double r, g, b;
-	r = (random() % 255) /  255.0;
-	g = (random() % 255) /  255.0;
-	b = (random() % 255) /  255.0;
-	context->set_source_rgb (r, g, b);
-*/
+
 	if (_points.size() == 2) {
 
 		/* straight line */
@@ -320,15 +313,31 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		window_space = item_to_window (_points.back());
 		context->line_to (window_space.x, window_space.y);
 
+		context->stroke ();
+
 	} else {
 
 		/* curve of at least 3 points */
-		
-		/* clamp actual draw to area bound by points, rather than our bounding box which is slightly different */
+
+		/* x-axis limits of the curve, in window space coordinates */
 
 		Duple w1 = item_to_window (Duple (_points.front().x, 0.0));
 		Duple w2 = item_to_window (Duple (_points.back().x, 0.0));
 
+		/* clamp actual draw to area bound by points, rather than our bounding box which is slightly different */
+
+		context->save ();
+		context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
+		context->clip ();
+
+		/* expand drawing area by several pixels on each side to avoid cairo stroking effects at the boundary.
+		   they will still occur, but cairo's clipping will hide them.
+		 */
+
+		draw = draw.expand (4.0);
+
+		/* now clip it to the actual points in the curve */
+		
 		if (draw.x0 < w1.x) {
 			draw.x0 = w1.x;
 		}
@@ -336,8 +345,6 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		if (draw.x1 >= w2.x) {
 			draw.x1 = w2.x;
 		}
-
-		std::cerr << "Draw " << draw << " win-x = " << w1 << " .. " << w2 << std::endl;
 
 		/* full width of the curve */
 		const double xextent = _points.back().x - _points.front().x;
@@ -348,22 +355,14 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		const uint32_t pixels = draw.width ();
 		Duple window_space;
 
-#if 1
-		std::cerr << "begin draw at " << draw.x0 << " (" << item_space.x << ") which is " << xfract_offset << " into " << w1.x << " .. " << w2.x 
-			  << " I = " << _points.front().x << " .. " << _points.back().x 
-			  << std::endl;
-#endif
-
 		/* draw the first point */
 
-		std::cerr << this << " redraw " << pixels << " pixels from " << draw.x0 << " .. " << draw.x0 + pixels << std::endl;
-		
 		for (uint32_t pixel = 0; pixel < pixels; ++pixel) {
 
 			/* fractional distance into the total horizontal extent of the curve */
 			double xfract = xfract_offset + (pixel / xextent);
 			/* compute vertical coordinate (item-space) at that location */
-			y = map_value (xfract);
+			double y = map_value (xfract);
 			
 			/* convert to window space for drawing */
 			window_space = item_to_window (Duple (0.0, y)); /* x-value is irrelevant */
@@ -377,12 +376,11 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 			} else {
 				context->line_to (window_space.x, window_space.y);
 			}
-			std::cerr << window_space << ' ';
 		}
-		std::cerr << std::endl;
-	}
 
-	context->stroke ();
+		context->stroke ();
+		context->restore ();
+	}
 
 #if 0
 	/* add points */
