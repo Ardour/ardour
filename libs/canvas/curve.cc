@@ -17,6 +17,7 @@
 
 */
 
+#include <cmath>
 #include <exception>
 #include <algorithm>
 
@@ -31,24 +32,9 @@ Curve::Curve (Group* parent)
 	, PolyItem (parent)
 	, Fill (parent)
 	, n_samples (0)
-	, n_segments (512)
+	, points_per_segment (16)
+	, curve_type (CatmullRomCentripetal)
 {
-	set_n_samples (256);
-}
-
-/** Set the number of points to compute when we smooth the data points into a
- * curve. 
- */
-void
-Curve::set_n_samples (Points::size_type n)
-{
-	/* this only changes our appearance rather than the bounding box, so we
-	   just need to schedule a redraw rather than notify the parent of any
-	   changes
-	*/
-	n_samples = n;
-	samples.assign (n_samples, Duple (0.0, 0.0));
-	interpolate ();
 }
 
 /** When rendering the curve, we will always draw a fixed number of straight
@@ -57,13 +43,14 @@ Curve::set_n_samples (Points::size_type n)
  * render.
  */
 void
-Curve::set_n_segments (uint32_t n)
+Curve::set_points_per_segment (uint32_t n)
 {
 	/* this only changes our appearance rather than the bounding box, so we
 	   just need to schedule a redraw rather than notify the parent of any
 	   changes
 	*/
-	n_segments = n;
+	points_per_segment = n;
+	interpolate ();
 	redraw ();
 }
 
@@ -85,171 +72,204 @@ Curve::set (Points const& p)
 void
 Curve::interpolate ()
 {
-	Points::size_type npoints = _points.size ();
-
-	if (npoints < 3) {
-		return;
-	}
-
-	Duple p;
-	double boundary;
-
-	const double xfront = _points.front().x;
-	const double xextent = _points.back().x - xfront;
-
-	/* initialize boundary curve points */
-
-	p = _points.front();
-	boundary = round (((p.x - xfront)/xextent) * (n_samples - 1));
-
-	for (Points::size_type i = 0; i < boundary; ++i) {
-		samples[i] = Duple (i, p.y);
-	}
-
-	p = _points.back();
-	boundary = round (((p.x - xfront)/xextent) * (n_samples - 1));
-
-	for (Points::size_type i = boundary; i < n_samples; ++i) {
-		samples[i] = Duple (i, p.y);
-	}
-
-	for (int i = 0; i < (int) npoints - 1; ++i) {
-
-		Points::size_type p1, p2, p3, p4;
-		
-		p1 = max (i - 1, 0);
-		p2 = i;
-		p3 = i + 1;
-		p4 = min (i + 2, (int) npoints - 1);
-
-		smooth (p1, p2, p3, p4, xfront, xextent);
-	}
-	
-	/* make sure that actual data points are used with their exact values */
-
-	for (Points::const_iterator p = _points.begin(); p != _points.end(); ++p) {
-		uint32_t idx = (((*p).x - xfront)/xextent) * (n_samples - 1);
-		samples[idx].y = (*p).y;
-	}
+	samples.clear ();
+	interpolate (_points, points_per_segment, CatmullRomCentripetal, false, samples);
+	n_samples = samples.size();
 }
 
-/*
- * This function calculates the curve values between the control points
- * p2 and p3, taking the potentially existing neighbors p1 and p4 into
- * account.
+/* Cartmull-Rom code from http://stackoverflow.com/questions/9489736/catmull-rom-curve-with-no-cusps-and-no-self-intersections/19283471#19283471
+ * 
+ * Thanks to Ted for his Java version, which I translated into Ardour-idiomatic
+ * C++ here.
+ */
+
+/**
+ * Calculate the same values but introduces the ability to "parameterize" the t
+ * values used in the calculation. This is based on Figure 3 from
+ * http://www.cemyuksel.com/research/catmullrom_param/catmullrom.pdf
  *
- * This function uses a cubic bezier curve for the individual segments and
- * calculates the necessary intermediate control points depending on the
- * neighbor curve control points.
+ * @param p An array of double values of length 4, where interpolation
+ * occurs from p1 to p2.
+ * @param time An array of time measures of length 4, corresponding to each
+ * p value.
+ * @param t the actual interpolation ratio from 0 to 1 representing the
+ * position between p1 and p2 to interpolate the value.
+ */
+static double 
+__interpolate (double p[4], double time[4], double t) 
+{
+        const double L01 = p[0] * (time[1] - t) / (time[1] - time[0]) + p[1] * (t - time[0]) / (time[1] - time[0]);
+        const double L12 = p[1] * (time[2] - t) / (time[2] - time[1]) + p[2] * (t - time[1]) / (time[2] - time[1]);
+        const double L23 = p[2] * (time[3] - t) / (time[3] - time[2]) + p[3] * (t - time[2]) / (time[3] - time[2]);
+        const double L012 = L01 * (time[2] - t) / (time[2] - time[0]) + L12 * (t - time[0]) / (time[2] - time[0]);
+        const double L123 = L12 * (time[3] - t) / (time[3] - time[1]) + L23 * (t - time[1]) / (time[3] - time[1]);
+        const double C12 = L012 * (time[2] - t) / (time[2] - time[1]) + L123 * (t - time[1]) / (time[2] - time[1]);
+        return C12;
+}   
+
+/**
+ * Given a list of control points, this will create a list of points_per_segment
+ * points spaced uniformly along the resulting Catmull-Rom curve.
  *
+ * @param points The list of control points, leading and ending with a 
+ * coordinate that is only used for controling the spline and is not visualized.
+ * @param index The index of control point p0, where p0, p1, p2, and p3 are
+ * used in order to create a curve between p1 and p2.
+ * @param points_per_segment The total number of uniformly spaced interpolated
+ * points to calculate for each segment. The larger this number, the
+ * smoother the resulting curve.
+ * @param curve_type Clarifies whether the curve should use uniform, chordal
+ * or centripetal curve types. Uniform can produce loops, chordal can
+ * produce large distortions from the original lines, and centripetal is an
+ * optimal balance without spaces.
+ * @return the list of coordinates that define the CatmullRom curve
+ * between the points defined by index+1 and index+2.
+ */
+static void
+_interpolate (const Points& points, Points::size_type index, int points_per_segment, Curve::SplineType curve_type, Points& results) 
+{
+        double x[4];
+        double y[4];
+        double time[4];
+
+        for (int i = 0; i < 4; i++) {
+                x[i] = points[index + i].x;
+                y[i] = points[index + i].y;
+                time[i] = i;
+        }
+        
+        double tstart = 1;
+        double tend = 2;
+
+        if (curve_type != Curve::CatmullRomUniform) {
+                double total = 0;
+                for (int i = 1; i < 4; i++) {
+                        double dx = x[i] - x[i - 1];
+                        double dy = y[i] - y[i - 1];
+                        if (curve_type == Curve::CatmullRomCentripetal) {
+                                total += pow (dx * dx + dy * dy, .25);
+                        } else {
+                                total += pow (dx * dx + dy * dy, .5);
+                        }
+                        time[i] = total;
+                }
+                tstart = time[1];
+                tend = time[2];
+        }
+
+        int segments = points_per_segment - 1;
+        results.push_back (points[index + 1]);
+
+        for (int i = 1; i < segments; i++) {
+                double xi = __interpolate (x, time, tstart + (i * (tend - tstart)) / segments);
+                double yi = __interpolate (y, time, tstart + (i * (tend - tstart)) / segments);
+                results.push_back (Duple (xi, yi));
+        }
+
+        results.push_back (points[index + 2]);
+}
+
+/**
+ * This method will calculate the Catmull-Rom interpolation curve, returning
+ * it as a list of Coord coordinate objects.  This method in particular
+ * adds the first and last control points which are not visible, but required
+ * for calculating the spline.
+ *
+ * @param coordinates The list of original straight line points to calculate
+ * an interpolation from.
+ * @param points_per_segment The integer number of equally spaced points to
+ * return along each curve.  The actual distance between each
+ * point will depend on the spacing between the control points.
+ * @return The list of interpolated coordinates.
+ * @param curve_type Chordal (stiff), Uniform(floppy), or Centripetal(medium)
+ * @throws gov.ca.water.shapelite.analysis.CatmullRomException if
+ * points_per_segment is less than 2.
  */
 
 void
-Curve::smooth (Points::size_type p1, Points::size_type p2, Points::size_type p3, Points::size_type p4,
-	       double xfront, double xextent)
+Curve::interpolate (const Points& coordinates, uint32_t points_per_segment, SplineType curve_type, bool closed, Points& results)
 {
-	int i;
-	double x0, x3;
-	double y0, y1, y2, y3;
-	double dx, dy;
-	double slope;
+        if (points_per_segment < 2) {
+                return;
+        }
+        
+        // Cannot interpolate curves given only two points.  Two points
+        // is best represented as a simple line segment.
+        if (coordinates.size() < 3) {
+                results = coordinates;
+                return;
+        }
 
-	/* the outer control points for the bezier curve. */
+        // Copy the incoming coordinates. We need to modify it during interpolation
+        Points vertices = coordinates;
+        
+        // Test whether the shape is open or closed by checking to see if
+        // the first point intersects with the last point.  M and Z are ignored.
+        if (closed) {
+                // Use the second and second from last points as control points.
+                // get the second point.
+                Duple p2 = vertices[1];
+                // get the point before the last point
+                Duple pn1 = vertices[vertices.size() - 2];
+                
+                // insert the second from the last point as the first point in the list
+                // because when the shape is closed it keeps wrapping around to
+                // the second point.
+                vertices.insert(vertices.begin(), pn1);
+                // add the second point to the end.
+                vertices.push_back(p2);
+        } else {
+                // The shape is open, so use control points that simply extend
+                // the first and last segments
+                
+                // Get the change in x and y between the first and second coordinates.
+                double dx = vertices[1].x - vertices[0].x;
+                double dy = vertices[1].y - vertices[0].y;
+                
+                // Then using the change, extrapolate backwards to find a control point.
+                double x1 = vertices[0].x - dx;
+                double y1 = vertices[0].y - dy;
+                
+                // Actaully create the start point from the extrapolated values.
+                Duple start (x1, y1);
+                
+                // Repeat for the end control point.
+                int n = vertices.size() - 1;
+                dx = vertices[n].x - vertices[n - 1].x;
+                dy = vertices[n].y - vertices[n - 1].y;
+                double xn = vertices[n].x + dx;
+                double yn = vertices[n].y + dy;
+                Duple end (xn, yn);
+                
+                // insert the start control point at the start of the vertices list.
+                vertices.insert (vertices.begin(), start);
+                
+                // append the end control ponit to the end of the vertices list.
+                vertices.push_back (end);
+        }
+        
+        // When looping, remember that each cycle requires 4 points, starting
+        // with i and ending with i+3.  So we don't loop through all the points.
+        
+        for (Points::size_type i = 0; i < vertices.size() - 3; i++) {
 
-	x0 = _points[p2].x;
-	y0 = _points[p2].y;
-	x3 = _points[p3].x;
-	y3 = _points[p3].y;
+                // Actually calculate the Catmull-Rom curve for one segment.
+		Points r;
 
-	/*
-	 * the x values of the inner control points are fixed at
-	 * x1 = 2/3*x0 + 1/3*x3   and  x2 = 1/3*x0 + 2/3*x3
-	 * this ensures that the x values increase linearily with the
-	 * parameter t and enables us to skip the calculation of the x
-	 * values altogehter - just calculate y(t) evenly spaced.
-	 */
+                _interpolate (vertices, i, points_per_segment, curve_type, r);
+ 
+                // Since the middle points are added twice, once for each bordering
+                // segment, we only add the 0 index result point for the first
+                // segment.  Otherwise we will have duplicate points.
 
-	dx = x3 - x0;
-	dy = y3 - y0;
+                if (results.size() > 0) {
+                        r.erase (r.begin());
+                }
+                
+                // Add the coordinates for the segment to the result list.
 
-	if (dx <= 0) {
-		/* error? */
-		return;
-	}
-
-	if (p1 == p2 && p3 == p4) {
-		/* No information about the neighbors,
-		 * calculate y1 and y2 to get a straight line
-		 */
-		y1 = y0 + dy / 3.0;
-		y2 = y0 + dy * 2.0 / 3.0;
-
-	} else if (p1 == p2 && p3 != p4) {
-
-		/* only the right neighbor is available. Make the tangent at the
-		 * right endpoint parallel to the line between the left endpoint
-		 * and the right neighbor. Then point the tangent at the left towards
-		 * the control handle of the right tangent, to ensure that the curve
-		 * does not have an inflection point.
-		 */
-		slope = (_points[p4].y - y0) / (_points[p4].x - x0);
-
-		y2 = y3 - slope * dx / 3.0;
-		y1 = y0 + (y2 - y0) / 2.0;
-
-	} else if (p1 != p2 && p3 == p4) {
-
-		/* see previous case */
-		slope = (y3 - _points[p1].y) / (x3 - _points[p1].x);
-
-		y1 = y0 + slope * dx / 3.0;
-		y2 = y3 + (y1 - y3) / 2.0;
-
-
-	} else /* (p1 != p2 && p3 != p4) */ {
-
-		/* Both neighbors are available. Make the tangents at the endpoints
-		 * parallel to the line between the opposite endpoint and the adjacent
-		 * neighbor.
-		 */
-
-		slope = (y3 - _points[p1].y) / (x3 - _points[p1].x);
-
-		y1 = y0 + slope * dx / 3.0;
-
-		slope = (_points[p4].y - y0) / (_points[p4].x - x0);
-
-		y2 = y3 - slope * dx / 3.0;
-	}
-
-	/*
-	 * finally calculate the y(t) values for the given bezier values. We can
-	 * use homogenously distributed values for t, since x(t) increases linearily.
-	 */
-
-	dx = dx / xextent;
-
-	int limit = round (dx * (n_samples - 1));
-	const int idx_offset = round (((x0 - xfront)/xextent) * (n_samples - 1));
-
-	for (i = 0; i <= limit; i++) {
-		double y, t;
-		Points::size_type index;
-
-		t = i / dx / (n_samples - 1);
-		
-		y =     y0 * (1-t) * (1-t) * (1-t) +
-			3 * y1 * (1-t) * (1-t) * t     +
-			3 * y2 * (1-t) * t     * t     +
-			y3 * t     * t     * t;
-
-		index = i + idx_offset;
-		
-		if (index < n_samples) {
-			Duple d (i, max (y, 0.0));
-			samples[index] = d;
-		}
-	}
+                results.insert (results.end(), r.begin(), r.end());
+        }
 }
 
 /** Given a fractional position within the x-axis range of the

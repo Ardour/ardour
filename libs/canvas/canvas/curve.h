@@ -30,25 +30,30 @@ class LIBCANVAS_API Curve : public PolyItem, public Fill
 {
 public:
     Curve (Group *);
+
+    enum SplineType {
+	    CatmullRomUniform,
+	    CatmullRomCentripetal,
+    };
     
     void compute_bounding_box () const;
     void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
     void set (Points const &);
 
-    void set_n_segments (uint32_t n);
-    void set_n_samples (Points::size_type);
+    void set_points_per_segment (uint32_t n);
 
     bool covers (Duple const &) const;
 
   private:
     Points samples;
     Points::size_type n_samples;
-    uint32_t n_segments;
+    uint32_t points_per_segment;
+    SplineType curve_type;
 
-    void smooth (Points::size_type p1, Points::size_type p2, Points::size_type p3, Points::size_type p4, 
-		 double xfront, double xextent);
     double map_value (double) const;
     void interpolate ();
+
+    static void interpolate (const Points& coordinates, uint32_t points_per_segment, SplineType, bool closed, Points& results);
 };
 	
 }
