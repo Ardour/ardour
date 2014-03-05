@@ -171,6 +171,9 @@ AutomationLine::update_visibility ()
 
 	} else {
 		line->hide ();
+		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+			(*i)->hide ();
+		}
 	}
 
 }
