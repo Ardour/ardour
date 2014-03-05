@@ -141,7 +141,6 @@ void
 AutomationLine::show ()
 {
 	if (_visible & Line) {
-		cerr << "AL visibile with vis = " << (hex) << _visible << dec << endl;
 		/* Only show the line there are some points, otherwise we may show an out-of-date line
 		   when automation points have been removed (the line will still follow the shape of the
 		   old points).
@@ -153,12 +152,10 @@ AutomationLine::show ()
 		}
 
 		if (_visible & ControlPoints) {
-			cerr << "AL visibile (just cp's with vis = " << (hex) << _visible << dec << endl;
 			for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 				(*i)->show ();
 			}
 		} else if (_visible & SelectedControlPoints) {
-			cerr << "AL visibile (just selected cp's with vis = " << (hex) << _visible << dec << endl;
 			for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 				if ((*i)->get_selected()) {
 					(*i)->show ();
@@ -167,7 +164,6 @@ AutomationLine::show ()
 				}
 			}
 		} else {
-			cerr << "AL visibile (no cp's with vis = " << (hex) << _visible << dec << endl;
 			for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 				(*i)->hide ();
 			}
