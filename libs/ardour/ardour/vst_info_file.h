@@ -25,6 +25,10 @@
 #include "ardour/vst_types.h"
 #include <vector>
 
+#ifndef VST_SCANNER_APP
+namespace ARDOUR {
+#endif
+
 enum VSTScanMode {
 	VST_SCAN_CACHE_ONLY,
 	VST_SCAN_USE_APP,
@@ -41,6 +45,10 @@ LIBARDOUR_API extern std::vector<VSTInfo*> * vstfx_get_info_lx (char *, enum VST
 
 #ifdef WINDOWS_VST_SUPPORT
 LIBARDOUR_API extern std::vector<VSTInfo*> * vstfx_get_info_fst (char *, enum VSTScanMode mode = VST_SCAN_USE_APP);
+#endif
+
+#ifndef VST_SCANNER_APP
+} // namespace
 #endif
 
 #endif /* __vstfx_h__ */

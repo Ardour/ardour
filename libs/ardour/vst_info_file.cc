@@ -65,6 +65,9 @@
 
 
 using namespace std;
+#ifndef VST_SCANNER_APP
+namespace ARDOUR {
+#endif
 
 /* prototypes */
 #ifdef WINDOWS_VST_SUPPORT
@@ -1009,4 +1012,8 @@ vstfx_get_info_fst (char* dllpath, enum VSTScanMode mode)
 {
 	return vstfx_get_info(dllpath, ARDOUR::Windows_VST, mode);
 }
+#endif
+
+#ifndef VST_SCANNER_APP
+} // namespace
 #endif
