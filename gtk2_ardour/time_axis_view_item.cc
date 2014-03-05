@@ -931,15 +931,17 @@ TimeAxisViewItem::set_trim_handle_colors()
 bool
 TimeAxisViewItem::frame_handle_crossing (GdkEvent* ev, ArdourCanvas::Rectangle* item)
 {
-	switch (ev->type) {
-	case GDK_LEAVE_NOTIFY:
-		item->set_fill (false);
-		break;
-	case GDK_ENTER_NOTIFY:
-		item->set_fill (true);
-		break;
-	default:
-		break;
+	if (trackview.editor().effective_mouse_mode() == Editing::MouseObject) {
+		switch (ev->type) {
+		case GDK_LEAVE_NOTIFY:
+			item->set_fill (false);
+			break;
+		case GDK_ENTER_NOTIFY:
+			item->set_fill (true);
+			break;
+		default:
+			break;
+		}
 	}
 	return false;
 }
