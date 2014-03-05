@@ -138,7 +138,7 @@ AutomationLine::event_handler (GdkEvent* event)
 }
 
 void
-AutomationLine::show ()
+AutomationLine::update_visibility ()
 {
 	if (_visible & Line) {
 		/* Only show the line there are some points, otherwise we may show an out-of-date line
@@ -1004,9 +1004,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 		line->set (line_points);
 
-		/* despite the name, this may show or hide things */
-
-		show();
+		update_visibility ();
 	}
 
 	set_selected_points (trackview.editor().get_selection().points);
@@ -1079,7 +1077,7 @@ AutomationLine::add_visibility (VisibleAspects va)
 	_visible = VisibleAspects (_visible | va);
 
 	if (old != _visible) {
-		show ();
+		update_visibility ();
 	}
 }
 
@@ -1088,7 +1086,7 @@ AutomationLine::set_visibility (VisibleAspects va)
 {
 	if (_visible != va) {
 		_visible = va;
-		show ();
+		update_visibility ();
 	}
 }
 
@@ -1100,7 +1098,7 @@ AutomationLine::remove_visibility (VisibleAspects va)
 	_visible = VisibleAspects (_visible & ~va);
 
 	if (old != _visible) {
-		show ();
+		update_visibility ();
 	}
 }
 
