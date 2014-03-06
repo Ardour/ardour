@@ -623,13 +623,22 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	   to cut notes or regions.
 	*/
 
-	if (((mouse_mode != MouseObject) &&
-	     (mouse_mode != MouseAudition || item_type != RegionItem) &&
-	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
-	     (mouse_mode != MouseGain) &&
-	     (mouse_mode != MouseDraw)) ||
+	MouseMode eff_mouse_mode = effective_mouse_mode ();
+
+	if (get_smart_mode() && eff_mouse_mode == MouseRange && event->button.button == 3 && item_type == RegionItem) {
+		/* context clicks are always about object properties, even if
+		   we're in range mode within smart mode.
+		*/
+		eff_mouse_mode = MouseObject;
+	}
+
+	if (((eff_mouse_mode != MouseObject) &&
+	     (eff_mouse_mode != MouseAudition || item_type != RegionItem) &&
+	     (eff_mouse_mode != MouseTimeFX || item_type != RegionItem) &&
+	     (eff_mouse_mode != MouseGain) &&
+	     (eff_mouse_mode != MouseDraw)) ||
 	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3) ||
-	    (internal_editing() && mouse_mode != MouseTimeFX)) {
+	    (internal_editing() && eff_mouse_mode != MouseTimeFX)) {
 
 		return;
 	}
@@ -651,24 +660,22 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
 	switch (item_type) {
 	case RegionItem:
-		if (!get_smart_mode() || (_join_object_range_state != JOIN_OBJECT_RANGE_RANGE)) {
-			if (press) {
-				if (mouse_mode != MouseRange) {
-					set_selected_regionview_from_click (press, op);
-				} else {
-					/* don't change the selection unless the
-					   clicked track is not currently selected. if
-					   so, "collapse" the selection to just this
-					   track
-					*/
-					if (!selection->selected (clicked_axisview)) {
-						set_selected_track_as_side_effect (Selection::Set);
-					}
-				}
+		if (press) {
+			if (eff_mouse_mode != MouseRange) {
+				set_selected_regionview_from_click (press, op);
 			} else {
-				if (mouse_mode != MouseRange) {
-					set_selected_regionview_from_click (press, op);
+				/* don't change the selection unless the
+				   clicked track is not currently selected. if
+				   so, "collapse" the selection to just this
+				   track
+				*/
+				if (!selection->selected (clicked_axisview)) {
+					set_selected_track_as_side_effect (Selection::Set);
 				}
+			}
+		} else {
+			if (eff_mouse_mode != MouseRange) {
+				set_selected_regionview_from_click (press, op);
 			}
 		}
 		break;
