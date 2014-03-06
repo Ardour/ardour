@@ -74,10 +74,19 @@ protected:
 	void on_size_allocate (Gtk::Allocation &);
 	void on_state_changed (Gtk::StateType);
 	Gdk::Color get_parent_bg ();
+	
+	/* this is an additional virtual "on_..." method. Glibmm does not
+	   provide a direct signal for name changes, so this acts as a proxy.
+	*/
+
+	virtual void on_name_changed () {};
 
 	Gtkmm2ext::ActiveState _active_state;
 	Gtkmm2ext::VisualState _visual_state;
 	bool                   _need_bg;
+
+  private:
+	Glib::SignalProxyProperty _name_proxy;
 };
 
 #endif
