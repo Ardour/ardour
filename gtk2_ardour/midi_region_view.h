@@ -431,7 +431,7 @@ private:
 	Events::iterator _optimization_iterator;
 
 	void update_note (Note *, bool update_ghost_regions = true);
-	double update_hit (Hit *);
+        void update_hit (Hit *);
 	void create_ghost_note (double, double);
 	void update_ghost_note (double, double);
 

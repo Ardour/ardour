@@ -1437,9 +1437,7 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 
 		} else if (Hit* chit = dynamic_cast<Hit*>(event)) {
 
-			const double diamond_size = update_hit (chit);
-
-			chit->set_height (diamond_size);
+			update_hit (chit);
 		}
 	}
 }
@@ -1675,19 +1673,18 @@ MidiRegionView::update_note (Note* ev, bool update_ghost_regions)
 	}
 }
 
-double
+void
 MidiRegionView::update_hit (Hit* ev)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
 
 	const framepos_t note_start_frames = source_beats_to_region_frames(note->time());
 	const double x = trackview.editor().sample_to_pixel(note_start_frames);
-	const double diamond_size = midi_stream_view()->note_height() / 2.0;
-	const double y = midi_stream_view()->note_to_y(note->note()) + ((diamond_size-2) / 4.0);
+	const double diamond_size = midi_stream_view()->note_height();
+	const double y = midi_stream_view()->note_to_y(note->note()) + (diamond_size/2.0);
 
 	ev->set_position (ArdourCanvas::Duple (x, y));
-
-	return diamond_size;
+	ev->set_height (diamond_size);
 }
 
 /** Add a MIDI note to the view (with length).
@@ -1700,8 +1697,6 @@ void
 MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 {
 	NoteBase* event = 0;
-
-	//ArdourCanvas::Group* const group = (ArdourCanvas::Group*) get_canvas_group();
 
 	if (midi_view()->note_mode() == Sustained) {
 
