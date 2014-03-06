@@ -18,7 +18,10 @@
 */
 
 #include "evoral/Note.hpp"
+
 #include "canvas/polygon.h"
+#include "canvas/debug.h"
+
 #include "midi_region_view.h"
 #include "public_editor.h"
 #include "utils.h"
@@ -27,54 +30,19 @@
 using namespace ARDOUR;
 using namespace ArdourCanvas;
 
-Hit::Hit (
-	MidiRegionView&                   region,
-	Group*                            group,
-	double                            /*size*/,
-	const boost::shared_ptr<NoteType> note,
-	bool with_events) 
+Hit::Hit (MidiRegionView& region, Group* group, double size, const boost::shared_ptr<NoteType> note, bool with_events) 
 	: NoteBase (region, with_events, note)
 {
 	_polygon = new ArdourCanvas::Polygon (group);
+	CANVAS_DEBUG_NAME (_polygon, "note");
 	set_item (_polygon);
+	set_height (size);
 }
 
 void
 Hit::move_event (double dx, double dy)
 {
 	_polygon->move (Duple (dx, dy));
-}
-
-Coord
-Hit::x0 () const
-{
-	boost::optional<ArdourCanvas::Rect> bbox = _polygon->bounding_box ();
-	assert (bbox);
-	return bbox.get().x0;
-}
-
-Coord
-Hit::x1 () const
-{
-	boost::optional<ArdourCanvas::Rect> bbox = _polygon->bounding_box ();
-	assert (bbox);
-	return bbox.get().x1;
-}
-
-Coord
-Hit::y0 () const
-{
-	boost::optional<ArdourCanvas::Rect> bbox = _polygon->bounding_box ();
-	assert (bbox);
-	return bbox.get().y0;
-}
-
-Coord
-Hit::y1 () const
-{
-	boost::optional<ArdourCanvas::Rect> bbox = _polygon->bounding_box ();
-	assert (bbox);
-	return bbox.get().y1;
 }
 
 void
@@ -102,13 +70,51 @@ Hit::hide ()
 }
 
 void
-Hit::set_height (Distance /*height*/)
+Hit::set_height (Distance height)
 {
-	/* XXX */
+	/* draw a diamond */
+
+	Points p;
+
+	const double half_height = height/2.0;
+	p.push_back (Duple (-half_height, 0)); // left, middle
+	p.push_back (Duple (0, -half_height)); // top
+	p.push_back (Duple (+half_height, 0)); // right, middle
+	p.push_back (Duple (0, +half_height)); // bottom
+
+	_polygon->set (p);
 }
 
 void
 Hit::set_position (Duple position)
 {
 	_polygon->set_position (position);
+}
+
+Coord
+Hit::x0 () const
+{
+	/* left vertex */
+	return _polygon->get()[0].x;
+}
+
+Coord
+Hit::x1 () const
+{
+	/* right vertex */
+	return _polygon->get()[2].x;
+}
+
+Coord
+Hit::y0 () const
+{
+	/* top vertex */
+	return _polygon->get()[1].y;
+}
+
+Coord
+Hit::y1 () const
+{
+	/* bottom vertex */
+	return _polygon->get()[3].y;
 }
