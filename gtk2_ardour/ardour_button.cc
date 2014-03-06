@@ -438,7 +438,7 @@ ArdourButton::set_diameter (float d)
 		_fixed_diameter = true;
 	}
 
-	set_colors ();
+	build_patterns ();
 	queue_resize ();
 }
 
@@ -515,8 +515,6 @@ ArdourButton::set_colors ()
 
 	led_active_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led active", name));
 	led_inactive_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led", name));
-
-	build_patterns ();
 }
 /**
  * This sets the colors used for rendering based on two fixed values, rather
@@ -746,6 +744,7 @@ void
 ArdourButton::color_handler ()
 {
 	set_colors ();
+	build_patterns ();
 	set_dirty ();
 }
 
@@ -754,7 +753,7 @@ ArdourButton::on_size_allocate (Allocation& alloc)
 {
 	CairoWidget::on_size_allocate (alloc);
 	setup_led_rect ();
-	set_colors ();
+	build_patterns ();
 }
 
 void
@@ -828,12 +827,14 @@ void
 ArdourButton::on_style_changed (const RefPtr<Gtk::Style>&)
 {
 	set_colors ();
+	build_patterns ();
 }
 
 void
 ArdourButton::on_name_changed ()
 {
 	set_colors ();
+	build_patterns ();
 }
 
 void
@@ -885,6 +886,7 @@ ArdourButton::set_active_state (Gtkmm2ext::ActiveState s)
 	CairoWidget::set_active_state (s);
 	if (changed) {
 		set_colors ();
+		build_patterns ();
 	}
 }
 	
@@ -895,6 +897,7 @@ ArdourButton::set_visual_state (Gtkmm2ext::VisualState s)
 	CairoWidget::set_visual_state (s);
 	if (changed) {
 		set_colors ();
+		build_patterns ();
 	}
 }
 	
@@ -971,14 +974,12 @@ void
 ArdourButton::set_elements (Element e)
 {
 	_elements = e;
-	set_colors ();
 }
 
 void
 ArdourButton::add_elements (Element e)
 {
 	_elements = (ArdourButton::Element) (_elements | e);
-	set_colors ();
 }
 
 void
