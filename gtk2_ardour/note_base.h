@@ -42,26 +42,21 @@ namespace ArdourCanvas {
 
 /** This manages all the event handling for any MIDI event on the canvas.
  *
- * This is not actually a canvas item itself to avoid the dreaded diamond,
- * since various types of canvas items (Note (rect), Hit (diamond), etc)
- * need to share this functionality but can't share an ancestor.
+ * This is not actually a canvas item itself to avoid the dreaded diamond
+ * inheritance pattern, since various types of canvas items (Note (rect), Hit
+ * (diamond), etc) need to share this functionality but can't share an
+ * ancestor. 
  *
  * Note: Because of this, derived classes need to manually bounce events to
  * on_event, it won't happen automatically.
- *
- * A newer, better canvas should remove the need for all the ugly here.
  */
+
 class NoteBase : public sigc::trackable
 {
 public:
 	typedef Evoral::Note<ARDOUR::MidiModel::TimeType> NoteType;
 
-	NoteBase (
-		MidiRegionView&                   region,
-		bool,
-		const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>()
-		);
-
+	NoteBase (MidiRegionView& region, bool, const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>());
 	virtual ~NoteBase ();
 
 	void set_item (ArdourCanvas::Item *);
