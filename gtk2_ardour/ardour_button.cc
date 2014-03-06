@@ -831,6 +831,12 @@ ArdourButton::on_style_changed (const RefPtr<Gtk::Style>&)
 }
 
 void
+ArdourButton::on_name_changed ()
+{
+	set_colors ();
+}
+
+void
 ArdourButton::setup_led_rect ()
 {
 	int text_margin;
