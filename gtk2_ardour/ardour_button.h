@@ -96,6 +96,8 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	void set_image (const Glib::RefPtr<Gdk::Pixbuf>&);
 
+        void set_fixed_colors (const uint32_t active_color, const uint32_t inactive_color);
+
   protected:
 	void render (cairo_t *);
 	void on_size_request (Gtk::Requisition* req);

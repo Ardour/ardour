@@ -493,12 +493,16 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	req->width += _corner_radius;
 }
 
+/**
+ * This sets the colors used for rendering based on the name of the button, and
+ * thus uses information from the GUI config data. 
+ */
 void
 ArdourButton::set_colors ()
 {
 	std::string name = get_name();
 
-	border_color = ARDOUR_UI::config()->color_by_name ( "button border" );
+	border_color = ARDOUR_UI::config()->color_by_name ("button border");
 
 	fill_start_active_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start active", name));
 	fill_end_active_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", name));
@@ -511,6 +515,41 @@ ArdourButton::set_colors ()
 
 	led_active_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led active", name));
 	led_inactive_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led", name));
+
+	build_patterns ();
+}
+/**
+ * This sets the colors used for rendering based on two fixed values, rather
+ * than basing them on the button name, and thus information in the GUI config
+ * data.
+ */
+void ArdourButton::set_fixed_colors (const uint32_t color_active, const uint32_t color_inactive)
+{
+	set_name (""); /* this will trigger a "style-changed" message and then
+			  set_colors()
+		       */
+
+	fill_start_active_color = fill_end_active_color = color_active;
+
+	unsigned char r, g, b, a;
+	UINT_TO_RGBA(color_active, &r, &g, &b, &a);
+	
+	double white_contrast = (max (double(r), 255.) - min (double(r), 255.)) +
+		(max (double(g), 255.) - min (double(g), 255.)) +
+		(max (double(b), 255.) - min (double(b), 255.));
+	
+	double black_contrast = (max (double(r), 0.) - min (double(r), 0.)) +
+		(max (double(g), 0.) - min (double(g), 0.)) +
+		(max (double(b), 0.) - min (double(b), 0.));
+	
+	text_active_color =
+		text_inactive_color = (white_contrast > black_contrast) ?
+		RGBA_TO_UINT(255, 255, 255, 255) : /* use white */
+		RGBA_TO_UINT(  0,   0,   0,   255);  /* use black */
+	
+	fill_start_inactive_color = fill_end_inactive_color = color_inactive;
+
+	/* XXX what about led colors ? */
 
 	build_patterns ();
 }
