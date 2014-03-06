@@ -19,7 +19,10 @@
 */
 
 #include "evoral/Note.hpp"
+
 #include "canvas/rectangle.h"
+#include "canvas/debug.h"
+
 #include "note.h"
 #include "midi_region_view.h"
 #include "public_editor.h"
@@ -28,17 +31,11 @@ using namespace ARDOUR;
 using namespace ArdourCanvas;
 
 Note::Note (
-	MidiRegionView&                   region,
-	Group*                            group,
-	const boost::shared_ptr<NoteType> note,
-	bool with_events
-	)
+	MidiRegionView& region, Group* group, const boost::shared_ptr<NoteType> note, bool with_events)
 	: NoteBase (region, with_events, note)
 	, _rectangle (new ArdourCanvas::Rectangle (group))
 {
-#ifdef CANVAS_DEBUG
-	_rectangle->name = "note";
-#endif
+	CANVAS_DEBUG_NAME (_rectangle, "note");
 	set_item (_rectangle);
 }
 
