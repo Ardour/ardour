@@ -53,13 +53,14 @@ namespace ArdourCanvas {
 
 class NoteBase : public sigc::trackable
 {
-public:
+  public:
 	typedef Evoral::Note<ARDOUR::MidiModel::TimeType> NoteType;
 
 	NoteBase (MidiRegionView& region, bool, const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>());
 	virtual ~NoteBase ();
 
 	void set_item (ArdourCanvas::Item *);
+        ArdourCanvas::Item* item() const { return _item; }
 
         static PBD::Signal1<void, NoteBase*> NoteBaseDeleted;
 
@@ -137,7 +138,7 @@ public:
 	static const uint32_t midi_channel_colors[16];
 
         bool mouse_near_ends () const;
-        bool big_enough_to_trim () const;
+        virtual bool big_enough_to_trim () const;
 
 protected:
 	enum State { None, Pressed, Dragging };
