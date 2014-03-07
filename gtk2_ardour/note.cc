@@ -48,14 +48,6 @@ void
 Note::move_event (double dx, double dy)
 {
 	_rectangle->move (Duple (dx, dy));
-
-	/* XXX */
-	// if (_text) {
-	// 	_text->hide();
-	// 	_text->property_x() = _text->property_x() + dx;
-	// 	_text->property_y() = _text->property_y() + dy;
-	// 	_text->show();
-	// }
 }
 
 Coord
