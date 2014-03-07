@@ -32,6 +32,7 @@ Fill::Fill (Group* parent)
 	: Item (parent)
 	, _fill_color (0x000000ff)
 	, _fill (true)
+	, _transparent (false)
 {
 
 }
@@ -42,6 +43,15 @@ Fill::set_fill_color (Color color)
 	if (_fill_color != color) {
 		begin_visual_change ();
 		_fill_color = color;
+
+		double r, g, b, a;
+		color_to_rgba (color, r, g, b, a);
+		if (a == 0.0) {
+			_transparent = true;
+		} else {
+			_transparent = false;
+		}
+
 		end_visual_change ();
 	}
 }

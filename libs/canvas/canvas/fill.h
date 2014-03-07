@@ -54,6 +54,7 @@ protected:
        	
 	Color _fill_color;
 	bool _fill;
+	bool _transparent;
         StopList _stops;
         bool _vertical_gradient;
 };
