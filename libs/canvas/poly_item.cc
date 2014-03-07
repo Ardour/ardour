@@ -37,27 +37,28 @@ PolyItem::PolyItem (Group* parent)
 void
 PolyItem::compute_bounding_box () const
 {
-	bool have_one = false;
-	Rect bbox;
+	
+	if (!_points.empty()) {
 
-	for (Points::const_iterator i = _points.begin(); i != _points.end(); ++i) {
-		if (have_one) {
+		Rect bbox;
+		Points::const_iterator i = _points.begin();
+		
+		bbox.x0 = bbox.x1 = i->x;
+		bbox.y0 = bbox.y1 = i->y;
+		
+		while (i != _points.end()) {
 			bbox.x0 = min (bbox.x0, i->x);
 			bbox.y0 = min (bbox.y0, i->y);
 			bbox.x1 = max (bbox.x1, i->x);
 			bbox.y1 = max (bbox.y1, i->y);
-		} else {
-			bbox.x0 = bbox.x1 = i->x;
-			bbox.y0 = bbox.y1 = i->y;
-			have_one = true;
+			++i;
 		}
-	}
 
-
-	if (!have_one) {
-		_bounding_box = boost::optional<Rect> ();
-	} else {
 		_bounding_box = bbox.expand (_outline_width / 2);
+
+		
+	} else {
+		_bounding_box = boost::optional<Rect> ();
 	}
 	
 	_bounding_box_dirty = false;
