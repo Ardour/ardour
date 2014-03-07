@@ -41,8 +41,7 @@ Polygon::~Polygon ()
 void
 Polygon::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	if (_outline) {
-		setup_outline_context (context);
+	if (_outline || _fill) {
 		render_path (area, context);
 		
 		if (!_points.empty ()) {
@@ -51,7 +50,15 @@ Polygon::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 			context->move_to (p.x, p.y);
 		}
 
-		context->stroke_preserve ();
+	}
+
+	if (_outline) {
+		setup_outline_context (context);
+		if (_fill) {
+			context->stroke_preserve ();
+		} else {
+			context->stroke ();
+		}
 	}
 
 	if (_fill) {
