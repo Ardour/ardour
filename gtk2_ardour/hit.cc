@@ -39,6 +39,11 @@ Hit::Hit (MidiRegionView& region, Group* group, double size, const boost::shared
 	set_height (size);
 }
 
+Hit::~Hit ()
+{
+	delete _polygon;
+}
+
 void
 Hit::move_event (double dx, double dy)
 {

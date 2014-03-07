@@ -32,14 +32,14 @@ class Hit : public NoteBase
 public:
 	typedef Evoral::Note<double> NoteType;
 
-	Hit (
-		MidiRegionView&                   region,
-		ArdourCanvas::Group*              group,
-		double                            size,
-		const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>(),
-		bool with_events = true);
+	Hit (MidiRegionView&                   region,
+	     ArdourCanvas::Group*              group,
+	     double                            size,
+	     const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>(),
+	     bool with_events = true);
+       ~Hit();
 
-	void show ();
+        void show ();
 	void hide ();
 
 	ArdourCanvas::Coord x0 () const;
