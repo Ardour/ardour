@@ -60,7 +60,7 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 
 	Rect draw = r.get ();
 
-	if (_fill) {
+	if (_fill && !_transparent) {
 		if (_stops.empty()) {
 			setup_fill_context (context);
 		} else {
@@ -124,7 +124,7 @@ Rectangle::compute_bounding_box () const
 		   box for the right and bottom edges, see ::render() above
 		*/
 
-		r.x1 += 0.5;
+		// r.x1 += 0.5;
 		r.y1 += 0.5;
 
 		_bounding_box = r;
