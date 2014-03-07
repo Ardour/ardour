@@ -56,6 +56,9 @@ public:
 
 	void move_event (double, double);
 
+        /* no trimming of percussive hits */
+        bool big_enough_to_trim() const { return false; }
+
 private:
 	ArdourCanvas::Polygon* _polygon;
 };
