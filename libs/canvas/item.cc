@@ -404,9 +404,9 @@ Item::bounding_box () const
 {
 	if (_bounding_box_dirty) {
 		compute_bounding_box ();
+		assert (!_bounding_box_dirty);
 	}
 
-	assert (!_bounding_box_dirty);
 	return _bounding_box;
 }
 
