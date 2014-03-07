@@ -925,17 +925,18 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MouseDraw:
 		switch (item_type) {
 		case NoteItem:
+			/* Existing note: allow trimming/motion */
 			if (internal_editing()) {
 				/* trim notes if we're in internal edit mode and near the ends of the note */
 				NoteBase* cn = reinterpret_cast<NoteBase*>(item->get_data ("notebase"));
 				assert (cn);
-				if (cn && cn->big_enough_to_trim() && cn->mouse_near_ends()) {
+				if (cn->big_enough_to_trim() && cn->mouse_near_ends()) {
 					_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
 				} else {
 					_drags->set (new NoteDrag (this, item), event);
 				}
 				return true;
-			}
+			} 
 			break;
 		case StreamItem:
 			if (internal_editing()) {
@@ -954,10 +955,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MouseObject:
 		switch (item_type) {
 		case NoteItem:
+			/* Existing note: allow trimming/motion */
 			if (internal_editing()) {
 				NoteBase* cn = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
 				assert (cn);
-				if (cn->mouse_near_ends()) {
+				if (cn->big_enough_to_trim() && cn->mouse_near_ends()) {
 					_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
 				} else {
 					_drags->set (new NoteDrag (this, item), event);
@@ -1205,9 +1207,13 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		break;
 
 	case MouseTimeFX:
-		if (internal_editing() && item_type == NoteItem) {
+		if (internal_editing() && item_type == NoteItem ) {
 			/* drag notes if we're in internal edit mode */
-			_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
+			NoteBase* cn = reinterpret_cast<NoteBase*>(item->get_data ("notebase"));
+			assert (cn);
+			if (cn->big_enough_to_trim()) {
+				_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
+			}
 			return true;
 		} else if (clicked_regionview) {
 			/* do time-FX  */
