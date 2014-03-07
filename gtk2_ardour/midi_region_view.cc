@@ -1115,7 +1115,7 @@ MidiRegionView::redisplay_model()
 	MidiModel::Notes& notes (_model->notes());
 	_optimization_iterator = _events.begin();
 
-	bool empty_when_starting = !_events.empty();
+	bool empty_when_starting = _events.empty();
 
 	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
 
@@ -1124,8 +1124,8 @@ MidiRegionView::redisplay_model()
 		bool visible;
 
 		if (note_in_region_range (note, visible)) {
-
-			if (empty_when_starting && (cne = find_canvas_note (note)) != 0) {
+			
+			if (!empty_when_starting && (cne = find_canvas_note (note)) != 0) {
 
 				cne->validate ();
 
@@ -1150,8 +1150,8 @@ MidiRegionView::redisplay_model()
 			}
 
 		} else {
-
-			if (empty_when_starting && (cne = find_canvas_note (note)) != 0) {
+			
+			if (!empty_when_starting && (cne = find_canvas_note (note)) != 0) {
 				cne->validate ();
 				cne->hide ();
 			}
@@ -1161,7 +1161,7 @@ MidiRegionView::redisplay_model()
 
 	/* remove note items that are no longer valid */
 
-	if (empty_when_starting) {
+	if (!empty_when_starting) {
 		for (Events::iterator i = _events.begin(); i != _events.end(); ) {
 			if (!(*i)->valid ()) {
 				
@@ -1436,7 +1436,6 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 			cnote->set_y1 (y1);
 
 		} else if (Hit* chit = dynamic_cast<Hit*>(event)) {
-
 			update_hit (chit);
 		}
 	}
