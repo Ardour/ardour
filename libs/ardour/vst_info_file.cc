@@ -740,6 +740,16 @@ vstfx_info_from_plugin (const char *dllpath, VSTState* vstfx, vector<VSTInfo *> 
 				}
 			}
 		}
+	} else {
+		switch(type) {
+#ifdef WINDOWS_VST_SUPPORT
+			case ARDOUR::Windows_VST: fst_close(vstfx); break;
+#endif
+#ifdef LXVST_SUPPORT
+			case ARDOUR::LXVST: vstfx_close (vstfx); break;
+#endif
+			default: assert(0); break;
+		}
 	}
 #endif
 }
@@ -772,7 +782,6 @@ vstfx_instantiate_and_get_info_lx (
 
 	vstfx_info_from_plugin(dllpath, vstfx, infos, ARDOUR::LXVST);
 
-	vstfx_close (vstfx);
 	vstfx_unload (h);
 	return true;
 }
@@ -802,8 +811,6 @@ vstfx_instantiate_and_get_info_fst (
 
 	vstfx_info_from_plugin(dllpath, vstfx, infos, ARDOUR::Windows_VST);
 
-	fst_close(vstfx);
-	//fst_unload(&h); // XXX -> fst_close()
 	return true;
 }
 #endif
