@@ -51,8 +51,11 @@ const char* Session::vst_can_do_strings[] = {
 	X_("sendVstTimeInfo"),
 	X_("sendVstEvents"),
 	X_("sendVstMidiEvent"),
+	X_("receiveVstEvents"),
+	X_("receiveVstMidiEvent"),
 	X_("supportShell"),
-	X_("shellCategory")
+	X_("shellCategory"),
+	X_("shellCategorycurID")
 };
 const int Session::vst_can_do_string_count = sizeof (vst_can_do_strings) / sizeof (char*);
 

@@ -562,10 +562,17 @@ static intptr_t
 simple_master_callback (AEffect *, int32_t opcode, int32_t, intptr_t, void *ptr, float)
 {
 	const char* vstfx_can_do_strings[] = {
+		"supplyIdle",
+		"sendVstTimeInfo",
+		"sendVstEvents",
+		"sendVstMidiEvent",
+		"receiveVstEvents",
+		"receiveVstMidiEvent",
 		"supportShell",
-		"shellCategory"
+		"shellCategory",
+		"shellCategorycurID"
 	};
-	const int vstfx_can_do_string_count = 2;
+	const int vstfx_can_do_string_count = 9;
 
 	if (opcode == audioMasterVersion) {
 		return 2400;
