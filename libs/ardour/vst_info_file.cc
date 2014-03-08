@@ -251,7 +251,7 @@ vstfx_load_info_file (FILE* fp, vector<VSTInfo*> *infos)
 		} else {
 			int plugin_cnt = 0;
 			vstfx_free_info(info);
-			if (read_int (fp, &plugin_cnt)) {
+			if (!read_int (fp, &plugin_cnt)) {
 				for (int i = 0; i < plugin_cnt; i++) {
 					if ((info = (VSTInfo*) calloc (1, sizeof (VSTInfo))) == 0) {
 						vstfx_clear_info_list(infos);
