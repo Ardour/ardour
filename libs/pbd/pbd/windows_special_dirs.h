@@ -21,7 +21,7 @@
 #define __libpbd_windows_special_dirs_h__
 
 namespace PBD {
-	char * get_win_special_folder (int csidl);
+	LIBPBD_API char * get_win_special_folder (int csidl);
 }
 
 #endif /* __libpbd_windows_special_dirs_h__ */
