@@ -702,10 +702,10 @@ vstfx_info_from_plugin (const char *dllpath, VSTState* vstfx, vector<VSTInfo *> 
 
 		switch(type) {
 #ifdef WINDOWS_VST_SUPPORT
-			case 1: fst_close(vstfx); break;
+			case ARDOUR::Windows_VST: fst_close(vstfx); break;
 #endif
 #ifdef LXVST_SUPPORT
-			case 2: vstfx_close (vstfx); break;
+			case ARDOUR::LXVST: vstfx_close (vstfx); break;
 #endif
 			default: assert(0); break;
 		}
