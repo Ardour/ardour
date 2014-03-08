@@ -107,6 +107,12 @@ PathsDialog::selection_changed () {
 void
 PathsDialog::add_path() {
 	Gtk::FileChooserDialog d (_("Add folder to search path"), Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
+
+	std::vector<int> selection = paths_list_view.get_selected();
+	if (selection.size() == 1 ) {
+		d.set_current_folder(paths_list_view.get_text(selection.at(0), 0));
+	}
+
 	d.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	d.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
 	ResponseType r = (ResponseType) d.run ();
