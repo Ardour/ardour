@@ -1410,7 +1410,7 @@ RegionSpliceDrag::motion (GdkEvent* event, bool)
 
 	if (!tv || !tv->is_track()) {
 		/* To make sure we hide the verbose canvas cursor when the mouse is
-		   not held over and audiotrack.
+		   not held over an audio track.
 		*/
 		_editor->verbose_cursor()->hide ();
 		return;
