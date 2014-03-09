@@ -407,7 +407,7 @@ def build(bld):
         # just the normal executable version of the GTK GUI
         obj = bld (features = 'cxx c cxxprogram')
         obj.source    = gtk2_ardour_sources
-        obj.target = 'ardour-' + str(bld.env['VERSION'], "utf-8")
+        obj.target = 'ardour-' + str(bld.env['VERSION'])
         obj.includes = ['.']
 
     # at this point, "obj" refers to either the normal native executable
@@ -436,7 +436,7 @@ def build(bld):
         obj.use += ' libappleutility'
     obj.defines     = [
         'PACKAGE="' + I18N_PACKAGE + '"',
-        'VERSIONSTRING="' + str(bld.env['VERSION'], "utf-8") + '"',
+        'VERSIONSTRING="' + str(bld.env['VERSION']) + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
@@ -483,8 +483,8 @@ def build(bld):
             'DATADIR'        : os.path.normpath(bld.env['DATADIR']),
             'SYSCONFDIR'     : os.path.normpath(bld.env['SYSCONFDIR']),
             'LIBS'           : 'build/libs',
-            'VERSION'        : str(bld.env['VERSION'], "utf-8"),
-            'EXECUTABLE'     : 'build/gtk2_ardour/ardour-' + str(bld.env['VERSION'], "utf-8")
+            'VERSION'        : str(bld.env['VERSION']),
+            'EXECUTABLE'     : 'build/gtk2_ardour/ardour-' + str(bld.env['VERSION'])
     }
 
     def set_subst_dict(obj, dict):
