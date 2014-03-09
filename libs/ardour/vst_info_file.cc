@@ -45,6 +45,7 @@
 #ifndef VST_SCANNER_APP
 #include "pbd/system_exec.h"
 #include "ardour/plugin_manager.h" // scanner_bin_path
+#include "ardour/rc_configuration.h"
 #endif
 
 #include "ardour/filesystem_paths.h"
@@ -53,7 +54,7 @@
 #include "ardour/vst_info_file.h"
 
 #define MAX_STRING_LEN 256
-#define PLUGIN_SCAN_TIMEOUT (600) // in deciseconds
+#define PLUGIN_SCAN_TIMEOUT (Config->get_vst_scan_timeout()) // in deciseconds
 
 
 /* CACHE FILE PATHS */
