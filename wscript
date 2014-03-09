@@ -15,7 +15,7 @@ def fetch_git_revision ():
 
 def fetch_tarball_revision ():
     if not os.path.exists ('libs/ardour/revision.cc'):
-        print 'This tarball was not created correctly - it is missing libs/ardour/revision.cc'
+        print('This tarball was not created correctly - it is missing libs/ardour/revision.cc')
         sys.exit (1)
     with open('libs/ardour/revision.cc') as f:
         content = f.readlines()
