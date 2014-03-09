@@ -1001,6 +1001,8 @@ public:
 		: _rc_config (c)
 		, _display_plugin_scan_progress (_("Always Display Plugin Scan Progress"))
 		, _discover_vst_on_start (_("Scan for new VST Plugins on Application Start"))
+		, _timeout_adjustment (0, 0, 3000, 50, 50)
+		, _timeout_slider (_timeout_adjustment)
 	{
 		Label *l;
 		std::stringstream ss;
@@ -1024,6 +1026,18 @@ public:
 		Gtkmm2ext::UI::instance()->set_tip (_display_plugin_scan_progress,
 					    _("<b>When enabled</b> a popup window showing plugin scan progress is displayed for indexing (cache load) and discovery (detect new plugins)"));
 
+		_timeout_slider.set_digits (0);
+		_timeout_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &PluginOptions::timeout_changed));
+
+		Gtkmm2ext::UI::instance()->set_tip(_timeout_slider,
+			 _("Specify the default timeout for plugin instantiation in 1/10 seconds. Plugins that require more time to load will be blacklisted. A value of 0 disables the timeout."));
+
+		l = manage (left_aligned_label (_("Scan Time Out [deciseconds]")));;
+		HBox* h = manage (new HBox);
+		h->set_spacing (4);
+		h->pack_start (*l, false, false);
+		h->pack_start (_timeout_slider, true, true);
+		t->attach (*h, 0, 2, n, n+1); ++n;
 
 		ss.str("");
 		ss << "<b>" << _("VST") << "</b>";
@@ -1072,17 +1086,24 @@ public:
 			bool const x = _rc_config->get_discover_vst_on_start();
 			_discover_vst_on_start.set_active (x);
 		}
+		else if (p == "vst-scan-timeout") {
+			int const x = _rc_config->get_vst_scan_timeout();
+			_timeout_adjustment.set_value (x);
+		}
 	}
 
 	void set_state_from_config () {
 		parameter_changed ("show-plugin-scan-window");
 		parameter_changed ("discover-vst-on-start");
+		parameter_changed ("vst-scan-timeout");
 	}
 
 private:
 	RCConfiguration* _rc_config;
 	CheckButton _display_plugin_scan_progress;
 	CheckButton _discover_vst_on_start;
+	Adjustment _timeout_adjustment;
+	HScale _timeout_slider;
 
 	void display_plugin_scan_progress_toggled () {
 		bool const x = _display_plugin_scan_progress.get_active();
@@ -1092,6 +1113,11 @@ private:
 	void discover_vst_on_start_toggled () {
 		bool const x = _discover_vst_on_start.get_active();
 		_rc_config->set_discover_vst_on_start(x);
+	}
+
+	void timeout_changed () {
+		int x = floor(_timeout_adjustment.get_value());
+		_rc_config->set_vst_scan_timeout(x);
 	}
 
 	void clear_vst_cache_clicked () {
