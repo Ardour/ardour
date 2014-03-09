@@ -474,6 +474,23 @@ SoundFileBox::audition ()
 		r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
 	}
 
+	frameoffset_t audition_position = 0;
+	switch(_import_position) {
+		case ImportAtTimestamp:
+			audition_position = 0;
+			break;
+		case ImportAtPlayhead:
+			audition_position = _session->transport_frame();
+			break;
+		case ImportAtStart:
+			audition_position = _session->current_start_frame();
+			break;
+		case ImportAtEditPoint:
+			audition_position = PublicEditor::instance().get_preferred_edit_position ();
+			break;
+	}
+	r->set_position(audition_position);
+
 	_session->audition_region(r);
 }
 
@@ -1662,6 +1679,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	str.push_back (_("session start"));
 	set_popdown_strings (where_combo, str);
 	where_combo.set_active_text (str.front());
+	where_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::where_combo_changed));
 
 	Label* l = manage (new Label);
 	l->set_markup (_("<b>Add files as ...</b>"));
@@ -1853,6 +1871,12 @@ void
 SoundFileOmega::src_combo_changed()
 {
 	preview.set_src_quality(get_src_quality());
+}
+
+void
+SoundFileOmega::where_combo_changed()
+{
+	preview.set_import_position(get_position());
 }
 
 ImportDisposition

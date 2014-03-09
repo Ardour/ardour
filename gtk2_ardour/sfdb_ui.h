@@ -71,6 +71,7 @@ class SoundFileBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr, public P
 	bool audition_oneshot();
 	bool autoplay () const;
 	void set_src_quality(ARDOUR::SrcQuality q) { _src_quality = q; }
+	void set_import_position(Editing::ImportPosition p) { _import_position = p; }
 
   protected:
 	std::string path;
@@ -119,6 +120,7 @@ class SoundFileBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr, public P
 	bool seek_button_release(GdkEventButton*);
 	bool _seeking;
 	ARDOUR::SrcQuality _src_quality;
+	Editing::ImportPosition _import_position;
 };
 
 class SoundFileBrowser : public ArdourWindow
@@ -316,6 +318,7 @@ class SoundFileOmega : public SoundFileBrowser
 	void reset_options_noret ();
 	bool bad_file_message ();
 	void src_combo_changed ();
+	void where_combo_changed ();
 
         void do_something (int action);
 };

@@ -136,6 +136,7 @@ class LIBARDOUR_API Auditioner : public Track
 	static void *_drop_ports (void *);
 	void actually_drop_ports ();
 	void output_changed (IOChange, void*);
+	frameoffset_t _import_position;
 };
 
 }; /* namespace ARDOUR */
