@@ -51,6 +51,7 @@ namespace ARDOUR {
 
 	extern LIBARDOUR_API PBD::Signal1<void,std::string> BootMessage;
 	extern LIBARDOUR_API PBD::Signal3<void,std::string,std::string,bool> PluginScanMessage;
+	extern LIBARDOUR_API PBD::Signal1<void,int> PluginScanTimeout;
 	extern LIBARDOUR_API PBD::Signal0<void> GUIIdle;
 
 	/**

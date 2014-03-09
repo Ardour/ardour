@@ -111,7 +111,8 @@ PluginManager::PluginManager ()
 	, _ladspa_plugin_info(0)
 	, _lv2_plugin_info(0)
 	, _au_plugin_info(0)
-	, cancel_scan(false)
+	, _cancel_scan(false)
+	, _cancel_timeout(false)
 {
 	char* s;
 	string lrdf_path;
@@ -192,7 +193,7 @@ void
 PluginManager::refresh (bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, "PluginManager::refresh\n");
-	cancel_scan = false;
+	_cancel_scan = false;
 
 	BootMessage (_("Scanning LADSPA Plugins"));
 	ladspa_refresh ();
@@ -222,13 +223,19 @@ PluginManager::refresh (bool cache_only)
 	BootMessage (_("Plugin Scan Complete..."));
 	PluginListChanged (); /* EMIT SIGNAL */
 	PluginScanMessage(X_("closeme"), "", false);
-	cancel_scan = false;
+	_cancel_scan = false;
 }
 
 void
 PluginManager::cancel_plugin_scan ()
 {
-	cancel_scan = true;
+	_cancel_scan = true;
+}
+
+void
+PluginManager::cancel_plugin_timeout ()
+{
+	_cancel_timeout = true;
 }
 
 void
@@ -674,6 +681,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("windows_vst_discover '%1'\n", path));
 
+	_cancel_timeout = false;
 	vector<VSTInfo*> * finfos = vstfx_get_info_fst (const_cast<char *> (path.c_str()),
 			cache_only ? VST_SCAN_CACHE_ONLY : VST_SCAN_USE_APP);
 
@@ -797,6 +805,7 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("checking apparent LXVST plugin at %1\n", path));
 
+	_cancel_timeout = false;
 	vector<VSTInfo*> * finfos = vstfx_get_info_lx (const_cast<char *> (path.c_str()),
 			cache_only ? VST_SCAN_CACHE_ONLY : VST_SCAN_USE_APP);
 

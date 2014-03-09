@@ -3866,7 +3866,7 @@ ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin, bool can_ca
 		timeout_button->show();
 
 		scan_pbar = manage(new ProgressBar());
-		//scan_pbar->set_size_request(300,-1);
+		scan_pbar->set_orientation(Gtk::PROGRESS_RIGHT_TO_LEFT);
 		scan_pbar->set_text(_("Scan Timeout"));
 		scan_pbar->show();
 

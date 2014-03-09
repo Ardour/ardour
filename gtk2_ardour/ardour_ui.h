@@ -669,7 +669,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void gui_idle_handler ();
 
 	void cancel_plugin_scan ();
+	void cancel_plugin_timeout ();
 	void plugin_scan_dialog (std::string type, std::string plugin, bool);
+	void plugin_scan_timeout (int);
 
         void session_format_mismatch (std::string, std::string);
 

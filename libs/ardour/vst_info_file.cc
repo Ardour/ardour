@@ -916,7 +916,15 @@ vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanM
 			return infos;
 		} else {
 			int timeout = PLUGIN_SCAN_TIMEOUT;
-			while (scanner.is_running() && --timeout) {
+			bool no_timeout = (timeout <= 0);
+			ARDOUR::PluginScanTimeout(timeout);
+			while (scanner.is_running() && (no_timeout || timeout > 0)) {
+				if (!no_timeout && !ARDOUR::PluginManager::instance().no_timeout()) {
+					if (timeout%5 == 0) {
+						ARDOUR::PluginScanTimeout(timeout);
+					}
+					--timeout;
+				}
 				ARDOUR::GUIIdle();
 				Glib::usleep (100000);
 

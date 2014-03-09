@@ -53,13 +53,15 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 
 	void refresh (bool cache_only = false);
 	void cancel_plugin_scan();
+	void cancel_plugin_timeout();
 	void clear_vst_cache ();
 	void clear_vst_blacklist ();
 
 	const std::string get_default_windows_vst_path() const { return windows_vst_path; }
 	const std::string get_default_lxvst_path() const { return lxvst_path; }
 
-	bool cancelled () { return cancel_scan; }
+	bool cancelled () { return _cancel_scan; }
+	bool no_timeout () { return _cancel_timeout; }
 
 	enum PluginStatusType {
 		Normal = 0,
@@ -112,7 +114,8 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	std::string windows_vst_path;
 	std::string lxvst_path;
 
-	bool cancel_scan;
+	bool _cancel_scan;
+	bool _cancel_timeout;
 
 	void ladspa_refresh ();
 	void windows_vst_refresh (bool cache_only = false);
