@@ -20,6 +20,8 @@
 #ifndef __libpbd_windows_special_dirs_h__
 #define __libpbd_windows_special_dirs_h__
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 	LIBPBD_API char * get_win_special_folder (int csidl);
 }
