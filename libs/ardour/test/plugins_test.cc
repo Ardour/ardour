@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "ardour/plugin_manager.h"
-#include "ardour/ladspa_search_path.h"
+#include "ardour/search_paths.h"
 
 #include "plugins_test.h"
 #include "test_common.h"

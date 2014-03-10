@@ -29,7 +29,7 @@
 #include "ardour/session_directory.h"
 #include "ardour/midi_patch_manager.h"
 
-#include "ardour/midi_patch_search_path.h"
+#include "ardour/search_paths.h"
 
 #include "i18n.h"
 

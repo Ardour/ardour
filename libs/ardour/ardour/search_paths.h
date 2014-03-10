@@ -69,6 +69,17 @@ namespace ARDOUR {
 	 */
 	LIBARDOUR_API PBD::Searchpath lv2_bundled_search_path ();
 
+	/**
+	 * return a Searchpath containing directories in which to look for
+	 * MIDI patch files ("*.midnam") aka MIDNAM files
+	 *
+	 * If ARDOUR_MIDI_PATCH_PATH is defined then the Searchpath returned
+	 * will contain only those directories specified in it, otherwise it will
+	 * contain the user and system directories which may contain control
+	 * surface plugins.
+	 */
+	LIBARDOUR_API PBD::Searchpath midi_patch_search_path ();
+
 } // namespace ARDOUR
 
 #endif /* __libardour_search_paths_h__ */
