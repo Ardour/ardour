@@ -40,11 +40,11 @@ const char* const ladspa_dir_name = X_("ladspa");
 const char* const panner_dir_name = X_("panners");
 const char* const backend_dir_name = X_("backends");
 
-/* these should end up using variants of PROGRAM_NAME */
-#ifdef __APPLE__
-const char* const user_config_dir_name = X_("Ardour" "3");
+char config_dir_name[] = X_(PROGRAM_NAME "3");
+#if defined (__APPLE__) || defined (PLATFORM_WINDOWS)
+const char* const user_config_dir_name = config_dir_name;
 #else
-const char* const user_config_dir_name = X_("ardour" "3");
+const char* const user_config_dir_name = strlwr(config_dir_name);
 #endif
 
 }
