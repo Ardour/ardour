@@ -36,6 +36,17 @@ namespace ARDOUR {
 	 */
 	LIBARDOUR_API PBD::Searchpath backend_search_path ();
 
+	/**
+	 * return a Searchpath containing directories in which to look for
+	 * control surface plugins.
+	 *
+	 * If ARDOUR_SURFACES_PATH is defined then the Searchpath returned
+	 * will contain only those directories specified in it, otherwise it will
+	 * contain the user and system directories which may contain control
+	 * surface plugins.
+	 */
+	LIBARDOUR_API PBD::Searchpath control_protocol_search_path ();
+
 } // namespace ARDOUR
 
 #endif /* __libardour_search_paths_h__ */

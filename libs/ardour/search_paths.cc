@@ -26,6 +26,7 @@
 
 namespace {
 	const char * const backend_env_variable_name = "ARDOUR_BACKEND_PATH";
+	const char * const surfaces_env_variable_name = "ARDOUR_SURFACES_PATH";
 } // anonymous
 
 using namespace PBD;
@@ -40,6 +41,17 @@ backend_search_path ()
 	spath.add_subdirectory_to_paths(backend_dir_name);
 
 	spath += Searchpath(Glib::getenv(backend_env_variable_name));
+	return spath;
+}
+
+Searchpath
+control_protocol_search_path ()
+{
+	Searchpath spath(user_config_directory ());
+	spath += ardour_dll_directory ();
+	spath.add_subdirectory_to_paths (surfaces_dir_name);
+	
+	spath += Searchpath(Glib::getenv(surfaces_env_variable_name));
 	return spath;
 }
 

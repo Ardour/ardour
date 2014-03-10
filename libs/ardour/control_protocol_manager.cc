@@ -30,7 +30,7 @@
 #include "ardour/debug.h"
 #include "ardour/control_protocol_manager.h"
 
-#include "ardour/control_protocol_search_path.h"
+#include "ardour/search_paths.h"
 
 
 using namespace ARDOUR;
