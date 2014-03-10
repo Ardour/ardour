@@ -45,7 +45,9 @@ PolyItem::compute_bounding_box () const
 		
 		bbox.x0 = bbox.x1 = i->x;
 		bbox.y0 = bbox.y1 = i->y;
-		
+
+		++i;
+
 		while (i != _points.end()) {
 			bbox.x0 = min (bbox.x0, i->x);
 			bbox.y0 = min (bbox.y0, i->y);
