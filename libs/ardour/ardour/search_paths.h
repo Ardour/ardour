@@ -25,6 +25,8 @@
 
 namespace ARDOUR {
 
+	LIBARDOUR_API const char *vst_search_path ();
+
 	/**
 	 * return a SearchPath containing directories in which to look for
 	 * backend plugins.

@@ -63,7 +63,6 @@
 #include "ardour/rc_configuration.h"
 
 #include "ardour/search_paths.h"
-#include "ardour/vst_search_path.h"
 
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
