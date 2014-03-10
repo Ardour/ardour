@@ -30,7 +30,7 @@
 #include "ardour/debug.h"
 #include "ardour/panner_manager.h"
 
-#include "ardour/panner_search_path.h"
+#include "ardour/search_paths.h"
 
 #include "i18n.h"
 

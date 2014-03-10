@@ -32,6 +32,7 @@ namespace {
 	const char * const export_env_variable_name = "ARDOUR_EXPORT_FORMATS_PATH";
 	const char * const ladspa_env_variable_name = "LADSPA_PATH";
 	const char * const midi_patch_env_variable_name = "ARDOUR_MIDI_PATCH_PATH";
+	const char * const panner_env_variable_name = "ARDOUR_PANNER_PATH";
 } // anonymous
 
 using namespace PBD;
@@ -122,6 +123,18 @@ midi_patch_search_path ()
 	if (midi_patch_path_defined) {
 		spath += spath_env;
 	}
+
+	return spath;
+}
+
+Searchpath
+panner_search_path ()
+{
+	Searchpath spath(user_config_directory ());
+
+	spath += ardour_dll_directory ();
+	spath.add_subdirectory_to_paths(panner_dir_name);
+	spath += Searchpath(Glib::getenv(panner_env_variable_name));
 
 	return spath;
 }
