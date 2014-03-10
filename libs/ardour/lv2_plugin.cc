@@ -48,7 +48,7 @@
 #include "ardour/types.h"
 #include "ardour/utils.h"
 #include "ardour/worker.h"
-#include "ardour/lv2_bundled_search_path.h"
+#include "ardour/search_paths.h"
 
 #include "i18n.h"
 #include <locale.h>

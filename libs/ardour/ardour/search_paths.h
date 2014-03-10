@@ -63,6 +63,12 @@ namespace ARDOUR {
 	 */
 	LIBARDOUR_API PBD::Searchpath ladspa_search_path ();
 
+	/**
+	 * return a Searchpath containing directories in which to look for
+	 * lv2 plugins.
+	 */
+	LIBARDOUR_API PBD::Searchpath lv2_bundled_search_path ();
+
 } // namespace ARDOUR
 
 #endif /* __libardour_search_paths_h__ */

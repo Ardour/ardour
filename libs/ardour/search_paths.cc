@@ -100,4 +100,13 @@ ladspa_search_path ()
 	return spath_env + spath;
 }
 
+Searchpath
+lv2_bundled_search_path ()
+{
+	Searchpath spath( ardour_dll_directory () );
+	spath.add_subdirectory_to_paths ("LV2");
+
+	return spath;
+}
+
 } // namespace ARDOUR
