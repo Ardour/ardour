@@ -53,6 +53,16 @@ namespace ARDOUR {
 	 */
 	LIBARDOUR_API PBD::Searchpath export_formats_search_path ();
 
+	/**
+	 * return a Searchpath containing directories in which to look for
+	 * LADSPA plugins.
+	 *
+	 * If LADSPA_PATH is defined then the Searchpath returned
+	 * will contain the directories specified in it as well as the
+	 * user and system directories.
+	 */
+	LIBARDOUR_API PBD::Searchpath ladspa_search_path ();
+
 } // namespace ARDOUR
 
 #endif /* __libardour_search_paths_h__ */

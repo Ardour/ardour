@@ -20,6 +20,8 @@
 
 #include <glibmm/miscutils.h>
 
+#include "pbd/pathexpand.h"
+
 #include "ardour/search_paths.h"
 #include "ardour/directory_names.h"
 #include "ardour/filesystem_paths.h"
@@ -28,6 +30,7 @@ namespace {
 	const char * const backend_env_variable_name = "ARDOUR_BACKEND_PATH";
 	const char * const surfaces_env_variable_name = "ARDOUR_SURFACES_PATH";
 	const char * const export_env_variable_name = "ARDOUR_EXPORT_FORMATS_PATH";
+	const char * const ladspa_env_variable_name = "LADSPA_PATH";
 } // anonymous
 
 using namespace PBD;
@@ -70,6 +73,31 @@ export_formats_search_path ()
 	}
 
 	return spath;
+}
+
+Searchpath
+ladspa_search_path ()
+{
+	Searchpath spath_env (Glib::getenv(ladspa_env_variable_name));
+
+	Searchpath spath (user_config_directory ());
+
+	spath += ardour_dll_directory ();
+	spath.add_subdirectory_to_paths (ladspa_dir_name);
+
+#ifndef PLATFORM_WINDOWS
+	spath.push_back ("/usr/local/lib64/ladspa");
+	spath.push_back ("/usr/local/lib/ladspa");
+	spath.push_back ("/usr/lib64/ladspa");
+	spath.push_back ("/usr/lib/ladspa");
+#endif
+
+#ifdef __APPLE__
+	spath.push_back (path_expand ("~/Library/Audio/Plug-Ins/LADSPA"));
+	spath.push_back ("/Library/Audio/Plug-Ins/LADSPA");
+#endif
+
+	return spath_env + spath;
 }
 
 } // namespace ARDOUR
