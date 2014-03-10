@@ -21,6 +21,8 @@
 #ifndef __libardour_search_paths_h__
 #define __libardour_search_paths_h__
 
+#include "ardour/libardour_visibility.h"
+
 #include "pbd/search_path.h"
 
 namespace ARDOUR {
