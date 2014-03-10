@@ -34,7 +34,7 @@
 
 #include "ardour/export_profile_manager.h"
 #include "ardour/export_format_specification.h"
-#include "ardour/export_formats_search_path.h"
+#include "ardour/search_paths.h"
 #include "ardour/export_timespan.h"
 #include "ardour/export_channel_configuration.h"
 #include "ardour/export_filename.h"

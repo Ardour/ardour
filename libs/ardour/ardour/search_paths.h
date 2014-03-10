@@ -47,6 +47,12 @@ namespace ARDOUR {
 	 */
 	LIBARDOUR_API PBD::Searchpath control_protocol_search_path ();
 
+	/**
+	 * return a Searchpath containing directories in which to look for
+	 * export_formats.
+	 */
+	LIBARDOUR_API PBD::Searchpath export_formats_search_path ();
+
 } // namespace ARDOUR
 
 #endif /* __libardour_search_paths_h__ */

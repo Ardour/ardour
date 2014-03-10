@@ -27,6 +27,7 @@
 namespace {
 	const char * const backend_env_variable_name = "ARDOUR_BACKEND_PATH";
 	const char * const surfaces_env_variable_name = "ARDOUR_SURFACES_PATH";
+	const char * const export_env_variable_name = "ARDOUR_EXPORT_FORMATS_PATH";
 } // anonymous
 
 using namespace PBD;
@@ -52,6 +53,22 @@ control_protocol_search_path ()
 	spath.add_subdirectory_to_paths (surfaces_dir_name);
 	
 	spath += Searchpath(Glib::getenv(surfaces_env_variable_name));
+	return spath;
+}
+
+Searchpath
+export_formats_search_path ()
+{
+	Searchpath spath (ardour_data_search_path());
+	spath.add_subdirectory_to_paths (export_formats_dir_name);
+
+	bool export_formats_path_defined = false;
+	Searchpath spath_env (Glib::getenv(export_env_variable_name, export_formats_path_defined));
+
+	if (export_formats_path_defined) {
+		spath += spath_env;
+	}
+
 	return spath;
 }
 
