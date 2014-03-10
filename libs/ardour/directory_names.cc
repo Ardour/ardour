@@ -44,7 +44,8 @@ char config_dir_name[] = X_(PROGRAM_NAME "3");
 #if defined (__APPLE__) || defined (PLATFORM_WINDOWS)
 const char* const user_config_dir_name = config_dir_name;
 #else
-const char* const user_config_dir_name = strlwr(config_dir_name);
+#include "pbd/convert.h"
+const char* const user_config_dir_name = PBD::downcase (config_dir_name);
 #endif
 
 }
