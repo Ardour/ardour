@@ -573,7 +573,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		bool valid = false;
 		const uint32_t buf_index_in = in_map.get(DataType::MIDI, 0, &valid);
 		if (valid) {
-			v = bufs.get_vst_midi (0);
+			v = bufs.get_vst_midi (buf_index_in);
 		}
 		valid = false;
 		const uint32_t buf_index_out = out_map.get(DataType::MIDI, 0, &valid);
