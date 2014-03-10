@@ -30,6 +30,11 @@
 
 #include "i18n.h"
 
+#ifdef PLATFORM_WINDOWS
+#include "shlobj.h"
+#include "pbd/windows_special_dirs.h"
+#endif
+
 using namespace PBD;
 
 namespace ARDOUR {
@@ -54,8 +59,14 @@ user_config_directory ()
 	if ((c = getenv ("XDG_CONFIG_HOME")) != 0) {
 		p = c;
 	} else {
-		const string home_dir = Glib::get_home_dir();
+#ifdef PLATFORM_WINDOWS
+		std::string home_dir;
 
+		if (0 != PBD::get_win_special_folder(CSIDL_LOCAL_APPDATA))
+			home_dir = PBD::get_win_special_folder(CSIDL_LOCAL_APPDATA);
+#else
+		const string home_dir = Glib::get_home_dir();
+#endif
 		if (home_dir.empty ()) {
 			error << "Unable to determine home directory" << endmsg;
 			exit (1);
@@ -104,7 +115,14 @@ user_cache_directory ()
 	if ((c = getenv ("XDG_CACHE_HOME")) != 0) {
 		p = c;
 	} else {
+#ifdef PLATFORM_WINDOWS
+		std::string home_dir;
+
+		if (0 != PBD::get_win_special_folder(CSIDL_LOCAL_APPDATA))
+			home_dir = PBD::get_win_special_folder(CSIDL_LOCAL_APPDATA);
+#else
 		const string home_dir = Glib::get_home_dir();
+#endif
 
 		if (home_dir.empty ()) {
 			error << "Unable to determine home directory" << endmsg;
