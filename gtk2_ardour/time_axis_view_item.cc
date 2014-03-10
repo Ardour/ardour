@@ -931,17 +931,24 @@ TimeAxisViewItem::set_trim_handle_colors()
 bool
 TimeAxisViewItem::frame_handle_crossing (GdkEvent* ev, ArdourCanvas::Rectangle* item)
 {
-	if (trackview.editor().effective_mouse_mode() == Editing::MouseObject && !trackview.editor().internal_editing()) {
-		switch (ev->type) {
-		case GDK_LEAVE_NOTIFY:
-			item->set_fill (false);
-			break;
-		case GDK_ENTER_NOTIFY:
+	switch (ev->type) {
+	case GDK_LEAVE_NOTIFY:
+		/* always hide the handle whenever we leave, no matter what mode */
+		item->set_fill (false);
+		break;
+	case GDK_ENTER_NOTIFY:
+		if (trackview.editor().effective_mouse_mode() == Editing::MouseObject &&
+		    !trackview.editor().internal_editing()) {
+			/* never set this to be visible in internal
+			   edit mode. Note, however, that we do need to
+			   undo visibility (LEAVE_NOTIFY case above) no
+			   matter what the mode is.
+			*/
 			item->set_fill (true);
-			break;
-		default:
-			break;
 		}
+		break;
+	default:
+		break;
 	}
 	return false;
 }
