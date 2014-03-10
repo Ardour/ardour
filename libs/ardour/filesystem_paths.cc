@@ -62,8 +62,11 @@ user_config_directory ()
 #ifdef PLATFORM_WINDOWS
 		std::string home_dir;
 
-		if (0 != PBD::get_win_special_folder(CSIDL_LOCAL_APPDATA))
+		if (0 != PBD::get_win_special_folder(CSIDL_LOCAL_APPDATA)) {
 			home_dir = PBD::get_win_special_folder(CSIDL_LOCAL_APPDATA);
+			home_dir += "\\";
+			home_dir += PROGRAM_NAME;
+		}
 #else
 		const string home_dir = Glib::get_home_dir();
 #endif
@@ -118,8 +121,11 @@ user_cache_directory ()
 #ifdef PLATFORM_WINDOWS
 		std::string home_dir;
 
-		if (0 != PBD::get_win_special_folder(CSIDL_LOCAL_APPDATA))
+		if (0 != PBD::get_win_special_folder(CSIDL_LOCAL_APPDATA)) {
 			home_dir = PBD::get_win_special_folder(CSIDL_LOCAL_APPDATA);
+			home_dir += "\\";
+			home_dir += PROGRAM_NAME;
+		}
 #else
 		const string home_dir = Glib::get_home_dir();
 #endif
