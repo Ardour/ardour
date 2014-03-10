@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 2011 Paul Davis
+    Copyright (C) 2011 Tim Mayberry 
+    Copyright (C) 2013 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,10 +15,11 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 */
 
-#ifndef __ardour_backend_search_path_h__
-#define __ardour_backend_search_path_h__
+#ifndef __libardour_search_paths_h__
+#define __libardour_search_paths_h__
 
 #include "pbd/search_path.h"
 
@@ -32,8 +34,8 @@ namespace ARDOUR {
 	 * contain the user and system directories which may contain audio/MIDI
 	 * backends.
 	 */
-	PBD::Searchpath backend_search_path ();
+	LIBARDOUR_API PBD::Searchpath backend_search_path ();
 
 } // namespace ARDOUR
 
-#endif /* __ardour_backend_search_path_h__ */
+#endif /* __libardour_search_paths_h__ */

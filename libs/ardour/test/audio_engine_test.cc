@@ -2,7 +2,7 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/audio_backend.h"
-#include "ardour/backend_search_path.h"
+#include "ardour/search_paths.h"
 
 #include "audio_engine_test.h"
 #include "test_common.h"

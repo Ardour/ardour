@@ -41,7 +41,7 @@
 #include "ardour/audio_port.h"
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
-#include "ardour/backend_search_path.h"
+#include "ardour/search_paths.h"
 #include "ardour/buffer.h"
 #include "ardour/cycle_timer.h"
 #include "ardour/internal_send.h"

@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 2013 Paul Davis
+    Copyright (C) 2011 Tim Mayberry 
+    Copyright (C) 2013 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@
 
 #include <glibmm/miscutils.h>
 
-#include "ardour/backend_search_path.h"
+#include "ardour/search_paths.h"
 #include "ardour/directory_names.h"
 #include "ardour/filesystem_paths.h"
 
