@@ -399,6 +399,8 @@ def set_compiler_flags (conf,opt):
     if opt.nls:
         compiler_flags.append('-DENABLE_NLS')
 
+    compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
+
     if opt.debug:
         conf.env.append_value('CFLAGS', debug_flags)
         conf.env.append_value('CXXFLAGS', debug_flags)
@@ -755,7 +757,6 @@ def configure(conf):
 	    conf.define('LXVST_SUPPORT', 1)
 	    conf.env['LXVST_SUPPORT'] = True
     conf.define('WINDOWS_KEY', opts.windows_key)
-    conf.env['PROGRAM_NAME'] = opts.program_name
     if opts.rt_alloc_debug:
         conf.define('DEBUG_RT_ALLOC', 1)
         conf.env['DEBUG_RT_ALLOC'] = True
@@ -793,7 +794,7 @@ const char* const ardour_config_info = "\\n\\
     def write_config_text(title, val):
         autowaf.display_msg(conf, title, val)
         config_text.write(title + ': ')
-        config_text.write(str(val))
+        config_text.write(str(val).replace ('"', '\\"'))
         config_text.write("\\n\\\n")
 
     write_config_text('Build documentation',   conf.env['DOCS'])

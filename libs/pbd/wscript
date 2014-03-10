@@ -148,7 +148,6 @@ def build(bld):
     obj.vnum         = LIBPBD_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.defines     += [ 'PACKAGE="' + I18N_PACKAGE + '"',
-                         'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"'
                          ]
 
     if bld.env['build_target'] == 'x86_64':

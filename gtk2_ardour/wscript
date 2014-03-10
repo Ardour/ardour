@@ -423,7 +423,6 @@ def build(bld):
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
-        'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"'
         ]
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL'

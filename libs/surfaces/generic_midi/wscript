@@ -32,7 +32,6 @@ def build(bld):
     obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_genericmidi"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
-    obj.defines     += [ 'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"' ]
     obj.includes     = [ '.', './generic_midi']
     obj.name         = 'libardour_generic_midi'
     obj.target       = 'ardour_generic_midi'

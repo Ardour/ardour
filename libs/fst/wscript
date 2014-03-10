@@ -65,6 +65,7 @@ def build(bld):
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
         obj.target = 'ardour-vst-scanner.exe.so'
         obj.uselib = ['GIOMM', 'DL']
+        obj.use = [ 'libpbd' ]
     else:
         obj = bld (features = 'cxx c cxxprogram')
         if bld.is_defined('WINDOWS_VST_SUPPORT'):
@@ -74,6 +75,7 @@ def build(bld):
             obj.source = ( 'scanner.cc' )
             obj.uselib = ['GIOMM', 'DL']
         obj.target = 'ardour-vst-scanner'
+        obj.use = [ 'libpbd' ]
 
     obj.includes  = [ '../pbd/', '../ardour/', '.' ]
     obj.defines = [
