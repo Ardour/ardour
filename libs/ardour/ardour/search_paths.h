@@ -93,6 +93,18 @@ namespace ARDOUR {
 	 */
 	LIBARDOUR_API PBD::Searchpath panner_search_path ();
 
+	/**
+	 * return a Searchpath containing directories in which to look for
+	 * route templates.
+	 */
+	LIBARDOUR_API PBD::Searchpath route_template_search_path ();
+
+	/**
+	 * return a Searchpath containing directories in which to look for
+	 * other templates.
+	 */
+	LIBARDOUR_API PBD::Searchpath template_search_path ();
+
 } // namespace ARDOUR
 
 #endif /* __libardour_search_paths_h__ */

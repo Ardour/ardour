@@ -147,6 +147,22 @@ panner_search_path ()
 	return spath;
 }
 
+Searchpath
+template_search_path ()
+{
+	Searchpath spath (ardour_data_search_path());
+	spath.add_subdirectory_to_paths(templates_dir_name);
+	return spath;
+}
+
+Searchpath
+route_template_search_path ()
+{
+	Searchpath spath (ardour_data_search_path());
+	spath.add_subdirectory_to_paths(route_templates_dir_name);
+	return spath;
+}
+
 #ifdef PLATFORM_WINDOWS
 
 const char*

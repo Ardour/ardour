@@ -30,28 +30,13 @@
 #include "ardour/directory_names.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/search_paths.h"
 #include "ardour/io.h"
 
 using namespace std;
 using namespace PBD;
 
 namespace ARDOUR {
-
-Searchpath
-template_search_path ()
-{
-	Searchpath spath (ardour_data_search_path());
-	spath.add_subdirectory_to_paths(templates_dir_name);
-	return spath;
-}
-
-Searchpath
-route_template_search_path ()
-{
-	Searchpath spath (ardour_data_search_path());
-	spath.add_subdirectory_to_paths(route_templates_dir_name);
-	return spath;
-}
 
 std::string
 user_template_directory ()
