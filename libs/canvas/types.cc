@@ -121,6 +121,16 @@ Rect::fix () const
 	return r;
 }
 
+bool
+ArdourCanvas::operator!= (Rect const& a, Rect const& b)
+{
+	return a.x0 != b.x0 ||
+		a.x1 != b.x1 ||
+		a.y0 != b.y0 ||
+		a.y1 != b.y1;
+}
+
+
 Duple
 ArdourCanvas::operator- (Duple const & o)
 {
@@ -137,6 +147,12 @@ bool
 ArdourCanvas::operator== (Duple const & a, Duple const & b)
 {
 	return a.x == b.x && a.y == b.y;
+}
+
+bool
+ArdourCanvas::operator!= (Duple const & a, Duple const & b)
+{
+	return a.x != b.x || a.y != b.y;
 }
 
 Duple

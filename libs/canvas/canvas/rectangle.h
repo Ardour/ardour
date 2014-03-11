@@ -72,7 +72,12 @@ public:
 	};
 
 	void set_outline_what (What);
-	void set_outline_what (int);
+	void set_outline_all () {
+		set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::TOP|
+								 ArdourCanvas::Rectangle::LEFT|
+								 ArdourCanvas::Rectangle::RIGHT|
+								 ArdourCanvas::Rectangle::BOTTOM));
+	}
 
 private:
 	/** Our rectangle; note that x0 may not always be less than x1

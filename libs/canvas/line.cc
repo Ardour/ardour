@@ -77,53 +77,55 @@ Line::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) cons
 void
 Line::set (Duple a, Duple b)
 {
-	begin_change ();
-
-	_points[0] = a;
-	_points[1] = b;
-
-	_bounding_box_dirty = true;
-	end_change ();
-
-	DEBUG_TRACE (PBD::DEBUG::CanvasItemsDirtied, "canvas item dirty: line change\n");
+	if (a != _points[0] || b != _points[1]) {
+		begin_change ();
+		
+		_points[0] = a;
+		_points[1] = b;
+		
+		_bounding_box_dirty = true;
+		end_change ();
+	}
 }
 
 void
 Line::set_x (Coord x0, Coord x1)
 {
-	begin_change ();
-	
-	_points[0].x = x0;
-	_points[1].x = x1;
-
-	_bounding_box_dirty = true;
-	end_change ();
-
-	DEBUG_TRACE (PBD::DEBUG::CanvasItemsDirtied, "canvas item dirty: line change\n");
+	if (x0 != _points[0].x || x1 != _points[1].x) {
+		begin_change ();
+		
+		_points[0].x = x0;
+		_points[1].x = x1;
+		
+		_bounding_box_dirty = true;
+		end_change ();
+	}
 }	
 
 void
 Line::set_x0 (Coord x0)
 {
-	begin_change ();
-	
-	_points[0].x = x0;
-
-	_bounding_box_dirty = true;
-	end_change ();
-
-	DEBUG_TRACE (PBD::DEBUG::CanvasItemsDirtied, "canvas item dirty: line change\n");
+	if (x0 != _points[0].x) {
+		begin_change ();
+		
+		_points[0].x = x0;
+		
+		_bounding_box_dirty = true;
+		end_change ();
+	}
 }
 
 void
 Line::set_y0 (Coord y0)
 {
-	begin_change ();
-
-	_points[0].y = y0;
-
-	_bounding_box_dirty = true;
-	end_change ();
+	if (y0 != _points[0].y) {
+		begin_change ();
+		
+		_points[0].y = y0;
+		
+		_bounding_box_dirty = true;
+		end_change ();
+	}
 
 	DEBUG_TRACE (PBD::DEBUG::CanvasItemsDirtied, "canvas item dirty: line change\n");
 }
@@ -131,27 +133,27 @@ Line::set_y0 (Coord y0)
 void
 Line::set_x1 (Coord x1)
 {
-	begin_change ();
-
-	_points[1].x = x1;
-
-	_bounding_box_dirty = true;
-	end_change ();
-
-	DEBUG_TRACE (PBD::DEBUG::CanvasItemsDirtied, "canvas item dirty: line change\n");
+	if (x1 != _points[1].x) {
+		begin_change ();
+		
+		_points[1].x = x1;
+		
+		_bounding_box_dirty = true;
+		end_change ();
+	}
 }
 
 void
 Line::set_y1 (Coord y1)
 {
-	begin_change ();
-
-	_points[1].y = y1;
-
-	_bounding_box_dirty = true;
-	end_change ();
-
-	DEBUG_TRACE (PBD::DEBUG::CanvasItemsDirtied, "canvas item dirty: line change\n");
+	if (y1 != _points[1].y) {
+		begin_change ();
+		
+		_points[1].y = y1;
+		
+		_bounding_box_dirty = true;
+		end_change ();
+	}
 }
 
 bool

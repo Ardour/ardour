@@ -64,6 +64,7 @@ struct LIBCANVAS_API Duple
 extern LIBCANVAS_API Duple operator- (Duple const &);
 extern LIBCANVAS_API Duple operator+ (Duple const &, Duple const &);
 extern LIBCANVAS_API bool operator== (Duple const &, Duple const &);
+extern LIBCANVAS_API bool operator!= (Duple const &, Duple const &);
 extern LIBCANVAS_API Duple operator- (Duple const &, Duple const &);
 extern LIBCANVAS_API Duple operator/ (Duple const &, double);
 extern LIBCANVAS_API std::ostream & operator<< (std::ostream &, Duple const &);
@@ -105,6 +106,8 @@ struct LIBCANVAS_API Rect
 		return y1 - y0;
 	}
 };
+
+extern LIBCANVAS_API bool operator!= (Rect const &, Rect const &);
 
 extern LIBCANVAS_API std::ostream & operator<< (std::ostream &, Rect const &);
 

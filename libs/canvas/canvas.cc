@@ -262,7 +262,7 @@ void
 Canvas::queue_draw_item_area (Item* item, Rect area)
 {
 	ArdourCanvas::Rect canvas_area = item->item_to_canvas (area);
-	// cerr << "CANVAS " << this << " for " << item->whatami() << ' ' << item->name << " invalidate " << area << " TRANSLATE AS " << canvas_area << " window = " << canvas_to_window (canvas_area) << std::endl;
+	// cerr << "CANVAS " << this << " for " << item << ' ' << item->whatami() << ' ' << item->name << " invalidate " << area << " TRANSLATE AS " << canvas_area << " window = " << canvas_to_window (canvas_area) << std::endl;
 	request_redraw (canvas_area);
 }
 
