@@ -608,17 +608,7 @@ TimeAxisViewItem::manage_name_highlight ()
 	if (name_highlight && wide_enough_for_name && high_enough_for_name) {
 
 		name_highlight->show();
-
-		name_highlight->set_y0 ((double) _height - NAME_HIGHLIGHT_SIZE);
-		name_highlight->set_y1 ((double) _height - 1.0);
-		
-		if (visibility & FullWidthNameHighlight) {
-			/* x0 is always 0.0 */
-			name_highlight->set_x1 (_width+RIGHT_EDGE_SHIFT);
-		} else {
-			/* x0 is always 1.0 */
-			name_highlight->set_x1 (_width+RIGHT_EDGE_SHIFT);
-		}
+		name_highlight->set (ArdourCanvas::Rect (0.0, (double) _height - NAME_HIGHLIGHT_SIZE,  _width+RIGHT_EDGE_SHIFT, (double) _height - 1.0));
 			
 	} else {
 		name_highlight->hide();
