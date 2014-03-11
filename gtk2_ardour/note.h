@@ -51,7 +51,8 @@ public:
 	void set_x1 (ArdourCanvas::Coord);
 	void set_y1 (ArdourCanvas::Coord);
 
-	void set_outline_what (int);
+        void set_outline_what (ArdourCanvas::Rectangle::What);
+        void set_outline_all ();
 
 	void set_outline_color (uint32_t);
 	void set_fill_color (uint32_t);

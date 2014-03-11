@@ -123,9 +123,15 @@ Note::set_y1 (Coord y1)
 }
 
 void
-Note::set_outline_what (int what)
+Note::set_outline_what (ArdourCanvas::Rectangle::What what)
 {
 	_rectangle->set_outline_what (what);
+}
+
+void
+Note::set_outline_all ()
+{
+	_rectangle->set_outline_all ();
 }
 
 void
