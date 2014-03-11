@@ -608,7 +608,11 @@ SystemExec::start (int stderr_mode)
 		return -1;
 	}
 
+#ifdef USE_VFORK
+	r = ::vfork();
+#else
 	r = ::fork();
+#endif
 	if (r < 0) {
 		/* failed to fork */
 		return -2;
@@ -642,28 +646,6 @@ SystemExec::start (int stderr_mode)
 		close_fd(pok[0]);
 		/* child started successfully */
 
-#if 0
-/* use fork for output-interposer
- * it will run in a separated process
- */
-		/* catch stdout thread */
-		r = ::fork();
-		if (r < 0) {
-			// failed to fork
-			terminate();
-			return -2;
-		}
-		if (r == 0) {
-			/* 2nd child process - catch stdout */
-			close_fd(pin[1]);
-			close_fd(pout[1]);
-			output_interposer();
-			exit(0);
-		}
-		close_fd(pout[1]);
-		close_fd(pin[0]);
-		close_fd(pout[0]);
-#else /* use pthread */
 		close_fd(pout[1]);
 		close_fd(pin[0]);
 		int rv = pthread_create(&thread_id_tt, NULL, interposer_thread, this);
@@ -674,10 +656,10 @@ SystemExec::start (int stderr_mode)
 			terminate();
 			return -2;
 		}
-#endif
 		return 0; /* all systems go - return to main */
 	}
 
+#ifndef USE_VFORK
 	/* child process - exec external process */
 	close_fd(pok[0]);
 	::fcntl(pok[1], F_SETFD, FD_CLOEXEC);
@@ -712,16 +694,6 @@ SystemExec::start (int stderr_mode)
 		::nice(nicelevel);
 	}
 
-#if 0
-	/* chdir to executable dir */
-	char *directory;
-	directory = strdup(cmd.c_str());
-	if (strrchr(directory, '/') != (char *) 0) {
-		::chdir(directory);
-	}
-	free(directory);
-#endif
-
 #ifdef HAVE_SIGSET
 	sigset(SIGPIPE, SIG_DFL);
 #else
@@ -738,6 +710,42 @@ SystemExec::start (int stderr_mode)
 	close_fd(pok[1]);
 	exit(-1);
 	return -1;
+#else
+
+	/* XXX this should be done before vfork()
+	 * calling malloc here only increases the time we vfork() blocks
+	 */
+	int argn = 0;
+	for (int i=0;argp[i];++i) { argn++; }
+	char **argx = (char **) malloc((argn + 10) * sizeof(char *));
+	argx[0] = strdup("/home/rgareus/src/git/ardourCairoCanvas/tools/exec_wrapper"); // XXX TODO
+
+#define FDARG(NUM, FDN) \
+	argx[NUM] = (char*) calloc(6, sizeof(char)); snprintf(argx[NUM], 6, "%d", FDN);
+
+	FDARG(1, pok[0])
+	FDARG(2, pok[1])
+	FDARG(3, pin[0])
+	FDARG(4, pin[1])
+	FDARG(5, pout[0])
+	FDARG(6, pout[1])
+	FDARG(7, stderr_mode)
+	FDARG(8, nicelevel)
+
+	for (int i=0;argp[i];++i) {
+		argx[9+i] = argp[i];
+	}
+	argx[argn+9] = NULL;
+
+	::execve(argx[0], argx, envp);
+
+	/* if we reach here something went wrong.. */
+	char buf = 0;
+	(void) ::write(pok[1], &buf, 1 );
+	close_fd(pok[1]);
+	exit(-1);
+	return -1;
+#endif
 }
 
 void
