@@ -1376,14 +1376,12 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 void
 MidiRegionView::set_height (double height)
 {
-	static const double FUDGE = 2.0;
-	const double old_height = _height;
+	double old_height = _height;
 	RegionView::set_height(height);
-	_height = height - FUDGE;
 
-	apply_note_range(midi_stream_view()->lowest_note(),
-	                 midi_stream_view()->highest_note(),
-	                 height != old_height + FUDGE);
+	apply_note_range (midi_stream_view()->lowest_note(),
+			  midi_stream_view()->highest_note(),
+			  height != old_height);
 
 	if (name_text) {
 		name_text->raise_to_top();
@@ -1520,8 +1518,9 @@ MidiRegionView::resolve_note(uint8_t note, double end_time)
 		const framepos_t end_time_frames = region_beats_to_region_frames(end_time);
 
 		_active_notes[note]->set_x1 (trackview.editor().sample_to_pixel(end_time_frames));
-		_active_notes[note]->set_outline_what (0xf);
+		_active_notes[note]->set_outline_all ();
 		_active_notes[note] = 0;
+
 	}
 }
 
@@ -1651,15 +1650,18 @@ MidiRegionView::update_note (Note* ev, bool update_ghost_regions)
 				Note* const old_rect = _active_notes[note->note()];
 				boost::shared_ptr<NoteType> old_note = old_rect->note();
 				old_rect->set_x1 (x);
-				old_rect->set_outline_what (0xF);
+				old_rect->set_outline_all ();
 			}
 			_active_notes[note->note()] = ev;
 		}
 		/* outline all but right edge */
-		ev->set_outline_what (0x1 & 0x4 & 0x8);
+		ev->set_outline_what (ArdourCanvas::Rectangle::What (
+					      ArdourCanvas::Rectangle::TOP|
+					      ArdourCanvas::Rectangle::LEFT|
+					      ArdourCanvas::Rectangle::BOTTOM));
 	} else {
 		/* outline all edges */
-		ev->set_outline_what (0xF);
+		ev->set_outline_all ();
 	}
 	
 	if (update_ghost_regions) {

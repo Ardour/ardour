@@ -4898,7 +4898,7 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	double const y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
 
 	_drag_rect->set (ArdourCanvas::Rect (x, y, x, y + floor (_region_view->midi_stream_view()->note_height ())));
-	_drag_rect->set_outline_what (0xff);
+	_drag_rect->set_outline_all ();
 	_drag_rect->set_outline_color (0xffffff99);
 	_drag_rect->set_fill_color (0xffffff66);
 }
