@@ -1348,7 +1348,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 	}
 
         pre_press_cursor = current_canvas_cursor;
-	
+
 	_track_canvas->grab_focus();
 
 	if (_session && _session->actively_recording()) {
@@ -1902,6 +1902,17 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
                 break;
 
+	case RegionItem:
+		switch (effective_mouse_mode()) {
+		case MouseRange:
+			set_canvas_cursor (_cursors->selector);
+			break;
+		default:
+			set_canvas_cursor (which_grabber_cursor());
+			break;
+		}
+		break;	
+
 	case StartSelectionTrimItem:
 		if (is_drawable()) {
 			set_canvas_cursor (_cursors->left_side_trim);
@@ -1925,6 +1936,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			}
 		}
 		break;
+
 
 	case RegionViewName:
 
@@ -2016,7 +2028,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		line->set_outline_color (0xFF0000FF);
 	}
 	break;
-	
+
 	case SelectionItem:
 		if ( get_smart_mode() ) {
 			set_canvas_cursor ();
@@ -2920,15 +2932,15 @@ Editor::set_canvas_cursor_for_region_view (double x, RegionView* rv)
 	Trimmable::CanTrim ct = rv->region()->can_trim ();
 	if (x <= h) {
 		if (ct & Trimmable::FrontTrimEarlier) {
-			set_canvas_cursor (_cursors->left_side_trim);
+			set_canvas_cursor (_cursors->left_side_trim, true);
 		} else {
-			set_canvas_cursor (_cursors->left_side_trim_right_only);
+			set_canvas_cursor (_cursors->left_side_trim_right_only, true);
 		}
 	} else {
 		if (ct & Trimmable::EndTrimLater) {
-			set_canvas_cursor (_cursors->right_side_trim);
+			set_canvas_cursor (_cursors->right_side_trim, true);
 		} else {
-			set_canvas_cursor (_cursors->right_side_trim_left_only);
+			set_canvas_cursor (_cursors->right_side_trim_left_only, true);
 		}
 	}
 }
