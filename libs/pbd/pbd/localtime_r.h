@@ -9,7 +9,7 @@
 
 #elif defined __MINGW64__
 
-#  ifdef (localtime_r)
+#  ifdef localtime_r
 #  undef localtime_r
 #  endif
 
