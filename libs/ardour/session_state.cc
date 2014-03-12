@@ -3602,8 +3602,6 @@ Session::rename (const std::string& new_name)
 
 	string const old_sources_root = _session_dir->sources_root();
 
-#define RENAME ::rename
-
 	/* Rename:
 
 	 * session directory
@@ -3665,7 +3663,8 @@ Session::rename (const std::string& new_name)
 
 		cerr << "Rename " << oldstr << " => " << newstr << endl;		
 
-		if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
+		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
+			error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 			return 1;
 		}
 
@@ -3692,7 +3691,8 @@ Session::rename (const std::string& new_name)
 		
 		cerr << "Rename " << oldstr << " => " << newstr << endl;
 		
-		if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
+		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
+			error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 			return 1;
 		}
 	}
@@ -3704,7 +3704,8 @@ Session::rename (const std::string& new_name)
 	
 	cerr << "Rename " << oldstr << " => " << newstr << endl;		
 
-	if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
+	if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
+		error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 		return 1;
 	}
 
@@ -3718,7 +3719,8 @@ Session::rename (const std::string& new_name)
 		
 		cerr << "Rename " << oldstr << " => " << newstr << endl;		
 		
-		if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
+		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
+			error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 			return 1;
 		}
 	}
@@ -3754,8 +3756,6 @@ Session::rename (const std::string& new_name)
 	store_recent_sessions (new_name, _path);
 
 	return 0;
-
-#undef RENAME
 }
 
 int
