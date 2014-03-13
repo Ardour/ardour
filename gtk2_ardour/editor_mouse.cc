@@ -623,7 +623,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	   to cut notes or regions.
 	*/
 
-	MouseMode eff_mouse_mode = effective_mouse_mode ();
+	MouseMode eff_mouse_mode = mouse_mode;
 
 	if (get_smart_mode() && eff_mouse_mode == MouseRange && event->button.button == 3 && item_type == RegionItem) {
 		/* context clicks are always about object properties, even if
@@ -632,13 +632,15 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		eff_mouse_mode = MouseObject;
 	}
 
-	if (((eff_mouse_mode != MouseObject) &&
-	     (eff_mouse_mode != MouseAudition || item_type != RegionItem) &&
-	     (eff_mouse_mode != MouseTimeFX || item_type != RegionItem) &&
-	     (eff_mouse_mode != MouseGain) &&
-	     (eff_mouse_mode != MouseDraw)) ||
+	if (((mouse_mode != MouseObject) &&
+	     (mouse_mode != MouseAudition || item_type != RegionItem) &&
+	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
+	     (mouse_mode != MouseGain) &&
+	     (mouse_mode != MouseDraw)) ||
 	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3) ||
-	    (internal_editing() && eff_mouse_mode != MouseTimeFX)) {
+	    (internal_editing() && mouse_mode != MouseTimeFX)) {
+
+		cerr << "gone\n";
 
 		return;
 	}
@@ -684,7 +686,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
  	case RegionViewName:
 	case LeftFrameHandle:
 	case RightFrameHandle:
-		if ( mouse_mode != MouseRange ) {
+		if (eff_mouse_mode != MouseRange) {
 			set_selected_regionview_from_click (press, op);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			set_selected_track_as_side_effect (op);
@@ -697,7 +699,8 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	case FadeOutItem:
 	case StartCrossFadeItem:
 	case EndCrossFadeItem:
-		if ( mouse_mode != MouseRange ) {
+		if (eff_mouse_mode != MouseRange) {
+			cerr << "Should be setting selected regionview\n";
 			set_selected_regionview_from_click (press, op);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			set_selected_track_as_side_effect (op);
@@ -706,7 +709,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
 	case ControlPointItem:
 		set_selected_track_as_side_effect (op);
-		if ( mouse_mode != MouseRange ) {
+		if (eff_mouse_mode != MouseRange) {
 			set_selected_control_point_from_click (press, op);
 		}
 		break;
