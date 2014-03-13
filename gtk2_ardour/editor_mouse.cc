@@ -640,8 +640,6 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3) ||
 	    (internal_editing() && mouse_mode != MouseTimeFX)) {
 
-		cerr << "gone\n";
-
 		return;
 	}
 
