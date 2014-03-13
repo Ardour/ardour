@@ -47,7 +47,7 @@ Note::~Note ()
 void
 Note::move_event (double dx, double dy)
 {
-	_rectangle->move (Duple (dx, dy));
+	_rectangle->set (_rectangle->get().translate (Duple (dx, dy)));
 }
 
 Coord

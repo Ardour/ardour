@@ -47,7 +47,12 @@ Hit::~Hit ()
 void
 Hit::move_event (double dx, double dy)
 {
-	_polygon->move (Duple (dx, dy));
+	Points points = _polygon->get();
+	Points moved;
+	for (Points::iterator p = points.begin(); p != points.end(); ++p) {
+		moved.push_back ((*p).translate (ArdourCanvas::Duple (dx, dy)));
+	}
+	_polygon->set (moved);
 }
 
 void
