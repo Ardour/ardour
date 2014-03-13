@@ -74,7 +74,9 @@ children = [
         'mcp',
         'patchfiles',
         'headless',
+        # shared helper binaries (plugin-scanner, exec-wrapper)
         'libs/fst',
+        'libs/vfork',
 ]
 
 i18n_children = [

@@ -22,11 +22,11 @@
 
 #include <string>
 
-#include "pbd/system_exec.h"
 #include "ardour/ardour.h"
 #include "ardour/types.h"
 #include "ardour/session.h"
 #include "ardour/session_handle.h"
+#include "ardour/system_exec.h"
 
 namespace ARDOUR {
 	class Session;
@@ -83,7 +83,7 @@ class VideoMonitor : public sigc::trackable , public ARDOUR::SessionHandlePtr, p
 
 	protected:
 	PublicEditor *editor;
-	PBD::SystemExec *process;
+	ARDOUR::SystemExec *process;
 	float fps;
 	void parse_output (std::string d, size_t s);
 	void terminated ();

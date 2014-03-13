@@ -1,0 +1,44 @@
+vfork-exec-wrapper
+==================
+
+A tiny tool that redirects stdio file-descriptors and executes a program.
+
+Motivation
+----------
+
+Ardour can start external helper applications for various purposes
+(e.g. video-server, video-monitor, plugin-scanner, post-export scripts,...)
+and has the need to bidirectionally communicate with the external app.
+
+On POSIX platforms (OSX, GNU/Linux, BSD,..) launching an external app is a
+combination of fork() and execve(2). The problem with that is that fork(2)
+duplicates the complete page-table (incl. allocated locked memory, and 
+file-descriptors) which -  even if fork(2) is done from a non-realtime
+thread - may cause audio I/O glitches or worse out-of-memory errors if
+the mlock(2) limit is reached.
+
+vfork(2) on the other hand "is a special case of clone(2). It is used to
+create new processes without copying the page tables of the parent process.
+It may be useful in performance-sensitive applications where a child is
+created which then immediately issues an execve(2)." [vfork man page].
+
+The problem with vfork(2) is that file-descriptors are not cloned, which
+makes bi-directional communication impossible without additional work.
+This is exactly what this vfork-exec-wrapper does: It takes a list of
+file-descriptors, re-directs them to stdio and calls execve(2) again.
+
+This code was previously in pbd/system_exec.cc (done after fork(2),
+which become a NOOP with vfork(2)).
+
+Usage
+-----
+
+ardour-exec-wrapper <file-des> <mode> <nice> <command> [args]
+
+ardour-exec-wrapper takes three pairs of file-descriptors, stderr mode,
+nice-level followed by the command to execute and optional arguments.
+
+The first set FDs is used to communicate failure back to the parent process.
+They are closed if execve(2) succeeds. The following two FDs are stdin and
+stdout. The mode specifies handling of stderr: 0: keep stderr, 1: close and
+ignore, 2: merge stderr into stdout.

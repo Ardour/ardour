@@ -107,7 +107,7 @@ class LIBPBD_API SystemExec
 		 * @return If the process is already running or was launched successfully
 		 * the function returns zero (0). A negative number indicates an error.
 		 */
-		int start (int stderr_mode = 1);
+		int start (int stderr_mode, const char *_vfork_exec_wrapper);
 		/** kill running child-process
 		 *
 		 * if a child process exists trt to shut it down by closing its STDIN.

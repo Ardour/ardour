@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <signal.h>
 
 #ifndef STDIN_FILENO
 #define STDIN_FILENO 0
@@ -81,6 +82,12 @@ int main(int argc, char *argv[]) {
 		envp = (char **) realloc(envp, (i+2) * sizeof(char*));
 	}
 	envp[i] = 0;
+
+#ifdef HAVE_SIGSET
+	sigset(SIGPIPE, SIG_DFL);
+#else
+	signal(SIGPIPE, SIG_DFL);
+#endif
 
 	/* all systems go */
 	execve(argv[9], &argv[9], envp);

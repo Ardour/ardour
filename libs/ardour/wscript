@@ -197,6 +197,7 @@ libardour_sources = [
         'speakers.cc',
         'srcfilesource.cc',
         'strip_silence.cc',
+        'system_exec.cc',
         'revision.cc',
         'tape_file_matcher.cc',
         'template_utils.cc',

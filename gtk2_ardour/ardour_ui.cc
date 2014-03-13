@@ -52,7 +52,6 @@
 #include "pbd/openuri.h"
 #include "pbd/file_utils.h"
 #include "pbd/localtime_r.h"
-#include "pbd/system_exec.h"
 
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/bindings.h"
@@ -81,6 +80,7 @@
 #include "ardour/session_state_utils.h"
 #include "ardour/session_utils.h"
 #include "ardour/slave.h"
+#include "ardour/system_exec.h"
 
 #ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
@@ -3517,7 +3517,7 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 			delete video_server_process;
 		}
 
-		video_server_process = new SystemExec(icsd_exec, argp);
+		video_server_process = new ARDOUR::SystemExec(icsd_exec, argp);
 		if (video_server_process->start()) {
 			warning << _("Cannot launch the video-server") << endmsg;
 			continue;

@@ -43,6 +43,8 @@
 #endif
 
 
+#define USE_VFORK
+
 #include "pbd/system_exec.h"
 
 using namespace std;
@@ -51,7 +53,7 @@ using namespace PBD;
 static void * interposer_thread (void *arg);
 static void close_fd (int& fd) { if (fd >= 0) ::close (fd); fd = -1; }
 
-#ifndef PLATFORM_WINDOWS
+#if (!defined PLATFORM_WINDOWS && defined NO_VFORK)
 /*
  * This function was part of libasyncns.
  * LGPL v2.1
@@ -146,7 +148,7 @@ static int close_allv(const int except_fds[]) {
 
 	return 0;
 }
-#endif /* not on windows */
+#endif /* not on windows, nor vfork */
 
 
 SystemExec::SystemExec (std::string c, std::string a)
@@ -324,7 +326,7 @@ SystemExec::is_running ()
 }
 
 int
-SystemExec::start (int stderr_mode)
+SystemExec::start (int stderr_mode, const char * /*vfork_exec_wrapper*/)
 {
 	char* working_dir = 0;
 
@@ -596,7 +598,7 @@ SystemExec::is_running ()
 }
 
 int
-SystemExec::start (int stderr_mode)
+SystemExec::start (int stderr_mode, const char *vfork_exec_wrapper)
 {
 	if (is_running()) {
 		return 0; // mmh what to return here?
@@ -608,7 +610,7 @@ SystemExec::start (int stderr_mode)
 		return -1;
 	}
 
-#ifdef USE_VFORK
+#ifndef NO_VFORK
 	r = ::vfork();
 #else
 	r = ::fork();
@@ -631,11 +633,11 @@ SystemExec::start (int stderr_mode)
 				/* child process returned from execve */
 				pid=0;
 				close_fd(pok[0]);
+				close_fd(pok[1]);
 				close_fd(pin[1]);
 				close_fd(pin[0]);
 				close_fd(pout[1]);
 				close_fd(pout[0]);
-				pin[1] = -1;
 				return -3;
 			} else if ( n==-1 ) {
 				 if ( errno==EAGAIN || errno==EINTR )
@@ -659,7 +661,7 @@ SystemExec::start (int stderr_mode)
 		return 0; /* all systems go - return to main */
 	}
 
-#ifndef USE_VFORK
+#ifdef NO_VFORK
 	/* child process - exec external process */
 	close_fd(pok[0]);
 	::fcntl(pok[1], F_SETFD, FD_CLOEXEC);
@@ -713,12 +715,12 @@ SystemExec::start (int stderr_mode)
 #else
 
 	/* XXX this should be done before vfork()
-	 * calling malloc here only increases the time we vfork() blocks
+	 * calling malloc here only increases the time vfork() blocks
 	 */
 	int argn = 0;
 	for (int i=0;argp[i];++i) { argn++; }
 	char **argx = (char **) malloc((argn + 10) * sizeof(char *));
-	argx[0] = strdup("/home/rgareus/src/git/ardourCairoCanvas/tools/exec_wrapper"); // XXX TODO
+	argx[0] = strdup(vfork_exec_wrapper); // XXX
 
 #define FDARG(NUM, FDN) \
 	argx[NUM] = (char*) calloc(6, sizeof(char)); snprintf(argx[NUM], 6, "%d", FDN);
