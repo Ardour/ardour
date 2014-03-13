@@ -52,7 +52,11 @@ MidiControlUI::MidiControlUI (Session& s)
 
 MidiControlUI::~MidiControlUI ()
 {
+	/* stop the thread */
+	quit ();
+	/* drop all ports as GIO::Sources */
 	clear_ports ();
+	/* we no longer exist */
 	_instance = 0;
 }
 
