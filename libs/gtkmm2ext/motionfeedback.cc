@@ -475,7 +475,6 @@ MotionFeedback::render_pixbuf (int size)
 	GError *error = NULL;
 
 	fd = g_file_open_tmp ("mfimgXXXXXX", &path, &error);
-	close (fd);
 
 	if(error) {
 		g_critical("failed to open a temporary file for writing: %s.", error->message);
