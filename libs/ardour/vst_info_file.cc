@@ -125,12 +125,13 @@ vstfx_infofile_path (const char* dllpath, int personal)
 	return vstfx_cache_file(dllpath, personal, EXT_INFOFILE);
 }
 
+#ifndef VST_SCANNER_APP
 static string
 vstfx_errorfile_path (const char* dllpath, int personal)
 {
 	return vstfx_cache_file(dllpath, personal, EXT_ERRORFILE);
 }
-
+#endif
 
 
 /* *** MEMORY MANAGEMENT *** */
@@ -406,6 +407,7 @@ vstfx_un_blacklist (const char *dllpath)
 	::g_unlink(vstfx_blacklist_path (dllpath, 1).c_str());
 }
 
+#ifndef VST_SCANNER_APP
 /** remove info file from cache */
 static void
 vstfx_remove_infofile (const char *dllpath)
@@ -413,6 +415,7 @@ vstfx_remove_infofile (const char *dllpath)
 	::g_unlink(vstfx_infofile_path (dllpath, 0).c_str());
 	::g_unlink(vstfx_infofile_path (dllpath, 1).c_str());
 }
+#endif
 
 /** helper function, check if cache is newer than plugin
  * @return path to cache file */
