@@ -334,7 +334,10 @@ Editor::update_marker_labels (ArdourCanvas::Group* group)
 
 	list<Marker*>::iterator prev = sorted.end ();
 	list<Marker*>::iterator next = i;
-	++next;
+
+	if (next != sorted.end()) {
+		++next;
+	}
 
 	while (i != sorted.end()) {
 
