@@ -96,7 +96,5 @@ int main(int argc, char *argv[]) {
 	char buf = 0;
 	(void) write(pok[1], &buf, 1 );
 	close_fd(&pok[1]);
-	exit(-1);
 	return -1;
 }
-
