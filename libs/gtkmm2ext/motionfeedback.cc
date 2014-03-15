@@ -476,60 +476,64 @@ MotionFeedback::render_pixbuf (int size)
 
 	fd = g_file_open_tmp ("mfimgXXXXXX", &path, &error);
 
-	if(error) {
+	if (error) {
 		g_critical("failed to open a temporary file for writing: %s.", error->message);
 		g_error_free (error);
                 return pixbuf;
-	}
-        
-	GdkColor col2 = {0,0,0,0};
-	GdkColor col3 = {0,0,0,0};
-        GdkColor dark;
-        GdkColor bright;
-        ProlooksHSV* hsv;
-
-	hsv = prolooks_hsv_new_for_gdk_color (base_color->gobj());
-	bright = (prolooks_hsv_to_gdk_color (hsv, &col2), col2);
-	prolooks_hsv_set_saturation (hsv, 0.66);
-	prolooks_hsv_set_value (hsv, 0.67);
-	dark = (prolooks_hsv_to_gdk_color (hsv, &col3), col3);
-
-        cairo_surface_t *surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, size * 64, size);
-        cairo_t* cr = cairo_create (surface);
-
-        for (int i = 0; i < 64; ++i) {
-                cairo_save (cr);
-                core_draw (cr, i, size, 20, size*i, 0, &bright, &dark);
-                cairo_restore (cr);
-        }
-
-        if (cairo_surface_write_to_png (surface, path) != CAIRO_STATUS_SUCCESS) {
-                std::cerr << "could not save image set to " << path << std::endl;
-                return pixbuf;
-        }
-
-        close (fd);
-
-        cairo_destroy (cr);
-        cairo_surface_destroy (surface);
-
-	try {
-		pixbuf = Gdk::Pixbuf::create_from_file (path);
-	} catch (const Gdk::PixbufError &e) {
-                std::cerr << "Caught PixbufError: " << e.what() << std::endl;
-                ::g_unlink (path);
-                throw;
-	} catch (...) {
-                ::g_unlink (path);
-		g_message("Caught ... ");
-                throw;
+	} else {
+		g_close (fd, &error); // No need to keep open. 'cairo_surface_write_to_png()' will re-open our temp file, later
 	}
 
-        ::g_unlink (path);
+	if (!error) {
+		GdkColor col2 = {0,0,0,0};
+		GdkColor col3 = {0,0,0,0};
+			GdkColor dark;
+			GdkColor bright;
+			ProlooksHSV* hsv;
 
-	g_free(path);
+		hsv = prolooks_hsv_new_for_gdk_color (base_color->gobj());
+		bright = (prolooks_hsv_to_gdk_color (hsv, &col2), col2);
+		prolooks_hsv_set_saturation (hsv, 0.66);
+		prolooks_hsv_set_value (hsv, 0.67);
+		dark = (prolooks_hsv_to_gdk_color (hsv, &col3), col3);
 
-        return pixbuf;
+			cairo_surface_t *surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, size * 64, size);
+			cairo_t* cr = cairo_create (surface);
+
+			for (int i = 0; i < 64; ++i) {
+					cairo_save (cr);
+					core_draw (cr, i, size, 20, size*i, 0, &bright, &dark);
+					cairo_restore (cr);
+			}
+
+			if (cairo_surface_write_to_png (surface, path) != CAIRO_STATUS_SUCCESS) {
+					std::cerr << "could not save image set to " << path << std::endl;
+					return pixbuf;
+			}
+
+			cairo_destroy (cr);
+			cairo_surface_destroy (surface);
+
+		try {
+			pixbuf = Gdk::Pixbuf::create_from_file (path);
+		} catch (const Gdk::PixbufError &e) {
+					std::cerr << "Caught PixbufError: " << e.what() << std::endl;
+					::g_unlink (path);
+					throw;
+		} catch (...) {
+					::g_unlink (path);
+			g_message("Caught ... ");
+					throw;
+		}
+
+			::g_unlink (path);
+
+		g_free(path);
+	} else {
+		g_error_free (error);
+	}
+
+    return pixbuf;
 } 
 
 void
