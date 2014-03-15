@@ -360,11 +360,12 @@ Editor::update_marker_labels (ArdourCanvas::Group* group)
 			} else {
 				(*i)->set_right_label_limit (p);
 			}
+
+			++next;
 		}
 
 		prev = i;
 		++i;
-		++next;
 	}
 }
 
