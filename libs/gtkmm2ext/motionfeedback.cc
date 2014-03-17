@@ -31,15 +31,21 @@
 #include <gtkmm.h>
 
 #include "pbd/controllable.h"
+#include "pbd/compose.h"
+#include "pbd/error.h"
 
 #include "gtkmm2ext/motionfeedback.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/prolooks-helpers.h"
 #include "gtkmm2ext/gui_thread.h"
 
+#include "i18n.h"
+
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace sigc;
+
+using PBD::error;
 
 Gdk::Color* MotionFeedback::base_color;
 
@@ -472,68 +478,60 @@ MotionFeedback::render_pixbuf (int size)
         Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 	char *path;
         int fd;
-	GError *error = NULL;
+	GError *gerror = NULL;
 
-	fd = g_file_open_tmp ("mfimgXXXXXX", &path, &error);
+	fd = g_file_open_tmp ("mfimgXXXXXX", &path, &gerror);
 
-	if (error) {
-		g_critical("failed to open a temporary file for writing: %s.", error->message);
-		g_error_free (error);
+	if (gerror) {
+		error << string_compose (_("motionfeedback: failed to open a temporary file for writing: %1"), gerror->message) << endmsg;
+		g_error_free (gerror);
                 return pixbuf;
 	} else {
-		g_close (fd, &error); // No need to keep open. 'cairo_surface_write_to_png()' will re-open our temp file, later
+		::close (fd);
 	}
 
-	if (!error) {
-		GdkColor col2 = {0,0,0,0};
-		GdkColor col3 = {0,0,0,0};
-			GdkColor dark;
-			GdkColor bright;
-			ProlooksHSV* hsv;
 
-		hsv = prolooks_hsv_new_for_gdk_color (base_color->gobj());
-		bright = (prolooks_hsv_to_gdk_color (hsv, &col2), col2);
-		prolooks_hsv_set_saturation (hsv, 0.66);
-		prolooks_hsv_set_value (hsv, 0.67);
-		dark = (prolooks_hsv_to_gdk_color (hsv, &col3), col3);
-
-			cairo_surface_t *surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, size * 64, size);
-			cairo_t* cr = cairo_create (surface);
-
-			for (int i = 0; i < 64; ++i) {
-					cairo_save (cr);
-					core_draw (cr, i, size, 20, size*i, 0, &bright, &dark);
-					cairo_restore (cr);
-			}
-
-			if (cairo_surface_write_to_png (surface, path) != CAIRO_STATUS_SUCCESS) {
-					std::cerr << "could not save image set to " << path << std::endl;
-					return pixbuf;
-			}
-
-			cairo_destroy (cr);
-			cairo_surface_destroy (surface);
-
-		try {
-			pixbuf = Gdk::Pixbuf::create_from_file (path);
-		} catch (const Gdk::PixbufError &e) {
-					std::cerr << "Caught PixbufError: " << e.what() << std::endl;
-					::g_unlink (path);
-					throw;
-		} catch (...) {
-					::g_unlink (path);
-			g_message("Caught ... ");
-					throw;
-		}
-
-			::g_unlink (path);
-
-		g_free(path);
-	} else {
-		g_error_free (error);
+	GdkColor col2 = {0,0,0,0};
+	GdkColor col3 = {0,0,0,0};
+	GdkColor dark;
+	GdkColor bright;
+	ProlooksHSV* hsv;
+		
+	hsv = prolooks_hsv_new_for_gdk_color (base_color->gobj());
+	bright = (prolooks_hsv_to_gdk_color (hsv, &col2), col2);
+	prolooks_hsv_set_saturation (hsv, 0.66);
+	prolooks_hsv_set_value (hsv, 0.67);
+	dark = (prolooks_hsv_to_gdk_color (hsv, &col3), col3);
+		
+	cairo_surface_t *surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, size * 64, size);
+	cairo_t* cr = cairo_create (surface);
+		
+	for (int i = 0; i < 64; ++i) {
+		cairo_save (cr);
+		core_draw (cr, i, size, 20, size*i, 0, &bright, &dark);
+		cairo_restore (cr);
+	}
+		
+	if (cairo_surface_write_to_png (surface, path) != CAIRO_STATUS_SUCCESS) {
+		error << string_compose (_("motionfeedback: could not save image set to %1"), path) << endmsg;
+		return pixbuf;
+	}
+		
+	cairo_destroy (cr);
+	cairo_surface_destroy (surface);
+		
+	try {
+		pixbuf = Gdk::Pixbuf::create_from_file (path);
+	} catch (const Gdk::PixbufError &e) {
+		error << string_compose (_("motionfeedback: caught PixbufError: %1"), e.what()) << endmsg;
+	} catch (...) {
+		error << _("motionfeedback: unknown exception") << endmsg;
 	}
 
-    return pixbuf;
+	g_unlink (path);
+	g_free (path);
+	
+	return pixbuf;
 } 
 
 void
