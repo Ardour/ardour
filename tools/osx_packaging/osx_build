@@ -374,6 +374,13 @@ cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
 # Suil modules
 cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Frameworks
 
+# VST scanner app and wrapper script, if they exist
+cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $Frameworks/ || true
+
+# vfork wrapper
+cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $Frameworks/
+
+
 while [ true ] ; do 
     missing=false
     for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib $Plugins/*.so ; do 
