@@ -63,7 +63,24 @@ PannerManager::instance ()
 
 static bool panner_filter (const string& str, void */*arg*/)
 {
-#ifdef __APPLE__
+#ifdef COMPILER_MSVC
+   /**
+    * Different build targets (Debug / Release etc) use different versions
+    * of the 'C' runtime (which can't be 'mixed & matched'). Therefore, in
+    * case the supplied search path contains multiple version(s) of a given
+    * panner module, only select the one(s) which match the current build
+    * target (otherwise, all hell will break loose !!)
+    */
+	#if defined (_DEBUG)
+		return str.length() > 12 && (str.find ("panner_") == 0) && (str.find ("D.dll") == (str.length() - 5));
+	#elif defined (RDC_BUILD)
+		return str.length() > 14 && (str.find ("panner_") == 0) && (str.find ("RDC.dll") == (str.length() - 7));
+	#elif defined (_WIN64)
+		return str.length() > 13 && (str.find ("panner_") == 0) && (str.find ("64.dll") == (str.length() - 6));
+	#else
+		return str.length() > 13 && (str.find ("panner_") == 0) && (str.find ("32.dll") == (str.length() - 6));
+	#endif
+#elif defined (__APPLE__)
 	return str[0] != '.' && (str.length() > 6 && str.find (".dylib") == (str.length() - 6));
 #else
 	return str[0] != '.' && (str.length() > 3 && (str.find (".so") == (str.length() - 3) || str.find (".dll") == (str.length() - 4)));

@@ -29,6 +29,11 @@
 /* #define to zero for a more conventional Debug build */
 #endif
 
+#if !defined(DEBUG) && !defined(NDEBUG)
+/* Assume a debuggable Release build (RDC build) */
+#define RDC_BUILD 1
+#endif
+
 #ifndef __midl
 #if defined(_DEBUG) || defined (DEBUG)
 /* Experimental - link to the lowest DebugCRT so we can run on another system */
