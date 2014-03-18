@@ -41,7 +41,7 @@ int main (int argc, char **argv) {
 	}
 
 	char *dllpath = argv[1];
-	std::vector<VSTInfo *> *infos;
+	std::vector<VSTInfo *> *infos = 0;
 #ifdef LXVST_SUPPORT
 	if (strstr (dllpath, ".so")) {
 		infos = vstfx_get_info_lx(dllpath);
@@ -54,7 +54,7 @@ int main (int argc, char **argv) {
 	}
 #endif
 
-	if (infos->empty()) {
+	if (!infos || infos->empty()) {
 		return EXIT_FAILURE;
 	} else {
 		return EXIT_SUCCESS;
