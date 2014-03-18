@@ -244,7 +244,7 @@ SessionEventManager::_remove_event (SessionEvent* ev)
 			if (i == next_event) {
 				++next_event;
 			}
-			events.erase (i);
+			i = events.erase (i);
 			break;
 		}
 	}
