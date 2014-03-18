@@ -725,7 +725,7 @@ RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
 		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_track_mode, _1, mode, false));
 	} else {
 
-		bool needs_bounce;
+		bool needs_bounce = false;
 
 		if (!track()->can_use_mode (mode, needs_bounce)) {
 

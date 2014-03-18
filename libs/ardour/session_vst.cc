@@ -261,7 +261,7 @@ intptr_t Session::vst_callback (
 	case audioMasterProcessEvents:
 		SHOW_CALLBACK ("amc: audioMasterProcessEvents\n");
 		// VstEvents* in <ptr>
-		if (plug->midi_buffer()) {
+		if (plug && plug->midi_buffer()) {
 			VstEvents* v = (VstEvents*)ptr;
 			for (int n = 0 ; n < v->numEvents; ++n) {
 				VstMidiEvent *vme = (VstMidiEvent*) (v->events[n]->dump);
