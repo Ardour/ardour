@@ -46,6 +46,7 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 	m_avoffset = m_lead_in = m_lead_out = 0;
 	m_width = m_height = 0;
 	m_aspect = m_fps = 0;
+	m_sar = "";
 #if 1 /* tentative debug mode */
 	debug_enable = false;
 #endif
@@ -138,6 +139,7 @@ TranscodeFfmpeg::probe ()
 	m_width = m_height = 0;
 	m_fps = m_aspect = 0;
 	m_duration = 0;
+	m_sar.clear();
 	m_codec.clear();
 	m_audio.clear();
 
@@ -199,6 +201,13 @@ TranscodeFfmpeg::probe ()
 						m_duration = atof(value) * m_fps * timebase;
 					} else if (key == X_("duration") && m_fps != 0 && m_duration == 0) {
 						m_duration = atof(value) * m_fps;
+					} else if (key == X_("sample_aspect_ratio")) {
+						std::string::size_type pos;
+						pos = value.find_first_of(':');
+						if (pos != std::string::npos && atof(value.substr(pos+1)) != 0) {
+							m_sar = value;
+							m_sar.replace(pos, 1, "/");
+						}
 					} else if (key == X_("display_aspect_ratio")) {
 						std::string::size_type pos;
 						pos = value.find_first_of(':');
@@ -340,20 +349,28 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 	if (m_lead_in != 0 && m_lead_out != 0) {
 		std::ostringstream osstream;
 		argp[a++] = strdup("-vf");
-		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_in << X_(" [pre]; ");
-		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_out << X_(" [post]; ");
+		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_in;
+		if (!m_sar.empty()) osstream << X_(":sar=") << m_sar;
+		osstream << X_(" [pre]; ");
+		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_out;
+		if (!m_sar.empty()) osstream << X_(":sar=") << m_sar;
+		osstream << X_(" [post]; ");
 		osstream << X_("[pre] [in] [post] concat=n=3");
 		argp[a++] = strdup(osstream.str().c_str());
 	} else if (m_lead_in != 0) {
 		std::ostringstream osstream;
 		argp[a++] = strdup("-vf");
-		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_in << X_(" [pre]; ");
+		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_in;
+		if (!m_sar.empty()) osstream << X_(":sar=") << m_sar;
+		osstream << X_(" [pre]; ");
 		osstream << X_("[pre] [in] concat=n=2");
 		argp[a++] = strdup(osstream.str().c_str());
 	} else if (m_lead_out != 0) {
 		std::ostringstream osstream;
 		argp[a++] = strdup("-vf");
-		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_out << X_(" [post]; ");
+		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_out;
+		if (!m_sar.empty()) osstream << X_(":sar=") << m_sar;
+		osstream << X_(" [post]; ");
 		osstream << X_("[in] [post] concat=n=2");
 		argp[a++] = strdup(osstream.str().c_str());
 	}
