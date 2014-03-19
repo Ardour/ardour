@@ -225,8 +225,11 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	t->attach (*l, 0, 1, 2, 3);
 	audio_combo.set_name ("PaddedButton");
 	t->attach (audio_combo, 1, 4, 2, 3);
-	audio_combo.append_text("No audio");
-	if (as.size() > 0) {
+	if (as.size() == 0) {
+		audio_combo.append_text(_("No audio Track Present"));
+		audio_combo.set_sensitive(false);
+	} else {
+		audio_combo.append_text(_("Do not Extract Audio"));
 		for (TranscodeFfmpeg::FFAudioStreams::iterator it = as.begin(); it < as.end(); ++it) {
 			audio_combo.append_text((*it).name);
 		}
