@@ -60,13 +60,8 @@ user_config_directory ()
 		p = c;
 	} else {
 #ifdef PLATFORM_WINDOWS
-		std::string home_dir;
-
-		if (0 != PBD::get_win_special_folder(CSIDL_LOCAL_APPDATA)) {
-			home_dir = PBD::get_win_special_folder(CSIDL_LOCAL_APPDATA);
-			home_dir += "\\";
-			home_dir += PROGRAM_NAME;
-		}
+		// Not technically the home dir (since it needs to be a writable folder)
+		const string home_dir = Glib::build_filename (Glib::get_user_config_dir(), user_config_dir_name);
 #else
 		const string home_dir = Glib::get_home_dir();
 #endif
@@ -80,7 +75,9 @@ user_config_directory ()
 	}
 #endif
 
+#ifndef PLATFORM_WINDOWS
 	p = Glib::build_filename (p, user_config_dir_name);
+#endif
 
 	if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
 		if (g_mkdir_with_parents (p.c_str(), 0755)) {
@@ -111,25 +108,16 @@ user_cache_directory ()
 
 	/* adopt freedesktop standards, and put .ardour3 into $XDG_CACHE_HOME
 	 * defaulting to or ~/.config
-	 *
-	 * NB this should work on windows, too, but we may want to prefer
-	 * PBD::get_platform_fallback_folder (PBD::FOLDER_VST) or someplace
 	 */
 	if ((c = getenv ("XDG_CACHE_HOME")) != 0) {
 		p = c;
 	} else {
 #ifdef PLATFORM_WINDOWS
-		std::string home_dir;
-
-		if (0 != PBD::get_win_special_folder(CSIDL_LOCAL_APPDATA)) {
-			home_dir = PBD::get_win_special_folder(CSIDL_LOCAL_APPDATA);
-			home_dir += "\\";
-			home_dir += PROGRAM_NAME;
-		}
+		// Not technically the home dir (since it needs to be a writable folder)
+		const string home_dir = Glib::build_filename (Glib::get_user_data_dir(), user_config_dir_name);
 #else
 		const string home_dir = Glib::get_home_dir();
 #endif
-
 		if (home_dir.empty ()) {
 			error << "Unable to determine home directory" << endmsg;
 			exit (1);
@@ -140,7 +128,9 @@ user_cache_directory ()
 	}
 #endif
 
+#ifndef PLATFORM_WINDOWS
 	p = Glib::build_filename (p, user_config_dir_name);
+#endif
 
 	if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
 		if (g_mkdir_with_parents (p.c_str(), 0755)) {
