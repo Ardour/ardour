@@ -179,15 +179,17 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	options_box->pack_start (*l, false, true, 4);
 
 	video_combo.set_name ("PaddedButton");
-	video_combo.append_text(_("Do Not Import Video"));
-	video_combo.append_text(_("Reference From Current Location"));
+	video_combo.append_text(_("Reference From Current Location (Previously Transcoded Files Only)"));
 	if (ffok)  {
 		video_combo.append_text(_("Import/Transcode Video to Session"));
-		video_combo.set_active(2);
-	} else {
 		video_combo.set_active(1);
+	} else {
+		video_combo.set_active(0);
 		video_combo.set_sensitive(false);
 		audio_combo.set_sensitive(false);
+	}
+	if (as.size() > 0) {
+		video_combo.append_text(_("Do Not Import Video (Audio Import Only)"));
 	}
 
 	options_box->pack_start (video_combo, false, false, 4);
@@ -228,10 +230,10 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	audio_combo.set_name ("PaddedButton");
 	t->attach (audio_combo, 1, 4, 2, 3);
 	if (as.size() == 0) {
-		audio_combo.append_text(_("No audio Track Present"));
+		audio_combo.append_text(_("No Audio Track Present"));
 		audio_combo.set_sensitive(false);
 	} else {
-		audio_combo.append_text(_("Do not Extract Audio"));
+		audio_combo.append_text(_("Do Not Extract Audio"));
 		for (TranscodeFfmpeg::FFAudioStreams::iterator it = as.begin(); it < as.end(); ++it) {
 			audio_combo.append_text((*it).name);
 		}
@@ -369,7 +371,7 @@ TranscodeVideoDialog::dialog_progress_mode ()
 void
 TranscodeVideoDialog::launch_transcode ()
 {
-	if (video_combo.get_active_row_number() != 2) {
+	if (video_combo.get_active_row_number() != 1) {
 		launch_audioonly();
 		return;
 	}
@@ -418,8 +420,8 @@ TranscodeVideoDialog::launch_transcode ()
 void
 TranscodeVideoDialog::video_combo_changed ()
 {
-	int i = video_combo.get_active_row_number();
-	if (i != 2) {
+	const int i = video_combo.get_active_row_number();
+	if (i != 1) {
 		scale_combo.set_sensitive(false);
 		aspect_checkbox.set_sensitive(false);
 		height_spinner.set_sensitive(false);
@@ -432,12 +434,19 @@ TranscodeVideoDialog::video_combo_changed ()
 		bitrate_checkbox.set_sensitive(true);
 		bitrate_spinner.set_sensitive(true);
 	}
+	if (i == 2 && audio_combo.get_active_row_number() == 0) {
+		audio_combo.set_active(1);
+	}
 }
 
 void
 TranscodeVideoDialog::audio_combo_changed ()
 {
-	;
+	if (video_combo.get_active_row_number() == 2
+			&& audio_combo.get_active_row_number() == 0)
+	{
+		audio_combo.set_active(1);
+	}
 }
 
 void
