@@ -193,15 +193,13 @@ ardour_config_search_path ()
 		search_path += user_config_directory();
 #ifdef PLATFORM_WINDOWS
 		search_path += windows_search_path ();
-#else
+#endif
 		std::string s = Glib::getenv("ARDOUR_CONFIG_PATH");
 		if (s.empty()) {
-			std::cerr << _("ARDOUR_CONFIG_PATH not set in environment - exiting\n");
-			::exit (1);
+			std::cerr << _("ARDOUR_CONFIG_PATH not set in environment\n");
+		} else {
+			search_path += Searchpath (s);
 		}
-		
-		search_path += Searchpath (s);
-#endif
 	}
 
 	return search_path;
@@ -216,15 +214,13 @@ ardour_data_search_path ()
 		search_path += user_config_directory();
 #ifdef PLATFORM_WINDOWS
 		search_path += windows_search_path ();
-#else
+#endif
 		std::string s = Glib::getenv("ARDOUR_DATA_PATH");
 		if (s.empty()) {
-			std::cerr << _("ARDOUR_DATA_PATH not set in environment - exiting\n");
-			::exit (1);
+			std::cerr << _("ARDOUR_DATA_PATH not set in environment\n");
+		} else {
+			search_path += Searchpath (s);
 		}
-		
-		search_path += Searchpath (s);
-#endif
 	}
 
 	return search_path;
