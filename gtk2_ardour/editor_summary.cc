@@ -89,7 +89,7 @@ EditorSummary::set_session (Session* s)
  *  @param cr Context.
  */
 void
-EditorSummary::render (cairo_t* cr)
+EditorSummary::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	/* background (really just the dividing lines between tracks */
 

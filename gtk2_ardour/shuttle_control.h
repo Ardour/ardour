@@ -87,7 +87,7 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool on_scroll_event (GdkEventScroll*);
 	bool on_motion_notify_event(GdkEventMotion*);
 
-	void render (cairo_t *);
+	void render (cairo_t *, cairo_rectangle_t*);
 
 	void on_size_allocate (Gtk::Allocation&);
 	bool on_query_tooltip (int, int, bool, const Glib::RefPtr<Gtk::Tooltip>&);

@@ -69,7 +69,7 @@ private:
         bool on_leave_notify_event (GdkEventCrossing*); 
 
 	void centre_on_click (GdkEventButton *);
-	void render (cairo_t *);
+	void render (cairo_t *, cairo_rectangle_t*);
 	void render_region (RegionView*, cairo_t*, double) const;
 	void get_editor (std::pair<double, double> *, std::pair<double, double> *) const;
 	void set_editor (double, double);

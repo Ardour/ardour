@@ -504,7 +504,7 @@ FastMeter::vertical_size_allocate (Gtk::Allocation &alloc)
 		pixwidth  = request_width - 2;
 	}
 
-	DrawingArea::on_size_allocate (alloc);
+	CairoWidget::on_size_allocate (alloc);
 }
 
 void
@@ -529,31 +529,26 @@ FastMeter::horizontal_size_allocate (Gtk::Allocation &alloc)
 		pixheight  = request_height - 2;
 	}
 
-	DrawingArea::on_size_allocate (alloc);
+	CairoWidget::on_size_allocate (alloc);
 }
 
-bool
-FastMeter::on_expose_event (GdkEventExpose* ev)
+void
+FastMeter::render (cairo_t* cr, cairo_rectangle_t* area)
 {
 	if (orientation == Vertical) {
-		return vertical_expose (ev);
+		return vertical_expose (cr, area);
 	} else {
-		return horizontal_expose (ev);
+		return horizontal_expose (cr, area);
 	}
 }
 
-bool
-FastMeter::vertical_expose (GdkEventExpose* ev)
+void
+FastMeter::vertical_expose (cairo_t* cr, cairo_rectangle_t* area)
 {
-	Glib::RefPtr<Gdk::Window> win = get_window ();
 	gint top_of_meter;
 	GdkRectangle intersection;
 	GdkRectangle background;
-
-	cairo_t* cr = gdk_cairo_create (get_window ()->gobj());
-
-	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cairo_clip (cr);
+	GdkRectangle eventarea;
 
 	cairo_set_source_rgb (cr, 0, 0, 0); // black
 	rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
@@ -572,13 +567,18 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	background.width = pixrect.width;
 	background.height = pixheight - top_of_meter;
 
-	if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
+	eventarea.x = area->x;
+	eventarea.y = area->y;
+	eventarea.width = area->width;
+	eventarea.height = area->height;
+
+	if (gdk_rectangle_intersect (&background, &eventarea, &intersection)) {
 		cairo_set_source (cr, bgpattern->cobj());
 		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
 		cairo_fill (cr);
 	}
 
-	if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
+	if (gdk_rectangle_intersect (&pixrect, &eventarea, &intersection)) {
 		// draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
 		cairo_set_source (cr, fgpattern->cobj());
 		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
@@ -610,24 +610,15 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 		last_peak_rect.width = 0;
 		last_peak_rect.height = 0;
 	}
-
-	cairo_destroy (cr);
-
-	return TRUE;
 }
 
-bool
-FastMeter::horizontal_expose (GdkEventExpose* ev)
+void
+FastMeter::horizontal_expose (cairo_t* cr, cairo_rectangle_t* area)
 {
-	Glib::RefPtr<Gdk::Window> win = get_window ();
 	gint right_of_meter;
 	GdkRectangle intersection;
 	GdkRectangle background;
-
-	cairo_t* cr = gdk_cairo_create (get_window ()->gobj());
-
-	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cairo_clip (cr);
+	GdkRectangle eventarea;
 
 	cairo_set_source_rgb (cr, 0, 0, 0); // black
 	rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
@@ -645,13 +636,18 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 	background.width = pixwidth - right_of_meter;
 	background.height = pixheight;
 
-	if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
+	eventarea.x = area->x;
+	eventarea.y = area->y;
+	eventarea.width = area->width;
+	eventarea.height = area->height;
+
+	if (gdk_rectangle_intersect (&background, &eventarea, &intersection)) {
 		cairo_set_source (cr, bgpattern->cobj());
 		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
 		cairo_fill (cr);
 	}
 
-	if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
+	if (gdk_rectangle_intersect (&pixrect, &eventarea, &intersection)) {
 		cairo_set_source (cr, fgpattern->cobj());
 		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
 		cairo_fill (cr);
@@ -683,10 +679,6 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 		last_peak_rect.width = 0;
 		last_peak_rect.height = 0;
 	}
-
-	cairo_destroy (cr);
-
-	return TRUE;
 }
 
 void

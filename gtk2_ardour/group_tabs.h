@@ -108,7 +108,7 @@ private:
 	void disable_all ();
 	void remove_group (ARDOUR::RouteGroup *);
 
-	void render (cairo_t *);
+	void render (cairo_t *, cairo_rectangle_t*);
 	void on_size_request (Gtk::Requisition *);
 	bool on_button_press_event (GdkEventButton *);
 	bool on_motion_notify_event (GdkEventMotion *);

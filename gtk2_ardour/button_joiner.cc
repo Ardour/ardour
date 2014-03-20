@@ -99,7 +99,7 @@ ButtonJoiner::~ButtonJoiner ()
 }
 
 void
-ButtonJoiner::render (cairo_t* cr)
+ButtonJoiner::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	double h = get_height();
 	

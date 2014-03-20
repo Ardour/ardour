@@ -512,7 +512,7 @@ ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 }
 
 void
-ShuttleControl::render (cairo_t* cr)
+ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	cairo_text_extents_t extents;
 

@@ -195,7 +195,7 @@ ArdourButton::set_alignment (const float xa, const float ya)
 }
 
 void
-ArdourButton::render (cairo_t* cr)
+ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 {
 	void (*rounded_function)(cairo_t*, double, double, double, double, double);
 

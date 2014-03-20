@@ -99,7 +99,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
         void set_fixed_colors (const uint32_t active_color, const uint32_t inactive_color);
 
   protected:
-	void render (cairo_t *);
+	void render (cairo_t *, cairo_rectangle_t *);
 	void on_size_request (Gtk::Requisition* req);
 	void on_size_allocate (Gtk::Allocation&);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
