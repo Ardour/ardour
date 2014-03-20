@@ -179,12 +179,12 @@ Editor::canvas_event_sample (GdkEvent const * event, double* pcx, double* pcy) c
 		*pcy = y;
 	}
 
-	/* note that pixel_to_sample() never returns less than zero, so even if the pixel
+	/* note that pixel_to_sample_from_event() never returns less than zero, so even if the pixel
 	   position is negative (as can be the case with motion events in particular),
 	   the frame location is always positive.
 	*/
 
-	return pixel_to_sample (x);
+	return pixel_to_sample_from_event (x);
 }
 
 Gdk::Cursor*

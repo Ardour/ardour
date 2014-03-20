@@ -402,7 +402,7 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		context->restore ();
 	}
 
-#if 0
+#if 1
 	/* add points */
 	
 	setup_fill_context (context);

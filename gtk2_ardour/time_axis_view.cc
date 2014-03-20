@@ -370,32 +370,11 @@ TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
 		 * are pretending that the drag is taking place over the canvas
 		 * (which perhaps in the glorious future, when track headers
 		 * and the canvas are unified, will actually be true.)
-		 *
-		 * First, translate the event coordinates into the canvas
-		 * coordinate space that DragManager::motion_handler is
-		 * expecting (this requires translation into the *window*
-		 * coordinates for the track canvas window, and then conversion
-		 * from window to canvas coordinate spaces).
-		 * 
-		 * Then fake a DragManager motion event so that when
-		 * maybe_autoscroll asks DragManager for the current pointer
-		 * position it will get the correct answers.
 		*/
 
-		int tx, ty;
-		controls_ebox.translate_coordinates (*_editor.get_track_canvas(), ev->x, ev->y, tx, ty);
+		_editor.maybe_autoscroll (false, true, true);
 
-		/* x-axis of track headers is not shared with the canvas, but
-		   the y-axis is, so we we can get a valid translation here.
-		*/
-
-		Duple canvas_coord = _editor.get_track_canvas()->canvas()->window_to_canvas (Duple (tx, ty));
-		ev->y = (int) floor (canvas_coord.y);
-
-		_editor.drags()->motion_handler ((GdkEvent *) ev, false);
-		_editor.maybe_autoscroll (false, true, false, ev->y_root < _resize_drag_start);
-
-		/* now do the actual TAV resize */
+		/* now schedule the actual TAV resize */
                 int32_t const delta = (int32_t) floor (ev->y_root - _resize_drag_start);
                 _editor.add_to_idle_resize (this, delta);
                 _resize_drag_start = ev->y_root;

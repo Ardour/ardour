@@ -361,16 +361,16 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 
 		if (event->motion.state & Gdk::BUTTON1_MASK || event->motion.state & Gdk::BUTTON2_MASK) {
 			if (!from_autoscroll) {
-				bool const moving_left = _drags->current_pointer_x() < _last_pointer_x;
-				bool const moving_up = _drags->current_pointer_y() < _last_pointer_y;
-				_editor->maybe_autoscroll (true, allow_vertical_autoscroll (), moving_left, moving_up);
+				_editor->maybe_autoscroll (true, allow_vertical_autoscroll (), false);
 			}
 
-			motion (event, _move_threshold_passed != old_move_threshold_passed);
-
-			_last_pointer_x = _drags->current_pointer_x ();
-			_last_pointer_y = _drags->current_pointer_y ();
-			_last_pointer_frame = adjusted_current_frame (event);
+			if (!_editor->autoscroll_active() || from_autoscroll) {
+				motion (event, _move_threshold_passed != old_move_threshold_passed);
+				
+				_last_pointer_x = _drags->current_pointer_x ();
+				_last_pointer_y = _drags->current_pointer_y ();
+				_last_pointer_frame = adjusted_current_frame (event);
+			}
 
 			return true;
 		}
