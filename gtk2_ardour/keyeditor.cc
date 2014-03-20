@@ -204,6 +204,7 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 		if (result) {
 			AccelKey key;
 			(*i)[columns.binding] = ActionManager::get_key_representation (path, key);
+			unbind_button.set_sensitive (true);
 		}
 	}
 
