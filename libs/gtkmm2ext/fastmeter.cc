@@ -533,24 +533,22 @@ FastMeter::horizontal_size_allocate (Gtk::Allocation &alloc)
 }
 
 void
-FastMeter::render (cairo_t* cr)
+FastMeter::render (cairo_t* cr, cairo_rectangle_t* area)
 {
 	if (orientation == Vertical) {
-		vertical_render (cr);
+		return vertical_expose (cr, area);
 	} else {
-		horizontal_render (cr);
+		return horizontal_expose (cr, area);
 	}
 }
 
 void
-FastMeter::vertical_render (cairo_t* cr)
+FastMeter::vertical_expose (cairo_t* cr, cairo_rectangle_t* area)
 {
 	gint top_of_meter;
 	GdkRectangle intersection;
 	GdkRectangle background;
-
-	//cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	//cairo_clip (cr);
+	GdkRectangle eventarea;
 
 	//cairo_set_source_rgb (cr, 0, 0, 0); // black
 	//rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
@@ -569,16 +567,28 @@ FastMeter::vertical_render (cairo_t* cr)
 	background.width = pixrect.width;
 	background.height = pixheight - top_of_meter;
 
+	eventarea.x = area->x;
+	eventarea.y = area->y;
+	eventarea.width = area->width;
+	eventarea.height = area->height;
+
 	// Switching to CAIRO we would like to draw on the container's bkg.
-	//if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
-	//	cairo_set_source (cr, bgpattern->cobj());
-	//	cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
-	//	cairo_fill (cr);
-	//}
+	// if (gdk_rectangle_intersect (&background, &eventarea, &intersection)) {
+        // cairo_set_source (cr, bgpattern->cobj());
+        // cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
+        // cairo_fill (cr);
+        // }
 
 	// MEMO: Normaly MATURE OS clips so called invalidated rects itself making APP free of
 	//       heavy operations which OS does with graphic HW
-	//if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
+
+        // NOTE FROM PAUL: GTK does clip already. The invalidated rect isn't the only area 
+        // we want to clip to however, which is why this object/class is called FastMeter.
+        // I have left stuff commented out as I found it when I merged from Ardour in August 2014,
+        // but this commenting and the previous MEMO comment represent a misunderstanding
+        // of what this code is doing.
+
+	// if (gdk_rectangle_intersect (&pixrect, &eventarea, &intersection)) {
 		// draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
 		//cairo_set_source (cr, fgpattern->cobj());
 		cairo_set_source_rgba (cr, 0.69, 0.69, 0.69, 1);
@@ -614,14 +624,12 @@ FastMeter::vertical_render (cairo_t* cr)
 }
 
 void
-FastMeter::horizontal_render (cairo_t* cr)
+FastMeter::horizontal_expose (cairo_t* cr, cairo_rectangle_t* area)
 {
 	gint right_of_meter;
 	GdkRectangle intersection;
 	GdkRectangle background;
-
-	//cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	//cairo_clip (cr);
+	GdkRectangle eventarea;
 
 	//cairo_set_source_rgb (cr, 0, 0, 0); // black
 	//rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
@@ -639,17 +647,22 @@ FastMeter::horizontal_render (cairo_t* cr)
 	background.width = pixwidth - right_of_meter;
 	background.height = pixheight;
 
-	//if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
+	eventarea.x = area->x;
+	eventarea.y = area->y;
+	eventarea.width = area->width;
+	eventarea.height = area->height;
+
+	// if (gdk_rectangle_intersect (&background, &eventarea, &intersection)) {
 	//	cairo_set_source (cr, bgpattern->cobj());
 	//	cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
 	//	cairo_fill (cr);
-	//}
+	// }
 
-	//if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
+	// if (gdk_rectangle_intersect (&pixrect, &eventarea, &intersection)) {
 	//	cairo_set_source (cr, fgpattern->cobj());
 	//	cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
 	//	cairo_fill (cr);
-	//}
+	// }
 
 	// draw peak bar
 

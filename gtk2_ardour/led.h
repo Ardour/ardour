@@ -33,7 +33,7 @@ class LED : public CairoWidget
 	void set_diameter (float);
 
   protected:
-	void render (cairo_t *);
+	void render (cairo_t *, cairo_rectangle_t*);
 	void on_size_request (Gtk::Requisition* req);
 	void on_realize ();
 

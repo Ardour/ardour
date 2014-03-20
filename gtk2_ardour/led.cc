@@ -42,7 +42,7 @@ LED::~LED()
 }
 
 void
-LED::render (cairo_t* cr)
+LED::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	if (!_fixed_diameter) {
 		_diameter = std::min (get_width(), get_height());

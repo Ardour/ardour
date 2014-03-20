@@ -282,7 +282,7 @@ AudioClock::set_colors ()
 }
 
 void
-AudioClock::render (cairo_t* cr)
+AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	/* main layout: rounded rect, plus the text */
 

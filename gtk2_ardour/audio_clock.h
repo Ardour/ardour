@@ -85,7 +85,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	static std::vector<AudioClock*> clocks;
 
   protected:
-	void render (cairo_t*);
+	void render (cairo_t*, cairo_rectangle_t*);
 
 	virtual void build_ops_menu ();
 	Gtk::Menu  *ops_menu;

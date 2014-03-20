@@ -52,12 +52,17 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
     if (get_visible_window ()) {
         Gdk::Color bg (get_parent_bg());
 	
-        cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-        cairo_set_source_rgb (cr, bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
-        cairo_fill (cr);
-    }
-    
-	render (cr);
+	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	cairo_set_source_rgb (cr, bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
+	cairo_fill (cr);
+
+	cairo_rectangle_t expose_area;
+	expose_area.x = ev->area.x;
+	expose_area.y = ev->area.y;
+	expose_area.width = ev->area.width;
+	expose_area.height = ev->area.height;
+
+	render (cr, &expose_area);
 
 	cairo_destroy (cr);
 

@@ -24,7 +24,6 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <cairomm/pattern.h>
-#include <gdkmm/pixbuf.h>
 
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/visibility.h"
@@ -67,8 +66,7 @@ class LIBGTKMM2EXT_API FastMeter : public CairoWidget {
 	bool get_highlight () { return highlight; }
 
 protected:
-	//bool on_expose_event (GdkEventExpose*);
-	void render (cairo_t* cr);
+	void render (cairo_t *, cairo_rectangle_t*);
 	void on_size_request (GtkRequisition*);
 	void on_size_allocate (Gtk::Allocation&);
 private:
@@ -97,12 +95,12 @@ private:
 	float current_user_level;
 	bool highlight;
 
-	void vertical_render (cairo_t* cr);
+	void vertical_expose (cairo_t*, cairo_rectangle_t*);
 	void vertical_size_request (GtkRequisition*);
 	void vertical_size_allocate (Gtk::Allocation&);
 	void queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>&, float);
 
-	void horizontal_render (cairo_t* cr);
+	void horizontal_expose (cairo_t*, cairo_rectangle_t*);
 	void horizontal_size_request (GtkRequisition*);
 	void horizontal_size_allocate (Gtk::Allocation&);
 	void queue_horizontal_redraw (const Glib::RefPtr<Gdk::Window>&, float);
