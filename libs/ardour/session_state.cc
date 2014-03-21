@@ -798,7 +798,7 @@ Session::load_state (string snapshot_name)
 
 	set_dirty();
 
-	_writable = exists_and_writable (xmlpath);
+	_writable = exists_and_writable (xmlpath) && exists_and_writable(Glib::path_get_dirname(xmlpath));
 
 	if (!state_tree->read (xmlpath)) {
 		error << string_compose(_("Could not understand session file %1"), xmlpath) << endmsg;
