@@ -240,6 +240,7 @@ Mixer_UI::Mixer_UI ()
 	group_display.show();
 
 	_in_group_rebuild_or_clear = false;
+	_maximised = false;
 
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 
@@ -1559,6 +1560,19 @@ Mixer_UI::set_state (const XMLNode& node)
 		}
 	}
 
+	if ((prop = node.property ("maximised"))) {
+		bool yn = string_is_affirmative (prop->value());
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleMaximalMixer"));
+		assert (act);
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		bool fs = tact && tact->get_active();
+		if (yn ^ fs) {
+			ActionManager::do_action ("Common",
+					"ToggleMaximalMixer");
+		}
+	}
+
+
 	return 0;
 }
 
@@ -1600,6 +1614,8 @@ Mixer_UI::get_state (void)
 	node->add_property ("narrow-strips", _strip_width == Narrow ? "yes" : "no");
 
 	node->add_property ("show-mixer", _visible ? "yes" : "no");
+
+	node->add_property ("maximised", _maximised ? "yes" : "no");
 
 	return *node;
 }
@@ -1942,3 +1958,26 @@ Mixer_UI::toggle_midi_input_active (bool flip_others)
 	_session->set_exclusive_input_active (rl, onoff, flip_others);
 }
 
+void
+Mixer_UI::maximise_mixer_space ()
+{
+	if (_maximised) {
+		return;
+	}
+
+	fullscreen ();
+
+	_maximised = true;
+}
+
+void
+Mixer_UI::restore_mixer_space ()
+{
+	if (!_maximised) {
+		return;
+	}
+
+	unfullscreen();
+
+	_maximised = false;
+}
