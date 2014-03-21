@@ -2415,7 +2415,11 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("maximised"))) {
 		bool yn = string_is_affirmative (prop->value());
-		if (yn) {
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleMaximalEditor"));
+		assert (act);
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		bool fs = tact && tact->get_active();
+		if (yn ^ fs) {
 			ActionManager::do_action ("Common", "ToggleMaximalEditor");
 		}
 	}
