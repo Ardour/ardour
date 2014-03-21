@@ -245,8 +245,31 @@ ControlProtocolManager::discover_control_protocols ()
 {
 	vector<std::string> cp_modules;
 
+#ifdef COMPILER_MSVC
+   /**
+    * Different build targets (Debug / Release etc) use different versions
+    * of the 'C' runtime (which can't be 'mixed & matched'). Therefore, in
+    * case the supplied search path contains multiple version(s) of a given
+    * module, only select the one(s) which match the current build target
+    */
+	#if defined (_DEBUG)
+		Glib::PatternSpec dll_extension_pattern("*D.dll");
+	#elif defined (RDC_BUILD)
+		Glib::PatternSpec dll_extension_pattern("*RDC.dll");
+	#elif defined (_WIN64)
+		Glib::PatternSpec dll_extension_pattern("*64.dll");
+	#else
+		Glib::PatternSpec dll_extension_pattern("*32.dll");
+	#endif
+#else
+	Glib::PatternSpec dll_extension_pattern("*.dll");
+#endif
+
 	Glib::PatternSpec so_extension_pattern("*.so");
 	Glib::PatternSpec dylib_extension_pattern("*.dylib");
+
+	find_matching_files_in_search_path (control_protocol_search_path (),
+					    dll_extension_pattern, cp_modules);
 
 	find_matching_files_in_search_path (control_protocol_search_path (),
 					    so_extension_pattern, cp_modules);
