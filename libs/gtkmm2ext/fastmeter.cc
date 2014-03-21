@@ -590,7 +590,10 @@ FastMeter::vertical_expose (cairo_t* cr, cairo_rectangle_t* area)
 	if (hold_state) {
 		last_peak_rect.x = 1;
 		last_peak_rect.width = pixwidth;
-		last_peak_rect.y = max(1, 1 + pixheight - (gint) floor (pixheight * current_peak));
+		last_peak_rect.y = max(1, 1 + pixheight - (int) floor (pixheight * current_peak));
+		if (_styleflags & 2) { // LED stripes
+			last_peak_rect.y = max(0, 2 * (int) floor (last_peak_rect.y / 2));
+		}
 		if (bright_hold || (_styleflags & 2)) {
 			last_peak_rect.height = max(0, min(3, pixheight - last_peak_rect.y - 1 ));
 		} else {
@@ -786,7 +789,10 @@ FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float ol
 			queue = true;
 		}
 		rect.x = 1;
-		rect.y = max(1, 1 + pixheight - (gint) floor (pixheight * current_peak));
+		rect.y = max(1, 1 + pixheight - (int) floor (pixheight * current_peak));
+		if (_styleflags & 2) { // LED stripes
+			rect.y = max(0, 2 * (int) floor (rect.y / 2));
+		}
 		if (bright_hold || (_styleflags & 2)) {
 			rect.height = max(0, min(3, pixheight - last_peak_rect.y -1 ));
 		} else {
