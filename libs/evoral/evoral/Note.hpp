@@ -33,7 +33,11 @@ namespace Evoral {
  * Currently a note is defined as (on event, length, off event).
  */
 template<typename Time>
+#ifdef COMPILER_MSVC
+class LIBEVORAL_LOCAL Note {
+#else
 class LIBEVORAL_TEMPLATE_API Note {
+#endif
 public:
 	Note(uint8_t chan=0, Time time=0, Time len=0, uint8_t note=0, uint8_t vel=0x40);
 	Note(const Note<Time>& copy);

@@ -24,8 +24,8 @@
   #define LIBEVORAL_DLL_IMPORT __declspec(dllimport)
   #define LIBEVORAL_DLL_EXPORT __declspec(dllexport)
   #define LIBEVORAL_DLL_LOCAL
-  #define LIBEVORAL_TEMPLATE_DLL_IMPORT
-  #define LIBEVORAL_TEMPLATE_DLL_EXPORT
+  #define LIBEVORAL_TEMPLATE_DLL_IMPORT __declspec(dllimport)
+  #define LIBEVORAL_TEMPLATE_DLL_EXPORT __declspec(dllexport)
 #else
   #define LIBEVORAL_DLL_IMPORT __attribute__ ((visibility ("default")))
   #define LIBEVORAL_DLL_EXPORT __attribute__ ((visibility ("default")))
