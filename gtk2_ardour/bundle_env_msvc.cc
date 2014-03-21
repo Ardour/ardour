@@ -252,10 +252,13 @@ string pango_modules_file;
 		pango_modules_file += "\\";
 		pango_modules_file += PROGRAM_NAME;
 		pango_modules_file += PANGO_CONF_LOCATION;
-/* JE - handy for non-English locale testing (Greek, in this case)
-pango_modules_file = Glib::locale_to_utf8("C:\\Program Files\\Mixbus3\\etc\\ÄÇÌÇÔÑÇÓ\\pango.modules");
+#if 0
+// JE - handy for non-English locale testing (Greek, in this case)
+		Glib::ustring pango_modules_path = Glib::locale_to_utf8("C:\\Program Files\\Mixbus3\\etc\\ÄÇÌÇÔÑÇÓ\\pango.modules");
 /**/
+#else
 		Glib::ustring pango_modules_path = pango_modules_file;
+#endif
 		pango_modules_path.resize (pango_modules_path.size()-14); // Remove "/pango.modules" from the end
 #else
 	if (PBD::find_file_in_search_path (ARDOUR::ardour_config_search_path(), "pango.modules", pango_modules_file)) {
