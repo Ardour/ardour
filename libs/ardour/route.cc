@@ -3911,7 +3911,7 @@ Route::setup_invisible_processors ()
 		++amp;
 	}
 
-	assert (amp != _processors.end ());
+	assert (amp != new_processors.end ());
 
 	/* and the processor after the amp */
 
