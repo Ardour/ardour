@@ -565,3 +565,18 @@ ARDOUR_UI::editor_meter_peak_button_release (GdkEventButton* ev)
 	}
 	return true;
 }
+
+void
+ARDOUR_UI::toggle_mixer_space()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMaximalMixer");
+
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		if (tact->get_active()) {
+			mixer->maximise_mixer_space ();
+		} else {
+			mixer->restore_mixer_space ();
+		}
+	}
+}
