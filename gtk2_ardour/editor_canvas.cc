@@ -462,54 +462,41 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 		return;
 	}
 
-	if (autoscroll_boundary.empty()) {
 
-		ArdourCanvas::Rect scrolling_boundary;
-		Gtk::Allocation alloc;
+	ArdourCanvas::Rect scrolling_boundary;
+	Gtk::Allocation alloc;
+	
+	if (from_headers) {
+		alloc = controls_layout.get_allocation ();
+	} else {
+		alloc = _track_canvas_viewport->get_allocation ();
 		
-		if (from_headers) {
-			alloc = controls_layout.get_allocation ();
-		} else {
-			alloc = _track_canvas_viewport->get_allocation ();
-
-			/* Increase the autoscroll area to include the rulers.
-			   
-			   XXX this can go away once the two canvases are
-			   unified.
-			*/
-
-			// Gdk::Rectangle timebars = _time_bars_canvas_viewport->get_allocation ();
-			//alloc.set_y (timebars.get_y());
-			//alloc.set_height (alloc.get_height() + timebars.get_height());
-
-			/* if there is no other widget on the right side of
-			   the canvas, reduce the effective width of
-			   the autoscroll boundary so that we start scrolling
-			   before we hit the edge.
-
-			   this helps when the window is slammed up against
-			   the right edge of the screen, making it hard to 
-			   scroll effectively.
-			*/
-
-			if (alloc.get_width() > 10) { 
-				alloc.set_width (alloc.get_width() - 10);
-			} 
-		}
+		/* the effective width of the autoscroll boundary so
+		   that we start scrolling before we hit the edge.
+		   
+		   this helps when the window is slammed up against the
+		   right edge of the screen, making it hard to scroll
+		   effectively.
+		*/
 		
-		autoscroll_boundary = ArdourCanvas::Rect (alloc.get_x(), alloc.get_y(), 
-							  alloc.get_x() + alloc.get_width(), 
-							  alloc.get_y() + alloc.get_height());
+		if (alloc.get_width() > 20) { 
+			alloc.set_width (alloc.get_width() - 20);
+			alloc.set_x (alloc.get_x() + 10);
+		} 
 	}
-
+	
+	scrolling_boundary = ArdourCanvas::Rect (alloc.get_x(), alloc.get_y(), 
+						 alloc.get_x() + alloc.get_width(), 
+						 alloc.get_y() + alloc.get_height());
+	
 	int x, y;
 	Gdk::ModifierType mask;
 
 	get_window()->get_pointer (x, y, mask);
 
-	if ((allow_horiz && (x < autoscroll_boundary.x0 || x >= autoscroll_boundary.x1)) ||
-	    (allow_vert && (y < autoscroll_boundary.y0 || y >= autoscroll_boundary.y1))) {
-		start_canvas_autoscroll (allow_horiz, allow_vert);
+	if ((allow_horiz && (x < scrolling_boundary.x0 || x >= scrolling_boundary.x1)) ||
+	    (allow_vert && (y < scrolling_boundary.y0 || y >= scrolling_boundary.y1))) {
+		start_canvas_autoscroll (allow_horiz, allow_vert, scrolling_boundary);
 	}
 }
 
@@ -605,11 +592,13 @@ Editor::autoscroll_canvas ()
 		no_stop = true;
 	}
 
-	if (vc.pending || y_motion) {
+	if (vc.pending) {
 
 		/* change horizontal first */
 
-		visual_changer (vc);
+		if (vc.pending) {
+			visual_changer (vc);
+		}
 
 		/* now send a motion event to notify anyone who cares
 		   that we have moved to a new location (because we scrolled)
@@ -662,9 +651,16 @@ Editor::autoscroll_canvas ()
 		int cx;
 		int cy;
 
-		/* clamp x and y to remain within the visible area */
+		/* clamp x and y to remain within the visible area. except
+		 * .. if horizontal scrolling is allowed, always allow us to
+		 * move back to zero
+		 */
 
-		x = min (max ((ArdourCanvas::Coord) x, autoscroll_boundary.x0), autoscroll_boundary.x1);
+		if (autoscroll_horizontal_allowed) {
+			x = min (max ((ArdourCanvas::Coord) x, 0.0), autoscroll_boundary.x1);
+		} else {
+			x = min (max ((ArdourCanvas::Coord) x, autoscroll_boundary.x0), autoscroll_boundary.x1);
+		}
 		y = min (max ((ArdourCanvas::Coord) y, autoscroll_boundary.y0), autoscroll_boundary.y1);
 
 		translate_coordinates (*_track_canvas_viewport, x, y, cx, cy);
@@ -677,7 +673,6 @@ Editor::autoscroll_canvas ()
 
 	} else {
 		stop_canvas_autoscroll ();
-		autoscroll_boundary = ArdourCanvas::Rect();
 		return false;
 	}
 
@@ -687,7 +682,7 @@ Editor::autoscroll_canvas ()
 }	
 
 void
-Editor::start_canvas_autoscroll (bool allow_horiz, bool allow_vert)
+Editor::start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary)
 {
 	if (!_session) {
 		return;
@@ -698,6 +693,7 @@ Editor::start_canvas_autoscroll (bool allow_horiz, bool allow_vert)
 	autoscroll_cnt = 0;
 	autoscroll_horizontal_allowed = allow_horiz;
 	autoscroll_vertical_allowed = allow_vert;
+	autoscroll_boundary = boundary;
 
 	/* do the first scroll right now
 	*/

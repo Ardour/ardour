@@ -1736,7 +1736,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         ArdourCanvas::Rect autoscroll_boundary;
 
 	bool autoscroll_canvas ();
-        void start_canvas_autoscroll (bool allow_horiz, bool allow_vert);
+        void start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary);
 	void stop_canvas_autoscroll ();
 
 	/* trimming */
