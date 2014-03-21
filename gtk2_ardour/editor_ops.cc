@@ -1276,6 +1276,69 @@ Editor::scroll_tracks_up_line ()
 	reset_y_origin (vertical_adjustment.get_value() - 60);
 }
 
+bool
+Editor::scroll_down_one_track ()
+{
+	double vertical_pos = vertical_adjustment.get_value () + vertical_adjustment.get_page_size() - 1.0; 
+
+	TrackViewList::reverse_iterator next = track_views.rend();
+	std::pair<TimeAxisView*,double> res;
+
+	for (TrackViewList::reverse_iterator t = track_views.rbegin(); t != track_views.rend(); ++t) {
+		if ((*t)->hidden()) {
+			continue;
+		}
+		
+		res = (*t)->covers_y_position (vertical_pos);
+
+		if (res.first) {
+			break;
+		}
+
+		next = t;
+	}
+
+	/* move to the track below the first one that covers the */
+	
+	if (next != track_views.rend()) {
+		ensure_track_visible (*next);
+		return true;
+	}
+
+	return false;
+}	
+
+bool
+Editor::scroll_up_one_track ()
+{
+	double vertical_pos = vertical_adjustment.get_value ();
+
+	TrackViewList::iterator prev = track_views.end();
+	std::pair<TimeAxisView*,double> res;
+
+	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
+
+		if ((*t)->hidden()) {
+			continue;
+		}
+
+		res = (*t)->covers_y_position(vertical_pos);
+		
+		if (res.first) {
+			break;
+		}
+
+		prev = t;
+	}
+	
+	if (prev != track_views.end()) {
+		ensure_track_visible (*prev);
+		return true;
+	}
+
+	return false;
+}
+
 /* ZOOM */
 
 void

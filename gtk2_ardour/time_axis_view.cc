@@ -298,7 +298,7 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 			e.stepping_axis_view()->step_height (false);
 			return true;
 		} else if (Keyboard::no_modifiers_active (ev->state)) {
-			_editor.scroll_tracks_up_line();
+			_editor.scroll_up_one_track();
 			return true;
 		}
 		break;
@@ -313,7 +313,7 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 			e.stepping_axis_view()->step_height (true);
 			return true;
 		} else if (Keyboard::no_modifiers_active (ev->state)) {
-			_editor.scroll_tracks_down_line();
+			_editor.scroll_down_one_track();
 			return true;
 		}
 		break;

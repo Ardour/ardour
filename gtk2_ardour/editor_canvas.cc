@@ -477,11 +477,11 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 			   XXX this can go away once the two canvases are
 			   unified.
 			*/
-			
-			Gdk::Rectangle timebars = time_canvas_event_box.get_allocation ();
-			alloc.set_y (timebars.get_y());
-			alloc.set_height (alloc.get_height() + timebars.get_height());
-			
+
+			// Gdk::Rectangle timebars = _time_bars_canvas_viewport->get_allocation ();
+			//alloc.set_y (timebars.get_y());
+			//alloc.set_height (alloc.get_height() + timebars.get_height());
+
 			/* if there is no other widget on the right side of
 			   the canvas, reduce the effective width of
 			   the autoscroll boundary so that we start scrolling
@@ -507,11 +507,10 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 
 	get_window()->get_pointer (x, y, mask);
 
-	if (!autoscroll_boundary.contains (ArdourCanvas::Duple (x, y))) {
-		if (!autoscroll_active()) {
-			start_canvas_autoscroll (allow_horiz, allow_vert);
-		}
-	} 
+	if ((allow_horiz && (x < autoscroll_boundary.x0 || x >= autoscroll_boundary.x1)) ||
+	    (allow_vert && (y < autoscroll_boundary.y0 || y >= autoscroll_boundary.y1))) {
+		start_canvas_autoscroll (allow_horiz, allow_vert);
+	}
 }
 
 bool
@@ -526,8 +525,8 @@ Editor::autoscroll_canvas ()
 	int x, y;
 	Gdk::ModifierType mask;
 	frameoffset_t dx = 0;
-	double dy = 0;
 	bool no_stop = false;
+	bool y_motion = false;
 
 	get_window()->get_pointer (x, y, mask);
 
@@ -581,55 +580,34 @@ Editor::autoscroll_canvas ()
 		
 		const double vertical_pos = vertical_adjustment.get_value();
 		double new_pixel = vertical_pos;
+		const int speed_factor = 20;
 
 		/* vertical */ 
 		
 		new_pixel = vertical_pos;
-		
+
 		if (y < autoscroll_boundary.y0) {
 
 			/* scroll to make higher tracks visible */
 
-			const int step_size = _visible_canvas_height / 100;
-
-			dy = autoscroll_boundary.y0 - y;
-			dy += step_size + (step_size * (autoscroll_cnt/10));
-
-			if (vertical_pos > dy) {
-				new_pixel = vertical_pos - dy;
-			} else {
-				new_pixel = 0;
+			if (autoscroll_cnt && (autoscroll_cnt % speed_factor == 0)) {
+				y_motion = scroll_up_one_track ();
 			}
-
-			no_stop = true;
 
 		} else if (y > autoscroll_boundary.y1) {
 
-			/* scroll to make lower tracks visible */
-
-			const int step_size = _visible_canvas_height / 100;
-
-			dy = y - autoscroll_boundary.y1;
-			dy +=  step_size + (step_size * (autoscroll_cnt/10));
-
-			/* unlike horizontally, we never want to scroll past the lower edge of the full canvas as defined by all visible tracks
-			 */
-			new_pixel = min (_full_canvas_height - _visible_canvas_height, min (_full_canvas_height, vertical_pos + dy));
-			/* adjust dy to match */
-			dy = vertical_pos - new_pixel; 
-
-			no_stop = true;
+			if (autoscroll_cnt && (autoscroll_cnt % speed_factor == 0)) {
+				y_motion = scroll_down_one_track ();
+				
+			}
 		}
-		
-		if (new_pixel != vertical_pos) {
-			vc.add (VisualChange::YOrigin);
-			vc.y_origin = new_pixel;
-		}
+
+		no_stop = true;
 	}
 
-	if (vc.pending) {
+	if (vc.pending || y_motion) {
 
-		/* change horizontal & vertical position first */
+		/* change horizontal first */
 
 		visual_changer (vc);
 

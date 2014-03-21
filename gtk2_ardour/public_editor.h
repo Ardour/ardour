@@ -270,6 +270,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void ensure_time_axis_view_is_visible (const TimeAxisView& tav) = 0;
 	virtual void scroll_tracks_down_line () = 0;
 	virtual void scroll_tracks_up_line () = 0;
+        virtual bool scroll_down_one_track () = 0;
+        virtual bool scroll_up_one_track () = 0;
 	virtual void prepare_for_cleanup () = 0;
 	virtual void finish_cleanup () = 0;
 	virtual void reset_x_origin (framepos_t frame) = 0;

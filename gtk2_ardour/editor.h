@@ -352,6 +352,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void ensure_time_axis_view_is_visible (const TimeAxisView& tav);
 	void scroll_tracks_down_line ();
 	void scroll_tracks_up_line ();
+        bool scroll_up_one_track ();
+        bool scroll_down_one_track ();
 
 	void prepare_for_cleanup ();
 	void finish_cleanup ();
