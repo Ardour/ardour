@@ -163,6 +163,7 @@
 ; (gtk_accel_path "<Actions>/Snap/snap-to-eighths" "")
 (gtk_accel_path "<Actions>/Editor/select-all-after-playhead" "<@TERTIARY@><@PRIMARY@>p")
 (gtk_accel_path "<Actions>/Common/ToggleMaximalEditor" "F11")
+(gtk_accel_path "<Actions>/Common/ToggleMaximalMixer" "F12")
 ; (gtk_accel_path "<Actions>/RegionList/SortBySourceFileLength" "")
 ; (gtk_accel_path "<Actions>/Editor/Timecode" "")
 ; (gtk_accel_path "<Actions>/Transport/PlaySelection" "")
