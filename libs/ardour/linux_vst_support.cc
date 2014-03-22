@@ -112,7 +112,7 @@ vstfx_new ()
 void* vstfx_load_vst_library(const char* path)
 {
 	void* dll;
-	char* full_path;
+	char* full_path = NULL;
 	char* envdup;
 	char* lxvst_path;
 	size_t len1;
@@ -160,6 +160,7 @@ void* vstfx_load_vst_library(const char* path)
 		vstfx_error ("\"%s\"", lxvst_path);
 		len1 = strlen(lxvst_path);
 		
+		if (full_path) free(full_path);
 		full_path = (char*)malloc(len1 + 1 + len2 + 1);
 		memcpy(full_path, lxvst_path, len1);
 		full_path[len1] = '/';
@@ -180,7 +181,7 @@ void* vstfx_load_vst_library(const char* path)
 	}
 
 	/*Free the path*/
-
+	if (full_path) free(full_path);
 	free(envdup);
 
 	return dll;

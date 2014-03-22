@@ -124,6 +124,7 @@ Worker::run()
 	while (true) {
 		_sem.wait();
 		if (_exit) {
+			if (buf) free(buf);
 			return;
 		}
 
@@ -135,6 +136,7 @@ Worker::run()
 		while (!verify_message_completeness(_requests)) {
 			Glib::usleep(2000);
 			if (_exit) {
+				if (buf) free(buf);
 				return;
 			}
 		}

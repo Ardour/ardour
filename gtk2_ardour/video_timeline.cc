@@ -716,7 +716,7 @@ void
 VideoTimeLine::find_xjadeo () {
 	std::string xjadeo_file_path;
 	if (getenv("XJREMOTE")) {
-		_xjadeo_bin = strdup(getenv("XJREMOTE")); // XXX TODO: free it?!
+		_xjadeo_bin = getenv("XJREMOTE");
 	} else if (find_file_in_search_path (Searchpath(Glib::getenv("PATH")), X_("xjremote"), xjadeo_file_path)) {
 		_xjadeo_bin = xjadeo_file_path;
 	}

@@ -105,15 +105,15 @@ AudioLibrary::get_tags (string member)
 {
 	vector<string> tags;
 #ifdef HAVE_LRDF
+	char * uri = strdup(Glib::filename_to_uri(member).c_str());
 
 	lrdf_statement pattern;
-	pattern.subject = strdup(Glib::filename_to_uri(member).c_str());
+	pattern.subject = uri;
 	pattern.predicate = const_cast<char*>(TAG);
 	pattern.object = 0;
 	pattern.object_type = lrdf_literal;
 
 	lrdf_statement* matches = lrdf_matches (&pattern);
-	free (pattern.subject);
 
 	lrdf_statement* current = matches;
 	while (current != 0) {
@@ -125,6 +125,7 @@ AudioLibrary::get_tags (string member)
 	lrdf_free_statements (matches);
 
 	sort (tags.begin(), tags.end());
+	free (uri);
 #endif
 	return tags;
 }
