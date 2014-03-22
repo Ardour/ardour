@@ -26,7 +26,6 @@
 #include <cstring>
 
 #include <glib/gstdio.h>
-#include <giomm/file.h>
 #include <glib/gprintf.h>
 #include <glibmm.h>
 
