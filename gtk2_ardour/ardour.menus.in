@@ -341,6 +341,7 @@
 
     <menu name='View' action = 'View'>
       <menuitem action='ToggleMaximalEditor'/>
+      <menuitem action='ToggleMaximalMixer'/>
       <menuitem action='KeepTearoffs'/>
 
       <separator/>

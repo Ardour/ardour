@@ -167,6 +167,7 @@
   <Binding action="Editor/pitch-shift-region" key="F5"/>
   <Binding action="Editor/select-range-between-cursors" key="F6"/>
   <Binding action="Common/ToggleMaximalEditor" key="F11"/>
+  <Binding action="Common/ToggleMaximalMixer" key="F12"/>
   <Binding action="Editor/save-visual-state-1" key="Primary-F1"/>
   <Binding action="Editor/save-visual-state-2" key="Primary-F2"/>
   <Binding action="Editor/save-visual-state-3" key="Primary-F3"/>

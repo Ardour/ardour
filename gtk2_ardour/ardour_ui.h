@@ -174,6 +174,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void new_midi_tracer_window ();
 	void toggle_editing_space();
+	void toggle_mixer_space();
 	void toggle_keep_tearoffs();
 
 	Gtk::Tooltips& tooltips() { return _tooltips; }
