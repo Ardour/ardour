@@ -82,6 +82,9 @@ Worker::verify_message_completeness(RingBuffer<uint8_t>* rb)
 	uint32_t size;
 	RingBuffer<uint8_t>::rw_vector vec;
 	rb->get_read_vector (&vec);
+	if (vec.len[0] + vec.len[1] < sizeof(size)) {
+		return false;
+	}
 	if (vec.len[0] >= sizeof(size)) {
 		memcpy (&size, vec.buf[0], sizeof (size));
 	} else {
