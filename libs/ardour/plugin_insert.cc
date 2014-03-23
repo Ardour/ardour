@@ -1184,6 +1184,10 @@ PluginInsert::PluginControl::PluginControl (PluginInsert* p, const Evoral::Param
 	_logarithmic = desc.logarithmic;
 	_sr_dependent = desc.sr_dependent;
 	_toggled = desc.toggled;
+
+	if (desc.toggled) {
+		set_flags(Controllable::Toggle);
+	}
 }
 
 /** @param val `user' value */

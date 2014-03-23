@@ -167,13 +167,21 @@ MIDIControllable::control_to_midi (float val)
 
 	float control_min = controllable->lower ();
 	float control_max = controllable->upper ();
-	const float control_range = control_max - control_min;
+	float control_range = control_max - control_min;
 
 	if (controllable->is_toggle()) {
 		if (val >= (control_min + (control_range/2.0f))) {
 			return max_value_for_type();
 		} else {
 			return 0;
+		}
+	} else {
+		AutomationControl *actl = dynamic_cast<AutomationControl*> (controllable);
+		if (actl) {
+			control_min = actl->internal_to_interface(control_min);
+			control_max = actl->internal_to_interface(control_max);
+			control_range = control_max - control_min;
+			val = actl->internal_to_interface(val);
 		}
 	}
 
@@ -196,8 +204,17 @@ MIDIControllable::midi_to_control (int val)
 
 	float control_min = controllable->lower ();
 	float control_max = controllable->upper ();
-	const float control_range = control_max - control_min;
+	float control_range = control_max - control_min;
 
+	AutomationControl *actl = dynamic_cast<AutomationControl*> (controllable);
+	if (actl) {
+		if (fv == 0.f) return control_min;
+		if (fv == 1.f) return control_max;
+		control_min = actl->internal_to_interface(control_min);
+		control_max = actl->internal_to_interface(control_max);
+		control_range = control_max - control_min;
+		return actl->interface_to_internal((fv * control_range) + control_min);
+	}
 	return (fv * control_range) + control_min;
 }
 
