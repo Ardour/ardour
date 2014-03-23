@@ -6495,12 +6495,13 @@ Editor::remove_tracks ()
 
 	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*x);
-		if (rtv) {
-			if (rtv->is_track()) {
-				ntracks++;
-			} else {
-				nbusses++;
-			}
+		if (!rtv) {
+			continue;
+		}
+		if (rtv->is_track()) {
+			ntracks++;
+		} else {
+			nbusses++;
 		}
 		routes.push_back (rtv->_route);
 
