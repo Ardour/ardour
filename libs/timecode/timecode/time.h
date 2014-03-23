@@ -19,6 +19,7 @@
 #ifndef __timecode_time_h__
 #define __timecode_time_h__
 
+#include <cmath>
 #include <ostream>
 #include <inttypes.h>
 
@@ -68,6 +69,7 @@ struct LIBTIMECODE_API Time {
 		frames = 0;
 		subframes = 0;
 		rate = a_rate;
+		drop = (rintf(100.f * a_rate) == 2997);
 	}
 	
 	bool operator== (const Time& other) const {
