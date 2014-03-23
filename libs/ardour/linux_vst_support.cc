@@ -311,8 +311,9 @@ vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 
 	if(fhandle == 0)
 	{
-	    vstfx_error( "** ERROR ** VSTFX : The handle was 0\n" );
-	    return 0;
+		vstfx_error( "** ERROR ** VSTFX : The handle was 0\n" );
+		free (vstfx);
+		return 0;
 	}
 
 	if ((vstfx->plugin = fhandle->main_entry (amc)) == 0) 
