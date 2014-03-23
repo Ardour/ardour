@@ -38,6 +38,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 		Text = 0x4,
 		Indicator = 0x8,
 		FlatFace = 0x10,
+		Menu = 0x20,
 	};
 
 	static Element default_elements;
@@ -72,6 +73,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_diameter (float);
 
 	void set_text (const std::string&);
+	const std::string& get_text () {return _text;}
 	void set_markup (const std::string&);
 	void set_angle (const double);
 	void set_alignment (const float, const float);

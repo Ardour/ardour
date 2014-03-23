@@ -51,6 +51,7 @@
 #include "gtk-custom-ruler.h"
 #include "ardour_button.h"
 #include "ardour_dialog.h"
+#include "ardour_menu.h"
 #include "public_editor.h"
 #include "editing.h"
 #include "enums.h"
@@ -1593,35 +1594,40 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::VBox                automation_box;
 	Gtk::Button              automation_mode_button;
 
-	Gtk::ComboBoxText edit_mode_selector;
+	//edit mode menu stuff
+	ArdourMenu	edit_mode_selector;
+	void edit_mode_selection_done ( ARDOUR::EditMode m );
+	void build_edit_mode_menu ();
 	Gtk::VBox         edit_mode_box;
 	std::vector<std::string> edit_mode_strings;
 
 	void set_edit_mode (ARDOUR::EditMode);
 	void cycle_edit_mode ();
-	void edit_mode_selection_done ();
 
-	Gtk::ComboBoxText snap_type_selector;
-	Gtk::ComboBoxText snap_mode_selector;
+	ArdourMenu snap_type_selector;
+	void build_snap_type_menu ();
+
+	ArdourMenu snap_mode_selector;
+	void build_snap_mode_menu ();
 	Gtk::HBox         snap_box;
 
 	std::vector<std::string> snap_type_strings;
 	std::vector<std::string> snap_mode_strings;
 
-	void snap_type_selection_done ();
-	void snap_mode_selection_done ();
+	void snap_type_selection_done (Editing::SnapType);
+	void snap_mode_selection_done (Editing::SnapMode);
 	void snap_mode_chosen (Editing::SnapMode);
 	void snap_type_chosen (Editing::SnapType);
 
 	Glib::RefPtr<Gtk::RadioAction> snap_type_action (Editing::SnapType);
 	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
 
-	Gtk::ComboBoxText zoom_focus_selector;
-	Gtk::VBox         zoom_focus_box;
-
+	//zoom focus meu stuff
+	ArdourMenu	zoom_focus_selector;
+	void zoom_focus_selection_done ( Editing::ZoomFocus f );
+	void build_zoom_focus_menu ();
 	std::vector<std::string> zoom_focus_strings;
 
-	void zoom_focus_selection_done ();
 	void zoom_focus_chosen (Editing::ZoomFocus);
 
 	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
@@ -1943,12 +1949,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Editing::EditPoint _edit_point;
 
-	Gtk::ComboBoxText edit_point_selector;
+	ArdourMenu edit_point_selector;
+	void build_edit_point_menu();
 
 	void set_edit_point_preference (Editing::EditPoint ep, bool force = false);
 	void cycle_edit_point (bool with_marker);
 	void set_edit_point ();
-	void edit_point_selection_done ();
+	void edit_point_selection_done (Editing::EditPoint);
 	void edit_point_chosen (Editing::EditPoint);
 	Glib::RefPtr<Gtk::RadioAction> edit_point_action (Editing::EditPoint);
 	std::vector<std::string> edit_point_strings;

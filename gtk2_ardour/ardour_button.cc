@@ -324,7 +324,10 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_new_path (cr);	
 		cairo_set_source_rgba (cr, text_r, text_g, text_b, text_a);
 
-		if (_elements & Indicator) {
+		if ( (_elements & Menu) == Menu) {
+			cairo_move_to (cr, text_margin, get_height()/2.0 - _text_height/2.0);
+			pango_cairo_show_layout (cr, _layout->gobj());
+		} else if ( (_elements & Indicator)  == Indicator) {
 			if (_led_left) {
 				cairo_move_to (cr, text_margin + _diameter + 4, get_height()/2.0 - _text_height/2.0);
 			} else {
@@ -363,6 +366,24 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_restore (cr);
 	} 
 
+	if (((_elements & Menu)==Menu)) {
+	
+		cairo_save (cr);
+
+		cairo_translate (cr, 0,0 );
+		
+		//white arrow
+		cairo_set_source_rgba (cr, 1, 1, 1, 0.4);
+		cairo_move_to(cr, get_width() - ((_diameter/2.0) + 6.0), get_height()/2.0 +_diameter/4);
+		cairo_rel_line_to(cr, -_diameter/2, -_diameter/2);
+		cairo_rel_line_to(cr, _diameter, 0);
+		cairo_close_path(cr);
+		cairo_fill(cr);
+		
+	
+		cairo_restore (cr);
+	}
+	
 	if (((_elements & Indicator)==Indicator)) {
 
 		/* move to the center of the indicator/led */
