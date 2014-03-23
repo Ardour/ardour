@@ -1150,6 +1150,7 @@ JACKAudioBackend::speed_and_position (double& speed, framepos_t& position)
 		// don't adjust speed here, just leave it as it was
 		break;
 	default:
+		starting = true; // jack2: JackTransportNetStarting
 		std::cerr << "WARNING: Unknown JACK transport state: " << state << std::endl;
 	}
 
