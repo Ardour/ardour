@@ -1252,7 +1252,7 @@ MidiModel::PatchChangePtr
 MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 {
 	XMLProperty* prop;
-	Evoral::event_id_t id;
+	Evoral::event_id_t id = 0;
 	Evoral::MusicalTime time = 0;
 	int channel = 0;
 	int program = 0;
@@ -1284,6 +1284,7 @@ MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 	}
 
 	PatchChangePtr p (new Evoral::PatchChange<TimeType> (time, channel, program, bank));
+	assert(id);
 	p->set_id (id);
 	return p;
 }
