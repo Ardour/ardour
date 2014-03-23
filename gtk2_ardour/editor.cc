@@ -53,6 +53,9 @@
 #include <gdkmm/color.h>
 #include <gdkmm/bitmap.h>
 
+#include <gtkmm/menu.h>
+#include <gtkmm/menuitem.h>
+
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/grouped_buttons.h"
 #include "gtkmm2ext/gtk_ui.h"
@@ -324,7 +327,7 @@ Editor::Editor ()
 	get_container ("meter_bridge_view_home").add (_meter_bridge_view);
 
 	_have_idled = false;
-
+	
 	selection = new Selection (this);
 	cut_buffer = new Selection (this);
 
@@ -675,11 +678,11 @@ Editor::Editor ()
 	/* nudge stuff */
 
 	nudge_forward_button.set_name ("nudge button");
-	nudge_forward_button.add_elements (ArdourButton::Inset);
+//	nudge_forward_button.add_elements (ArdourButton::FlatFace);
 	nudge_forward_button.set_image(::get_icon("nudge_right"));
 
 	nudge_backward_button.set_name ("nudge button");
-	nudge_backward_button.add_elements (ArdourButton::Inset);
+//	nudge_backward_button.add_elements (ArdourButton::FlatFace);
 	nudge_backward_button.set_image(::get_icon("nudge_left"));
 
 	fade_context_menu.set_name ("ArdourContextMenu");
@@ -2201,8 +2204,8 @@ Editor::set_snap_to (SnapType st)
 
 	string str = snap_type_strings[snap_ind];
 
-	if (str != snap_type_selector.get_active_text()) {
-		snap_type_selector.set_active_text (str);
+	if (str != snap_type_selector.get_text()) {
+		snap_type_selector.set_text (str);
 	}
 
 	instant_save ();
@@ -2264,8 +2267,8 @@ Editor::set_snap_mode (SnapMode mode)
 
 	_snap_mode = mode;
 
-	if (str != snap_mode_selector.get_active_text ()) {
-		snap_mode_selector.set_active_text (str);
+	if (str != snap_mode_selector.get_text ()) {
+		snap_mode_selector.set_text (str);
 	}
 
 	instant_save ();
@@ -2278,8 +2281,8 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 	_edit_point = ep;
 	string str = edit_point_strings[(int)ep];
 
-	if (str != edit_point_selector.get_active_text ()) {
-		edit_point_selector.set_active_text (str);
+	if (str != edit_point_selector.get_text ()) {
+		edit_point_selector.set_text (str);
 	}
 
 	set_canvas_cursor ();
@@ -3040,9 +3043,9 @@ Editor::setup_toolbar ()
 	}
 	edit_mode_strings.push_back (edit_mode_to_string (Lock));
 
-	edit_mode_selector.set_name ("EditModeSelector");
-	set_popdown_strings (edit_mode_selector, edit_mode_strings);
-	edit_mode_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::edit_mode_selection_done));
+	edit_mode_selector.set_name ("mouse mode button");
+	edit_mode_selector.set_size_request (65, -1);
+	//edit_mode_selector.add_elements (ArdourButton::FlatFace);
 
 	if (!ARDOUR::Profile->get_trx()) {
 		mode_box->pack_start (edit_mode_selector, false, false);
@@ -3064,30 +3067,30 @@ Editor::setup_toolbar ()
 
 	RefPtr<Action> act;
 
-	zoom_in_button.set_name ("zoom button");
-	zoom_in_button.add_elements ( ArdourButton::Inset );
+	zoom_in_button.set_name ("transport option button");
+//	zoom_in_button.add_elements ( ArdourButton::FlatFace );
 	zoom_in_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	zoom_in_button.set_image(::get_icon ("zoom_in"));
 	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-in"));
 	zoom_in_button.set_related_action (act);
 
-	zoom_out_button.set_name ("zoom button");
-	zoom_out_button.add_elements ( ArdourButton::Inset );
+	zoom_out_button.set_name ("transport option button");
+//	zoom_out_button.add_elements ( ArdourButton::FlatFace );
 	zoom_out_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	zoom_out_button.set_image(::get_icon ("zoom_out"));
 	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-out"));
 	zoom_out_button.set_related_action (act);
 
-	zoom_out_full_button.set_name ("zoom button");
-	zoom_out_full_button.add_elements ( ArdourButton::Inset );
+	zoom_out_full_button.set_name ("transport option button");
+//	zoom_out_full_button.add_elements ( ArdourButton::FlatFace );
 	zoom_out_full_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	zoom_out_full_button.set_image(::get_icon ("zoom_full"));
 	act = ActionManager::get_action (X_("Editor"), X_("zoom-to-session"));
 	zoom_out_full_button.set_related_action (act);
 
-	zoom_focus_selector.set_name ("ZoomFocusSelector");
-	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);
-	zoom_focus_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done));
+	zoom_focus_selector.set_name ("transport option button");
+	zoom_focus_selector.set_size_request (80, -1);
+//	zoom_focus_selector.add_elements (ArdourButton::FlatFace);
 
 	if (!ARDOUR::Profile->get_trx()) {
 		_zoom_box.pack_start (zoom_out_button, false, false);
@@ -3103,20 +3106,16 @@ Editor::setup_toolbar ()
 	}
 
 	/* Track zoom buttons */
-	visible_tracks_selector.set_name ("zoom button");
-//	visible_tracks_selector.add_elements ( ArdourButton::Inset );
-	set_size_request_to_display_given_text (visible_tracks_selector, _("all"), 40, 2);
-
-	tav_expand_button.set_name ("zoom button");
-//	tav_expand_button.add_elements ( ArdourButton::Inset );
+	tav_expand_button.set_name ("transport option button");
+//	tav_expand_button.add_elements ( ArdourButton::FlatFace );
 	tav_expand_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	tav_expand_button.set_size_request (-1, 20);
 	tav_expand_button.set_image(::get_icon ("tav_exp"));
 	act = ActionManager::get_action (X_("Editor"), X_("expand-tracks"));
 	tav_expand_button.set_related_action (act);
 
-	tav_shrink_button.set_name ("zoom button");
-//	tav_shrink_button.add_elements ( ArdourButton::Inset );
+	tav_shrink_button.set_name ("transport option button");
+//	tav_shrink_button.add_elements ( ArdourButton::FlatFace );
 	tav_shrink_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	tav_shrink_button.set_size_request (-1, 20);
 	tav_shrink_button.set_image(::get_icon ("tav_shrink"));
@@ -3137,17 +3136,17 @@ Editor::setup_toolbar ()
 	snap_box.set_spacing (2);
 	snap_box.set_border_width (2);
 
-	snap_type_selector.set_name ("SnapTypeSelector");
-	set_popdown_strings (snap_type_selector, snap_type_strings);
-	snap_type_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::snap_type_selection_done));
+	snap_type_selector.set_name ("mouse mode button");
+	snap_type_selector.set_size_request (140, -1);
+	//snap_type_selector.add_elements (ArdourButton::FlatFace);
 
-	snap_mode_selector.set_name ("SnapModeSelector");
-	set_popdown_strings (snap_mode_selector, snap_mode_strings);
-	snap_mode_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::snap_mode_selection_done));
+	snap_mode_selector.set_name ("mouse mode button");
+	snap_mode_selector.set_size_request (85, -1);
+	//snap_mode_selector.add_elements (ArdourButton::FlatFace);
 
-	edit_point_selector.set_name ("EditPointSelector");
-	set_popdown_strings (edit_point_selector, edit_point_strings);
-	edit_point_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::edit_point_selection_done));
+	edit_point_selector.set_name ("mouse mode button");
+	edit_point_selector.set_size_request (85, -1);
+	//edit_point_selector.add_elements (ArdourButton::FlatFace);
 
 	snap_box.pack_start (snap_mode_selector, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
@@ -3221,43 +3220,36 @@ Editor::setup_toolbar ()
 void
 Editor::build_edit_point_menu ()
 {
-#if 0
 	using namespace Menu_Helpers;
 
 	edit_point_selector.AddMenuElem (MenuElem ( edit_point_strings[(int)EditAtPlayhead], sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_selection_done), (EditPoint) EditAtPlayhead)));
 	edit_point_selector.AddMenuElem (MenuElem ( edit_point_strings[(int)EditAtSelectedMarker], sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_selection_done), (EditPoint) EditAtSelectedMarker)));
 	edit_point_selector.AddMenuElem (MenuElem ( edit_point_strings[(int)EditAtMouse], sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_selection_done), (EditPoint) EditAtMouse)));
-#endif
 }
 
 void
 Editor::build_edit_mode_menu ()
 {
-#if 0
 	using namespace Menu_Helpers;
 
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Slide), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Slide)));
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Splice), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Splice)));
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Lock), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode)  Lock)));
-#endif
 }
 
 void
 Editor::build_snap_mode_menu ()
 {
-#if 0
 	using namespace Menu_Helpers;
 
 	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapOff], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapOff)));
 	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapNormal], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapNormal)));
 	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapMagnetic], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapMagnetic)));
-#endif
 }
 
 void
 Editor::build_snap_type_menu ()
 {
-#if 0
 	using namespace Menu_Helpers;
 
 	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToCDFrame], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToCDFrame)));
@@ -3290,7 +3282,6 @@ Editor::build_snap_type_menu ()
 	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionEnd], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionEnd)));
 	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionSync], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionSync)));
 	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionBoundary], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionBoundary)));
-#endif
 }
 
 void
@@ -3564,83 +3555,14 @@ Editor::cycle_edit_mode ()
 }
 
 void
-Editor::edit_mode_selection_done ()
+Editor::edit_mode_selection_done ( EditMode m )
 {
-        string s = edit_mode_selector.get_active_text ();
-
-        if (!s.empty()) {
-                Config->set_edit_mode (string_to_edit_mode (s));
-        }
+	Config->set_edit_mode ( m );
 }
 
 void
-Editor::snap_type_selection_done ()
+Editor::snap_type_selection_done (SnapType snaptype)
 {
-	string choice = snap_type_selector.get_active_text();
-	SnapType snaptype = SnapToBeat;
-
-	if (choice == _("Beats/2")) {
-		snaptype = SnapToBeatDiv2;
-	} else if (choice == _("Beats/3")) {
-		snaptype = SnapToBeatDiv3;
-	} else if (choice == _("Beats/4")) {
-		snaptype = SnapToBeatDiv4;
-	} else if (choice == _("Beats/5")) {
-		snaptype = SnapToBeatDiv5;
-	} else if (choice == _("Beats/6")) {
-		snaptype = SnapToBeatDiv6;
-	} else if (choice == _("Beats/7")) {
-		snaptype = SnapToBeatDiv7;
-	} else if (choice == _("Beats/8")) {
-		snaptype = SnapToBeatDiv8;
-	} else if (choice == _("Beats/10")) {
-		snaptype = SnapToBeatDiv10;
-	} else if (choice == _("Beats/12")) {
-		snaptype = SnapToBeatDiv12;
-	} else if (choice == _("Beats/14")) {
-		snaptype = SnapToBeatDiv14;
-	} else if (choice == _("Beats/16")) {
-		snaptype = SnapToBeatDiv16;
-	} else if (choice == _("Beats/20")) {
-		snaptype = SnapToBeatDiv20;
-	} else if (choice == _("Beats/24")) {
-		snaptype = SnapToBeatDiv24;
-	} else if (choice == _("Beats/28")) {
-		snaptype = SnapToBeatDiv28;
-	} else if (choice == _("Beats/32")) {
-		snaptype = SnapToBeatDiv32;
-	} else if (choice == _("Beats/64")) {
-		snaptype = SnapToBeatDiv64;
-	} else if (choice == _("Beats/128")) {
-		snaptype = SnapToBeatDiv128;
-	} else if (choice == _("Beats")) {
-		snaptype = SnapToBeat;
-	} else if (choice == _("Bars")) {
-		snaptype = SnapToBar;
-	} else if (choice == _("Marks")) {
-		snaptype = SnapToMark;
-	} else if (choice == _("Region starts")) {
-		snaptype = SnapToRegionStart;
-	} else if (choice == _("Region ends")) {
-		snaptype = SnapToRegionEnd;
-	} else if (choice == _("Region bounds")) {
-		snaptype = SnapToRegionBoundary;
-	} else if (choice == _("Region syncs")) {
-		snaptype = SnapToRegionSync;
-	} else if (choice == _("CD Frames")) {
-		snaptype = SnapToCDFrame;
-	} else if (choice == _("Timecode Frames")) {
-		snaptype = SnapToTimecodeFrame;
-	} else if (choice == _("Timecode Seconds")) {
-		snaptype = SnapToTimecodeSeconds;
-	} else if (choice == _("Timecode Minutes")) {
-		snaptype = SnapToTimecodeMinutes;
-	} else if (choice == _("Seconds")) {
-		snaptype = SnapToSeconds;
-	} else if (choice == _("Minutes")) {
-		snaptype = SnapToMinutes;
-	}
-
 	RefPtr<RadioAction> ract = snap_type_action (snaptype);
 	if (ract) {
 		ract->set_active ();
@@ -3648,19 +3570,8 @@ Editor::snap_type_selection_done ()
 }
 
 void
-Editor::snap_mode_selection_done ()
+Editor::snap_mode_selection_done (SnapMode mode)
 {
-	string choice = snap_mode_selector.get_active_text();
-	SnapMode mode = SnapNormal;
-
-	if (choice == _("No Grid")) {
-		mode = SnapOff;
-	} else if (choice == _("Grid")) {
-		mode = SnapNormal;
-	} else if (choice == _("Magnetic")) {
-		mode = SnapMagnetic;
-	}
-
 	RefPtr<RadioAction> ract = snap_mode_action (mode);
 
 	if (ract) {
@@ -3689,30 +3600,14 @@ Editor::cycle_edit_point (bool with_marker)
 }
 
 void
-Editor::edit_point_selection_done ()
+Editor::edit_point_selection_done (EditPoint ep)
 {
-	string choice = edit_point_selector.get_active_text();
-	EditPoint ep = EditAtSelectedMarker;
-
-	if (choice == _("Marker")) {
-		set_edit_point_preference (EditAtSelectedMarker);
-	} else if (choice == _("Playhead")) {
-		set_edit_point_preference (EditAtPlayhead);
-	} else {
-		set_edit_point_preference (EditAtMouse);
-	}
-
-	RefPtr<RadioAction> ract = edit_point_action (ep);
-
-	if (ract) {
-		ract->set_active (true);
-	}
+	set_edit_point_preference ( ep );
 }
 
 void
 Editor::build_zoom_focus_menu ()
 {
-#if 0
 	using namespace Menu_Helpers;
 
 	zoom_focus_selector.AddMenuElem (MenuElem ( zoom_focus_strings[(int)ZoomFocusLeft], sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done), (ZoomFocus) ZoomFocusLeft)));
@@ -3721,31 +3616,12 @@ Editor::build_zoom_focus_menu ()
 	zoom_focus_selector.AddMenuElem (MenuElem ( zoom_focus_strings[(int)ZoomFocusPlayhead], sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done), (ZoomFocus) ZoomFocusPlayhead)));
 	zoom_focus_selector.AddMenuElem (MenuElem ( zoom_focus_strings[(int)ZoomFocusMouse], sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done), (ZoomFocus) ZoomFocusMouse)));
 	zoom_focus_selector.AddMenuElem (MenuElem ( zoom_focus_strings[(int)ZoomFocusEdit], sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done), (ZoomFocus) ZoomFocusEdit)));
-#endif
 }
 
 void
-Editor::zoom_focus_selection_done ()
+Editor::zoom_focus_selection_done ( ZoomFocus f )
 {
-	string choice = zoom_focus_selector.get_active_text();
-	ZoomFocus focus_type = ZoomFocusLeft;
-
-	if (choice == _("Left")) {
-		focus_type = ZoomFocusLeft;
-	} else if (choice == _("Right")) {
-		focus_type = ZoomFocusRight;
-	} else if (choice == _("Center")) {
-		focus_type = ZoomFocusCenter;
-	} else if (choice == _("Playhead")) {
-		focus_type = ZoomFocusPlayhead;
-	} else if (choice == _("Mouse")) {
-		focus_type = ZoomFocusMouse;
-	} else if (choice == _("Edit point")) {
-		focus_type = ZoomFocusEdit;
-	}
-
-	RefPtr<RadioAction> ract = zoom_focus_action (focus_type);
-
+	RefPtr<RadioAction> ract = zoom_focus_action (f);
 	if (ract) {
 		ract->set_active ();
 	}
@@ -3860,8 +3736,8 @@ Editor::set_zoom_focus (ZoomFocus f)
 {
 	string str = zoom_focus_strings[(int)f];
 
-	if (str != zoom_focus_selector.get_active_text()) {
-		zoom_focus_selector.set_active_text (str);
+	if (str != zoom_focus_selector.get_text()) {
+		zoom_focus_selector.set_text (str);
 	}
 
 	if (zoom_focus != f) {
