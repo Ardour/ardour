@@ -148,7 +148,13 @@ Worker::run()
 
 		if (size > buf_size) {
 			buf = realloc(buf, size);
-			buf_size = size;
+			if (buf) {
+				buf_size = size;
+			} else {
+				PBD::error << "Worker: Error allocating memory"
+				           << endmsg;
+				buf_size = 0; // TODO: This is probably fatal
+			}
 		}
 
 		if (_requests->read((uint8_t*)buf, size) < size) {
