@@ -1795,6 +1795,8 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_new_plugins_active)
 		     ));
 
+	add_option (_("Audio"), new OptionEditorHeading (_("Regions")));
+
 	add_option (_("Audio"),
 	     new BoolOption (
 		     "auto-analyse-audio",

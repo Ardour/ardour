@@ -379,8 +379,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_rel_line_to(cr, _diameter, 0);
 		cairo_close_path(cr);
 		cairo_fill(cr);
-		
-	
+			
 		cairo_restore (cr);
 	}
 	
