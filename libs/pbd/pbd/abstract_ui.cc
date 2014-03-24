@@ -44,18 +44,18 @@ cleanup_request_buffer (void* ptr)
 {
         RequestBuffer* rb = (RequestBuffer*) ptr;
 	
-	/* there is the question of why we don't simply erase the request
-	 * buffer and delete it right here, since we have to take the lock
-	 * anyway.
+	/* this is called when the thread for which this request buffer was
+	 * allocated dies. That could be before or after the end of the UI
+	 * event loop that the request buffer communicates.
 	 *
-	 * as of april 24th 2012, i don't have a good answer to that.
+	 * We are not modifying the UI's thread/buffer map, just marking it 
+	 * dead. If the UI is currently processing the buffers and misses
+	 * this "dead" signal, it will find it the next time it receives
+	 * a request. If the UI has finished processing requests, then
+	 * we will leak this buffer object.
 	 */
 	 
-
-        {
-                Glib::Threads::Mutex::Lock lm (rb->ui.request_buffer_map_lock);
-                rb->dead = true;
-        }
+	rb->dead = true;
 }
 
 template<typename R>
