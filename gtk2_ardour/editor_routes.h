@@ -98,6 +98,7 @@ private:
 	void show_all_miditracks ();
 	void hide_all_miditracks ();
 	void show_tracks_with_regions_at_playhead ();
+        void selection_changed ();
 
 	void display_drag_data_received (
 		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint

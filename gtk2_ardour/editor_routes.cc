@@ -222,6 +222,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.set_headers_visible (true);
 	_display.get_selection()->set_mode (SELECTION_SINGLE);
 	_display.get_selection()->set_select_function (sigc::mem_fun (*this, &EditorRoutes::selection_filter));
+	_display.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::selection_changed));
 	_display.set_reorderable (true);
 	_display.set_name (X_("EditGroupList"));
 	_display.set_rules_hint (true);
@@ -1288,25 +1289,44 @@ EditorRoutes::button_press (GdkEventButton* ev)
 	//Scroll editor canvas to selected track
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
-		// Get the model row.
 		Gtk::TreeModel::Row row = *_model->get_iter (path);
-
 		TimeAxisView *tv = row[_columns.tv];
 
-		int y_pos = tv->y_position();
-
-		//Clamp the y pos so that we do not extend beyond the canvas full height.
-		if (_editor->_full_canvas_height - y_pos < _editor->_visible_canvas_height){
-		    y_pos = _editor->_full_canvas_height - _editor->_visible_canvas_height;
-		}
-
-		//Only scroll to if the track is visible
-		if(y_pos != -1){
-		    _editor->reset_y_origin (y_pos);
+		if (tv) {
+			_editor->ensure_time_axis_view_is_visible (*tv);
 		}
 	}
 
 	return false;
+}
+
+void
+EditorRoutes::selection_changed ()
+{
+	if (_display.get_selection()->count_selected_rows() > 0) {
+
+		TreeIter iter;
+		TreeView::Selection::ListHandle_Path rows = _display.get_selection()->get_selected_rows ();
+		TrackViewList selected;
+
+		_editor->get_selection().clear_regions ();
+
+		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
+
+			if ((iter = _model->get_iter (*i))) {
+
+				TimeAxisView* tv = (*iter)[_columns.tv];
+				selected.push_back (tv);
+			}
+			
+		}
+
+		_editor->get_selection().set (selected);
+		_editor->ensure_time_axis_view_is_visible (*(selected.front()));
+
+	} else {
+		_editor->get_selection().clear_tracks ();
+	}
 }
 
 bool
