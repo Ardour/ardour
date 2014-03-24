@@ -69,7 +69,7 @@ struct LIBTIMECODE_API Time {
 		frames = 0;
 		subframes = 0;
 		rate = a_rate;
-		drop = (rintf(100.f * a_rate) == 2997);
+		drop = (lrintf(100.f * (float)a_rate) == (long)2997);
 	}
 	
 	bool operator== (const Time& other) const {
