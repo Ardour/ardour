@@ -731,19 +731,26 @@ Editor::entered_track_canvas (GdkEventCrossing */*ev*/)
 }
 
 void
-Editor::ensure_time_axis_view_is_visible (const TimeAxisView& tav)
+Editor::_ensure_time_axis_view_is_visible (const TimeAxisView& tav, bool at_top)
 {
 	double begin = tav.y_position();
-
 	double v = vertical_adjustment.get_value ();
 
-	if (begin < v || begin + tav.current_height() > v + _visible_canvas_height) {
+	if (!at_top && (begin < v || begin + tav.current_height() > v + _visible_canvas_height)) {
 		/* try to put the TimeAxisView roughly central */
 		if (begin >= _visible_canvas_height/2.0) {
 			begin -= _visible_canvas_height/2.0;
 		}
-		vertical_adjustment.set_value (begin);
 	}
+
+	/* Clamp the y pos so that we do not extend beyond the canvas full
+	 * height. 
+	 */
+	if (_full_canvas_height - begin < _visible_canvas_height){
+		begin = _full_canvas_height - _visible_canvas_height;
+	}
+
+	vertical_adjustment.set_value (begin);
 }
 
 /** Called when the main vertical_adjustment has changed */

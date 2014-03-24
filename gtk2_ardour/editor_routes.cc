@@ -1293,7 +1293,7 @@ EditorRoutes::button_press (GdkEventButton* ev)
 		TimeAxisView *tv = row[_columns.tv];
 
 		if (tv) {
-			_editor->ensure_time_axis_view_is_visible (*tv);
+			_editor->ensure_time_axis_view_is_visible (*tv, true);
 		}
 	}
 
@@ -1322,7 +1322,7 @@ EditorRoutes::selection_changed ()
 		}
 
 		_editor->get_selection().set (selected);
-		_editor->ensure_time_axis_view_is_visible (*(selected.front()));
+		_editor->ensure_time_axis_view_is_visible (*(selected.front()), true);
 
 	} else {
 		_editor->get_selection().clear_tracks ();

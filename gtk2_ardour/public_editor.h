@@ -267,7 +267,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual framecnt_t current_page_samples() const = 0;
 	virtual double visible_canvas_height () const = 0;
 	virtual void temporal_zoom_step (bool coarser) = 0;
-	virtual void ensure_time_axis_view_is_visible (const TimeAxisView& tav) = 0;
+        virtual void ensure_time_axis_view_is_visible (const TimeAxisView& tav, bool at_top = false) { 
+	    _ensure_time_axis_view_is_visible (tav, at_top);
+	}
 	virtual void scroll_tracks_down_line () = 0;
 	virtual void scroll_tracks_up_line () = 0;
         virtual bool scroll_down_one_track () = 0;
@@ -409,6 +411,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 
 	PBD::Signal0<void> SnapChanged;
 	PBD::Signal0<void> MouseModeChanged;
+
+  protected:
+       virtual void _ensure_time_axis_view_is_visible (const TimeAxisView& tav, bool at_top) = 0;
 };
 
 #endif // __gtk_ardour_public_editor_h__

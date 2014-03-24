@@ -178,6 +178,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_internal_edit (bool yn);
 	bool toggle_internal_editing_from_double_click (GdkEvent*);
 
+        void _ensure_time_axis_view_is_visible (const TimeAxisView& tav, bool at_top);
 	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
 	void add_to_idle_resize (TimeAxisView*, int32_t);
 
@@ -350,7 +351,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void show_window ();
 
-	void ensure_time_axis_view_is_visible (const TimeAxisView& tav);
 	void scroll_tracks_down_line ();
 	void scroll_tracks_up_line ();
         bool scroll_up_one_track ();
