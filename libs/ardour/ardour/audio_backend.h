@@ -188,6 +188,9 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     /** Set the name of the device to be used
      */
     virtual int set_device_name (const std::string&) = 0;
+    /** Deinitialize and destroy current device
+     */
+	virtual int drop_device() {};
     /** Set the sample rate to be used
      */
     virtual int set_sample_rate (float) = 0;
