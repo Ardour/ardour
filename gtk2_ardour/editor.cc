@@ -314,6 +314,7 @@ Editor::Editor ()
 
 	build_edit_mode_menu();
 	build_zoom_focus_menu();
+	build_track_count_menu();
 	build_snap_mode_menu();
 	build_snap_type_menu();
 	build_edit_point_menu();
@@ -381,6 +382,7 @@ Editor::Editor ()
 	_edit_point = EditAtMouse;
 	_internal_editing = false;
 	current_canvas_cursor = 0;
+	_visible_track_count = 16;
 
 	samples_per_pixel = 2048; /* too early to use reset_zoom () */
 
@@ -644,6 +646,7 @@ Editor::Editor ()
 	setup_toolbar ();
 
 	set_zoom_focus (zoom_focus);
+	set_visible_track_count (_visible_track_count);
 	_snap_type = SnapToBeat;
 	set_snap_to (_snap_type);
 	_snap_mode = SnapOff;
@@ -2948,24 +2951,11 @@ Editor::setup_toolbar ()
 	_zoom_box.pack_start (zoom_focus_selector, false, false);
 
 	/* Track zoom buttons */
-	tav_expand_button.set_name ("zoom button");
-//	tav_expand_button.add_elements ( ArdourButton::FlatFace );
-	tav_expand_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
-	tav_expand_button.set_size_request (-1, 20);
-	tav_expand_button.set_image(::get_icon ("tav_exp"));
-	act = ActionManager::get_action (X_("Editor"), X_("expand-tracks"));
-	tav_expand_button.set_related_action (act);
+	visible_tracks_selector.set_name ("zoom button");
+//	visible_tracks_selector.add_elements ( ArdourButton::FlatFace );
+	set_size_request_to_display_given_text (visible_tracks_selector, _("all"), 40, 2);
 
-	tav_shrink_button.set_name ("zoom button");
-//	tav_shrink_button.add_elements ( ArdourButton::FlatFace );
-	tav_shrink_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
-	tav_shrink_button.set_size_request (-1, 20);
-	tav_shrink_button.set_image(::get_icon ("tav_shrink"));
-	act = ActionManager::get_action (X_("Editor"), X_("shrink-tracks"));
-	tav_shrink_button.set_related_action (act);
-
-	_zoom_box.pack_start (tav_shrink_button);
-	_zoom_box.pack_start (tav_expand_button);
+	_zoom_box.pack_start (visible_tracks_selector);
 
 	_zoom_tearoff = manage (new TearOff (_zoom_box));
 
@@ -3151,8 +3141,7 @@ Editor::setup_tooltips ()
 	ARDOUR_UI::instance()->set_tip (zoom_out_button, _("Zoom Out"));
 	ARDOUR_UI::instance()->set_tip (zoom_out_full_button, _("Zoom to Session"));
 	ARDOUR_UI::instance()->set_tip (zoom_focus_selector, _("Zoom focus"));
-	ARDOUR_UI::instance()->set_tip (tav_expand_button, _("Expand Tracks"));
-	ARDOUR_UI::instance()->set_tip (tav_shrink_button, _("Shrink Tracks"));
+	ARDOUR_UI::instance()->set_tip (visible_tracks_selector, _("Number of visible tracks"));
 	ARDOUR_UI::instance()->set_tip (snap_type_selector, _("Snap/Grid Units"));
 	ARDOUR_UI::instance()->set_tip (snap_mode_selector, _("Snap/Grid Mode"));
 	ARDOUR_UI::instance()->set_tip (edit_point_selector, _("Edit point"));
@@ -3474,6 +3463,51 @@ Editor::zoom_focus_selection_done ( ZoomFocus f )
 	RefPtr<RadioAction> ract = zoom_focus_action (f);
 	if (ract) {
 		ract->set_active ();
+	}
+}
+
+void
+Editor::build_track_count_menu ()
+{
+	using namespace Menu_Helpers;
+
+	visible_tracks_selector.AddMenuElem (MenuElem (X_("1"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 1)));
+	visible_tracks_selector.AddMenuElem (MenuElem (X_("2"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 2)));
+	visible_tracks_selector.AddMenuElem (MenuElem (X_("3"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 3)));
+	visible_tracks_selector.AddMenuElem (MenuElem (X_("4"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 4)));
+	visible_tracks_selector.AddMenuElem (MenuElem (X_("8"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 8)));
+	visible_tracks_selector.AddMenuElem (MenuElem (X_("12"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 12)));
+	visible_tracks_selector.AddMenuElem (MenuElem (X_("16"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 16)));
+	visible_tracks_selector.AddMenuElem (MenuElem (X_("20"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 20)));
+	visible_tracks_selector.AddMenuElem (MenuElem (X_("24"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 24)));
+	visible_tracks_selector.AddMenuElem (MenuElem (X_("32"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 32)));
+	visible_tracks_selector.AddMenuElem (MenuElem (X_("64"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 64)));
+	visible_tracks_selector.AddMenuElem (MenuElem (_("all"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), -1)));
+}
+
+void
+Editor::set_visible_track_count (int32_t n)
+{
+	if (n == _visible_track_count && !visible_tracks_selector.get_text().empty()) {
+		return;
+	}
+
+	_visible_track_count = n;
+	
+	string str;
+
+	if (_visible_track_count > 0) {
+		std::ostringstream s;
+		s << _visible_track_count;
+		
+		str = s.str();
+		
+	} else {
+		str = _("all");
+	}
+
+	if (str != visible_tracks_selector.get_text()) {
+		visible_tracks_selector.set_text (str);
 	}
 }
 

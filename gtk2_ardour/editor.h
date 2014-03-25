@@ -1562,8 +1562,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourButton              zoom_out_button;
 	ArdourButton              zoom_out_full_button;
 
-	ArdourButton              tav_expand_button;
-	ArdourButton              tav_shrink_button;
+	ArdourMenu                visible_tracks_selector;
+        int32_t                   _visible_track_count;
+        void build_track_count_menu ();
+        void set_visible_track_count (int32_t);
 
 	Gtk::VBox                toolbar_clock_vbox;
 	Gtk::VBox                toolbar_selection_clock_vbox;
