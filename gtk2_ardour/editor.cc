@@ -2961,7 +2961,26 @@ Editor::setup_toolbar ()
 //	visible_tracks_selector.add_elements ( ArdourButton::FlatFace );
 	set_size_request_to_display_given_text (visible_tracks_selector, _("all"), 40, 2);
 
+	tav_expand_button.set_name ("zoom button");
+//	tav_expand_button.add_elements ( ArdourButton::FlatFace );
+	tav_expand_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
+	tav_expand_button.set_size_request (-1, 20);
+	tav_expand_button.set_image(::get_icon ("tav_exp"));
+	act = ActionManager::get_action (X_("Editor"), X_("expand-tracks"));
+	tav_expand_button.set_related_action (act);
+
+	tav_shrink_button.set_name ("zoom button");
+//	tav_shrink_button.add_elements ( ArdourButton::FlatFace );
+	tav_shrink_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
+	tav_shrink_button.set_size_request (-1, 20);
+	tav_shrink_button.set_image(::get_icon ("tav_shrink"));
+	act = ActionManager::get_action (X_("Editor"), X_("shrink-tracks"));
+	tav_shrink_button.set_related_action (act);
+
 	_zoom_box.pack_start (visible_tracks_selector);
+	_zoom_box.pack_start (tav_shrink_button);
+	_zoom_box.pack_start (tav_expand_button);
+
 
 	_zoom_tearoff = manage (new TearOff (_zoom_box));
 
@@ -3147,6 +3166,8 @@ Editor::setup_tooltips ()
 	ARDOUR_UI::instance()->set_tip (zoom_out_button, _("Zoom Out"));
 	ARDOUR_UI::instance()->set_tip (zoom_out_full_button, _("Zoom to Session"));
 	ARDOUR_UI::instance()->set_tip (zoom_focus_selector, _("Zoom focus"));
+	ARDOUR_UI::instance()->set_tip (tav_expand_button, _("Expand Tracks"));
+	ARDOUR_UI::instance()->set_tip (tav_shrink_button, _("Shrink Tracks"));
 	ARDOUR_UI::instance()->set_tip (visible_tracks_selector, _("Number of visible tracks"));
 	ARDOUR_UI::instance()->set_tip (snap_type_selector, _("Snap/Grid Units"));
 	ARDOUR_UI::instance()->set_tip (snap_mode_selector, _("Snap/Grid Mode"));
