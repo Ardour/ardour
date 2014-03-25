@@ -3493,19 +3493,24 @@ Editor::set_visible_track_count (int32_t n)
 	}
 
 	_visible_track_count = n;
-	
+
+	int h;
 	string str;
 
 	if (_visible_track_count > 0) {
+		h = _visible_canvas_height / _visible_track_count;
 		std::ostringstream s;
 		s << _visible_track_count;
-		
 		str = s.str();
-		
 	} else {
+		h = _visible_canvas_height / track_views.size();
 		str = _("all");
 	}
-
+	
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		(*i)->set_height (h);
+	}
+	
 	if (str != visible_tracks_selector.get_text()) {
 		visible_tracks_selector.set_text (str);
 	}
