@@ -128,7 +128,7 @@ class VerboseCursor;
 
 class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
-  public:
+ public:
 	Editor ();
 	~Editor ();
 
@@ -450,6 +450,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         ArdourCanvas::GtkCanvasViewport* get_time_bars_canvas () const;
         ArdourCanvas::GtkCanvasViewport* get_track_canvas () const;
 
+        void override_visible_track_count ();
 
   protected:
 	void map_transport_state ();

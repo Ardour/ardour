@@ -283,6 +283,8 @@ Editor::track_canvas_viewport_size_allocated ()
 			*/
 			vertical_adjustment.set_value (_full_canvas_height - _visible_canvas_height);
 		}
+
+		set_visible_track_count (_visible_track_count);
 	}
 
 	update_fixed_rulers();

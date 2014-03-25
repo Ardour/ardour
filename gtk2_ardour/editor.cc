@@ -2265,6 +2265,10 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		reset_zoom (samples_per_pixel);
 	}
 
+	if ((prop = node.property ("visible-track-count"))) {
+		set_visible_track_count (PBD::atoi (prop->value()));
+	}
+
 	if ((prop = node.property ("snap-to"))) {
 		set_snap_to ((SnapType) string_2_enum (prop->value(), _snap_type));
 	}
@@ -2496,6 +2500,8 @@ Editor::get_state ()
 	node->add_property ("pre-internal-snap-to", enum_2_string (pre_internal_snap_type));
 	node->add_property ("pre-internal-snap-mode", enum_2_string (pre_internal_snap_mode));
 	node->add_property ("edit-point", enum_2_string (_edit_point));
+	snprintf (buf, sizeof(buf), "%d", _visible_track_count);
+	node->add_property ("visible-track-count", buf);
 
 	snprintf (buf, sizeof (buf), "%" PRIi64, playhead_cursor->current_frame ());
 	node->add_property ("playhead", buf);
@@ -3482,17 +3488,23 @@ Editor::build_track_count_menu ()
 	visible_tracks_selector.AddMenuElem (MenuElem (X_("24"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 24)));
 	visible_tracks_selector.AddMenuElem (MenuElem (X_("32"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 32)));
 	visible_tracks_selector.AddMenuElem (MenuElem (X_("64"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 64)));
-	visible_tracks_selector.AddMenuElem (MenuElem (_("all"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), -1)));
+	visible_tracks_selector.AddMenuElem (MenuElem (_("all"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 0)));
 }
 
 void
 Editor::set_visible_track_count (int32_t n)
 {
-	if (n == _visible_track_count && !visible_tracks_selector.get_text().empty()) {
+	_visible_track_count = n;
+
+	/* if the canvas hasn't really been allocated any size yet, just
+	   record the desired number of visible tracks and return. when canvas
+	   allocation happens, we will get called again and then we can do the
+	   real work.
+	*/
+	
+	if (_visible_canvas_height <= 1) {
 		return;
 	}
-
-	_visible_track_count = n;
 
 	int h;
 	string str;
@@ -3502,11 +3514,17 @@ Editor::set_visible_track_count (int32_t n)
 		std::ostringstream s;
 		s << _visible_track_count;
 		str = s.str();
-	} else {
+	} else if (_visible_track_count == 0) {
 		h = _visible_canvas_height / track_views.size();
 		str = _("all");
+	} else {
+		/* negative value means that the visible track count has 
+		   been overridden by explicit track height changes.
+		*/
+		visible_tracks_selector.set_text (X_("*"));
+		return;
 	}
-	
+
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(*i)->set_height (h);
 	}
@@ -3514,6 +3532,12 @@ Editor::set_visible_track_count (int32_t n)
 	if (str != visible_tracks_selector.get_text()) {
 		visible_tracks_selector.set_text (str);
 	}
+}
+
+void
+Editor::override_visible_track_count ()
+{
+	_visible_track_count = -_visible_track_count;
 }
 
 bool

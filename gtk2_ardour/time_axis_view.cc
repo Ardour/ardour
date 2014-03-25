@@ -524,6 +524,8 @@ TimeAxisView::set_height (uint32_t h)
 		/* resize the selection rect */
 		show_selection (_editor.get_selection().time);
 	}
+
+	_editor.override_visible_track_count ();
 }
 
 bool
