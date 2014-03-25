@@ -2916,28 +2916,28 @@ Editor::setup_toolbar ()
 
 	RefPtr<Action> act;
 
-	zoom_in_button.set_name ("transport option button");
+	zoom_in_button.set_name ("zoom button");
 //	zoom_in_button.add_elements ( ArdourButton::FlatFace );
 	zoom_in_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	zoom_in_button.set_image(::get_icon ("zoom_in"));
 	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-in"));
 	zoom_in_button.set_related_action (act);
 
-	zoom_out_button.set_name ("transport option button");
+	zoom_out_button.set_name ("zoom button");
 //	zoom_out_button.add_elements ( ArdourButton::FlatFace );
 	zoom_out_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	zoom_out_button.set_image(::get_icon ("zoom_out"));
 	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-out"));
 	zoom_out_button.set_related_action (act);
 
-	zoom_out_full_button.set_name ("transport option button");
+	zoom_out_full_button.set_name ("zoom button");
 //	zoom_out_full_button.add_elements ( ArdourButton::FlatFace );
 	zoom_out_full_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	zoom_out_full_button.set_image(::get_icon ("zoom_full"));
 	act = ActionManager::get_action (X_("Editor"), X_("zoom-to-session"));
 	zoom_out_full_button.set_related_action (act);
 
-	zoom_focus_selector.set_name ("transport option button");
+	zoom_focus_selector.set_name ("zoom button");
 	zoom_focus_selector.set_size_request (80, -1);
 //	zoom_focus_selector.add_elements (ArdourButton::FlatFace);
 
@@ -2948,7 +2948,7 @@ Editor::setup_toolbar ()
 	_zoom_box.pack_start (zoom_focus_selector, false, false);
 
 	/* Track zoom buttons */
-	tav_expand_button.set_name ("transport option button");
+	tav_expand_button.set_name ("zoom button");
 //	tav_expand_button.add_elements ( ArdourButton::FlatFace );
 	tav_expand_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	tav_expand_button.set_size_request (-1, 20);
@@ -2956,7 +2956,7 @@ Editor::setup_toolbar ()
 	act = ActionManager::get_action (X_("Editor"), X_("expand-tracks"));
 	tav_expand_button.set_related_action (act);
 
-	tav_shrink_button.set_name ("transport option button");
+	tav_shrink_button.set_name ("zoom button");
 //	tav_shrink_button.add_elements ( ArdourButton::FlatFace );
 	tav_shrink_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	tav_shrink_button.set_size_request (-1, 20);
