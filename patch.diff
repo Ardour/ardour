@@ -1,0 +1,47 @@
+From 87184ab80d80b1ef0301344bfd633b2d81476c9a Mon Sep 17 00:00:00 2001
+From: Paul Davis <paul@linuxaudiosystems.com>
+Date: Mon, 24 Mar 2014 17:47:56 -0400
+Subject: [PATCH] fix a race condition between the death of a thread that
+ communicates with an UI event loop and the event loop itself.
+
+The comment tries to explain it all. There may be a better solution, but I believe that this one is
+(a) safe (b) better than the old approach.
+---
+ libs/pbd/pbd/abstract_ui.cc | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/libs/pbd/pbd/abstract_ui.cc b/libs/pbd/pbd/abstract_ui.cc
+index 67c39b5..b0ac676 100644
+--- a/libs/pbd/pbd/abstract_ui.cc
++++ b/libs/pbd/pbd/abstract_ui.cc
+@@ -44,18 +44,18 @@ cleanup_request_buffer (void* ptr)
+ {
+         RequestBuffer* rb = (RequestBuffer*) ptr;
+ 	
+-	/* there is the question of why we don't simply erase the request
+-	 * buffer and delete it right here, since we have to take the lock
+-	 * anyway.
++	/* this is called when the thread for which this request buffer was
++	 * allocated dies. That could be before or after the end of the UI
++	 * event loop that the request buffer communicates.
+ 	 *
+-	 * as of april 24th 2012, i don't have a good answer to that.
++	 * We are not modifying the UI's thread/buffer map, just marking it 
++	 * dead. If the UI is currently processing the buffers and misses
++	 * this "dead" signal, it will find it the next time it receives
++	 * a request. If the UI has finished processing requests, then
++	 * we will leak this buffer object.
+ 	 */
+ 	 
+-
+-        {
+-                Glib::Threads::Mutex::Lock lm (rb->ui.request_buffer_map_lock);
+-                rb->dead = true;
+-        }
++	rb->dead = true;
+ }
+ 
+ template<typename R>
+-- 
+1.8.1.msysgit.1
+

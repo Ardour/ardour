@@ -10,10 +10,6 @@
 #include "WCMRAudioDeviceManager.h"
 
 
-
-
-
-
 //**********************************************************************************************
 // WCMRAudioDevice::WCMRAudioDevice 
 //
@@ -542,6 +538,7 @@ uint32_t WCMRAudioDevice::GetLatency (bool isInput)
     return 0;
 }
 
+
 //**********************************************************************************************
 // WCMRAudioDeviceManager::WCMRAudioDeviceManager
 //
@@ -558,7 +555,6 @@ WCMRAudioDeviceManager::WCMRAudioDeviceManager(WCMRAudioDeviceManagerClient *pTh
     , m_pTheClient (pTheClient)
 {
 }
-
 
 
 //**********************************************************************************************

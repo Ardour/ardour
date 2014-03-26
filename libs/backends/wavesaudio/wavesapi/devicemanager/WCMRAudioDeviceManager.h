@@ -193,6 +193,7 @@ protected:
 	float m_MonitorGain; ///< Amount of gain to apply for monitoring signal.
 };
 
+
 // This enum is for choosing filter for audio devices scan
 typedef enum eAudioDeviceFilter
 {

@@ -37,6 +37,9 @@
 #include "utils.h"
 #include "window_manager.h"
 
+#if defined(_WIN32)
+    #define strcasecmp _stricmp
+#endif
 
 using namespace std;
 using namespace Gtk;
@@ -255,7 +258,7 @@ WavesDialog::read_layout (std::string file_name)
 
 	XMLTree layout(layout_file, false);
 	XMLNode* root  = layout.root();
-	if ((root == NULL) || stricmp(root->name().c_str(), "dialog")) {
+	if ((root == NULL) || strcasecmp(root->name().c_str(), "dialog")) {
 		return false;
 	}
 

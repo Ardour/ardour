@@ -36,7 +36,6 @@ protected:
 	bool m_UseMultithreading;
     bool m_bNoCopyAudioBuffer; ///< This flag determines whether the audio callback performs a copy of audio, or the source/sink perform the copy. It should be true to let source/sink do the copies.
 
-
 };
 
 
