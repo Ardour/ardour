@@ -416,7 +416,8 @@ cp $BUILD_ROOT/gtk2_ardour/mnemonic-us.bindings  $Resources
 cp ../../gtk2_ardour/mixer.bindings $Resources
 cp ../../gtk2_ardour/step_editing.bindings $Resources
 cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Resources
-
+mkdir $Resources/ui
+cp ../../gtk2_ardour/ui/* $Resources/ui
 if test x$SAE != x ; then
     cp $BUILD_ROOT/gtk2_ardour/SAE-de-keypad.bindings  $Resources
     cp $BUILD_ROOT/gtk2_ardour/SAE-de-nokeypad.bindings  $Resources
