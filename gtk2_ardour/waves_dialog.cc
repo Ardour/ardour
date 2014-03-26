@@ -37,9 +37,6 @@
 #include "utils.h"
 #include "window_manager.h"
 
-#if defined(_WIN32)
-    #define strcasecmp _stricmp
-#endif
 
 using namespace std;
 using namespace Gtk;
