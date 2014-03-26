@@ -33,7 +33,7 @@
 
 #include "ardour/rc_configuration.h" // for widget prelight preference
 
-#include "ardour_menu.h"
+#include "ardour_dropdown.h"
 #include "ardour_ui.h"
 #include "global_signals.h"
 
@@ -50,20 +50,20 @@ using std::min;
 using namespace std;
 
 
-ArdourMenu::ArdourMenu (Element e)
+ArdourDropdown::ArdourDropdown (Element e)
 {
-	signal_button_press_event().connect (sigc::mem_fun(*this, &ArdourMenu::on_mouse_pressed));
+	signal_button_press_event().connect (sigc::mem_fun(*this, &ArdourDropdown::on_mouse_pressed));
 
 	add_elements(e);
 	add_elements(ArdourButton::Menu);
 }
 
-ArdourMenu::~ArdourMenu ()
+ArdourDropdown::~ArdourDropdown ()
 {
 }
 
 bool
-ArdourMenu::on_mouse_pressed (GdkEventButton*)
+ArdourDropdown::on_mouse_pressed (GdkEventButton*)
 {
 	_menu.popup (1, gtk_get_current_event_time());	
 	return true;
@@ -71,7 +71,7 @@ ArdourMenu::on_mouse_pressed (GdkEventButton*)
 
 
 void
-ArdourMenu::AddMenuElem (Menu_Helpers::MenuElem e)
+ArdourDropdown::AddMenuElem (Menu_Helpers::MenuElem e)
 {
 	using namespace Menu_Helpers;
 
