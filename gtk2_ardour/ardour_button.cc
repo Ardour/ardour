@@ -267,7 +267,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		}
 	}
 
-	if ( ((_elements & FlatFace)==FlatFace) && (active_state() != Gtkmm2ext::ExplicitActive) ) {
+	if ( ((_elements & Inset)==Inset) && (active_state() != Gtkmm2ext::ExplicitActive) ) {
 
 		if ( !_flat_buttons ) {
 			float rheight = get_height()*0.5-REFLECTION_HEIGHT;

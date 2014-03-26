@@ -37,7 +37,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 		Body = 0x2,
 		Text = 0x4,
 		Indicator = 0x8,
-		FlatFace = 0x10,
+		Inset = 0x10,
 		Menu = 0x20,
 	};
 
