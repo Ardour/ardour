@@ -51,7 +51,7 @@
 #include "gtk-custom-ruler.h"
 #include "ardour_button.h"
 #include "ardour_dialog.h"
-#include "ardour_menu.h"
+#include "ardour_dropdown.h"
 #include "public_editor.h"
 #include "editing.h"
 #include "enums.h"
@@ -1565,10 +1565,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	ArdourButton              tav_expand_button;
 	ArdourButton              tav_shrink_button;
-	ArdourMenu                visible_tracks_selector;
-        int32_t                   _visible_track_count;
-        void build_track_count_menu ();
-        void set_visible_track_count (int32_t);
+	ArdourDropdown            visible_tracks_selector;
+
+    int32_t                   _visible_track_count;
+    void build_track_count_menu ();
+    void set_visible_track_count (int32_t);
 
 	Gtk::VBox                toolbar_clock_vbox;
 	Gtk::VBox                toolbar_selection_clock_vbox;
@@ -1600,7 +1601,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Button              automation_mode_button;
 
 	//edit mode menu stuff
-	ArdourMenu	edit_mode_selector;
+	ArdourDropdown	edit_mode_selector;
 	void edit_mode_selection_done ( ARDOUR::EditMode m );
 	void build_edit_mode_menu ();
 	Gtk::VBox         edit_mode_box;
@@ -1609,10 +1610,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_edit_mode (ARDOUR::EditMode);
 	void cycle_edit_mode ();
 
-	ArdourMenu snap_type_selector;
+	ArdourDropdown snap_type_selector;
 	void build_snap_type_menu ();
 
-	ArdourMenu snap_mode_selector;
+	ArdourDropdown snap_mode_selector;
 	void build_snap_mode_menu ();
 	Gtk::HBox         snap_box;
 
@@ -1628,7 +1629,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
 
 	//zoom focus meu stuff
-	ArdourMenu	zoom_focus_selector;
+	ArdourDropdown	zoom_focus_selector;
 	void zoom_focus_selection_done ( Editing::ZoomFocus f );
 	void build_zoom_focus_menu ();
 	std::vector<std::string> zoom_focus_strings;
@@ -1954,7 +1955,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Editing::EditPoint _edit_point;
 
-	ArdourMenu edit_point_selector;
+	ArdourDropdown edit_point_selector;
 	void build_edit_point_menu();
 
 	void set_edit_point_preference (Editing::EditPoint ep, bool force = false);

@@ -16,8 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __gtk2_ardour_ardour_menu_h__
-#define __gtk2_ardour_ardour_menu_h__
+#ifndef __gtk2_ardour_ardour_dropdown_h__
+#define __gtk2_ardour_ardour_dropdown_h__
 
 #include <list>
 #include <stdint.h>
@@ -29,12 +29,12 @@
 
 #include "ardour_button.h"
 
-class ArdourMenu : public ArdourButton
+class ArdourDropdown : public ArdourButton
 {
   public:
 
-	ArdourMenu (Element e = default_elements);
-	virtual ~ArdourMenu ();
+	ArdourDropdown (Element e = default_elements);
+	virtual ~ArdourDropdown ();
 
 	bool on_mouse_pressed (GdkEventButton*);
 
