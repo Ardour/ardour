@@ -30,6 +30,8 @@
 #include <glibmm.h>
 #include <glib/gstdio.h>
 
+#include <fontconfig/fontconfig.h>
+
 #include "ardour/ardour.h"
 #include "ardour/search_paths.h"
 #include "ardour/filesystem_paths.h"
@@ -470,4 +472,22 @@ fixup_bundle_environment (int argc, char* argv[], const char** localedir)
 
 void load_custom_fonts() 
 {
+	std::string ardour_mono_file;
+
+	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
+		cerr << "Cannot find ArdourMono TrueType font" << endl;
+	}
+
+	FcConfig *config = FcInitLoadConfigAndFonts();
+	FcBool ret = FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()));
+
+	if (ret == FcFalse) {
+		cerr << "Cannot load ArdourMono TrueType font." << endl;
+	}
+
+	ret = FcConfigSetCurrent(config);
+
+	if (ret == FcFalse) {
+		cerr << "Failed to set fontconfig configuration." << endl;
+	}
 }
