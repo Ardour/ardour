@@ -18,6 +18,7 @@
 */
 
 #include "bundle_env.h"
+#include "i18n.h"
 
 #include <shlobj.h>
 #include <stdlib.h>
@@ -178,7 +179,7 @@ bool  succeeded = false;
 									i->insert(token_begin, str_replace_with);
 								} else {
 									error = true;
-									cerr << "ERROR: unknown environment variable" << endl;
+									cerr << _("ERROR: unknown environment variable") << endl;
 								}
 							}
 						}
@@ -211,7 +212,7 @@ bool  succeeded = false;
 			succeeded = false;
 		}
 	} else {
-		cerr << "ERROR: Could not open config file '" << str_file_to_fix << "'" << endl;
+		cerr << _("ERROR: Could not open config file '") << str_file_to_fix << "'" << endl;
 	}
 
 	return succeeded;
@@ -235,9 +236,9 @@ string fonts_conf_file;
 		Glib::setenv ("FONTCONFIG_FILE", fonts_conf_file, true);
 
 		if (0 == fixup_config_file (fonts_conf_file))
-			cerr << "ERROR: processing error for 'fonts.conf' file" << endl;
+			cerr << _("ERROR: processing error for 'fonts.conf' file") << endl;
 	} else {
-		cerr << "ERROR: Malformed module folder (fonts.conf)" << endl;
+		cerr << _("ERROR: Malformed module folder (fonts.conf)") << endl;
 	}
 }
 
@@ -273,9 +274,9 @@ string pango_modules_file;
 		Glib::setenv ("PANGO_MODULE_PATH", Glib::filename_from_utf8(pango_modules_path), true);
 
 		if (0 == fixup_config_file (pango_modules_file))
-			cerr << "ERROR: processing error for 'pango.modules' file" << endl;
+			cerr << _("ERROR: processing error for 'pango.modules' file") << endl;
 	} else {
-		cerr << "ERROR: Malformed module folder (pango.modules)" << endl;
+		cerr << _("ERROR: Malformed module folder (pango.modules)") << endl;
 	}
 }
 
@@ -299,9 +300,9 @@ string gdk_pixbuf_loaders_file;
 		Glib::setenv ("GDK_PIXBUF_MODULE_FILE", Glib::filename_from_utf8(gdk_pixbuf_loaders_file), true);
 
 		if (0 == fixup_config_file (gdk_pixbuf_loaders_file))
-			cerr << "ERROR: processing error for 'gdk-pixbuf.loaders' file" << endl;
+			cerr << _("ERROR: processing error for 'gdk-pixbuf.loaders' file") << endl;
 	} else {
-		cerr << "ERROR: Malformed module folder (gdk-pixbuf.loaders)" << endl;
+		cerr << _("ERROR: Malformed module folder (gdk-pixbuf.loaders)") << endl;
 	}
 }
 
@@ -326,9 +327,9 @@ string clearlooks_la_file;
 		Glib::setenv ("GTK_THEME_ENGINE_FILE", Glib::filename_from_utf8(clearlooks_la_file).c_str(), true);
 
 		if (0 == fixup_config_file (clearlooks_la_file))
-			cerr << "ERROR: processing error for 'clearlooks.la' file" << endl;
+			cerr << _("ERROR: processing error for 'clearlooks.la' file") << endl;
 	} else {
-		cerr << "ERROR: Malformed module folder (clearlooks.la)" << endl;
+		cerr << _("ERROR: Malformed module folder (clearlooks.la)") << endl;
 	}
 }
 
@@ -475,19 +476,19 @@ void load_custom_fonts()
 	std::string ardour_mono_file;
 
 	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
-		cerr << "Cannot find ArdourMono TrueType font" << endl;
+		cerr << _("Cannot find ArdourMono TrueType font") << endl;
 	}
 
 	FcConfig *config = FcInitLoadConfigAndFonts();
 	FcBool ret = FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()));
 
 	if (ret == FcFalse) {
-		cerr << "Cannot load ArdourMono TrueType font." << endl;
+		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
 	}
 
 	ret = FcConfigSetCurrent(config);
 
 	if (ret == FcFalse) {
-		cerr << "Failed to set fontconfig configuration." << endl;
+		cerr << _("Failed to set fontconfig configuration.") << endl;
 	}
 }
