@@ -44,7 +44,7 @@ V = MAJOR + '.' + MINOR + '.' + MICRO
 # because if it is, it breaks waf somehow.
 #
 VERSION = V.encode ('ascii', 'ignore')
-APPNAME = 'Ardour' + MAJOR
+APPNAME = 'Tracks'
 
 # Mandatory variables
 top = '.'

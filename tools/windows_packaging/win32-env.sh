@@ -7,8 +7,8 @@ BASE=$(dirname $BASE) # up one more
 
 HOST=x86_64-w64-mingw32
 MINGW_ROOT=/mingw
-GTK=$HOME/gtk/inst
-A3=$HOME/A3/inst
+GTK=$WINGTK/inst
+A3=$WINA3/inst
 
 export PKG_CONFIG_PREFIX=$MINGW_ROOT
 export PKG_CONFIG_LIBDIR=$MINGW_ROOT/lib/pkgconfig

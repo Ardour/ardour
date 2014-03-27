@@ -15,6 +15,15 @@ I18N_PACKAGE = 'gtk2_ardour3'
 top = '.'
 out = 'build'
 
+def copyfile(task):
+	src=task.inputs[0].abspath()
+	tgt=task.outputs[0].abspath()
+	if os.path.isfile(tgt) :
+		os.chmod(tgt, Utils.O755);
+	shutil.copy2(src,tgt)
+	if os.path.isfile(tgt) :
+		os.chmod(tgt, Utils.O755);
+
 path_prefix = 'gtk2_ardour/'
 
 gtk2_ardour_sources = [
@@ -383,7 +392,7 @@ def build(bld):
                              'libgtkmm2ext',
                              'libcanvas'
                              ]
-        obj.target = 'ardour-' + bld.env['VERSION'] + '-vst.exe.so'
+        obj.target = 'tracks.exe.so'
         obj.includes  = [ '../libs/fst', '.' ]
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
         obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
@@ -400,7 +409,7 @@ def build(bld):
         # just the normal executable version of the GTK GUI
         obj = bld (features = 'cxx c cxxprogram')
         obj.source    = gtk2_ardour_sources
-        obj.target = 'ardour-' + bld.env['VERSION']
+        obj.target = 'tracks'
         obj.includes = ['.']
         obj.ldflags = ['-no-undefined']
 
@@ -489,7 +498,7 @@ def build(bld):
             'SYSCONFDIR'     : os.path.normpath(bld.env['SYSCONFDIR']),
             'LIBS'           : 'build/libs',
             'VERSION'        : bld.env['VERSION'],
-            'EXECUTABLE'     : 'build/gtk2_ardour/ardour-' + bld.env['VERSION']
+            'EXECUTABLE'     : 'build/gtk2_ardour/ardour'
     }
 
     def set_subst_dict(obj, dict):
@@ -641,7 +650,7 @@ def build(bld):
     obj.install_path = None
     set_subst_dict(obj, light_rc_subst_dict)
 
-    obj              = bld(rule = autowaf.copyfile) 
+    obj              = bld(rule = copyfile) 
     obj.source       = [ 'ardour3_widget_list.rc' ]
     obj.target       = 'ardour3_widgets.rc'
     obj.install_path = None
