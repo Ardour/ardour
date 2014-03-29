@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2002 Paul Davis
+	Copyright (C) 2014 Valeriy Kamyshniy
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -53,7 +53,6 @@ class WavesDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr
 
   protected:
 
-	  void set_layout_size (int width, int height);
 	  bool read_layout (std::string file_name);
 
 	  Gtk::Layout& get_layout (char* id);
@@ -71,23 +70,6 @@ class WavesDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr
 	Gtk::Widget* get_widget(char *id);
 
 	static sigc::signal<void> CloseAllDialogs;
-
-	// Layout
-	Gtk::Layout parent;
-
-	Gtk::Widget* create_widget (const XMLNode& definition);
-	Gtk::Widget* add_widget (Gtk::Layout& parent, const XMLNode &definition);
-	Gtk::Widget* add_widget (Gtk::Widget& parent, const XMLNode &definition);
-
-	Gtk::Label& add_label (const std::string& label, int x, int y, int width = -1, int height = -1);
-	Gtk::ComboBoxText& add_combo_box_text (int x, int y, int width = -1, int height = -1);
-	WavesButton& add_button (const std::string& label, const std::string name, int x, int y, int width = -1, int height = -1);
-
-	double xml_property (const XMLNode& node, const char* prop_name, double default_value);
-	int xml_property (const XMLNode& node, const char* prop_name, int default_value);
-	bool xml_property (const XMLNode& node, const char* prop_name, bool default_value);
-	std::string xml_property (const XMLNode& node, const char* prop_name, const std::string default_value);
-	std::string xml_property (const XMLNode& node, const char* prop_name, const char* default_value) { return xml_property (node, prop_name, std::string(default_value)); };
 };
 
 #endif // __waves_dialog_h__

@@ -17,16 +17,6 @@
 
 */
 
-#include <iostream>
-#include <cmath>
-#include <algorithm>
-
-#include <pangomm/layout.h>
-
-#include "pbd/compose.h"
-#include "pbd/error.h"
-#include "pbd/stacktrace.h"
-
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 #include "gtkmm2ext/gui_thread.h"

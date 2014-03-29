@@ -22,6 +22,7 @@
 #include <sigc++/bind.h>
 #include <boost/algorithm/string.hpp>
 #include "pbd/xml++.h"
+#include "waves_ui.h"
 
 #include <gtkmm2ext/doi.h>
 
@@ -36,7 +37,6 @@
 #include "splash.h"
 #include "utils.h"
 #include "window_manager.h"
-
 
 using namespace std;
 using namespace Gtk;
@@ -87,7 +87,6 @@ WavesDialog::WavesDialog (string layout_script_file, bool modal, bool use_sepera
 
 	get_vbox()->set_spacing (0);
 	get_vbox()->set_border_width (0);
-	get_vbox()->pack_start (parent, false, false);
 
 	read_layout(layout_script_file);
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -146,6 +145,7 @@ WavesDialog::on_show ()
 	}
 }
 
+
 bool
 WavesDialog::on_delete_event (GdkEventAny*)
 {
@@ -155,92 +155,6 @@ WavesDialog::on_delete_event (GdkEventAny*)
 
 
 // Layout
-
-void
-WavesDialog::set_layout_size (int width, int height)
-{
-	parent.set_size_request (width, height);
-}
-
-Gtk::Widget*
-WavesDialog::create_widget (const XMLNode& definition)
-{
-	Gtk::Widget* child = NULL;
-	std::string widget_type = definition.name();
-	std::string widget_id = xml_property (definition, "id", "");
-	string style = xml_property (definition, "style", "");
-
-	string text = xml_property (definition, "text", "");
-	boost::replace_all(text, "\\n", "\n");
-
-	int height = xml_property (definition, "height", -1);
-	int width = xml_property (definition, "width", -1);
-
-	std::transform(widget_type.begin(), widget_type.end(), widget_type.begin(), ::toupper);
-	if (widget_type == "BUTTON") {
-		WavesButton::Element visual_element = WavesButton::default_elements;
-		bool flat = xml_property(definition, "flat", false);
-		if (flat) {
-			dbg_out << "button [" << text << "] is flat" << std::endl;
-			visual_element = WavesButton::Element (visual_element | WavesButton::FlatFace);
-		}
-		child = manage (new WavesButton(text, visual_element));
-	} else if (widget_type == "COMBOBOXTEXT") {
-		child = manage (new Gtk::ComboBoxText);
-	} else if (widget_type == "LABEL") {
-		child = manage (new Gtk::Label(text));
-	} else if (widget_type == "LAYOUT") {
-		child = manage (new Gtk::Layout);
-		string color = xml_property (definition, "bgcolor", "");
-		if (!color.empty()) {
-			child->modify_bg(Gtk::STATE_NORMAL, Gdk::Color(color));
-		}
-	}
-
-	if (child != NULL) {
-		if (!style.empty()) {
-			child->set_name (style);
-		}
-		child->set_size_request (width, height);
-		if (!widget_id.empty())
-		{
-			_children[widget_id] = child;
-		}
-	}
-	return child;
-}
-
-Gtk::Widget*
-WavesDialog::add_widget (Gtk::Layout& parent, const XMLNode& definition)
-{
-	Gtk::Widget* child = create_widget(definition);
-
-	if (child != NULL)
-	{
-		parent.put (*child, 
-					xml_property (definition, "x", 0), 
-					xml_property (definition, "y", 0));
-	}
-	return child;
-}
-
-
-Gtk::Widget*
-WavesDialog::add_widget (Gtk::Widget& parent, const XMLNode &definition)
-{
-	Gtk::Widget* child = NULL;
-	if(dynamic_cast<Gtk::Layout*> (&parent)) {
-		child = add_widget (*dynamic_cast<Gtk::Layout*> (&parent), definition);
-	}
-	if (child != NULL)
-	{
-		const XMLNodeList& children = definition.children();
-		for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-			add_widget(*child, **i);
-		}
-	}
-	return child;
-}
 
 bool
 WavesDialog::read_layout (std::string file_name)
@@ -259,47 +173,12 @@ WavesDialog::read_layout (std::string file_name)
 		return false;
 	}
 
-	string title = xml_property (*root, "title", "");
+	string title = WavesUI::xml_property (*root, "title", "");
 	set_title(title);
 
-	int height = xml_property(*root, "height",  -1);
-	int width = xml_property(*root, "width", -1);
-
-	set_layout_size (width, height);
-
-	const XMLNodeList& children = root->children(); 
-	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-		add_widget ((Gtk::Widget&)parent, **i);
-	}
+	WavesUI::create_ui(root->children(), *get_vbox(), _children);
 
 	return true;
-}
-
-
-Gtk::Label&
-WavesDialog::add_label(const std::string& label, int x, int y, int width, int height)
-{
-	Gtk::Label& l = *manage (new Gtk::Label(label));
-	parent.put(l, x, y);
-	l.set_size_request(width, height);
-	return l;
-}
-
-
-WavesButton&
-WavesDialog::add_button (const std::string& label, const std::string name, int x, int y, int width, int height)
-{
-	WavesButton& ab = *manage (new WavesButton(label));
-	ab.set_name (name);
-	parent.put(ab, x, y);
-	ab.set_size_request(width, height);
-	return ab;
-}
-
-
-Gtk::ComboBoxText&
-WavesDialog::add_combo_box_text (int x, int y, int width, int height)
-{
 }
 
 
@@ -314,6 +193,7 @@ WavesDialog::get_widget(char *id)
 	return child;
 }
 
+
 Gtk::Layout&
 WavesDialog::get_layout (char* id)
 {
@@ -323,6 +203,7 @@ WavesDialog::get_layout (char* id)
 	}
 	return *child;
 }
+
 
 Gtk::Label&
 WavesDialog::get_label (char* id)
@@ -354,32 +235,4 @@ WavesDialog::get_waves_button (char* id)
 		throw exception();
 	}
 	return *child;
-}
-
-double 
-WavesDialog::xml_property (const XMLNode &node, const char *prop_name, double default_value)
-{
-	return node.property (prop_name) ? atof(node.property(prop_name)->value()) : default_value;
-}
-
-int
-WavesDialog::xml_property (const XMLNode &node, const char *prop_name, int default_value)
-{
-	return node.property (prop_name) ? atoi(node.property(prop_name)->value()) : default_value;
-}
-
-bool
-WavesDialog::xml_property (const XMLNode &node, const char *prop_name, bool default_value)
-{
-	std::string property = node.property (prop_name) ? node.property(prop_name)->value() : std::string("");
-	if (property.empty())
-		return default_value;
-	std::transform(property.begin(), property.end(), property.begin(), ::toupper);
-	return property == "TRUE";
-}
-
-std::string
-WavesDialog::xml_property (const XMLNode &node, const char *prop_name, const std::string default_value)
-{
-	return node.property (prop_name) ? node.property(prop_name)->value() : default_value;
 }

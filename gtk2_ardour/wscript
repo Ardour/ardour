@@ -27,6 +27,7 @@ def copyfile(task):
 path_prefix = 'gtk2_ardour/'
 
 gtk2_ardour_sources = [
+        'waves_ui.cc',
         'about.cc',
         'actions.cc',
         'add_route_dialog.cc',

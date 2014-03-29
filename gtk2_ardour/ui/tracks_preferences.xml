@@ -38,7 +38,7 @@
         <Label id="latency_label" text="INPUT LATENCY:" x="16" y="74  " width="476"/>
       </Layout>
       <Layout bgcolor="#565656" x="0" y="101" width="505" height="39">
-        <Label text="CHANNEL CONFIGURATION MODE" x="17" y="15"/>
+        <Label text="CHANNEL CONFIGURATION MODE" fgcolor="#ffffff" x="17" y="15"/>
         <Button
           id="multi_out_button"
           style="generic button" flat="true"
@@ -52,10 +52,14 @@
       </Layout>
       <Layout bgcolor="#565656" x="0" y="141" width="505" height="417">
         <Layout bgcolor="#862579" x="16" y="13" width="3" height="41"/>
-        <Layout bgcolor="#862579" x="22" y="13" width="265" height="19"/>
+        <Layout bgcolor="#862579" x="22" y="13" width="265" height="19">
+          <Label text="INPUTS" fgcolor="#ffffff" x="7" y="3"/>
+        </Layout>
         <Layout bgcolor="#862579" x="16" y="62" width="3" height="299"/>
         <Layout bgcolor="#27ae36" x="290" y="13" width="3" height="41"/>
-        <Layout bgcolor="#27ae36" x="296" y="13" width="179" height="19"/>
+        <Layout bgcolor="#27ae36" x="296" y="13" width="179" height="19">
+          <Label text="OUTPUTS" fgcolor="#ffffff" x="7" y="3"/>
+        </Layout>
         <Layout bgcolor="#27ae36" x="290" y="62" width="3" height="299"/>
         <Button
           id="name_track_after_driver_button"
