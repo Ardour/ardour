@@ -1,107 +1,189 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog
-  title="Tracks Preferences"
-  width="619"
-  height="623">
+  title="Tracks Preferences">
 
-  <Layout bgcolor="#1F1F1F" x="0" y="0" width="619" height="623">
+  <Layout bgnormal="#1F1F1F" x="0" y="0" width="619" height="623">
     <Button
       id="audio_settings_tab_button"
-      style="generic button" flat="true"
       text="AUDIO\nSYSTEM\nSETTINGS"
+      fgnormal="#C1C1C1"
+      fgactive="#CDCDCD"
+      bgnormal="#1F1F1F"
+      bgactive="#565656"
+      bghover="#2f2f2f"
+      font ="Lucida Sans Bold 11"
       x="2" y="3" width="107" height="65"/>
     <Button
       id="midi_settings_tab_button"
-      style="generic button" flat="true"
       text="MIDI\nSYSTEM\nSETTINGS"
+      fgnormal="#C1C1C1"
+      fgactive="#CDCDCD"
+      bgnormal="#1F1F1F"
+      bgactive="#565656"
+      bghover="#2f2f2f"
+      font ="Lucida Sans Bold 11"
       x="2" y="68" width="107" height="65"/>
-    <Layout id="audio_settings_layout" bgcolor="#000000" x="113" y="0" width="505" height="559">
-      <Layout bgcolor="#565656" x="0" y="0" width="505" height="100">
-        <Label text="AUDIO ENGINE" x="12" y="17"/>
+
+    <Layout id="audio_settings_layout" bgnormal="#000000" x="113" y="0" width="505" height="559">
+      <Layout bgnormal="#565656" x="0" y="0" width="505" height="100">
+        <Label text="AUDIO ENGINE" font ="Lucida Sans 10" x="12" y="17"/>
         <ComboBoxText id="engine_combo" x="97" y="12" width="126" height="20"/>
 
-        <Label text="INTERFACE" x="12" y="47"/>
+        <Label text="INTERFACE" font ="Lucida Sans 10" x="12" y="47"/>
         <ComboBoxText id="device_combo" x="97" y="40" width="126" height="20"/>
 
-        <Label text="SAMPLE RATE" x="231" y="17"/>
+        <Label text="SAMPLE RATE" font ="Lucida Sans 10" x="231" y="17"/>
         <ComboBoxText id="sample_rate_combo" x="311" y="12" width="90" height="20"/>
 
-        <Label text="BUFFER SIZE" x="231" y="47"/>
+        <Label text="BUFFER SIZE" font ="Lucida Sans 10" x="231" y="47"/>
         <ComboBoxText id="buffer_size_combo" x="311" y="42" width="90" height="20"/>
 
         <Button
           id="control_panel_button"
-          style="generic button" flat="true"
+          style="generic button"
           text="DEVICE\nCONTROL\nPANEL"
+          fgnormal="#CDCDCD"
+          bgnormal="#6C6C6C"
+          fgactive="#C0C0C0"
+          bgactive="#454545"
+          fghover="#D7D7D7"
+          bghover="#898989"
+          font ="Lucida Sans 10"
+          borderwidth="1"
           x="407" y="12" width="84" height="48"/>
 
-        <Label id="latency_label" text="INPUT LATENCY:" x="16" y="74  " width="476"/>
+        <Label id="latency_label" text="INPUT LATENCY:" font ="Lucida Sans 10" x="16" y="74  " width="476"/>
       </Layout>
-      <Layout bgcolor="#565656" x="0" y="101" width="505" height="39">
-        <Label text="CHANNEL CONFIGURATION MODE" fgcolor="#ffffff" x="17" y="15"/>
+      <Layout bgnormal="#565656" x="0" y="101" width="505" height="39">
+        <Label text="CHANNEL CONFIGURATION MODE" fgnormal="#ffffff" font ="Lucida Sans Bold 10" x="17" y="15"/>
         <Button
           id="multi_out_button"
-          style="generic button" flat="true"
+          style="generic button"
           text="MULTI OUT"
+          fgnormal="#C2C2C2"
+          bgnormal="#6C6C6C"
+          fgactive="#FFFFFF"
+          bgactive="#1CA3B3"
+          fghover="#CECECE"
+          bghover="#898989"
+          font ="Lucida Sans Bold 10"
+          borderwidth="1"
           x="281" y="6" width="106" height="28"/>
         <Button
           id="stereo_out_button"
-          style="generic button" flat="true"
+          style="generic button"
           text="STEREO OUT"
+          fgnormal="#C2C2C2"
+          bgnormal="#6C6C6C"
+          fgactive="#FFFFFF"
+          bgactive="#1CA3B3"
+          fghover="#CECECE"
+          bghover="#898989"
+          font ="Lucida Sans Bold 10"
+          borderwidth="1"
           x="387" y="6" width="106" height="28"/>
       </Layout>
-      <Layout bgcolor="#565656" x="0" y="141" width="505" height="417">
-        <Layout bgcolor="#862579" x="16" y="13" width="3" height="41"/>
-        <Layout bgcolor="#862579" x="22" y="13" width="265" height="19">
-          <Label text="INPUTS" fgcolor="#ffffff" x="7" y="3"/>
+      <Layout bgnormal="#565656" x="0" y="141" width="505" height="417">
+        <Layout bgnormal="#862579" x="16" y="13" width="3" height="41"/>
+        <Layout bgnormal="#862579" x="22" y="13" width="265" height="19">
+          <Label text="INPUTS" fgnormal="#ffffff" font ="Lucida Sans Bold 10" x="7" y="3"/>
         </Layout>
-        <Layout bgcolor="#862579" x="16" y="62" width="3" height="299"/>
-        <Layout bgcolor="#27ae36" x="290" y="13" width="3" height="41"/>
-        <Layout bgcolor="#27ae36" x="296" y="13" width="179" height="19">
-          <Label text="OUTPUTS" fgcolor="#ffffff" x="7" y="3"/>
+        <Layout bgnormal="#862579" x="16" y="62" width="3" height="299"/>
+        <Layout bgnormal="#27ae36" x="290" y="13" width="3" height="41"/>
+        <Layout bgnormal="#27ae36" x="296" y="13" width="179" height="19">
+          <Label text="OUTPUTS" fgnormal="#ffffff" font ="Lucida Sans Bold 10" x="7" y="3"/>
         </Layout>
-        <Layout bgcolor="#27ae36" x="290" y="62" width="3" height="299"/>
+        <Layout bgnormal="#27ae36" x="290" y="62" width="3" height="299"/>
         <Button
           id="name_track_after_driver_button"
-          style="generic button" flat="true"
           text="NAME TRACK\nAFTER DRIVER"
+          fgnormal="#BFBFBF"
+          bgnormal="#6C6C6C"
+          fgactive="#BFBFBF"
+          bgactive="#454545"
+          fghover="#CCCCCC"
+          bghover="#898989"
+          font ="Lucida Sans 10"
+          borderwidth="1"
           x="16" y="369" width="137" height="39"/>
         <Button
           id="reset_track_names_button"
-          style="generic button" flat="true"
           text="RESET TRACK\nNAMES TO DEFAULT"
+          fgnormal="#BFBFBF"
+          bgnormal="#6C6C6C"
+          fgactive="#BFBFBF"
+          bgactive="#454545"
+          fghover="#CCCCCC"
+          bghover="#898989"
+          font ="Lucida Sans 10"
+          borderwidth="1"
           x="153" y="369" width="137" height="39"/>
         <Button
           id="yes_button"
-          style="generic button" flat="true"
           text="YES"
+          fgnormal="#BFBFBF"
+          bgnormal="#6C6C6C"
+          fgactive="#BFBFBF"
+          bgactive="#454545"
+          fghover="#CCCCCC"
+          bghover="#898989"
+          font ="Lucida Sans 10"
+          borderwidth="1"
           x="292" y="369" width="53" height="39"/>
         <Button
           id="no_button"
-          style="generic button" flat="true"
           text="NO"
+          fgnormal="#BFBFBF"
+          bgnormal="#6C6C6C"
+          fgactive="#BFBFBF"
+          bgactive="#454545"
+          fghover="#CCCCCC"
+          bghover="#898989"
+          font ="Lucida Sans 10"
+          borderwidth="1"
           x="345" y="369" width="53" height="39"/>
       </Layout>
     </Layout>
-    <Layout bgcolor="#565656" x="113" y="559" width="505" height="63">
+    <Layout bgnormal="#565656" x="113" y="559" width="505" height="63">
       <Button
         id="ok_button"
-        style="generic button" flat="true"
         text="OK"
+        fgnormal="#BFBFBF"
+        bgnormal="#6C6C6C"
+        fgactive="#BFBFBF"
+        bgactive="#454545"
+        fghover="#CCCCCC"
+        bghover="#898989"
+        font ="Lucida Sans 10"
+        borderwidth="1"
         x="277" y="18" width="71" height="28"/>
       <Button
         id="cancel_button"
-        style="generic button" flat="true"
         text="CANCEL"
+        fgnormal="#BFBFBF"
+        bgnormal="#6C6C6C"
+        fgactive="#BFBFBF"
+        bgactive="#454545"
+        fghover="#CCCCCC"
+        bghover="#898989"
+        font ="Lucida Sans 10"
+        borderwidth="1"
         x="348" y="18" width="71" height="28"/>
       <Button
         id="apply_button"
-        style="generic button" flat="true"
         text="APPLY"
+        fgnormal="#BFBFBF"
+        bgnormal="#6C6C6C"
+        fgactive="#BFBFBF"
+        bgactive="#454545"
+        fghover="#CCCCCC"
+        bghover="#898989"
+        font ="Lucida Sans 10"
+        borderwidth="1"
         x="419" y="18" width="71" height="28"/>
     </Layout>
 
-    <Layout id="midi_settings_layout" bgcolor="#000000" x="113" y="0" width="505" height="559">
+    <Layout id="midi_settings_layout" bgnormal="#000000" x="113" y="0" width="505" height="559">
     </Layout>
   </Layout>
 </Dialog>

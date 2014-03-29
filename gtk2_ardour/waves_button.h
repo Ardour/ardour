@@ -32,57 +32,22 @@
 class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 {
   public:
-	enum Element {
-		Edge = 0x1,
-		Body = 0x2,
-		Text = 0x4,
-		Indicator = 0x8,
-		FlatFace = 0x10,
-	};
-
-	static Element default_elements;
-	static Element led_default_elements;
-	static Element just_led_default_elements;
-
-	static void set_flat_buttons (bool yn);
-	static bool flat_buttons() { return _flat_buttons; }
-
-	WavesButton (Element e = default_elements);
-	WavesButton (const std::string&, Element e = default_elements);
+	WavesButton ();
+	WavesButton (const std::string&);
 	virtual ~WavesButton ();
-
-	enum Tweaks {
-		ShowClick = 0x1,
-		NoModel = 0x2,
-		ImplicitUsesSolidColor = 0x4,
-	};
-
-	Tweaks tweaks() const { return _tweaks; }
-	void set_tweaks (Tweaks);
 
 	void set_active_state (Gtkmm2ext::ActiveState);
 	void set_visual_state (Gtkmm2ext::VisualState);
 
-	Element elements() const { return _elements; }
-	void set_elements (Element);
-	void add_elements (Element);
-	
 	void set_corner_radius (float);
 	void set_rounded_corner_mask (int);
-	void set_diameter (float);
 
 	void set_text (const std::string&);
 	void set_markup (const std::string&);
 	void set_angle (const double);
-	void set_alignment (const float, const float);
-	void get_alignment (float& xa, float& ya) {xa = _xalign; ya = _yalign;};
-
-	void set_led_left (bool yn);
-	void set_distinct_led_click (bool yn);
-
+	void set_border_width(float);
 	Glib::RefPtr<Pango::Layout> layout() const { return _layout; }
 
-	sigc::signal<void> signal_led_clicked;
 	sigc::signal<void> signal_clicked;
 
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
@@ -93,10 +58,6 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
-
-	void set_image (const Glib::RefPtr<Gdk::Pixbuf>&);
-
-        void set_fixed_colors (const uint32_t active_color, const uint32_t inactive_color);
 
   protected:
 	void render (cairo_t *);
@@ -112,67 +73,21 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 
   private:
 	Glib::RefPtr<Pango::Layout> _layout;
-	Glib::RefPtr<Gdk::Pixbuf>   _pixbuf;
 	std::string                 _text;
-	Element                     _elements;
-	Tweaks                      _tweaks;
 	BindingProxy                binding_proxy;
 
 	int   _text_width;
 	int   _text_height;
-	float _diameter;
 	float _corner_radius;
 	int   _corner_mask;
-
+	float _border_width;
 	double _angle;
-	float _xalign, _yalign;
-
-	uint32_t bg_color;
-	uint32_t border_color;
-        uint32_t fill_start_inactive_color;
-        uint32_t fill_end_inactive_color;
-        uint32_t fill_start_active_color;
-        uint32_t fill_end_active_color;
-        uint32_t text_active_color;
-        uint32_t text_inactive_color;
-        uint32_t led_active_color;
-        uint32_t led_inactive_color;
-    
-	cairo_pattern_t* fill_pattern;
-	cairo_pattern_t* fill_pattern_active;
-	cairo_pattern_t* shine_pattern;
-	cairo_pattern_t* led_inset_pattern;
-	cairo_pattern_t* reflection_pattern;
-    
-	cairo_rectangle_t* _led_rect;
-
-	double text_r;
-	double text_g;
-	double text_b;
-	double text_a;
-
-	double led_r;
-	double led_g;
-	double led_b;
-	double led_a;
-
-	double active_r;
-	double active_g;
-	double active_b;
-	double active_a;
 
 	bool _act_on_release;
-	bool _led_left;
-	bool _fixed_diameter;
-	bool _distinct_led_click;
 	bool _hovering;
+	bool _pushed;
     
-	static bool _flat_buttons;
-
-	void setup_led_rect ();
-	void set_colors ();
 	void color_handler ();
-        void build_patterns ();
 
 	void action_toggled ();
 
