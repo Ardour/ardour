@@ -499,7 +499,7 @@ def build(bld):
             'SYSCONFDIR'     : os.path.normpath(bld.env['SYSCONFDIR']),
             'LIBS'           : 'build/libs',
             'VERSION'        : bld.env['VERSION'],
-            'EXECUTABLE'     : 'build/gtk2_ardour/ardour'
+            'EXECUTABLE'     : 'build/gtk2_ardour/tracks'
     }
 
     def set_subst_dict(obj, dict):

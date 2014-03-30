@@ -59,6 +59,6 @@ if [ $# -gt 0 ] ; then
     esac
 fi
 
-exec $GDB @LIBDIR@/ardour3/ardour-@VERSION@ "$@"
+exec $GDB @LIBDIR@/ardour3/tracks "$@"
 
 

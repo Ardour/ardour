@@ -11,7 +11,7 @@
       bgnormal="#1F1F1F"
       bgactive="#565656"
       bghover="#2f2f2f"
-      font ="Lucida Sans Bold 11"
+      font ="Helvetica Neue Bold 11"
       x="2" y="3" width="107" height="65"/>
     <Button
       id="midi_settings_tab_button"
@@ -21,21 +21,21 @@
       bgnormal="#1F1F1F"
       bgactive="#565656"
       bghover="#2f2f2f"
-      font ="Lucida Sans Bold 11"
+      font ="Helvetica Neue Bold 11"
       x="2" y="68" width="107" height="65"/>
 
     <Layout id="audio_settings_layout" bgnormal="#000000" x="113" y="0" width="505" height="559">
       <Layout bgnormal="#565656" x="0" y="0" width="505" height="100">
-        <Label text="AUDIO ENGINE" font ="Lucida Sans 10" x="12" y="17"/>
+        <Label text="AUDIO ENGINE" font ="Helvetica Neue 10" x="12" y="17"/>
         <ComboBoxText id="engine_combo" x="97" y="12" width="126" height="20"/>
 
-        <Label text="INTERFACE" font ="Lucida Sans 10" x="12" y="47"/>
+        <Label text="INTERFACE" font ="Helvetica Neue 10" x="12" y="47"/>
         <ComboBoxText id="device_combo" x="97" y="40" width="126" height="20"/>
 
-        <Label text="SAMPLE RATE" font ="Lucida Sans 10" x="231" y="17"/>
+        <Label text="SAMPLE RATE" font ="Helvetica Neue 10" x="231" y="17"/>
         <ComboBoxText id="sample_rate_combo" x="311" y="12" width="90" height="20"/>
 
-        <Label text="BUFFER SIZE" font ="Lucida Sans 10" x="231" y="47"/>
+        <Label text="BUFFER SIZE" font ="Helvetica Neue 10" x="231" y="47"/>
         <ComboBoxText id="buffer_size_combo" x="311" y="42" width="90" height="20"/>
 
         <Button
@@ -48,14 +48,14 @@
           bgactive="#454545"
           fghover="#D7D7D7"
           bghover="#898989"
-          font ="Lucida Sans 10"
+          font ="Helvetica Neue 10"
           borderwidth="1"
           x="407" y="12" width="84" height="48"/>
 
-        <Label id="latency_label" text="INPUT LATENCY:" font ="Lucida Sans 10" x="16" y="74  " width="476"/>
+        <Label id="latency_label" text="INPUT LATENCY:" font ="Helvetica Neue 10" x="16" y="74  " width="476"/>
       </Layout>
       <Layout bgnormal="#565656" x="0" y="101" width="505" height="39">
-        <Label text="CHANNEL CONFIGURATION MODE" fgnormal="#ffffff" font ="Lucida Sans Bold 10" x="17" y="15"/>
+        <Label text="CHANNEL CONFIGURATION MODE" fgnormal="#ffffff" font ="Helvetica Neue, Bold 10" x="17" y="15"/>
         <Button
           id="multi_out_button"
           style="generic button"
@@ -66,7 +66,7 @@
           bgactive="#1CA3B3"
           fghover="#CECECE"
           bghover="#898989"
-          font ="Lucida Sans Bold 10"
+          font ="Helvetica Neue Bold 10"
           borderwidth="1"
           x="281" y="6" width="106" height="28"/>
         <Button
@@ -79,19 +79,19 @@
           bgactive="#1CA3B3"
           fghover="#CECECE"
           bghover="#898989"
-          font ="Lucida Sans Bold 10"
+          font ="Helvetica Neue Bold 10"
           borderwidth="1"
           x="387" y="6" width="106" height="28"/>
       </Layout>
       <Layout bgnormal="#565656" x="0" y="141" width="505" height="417">
         <Layout bgnormal="#862579" x="16" y="13" width="3" height="41"/>
         <Layout bgnormal="#862579" x="22" y="13" width="265" height="19">
-          <Label text="INPUTS" fgnormal="#ffffff" font ="Lucida Sans Bold 10" x="7" y="3"/>
+          <Label text="INPUTS" fgnormal="#ffffff" font ="Helvetica Neue Bold 10" x="7" y="3"/>
         </Layout>
         <Layout bgnormal="#862579" x="16" y="62" width="3" height="299"/>
         <Layout bgnormal="#27ae36" x="290" y="13" width="3" height="41"/>
         <Layout bgnormal="#27ae36" x="296" y="13" width="179" height="19">
-          <Label text="OUTPUTS" fgnormal="#ffffff" font ="Lucida Sans Bold 10" x="7" y="3"/>
+          <Label text="OUTPUTS" fgnormal="#ffffff" font ="Helvetica Neue Bold 10" x="7" y="3"/>
         </Layout>
         <Layout bgnormal="#27ae36" x="290" y="62" width="3" height="299"/>
         <Button
@@ -103,7 +103,7 @@
           bgactive="#454545"
           fghover="#CCCCCC"
           bghover="#898989"
-          font ="Lucida Sans 10"
+          font ="Helvetica Neue 10"
           borderwidth="1"
           x="16" y="369" width="137" height="39"/>
         <Button
@@ -115,7 +115,7 @@
           bgactive="#454545"
           fghover="#CCCCCC"
           bghover="#898989"
-          font ="Lucida Sans 10"
+          font ="Helvetica Neue 10"
           borderwidth="1"
           x="153" y="369" width="137" height="39"/>
         <Button
@@ -127,7 +127,7 @@
           bgactive="#454545"
           fghover="#CCCCCC"
           bghover="#898989"
-          font ="Lucida Sans 10"
+          font ="Helvetica Neue 10"
           borderwidth="1"
           x="292" y="369" width="53" height="39"/>
         <Button
@@ -139,7 +139,7 @@
           bgactive="#454545"
           fghover="#CCCCCC"
           bghover="#898989"
-          font ="Lucida Sans 10"
+          font ="Helvetica Neue 10"
           borderwidth="1"
           x="345" y="369" width="53" height="39"/>
       </Layout>
@@ -154,7 +154,7 @@
         bgactive="#454545"
         fghover="#CCCCCC"
         bghover="#898989"
-        font ="Lucida Sans 10"
+        font ="Helvetica Neue 10"
         borderwidth="1"
         x="277" y="18" width="71" height="28"/>
       <Button
@@ -166,7 +166,7 @@
         bgactive="#454545"
         fghover="#CCCCCC"
         bghover="#898989"
-        font ="Lucida Sans 10"
+        font ="Helvetica Neue 10"
         borderwidth="1"
         x="348" y="18" width="71" height="28"/>
       <Button
@@ -178,7 +178,7 @@
         bgactive="#454545"
         fghover="#CCCCCC"
         bghover="#898989"
-        font ="Lucida Sans 10"
+        font ="Helvetica Neue 10"
         borderwidth="1"
         x="419" y="18" width="71" height="28"/>
     </Layout>
