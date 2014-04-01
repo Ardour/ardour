@@ -27,17 +27,23 @@
 #include "waves_button.h"
 
 namespace WavesUI {
-	double xml_property (const XMLNode& node, const char* prop_name, double default_value);
-	int xml_property (const XMLNode& node, const char* prop_name, int default_value);
-	bool xml_property (const XMLNode& node, const char* prop_name, bool default_value);
-	std::string xml_property (const XMLNode& node, const char* prop_name, const std::string default_value);
-	std::string xml_property (const XMLNode& node, const char* prop_name, const char* default_value);
 
-	void create_ui (const XMLNodeList& definition, Gtk::Widget& root, std::map<std::string, Gtk::Widget*> &named_widgets);
-	Gtk::Widget* create_widget (const XMLNode& definition, std::map<std::string, Gtk::Widget*> &named_widgets);
-	Gtk::Widget* add_widget (Gtk::Box& parent, const XMLNode &definition, std::map<std::string, Gtk::Widget*> &named_widgets);
-	Gtk::Widget* add_widget (Gtk::Layout& parent, const XMLNode &definition, std::map<std::string, Gtk::Widget*> &named_widgets);
-	Gtk::Widget* add_widget (Gtk::Widget& parent, const XMLNode &definition, std::map<std::string, Gtk::Widget*> &named_widgets);
+	typedef std::map<std::string, XMLNode*>    XMLNodeMap;
+
+	void get_styles(const XMLTree& layout, WavesUI::XMLNodeMap &styles);
+
+	double xml_property (const XMLNode& node, const char* prop_name, const XMLNodeMap& styles, double default_value);
+	int xml_property (const XMLNode& node, const char* prop_name, const XMLNodeMap& styles, int default_value);
+	bool xml_property (const XMLNode& node, const char* prop_name, const XMLNodeMap& styles, bool default_value);
+	std::string xml_property (const XMLNode& node, const char* prop_name, const XMLNodeMap& styles, const std::string default_value);
+	std::string xml_property (const XMLNode& node, const char* prop_name, const XMLNodeMap& styles, const char* default_value);
+
+	void create_ui (const XMLTree& layout, Gtk::Widget& root, std::map<std::string, Gtk::Widget*> &named_widgets);
+	void create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk::Widget& root, std::map<std::string, Gtk::Widget*> &named_widgets);
+	Gtk::Widget* create_widget (const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets);
+	Gtk::Widget* add_widget (Gtk::Box& parent, const XMLNode &definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets);
+	Gtk::Widget* add_widget (Gtk::Layout& parent, const XMLNode &definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets);
+	Gtk::Widget* add_widget (Gtk::Widget& parent, const XMLNode &definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets);
 
 	extern std::ofstream dbg_out;
 }

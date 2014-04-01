@@ -46,7 +46,7 @@ using namespace ARDOUR;
 
 std::ofstream dbg_out("/users/VKamyshniy/WavesDialogLog.txt");
 
-WavesDialog::WavesDialog (string layout_script_file, bool modal, bool use_seperator)
+WavesDialog::WavesDialog (std::string layout_script_file, bool modal, bool use_seperator)
 	: Dialog ("", modal, use_seperator)
 	, proxy (0)
     , _splash_pushed (false)
@@ -173,10 +173,10 @@ WavesDialog::read_layout (std::string file_name)
 		return false;
 	}
 
-	string title = WavesUI::xml_property (*root, "title", "");
+	std::string title = WavesUI::xml_property (*root, "title", WavesUI::XMLNodeMap(), "");
 	set_title(title);
 
-	WavesUI::create_ui(root->children(), *get_vbox(), _children);
+	WavesUI::create_ui(layout, *get_vbox(), _children);
 
 	return true;
 }

@@ -44,11 +44,14 @@ WavesButton::WavesButton ()
 	, _text_height (0)
 	, _corner_radius (0.0)
 	, _corner_mask (0xf)
-	, _angle(0)
+	, _angle (0)
 	, _act_on_release (true)
 	, _hovering (false)
 	, _pushed (false)
-	, _border_width(0)
+	, _left_border_width (0)
+	, _top_border_width (0)
+	, _right_border_width (0)
+	, _bottom_border_width (0)
 {
 	ColorsChanged.connect (sigc::mem_fun (*this, &WavesButton::color_handler));
 }
@@ -62,7 +65,10 @@ WavesButton::WavesButton (const std::string& str)
 	, _act_on_release (true)
 	, _hovering (false)
 	, _pushed (false)
-	, _border_width(0)
+	, _left_border_width (0)
+	, _top_border_width (0)
+	, _right_border_width (0)
+	, _bottom_border_width (0)
 {
 	set_text (str);
 }
@@ -137,13 +143,16 @@ WavesButton::render (cairo_t* cr)
 												Gtk::STATE_ACTIVE :
 												Gtk::STATE_NORMAL));
 
-	if (_border_width != 0) {
-		cairo_set_source_rgba (cr, 0, 0, 0, 1);
+	if ((_left_border_width != 0) ||
+		(_top_border_width != 0) ||
+		(_right_border_width != 0) ||
+		(_bottom_border_width != 0)) {
+		cairo_set_source_rgba (cr, _border_color.get_red_p(), _border_color.get_blue_p(), _border_color.get_green_p(), 1);
 		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
 		cairo_fill (cr);
 	}
 
-	rounded_function (cr, _border_width, _border_width, get_width()-_border_width*2.0, get_height()-_border_width*2.0, _corner_radius);
+	rounded_function (cr, _left_border_width, _top_border_width, get_width()-_left_border_width-_right_border_width, get_height()-_top_border_width-_bottom_border_width, _corner_radius);
 	cairo_set_source_rgba (cr, bgcolor.get_red_p(), bgcolor.get_green_p(), bgcolor.get_blue_p(), 1);
 	cairo_fill (cr);
 
@@ -196,10 +205,56 @@ WavesButton::set_corner_radius (float r)
 }
 
 void
-WavesButton::set_border_width (float border_width)
+WavesButton::set_border_width (float left_border_width,
+							   float top_border_width,
+							   float right_border_width,
+							   float bottom_border_width)
 {
-	_border_width = fabs(border_width);
+	_left_border_width = fabs(left_border_width);
+	_top_border_width = fabs(top_border_width);
+	_right_border_width = fabs(right_border_width);
+	_bottom_border_width = fabs(bottom_border_width);
 	set_dirty ();
+}
+
+void
+WavesButton::set_border_width (const char* definition)
+{
+	if (definition)
+	{
+		float left;
+		float top;
+		float right;
+		float bottom;
+		int nread = sscanf(definition, "%f%f%f%f", &left, &top, &right, &bottom);
+		if (nread > 0) {
+			_left_border_width = fabs(left);
+			if (nread < 2) {
+				_top_border_width = _left_border_width;
+			} else {
+				_top_border_width = fabs(top);
+			}
+			if (nread < 3) {
+				_right_border_width = _top_border_width;
+			} else {
+				_right_border_width = fabs(right);
+			}
+			if (nread < 4) {
+				_bottom_border_width = _right_border_width;
+			} else {
+				_bottom_border_width = fabs(bottom);
+			}
+			
+			set_dirty ();
+		}
+	}
+}
+
+void WavesButton::set_border_color(const char* color)
+{
+	if (color) {
+		_border_color = Gdk::Color(color);
+	}
 }
 
 void

@@ -45,7 +45,9 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_text (const std::string&);
 	void set_markup (const std::string&);
 	void set_angle (const double);
-	void set_border_width(float);
+	void set_border_width(float, float, float, float);
+	void set_border_width(const char*);
+	void set_border_color(const char*);
 	Glib::RefPtr<Pango::Layout> layout() const { return _layout; }
 
 	sigc::signal<void> signal_clicked;
@@ -80,8 +82,12 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	int   _text_height;
 	float _corner_radius;
 	int   _corner_mask;
-	float _border_width;
+	float _left_border_width;
+	float _top_border_width;
+	float _right_border_width;
+	float _bottom_border_width;
 	double _angle;
+	Gdk::Color _border_color;
 
 	bool _act_on_release;
 	bool _hovering;
