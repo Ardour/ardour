@@ -114,7 +114,7 @@ EditorRegions::EditorRegions (Editor* e)
 		{ 3, _("Length"),  _("Length of the region") },
 		{ 4, _("Sync"),  _("Position of region sync point, relative to start of the region") },
 		{ 5, _("Fade In"),  _("Length of region fade-in (units: secondary clock), () if disabled") },
-		{ 6, _("Fade Out"),  _("Length of region fade-out (units: secondary clock), () if dsisabled") },
+		{ 6, _("Fade Out"),  _("Length of region fade-out (units: secondary clock), () if disabled") },
 		{ 7, _("L"),  _("Region position locked?") },
 		{ 8, _("G"),  _("Region position glued to Bars|Beats time?") },
 		{ 9, _("M"),  _("Region muted?") },
