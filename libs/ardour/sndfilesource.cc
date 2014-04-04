@@ -65,7 +65,9 @@ SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	}
 }
 
-/** Files created this way are never writable or removable */
+/** Constructor for existing external-to-session files.
+    Files created this way are never writable or removable 
+*/
 SndFileSource::SndFileSource (Session& s, const string& path, int chn, Flag flags)
 	: Source(s, DataType::AUDIO, path, flags)
           /* note that the origin of an external file is itself */
@@ -80,7 +82,9 @@ SndFileSource::SndFileSource (Session& s, const string& path, int chn, Flag flag
 	}
 }
 
-/** This constructor is used to construct new files, not open existing ones. */
+/** This constructor is used to construct new internal-to-session files, 
+    not open existing ones. 
+*/
 SndFileSource::SndFileSource (Session& s, const string& path, const string& origin,
                               SampleFormat sfmt, HeaderFormat hf, framecnt_t rate, Flag flags)
 	: Source(s, DataType::AUDIO, path, flags)
