@@ -39,6 +39,7 @@
 #include "ardour/midi_model.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/midi_source.h"
+#include "ardour/file_source.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/source_factory.h"
@@ -381,6 +382,10 @@ MidiSource::clone (const string& path, Evoral::MusicalTime begin, Evoral::Musica
 	} else {
 		newsrc->set_model (_model);
 	}
+	
+	/* this file is not removable (but since it is MIDI, it is mutable) */
+
+	boost::dynamic_pointer_cast<FileSource> (newsrc)->prevent_deletion ();
 
 	return newsrc;
 }

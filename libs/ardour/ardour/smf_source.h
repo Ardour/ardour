@@ -69,6 +69,8 @@ public:
 
 	static bool safe_midi_file_extension (const std::string& path);
 
+	void prevent_deletion ();
+
   protected:
 	void set_path (const std::string& newpath);
 
