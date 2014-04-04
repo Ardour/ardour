@@ -82,6 +82,8 @@ public:
 	
 	static PBD::Signal2<int,std::string,std::vector<std::string> > AmbiguousFileName;
 
+	virtual void prevent_deletion ();
+
 protected:
 	FileSource (Session& session, DataType type,
 	            const std::string& path,
@@ -103,7 +105,6 @@ protected:
 	std::string _origin;
 	bool        _open;
 
-	void prevent_deletion ();
 };
 
 } // namespace ARDOUR

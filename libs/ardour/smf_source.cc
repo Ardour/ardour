@@ -73,9 +73,10 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 		return;
 	}
 
-	if (open(_path)) {
+	if (open (_path)) {
 		throw failed_constructor ();
 	}
+
 	_open = true;
 }
 
@@ -658,3 +659,12 @@ SMFSource::ensure_disk_file ()
 	}
 }
 
+void
+SMFSource::prevent_deletion ()
+{
+	/* Unlike the audio case, the MIDI file remains mutable (because we can
+	   edit MIDI data)
+	*/
+  
+	_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
+}
