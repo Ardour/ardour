@@ -18,20 +18,18 @@
 */
 #include "waves_ui.h"
 
-std::ofstream WavesUI::dbg_out("/users/WavesUILog.txt");
+//std::ofstream dbg_out("/users/WavesUILog.txt");
 
 void
 WavesUI::get_styles(const XMLTree& layout, WavesUI::XMLNodeMap &styles)
 {
 	XMLNode* root  = layout.root();
 	if (root != NULL) {
-		WavesUI::dbg_out << "WavesUI::get_styles\n";
 
 		for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
 			if ( !strcasecmp((*i)->name().c_str(), "style")) {
 				std::string style_name = ((*i)->property("name") ? (*i)->property("name")->value() : std::string(""));
 				if (!style_name.empty()) {
-					WavesUI::dbg_out << "\tstyle [" << style_name << "] added:" << *i << "\n";
 					styles[style_name] = *i;
 				}
 			}
@@ -42,7 +40,6 @@ WavesUI::get_styles(const XMLTree& layout, WavesUI::XMLNodeMap &styles)
 double
 WavesUI::xml_property (const XMLNode &node, const char *prop_name, const XMLNodeMap& styles, double default_value)
 {
-	WavesUI::dbg_out << "double xml_property ( " << prop_name << ")\n";
 	std::string property = xml_property(node, prop_name, styles, "");
 	if (property.empty()) {
 		return default_value;
@@ -53,7 +50,6 @@ WavesUI::xml_property (const XMLNode &node, const char *prop_name, const XMLNode
 int
 WavesUI::xml_property (const XMLNode &node, const char *prop_name, const XMLNodeMap& styles, int default_value)
 {
-	WavesUI::dbg_out << "int xml_property ( " << prop_name << ")\n";
 	std::string property = xml_property(node, prop_name, styles, "");
 	if (property.empty()) {
 		return default_value;
@@ -65,7 +61,6 @@ WavesUI::xml_property (const XMLNode &node, const char *prop_name, const XMLNode
 bool
 WavesUI::xml_property (const XMLNode &node, const char *prop_name, const XMLNodeMap& styles, bool default_value)
 {
-	WavesUI::dbg_out << "bool xml_property ( " << prop_name << ")\n";
 	std::string property = xml_property(node, prop_name, styles, "");
 	if (property.empty()) {
 		return default_value;
@@ -77,20 +72,15 @@ WavesUI::xml_property (const XMLNode &node, const char *prop_name, const XMLNode
 std::string
 WavesUI::xml_property (const XMLNode &node, const char *prop_name, const XMLNodeMap& styles, const std::string default_value)
 {
-	WavesUI::dbg_out << "std::string xml_property (<" << node.name() << ">, " << prop_name << " )\n";
 	std::string property = node.property (prop_name) ? node.property(prop_name)->value() : "";
 	if (property.empty()) {
-		WavesUI::dbg_out << "\tlooking for style_name to read [" << prop_name << "]\n";
 		std::string style_name = node.property ("style") ? node.property("style")->value() : "";
 		if (!style_name.empty()) {
-			WavesUI::dbg_out << "\tstyle_name [" << style_name << "] found\n";
 			XMLNodeMap::const_iterator style = styles.find(style_name);
 			if (style != styles.end()) {
 				return WavesUI::xml_property (*style->second, prop_name, styles, default_value);
 			}
 		}
-	} else {
-		WavesUI::dbg_out << "\t" << prop_name << " = [" << property << "]\n";
 	}
 
 
@@ -144,6 +134,11 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, std
 			child->modify_bg(Gtk::STATE_NORMAL, Gdk::Color(property));
 		}
 
+		property = WavesUI::xml_property (definition, "bgdisabled", styles, property);
+		if (!property.empty()) {
+			child->modify_bg(Gtk::STATE_INSENSITIVE, Gdk::Color(property));
+		}
+
 		property = WavesUI::xml_property (definition, "bgactive", styles, "");
 		if (!property.empty()) {
 			child->modify_bg(Gtk::STATE_ACTIVE, Gdk::Color(property));
@@ -157,6 +152,11 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, std
 		property = WavesUI::xml_property (definition, "fgnormal", styles, "");
 		if (!property.empty()) {
 			child->modify_fg(Gtk::STATE_NORMAL, Gdk::Color(property));
+		}
+
+		property = WavesUI::xml_property (definition, "fgdisabled", styles, property);
+		if (!property.empty()) {
+			child->modify_fg(Gtk::STATE_INSENSITIVE, Gdk::Color(property));
 		}
 
 		property = WavesUI::xml_property (definition, "fgactive", styles, "");
@@ -234,7 +234,6 @@ WavesUI::create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk
 void
 WavesUI::create_ui (const XMLTree& layout, Gtk::Widget& root, std::map<std::string, Gtk::Widget*> &named_widgets)
 {
-	WavesUI::dbg_out << "const XMLTree& layout, Gtk::Widget& root, std::map<std::string, Gtk::Widget*> &named_widgets):\n";
 	XMLNodeMap styles;
 	WavesUI::get_styles(layout, styles);
 	const XMLNodeList& definition = layout.root()->children();

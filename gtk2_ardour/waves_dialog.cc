@@ -175,6 +175,10 @@ WavesDialog::read_layout (std::string file_name)
 
 	std::string title = WavesUI::xml_property (*root, "title", WavesUI::XMLNodeMap(), "");
 	set_title(title);
+	bool resizeable = WavesUI::xml_property (*root, "resizeable", WavesUI::XMLNodeMap(), false);
+	property_allow_grow().set_value(resizeable);
+
+	set_border_width(0);
 
 	WavesUI::create_ui(layout, *get_vbox(), _children);
 

@@ -51,12 +51,12 @@
 
 // methods
 	virtual void init();
-	void on_audio_settings();
-	void on_midi_settings();
-	void on_control_panel();
-	void on_ok();
-	void on_cancel();
-	void on_apply();
+	void on_audio_settings(WavesButton*);
+	void on_midi_settings(WavesButton*);
+	void on_control_panel(WavesButton*);
+	void on_ok(WavesButton*);
+	void on_cancel(WavesButton*);
+	void on_apply(WavesButton*);
 	void engine_changed ();
 	void device_changed ();
 	void buffer_size_changed();

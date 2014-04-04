@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title="Session" resizeable="false">
+  <style name="generic_control" font ="Arial 10"/>
+  <style name="generic_button"
+         style="generic_control"
+         fgnormal="#BFBFBF"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"
+         fghover="#CCCCCC"
+         bghover="#898989"
+         fgdisabled ="#959595"
+         bordercolor="#7E7E7E"
+         borderwidth="1 1 0 0" />
+  <style name="recent_session_button"
+         style="generic_button"
+         bgactive="#1CA3B6"
+         fgnormal="#DDDDDD"
+         fgactive="#DDDDDD"
+         borderwidth="0 0 0 0"/>
+  <Layout bgnormal="#000000" width="299" height="249">
+    <Layout bgnormal="#404040" x="1" y="1" width="297" height="247">
+      <Button style="generic_button"
+              id="new_session_button"
+              text="NEW SESSION"
+              x="11" y="10" width="148" height="26"/>
+      <Button style="generic_button"
+              id="open_selected_button"
+              text="OPEN SELECTED"
+              x="11" y="38" width="148" height="26"/>
+      <Button style="generic_button"
+              id="open_saved_session_button"
+              text="OPEN SAVED SESSION"
+              x="11" y="66" width="148" height="26"/>
+      <Button style="generic_button"
+              id="system_configuration_button"
+              text="SYSTEM CONFIGURATION"
+              x="11" y="94" width="148" height="26"/>
+      <Button style="generic_button"
+              id="quit_button"
+              text="QUIT"
+              x="11" y="214" width="148" height="26"/>
+      <Layout bgnormal="#404040" x="12" y="131" width="110" height="75">
+        <Label style ="generic_control" text="Audio Interface:\nChannel Configuration:\nOperation Mode:\nFrame Rate:\nSample Rate:" x="0" y="0"/>
+      </Layout>
+      <Layout bgnormal="#646464" x="169" y="10" width="121" height="229">
+        <Layout bgnormal="#383838" x="1" y="1" width="119" height="227">
+          <Label style="generic_control"
+                 text="RECENT" x="37" y="6" font ="Arial 9"/>
+          <Button style="recent_session_button"
+                  id="recent_session_button_0"
+                  x="4" y="24" width="111" height="19"/>
+          <Button style="recent_session_button"
+                  id="recent_session_button_1"
+                  x="4" y="44" width="111" height="19"/>
+          <Button style="recent_session_button"
+                  id="recent_session_button_2"
+                  x="4" y="64" width="111" height="19"/>
+          <Button style="recent_session_button"
+                  id="recent_session_button_3"
+                  x="4" y="84" width="111" height="19"/>
+          <Button style="recent_session_button"
+                  id="recent_session_button_4"
+                  x="4" y="104" width="111" height="19"/>
+          <Button style="recent_session_button"
+                  id="recent_session_button_5"
+                  x="4" y="124" width="111" height="19"/>
+          <Button style="recent_session_button"
+                  id="recent_session_button_6"
+                  x="4" y="144" width="111" height="19"/>
+          <Button style="recent_session_button"
+                  id="recent_session_button_7"
+                  x="4" y="164" width="111" height="19"/>
+          <Button style="recent_session_button"
+                  id="recent_session_button_8"
+                  x="4" y="184" width="111" height="19"/>
+          <Button style="recent_session_button"
+                  id="recent_session_button_9"
+                  x="4" y="204" width="111" height="19"/>
+        </Layout>
+      </Layout>
+    </Layout>
+  </Layout>
+</Dialog>

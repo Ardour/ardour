@@ -135,13 +135,15 @@ WavesButton::render (cairo_t* cr)
 	}
 
 	Glib::RefPtr<Gtk::Style> style = get_style();
-	Gdk::Color bgcolor = style->get_bg (_hovering ? 
-											(_pushed ? 
-												Gtk::STATE_ACTIVE :
-												Gtk::STATE_PRELIGHT ) :
-											(get_active() ? 
-												Gtk::STATE_ACTIVE :
-												Gtk::STATE_NORMAL));
+	
+	Gdk::Color bgcolor = style->get_bg ((get_state() == Gtk::STATE_INSENSITIVE) ? Gtk::STATE_INSENSITIVE : 
+											(_hovering ? 
+												(_pushed ? 
+													Gtk::STATE_ACTIVE :
+													Gtk::STATE_PRELIGHT ) :
+												(get_active() ? 
+													Gtk::STATE_ACTIVE :
+													Gtk::STATE_NORMAL)));
 
 	if ((_left_border_width != 0) ||
 		(_top_border_width != 0) ||
@@ -165,13 +167,14 @@ WavesButton::render (cairo_t* cr)
 
 		cairo_new_path (cr);	
 
-		Gdk::Color fgcolor = style->get_fg (_hovering ? 
+		Gdk::Color fgcolor = style->get_fg ((get_state() == Gtk::STATE_INSENSITIVE) ? Gtk::STATE_INSENSITIVE : 
+											(_hovering ? 
 												(_pushed ? 
 													Gtk::STATE_ACTIVE :
 													Gtk::STATE_PRELIGHT ) :
 												(get_active() ? 
 													Gtk::STATE_ACTIVE :
-													Gtk::STATE_NORMAL));
+													Gtk::STATE_NORMAL)));
 		cairo_set_source_rgba (cr, fgcolor.get_red_p(), fgcolor.get_green_p(), fgcolor.get_blue_p(), 1);
 
 		/* align text */
@@ -298,7 +301,7 @@ WavesButton::on_button_release_event (GdkEventButton *ev)
 	_pushed = false;
 	queue_draw ();
 	if (_hovering) {
-		signal_clicked ();
+		signal_clicked (this);
 		
 		if (_act_on_release) {
 			if (_action) {

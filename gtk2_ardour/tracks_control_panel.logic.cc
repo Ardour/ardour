@@ -65,12 +65,11 @@ void
 TracksControlPanel::init ()
 {
 	ok_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_ok));
-	audio_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_audio_settings));
-	midi_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_midi_settings));
-
-	ok_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_ok));
 	cancel_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_cancel));
 	apply_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_apply));
+
+	audio_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_audio_settings));
+	midi_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_midi_settings));
 	control_panel_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_control_panel));
 
 	ARDOUR::AudioEngine::instance ()->Running.connect (running_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_running, this), gui_context());
@@ -213,7 +212,7 @@ TracksControlPanel::populate_buffer_size_combo()
 }
 
 void
-TracksControlPanel::on_control_panel()
+TracksControlPanel::on_control_panel(WavesButton*)
 {
 }
 
@@ -404,7 +403,7 @@ TracksControlPanel::engine_stopped ()
 
 
 void
-TracksControlPanel::on_audio_settings()
+TracksControlPanel::on_audio_settings (WavesButton*)
 {
 	midi_settings_layout.hide ();
 	midi_settings_tab_button.set_active(false);
@@ -414,7 +413,7 @@ TracksControlPanel::on_audio_settings()
 
 
 void
-TracksControlPanel::on_midi_settings()
+TracksControlPanel::on_midi_settings (WavesButton*)
 {
 	audio_settings_layout.hide ();
 	audio_settings_tab_button.set_active(false);
@@ -424,7 +423,7 @@ TracksControlPanel::on_midi_settings()
 
 
 void
-TracksControlPanel::on_ok()
+TracksControlPanel::on_ok (WavesButton*)
 {
 	hide();
 	push_state_to_backend (true);
@@ -433,7 +432,7 @@ TracksControlPanel::on_ok()
 
 
 void
-TracksControlPanel::on_cancel()
+TracksControlPanel::on_cancel (WavesButton*)
 {
 	hide();
 	response(Gtk::RESPONSE_CANCEL);
@@ -441,7 +440,7 @@ TracksControlPanel::on_cancel()
 
 
 void 
-TracksControlPanel::on_apply()
+TracksControlPanel::on_apply (WavesButton*)
 {
 	//push_state_to_backend (true);
 	response(Gtk::RESPONSE_APPLY);

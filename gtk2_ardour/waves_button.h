@@ -50,7 +50,7 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_border_color(const char*);
 	Glib::RefPtr<Pango::Layout> layout() const { return _layout; }
 
-	sigc::signal<void> signal_clicked;
+	sigc::signal1<void, WavesButton*> signal_clicked;
 
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
  	void set_controllable (boost::shared_ptr<PBD::Controllable> c);

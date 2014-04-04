@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Dialog
-  title="Tracks Preferences">
+<Dialog title="Tracks Preferences" resizeable="false">
   <style name="generic_control" font ="Arial 10"/>
   <style name="generic_button"
     style="generic_control"
@@ -10,6 +9,7 @@
     bgactive="#454545"
     fghover="#CCCCCC"
     bghover="#898989"
+    fgdisabled ="959595"
     bordercolor="#7E7E7E"
     borderwidth="1 1 0 0" />
 
