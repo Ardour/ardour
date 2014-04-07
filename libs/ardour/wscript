@@ -418,7 +418,7 @@ def build(bld):
         testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                                    'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
         testcommon.use          = ['libpbd','libmidipp','libevoral',
-                                   'libaudiographer','ardour']
+                                   'libaudiographer','libardour']
         if bld.is_defined('USE_EXTERNAL_LIBS'):
             testcommon.uselib.extend(['LIBLTC',])
         else:
@@ -498,7 +498,7 @@ def build(bld):
         session_load_tester.includes.append ('test')
         session_load_tester.uselib    = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                              'SAMPLERATE','XML','LRDF','COREAUDIO']
-        session_load_tester.use       = ['libpbd','libmidipp','ardour']
+        session_load_tester.use       = ['libpbd','libmidipp','libardour']
         session_load_tester.name      = 'libardour-session-load-tester'
         session_load_tester.target    = 'load-session'
         session_load_tester.install_path = ''
@@ -531,7 +531,7 @@ def build(bld):
             profilingobj.includes.append ('test')
             profilingobj.uselib    = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                              'SAMPLERATE','XML','LRDF','COREAUDIO']
-            profilingobj.use       = ['libpbd','libmidipp','ardour']
+            profilingobj.use       = ['libpbd','libmidipp','libardour']
             profilingobj.name      = 'libardour-profiling'
             profilingobj.target    = p
             profilingobj.install_path = ''
@@ -557,7 +557,7 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                             'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
     testobj.use          = ['libpbd','libmidipp','libevoral',
-                            'libaudiographer','ardour','testcommon']
+                            'libaudiographer','libardour','testcommon']
     if bld.is_defined('USE_EXTERNAL_LIBS'):
         testobj.uselib.extend(['LIBLTC'])
     else:
