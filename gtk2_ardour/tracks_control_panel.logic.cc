@@ -70,6 +70,7 @@ TracksControlPanel::init ()
 
 	audio_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_audio_settings));
 	midi_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_midi_settings));
+	session_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_session_settings));
 	control_panel_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_control_panel));
 
 	ARDOUR::AudioEngine::instance ()->Running.connect (running_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_running, this), gui_context());
@@ -88,6 +89,7 @@ TracksControlPanel::init ()
 	populate_engine_combo ();
 	show_all ();
 	midi_settings_layout.hide ();
+	session_settings_layout.hide ();
 	audio_settings_tab_button.set_active(true);
 }
 
@@ -407,6 +409,8 @@ TracksControlPanel::on_audio_settings (WavesButton*)
 {
 	midi_settings_layout.hide ();
 	midi_settings_tab_button.set_active(false);
+	session_settings_layout.hide ();
+	session_settings_tab_button.set_active(false);
 	audio_settings_layout.show ();
 	audio_settings_tab_button.set_active(true);
 }
@@ -417,8 +421,22 @@ TracksControlPanel::on_midi_settings (WavesButton*)
 {
 	audio_settings_layout.hide ();
 	audio_settings_tab_button.set_active(false);
+	session_settings_layout.hide ();
+	session_settings_tab_button.set_active(false);
 	midi_settings_layout.show ();
 	midi_settings_tab_button.set_active(true);
+}
+
+
+void
+TracksControlPanel::on_session_settings (WavesButton*)
+{
+	audio_settings_layout.hide ();
+	audio_settings_tab_button.set_active(false);
+	midi_settings_layout.hide ();
+	midi_settings_tab_button.set_active(false);
+	session_settings_layout.show ();
+	session_settings_tab_button.set_active(true);
 }
 
 
@@ -442,7 +460,7 @@ TracksControlPanel::on_cancel (WavesButton*)
 void 
 TracksControlPanel::on_apply (WavesButton*)
 {
-	//push_state_to_backend (true);
+	push_state_to_backend (true);
 	response(Gtk::RESPONSE_APPLY);
 }
 

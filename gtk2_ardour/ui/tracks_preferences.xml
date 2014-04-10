@@ -34,8 +34,18 @@
       bghover="#2f2f2f"
       font ="Arial Bold 10"
       x="2" y="68" width="107" height="65"/>
+    <Button
+      id="session_settings_tab_button"
+      text="SESSION\nSETTINGS"
+      fgnormal="#C1C1C1"
+      fgactive="#CDCDCD"
+      bgnormal="#1F1F1F"
+      bgactive="#565656"
+      bghover="#2f2f2f"
+      font ="Arial Bold 10"
+      x="2" y="134" width="107" height="65"/>
 
-    <Layout id="audio_settings_layout" bgnormal="#000000" x="113" y="0" width="505" height="559">
+    <Layout id="audio_settings_layout" bgnormal="#000000" x="113" y="1" width="505" height="558">
       <Layout bgnormal="#565656" x="0" y="0" width="505" height="100">
         <Label style="generic_control" text="AUDIO ENGINE" x="12" y="17"/>
         <ComboBoxText style="generic_control" id="engine_combo" x="97" y="12" width="126" height="20"/>
@@ -80,7 +90,7 @@
           font="Arial Bold 10"
           x="387" y="6" width="106" height="28"/>
       </Layout>
-      <Layout bgnormal="#565656" x="0" y="141" width="505" height="417">
+      <Layout bgnormal="#565656" x="0" y="141" width="505" height="416">
         <Layout bgnormal="#862579" x="16" y="13" width="3" height="41"/>
         <Layout bgnormal="#862579" x="22" y="13" width="265" height="19">
           <Label style="generic_control" text="INPUTS" fgnormal="#ffffff" font ="Arial Bold 10" x="7" y="3"/>
@@ -131,7 +141,23 @@
         x="419" y="18" width="71" height="28"/>
     </Layout>
 
-    <Layout id="midi_settings_layout" bgnormal="#000000" x="113" y="0" width="505" height="559">
+    <Layout id="midi_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557">
+      <Layout bgnormal="#000000" x="21" y="20" width="291" height="19">
+        <Label style="generic_control" text="MIDI PORTS" fgnormal="#ffffff" font ="Arial Bold 10" x="7" y="3"/>
+      </Layout>
+      <Layout bgnormal="#797979" x="317" y="20" width="60" height="19">
+        <Label style="generic_control" text="INPUTS" fgnormal="#ffffff" font="Arial Bold 10" x="7" y="3"/>
+      </Layout>
+      <Layout bgnormal="#797979" x="382" y="20" width="60" height="19">
+        <Label style="generic_control" text="INPUTS" fgnormal="#ffffff" font="Arial Bold 10" x="7" y="3"/>
+      </Layout>
+    </Layout>
+    <Layout id="session_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557">
+      <!--
+    
+    Igor! Add feel free to add what you need here!
+    
+    -->
     </Layout>
   </Layout>
 </Dialog>

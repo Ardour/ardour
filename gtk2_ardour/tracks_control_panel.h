@@ -50,7 +50,9 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
   private:
 	Gtk::Layout& audio_settings_layout;
 	Gtk::Layout& midi_settings_layout;
+	Gtk::Layout& session_settings_layout;
 	WavesButton& audio_settings_tab_button;
+	WavesButton& session_settings_tab_button;
 	WavesButton& midi_settings_tab_button;
 	WavesButton& multi_out_button;
 	WavesButton& stereo_out_button;
