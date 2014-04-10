@@ -33,7 +33,8 @@ public:
 		SmallScreen,
 		SAE,
 		SinglePackage,
-		LastElement
+		Tracks,
+		LastElement,
 	};
 
     RuntimeProfile() { bits.resize (LastElement); }
@@ -44,6 +45,9 @@ public:
 
     void set_sae () { bits[SAE] = true; }
     bool get_sae () const { return bits[SAE]; }
+
+    bool get_tracks() const { return bits[Tracks]; }
+    void set_tracks() { bits[Tracks] = true; }
 
     void set_single_package () { bits[SinglePackage] = true; }
     bool get_single_package () const { return bits[SinglePackage]; }
