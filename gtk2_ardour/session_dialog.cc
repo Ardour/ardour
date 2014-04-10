@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2013 Paul Davis
+    Copyright (C) 2014 Valeriy Kamyshniy
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
 
-//static std::ofstream dbg_out("/users/sessions_dialog.txt");
+#define dbg_msg(a) MessageDialog (a, PROGRAM_NAME).run();
 
 static string poor_mans_glob (string path)
 {
@@ -72,6 +72,7 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	, new_session_button (get_waves_button ("new_session_button"))
 	, open_selected_button (get_waves_button ("open_selected_button"))
 	, open_saved_session_button (get_waves_button ("open_saved_session_button"))
+	, session_details_label(get_label("session_details_label"))
 	, new_only (require_new)
 	, _provided_session_name (session_name)
 	, _provided_session_path (session_path)
@@ -321,6 +322,16 @@ SessionDialog::on_recent_session (WavesButton* clicked_button)
 
 	if (selected_recent_session >= 0) {
 		open_selected_button.set_sensitive (true);
+		float sr;
+		SampleFormat sf;
+		std::string state_file_path (selected_session_full_name + Glib::path_get_basename(selected_session_full_name) + ARDOUR::statefile_suffix);
+        if (Session::get_info_from_path (state_file_path, sr, sf) == 0) {
+			std::string sample_format(sf == FormatFloat ? _("32 bit float") : 
+														  (sf == FormatInt24 ? _("24 bit") :
+																			   (sf == FormatInt16 ? _("16 bit") :
+																									 "??")));
+			session_details_label.set_text(string_compose (_("<TBI>\n<TBI>\n<TBI>\n%1\n%2"), sr, sample_format));
+		}
 	} else {
 		open_selected_button.set_sensitive (false);
 	}

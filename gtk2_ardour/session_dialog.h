@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2010 Paul Davis
+    Copyright (C) 2014 Valeriy Kamyshniy
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -82,6 +82,7 @@ class SessionDialog : public WavesDialog {
 	WavesButton& open_selected_button;
 	WavesButton& open_saved_session_button;
 	WavesButton* recent_session_button[MAX_RECENT_SESSION_COUNTS];
+	Gtk::Label& session_details_label;
 
   private: //app logic
 	void on_quit (WavesButton*);
