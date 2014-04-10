@@ -61,7 +61,7 @@ load_session (string dir, string state)
 }
 
 string session_name = "";
-string backend_client_name = "ardour";
+string backend_client_name = "tracks";
 string backend_session_uuid;
 bool just_version = false;
 bool use_vst = true;

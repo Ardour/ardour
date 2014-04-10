@@ -32,7 +32,7 @@
 using namespace std;
 
 string ARDOUR_COMMAND_LINE::session_name = "";
-string ARDOUR_COMMAND_LINE::backend_client_name = "ardour";
+string ARDOUR_COMMAND_LINE::backend_client_name = "tracks";
 string ARDOUR_COMMAND_LINE::backend_session_uuid;
 bool  ARDOUR_COMMAND_LINE::show_key_actions = false;
 bool ARDOUR_COMMAND_LINE::no_splash = false;
@@ -43,7 +43,7 @@ char* ARDOUR_COMMAND_LINE::curvetest_file = 0;
 bool ARDOUR_COMMAND_LINE::try_hw_optimization = true;
 bool ARDOUR_COMMAND_LINE::no_connect_ports = false;
 string ARDOUR_COMMAND_LINE::keybindings_path = ""; /* empty means use builtin default */
-std::string ARDOUR_COMMAND_LINE::menus_file = "trx.menus";
+std::string ARDOUR_COMMAND_LINE::menus_file = "tracks.menus";
 bool ARDOUR_COMMAND_LINE::finder_invoked_ardour = false;
 string ARDOUR_COMMAND_LINE::immediate_save;
 string ARDOUR_COMMAND_LINE::load_template;
