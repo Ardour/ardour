@@ -384,7 +384,7 @@ def build(bld):
         obj.includes  = [ '../libs/fst', '.' ]
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
         obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
-        obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+        obj.install_path = bld.env['DLLDIR']
         # end of the wine executable
 
         # now the shared library containing the GTK GUI for ardour
@@ -425,7 +425,7 @@ def build(bld):
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
         ]
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    obj.install_path = os.path.join(bld.env['DLLDIR'])
     obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL'
     obj.uselib       += ' GTKMM CANVAS FFTW3F'
     obj.uselib       += ' AUDIOUNITS OSX GTKOSX LO '
@@ -479,11 +479,15 @@ def build(bld):
 
     # Wrappers
 
+        print 'DLL = ' + bld.env['DLLDIR'], '\n'
+        print 'DATADIR = ' + bld.env['DATADIR'], '\n'
+        print 'CONF = ' + bld.env['CONFDIR'], '\n'
+
     wrapper_subst_dict = {
             'INSTALL_PREFIX' : bld.env['PREFIX'],
-            'LIBDIR'         : os.path.normpath(bld.env['LIBDIR']),
+            'LIBDIR'         : os.path.normpath(bld.env['DLLDIR']),
             'DATADIR'        : os.path.normpath(bld.env['DATADIR']),
-            'SYSCONFDIR'     : os.path.normpath(bld.env['SYSCONFDIR']),
+            'SYSCONFDIR'     : os.path.normpath(bld.env['CONFDIR']),
             'LIBS'           : 'build/libs',
             'VERSION'        : bld.env['VERSION'],
             'EXECUTABLE'     : 'build/gtk2_ardour/ardour-' + bld.env['VERSION']
@@ -648,14 +652,14 @@ def build(bld):
     # find and add all ##include dependencies as sources
     obj.source += _doPyp (bld.path.find_resource ('ardour3_ui_dark.rc.in').srcpath(), True)
     obj.target = 'ardour3_ui_dark.rc'
-    obj.install_path = '${SYSCONFDIR}/ardour3'
+    obj.install_path = bld.env['CONFDIR']
 
     obj = bld (rule = include_processor)
     obj.source = [ 'ardour3_ui_light.rc.pre' ]
     # find and add all ##include dependencies as sources
     obj.source += _doPyp (bld.path.find_resource ('ardour3_ui_light.rc.in').srcpath(), True)
     obj.target = 'ardour3_ui_light.rc'
-    obj.install_path = '${SYSCONFDIR}/ardour3'
+    obj.install_path = bld.env['CONFDIR']
 
     # Menus
     menus_argv = []
@@ -675,19 +679,7 @@ def build(bld):
         obj.dep_vars = ['GTKOSX']
         obj.stdin = program + '.menus.in'
         obj.stdout = program + '.menus'
-        bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
-                          program + '.menus')
-
-    obj = bld(features = 'command-output')
-    obj.command = 'cpp'
-    obj.command_is_external = True
-    obj.no_inputs = True
-    obj.argv = menus_argv
-    obj.dep_vars = ['GTKOSX']
-    obj.stdin = 'ardour.menus.in'
-    obj.stdout = 'ardour.menus'
-    bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
-                      'ardour.menus')
+        bld.install_files (bld.env['CONFDIR'], program + '.menus')
 
     # Keybindings
 
@@ -704,26 +696,24 @@ def build(bld):
             source = b + '.bindings.in',
             rule = a_rule
             )
-        obj.install_path = os.path.join(bld.env['SYSCONFDIR'], 'ardour3')
+        obj.install_path = os.path.join(bld.env['CONFDIR'])
 
     # not modified at present
-    bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
-                      'step_editing.bindings')
-    bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
-                      'mixer.bindings')
+    bld.install_files(bld.env['CONFDIR'], 'step_editing.bindings')
+    bld.install_files(bld.env['CONFDIR'], 'mixer.bindings')
 
     # Icons/Images
-    bld.install_files('${DATADIR}/ardour3/icons', bld.path.ant_glob('icons/*.png'))
-    bld.install_files('${DATADIR}/ardour3/pixmaps', bld.path.ant_glob('pixmaps/*.xpm'))
-    bld.install_files('${DATADIR}/ardour3', 'splash.png')
-    bld.install_files('${DATADIR}/ardour3', 'small-splash.png')
-    bld.install_files('${DATADIR}/ardour3', 'ArdourMono.ttf')
+    bld.install_files(os.path.join (bld.env['DATADIR'], 'icons'), bld.path.ant_glob('icons/*.png'))
+    bld.install_files(os.path.join (bld.env['DATADIR'], 'pixmaps'), bld.path.ant_glob('pixmaps/*.xpm'))
+    bld.install_files(bld.env['DATADIR'], 'splash.png')
+    bld.install_files(bld.env['DATADIR'], 'small-splash.png')
+    bld.install_files(bld.env['DATADIR'], 'ArdourMono.ttf')
 
     # Default UI configuration
-    bld.install_files('${SYSCONFDIR}/ardour3', 'ardour3_ui_default.conf')
+    bld.install_files(bld.env['CONFDIR'], 'ardour3_ui_default.conf')
 
     # Default export stuff
-    bld.install_files('${SYSCONFDIR}/ardour3/export', bld.path.ant_glob('export/*.format'))
+    bld.install_files(os.path.join(bld.env['CONFDIR'],' export'), bld.path.ant_glob('export/*.format'))
 
     # i18n
     if bld.is_defined('ENABLE_NLS'):
