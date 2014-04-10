@@ -18,29 +18,29 @@
          fgnormal="#DDDDDD"
          fgactive="#DDDDDD"
          borderwidth="0 0 0 0"/>
-  <Layout bgnormal="#000000" width="299" height="249">
-    <Layout bgnormal="#404040" x="1" y="1" width="297" height="247">
+  <Layout bgnormal="#000000" width="447" height="249">
+    <Layout bgnormal="#404040" x="1" y="1" width="445" height="247">
       <Button style="generic_button"
               id="new_session_button"
               text="NEW SESSION"
-              x="11" y="10" width="148" height="26"/>
+              x="11" y="10" width="296" height="26"/>
       <Button style="generic_button"
               id="open_selected_button"
               text="OPEN SELECTED"
-              x="11" y="38" width="148" height="26"/>
+              x="11" y="38" width="296" height="26"/>
       <Button style="generic_button"
               id="open_saved_session_button"
               text="OPEN SAVED SESSION"
-              x="11" y="66" width="148" height="26"/>
+              x="11" y="66" width="296" height="26"/>
       <Button style="generic_button"
               id="system_configuration_button"
               text="SYSTEM CONFIGURATION"
-              x="11" y="94" width="148" height="26"/>
+              x="11" y="94" width="296" height="26"/>
       <Button style="generic_button"
               id="quit_button"
               text="QUIT"
-              x="11" y="214" width="148" height="26"/>
-      <Layout bgnormal="#404040" x="12" y="131" width="148" height="75">
+              x="11" y="214" width="296" height="26"/>
+      <Layout bgnormal="#404040" x="12" y="131" width="296" height="75">
         <Label style ="generic_control"
                text="Audio Interface:\nChannel Configuration:\nOperation Mode:\nFrame Rate:\nSample Rate:"
                x="0" y="0"/>
@@ -50,7 +50,7 @@
                x="114"
                y="0"/>
       </Layout>
-      <Layout bgnormal="#646464" x="169" y="10" width="121" height="229">
+      <Layout bgnormal="#646464" x="317" y="10" width="121" height="229">
         <Layout bgnormal="#383838" x="1" y="1" width="119" height="227">
           <Label style="generic_control"
                  text="RECENT" x="37" y="6" font ="Arial 9"/>
