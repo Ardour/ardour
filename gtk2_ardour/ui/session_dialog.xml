@@ -40,8 +40,15 @@
               id="quit_button"
               text="QUIT"
               x="11" y="214" width="148" height="26"/>
-      <Layout bgnormal="#404040" x="12" y="131" width="110" height="75">
-        <Label style ="generic_control" text="Audio Interface:\nChannel Configuration:\nOperation Mode:\nFrame Rate:\nSample Rate:" x="0" y="0"/>
+      <Layout bgnormal="#404040" x="12" y="131" width="148" height="75">
+        <Label style ="generic_control"
+               text="Audio Interface:\nChannel Configuration:\nOperation Mode:\nFrame Rate:\nSample Rate:"
+               x="0" y="0"/>
+        <Label style ="generic_control"
+               id="session_details_label"
+               text="??\n??\n??\n??\n??"
+               x="114"
+               y="0"/>
       </Layout>
       <Layout bgnormal="#646464" x="169" y="10" width="121" height="229">
         <Layout bgnormal="#383838" x="1" y="1" width="119" height="227">
