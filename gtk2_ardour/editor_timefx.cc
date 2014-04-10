@@ -17,6 +17,9 @@
 
 */
 
+#ifdef PLATFORM_WINDOWS
+	#include <windows.h>
+#endif
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
