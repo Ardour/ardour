@@ -139,7 +139,6 @@ class AudioDiskstream : public Diskstream
 	void set_block_size (pframes_t);
 	int  internal_playback_seek (framecnt_t distance);
 	int  can_internal_playback_seek (framecnt_t distance);
-	std::list<boost::shared_ptr<Source> > steal_write_sources();
 	void reset_write_sources (bool, bool force = false);
 	void non_realtime_input_change ();
 	void non_realtime_locate (framepos_t location);

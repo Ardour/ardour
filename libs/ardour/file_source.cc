@@ -81,6 +81,10 @@ FileSource::FileSource (Session& session, const XMLNode& node, bool /*must_exist
         prevent_deletion ();
 }
 
+FileSource::~FileSource()
+{
+}
+
 void
 FileSource::prevent_deletion ()
 {
@@ -88,6 +92,8 @@ FileSource::prevent_deletion ()
          */
 
         if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS)) {
+		cerr << " ... " << _path << " already  exists, marking immutable\n";
+
                 if (!(_flags & Destructive)) {
                         mark_immutable ();
                 } else {
@@ -536,10 +542,13 @@ FileSource::set_source_name (const string& newname, bool destructive)
 		return -1;
 	}
 
-        if (::rename (oldpath.c_str(), newpath.c_str()) != 0) {
-                error << string_compose (_("cannot rename file %1 to %2 (%3)"), oldpath, newpath, strerror(errno)) << endmsg;
-                return -1;
-        }
+	if (Glib::file_test (oldpath.c_str(), Glib::FILE_TEST_EXISTS)) { 
+		/* rename only needed if file exists on disk */
+		if (::rename (oldpath.c_str(), newpath.c_str()) != 0) {
+			error << string_compose (_("cannot rename file %1 to %2 (%3)"), oldpath, newpath, strerror(errno)) << endmsg;
+			return -1;
+		}
+	}
 
 	_name = Glib::path_get_basename (newpath);
 	_path = newpath;

@@ -70,6 +70,8 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	virtual bool set_name (const std::string& str);
 
+	virtual std::string steal_write_source_name () { return std::string(); }
+
 	boost::shared_ptr<ARDOUR::IO> io() const { return _io; }
 	void set_track (ARDOUR::Track *);
 

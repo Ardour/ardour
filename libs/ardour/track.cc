@@ -579,10 +579,10 @@ Track::set_capture_offset ()
 	_diskstream->set_capture_offset ();
 }
 
-list<boost::shared_ptr<Source> >
-Track::steal_write_sources()
+std::string
+Track::steal_write_source_name()
 {
-        return _diskstream->steal_write_sources ();
+        return _diskstream->steal_write_source_name ();
 }
 
 void

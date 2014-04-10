@@ -88,6 +88,7 @@
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
 #include "ardour/speakers.h"
+#include "ardour/track.h"
 #include "ardour/utils.h"
 
 #include "midi++/port.h"
@@ -3587,6 +3588,7 @@ Session::new_midi_source_name (const string& base)
 	legalized = legalize_for_path (base);
 
 	// Find a "version" of the file name that doesn't exist in any of the possible directories.
+
 	for (cnt = 1; cnt <= limit; ++cnt) {
 
 		vector<space_and_path>::iterator i;
@@ -3626,23 +3628,37 @@ Session::new_midi_source_name (const string& base)
 boost::shared_ptr<MidiSource>
 Session::create_midi_source_for_session (Track* track, string const & n)
 {
-	/* try to use the existing write source for the track, to keep numbering sane
-	 */
+	std::string name;
 
 	if (track) {
-		/*MidiTrack* mt = dynamic_cast<Track*> (track);
-		  assert (mt);
+		/* the caller passes in the track the source will be used in,
+		   so that we can keep the numbering sane. 
+		   
+		   Rationale: a track with the name "Foo" that has had N
+		   captures carried out so far will already have a write source
+		   named "Foo-N+1.mid" waiting to be used for the next capture.
+
+		   If we call new_midi_source_name() we will get "Foo-N+2". But
+		   there is no region corresponding to "Foo-N+1", so when
+		   "Foo-N+2" appears in the track, the gap presents the user
+		   with odd behaviour - why did it skip past Foo-N+1?
+
+		   We could explain this to the user in some odd way, but
+		   instead we rename "Foo-N+1.mid" as "Foo-N+2.mid", and then
+		   use "Foo-N+1" here.
+
+		   If that attempted rename fails, we get "Foo-N+2.mid" anyway.
 		*/
 
-		list<boost::shared_ptr<Source> > l = track->steal_write_sources ();
-
-		if (!l.empty()) {
-			assert (boost::dynamic_pointer_cast<MidiSource> (l.front()));
-			return boost::dynamic_pointer_cast<MidiSource> (l.front());
-		}
+		MidiTrack* mt = dynamic_cast<MidiTrack*> (track);
+		assert (mt);
+		name = track->steal_write_source_name ();
 	}
 
-	const string name = new_midi_source_name (n);
+	if (name.empty()) {
+		name = new_midi_source_name (n);
+	}
+
 	const string path = new_source_path_from_name (DataType::MIDI, name);
 
 	return boost::dynamic_pointer_cast<SMFSource> (
