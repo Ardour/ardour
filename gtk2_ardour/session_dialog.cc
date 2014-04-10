@@ -125,20 +125,20 @@ SessionDialog::clear_given ()
 std::string
 SessionDialog::session_name (bool& should_be_new)
 {
+    should_be_new = false;
+    
 	if (!_provided_session_name.empty() && !new_only) {
-		should_be_new = false;
 		return _provided_session_name;
 	}
 
 	/* Try recent session selection */
 
 	if (!selected_session_full_name.empty()) {
-		should_be_new = false;
 		return selected_session_full_name;
 	}
 
-	/*
-	if (_existing_session_chooser_used) {
+	
+	/*if (_existing_session_chooser_used) {
 		// existing session chosen from file chooser
 		should_be_new = false;
 		return existing_session_chooser.get_filename ();
@@ -147,8 +147,14 @@ SessionDialog::session_name (bool& should_be_new)
 		string val = new_name_entry.get_text ();
 		strip_whitespace_edges (val);
 		return val;
-	}
-	*/
+	}*/
+    
+    
+    if (!new_session_full_name.empty() ) {
+        should_be_new = true;
+        return Glib::path_get_basename(new_session_full_name);
+    }
+
 	return "";
 }
 
@@ -161,7 +167,7 @@ SessionDialog::session_folder ()
 
 	/* Try recent session selection */
 	
-	if (!selected_session_full_name.empty()) {
+	if (!selected_session_full_name.empty() ) {
 		if (Glib::file_test (selected_session_full_name, Glib::FILE_TEST_IS_REGULAR)) {
 			return Glib::path_get_dirname (selected_session_full_name);
 		}
@@ -177,6 +183,15 @@ SessionDialog::session_folder ()
 		return Glib::build_filename (new_folder_chooser.get_current_folder(), legal_session_folder_name);
 	}
 	*/
+    
+    if (!new_session_full_name.empty() ) {
+        if (Glib::file_test (new_session_full_name, Glib::FILE_TEST_IS_REGULAR)) {
+            return Glib::path_get_dirname (new_session_full_name);
+        }
+        return new_session_full_name;
+    }
+    
+    return "";
 }
 
 void
@@ -187,6 +202,16 @@ SessionDialog::session_selected ()
 void
 SessionDialog::on_new_session (WavesButton*)
 {
+    Gtk::FileChooserDialog dialog(*this, _("Create New Session"), Gtk::FILE_CHOOSER_ACTION_SAVE);
+
+	dialog.add_button("CANCEL", Gtk::RESPONSE_CANCEL);
+	dialog.add_button("OK", Gtk::RESPONSE_OK);
+	
+    if (dialog.run() == Gtk::RESPONSE_OK) {
+		new_session_full_name = dialog.get_filename();
+		hide();
+		response (Gtk::RESPONSE_ACCEPT);
+	}
 }
 
 int

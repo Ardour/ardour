@@ -95,6 +95,8 @@ class SessionDialog : public WavesDialog {
 	std::string recent_session_full_name[MAX_RECENT_SESSION_COUNTS];
 	std::string selected_session_full_name;
 
+    std::string new_session_full_name;
+    
   private:
 	bool new_only;
     std::string _provided_session_name;
