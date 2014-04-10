@@ -91,7 +91,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, rec_solo_table (2, 2)
 	, top_button_table (1, 2)
 	, middle_button_table (1, 2)
-	, bottom_button_table (1, 2)
+	, bottom_button_table (1, 3)
 	, meter_point_button (_("pre"))
 	, midi_input_enable_button (0)
 	, _comment_button (_("Comments"))
@@ -119,7 +119,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, button_table (3, 1)
 	, middle_button_table (1, 2)
-	, bottom_button_table (1, 2)
+	, bottom_button_table (1, 3)
 	, meter_point_button (_("pre"))
 	, midi_input_enable_button (0)
 	, _comment_button (_("Comments"))
@@ -176,7 +176,7 @@ MixerStrip::init ()
 	*/
 	set_size_request_to_display_given_text (meter_point_button, _("tupni"), 5, 5);
 
-	bottom_button_table.attach (meter_point_button, 1, 2, 0, 1);
+	bottom_button_table.attach (meter_point_button, 2, 3, 0, 1);
 
 	meter_point_button.signal_button_press_event().connect (sigc::mem_fun (gpm, &GainMeter::meter_press), false);
 	meter_point_button.signal_button_release_event().connect (sigc::mem_fun (gpm, &GainMeter::meter_release), false);
@@ -244,11 +244,11 @@ MixerStrip::init ()
 	}
 
 	if (!ARDOUR::Profile->get_trx()) {
-		button_table.attach (name_button, button_table_row, button_table_row+1, 0, 1);
+		button_table.attach (name_button, 0, 1, button_table_row, button_table_row+1);
 		button_table_row++;
-		button_table.attach (input_button_box, button_table_row, button_table_row+1, 1, 2);
+		button_table.attach (input_button_box, 0, 2, button_table_row, button_table_row+1);
 		button_table_row++;
-		button_table.attach (_invert_button_box, button_table_row, button_table_row+1, 2, 3);
+		button_table.attach (_invert_button_box, 0, 2, button_table_row, button_table_row+1);
 		button_table_row++;
 	}
 
@@ -256,10 +256,10 @@ MixerStrip::init ()
 	middle_button_table.set_spacings (2);
 
 	bottom_button_table.set_spacings (2);
-	bottom_button_table.set_homogeneous (true);
-	bottom_button_table.attach (group_button, button_table_row, button_table_row+1, 0, 1);
-	button_table_row++;
-	bottom_button_table.attach (gpm.gain_automation_state_button, button_table_row, button_table_row+1, 0, 1);
+	bottom_button_table.set_homogeneous (false);
+	button_table_row = 0;
+	bottom_button_table.attach (group_button, 0, 1, button_table_row, button_table_row+1);
+	bottom_button_table.attach (gpm.gain_automation_state_button, 1, 2, button_table_row, button_table_row+1);
 	button_table_row++;
 
 	name_button.set_name ("mixer strip button");
