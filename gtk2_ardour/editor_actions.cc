@@ -1650,7 +1650,9 @@ Editor::parameter_changed (std::string p)
 	} else if (p == "timecode-offset" || p == "timecode-offset-negative") {
 		update_just_timecode ();
 	} else if (p == "show-zoom-tools") {
-		_zoom_tearoff->set_visible (Config->get_show_zoom_tools(), true);
+		if (_zoom_tearoff) {
+			_zoom_tearoff->set_visible (Config->get_show_zoom_tools(), true);
+		}
 	} else if (p == "sound-midi-notes") {
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("sound-midi-notes"));
 

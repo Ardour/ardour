@@ -387,20 +387,29 @@ ARDOUR_UI::setup_transport ()
 	HBox* clock_box = manage (new HBox);
 
 	clock_box->pack_start (*primary_clock, false, false);
-	if (!ARDOUR::Profile->get_small_screen()) {
+	if (!ARDOUR::Profile->get_small_screen() && !ARDOUR::Profile->get_trx()) {
 		clock_box->pack_start (*secondary_clock, false, false);
 	}
 	clock_box->set_spacing (3);
 
 	shuttle_box = new ShuttleControl;
 	shuttle_box->show ();
-
+	
 	VBox* transport_vbox = manage (new VBox);
 	transport_vbox->set_name ("TransportBase");
 	transport_vbox->set_border_width (0);
 	transport_vbox->set_spacing (3);
 	transport_vbox->pack_start (*tbox, true, true, 0);
-	transport_vbox->pack_start (*shuttle_box, false, false, 0);
+
+	if (!Profile->get_trx()) {
+		transport_vbox->pack_start (*shuttle_box, false, false, 0);
+	}
+
+	time_info_box = manage (new TimeInfoBox);
+
+	if (ARDOUR::Profile->get_trx()) {
+		transport_tearoff_hbox.pack_start (*time_info_box, false, false);
+	}
 
 	transport_tearoff_hbox.pack_start (*transport_vbox, false, false);
 
@@ -410,21 +419,33 @@ ARDOUR_UI::setup_transport ()
 	auto_box->set_homogeneous (true);
 	auto_box->set_spacing (2);
 	auto_box->pack_start (sync_button, false, false);
-	auto_box->pack_start (follow_edits_button, false, false);
-	auto_box->pack_start (auto_return_button, false, false);
+	if (!ARDOUR::Profile->get_trx()) {
+		auto_box->pack_start (follow_edits_button, false, false);
+		auto_box->pack_start (auto_return_button, false, false);
+	}
 
-	transport_tearoff_hbox.pack_start (*auto_box, false, false);
+	if (!ARDOUR::Profile->get_trx()) {
+		transport_tearoff_hbox.pack_start (*auto_box, false, false);
+	}
 	transport_tearoff_hbox.pack_start (*clock_box, true, true);
 
-	time_info_box = manage (new TimeInfoBox);
-	transport_tearoff_hbox.pack_start (*time_info_box, false, false);
+	if (ARDOUR::Profile->get_trx()) {
+		transport_tearoff_hbox.pack_start (*auto_box, false, false);
+	}
 
-        if (Profile->get_small_screen()) {
+	if (!ARDOUR::Profile->get_trx()) {
+		transport_tearoff_hbox.pack_start (*time_info_box, false, false);
+	}
+
+        if (ARDOUR::Profile->get_small_screen()) {
                 transport_tearoff_hbox.pack_start (_editor_transport_box, false, false);
         }
-	transport_tearoff_hbox.pack_start (alert_box, false, false);
-	transport_tearoff_hbox.pack_start (meter_box, false, false);
-	transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
+
+	if (!ARDOUR::Profile->get_trx()) {
+		transport_tearoff_hbox.pack_start (alert_box, false, false);
+		transport_tearoff_hbox.pack_start (meter_box, false, false);
+		transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
+	}
 
 	if (Profile->get_sae()) {
 		Image* img = manage (new Image ((::get_icon (X_("sae")))));

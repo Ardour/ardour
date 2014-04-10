@@ -132,6 +132,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 void
 MixerStrip::init ()
 {
+	int button_table_row = 0;
+
 	input_selector = 0;
 	output_selector = 0;
 	group_menu = 0;
@@ -207,15 +209,19 @@ MixerStrip::init ()
 
 	top_button_table.set_homogeneous (true);
 	top_button_table.set_spacings (2);
-	top_button_table.attach (*monitor_input_button, 0, 1, 0, 1);
-        top_button_table.attach (*monitor_disk_button, 1, 2, 0, 1);
+	if (!ARDOUR::Profile->get_trx()) {
+		top_button_table.attach (*monitor_input_button, 0, 1, 0, 1);
+		top_button_table.attach (*monitor_disk_button, 1, 2, 0, 1);
+	}
 	top_button_table.show ();
 
 	rec_solo_table.set_homogeneous (true);
 	rec_solo_table.set_row_spacings (2);
 	rec_solo_table.set_col_spacings (2);
-        rec_solo_table.attach (*solo_isolated_led, 1, 2, 0, 1);
-        rec_solo_table.attach (*solo_safe_led, 1, 2, 1, 2);
+	if (!ARDOUR::Profile->get_trx()) {
+		rec_solo_table.attach (*solo_isolated_led, 1, 2, 0, 1);
+		rec_solo_table.attach (*solo_safe_led, 1, 2, 1, 2);
+	}
         rec_solo_table.show ();
 
 	button_table.set_homogeneous (false);
@@ -237,17 +243,24 @@ MixerStrip::init ()
 		button_size_group->add_widget (*monitor_input_button);
 	}
 
-	button_table.attach (name_button, 0, 1, 0, 1);
-	button_table.attach (input_button_box, 0, 1, 1, 2);
-	button_table.attach (_invert_button_box, 0, 1, 2, 3);
+	if (!ARDOUR::Profile->get_trx()) {
+		button_table.attach (name_button, button_table_row, button_table_row+1, 0, 1);
+		button_table_row++;
+		button_table.attach (input_button_box, button_table_row, button_table_row+1, 1, 2);
+		button_table_row++;
+		button_table.attach (_invert_button_box, button_table_row, button_table_row+1, 2, 3);
+		button_table_row++;
+	}
 
 	middle_button_table.set_homogeneous (true);
 	middle_button_table.set_spacings (2);
 
 	bottom_button_table.set_spacings (2);
 	bottom_button_table.set_homogeneous (true);
-//	bottom_button_table.attach (group_button, 0, 1, 0, 1);
-	bottom_button_table.attach (gpm.gain_automation_state_button, 0, 1, 0, 1);
+	bottom_button_table.attach (group_button, button_table_row, button_table_row+1, 0, 1);
+	button_table_row++;
+	bottom_button_table.attach (gpm.gain_automation_state_button, button_table_row, button_table_row+1, 0, 1);
+	button_table_row++;
 
 	name_button.set_name ("mixer strip button");
 	name_button.set_text (" "); /* non empty text, forces creation of the layout */
@@ -281,17 +294,23 @@ MixerStrip::init ()
 	whvbox.pack_start (width_hide_box, true, true);
 
 	global_vpacker.set_spacing (2);
-	global_vpacker.pack_start (whvbox, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (button_table, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (processor_box, true, true);
+	if (!ARDOUR::Profile->get_trx()) {
+		global_vpacker.pack_start (whvbox, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (button_table, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (processor_box, true, true);
+	}
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (top_button_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (rec_solo_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (middle_button_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (_comment_button, Gtk::PACK_SHRINK);
+	if (!ARDOUR::Profile->get_trx()) {
+		global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (_comment_button, Gtk::PACK_SHRINK);
+	} else {
+		global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
+	}
 
 	global_frame.add (global_vpacker);
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -496,6 +515,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		rec_solo_table.attach (*rec_enable_button, 0, 1, 0, 2);
 		rec_enable_button->set_sensitive (_session->writable());
 		rec_enable_button->show();
+
+		if (ARDOUR::Profile->get_trx()) {
+			rec_solo_table.attach (*monitor_input_button, 1, 2, 0, 2);
+		}
 
 	} else {
 

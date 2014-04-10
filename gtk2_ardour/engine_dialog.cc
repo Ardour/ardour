@@ -1608,7 +1608,7 @@ EngineControl::EngineControl ()
 			 uint32_t il = (uint32_t) input_latency.get_value ();
 			 uint32_t ol = (uint32_t) input_latency.get_value ();
 
-			 /* reset to zero so that our new test instance of JACK
+			 /* reset to zero so that our new test instance
 			    will be clean of any existing latency measures.
 			 */
 

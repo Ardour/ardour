@@ -262,10 +262,11 @@ Editor::Editor ()
 	  /* tool bar related */
 
 	, zoom_range_clock (new AudioClock (X_("zoomrange"), false, X_("zoom range"), true, false, true))
-
 	, toolbar_selection_clock_table (2,3)
-
+	, _mouse_mode_tearoff (0)
 	, automation_mode_button (_("mode"))
+	, _zoom_tearoff (0)
+	, _tools_tearoff (0)
 
 	, _toolbar_viewport (*manage (new Gtk::Adjustment (0, 0, 1e10)), *manage (new Gtk::Adjustment (0, 0, 1e10)))
 
@@ -484,7 +485,9 @@ Editor::Editor ()
 
 	HBox* h = manage (new HBox);
 	_group_tabs = new EditorGroupTabs (this);
-	h->pack_start (*_group_tabs, PACK_SHRINK);
+	if (!ARDOUR::Profile->get_trx()) {
+		h->pack_start (*_group_tabs, PACK_SHRINK);
+	}
 	h->pack_start (edit_controls_vbox);
 	controls_layout.add (*h);
 
@@ -603,10 +606,14 @@ Editor::Editor ()
 	_summary_hbox.pack_start (*summary_frame, true, true);
 	_summary_hbox.pack_start (*summary_arrows_right, false, false);
 
-	editor_summary_pane.pack2 (_summary_hbox);
+	if (!ARDOUR::Profile->get_trx()) {
+		editor_summary_pane.pack2 (_summary_hbox);
+	}
 
 	edit_pane.pack1 (editor_summary_pane, true, true);
-	edit_pane.pack2 (_the_notebook, false, true);
+	if (!ARDOUR::Profile->get_trx()) {
+		edit_pane.pack2 (_the_notebook, false, true);
+	}
 
 	editor_summary_pane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun (*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&editor_summary_pane)));
 
@@ -2871,15 +2878,21 @@ Editor::setup_toolbar ()
 
 	mouse_mode_hbox->set_spacing (2);
 
-	mouse_mode_hbox->pack_start (smart_mode_button, false, false);
+	if (!ARDOUR::Profile->get_trx()) {
+		mouse_mode_hbox->pack_start (smart_mode_button, false, false);
+	}
+
 	mouse_mode_hbox->pack_start (mouse_move_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_select_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_zoom_button, false, false);
-	mouse_mode_hbox->pack_start (mouse_gain_button, false, false);
-	mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
-	mouse_mode_hbox->pack_start (mouse_audition_button, false, false);
-	mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
-	mouse_mode_hbox->pack_start (internal_edit_button, false, false, 8);
+
+	if (!ARDOUR::Profile->get_trx()) {
+		mouse_mode_hbox->pack_start (mouse_gain_button, false, false);
+		mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
+		mouse_mode_hbox->pack_start (mouse_audition_button, false, false);
+		mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
+		mouse_mode_hbox->pack_start (internal_edit_button, false, false, 8);
+	}
 
 	mouse_mode_vbox->pack_start (*mouse_mode_hbox);
 
@@ -2898,7 +2911,9 @@ Editor::setup_toolbar ()
 	edit_mode_selector.set_size_request (65, -1);
 	edit_mode_selector.add_elements (ArdourButton::Inset);
 
-	mode_box->pack_start (edit_mode_selector, false, false);
+	if (!ARDOUR::Profile->get_trx()) {
+		mode_box->pack_start (edit_mode_selector, false, false);
+	}
 	mode_box->pack_start (*mouse_mode_box, false, false);
 
 	_mouse_mode_tearoff = manage (new TearOff (*mode_box));
@@ -2950,11 +2965,15 @@ Editor::setup_toolbar ()
 	zoom_focus_selector.set_size_request (80, -1);
 //	zoom_focus_selector.add_elements (ArdourButton::Inset);
 
-	_zoom_box.pack_start (zoom_out_button, false, false);
-	_zoom_box.pack_start (zoom_in_button, false, false);
-	_zoom_box.pack_start (zoom_out_full_button, false, false);
-
-	_zoom_box.pack_start (zoom_focus_selector, false, false);
+	if (!ARDOUR::Profile->get_trx()) {
+		_zoom_box.pack_start (zoom_out_button, false, false);
+		_zoom_box.pack_start (zoom_in_button, false, false);
+		_zoom_box.pack_start (zoom_out_full_button, false, false);
+		_zoom_box.pack_start (zoom_focus_selector, false, false);
+	} else {
+		mode_box->pack_start (zoom_out_button, false, false);
+		mode_box->pack_start (zoom_in_button, false, false);
+	}
 
 	/* Track zoom buttons */
 	visible_tracks_selector.set_name ("zoom button");
@@ -2977,21 +2996,24 @@ Editor::setup_toolbar ()
 	act = ActionManager::get_action (X_("Editor"), X_("shrink-tracks"));
 	tav_shrink_button.set_related_action (act);
 
-	_zoom_box.pack_start (visible_tracks_selector);
+	if (!ARDOUR::Profile->get_trx()) {
+		_zoom_box.pack_start (visible_tracks_selector);
+	}
 	_zoom_box.pack_start (tav_shrink_button);
 	_zoom_box.pack_start (tav_expand_button);
 
-
-	_zoom_tearoff = manage (new TearOff (_zoom_box));
-
-	_zoom_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-						   &_zoom_tearoff->tearoff_window()));
-	_zoom_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-						   &_zoom_tearoff->tearoff_window(), 0));
-	_zoom_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-						   &_zoom_tearoff->tearoff_window()));
-	_zoom_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-						    &_zoom_tearoff->tearoff_window(), 0));
+	if (!ARDOUR::Profile->get_trx()) {
+		_zoom_tearoff = manage (new TearOff (_zoom_box));
+		
+		_zoom_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
+							   &_zoom_tearoff->tearoff_window()));
+		_zoom_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
+							   &_zoom_tearoff->tearoff_window(), 0));
+		_zoom_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
+							   &_zoom_tearoff->tearoff_window()));
+		_zoom_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
+							    &_zoom_tearoff->tearoff_window(), 0));
+	} 
 
 	snap_box.set_spacing (2);
 	snap_box.set_border_width (2);
@@ -3055,15 +3077,19 @@ Editor::setup_toolbar ()
 	toolbar_hbox.set_border_width (1);
 
 	toolbar_hbox.pack_start (*_mouse_mode_tearoff, false, false);
-	toolbar_hbox.pack_start (*_zoom_tearoff, false, false);
-	toolbar_hbox.pack_start (*_tools_tearoff, false, false);
+	if (!ARDOUR::Profile->get_trx()) {
+		toolbar_hbox.pack_start (*_zoom_tearoff, false, false);
+		toolbar_hbox.pack_start (*_tools_tearoff, false, false);
+	}
 
-	hbox->pack_start (snap_box, false, false);
-        if (!Profile->get_small_screen()) {
-                hbox->pack_start (*nudge_box, false, false);
-        } else {
-                ARDOUR_UI::instance()->editor_transport_box().pack_start (*nudge_box, false, false);
-        }
+	if (!ARDOUR::Profile->get_trx()) {
+		hbox->pack_start (snap_box, false, false);
+		if (!Profile->get_small_screen()) {
+			hbox->pack_start (*nudge_box, false, false);
+		} else {
+			ARDOUR_UI::instance()->editor_transport_box().pack_start (*nudge_box, false, false);
+		}
+	}
 	hbox->pack_start (panic_box, false, false);
 
 	hbox->show_all ();
@@ -3704,7 +3730,7 @@ Editor::detach_tearoff (Box* /*b*/, Window* /*w*/)
 {
 	if ((_tools_tearoff->torn_off() || !_tools_tearoff->visible()) && 
 	    (_mouse_mode_tearoff->torn_off() || !_mouse_mode_tearoff->visible()) && 
-	    (_zoom_tearoff->torn_off() || !_zoom_tearoff->visible())) {
+	    (_zoom_tearoff && (_zoom_tearoff->torn_off() || !_zoom_tearoff->visible()))) {
 		top_hbox.remove (toolbar_frame);
 	}
 }
@@ -4014,7 +4040,9 @@ Editor::update_tearoff_visibility()
 	bool visible = Config->get_keep_tearoffs();
 	_mouse_mode_tearoff->set_visible (visible);
 	_tools_tearoff->set_visible (visible);
-	_zoom_tearoff->set_visible (visible);
+	if (_zoom_tearoff) {
+		_zoom_tearoff->set_visible (visible);
+	}
 }
 
 void

@@ -23,9 +23,10 @@
    This is to cut down on the compile times.  It also helps with my sanity.
 */
 
-#include "ardour/session.h"
 #include "ardour/audioengine.h"
 #include "ardour/automation_watch.h"
+#include "ardour/profile.h"
+#include "ardour/session.h"
 
 #ifdef interface
 #undef interface
@@ -210,13 +211,15 @@ ARDOUR_UI::set_session (Session *s)
 	    _session->master_out() && 
 	    _session->master_out()->n_outputs().n(DataType::AUDIO) > 0) {
 
-		editor_meter = new LevelMeterHBox(_session);
-		editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
-		editor_meter->clear_meters();
-		editor_meter->set_type (_session->master_out()->meter_type());
-		editor_meter->setup_meters (30, 12, 6);
-		editor_meter->show();
-		meter_box.pack_start(*editor_meter);
+		if (!ARDOUR::Profile->get_trx()) {
+			editor_meter = new LevelMeterHBox(_session);
+			editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
+			editor_meter->clear_meters();
+			editor_meter->set_type (_session->master_out()->meter_type());
+			editor_meter->setup_meters (30, 12, 6);
+			editor_meter->show();
+			meter_box.pack_start(*editor_meter);
+		}
 
 		ArdourMeter::ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_peak_display));
 		ArdourMeter::ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_route_peak_display));
@@ -231,7 +234,7 @@ ARDOUR_UI::set_session (Session *s)
 		editor_meter_max_peak = -INFINITY;
 		editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::editor_meter_peak_button_release), false);
 
-		if (Config->get_show_editor_meter()) {
+		if (Config->get_show_editor_meter() && !ARDOUR::Profile->get_trx()) {
 			transport_tearoff_hbox.pack_start (meter_box, false, false);
 			transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
 			meter_box.show();
