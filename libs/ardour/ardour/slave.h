@@ -24,7 +24,6 @@
 
 #include <glibmm/threads.h>
 
-#include <jack/jack.h>
 #include <ltc.h>
 
 #include "pbd/signals.h"

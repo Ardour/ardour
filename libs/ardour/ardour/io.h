@@ -23,7 +23,6 @@
 #include <string>
 #include <vector>
 #include <cmath>
-#include <jack/jack.h>
 
 #include <glibmm/threads.h>
 
