@@ -22,10 +22,6 @@
 #include <string>
 #include <iostream>
 
-#include <jack/types.h> /* XXX ... desirable to get rid of this but needed for
-			 * now due to use of JackPortIsXXXX
-			 */
-
 #include <pthread.h>
 
 #include "pbd/xml++.h"
@@ -47,8 +43,8 @@ class PortRequest;
 class LIBMIDIPP_API Port {
   public:
 	enum Flags {
-		IsInput = JackPortIsInput,
-		IsOutput = JackPortIsOutput,
+		IsInput = 0x1,  /* MUST MATCH JACK's JackPortIsInput */
+		IsOutput = 0x2, /* MUST MATCH JACK's JackPortIsOutput */
 	};
 	
 	Port (std::string const &, Flags);
