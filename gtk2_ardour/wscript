@@ -664,23 +664,30 @@ def build(bld):
     else:
         menus_argv = [ '-E', '-P' ]
 
+    # always build all versions of the menu definitions
+    # so that we can try them out with different program builds.
+    for program in [ 'ardour', 'trx' ]:
+        obj = bld(features = 'command-output')
+        obj.command = 'cpp'
+        obj.command_is_external = True
+        obj.no_inputs = True
+        obj.argv = menus_argv
+        obj.dep_vars = ['GTKOSX']
+        obj.stdin = program + '.menus.in'
+        obj.stdout = program + '.menus'
+        bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
+                          program + '.menus')
+
     obj = bld(features = 'command-output')
     obj.command = 'cpp'
     obj.command_is_external = True
     obj.no_inputs = True
     obj.argv = menus_argv
     obj.dep_vars = ['GTKOSX']
-    
-    if bld.is_defined('TRX_BUILD'):
-        obj.stdin = 'trx.menus.in'
-        obj.stdout = 'trx.menus'
-        bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
-                          'trx.menus')
-    else:
-        obj.stdin = 'ardour.menus.in'
-        obj.stdout = 'ardour.menus'
-        bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
-                          'ardour.menus')
+    obj.stdin = 'ardour.menus.in'
+    obj.stdout = 'ardour.menus'
+    bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
+                      'ardour.menus')
 
     # Keybindings
 
