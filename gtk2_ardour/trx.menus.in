@@ -44,14 +44,14 @@
         <menuitem action='CleanupUnused'/>
         <menuitem action='FlushWastebasket'/>
       </menu>
-      #ifdef GTKOSX      
+#ifdef GTKOSX      
       <menuitem action='toggle-about'/>
       <menuitem action='toggle-rc-options-editor'/>
-      #endif
-      #ifndef GTKOSX
+#endif
+#ifndef GTKOSX
       <separator/>
       <menuitem action='Quit'/>
-      #endif
+#endif
     </menu>
 
     <menu name='Transport' action='Transport'>
@@ -97,10 +97,10 @@
       <menuitem action='editor-crop'/>
       <menuitem action='split-region'/>
       <separator/>
-      #ifndef GTKOSX
+#ifndef GTKOSX
       <separator/>
       <menuitem action='toggle-rc-options-editor'/>
-      #endif
+#endif
     </menu>         
 
     <menu action='TrackMenu'>
@@ -154,9 +154,9 @@
       <menuitem action='toggle-big-clock'/>
     </menu>
     <menu name='Help' action='Help'>
-      #ifndef GTKOSX
+#ifndef GTKOSX
       <menuitem action='toggle-about'/>
-      #endif
+#endif
       <menuitem action='Manual'/>
     </menu>
   </menubar>
