@@ -430,6 +430,8 @@ def options(opt):
     autowaf.set_options(opt, debug_by_default=True)
     opt.add_option('--program-name', type='string', action='store', default='Ardour', dest='program_name',
                     help='The user-visible name of the program being built')
+    opt.add_option ('--trx', action='store_true', default=False, dest='trx_build',
+                    help='Whether to build for TRX')
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler flags')
     opt.add_option('--backtrace', action='store_true', default=True, dest='backtrace',
@@ -578,6 +580,9 @@ def configure(conf):
         conf.env.append_value ('CFLAGS', '-DNO_PLUGIN_STATE')
         conf.env.append_value ('CXXFLAGS', '-DNO_PLUGIN_STATE')
         conf.define ('NO_PLUGIN_STATE', 1)
+
+    if Options.options.trx_build:
+        conf.define ('TRX_BUILD', 1)
 
     if Options.options.lv2dir:
         conf.env['LV2DIR'] = Options.options.lv2dir

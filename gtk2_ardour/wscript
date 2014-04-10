@@ -669,11 +669,18 @@ def build(bld):
     obj.command_is_external = True
     obj.no_inputs = True
     obj.argv = menus_argv
-    obj.stdin = 'ardour.menus.in'
-    obj.stdout = 'ardour.menus'
     obj.dep_vars = ['GTKOSX']
-    bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
-                      'ardour.menus')
+    
+    if bld.is_defined('TRX_BUILD'):
+        obj.stdin = 'trx.menus.in'
+        obj.stdout = 'trx.menus'
+        bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
+                          'trx.menus')
+    else:
+        obj.stdin = 'ardour.menus.in'
+        obj.stdout = 'ardour.menus'
+        bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
+                          'ardour.menus')
 
     # Keybindings
 
