@@ -72,11 +72,11 @@ ActionManager::init ()
 }
 
 void
-ActionManager::load_menus ()
+ActionManager::load_menus (const string& menus_file)
 {
 	std::string ui_file;
 
-	find_file_in_search_path (ardour_config_search_path(), "ardour.menus", ui_file);
+	find_file_in_search_path (ardour_config_search_path(), menus_file, ui_file);
 
 	bool loaded = false;
 

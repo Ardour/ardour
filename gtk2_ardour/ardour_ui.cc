@@ -491,7 +491,7 @@ ARDOUR_UI::post_engine ()
 
 	_tooltips.enable();
 
-	ActionManager::load_menus ();
+	ActionManager::load_menus (ARDOUR_COMMAND_LINE::menus_file);
 
 	if (setup_windows ()) {
 		throw failed_constructor ();
@@ -4239,10 +4239,12 @@ ARDOUR_UI::setup_profile ()
 		Profile->set_small_screen ();
 	}
 
-	if (getenv ("ARDOUR_SAE")) {
+	if (g_getenv ("ARDOUR_SAE")) {
 		Profile->set_sae ();
 		Profile->set_single_package ();
 	}
+
+    Profile->set_trx ();
 }
 
 int
