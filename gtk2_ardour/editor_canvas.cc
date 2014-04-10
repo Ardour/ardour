@@ -21,8 +21,6 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#include <jack/types.h>
-
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/profile.h"
