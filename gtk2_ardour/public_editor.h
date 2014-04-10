@@ -32,7 +32,6 @@
 #include <gtkmm/box.h>
 #include <gtkmm/window.h>
 #include <gtkmm/actiongroup.h>
-#include <jack/types.h>
 #include <sigc++/signal.h>
 
 #include "evoral/types.hpp"

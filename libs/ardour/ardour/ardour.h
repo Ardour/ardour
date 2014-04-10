@@ -38,8 +38,6 @@
 #include "ardour/types.h"
 #include "ardour/libardour_visibility.h"
 
-#include <jack/jack.h>
-
 namespace MIDI {
 	class MachineControl;
 	class Port;

@@ -18,8 +18,6 @@
 
 */
 
-#include <jack/types.h>
-
 #include <glib/gstdio.h>
 
 #include "ardour/profile.h"

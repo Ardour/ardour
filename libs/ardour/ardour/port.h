@@ -25,7 +25,6 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <jack/jack.h>
 #include <boost/utility.hpp>
 #include "pbd/signals.h"
 

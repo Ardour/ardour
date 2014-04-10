@@ -26,7 +26,6 @@
 #include "pbd/statefuldestructible.h"
 #include "pbd/controllable.h"
 
-#include <jack/types.h>
 #include "ardour/chan_count.h"
 #include "ardour/chan_mapping.h"
 #include "ardour/cycles.h"

@@ -32,8 +32,6 @@
 #include "ardour/process_thread.h"
 #include "ardour/audioengine.h"
 
-#include <jack/thread.h>
-
 #include "i18n.h"
 
 using namespace ARDOUR;

@@ -1469,7 +1469,7 @@ Editor::update_punch_range_view ()
 
 		if (_session->config.get_punch_in()) {
 			transport_punch_range_rect->set_x0 (sample_to_pixel (tpl->start()));
-			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? sample_to_pixel (tpl->end()) : sample_to_pixel (JACK_MAX_FRAMES));
+			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? sample_to_pixel (tpl->end()) : sample_to_pixel (max_framepos));
 		} else {
 			transport_punch_range_rect->set_x0 (0);
 			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? sample_to_pixel (tpl->end()) : v.width ());

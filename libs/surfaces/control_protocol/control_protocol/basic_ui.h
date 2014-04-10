@@ -28,8 +28,6 @@
 
 #include "ardour/types.h"
 
-#include <jack/types.h>
-
 #include "timecode/time.h"
 
 #include "control_protocol/visibility.h"

@@ -21,10 +21,6 @@
 #include "libardour-config.h"
 #endif
 
-#ifndef PLATFORM_WINDOWS
-#include <jack/weakjack.h> // so that we can test for new functions at runtime
-#endif
-
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
@@ -382,7 +378,7 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 
                                 boost::shared_ptr<Port> remote_port = AudioEngine::instance()->get_port_by_name (*c);
                                 if (remote_port) {
-                                        lr = remote_port->private_latency_range ((playback ? JackPlaybackLatency : JackCaptureLatency));
+                                        lr = remote_port->private_latency_range ((playback ? true : false));
                                         DEBUG_TRACE (DEBUG::Latency, string_compose (
                                                              "\t%1 <-LOCAL-> %2 : latter has latency range %3 .. %4\n",
                                                              name(), *c, lr.min, lr.max));
