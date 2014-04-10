@@ -44,7 +44,7 @@ class LIBARDOUR_API MissingSource : public std::exception
 /** A source associated with a file on disk somewhere */
 class LIBARDOUR_API FileSource : virtual public Source {
 public:
-	virtual ~FileSource () {}
+	virtual ~FileSource ();
 
 	virtual const std::string& path() const { return _path; }
 

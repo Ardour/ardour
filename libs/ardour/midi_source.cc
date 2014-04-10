@@ -335,21 +335,19 @@ MidiSource::mark_streaming_write_completed ()
 boost::shared_ptr<MidiSource>
 MidiSource::clone (const string& path, Evoral::MusicalTime begin, Evoral::MusicalTime end)
 {
-	string newname = PBD::basename_nosuffix(_name.val());
 	string newpath;
 
+	/* get a new name for the MIDI file we're going to write to
+	 */
+	
 	if (path.empty()) {
-
-		/* get a new name for the MIDI file we're going to write to
-		 */
-		
-		do {
-			newname = bump_name_once (newname, '-');
-			newpath = Glib::build_filename (_session.session_directory().midi_path(), newname + ".mid");
-			
-		} while (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS));
+		string newname = PBD::basename_nosuffix(_name.val());
+		newname = bump_name_once (newname, '-');
+		newname += ".mid";
+		newpath = _session.new_source_path_from_name (DataType::MIDI, newname);
 	} else {
 		/* caller must check for pre-existing file */
+		assert (!Glib::file_test (path, Glib::FILE_TEST_EXISTS));
 		newpath = path;
 	}
 

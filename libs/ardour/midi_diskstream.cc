@@ -1213,25 +1213,24 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 
 	return 0;
 }
-
-list<boost::shared_ptr<Source> >
-MidiDiskstream::steal_write_sources()
+/**
+ * We want to use the name of the existing write source (the one that will be
+ * used by the next capture) for another purpose. So change the name of the
+ * current source, and return its current name.
+ *
+ * Return an empty string if the change cannot be accomplished.
+ */
+std::string
+MidiDiskstream::steal_write_source_name ()
 {
-	list<boost::shared_ptr<Source> > ret;
+	std::string our_new_name = _session.new_midi_source_name (_write_source->name());
+	std::string our_old_name = _write_source->name();
+	
+	if (_write_source->set_source_name (our_new_name, false)) {
+		return string();
+	}
 
-	/* put some data on the disk, even if its just a header for an empty file */
-	boost::dynamic_pointer_cast<SMFSource> (_write_source)->ensure_disk_file ();
-
-	/* never let it go away */
-	_write_source->mark_nonremovable ();
-
-	ret.push_back (_write_source);
-
-	/* get a new one */
-
-	use_new_write_source (0);
-
-	return ret;
+	return our_old_name;
 }
 
 void
