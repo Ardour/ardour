@@ -1656,10 +1656,10 @@ ARDOUR_UI::session_add_mixed_track (const ChanCount& input, const ChanCount& out
 
 	catch (...) {
 		MessageDialog msg (*editor,
-				   string_compose (_("There are insufficient JACK ports available\n\
+				   string_compose (_("There are insufficient ports available\n\
 to create a new track or bus.\n\
 You should save %1, exit and\n\
-restart JACK with more ports."), PROGRAM_NAME));
+restart with more ports."), PROGRAM_NAME));
 		msg.run ();
 	}
 }
@@ -1717,10 +1717,10 @@ ARDOUR_UI::session_add_audio_route (
 
 	catch (...) {
 		MessageDialog msg (*editor,
-				   string_compose (_("There are insufficient JACK ports available\n\
+				   string_compose (_("There are insufficient ports available\n\
 to create a new track or bus.\n\
 You should save %1, exit and\n\
-restart JACK with more ports."), PROGRAM_NAME));
+restart with more ports."), PROGRAM_NAME));
 		pop_back_splash (msg);
 		msg.run ();
 	}
