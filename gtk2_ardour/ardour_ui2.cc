@@ -357,13 +357,18 @@ ARDOUR_UI::setup_transport ()
 	tbox2->set_spacing (2);
 	tbox->set_spacing (2);
 
-	tbox1->pack_start (midi_panic_button, false, false, 5);
-	tbox1->pack_start (click_button, false, false, 5);
+	if (!Profile->get_trx()) {
+		tbox1->pack_start (midi_panic_button, false, false, 5);
+		tbox1->pack_start (click_button, false, false, 5);
+	}
+
 	tbox1->pack_start (goto_start_button, false, false);
 	tbox1->pack_start (goto_end_button, false, false);
 	tbox1->pack_start (auto_loop_button, false, false);
 
-	tbox2->pack_start (play_selection_button, false, false);
+	if (!Profile->get_trx()) {
+		tbox2->pack_start (play_selection_button, false, false);
+	}
 	tbox2->pack_start (roll_button, false, false);
 	tbox2->pack_start (stop_button, false, false);
 	tbox2->pack_start (rec_button, false, false, 5);
