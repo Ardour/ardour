@@ -127,7 +127,6 @@ SessionDialog::session_name (bool& should_be_new)
 {
 	if (!_provided_session_name.empty() && !new_only) {
 		should_be_new = false;
-        dbg_msg(std::string("return _provided_session_name = \n")+selected_session_full_name);
 		return _provided_session_name;
 	}
 
@@ -135,7 +134,6 @@ SessionDialog::session_name (bool& should_be_new)
 
 	if (!selected_session_full_name.empty()) {
 		should_be_new = false;
-        dbg_msg(std::string("return selected_session_full_name = \n")+selected_session_full_name);
 		return selected_session_full_name;
 	}
 
@@ -165,10 +163,8 @@ SessionDialog::session_folder ()
 	
 	if (!selected_session_full_name.empty()) {
 		if (Glib::file_test (selected_session_full_name, Glib::FILE_TEST_IS_REGULAR)) {
-            dbg_msg(std::string("Glib::path_get_dirname (selected_session_full_name) =\n")+Glib::path_get_dirname (selected_session_full_name));
 			return Glib::path_get_dirname (selected_session_full_name);
 		}
-        dbg_msg(std::string("selected_session_full_name =\t")+selected_session_full_name);
 		return selected_session_full_name;
 	}
 
@@ -327,9 +323,7 @@ SessionDialog::on_recent_session (WavesButton* clicked_button)
 		open_selected_button.set_sensitive (true);
 		float sr;
 		SampleFormat sf;
-        dbg_msg(std::string("selected_session_full_name =\n") + selected_session_full_name);
-		std::string state_file_path (selected_session_full_name + Glib::path_get_basename(selected_session_full_name) + ARDOUR::statefile_suffix);
-        if (Session::get_info_from_path (state_file_path, sr, sf) == 0) {
+        if (Session::get_info_from_path (selected_session_full_name, sr, sf) == 0) {
 			std::string sample_format(sf == FormatFloat ? _("32 bit float") : 
 														  (sf == FormatInt24 ? _("24 bit") :
 																			   (sf == FormatInt16 ? _("16 bit") :
