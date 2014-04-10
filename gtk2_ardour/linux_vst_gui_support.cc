@@ -26,8 +26,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <jack/jack.h>
-#include <jack/thread.h>
 #include <libgen.h>
 
 #include <pthread.h>
