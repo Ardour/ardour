@@ -62,7 +62,7 @@ using namespace Editing;
 
 /* XXX this is a hack. it ought to be the maximum value of an framepos_t */
 
-const double max_canvas_coordinate = (double) JACK_MAX_FRAMES;
+const double max_canvas_coordinate = (double) UINT32_MAX;
 
 void
 Editor::initialize_canvas ()
