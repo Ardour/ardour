@@ -376,7 +376,7 @@ def build(bld):
         obj.includes += [ '../fst' ]
         obj.defines += [ 'WINDOWS_VST_SUPPORT' ]
         if bld.env['build_target'] == 'mingw':
-            obj.source += [ '../fst/vstwin.c', '../fst/fst.c']
+            obj.source += [ '../fst/vstwin.c']
             obj.uselib += ['GDI32']
 
     if bld.is_defined('LXVST_SUPPORT'):

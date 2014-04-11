@@ -2,6 +2,8 @@
 #include <string.h>
 #include <windows.h>
 
+#define fst_error(...) fprintf(stderr, __VA_ARGS__)
+
 #ifdef PLATFORM_WINDOWS
 
 #include <pthread.h>

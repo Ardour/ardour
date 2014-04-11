@@ -9,26 +9,6 @@
 #include "ardour/vst_types.h"
 #include "ardour/vestige/aeffectx.h"
 
-/**
- * Display FST error message.
- *
- * Set via fst_set_error_function(), otherwise a FST-provided
- * default will print @a msg (plus a newline) to stderr.
- *
- * @param msg error message text (no newline at end).
- */
-LIBARDOUR_API void (*fst_error_callback)(const char *msg);
-
-/**
- * Set the @ref fst_error_callback for error message display.
- *
- * The FST library provides two built-in callbacks for this purpose:
- * default_fst_error_callback() and silent_fst_error_callback().
- */
-void fst_set_error_function (void (*func)(const char *));
-
-void  fst_error (const char *fmt, ...);
-
 #ifdef __cplusplus
 extern "C" {
 #endif

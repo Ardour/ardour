@@ -363,7 +363,6 @@ def build(bld):
         # here using winegcc, and link it to the GTK front-end library
         obj = bld (features = 'cxx c cxxprogram wine')
         obj.source = (
-            '../libs/fst/fst.c',
             '../libs/fst/vstwin.c',
             '../vst/winmain.c',
             )
