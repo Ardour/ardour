@@ -89,8 +89,13 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	else {
 		PBD::warning <<
 			string_compose(
-			_("The external video server 'harvid' can not be found. The tool is included with the %1 releases from ardour.org, "
-			  "alternatively you can download it from http://x42.github.com/harvid/ or acquire it from your distribution."), PROGRAM_NAME)
+					_("The external video server 'harvid' can not be found.\n"
+						"The tool is included with the %1 releases from ardour.org, "
+						"alternatively you can download it from http://x42.github.com/harvid/ "
+						"or acquire it from your distribution.\n"
+						"\n"
+						"see also http://manual.ardour.org/video-timeline/setup/"
+					 ), PROGRAM_NAME)
 			<< endmsg;
 	}
 
