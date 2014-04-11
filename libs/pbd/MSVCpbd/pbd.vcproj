@@ -382,10 +382,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\pipex.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\pool.cc"
 				>
 			</File>
@@ -717,10 +713,6 @@
 			</File>
 			<File
 				RelativePath="..\pbd\pbd.h"
-				>
-			</File>
-			<File
-				RelativePath="..\pbd\pipex.h"
 				>
 			</File>
 			<File
