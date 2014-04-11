@@ -28,7 +28,6 @@
 
 #include "pbd/stateful.h"
 
-#include <jack/types.h>
 #include "ardour/ladspa.h"
 #include "ardour/plugin.h"
 
