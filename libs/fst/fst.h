@@ -20,7 +20,7 @@
  *
  * @param msg error message text (no newline at end).
  */
-LIBARDOUR_API void (*fst_error_callback)(const char *msg);
+LIBARDOUR void (*fst_error_callback)(const char *msg);
 
 /**
  * Set the @ref fst_error_callback for error message display.
