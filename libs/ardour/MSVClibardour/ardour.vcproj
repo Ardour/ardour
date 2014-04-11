@@ -552,10 +552,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\fst\fst.c"
-				>
-			</File>
-			<File
 				RelativePath="..\globals.cc"
 				>
 			</File>
