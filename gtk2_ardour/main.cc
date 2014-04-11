@@ -139,8 +139,9 @@ sigpipe_handler (int /*signal*/)
 }
 
 #ifdef WINDOWS_VST_SUPPORT
-
+#ifndef PLATFORM_WINDOWS
 extern int windows_vst_gui_init (int* argc, char** argv[]);
+#endif
 
 /* this is called from the entry point of a wine-compiled
    executable that is linked against gtk2_ardour built
@@ -165,10 +166,12 @@ int main (int argc, char *argv[])
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
+#ifndef PLATFORM_WINDOWS
 	/* this does some magic that is needed to make GTK and Wine's own
 	   X11 client interact properly.
 	*/
 	windows_vst_gui_init (&argc, &argv);
+#endif
 #endif
 
 #ifdef ENABLE_NLS

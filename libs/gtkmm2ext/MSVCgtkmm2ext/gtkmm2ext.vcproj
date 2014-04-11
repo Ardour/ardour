@@ -366,6 +366,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\paths_dialog.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\persistent_tooltip.cc"
 				>
 			</File>

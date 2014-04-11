@@ -552,6 +552,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\fst\fst.c"
+				>
+			</File>
+			<File
 				RelativePath="..\globals.cc"
 				>
 			</File>
@@ -1128,6 +1132,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\session_vst.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\slave.cc"
 				>
 			</File>
@@ -1228,7 +1236,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\vst_info_file.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\vst_plugin.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\..\fst\vstwin.c"
+				>
+			</File>
+			<File
 				RelativePath="..\vumeterdsp.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\windows_vst_plugin.cc"
 				>
 			</File>
 			<File

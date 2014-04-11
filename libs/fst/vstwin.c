@@ -8,12 +8,11 @@
 
 #include <pthread.h>
 static UINT_PTR idle_timer_id   = 0;
-extern char *basename(char *path);
+//extern char* basename(char *path);  //
 
 #else /* linux + wine */
 
 #include <linux/limits.h> // PATH_MAX
-#include <libgen.h> // basename
 #include <winnt.h>
 #include <wine/exception.h>
 #include <pthread.h>
@@ -24,6 +23,7 @@ static unsigned int idle_id = 0;
 
 extern char * strdup (const char *);
 #include <glib.h>
+#include <glibmm/miscutils.h>  //basename
 #include "fst.h"
 
 struct ERect {
@@ -321,20 +321,20 @@ fst_init (void* possible_hmodule)
 	return 0;
 }
 
+#ifndef PLATFORM_WINDOWS /* linux + wine */
 void
 fst_start_threading(void)
 {
-#ifndef PLATFORM_WINDOWS /* linux + wine */
 	if (idle_id == 0) {
 		gui_quit = 0;
 		idle_id = g_idle_add (g_idle_call, NULL);
 	}
-#endif
 }
+#endif
 
+#ifndef PLATFORM_WINDOWS /* linux + wine */
 void
 fst_stop_threading(void) {
-#ifndef PLATFORM_WINDOWS /* linux + wine */
 	if (idle_id != 0) {
 		gui_quit = 1;
 		PostQuitMessage (0);
@@ -342,8 +342,8 @@ fst_stop_threading(void) {
 		//g_source_remove(idle_id);
 		idle_id = 0;
 	}
-#endif
 }
+#endif
 
 void
 fst_exit (void)
@@ -493,7 +493,7 @@ fst_load (const char *path)
 		char* period;
 		fhandle->nameptr = strdup (path);
 		fhandle->path = strdup (path);
-		fhandle->name = basename(fhandle->nameptr);
+		fhandle->name = strdup (Glib::path_get_basename(fhandle->nameptr).c_str());
 		if ((period = strrchr (fhandle->name, '.'))) {
 			*period = '\0';
 		}
@@ -504,10 +504,10 @@ fst_load (const char *path)
 			return NULL;
 		}
 
-		fhandle->main_entry = (main_entry_t) GetProcAddress (fhandle->dll, "main");
+		fhandle->main_entry = (main_entry_t) GetProcAddress ((HMODULE)fhandle->dll, "main");
 
 		if (fhandle->main_entry == 0) {
-			if ((fhandle->main_entry = (main_entry_t) GetProcAddress (fhandle->dll, "VSTPluginMain"))) {
+			if ((fhandle->main_entry = (main_entry_t) GetProcAddress ((HMODULE)fhandle->dll, "VSTPluginMain"))) {
 				fprintf(stderr, "VST >= 2.4 plugin '%s'\n", path);
 				//PBD::warning << path << _(": is a VST >= 2.4 - this plugin may or may not function correctly with this version of Ardour.") << endmsg;
 			}
