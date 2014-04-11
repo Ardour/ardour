@@ -174,7 +174,7 @@ PBD::search_path_expand (string path)
 	vector<string> s;
 	vector<string> n;
 
-	split (path, s, ':');
+	split (path, s, G_SEARCHPATH_SEPARATOR);
 
 	for (vector<string>::iterator i = s.begin(); i != s.end(); ++i) {
 		string exp = path_expand (*i);
@@ -187,7 +187,7 @@ PBD::search_path_expand (string path)
 
 	for (vector<string>::iterator i = n.begin(); i != n.end(); ++i) {
 		if (!r.empty()) {
-			r += ':';
+			r += G_SEARCHPATH_SEPARATOR;
 		}
 		r += *i;
 	}

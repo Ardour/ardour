@@ -916,7 +916,7 @@ Session::state (bool full_state)
 				p += (*i).path;
 
 				if (next != session_dirs.end()) {
-					p += ':';
+					p += G_DIR_SEPARATOR;
 				} else {
 					break;
 				}
@@ -2680,7 +2680,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		audio_path += sdir.sound_path();
 
 		if (nexti != session_dirs.end()) {
-			audio_path += ':';
+			audio_path += G_DIR_SEPARATOR;
 		}
 
 		i = nexti;
@@ -2698,7 +2698,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		midi_path += sdir.midi_path();
 
 		if (nexti != session_dirs.end()) {
-			midi_path += ':';
+			midi_path += G_DIR_SEPARATOR;
 		}
 
 		i = nexti;
