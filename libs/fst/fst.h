@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <pthread.h>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/vst_types.h"
 #include "ardour/vestige/aeffectx.h"
 
@@ -16,7 +17,7 @@
  *
  * @param msg error message text (no newline at end).
  */
-extern void (*fst_error_callback)(const char *msg);
+LIBARDOUR_API void (*fst_error_callback)(const char *msg);
 
 /**
  * Set the @ref fst_error_callback for error message display.
@@ -32,23 +33,23 @@ void  fst_error (const char *fmt, ...);
 extern "C" {
 #endif
 
-extern int        fst_init (void* possible_hmodule);
-extern void       fst_exit (void);
+LIBARDOUR_API int        fst_init (void* possible_hmodule);
+LIBARDOUR_API void       fst_exit (void);
 
-extern VSTHandle* fst_load (const char*);
-extern int        fst_unload (VSTHandle**);
+LIBARDOUR_API VSTHandle* fst_load (const char*);
+LIBARDOUR_API int        fst_unload (VSTHandle**);
 
-extern VSTState * fst_instantiate (VSTHandle *, audioMasterCallback amc, void* userptr);
-extern void       fst_close (VSTState *);
+LIBARDOUR_API VSTState * fst_instantiate (VSTHandle *, audioMasterCallback amc, void* userptr);
+LIBARDOUR_API void       fst_close (VSTState *);
 
-extern int  fst_run_editor (VSTState *, void* window_parent);
-extern void fst_destroy_editor (VSTState *);
-extern void fst_move_window_into_view (VSTState *);
+LIBARDOUR_API int  fst_run_editor (VSTState *, void* window_parent);
+LIBARDOUR_API void fst_destroy_editor (VSTState *);
+LIBARDOUR_API void fst_move_window_into_view (VSTState *);
 
-extern void fst_event_loop_remove_plugin (VSTState* fst);
-extern void fst_start_threading(void);
-extern void fst_stop_threading(void);
-extern void fst_audio_master_idle(void);
+LIBARDOUR_API void fst_event_loop_remove_plugin (VSTState* fst);
+LIBARDOUR_API void fst_start_threading(void);
+LIBARDOUR_API void fst_stop_threading(void);
+LIBARDOUR_API void fst_audio_master_idle(void);
 
 #ifdef __cplusplus
 }
