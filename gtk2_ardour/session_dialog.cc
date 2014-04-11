@@ -75,9 +75,8 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	, session_details_label(get_label("session_details_label"))
 	, new_only (require_new)
 	, _provided_session_name (session_name)
-	, _provided_session_path (session_path)
+	, _provided_session_path 	(session_path)
 	, _existing_session_chooser_used (false)
-	, selected_recent_session(-1)
 {
 	recent_session_button[0] = &get_waves_button ("recent_session_button_0");
 	recent_session_button[1] = &get_waves_button ("recent_session_button_1");
@@ -134,63 +133,23 @@ SessionDialog::session_name (bool& should_be_new)
 	/* Try recent session selection */
 
 	if (!selected_session_full_name.empty()) {
-		return selected_session_full_name;
+        should_be_new = (_selection_type == NewSession);
+		return should_be_new ? Glib::path_get_basename(selected_session_full_name) :
+                               selected_session_full_name;
 	}
-
 	
-	/*if (_existing_session_chooser_used) {
-		// existing session chosen from file chooser
-		should_be_new = false;
-		return existing_session_chooser.get_filename ();
-	} else {
-		should_be_new = true;
-		string val = new_name_entry.get_text ();
-		strip_whitespace_edges (val);
-		return val;
-	}*/
-    
-    
-    if (!new_session_full_name.empty() ) {
-        should_be_new = true;
-        return Glib::path_get_basename(new_session_full_name);
-    }
-
 	return "";
 }
 
 std::string
 SessionDialog::session_folder ()
 {
-	if (!_provided_session_path.empty() && !new_only) {
-		return _provided_session_path;
-	}
-
-	/* Try recent session selection */
-	
 	if (!selected_session_full_name.empty() ) {
 		if (Glib::file_test (selected_session_full_name, Glib::FILE_TEST_IS_REGULAR)) {
 			return Glib::path_get_dirname (selected_session_full_name);
 		}
 		return selected_session_full_name;
-	}
-
-	/*
-	if (_existing_session_chooser_used) {
-		// existing session chosen from file chooser
-		return Glib::path_get_dirname (existing_session_chooser.get_current_folder ());
-	} else {
-		std::string legal_session_folder_name = legalize_for_path (new_name_entry.get_text());
-		return Glib::build_filename (new_folder_chooser.get_current_folder(), legal_session_folder_name);
-	}
-	*/
-    
-    if (!new_session_full_name.empty() ) {
-        if (Glib::file_test (new_session_full_name, Glib::FILE_TEST_IS_REGULAR)) {
-            return Glib::path_get_dirname (new_session_full_name);
-        }
-        return new_session_full_name;
-    }
-    
+	}    
     return "";
 }
 
@@ -208,8 +167,12 @@ SessionDialog::on_new_session (WavesButton*)
 	dialog.add_button("OK", Gtk::RESPONSE_OK);
 	
     if (dialog.run() == Gtk::RESPONSE_OK) {
-		new_session_full_name = dialog.get_filename();
+		selected_session_full_name = dialog.get_filename();
+		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
+            recent_session_button[i]->set_active(false);
+		}
 		hide();
+        _selection_type = NewSession;
 		response (Gtk::RESPONSE_ACCEPT);
 	}
 }
@@ -317,6 +280,10 @@ SessionDialog::on_open_saved_session (WavesButton*)
 	dialog.add_button("OK", Gtk::RESPONSE_OK);
 	if (dialog.run() == Gtk::RESPONSE_OK) {
 		selected_session_full_name = dialog.get_filename();
+		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
+            recent_session_button[i]->set_active(false);
+		}
+        _selection_type = SavedSession;
 		hide();
 		response (Gtk::RESPONSE_ACCEPT);
 	}
@@ -326,25 +293,23 @@ void
 SessionDialog::on_recent_session (WavesButton* clicked_button)
 {
 	if (clicked_button->get_active()) {
-		clicked_button->set_active(false);
-		selected_recent_session = -1;
-		selected_session_full_name = "";
-	}
+        return;
+    }
 	else {
-		if (selected_recent_session >= 0) {
-			recent_session_button[selected_recent_session]->set_active(false);
-			selected_session_full_name = "";
-		}
-		clicked_button->set_active(true);
+        selected_session_full_name = "";
+        _selection_type = Nothing;
 		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
 			if (recent_session_button[i] == clicked_button) {
-				selected_recent_session = i;
-				selected_session_full_name = recent_session_full_name[selected_recent_session];
-			}
+				selected_session_full_name = recent_session_full_name[i];
+                recent_session_button[i]->set_active(true);
+			} else {
+                recent_session_button[i]->set_active(false);
+                _selection_type = RecentSession;
+            }
 		}
     }
 
-	if (selected_recent_session >= 0) {
+	if (_selection_type == RecentSession) {
 		open_selected_button.set_sensitive (true);
 		float sr;
 		SampleFormat sf;

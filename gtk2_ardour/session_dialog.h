@@ -91,11 +91,15 @@ class SessionDialog : public WavesDialog {
     void on_new_session (WavesButton*);
     void on_recent_session (WavesButton*);
 
-	int selected_recent_session;
+    enum SessionSelectionType {
+        Nothing,
+        RecentSession,
+        SavedSession,
+        NewSession
+    } _selection_type;
+    
 	std::string recent_session_full_name[MAX_RECENT_SESSION_COUNTS];
 	std::string selected_session_full_name;
-
-    std::string new_session_full_name;
     
   private:
 	bool new_only;
