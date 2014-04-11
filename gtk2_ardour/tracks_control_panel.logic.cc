@@ -480,7 +480,12 @@ TracksControlPanel::set_desired_sample_rate (uint32_t sr)
  {
 	_desired_sample_rate = sr;
 	std::string active_sr = rate_as_string(_desired_sample_rate);
+	std::string prev_selected = sample_rate_combo.get_active_text();
 	sample_rate_combo.set_active_text(active_sr);
+	active_sr = sample_rate_combo.get_active_text();
+	if (active_sr.empty()) {
+		sample_rate_combo.set_active_text(prev_selected);
+	}
  }
 
 XMLNode&
