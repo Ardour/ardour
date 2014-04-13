@@ -49,8 +49,6 @@ public:
 		return safe_midi_file_extension(path);
 	}
 
-	bool set_name (const std::string& newname) { return (set_source_name(newname, false) == 0); }
-
 	void append_event_unlocked_beats (const Evoral::Event<Evoral::MusicalTime>& ev);
 	void append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, framepos_t source_start);
 
