@@ -3469,6 +3469,13 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 				existing++;
 				break;
 			}
+
+			string possible_path = Glib::build_filename (spath, buf);
+
+			if (source_by_path (possible_path)) {
+				existing++;
+				break;
+			}
 		}
 
 		if (existing == 0) {
