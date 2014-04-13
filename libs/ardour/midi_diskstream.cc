@@ -1229,12 +1229,18 @@ MidiDiskstream::steal_write_source_name ()
 	/* this will bump the name of the current write source to the next one
 	 * (e.g. "MIDI 1-1" gets renamed to "MIDI 1-2"), thus leaving the
 	 * current write source name (e.g. "MIDI 1-1" available). See the
-	 * comments in Session::create_midi_source_for_track() about why we do
-	 * this.
+	 * comments in Session::create_midi_source_by_stealing_name() about why
+	 * we do this.
 	 */
 
-	if (_write_source->set_source_name (name(), false)) {
-		return string();
+	try {
+		string new_name = _session.new_midi_source_name (name());
+		
+		if (_write_source->rename (new_name)) {
+			return string();
+		}
+	} catch (...) {
+		return string ();
 	}
 	
 	return our_old_name;

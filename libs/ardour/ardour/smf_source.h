@@ -45,6 +45,15 @@ public:
 
 	virtual ~SMFSource ();
 
+	/** Rename the file on disk referenced by this source to \param newname
+	 *
+	 * This method exists only for MIDI file sources, not for audio, which 
+	 * can never be renamed. It exists for MIDI so that we can get
+	 * consistent and sane region/source numbering when regions are added
+	 * manually (which never happens with audio).
+	 */
+	int rename (const std::string& name);
+
         bool safe_file_extension (const std::string& path) const {
 		return safe_midi_file_extension(path);
 	}
