@@ -515,38 +515,6 @@ out:
 	return ret;
 }
 
-int
-FileSource::set_source_name (const string& newname, bool destructive)
-{
-	Glib::Threads::Mutex::Lock lm (_lock);
-	string oldpath = _path;
-	string newpath = _session.generate_new_source_path_from_name (oldpath, _name, newname, destructive);
-
-	if (newpath.empty()) {
-		error << string_compose (_("programming error: %1"), "cannot generate a changed file path") << endmsg;
-		return -1;
-	}
-
-	// Test whether newpath exists, if yes notify the user but continue.
-	if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
-		error << string_compose (_("Programming error! %1 tried to rename a file over another file! It's safe to continue working, but please report this to the developers."), PROGRAM_NAME) << endmsg;
-		return -1;
-	}
-
-	if (Glib::file_test (oldpath.c_str(), Glib::FILE_TEST_EXISTS)) { 
-		/* rename only needed if file exists on disk */
-		if (::rename (oldpath.c_str(), newpath.c_str()) != 0) {
-			error << string_compose (_("cannot rename file %1 to %2 (%3)"), oldpath, newpath, strerror(errno)) << endmsg;
-			return -1;
-		}
-	}
-
-	_name = Glib::path_get_basename (newpath);
-	_path = newpath;
-
-	return 0;
-}
-
 void
 FileSource::mark_immutable ()
 {
