@@ -106,8 +106,8 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
 		recent_session_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_recent_session ));
 	}
-	redisplay_recent_sessions();
 	show_all ();
+	redisplay_recent_sessions();
 }
 
 SessionDialog::~SessionDialog()
@@ -244,6 +244,7 @@ SessionDialog::redisplay_recent_sessions ()
 		recent_session_full_name[session_snapshot_count] = Glib::build_filename (dirname, state_file_names.front() + statefile_suffix);
 		recent_session_button[session_snapshot_count]->set_text(Glib::path_get_basename (dirname));
 		recent_session_button[session_snapshot_count]->set_sensitive(true);
+		ARDOUR_UI::instance()->set_tip(*recent_session_button[session_snapshot_count], recent_session_full_name[session_snapshot_count]);
 		++session_snapshot_count;
 	}
 
