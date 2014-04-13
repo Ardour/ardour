@@ -48,9 +48,21 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	MidiSource (Session& session, const XMLNode&);
 	virtual ~MidiSource ();
 
-	boost::shared_ptr<MidiSource> clone (const std::string& path,
-					     Evoral::MusicalTime begin = Evoral::MinMusicalTime,
-	                                     Evoral::MusicalTime end = Evoral::MaxMusicalTime);
+	/** Write the data in the given time range to another MidiSource
+	 * \param newsrc MidiSource to which data will be written. Should be a
+	 *        new, empty source. If it already has contents, the results are
+	 *        undefined. Source must be writable.
+	 *
+	 * \param begin time of earliest event that can be written.
+	 * \param end time of latest event that can be written.
+	 *
+	 * Returns zero on success, non-zero if the write failed for any
+	 * reason.
+	 *
+	 */
+	int write_to (boost::shared_ptr<MidiSource> newsrc,
+		      Evoral::MusicalTime begin = Evoral::MinMusicalTime,
+		      Evoral::MusicalTime end = Evoral::MaxMusicalTime);
 
 	/** Read the data in a given time range from the MIDI source.
 	 * All time stamps in parameters are in audio frames (even if the source has tempo time).

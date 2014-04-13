@@ -1199,7 +1199,7 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 
 	try {
 		_write_source = boost::dynamic_pointer_cast<SMFSource>(
-			_session.create_midi_source_for_session (0, name ()));
+			_session.create_midi_source_for_session (name ()));
 
 		if (!_write_source) {
 			throw failed_constructor();
@@ -1224,13 +1224,19 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 std::string
 MidiDiskstream::steal_write_source_name ()
 {
-	std::string our_new_name = _session.new_midi_source_name (_write_source->name());
-	std::string our_old_name = _write_source->name();
-	
-	if (_write_source->set_source_name (our_new_name, false)) {
+	string our_old_name = _write_source->name();
+
+	/* this will bump the name of the current write source to the next one
+	 * (e.g. "MIDI 1-1" gets renamed to "MIDI 1-2"), thus leaving the
+	 * current write source name (e.g. "MIDI 1-1" available). See the
+	 * comments in Session::create_midi_source_for_track() about why we do
+	 * this.
+	 */
+
+	if (_write_source->set_source_name (name(), false)) {
 		return string();
 	}
-
+	
 	return our_old_name;
 }
 

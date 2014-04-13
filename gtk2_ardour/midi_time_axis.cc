@@ -1524,8 +1524,7 @@ MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit)
 
 	real_editor->snap_to (pos, 0);
 
-	boost::shared_ptr<Source> src = _session->create_midi_source_for_session (
-		view()->trackview().track().get(), view()->trackview().track()->name());
+	boost::shared_ptr<Source> src = _session->create_midi_source_by_stealing_name (view()->trackview().track());
 	PropertyList plist;
 
 	plist.add (ARDOUR::Properties::start, 0);

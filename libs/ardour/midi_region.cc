@@ -25,6 +25,8 @@
 #include <set>
 
 #include <glibmm/threads.h>
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
 
 #include "pbd/xml++.h"
 #include "pbd/basename.h"
@@ -36,6 +38,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
+#include "ardour/source_factory.h"
 #include "ardour/tempo.h"
 #include "ardour/types.h"
 
@@ -127,15 +130,30 @@ MidiRegion::~MidiRegion ()
 boost::shared_ptr<MidiRegion>
 MidiRegion::clone (string path) const
 {
+	boost::shared_ptr<MidiSource> newsrc;
+
+	/* caller must check for pre-existing file */
+	assert (!Glib::file_test (path, Glib::FILE_TEST_EXISTS));
+	newsrc = boost::dynamic_pointer_cast<MidiSource>(
+		SourceFactory::createWritable(DataType::MIDI, _session,
+					      path, false, _session.frame_rate()));
+	return clone (newsrc);
+}
+
+boost::shared_ptr<MidiRegion>
+MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
+{
 	BeatsFramesConverter bfc (_session.tempo_map(), _position);
 	Evoral::MusicalTime const bbegin = bfc.from (_start);
 	Evoral::MusicalTime const bend = bfc.from (_start + _length);
 
-	boost::shared_ptr<MidiSource> ms = midi_source(0)->clone (path, bbegin, bend);
+	if (midi_source(0)->write_to (newsrc, bbegin, bend)) {
+		return boost::shared_ptr<MidiRegion> ();
+	}
 
 	PropertyList plist;
 
-	plist.add (Properties::name, PBD::basename_nosuffix (ms->name()));
+	plist.add (Properties::name, PBD::basename_nosuffix (newsrc->name()));
 	plist.add (Properties::whole_file, true);
 	plist.add (Properties::start, _start);
 	plist.add (Properties::start_beats, _start_beats);
@@ -143,7 +161,7 @@ MidiRegion::clone (string path) const
 	plist.add (Properties::length_beats, _length_beats);
 	plist.add (Properties::layer, 0);
 
-	return boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (ms, plist, true));
+	return boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (newsrc, plist, true));
 }
 
 void

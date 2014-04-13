@@ -3304,12 +3304,16 @@ Session::source_by_id (const PBD::ID& id)
 	return source;
 }
 
-boost::shared_ptr<Source>
-Session::source_by_path_and_channel (const string& path, uint16_t chn)
+boost::shared_ptr<AudioFileSource>
+Session::source_by_path_and_channel (const string& path, uint16_t chn) const
 {
+	/* Restricted to audio files because only audio sources have channel
+	   as a property.
+	*/
+
 	Glib::Threads::Mutex::Lock lm (source_lock);
 
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 		boost::shared_ptr<AudioFileSource> afs
 			= boost::dynamic_pointer_cast<AudioFileSource>(i->second);
 
@@ -3317,7 +3321,31 @@ Session::source_by_path_and_channel (const string& path, uint16_t chn)
 			return afs;
 		}
 	}
-	return boost::shared_ptr<Source>();
+
+	return boost::shared_ptr<AudioFileSource>();
+}
+
+boost::shared_ptr<MidiSource>
+Session::source_by_path (const std::string& path) const
+{
+	/* Restricted to MIDI files because audio sources require a channel
+	   for unique identification, in addition to a path.
+	*/
+
+	Glib::Threads::Mutex::Lock lm (source_lock);
+
+	for (SourceMap::const_iterator s = sources.begin(); s != sources.end(); ++s) {
+		boost::shared_ptr<MidiSource> ms
+			= boost::dynamic_pointer_cast<MidiSource>(s->second);
+		boost::shared_ptr<FileSource> fs
+			= boost::dynamic_pointer_cast<FileSource>(s->second);
+		
+		if (ms && fs && fs->path() == path) {
+			return ms;
+		}
+	}
+
+	return boost::shared_ptr<MidiSource>();
 }
 
 uint32_t
@@ -3338,9 +3366,8 @@ Session::count_sources_by_origin (const string& path)
 	return cnt;
 }
 
-
 string
-Session::change_source_path_by_name (string path, string oldname, string newname, bool destructive)
+Session::generate_new_source_path_from_name (string path, string oldname, string newname, bool destructive)
 {
 	string look_for;
 	string old_basename = PBD::basename_nosuffix (oldname);
@@ -3427,7 +3454,9 @@ Session::change_source_path_by_name (string path, string oldname, string newname
 
 			if (!matching_unsuffixed_filename_exists_in (dir, buf)) {
 				path = Glib::build_filename (dir, buf);
-				break;
+				if (!source_by_path (path)) {
+					break;
+				}
 			}
 
 			path = "";
@@ -3575,17 +3604,18 @@ Session::create_audio_source_for_session (size_t n_chans, string const & n, uint
 		SourceFactory::createWritable (DataType::AUDIO, *this, path, destructive, frame_rate()));
 }
 
-/** Return a unique name based on \a base for a new internal MIDI source */
+/** Return a unique name based on \a owner_name for a new internal MIDI source */
 string
-Session::new_midi_source_name (const string& base)
+Session::new_midi_source_name (const string& owner_name)
 {
 	uint32_t cnt;
 	char buf[PATH_MAX+1];
 	const uint32_t limit = 10000;
 	string legalized;
+	string possible_name;
 
 	buf[0] = '\0';
-	legalized = legalize_for_path (base);
+	legalized = legalize_for_path (owner_name);
 
 	// Find a "version" of the file name that doesn't exist in any of the possible directories.
 
@@ -3597,12 +3627,17 @@ Session::new_midi_source_name (const string& base)
 		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 
 			SessionDirectory sdir((*i).path);
+			
+			snprintf (buf, sizeof(buf), "%s-%u.mid", legalized.c_str(), cnt);
+			possible_name = buf;
 
-			std::string p = Glib::build_filename (sdir.midi_path(), legalized);
+			std::string possible_path = Glib::build_filename (sdir.midi_path(), possible_name);
+			
+			if (Glib::file_test (possible_path, Glib::FILE_TEST_EXISTS)) {
+				existing++;
+			}
 
-			snprintf (buf, sizeof(buf), "%s-%u.mid", p.c_str(), cnt);
-
-			if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
+			if (source_by_path (possible_path)) {
 				existing++;
 			}
 		}
@@ -3614,49 +3649,62 @@ Session::new_midi_source_name (const string& base)
 		if (cnt > limit) {
 			error << string_compose(
 					_("There are already %1 recordings for %2, which I consider too many."),
-					limit, base) << endmsg;
+					limit, owner_name) << endmsg;
 			destroy ();
 			throw failed_constructor();
 		}
 	}
 
-	return Glib::path_get_basename(buf);
+	return possible_name;
 }
 
 
 /** Create a new within-session MIDI source */
 boost::shared_ptr<MidiSource>
-Session::create_midi_source_for_session (Track* track, string const & n)
+Session::create_midi_source_for_session (string const & basic_name)
 {
 	std::string name;
 
-	if (track) {
-		/* the caller passes in the track the source will be used in,
-		   so that we can keep the numbering sane. 
-		   
-		   Rationale: a track with the name "Foo" that has had N
-		   captures carried out so far will already have a write source
-		   named "Foo-N+1.mid" waiting to be used for the next capture.
-
-		   If we call new_midi_source_name() we will get "Foo-N+2". But
-		   there is no region corresponding to "Foo-N+1", so when
-		   "Foo-N+2" appears in the track, the gap presents the user
-		   with odd behaviour - why did it skip past Foo-N+1?
-
-		   We could explain this to the user in some odd way, but
-		   instead we rename "Foo-N+1.mid" as "Foo-N+2.mid", and then
-		   use "Foo-N+1" here.
-
-		   If that attempted rename fails, we get "Foo-N+2.mid" anyway.
-		*/
-
-		MidiTrack* mt = dynamic_cast<MidiTrack*> (track);
-		assert (mt);
-		name = track->steal_write_source_name ();
+	if (name.empty()) {
+		name = new_midi_source_name (basic_name);
 	}
 
+	const string path = new_source_path_from_name (DataType::MIDI, name);
+
+	return boost::dynamic_pointer_cast<SMFSource> (
+		SourceFactory::createWritable (
+			DataType::MIDI, *this, path, false, frame_rate()));
+}
+
+/** Create a new within-session MIDI source */
+boost::shared_ptr<MidiSource>
+Session::create_midi_source_by_stealing_name (boost::shared_ptr<Track> track)
+{
+	/* the caller passes in the track the source will be used in,
+	   so that we can keep the numbering sane. 
+	   
+	   Rationale: a track with the name "Foo" that has had N
+	   captures carried out so far will ALREADY have a write source
+	   named "Foo-N+1.mid" waiting to be used for the next capture.
+	   
+	   If we call new_midi_source_name() we will get "Foo-N+2". But
+	   there is no region corresponding to "Foo-N+1", so when
+	   "Foo-N+2" appears in the track, the gap presents the user
+	   with odd behaviour - why did it skip past Foo-N+1?
+	   
+	   We could explain this to the user in some odd way, but
+	   instead we rename "Foo-N+1.mid" as "Foo-N+2.mid", and then
+	   use "Foo-N+1" here.
+	   
+	   If that attempted rename fails, we get "Foo-N+2.mid" anyway.
+	*/
+	
+	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (track);
+	assert (mt);
+	std::string name = track->steal_write_source_name ();
+
 	if (name.empty()) {
-		name = new_midi_source_name (n);
+		return boost::shared_ptr<MidiSource>();
 	}
 
 	const string path = new_source_path_from_name (DataType::MIDI, name);
