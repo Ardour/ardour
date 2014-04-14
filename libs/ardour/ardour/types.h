@@ -441,11 +441,6 @@ namespace ARDOUR {
 		AutoConnectMaster = 0x2
 	};
 
-    enum OutputConfigOption {
-        MutiOut = 0x0,
-        StereoOut = 0x1
-    };
-        
 	enum SampleFormat {
 		FormatFloat = 0,
 		FormatInt24,
