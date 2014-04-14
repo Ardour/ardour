@@ -138,9 +138,15 @@ sigpipe_handler (int /*signal*/)
 	}
 }
 
-#if (defined(LXVST_SUPPORT) || (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD)))
+#if (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
+/*
+ *  Release build with MSVC uses ardour_main()
+ */
+int ardour_main (int argc, char *argv[])
 
-#ifdef LXVST_SUPPORT
+#elif (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
+
+// prototype for function in windows_vst_plugin_ui.cc
 extern int windows_vst_gui_init (int* argc, char** argv[]);
 
 /* this is called from the entry point of a wine-compiled
@@ -148,7 +154,7 @@ extern int windows_vst_gui_init (int* argc, char** argv[]);
    as a shared library.
 */
 extern "C" {
-#endif
+
 int ardour_main (int argc, char *argv[])
 
 #else
@@ -167,10 +173,10 @@ int main (int argc, char *argv[])
 	gtk_set_locale ();
 #endif
 
-#ifdef LXVST_SUPPORT
-	/* this does some magic that is needed to make GTK and Wine's own
-	   X11 client interact properly.
-	*/
+#ifdef WINDOWS_VST_SUPPORT
+	/* this does some magic that is needed to make GTK and X11 client interact properly.
+	 * the platform dependent code is in windows_vst_plugin_ui.cc
+	 */
 	windows_vst_gui_init (&argc, &argv);
 #endif
 
@@ -263,6 +269,6 @@ int main (int argc, char *argv[])
 
 	return 0;
 }
-#ifdef LXVST_SUPPORT
+#if (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
 } // end of extern "C" block
 #endif
