@@ -210,8 +210,6 @@ vstfx_load (const char *path)
 		buf = (char *)malloc(strlen(path) + 4); //The .so and a terminating zero
 
 		sprintf (buf, "%s.so", path);
-		
-		fhandle->nameptr = strdup (path);
 
 	}
 	else
@@ -219,8 +217,6 @@ vstfx_load (const char *path)
 		/*We already have .so appened to the filename*/
 		
 		buf = strdup(path);
-		
-		fhandle->nameptr = strdup (path);
 	}
 
 	/* get a name for the plugin based on the path: ye old VST problem where
@@ -228,7 +224,7 @@ vstfx_load (const char *path)
 	   which we don't want to do at this point
 	*/
 	
-	fhandle->name = strdup (PBD::basename_nosuffix (fhandle->nameptr).c_str());
+	fhandle->name = strdup (PBD::basename_nosuffix (path).c_str());
 
 	/*call load_vstfx_library to actually load the .so into memory*/
 
@@ -290,9 +286,8 @@ vstfx_unload (VSTHandle* fhandle)
 		fhandle->dll = 0;
 	}
 
-	if (fhandle->nameptr)
+	if (fhandle->name)
 	{
-		free (fhandle->nameptr);
 		free (fhandle->name);
 	}
 	

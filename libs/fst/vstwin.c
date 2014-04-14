@@ -8,7 +8,6 @@
 
 #include <pthread.h>
 static UINT_PTR idle_timer_id   = 0;
-//extern char* basename(char *path);  //
 
 #else /* linux + wine */
 
@@ -490,9 +489,8 @@ fst_load (const char *path)
 	if ((strlen(path)) && (NULL != (fhandle = fst_handle_new ())))
 	{
 		char* period;
-		fhandle->nameptr = strdup (path);
 		fhandle->path = strdup (path);
-		fhandle->name = strdup (g_path_get_basename(fhandle->nameptr));
+		fhandle->name = g_path_get_basename(path);
 		if ((period = strrchr (fhandle->name, '.'))) {
 			*period = '\0';
 		}
@@ -541,9 +539,8 @@ fst_unload (VSTHandle** fhandle)
 		(*fhandle)->path = NULL;
 	}
 
-	if ((*fhandle)->nameptr) {
-		free ((*fhandle)->nameptr);
-		(*fhandle)->nameptr = NULL;
+	if ((*fhandle)->name) {
+		free ((*fhandle)->name);
 		(*fhandle)->name = NULL;
 	}
 
