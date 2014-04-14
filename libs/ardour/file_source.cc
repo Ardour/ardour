@@ -62,8 +62,6 @@ FileSource::FileSource (Session& session, DataType type, const string& path, con
         , _open (false)
 {
 	set_within_session_from_path (path);
-
-        prevent_deletion ();
 }
 
 FileSource::FileSource (Session& session, const XMLNode& node, bool /*must_exist*/)
@@ -77,8 +75,6 @@ FileSource::FileSource (Session& session, const XMLNode& node, bool /*must_exist
 
 	_path = _name;
 	_within_session = true;
-
-        prevent_deletion ();
 }
 
 FileSource::~FileSource()
@@ -86,20 +82,21 @@ FileSource::~FileSource()
 }
 
 void
+FileSource::existence_check ()
+{
+        if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS)) {
+		prevent_deletion ();
+	}
+}
+
+void
 FileSource::prevent_deletion ()
 {
-        /* if this file already exists, it cannot be removed, ever
-         */
-
-        if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS)) {
-		cerr << " ... " << _path << " already  exists, marking immutable\n";
-
-                if (!(_flags & Destructive)) {
-                        mark_immutable ();
-                } else {
-                        _flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
-                }
-        }
+	if (!(_flags & Destructive)) {
+		mark_immutable ();
+	} else {
+		_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
+	}
 }
 
 bool

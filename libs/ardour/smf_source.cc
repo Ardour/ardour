@@ -62,9 +62,12 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 {
 	/* note that origin remains empty */
 
-	if (init(_path, false)) {
+	if (init (_path, false)) {
 		throw failed_constructor ();
 	}
+ 
+        assert (!Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
 
 	/* file is not opened until write */
 
@@ -93,9 +96,12 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 		throw failed_constructor ();
 	}
 
-	if (init(_path, true)) {
+	if (init (_path, true)) {
 		throw failed_constructor ();
 	}
+
+        assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
 
 	if (open(_path)) {
 		throw failed_constructor ();

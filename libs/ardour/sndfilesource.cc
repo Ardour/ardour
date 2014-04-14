@@ -30,6 +30,10 @@
 #include <sys/utsname.h>
 #include <sys/stat.h>
 
+#ifdef PLATFORM_WINDOWS
+#include <glibmm/convert.h>
+#endif
+#include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
 #include "ardour/sndfilesource.h"
@@ -56,8 +60,17 @@ const Source::Flag SndFileSource::default_writable_flags = Source::Flag (
 SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	: Source(s, node)
 	, AudioFileSource (s, node)
+	, _descriptor (0)
+	, _broadcast_info (0)
+	, _capture_start (false)
+	, _capture_end (false)
+	, file_pos (0)
+	, xfade_buf (0)
 {
 	init_sndfile ();
+
+        assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
 
 	if (open()) {
 		throw failed_constructor ();
@@ -69,10 +82,19 @@ SndFileSource::SndFileSource (Session& s, const string& path, int chn, Flag flag
 	: Source(s, DataType::AUDIO, path, flags)
           /* note that the origin of an external file is itself */
 	, AudioFileSource (s, path, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
+	, _descriptor (0)
+	, _broadcast_info (0)
+	, _capture_start (false)
+	, _capture_end (false)
+	, file_pos (0)
+	, xfade_buf (0)
 {
 	_channel = chn;
 
 	init_sndfile ();
+
+        assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
 
 	if (open()) {
 		throw failed_constructor ();
@@ -84,10 +106,19 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
                               SampleFormat sfmt, HeaderFormat hf, framecnt_t rate, Flag flags)
 	: Source(s, DataType::AUDIO, path, flags)
 	, AudioFileSource (s, path, origin, flags, sfmt, hf)
+	, _descriptor (0)
+	, _broadcast_info (0)
+	, _capture_start (false)
+	, _capture_end (false)
+	, file_pos (0)
+	, xfade_buf (0)
 {
 	int fmt = 0;
 
         init_sndfile ();
+
+        assert (!Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
 
 	_file_is_new = true;
 
@@ -155,23 +186,11 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 void
 SndFileSource::init_sndfile ()
 {
-	string file;
-
-        _descriptor = 0;
-
-	// lets try to keep the object initalizations here at the top
-	xfade_buf = 0;
-	_broadcast_info = 0;
-
 	/* although libsndfile says we don't need to set this,
 	   valgrind and source code shows us that we do.
 	*/
 
 	memset (&_info, 0, sizeof(_info));
-
-	_capture_start = false;
-	_capture_end = false;
-	file_pos = 0;
 
 	if (destructive()) {
 		xfade_buf = new Sample[xfade_frames];

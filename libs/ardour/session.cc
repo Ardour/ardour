@@ -3470,6 +3470,15 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 				break;
 			}
 
+			/* it is possible that we have the path already
+			 * assigned to a source that has not yet been written
+			 * (ie. the write source for a diskstream). we have to
+			 * check this in order to make sure that our candidate
+			 * path isn't used again, because that can lead to
+			 * two Sources point to the same file with different
+			 * notions of their removability.
+			 */
+
 			string possible_path = Glib::build_filename (spath, buf);
 
 			if (source_by_path (possible_path)) {

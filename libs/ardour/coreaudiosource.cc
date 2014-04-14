@@ -28,6 +28,8 @@
 #include <appleutility/CAAudioFile.h>
 #include <appleutility/CAStreamBasicDescription.h>
 
+#include <glibmm/fileutils.h>
+
 #include "i18n.h"
 
 #include <AudioToolbox/AudioFormat.h>
@@ -36,21 +38,32 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+/** Create a new CoreAudioSource using session state, which implies that the
+ *  file must already exist.
+ */
 CoreAudioSource::CoreAudioSource (Session& s, const XMLNode& node)
 	: Source (s, node)
 	, AudioFileSource (s, node)
 {
 	init_cafile ();
+
+        assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
 }
 
+/** Create a new CoreAudioSource from an existing file. Sources created with this
+ *  method are never writable or removable.
+ */
 CoreAudioSource::CoreAudioSource (Session& s, const string& path, int chn, Flag flags)
-	/* files created this way are never writable or removable */
 	: Source (s, DataType::AUDIO, path, Source::Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy))),
 		AudioFileSource (s, path,
 			Source::Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
 	_channel = chn;
 	init_cafile ();
+
+        assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
 }
 
 void

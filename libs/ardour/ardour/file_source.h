@@ -84,6 +84,7 @@ public:
 
 	virtual void prevent_deletion ();
 
+	void existence_check ();
 	virtual void prevent_deletion ();
 
 protected:
