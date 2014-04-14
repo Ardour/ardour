@@ -1227,7 +1227,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\vst_plugin_ui.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\window_manager.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\windows_vst_plugin_ui.cc"
 				>
 			</File>
 			<File
@@ -2181,7 +2189,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\vst_plugin_ui.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\window_manager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\windows_vst_plugin_ui.h"
 				>
 			</File>
 		</Filter>
