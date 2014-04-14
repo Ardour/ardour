@@ -320,20 +320,20 @@ fst_init (void* possible_hmodule)
 	return 0;
 }
 
-#ifndef PLATFORM_WINDOWS /* linux + wine */
 void
 fst_start_threading(void)
 {
+#ifndef PLATFORM_WINDOWS /* linux + wine */
 	if (idle_id == 0) {
 		gui_quit = 0;
 		idle_id = g_idle_add (g_idle_call, NULL);
 	}
-}
 #endif
+}
 
-#ifndef PLATFORM_WINDOWS /* linux + wine */
 void
 fst_stop_threading(void) {
+#ifndef PLATFORM_WINDOWS /* linux + wine */
 	if (idle_id != 0) {
 		gui_quit = 1;
 		PostQuitMessage (0);
@@ -341,8 +341,8 @@ fst_stop_threading(void) {
 		//g_source_remove(idle_id);
 		idle_id = 0;
 	}
-}
 #endif
+}
 
 void
 fst_exit (void)

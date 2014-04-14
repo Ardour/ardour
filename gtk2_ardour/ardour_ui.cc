@@ -1013,9 +1013,7 @@ If you still wish to quit, please use the\n\n\
 	halt_connection.disconnect ();
 	AudioEngine::instance()->stop ();
 #ifdef WINDOWS_VST_SUPPORT
-#ifndef PLATFORM_WINDOWS
 	fst_stop_threading();
-#endif
 #endif
 	quit ();
 }
@@ -2926,17 +2924,13 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 	}
 
 #ifdef WINDOWS_VST_SUPPORT
-#ifndef PLATFORM_WINDOWS
 	fst_stop_threading();
-#endif
 #endif
 
 	flush_pending ();
 
 #ifdef WINDOWS_VST_SUPPORT
-#ifndef PLATFORM_WINDOWS
 	fst_start_threading();
-#endif
 #endif
 	retval = 0;
 
