@@ -1077,6 +1077,17 @@ RegionMoveDrag::finished_no_copy (
 
 		} else {
 
+			boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
+
+			/* this movement may result in a crossfade being modified, or a layering change,
+			   so we need to get undo data from the playlist as well as the region.
+			*/
+
+			pair<PlaylistSet::iterator, bool> r = modified_playlists.insert (playlist);
+			if (r.second) {
+				playlist->clear_changes ();
+			}
+
 			rv->region()->clear_changes ();
 
 			/*
@@ -1090,28 +1101,16 @@ RegionMoveDrag::finished_no_copy (
 			rv->drag_end ();
 
 			/* just change the model */
-
-			boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
-
 			if (dest_rtv->view()->layer_display() == Stacked || dest_rtv->view()->layer_display() == Expanded) {
 				playlist->set_layer (rv->region(), dest_layer);
 			}
 
 			/* freeze playlist to avoid lots of relayering in the case of a multi-region drag */
 
-			pair<PlaylistSet::iterator, bool> r = frozen_playlists.insert (playlist);
+			r = frozen_playlists.insert (playlist);
 
 			if (r.second) {
 				playlist->freeze ();
-			}
-
-			/* this movement may result in a crossfade being modified, so we need to get undo
-			   data from the playlist as well as the region.
-			*/
-
-			r = modified_playlists.insert (playlist);
-			if (r.second) {
-				playlist->clear_changes ();
 			}
 
 			rv->region()->set_position (where);
