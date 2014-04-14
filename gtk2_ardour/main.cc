@@ -138,7 +138,7 @@ sigpipe_handler (int /*signal*/)
 	}
 }
 
-#if (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
+#if (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
 /*
  *  Release build with MSVC uses ardour_main()
  */
