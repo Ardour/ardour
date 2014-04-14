@@ -88,6 +88,7 @@ TracksControlPanel::init ()
 
 	populate_engine_combo ();
 	show_all ();
+	hide();
 	midi_settings_layout.hide ();
 	session_settings_layout.hide ();
 	audio_settings_tab_button.set_active(true);
