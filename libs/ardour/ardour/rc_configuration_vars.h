@@ -30,6 +30,7 @@
 CONFIG_VARIABLE (bool, auto_connect_standard_busses, "auto-connect-standard-busses", true)
 CONFIG_VARIABLE (AutoConnectOption, output_auto_connect, "output-auto-connect", AutoConnectMaster)
 CONFIG_VARIABLE (AutoConnectOption, input_auto_connect, "input-auto-connect", AutoConnectPhysical)
+CONFIG_VARIABLE (OutputConfigOption, output_config_option, "output-config-option", MutiOut)
 
 /* MIDI and MIDI related */
 
