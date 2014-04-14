@@ -24,6 +24,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include <glib.h>
+#include <glib/gstdio.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/error.h"
@@ -84,4 +86,39 @@ PBD::clear_directory (const string& dir, size_t* size, vector<string>* paths)
         ::closedir (dead);
 
         return ret;
+}
+
+// rm -rf <dir> -- used to remove saved plugin state
+void
+PBD::remove_directory (const std::string& dir) {
+	DIR* dead;
+	struct dirent* dentry;
+	struct stat statbuf;
+
+	if ((dead = ::opendir (dir.c_str())) == 0) {
+		return;
+	}
+
+	while ((dentry = ::readdir (dead)) != 0) {
+		if(!strcmp(dentry->d_name, ".") || !strcmp(dentry->d_name, "..")) {
+			continue;
+		}
+
+		string fullpath = Glib::build_filename (dir, dentry->d_name);
+		if (::stat (fullpath.c_str(), &statbuf)) {
+			continue;
+		}
+
+		if (S_ISDIR (statbuf.st_mode)) {
+			remove_directory(fullpath);
+			continue;
+		}
+
+		if (::g_unlink (fullpath.c_str())) {
+			error << string_compose (_("cannot remove file %1 (%2)"), fullpath, strerror (errno)) << endmsg;
+		}
+	}
+	if (::g_rmdir(dir.c_str())) {
+		error << string_compose (_("cannot remove directory %1 (%2)"), dir, strerror (errno)) << endmsg;
+	}
 }

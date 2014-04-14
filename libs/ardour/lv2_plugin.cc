@@ -31,6 +31,7 @@
 
 #include <boost/utility.hpp>
 
+#include "pbd/clear_dir.h"
 #include "pbd/pathscanner.h"
 #include "pbd/compose.h"
 #include "pbd/error.h"
@@ -880,27 +881,6 @@ LV2Plugin::lv2_state_make_path(LV2_State_Make_Path_Handle handle,
 	return g_strndup(abs_path.c_str(), abs_path.length());
 }
 
-static void
-remove_directory(const std::string& path)
-{
-	if (!Glib::file_test(path, Glib::FILE_TEST_IS_DIR)) {
-		warning << string_compose("\"%1\" is not a directory", path) << endmsg;
-		return;
-	}
-
-	Glib::RefPtr<Gio::File>           dir = Gio::File::create_for_path(path);
-	Glib::RefPtr<Gio::FileEnumerator> e   = dir->enumerate_children();
-	Glib::RefPtr<Gio::FileInfo>       fi;
-	while ((fi = e->next_file())) {
-		if (fi->get_type() == Gio::FILE_TYPE_DIRECTORY) {
-			remove_directory(fi->get_name());
-		} else {
-			dir->get_child(fi->get_name())->remove();
-		}
-	}
-	dir->remove();
-}
-
 void
 LV2Plugin::add_state(XMLNode* root) const
 {
@@ -952,7 +932,7 @@ LV2Plugin::add_state(XMLNode* root) const
 		} else {
 			// State is identical, decrement version and nuke directory
 			lilv_state_free(state);
-			remove_directory(new_dir);
+			PBD::remove_directory(new_dir);
 			--_state_version;
 		}
 
