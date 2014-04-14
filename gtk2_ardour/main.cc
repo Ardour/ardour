@@ -138,24 +138,26 @@ sigpipe_handler (int /*signal*/)
 	}
 }
 
-#ifdef WINDOWS_VST_SUPPORT
-#ifndef PLATFORM_WINDOWS
+#if (defined(LXVST_SUPPORT) || (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD)))
+
+#ifdef LXVST_SUPPORT
 extern int windows_vst_gui_init (int* argc, char** argv[]);
-#endif
 
 /* this is called from the entry point of a wine-compiled
    executable that is linked against gtk2_ardour built
    as a shared library.
 */
 extern "C" {
+#endif
 int ardour_main (int argc, char *argv[])
+
 #else
 int main (int argc, char *argv[])
 #endif
 {
 	fixup_bundle_environment (argc, argv, &localedir);
 
-	load_custom_fonts(); /* needs to happend before any gtk and pango init calls */
+	load_custom_fonts(); /* needs to happen before any gtk and pango init calls */
 
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
@@ -165,17 +167,15 @@ int main (int argc, char *argv[])
 	gtk_set_locale ();
 #endif
 
-#ifdef WINDOWS_VST_SUPPORT
-#ifndef PLATFORM_WINDOWS
+#ifdef LXVST_SUPPORT
 	/* this does some magic that is needed to make GTK and Wine's own
 	   X11 client interact properly.
 	*/
 	windows_vst_gui_init (&argc, &argv);
 #endif
-#endif
 
 #ifdef ENABLE_NLS
-	cerr << "bnd txt domain [" << PACKAGE << "] to " << localedir << endl;
+	cerr << "bind txt domain [" << PACKAGE << "] to " << localedir << endl;
 
 	(void) bindtextdomain (PACKAGE, localedir);
 	/* our i18n translations are all in UTF-8, so make sure
@@ -263,7 +263,6 @@ int main (int argc, char *argv[])
 
 	return 0;
 }
-#ifdef WINDOWS_VST_SUPPORT
-} // end of extern C block
+#ifdef LXVST_SUPPORT
+} // end of extern "C" block
 #endif
-

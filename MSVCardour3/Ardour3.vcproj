@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="Mixbus3"
+	Name="Ardour3"
 	ProjectGUID="{94B9EA5B-1D83-4573-9F02-29A2E33E6D1F}"
-	RootNamespace="Mixbus3"
+	RootNamespace="Ardour3"
 	>
 	<Platforms>
 		<Platform
@@ -150,7 +150,8 @@
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				GenerateManifest="true"
 				IgnoreDefaultLibraryNames="libboost_regex-vc80-mt-1_40.lib;dsound.lib"
-				SubSystem="1"
+				SubSystem="2"
+				OptimizeReferences="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -1229,6 +1230,10 @@
 				RelativePath="..\gtk2_ardour\window_manager.cc"
 				>
 			</File>
+			<File
+				RelativePath="..\gtk2_ardour\msvc\winmain.cc"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -1621,10 +1626,6 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\lv2_plugin_ui.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\lxvst_plugin_ui.h"
 				>
 			</File>
 			<File
@@ -2180,15 +2181,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\vst_plugin_ui.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\window_manager.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\windows_vst_plugin_ui.h"
 				>
 			</File>
 		</Filter>
