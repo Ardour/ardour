@@ -23,7 +23,6 @@ static unsigned int idle_id = 0;
 
 extern char * strdup (const char *);
 #include <glib.h>
-#include <glibmm/miscutils.h>  //basename
 #include "fst.h"
 
 struct ERect {
@@ -493,7 +492,7 @@ fst_load (const char *path)
 		char* period;
 		fhandle->nameptr = strdup (path);
 		fhandle->path = strdup (path);
-		fhandle->name = strdup (Glib::path_get_basename(fhandle->nameptr).c_str());
+		fhandle->name = strdup (g_path_get_basename(fhandle->nameptr));
 		if ((period = strrchr (fhandle->name, '.'))) {
 			*period = '\0';
 		}
