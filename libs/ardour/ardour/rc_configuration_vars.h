@@ -25,9 +25,6 @@
     the value of the variable.
 *****************************************************/
 
-/* DAW type */
-CONFIG_VARIABLE (bool, waves_live_sound_daw, "waves-live-sound-daw", false)
-
 /* IO connection */
 
 CONFIG_VARIABLE (bool, auto_connect_standard_busses, "auto-connect-standard-busses", true)

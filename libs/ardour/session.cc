@@ -75,6 +75,7 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/process_thread.h"
+#include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/region.h"
@@ -230,6 +231,7 @@ Session::Session (AudioEngine &eng,
 	, _all_route_group (new RouteGroup (*this, "all"))
 	, routes (new RouteList)
 	, _adding_routes_in_progress (false)
+    , _reconnecting_routes_in_progress (false)
 	, destructive_index (0)
 	, solo_update_disabled (false)
 	, default_fade_steepness (0)
@@ -266,10 +268,6 @@ Session::Session (AudioEngine &eng,
 
 	pre_engine_init (fullpath);
 	
-    // Waves Live Session
-    Config->set_waves_live_sound_daw(true);
-    Config->set_use_monitor_bus(false);
-    
 	if (_is_new) {
 		if (ensure_engine (sr)) {
 			destroy ();
@@ -348,11 +346,10 @@ Session::Session (AudioEngine &eng,
 	_engine.set_session (this);
 	_engine.reset_timebase ();
 
-    // NOTE: might be put into GUI after session creation
-    /* Waves Live: fill session with tracks basing on the amount of inputs.
+    /* Waves Tracks: fill session with tracks basing on the amount of inputs.
      * each available input must have corresponding track when session starts.
      */
-    if (_is_new && Config->get_waves_live_sound_daw() ) {
+    if (_is_new && ARDOUR::Profile->get_trx () ) {
         uint32_t how_many (0);
         if (_engine.current_backend()->input_channels () > 0){
             how_many = _engine.current_backend()->input_channels ();
@@ -826,7 +823,8 @@ Session::auto_connect_master_bus ()
 void
 Session::remove_monitor_section ()
 {
-	if (!_monitor_out) {
+    // Waves Tracks: Do not ever create monitor bus and section for Tracks
+	if (ARDOUR::Profile->get_trx () || !_monitor_out) {
 		return;
 	}
 
@@ -880,7 +878,8 @@ Session::add_monitor_section ()
 {
 	RouteList rl;
 
-	if (_monitor_out || !_master_out) {
+    // Waves Tracks: Do not ever create monitor bus and section for Tracks
+	if (ARDOUR::Profile->get_trx () || _monitor_out || !_master_out ) {
 		return;
 	}
 
@@ -1631,7 +1630,7 @@ trace_terminal (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> rbase)
 }
 
 void
-Session::resort_routes (bool reconnect_routes_io/*=false*/)
+Session::resort_routes ()
 {
 	/* don't do anything here with signals emitted
 	   by Routes during initial setup or while we
@@ -1648,11 +1647,6 @@ Session::resort_routes (bool reconnect_routes_io/*=false*/)
 		resort_routes_using (r);
 		/* writer goes out of scope and forces update */
 	}
-    
-    /* Waves Live: reconnect inputs/outputs of existing routes */
-    if (reconnect_routes_io) {
-        reconnect_existing_routes (true);
-    }
     
 #ifndef NDEBUG
 	boost::shared_ptr<RouteList> rl = routes.reader ();
@@ -1876,7 +1870,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 				route_group->add (track);
 			}
 
-			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this, false));
+			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
 
 			if (Config->get_remote_model() == UserOrdered) {
 				track->set_remote_control_id (next_control_id());
@@ -2006,10 +2000,10 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
 			for (uint32_t i = input_start.get(*t); i < route->n_inputs().get(*t) && i < nphysical_in; ++i) {
 				string port;
 
-                /* Waves Live:
+                /* Waves Tracks:
                  * do not create new connections if we reached the limit of physical outputs
                  */
-                if (Config->get_waves_live_sound_daw() &&
+                if (ARDOUR::Profile->get_trx () &&
                     existing_inputs.get(*t) == nphysical_in ) {
                     break;
                 }
@@ -2049,12 +2043,12 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
 			for (uint32_t i = output_start.get(*t); i < route->n_outputs().get(*t); ++i) {
 				string port;
 
-                /* Waves Live:
+                /* Waves Tracks:
                  * do not create new connections if we reached the limit of physical outputs
-                 * but not for master bus case
+                 * in Multi Out mode
                  */
                 if ( !(Config->get_output_auto_connect() & AutoConnectMaster)&&
-                    Config->get_waves_live_sound_daw() &&
+                    ARDOUR::Profile->get_trx () &&
                     existing_outputs.get(*t) == nphysical_out ) {
                     break;
                 }
@@ -2104,24 +2098,29 @@ Session::reconnect_existing_routes (bool withLock)
     ChanCount outputs = ChanCount::ZERO;
     
     boost::shared_ptr<RouteList> existing_routes = routes.reader ();
-    for (RouteList::iterator rIter = existing_routes->begin(); rIter != existing_routes->end(); ++rIter) {
-        
-        if (*rIter == _master_out || *rIter == _monitor_out) {
-            continue;
+    {
+        PBD::Unwinder<bool> protect_ignore_changes (_reconnecting_routes_in_progress, true);
+        for (RouteList::iterator rIter = existing_routes->begin(); rIter != existing_routes->end(); ++rIter) {
+            
+            if (*rIter == _master_out || *rIter == _monitor_out) {
+                continue;
+            }
+            
+            if (reconnectIputs) {
+                (*rIter)->input()->disconnect (0);
+            }
+            
+            if (reconnectOutputs) {
+                (*rIter)->output()->disconnect (0);
+            }
+            
+            auto_connect_route (*rIter, inputs, outputs, withLock, reconnectIputs);
         }
         
-        if (reconnectIputs) {
-            (*rIter)->input()->disconnect (0);
-        }
-        
-        if (reconnectOutputs) {
-            (*rIter)->output()->disconnect (0);
-        }
-        
-        auto_connect_route (*rIter, inputs, outputs, withLock, reconnectIputs);
+        auto_connect_master_bus ();
     }
     
-    auto_connect_master_bus ();
+    graph_reordered ();
 }
 
 
@@ -2186,7 +2185,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 			track->non_realtime_input_change();
 
-			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this, false));
+			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
 			if (Config->get_remote_model() == UserOrdered) {
 				track->set_remote_control_id (next_control_id());
 			}
@@ -2694,11 +2693,14 @@ Session::remove_route (boost::shared_ptr<Route> route)
 
 	/* Re-sort routes to remove the graph's current references to the one that is
 	 * going away, then flush old references out of the graph.
-     * Wavel Live: reconnect routes io while resorting
+     * Wave Tracks: reconnect routes
 	 */
-    bool with_reconnect = Config->get_waves_live_sound_daw();
+    if (ARDOUR::Profile->get_trx () ) {
+        reconnect_existing_routes(true);
+    } else {
+        resort_routes ();
+    }
     
-	resort_routes (with_reconnect);
 	if (_process_graph) {
 		_process_graph->clear_other_chain ();
 	}
@@ -3869,7 +3871,7 @@ Session::graph_reordered ()
 	   from a set_state() call or creating new tracks. Ditto for deletion.
 	*/
 
-	if ((_state_of_the_state & (InitialConnecting|Deletion)) || _adding_routes_in_progress) {
+	if ((_state_of_the_state & (InitialConnecting|Deletion)) || _adding_routes_in_progress || _reconnecting_routes_in_progress) {
 		return;
 	}
 
@@ -5067,11 +5069,11 @@ Session::notify_remote_id_change ()
 		break;
 	}
     
-    /* Waves Live: for waves live session it's required to resort tracks processing order
-     * and reconnect their IOs if track order has been changed in GUI
+    /* Waves Tracks: for Waves Tracks session it's required to reconnect their IOs if track order has been changed in GUI
+     * TODO: move it to GUI
      */
-    if (Config->get_waves_live_sound_daw() ) {
-        resort_routes (true);
+    if (ARDOUR::Profile->get_trx () ) {
+        reconnect_existing_routes(true);
     }
 }
 
