@@ -23,6 +23,9 @@
 #include <gtkmm.h>
 
 #include "ardour/session_handle.h"
+#include "canvas/xml_ui.h"
+
+using namespace ArdourCanvas::XMLUI;
 
 namespace WM {
 	class ProxyTemporary;

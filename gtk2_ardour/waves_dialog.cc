@@ -173,9 +173,9 @@ WavesDialog::read_layout (std::string file_name)
 		return false;
 	}
 
-	std::string title = WavesUI::xml_property (*root, "title", WavesUI::XMLNodeMap(), "");
+	std::string title = xml_property (*root, "title", "");
 	set_title(title);
-	bool resizeable = WavesUI::xml_property (*root, "resizeable", WavesUI::XMLNodeMap(), false);
+	bool resizeable = xml_property (*root, "resizeable", false);
 	property_allow_grow().set_value(resizeable);
 
 	set_border_width(0);

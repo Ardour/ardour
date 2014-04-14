@@ -32,6 +32,7 @@ class LIBCANVAS_API Outline : virtual public Item
 {
 public:
 	Outline (Group *);
+	Outline (Group *, const XMLNode&, const XMLNodeMap&, std::map<std::string, Item*>&);
 	virtual ~Outline () {}
 
 	Color outline_color () const {

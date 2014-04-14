@@ -27,12 +27,14 @@
 #include "canvas/item.h"
 
 namespace ArdourCanvas {
+using namespace XMLUI;
 
 class LIBCANVAS_API Text : public Item
 {
 public:
 	Text (Group *);
-       ~Text();
+	Text (Group *, const XMLNode&, const XMLNodeMap&, std::map<std::string, Item*>&);
+    ~Text();
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;

@@ -38,6 +38,18 @@ Rectangle::Rectangle (Group* parent)
 {
 }
 
+Rectangle::Rectangle (Group* parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Item*>& named_items)
+	: Item (parent, definition, styles, named_items)
+	, Outline (parent, definition, styles, named_items)
+	, Fill (parent, definition, styles, named_items)
+	, _outline_what ((What) (LEFT | RIGHT | TOP | BOTTOM))
+{
+	//_rect.x0 = xml_property(definition, "x", styles, 0.0);
+	//_rect.y0 = xml_property(definition, "y", styles, 0.0);
+	_rect.x1 = _rect.x0 + xml_property(definition, "width", styles, 0.0);
+	_rect.y1 = _rect.y0 + xml_property(definition, "height", styles, 0.0);
+}
+
 Rectangle::Rectangle (Group* parent, Rect const & rect)
 	: Item (parent)
 	, Outline (parent)

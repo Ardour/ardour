@@ -44,6 +44,20 @@ Text::Text (Group* parent)
 
 }
 
+Text::Text (Group* parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Item*>& named_items)
+	: Item (parent, definition, styles, named_items)
+	, _color (xml_property(definition, "color", styles, 0x000000ff))
+	, _font_description ((xml_property(definition, "font", styles, "") == "") ? 0 :
+						 new Pango::FontDescription (xml_property(definition, "font", styles, "")))
+	, _alignment (xml_text_alignment(definition, styles, Pango::ALIGN_LEFT))
+	, _width (xml_property(definition, "width", styles, 0.0))
+	, _height (xml_property(definition, "heigt", styles, 0.0))
+	, _text (xml_property(definition, "text", styles, ""))
+	, _need_redraw (false)
+	, _clamped_width (COORD_MAX)
+{
+}
+
 Text::~Text ()
 {
 	delete _font_description;

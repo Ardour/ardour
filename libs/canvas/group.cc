@@ -56,6 +56,16 @@ Group::Group (Group* parent, Duple position)
 	
 }
 
+Group::Group (Group* parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Item*>& named_items)
+	: Item (parent, definition, styles, named_items)
+	, _lut (0)
+{
+	const XMLNodeList& children = definition.children();
+	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+		XMLUI::create_item (this, **i, styles, named_items);
+	}
+}
+
 Group::~Group ()
 {
 	clear_items (true);

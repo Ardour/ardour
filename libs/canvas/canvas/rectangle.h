@@ -33,6 +33,7 @@ class LIBCANVAS_API Rectangle : virtual public Item, public Outline, public Fill
 {
 public:
 	Rectangle (Group *);
+	Rectangle (Group *, const XMLNode&, const XMLNodeMap&, std::map<std::string, Item*>&);
 	Rectangle (Group *, Rect const &);
 	
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;

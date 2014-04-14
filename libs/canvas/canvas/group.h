@@ -28,13 +28,17 @@
 #include "canvas/types.h"
 #include "canvas/lookup_table.h"
 
+#include "canvas/xml_ui.h"
+
 namespace ArdourCanvas {
+using namespace XMLUI;
 
 class LIBCANVAS_API Group : public Item
 {
 public:
 	explicit Group (Group *);
 	explicit Group (Group *, Duple);
+	explicit Group (Group *, const XMLNode&, const XMLNodeMap&, std::map<std::string, Item*>&);
 	~Group ();
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;

@@ -37,6 +37,15 @@ Fill::Fill (Group* parent)
 
 }
 
+Fill::Fill (Group* parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Item*>& named_items)
+	: Item (parent, definition, styles, named_items)
+	, _fill_color (xml_property(definition, "fillcolor", styles, 0x000000ff))
+	, _fill (xml_property(definition, "fill", styles, true))
+	, _transparent (xml_property(definition, "transparent", styles, false))
+{
+
+}
+
 void
 Fill::set_fill_color (Color color)
 {

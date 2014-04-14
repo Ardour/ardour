@@ -30,9 +30,11 @@
 
 #include "canvas/visibility.h"
 #include "canvas/types.h"
+#include "canvas/xml_ui.h"
 
 namespace ArdourCanvas
 {
+using namespace XMLUI;
 
 class Canvas;
 class Group;
@@ -48,12 +50,13 @@ class Rect;
  *  Any item that is being displayed on a canvas has a pointer to that canvas,
  *  and all except the `root group' have a pointer to their parent group.
  */
-	
+
 class LIBCANVAS_API Item
 {
 public:
 	Item (Canvas *);
 	Item (Group *);
+	Item (Group *, const XMLNode&, const XMLNodeMap&, std::map<std::string, Item*>&);
 	Item (Group *, Duple);
 	virtual ~Item ();
 

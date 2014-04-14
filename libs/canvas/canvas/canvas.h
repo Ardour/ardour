@@ -38,9 +38,11 @@
 
 #include "canvas/root_group.h"
 
+#include "canvas/xml_ui.h"
+
 namespace ArdourCanvas
 {
-
+using namespace XMLUI;
 class Rect;
 class Group;	
 
@@ -58,6 +60,7 @@ class LIBCANVAS_API Canvas
 {
 public:
 	Canvas ();
+	Canvas (const XMLNode&, const XMLNodeMap&, std::map<std::string, Item*>&);
 	virtual ~Canvas () {}
 
 	/** called to request a redraw of an area of the canvas */
@@ -134,6 +137,7 @@ class LIBCANVAS_API GtkCanvas : public Canvas, public Gtk::EventBox
 {
 public:
 	GtkCanvas ();
+	GtkCanvas (const XMLNode&, const XMLNodeMap&, std::map<std::string, Item*>&);
 
 	void request_redraw (Rect const &);
 	void request_size (Duple);

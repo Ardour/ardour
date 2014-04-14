@@ -38,6 +38,16 @@ Outline::Outline (Group* parent)
 
 }
 
+Outline::Outline (Group* parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Item*>& named_items)
+	: Item (parent, definition, styles, named_items)
+	, _outline_color (xml_property(definition, "linecolor", styles, 0x000000ff))
+	, _outline_width (xml_property(definition, "linewidth", styles, 1.0))
+	, _outline (xml_property(definition, "contour", styles, true))
+{
+
+}
+
+
 void
 Outline::set_outline_color (Color color)
 {

@@ -85,6 +85,13 @@ struct LIBCANVAS_API Rect
 		, y1 (y1_)
 	{}
 		
+	Rect (const Duple& p0, const Duple &p1)
+		: x0 (p0.x)
+		, y0 (p0.y)
+		, x1 (p1.x)
+		, y1 (p1.y)
+	{}
+
 	Coord x0;
 	Coord y0;
 	Coord x1;

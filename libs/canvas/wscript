@@ -54,7 +54,8 @@ canvas_sources = [
         'text.cc',
         'types.cc',
         'utils.cc',
-        'wave_view.cc'
+        'wave_view.cc',
+        'xml_ui.cc'
 ]
 
 def options(opt):

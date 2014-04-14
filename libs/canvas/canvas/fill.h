@@ -27,11 +27,13 @@
 #include "canvas/item.h"
 
 namespace ArdourCanvas {
+using namespace XMLUI;
 
 class LIBCANVAS_API Fill : virtual public Item
 {
 public:
 	Fill (Group *);
+	Fill (Group *, const XMLNode&, const XMLNodeMap&, std::map<std::string, Item*>&);
 
 	virtual void set_fill_color (Color);
 	virtual void set_fill (bool);
