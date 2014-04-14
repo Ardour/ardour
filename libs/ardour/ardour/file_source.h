@@ -82,6 +82,7 @@ public:
 	
 	static PBD::Signal2<int,std::string,std::vector<std::string> > AmbiguousFileName;
 
+	void existence_check ();
 	virtual void prevent_deletion ();
 
 protected:
