@@ -78,9 +78,10 @@ PBD::set_debug_bits (uint64_t bits)
 int
 PBD::parse_debug_options (const char* str)
 {
+	string in_str = str;
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep (",");
-	tokenizer tokens (string(str), sep);
+	tokenizer tokens (in_str, sep);
 	uint64_t bits = 0;
 
 	for (tokenizer::iterator tok_iter = tokens.begin(); tok_iter != tokens.end(); ++tok_iter) {
