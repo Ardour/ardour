@@ -907,6 +907,13 @@ TimeAxisViewItem::set_frame_gradient ()
 void
 TimeAxisViewItem::set_trim_handle_colors()
 {
+#if 1
+	/* Leave them transparent for now */
+	if (frame_handle_start) {
+		frame_handle_start->set_fill_color (0x00000000);
+		frame_handle_end->set_fill_color (0x00000000);
+	}
+#else
 	if (frame_handle_start) {
 		if (position_locked) {
 			frame_handle_start->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandleLocked());
@@ -916,6 +923,7 @@ TimeAxisViewItem::set_trim_handle_colors()
 			frame_handle_end->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandle());
 		}
 	}
+#endif
 }
 
 bool
