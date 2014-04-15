@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="Ardour3"
+	Name="Mixbus3"
 	ProjectGUID="{94B9EA5B-1D83-4573-9F02-29A2E33E6D1F}"
 	RootNamespace="Ardour3"
 	>
@@ -1238,10 +1238,14 @@
 				RelativePath="..\gtk2_ardour\windows_vst_plugin_ui.cc"
 				>
 			</File>
-			<File
-				RelativePath="..\gtk2_ardour\msvc\winmain.cc"
+			<Filter
+				Name="msvc"
 				>
-			</File>
+				<File
+					RelativePath="..\gtk2_ardour\msvc\winmain.cc"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"

@@ -19,7 +19,7 @@
 
 int ardour_main (int argc, char *argv[]);
 
-#if (defined(LXVST_SUPPORT) || (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD)))
+#if (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
 
 #include <fcntl.h>
 #include <shellapi.h>
