@@ -2914,8 +2914,6 @@ Editor::set_canvas_cursor_for_region_view (double x, RegionView* rv)
 		return;
 	}
 
-	assert (rv);
-
 	ArdourCanvas::Group* g = rv->get_canvas_group ();
 	ArdourCanvas::Group* p = g->parent ();
 
