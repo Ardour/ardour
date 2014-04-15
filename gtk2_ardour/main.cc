@@ -57,6 +57,9 @@
 
 #include "i18n.h"
 
+#ifdef COMPILER_MSVC
+#include <fcntl.h> // Needed for '_fmode'
+#endif
 
 using namespace std;
 using namespace Gtk;
@@ -161,6 +164,12 @@ int ardour_main (int argc, char *argv[])
 int main (int argc, char *argv[])
 #endif
 {
+#ifdef COMPILER_MSVC
+	// Essential!!  Make sure that any files used by Ardour
+	//              will be created or opened in BINARY mode!
+	_fmode = O_BINARY;
+#endif
+
 	fixup_bundle_environment (argc, argv, &localedir);
 
 	load_custom_fonts(); /* needs to happen before any gtk and pango init calls */
@@ -173,7 +182,7 @@ int main (int argc, char *argv[])
 	gtk_set_locale ();
 #endif
 
-#ifdef WINDOWS_VST_SUPPORT
+#if (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
 	/* this does some magic that is needed to make GTK and X11 client interact properly.
 	 * the platform dependent code is in windows_vst_plugin_ui.cc
 	 */
@@ -207,6 +216,16 @@ int main (int argc, char *argv[])
 #endif
 
 	if (parse_opts (argc, argv)) {
+#if (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
+        // Since we don't ordinarily have access to stdout and stderr with
+        // an MSVC app, let the user know we encountered a parsing error.
+        Gtk::Main app(&argc, &argv); // Calls 'gtk_init()'
+
+        Gtk::MessageDialog dlgReportParseError (_("\n   Ardour could not understand your command line      "),
+                                                      false, MESSAGE_ERROR, BUTTONS_CLOSE, true);
+        dlgReportParseError.set_title (_("An error was encountered while launching Ardour"));
+		dlgReportParseError.run ();
+#endif
 		exit (1);
 	}
 
