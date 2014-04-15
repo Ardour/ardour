@@ -437,6 +437,9 @@ fixup_bundle_environment (int argc, char* argv[], const char** localedir)
 		path = windows_search_path().to_string();
 		path += "\\locale";
 		Glib::setenv ("GTK_LOCALEDIR", path, true);
+
+		// and return the same path to our caller
+		(*localedir) = strdup (path.c_str());
 	}
 
 
