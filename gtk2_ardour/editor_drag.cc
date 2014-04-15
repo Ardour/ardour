@@ -1958,8 +1958,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	case ContentsTrim:
 		{
-			frame_delta = (adjusted_current_frame(event) - last_pointer_frame());
-			// frame_delta = (last_pointer_frame() - adjusted_current_frame(event));
+			frame_delta = (last_pointer_frame() - adjusted_current_frame(event));
 
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 				i->view->move_contents (frame_delta);
