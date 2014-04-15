@@ -164,7 +164,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 void
 MidiRegionView::parameter_changed (std::string const & p)
 {
-	if (p == "diplay-first-midi-bank-as-zero") {
+	if (p == "display-first-midi-bank-as-zero") {
 		if (_enable_display) {
 			redisplay_model();
 		}

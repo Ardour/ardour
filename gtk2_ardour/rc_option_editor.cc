@@ -2018,7 +2018,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("MIDI"),
 		    new BoolOption (
-			    "diplay-first-midi-bank-as-zero",
+			    "display-first-midi-bank-as-zero",
 			    _("Display first MIDI bank/program as 0"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_first_midi_bank_is_zero),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_first_midi_bank_is_zero)
