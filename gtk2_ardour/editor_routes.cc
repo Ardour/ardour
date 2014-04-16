@@ -512,6 +512,10 @@ EditorRoutes::redisplay ()
 			// just a "title" row
 			continue;
 		}
+        
+        if (route->is_master()) {
+            continue;
+        }
 
 		bool visible = tv->marked_for_display ();
 
