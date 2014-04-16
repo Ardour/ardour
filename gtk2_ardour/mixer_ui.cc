@@ -40,6 +40,7 @@
 #include "ardour/debug.h"
 #include "ardour/midi_track.h"
 #include "ardour/plugin_manager.h"
+#include "ardour/profile.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 
@@ -503,7 +504,9 @@ Mixer_UI::sync_order_keys_from_treeview ()
 			changed = true;
 		}
 
-		if ((Config->get_remote_model() == MixerOrdered) && !route->is_master() && !route->is_monitor()) {
+        bool do_reorder = (Config->get_remote_model() == MixerOrdered) || (ARDOUR::Profile->get_trx() );
+        
+		if (do_reorder && !route->is_master() && !route->is_monitor()) {
 
 			uint32_t new_rid = (visible ? rid : invisible_key--);
 
