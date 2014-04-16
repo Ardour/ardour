@@ -2124,6 +2124,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_tooltips)
 		     ));
 
+	add_option (S_("Preferences|GUI"),
+	     new BoolOption (
+		     "show-name-highlight",
+		     _("use name highlight bars in region displays"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_name_highlight),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_name_highlight)
+		     ));
+
 #ifndef GTKOSX
 	/* font scaling does nothing with GDK/Quartz */
 	add_option (S_("Preferences|GUI"), new FontScalingOptions (_rc_config));
