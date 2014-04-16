@@ -44,11 +44,13 @@
         <menuitem action='CleanupUnused'/>
         <menuitem action='FlushWastebasket'/>
       </menu>
-#ifdef GTKOSX
+      #ifdef GTKOSX
       <menuitem action='toggle-about'/>
       <menuitem action='toggle-rc-options-editor'/>
 #endif
 #ifndef GTKOSX
+      <separator/>
+      <menuitem action='toggle-session-lock-dialog'/>
       <separator/>
       <menuitem action='Quit'/>
 #endif

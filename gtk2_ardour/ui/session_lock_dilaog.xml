@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title="Session Lock" resizeable="false">
+  <style name="generic_control" font ="Arial 10"/>
+  <style name="generic_button"
+         style="generic_control"
+         fgnormal="#BFBFBF"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"
+         fghover="#CCCCCC"
+         bghover="#898989"
+         fgdisabled ="#959595"
+         bordercolor="#7E7E7E"
+         borderwidth="1 1 0 0" />
+    <Layout bgnormal="#FF0000"  width="447" height="500">
+      <Button style="generic_button"
+        id="ok_button"
+        text="UNLOCK"        
+        x="0" y="0" width="71" height="28"/>
+    </Layout>
+  </Layout>
+</Dialog>

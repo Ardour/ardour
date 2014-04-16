@@ -202,8 +202,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, about (X_("about"), _("About"))
 	, location_ui (X_("locations"), _("Locations"))
 	, route_params (X_("inspector"), _("Tracks and Busses"))
-	//VKPRefs:, audio_midi_setup (X_("audio-midi-setup"), _("Audio/MIDI Setup"))
 	, tracks_control_panel (X_("tracks-control-panel"), _("PREFERENCES"))
+	, session_lock_dialog (X_("session-lock-dialog"), _("SESSION LOCK"))
 	, session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
 	, add_video_dialog (X_("add-video"), _("Add Tracks/Busses"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
@@ -370,8 +370,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&add_route_dialog);
 	WM::Manager::instance().register_window (&add_video_dialog);
 	WM::Manager::instance().register_window (&route_params);
-	//VKPRefs:WM::Manager::instance().register_window (&audio_midi_setup);
 	WM::Manager::instance().register_window (&tracks_control_panel);
+	WM::Manager::instance().register_window (&session_lock_dialog);
 	WM::Manager::instance().register_window (&bundle_manager);
 	WM::Manager::instance().register_window (&location_ui);
 	WM::Manager::instance().register_window (&big_clock_window);
@@ -4399,3 +4399,10 @@ ARDOUR_UI::do_tracks_control_panel (uint32_t desired_sample_rate)
 	return -1;
 }
 
+int
+ARDOUR_UI::do_session_lock_dialog ()
+{
+	session_lock_dialog->run();
+    
+	return 0;
+}

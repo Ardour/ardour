@@ -72,7 +72,7 @@
 #include "ardour_dialog.h"
 #include "ardour_window.h"
 #include "editing.h"
-//VKPRefs:#include "engine_dialog.h"
+#include "session_lock_dialog.h"
 #include "tracks_control_panel.h"
 #include "meterbridge.h"
 #include "ui_config.h"
@@ -606,8 +606,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         WM::Proxy<About> about;
         WM::Proxy<LocationUIWindow> location_ui;
         WM::Proxy<RouteParams_UI> route_params;
-        //VKPRefs:WM::Proxy<EngineControl> audio_midi_setup;
         WM::Proxy<TracksControlPanel> tracks_control_panel;
+        WM::Proxy<SessionLockDialog> session_lock_dialog;
 
         /* Windows/Dialogs that require a creator method */
 
@@ -754,11 +754,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void resize_text_widgets ();
 
-        std::string _announce_string;
-        void check_announcements ();
+    std::string _announce_string;
+    void check_announcements ();
 
-        //VKPRefs:int do_audio_midi_setup (uint32_t);
-		int do_tracks_control_panel(uint32_t);
+	int do_tracks_control_panel(uint32_t);
+	int do_session_lock_dialog();
 };
 
 #endif /* __ardour_gui_h__ */

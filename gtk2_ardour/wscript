@@ -210,6 +210,7 @@ gtk2_ardour_sources = [
         'selection.cc',
         'send_ui.cc',
         'session_dialog.cc',
+		'session_lock_dialog.cc',
         'session_import_dialog.cc',
         'session_metadata_dialog.cc',
         'session_option_editor.cc',
@@ -234,6 +235,8 @@ gtk2_ardour_sources = [
         'time_fx_dialog.cc',
         'time_info_box.cc',
         'time_selection.cc',
+        'tracks_control_panel.cc',
+        'tracks_control_panel.logic.cc',
         'track_selection.cc',
         'track_view_list.cc',
         'transpose_dialog.cc',
@@ -255,9 +258,7 @@ gtk2_ardour_sources = [
         'video_server_dialog.cc',
         'utils_videotl.cc',
         'export_video_dialog.cc',
-        'export_video_infobox.cc',
-        'tracks_control_panel.cc',
-        'tracks_control_panel.logic.cc'
+        'export_video_infobox.cc'
 ]
 
 def options(opt):
