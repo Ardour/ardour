@@ -255,7 +255,7 @@ void
 Editor::track_canvas_viewport_allocate (Gtk::Allocation alloc)
 {
 	_canvas_viewport_allocation = alloc;
-	track_canvas_viewport_size_allocated ();
+	(void) track_canvas_viewport_size_allocated ();
 }
 
 bool
