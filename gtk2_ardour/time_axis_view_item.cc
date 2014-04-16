@@ -93,11 +93,11 @@ TimeAxisViewItem::set_constant_heights ()
 	   TRX: Y_OFFSET is measured from the top of the time axis view item.
 	*/
 	if (Config->get_show_name_highlight()) {
-		NAME_Y_OFFSET = 3;
-		NAME_HIGHLIGHT_SIZE = 0;
-	} else {
 		NAME_Y_OFFSET = height + 1;
 		NAME_HIGHLIGHT_SIZE = height + 2;
+	} else {
+		NAME_Y_OFFSET = 3;
+		NAME_HIGHLIGHT_SIZE = 0;
 	}
         NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 3;
 }
@@ -251,9 +251,9 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 		name_text = new ArdourCanvas::Text (group);
 		CANVAS_DEBUG_NAME (name_text, string_compose ("name text for %1", get_item_name()));
 		if (Config->get_show_name_highlight()) {
-			name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, NAME_Y_OFFSET));
-		} else {
 			name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, trackview.current_height() - NAME_Y_OFFSET));
+		} else {
+			name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, NAME_Y_OFFSET));
 		}
 		name_text->set_font_description (NAME_FONT);
 	} else {
@@ -585,9 +585,9 @@ TimeAxisViewItem::set_height (double height)
 
 	if (visibility & ShowNameText) {
 		if (Config->get_show_name_highlight()) {
-			name_text->set_y_position (NAME_Y_OFFSET); 
-		} else {
 			name_text->set_y_position (height - NAME_Y_OFFSET); 
+		} else {
+			name_text->set_y_position (NAME_Y_OFFSET); 
 		}
 	}
 
