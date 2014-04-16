@@ -225,6 +225,7 @@ CONFIG_VARIABLE (bool, use_tooltips, "use-tooltips", true)
 CONFIG_VARIABLE (std::string, mixer_strip_visibility, "mixer-strip-visibility", "PhaseInvert,SoloSafe,SoloIsolated,Group,MeterPoint")
 CONFIG_VARIABLE (bool, allow_non_quarter_pulse, "allow-non-quarter-pulse", false)
 CONFIG_VARIABLE (bool, show_region_gain, "show-region-gain", false)
+CONFIG_VARIABLE (bool, show_name_highlight, "show-name-highlight", false)
 
 /* web addresses used in the program */
 
