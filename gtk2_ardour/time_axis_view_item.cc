@@ -89,9 +89,13 @@ TimeAxisViewItem::set_constant_heights ()
         layout = foo.create_pango_layout (X_("H")); /* just the ascender */
 
         NAME_HEIGHT = height;
-	/* Ardour: Y_OFFSET is measured from bottom of the time axis view item.
-	   TRX: Y_OFFSET is measured from the top of the time axis view item.
+
+	/* Config->get_show_name_highlight) == true: 
+	        Y_OFFSET is measured from bottom of the time axis view item.
+	   Config->get_show_name_highlight) == false: 
+	        Y_OFFSET is measured from the top of the time axis view item.
 	*/
+
 	if (Config->get_show_name_highlight()) {
 		NAME_Y_OFFSET = height + 1;
 		NAME_HIGHLIGHT_SIZE = height + 2;
