@@ -84,7 +84,7 @@ Editor::initialize_canvas ()
 		// logo_item->property_width_in_pixels() = true;
 		// logo_item->property_height_set() = true;
 		// logo_item->property_width_set() = true;
-		logo_item->show ();
+		// logo_item->show ();
 	}
 	
 	/*a group to hold global rects like punch/loop indicators */
