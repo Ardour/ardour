@@ -891,7 +891,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
 	void set_frame_rate (framecnt_t nframes);
-	void reconnect_existing_routes (bool withLock);
+	void reconnect_existing_routes (bool withLock, bool reconnect_master = false);
 
   protected:
 	friend class Route;
@@ -1338,7 +1338,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void route_solo_changed (bool self_solo_change, void *src, boost::weak_ptr<Route>);
 	void route_solo_isolated_changed (void *src, boost::weak_ptr<Route>);
 	void update_route_solo_state (boost::shared_ptr<RouteList> r = boost::shared_ptr<RouteList>());
-
+    void update_output_mode();
+    
 	void listen_position_changed ();
 	void solo_control_mode_changed ();
 

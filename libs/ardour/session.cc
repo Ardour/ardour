@@ -76,7 +76,6 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
-#include "ardour/rc_configuration.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
@@ -789,10 +788,16 @@ Session::setup_bundles ()
 void
 Session::auto_connect_master_bus ()
 {
-	if (!_master_out || !Config->get_auto_connect_standard_busses() || _monitor_out) {
+	if (!_master_out || !Config->get_auto_connect_standard_busses() || _monitor_out ) {
 		return;
 	}
-		
+	
+    // Waves Tracks: Do not connect master bas for Tracks if AutoConnectMaster option is not set
+    // In this case it means "Multi Out" output mode
+	if (ARDOUR::Profile->get_trx() && !(Config->get_output_auto_connect() & AutoConnectMaster) ) {
+        return;
+    }
+    
 	/* if requested auto-connect the outputs to the first N physical ports.
 	 */
 	
@@ -2056,7 +2061,7 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
                 if ((*t) == DataType::AUDIO && (Config->get_output_auto_connect() & AutoConnectMaster)) {
                                         /* master bus is audio only */
 					if (_master_out) {
-                        port = _master_out->input()->ports().port(*t,                                     i % _master_out->input()->n_ports().get(*t))->name();
+                        port = _master_out->input()->ports().port(*t,i % _master_out->input()->n_ports().get(*t))->name();
 
                     }
                     
@@ -2082,41 +2087,144 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
 
 
 void
-Session::reconnect_existing_routes (bool withLock)
+Session::reconnect_existing_routes (bool withLock, bool reconnect_master)
 {
+    PBD::stacktrace (cerr, 20);
+    Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+    
+	if (withLock) {
+		lm.acquire ();
+	}
     
     // We need to disconnect the route's inputs and outputs first
     // basing on autoconnect configuration
-    bool reconnectIputs = Config->get_input_auto_connect();
-    bool reconnectOutputs = Config->get_output_auto_connect();
+    bool reconnectIputs = !(Config->get_input_auto_connect() & ManualConnect);
+    bool reconnectOutputs = !(Config->get_output_auto_connect() & ManualConnect);
     
     ChanCount existing_inputs;
     ChanCount existing_outputs;
     count_existing_track_channels (existing_inputs, existing_outputs);
     
-    ChanCount inputs = ChanCount::ZERO;
-    ChanCount outputs = ChanCount::ZERO;
+    //ChanCount inputs = ChanCount::ZERO;
+    //ChanCount outputs = ChanCount::ZERO;
+    
+    resort_routes();
     
     boost::shared_ptr<RouteList> existing_routes = routes.reader ();
+    
     {
         PBD::Unwinder<bool> protect_ignore_changes (_reconnecting_routes_in_progress, true);
-        for (RouteList::iterator rIter = existing_routes->begin(); rIter != existing_routes->end(); ++rIter) {
+
+        vector<string> physinputs;
+		vector<string> physoutputs;
+        
+		_engine.get_physical_outputs (DataType::AUDIO, physoutputs);
+		_engine.get_physical_inputs (DataType::AUDIO, physinputs);
+                
+        uint32_t input_n = 0;
+        uint32_t output_n = 0;
+        RouteList::iterator rIter = existing_routes->begin();
+        for (; rIter != existing_routes->end(); ++rIter) {
             
             if (*rIter == _master_out || *rIter == _monitor_out) {
                 continue;
             }
             
             if (reconnectIputs) {
-                (*rIter)->input()->disconnect (0);
+                (*rIter)->input()->disconnect (this); //GZ: check this; could be heavy
+                
+                for (uint32_t route_input_n = 0; route_input_n < (*rIter)->n_inputs().get(DataType::AUDIO); ++route_input_n) {
+                    
+                    if (Config->get_input_auto_connect() & AutoConnectPhysical) {
+                        
+                        if ( input_n == physinputs.size() ) {
+                            break;
+                        }
+                        
+                        string port = physinputs[input_n];
+                    
+                        if (port.empty() ) {
+                            error << "Physical Input number "<< input_n << " is unavailable and cannot be connected" << endmsg;
+                        }
+                        
+                        //GZ: check this; could be heavy
+                        (*rIter)->input()->connect ((*rIter)->input()->ports().port(DataType::AUDIO, route_input_n), port, this);
+                        ++input_n;
+                    }
+				}
+
             }
             
             if (reconnectOutputs) {
-                (*rIter)->output()->disconnect (0);
+                
+                //normalize route ouptuts: reduce the amount outputs to be equal to the amount of inputs
+                if (Config->get_output_auto_connect() & AutoConnectPhysical) {
+                
+                    //GZ: check this; could be heavy
+                    (*rIter)->output()->disconnect (this);
+                    size_t route_inputs_count = (*rIter)->n_inputs().get(DataType::AUDIO);
+                    
+                    //GZ: check this; could be heavy
+                    (*rIter)->output()->ensure_io(ChanCount(DataType::AUDIO, route_inputs_count), false, this );
+               
+                } else if (Config->get_output_auto_connect() & AutoConnectMaster){
+                    
+                    if (!reconnect_master) {
+                        continue;
+                    }
+                    
+                    //GZ: check this; could be heavy
+                    (*rIter)->output()->disconnect (this);
+                    
+                    if (_master_out) {
+                        uint32_t master_inputs_count = _master_out->n_inputs().get(DataType::AUDIO);
+                        (*rIter)->output()->ensure_io(ChanCount(DataType::AUDIO, master_inputs_count), false, this );
+                    } else {
+                        error << error << "Master bus is not available" << endmsg;
+                    }
+                        
+                }
+                
+                for (uint32_t route_output_n = 0; route_output_n < (*rIter)->n_outputs().get(DataType::AUDIO); ++route_output_n) {
+                    if (Config->get_output_auto_connect() & AutoConnectPhysical) {
+                        
+                        if ( output_n == physoutputs.size() ) {
+                            break;
+                        }
+                        
+                        string port = physoutputs[output_n];
+                        
+                        if (port.empty() ) {
+                            error << "Physical Output number "<< output_n << " is unavailable and cannot be connected" << endmsg;
+                        }
+                    
+                        //GZ: check this; could be heavy
+                        (*rIter)->output()->connect ((*rIter)->output()->ports().port(DataType::AUDIO, route_output_n), port, this);
+                        ++output_n;
+                        
+                    } else if (Config->get_output_auto_connect() & AutoConnectMaster) {
+                  
+                        if ( route_output_n == _master_out->n_inputs().get(DataType::AUDIO) ) {
+                            break;
+                        }
+                        
+                        string port = _master_out->input()->ports().port(DataType::AUDIO, route_output_n)->name();
+                    
+                        if (port.empty() ) {
+                            error << "MasterBus Input number "<< route_output_n << " is unavailable and cannot be connected" << endmsg;
+                        }
+                        
+                        //GZ: check this; could be heavy
+                        (*rIter)->output()->connect ((*rIter)->output()->ports().port(DataType::AUDIO, route_output_n), port, this);
+                        
+                    }
+                }
             }
             
-            auto_connect_route (*rIter, inputs, outputs, withLock, reconnectIputs);
+            //auto_connect_route (*rIter, inputs, outputs, false, reconnectIputs);
         }
         
+        _master_out->output()->disconnect (this);
         auto_connect_master_bus ();
     }
     

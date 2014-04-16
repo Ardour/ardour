@@ -99,6 +99,7 @@
 #include "ardour/port.h"
 #include "ardour/processor.h"
 #include "ardour/proxy_controllable.h"
+#include "ardour/profile.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/region_factory.h"
 #include "ardour/route_group.h"
@@ -529,7 +530,8 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 		RouteList rl;
                 ChanCount count(DataType::AUDIO, bus_profile->master_out_channels);
 
-		if (bus_profile->master_out_channels) {
+        // Waves Tracks: always create master bus for Tracks
+        if (ARDOUR::Profile->get_trx() || bus_profile->master_out_channels) {
 			boost::shared_ptr<Route> r (new Route (*this, _("master"), Route::MasterOut, DataType::AUDIO));
                         if (r->init ()) {
                                 return -1;
@@ -553,10 +555,11 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 		if (!rl.empty()) {
 			add_routes (rl, false, false, false);
 		}
+            // Waves Tracks: Skip this. Always use autoconnection for Tracks
+            if (!ARDOUR::Profile->get_trx() ) {
 
                 /* this allows the user to override settings with an environment variable.
                  */
-
                 if (no_auto_connect()) {
                         bus_profile->input_ac = AutoConnectOption (0);
                         bus_profile->output_ac = AutoConnectOption (0);
@@ -564,6 +567,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
                 Config->set_input_auto_connect (bus_profile->input_ac);
                 Config->set_output_auto_connect (bus_profile->output_ac);
+            }
         }
 
 	if (Config->get_use_monitor_bus() && bus_profile) {
@@ -3508,9 +3512,19 @@ Session::config_changed (std::string p, bool ours)
 		reconnect_ltc_output ();
 	} else if (p == "timecode-generator-offset") {
 		ltc_tx_parse_offset();
-	}
+	} else if (p == "output-auto-connect") {
+        if (ARDOUR::Profile->get_trx() ) {
+            update_output_mode();
+        }
+    }
 
 	set_dirty ();
+}
+
+void
+Session::update_output_mode()
+{
+    reconnect_existing_routes(true, true);
 }
 
 void
