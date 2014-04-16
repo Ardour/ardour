@@ -41,7 +41,7 @@
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
 //#include "ardour/mtdm.h"
-//#include "ardour/rc_configuration.h"
+#include "ardour/rc_configuration.h"
 //#include "ardour/types.h"
 
 //#include "pbd/convert.h"
@@ -72,7 +72,10 @@ TracksControlPanel::init ()
 	midi_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_midi_settings));
 	session_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_session_settings));
 	control_panel_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_control_panel));
-
+    
+    multi_out_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_multi_out));
+    stereo_out_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_stereo_out));
+    
 	ARDOUR::AudioEngine::instance ()->Running.connect (running_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_running, this), gui_context());
 	ARDOUR::AudioEngine::instance ()->Stopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_stopped, this), gui_context());
 	ARDOUR::AudioEngine::instance ()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_stopped, this), gui_context());
@@ -92,6 +95,8 @@ TracksControlPanel::init ()
 	midi_settings_layout.hide ();
 	session_settings_layout.hide ();
 	audio_settings_tab_button.set_active(true);
+    multi_out_button.set_active(ARDOUR::Config->get_output_auto_connect() & ARDOUR::AutoConnectPhysical);
+    stereo_out_button.set_active(ARDOUR::Config->get_output_auto_connect() & ARDOUR::AutoConnectMaster);
 }
 
 void
@@ -440,6 +445,32 @@ TracksControlPanel::on_session_settings (WavesButton*)
 	session_settings_tab_button.set_active(true);
 }
 
+
+void
+TracksControlPanel::on_multi_out (WavesButton*)
+{
+    if (ARDOUR::Config->get_output_auto_connect() & ARDOUR::AutoConnectPhysical) {
+        return;
+    }
+    
+    ARDOUR::Config->set_output_auto_connect(ARDOUR::AutoConnectPhysical);
+    stereo_out_button.set_active(false);
+    multi_out_button.set_active(true);
+}
+
+
+void
+TracksControlPanel::on_stereo_out (WavesButton*)
+{
+    if (ARDOUR::Config->get_output_auto_connect() & ARDOUR::AutoConnectMaster) {
+        return;
+    }
+    
+    ARDOUR::Config->set_output_auto_connect(ARDOUR::AutoConnectMaster);
+    multi_out_button.set_active(false);
+    stereo_out_button.set_active(true);
+
+}
 
 void
 TracksControlPanel::on_ok (WavesButton*)
