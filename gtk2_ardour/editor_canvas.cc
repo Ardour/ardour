@@ -212,6 +212,13 @@ Editor::initialize_canvas ()
 		logo_item->lower_to_bottom ();
 	}
 
+
+	_canvas_bottom_rect = new ArdourCanvas::Rectangle (_track_canvas->root(), ArdourCanvas::Rect (0.0, 0.0, max_canvas_coordinate, 20));
+	/* this thing is transparent */
+	_canvas_bottom_rect->set_fill (false);
+	_canvas_bottom_rect->set_outline (false);
+	_canvas_bottom_rect->Event.connect (sigc::mem_fun (*this, &Editor::canvas_bottom_rect_event));
+
 	/* these signals will initially be delivered to the canvas itself, but if they end up remaining unhandled, they are passed to Editor-level
 	   handlers.
 	*/
@@ -316,12 +323,24 @@ Editor::reset_controls_layout_width ()
 void
 Editor::reset_controls_layout_height (int32_t h)
 {
+	/* ensure that the rect that represents the "bottom" of the canvas
+	 * (the drag-n-drop zone) is, in fact, at the bottom.
+	 */
+
+	_canvas_bottom_rect->set_position (ArdourCanvas::Duple (0, h));
+
+	/* track controls layout must span the full height of "h" (all tracks)
+	 * plus the bottom rect.
+	 */
+
+	h += _canvas_bottom_rect->height ();
+
         /* set the height of the scrollable area (i.e. the sum of all contained widgets)
+	 * for the controls layout. The size request is set elsewhere.
          */
 
         controls_layout.property_height() = h;
 
-        /* size request is set elsewhere, see ::track_canvas_allocate() */
 }
 
 bool

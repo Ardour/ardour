@@ -737,6 +737,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* The group used for region motion.  Sits on top of _trackview_group */
 	ArdourCanvas::Group* _region_motion_group;
 
+        /* a rect that sits at the bottom of all tracks to act as a drag-no-drop/clickable
+	 * target area.
+	 */
+        ArdourCanvas::Rectangle* _canvas_bottom_rect;
+        bool canvas_bottom_rect_event (GdkEvent* event);
+
 	enum RulerType {
 		ruler_metric_timecode = 0,
 		ruler_metric_bbt = 1,
