@@ -35,6 +35,8 @@
 #include "canvas/text.h"
 #include "canvas/utils.h"
 
+#include "ardour/profile.h"
+
 #include "ardour_ui.h"
 /*
  * ardour_ui.h was moved up in the include list
@@ -87,8 +89,16 @@ TimeAxisViewItem::set_constant_heights ()
         layout = foo.create_pango_layout (X_("H")); /* just the ascender */
 
         NAME_HEIGHT = height;
-        NAME_Y_OFFSET = height + 1;
-        NAME_HIGHLIGHT_SIZE = height + 2;
+	/* Ardour: Y_OFFSET is measured from bottom of the time axis view item.
+	   TRX: Y_OFFSET is measured from the top of the time axis view item.
+	*/
+	if (Config->get_show_name_highlight()) {
+		NAME_Y_OFFSET = 3;
+		NAME_HIGHLIGHT_SIZE = 0;
+	} else {
+		NAME_Y_OFFSET = height + 1;
+		NAME_HIGHLIGHT_SIZE = height + 2;
+	}
         NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 3;
 }
 
@@ -210,7 +220,7 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 		frame = 0;
 	}
 	
-	if (visibility & ShowNameHighlight) {
+	if (Config->get_show_name_highlight() && (visibility & ShowNameHighlight)) {
 
 		double width;
 		double start;
@@ -240,7 +250,11 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 	if (visibility & ShowNameText) {
 		name_text = new ArdourCanvas::Text (group);
 		CANVAS_DEBUG_NAME (name_text, string_compose ("name text for %1", get_item_name()));
-		name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, trackview.current_height() - NAME_Y_OFFSET));
+		if (Config->get_show_name_highlight()) {
+			name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, NAME_Y_OFFSET));
+		} else {
+			name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, trackview.current_height() - NAME_Y_OFFSET));
+		}
 		name_text->set_font_description (NAME_FONT);
 	} else {
 		name_text = 0;
@@ -570,7 +584,11 @@ TimeAxisViewItem::set_height (double height)
 	manage_name_highlight ();
 
 	if (visibility & ShowNameText) {
-		name_text->set_y_position (height - NAME_Y_OFFSET); 
+		if (Config->get_show_name_highlight()) {
+			name_text->set_y_position (NAME_Y_OFFSET); 
+		} else {
+			name_text->set_y_position (height - NAME_Y_OFFSET); 
+		}
 	}
 
 	if (frame) {
