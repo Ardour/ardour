@@ -1448,7 +1448,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gtk::Allocation _canvas_viewport_allocation;
 	void track_canvas_viewport_allocate (Gtk::Allocation alloc);
-	bool track_canvas_viewport_size_allocated ();
+	void track_canvas_viewport_size_allocated ();
 	bool track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const &, int, int, guint);
 	bool track_canvas_key_press (GdkEventKey *);
 	bool track_canvas_key_release (GdkEventKey *);

@@ -255,10 +255,10 @@ void
 Editor::track_canvas_viewport_allocate (Gtk::Allocation alloc)
 {
 	_canvas_viewport_allocation = alloc;
-	(void) track_canvas_viewport_size_allocated ();
+	track_canvas_viewport_size_allocated ();
 }
 
-bool
+void
 Editor::track_canvas_viewport_size_allocated ()
 {
 	bool height_changed = _visible_canvas_height != _canvas_viewport_allocation.get_height();
@@ -289,8 +289,6 @@ Editor::track_canvas_viewport_size_allocated ()
 	update_fixed_rulers();
 	redisplay_tempo (false);
 	_summary->set_overlays_dirty ();
-
-	return false;
 }
 
 void
