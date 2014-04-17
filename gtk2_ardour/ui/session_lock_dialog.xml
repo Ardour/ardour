@@ -12,11 +12,13 @@
          fgdisabled ="#959595"
          bordercolor="#7E7E7E"
          borderwidth="1 1 0 0" />
-    <Layout bgnormal="#FF0000"  width="447" height="500">
+    <Layout width="408" height="338">
+      <canvas>
+        <icon file="icons/session_lock.png"/>
+      </canvas>
       <Button style="generic_button"
         id="ok_button"
         text="UNLOCK"        
-        x="0" y="0" width="71" height="28"/>
+        x="100" y="250" width="71" height="28"/>
     </Layout>
-  </Layout>
 </Dialog>

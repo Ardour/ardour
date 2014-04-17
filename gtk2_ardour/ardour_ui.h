@@ -758,7 +758,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     void check_announcements ();
 
 	int do_tracks_control_panel(uint32_t);
-	int do_session_lock_dialog();
 };
 
 #endif /* __ardour_gui_h__ */

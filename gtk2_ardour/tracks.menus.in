@@ -35,6 +35,8 @@
       <menuitem action='Save'/>
       <menuitem action='SaveAs'/>
       <separator/>
+      <menuitem action='toggle-session-lock-dialog'/>
+      <separator/>
       <menuitem action='addExistingAudioFiles'/>
       <menu name='Export' action='Export'>
         <menuitem action='ExportAudio'/>
@@ -44,7 +46,7 @@
         <menuitem action='CleanupUnused'/>
         <menuitem action='FlushWastebasket'/>
       </menu>
-      #ifdef GTKOSX
+#ifdef GTKOSX
       <menuitem action='toggle-about'/>
       <menuitem action='toggle-rc-options-editor'/>
 #endif

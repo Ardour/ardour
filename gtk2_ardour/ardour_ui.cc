@@ -283,7 +283,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	/* handle Audio/MIDI setup when session requires it */
 
-	//VKPRefs:ARDOUR::Session::AudioEngineSetupRequired.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::do_audio_midi_setup, this, _1));
 	ARDOUR::Session::AudioEngineSetupRequired.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::do_tracks_control_panel, this, _1));
 
 	/* handle sr mismatch with a dialog (PROBLEM: needs to return a value and thus cannot be x-thread) */
@@ -4362,24 +4361,7 @@ ARDOUR_UI::reset_route_peak_display (Route* route)
 		reset_peak_display ();
 	}
 }
-//VKPRefs:
-/*
-int
-ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
-{
-	audio_midi_setup->set_desired_sample_rate (desired_sample_rate);
-	audio_midi_setup->set_position (WIN_POS_CENTER);
 
-	switch (audio_midi_setup->run()) {
-	case Gtk::RESPONSE_OK:
-		return 0;
-	case Gtk::RESPONSE_APPLY:
-		return 0;
-	default:
-		return -1;
-	}
-}
-*/
 #define dbg_msg(a) MessageDialog(a, PROGRAM_NAME).run();
 int
 ARDOUR_UI::do_tracks_control_panel (uint32_t desired_sample_rate)
@@ -4397,12 +4379,4 @@ ARDOUR_UI::do_tracks_control_panel (uint32_t desired_sample_rate)
 	}
     
 	return -1;
-}
-
-int
-ARDOUR_UI::do_session_lock_dialog ()
-{
-	session_lock_dialog->run();
-    
-	return 0;
 }
