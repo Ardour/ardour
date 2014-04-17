@@ -1262,7 +1262,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	int           start_midi_thread ();
 
-	void set_play_loop (bool yn);
+	void set_play_loop (bool yn, double speed);
 	void unset_play_loop ();
 	void overwrite_some_buffers (Track *);
 	void flush_all_inserts ();
