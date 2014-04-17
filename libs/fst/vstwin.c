@@ -223,7 +223,7 @@ fst_new (void)
 	fst->n_pending_keys = 0;
 	fst->has_editor = 0;
 #ifdef PLATFORM_WINDOWS
-	fst->voffset = 36;
+	fst->voffset = 50;
 	fst->hoffset = 0;
 #else /* linux + wine */
 	fst->voffset = 24;
@@ -465,7 +465,7 @@ fst_move_window_into_view (VSTState* fst)
 {
 	if (fst->windows_window) {
 #ifdef PLATFORM_WINDOWS
-		SetWindowPos ((HWND)(fst->windows_window), 0, fst->hoffset, fst->voffset, fst->width, fst->height, 0);
+		SetWindowPos ((HWND)(fst->windows_window), 0, fst->hoffset, fst->voffset, fst->width + fst->hoffset, fst->height + fst->voffset, 0);
 #else /* linux + wine */
 		SetWindowPos ((HWND)(fst->windows_window), 0, 0, 0, fst->width + fst->hoffset, fst->height + fst->voffset, 0);
 #endif

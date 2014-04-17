@@ -38,22 +38,18 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace PBD;
 
-WindowsVSTPluginUI::WindowsVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<VSTPlugin> vp)
+WindowsVSTPluginUI::WindowsVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<VSTPlugin> vp, GtkWidget *parent)
 	: VSTPluginUI (pi, vp)
 {
 
 #ifdef GDK_WINDOWING_WIN32
-
-#if 0 // TODO verify window vs vbox-widget WRT to plugin_analysis_expander
-	GtkWindow* wobj = GTK_WINDOW(gtk_widget_get_toplevel(this->gobj()));
-#else
-	GtkVBox* wobj = this->gobj();
-#endif
-
-	gtk_widget_realize(GTK_WIDGET(wobj));
-	void* hWndHost = gdk_win32_drawable_get_handle(GTK_WIDGET(wobj)->window);
+	gtk_widget_realize(parent);
+	void* hWndHost = gdk_win32_drawable_get_handle(parent->window);
 
 	fst_run_editor (_vst->state(), hWndHost);
+	// TODO pack a placeholder (compare to VSTPluginUI::VSTPluginUI X11 socket)
+	// have placeholder use VSTPluginUI::get_preferred_height(), width()
+	// TODO pack plugin_analysis_expander at the bottom.
 #else
 	fst_run_editor (_vst->state(), NULL);
 	pack_start (plugin_analysis_expander, true, true);
