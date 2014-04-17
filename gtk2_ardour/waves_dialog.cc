@@ -44,8 +44,6 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace ARDOUR;
 
-std::ofstream dbg_out("/users/VKamyshniy/WavesDialogLog.txt");
-
 WavesDialog::WavesDialog (std::string layout_script_file, bool modal, bool use_seperator)
 	: Dialog ("", modal, use_seperator)
 	, proxy (0)
@@ -141,7 +139,7 @@ WavesDialog::on_show ()
 
 	if (spl && spl->is_visible()) {
 		spl->pop_back_for (*this);
-                _splash_pushed = true;
+        _splash_pushed = true;
 	}
 }
 

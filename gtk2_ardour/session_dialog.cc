@@ -46,7 +46,6 @@
 #include "ardour_ui.h"
 #include "session_dialog.h"
 #include "opts.h"
-//VKPRefs:#include "engine_dialog.h"
 #include "i18n.h"
 #include "utils.h"
 
@@ -106,7 +105,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
 		recent_session_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_recent_session ));
 	}
-	show_all ();
 	redisplay_recent_sessions();
 }
 

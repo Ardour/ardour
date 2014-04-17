@@ -101,6 +101,12 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, std
 		if (!property.empty()) {
 			child->modify_font(Pango::FontDescription(property));
 		}
+
+		if (xml_property (definition, "visible", styles, true)) {
+			child->show();
+		} else {
+			child->hide();
+		}
 	}
 	return child;
 }

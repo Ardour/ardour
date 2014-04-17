@@ -19,36 +19,15 @@
 #include <stdlib.h>
 #include "tracks_control_panel.h"
 #include "waves_button.h"
-//#include <vector>
-//#include <cmath>
-//#include <fstream>
-//#include <map>
-
-//#include <boost/scoped_ptr.hpp>
-
-//#include <gtkmm/messagedialog.h>
-
-//#include "pbd/error.h"
-//#include "pbd/xml++.h"
 #include "pbd/unwind.h"
-//#include "pbd/failed_constructor.h"
 
-//#include <gtkmm/alignment.h>
-//#include <gtkmm/stock.h>
-//#include <gtkmm/notebook.h>
 #include <gtkmm2ext/utils.h>
 
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
-//#include "ardour/mtdm.h"
 #include "ardour/rc_configuration.h"
-//#include "ardour/types.h"
-
-//#include "pbd/convert.h"
-//#include "pbd/error.h"
 
 #include "ardour_ui.h"
-//#include "tracks_control_panel.h"
 #include "gui_thread.h"
 #include "utils.h"
 #include "i18n.h"
@@ -90,8 +69,6 @@ TracksControlPanel::init ()
 	buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::buffer_size_changed));
 
 	populate_engine_combo ();
-	show_all ();
-	hide();
 	midi_settings_layout.hide ();
 	session_settings_layout.hide ();
 	audio_settings_tab_button.set_active(true);
