@@ -311,8 +311,11 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 			string::size_type pos = 0;
 
 			/* stupid LADSPA creator strings */
-
+#ifdef PLATFORM_WINDOWS
+			while (pos < creator.length() && creator[pos] > -2 && creator[pos] < 256 && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
+#else
 			while (pos < creator.length() && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
+#endif
 			creator = creator.substr (0, pos);
 
 			newrow[plugin_columns.creator] = creator;
@@ -681,7 +684,11 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 
 		/* stupid LADSPA creator strings */
 		string::size_type pos = 0;
+#ifdef PLATFORM_WINDOWS
+		while (pos < creator.length() && creator[pos] > -2 && creator[pos] < 256 && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
+#else
 		while (pos < creator.length() && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
+#endif
 		creator = creator.substr (0, pos);
 
 		SubmenuMap::iterator x;
