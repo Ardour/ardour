@@ -31,6 +31,9 @@ using namespace ARDOUR;
 char * SystemExec::_vfork_exec_wrapper = NULL;
 
 static char *vfork_exec_wrapper_path() {
+#ifdef PLATFORM_WINDOWS
+	return NULL;
+#else
 	std::string vfork_exec_wrapper;
 	if (!PBD::find_file_in_search_path (
 				PBD::Searchpath(Glib::build_filename(ARDOUR::ardour_dll_directory(), "vfork")),
@@ -39,22 +42,27 @@ static char *vfork_exec_wrapper_path() {
 		return NULL;
 	}
 	return strdup(vfork_exec_wrapper.c_str());
+#endif
 }
 
 SystemExec::SystemExec (std::string c, char ** a)
 	: PBD::SystemExec(c, a)
 {
+#ifndef PLATFORM_WINDOWS
 	if (!_vfork_exec_wrapper) {
 		_vfork_exec_wrapper = vfork_exec_wrapper_path();
 	}
+#endif
 }
 
 SystemExec::SystemExec (std::string c, std::string a)
 	: PBD::SystemExec(c, a)
 {
+#ifndef PLATFORM_WINDOWS
 	if (!_vfork_exec_wrapper) {
 		_vfork_exec_wrapper = vfork_exec_wrapper_path();
 	}
+#endif
 }
 
 SystemExec::~SystemExec() { }
