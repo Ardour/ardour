@@ -209,15 +209,17 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 
 		CANVAS_DEBUG_NAME (frame, string_compose ("frame for %1", get_item_name()));
 		
-		frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
+		if (Config->get_show_name_highlight()) {
+			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
+		} else {
+			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM));
+		}
 
 		if (_recregion) {
 			frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RecordingRect());
 		} else {
 			frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame());
 		}
-
-		frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::LEFT));
 
 	} else {
 
