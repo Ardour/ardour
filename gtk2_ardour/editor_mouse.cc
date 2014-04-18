@@ -179,12 +179,12 @@ Editor::canvas_event_sample (GdkEvent const * event, double* pcx, double* pcy) c
 		*pcy = y;
 	}
 
-	/* note that pixel_to_sample() never returns less than zero, so even if the pixel
+	/* note that pixel_to_sample_from_event() never returns less than zero, so even if the pixel
 	   position is negative (as can be the case with motion events in particular),
 	   the frame location is always positive.
 	*/
 
-	return pixel_to_sample (x);
+	return pixel_to_sample_from_event (x);
 }
 
 Gdk::Cursor*
@@ -2914,8 +2914,6 @@ Editor::set_canvas_cursor_for_region_view (double x, RegionView* rv)
 		return;
 	}
 
-	assert (rv);
-
 	ArdourCanvas::Group* g = rv->get_canvas_group ();
 	ArdourCanvas::Group* p = g->parent ();
 
@@ -2927,21 +2925,28 @@ Editor::set_canvas_cursor_for_region_view (double x, RegionView* rv)
 	assert (item_bbox);
 	ArdourCanvas::Rect parent_bbox = g->item_to_parent (item_bbox.get ());
 
-	/* Halfway across the region */
-	double const h = (parent_bbox.x0 + parent_bbox.x1) / 2;
+	/* First or last 10% of region is used for trimming, if the whole
+	   region is wider than 20 pixels at the current zoom level.
+	*/
 
-	Trimmable::CanTrim ct = rv->region()->can_trim ();
-	if (x <= h) {
-		if (ct & Trimmable::FrontTrimEarlier) {
-			set_canvas_cursor (_cursors->left_side_trim, true);
-		} else {
-			set_canvas_cursor (_cursors->left_side_trim_right_only, true);
-		}
-	} else {
-		if (ct & Trimmable::EndTrimLater) {
-			set_canvas_cursor (_cursors->right_side_trim, true);
-		} else {
-			set_canvas_cursor (_cursors->right_side_trim_left_only, true);
+	double const w = parent_bbox.width();
+
+	if (w > 20.0 && x >= parent_bbox.x0 && x < parent_bbox.x1) {
+		
+		Trimmable::CanTrim ct = rv->region()->can_trim ();
+
+		if (((x - parent_bbox.x0) / w) < 0.10) {
+			if (ct & Trimmable::FrontTrimEarlier) {
+				set_canvas_cursor (_cursors->left_side_trim, true);
+			} else {
+				set_canvas_cursor (_cursors->left_side_trim_right_only, true);
+			}
+		} else if (((parent_bbox.x1 - x) / w) < 0.10) {
+			if (ct & Trimmable::EndTrimLater) {
+				set_canvas_cursor (_cursors->right_side_trim, true);
+			} else {
+				set_canvas_cursor (_cursors->right_side_trim_left_only, true);
+			}
 		}
 	}
 }

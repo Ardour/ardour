@@ -59,7 +59,6 @@ def build(bld):
         obj = bld (features = 'c cxx cxxprogram wine')
         obj.source = (
             'scanner.cc',
-            'fst.c',
             'vstwin.c',
             )
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
@@ -69,7 +68,7 @@ def build(bld):
     else:
         obj = bld (features = 'cxx c cxxprogram')
         if bld.is_defined('WINDOWS_VST_SUPPORT'):
-            obj.source = ( 'scanner.cc', 'fst.c', 'vstwin.c' )
+            obj.source = ( 'scanner.cc', 'vstwin.c' )
             obj.uselib = ['GIOMM', 'DL', 'GDI32']
         else:
             obj.source = ( 'scanner.cc' )

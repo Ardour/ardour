@@ -298,7 +298,7 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 			e.stepping_axis_view()->step_height (false);
 			return true;
 		} else if (Keyboard::no_modifiers_active (ev->state)) {
-			_editor.scroll_tracks_up_line();
+			_editor.scroll_up_one_track();
 			return true;
 		}
 		break;
@@ -313,7 +313,7 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 			e.stepping_axis_view()->step_height (true);
 			return true;
 		} else if (Keyboard::no_modifiers_active (ev->state)) {
-			_editor.scroll_tracks_down_line();
+			_editor.scroll_down_one_track();
 			return true;
 		}
 		break;
@@ -370,32 +370,11 @@ TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
 		 * are pretending that the drag is taking place over the canvas
 		 * (which perhaps in the glorious future, when track headers
 		 * and the canvas are unified, will actually be true.)
-		 *
-		 * First, translate the event coordinates into the canvas
-		 * coordinate space that DragManager::motion_handler is
-		 * expecting (this requires translation into the *window*
-		 * coordinates for the track canvas window, and then conversion
-		 * from window to canvas coordinate spaces).
-		 * 
-		 * Then fake a DragManager motion event so that when
-		 * maybe_autoscroll asks DragManager for the current pointer
-		 * position it will get the correct answers.
 		*/
 
-		int tx, ty;
-		controls_ebox.translate_coordinates (*_editor.get_track_canvas(), ev->x, ev->y, tx, ty);
+		_editor.maybe_autoscroll (false, true, true);
 
-		/* x-axis of track headers is not shared with the canvas, but
-		   the y-axis is, so we we can get a valid translation here.
-		*/
-
-		Duple canvas_coord = _editor.get_track_canvas()->canvas()->window_to_canvas (Duple (tx, ty));
-		ev->y = (int) floor (canvas_coord.y);
-
-		_editor.drags()->motion_handler ((GdkEvent *) ev, false);
-		_editor.maybe_autoscroll (false, true, false, ev->y_root < _resize_drag_start);
-
-		/* now do the actual TAV resize */
+		/* now schedule the actual TAV resize */
                 int32_t const delta = (int32_t) floor (ev->y_root - _resize_drag_start);
                 _editor.add_to_idle_resize (this, delta);
                 _resize_drag_start = ev->y_root;
@@ -545,6 +524,8 @@ TimeAxisView::set_height (uint32_t h)
 		/* resize the selection rect */
 		show_selection (_editor.get_selection().time);
 	}
+
+	_editor.override_visible_track_count ();
 }
 
 bool

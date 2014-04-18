@@ -112,7 +112,7 @@ vstfx_new ()
 void* vstfx_load_vst_library(const char* path)
 {
 	void* dll;
-	char* full_path;
+	char* full_path = NULL;
 	char* envdup;
 	char* lxvst_path;
 	size_t len1;
@@ -160,6 +160,7 @@ void* vstfx_load_vst_library(const char* path)
 		vstfx_error ("\"%s\"", lxvst_path);
 		len1 = strlen(lxvst_path);
 		
+		if (full_path) free(full_path);
 		full_path = (char*)malloc(len1 + 1 + len2 + 1);
 		memcpy(full_path, lxvst_path, len1);
 		full_path[len1] = '/';
@@ -180,7 +181,7 @@ void* vstfx_load_vst_library(const char* path)
 	}
 
 	/*Free the path*/
-
+	if (full_path) free(full_path);
 	free(envdup);
 
 	return dll;
@@ -209,8 +210,6 @@ vstfx_load (const char *path)
 		buf = (char *)malloc(strlen(path) + 4); //The .so and a terminating zero
 
 		sprintf (buf, "%s.so", path);
-		
-		fhandle->nameptr = strdup (path);
 
 	}
 	else
@@ -218,8 +217,6 @@ vstfx_load (const char *path)
 		/*We already have .so appened to the filename*/
 		
 		buf = strdup(path);
-		
-		fhandle->nameptr = strdup (path);
 	}
 
 	/* get a name for the plugin based on the path: ye old VST problem where
@@ -227,7 +224,7 @@ vstfx_load (const char *path)
 	   which we don't want to do at this point
 	*/
 	
-	fhandle->name = strdup (PBD::basename_nosuffix (fhandle->nameptr).c_str());
+	fhandle->name = strdup (PBD::basename_nosuffix (path).c_str());
 
 	/*call load_vstfx_library to actually load the .so into memory*/
 
@@ -289,9 +286,8 @@ vstfx_unload (VSTHandle* fhandle)
 		fhandle->dll = 0;
 	}
 
-	if (fhandle->nameptr)
+	if (fhandle->name)
 	{
-		free (fhandle->nameptr);
 		free (fhandle->name);
 	}
 	
@@ -310,8 +306,9 @@ vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 
 	if(fhandle == 0)
 	{
-	    vstfx_error( "** ERROR ** VSTFX : The handle was 0\n" );
-	    return 0;
+		vstfx_error( "** ERROR ** VSTFX : The handle was 0\n" );
+		free (vstfx);
+		return 0;
 	}
 
 	if ((vstfx->plugin = fhandle->main_entry (amc)) == 0) 

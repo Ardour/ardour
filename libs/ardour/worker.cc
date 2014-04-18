@@ -82,6 +82,9 @@ Worker::verify_message_completeness(RingBuffer<uint8_t>* rb)
 	uint32_t size;
 	RingBuffer<uint8_t>::rw_vector vec;
 	rb->get_read_vector (&vec);
+	if (vec.len[0] + vec.len[1] < sizeof(size)) {
+		return false;
+	}
 	if (vec.len[0] >= sizeof(size)) {
 		memcpy (&size, vec.buf[0], sizeof (size));
 	} else {
@@ -121,6 +124,7 @@ Worker::run()
 	while (true) {
 		_sem.wait();
 		if (_exit) {
+			if (buf) free(buf);
 			return;
 		}
 
@@ -132,6 +136,7 @@ Worker::run()
 		while (!verify_message_completeness(_requests)) {
 			Glib::usleep(2000);
 			if (_exit) {
+				if (buf) free(buf);
 				return;
 			}
 		}
@@ -143,7 +148,13 @@ Worker::run()
 
 		if (size > buf_size) {
 			buf = realloc(buf, size);
-			buf_size = size;
+			if (buf) {
+				buf_size = size;
+			} else {
+				PBD::error << "Worker: Error allocating memory"
+				           << endmsg;
+				buf_size = 0; // TODO: This is probably fatal
+			}
 		}
 
 		if (_requests->read((uint8_t*)buf, size) < size) {

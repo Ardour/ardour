@@ -133,7 +133,7 @@ MissingFileDialog::add_chosen ()
                 break;
         }
 
-        split (str, dirs, ':');
+        split (str, dirs, G_SEARCHPATH_SEPARATOR);
 
         newdir = chooser.get_filename ();
 
@@ -144,7 +144,7 @@ MissingFileDialog::add_chosen ()
         }
 
         if (!str.empty()) {
-                str += ':';
+                str += G_SEARCHPATH_SEPARATOR;
         }
 
         str += newdir;

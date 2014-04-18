@@ -88,7 +88,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Sync"), new BoolOption (
 			    "videotimeline-pullup",
-			    _("Apply Pull-Up/Down to Video Timeline and Video Monitor (Unless in JACK-sync)."),
+			    _("Apply Pull-Up/Down to Video Timeline and Video Monitor (Unless using JACK-sync)."),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_videotimeline_pullup),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_videotimeline_pullup)
 			    ));

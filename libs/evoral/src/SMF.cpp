@@ -318,7 +318,7 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, eve
 		/* this should be allocated by malloc(3) because libsmf will
 		   call free(3) on it
 		*/
-		event->midi_buffer = (uint8_t*) malloc (sizeof (uint8_t*) * event->midi_buffer_length);
+		event->midi_buffer = (uint8_t*) malloc (sizeof(uint8_t) * event->midi_buffer_length);
 
 		event->midi_buffer[0] = 0xff; // Meta-event
 		event->midi_buffer[1] = 0x7f; // Sequencer-specific

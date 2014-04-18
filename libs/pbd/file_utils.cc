@@ -31,7 +31,20 @@
 #include <glibmm/miscutils.h>
 #include <glibmm/pattern.h>
 
-#include <giomm/file.h>
+#include <errno.h>
+#include <string.h> /* strerror */
+
+/* open() */
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+/* close(), read(), write() */
+#ifdef COMPILER_MSVC
+#include <io.h> // Microsoft's nearest equivalent to <unistd.h>
+#else
+#include <unistd.h>
+#endif
 
 #include "pbd/compose.h"
 #include "pbd/file_utils.h"
@@ -153,21 +166,57 @@ copy_file(const std::string & from_path, const std::string & to_path)
 {
 	if (!Glib::file_test (from_path, Glib::FILE_TEST_EXISTS)) return false;
 
-	Glib::RefPtr<Gio::File> from_file = Gio::File::create_for_path(from_path);
-	Glib::RefPtr<Gio::File> to_file = Gio::File::create_for_path(to_path);
+	int fd_from = -1;
+	int fd_to = -1;
+	char buf[4096]; // BUFSIZ  ??
+	ssize_t nread;
 
-	try
-	{
-		from_file->copy (to_file, Gio::FILE_COPY_OVERWRITE);
+	fd_from = ::open(from_path.c_str(), O_RDONLY);
+	if (fd_from < 0) {
+		goto copy_error;
 	}
-	catch(const Glib::Exception& ex)
-	{
-		error << string_compose (_("Unable to Copy file %1 to %2 (%3)"),
-				from_path, to_path, ex.what())
-			<< endmsg;
-		return false;
+
+	fd_to = ::open(to_path.c_str(), O_WRONLY | O_CREAT, 0666);
+	if (fd_to < 0) {
+		goto copy_error;
 	}
-	return true;
+
+	while (nread = ::read(fd_from, buf, sizeof(buf)), nread > 0) {
+		char *out_ptr = buf;
+		do {
+			ssize_t nwritten = ::write(fd_to, out_ptr, nread);
+			if (nwritten >= 0) {
+				nread -= nwritten;
+				out_ptr += nwritten;
+			} else if (errno != EINTR) {
+				goto copy_error;
+			}
+		} while (nread > 0);
+	}
+
+	if (nread == 0) {
+		if (::close(fd_to)) {
+			fd_to = -1;
+			goto copy_error;
+		}
+		::close(fd_from);
+		return true;
+	}
+
+copy_error:
+	int saved_errno = errno;
+
+	if (fd_from >= 0) {
+		::close(fd_from);
+	}
+	if (fd_to >= 0) {
+		::close(fd_to);
+	}
+
+	error << string_compose (_("Unable to Copy file %1 to %2 (%3)"),
+			from_path, to_path, strerror(saved_errno))
+		<< endmsg;
+	return false;
 }
 
 static
@@ -195,8 +244,8 @@ copy_files(const std::string & from_path, const std::string & to_dir)
 std::string
 get_absolute_path (const std::string & p)
 {
-	Glib::RefPtr<Gio::File> f = Gio::File::create_for_path (p);
-	return f->get_path ();
+	if (Glib::path_is_absolute(p)) return p;
+	return Glib::build_filename (Glib::get_current_dir(), p);
 }
 
 bool

@@ -11,8 +11,8 @@
 /* Comment out the above lines to build Mixbus without LV2 support */
 #endif
 
-#ifndef VST_SUPPORT
-// Commented out temporarily by JE - 18-10-2013 #define VST_SUPPORT
+#ifndef WINDOWS_VST_SUPPORT
+#define WINDOWS_VST_SUPPORT
 /* Comment out the above line to build Mixbus without VST support */
 #endif
 

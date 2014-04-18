@@ -85,15 +85,15 @@ ActionManager::load_menus (const string& menus_file)
 		info << string_compose (_("Loading menus from %1"), ui_file) << endmsg;
 		loaded = true;
 	} catch (Glib::MarkupError& err) {
-		error << string_compose (_("badly formatted UI definition file: %1"), err.what()) << endmsg;
-		cerr << string_compose (_("badly formatted UI definition file: %1"), err.what()) << endl;
+		error << string_compose (_("badly formatted menu definition file: %1"), err.what()) << endmsg;
+		cerr << string_compose (_("badly formatted menu definition file: %1"), err.what()) << endl;
 	} catch (...) {
 		error << string_compose (_("%1 menu definition file not found"), PROGRAM_NAME) << endmsg;
 	}
 
 	if (!loaded) {
-		cerr << string_compose (_("%1 will not work without a valid ardour.menus file"), PROGRAM_NAME) << endl;
-		error << string_compose (_("%1 will not work without a valid ardour.menus file"), PROGRAM_NAME) << endmsg;
+		cerr << string_compose (_("%1 will not work without a valid menu definition file"), PROGRAM_NAME) << endl;
+		error << string_compose (_("%1 will not work without a valid menu definition file"), PROGRAM_NAME) << endmsg;
 		exit(1);
 	}
 }

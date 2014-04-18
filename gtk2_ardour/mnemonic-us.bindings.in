@@ -189,6 +189,7 @@ This mode provides many different operations on both regions and control points,
 @trans|Editor/toggle-follow-playhead|<@PRIMARY@>f|toggle playhead tracking
 @trans|Transport/ToggleFollowEdits|<@TERTIARY@>f|toggle playhead follows edits
 @wvis|Common/ToggleMaximalEditor|<@PRIMARY@><@SECONDARY@>f|maximise editor space
+@wvis|Common/ToggleMaximalMixer|F12|maximise mixer space
 @wvis|Region/show-rhythm-ferret|<@WINDOW@>f|show rhythm ferret window 
 @mmode|MouseMode/set-mouse-mode-gain|g|region gain mode
 @epp|Region/play-selected-regions|h|play selected region(s)

@@ -802,7 +802,7 @@ Session::load_state (string snapshot_name)
 
 	set_dirty();
 
-	_writable = exists_and_writable (xmlpath);
+	_writable = exists_and_writable (xmlpath) && exists_and_writable(Glib::path_get_dirname(xmlpath));
 
 	if (!state_tree->read (xmlpath)) {
 		error << string_compose(_("Could not understand session file %1"), xmlpath) << endmsg;
@@ -920,7 +920,7 @@ Session::state (bool full_state)
 				p += (*i).path;
 
 				if (next != session_dirs.end()) {
-					p += ':';
+					p += G_SEARCHPATH_SEPARATOR;
 				} else {
 					break;
 				}
@@ -2684,7 +2684,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		audio_path += sdir.sound_path();
 
 		if (nexti != session_dirs.end()) {
-			audio_path += ':';
+			audio_path += G_SEARCHPATH_SEPARATOR;
 		}
 
 		i = nexti;
@@ -2702,7 +2702,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		midi_path += sdir.midi_path();
 
 		if (nexti != session_dirs.end()) {
-			midi_path += ':';
+			midi_path += G_SEARCHPATH_SEPARATOR;
 		}
 
 		i = nexti;

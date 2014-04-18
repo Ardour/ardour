@@ -44,7 +44,7 @@ class LIBARDOUR_API MissingSource : public std::exception
 /** A source associated with a file on disk somewhere */
 class LIBARDOUR_API FileSource : virtual public Source {
 public:
-	virtual ~FileSource () {}
+	virtual ~FileSource ();
 
 	virtual const std::string& path() const { return _path; }
 
@@ -82,6 +82,9 @@ public:
 	
 	static PBD::Signal2<int,std::string,std::vector<std::string> > AmbiguousFileName;
 
+	void existence_check ();
+	virtual void prevent_deletion ();
+
 protected:
 	FileSource (Session& session, DataType type,
 	            const std::string& path,
@@ -103,7 +106,6 @@ protected:
 	std::string _origin;
 	bool        _open;
 
-	void prevent_deletion ();
 };
 
 } // namespace ARDOUR

@@ -266,9 +266,14 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual framecnt_t current_page_samples() const = 0;
 	virtual double visible_canvas_height () const = 0;
 	virtual void temporal_zoom_step (bool coarser) = 0;
-	virtual void ensure_time_axis_view_is_visible (const TimeAxisView& tav) = 0;
+        virtual void ensure_time_axis_view_is_visible (const TimeAxisView& tav, bool at_top = false) { 
+	    _ensure_time_axis_view_is_visible (tav, at_top);
+	}
+        virtual void override_visible_track_count () = 0;
 	virtual void scroll_tracks_down_line () = 0;
 	virtual void scroll_tracks_up_line () = 0;
+        virtual bool scroll_down_one_track () = 0;
+        virtual bool scroll_up_one_track () = 0;
 	virtual void prepare_for_cleanup () = 0;
 	virtual void finish_cleanup () = 0;
 	virtual void reset_x_origin (framepos_t frame) = 0;
@@ -302,8 +307,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, PBD::PropertyID) const = 0;
 
 	sigc::signal<void> ZoomChanged;
-	/** Emitted when the horizontal position of the editor view changes */
-	sigc::signal<void> HorizontalPositionChanged;
 	sigc::signal<void> Realized;
 	sigc::signal<void,framepos_t> UpdateAllTransportClocks;
 
@@ -381,8 +384,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual Gtkmm2ext::TearOff* tools_tearoff () const = 0;
 
 	virtual DragManager* drags () const = 0;
-	virtual void maybe_autoscroll (bool, bool, bool, bool) = 0;
+        virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
 	virtual void stop_canvas_autoscroll () = 0;
+        virtual bool autoscroll_active() const = 0;
 
 	virtual MouseCursors const * cursors () const = 0;
 	virtual VerboseCursor * verbose_cursor () const = 0;
@@ -407,6 +411,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 
 	PBD::Signal0<void> SnapChanged;
 	PBD::Signal0<void> MouseModeChanged;
+
+  protected:
+       virtual void _ensure_time_axis_view_is_visible (const TimeAxisView& tav, bool at_top) = 0;
 };
 
 #endif // __gtk_ardour_public_editor_h__

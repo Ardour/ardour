@@ -1022,6 +1022,7 @@ GainMeter::get_gm_width ()
 {
 	Gtk::Requisition sz;
 	int min_w = 0;
+	sz.width = 0;
 	meter_metric_area.size_request (sz);
 	min_w += sz.width;
 	level_meter->size_request (sz);

@@ -170,7 +170,7 @@ PathScanner::run_scan_internal (vector<string *> *result,
 		}
 		closedir (dir);
 		
-	} while ((limit < 0 || (nfound < limit)) && (thisdir = strtok (0, ":")));
+	} while ((limit < 0 || (nfound < limit)) && (thisdir = strtok (0, G_SEARCHPATH_SEPARATOR_S)));
 
 	free (pathcopy);
 	return result;

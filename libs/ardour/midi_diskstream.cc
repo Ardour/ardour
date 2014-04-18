@@ -1198,7 +1198,7 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 
 	try {
 		_write_source = boost::dynamic_pointer_cast<SMFSource>(
-			_session.create_midi_source_for_session (0, name ()));
+			_session.create_midi_source_for_session (name ()));
 
 		if (!_write_source) {
 			throw failed_constructor();
@@ -1213,25 +1213,36 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 
 	return 0;
 }
-
-list<boost::shared_ptr<Source> >
-MidiDiskstream::steal_write_sources()
+/**
+ * We want to use the name of the existing write source (the one that will be
+ * used by the next capture) for another purpose. So change the name of the
+ * current source, and return its current name.
+ *
+ * Return an empty string if the change cannot be accomplished.
+ */
+std::string
+MidiDiskstream::steal_write_source_name ()
 {
-	list<boost::shared_ptr<Source> > ret;
+	string our_old_name = _write_source->name();
 
-	/* put some data on the disk, even if its just a header for an empty file */
-	boost::dynamic_pointer_cast<SMFSource> (_write_source)->ensure_disk_file ();
+	/* this will bump the name of the current write source to the next one
+	 * (e.g. "MIDI 1-1" gets renamed to "MIDI 1-2"), thus leaving the
+	 * current write source name (e.g. "MIDI 1-1" available). See the
+	 * comments in Session::create_midi_source_by_stealing_name() about why
+	 * we do this.
+	 */
 
-	/* never let it go away */
-	_write_source->mark_nonremovable ();
-
-	ret.push_back (_write_source);
-
-	/* get a new one */
-
-	use_new_write_source (0);
-
-	return ret;
+	try {
+		string new_name = _session.new_midi_source_name (name());
+		
+		if (_write_source->rename (new_name)) {
+			return string();
+		}
+	} catch (...) {
+		return string ();
+	}
+	
+	return our_old_name;
 }
 
 void

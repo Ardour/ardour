@@ -46,7 +46,7 @@ cleanup_request_buffer (void* ptr)
 	
 	/* this is called when the thread for which this request buffer was
 	 * allocated dies. That could be before or after the end of the UI
-	 * event loop that the request buffer communicates.
+	 * event loop for which this request buffer provides communication.
 	 *
 	 * We are not modifying the UI's thread/buffer map, just marking it 
 	 * dead. If the UI is currently processing the buffers and misses

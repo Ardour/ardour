@@ -1276,6 +1276,69 @@ Editor::scroll_tracks_up_line ()
 	reset_y_origin (vertical_adjustment.get_value() - 60);
 }
 
+bool
+Editor::scroll_down_one_track ()
+{
+	double vertical_pos = vertical_adjustment.get_value () + vertical_adjustment.get_page_size() - 1.0; 
+
+	TrackViewList::reverse_iterator next = track_views.rend();
+	std::pair<TimeAxisView*,double> res;
+
+	for (TrackViewList::reverse_iterator t = track_views.rbegin(); t != track_views.rend(); ++t) {
+		if ((*t)->hidden()) {
+			continue;
+		}
+		
+		res = (*t)->covers_y_position (vertical_pos);
+
+		if (res.first) {
+			break;
+		}
+
+		next = t;
+	}
+
+	/* move to the track below the first one that covers the */
+	
+	if (next != track_views.rend()) {
+		ensure_track_visible (*next);
+		return true;
+	}
+
+	return false;
+}	
+
+bool
+Editor::scroll_up_one_track ()
+{
+	double vertical_pos = vertical_adjustment.get_value ();
+
+	TrackViewList::iterator prev = track_views.end();
+	std::pair<TimeAxisView*,double> res;
+
+	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
+
+		if ((*t)->hidden()) {
+			continue;
+		}
+
+		res = (*t)->covers_y_position(vertical_pos);
+		
+		if (res.first) {
+			break;
+		}
+
+		prev = t;
+	}
+	
+	if (prev != track_views.end()) {
+		ensure_track_visible (*prev);
+		return true;
+	}
+
+	return false;
+}
+
 /* ZOOM */
 
 void
@@ -4755,12 +4818,17 @@ Editor::fork_region ()
 		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*>(*r);
 
 		if (mrv) {
-			boost::shared_ptr<Playlist> playlist = mrv->region()->playlist();
-			boost::shared_ptr<MidiRegion> newregion = mrv->midi_region()->clone ();
-
-			playlist->clear_changes ();
-			playlist->replace_region (mrv->region(), newregion, mrv->region()->position());
-			_session->add_command(new StatefulDiffCommand (playlist));
+			try {
+				boost::shared_ptr<Playlist> playlist = mrv->region()->playlist();
+				boost::shared_ptr<MidiSource> new_source = _session->create_midi_source_by_stealing_name (mrv->midi_view()->track());
+				boost::shared_ptr<MidiRegion> newregion = mrv->midi_region()->clone (new_source);
+				
+				playlist->clear_changes ();
+				playlist->replace_region (mrv->region(), newregion, mrv->region()->position());
+				_session->add_command(new StatefulDiffCommand (playlist));
+			} catch (...) {
+				error << string_compose (_("Could not unlink %1"), mrv->region()->name()) << endmsg;
+			}
 		}
 
 		r = tmp;
@@ -6432,12 +6500,13 @@ Editor::remove_tracks ()
 
 	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*x);
-		if (rtv) {
-			if (rtv->is_track()) {
-				ntracks++;
-			} else {
-				nbusses++;
-			}
+		if (!rtv) {
+			continue;
+		}
+		if (rtv->is_track()) {
+			ntracks++;
+		} else {
+			nbusses++;
 		}
 		routes.push_back (rtv->_route);
 

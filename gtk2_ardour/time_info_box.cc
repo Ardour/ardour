@@ -27,6 +27,7 @@
 #include "gtkmm2ext/actions.h"
 
 #include "ardour/location.h"
+#include "ardour/profile.h"
 #include "ardour/session.h"
 
 #include "time_info_box.h"
@@ -71,7 +72,9 @@ TimeInfoBox::TimeInfoBox ()
 	set_border_width (2);
 
 	pack_start (left, true, true);
-	pack_start (right, true, true);
+	if (!ARDOUR::Profile->get_trx()) {
+		pack_start (right, true, true);
+	}
 
 	left.set_homogeneous (false);
 	left.set_spacings (0);

@@ -1795,6 +1795,8 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_new_plugins_active)
 		     ));
 
+	add_option (_("Audio"), new OptionEditorHeading (_("Regions")));
+
 	add_option (_("Audio"),
 	     new BoolOption (
 		     "auto-analyse-audio",
@@ -2016,7 +2018,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("MIDI"),
 		    new BoolOption (
-			    "diplay-first-midi-bank-as-zero",
+			    "display-first-midi-bank-as-zero",
 			    _("Display first MIDI bank/program as 0"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_first_midi_bank_is_zero),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_first_midi_bank_is_zero)
@@ -2122,6 +2124,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_tooltips)
 		     ));
 
+	add_option (S_("Preferences|GUI"),
+	     new BoolOption (
+		     "show-name-highlight",
+		     _("use name highlight bars in region displays"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_name_highlight),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_name_highlight)
+		     ));
+
 #ifndef GTKOSX
 	/* font scaling does nothing with GDK/Quartz */
 	add_option (S_("Preferences|GUI"), new FontScalingOptions (_rc_config));
@@ -2142,6 +2152,7 @@ RCOptionEditor::RCOptionEditor ()
 	_mixer_strip_visibility.add (0, X_("SoloSafe"), _("Solo Safe"));
 	_mixer_strip_visibility.add (0, X_("SoloIsolated"), _("Solo Isolated"));
 	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
+	_mixer_strip_visibility.add (0, X_("Group"), _("Group"));
 	_mixer_strip_visibility.add (0, X_("MeterPoint"), _("Meter Point"));
 	
 	add_option (

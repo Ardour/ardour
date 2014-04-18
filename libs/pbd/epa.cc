@@ -131,19 +131,26 @@ EnvironmentalProtectionAgency::restore () const
 void
 EnvironmentalProtectionAgency::clear () const
 {
-        char** the_environ = environ;
+	/* Copy the environment before using (g_)unsetenv() because on some
+	   platforms (maybe all?) this directly modifies the environ array,
+	   cause complications for iterating through it.
+	*/
 
-        for (size_t i = 0; the_environ[i]; ++i) {
-			
-                string estring = the_environ[i];
-                string::size_type equal = estring.find_first_of ('=');
+	vector<string> ecopy;
+
+        for (size_t i = 0; environ[i]; ++i) {
+		ecopy.push_back (environ[i]);
+	}
+
+	for (vector<string>::const_iterator e = ecopy.begin(); e != ecopy.end(); ++e) {
+                string::size_type equal = (*e).find_first_of ('=');
 			
                 if (equal == string::npos) {
                         /* say what? an environ value without = ? */
                         continue;
                 }
 			
-                string before = estring.substr (0, equal);
-                g_unsetenv(before.c_str());
+                string var_name = (*e).substr (0, equal);
+                g_unsetenv(var_name.c_str());
         }
 }

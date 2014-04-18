@@ -1659,10 +1659,10 @@ ARDOUR_UI::session_add_mixed_track (const ChanCount& input, const ChanCount& out
 
 	catch (...) {
 		MessageDialog msg (*editor,
-				   string_compose (_("There are insufficient JACK ports available\n\
+				   string_compose (_("There are insufficient ports available\n\
 to create a new track or bus.\n\
 You should save %1, exit and\n\
-restart JACK with more ports."), PROGRAM_NAME));
+restart with more ports."), PROGRAM_NAME));
 		msg.run ();
 	}
 }
@@ -1720,10 +1720,10 @@ ARDOUR_UI::session_add_audio_route (
 
 	catch (...) {
 		MessageDialog msg (*editor,
-				   string_compose (_("There are insufficient JACK ports available\n\
+				   string_compose (_("There are insufficient ports available\n\
 to create a new track or bus.\n\
 You should save %1, exit and\n\
-restart JACK with more ports."), PROGRAM_NAME));
+restart with more ports."), PROGRAM_NAME));
 		pop_back_splash (msg);
 		msg.run ();
 	}
@@ -1885,12 +1885,25 @@ ARDOUR_UI::transport_roll ()
 	bool rolling = _session->transport_rolling();
 
 	if (_session->get_play_loop()) {
-		/* XXX it is not possible to just leave seamless loop and keep
-		   playing at present (nov 4th 2009)
+
+		/* If loop playback is not a mode, then we should cancel
+		   it when this action is requested. If it is a mode
+		   we just leave it in place.
 		*/
-		if (!Config->get_seamless_loop()) {
-			_session->request_play_loop (false, true);
-		}
+
+		if (!Config->get_loop_is_mode()) {
+			/* XXX it is not possible to just leave seamless loop and keep
+			   playing at present (nov 4th 2009)
+			*/
+			if (!Config->get_seamless_loop()) {
+				/* stop loop playback and stop rolling */
+				_session->request_play_loop (false, true);
+			} else if (rolling) {
+				/* stop loop playback but keep rolling */
+				_session->request_play_loop (false, false);
+			}
+		} 
+
 	} else if (_session->get_play_range () && !Config->get_always_play_range()) {
 		/* stop playing a range if we currently are */
 		_session->request_play_range (0, true);
@@ -1947,7 +1960,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 				/* disk buffers are normal, so we can keep playing */
 				affect_transport = false;
 			}
-			_session->request_play_loop (false, true);
+			_session->request_play_loop (false, affect_transport);
 		} else if (_session->get_play_range ()) {
 			affect_transport = false;
 			_session->request_play_range (0, true);
@@ -1978,16 +1991,23 @@ ARDOUR_UI::toggle_session_auto_loop ()
 
 	if (_session->get_play_loop()) {
 
-		if (_session->transport_rolling()) {
+		/* looping enabled, our job is to disable it */
 
-			_session->request_locate (looploc->start(), true);
-			_session->request_play_loop (false);
+		_session->request_play_loop (false);
 
-		} else {
-			_session->request_play_loop (false);
-		}
 	} else {
-		_session->request_play_loop (true);
+
+		/* looping not enabled, our job is to enable it.
+
+		   loop-is-NOT-mode: this action always starts the transport rolling.
+		   loop-IS-mode:     this action simply sets the loop play mechanism, but
+		                        does not start transport.
+		*/
+		if (Config->get_loop_is_mode()) {
+			_session->request_play_loop (true, false);
+		} else {
+			_session->request_play_loop (true, true);
+		}
 	}
 	
 	//show the loop markers
@@ -2115,7 +2135,11 @@ ARDOUR_UI::map_transport_state ()
 
 			auto_loop_button.set_active (true);
 			play_selection_button.set_active (false);
-			roll_button.set_active (false);
+			if (Config->get_loop_is_mode()) {
+				roll_button.set_active (true);
+			} else {
+				roll_button.set_active (false);
+			}
 
 		} else {
 
@@ -2137,7 +2161,11 @@ ARDOUR_UI::map_transport_state ()
 		stop_button.set_active (true);
 		roll_button.set_active (false);
 		play_selection_button.set_active (false);
-		auto_loop_button.set_active (false);
+		if (Config->get_loop_is_mode ()) {
+			auto_loop_button.set_active (_session->get_play_loop());
+		} else {
+			auto_loop_button.set_active (false);
+		}
 		update_disk_space ();
 	}
 }

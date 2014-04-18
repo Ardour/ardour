@@ -133,7 +133,7 @@ export_search_path (const string& base_dir, const char* varname, const char* dir
 
 	if (cstr) {
 		path = cstr;
-		path += ':';
+		path += G_SEARCHPATH_SEPARATOR;
 	} else {
 		path = "";
 	}

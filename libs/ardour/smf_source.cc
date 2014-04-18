@@ -63,9 +63,12 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 {
 	/* note that origin remains empty */
 
-	if (init(_path, false)) {
+	if (init (_path, false)) {
 		throw failed_constructor ();
 	}
+ 
+        assert (!Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
 
 	/* file is not opened until write */
 
@@ -73,9 +76,10 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 		return;
 	}
 
-	if (open(_path)) {
+	if (open (_path)) {
 		throw failed_constructor ();
 	}
+
 	_open = true;
 }
 
@@ -93,9 +97,12 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 		throw failed_constructor ();
 	}
 
-	if (init(_path, true)) {
+	if (init (_path, true)) {
 		throw failed_constructor ();
 	}
+
+        assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
 
 	if (open(_path)) {
 		throw failed_constructor ();
@@ -658,3 +665,44 @@ SMFSource::ensure_disk_file ()
 	}
 }
 
+void
+SMFSource::prevent_deletion ()
+{
+	/* Unlike the audio case, the MIDI file remains mutable (because we can
+	   edit MIDI data)
+	*/
+  
+	_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
+}
+
+int
+SMFSource::rename (const string& newname)
+{
+	Glib::Threads::Mutex::Lock lm (_lock);
+	string oldpath = _path;
+	string newpath = _session.new_source_path_from_name (DataType::MIDI, newname);
+
+	if (newpath.empty()) {
+		error << string_compose (_("programming error: %1"), "cannot generate a changed file path") << endmsg;
+		return -1;
+	}
+
+	// Test whether newpath exists, if yes notify the user but continue.
+	if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
+		error << string_compose (_("Programming error! %1 tried to rename a file over another file! It's safe to continue working, but please report this to the developers."), PROGRAM_NAME) << endmsg;
+		return -1;
+	}
+
+	if (Glib::file_test (oldpath.c_str(), Glib::FILE_TEST_EXISTS)) { 
+		/* rename only needed if file exists on disk */
+		if (::rename (oldpath.c_str(), newpath.c_str()) != 0) {
+			error << string_compose (_("cannot rename file %1 to %2 (%3)"), oldpath, newpath, strerror(errno)) << endmsg;
+			return -1;
+		}
+	}
+
+	_name = Glib::path_get_basename (newpath);
+	_path = newpath;
+
+	return 0;
+}

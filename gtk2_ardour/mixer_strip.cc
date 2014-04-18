@@ -197,7 +197,7 @@ MixerStrip::init ()
 		button_size_group->add_widget (*monitor_input_button);
 	}
 
-    name_button.add_elements ( ArdourButton::FlatFace );
+    name_button.add_elements ( ArdourButton::Inset );
     top_button_table.attach (name_button, 0, 2, 2, 3);
 	auto_n_io_table.attach (automation_label, 0, 1, 0, 1);
     automation_label.show();

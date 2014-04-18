@@ -45,11 +45,18 @@ public:
 
 	virtual ~SMFSource ();
 
+	/** Rename the file on disk referenced by this source to \param newname
+	 *
+	 * This method exists only for MIDI file sources, not for audio, which 
+	 * can never be renamed. It exists for MIDI so that we can get
+	 * consistent and sane region/source numbering when regions are added
+	 * manually (which never happens with audio).
+	 */
+	int rename (const std::string& name);
+
         bool safe_file_extension (const std::string& path) const {
 		return safe_midi_file_extension(path);
 	}
-
-	bool set_name (const std::string& newname) { return (set_source_name(newname, false) == 0); }
 
 	void append_event_unlocked_beats (const Evoral::Event<Evoral::MusicalTime>& ev);
 	void append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, framepos_t source_start);
@@ -68,6 +75,8 @@ public:
 	void ensure_disk_file ();
 
 	static bool safe_midi_file_extension (const std::string& path);
+
+	void prevent_deletion ();
 
   protected:
 	void set_path (const std::string& newpath);

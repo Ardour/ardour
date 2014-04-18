@@ -39,10 +39,6 @@ class LIBARDOUR_API AudioFileSource : public AudioSource, public FileSource {
 public:
 	virtual ~AudioFileSource ();
 
-	bool set_name (const std::string& newname) {
-		return (set_source_name(newname, destructive()) == 0);
-	}
-
 	std::string peak_path (std::string audio_path);
 	std::string find_broken_peakfile (std::string missing_peak_path,
 	                                  std::string audio_path);

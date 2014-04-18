@@ -177,6 +177,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_internal_edit (bool yn);
 	bool toggle_internal_editing_from_double_click (GdkEvent*);
 
+        void _ensure_time_axis_view_is_visible (const TimeAxisView& tav, bool at_top);
 	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
 	void add_to_idle_resize (TimeAxisView*, int32_t);
 
@@ -207,7 +208,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	   account any scrolling offsets.
 	*/
 
-	framepos_t pixel_to_sample (double pixel) const {
+	framepos_t pixel_to_sample_from_event (double pixel) const {
 
 		/* pixel can be less than zero when motion events
 		   are processed. since we've already run the world->canvas
@@ -220,6 +221,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		} else {
 			return 0;
 		}
+	}
+
+	framepos_t pixel_to_sample (double pixel) const {
+		return pixel * samples_per_pixel;
 	}
 
         double sample_to_pixel (framepos_t sample) const {
@@ -345,9 +350,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void show_window ();
 
-	void ensure_time_axis_view_is_visible (const TimeAxisView& tav);
 	void scroll_tracks_down_line ();
 	void scroll_tracks_up_line ();
+        bool scroll_up_one_track ();
+        bool scroll_down_one_track ();
 
 	void prepare_for_cleanup ();
 	void finish_cleanup ();
@@ -408,7 +414,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		return _drags;
 	}
 
-	void maybe_autoscroll (bool, bool, bool, bool);
+        void maybe_autoscroll (bool, bool, bool);
+        bool autoscroll_active() const;
 
 	Gdk::Cursor* get_canvas_cursor () const { return current_canvas_cursor; }
 	void set_canvas_cursor (Gdk::Cursor*, bool save=false);
@@ -442,6 +449,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         ArdourCanvas::GtkCanvasViewport* get_time_bars_canvas () const;
         ArdourCanvas::GtkCanvasViewport* get_track_canvas () const;
 
+        void override_visible_track_count ();
 
   protected:
 	void map_transport_state ();
@@ -727,6 +735,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* The group used for region motion.  Sits on top of _trackview_group */
 	ArdourCanvas::Group* _region_motion_group;
+
+        /* a rect that sits at the bottom of all tracks to act as a drag-no-drop/clickable
+	 * target area.
+	 */
+        ArdourCanvas::Rectangle* _canvas_bottom_rect;
+        bool canvas_bottom_rect_event (GdkEvent* event);
 
 	enum RulerType {
 		ruler_metric_timecode = 0,
@@ -1022,6 +1036,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	static int _idle_visual_changer (void *arg);
 	int idle_visual_changer ();
+        void visual_changer (const VisualChange&);
 	void ensure_visual_change_idle_handler ();
 
 	/* track views */
@@ -1440,7 +1455,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gtk::Allocation _canvas_viewport_allocation;
 	void track_canvas_viewport_allocate (Gtk::Allocation alloc);
-	bool track_canvas_viewport_size_allocated ();
+	void track_canvas_viewport_size_allocated ();
 	bool track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const &, int, int, guint);
 	bool track_canvas_key_press (GdkEventKey *);
 	bool track_canvas_key_release (GdkEventKey *);
@@ -1557,6 +1572,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	ArdourButton              tav_expand_button;
 	ArdourButton              tav_shrink_button;
+    Gtk::ComboBoxText         visible_tracks_selector;
+
+    int32_t                   _visible_track_count;
+    void build_track_count_menu ();
+    void set_visible_track_count (int32_t);
 
 	Gtk::VBox                toolbar_clock_vbox;
 	Gtk::VBox                toolbar_selection_clock_vbox;
@@ -1587,7 +1607,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::VBox                automation_box;
 	Gtk::Button              automation_mode_button;
 
-	Gtk::ComboBoxText edit_mode_selector;
+	//edit mode menu stuff
+	Gtk::ComboBoxText	edit_mode_selector;
+	void build_edit_mode_menu ();
 	Gtk::VBox         edit_mode_box;
 	std::vector<std::string> edit_mode_strings;
 
@@ -1596,7 +1618,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void edit_mode_selection_done ();
 
 	Gtk::ComboBoxText snap_type_selector;
+	void build_snap_type_menu ();
+
 	Gtk::ComboBoxText snap_mode_selector;
+	void build_snap_mode_menu ();
 	Gtk::HBox         snap_box;
 
 	std::vector<std::string> snap_type_strings;
@@ -1612,7 +1637,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gtk::ComboBoxText zoom_focus_selector;
 	Gtk::VBox         zoom_focus_box;
-
+	void build_zoom_focus_menu ();
 	std::vector<std::string> zoom_focus_strings;
 
 	void zoom_focus_selection_done ();
@@ -1722,22 +1747,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* autoscrolling */
 
-	bool autoscroll_active;
-	int autoscroll_timeout_tag;
-	int autoscroll_x;
-	int autoscroll_y;
-	int last_autoscroll_x;
-	int last_autoscroll_y;
-	uint32_t autoscroll_cnt;
-	framecnt_t autoscroll_x_distance;
-	double autoscroll_y_distance;
+        sigc::connection autoscroll_connection;
+        bool autoscroll_horizontal_allowed;
+        bool autoscroll_vertical_allowed;
+        uint32_t autoscroll_cnt;
+        Gtk::Widget* autoscroll_widget;
+        ArdourCanvas::Rect autoscroll_boundary;
 
-	bool _autoscroll_fudging;
-	int autoscroll_fudge_threshold () const;
-
-	static gint _autoscroll_canvas (void *);
 	bool autoscroll_canvas ();
-	void start_canvas_autoscroll (int x, int y);
+        void start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary);
 	void stop_canvas_autoscroll ();
 
 	/* trimming */
@@ -1945,6 +1963,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Editing::EditPoint _edit_point;
 
 	Gtk::ComboBoxText edit_point_selector;
+	void build_edit_point_menu();	
 
 	void set_edit_point_preference (Editing::EditPoint ep, bool force = false);
 	void cycle_edit_point (bool with_marker);

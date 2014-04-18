@@ -579,6 +579,8 @@ def configure(conf):
         conf.env.append_value ('CXXFLAGS', '-DNO_PLUGIN_STATE')
         conf.define ('NO_PLUGIN_STATE', 1)
 
+    conf.define ('TRX_BUILD', 1)
+
     if Options.options.lv2dir:
         conf.env['LV2DIR'] = Options.options.lv2dir
     else:
@@ -858,6 +860,19 @@ def build(bld):
     bld.path.find_dir ('libs/gtkmm2ext/gtkmm2ext')
     bld.path.find_dir ('libs/ardour/ardour')
     bld.path.find_dir ('libs/pbd/pbd')
+
+    # set up target directories
+    lwrcase_dirname = 'ardour3'
+
+    if bld.is_defined ('TRX_BUILD'):
+        lwrcase_dirname = 'tracks'
+
+    # configuration files go here
+    bld.env['CONFDIR'] = os.path.join(bld.env['SYSCONFDIR'], lwrcase_dirname)
+    # data files loaded at run time go here
+    bld.env['DATADIR'] = os.path.join(bld.env['DATADIR'], lwrcase_dirname)
+    # shared objects loaded at runtime go here
+    bld.env['DLLDIR'] = os.path.join(bld.env['LIBDIR'], lwrcase_dirname)
 
     autowaf.set_recursive()
 

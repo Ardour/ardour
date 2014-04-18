@@ -303,7 +303,7 @@ framecnt_t
 AudioSource::write (Sample *dst, framecnt_t cnt)
 {
 	Glib::Threads::Mutex::Lock lm (_lock);
-	/* any write makes the fill not removable */
+	/* any write makes the file not removable */
 	_flags = Flag (_flags & ~Removable);
 	return write_unlocked (dst, cnt);
 }

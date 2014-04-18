@@ -62,8 +62,6 @@ FileSource::FileSource (Session& session, DataType type, const string& path, con
         , _open (false)
 {
 	set_within_session_from_path (path);
-
-        prevent_deletion ();
 }
 
 FileSource::FileSource (Session& session, const XMLNode& node, bool /*must_exist*/)
@@ -77,23 +75,28 @@ FileSource::FileSource (Session& session, const XMLNode& node, bool /*must_exist
 
 	_path = _name;
 	_within_session = true;
+}
 
-        prevent_deletion ();
+FileSource::~FileSource()
+{
+}
+
+void
+FileSource::existence_check ()
+{
+        if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS)) {
+		prevent_deletion ();
+	}
 }
 
 void
 FileSource::prevent_deletion ()
 {
-        /* if this file already exists, it cannot be removed, ever
-         */
-
-        if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS)) {
-                if (!(_flags & Destructive)) {
-                        mark_immutable ();
-                } else {
-                        _flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
-                }
-        }
+	if (!(_flags & Destructive)) {
+		mark_immutable ();
+	} else {
+		_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
+	}
 }
 
 bool
@@ -507,35 +510,6 @@ FileSource::find_2X (Session& s, DataType type, const string& path, bool must_ex
 
 out:
 	return ret;
-}
-
-int
-FileSource::set_source_name (const string& newname, bool destructive)
-{
-	Glib::Threads::Mutex::Lock lm (_lock);
-	string oldpath = _path;
-	string newpath = _session.change_source_path_by_name (oldpath, _name, newname, destructive);
-
-	if (newpath.empty()) {
-		error << string_compose (_("programming error: %1"), "cannot generate a changed file path") << endmsg;
-		return -1;
-	}
-
-	// Test whether newpath exists, if yes notify the user but continue.
-	if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
-		error << string_compose (_("Programming error! %1 tried to rename a file over another file! It's safe to continue working, but please report this to the developers."), PROGRAM_NAME) << endmsg;
-		return -1;
-	}
-
-        if (::rename (oldpath.c_str(), newpath.c_str()) != 0) {
-                error << string_compose (_("cannot rename file %1 to %2 (%3)"), oldpath, newpath, strerror(errno)) << endmsg;
-                return -1;
-        }
-
-	_name = Glib::path_get_basename (newpath);
-	_path = newpath;
-
-	return 0;
 }
 
 void

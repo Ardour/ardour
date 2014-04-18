@@ -84,7 +84,7 @@ Editor::initialize_canvas ()
 		// logo_item->property_width_in_pixels() = true;
 		// logo_item->property_height_set() = true;
 		// logo_item->property_width_set() = true;
-		logo_item->show ();
+		// logo_item->show ();
 	}
 	
 	/*a group to hold global rects like punch/loop indicators */
@@ -192,12 +192,10 @@ Editor::initialize_canvas ()
 	// used to show zoom mode active zooming
 	zoom_rect = new ArdourCanvas::Rectangle (_track_canvas->root(), ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
 	zoom_rect->hide();
-
 	zoom_rect->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
 
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::Rectangle (_trackview_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
-
 	rubberband_rect->hide();
 
 	tempo_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_tempo_bar_event), tempo_bar));
@@ -213,7 +211,17 @@ Editor::initialize_canvas ()
 	if (logo_item) {
 		logo_item->lower_to_bottom ();
 	}
-	/* need to handle 4 specific types of events as catch-alls */
+
+
+	_canvas_bottom_rect = new ArdourCanvas::Rectangle (_track_canvas->root(), ArdourCanvas::Rect (0.0, 0.0, max_canvas_coordinate, 20));
+	/* this thing is transparent */
+	_canvas_bottom_rect->set_fill (false);
+	_canvas_bottom_rect->set_outline (false);
+	_canvas_bottom_rect->Event.connect (sigc::mem_fun (*this, &Editor::canvas_bottom_rect_event));
+
+	/* these signals will initially be delivered to the canvas itself, but if they end up remaining unhandled, they are passed to Editor-level
+	   handlers.
+	*/
 
 	_track_canvas->signal_scroll_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_scroll_event));
 	_track_canvas->signal_motion_notify_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_motion_notify_event));
@@ -257,7 +265,7 @@ Editor::track_canvas_viewport_allocate (Gtk::Allocation alloc)
 	track_canvas_viewport_size_allocated ();
 }
 
-bool
+void
 Editor::track_canvas_viewport_size_allocated ()
 {
 	bool height_changed = _visible_canvas_height != _canvas_viewport_allocation.get_height();
@@ -281,13 +289,13 @@ Editor::track_canvas_viewport_size_allocated ()
 			*/
 			vertical_adjustment.set_value (_full_canvas_height - _visible_canvas_height);
 		}
+
+		set_visible_track_count (_visible_track_count);
 	}
 
 	update_fixed_rulers();
 	redisplay_tempo (false);
 	_summary->set_overlays_dirty ();
-
-	return false;
 }
 
 void
@@ -315,12 +323,24 @@ Editor::reset_controls_layout_width ()
 void
 Editor::reset_controls_layout_height (int32_t h)
 {
+	/* ensure that the rect that represents the "bottom" of the canvas
+	 * (the drag-n-drop zone) is, in fact, at the bottom.
+	 */
+
+	_canvas_bottom_rect->set_position (ArdourCanvas::Duple (0, h));
+
+	/* track controls layout must span the full height of "h" (all tracks)
+	 * plus the bottom rect.
+	 */
+
+	h += _canvas_bottom_rect->height ();
+
         /* set the height of the scrollable area (i.e. the sum of all contained widgets)
+	 * for the controls layout. The size request is set elsewhere.
          */
 
         controls_layout.property_height() = h;
 
-        /* size request is set elsewhere, see ::track_canvas_allocate() */
 }
 
 bool
@@ -448,245 +468,265 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 	context->drag_finish (true, false, time);
 }
 
-/** If the editor window is arranged such that the edge of the trackview is right up
- *  against the edge of the screen, autoscroll will not work very well.  In this situation,
- *  we start autoscrolling some distance in from the right-hand-side of the screen edge;
- *  this is the distance at which that happens.
- */
-int
-Editor::autoscroll_fudge_threshold () const
-{
-	return current_page_samples() / 6;
-}
-
 /** @param allow_horiz true to allow horizontal autoscroll, otherwise false.
  *
  *  @param allow_vert true to allow vertical autoscroll, otherwise false.
  *
- *  @param moving_left true if we are moving left, so we only want to autoscroll on the left of the canvas,
- *  otherwise false, so we only want to autoscroll on the right of the canvas.
- *
- *  @param moving_up true if we are moving up, so we only want to autoscroll at the top of the canvas,
- *  otherwise false, so we only want to autoscroll at the bottom of the canvas.
  */
 void
-Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool moving_left, bool moving_up)
+Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 {
 	if (!Config->get_autoscroll_editor ()) {
 		return;
 	}
+
+
+	ArdourCanvas::Rect scrolling_boundary;
+	Gtk::Allocation alloc;
 	
-	bool startit = false;
-
-	/* Work out the distance between the right hand edge of the trackview and the edge of
-	   the monitor that it is on.
-	*/
-
-	Glib::RefPtr<Gdk::Window> gdk_window = get_window ();
-	Gdk::Rectangle window_rect;
-	gdk_window->get_frame_extents (window_rect);
+	if (from_headers) {
+		alloc = controls_layout.get_allocation ();
+	} else {
+		alloc = _track_canvas_viewport->get_allocation ();
+		
+		/* the effective width of the autoscroll boundary so
+		   that we start scrolling before we hit the edge.
+		   
+		   this helps when the window is slammed up against the
+		   right edge of the screen, making it hard to scroll
+		   effectively.
+		*/
+		
+		if (alloc.get_width() > 20) { 
+			alloc.set_width (alloc.get_width() - 20);
+			alloc.set_x (alloc.get_x() + 10);
+		} 
+	}
 	
-	Glib::RefPtr<Gdk::Screen> screen = get_screen ();
-	Gdk::Rectangle root_rect;
-	screen->get_root_window()->get_frame_extents (root_rect);
+	scrolling_boundary = ArdourCanvas::Rect (alloc.get_x(), alloc.get_y(), 
+						 alloc.get_x() + alloc.get_width(), 
+						 alloc.get_y() + alloc.get_height());
+	
+	int x, y;
+	Gdk::ModifierType mask;
 
-	Gtk::Allocation editor_list = _the_notebook.get_allocation ();
+	get_window()->get_pointer (x, y, mask);
 
-	framecnt_t distance = pixel_to_sample (root_rect.get_x() + root_rect.get_width() - window_rect.get_x() - window_rect.get_width());
-	if (_the_notebook.is_visible ()) {
-		distance += pixel_to_sample (editor_list.get_width());
+	if ((allow_horiz && (x < scrolling_boundary.x0 || x >= scrolling_boundary.x1)) ||
+	    (allow_vert && (y < scrolling_boundary.y0 || y >= scrolling_boundary.y1))) {
+		start_canvas_autoscroll (allow_horiz, allow_vert, scrolling_boundary);
 	}
-
-	/* Note whether we're fudging the autoscroll (see autoscroll_fudge_threshold) */
-	_autoscroll_fudging = (distance < autoscroll_fudge_threshold ());
-
-	/* ty is in canvas-coordinate space */
-
-	double const ty = _drags->current_pointer_y();
-	ArdourCanvas::Rect visible = _track_canvas->visible_area();
-
-	autoscroll_y = 0;
-	autoscroll_x = 0;
-	if (ty < visible.y0 && moving_up && allow_vert) {
-		autoscroll_y = -1;
-		startit = true;
-	} else if (ty > visible.y1 && !moving_up && allow_vert) {
-		autoscroll_y = 1;
-		startit = true;
-	}
-
-	framepos_t rightmost_frame = leftmost_frame + current_page_samples();
-	if (_autoscroll_fudging) {
-		rightmost_frame -= autoscroll_fudge_threshold ();
-	}
-
-	if (_drags->current_pointer_frame() > rightmost_frame && allow_horiz) {
-		if (rightmost_frame < max_framepos && !moving_left) {
-			autoscroll_x = 1;
-			startit = true;
-		}
-	} else if (_drags->current_pointer_frame() < leftmost_frame && allow_horiz) {
-		if (leftmost_frame > 0 && moving_left) {
-			autoscroll_x = -1;
-			startit = true;
-		}
-	}
-
-	if (autoscroll_active && ((autoscroll_x != last_autoscroll_x) || (autoscroll_y != last_autoscroll_y) || (autoscroll_x == 0 && autoscroll_y == 0))) {
-		stop_canvas_autoscroll ();
-	}
-
-	if (startit && autoscroll_timeout_tag < 0) {
-		start_canvas_autoscroll (autoscroll_x, autoscroll_y);
-	}
-
-	last_autoscroll_x = autoscroll_x;
-	last_autoscroll_y = autoscroll_y;
 }
 
-gint
-Editor::_autoscroll_canvas (void *arg)
+bool
+Editor::autoscroll_active () const
 {
-        return ((Editor *) arg)->autoscroll_canvas ();
+	return autoscroll_connection.connected ();
 }
 
 bool
 Editor::autoscroll_canvas ()
 {
-	framepos_t new_frame;
-	framepos_t limit = max_framepos - current_page_samples();
-	double new_pixel;
+	int x, y;
+	Gdk::ModifierType mask;
+	frameoffset_t dx = 0;
+	bool no_stop = false;
+	bool y_motion = false;
 
-	if (autoscroll_x_distance != 0) {
+	get_window()->get_pointer (x, y, mask);
 
-		if (autoscroll_x > 0) {
-			autoscroll_x_distance = (_drags->current_pointer_frame() - (leftmost_frame + current_page_samples())) / 3;
-			if (_autoscroll_fudging) {
-				autoscroll_x_distance += autoscroll_fudge_threshold () / 3;
+	VisualChange vc;
+
+	if (autoscroll_horizontal_allowed) {
+
+		framepos_t new_frame = leftmost_frame;
+
+		/* horizontal */
+
+		if (x > autoscroll_boundary.x1) {
+
+			/* bring it back into view */
+			dx = x - autoscroll_boundary.x1;
+			dx += 10 + (2 * (autoscroll_cnt/2));
+
+			dx = pixel_to_sample (dx);
+
+			if (leftmost_frame < max_framepos - dx) {
+				new_frame = leftmost_frame + dx;
+			} else {
+				new_frame = max_framepos;
 			}
-		} else if (autoscroll_x < 0) {
-			autoscroll_x_distance = (leftmost_frame - _drags->current_pointer_frame()) / 3;
 
+			no_stop = true;
+
+		} else if (x < autoscroll_boundary.x0) {
+			
+			dx = autoscroll_boundary.x0 - x;
+			dx += 10 + (2 * (autoscroll_cnt/2));
+
+			dx = pixel_to_sample (dx);
+
+			if (leftmost_frame >= dx) {
+				new_frame = leftmost_frame - dx;
+			} else {
+				new_frame = 0;
+			}
+
+			no_stop = true;
+		}
+		
+		if (new_frame != leftmost_frame) {
+			vc.time_origin = new_frame;
+			vc.add (VisualChange::TimeOrigin);
 		}
 	}
 
-	if (autoscroll_y_distance != 0) {
-		if (autoscroll_y > 0) {
-			autoscroll_y_distance = (_drags->current_pointer_y() - _visible_canvas_height) / 3;
-		} else if (autoscroll_y < 0) {
+	if (autoscroll_vertical_allowed) {
+		
+		const double vertical_pos = vertical_adjustment.get_value();
+		double new_pixel = vertical_pos;
+		const int speed_factor = 20;
 
-			autoscroll_y_distance = (vertical_adjustment.get_value () - _drags->current_pointer_y()) / 3;
-		}
-	}
-
-	if (autoscroll_x < 0) {
-		if (leftmost_frame < autoscroll_x_distance) {
-			new_frame = 0;
-		} else {
-			new_frame = leftmost_frame - autoscroll_x_distance;
-		}
- 	} else if (autoscroll_x > 0) {
-		if (leftmost_frame > limit - autoscroll_x_distance) {
-			new_frame = limit;
-		} else {
-			new_frame = leftmost_frame + autoscroll_x_distance;
-		}
-	} else {
-		new_frame = leftmost_frame;
-	}
-
-	double vertical_pos = vertical_adjustment.get_value();
-
-	if (autoscroll_y < 0) {
-
-		if (vertical_pos < autoscroll_y_distance) {
-			new_pixel = 0;
-		} else {
-			new_pixel = vertical_pos - autoscroll_y_distance;
-		}
-
- 	} else if (autoscroll_y > 0) {
-
-		new_pixel = min (_full_canvas_height - _visible_canvas_height, min (_full_canvas_height, (vertical_adjustment.get_value() + autoscroll_y_distance)));
-
-	} else {
+		/* vertical */ 
+		
 		new_pixel = vertical_pos;
+
+		if (y < autoscroll_boundary.y0) {
+
+			/* scroll to make higher tracks visible */
+
+			if (autoscroll_cnt && (autoscroll_cnt % speed_factor == 0)) {
+				y_motion = scroll_up_one_track ();
+			}
+
+		} else if (y > autoscroll_boundary.y1) {
+
+			if (autoscroll_cnt && (autoscroll_cnt % speed_factor == 0)) {
+				y_motion = scroll_down_one_track ();
+				
+			}
+		}
+
+		no_stop = true;
 	}
 
-	if ((new_frame == 0 || new_frame == limit) && (new_pixel == 0 || new_pixel == DBL_MAX)) {
-		/* we are done */
+	if (vc.pending) {
+
+		/* change horizontal first */
+
+		if (vc.pending) {
+			visual_changer (vc);
+		}
+
+		/* now send a motion event to notify anyone who cares
+		   that we have moved to a new location (because we scrolled)
+		*/
+
+		GdkEventMotion ev;
+
+		ev.type = GDK_MOTION_NOTIFY;
+		ev.state = Gdk::BUTTON1_MASK;
+		
+		/* the motion handler expects events in canvas coordinate space */
+
+		/* first convert from Editor window coordinates to canvas
+		 * window coordinates
+		 */
+
+		int cx;
+		int cy;
+
+		/* clamp x and y to remain within the visible area */
+
+		x = min (max ((ArdourCanvas::Coord) x, autoscroll_boundary.x0), autoscroll_boundary.x1);
+		y = min (max ((ArdourCanvas::Coord) y, autoscroll_boundary.y0), autoscroll_boundary.y1);
+
+		translate_coordinates (*_track_canvas_viewport, x, y, cx, cy);
+
+		ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (cx, cy));
+		ev.x = d.x;
+		ev.y = d.y;
+
+		motion_handler (0, (GdkEvent*) &ev, true);
+
+	} else if (no_stop) {
+
+		/* not changing visual state but pointer is outside the scrolling boundary
+		 * so we still need to deliver a fake motion event 
+		 */
+
+		GdkEventMotion ev;
+
+		ev.type = GDK_MOTION_NOTIFY;
+		ev.state = Gdk::BUTTON1_MASK;
+		
+		/* the motion handler expects events in canvas coordinate space */
+
+		/* first convert from Editor window coordinates to canvas
+		 * window coordinates
+		 */
+
+		int cx;
+		int cy;
+
+		/* clamp x and y to remain within the visible area. except
+		 * .. if horizontal scrolling is allowed, always allow us to
+		 * move back to zero
+		 */
+
+		if (autoscroll_horizontal_allowed) {
+			x = min (max ((ArdourCanvas::Coord) x, 0.0), autoscroll_boundary.x1);
+		} else {
+			x = min (max ((ArdourCanvas::Coord) x, autoscroll_boundary.x0), autoscroll_boundary.x1);
+		}
+		y = min (max ((ArdourCanvas::Coord) y, autoscroll_boundary.y0), autoscroll_boundary.y1);
+
+		translate_coordinates (*_track_canvas_viewport, x, y, cx, cy);
+
+		ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (cx, cy));
+		ev.x = d.x;
+		ev.y = d.y;
+
+		motion_handler (0, (GdkEvent*) &ev, true);
+
+	} else {
+		stop_canvas_autoscroll ();
 		return false;
 	}
-
-	if (new_frame != leftmost_frame) {
-		reset_x_origin (new_frame);
-	}
-
-	if (new_pixel != vertical_pos) {
-		vertical_adjustment.set_value (new_pixel);
-	}
-
-	/* fake an event. */
-
-	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->_track_canvas->get_window();
-	gint x, y;
-	Gdk::ModifierType mask;
-	GdkEventMotion ev;
-	canvas_window->get_pointer (x, y, mask);
-	ev.type = GDK_MOTION_NOTIFY;
-	ev.state = Gdk::BUTTON1_MASK;
-
-	/* the motion handler expects events in canvas coordinate space */
-	ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (x, y));
-	ev.x = d.x;
-	ev.y = d.y;
-
-	motion_handler (0, (GdkEvent*) &ev, true);
 
 	autoscroll_cnt++;
 
-	if (autoscroll_cnt == 1) {
-
-		/* connect the timeout so that we get called repeatedly */
-
-		autoscroll_timeout_tag = g_idle_add ( _autoscroll_canvas, this);
-		return false;
-
-	}
-
-	return true;
-}
+	return true; /* call me again */
+}	
 
 void
-Editor::start_canvas_autoscroll (int dx, int dy)
+Editor::start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary)
 {
-	if (!_session || autoscroll_active) {
+	if (!_session) {
 		return;
 	}
 
 	stop_canvas_autoscroll ();
 
-	autoscroll_active = true;
-	autoscroll_x = dx;
-	autoscroll_y = dy;
-	autoscroll_x_distance = (framepos_t) floor (current_page_samples()/50.0);
-	autoscroll_y_distance = fabs ((double)dy * 5); /* pixels */
 	autoscroll_cnt = 0;
+	autoscroll_horizontal_allowed = allow_horiz;
+	autoscroll_vertical_allowed = allow_vert;
+	autoscroll_boundary = boundary;
 
-	/* do it right now, which will start the repeated callbacks */
+	/* do the first scroll right now
+	*/
 
 	autoscroll_canvas ();
+
+	/* scroll again at very very roughly 30FPS */
+
+	autoscroll_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &Editor::autoscroll_canvas), 30);
 }
 
 void
 Editor::stop_canvas_autoscroll ()
 {
-	if (autoscroll_timeout_tag >= 0) {
-		g_source_remove (autoscroll_timeout_tag);
-		autoscroll_timeout_tag = -1;
-	}
-
-	autoscroll_active = false;
+	autoscroll_connection.disconnect ();
 }
 
 bool
@@ -709,19 +749,26 @@ Editor::entered_track_canvas (GdkEventCrossing */*ev*/)
 }
 
 void
-Editor::ensure_time_axis_view_is_visible (const TimeAxisView& tav)
+Editor::_ensure_time_axis_view_is_visible (const TimeAxisView& tav, bool at_top)
 {
 	double begin = tav.y_position();
-
 	double v = vertical_adjustment.get_value ();
 
-	if (begin < v || begin + tav.current_height() > v + _visible_canvas_height) {
+	if (!at_top && (begin < v || begin + tav.current_height() > v + _visible_canvas_height)) {
 		/* try to put the TimeAxisView roughly central */
 		if (begin >= _visible_canvas_height/2.0) {
 			begin -= _visible_canvas_height/2.0;
 		}
-		vertical_adjustment.set_value (begin);
 	}
+
+	/* Clamp the y pos so that we do not extend beyond the canvas full
+	 * height. 
+	 */
+	if (_full_canvas_height - begin < _visible_canvas_height){
+		begin = _full_canvas_height - _visible_canvas_height;
+	}
+
+	vertical_adjustment.set_value (begin);
 }
 
 /** Called when the main vertical_adjustment has changed */
@@ -748,8 +795,6 @@ Editor::set_horizontal_position (double p)
 	}
 
 	update_video_timeline();
-
-	HorizontalPositionChanged (); /* EMIT SIGNAL */
 }
 
 void

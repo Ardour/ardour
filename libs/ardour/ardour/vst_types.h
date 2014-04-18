@@ -62,7 +62,6 @@ struct LIBARDOUR_API _VSTHandle
 {
 	void*        dll;
 	char*        name;
-	char*        nameptr;
 	char*        path;
 	
 	main_entry_t main_entry;

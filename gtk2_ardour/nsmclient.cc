@@ -27,6 +27,10 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #else
 #include <process.h>  // Needed for 'getpid()'
+
+#include <lo/lo_osc_types.h>
+#define LO_TT_IMMEDIATE lo_get_tt_immediate()
+lo_timetag lo_get_tt_immediate() { lo_timetag tt = {0U,1U}; return tt; }
 #endif
 
 namespace NSM

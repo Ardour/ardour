@@ -2,16 +2,16 @@
 #include <string.h>
 #include <windows.h>
 
+#define fst_error(...) fprintf(stderr, __VA_ARGS__)
+
 #ifdef PLATFORM_WINDOWS
 
 #include <pthread.h>
 static UINT_PTR idle_timer_id   = 0;
-extern char *basename(char *path);
 
 #else /* linux + wine */
 
 #include <linux/limits.h> // PATH_MAX
-#include <libgen.h> // basename
 #include <winnt.h>
 #include <wine/exception.h>
 #include <pthread.h>
@@ -489,9 +489,8 @@ fst_load (const char *path)
 	if ((strlen(path)) && (NULL != (fhandle = fst_handle_new ())))
 	{
 		char* period;
-		fhandle->nameptr = strdup (path);
 		fhandle->path = strdup (path);
-		fhandle->name = basename(fhandle->nameptr);
+		fhandle->name = g_path_get_basename(path);
 		if ((period = strrchr (fhandle->name, '.'))) {
 			*period = '\0';
 		}
@@ -502,10 +501,10 @@ fst_load (const char *path)
 			return NULL;
 		}
 
-		fhandle->main_entry = (main_entry_t) GetProcAddress (fhandle->dll, "main");
+		fhandle->main_entry = (main_entry_t) GetProcAddress ((HMODULE)fhandle->dll, "main");
 
 		if (fhandle->main_entry == 0) {
-			if ((fhandle->main_entry = (main_entry_t) GetProcAddress (fhandle->dll, "VSTPluginMain"))) {
+			if ((fhandle->main_entry = (main_entry_t) GetProcAddress ((HMODULE)fhandle->dll, "VSTPluginMain"))) {
 				fprintf(stderr, "VST >= 2.4 plugin '%s'\n", path);
 				//PBD::warning << path << _(": is a VST >= 2.4 - this plugin may or may not function correctly with this version of Ardour.") << endmsg;
 			}
@@ -540,9 +539,8 @@ fst_unload (VSTHandle** fhandle)
 		(*fhandle)->path = NULL;
 	}
 
-	if ((*fhandle)->nameptr) {
-		free ((*fhandle)->nameptr);
-		(*fhandle)->nameptr = NULL;
+	if ((*fhandle)->name) {
+		free ((*fhandle)->name);
 		(*fhandle)->name = NULL;
 	}
 
