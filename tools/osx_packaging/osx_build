@@ -144,7 +144,7 @@ mkdir -p $Templates
 mkdir -p $Frameworks/modules
 mkdir -p $Etc
 mkdir -p $MackieControl
-mkdir -p $Patchfiles
+mkdir -p $PatchFiles
 
 # maybe set variables
 env=""
