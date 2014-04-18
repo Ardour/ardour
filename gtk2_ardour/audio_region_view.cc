@@ -1423,18 +1423,25 @@ AudioRegionView::set_one_waveform_color (ArdourCanvas::WaveView* wave)
 			}
 		}
 	}
+#if 0 //Removed for Tracks
+	if (ARDOUR_UI::config()->get_color_regions_using_track_color()) {
 
-	//if (ARDOUR_UI::config()->get_color_regions_using_track_color()) {
+		/* just use a slightly transparent version of the selected
+		 * color so that some of the track color bleeds through
+		 */
 
-	//	/* just use a slightly transparent version of the selected
-	//	 * color so that some of the track color bleeds through
-	//	 */
+		double r, g, b, a;
+		ArdourCanvas::color_to_rgba (fill, r, g, b, a);
+		fill = ArdourCanvas::rgba_to_color (r, g, b, 0.85); /* magic number, not user controllable */
+		outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
 
-	//	double r, g, b, a;
-	//	ArdourCanvas::color_to_rgba (fill, r, g, b, a);
-	//	fill = ArdourCanvas::rgba_to_color (r, g, b, 0.85); /* magic number, not user controllable */
-	//	outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
-	//}
+		if (!Config->get_show_name_highlight()) {
+			/* recolor name text because it needs to contrast with
+			   the waveform background, not the name highlight.
+			*/
+		}
+	}
+#endif
 
 	wave->set_fill_color (fill);
 	wave->set_outline_color (outline);

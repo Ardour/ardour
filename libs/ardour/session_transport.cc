@@ -30,6 +30,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/memento_command.h"
+#include "pbd/stacktrace.h"
 
 #include "midi++/mmc.h"
 #include "midi++/port.h"
@@ -40,6 +41,7 @@
 #include "ardour/click.h"
 #include "ardour/debug.h"
 #include "ardour/location.h"
+#include "ardour/profile.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
 #include "ardour/operations.h"
@@ -158,10 +160,11 @@ Session::force_locate (framepos_t target_frame, bool with_roll)
 }
 
 void
-Session::request_play_loop (bool yn, bool leave_rolling)
+Session::request_play_loop (bool yn, bool change_transport_roll)
 {
 	SessionEvent* ev;
 	Location *location = _locations->auto_loop_location();
+	double target_speed;
 
 	if (location == 0 && yn) {
 		error << _("Cannot loop - no loop range defined")
@@ -169,14 +172,44 @@ Session::request_play_loop (bool yn, bool leave_rolling)
 		return;
 	}
 
-	ev = new SessionEvent (SessionEvent::SetLoop, SessionEvent::Add, SessionEvent::Immediate, 0, (leave_rolling ? 1.0 : 0.0), yn);
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request set loop = %1, leave rolling ? %2\n", yn, leave_rolling));
+	if (change_transport_roll) {
+		if (transport_rolling()) {
+			/* start looping at current speed */
+			target_speed = transport_speed ();
+		} else {
+			/* currently stopped */
+			if (yn) {
+				/* start looping at normal speed */
+				target_speed = 1.0;
+			} else {
+				target_speed = 0.0;
+			}
+		}
+	} else {
+		/* leave the speed alone */
+		target_speed = transport_speed ();
+	}
+
+	ev = new SessionEvent (SessionEvent::SetLoop, SessionEvent::Add, SessionEvent::Immediate, 0, target_speed, yn);
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request set loop = %1, change roll state ? %2\n", yn, change_transport_roll));
 	queue_event (ev);
 
-	if (!leave_rolling && !yn && Config->get_seamless_loop() && transport_rolling()) {
-		// request an immediate locate to refresh the tracks
-		// after disabling looping
-		request_locate (_transport_frame-1, false);
+	if (yn) {
+		if (!change_transport_roll) {
+			if (!transport_rolling()) {
+				/* we're not changing transport state, but we do want
+				   to set up position for the new loop. Don't
+				   do this if we're rolling already.
+				*/
+				request_locate (location->start(), false);
+			}
+		}
+	} else {
+		if (!change_transport_roll && Config->get_seamless_loop() && transport_rolling()) {
+			// request an immediate locate to refresh the tracks
+			// after disabling looping
+			request_locate (_transport_frame-1, false);
+		}
 	}
 }
 
@@ -531,8 +564,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 				/* explicit return request pre-queued in event list. overrides everything else */
 
-				cerr << "explicit auto-return to " << _requested_return_frame << endl;
-
 				_transport_frame = _requested_return_frame;
 				do_locate = true;
 
@@ -589,8 +620,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	*/
 
 	if (ptw & PostTransportClearSubstate) {
-		_play_range = false;
-		unset_play_loop ();
+		unset_play_range ();
+		if (!Config->get_loop_is_mode()) {
+			unset_play_loop ();
+		}
 	}
 
 	/* this for() block can be put inside the previous if() and has the effect of ... ??? what */
@@ -657,8 +690,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	if (ptw & PostTransportStop) {
-		_play_range = false;
-		play_loop = false;
+		unset_play_range ();
+		if (!Config->get_loop_is_mode()) {
+			unset_play_loop ();
+		}
 	}
 
 	PositionChanged (_transport_frame); /* EMIT SIGNAL */
@@ -723,7 +758,7 @@ Session::unset_play_loop ()
 }
 
 void
-Session::set_play_loop (bool yn)
+Session::set_play_loop (bool yn, double speed)
 {
 	/* Called from event-handling context */
 
@@ -782,12 +817,24 @@ Session::set_play_loop (bool yn)
 			merge_event (new SessionEvent (SessionEvent::AutoLoopDeclick, SessionEvent::Replace, dcp, dcl, 0.0f));
 			merge_event (new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f));
 
-			/* locate to start of loop and roll. 
+			/* if requested to roll, locate to start of loop and
+			 * roll but ONLY if we're not already rolling.
 
 			   args: positition, roll=true, flush=true, with_loop=false, force buffer refill if seamless looping
 			*/
 
-			start_locate (loc->start(), true, true, false, Config->get_seamless_loop());
+			if (Config->get_loop_is_mode()) {
+				/* loop IS a transport mode: if already
+				   rolling, do not locate to loop start.
+				*/
+				if (!transport_rolling() && (speed != 0.0)) {
+					start_locate (loc->start(), true, true, false, Config->get_seamless_loop());
+				}
+			} else {
+				if (speed != 0.0) {
+					start_locate (loc->start(), true, true, false, Config->get_seamless_loop());
+				}
+			}
 		}
 
 	} else {
@@ -983,7 +1030,9 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 				// located outside the loop: cancel looping directly, this is called from event handling context
 
-				set_play_loop (false);
+				if (!Config->get_loop_is_mode()) {
+					set_play_loop (false, _transport_speed);
+				}
 				
 			} else if (_transport_frame == al->start()) {
 
@@ -1080,11 +1129,26 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 			stop_transport (abort);
 		}
 
-		unset_play_loop ();
+		if (!Config->get_loop_is_mode()) {
+			unset_play_loop ();
+		}
 
 	} else if (transport_stopped() && speed == 1.0) {
 
 		/* we are stopped and we want to start rolling at speed 1 */
+
+		if (Config->get_loop_is_mode() && play_loop) {
+
+			Location *location = _locations->auto_loop_location();
+			
+			if (location != 0) {
+				if (_transport_frame != location->start()) {
+					/* jump to start and then roll from there */
+					request_locate (location->start(), true);
+					return;
+				}
+			}
+		}
 
 		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 			set_track_monitor_input_status (false);

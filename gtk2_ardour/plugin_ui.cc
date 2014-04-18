@@ -227,7 +227,7 @@ PluginUIWindow::create_windows_vst_editor(boost::shared_ptr<PluginInsert>)
 		      << endmsg;
 		throw failed_constructor ();
 	} else {
-		WindowsVSTPluginUI* vpu = new WindowsVSTPluginUI (insert, vp);
+		WindowsVSTPluginUI* vpu = new WindowsVSTPluginUI (insert, vp, GTK_WIDGET(this->gobj()));
 
 		_pluginui = vpu;
 		_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
