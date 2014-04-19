@@ -164,6 +164,13 @@ bool  succeeded = false;
 								// Replace the first occurrence of our token with the required string
 								i->erase(token_begin, ((token_end+1)-token_begin));
 								i->insert(token_begin, str_replace_with);
+							} else if (0 == str_to_replace.compare("$(LOCALCACHEDIR)")){
+								// Replace our token with the path to our Ardour cache directory
+								str_replace_with = user_cache_directory();
+
+								// Replace the first occurrence of our token with the required string
+								i->erase(token_begin, ((token_end+1)-token_begin));
+								i->insert(token_begin, str_replace_with);
 							} else {
 								// Assume that our token represents an environment variable
 								std::string envvar_name = str_to_replace.substr(2, str_to_replace.length()-3);
