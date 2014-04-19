@@ -151,19 +151,19 @@ VideoUtils::video_map_path (std::string server_docroot, std::string filepath)
 {
 	std::string rv = filepath;
 
+	/* strip docroot */
+	if (server_docroot.length() > 0) {
+		if (rv.compare(0, server_docroot.length(), server_docroot) == 0 ) {
+			rv = rv.substr(server_docroot.length());
+		}
+	}
+
 	/* replace all G_DIR_SEPARATOR with '/' */
 	size_t look_here = 0;
 	size_t found_here;
 	while((found_here = rv.find(G_DIR_SEPARATOR, look_here)) != string::npos) {
 		rv.replace(found_here, 1, "/");
 		look_here = found_here + 1;
-	}
-
-	/* strip docroot */
-	if (server_docroot.length() > 0) {
-		if (rv.compare(0, server_docroot.length(), server_docroot) == 0 ) {
-			rv = rv.substr(server_docroot.length());
-		}
 	}
 
 	CURL *curl;

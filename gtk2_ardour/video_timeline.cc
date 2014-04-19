@@ -452,7 +452,8 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 {
 
 	local_file = local;
-	if (filename.at(0) == G_DIR_SEPARATOR || !local_file) {
+	if (Glib::path_is_absolute(filename) || !local_file)
+	{
 		video_filename = filename;
 	}  else {
 		video_filename = Glib::build_filename (_session->session_directory().video_path(), filename);
