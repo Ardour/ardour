@@ -1512,7 +1512,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	_ltc_send_continuously = new BoolOption (
 			    "ltc-send-continuously",
-			    _("send LTC while stopped"),
+			    _("Send LTC while stopped"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_send_continuously),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_send_continuously)
 			    );
@@ -2137,7 +2137,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "show-name-highlight",
-		     _("use name highlight bars in region displays"),
+		     _("Use name highlight bars in region displays"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_name_highlight),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_name_highlight)
 		     ));
