@@ -295,6 +295,9 @@ void
 SystemExec::terminate ()
 {
 	::pthread_mutex_lock(&write_lock);
+
+	close_stdin();
+
 	if (pid) {
 		/* terminate */
 		EnumWindows(my_terminateApp, (LPARAM)pid->dwProcessId);
