@@ -23,6 +23,7 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <algorithm>
 
 #include <assert.h>
 
@@ -266,10 +267,16 @@ SystemExec::make_wargs(char **a) {
 	std::string wa = cmd;
 	if (cmd[0] != '"' && cmd[cmd.size()] != '"' && strchr(cmd.c_str(), ' ')) { wa = "\"" + cmd + "\""; }
 	std::replace(cmd.begin(), cmd.end(), '/', '\\' );
-	char **tmp = a;
+	char **tmp = ++a;
 	while (tmp && *tmp) {
 		wa.append(" \"");
-		wa.append(*tmp);
+		std::string arg(*tmp);
+		size_t start_pos = 0;
+		while((start_pos = arg.find("\\", start_pos)) != std::string::npos) {
+			arg.replace(start_pos, 1, "\\\\");
+			start_pos += 2;
+		}
+		wa.append(arg);
 		wa.append("\"");
 		tmp++;
 	}
@@ -416,7 +423,11 @@ SystemExec::output_interposer()
 		if (bytesAvail < 1) {Sleep(500); printf("N/A\n"); continue;}
 #endif
 		if (stdoutP[0] == INVALID_HANDLE_VALUE) break;
-		if (!ReadFile(stdoutP[0], data, BUFSIZ, &bytesRead, 0)) break;
+		if (!ReadFile(stdoutP[0], data, BUFSIZ, &bytesRead, 0)) {
+			DWORD err =  GetLastError();
+			if (err == ERROR_IO_PENDING) continue;
+			break;
+		}
 		if (bytesRead < 1) continue; /* actually not needed; but this is safe. */
 		data[bytesRead] = 0;
 		ReadStdout(data, bytesRead);/* EMIT SIGNAL */
