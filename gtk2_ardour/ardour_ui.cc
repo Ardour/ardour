@@ -3555,6 +3555,7 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 		int timeout = 120; // 6 sec
 		while (!ARDOUR_UI::instance()->video_timeline->check_server()) {
 			Glib::usleep (50000);
+			gui_idle_handler();
 			if (--timeout <= 0 || !video_server_process->is_running()) break;
 		}
 		if (timeout <= 0) {
