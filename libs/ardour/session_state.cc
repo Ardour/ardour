@@ -3744,6 +3744,11 @@ Session::rename (const std::string& new_name)
 	_current_snapshot_name = new_name;
 	_name = new_name;
 
+	/* re-add directory separator - reverse hack to oldstr above */
+	if (_path[_path.length()-1] != G_DIR_SEPARATOR) {
+		_path += G_DIR_SEPARATOR;
+	}
+
 	set_dirty ();
 
 	/* save state again to get everything just right */
