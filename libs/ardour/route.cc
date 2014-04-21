@@ -180,8 +180,7 @@ Route::init ()
 	Metering::Meter.connect_same_thread (*this, (boost::bind (&Route::meter, this)));
 
 	{
-		/* run a configure so that the invisible processors get set up */
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		configure_processors (0);
 	}
 
@@ -420,6 +419,12 @@ Route::process_output_buffers (BufferSet& bufs,
 			       framepos_t start_frame, framepos_t end_frame, pframes_t nframes,
 			       int declick, bool gain_automation_ok)
 {
+	/* Caller must hold process lock */
+	assert (!AudioEngine::instance()->process_lock().trylock());
+
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+	assert(lm.locked());
+
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {
 		_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
@@ -542,6 +547,7 @@ Route::monitor_run (framepos_t start_frame, framepos_t end_frame, pframes_t nfra
 {
 	assert (is_monitor());
 	BufferSet& bufs (_session.get_route_buffers (n_process_buffers()));
+	fill_buffers_with_input (bufs, _input, nframes);
 	passthru (bufs, start_frame, end_frame, nframes, declick);
 }
 
@@ -945,6 +951,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 	}
 
 	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
@@ -986,8 +993,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 		// configure redirect ports properly, etc.
 
 		{
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-
 			if (configure_processors_unlocked (err)) {
 				pstate.restore ();
 				configure_processors_unlocked (0); // it worked before we tried to add it ...
@@ -1115,6 +1120,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 	}
 
 	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
@@ -1137,8 +1143,8 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 				(*i)->activate ();
 			}
 
+			/* Think: does this really need to be called for every processor in the loop? */
 			{
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				if (configure_processors_unlocked (err)) {
 					pstate.restore ();
 					configure_processors_unlocked (0); // it worked before we tried to add it ...
@@ -1314,6 +1320,7 @@ Route::clear_processors (Placement p)
 	}
 
 	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		ProcessorList new_list;
 		ProcessorStreams err;
@@ -1358,11 +1365,7 @@ Route::clear_processors (Placement p)
 		}
 
 		_processors = new_list;
-
-		{
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			configure_processors_unlocked (&err); // this can't fail
-		}
+		configure_processors_unlocked (&err); // this can't fail
 	}
 
 	processor_max_streams.reset();
@@ -1382,7 +1385,16 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 {
 	// TODO once the export point can be configured properly, do something smarter here
 	if (processor == _capturing_processor) {
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+		if (need_process_lock) {
+			lx.acquire();
+		}
+
 		_capturing_processor.reset();
+
+		if (need_process_lock) {
+			lx.release();
+		}
 	}
 
 	/* these can never be removed */
@@ -1398,7 +1410,16 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 	processor_max_streams.reset();
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+		if (need_process_lock) {
+			lx.acquire();
+		}
+
+		/* Caller must hold process lock */
+		assert (!AudioEngine::instance()->process_lock().trylock());
+
+		Glib::Threads::RWLock::WriterLock lm (_processor_lock); // XXX deadlock after export
+
 		ProcessorState pstate (this);
 
 		ProcessorList::iterator i;
@@ -1438,22 +1459,11 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 			return 1;
 		} 
 
-		if (need_process_lock) {
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-
-			if (configure_processors_unlocked (err)) {
-				pstate.restore ();
-				/* we know this will work, because it worked before :) */
-				configure_processors_unlocked (0);
-				return -1;
-			}
-		} else {
-			if (configure_processors_unlocked (err)) {
-				pstate.restore ();
-				/* we know this will work, because it worked before :) */
-				configure_processors_unlocked (0);
-				return -1;
-			}
+		if (configure_processors_unlocked (err)) {
+			pstate.restore ();
+			/* we know this will work, because it worked before :) */
+			configure_processors_unlocked (0);
+			return -1;
 		}
 
 		_have_internal_generator = false;
@@ -1467,6 +1477,9 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 					break;
 				}
 			}
+		}
+		if (need_process_lock) {
+			lx.release();
 		}
 	}
 
@@ -1490,6 +1503,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 	processor_max_streams.reset();
 
 	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
@@ -1536,16 +1550,13 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 
 		_output->set_user_latency (0);
 
-		{
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-
-			if (configure_processors_unlocked (err)) {
-				pstate.restore ();
-				/* we know this will work, because it worked before :) */
-				configure_processors_unlocked (0);
-				return -1;
-			}
+		if (configure_processors_unlocked (err)) {
+			pstate.restore ();
+			/* we know this will work, because it worked before :) */
+			configure_processors_unlocked (0);
+			return -1;
 		}
+		//lx.unlock();
 
 		_have_internal_generator = false;
 
@@ -1575,58 +1586,6 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 }
 
 void
-Route::set_custom_panner_uri (std::string const panner_uri)
-{
-	if (_in_configure_processors) {
-		DEBUG_TRACE (DEBUG::Panning, string_compose (_("Route::set_custom_panner_uri '%1' -- called while in_configure_processors\n"), name()));
-		return;
-	}
-
-	if (!_main_outs->panner_shell()->set_user_selected_panner_uri(panner_uri)) {
-		DEBUG_TRACE (DEBUG::Panning, string_compose (_("Route::set_custom_panner_uri '%1 '%2' -- no change needed\n"), name(), panner_uri));
-		/* no change needed */
-		return;
-	}
-
-	DEBUG_TRACE (DEBUG::Panning, string_compose (_("Route::set_custom_panner_uri '%1 '%2' -- reconfigure I/O\n"), name(), panner_uri));
-
-	/* reconfigure I/O -- re-initialize panner modules */
-	{
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-
-		for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p) {
-			boost::shared_ptr<Delivery> dl;
-			boost::shared_ptr<Panner> panner;
-			if ((dl = boost::dynamic_pointer_cast<Delivery> (*p)) == 0) {
-				continue;
-			}
-			if (!dl->panner_shell()) {
-				continue;
-			}
-			if (!(panner = dl->panner_shell()->panner())) {
-				continue;
-			}
-			/* _main_outs has already been set before the loop.
-			 * Ignore the return status here. It need reconfiguration */
-			if (dl->panner_shell() != _main_outs->panner_shell()) {
-				if (!dl->panner_shell()->set_user_selected_panner_uri(panner_uri)) {
-					continue;
-				}
-			}
-
-			ChanCount in = panner->in();
-			ChanCount out = panner->out();
-			dl->panner_shell()->configure_io(in, out);
-			dl->panner_shell()->pannable()->set_panner(dl->panner_shell()->panner());
-		}
-	}
-
-	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
-	_session.set_dirty ();
-}
-
-void
 Route::reset_instrument_info ()
 {
 	boost::shared_ptr<Processor> instr = the_instrument();
@@ -1640,7 +1599,6 @@ int
 Route::configure_processors (ProcessorStreams* err)
 {
 	assert (!AudioEngine::instance()->process_lock().trylock());
-
 	if (!_in_configure_processors) {
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		return configure_processors_unlocked (err);
@@ -1811,6 +1769,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 	*/
 
 	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
@@ -1872,13 +1831,9 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 		/* If the meter is in a custom position, find it and make a rough note of its position */
 		maybe_note_meter_position ();
 
-		{
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-
-			if (configure_processors_unlocked (err)) {
-				pstate.restore ();
-				return -1;
-			}
+		if (configure_processors_unlocked (err)) {
+			pstate.restore ();
+			return -1;
 		}
 	}
 
@@ -2558,7 +2513,7 @@ Route::set_processor_state (const XMLNode& node)
 
 				if (prop->value() == "intsend") {
 
-					processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<Route>(), Delivery::Role (0)));
+					processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<Route>(), Delivery::Aux, true));
 
 				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 				           prop->value() == "lv2" ||
@@ -2574,7 +2529,7 @@ Route::set_processor_state (const XMLNode& node)
 
 				} else if (prop->value() == "send") {
 
-					processor.reset (new Send (_session, _pannable, _mute_master));
+					processor.reset (new Send (_session, _pannable, _mute_master, Delivery::Send, true));
 
 				} else {
 					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
@@ -2605,11 +2560,11 @@ Route::set_processor_state (const XMLNode& node)
 	}
 
 	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		_processors = new_order;
 
 		if (must_configure) {
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 			configure_processors_unlocked (0);
 		}
 
@@ -2723,6 +2678,7 @@ Route::enable_monitor_send ()
 
 	/* master never sends to monitor section via the normal mechanism */
 	assert (!is_master ());
+	assert (!is_monitor ());
 
 	/* make sure we have one */
 	if (!_monitor_send) {
@@ -3123,6 +3079,7 @@ Route::set_meter_point (MeterPoint p, bool force)
 	bool meter_was_visible_to_user = _meter->display_to_user ();
 
 	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 
 		maybe_note_meter_position ();
@@ -3190,17 +3147,14 @@ void
 Route::listen_position_changed ()
 {
 	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
-		{
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-
-			if (configure_processors_unlocked (0)) {
-				pstate.restore ();
-				configure_processors_unlocked (0); // it worked before we tried to add it ...
-				return;
-			}
+		if (configure_processors_unlocked (0)) {
+			pstate.restore ();
+			configure_processors_unlocked (0); // it worked before we tried to add it ...
+			return;
 		}
 	}
 
@@ -3211,15 +3165,16 @@ Route::listen_position_changed ()
 boost::shared_ptr<CapturingProcessor>
 Route::add_export_point()
 {
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	if (!_capturing_processor) {
+		lm.release();
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		Glib::Threads::RWLock::WriterLock lw (_processor_lock);
 
 		_capturing_processor.reset (new CapturingProcessor (_session));
 		_capturing_processor->activate ();
 
-		{
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			configure_processors (0);
-		}
+		configure_processors_unlocked (0);
 
 	}
 
@@ -4170,7 +4125,7 @@ Route::has_external_redirects () const
 boost::shared_ptr<Processor>
 Route::the_instrument () const
 {
-	Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	return the_instrument_unlocked ();
 }
 
@@ -4198,7 +4153,8 @@ Route::non_realtime_locate (framepos_t pos)
 	}
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		//Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			(*i)->transport_located (pos);

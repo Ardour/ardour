@@ -321,7 +321,7 @@ Pannerbalance::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 					(int) rint (100.0 * val));
 
 		default:
-			return _pannable->value_as_string (ac);
+			return _("unused");
 	}
 }
 

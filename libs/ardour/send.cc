@@ -29,6 +29,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/meter.h"
 #include "ardour/io.h"
+#include "ardour/panner_shell.h"
 
 #include "i18n.h"
 
@@ -43,9 +44,9 @@ using namespace PBD;
 using namespace std;
 
 string
-Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot)
+Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_bitslot)
 {
-	if (r == Role (0)) {
+	if (ignore_bitslot) {
 		/* this happens during initial construction of sends from XML, 
 		   before they get ::set_state() called. lets not worry about
 		   it.
@@ -69,8 +70,8 @@ Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot)
 	
 }
 
-Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, Role r)
-	: Delivery (s, p, mm, name_and_id_new_send (s, r, _bitslot), r)
+Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, Role r, bool ignore_bitslot)
+	: Delivery (s, p, mm, name_and_id_new_send (s, r, _bitslot, ignore_bitslot), r)
 	, _metering (false)
 {
 	if (_role == Listen) {
@@ -80,12 +81,16 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 		_bitslot = 0;
 	}
 
-	boost_debug_shared_ptr_mark_interesting (this, "send");
+	//boost_debug_shared_ptr_mark_interesting (this, "send");
 
 	_amp.reset (new Amp (_session));
 	_meter.reset (new PeakMeter (_session, name()));
 
 	add_control (_amp->gain_control ());
+
+	if (panner_shell()) {
+		panner_shell()->Changed.connect_same_thread (*this, boost::bind (&Send::panshell_changed, this));
+	}
 }
 
 Send::~Send ()
@@ -284,7 +289,7 @@ Send::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 bool
 Send::configure_io (ChanCount in, ChanCount out)
 {
-	if (!_amp->configure_io (in, out) || !_meter->configure_io (in, out)) {
+	if (!_amp->configure_io (in, out)) {
 		return false;
 	}
 
@@ -292,9 +297,19 @@ Send::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
+	if (!_meter->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()))) {
+		return false;
+	}
+
 	reset_panner ();
 
 	return true;
+}
+
+void
+Send::panshell_changed ()
+{
+	_meter->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()));
 }
 
 bool

@@ -44,7 +44,7 @@ class MissingSource : public std::exception
 /** A source associated with a file on disk somewhere */
 class FileSource : virtual public Source {
 public:
-	virtual ~FileSource () {}
+	virtual ~FileSource ();
 
 	virtual const std::string& path() const { return _path; }
 
@@ -74,12 +74,16 @@ public:
 
 	void inc_use_count ();
 	bool removable () const;
+        bool is_stub () const;
 
 	const std::string& origin() const { return _origin; }
 
 	virtual void set_path (const std::string&);
 	
 	static PBD::Signal3<int,std::string,std::string,std::vector<std::string> > AmbiguousFileName;
+
+	void existence_check ();
+	virtual void prevent_deletion ();
 
 protected:
 	FileSource (Session& session, DataType type,
@@ -102,7 +106,6 @@ protected:
 	std::string _origin;
 	bool        _open;
 
-	void prevent_deletion ();
 };
 
 } // namespace ARDOUR

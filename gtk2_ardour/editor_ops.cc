@@ -4772,12 +4772,17 @@ Editor::fork_region ()
 		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*>(*r);
 
 		if (mrv) {
-			boost::shared_ptr<Playlist> playlist = mrv->region()->playlist();
-			boost::shared_ptr<MidiRegion> newregion = mrv->midi_region()->clone ();
-
-			playlist->clear_changes ();
-			playlist->replace_region (mrv->region(), newregion, mrv->region()->position());
-			_session->add_command(new StatefulDiffCommand (playlist));
+			try {
+				boost::shared_ptr<Playlist> playlist = mrv->region()->playlist();
+				boost::shared_ptr<MidiSource> new_source = _session->create_midi_source_by_stealing_name (mrv->midi_view()->track());
+				boost::shared_ptr<MidiRegion> newregion = mrv->midi_region()->clone (new_source);
+				
+				playlist->clear_changes ();
+				playlist->replace_region (mrv->region(), newregion, mrv->region()->position());
+				_session->add_command(new StatefulDiffCommand (playlist));
+			} catch (...) {
+				error << string_compose (_("Could not unlink %1"), mrv->region()->name()) << endmsg;
+			}
 		}
 
 		r = tmp;

@@ -149,7 +149,7 @@ Speakers::move_speaker (int id, const AngularVector& new_position)
 void
 Speakers::setup_default_speakers (uint32_t n)
 {
-	double o = 90.0;
+	double o = 180.0;
 
         /* default assignment of speaker position for n speakers */
 
@@ -229,12 +229,12 @@ Speakers::setup_default_speakers (uint32_t n)
 		*/
 
 		if (n % 2) {
-			deg = 90.0 - degree_step;
+			deg = 360 + o + degree_step;
 		} else {
-			deg = 90.0;
+			deg = 360 + o;
 		}
-		for (i = 0; i < n; ++i, deg += degree_step) {
-			add_speaker (AngularVector (deg, 0.0));
+		for (i = 0; i < n; ++i, deg -= degree_step) {
+			add_speaker (AngularVector (fmod(deg, 360), 0.0));
 		}
 	}
         }

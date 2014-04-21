@@ -119,6 +119,8 @@ class MackieControlProtocol
 	const Mackie::DeviceInfo& device_info() const { return _device_info; }
 	Mackie::DeviceProfile& device_profile() { return _device_profile; }
 
+        void device_ready ();
+
 	int set_active (bool yn);
 	int  set_device (const std::string&);
         void set_profile (const std::string&);

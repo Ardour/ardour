@@ -78,6 +78,7 @@ LevelMeterBase::set_meter (PeakMeter* meter)
 	_meter_type_connection.disconnect();
 
 	_meter = meter;
+	color_changed = true;
 
 	if (_meter) {
 		_meter->ConfigurationChanged.connect (_configuration_connection, parent_invalidator, boost::bind (&LevelMeterBase::configuration_changed, this, _1, _2), gui_context());

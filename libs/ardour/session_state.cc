@@ -136,13 +136,21 @@ Session::pre_engine_init (string fullpath)
 	/* discover canonical fullpath */
 
 	char buf[PATH_MAX+1];
-	if (!realpath (fullpath.c_str(), buf) && (errno != ENOENT)) {
-		error << string_compose(_("Could not use path %1 (%2)"), buf, strerror(errno)) << endmsg;
-		destroy ();
-		throw failed_constructor();
-	}
 
-	_path = string(buf);
+	if (!realpath (fullpath.c_str(), buf)) {
+		if (errno == ENOENT) {
+			/* fullpath does not exist yet, so realpath() returned
+			 * ENOENT. Just use it as-is
+			 */
+			_path = fullpath;
+		} else {
+			error << string_compose(_("Could not use path %1 (%2)"), buf, strerror(errno)) << endmsg;
+			destroy ();
+			throw failed_constructor();
+		}
+	} else {
+		_path = string(buf);
+	}
 	
 	/* we require _path to end with a dir separator */
 
@@ -2692,19 +2700,23 @@ Session::cleanup_sources (CleanupReport& rep)
                 ++tmp;
 
 		if ((fs = boost::dynamic_pointer_cast<FileSource> (i->second)) != 0) {
-                        if (playlists->source_use_count (fs) != 0) {
-                                all_sources.insert (fs->path());
-                        } else {
 
-                                /* we might not remove this source from disk, because it may be used
-                                   by other snapshots, but its not being used in this version
-                                   so lets get rid of it now, along with any representative regions
-                                   in the region list.
-                                */
+			if (!fs->is_stub()) {
 
-                                RegionFactory::remove_regions_using_source (i->second);
-                                sources.erase (i);
-                        }
+				if (playlists->source_use_count (fs) != 0) {
+					all_sources.insert (fs->path());
+				} else {
+					
+					/* we might not remove this source from disk, because it may be used
+					   by other snapshots, but its not being used in this version
+					   so lets get rid of it now, along with any representative regions
+					   in the region list.
+					*/
+					
+					RegionFactory::remove_regions_using_source (i->second);
+					sources.erase (i);
+				}
+			}
 		}
 
                 i = tmp;

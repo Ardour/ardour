@@ -1237,13 +1237,13 @@ RouteUI::build_mute_menu(void)
 
 	MenuList& items = mute_menu->items();
 
-	pre_fader_mute_check = manage (new CheckMenuItem(_("Pre Fader")));
+	pre_fader_mute_check = manage (new CheckMenuItem(_("Pre Fader Sends")));
 	init_mute_menu(MuteMaster::PreFader, pre_fader_mute_check);
 	pre_fader_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::PreFader, pre_fader_mute_check));
 	items.push_back (CheckMenuElem(*pre_fader_mute_check));
 	pre_fader_mute_check->show_all();
 
-	post_fader_mute_check = manage (new CheckMenuItem(_("Post Fader")));
+	post_fader_mute_check = manage (new CheckMenuItem(_("Post Fader Sends")));
 	init_mute_menu(MuteMaster::PostFader, post_fader_mute_check);
 	post_fader_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::PostFader, post_fader_mute_check));
 	items.push_back (CheckMenuElem(*post_fader_mute_check));

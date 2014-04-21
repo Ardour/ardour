@@ -45,6 +45,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
+#include "ardour/panner_shell.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/port_insert.h"
 #include "ardour/profile.h"
@@ -455,6 +456,34 @@ ProcessorEntry::toggle_control_visibility (Control* c)
 	_parent->update_gui_object_state (this);
 }
 
+Menu *
+ProcessorEntry::build_send_options_menu ()
+{
+	using namespace Menu_Helpers;
+	Menu* menu = manage (new Menu);
+	MenuList& items = menu->items ();
+
+	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
+	if (send) {
+
+		items.push_back (CheckMenuElem (_("Link panner controls")));
+		CheckMenuItem* c = dynamic_cast<CheckMenuItem*> (&items.back ());
+		c->set_active (send->panner_shell()->is_linked_to_route());
+		c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_panner_link));
+
+	}
+	return menu;
+}
+
+void
+ProcessorEntry::toggle_panner_link ()
+{
+	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
+	if (send) {
+		send->panner_shell()->set_linked_to_route(!send->panner_shell()->is_linked_to_route());
+	}
+}
+
 ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string const & n)
 	: _control (c)
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
@@ -815,6 +844,13 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 		cairo_move_to (cr, si_x, height);
 		cairo_line_to (cr, si_x, 0);
 		cairo_stroke (cr);
+	} else if (midi_sources == 1 && midi_sinks == 1) {
+		/* unusual cases -- removed synth, midi-track w/audio plugins */
+		const float si_x  = rintf(width * (sinks   > 1 ? .2f : .5f)) + .5f;
+		const float si_x0 = rintf(width * (sources > 1 ? .2f : .5f)) + .5f;
+		cairo_move_to (cr, si_x, height);
+		cairo_curve_to (cr, si_x, 0, si_x0, height, si_x0, 0);
+		cairo_stroke (cr);
 	}
 
 	/* AUDIO */
@@ -826,8 +862,10 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 			UINT_RGBA_B_FLT(audio_port_color));
 
 	if (_splitting) {
+		assert(audio_sources < 2);
 		assert(audio_sinks > 1);
-		const float si_x0 = rintf(width * .5f) + .5f;
+		/* assume there is only ever one MIDI port */
+		const float si_x0 = rintf(width * (midi_sources > 0 ? .8f : .5f)) + .5f;
 		for (uint32_t i = midi_sinks; i < sinks; ++i) {
 			const float si_x = rintf(width * (.2f + .6f * i / (sinks - 1.f))) + .5f;
 			cairo_move_to (cr, si_x, height);
@@ -1087,6 +1125,20 @@ ProcessorBox::show_processor_menu (int arg)
 			} else {
 				gtk_menu_item_set_submenu (controls_menu_item->gobj(), 0);
 				controls_menu_item->set_sensitive (false);
+			}
+		}
+	}
+
+	Gtk::MenuItem* send_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/send_options"));
+	if (send_menu_item) {
+		if (single_selection) {
+			Menu* m = single_selection->build_send_options_menu ();
+			if (m && !m->items().empty()) {
+				send_menu_item->set_submenu (*m);
+				send_menu_item->set_sensitive (true);
+			} else {
+				gtk_menu_item_set_submenu (send_menu_item->gobj(), 0);
+				send_menu_item->set_sensitive (false);
 			}
 		}
 	}
@@ -2067,7 +2119,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 			} else if (type->value() == "send") {
 
 				XMLNode n (**niter);
-                                Send* s = new Send (*_session, _route->pannable(), _route->mute_master());
+				Send* s = new Send (*_session, _route->pannable(), _route->mute_master());
 
 				IOProcessor::prepare_for_reset (n, s->name());
 				
@@ -2400,6 +2452,7 @@ ProcessorBox::register_actions ()
 	ActionManager::register_action (popup_act_grp, X_("newaux"), _("New Aux Send ..."));
 
 	ActionManager::register_action (popup_act_grp, X_("controls"), _("Controls"));
+	ActionManager::register_action (popup_act_grp, X_("send_options"), _("Send Options"));
 
 	ActionManager::register_action (popup_act_grp, X_("clear"), _("Clear (all)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear));

@@ -31,6 +31,7 @@
 #include "pbd/strsplit.h"
 
 #include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
 
 #include "evoral/Control.hpp"
 
@@ -61,11 +62,24 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 {
 	/* note that origin remains empty */
 
-	if (init(_path, false)) {
+	if (init (_path, false)) {
+		throw failed_constructor ();
+	}
+ 
+        assert (!Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
+
+	/* file is not opened until write */
+
+	if (flags & Writable) {
+		return;
+	}
+
+	if (open (_path)) {
 		throw failed_constructor ();
 	}
 
-	/* file is not opened until write */
+	_open = true;
 }
 
 /** Constructor used for existing internal-to-session files. */
@@ -82,9 +96,12 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 		throw failed_constructor ();
 	}
 
-	if (init(_path, true)) {
+	if (init (_path, true)) {
 		throw failed_constructor ();
 	}
+
+        assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
 
 	if (open(_path)) {
 		throw failed_constructor ();
@@ -454,7 +471,14 @@ SMFSource::safe_midi_file_extension (const string& file)
 	const int nmatches = 2;
 	regmatch_t matches[nmatches];
 	
-	if (compile && regcomp (&compiled_pattern, "[mM][iI][dD][iI]?$", REG_EXTENDED)) {
+	if (Glib::file_test (file, Glib::FILE_TEST_EXISTS)) {
+		if (!Glib::file_test (file, Glib::FILE_TEST_IS_REGULAR)) {
+			/* exists but is not a regular file */
+			return false;
+		}
+	}
+
+	if (compile && regcomp (&compiled_pattern, "\\.[mM][iI][dD][iI]?$", REG_EXTENDED)) {
 		return false;
 	} else {
 		compile = false;
@@ -465,6 +489,12 @@ SMFSource::safe_midi_file_extension (const string& file)
 	}
 
 	return true;
+}
+
+static bool compare_eventlist (
+		const std::pair< Evoral::Event<double>*, gint >& a,
+		const std::pair< Evoral::Event<double>*, gint >& b) {
+	return ( a.first->time() < b.first->time() );
 }
 
 void
@@ -505,60 +535,74 @@ SMFSource::load_model (bool lock, bool force_reload)
 	uint8_t* buf     = NULL;
 	int ret;
 	gint event_id;
-	bool have_event_id = false;
+	bool have_event_id;
 
-	while ((ret = read_event (&delta_t, &size, &buf, &event_id)) >= 0) {
+	// TODO simplify event allocation
+	std::list< std::pair< Evoral::Event<double>*, gint > > eventlist;
 
-		time += delta_t;
+	for (unsigned i = 1; i <= num_tracks(); ++i) {
+		if (seek_to_track(i)) continue;
 
-		if (ret == 0) {
+		time = 0;
+		have_event_id = false;
 
-			/* meta-event : did we get an event ID ?
-			 */
+		while ((ret = read_event (&delta_t, &size, &buf, &event_id)) >= 0) {
 
-			if (event_id >= 0) {
-				have_event_id = true;
+			time += delta_t;
+
+			if (ret == 0) {
+				/* meta-event : did we get an event ID ?  */
+				if (event_id >= 0) {
+					have_event_id = true;
+				}
+				continue;
 			}
 
-			continue;
-		}
+			if (ret > 0) {
+				/* not a meta-event */
 
-		if (ret > 0) {
-
-			/* not a meta-event */
-
-			ev.set (buf, size, time / (double)ppqn());
-			ev.set_event_type(EventTypeMap::instance().midi_event_type(buf[0]));
-
-			if (!have_event_id) {
-				event_id = Evoral::next_event_id();
-			}
+				if (!have_event_id) {
+					event_id = Evoral::next_event_id();
+				}
+				uint32_t event_type = EventTypeMap::instance().midi_event_type(buf[0]);
+				double   event_time = time / (double) ppqn();
 #ifndef NDEBUG
-			std::string ss;
+				std::string ss;
 
-			for (uint32_t xx = 0; xx < size; ++xx) {
-				char b[8];
-				snprintf (b, sizeof (b), "0x%x ", buf[xx]);
-				ss += b;
-			}
+				for (uint32_t xx = 0; xx < size; ++xx) {
+					char b[8];
+					snprintf (b, sizeof (b), "0x%x ", buf[xx]);
+					ss += b;
+				}
 
-			DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF %6 load model delta %1, time %2, size %3 buf %4, type %5\n",
-			                                                  delta_t, time, size, ss , ev.event_type(), name()));
+				DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF %6 load model delta %1, time %2, size %3 buf %4, type %5\n",
+							delta_t, time, size, ss , event_type, name()));
 #endif
 
-			_model->append (ev, event_id);
+				eventlist.push_back(make_pair (
+							new Evoral::Event<double> (
+								event_type, event_time,
+								size, buf, true)
+							, event_id));
 
-			// Set size to max capacity to minimize allocs in read_event
-			scratch_size = std::max(size, scratch_size);
-			size = scratch_size;
+				// Set size to max capacity to minimize allocs in read_event
+				scratch_size = std::max(size, scratch_size);
+				size = scratch_size;
 
-			_length_beats = max(_length_beats, ev.time());
+				_length_beats = max(_length_beats, event_time);
+			}
+
+			/* event ID's must immediately precede the event they are for */
+			have_event_id = false;
 		}
+	}
 
-		/* event ID's must immediately precede the event they are for
-		 */
+	eventlist.sort(compare_eventlist);
 
-		have_event_id = false;
+	std::list< std::pair< Evoral::Event<double>*, gint > >::iterator it;
+	for (it=eventlist.begin(); it!=eventlist.end(); ++it) {
+		_model->append (*it->first, it->second);
+		delete it->first;
 	}
 
 	_model->end_write (Evoral::Sequence<Evoral::MusicalTime>::ResolveStuckNotes, _length_beats);
@@ -620,3 +664,44 @@ SMFSource::ensure_disk_file ()
 	}
 }
 
+void
+SMFSource::prevent_deletion ()
+{
+	/* Unlike the audio case, the MIDI file remains mutable (because we can
+	   edit MIDI data)
+	*/
+  
+	_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
+}
+
+int
+SMFSource::rename (const string& newname)
+{
+	Glib::Threads::Mutex::Lock lm (_lock);
+	string oldpath = _path;
+	string newpath = _session.new_source_path_from_name (DataType::MIDI, newname);
+
+	if (newpath.empty()) {
+		error << string_compose (_("programming error: %1"), "cannot generate a changed file path") << endmsg;
+		return -1;
+	}
+
+	// Test whether newpath exists, if yes notify the user but continue.
+	if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
+		error << string_compose (_("Programming error! %1 tried to rename a file over another file! It's safe to continue working, but please report this to the developers."), PROGRAM_NAME) << endmsg;
+		return -1;
+	}
+
+	if (Glib::file_test (oldpath.c_str(), Glib::FILE_TEST_EXISTS)) { 
+		/* rename only needed if file exists on disk */
+		if (::rename (oldpath.c_str(), newpath.c_str()) != 0) {
+			error << string_compose (_("cannot rename file %1 to %2 (%3)"), oldpath, newpath, strerror(errno)) << endmsg;
+			return -1;
+		}
+	}
+
+	_name = Glib::path_get_basename (newpath);
+	_path = newpath;
+
+	return 0;
+}

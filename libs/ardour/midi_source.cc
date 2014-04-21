@@ -39,6 +39,7 @@
 #include "ardour/midi_model.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/midi_source.h"
+#include "ardour/file_source.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/source_factory.h"
@@ -332,31 +333,9 @@ MidiSource::mark_streaming_write_completed ()
 	mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::DeleteStuckNotes);
 }
 
-boost::shared_ptr<MidiSource>
-MidiSource::clone (const string& path, Evoral::MusicalTime begin, Evoral::MusicalTime end)
+int
+MidiSource::write_to (boost::shared_ptr<MidiSource> newsrc, Evoral::MusicalTime begin, Evoral::MusicalTime end)
 {
-	string newname = PBD::basename_nosuffix(_name.val());
-	string newpath;
-
-	if (path.empty()) {
-
-		/* get a new name for the MIDI file we're going to write to
-		 */
-		
-		do {
-			newname = bump_name_once (newname, '-');
-			newpath = Glib::build_filename (_session.session_directory().midi_path(), newname + ".mid");
-			
-		} while (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS));
-	} else {
-		/* caller must check for pre-existing file */
-		newpath = path;
-	}
-
-	boost::shared_ptr<MidiSource> newsrc = boost::dynamic_pointer_cast<MidiSource>(
-		SourceFactory::createWritable(DataType::MIDI, _session,
-		                              newpath, false, _session.frame_rate()));
-
 	newsrc->set_timeline_position(_timeline_position);
 	newsrc->copy_interpolation_from (this);
 	newsrc->copy_automation_state_from (this);
@@ -369,7 +348,7 @@ MidiSource::clone (const string& path, Evoral::MusicalTime begin, Evoral::Musica
 		}
 	} else {
 		error << string_compose (_("programming error: %1"), X_("no model for MidiSource during ::clone()"));
-		return boost::shared_ptr<MidiSource>();
+		return -1;
 	}
 
 	newsrc->flush_midi();
@@ -381,8 +360,12 @@ MidiSource::clone (const string& path, Evoral::MusicalTime begin, Evoral::Musica
 	} else {
 		newsrc->set_model (_model);
 	}
+	
+	/* this file is not removable (but since it is MIDI, it is mutable) */
 
-	return newsrc;
+	boost::dynamic_pointer_cast<FileSource> (newsrc)->prevent_deletion ();
+
+	return 0;
 }
 
 void

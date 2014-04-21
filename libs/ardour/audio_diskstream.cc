@@ -1928,14 +1928,6 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 	return 0;
 }
 
-list<boost::shared_ptr<Source> >
-AudioDiskstream::steal_write_sources()
-{
-	/* not possible to steal audio write sources */
-	list<boost::shared_ptr<Source> > ret;
-	return ret;
-}
-
 void
 AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 {

@@ -176,8 +176,6 @@ PortInsertWindow::PortInsertWindow (ARDOUR::Session* sess, boost::shared_ptr<ARD
 	ok_but->signal_clicked().connect (sigc::mem_fun (*this, &PortInsertWindow::accept));
 
 	signal_delete_event().connect (sigc::mem_fun (*this, &PortInsertWindow::wm_delete), false);
-
-	pi->DropReferences.connect (going_away_connection, invalidator (*this), boost::bind (&PortInsertWindow::plugin_going_away, this), gui_context());
 }
 
 bool
@@ -185,15 +183,6 @@ PortInsertWindow::wm_delete (GdkEventAny* /*event*/)
 {
 	accept ();
 	return false;
-}
-
-void
-PortInsertWindow::plugin_going_away ()
-{
-	ENSURE_GUI_THREAD (*this, &PortInsertWindow::plugin_going_away)
-
-	going_away_connection.disconnect ();
-	delete_when_idle (this);
 }
 
 void

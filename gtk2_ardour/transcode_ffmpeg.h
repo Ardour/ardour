@@ -134,6 +134,7 @@ class TranscodeFfmpeg : public sigc::trackable
 
 		double m_fps;
 		double m_aspect;
+		std::string m_sar;
 		ARDOUR::framecnt_t m_duration;
 		int m_width;
 		int m_height;

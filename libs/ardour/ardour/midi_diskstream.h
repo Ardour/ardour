@@ -111,7 +111,7 @@ class MidiDiskstream : public Diskstream
 	void set_block_size (pframes_t);
 	int  internal_playback_seek (framecnt_t distance);
 	int  can_internal_playback_seek (framecnt_t distance);
-	std::list<boost::shared_ptr<Source> > steal_write_sources();
+	std::string steal_write_source_name();
 	void reset_write_sources (bool, bool force = false);
 	void non_realtime_input_change ();
 	void non_realtime_locate (framepos_t location);
@@ -119,10 +119,9 @@ class MidiDiskstream : public Diskstream
 	static void set_readahead_frames (framecnt_t frames_ahead) { midi_readahead = frames_ahead; }
 
   protected:
-	int seek (framepos_t which_sample, bool complete_refill = false);
-
-  protected:
 	friend class MidiTrack;
+	friend class Auditioner;
+	int seek (framepos_t which_sample, bool complete_refill = false);
 
         int  process (BufferSet&, framepos_t transport_frame, pframes_t nframes, framecnt_t &, bool need_diskstream);
         frameoffset_t calculate_playback_distance (pframes_t nframes);

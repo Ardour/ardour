@@ -89,9 +89,10 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 		have_font = true;
 	}
 
-	position_control->Changed.connect (connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
+	position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
 
-	_panner_shell->Changed.connect (connections, invalidator (*this), boost::bind (&MonoPanner::bypass_handler, this), gui_context());
+	_panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::bypass_handler, this), gui_context());
+	_panner_shell->PannableChanged.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::pannable_handler, this), gui_context());
 	ColorsChanged.connect (sigc::mem_fun (*this, &MonoPanner::color_handler));
 
 	set_tooltip ();
@@ -404,7 +405,7 @@ MonoPanner::on_scroll_event (GdkEventScroll* ev)
 	return true;
 }
 
-	bool
+bool
 MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 {
 	if (_panner_shell->bypassed()) {
@@ -444,7 +445,7 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 	return true;
 }
 
-	bool
+bool
 MonoPanner::on_key_press_event (GdkEventKey* ev)
 {
 	double one_degree = 1.0/180.0;
@@ -481,7 +482,7 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
 	return true;
 }
 
-	void
+void
 MonoPanner::set_colors ()
 {
 	colors.fill = ARDOUR_UI::config()->canvasvar_MonoPannerFill.get();
@@ -492,20 +493,30 @@ MonoPanner::set_colors ()
 	colors.pos_fill = ARDOUR_UI::config()->canvasvar_MonoPannerPositionFill.get();
 }
 
-	void
+void
 MonoPanner::color_handler ()
 {
 	set_colors ();
 	queue_draw ();
 }
 
-	void
+void
 MonoPanner::bypass_handler ()
 {
 	queue_draw ();
 }
 
-	PannerEditor*
+void
+MonoPanner::pannable_handler ()
+{
+	panvalue_connections.drop_connections();
+	position_control = _panner->pannable()->pan_azimuth_control;
+	position_binder.set_controllable(position_control);
+	position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
+	queue_draw ();
+}
+
+PannerEditor*
 MonoPanner::editor ()
 {
 	return new MonoPannerEditor (this);

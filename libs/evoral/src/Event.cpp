@@ -98,6 +98,7 @@ Event<Timestamp>::operator=(const Event& copy)
 	_type = copy._type;
 	_original_time = copy._original_time;
 	_nominal_time = copy._nominal_time;
+	_owns_buf = copy._owns_buf;
 	if (_owns_buf) {
 		if (copy._buf) {
 			if (copy._size > _size) {

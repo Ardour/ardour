@@ -113,6 +113,9 @@ CONFIG_VARIABLE (gain_t, solo_mute_gain, "solo-mute-gain", 0.0)
 CONFIG_VARIABLE (std::string, monitor_bus_preferred_bundle, "monitor-bus-preferred-bundle", "")
 CONFIG_VARIABLE (bool, quieten_at_speed, "quieten-at-speed", true)
 
+CONFIG_VARIABLE (bool, link_send_and_route_panner, "link-send-and-route-panner", true)
+CONFIG_VARIABLE (std::string, midi_audition_synth_uri, "midi-audition-synth-uri", "https://community.ardour.org/node/7596")
+
 /* click */
 
 CONFIG_VARIABLE (bool, clicking, "clicking", false)

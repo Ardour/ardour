@@ -64,7 +64,8 @@ class StereoPanner : public PannerInterface
 		   
         boost::shared_ptr<PBD::Controllable> position_control;
         boost::shared_ptr<PBD::Controllable> width_control;
-        PBD::ScopedConnectionList connections;
+        PBD::ScopedConnectionList panvalue_connections;
+        PBD::ScopedConnectionList panshell_connections;
         bool dragging;
         bool dragging_position;
         bool dragging_left;
@@ -103,6 +104,7 @@ class StereoPanner : public PannerInterface
         static bool have_colors;
 	void color_handler ();
 	void bypass_handler ();
+	void pannable_handler ();
 };
 
 #endif /* __gtk_ardour_stereo_panner_h__ */

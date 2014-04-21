@@ -60,7 +60,8 @@ class MonoPanner : public PannerInterface
 	boost::shared_ptr<ARDOUR::PannerShell> _panner_shell;
 	
         boost::shared_ptr<PBD::Controllable> position_control;
-        PBD::ScopedConnectionList connections;
+        PBD::ScopedConnectionList panvalue_connections;
+        PBD::ScopedConnectionList panshell_connections;
         int drag_start_x;
         int last_drag_x;
         double accumulated_delta;
@@ -89,6 +90,7 @@ class MonoPanner : public PannerInterface
         static bool have_colors;
 	void color_handler ();
 	void bypass_handler ();
+	void pannable_handler ();
 };
 
 #endif /* __gtk_ardour_mono_panner_h__ */

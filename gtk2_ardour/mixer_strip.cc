@@ -37,6 +37,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/internal_send.h"
+#include "ardour/meter.h"
 #include "ardour/midi_track.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
@@ -1033,6 +1034,7 @@ MixerStrip::connect_to_pan ()
 	if (panners._panner == 0) {
 		panners.panshell_changed ();
 	}
+	update_panner_choices();
 }
 
 void
@@ -1041,29 +1043,13 @@ MixerStrip::update_panner_choices ()
 	ENSURE_GUI_THREAD (*this, &MixerStrip::update_panner_choices)
 	if (!_route->panner_shell()) { return; }
 
-	int in = _route->output()->n_ports().n_audio();
-	int out = in;
-
+	uint32_t in = _route->output()->n_ports().n_audio();
+	uint32_t out = in;
 	if (_route->panner()) {
 		in = _route->panner()->in().n_audio();
 	}
 
-	if (out < 2 || in == 0) {
-		panners.set_available_panners(_route, std::map<std::string,std::string>());
-		return;
-	}
-
-	std::map<std::string,std::string> panner_list;
-	std::list<PannerInfo*> panner_info = PannerManager::instance().panner_info;
-	/* get available panners for current configuration. */
-	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		 PanPluginDescriptor* d = &(*p)->descriptor;
-		 if (d->in != -1 && d->in != in) continue;
-		 if (d->out != -1 && d->out != out) continue;
-		 if (d->in == -1 && d->out == -1 && out <= 2) continue;
-		 panner_list.insert(std::pair<std::string,std::string>(d->panner_uri,d->name));
-	}
-	panners.set_available_panners(_route, panner_list);
+	panners.set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
 }
 
 /*
@@ -1885,24 +1871,20 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 
 	set_current_delivery (send);
 
+	send->meter()->set_type(_route->shared_peak_meter()->get_type());
 	send->set_metering (true);
 	_current_delivery->DropReferences.connect (send_gone_connection, invalidator (*this), boost::bind (&MixerStrip::revert_to_default_display, this), gui_context());
 
 	gain_meter().set_controls (_route, send->meter(), send->amp());
 	gain_meter().setup_meters ();
 
+	uint32_t const in = _current_delivery->pans_required();
+	uint32_t const out = _current_delivery->pan_outs();
+
 	panner_ui().set_panner (_current_delivery->panner_shell(), _current_delivery->panner());
-	panner_ui().set_available_panners(boost::shared_ptr<ARDOUR::Route>(), std::map<std::string,std::string>());
-
+	panner_ui().set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
 	panner_ui().setup_pan ();
-
-	/* make sure the send has audio output */
-
-	if (_current_delivery->output() && _current_delivery->output()->n_ports().n_audio() > 0) {
-		panners.show_all ();
-	} else {
-		panners.hide_all ();
-	}
+	panner_ui().show_all ();
 
 	input_button.set_sensitive (false);
 	group_button.set_sensitive (false);
@@ -2157,6 +2139,9 @@ MixerStrip::ab_plugins ()
 bool
 MixerStrip::level_meter_button_press (GdkEventButton* ev)
 {
+	if (_current_delivery && boost::dynamic_pointer_cast<Send>(_current_delivery)) {
+		return false;
+	}
 	if (ev->button == 3) {
 		popup_level_meter_menu (ev);
 		return true;
@@ -2177,8 +2162,8 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	_suspend_menu_callbacks = true;
 	add_level_meter_item_point (items, group, _("Input"), MeterInput);
-	add_level_meter_item_point (items, group, _("Pre-fader"), MeterPreFader);
-	add_level_meter_item_point (items, group, _("Post-fader"), MeterPostFader);
+	add_level_meter_item_point (items, group, _("Pre Fader"), MeterPreFader);
+	add_level_meter_item_point (items, group, _("Post Fader"), MeterPostFader);
 	add_level_meter_item_point (items, group, _("Output"), MeterOutput);
 	add_level_meter_item_point (items, group, _("Custom"), MeterCustom);
 

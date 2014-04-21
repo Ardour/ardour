@@ -239,7 +239,7 @@ RouteExportChannel::read (Sample const *& data, framecnt_t frames) const
 {
 	assert(processor);
 	AudioBuffer const & buffer = processor->get_capture_buffers().get_audio (channel);
-	assert (frames <= (framecnt_t) buffer.size());
+	assert (frames <= (framecnt_t) buffer.capacity());
 	data = buffer.data();
 }
 

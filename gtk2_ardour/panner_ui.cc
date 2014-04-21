@@ -49,6 +49,7 @@ const int PannerUI::pan_bar_height = 35;
 PannerUI::PannerUI (Session* s)
 	: _current_nouts (-1)
 	, _current_nins (-1)
+	, _current_uri ("")
 	, pan_automation_style_button ("")
 	, pan_automation_state_button ("")
 	, _panner_list()
@@ -214,12 +215,17 @@ PannerUI::setup_pan ()
 	int const nouts = _panner ? _panner->out().n_audio() : -1;
 	int const nins = _panner ? _panner->in().n_audio() : -1;
 
-	if (nouts == _current_nouts && nins == _current_nins) {
+	if (nouts == _current_nouts
+			&& nins == _current_nins
+			&& _current_uri == _panshell->panner_gui_uri()
+			)
+	{
 		return;
 	}
 
         _current_nins = nins;
         _current_nouts = nouts;
+        _current_uri = _panshell->panner_gui_uri();
 
         container_clear (pan_vbox);
 
@@ -231,11 +237,16 @@ PannerUI::setup_pan ()
 	_mono_panner = 0;
 
 	if (!_panner) {
+		delete big_window;
+		big_window = 0;
 		return;
 	}
 
-	if (_panshell->panner_gui_uri() == "http://ardour.org/plugin/panner_2in2out#ui")
+	if (_current_uri == "http://ardour.org/plugin/panner_2in2out#ui")
 	{
+		delete big_window;
+		big_window = 0;
+
 		boost::shared_ptr<Pannable> pannable = _panner->pannable();
 
 		_stereo_panner = new StereoPanner (_panshell);
@@ -257,9 +268,11 @@ PannerUI::setup_pan ()
 					boost::weak_ptr<AutomationControl>(ac)));
 		_stereo_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
 	}
-	else if (_panshell->panner_gui_uri() == "http://ardour.org/plugin/panner_1in2out#ui"
-			|| _panshell->panner_gui_uri() == "http://ardour.org/plugin/panner_balance#ui")
+	else if (_current_uri == "http://ardour.org/plugin/panner_1in2out#ui"
+			|| _current_uri == "http://ardour.org/plugin/panner_balance#ui")
 	{
+		delete big_window;
+		big_window = 0;
 		boost::shared_ptr<Pannable> pannable = _panner->pannable();
 		boost::shared_ptr<AutomationControl> ac = pannable->pan_azimuth_control;
 
@@ -277,7 +290,7 @@ PannerUI::setup_pan ()
 		update_pan_sensitive ();
 		pan_vbox.pack_start (*_mono_panner, false, false);
 	}
-	else if (_panshell->panner_gui_uri() == "http://ardour.org/plugin/panner_vbap#ui")
+	else if (_current_uri == "http://ardour.org/plugin/panner_vbap#ui")
 	{
 		if (!twod_panner) {
 			twod_panner = new Panner2d (_panshell, 61);
@@ -381,12 +394,9 @@ PannerUI::build_pan_menu ()
 		items.push_back (MenuElem (_("Edit..."), sigc::mem_fun (*this, &PannerUI::pan_edit)));
 	}
 
-	if (_route && _panner_list.size() > 1 && !_panshell->bypassed()) {
+	if (_panner_list.size() > 1 && !_panshell->bypassed()) {
 		RadioMenuItem::Group group;
 		items.push_back (SeparatorElem());
-
-		assert(_panshell->user_selected_panner_uri() == ""
-				||  _panshell->user_selected_panner_uri() == _panshell->current_panner_uri());
 
 		_suspend_menu_callbacks = true;
 		for (std::map<std::string,std::string>::const_iterator p = _panner_list.begin(); p != _panner_list.end(); ++p) {
@@ -417,6 +427,11 @@ PannerUI::pan_edit ()
 		_mono_panner->edit ();
 	} else if (_stereo_panner) {
 		_stereo_panner->edit ();
+	} else if (twod_panner) {
+		if (!big_window) {
+			big_window = new Panner2dWindow (_panshell, 400, _panner->in().n_audio());
+		}
+		big_window->show ();
 	}
 }
 
@@ -432,9 +447,7 @@ PannerUI::pan_reset ()
 void
 PannerUI::pan_set_custom_type (std::string uri) {
 	if (_suspend_menu_callbacks) return;
-	if (_route) {
-		_route->set_custom_panner_uri(uri);
-	}
+	_panshell->select_panner_by_uri(uri);
 }
 
 void
@@ -632,8 +645,7 @@ PannerUI::position_adjusted ()
 }
 
 void
-PannerUI::set_available_panners(boost::shared_ptr<ARDOUR::Route> r, std::map<std::string,std::string> p)
+PannerUI::set_available_panners(std::map<std::string,std::string> p)
 {
-	_route = r;
 	_panner_list = p;
 }

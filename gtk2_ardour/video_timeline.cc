@@ -736,7 +736,9 @@ VideoTimeLine::find_xjadeo () {
 		_xjadeo_bin = X_("");
 		warning << _("Video-monitor 'xjadeo' was not found. Please install http://xjadeo.sf.net/ "
 				"(a custom path to xjadeo can be specified by setting the XJREMOTE environment variable. "
-				"It should point to an application compatible with xjadeo's remote-control interface 'xjremote').")
+				"It should point to an application compatible with xjadeo's remote-control interface 'xjremote').\n"
+				"\n"
+				"see also http://manual.ardour.org/video-timeline/setup/")
 			<< endmsg;
 	}
 }

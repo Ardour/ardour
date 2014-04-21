@@ -117,15 +117,23 @@ AutomationControl::set_automation_style (AutoStyle as)
 void
 AutomationControl::start_touch(double when)
 {
-	set_touching (true);
-	alist()->start_touch(when);
-	AutomationWatch::instance().add_automation_watch (shared_from_this());
+	if (!touching()) {
+		if (alist()->automation_state() == Touch) {
+			alist()->start_touch (when);
+			AutomationWatch::instance().add_automation_watch (shared_from_this());
+		}
+		set_touching (true);
+	}
 }
 
 void
 AutomationControl::stop_touch(bool mark, double when)
 {
-	set_touching (false);
-	alist()->stop_touch (mark, when);
-	AutomationWatch::instance().remove_automation_watch (shared_from_this());
+	if (touching()) {
+		set_touching (false);
+		if (alist()->automation_state() == Touch) {
+			alist()->stop_touch (mark, when);
+			AutomationWatch::instance().remove_automation_watch (shared_from_this());
+		}
+	}
 }

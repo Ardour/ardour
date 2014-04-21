@@ -31,9 +31,9 @@
 #include "transcode_ffmpeg.h"
 
 enum VtlTranscodeOption {
- VTL_IMPORT_NO_VIDEO = 0,
- VTL_IMPORT_REFERENCE = 1,
- VTL_IMPORT_TRANSCODED = 2
+ VTL_IMPORT_REFERENCE = 0,
+ VTL_IMPORT_TRANSCODED = 1,
+ VTL_IMPORT_NO_VIDEO = 2
 };
 
 /** @class TranscodeVideoDialog

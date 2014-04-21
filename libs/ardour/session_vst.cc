@@ -17,9 +17,12 @@
 
 */
 
+#ifndef COMPILER_MSVC
 #include <stdbool.h>
+#endif
 #include <cstdio>
 
+#include "ardour/audioengine.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/windows_vst_plugin.h"
@@ -59,11 +62,19 @@ intptr_t Session::vst_callback (
 	if (effect && effect->user) {
 	        plug = (VSTPlugin *) (effect->user);
 		session = &plug->session();
+#ifdef COMPILER_MSVC
+		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (int) pthread_self().p, opcode, plug->name());
+#else
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (int) pthread_self(), opcode, plug->name());
+#endif
 	} else {
 		plug = 0;
 		session = 0;
+#ifdef COMPILER_MSVC
+		SHOW_CALLBACK ("am callback 0x%x, opcode = %d", (int) pthread_self().p, opcode);
+#else
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %d", (int) pthread_self(), opcode);
+#endif
 	}
 
 	switch(opcode){
@@ -119,30 +130,117 @@ intptr_t Session::vst_callback (
 		// <value> should contain a mask indicating which fields are required
 		// (see valid masks above), as some items may require extensive
 		// conversions
-		memset(&_timeInfo, 0, sizeof(_timeInfo));
+		_timeInfo.flags = 0;
+
 		if (session) {
-			_timeInfo.samplePos = session->transport_frame();
+			framepos_t now = session->transport_frame();
+
+			_timeInfo.samplePos = now;
 			_timeInfo.sampleRate = session->frame_rate();
-			_timeInfo.flags = 0;
+			
+			const TempoMetric& tm (session->tempo_map().metric_at (now));
 
 			if (value & (kVstTempoValid)) {
-				const Tempo& t (session->tempo_map().tempo_at (session->transport_frame()));
+				const Tempo& t (tm.tempo());
 				_timeInfo.tempo = t.beats_per_minute ();
 				_timeInfo.flags |= (kVstTempoValid);
 			}
-			if (value & (kVstBarsValid)) {
-				const Meter& m (session->tempo_map().meter_at (session->transport_frame()));
+			if (value & (kVstTimeSigValid)) {
+				const Meter& m (tm.meter());
 				_timeInfo.timeSigNumerator = m.divisions_per_bar ();
 				_timeInfo.timeSigDenominator = m.note_divisor ();
-				_timeInfo.flags |= (kVstBarsValid);
+				_timeInfo.flags |= (kVstTimeSigValid);
+			}
+			if ((value & (kVstPpqPosValid)) || (value & (kVstBarsValid))) {
+				Timecode::BBT_Time bbt;
+
+				try {
+					session->tempo_map().bbt_time_rt (now, bbt);
+					
+					/* PPQ = pulse per quarter
+					   VST's "pulse" is our "division".
+
+					   8 divisions per bar, 1 division = quarter, so 8 quarters per bar, ppq = 1
+					   8 divisions per bar, 1 division = eighth, so  4 quarters per bar, ppq = 2
+					   4 divisions per bar, 1 division = quarter, so  4 quarters per bar, ppq = 1
+					   4 divisions per bar, 1 division = half, so 8 quarters per bar, ppq = 0.5
+					   4 divisions per bar, 1 division = fifth, so (4 * 5/4) quarters per bar, ppq = 5/4
+					   
+					   general: divs_per_bar / (note_type / 4.0)
+					*/
+					double ppq_scaling =  tm.meter().note_divisor() / 4.0;
+
+					/* Note that this assumes constant meter/tempo throughout the session. Stupid VST
+					*/
+					double ppqBar = double(bbt.bars - 1) * tm.meter().divisions_per_bar();
+					double ppqBeat = double(bbt.beats - 1);
+					double ppqTick = double(bbt.ticks) / Timecode::BBT_Time::ticks_per_beat;
+
+					ppqBar *= ppq_scaling;
+					ppqBeat *= ppq_scaling;
+					ppqTick *= ppq_scaling;
+					
+					if (value & (kVstPpqPosValid)) {
+						_timeInfo.ppqPos = ppqBar + ppqBeat + ppqTick;
+						_timeInfo.flags |= (kVstPpqPosValid);
+					}
+					
+					if (value & (kVstBarsValid)) {
+						_timeInfo.barStartPos = ppqBar;
+						_timeInfo.flags |= (kVstBarsValid);
+					}
+					
+				} catch (...) {
+					/* relax */
+				}
+			}
+
+			if (value & (kVstSmpteValid)) {
+				Timecode::Time t;
+				
+				session->timecode_time (now, t);
+				
+				_timeInfo.smpteOffset = (t.hours * t.rate * 60.0 * 60.0) + 
+					(t.minutes * t.rate * 60.0) + 
+					(t.seconds * t.rate) + 
+					(t.frames) + 
+					(t.subframes);
+
+				_timeInfo.smpteOffset *= 80.0; /* VST spec is 1/80th frames */
+
+				if (session->timecode_drop_frames()) {
+					if (session->timecode_frames_per_second() == 30.0) {
+						_timeInfo.smpteFrameRate = 5;
+					} else {
+						_timeInfo.smpteFrameRate = 4; /* 29.97 assumed, thanks VST */
+					}
+				} else {
+					if (session->timecode_frames_per_second() == 24.0) {
+						_timeInfo.smpteFrameRate = 0;
+					} else if (session->timecode_frames_per_second() == 24.975) {
+						_timeInfo.smpteFrameRate = 2;
+					} else if (session->timecode_frames_per_second() == 25.0) {
+						_timeInfo.smpteFrameRate = 1;
+					} else {
+						_timeInfo.smpteFrameRate = 3; /* 30 fps */
+					}
+				}
+				_timeInfo.flags |= (kVstSmpteValid);
 			}
 
 			if (session->transport_speed() != 0.0f) {
-				_timeInfo.flags |= kVstTransportPlaying;
+				_timeInfo.flags |= (kVstTransportPlaying);
 			}
-		}
 
-		return (long)&_timeInfo;
+			if (session->get_play_loop()) {
+			}
+
+		} else {
+			_timeInfo.samplePos = 0;
+			_timeInfo.sampleRate = AudioEngine::instance()->sample_rate();
+		}
+		
+		return (intptr_t) &_timeInfo;
 
 	case audioMasterProcessEvents:
 		SHOW_CALLBACK ("amc: audioMasterProcessEvents\n");

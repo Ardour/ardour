@@ -162,6 +162,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
 	, first_time_engine_run (true)
+	, blink_timeout_tag (-1)
 
 	  /* transport */
 
@@ -495,10 +496,13 @@ ARDOUR_UI::post_engine ()
 
 		vector<string>::iterator n;
 		vector<string>::iterator k;
-		for (n = names.begin(), k = keys.begin(); n != names.end(); ++n, ++k) {
-			cout << "Action: " << (*n) << " bound to " << (*k) << endl;
+		vector<string>::iterator p;
+		for (n = names.begin(), k = keys.begin(), p = paths.begin(); n != names.end(); ++n, ++k, ++p) {
+			cout << "Action: '" << (*n) << "' bound to '" << (*k) << "' Path: '" << (*p) << "'" << endl;
 		}
 
+		halt_connection.disconnect ();
+		AudioEngine::instance()->stop ();
 		exit (0);
 	}
 
@@ -3303,7 +3307,7 @@ ARDOUR_UI::setup_order_hint ()
 	} else {
 		for (TrackSelection::iterator s = editor->get_selection().tracks.begin(); s != editor->get_selection().tracks.end(); ++s) {
 			RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (*s);
-			if (tav->route()->order_key() > order_hint) {
+			if (tav && tav->route() && tav->route()->order_key() > order_hint) {
 				order_hint = tav->route()->order_key();
 			}
 		}

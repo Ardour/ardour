@@ -78,7 +78,14 @@ Panner2in2out::Panner2in2out (boost::shared_ptr<Pannable> p)
         if (!_pannable->has_state()) {
                 _pannable->pan_azimuth_control->set_value (0.5);
                 _pannable->pan_width_control->set_value (1.0);
-        } 
+        }
+
+        double const w = width();
+        double const wrange = min (position(), (1 - position())) * 2;
+        if (fabs(w) > wrange) {
+                set_width(w > 0 ? wrange : -wrange);
+        }
+
         
         update ();
         
@@ -157,6 +164,11 @@ Panner2in2out::update ()
         float pos[2];
         double width = this->width ();
         const double direction_as_lr_fract = position ();
+
+        double const wrange = min (position(), (1 - position())) * 2;
+        if (fabs(width) > wrange) {
+                width = (width  > 0 ? wrange : -wrange);
+        }
 
         if (width < 0.0) {
                 width = -width;
@@ -421,6 +433,8 @@ Panner2in2out::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
                         panR = position[n] + (width[n]/2.0f); // center - width/2
                 }
 
+                panR = max(0.f, min(1.f, panR));
+
                 const float panL = 1 - panR;
 
                 /* note that are overwriting buffers, but its OK
@@ -522,7 +536,7 @@ Panner2in2out::value_as_string (boost::shared_ptr<AutomationControl> ac) const
                 return string_compose (_("Width: %1%%"), (int) floor (100.0 * val));
                 
         default:
-                return _pannable->value_as_string (ac);
+                return _("unused");
         }
 }
 

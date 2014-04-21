@@ -88,6 +88,7 @@
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
 #include "ardour/speakers.h"
+#include "ardour/track.h"
 #include "ardour/utils.h"
 
 #include "midi++/port.h"
@@ -526,13 +527,16 @@ Session::destroy ()
 	}
 	routes.flush ();
 
-	DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->name(), i->second.use_count()));
-		i->second->drop_references ();
-	}
+	{
+		DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
+		Glib::Threads::Mutex::Lock lm (source_lock);
+		for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+			DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->name(), i->second.use_count()));
+			i->second->drop_references ();
+		}
 
-	sources.clear ();
+		sources.clear ();
+	}
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
 	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
@@ -805,6 +809,12 @@ Session::remove_monitor_section ()
 	/* force reversion to Solo-In-Place */
 	Config->set_solo_control_is_listen_control (false);
 
+	/* if we are auditioning, cancel it ... this is a workaround
+	   to a problem (auditioning does not execute the process graph,
+	   which is needed to remove routes when using >1 core for processing)
+	*/
+	cancel_audition ();
+
 	{
 		/* Hold process lock while doing this so that we don't hear bits and
 		 * pieces of audio as we work on each route.
@@ -835,6 +845,10 @@ Session::remove_monitor_section ()
 
 	remove_route (_monitor_out);
 	auto_connect_master_bus ();
+
+	if (auditioner) {
+		auditioner->connect ();
+	}
 }
 
 void
@@ -978,6 +992,10 @@ Session::add_monitor_section ()
 		} else {
 			(*x)->enable_monitor_send ();
 		}
+	}
+
+	if (auditioner) {
+		auditioner->connect ();
 	}
 }
 
@@ -3286,12 +3304,16 @@ Session::source_by_id (const PBD::ID& id)
 	return source;
 }
 
-boost::shared_ptr<Source>
-Session::source_by_path_and_channel (const string& path, uint16_t chn)
+boost::shared_ptr<AudioFileSource>
+Session::source_by_path_and_channel (const string& path, uint16_t chn) const
 {
+	/* Restricted to audio files because only audio sources have channel
+	   as a property.
+	*/
+
 	Glib::Threads::Mutex::Lock lm (source_lock);
 
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 		boost::shared_ptr<AudioFileSource> afs
 			= boost::dynamic_pointer_cast<AudioFileSource>(i->second);
 
@@ -3299,7 +3321,31 @@ Session::source_by_path_and_channel (const string& path, uint16_t chn)
 			return afs;
 		}
 	}
-	return boost::shared_ptr<Source>();
+
+	return boost::shared_ptr<AudioFileSource>();
+}
+
+boost::shared_ptr<MidiSource>
+Session::source_by_path (const std::string& path) const
+{
+	/* Restricted to MIDI files because audio sources require a channel
+	   for unique identification, in addition to a path.
+	*/
+
+	Glib::Threads::Mutex::Lock lm (source_lock);
+
+	for (SourceMap::const_iterator s = sources.begin(); s != sources.end(); ++s) {
+		boost::shared_ptr<MidiSource> ms
+			= boost::dynamic_pointer_cast<MidiSource>(s->second);
+		boost::shared_ptr<FileSource> fs
+			= boost::dynamic_pointer_cast<FileSource>(s->second);
+		
+		if (ms && fs && fs->path() == path) {
+			return ms;
+		}
+	}
+
+	return boost::shared_ptr<MidiSource>();
 }
 
 uint32_t
@@ -3318,111 +3364,6 @@ Session::count_sources_by_origin (const string& path)
 	}
 
 	return cnt;
-}
-
-
-string
-Session::change_source_path_by_name (string path, string oldname, string newname, bool destructive)
-{
-	string look_for;
-	string old_basename = PBD::basename_nosuffix (oldname);
-	string new_legalized = legalize_for_path (newname);
-
-	/* note: we know (or assume) the old path is already valid */
-
-	if (destructive) {
-
-		/* destructive file sources have a name of the form:
-
-		    /path/to/Tnnnn-NAME(%[LR])?.wav
-
-		    the task here is to replace NAME with the new name.
-		*/
-
-		string dir;
-		string prefix;
-		string::size_type dash;
-
-		dir = Glib::path_get_dirname (path);
-		path = Glib::path_get_basename (path);
-
-		/* '-' is not a legal character for the NAME part of the path */
-
-		if ((dash = path.find_last_of ('-')) == string::npos) {
-			return "";
-		}
-
-		prefix = path.substr (0, dash);
-
-		path += prefix;
-		path += '-';
-		path += new_legalized;
-		path += native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
-		path = Glib::build_filename (dir, path);
-
-	} else {
-
-		/* non-destructive file sources have a name of the form:
-
-		    /path/to/NAME-nnnnn(%[LR])?.ext
-
-		    the task here is to replace NAME with the new name.
-		*/
-
-		string dir;
-		string suffix;
-		string::size_type dash;
-		string::size_type postfix;
-
-		dir = Glib::path_get_dirname (path);
-		path = Glib::path_get_basename (path);
-
-		/* '-' is not a legal character for the NAME part of the path */
-
-		if ((dash = path.find_last_of ('-')) == string::npos) {
-			return "";
-		}
-
-		suffix = path.substr (dash+1);
-
-		// Suffix is now everything after the dash. Now we need to eliminate
-		// the nnnnn part, which is done by either finding a '%' or a '.'
-
-		postfix = suffix.find_last_of ("%");
-		if (postfix == string::npos) {
-			postfix = suffix.find_last_of ('.');
-		}
-
-		if (postfix != string::npos) {
-			suffix = suffix.substr (postfix);
-		} else {
-			error << "Logic error in Session::change_source_path_by_name(), please report" << endl;
-			return "";
-		}
-
-		const uint32_t limit = 10000;
-		char buf[PATH_MAX+1];
-
-		for (uint32_t cnt = 1; cnt <= limit; ++cnt) {
-
-			snprintf (buf, sizeof(buf), "%s-%u%s", newname.c_str(), cnt, suffix.c_str());
-
-			if (!matching_unsuffixed_filename_exists_in (dir, buf)) {
-				path = Glib::build_filename (dir, buf);
-				break;
-			}
-
-			path = "";
-		}
-
-		if (path.empty()) {
-			fatal << string_compose (_("FATAL ERROR! Could not find a suitable version of %1 for a rename"),
-			                         newname) << endl;
-			/*NOTREACHED*/
-		}
-	}
-
-	return path;
 }
 
 /** Return the full path (in some session directory) for a new within-session source.
@@ -3528,6 +3469,22 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 				existing++;
 				break;
 			}
+
+			/* it is possible that we have the path already
+			 * assigned to a source that has not yet been written
+			 * (ie. the write source for a diskstream). we have to
+			 * check this in order to make sure that our candidate
+			 * path isn't used again, because that can lead to
+			 * two Sources point to the same file with different
+			 * notions of their removability.
+			 */
+
+			string possible_path = Glib::build_filename (spath, buf);
+
+			if (source_by_path (possible_path)) {
+				existing++;
+				break;
+			}
 		}
 
 		if (existing == 0) {
@@ -3557,19 +3514,21 @@ Session::create_audio_source_for_session (size_t n_chans, string const & n, uint
 		SourceFactory::createWritable (DataType::AUDIO, *this, path, destructive, frame_rate()));
 }
 
-/** Return a unique name based on \a base for a new internal MIDI source */
+/** Return a unique name based on \a owner_name for a new internal MIDI source */
 string
-Session::new_midi_source_name (const string& base)
+Session::new_midi_source_name (const string& owner_name)
 {
 	uint32_t cnt;
 	char buf[PATH_MAX+1];
 	const uint32_t limit = 10000;
 	string legalized;
+	string possible_name;
 
 	buf[0] = '\0';
-	legalized = legalize_for_path (base);
+	legalized = legalize_for_path (owner_name);
 
 	// Find a "version" of the file name that doesn't exist in any of the possible directories.
+
 	for (cnt = 1; cnt <= limit; ++cnt) {
 
 		vector<space_and_path>::iterator i;
@@ -3578,12 +3537,17 @@ Session::new_midi_source_name (const string& base)
 		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 
 			SessionDirectory sdir((*i).path);
+			
+			snprintf (buf, sizeof(buf), "%s-%u.mid", legalized.c_str(), cnt);
+			possible_name = buf;
 
-			std::string p = Glib::build_filename (sdir.midi_path(), legalized);
+			std::string possible_path = Glib::build_filename (sdir.midi_path(), possible_name);
+			
+			if (Glib::file_test (possible_path, Glib::FILE_TEST_EXISTS)) {
+				existing++;
+			}
 
-			snprintf (buf, sizeof(buf), "%s-%u.mid", p.c_str(), cnt);
-
-			if (Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
+			if (source_by_path (possible_path)) {
 				existing++;
 			}
 		}
@@ -3595,37 +3559,64 @@ Session::new_midi_source_name (const string& base)
 		if (cnt > limit) {
 			error << string_compose(
 					_("There are already %1 recordings for %2, which I consider too many."),
-					limit, base) << endmsg;
+					limit, owner_name) << endmsg;
 			destroy ();
 			throw failed_constructor();
 		}
 	}
 
-	return Glib::path_get_basename(buf);
+	return possible_name;
 }
 
 
 /** Create a new within-session MIDI source */
 boost::shared_ptr<MidiSource>
-Session::create_midi_source_for_session (Track* track, string const & n)
+Session::create_midi_source_for_session (string const & basic_name)
 {
-	/* try to use the existing write source for the track, to keep numbering sane
-	 */
+	std::string name;
 
-	if (track) {
-		/*MidiTrack* mt = dynamic_cast<Track*> (track);
-		  assert (mt);
-		*/
-
-		list<boost::shared_ptr<Source> > l = track->steal_write_sources ();
-
-		if (!l.empty()) {
-			assert (boost::dynamic_pointer_cast<MidiSource> (l.front()));
-			return boost::dynamic_pointer_cast<MidiSource> (l.front());
-		}
+	if (name.empty()) {
+		name = new_midi_source_name (basic_name);
 	}
 
-	const string name = new_midi_source_name (n);
+	const string path = new_source_path_from_name (DataType::MIDI, name);
+
+	return boost::dynamic_pointer_cast<SMFSource> (
+		SourceFactory::createWritable (
+			DataType::MIDI, *this, path, false, frame_rate()));
+}
+
+/** Create a new within-session MIDI source */
+boost::shared_ptr<MidiSource>
+Session::create_midi_source_by_stealing_name (boost::shared_ptr<Track> track)
+{
+	/* the caller passes in the track the source will be used in,
+	   so that we can keep the numbering sane. 
+	   
+	   Rationale: a track with the name "Foo" that has had N
+	   captures carried out so far will ALREADY have a write source
+	   named "Foo-N+1.mid" waiting to be used for the next capture.
+	   
+	   If we call new_midi_source_name() we will get "Foo-N+2". But
+	   there is no region corresponding to "Foo-N+1", so when
+	   "Foo-N+2" appears in the track, the gap presents the user
+	   with odd behaviour - why did it skip past Foo-N+1?
+	   
+	   We could explain this to the user in some odd way, but
+	   instead we rename "Foo-N+1.mid" as "Foo-N+2.mid", and then
+	   use "Foo-N+1" here.
+	   
+	   If that attempted rename fails, we get "Foo-N+2.mid" anyway.
+	*/
+	
+	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (track);
+	assert (mt);
+	std::string name = track->steal_write_source_name ();
+
+	if (name.empty()) {
+		return boost::shared_ptr<MidiSource>();
+	}
+
 	const string path = new_source_path_from_name (DataType::MIDI, name);
 
 	return boost::dynamic_pointer_cast<SMFSource> (
