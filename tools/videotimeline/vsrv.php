@@ -47,6 +47,9 @@ if (isset($_REQUEST['format'])) {
 	case 'rgba':
 		$fmt='rgba';
 		break;
+	case 'bgra':
+		$fmt='bgra';
+		break;
 	case 'rgb':
 		$fmt='rgb';
 		break;
@@ -99,21 +102,22 @@ else if (preg_match('@Video:.* ([0-9]+x[0-9]+),@m',$nfo, $m)) {
 }
 
 if ($mode=='info') {
-	# Protocol Version number
-	# FPS
-	# duration (in frames)
-	# start-offset (in seconds)
-	# aspect-ratio
 	if (isset($_REQUEST['format'])) {
 		switch ($_REQUEST['format']) {
 		case 'csv':
-			echo "1,$fr,$df,$so,$ar\n";
+			# protocol, width, height, aspect, fps, fps, duration
+			echo "1,0,0,$ar,$fr,$df\n";
 			exit;
 			break;
 		default:
 			break;
 		}
 	}
+	# Protocol Version number
+	# FPS
+	# duration (in frames)
+	# start-offset (in seconds)
+	# aspect-ratio
 	echo "1\n$fr\n$df\n$so\n$ar\n";
 	exit;
 }
