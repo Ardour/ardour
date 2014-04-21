@@ -16,6 +16,14 @@ if (isset($_SERVER['PATH_INFO'])) {
 		case '/info':
 			$mode='info';
 			break;
+		case '/rc':
+		case '/rc/':
+			# TODO proper CSV encode (possible quotes in docroot)
+			# TODO support optional plain text version
+			echo '"'.$docroot.'",'.$_SERVER['SERVER_ADDR'].','.$_SERVER['SERVER_PORT'].',0,"/info /rc /status",""'."\n";
+			echo 'status: ok, online.';
+			exit;
+			break;
 		default:
 			break;
 	}
@@ -96,6 +104,16 @@ if ($mode=='info') {
 	# duration (in frames)
 	# start-offset (in seconds)
 	# aspect-ratio
+	if (isset($_REQUEST['format'])) {
+		switch ($_REQUEST['format']) {
+		case 'csv':
+			echo "1,$fr,$df,$so,$ar\n";
+			exit;
+			break;
+		default:
+			break;
+		}
+	}
 	echo "1\n$fr\n$df\n$so\n$ar\n";
 	exit;
 }
