@@ -201,7 +201,7 @@ http_get_thread (void *arg) {
 	char url[2048];
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-	snprintf(url, sizeof(url), "%s?frame=%li&w=%d&h=%di&file=%s&format=bgra",
+	snprintf(url, sizeof(url), "%s?frame=%li&w=%d&h=%d&file=%s&format=bgra",
 	  vif->get_video_server_url().c_str(),
 	  (long int) vif->get_req_frame(), vif->get_width(), vif->get_height(),
 	  vif->get_video_filename().c_str()
