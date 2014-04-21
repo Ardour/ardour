@@ -42,6 +42,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 struct ERect{
     short top;
@@ -333,10 +334,11 @@ windows, that is if they don't manage their own UIs **/
 void* gui_event_loop (void* ptr)
 {
 	VSTState* vstfx;
-	int LXVST_sched_event_timer = 0;
-	int LXVST_sched_timer_interval = 50; //ms
+	int LXVST_sched_timer_interval = 40; //ms, 25fps
 	XEvent event;
+	struct timeval clock1, clock2;
 	
+	gettimeofday(&clock1, NULL);
 	/*The 'Forever' loop - runs the plugin UIs etc - based on the FST gui event loop*/
 	
 	while (!gui_quit)
@@ -378,14 +380,14 @@ void* gui_event_loop (void* ptr)
 
 		Glib::usleep(1000);
 		
-		LXVST_sched_event_timer++;
-		
-		LXVST_sched_event_timer = LXVST_sched_event_timer & 0x00FFFFFF;
-
 		/*See if its time for us to do a scheduled event pass on all the plugins*/
 
-		if((LXVST_sched_timer_interval!=0) && (!(LXVST_sched_event_timer% LXVST_sched_timer_interval)))
+		gettimeofday(&clock2, NULL);
+		const int elapsed_time = (clock2.tv_sec - clock1.tv_sec) * 1000 + (clock2.tv_usec - clock1.tv_usec) / 1000;
+
+		if((LXVST_sched_timer_interval != 0) && elapsed_time >= LXVST_sched_timer_interval)
 		{
+			//printf("elapsed %d ms ^= %.2f Hz\n", elapsed_time, 1000.0/(double)elapsed_time); // DEBUG
 			pthread_mutex_lock (&plugin_mutex);
 		    
 again:
@@ -460,6 +462,8 @@ again:
 				pthread_mutex_unlock (&vstfx->lock);
 			}
 			pthread_mutex_unlock (&plugin_mutex);
+
+			gettimeofday(&clock1, NULL);
 		}
 	}
 
