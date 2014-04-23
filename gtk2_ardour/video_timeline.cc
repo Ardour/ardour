@@ -724,12 +724,8 @@ VideoTimeLine::find_xjadeo () {
 	else if (Glib::file_test(X_("/Applications/Jadeo.app/Contents/MacOS/xjremote"), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
 		_xjadeo_bin = X_("/Applications/Jadeo.app/Contents/MacOS/xjremote");
 	}
-	/* TODO: win32: allow to configure PATH to xjremote */
-	else if (Glib::file_test(X_("C:\\Program Files\\xjadeo\\xjremote.exe"), Glib::FILE_TEST_EXISTS)) {
-		_xjadeo_bin = X_("C:\\Program Files\\xjadeo\\xjremote.exe");
-	}
-	else if (Glib::file_test(X_("C:\\Program Files\\xjadeo\\xjremote.bat"), Glib::FILE_TEST_EXISTS)) {
-		_xjadeo_bin = X_("C:\\Program Files\\xjadeo\\xjremote.bat");
+	else if (Glib::file_test(X_("C:\\Program Files\\xjadeo\\xjadeo.exe"), Glib::FILE_TEST_EXISTS)) {
+		_xjadeo_bin = X_("C:\\Program Files\\xjadeo\\xjadeo.exe");
 	}
 	else  {
 		_xjadeo_bin = X_("");
