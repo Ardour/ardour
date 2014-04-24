@@ -49,6 +49,7 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost:
 	pack_start (*box, false, false);
 #ifdef GDK_WINDOWING_X11
 	pack_start (_socket, true, true);
+	_socket.set_border_width (0);
 #endif
 }
 
@@ -87,6 +88,9 @@ VSTPluginUI::package (Gtk::Window& win)
 
 	/* This assumes that the window's owner understands the XEmbed protocol */
 	_socket.add_id (get_XID ());
+	_socket.set_size_request(
+			_vst->state()->width + _vst->state()->hoffset,
+			_vst->state()->height + _vst->state()->voffset);
 #endif
 	
 	return 0;
