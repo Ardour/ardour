@@ -29,6 +29,12 @@
 #include "ardour/template_utils.h"
 #include "ardour/session.h"
 
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+#include <shlobj.h> // CSIDL_*
+#include "pbd/windows_special_dirs.h"
+#endif
+
 #ifdef interface
 #undef interface
 #endif
@@ -87,6 +93,7 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	HKEY key;
 	DWORD size = PATH_MAX;
 	char tmp[PATH_MAX+1];
+	const char *program_files = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
 #endif
 
 	std::string icsd_file_path;
@@ -100,7 +107,12 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	{
 		path_entry.set_text(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "harvid.exe", 0));
 	}
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "harvid.exe", 0), Glib::FILE_TEST_EXISTS))
+	{
+		path_entry.set_text(g_build_filename(program_files, "harvid", "harvid.exe", 0));
+	}
 #endif
+	/* generic fallbacks to try */
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\harvid.exe"), Glib::FILE_TEST_EXISTS)) {
 		path_entry.set_text(X_("C:\\Program Files\\harvid\\harvid.exe"));
 	}

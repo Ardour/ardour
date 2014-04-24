@@ -25,6 +25,12 @@
 #include "pbd/convert.h"
 #include "ardour/session_directory.h"
 
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+#include <shlobj.h> // CSIDL_*
+#include "pbd/windows_special_dirs.h"
+#endif
+
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "gui_thread.h"
@@ -720,6 +726,7 @@ VideoTimeLine::find_xjadeo () {
 	HKEY key;
 	DWORD size = PATH_MAX;
 	char tmp[PATH_MAX+1];
+	const char *program_files = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
 #endif
 	if (getenv("XJREMOTE")) {
 		_xjadeo_bin = getenv("XJREMOTE");
@@ -740,7 +747,12 @@ VideoTimeLine::find_xjadeo () {
 	{
 		_xjadeo_bin = std::string(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "xjadeo.exe", 0));
 	}
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "xjadeo", "xjadeo.exe", 0), Glib::FILE_TEST_EXISTS))
+	{
+		_xjadeo_bin = std::string(g_build_filename(program_files, "harvid", "xjadeo.exe", 0));
+	}
 #endif
+	/* generic fallbacks to try */
 #ifdef __APPLE__
 	else if (Glib::file_test(X_("/Applications/Jadeo.app/Contents/MacOS/xjremote"), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
 		_xjadeo_bin = X_("/Applications/Jadeo.app/Contents/MacOS/xjremote");
