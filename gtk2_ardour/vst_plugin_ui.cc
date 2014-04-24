@@ -151,4 +151,3 @@ VSTPluginUI::configure_handler (GdkEventConfigure*)
 #endif
 	return false;
 }
-
