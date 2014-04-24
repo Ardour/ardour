@@ -716,14 +716,36 @@ VideoTimeLine::set_video_server_docroot(std::string vsr) {
 void
 VideoTimeLine::find_xjadeo () {
 	std::string xjadeo_file_path;
+#ifdef PLATFORM_WINDOWS
+	HKEY key;
+	DWORD size = PATH_MAX;
+	char tmp[PATH_MAX+1];
+#endif
 	if (getenv("XJREMOTE")) {
 		_xjadeo_bin = getenv("XJREMOTE");
 	} else if (find_file_in_search_path (Searchpath(Glib::getenv("PATH")), X_("xjremote"), xjadeo_file_path)) {
 		_xjadeo_bin = xjadeo_file_path;
 	}
+#ifdef PLATFORM_WINDOWS
+	/* old xjadeo, typo in key <= 0.7.6 */
+	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSSxjadeo", 0, KEY_READ, &key))
+			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+			)
+	{
+		_xjadeo_bin = std::string(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "xjadeo.exe", 0));
+	}
+	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\xjadeo", 0, KEY_READ, &key))
+			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+			)
+	{
+		_xjadeo_bin = std::string(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "xjadeo.exe", 0));
+	}
+#endif
+#ifdef __APPLE__
 	else if (Glib::file_test(X_("/Applications/Jadeo.app/Contents/MacOS/xjremote"), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
 		_xjadeo_bin = X_("/Applications/Jadeo.app/Contents/MacOS/xjremote");
 	}
+#endif
 	else if (Glib::file_test(X_("C:\\Program Files\\xjadeo\\xjadeo.exe"), Glib::FILE_TEST_EXISTS)) {
 		_xjadeo_bin = X_("C:\\Program Files\\xjadeo\\xjadeo.exe");
 	}
