@@ -83,10 +83,24 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	listenaddr_combo.append_text("0.0.0.0");
 	listenaddr_combo.set_active(0);
 
+#ifdef PLATFORM_WINDOWS
+	HKEY key;
+	DWORD size = PATH_MAX;
+	char tmp[PATH_MAX+1];
+#endif
+
 	std::string icsd_file_path;
 	if (find_file_in_search_path (PBD::Searchpath(Glib::getenv("PATH")), X_("harvid"), icsd_file_path)) {
 		path_entry.set_text(icsd_file_path);
 	}
+#ifdef PLATFORM_WINDOWS
+	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\harvid", 0, KEY_READ, &key))
+			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+			)
+	{
+		path_entry.set_text(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "harvid.exe", 0));
+	}
+#endif
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\harvid.exe"), Glib::FILE_TEST_EXISTS)) {
 		path_entry.set_text(X_("C:\\Program Files\\harvid\\harvid.exe"));
 	}
