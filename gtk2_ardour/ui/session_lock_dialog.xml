@@ -4,7 +4,7 @@
   <style name="generic_button"
          style="generic_control"
          fgnormal="#BFBFBF"
-         bgnormal="#6C6C6C"
+         bgnormal="#007c7e"
          fgactive="#BFBFBF"
          bgactive="#454545"
          fghover="#CCCCCC"
@@ -12,13 +12,13 @@
          fgdisabled ="#959595"
          bordercolor="#7E7E7E"
          borderwidth="1 1 0 0" />
-    <Layout width="408" height="338">
+    <Layout width="448" height="660">
       <canvas>
-        <icon file="icons/session_lock.png"/>
+        <icon file="icons/sessionlock.png"/>
       </canvas>
       <Button style="generic_button"
         id="ok_button"
         text="UNLOCK"        
-        x="100" y="250" width="71" height="28"/>
+        x="75" y="368" width="72" height="32"/>
     </Layout>
 </Dialog>
