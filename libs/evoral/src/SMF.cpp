@@ -71,6 +71,28 @@ SMF::seek_to_track(int track)
 	}
 }
 
+/** Attempt to open the SMF file just to see if it is valid.
+ *
+ * \return  true on success
+ *          false on failure
+ */
+bool
+SMF::test(const std::string& path)
+{
+	PBD::StdioFileDescriptor d (path, "r");
+	FILE* f = d.allocate ();
+	if (f == 0) {
+		return false;
+	}
+
+	smf_t* test_smf;
+	if ((test_smf = smf_load (f)) == NULL) {
+		return false;
+	}
+	smf_delete (test_smf);
+	return true;
+}
+
 /** Attempt to open the SMF file for reading and/or writing.
  *
  * \return  0 on success
