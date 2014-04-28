@@ -17,6 +17,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <sys/time.h>
 #include "dummy_audiobackend.h"
 #include "pbd/error.h"
 #include "i18n.h"
@@ -26,6 +27,16 @@ using namespace ARDOUR;
 static std::string s_instance_name;
 DummyAudioBackend::DummyAudioBackend (AudioEngine& e)
 	: AudioBackend (e)
+	, _running (false)
+	, _freewheeling (false)
+	, _samplerate (48000)
+	, _audio_buffersize (1024)
+	, _dsp_load (0)
+	, _n_inputs (0)
+	, _n_outputs (0)
+	, _systemic_input_latency (0)
+	, _systemic_output_latency (0)
+	, _processed_samples (0)
 {
 	_instance_name = s_instance_name;
 }
@@ -89,31 +100,37 @@ DummyAudioBackend::available_output_channel_count (const std::string&) const
 bool
 DummyAudioBackend::can_change_sample_rate_when_running () const
 {
-	return false;
+	return true;
 }
 
 bool
 DummyAudioBackend::can_change_buffer_size_when_running () const
 {
-	return false;
+	return true;
 }
 
 int
 DummyAudioBackend::set_device_name (const std::string&)
 {
-	return -1;
+	return 0;
 }
 
 int
-DummyAudioBackend::set_sample_rate (float)
+DummyAudioBackend::set_sample_rate (float sr)
 {
-	return -1;
+	if (sr <= 0) { return -1; }
+	_samplerate = sr;
+	engine.sample_rate_change (sr);
+	return 0;
 }
 
 int
-DummyAudioBackend::set_buffer_size (uint32_t)
+DummyAudioBackend::set_buffer_size (uint32_t bs)
 {
 	return -1;
+	_audio_buffersize = bs;
+	engine.buffer_size_change (bs);
+	return 0;
 }
 
 int
@@ -157,13 +174,13 @@ DummyAudioBackend::device_name () const
 float
 DummyAudioBackend::sample_rate () const
 {
-	return 0;
+	return _samplerate;
 }
 
 uint32_t
 DummyAudioBackend::buffer_size () const
 {
-	return 0;
+	return _audio_buffersize;
 }
 
 bool
@@ -219,28 +236,74 @@ DummyAudioBackend::midi_option () const
 
 /* State Control */
 
+static void * pthread_process (void *arg)
+{
+	DummyAudioBackend *d = static_cast<DummyAudioBackend *>(arg);
+	d->main_process_thread ();
+	pthread_exit (0);
+	return 0;
+}
+
 int
 DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 {
-	return -1;
+	if (_running) {
+		PBD::error << _("DummyAudioBackend: already active.") << endmsg;
+		return -1;
+	}
+	if (pthread_create (&_main_thread, NULL, pthread_process, this)) {
+		PBD::error << _("DummyAudioBackend: cannot start.") << endmsg;
+	}
+
+	int timeout = 5000;
+	while (!_running && --timeout > 0) { usleep (1000); }
+
+	if (timeout == 0 || !_running) {
+		PBD::error << _("DummyAudioBackend: failed to start process thread.") << endmsg;
+		return -1;
+	}
+
+	if (engine.reestablish_ports ()) {
+		PBD::error << _("DummyAudioBackend: Could not re-establish ports.") << endmsg;
+		stop ();
+		return -1;
+	}
+
+	engine.reconnect_ports ();
+	return 0;
 }
 
 int
 DummyAudioBackend::stop ()
 {
-	return -1;
+	void *status;
+	if (!_running) {
+		return -1;
+	}
+
+	_running = false;
+	if (pthread_join (_main_thread, &status)) {
+		PBD::error << _("DummyAudioBackend: failed to terminate.") << endmsg;
+		return -1;
+	}
+	return 0;
 }
 
 int
-DummyAudioBackend::freewheel (bool)
+DummyAudioBackend::freewheel (bool onoff)
 {
+	if (onoff != _freewheeling) {
+		return 0;
+	}
+	_freewheeling = onoff;
+	engine.freewheel_callback (onoff);
 	return 0;
 }
 
 float
 DummyAudioBackend::dsp_load () const
 {
-	return 0.0;
+	return 100.f * _dsp_load;
 }
 
 size_t
@@ -253,13 +316,13 @@ DummyAudioBackend::raw_buffer_size (DataType t)
 pframes_t
 DummyAudioBackend::sample_time ()
 {
-	return 0;
+	return _processed_samples;
 }
 
 pframes_t
 DummyAudioBackend::sample_time_at_cycle_start ()
 {
-	return 0;
+	return _processed_samples;
 }
 
 pframes_t
@@ -268,28 +331,76 @@ DummyAudioBackend::samples_since_cycle_start ()
 	return 0;
 }
 
+
+void *
+DummyAudioBackend::dummy_process_thread (void *arg)
+{
+	ThreadData* td = reinterpret_cast<ThreadData*> (arg);
+	boost::function<void ()> f = td->f;
+	delete td;
+	f ();
+	return 0;
+}
+
 int
 DummyAudioBackend::create_process_thread (boost::function<void()> func)
 {
-	return -1;
+	pthread_t thread_id;
+	pthread_attr_t attr;
+	size_t stacksize = 100000;
+
+	pthread_attr_init (&attr);
+	pthread_attr_setstacksize (&attr, stacksize);
+	ThreadData* td = new ThreadData (this, func, stacksize);
+
+	if (pthread_create (&thread_id, &attr, dummy_process_thread, td)) {
+		PBD::error << _("AudioEngine: cannot create process thread.") << endmsg;
+		return -1;
+	}
+
+	_threads.push_back (thread_id);
+	return 0;
 }
 
 int
 DummyAudioBackend::join_process_threads ()
 {
-	return -1;
+	int rv = 0;
+
+	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
+	{
+		void *status;
+		if (pthread_join (*i, &status)) {
+			PBD::error << _("AudioEngine: cannot terminate process thread.") << endmsg;
+			rv -= 1;
+		}
+	}
+	_threads.clear ();
+	return rv;
 }
 
 bool
 DummyAudioBackend::in_process_thread ()
 {
+	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
+	{
+#ifdef COMPILER_MINGW
+		if (*i == GetCurrentThread ()) {
+			return true;
+		}
+#else // pthreads
+		if (pthread_equal (*i, pthread_self ()) != 0) {
+			return true;
+		}
+#endif
+	}
 	return false;
 }
 
 uint32_t
 DummyAudioBackend::process_thread_count ()
 {
-	return 0;
+	return _threads.size ();
 }
 
 void
@@ -533,6 +644,40 @@ DummyAudioBackend::n_physical_inputs () const
 void*
 DummyAudioBackend::get_buffer (PortEngine::PortHandle, pframes_t)
 {
+}
+
+/* Engine Process */
+void *
+DummyAudioBackend::main_process_thread ()
+{
+	AudioEngine::thread_init_callback (this);
+	_running = true;
+	_processed_samples = 0;
+
+	struct timeval clock1, clock2;
+	::gettimeofday (&clock1, NULL);
+	while (_running) {
+		if (engine.process_callback (_audio_buffersize)) {
+			return 0;
+		}
+		_processed_samples += _audio_buffersize;
+		if (!_freewheeling) {
+			::gettimeofday (&clock2, NULL);
+			const int elapsed_time = (clock2.tv_sec - clock1.tv_sec) * 1000000 + (clock2.tv_usec - clock1.tv_usec);
+			const int nomial_time = 1000000 * _audio_buffersize / _samplerate;
+			_dsp_load = elapsed_time / (float) nomial_time;
+			if (elapsed_time < nomial_time) {
+				::usleep (nomial_time - elapsed_time);
+			} else {
+				::usleep (100); // don't hog cpu
+			}
+		} else {
+			_dsp_load = 1.0;
+			::usleep (100); // don't hog cpu
+		}
+		::gettimeofday (&clock1, NULL);
+	}
+	_running = false;
 	return 0;
 }
 
