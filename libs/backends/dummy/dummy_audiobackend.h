@@ -28,10 +28,117 @@
 #include <stdint.h>
 #include <pthread.h>
 
+#include <boost/shared_ptr.hpp>
+
 #include "ardour/types.h"
 #include "ardour/audio_backend.h"
 
 namespace ARDOUR {
+
+class DummyMidiEvent {
+	public:
+		DummyMidiEvent(const pframes_t timestamp, const uint8_t* data, size_t size);
+		DummyMidiEvent(const DummyMidiEvent& other);
+		~DummyMidiEvent();
+		size_t size () const { return _size; };
+		pframes_t timestamp () const { return _timestamp; };
+		const unsigned char* const_data () const { return _data; };
+		unsigned char* data () { return _data; };
+		bool operator< (const DummyMidiEvent &other) const { return timestamp () < other.timestamp (); };
+	private:
+		size_t _size;
+		pframes_t _timestamp;
+		uint8_t *_data;
+};
+
+typedef std::vector<boost::shared_ptr<DummyMidiEvent> > DummyMidiBuffer;
+
+class DummyPort {
+	protected:
+		DummyPort (const std::string&, PortFlags);
+	public:
+		virtual ~DummyPort ();
+
+		const std::string& name () const { return _name; }
+		PortFlags flags () const { return _flags; }
+
+		int set_name (const std::string &name) { _name = name; return 0; }
+
+		virtual DataType type () const = 0;
+
+		bool is_input ()     const { return flags () & IsInput; }
+		bool is_output ()    const { return flags () & IsOutput; }
+		bool is_physical ()  const { return flags () & IsPhysical; }
+		bool is_terminal ()  const { return flags () & IsTerminal; }
+		bool is_connected () const { return _connections.size () != 0; }
+		bool is_connected (const DummyPort *port) const;
+		bool is_physically_connected () const;
+
+		const std::vector<DummyPort *>& get_connections () const { return _connections; }
+
+		int connect (DummyPort *port);
+		int disconnect (DummyPort *port);
+		void disconnect_all ();
+
+		virtual void* get_buffer (pframes_t nframes) = 0;
+
+		const LatencyRange& latency_range (bool for_playback) const
+		{
+			return for_playback ? _playback_latency_range : _capture_latency_range;
+		}
+
+		void set_latency_range (const LatencyRange &latency_range, bool for_playback)
+		{
+			if (for_playback)
+			{
+				_playback_latency_range = latency_range;
+			}
+			else
+			{
+				_capture_latency_range = latency_range;
+			}
+		}
+
+	private:
+		std::string _name;
+		const PortFlags _flags;
+		LatencyRange _capture_latency_range;
+		LatencyRange _playback_latency_range;
+		std::vector<DummyPort*> _connections;
+
+		void _connect (DummyPort* , bool);
+		void _disconnect (DummyPort* , bool);
+
+}; // class DummyPort
+
+class DummyAudioPort : public DummyPort {
+	public:
+		DummyAudioPort (const std::string&, PortFlags);
+		~DummyAudioPort ();
+
+		DataType type () const { return DataType::AUDIO; };
+
+		Sample* buffer () { return _buffer; }
+		const Sample* const_buffer () const { return _buffer; }
+		void* get_buffer (pframes_t nframes);
+
+	private:
+		Sample _buffer[8192];
+}; // class DummyAudioPort
+
+class DummyMidiPort : public DummyPort {
+	public:
+		DummyMidiPort (const std::string&, PortFlags);
+		~DummyMidiPort ();
+
+		DataType type () const { return DataType::MIDI; };
+
+		void* get_buffer (pframes_t nframes);
+		const DummyMidiBuffer const_buffer () const { return _buffer; }
+
+	private:
+		DummyMidiBuffer _buffer;
+}; // class DummyMidiPort
 
 class DummyAudioBackend : public AudioBackend {
 	public:
@@ -170,6 +277,7 @@ class DummyAudioBackend : public AudioBackend {
 		float  _samplerate;
 		size_t _audio_buffersize;
 		float  _dsp_load;
+		static size_t _max_buffer_size;
 
 		uint32_t _n_inputs;
 		uint32_t _n_outputs;
@@ -193,6 +301,22 @@ class DummyAudioBackend : public AudioBackend {
 			ThreadData (DummyAudioBackend* e, boost::function<void ()> fp, size_t stacksz)
 				: engine (e) , f (fp) , stacksize (stacksz) {}
 		};
+
+		/* port engine */
+		std::vector<DummyPort *> _ports;
+
+		bool valid_port (PortHandle port) const {
+			return std::find (_ports.begin (), _ports.end (), (DummyPort*)port) != _ports.end ();
+		}
+		DummyPort * find_port(const std::string& port_name) const {
+			for (std::vector<DummyPort*>::const_iterator it = _ports.begin (); it != _ports.end (); ++it) {
+				if ((*it)->name () == port_name) {
+					return *it;
+				}
+			}
+			return NULL;
+		}
+
 }; // class DummyAudioBackend
 
 } // namespace
