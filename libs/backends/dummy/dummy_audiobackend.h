@@ -26,6 +26,7 @@
 #include <set>
 
 #include <stdint.h>
+#include <pthread.h>
 
 #include "ardour/types.h"
 #include "ardour/audio_backend.h"
@@ -159,9 +160,39 @@ class DummyAudioBackend : public AudioBackend {
 
 		void* get_buffer (PortHandle, pframes_t);
 
+		void* main_process_thread ();
 
 	private:
 		std::string _instance_name;
+		bool  _running;
+		bool  _freewheeling;
+
+		float  _samplerate;
+		size_t _audio_buffersize;
+		float  _dsp_load;
+
+		uint32_t _n_inputs;
+		uint32_t _n_outputs;
+
+		uint32_t _systemic_input_latency;
+		uint32_t _systemic_output_latency;
+
+		uint64_t _processed_samples;
+
+		pthread_t _main_thread;
+
+		/* process threads */
+		static void* dummy_process_thread (void *);
+		std::vector<pthread_t> _threads;
+
+		struct ThreadData {
+			DummyAudioBackend* engine;
+			boost::function<void ()> f;
+			size_t stacksize;
+
+			ThreadData (DummyAudioBackend* e, boost::function<void ()> fp, size_t stacksz)
+				: engine (e) , f (fp) , stacksize (stacksz) {}
+		};
 }; // class DummyAudioBackend
 
 } // namespace
