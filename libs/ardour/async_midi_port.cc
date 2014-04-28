@@ -50,6 +50,7 @@ AsyncMIDIPort::AsyncMIDIPort (string const & name, PortFlags flags)
 	, MIDI::Port (name, MIDI::Port::Flags (0))
 	, _currently_in_cycle (false)
 	, _last_write_timestamp (0)
+	, have_timer (false)
 	, output_fifo (512)
 	, input_fifo (1024)
 #ifndef PLATFORM_WINDOWS
@@ -60,6 +61,13 @@ AsyncMIDIPort::AsyncMIDIPort (string const & name, PortFlags flags)
 
 AsyncMIDIPort::~AsyncMIDIPort ()
 {
+}
+
+void
+AsyncMIDIPort::set_timer (boost::function<framecnt_t (void)>& f)
+{
+	timer = f;
+	have_timer = true;
 }
 
 void
@@ -113,9 +121,18 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 
 	if (ARDOUR::Port::receives_input()) {
 		MidiBuffer& mb (get_midi_buffer (nframes));
-		pframes_t when = AudioEngine::instance()->sample_time_at_cycle_start();
+		framecnt_t when;
+		
+		if (have_timer) {
+			when = timer ();
+		} else {
+			when = AudioEngine::instance()->sample_time_at_cycle_start();
+		}
 
 		for (MidiBuffer::iterator b = mb.begin(); b != mb.end(); ++b) {
+			if (!have_timer) {
+				when += (*b).time();
+			}
 			input_fifo.write (when, (Evoral::EventType) 0, (*b).size(), (*b).buffer());
 		}
 

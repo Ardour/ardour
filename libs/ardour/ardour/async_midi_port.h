@@ -22,6 +22,8 @@
 #include <string>
 #include <iostream>
 
+#include <boost/function.hpp>
+
 #include "pbd/xml++.h"
 #include "pbd/crossthread.h"
 #include "pbd/signals.h"
@@ -64,6 +66,8 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 #endif
 	}
 
+	void set_timer (boost::function<framecnt_t (void)>&);
+
 	static void set_process_thread (pthread_t);
 	static pthread_t get_process_thread () { return _process_thread; }
 	static bool is_process_thread();
@@ -71,6 +75,8 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
   private:	
 	bool                    _currently_in_cycle;
         MIDI::timestamp_t       _last_write_timestamp;
+	bool                    have_timer;
+	boost::function<framecnt_t (void)> timer;
 	RingBuffer< Evoral::Event<double> > output_fifo;
         Evoral::EventRingBuffer<MIDI::timestamp_t> input_fifo;
         Glib::Threads::Mutex output_fifo_lock;
