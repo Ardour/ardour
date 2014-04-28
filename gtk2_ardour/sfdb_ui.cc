@@ -279,7 +279,7 @@ SoundFileBox::setup_labels (const string& filename)
 
 	string error_msg;
 
-	if (SMFSource::safe_midi_file_extension (path)) {
+	if (SMFSource::valid_midi_file (path)) {
 
 		boost::shared_ptr<SMFSource> ms =
 			boost::dynamic_pointer_cast<SMFSource> (
@@ -404,7 +404,7 @@ SoundFileBox::audition ()
 
 	boost::shared_ptr<Region> r;
 
-	if (SMFSource::safe_midi_file_extension (path)) {
+	if (SMFSource::valid_midi_file (path)) {
 
 		boost::shared_ptr<SMFSource> ms =
 			boost::dynamic_pointer_cast<SMFSource> (
@@ -1307,7 +1307,7 @@ SoundFileOmega::reset_options ()
 
 	/* See if we are thinking about importing any MIDI files */
 	vector<string>::iterator i = paths.begin ();
-	while (i != paths.end() && SMFSource::safe_midi_file_extension (*i) == false) {
+	while (i != paths.end() && SMFSource::valid_midi_file (*i) == false) {
 		++i;
 	}
 	bool const have_a_midi_file = (i != paths.end ());
@@ -1535,7 +1535,7 @@ SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& 
 				src_needed = true;
 			}
 
-		} else if (SMFSource::safe_midi_file_extension (*i)) {
+		} else if (SMFSource::valid_midi_file (*i)) {
 
 			Evoral::SMF reader;
 			reader.open(*i);

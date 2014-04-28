@@ -50,6 +50,7 @@ public:
 	SMF() : _smf(0), _smf_track(0), _empty(true) {};
 	virtual ~SMF();
 
+	static bool test(const std::string& path);
 	int  open(const std::string& path, int track=1) THROW_FILE_ERROR;
 	int  create(const std::string& path, int track=1, uint16_t ppqn=19200) THROW_FILE_ERROR;
 	void close() THROW_FILE_ERROR;

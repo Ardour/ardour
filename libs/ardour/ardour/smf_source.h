@@ -77,6 +77,7 @@ public:
 	void ensure_disk_file ();
 
 	static bool safe_midi_file_extension (const std::string& path);
+	static bool valid_midi_file (const std::string& path);
 
 	void prevent_deletion ();
 
