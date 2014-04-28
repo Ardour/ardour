@@ -7,7 +7,7 @@ import sys
 top = '.'
 out = 'build'
 
-backends = [ 'jack' ]
+backends = [ 'jack', 'dummy' ]
 
 if sys.platform == 'darwin':
     backends += ['wavesaudio' ]
