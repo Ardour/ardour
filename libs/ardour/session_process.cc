@@ -35,6 +35,7 @@
 #include "ardour/graph.h"
 #include "ardour/port.h"
 #include "ardour/process_thread.h"
+#include "ardour/scene_changer.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
 #include "ardour/ticker.h"
@@ -86,6 +87,9 @@ Session::process (pframes_t nframes)
 		if (!_silent && !_engine.freewheeling() && Config->get_send_midi_clock() && (transport_speed() == 1.0f || transport_speed() == 0.0f) && midi_clock->has_midi_port()) {
 			midi_clock->tick (transport_at_start, nframes);
 		}
+
+		_scene_changer->run (transport_at_start, transport_at_start + nframes);
+
 	} catch (...) {
 		/* don't bother with a message */
 	}

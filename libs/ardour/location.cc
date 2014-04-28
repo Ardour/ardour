@@ -30,6 +30,7 @@
 #include "pbd/enumwriter.h"
 
 #include "ardour/location.h"
+#include "ardour/midi_scene_change.h"
 #include "ardour/session.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/tempo.h"
@@ -41,6 +42,8 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+
+PBD::Signal0<void> Location::scene_changed;
 
 Location::Location (Session& s)
 	: SessionHandleRef (s)
@@ -87,6 +90,8 @@ Location::Location (const Location& other)
 
 	assert (_start >= 0);
 	assert (_end >= 0);
+
+	/* scene change is NOT COPIED */
 }
 
 Location::Location (Session& s, const XMLNode& node)
@@ -134,6 +139,8 @@ Location::operator= (const Location& other)
 	_bbt_end = other._bbt_end;
 	_flags = other._flags;
 	_position_lock_style = other._position_lock_style;
+	
+	/* XXX need to copy scene change */
 
 	/* copy is not locked even if original was */
 
@@ -431,11 +438,15 @@ Location::get_state ()
 	node->add_property ("locked", (_locked ? "yes" : "no"));
 	node->add_property ("position-lock-style", enum_2_string (_position_lock_style));
 
+	if (_scene_change) {
+		node->add_child_nocopy (_scene_change->get_state());
+	}
+
 	return *node;
 }
 
 int
-Location::set_state (const XMLNode& node, int /*version*/)
+Location::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty *prop;
 
@@ -521,6 +532,16 @@ Location::set_state (const XMLNode& node, int /*version*/)
 		_position_lock_style = PositionLockStyle (string_2_enum (prop->value(), _position_lock_style));
 	}
 
+	XMLNode* scene_child = find_named_node (node, SceneChange::xml_node_name);
+	
+	if (scene_child) {
+		_scene_change = SceneChange::factory (*scene_child, version);
+
+		if (_scene_change) {
+			_scene_change->set_time (_start);
+		}
+	}
+
 	recompute_bbt_from_frames ();
 
 	changed (this); /* EMIT SIGNAL */
@@ -579,6 +600,14 @@ Location::unlock ()
 {
 	_locked = false;
 	LockChanged (this);
+}
+
+void
+Location::set_scene_change (boost::shared_ptr<SceneChange>  sc)
+{
+	_scene_change = sc;
+
+	scene_changed (); /* EMIT SIGNAL */
 }
 
 /*---------------------------------------------------------------------- */
@@ -675,6 +704,7 @@ Locations::clear ()
 			++tmp;
 
 			if (!(*i)->is_session_range()) {
+				delete *i;
 				locations.erase (i);
 			}
 
@@ -700,6 +730,7 @@ Locations::clear_markers ()
 			++tmp;
 
 			if ((*i)->is_mark() && !(*i)->is_session_range()) {
+				delete *i;
 				locations.erase (i);
 			}
 
@@ -723,6 +754,7 @@ Locations::clear_ranges ()
 			++tmp;
 
 			if (!(*i)->is_mark()) {
+				delete *i;
 				locations.erase (i);
 
 			}
@@ -779,6 +811,7 @@ Locations::remove (Location *loc)
 
 		for (i = locations.begin(); i != locations.end(); ++i) {
 			if ((*i) == loc) {
+				delete *i;
 				locations.erase (i);
 				was_removed = true;
 				if (current_location == loc) {
@@ -972,6 +1005,44 @@ Locations::first_mark_before (framepos_t frame, bool include_special_ranges)
 	return -1;
 }
 
+Location*
+Locations::mark_at (framepos_t pos, framecnt_t slop) const
+{
+	Glib::Threads::Mutex::Lock lm (lock);
+	Location* closest = 0;
+	frameoffset_t mindelta = max_framepos;
+	frameoffset_t delta;
+
+	/* locations are not necessarily stored in linear time order so we have
+	 * to iterate across all of them to find the one closest to a give point.
+	 */
+
+	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
+
+		if ((*i)->is_mark()) {
+			if (pos > (*i)->start()) { 
+				delta = pos - (*i)->start();
+			} else {
+				delta = (*i)->start() - pos;
+			}
+			
+			if (slop == 0 && delta == 0) {
+				/* special case: no slop, and direct hit for position */
+				return *i;
+			}
+
+			if (delta <= slop) {
+				if (delta < mindelta) {
+					closest = *i;
+					mindelta = delta;
+				}
+			}
+		}
+	}
+
+	return closest;
+}
+
 framepos_t
 Locations::first_mark_after (framepos_t frame, bool include_special_ranges)
 {
@@ -1146,3 +1217,4 @@ Locations::find_all_between (framepos_t start, framepos_t end, LocationList& ll,
 		}
 	}
 }
+

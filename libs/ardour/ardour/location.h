@@ -34,9 +34,12 @@
 #include "pbd/statefuldestructible.h"
 
 #include "ardour/ardour.h"
+#include "ardour/scene_change.h"
 #include "ardour/session_handle.h"
 
 namespace ARDOUR {
+
+class SceneChange;
 
 class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDestructible
 {
@@ -93,6 +96,9 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 
 	Flags flags () const { return _flags; }
 
+	boost::shared_ptr<SceneChange> scene_change() const { return _scene_change; }
+	void set_scene_change (boost::shared_ptr<SceneChange>);
+
 	PBD::Signal1<void,Location*> name_changed;
 	PBD::Signal1<void,Location*> end_changed;
 	PBD::Signal1<void,Location*> start_changed;
@@ -116,6 +122,8 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	void set_position_lock_style (PositionLockStyle ps);
 	void recompute_frames_from_bbt ();
 
+	static PBD::Signal0<void> scene_changed;
+
   private:
 	std::string        _name;
 	framepos_t         _start;
@@ -125,6 +133,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	Flags              _flags;
 	bool               _locked;
 	PositionLockStyle  _position_lock_style;
+	boost::shared_ptr<SceneChange> _scene_change;
 
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
@@ -160,6 +169,8 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 
 	int set_current (Location *, bool want_lock = true);
 	Location *current () const { return current_location; }
+
+	Location* mark_at (framepos_t, framecnt_t slop = 0) const;
 
         framepos_t first_mark_before (framepos_t, bool include_special_ranges = false);
 	framepos_t first_mark_after (framepos_t, bool include_special_ranges = false);

@@ -644,3 +644,27 @@ Session::mmc_input_port () const
 {
 	return _midi_ports->mmc_input_port ();
 }
+
+MIDI::Port*
+Session::scene_output_port () const
+{
+	return _midi_ports->scene_output_port ();
+}
+
+MIDI::Port*
+Session::scene_input_port () const
+{
+	return _midi_ports->scene_input_port ();
+}
+
+boost::shared_ptr<MidiPort>
+Session::scene_in () const
+{
+	return _midi_ports->scene_in ();
+}
+
+boost::shared_ptr<MidiPort>
+Session::scene_out () const
+{
+	return _midi_ports->scene_out ();
+}

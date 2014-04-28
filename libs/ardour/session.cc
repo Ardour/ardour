@@ -68,6 +68,7 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/graph.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/scene_changer.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_ui.h"
 #include "ardour/operations.h"
@@ -260,6 +261,7 @@ Session::Session (AudioEngine &eng,
 	,  _speakers (new Speakers)
 	, _order_hint (0)
 	, ignore_route_processor_changes (false)
+	, _scene_changer (0)
 	, _midi_ports (0)
 	, _mmc (0)
 {
@@ -546,6 +548,8 @@ Session::destroy ()
 
 	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
 	playlists.reset ();
+
+	delete _scene_changer; _scene_changer = 0;
 
 	delete _mmc; _mmc = 0;
 	delete _midi_ports; _midi_ports = 0;
