@@ -82,6 +82,39 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 	_open = true;
 }
 
+/** Constructor used for external-to-session files.  File must exist. */
+SMFSource::SMFSource (Session& s, const string& path)
+	: Source(s, DataType::MIDI, path, Source::Flag (0))
+	, MidiSource(s, path, Source::Flag (0))
+	, FileSource(s, DataType::MIDI, path, string(), Source::Flag (0))
+	, Evoral::SMF()
+	, _last_ev_time_beats(0.0)
+	, _last_ev_time_frames(0)
+	, _smf_last_read_end (0)
+	, _smf_last_read_time (0)
+{
+	/* note that origin remains empty */
+
+	if (init (_path, false)) {
+		throw failed_constructor ();
+	}
+ 
+        assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
+
+	/* file is not opened until write */
+
+	if (_flags & Writable) {
+		return;
+	}
+
+	if (open (_path)) {
+		throw failed_constructor ();
+	}
+
+	_open = true;
+}
+
 /** Constructor used for existing internal-to-session files. */
 SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 	: Source(s, node)
