@@ -34,6 +34,7 @@
 #include <glibmm/fileutils.h>
 
 #include "evoral/Control.hpp"
+#include "evoral/evoral/SMF.hpp"
 
 #include "ardour/event_type_map.h"
 #include "ardour/midi_model.h"
@@ -48,6 +49,7 @@
 using namespace ARDOUR;
 using namespace Glib;
 using namespace PBD;
+using namespace Evoral;
 
 /** Constructor used for new internal-to-session files.  File cannot exist. */
 SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
@@ -494,6 +496,15 @@ SMFSource::mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::Musical
 	/* data in the file now, not removable */
 
 	mark_nonremovable ();
+}
+
+bool
+SMFSource::valid_midi_file (const string& file)
+{
+	if (safe_midi_file_extension (file) ) {
+		return (SMF::test (file) );
+	}
+	return false;
 }
 
 bool
