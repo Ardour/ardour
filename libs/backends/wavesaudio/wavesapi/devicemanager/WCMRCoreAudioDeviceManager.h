@@ -1,6 +1,23 @@
+/*
+    Copyright (C) 2013 Waves Audio Ltd.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
 //----------------------------------------------------------------------------------
 //
-// Copyright (c) 2008 Waves Audio Ltd. All rights reserved.
 //
 //! \file	WCMRCoreAudioDeviceManager.h
 //!
@@ -121,7 +138,7 @@ protected:
 	uint32_t m_NextSampleToUse;
 #endif //WV_USE_TONE_GEN
 	
-	WTErr UpdateDeviceInfo ();
+	WTErr UpdateDeviceInfo (bool updateSRSupported, bool updateBufferSizes);
 	WTErr UpdateDeviceName();
 	WTErr UpdateDeviceInputs();
 	WTErr UpdateDeviceOutputs();
@@ -164,28 +181,40 @@ class WCMRCoreAudioDeviceManager : public WCMRAudioDeviceManager
 public:
 
 	WCMRCoreAudioDeviceManager(WCMRAudioDeviceManagerClient *pTheClient, eAudioDeviceFilter eCurAudioDeviceFilter,
-		bool useMultithreading = true, bool bNocopy = false); ///< constructor
+		bool useMultithreading = true, eCABS_Method eCABS_method = eCABS_Simple, bool bNocopy = false); ///< constructor
 	virtual ~WCMRCoreAudioDeviceManager(void); ///< Destructor
+	
+
+	virtual WTErr UpdateDeviceList() //has to be overridden!
+    {
+			//wvNS::wvThread::ThreadMutex::lock theLock(m_AudioDeviceManagerMutex);
+        return UpdateDeviceList_Private();
+    }
+
+	virtual eCABS_Method GetBufferSizeMethod()
+    { 
+			//wvNS::wvThread::ThreadMutex::lock theLock(m_AudioDeviceManagerMutex);
+        return GetBufferSizeMethod_Private();
+    }
+	
+	virtual WTErr DoIdle();
+	
+private:
+    WTErr UpdateDeviceList_Private();
+    eCABS_Method GetBufferSizeMethod_Private() { return m_eCABS_Method; }
 
 protected:
-    static OSStatus DevicePropertyChangeCallback (AudioHardwarePropertyID inPropertyID, void* inClientData);
-    
-    virtual WCMRAudioDevice*	initNewCurrentDeviceImpl(const std::string & deviceName);
-	virtual void				destroyCurrentDeviceImpl();
-	virtual WTErr				generateDeviceListImpl();
-    virtual WTErr				updateDeviceListImpl();
-	virtual WTErr				getDeviceBufferSizesImpl(const std::string & deviceName, std::vector<int>& bufferSizes) const;
-    
+
+	int m_UpdateDeviceListRequested; ///< Number of times device list change has been detected.
+	int m_UpdateDeviceListProcessed; ///< Number of times device list change has been processed.
 	bool m_UseMultithreading; ///< Flag indicates whether to use multi-threading for audio processing.
     bool m_bNoCopyAudioBuffer;
-	    
-private:
-    // helper functions for this class only
-    WTErr getDeviceAvailableSampleRates(DeviceID deviceId, std::vector<int>& sampleRates);
-    WTErr getDeviceMaxInputChannels(DeviceID deviceId, unsigned int& inputChannels);
-    WTErr getDeviceMaxOutputChannels(DeviceID deviceId, unsigned int& outputChannels);
-    
-    WCMRAudioDevice*			m_NoneDevice;
+	eCABS_Method m_eCABS_Method; // Type of core audio buffer size list method
+
+	static OSStatus StaticPropertyChangeProc (AudioHardwarePropertyID inPropertyID, void* inClientData);
+	OSStatus PropertyChangeProc (AudioHardwarePropertyID inPropertyID);
+
+	void remove_pattern(const std::string& original_str, const std::string& pattern_str, std::string& return_str);
 };
 
 #endif //#ifndef __WCMRCoreAudioDeviceManager_h_

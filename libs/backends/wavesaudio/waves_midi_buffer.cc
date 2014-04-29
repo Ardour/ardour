@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2013 Valeriy amyshniy
+    Copyright (C) 2014 Waves Audio Ltd.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+
 #include "waves_midi_buffer.h"
 #include "waves_midi_event.h"
 

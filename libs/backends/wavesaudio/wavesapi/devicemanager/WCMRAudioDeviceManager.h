@@ -1,6 +1,23 @@
+/*
+    Copyright (C) 2013 Waves Audio Ltd.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
 //----------------------------------------------------------------------------------
 //
-// Copyright (c) 2008 Waves Audio Ltd. All rights reserved.
 //
 //! \file	WCMRAudioDeviceManager.h
 //!
@@ -25,35 +42,19 @@
 #include "WCRefManager.h"
 #include "BasicTypes/WUTypes.h"
 #include "WUErrors.h"
-#include "WCThreadSafe.h"
 
 #define WCUNUSEDPARAM(a)
 
+//forward decl.
+class WCMRAudioConnection;
 class WCMRAudioDevice;
 class WCMRAudioDeviceManager;
 
-typedef unsigned int DeviceID;
+typedef std::vector<WCMRAudioDevice *> WCMRAudioDeviceList; ///< Vector for audio devices
+typedef std::vector<WCMRAudioDevice *>::iterator WCMRAudioDeviceListIter; ///< Vector iterator for audio devices
+typedef std::vector<WCMRAudioDevice *>::const_iterator WCMRAudioDeviceListConstIter; ///< Vector iterator for audio devices
+typedef std::vector<WCMRAudioConnection *> WCMRAudioConnectionsList; ///< Vector for audio devices
 
-struct DeviceInfo
-{
-	DeviceID m_DeviceId;
-	std::string m_DeviceName;
-	std::vector<int> m_AvailableSampleRates;
-	unsigned int m_MaxInputChannels;
-	unsigned int m_MaxOutputChannels;
-
-    DeviceInfo():
-    m_DeviceId(-1), m_DeviceName("Unknown"), m_MaxInputChannels(0), m_MaxOutputChannels(0)
-	{};
-    
-	DeviceInfo(unsigned int deviceID, const std::string & deviceName):
-		m_DeviceId(deviceID), m_DeviceName(deviceName), m_MaxInputChannels(0), m_MaxOutputChannels(0)
-	{};
-};
-
-typedef std::vector<DeviceInfo*> DeviceInfoVec;
-typedef DeviceInfoVec::iterator DeviceInfoVecIter;
-typedef DeviceInfoVec::const_iterator DeviceInfoVecConstIter;
 
 /// for notification... A client must derive it's class from us.
 class WCMRAudioDeviceManagerClient
@@ -70,7 +71,6 @@ class WCMRAudioDeviceManagerClient
 		BufferSizeChanged,
 		ClockSourceChanged,
 		DeviceStoppedStreaming,
-		DeviceStartsStreaming,
 		DeviceDroppedSamples,
 		DeviceConnectionLost,
 		DeviceGenericError,
@@ -123,7 +123,7 @@ public:
 	{
 		DeviceAvailable,
 		DeviceDisconnected,
-		DeviceErrors
+		DeviceError
 	};
 
 	WCMRAudioDevice (WCMRAudioDeviceManager *pManager);///<Constructor
@@ -167,8 +167,6 @@ public:
 	virtual WTErr SendCustomCommand (int customCommand, void *pCommandParam); ///< Send a custom command to the audiodevice...
     
     virtual uint32_t GetLatency (bool isInput); ///Get latency.
-
-	virtual WTErr UpdateDeviceInfo () = 0;
     
 protected:
 	WCMRAudioDeviceManager *m_pMyManager; ///< The manager who's managing this device, can be used for sending notifications!
@@ -193,7 +191,6 @@ protected:
 	float m_MonitorGain; ///< Amount of gain to apply for monitoring signal.
 };
 
-
 // This enum is for choosing filter for audio devices scan
 typedef enum eAudioDeviceFilter
 {
@@ -205,44 +202,65 @@ typedef enum eAudioDeviceFilter
 	eAudioDeviceFilterNum   // Number of enums
 }	eAudioDeviceFilter;
 
-
+//! WCMRAudioDeviceManager
+/*! The Audio Device Manager class */
 class WCMRAudioDeviceManager : public WCRefManager
 {
+private://< Private version of class functions which will be called by class's public function after mutex lock acquistion.
+    WCMRAudioDevice* GetDefaultDevice_Private();
+    WTErr DoIdle_Private();
+    const WCMRAudioDeviceList& Devices_Private() const;	
+    WCMRAudioDevice* GetDeviceByName_Private(const std::string & nameToMatch) const;
+
 public://< Public functions for the class.
-  
-	WCMRAudioDeviceManager(WCMRAudioDeviceManagerClient *pTheClient, eAudioDeviceFilter eCurAudioDeviceFilter); ///< constructor
-	virtual ~WCMRAudioDeviceManager(void); ///< Destructor
+    WCMRAudioDevice* GetDefaultDevice()
+    {
+		//wvNS::wvThread::ThreadMutex::lock theLock(m_AudioDeviceManagerMutex);
+        return GetDefaultDevice_Private();
+    }
 
-	//interfaces
-	WCMRAudioDevice*	InitNewCurrentDevice(const std::string & deviceName);
-	void				DestroyCurrentDevice();
-	const DeviceInfoVec DeviceInfoList () const;
-    WTErr               GetDeviceInfoByName(const std::string & nameToMatch, DeviceInfo & devInfo) const;
-	WTErr				GetDeviceBufferSizes(const std::string & nameToMatch, std::vector<int>& bufferSizes) const;
+    virtual WTErr DoIdle()
+    {
+        //wvNS::wvThread::ThreadMutex::lock theLock(m_AudioDeviceManagerMutex);
+        return DoIdle_Private();
+    }
 
-    //virtual void		EnableVerboseLogging(bool /*bEnable*/, const std::string& /*logFilePath*/) { };
+    const WCMRAudioDeviceList& Devices() const
+    {
+        //wvNS::wvThread::ThreadMutex::lock theLock(m_AudioDeviceManagerMutex);
+        return Devices_Private();
+    }
 
-	//notify backend
-	void					NotifyClient (WCMRAudioDeviceManagerClient::NotificationReason forReason, void *pParam = NULL);
+    WCMRAudioDevice* GetDeviceByName(const std::string & nameToMatch) const
+    {
+        //wvNS::wvThread::ThreadMutex::lock theLock(m_AudioDeviceManagerMutex);
+        return GetDeviceByName_Private(nameToMatch);
+    }
+
+public:
+	
+	WCMRAudioDeviceManager(WCMRAudioDeviceManagerClient *pTheClient, eAudioDeviceFilter eCurAudioDeviceFilter
+		); ///< constructor
+	virtual ~WCMRAudioDeviceManager(void); ///< Destructor	
+    
+	virtual WTErr UpdateDeviceList () = 0; //has to be overridden!
+	
+	
+	//This is primarily for use by WCMRAudioDevice and it's descendants... We could have made it
+	//protected and made WCMRAudioDevice a friend, and then in some way found a way to extend 
+	//the friendship to WCMRAudioDevice's descendants, but that would require a lot of extra
+	//effort!
+	void NotifyClient (WCMRAudioDeviceManagerClient::NotificationReason forReason, void *pParam = NULL);
+    virtual void EnableVerboseLogging(bool /*bEnable*/, const std::string& /*logFilePath*/) { };
 
 protected:
     
-    mutable wvNS::wvThread::ThreadMutex         m_AudioDeviceInfoVecMutex; // mutex to lock device info list
-	DeviceInfoVec                               m_DeviceInfoVec;
+    //< NOTE : Mutex protection is commented, but wrapper classes are still there, in case they are required in future.
+    //wvNS::wvThread::ThreadMutex   m_AudioDeviceManagerMutex;   ///< Mutex for Audio device manager class function access.
+	WCMRAudioDeviceManagerClient *m_pTheClient; ///< The device manager's client, used to send notifications.
 	
-    eAudioDeviceFilter                          m_eAudioDeviceFilter;
-	WCMRAudioDevice*                            m_CurrentDevice;
-
-private:
-	// override in derived classes
-	// made private to avoid pure virtual function call
-	virtual WCMRAudioDevice*	initNewCurrentDeviceImpl(const std::string & deviceName) = 0;
-	virtual void				destroyCurrentDeviceImpl() = 0;
-	virtual WTErr				getDeviceBufferSizesImpl(const std::string & deviceName, std::vector<int>& bufferSizes) const = 0;
-    virtual WTErr				generateDeviceListImpl() = 0;
-    virtual WTErr				updateDeviceListImpl() = 0;
-    
-	WCMRAudioDeviceManagerClient	*m_pTheClient; ///< The device manager's client, used to send notifications.
+	WCMRAudioDeviceList m_Devices; ///< List of all relevant devices devices
+	eAudioDeviceFilter m_eAudioDeviceFilter; // filter of 'm_Devices'
 };
 
 #endif //#ifndef __WCMRAudioDeviceManager_h_

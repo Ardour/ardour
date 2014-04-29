@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2013 Gorobchenko Dmytro
+    Copyright (C) 2014 Waves Audio Ltd.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2013 Valeriy Kamyshniy
+    Copyright (C) 2014 Waves Audio Ltd.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ int WavesDataPort::disconnect (WavesDataPort *port)
         std::cerr << "WavesDataPort::disconnect (): the ports are not connected!" << std::endl;
         return -1;
     }
-
+	
     _disconnect (port, true);
 
     return 0;

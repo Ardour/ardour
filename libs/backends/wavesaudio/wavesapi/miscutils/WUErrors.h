@@ -1,3 +1,21 @@
+/*
+    Copyright (C) 2013 Waves Audio Ltd.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
 #ifndef __WUErrors_h__
     #define __WUErrors_h__
 
@@ -35,7 +53,6 @@ const WTErr eAppTerminateFailed    		    = -23; //!< failed to terminate an appl
 const WTErr eAppReturnedError               = -24; //!< Non zero exit code from application
 const WTErr eNotImplemented                 = -25; //!< Function is not implmemented
 const WTErr eNotEmpty		                = -26; //!< Something was expected to be empty but is not
-const WTErr eAsioFailed						= -27;
 
 // File Manager errors
 const WTErr eFMNoSuchVolume					= -1001; 

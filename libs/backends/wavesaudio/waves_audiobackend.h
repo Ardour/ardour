@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2013 Valeriy Kamyshniy
+    Copyright (C) 2014 Waves Audio Ltd.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@
 class ArdourAudioDeviceManager : public WCMRCoreAudioDeviceManager
 {
   public:
-    ArdourAudioDeviceManager (WCMRAudioDeviceManagerClient *client) : WCMRCoreAudioDeviceManager (client, eAllDevices) {};
+    ArdourAudioDeviceManager (WCMRAudioDeviceManagerClient *client) : WCMRCoreAudioDeviceManager (client, eFullDuplexDevices, true, eCABS_Simple, false) {};
 };
 
 #elif defined (_WINDOWS)
@@ -51,7 +51,7 @@ class ArdourAudioDeviceManager : public WCMRCoreAudioDeviceManager
 class ArdourAudioDeviceManager : public WCMRPortAudioDeviceManager
 {
   public:
-    ArdourAudioDeviceManager (WCMRAudioDeviceManagerClient *client) : WCMRPortAudioDeviceManager (client, eAllDevices) {};
+    ArdourAudioDeviceManager (WCMRAudioDeviceManagerClient *client) : WCMRPortAudioDeviceManager (client, eFullDuplexDevices, paASIO) {};
 };
 
 #endif
@@ -103,13 +103,9 @@ class WavesMidiPort;
 
     virtual int set_device_name (const std::string& name);
 
-	virtual int drop_device();
-
     virtual int set_sample_rate (float);
 
     virtual int set_buffer_size (uint32_t);
-
-    virtual int set_sample_format (SampleFormat);
 
     virtual int set_interleaved (bool yn);
     
@@ -126,8 +122,6 @@ class WavesMidiPort;
     virtual float sample_rate () const;
     
     virtual uint32_t buffer_size () const;
-    
-    virtual SampleFormat sample_format () const;
     
     virtual bool interleaved () const;
     
@@ -281,7 +275,6 @@ class WavesMidiPort;
     WavesMidiDeviceManager _midi_device_manager;
 
     WCMRAudioDevice *_device;
-    SampleFormat _sample_format;
     bool _interleaved;
     static std::string __instantiated_name;
     uint32_t _input_channels;
@@ -324,15 +317,8 @@ class WavesMidiPort;
                                  pframes_t sample_time,
                                  uint64_t cycle_start_time_nanos);
 
-	int _reset_device (uint32_t buffer_size, float sample_rate);
     void _changed_midi_devices ();
 
-	// DO change sample rate and buffer size
-	int _buffer_size_change(uint32_t new_buffer_size);
-	int _sample_rate_change(float new_sample_rate);
-    
-    int _device_list_change();
-    
     int _register_system_audio_ports ();
     int _register_system_midi_ports ();
 

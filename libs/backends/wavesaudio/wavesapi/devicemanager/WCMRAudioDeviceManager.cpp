@@ -1,6 +1,23 @@
+/*
+    Copyright (C) 2013 Waves Audio Ltd.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
 //----------------------------------------------------------------------------------
 //
-// Copyright (c) 2008 Waves Audio Ltd. All rights reserved.
 //
 //! \file	WCMRAudioDeviceManager.cpp
 //!
@@ -8,6 +25,10 @@
 //!
 //---------------------------------------------------------------------------------*/
 #include "WCMRAudioDeviceManager.h"
+
+
+
+
 
 
 //**********************************************************************************************
@@ -18,21 +39,27 @@
 //!		and streaming will also be provided by the derived implementations.
 //!
 //! \param *pManager : The audio device manager that's managing this device.
+//! 
 //! \return Nothing.
 //! 
 //**********************************************************************************************
-WCMRAudioDevice::WCMRAudioDevice (WCMRAudioDeviceManager *pManager) :
-	m_pMyManager (pManager)
-	, m_ConnectionStatus (DeviceDisconnected)
-	, m_IsActive (false)
-	, m_IsStreaming (false)
-	, m_CurrentSamplingRate (-1)
-	, m_CurrentBufferSize (0)
-	, m_LeftMonitorChannel (-1)
-	, m_RightMonitorChannel (-1)
-	, m_MonitorGain (1.0f)
+WCMRAudioDevice::WCMRAudioDevice (WCMRAudioDeviceManager *pManager)
 {
+	m_pMyManager = pManager;
 	m_DeviceName = "Unknown";
+
+	m_ConnectionStatus = DeviceDisconnected;
+	m_IsActive = false;
+	m_IsStreaming = false;
+	
+	m_CurrentSamplingRate = -1;
+	m_CurrentBufferSize = 0;
+	
+	m_LeftMonitorChannel = -1;
+	m_RightMonitorChannel = -1;
+	m_MonitorGain = 1.0f;
+	
+
 }
 
 
@@ -538,7 +565,6 @@ uint32_t WCMRAudioDevice::GetLatency (bool isInput)
     return 0;
 }
 
-
 //**********************************************************************************************
 // WCMRAudioDeviceManager::WCMRAudioDeviceManager
 //
@@ -550,11 +576,13 @@ uint32_t WCMRAudioDevice::GetLatency (bool isInput)
 //! 
 //**********************************************************************************************
 WCMRAudioDeviceManager::WCMRAudioDeviceManager(WCMRAudioDeviceManagerClient *pTheClient, eAudioDeviceFilter eCurAudioDeviceFilter)
-    : m_eAudioDeviceFilter(eCurAudioDeviceFilter)
-    , m_CurrentDevice(0)
-    , m_pTheClient (pTheClient)
+	: m_pTheClient (pTheClient)
+	, m_eAudioDeviceFilter(eCurAudioDeviceFilter)
 {
+	//The derived classes will do lot more init!
+	return;
 }
+
 
 
 //**********************************************************************************************
@@ -571,21 +599,19 @@ WCMRAudioDeviceManager::~WCMRAudioDeviceManager()
 {
     AUTO_FUNC_DEBUG;
 
-	std::cout << "API::Destroying AudioDeviceManager " << std::endl;
 	try
 	{
-		// clean up device info list
-        {
-            wvNS::wvThread::ThreadMutex::lock theLock(m_AudioDeviceInfoVecMutex);
-            while( m_DeviceInfoVec.size() )
-            {
-                DeviceInfo* devInfo = m_DeviceInfoVec.back();
-                m_DeviceInfoVec.pop_back();
-                delete devInfo;
-            }
-        }
-		delete m_CurrentDevice;
-
+		//Need to call release on our devices, and erase them from list
+		std::vector<WCMRAudioDevice*>::iterator deviceIter;
+		while (m_Devices.size())
+		{
+			WCMRAudioDevice *pDeviceToRelease = m_Devices.back();
+			m_Devices.pop_back();
+			if (pDeviceToRelease)
+				SAFE_RELEASE (pDeviceToRelease);
+		}
+		
+		//The derived classes may want to do additional de-int!
 	}
 	catch (...)
 	{
@@ -595,46 +621,107 @@ WCMRAudioDeviceManager::~WCMRAudioDeviceManager()
 }
 
 
-WCMRAudioDevice* WCMRAudioDeviceManager::InitNewCurrentDevice(const std::string & deviceName)
+
+
+//**********************************************************************************************
+// WCMRAudioDeviceManager::DoIdle_Private
+//
+//! Used for idle time processing. This calls each device's DoIdle so that it can perform it's own idle processing.
+//!
+//! \param none
+//! 
+//! \return noErr if no devices have returned an error. An error code if any of the devices returned error.
+//! 
+//**********************************************************************************************
+WTErr WCMRAudioDeviceManager::DoIdle_Private()
 {
-	return initNewCurrentDeviceImpl(deviceName);
-}
-
-
-void WCMRAudioDeviceManager::DestroyCurrentDevice()
-{
-	return destroyCurrentDeviceImpl();
-}
-
-
-const DeviceInfoVec WCMRAudioDeviceManager::DeviceInfoList() const
-{
-    wvNS::wvThread::ThreadMutex::lock theLock(m_AudioDeviceInfoVecMutex);
-	return m_DeviceInfoVec;
-}
-
-
-WTErr WCMRAudioDeviceManager::GetDeviceInfoByName(const std::string & nameToMatch, DeviceInfo & devInfo) const
-{
-    wvNS::wvThread::ThreadMutex::lock theLock(m_AudioDeviceInfoVecMutex);
-	DeviceInfoVecConstIter iter = m_DeviceInfoVec.begin();
-	for (; iter != m_DeviceInfoVec.end(); ++iter)
+	WTErr retVal = eNoErr;
+	
+	//Need to call DoIdle of all our devices...
+	std::vector<WCMRAudioDevice*>::iterator deviceIter;
+	for (deviceIter = m_Devices.begin();  deviceIter != m_Devices.end(); deviceIter++)
 	{
-		if (nameToMatch == (*iter)->m_DeviceName)
-        {
-			devInfo = *(*iter);
-            return eNoErr;
-        }
+		WTErr thisDeviceErr = (*deviceIter)->DoIdle();
+		
+		if (thisDeviceErr != eNoErr)
+			retVal = thisDeviceErr;
 	}
-
-	return eRMResNotFound;
+	
+	return (retVal);
 }
 
 
-WTErr WCMRAudioDeviceManager::GetDeviceBufferSizes(const std::string & nameToMatch, std::vector<int>& bufferSizes) const
+
+
+//**********************************************************************************************
+// WCMRAudioDeviceManager::Devices_Private
+//
+//! Retrieve list of devices managed by this manager.
+//!
+//! \param none
+//! 
+//! \return A vector containing the list of devices.
+//! 
+//**********************************************************************************************
+const WCMRAudioDeviceList& WCMRAudioDeviceManager::Devices_Private() const
 {
-	return getDeviceBufferSizesImpl(nameToMatch, bufferSizes);
+	return (m_Devices);
 }
+
+
+
+//**********************************************************************************************
+// *WCMRAudioDeviceManager::GetDeviceByName_Private
+//
+//! Locates a device based on device name.
+//!
+//! \param nameToMatch : Device to look for.
+//! 
+//! \return Pointer to the device object if found, NULL otherwise.
+//! 
+//**********************************************************************************************
+WCMRAudioDevice *WCMRAudioDeviceManager::GetDeviceByName_Private(const std::string& nameToMatch) const
+{
+	//Need to check all our devices...
+	WCMRAudioDevice *pRetVal = NULL;
+	
+	WCMRAudioDeviceListConstIter deviceIter;
+	for (deviceIter = m_Devices.begin();  deviceIter != m_Devices.end(); deviceIter++)
+	{
+		if ((*deviceIter)->DeviceName() == nameToMatch)
+		{
+			pRetVal = *deviceIter;
+			break;
+		}
+	}
+	
+	return (pRetVal);
+}
+
+//**********************************************************************************************
+// *WCMRAudioDeviceManager::GetDefaultDevice 
+//
+//! Locates a device based on device name.
+//! 
+//! \param nameToMatch : Device to look for.
+//! 
+//! \return Pointer to the device object if found, NULL otherwise.
+//! 
+//**********************************************************************************************
+WCMRAudioDevice *WCMRAudioDeviceManager::GetDefaultDevice_Private()
+{
+	//Need to check all our devices...
+	WCMRAudioDevice *pRetVal = NULL;
+	
+	WCMRAudioDeviceListIter deviceIter = m_Devices.begin();
+	if(deviceIter != m_Devices.end())
+	{
+		pRetVal = *deviceIter;
+	}
+	return (pRetVal);
+}
+
+
 
 
 //**********************************************************************************************
