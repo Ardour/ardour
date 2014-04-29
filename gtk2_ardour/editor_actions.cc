@@ -1893,6 +1893,8 @@ Editor::register_region_actions ()
 	reg_sens (_region_actions, "nudge-forward", _("Nudge Later"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_forward), false, false));
 	reg_sens (_region_actions, "nudge-backward", _("Nudge Earlier"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_backward), false, false));
 
+	reg_sens (_region_actions, "sequence-regions", _("Sequence Regions"), sigc::mem_fun (*this, &Editor::sequence_regions));
+
 	reg_sens (
 		_region_actions,
 		"nudge-forward-by-capture-offset",
