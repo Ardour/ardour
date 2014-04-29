@@ -67,7 +67,7 @@ def build(bld):
     obj.target   = 'waves_audiobackend'
     obj.use      = [ 'libardour', 'libpbd' ]
     obj.vnum     = WAVESAUDIOBACKEND_VERSION
-    obj.install_path  = os.path.join(bld.env['LIBDIR'], 'ardour3', 'backends')
+    obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
             '__MACOS__',
             'ARDOURBACKEND_DLL_EXPORTS'

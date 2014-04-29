@@ -31,7 +31,7 @@ def build(bld):
     obj.target   = 'dummy_audiobackend'
     obj.use      = 'libardour libpbd'
     obj.vnum     = DUMMYBACKEND_VERSION
-    obj.install_path  = os.path.join(bld.env['LIBDIR'], 'ardour3', 'backends')
+    obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
                    'ARDOURBACKEND_DLL_EXPORTS'
                   ]

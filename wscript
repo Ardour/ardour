@@ -874,8 +874,9 @@ def build(bld):
     bld.env['CONFDIR'] = os.path.join(bld.env['SYSCONFDIR'], lwrcase_dirname)
     # data files loaded at run time go here
     bld.env['DATADIR'] = os.path.join(bld.env['DATADIR'], lwrcase_dirname)
-    # shared objects loaded at runtime go here
+    # shared objects loaded at runtime go here (two aliases)
     bld.env['DLLDIR'] = os.path.join(bld.env['LIBDIR'], lwrcase_dirname)
+    bld.env['LIBDIR'] = bld.env['DLLDIR']
 
     autowaf.set_recursive()
 
@@ -890,7 +891,7 @@ def build(bld):
     for i in children:
         bld.recurse(i)
 
-    bld.install_files (os.path.join(bld.env['SYSCONFDIR'], 'ardour3', ), 'ardour_system.rc')
+    bld.install_files (bld.env['SYSCONFDIR'], 'ardour_system.rc')
 
     if bld.env['RUN_TESTS']:
         bld.add_post_fun(test)

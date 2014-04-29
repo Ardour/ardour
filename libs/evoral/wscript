@@ -73,7 +73,7 @@ def build(bld):
     libsmf.uselib       = 'GLIB'
     libsmf.cxxflags     = [ '-fPIC' ]
     libsmf.cflags       = [ '-fPIC' ]
-    libsmf.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    libsmf.install_path = os.path.join(bld.env['LIBDIR'])
 
     lib_source = '''
             src/Control.cpp
@@ -108,7 +108,7 @@ def build(bld):
     obj.uselib         = 'GLIBMM GTHREAD SMF'
     obj.use            = 'libsmf libpbd'
     obj.vnum           = EVORAL_LIB_VERSION
-    obj.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    obj.install_path   = bld.env['LIBDIR']
     obj.defines       += [ 'PACKAGE="libevoral"', 'EVORAL_MIDI_XML=1' ]
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):

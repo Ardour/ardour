@@ -51,7 +51,7 @@ def build(bld):
         obj.source = 'scanner.wine'
         obj.target = 'ardour-vst-scanner'
         obj.chmod  = Utils.O755
-        obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3/fst')
+        obj.install_path = os.path.join(bld.env['LIBDIR'], 'fst')
         obj.dict   = {
             'VERSION' : bld.env['VERSION'],
                 }
@@ -83,4 +83,4 @@ def build(bld):
         'VST_SCANNER_APP',
         'PACKAGE="' + I18N_PACKAGE + '"',
         ]
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3/fst')
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'fst')
