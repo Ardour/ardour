@@ -59,8 +59,7 @@
         <Label style="generic_control" text="BUFFER SIZE" x="231" y="47"/>
         <ComboBoxText style="generic_control" id="buffer_size_combo" x="311" y="42" width="90" height="20" />
 
-        <Button
-          id="control_panel_button"
+        <Button id="control_panel_button"
           style="generic_button"
           text="DEVICE\nCONTROL\nPANEL"
           x="407" y="12" width="84" height="48"/>
@@ -69,8 +68,7 @@
       </Layout>
       <Layout bgnormal="#565656" x="0" y="101" width="505" height="39">
         <Label style="generic_control" text="CHANNEL CONFIGURATION MODE" fgnormal="#ffffff" font="Arial Bold 10" x="17" y="15"/>
-        <Button
-          id="multi_out_button"
+        <Button id="multi_out_button"
           style="generic_button"
           text="MULTI OUT"
           fgnormal="#C2C2C2"
@@ -79,8 +77,7 @@
           fghover="#CECECE"
           font="Arial Bold 10"
           x="280" y="6" width="106" height="28"/>
-        <Button
-          id="stereo_out_button"
+        <Button id="stereo_out_button"
           text="STEREO OUT"
           style="generic_button"
           fgnormal="#C2C2C2"
@@ -95,12 +92,148 @@
         <Layout bgnormal="#862579" x="22" y="13" width="265" height="19">
           <Label style="generic_control" text="INPUTS" fgnormal="#ffffff" font ="Arial Bold 10" x="7" y="3"/>
         </Layout>
-        <Layout bgnormal="#862579" x="16" y="62" width="3" height="299"/>
+        <Layout bgnormal="#797979" x="22" y="35" width="85" height="19">
+          <Label style="generic_control" text="Port" fgnormal="#000000" x="7" y="3"/>
+        </Layout>
+        <Button id="all_inputs_on_button"
+          text="ALL"
+          style="generic_control"
+          fgnormal="#D1D1D1"
+          bgnormal="#606060"
+          fgactive="#C9C9C9"
+          bgactive="#454545"
+          fghover="#DADADA"
+          bghover="#808080"
+          borderwidth="0 0 0 0"
+          x="111" y="35" width="29" height="19"/>
+        <Button id="all_inputs_off_button"
+          text="ALL"
+          style="generic_control"
+          fgnormal="#D1D1D1"
+          bgnormal="#606060"
+          fgactive="#C9C9C9"
+          bgactive="#454545"
+          fghover="#DADADA"
+          bghover="#808080"
+          borderwidth="0 0 0 0"
+          x="141" y="35" width="29" height="19"/>
+        <Layout bgnormal="#797979" x="174" y="35" width="26" height="19">
+          <Label style="generic_control" text="#" fgnormal="#000000" x="7" y="3"/>
+        </Layout>
+        <Layout bgnormal="#797979" x="202" y="35" width="85" height="19">
+          <Label style="generic_control" text="Track Name" fgnormal="#000000" x="7" y="3"/>
+        </Layout>
         <Layout bgnormal="#27ae36" x="290" y="13" width="3" height="41"/>
         <Layout bgnormal="#27ae36" x="296" y="13" width="179" height="19">
           <Label style="generic_control" text="OUTPUTS" fgnormal="#ffffff" font ="Arial Bold 10" x="7" y="3"/>
         </Layout>
-        <Layout bgnormal="#27ae36" x="290" y="62" width="3" height="299"/>
+        <Layout bgnormal="#797979" x="296" y="35" width="85" height="19">
+          <Label style="generic_control" text="Port" fgnormal="#000000" x="7" y="3"/>
+        </Layout>
+        <Button id="all_outputs_on_button"
+          text="ALL"
+          style="generic_control"
+          fgnormal="#D1D1D1"
+          bgnormal="#606060"
+          fgactive="#C9C9C9"
+          bgactive="#454545"
+          fghover="#DADADA"
+          bghover="#808080"
+          borderwidth="0 0 0 0"
+          x="385" y="35" width="29" height="19"/>
+        <Button id="all_outputs_off_button"
+          text="ALL"
+          style="generic_control"
+          fgnormal="#D1D1D1"
+          bgnormal="#606060"
+          fgactive="#C9C9C9"
+          bgactive="#454545"
+          fghover="#DADADA"
+          bghover="#808080"
+          borderwidth="0 0 0 0"
+          x="415" y="35" width="29" height="19"/>
+        <Layout bgnormal="#797979" x="448" y="35" width="26" height="19">
+          <Label style="generic_control" text="#" fgnormal="#000000" x="7" y="3"/>
+        </Layout>
+        <ScrolledWindow x="14" y="62" width="480" height="299">
+          <HBox>
+            <VBox>
+              <Layout bgnormal="#565656" width="274" height="20">
+                <Layout bgnormal="#862579" x="0" y="0" width="3" height="19"/>
+                <Layout bgnormal="#797979" x="6" y="0" width="85" height="19">
+                  <Label style="generic_control" text="In 1" fgnormal="#000000" x="7" y="3"/>
+                </Layout>
+                <Button id="input_on_button"
+                  text="ON"
+                  style="generic_control"
+                  fgnormal="#FFFFFF"
+                  bgnormal="#606060"
+                  fgactive="#FFFFFF"
+                  bgactive="#1CA3B3"
+                  fghover="#FFFFFF"
+                  bghover="#808080"
+                  borderwidth="0 0 0 0"
+                  x="95" y="0" width="29" height="19"/>
+                <Button id="input_off_button"
+                  text="OFF"
+                  style="generic_control"
+                  fgnormal="#FFFFFF"
+                  bgnormal="#606060"
+                  fgactive="#FFFFFF"
+                  bgactive="#FC3334"
+                  fghover="#FFFFFF"
+                  bghover="#808080"
+                  borderwidth="0 0 0 0"
+                  x="125" y="0" width="29" height="19"/>
+                <Layout bgnormal="#797979" x="158" y="0" width="26" height="19">
+                  <Label style="generic_control" text="1" fgnormal="#000000" x="7" y="3"/>
+                </Layout>
+                <Layout bgnormal="#797979" x="186" y="0" width="85" height="19">
+                  <Label style="generic_control" text="Track Name" fgnormal="#000000" x="7" y="3"/>
+                </Layout>
+              </Layout>
+            </VBox>
+            <VBox>
+              <Layout bgnormal="#565656" width="200" height="20">
+                <Layout bgnormal="#27ae36" x="0" y="0" width="3" height="19"/>
+                <Layout bgnormal="#797979" x="6" y="0" width="85" height="19">
+                  <Label style="generic_control" text="Out 1" fgnormal="#000000" x="7" y="3"/>
+                </Layout>
+                <Button id="output_on_button"
+                  text="ON"
+                  style="generic_control"
+                  fgnormal="#FFFFFF"
+                  bgnormal="#606060"
+                  fgactive="#FFFFFF"
+                  bgactive="#1CA3B3"
+                  fghover="#FFFFFF"
+                  bghover="#808080"
+                  borderwidth="0 0 0 0"
+                  x="95" y="0" width="29" height="19"/>
+                <Button id="output_off_button"
+                  text="OFF"
+                  style="generic_control"
+                  fgnormal="#FFFFFF"
+                  bgnormal="#606060"
+                  fgactive="#FFFFFF"
+                  bgactive="#FC3334"
+                  fghover="#FFFFFF"
+                  bghover="#808080"
+                  borderwidth="0 0 0 0"
+                  x="125" y="0" width="29" height="19"/>
+                <Layout bgnormal="#797979" x="158" y="0" width="26" height="19">
+                  <Label style="generic_control" text="1" fgnormal="#000000" x="7" y="3"/>
+                </Layout>
+              </Layout>
+            </VBox>
+          </HBox>
+        </ScrolledWindow>
+        <!--VBox x="14" y="62">
+          <Layout bgnormal="#565656" width="475" height="800">
+            <Layout bgnormal="#862579" x="0" y="0" width="3" height="299"/>
+            <Layout bgnormal="#27ae36" x="274" y="0" width="3" height="299"/>
+          </Layout>
+        </VBox-->
         <Button
           id="name_track_after_driver_button"
           text="NAME TRACK\nAFTER DRIVER"
@@ -158,14 +291,14 @@
     Igor! Add feel free to add what you need here!
     
     -->
-    <Label style="generic_control" text="FILE TYPE" x="24" y="40"/>
-    <ComboBoxText style="generic_control" id="file_type_combo"  x="215" y="40" width="90" height="20" />
-    <Label style="generic_control" text="BIT DEPTH" x="24" y="70"/>
-    <ComboBoxText style="generic_control" id="bit_depth_combo"  x="215" y="70" width="90" height="20" />
-    <Label style="generic_control" text="SESSION FRAME RATE" x="24" y="100"/>
-    <ComboBoxText style="generic_control" id="frame_rate_combo"  x="215" y="100" width="90" height="20" />
-    <Label style="generic_control" text="AUTO LOCK TIMER" x="24" y="175"/>
-    <ComboBoxText style="generic_control" id="auto_lock_timer_combo"  x="215" y="175" width="90" height="20" />
+      <Label style="generic_control" text="FILE TYPE" x="24" y="40"/>
+      <ComboBoxText style="generic_control" id="file_type_combo"  x="215" y="40" width="90" height="20" />
+      <Label style="generic_control" text="BIT DEPTH" x="24" y="70"/>
+      <ComboBoxText style="generic_control" id="bit_depth_combo"  x="215" y="70" width="90" height="20" />
+      <Label style="generic_control" text="SESSION FRAME RATE" x="24" y="100"/>
+      <ComboBoxText style="generic_control" id="frame_rate_combo"  x="215" y="100" width="90" height="20" />
+      <Label style="generic_control" text="AUTO LOCK TIMER" x="24" y="175"/>
+      <ComboBoxText style="generic_control" id="auto_lock_timer_combo"  x="215" y="175" width="90" height="20" />
     </Layout>
   </Layout>
 </Dialog>

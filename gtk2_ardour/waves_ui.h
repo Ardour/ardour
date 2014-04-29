@@ -26,6 +26,7 @@
 #include "gtkmm/box.h"
 #include "gtkmm/layout.h"
 #include "gtkmm/label.h"
+#include "gtkmm/scrolledwindow.h"
 #include "canvas/xml_ui.h"
 
 using namespace ArdourCanvas::XMLUI;
@@ -35,6 +36,7 @@ namespace WavesUI {
 	void create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk::Widget& root, std::map<std::string, Gtk::Widget*> &named_widgets);
 	Gtk::Widget* create_widget (const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets);
 	Gtk::Widget* add_widget (Gtk::Box& parent, const XMLNode &definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets);
+	Gtk::Widget* add_widget (Gtk::ScrolledWindow& parent, const XMLNode &definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets);
 	Gtk::Widget* add_widget (Gtk::Layout& parent, const XMLNode &definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets);
 	Gtk::Widget* add_widget (Gtk::Widget& parent, const XMLNode &definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets);
 

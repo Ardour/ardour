@@ -1,3 +1,21 @@
+/*
+    Copyright (C) 2014 Waves Audio Ltd.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
 
 // class TracksControlPanel : public WavesDialog {
   public:
@@ -8,29 +26,32 @@
     void update_device_list ();
     void switch_to_device(const std::string& device_name);
 
+	float get_sample_rate() const;
+	std::string get_device_name() const { return device_combo.get_active_text (); };
+
   private:
 // data types:
     struct State {
-	std::string backend;
-	std::string driver;
-	std::string device;
-	float sample_rate;
-	uint32_t buffer_size;
-	uint32_t input_latency;
-	uint32_t output_latency;
-	uint32_t input_channels;
-	uint32_t output_channels;
-	bool active;
-	std::string midi_option;
+		std::string backend;
+		std::string driver;
+		std::string device;
+		float sample_rate;
+		uint32_t buffer_size;
+		uint32_t input_latency;
+		uint32_t output_latency;
+		uint32_t input_channels;
+		uint32_t output_channels;
+		bool active;
+		std::string midi_option;
 
-	State() 
-		: input_latency (0)
-		, output_latency (0)
-		, input_channels (0)
-		, output_channels (0)
-		, active (false) {}
-
+		State() 
+			: input_latency (0)
+			, output_latency (0)
+			, input_channels (0)
+			, output_channels (0)
+			, active (false) {}
     };
+
     typedef std::list<State> StateList;
 
 // attributes
@@ -76,8 +97,6 @@
     void set_state (const XMLNode&);
     int push_state_to_backend (bool start);
 
-	float get_rate() const;
-	std::string get_device_name() const { return device_combo.get_active_text (); };
 	uint32_t get_buffer_size() const;
 	uint32_t get_input_channels() const { return 0; };
     uint32_t get_output_channels() const { return 0; };

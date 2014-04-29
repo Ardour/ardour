@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2010 Paul Davis
+    Copyright (C) 2014 Waves Audio Ltd.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -540,7 +540,7 @@ TracksControlPanel::set_state (const XMLNode& root)
 }
 
 float
-TracksControlPanel::get_rate () const
+TracksControlPanel::get_sample_rate () const
 {
 	float r = atof (sample_rate_combo.get_active_text ());
 	/* the string may have been translated with an abbreviation for
@@ -562,7 +562,7 @@ uint32_t TracksControlPanel::get_buffer_size() const
 void
 TracksControlPanel::show_buffer_duration ()
 {
-	 float latency = (get_buffer_size() * 1000.0) / get_rate();
+	 float latency = (get_buffer_size() * 1000.0) / get_sample_rate();
 
 	 char buf[256];
 	 snprintf (buf, sizeof (buf), _("INPUT LATENCY: %.1f MS      OUTPUT LATENCY: %.1f MS      TOTAL LATENCY: %.1f MS"), 
@@ -591,8 +591,8 @@ TracksControlPanel::push_state_to_backend (bool start)
 		return -1;
 	}
 
-	if (backend->set_sample_rate (get_rate())) {
-		error << string_compose (_("Cannot set sample rate to %1"), get_rate()) << endmsg;
+	if (backend->set_sample_rate (get_sample_rate())) {
+		error << string_compose (_("Cannot set sample rate to %1"), get_sample_rate()) << endmsg;
 		return -1;
 	}
 

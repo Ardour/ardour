@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014 Valeriy Kamyshniy
+    Copyright (C) 2014 Waves Audio Ltd.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,33 +21,33 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#include <fstream>
-#include <algorithm>
-
-#include "waves_button.h"
-
-#include <gtkmm/filechooser.h>
-
-#include "pbd/failed_constructor.h"
-#include "pbd/file_utils.h"
-#include "pbd/replace_all.h"
-#include "pbd/whitespace.h"
-#include "pbd/stacktrace.h"
-#include "pbd/openuri.h"
-
-#include "ardour/audioengine.h"
-#include "ardour/filesystem_paths.h"
-#include "ardour/recent_sessions.h"
-#include "ardour/session.h"
-#include "ardour/session_state_utils.h"
-#include "ardour/template_utils.h"
-#include "ardour/filename_extensions.h"
-
-#include "ardour_ui.h"
+//#include <fstream>
+//#include <algorithm>
+//
+//#include "waves_button.h"
+//
+//#include <gtkmm/filechooser.h>
+//
+//#include "pbd/failed_constructor.h"
+//#include "pbd/file_utils.h"
+//#include "pbd/replace_all.h"
+//#include "pbd/whitespace.h"
+//#include "pbd/stacktrace.h"
+//#include "pbd/openuri.h"
+//
+//#include "ardour/audioengine.h"
+//#include "ardour/filesystem_paths.h"
+//#include "ardour/recent_sessions.h"
+//#include "ardour/session.h"
+//#include "ardour/session_state_utils.h"
+//#include "ardour/template_utils.h"
+//#include "ardour/filename_extensions.h"
+//
+//#include "ardour_ui.h"
 #include "session_dialog.h"
-#include "opts.h"
+//#include "opts.h"
 #include "i18n.h"
-#include "utils.h"
+//#include "utils.h"
 
 using namespace std;
 using namespace Gtk;
@@ -58,16 +58,16 @@ using namespace ARDOUR;
 
 #define dbg_msg(a) MessageDialog (a, PROGRAM_NAME).run();
 
-static string poor_mans_glob (string path)
-{
-	string copy = path;
-	replace_all (copy, "~", Glib::get_home_dir());
-	return copy;
-}
 
-SessionDialog::SessionDialog (bool require_new, const std::string& session_name, const std::string& session_path, const std::string& template_name, bool cancel_not_quit)
+SessionDialog::SessionDialog (WM::Proxy<TracksControlPanel>& system_configuration_dialog, 
+							  bool require_new,
+							  const std::string& session_name,
+							  const std::string& session_path,
+							  const std::string& template_name,
+							  bool cancel_not_quit)
 	: WavesDialog (_("session_dialog.xml"), true, false)
 	, quit_button (get_waves_button ("quit_button"))
+	, system_configuration_button (get_waves_button ("system_configuration_button")) 
 	, new_session_button (get_waves_button ("new_session_button"))
 	, open_selected_button (get_waves_button ("open_selected_button"))
 	, open_saved_session_button (get_waves_button ("open_saved_session_button"))
@@ -76,6 +76,7 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	, _provided_session_name (session_name)
 	, _provided_session_path 	(session_path)
 	, _existing_session_chooser_used (false)
+	, _system_configuration_dialog(system_configuration_dialog)
 {
 	recent_session_button[0] = &get_waves_button ("recent_session_button_0");
 	recent_session_button[1] = &get_waves_button ("recent_session_button_1");
@@ -87,239 +88,10 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	recent_session_button[7] = &get_waves_button ("recent_session_button_7");
 	recent_session_button[8] = &get_waves_button ("recent_session_button_8");
 	recent_session_button[9] = &get_waves_button ("recent_session_button_9");
-
-	set_keep_above (true);
-	set_position (WIN_POS_CENTER);
-
-	open_selected_button.set_sensitive (false);
-
-	if (!session_name.empty() && !require_new) {
-		response (RESPONSE_OK);
-		return;
-	}
-
-	open_selected_button.signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_open_selected));
-	open_saved_session_button.signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_open_saved_session));
-	quit_button.signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_quit));
-	new_session_button.signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_new_session));
-	for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
-		recent_session_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_recent_session ));
-	}
-	redisplay_recent_sessions();
+	init();
 }
 
 SessionDialog::~SessionDialog()
 {
 }
 
-void
-SessionDialog::clear_given ()
-{
-	_provided_session_path = "";
-	_provided_session_name = "";
-}
-
-std::string
-SessionDialog::session_name (bool& should_be_new)
-{
-    should_be_new = false;
-    
-	if (!_provided_session_name.empty() && !new_only) {
-		return _provided_session_name;
-	}
-
-	/* Try recent session selection */
-
-	if (!selected_session_full_name.empty()) {
-        should_be_new = (_selection_type == NewSession);
-		return should_be_new ? Glib::path_get_basename(selected_session_full_name) :
-                               selected_session_full_name;
-	}
-	
-	return "";
-}
-
-std::string
-SessionDialog::session_folder ()
-{
-	if (!selected_session_full_name.empty() ) {
-		if (Glib::file_test (selected_session_full_name, Glib::FILE_TEST_IS_REGULAR)) {
-			return Glib::path_get_dirname (selected_session_full_name);
-		}
-		return selected_session_full_name;
-	}    
-    return "";
-}
-
-void
-SessionDialog::session_selected ()
-{
-}
-
-void
-SessionDialog::on_new_session (WavesButton*)
-{
-    Gtk::FileChooserDialog dialog(*this, _("Create New Session"), Gtk::FILE_CHOOSER_ACTION_SAVE);
-
-	dialog.add_button("CANCEL", Gtk::RESPONSE_CANCEL);
-	dialog.add_button("OK", Gtk::RESPONSE_OK);
-	
-    if (dialog.run() == Gtk::RESPONSE_OK) {
-		selected_session_full_name = dialog.get_filename();
-		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
-            recent_session_button[i]->set_active(false);
-		}
-		hide();
-        _selection_type = NewSession;
-		response (Gtk::RESPONSE_ACCEPT);
-	}
-}
-
-int
-SessionDialog::redisplay_recent_sessions ()
-{
-	for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
-		recent_session_button[i]->set_sensitive(false);
-	}
-
-	std::vector<std::string> session_directories;
-	RecentSessionsSorter cmp;
-
-	ARDOUR::RecentSessions rs;
-	ARDOUR::read_recent_sessions (rs);
-
-	if (rs.empty()) {
-		return 0;
-	}
-
-	// sort them alphabetically
-	// sort (rs.begin(), rs.end(), cmp);
-
-	for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
-		session_directories.push_back ((*i).second);
-	}
-
-	int session_snapshot_count = 0;
-
-	for (vector<std::string>::const_iterator i = session_directories.begin();
-		 (session_snapshot_count < MAX_RECENT_SESSION_COUNTS) && (i != session_directories.end());
-		 ++i)
-	{
-		std::vector<std::string> state_file_paths;
-
-		// now get available states for this session
-
-		get_state_files_in_directory (*i, state_file_paths);
-
-		vector<string*>* states;
-		vector<const gchar*> item;
-		string dirname = *i;
-
-		/* remove any trailing / */
-		if (dirname[dirname.length()-1] == '/') {
-			dirname = dirname.substr (0, dirname.length()-1);
-		}
-
-		/* check whether session still exists */
-		if (!Glib::file_test(dirname.c_str(), Glib::FILE_TEST_EXISTS)) {
-			/* session doesn't exist */
-			continue;
-		}
-
-		/* now get available states for this session */
-
-		if ((states = Session::possible_states (dirname)) == 0) {
-			/* no state file? */
-			continue;
-		}
-
-		std::vector<string> state_file_names(get_file_names_no_extension (state_file_paths));
-
-		if (state_file_names.empty()) {
-			continue;
-		}
-
-		recent_session_full_name[session_snapshot_count] = Glib::build_filename (dirname, state_file_names.front() + statefile_suffix);
-		recent_session_button[session_snapshot_count]->set_text(Glib::path_get_basename (dirname));
-		recent_session_button[session_snapshot_count]->set_sensitive(true);
-		ARDOUR_UI::instance()->set_tip(*recent_session_button[session_snapshot_count], recent_session_full_name[session_snapshot_count]);
-		++session_snapshot_count;
-	}
-
-	return session_snapshot_count;
-}
-
-bool
-SessionDialog::on_delete_event (GdkEventAny* ev)
-{
-	response (RESPONSE_CANCEL);
-	return WavesDialog::on_delete_event (ev);
-}
-
-//app logic
-void
-SessionDialog::on_quit (WavesButton*)
-{
-	hide();
-	response (Gtk::RESPONSE_CANCEL);
-}
-
-void
-SessionDialog::on_open_selected (WavesButton*)
-{
-	hide();
-	response (Gtk::RESPONSE_ACCEPT);
-}
-
-void
-SessionDialog::on_open_saved_session (WavesButton*)
-{
-	Gtk::FileChooserDialog dialog(*this, _("Select Saved Session"));
-	dialog.add_button("CANCEL", Gtk::RESPONSE_CANCEL);
-	dialog.add_button("OK", Gtk::RESPONSE_OK);
-	if (dialog.run() == Gtk::RESPONSE_OK) {
-		selected_session_full_name = dialog.get_filename();
-		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
-            recent_session_button[i]->set_active(false);
-		}
-        _selection_type = SavedSession;
-		hide();
-		response (Gtk::RESPONSE_ACCEPT);
-	}
-}
-
-void
-SessionDialog::on_recent_session (WavesButton* clicked_button)
-{
-	if (clicked_button->get_active()) {
-        return;
-    }
-	else {
-        selected_session_full_name = "";
-        _selection_type = Nothing;
-		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
-			if (recent_session_button[i] == clicked_button) {
-				selected_session_full_name = recent_session_full_name[i];
-                recent_session_button[i]->set_active(true);
-			} else {
-                recent_session_button[i]->set_active(false);
-                _selection_type = RecentSession;
-            }
-		}
-    }
-
-	if (_selection_type == RecentSession) {
-		open_selected_button.set_sensitive (true);
-		float sr;
-		SampleFormat sf;
-        if (Session::get_info_from_path (selected_session_full_name, sr, sf) == 0) {
-			std::string sample_format(sf == FormatFloat ? _("32 bit float") : 
-														  (sf == FormatInt24 ? _("24 bit") :
-																			   (sf == FormatInt16 ? _("16 bit") :
-																									 "??")));
-			session_details_label.set_text(string_compose (_("<TBI>\n<TBI>\n<TBI>\n%1\n%2"), sr, sample_format));
-		}
-	} else {
-		open_selected_button.set_sensitive (false);
-	}
-}

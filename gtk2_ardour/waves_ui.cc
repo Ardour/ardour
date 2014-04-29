@@ -45,7 +45,13 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, std
 		child = manage (new Gtk::Layout);
 	} else if (widget_type == "CANVAS") {
 		std::map<std::string, ArdourCanvas::Item*> named_items;
-		child = new ArdourCanvas::GtkCanvas(definition, styles, named_items);
+		child = manage (new ArdourCanvas::GtkCanvas(definition, styles, named_items));
+	} else if (widget_type == "SCROLLEDWINDOW") {
+		child = manage (new Gtk::ScrolledWindow);
+	} else if (widget_type == "VBOX") {
+		child = manage (new Gtk::VBox);
+	} else if (widget_type == "HBOX") {
+		child = manage (new Gtk::HBox);
 	}
 
 	if (child != NULL) {
@@ -126,6 +132,19 @@ WavesUI::add_widget (Gtk::Box& parent, const XMLNode& definition, const XMLNodeM
 
 
 Gtk::Widget*
+WavesUI::add_widget (Gtk::ScrolledWindow& parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets)
+{
+	Gtk::Widget* child = create_widget(definition, styles, named_widgets);
+
+	if (child != NULL)
+	{
+		parent.add(*child);
+	}
+	return child;
+}
+
+
+Gtk::Widget*
 WavesUI::add_widget (Gtk::Layout& parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets)
 {
 	Gtk::Widget* child = create_widget(definition, styles, named_widgets);
@@ -146,9 +165,10 @@ WavesUI::add_widget (Gtk::Widget& parent, const XMLNode &definition, const XMLNo
 	Gtk::Widget* child = NULL;
 	if(dynamic_cast<Gtk::Layout*> (&parent)) {
 		child = WavesUI::add_widget (*dynamic_cast<Gtk::Layout*> (&parent), definition, styles, named_widgets);
-	}
-	else if(dynamic_cast<Gtk::Box*> (&parent)) {
+	} else if(dynamic_cast<Gtk::Box*> (&parent)) {
 		child = WavesUI::add_widget (*dynamic_cast<Gtk::Box*> (&parent), definition, styles, named_widgets);
+	} else if(dynamic_cast<Gtk::ScrolledWindow*> (&parent)) {
+		child = WavesUI::add_widget (*dynamic_cast<Gtk::ScrolledWindow*> (&parent), definition, styles, named_widgets);
 	}
 
 	if (child != NULL) {

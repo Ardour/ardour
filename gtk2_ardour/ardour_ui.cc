@@ -2644,7 +2644,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		}
 	}
 
-	SessionDialog session_dialog (should_be_new, session_name, session_path, load_template, cancel_not_quit);
+	SessionDialog session_dialog (tracks_control_panel, should_be_new, session_name, session_path, load_template, cancel_not_quit);
 
 	while (ret != 0) {
 
