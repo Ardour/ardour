@@ -73,7 +73,7 @@ def build(bld):
     libsmf.uselib       = 'GLIB'
     libsmf.cxxflags     = [ '-fPIC' ]
     libsmf.cflags       = [ '-fPIC' ]
-    libsmf.install_path = os.path.join(bld.env['LIBDIR'])
+    libsmf.install_path = bld.env['LIBDIR']
 
     lib_source = '''
             src/Control.cpp
