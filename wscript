@@ -876,6 +876,20 @@ def build(bld):
     bld.path.find_dir ('libs/ardour/ardour')
     bld.path.find_dir ('libs/pbd/pbd')
 
+    # set up target directories
+    lwrcase_dirname = 'ardour3'
+
+    if bld.is_defined ('TRX_BUILD'):
+        lwrcase_dirname = 'trx'
+
+    # configuration files go here
+    bld.env['CONFDIR'] = os.path.join(bld.env['SYSCONFDIR'], lwrcase_dirname)
+    # data files loaded at run time go here
+    bld.env['DATADIR'] = os.path.join(bld.env['DATADIR'], lwrcase_dirname)
+    # shared objects loaded at runtime go here (two aliases)
+    bld.env['DLLDIR'] = os.path.join(bld.env['LIBDIR'], lwrcase_dirname)
+    bld.env['LIBDIR'] = bld.env['DLLDIR']
+
     autowaf.set_recursive()
 
     if sys.platform == 'darwin':
@@ -889,7 +903,7 @@ def build(bld):
     for i in children:
         bld.recurse(i)
 
-    bld.install_files (os.path.join(bld.env['SYSCONFDIR'], 'ardour3', ), 'ardour_system.rc')
+    bld.install_files (bld.env['SYSCONFDIR'], 'ardour_system.rc')
 
     if bld.env['RUN_TESTS']:
         bld.add_post_fun(test)

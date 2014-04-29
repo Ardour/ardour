@@ -53,7 +53,7 @@ def build(bld):
     obj.name         = 'libqmdsp'
     obj.target       = 'qmdsp'
     obj.vnum         = QM_DSP_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    obj.install_path = os.path.join(bld.env['LIBDIR'])
 
 def shutdown():
     autowaf.shutdown()

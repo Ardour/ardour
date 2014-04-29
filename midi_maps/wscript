@@ -10,7 +10,7 @@ def configure(conf):
 
 def build(bld):
     maps = bld.path.ant_glob ('*.map')
-    bld.install_files (os.path.join(bld.env['DATADIR'], 'ardour3', 'midi_maps'),
+    bld.install_files (os.path.join(bld.env['DATADIR'], 'midi_maps'),
                        maps)
 
 def options(opt):

@@ -82,7 +82,7 @@ def build(bld):
     audiographer.uselib         = 'GLIB GLIBMM GTHREAD SAMPLERATE SNDFILE'
     audiographer.use            = 'libpbd'
     audiographer.vnum           = AUDIOGRAPHER_LIB_VERSION
-    audiographer.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    audiographer.install_path   = os.path.join(bld.env['LIBDIR'])
 
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):

@@ -35,7 +35,7 @@ def build(bld):
     obj.target = 'clearlooks'
     obj.uselib = 'GTK'
     obj.includes = '.'
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'engines')
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'engines')
     autowaf.ensure_visible_symbols (obj, True)
 
     if sys.platform == 'darwin':

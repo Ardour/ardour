@@ -35,7 +35,7 @@ def build(bld):
                   name = 'template',
                   source = [ t ],
                   target = [ os.path.join(dir_name, file_name) ],
-                  install_path = os.path.join(bld.env['DATADIR'], 'ardour3', os.path.join('templates', dir_name)))
+                  install_path = os.path.join(bld.env['DATADIR'], os.path.join('templates', dir_name)))
 
 def options(opt):
     pass
