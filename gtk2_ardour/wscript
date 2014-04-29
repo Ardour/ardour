@@ -424,7 +424,7 @@ def build(bld):
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
         ]
-    obj.install_path = os.path.join(bld.env['DLLDIR'])
+    obj.install_path = bld.env['DLLDIR']
     obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL'
     obj.uselib       += ' GTKMM CANVAS FFTW3F'
     obj.uselib       += ' AUDIOUNITS OSX GTKOSX LO '
@@ -695,7 +695,7 @@ def build(bld):
             source = b + '.bindings.in',
             rule = a_rule
             )
-        obj.install_path = os.path.join(bld.env['CONFDIR'])
+        obj.install_path = bld.env['CONFDIR']
 
     # not modified at present
     bld.install_files(bld.env['CONFDIR'], 'step_editing.bindings')
