@@ -57,7 +57,7 @@ def build(bld):
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
         ]
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    obj.install_path = bld.env['LIBDIR']
     obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD OGG CURL DL'
     obj.uselib       += ' FFTW3F'
     obj.uselib       += ' AUDIOUNITS OSX LO '

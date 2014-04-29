@@ -34,6 +34,7 @@ class Port;
 class Parser;
 
 typedef PBD::Signal1<void,Parser&>                   ZeroByteSignal;
+typedef PBD::Signal2<void,Parser&,unsigned short>    BankSignal;
 typedef PBD::Signal2<void,Parser&,framecnt_t>        TimestampedSignal;
 typedef PBD::Signal2<void,Parser&, byte>             OneByteSignal;
 typedef PBD::Signal2<void,Parser &, EventTwoBytes *> TwoByteSignal;
@@ -55,7 +56,7 @@ class LIBMIDIPP_API Parser {
 
 	/* signals that anyone can connect to */
 	
-	OneByteSignal         bank_change;
+	BankSignal            bank_change;
 	TwoByteSignal         note_on;
 	TwoByteSignal         note_off;
 	TwoByteSignal         poly_pressure;
@@ -64,7 +65,7 @@ class LIBMIDIPP_API Parser {
 	PitchBendSignal       pitchbend;
 	TwoByteSignal         controller;
 
-	OneByteSignal         channel_bank_change[16];
+	BankSignal            channel_bank_change[16];
 	TwoByteSignal         channel_note_on[16];
 	TwoByteSignal         channel_note_off[16];
 	TwoByteSignal         channel_poly_pressure[16];

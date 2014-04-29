@@ -41,7 +41,7 @@ def build(bld):
     obj.target       = 'ardourcp'
     obj.use          = 'libardour'
     obj.vnum         = LIBARDOUR_CP_LIB_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    obj.install_path = bld.env['LIBDIR']
 
 def shutdown():
     autowaf.shutdown()

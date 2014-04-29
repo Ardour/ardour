@@ -33,7 +33,7 @@ def build(bld):
     obj.uselib       = 'GTKMM CWIID'
     obj.use          = 'libardour libardour_cp libgtkmm2ext'
     obj.vnum         = LIBARDOUR_WIIMOTE_LIB_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'surfaces')
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
 def shutdown():
     autowaf.shutdown()

@@ -122,6 +122,10 @@ MidiControlUI::reset_ports ()
 	if ((p = dynamic_cast<AsyncMIDIPort*> (_session.mmc_input_port()))) {
 		ports.push_back (p);
 	}
+
+	if ((p = dynamic_cast<AsyncMIDIPort*> (_session.scene_input_port()))) {
+		ports.push_back (p);
+	}
 	
 	if (ports.empty()) {
 		return;

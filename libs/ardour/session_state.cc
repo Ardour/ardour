@@ -77,6 +77,7 @@
 #include "pbd/localtime_r.h"
 
 #include "ardour/amp.h"
+#include "ardour/async_midi_port.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
@@ -92,6 +93,7 @@
 #include "ardour/midi_model.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/midi_region.h"
+#include "ardour/midi_scene_changer.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
 #include "ardour/pannable.h"
@@ -207,6 +209,16 @@ Session::post_engine_init ()
 	BootMessage (_("Using configuration"));
 
 	_midi_ports = new MidiPortManager;
+	
+	MIDISceneChanger* msc;
+
+	_scene_changer = msc = new MIDISceneChanger (*this);
+	msc->set_input_port (scene_input_port());
+	msc->set_output_port (scene_out());
+
+	boost::function<framecnt_t(void)> timer_func (boost::bind (&Session::audible_frame, this));
+	boost::dynamic_pointer_cast<AsyncMIDIPort>(scene_in())->set_timer (timer_func);
+
 	setup_midi_machine_control ();
 	
 	if (_butler->start_thread()) {

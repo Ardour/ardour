@@ -75,7 +75,7 @@ def build(bld):
     obj.uselib       = 'GLIBMM SIGCPP XML OSX'
     obj.use          = 'libpbd libevoral libtimecode'
     obj.vnum         = LIBMIDIPP_LIB_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    obj.install_path = bld.env['LIBDIR']
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'): 
         # Unit tests

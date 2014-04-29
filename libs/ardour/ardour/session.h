@@ -129,6 +129,7 @@ class Route;
 class RouteGroup;
 class SMFSource;
 class Send;
+class SceneChanger;
 class SessionDirectory;
 class SessionMetadata;
 class SessionPlaylists;
@@ -868,23 +869,31 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	 */
         static PBD::Signal2<void,std::string,std::string> VersionMismatch;
 
+	SceneChanger* scene_changer() const { return _scene_changer; }
+
         boost::shared_ptr<Port> ltc_input_port() const;
         boost::shared_ptr<Port> ltc_output_port() const;
 
 	boost::shared_ptr<IO> ltc_input_io() { return _ltc_input; }
 	boost::shared_ptr<IO> ltc_output_io() { return _ltc_output; }
 
-    MIDI::Port* midi_input_port () const;
-    MIDI::Port* midi_output_port () const;
-    MIDI::Port* mmc_output_port () const;
-    MIDI::Port* mmc_input_port () const;
+	MIDI::Port* midi_input_port () const;
+	MIDI::Port* midi_output_port () const;
+	MIDI::Port* mmc_output_port () const;
+	MIDI::Port* mmc_input_port () const;
 
-    boost::shared_ptr<MidiPort> midi_clock_output_port () const;
-    boost::shared_ptr<MidiPort> midi_clock_input_port () const;
-    boost::shared_ptr<MidiPort> mtc_output_port () const;
-    boost::shared_ptr<MidiPort> mtc_input_port () const;
+	MIDI::Port* scene_input_port () const;
+	MIDI::Port* scene_output_port () const;
 
-    MIDI::MachineControl& mmc() { return *_mmc; }
+	boost::shared_ptr<MidiPort> scene_in () const;
+	boost::shared_ptr<MidiPort> scene_out () const;
+	
+	boost::shared_ptr<MidiPort> midi_clock_output_port () const;
+	boost::shared_ptr<MidiPort> midi_clock_input_port () const;
+	boost::shared_ptr<MidiPort> mtc_output_port () const;
+	boost::shared_ptr<MidiPort> mtc_input_port () const;
+    
+	MIDI::MachineControl& mmc() { return *_mmc; }
 
   protected:
 	friend class AudioEngine;
@@ -1607,16 +1616,19 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
         void reconnect_ltc_input ();
         void reconnect_ltc_output ();
 
-    /* persistent, non-track related MIDI ports */
-    MidiPortManager* _midi_ports;
-    MIDI::MachineControl* _mmc;
-
-    void setup_ltc ();
-    void setup_click ();
-    void setup_click_state (const XMLNode*);
-    void setup_bundles ();
-
-    static int get_session_info_from_path (XMLTree& state_tree, const std::string& xmlpath);
+	/* Scene Changing */
+	SceneChanger* _scene_changer;
+	
+	/* persistent, non-track related MIDI ports */
+	MidiPortManager* _midi_ports;
+	MIDI::MachineControl* _mmc;
+	
+	void setup_ltc ();
+	void setup_click ();
+	void setup_click_state (const XMLNode*);
+	void setup_bundles ();
+	
+	static int get_session_info_from_path (XMLTree& state_tree, const std::string& xmlpath);
 };
 
 } // namespace ARDOUR

@@ -146,7 +146,7 @@ def build(bld):
             obj.source += [ 'cocoa_open_uri.mm' ]
         obj.uselib += ' OSX'
     obj.vnum         = LIBPBD_LIB_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    obj.install_path = bld.env['LIBDIR']
     obj.defines     += [ 'PACKAGE="' + I18N_PACKAGE + '"',
                          ]
 
