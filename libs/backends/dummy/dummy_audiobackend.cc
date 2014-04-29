@@ -34,7 +34,7 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e)
 	, _running (false)
 	, _freewheeling (false)
 	, _samplerate (48000)
-	, _audio_buffersize (1024)
+	, _samples_per_period (1024)
 	, _dsp_load (0)
 	, _n_inputs (0)
 	, _n_outputs (0)
@@ -151,7 +151,7 @@ DummyAudioBackend::set_buffer_size (uint32_t bs)
 	if (bs <= 0 || bs >= _max_buffer_size) {
 		return -1;
 	}
-	_audio_buffersize = bs;
+	_samples_per_period = bs;
 	engine.buffer_size_change (bs);
 	return 0;
 }
@@ -207,7 +207,7 @@ DummyAudioBackend::sample_rate () const
 uint32_t
 DummyAudioBackend::buffer_size () const
 {
-	return _audio_buffersize;
+	return _samples_per_period;
 }
 
 bool
@@ -707,7 +707,7 @@ DummyAudioBackend::midi_event_get (
 		uint32_t event_index)
 {
 	assert (buf && port_buffer);
-	DummyMidiBuffer& source = * (DummyMidiBuffer*)port_buffer;
+	DummyMidiBuffer& source = * static_cast<DummyMidiBuffer*>(port_buffer);
 	if (event_index >= source.size ()) {
 		return -1;
 	}
@@ -726,7 +726,7 @@ DummyAudioBackend::midi_event_put (
 		const uint8_t* buffer, size_t size)
 {
 	assert (buffer && port_buffer);
-	DummyMidiBuffer& dst = * (DummyMidiBuffer*)port_buffer;
+	DummyMidiBuffer& dst = * static_cast<DummyMidiBuffer*>(port_buffer);
 	if (dst.size () && (pframes_t)dst.back ()->timestamp () > timestamp) {
 		fprintf (stderr, "DummyMidiBuffer: it's too late for this event.\n");
 		return -1;
@@ -898,14 +898,14 @@ DummyAudioBackend::main_process_thread ()
 	struct timeval clock1, clock2;
 	::gettimeofday (&clock1, NULL);
 	while (_running) {
-		if (engine.process_callback (_audio_buffersize)) {
+		if (engine.process_callback (_samples_per_period)) {
 			return 0;
 		}
-		_processed_samples += _audio_buffersize;
+		_processed_samples += _samples_per_period;
 		if (!_freewheeling) {
 			::gettimeofday (&clock2, NULL);
 			const int elapsed_time = (clock2.tv_sec - clock1.tv_sec) * 1000000 + (clock2.tv_usec - clock1.tv_usec);
-			const int nomial_time = 1000000 * _audio_buffersize / _samplerate;
+			const int nomial_time = 1000000 * _samples_per_period / _samplerate;
 			_dsp_load = elapsed_time / (float) nomial_time;
 			if (elapsed_time < nomial_time) {
 				::usleep (nomial_time - elapsed_time);

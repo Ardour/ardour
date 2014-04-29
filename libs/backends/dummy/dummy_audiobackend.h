@@ -37,9 +37,9 @@ namespace ARDOUR {
 
 class DummyMidiEvent {
 	public:
-		DummyMidiEvent(const pframes_t timestamp, const uint8_t* data, size_t size);
-		DummyMidiEvent(const DummyMidiEvent& other);
-		~DummyMidiEvent();
+		DummyMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size);
+		DummyMidiEvent (const DummyMidiEvent& other);
+		~DummyMidiEvent ();
 		size_t size () const { return _size; };
 		pframes_t timestamp () const { return _timestamp; };
 		const unsigned char* const_data () const { return _data; };
@@ -275,7 +275,7 @@ class DummyAudioBackend : public AudioBackend {
 		bool  _freewheeling;
 
 		float  _samplerate;
-		size_t _audio_buffersize;
+		size_t _samples_per_period;
 		float  _dsp_load;
 		static size_t _max_buffer_size;
 
@@ -308,7 +308,7 @@ class DummyAudioBackend : public AudioBackend {
 		bool valid_port (PortHandle port) const {
 			return std::find (_ports.begin (), _ports.end (), (DummyPort*)port) != _ports.end ();
 		}
-		DummyPort * find_port(const std::string& port_name) const {
+		DummyPort * find_port (const std::string& port_name) const {
 			for (std::vector<DummyPort*>::const_iterator it = _ports.begin (); it != _ports.end (); ++it) {
 				if ((*it)->name () == port_name) {
 					return *it;
