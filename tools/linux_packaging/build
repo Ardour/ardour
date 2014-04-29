@@ -389,7 +389,9 @@ done
 cp $BUILD_ROOT/libs/panners/*/lib*.so* $Panners
 
 # Backends
-cp $BUILD_ROOT/libs/backends/*/lib*.so* $Backends
+for backend in jack wavesaudio ; do
+    cp $BUILD_ROOT/libs/backends/$backend/lib*.so* $Backends
+done
 
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.so* $Libraries
