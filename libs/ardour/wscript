@@ -355,7 +355,7 @@ def build(bld):
         obj.use.extend(['librubberband', 'libltc_includes', 'libltc'])
 
     obj.vnum         = LIBARDOUR_LIB_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'])
+    obj.install_path = bld.env['LIBDIR']
     obj.defines      += [
         'PACKAGE="' + I18N_PACKAGE + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
@@ -569,7 +569,7 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj.name         = name
     testobj.target       = target
     # not sure about install path
-    testobj.install_path = os.path.join(bld.env['LIBDIR'])
+    testobj.install_path = bld.env['LIBDIR']
     testobj.defines      = [
         'PACKAGE="libardour3test"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',

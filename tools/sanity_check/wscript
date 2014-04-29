@@ -20,4 +20,4 @@ def build(bld):
     obj.source = [ 'main.cpp', 'systemtest.cpp' ]
     obj.target = 'sanityCheck'
     obj.name = 'sanityCheck'
-    obj.install_path = os.path.join(bld.env['LIBDIR'])
+    obj.install_path = bld.env['LIBDIR']

@@ -101,7 +101,7 @@ def build(bld):
     obj.uselib       = 'GTKMM GTK GTKOSX OSX GDK'
     obj.use          = [ 'libpbd' ]
     obj.vnum         = GTKMM2EXT_LIB_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'])
+    obj.install_path = bld.env['LIBDIR']
     obj.defines     += [
                     'PACKAGE="' + I18N_PACKAGE + '"',
                     'LOCALEDIR="' + os.path.join(
