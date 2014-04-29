@@ -337,7 +337,9 @@ cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp*.dylib $Frameworks
 cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
 
 # Backends
-cp $BUILD_ROOT/libs/backends/*/lib*.dylib $Backends
+for backend in jack wavesaudio ; do
+    cp $BUILD_ROOT/libs/backends/$backend/lib*.dylib $Backends
+done
 
 # Export Formats/Presets
 for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do 
