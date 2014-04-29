@@ -1,23 +1,6 @@
-/*
-    Copyright (C) 2013 Waves Audio Ltd.
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
 //----------------------------------------------------------------------------------
 //
+// Copyright (c) 2008 Waves Audio Ltd. All rights reserved.
 //
 //! \file	WCMRNativeAudio.h
 //!
@@ -42,16 +25,16 @@ class WCMRNativeAudioDevice : public WCMRAudioDevice
 {
 public:
 
-	WCMRNativeAudioDevice (WCMRAudioDeviceManager *pManager, bool useMultithreading = true, bool bNoCopy = false) : WCMRAudioDevice (pManager), 
-		m_UseMultithreading (useMultithreading),
-        m_bNoCopyAudioBuffer(bNoCopy)
+	WCMRNativeAudioDevice (WCMRAudioDeviceManager *pManager, bool useMultithreading = true, bool bNoCopy = false) :
+		WCMRAudioDevice (pManager)
+		, m_UseMultithreading (useMultithreading)
+        , m_bNoCopyAudioBuffer(bNoCopy)
 		{}
 	virtual ~WCMRNativeAudioDevice () {}
 
 protected:
 	bool m_UseMultithreading;
     bool m_bNoCopyAudioBuffer; ///< This flag determines whether the audio callback performs a copy of audio, or the source/sink perform the copy. It should be true to let source/sink do the copies.
-
 
 };
 
@@ -65,6 +48,7 @@ public:
 	virtual WTErr SetActive (bool newState);///<Prepare/Activate device.
 	virtual WTErr SetStreaming (bool newState);///<Start/Stop Streaming - should reconnect connections when streaming starts!
 	virtual WTErr SetCurrentBufferSize (int newSize);///<Change Current Buffer Size : This is a requset, might not be successful at run time!
+	virtual WTErr UpdateDeviceInfo ();
 
 private:
 
@@ -75,8 +59,8 @@ private:
 #else
 	inline void _usleep(uint64_t usec) { ::usleep(usec); }
 #endif
-    static const size_t __m_NumInputChannels = 32;
-    static const size_t __m_NumOutputChannels = 32;
+    static const size_t __m_NumInputChannels = 0;
+    static const size_t __m_NumOutputChannels = 0;
 	pthread_t m_SilenceThread;
     float *_m_inputBuffer;
     float *_m_outputBuffer;

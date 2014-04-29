@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014 Waves Audio Ltd.
+    Copyright (C) 2013 Valeriy Kamyshniy
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-
 #include <boost/assign/list_of.hpp>
 
 #include "waves_audiobackend.h"
