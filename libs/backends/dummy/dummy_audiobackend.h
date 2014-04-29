@@ -303,6 +303,10 @@ class DummyAudioBackend : public AudioBackend {
 		};
 
 		/* port engine */
+		PortHandle add_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
+		int register_system_ports ();
+		void unregister_system_ports ();
+
 		std::vector<DummyPort *> _ports;
 
 		bool valid_port (PortHandle port) const {

@@ -278,6 +278,25 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 		PBD::error << _("DummyAudioBackend: already active.") << endmsg;
 		return -1;
 	}
+
+	if (_ports.size()) {
+		PBD::warning << _("DummyAudioBackend: recovering from unclean shutdown, port registry is not empty.") << endmsg;
+		_ports.clear();
+	}
+
+	if (register_system_ports()) {
+		PBD::error << _("DummyAudioBackend: failed to register system ports.") << endmsg;
+		return -1;
+	}
+
+	if (engine.reestablish_ports ()) {
+		PBD::error << _("DummyAudioBackend: Could not re-establish ports.") << endmsg;
+		stop ();
+		return -1;
+	}
+
+	engine.reconnect_ports ();
+
 	if (pthread_create (&_main_thread, NULL, pthread_process, this)) {
 		PBD::error << _("DummyAudioBackend: cannot start.") << endmsg;
 	}
@@ -290,13 +309,6 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 		return -1;
 	}
 
-	if (engine.reestablish_ports ()) {
-		PBD::error << _("DummyAudioBackend: Could not re-establish ports.") << endmsg;
-		stop ();
-		return -1;
-	}
-
-	engine.reconnect_ports ();
 	return 0;
 }
 
@@ -313,6 +325,7 @@ DummyAudioBackend::stop ()
 		PBD::error << _("DummyAudioBackend: failed to terminate.") << endmsg;
 		return -1;
 	}
+	unregister_system_ports();
 	return 0;
 }
 
@@ -540,18 +553,28 @@ DummyAudioBackend::register_port (
 {
 	if (name.size () == 0) { return 0; }
 	if (flags & IsPhysical) { return 0; }
-	if (find_port (_instance_name + ":" + name) != NULL) {
-		PBD::error << _("DummyBackend::register_port: Port already exists.") << endmsg;
+	return add_port (_instance_name + ":" + name, type, flags);
+}
+
+PortEngine::PortHandle
+DummyAudioBackend::add_port (
+		const std::string& name,
+		ARDOUR::DataType type,
+		ARDOUR::PortFlags flags)
+{
+	assert(name.size ());
+	if (find_port (name)) {
+		PBD::error << _("DummyBackend::register_port: Port already exists:")
+				<< " (" << name << ")" << endmsg;
 		return 0;
 	}
-
 	DummyPort* port = NULL;
 	switch (type) {
 		case DataType::AUDIO:
-			port = new DummyAudioPort (_instance_name + ":" + name, flags);
+			port = new DummyAudioPort (name, flags);
 			break;
 		case DataType::MIDI:
-			port = new DummyMidiPort (_instance_name + ":" + name, flags);
+			port = new DummyMidiPort (name, flags);
 			break;
 		default:
 			PBD::error << _("DummyBackend::register_port: Invalid Data Type.") << endmsg;
@@ -569,14 +592,81 @@ DummyAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 	if (!valid_port (port_handle)) {
 		PBD::error << _("DummyBackend::unregister_port: Invalid Port.") << endmsg;
 	}
-	DummyPort* port = (DummyPort*)port_handle;
-	std::vector<DummyPort*>::iterator i = std::find (_ports.begin (), _ports.end (), (DummyPort*)port_handle);
+	DummyPort* port = static_cast<DummyPort*>(port_handle);
+	std::vector<DummyPort*>::iterator i = std::find (_ports.begin (), _ports.end (), static_cast<DummyPort*>(port_handle));
 	if (i == _ports.end ()) {
 		PBD::error << _("DummyBackend::unregister_port: Failed to find port") << endmsg;
 		return;
 	}
+	disconnect_all(port_handle);
 	_ports.erase (i);
 	delete port;
+}
+
+int
+DummyAudioBackend::register_system_ports()
+{
+	LatencyRange lr;
+
+	const int a_ins = _n_inputs > 0 ? _n_inputs : 8;
+	const int a_out = _n_outputs > 0 ? _n_outputs : 8;
+	const int m_ins = 2; // TODO
+	const int m_out = 2;
+
+	/* audio ports */
+	lr.min = lr.max = _samples_per_period + _systemic_input_latency;
+	for (int i = 1; i <= a_ins; ++i) {
+		char tmp[64];
+		snprintf(tmp, sizeof(tmp), "system:capture_%d", i);
+		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
+		if (!p) return -1;
+		set_latency_range (p, false, lr);
+	}
+
+	lr.min = lr.max = _samples_per_period + _systemic_output_latency;
+	for (int i = 1; i <= a_out; ++i) {
+		char tmp[64];
+		snprintf(tmp, sizeof(tmp), "system:playback_%d", i);
+		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
+		if (!p) return -1;
+		set_latency_range (p, false, lr);
+	}
+
+	/* midi ports */
+	lr.min = lr.max = _samples_per_period + _systemic_input_latency;
+	for (int i = 1; i <= m_ins; ++i) {
+		char tmp[64];
+		snprintf(tmp, sizeof(tmp), "system:midi_capture_%d", i);
+		PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
+		if (!p) return -1;
+		set_latency_range (p, false, lr);
+	}
+
+	lr.min = lr.max = _samples_per_period + _systemic_output_latency;
+	for (int i = 1; i <= m_out; ++i) {
+		char tmp[64];
+		snprintf(tmp, sizeof(tmp), "system:midi_playback_%d", i);
+		PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
+		if (!p) return -1;
+		set_latency_range (p, false, lr);
+	}
+
+	return 0;
+}
+
+void
+DummyAudioBackend::unregister_system_ports()
+{
+	size_t i = 0;
+	while (i <  _ports.size ()) {
+		DummyPort* port = _ports[i];
+		if (port->is_physical () && port->is_terminal ()) {
+			port->disconnect_all ();
+			_ports.erase (_ports.begin() + i);
+		} else {
+			++i;
+		}
+	}
 }
 
 int
@@ -738,14 +828,14 @@ DummyAudioBackend::midi_event_put (
 uint32_t
 DummyAudioBackend::get_midi_event_count (void* port_buffer)
 {
-	assert (port_buffer);
+	assert (port_buffer && _running);
 	return static_cast<DummyMidiBuffer*>(port_buffer)->size ();
 }
 
 void
 DummyAudioBackend::midi_clear (void* port_buffer)
 {
-	assert (port_buffer);
+	assert (port_buffer && _running);
 	DummyMidiBuffer * buf = static_cast<DummyMidiBuffer*>(port_buffer);
 	assert (buf);
 	buf->clear ();
@@ -882,7 +972,7 @@ DummyAudioBackend::n_physical_inputs () const
 void*
 DummyAudioBackend::get_buffer (PortEngine::PortHandle port, pframes_t nframes)
 {
-	assert (port);
+	assert (port && _running);
 	assert (valid_port (port));
 	return static_cast<DummyPort*>(port)->get_buffer (nframes);
 }
@@ -1014,9 +1104,11 @@ int DummyPort::connect (DummyPort *port)
 	}
 
 	if (is_connected (port)) {
+#if 0 // don't bother to warn about this for now. just ignore it
 		PBD::error << _("DummyPort::connect (): ports are already connected:")
 			<< " (" << name () << ") -> (" << port->name () << ")"
 			<< endmsg;
+#endif
 		return -1;
 	}
 
@@ -1118,6 +1210,8 @@ void* DummyAudioPort::get_buffer (pframes_t n_samples)
 				}
 			}
 		}
+	} else if (is_output () && is_physical () && is_terminal()) {
+		memset (_buffer, 0, n_samples * sizeof (Sample));
 	}
 	return _buffer;
 }
@@ -1144,6 +1238,8 @@ void* DummyMidiPort::get_buffer (pframes_t /* nframes */)
 			}
 		}
 		std::sort (_buffer.begin (), _buffer.end ());
+	} else if (is_output () && is_physical () && is_terminal()) {
+		_buffer.clear ();
 	}
 	return &_buffer;
 }
