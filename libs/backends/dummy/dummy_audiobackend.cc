@@ -332,7 +332,7 @@ DummyAudioBackend::stop ()
 int
 DummyAudioBackend::freewheel (bool onoff)
 {
-	if (onoff != _freewheeling) {
+	if (onoff == _freewheeling) {
 		return 0;
 	}
 	_freewheeling = onoff;
