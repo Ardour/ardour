@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# Ardour profiler using callgrind
+# intended for use with the 'Dummy' backend engine.
+#
+# inspect data with kcachegrind
+# see http://valgrind.org/docs/manual/cl-manual.html and
+# http://log.fundamental-code.com/2013/09/07/profiling-realtime-code
+
+. `dirname "$0"`/../build/gtk2_ardour/ardev_common_waf.sh
+LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
+
+
+# depending on options, there can be many files (one per thread,
+# one per process cycle,..) dump them in a dedicated place.
+mkdir -p /tmp/ardour_profile/
+
+## some options to drop in
+#  --zero-before="ARDOUR::AudioEngine::process_callback*" \
+#  --dump-after="ARDOUR::AudioEngine::process_callback*" \
+## and/or
+#  --toggle-collect="ARDOUR::AudioEngine::process_callback*" \
+
+exec valgrind --tool=callgrind \
+  --dump-instr=yes --collect-jumps=yes\
+  --separate-threads=yes \
+  --collect-systime=yes --collect-bus=yes \
+  --callgrind-out-file=/tmp/ardour_profile/ardour-%p.log \
+	--toggle-collect="ARDOUR::AudioEngine::process_callback*" \
+  $TOP/$EXECUTABLE --novst "$@"
