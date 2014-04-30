@@ -1569,6 +1569,25 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_editor_meter)
 		     ));
 
+	ComboOption<FadeShape>* fadeshape = new ComboOption<FadeShape> (
+			"default-fade-shape",
+			_("Default fade shape"),
+			sigc::mem_fun (*_rc_config,
+				&RCConfiguration::get_default_fade_shape),
+			sigc::mem_fun (*_rc_config,
+				&RCConfiguration::set_default_fade_shape)
+			);
+
+	fadeshape->add (FadeLinear,
+			_("Linear (for highly correlated material)"));
+	fadeshape->add (FadeConstantPower, _("Constant power"));
+	fadeshape->add (FadeSymmetric, _("Symmetric"));
+	fadeshape->add (FadeSlow, _("Slow"));
+	fadeshape->add (FadeFast, _("Fast"));
+
+	add_option (_("Editor"), fadeshape);
+
+
 	bco = new BoolComboOption (
 		     "use-overlap-equivalency",
 		     _("Regions in active edit groups are edited together"),
