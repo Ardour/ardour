@@ -27,9 +27,12 @@ def configure(conf):
 def build(bld):
     
     if bld.env['build_target'] == 'mingw':
-	obj = bld(features = 'c cxx cxxshlib')
+	obj = bld(features = 'cxx cxxshlib')
     else:
-	obj = bld(features = 'cxx cxxshlib', framework = ["CoreMidi"])
+	obj = bld(features = 'c cxx cxxshlib')
+
+    if bld.env['build_target'] == 'mountain_lion':
+         obj.framework = 'CoreMidi'
 	
     obj.source = [
             'waves_audiobackend.cc',
