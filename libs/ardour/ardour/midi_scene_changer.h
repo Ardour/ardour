@@ -59,12 +59,11 @@ class MIDISceneChanger : public SceneChanger
 	void jump_to (int bank, int program);
 	void deliver (MidiBuffer&, framepos_t, boost::shared_ptr<MIDISceneChange>);
 
-	void bank_change_input (MIDI::Parser&, unsigned short);
-	void program_change_input (MIDI::Parser&, MIDI::byte);
+	void bank_change_input (MIDI::Parser&, unsigned short, int channel);
+	void program_change_input (MIDI::Parser&, MIDI::byte, int channel);
 	void locations_changed (Locations::Change);
 
-	PBD::ScopedConnection incoming_bank_change_connection;
-	PBD::ScopedConnection incoming_program_change_connection;
+	PBD::ScopedConnectionList incoming_connections;
 };
 
 } // namespace

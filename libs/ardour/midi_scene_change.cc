@@ -65,7 +65,7 @@ MIDISceneChange::get_bank_msb_message (uint8_t* buf, size_t size) const
 
 	buf[0] = 0xB0 | (_channel & 0xf);
 	buf[1] = 0x0;
-	buf[2] = (_bank & 0xf700) >> 8;
+	buf[2] = (_bank >> 7) & 0x7f;
 
 	return 3;
 }
@@ -79,7 +79,7 @@ MIDISceneChange::get_bank_lsb_message (uint8_t* buf, size_t size) const
 
 	buf[0] = 0xB0 | (_channel & 0xf);
 	buf[1] = 0x20;
-	buf[2] = (_bank & 0xf7);	
+	buf[2] = _bank & 0x7f;	
 
 	return 3;
 }
@@ -92,7 +92,7 @@ MIDISceneChange::get_program_message (uint8_t* buf, size_t size) const
 	}
 
 	buf[0] = 0xC0 | (_channel & 0xf);
-	buf[1] = _program & 0xf7;
+	buf[1] = _program & 0x7f;
 
 	return 2;
 }
