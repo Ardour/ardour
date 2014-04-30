@@ -18,6 +18,7 @@
 */
 
 #include "evoral/MIDIEvent.hpp"
+#include "midi++/channel.h"
 #include "midi++/parser.h"
 #include "midi++/port.h"
 
@@ -147,8 +148,7 @@ MIDISceneChanger::set_input_port (MIDI::Port* mp)
 {
 	input_port = mp;
 
-	incoming_bank_change_connection.disconnect ();
-	incoming_program_change_connection.disconnect ();
+	incoming_connections.drop_connections();
 	
 	if (input_port) {
 		
@@ -157,8 +157,10 @@ MIDISceneChanger::set_input_port (MIDI::Port* mp)
 		 * and thus invoke our callbacks as necessary.
 		 */
 
-		input_port->parser()->bank_change.connect_same_thread (incoming_bank_change_connection, boost::bind (&MIDISceneChanger::bank_change_input, this, _1, _2));
-		input_port->parser()->program_change.connect_same_thread (incoming_program_change_connection, boost::bind (&MIDISceneChanger::program_change_input, this, _1, _2));
+		for (int channel = 0; channel < 16; ++channel) {
+			input_port->parser()->channel_bank_change[channel].connect_same_thread (incoming_connections, boost::bind (&MIDISceneChanger::bank_change_input, this, _1, _2, channel));
+			input_port->parser()->channel_program_change[channel].connect_same_thread (incoming_connections, boost::bind (&MIDISceneChanger::program_change_input, this, _1, _2, channel));
+		}
 	}
 }
 
@@ -181,26 +183,24 @@ MIDISceneChanger::recording() const
 }
 
 void
-MIDISceneChanger::bank_change_input (MIDI::Parser& parser, unsigned short bank)
+MIDISceneChanger::bank_change_input (MIDI::Parser& parser, unsigned short, int)
 {
 	if (!recording()) {
 		return;
 	}
 
 	last_bank_message_time = parser.get_timestamp ();
-	current_bank = bank;
 }
 
 void
-MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program)
+MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program, int channel)
 {
 	framecnt_t time = parser.get_timestamp ();
-	frameoffset_t delta = time - last_program_message_time;
 
 	last_program_message_time = time;
 
 	if (!recording()) {
-		jump_to (current_bank, program);
+		jump_to (input_port->channel (channel)->bank(), program);
 		return;
 	}
 
@@ -227,19 +227,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 		new_mark = true;
 	}
 
-	uint8_t bank;
-	uint8_t channel = (program & 0xf0) >> 8;
-
-	/* if we received a bank change message within the last 2 msec, use the
-	 * current bank value, otherwise lookup the current bank number and use
-	 * that.
-	 */
-
-	if (time - last_bank_message_time < (2 * _session.frame_rate() / 1000.0)) {
-		bank = current_bank;
-	} else {
-		bank = -1;
-	}
+	unsigned short bank = input_port->channel (channel)->bank();
 
 	MIDISceneChange* msc =new MIDISceneChange (loc->start(), channel, bank, program & 0x7f);
 
