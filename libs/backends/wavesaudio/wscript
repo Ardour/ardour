@@ -27,7 +27,7 @@ def configure(conf):
 def build(bld):
     
     if bld.env['build_target'] == 'mingw':
-	obj = bld(features = 'cxx cxxshlib')
+	obj = bld(features = 'c cxx cxxshlib')
     else:
 	obj = bld(features = 'cxx cxxshlib', framework = ["CoreMidi"])
 	
