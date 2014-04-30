@@ -1,23 +1,6 @@
-/*
-    Copyright (C) 2013 Waves Audio Ltd.
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
 //----------------------------------------------------------------------------------
 //
+// Copyright (c) 2008 Waves Audio Ltd. All rights reserved.
 //
 //! \file   WCMRCoreAudioDeviceManager.cpp
 //!
@@ -57,6 +40,8 @@ static const int gAllBufferSizes[] =
 static const int DEFAULT_SR = 44100;
 ///< The default buffer size.
 static const int DEFAULT_BUFFERSIZE = 128;
+
+static const int NONE_DEVICE_ID = -1;
 
 ///< Number of stalls to wait before notifying user...
 static const int NUM_STALLS_FOR_NOTIFICATION = 2 * 50; // 2*50 corresponds to 2 * 50 x 42 ms idle timer - about 4 seconds.
@@ -166,7 +151,7 @@ WCMRCoreAudioDevice::WCMRCoreAudioDevice (WCMRCoreAudioDeviceManager *pManager, 
         m_CurrentBufferSize = (int)bufferSize;
     
     
-    UpdateDeviceInfo(true /*updateSRSupported*/, true /* updateBufferSizes */);
+    UpdateDeviceInfo();
 
     //should use a valid current SR...
     if (m_SamplingRates.size())
@@ -252,14 +237,11 @@ WCMRCoreAudioDevice::~WCMRCoreAudioDevice ()
 // WCMRCoreAudioDevice::UpdateDeviceInfo 
 //
 //! Updates Device Information about channels, sampling rates, buffer sizes.
-//!
-//! \param updateSRSupported : Is Sampling Rate support needs to be updated.
-//! \param updateBufferSizes : Is buffer size support needs to be updated.
 //! 
 //! \return WTErr.
 //! 
 //**********************************************************************************************
-WTErr WCMRCoreAudioDevice::UpdateDeviceInfo (bool updateSRSupported, bool updateBufferSizes)
+WTErr WCMRCoreAudioDevice::UpdateDeviceInfo ()
 {
     AUTO_FUNC_DEBUG;
     
@@ -272,17 +254,8 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInfo (bool updateSRSupported, bool update
     WTErr errSR =   eNoErr; 
     WTErr errBS =   eNoErr; 
     
-    if (updateSRSupported)
-    {
-        errSR = UpdateDeviceSampleRates();      
-    }
-    
-    //update SR list... This is done conditionally, because some devices may not like
-    //changing the SR later on, just to check on things.
-    if (updateBufferSizes)
-    {
-        errBS = UpdateDeviceBufferSizes();
-    }
+    errSR = UpdateDeviceSampleRates();
+    errBS = UpdateDeviceBufferSizes();
 
     if(errName != eNoErr || errIn != eNoErr || errOut != eNoErr || errSR != eNoErr || errBS != eNoErr)
     {
@@ -786,7 +759,7 @@ WTErr WCMRCoreAudioDevice::SetCurrentSamplingRate (int newRate)
     retVal = SetAndCheckCurrentSamplingRate (newRate);
     if(retVal == eNoErr)
     {
-        retVal = UpdateDeviceInfo (false/*updateSRSupported*/, true/*updateBufferSizes*/);
+        retVal = UpdateDeviceInfo ();
     }
 
     //reactivate it.    
@@ -1759,7 +1732,7 @@ WTErr WCMRCoreAudioDevice::SetActive (bool newState)
         m_DropsReported = 0;
         m_IgnoreThisDrop = true;
 
-        UpdateDeviceInfo(true /*updateSRSupported */, true /* updateBufferSizes#*/);
+        UpdateDeviceInfo();
 
     }
     
@@ -2317,14 +2290,10 @@ OSStatus WCMRCoreAudioDevice::GetStreamLatency(AudioDeviceID device, bool isInpu
 //! \return Nothing.
 //! 
 //**********************************************************************************************
-WCMRCoreAudioDeviceManager::WCMRCoreAudioDeviceManager(WCMRAudioDeviceManagerClient *pTheClient, eAudioDeviceFilter eCurAudioDeviceFilter 
-                                                       , bool useMultithreading, eCABS_Method eCABS_method, bool bNocopy) 
-  : WCMRAudioDeviceManager (pTheClient, eCurAudioDeviceFilter
-      )
-  , m_UpdateDeviceListRequested(0)
-  , m_UpdateDeviceListProcessed(0)
+WCMRCoreAudioDeviceManager::WCMRCoreAudioDeviceManager(WCMRAudioDeviceManagerClient *pTheClient,
+                            eAudioDeviceFilter eCurAudioDeviceFilter, bool useMultithreading, bool bNocopy)
+  : WCMRAudioDeviceManager (pTheClient, eCurAudioDeviceFilter)
   , m_UseMultithreading (useMultithreading)
-  , m_eCABS_Method(eCABS_method)
   , m_bNoCopyAudioBuffer(bNocopy)
 {
     AUTO_FUNC_DEBUG;
@@ -2347,13 +2316,13 @@ WCMRCoreAudioDeviceManager::WCMRCoreAudioDeviceManager(WCMRAudioDeviceManagerCli
     }
 
     //add a listener to find out when devices change...
-    AudioHardwareAddPropertyListener (kAudioHardwarePropertyDevices, StaticPropertyChangeProc, this);
-
+    AudioHardwareAddPropertyListener (kAudioHardwarePropertyDevices, DevicePropertyChangeCallback, this);
+    
     //Always add the None device first...
-    m_Devices.push_back (new WCMRNativeAudioNoneDevice(this));
+    m_NoneDevice = new WCMRNativeAudioNoneDevice(this);
 
     //prepare our initial list...
-    UpdateDeviceList_Private();
+    generateDeviceListImpl();
 
     return;
 }
@@ -2376,25 +2345,7 @@ WCMRCoreAudioDeviceManager::~WCMRCoreAudioDeviceManager()
 
     try
     {
-        AudioHardwareRemovePropertyListener (kAudioHardwarePropertyDevices, StaticPropertyChangeProc);
-
-        //Note: We purposely release the device list here, instead of
-        //depending on the superclass to do it, as by the time the superclass'
-        //destructor executes, we will have called Pa_Terminate()!
-    
-        //Need to call release on our devices, and erase them from list
-        std::vector<WCMRAudioDevice*>::iterator deviceIter;
-        while (m_Devices.size())
-        {
-            WCMRAudioDevice *pDeviceToRelease = m_Devices.back();
-            m_Devices.pop_back();
-
-            SAFE_RELEASE (pDeviceToRelease);
-        }
-    
-        
-        //The derived classes may want to do additional de-int!
-
+        delete m_NoneDevice;
     }
     catch (...)
     {
@@ -2405,313 +2356,511 @@ WCMRCoreAudioDeviceManager::~WCMRCoreAudioDeviceManager()
 }
 
 
-//**********************************************************************************************
-// WCMRCoreAudioDeviceManager::StaticPropertyChangeProc
-//
-//! The property change listener for the Audio Device Manager. It calls upon (non-static) PropertyChangeProc
-//!     to do the actual work.
-//!
-//! \param iPropertyID : the property that has changed.
-//! \param inClientData : What was supplied at init time.
-//! 
-//! \return if parameters are incorrect, or the value returned by PropertyChangeProc.
-//! 
-//**********************************************************************************************
-OSStatus WCMRCoreAudioDeviceManager::StaticPropertyChangeProc (AudioHardwarePropertyID inPropertyID, void* inClientData)
+WCMRAudioDevice* WCMRCoreAudioDeviceManager::initNewCurrentDeviceImpl(const std::string & deviceName)
 {
-    WCMRCoreAudioDeviceManager *pMyManager = (WCMRCoreAudioDeviceManager *)inClientData;
+    destroyCurrentDeviceImpl();
     
-    if (pMyManager)
-        return pMyManager->PropertyChangeProc (inPropertyID);
-
-    return 0;
+    std::cout << "API::PortAudioDeviceManager::initNewCurrentDevice " << deviceName << std::endl;
+	if (deviceName == m_NoneDevice->DeviceName() )
+	{
+		m_CurrentDevice = m_NoneDevice;
+		return m_CurrentDevice;
+	}
+    
+	DeviceInfo devInfo;
+    WTErr err = GetDeviceInfoByName(deviceName, devInfo);
+    
+	if (eNoErr == err)
+	{
+		try
+		{
+			std::cout << "API::PortAudioDeviceManager::Creating PA device: " << devInfo.m_DeviceId << ", Device Name: " << devInfo.m_DeviceName << std::endl;
+			TRACE_MSG ("API::PortAudioDeviceManager::Creating PA device: " << devInfo.m_DeviceId << ", Device Name: " << devInfo.m_DeviceName);
+            
+            m_CurrentDevice = new WCMRCoreAudioDevice (this, devInfo.m_DeviceId, m_UseMultithreading, m_bNoCopyAudioBuffer);
+		}
+		catch (...)
+		{
+			std::cout << "Unabled to create PA Device: " << devInfo.m_DeviceId << std::endl;
+			DEBUG_MSG ("Unabled to create PA Device: " << devInfo.m_DeviceId);
+		}
+	}
+    
+	return m_CurrentDevice;
 }
 
 
-
-//**********************************************************************************************
-// WCMRCoreAudioDeviceManager::PropertyChangeProc
-//
-//! The property change listener for the Audio Device Manager. Currently we only listen for the
-//!     device list change (device arrival/removal, and accordingly cause an update to the device list.
-//!     Note that the actual update happens from the DoIdle() call to prevent multi-threading related issues.
-//!
-//! \param 
-//! 
-//! \return Nothing.
-//! 
-//**********************************************************************************************
-OSStatus WCMRCoreAudioDeviceManager::PropertyChangeProc (AudioHardwarePropertyID inPropertyID)
+void WCMRCoreAudioDeviceManager::destroyCurrentDeviceImpl()
 {
-    OSStatus retVal = 0;
-    switch (inPropertyID)
+    if (m_CurrentDevice != m_NoneDevice)
+        delete m_CurrentDevice;
+    
+    m_CurrentDevice = 0;
+}
+    
+    
+WTErr WCMRCoreAudioDeviceManager::getDeviceAvailableSampleRates(DeviceID deviceId, std::vector<int>& sampleRates)
+{
+    AUTO_FUNC_DEBUG;
+    
+    WTErr retVal = eNoErr;
+    OSStatus err = kAudioHardwareNoError;
+    UInt32 propSize = 0;
+    
+    sampleRates.clear();
+    
+    //! 1. Get sample rate property size.
+    err = AudioDeviceGetPropertyInfo(deviceId, 0, 0, kAudioDevicePropertyAvailableNominalSampleRates, &propSize, NULL);
+    if (err == kAudioHardwareNoError)
     {
-    case kAudioHardwarePropertyDevices:
-        m_UpdateDeviceListRequested++;
-        break;
-    default:
-        break;
+        //! 2. Get property: cannels output.
+        
+        // Allocate size accrding to the number of audio values
+        int numRates = propSize / sizeof(AudioValueRange);
+        AudioValueRange* supportedRates = new AudioValueRange[numRates];
+        
+        // Get sampling rates from Audio device
+        err = AudioDeviceGetProperty(deviceId, 0, 0, kAudioDevicePropertyAvailableNominalSampleRates, &propSize, supportedRates);
+        if (err == kAudioHardwareNoError)
+        {
+            //! 3. Update sample rates
+            
+            // now iterate through our standard SRs
+            for(int ourSR=0; gAllSampleRates[ourSR] > 0; ourSR++)
+            {
+                //check to see if our SR is in the supported rates...
+                for (int deviceSR = 0; deviceSR < numRates; deviceSR++)
+                {
+                    if ((supportedRates[deviceSR].mMinimum <= gAllSampleRates[ourSR]) &&
+                        (supportedRates[deviceSR].mMaximum >= gAllSampleRates[ourSR]))
+                    {
+                        sampleRates.push_back ((int)gAllSampleRates[ourSR]);
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            retVal = eCoreAudioFailed;
+            DEBUG_MSG("Failed to get device Sample rates. Device Name: " << m_DeviceName.c_str());
+        }
+        
+        delete [] supportedRates;
+    }
+    else
+    {
+        retVal = eCoreAudioFailed;
+        DEBUG_MSG("Failed to get device Sample rates property size. Device Name: " << m_DeviceName.c_str());
     }
     
     return retVal;
 }
-
-//**********************************************************************************************
-// WCMRCoreAudioDeviceManager::remove_pattern
-//
-//! remove a substring from a given string
-//!
-//! \param original_str - original string
-//! \param pattern_str - pattern to find
-//! \param return_str - the return string - without the pattern substring
-//! 
-//! \return Nothing.
-//! 
-//**********************************************************************************************
-void WCMRCoreAudioDeviceManager::remove_pattern(const std::string& original_str, const std::string& pattern_str, std::string& return_str)
-{
-    char *orig_c_str = new char[original_str.size() + 1];
-    char* strSavePtr;
-    strcpy(orig_c_str, original_str.c_str());
-    char *p_splited_orig_str = strtok_r(orig_c_str," ", &strSavePtr);
     
-    std::ostringstream stream_str;
-    while (p_splited_orig_str != 0) 
+    
+WTErr WCMRCoreAudioDeviceManager::getDeviceMaxInputChannels(DeviceID deviceId, unsigned int& inputChannels)
+{
+    AUTO_FUNC_DEBUG;
+    WTErr retVal = eNoErr;
+    OSStatus err = kAudioHardwareNoError;
+    UInt32 propSize = 0;
+    inputChannels = 0;
+    
+    // 1. Get property cannels input size.
+    err = AudioDeviceGetPropertyInfo (deviceId, 0, 1/* Input */, kAudioDevicePropertyStreamConfiguration, &propSize, NULL);
+    if (err == kAudioHardwareNoError)
     {
-        int cmp_res = strcmp(p_splited_orig_str, pattern_str.c_str()); // might need Ignore case ( stricmp OR strcasecmp)
-        if ( cmp_res != 0)
-            stream_str << p_splited_orig_str << " ";
-        p_splited_orig_str = strtok_r(NULL," ", &strSavePtr);
+        //! 2. Get property: cannels input.
+        
+        // Allocate size according to the property size. Note that this is a variable sized struct...
+        AudioBufferList *pStreamBuffers = (AudioBufferList *)malloc(propSize);
+        
+        if (pStreamBuffers)
+        {
+            memset (pStreamBuffers, 0, propSize);
+            
+            // Get the Input channels
+            err = AudioDeviceGetProperty (deviceId, 0, 1/* Input */, kAudioDevicePropertyStreamConfiguration, &propSize, pStreamBuffers);
+            if (err == kAudioHardwareNoError)
+            {
+                // Calculate the number of input channels
+                for (UInt32 streamIndex = 0; streamIndex < pStreamBuffers->mNumberBuffers; streamIndex++)
+                {
+                    inputChannels += pStreamBuffers->mBuffers[streamIndex].mNumberChannels;
+                }
+            }
+            else
+            {
+                retVal = eCoreAudioFailed;
+                DEBUG_MSG("Failed to get device Input channels. Device Name: " << m_DeviceName.c_str());
+            }
+            
+            free (pStreamBuffers);
+        }
+        else
+        {
+            retVal = eMemOutOfMemory;
+            DEBUG_MSG("Faild to allocate memory. Device Name: " << m_DeviceName.c_str());
+        }
     }
-    delete[] orig_c_str;
-    return_str = stream_str.str();
+    else
+    {
+        retVal = eCoreAudioFailed;
+        DEBUG_MSG("Failed to get device Input channels property size. Device Name: " << m_DeviceName.c_str());
+    }
+    
+    return retVal;
 }
+    
 
-
-//**********************************************************************************************
-// WCMRCoreAudioDeviceManager::UpdateDeviceList_Private
-//
-//! Updates the list of devices maintained by the manager. If devices have gone away, they are removed
-//!     if new devices have been connected, they are added to the list.
-//!
-//! \param none
-//! 
-//! \return eNoErr on success, an error code on failure.
-//! 
-//**********************************************************************************************
-WTErr WCMRCoreAudioDeviceManager::UpdateDeviceList_Private()
+WTErr WCMRCoreAudioDeviceManager::getDeviceMaxOutputChannels(DeviceID deviceId, unsigned int& outputChannels)
 {
     AUTO_FUNC_DEBUG;
     
+    WTErr retVal = eNoErr;
+    OSStatus err = kAudioHardwareNoError;
+    UInt32 propSize = 0;
+    outputChannels = 0;
+    
+    //! 1. Get property cannels output size.
+    err = AudioDeviceGetPropertyInfo (deviceId, 0, 0/* Output */, kAudioDevicePropertyStreamConfiguration, &propSize, NULL);
+    if (err == kAudioHardwareNoError)
+    {
+        //! 2. Get property: cannels output.
+        
+        // Allocate size according to the property size. Note that this is a variable sized struct...
+        AudioBufferList *pStreamBuffers = (AudioBufferList *)malloc(propSize);
+        if (pStreamBuffers)
+        {
+            memset (pStreamBuffers, 0, propSize);
+            
+            // Get the Output channels
+            err = AudioDeviceGetProperty (deviceId, 0, 0/* Output */, kAudioDevicePropertyStreamConfiguration, &propSize, pStreamBuffers);
+            if (err == kAudioHardwareNoError)
+            {
+                // Calculate the number of output channels
+                for (UInt32 streamIndex = 0; streamIndex < pStreamBuffers->mNumberBuffers; streamIndex++)
+                {
+                    outputChannels += pStreamBuffers->mBuffers[streamIndex].mNumberChannels;
+                }
+            }
+            else
+            {
+                retVal = eCoreAudioFailed;
+                DEBUG_MSG("Failed to get device Output channels. Device Name: " << m_DeviceName.c_str());
+            }
+            free (pStreamBuffers);
+        }
+        else
+        {
+            retVal = eMemOutOfMemory;
+            DEBUG_MSG("Faild to allocate memory. Device Name: " << m_DeviceName.c_str());
+        }
+    }
+    else
+    {
+        retVal = eCoreAudioFailed;
+        DEBUG_MSG("Failed to get device Output channels property size. Device Name: " << m_DeviceName.c_str());
+    }
+ 
+    return retVal;
+}
+    
+    
+WTErr WCMRCoreAudioDeviceManager::generateDeviceListImpl()
+{
+    AUTO_FUNC_DEBUG;
+    
+    // lock the list first
+    wvNS::wvThread::ThreadMutex::lock theLock(m_AudioDeviceInfoVecMutex);
+    m_DeviceInfoVec.clear();
+    
+    //First, get info from None device which is always present
+    if (m_NoneDevice)
+    {
+        DeviceInfo *pDevInfo = new DeviceInfo(NONE_DEVICE_ID, m_NoneDevice->DeviceName() );
+        pDevInfo->m_AvailableSampleRates = m_NoneDevice->SamplingRates();
+        m_DeviceInfoVec.push_back(pDevInfo);
+    }
     
     WTErr retVal = eNoErr;
     OSStatus osErr = noErr;
     AudioDeviceID* deviceIDs = 0;
-    size_t reportedDeviceIndex = 0;
     
     openlog("WCMRCoreAudioDeviceManager", LOG_PID | LOG_CONS, LOG_USER);
-
-    try 
+    
+    try
     {
-    
-        // Define 2 vectors for input and output - only for eMatchedDuplexDevices case
-        WCMRAudioDeviceList adOnlyIn;
-        WCMRAudioDeviceList adOnlyOut;
-    
         //Get device count...
         UInt32 propSize = 0;
         osErr = AudioHardwareGetPropertyInfo (kAudioHardwarePropertyDevices, &propSize, NULL);
         ASSERT_ERROR(osErr, "AudioHardwareGetProperty 1");
         if (WUIsError(osErr))
             throw osErr;
-    
+        
         size_t numDevices = propSize / sizeof (AudioDeviceID);
         deviceIDs = new AudioDeviceID[numDevices];
-
+        
         //retrieve the device IDs
         propSize = numDevices * sizeof (AudioDeviceID);
         osErr = AudioHardwareGetProperty (kAudioHardwarePropertyDevices, &propSize, deviceIDs);
         ASSERT_ERROR(osErr, "Error while getting audio devices: AudioHardwareGetProperty 2");
         if (WUIsError(osErr))
             throw osErr;
-    
-        //first go through our list of devices, remove the ones that are no longer present...
-        std::vector<WCMRAudioDevice*>::iterator deviceIter;
-        for (deviceIter = m_Devices.begin(); deviceIter != m_Devices.end(); /*This is purposefully blank*/)
-        {
-            WCMRCoreAudioDevice *pDeviceToWorkUpon = dynamic_cast<WCMRCoreAudioDevice *>(*deviceIter);
-
-            //it's possible that the device is actually not a core audio device - perhaps a none device...
-            if (!pDeviceToWorkUpon)
-            {
-                deviceIter++;
-                continue;
-            }
-
-            AudioDeviceID myDeviceID = pDeviceToWorkUpon->DeviceID();
-            bool deviceFound = false;
-            for (reportedDeviceIndex = 0; reportedDeviceIndex < numDevices; reportedDeviceIndex++)
-            {
-                if (myDeviceID == deviceIDs[reportedDeviceIndex])
-                {
-                    deviceFound = true;
-                    break;
-                }
-            }
         
-            if (!deviceFound)
+        //now add the ones that are not there...
+        for (size_t deviceIndex = 0; deviceIndex < numDevices; deviceIndex++)
+        {
+            DeviceInfo* pDevInfo = 0;
+            
+            //Get device name and create new DeviceInfo entry
+            //Get property name size.
+            osErr = AudioDeviceGetPropertyInfo(deviceIDs[deviceIndex], 0, 0, kAudioDevicePropertyDeviceName, &propSize, NULL);
+            if (osErr == kAudioHardwareNoError)
             {
-                //it's no longer there, need to remove it!
-                WCMRAudioDevice *pTheDeviceToErase = *deviceIter;
-                deviceIter = m_Devices.erase (deviceIter);
-                if (pTheDeviceToErase->Active())
+                //Get property: name.
+                char* deviceName = new char[propSize];
+                osErr = AudioDeviceGetProperty(deviceIDs[deviceIndex], 0, 0, kAudioDevicePropertyDeviceName, &propSize, deviceName);
+                if (osErr == kAudioHardwareNoError)
                 {
-                    NotifyClient (WCMRAudioDeviceManagerClient::DeviceConnectionLost);
+                    pDevInfo = new DeviceInfo(deviceIDs[deviceIndex], deviceName);
                 }
-                SAFE_RELEASE (pTheDeviceToErase);
+                else
+                {
+                    retVal = eCoreAudioFailed;
+                    DEBUG_MSG("Failed to get device name. Device ID: " << m_DeviceID);
+                }
+                
+                delete [] deviceName;
             }
             else
-                deviceIter++;
-        }
-
-        //now add the ones that are not there...
-        for (reportedDeviceIndex = 0; reportedDeviceIndex < numDevices; reportedDeviceIndex++)
-        {
-            bool deviceFound = false;
-            for (deviceIter = m_Devices.begin(); deviceIter != m_Devices.end(); deviceIter++)
             {
-                WCMRCoreAudioDevice *pDeviceToWorkUpon = dynamic_cast<WCMRCoreAudioDevice *>(*deviceIter);
-                //it's possible that the device is actually not a core audio device - perhaps a none device...
-                if (!pDeviceToWorkUpon)
-                    continue;
-
-                if (pDeviceToWorkUpon->DeviceID() == deviceIDs[reportedDeviceIndex])
-                {
-                    deviceFound = true;
-                    break;
-                }
+                retVal = eCoreAudioFailed;
+                DEBUG_MSG("Failed to get device name property size. Device ID: " << m_DeviceID);
             }
-        
-            if (!deviceFound)
+            
+            if (pDevInfo)
             {
-                //add it to our list...
-                //build a device object...
-                WCMRCoreAudioDevice *pNewDevice = new WCMRCoreAudioDevice (this, deviceIDs[reportedDeviceIndex], m_UseMultithreading, m_bNoCopyAudioBuffer);
-                bool bDeleteNewDevice = true;
+                //Retrieve all the information we need for the device
+                WTErr wErr = eNoErr;
                 
-                if (pNewDevice)
+                //Get available sample rates for the device
+                std::vector<int> availableSampleRates;
+                wErr = getDeviceAvailableSampleRates(pDevInfo->m_DeviceId, availableSampleRates);
+                
+                if (wErr != eNoErr)
                 {
-
-                    // Don't delete the new device by default, since most cases use it
-                    bDeleteNewDevice = false;
-                    
-                    // Insert the new device to the device list according to its enum
-                    switch(m_eAudioDeviceFilter)
-                    {
+                    DEBUG_MSG ("Failed to get device available sample rates. Device ID: " << m_DeviceID);
+                    delete pDevInfo;
+                    continue; //proceed to the next device
+                }
+                
+                pDevInfo->m_AvailableSampleRates = availableSampleRates;
+                
+                //Get max input channels
+                uint32 maxInputChannels;
+                wErr = getDeviceMaxInputChannels(pDevInfo->m_DeviceId, maxInputChannels);
+                
+                if (wErr != eNoErr)
+                {
+                    DEBUG_MSG ("Failed to get device max input channels count. Device ID: " << m_DeviceID);
+                    delete pDevInfo;
+                    continue; //proceed to the next device
+                }
+                
+                pDevInfo->m_MaxInputChannels = maxInputChannels;
+                
+                //Get max output channels
+                uint32 maxOutputChannels;
+                wErr = getDeviceMaxOutputChannels(pDevInfo->m_DeviceId, maxOutputChannels);
+                
+                if (wErr != eNoErr)
+                {
+                    DEBUG_MSG ("Failed to get device max output channels count. Device ID: " << m_DeviceID);
+                    delete pDevInfo;
+                    continue; //proceed to the next device
+                }
+                
+                pDevInfo->m_MaxOutputChannels = maxOutputChannels;
+                
+                //Now check if this device is acceptable according to current input/output settings
+                bool bRejectDevice = false;
+                switch(m_eAudioDeviceFilter)
+                {
                     case eInputOnlyDevices:
-                        if ((int) pNewDevice->InputChannels().size() != 0)
+                        if (pDevInfo->m_MaxInputChannels != 0)
                         {
-                            m_Devices.push_back (pNewDevice);
+                            m_DeviceInfoVec.push_back(pDevInfo);
                         }
                         else
                         {
                             // Delete unnecesarry device
-                            bDeleteNewDevice = true;
+                            bRejectDevice = true;
                         }
                         break;
                     case eOutputOnlyDevices:
-                        if ((int) pNewDevice->OutputChannels().size() != 0)
+                        if (pDevInfo->m_MaxOutputChannels != 0)
                         {
-                            m_Devices.push_back (pNewDevice);
+                            m_DeviceInfoVec.push_back(pDevInfo);
                         }
                         else
                         {
                             // Delete unnecesarry device
-                            bDeleteNewDevice = true;
+                            bRejectDevice = true;
                         }
                         break;
                     case eFullDuplexDevices:
-                        if ((int) pNewDevice->InputChannels().size() != 0 && (int) pNewDevice->OutputChannels().size() != 0)
+                        if (pDevInfo->m_MaxInputChannels != 0 && pDevInfo->m_MaxOutputChannels != 0)
                         {
-                            m_Devices.push_back (pNewDevice);
+                            m_DeviceInfoVec.push_back(pDevInfo);
                         }
                         else
                         {
                             // Delete unnecesarry device
-                            bDeleteNewDevice = true;
+                            bRejectDevice = true;
                         }
                         break;
                     case eAllDevices:
                     default:
-                        m_Devices.push_back (pNewDevice);
+                        m_DeviceInfoVec.push_back(pDevInfo);
                         break;
-                    }
                 }
                 
-                if(bDeleteNewDevice)
+                if(bRejectDevice)
                 {
                     syslog (LOG_NOTICE, "%s rejected, In Channels = %d, Out Channels = %d\n",
-                            pNewDevice->DeviceName().c_str(), (int) pNewDevice->InputChannels().size(),
-                            (int) pNewDevice->OutputChannels().size());
+                            pDevInfo->m_DeviceName.c_str(), pDevInfo->m_MaxInputChannels, pDevInfo->m_MaxOutputChannels);
                     // In case of Input and Output both channels being Zero, we will release memory; since we created CoreAudioDevice but we are Not adding it in list.
-                    SAFE_RELEASE(pNewDevice);
+                    delete pDevInfo;
                 }
             }
         }
-    
-
+        
+        
         //If no devices were found, that's not a good thing!
-        if (m_Devices.empty())
+        if (m_DeviceInfoVec.empty())
         {
             DEBUG_MSG ("No matching CoreAudio devices were found\n");
-        }
-    
-
-        m_UpdateDeviceListRequested = m_UpdateDeviceListProcessed = 0;
-    
+        }        
     }
     catch (...)
     {
         if (WUNoError(retVal))
             retVal = eCoreAudioFailed;
     }
-
-    safe_delete_array(deviceIDs);
+    
+    delete[] deviceIDs;
     closelog();
-
+    
     return retVal;
 }
 
 
-
-//**********************************************************************************************
-// WCMRCoreAudioDeviceManager::DoIdle
-//
-//! Used for idle time processing. This calls each device's DoIdle so that it can perform it's own idle processing.
-//!     Also, if a device list change is detected, it updates the device list.
-//!
-//! \param none
-//! 
-//! \return noErr if no devices have returned an error. An error code if any of the devices returned error.
-//! 
-//**********************************************************************************************
-WTErr WCMRCoreAudioDeviceManager::DoIdle()
+WTErr WCMRCoreAudioDeviceManager::updateDeviceListImpl()
 {
-    //WTErr retVal = eNoErr;
+    wvNS::wvThread::ThreadMutex::lock theLock(m_AudioDeviceInfoVecMutex);
+    WTErr err = generateDeviceListImpl();
     
+    if (eNoErr != err)
     {
-        //wvThread::ThreadMutex::lock theLock(m_AudioDeviceManagerMutex);
-
-        //If there's something specific to CoreAudio manager idle handling do it here...
-        if (m_UpdateDeviceListRequested != m_UpdateDeviceListProcessed)
+        std::cout << "API::PortAudioDeviceManager::updateDeviceListImpl: Device list update error: "<< err << std::endl;
+        return err;
+    }
+    
+    if (m_CurrentDevice)
+    {
+        // if we have device initialized we should find out if this device is still connected
+        DeviceInfo devInfo;
+        WTErr deviceLookUpErr = GetDeviceInfoByName(m_CurrentDevice->DeviceName(), devInfo );
+    
+        if (eNoErr != deviceLookUpErr)
         {
-            m_UpdateDeviceListProcessed = m_UpdateDeviceListRequested;
-            UpdateDeviceList_Private();
-            NotifyClient (WCMRAudioDeviceManagerClient::DeviceListChanged);
+            NotifyClient (WCMRAudioDeviceManagerClient::IODeviceDisconnected);
+            return err;
         }
-    }   
-
-    //Note that the superclass is going to call all the devices' DoIdle() anyway...
-    return (WCMRAudioDeviceManager::DoIdle());
+    }
+    
+    NotifyClient (WCMRAudioDeviceManagerClient::DeviceListChanged);
+    
+    return err;
 }
 
+
+WTErr WCMRCoreAudioDeviceManager::getDeviceBufferSizesImpl(const std::string & deviceName, std::vector<int>& bufferSizes) const
+{
+    AUTO_FUNC_DEBUG;
+    
+    WTErr retVal = eNoErr;
+    OSStatus err = kAudioHardwareNoError;
+    UInt32 propSize = 0;
+    
+    bufferSizes.clear();
+    
+    //first check if the request has been made for None device
+	if (deviceName == m_NoneDevice->DeviceName() )
+	{
+		bufferSizes = m_NoneDevice->BufferSizes();
+		return retVal;
+	}
+    
+    DeviceInfo devInfo;
+    retVal = GetDeviceInfoByName(deviceName, devInfo);
+    
+    if (eNoErr == retVal)
+    {
+        // 1. Get buffer size range
+        AudioValueRange bufferSizesRange;
+        propSize = sizeof (AudioValueRange);
+        err = AudioDeviceGetProperty (devInfo.m_DeviceId, 0, 0, kAudioDevicePropertyBufferFrameSizeRange, &propSize, &bufferSizesRange);
+        if(err == kAudioHardwareNoError)
+        {
+            // 2. Run on all ranges and add them to the list
+            for(int bsize=0; gAllBufferSizes[bsize] > 0; bsize++)
+            {
+                if ((bufferSizesRange.mMinimum <= gAllBufferSizes[bsize]) && (bufferSizesRange.mMaximum >= gAllBufferSizes[bsize]))
+                {
+                    bufferSizes.push_back (gAllBufferSizes[bsize]);
+                }
+            }
+            
+            //if we didn't get a single hit, let's simply add the min. and the max...
+            if (bufferSizes.empty())
+            {
+                bufferSizes.push_back ((int)bufferSizesRange.mMinimum);
+                bufferSizes.push_back ((int)bufferSizesRange.mMaximum);
+            }
+        }
+        else
+        {
+            retVal = eCoreAudioFailed;
+            DEBUG_MSG("Failed to get device buffer sizes range. Device Name: " << m_DeviceName.c_str());
+        }
+    }
+    else
+	{
+		retVal = eRMResNotFound;
+		std::cout << "API::PortAudioDeviceManager::GetBufferSizes: Device not found: "<< deviceName << std::endl;
+	}
+
+    
+    return retVal;
+}
+
+
+OSStatus WCMRCoreAudioDeviceManager::DevicePropertyChangeCallback (AudioHardwarePropertyID inPropertyID, void* inClientData)
+{
+    switch (inPropertyID)
+    {
+        case kAudioHardwarePropertyDevices:
+            {
+                WCMRCoreAudioDeviceManager* pManager = (WCMRCoreAudioDeviceManager*)inClientData;
+                if (pManager)
+                    pManager->updateDeviceListImpl();
+            }
+            break;
+        default:
+            break;
+    }
+    
+    return 0;
+}
