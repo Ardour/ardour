@@ -138,7 +138,9 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 	} else if ((tb->controller_number >= 32 && 
 		    tb->controller_number <= 63)) {
 		   
-		cv = (unsigned short) _controller_val[tb->controller_number];
+		int cn = tb->controller_number - 32;
+
+		cv = (unsigned short) _controller_val[cn];
 
 		/* LSB for CC 0-31 arrived. 
 
@@ -151,7 +153,6 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 		   high 7.
 		*/
 
-		int cn = tb->controller_number - 32;
 		   
 		if (_controller_14bit[cn] == false) {
 			_controller_14bit[cn] = true;
