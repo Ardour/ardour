@@ -42,11 +42,46 @@
 
 namespace ARDOUR {
 
+struct LIBARDOUR_API AudioBackendInfo {
+    const char* name;
+
+    /** Using arg1 and arg2, initialize this audiobackend.
+     * 
+     * Returns zero on success, non-zero otherwise.
+     */
+    int (*instantiate) (const std::string& arg1, const std::string& arg2);
+
+    /** Release all resources associated with this audiobackend
+     */
+    int (*deinstantiate) (void);
+
+    /** Factory method to create an AudioBackend-derived class.
+     * 
+     * Returns a valid shared_ptr to the object if successfull,
+     * or a "null" shared_ptr otherwise.
+     */
+    boost::shared_ptr<AudioBackend> (*factory) (AudioEngine&);
+
+    /** Return true if the underlying mechanism/API has been
+     * configured and does not need (re)configuration in order
+     * to be usable. Return false otherwise.
+     *
+     * Note that this may return true if (re)configuration, even though
+     * not currently required, is still possible.
+     */
+    bool (*already_configured)();
+};
+
 class LIBARDOUR_API AudioBackend : public PortEngine {
   public:
 
-    AudioBackend (AudioEngine& e) : PortEngine (e), engine (e) {}
+    AudioBackend (AudioEngine& e, AudioBackendInfo& i) : PortEngine (e), _info (i), engine (e) {}
     virtual ~AudioBackend () {}
+    
+    /** Return the AudioBackendInfo object from which this backend
+	was constructed.
+    */
+    AudioBackendInfo& info() const { return _info; }
 
     /** Return the name of this backend.
      *
@@ -482,39 +517,10 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      }
 
   protected:
-    AudioEngine&          engine;
+     AudioBackendInfo&  _info; 
+     AudioEngine&        engine;
 
-    virtual int _start (bool for_latency_measurement) = 0;
-};
-
-struct LIBARDOUR_API AudioBackendInfo {
-    const char* name;
-
-    /** Using arg1 and arg2, initialize this audiobackend.
-     * 
-     * Returns zero on success, non-zero otherwise.
-     */
-    int (*instantiate) (const std::string& arg1, const std::string& arg2);
-
-    /** Release all resources associated with this audiobackend
-     */
-    int (*deinstantiate) (void);
-
-    /** Factory method to create an AudioBackend-derived class.
-     * 
-     * Returns a valid shared_ptr to the object if successfull,
-     * or a "null" shared_ptr otherwise.
-     */
-    boost::shared_ptr<AudioBackend> (*factory) (AudioEngine&);
-
-    /** Return true if the underlying mechanism/API has been
-     * configured and does not need (re)configuration in order
-     * to be usable. Return false otherwise.
-     *
-     * Note that this may return true if (re)configuration, even though
-     * not currently required, is still possible.
-     */
-    bool (*already_configured)();
+     virtual int _start (bool for_latency_measurement) = 0;
 };
 
 } // namespace
