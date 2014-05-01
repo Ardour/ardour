@@ -430,6 +430,9 @@ Editor::Editor ()
 	meter_label.hide();
 	meter_label.set_no_show_all();
 
+	if (Profile->get_trx()) {
+		mark_label.set_text (_("Markers"));
+	}
 	mark_label.set_name ("EditorRulerLabel");
 	mark_label.set_size_request (-1, (int)timebar_height);
 	mark_label.set_alignment (1.0, 0.5);
