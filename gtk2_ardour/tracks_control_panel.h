@@ -48,27 +48,29 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
     ~TracksControlPanel ();
 
   private:
-	Gtk::Layout& audio_settings_layout;
-	Gtk::Layout& midi_settings_layout;
-	Gtk::Layout& session_settings_layout;
-	WavesButton& audio_settings_tab_button;
-	WavesButton& session_settings_tab_button;
-	WavesButton& midi_settings_tab_button;
-	WavesButton& multi_out_button;
-	WavesButton& stereo_out_button;
-	WavesButton& ok_button;
-	WavesButton& cancel_button;
-	WavesButton& apply_button;
-	WavesButton& control_panel_button;
-	WavesButton& no_button;
-	WavesButton& name_track_after_driver_button;
-	WavesButton& reset_track_names_button;
-	WavesButton& yes_button;
-	Gtk::ComboBoxText& engine_combo;
-	Gtk::ComboBoxText& device_combo;
-	Gtk::ComboBoxText& sample_rate_combo;
-	Gtk::ComboBoxText& buffer_size_combo;
-	Gtk::Label& latency_label;
+	Gtk::VBox& _device_capture_list;
+	Gtk::VBox& _device_playback_list;
+	Gtk::Layout& _audio_settings_layout;
+	Gtk::Layout& _midi_settings_layout;
+	Gtk::Layout& _session_settings_layout;
+	WavesButton& _audio_settings_tab_button;
+	WavesButton& _session_settings_tab_button;
+	WavesButton& _midi_settings_tab_button;
+	WavesButton& _multi_out_button;
+	WavesButton& _stereo_out_button;
+	WavesButton& _ok_button;
+	WavesButton& _cancel_button;
+	WavesButton& _apply_button;
+	WavesButton& _control_panel_button;
+	WavesButton& _no_button;
+	WavesButton& _name_track_after_driver_button;
+	WavesButton& _reset_track_names_button;
+	WavesButton& _yes_button;
+	Gtk::ComboBoxText& _engine_combo;
+	Gtk::ComboBoxText& _device_combo;
+	Gtk::ComboBoxText& _sample_rate_combo;
+	Gtk::ComboBoxText& _buffer_size_combo;
+	Gtk::Label& _latency_label;
 
 #include "tracks_control_panel.logic.h"
 };

@@ -23,22 +23,39 @@
 #include <string>
 #include <fstream>
 #include <boost/algorithm/string.hpp>
-#include "gtkmm/box.h"
-#include "gtkmm/layout.h"
-#include "gtkmm/label.h"
-#include "gtkmm/scrolledwindow.h"
+#include <gtkmm/box.h>
+#include <gtkmm/layout.h>
+#include <gtkmm/label.h>
+#include <gtkmm/scrolledwindow.h>
+#include "canvas/canvas.h"
 #include "canvas/xml_ui.h"
+#include "waves_button.h"
 
 using namespace ArdourCanvas::XMLUI;
 namespace WavesUI {
 
-	void create_ui (const XMLTree& layout, Gtk::Widget& root, std::map<std::string, Gtk::Widget*> &named_widgets);
-	void create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk::Widget& root, std::map<std::string, Gtk::Widget*> &named_widgets);
-	Gtk::Widget* create_widget (const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets);
-	Gtk::Widget* add_widget (Gtk::Box& parent, const XMLNode &definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets);
-	Gtk::Widget* add_widget (Gtk::ScrolledWindow& parent, const XMLNode &definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets);
-	Gtk::Widget* add_widget (Gtk::Layout& parent, const XMLNode &definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets);
-	Gtk::Widget* add_widget (Gtk::Widget& parent, const XMLNode &definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*> &named_widgets);
+	class WidgetMap : public std::map<std::string, Gtk::Widget*>
+	{
+	  public:
+		Gtk::VBox& get_vbox (char* id);
+		Gtk::HBox& get_hbox (char* id);
+		Gtk::Layout& get_layout (char* id);
+		Gtk::Label& get_label (char* id);
+		Gtk::ComboBoxText& get_combo_box_text (char* id);
+		WavesButton& get_waves_button (char* id);
+	  private:
+		Gtk::Widget* get_widget(char *id);
+	};
+
+	const XMLTree* load_layout (const std::string xml_file_name);
+	void create_ui (const XMLTree& layout, Gtk::Container& root, std::map<std::string, Gtk::Widget*>& named_widgets);
+	void create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk::Container& root, std::map<std::string, Gtk::Widget*>& named_widgets);
+	Gtk::Widget* create_widget (const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*>& named_widgets);
+	Gtk::Widget* add_widget (Gtk::Box& parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*>& named_widgets);
+	Gtk::Widget* add_widget (Gtk::ScrolledWindow& parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*>& named_widgets);
+	Gtk::Widget* add_widget (Gtk::Layout& parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*>& named_widgets);
+	Gtk::Widget* add_widget (Gtk::Container& parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*>& named_widgets);
+	void set_attributes (Gtk::Widget& widget, const XMLNode& definition, const XMLNodeMap& styles);
 
 }
 

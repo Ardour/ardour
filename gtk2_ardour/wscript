@@ -65,6 +65,7 @@ gtk2_ardour_sources = [
         'control_point_dialog.cc',
         'curvetest.cc',
         'debug.cc',
+		'device_connection_conrol.cc',
         'edit_note_dialog.cc',
         'editing.cc',
         'editor.cc',

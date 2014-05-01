@@ -155,76 +155,11 @@
         <Layout bgnormal="#797979" x="448" y="35" width="26" height="19">
           <Label style="generic_control" text="#" fgnormal="#000000" x="7" y="3"/>
         </Layout>
-        <ScrolledWindow x="14" y="62" width="480" height="299">
+        <ScrolledWindow x="14" y="62" width="480" height="299" hscroll="never" vscroll="always">
           <HBox>
-            <VBox>
-              <Layout bgnormal="#565656" width="274" height="20">
-                <Layout bgnormal="#862579" x="0" y="0" width="3" height="19"/>
-                <Layout bgnormal="#797979" x="6" y="0" width="85" height="19">
-                  <Label style="generic_control" text="In 1" fgnormal="#000000" x="7" y="3"/>
-                </Layout>
-                <Button id="input_on_button"
-                  text="ON"
-                  style="generic_control"
-                  fgnormal="#FFFFFF"
-                  bgnormal="#606060"
-                  fgactive="#FFFFFF"
-                  bgactive="#1CA3B3"
-                  fghover="#FFFFFF"
-                  bghover="#808080"
-                  borderwidth="0 0 0 0"
-                  x="95" y="0" width="29" height="19"/>
-                <Button id="input_off_button"
-                  text="OFF"
-                  style="generic_control"
-                  fgnormal="#FFFFFF"
-                  bgnormal="#606060"
-                  fgactive="#FFFFFF"
-                  bgactive="#FC3334"
-                  fghover="#FFFFFF"
-                  bghover="#808080"
-                  borderwidth="0 0 0 0"
-                  x="125" y="0" width="29" height="19"/>
-                <Layout bgnormal="#797979" x="158" y="0" width="26" height="19">
-                  <Label style="generic_control" text="1" fgnormal="#000000" x="7" y="3"/>
-                </Layout>
-                <Layout bgnormal="#797979" x="186" y="0" width="85" height="19">
-                  <Label style="generic_control" text="Track Name" fgnormal="#000000" x="7" y="3"/>
-                </Layout>
-              </Layout>
+            <VBox id="device_capture_list">
             </VBox>
-            <VBox>
-              <Layout bgnormal="#565656" width="184" height="20">
-                <Layout bgnormal="#27ae36" x="0" y="0" width="3" height="19"/>
-                <Layout bgnormal="#797979" x="6" y="0" width="85" height="19">
-                  <Label style="generic_control" text="Out 1" fgnormal="#000000" x="7" y="3"/>
-                </Layout>
-                <Button id="output_on_button"
-                  text="ON"
-                  style="generic_control"
-                  fgnormal="#FFFFFF"
-                  bgnormal="#606060"
-                  fgactive="#FFFFFF"
-                  bgactive="#1CA3B3"
-                  fghover="#FFFFFF"
-                  bghover="#808080"
-                  borderwidth="0 0 0 0"
-                  x="95" y="0" width="29" height="19"/>
-                <Button id="output_off_button"
-                  text="OFF"
-                  style="generic_control"
-                  fgnormal="#FFFFFF"
-                  bgnormal="#606060"
-                  fgactive="#FFFFFF"
-                  bgactive="#FC3334"
-                  fghover="#FFFFFF"
-                  bghover="#808080"
-                  borderwidth="0 0 0 0"
-                  x="125" y="0" width="29" height="19"/>
-                <Layout bgnormal="#797979" x="158" y="0" width="26" height="19">
-                  <Label style="generic_control" text="1" fgnormal="#000000" x="7" y="3"/>
-                </Layout>
-              </Layout>
+            <VBox id="device_playback_list">
             </VBox>
           </HBox>
         </ScrolledWindow>
@@ -274,7 +209,7 @@
         x="419" y="18" width="71" height="28"/>
     </Layout>
 
-    <Layout id="midi_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557">
+    <Layout id="midi_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557" visible="false">
       <Layout bgnormal="#000000" x="21" y="20" width="291" height="19">
         <Label style="generic_control" text="MIDI PORTS" fgnormal="#ffffff" font ="Arial Bold 10" x="7" y="3"/>
       </Layout>
@@ -285,7 +220,7 @@
         <Label style="generic_control" text="OUTPUT" fgnormal="#ffffff" font="Arial Bold 10" x="7" y="3"/>
       </Layout>
     </Layout>
-    <Layout id="session_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557">
+    <Layout id="session_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557" visible="false">
       <!--
     
     Igor! Add feel free to add what you need here!

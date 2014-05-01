@@ -27,7 +27,7 @@
     void switch_to_device(const std::string& device_name);
 
 	float get_sample_rate() const;
-	std::string get_device_name() const { return device_combo.get_active_text (); };
+	std::string get_device_name() const { return _device_combo.get_active_text (); };
 
   private:
 // data types:

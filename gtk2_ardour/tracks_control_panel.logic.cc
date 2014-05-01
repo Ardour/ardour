@@ -26,11 +26,12 @@
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
 #include "ardour/rc_configuration.h"
-
+#include "device_connection_conrol.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "utils.h"
 #include "i18n.h"
+#include "pbd/convert.h"
 
 using namespace std;
 using namespace Gtk;
@@ -43,17 +44,17 @@ using namespace Glib;
 void
 TracksControlPanel::init ()
 {
-	ok_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_ok));
-	cancel_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_cancel));
-	apply_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_apply));
+	_ok_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_ok));
+	_cancel_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_cancel));
+	_apply_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_apply));
 
-	audio_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_audio_settings));
-	midi_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_midi_settings));
-	session_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_session_settings));
-	control_panel_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_control_panel));
+	_audio_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_audio_settings));
+	_midi_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_midi_settings));
+	_session_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_session_settings));
+	_control_panel_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_control_panel));
     
-    multi_out_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_multi_out));
-    stereo_out_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_stereo_out));
+    _multi_out_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_multi_out));
+    _stereo_out_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_stereo_out));
     
 	ARDOUR::AudioEngine::instance ()->Running.connect (running_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_running, this), gui_context());
 	ARDOUR::AudioEngine::instance ()->Stopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_stopped, this), gui_context());
@@ -63,17 +64,17 @@ TracksControlPanel::init ()
 	ARDOUR::AudioEngine::instance()->BufferSizeChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::update_current_buffer_size, this, _1), gui_context());
     ARDOUR::AudioEngine::instance()->DeviceListChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::update_device_list, this), gui_context());
 
-	engine_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::engine_changed));
-	device_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::device_changed));
-	sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::sample_rate_changed));
-	buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::buffer_size_changed));
+	_engine_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::engine_changed));
+	_device_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::device_changed));
+	_sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::sample_rate_changed));
+	_buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::buffer_size_changed));
 
 	populate_engine_combo ();
-	midi_settings_layout.hide ();
-	session_settings_layout.hide ();
-	audio_settings_tab_button.set_active(true);
-    multi_out_button.set_active(ARDOUR::Config->get_output_auto_connect() & ARDOUR::AutoConnectPhysical);
-    stereo_out_button.set_active(ARDOUR::Config->get_output_auto_connect() & ARDOUR::AutoConnectMaster);
+	_midi_settings_layout.hide ();
+	_session_settings_layout.hide ();
+	_audio_settings_tab_button.set_active(true);
+    _multi_out_button.set_active(ARDOUR::Config->get_output_auto_connect() & ARDOUR::AutoConnectPhysical);
+    _stereo_out_button.set_active(ARDOUR::Config->get_output_auto_connect() & ARDOUR::AutoConnectMaster);
 }
 
 void
@@ -83,7 +84,7 @@ TracksControlPanel::populate_engine_combo()
 		return;
 	}
 
-	vector<string> strings;
+	std::vector<std::string> strings;
 	vector<const ARDOUR::AudioBackendInfo*> backends = ARDOUR::AudioEngine::instance()->available_backends();
 
 	if (backends.empty()) {
@@ -98,13 +99,13 @@ TracksControlPanel::populate_engine_combo()
 	{
 		// set _ignore_changes flag to ignore changes in combo-box callbacks
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-		set_popdown_strings (engine_combo, strings);
-		engine_combo.set_sensitive (strings.size() > 1);
+		set_popdown_strings (_engine_combo, strings);
+		_engine_combo.set_sensitive (strings.size() > 1);
 	}
 
 	if (!strings.empty() )
 	{
-		engine_combo.set_active_text (strings.front());
+		_engine_combo.set_active_text (strings.front());
 	}
 }
 
@@ -124,12 +125,12 @@ TracksControlPanel::populate_device_combo()
 	{
 		// set _ignore_changes flag to ignore changes in combo-box callbacks
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-		set_popdown_strings (device_combo, available_devices);
-		device_combo.set_sensitive (available_devices.size() > 1);
+		set_popdown_strings (_device_combo, available_devices);
+		_device_combo.set_sensitive (available_devices.size() > 1);
 	}
 
 	if(!available_devices.empty() ) {
-		device_combo.set_active_text (available_devices.front() );
+		_device_combo.set_active_text (available_devices.front() );
 	}
 
 }
@@ -139,7 +140,7 @@ TracksControlPanel::populate_sample_rate_combo()
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
-	std::string device_name = device_combo.get_active_text ();
+	std::string device_name = _device_combo.get_active_text ();
 	std::vector<std::string> s;
 	vector<float> sr;
 
@@ -151,8 +152,8 @@ TracksControlPanel::populate_sample_rate_combo()
 	{
 		// set _ignore_changes flag to ignore changes in combo-box callbacks
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-		set_popdown_strings (sample_rate_combo, s);
-		sample_rate_combo.set_sensitive (s.size() > 1);
+		set_popdown_strings (_sample_rate_combo, s);
+		_sample_rate_combo.set_sensitive (s.size() > 1);
 	}
 
 	if (!s.empty() ) {
@@ -162,7 +163,7 @@ TracksControlPanel::populate_sample_rate_combo()
 		if (std::find(s.begin(), s.end(), active_sr) == s.end()) {
 			active_sr = s.front();
 		} 
-		sample_rate_combo.set_active_text(active_sr);
+		_sample_rate_combo.set_active_text(active_sr);
 	}
 }
 
@@ -171,7 +172,7 @@ TracksControlPanel::populate_buffer_size_combo()
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
-	std::string device_name = device_combo.get_active_text ();
+	std::string device_name = _device_combo.get_active_text ();
 	std::vector<std::string> s;
 	std::vector<uint32_t> bs;
 
@@ -183,8 +184,8 @@ TracksControlPanel::populate_buffer_size_combo()
 	{
 		// set _ignore_changes flag to ignore changes in combo-box callbacks
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-		set_popdown_strings (buffer_size_combo, s);
-		buffer_size_combo.set_sensitive (s.size() > 1);
+		set_popdown_strings (_buffer_size_combo, s);
+		_buffer_size_combo.set_sensitive (s.size() > 1);
 	}
 
 	if (!s.empty() ) {
@@ -192,13 +193,23 @@ TracksControlPanel::populate_buffer_size_combo()
 		if (std::find(s.begin(), s.end(), active_bs) == s.end() ) {
 			active_bs = s.front();
 		} 
-		buffer_size_combo.set_active_text(active_bs);
+		_buffer_size_combo.set_active_text(active_bs);
 	}
 }
 
 void
 TracksControlPanel::on_control_panel(WavesButton*)
 {
+	static uint16_t number = 0;
+	static bool active = false;
+
+	number++;
+	active = !active;
+
+	std::string name = string_compose (_("Input %1"), number);
+	_device_capture_list.pack_start (*manage (new DeviceConnectionControl(name, active, 1, name)), false, false);
+	name = string_compose (_("Output %1"), number);
+	_device_playback_list.pack_start (*manage (new DeviceConnectionControl(name, active, 1)), false, false);
 }
 
 void TracksControlPanel::engine_changed ()
@@ -207,7 +218,7 @@ void TracksControlPanel::engine_changed ()
 		return;
 	}
 
-	string backend_name = engine_combo.get_active_text();
+	string backend_name = _engine_combo.get_active_text();
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->set_backend (backend_name, "ardour", "");
 	if (!backend)
 	{
@@ -226,7 +237,7 @@ void TracksControlPanel::device_changed ()
 		return;
 	}
 
-    string newDevice = device_combo.get_active_text();
+    std::string newDevice = _device_combo.get_active_text();
     if (newDevice != "None") {
         _current_device = newDevice;
     }
@@ -261,13 +272,13 @@ TracksControlPanel::update_current_buffer_size (uint32_t new_buffer_size)
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
     
-    string new_buffer_size_str = bufsize_as_string(new_buffer_size);
+    std::string new_buffer_size_str = bufsize_as_string(new_buffer_size);
     
     /* check if new buffer size value is no the same as already set in combobox */
-    if ( new_buffer_size_str != buffer_size_combo.get_active_text() ) {
+    if ( new_buffer_size_str != _buffer_size_combo.get_active_text() ) {
         vector<string> s;
         vector<uint32_t> bs;
-        string device_name = device_combo.get_active_text ();
+        std::string device_name = _device_combo.get_active_text ();
         bs = backend->available_buffer_sizes(device_name);
         
         for (vector<uint32_t>::const_iterator x = bs.begin(); x != bs.end(); ++x) {
@@ -277,13 +288,13 @@ TracksControlPanel::update_current_buffer_size (uint32_t new_buffer_size)
 		{
 			// set _ignore_changes flag to ignore changes in combo-box callbacks
 			PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-			set_popdown_strings (buffer_size_combo, s);
-			buffer_size_combo.set_sensitive (s.size() > 1);
+			set_popdown_strings (_buffer_size_combo, s);
+			_buffer_size_combo.set_sensitive (s.size() > 1);
 		}
 
         if (!s.empty() ) {
             if (std::find(s.begin(), s.end(), new_buffer_size_str) == s.end() ) {
-				buffer_size_combo.set_active_text (new_buffer_size_str );
+				_buffer_size_combo.set_active_text (new_buffer_size_str );
 			} else {
 				MessageDialog( _("Buffer size changed to the value which is not supported"), PROGRAM_NAME).run();
 			}
@@ -311,10 +322,10 @@ TracksControlPanel::update_device_list ()
 	if (!available_devices.empty()) {
             
 		/* Now get current device name */
-		string current_active_device = device_combo.get_active_text ();
+		std::string current_active_device = _device_combo.get_active_text ();
 
         /* If previous device is available again we should switch to it from "None" */
-        string newDevice;
+        std::string newDevice;
         if (current_active_device == "None" && !_current_device.empty() ){
             newDevice = _current_device;
         } else {
@@ -325,8 +336,8 @@ TracksControlPanel::update_device_list ()
 		{
 			// set _ignore_changes flag to ignore changes in combo-box callbacks
 			PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-			set_popdown_strings (device_combo, available_devices);
-			device_combo.set_sensitive (available_devices.size() > 1);
+			set_popdown_strings (_device_combo, available_devices);
+			_device_combo.set_sensitive (available_devices.size() > 1);
 
 			for (vector<string>::const_iterator i = available_devices.begin(); i != available_devices.end(); ++i) {
 				if (newDevice == *i) {
@@ -348,14 +359,14 @@ TracksControlPanel::update_device_list ()
 
 
 void
-TracksControlPanel::switch_to_device(const string& device_name)
+TracksControlPanel::switch_to_device(const std::string& device_name)
 {
     boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
     
     {
         // set _ignore_changes flag to ignore changes in combo-box callbacks
         PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-        device_combo.set_active_text(device_name);
+        _device_combo.set_active_text(device_name);
     }
     
     if (backend->device_name() != device_name) {
@@ -372,12 +383,12 @@ TracksControlPanel::engine_running ()
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
 
-	buffer_size_combo.set_active_text (bufsize_as_string (backend->buffer_size()));
+	_buffer_size_combo.set_active_text (bufsize_as_string (backend->buffer_size()));
 
-	sample_rate_combo.set_active_text (rate_as_string (backend->sample_rate()));
+	_sample_rate_combo.set_active_text (rate_as_string (backend->sample_rate()));
 
-	buffer_size_combo.set_sensitive (true);
-	sample_rate_combo.set_sensitive (true);
+	_buffer_size_combo.set_sensitive (true);
+	_sample_rate_combo.set_sensitive (true);
 }
 
 
@@ -390,36 +401,36 @@ TracksControlPanel::engine_stopped ()
 void
 TracksControlPanel::on_audio_settings (WavesButton*)
 {
-	midi_settings_layout.hide ();
-	midi_settings_tab_button.set_active(false);
-	session_settings_layout.hide ();
-	session_settings_tab_button.set_active(false);
-	audio_settings_layout.show ();
-	audio_settings_tab_button.set_active(true);
+	_midi_settings_layout.hide ();
+	_midi_settings_tab_button.set_active(false);
+	_session_settings_layout.hide ();
+	_session_settings_tab_button.set_active(false);
+	_audio_settings_layout.show ();
+	_audio_settings_tab_button.set_active(true);
 }
 
 
 void
 TracksControlPanel::on_midi_settings (WavesButton*)
 {
-	audio_settings_layout.hide ();
-	audio_settings_tab_button.set_active(false);
-	session_settings_layout.hide ();
-	session_settings_tab_button.set_active(false);
-	midi_settings_layout.show ();
-	midi_settings_tab_button.set_active(true);
+	_audio_settings_layout.hide ();
+	_audio_settings_tab_button.set_active(false);
+	_session_settings_layout.hide ();
+	_session_settings_tab_button.set_active(false);
+	_midi_settings_layout.show ();
+	_midi_settings_tab_button.set_active(true);
 }
 
 
 void
 TracksControlPanel::on_session_settings (WavesButton*)
 {
-	audio_settings_layout.hide ();
-	audio_settings_tab_button.set_active(false);
-	midi_settings_layout.hide ();
-	midi_settings_tab_button.set_active(false);
-	session_settings_layout.show ();
-	session_settings_tab_button.set_active(true);
+	_audio_settings_layout.hide ();
+	_audio_settings_tab_button.set_active(false);
+	_midi_settings_layout.hide ();
+	_midi_settings_tab_button.set_active(false);
+	_session_settings_layout.show ();
+	_session_settings_tab_button.set_active(true);
 }
 
 
@@ -431,22 +442,22 @@ TracksControlPanel::on_multi_out (WavesButton*)
     }
     
     ARDOUR::Config->set_output_auto_connect(ARDOUR::AutoConnectPhysical);
-    stereo_out_button.set_active(false);
-    multi_out_button.set_active(true);
+    _stereo_out_button.set_active(false);
+    _multi_out_button.set_active(true);
 }
 
 
 void
 TracksControlPanel::on_stereo_out (WavesButton*)
 {
+
     if (ARDOUR::Config->get_output_auto_connect() & ARDOUR::AutoConnectMaster) {
         return;
     }
     
     ARDOUR::Config->set_output_auto_connect(ARDOUR::AutoConnectMaster);
-    multi_out_button.set_active(false);
-    stereo_out_button.set_active(true);
-
+    _multi_out_button.set_active(false);
+    _stereo_out_button.set_active(true);
 }
 
 void
@@ -489,11 +500,11 @@ TracksControlPanel::set_desired_sample_rate (uint32_t sr)
  {
 	_desired_sample_rate = sr;
 	std::string active_sr = rate_as_string(_desired_sample_rate);
-	std::string prev_selected = sample_rate_combo.get_active_text();
-	sample_rate_combo.set_active_text(active_sr);
-	active_sr = sample_rate_combo.get_active_text();
+	std::string prev_selected = _sample_rate_combo.get_active_text();
+	_sample_rate_combo.set_active_text(active_sr);
+	active_sr = _sample_rate_combo.get_active_text();
 	if (active_sr.empty()) {
-		sample_rate_combo.set_active_text(prev_selected);
+		_sample_rate_combo.set_active_text(prev_selected);
 	}
  }
 
@@ -542,7 +553,7 @@ TracksControlPanel::set_state (const XMLNode& root)
 float
 TracksControlPanel::get_sample_rate () const
 {
-	float r = atof (sample_rate_combo.get_active_text ());
+	float r = atof (_sample_rate_combo.get_active_text ());
 	/* the string may have been translated with an abbreviation for
 	* thousands, so use a crude heuristic to fix this.
 	*/
@@ -554,7 +565,7 @@ TracksControlPanel::get_sample_rate () const
 
 uint32_t TracksControlPanel::get_buffer_size() const
 {
-	string bs_text = buffer_size_combo.get_active_text ();
+	string bs_text = _buffer_size_combo.get_active_text ();
 	uint32_t samples = atoi (bs_text); /* will ignore trailing text */
 	return samples;
 }
@@ -567,7 +578,7 @@ TracksControlPanel::show_buffer_duration ()
 	 char buf[256];
 	 snprintf (buf, sizeof (buf), _("INPUT LATENCY: %.1f MS      OUTPUT LATENCY: %.1f MS      TOTAL LATENCY: %.1f MS"), 
 			   latency, latency, 2*latency);
-	 latency_label.set_text (buf);
+	 _latency_label.set_text (buf);
 }
 
 int

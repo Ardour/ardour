@@ -23,6 +23,7 @@
 #include <gtkmm.h>
 
 #include "ardour/session_handle.h"
+#include "waves_ui.h"
 #include "canvas/xml_ui.h"
 
 using namespace ArdourCanvas::XMLUI;
@@ -57,21 +58,15 @@ class WavesDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr
   protected:
 
 	  bool read_layout (std::string file_name);
-
-	  Gtk::Layout& get_layout (char* id);
-	  Gtk::Label& get_label (char* id);
-	  Gtk::ComboBoxText& get_combo_box_text (char* id);
-	  WavesButton& get_waves_button (char* id);
+	  WavesUI::WidgetMap& named_children() { return _children; }
 
   private:
 
-	WM::ProxyTemporary* proxy;
+	WM::ProxyTemporary* _proxy;
 	bool _splash_pushed;
 	
-	std::map<std::string, Gtk::Widget*> _children;
+	WavesUI::WidgetMap _children;
 	
-	Gtk::Widget* get_widget(char *id);
-
 	static sigc::signal<void> CloseAllDialogs;
 };
 

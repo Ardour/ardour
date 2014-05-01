@@ -22,7 +22,6 @@
 #include <sigc++/bind.h>
 #include <boost/algorithm/string.hpp>
 #include "pbd/xml++.h"
-#include "waves_ui.h"
 
 #include <gtkmm2ext/doi.h>
 
@@ -38,7 +37,6 @@
 #include "utils.h"
 #include "window_manager.h"
 
-using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
@@ -46,10 +44,10 @@ using namespace ARDOUR;
 
 WavesDialog::WavesDialog (std::string layout_script_file, bool modal, bool use_seperator)
 	: Dialog ("", modal, use_seperator)
-	, proxy (0)
+	, _proxy (0)
     , _splash_pushed (false)
 {
-	list<Glib::RefPtr<Gdk::Pixbuf> > window_icons;
+	std::list<Glib::RefPtr<Gdk::Pixbuf> > window_icons;
 	Glib::RefPtr<Gdk::Pixbuf> icon;
 	
 	if ((icon = ::get_icon ("ardour_icon_16px")) != 0) {
@@ -80,8 +78,8 @@ WavesDialog::WavesDialog (std::string layout_script_file, bool modal, bool use_s
 
 	ARDOUR_UI::CloseAllDialogs.connect (sigc::bind (sigc::mem_fun (*this, &WavesDialog::response), RESPONSE_CANCEL));
 
-	proxy = new WM::ProxyTemporary (get_title(), this);
-	WM::Manager::instance().register_window (proxy);
+	_proxy = new WM::ProxyTemporary (get_title(), this);
+	WM::Manager::instance().register_window (_proxy);
 
 	get_vbox()->set_spacing (0);
 	get_vbox()->set_border_width (0);
@@ -99,7 +97,7 @@ WavesDialog::~WavesDialog ()
                     spl->pop_front();
             }
     }
-	WM::Manager::instance().remove (proxy);
+	WM::Manager::instance().remove (_proxy);
 }
 
 bool
@@ -157,16 +155,11 @@ WavesDialog::on_delete_event (GdkEventAny*)
 bool
 WavesDialog::read_layout (std::string file_name)
 {
-	std::string layout_file; 
-	Searchpath spath (ardour_data_search_path());
-	spath.add_subdirectory_to_paths("ui");
-
-	if (!find_file_in_search_path (spath, file_name, layout_file)) {
+	const XMLTree* layout = WavesUI::load_layout(file_name);
+	if (layout == NULL) {
 		return false;
 	}
-
-	XMLTree layout(layout_file, false);
-	XMLNode* root  = layout.root();
+	XMLNode* root  = layout->root();
 	if ((root == NULL) || strcasecmp(root->name().c_str(), "dialog")) {
 		return false;
 	}
@@ -179,62 +172,5 @@ WavesDialog::read_layout (std::string file_name)
 	set_border_width(0);
 
 	WavesUI::create_ui(layout, *get_vbox(), _children);
-
 	return true;
-}
-
-
-Gtk::Widget*
-WavesDialog::get_widget(char *id)
-{
-	Gtk::Widget *child = NULL;
-	std::map<std::string, Gtk::Widget*>::iterator it = _children.find(id);
-	if(it != _children.end())
-		child = it->second;
-
-	return child;
-}
-
-
-Gtk::Layout&
-WavesDialog::get_layout (char* id)
-{
-	Gtk::Layout* child = dynamic_cast<Gtk::Layout*> (get_widget(id));
-	if (child == NULL ) {
-		throw exception();
-	}
-	return *child;
-}
-
-
-Gtk::Label&
-WavesDialog::get_label (char* id)
-{
-	Gtk::Label* child = dynamic_cast<Gtk::Label*> (get_widget(id));
-	if (child == NULL ) {
-		throw exception();
-	}
-	return *child;
-}
-
-
-Gtk::ComboBoxText&
-WavesDialog::get_combo_box_text (char* id)
-{
-	Gtk::ComboBoxText* child = dynamic_cast<Gtk::ComboBoxText*> (get_widget(id));
-	if (child == NULL ) {
-		throw exception();
-	}
-	return *child;
-}
-
-
-WavesButton&
-WavesDialog::get_waves_button (char* id)
-{
-	WavesButton* child = dynamic_cast<WavesButton*> (get_widget(id));
-	if (child == NULL ) {
-		throw exception();
-	}
-	return *child;
 }

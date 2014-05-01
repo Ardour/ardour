@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layout bgnormal="#565656" width="184" height="20">
+  <style name="generic_control" font ="Arial 10"/>
+  <Layout bgnormal="#862579" x="0" y="0" width="3" height="20"/>
+  <Layout bgnormal="#797979" x="6" y="0" width="85" height="19">
+    <Label style="generic_control"
+           id="playback_name_label"
+           text="-"
+           fgnormal="#000000"
+           x="7" y="3"/>
+  </Layout>
+  <Button id="playback_on_button"
+    text="ON"
+    style="generic_control"
+    fgnormal="#FFFFFF"
+    bgnormal="#606060"
+    fgactive="#FFFFFF"
+    bgactive="#1CA3B3"
+    fghover="#FFFFFF"
+    bghover="#808080"
+    borderwidth="0 0 0 0"
+    x="95" y="0" width="29" height="19"/>
+  <Button id="playback_off_button"
+    text="OFF"
+    style="generic_control"
+    fgnormal="#FFFFFF"
+    bgnormal="#606060"
+    fgactive="#FFFFFF"
+    bgactive="#FC3334"
+    fghover="#FFFFFF"
+    bghover="#808080"
+    borderwidth="0 0 0 0"
+    x="125" y="0" width="29" height="19"/>
+  <Layout bgnormal="#797979" x="158" y="0" width="26" height="19">
+    <Label style="generic_control"
+           id="playback_number_label"
+           text="-"
+           fgnormal="#000000"
+           x="7"
+           y="3"/>
+  </Layout>
+</Layout>
