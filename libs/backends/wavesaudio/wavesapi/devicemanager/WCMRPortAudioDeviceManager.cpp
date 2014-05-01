@@ -1085,7 +1085,7 @@ void WCMRPortAudioDevice::resetDevice (bool callerIsWaiting /*=false*/ )
 }
 
 
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
 
 long WCMRPortAudioDevice::StaticASIOMessageHook (void *pRefCon, long selector, long value, void* message, double* opt)
 {
@@ -1302,7 +1302,7 @@ WTErr WCMRPortAudioDevice::ShowConfigPanel (void *pParam)
 	
 	if (Active())
 	{
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
 		if(Pa_GetHostApiInfo(Pa_GetDeviceInfo(m_DeviceID)->hostApi)->type == paASIO)
 		{
 			// stop and deactivate the device
