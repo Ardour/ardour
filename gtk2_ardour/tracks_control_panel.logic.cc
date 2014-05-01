@@ -207,9 +207,9 @@ TracksControlPanel::on_control_panel(WavesButton*)
 	active = !active;
 
 	std::string name = string_compose (_("Input %1"), number);
-	_device_capture_list.pack_start (*manage (new DeviceConnectionControl(name, active, 1, name)), false, false);
+	_device_capture_list.pack_start (*manage (new DeviceConnectionControl(name, active, number, name)), false, false);
 	name = string_compose (_("Output %1"), number);
-	_device_playback_list.pack_start (*manage (new DeviceConnectionControl(name, active, 1)), false, false);
+	_device_playback_list.pack_start (*manage (new DeviceConnectionControl(name, active, number)), false, false);
 }
 
 void TracksControlPanel::engine_changed ()

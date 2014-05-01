@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Layout bgnormal="#565656" width="184" height="20">
   <style name="generic_control" font ="Arial 10"/>
-  <Layout bgnormal="#862579" x="0" y="0" width="3" height="20"/>
+  <Layout bgnormal="#27ae36" x="0" y="0" width="3" height="20"/>
   <Layout bgnormal="#797979" x="6" y="0" width="85" height="19">
     <Label style="generic_control"
            id="playback_name_label"
