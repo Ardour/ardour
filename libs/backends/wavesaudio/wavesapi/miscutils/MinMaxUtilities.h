@@ -30,7 +30,7 @@ template<class T> inline T WUMinMax(const T &Smallest, const T &Biggest, const T
 	}
  */	
 // Absolute value
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
 	#include <math.h>
 #define __abs(x)	abs(x) 
 #define __labs(x)	labs(x)
@@ -45,7 +45,7 @@ template<class T> inline T WUMinMax(const T &Smallest, const T &Biggest, const T
 #define __labs(x)	std::labs(x)
 #define __fabs(x)	std::fabs(x)
 #endif
-	#ifdef __MACOS__
+	#ifdef __APPLE__
         #ifdef __GNUC__
             #include <iostream> // why don't know makes it work need to check
             #include <cmath>
@@ -57,7 +57,7 @@ template<class T> inline T WUMinMax(const T &Smallest, const T &Biggest, const T
 
 // log2: on Windows there's no proper definition for log2, whereas on other platform there is.
 	#ifndef WUlog2
-    #if defined(_WINDOWS)
+    #if defined(PLATFORM_WINDOWS)
         #define WUlog2(x)  (kdOneOverLog2 * log10((x))) 
     #else    
         #define WUlog2(x) log2(x)

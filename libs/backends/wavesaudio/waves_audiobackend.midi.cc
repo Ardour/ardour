@@ -25,11 +25,11 @@
 
 using namespace ARDOUR;
 
-#ifdef __MACOS__
+#ifdef __APPLE__
 
 const std::vector<std::string> WavesAudioBackend::__available_midi_options = boost::assign::list_of ("None") ("CoreMIDI");
 
-#elif _WINDOWS
+#elif PLATFORM_WINDOWS
 
 const std::vector<std::string> WavesAudioBackend::__available_midi_options = boost::assign::list_of ("None") ("Multimedia Extensions");
 

@@ -5,7 +5,7 @@
 #include "WavesPublicAPI_Defines.h"
 */
 
-#ifdef __MACOS__
+#ifdef __APPLE__
 
     #ifdef __GNUC__
         #define WPAPI_DllExport __attribute__ ((visibility("default")))
@@ -23,7 +23,7 @@
 #endif
 
 
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
     #define WPAPI_DllExport __declspec(dllexport)
 	#define __WPAPI_CDECL __cdecl
 	#define __WPAPI_STDCALL __stdcall

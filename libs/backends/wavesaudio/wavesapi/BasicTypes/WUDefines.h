@@ -10,7 +10,7 @@
 // When changing wvNS value also do the same change in Objective_C_MangledNames.h
 // because CWSAUCocoaViewFactoryAsString is hard coded there
 #define wvNS wvWavesV9_3 
-#ifdef __MACOS__
+#ifdef __APPLE__
     #define ObjCNameSpace(__className__) wvWavesV9_3_ ## __className__
 #endif
 
@@ -38,7 +38,7 @@
 
 #define WUNUSED_PARAM(__SOME_UNUSED_PARAM__) ((void)__SOME_UNUSED_PARAM__)
 
-#ifdef __MACOS__
+#ifdef __APPLE__
     const char* const  OS_NAME = "Mac";
 
     #define WIN_ONLY(__Something_only_for_windows__)
@@ -81,7 +81,7 @@
 #endif
 
 
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
     const char* const  OS_NAME = "Win";
 
     #define WIN_ONLY(__Something_only_for_windows__) __Something_only_for_windows__
