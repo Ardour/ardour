@@ -594,7 +594,7 @@ AudioEngine::set_backend (const std::string& name, const std::string& arg1, cons
 		if (b->second->instantiate (arg1, arg2)) {
 			throw failed_constructor ();
 		}
-
+		
 		_backend = b->second->factory (*this);
 
 	} catch (exception& e) {
@@ -1016,17 +1016,15 @@ AudioEngine::halted_callback (const char* why)
 bool
 AudioEngine::setup_required () const
 {
-	/* If there is only a single backend and it claims to be configured
-	 * already there is no setup to be done.
-	 *
-	 * Primarily for a case where there is only a JACK backend and
-	 * JACK is already running.
-	 */
-	 
-	if (_backends.size() == 1 && _backends.begin()->second->already_configured()) {
-		return false;
+	if (_backend) {
+		if (_backend->info().already_configured())
+			return false;
+	} else {
+		if (_backends.size() == 1 && _backends.begin()->second->already_configured()) {
+			return false;
+		}
 	}
-
+	
 	return true;
 }
 
