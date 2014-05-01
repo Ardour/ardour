@@ -128,9 +128,9 @@ WavesAudioBackend::~WavesAudioBackend ()
 std::string
 WavesAudioBackend::name () const
 {
-#ifdef __MACOS__
+#ifdef __APPLE__
     return std::string ("CoreAudio");
-#elif _WINDOWS
+#elif PLATFORM_WINDOWS
     return std::string ("ASIO");
 #endif
 }
@@ -1062,13 +1062,13 @@ WavesAudioBackend::sample_time ()
 uint64_t
 WavesAudioBackend::__get_time_nanos ()
 {
-#ifdef __MACOS__
+#ifdef __APPLE__
     // here we exploit the time counting API which is used by the WCMRCoreAudioDeviceManager. However,
     // the API should be a part of WCMRCoreAudioDeviceManager to give a chance of being tied to the
     // audio device transport timeß.
     return AudioConvertHostTimeToNanos (AudioGetCurrentHostTime ());
     
-#elif _WINDOWS
+#elif PLATFORM_WINDOWS
 	LARGE_INTEGER Count;
     QueryPerformanceCounter (&Count);
     return uint64_t ((Count.QuadPart * 1000000000L / __performance_counter_frequency));
@@ -1196,9 +1196,9 @@ size_t
 WavesAudioBackend::__thread_stack_size ()
 {
     // Align stacksize to PTHREAD_STACK_MIN.
-#if defined (__MACOS__)
+#if defined (__APPLE__)
     return (((thread_stack_size () - 1) / PTHREAD_STACK_MIN) + 1) * PTHREAD_STACK_MIN;
-#elif defined (_WINDOWS)
+#elif defined (PLATFORM_WINDOWS)
     return thread_stack_size ();
 #endif
 }
@@ -1215,7 +1215,7 @@ WavesAudioBackend::process_thread_count ()
 void
 WavesAudioBackend::_read_audio_data_from_device (const float* input_buffer, pframes_t nframes)
 {
-#if defined(_WINDOWS)
+#if defined(PLATFORM_WINDOWS)
     const float **buffer = (const float**)input_buffer;
     size_t copied_bytes = nframes*sizeof(float*);
 
@@ -1290,7 +1290,7 @@ WavesAudioBackend::__waves_backend_factory (AudioEngine& e)
 }
 
 
-#if defined(_WINDOWS)
+#if defined(PLATFORM_WINDOWS)
 
 uint64_t WavesAudioBackend::__performance_counter_frequency;
 
@@ -1301,7 +1301,7 @@ WavesAudioBackend::__instantiate (const std::string& arg1, const std::string& ar
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::__instantiate ():" << "[" << arg1 << "], [" << arg2 << "]" << std::endl;
     __instantiated_name = arg1;
-#if defined(_WINDOWS)
+#if defined(PLATFORM_WINDOWS)
 
 	LARGE_INTEGER Frequency;
 	QueryPerformanceFrequency(&Frequency);
@@ -1364,9 +1364,9 @@ WavesAudioBackend::can_monitor_input () const
 std::string WavesAudioBackend::__instantiated_name;
 
 AudioBackendInfo WavesAudioBackend::__backend_info = {
-#ifdef __MACOS__
+#ifdef __APPLE__
     "CoreAudio",
-#elif _WINDOWS
+#elif PLATFORM_WINDOWS
     "ASIO",
 #endif
     __instantiate,

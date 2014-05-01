@@ -20,12 +20,12 @@
 #include "waves_midi_device_manager.h"
 #include "waves_audiobackend.h"
 
-#ifdef __WINDOWS__
+#ifdef PLATFORM_WINDOWS
 
 #include "windows.h"
 #include "mmsystem.h"
 
-#elif __MACOS__
+#else if defined(__APPLE__)
 
 #include <CoreMIDI/MIDIServices.h>
 

@@ -10,7 +10,7 @@
 #ifndef __WCMRNativeAudio_h_
 	#define __WCMRNativeAudio_h_
 
-#if defined(_WINDOWS)
+#if defined(PLATFORM_WINDOWS)
 #include "windows.h"
 #endif
 #include "pthread.h"
@@ -54,7 +54,7 @@ private:
 
 	static void* __SilenceThread(void *This);
 	void _SilenceThread();
-#if defined(_WINDOWS)
+#if defined(PLATFORM_WINDOWS)
 	void _usleep(uint64_t usec);
 #else
 	inline void _usleep(uint64_t usec) { ::usleep(usec); }
@@ -65,7 +65,7 @@ private:
     float *_m_inputBuffer;
     float *_m_outputBuffer;
     static uint64_t __get_time_nanos ();
-#if defined (_WINDOWS)
+#if defined (PLATFORM_WINDOWS)
 	HANDLE _waitableTimerForUsleep;
 #endif
 };

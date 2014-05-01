@@ -16,10 +16,10 @@ class DllExport UMicroseconds
 {
 public:
 
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
  	typedef int64_t TimeKeeper;
 #endif
-#ifdef __MACOS__
+#ifdef __APPLE__
  	typedef uint64_t TimeKeeper;
 #endif
 #ifdef __linux__
@@ -52,7 +52,7 @@ public:
 	double MilliSeconds() const {return static_cast<double>(theTime) / double(1000);}
 	double MicroSeconds() const {return static_cast<double>(theTime);}
 
-#ifdef __MACOS__
+#ifdef __APPLE__
 	uint32_t hi();
 	uint32_t lo();
 #endif

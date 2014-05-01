@@ -1,7 +1,7 @@
 #ifndef __IncludeWindows_h__
 #define __IncludeWindows_h__
 
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
 
 /* Copy to include
 #include "IncludeWindows.h"
@@ -26,6 +26,6 @@
 #include <WinSock2.h>
 #include <Windows.h>
 #include <objbase.h>
-#endif // #if _WINDOWS 
+#endif // #if PLATFORM_WINDOWS 
 #endif // #ifndef __IncludeWindows_h__
 

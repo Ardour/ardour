@@ -49,10 +49,10 @@ public:
 
 	virtual WTErr ResetDevice();
 
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
 	static long StaticASIOMessageHook (void *pRefCon, long selector, long value, void* message, double* opt);
 	long ASIOMessageHook (long selector, long value, void* message, double* opt);
-#endif //_WINDOWS
+#endif //PLATFORM_WINDOWS
 	
 protected:
 	static DWORD WINAPI __DoIdle__(LPVOID lpThreadParameter);

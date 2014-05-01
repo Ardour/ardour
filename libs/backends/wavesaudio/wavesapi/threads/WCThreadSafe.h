@@ -23,7 +23,7 @@
 
 #include "BasicTypes/WUDefines.h"
 
-#if defined(__linux__) || defined(__MACOS__)
+#if defined(__linux__) || defined(__APPLE__)
 	#define XPLATFORMOSSERVICES_UNIX  1
 #endif
 
@@ -46,12 +46,12 @@ namespace wvThread
 {
     //#include "BasicTypes/WavesAPISetAligment.h"
     //Packing affects the layout of classes, and commonly, if packing changes across header files, there can be problems. 
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
 #pragma pack(push)
 #pragma pack(8)
 #endif
 
-#ifdef __MACOS__
+#ifdef __APPLE__
 #ifdef __GNUC__
 #pragma pack(push, 8)
 #endif
@@ -86,7 +86,7 @@ namespace wvThread
         bool is_null() const { return m_nMicroseconds==0; }
 	};
 	//--------------------------------------------------------
-#ifdef __MACOS__
+#ifdef __APPLE__
 	bool FindNetInterfaceByIPAddress(const char *sIP, char *sInterface);
 #endif // MACOS
 	//--------------------------------------------------------
@@ -356,11 +356,11 @@ namespace wvThread
     };
 
     //#include "BasicTypes/WavesAPIResetAligment.h"
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
 #pragma pack(pop)
 #endif
 
-#ifdef __MACOS__
+#ifdef __APPLE__
 #ifdef __GNUC__
 #pragma pack(pop)
 #endif

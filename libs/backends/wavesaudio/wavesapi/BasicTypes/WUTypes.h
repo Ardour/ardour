@@ -121,10 +121,10 @@ enum WESystemFolders{
 //********************************************************************************
 //    Process
 
-#ifdef __MACOS__
+#ifdef __APPLE__
 	typedef uint32_t WTProcessID; // actually pid_t which is __darwin_pid_t which is __uint32_t
 #endif
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
 	typedef int		WTProcessID;
 #endif
 #ifdef __linux__
@@ -147,14 +147,14 @@ enum WEManagerInitOptions
     eInit_UM,
     eInit_BKG
 };
-#ifdef __MACOS__
+#ifdef __APPLE__
     #if __LP64__ || NS_BUILD_32_LIKE_64	// in 64bit (or when NS_BUILD_32_LIKE_64 is specified) we decline Carbon implementation.
         const WEManagerInitOptions eDefaultRuntime = eMacOS_Cocoa_Runtime;
     #else
         const WEManagerInitOptions eDefaultRuntime = eMacOS_Carbon_Runtime;
     #endif
 #endif
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
     const WEManagerInitOptions eDefaultRuntime = eWindowsOS_GoodOld_Runtime;
 #endif
 #ifdef __linux__
@@ -196,11 +196,11 @@ typedef struct WTResourceType*					WTResRef;
 const WTResContainerRef kIllegalContainerRef = 0;
 const WTResRef kIllegalResourceRef = 0;
 
-#ifdef __MACOS__
+#ifdef __APPLE__
 	typedef struct WTNativeResourceType*	WTNativeResourceRef;	// for use when need to have access to the native resource without going though resource manager caching anf conversion.
     const WTNativeResourceRef		kIllegalNativeResourceRef = 0;
 #endif
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
 	typedef struct WTNativeResourceType*	WTNativeResourceRef; //HGLOBAL  // for use when need to have access to the native resource without going though resource manager caching anf conversion.
     const WTNativeResourceRef		kIllegalNativeResourceRef = 0;
 #endif

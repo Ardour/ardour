@@ -34,7 +34,7 @@
 
 #include "waves_midi_device_manager.h"
 
-#ifdef __MACOS__
+#ifdef __APPLE__
 
 #include <WCMRCoreAudioDeviceManager.h>
 
@@ -44,7 +44,7 @@ class ArdourAudioDeviceManager : public WCMRCoreAudioDeviceManager
     ArdourAudioDeviceManager (WCMRAudioDeviceManagerClient *client) : WCMRCoreAudioDeviceManager (client, eAllDevices) {};
 };
 
-#elif defined (_WINDOWS)
+#elif defined (PLATFORM_WINDOWS)
 
 #include <WCMRPortAudioDeviceManager.h>
 
@@ -364,7 +364,7 @@ class WavesMidiPort;
     std::vector<WavesDataPort*> _ports;
     static AudioBackendInfo __backend_info;
 
-#if defined (_WINDOWS)
+#if defined (PLATFORM_WINDOWS)
 	static uint64_t __performance_counter_frequency;
 #endif
 	uint64_t _cycle_start_time_nanos;

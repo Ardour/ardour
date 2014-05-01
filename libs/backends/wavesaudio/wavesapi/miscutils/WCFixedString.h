@@ -12,7 +12,7 @@
 #include <cstring>
 #include <cstdio>
 
-#ifdef __MACOS__
+#ifdef __APPLE__
 #include <strings.h>
 #endif
 
@@ -28,7 +28,7 @@
 #ifdef __POSIX__
 const char* const kStrNewLine = "\n";
 #endif
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
 const char* const kStrNewLine = "\r\n";
 #endif
 
@@ -256,10 +256,10 @@ public:
 		const unsigned int tempBufSize = 32;
 		char buf[tempBufSize];
 
-	#ifdef _WINDOWS
+	#ifdef PLATFORM_WINDOWS
 		_snprintf_s(buf, tempBufSize, tempBufSize - 1, "%.*f", in_precision, in_double);
 	#endif
-	#ifdef __MACOS__
+	#ifdef __APPLE__
 		std::snprintf(buf, tempBufSize, "%.*f", in_precision, in_double);
 	#endif		
 	#ifdef __linux__	
@@ -356,7 +356,7 @@ public:
 	// warning which we do not know how to solve yet. The function DummyFunctionsForWarningTest
     // in file WCFixedStringStream.cpp calls all combinations of operator<<(unsigned something)
     // And should produce no warnings - (except the C4267 on windows).
-#if defined(__MACOS__) // both 32 & 64 bit
+#if defined(__APPLE__) // both 32 & 64 bit
 	WCFixedStringBase& operator<<(const size_t in_uint) {
 		return operator<<(static_cast<unsigned long long>(in_uint));
 	}
@@ -369,13 +369,13 @@ public:
 //		return operator<<(static_cast<const uint64_t>(in_uint));
 //		}
 //		
-#if defined(__MACOS__) || defined(_WINDOWS) || defined(__linux__) // both 32 & 64 bit
+#if defined(__APPLE__) || defined(PLATFORM_WINDOWS) || defined(__linux__) // both 32 & 64 bit
 	WCFixedStringBase& operator<<(const unsigned int in_uint) {
 		return operator<<(static_cast<uint64_t>(in_uint));
 	}
 #endif   
 //		
-#if defined(_WINDOWS) || defined(__linux__) // both 32 & 64 bit
+#if defined(PLATFORM_WINDOWS) || defined(__linux__) // both 32 & 64 bit
 	WCFixedStringBase& operator<<(const unsigned long in_uint) {
 		return operator<<(static_cast<uint64_t>(in_uint));
 	}
@@ -385,7 +385,7 @@ public:
 	{
 		if (in_int < 0)
 			operator<<('-');
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
 //        uintmax_t unsigned_in_num = _abs64(in_int);
 		uintmax_t unsigned_in_num = in_int < 0 ? static_cast<uintmax_t>(-in_int) : static_cast<uintmax_t>(in_int);
 #else
@@ -464,10 +464,10 @@ public:
 
 		if (0 != in_to_compare)
 		{
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
 			retVal = _stricmp(c_str(), in_to_compare);
 #endif
-#if defined(__linux__) || defined(__MACOS__)
+#if defined(__linux__) || defined(__APPLE__)
 			retVal =  strcasecmp(c_str(), in_to_compare);
 #endif
 		}

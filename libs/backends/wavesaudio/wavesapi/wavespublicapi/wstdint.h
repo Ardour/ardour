@@ -6,7 +6,7 @@
 */
 
 
-#ifdef __MACOS__
+#ifdef __APPLE__
 	#include <stddef.h>
 	#include </usr/include/stdint.h>  // Mac has this file in /usr/includez
 #endif
@@ -19,7 +19,7 @@
 	#include </usr/include/stdint.h>
 #endif
 
-#if (defined (_WINDOWS) || defined(WIN32) || defined(WIN64))
+#if (defined (PLATFORM_WINDOWS) || defined(WIN32) || defined(WIN64))
 #if (_MSC_VER > 1600) || defined(__MINGW64__)
     // Taken from MSDN official page:
     // In Visual Studio 2010 _MSC_VER  is defined as 1600, In Visual Studio 2012 _MSC_VER  is defined as 1700.
@@ -335,6 +335,6 @@ typedef uint32_t uintmax_t;
 
 #endif /* (_MSC_VER < 1400) */
 
-#endif /* #ifdef _WINDOWS */
+#endif /* #ifdef PLATFORM_WINDOWS */
 
 #endif /* __stdint_h__ */
