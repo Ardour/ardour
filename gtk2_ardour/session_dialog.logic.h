@@ -60,15 +60,15 @@
 	};
 
 // attributes & control data
-	bool new_only;
+	bool _new_only;
     std::string _provided_session_name;
     std::string _provided_session_path;
-	std::string recent_session_full_name[MAX_RECENT_SESSION_COUNTS];
-	std::string selected_session_full_name;
+	std::string _recent_session_full_name[MAX_RECENT_SESSION_COUNTS];
+	std::string _selected_session_full_name;
 	bool _existing_session_chooser_used; ///< set to true when the existing session chooser has been used
-	Gtk::Label info_scroller_label;
-    std::string::size_type info_scroller_count;
-	sigc::connection info_scroller_connection;
+	Gtk::Label _info_scroller_label;
+    std::string::size_type _info_scroller_count;
+	sigc::connection _info_scroller_connection;
 
 // methods
 	virtual void init();

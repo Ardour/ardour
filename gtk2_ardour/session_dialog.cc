@@ -66,28 +66,28 @@ SessionDialog::SessionDialog (WM::Proxy<TracksControlPanel>& system_configuratio
 							  const std::string& template_name,
 							  bool cancel_not_quit)
 	: WavesDialog (_("session_dialog.xml"), true, false)
-	, quit_button (get_waves_button ("quit_button"))
-	, system_configuration_button (get_waves_button ("system_configuration_button")) 
-	, new_session_button (get_waves_button ("new_session_button"))
-	, open_selected_button (get_waves_button ("open_selected_button"))
-	, open_saved_session_button (get_waves_button ("open_saved_session_button"))
-	, session_details_label(get_label("session_details_label"))
-	, new_only (require_new)
+	, _quit_button (named_children ().get_waves_button ("quit_button"))
+	, _system_configuration_button (named_children ().get_waves_button ("system_configuration_button")) 
+	, _new_session_button (named_children ().get_waves_button ("new_session_button"))
+	, _open_selected_button (named_children ().get_waves_button ("open_selected_button"))
+	, _open_saved_session_button (named_children ().get_waves_button ("open_saved_session_button"))
+	, _session_details_label(named_children ().get_label("session_details_label"))
+	, _new_only (require_new)
 	, _provided_session_name (session_name)
 	, _provided_session_path 	(session_path)
 	, _existing_session_chooser_used (false)
 	, _system_configuration_dialog(system_configuration_dialog)
 {
-	recent_session_button[0] = &get_waves_button ("recent_session_button_0");
-	recent_session_button[1] = &get_waves_button ("recent_session_button_1");
-	recent_session_button[2] = &get_waves_button ("recent_session_button_2");
-	recent_session_button[3] = &get_waves_button ("recent_session_button_3");
-	recent_session_button[4] = &get_waves_button ("recent_session_button_4");
-	recent_session_button[5] = &get_waves_button ("recent_session_button_5");
-	recent_session_button[6] = &get_waves_button ("recent_session_button_6");
-	recent_session_button[7] = &get_waves_button ("recent_session_button_7");
-	recent_session_button[8] = &get_waves_button ("recent_session_button_8");
-	recent_session_button[9] = &get_waves_button ("recent_session_button_9");
+	_recent_session_button[0] = &named_children ().get_waves_button ("recent_session_button_0");
+	_recent_session_button[1] = &named_children ().get_waves_button ("recent_session_button_1");
+	_recent_session_button[2] = &named_children ().get_waves_button ("recent_session_button_2");
+	_recent_session_button[3] = &named_children ().get_waves_button ("recent_session_button_3");
+	_recent_session_button[4] = &named_children ().get_waves_button ("recent_session_button_4");
+	_recent_session_button[5] = &named_children ().get_waves_button ("recent_session_button_5");
+	_recent_session_button[6] = &named_children ().get_waves_button ("recent_session_button_6");
+	_recent_session_button[7] = &named_children ().get_waves_button ("recent_session_button_7");
+	_recent_session_button[8] = &named_children ().get_waves_button ("recent_session_button_8");
+	_recent_session_button[9] = &named_children ().get_waves_button ("recent_session_button_9");
 	init();
 }
 

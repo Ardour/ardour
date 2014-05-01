@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014 Valeriy Kamyshniy
+    Copyright (C) 2014 Waves Audio Ltd.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,27 +28,8 @@
 
 #include <gtkmm/filechooser.h>
 
-//#include "pbd/failed_constructor.h"
-//#include "pbd/file_utils.h"
-//#include "pbd/replace_all.h"
-//#include "pbd/whitespace.h"
-//#include "pbd/stacktrace.h"
-//#include "pbd/openuri.h"
-//
-//#include "ardour/audioengine.h"
-//#include "ardour/filesystem_paths.h"
-//#include "ardour/recent_sessions.h"
-//#include "ardour/session.h"
-//#include "ardour/session_state_utils.h"
-//#include "ardour/template_utils.h"
-//#include "ardour/filename_extensions.h"
-//
-//#include "ardour_ui.h"
 #include "session_lock_dialog.h"
-//#include "opts.h"
-//VKPRefs:#include "engine_dialog.h"
 #include "i18n.h"
-//#include "utils.h"
 
 using namespace std;
 using namespace Gtk;
@@ -62,12 +43,12 @@ using namespace ARDOUR;
 
 SessionLockDialog::SessionLockDialog ()
 	: WavesDialog (_("session_lock_dialog.xml"), true, false)
-	, ok_button (get_waves_button ("ok_button"))
+	, _ok_button (named_children ().get_waves_button ("ok_button"))
 {
 	set_keep_above (true);
 	set_position (WIN_POS_CENTER);
 
-	ok_button.signal_clicked.connect (sigc::mem_fun (*this, &SessionLockDialog::on_ok));
+	_ok_button.signal_clicked.connect (sigc::mem_fun (*this, &SessionLockDialog::on_ok));
 }
 
 SessionLockDialog::~SessionLockDialog()

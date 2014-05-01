@@ -61,13 +61,13 @@ class SessionDialog : public WavesDialog {
 	~SessionDialog ();
 
   private:
-	WavesButton& quit_button;
-	WavesButton& new_session_button;
-	WavesButton& open_selected_button;
-	WavesButton& open_saved_session_button;
-	WavesButton& system_configuration_button;
-	WavesButton* recent_session_button[MAX_RECENT_SESSION_COUNTS];
-	Gtk::Label& session_details_label;
+	WavesButton& _quit_button;
+	WavesButton& _new_session_button;
+	WavesButton& _open_selected_button;
+	WavesButton& _open_saved_session_button;
+	WavesButton& _system_configuration_button;
+	WavesButton* _recent_session_button[MAX_RECENT_SESSION_COUNTS];
+	Gtk::Label& _session_details_label;
 	WM::Proxy<TracksControlPanel>& _system_configuration_dialog;
   
 #include "session_dialog.logic.h"

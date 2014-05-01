@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014 Valeriy Kamyshniy
+    Copyright (C) 2014 Waves Audio Ltd.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ class SessionLockDialog : public WavesDialog {
 	~SessionLockDialog ();
 
   private:
-	WavesButton& ok_button;
+	WavesButton& _ok_button;
 	void on_ok(WavesButton*);
 };
 
