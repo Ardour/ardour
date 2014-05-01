@@ -23,6 +23,16 @@
 
 using namespace ARDOUR;
 
+#ifdef __MINGW64__
+	extern "C" __declspec(dllexport) ARDOUR::AudioBackendInfo* descriptor ()
+#else
+	extern "C" ARDOURBACKEND_API ARDOUR::AudioBackendInfo* descriptor ()
+#endif
+{
+    // COMMENTED DBG LOGS */ std::cout  << "waves_backend.dll : ARDOUR::AudioBackendInfo* descriptor (): " << std::endl;
+    return &WavesAudioBackend::backend_info ();
+}
+
 void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reason, void* parameter)
 {
     switch (reason) {
@@ -83,8 +93,8 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
 }
 
 
-WavesAudioBackend::WavesAudioBackend (AudioEngine& e)
-    : AudioBackend (e)
+WavesAudioBackend::WavesAudioBackend (AudioEngine& e, AudioBackendInfo& info)
+    : AudioBackend (e, info)
     , _audio_device_manager (this)
     , _midi_device_manager (*this)
     , _device (NULL)
@@ -1274,7 +1284,7 @@ WavesAudioBackend::__waves_backend_factory (AudioEngine& e)
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::__waves_backend_factory ():" << std::endl;
     if (!__instance) {
-        __instance.reset (new WavesAudioBackend (e));
+        __instance.reset (new WavesAudioBackend (e, descriptor()));
     }
     return __instance;
 }
@@ -1365,12 +1375,3 @@ AudioBackendInfo WavesAudioBackend::__backend_info = {
     WavesAudioBackend::__already_configured,
 };
 
-#ifdef __MINGW64__
-	extern "C" __declspec(dllexport) ARDOUR::AudioBackendInfo* descriptor ()
-#else
-	extern "C" ARDOURBACKEND_API ARDOUR::AudioBackendInfo* descriptor ()
-#endif
-{
-    // COMMENTED DBG LOGS */ std::cout  << "waves_backend.dll : ARDOUR::AudioBackendInfo* descriptor (): " << std::endl;
-    return &WavesAudioBackend::backend_info ();
-}

@@ -50,8 +50,8 @@ using std::vector;
 #define GET_PRIVATE_JACK_POINTER(localvar)  jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(localvar,r) jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return r; }
 
-JACKAudioBackend::JACKAudioBackend (AudioEngine& e, boost::shared_ptr<JackConnection> jc)
-	: AudioBackend (e)
+JACKAudioBackend::JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, boost::shared_ptr<JackConnection> jc)
+	: AudioBackend (e, info)
 	, _jack_connection (jc)
 	, _running (false)
 	, _freewheeling (false)

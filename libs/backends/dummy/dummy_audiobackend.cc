@@ -29,8 +29,8 @@ using namespace ARDOUR;
 static std::string s_instance_name;
 size_t DummyAudioBackend::_max_buffer_size = 8192;
 
-DummyAudioBackend::DummyAudioBackend (AudioEngine& e)
-	: AudioBackend (e)
+DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
+	: AudioBackend (e, info)
 	, _running (false)
 	, _freewheeling (false)
 	, _samplerate (48000)
@@ -1017,11 +1017,24 @@ DummyAudioBackend::main_process_thread ()
 
 static boost::shared_ptr<DummyAudioBackend> _instance;
 
+static boost::shared_ptr<AudioBackend> backend_factory (AudioEngine& e);
+static int instantiate (const std::string& arg1, const std::string& /* arg2 */);
+static int deinstantiate ();
+static bool already_configured ();
+
+static ARDOUR::AudioBackendInfo _descriptor = {
+	"Dummy",
+	instantiate,
+	deinstantiate,
+	backend_factory,
+	already_configured,
+};
+
 static boost::shared_ptr<AudioBackend>
 backend_factory (AudioEngine& e)
 {
 	if (!_instance) {
-		_instance.reset (new DummyAudioBackend (e));
+		_instance.reset (new DummyAudioBackend (e, _descriptor));
 	}
 	return _instance;
 }
@@ -1045,14 +1058,6 @@ already_configured ()
 {
 	return false;
 }
-
-static ARDOUR::AudioBackendInfo _descriptor = {
-	"Dummy",
-	instantiate,
-	deinstantiate,
-	backend_factory,
-	already_configured,
-};
 
 extern "C" ARDOURBACKEND_API ARDOUR::AudioBackendInfo* descriptor ()
 {

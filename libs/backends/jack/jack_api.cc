@@ -25,6 +25,19 @@ using namespace ARDOUR;
 static boost::shared_ptr<JACKAudioBackend> backend;
 static boost::shared_ptr<JackConnection> jack_connection;
 
+static boost::shared_ptr<AudioBackend> backend_factory (AudioEngine& ae);
+static int  instantiate (const std::string& arg1, const std::string& arg2);
+static int  deinstantiate ();
+static bool already_configured ();
+
+static ARDOUR::AudioBackendInfo _descriptor = {
+	"JACK",
+	instantiate,
+	deinstantiate,
+	backend_factory,
+	already_configured,
+};
+
 static boost::shared_ptr<AudioBackend>
 backend_factory (AudioEngine& ae)
 {
@@ -33,7 +46,7 @@ backend_factory (AudioEngine& ae)
 	}
 
 	if (!backend) {
-		backend.reset (new JACKAudioBackend (ae, jack_connection));
+		backend.reset (new JACKAudioBackend (ae, _descriptor, jack_connection));
 	}
 
 	return backend;
@@ -65,14 +78,6 @@ already_configured ()
 {
 	return !JackConnection::in_control ();
 }
-
-static ARDOUR::AudioBackendInfo _descriptor = {
-	"JACK",
-	instantiate,
-	deinstantiate,
-	backend_factory,
-	already_configured,
-};
 
 extern "C" ARDOURBACKEND_API ARDOUR::AudioBackendInfo* descriptor() { return &_descriptor; }
 

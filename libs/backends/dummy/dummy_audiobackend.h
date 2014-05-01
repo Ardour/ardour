@@ -142,7 +142,7 @@ class DummyMidiPort : public DummyPort {
 
 class DummyAudioBackend : public AudioBackend {
 	public:
-		DummyAudioBackend (AudioEngine& e);
+	         DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info);
 		~DummyAudioBackend ();
 
 		/* AUDIOBACKEND API */

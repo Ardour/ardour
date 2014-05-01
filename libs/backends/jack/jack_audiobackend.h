@@ -41,7 +41,7 @@ class JACKSession;
 
 class JACKAudioBackend : public AudioBackend {
   public:
-    JACKAudioBackend (AudioEngine& e, boost::shared_ptr<JackConnection>);
+    JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, boost::shared_ptr<JackConnection>);
     ~JACKAudioBackend ();
     
     /* AUDIOBACKEND API */
