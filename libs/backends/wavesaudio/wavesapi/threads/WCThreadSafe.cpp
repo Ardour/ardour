@@ -7,10 +7,10 @@
 #endif // XPLATFORMTHREADS_WINDOWS
 
 
-#if defined(__MACOS__)
+#if defined(__APPLE__)
     #include <CoreServices/CoreServices.h>
     #include <stdio.h>
-#endif // __MACOS__
+#endif // __APPLE__
 
 #if XPLATFORMTHREADS_POSIX
     #include </usr/include/unistd.h>   // avoid the framework version and use the /usr/include version
@@ -87,7 +87,7 @@ namespace wvThread
         return nTicksPerMicrosecond;
     }
     
-#if defined(__MACOS__) //&& !defined(__MACH__)
+#if defined(__APPLE__) //&& !defined(__MACH__)
 
     
     bool FindNetInterfaceByIPAddress(const char *sIP, char *sInterface) // sIP and sInterface are both char[16]
@@ -143,7 +143,7 @@ namespace wvThread
             return timestamp(uint32_t(TSC.QuadPart/nTicksPerMicrosecond));
         }
         else return timestamp(0);
-#elif defined(__MACOS__)
+#elif defined(__APPLE__)
         if (nTicksPerMicrosecond) {} // prevent 'unused' warnings
         UnsignedWide usecs;
         ::Microseconds(&usecs);

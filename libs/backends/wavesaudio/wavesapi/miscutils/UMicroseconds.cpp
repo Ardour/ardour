@@ -1,7 +1,7 @@
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
     #include "IncludeWindows.h"
 #endif
-#if defined(__linux__) || defined(__MACOS__)
+#if defined(__linux__) || defined(__APPLE__)
 	#include <sys/time.h>
 #endif
 
@@ -10,7 +10,7 @@
 namespace wvNS { 
 UMicroseconds& UMicroseconds::ReadTime()
 {
-#ifdef _WINDOWS
+#ifdef PLATFORM_WINDOWS
 	LARGE_INTEGER Frequency, Count ;
 
 	QueryPerformanceFrequency(&Frequency) ;
@@ -18,7 +18,7 @@ UMicroseconds& UMicroseconds::ReadTime()
 	theTime = uint64_t((Count.QuadPart * 1000000.0 / Frequency.QuadPart));
 #endif
 
-#if defined(__linux__) || defined(__MACOS__)
+#if defined(__linux__) || defined(__APPLE__)
 //	Mac code replaced by posix calls, to reduce Carbon dependency. 
 	timeval buf;
 
@@ -32,7 +32,7 @@ UMicroseconds& UMicroseconds::ReadTime()
 }
 /*
  Removed in favor of the posix implementation. 
-#ifdef __MACOS__
+#ifdef __APPLE__
 	uint32_t UMicroseconds::hi() {return reinterpret_cast<UnsignedWide*>(&theTime)->hi;}
 	uint32_t UMicroseconds::lo() {return reinterpret_cast<UnsignedWide*>(&theTime)->lo;}
 #endif

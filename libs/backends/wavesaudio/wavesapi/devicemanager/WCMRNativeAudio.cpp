@@ -7,7 +7,7 @@
 //! WCMRNativeAudioConnection and related class defienitions
 //!
 //---------------------------------------------------------------------------------*/
-#if defined(__MACOS__)
+#if defined(__APPLE__)
 #include <CoreAudio/CoreAudio.h>
 #endif
 
@@ -34,7 +34,7 @@
 WCMRNativeAudioNoneDevice::WCMRNativeAudioNoneDevice (WCMRAudioDeviceManager *pManager)
 	: WCMRNativeAudioDevice (pManager, false /*useMultiThreading*/)
 	, m_SilenceThread(0)
-#if defined (_WINDOWS)
+#if defined (PLATFORM_WINDOWS)
     , _waitableTimerForUsleep (CreateWaitableTimer(NULL, TRUE, NULL))
 #endif
 {
@@ -66,7 +66,7 @@ WCMRNativeAudioNoneDevice::WCMRNativeAudioNoneDevice (WCMRAudioDeviceManager *pM
 
 WCMRNativeAudioNoneDevice::~WCMRNativeAudioNoneDevice ()
 {
-#if defined (_WINDOWS)
+#if defined (PLATFORM_WINDOWS)
     if(_waitableTimerForUsleep) {
         CloseHandle(_waitableTimerForUsleep);
     }
@@ -141,7 +141,7 @@ WTErr WCMRNativeAudioNoneDevice::SetStreaming (bool newState)
 
 		pthread_attr_t attributes;
 		size_t stack_size = 100000;
-#ifdef __MACOS__
+#ifdef __APPLE__
 	    stack_size = (((stack_size - 1) / PTHREAD_STACK_MIN) + 1) * PTHREAD_STACK_MIN;
 #endif
 		if (pthread_attr_init (&attributes)) {
@@ -178,7 +178,7 @@ WTErr WCMRNativeAudioNoneDevice::SetStreaming (bool newState)
 
 void WCMRNativeAudioNoneDevice::_SilenceThread()
 {
-#if defined(_WINDOWS)
+#if defined(PLATFORM_WINDOWS)
 	float* theInpBuffers[__m_NumInputChannels];
 	for(int i = 0; i < __m_NumInputChannels; ++i)
 	{
@@ -228,7 +228,7 @@ void* WCMRNativeAudioNoneDevice::__SilenceThread(void *This)
 	return 0;
 }
 
-#if defined(_WINDOWS)
+#if defined(PLATFORM_WINDOWS)
 void WCMRNativeAudioNoneDevice::_usleep(uint64_t duration_usec)
 { 
     LARGE_INTEGER ft; 
@@ -243,13 +243,13 @@ void WCMRNativeAudioNoneDevice::_usleep(uint64_t duration_usec)
 uint64_t
 WCMRNativeAudioNoneDevice::__get_time_nanos ()
 {
-#ifdef __MACOS__
+#ifdef __APPLE__
     // here we exploit the time counting API which is used by the WCMRCoreAudioDeviceManager. However,
     // the API should be a part of WCMRCoreAudioDeviceManager to give a chance of being tied to the
     // audio device transport timeß.
     return AudioConvertHostTimeToNanos (AudioGetCurrentHostTime ());
     
-#elif _WINDOWS
+#elif PLATFORM_WINDOWS
     
     LARGE_INTEGER Frequency, Count ;
 
