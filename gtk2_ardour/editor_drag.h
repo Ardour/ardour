@@ -421,17 +421,8 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 protected:
-	bool y_movement_allowed (int delta_track, double delta_layer) const {
-		std::cerr << "RegionRippleDrag::y_movement_allowed (" << delta_track << ", " << delta_layer << ")..." << std::endl;
-		if (RegionMotionDrag::y_movement_allowed (delta_track, delta_layer)) {
-			if (delta_track) {
-				return allow_moves_across_tracks;
-			} else {
-				return true;
-			}
-		}
-		return false;
-	}
+	bool y_movement_allowed (int delta_track, double delta_layer) const;
+
 private:
 	TimeAxisView *prev_tav;		// where regions were most recently dragged from
 	TimeAxisView *orig_tav;		// where drag started
