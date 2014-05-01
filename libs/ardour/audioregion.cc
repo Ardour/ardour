@@ -1211,14 +1211,14 @@ void
 AudioRegion::set_default_fade_in ()
 {
 	_fade_in_suspended = 0;
-	set_fade_in (FadeLinear, 64);
+	set_fade_in (Config->get_default_fade_shape(), 64);
 }
 
 void
 AudioRegion::set_default_fade_out ()
 {
 	_fade_out_suspended = 0;
-	set_fade_out (FadeLinear, 64);
+	set_fade_out (Config->get_default_fade_shape(), 64);
 }
 
 void
