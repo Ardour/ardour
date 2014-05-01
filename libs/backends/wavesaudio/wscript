@@ -93,7 +93,7 @@ def build(bld):
     if bld.env['build_target'] == 'mingw':
 	    obj.uselib   = ['PORTAUDIO']
     obj.vnum     = WAVESAUDIOBACKEND_VERSION
-    obj.install_path  = os.path.join(bld.env['LIBDIR'], 'ardour3', 'backends')
+    obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     
     if bld.env['build_target']== 'mingw':
 	obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
