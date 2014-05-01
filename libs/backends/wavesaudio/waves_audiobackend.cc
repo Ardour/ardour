@@ -1284,7 +1284,7 @@ WavesAudioBackend::__waves_backend_factory (AudioEngine& e)
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::__waves_backend_factory ():" << std::endl;
     if (!__instance) {
-        __instance.reset (new WavesAudioBackend (e, descriptor()));
+        __instance.reset (new WavesAudioBackend (e, __backend_info));
     }
     return __instance;
 }
