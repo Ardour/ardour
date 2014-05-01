@@ -76,6 +76,7 @@ class LIBARDOUR_API Butler : public SessionHandleRef
 	};
 
 	pthread_t    thread;
+	bool         have_thread;
 	Glib::Threads::Mutex  request_lock;
         Glib::Threads::Cond   paused;
 	bool         should_run;

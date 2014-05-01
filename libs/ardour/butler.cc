@@ -43,6 +43,7 @@ namespace ARDOUR {
 Butler::Butler(Session& s)
 	: SessionHandleRef (s)
 	, thread()
+	, have_thread (false)
 	, audio_dstream_capture_buffer_size(0)
 	, audio_dstream_playback_buffer_size(0)
 	, midi_dstream_buffer_size(0)
@@ -126,16 +127,18 @@ Butler::start_thread()
 	}
 
 	//pthread_detach (thread);
-
+	have_thread = true;
 	return 0;
 }
 
 void
 Butler::terminate_thread ()
 {
-	void* status;
-	queue_request (Request::Quit);
-	pthread_join (thread, &status);
+	if (have_thread) {
+		void* status;
+		queue_request (Request::Quit);
+		pthread_join (thread, &status);
+	}
 }
 
 void *
