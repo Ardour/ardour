@@ -1332,6 +1332,13 @@ EngineControl::EngineControl ()
 			 backend->set_buffer_size (get_buffer_size());
 		 }
 
+		 if (start) {
+			 if (ARDOUR::AudioEngine::instance()->start ()) {
+				 error << string_compose (_("Could not start backend engine %1"), backend->name()) << endmsg;
+				 return -1;
+			 }
+		 }
+
 		 post_push ();
 
 		 return 0;
