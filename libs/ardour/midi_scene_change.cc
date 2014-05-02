@@ -28,9 +28,8 @@
 using namespace PBD;
 using namespace ARDOUR;
 
-MIDISceneChange::MIDISceneChange (framepos_t time, int c, int b, int p)
-	: SceneChange (time)
-	, _bank (b)
+MIDISceneChange::MIDISceneChange (int c, int b, int p)
+	: _bank (b)
 	, _program (p)
 	, _channel (c & 0xf)
 {
@@ -44,8 +43,7 @@ MIDISceneChange::MIDISceneChange (framepos_t time, int c, int b, int p)
 }
 
 MIDISceneChange::MIDISceneChange (const XMLNode& node, int version)
-	: SceneChange (0)
-	, _bank (-1)
+	: _bank (-1)
 	, _program (-1)
 	, _channel (-1)
 {

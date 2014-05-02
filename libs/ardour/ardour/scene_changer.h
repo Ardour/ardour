@@ -48,6 +48,7 @@ class SceneChanger : public SessionHandleRef
         virtual ~SceneChanger () {};
 	
 	virtual void run (framepos_t start, framepos_t end) = 0;
+	virtual void locate (framepos_t where) = 0;
 };
 
 } /* namespace */
