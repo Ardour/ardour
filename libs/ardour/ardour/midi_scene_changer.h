@@ -20,6 +20,8 @@
 #ifndef __libardour_midi_scene_changer_h__
 #define __libardour_midi_scene_changer_h__
 
+#include <glibmm/threads.h>
+
 #include "ardour/scene_changer.h"
 
 namespace ARDOUR
@@ -46,6 +48,7 @@ class MIDISceneChanger : public SceneChanger
 
 	MIDI::Port* input_port;
 	boost::shared_ptr<MidiPort> output_port;
+	Glib::Threads::RWLock scene_lock;
 	Scenes scenes;
 	bool _recording;
 	framepos_t last_bank_message_time;
@@ -57,7 +60,8 @@ class MIDISceneChanger : public SceneChanger
 	void gather ();
 	bool recording () const;
 	void jump_to (int bank, int program);
-	void deliver (MidiBuffer&, framepos_t, boost::shared_ptr<MIDISceneChange>);
+	void rt_deliver (MidiBuffer&, framepos_t, boost::shared_ptr<MIDISceneChange>);
+	void non_rt_deliver (boost::shared_ptr<MIDISceneChange>);
 
 	void bank_change_input (MIDI::Parser&, unsigned short, int channel);
 	void program_change_input (MIDI::Parser&, MIDI::byte, int channel);

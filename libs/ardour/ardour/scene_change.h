@@ -30,17 +30,11 @@ namespace ARDOUR
 class SceneChange : public PBD::Stateful
 {
   public:
-        SceneChange (framepos_t t) : _time (t) {};
+        SceneChange () {};
         virtual ~SceneChange () {};
-
-	void set_time (framepos_t);
-	framepos_t time() const { return _time; }
 
 	static boost::shared_ptr<SceneChange> factory (const XMLNode&, int version);
 	static std::string xml_node_name;
-
-    private:
-	framepos_t _time;
 };
 
 } /* namespace */

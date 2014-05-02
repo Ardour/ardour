@@ -32,7 +32,7 @@ class MidiPort;
 class MIDISceneChange : public SceneChange
 {
   public:
-	MIDISceneChange (framepos_t time, int channel, int bank = -1, int program = -1);
+	MIDISceneChange (int channel, int bank = -1, int program = -1);
 	MIDISceneChange (const XMLNode&, int version);
 	~MIDISceneChange ();
 

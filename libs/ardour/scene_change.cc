@@ -37,9 +37,3 @@ SceneChange::factory (const XMLNode& node, int version)
 
 	return boost::shared_ptr<SceneChange>();
 }
-
-void
-SceneChange::set_time (framepos_t t)
-{
-	_time = t;
-}

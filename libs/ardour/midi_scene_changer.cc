@@ -22,6 +22,7 @@
 #include "midi++/parser.h"
 #include "midi++/port.h"
 
+#include "ardour/async_midi_port.h"
 #include "ardour/event_type_map.h"
 #include "ardour/midi_port.h"
 #include "ardour/midi_scene_change.h"
@@ -65,6 +66,8 @@ MIDISceneChanger::gather ()
 	const Locations::LocationList& locations (_session.locations()->list());
 	boost::shared_ptr<SceneChange> sc;
 
+	Glib::Threads::RWLock::WriterLock lm (scene_lock);
+
 	scenes.clear ();
 
 	for (Locations::LocationList::const_iterator l = locations.begin(); l != locations.end(); ++l) {
@@ -72,16 +75,16 @@ MIDISceneChanger::gather ()
 		if ((sc = (*l)->scene_change()) != 0) {
 
 			boost::shared_ptr<MIDISceneChange> msc = boost::dynamic_pointer_cast<MIDISceneChange> (sc);
-
+			
 			if (msc) {
-				scenes.insert (std::make_pair (msc->time(), msc));
+				scenes.insert (std::make_pair ((*l)->start(), msc));
 			}
 		}
 	}
 }
 
 void
-MIDISceneChanger::deliver (MidiBuffer& mbuf, framepos_t when, boost::shared_ptr<MIDISceneChange> msc)
+MIDISceneChanger::rt_deliver (MidiBuffer& mbuf, framepos_t when, boost::shared_ptr<MIDISceneChange> msc)
 {
 	uint8_t buf[4];
 	size_t cnt;
@@ -102,12 +105,45 @@ MIDISceneChanger::deliver (MidiBuffer& mbuf, framepos_t when, boost::shared_ptr<
 		last_delivered_program = msc->program();
 	}
 }
-			
+
+void
+MIDISceneChanger::non_rt_deliver (boost::shared_ptr<MIDISceneChange> msc)
+{
+	uint8_t buf[4];
+	size_t cnt;
+	boost::shared_ptr<AsyncMIDIPort> aport = boost::dynamic_pointer_cast<AsyncMIDIPort>(output_port);
+
+	/* We use zero as the timestamp for these messages because we are in a
+	   non-RT/process context. Using zero means "deliver them as early as
+	   possible" (practically speaking, in the next process callback).
+	*/
+
+	if ((cnt = msc->get_bank_msb_message (buf, sizeof (buf))) > 0) {
+		aport->write (buf, cnt, 0);
+
+		if ((cnt = msc->get_bank_lsb_message (buf, sizeof (buf))) > 0) {
+			aport->write (buf, cnt, 0);
+		}
+
+		last_delivered_bank = msc->bank();
+	}
+
+	if ((cnt = msc->get_program_message (buf, sizeof (buf))) > 0) {
+		aport->write (buf, cnt, 0);
+		last_delivered_program = msc->program();
+	}
+}
 
 void
 MIDISceneChanger::run (framepos_t start, framepos_t end)
 {
-	if (!output_port || recording()) {
+	if (!output_port || recording() || !_session.transport_rolling()) {
+		return;
+	}
+
+	Glib::Threads::RWLock::ReaderLock lm (scene_lock, Glib::Threads::TRY_LOCK);
+	
+	if (!lm.locked()) {
 		return;
 	}
 
@@ -121,9 +157,9 @@ MIDISceneChanger::run (framepos_t start, framepos_t end)
 		if (i->first >= end) {
 			break;
 		}
+	
+		rt_deliver (mbuf, i->first - start, i->second);
 		
-		deliver (mbuf, i->first - start, i->second);
-
 		++i;
 	}
 }
@@ -131,15 +167,41 @@ MIDISceneChanger::run (framepos_t start, framepos_t end)
 void
 MIDISceneChanger::locate (framepos_t pos)
 {
-	Scenes::const_iterator i = scenes.upper_bound (pos);
+	boost::shared_ptr<MIDISceneChange> msc;
+	framepos_t when;
 
-	if (i == scenes.end()) {
-		return;
+	{
+		Glib::Threads::RWLock::ReaderLock lm (scene_lock);
+
+		if (scenes.empty()) {
+			return;
+		}
+		
+		Scenes::const_iterator i = scenes.lower_bound (pos);
+		
+		if (i != scenes.end()) {
+
+			if (i->first != pos) {
+				/* i points to first scene with position > pos, so back
+				 * up, if possible.
+				 */
+				if (i != scenes.begin()) {
+					--i;
+				} else {
+					return;
+				}
+			}
+		} else {
+			/* go back to the final scene and use it */
+			--i;
+		}
+
+		when = i->first;
+		msc = i->second;
 	}
 
-	if (i->second->program() != last_delivered_program || i->second->bank() != last_delivered_bank) {
-		// MidiBuffer& mbuf (output_port->get_midi_buffer (end-start));
-		// deliver (mbuf, i->first, i->second);
+	if (msc->program() != last_delivered_program || msc->bank() != last_delivered_bank) {
+		non_rt_deliver (msc);
 	}
 }		
 
@@ -229,7 +291,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 
 	unsigned short bank = input_port->channel (channel)->bank();
 
-	MIDISceneChange* msc =new MIDISceneChange (loc->start(), channel, bank, program & 0x7f);
+	MIDISceneChange* msc =new MIDISceneChange (channel, bank, program & 0x7f);
 
 	loc->set_scene_change (boost::shared_ptr<MIDISceneChange> (msc));
 	
