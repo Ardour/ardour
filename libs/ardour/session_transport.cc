@@ -42,6 +42,7 @@
 #include "ardour/debug.h"
 #include "ardour/location.h"
 #include "ardour/profile.h"
+#include "ardour/scene_changer.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
 #include "ardour/operations.h"
@@ -455,6 +456,8 @@ Session::non_realtime_locate ()
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		(*i)->non_realtime_locate (_transport_frame);
 	}
+
+	_scene_changer->locate (_transport_frame);
 
 	/* XXX: it would be nice to generate the new clicks here (in the non-RT thread)
 	   rather than clearing them so that the RT thread has to spend time constructing
