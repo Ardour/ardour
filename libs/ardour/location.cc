@@ -188,6 +188,14 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 			end_changed (this); /* EMIT SIGNAL */
 		}
 
+		/* moving the start (position) of a marker with a scene change
+		   requires an update in the Scene Changer.
+		*/
+
+		if (_scene_change) {
+			scene_changed (); /* EMIT SIGNAL */
+		}
+
 		assert (_start >= 0);
 		assert (_end >= 0);
 
@@ -203,6 +211,7 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 			recompute_bbt_from_frames ();
 		}
 		start_changed (this); /* EMIT SIGNAL */
+				
 		if (is_session_range ()) {
 			Session::StartTimeChanged (old); /* EMIT SIGNAL */
 			AudioFileSource::set_header_position_offset (s);
@@ -536,10 +545,6 @@ Location::set_state (const XMLNode& node, int version)
 	
 	if (scene_child) {
 		_scene_change = SceneChange::factory (*scene_child, version);
-
-		if (_scene_change) {
-			_scene_change->set_time (_start);
-		}
 	}
 
 	recompute_bbt_from_frames ();
