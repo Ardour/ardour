@@ -22,6 +22,10 @@
 
 #include <string>
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <gtkmm.h>
 
 #include "ardour/types.h"
