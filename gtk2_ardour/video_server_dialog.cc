@@ -43,6 +43,10 @@
 #include "utils_videotl.h"
 #include "i18n.h"
 
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+#endif
+
 using namespace Gtk;
 using namespace std;
 using namespace PBD;
