@@ -275,23 +275,24 @@ WavesButton::on_size_request (Gtk::Requisition* req)
 	req->width += _corner_radius;
 }
 
-
-
 bool
 WavesButton::on_button_press_event (GdkEventButton *ev)
 {
-	_pushed = true;
-	queue_draw ();
-	if (binding_proxy.button_press_handler (ev)) {
-		return true;
-	}
-	if (!_act_on_release) {
-		if (_action) {
-			_action->activate ();
+	if (ev->type == GDK_2BUTTON_PRESS) {
+		signal_double_clicked (this);
+	} else {
+		_pushed = true;
+		queue_draw ();
+		if (binding_proxy.button_press_handler (ev)) {
 			return true;
 		}
+		if (!_act_on_release) {
+			if (_action) {
+				_action->activate ();
+				return true;
+			}
+		}
 	}
-
 	return false;
 }
 

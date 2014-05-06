@@ -84,6 +84,7 @@ void SessionDialog::init()
 	_system_configuration_button.signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_system_configuration));
 	for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
 		_recent_session_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_recent_session ));
+		_recent_session_button[i]->signal_double_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_recent_session_double_click ));
 	}
 	redisplay_system_configuration ();
 	redisplay_recent_sessions();
@@ -309,6 +310,18 @@ SessionDialog::on_recent_session (WavesButton* clicked_button)
 
 	_open_selected_button.set_sensitive (_selection_type == RecentSession);
 }
+
+void
+SessionDialog::on_recent_session_double_click (WavesButton*)
+{
+	// we suppose the first click, occurred prior to the second in the 
+	// double click sequence has been processed correctly and now
+	// the job is just to respond with ok
+
+	hide();
+	response (Gtk::RESPONSE_ACCEPT);
+}
+
 
 void
 SessionDialog::on_system_configuration (WavesButton* clicked_button)

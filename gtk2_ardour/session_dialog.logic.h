@@ -77,6 +77,7 @@
 	void on_open_saved_session (WavesButton*);
     void on_new_session (WavesButton*);
     void on_recent_session (WavesButton*);
+    void on_recent_session_double_click (WavesButton*);
 	void on_system_configuration (WavesButton*);
 	bool on_delete_event (GdkEventAny*);
   
