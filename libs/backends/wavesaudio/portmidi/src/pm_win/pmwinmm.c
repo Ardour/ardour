@@ -2,6 +2,8 @@
 
 #ifdef _MSC_VER
  #pragma warning(disable: 4133) // stop warnings about implicit typecasts
+
+#define max(a,b) __max(a,b)
 #endif
 
 #ifndef _WIN32_WINNT
@@ -209,7 +211,7 @@ static void pm_winmm_general_outputs()
     UINT i;
     DWORD wRtn;
     midi_num_outputs = midiOutGetNumDevs();
-    midi_out_caps = pm_alloc( sizeof(MIDIOUTCAPS) * midi_num_outputs );
+    midi_out_caps = (MIDIOUTCAPS*)pm_alloc( sizeof(MIDIOUTCAPS) * midi_num_outputs );
 
     if (midi_out_caps == NULL) {
         /* no error is reported -- see pm_winmm_general_inputs */
@@ -533,10 +535,10 @@ static PmError allocate_input_buffer(HMIDIIN h, long buffer_len)
     pm_hosterror = midiInPrepareHeader(h, hdr, sizeof(MIDIHDR));
     if (pm_hosterror) {
         pm_free(hdr);
-        return pm_hosterror;
+        return (PmError) pm_hosterror;
     }
     pm_hosterror = midiInAddBuffer(h, hdr, sizeof(MIDIHDR));
-    return pm_hosterror;
+    return (PmError) pm_hosterror;
 }
 
 
@@ -628,7 +630,7 @@ no_memory:
 
 static PmError winmm_in_poll(PmInternal *midi) {
     midiwinmm_type m = (midiwinmm_type) midi->descriptor;
-    return m->error;
+    return (PmError) m->error;
 }
 
 
@@ -1208,7 +1210,7 @@ static PmError winmm_write_byte(PmInternal *midi, unsigned char byte,
         m->hdr = hdr = get_free_output_buffer(midi);
         assert(hdr);
         midi->fill_base = (unsigned char *) m->hdr->lpData;
-        midi->fill_offset_ptr = &(hdr->dwBytesRecorded);
+        midi->fill_offset_ptr = (uint32_t*) &(hdr->dwBytesRecorded);
         /* when buffer fills, Pm_WriteSysEx will revert to calling
          * pmwin_write_byte, which expect to have space, so leave
          * one byte free for pmwin_write_byte. Leave another byte
@@ -1424,7 +1426,7 @@ void pm_winmm_term( void )
     printf("pm_winmm_term called\n");
 #endif
     for (i = 0; i < pm_descriptor_index; i++) {
-        PmInternal * midi = descriptors[i].internalDescriptor;
+        PmInternal * midi = (PmInternal*) descriptors[i].internalDescriptor;
         if (midi) {
             midiwinmm_type m = (midiwinmm_type) midi->descriptor;
             if (m->handle.out) {
