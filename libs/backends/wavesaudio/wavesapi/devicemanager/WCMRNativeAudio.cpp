@@ -14,6 +14,7 @@
 #include "WCMRNativeAudio.h"
 #include "MiscUtils/pthread_utils.h"
 #include "MiscUtils/safe_delete.h"
+#include <iostream>
 #include <sstream>
 #include <boost/assign/list_of.hpp>
 

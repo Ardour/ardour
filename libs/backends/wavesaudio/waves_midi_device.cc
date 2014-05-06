@@ -17,6 +17,7 @@
 
 */
 
+#include <iostream>
 #include "waves_midi_device.h"
 #include "waves_midi_event.h"
 

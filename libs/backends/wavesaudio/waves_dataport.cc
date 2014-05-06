@@ -17,6 +17,7 @@
 
 */
 
+#include <iostream>
 #include "waves_dataport.h"
 
 using namespace ARDOUR;
