@@ -68,6 +68,8 @@
 #if !defined(__FreeBSD__)
 
 #if defined(_MSC_VER)
+#ifndef __int8_t_defined
+#define __int8_t_defined
 typedef          __int8  int8_t;
 typedef unsigned __int8  uint8_t;
 typedef          __int16 int16_t;
@@ -76,7 +78,7 @@ typedef          __int32 int32_t;
 typedef unsigned __int32 uint32_t;
 typedef          __int64 int64_t;
 typedef unsigned __int64 uint64_t;
-
+#endif
 
 #else // _MSC_VER
 
@@ -127,6 +129,7 @@ typedef uint64_t uint_least64_t;
 
 /* 7.18.1.3. Fastest minimum-width integer types */
 
+#ifndef _STDINT_H
 typedef int32_t  int_fast8_t;
 typedef uint32_t uint_fast8_t;
 typedef int32_t  int_fast16_t;
@@ -135,6 +138,7 @@ typedef int32_t  int_fast32_t;
 typedef uint32_t uint_fast32_t;
 typedef int64_t  int_fast64_t;
 typedef uint64_t uint_fast64_t;
+#endif
 
 
 /* 7.18.1.4. Integer types capable of holding object pointers */
@@ -169,6 +173,8 @@ typedef uint32_t uintmax_t;
 //#if !defined(__cplusplus) || defined(__STDC_LIMIT_MACROS)
 
 /* 7.18.2.1. Limits of exact-width integer types */
+
+#ifndef _STDINT_H
 
 #define INT8_MIN  -128
 #define INT8_MAX   127
@@ -249,6 +255,8 @@ typedef uint32_t uintmax_t;
 /* This may be wrong...  */
 #define SIG_ATOMIC_MIN 0
 #define SIG_ATOMIC_MAX 127
+
+#endif /* _STDINT_H */
 
 //#define SIZE_MAX (~(size_t)0)
 
