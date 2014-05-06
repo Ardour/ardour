@@ -145,9 +145,11 @@ PortSet::port(DataType type, size_t n) const
 		return port(n);
 	} else {
 		const PortVec& v = _ports[type];
-		assert(n < v.size());
-		return v[n];
+		if (n < v.size()) {
+			return v[n];
+		}
 	}
+	return boost::shared_ptr<Port>();
 }
 
 boost::shared_ptr<AudioPort>

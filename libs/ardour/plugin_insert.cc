@@ -352,6 +352,9 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		}
 	}
 
+	bufs.set_count(ChanCount::max(bufs.count(), in_streams));
+	bufs.set_count(ChanCount::max(bufs.count(), out_streams));
+
 	/* Note that we've already required that plugins
 	   be able to handle in-place processing.
 	*/
