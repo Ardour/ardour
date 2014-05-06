@@ -138,13 +138,17 @@ SessionDialog::on_new_session (WavesButton*)
 {
     Gtk::FileChooserDialog dialog(*this, _("Create New Session"), Gtk::FILE_CHOOSER_ACTION_SAVE);
 
-	dialog.add_button("CANCEL", Gtk::RESPONSE_CANCEL);
-	dialog.add_button("OK", Gtk::RESPONSE_OK);
+	dialog.add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
+	dialog.add_button ("OK", Gtk::RESPONSE_OK);
 	
-    if (dialog.run() == Gtk::RESPONSE_OK) {
-		_selected_session_full_name = dialog.get_filename();
+	set_keep_above(false);
+	int responce = dialog.run ();
+	set_keep_above(true);
+
+    if (responce == Gtk::RESPONSE_OK) {
+		_selected_session_full_name = dialog.get_filename ();
 		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
-            _recent_session_button[i]->set_active(false);
+            _recent_session_button[i]->set_active (false);
 		}
 		hide();
         _selection_type = NewSession;
@@ -267,7 +271,12 @@ SessionDialog::on_open_saved_session (WavesButton*)
 	Gtk::FileChooserDialog dialog(*this, _("Select Saved Session"));
 	dialog.add_button("CANCEL", Gtk::RESPONSE_CANCEL);
 	dialog.add_button("OK", Gtk::RESPONSE_OK);
-	if (dialog.run() == Gtk::RESPONSE_OK) {
+
+	set_keep_above(false);
+	int responce = dialog.run ();
+	set_keep_above(true);
+
+    if (responce == Gtk::RESPONSE_OK) {
 		_selected_session_full_name = dialog.get_filename();
 		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
             _recent_session_button[i]->set_active(false);
