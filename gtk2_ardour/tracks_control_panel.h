@@ -24,21 +24,13 @@
 #include <vector>
 #include <string>
 
-//#include <gtkmm/checkbutton.h>
-//#include <gtkmm/spinbutton.h>
-//#include <gtkmm/comboboxtext.h>
-//#include <gtkmm/table.h>
-//#include <gtkmm/expander.h>
-//#include <gtkmm/box.h>
-//#include <gtkmm/buttonbox.h>
-//#include <gtkmm/button.h>
-
 #include <gtkmm/layout.h>
 
 #include "pbd/signals.h"
+#include "pbd/xml++.h"
 
 #include "waves_dialog.h"
-#include "pbd/xml++.h"
+#include "device_connection_control.h"
 
 class WavesButton;
 

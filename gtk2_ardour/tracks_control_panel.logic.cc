@@ -26,7 +26,7 @@
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
 #include "ardour/rc_configuration.h"
-#include "device_connection_conrol.h"
+#include "device_connection_control.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "utils.h"
@@ -75,6 +75,22 @@ TracksControlPanel::init ()
 	_audio_settings_tab_button.set_active(true);
     _multi_out_button.set_active(ARDOUR::Config->get_output_auto_connect() & ARDOUR::AutoConnectPhysical);
     _stereo_out_button.set_active(ARDOUR::Config->get_output_auto_connect() & ARDOUR::AutoConnectMaster);
+}
+
+DeviceConnectionControl& TracksControlPanel::add_device_capture_control(std::string device_capture_name, bool active, uint16_t capture_number, std::string track_name)
+{
+	DeviceConnectionControl &capture_control = *manage (new DeviceConnectionControl(device_capture_name, active, capture_number, track_name));
+	_device_capture_list.pack_start (capture_control, false, false);
+	capture_control.signal_active_changed.connect (sigc::mem_fun (*this, &TracksControlPanel::on_capture_active_changed));
+	return capture_control;
+}
+
+DeviceConnectionControl& TracksControlPanel::add_device_playback_control(std::string device_playback_name, bool active, uint16_t playback_number)
+{
+	DeviceConnectionControl &playback_control = *manage (new DeviceConnectionControl(device_playback_name, active, playback_number));
+	_device_playback_list.pack_start (playback_control, false, false);
+	playback_control.signal_active_changed.connect(sigc::mem_fun (*this, &TracksControlPanel::on_playback_active_changed));
+	return playback_control;
 }
 
 void
@@ -200,6 +216,9 @@ TracksControlPanel::populate_buffer_size_combo()
 void
 TracksControlPanel::on_control_panel(WavesButton*)
 {
+// ******************************* ATTENTION!!! ****************************
+// here is just demo code to remove it in future
+// *************************************************************************
 	static uint16_t number = 0;
 	static bool active = false;
 
@@ -207,9 +226,10 @@ TracksControlPanel::on_control_panel(WavesButton*)
 	active = !active;
 
 	std::string name = string_compose (_("Input %1"), number);
-	_device_capture_list.pack_start (*manage (new DeviceConnectionControl(name, active, number, name)), false, false);
+	add_device_capture_control (name, active, number, name);
+
 	name = string_compose (_("Output %1"), number);
-	_device_playback_list.pack_start (*manage (new DeviceConnectionControl(name, active, number)), false, false);
+	add_device_playback_control (name, active, number);
 }
 
 void TracksControlPanel::engine_changed ()
@@ -483,6 +503,25 @@ TracksControlPanel::on_apply (WavesButton*)
 	push_state_to_backend (true);
 	response(Gtk::RESPONSE_APPLY);
 }
+
+
+void TracksControlPanel::on_capture_active_changed(DeviceConnectionControl* capture_control, bool active)
+{
+// ******************************* ATTENTION!!! ****************************
+// here is just demo code to replace it with a meaningful app logic in future
+// *************************************************************************
+	capture_control->set_number ( active ? 1000 : DeviceConnectionControl::NoNumber);
+}
+
+
+void TracksControlPanel::on_playback_active_changed(DeviceConnectionControl* playback_control, bool active)
+{
+// ******************************* ATTENTION!!! ****************************
+// here is just demo code to replace it with a meaningful app logic in future
+// *************************************************************************
+	playback_control->set_number ( active ? 1000 : DeviceConnectionControl::NoNumber);
+}
+
 
 std::string
 TracksControlPanel::bufsize_as_string (uint32_t sz)

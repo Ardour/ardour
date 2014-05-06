@@ -17,20 +17,20 @@
 
 */
 
-#include "device_connection_conrol.h"
+#include "device_connection_control.h"
 #include "pbd/convert.h"
 
 DeviceConnectionControl::DeviceConnectionControl (std::string device_capture_name, bool active, uint16_t capture_number, std::string track_name)
 
 	: Gtk::Layout()
-	, _switch_on_button (NULL)
-	, _switch_off_button (NULL)
+	, _active_on_button (NULL)
+	, _active_off_button (NULL)
 	, _name_label (NULL)
 	, _track_name_label (NULL)
 {
 	build_layout("device_capture_connection_conrol.xml");
-	_switch_on_button = &_children.get_waves_button ("capture_on_button");
-	_switch_off_button = &_children.get_waves_button ("capture_off_button");
+	_active_on_button = &_children.get_waves_button ("capture_on_button");
+	_active_off_button = &_children.get_waves_button ("capture_off_button");
 	_name_label = &_children.get_label ("capture_name_label");
 	_number_label = &_children.get_label ("capture_number_label");
 	_track_name_label  = &_children.get_label ("track_name_label");
@@ -40,14 +40,14 @@ DeviceConnectionControl::DeviceConnectionControl (std::string device_capture_nam
 DeviceConnectionControl::DeviceConnectionControl (std::string device_playback_name, bool active, uint16_t playback_number)
 
 	: Gtk::Layout()
-	, _switch_on_button (NULL)
-	, _switch_off_button (NULL)
+	, _active_on_button (NULL)
+	, _active_off_button (NULL)
 	, _name_label (NULL)
 	, _track_name_label (NULL)
 {
 	build_layout("device_playback_connection_conrol.xml");
-	_switch_on_button = &_children.get_waves_button ("playback_on_button");
-	_switch_off_button = &_children.get_waves_button ("playback_off_button");
+	_active_on_button = &_children.get_waves_button ("playback_on_button");
+	_active_off_button = &_children.get_waves_button ("playback_off_button");
 	_name_label = &_children.get_label ("playback_name_label");
 	_number_label = &_children.get_label ("playback_number_label");
 	init(device_playback_name, active, playback_number);
@@ -55,15 +55,15 @@ DeviceConnectionControl::DeviceConnectionControl (std::string device_playback_na
 
 void DeviceConnectionControl::init(std::string name, bool active, uint16_t number, std::string track_name)
 {
-	_switch_on_button->signal_clicked.connect (sigc::mem_fun (*this, &DeviceConnectionControl::on_switch_on));
-	_switch_off_button->signal_clicked.connect (sigc::mem_fun (*this, &DeviceConnectionControl::on_switch_off));
+	_active_on_button->signal_clicked.connect (sigc::mem_fun (*this, &DeviceConnectionControl::on_active_on));
+	_active_off_button->signal_clicked.connect (sigc::mem_fun (*this, &DeviceConnectionControl::on_active_off));
 	_name_label->set_text (name);
 	_number_label->set_text(PBD::to_string (number, std::dec));
 	if (_track_name_label != NULL) {
 		_track_name_label->set_text (track_name);
 	}
-	_switch_on_button->set_active (active);
-	_switch_off_button->set_active (!active);
+	_active_on_button->set_active (active);
+	_active_off_button->set_active (!active);
 }
 
 bool	
@@ -84,17 +84,33 @@ DeviceConnectionControl::build_layout (std::string file_name)
 }
 
 void
-DeviceConnectionControl::on_switch_on(WavesButton*)
+DeviceConnectionControl::set_number (uint16_t number)
 {
-	_switch_on_button->set_active (true);
-	_switch_off_button->set_active (false);
-	_switch_changed(this, true);
+	if (number == DeviceConnectionControl::NoNumber) {
+		_number_label->get_parent()->hide ();
+	} else {
+		_number_label->get_parent()->show ();
+		_number_label->set_text(PBD::to_string (number, std::dec));
+	}
 }
 
 void
-DeviceConnectionControl::on_switch_off(WavesButton*)
+DeviceConnectionControl::set_active (bool active)
 {
-	_switch_on_button->set_active (false);
-	_switch_off_button->set_active (true);
-	_switch_changed(this, false);
+	_active_on_button->set_active (active);
+	_active_off_button->set_active (!active);
+}
+
+void
+DeviceConnectionControl::on_active_on(WavesButton*)
+{
+	set_active (true);
+	signal_active_changed(this, true);
+}
+
+void
+DeviceConnectionControl::on_active_off(WavesButton*)
+{
+	set_active (false);
+	signal_active_changed(this, false);
 }

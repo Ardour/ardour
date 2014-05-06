@@ -16,7 +16,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-
 // class TracksControlPanel : public WavesDialog {
   public:
 	void set_desired_sample_rate (uint32_t sr);
@@ -72,36 +71,42 @@
 
 // methods
 	virtual void init();
-	void on_audio_settings(WavesButton*);
-	void on_midi_settings(WavesButton*);
-	void on_session_settings(WavesButton*);
-	void on_control_panel(WavesButton*);
+	DeviceConnectionControl& add_device_capture_control(std::string device_capture_name, bool active, uint16_t capture_number, std::string track_name);
+	DeviceConnectionControl& add_device_playback_control(std::string device_playback_name, bool active, uint16_t playback_number);
+
+	void on_audio_settings (WavesButton*);
+	void on_midi_settings (WavesButton*);
+	void on_session_settings (WavesButton*);
+	void on_control_panel (WavesButton*);
     void on_multi_out (WavesButton*);
     void on_stereo_out (WavesButton*);
 	void on_ok(WavesButton*);
 	void on_cancel(WavesButton*);
 	void on_apply(WavesButton*);
+	void on_capture_active_changed (DeviceConnectionControl* capture_control, bool active);
+	void on_playback_active_changed (DeviceConnectionControl* playback_control, bool active);
+
 	void engine_changed ();
 	void device_changed ();
-	void buffer_size_changed();
-	void sample_rate_changed();
+	void buffer_size_changed ();
+	void sample_rate_changed ();
     void engine_running ();
     void engine_stopped ();
 
-	void populate_engine_combo();
-	void populate_device_combo();
-	void populate_sample_rate_combo();
-	void populate_buffer_size_combo();
+	void populate_engine_combo ();
+	void populate_device_combo ();
+	void populate_sample_rate_combo ();
+	void populate_buffer_size_combo ();
 
 	std::string bufsize_as_string (uint32_t sz);
     void set_state (const XMLNode&);
     int push_state_to_backend (bool start);
 
-	uint32_t get_buffer_size() const;
-	uint32_t get_input_channels() const { return 0; };
-    uint32_t get_output_channels() const { return 0; };
-    uint32_t get_input_latency() const { return 0; };
-    uint32_t get_output_latency() const { return 0; };
+	uint32_t get_buffer_size () const;
+	uint32_t get_input_channels () const { return 0; };
+    uint32_t get_output_channels () const { return 0; };
+    uint32_t get_input_latency () const { return 0; };
+    uint32_t get_output_latency () const { return 0; };
 
 	void show_buffer_duration ();
 //};
