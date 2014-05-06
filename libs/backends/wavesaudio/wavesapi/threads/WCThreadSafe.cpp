@@ -1,5 +1,6 @@
 #include "Threads/WCThreadSafe.h"
-    
+#include <glib.h>
+
 #if XPLATFORMTHREADS_WINDOWS
     #define _WIN32_WINNT 0x0500   // need at least Windows2000 (for TryEnterCriticalSection() and SignalObjectAndWait()
     #include "IncludeWindows.h"
@@ -28,7 +29,6 @@ static int (*BSDfread)( void *, size_t, size_t, FILE * ) = 0;
 
 #endif //XPLATFORMTHREADS_POSIX
 
-#include "Akupara/threading/atomic_ops.hpp"
 namespace wvNS {
 static const unsigned int knMicrosecondsPerSecond = 1000*1000;
 static const unsigned int knNanosecondsPerMicrosecond = 1000;
@@ -798,7 +798,7 @@ namespace wvThread
         uint32_t timeOut = in_num_trys;
         while (true)
         {
-            retVal = Akupara::threading::atomic::compare_and_store<int32_t>(&m_the_lock, int32_t(0), int32_t(1));
+            retVal = g_atomic_int_compare_and_exchange(&m_the_lock, gint(0), gint(1));
             if (retVal)
             {
                 break;
