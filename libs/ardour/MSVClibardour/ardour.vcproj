@@ -676,6 +676,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\midi_scene_change.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\midi_scene_changer.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\midi_source.cc"
 				>
 			</File>
@@ -857,6 +865,10 @@
 			</File>
 			<File
 				RelativePath="..\route_group_member.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\scene_change.cc"
 				>
 			</File>
 			<File
@@ -1718,6 +1730,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\midi_scene_change.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\midi_scene_changer.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\midi_source.h"
 				>
 			</File>
@@ -1951,6 +1971,14 @@
 			</File>
 			<File
 				RelativePath="..\ardour\runtime_functions.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\scene_change.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\scene_changer.h"
 				>
 			</File>
 			<File
