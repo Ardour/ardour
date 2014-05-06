@@ -91,7 +91,7 @@ static PmDeviceID pm_get_default_device_id(int is_input, char *key) {
         ERROR_SUCCESS) {
         return id;
     }
-    if (RegQueryValueEx(hkey, key, NULL, &dwType, pattern, &pattern_max) != 
+    if (RegQueryValueEx(hkey, key, NULL, &dwType, (LPBYTE)pattern, (LPDWORD)&pattern_max) != 
 	ERROR_SUCCESS) {
         return id;
     }
@@ -139,5 +139,4 @@ void *pm_alloc(size_t s) {
 void pm_free(void *ptr) { 
     free(ptr); 
 }
-
 

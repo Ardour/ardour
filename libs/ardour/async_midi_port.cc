@@ -64,7 +64,7 @@ AsyncMIDIPort::~AsyncMIDIPort ()
 }
 
 void
-AsyncMIDIPort::set_timer (boost::function<framecnt_t (void)>& f)
+AsyncMIDIPort::set_timer (boost::function<MIDI::framecnt_t (void)>& f)
 {
 	timer = f;
 	have_timer = true;
