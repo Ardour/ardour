@@ -1521,6 +1521,8 @@ void WCMRPortAudioDeviceManager::destroyCurrentDeviceImpl()
 
 WTErr WCMRPortAudioDeviceManager::getDeviceAvailableSampleRates(DeviceID deviceId, std::vector<int>& sampleRates)
 {
+	WTErr retVal = eNoErr;
+
 	sampleRates.clear();
 	const PaDeviceInfo *pPaDeviceInfo = Pa_GetDeviceInfo(deviceId);
 
@@ -1554,6 +1556,8 @@ WTErr WCMRPortAudioDeviceManager::getDeviceAvailableSampleRates(DeviceID deviceI
 			sampleRates.push_back ((int)gAllSampleRates[sr]);
 		}
 	}
+
+	return retVal;
 }
 
 
