@@ -434,7 +434,7 @@ def build(bld):
         obj.uselib += ' AUDIOUNITS OSX GTKOSX'
         obj.use    += ' libappleutility'
         obj.source += [ 'cocoacarbon.mm', 'bundle_env_cocoa.cc' ]
-    elif sys.platform == 'mingw':
+    elif bld.env['build_target'] == 'mingw':
         obj.source += [ 'bundle_env_mingw.cc' ]
     else:
         obj.source += [ 'bundle_env_linux.cc' ]
