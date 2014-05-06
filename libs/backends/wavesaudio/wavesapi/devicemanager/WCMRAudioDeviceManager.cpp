@@ -7,6 +7,7 @@
 //! WCMRAudioDeviceManager and related class declarations
 //!
 //---------------------------------------------------------------------------------*/
+#include <iostream>
 #include "WCMRAudioDeviceManager.h"
 
 
