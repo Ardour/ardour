@@ -10,6 +10,7 @@
 #include "WCMRPortAudioDeviceManager.h"
 #include "MiscUtils/safe_delete.h"
 #include "UMicroseconds.h"
+#include <iostream>
 #include <sstream>
 #include <algorithm>
 using namespace wvNS;
