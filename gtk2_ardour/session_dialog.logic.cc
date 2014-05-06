@@ -49,6 +49,11 @@
 #include "i18n.h"
 #include "utils.h"
 
+#ifdef _WIN32 
+#include <Windows.h>
+#include <commdlg.h>
+#endif
+
 using namespace std;
 using namespace Gtk;
 using namespace Gdk;
@@ -137,6 +142,38 @@ SessionDialog::session_selected ()
 void
 SessionDialog::on_new_session (WavesButton*)
 {
+	/*
+#ifdef __APPLE__
+	cout<<"APPLE works 2\n"<<flush;
+	//return;
+#endif	   */
+  
+#ifdef _WIN32 	 	
+// Fill the OPENFILENAME structure
+	TCHAR szFilePathName[_MAX_PATH] = "";
+	OPENFILENAME ofn = {0};
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.lpstrFile = szFilePathName;  // This will hold the file name
+	ofn.nMaxFile = _MAX_PATH;
+	ofn.lpstrTitle = _("Create New Session");
+	ofn.Flags = OFN_OVERWRITEPROMPT;
+
+	set_keep_above(false);
+	// Open the file save dialog, and choose the file name
+	if (GetSaveFileName(&ofn)) {
+		set_keep_above(true);
+		_selected_session_full_name = ofn.lpstrFile;
+		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
+            _recent_session_button[i]->set_active (false);
+		}
+		hide();
+        _selection_type = NewSession;
+		response (Gtk::RESPONSE_ACCEPT);
+	}
+
+	return;
+#endif // _WIN32 
+   
     Gtk::FileChooserDialog dialog(*this, _("Create New Session"), Gtk::FILE_CHOOSER_ACTION_SAVE);
 
 	dialog.add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
@@ -269,6 +306,38 @@ SessionDialog::on_open_selected (WavesButton*)
 void
 SessionDialog::on_open_saved_session (WavesButton*)
 {
+	/*
+#ifdef __APPLE__
+	cout<<"APPLE works 2\n"<<flush;
+	//return;
+#endif	   */
+  
+#ifdef _WIN32 
+// Fill the OPENFILENAME structure
+	TCHAR szFilePathName[_MAX_PATH] = "";
+	OPENFILENAME ofn = {0};
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.lpstrFile = szFilePathName;  // This will hold the file name
+	ofn.nMaxFile = _MAX_PATH;
+	ofn.lpstrTitle = _("Select Saved Session");
+	ofn.Flags = OFN_PATHMUSTEXIST;
+
+	set_keep_above(false);
+	// Open the file save dialog, and choose the file name
+	if (GetOpenFileName(&ofn)) {
+		set_keep_above(true);
+		_selected_session_full_name = ofn.lpstrFile;
+		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
+            _recent_session_button[i]->set_active(false);
+		}
+        _selection_type = SavedSession;
+		hide();
+		response (Gtk::RESPONSE_ACCEPT);
+	}
+
+	return;
+#endif // _WIN32
+  
 	Gtk::FileChooserDialog dialog(*this, _("Select Saved Session"));
 	dialog.add_button("CANCEL", Gtk::RESPONSE_CANCEL);
 	dialog.add_button("OK", Gtk::RESPONSE_OK);
