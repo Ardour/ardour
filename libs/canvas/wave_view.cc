@@ -419,9 +419,7 @@ WaveView::ensure_cache (framepos_t start, framepos_t end) const
 	_sample_start = max ((framepos_t) 0, (center - canvas_samples));
 	_sample_end = min (center + canvas_samples, _region->source_length (0));
 
-	double pixel_start = floor (_sample_start / (double) _samples_per_pixel);
-	double pixel_end = ceil (_sample_end / (double) _samples_per_pixel);
-	int n_peaks = llrintf (pixel_end - pixel_start);
+	const int n_peaks = llrintf ((_sample_end - _sample_start)/ (double) _samples_per_pixel);
 
 	boost::scoped_array<ARDOUR::PeakData> peaks (new PeakData[n_peaks]);
 
@@ -442,7 +440,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		return;
 	}
 
-	Rect self = item_to_window (Rect (0.0, 0.0, floor (_region->length() / _samples_per_pixel), _height));
+	Rect self = item_to_window (Rect (0.0, 0.0, _region->length() / _samples_per_pixel, _height));
 	boost::optional<Rect> d = self.intersection (area);
 
 	if (!d) {
@@ -452,12 +450,12 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	Rect draw = d.get();
 
 	/* window coordinates - pixels where x=0 is the left edge of the canvas
-	 * window. We round up and down in case we were asked to
+	 * window. We round down in case we were asked to
 	 * draw "between" pixels at the start and/or end.
 	 */
 
 	const double draw_start = floor (draw.x0);
-	const double draw_end = ceil (draw.x1);
+	const double draw_end = floor (draw.x1);
 
 	// cerr << "Need to draw " << draw_start << " .. " << draw_end << endl;
 	
