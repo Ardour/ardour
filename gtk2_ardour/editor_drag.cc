@@ -1789,9 +1789,10 @@ VideoTimeLineDrag::aborted (bool)
 
 TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool preserve_fade_anchor)
 	: RegionDrag (e, i, p, v)
+	, _preserve_fade_anchor (preserve_fade_anchor)
+	, _jump_position_when_done (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TrimDrag\n");
-	_preserve_fade_anchor = preserve_fade_anchor;
 }
 
 void
@@ -1826,6 +1827,10 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 			_operation = EndTrim;
 			Drag::start_grab (event, _editor->cursors()->right_side_trim);
 		}
+	}
+
+	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+		_jump_position_when_done = true;
 	}
 
 	switch (_operation) {
@@ -2007,6 +2012,9 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 						ar->set_fade_in_length(new_length);
 					}
 				}
+				if (_jump_position_when_done) {
+					i->view->region()->set_position (i->initial_position);
+				}
 			}
 		} else if (_operation == EndTrim) {
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
@@ -2023,6 +2031,9 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 						new_length = ar->verify_xfade_bounds (new_length, false  /*END*/ );
 						ar->set_fade_out_length(new_length);
 					}
+				}
+				if (_jump_position_when_done) {
+					i->view->region()->set_position (i->initial_end - i->view->region()->length());
 				}
 			}
 		}
