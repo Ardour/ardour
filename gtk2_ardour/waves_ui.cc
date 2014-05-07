@@ -22,6 +22,8 @@
 #include "waves_ui.h"
 #include "pbd/file_utils.h"
 #include "ardour/filesystem_paths.h"
+
+#include "pbd/convert.h"
 #include "dbg_msg.h"
 
 using namespace PBD;
@@ -147,6 +149,14 @@ WavesUI::add_widget (Gtk::Container& parent, const XMLNode& definition, const XM
 
 	if (container != NULL) {
 		WavesUI::create_ui (definition.children(), styles, *container, named_widgets);
+		Gtk::ScrolledWindow* sw = dynamic_cast<Gtk::ScrolledWindow*>(child);
+		if (sw != NULL) {
+			Gtk::Viewport* vp = (Gtk::Viewport*)sw->get_child();
+			if (vp != NULL) {
+				set_attributes(*(Gtk::Widget*)vp, definition, styles);
+				vp->set_shadow_type(Gtk::SHADOW_NONE);
+			}
+		}
 	}
 	return child;
 }

@@ -124,7 +124,7 @@
           <Label style="generic_control" text="Track Name" fgnormal="#000000" x="7" y="3"/>
         </Layout>
         <Layout bgnormal="#27ae36" x="290" y="13" width="3" height="41"/>
-        <Layout bgnormal="#27ae36" x="296" y="13" width="179" height="19">
+        <Layout bgnormal="#27ae36" x="296" y="13" width="178" height="19">
           <Label style="generic_control" text="OUTPUTS" fgnormal="#ffffff" font ="Arial Bold 10" x="7" y="3"/>
         </Layout>
         <Layout bgnormal="#797979" x="296" y="35" width="85" height="19">
@@ -155,7 +155,7 @@
         <Layout bgnormal="#797979" x="448" y="35" width="26" height="19">
           <Label style="generic_control" text="#" fgnormal="#000000" x="7" y="3"/>
         </Layout>
-        <ScrolledWindow x="14" y="62" width="480" height="299" hscroll="never" vscroll="always">
+        <ScrolledWindow x="16" y="62" bgnormal="#565656" width="478" height="299" hscroll="never" vscroll="auto">
           <HBox>
             <VBox id="device_capture_list">
             </VBox>
