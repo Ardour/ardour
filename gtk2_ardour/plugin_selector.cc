@@ -316,7 +316,12 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 #else
 			while (pos < creator.length() && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
 #endif
-			creator = creator.substr (0, pos);
+			// If there were too few characters to create a
+			// meaningfule name, mark this creator as 'Unknown'
+			if (creator.length()<2 || pos<3)
+				creator = "Unknown";
+			else
+				creator = creator.substr (0, pos);
 
 			newrow[plugin_columns.creator] = creator;
 
@@ -685,11 +690,20 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 		/* stupid LADSPA creator strings */
 		string::size_type pos = 0;
 #ifdef PLATFORM_WINDOWS
-		while (pos < creator.length() && creator[pos] > -2 && creator[pos] < 256 && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
+		while (pos < creator.length() && creator[pos]>(-2) && creator[pos]<256 && (isprint (creator[pos]))) ++pos;
 #else
 		while (pos < creator.length() && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
 #endif
-		creator = creator.substr (0, pos);
+
+		// Check to see if we found any invalid characters.
+		if (creator.length() != pos) {
+			// If there were too few characters to create a
+			// meaningfule name, mark this creator as 'Unknown'
+			if (pos<3)
+				creator = "Unknown?";
+			else
+				creator = creator.substr (0, pos);
+		}
 
 		SubmenuMap::iterator x;
 		Gtk::Menu* submenu;
