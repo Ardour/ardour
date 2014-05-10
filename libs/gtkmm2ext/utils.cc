@@ -42,6 +42,7 @@ Gtkmm2ext::init (const char* localedir)
 {
 #ifdef ENABLE_NLS
 	(void) bindtextdomain(PACKAGE, localedir);
+	(void) bind_textdomain_codeset (PACKAGE, "UTF-8");
 #endif
 }
 
