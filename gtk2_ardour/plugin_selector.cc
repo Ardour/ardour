@@ -317,7 +317,7 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 			while (pos < creator.length() && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
 #endif
 			// If there were too few characters to create a
-			// meaningfule name, mark this creator as 'Unknown'
+			// meaningful name, mark this creator as 'Unknown'
 			if (creator.length()<2 || pos<3)
 				creator = "Unknown";
 			else
@@ -698,7 +698,7 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 		// Check to see if we found any invalid characters.
 		if (creator.length() != pos) {
 			// If there were too few characters to create a
-			// meaningfule name, mark this creator as 'Unknown'
+			// meaningful name, mark this creator as 'Unknown'
 			if (pos<3)
 				creator = "Unknown?";
 			else
