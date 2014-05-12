@@ -42,6 +42,8 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
   private:
 	Gtk::VBox& _device_capture_list;
 	Gtk::VBox& _device_playback_list;
+	Gtk::VBox& _midi_capture_list;
+	Gtk::VBox& _midi_playback_list;
 	Gtk::Layout& _audio_settings_layout;
 	Gtk::Layout& _midi_settings_layout;
 	Gtk::Layout& _session_settings_layout;

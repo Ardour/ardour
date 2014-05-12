@@ -45,7 +45,44 @@
       font ="Arial Bold 10"
       x="2" y="134" width="107" height="65"/>
 
-    <Layout id="audio_settings_layout" bgnormal="#000000" x="113" y="1" width="505" height="558">
+    <Layout bgnormal="#565656" x="113" y="559" width="505" height="63">
+      <Button
+        id="ok_button"
+        text="OK"
+        style="generic_button"
+        x="275" y="18" width="71" height="28"/>
+      <Button
+        id="cancel_button"
+        text="CANCEL"
+        style="generic_button"
+        x="347" y="18" width="71" height="28"/>
+      <Button
+        id="apply_button"
+        text="APPLY"
+        style="generic_button"
+        x="419" y="18" width="71" height="28"/>
+    </Layout>
+    <Layout id="midi_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557" visible="true">
+      <Layout bgnormal="#000000" x="21" y="20" width="291" height="19">
+        <Label style="generic_control" text="MIDI PORTS" fgnormal="#ffffff" font ="Arial Bold 10" x="7" y="3"/>
+      </Layout>
+      <Layout bgnormal="#797979" x="317" y="20" width="60" height="19">
+        <Label style="generic_control" text="INPUT" fgnormal="#ffffff" font="Arial Bold 10" x="7" y="3"/>
+      </Layout>
+      <Layout bgnormal="#797979" x="382" y="20" width="60" height="19">
+        <Label style="generic_control" text="OUTPUT" fgnormal="#ffffff" font="Arial Bold 10" x="7" y="3"/>
+      </Layout>
+      <Layout bgnormal="#000000" x="447" y="20" width="14" height="19" />
+      <ScrolledWindow x="21" y="62" bgnormal="#565656" width="440" height="218" hscroll="never" vscroll="auto">
+        <HBox>
+          <VBox id="midi_capture_list">
+          </VBox>
+          <VBox id="midi_playback_list">
+          </VBox>
+        </HBox>
+      </ScrolledWindow>
+    </Layout>
+    <Layout id="audio_settings_layout" bgnormal="#000000" x="113" y="1" width="505" height="558" visible="true">
       <Layout bgnormal="#565656" x="0" y="0" width="505" height="100">
         <Label style="generic_control" text="AUDIO ENGINE" x="12" y="17"/>
         <ComboBoxText style="generic_control" id="engine_combo" x="97" y="12" width="126" height="20"/>
@@ -163,12 +200,6 @@
             </VBox>
           </HBox>
         </ScrolledWindow>
-        <!--VBox x="14" y="62">
-          <Layout bgnormal="#565656" width="475" height="800">
-            <Layout bgnormal="#862579" x="0" y="0" width="3" height="299"/>
-            <Layout bgnormal="#27ae36" x="274" y="0" width="3" height="299"/>
-          </Layout>
-        </VBox-->
         <Button
           id="name_track_after_driver_button"
           text="NAME TRACK\nAFTER DRIVER"
@@ -189,35 +220,6 @@
           text="NO"
           style="generic_button"
           x="345" y="369" width="52" height="39"/>
-      </Layout>
-    </Layout>
-    <Layout bgnormal="#565656" x="113" y="559" width="505" height="63">
-      <Button
-        id="ok_button"
-        text="OK"
-        style="generic_button"
-        x="275" y="18" width="71" height="28"/>
-      <Button
-        id="cancel_button"
-        text="CANCEL"
-        style="generic_button"
-        x="347" y="18" width="71" height="28"/>
-      <Button
-        id="apply_button"
-        text="APPLY"
-        style="generic_button"
-        x="419" y="18" width="71" height="28"/>
-    </Layout>
-
-    <Layout id="midi_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557" visible="false">
-      <Layout bgnormal="#000000" x="21" y="20" width="291" height="19">
-        <Label style="generic_control" text="MIDI PORTS" fgnormal="#ffffff" font ="Arial Bold 10" x="7" y="3"/>
-      </Layout>
-      <Layout bgnormal="#797979" x="317" y="20" width="60" height="19">
-        <Label style="generic_control" text="INPUT" fgnormal="#ffffff" font="Arial Bold 10" x="7" y="3"/>
-      </Layout>
-      <Layout bgnormal="#797979" x="382" y="20" width="60" height="19">
-        <Label style="generic_control" text="OUTPUT" fgnormal="#ffffff" font="Arial Bold 10" x="7" y="3"/>
       </Layout>
     </Layout>
     <Layout id="session_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557" visible="false">

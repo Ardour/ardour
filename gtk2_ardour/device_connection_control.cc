@@ -27,8 +27,9 @@ DeviceConnectionControl::DeviceConnectionControl (std::string device_capture_nam
 	, _active_off_button (NULL)
 	, _name_label (NULL)
 	, _track_name_label (NULL)
+	, _number_label (NULL)
 {
-	build_layout("device_capture_connection_conrol.xml");
+	build_layout("device_capture_control.xml");
 	_active_on_button = &_children.get_waves_button ("capture_on_button");
 	_active_off_button = &_children.get_waves_button ("capture_off_button");
 	_name_label = &_children.get_label ("capture_name_label");
@@ -44,8 +45,9 @@ DeviceConnectionControl::DeviceConnectionControl (std::string device_playback_na
 	, _active_off_button (NULL)
 	, _name_label (NULL)
 	, _track_name_label (NULL)
+	, _number_label (NULL)
 {
-	build_layout("device_playback_connection_conrol.xml");
+	build_layout("device_playback_control.xml");
 	_active_on_button = &_children.get_waves_button ("playback_on_button");
 	_active_off_button = &_children.get_waves_button ("playback_off_button");
 	_name_label = &_children.get_label ("playback_name_label");
@@ -53,15 +55,54 @@ DeviceConnectionControl::DeviceConnectionControl (std::string device_playback_na
 	init(device_playback_name, active, playback_number);
 }
 
+DeviceConnectionControl::DeviceConnectionControl (std::string midi_capture_name, bool active)
+
+	: Gtk::Layout()
+	, _active_on_button (NULL)
+	, _active_off_button (NULL)
+	, _name_label (NULL)
+	, _track_name_label (NULL)
+	, _number_label (NULL)
+{
+	build_layout("midi_capture_control.xml");
+	_active_on_button = &_children.get_waves_button ("capture_on_button");
+	_active_off_button = &_children.get_waves_button ("capture_off_button");
+	_name_label = &_children.get_label ("capture_name_label");
+	init(midi_capture_name, active, NoNumber);
+}
+
+DeviceConnectionControl::DeviceConnectionControl (bool active)
+
+	: Gtk::Layout()
+	, _active_on_button (NULL)
+	, _active_off_button (NULL)
+	, _name_label (NULL)
+	, _track_name_label (NULL)
+	, _number_label (NULL)
+{
+	build_layout("midi_playback_control.xml");
+	_active_on_button = &_children.get_waves_button ("playback_on_button");
+	_active_off_button = &_children.get_waves_button ("playback_off_button");
+	init("", active, NoNumber);
+}
+
 void DeviceConnectionControl::init(std::string name, bool active, uint16_t number, std::string track_name)
 {
 	_active_on_button->signal_clicked.connect (sigc::mem_fun (*this, &DeviceConnectionControl::on_active_on));
 	_active_off_button->signal_clicked.connect (sigc::mem_fun (*this, &DeviceConnectionControl::on_active_off));
-	_name_label->set_text (name);
-	_number_label->set_text(PBD::to_string (number, std::dec));
+
+	if (_name_label != NULL) {
+		_name_label->set_text (name);
+	}
+
+	if (_number_label != NULL) {
+		_number_label->set_text(PBD::to_string (number, std::dec));
+	}
+
 	if (_track_name_label != NULL) {
 		_track_name_label->set_text (track_name);
 	}
+
 	_active_on_button->set_active (active);
 	_active_off_button->set_active (!active);
 }
@@ -86,11 +127,13 @@ DeviceConnectionControl::build_layout (std::string file_name)
 void
 DeviceConnectionControl::set_number (uint16_t number)
 {
-	if (number == DeviceConnectionControl::NoNumber) {
-		_number_label->get_parent()->hide ();
-	} else {
-		_number_label->get_parent()->show ();
-		_number_label->set_text(PBD::to_string (number, std::dec));
+	if (_number_label != NULL) {
+		if (number == NoNumber) {
+			_number_label->get_parent()->hide ();
+		} else {
+			_number_label->get_parent()->show ();
+			_number_label->set_text(PBD::to_string (number, std::dec));
+		}
 	}
 }
 

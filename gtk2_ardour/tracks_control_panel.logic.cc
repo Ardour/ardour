@@ -70,8 +70,6 @@ TracksControlPanel::init ()
 	_buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::buffer_size_changed));
 
 	populate_engine_combo ();
-	_midi_settings_layout.hide ();
-	_session_settings_layout.hide ();
 	_audio_settings_tab_button.set_active(true);
     _multi_out_button.set_active(ARDOUR::Config->get_output_auto_connect() & ARDOUR::AutoConnectPhysical);
     _stereo_out_button.set_active(ARDOUR::Config->get_output_auto_connect() & ARDOUR::AutoConnectMaster);
@@ -90,6 +88,22 @@ DeviceConnectionControl& TracksControlPanel::add_device_playback_control(std::st
 	DeviceConnectionControl &playback_control = *manage (new DeviceConnectionControl(device_playback_name, active, playback_number));
 	_device_playback_list.pack_start (playback_control, false, false);
 	playback_control.signal_active_changed.connect(sigc::mem_fun (*this, &TracksControlPanel::on_playback_active_changed));
+	return playback_control;
+}
+
+DeviceConnectionControl& TracksControlPanel::add_midi_capture_control(std::string device_capture_name, bool active)
+{
+	DeviceConnectionControl &capture_control = *manage (new DeviceConnectionControl(device_capture_name, active));
+	_midi_capture_list.pack_start (capture_control, false, false);
+	capture_control.signal_active_changed.connect (sigc::mem_fun (*this, &TracksControlPanel::on_midi_capture_active_changed));
+	return capture_control;
+}
+
+DeviceConnectionControl& TracksControlPanel::add_midi_playback_control(bool active)
+{
+	DeviceConnectionControl &playback_control = *manage (new DeviceConnectionControl(active));
+	_midi_playback_list.pack_start (playback_control, false, false);
+	playback_control.signal_active_changed.connect(sigc::mem_fun (*this, &TracksControlPanel::on_midi_playback_active_changed));
 	return playback_control;
 }
 
@@ -225,11 +239,16 @@ TracksControlPanel::on_control_panel(WavesButton*)
 	number++;
 	active = !active;
 
-	std::string name = string_compose (_("Input %1"), number);
+	std::string name = string_compose (_("Audio Capture %1"), number);
 	add_device_capture_control (name, active, number, name);
 
-	name = string_compose (_("Output %1"), number);
+	name = string_compose (_("Audio Playback Output %1"), number);
 	add_device_playback_control (name, active, number);
+
+	name = string_compose (_("Midi Capture %1"), number);
+	add_midi_capture_control (name, active);
+
+	add_midi_playback_control (active);
 }
 
 void TracksControlPanel::engine_changed ()
@@ -520,6 +539,16 @@ void TracksControlPanel::on_playback_active_changed(DeviceConnectionControl* pla
 // here is just demo code to replace it with a meaningful app logic in future
 // *************************************************************************
 	playback_control->set_number ( active ? 1000 : DeviceConnectionControl::NoNumber);
+}
+
+
+void TracksControlPanel::on_midi_capture_active_changed(DeviceConnectionControl* capture_control, bool active)
+{
+}
+
+
+void TracksControlPanel::on_midi_playback_active_changed(DeviceConnectionControl* playback_control, bool active)
+{
 }
 
 

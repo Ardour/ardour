@@ -73,6 +73,8 @@
 	virtual void init();
 	DeviceConnectionControl& add_device_capture_control(std::string device_capture_name, bool active, uint16_t capture_number, std::string track_name);
 	DeviceConnectionControl& add_device_playback_control(std::string device_playback_name, bool active, uint16_t playback_number);
+	DeviceConnectionControl& add_midi_capture_control(std::string device_capture_name, bool active);
+	DeviceConnectionControl& add_midi_playback_control(bool active);
 
 	void on_audio_settings (WavesButton*);
 	void on_midi_settings (WavesButton*);
@@ -85,6 +87,8 @@
 	void on_apply(WavesButton*);
 	void on_capture_active_changed (DeviceConnectionControl* capture_control, bool active);
 	void on_playback_active_changed (DeviceConnectionControl* playback_control, bool active);
+	void on_midi_capture_active_changed (DeviceConnectionControl* capture_control, bool active);
+	void on_midi_playback_active_changed (DeviceConnectionControl* playback_control, bool active);
 
 	void engine_changed ();
 	void device_changed ();

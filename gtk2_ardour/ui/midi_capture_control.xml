@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layout bgnormal="#565656" width="361" height="20">
+  <style name="generic_control" font ="Arial 10"/>
+  <Layout bgnormal="#797979" x="0" y="0" width="291" height="19">
+    <Label style="generic_control"
+           id="capture_name_label"
+           text="-"
+           fgnormal="#000000"
+           x="7" y="3"/>
+  </Layout>
+  <Button id="capture_on_button"
+    text="ON"
+    style="generic_control"
+    fgnormal="#FFFFFF"
+    bgnormal="#606060"
+    fgactive="#FFFFFF"
+    bgactive="#1CA3B3"
+    fghover="#FFFFFF"
+    bghover="#808080"
+    borderwidth="0 0 0 0"
+    x="296" y="0" width="30" height="19"/>
+  <Button id="capture_off_button"
+    text="OFF"
+    style="generic_control"
+    fgnormal="#FFFFFF"
+    bgnormal="#606060"
+    fgactive="#FFFFFF"
+    bgactive="#FC3334"
+    fghover="#FFFFFF"
+    bghover="#808080"
+    borderwidth="0 0 0 0"
+    x="326" y="0" width="30" height="19"/>
+</Layout>
