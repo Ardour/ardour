@@ -358,23 +358,9 @@ def set_compiler_flags (conf,opt):
     if conf.env['DEBUG_DENORMAL_EXCEPTION']:
         compiler_flags.append('-DDEBUG_DENORMAL_EXCEPTION')
 
-    if opt.universal:
-        if opt.generic:
-            print ('Specifying Universal and Generic builds at the same time is not supported')
-            sys.exit (1)
-        else:
-            if not Options.options.nocarbon:
-                compiler_flags.extend(("-arch", "i386", "-arch", "ppc"))
-                linker_flags.extend(("-arch", "i386", "-arch", "ppc"))
-            else:
-                compiler_flags.extend(
-                        ("-arch", "x86_64", "-arch", "i386", "-arch", "ppc"))
-                linker_flags.extend(
-                        ("-arch", "x86_64", "-arch", "i386", "-arch", "ppc"))
-    else:
-        if opt.generic:
-            compiler_flags.extend(('-arch', 'i386'))
-            linker_flags.extend(('-arch', 'i386'))
+    if opt.generic:
+        compiler_flags.extend(('-arch', 'i386'))
+        linker_flags.extend(('-arch', 'i386'))
 
     #
     # warnings flags
@@ -490,8 +476,6 @@ def options(opt):
                     help="Build a single executable for each unit test")
     #opt.add_option('--tranzport', action='store_true', default=False, dest='tranzport',
     # help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
-    opt.add_option('--universal', action='store_true', default=False, dest='universal',
-                    help='Compile as universal binary (OS X ONLY, requires that external libraries are universal)')
     opt.add_option('--generic', action='store_true', default=False, dest='generic',
                     help='Compile with -arch i386 (OS X ONLY)')
     opt.add_option('--versioned', action='store_true', default=False, dest='versioned',
@@ -836,7 +820,6 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Translation',           opts.nls)
 #    write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
-    write_config_text('Universal binary',      opts.universal)
     write_config_text('Generic x86 CPU',       opts.generic)
     write_config_text('Windows VST support',   opts.windows_vst)
     write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))
