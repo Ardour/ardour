@@ -60,10 +60,10 @@ public:
     
     //SIGNALS
     /* this signal is emitted if the sample rate changes */
-    PBD::Signal1<void, ARDOUR::framecnt_t> SampleRateChanged;
+    PBD::Signal0<void> SampleRateChanged;
     
     /* this signal is emitted if the buffer size changes */
-    PBD::Signal1<void, ARDOUR::pframes_t> BufferSizeChanged;
+    PBD::Signal0<void> BufferSizeChanged;
     
     /* this signal is emitted if the device list changes */
     PBD::Signal0<void> DeviceListChanged;

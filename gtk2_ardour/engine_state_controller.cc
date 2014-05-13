@@ -55,7 +55,7 @@ EngineStateController::EngineStateController()
 	AudioEngine::instance ()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineStateController::_on_engine_stopped, this), gui_context());
     
 	/* Subscribe for udpates from AudioEngine */
-    AudioEngine::instance()->BufferSizeChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&EngineStateController::_on_sample_rate_change, this, _1), gui_context());
+    AudioEngine::instance()->SampleRateChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&EngineStateController::_on_sample_rate_change, this, _1), gui_context());
 	AudioEngine::instance()->BufferSizeChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&EngineStateController::_on_buffer_size_change, this, _1), gui_context());
     AudioEngine::instance()->DeviceListChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&EngineStateController::_on_device_list_change, this), gui_context());
     
@@ -147,10 +147,21 @@ EngineStateController::_validate_current_device_state()
     std::vector<pframes_t> buffer_sizes = backend->available_buffer_sizes (_current_state->device_name);
     // check if buffer size is supported
     std::vector<pframes_t>::iterator bs_iter = std::find (buffer_sizes.begin(), buffer_sizes.end(), _current_state->buffer_size);
-    // switch to default if not supported
+    // if current is not found switch to default if is supported
     if (bs_iter == buffer_sizes.end() ) {
-        _current_state->buffer_size = backend->default_buffer_size ();
-    }
+		std::find (buffer_sizes.begin(), buffer_sizes.end(), backend->default_buffer_size () );
+	
+		if (bs_iter != buffer_sizes.end() ) {
+			_current_state->buffer_size = backend->default_buffer_size ();
+		} else {
+			if (!buffer_sizes.empty() ) {
+				_current_state->buffer_size = buffer_sizes.front();
+			}
+		}
+
+	}
+
+	
 }
 
 
@@ -314,6 +325,8 @@ EngineStateController::set_new_current_device_in_controller(const std::string& d
             _states.push_front(_current_state);
         }
         
+		push_current_state_to_backend(false);
+
         return true;
     }
     
@@ -372,18 +385,31 @@ EngineStateController::set_new_buffer_size_in_controller(pframes_t buffer_size)
 void
 EngineStateController::_on_sample_rate_change(framecnt_t new_sample_rate)
 {
-    set_new_sample_rate_in_controller(new_sample_rate);
-    
-    SampleRateChanged(new_sample_rate); // emit a signal
+	// validate the change
+	if (set_new_sample_rate_in_controller(new_sample_rate)) {
+		SampleRateChanged(); // emit a signal if successful
+	
+	} else {
+		// restore previous state in backend
+		push_current_state_to_backend(false);
+	}
+
 }
 
 
 void
 EngineStateController::_on_buffer_size_change(pframes_t new_buffer_size)
 {
-    set_new_buffer_size_in_controller(new_buffer_size);
+	// validate the change
+    if (set_new_buffer_size_in_controller(new_buffer_size) ) {
+		BufferSizeChanged(); // emit a signal if successful
+	
+	} else {
+		// restore previous state in backend
+		push_current_state_to_backend(false);
+	}
     
-    BufferSizeChanged(new_buffer_size); // emit a signal
+    
 }
 
 
