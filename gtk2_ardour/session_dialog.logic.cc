@@ -51,14 +51,7 @@
 #include "i18n.h"
 #include "utils.h"
 
-#ifdef _WIN32 
-#include <Windows.h>
-#include <commdlg.h>
-#endif
-
-#ifdef __APPLE__
 #include "OpenFileDialogProxy.h"
-#endif
 
 using namespace std;
 using namespace Gtk;
@@ -167,20 +160,12 @@ SessionDialog::on_new_session (WavesButton*)
 #endif
   
 #ifdef _WIN32 	 	
-// Fill the OPENFILENAME structure
-	TCHAR szFilePathName[_MAX_PATH] = "";
-	OPENFILENAME ofn = {0};
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.lpstrFile = szFilePathName;  // This will hold the file name
-	ofn.nMaxFile = _MAX_PATH;
-	ofn.lpstrTitle = _("Create New Session");
-	ofn.Flags = OFN_OVERWRITEPROMPT;
-
-	set_keep_above(false);
+	set_keep_above(false);	 
+	string fileTitle;		 
 	// Open the file save dialog, and choose the file name
-	if (GetSaveFileName(&ofn)) {
+	if ( ARDOUR::SaveFileDialog(fileTitle, _("Create New Session")) ) {
 		set_keep_above(true);
-		_selected_session_full_name = ofn.lpstrFile;
+		_selected_session_full_name = fileTitle;
 		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
             _recent_session_button[i]->set_active (false);
 		}
@@ -340,20 +325,12 @@ SessionDialog::on_open_saved_session (WavesButton*)
 #endif
   
 #ifdef _WIN32 
-// Fill the OPENFILENAME structure
-	TCHAR szFilePathName[_MAX_PATH] = "";
-	OPENFILENAME ofn = {0};
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.lpstrFile = szFilePathName;  // This will hold the file name
-	ofn.nMaxFile = _MAX_PATH;
-	ofn.lpstrTitle = _("Select Saved Session");
-	ofn.Flags = OFN_PATHMUSTEXIST;
-
 	set_keep_above(false);
 	// Open the file save dialog, and choose the file name
-	if (GetOpenFileName(&ofn)) {
+	string fileName;
+	if (OpenFileDialog(fileName, _("Select Saved Session"))) {
 		set_keep_above(true);
-		_selected_session_full_name = ofn.lpstrFile;
+		_selected_session_full_name = fileName;
 		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
             _recent_session_button[i]->set_active(false);
 		}

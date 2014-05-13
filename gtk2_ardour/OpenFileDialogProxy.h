@@ -15,7 +15,14 @@
 // to invoke a specific Objective-C method FROM C++
 namespace ARDOUR
 {
+	#ifdef __APPLE__
     std::string SaveFileDialog(std::string title = "");
     std::string OpenFileDialog(std::string title = "");
+	#endif
+		
+	#ifdef _WIN32
+	bool SaveFileDialog(std::string& fileName, std::string title = "Save");
+    bool OpenFileDialog(std::string& fileName, std::string title = "Open");
+	#endif
 }
 #endif
