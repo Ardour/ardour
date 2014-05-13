@@ -758,7 +758,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     std::string _announce_string;
     void check_announcements ();
 
-	int do_tracks_control_panel(uint32_t);
+	int do_engine_setup(ARDOUR::framecnt_t desired_sample_rate);
 };
 
 #endif /* __ardour_gui_h__ */

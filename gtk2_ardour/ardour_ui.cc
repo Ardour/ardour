@@ -95,6 +95,7 @@ typedef uint64_t microseconds_t;
 #include "add_route_dialog.h"
 #include "ambiguous_file_dialog.h"
 #include "ardour_ui.h"
+#include "engine_state_controller.h"
 #include "audio_clock.h"
 #include "big_clock_window.h"
 #include "bundle_manager.h"
@@ -283,7 +284,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	/* handle Audio/MIDI setup when session requires it */
 
-	ARDOUR::Session::AudioEngineSetupRequired.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::do_tracks_control_panel, this, _1));
+	ARDOUR::Session::AudioEngineSetupRequired.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::do_engine_setup, this, _1));
 
 	/* handle sr mismatch with a dialog (PROBLEM: needs to return a value and thus cannot be x-thread) */
 
@@ -389,7 +390,15 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
 
+    // start the engine:
+    // initialize engin state controller
+    EngineStateController::instance();
+    
+    // attach to the engine signals
 	attach_to_engine ();
+    
+    // start the engine pushing state from the state controller
+    EngineStateController::instance()->push_current_state_to_backend(true);
 }
 
 GlobalPortMatrixWindow*
@@ -426,7 +435,7 @@ ARDOUR_UI::engine_running ()
 	
 	update_disk_space ();
 	update_cpu_load ();
-	update_sample_rate (AudioEngine::instance()->sample_rate());
+	update_sample_rate (EngineStateController::instance()->get_current_sample_rate() );
 	update_timecode_format ();
 }
 
@@ -1152,7 +1161,7 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 
 	} else {
 
-		framecnt_t rate = AudioEngine::instance()->sample_rate();
+		framecnt_t rate = EngineStateController::instance()->get_current_sample_rate();
 
 		if (rate == 0) {
 			/* no sample rate available */
@@ -4392,19 +4401,9 @@ ARDOUR_UI::reset_route_peak_display (Route* route)
 
 #define dbg_msg(a) MessageDialog(a, PROGRAM_NAME).run();
 int
-ARDOUR_UI::do_tracks_control_panel (uint32_t desired_sample_rate)
+ARDOUR_UI::do_engine_setup (framecnt_t desired_sample_rate)
 {
-	tracks_control_panel->set_desired_sample_rate (desired_sample_rate);
-	tracks_control_panel->set_position (WIN_POS_CENTER);
-
-	switch (tracks_control_panel->run()) {
-        case Gtk::RESPONSE_OK:
-            return 0;
-        case Gtk::RESPONSE_APPLY:
-            return 0;
-        default:
-            break;
-	}
+    ARDOUR::EngineStateController::instance()->set_desired_sample_rate (desired_sample_rate);
     
-	return -1;
+	return 0;
 }

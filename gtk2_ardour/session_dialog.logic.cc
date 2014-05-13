@@ -28,6 +28,8 @@
 
 #include <gtkmm/filechooser.h>
 
+#include "engine_state_controller.h"
+
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
 #include "pbd/replace_all.h"
@@ -213,15 +215,11 @@ SessionDialog::on_new_session (WavesButton*)
 
 void SessionDialog::redisplay_system_configuration ()
 {
-	// Temp solution:
-	TracksControlPanel* panel = dynamic_cast<TracksControlPanel*>(_system_configuration_dialog.get(false));
-	if (panel) {
-		_session_details_label.set_text(string_compose (_("%1\n\n\n\n%2"),
-														panel->get_device_name(),
-														panel->get_sample_rate()));
-	} else {
-		_session_details_label.set_text("");
-	}
+	ARDOUR::EngineStateController* eng_controller (ARDOUR::EngineStateController::instance() );
+    
+    _session_details_label.set_text(string_compose (_("%1\n\n\n\n%2"),
+                                                    eng_controller->get_current_device_name(),
+													eng_controller->get_current_sample_rate()));
 }
 
 int

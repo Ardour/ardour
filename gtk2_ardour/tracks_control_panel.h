@@ -24,6 +24,8 @@
 #include <vector>
 #include <string>
 
+#include "ardour/types.h"
+
 #include <gtkmm/layout.h>
 
 #include "pbd/signals.h"

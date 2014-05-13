@@ -16,17 +16,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+
 // class TracksControlPanel : public WavesDialog {
   public:
-	void set_desired_sample_rate (uint32_t sr);
-	XMLNode& get_state ();
-	
-	void update_current_buffer_size (uint32_t new_buffer_size);
-    void update_device_list ();
-    void switch_to_device(const std::string& device_name);
-
-	float get_sample_rate() const;
-	std::string get_device_name() const { return _device_combo.get_active_text (); };
 
   private:
 // data types:
@@ -101,16 +93,17 @@
 	void populate_device_combo ();
 	void populate_sample_rate_combo ();
 	void populate_buffer_size_combo ();
+	void populate_output_mode ();
 
 	std::string bufsize_as_string (uint32_t sz);
-    void set_state (const XMLNode&);
-    int push_state_to_backend (bool start);
 
-	uint32_t get_buffer_size () const;
-	uint32_t get_input_channels () const { return 0; };
-    uint32_t get_output_channels () const { return 0; };
-    uint32_t get_input_latency () const { return 0; };
-    uint32_t get_output_latency () const { return 0; };
+    std::string         get_device_name() const { return _device_combo.get_active_text (); };
+    ARDOUR::framecnt_t  get_sample_rate() const;
+    ARDOUR::pframes_t   get_buffer_size () const;
+	uint32_t            get_input_channels () const { return 0; };
+    uint32_t            get_output_channels () const { return 0; };
+    uint32_t            get_input_latency () const { return 0; };
+    uint32_t            get_output_latency () const { return 0; };
 
 	void show_buffer_duration ();
 //};
