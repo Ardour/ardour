@@ -430,15 +430,9 @@ DummyAudioBackend::in_process_thread ()
 {
 	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
 	{
-#ifdef COMPILER_MINGW
-		if (*i == GetCurrentThread ()) {
-			return true;
-		}
-#else // pthreads
 		if (pthread_equal (*i, pthread_self ()) != 0) {
 			return true;
 		}
-#endif
 	}
 	return false;
 }
