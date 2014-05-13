@@ -314,12 +314,12 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ActionManager::map_some_state ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
 
 		if (!_session->config.get_external_sync()) {
-			sync_button.set_text (_("Internal"));
+			// NO NEED TO HAVE IT: sync_button.set_text (_("Internal"));
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (true);
 		} else {
-			sync_button.set_text (sync_source_to_string (Config->get_sync_source(), true));
+			// NO NEED TO HAVE IT: sync_button.set_text (sync_source_to_string (Config->get_sync_source(), true));
 			/* XXX need to make auto-play is off as well as insensitive */
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
@@ -474,9 +474,9 @@ ARDOUR_UI::synchronize_sync_source_and_video_pullup ()
 
   just_label:
 	if (act->get_sensitive ()) {
-		set_tip (sync_button, _("Enable/Disable external positional sync"));
+		// NO NEED TO HAVE IT: set_tip (sync_button, _("Enable/Disable external positional sync"));
 	} else {
-		set_tip (sync_button, _("Sync to JACK is not possible: video pull up/down is set"));
+		// NO NEED TO HAVE IT: set_tip (sync_button, _("Sync to JACK is not possible: video pull up/down is set"));
 	}
 
 }

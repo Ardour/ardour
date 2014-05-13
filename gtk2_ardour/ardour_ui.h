@@ -448,8 +448,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ArdourButton follow_edits_button;
 	ArdourButton auto_input_button;
 	ArdourButton click_button;
-	ArdourButton sync_button;
-
+	// NO NEED TO HAVE IT: ArdourButton sync_button;
+ 
 	ArdourButton auditioning_alert_button;
 	ArdourButton solo_alert_button;
 	ArdourButton feedback_alert_button;

@@ -262,7 +262,7 @@ ARDOUR_UI::setup_transport ()
 	/* these have to provide a clear indication of active state */
 
 	click_button.set_name ("transport button");
-	sync_button.set_name ("transport active option button");
+	// NO NEED TO HAVE IT: sync_button.set_name ("transport active option button");
 
 	stop_button.set_active (true);
 
@@ -295,7 +295,7 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action (X_("MIDI"), X_("panic"));
 	midi_panic_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
-	sync_button.set_related_action (act);
+	// NO NEED TO HAVE IT: sync_button.set_related_action (act);
 
 	/* clocks, etc. */
 
@@ -418,7 +418,7 @@ ARDOUR_UI::setup_transport ()
 	VBox* auto_box = manage (new VBox);
 	auto_box->set_homogeneous (true);
 	auto_box->set_spacing (2);
-	auto_box->pack_start (sync_button, false, false);
+	// NO NEED TO HAVE IT: auto_box->pack_start (sync_button, false, false);
 	if (!ARDOUR::Profile->get_trx()) {
 		auto_box->pack_start (follow_edits_button, false, false);
 		auto_box->pack_start (auto_return_button, false, false);
@@ -548,7 +548,7 @@ ARDOUR_UI::sync_blink (bool onoff)
 {
 	if (_session == 0 || !_session->config.get_external_sync()) {
 		/* internal sync */
-		sync_button.set_active (false);
+		// NO NEED TO HAVE IT: sync_button.set_active (false);
 		return;
 	}
 
@@ -556,13 +556,13 @@ ARDOUR_UI::sync_blink (bool onoff)
 		/* not locked, so blink on and off according to the onoff argument */
 
 		if (onoff) {
-			sync_button.set_active (true);
+			// NO NEED TO HAVE IT: sync_button.set_active (true);
 		} else {
-			sync_button.set_active (false);
+			// NO NEED TO HAVE IT: sync_button.set_active (false);
 		}
 	} else {
 		/* locked */
-		sync_button.set_active (true);
+		// NO NEED TO HAVE IT: sync_button.set_active (true);
 	}
 }
 
