@@ -208,25 +208,7 @@ def set_compiler_flags (conf,opt):
         # 
         compiler_flags.append ('-U__STRICT_ANSI__')
 
-    if cpu == 'powerpc' and conf.env['build_target'] != 'none':
-        #
-        # Apple/PowerPC optimization options
-        #
-        # -mcpu=7450 does not reliably work with gcc 3.*
-        #
-        if opt.dist_target == 'panther' or opt.dist_target == 'tiger':
-            if platform == 'darwin':
-                # optimization_flags.extend ([ "-mcpu=7450", "-faltivec"])
-                # to support g3s but still have some optimization for above
-                compiler_flags.extend ([ "-mcpu=G3", "-mtune=7450"])
-            else:
-                compiler_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"])
-        else:
-            compiler_flags.extend([ "-mcpu=750", "-mmultiple" ])
-        compiler_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
-        optimization_flags.extend (["-Os"])
-
-    elif ((re.search ("i[0-9]86", cpu) != None) or (re.search ("x86_64", cpu) != None)) and conf.env['build_target'] != 'none':
+    if ((re.search ("i[0-9]86", cpu) != None) or (re.search ("x86_64", cpu) != None)) and conf.env['build_target'] != 'none':
 
 
         #
@@ -429,7 +411,7 @@ def options(opt):
     opt.add_option('--depstack-root', type='string', default='~', dest='depstack_root',
                     help='Directory/folder where dependency stack trees (gtk, a3) can be found (defaults to ~)')
     opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
-                    help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,powerpc,tiger,leopard,mingw]')
+                    help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,tiger,leopard,mingw]')
     opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
                     help='Build runtime checked assembler code (default)')
     opt.add_option('--no-fpu-optimization', action='store_false', dest='fpu_optimization')
