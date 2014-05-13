@@ -1,11 +1,23 @@
 #!/bin/bash
 
-BASE=$(readlink -f $0)
-BASE=$(dirname $BASE) # up one
-BASE=$(dirname $BASE) # up one more
-BASE=$(dirname $BASE) # up one more
+if [ -z "$ARCH" ]; then
+	echo "ARCH not set defaulting to win32"
+	ARCH=win32
+elif [ "$ARCH" == "win32" ]; then
+	echo "ARCH set to win32"
+elif [ "$ARCH" == "win64" ]; then
+	echo "ARCH set to win64"
+else
+	echo "ARCH set invalid value aborting..."
+	exit 1
+fi
 
-HOST=i686-w64-mingw32
+if [ "$ARCH" == "win32" ]; then
+	HOST=i686-w64-mingw32
+else
+	HOST=x86_64-w64-mingw32
+fi
+
 MINGW_ROOT=/usr/$HOST/sys-root/mingw
 
 export PKG_CONFIG_PREFIX=$MINGW_ROOT
@@ -22,6 +34,11 @@ export LINK_CXX=$HOST-g++
 export WINRC=$HOST-windres
 export STRIP=$HOST-strip
 
+BASE=$(readlink -f $0)
+BASE=$(dirname $BASE) # up one
+BASE=$(dirname $BASE) # up one more
+BASE=$(dirname $BASE) # up one more
+
 BUILD_DIR=$BASE/build
 BUILD_CACHE_FILE=$BUILD_DIR/c4che/_cache.py
 TOOLS_DIR=$BASE/tools/windows_packaging
@@ -35,9 +52,9 @@ then
 
 	# Figure out the Build Type
 	if [ x$DEBUG = xT ]; then
-		PACKAGE_DIR="$APPNAME-${release_version}-win32-dbg"
+		PACKAGE_DIR="$APPNAME-${release_version}-$ARCH-dbg"
 	else
-		PACKAGE_DIR="$APPNAME-${release_version}-win32"
+		PACKAGE_DIR="$APPNAME-${release_version}-$ARCH"
 	fi
 
 	if grep -q "BUILD_TESTS = True" $BUILD_CACHE_FILE; then
