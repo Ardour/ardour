@@ -4,6 +4,11 @@
 
 . ./print-env.sh
 
+if [ -z "$DLLS" ]; then
+	echo "ERROR: DLLS variable is not defined..."
+	exit 1
+fi
+
 cd $BASE || exit 1
 
 if ! test -f $BUILD_CACHE_FILE; then
@@ -50,90 +55,30 @@ cp -r $MINGW_ROOT/lib/gtk-2.0 $PACKAGE_DIR/lib
 cp -r $MINGW_ROOT/lib/gdk-pixbuf-2.0 $PACKAGE_DIR/lib
 cp $TOOLS_DIR/loaders.cache $PACKAGE_DIR/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
 
-mkdir -p $PACKAGE_DIR/lib/pango/1.6.0/modules
-cp -r $MINGW_ROOT/lib/pango/1.6.0/modules/*.dll $PACKAGE_DIR/lib/pango/1.6.0/modules
+if test x$WITH_PANGO_1_6 != x; then
+	mkdir -p $PACKAGE_DIR/lib/pango/1.6.0/modules
+	cp -r $MINGW_ROOT/lib/pango/1.6.0/modules/*.dll $PACKAGE_DIR/lib/pango/1.6.0/modules
+else
+	mkdir -p $PACKAGE_DIR/lib/pango/1.8.0/modules
+	cp -r $MINGW_ROOT/lib/pango/1.8.0/modules/*.dll $PACKAGE_DIR/lib/pango/1.8.0/modules
+fi
+
 cp $TOOLS_DIR/pango.modules $PACKAGE_DIR/etc/pango
 
 cp $TOOLS_DIR/README $PACKAGE_DIR
-
-DLLS='
-jack-0.dll
-jackserver-0.dll
-libart_lgpl_2-2.dll
-libatk-1.0-0.dll
-libatkmm-1.6-1.dll
-libbz2-1.dll
-libcairo-2.dll
-libcairo-gobject-2.dll
-libcairomm-1.0-1.dll
-libcairo-script-interpreter-2.dll
-libcppunit-1-12-1.dll
-libcrypto-10.dll
-libcurl-4.dll
-libexpat-1.dll
-libfftw3-3.dll
-libfftw3f-3.dll
-libfontconfig-1.dll
-libfreetype-6.dll
-libgailutil-18.dll
-libgcc_s_sjlj-1.dll
-libgdkmm-2.4-1.dll
-libgdk_pixbuf-2.0-0.dll
-libgdk-win32-2.0-0.dll
-libgio-2.0-0.dll
-libgiomm-2.4-1.dll
-libglib-2.0-0.dll
-libglibmm-2.4-1.dll
-libglibmm_generate_extra_defs-2.4-1.dll
-libgmodule-2.0-0.dll
-libgnomecanvas-2-0.dll
-libgnomecanvasmm-2.6-1.dll
-libgnurx-0.dll
-libgobject-2.0-0.dll
-libgthread-2.0-0.dll
-libgtkmm-2.4-1.dll
-libgtk-win32-2.0-0.dll
-libharfbuzz-0.dll
-libiconv-2.dll
-iconv.dll
-libFLAC-8.dll
-libogg-0.dll
-libvorbis-0.dll
-libvorbisenc-2.dll
-libffi-6.dll
-libidn-11.dll
-libintl-8.dll
-liblo-7.dll
-libpango-1.0-0.dll
-libpangocairo-1.0-0.dll
-libpangoft2-1.0-0.dll
-libpangomm-1.4-1.dll
-libpangowin32-1.0-0.dll
-libpixman-1-0.dll
-libpng15-15.dll
-libsamplerate-0.dll
-libsigc-2.0-0.dll
-libsndfile-1.dll
-libssh2-1.dll
-libssl-10.dll
-libstdc++-6.dll
-libxml2-2.dll
-pthreadGC2.dll
-zlib1.dll
-'
 
 echo "Copying mingw shared libraries to $PACKAGE_DIR ..."
 
 for i in $DLLS;
 do
-cp $MINGW_ROOT/bin/$i $PACKAGE_DIR
+	copydll "$i" "$PACKAGE_DIR" || exit 1
 done
 
-echo "Copying JACK server and drivers to $PACKAGE_DIR ..."
-
-cp $MINGW_ROOT/bin/jackd.exe $PACKAGE_DIR
-cp -r $MINGW_ROOT/bin/jack $PACKAGE_DIR
-cp $MINGW_ROOT/bin/libportaudio-2.dll $PACKAGE_DIR
+if test x$WITH_JACK != x; then
+	echo "Copying JACK server and drivers to $PACKAGE_DIR ..."
+	cp $MINGW_ROOT/bin/jackd.exe $PACKAGE_DIR
+	cp -r $MINGW_ROOT/bin/jack $PACKAGE_DIR
+fi
 
 SRC_DIRS='
 libs/ardour
@@ -156,9 +101,11 @@ if [ x$DEBUG = xT ]; then
 	do
 	cp -r -p $BASE/$i $PACKAGE_SRC_DIR/libs
 	done
-	
-	echo "Copying JACK utility programs to $PACKAGE_DIR ..."
-	cp $MINGW_ROOT/bin/jack_*.exe $PACKAGE_DIR
+
+	if test x$WITH_JACK != x; then
+		echo "Copying JACK utility programs to $PACKAGE_DIR ..."
+		cp $MINGW_ROOT/bin/jack_*.exe $PACKAGE_DIR
+	fi
 
 	#echo "Copying any debug files to $PACKAGE_DIR ..."
 	#cp $MINGW_ROOT/bin/*.debug $PACKAGE_DIR
