@@ -54,6 +54,10 @@
 #include <commdlg.h>
 #endif
 
+#ifdef __APPLE__
+#include "OpenFileDialogProxy.h"
+#endif
+
 using namespace std;
 using namespace Gtk;
 using namespace Gdk;
@@ -142,11 +146,23 @@ SessionDialog::session_selected ()
 void
 SessionDialog::on_new_session (WavesButton*)
 {
-	/*
-#ifdef __APPLE__
-	cout<<"APPLE works 2\n"<<flush;
-	//return;
-#endif	   */
+#ifdef __APPLE__  
+    set_keep_above(false);
+    _selected_session_full_name = ARDOUR::SaveFileDialog(_("Create New Session"));
+    set_keep_above(true);
+    
+    if(_selected_session_full_name.size() >= 1) {
+        for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
+            _recent_session_button[i]->set_active (false);
+		}
+ 
+		hide();
+        _selection_type = NewSession;
+		response (Gtk::RESPONSE_ACCEPT);
+    }
+    
+	return;
+#endif
   
 #ifdef _WIN32 	 	
 // Fill the OPENFILENAME structure
@@ -185,6 +201,7 @@ SessionDialog::on_new_session (WavesButton*)
 
     if (responce == Gtk::RESPONSE_OK) {
 		_selected_session_full_name = dialog.get_filename ();
+        
 		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
             _recent_session_button[i]->set_active (false);
 		}
@@ -306,11 +323,23 @@ SessionDialog::on_open_selected (WavesButton*)
 void
 SessionDialog::on_open_saved_session (WavesButton*)
 {
-	/*
+	
 #ifdef __APPLE__
-	cout<<"APPLE works 2\n"<<flush;
-	//return;
-#endif	   */
+	set_keep_above(false);
+    _selected_session_full_name = ARDOUR::OpenFileDialog(_("Select Saved Session"));
+    set_keep_above(true);
+    
+    if(_selected_session_full_name.size() >= 1) {
+        for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
+            _recent_session_button[i]->set_active (false);
+		}
+		_selection_type = SavedSession;
+		hide();
+		response (Gtk::RESPONSE_ACCEPT);
+    }
+    
+	return;
+#endif
   
 #ifdef _WIN32 
 // Fill the OPENFILENAME structure
