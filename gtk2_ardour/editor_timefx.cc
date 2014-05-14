@@ -403,7 +403,7 @@ Editor::timefx_thread (void *arg)
         */
 
 #ifdef PLATFORM_WINDOWS
-	Sleep(2000);
+	Glib::usleep(2 * G_USEC_PER_SEC);
 #else
         struct timespec t = { 2, 0 };
         nanosleep (&t, 0);

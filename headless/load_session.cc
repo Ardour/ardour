@@ -17,6 +17,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 #ifdef PLATFORM_WINDOWS
+#include <windows.h>
 #define sleep(X) Sleep((X) * 1000)
 #endif
 

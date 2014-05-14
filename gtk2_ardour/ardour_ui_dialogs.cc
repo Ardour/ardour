@@ -28,10 +28,6 @@
 #include "ardour/profile.h"
 #include "ardour/session.h"
 
-#ifdef interface
-#undef interface
-#endif
-
 #include "actions.h"
 #include "add_route_dialog.h"
 #include "add_video_dialog.h"
