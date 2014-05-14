@@ -38,6 +38,8 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _dsp_load (0)
 	, _n_inputs (0)
 	, _n_outputs (0)
+	, _n_midi_inputs (0)
+	, _n_midi_outputs (0)
 	, _systemic_input_latency (0)
 	, _systemic_output_latency (0)
 	, _processed_samples (0)
@@ -610,8 +612,8 @@ DummyAudioBackend::register_system_ports()
 
 	const int a_ins = _n_inputs > 0 ? _n_inputs : 8;
 	const int a_out = _n_outputs > 0 ? _n_outputs : 8;
-	const int m_ins = 2; // TODO
-	const int m_out = 2;
+	const int m_ins = _n_midi_inputs > 0 ? _n_midi_inputs : 2;
+	const int m_out = _n_midi_outputs > 0 ? _n_midi_outputs : 2;
 
 	/* audio ports */
 	lr.min = lr.max = _samples_per_period + _systemic_input_latency;
