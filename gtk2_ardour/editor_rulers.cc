@@ -1862,13 +1862,13 @@ sample_to_clock_parts ( framepos_t sample,
 	long millisecs;
 
 	left = sample;
-	hrs = left / (sample_rate * 60 * 60);
-	left -= hrs * sample_rate * 60 * 60;
-	mins = left / (sample_rate * 60);
-	left -= mins * sample_rate * 60;
-	secs = left / sample_rate;
-	left -= secs * sample_rate;
-	millisecs = left * 1000 / sample_rate;
+	hrs = left / (sample_rate * 60 * 60 * 1000);
+	left -= hrs * sample_rate * 60 * 60 * 1000;
+	mins = left / (sample_rate * 60 * 1000);
+	left -= mins * sample_rate * 60 * 1000;
+	secs = left / (sample_rate * 1000);
+	left -= secs * sample_rate * 1000;
+	millisecs = left / sample_rate;
 
 	*millisecs_p = millisecs;
 	*secs_p = secs;
@@ -1888,7 +1888,7 @@ Editor::set_minsec_ruler_scale (framepos_t lower, framepos_t upper)
 		return;
 	}
 
-	fr = _session->frame_rate();
+	fr = _session->frame_rate() * 1000;
 
 	/* to prevent 'flashing' */
 	if (lower > (spacer = (framepos_t)(128 * Editor::get_current_zoom ()))) {
@@ -1897,7 +1897,7 @@ Editor::set_minsec_ruler_scale (framepos_t lower, framepos_t upper)
 		lower = 0;
 	}
 	upper += spacer;
-	framecnt_t const range = upper - lower;
+	framecnt_t const range = (upper - lower) * 1000;
 
 	if (range <  (fr / 50)) {
 		minsec_mark_interval =  fr / 1000; /* show 1/1000 seconds */
@@ -1997,7 +1997,7 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
 	}
 
 	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * minsec_nmarks);
-	pos = ((((framepos_t) floor(lower)) + (minsec_mark_interval/2))/minsec_mark_interval) * minsec_mark_interval;
+	pos = (((1000 * (framepos_t) floor(lower)) + (minsec_mark_interval/2))/minsec_mark_interval) * minsec_mark_interval;
 	switch (minsec_ruler_scale) {
 	case minsec_show_seconds:
 		for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
@@ -2014,7 +2014,7 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
 	                        (*marks)[n].style = GtkCustomRulerMarkMicro;
         	        }
                 	(*marks)[n].label = g_strdup (buf);
-              		(*marks)[n].position = pos;
+			(*marks)[n].position = pos/1000.0;
 		}
 	  break;
 	case minsec_show_minutes:
@@ -2032,7 +2032,7 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
                                 (*marks)[n].style = GtkCustomRulerMarkMicro;
                         }
                         (*marks)[n].label = g_strdup (buf);
-                        (*marks)[n].position = pos;
+                        (*marks)[n].position = pos/1000.0;
                 }
 	  break;
 	case minsec_show_hours:
@@ -2046,7 +2046,7 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
                                 (*marks)[n].style = GtkCustomRulerMarkMicro;
                         }
                         (*marks)[n].label = g_strdup (buf);
-                        (*marks)[n].position = pos;
+                        (*marks)[n].position = pos/1000.0;
                 }
 	      break;
 	case minsec_show_frames:
@@ -2064,7 +2064,7 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
 				(*marks)[n].style = GtkCustomRulerMarkMicro;
 			}
 			(*marks)[n].label = g_strdup (buf);
-			(*marks)[n].position = pos;
+			(*marks)[n].position = pos/1000.0;
 		}
 	  break;
 	}
