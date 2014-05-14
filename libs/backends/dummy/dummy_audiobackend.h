@@ -282,6 +282,9 @@ class DummyAudioBackend : public AudioBackend {
 		uint32_t _n_inputs;
 		uint32_t _n_outputs;
 
+		uint32_t _n_midi_inputs;
+		uint32_t _n_midi_outputs;
+
 		uint32_t _systemic_input_latency;
 		uint32_t _systemic_output_latency;
 
