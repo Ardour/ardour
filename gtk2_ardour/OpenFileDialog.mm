@@ -17,6 +17,8 @@ using namespace std;
 
 @implementation FileDialog 
 
+namespace ARDOUR
+{
 // ====== C "trampoline" functions to invoke Objective-C method ====== //
 string OpenFileDialog(string title)
 {
@@ -45,7 +47,7 @@ string SaveFileDialog(string title)
     
     return stdPath;
 }
-
+}
 
 // ====== Objective-C functions called from C++ functions ====== //
 
