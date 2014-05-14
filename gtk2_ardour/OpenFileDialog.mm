@@ -21,10 +21,7 @@ namespace ARDOUR
 {
 // ====== C "trampoline" functions to invoke Objective-C method ====== //
 string OpenFileDialog(string title)
-{
-    if(title.size()==0)
-        title = "Open";
-    
+{    
     NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
     
     // Call the Objective-C method using Objective-C syntax
@@ -36,9 +33,6 @@ string OpenFileDialog(string title)
 
 string SaveFileDialog(string title)
 {
-    if(title.size()==0)
-        title = "Save";
-    
     NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
     
     // Call the Objective-C method using Objective-C syntax
