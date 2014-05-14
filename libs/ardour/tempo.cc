@@ -1017,11 +1017,11 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 
 		if (current.beats == 1) {
 			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add Bar at %1|1 @ %2\n", current.bars, current_frame));
-			_map.push_back (BBTPoint (*meter, *tempo,(framepos_t) llrint(current_frame), current.bars, 1));
+			_map.push_back (BBTPoint (*meter, *tempo, current_frame, current.bars, 1));
 			bar_start_frame = current_frame;
 		} else {
 			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Add Beat at %1|%2 @ %3\n", current.bars, current.beats, current_frame));
-			_map.push_back (BBTPoint (*meter, *tempo, (framepos_t) llrint(current_frame), current.bars, current.beats));
+			_map.push_back (BBTPoint (*meter, *tempo, current_frame, current.bars, current.beats));
 		}
 
 		if (next_metric == metrics.end()) {
