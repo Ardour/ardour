@@ -884,6 +884,7 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 	TempoSection* ts;
 	MeterSection* ms;
 	double beat_frames;
+	double current_frame_exact;
 	framepos_t bar_start_frame;
 
 	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("Extend map to %1 from %2 = %3\n", end, current, current_frame));
@@ -895,11 +896,13 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 	}
 
 	beat_frames = meter->frames_per_grid (*tempo,_frame_rate);
+	current_frame_exact = current_frame;
 
 	while (current_frame < end) {
 
 		current.beats++;
-		current_frame += beat_frames;
+		current_frame_exact += beat_frames;
+		current_frame = llrint(current_frame_exact);
 
 		if (current.beats > meter->divisions_per_bar()) {
 			current.bars++;
@@ -942,7 +945,8 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 						                                               tempo->start(), current_frame, tempo->bar_offset()));
 						
 						/* back up to previous beat */
-						current_frame -= beat_frames;
+						current_frame_exact -= beat_frames;
+						current_frame = llrint(current_frame_exact);
 
 						/* set tempo section location
 						 * based on offset from last
@@ -963,7 +967,8 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 
 						double offset_within_old_beat = (tempo->frame() - current_frame) / beat_frames;
 
-						current_frame += (offset_within_old_beat * beat_frames) + ((1.0 - offset_within_old_beat) * next_beat_frames);
+						current_frame_exact += (offset_within_old_beat * beat_frames) + ((1.0 - offset_within_old_beat) * next_beat_frames);
+						current_frame = llrint(current_frame_exact);
 
 						/* next metric doesn't have to
 						 * match this precisely to
