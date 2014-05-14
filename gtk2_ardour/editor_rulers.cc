@@ -2045,7 +2045,7 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
 		for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
 			sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
 			if (millisecs % minsec_mark_modulo == 0) {
-				if (secs == 0) {
+				if (millisecs == 0) {
 					(*marks)[n].style = GtkCustomRulerMarkMajor;
 				} else {
 					(*marks)[n].style = GtkCustomRulerMarkMinor;
