@@ -40,6 +40,9 @@ public:
     ARDOUR::pframes_t   get_default_buffer_size() const;
     void                available_buffer_sizes_for_current_device(std::vector<ARDOUR::pframes_t>&) const;
 
+    uint32_t            get_available_inputs_count() const {return 0; }
+    uint32_t            get_available_outputs_count () const {return 0; }
+    
     bool        is_setup_required() const {return ARDOUR::AudioEngine::instance()->setup_required (); }
     
     // set parameters inside the controller,
