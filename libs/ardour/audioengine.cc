@@ -644,7 +644,7 @@ AudioEngine::start (bool for_latency)
 			_backend->set_time_master (true);
 		}
 
-		_session->reconnect_existing_routes (true);
+		_session->reconnect_existing_routes (true, true);
 	}
 	
 	start_metering_thread ();
