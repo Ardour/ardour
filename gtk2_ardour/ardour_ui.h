@@ -93,6 +93,8 @@
 #include "speaker_dialog.h"
 #include "theme_manager.h"
 
+#include "waves_ui.h"
+
 class VideoTimeLine;
 class ArdourKeyboard;
 class AudioClock;
@@ -331,6 +333,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	int  setup_windows ();
 	void setup_transport ();
+	void setup_transport_trx ();
 	void setup_clock ();
 
 	static ARDOUR_UI *theArdourUI;
@@ -363,6 +366,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void about_signal_response(int response);
 
 	Gtk::VBox     top_packer;
+	Gtk::VBox     tracks_tools_packer;
 
 	sigc::connection clock_signal_connection;
 	void         update_clocks ();
@@ -437,6 +441,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ArdourButton auto_loop_button;
 	ArdourButton play_selection_button;
 	ArdourButton rec_button;
+
+	WavesUI::WidgetMap _tools;
 
 	void toggle_external_sync ();
 	void toggle_time_master ();

@@ -30,6 +30,7 @@
 #include "canvas/canvas.h"
 #include "canvas/xml_ui.h"
 #include "waves_button.h"
+#include "waves_icon_button.h"
 
 using namespace ArdourCanvas::XMLUI;
 namespace WavesUI {

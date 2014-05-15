@@ -35,6 +35,7 @@ gtk2_ardour_sources = [
         'analysis_window.cc',
         'ardour_button.cc',
         'waves_button.cc',
+        'waves_icon_button.cc',
         'ardour_dialog.cc',
         'waves_dialog.cc',
         'ardour_ui.cc',

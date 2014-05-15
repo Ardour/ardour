@@ -22,6 +22,7 @@
 #include "waves_ui.h"
 #include "pbd/file_utils.h"
 #include "ardour/filesystem_paths.h"
+#include "utils.h"
 
 #include "pbd/convert.h"
 #include "dbg_msg.h"
@@ -42,9 +43,32 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, std
 	std::transform(widget_type.begin(), widget_type.end(), widget_type.begin(), ::toupper);
 
 	if (widget_type == "BUTTON") {
-		child = manage (new WavesButton(text));
-		((WavesButton*)child)->set_border_width (xml_property (definition, "borderwidth", styles, "0").c_str());
-		((WavesButton*)child)->set_border_color (xml_property (definition, "bordercolor", styles, "#000000").c_str());
+		WavesButton& button = *manage (new WavesButton(text));
+		child = &button;
+		button.set_border_width (xml_property (definition, "borderwidth", styles, "0").c_str());
+		button.set_border_color (xml_property (definition, "bordercolor", styles, "#000000").c_str());
+	} else if (widget_type == "ICONBUTTON") {
+		WavesIconButton& iconbutton = *manage (new WavesIconButton);
+		child = &iconbutton;
+		iconbutton.set_border_width (xml_property (definition, "borderwidth", styles, "0").c_str());
+		iconbutton.set_border_color (xml_property (definition, "bordercolor", styles, "#000000").c_str());
+
+		std::string property = xml_property (definition, "normalicon", styles, "");
+		if (!property.empty ()) {
+			iconbutton.set_normal_image(get_icon(property.c_str()));
+		}
+		property = xml_property (definition, "activeicon", styles, "");
+		if (!property.empty ()) {
+			iconbutton.set_active_image(get_icon(property.c_str()));
+		}
+		property = xml_property (definition, "prelighticon", styles, "");
+		if (!property.empty ()) {
+			iconbutton.set_prelight_image(get_icon(property.c_str()));
+		}
+		property = xml_property (definition, "inactiveicon", styles, "");
+		if (!property.empty ()) {
+			iconbutton.set_inactive_image(get_icon(property.c_str()));
+		}
 	} else if (widget_type == "COMBOBOXTEXT") {
 		child = manage (new Gtk::ComboBoxText);
 	} else if (widget_type == "LABEL") {
@@ -212,47 +236,47 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 	widget.set_size_request (width, height);
 		
 	std::string property = xml_property (definition, "bgnormal", styles, "");
-	if (!property.empty()) {
+	if (!property.empty ()) {
 		widget.modify_bg(Gtk::STATE_NORMAL, Gdk::Color(property));
 	}
 
 	property = xml_property (definition, "bgdisabled", styles, property);
-	if (!property.empty()) {
+	if (!property.empty ()) {
 		widget.modify_bg(Gtk::STATE_INSENSITIVE, Gdk::Color(property));
 	}
 
 	property = xml_property (definition, "bgactive", styles, "");
-	if (!property.empty()) {
+	if (!property.empty ()) {
 		widget.modify_bg(Gtk::STATE_ACTIVE, Gdk::Color(property));
 	}
 
 	property = xml_property (definition, "bghover", styles, "");
-	if (!property.empty()) {
+	if (!property.empty ()) {
 		widget.modify_bg(Gtk::STATE_PRELIGHT, Gdk::Color(property));
 	}
 
 	property = xml_property (definition, "fgnormal", styles, "");
-	if (!property.empty()) {
+	if (!property.empty ()) {
 		widget.modify_fg(Gtk::STATE_NORMAL, Gdk::Color(property));
 	}
 
 	property = xml_property (definition, "fgdisabled", styles, property);
-	if (!property.empty()) {
+	if (!property.empty ()) {
 		widget.modify_fg(Gtk::STATE_INSENSITIVE, Gdk::Color(property));
 	}
 
 	property = xml_property (definition, "fgactive", styles, "");
-	if (!property.empty()) {
+	if (!property.empty ()) {
 		widget.modify_fg(Gtk::STATE_ACTIVE, Gdk::Color(property));
 	}
 
 	property = xml_property (definition, "fghover", styles, "");
-	if (!property.empty()) {
+	if (!property.empty ()) {
 		widget.modify_fg(Gtk::STATE_PRELIGHT, Gdk::Color(property));
 	}
 
 	property = xml_property (definition, "font", styles, "");
-	if (!property.empty()) {
+	if (!property.empty ()) {
 		widget.modify_font(Pango::FontDescription(property));
 	}
 
@@ -260,6 +284,12 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		widget.show();
 	} else {
 		widget.hide();
+	}
+
+	Gtk::Box* box = dynamic_cast<Gtk::Box*> (&widget);
+	if (box)
+	{
+		box->set_spacing(xml_property (definition, "spacing", styles, 0));
 	}
 }
 

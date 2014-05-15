@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Layout>
+  <HBox spacing="1">
+    <iconbutton id="inspector_on_button"
+                width="47" height="26"
+                normalicon="inspector_on"
+                activeicon="inspector_on_active"
+                prelighticon="inspector_on_prelight"/>
+    <iconbutton id="mixer_on_button"
+                width="48" height="26"
+                normalicon="mixer_on"
+                activeicon="mixer_on_active"
+                prelighticon="mixer_on_prelight"/>
+    <layout     width="48" height="26" bgnormal=""/>
+    <iconbutton id="transport_start_button"
+                width="34" height="26"
+                normalicon="transport_start"
+                activeicon="transport_start_active"
+                prelighticon="transport_start_prelight"/>
+    <iconbutton id="transport_end_button"
+                width="34" height="26"
+                normalicon="transport_end"
+                activeicon="transport_end_active"
+                prelighticon="transport_end_prelight"/>
+    <iconbutton id="transport_play_button"
+                width="34" height="26"
+                normalicon="transport_play"
+                activeicon="transport_play_active"
+                prelighticon="transport_play_prelight"/>
+    <iconbutton id="transport_record_button"
+                width="34" height="26"
+                normalicon="transport_record"
+                activeicon="transport_record_active"
+                prelighticon="transport_record_prelight"/>
+    <iconbutton id="transport_stop_button"
+                width="34" height="26"
+                normalicon="transport_stop"
+                activeicon="transport_stop_active"
+                prelighticon="transport_stop_prelight"/>
+    <iconbutton id="transport_loop_button"
+                width="34" height="26"
+                normalicon="transport_loop"
+                activeicon="transport_loop_active"
+                prelighticon="transport_loop_prelight"/>
+  </HBox>
+</Layout>

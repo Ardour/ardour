@@ -16,8 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __gtk2_waves_ardour_button_h__
-#define __gtk2_waves_ardour_button_h__
+#ifndef __gtk2_waves_button_h__
+#define __gtk2_waves_button_h__
 
 #include <list>
 #include <stdint.h>
@@ -74,11 +74,6 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void controllable_changed ();
 	PBD::ScopedConnection watch_connection;
 
-  private:
-	Glib::RefPtr<Pango::Layout> _layout;
-	std::string                 _text;
-	BindingProxy                binding_proxy;
-
 	int   _text_width;
 	int   _text_height;
 	float _corner_radius;
@@ -101,6 +96,12 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void action_sensitivity_changed ();
 	void action_visibility_changed ();
 	void action_tooltip_changed ();
+
+private:
+	Glib::RefPtr<Pango::Layout> _layout;
+	std::string                 _text;
+	BindingProxy                binding_proxy;
+
 };
 
-#endif /* __gtk2_waves_ardour_button_h__ */
+#endif /* __gtk2_waves_button_h__ */
