@@ -83,7 +83,7 @@
 	void on_midi_playback_active_changed (DeviceConnectionControl* playback_control, bool active);
 
 	void engine_changed ();
-	void device_changed ();
+	void device_changed (bool show_confirm_dial);
 	void buffer_size_changed ();
 	void sample_rate_changed ();
     void engine_running ();

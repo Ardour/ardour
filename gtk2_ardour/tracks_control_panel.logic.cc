@@ -17,6 +17,8 @@
 
 */
 #include <stdlib.h>
+#include <string>
+
 #include "tracks_control_panel.h"
 #include "waves_button.h"
 #include "pbd/unwind.h"
@@ -65,7 +67,7 @@ TracksControlPanel::init ()
     EngineStateController::instance()->DeviceListChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::populate_device_combo, this), gui_context());
 
 	_engine_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::engine_changed));
-	_device_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::device_changed));
+	_device_combo.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &TracksControlPanel::device_changed), true) );
 	_sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::sample_rate_changed));
 	_buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::buffer_size_changed));
 
@@ -157,12 +159,15 @@ TracksControlPanel::populate_device_combo()
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
 		set_popdown_strings (_device_combo, available_devices);
 		_device_combo.set_sensitive (available_devices.size() > 1);
-	}
-
-	if(!available_devices.empty() ) {
-		_device_combo.set_active_text (EngineStateController::instance()->get_current_device_name() );
-	}
-
+	
+        if(!available_devices.empty() ) {
+            _device_combo.set_active_text (EngineStateController::instance()->get_current_device_name() );
+        }
+    }
+    
+    if(!available_devices.empty() ) {
+        device_changed(false);
+    }
 }
 
 void
@@ -265,13 +270,36 @@ void TracksControlPanel::engine_changed ()
     std::cerr << "\tfailed to set backend [" << backend_name << "]\n";
 }
 
-void TracksControlPanel::device_changed ()
+void TracksControlPanel::device_changed (bool show_confirm_dial/*=true*/)
 {
 	if (_ignore_changes) {
 		return;
 	}
     
     std::string device_name = _device_combo.get_active_text ();
+    
+    if( show_confirm_dial )
+    {    
+        std::string message = "Would you like to switch to " + device_name;
+
+        MessageDialog msg (message,
+                           false,
+                           Gtk::MESSAGE_WARNING,
+                           Gtk::BUTTONS_YES_NO,
+                           true);
+        
+        msg.set_position (Gtk::WIN_POS_MOUSE);
+        
+        switch (msg.run()) {
+            case RESPONSE_NO:
+                // set _ignore_changes flag to ignore changes in combo-box callbacks
+                PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
+                
+                _device_combo.set_active_text (EngineStateController::instance()->get_current_device_name());
+                return;
+        }   
+    }
+    
     if (EngineStateController::instance()->set_new_current_device_in_controller(device_name) )
     {
         populate_buffer_size_combo();
