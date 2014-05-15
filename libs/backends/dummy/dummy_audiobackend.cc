@@ -247,13 +247,27 @@ std::vector<std::string>
 DummyAudioBackend::enumerate_midi_options () const
 {
 	std::vector<std::string> m;
-	m.push_back (_("None"));
+	m.push_back (_("1 in, 1 out"));
+	m.push_back (_("2 in, 2 out"));
+	m.push_back (_("8 in, 8 out"));
 	return m;
 }
 
 int
-DummyAudioBackend::set_midi_option (const std::string&)
+DummyAudioBackend::set_midi_option (const std::string& opt)
 {
+	if (opt == _("1 in, 1 out")) {
+		_n_midi_inputs = _n_midi_outputs = 1;
+	}
+	else if (opt == _("2 in, 2 out")) {
+		_n_midi_inputs = _n_midi_outputs = 2;
+	}
+	else if (opt == _("8 in, 8 out")) {
+		_n_midi_inputs = _n_midi_outputs = 8;
+	}
+	else {
+		_n_midi_inputs = _n_midi_outputs = 0;
+	}
 	return -1;
 }
 
