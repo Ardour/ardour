@@ -3784,7 +3784,7 @@ Editor::can_cut_copy () const
 
 
 /** Cut, copy or clear selected regions, automation points or a time range.
- * @param op Operation (Cut, Copy or Clear)
+ * @param op Operation (Delete, Cut, Copy or Clear)
  */
 void
 Editor::cut_copy (CutCopyOp op)
@@ -3820,7 +3820,7 @@ Editor::cut_copy (CutCopyOp op)
 		}
 	}
 
-	if ( op != Clear )  //"Delete" doesn't change copy/paste buf
+	if ( op != Delete )  //"Delete" doesn't change copy/paste buf
 		cut_buffer->clear ();
 
 	if (entered_marker) {
