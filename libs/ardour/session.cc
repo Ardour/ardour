@@ -106,6 +106,13 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+namespace {
+    bool compare_roots_by_remote_id (const boost::shared_ptr<Route>& route1, const boost::shared_ptr<Route>& route2)
+    {
+        return route1->remote_control_id() < route2->remote_control_id();
+    }
+}
+
 bool Session::_disable_all_loaded_plugins = false;
 
 PBD::Signal1<int,uint32_t> Session::AudioEngineSetupRequired;
@@ -2109,9 +2116,8 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master)
     //ChanCount inputs = ChanCount::ZERO;
     //ChanCount outputs = ChanCount::ZERO;
     
-    resort_routes();
-    
-    boost::shared_ptr<RouteList> existing_routes = routes.reader ();
+    RouteList existing_routes = *routes.reader ();
+    existing_routes.sort(compare_roots_by_remote_id);
     
     {
         PBD::Unwinder<bool> protect_ignore_changes (_reconnecting_routes_in_progress, true);
@@ -2124,8 +2130,8 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master)
                 
         uint32_t input_n = 0;
         uint32_t output_n = 0;
-        RouteList::iterator rIter = existing_routes->begin();
-        for (; rIter != existing_routes->end(); ++rIter) {
+        RouteList::iterator rIter = existing_routes.begin();
+        for (; rIter != existing_routes.end(); ++rIter) {
             
             if (*rIter == _master_out || *rIter == _monitor_out) {
                 continue;
