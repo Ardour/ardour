@@ -416,6 +416,8 @@ EngineStateController::_on_buffer_size_change(pframes_t new_buffer_size)
 void
 EngineStateController::_on_device_list_change()
 {
+    bool current_device_disconnected = false;
+    
     boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
     assert(backend);
     
@@ -446,6 +448,7 @@ EngineStateController::_on_device_list_change()
             }
             
             push_current_state_to_backend(false);
+            current_device_disconnected = true;
         }
     } else {
         // if the device which was active before is available now - switch to it
@@ -468,7 +471,7 @@ EngineStateController::_on_device_list_change()
         
     }
     
-    DeviceListChanged(); // emit a signal
+    DeviceListChanged(current_device_disconnected); // emit a signal    
 }
 
 

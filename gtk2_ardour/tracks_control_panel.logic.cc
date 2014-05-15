@@ -63,8 +63,8 @@ TracksControlPanel::init ()
 	AudioEngine::instance ()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_stopped, this), gui_context());
 
 	/* Subscribe for udpates from AudioEngine */
-	EngineStateController::instance()->BufferSizeChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::populate_buffer_size_combo, this), gui_context());
-    EngineStateController::instance()->DeviceListChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::populate_device_combo, this), gui_context());
+	EngineStateController::instance()->BufferSizeChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_buffer_size_update, this), gui_context());
+    EngineStateController::instance()->DeviceListChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_device_list_update, this, _1), gui_context());
 
 	_engine_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::engine_changed));
 	_device_combo.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &TracksControlPanel::device_changed), true) );
@@ -498,6 +498,24 @@ void TracksControlPanel::on_midi_capture_active_changed(DeviceConnectionControl*
 
 void TracksControlPanel::on_midi_playback_active_changed(DeviceConnectionControl* playback_control, bool active)
 {
+}
+
+
+void
+TracksControlPanel::on_buffer_size_update ()
+{
+    populate_buffer_size_combo();
+}
+
+
+void
+TracksControlPanel::on_device_list_update (bool current_device_disconnected)
+{
+    populate_device_combo();
+    
+    if (current_device_disconnected) {
+        // REACT ON CURRENT DEVICE DISCONNECTION
+    }
 }
 
 

@@ -95,6 +95,10 @@
 	void populate_buffer_size_combo ();
 	void populate_output_mode ();
 
+    // Engine State update callback handlers
+    void on_buffer_size_update ();
+    void on_device_list_update (bool current_device_disconnected);
+
 	std::string bufsize_as_string (uint32_t sz);
 
     std::string         get_device_name() const { return _device_combo.get_active_text (); };

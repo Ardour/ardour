@@ -69,7 +69,7 @@ public:
     PBD::Signal0<void> BufferSizeChanged;
     
     /* this signal is emitted if the device list changes */
-    PBD::Signal0<void> DeviceListChanged;
+    PBD::Signal1<void, bool> DeviceListChanged;
     
 private:
 
