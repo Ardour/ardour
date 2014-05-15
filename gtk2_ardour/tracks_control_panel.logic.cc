@@ -65,7 +65,8 @@ TracksControlPanel::init ()
 	/* Subscribe for udpates from AudioEngine */
 	EngineStateController::instance()->BufferSizeChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_buffer_size_update, this), gui_context());
     EngineStateController::instance()->DeviceListChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_device_list_update, this, _1), gui_context());
-
+    Config->ParameterChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_parameter_changed, this, _1), gui_context());
+    
 	_engine_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::engine_changed));
 	_device_combo.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &TracksControlPanel::device_changed), true) );
 	_sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::sample_rate_changed));
@@ -300,7 +301,7 @@ void TracksControlPanel::device_changed (bool show_confirm_dial/*=true*/)
         }   
     }
     
-    if (EngineStateController::instance()->set_new_current_device_in_controller(device_name) )
+    if (EngineStateController::instance()->set_new_device_as_current(device_name) )
     {
         populate_buffer_size_combo();
         populate_sample_rate_combo();
@@ -430,22 +431,17 @@ TracksControlPanel::on_multi_out (WavesButton*)
     }
     
     Config->set_output_auto_connect(AutoConnectPhysical);
-    _stereo_out_button.set_active(false);
-    _multi_out_button.set_active(true);
 }
 
 
 void
 TracksControlPanel::on_stereo_out (WavesButton*)
 {
-
     if (Config->get_output_auto_connect() & AutoConnectMaster) {
         return;
     }
     
     Config->set_output_auto_connect(AutoConnectMaster);
-    _multi_out_button.set_active(false);
-    _stereo_out_button.set_active(true);
 }
 
 void
@@ -518,7 +514,16 @@ TracksControlPanel::on_device_list_update (bool current_device_disconnected)
     }
 }
 
-
+                                      
+void
+TracksControlPanel::on_parameter_changed (const std::string& parameter_name)
+{
+    if (parameter_name == "output-auto-connect") {
+        populate_output_mode();
+    }
+}
+                                      
+                                      
 std::string
 TracksControlPanel::bufsize_as_string (uint32_t sz)
 {

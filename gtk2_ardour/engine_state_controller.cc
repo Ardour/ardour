@@ -100,11 +100,7 @@ EngineStateController::_set_last_active_state_as_current()
         if (!backends.empty() )
         {
             
-            if (set_new_backend_as_current(backends.front()->name ) ) {
-                _current_state->device_name = "None";
-                _validate_current_device_state();
-                _states.push_front(_current_state);
-            } else {
+            if (!set_new_backend_as_current(backends.front()->name ) ) {
                 std::cerr << "\tfailed to set backend [" << backends.front()->name << "]\n";
             }
         }
@@ -280,7 +276,7 @@ EngineStateController::set_new_backend_as_current(const std::string& backend_nam
 
 
 bool
-EngineStateController::set_new_current_device_in_controller(const std::string& device_name)
+EngineStateController::set_new_device_as_current(const std::string& device_name)
 {
     if (_current_state->device_name == device_name) {
         return true;

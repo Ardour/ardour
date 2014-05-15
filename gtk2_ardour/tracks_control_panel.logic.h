@@ -98,6 +98,7 @@
     // Engine State update callback handlers
     void on_buffer_size_update ();
     void on_device_list_update (bool current_device_disconnected);
+    void on_parameter_changed (const std::string& parameter_name);
 
 	std::string bufsize_as_string (uint32_t sz);
 

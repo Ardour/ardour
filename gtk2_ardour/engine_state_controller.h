@@ -48,7 +48,6 @@ public:
     // set parameters inside the controller,
     // the state of engine won't change untill we make a "push" of this state to the backend
     // NOTE: Use push_state_to_backend() method to update backend with the most recent controller state
-    bool        set_new_current_device_in_controller(const std::string& device_name);
     bool        set_new_sample_rate_in_controller(framecnt_t);
     bool        set_new_buffer_size_in_controller(pframes_t);
     
@@ -57,6 +56,8 @@ public:
     bool        push_current_state_to_backend(bool);
     // switch engine to new backend
     bool        set_new_backend_as_current(const std::string&);
+    // switch engine to new device
+    bool        set_new_device_as_current(const std::string& device_name);
     // switch backend to session sample rate
     void        set_desired_sample_rate(framecnt_t);
 
