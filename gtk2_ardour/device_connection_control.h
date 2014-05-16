@@ -48,7 +48,10 @@ class DeviceConnectionControl : public Gtk::Layout
 	void on_active_on(WavesButton*);
 	void on_active_off(WavesButton*);
 
-	WavesUI::WidgetMap _children;
+    // flag which reflects control "active" state
+    bool _active;
+	
+    WavesUI::WidgetMap _children;
 	WavesButton* _active_on_button; 
 	WavesButton* _active_off_button;
 	Gtk::Label* _name_label;

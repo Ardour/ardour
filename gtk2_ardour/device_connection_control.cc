@@ -103,8 +103,7 @@ void DeviceConnectionControl::init(std::string name, bool active, uint16_t numbe
 		_track_name_label->set_text (track_name);
 	}
 
-	_active_on_button->set_active (active);
-	_active_off_button->set_active (!active);
+	set_active(active);
 }
 
 bool	
@@ -142,11 +141,16 @@ DeviceConnectionControl::set_active (bool active)
 {
 	_active_on_button->set_active (active);
 	_active_off_button->set_active (!active);
+    _active = active;
 }
 
 void
 DeviceConnectionControl::on_active_on(WavesButton*)
 {
+    if (_active) {
+        return;
+    }
+        
 	set_active (true);
 	signal_active_changed(this, true);
 }
@@ -154,6 +158,10 @@ DeviceConnectionControl::on_active_on(WavesButton*)
 void
 DeviceConnectionControl::on_active_off(WavesButton*)
 {
+    if (!_active) {
+        return;
+    }
+        
 	set_active (false);
 	signal_active_changed(this, false);
 }
