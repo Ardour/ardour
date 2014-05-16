@@ -50,17 +50,8 @@ public:
 	*/
 	unsigned long start()
 	{
-#ifdef _WIN32
-		_start = (unsigned long)::GetTickCount();
-#else
-		gettimeofday ( &_start, 0 );
-#endif
-		running = true;
-#ifdef _WIN32
-		return _start;
-#else
-		return ( _start.tv_sec * 1000000 + _start.tv_usec ) / 1000;
-#endif
+		_start = g_get_monotonic_time();
+		return _start / 1000;
 	}
 
 	/**
@@ -69,12 +60,7 @@ public:
 	*/
 	unsigned long stop()
 	{
-#ifdef _WIN32
-		_stop = (unsigned long)::GetTickCount();
-#else
-		gettimeofday ( &_stop, 0 );
-#endif
-		running = false;
+		_stop = g_get_monotonic_time();
 		return elapsed();
 	}
 
@@ -85,28 +71,12 @@ public:
 	{
 		if ( running )
 		{
-#ifdef _WIN32
-			DWORD current = ::GetTickCount();
-			return current - _start;
-#else
-			struct timeval current;
-			gettimeofday ( &current, 0 );
-			return (
-				( current.tv_sec * 1000000 + current.tv_usec ) - ( _start.tv_sec * 1000000 + _start.tv_usec )
-			) / 1000
-			;
-#endif
+			uint64_t now = g_get_monotonic_time();
+			return (now - _start) / 1000;
 		}
 		else
 		{
-#ifdef _WIN32
-			return _stop - _start;
-#else
-			return (
-				( _stop.tv_sec * 1000000 + _stop.tv_usec ) - ( _start.tv_sec * 1000000 + _start.tv_usec )
-			) / 1000
-			;
-#endif
+			return (_stop - _start) / 1000;
 		}
 	}
 	
@@ -121,13 +91,8 @@ public:
 	}
 
 private:
-#ifdef _WIN32
-	unsigned long _start;
-	unsigned long _stop;
-#else
-	struct timeval _start;
-	struct timeval _stop;
-#endif
+	uint64_t _start;
+	uint64_t _stop;
 	bool running;
 };
 
