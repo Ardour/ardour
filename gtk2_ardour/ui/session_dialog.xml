@@ -42,7 +42,7 @@
               x="11" y="214" width="296" height="26"/>
       <Layout bgnormal="#404040" x="12" y="131" width="296" height="75">
         <Label style ="generic_control"
-               text="Audio Interface:\nChannel Configuration:\nOperation Mode:\nFrame Rate:\nSample Rate:"
+               text="Audio Interface:\nChannel Configuration:\nOperation Mode:\nSample Rate:"
                x="0" y="0"/>
         <Label style ="generic_control"
                id="session_details_label"
