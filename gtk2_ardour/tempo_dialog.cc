@@ -257,18 +257,16 @@ TempoDialog::pulse_change ()
 void
 TempoDialog::tap_tempo ()
 {
-	struct timeval now;
-	gettimeofday (&now, NULL);
+	gint64 now;
+	now = g_get_monotonic_time (); // microseconds
 
-	if (last_tap.tv_sec >= 0 || last_tap.tv_usec > 0) {
-		struct timeval diff;
+	if (last_tap > 0) {
 		double interval, bpm;
 		static const double decay = 0.5;
 
-		timersub (&now, &last_tap, &diff);
-		interval = diff.tv_sec + diff.tv_usec * 1.0e-6;
-		if (interval <= 0.25) {
-			// >= 15 bpm, say
+		interval = (now - last_tap) * 1.0e-6;
+		if (interval <= 6.0) {
+			// >= 10 bpm, say
 			if (average_interval > 0) {
 				average_interval = interval * decay
 					+ average_interval * (1.0-decay);
