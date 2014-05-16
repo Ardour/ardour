@@ -10,22 +10,30 @@
 namespace wvNS { 
 UMicroseconds& UMicroseconds::ReadTime()
 {
+	// Note: g_get_monotonic_time() may be a viable alternative
+	// (it is on Linux and OSX); if not, this code should really go into libpbd
 #ifdef PLATFORM_WINDOWS
 	LARGE_INTEGER Frequency, Count ;
 
 	QueryPerformanceFrequency(&Frequency) ;
 	QueryPerformanceCounter(&Count);
 	theTime = uint64_t((Count.QuadPart * 1000000.0 / Frequency.QuadPart));
-#endif
 
-#if defined(__linux__) || defined(__APPLE__)
-//	Mac code replaced by posix calls, to reduce Carbon dependency. 
-	timeval buf;
+#elif defined __MACH__ // OSX, BSD..
 
-	gettimeofday(&buf,NULL);
+	clock_serv_t cclock;
+	mach_timespec_t mts;
+	host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
+	clock_get_time(cclock, &mts);
+	mach_port_deallocate(mach_task_self(), cclock);
+	theTime = (uint64_t)mts.tv_sec * 1e6 + (uint64_t)mts.tv_nsec / 1000;
 
-	// micro sec
-  	theTime = uint64_t(buf.tv_sec) * 1000*1000 + buf.tv_usec;
+#else // Linux, POSIX
+
+	struct timespec *ts
+	clock_gettime(CLOCK_MONOTONIC, ts);
+	theTime = (uint64_t)ts.tv_sec * 1e6 + (uint64_t)buf.tv_nsec / 1000;
+
 #endif
 
 	return *this;
