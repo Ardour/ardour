@@ -1020,7 +1020,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	case Delete:
 		if (playlist->cut (time) != 0) {
 			if (Config->get_edit_mode() == Ripple)
-				playlist->ripple(time.start() + time.length(), -time.length(), NULL);
+				playlist->ripple(time.start(), -time.length(), NULL);
 				// no need to exclude any regions from rippling here
 
                         vector<Command*> cmds;
@@ -1035,7 +1035,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
 			if (Config->get_edit_mode() == Ripple)
-				playlist->ripple(time.start() + time.length(), -time.length(), NULL);
+				playlist->ripple(time.start(), -time.length(), NULL);
 				// no need to exclude any regions from rippling here
 
                         vector<Command*> cmds;
@@ -1054,7 +1054,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	case Clear:
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			if (Config->get_edit_mode() == Ripple)
-				playlist->ripple(time.start() + time.length(), -time.length(), NULL);
+				playlist->ripple(time.start(), -time.length(), NULL);
 				// no need to exclude any regions from rippling here
 
                         vector<Command*> cmds;
