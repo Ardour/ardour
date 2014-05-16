@@ -37,7 +37,7 @@ class LIBGTKMM2EXT_API IdleAdjustment : public sigc::trackable
 
   private:
 	void underlying_adjustment_value_changed();
-	struct timeval last_vc;
+	int64_t last_vc;
 	gint timeout_handler();
 	bool timeout_queued;
 };
