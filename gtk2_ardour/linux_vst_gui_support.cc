@@ -336,9 +336,9 @@ void* gui_event_loop (void* ptr)
 	VSTState* vstfx;
 	int LXVST_sched_timer_interval = 40; //ms, 25fps
 	XEvent event;
-	struct timeval clock1, clock2;
+	uint64_t clock1, clock2;
 	
-	gettimeofday(&clock1, NULL);
+	clock1 = g_get_monotonic_time();
 	/*The 'Forever' loop - runs the plugin UIs etc - based on the FST gui event loop*/
 	
 	while (!gui_quit)
@@ -382,12 +382,12 @@ void* gui_event_loop (void* ptr)
 		
 		/*See if its time for us to do a scheduled event pass on all the plugins*/
 
-		gettimeofday(&clock2, NULL);
-		const int elapsed_time = (clock2.tv_sec - clock1.tv_sec) * 1000 + (clock2.tv_usec - clock1.tv_usec) / 1000;
+		clock2 = g_get_monotonic_time();
+		const int64_t elapsed_time_ms = (clock2 - clock1) / 1000;
 
-		if((LXVST_sched_timer_interval != 0) && elapsed_time >= LXVST_sched_timer_interval)
+		if((LXVST_sched_timer_interval != 0) && elapsed_time_ms >= LXVST_sched_timer_interval)
 		{
-			//printf("elapsed %d ms ^= %.2f Hz\n", elapsed_time, 1000.0/(double)elapsed_time); // DEBUG
+			//printf("elapsed %d ms ^= %.2f Hz\n", elapsed_time_ms, 1000.0/(double)elapsed_time_ms); // DEBUG
 			pthread_mutex_lock (&plugin_mutex);
 		    
 again:
@@ -463,7 +463,7 @@ again:
 			}
 			pthread_mutex_unlock (&plugin_mutex);
 
-			gettimeofday(&clock1, NULL);
+			clock1 = g_get_monotonic_time();
 		}
 	}
 
