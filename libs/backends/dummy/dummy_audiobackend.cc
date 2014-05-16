@@ -1001,17 +1001,17 @@ DummyAudioBackend::main_process_thread ()
 	_running = true;
 	_processed_samples = 0;
 
-	struct timeval clock1, clock2;
-	::gettimeofday (&clock1, NULL);
+	uint64_t clock1, clock2;
+	clock1 = g_get_monotonic_time();
 	while (_running) {
 		if (engine.process_callback (_samples_per_period)) {
 			return 0;
 		}
 		_processed_samples += _samples_per_period;
 		if (!_freewheeling) {
-			::gettimeofday (&clock2, NULL);
-			const int elapsed_time = (clock2.tv_sec - clock1.tv_sec) * 1000000 + (clock2.tv_usec - clock1.tv_usec);
-			const int nomial_time = 1000000 * _samples_per_period / _samplerate;
+			clock2 = g_get_monotonic_time();
+			const int64_t elapsed_time = clock2 - clock1;
+			const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
 			_dsp_load = elapsed_time / (float) nomial_time;
 			if (elapsed_time < nomial_time) {
 				::usleep (nomial_time - elapsed_time);
@@ -1022,7 +1022,7 @@ DummyAudioBackend::main_process_thread ()
 			_dsp_load = 1.0;
 			::usleep (100); // don't hog cpu
 		}
-		::gettimeofday (&clock1, NULL);
+		clock1 = g_get_monotonic_time();
 	}
 	_running = false;
 	return 0;
