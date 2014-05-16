@@ -1034,6 +1034,7 @@ void
 SessionDialog::existing_session_selected ()
 {
 	_existing_session_chooser_used = true;
+	recent_session_display.get_selection()->unselect_all();
 	/* mark this sensitive in case we come back here after a failed open
 	 * attempt and the user has hacked up the fix. sigh.
 	 */
