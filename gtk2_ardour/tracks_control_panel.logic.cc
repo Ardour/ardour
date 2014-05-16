@@ -281,7 +281,7 @@ void TracksControlPanel::device_changed (bool show_confirm_dial/*=true*/)
     
     if( show_confirm_dial )
     {    
-        std::string message = "Would you like to switch to " + device_name;
+        std::string message = _("Would you like to switch to ") + device_name;
 
         MessageDialog msg (message,
                            false,
@@ -510,7 +510,18 @@ TracksControlPanel::on_device_list_update (bool current_device_disconnected)
     populate_device_combo();
     
     if (current_device_disconnected) {
-        // REACT ON CURRENT DEVICE DISCONNECTION
+        std::string message = _("Audio Device Has Been Removed");
+        
+        MessageDialog msg (message,
+                           false,
+                           Gtk::MESSAGE_WARNING,
+                           Gtk::BUTTONS_OK,
+                           true);
+        
+        msg.set_position (Gtk::WIN_POS_MOUSE);
+        msg.run();
+        
+        return;
     }
 }
 
