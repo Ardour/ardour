@@ -33,7 +33,7 @@ IdleAdjustment::IdleAdjustment (Gtk::Adjustment& adj)
 {
 	adj.signal_value_changed().connect (mem_fun (*this, &IdleAdjustment::underlying_adjustment_value_changed));
 	timeout_queued = 0;
-	gettimeofday (&last_vc, 0);
+	last_vc = g_get_monotonic_time();
 }
 
 IdleAdjustment::~IdleAdjustment ()
@@ -43,7 +43,7 @@ IdleAdjustment::~IdleAdjustment ()
 void
 IdleAdjustment::underlying_adjustment_value_changed ()
 {
-	gettimeofday (&last_vc, 0);
+	last_vc = g_get_monotonic_time();
 	
 	if (timeout_queued) {
 		return;
@@ -56,16 +56,13 @@ IdleAdjustment::underlying_adjustment_value_changed ()
 gint
 IdleAdjustment::timeout_handler ()
 {
-	struct timeval now;
-	struct timeval tdiff;
+	int64_t now, tdiff;
+	now = g_get_monotonic_time();
+	tdiff = now - last_vc;
 
-	gettimeofday (&now, 0);
+	std::cerr << "timer elapsed, diff = " << tdiff << " usec" << std::endl;
 
-	timersub (&now, &last_vc, &tdiff);
-
-	std::cerr << "timer elapsed, diff = " << tdiff.tv_sec << " + " << tdiff.tv_usec << std::endl;
-
-	if (tdiff.tv_sec > 0 || tdiff.tv_usec > 250000) {
+	if (tdiff > 250000) {
 		std::cerr << "send signal\n";
 		value_changed ();
 		timeout_queued = false;
