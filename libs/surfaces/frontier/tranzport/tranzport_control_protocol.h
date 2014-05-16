@@ -154,7 +154,7 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol
 	framepos_t     last_where;
 	ARDOUR::gain_t last_track_gain;
 	uint32_t       last_meter_fill;
-	struct timeval last_wheel_motion;
+	uint64_t       last_wheel_motion;
 	int            last_wheel_dir;
 
 	Glib::Mutex io_lock;
