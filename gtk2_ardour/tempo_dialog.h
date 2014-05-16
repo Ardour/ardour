@@ -57,7 +57,7 @@ private:
 	typedef std::map<std::string,float> NoteTypes;
 	NoteTypes note_types;
 
-	struct timeval last_tap;
+	gint64 last_tap;
 	double average_interval;
 
 	Gtk::ComboBoxText pulse_selector;
