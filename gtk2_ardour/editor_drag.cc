@@ -641,38 +641,41 @@ RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer) const
 void
 RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 {
+	double delta_layer = 0;
+	int delta_time_axis_view = 0;
+
 	assert (!_views.empty ());
-
-	/* Find the TimeAxisView that the pointer is now over */
-	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (_drags->current_pointer_y ());
-
-	/* Bail early if we're not over a track */
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv.first);
-
-	if (!rtv || !rtv->is_track()) {
-		_editor->verbose_cursor()->hide ();
-		return;
-	}
-
-	if (first_move && tv.first->view()->layer_display() == Stacked) {
-		tv.first->view()->set_layer_display (Expanded);
-	}
 
 	/* Note: time axis views in this method are often expressed as an index into the _time_axis_views vector */
 
-	/* Here's the current pointer position in terms of time axis view and layer */
-	int const current_pointer_time_axis_view = find_time_axis_view (tv.first);
-	double const current_pointer_layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
+	/* Find the TimeAxisView that the pointer is now over */
+	pair<TimeAxisView*, double> const r = _editor->trackview_by_y_position (_drags->current_pointer_y ());
+	TimeAxisView* tv = r.first;
 
+	if (tv) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+
+		double layer = r.second;
+	
+		if (first_move && tv->view()->layer_display() == Stacked) {
+			tv->view()->set_layer_display (Expanded);
+		}
+
+		/* Here's the current pointer position in terms of time axis view and layer */
+		int const current_pointer_time_axis_view = find_time_axis_view (tv);
+		double const current_pointer_layer = tv->layer_display() == Overlaid ? 0 : layer;
+		
+		/* Work out the change in y */
+
+		delta_time_axis_view = current_pointer_time_axis_view - _last_pointer_time_axis_view;
+		delta_layer = current_pointer_layer - _last_pointer_layer;
+	}
+	
 	/* Work out the change in x */
 	framepos_t pending_region_position;
 	double const x_delta = compute_x_delta (event, &pending_region_position);
 
-	/* Work out the change in y */
-
-	int delta_time_axis_view = current_pointer_time_axis_view - _last_pointer_time_axis_view;
-	double delta_layer = current_pointer_layer - _last_pointer_layer;
-
+	/* Verify change in y */
 	if (!y_movement_allowed (delta_time_axis_view, delta_layer)) {
 		/* this y movement is not allowed, so do no y movement this time */
 		delta_time_axis_view = 0;
@@ -725,58 +728,70 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			this_delta_layer = - i->layer;
 		}
 
-		/* The TimeAxisView that this region is now on */
-		TimeAxisView* tv = _time_axis_views[i->time_axis_view + delta_time_axis_view];
+		if (tv) {
 
-		/* Ensure it is moved from stacked -> expanded if appropriate */
-		if (tv->view()->layer_display() == Stacked) {
-			tv->view()->set_layer_display (Expanded);
-		}
+			/* The TimeAxisView that this region is now on */
+			TimeAxisView* current_tv = _time_axis_views[i->time_axis_view + delta_time_axis_view];
+
+			/* Ensure it is moved from stacked -> expanded if appropriate */
+			if (current_tv->view()->layer_display() == Stacked) {
+				current_tv->view()->set_layer_display (Expanded);
+			}
 		
-		/* We're only allowed to go -ve in layer on Expanded views */
-		if (tv->view()->layer_display() != Expanded && (i->layer + this_delta_layer) < 0) {
-			this_delta_layer = - i->layer;
-		}
+			/* We're only allowed to go -ve in layer on Expanded views */
+			if (current_tv->view()->layer_display() != Expanded && (i->layer + this_delta_layer) < 0) {
+				this_delta_layer = - i->layer;
+			}
 		
-		/* Set height */
-		rv->set_height (tv->view()->child_height ());
+			/* Set height */
+			rv->set_height (current_tv->view()->child_height ());
 		
-		/* Update show/hidden status as the region view may have come from a hidden track,
-		   or have moved to one.
-		*/
-		if (tv->hidden ()) {
-			rv->get_canvas_group()->hide ();
-		} else {
-			rv->get_canvas_group()->show ();
-		}
-
-		/* Update the DraggingView */
-		i->time_axis_view += delta_time_axis_view;
-		i->layer += this_delta_layer;
-
-		if (_brushing) {
-			_editor->mouse_brush_insert_region (rv, pending_region_position);
-		} else {
-			double x = 0;
-			double y = 0;
-
-			/* Get the y coordinate of the top of the track that this region is now on */
-			tv->canvas_display()->item_to_canvas (x, y);
-
-			/* And adjust for the layer that it should be on */
-			StreamView* cv = tv->view ();
-			switch (cv->layer_display ()) {
-			case Overlaid:
-				break;
-			case Stacked:
-				y += (cv->layers() - i->layer - 1) * cv->child_height ();
-				break;
-			case Expanded:
-				y += (cv->layers() - i->layer - 0.5) * 2 * cv->child_height ();
-				break;
+			/* Update show/hidden status as the region view may have come from a hidden track,
+			   or have moved to one.
+			*/
+			if (current_tv->hidden ()) {
+				rv->get_canvas_group()->hide ();
+			} else {
+				rv->get_canvas_group()->show ();
 			}
 
-			/* Now move the region view */
+			/* Update the DraggingView */
+			i->time_axis_view += delta_time_axis_view;
+			i->layer += this_delta_layer;
+
+			if (_brushing) {
+				_editor->mouse_brush_insert_region (rv, pending_region_position);
+			} else {
+				double x = 0;
+				double y = 0;
+
+				/* Get the y coordinate of the top of the track that this region is now on */
+				current_tv->canvas_display()->item_to_canvas (x, y);
+
+				/* And adjust for the layer that it should be on */
+				StreamView* cv = current_tv->view ();
+				switch (cv->layer_display ()) {
+				case Overlaid:
+					break;
+				case Stacked:
+					y += (cv->layers() - i->layer - 1) * cv->child_height ();
+					break;
+				case Expanded:
+					y += (cv->layers() - i->layer - 0.5) * 2 * cv->child_height ();
+					break;
+				}
+
+				/* Now move the region view */
+				rv->move (x_delta, y - rv->get_canvas_group()->position().y);
+			}
+		} else {
+			double y = 0;
+			double x = 0;
+			TimeAxisView* last = _time_axis_views.back();
+			last->canvas_display()->item_to_canvas (x, y);
+			cerr << "not over track, have " << _views.size() << " move to last @ " << y;
+			y += last->effective_height();
+			cerr << " + height of " << last->effective_height() << " ... y = " << y << endl;
 			rv->move (x_delta, y - rv->get_canvas_group()->position().y);
 		}
 
