@@ -250,6 +250,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 {
 	VstParameterProperties prop;
 
+	memset (&prop, 0, sizeof (VstParameterProperties));
 	desc.min_unbound = false;
 	desc.max_unbound = false;
 	prop.flags = 0;
@@ -257,6 +258,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 	if (_plugin->dispatcher (_plugin, effGetParameterProperties, which, 0, &prop, 0)) {
 
 		/* i have yet to find or hear of a VST plugin that uses this */
+		/* RG: faust2vsti does use this :) */
 
 		if (prop.flags & kVstParameterUsesIntegerMinMax) {
 			desc.lower = prop.minInteger;
@@ -285,6 +287,10 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 			desc.step = range / 100.0f;
 			desc.smallstep = desc.step / 2.0f;
 			desc.largestep = desc.step * 10.0f;
+		}
+
+		if (strlen(prop.label) == 0) {
+			_plugin->dispatcher (_plugin, effGetParamName, which, 0, prop.label, 0);
 		}
 
 		desc.toggled = prop.flags & kVstParameterIsSwitch;
