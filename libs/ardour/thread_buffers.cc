@@ -60,7 +60,9 @@ ThreadBuffers::ensure_buffers (ChanCount howmany)
 
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		size_t count = std::max (scratch_buffers->available().get(*t), howmany.get(*t));
-		size_t size = _engine->raw_buffer_size (*t) / sizeof (Sample);
+		size_t size = (*t == DataType::MIDI)
+			? _engine->raw_buffer_size (*t)
+			: _engine->raw_buffer_size (*t) / sizeof (Sample);
 
 		scratch_buffers->ensure_buffers (*t, count, size);
 		mix_buffers->ensure_buffers (*t, count, size);
