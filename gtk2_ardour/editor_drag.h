@@ -378,6 +378,7 @@ private:
 	void add_stateful_diff_commands_for_playlists (PlaylistSet const &);
 
 	void collect_new_region_view (RegionView *);
+	RouteTimeAxisView* create_destination_time_axis (boost::shared_ptr<ARDOUR::Region>);
 
 	bool _copy;
 	RegionView* _new_region_view;
