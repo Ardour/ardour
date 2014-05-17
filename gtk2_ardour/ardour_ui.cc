@@ -3384,8 +3384,6 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 
 	setup_order_hint();
 
-	PBD::ScopedConnection idle_connection;
-
 	string template_path = add_route_dialog->track_template();
 
 	if (!template_path.empty()) {
@@ -3427,8 +3425,6 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template);
 		break;
 	}
-
-	/* idle connection will end at scope end */
 }
 
 void
