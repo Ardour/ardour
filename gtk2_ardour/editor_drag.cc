@@ -943,12 +943,36 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 	_editor->maybe_locate_with_edit_preroll (_editor->get_selection().regions.start());
 }
 
+RouteTimeAxisView*
+RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region)
+{			
+	/* Add a new track of the correct type, and use the new time axis view that is created when we do this
+	   as the destination for the region drop.
+	 */
+			
+	try {
+		if (boost::dynamic_pointer_cast<AudioRegion> (region)) {
+			list<boost::shared_ptr<AudioTrack> > audio_tracks;
+			audio_tracks = _editor->session()->new_audio_track (region->n_channels(), region->n_channels(), ARDOUR::Normal, 0, 1, region->name());
+			return _editor->axis_view_from_route (audio_tracks.front());
+		} else {
+			ChanCount one_midi_port (DataType::MIDI, 1);
+			list<boost::shared_ptr<MidiTrack> > midi_tracks;
+			midi_tracks = _editor->session()->new_midi_track (one_midi_port, one_midi_port, boost::shared_ptr<ARDOUR::PluginInfo>(), ARDOUR::Normal, 0, 1, region->name());
+			return _editor->axis_view_from_route (midi_tracks.front());
+		}						
+	} catch (...) {
+		error << _("Could not create new track after region placed in the drop zone") << endmsg;
+		return 0;
+	}
+}
+
 void
 RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed_tracks*/, framecnt_t const drag_delta)
 {
 	RegionSelection new_views;
 	PlaylistSet modified_playlists;
-	list<RegionView*> views_to_delete;
+	RouteTimeAxisView* new_time_axis_view = 0;	
 
 	if (_brushing) {
 		/* all changes were made during motion event handlers */
@@ -968,7 +992,9 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 	}
 
 	/* insert the regions into their new playlists */
-	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end();) {
+
+		RouteTimeAxisView* dest_rtv = 0;
 
 		if (i->view->region()->locked() || i->view->region()->video_locked()) {
 			continue;
@@ -981,27 +1007,31 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 		} else {
 			where = i->view->region()->position();
 		}
-
-		RegionView* new_view = insert_region_into_playlist (
-			i->view->region(), dynamic_cast<RouteTimeAxisView*> (_time_axis_views[i->time_axis_view]), i->layer, where, modified_playlists
-			);
-
-		if (new_view == 0) {
-			continue;
+		
+		if (i->time_axis_view < 0) {
+			if (!new_time_axis_view) {
+				new_time_axis_view = create_destination_time_axis (i->view->region());
+			}
+			dest_rtv = new_time_axis_view;
+		} else {
+			dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[i->time_axis_view]);
+		}		
+		
+		if (dest_rtv != 0) {
+			RegionView* new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where, modified_playlists);
+			if (new_view != 0) {
+				new_views.push_back (new_view);
+			}
 		}
+	
+		/* Delete the copy of the view that was used for dragging. Need to play safe with the iterator
+		   since deletion will automagically remove it from _views, thus invalidating i as an iterator.
+		 */
 
-		new_views.push_back (new_view);
-
-		/* we don't need the copied RegionView any more */
-		views_to_delete.push_back (i->view);
-	}
-
-	/* Delete views that are no longer needed; we can't do this directly in the iteration over _views
-	   because when views are deleted they are automagically removed from _views, which messes
-	   up the iteration.
-	*/
-	for (list<RegionView*>::iterator i = views_to_delete.begin(); i != views_to_delete.end(); ++i) {
-		delete *i;
+		list<DraggingView>::const_iterator next = i;
+		++next;
+		delete i->view;
+		i = next;
 	}
 
 	/* If we've created new regions either by copying or moving
@@ -1054,36 +1084,14 @@ RegionMoveDrag::finished_no_copy (
 		}
 		
 		if (i->time_axis_view < 0) {
-			/* not over a time axis view */
-
 			if (!new_time_axis_view) {
-			
-				/* Add a new track of the correct type, and use the new time axis view that is created when we do this
-				   as the destination for the region drop.
-				 */
-			
-				try {
-					if (boost::dynamic_pointer_cast<AudioRegion> (rv->region())) {
-						list<boost::shared_ptr<AudioTrack> > audio_tracks;
-						audio_tracks = _editor->session()->new_audio_track (rv->region()->n_channels(), rv->region()->n_channels(), ARDOUR::Normal, 0, 1, rv->region()->name());
-						new_time_axis_view = _editor->axis_view_from_route (audio_tracks.front());
-					} else {
-						ChanCount one_midi_channel (DataType::MIDI, 1);
-						list<boost::shared_ptr<MidiTrack> > midi_tracks;
-						midi_tracks = _editor->session()->new_midi_track (one_midi_channel, one_midi_channel, boost::shared_ptr<ARDOUR::PluginInfo>(), ARDOUR::Normal, 0, 1, rv->region()->name());
-						new_time_axis_view = _editor->axis_view_from_route (midi_tracks.front());
-					}						
-				} catch (...) {
-					error << _("Could not create new track after region placed in the drop zone") << endmsg;
-					break;
-				}
+				new_time_axis_view = create_destination_time_axis (rv->region());
 			}
-			
 			dest_rtv = new_time_axis_view;
 		} else {
 			dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[i->time_axis_view]);
 		}
-
+			
 		assert (dest_rtv);
 
 		double const dest_layer = i->layer;
