@@ -4873,7 +4873,7 @@ Editor::region_view_removed ()
 	_summary->set_dirty ();
 }
 
-TimeAxisView*
+RouteTimeAxisView*
 Editor::axis_view_from_route (boost::shared_ptr<Route> r) const
 {
 	TrackViewList::const_iterator j = track_views.begin ();
