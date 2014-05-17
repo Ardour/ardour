@@ -60,10 +60,6 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace Editing;
 
-/* XXX this is a hack. it ought to be the maximum value of an framepos_t */
-
-const double max_canvas_coordinate = (double) UINT32_MAX;
-
 void
 Editor::initialize_canvas ()
 {
@@ -213,7 +209,7 @@ Editor::initialize_canvas ()
 	}
 
 
-	_canvas_bottom_rect = new ArdourCanvas::Rectangle (_track_canvas->root(), ArdourCanvas::Rect (0.0, 0.0, max_canvas_coordinate, 20));
+	_canvas_bottom_rect = new ArdourCanvas::Rectangle (_track_canvas->root(), ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 20));
 	/* this thing is transparent */
 	_canvas_bottom_rect->set_fill (false);
 	_canvas_bottom_rect->set_outline (false);
