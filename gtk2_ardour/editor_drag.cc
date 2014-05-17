@@ -655,7 +655,6 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	TimeAxisView* tv = r.first;
 
 	if (tv) {
-
 		double layer = r.second;
 	
 		if (first_move && tv->view()->layer_display() == Stacked) {
@@ -788,7 +787,6 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		} else {
 			double y = 0;
 			double x = 0;
-			
 			TimeAxisView* last = _time_axis_views.back();
 			last->canvas_display()->item_to_canvas (x, y);
 			y += last->effective_height();
