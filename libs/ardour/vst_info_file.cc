@@ -39,18 +39,12 @@
 #include <glib/gstdio.h>
 #include <glibmm.h>
 
+#include "pbd/error.h"
 
-#ifdef VST_SCANNER_APP
-#define errormsg cerr
-#define warningmsg cerr
-#define endmsg endl
-#else
+#ifndef VST_SCANNER_APP
 #include "ardour/plugin_manager.h" // scanner_bin_path
 #include "ardour/rc_configuration.h"
 #include "ardour/system_exec.h"
-#include "pbd/error.h"
-#define errormsg PBD::error
-#define warningmsg PBD::warning
 #endif
 
 #include "ardour/filesystem_paths.h"
@@ -330,7 +324,7 @@ vstfx_write_info_file (FILE* fp, vector<VSTInfo *> *infos)
 	} else if (infos->size() == 1) {
 		vstfx_write_info_block(fp, infos->front());
 	} else {
-		errormsg << "Zero plugins in VST." << endmsg; // XXX here? rather make this impossible before if it ain't already.
+		PBD::error << "Zero plugins in VST." << endmsg; // XXX here? rather make this impossible before if it ain't already.
 	}
 }
 
@@ -406,7 +400,6 @@ vstfx_un_blacklist (const char *dllpath)
 	::g_unlink(vstfx_blacklist_path (dllpath, 1).c_str());
 }
 
-#ifndef VST_SCANNER_APP
 /** remove info file from cache */
 static void
 vstfx_remove_infofile (const char *dllpath)
@@ -414,7 +407,6 @@ vstfx_remove_infofile (const char *dllpath)
 	::g_unlink(vstfx_infofile_path (dllpath, 0).c_str());
 	::g_unlink(vstfx_infofile_path (dllpath, 1).c_str());
 }
-#endif
 
 /** helper function, check if cache is newer than plugin
  * @return path to cache file */
@@ -516,7 +508,7 @@ vstfx_get_info_from_file(const char* dllpath, vector<VSTInfo*> *infos)
 		rv = vstfx_load_info_file(infofile, infos);
 		fclose (infofile);
 		if (!rv) {
-			warningmsg << "Cannot get VST information form " << dllpath << ": info file load failed." << endmsg;
+			PBD::warning << "Cannot get VST information form " << dllpath << ": info file load failed." << endmsg;
 		}
 	}
 	return rv;
@@ -782,7 +774,7 @@ vstfx_instantiate_and_get_info_lx (
 	VSTHandle* h;
 	VSTState* vstfx;
 	if (!(h = vstfx_load(dllpath))) {
-		warningmsg << "Cannot get LinuxVST information from " << dllpath << ": load failed." << endmsg;
+		PBD::warning << "Cannot get LinuxVST information from " << dllpath << ": load failed." << endmsg;
 		return false;
 	}
 
@@ -790,7 +782,7 @@ vstfx_instantiate_and_get_info_lx (
 
 	if (!(vstfx = vstfx_instantiate(h, simple_master_callback, 0))) {
 		vstfx_unload(h);
-		warningmsg << "Cannot get LinuxVST information from " << dllpath << ": instantiation failed." << endmsg;
+		PBD::warning << "Cannot get LinuxVST information from " << dllpath << ": instantiation failed." << endmsg;
 		return false;
 	}
 
@@ -811,7 +803,7 @@ vstfx_instantiate_and_get_info_fst (
 	VSTHandle* h;
 	VSTState* vstfx;
 	if(!(h = fst_load(dllpath))) {
-		warningmsg << "Cannot get Windows VST information from " << dllpath << ": load failed." << endmsg;
+		PBD::warning << "Cannot get Windows VST information from " << dllpath << ": load failed." << endmsg;
 		return false;
 	}
 
@@ -820,7 +812,7 @@ vstfx_instantiate_and_get_info_fst (
 	if(!(vstfx = fst_instantiate(h, simple_master_callback, 0))) {
 		fst_unload(&h);
 		vstfx_current_loading_id = 0;
-		warningmsg << "Cannot get Windows VST information from " << dllpath << ": instantiation failed." << endmsg;
+		PBD::warning << "Cannot get Windows VST information from " << dllpath << ": instantiation failed." << endmsg;
 		return false;
 	}
 	vstfx_current_loading_id = 0;
@@ -842,14 +834,14 @@ static char * _errorlog_dll = 0;
 static void parse_scanner_output (std::string msg, size_t /*len*/)
 {
 	if (!_errorlog_fd && !_errorlog_dll) {
-		errormsg << "VST scanner: " << msg;
+		PBD::error << "VST scanner: " << msg;
 		return;
 	}
 
 	if (!_errorlog_fd) {
 		if (!(_errorlog_fd = fopen(vstfx_errorfile_path(_errorlog_dll, 0).c_str(), "w"))) {
 			if (!(_errorlog_fd = fopen(vstfx_errorfile_path(_errorlog_dll, 1).c_str(), "w"))) {
-				errormsg << "Cannot create plugin error-log for plugin " << _errorlog_dll;
+				PBD::error << "Cannot create plugin error-log for plugin " << _errorlog_dll;
 				free(_errorlog_dll);
 				_errorlog_dll = NULL;
 			}
@@ -859,7 +851,7 @@ static void parse_scanner_output (std::string msg, size_t /*len*/)
 	if (_errorlog_fd) {
 		fprintf (_errorlog_fd, "%s\n", msg.c_str());
 	} else {
-		errormsg << "VST scanner: " << msg;
+		PBD::error << "VST scanner: " << msg;
 	}
 }
 
@@ -919,7 +911,7 @@ vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanM
 		PBD::ScopedConnectionList cons;
 		scanner.ReadStdout.connect_same_thread (cons, boost::bind (&parse_scanner_output, _1 ,_2));
 		if (scanner.start (2 /* send stderr&stdout via signal */)) {
-			errormsg << "Cannot launch VST scanner app '" << scanner_bin_path << "': "<< strerror(errno) << endmsg;
+			PBD::error << "Cannot launch VST scanner app '" << scanner_bin_path << "': "<< strerror(errno) << endmsg;
 			close_error_log();
 			return infos;
 		} else {
@@ -985,7 +977,7 @@ vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanM
 	/* crate cache/whitelist */
 	infofile = vstfx_infofile_for_write (dllpath);
 	if (!infofile) {
-		warningmsg << "Cannot cache VST information for " << dllpath << ": cannot create new FST info file." << endmsg;
+		PBD::warning << "Cannot cache VST information for " << dllpath << ": cannot create new FST info file." << endmsg;
 		return infos;
 	} else {
 		vstfx_write_info_file (infofile, infos);
@@ -1013,7 +1005,7 @@ get_personal_vst_blacklist_dir() {
 	/* if the directory doesn't exist, try to create it */
 	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
 		if (g_mkdir (dir.c_str (), 0700)) {
-			errormsg << "Cannot create VST blacklist folder '" << dir << "'" << endmsg;
+			PBD::error << "Cannot create VST blacklist folder '" << dir << "'" << endmsg;
 			//exit(1);
 		}
 	}
@@ -1026,7 +1018,7 @@ get_personal_vst_info_cache_dir() {
 	/* if the directory doesn't exist, try to create it */
 	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
 		if (g_mkdir (dir.c_str (), 0700)) {
-			errormsg << "Cannot create VST info folder '" << dir << "'" << endmsg;
+			PBD::error << "Cannot create VST info folder '" << dir << "'" << endmsg;
 			//exit(1);
 		}
 	}
