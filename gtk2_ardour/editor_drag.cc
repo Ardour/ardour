@@ -32,8 +32,10 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
+#include "ardour/audio_track.h"
 #include "ardour/dB.h"
 #include "ardour/midi_region.h"
+#include "ardour/midi_track.h"
 #include "ardour/operations.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
@@ -653,7 +655,6 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	TimeAxisView* tv = r.first;
 
 	if (tv) {
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
 		double layer = r.second;
 	
@@ -787,12 +788,12 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		} else {
 			double y = 0;
 			double x = 0;
+			
 			TimeAxisView* last = _time_axis_views.back();
 			last->canvas_display()->item_to_canvas (x, y);
-			cerr << "not over track, have " << _views.size() << " move to last @ " << y;
 			y += last->effective_height();
-			cerr << " + height of " << last->effective_height() << " ... y = " << y << endl;
 			rv->move (x_delta, y - rv->get_canvas_group()->position().y);
+			i->time_axis_view = -1;
 		}
 
 	} /* foreach region */
@@ -1028,6 +1029,7 @@ RegionMoveDrag::finished_no_copy (
 	PlaylistSet modified_playlists;
 	PlaylistSet frozen_playlists;
 	set<RouteTimeAxisView*> views_to_update;
+	RouteTimeAxisView* new_time_axis_view = 0;
 
 	if (_brushing) {
 		/* all changes were made during motion event handlers */
@@ -1044,15 +1046,48 @@ RegionMoveDrag::finished_no_copy (
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ) {
 
 		RegionView* rv = i->view;
-
-		RouteTimeAxisView* const dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[i->time_axis_view]);
-		double const dest_layer = i->layer;
+		RouteTimeAxisView* dest_rtv = 0;
 
 		if (rv->region()->locked() || rv->region()->video_locked()) {
 			++i;
 			continue;
 		}
+		
+		if (i->time_axis_view < 0) {
+			/* not over a time axis view */
 
+			if (!new_time_axis_view) {
+			
+				/* Add a new track of the correct type, and use the new time axis view that is created when we do this
+				   as the destination for the region drop.
+				 */
+			
+				try {
+					if (boost::dynamic_pointer_cast<AudioRegion> (rv->region())) {
+						list<boost::shared_ptr<AudioTrack> > audio_tracks;
+						audio_tracks = _editor->session()->new_audio_track (rv->region()->n_channels(), rv->region()->n_channels(), ARDOUR::Normal, 0, 1, rv->region()->name());
+						new_time_axis_view = _editor->axis_view_from_route (audio_tracks.front());
+					} else {
+						ChanCount one_midi_channel (DataType::MIDI, 1);
+						list<boost::shared_ptr<MidiTrack> > midi_tracks;
+						midi_tracks = _editor->session()->new_midi_track (one_midi_channel, one_midi_channel, boost::shared_ptr<ARDOUR::PluginInfo>(), ARDOUR::Normal, 0, 1, rv->region()->name());
+						new_time_axis_view = _editor->axis_view_from_route (midi_tracks.front());
+					}						
+				} catch (...) {
+					error << _("Could not create new track after region placed in the drop zone") << endmsg;
+					break;
+				}
+			}
+			
+			dest_rtv = new_time_axis_view;
+		} else {
+			dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[i->time_axis_view]);
+		}
+
+		assert (dest_rtv);
+
+		double const dest_layer = i->layer;
+		
 		views_to_update.insert (dest_rtv);
 
 		framepos_t where;
