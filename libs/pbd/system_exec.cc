@@ -187,6 +187,93 @@ SystemExec::SystemExec (std::string c, char **a)
 	make_envp();
 }
 
+SystemExec::SystemExec (std::string command, const std::map<char, std::string> subs)
+{
+	init ();
+	make_argp_escaped(command, subs);
+	cmd = argp[0];
+	// cmd = strdup(argp[0]);
+	make_envp();
+}
+
+void
+SystemExec::make_argp_escaped(std::string command, const std::map<char, std::string> subs)
+{
+
+	int inquotes = 0;
+	int n = 0;
+	size_t i = 0;
+	std::string arg = "";
+
+	argp = (char **) malloc(sizeof(char *));
+
+	for (i = 0; i <= command.length(); i++) { // include terminating '\0'
+		char c = command.c_str()[i];
+		if (inquotes) {
+			if (c == '"') {
+				inquotes = 0;
+			} else {
+				// still in quotes - just copy
+				arg += c;
+			}
+		} else switch (c) {
+			case '%' :
+				c = command.c_str()[++i];
+				if (c == '%' || c == '\0') {
+					// "%%", "%" at end-of-string => "%"
+					arg += '%';
+				} else {
+					// search subs for string to substitute for char
+					std::map<char, std::string>::const_iterator s = subs.find(c);
+					if (s != subs.end()) {
+						// found substitution
+						arg += s->second;
+					} else {
+						// not a valid substitution, just copy
+						arg += '%';
+						arg += c;
+					}
+				}
+				break;
+			case '\\':
+				c = command.c_str()[++i];
+				switch (c) {
+					case ' ' :
+					case '"' : arg += c; break; // "\\", "\" at end-of-string => "\"
+					case '\0': 
+					case '\\': arg += '\\'; break;
+					default  : arg += '\\'; arg += c; break;
+				}
+				break;
+			case '"' :
+				inquotes = 1;
+				break;
+			case ' ' :
+			case '\t':
+			case '\0':
+				if (arg.length() > 0) {
+					// if there wasn't already a space or tab, start a new parameter
+					argp = (char **) realloc(argp, (n + 2) * sizeof(char *));
+					argp[n++] = strdup (arg.c_str());
+					arg = "";
+				}
+				break;
+			default :
+				arg += c;
+				break;
+		}
+	}
+	argp[n] = NULL;
+
+	char *p = argp[0];
+	n = 0;
+	do {
+		std::cerr << "argv[" << n << "] == \"" << p << "\"" << std::endl;
+		p = argp[n++];
+	} while (p);
+
+}
+
 SystemExec::~SystemExec ()
 {
 	terminate ();
