@@ -65,10 +65,8 @@ Editor::initialize_canvas ()
 {
 	_track_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 	_track_canvas = _track_canvas_viewport->canvas ();
+	//_track_canvas->set_global_scroll (false);
 
-	_time_bars_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, unused_adjustment);
-	_time_bars_canvas = _time_bars_canvas_viewport->canvas ();
-	
 	_verbose_cursor = new VerboseCursor (this);
 
 	/* on the bottom, an image */
@@ -100,7 +98,15 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (time_line_group, "time line group");
 
 	_trackview_group = new ArdourCanvas::Group (_track_canvas->root());
+	//_trackview_group->set_scroll_sensitivity (ArdourCanvas::Group::ScrollSensitivity (ArdourCanvas::Group::ScrollsVertically|ArdourCanvas::Group::ScrollsHorizontally));	
 	CANVAS_DEBUG_NAME (_trackview_group, "Canvas TrackViews");
+	
+	
+	/* TIME BAR CANVAS */
+	
+	_time_bars_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, unused_adjustment);
+	_time_bars_canvas = _time_bars_canvas_viewport->canvas ();
+		
 	_region_motion_group = new ArdourCanvas::Group (_trackview_group);
 	CANVAS_DEBUG_NAME (_region_motion_group, "Canvas Region Motion");
 

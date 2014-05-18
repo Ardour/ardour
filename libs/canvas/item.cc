@@ -35,6 +35,7 @@ using namespace ArdourCanvas;
 Item::Item (Canvas* canvas)
 	: _canvas (canvas)
 	, _parent (0)
+	, _scroll_sensitivity (ScrollSensitivity (0))
 {
 	init ();
 }
@@ -42,6 +43,7 @@ Item::Item (Canvas* canvas)
 Item::Item (Group* parent)
 	: _canvas (parent->canvas ())
 	, _parent (parent)
+	, _scroll_sensitivity (ScrollSensitivity (0))
 {
 	init ();
 }
@@ -50,6 +52,7 @@ Item::Item (Group* parent, Duple position)
 	: _canvas (parent->canvas())
 	, _parent (parent)
 	, _position (position)
+	, _scroll_sensitivity (ScrollSensitivity (0))	
 {
 	init ();
 }
@@ -77,6 +80,24 @@ Item::~Item ()
 	if (_canvas) {
 		_canvas->item_going_away (this, _bounding_box);
 	}
+}
+
+void
+Item::scroll_to (Duple const& d)
+{
+	if (_scroll_sensitivity & ScrollsVertically) {
+		_scroll_offset.y = d.y;
+	}
+
+	if (_scroll_sensitivity & ScrollsHorizontally) {
+		_scroll_offset.x = d.x;
+	}
+}
+
+void
+Item::set_scroll_sensitivity (ScrollSensitivity s)
+{
+	_scroll_sensitivity = s;
 }
 
 ArdourCanvas::Rect
@@ -162,19 +183,57 @@ Item::canvas_to_item (Coord& x, Coord& y) const
 Duple
 Item::item_to_window (ArdourCanvas::Duple const & d, bool rounded) const
 {
-	return _canvas->canvas_to_window (item_to_canvas (d), rounded);
+	Item const * i = this;
+	Duple offset;
+
+	while (i) {
+		offset = offset.translate (i->scroll_offset());
+		i = i->parent();
+	}
+	
+	return _canvas->canvas_to_window (d.translate (offset), rounded);
 }
 
 Duple
 Item::window_to_item (ArdourCanvas::Duple const & d) const
 {
-	return _canvas->window_to_canvas (canvas_to_item (d));
+	Item const * i = this;
+	Duple offset;
+
+	while (i) {
+		offset = offset.translate (-i->scroll_offset());
+		i = i->parent();
+	}
+	
+	return _canvas->window_to_canvas (d.translate (offset));
 }
 
 ArdourCanvas::Rect
 Item::item_to_window (ArdourCanvas::Rect const & r) const
 {
-	return _canvas->canvas_to_window (item_to_canvas (r));
+	Item const * i = this;
+	Duple offset;
+
+	while (i) {
+		offset = offset.translate (i->scroll_offset());
+		i = i->parent();
+	}
+
+	return _canvas->canvas_to_window (item_to_canvas (r.translate (offset)));
+}
+
+ArdourCanvas::Rect
+Item::window_to_item (ArdourCanvas::Rect const & r) const
+{
+	Item const * i = this;
+	Duple offset;
+
+	while (i) {
+		offset = offset.translate (-i->scroll_offset());
+		i = i->parent();
+	}
+
+	return canvas_to_item (_canvas->window_to_canvas (r).translate (offset));
 }
 
 /** Set the position of this item in the parent's coordinates */
@@ -517,7 +576,7 @@ Item::dump (ostream& o) const
 	boost::optional<ArdourCanvas::Rect> bb = bounding_box();
 
 	o << _canvas->indent() << whatami() << ' ' << this << " Visible ? " << _visible;
-	o << " @ " << position();
+	o << " @ " << position() << " scrolled-to " << _scroll_offset;
 	
 #ifdef CANVAS_DEBUG
 	if (!name.empty()) {

@@ -40,8 +40,7 @@ using namespace ArdourCanvas;
 /** Construct a new Canvas */
 Canvas::Canvas ()
 	: _root (this)
-	, _scroll_offset_x (0)
-	, _scroll_offset_y (0)
+	, _global_scroll (true)
 {
 	set_epoch ();
 }
@@ -49,10 +48,21 @@ Canvas::Canvas ()
 void
 Canvas::scroll_to (Coord x, Coord y)
 {
-	_scroll_offset_x = x;
-	_scroll_offset_y = y;
+	Duple d (x, y);
+	
+	if (_global_scroll) {
+		_scroll_offset = d;
+	}
+	
+	//_root.scroll_to (d);
 
 	pick_current_item (0); // no current mouse position 
+}
+
+void
+Canvas::set_global_scroll (bool yn)
+{
+	_global_scroll = yn;
 }
 
 void
@@ -71,9 +81,9 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 #ifdef CANVAS_DEBUG
 	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 		cerr << this << " RENDER: " << area << endl;
-		//cerr << "CANVAS @ " << this << endl;
-		//dump (cerr);
-		//cerr << "-------------------------\n";
+		cerr << "CANVAS @ " << this << endl;
+		dump (cerr);
+		cerr << "-------------------------\n";
 	}
 #endif
 
@@ -189,13 +199,13 @@ Canvas::item_changed (Item* item, boost::optional<Rect> pre_change_bounding_box)
 Duple
 Canvas::window_to_canvas (Duple const & d) const
 {
-	return d.translate (Duple (_scroll_offset_x, _scroll_offset_y));
+	return d.translate (Duple (_scroll_offset.x, _scroll_offset.y));
 }
 
 Duple
 Canvas::canvas_to_window (Duple const & d, bool rounded) const
 {
-	Duple wd = d.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
+	Duple wd = d.translate (Duple (-_scroll_offset.x, -_scroll_offset.y));
 
 	/* Note that this intentionally almost always returns integer coordinates */
 	if (rounded) {
@@ -209,13 +219,13 @@ Canvas::canvas_to_window (Duple const & d, bool rounded) const
 Rect
 Canvas::window_to_canvas (Rect const & r) const
 {
-	return r.translate (Duple (_scroll_offset_x, _scroll_offset_y));
+	return r.translate (Duple (_scroll_offset.x, _scroll_offset.y));
 }
 
 Rect
 Canvas::canvas_to_window (Rect const & r, bool rounded) const
 {
-	Rect wr = r.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
+	Rect wr = r.translate (Duple (-_scroll_offset.x, -_scroll_offset.y));
 
 	/* Note that this intentionally almost always returns integer coordinates */
 
@@ -802,8 +812,8 @@ GtkCanvas::unfocus (Item* item)
 Rect
 GtkCanvas::visible_area () const
 {
-	Distance const xo = _scroll_offset_x;
-	Distance const yo = _scroll_offset_y;
+	Distance const xo = _scroll_offset.x;
+	Distance const yo = _scroll_offset.y;
 	return Rect (xo, yo, xo + get_allocation().get_width (), yo + get_allocation().get_height ());
 }
 

@@ -180,7 +180,7 @@ Line::covers (Duple const & point) const
 	double t;
 	Duple a (_points[0]);
 	Duple b (_points[1]);
-	const Rect visible (_canvas->visible_area());
+	const Rect visible (window_to_item (_canvas->visible_area()));
 
 	/*
 	   Clamp the line endpoints to the visible area of the canvas. If we do

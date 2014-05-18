@@ -112,6 +112,17 @@ public:
 	void set_y_position (Coord);
 	void move (Duple);
 
+	enum ScrollSensitivity {
+		ScrollsVertically = 0x1,
+		ScrollsHorizontally = 0x2
+	};
+	
+	void set_scroll_sensitivity (ScrollSensitivity s);
+	ScrollSensitivity scroll_sensitivity () const { return _scroll_sensitivity; }
+
+	virtual void scroll_to (Duple const& d);
+	Duple scroll_offset() const { return _scroll_offset; }
+
 	/** @return Position of this item in the parent's coordinates */
 	Duple position () const {
 		return _position;
@@ -125,21 +136,18 @@ public:
 	Rect item_to_parent (Rect const &) const;
 	Duple parent_to_item (Duple const &) const;
 	Rect parent_to_item (Rect const &) const;
-	/* XXX: it's a pity these aren't the same form as item_to_parent etc.,
+
+	/* XXX: it's a pity these two aren't the same form as item_to_parent etc.,
 	   but it makes a bit of a mess in the rest of the code if they are not.
 	*/
-
         void canvas_to_item (Coord &, Coord &) const;
-        Duple canvas_to_item (Duple const &) const;
 	void item_to_canvas (Coord &, Coord &) const;
-	Rect item_to_canvas (Rect const &) const;
-	Rect canvas_to_item (Rect const &) const;
-        Duple item_to_canvas (Duple const &) const;
 
         Duple item_to_window (Duple const&, bool rounded = true) const;
         Duple window_to_item (Duple const&) const;
         Rect item_to_window (Rect const&) const;
-
+        Rect window_to_item (Rect const&) const;
+        
 	void raise_to_top ();
 	void raise (int);
 	void lower_to_bottom ();
@@ -240,6 +248,8 @@ private:
 	void init ();
 
 	bool _ignore_events;
+	ScrollSensitivity _scroll_sensitivity;
+	Duple _scroll_offset;
 };
 
 extern LIBCANVAS_API std::ostream& operator<< (std::ostream&, const ArdourCanvas::Item&);

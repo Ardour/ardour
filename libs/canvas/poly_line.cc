@@ -59,7 +59,7 @@ PolyLine::covers (Duple const & point) const
 
 	/* repeat for each line segment */
 
-	const Rect visible (_canvas->visible_area());
+	const Rect visible (window_to_item (_canvas->visible_area()));
 
 	for (i = 1, j = 0; i < npoints; ++i, ++j) {
 

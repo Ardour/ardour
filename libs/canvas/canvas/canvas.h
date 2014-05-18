@@ -108,6 +108,8 @@ public:
         }
 
         void scroll_to (Coord x, Coord y);
+        void set_global_scroll (bool);
+        
         virtual Rect visible_area () const = 0;
 
         void zoomed();
@@ -122,8 +124,8 @@ protected:
 	/** our root group */
 	RootGroup _root;
 
-        Coord _scroll_offset_x;
-        Coord _scroll_offset_y;
+        Duple _scroll_offset;
+        bool _global_scroll;
 
         virtual void pick_current_item (int state) = 0;
         virtual void pick_current_item (Duple const &, int state) = 0;

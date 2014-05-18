@@ -65,7 +65,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 		  const ARDOUR::TempoMap::BBTPointList::const_iterator& end)
 {
 	ARDOUR::TempoMap::BBTPointList::const_iterator i;
-	ArdourCanvas::Rect const visible = _canvas.visible_area ();
+	ArdourCanvas::Rect const visible = _group->window_to_item (_canvas.visible_area ());
 	double  beat_density;
 
 	uint32_t beats = 0;

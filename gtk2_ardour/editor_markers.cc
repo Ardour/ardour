@@ -1465,16 +1465,23 @@ Editor::update_punch_range_view ()
 	Location* tpl;
 
 	if ((_session->config.get_punch_in() || _session->config.get_punch_out()) && ((tpl = transport_punch_location()) != 0)) {
-		ArdourCanvas::Rect const v = _track_canvas->visible_area ();
 
+		double pixel_start;
+		double pixel_end;
+		
 		if (_session->config.get_punch_in()) {
-			transport_punch_range_rect->set_x0 (sample_to_pixel (tpl->start()));
-			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? sample_to_pixel (tpl->end()) : sample_to_pixel (max_framepos));
+			pixel_start = sample_to_pixel (tpl->start());
 		} else {
-			transport_punch_range_rect->set_x0 (0);
-			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? sample_to_pixel (tpl->end()) : v.width ());
+			pixel_start = 0;
+		}
+		if (_session->config.get_punch_out()) {
+			pixel_end = sample_to_pixel (tpl->end());
+		} else {
+			pixel_end = sample_to_pixel (max_framepos);
 		}
 		
+		transport_punch_range_rect->set_x0 (pixel_start);
+		transport_punch_range_rect->set_x1 (pixel_end);			
 		transport_punch_range_rect->show();
 
 	} else {
