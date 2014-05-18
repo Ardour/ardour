@@ -201,7 +201,7 @@ SystemExec::make_argp_escaped(std::string command, const std::map<char, std::str
 
 	argp = (char **) malloc(sizeof(char *));
 
-	for (i = 0; i < command.length(); i++) {
+	for (i = 0; i <= command.length(); i++) { // include terminating '\0'
 		char c = command.c_str()[i];
 		if (inquotes) {
 			if (c == '"') {
@@ -244,6 +244,7 @@ SystemExec::make_argp_escaped(std::string command, const std::map<char, std::str
 				break;
 			case ' ' :
 			case '\t':
+			case '\0':
 				if (arg.length() > 0) {
 					// if there wasn't already a space or tab, start a new parameter
 					argp = (char **) realloc(argp, (n + 2) * sizeof(char *));
