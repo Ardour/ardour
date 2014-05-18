@@ -65,4 +65,14 @@ SystemExec::SystemExec (std::string c, std::string a)
 #endif
 }
 
+SystemExec::SystemExec (std::string c, const std::map<char, std::string> subs)
+	: PBD::SystemExec(c, subs)
+{
+#ifndef PLATFORM_WINDOWS
+	if (!_vfork_exec_wrapper) {
+		_vfork_exec_wrapper = vfork_exec_wrapper_path();
+	}
+#endif
+}
+
 SystemExec::~SystemExec() { }
