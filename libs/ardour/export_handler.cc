@@ -33,9 +33,9 @@
 #include "ardour/export_format_specification.h"
 #include "ardour/export_filename.h"
 #include "ardour/soundcloud_upload.h"
+#include "ardour/system_exec.h"
 #include "pbd/openuri.h"
 #include "pbd/basename.h"
-#include "pbd/system_exec.h"
 #include "ardour/session_metadata.h"
 
 #include "i18n.h"
@@ -329,7 +329,7 @@ ExportHandler::finish_timespan ()
 
 
 			std::cerr << "running command: " << fmt->command() << "..." << std::endl;
-			SystemExec *se = new SystemExec(fmt->command(), subs);
+			ARDOUR::SystemExec *se = new ARDOUR::SystemExec(fmt->command(), subs);
 			se->ReadStdout.connect_same_thread(command_connection, boost::bind(&ExportHandler::command_output, this, _1, _2));
 			if (se->start (2) == 0) {
 				// successfully started
