@@ -24,7 +24,9 @@
 #include <glibmm.h>
 #include <glibmm/convert.h>
 
+#include "pbd/basename.h"
 #include "pbd/convert.h"
+#include "pbd/openuri.h"
 
 #include "ardour/audiofile_tagger.h"
 #include "ardour/export_graph_builder.h"
@@ -35,8 +37,8 @@
 #include "ardour/export_filename.h"
 #include "ardour/session_metadata.h"
 #include "ardour/soundcloud_upload.h"
-#include "pbd/openuri.h"
-#include "pbd/basename.h"
+#include "ardour/system_exec.h"
+#include "ardour/session_metadata.h"
 
 #include "i18n.h"
 
@@ -301,13 +303,40 @@ ExportHandler::finish_timespan ()
 		}
 
 		if (!fmt->command().empty()) {
-			std::string command = string_compose(fmt->command(),
-					filepath,
-					Glib::path_get_dirname(filepath),
-					PBD::basename_nosuffix(filepath)
-					);
-			std::cerr << "running command: " << command << "..." << std::endl;
-			system(command.c_str());
+
+#if 0			// would be nicer with C++11 initialiser...
+			std::map<char, std::string> subs {
+				{ 'f', filename },
+				{ 'd', Glib::path_get_dirname(filename) },
+				{ 'b', PBD::basename_nosuffix(filename) },
+				{ 'u', upload_username },
+				{ 'p', upload_password}
+			};
+#endif
+
+			PBD::ScopedConnection command_connection;
+			std::map<char, std::string> subs;
+			subs.insert (std::pair<char, std::string> ('f', filename));
+			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname(filename)));
+			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix(filename)));
+			subs.insert (std::pair<char, std::string> ('u', upload_username));
+			subs.insert (std::pair<char, std::string> ('p', upload_password));
+
+
+			std::cerr << "running command: " << fmt->command() << "..." << std::endl;
+			ARDOUR::SystemExec *se = new ARDOUR::SystemExec(fmt->command(), subs);
+			se->ReadStdout.connect_same_thread(command_connection, boost::bind(&ExportHandler::command_output, this, _1, _2));
+			if (se->start (2) == 0) {
+				// successfully started
+				std::cerr << "started!" << std::endl;
+				while (se->is_running ()) {
+					// wait for system exec to terminate
+					// std::cerr << "waiting..." << std::endl;
+					usleep (1000);
+				}
+			}
+			std::cerr << "done! deleting..." << std::endl;
+			delete (se);
 		}
 
 		if (fmt->upload()) {
