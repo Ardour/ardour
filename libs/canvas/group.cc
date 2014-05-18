@@ -148,6 +148,16 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 }
 
 void
+Group::scroll_to (Duple const& d)
+{
+	Item::scroll_to (d);
+	
+	for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ) {
+		(*i)->scroll_to (d);
+	}
+}
+
+void
 Group::compute_bounding_box () const
 {
 	Rect bbox;

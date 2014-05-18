@@ -51,7 +51,9 @@ public:
 	void raise_child (Item *, int);
 	void lower_child_to_bottom (Item *);
 	void child_changed ();
-
+	
+	void scroll_to (Duple const& d);
+	
 	void add_items_at_point (Duple, std::vector<Item const *> &) const;
 
         void dump (std::ostream&) const;
