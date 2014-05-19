@@ -69,6 +69,7 @@ libardour_sources = [
         'element_import_handler.cc',
         'element_importer.cc',
         'engine_slave.cc',
+        'engine_state_controller.cc',
         'enums.cc',
         'event_type_map.cc',
         'export_channel.cc',

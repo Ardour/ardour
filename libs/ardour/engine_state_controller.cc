@@ -6,13 +6,15 @@
 //  Copyright (c) 2014 Waves. All rights reserved.
 //
 
-#include "engine_state_controller.h"
+#include "ardour/engine_state_controller.h"
 
-#include "ardour_ui.h"
 #include "ardour/audioengine.h"
+#include "ardour/rc_configuration.h"
+#include "ardour/data_type.h"
+
 #include "pbd/error.h"
 #include "i18n.h"
-#include "gui_thread.h"
+
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -50,14 +52,17 @@ EngineStateController::EngineStateController()
 , _have_control(false)
 
 {
-    AudioEngine::instance ()->Running.connect (running_connection, MISSING_INVALIDATOR, boost::bind (&EngineStateController::_on_engine_running, this), gui_context());
-	AudioEngine::instance ()->Stopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineStateController::_on_engine_stopped, this), gui_context());
-	AudioEngine::instance ()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineStateController::_on_engine_stopped, this), gui_context());
+    AudioEngine::instance ()->Running.connect_same_thread (running_connection, boost::bind (&EngineStateController::_on_engine_running, this) );
+	AudioEngine::instance ()->Stopped.connect_same_thread (stopped_connection, boost::bind (&EngineStateController::_on_engine_stopped, this) );
+	AudioEngine::instance ()->Halted.connect_same_thread (stopped_connection, boost::bind (&EngineStateController::_on_engine_stopped, this) );
     
 	/* Subscribe for udpates from AudioEngine */
-    AudioEngine::instance()->SampleRateChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&EngineStateController::_on_sample_rate_change, this, _1), gui_context());
-	AudioEngine::instance()->BufferSizeChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&EngineStateController::_on_buffer_size_change, this, _1), gui_context());
-    AudioEngine::instance()->DeviceListChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&EngineStateController::_on_device_list_change, this), gui_context());
+    AudioEngine::instance()->SampleRateChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_sample_rate_change, this, _1) );
+	AudioEngine::instance()->BufferSizeChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_buffer_size_change, this, _1) );
+    AudioEngine::instance()->DeviceListChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_device_list_change, this) );
+    
+    /* Global configuration parameters update */
+    Config->ParameterChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_parameter_changed, this, _1) );
     
     _deserialize_and_load_states();
     _set_last_active_state_as_current();
@@ -97,8 +102,7 @@ EngineStateController::_set_last_active_state_as_current()
         
         std::vector<const AudioBackendInfo*> backends = AudioEngine::instance()->available_backends();
         
-        if (!backends.empty() )
-        {
+        if (!backends.empty() ) {
             
             if (!set_new_backend_as_current(backends.front()->name ) ) {
                 std::cerr << "\tfailed to set backend [" << backends.front()->name << "]\n";
@@ -379,6 +383,186 @@ EngineStateController::set_new_buffer_size_in_controller(pframes_t buffer_size)
 
 
 void
+EngineStateController::get_physical_audio_inputs(std::vector<std::string>& port_names)
+{
+    port_names.clear();
+    
+    boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
+	assert(backend);
+    
+    // update audio input states
+    std::vector<std::string> phys_audio_inputs;
+    backend->get_physical_inputs(DataType::AUDIO, phys_audio_inputs);
+    
+    ChannelStateList &input_states = _current_state->input_channel_states;
+    
+    std::vector<std::string>::const_iterator input_iter = phys_audio_inputs.begin();
+    for (; input_iter != phys_audio_inputs.end(); ++input_iter) {
+        
+        ChannelStateList::const_iterator found_state_iter;
+        found_state_iter = std::find(input_states.begin(), input_states.end(), ChannelState(*input_iter) );
+        
+        if (found_state_iter != input_states.end() && found_state_iter->active) {
+            port_names.push_back(found_state_iter->name);
+        }
+    }
+}
+
+
+void
+EngineStateController::get_physical_audio_outputs(std::vector<std::string>& port_names)
+{
+    port_names.clear();
+    
+    boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
+	assert(backend);
+    
+    // update audio input states
+    std::vector<std::string> phys_audio_outputs;
+    backend->get_physical_outputs(DataType::AUDIO, phys_audio_outputs);
+    
+    ChannelStateList &output_states = _current_state->output_channel_states;
+    
+    std::vector<std::string>::const_iterator output_iter = phys_audio_outputs.begin();
+    for (; output_iter != phys_audio_outputs.end(); ++output_iter) {
+        
+        ChannelStateList::const_iterator found_state_iter;
+        found_state_iter = std::find(output_states.begin(), output_states.end(), ChannelState(*output_iter) );
+        
+        if (found_state_iter != output_states.end() && found_state_iter->active) {
+            port_names.push_back(found_state_iter->name);
+        }
+    }
+}
+
+
+void
+EngineStateController::set_physical_audio_input_state(const std::string& port_name, bool state)
+{
+    ChannelStateList &input_states = _current_state->input_channel_states;
+    ChannelStateList::iterator found_state_iter;
+    found_state_iter = std::find(input_states.begin(), input_states.end(), ChannelState(port_name) );
+    
+    if (found_state_iter != input_states.end() && found_state_iter->active != state ) {
+        found_state_iter->active = state;
+        AudioEngine::instance()->reconnect_session_routes();
+        
+        InputConfigChanged();
+    }
+}
+
+
+void
+EngineStateController::set_physical_audio_output_state(const std::string& port_name, bool state)
+{
+    ChannelStateList &output_states = _current_state->output_channel_states;
+    ChannelStateList::iterator target_state_iter;
+    target_state_iter = std::find(output_states.begin(), output_states.end(), ChannelState(port_name) );
+    
+    if (target_state_iter != output_states.end() && target_state_iter->active != state ) {
+        target_state_iter->active = state;
+        
+        // if StereoOut mode is used
+        if (Config->get_output_auto_connect() & AutoConnectMaster) {
+            
+            // get next element
+            ChannelStateList::iterator next_state_iter(target_state_iter);
+                        
+            // loopback
+            if (++next_state_iter == output_states.end() ) {
+                next_state_iter = output_states.begin();
+            }
+            
+            // if current was set to active - activate next and disable the rest
+            if (target_state_iter->active ) {
+                next_state_iter->active = true;
+            } else {
+                // if current was deactivated but the next is active
+                if (next_state_iter->active) {
+                    if (++next_state_iter == output_states.end() ) {
+                        next_state_iter = output_states.begin();
+                    }
+                    next_state_iter->active = true;
+                } else {
+                    // if current was deactivated but the previous is active - restore the state of current
+                    target_state_iter->active = true; // state restored;
+                    --target_state_iter; // switch to previous to make it stop point
+                    target_state_iter->active = true;
+                }
+            }
+            
+            while (++next_state_iter != target_state_iter) {
+                
+                if (next_state_iter == output_states.end() ) {
+                    next_state_iter = output_states.begin();
+                    // we jumped, so additional check is required
+                    if (next_state_iter == target_state_iter) {
+                        break;
+                    }
+                }
+                
+                next_state_iter->active = false;
+            }
+
+        }
+        
+        AudioEngine::instance()->reconnect_session_routes();
+        OutputConfigChanged();
+    }
+}
+
+
+bool
+EngineStateController::get_physical_audio_input_state(const std::string& port_name)
+{
+    bool state = false;
+    
+    ChannelStateList &input_states = _current_state->input_channel_states;
+    ChannelStateList::iterator found_state_iter;
+    found_state_iter = std::find(input_states.begin(), input_states.end(), ChannelState(port_name) );
+    
+    if (found_state_iter != input_states.end() ) {
+        state = found_state_iter->active;
+    }
+    
+    return state;
+}
+
+
+bool
+EngineStateController::get_physical_audio_output_state(const std::string& port_name)
+{
+    bool state = false;
+    
+    ChannelStateList &output_states = _current_state->output_channel_states;
+    ChannelStateList::iterator found_state_iter;
+    found_state_iter = std::find(output_states.begin(), output_states.end(), ChannelState(port_name) );
+    
+    if (found_state_iter != output_states.end() ) {
+        state = found_state_iter->active;
+    }
+
+    return state;
+}
+
+
+void
+EngineStateController::get_physical_audio_input_states(std::vector<ChannelState>& channel_states)
+{
+    ChannelStateList &input_states = _current_state->input_channel_states;
+    channel_states.assign(input_states.begin(), input_states.end());
+}
+
+
+void
+EngineStateController::get_physical_audio_output_states(std::vector<ChannelState>& channel_states)
+{
+    ChannelStateList &output_states = _current_state->output_channel_states;
+    channel_states.assign(output_states.begin(), output_states.end());
+}
+
+
+void
 EngineStateController::_on_sample_rate_change(framecnt_t new_sample_rate)
 {
 	// validate the change
@@ -472,15 +656,123 @@ EngineStateController::_on_device_list_change()
 
 
 void
+EngineStateController::_update_device_channels_state(bool reconnect_session_routes/*=true*/)
+{
+    boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
+	assert(backend);
+    
+    // update audio input states
+    std::vector<std::string> phys_audio_inputs;
+    backend->get_physical_inputs(DataType::AUDIO, phys_audio_inputs);
+    
+    ChannelStateList new_input_states;
+    ChannelStateList &input_states = _current_state->input_channel_states;
+    
+    std::vector<std::string>::const_iterator input_iter = phys_audio_inputs.begin();
+    for (; input_iter != phys_audio_inputs.end(); ++input_iter) {
+        
+        ChannelState state(*input_iter);
+        ChannelStateList::const_iterator found_state_iter = std::find(input_states.begin(), input_states.end(), state);
+        
+        if (found_state_iter != input_states.end() ) {
+            new_input_states.push_back(*found_state_iter);
+        } else {
+            new_input_states.push_back(state);
+        }
+    }
+    _current_state->input_channel_states = new_input_states;
+    
+    // update audio output state
+    std::vector<std::string> phys_audio_outputs;
+    backend->get_physical_outputs(DataType::AUDIO, phys_audio_outputs);
+    
+    ChannelStateList new_output_states;
+    ChannelStateList &output_states = _current_state->output_channel_states;
+    
+    std::vector<std::string>::const_iterator output_iter = phys_audio_outputs.begin();
+    for (; output_iter != phys_audio_outputs.end(); ++output_iter) {
+        
+        ChannelState state(*output_iter);
+        ChannelStateList::const_iterator found_state_iter = std::find(output_states.begin(), output_states.end(), state);
+        
+        if (found_state_iter != output_states.end() ) {
+            new_output_states.push_back(*found_state_iter);
+        } else {
+            new_output_states.push_back(state);
+        }
+    }
+    
+    _current_state->output_channel_states = new_output_states;
+    
+    if (Config->get_output_auto_connect() & AutoConnectMaster) {
+        _switch_to_stereo_out_io();
+    }
+    
+    // update midi channels
+    /* provide implementation */
+    
+    if (reconnect_session_routes) {
+        AudioEngine::instance()->reconnect_session_routes();
+    }
+}
+
+
+void
+EngineStateController::_switch_to_stereo_out_io()
+{
+    ChannelStateList &output_states = _current_state->output_channel_states;
+    ChannelStateList::iterator iter = output_states.begin();
+    
+    uint32_t active_channels = 2;
+    
+    for (; iter != output_states.end(); ++iter) {
+        if (active_channels) {
+            iter->active = true;
+            --active_channels;
+        } else {
+            iter->active = false;
+        }
+    }
+}
+
+
+void
 EngineStateController::_on_engine_running ()
 {
+    _update_device_channels_state();
+    _serialize_and_save_current_state();
+    
+    EngineRunning();
 }
 
 
 void
 EngineStateController::_on_engine_stopped ()
 {
+    EngineStopped();
 }
+
+
+void
+EngineStateController::_on_engine_halted ()
+{
+    EngineHalted();
+}
+
+
+void
+EngineStateController::_on_parameter_changed (const std::string& parameter_name)
+{
+    if (parameter_name == "output-auto-connect") {
+        
+        if (Config->get_output_auto_connect() & AutoConnectMaster) {
+            _switch_to_stereo_out_io();
+            AudioEngine::instance()->reconnect_session_routes();
+            OutputConfigChanged(); // emit a signal
+        }
+    }
+}
+
 
 bool
 EngineStateController::push_current_state_to_backend(bool start)
@@ -501,7 +793,7 @@ EngineStateController::push_current_state_to_backend(bool start)
     if (state_changed) {
         
         if (was_running) {
-            if (ARDOUR_UI::instance()->disconnect_from_engine () ) {
+            if (AudioEngine::instance()->stop () ) {
                 return false;
             }
         }
@@ -539,10 +831,8 @@ EngineStateController::push_current_state_to_backend(bool start)
         //}
     }
     
-    _serialize_and_save_current_state();
-    
 	if(start || (was_running && state_changed) ) {
-        if (ARDOUR_UI::instance()->reconnect_to_engine () ) {
+        if (AudioEngine::instance()->start () ) {
             return false;
         }
 	}

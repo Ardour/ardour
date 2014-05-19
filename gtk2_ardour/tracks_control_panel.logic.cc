@@ -25,8 +25,9 @@
 
 #include <gtkmm2ext/utils.h>
 
-#include "engine_state_controller.h"
+#include "ardour/engine_state_controller.h"
 #include "ardour/rc_configuration.h"
+
 #include "device_connection_control.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -58,13 +59,17 @@ TracksControlPanel::init ()
     _stereo_out_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_stereo_out));
     
     
-	AudioEngine::instance ()->Running.connect (running_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_running, this), gui_context());
-	AudioEngine::instance ()->Stopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_stopped, this), gui_context());
-	AudioEngine::instance ()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_stopped, this), gui_context());
+	EngineStateController::instance ()->EngineRunning.connect (running_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_running, this), gui_context());
+	EngineStateController::instance ()->EngineStopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_stopped, this), gui_context());
+	EngineStateController::instance ()->EngineHalted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_stopped, this), gui_context());
 
-	/* Subscribe for udpates from AudioEngine */
+	/* Subscribe for udpates from EngineStateController */
 	EngineStateController::instance()->BufferSizeChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_buffer_size_update, this), gui_context());
     EngineStateController::instance()->DeviceListChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_device_list_update, this, _1), gui_context());
+    EngineStateController::instance()->InputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_input_configuration_changed, this), gui_context());
+    EngineStateController::instance()->OutputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_output_configuration_changed, this), gui_context());
+    
+    /* Global configuration parameters update */
     Config->ParameterChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_parameter_changed, this, _1), gui_context());
     
 	_engine_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::engine_changed));
@@ -75,6 +80,9 @@ TracksControlPanel::init ()
 	populate_engine_combo ();
 	populate_output_mode();
 
+    populate_input_channels();
+    populate_output_channels();
+    
 	_audio_settings_tab_button.set_active(true);
 }
 
@@ -227,30 +235,110 @@ TracksControlPanel::populate_output_mode()
     _stereo_out_button.set_active(Config->get_output_auto_connect() & AutoConnectMaster);
 }
 
+
+void
+TracksControlPanel::populate_input_channels()
+{
+    cleanup_input_channels_list();
+    
+    // process captures (inputs)
+    std::vector<EngineStateController::ChannelState> input_states;
+    EngineStateController::instance()->get_physical_audio_input_states(input_states);
+    
+    std::vector<EngineStateController::ChannelState>::const_iterator input_iter;
+    
+    uint16_t number_count = 1;
+    for (input_iter = input_states.begin(); input_iter != input_states.end(); ++input_iter ) {
+        
+        uint16_t number = DeviceConnectionControl::NoNumber;
+        std::string track_name = "";
+        
+        if (input_iter->active) {
+            
+            number = number_count++;
+            
+            if (Config->get_tracks_auto_naming() & UseDefaultNames) {
+                track_name = string_compose ("Track %1", number);
+            } else if (Config->get_tracks_auto_naming() & NameAfterDriver) {
+                track_name = input_iter->name;
+            }
+        }
+        
+        add_device_capture_control (input_iter->name, input_iter->active, number, track_name);
+    }    
+}
+
+
+void
+TracksControlPanel::populate_output_channels()
+{
+    cleanup_output_channels_list();
+        
+    // process captures (outputs)
+    std::vector<EngineStateController::ChannelState> output_states;
+    EngineStateController::instance()->get_physical_audio_output_states(output_states);
+    
+    std::vector<EngineStateController::ChannelState>::const_iterator output_iter;
+    
+    uint16_t number_count = 1;
+    for (output_iter = output_states.begin(); output_iter != output_states.end(); ++output_iter ) {
+        
+        uint16_t number = DeviceConnectionControl::NoNumber;
+        
+        if (output_iter->active) {
+            number = number_count++;
+        }
+        
+        add_device_playback_control (output_iter->name, output_iter->active, number);
+    }
+    
+}
+
+
+
+void update_channel_numbers()
+{
+    
+}
+
+
+void update_channel_names()
+{
+    
+}
+
+
+void
+TracksControlPanel::cleanup_input_channels_list()
+{
+    std::vector<Gtk::Widget*> capture_controls = _device_capture_list.get_children();
+        
+    while (capture_controls.size() != 0) {
+        Gtk::Widget* item = capture_controls.back();
+        capture_controls.pop_back();
+        _device_capture_list.remove(*item);
+        delete item;
+    }
+}
+
+
+void
+TracksControlPanel::cleanup_output_channels_list()
+{
+    std::vector<Gtk::Widget*> playback_controls = _device_playback_list.get_children();
+
+    while (playback_controls.size() != 0) {
+        Gtk::Widget* item = playback_controls.back();
+        playback_controls.pop_back();
+        _device_capture_list.remove(*item);
+        delete item;
+    }
+}
+
+
 void
 TracksControlPanel::on_control_panel(WavesButton*)
 {
-// ******************************* ATTENTION!!! ****************************
-// here is just demo code to remove it in future
-// *************************************************************************
-/*
-	static uint16_t number = 0;
-	static bool active = false;
-
-	number++;
-	active = !active;
-
-	std::string name = string_compose (_("Audio Capture %1"), number);
-	add_device_capture_control (name, active, number, name);
-
-	name = string_compose (_("Audio Playback Output %1"), number);
-	add_device_playback_control (name, active, number);
-
-	name = string_compose (_("Midi Capture %1"), number);
-	add_midi_capture_control (name, active);
-
-	add_midi_playback_control (active);
-*/
 }
 
 void TracksControlPanel::engine_changed ()
@@ -372,6 +460,9 @@ TracksControlPanel::sample_rate_changed()
 void
 TracksControlPanel::engine_running ()
 {
+    populate_input_channels();
+    populate_output_channels();
+
 	_buffer_size_combo.set_active_text (bufsize_as_string (EngineStateController::instance()->get_current_buffer_size() ) );
 
 	_sample_rate_combo.set_active_text (rate_as_string (EngineStateController::instance()->get_current_sample_rate() ) );
@@ -471,19 +562,13 @@ TracksControlPanel::on_apply (WavesButton*)
 
 void TracksControlPanel::on_capture_active_changed(DeviceConnectionControl* capture_control, bool active)
 {
-// ******************************* ATTENTION!!! ****************************
-// here is just demo code to replace it with a meaningful app logic in future
-// *************************************************************************
-	capture_control->set_number ( active ? 1000 : DeviceConnectionControl::NoNumber);
+    EngineStateController::instance()->set_physical_audio_input_state(capture_control->get_name(), active);
 }
 
 
 void TracksControlPanel::on_playback_active_changed(DeviceConnectionControl* playback_control, bool active)
 {
-// ******************************* ATTENTION!!! ****************************
-// here is just demo code to replace it with a meaningful app logic in future
-// *************************************************************************
-	playback_control->set_number ( active ? 1000 : DeviceConnectionControl::NoNumber);
+	EngineStateController::instance()->set_physical_audio_output_state(playback_control->get_name(), active);
 }
 
 
@@ -531,9 +616,75 @@ TracksControlPanel::on_parameter_changed (const std::string& parameter_name)
 {
     if (parameter_name == "output-auto-connect") {
         populate_output_mode();
+    } else if (parameter_name == "tracks-auto-naming") {
+        on_input_configuration_changed ();
     }
 }
-                                      
+
+
+void
+TracksControlPanel::on_input_configuration_changed ()
+{
+    std::vector<Gtk::Widget*> capture_controls = _device_capture_list.get_children();
+    
+    std::vector<Gtk::Widget*>::iterator control_iter = capture_controls.begin();
+    
+    uint16_t number_count = 1;
+    for (; control_iter != capture_controls.end(); ++control_iter) {
+        DeviceConnectionControl* control = dynamic_cast<DeviceConnectionControl*> (*control_iter);
+        
+        if (control) {
+            bool new_state = EngineStateController::instance()->get_physical_audio_input_state(control->get_name() );
+            
+            uint16_t number = DeviceConnectionControl::NoNumber;
+            std::string track_name = "";
+            
+            if (new_state) {
+                
+                number = number_count++;
+                
+                if (Config->get_tracks_auto_naming() & UseDefaultNames) {
+                    track_name = string_compose ("Track %1", number);
+                } else if (Config->get_tracks_auto_naming() & NameAfterDriver) {
+                    track_name = control->get_name();
+                }
+            }
+            
+            control->set_track_name(track_name);
+            control->set_number(number);
+            control->set_active(new_state);
+        }
+    }
+}
+
+
+void
+TracksControlPanel::on_output_configuration_changed()
+{
+    std::vector<Gtk::Widget*> playback_controls = _device_playback_list.get_children();
+    
+    std::vector<Gtk::Widget*>::iterator control_iter = playback_controls.begin();
+    
+    uint16_t number_count = 1;
+    for (; control_iter != playback_controls.end(); ++control_iter) {
+        DeviceConnectionControl* control = dynamic_cast<DeviceConnectionControl*> (*control_iter);
+        
+        if (control) {
+            bool new_state = EngineStateController::instance()->get_physical_audio_output_state(control->get_name() );
+            
+            uint16_t number = DeviceConnectionControl::NoNumber;
+            
+            if (new_state) {
+                number = number_count++;
+            }
+            
+            control->set_number(number);
+            control->set_active(new_state);
+        }
+    }
+
+}
+
                                       
 std::string
 TracksControlPanel::bufsize_as_string (uint32_t sz)

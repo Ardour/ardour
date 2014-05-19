@@ -10,6 +10,7 @@
 #define __gtk2_ardour__engine_state_controller__
 
 #include <vector>
+#include <list>
 
 #include "ardour/types.h"
 #include "ardour/audio_backend.h"
@@ -21,6 +22,31 @@ class AudioBackendInfo;
 class EngineStateController
 {
 public:
+    
+    // public data types:
+    struct ChannelState {
+        std::string name;
+        bool active;
+        
+        ChannelState ()
+        : name(""),
+        active(true)
+        {
+        }
+        
+        ChannelState (const std::string& name)
+        : name(name),
+        active(true)
+        {
+        }
+        
+        bool operator==(const ChannelState& rhs) {return rhs.name == name; }
+        
+    };
+    
+    typedef std::list<ChannelState> ChannelStateList;
+    
+    
     static EngineStateController* instance();
     
     //Interfaces
@@ -40,10 +66,21 @@ public:
     ARDOUR::pframes_t   get_default_buffer_size() const;
     void                available_buffer_sizes_for_current_device(std::vector<ARDOUR::pframes_t>&) const;
 
-    uint32_t            get_available_inputs_count() const {return 0; }
-    uint32_t            get_available_outputs_count () const {return 0; }
+    uint32_t            get_available_inputs_count() const {return _current_state->input_channel_states.size(); }
+    uint32_t            get_available_outputs_count () const {return _current_state->output_channel_states.size(); }
     
-    bool        is_setup_required() const {return ARDOUR::AudioEngine::instance()->setup_required (); }
+    void                get_physical_audio_inputs (std::vector<std::string>&);
+    void                get_physical_audio_outputs (std::vector<std::string>&);
+    
+    void                set_physical_audio_input_state(const std::string&, bool);
+    void                set_physical_audio_output_state(const std::string&, bool);
+    bool                get_physical_audio_input_state(const std::string&);
+    bool                get_physical_audio_output_state(const std::string&);
+    
+    void                get_physical_audio_input_states(std::vector<ChannelState>&);
+    void                get_physical_audio_output_states(std::vector<ChannelState>&);
+    
+    bool                is_setup_required() const {return ARDOUR::AudioEngine::instance()->setup_required (); }
     
     // set parameters inside the controller,
     // the state of engine won't change untill we make a "push" of this state to the backend
@@ -62,15 +99,25 @@ public:
     void        set_desired_sample_rate(framecnt_t);
 
     
-    //SIGNALS
+    //DATE UPDATE SIGNALS
     /* this signal is emitted if the sample rate changes */
     PBD::Signal0<void> SampleRateChanged;
-    
     /* this signal is emitted if the buffer size changes */
     PBD::Signal0<void> BufferSizeChanged;
-    
     /* this signal is emitted if the device list changes */
     PBD::Signal1<void, bool> DeviceListChanged;
+    
+    //ENGINE STATE SIGNALS
+    /* this signal is emitted when the engine is started */
+    PBD::Signal0<void> EngineRunning;
+    /* this signal is emitted when the engine is stopped */
+    PBD::Signal0<void> EngineStopped;
+    /* this signal is emitted if the backend ever disconnects us */
+    PBD::Signal0<void> EngineHalted;
+    
+    /* this signal is emitted if the i/o channel configuration changes */
+    PBD::Signal0<void> InputConfigChanged;
+    PBD::Signal0<void> OutputConfigChanged;
     
 private:
 
@@ -79,7 +126,6 @@ private:
     EngineStateController(const EngineStateController& ); // prohibited
     EngineStateController& operator=(const EngineStateController&); // prohibited
     
-    // data types:
     struct State {
 		std::string backend_name;
 		std::string device_name;
@@ -87,17 +133,17 @@ private:
 		ARDOUR::pframes_t buffer_size;
 		uint32_t input_latency;
 		uint32_t output_latency;
-		uint32_t input_channels;
-		uint32_t output_channels;
-		bool active;
+		ChannelStateList input_channel_states;
+		ChannelStateList output_channel_states;
+		//bool active;
 		std::string midi_option;
         
 		State()
         : input_latency (0)
         , output_latency (0)
-        , input_channels (0)
-        , output_channels (0)
-        , active (false)
+        , input_channel_states (0)
+        , output_channel_states (0)
+        //, active (false)
         {
         }
         
@@ -134,6 +180,10 @@ private:
     // sets last active state as current state
     // if no last active state found it loads default state
     void _set_last_active_state_as_current();
+    // get gets available device channels from engine and updates internal controller state
+    void _update_device_channels_state(bool reconnect_session_routes = true);
+    // change channel configuration to stereo out mode
+    void _switch_to_stereo_out_io();
     ////////////////////////////////////////
     
     // internal helper functions////////////
@@ -144,11 +194,12 @@ private:
     ////////////////////////////////////////
     // callbacks
     void _on_engine_running();
-    void _on_engine_halted(const char*);
+    void _on_engine_halted();
     void _on_engine_stopped();
     void _on_sample_rate_change(ARDOUR::framecnt_t);
     void _on_buffer_size_change(ARDOUR::pframes_t);
     void _on_device_list_change();
+    void _on_parameter_changed (const std::string&);
     ////////////////////////////////////////
         
     ////////////////////////////////////////

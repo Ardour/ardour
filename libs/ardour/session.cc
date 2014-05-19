@@ -65,6 +65,7 @@
 #include "ardour/control_protocol_manager.h"
 #include "ardour/data_type.h"
 #include "ardour/debug.h"
+#include "ardour/engine_state_controller.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/graph.h"
 #include "ardour/midiport_manager.h"
@@ -358,12 +359,11 @@ Session::Session (AudioEngine &eng,
      */
     if (_is_new && ARDOUR::Profile->get_trx () ) {
         uint32_t how_many (0);
-        if (_engine.current_backend()->input_channels () > 0){
-            how_many = _engine.current_backend()->input_channels ();
-        } else {
-            const string device_name = _engine.current_backend()->device_name ();
-            how_many = _engine.current_backend()->available_input_channel_count (device_name);
-        }
+        
+        std::vector<std::string> inputs;
+        EngineStateController::instance()->get_physical_audio_inputs(inputs);
+        
+        how_many = inputs.size();
         
         list<boost::shared_ptr<AudioTrack> > tracks = new_audio_track (1, 1, Normal, 0, how_many, string() );
         
@@ -813,7 +813,12 @@ Session::auto_connect_master_bus ()
 	vector<string> outputs[DataType::num_types];
 	
 	for (uint32_t i = 0; i < DataType::num_types; ++i) {
-		_engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
+        
+        if ( Profile->get_trx() && DataType::Symbol (i) == DataType::AUDIO) {
+            EngineStateController::instance()->get_physical_audio_outputs(outputs[i]);
+        } else {
+            _engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
+        }
 	}
 	
 	for (uint32_t n = 0; n < limit; ++n) {
@@ -973,7 +978,13 @@ Session::add_monitor_section ()
 			vector<string> outputs[DataType::num_types];
 
 			for (uint32_t i = 0; i < DataType::num_types; ++i) {
-				_engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
+                
+                if ( Profile->get_trx() && DataType::Symbol (i) == DataType::AUDIO) {
+                    EngineStateController::instance()->get_physical_audio_outputs(outputs[i]);
+                } else {
+                    _engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
+                }
+                
 			}
 
 			uint32_t mod = outputs[DataType::AUDIO].size();
@@ -2000,8 +2011,17 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
 		vector<string> physinputs;
 		vector<string> physoutputs;
 
-		_engine.get_physical_outputs (*t, physoutputs);
-		_engine.get_physical_inputs (*t, physinputs);
+        if ( Profile->get_trx() && *t == DataType::AUDIO) {
+            EngineStateController::instance()->get_physical_audio_outputs(physoutputs);
+        } else {
+            _engine.get_physical_outputs (*t, physoutputs);
+        }
+        
+        if ( Profile->get_trx() && *t == DataType::AUDIO) {
+            EngineStateController::instance()->get_physical_audio_inputs(physinputs);
+        } else {
+            _engine.get_physical_inputs (*t, physinputs);
+        }
 
 		if (!physinputs.empty() && connect_inputs) {
 			uint32_t nphysical_in = physinputs.size();
@@ -2097,7 +2117,6 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
 void
 Session::reconnect_existing_routes (bool withLock, bool reconnect_master)
 {
-    PBD::stacktrace (cerr, 20);
     Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
     
 	if (withLock) {
@@ -2125,8 +2144,8 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master)
         vector<string> physinputs;
 		vector<string> physoutputs;
         
-		_engine.get_physical_outputs (DataType::AUDIO, physoutputs);
-		_engine.get_physical_inputs (DataType::AUDIO, physinputs);
+        EngineStateController::instance()->get_physical_audio_outputs(physoutputs);
+        EngineStateController::instance()->get_physical_audio_inputs(physinputs);
                 
         uint32_t input_n = 0;
         uint32_t output_n = 0;

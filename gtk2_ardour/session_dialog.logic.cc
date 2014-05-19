@@ -28,8 +28,6 @@
 
 #include <gtkmm/filechooser.h>
 
-#include "engine_state_controller.h"
-
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
 #include "pbd/replace_all.h"
@@ -38,6 +36,7 @@
 #include "pbd/openuri.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/engine_state_controller.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/session.h"

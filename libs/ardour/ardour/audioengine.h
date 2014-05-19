@@ -136,6 +136,8 @@ public:
     void remove_session (); // not a replacement for SessionHandle::session_going_away()
     Session* session() const { return _session; }
 
+    void reconnect_session_routes ();
+    
     class NoBackendAvailable : public std::exception {
       public:
 	virtual const char *what() const throw() { return "could not connect to engine backend"; }

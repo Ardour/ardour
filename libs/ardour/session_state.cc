@@ -3512,19 +3512,9 @@ Session::config_changed (std::string p, bool ours)
 		reconnect_ltc_output ();
 	} else if (p == "timecode-generator-offset") {
 		ltc_tx_parse_offset();
-	} else if (p == "output-auto-connect") {
-        if (ARDOUR::Profile->get_trx() ) {
-            update_output_mode();
-        }
-    }
+	}
 
 	set_dirty ();
-}
-
-void
-Session::update_output_mode()
-{
-    reconnect_existing_routes(true, true);
 }
 
 void

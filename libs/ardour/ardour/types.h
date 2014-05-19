@@ -440,6 +440,11 @@ namespace ARDOUR {
 		AutoConnectPhysical = 0x1,
 		AutoConnectMaster = 0x2
 	};
+        
+    enum TracksAutoNamingRule {
+        UseDefaultNames = 0x1,
+        NameAfterDriver = 0x2
+    };
 
 	enum SampleFormat {
 		FormatFloat = 0,
@@ -613,6 +618,7 @@ namespace ARDOUR {
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AutoConnectOption& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::TracksAutoNamingRule& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::EditMode& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::MonitorModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::VUMeterStandard& sf);
@@ -636,6 +642,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::PositionLockStyle& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::SampleFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::HeaderFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::AutoConnectOption& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::TracksAutoNamingRule& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::EditMode& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::MonitorModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::VUMeterStandard& sf);

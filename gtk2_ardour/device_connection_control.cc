@@ -20,7 +20,7 @@
 #include "device_connection_control.h"
 #include "pbd/convert.h"
 
-DeviceConnectionControl::DeviceConnectionControl (std::string device_capture_name, bool active, uint16_t capture_number, std::string track_name)
+DeviceConnectionControl::DeviceConnectionControl (const std::string& device_capture_name, bool active, uint16_t capture_number, const std::string& track_name)
 
 	: Gtk::Layout()
 	, _active_on_button (NULL)
@@ -38,7 +38,7 @@ DeviceConnectionControl::DeviceConnectionControl (std::string device_capture_nam
 	init(device_capture_name, active, capture_number, track_name);
 }
 
-DeviceConnectionControl::DeviceConnectionControl (std::string device_playback_name, bool active, uint16_t playback_number)
+DeviceConnectionControl::DeviceConnectionControl (const std::string& device_playback_name, bool active, uint16_t playback_number)
 
 	: Gtk::Layout()
 	, _active_on_button (NULL)
@@ -55,7 +55,7 @@ DeviceConnectionControl::DeviceConnectionControl (std::string device_playback_na
 	init(device_playback_name, active, playback_number);
 }
 
-DeviceConnectionControl::DeviceConnectionControl (std::string midi_capture_name, bool active)
+DeviceConnectionControl::DeviceConnectionControl (const std::string& midi_capture_name, bool active)
 
 	: Gtk::Layout()
 	, _active_on_button (NULL)
@@ -86,7 +86,7 @@ DeviceConnectionControl::DeviceConnectionControl (bool active)
 	init("", active, NoNumber);
 }
 
-void DeviceConnectionControl::init(std::string name, bool active, uint16_t number, std::string track_name)
+void DeviceConnectionControl::init(const std::string& name, bool active, uint16_t number, const std::string& track_name)
 {
 	_active_on_button->signal_clicked.connect (sigc::mem_fun (*this, &DeviceConnectionControl::on_active_on));
 	_active_off_button->signal_clicked.connect (sigc::mem_fun (*this, &DeviceConnectionControl::on_active_off));
@@ -97,17 +97,22 @@ void DeviceConnectionControl::init(std::string name, bool active, uint16_t numbe
 
 	if (_number_label != NULL) {
 		_number_label->set_text(PBD::to_string (number, std::dec));
+        
+        if (number == NoNumber) {
+			_number_label->get_parent()->hide ();
+        }
 	}
 
 	if (_track_name_label != NULL) {
 		_track_name_label->set_text (track_name);
 	}
+    
 
 	set_active(active);
 }
 
 bool	
-DeviceConnectionControl::build_layout (std::string file_name)
+DeviceConnectionControl::build_layout (const std::string& file_name)
 {
 	const XMLTree* layout = WavesUI::load_layout(file_name);
 	if (layout == NULL) {
@@ -142,6 +147,32 @@ DeviceConnectionControl::set_active (bool active)
 	_active_on_button->set_active (active);
 	_active_off_button->set_active (!active);
     _active = active;
+}
+
+
+void
+DeviceConnectionControl::set_track_name (const std::string& new_track_name)
+{
+    if (_track_name_label != NULL ) {
+		_track_name_label->set_text (new_track_name);
+        if (new_track_name.empty() ) {
+            _track_name_label->get_parent()->hide();
+        } else {
+            _track_name_label->get_parent()->show();
+        }
+	}
+}
+
+
+std::string
+DeviceConnectionControl::get_name ()
+{
+    std::string name;
+    if (_name_label != NULL) {
+        name = _name_label->get_text();
+    }
+    
+    return name;
 }
 
 void

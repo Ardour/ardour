@@ -443,6 +443,15 @@ AudioEngine::remove_session ()
 
 
 void
+AudioEngine::reconnect_session_routes()
+{
+    if (_session) {
+        _session->reconnect_existing_routes(true, true);
+    }
+}
+
+
+void
 AudioEngine::died ()
 {
         /* called from a signal handler for SIGPIPE */

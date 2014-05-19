@@ -94,11 +94,18 @@
 	void populate_sample_rate_combo ();
 	void populate_buffer_size_combo ();
 	void populate_output_mode ();
+    void populate_input_channels();
+    void populate_output_channels();
 
     // Engine State update callback handlers
     void on_buffer_size_update ();
     void on_device_list_update (bool current_device_disconnected);
     void on_parameter_changed (const std::string& parameter_name);
+    void on_input_configuration_changed ();
+    void on_output_configuration_changed ();
+
+    void cleanup_input_channels_list();
+    void cleanup_output_channels_list();
 
 	std::string bufsize_as_string (uint32_t sz);
 
