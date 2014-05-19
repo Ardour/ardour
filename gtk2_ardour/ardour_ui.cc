@@ -123,7 +123,6 @@ typedef uint64_t microseconds_t;
 #include "video_server_dialog.h"
 #include "add_video_dialog.h"
 #include "transcode_video_dialog.h"
-#include "pbd/system_exec.h"
 
 #include "i18n.h"
 

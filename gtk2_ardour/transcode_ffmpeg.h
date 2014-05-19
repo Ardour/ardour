@@ -21,8 +21,8 @@
 #define __ardour_transcode_ffmpeg_h__
 
 #include <string>
+#include "ardour/system_exec.h"
 #include "ardour/types.h"
-#include "pbd/system_exec.h"
 
 
 /** @class TranscodeFfmpeg
