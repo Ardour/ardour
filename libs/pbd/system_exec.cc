@@ -268,11 +268,6 @@ SystemExec::make_argp_escaped(std::string command, const std::map<char, std::str
 
 	char *p = argp[0];
 	n = 0;
-	do {
-		std::cerr << "argv[" << n << "] == \"" << p << "\"" << std::endl;
-		p = argp[n++];
-	} while (p);
-
 }
 
 SystemExec::~SystemExec ()
