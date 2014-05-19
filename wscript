@@ -665,6 +665,7 @@ def configure(conf):
 
     # executing a test program is n/a when cross-compiling
     if Options.options.dist_target != 'mingw':
+        conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
         conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
                   execute = "1",
                   mandatory = True,
@@ -700,16 +701,6 @@ def configure(conf):
                       lib='regex', uselib_store="REGEX", define_name='HAVE_REGEX_H')
         # TODO put this only where it is needed
         conf.env.append_value('LIB', 'regex')
-
-    if Options.options.dist_target != 'mingw':
-        conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
-
-        conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
-                      execute = "1",
-                      mandatory = True,
-                      msg = 'Checking for boost library >= 1.39',
-                      okmsg = 'ok',
-                      errmsg = 'too old\nPlease install boost version 1.39 or higher.')
 
     # Tell everyone that this is a waf build
 

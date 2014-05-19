@@ -20,6 +20,8 @@
 #include <sys/time.h>
 #include <regex.h>
 
+#include <glibmm.h>
+
 #include "dummy_audiobackend.h"
 #include "pbd/error.h"
 #include "i18n.h"
@@ -318,7 +320,7 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 	}
 
 	int timeout = 5000;
-	while (!_running && --timeout > 0) { usleep (1000); }
+	while (!_running && --timeout > 0) { Glib::usleep (1000); }
 
 	if (timeout == 0 || !_running) {
 		PBD::error << _("DummyAudioBackend: failed to start process thread.") << endmsg;
@@ -446,15 +448,9 @@ DummyAudioBackend::in_process_thread ()
 {
 	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
 	{
-#ifdef COMPILER_MINGW
-		if (*i == GetCurrentThread ()) {
-			return true;
-		}
-#else // pthreads
 		if (pthread_equal (*i, pthread_self ()) != 0) {
 			return true;
 		}
-#endif
 	}
 	return false;
 }
@@ -1014,13 +1010,13 @@ DummyAudioBackend::main_process_thread ()
 			const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
 			_dsp_load = elapsed_time / (float) nomial_time;
 			if (elapsed_time < nomial_time) {
-				::usleep (nomial_time - elapsed_time);
+				Glib::usleep (nomial_time - elapsed_time);
 			} else {
-				::usleep (100); // don't hog cpu
+				Glib::usleep (100); // don't hog cpu
 			}
 		} else {
 			_dsp_load = 1.0;
-			::usleep (100); // don't hog cpu
+			Glib::usleep (100); // don't hog cpu
 		}
 		clock1 = g_get_monotonic_time();
 	}

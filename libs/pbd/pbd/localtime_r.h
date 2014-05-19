@@ -7,7 +7,7 @@
 #define localtime_r( _clock, _result ) \
 	( *(_result) = *localtime( (_clock) ), (_result) )
 
-#elif defined __MINGW64__
+#elif defined COMPILER_MINGW
 
 #  ifdef localtime_r
 #  undef localtime_r

@@ -480,7 +480,7 @@ AudioEngine::discover_backends ()
 		Glib::PatternSpec dll_extension_pattern("*backendRDC.dll");
 	#endif
 #else
-	Glib::PatternSpec dll_extension_pattern("*backend.dll");
+	Glib::PatternSpec dll_extension_pattern("*backend*.dll");
 #endif
 	
 	find_matching_files_in_search_path (backend_search_path (),
