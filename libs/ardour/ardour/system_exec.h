@@ -32,6 +32,7 @@ class LIBARDOUR_API SystemExec
 public:
 	SystemExec (std::string c, std::string a = "");
 	SystemExec (std::string c, char ** a);
+	SystemExec (std::string c, const std::map<char, std::string> subs);
 	~SystemExec ();
 
 	int start (int stderr_mode = 1) {

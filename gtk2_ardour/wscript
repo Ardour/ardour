@@ -204,6 +204,7 @@ gtk2_ardour_sources = [
         'session_option_editor.cc',
         'sfdb_ui.cc',
         'shuttle_control.cc',
+        'soundcloud_export_selector.cc',
         'splash.cc',
         'speaker_dialog.cc',
         'startup.cc',

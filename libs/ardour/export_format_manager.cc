@@ -294,6 +294,20 @@ ExportFormatManager::select_with_toc (bool value)
 }
 
 void
+ExportFormatManager::select_upload (bool value)
+{
+	current_selection->set_upload (value);
+	check_for_description_change ();
+}
+
+void
+ExportFormatManager::set_command (std::string command)
+{
+	current_selection->set_command (command);
+	check_for_description_change ();
+}
+
+void
 ExportFormatManager::select_trim_beginning (bool value)
 {
 	current_selection->set_trim_beginning (value);

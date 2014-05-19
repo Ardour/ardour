@@ -89,6 +89,7 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void update_range_name (std::string const & path, std::string const & new_text);
 
 	void set_selection_state_of_all_timespans (bool);
+	int location_sorter(Gtk::TreeModel::iterator a, Gtk::TreeModel::iterator b);
 
 	/*** GUI components ***/
 
@@ -132,7 +133,7 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	Gtk::ScrolledWindow          range_scroller;
 };
 
-/// Allows seleting multiple timespans
+/// Allows selecting multiple timespans
 class ExportTimespanSelectorMultiple : public ExportTimespanSelector
 {
   public:

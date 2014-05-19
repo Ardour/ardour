@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportFormatSpecification name="Soundcloud upload (lossy)" id="a42eb2fe-2470-4aa9-8027-798ba625592a" with-cue="false" with-toc="false" upload="true" command="">
+  <Encoding id="F_Ogg" type="T_Sndfile" extension="ogg" name="Ogg Vorbis" has-sample-format="false" channel-limit="256"/>
+  <SampleRate rate="44100"/>
+  <SRCQuality quality="SRC_SincBest"/>
+  <EncodingOptions>
+    <Option name="sample-format" value="SF_Vorbis"/>
+    <Option name="dithering" value="D_Shaped"/>
+    <Option name="tag-metadata" value="true"/>
+    <Option name="tag-support" value="true"/>
+    <Option name="broadcast-info" value="false"/>
+  </EncodingOptions>
+  <Processing>
+    <Normalize enabled="false" target="1"/>
+    <Silence>
+      <Start>
+        <Trim enabled="false"/>
+        <Add enabled="false">
+          <Duration format="Timecode" hours="0" minutes="0" seconds="0" frames="0"/>
+        </Add>
+      </Start>
+      <End>
+        <Trim enabled="false"/>
+        <Add enabled="false">
+          <Duration format="Timecode" hours="0" minutes="0" seconds="0" frames="0"/>
+        </Add>
+      </End>
+    </Silence>
+  </Processing>
+</ExportFormatSpecification>
