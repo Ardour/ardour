@@ -208,25 +208,7 @@ def set_compiler_flags (conf,opt):
         # 
         compiler_flags.append ('-U__STRICT_ANSI__')
 
-    if cpu == 'powerpc' and conf.env['build_target'] != 'none':
-        #
-        # Apple/PowerPC optimization options
-        #
-        # -mcpu=7450 does not reliably work with gcc 3.*
-        #
-        if opt.dist_target == 'panther' or opt.dist_target == 'tiger':
-            if platform == 'darwin':
-                # optimization_flags.extend ([ "-mcpu=7450", "-faltivec"])
-                # to support g3s but still have some optimization for above
-                compiler_flags.extend ([ "-mcpu=G3", "-mtune=7450"])
-            else:
-                compiler_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"])
-        else:
-            compiler_flags.extend([ "-mcpu=750", "-mmultiple" ])
-        compiler_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
-        optimization_flags.extend (["-Os"])
-
-    elif ((re.search ("i[0-9]86", cpu) != None) or (re.search ("x86_64", cpu) != None)) and conf.env['build_target'] != 'none':
+    if ((re.search ("i[0-9]86", cpu) != None) or (re.search ("x86_64", cpu) != None)) and conf.env['build_target'] != 'none':
 
 
         #
@@ -358,23 +340,9 @@ def set_compiler_flags (conf,opt):
     if conf.env['DEBUG_DENORMAL_EXCEPTION']:
         compiler_flags.append('-DDEBUG_DENORMAL_EXCEPTION')
 
-    if opt.universal:
-        if opt.generic:
-            print ('Specifying Universal and Generic builds at the same time is not supported')
-            sys.exit (1)
-        else:
-            if not Options.options.nocarbon:
-                compiler_flags.extend(("-arch", "i386", "-arch", "ppc"))
-                linker_flags.extend(("-arch", "i386", "-arch", "ppc"))
-            else:
-                compiler_flags.extend(
-                        ("-arch", "x86_64", "-arch", "i386", "-arch", "ppc"))
-                linker_flags.extend(
-                        ("-arch", "x86_64", "-arch", "i386", "-arch", "ppc"))
-    else:
-        if opt.generic:
-            compiler_flags.extend(('-arch', 'i386'))
-            linker_flags.extend(('-arch', 'i386'))
+    if opt.generic:
+        compiler_flags.extend(('-arch', 'i386'))
+        linker_flags.extend(('-arch', 'i386'))
 
     #
     # warnings flags
@@ -443,7 +411,7 @@ def options(opt):
     opt.add_option('--depstack-root', type='string', default='~', dest='depstack_root',
                     help='Directory/folder where dependency stack trees (gtk, a3) can be found (defaults to ~)')
     opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
-                    help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,powerpc,tiger,leopard,mingw]')
+                    help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,tiger,leopard,mingw]')
     opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
                     help='Build runtime checked assembler code (default)')
     opt.add_option('--no-fpu-optimization', action='store_false', dest='fpu_optimization')
@@ -490,8 +458,6 @@ def options(opt):
                     help="Build a single executable for each unit test")
     #opt.add_option('--tranzport', action='store_true', default=False, dest='tranzport',
     # help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
-    opt.add_option('--universal', action='store_true', default=False, dest='universal',
-                    help='Compile as universal binary (OS X ONLY, requires that external libraries are universal)')
     opt.add_option('--generic', action='store_true', default=False, dest='generic',
                     help='Compile with -arch i386 (OS X ONLY)')
     opt.add_option('--versioned', action='store_true', default=False, dest='versioned',
@@ -827,7 +793,6 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Translation',           opts.nls)
 #    write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
-    write_config_text('Universal binary',      opts.universal)
     write_config_text('Generic x86 CPU',       opts.generic)
     write_config_text('Windows VST support',   opts.windows_vst)
     write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))
