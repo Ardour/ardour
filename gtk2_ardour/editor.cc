@@ -246,7 +246,7 @@ Editor::Editor ()
 	, cd_mark_label (_("CD Markers"))
 	, videotl_label (_("Video Timeline"))
 	, edit_packer (4, 4, true)
-	//, vpacker (named_children ().get_vbox ("quit_button"))
+	, vpacker (named_children ().get_vbox ("vpacker"))
 
 	  /* the values here don't matter: layout widgets
 	     reset them as needed.
@@ -709,7 +709,7 @@ Editor::Editor ()
 	set_title (title.get_string());
 	set_wmclass (X_("ardour_editor"), PROGRAM_NAME);
 
-	add (vpacker);
+	//add (vpacker);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));

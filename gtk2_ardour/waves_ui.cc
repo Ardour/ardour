@@ -180,6 +180,8 @@ WavesUI::add_widget (Gtk::Container& parent, const XMLNode& definition, const XM
 		child = WavesUI::add_widget (*dynamic_cast<Gtk::Box*> (&parent), definition, styles, named_widgets);
 	} else if(dynamic_cast<Gtk::ScrolledWindow*> (&parent)) {
 		child = WavesUI::add_widget (*dynamic_cast<Gtk::ScrolledWindow*> (&parent), definition, styles, named_widgets);
+	} else if(dynamic_cast<Gtk::Window*> (&parent)) {
+		child = WavesUI::add_widget (*dynamic_cast<Gtk::Window*> (&parent), definition, styles, named_widgets);
 	}
 
 	Gtk::Container* container = dynamic_cast<Gtk::Container*>(child);

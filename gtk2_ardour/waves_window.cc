@@ -28,23 +28,15 @@ WavesWindow::WavesWindow (Gtk::WindowType window_type)
 
 WavesWindow::WavesWindow (Gtk::WindowType window_type, std::string layout_script) : Gtk::Window (window_type)
 {
-    dbg_msg("Chance to debug");
 	const XMLTree* layout = WavesUI::load_layout(layout_script);
 	if (layout == NULL) {
 		return;
 	}
 
 	XMLNode* root  = layout->root();
-	if ((root == NULL) || strcasecmp(root->name().c_str(), "dialog")) {
+	if ((root == NULL) || strcasecmp(root->name().c_str(), "Window")) {
 		return;
 	}
-
-	std::string title = xml_property (*root, "title", "");
-	set_title(title);
-	bool resizeable = xml_property (*root, "resizeable", false);
-	property_allow_grow().set_value(resizeable);
-
-	set_border_width(0);
 
 	WavesUI::create_ui(layout, *this, _children);
 }

@@ -683,7 +683,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gtk::HBox           global_hpacker;
 	Gtk::VBox           global_vpacker;
-	Gtk::VBox           vpacker;
+	Gtk::VBox&           vpacker;
 
 	Gdk::Cursor*          current_canvas_cursor;
 	Gdk::Cursor* which_grabber_cursor ();
