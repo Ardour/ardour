@@ -443,7 +443,7 @@ Editor::register_actions ()
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseZoom));	
 	mouse_zoom_button.set_related_action (act);
-	mouse_zoom_button.set_image (::get_icon("tool_zoom"));
+	mouse_zoom_button.set_image (::get_icon("tool_zoom_ardour"));
 	mouse_zoom_button.add_elements ( ArdourButton::Inset );
 	mouse_zoom_button.set_name ("mouse mode button");
 
