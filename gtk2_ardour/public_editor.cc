@@ -29,7 +29,13 @@ const int PublicEditor::horizontal_spacing = 6;
 sigc::signal<void> PublicEditor::DropDownKeys;
 
 PublicEditor::PublicEditor ()
-  	: Window (Gtk::WINDOW_TOPLEVEL)
+  	: WavesWindow (Gtk::WINDOW_TOPLEVEL)
+	, VisibilityTracker (*((Gtk::Window*)this))
+{
+}
+
+PublicEditor::PublicEditor (std::string layout_script)
+  	: WavesWindow (Gtk::WINDOW_TOPLEVEL, layout_script)
 	, VisibilityTracker (*((Gtk::Window*)this))
 {
 }

@@ -230,7 +230,8 @@ pane_size_watcher (Paned* pane)
 }
 
 Editor::Editor ()
-	: _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
+	: PublicEditor ("editor_window.xml")
+	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 
 	  /* time display buttons */
 	, minsec_label (_("Mins:Secs"))
@@ -245,6 +246,7 @@ Editor::Editor ()
 	, cd_mark_label (_("CD Markers"))
 	, videotl_label (_("Video Timeline"))
 	, edit_packer (4, 4, true)
+	//, vpacker (named_children ().get_vbox ("quit_button"))
 
 	  /* the values here don't matter: layout widgets
 	     reset them as needed.

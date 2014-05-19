@@ -30,9 +30,10 @@
 #include <glib.h>
 #include <gdk/gdktypes.h>
 #include <gtkmm/box.h>
-#include <gtkmm/window.h>
 #include <gtkmm/actiongroup.h>
 #include <sigc++/signal.h>
+
+#include "waves_window.h"
 
 #include "evoral/types.hpp"
 
@@ -94,9 +95,10 @@ using ARDOUR::framecnt_t;
  * of PublicEditor need not be recompiled if private methods or member variables
  * change.
  */
-class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, public Gtkmm2ext::VisibilityTracker {
+class PublicEditor : public WavesWindow, public PBD::StatefulDestructible, public Gtkmm2ext::VisibilityTracker {
   public:
 	PublicEditor ();
+	PublicEditor (std::string layout_script);
 	virtual ~PublicEditor ();
 
 	/** @return Singleton PublicEditor instance */

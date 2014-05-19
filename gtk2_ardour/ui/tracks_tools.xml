@@ -4,7 +4,7 @@
   <VBox>
     <HBox>
       <iconbutton id="tracks_button"
-                  width="53" height="53"
+                  width="52" height="51"
                   normalicon="tracks"
                   activeicon="tracks_active"
                   prelighticon="tracks_prelight"/>

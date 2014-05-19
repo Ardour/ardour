@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2014 Valeriy Kamyshniy
+	Copyright (C) 2014 Waves Audio Ltd.
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -54,6 +54,7 @@ namespace WavesUI {
 	Gtk::Widget* create_widget (const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*>& named_widgets);
 	Gtk::Widget* add_widget (Gtk::Box& parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*>& named_widgets);
 	Gtk::Widget* add_widget (Gtk::ScrolledWindow& parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*>& named_widgets);
+	Gtk::Widget* add_widget (Gtk::Window& parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*>& named_widgets);
 	Gtk::Widget* add_widget (Gtk::Layout& parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*>& named_widgets);
 	Gtk::Widget* add_widget (Gtk::Container& parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*>& named_widgets);
 	void set_attributes (Gtk::Widget& widget, const XMLNode& definition, const XMLNodeMap& styles);
