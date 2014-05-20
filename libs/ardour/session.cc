@@ -357,20 +357,24 @@ Session::Session (AudioEngine &eng,
     /* Waves Tracks: fill session with tracks basing on the amount of inputs.
      * each available input must have corresponding track when session starts.
      */
-    if (_is_new && ARDOUR::Profile->get_trx () ) {
-        uint32_t how_many (0);
-        
-        std::vector<std::string> inputs;
-        EngineStateController::instance()->get_physical_audio_inputs(inputs);
-        
-        how_many = inputs.size();
-        
-        list<boost::shared_ptr<AudioTrack> > tracks = new_audio_track (1, 1, Normal, 0, how_many, string() );
-        
-        if (tracks.size() != how_many) {
-            destroy ();
-            throw failed_constructor ();
+    if (_is_new ) {
+        if ( ARDOUR::Profile->get_trx () ) {
+            uint32_t how_many (0);
+            
+            std::vector<std::string> inputs;
+            EngineStateController::instance()->get_physical_audio_inputs(inputs);
+            
+            how_many = inputs.size();
+            
+            list<boost::shared_ptr<AudioTrack> > tracks = new_audio_track (1, 1, Normal, 0, how_many, string() );
+            
+            if (tracks.size() != how_many) {
+                destroy ();
+                throw failed_constructor ();
+            }
         }
+    } else {
+        reconnect_existing_routes(true, true);
     }
     
     _is_new = false;
