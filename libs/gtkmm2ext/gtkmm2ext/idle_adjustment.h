@@ -20,7 +20,9 @@
 #ifndef __gtkmm2ext_idle_adjustment_h__
 #define __gtkmm2ext_idle_adjustment_h__
 
+#include <stdint.h>
 #include <sys/time.h>
+
 #include <gtkmm/adjustment.h>
 
 #include "gtkmm2ext/visibility.h"
