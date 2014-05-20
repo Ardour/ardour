@@ -35,6 +35,8 @@
 #include "i18n.h"
 #include "pbd/convert.h"
 
+#include "OpenFileDialogProxy.h"
+
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -58,6 +60,7 @@ TracksControlPanel::init ()
     _multi_out_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_multi_out));
     _stereo_out_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_stereo_out));
     
+    _brows_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_brows_button));    
     
 	EngineStateController::instance ()->EngineRunning.connect (running_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_running, this), gui_context());
 	EngineStateController::instance ()->EngineStopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_stopped, this), gui_context());
@@ -84,6 +87,8 @@ TracksControlPanel::init ()
     populate_output_channels();
     
 	_audio_settings_tab_button.set_active(true);
+    
+    _default_open_path.set_text(Config->get_default_open_path());
 }
 
 DeviceConnectionControl& TracksControlPanel::add_device_capture_control(std::string device_capture_name, bool active, uint16_t capture_number, std::string track_name)
@@ -524,7 +529,6 @@ TracksControlPanel::on_multi_out (WavesButton*)
     Config->set_output_auto_connect(AutoConnectPhysical);
 }
 
-
 void
 TracksControlPanel::on_stereo_out (WavesButton*)
 {
@@ -536,11 +540,54 @@ TracksControlPanel::on_stereo_out (WavesButton*)
 }
 
 void
+TracksControlPanel::on_brows_button (WavesButton*)
+{
+    using namespace std;
+    
+#ifdef __APPLE__
+    set_keep_above(false);
+    _default_path_name = ARDOUR::ChooseFolderDialog(Config->get_default_open_path(), _("Choose Default Path"));
+    set_keep_above(true);    
+    
+    if( !_default_path_name.empty() )
+        _default_open_path.set_text(_default_path_name);
+    else
+        _default_open_path.set_text(Config->get_default_open_path());
+	
+    return;
+#endif
+    
+#ifdef _WIN32
+	/*set_keep_above(false);
+	string fileTitle;
+	if ( ARDOUR::OpenFileDialog(fileTitle, _("Choose Default Path")) ) {
+		set_keep_above(true);
+		_default_path_name = fileTitle;
+	}
+    
+    using namespace std;
+    cout<<endl<<endl<<"DEFAULT_PATH = "<<_default_path_name<<endl<<endl<<flush;
+    
+    Gtk::Label& default_open_path (named_children ().get_label("default_open_path"));
+
+    if(  !_default_path_name.empty()  )
+        _default_open_path.set_text(_default_path_name);
+    else
+        _default_open_path.set_text(Config->get_default_open_path());
+    */
+	return;
+#endif // _WIN32
+}
+
+void
 TracksControlPanel::on_ok (WavesButton*)
 {
 	hide();
 	EngineStateController::instance()->push_current_state_to_backend(true);
 	response(Gtk::RESPONSE_OK);
+    
+    Config->set_default_open_path(_default_path_name);
+    Config->save_state();
 }
 
 
@@ -548,7 +595,8 @@ void
 TracksControlPanel::on_cancel (WavesButton*)
 {
 	hide();
-	response(Gtk::RESPONSE_CANCEL);
+	response(Gtk::RESPONSE_CANCEL);    
+    _default_open_path.set_text(Config->get_default_open_path());
 }
 
 
@@ -557,6 +605,9 @@ TracksControlPanel::on_apply (WavesButton*)
 {
 	EngineStateController::instance()->push_current_state_to_backend(true);
 	response(Gtk::RESPONSE_APPLY);
+    
+    Config->set_default_open_path(_default_path_name);
+    Config->save_state();
 }
 
 

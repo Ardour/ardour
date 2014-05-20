@@ -43,6 +43,7 @@
 #include "ardour/session_state_utils.h"
 #include "ardour/template_utils.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/rc_configuration.h"
 
 #include "ardour_ui.h"
 #include "session_dialog.h"
@@ -142,7 +143,7 @@ SessionDialog::on_new_session (WavesButton*)
 {
 #ifdef __APPLE__  
     set_keep_above(false);
-    _selected_session_full_name = ARDOUR::SaveFileDialog(_("Create New Session"));
+    _selected_session_full_name = ARDOUR::SaveFileDialog(Config->get_default_open_path(),_("Create New Session"));
     set_keep_above(true);
     
     if(_selected_session_full_name.size() >= 1) {
@@ -324,7 +325,7 @@ SessionDialog::on_open_saved_session (WavesButton*)
 	
 #ifdef __APPLE__
 	set_keep_above(false);
-    _selected_session_full_name = ARDOUR::OpenFileDialog(_("Select Saved Session"));
+    _selected_session_full_name = ARDOUR::OpenFileDialog(Config->get_default_open_path(), _("Select Saved Session"));
     set_keep_above(true);
     
     if(_selected_session_full_name.size() >= 1) {

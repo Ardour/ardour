@@ -62,11 +62,13 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
 	WavesButton& _name_track_after_driver_button;
 	WavesButton& _reset_track_names_button;
 	WavesButton& _yes_button;
+    WavesButton& _brows_button;
 	Gtk::ComboBoxText& _engine_combo;
 	Gtk::ComboBoxText& _device_combo;
 	Gtk::ComboBoxText& _sample_rate_combo;
 	Gtk::ComboBoxText& _buffer_size_combo;
 	Gtk::Label& _latency_label;
+    Gtk::Label& _default_open_path;
 
 #include "tracks_control_panel.logic.h"
 };

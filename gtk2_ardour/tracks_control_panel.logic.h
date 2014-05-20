@@ -17,6 +17,8 @@
 
 */
 
+#include <string.h>
+
 // class TracksControlPanel : public WavesDialog {
   public:
 
@@ -74,6 +76,7 @@
 	void on_control_panel (WavesButton*);
     void on_multi_out (WavesButton*);
     void on_stereo_out (WavesButton*);
+    void on_brows_button (WavesButton*);
 	void on_ok(WavesButton*);
 	void on_cancel(WavesButton*);
 	void on_apply(WavesButton*);
@@ -116,6 +119,8 @@
     uint32_t            get_output_channels () const { return 0; };
     uint32_t            get_input_latency () const { return 0; };
     uint32_t            get_output_latency () const { return 0; };
+
+    std::string _default_path_name;
 
 	void show_buffer_duration ();
 //};

@@ -16,8 +16,9 @@
 }
 
 // The Objective-C member function you want to call from C++
-+ (NSString*) ClassSaveFileDialog:(NSString *) title;
-+ (NSString*) ClassOpenFileDialog:(NSString *) title;
++ (NSString*) ClassSaveFileDialog:(NSString *) title withArg2:(NSString *)path;
++ (NSString*) ClassOpenFileDialog:(NSString *) title withArg2:(NSString *)path;
++ (NSString*) ClassChooseFolderDialog:(NSString *) title withArg2:(NSString *)path;
 
 @end
 

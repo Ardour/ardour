@@ -19,34 +19,55 @@ using namespace std;
 
 namespace ARDOUR
 {
-// ====== C "trampoline" functions to invoke Objective-C method ====== //
-string OpenFileDialog(string title)
-{    
-    NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
-    
-    // Call the Objective-C method using Objective-C syntax
-    NSString *path = [FileDialog ClassOpenFileDialog : nsTitle];
-    string stdPath = [path UTF8String];
-    
-    return stdPath;
-}
+    // ====== C "trampoline" functions to invoke Objective-C method ====== //
+    string OpenFileDialog(std::string path, string title)
+    {
+        NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
+        
+        //NP: we should find some gentle way to do this
+        path = "file://localhost" + path;
+        NSString *nsDefaultPath = [NSString stringWithUTF8String:path.c_str()];
+        // Call the Objective-C method using Objective-C syntax
+        NSString *nsPath = [FileDialog ClassOpenFileDialog:nsTitle withArg2:nsDefaultPath];
+        string stdPath = [nsPath UTF8String];
+        
+        return stdPath;
+    }
 
-string SaveFileDialog(string title)
-{
-    NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
+    string SaveFileDialog(std::string path, string title)
+    {
+        NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
+        
+        //NP: we should find some gentle way to do this
+        path = "file://localhost" + path;
+        NSString *nsDefaultPath = [NSString stringWithUTF8String:path.c_str()];
+        // Call the Objective-C method using Objective-C syntax
+        NSString *nsPath = [FileDialog ClassSaveFileDialog:nsTitle withArg2:nsDefaultPath];
+        string stdPath = [nsPath UTF8String];    
+        
+        return stdPath;
+    }
     
-    // Call the Objective-C method using Objective-C syntax
-    NSString *path = [FileDialog ClassSaveFileDialog : nsTitle];
-    string stdPath = [path UTF8String];    
-    
-    return stdPath;
-}
-}
+    string ChooseFolderDialog(std::string path, string title)
+    {
+        NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
+        
+        //NP: we should find some gentle way to do this
+        path = "file://localhost" + path;
+        NSString *nsDefaultPath = [NSString stringWithUTF8String:path.c_str()];
+        // Call the Objective-C method using Objective-C syntax
+        NSString *nsPath = [FileDialog ClassChooseFolderDialog:nsTitle withArg2:nsDefaultPath];
+            
+        string stdPath = [nsPath UTF8String];
+        
+        return stdPath;
+    }  
+}// namespace ARDOUR
 
 // ====== Objective-C functions called from C++ functions ====== //
 
 // On open saved session
-+ (NSString*) ClassOpenFileDialog:(NSString*) title
++ (NSString*) ClassOpenFileDialog:(NSString *)title withArg2:(NSString *)path
 {
     // Create a File Open Dialog class.
     NSOpenPanel* openDlg = [NSOpenPanel openPanel];
@@ -59,6 +80,7 @@ string SaveFileDialog(string title)
     [openDlg setAllowedFileTypes:fileTypesArray];
     [openDlg setAllowsMultipleSelection:FALSE];
     [openDlg setTitle:title];
+    [openDlg setDirectoryURL : [NSURL URLWithString:path]];
     
     // Display the dialog box.  If the OK pressed,
     // process the files.
@@ -76,11 +98,12 @@ string SaveFileDialog(string title)
 }
 
 // On create new session
-+ (NSString*) ClassSaveFileDialog:(NSString*) title
++ (NSString*) ClassSaveFileDialog:(NSString *)title withArg2:(NSString *)path
 {    
     // Create a File Open Dialog class.
     NSSavePanel* saveDlg = [NSSavePanel savePanel];
     [saveDlg setTitle:title];
+    [saveDlg setDirectoryURL : [NSURL URLWithString:path]];
     
     // Display the dialog box.  If the OK pressed,
     // process the files.
@@ -90,6 +113,31 @@ string SaveFileDialog(string title)
         NSURL *saveURL = [saveDlg URL];
         NSString *filePath = [saveURL path];
                 
+        return filePath;
+    }
+    
+    return @"";
+}
+
++ (NSString*) ClassChooseFolderDialog:(NSString *)title withArg2:(NSString *)path
+{
+    // Create a File Open Dialog class.
+    NSOpenPanel* openDlg = [NSOpenPanel openPanel];
+    
+    [openDlg setCanChooseDirectories:YES];
+    [openDlg setAllowsMultipleSelection:FALSE];
+    [openDlg setTitle:title];
+    [openDlg setDirectoryURL : [NSURL URLWithString:path]];
+    
+    // Display the dialog box.  If the OK pressed,
+    // process the files.
+    if ( [openDlg runModal] == NSOKButton )
+    {
+        // Gets first selected file
+        NSArray *files = [openDlg URLs];
+        NSURL *saveURL = [files objectAtIndex:0];
+        NSString *filePath = [saveURL path];
+        
         return filePath;
     }
     

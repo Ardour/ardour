@@ -36,6 +36,10 @@ CONFIG_VARIABLE (AutoConnectOption, input_auto_connect, "input-auto-connect", Au
 /* Naming */
 CONFIG_VARIABLE (TracksAutoNamingRule, tracks_auto_naming, "tracks-auto-naming", UseDefaultNames)
 
+/* Paths */
+CONFIG_VARIABLE (std::string, default_open_path, "default-open-path", Glib::get_home_dir() )
+
+
 /* MIDI and MIDI related */
 
 CONFIG_VARIABLE (bool, trace_midi_input, "trace-midi-input", false)
