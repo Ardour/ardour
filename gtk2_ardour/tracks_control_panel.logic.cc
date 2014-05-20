@@ -257,6 +257,14 @@ TracksControlPanel::populate_input_channels()
         
         uint16_t number = DeviceConnectionControl::NoNumber;
         std::string track_name = "";
+        std::string port_name = "";
+        
+        std::string pattern("system:");
+        if (input_iter->name.find(pattern) != std::string::npos ) {
+            port_name = input_iter->name.substr(pattern.size() );
+        } else {
+            port_name = input_iter->name;
+        }
         
         if (input_iter->active) {
             
@@ -265,11 +273,11 @@ TracksControlPanel::populate_input_channels()
             if (Config->get_tracks_auto_naming() & UseDefaultNames) {
                 track_name = string_compose ("Track %1", number);
             } else if (Config->get_tracks_auto_naming() & NameAfterDriver) {
-                track_name = input_iter->name;
+                track_name = port_name;
             }
         }
         
-        add_device_capture_control (input_iter->name, input_iter->active, number, track_name);
+        add_device_capture_control (port_name, input_iter->active, number, track_name);
     }    
 }
 
@@ -289,12 +297,20 @@ TracksControlPanel::populate_output_channels()
     for (output_iter = output_states.begin(); output_iter != output_states.end(); ++output_iter ) {
         
         uint16_t number = DeviceConnectionControl::NoNumber;
+        std::string port_name = "";
+        
+        std::string pattern("system:");
+        if (output_iter->name.find(pattern) != std::string::npos ) {
+            port_name = output_iter->name.substr(pattern.size() );
+        } else {
+            port_name = output_iter->name;
+        }
         
         if (output_iter->active) {
             number = number_count++;
         }
         
-        add_device_playback_control (output_iter->name, output_iter->active, number);
+        add_device_playback_control (port_name, output_iter->active, number);
     }
     
 }
