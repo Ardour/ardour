@@ -462,6 +462,9 @@ void
 WavesButton::action_tooltip_changed ()
 {
 	string str = _action->property_tooltip().get_value();
+    if (str.empty()) {
+        str = get_tooltip_text();
+    }
 	ARDOUR_UI::instance()->set_tip (*this, str);
 }
 

@@ -79,13 +79,13 @@
                   activeicon="transport_loop_active"
                   prelighticon="transport_loop_prelight"/>
       <iconbutton id="lock_session_button"
+                  tooltip="Lock"
                   width="34" height="26"
                   normalicon="lock_session"
                   activeicon="lock_session_active"
                   prelighticon="lock_session_prelight"/>
       <layout     width="60" height="26" bgnormal=""/>
       <iconbutton id="tool_marker_button"
-                  tooltip="Lock"
                   width="34" height="26"
                   normalicon="tool_marker"
                   activeicon="tool_marker_active"
