@@ -66,8 +66,8 @@ public:
     ARDOUR::pframes_t   get_default_buffer_size() const;
     void                available_buffer_sizes_for_current_device(std::vector<ARDOUR::pframes_t>&) const;
 
-    uint32_t            get_available_inputs_count() const {return _current_state->input_channel_states.size(); }
-    uint32_t            get_available_outputs_count () const {return _current_state->output_channel_states.size(); }
+    uint32_t            get_available_inputs_count() const;
+    uint32_t            get_available_outputs_count () const;
     
     void                get_physical_audio_inputs (std::vector<std::string>&);
     void                get_physical_audio_outputs (std::vector<std::string>&);

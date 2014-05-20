@@ -382,6 +382,40 @@ EngineStateController::set_new_buffer_size_in_controller(pframes_t buffer_size)
 }
 
 
+uint32_t
+EngineStateController::get_available_inputs_count() const
+{
+    uint32_t available_channel_count = 0;
+    
+    ChannelStateList::const_iterator iter = _current_state->input_channel_states.begin();
+    
+    for (; iter != _current_state->input_channel_states.end(); ++iter) {
+        if (iter->active) {
+            ++available_channel_count;
+        }
+    }
+    
+    return available_channel_count;
+}
+
+
+uint32_t
+EngineStateController::get_available_outputs_count () const
+{
+    uint32_t available_channel_count = 0;
+    
+    ChannelStateList::const_iterator iter = _current_state->output_channel_states.begin();
+    
+    for (; iter != _current_state->output_channel_states.end(); ++iter) {
+        if (iter->active) {
+            ++available_channel_count;
+        }
+    }
+    
+    return available_channel_count;
+}
+
+
 void
 EngineStateController::get_physical_audio_inputs(std::vector<std::string>& port_names)
 {
