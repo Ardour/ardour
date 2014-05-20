@@ -14,36 +14,42 @@
     borderwidth="1 1 0 0" />
 
   <Layout bgnormal="#1F1F1F" x="0" y="0" width="619" height="623">
-    <Button
-      id="audio_settings_tab_button"
-      text="AUDIO\nSYSTEM\nSETTINGS"
-      fgnormal="#C1C1C1"
-      fgactive="#CDCDCD"
-      bgnormal="#1F1F1F"
-      bgactive="#565656"
-      bghover="#2f2f2f"
-      font ="Arial Bold 10"
-      x="2" y="3" width="107" height="65"/>
-    <Button
-      id="midi_settings_tab_button"
-      text="MIDI\nSYSTEM\nSETTINGS"
-      fgnormal="#C1C1C1"
-      fgactive="#CDCDCD"
-      bgnormal="#1F1F1F"
-      bgactive="#565656"
-      bghover="#2f2f2f"
-      font ="Arial Bold 10"
-      x="2" y="68" width="107" height="65"/>
-    <Button
-      id="session_settings_tab_button"
-      text="SESSION\nSETTINGS"
-      fgnormal="#C1C1C1"
-      fgactive="#CDCDCD"
-      bgnormal="#1F1F1F"
-      bgactive="#565656"
-      bghover="#2f2f2f"
-      font ="Arial Bold 10"
-      x="2" y="134" width="107" height="65"/>
+    <VBox x="2" y="1">
+      <Layout bgnormal="#A0A0A0" width="107" height="1"/>
+      <Button
+        id="audio_settings_tab_button"
+        text="AUDIO\nSYSTEM\nSETTINGS"
+        fgnormal="#C1C1C1"
+        fgactive="#CDCDCD"
+        bgnormal="#1F1F1F"
+        bgactive="#565656"
+        bghover="#2f2f2f"
+        font ="Arial Bold 10"
+        width="107" height="65"/>
+      <Layout bgnormal="#A0A0A0" width="107" height="1"/>
+      <Button
+        id="midi_settings_tab_button"
+        text="MIDI\nSYSTEM\nSETTINGS"
+        fgnormal="#C1C1C1"
+        fgactive="#CDCDCD"
+        bgnormal="#1F1F1F"
+        bgactive="#565656"
+        bghover="#2f2f2f"
+        font ="Arial Bold 10"
+        width="107" height="65"/>
+      <Layout bgnormal="#A0A0A0" width="107" height="1"/>
+      <Button
+        id="session_settings_tab_button"
+        text="SESSION\nSETTINGS"
+        fgnormal="#C1C1C1"
+        fgactive="#CDCDCD"
+        bgnormal="#1F1F1F"
+        bgactive="#565656"
+        bghover="#2f2f2f"
+        font ="Arial Bold 10"
+        width="107" height="65"/>
+      <Layout bgnormal="#A0A0A0" width="107" height="1"/>
+    </VBox>
 
     <Layout bgnormal="#565656" x="113" y="559" width="505" height="63">
       <Button
