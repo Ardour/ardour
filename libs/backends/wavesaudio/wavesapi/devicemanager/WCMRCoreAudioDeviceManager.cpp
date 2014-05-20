@@ -2755,7 +2755,7 @@ WTErr WCMRCoreAudioDeviceManager::generateDeviceListImpl()
                 pDevInfo->m_AvailableSampleRates = availableSampleRates;
                 
                 //Get max input channels
-                uint32 maxInputChannels;
+                uint32_t maxInputChannels;
                 wErr = getDeviceMaxInputChannels(pDevInfo->m_DeviceId, maxInputChannels);
                 
                 if (wErr != eNoErr)
@@ -2768,7 +2768,7 @@ WTErr WCMRCoreAudioDeviceManager::generateDeviceListImpl()
                 pDevInfo->m_MaxInputChannels = maxInputChannels;
                 
                 //Get max output channels
-                uint32 maxOutputChannels;
+                uint32_t maxOutputChannels;
                 wErr = getDeviceMaxOutputChannels(pDevInfo->m_DeviceId, maxOutputChannels);
                 
                 if (wErr != eNoErr)
