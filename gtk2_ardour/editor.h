@@ -275,7 +275,14 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void export_region ();
 
 	void add_toplevel_controls (Gtk::Container&);
-	Gtk::HBox& get_status_bar_packer()  { return status_bar_hpacker; }
+#ifdef TOP_MENUBAR
+	/*
+	 * This is needed for OS X primarily
+	 * but also any other OS that uses a single
+	 * top menubar instead of per window menus
+	 */
+	Gtk::HBox& get_status_bar_packer()  { return _status_bar_hpacker; }
+#endif
 
 	void               set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
@@ -1584,11 +1591,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Label               toolbar_selection_cursor_label;
 
 	Gtkmm2ext::TearOff*      _mouse_mode_tearoff;
-	ArdourButton mouse_select_button;
+	WavesButton& _tool_marker_button;
 	ArdourButton mouse_draw_button;
-	ArdourButton mouse_move_button;
+	WavesButton& _tool_arrow_button;
 	ArdourButton mouse_gain_button;
-	ArdourButton mouse_zoom_button;
+	WavesButton& _tool_zoom_button;
 	ArdourButton mouse_timefx_button;
 	ArdourButton mouse_audition_button;
 
@@ -1958,7 +1965,14 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void history_changed ();
 
-	Gtk::HBox      status_bar_hpacker;
+#ifdef TOP_MENUBAR
+	/*
+	 * This is needed for OS X primarily
+	 * but also any other OS that uses a single
+	 * top menubar instead of per window menus
+	 */
+	Gtk::HBox&      _status_bar_hpacker;
+#endif
 
 	Editing::EditPoint _edit_point;
 

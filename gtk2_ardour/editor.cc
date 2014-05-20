@@ -246,7 +246,18 @@ Editor::Editor ()
 	, cd_mark_label (_("CD Markers"))
 	, videotl_label (_("Video Timeline"))
 	, edit_packer (4, 4, true)
-	, vpacker (named_children ().get_vbox ("vpacker"))
+	, vpacker (get_vbox ("vpacker"))
+	, _tool_marker_button (get_waves_button ("tool_marker_button"))
+	, _tool_zoom_button (get_waves_button ("tool_zoom_button"))
+	, _tool_arrow_button (get_waves_button ("tool_arrow_button"))
+#ifdef TOP_MENUBAR
+	/*
+	 * This is needed for OS X primarily
+	 * but also any other OS that uses a single
+	 * top menubar instead of per window menus
+	 */
+	, _status_bar_hpacker (get_hbox ("menu_bar_base"))
+#endif
 
 	  /* the values here don't matter: layout widgets
 	     reset them as needed.
@@ -636,9 +647,6 @@ Editor::Editor ()
 	set_name ("EditorWindow");
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
 
-	status_bar_hpacker.show ();
-
-	vpacker.pack_end (status_bar_hpacker, false, false);
 	vpacker.pack_end (global_hpacker, true, true);
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
@@ -709,7 +717,6 @@ Editor::Editor ()
 	set_title (title.get_string());
 	set_wmclass (X_("ardour_editor"), PROGRAM_NAME);
 
-	//add (vpacker);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
@@ -2858,28 +2865,19 @@ Editor::setup_toolbar ()
 	Alignment* mouse_mode_align = manage (new Alignment);
 
 	Glib::RefPtr<SizeGroup> mouse_mode_size_group = SizeGroup::create (SIZE_GROUP_BOTH);
-//	mouse_mode_size_group->add_widget (smart_mode_button);
-	mouse_mode_size_group->add_widget (mouse_move_button);
-	mouse_mode_size_group->add_widget (mouse_select_button);
-	mouse_mode_size_group->add_widget (mouse_zoom_button);
-	mouse_mode_size_group->add_widget (mouse_gain_button);
 	mouse_mode_size_group->add_widget (mouse_timefx_button);
 	mouse_mode_size_group->add_widget (mouse_audition_button);
 	mouse_mode_size_group->add_widget (mouse_draw_button);
 	mouse_mode_size_group->add_widget (internal_edit_button);
 
 	/* make them just a bit bigger */
-	mouse_move_button.set_size_request (-1, 30);
+	internal_edit_button.set_size_request (-1, 30);
 
 	mouse_mode_hbox->set_spacing (2);
 
 	if (!ARDOUR::Profile->get_trx()) {
 		mouse_mode_hbox->pack_start (smart_mode_button, false, false);
 	}
-
-	mouse_mode_hbox->pack_start (mouse_move_button, false, false);
-	mouse_mode_hbox->pack_start (mouse_select_button, false, false);
-	mouse_mode_hbox->pack_start (mouse_zoom_button, false, false);
 
 	if (!ARDOUR::Profile->get_trx()) {
 		mouse_mode_hbox->pack_start (mouse_gain_button, false, false);
@@ -3180,11 +3178,8 @@ void
 Editor::setup_tooltips ()
 {
 	ARDOUR_UI::instance()->set_tip (smart_mode_button, _("Smart Mode (add Range functions to Object mode)"));
-	ARDOUR_UI::instance()->set_tip (mouse_move_button, _("Object Mode (select/move Objects)"));
-	ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Range Mode (select/move Ranges)"));
 	ARDOUR_UI::instance()->set_tip (mouse_draw_button, _("Draw/Edit MIDI Notes"));
 	ARDOUR_UI::instance()->set_tip (mouse_gain_button, _("Draw Region Gain"));
-	ARDOUR_UI::instance()->set_tip (mouse_zoom_button, _("Select Zoom Range"));
 	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch/Shrink Regions and MIDI Notes"));
 	ARDOUR_UI::instance()->set_tip (mouse_audition_button, _("Listen to Specific Regions"));
 	ARDOUR_UI::instance()->set_tip (internal_edit_button, _("Note Level Editing"));

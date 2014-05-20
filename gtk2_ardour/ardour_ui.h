@@ -442,8 +442,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ArdourButton play_selection_button;
 	ArdourButton rec_button;
 
-	WavesUI::WidgetMap _tools;
-
 	void toggle_external_sync ();
 	void toggle_time_master ();
 	void toggle_video_sync ();
@@ -720,7 +718,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 			Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, Glib::RefPtr<Gtk::TextBuffer::Tag> mtag,
 			const char *msg);
 	Gtk::Label status_bar_label;
-        bool status_bar_button_press (GdkEventButton*);
+    bool status_bar_button_press (GdkEventButton*);
 	Gtk::ToggleButton error_log_button;
 
 	void loading_message (const std::string& msg);

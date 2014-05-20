@@ -108,7 +108,7 @@ ARDOUR_UI::setup_windows ()
 	editor->get_status_bar_packer().pack_start (*status_bar_packer, true, true);
 	editor->get_status_bar_packer().pack_start (menu_bar_base, false, false, 6);
 #else
-	top_packer.pack_start (menu_bar_base, false, false);
+	editor->get_hbox ("menu_bar_base").pack_start (menu_bar_base, false, false);
 #endif
 	if (ARDOUR::Profile->get_trx()) {
 		top_packer.pack_start (tracks_tools_packer, false, false);
@@ -218,6 +218,13 @@ ARDOUR_UI::setup_transport_trx ()
 {
 	RefPtr<Action> act;
 
+	editor->get_waves_button ("transport_play_button").set_controllable (roll_controllable);
+	editor->get_waves_button ("transport_stop_button").set_controllable (stop_controllable);
+	editor->get_waves_button ("transport_start_button").set_controllable (goto_start_controllable);
+	editor->get_waves_button ("transport_end_button").set_controllable (goto_end_controllable);
+	editor->get_waves_button ("transport_loop_button").set_controllable (auto_loop_controllable);
+	editor->get_waves_button ("transport_record_button").set_controllable (rec_controllable);
+
 	transport_tearoff_hbox.set_border_width (3);
 	transport_tearoff_hbox.set_spacing (3);
 
@@ -262,7 +269,7 @@ ARDOUR_UI::setup_transport_trx ()
 	click_button.set_name ("transport button");
 
 	stop_button.set_active (true);
-	_tools.get_waves_button ("transport_stop_button").set_active (true);
+	editor->get_waves_button ("transport_stop_button").set_active (true);
 
 	goto_start_button.set_image (get_icon (X_("transport_start")));
 	goto_end_button.set_image (get_icon (X_("transport_end")));
@@ -278,27 +285,27 @@ ARDOUR_UI::setup_transport_trx ()
 	
 	act = ActionManager::get_action (X_("Transport"), X_("Stop"));
 	stop_button.set_related_action (act);
-	_tools.get_waves_button ("transport_stop_button").set_related_action (act);
+	editor->get_waves_button ("transport_stop_button").set_related_action (act);
 
 	act = ActionManager::get_action (X_("Transport"), X_("Roll"));
 	roll_button.set_related_action (act);
-	_tools.get_waves_button ("transport_play_button").set_related_action (act);
+	editor->get_waves_button ("transport_play_button").set_related_action (act);
 
 	act = ActionManager::get_action (X_("Transport"), X_("Record"));
 	rec_button.set_related_action (act);
-	_tools.get_waves_button ("transport_record_button").set_related_action (act);
+	editor->get_waves_button ("transport_record_button").set_related_action (act);
 
 	act = ActionManager::get_action (X_("Transport"), X_("GotoStart"));
 	goto_start_button.set_related_action (act);
-	_tools.get_waves_button ("transport_start_button").set_related_action (act);
+	editor->get_waves_button ("transport_start_button").set_related_action (act);
 
 	act = ActionManager::get_action (X_("Transport"), X_("GotoEnd"));
 	goto_end_button.set_related_action (act);
-	_tools.get_waves_button ("transport_end_button").set_related_action (act);
+	editor->get_waves_button ("transport_end_button").set_related_action (act);
 
 	act = ActionManager::get_action (X_("Transport"), X_("Loop"));
 	auto_loop_button.set_related_action (act);
-	_tools.get_waves_button ("transport_loop_button").set_related_action (act);
+	editor->get_waves_button ("transport_loop_button").set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("PlaySelection"));
 	play_selection_button.set_related_action (act);
 	act = ActionManager::get_action (X_("MIDI"), X_("panic"));

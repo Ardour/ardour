@@ -418,16 +418,10 @@ Editor::register_actions ()
 	smart_mode_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Object Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
-	mouse_move_button.set_related_action (act);
-	mouse_move_button.set_image (::get_icon("tool_object"));
-	mouse_move_button.add_elements ( ArdourButton::Inset );
-	mouse_move_button.set_name ("mouse mode button");
+	_tool_arrow_button.set_related_action (act);
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));	
-	mouse_select_button.set_related_action (act);
-	mouse_select_button.set_image (::get_icon("tool_range"));
-	mouse_select_button.add_elements ( ArdourButton::Inset );
-	mouse_select_button.set_name ("mouse mode button");
+	_tool_marker_button.set_related_action (act);
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseDraw));	
 	mouse_draw_button.set_related_action (act);
@@ -442,10 +436,7 @@ Editor::register_actions ()
 	mouse_gain_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseZoom));	
-	mouse_zoom_button.set_related_action (act);
-	mouse_zoom_button.set_image (::get_icon("tool_zoom_ardour"));
-	mouse_zoom_button.add_elements ( ArdourButton::Inset );
-	mouse_zoom_button.set_name ("mouse mode button");
+	_tool_zoom_button.set_related_action (act);
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));	
 	mouse_audition_button.set_related_action (act);
