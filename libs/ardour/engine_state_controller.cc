@@ -767,9 +767,10 @@ EngineStateController::_on_parameter_changed (const std::string& parameter_name)
         
         if (Config->get_output_auto_connect() & AutoConnectMaster) {
             _switch_to_stereo_out_io();
-            AudioEngine::instance()->reconnect_session_routes();
-            OutputConfigChanged(); // emit a signal
         }
+        
+        AudioEngine::instance()->reconnect_session_routes();
+        OutputConfigChanged(); // emit a signal
     }
 }
 
