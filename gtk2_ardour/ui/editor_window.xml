@@ -8,13 +8,17 @@
                   width="52" height="51"
                   normalicon="tracks"
                   activeicon="tracks_active"
-                  prelighticon="tracks_prelight"/>
+                  prelighticon="tracks_prelight" box.padding=""/>
+      <icon source="display_clock_mockup.png" tooltip="--------------------&#xA;This is a mockup&#xA;--------------------" />
+      <icon source="display_metrics_mockup.png" tooltip="--------------------&#xA;This is a mockup&#xA;--------------------" box.pack="end"/>
+      <layout bgnormal="#323232" box.expand="true" box.fill="true"/>
       <VBox spacing ="1" box.pack="end">
         <iconbutton id="mode_stereo_out_button"
                     width="79" height="25"
                     normalicon="mode_stereo_out"
                     activeicon="mode_stereo_out_active"
-                    prelighticon="mode_stereo_out_prelight"/>
+                    prelighticon="mode_stereo_out_prelight"
+                    active="true"/>
         <iconbutton id="mode_multi_out_button"
                     width="79" height="25"
                     normalicon="mode_multi_out"

@@ -47,12 +47,13 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, std
 		child = &button;
 		button.set_border_width (xml_property (definition, "borderwidth", styles, "0").c_str());
 		button.set_border_color (xml_property (definition, "bordercolor", styles, "#000000").c_str());
+		button.set_active (xml_property (definition, "active", styles, false));
 	} else if (widget_type == "ICONBUTTON") {
 		WavesIconButton& iconbutton = *manage (new WavesIconButton);
 		child = &iconbutton;
 		iconbutton.set_border_width (xml_property (definition, "borderwidth", styles, "0").c_str());
 		iconbutton.set_border_color (xml_property (definition, "bordercolor", styles, "#000000").c_str());
-
+		iconbutton.set_active (xml_property (definition, "active", styles, false));
 		std::string property = xml_property (definition, "normalicon", styles, "");
 		if (!property.empty ()) {
 			iconbutton.set_normal_image(get_icon(property.c_str()));
@@ -68,6 +69,20 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, std
 		property = xml_property (definition, "inactiveicon", styles, "");
 		if (!property.empty ()) {
 			iconbutton.set_inactive_image(get_icon(property.c_str()));
+		}
+	} else if (widget_type == "ICON") {
+		std::string image_path;
+		Searchpath spath(ARDOUR::ardour_data_search_path());
+
+		spath.add_subdirectory_to_paths("icons");
+    
+		if (find_file_in_search_path (spath, 
+									  xml_property (definition, "source", styles, ""),
+									  image_path)) {
+			Gtk::Image& icon = *manage (new Gtk::Image(image_path));
+			child = &icon;
+		} else {
+			dbg_msg(xml_property (definition, "source", styles, "") + " NOT FOUND");
 		}
 	} else if (widget_type == "COMBOBOXTEXT") {
 		child = manage (new Gtk::ComboBoxText);

@@ -25,6 +25,7 @@
 #include <boost/algorithm/string.hpp>
 #include <gtkmm/box.h>
 #include <gtkmm/layout.h>
+#include <gtkmm/image.h>
 #include <gtkmm/label.h>
 #include <gtkmm/scrolledwindow.h>
 #include "canvas/canvas.h"
@@ -42,6 +43,7 @@ namespace WavesUI {
 		Gtk::HBox& get_hbox (char* id);
 		Gtk::Layout& get_layout (char* id);
 		Gtk::Label& get_label (char* id);
+		Gtk::Image& get_image (char* id);
 		Gtk::ComboBoxText& get_combo_box_text (char* id);
 		WavesButton& get_waves_button (char* id);
 	  private:
