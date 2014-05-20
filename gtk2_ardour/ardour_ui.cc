@@ -2257,6 +2257,11 @@ ARDOUR_UI::stop_blinking ()
 	}
 }
 
+void
+ARDOUR_UI::lock_session () {
+	session_lock_dialog->run ();
+}
+
 
 /** Ask the user for the name of a new snapshot and then take it.
  */

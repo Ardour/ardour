@@ -589,6 +589,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	guint32  last_key_press_time;
 
+	void lock_session ();
 	void snapshot_session (bool switch_to_it);
 	void rename_session ();
 	void setup_order_hint ();

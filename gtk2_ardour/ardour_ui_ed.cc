@@ -142,6 +142,8 @@ ARDOUR_UI::install_actions ()
 			hide_return (sigc::bind (sigc::mem_fun(*editor, &PublicEditor::export_video), false)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	ActionManager::register_action (main_actions, X_("LockSession"), _("Lock this session"),  sigc::mem_fun(*this, &ARDOUR_UI::lock_session));
+
 	act = ActionManager::register_action (main_actions, X_("Snapshot"), _("Snapshot..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);

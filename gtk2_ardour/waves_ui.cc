@@ -123,7 +123,17 @@ WavesUI::add_widget (Gtk::Box& parent, const XMLNode& definition, const XMLNodeM
 
 	if (child != NULL)
 	{
-		parent.pack_start(*child, false, false);
+		std::string property = xml_property (definition, "box.pack", styles, "start");
+		bool expand = xml_property (definition, "box.expand", styles, false);
+		bool fill = xml_property (definition, "box.fill", styles, false);
+		uint32_t padding = xml_property (definition, "box.padding", styles, 0);
+		
+		if (property == "start") {
+			parent.pack_start(*child, expand, fill, padding);
+		} else {
+			parent.pack_end(*child, expand, fill, padding);
+		}
+
 	}
 	return child;
 }
@@ -299,6 +309,11 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		widget.show();
 	} else {
 		widget.hide();
+	}
+
+	property = xml_property (definition, "tooltip", styles, "");
+	if (!property.empty ()) {
+		widget.set_tooltip_text (property);
 	}
 
 	Gtk::Box* box = dynamic_cast<Gtk::Box*> (&widget);

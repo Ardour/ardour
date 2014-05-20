@@ -224,6 +224,8 @@ ARDOUR_UI::setup_transport_trx ()
 	editor->get_waves_button ("transport_end_button").set_controllable (goto_end_controllable);
 	editor->get_waves_button ("transport_loop_button").set_controllable (auto_loop_controllable);
 	editor->get_waves_button ("transport_record_button").set_controllable (rec_controllable);
+	act = ActionManager::get_action (X_("Main"), X_("LockSession"));
+	editor->get_waves_button ("lock_session_button").set_related_action (act);
 
 	transport_tearoff_hbox.set_border_width (3);
 	transport_tearoff_hbox.set_spacing (3);
