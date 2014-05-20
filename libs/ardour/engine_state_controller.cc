@@ -149,7 +149,7 @@ EngineStateController::_validate_current_device_state()
     std::vector<pframes_t>::iterator bs_iter = std::find (buffer_sizes.begin(), buffer_sizes.end(), _current_state->buffer_size);
     // if current is not found switch to default if is supported
     if (bs_iter == buffer_sizes.end() ) {
-		std::find (buffer_sizes.begin(), buffer_sizes.end(), backend->default_buffer_size () );
+		bs_iter = std::find (buffer_sizes.begin(), buffer_sizes.end(), backend->default_buffer_size () );
 	
 		if (bs_iter != buffer_sizes.end() ) {
 			_current_state->buffer_size = backend->default_buffer_size ();
