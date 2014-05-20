@@ -200,7 +200,7 @@
         </Layout>
         <ScrolledWindow x="16" y="62" bgnormal="#565656" width="478" height="299" hscroll="never" vscroll="auto">
           <HBox>
-            <VBox id="device_capture_list">
+            <VBox id="device_capture_list" width="274">
             </VBox>
             <VBox id="device_playback_list">
             </VBox>
