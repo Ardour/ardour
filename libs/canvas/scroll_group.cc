@@ -37,27 +37,26 @@ ScrollGroup::ScrollGroup (Group* parent, Duple position, ScrollSensitivity s)
 void
 ScrollGroup::scroll_to (Duple const& d)
 {
-	Duple base_pos (position().translate (_scroll_offset));
+	/* get the nominal position of the group without scroll being in effect
+	 */
+
+	Duple base_pos (_position.translate (_scroll_offset));
+
+	/* compute a new position given our sensitivity to h- and v-scrolling 
+	 */
 
 	if (_scroll_sensitivity & ScrollsHorizontally) {
 		base_pos.x -= d.x;
 		_scroll_offset.x = d.x;
-	} 
+	}
 
 	if (_scroll_sensitivity & ScrollsVertically) {
 		base_pos.y -= d.y;
 		_scroll_offset.y = d.y;
 	}
 
+	/* move there */
+
 	set_position (base_pos);
 }
 
-Duple
-ScrollGroup::canvas_position() const
-{
-	/* return the normal "base" position of this item
-	   rather its position as affected by any scroll
-	   offset.
-	*/
-	return _position.translate (_scroll_offset);
-}
