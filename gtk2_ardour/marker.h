@@ -103,7 +103,6 @@ class Marker : public sigc::trackable
 	ArdourCanvas::Polygon *mark;
         ArdourCanvas::Text *_name_item;
 	ArdourCanvas::Points *points;
-	ArdourCanvas::Line* _time_bars_line;
 	ArdourCanvas::Line* _track_canvas_line;
 	ArdourCanvas::Rectangle* _name_background;
 

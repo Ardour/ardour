@@ -57,7 +57,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 	: editor (ed)
 	, _parent (&parent)
-	, _time_bars_line (0)
 	, _track_canvas_line (0)
 	, _type (type)
 	, _selected (false)
@@ -299,7 +298,6 @@ Marker::~Marker ()
 
 	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
 	delete group;
-	delete _time_bars_line;
 	delete _track_canvas_line;
 }
 
@@ -328,29 +326,16 @@ Marker::setup_line ()
 {
 	if (_shown && (_selected || _line_shown)) {
 
-		if (_time_bars_line == 0) {
+		if (_track_canvas_line == 0) {
 
-			_time_bars_line = new ArdourCanvas::Line (editor.get_time_bars_group());
-			_time_bars_line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_EditPoint());
-			_time_bars_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
-			
-			_track_canvas_line = new ArdourCanvas::Line (editor.get_track_canvas_group());
+			_track_canvas_line = new ArdourCanvas::Line (editor.get_hscroll_group());
 			_track_canvas_line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_EditPoint());
 			_track_canvas_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 		}
 
 		ArdourCanvas::Duple g = group->item_to_canvas (ArdourCanvas::Duple (0, 0));
-		ArdourCanvas::Duple d = _time_bars_line->canvas_to_item (ArdourCanvas::Duple (g.x + _shift, 0));
+		ArdourCanvas::Duple d = _track_canvas_line->canvas_to_item (ArdourCanvas::Duple (g.x + _shift, 0));
 
-                _time_bars_line->set_x0 (d.x);
-                _time_bars_line->set_x1 (d.x);
-		_time_bars_line->set_y0 (d.y);
-		_time_bars_line->set_y1 (ArdourCanvas::COORD_MAX);
-		_time_bars_line->set_outline_color (_selected ? ARDOUR_UI::config()->get_canvasvar_EditPoint() : _color);
-		_time_bars_line->raise_to_top ();
-		_time_bars_line->show ();
-
-                d = _track_canvas_line->canvas_to_item (ArdourCanvas::Duple (g.x + _shift, 0));
 		_track_canvas_line->set_x0 (d.x);
 		_track_canvas_line->set_x1 (d.x);
 		_track_canvas_line->set_y0 (d.y);
@@ -360,8 +345,7 @@ Marker::setup_line ()
 		_track_canvas_line->show ();
 
 	} else {
-		if (_time_bars_line) {
-			_time_bars_line->hide ();
+		if (_track_canvas_line) {
 			_track_canvas_line->hide ();
 		}
 	}
@@ -475,8 +459,7 @@ Marker::set_color_rgba (uint32_t c)
 	mark->set_fill_color (_color);
 	mark->set_outline_color (_color);
 
-	if (_time_bars_line && !_selected) {
-		_time_bars_line->set_outline_color (_color);
+	if (_track_canvas_line && !_selected) {
 		_track_canvas_line->set_outline_color (_color);
 	}
 
