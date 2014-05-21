@@ -541,10 +541,8 @@ Editor::Editor ()
 	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
 	/* track controls */
 	edit_packer.attach (controls_layout,         0, 2, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
-	/* time bars canvas */
-	edit_packer.attach (*_time_bars_canvas_viewport, 2, 3, 1, 2,    FILL,    FILL, 0, 0);
 	/* track canvas */
-	edit_packer.attach (*_track_canvas_viewport,  2, 3, 2, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
+	edit_packer.attach (*_track_canvas_viewport,  2, 3, 1, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
 	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
@@ -783,7 +781,6 @@ Editor::~Editor()
         delete button_bindings;
 	delete _routes;
 	delete _route_groups;
-	delete _time_bars_canvas_viewport;
 	delete _track_canvas_viewport;
 	delete _drags;
 }
@@ -4182,10 +4179,6 @@ Editor::set_samples_per_pixel (framecnt_t spp)
 
 	ArdourCanvas::GtkCanvasViewport* c;
 
-	c = get_time_bars_canvas();
-	if (c) {
-		c->canvas()->zoomed ();
-	}
 	c = get_track_canvas();
 	if (c) {
 		c->canvas()->zoomed ();

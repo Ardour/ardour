@@ -2472,7 +2472,7 @@ TempoMarkerDrag::aborted (bool moved)
 }
 
 CursorDrag::CursorDrag (Editor* e, EditorCursor& c, bool s)
-	: Drag (e, &c.time_bar_canvas_item())
+	: Drag (e, &c.track_canvas_item())
 	, _cursor (c)
 	, _stop (s)
 {

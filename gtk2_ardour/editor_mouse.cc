@@ -114,7 +114,7 @@ Editor::mouse_frame (framepos_t& where, bool& in_track_canvas) const
 		return false;
 	}
 
-	if (pointer_window != canvas_window && pointer_window != _time_bars_canvas->get_window()) {
+	if (pointer_window != canvas_window) {
 		in_track_canvas = false;
 		return false;
 	}

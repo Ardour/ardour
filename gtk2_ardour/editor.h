@@ -449,7 +449,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
         ArdourCanvas::Group* get_time_bars_group () const;
         ArdourCanvas::Group* get_track_canvas_group () const;
-        ArdourCanvas::GtkCanvasViewport* get_time_bars_canvas () const;
         ArdourCanvas::GtkCanvasViewport* get_track_canvas () const;
 
         void override_visible_track_count ();
@@ -694,9 +693,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	ArdourCanvas::GtkCanvas* _track_canvas;
 	ArdourCanvas::GtkCanvasViewport* _track_canvas_viewport;
-
-        ArdourCanvas::GtkCanvas* _time_bars_canvas;
-        ArdourCanvas::GtkCanvasViewport* _time_bars_canvas_viewport;
 
 	bool within_track_canvas;
 
