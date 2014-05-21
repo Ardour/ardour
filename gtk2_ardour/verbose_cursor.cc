@@ -43,7 +43,7 @@ VerboseCursor::VerboseCursor (Editor* editor)
 	, _xoffset (0)
 	, _yoffset (0)
 {
-	_canvas_item = new ArdourCanvas::Text (_editor->get_track_canvas_group());
+	_canvas_item = new ArdourCanvas::Text (_editor->get_hscroll_group());
 	CANVAS_DEBUG_NAME (_canvas_item, "verbose canvas cursor");
 	_canvas_item->set_ignore_events (true);
 	_canvas_item->set_font_description (get_font_for_style (N_("VerboseCanvasCursor")));

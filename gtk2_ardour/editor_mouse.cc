@@ -320,8 +320,12 @@ Editor::set_canvas_cursor ()
 		if (x >= 0 && y >= 0) {
 			
 			vector<ArdourCanvas::Item const *> items;
+
+			/* Note how we choose a specific scroll group to get
+			 * items from. This could be problematic.
+			 */
 			
-			get_track_canvas_group()->add_items_at_point (ArdourCanvas::Duple (x,y), items);
+			hv_scroll_group->add_items_at_point (ArdourCanvas::Duple (x,y), items);
 			
 			// first item will be the upper most 
 			
