@@ -411,14 +411,19 @@ void TracksControlPanel::device_changed (bool show_confirm_dial/*=true*/)
         
         msg.set_position (Gtk::WIN_POS_MOUSE);
         
+		set_keep_above(false);
+
         switch (msg.run()) {
             case RESPONSE_NO:
                 // set _ignore_changes flag to ignore changes in combo-box callbacks
                 PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
                 
                 _device_combo.set_active_text (EngineStateController::instance()->get_current_device_name());
+				set_keep_above(true);
                 return;
-        }   
+        } 
+
+		set_keep_above(true);
     }
     
     if (EngineStateController::instance()->set_new_device_as_current(device_name) )
@@ -585,23 +590,18 @@ TracksControlPanel::on_brows_button (WavesButton*)
 #endif
     
 #ifdef _WIN32
-	/*set_keep_above(false);
+	set_keep_above(false);
 	string fileTitle;
-	if ( ARDOUR::OpenFileDialog(fileTitle, _("Choose Default Path")) ) {
+	if ( ARDOUR::ChooseFolderDialog(fileTitle, _("Choose Default Path")) ) {
 		set_keep_above(true);
 		_default_path_name = fileTitle;
 	}
-    
-    using namespace std;
-    cout<<endl<<endl<<"DEFAULT_PATH = "<<_default_path_name<<endl<<endl<<flush;
-    
-    Gtk::Label& default_open_path (named_children ().get_label("default_open_path"));
 
     if(  !_default_path_name.empty()  )
         _default_open_path.set_text(_default_path_name);
     else
         _default_open_path.set_text(Config->get_default_open_path());
-    */
+    
 	return;
 #endif // _WIN32
 }

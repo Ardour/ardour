@@ -459,7 +459,7 @@ def build(bld):
         obj.source += [ 'cocoacarbon.mm', 'bundle_env_cocoa.cc' ]
     elif bld.env['build_target'] == 'mingw':
         obj.source += [ 'bundle_env_mingw.cc' ]
-        obj.lib = 'comdlg32'
+        obj.lib = 'comdlg32 Shell32'
     else:
         obj.source += [ 'bundle_env_linux.cc' ]
 

@@ -23,9 +23,9 @@ namespace ARDOUR
 	
 	// OS Windows specific functions
 	#ifdef _WIN32
-	bool SaveFileDialog(std::string& fileName, std::string title = "Save");
-    bool OpenFileDialog(std::string& fileName, std::string title = "Open");
-    bool ChooseFolderDialog(std::string& fileName, std::string title = "Choose Folder");
+	bool SaveFileDialog(std::string& fileName, std::string path = "", std::string title = "Save");
+    bool OpenFileDialog(std::string& fileName, std::string path = "", std::string title = "Open");
+    bool ChooseFolderDialog(std::string& selectedPath, std::string title = "Choose Folder");
 	#endif
 }
 #endif
