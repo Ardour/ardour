@@ -33,6 +33,7 @@
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
 #include "canvas/line.h"
+#include "canvas/scroll_group.h"
 
 using namespace std;
 using namespace ArdourCanvas;
@@ -40,7 +41,6 @@ using namespace ArdourCanvas;
 /** Construct a new Canvas */
 Canvas::Canvas ()
 	: _root (this)
-	, _global_scroll (true)
 {
 	set_epoch ();
 }
@@ -48,19 +48,29 @@ Canvas::Canvas ()
 void
 Canvas::scroll_to (Coord x, Coord y)
 {
-	Duple d (x, y);
-	
-	_scroll_offset = d;
+	_scroll_offset = Duple (x, y);
 
-	_root.scroll_to (d);
+	/* We do things this way because we do not want to recurse through
+	   the canvas for every scroll. In the presence of large MIDI
+	   tracks this means traversing item lists that include
+	   thousands of items (notes).
+
+	   This design limits us to moving only those items (groups, typically)
+	   that should move in certain ways as we scroll. In other terms, it
+	   becomes O(1) rather than O(N).
+	*/
+
+	for (list<ScrollGroup*>::iterator i = scrollers.begin(); i != scrollers.end(); ++i) {
+		(*i)->scroll_to (_scroll_offset);
+	}
 
 	pick_current_item (0); // no current mouse position 
 }
 
 void
-Canvas::set_global_scroll (bool yn)
+Canvas::add_scroller (ScrollGroup& i)
 {
-	_global_scroll = yn;
+	scrollers.push_back (&i);
 }
 
 void
@@ -600,6 +610,11 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 
 	if (_focused_item == item) {
 		_focused_item = 0;
+	}
+
+	ScrollGroup* sg = dynamic_cast<ScrollGroup*>(item);
+	if (sg) {
+		scrollers.remove (sg);
 	}
 
 	if (_current_item == item) {

@@ -66,12 +66,14 @@ Editor::initialize_canvas ()
 {
 	_track_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 	_track_canvas = _track_canvas_viewport->canvas ();
-	_track_canvas->set_global_scroll (false);
 
-	hv_scroll_group = new ArdourCanvas::ScrollGroup (_track_canvas->root(), 
-							 ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
-												       ArdourCanvas::ScrollGroup::ScrollsHorizontally));
+	ArdourCanvas::ScrollGroup* hsg; 
+
+	hv_scroll_group = hsg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), 
+							       ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
+													     ArdourCanvas::ScrollGroup::ScrollsHorizontally));
 	CANVAS_DEBUG_NAME (hv_scroll_group, "canvas hv scroll");
+	_track_canvas->add_scroller (*hsg);
 
 	_verbose_cursor = new VerboseCursor (this);
 
