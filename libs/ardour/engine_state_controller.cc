@@ -501,43 +501,53 @@ EngineStateController::set_physical_audio_output_state(const std::string& port_n
             
             // get next element
             ChannelStateList::iterator next_state_iter(target_state_iter);
-                        
+            
             // loopback
             if (++next_state_iter == output_states.end() ) {
                 next_state_iter = output_states.begin();
             }
+
             
-            // if current was set to active - activate next and disable the rest
-            if (target_state_iter->active ) {
+            // only two outputs should be enabled
+            if (output_states.size() <= 2) {
+                
+                target_state_iter->active = true;
                 next_state_iter->active = true;
+                
             } else {
-                // if current was deactivated but the next is active
-                if (next_state_iter->active) {
-                    if (++next_state_iter == output_states.end() ) {
-                        next_state_iter = output_states.begin();
-                    }
+            
+                // if current was set to active - activate next and disable the rest
+                if (target_state_iter->active ) {
                     next_state_iter->active = true;
                 } else {
-                    // if current was deactivated but the previous is active - restore the state of current
-                    target_state_iter->active = true; // state restored;
-                    --target_state_iter; // switch to previous to make it stop point
-                    target_state_iter->active = true;
-                }
-            }
-            
-            while (++next_state_iter != target_state_iter) {
-                
-                if (next_state_iter == output_states.end() ) {
-                    next_state_iter = output_states.begin();
-                    // we jumped, so additional check is required
-                    if (next_state_iter == target_state_iter) {
-                        break;
+                    // if current was deactivated but the next is active
+                    if (next_state_iter->active) {
+                        if (++next_state_iter == output_states.end() ) {
+                            next_state_iter = output_states.begin();
+                        }
+                        next_state_iter->active = true;
+                    } else {
+                        // if current was deactivated but the previous is active - restore the state of current
+                        target_state_iter->active = true; // state restored;
+                        --target_state_iter; // switch to previous to make it stop point
+                        target_state_iter->active = true;
                     }
                 }
                 
-                next_state_iter->active = false;
-            }
+                while (++next_state_iter != target_state_iter) {
+                    
+                    if (next_state_iter == output_states.end() ) {
+                        next_state_iter = output_states.begin();
+                        // we jumped, so additional check is required
+                        if (next_state_iter == target_state_iter) {
+                            break;
+                        }
+                    }
+                    
+                    next_state_iter->active = false;
+                }
 
+            }
         }
         
         AudioEngine::instance()->reconnect_session_routes();
