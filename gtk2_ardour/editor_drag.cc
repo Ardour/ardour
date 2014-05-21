@@ -4230,8 +4230,6 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		break;
 	}
 
-	_editor->maybe_autoscroll (true, false, false);
-
 	if (start != end) {
 		switch (_operation) {
 		case SelectionMove:	
@@ -4418,8 +4416,6 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 
 		}
 	}
-
-	_editor->maybe_autoscroll (true, false, false);
 
 	if (start != end) {
 		_editor->temp_location->set (start, end);
