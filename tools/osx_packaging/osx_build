@@ -381,7 +381,8 @@ cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Frameworks
 cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $Frameworks/ || true
 
 # vfork wrapper
-cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $Frameworks/
+mkdir $Frameworks/vfork
+cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $Frameworks/vfork/
 
 
 while [ true ] ; do 
