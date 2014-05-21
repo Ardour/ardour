@@ -68,12 +68,22 @@ Editor::initialize_canvas ()
 	_track_canvas = _track_canvas_viewport->canvas ();
 
 	ArdourCanvas::ScrollGroup* hsg; 
+	ArdourCanvas::ScrollGroup* hg;
+	ArdourCanvas::ScrollGroup* vg;
 
 	hv_scroll_group = hsg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), 
 							       ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
 													     ArdourCanvas::ScrollGroup::ScrollsHorizontally));
 	CANVAS_DEBUG_NAME (hv_scroll_group, "canvas hv scroll");
 	_track_canvas->add_scroller (*hsg);
+
+	v_scroll_group = vg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsVertically);
+	CANVAS_DEBUG_NAME (v_scroll_group, "canvas v scroll");
+	_track_canvas->add_scroller (*vg);
+
+	h_scroll_group = hg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
+	CANVAS_DEBUG_NAME (h_scroll_group, "canvas h scroll");
+	_track_canvas->add_scroller (*hg);
 
 	_verbose_cursor = new VerboseCursor (this);
 
@@ -114,43 +124,8 @@ Editor::initialize_canvas ()
 
 	/* TIME BAR CANVAS */
 	
-	ArdourCanvas::ScrollGroup* hg; 
-
-	h_scroll_group = hg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
-	CANVAS_DEBUG_NAME (h_scroll_group, "canvas h scroll");
-	_track_canvas->add_scroller (*hg);
-	
-	meter_bar_group = new ArdourCanvas::Group (h_scroll_group);
-	meter_bar = new ArdourCanvas::Rectangle (meter_bar_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
-	CANVAS_DEBUG_NAME (meter_bar, "meter Bar");
-	meter_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
-
-	tempo_bar_group = new ArdourCanvas::Group (h_scroll_group);
-	tempo_bar = new ArdourCanvas::Rectangle (tempo_bar_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
-	CANVAS_DEBUG_NAME (tempo_bar, "Tempo  Bar");
-	tempo_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
-
-	range_marker_bar_group = new ArdourCanvas::Group (h_scroll_group);
-	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_bar_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
-	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
-	range_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
-
-	transport_marker_bar_group = new ArdourCanvas::Group (h_scroll_group);
-	transport_marker_bar = new ArdourCanvas::Rectangle (transport_marker_bar_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
-	CANVAS_DEBUG_NAME (transport_marker_bar, "transport Marker Bar");
-	transport_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
-
-	marker_bar_group = new ArdourCanvas::Group (h_scroll_group);
-	marker_bar = new ArdourCanvas::Rectangle (marker_bar_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
-	CANVAS_DEBUG_NAME (marker_bar, "Marker Bar");
-	marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
-
-	cd_marker_bar_group = new ArdourCanvas::Group (h_scroll_group);
-	cd_marker_bar = new ArdourCanvas::Rectangle (cd_marker_bar_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
-	CANVAS_DEBUG_NAME (cd_marker_bar, "CD Marker Bar");
- 	cd_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
-	
 	_time_markers_group = new ArdourCanvas::Group (h_scroll_group);
+	CANVAS_DEBUG_NAME (_time_markers_group, "time bars");
 
 	cd_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
 	CANVAS_DEBUG_NAME (cd_marker_group, "cd marker group");
@@ -170,8 +145,32 @@ Editor::initialize_canvas ()
 	meter_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
 	CANVAS_DEBUG_NAME (meter_group, "meter group");
 
-	ARDOUR_UI::instance()->video_timeline = new VideoTimeLine(this, videotl_group, (timebar_height * videotl_bar_height));
+	meter_bar = new ArdourCanvas::Rectangle (meter_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	CANVAS_DEBUG_NAME (meter_bar, "meter Bar");
+	meter_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
+	tempo_bar = new ArdourCanvas::Rectangle (tempo_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	CANVAS_DEBUG_NAME (tempo_bar, "Tempo  Bar");
+	tempo_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
+
+	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
+	range_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
+
+	transport_marker_bar = new ArdourCanvas::Rectangle (transport_marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	CANVAS_DEBUG_NAME (transport_marker_bar, "transport Marker Bar");
+	transport_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
+
+	marker_bar = new ArdourCanvas::Rectangle (marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	CANVAS_DEBUG_NAME (marker_bar, "Marker Bar");
+	marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
+
+	cd_marker_bar = new ArdourCanvas::Rectangle (cd_marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	CANVAS_DEBUG_NAME (cd_marker_bar, "CD Marker Bar");
+ 	cd_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
+
+	ARDOUR_UI::instance()->video_timeline = new VideoTimeLine(this, videotl_group, (timebar_height * videotl_bar_height));
+	
 	cd_marker_bar_drag_rect = new ArdourCanvas::Rectangle (cd_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
 	CANVAS_DEBUG_NAME (cd_marker_bar_drag_rect, "cd marker drag");
 	cd_marker_bar_drag_rect->set_outline (false);
@@ -595,7 +594,6 @@ Editor::autoscroll_canvas ()
 	if (autoscroll_vertical_allowed) {
 		
 		const double vertical_pos = vertical_adjustment.get_value();
-		double new_pixel = vertical_pos;
 		const int speed_factor = 20;
 
 		/* vertical */ 
@@ -927,18 +925,6 @@ Editor::clamp_verbose_cursor_y (double y)
 	y = max (0.0, y);
 	y = min (_visible_canvas_height - 50, y);
 	return y;
-}
-
-ArdourCanvas::Group*
-Editor::get_time_bars_group () const
-{
-	return h_scroll_group;
-}
-
-ArdourCanvas::Group*
-Editor::get_track_canvas_group() const
-{
-	return hv_scroll_group;
 }
 
 ArdourCanvas::GtkCanvasViewport*

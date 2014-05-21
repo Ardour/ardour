@@ -364,8 +364,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 #endif
 
 	virtual ArdourCanvas::Group* get_trackview_group () const = 0;
-	virtual ArdourCanvas::Group* get_time_bars_group () const = 0;
-	virtual ArdourCanvas::Group* get_track_canvas_group () const = 0;
+	virtual ArdourCanvas::Group* get_hscroll_group () const = 0;
+	virtual ArdourCanvas::Group* get_vscroll_group () const = 0;
+	virtual ArdourCanvas::Group* get_hvscroll_group () const = 0;
 
         virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
 

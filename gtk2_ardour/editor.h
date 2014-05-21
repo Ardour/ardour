@@ -446,9 +446,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		_stepping_axis_view = v;
 	}
 
-	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
-        ArdourCanvas::Group* get_time_bars_group () const;
-        ArdourCanvas::Group* get_track_canvas_group () const;
+ 	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
+        ArdourCanvas::Group* get_hscroll_group () const { return h_scroll_group; }
+        ArdourCanvas::Group* get_vscroll_group () const { return v_scroll_group; }
+        ArdourCanvas::Group* get_hvscroll_group () const { return hv_scroll_group; }
+
         ArdourCanvas::GtkCanvasViewport* get_track_canvas () const;
 
         void override_visible_track_count ();
@@ -707,11 +709,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::EventBox             time_bars_event_box;
 	Gtk::EventBox             ruler_label_event_box;
 
-	ArdourCanvas::Group      *minsec_group;
 	ArdourCanvas::Pixbuf     *logo_item;
+#if 0    
+    /* these will be needed when we have canvas rulers */
+	ArdourCanvas::Group      *minsec_group;
 	ArdourCanvas::Group      *bbt_group;
 	ArdourCanvas::Group      *timecode_group;
 	ArdourCanvas::Group      *frame_group;
+#endif
+
 	ArdourCanvas::Group      *tempo_group;
 	ArdourCanvas::Group      *meter_group;
 	ArdourCanvas::Group      *marker_group;
@@ -721,13 +727,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* parent for groups which themselves contain time markers */
 	ArdourCanvas::Group*     _time_markers_group;
-
-	ArdourCanvas::Group*      meter_bar_group;
-	ArdourCanvas::Group*      tempo_bar_group;
-	ArdourCanvas::Group*      marker_bar_group;
-	ArdourCanvas::Group*      range_marker_bar_group;
-	ArdourCanvas::Group*      transport_marker_bar_group;
-	ArdourCanvas::Group*      cd_marker_bar_group;
 
 	/* The group containing all other groups that are scrolled vertically
 	   and horizontally.

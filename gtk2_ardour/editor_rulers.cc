@@ -664,18 +664,12 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			meter_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
-		old_unit_pos = meter_bar_group->position().y;
-		if (tbgpos != old_unit_pos) {
-			meter_bar_group->move (ArdourCanvas::Duple (0.0, tbgpos - old_unit_pos));
-		}
-		meter_bar_group->show();
 		meter_group->show();
 		meter_label.show();
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
-		meter_bar_group->hide();
 		meter_group->hide();
 		meter_label.hide();
 	}
@@ -685,18 +679,12 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			tempo_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
-		old_unit_pos = tempo_bar_group->position().y;
-		if (tbgpos != old_unit_pos) {
-			tempo_bar_group->move (ArdourCanvas::Duple (0.0, tbgpos - old_unit_pos));
-		}
-		tempo_bar_group->show();
 		tempo_group->show();
 		tempo_label.show();
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
-		tempo_bar_group->hide();
 		tempo_group->hide();
 		tempo_label.hide();
 	}
@@ -706,11 +694,6 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			range_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
-		old_unit_pos = range_marker_bar_group->position().y;
-		if (tbgpos != old_unit_pos) {
-			range_marker_bar_group->move (ArdourCanvas::Duple (0.0, tbgpos - old_unit_pos));
-		}
-		range_marker_bar_group->show();
 		range_marker_group->show();
 		range_mark_label.show();
 
@@ -718,7 +701,6 @@ Editor::update_ruler_visibility ()
 		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
-		range_marker_bar_group->hide();
 		range_marker_group->hide();
 		range_mark_label.hide();
 	}
@@ -728,18 +710,12 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			transport_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
-		old_unit_pos = transport_marker_bar_group->position().y;
-		if (tbgpos != old_unit_pos) {
-			transport_marker_bar_group->move (ArdourCanvas::Duple (0.0, tbgpos - old_unit_pos));
-		}
-		transport_marker_bar_group->show();
 		transport_marker_group->show();
 		transport_mark_label.show();
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
-		transport_marker_bar_group->hide();
 		transport_marker_group->hide();
 		transport_mark_label.hide();
 	}
@@ -749,11 +725,6 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			cd_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
-		old_unit_pos = cd_marker_bar_group->position().y;
-		if (tbgpos != old_unit_pos) {
-			cd_marker_bar_group->move (ArdourCanvas::Duple (0.0, tbgpos - old_unit_pos));
-		}
-		cd_marker_bar_group->show();
 		cd_marker_group->show();
 		cd_mark_label.show();
 		tbpos += timebar_height;
@@ -762,7 +733,6 @@ Editor::update_ruler_visibility ()
 		// make sure all cd markers show up in their respective places
 		update_cd_marker_display();
 	} else {
-		cd_marker_bar_group->hide();
 		cd_marker_group->hide();
 		cd_mark_label.hide();
 		// make sure all cd markers show up in their respective places
@@ -774,18 +744,12 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
-		old_unit_pos = marker_bar_group->position().y;
-		if (tbgpos != old_unit_pos) {
-			marker_bar_group->move (ArdourCanvas::Duple (0.0, tbgpos - old_unit_pos));
-		}
-		marker_bar_group->show();
 		marker_group->show();
 		mark_label.show();
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
-		marker_bar_group->hide();
 		marker_group->hide();
 		mark_label.hide();
 	}
@@ -795,11 +759,6 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			videotl_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
-		old_unit_pos = videotl_group->position().y;
-		if (tbgpos != old_unit_pos) {
-			videotl_group->move (ArdourCanvas::Duple (0.0, tbgpos - old_unit_pos));
-		}
-		videotl_group->show();
 		videotl_group->show();
 		videotl_label.show();
 		tbpos += timebar_height * videotl_bar_height;
@@ -808,13 +767,16 @@ Editor::update_ruler_visibility ()
 		queue_visual_videotimeline_update();
 	} else {
 		videotl_group->hide();
-		videotl_group->hide();
 		videotl_label.hide();
 		update_video_timeline(true);
 	}
 
 	ruler_label_vbox.set_size_request (-1, (int)(timebar_height * visible_rulers));
 	time_canvas_vbox.set_size_request (-1,-1);
+
+	std::cerr << "place HV group at " << timebar_height * visible_timebars << std::endl;
+
+	hv_scroll_group->set_y_position (timebar_height * visible_timebars);
 
 	compute_fixed_ruler_scale ();
 	update_fixed_rulers();
