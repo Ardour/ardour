@@ -315,6 +315,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_click ();
         void toggle_audio_midi_setup ();
 	void toggle_session_auto_loop ();
+	void toggle_multi_out_mode ();
+	void toggle_stereo_out_mode ();
+
 	void toggle_rc_options_window ();
 	void toggle_session_options_window ();
 
@@ -322,14 +325,14 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::Tooltips       _tooltips;
 	NSM_Client          *nsm;
 	bool                _was_dirty;
-        bool                _mixer_on_top;
-        bool first_time_engine_run;
+    bool                _mixer_on_top;
+    bool first_time_engine_run;
 
 	void goto_editor_window ();
 	void goto_mixer_window ();
 	void toggle_mixer_window ();
 	void toggle_meterbridge ();
-        void toggle_editor_mixer ();
+    void toggle_editor_mixer ();
 
 	int  setup_windows ();
 	void setup_transport ();

@@ -143,6 +143,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::register_action (main_actions, X_("LockSession"), _("Lock this session"),  sigc::mem_fun(*this, &ARDOUR_UI::lock_session));
+	ActionManager::register_action (main_actions, X_("ToggleMultiOutMode"), "Multi Out", sigc::mem_fun(*this, &ARDOUR_UI::toggle_multi_out_mode));
+	ActionManager::register_action (main_actions, X_("ToggleStereoOutMode"), "Stereo Out", sigc::mem_fun(*this, &ARDOUR_UI::toggle_stereo_out_mode));
 
 	act = ActionManager::register_action (main_actions, X_("Snapshot"), _("Snapshot..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), false));
 	ActionManager::session_sensitive_actions.push_back (act);

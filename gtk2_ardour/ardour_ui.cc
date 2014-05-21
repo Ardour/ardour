@@ -82,6 +82,7 @@
 #include "ardour/session_utils.h"
 #include "ardour/slave.h"
 #include "ardour/system_exec.h"
+#include "dbg_msg.h"
 
 #ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
@@ -2025,6 +2026,20 @@ ARDOUR_UI::toggle_session_auto_loop ()
 	
 	//show the loop markers
 	looploc->set_hidden (false, this);
+}
+
+void ARDOUR_UI::toggle_multi_out_mode ()
+{
+	dbg_msg("ARDOUR_UI::toggle_multi_out_mode ()");
+	editor->get_waves_button ("mode_multi_out_button").set_active(true);
+	editor->get_waves_button ("mode_stereo_out_button").set_active(false);
+}
+
+void ARDOUR_UI::toggle_stereo_out_mode ()
+{
+	dbg_msg("ARDOUR_UI::toggle_stereo_out_mode ()");
+	editor->get_waves_button ("mode_stereo_out_button").set_active(true);
+	editor->get_waves_button ("mode_multi_out_button").set_active(false);
 }
 
 void
@@ -4431,7 +4446,6 @@ ARDOUR_UI::reset_route_peak_display (Route* route)
 	}
 }
 
-#define dbg_msg(a) MessageDialog(a, PROGRAM_NAME).run();
 int
 ARDOUR_UI::do_engine_setup (framecnt_t desired_sample_rate)
 {
