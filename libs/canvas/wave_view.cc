@@ -219,7 +219,7 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 		if (_logscaled) {
 			for (int i = 0; i < n_peaks; ++i) {
 				tips[i].bot = height();
-				tips[i].top = position (alt_log_meter (fast_coefficient_to_dB (max (fabs (_peaks[i].max), fabs (_peaks[i].min)))));
+				tips[i].top = y_extent (alt_log_meter (fast_coefficient_to_dB (max (fabs (_peaks[i].max), fabs (_peaks[i].min)))));
 
 				if (fabs (_peaks[i].max) >= clip_level) {
 					tips[i].clip_max = true;
@@ -231,7 +231,7 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 			}
 		} else {for (int i = 0; i < n_peaks; ++i) {
 				tips[i].bot = height();
-				tips[i].top = position (max (fabs (_peaks[i].max), fabs (_peaks[i].min)));
+				tips[i].top = y_extent (max (fabs (_peaks[i].max), fabs (_peaks[i].min)));
 
 				if (fabs (_peaks[i].max) >= clip_level) {
 					tips[i].clip_max = true;
@@ -259,19 +259,19 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 				}
 
 				if (top > 0.0) {
-					top = position (alt_log_meter (fast_coefficient_to_dB (top)));
+					top = y_extent (alt_log_meter (fast_coefficient_to_dB (top)));
 				} else if (top < 0.0) {
-					top = position (-alt_log_meter (fast_coefficient_to_dB (-top)));
+					top = y_extent (-alt_log_meter (fast_coefficient_to_dB (-top)));
 				} else {
-					top = position (0.0);
+					top = y_extent (0.0);
 				}
 
 				if (bot > 0.0) {
-					bot = position (alt_log_meter (fast_coefficient_to_dB (bot)));
+					bot = y_extent (alt_log_meter (fast_coefficient_to_dB (bot)));
 				} else if (bot < 0.0) {
-					bot = position (-alt_log_meter (fast_coefficient_to_dB (-bot)));
+					bot = y_extent (-alt_log_meter (fast_coefficient_to_dB (-bot)));
 				} else {
-					bot = position (0.0);
+					bot = y_extent (0.0);
 				}
 
 				tips[i].top = top;
@@ -289,8 +289,8 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 					tips[i].clip_min = true;
 				}
 
-				tips[i].top = position (_peaks[i].min);
-				tips[i].bot = position (_peaks[i].max);
+				tips[i].top = y_extent (_peaks[i].min);
+				tips[i].bot = y_extent (_peaks[i].max);
 
 
 			}
@@ -402,8 +402,8 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 
 		set_source_rgba (context, _zero_color);
 		context->set_line_width (1.0);
-		context->move_to (0, position (0.0) + 0.5);
-		context->line_to (n_peaks, position (0.0) + 0.5);
+		context->move_to (0, y_extent (0.0) + 0.5);
+		context->line_to (n_peaks, y_extent (0.0) + 0.5);
 		context->stroke ();
 	}
 }
@@ -668,7 +668,7 @@ WaveView::region_resized ()
 }
 
 Coord
-WaveView::position (double s) const
+WaveView::y_extent (double s) const
 {
 	/* it is important that this returns an integral value, so that we 
 	   can ensure correct single pixel behaviour.
