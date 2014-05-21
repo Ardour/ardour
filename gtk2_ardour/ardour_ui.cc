@@ -2030,14 +2030,12 @@ ARDOUR_UI::toggle_session_auto_loop ()
 
 void ARDOUR_UI::toggle_multi_out_mode ()
 {
-	dbg_msg("ARDOUR_UI::toggle_multi_out_mode ()");
 	editor->get_waves_button ("mode_multi_out_button").set_active(true);
 	editor->get_waves_button ("mode_stereo_out_button").set_active(false);
 }
 
 void ARDOUR_UI::toggle_stereo_out_mode ()
 {
-	dbg_msg("ARDOUR_UI::toggle_stereo_out_mode ()");
 	editor->get_waves_button ("mode_stereo_out_button").set_active(true);
 	editor->get_waves_button ("mode_multi_out_button").set_active(false);
 }
