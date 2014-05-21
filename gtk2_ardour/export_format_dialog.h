@@ -179,9 +179,8 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	Gtk::CheckButton silence_end_checkbox;
 	AudioClock       silence_end_clock;
 
-	/* Upload */
+	/* Post-export hook */
 	
-	Gtk::CheckButton upload_checkbox;
 	Gtk::Label       command_label;
 	Gtk::Entry       command_entry;
 
@@ -317,7 +316,6 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	void update_with_toc ();
 	void update_with_cue ();
-	void update_upload ();
 	void update_command ();
 
 	Gtk::TreeView sample_format_view;
