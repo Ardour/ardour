@@ -86,6 +86,7 @@ bool ChooseFolderDialog(std::string& selectedPath, std::string path, std::string
     memset(&bi, 0, sizeof(bi));
 
 	bi.lpszTitle = title.c_str();
+	bi.ulFlags = BIF_NEWDIALOGSTYLE;
 
     OleInitialize(NULL);
 
