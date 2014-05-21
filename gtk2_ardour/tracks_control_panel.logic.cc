@@ -85,10 +85,9 @@ TracksControlPanel::init ()
 
     populate_input_channels();
     populate_output_channels();
+    populate_default_session_path();
     
 	_audio_settings_tab_button.set_active(true);
-    
-    _default_open_path.set_text(Config->get_default_open_path());
 }
 
 DeviceConnectionControl& TracksControlPanel::add_device_capture_control(std::string device_capture_name, bool active, uint16_t capture_number, std::string track_name)
@@ -121,6 +120,18 @@ DeviceConnectionControl& TracksControlPanel::add_midi_playback_control(bool acti
 	_midi_playback_list.pack_start (playback_control, false, false);
 	playback_control.signal_active_changed.connect(sigc::mem_fun (*this, &TracksControlPanel::on_midi_playback_active_changed));
 	return playback_control;
+}
+
+void
+TracksControlPanel::populate_default_session_path()
+{
+    std::string std_path = Config->get_default_open_path();
+    bool folderExist = Glib::file_test(std_path, FILE_TEST_EXISTS);
+    
+    if ( !folderExist )
+        Config->set_default_open_path(Glib::get_home_dir());
+    
+    _default_open_path.set_text(Config->get_default_open_path());
 }
 
 void
@@ -596,14 +607,23 @@ TracksControlPanel::on_brows_button (WavesButton*)
 }
 
 void
+TracksControlPanel::save_default_session_path()
+{
+    if(!_default_path_name.empty())
+    {
+        Config->set_default_open_path(_default_path_name);
+        Config->save_state();
+    }
+}
+
+void
 TracksControlPanel::on_ok (WavesButton*)
 {
 	hide();
 	EngineStateController::instance()->push_current_state_to_backend(true);
 	response(Gtk::RESPONSE_OK);
     
-    Config->set_default_open_path(_default_path_name);
-    Config->save_state();
+    save_default_session_path();    
 }
 
 
@@ -622,8 +642,7 @@ TracksControlPanel::on_apply (WavesButton*)
 	EngineStateController::instance()->push_current_state_to_backend(true);
 	response(Gtk::RESPONSE_APPLY);
     
-    Config->set_default_open_path(_default_path_name);
-    Config->save_state();
+    save_default_session_path();  
 }
 
 

@@ -25,7 +25,6 @@ namespace ARDOUR
         NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
         
         //NP: we should find some gentle way to do this
-        path = "file://localhost" + path;
         NSString *nsDefaultPath = [NSString stringWithUTF8String:path.c_str()];
         // Call the Objective-C method using Objective-C syntax
         NSString *nsPath = [FileDialog ClassOpenFileDialog:nsTitle withArg2:nsDefaultPath];
@@ -39,7 +38,6 @@ namespace ARDOUR
         NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
         
         //NP: we should find some gentle way to do this
-        path = "file://localhost" + path;
         NSString *nsDefaultPath = [NSString stringWithUTF8String:path.c_str()];
         // Call the Objective-C method using Objective-C syntax
         NSString *nsPath = [FileDialog ClassSaveFileDialog:nsTitle withArg2:nsDefaultPath];
@@ -53,7 +51,6 @@ namespace ARDOUR
         NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
         
         //NP: we should find some gentle way to do this
-        path = "file://localhost" + path;
         NSString *nsDefaultPath = [NSString stringWithUTF8String:path.c_str()];
         // Call the Objective-C method using Objective-C syntax
         NSString *nsPath = [FileDialog ClassChooseFolderDialog:nsTitle withArg2:nsDefaultPath];
@@ -80,7 +77,15 @@ namespace ARDOUR
     [openDlg setAllowedFileTypes:fileTypesArray];
     [openDlg setAllowsMultipleSelection:FALSE];
     [openDlg setTitle:title];
-    [openDlg setDirectoryURL : [NSURL URLWithString:path]];
+    
+    NSFileManager *fm = [[NSFileManager alloc] init];
+    BOOL isDir;
+    BOOL exists = [fm fileExistsAtPath:path isDirectory:&isDir];
+    
+    if(!exists)
+        path = NSHomeDirectory();
+    
+    [openDlg setDirectoryURL : [NSURL fileURLWithPath:path]];
     
     // Display the dialog box.  If the OK pressed,
     // process the files.
@@ -103,7 +108,15 @@ namespace ARDOUR
     // Create a File Open Dialog class.
     NSSavePanel* saveDlg = [NSSavePanel savePanel];
     [saveDlg setTitle:title];
-    [saveDlg setDirectoryURL : [NSURL URLWithString:path]];
+    
+    NSFileManager *fm = [[NSFileManager alloc] init];
+    BOOL isDir;
+    BOOL exists = [fm fileExistsAtPath:path isDirectory:&isDir];
+    
+    if(!exists)
+        path = NSHomeDirectory();
+    
+    [saveDlg setDirectoryURL : [NSURL fileURLWithPath:path]];
     
     // Display the dialog box.  If the OK pressed,
     // process the files.
@@ -127,7 +140,15 @@ namespace ARDOUR
     [openDlg setCanChooseDirectories:YES];
     [openDlg setAllowsMultipleSelection:FALSE];
     [openDlg setTitle:title];
-    [openDlg setDirectoryURL : [NSURL URLWithString:path]];
+    
+    NSFileManager *fm = [[NSFileManager alloc] init];
+    BOOL isDir;
+    BOOL exists = [fm fileExistsAtPath:path isDirectory:&isDir];
+    
+    if(!exists)
+        path = NSHomeDirectory();
+
+    [openDlg setDirectoryURL : [NSURL fileURLWithPath:path]];
     
     // Display the dialog box.  If the OK pressed,
     // process the files.
