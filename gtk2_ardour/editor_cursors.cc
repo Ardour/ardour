@@ -33,26 +33,20 @@ using namespace Gtk;
 
 EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*))
 	: _editor (ed)
-	, _time_bars_canvas_item (new ArdourCanvas::Arrow (_editor.get_time_bars_group()))
-	, _track_canvas_item (new ArdourCanvas::Line (_editor.get_track_canvas_group()))
+	, _track_canvas_item (new ArdourCanvas::Arrow (_editor.get_track_canvas_group()))
 	, _length (1.0)
 {
-	CANVAS_DEBUG_NAME (_time_bars_canvas_item, "timebars editor cursor");
 	CANVAS_DEBUG_NAME (_track_canvas_item, "track canvas editor cursor");
 
-	_time_bars_canvas_item->set_show_head (0, true);
-	_time_bars_canvas_item->set_head_height (0, 9);
-	_time_bars_canvas_item->set_head_width (0, 16);
-	_time_bars_canvas_item->set_head_outward (0, false);
-	_time_bars_canvas_item->set_show_head (1, false); // head only
-
-	_time_bars_canvas_item->set_data ("cursor", this);
+	_track_canvas_item->set_show_head (0, true);
+	_track_canvas_item->set_head_height (0, 9);
+	_track_canvas_item->set_head_width (0, 16);
+	_track_canvas_item->set_head_outward (0, false);
+	_track_canvas_item->set_show_head (1, false); // head only
 	_track_canvas_item->set_data ("cursor", this);
 
-	_time_bars_canvas_item->Event.connect (sigc::bind (sigc::mem_fun (ed, callbck), _time_bars_canvas_item));
 	_track_canvas_item->Event.connect (sigc::bind (sigc::mem_fun (ed, callbck), _track_canvas_item));
 
-	_time_bars_canvas_item->set_y1 (ArdourCanvas::COORD_MAX);
 	_track_canvas_item->set_y1 (ArdourCanvas::COORD_MAX);
 	
 	_current_frame = 1; /* force redraw at 0 */
@@ -70,12 +64,8 @@ EditorCursor::set_position (framepos_t frame)
 
 	double const new_pos = _editor.sample_to_pixel_unrounded (frame);
 
-	if (new_pos != _time_bars_canvas_item->x ()) {
-		_time_bars_canvas_item->set_x (new_pos);
-	}
-
-	if (new_pos != _track_canvas_item->x0 ()) {
-		_track_canvas_item->set_x (new_pos, new_pos);
+	if (new_pos != _track_canvas_item->x ()) {
+		_track_canvas_item->set_x (new_pos);
 	}
 
 	_current_frame = frame;
@@ -84,20 +74,17 @@ EditorCursor::set_position (framepos_t frame)
 void
 EditorCursor::show ()
 {
-	_time_bars_canvas_item->show ();
 	_track_canvas_item->show ();
 }
 
 void
 EditorCursor::hide ()
 {
-	_time_bars_canvas_item->hide ();
 	_track_canvas_item->hide ();
 }
 
 void
 EditorCursor::set_color (ArdourCanvas::Color color)
 {
-	_time_bars_canvas_item->set_color (color);
-	_track_canvas_item->set_outline_color (color);
+	_track_canvas_item->set_color (color);
 }

@@ -604,12 +604,10 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 	/* points *MUST* be in anti-clockwise order */
 
 	Points points;
-	Points::size_type npoints;
 	Points::size_type pi;
 	boost::shared_ptr<const Evoral::ControlList> list (audio_region()->fade_in());
 	Evoral::ControlList::const_iterator x;
 	double length = list->length();
-	npoints = list->size();
 
 	points.assign (list->size(), Duple());
 
