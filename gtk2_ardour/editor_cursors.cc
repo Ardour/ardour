@@ -33,8 +33,8 @@ using namespace Gtk;
 
 EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*))
 	: _editor (ed)
-	, _time_bars_canvas_item (new ArdourCanvas::Arrow (_editor._time_bars_canvas->root ()))
-	, _track_canvas_item (new ArdourCanvas::Line (_editor._track_canvas->root ()))
+	, _time_bars_canvas_item (new ArdourCanvas::Arrow (_editor.get_time_bars_group()))
+	, _track_canvas_item (new ArdourCanvas::Line (_editor.get_track_canvas_group()))
 	, _length (1.0)
 {
 	CANVAS_DEBUG_NAME (_time_bars_canvas_item, "timebars editor cursor");

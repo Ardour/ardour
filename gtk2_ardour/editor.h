@@ -733,7 +733,20 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Group*      transport_marker_bar_group;
 	ArdourCanvas::Group*      cd_marker_bar_group;
 
-	/* The group containing all trackviews.  Only scrolled vertically. */
+	/* The group containing all other groups that are scrolled vertically
+	   and horizontally.
+	*/
+        ArdourCanvas::Group* hv_scroll_group;
+
+	/* The group containing all other groups that are scrolled vertically ONLY
+	*/
+        ArdourCanvas::Group* v_scroll_group;
+
+	/* The group containing all other groups that are scrolled horizontally ONLY
+	*/
+        ArdourCanvas::Group* h_scroll_group;
+
+	/* The group containing all trackviews. */
 	ArdourCanvas::Group* _trackview_group;
 
 	/* The group used for region motion.  Sits on top of _trackview_group */

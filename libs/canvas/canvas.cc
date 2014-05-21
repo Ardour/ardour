@@ -50,11 +50,9 @@ Canvas::scroll_to (Coord x, Coord y)
 {
 	Duple d (x, y);
 	
-	if (_global_scroll) {
-		_scroll_offset = d;
-	}
-	
-	//_root.scroll_to (d);
+	_scroll_offset = d;
+
+	_root.scroll_to (d);
 
 	pick_current_item (0); // no current mouse position 
 }
@@ -81,9 +79,9 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 #ifdef CANVAS_DEBUG
 	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 		cerr << this << " RENDER: " << area << endl;
-		cerr << "CANVAS @ " << this << endl;
-		dump (cerr);
-		cerr << "-------------------------\n";
+		//cerr << "CANVAS @ " << this << endl;
+		//dump (cerr);
+		//cerr << "-------------------------\n";
 	}
 #endif
 
@@ -208,13 +206,14 @@ Canvas::canvas_to_window (Duple const & d, bool rounded) const
 	Duple wd = d.translate (Duple (-_scroll_offset.x, -_scroll_offset.y));
 
 	/* Note that this intentionally almost always returns integer coordinates */
+
 	if (rounded) {
 		wd.x = round (wd.x);
 		wd.y = round (wd.y);
 	}
 
 	return wd;
-}	
+}
 
 Rect
 Canvas::window_to_canvas (Rect const & r) const

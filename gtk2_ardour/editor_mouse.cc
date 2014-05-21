@@ -134,18 +134,22 @@ Editor::mouse_frame (framepos_t& where, bool& in_track_canvas) const
 framepos_t
 Editor::window_event_sample (GdkEvent const * event, double* pcx, double* pcy) const
 {
-	double x;
-	double y;
+	ArdourCanvas::Duple d;
 
-	if (!gdk_event_get_coords (event, &x, &y)) {
+	if (!gdk_event_get_coords (event, &d.x, &d.y)) {
 		return 0;
 	}
 
-	/* event coordinates are in window units, so convert to canvas
-	 * (i.e. account for scrolling)
+	/* adjust for scrolling (the canvas used by Ardour has global scroll
+	 * disabled, so we have to do the adjustment explicitly).
 	 */
 
-	ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (x, y));
+	d.translate (ArdourCanvas::Duple (horizontal_adjustment.get_value(), vertical_adjustment.get_value()));
+
+	/* event coordinates are in window units, so convert to canvas
+	 */
+
+	d = _track_canvas->window_to_canvas (d);
 
 	if (pcx) {
 		*pcx = d.x;
@@ -317,7 +321,7 @@ Editor::set_canvas_cursor ()
 			
 			vector<ArdourCanvas::Item const *> items;
 			
-			_track_canvas->root()->add_items_at_point (ArdourCanvas::Duple (x,y), items);
+			get_track_canvas_group()->add_items_at_point (ArdourCanvas::Duple (x,y), items);
 			
 			// first item will be the upper most 
 			
@@ -2101,7 +2105,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	AutomationLine* al;
 	Marker *marker;
 	Location *loc;
-	RegionView* rv;
 	bool is_start;
 	bool ret = true;
 
@@ -2186,7 +2189,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	case FadeOutTrimHandleItem:
 	case FadeInHandleItem:
 	case FadeOutHandleItem:
-		rv = static_cast<RegionView*>(item->get_data ("regionview"));
 		{
 			ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
 			if (rect) {

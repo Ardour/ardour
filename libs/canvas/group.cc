@@ -117,7 +117,9 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 						     << (*i)->whatami()
 						     << ' '
 						     << (*i)->name
-						     << " item = " 
+						     << " item "
+						     << item_bbox.get()
+						     << " window = " 
 						     << item
 						     << " intersect = "
 						     << draw
@@ -136,8 +138,8 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 
 #ifdef CANVAS_DEBUG
 			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-				cerr << string_compose ("%1skip render of %2 %3, no intersection\n", _canvas->render_indent(), (*i)->whatami(),
-							(*i)->name);
+				cerr << string_compose ("%1skip render of %2 %3, no intersection between %4 and %5\n", _canvas->render_indent(), (*i)->whatami(),
+							(*i)->name, item, area);
 			}
 #endif
 
@@ -152,7 +154,7 @@ Group::scroll_to (Duple const& d)
 {
 	Item::scroll_to (d);
 	
-	for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ) {
+	for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
 		(*i)->scroll_to (d);
 	}
 }

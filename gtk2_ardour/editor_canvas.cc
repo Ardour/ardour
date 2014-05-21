@@ -30,6 +30,7 @@
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 #include "canvas/pixbuf.h"
+#include "canvas/scroll_group.h"
 #include "canvas/text.h"
 #include "canvas/debug.h"
 
@@ -65,7 +66,12 @@ Editor::initialize_canvas ()
 {
 	_track_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 	_track_canvas = _track_canvas_viewport->canvas ();
-	//_track_canvas->set_global_scroll (false);
+	_track_canvas->set_global_scroll (false);
+
+	hv_scroll_group = new ArdourCanvas::ScrollGroup (_track_canvas->root(), 
+							 ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
+												       ArdourCanvas::ScrollGroup::ScrollsHorizontally));
+	CANVAS_DEBUG_NAME (hv_scroll_group, "canvas hv scroll");
 
 	_verbose_cursor = new VerboseCursor (this);
 
@@ -80,9 +86,9 @@ Editor::initialize_canvas ()
 		// logo_item->property_width_set() = true;
 		// logo_item->show ();
 	}
-	
+
 	/*a group to hold global rects like punch/loop indicators */
-	global_rect_group = new ArdourCanvas::Group (_track_canvas->root());
+	global_rect_group = new ArdourCanvas::Group (hv_scroll_group);
 	CANVAS_DEBUG_NAME (global_rect_group, "global rect group");
 
         transport_loop_range_rect = new ArdourCanvas::Rectangle (global_rect_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
@@ -94,21 +100,20 @@ Editor::initialize_canvas ()
 	transport_punch_range_rect->hide();
 
 	/*a group to hold time (measure) lines */
-	time_line_group = new ArdourCanvas::Group (_track_canvas->root());
+	time_line_group = new ArdourCanvas::Group (hv_scroll_group);
 	CANVAS_DEBUG_NAME (time_line_group, "time line group");
 
-	_trackview_group = new ArdourCanvas::Group (_track_canvas->root());
+	_trackview_group = new ArdourCanvas::Group (hv_scroll_group);
 	//_trackview_group->set_scroll_sensitivity (ArdourCanvas::Group::ScrollSensitivity (ArdourCanvas::Group::ScrollsVertically|ArdourCanvas::Group::ScrollsHorizontally));	
 	CANVAS_DEBUG_NAME (_trackview_group, "Canvas TrackViews");
 	
-	
+	_region_motion_group = new ArdourCanvas::Group (_trackview_group);
+	CANVAS_DEBUG_NAME (_region_motion_group, "Canvas Region Motion");
+
 	/* TIME BAR CANVAS */
 	
 	_time_bars_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, unused_adjustment);
 	_time_bars_canvas = _time_bars_canvas_viewport->canvas ();
-		
-	_region_motion_group = new ArdourCanvas::Group (_trackview_group);
-	CANVAS_DEBUG_NAME (_region_motion_group, "Canvas Region Motion");
 
 	meter_bar_group = new ArdourCanvas::Group (_time_bars_canvas->root ());
 	meter_bar = new ArdourCanvas::Rectangle (meter_bar_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
@@ -177,14 +182,14 @@ Editor::initialize_canvas ()
 	transport_bar_drag_rect->set_outline (false);
 	transport_bar_drag_rect->hide ();
 
-	transport_punchin_line = new ArdourCanvas::Line (_track_canvas->root());
+	transport_punchin_line = new ArdourCanvas::Line (hv_scroll_group);
 	transport_punchin_line->set_x0 (0);
 	transport_punchin_line->set_y0 (0);
 	transport_punchin_line->set_x1 (0);
 	transport_punchin_line->set_y1 (ArdourCanvas::COORD_MAX);
 	transport_punchin_line->hide ();
 
-	transport_punchout_line  = new ArdourCanvas::Line (_track_canvas->root());
+	transport_punchout_line  = new ArdourCanvas::Line (hv_scroll_group);
 	transport_punchout_line->set_x0 (0);
 	transport_punchout_line->set_y0 (0);
 	transport_punchout_line->set_x1 (0);
@@ -192,12 +197,12 @@ Editor::initialize_canvas ()
 	transport_punchout_line->hide();
 
 	// used to show zoom mode active zooming
-	zoom_rect = new ArdourCanvas::Rectangle (_track_canvas->root(), ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
+	zoom_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
 	zoom_rect->hide();
 	zoom_rect->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
 
 	// used as rubberband rect
-	rubberband_rect = new ArdourCanvas::Rectangle (_trackview_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
+	rubberband_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
 	rubberband_rect->hide();
 
 	tempo_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_tempo_bar_event), tempo_bar));
@@ -215,7 +220,7 @@ Editor::initialize_canvas ()
 	}
 
 
-	_canvas_bottom_rect = new ArdourCanvas::Rectangle (_track_canvas->root(), ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 20));
+	_canvas_bottom_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 20));
 	/* this thing is transparent */
 	_canvas_bottom_rect->set_fill (false);
 	_canvas_bottom_rect->set_outline (false);
@@ -591,8 +596,6 @@ Editor::autoscroll_canvas ()
 
 		/* vertical */ 
 		
-		new_pixel = vertical_pos;
-
 		if (y < autoscroll_boundary.y0) {
 
 			/* scroll to make higher tracks visible */
@@ -931,7 +934,7 @@ Editor::get_time_bars_group () const
 ArdourCanvas::Group*
 Editor::get_track_canvas_group() const
 {
-	return _track_canvas->root();
+	return hv_scroll_group;
 }
 
 ArdourCanvas::GtkCanvasViewport*

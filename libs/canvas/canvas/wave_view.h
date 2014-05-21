@@ -173,7 +173,7 @@ private:
         void handle_clip_level_change ();
 
         void ensure_cache (ARDOUR::framepos_t sample_start, ARDOUR::framepos_t sample_end) const;
-        ArdourCanvas::Coord position (double) const;
+        ArdourCanvas::Coord y_extent (double) const;
         void draw_image (ARDOUR::PeakData*, int npeaks) const;
 };
 

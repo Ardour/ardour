@@ -112,19 +112,14 @@ public:
 	void set_y_position (Coord);
 	void move (Duple);
 
-	enum ScrollSensitivity {
-		ScrollsVertically = 0x1,
-		ScrollsHorizontally = 0x2
-	};
-	
-	void set_scroll_sensitivity (ScrollSensitivity s);
-	ScrollSensitivity scroll_sensitivity () const { return _scroll_sensitivity; }
-
-	virtual void scroll_to (Duple const& d);
-	Duple scroll_offset() const { return _scroll_offset; }
+	virtual void scroll_to (Duple const&) {}
 
 	/** @return Position of this item in the parent's coordinates */
 	Duple position () const {
+		return _position;
+	}
+
+	virtual Duple canvas_position () const {
 		return _position;
 	}
 
@@ -248,8 +243,6 @@ private:
 	void init ();
 
 	bool _ignore_events;
-	ScrollSensitivity _scroll_sensitivity;
-	Duple _scroll_offset;
 };
 
 extern LIBCANVAS_API std::ostream& operator<< (std::ostream&, const ArdourCanvas::Item&);
