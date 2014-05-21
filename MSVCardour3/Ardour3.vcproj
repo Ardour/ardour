@@ -1087,6 +1087,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\soundcloud_export_selector.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\speaker_dialog.cc"
 				>
 			</File>
@@ -2042,6 +2046,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\shuttle_control.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\soundcloud_export_selector.h"
 				>
 			</File>
 			<File

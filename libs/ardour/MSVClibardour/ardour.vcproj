@@ -1164,6 +1164,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundcloud_upload.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\source.cc"
 				>
 			</File>
@@ -2063,6 +2067,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\sndfilesource.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\soundcloud_upload.h"
 				>
 			</File>
 			<File
