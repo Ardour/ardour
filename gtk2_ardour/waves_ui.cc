@@ -43,33 +43,9 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, std
 	std::transform(widget_type.begin(), widget_type.end(), widget_type.begin(), ::toupper);
 
 	if (widget_type == "BUTTON") {
-		WavesButton& button = *manage (new WavesButton(text));
-		child = &button;
-		button.set_border_width (xml_property (definition, "borderwidth", styles, "0").c_str());
-		button.set_border_color (xml_property (definition, "bordercolor", styles, "#000000").c_str());
-		button.set_active (xml_property (definition, "active", styles, false));
+		child = manage (new WavesButton(text));
 	} else if (widget_type == "ICONBUTTON") {
-		WavesIconButton& iconbutton = *manage (new WavesIconButton);
-		child = &iconbutton;
-		iconbutton.set_border_width (xml_property (definition, "borderwidth", styles, "0").c_str());
-		iconbutton.set_border_color (xml_property (definition, "bordercolor", styles, "#000000").c_str());
-		iconbutton.set_active (xml_property (definition, "active", styles, false));
-		std::string property = xml_property (definition, "normalicon", styles, "");
-		if (!property.empty ()) {
-			iconbutton.set_normal_image(get_icon(property.c_str()));
-		}
-		property = xml_property (definition, "activeicon", styles, "");
-		if (!property.empty ()) {
-			iconbutton.set_active_image(get_icon(property.c_str()));
-		}
-		property = xml_property (definition, "prelighticon", styles, "");
-		if (!property.empty ()) {
-			iconbutton.set_prelight_image(get_icon(property.c_str()));
-		}
-		property = xml_property (definition, "inactiveicon", styles, "");
-		if (!property.empty ()) {
-			iconbutton.set_inactive_image(get_icon(property.c_str()));
-		}
+		child = manage (new WavesIconButton);
 	} else if (widget_type == "ICON") {
 		std::string image_path;
 		Searchpath spath(ARDOUR::ardour_data_search_path());
@@ -95,34 +71,16 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, std
 		child = manage (new ArdourCanvas::GtkCanvas(definition, styles, named_items));
 	} else if (widget_type == "SCROLLEDWINDOW") {
 		child = manage (new Gtk::ScrolledWindow);
-		Gtk::PolicyType hscrollbar_policy = Gtk::POLICY_AUTOMATIC; 
-		Gtk::PolicyType vscrollbar_policy = Gtk::POLICY_AUTOMATIC;
-		std::string property = xml_property (definition, "hscroll", styles, "");
-		if (property == "never") {
-			hscrollbar_policy = Gtk::POLICY_NEVER;
-		} else if (property == "always") {
-			hscrollbar_policy = Gtk::POLICY_ALWAYS;
-		} else if (property == "auto") {
-			hscrollbar_policy = Gtk::POLICY_AUTOMATIC; 
-		}
-		property = xml_property (definition, "vscroll", styles, "");
-		if (property == "never") {
-			vscrollbar_policy = Gtk::POLICY_NEVER;
-		} else if (property == "always") {
-			vscrollbar_policy = Gtk::POLICY_ALWAYS;
-		} else if (property == "auto") {
-			vscrollbar_policy = Gtk::POLICY_AUTOMATIC; 
-		}
-		((Gtk::ScrolledWindow*)child)->set_policy(hscrollbar_policy, vscrollbar_policy);
 	} else if (widget_type == "VBOX") {
 		child = manage (new Gtk::VBox);
 	} else if (widget_type == "HBOX") {
 		child = manage (new Gtk::HBox);
+	} else if (widget_type == "EVENTBOX") {
+		child = manage (new Gtk::EventBox);
 	}
 
 	if (child != NULL) {
-		if (!widget_id.empty())
-		{
+		if (!widget_id.empty()) {
 			named_widgets[widget_id] = child;
 		}
 		set_attributes(*child, definition, styles);
@@ -181,6 +139,19 @@ WavesUI::add_widget (Gtk::Window& parent, const XMLNode& definition, const XMLNo
 
 
 Gtk::Widget*
+WavesUI::add_widget (Gtk::EventBox& parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*>& named_widgets)
+{
+	Gtk::Widget* child = create_widget(definition, styles, named_widgets);
+
+	if (child != NULL)
+	{
+		parent.add(*child);
+	}
+	return child;
+}
+
+
+Gtk::Widget*
 WavesUI::add_widget (Gtk::Layout& parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Gtk::Widget*>& named_widgets)
 {
 	Gtk::Widget* child = create_widget(definition, styles, named_widgets);
@@ -207,6 +178,8 @@ WavesUI::add_widget (Gtk::Container& parent, const XMLNode& definition, const XM
 		child = WavesUI::add_widget (*dynamic_cast<Gtk::ScrolledWindow*> (&parent), definition, styles, named_widgets);
 	} else if(dynamic_cast<Gtk::Window*> (&parent)) {
 		child = WavesUI::add_widget (*dynamic_cast<Gtk::Window*> (&parent), definition, styles, named_widgets);
+	} else if(dynamic_cast<Gtk::EventBox*> (&parent)) {
+		child = WavesUI::add_widget (*dynamic_cast<Gtk::EventBox*> (&parent), definition, styles, named_widgets);
 	}
 
 	Gtk::Container* container = dynamic_cast<Gtk::Container*>(child);
@@ -247,7 +220,6 @@ static std::map<std::string, const XMLTree*> xml_tree_cache;
 const XMLTree*
 WavesUI::load_layout (const std::string xml_file_name)
 {
-
 	std::map<std::string, const XMLTree*>::const_iterator it = xml_tree_cache.find(xml_file_name);
 	if (it != xml_tree_cache.end()) {
 		return (*it).second;
@@ -277,21 +249,25 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		
 	std::string property = xml_property (definition, "bgnormal", styles, "");
 	if (!property.empty ()) {
+		widget.unset_bg(Gtk::STATE_NORMAL);
 		widget.modify_bg(Gtk::STATE_NORMAL, Gdk::Color(property));
 	}
 
 	property = xml_property (definition, "bgdisabled", styles, property);
 	if (!property.empty ()) {
+		widget.unset_bg(Gtk::STATE_INSENSITIVE);
 		widget.modify_bg(Gtk::STATE_INSENSITIVE, Gdk::Color(property));
 	}
 
 	property = xml_property (definition, "bgactive", styles, "");
 	if (!property.empty ()) {
+		widget.unset_bg(Gtk::STATE_ACTIVE);
 		widget.modify_bg(Gtk::STATE_ACTIVE, Gdk::Color(property));
 	}
 
 	property = xml_property (definition, "bghover", styles, "");
 	if (!property.empty ()) {
+		widget.unset_bg(Gtk::STATE_PRELIGHT);
 		widget.modify_bg(Gtk::STATE_PRELIGHT, Gdk::Color(property));
 	}
 
@@ -332,9 +308,64 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 	}
 
 	Gtk::Box* box = dynamic_cast<Gtk::Box*> (&widget);
-	if (box)
-	{
+	if (box) {
 		box->set_spacing(xml_property (definition, "spacing", styles, 0));
+	}
+
+	Gtk::Container* container = dynamic_cast<Gtk::Container*> (&widget);
+	if (container) {
+		container->set_border_width (xml_property (definition, "borderwidth", styles, 0));
+	}
+
+	WavesButton* button = dynamic_cast<WavesButton*> (&widget);
+	if (button) {
+		button->set_border_width (xml_property (definition, "borderwidth", styles, "0").c_str());
+		button->set_border_color (xml_property (definition, "bordercolor", styles, "#000000").c_str());
+		button->set_active (xml_property (definition, "active", styles, false));
+	}
+
+	WavesIconButton* iconbutton = dynamic_cast<WavesIconButton*> (&widget);
+	if (iconbutton) {
+		property = xml_property (definition, "normalicon", styles, "");
+		if (!property.empty ()) {
+			iconbutton->set_normal_image(get_icon(property.c_str()));
+		}
+		property = xml_property (definition, "activeicon", styles, "");
+		if (!property.empty ()) {
+			iconbutton->set_active_image(get_icon(property.c_str()));
+		}
+		property = xml_property (definition, "prelighticon", styles, "");
+		if (!property.empty ()) {
+			iconbutton->set_prelight_image(get_icon(property.c_str()));
+		}
+		property = xml_property (definition, "inactiveicon", styles, "");
+		if (!property.empty ()) {
+			iconbutton->set_inactive_image(get_icon(property.c_str()));
+		}
+	}
+
+	Gtk::ScrolledWindow* scrolled_window = dynamic_cast<Gtk::ScrolledWindow*> (&widget);
+
+	if (scrolled_window) {
+		Gtk::PolicyType hscrollbar_policy = Gtk::POLICY_AUTOMATIC; 
+		Gtk::PolicyType vscrollbar_policy = Gtk::POLICY_AUTOMATIC;
+		property = xml_property (definition, "hscroll", styles, "");
+		if (property == "never") {
+			hscrollbar_policy = Gtk::POLICY_NEVER;
+		} else if (property == "always") {
+			hscrollbar_policy = Gtk::POLICY_ALWAYS;
+		} else if (property == "auto") {
+			hscrollbar_policy = Gtk::POLICY_AUTOMATIC; 
+		}
+		property = xml_property (definition, "vscroll", styles, "");
+		if (property == "never") {
+			vscrollbar_policy = Gtk::POLICY_NEVER;
+		} else if (property == "always") {
+			vscrollbar_policy = Gtk::POLICY_ALWAYS;
+		} else if (property == "auto") {
+			vscrollbar_policy = Gtk::POLICY_AUTOMATIC; 
+		}
+		scrolled_window->set_policy(hscrollbar_policy, vscrollbar_policy);
 	}
 }
 
