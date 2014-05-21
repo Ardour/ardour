@@ -226,11 +226,13 @@ ARDOUR_UI::setup_transport_trx ()
 	editor->get_waves_button ("transport_record_button").set_controllable (rec_controllable);
 	act = ActionManager::get_action (X_("Main"), X_("LockSession"));
 	editor->get_waves_button ("lock_session_button").set_related_action (act);
-	act = ActionManager::get_action (X_("Main"), X_("ToggleMultiOutMode"));
-	editor->get_waves_button ("mode_multi_out_button").set_related_action (act);
-	act = ActionManager::get_action (X_("Main"), X_("ToggleStereoOutMode"));
-	editor->get_waves_button ("mode_stereo_out_button").set_related_action (act);
-
+    act = ActionManager::get_action (X_("Main"), X_("ToggleMultiOutMode"));
+    editor->get_waves_button ("mode_multi_out_button").set_related_action (act);
+    act = ActionManager::get_action (X_("Main"), X_("ToggleStereoOutMode"));
+    editor->get_waves_button ("mode_stereo_out_button").set_related_action (act);
+    
+    update_ouput_operation_mode_buttons();
+    
 	transport_tearoff_hbox.set_border_width (3);
 	transport_tearoff_hbox.set_spacing (3);
 

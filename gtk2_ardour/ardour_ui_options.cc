@@ -417,7 +417,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 				editor_meter_peak_display.show();
 			} 
 		}
-	}
+	} else if (p == "output-auto-connect") {
+        update_ouput_operation_mode_buttons();
+    }
 }
 
 void

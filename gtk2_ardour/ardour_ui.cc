@@ -571,6 +571,19 @@ ARDOUR_UI::post_engine ()
 	Config->map_parameters (pc);
 }
 
+void
+ARDOUR_UI::update_ouput_operation_mode_buttons()
+{
+    // muti out
+    WavesButton& multi_out_button = editor->get_waves_button ("mode_multi_out_button");
+    multi_out_button.set_active(Config->get_output_auto_connect() & AutoConnectPhysical);
+    
+	// stereo out
+    WavesButton& stereo_out_button = editor->get_waves_button ("mode_stereo_out_button");
+    stereo_out_button.set_active(Config->get_output_auto_connect() & AutoConnectMaster);
+}
+
+
 ARDOUR_UI::~ARDOUR_UI ()
 {
 	if (ui_config->dirty()) {
@@ -2030,12 +2043,24 @@ ARDOUR_UI::toggle_session_auto_loop ()
 
 void ARDOUR_UI::toggle_multi_out_mode ()
 {
+    if (Config->get_output_auto_connect() & AutoConnectPhysical) {
+        // the mode is already enabled, nothing to do here
+        return;
+    }
+    
+    Config->set_output_auto_connect(AutoConnectPhysical);
 	editor->get_waves_button ("mode_multi_out_button").set_active(true);
 	editor->get_waves_button ("mode_stereo_out_button").set_active(false);
 }
 
 void ARDOUR_UI::toggle_stereo_out_mode ()
 {
+    if (Config->get_output_auto_connect() & AutoConnectMaster) {
+        // the mode is already enabled, nothing to do here
+        return;
+    }
+    
+    Config->set_output_auto_connect(AutoConnectMaster);
 	editor->get_waves_button ("mode_stereo_out_button").set_active(true);
 	editor->get_waves_button ("mode_multi_out_button").set_active(false);
 }

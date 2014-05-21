@@ -275,6 +275,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         void attach_to_engine ();
 	void post_engine ();
 
+    void update_ouput_operation_mode_buttons();
+    
 	gint exit_on_main_window_close (GdkEventAny *);
 
 	void maximise_editing_space ();
