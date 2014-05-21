@@ -592,7 +592,8 @@ TracksControlPanel::on_brows_button (WavesButton*)
 #ifdef _WIN32
 	set_keep_above(false);
 	string fileTitle;
-	if ( ARDOUR::ChooseFolderDialog(fileTitle, _("Choose Default Path")) ) {
+	// if path was chosen in dialog
+	if ( ARDOUR::ChooseFolderDialog(fileTitle, Config->get_default_open_path(), _("Choose Default Path")) ) {
 		set_keep_above(true);
 		_default_path_name = fileTitle;
 	}

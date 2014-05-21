@@ -8,6 +8,8 @@
 
 #include <string>
 
+#include "glibmm/miscutils.h"
+
 using namespace std;
 namespace ARDOUR
 {
@@ -21,8 +23,19 @@ bool SaveFileDialog(std::string& fileName, std::string path, std::string title)
 	ofn.lpstrTitle = title.c_str();
 	ofn.Flags = OFN_OVERWRITEPROMPT;
 
-	if( !path.empty() )
+	// Check on valid path
+	WIN32_FIND_DATA FindFileData;
+	HANDLE handle = FindFirstFile(path.c_str(), &FindFileData) ;
+    int found = (handle != INVALID_HANDLE_VALUE);
+
+	// if path is valid
+	if( found )
 		ofn.lpstrInitialDir = path.c_str();
+	else
+	{
+		path = Glib::get_home_dir();
+		ofn.lpstrInitialDir = path.c_str();
+	}
 
 	// Run dialog
 	if(GetSaveFileName(&ofn))
@@ -44,8 +57,19 @@ bool OpenFileDialog(std::string& fileName, std::string path, std::string title)
 	ofn.lpstrTitle = title.c_str();
 	ofn.Flags = OFN_PATHMUSTEXIST;
 
-	if( !path.empty() )
+	// Check on valid path
+	WIN32_FIND_DATA FindFileData;
+	HANDLE handle = FindFirstFile(path.c_str(), &FindFileData) ;
+    int found = (handle != INVALID_HANDLE_VALUE);
+
+	// if path is valid
+	if( found )
 		ofn.lpstrInitialDir = path.c_str();
+	else
+	{
+		path = Glib::get_home_dir();
+		ofn.lpstrInitialDir = path.c_str();
+	}
 
 	if( GetOpenFileName(&ofn) )
 	{
@@ -56,7 +80,7 @@ bool OpenFileDialog(std::string& fileName, std::string path, std::string title)
 	return false;
 }
 
-bool ChooseFolderDialog(std::string& selectedPath, std::string title)
+bool ChooseFolderDialog(std::string& selectedPath, std::string path, std::string title)
 {
 	BROWSEINFO bi;
     memset(&bi, 0, sizeof(bi));
@@ -66,7 +90,7 @@ bool ChooseFolderDialog(std::string& selectedPath, std::string title)
     OleInitialize(NULL);
 
     LPITEMIDLIST pIDL = SHBrowseForFolder(&bi);
-
+	 
     if (pIDL == NULL)
     {
         return false;
