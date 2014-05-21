@@ -243,6 +243,9 @@ private:
 	void init ();
 
 	bool _ignore_events;
+
+	Duple scroll_offset() const;
+	Duple position_offset() const;
 };
 
 extern LIBCANVAS_API std::ostream& operator<< (std::ostream&, const ArdourCanvas::Item&);

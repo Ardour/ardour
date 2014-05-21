@@ -23,10 +23,11 @@
 
 #include "ardour/utils.h"
 
-#include "canvas/group.h"
-#include "canvas/item.h"
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
+#include "canvas/group.h"
+#include "canvas/item.h"
+#include "canvas/scroll_group.h"
 
 using namespace std;
 using namespace PBD;
@@ -85,8 +86,25 @@ Item::item_to_parent (ArdourCanvas::Rect const & r) const
 	return r.translate (_position);
 }
 
-ArdourCanvas::Rect
-Item::item_to_canvas (ArdourCanvas::Rect const & r) const
+Duple
+Item::scroll_offset () const
+{
+	Item const * i = this;
+	Duple offset;
+
+	while (i) {
+		ScrollGroup const * sg = dynamic_cast<ScrollGroup const *> (i);
+		if (sg) {
+			offset = offset.translate (sg->scroll_offset());
+		}
+		i = i->parent();
+	}
+
+	return offset;
+}
+
+Duple
+Item::position_offset() const
 {
 	Item const * i = this;
 	Duple offset;
@@ -96,49 +114,31 @@ Item::item_to_canvas (ArdourCanvas::Rect const & r) const
 		i = i->parent();
 	}
 
-	return r.translate (offset);
+	return offset;
+}
+
+ArdourCanvas::Rect
+Item::item_to_canvas (ArdourCanvas::Rect const & r) const
+{
+	return r.translate (position_offset());
 }
 
 ArdourCanvas::Duple
 Item::item_to_canvas (ArdourCanvas::Duple const & d) const
 {
-	Item const * i = this;
-	Duple offset;
-
-	while (i) {
-		offset = offset.translate (i->canvas_position());
-		i = i->parent();
-	}
-
-	return d.translate (offset);
+	return d.translate (position_offset());
 }
 
 ArdourCanvas::Duple
-Item::canvas_to_item (ArdourCanvas::Duple const & d) const
+Item::canvas_to_item (ArdourCanvas::Duple const & r) const
 {
-	Item const * i = this;
-	Duple offset;
-
-	while (i) {
-		offset = offset.translate (-(i->canvas_position()));
-		i = i->parent();
-	}
-
-	return d.translate (offset);
+	return r.translate (-position_offset());
 }
 
 ArdourCanvas::Rect
-Item::canvas_to_item (ArdourCanvas::Rect const & d) const
+Item::canvas_to_item (ArdourCanvas::Rect const & r) const
 {
-	Item const * i = this;
-	Duple offset;
-
-	while (i) {
-		offset = offset.translate (-(i->canvas_position()));
-		i = i->parent();
-	}
-
-	return d.translate (offset);
+	return r.translate (-position_offset());
 }
 
 void
@@ -159,36 +159,29 @@ Item::canvas_to_item (Coord& x, Coord& y) const
 	y = d.y;
 }
 
+
 Duple
 Item::item_to_window (ArdourCanvas::Duple const & d, bool rounded) const
 {
-	Item const * i = this;
-	Duple offset;
-
-	while (i) {
-		offset = offset.translate (i->scroll_offset());
-		i = i->parent();
-	}
-	
-	return _canvas->canvas_to_window (d.translate (offset), rounded);
+	return item_to_canvas (d).translate (-scroll_offset());
 }
 
 Duple
 Item::window_to_item (ArdourCanvas::Duple const & d) const
 {
-	return canvas_to_item (_canvas->window_to_canvas (d));
+	return canvas_to_item (d.translate (scroll_offset()));
 }
 
 ArdourCanvas::Rect
 Item::item_to_window (ArdourCanvas::Rect const & r) const
 {
-	return _canvas->canvas_to_window (item_to_canvas (r));
+	return item_to_canvas (r).translate (-scroll_offset());
 }
 
 ArdourCanvas::Rect
 Item::window_to_item (ArdourCanvas::Rect const & r) const
 {
-	return canvas_to_item (_canvas->window_to_canvas (r));
+	return canvas_to_item (r.translate (scroll_offset()));
 }
 
 /** Set the position of this item in the parent's coordinates */
