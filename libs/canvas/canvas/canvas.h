@@ -43,6 +43,7 @@ namespace ArdourCanvas
 
 class Rect;
 class Group;	
+class ScrollGroup;
 
 /** The base class for our different types of canvas.
  *
@@ -108,7 +109,7 @@ public:
         }
 
         void scroll_to (Coord x, Coord y);
-        void set_global_scroll (bool);
+	void add_scroller (ScrollGroup& i);
         
         virtual Rect visible_area () const = 0;
 
@@ -125,10 +126,11 @@ protected:
 	RootGroup _root;
 
         Duple _scroll_offset;
-        bool _global_scroll;
 
         virtual void pick_current_item (int state) = 0;
         virtual void pick_current_item (Duple const &, int state) = 0;
+
+	std::list<ScrollGroup*> scrollers;
 };
 
 /** A canvas which renders onto a GTK EventBox */
