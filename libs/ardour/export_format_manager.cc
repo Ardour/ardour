@@ -293,12 +293,6 @@ ExportFormatManager::select_with_toc (bool value)
 	check_for_description_change ();
 }
 
-void
-ExportFormatManager::select_upload (bool value)
-{
-	current_selection->set_upload (value);
-	check_for_description_change ();
-}
 
 void
 ExportFormatManager::set_command (std::string command)
