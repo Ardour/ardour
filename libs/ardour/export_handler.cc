@@ -338,7 +338,7 @@ ExportHandler::finish_timespan ()
 				while (se->is_running ()) {
 					// wait for system exec to terminate
 					// std::cerr << "waiting..." << std::endl;
-					usleep (1000);
+					Glib::usleep (1000);
 				}
 			}
 			std::cerr << "done! deleting..." << std::endl;
