@@ -31,7 +31,7 @@ def build(bld):
     else:
 	obj = bld(features = 'c cxx cxxshlib')
 
-    if bld.env['build_target'] == 'mountain_lion':
+		if bld.env['build_target'] == 'mountain_lion' or bld.env['build_target'] == 'snowleopard':
          obj.framework = 'CoreMidi'
 	
     obj.source = [
