@@ -23,17 +23,17 @@ def configure(conf):
         autowaf.check_pkg(conf, 'portaudio-2.0', uselib_store='PORTAUDIO',
                           atleast_version='19')
     autowaf.configure(conf)
-    
-def build(bld):
-    
-    if bld.env['build_target'] == 'mingw':
-	obj = bld(features = 'cxx cxxshlib')
-    else:
-	obj = bld(features = 'c cxx cxxshlib')
 
-		if bld.env['build_target'] == 'mountain_lion' or bld.env['build_target'] == 'snowleopard':
+def build(bld):
+
+    if bld.env['build_target'] == 'mingw':
+        obj = bld(features = 'cxx cxxshlib')
+    else:
+        obj = bld(features = 'c cxx cxxshlib')
+
+    if bld.env['build_target'] == 'mountain_lion' or bld.env['build_target'] == 'snowleopard':
          obj.framework = 'CoreMidi'
-	
+
     obj.source = [
             'waves_audiobackend.cc',
             'waves_audiobackend.latency.cc',
@@ -50,56 +50,56 @@ def build(bld):
             'wavesapi/devicemanager/WCMRAudioDeviceManager.cpp',
             'wavesapi/devicemanager/WCMRNativeAudio.cpp',
             'wavesapi/threads/WCThreadSafe.cpp',
-	    'portmidi/src/pm_common/pmutil.c',
-	    'portmidi/src/pm_common/portmidi.c'
+            'portmidi/src/pm_common/pmutil.c',
+            'portmidi/src/pm_common/portmidi.c'
             ]
-    
+
     if bld.env['build_target'] == 'mingw':
-	platform_dependent = [
-			'wavesapi/miscutils/UMicroseconds.cpp',
-			'wavesapi/devicemanager/WCMRPortAudioDeviceManager.cpp',
-			'portmidi/src/pm_win/pmwin.c',
-			'portmidi/src/pm_win/pmwinmm.c',
-			'portmidi/src/porttime/ptwinmm.c'
-			]
+        platform_dependent = [
+                        'wavesapi/miscutils/UMicroseconds.cpp',
+                        'wavesapi/devicemanager/WCMRPortAudioDeviceManager.cpp',
+                        'portmidi/src/pm_win/pmwin.c',
+                        'portmidi/src/pm_win/pmwinmm.c',
+                        'portmidi/src/porttime/ptwinmm.c'
+                        ]
     else:
-    	platform_dependent = [
-    	    'wavesapi/devicemanager/WCMRCoreAudioDeviceManager.cpp',
-    	    'portmidi/src/pm_mac/pmmac.c',
-    	    'portmidi/src/pm_mac/pmmacosxcm.c',
-    	    'portmidi/src/pm_mac/finddefault.c',
-    	    'portmidi/src/pm_mac/readbinaryplist.c',
-    	    'portmidi/src/porttime/ptmacosx_mach.c'
-	    ]
-    
+            platform_dependent = [
+                'wavesapi/devicemanager/WCMRCoreAudioDeviceManager.cpp',
+                'portmidi/src/pm_mac/pmmac.c',
+                'portmidi/src/pm_mac/pmmacosxcm.c',
+                'portmidi/src/pm_mac/finddefault.c',
+                'portmidi/src/pm_mac/readbinaryplist.c',
+                'portmidi/src/porttime/ptmacosx_mach.c'
+            ]
+
     obj.source.extend(platform_dependent)
-    
+
     obj.includes = ['.',
-	   'wavesapi',
-	   'wavesapi/refmanager',
-	   'wavesapi/wavespublicapi',
-	   'wavesapi/devicemanager',
-	   'wavesapi/miscutils',
-	   'wavesapi/threads',
-	   'portmidi',
-	   'portmidi/src/pm_common'
-	    ]
-    
+           'wavesapi',
+           'wavesapi/refmanager',
+           'wavesapi/wavespublicapi',
+           'wavesapi/devicemanager',
+           'wavesapi/miscutils',
+           'wavesapi/threads',
+           'portmidi',
+           'portmidi/src/pm_common'
+            ]
+
     obj.cxxflags = [ '-fPIC' ]
     obj.cflags = [ '-fPIC', '-fms-extensions' ]
     obj.name     = 'waves_audiobackend'
     obj.target   = 'waves_audiobackend'
     obj.use      = 'libardour libpbd'
     if bld.env['build_target'] == 'mingw':
-	    obj.uselib   = ['PORTAUDIO']
+            obj.uselib   = ['PORTAUDIO']
     obj.vnum     = WAVESAUDIOBACKEND_VERSION
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
-    
+
     if bld.env['build_target']== 'mingw':
-	obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
-		'ARDOURBACKEND_DLL_EXPORTS'
-		]
+        obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
+                'ARDOURBACKEND_DLL_EXPORTS'
+                ]
     else:
-	obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
-		'ARDOURBACKEND_DLL_EXPORTS'
-		]
+        obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
+                'ARDOURBACKEND_DLL_EXPORTS'
+                ]
