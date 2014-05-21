@@ -487,7 +487,6 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 		return;
 	}
 
-
 	ArdourCanvas::Rect scrolling_boundary;
 	Gtk::Allocation alloc;
 	
