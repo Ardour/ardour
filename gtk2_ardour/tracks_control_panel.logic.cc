@@ -629,13 +629,19 @@ TracksControlPanel::on_apply (WavesButton*)
 
 void TracksControlPanel::on_capture_active_changed(DeviceConnectionControl* capture_control, bool active)
 {
-    EngineStateController::instance()->set_physical_audio_input_state(capture_control->get_name(), active);
+    // GZ FIXME: remove this ugly workaround with prefix
+    std::string prefix("system:");
+    std::string port_name(prefix + capture_control->get_name() );
+    EngineStateController::instance()->set_physical_audio_input_state(port_name, active);
 }
 
 
 void TracksControlPanel::on_playback_active_changed(DeviceConnectionControl* playback_control, bool active)
 {
-	EngineStateController::instance()->set_physical_audio_output_state(playback_control->get_name(), active);
+    // GZ FIXME: remove this ugly workaround with prefix
+    std::string prefix("system:");
+    std::string port_name(prefix + playback_control->get_name() );
+	EngineStateController::instance()->set_physical_audio_output_state(port_name, active);
 }
 
 
@@ -701,7 +707,12 @@ TracksControlPanel::on_input_configuration_changed ()
         DeviceConnectionControl* control = dynamic_cast<DeviceConnectionControl*> (*control_iter);
         
         if (control) {
-            bool new_state = EngineStateController::instance()->get_physical_audio_input_state(control->get_name() );
+            
+            // GZ FIXME: remove this ugly workaround with prefix
+            std::string prefix("system:");
+            std::string port_name(prefix + control->get_name() );
+
+            bool new_state = EngineStateController::instance()->get_physical_audio_input_state(port_name );
             
             uint16_t number = DeviceConnectionControl::NoNumber;
             std::string track_name = "";
@@ -737,7 +748,12 @@ TracksControlPanel::on_output_configuration_changed()
         DeviceConnectionControl* control = dynamic_cast<DeviceConnectionControl*> (*control_iter);
         
         if (control) {
-            bool new_state = EngineStateController::instance()->get_physical_audio_output_state(control->get_name() );
+            
+            // GZ FIXME: remove this ugly workaround with prefix
+            std::string prefix("system:");
+            std::string port_name(prefix + control->get_name() );
+            
+            bool new_state = EngineStateController::instance()->get_physical_audio_output_state(port_name );
             
             uint16_t number = DeviceConnectionControl::NoNumber;
             
