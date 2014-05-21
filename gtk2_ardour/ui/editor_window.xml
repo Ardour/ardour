@@ -1,30 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Window>
-  <EventBox bgnormal="#000000">
-    <VBox id="vpacker">
-      <HBox id="menu_bar_base"/>
+  <VBox id="vpacker">
+    <HBox id="menu_bar_base"/>
+    <EventBox bgnormal="#000000">
       <VBox borderwidth="2" spacing ="3">
-        <EventBox bgnormal="#303030">
-          <HBox spacing ="1">
+        <EventBox bgnormal="#282828">
+          <HBox borderwidth="1" spacing ="1">
             <iconbutton id="tracks_button"
                         width="52" height="51"
                         normalicon="tracks"
                         activeicon="tracks_active"
-                        prelighticon="tracks_prelight" box.padding=""/>
+                        prelighticon="tracks_prelight"/>
             <icon source="display_clock_mockup.png" tooltip="--------------------&#xA;This is a mockup&#xA;--------------------" />
             <icon source="display_metrics_mockup.png" tooltip="--------------------&#xA;This is a mockup&#xA;--------------------" box.pack="end"/>
-            <EventBox bgnormal="#383838" box.expand="true" box.fill="true" box.padding="2">
+            <EventBox bgnormal="#383838" box.expand="true" box.fill="true" box.padding="4">
               <EventBox bgnormal="#151515" borderwidth="1"/>
             </EventBox>
             <VBox spacing ="1" box.pack="end">
               <iconbutton id="mode_stereo_out_button"
+                          tooltip="Stereo Out Mode"
                           width="79" height="25"
                           normalicon="mode_stereo_out"
                           activeicon="mode_stereo_out_active"
                           prelighticon="mode_stereo_out_prelight"
                           active="true"/>
               <iconbutton id="mode_multi_out_button"
+                          tooltip="Multi Out Mode"
                           width="79" height="25"
                           normalicon="mode_multi_out"
                           activeicon="mode_multi_out_active"
@@ -33,7 +35,7 @@
           </HBox>
         </EventBox>
         <EventBox bgnormal="#3E3E3E">
-          <HBox spacing="1">
+          <HBox borderwidth="1" spacing="1">
             <iconbutton id="inspector_on_button"
                         tooltip="Show/Hide Inspector"
                         width="48" height="26"
@@ -52,7 +54,7 @@
                         normalicon="meter_bridge_on"
                         activeicon="meter_bridge_on_active"
                         prelighticon="meter_bridge_on_prelight"/>
-            <layout     width="54" height="26" bgnormal=""/>
+            <layout     width="54" height="26" bgnormal="#3E3E3E"/>
             <iconbutton id="transport_start_button"
                         tooltip="Rewind"
                         width="34" height="26"
@@ -95,33 +97,41 @@
                         normalicon="lock_session"
                         activeicon="lock_session_active"
                         prelighticon="lock_session_prelight"/>
-            <layout     width="60" height="26" bgnormal=""/>
+            <layout width="60" height="26" bgnormal="#3E3E3E"/>
             <iconbutton id="tool_marker_button"
+                        tooltip="Range Select Tool"
                         width="34" height="26"
                         normalicon="tool_marker"
                         activeicon="tool_marker_active"
                         prelighticon="tool_marker_prelight"/>
             <iconbutton id="tool_arrow_button"
-                        tooltip="Object Mode (select/move Objects)"
+                        tooltip="Pointer Tool"
                         width="34" height="26"
                         normalicon="tool_arrow"
                         activeicon="tool_arrow_active"
                         prelighticon="tool_arrow_prelight"/>
             <iconbutton id="tool_cut_button"
+                        tooltip="Split Tool"
                         width="34" height="26"
                         normalicon="tool_cut"
                         activeicon="tool_cut_active"
                         prelighticon="tool_cut_prelight"/>
             <iconbutton id="tool_zoom_button"
-                        tooltip="Select Zoom Range"
+                        tooltip="Zoom Tool"
                         width="34" height="26"
                         normalicon="tool_zoom"
                         activeicon="tool_zoom_active"
                         prelighticon="tool_zoom_prelight"/>
-            <layout     width="68" height="26" bgnormal=""/>
+            <iconbutton id="media_button"
+                        tooltip="Media Button"
+                        width="48" height="26"
+                        normalicon="media_button"
+                        activeicon="media_button_active"
+                        prelighticon="media_button_prelight"
+                        box.pack="end"/>
           </HBox>
         </EventBox>
       </VBox>
-    </VBox>
-  </EventBox>
+    </EventBox>
+  </VBox>
 </Window>

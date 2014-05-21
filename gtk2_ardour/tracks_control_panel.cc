@@ -86,7 +86,7 @@ TracksControlPanel::TracksControlPanel ()
     , _default_open_path (named_children ().get_label("default_open_path"))
 	, _multi_out_button(named_children ().get_waves_button ("multi_out_button"))
 	, _stereo_out_button(named_children ().get_waves_button ("stereo_out_button"))
-    , _brows_button(named_children ().get_waves_button("brows_default_folder"))
+    , _browse_button(named_children ().get_waves_button("browse_default_folder"))
     , _have_control (false)
 	, _ignore_changes (0)
 {

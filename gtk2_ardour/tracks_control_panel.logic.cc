@@ -60,7 +60,7 @@ TracksControlPanel::init ()
     _multi_out_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_multi_out));
     _stereo_out_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_stereo_out));
     
-    _brows_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_brows_button));    
+    _browse_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_browse_button));    
     
 	EngineStateController::instance ()->EngineRunning.connect (running_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_running, this), gui_context());
 	EngineStateController::instance ()->EngineStopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_stopped, this), gui_context());
@@ -572,7 +572,7 @@ TracksControlPanel::on_stereo_out (WavesButton*)
 }
 
 void
-TracksControlPanel::on_brows_button (WavesButton*)
+TracksControlPanel::on_browse_button (WavesButton*)
 {
     using namespace std;
     
@@ -590,15 +590,17 @@ TracksControlPanel::on_brows_button (WavesButton*)
 #endif
     
 #ifdef _WIN32
-	set_keep_above(false);
 	string fileTitle;
+	set_keep_above(false);
+	bool result = ARDOUR::ChooseFolderDialog(fileTitle, Config->get_default_open_path(), _("Choose Default Path"));
+	set_keep_above(true);
+
 	// if path was chosen in dialog
-	if ( ARDOUR::ChooseFolderDialog(fileTitle, Config->get_default_open_path(), _("Choose Default Path")) ) {
-		set_keep_above(true);
+	if (result) {
 		_default_path_name = fileTitle;
 	}
 
-    if(  !_default_path_name.empty()  )
+    if (!_default_path_name.empty())
         _default_open_path.set_text(_default_path_name);
     else
         _default_open_path.set_text(Config->get_default_open_path());

@@ -12,10 +12,8 @@
          fgdisabled ="#959595"
          bordercolor="#7E7E7E"
          borderwidth="1 1 0 0" />
-    <Layout width="448" height="660">
-      <canvas>
-        <icon file="icons/sessionlock.png"/>
-      </canvas>
+    <Layout width="442" height="660">
+      <icon source="sessionlock.png"/>
       <Button style="generic_button"
         id="ok_button"
         text="UNLOCK"        

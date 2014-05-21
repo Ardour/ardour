@@ -461,6 +461,10 @@ WavesButton::action_visibility_changed ()
 void
 WavesButton::action_tooltip_changed ()
 {
+	// so far, we orient UI on XML defined attributes.
+	// Let the code be here for a time; perhaps, it will
+	// be removed in the end. And now let's just return:
+	return;
 	string str = _action->property_tooltip().get_value();
     if (str.empty()) {
         str = get_tooltip_text();

@@ -76,7 +76,7 @@
 	void on_control_panel (WavesButton*);
     void on_multi_out (WavesButton*);
     void on_stereo_out (WavesButton*);
-    void on_brows_button (WavesButton*);
+    void on_browse_button (WavesButton*);
     void save_default_session_path();
 	void on_ok(WavesButton*);
 	void on_cancel(WavesButton*);

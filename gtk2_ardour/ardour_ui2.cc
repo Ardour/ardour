@@ -224,12 +224,24 @@ ARDOUR_UI::setup_transport_trx ()
 	editor->get_waves_button ("transport_end_button").set_controllable (goto_end_controllable);
 	editor->get_waves_button ("transport_loop_button").set_controllable (auto_loop_controllable);
 	editor->get_waves_button ("transport_record_button").set_controllable (rec_controllable);
+	
 	act = ActionManager::get_action (X_("Main"), X_("LockSession"));
 	editor->get_waves_button ("lock_session_button").set_related_action (act);
-    act = ActionManager::get_action (X_("Main"), X_("ToggleMultiOutMode"));
+    
+	act = ActionManager::get_action (X_("Main"), X_("ToggleMultiOutMode"));
     editor->get_waves_button ("mode_multi_out_button").set_related_action (act);
-    act = ActionManager::get_action (X_("Main"), X_("ToggleStereoOutMode"));
+    
+	act = ActionManager::get_action (X_("Main"), X_("ToggleStereoOutMode"));
     editor->get_waves_button ("mode_stereo_out_button").set_related_action (act);
+
+	act = ActionManager::get_action (X_("Common"), X_("toggle-mixer"));
+	editor->get_waves_button ("mixer_on_button").set_related_action (act);
+
+	act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
+	editor->get_waves_button ("inspector_on_button").set_related_action (act);
+
+	act = ActionManager::get_action (X_("Common"), X_("toggle-meterbridge"));	
+	editor->get_waves_button ("meter_bridge_on_button").set_related_action (act);
     
     update_ouput_operation_mode_buttons();
     

@@ -245,11 +245,11 @@
       
       <Label style="generic_control" text="DEFAULT FOLDER FOR NEW SESSION" x = "24" y = "230" />
       <Button
-        id = "brows_default_folder"
+        id = "browse_default_folder"
         text = "Browse"
         style = "generic_button"
-        x = "24" y = "250" width = "100" height = "20"/>
-      <Label id="default_open_path" style="generic_control" text="" x = "130" y = "255" />
+        x = "24" y = "250" width = "100" height = "28"/>
+      <Label id="default_open_path" style="generic_control" text="" x = "135" y = "255" />
     </Layout>
   </Layout>
 </Dialog>
