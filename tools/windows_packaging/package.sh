@@ -47,12 +47,14 @@ if test x$WITH_TESTS != x ; then
 	cp -r $BASE/libs/ardour/test/data $PACKAGE_DIR/ardour_testdata
 fi
 
-echo "Copying mingw config files to $PACKAGE_DIR ..."
-# just copy it all for now
-cp -r $MINGW_ROOT/etc $PACKAGE_DIR
+echo "Copying config files to $PACKAGE_DIR ..."
+mkdir -p $PACKAGE_DIR/etc
+cp -RL $MINGW_ROOT/etc/fonts $PACKAGE_DIR/etc
+cp -RL $MINGW_ROOT/etc/gtk-2.0 $PACKAGE_DIR/etc
+cp -RL $MINGW_ROOT/etc/pango $PACKAGE_DIR/etc
 
-cp -r $MINGW_ROOT/lib/gtk-2.0 $PACKAGE_DIR/lib
-cp -r $MINGW_ROOT/lib/gdk-pixbuf-2.0 $PACKAGE_DIR/lib
+cp -R $MINGW_ROOT/lib/gtk-2.0 $PACKAGE_DIR/lib
+cp -R $MINGW_ROOT/lib/gdk-pixbuf-2.0 $PACKAGE_DIR/lib
 cp $TOOLS_DIR/loaders.cache $PACKAGE_DIR/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
 
 if test x$WITH_PANGO_1_6 != x; then
