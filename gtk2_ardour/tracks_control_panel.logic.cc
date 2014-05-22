@@ -578,7 +578,7 @@ TracksControlPanel::on_browse_button (WavesButton*)
     
 #ifdef __APPLE__
     set_keep_above(false);
-    _default_path_name = ARDOUR::ChooseFolderDialog(Config->get_default_open_path(), _("Choose Default Path"));
+    _default_path_name = ARDOUR::choose_folder_dialog(Config->get_default_open_path(), _("Choose Default Path"));
     set_keep_above(true);    
     
     if( !_default_path_name.empty() )

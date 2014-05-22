@@ -16,9 +16,9 @@ namespace ARDOUR
     // This is the C "trampoline" function that will be used
     // to invoke a specific Objective-C method FROM C++
     #ifdef __APPLE__
-    std::string SaveFileDialog(std::string initial_path = "", std::string title = "Save");
-    std::string OpenFileDialog(std::string initial_path = "", std::string title = "Open");
-    std::string ChooseFolderDialog(std::string initial_path = "", std::string title = "Choose Folder");
+    std::string save_file_dialog(std::string initial_path = "", std::string title = "Save");
+    std::string open_file_dialog(std::string initial_path = "", std::string title = "Open");
+    std::string choose_folder_dialog(std::string initial_path = "", std::string title = "Choose Folder");
 	#endif
 	
 	// OS Windows specific functions

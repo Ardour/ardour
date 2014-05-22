@@ -143,7 +143,7 @@ SessionDialog::on_new_session (WavesButton*)
 {
 #ifdef __APPLE__  
     set_keep_above(false);
-    _selected_session_full_name = ARDOUR::SaveFileDialog(Config->get_default_open_path(),_("Create New Session"));
+    _selected_session_full_name = ARDOUR::save_file_dialog(Config->get_default_open_path(),_("Create New Session"));
     set_keep_above(true);
     
     if(_selected_session_full_name.size() >= 1) {
@@ -325,7 +325,7 @@ SessionDialog::on_open_saved_session (WavesButton*)
 	
 #ifdef __APPLE__
 	set_keep_above(false);
-    _selected_session_full_name = ARDOUR::OpenFileDialog(Config->get_default_open_path(), _("Select Saved Session"));
+    _selected_session_full_name = ARDOUR::open_file_dialog(Config->get_default_open_path(), _("Select Saved Session"));
     set_keep_above(true);
     
     if(_selected_session_full_name.size() >= 1) {

@@ -266,7 +266,7 @@ gtk2_ardour_sources = [
 ]
 
 if sys.platform == 'darwin':
-    gtk2_ardour_sources.append('OpenFileDialog.mm')
+    gtk2_ardour_sources.append('open_file_dialog.mm')
 else:
     gtk2_ardour_sources.append('open_file_dialog.cc')
     
