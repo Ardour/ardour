@@ -57,13 +57,8 @@ cp -R $MINGW_ROOT/lib/gtk-2.0 $PACKAGE_DIR/lib
 cp -R $MINGW_ROOT/lib/gdk-pixbuf-2.0 $PACKAGE_DIR/lib
 cp $TOOLS_DIR/loaders.cache $PACKAGE_DIR/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
 
-if test x$WITH_PANGO_1_6 != x; then
-	mkdir -p $PACKAGE_DIR/lib/pango/1.6.0/modules
-	cp -r $MINGW_ROOT/lib/pango/1.6.0/modules/*.dll $PACKAGE_DIR/lib/pango/1.6.0/modules
-else
-	mkdir -p $PACKAGE_DIR/lib/pango/1.8.0/modules
-	cp -r $MINGW_ROOT/lib/pango/1.8.0/modules/*.dll $PACKAGE_DIR/lib/pango/1.8.0/modules
-fi
+mkdir -p $PACKAGE_DIR/lib/pango/1.8.0/modules
+cp -r $MINGW_ROOT/lib/pango/1.8.0/modules/*.dll $PACKAGE_DIR/lib/pango/1.8.0/modules
 
 cp $TOOLS_DIR/pango.modules $PACKAGE_DIR/etc/pango
 
