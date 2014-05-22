@@ -51,7 +51,7 @@
 #include "i18n.h"
 #include "utils.h"
 
-#include "OpenFileDialogProxy.h"
+#include "open_file_dialog_proxy.h"
 
 using namespace std;
 using namespace Gtk;
@@ -163,7 +163,7 @@ SessionDialog::on_new_session (WavesButton*)
 	set_keep_above(false);	 
 	string fileTitle;		 
 	// Open the file save dialog, and choose the file name
-	if ( ARDOUR::SaveFileDialog(fileTitle, Config->get_default_open_path(), _("Create New Session")) ) {
+	if ( ARDOUR::save_file_dialog(fileTitle, Config->get_default_open_path(), _("Create New Session")) ) {
 		set_keep_above(true);
 		_selected_session_full_name = fileTitle;
 		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
@@ -344,7 +344,7 @@ SessionDialog::on_open_saved_session (WavesButton*)
 	set_keep_above(false);
 	// Open the file save dialog, and choose the file name
 	string fileName;
-	if (OpenFileDialog(fileName, Config->get_default_open_path(), _("Select Saved Session"))) {
+	if (open_file_dialog(fileName, Config->get_default_open_path(), _("Select Saved Session"))) {
 		set_keep_above(true);
 		_selected_session_full_name = fileName;
 		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {

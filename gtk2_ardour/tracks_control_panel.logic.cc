@@ -35,7 +35,7 @@
 #include "i18n.h"
 #include "pbd/convert.h"
 
-#include "OpenFileDialogProxy.h"
+#include "open_file_dialog_proxy.h"
 
 using namespace ARDOUR;
 using namespace Gtk;
@@ -592,7 +592,7 @@ TracksControlPanel::on_browse_button (WavesButton*)
 #ifdef _WIN32
 	string fileTitle;
 	set_keep_above(false);
-	bool result = ARDOUR::ChooseFolderDialog(fileTitle, Config->get_default_open_path(), _("Choose Default Path"));
+	bool result = ARDOUR::choose_folder_dialog(fileTitle, _("Choose Default Path"));
 	set_keep_above(true);
 
 	// if path was chosen in dialog
