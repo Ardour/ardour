@@ -45,6 +45,19 @@ using namespace Glib;
 
 #define dbg_msg(a) MessageDialog (a, PROGRAM_NAME).run();
 
+namespace {
+    // if pattern is not found out_str == in_str
+    bool remove_pattern_from_string(const std::string& in_str, const std::string& pattern, std::string& out_str) {
+        if (in_str.find(pattern) != std::string::npos ) {
+            out_str = in_str.substr(pattern.size() );
+            return true;
+        } else {
+            out_str = in_str;
+            return false;
+        }
+    }
+}
+
 void
 TracksControlPanel::init ()
 {
@@ -92,15 +105,33 @@ TracksControlPanel::init ()
 
 DeviceConnectionControl& TracksControlPanel::add_device_capture_control(std::string device_capture_name, bool active, uint16_t capture_number, std::string track_name)
 {
-	DeviceConnectionControl &capture_control = *manage (new DeviceConnectionControl(device_capture_name, active, capture_number, track_name));
-	_device_capture_list.pack_start (capture_control, false, false);
+    std::string port_name("");
+    std::string pattern("system:");
+    remove_pattern_from_string(device_capture_name, pattern, port_name);
+    
+	DeviceConnectionControl &capture_control = *manage (new DeviceConnectionControl(port_name, active, capture_number, track_name));
+    
+    char * id_str = new char [device_capture_name.length()+1];
+    std::strcpy (id_str, device_capture_name.c_str());
+    capture_control.set_data(DeviceConnectionControl::id_name, id_str);
+	
+    _device_capture_list.pack_start (capture_control, false, false);
 	capture_control.signal_active_changed.connect (sigc::mem_fun (*this, &TracksControlPanel::on_capture_active_changed));
 	return capture_control;
 }
 
 DeviceConnectionControl& TracksControlPanel::add_device_playback_control(std::string device_playback_name, bool active, uint16_t playback_number)
 {
-	DeviceConnectionControl &playback_control = *manage (new DeviceConnectionControl(device_playback_name, active, playback_number));
+    std::string port_name("");
+    std::string pattern("system:");
+    remove_pattern_from_string(device_playback_name, pattern, port_name);
+    
+	DeviceConnectionControl &playback_control = *manage (new DeviceConnectionControl(port_name, active, playback_number));
+    
+    char * id_str = new char [device_playback_name.length()+1];
+    std::strcpy (id_str, device_playback_name.c_str());
+    playback_control.set_data(DeviceConnectionControl::id_name, id_str);
+    
 	_device_playback_list.pack_start (playback_control, false, false);
 	playback_control.signal_active_changed.connect(sigc::mem_fun (*this, &TracksControlPanel::on_playback_active_changed));
 	return playback_control;
@@ -267,16 +298,12 @@ TracksControlPanel::populate_input_channels()
     for (input_iter = input_states.begin(); input_iter != input_states.end(); ++input_iter ) {
         
         uint16_t number = DeviceConnectionControl::NoNumber;
-        std::string track_name = "";
-        std::string port_name = "";
-        
+        std::string track_name("");        
+        std::string port_name("");
         std::string pattern("system:");
-        if (input_iter->name.find(pattern) != std::string::npos ) {
-            port_name = input_iter->name.substr(pattern.size() );
-        } else {
-            port_name = input_iter->name;
-        }
         
+        remove_pattern_from_string(input_iter->name, pattern, port_name);
+
         if (input_iter->active) {
             
             number = number_count++;
@@ -288,7 +315,7 @@ TracksControlPanel::populate_input_channels()
             }
         }
         
-        add_device_capture_control (port_name, input_iter->active, number, track_name);
+        add_device_capture_control (input_iter->name, input_iter->active, number, track_name);
     }    
 }
 
@@ -308,20 +335,12 @@ TracksControlPanel::populate_output_channels()
     for (output_iter = output_states.begin(); output_iter != output_states.end(); ++output_iter ) {
         
         uint16_t number = DeviceConnectionControl::NoNumber;
-        std::string port_name = "";
-        
-        std::string pattern("system:");
-        if (output_iter->name.find(pattern) != std::string::npos ) {
-            port_name = output_iter->name.substr(pattern.size() );
-        } else {
-            port_name = output_iter->name;
-        }
         
         if (output_iter->active) {
             number = number_count++;
         }
         
-        add_device_playback_control (port_name, output_iter->active, number);
+        add_device_playback_control (output_iter->name, output_iter->active, number);
     }
     
 }
@@ -347,6 +366,13 @@ TracksControlPanel::cleanup_input_channels_list()
         
     while (capture_controls.size() != 0) {
         Gtk::Widget* item = capture_controls.back();
+        
+        DeviceConnectionControl* control = dynamic_cast<DeviceConnectionControl*>(item);
+        
+        if (control) {
+            control->remove_data(DeviceConnectionControl::id_name);
+        }
+        
         capture_controls.pop_back();
         _device_capture_list.remove(*item);
         delete item;
@@ -361,6 +387,13 @@ TracksControlPanel::cleanup_output_channels_list()
 
     while (playback_controls.size() != 0) {
         Gtk::Widget* item = playback_controls.back();
+        
+        DeviceConnectionControl* control = dynamic_cast<DeviceConnectionControl*>(item);
+        
+        if (control) {
+            control->remove_data(DeviceConnectionControl::id_name);
+        }
+        
         playback_controls.pop_back();
         _device_capture_list.remove(*item);
         delete item;
@@ -651,19 +684,15 @@ TracksControlPanel::on_apply (WavesButton*)
 
 void TracksControlPanel::on_capture_active_changed(DeviceConnectionControl* capture_control, bool active)
 {
-    // GZ FIXME: remove this ugly workaround with prefix
-    std::string prefix("system:");
-    std::string port_name(prefix + capture_control->get_name() );
-    EngineStateController::instance()->set_physical_audio_input_state(port_name, active);
+    const char * id_name = (char*)capture_control->get_data(DeviceConnectionControl::id_name);
+    EngineStateController::instance()->set_physical_audio_input_state(id_name, active);
 }
 
 
 void TracksControlPanel::on_playback_active_changed(DeviceConnectionControl* playback_control, bool active)
 {
-    // GZ FIXME: remove this ugly workaround with prefix
-    std::string prefix("system:");
-    std::string port_name(prefix + playback_control->get_name() );
-	EngineStateController::instance()->set_physical_audio_output_state(port_name, active);
+    const char * id_name = (char*)playback_control->get_data(DeviceConnectionControl::id_name);
+    EngineStateController::instance()->set_physical_audio_output_state(id_name, active);
 }
 
 
@@ -730,11 +759,8 @@ TracksControlPanel::on_input_configuration_changed ()
         
         if (control) {
             
-            // GZ FIXME: remove this ugly workaround with prefix
-            std::string prefix("system:");
-            std::string port_name(prefix + control->get_name() );
-
-            bool new_state = EngineStateController::instance()->get_physical_audio_input_state(port_name );
+            const char* id_name = (char*)control->get_data(DeviceConnectionControl::id_name);
+            bool new_state = EngineStateController::instance()->get_physical_audio_input_state(id_name );
             
             uint16_t number = DeviceConnectionControl::NoNumber;
             std::string track_name = "";
@@ -771,11 +797,9 @@ TracksControlPanel::on_output_configuration_changed()
         
         if (control) {
             
-            // GZ FIXME: remove this ugly workaround with prefix
-            std::string prefix("system:");
-            std::string port_name(prefix + control->get_name() );
+            const char * id_name = (char*ope)control->get_data(DeviceConnectionControl::id_name);
             
-            bool new_state = EngineStateController::instance()->get_physical_audio_output_state(port_name );
+            bool new_state = EngineStateController::instance()->get_physical_audio_output_state(id_name );
             
             uint16_t number = DeviceConnectionControl::NoNumber;
             

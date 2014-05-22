@@ -32,6 +32,8 @@ class DeviceConnectionControl : public Gtk::Layout
 	enum ConnectionNumber {
 		NoNumber = 0
 	};
+    
+    static const char* id_name;
 
 	DeviceConnectionControl (const std::string& device_capture_name, bool active, uint16_t capture_number, const std::string& track_name);
 	DeviceConnectionControl (const std::string& device_playback_name, bool active, uint16_t playback_number);
@@ -42,7 +44,6 @@ class DeviceConnectionControl : public Gtk::Layout
 	void set_number (uint16_t number);
 	void set_active (bool active);
     void set_track_name (const std::string& new_track_name);
-    std::string get_name ();
 	sigc::signal2<void, DeviceConnectionControl*, bool> signal_active_changed;
 
   private:

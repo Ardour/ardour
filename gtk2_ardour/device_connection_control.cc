@@ -20,6 +20,8 @@
 #include "device_connection_control.h"
 #include "pbd/convert.h"
 
+const char * DeviceConnectionControl::id_name = "_id_name";
+
 DeviceConnectionControl::DeviceConnectionControl (const std::string& device_capture_name, bool active, uint16_t capture_number, const std::string& track_name)
 
 	: Gtk::Layout()
@@ -163,17 +165,6 @@ DeviceConnectionControl::set_track_name (const std::string& new_track_name)
 	}
 }
 
-
-std::string
-DeviceConnectionControl::get_name ()
-{
-    std::string name;
-    if (_name_label != NULL) {
-        name = _name_label->get_text();
-    }
-    
-    return name;
-}
 
 void
 DeviceConnectionControl::on_active_on(WavesButton*)
