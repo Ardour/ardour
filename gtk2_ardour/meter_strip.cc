@@ -245,8 +245,14 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	mtr_container.show();
 	mtr_hsep.show();
 	nfo_vbox.show();
-	monitor_input_button->show();
-	monitor_disk_button->show();
+
+	if (boost::dynamic_pointer_cast<Track>(_route)) {
+		monitor_input_button->show();
+		monitor_disk_button->show();
+	} else {
+		monitor_input_button->hide();
+		monitor_disk_button->hide();
+	}
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
 			route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_configuration_changed, this, _1), gui_context()
