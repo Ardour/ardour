@@ -65,9 +65,14 @@ portaudio-2.dll
 vamp-hostsdk-3.dll
 vamp-sdk-2.dll
 zlib1.dll
+lilv-0.dll
+sratom-0-0.dll
+serd-0-0.dll
+sord-0-0.dll
 '
 
 WITH_JACK='TRUE'
+WITH_LV2='TRUE'
 
 . ./copydll-fedora.sh
 . ./package.sh
