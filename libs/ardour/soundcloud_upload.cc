@@ -155,7 +155,7 @@ SoundcloudUploader::progress_callback(void *caller, double dltotal, double dlnow
 
 
 std::string
-SoundcloudUploader::Upload(std::string file_path, std::string title, std::string token, bool ispublic, ARDOUR::ExportHandler *caller)
+SoundcloudUploader::Upload(std::string file_path, std::string title, std::string token, bool ispublic, bool downloadable, ARDOUR::ExportHandler *caller)
 {
 	int still_running;
 

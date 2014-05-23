@@ -24,16 +24,18 @@ class SoundcloudExportSelector : public Gtk::VBox, public ARDOUR::SessionHandleP
 	std::string password () { return soundcloud_password_entry.get_text (); }
 	bool make_public  () { return soundcloud_public_checkbox.get_active (); }
 	bool open_page    () { return soundcloud_open_checkbox.get_active (); }
+	bool downloadable () { return soundcloud_download_checkbox.get_active (); }
 	void cancel () { soundcloud_cancel = true; }
 
   private:
 	Gtk::Table  sc_table;
-	Gtk::CheckButton soundcloud_public_checkbox;
 	Gtk::Label soundcloud_username_label;
 	Gtk::Entry soundcloud_username_entry;
 	Gtk::Label soundcloud_password_label;
 	Gtk::Entry soundcloud_password_entry;
+	Gtk::CheckButton soundcloud_public_checkbox;
 	Gtk::CheckButton soundcloud_open_checkbox;
+	Gtk::CheckButton soundcloud_download_checkbox;
 	bool soundcloud_cancel;
 	Gtk::ProgressBar progress_bar;
 	

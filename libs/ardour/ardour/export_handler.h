@@ -118,6 +118,7 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	std::string soundcloud_password;
 	bool soundcloud_make_public;
 	bool soundcloud_open_page;
+	bool soundcloud_downloadable;
 
   private:
 
