@@ -345,7 +345,7 @@ ExportHandler::finish_timespan ()
 			delete (se);
 		}
 
-		if (fmt->upload()) {
+		if (fmt->soundcloud_upload()) {
 			SoundcloudUploader *soundcloud_uploader = new SoundcloudUploader;
 			std::string token = soundcloud_uploader->Get_Auth_Token(upload_username, upload_password);
 			std::cerr

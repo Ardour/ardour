@@ -96,6 +96,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	void set_tag (bool tag_it) { _tag = tag_it; }
 	void set_with_cue (bool yn) { _with_cue = yn; }
 	void set_with_toc (bool yn) { _with_toc = yn; }
+	void set_soundcloud_upload (bool yn) { _soundcloud_upload = yn; }
 	void set_command (std::string command) { _command = command; }
 
 	void set_silence_beginning (AnyTime const & value) { _silence_beginning = value; }
@@ -126,6 +127,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	float normalize_target () const { return _normalize_target; }
 	bool with_toc() const { return _with_toc; }
 	bool with_cue() const { return _with_cue; }
+	bool soundcloud_upload() const { return _soundcloud_upload; }
 	std::string command() const { return _command; }
 
 	bool tag () const { return _tag && supports_tagging; }
@@ -176,6 +178,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	float           _normalize_target;
 	bool            _with_toc;
 	bool            _with_cue;
+	bool            _soundcloud_upload;
 	std::string	_command;
 
 	/* serialization helpers */

@@ -58,6 +58,7 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 	void add_file_page (ARDOUR::ExportProfileManager::FormatStatePtr format_state, ARDOUR::ExportProfileManager::FilenameStatePtr filename_state);
 	void remove_file_page (FilePage * page);
 	void update_remove_file_page_sensitivity ();
+	void update_soundcloud_upload();
 
 	sigc::connection page_change_connection;
 	void handle_page_change (GtkNotebookPage*, uint32_t page);
@@ -80,6 +81,7 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 		Gtk::Widget & get_tab_widget () { return tab_widget; }
 		void set_remove_sensitive (bool value);
 		std::string get_format_name () const;
+		bool get_soundcloud_upload () const;
 
 		void update_example_filename();
 
@@ -108,6 +110,7 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 		Gtk::Alignment          filename_align;
 		ExportFilenameSelector  filename_selector;
 
+		Gtk::CheckButton	soundcloud_upload_button;
 		Gtk::HBox               tab_widget;
 		Gtk::Label              tab_label;
 		Gtk::Alignment          tab_close_alignment;
