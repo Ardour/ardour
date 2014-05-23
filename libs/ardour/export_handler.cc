@@ -27,6 +27,7 @@
 #include "pbd/convert.h"
 
 #include "ardour/audiofile_tagger.h"
+#include "ardour/debug.h"
 #include "ardour/export_graph_builder.h"
 #include "ardour/export_timespan.h"
 #include "ardour/export_channel_configuration.h"
@@ -348,13 +349,9 @@ ExportHandler::finish_timespan ()
 		if (fmt->soundcloud_upload()) {
 			SoundcloudUploader *soundcloud_uploader = new SoundcloudUploader;
 			std::string token = soundcloud_uploader->Get_Auth_Token(soundcloud_username, soundcloud_password);
-			std::cerr
-				<< "uploading "
-				<< filename << std::endl
-				<< "username = " << soundcloud_username
-				<< ", password = " << soundcloud_password
-				<< " - token = " << token << " ..."
-				<< std::endl;
+			DEBUG_TRACE (DEBUG::Soundcloud, string_compose(
+						"uploading %1 - username=%2, password=%3, token=%4",
+						filename, soundcloud_username, soundcloud_password, token) );
 			std::string path = soundcloud_uploader->Upload (
 					filename,
 					PBD::basename_nosuffix(filename), // title
@@ -366,7 +363,7 @@ ExportHandler::finish_timespan ()
 			if (path.length() != 0) {
 				info << string_compose ( _("File %1 uploaded to %2"), filename, path) << endmsg;
 				if (soundcloud_open_page) {
-					std::cerr << "opening " << path << " ..." << std::endl;
+					DEBUG_TRACE (DEBUG::Soundcloud, string_compose ("opening %1", path) );
 					open_uri(path.c_str());  // open the soundcloud website to the new file
 				}
 			} else {
