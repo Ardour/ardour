@@ -22,7 +22,10 @@
  *  @brief Implementation of the Arrow canvas object.
  */
 
+#include "pbd/compose.h"
+
 #include "canvas/arrow.h"
+#include "canvas/debug.h"
 #include "canvas/polygon.h"
 #include "canvas/line.h"
 
@@ -39,14 +42,15 @@ Arrow::Arrow (Group* parent)
 	/* set up default arrow heads at each end */
 	for (int i = 0; i < 2; ++i) {
 		_heads[i].polygon = new Polygon (this);
-		_heads[i].show = true;
 		_heads[i].outward = true;
 		_heads[i].width = 4;
 		_heads[i].height = 4;
 		setup_polygon (i);
+		CANVAS_DEBUG_NAME (_heads[i].polygon, string_compose ("arrow head %1", i));
 	}
 	
 	_line = new Line (this);
+	CANVAS_DEBUG_NAME (_line, "arrow line");
 }
 
 /** Set whether to show an arrow head at one end or other
@@ -61,9 +65,13 @@ Arrow::set_show_head (int which, bool show)
 	
 	begin_change ();
 	
-	_heads[which].show = show;
+	if (!show) {
+		delete _heads[which].polygon;
+		_heads[which].polygon = 0;
+	} else {
+		setup_polygon (which);
+	}
 
-	setup_polygon (which);
 	_bounding_box_dirty = true;
 	end_change ();
 }
@@ -131,8 +139,12 @@ void
 Arrow::set_outline_width (Distance width)
 {
 	_line->set_outline_width (width);
-	_heads[0].polygon->set_outline_width (width);
-	_heads[1].polygon->set_outline_width (width);
+	if (_heads[0].polygon) {
+		_heads[0].polygon->set_outline_width (width);
+	}
+	if (_heads[1].polygon) {
+		_heads[1].polygon->set_outline_width (width);
+	}
 }
 
 /** Set the x position of our line.
@@ -144,7 +156,9 @@ Arrow::set_x (Coord x)
 	_line->set_x0 (x);
 	_line->set_x1 (x);
 	for (int i = 0; i < 2; ++i) {
-		_heads[i].polygon->set_x_position (x - _heads[i].width / 2);
+		if (_heads[i].polygon) {
+			_heads[i].polygon->set_x_position (x - _heads[i].width / 2);
+		}
 	}
 		
 }
@@ -156,7 +170,9 @@ void
 Arrow::set_y0 (Coord y0)
 {
 	_line->set_y0 (y0);
-	_heads[0].polygon->set_y_position (y0);
+	if (_heads[0].polygon) {
+		_heads[0].polygon->set_y_position (y0);
+	}
 }
 
 /** Set the y position of end 1 of our line.
@@ -166,7 +182,9 @@ void
 Arrow::set_y1 (Coord y1)
 {
 	_line->set_y1 (y1);
-	_heads[1].polygon->set_y_position (y1 - _heads[1].height);
+	if (_heads[1].polygon) {
+		_heads[1].polygon->set_y_position (y1 - _heads[1].height);
+	}
 }
 
 /** @return x position of our line in pixels (in our coordinate system) */
@@ -217,8 +235,10 @@ Arrow::set_color (Color color)
 {
 	_line->set_outline_color (color);
 	for (int i = 0; i < 2; ++i) {
-		_heads[i].polygon->set_outline_color (color);
-		_heads[i].polygon->set_fill_color (color);
+		if (_heads[i].polygon) {
+			_heads[i].polygon->set_outline_color (color);
+			_heads[i].polygon->set_fill_color (color);
+		}
 	}
 }
 
