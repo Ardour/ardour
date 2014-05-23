@@ -20,6 +20,7 @@
 
 
 *************************************************************************************/
+#include "ardour/debug.h"
 #include "ardour/soundcloud_upload.h"
 
 #include "pbd/xml++.h"
@@ -120,7 +121,7 @@ SoundcloudUploader::Get_Auth_Token( std::string username, std::string password )
 	// perform online request
 	CURLcode res = curl_easy_perform(curl_handle);
 	if( res != 0 ) {
-		std::cerr << "curl error " << res << " (" << curl_easy_strerror(res) << ")" << std::endl;
+		DEBUG_TRACE (DEBUG::Soundcloud, string_compose ("curl error %1 (%2)", res, curl_easy_strerror(res) ) );
 		return "";
 	}
 
@@ -148,7 +149,7 @@ int
 SoundcloudUploader::progress_callback(void *caller, double dltotal, double dlnow, double ultotal, double ulnow)
 {
 	SoundcloudUploader *scu = (SoundcloudUploader *) caller;
-	std::cerr << scu->title << ": uploaded " << ulnow << " of " << ultotal << std::endl;
+	DEBUG_TRACE (DEBUG::Soundcloud, string_compose ("%1: uploaded %2 of %3", scu->title, ulnow, ultotal) );
 	scu->caller->SoundcloudProgress(ultotal, ulnow, scu->title); /* EMIT SIGNAL */
 	return 0;
 }
@@ -297,26 +298,26 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 
 	if(xml_page.memory){
 
-		std::cout << xml_page.memory << std::endl;
+		DEBUG_TRACE (DEBUG::Soundcloud, xml_page.memory);
 
 		XMLTree doc;
 		doc.read_buffer( xml_page.memory );
 		XMLNode *root = doc.root();
 
 		if (!root) {
-			std::cout << "no root XML node!" << std::endl;
+			DEBUG_TRACE (DEBUG::Soundcloud, "no root XML node!");
 			return "";
 		}
 
 		XMLNode *url_node = root->child("permalink-url");
 		if (!url_node) {
-			std::cout << "no child node \"permalink-url\" found!" << std::endl;
+			DEBUG_TRACE (DEBUG::Soundcloud, "no child node \"permalink-url\" found!");
 			return "";
 		}
 
 		XMLNode *text_node = url_node->child("text");
 		if (!text_node) {
-			std::cout << "no text node found!" << std::endl;
+			DEBUG_TRACE (DEBUG::Soundcloud, "no text node found!");
 			return "";
 		}
 

@@ -63,5 +63,6 @@ uint64_t PBD::DEBUG::Automation = PBD::new_debug_bit ("automation");
 uint64_t PBD::DEBUG::WiimoteControl = PBD::new_debug_bit ("wiimotecontrol");
 uint64_t PBD::DEBUG::Ports = PBD::new_debug_bit ("Ports");
 uint64_t PBD::DEBUG::AudioEngine = PBD::new_debug_bit ("AudioEngine");
+uint64_t PBD::DEBUG::Soundcloud = PBD::new_debug_bit ("Soundcloud");
 
 
