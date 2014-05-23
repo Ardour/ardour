@@ -1351,21 +1351,6 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		return false;
 	}
 
-	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->_track_canvas_viewport->get_window();
-
-	if (canvas_window) {
-		Glib::RefPtr<const Gdk::Window> pointer_window;
-		int x, y;
-		double wx, wy;
-		Gdk::ModifierType mask;
-
-		pointer_window = canvas_window->get_pointer (x, y, mask);
-
-		if (pointer_window == _track_canvas->get_window()) {
-			_track_canvas->window_to_canvas (x, y, wx, wy);
-		}
-	}
-
         pre_press_cursor = current_canvas_cursor;
 
 	_track_canvas->grab_focus();
