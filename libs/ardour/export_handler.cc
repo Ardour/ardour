@@ -354,6 +354,7 @@ ExportHandler::finish_timespan ()
 					PBD::basename_nosuffix(filepath), // title
 					token,
 					soundcloud_make_public,
+					soundcloud_downloadable,
 					this);
 
 			if (path.length() != 0) {

@@ -35,7 +35,7 @@ public:
 	~SoundcloudUploader();
 
 	std::string	Get_Auth_Token(std::string username, std::string password);
-	std::string Upload (std::string file_path, std::string title, std::string token, bool ispublic, ARDOUR::ExportHandler *caller);
+	std::string Upload (std::string file_path, std::string title, std::string token, bool ispublic, bool downloadable, ARDOUR::ExportHandler *caller);
 	static int progress_callback(void *caller, double dltotal, double dlnow, double ultotal, double ulnow);
 
 

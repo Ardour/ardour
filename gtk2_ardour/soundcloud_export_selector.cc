@@ -40,15 +40,17 @@ using namespace PBD;
 
 SoundcloudExportSelector::SoundcloudExportSelector() :
 	  sc_table (4, 3),
-	  soundcloud_public_checkbox (_("Make file(s) public")),
 	  soundcloud_username_label (_("User Email"), 1.0, 0.5),
 	  soundcloud_password_label (_("Password"), 1.0, 0.5),
+	  soundcloud_public_checkbox (_("Make files public")),
 	  soundcloud_open_checkbox (_("Open uploaded files in browser")),
+	  soundcloud_download_checkbox (_("Make files downloadable")),
 	  progress_bar()
 {
 
 
 	soundcloud_public_checkbox.set_name ("ExportCheckbox");
+	soundcloud_download_checkbox.set_name ("ExportCheckbox");
 	soundcloud_username_label.set_name ("ExportFormatLabel");
 	soundcloud_username_entry.set_name ("ExportFormatDisplay");
 	soundcloud_password_label.set_name ("ExportFormatLabel");
@@ -63,7 +65,7 @@ SoundcloudExportSelector::SoundcloudExportSelector() :
 	sc_frame->set_name("soundcloud_export_box");
 	pack_start(*sc_frame, false, false);
 
-	sc_table.set_border_width(4);
+	sc_table.set_border_width (4);
 	sc_table.set_col_spacings (5);
 	sc_table.set_row_spacings (5);
 	sc_frame->add (sc_table);
@@ -71,12 +73,13 @@ SoundcloudExportSelector::SoundcloudExportSelector() :
 	//		sc_table.attach ( *( manage (new EventBox (::get_icon (X_("soundcloud"))))) , 0, 1,  0, 1);
 	sc_table.attach ( *(Gtk::manage (new Gtk::Image (get_icon (X_("soundcloud"))))) , 0, 1,  0, 2);
 
-	sc_table.attach (soundcloud_public_checkbox, 2, 3,  1, 2);
-	sc_table.attach (soundcloud_username_label, 0, 1,  3, 4);
-	sc_table.attach (soundcloud_username_entry, 1, 3,  3, 4);
-	sc_table.attach (soundcloud_password_label, 0, 1,  5, 6);
-	sc_table.attach (soundcloud_password_entry, 1, 3,  5, 6);
-	sc_table.attach (soundcloud_open_checkbox, 2, 3,  7, 8);
+	sc_table.attach (soundcloud_username_label,    0, 1,  1, 2);
+	sc_table.attach (soundcloud_username_entry,    1, 3,  1, 2);
+	sc_table.attach (soundcloud_password_label,    0, 1,  2, 3);
+	sc_table.attach (soundcloud_password_entry,    1, 3,  2, 3);
+	sc_table.attach (soundcloud_public_checkbox,   2, 3,  3, 4);
+	sc_table.attach (soundcloud_open_checkbox,     2, 3,  4, 5);
+	sc_table.attach (soundcloud_download_checkbox, 2, 3,  5, 6);
 
 	pack_end(progress_bar, false, false);
 	sc_frame->show_all();
