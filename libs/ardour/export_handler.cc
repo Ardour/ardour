@@ -364,6 +364,7 @@ ExportHandler::finish_timespan ()
 					this);
 
 			if (path.length() != 0) {
+				info << string_compose ( _("File %1 uploaded to %2"), filename, path) << endmsg;
 				if (soundcloud_open_page) {
 					std::cerr << "opening " << path << " ..." << std::endl;
 					open_uri(path.c_str());  // open the soundcloud website to the new file
