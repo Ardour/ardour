@@ -72,7 +72,6 @@ private:
 	/** Representation of a single arrow head */
 	struct Head {
 		Polygon* polygon; ///< the polygon which represents its shape
-		bool show;        ///< true if this head should be visible
 		bool outward;     ///< true if this head points out from the line
 		Distance height;  ///< the height of the head
 		Distance width;   ///< the maximum width of the head
