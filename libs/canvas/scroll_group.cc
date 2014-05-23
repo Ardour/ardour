@@ -17,6 +17,10 @@
 */
 
 #include <iostream>
+
+#include "pbd/compose.h"
+
+#include "canvas/debug.h"
 #include "canvas/scroll_group.h"
 
 using namespace std;
@@ -37,26 +41,11 @@ ScrollGroup::ScrollGroup (Group* parent, Duple position, ScrollSensitivity s)
 void
 ScrollGroup::scroll_to (Duple const& d)
 {
-	/* get the nominal position of the group without scroll being in effect
-	 */
-
-	Duple base_pos (_position.translate (_scroll_offset));
-
-	/* compute a new position given our sensitivity to h- and v-scrolling 
-	 */
-
 	if (_scroll_sensitivity & ScrollsHorizontally) {
-		base_pos.x -= d.x;
 		_scroll_offset.x = d.x;
 	}
 
 	if (_scroll_sensitivity & ScrollsVertically) {
-		base_pos.y -= d.y;
 		_scroll_offset.y = d.y;
 	}
-
-	/* move there */
-
-	set_position (base_pos);
 }
-

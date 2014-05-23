@@ -61,7 +61,7 @@ public:
 	Canvas ();
 	virtual ~Canvas () {}
 
-	/** called to request a redraw of an area of the canvas */
+	/** called to request a redraw of an area of the canvas in WINDOW coordinates */
 	virtual void request_redraw (Rect const &) = 0;
 	/** called to ask the canvas to request a particular size from its host */
 	virtual void request_size (Duple) = 0;
@@ -90,7 +90,6 @@ public:
 	void item_moved (Item *, boost::optional<Rect>);
 
         virtual Cairo::RefPtr<Cairo::Context> context () = 0;
-
         Rect canvas_to_window (Rect const&, bool rounded = true) const;
         Rect window_to_canvas (Rect const&) const;
         Duple canvas_to_window (Duple const&, bool rounded = true) const;
@@ -109,6 +108,7 @@ public:
         }
 
         void scroll_to (Coord x, Coord y);
+	Duple scroll_offset() const { return _scroll_offset; }
 	void add_scroller (ScrollGroup& i);
         
         virtual Rect visible_area () const = 0;

@@ -66,6 +66,8 @@ Item::init ()
 		_parent->add (this);
 	}
 
+	find_scroll_parent ();
+
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 }	
 
@@ -89,18 +91,10 @@ Item::item_to_parent (ArdourCanvas::Rect const & r) const
 Duple
 Item::scroll_offset () const
 {
-	Item const * i = this;
-	Duple offset;
-
-	while (i) {
-		ScrollGroup const * sg = dynamic_cast<ScrollGroup const *> (i);
-		if (sg) {
-			offset = offset.translate (sg->scroll_offset());
-		}
-		i = i->parent();
-	}
-
-	return offset;
+	if (_scroll_parent) {
+		return _scroll_parent->scroll_offset();
+	} 
+	return _canvas->scroll_offset();
 }
 
 Duple
@@ -110,7 +104,7 @@ Item::position_offset() const
 	Duple offset;
 
 	while (i) {
-		offset = offset.translate (i->canvas_position());
+		offset = offset.translate (i->position());
 		i = i->parent();
 	}
 
@@ -163,7 +157,12 @@ Item::canvas_to_item (Coord& x, Coord& y) const
 Duple
 Item::item_to_window (ArdourCanvas::Duple const & d, bool rounded) const
 {
-	return item_to_canvas (d).translate (-scroll_offset());
+	Duple ret = item_to_canvas (d).translate (-scroll_offset());
+
+	ret.x = round (ret.x);
+	ret.y = round (ret.y);
+
+	return ret;
 }
 
 Duple
@@ -175,7 +174,14 @@ Item::window_to_item (ArdourCanvas::Duple const & d) const
 ArdourCanvas::Rect
 Item::item_to_window (ArdourCanvas::Rect const & r) const
 {
-	return item_to_canvas (r).translate (-scroll_offset());
+	Rect ret = item_to_canvas (r).translate (-scroll_offset());
+
+	ret.x0 = round (ret.x0);
+	ret.x1 = round (ret.x1);
+	ret.y0 = round (ret.y0);
+	ret.y1 = round (ret.y1);
+
+	return ret;
 }
 
 ArdourCanvas::Rect
@@ -284,6 +290,7 @@ void
 Item::unparent ()
 {
 	_parent = 0;
+	_scroll_parent = 0;
 }
 
 void
@@ -299,7 +306,27 @@ Item::reparent (Group* new_parent)
 
 	_parent = new_parent;
 	_canvas = _parent->canvas ();
+
+	find_scroll_parent ();
+
 	_parent->add (this);
+}
+
+void
+Item::find_scroll_parent ()
+{
+	Item const * i = this;
+	ScrollGroup const * last_scroll_group = 0;
+
+	while (i) {
+		ScrollGroup const * sg = dynamic_cast<ScrollGroup const *> (i);
+		if (sg) {
+			last_scroll_group = sg;
+		}
+		i = i->parent();
+	}
+	
+	_scroll_parent = const_cast<ScrollGroup*> (last_scroll_group);
 }
 
 bool
@@ -444,7 +471,7 @@ void
 Item::redraw () const
 {
 	if (_visible && _bounding_box && _canvas) {
-		_canvas->request_redraw (item_to_canvas (_bounding_box.get()));
+		_canvas->request_redraw (item_to_window (_bounding_box.get()));
 	}
 }	
 
