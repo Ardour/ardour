@@ -170,6 +170,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	, _normalize_target (1.0)
 	, _with_toc (false)
 	, _with_cue (false)
+	, _soundcloud_upload (false)
 	, _command ("")
 {
 	format_ids.insert (F_None);
