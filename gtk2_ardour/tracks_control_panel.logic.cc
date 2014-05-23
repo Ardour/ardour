@@ -797,7 +797,7 @@ TracksControlPanel::on_output_configuration_changed()
         
         if (control) {
             
-            const char * id_name = (char*ope)control->get_data(DeviceConnectionControl::id_name);
+            const char * id_name = (char*)control->get_data(DeviceConnectionControl::id_name);
             
             bool new_state = EngineStateController::instance()->get_physical_audio_output_state(id_name );
             
