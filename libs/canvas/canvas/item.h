@@ -37,6 +37,7 @@ namespace ArdourCanvas
 class Canvas;
 class Group;
 class Rect;	
+class ScrollGroup;
 
 /** The parent class for anything that goes on the canvas.
  *
@@ -116,10 +117,6 @@ public:
 
 	/** @return Position of this item in the parent's coordinates */
 	Duple position () const {
-		return _position;
-	}
-
-	virtual Duple canvas_position () const {
 		return _position;
 	}
 
@@ -224,6 +221,8 @@ protected:
 	Canvas* _canvas;
 	/** parent group; may be 0 if we are the root group or if we have been unparent()ed */
 	Group* _parent;
+	/** scroll parent group; may be 0 if we are the root group or if we have been unparent()ed */
+	ScrollGroup* _scroll_parent;
 	/** position of this item in parent coordinates */
 	Duple _position;
 	/** true if this item is visible (ie to be drawn), otherwise false */
@@ -246,6 +245,8 @@ private:
 
 	Duple scroll_offset() const;
 	Duple position_offset() const;
+
+	void find_scroll_parent ();
 };
 
 extern LIBCANVAS_API std::ostream& operator<< (std::ostream&, const ArdourCanvas::Item&);

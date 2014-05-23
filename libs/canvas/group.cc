@@ -61,7 +61,7 @@ Group::~Group ()
 	clear_items (true);
 }
 
-/** @param area Area to draw in this group's coordinates.
+/** @param area Area to draw in window coordinates.
  *  @param context Context, set up with its origin at this group's position.
  */
 void

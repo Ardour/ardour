@@ -80,7 +80,7 @@ Canvas::zoomed ()
 }
 
 /** Render an area of the canvas.
- *  @param area Area in canvas coordinates.
+ *  @param area Area in window coordinates.
  *  @param context Cairo context to render to.
  */
 void
@@ -207,13 +207,13 @@ Canvas::item_changed (Item* item, boost::optional<Rect> pre_change_bounding_box)
 Duple
 Canvas::window_to_canvas (Duple const & d) const
 {
-	return d.translate (Duple (_scroll_offset.x, _scroll_offset.y));
+	return d.translate (_scroll_offset);
 }
 
 Duple
 Canvas::canvas_to_window (Duple const & d, bool rounded) const
 {
-	Duple wd = d.translate (Duple (-_scroll_offset.x, -_scroll_offset.y));
+	Duple wd = d.translate (-_scroll_offset);
 
 	/* Note that this intentionally almost always returns integer coordinates */
 
@@ -283,9 +283,7 @@ Canvas::item_moved (Item* item, boost::optional<Rect> pre_change_parent_bounding
 void
 Canvas::queue_draw_item_area (Item* item, Rect area)
 {
-	ArdourCanvas::Rect canvas_area = item->item_to_canvas (area);
-	// cerr << "CANVAS " << this << " for " << item << ' ' << item->whatami() << ' ' << item->name << " invalidate " << area << " TRANSLATE AS " << canvas_area << " window = " << canvas_to_window (canvas_area) << std::endl;
-	request_redraw (canvas_area);
+	request_redraw (item->item_to_window (area));
 }
 
 /** Construct a GtkCanvas */
@@ -750,18 +748,12 @@ GtkCanvas::on_leave_notify_event (GdkEventCrossing* ev)
 }
 
 /** Called to request a redraw of our canvas.
- *  @param area Area to redraw, in canvas coordinates.
+ *  @param area Area to redraw, in window coordinates.
  */
 void
 GtkCanvas::request_redraw (Rect const & request)
 {
-	boost::optional<Rect> req = request.intersection (visible_area());
-
-	if (req) {
-		Rect r = req.get();
-		Rect area = canvas_to_window (r);
-		queue_draw_area (area.x0, area.y0, area.width(), area.height());
-	}
+	queue_draw_area (request.x0, request.y0, request.width(), request.height());
 }
 
 /** Called to request that we try to get a particular size for ourselves.

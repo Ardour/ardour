@@ -35,16 +35,8 @@ class LIBCANVAS_API ScrollGroup : public Group
 	explicit ScrollGroup (Group *, Duple, ScrollSensitivity);
 
 	void scroll_to (Duple const& d);
-
-	/** return the normal "base" position of this item
-	    rather its position as affected by any scroll
-	    offset.
-	*/
-	Duple canvas_position() const {
-		return _position.translate (_scroll_offset);
-	}
-
 	Duple scroll_offset() const { return _scroll_offset; }
+
   private:
 	ScrollSensitivity _scroll_sensitivity;
 	Duple             _scroll_offset;
