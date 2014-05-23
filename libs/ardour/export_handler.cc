@@ -325,8 +325,8 @@ ExportHandler::finish_timespan ()
 			subs.insert (std::pair<char, std::string> ('f', filename));
 			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname(filename)));
 			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix(filename)));
-			subs.insert (std::pair<char, std::string> ('u', upload_username));
-			subs.insert (std::pair<char, std::string> ('p', upload_password));
+			subs.insert (std::pair<char, std::string> ('u', soundcloud_username));
+			subs.insert (std::pair<char, std::string> ('p', soundcloud_password));
 
 
 			std::cerr << "running command: " << fmt->command() << "..." << std::endl;
@@ -347,25 +347,25 @@ ExportHandler::finish_timespan ()
 
 		if (fmt->soundcloud_upload()) {
 			SoundcloudUploader *soundcloud_uploader = new SoundcloudUploader;
-			std::string token = soundcloud_uploader->Get_Auth_Token(upload_username, upload_password);
+			std::string token = soundcloud_uploader->Get_Auth_Token(soundcloud_username, soundcloud_password);
 			std::cerr
 				<< "uploading "
 				<< filename << std::endl
-				<< "username = " << upload_username
-				<< ", password = " << upload_password
+				<< "username = " << soundcloud_username
+				<< ", password = " << soundcloud_password
 				<< " - token = " << token << " ..."
 				<< std::endl;
 			std::string path = soundcloud_uploader->Upload (
 					filename,
 					PBD::basename_nosuffix(filename), // title
 					token,
-					upload_public,
+					soundcloud_make_public,
 					this);
 
 			if (path.length() != 0) {
-				if (upload_open) {
-				std::cerr << "opening " << path << " ..." << std::endl;
-				open_uri(path.c_str());  // open the soundcloud website to the new file
+				if (soundcloud_open_page) {
+					std::cerr << "opening " << path << " ..." << std::endl;
+					open_uri(path.c_str());  // open the soundcloud website to the new file
 				}
 			} else {
 				error << _("upload to Soundcloud failed.  Perhaps your email or password are incorrect?\n") << endmsg;

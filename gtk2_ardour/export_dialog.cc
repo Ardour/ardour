@@ -271,10 +271,10 @@ ExportDialog::do_export ()
 {
 	try {
 		profile_manager->prepare_for_export ();
-		handler->upload_username = soundcloud_selector->username();
-		handler->upload_password = soundcloud_selector->password();
-		handler->upload_public   = soundcloud_selector->upload_public();
-		handler->upload_open     = soundcloud_selector->upload_open();
+		handler->soundcloud_username    = soundcloud_selector->username ();
+		handler->soundcloud_password    = soundcloud_selector->password ();
+		handler->soundcloud_make_public = soundcloud_selector->make_public ();
+		handler->soundcloud_open_page   = soundcloud_selector->open_page ();
 
 		handler->SoundcloudProgress.connect_same_thread(
 				*this, 

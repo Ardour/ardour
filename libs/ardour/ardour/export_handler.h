@@ -114,10 +114,10 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	PBD::Signal3<void, double, double, std::string> SoundcloudProgress;
 
 	/* upload credentials & preferences */
-	std::string upload_username;
-	std::string upload_password;
-	bool upload_public;
-	bool upload_open;
+	std::string soundcloud_username;
+	std::string soundcloud_password;
+	bool soundcloud_make_public;
+	bool soundcloud_open_page;
 
   private:
 

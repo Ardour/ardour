@@ -22,8 +22,8 @@ class SoundcloudExportSelector : public Gtk::VBox, public ARDOUR::SessionHandleP
 	int do_progress_callback (double ultotal, double ulnow, const std::string &filename);
 	std::string username () { return soundcloud_username_entry.get_text (); }
 	std::string password () { return soundcloud_password_entry.get_text (); }
-	bool upload_public () { return soundcloud_public_checkbox.get_active (); }
-	bool upload_open () { return soundcloud_open_checkbox.get_active (); }
+	bool make_public  () { return soundcloud_public_checkbox.get_active (); }
+	bool open_page    () { return soundcloud_open_checkbox.get_active (); }
 	void cancel () { soundcloud_cancel = true; }
 
   private:
