@@ -65,6 +65,8 @@ BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 
 #include "pbd/abstract_ui.cc"  /* instantiate the template */
 
+template class AbstractUI<Gtkmm2ext::UIRequest>;
+
 UI::UI (string namestr, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (namestr)
 	, _receiver (*this)
