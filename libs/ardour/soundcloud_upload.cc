@@ -198,6 +198,14 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 			CURLFORM_COPYCONTENTS, ispublic ? "public" : "private",
 			CURLFORM_END);
 
+	curl_formadd(&formpost,
+			&lastptr,
+			CURLFORM_COPYNAME, "track[downloadable]",
+			CURLFORM_COPYCONTENTS, downloadable ? "true" : "false",
+			CURLFORM_END);
+
+
+
 	/* initalize custom header list (stating that Expect: 100-continue is not
 	   wanted */ 
 	struct curl_slist *headerlist=NULL;
