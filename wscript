@@ -148,15 +148,6 @@ def set_compiler_flags (conf,opt):
     # waf adds -O0 -g itself. thanks waf!
     is_clang = conf.env['CXX'][0].endswith('clang++')
     
-    if conf.options.cxx11 or conf.env['build_target'] == 'mavericks':
-        conf.check_cxx(cxxflags=["-std=c++11"])
-        cxx_flags.append('-std=c++11')
-        if platform == "darwin":
-            cxx_flags.append('-stdlib=libc++')
-            linker_flags.append('-lc++')
-            # Prevents visibility issues in standard headers
-            conf.define("_DARWIN_C_SOURCE", 1)
-
     if conf.options.asan:
         conf.check_cxx(cxxflags=["-fsanitize=address", "-fno-omit-frame-pointer"], linkflags=["-fsanitize=address"])
         cxx_flags.append('-fsanitize=address')
@@ -186,8 +177,10 @@ def set_compiler_flags (conf,opt):
                 conf.env['build_target'] = 'snowleopard'
             elif re.search ("^11[.]", version) != None:
                 conf.env['build_target'] = 'lion'
-            else:
+            elif re.search ("^12[.]", version) != None:
                 conf.env['build_target'] = 'mountainlion'
+            else:
+                conf.env['build_target'] = 'mavericks' # 13.0.0
         else:
             match = re.search(
                     "(?P<cpu>i[0-6]86|x86_64|powerpc|ppc|ppc64|arm|s390x?)",
@@ -207,6 +200,15 @@ def set_compiler_flags (conf,opt):
         # from being visible.
         # 
         compiler_flags.append ('-U__STRICT_ANSI__')
+
+    if conf.options.cxx11 or conf.env['build_target'] == 'mavericks':
+        conf.check_cxx(cxxflags=["-std=c++11"])
+        cxx_flags.append('-std=c++11')
+        if platform == "darwin":
+            cxx_flags.append('-stdlib=libc++')
+            linker_flags.append('-lc++')
+            # Prevents visibility issues in standard headers
+            conf.define("_DARWIN_C_SOURCE", 1)
 
     if ((re.search ("i[0-9]86", cpu) != None) or (re.search ("x86_64", cpu) != None)) and conf.env['build_target'] != 'none':
 
