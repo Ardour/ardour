@@ -126,7 +126,7 @@ Arc::set_start (double deg)
 bool
 Arc::covers (Duple const & point) const
 {
-	Duple p = canvas_to_item (point);
+	Duple p = window_to_item (point);
 
 	double angle_degs = atan (p.y/p.x) * 2.0 * M_PI;
 	double radius = sqrt (p.x * p.x + p.y * p.y);

@@ -235,7 +235,7 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 bool
 Curve::covers (Duple const & pc) const
 {
-	Duple point = canvas_to_item (pc);
+	Duple point = window_to_item (pc);
 
 	/* O(N) N = number of points, and not accurate */
 

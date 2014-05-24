@@ -159,7 +159,7 @@ Line::set_y1 (Coord y1)
 bool
 Line::covers (Duple const & point) const
 {
-	const Duple p = canvas_to_item (point);
+	const Duple p = window_to_item (point);
 	static const Distance threshold = 2.0;
 
 	/* this quick check works for vertical and horizontal lines, which are

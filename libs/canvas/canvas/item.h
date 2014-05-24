@@ -73,7 +73,16 @@ public:
 	 */
 	virtual void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const = 0;
 
-	virtual void add_items_at_point (Duple, std::vector<Item const *>& items) const {
+	/** Adds one or more items to the vector @param items based on their
+	 * covering @param point which is in **window** coordinates
+	 *
+	 * Note that Item::add_items_at_window_point() is only intended to be 
+	 * called on items already looked up in a LookupTable (i.e. by a
+	 * parent group) and thus known to cover @param point already.
+	 *
+	 * Derived classes may add more items than themselves (e.g. Group).
+	 */
+	virtual void add_items_at_point (Duple /*point*/, std::vector<Item const *>& items) const {
 		items.push_back (this);
 	}
 

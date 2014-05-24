@@ -46,7 +46,7 @@ PolyLine::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 bool
 PolyLine::covers (Duple const & point) const
 {
-	Duple p = canvas_to_item (point);
+	Duple p = window_to_item (point);
 
 	const Points::size_type npoints = _points.size();
 	

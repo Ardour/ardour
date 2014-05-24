@@ -318,6 +318,11 @@ Item::find_scroll_parent ()
 	Item const * i = this;
 	ScrollGroup const * last_scroll_group = 0;
 
+	/* Don't allow a scroll group to find itself as its own scroll parent
+	 */
+
+	i = i->parent ();
+
 	while (i) {
 		ScrollGroup const * sg = dynamic_cast<ScrollGroup const *> (i);
 		if (sg) {
@@ -591,7 +596,7 @@ Item::depth () const
 bool
 Item::covers (Duple const & point) const
 {
-	Duple p = canvas_to_item (point);
+	Duple p = window_to_item (point);
 
 	if (_bounding_box_dirty) {
 		compute_bounding_box ();
