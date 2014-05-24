@@ -35,6 +35,8 @@
 
 namespace ARDOUR {
 
+class DummyAudioBackend;
+
 class DummyMidiEvent {
 	public:
 		DummyMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size);
@@ -55,7 +57,7 @@ typedef std::vector<boost::shared_ptr<DummyMidiEvent> > DummyMidiBuffer;
 
 class DummyPort {
 	protected:
-		DummyPort (const std::string&, PortFlags);
+		DummyPort (DummyAudioBackend &b, const std::string&, PortFlags);
 	public:
 		virtual ~DummyPort ();
 
@@ -100,6 +102,7 @@ class DummyPort {
 		}
 
 	private:
+		DummyAudioBackend &_dummy_backend;
 		std::string _name;
 		const PortFlags _flags;
 		LatencyRange _capture_latency_range;
@@ -113,7 +116,7 @@ class DummyPort {
 
 class DummyAudioPort : public DummyPort {
 	public:
-		DummyAudioPort (const std::string&, PortFlags);
+		DummyAudioPort (DummyAudioBackend &b, const std::string&, PortFlags);
 		~DummyAudioPort ();
 
 		DataType type () const { return DataType::AUDIO; };
@@ -128,7 +131,7 @@ class DummyAudioPort : public DummyPort {
 
 class DummyMidiPort : public DummyPort {
 	public:
-		DummyMidiPort (const std::string&, PortFlags);
+		DummyMidiPort (DummyAudioBackend &b, const std::string&, PortFlags);
 		~DummyMidiPort ();
 
 		DataType type () const { return DataType::MIDI; };
@@ -141,6 +144,7 @@ class DummyMidiPort : public DummyPort {
 }; // class DummyMidiPort
 
 class DummyAudioBackend : public AudioBackend {
+	friend class DummyPort;
 	public:
 	         DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info);
 		~DummyAudioBackend ();
@@ -312,9 +316,29 @@ class DummyAudioBackend : public AudioBackend {
 
 		std::vector<DummyPort *> _ports;
 
+
+		struct PortConnectData {
+			std::string a;
+			std::string b;
+			bool c;
+
+			PortConnectData (const std::string& a, const std::string& b, bool c)
+				: a (a) , b (b) , c (c) {}
+		};
+
+		std::vector<PortConnectData *> _port_connection_queue;
+		pthread_mutex_t _port_callback_mutex;
+
+		void port_connect_callback (const std::string& a, const std::string& b, bool conn) {
+			pthread_mutex_lock (&_port_callback_mutex);
+			_port_connection_queue.push_back(new PortConnectData(a, b, conn));
+			pthread_mutex_unlock (&_port_callback_mutex);
+		}
+
 		bool valid_port (PortHandle port) const {
 			return std::find (_ports.begin (), _ports.end (), (DummyPort*)port) != _ports.end ();
 		}
+
 		DummyPort * find_port (const std::string& port_name) const {
 			for (std::vector<DummyPort*>::const_iterator it = _ports.begin (); it != _ports.end (); ++it) {
 				if ((*it)->name () == port_name) {
