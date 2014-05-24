@@ -315,7 +315,7 @@ GtkCanvas::pick_current_item (int state)
 		return;
 	}
 
-	pick_current_item (window_to_canvas (Duple (x, y)), state);
+	pick_current_item (Duple (x, y), state);
 }
 		
 void
@@ -388,6 +388,9 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 	}
 }
 
+/** Deliver a series of enter & leave events based on the pointer position being at window
+ * coordinate @param point, and pointer @param state (modifier keys, etc)
+ */
 void
 GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 {
@@ -449,7 +452,6 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 		 * heirarchy between current and new_current.
 		 */
 		
-
 		for (i = _current_item->parent(); i && i != _new_current_item; i = i->parent()) {
 			items_to_leave_virtual.push_back (i);
 		}
@@ -658,7 +660,10 @@ GtkCanvas::on_button_press_event (GdkEventButton* ev)
 	/* translate event coordinates from window to canvas */
 
 	GdkEvent copy = *((GdkEvent*)ev);
-	Duple where = window_to_canvas (Duple (ev->x, ev->y));
+	Duple winpos = Duple (ev->x, ev->y);
+	Duple where = window_to_canvas (winpos);
+	
+	pick_current_item (winpos, ev->state);
 
 	copy.button.x = where.x;
 	copy.button.y = where.y;
@@ -667,7 +672,6 @@ GtkCanvas::on_button_press_event (GdkEventButton* ev)
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
 
-	pick_current_item (where, ev->state);
 	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas button press @ %1, %2 => %3\n", ev->x, ev->y, where));
 	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
 }
@@ -682,9 +686,10 @@ GtkCanvas::on_button_release_event (GdkEventButton* ev)
 	/* translate event coordinates from window to canvas */
 
 	GdkEvent copy = *((GdkEvent*)ev);
-	Duple where = window_to_canvas (Duple (ev->x, ev->y));
+	Duple winpos = Duple (ev->x, ev->y);
+	Duple where = window_to_canvas (winpos);
 	
-	pick_current_item (where, ev->state);
+	pick_current_item (winpos, ev->state);
 
 	copy.button.x = where.x;
 	copy.button.y = where.y;
@@ -719,7 +724,7 @@ GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 
 	// DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas motion @ %1, %2\n", ev->x, ev->y));
 
-	pick_current_item (where, ev->state);
+	pick_current_item (point, ev->state);
 
 	/* Now deliver the motion event.  It may seem a little inefficient
 	   to recompute the items under the event, but the enter notify/leave
@@ -733,8 +738,7 @@ GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 bool
 GtkCanvas::on_enter_notify_event (GdkEventCrossing* ev)
 {
-	Duple where = window_to_canvas (Duple (ev->x, ev->y));
-	pick_current_item (where, ev->state);
+	pick_current_item (Duple (ev->x, ev->y), ev->state);
 	return true;
 }
 
@@ -742,8 +746,7 @@ bool
 GtkCanvas::on_leave_notify_event (GdkEventCrossing* ev)
 {
 	_new_current_item = 0;
-	Duple where = window_to_canvas (Duple (ev->x, ev->y));
-	deliver_enter_leave (where, ev->state);
+	deliver_enter_leave (Duple (ev->x, ev->y), ev->state);
 	return true;
 }
 

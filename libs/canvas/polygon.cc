@@ -103,7 +103,7 @@ Polygon::cache_shape_computation () const
 bool 
 Polygon::covers (Duple const & point) const
 {
-	Duple p = canvas_to_item (point);
+	Duple p = window_to_item (point);
 
 	Points::size_type npoints = _points.size();
 

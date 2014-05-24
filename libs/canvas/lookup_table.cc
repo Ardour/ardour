@@ -52,7 +52,7 @@ DumbLookupTable::get (Rect const &)
 vector<Item *>
 DumbLookupTable::items_at_point (Duple const & point) const
 {
-	/* Point is in canvas coordinate system */
+	/* Point is in window coordinate system */
 
 	list<Item *> const & items (_group.items ());
 	vector<Item *> vitems;
@@ -71,7 +71,7 @@ DumbLookupTable::items_at_point (Duple const & point) const
 bool
 DumbLookupTable::has_item_at_point (Duple const & point) const
 {
-	/* Point is in canvas coordinate system */
+	/* Point is in window coordinate system */
 
 	list<Item *> const & items (_group.items ());
 	vector<Item *> vitems;
