@@ -148,7 +148,7 @@ def set_compiler_flags (conf,opt):
     # waf adds -O0 -g itself. thanks waf!
     is_clang = conf.env['CXX'][0].endswith('clang++')
     
-    if conf.options.cxx11:
+    if conf.options.cxx11 or bld.env['build_target'] == 'mavericks':
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
         if platform == "darwin":
