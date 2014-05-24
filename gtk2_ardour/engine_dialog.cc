@@ -652,6 +652,7 @@ EngineControl::EngineControl ()
 
 	 if (backend->requires_driver_selection()) {
 		 vector<string> drivers = backend->enumerate_drivers();
+		 driver_combo.set_sensitive (true);
 
 		 if (!drivers.empty()) {
 			 {
