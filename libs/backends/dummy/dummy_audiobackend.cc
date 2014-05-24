@@ -317,6 +317,7 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 		return -1;
 	}
 
+	engine.buffer_size_change (_samples_per_period);
 	engine.reconnect_ports ();
 
 	if (pthread_create (&_main_thread, NULL, pthread_process, this)) {
@@ -339,7 +340,7 @@ DummyAudioBackend::stop ()
 {
 	void *status;
 	if (!_running) {
-		return -1;
+		return 0;
 	}
 
 	_running = false;
@@ -844,14 +845,14 @@ DummyAudioBackend::midi_event_put (
 uint32_t
 DummyAudioBackend::get_midi_event_count (void* port_buffer)
 {
-	assert (port_buffer && _running);
+	assert (port_buffer);
 	return static_cast<DummyMidiBuffer*>(port_buffer)->size ();
 }
 
 void
 DummyAudioBackend::midi_clear (void* port_buffer)
 {
-	assert (port_buffer && _running);
+	assert (port_buffer);
 	DummyMidiBuffer * buf = static_cast<DummyMidiBuffer*>(port_buffer);
 	assert (buf);
 	buf->clear ();
@@ -988,7 +989,7 @@ DummyAudioBackend::n_physical_inputs () const
 void*
 DummyAudioBackend::get_buffer (PortEngine::PortHandle port, pframes_t nframes)
 {
-	assert (port && _running);
+	assert (port);
 	assert (valid_port (port));
 	return static_cast<DummyPort*>(port)->get_buffer (nframes);
 }
