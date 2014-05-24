@@ -23,7 +23,9 @@
 #include <glibmm.h>
 
 #include "dummy_audiobackend.h"
+
 #include "pbd/error.h"
+#include "ardour/port_manager.h"
 #include "i18n.h"
 
 using namespace ARDOUR;
@@ -47,10 +49,12 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _processed_samples (0)
 {
 	_instance_name = s_instance_name;
+	pthread_mutex_init (&_port_callback_mutex, 0);
 }
 
 DummyAudioBackend::~DummyAudioBackend ()
 {
+	pthread_mutex_destroy (&_port_callback_mutex);
 }
 
 /* AUDIOBACKEND API */
@@ -583,10 +587,10 @@ DummyAudioBackend::add_port (
 	DummyPort* port = NULL;
 	switch (type) {
 		case DataType::AUDIO:
-			port = new DummyAudioPort (name, flags);
+			port = new DummyAudioPort (*this, name, flags);
 			break;
 		case DataType::MIDI:
-			port = new DummyMidiPort (name, flags);
+			port = new DummyMidiPort (*this, name, flags);
 			break;
 		default:
 			PBD::error << _("DummyBackend::register_port: Invalid Data Type.") << endmsg;
@@ -1019,6 +1023,17 @@ DummyAudioBackend::main_process_thread ()
 			Glib::usleep (100); // don't hog cpu
 		}
 		clock1 = g_get_monotonic_time();
+
+		if (!pthread_mutex_trylock (&_port_callback_mutex)) {
+			while (!_port_connection_queue.empty ()) {
+				PortConnectData *c = _port_connection_queue.back ();
+				manager.connect_callback (c->a, c->b, c->c);
+				_port_connection_queue.pop_back ();
+				delete c;
+			}
+			pthread_mutex_unlock (&_port_callback_mutex);
+		}
+
 	}
 	_running = false;
 	return 0;
@@ -1078,8 +1093,9 @@ extern "C" ARDOURBACKEND_API ARDOUR::AudioBackendInfo* descriptor ()
 
 
 /******************************************************************************/
-DummyPort::DummyPort (const std::string& name, PortFlags flags)
-	: _name  (name)
+DummyPort::DummyPort (DummyAudioBackend &b, const std::string& name, PortFlags flags)
+	: _dummy_backend (b)
+	, _name  (name)
 	, _flags (flags)
 {
 	_capture_latency_range.min = 0;
@@ -1139,6 +1155,7 @@ void DummyPort::_connect (DummyPort *port, bool callback)
 	_connections.push_back (port);
 	if (callback) {
 		port->_connect (this, false);
+		_dummy_backend.port_connect_callback (name(),  port->name(), true);
 	}
 }
 
@@ -1169,6 +1186,7 @@ void DummyPort::_disconnect (DummyPort *port, bool callback)
 
 	if (callback) {
 		port->_disconnect (this, false);
+		_dummy_backend.port_connect_callback (name(),  port->name(), false);
 	}
 }
 
@@ -1177,6 +1195,7 @@ void DummyPort::disconnect_all ()
 {
 	while (!_connections.empty ()) {
 		_connections.back ()->_disconnect (this, false);
+		_dummy_backend.port_connect_callback (name(),  _connections.back ()->name(), false);
 		_connections.pop_back ();
 	}
 }
@@ -1199,8 +1218,8 @@ bool DummyPort::is_physically_connected () const
 
 /******************************************************************************/
 
-DummyAudioPort::DummyAudioPort (const std::string& name, PortFlags flags)
-	: DummyPort (name, flags)
+DummyAudioPort::DummyAudioPort (DummyAudioBackend &b, const std::string& name, PortFlags flags)
+	: DummyPort (b, name, flags)
 {
 	memset (_buffer, 0, sizeof (_buffer));
 }
@@ -1234,8 +1253,8 @@ void* DummyAudioPort::get_buffer (pframes_t n_samples)
 }
 
 
-DummyMidiPort::DummyMidiPort (const std::string& name, PortFlags flags)
-	: DummyPort (name, flags)
+DummyMidiPort::DummyMidiPort (DummyAudioBackend &b, const std::string& name, PortFlags flags)
+	: DummyPort (b, name, flags)
 {
 	_buffer.clear ();
 }
