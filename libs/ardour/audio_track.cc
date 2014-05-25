@@ -417,38 +417,7 @@ AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nfram
 		}
 	}
 
-	// If no processing is required, there's no need to go any further.
-
-	if (!endpoint && !include_endpoint) {
-		return 0;
-	}
-
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-
-		if (!include_endpoint && (*i) == endpoint) {
-			break;
-		}
-		
-		/* if we're not exporting, stop processing if we come across a routing processor.
-		 */
-		
-		if (!for_export && (*i)->does_routing()) {
-			break;
-		}
-
-		/* even for export, don't run any processor that does routing. 
-
-		   oh, and don't bother with the peak meter either.
-		 */
-
-		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
-			(*i)->run (buffers, start, start+nframes, nframes, true);
-		}
-		
-		if ((*i) == endpoint) {
-			break;
-		}
-	}
+	bounce_process (buffers, start, nframes, endpoint, include_endpoint, for_export);
 
 	return 0;
 }
