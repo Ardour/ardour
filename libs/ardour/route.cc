@@ -536,6 +536,68 @@ Route::process_output_buffers (BufferSet& bufs,
 	}
 }
 
+void
+Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
+			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export)
+{
+	/* If no processing is required, there's no need to go any further. */
+	if (!endpoint && !include_endpoint) {
+		return;
+	}
+
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+
+		if (!include_endpoint && (*i) == endpoint) {
+			break;
+		}
+
+		/* if we're not exporting, stop processing if we come across a routing processor. */
+
+		if (!for_export && (*i)->does_routing()) {
+			break;
+		}
+
+		/* don't run any processors that does routing.
+		 * oh, and don't bother with the peak meter either.
+		 */
+		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
+			(*i)->run (buffers, start, start+nframes, nframes, true);
+		}
+
+		//buffers.set_count ((*i)->output_streams());
+
+		if ((*i) == endpoint) {
+			break;
+		}
+	}
+}
+
+framecnt_t
+Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export) const
+{
+	framecnt_t latency = 0;
+	if (!endpoint && !include_endpoint) {
+		return latency;
+	}
+
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+
+		if (!include_endpoint && (*i) == endpoint) {
+			break;
+		}
+		if (!for_export && (*i)->does_routing()) {
+			break;
+		}
+		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
+			latency += (*i)->signal_latency ();
+		}
+		if ((*i) == endpoint) {
+			break;
+		}
+	}
+	return latency;
+}
+
 ChanCount
 Route::n_process_buffers ()
 {

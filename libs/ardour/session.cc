@@ -4133,6 +4133,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	framepos_t position;
 	framecnt_t this_chunk;
 	framepos_t to_do;
+	framepos_t latency_skip;
 	BufferSet buffers;
 	SessionDirectory sdir(get_best_session_directory_for_new_source ());
 	const string sound_dir = sdir.sound_path();
@@ -4208,10 +4209,12 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 	position = start;
 	to_do = len;
+	latency_skip = track.bounce_get_latency (endpoint, include_endpoint, for_export);
 
 	/* create a set of reasonably-sized buffers */
-	buffers.ensure_buffers (DataType::AUDIO, max_proc.n_audio(), chunk_size);
-	buffers.ensure_buffers (DataType::MIDI, max_proc.n_midi(), chunk_size);
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		buffers.ensure_buffers(*t, max_proc.get(*t), chunk_size);
+	}
 	buffers.set_count (max_proc);
 
 	for (vector<boost::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
@@ -4228,6 +4231,40 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 			goto out;
 		}
 
+		start += this_chunk;
+		to_do -= this_chunk;
+		itt.progress = (float) (1.0 - ((double) to_do / len));
+
+		if (latency_skip >= chunk_size) {
+			latency_skip -= chunk_size;
+			continue;
+		}
+
+		const framecnt_t current_chunk = this_chunk - latency_skip;
+
+		uint32_t n = 0;
+		for (vector<boost::shared_ptr<Source> >::iterator src=srcs.begin(); src != srcs.end(); ++src, ++n) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
+
+			if (afs) {
+				if (afs->write (buffers.get_audio(n).data(latency_skip), current_chunk) != current_chunk) {
+					goto out;
+				}
+			}
+		}
+		latency_skip = 0;
+	}
+
+	/* post-roll, pick up delayed processor output */
+	latency_skip = track.bounce_get_latency (endpoint, include_endpoint, for_export);
+
+	while (latency_skip && !itt.cancel) {
+		this_chunk = min (latency_skip, chunk_size);
+		latency_skip -= this_chunk;
+
+		buffers.silence (this_chunk, 0);
+		track.bounce_process (buffers, start, this_chunk, endpoint, include_endpoint, for_export);
+
 		uint32_t n = 0;
 		for (vector<boost::shared_ptr<Source> >::iterator src=srcs.begin(); src != srcs.end(); ++src, ++n) {
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
@@ -4238,12 +4275,6 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 				}
 			}
 		}
-
-		start += this_chunk;
-		to_do -= this_chunk;
-
-		itt.progress = (float) (1.0 - ((double) to_do / len));
-
 	}
 
 	if (!itt.cancel) {
