@@ -564,7 +564,7 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 			(*i)->run (buffers, start, start+nframes, nframes, true);
 		}
 
-		//buffers.set_count ((*i)->output_streams());
+		buffers.set_count ((*i)->output_streams());
 
 		if ((*i) == endpoint) {
 			break;
@@ -596,6 +596,31 @@ Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_e
 		}
 	}
 	return latency;
+}
+
+ChanCount
+Route::bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export) const
+{
+	if (!endpoint && !include_endpoint) {
+		return cc;
+	}
+
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+
+		if (!include_endpoint && (*i) == endpoint) {
+			break;
+		}
+		if (!for_export && (*i)->does_routing()) {
+			break;
+		}
+		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
+			cc = (*i)->output_streams();
+		}
+		if ((*i) == endpoint) {
+			break;
+		}
+	}
+	return cc;
 }
 
 ChanCount

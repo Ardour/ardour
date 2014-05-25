@@ -476,6 +476,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	                             bool for_export);
 
 	framecnt_t   bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export) const;
+	ChanCount    bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export) const;
 
 	boost::shared_ptr<IO> _input;
 	boost::shared_ptr<IO> _output;

@@ -4148,6 +4148,13 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 		return result;
 	}
 
+	diskstream_channels = track.bounce_get_output_streams (diskstream_channels, endpoint, include_endpoint, for_export);
+
+	if (diskstream_channels.n_audio() < 1) {
+		error << _("Cannot write a range with no audio.") << endmsg;
+		return result;
+	}
+
 	const framecnt_t chunk_size = (256 * 1024)/4;
 
 	// block all process callback handling
