@@ -549,8 +549,7 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 		}
 
 		/* if we're not exporting, stop processing if we come across a routing processor. */
-
-		if (!for_export && (*i)->does_routing()) {
+		if (!for_export && boost::dynamic_pointer_cast<PortInsert>(*i)) {
 			break;
 		}
 
@@ -559,9 +558,8 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 		 */
 		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
 			(*i)->run (buffers, start, start+nframes, nframes, true);
+			buffers.set_count ((*i)->output_streams());
 		}
-
-		buffers.set_count ((*i)->output_streams());
 
 		if ((*i) == endpoint) {
 			break;
@@ -578,11 +576,10 @@ Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_e
 	}
 
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-
 		if (!include_endpoint && (*i) == endpoint) {
 			break;
 		}
-		if (!for_export && (*i)->does_routing()) {
+		if (!for_export && boost::dynamic_pointer_cast<PortInsert>(*i)) {
 			break;
 		}
 		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
@@ -603,11 +600,10 @@ Route::bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> en
 	}
 
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-
 		if (!include_endpoint && (*i) == endpoint) {
 			break;
 		}
-		if (!for_export && (*i)->does_routing()) {
+		if (!for_export && boost::dynamic_pointer_cast<PortInsert>(*i)) {
 			break;
 		}
 		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
