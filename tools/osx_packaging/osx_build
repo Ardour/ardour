@@ -557,6 +557,7 @@ if test x$WITH_HARVID != x ; then
 	echo "installing video tools.."
 	HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
 	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
+	MULTIARCH=osx
 	echo "copying harvid and xjadeo ..."
 
 	rsync -Pa \
