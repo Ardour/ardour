@@ -4153,6 +4153,16 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 	block_processing ();
 
+	{
+		// synchronize with AudioEngine::process_callback()
+		// make sure processing is not currently running
+		// and processing_blocked() is honored before
+		// acquiring thread buffers
+		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+	}
+
+	_engine.main_thread()->get_buffers ();
+
 	/* call tree *MUST* hold route_lock */
 
 	if ((playlist = track.playlist()) == 0) {
@@ -4201,6 +4211,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 	/* create a set of reasonably-sized buffers */
 	buffers.ensure_buffers (DataType::AUDIO, max_proc.n_audio(), chunk_size);
+	buffers.ensure_buffers (DataType::MIDI, max_proc.n_midi(), chunk_size);
 	buffers.set_count (max_proc);
 
 	for (vector<boost::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
@@ -4264,6 +4275,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	}
 
   out:
+	_engine.main_thread()->drop_buffers ();
 	if (!result) {
 		for (vector<boost::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
