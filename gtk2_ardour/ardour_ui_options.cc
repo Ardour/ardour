@@ -417,6 +417,13 @@ ARDOUR_UI::parameter_changed (std::string p)
 				editor_meter_peak_display.show();
 			} 
 		}
+	} else if (p == "waveform-scale") {
+		ArdourCanvas::WaveView::set_global_logscaled (Config->get_waveform_scale() == Logarithmic);
+	} else if (p == "waveform-shape") {
+		ArdourCanvas::WaveView::set_global_shape (Config->get_waveform_shape() == Rectified
+				? ArdourCanvas::WaveView::Rectified : ArdourCanvas::WaveView::Normal);
+	} else if (p == "show-waveform-clipping") {
+		ArdourCanvas::WaveView::set_global_show_waveform_clipping (ARDOUR_UI::config()->get_show_waveform_clipping());
 	}
 }
 

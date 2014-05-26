@@ -215,7 +215,6 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	set_colors ();
 
 	setup_waveform_visibility ();
-	setup_waveform_shape ();
 
 	if (frame_handle_start) {
 		frame_handle_start->raise_to_top ();
@@ -1259,33 +1258,6 @@ AudioRegionView::remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent* /*
 	audio_region()->envelope()->erase (cp->model());
 }
 
-void
-AudioRegionView::setup_waveform_shape ()
-{
-	WaveView::Shape shape;
-
-	switch (Config->get_waveform_shape()) {
-	case Rectified:
-		shape = WaveView::Rectified;
-		break;
-	default:
-		shape = WaveView::Normal;
-	}
-	WaveView::set_global_shape (shape);
-}
-
-void
-AudioRegionView::setup_waveform_scale ()
-{
-	WaveView::set_global_logscaled (Config->get_waveform_scale() == Logarithmic);
-}
-
-void
-AudioRegionView::setup_waveform_clipping ()
-{
-	WaveView::set_global_show_waveform_clipping (ARDOUR_UI::config()->get_show_waveform_clipping());
-}
-
 GhostRegion*
 AudioRegionView::add_ghost (TimeAxisView& tv)
 {
@@ -1631,11 +1603,5 @@ AudioRegionView::parameter_changed (string const & p)
 {
 	if (p == "show-waveforms") {
 		setup_waveform_visibility ();
-	} else if (p == "waveform-scale") {
-		setup_waveform_scale ();
-	} else if (p == "waveform-shape") {
-		setup_waveform_shape ();
-	} else if (p == "show-waveform-clipping") {
-		setup_waveform_clipping ();
 	}
 }
