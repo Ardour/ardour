@@ -669,6 +669,7 @@ WaveView::position (double s) const
 	switch (_shape) {
 	case Rectified:
 		pos = floor (_height - (s * _height));
+		break;
 	default:
 		pos = floor ((1.0-s) * (_height / 2.0));
 		break;
