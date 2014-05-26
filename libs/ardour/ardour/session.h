@@ -791,6 +791,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		return _exporting;
 	}
 
+	bool bounce_processing() const {
+		return _bounce_processing_active;
+	}
+
 	/* this is a private enum, but setup_enum_writer() needs it,
 	   and i can't find a way to give that function
 	   friend access. sigh.
@@ -928,6 +932,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	mutable gint             processing_prohibited;
 	process_function_type    process_function;
 	process_function_type    last_process_function;
+	bool                    _bounce_processing_active;
 	bool                     waiting_for_sync_offset;
 	framecnt_t              _base_frame_rate;
 	framecnt_t              _current_frame_rate;  //this includes video pullup offset
@@ -982,7 +987,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void process_without_events (pframes_t);
 	void process_with_events    (pframes_t);
 	void process_audition       (pframes_t);
-        int  process_export         (pframes_t);
+	int  process_export         (pframes_t);
 	int  process_export_fw      (pframes_t);
 
 	void block_processing() { g_atomic_int_set (&processing_prohibited, 1); }

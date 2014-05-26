@@ -455,13 +455,13 @@ PluginInsert::silence (framecnt_t nframes)
 }
 
 void
-PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t nframes, bool)
+PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t /*end_frame*/, pframes_t nframes, bool)
 {
 	if (_pending_active) {
 		/* run as normal if we are active or moving from inactive to active */
 
-		if (_session.transport_rolling()) {
-			automation_run (bufs, nframes);
+		if (_session.transport_rolling() || _session.bounce_processing()) {
+			automation_run (bufs, start_frame, nframes);
 		} else {
 			connect_and_run (bufs, nframes, 0, false);
 		}
@@ -538,10 +538,10 @@ PluginInsert::get_parameter (Evoral::Parameter param)
 }
 
 void
-PluginInsert::automation_run (BufferSet& bufs, pframes_t nframes)
+PluginInsert::automation_run (BufferSet& bufs, framepos_t start, pframes_t nframes)
 {
 	Evoral::ControlEvent next_event (0, 0.0f);
-	framepos_t now = _session.transport_frame ();
+	framepos_t now = start;
 	framepos_t end = now + nframes;
 	framecnt_t offset = 0;
 
