@@ -339,20 +339,22 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		}
 
 		/* find left and right-most sample */
+		Duple window_space;
 		Points::size_type left = 0;
 		Points::size_type right = n_samples;
 
 		for (Points::size_type idx = 0; idx < n_samples - 1; ++idx) {
 			left = idx;
-			if (samples[idx].x >= draw.x0) break;
+			window_space = item_to_window (Duple (samples[idx].x, 0.0));
+			if (window_space.x >= draw.x0) break;
 		}
 		for (Points::size_type idx = n_samples; idx > left + 1; --idx) {
-			if (samples[idx].x <= draw.x1) break;
+			window_space = item_to_window (Duple (samples[idx].x, 0.0));
+			if (window_space.x <= draw.x1) break;
 			right = idx;
 		}
 
 		/* draw line between samples */
-		Duple window_space;
 		window_space = item_to_window (Duple (samples[left].x, samples[left].y));
 		context->move_to (window_space.x, window_space.y);
 		for (uint32_t idx = left + 1; idx < right; ++idx) {
