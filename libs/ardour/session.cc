@@ -148,6 +148,7 @@ Session::Session (AudioEngine &eng,
 	: playlists (new SessionPlaylists)
 	, _engine (eng)
 	, process_function (&Session::process_with_events)
+	, _bounce_processing_active (false)
 	, waiting_for_sync_offset (false)
 	, _base_frame_rate (0)
 	, _current_frame_rate (0)
@@ -4574,6 +4575,8 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
 	}
 
+	_bounce_processing_active = true;
+
 	_engine.main_thread()->get_buffers ();
 
 	/* call tree *MUST* hold route_lock */
@@ -4739,6 +4742,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 		}
 	}
 
+	_bounce_processing_active = false;
 
 	if (need_block_size_reset) {
 		track.set_block_size (get_block_size());
