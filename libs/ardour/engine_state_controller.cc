@@ -591,6 +591,51 @@ EngineStateController::get_physical_audio_output_state(const std::string& port_n
 
 
 void
+EngineStateController::set_state_to_all_inputs(bool state)
+{
+    bool something_changed = false;
+    
+    ChannelStateList::iterator iter = _current_state->input_channel_states.begin();
+    for (; iter != _current_state->input_channel_states.end(); ++iter) {
+        if (iter->active != state) {
+            iter->active = state;
+            something_changed = true;
+        }
+    }
+    
+    if (something_changed) {
+        AudioEngine::instance()->reconnect_session_routes();
+        InputConfigChanged();
+    }
+}
+
+
+void
+EngineStateController::set_state_to_all_outputs(bool state)
+{
+    // unapplicable in Stereo Out mode, just return
+    if (Config->get_output_auto_connect() & AutoConnectMaster) {
+        return;
+    }
+    
+    bool something_changed = false;
+    
+    ChannelStateList::iterator iter = _current_state->output_channel_states.begin();
+    for (; iter != _current_state->output_channel_states.end(); ++iter) {
+        if (iter->active != state) {
+            iter->active = state;
+            something_changed = true;
+        }
+    }
+    
+    if (something_changed) {
+        AudioEngine::instance()->reconnect_session_routes();
+        OutputConfigChanged();
+    }
+}
+
+
+void
 EngineStateController::get_physical_audio_input_states(std::vector<ChannelState>& channel_states)
 {
     ChannelStateList &input_states = _current_state->input_channel_states;

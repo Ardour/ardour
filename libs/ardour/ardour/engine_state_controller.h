@@ -66,19 +66,27 @@ public:
     ARDOUR::pframes_t   get_default_buffer_size() const;
     void                available_buffer_sizes_for_current_device(std::vector<ARDOUR::pframes_t>&) const;
 
+    // get the number of all enabled inputs/outputs
     uint32_t            get_available_inputs_count() const;
     uint32_t            get_available_outputs_count () const;
     
+    // get all enabled physical inputs/outputs names
     void                get_physical_audio_inputs (std::vector<std::string>&);
     void                get_physical_audio_outputs (std::vector<std::string>&);
     
+    // propagate new state to all inputs/outputs
+    void                set_state_to_all_inputs(bool);
+    void                set_state_to_all_outputs(bool); // does nothing in Stereo Out mode
+    
+    // get states of all inputs/outputs
+    void                get_physical_audio_input_states(std::vector<ChannelState>&);
+    void                get_physical_audio_output_states(std::vector<ChannelState>&);
+    
+    // set/get the state for input or output
     void                set_physical_audio_input_state(const std::string&, bool);
     void                set_physical_audio_output_state(const std::string&, bool);
     bool                get_physical_audio_input_state(const std::string&);
     bool                get_physical_audio_output_state(const std::string&);
-    
-    void                get_physical_audio_input_states(std::vector<ChannelState>&);
-    void                get_physical_audio_output_states(std::vector<ChannelState>&);
     
     bool                is_setup_required() const {return ARDOUR::AudioEngine::instance()->setup_required (); }
     

@@ -487,25 +487,25 @@ void TracksControlPanel::device_changed (bool show_confirm_dial/*=true*/)
 void
 TracksControlPanel::on_all_inputs_on_button(WavesButton*)
 {
-    
+    EngineStateController::instance()->set_state_to_all_inputs(true);
 }
 
 void
 TracksControlPanel::on_all_inputs_off_button(WavesButton*)
 {
-    
+    EngineStateController::instance()->set_state_to_all_inputs(false);
 }
 
 void
 TracksControlPanel::on_all_outputs_on_button(WavesButton*)
 {
-    
+    EngineStateController::instance()->set_state_to_all_outputs(true);
 }
 
 void
 TracksControlPanel::on_all_outputs_off_button(WavesButton*)
 {
-    
+    EngineStateController::instance()->set_state_to_all_outputs(false);
 }
 
 void 
