@@ -540,21 +540,21 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		/* see if some part of this read is within the fade out */
 
 		/* .................        >|            REGION
-		                             _length
-
-                                 {           }            FADE
-				             fade_out_length
-                                 ^
-                                 _length - fade_out_length
-                        |--------------|
-                        ^internal_offset
-                                       ^internal_offset + to_read
-
-				       we need the intersection of [internal_offset,internal_offset+to_read] with
-				       [_length - fade_out_length, _length]
-
-		*/
-
+		 *                           _length
+		 *
+		 *               {           }            FADE
+		 *                           fade_out_length
+		 *               ^
+		 *               _length - fade_out_length
+		 *
+		 *      |--------------|
+		 *      ^internal_offset
+		 *                     ^internal_offset + to_read
+		 *
+		 *                     we need the intersection of [internal_offset,internal_offset+to_read] with
+		 *                     [_length - fade_out_length, _length]
+		 *
+		 */
 
 		fade_interval_start = max (internal_offset, _length - framecnt_t (_fade_out->back()->when));
 		framecnt_t fade_interval_end = min(internal_offset + to_read, _length.val());
