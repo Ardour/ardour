@@ -1271,9 +1271,7 @@ AudioRegionView::setup_waveform_shape ()
 	default:
 		shape = WaveView::Normal;
 	}
-	for (vector<WaveView *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
-		(*wave)->set_shape (shape);
-	}
+	WaveView::set_global_shape (shape);
 }
 
 void
