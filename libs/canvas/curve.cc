@@ -272,34 +272,6 @@ Curve::interpolate (const Points& coordinates, uint32_t points_per_segment, Spli
         }
 }
 
-/** Given a fractional position within the x-axis range of the
- * curve, return the corresponding y-axis value
- */
-
-double
-Curve::map_value (double x) const
-{
-	if (x > 0.0 && x < 1.0) {
-
-		double f;
-		Points::size_type index;
-		
-		/* linearly interpolate between two of our smoothed "samples"
-		 */
-		
-		x = x * (n_samples - 1);
-		index = (Points::size_type) x; // XXX: should we explicitly use floor()?
-		f = x - index;
-
-		return (1.0 - f) * samples[index].y + f * samples[index+1].y;
-		
-	} else if (x >= 1.0) {
-		return samples.back().y;
-	} else {
-		return samples.front().y;
-	}
-}
-
 void
 Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
@@ -366,36 +338,26 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 			draw.x1 = w2.x;
 		}
 
-		/* full width of the curve */
-		const double xextent = _points.back().x - _points.front().x;
-		/* Determine where the first drawn point will be */
-		Duple item_space = window_to_item (Duple (draw.x0, 0)); /* y value is irrelevant */
-		/* determine the fractional offset of this location into the overall extent of the curve */
-		const double xfract_offset = (item_space.x - _points.front().x)/xextent;
-		const uint32_t pixels = draw.width ();
+		/* find left and right-most sample */
+		Points::size_type left = 0;
+		Points::size_type right = n_samples;
+
+		for (Points::size_type idx = 0; idx < n_samples - 1; ++idx) {
+			left = idx;
+			if (samples[idx].x >= draw.x0) break;
+		}
+		for (Points::size_type idx = n_samples; idx > left + 1; --idx) {
+			if (samples[idx].x <= draw.x1) break;
+			right = idx;
+		}
+
+		/* draw line between samples */
 		Duple window_space;
-
-		/* draw the first point */
-
-		for (uint32_t pixel = 0; pixel < pixels; ++pixel) {
-
-			/* fractional distance into the total horizontal extent of the curve */
-			double xfract = xfract_offset + (pixel / xextent);
-			/* compute vertical coordinate (item-space) at that location */
-			double y = map_value (xfract);
-			
-			/* convert to window space for drawing */
-			window_space = item_to_window (Duple (0.0, y)); /* x-value is irrelevant */
-
-			/* we are moving across the draw area pixel-by-pixel */
-			window_space.x = draw.x0 + pixel;
-			
-			/* plot this point */
-			if (pixel == 0) {
-				context->move_to (window_space.x, window_space.y);
-			} else {
-				context->line_to (window_space.x, window_space.y);
-			}
+		window_space = item_to_window (Duple (samples[left].x, samples[left].y));
+		context->move_to (window_space.x, window_space.y);
+		for (uint32_t idx = left + 1; idx < right; ++idx) {
+			window_space = item_to_window (Duple (samples[idx].x, samples[idx].y));
+			context->line_to (window_space.x, window_space.y);
 		}
 
 		context->stroke ();

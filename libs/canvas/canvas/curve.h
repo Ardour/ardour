@@ -50,7 +50,6 @@ public:
     uint32_t points_per_segment;
     SplineType curve_type;
 
-    double map_value (double) const;
     void interpolate ();
 
     static void interpolate (const Points& coordinates, uint32_t points_per_segment, SplineType, bool closed, Points& results);
