@@ -208,9 +208,6 @@ private:
 
 	void parameter_changed (std::string const &);
 	void setup_waveform_visibility ();
-	void setup_waveform_shape ();
-	void setup_waveform_scale ();
-	void setup_waveform_clipping ();
 
 	/** A ScopedConnection for each PeaksReady callback (one per channel).  Each member
 	 *  may be 0 if no connection exists.
