@@ -159,7 +159,7 @@ private:
         mutable ARDOUR::framepos_t _sample_end; 
         mutable Cairo::RefPtr<Cairo::ImageSurface> _image;
 
-        PBD::ScopedConnection invalidation_connection;
+        PBD::ScopedConnectionList invalidation_connection;
 
         static double _global_gradient_depth;
         static bool   _global_logscaled;
@@ -170,6 +170,7 @@ private:
         static PBD::Signal0<void> VisualPropertiesChanged;
 
         void handle_visual_property_change ();
+        void handle_clip_level_change ();
 
         void ensure_cache (ARDOUR::framepos_t sample_start, ARDOUR::framepos_t sample_end) const;
         ArdourCanvas::Coord position (double) const;

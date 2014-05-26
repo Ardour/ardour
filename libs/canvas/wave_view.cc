@@ -73,6 +73,7 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 	, _sample_end (-1)
 {
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
+	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
 }
 
 WaveView::~WaveView ()
@@ -102,6 +103,12 @@ WaveView::handle_visual_property_change ()
 	if (changed) {
 		invalidate_image ();
 	}
+}
+
+void
+WaveView::handle_clip_level_change ()
+{
+	invalidate_image ();
 }
 
 void
@@ -165,8 +172,11 @@ alt_log_meter (float power)
 void
 WaveView::set_clip_level (double dB)
 {
-	_clip_level = dB_to_coefficient (dB);
-	ClipLevelChanged ();
+	const double clip_level = dB_to_coefficient (dB);
+	if (clip_level != _clip_level) {
+		_clip_level = clip_level;
+		ClipLevelChanged ();
+	}
 }
 
 struct LineTips {
