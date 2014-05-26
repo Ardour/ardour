@@ -4,7 +4,7 @@
   <style name="generic_button"
          style="generic_control"
          fgnormal="#FFffff"
-         bgnormal="#FF0000"
+         bgnormal="#00871B"
          fgactive="#BFBFBF"
          bgactive="#454545"
          fghover="#CCCCCC"
@@ -12,11 +12,11 @@
          fgdisabled ="#959595"
          bordercolor="#FF0000"
          borderwidth="0 0 0 0" />
-    <Layout width="400" height="66">
+    <Layout width="240" height="215">
       <icon source="systemlock.png"/>
     <Button style="generic_button"
         id="ok_button"
         text="UNLOCK"        
-        x="280" y="3" width="120" height="59"/>
+        x="15" y="170" width="80" height="32"/>
     </Layout>
 </Dialog>
