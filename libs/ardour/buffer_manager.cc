@@ -75,11 +75,11 @@ BufferManager::put_thread_buffers (ThreadBuffers* tbp)
 }
 
 void
-BufferManager::ensure_buffers (ChanCount howmany)
+BufferManager::ensure_buffers (ChanCount howmany, size_t custom)
 {
         /* this is protected by the audioengine's process lock: we do not  */
 
 	for (ThreadBufferList::iterator i = thread_buffers_list->begin(); i != thread_buffers_list->end(); ++i) {
-		(*i)->ensure_buffers (howmany);
+		(*i)->ensure_buffers (howmany, custom);
 	}
 }

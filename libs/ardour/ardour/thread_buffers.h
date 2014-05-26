@@ -35,7 +35,7 @@ public:
 	ThreadBuffers ();
 	~ThreadBuffers ();
 
-	void ensure_buffers (ChanCount howmany = ChanCount::ZERO);
+	void ensure_buffers (ChanCount howmany = ChanCount::ZERO, size_t custom = 0);
 
 	BufferSet* silent_buffers;
 	BufferSet* scratch_buffers;
