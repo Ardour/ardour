@@ -44,7 +44,8 @@ class DeviceConnectionControl : public Gtk::Layout
 	void set_number (uint16_t number);
 	void set_active (bool active);
     void set_track_name (const std::string& new_track_name);
-	sigc::signal2<void, DeviceConnectionControl*, bool> signal_active_changed;
+    std::string get_port_name ();
+    sigc::signal2<void, DeviceConnectionControl*, bool> signal_active_changed;
 
   private:
 	void init(const std::string& name, bool active, uint16_t number, const std::string& track_name="");

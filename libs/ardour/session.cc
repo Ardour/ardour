@@ -107,6 +107,9 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+const char * Session::default_trx_track_name_pattern = "Track "; // add track number to the pattern
+const char * Session::default_ardour_track_name_pattern = "Audio "; // add track number to the pattern
+
 namespace {
     bool compare_roots_by_remote_id (const boost::shared_ptr<Route>& route1, const boost::shared_ptr<Route>& route2)
     {
@@ -2275,10 +2278,17 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	RouteList new_routes;
 	list<boost::shared_ptr<AudioTrack> > ret;
 
-	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("Audio");
+    string name_pattern("");
+    if (Profile->get_trx() ) {
+        name_pattern = default_trx_track_name_pattern;
+    } else {
+        name_pattern = default_ardour_track_name_pattern;
+    }
+    
+	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _(name_pattern.c_str() );
 
 	while (how_many) {
-		if (!find_route_name (name_template.empty() ? _("Audio") : name_template, ++track_id, track_name, sizeof(track_name), use_number)) {
+		if (!find_route_name (name_template.empty() ? _(name_pattern.c_str() ) : name_template, ++track_id, track_name, sizeof(track_name), use_number)) {
 			error << "cannot find name for new audio track" << endmsg;
 			goto failed;
 		}

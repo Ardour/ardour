@@ -298,18 +298,18 @@ TracksControlPanel::populate_input_channels()
     for (input_iter = input_states.begin(); input_iter != input_states.end(); ++input_iter ) {
         
         uint16_t number = DeviceConnectionControl::NoNumber;
-        std::string track_name("");        
-        std::string port_name("");
-        std::string pattern("system:");
-        
-        remove_pattern_from_string(input_iter->name, pattern, port_name);
+        std::string track_name;
 
         if (input_iter->active) {
+            
+            std::string port_name("");
+            std::string pattern("system:");
+            remove_pattern_from_string(input_iter->name, pattern, port_name);
             
             number = number_count++;
             
             if (Config->get_tracks_auto_naming() & UseDefaultNames) {
-                track_name = string_compose ("Track %1", number);
+                track_name = string_compose ("%1 %2", Session::default_trx_track_name_pattern, number);
             } else if (Config->get_tracks_auto_naming() & NameAfterDriver) {
                 track_name = port_name;
             }
@@ -763,16 +763,16 @@ TracksControlPanel::on_input_configuration_changed ()
             bool new_state = EngineStateController::instance()->get_physical_audio_input_state(id_name );
             
             uint16_t number = DeviceConnectionControl::NoNumber;
-            std::string track_name = "";
+            std::string track_name ("");
             
             if (new_state) {
-                
+
                 number = number_count++;
                 
                 if (Config->get_tracks_auto_naming() & UseDefaultNames) {
-                    track_name = string_compose ("Track %1", number);
+                    track_name = string_compose ("%1 %2", Session::default_trx_track_name_pattern, number);
                 } else if (Config->get_tracks_auto_naming() & NameAfterDriver) {
-                    track_name = control->get_name();
+                    track_name = control->get_port_name();
                 }
             }
             

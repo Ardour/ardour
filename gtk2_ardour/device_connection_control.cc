@@ -166,6 +166,18 @@ DeviceConnectionControl::set_track_name (const std::string& new_track_name)
 }
 
 
+std::string
+DeviceConnectionControl::get_port_name ()
+{
+    std::string name;
+    if (_name_label != NULL) {
+        name = _name_label->get_text();
+    }
+    
+    return name;
+}
+
+
 void
 DeviceConnectionControl::on_active_on(WavesButton*)
 {
