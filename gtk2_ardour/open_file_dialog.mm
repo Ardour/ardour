@@ -108,6 +108,7 @@ namespace ARDOUR
     // Create a File Open Dialog class.
     NSSavePanel* saveDlg = [NSSavePanel savePanel];
     [saveDlg setTitle:title];
+    [saveDlg setCanCreateDirectories:YES];
     
     NSFileManager *fm = [[NSFileManager alloc] init];
     BOOL isDir;
