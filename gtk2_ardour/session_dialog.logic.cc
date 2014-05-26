@@ -50,6 +50,7 @@
 #include "opts.h"
 #include "i18n.h"
 #include "utils.h"
+#include "gui_thread.h" 
 
 #include "open_file_dialog_proxy.h"
 
@@ -86,7 +87,12 @@ void SessionDialog::init()
 	_quit_button.signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_quit));
 	_new_session_button.signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_new_session));
 	_system_configuration_button.signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_system_configuration));
-	for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
+	
+    EngineStateController::instance ()->InputConfigChanged.connect  (_system_config_update, invalidator (*this), boost::bind (&SessionDialog::on_system_configuration_change, this), gui_context());
+    EngineStateController::instance ()->OutputConfigChanged.connect (_system_config_update, invalidator (*this), boost::bind (&SessionDialog::on_system_configuration_change, this), gui_context());
+    EngineStateController::instance ()->EngineRunning.connect       (_system_config_update, invalidator (*this), boost::bind (&SessionDialog::on_system_configuration_change, this), gui_context());
+    
+    for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
 		_recent_session_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_recent_session ));
 		_recent_session_button[i]->signal_double_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_recent_session_double_click ));
 	}
@@ -198,7 +204,14 @@ SessionDialog::on_new_session (WavesButton*)
 	}
 }
 
-void SessionDialog::redisplay_system_configuration ()
+void
+SessionDialog::on_system_configuration_change ()
+{
+    redisplay_system_configuration ();
+}
+
+void
+SessionDialog::redisplay_system_configuration ()
 {
 	ARDOUR::EngineStateController* eng_controller (ARDOUR::EngineStateController::instance() );
     

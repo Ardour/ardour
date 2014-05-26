@@ -80,9 +80,13 @@
     void on_recent_session_double_click (WavesButton*);
 	void on_system_configuration (WavesButton*);
 	bool on_delete_event (GdkEventAny*);
-  
+
+    void on_system_configuration_change();
 	void redisplay_system_configuration();
 	int redisplay_recent_sessions ();
     void session_selected ();
     bool info_scroller_update();
+
+// connections
+    PBD::ScopedConnectionList _system_config_update;
 // };

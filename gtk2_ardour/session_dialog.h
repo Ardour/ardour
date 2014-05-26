@@ -20,6 +20,8 @@
 #ifndef __gtk2_ardour_session_dialog_h__
 #define __gtk2_ardour_session_dialog_h__
 
+#include "pbd/signals.h"
+
 #include <string>
 #include "waves_dialog.h"
 
