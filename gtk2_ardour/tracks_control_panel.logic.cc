@@ -70,6 +70,11 @@ TracksControlPanel::init ()
 	_session_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_session_settings));
 	_control_panel_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_control_panel));
     
+    _all_inputs_on_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_all_inputs_on_button));
+    _all_inputs_off_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_all_inputs_off_button));
+    _all_outputs_on_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_all_outputs_on_button));
+    _all_outputs_off_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_all_outputs_off_button));
+    
     _multi_out_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_multi_out));
     _stereo_out_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_stereo_out));
     
@@ -280,6 +285,9 @@ TracksControlPanel::populate_output_mode()
 {
     _multi_out_button.set_active(Config->get_output_auto_connect() & AutoConnectPhysical);
     _stereo_out_button.set_active(Config->get_output_auto_connect() & AutoConnectMaster);
+    
+    _all_outputs_on_button.set_sensitive(Config->get_output_auto_connect() & AutoConnectPhysical);
+    _all_outputs_off_button.set_sensitive(Config->get_output_auto_connect() & AutoConnectPhysical);
 }
 
 
@@ -474,6 +482,30 @@ void TracksControlPanel::device_changed (bool show_confirm_dial/*=true*/)
 	}
     
     MessageDialog( _("Selected device is not available for current engine"), PROGRAM_NAME).run();
+}
+
+void
+TracksControlPanel::on_all_inputs_on_button(WavesButton*)
+{
+    
+}
+
+void
+TracksControlPanel::on_all_inputs_off_button(WavesButton*)
+{
+    
+}
+
+void
+TracksControlPanel::on_all_outputs_on_button(WavesButton*)
+{
+    
+}
+
+void
+TracksControlPanel::on_all_outputs_off_button(WavesButton*)
+{
+    
 }
 
 void 

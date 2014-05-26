@@ -85,6 +85,10 @@
 	void on_playback_active_changed (DeviceConnectionControl* playback_control, bool active);
 	void on_midi_capture_active_changed (DeviceConnectionControl* capture_control, bool active);
 	void on_midi_playback_active_changed (DeviceConnectionControl* playback_control, bool active);
+    void on_all_inputs_on_button(WavesButton*);
+    void on_all_inputs_off_button(WavesButton*);
+    void on_all_outputs_on_button(WavesButton*);
+    void on_all_outputs_off_button(WavesButton*);
 
 	void engine_changed ();
 	void device_changed (bool show_confirm_dial);
