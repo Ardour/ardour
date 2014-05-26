@@ -545,6 +545,9 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 		return;
 	}
 
+	_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
+	_amp->setup_gain_automation (start, start + nframes, nframes);
+
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 		if (!include_endpoint && (*i) == endpoint) {

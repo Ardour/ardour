@@ -994,6 +994,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void unblock_processing() { g_atomic_int_set (&processing_prohibited, 0); }
 	bool processing_blocked() const { return g_atomic_int_get (&processing_prohibited); }
 
+	static const framecnt_t bounce_chunk_size;
+
 	/* slave tracking */
 
 	static const int delta_accumulator_size = 25;

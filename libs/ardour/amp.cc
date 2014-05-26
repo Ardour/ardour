@@ -435,7 +435,10 @@ Amp::setup_gain_automation (framepos_t start_frame, framepos_t end_frame, framec
 {
 	Glib::Threads::Mutex::Lock am (control_lock(), Glib::Threads::TRY_LOCK);
 
-	if (am.locked() && _session.transport_rolling() && _gain_control->automation_playback()) {
+	if (am.locked()
+	    && (_session.transport_rolling() || _session.bounce_processing())
+	    && _gain_control->automation_playback())
+	{
 		assert (_gain_automation_buffer);
 		_apply_gain_automation = _gain_control->list()->curve().rt_safe_get_vector (
 			start_frame, end_frame, _gain_automation_buffer, nframes);

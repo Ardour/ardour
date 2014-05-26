@@ -125,6 +125,7 @@ PBD::Signal0<void> Session::FeedbackDetected;
 PBD::Signal0<void> Session::SuccessfulGraphSort;
 PBD::Signal2<void,std::string,std::string> Session::VersionMismatch;
 
+const framecnt_t Session::bounce_chunk_size = 65536;
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
 
@@ -3882,7 +3883,7 @@ Session::update_locations_after_tempo_map_change (Locations::LocationList& loc)
 void
 Session::ensure_buffers (ChanCount howmany)
 {
-	BufferManager::ensure_buffers (howmany);
+	BufferManager::ensure_buffers (howmany, bounce_processing() ? bounce_chunk_size : 0);
 }
 
 void
@@ -4156,8 +4157,6 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 		return result;
 	}
 
-	const framecnt_t chunk_size = (256 * 1024)/4;
-
 	// block all process callback handling
 
 	block_processing ();
@@ -4171,8 +4170,6 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	}
 
 	_bounce_processing_active = true;
-
-	_engine.main_thread()->get_buffers ();
 
 	/* call tree *MUST* hold route_lock */
 
@@ -4215,7 +4212,8 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	 */
 
 	need_block_size_reset = true;
-	track.set_block_size (chunk_size);
+	track.set_block_size (bounce_chunk_size);
+	_engine.main_thread()->get_buffers ();
 
 	position = start;
 	to_do = len;
@@ -4223,7 +4221,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 	/* create a set of reasonably-sized buffers */
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		buffers.ensure_buffers(*t, max_proc.get(*t), chunk_size);
+		buffers.ensure_buffers(*t, max_proc.get(*t), bounce_chunk_size);
 	}
 	buffers.set_count (max_proc);
 
@@ -4235,7 +4233,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 	while (to_do && !itt.cancel) {
 
-		this_chunk = min (to_do, chunk_size);
+		this_chunk = min (to_do, bounce_chunk_size);
 
 		if (track.export_stuff (buffers, start, this_chunk, endpoint, include_endpoint, for_export)) {
 			goto out;
@@ -4245,8 +4243,8 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 		to_do -= this_chunk;
 		itt.progress = (float) (1.0 - ((double) to_do / len));
 
-		if (latency_skip >= chunk_size) {
-			latency_skip -= chunk_size;
+		if (latency_skip >= bounce_chunk_size) {
+			latency_skip -= bounce_chunk_size;
 			continue;
 		}
 
@@ -4269,7 +4267,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	latency_skip = track.bounce_get_latency (endpoint, include_endpoint, for_export);
 
 	while (latency_skip && !itt.cancel) {
-		this_chunk = min (latency_skip, chunk_size);
+		this_chunk = min (latency_skip, bounce_chunk_size);
 		latency_skip -= this_chunk;
 
 		buffers.silence (this_chunk, 0);
@@ -4316,7 +4314,6 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	}
 
   out:
-	_engine.main_thread()->drop_buffers ();
 	if (!result) {
 		for (vector<boost::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
@@ -4340,6 +4337,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	_bounce_processing_active = false;
 
 	if (need_block_size_reset) {
+		_engine.main_thread()->drop_buffers ();
 		track.set_block_size (get_block_size());
 	}
 
