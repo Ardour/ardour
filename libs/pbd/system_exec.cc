@@ -274,9 +274,6 @@ SystemExec::make_argp_escaped(std::string command, const std::map<char, std::str
 		}
 	}
 	argp[n] = NULL;
-
-	char *p = argp[0];
-	n = 0;
 }
 
 SystemExec::~SystemExec ()

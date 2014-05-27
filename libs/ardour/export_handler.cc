@@ -328,20 +328,15 @@ ExportHandler::finish_timespan ()
 			subs.insert (std::pair<char, std::string> ('s', session.path ()));
 			subs.insert (std::pair<char, std::string> ('n', session.name ()));
 
-
-			std::cerr << "running command: " << fmt->command() << "..." << std::endl;
 			ARDOUR::SystemExec *se = new ARDOUR::SystemExec(fmt->command(), subs);
 			se->ReadStdout.connect_same_thread(command_connection, boost::bind(&ExportHandler::command_output, this, _1, _2));
 			if (se->start (2) == 0) {
 				// successfully started
-				std::cerr << "started!" << std::endl;
 				while (se->is_running ()) {
 					// wait for system exec to terminate
-					// std::cerr << "waiting..." << std::endl;
 					Glib::usleep (1000);
 				}
 			}
-			std::cerr << "done! deleting..." << std::endl;
 			delete (se);
 		}
 
