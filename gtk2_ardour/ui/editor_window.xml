@@ -14,7 +14,7 @@
                         prelighticon="tracks_prelight"/>
             <icon source="display_clock_mockup.png" tooltip="--------------------&#xA;This is a mockup&#xA;--------------------" />
             <icon source="display_metrics_mockup.png" tooltip="--------------------&#xA;This is a mockup&#xA;--------------------" box.pack="end"/>
-            <EventBox bgnormal="#383838" box.expand="true" box.fill="true" box.padding="4">
+            <EventBox bgnormal="#383838" box.expand="false" box.fill="false" width="420" box.padding="4">
               <EventBox bgnormal="#151515" borderwidth="1"/>
             </EventBox>
             <VBox spacing ="1" box.pack="end">
@@ -122,13 +122,20 @@
                         normalicon="tool_zoom"
                         activeicon="tool_zoom_active"
                         prelighticon="tool_zoom_prelight"/>
-            <iconbutton id="media_button"
-                        tooltip="Media Button"
-                        width="48" height="26"
-                        normalicon="media_button"
-                        activeicon="media_button_active"
-                        prelighticon="media_button_prelight"
-                        box.pack="end"/>
+            <HBox box.pack="end" spacing ="1">
+              <iconbutton id="tool_waveform_zoom_button"
+                          tooltip="Waveform Zoom"
+                          width="34" height="26"
+                          normalicon="tool_waveform_zoom"
+                          activeicon="tool_waveform_zoom_active"
+                          prelighticon="tool_waveform_zoom_prelight"/>
+              <iconbutton id="media_button"
+                          tooltip="Media Button"
+                          width="48" height="26"
+                          normalicon="media_button"
+                          activeicon="media_button_active"
+                          prelighticon="media_button_prelight"/>
+            </HBox>
           </HBox>
         </EventBox>
       </VBox>
