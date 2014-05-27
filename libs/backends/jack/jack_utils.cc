@@ -29,6 +29,11 @@
 #include <mach-o/dyld.h>
 #endif
 
+#ifdef PLATFORM_WINDOWS
+#include <shobjidl.h>  //  Needed for
+#include <shlguid.h>   // 'IShellLink'
+#endif
+
 #ifdef HAVE_PORTAUDIO
 #include <portaudio.h>
 #endif
@@ -584,6 +589,60 @@ ARDOUR::get_jack_server_dir_paths (vector<std::string>& server_dir_paths)
 	Searchpath sp(string(g_getenv("PATH")));
 
 #ifdef PLATFORM_WINDOWS
+// N.B. The #define (immediately below) can be safely removed once we know that this code builds okay with mingw
+#ifdef COMPILER_MSVC
+	IShellLinkA  *pISL = NULL;    
+	IPersistFile *ppf  = NULL;
+
+	// Mixbus creates a Windows shortcut giving the location of its
+	// own (bundled) version of Jack. Let's see if that shortcut exists
+	if (SUCCEEDED (CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (void**)&pISL)))
+	{
+		if (SUCCEEDED (pISL->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf)))
+		{
+			char  target_path[MAX_PATH];
+			char  shortcut_pathA[MAX_PATH];
+			WCHAR shortcut_pathW[MAX_PATH];
+
+			// Our Windows installer should have created a shortcut to the Jack
+			// server so let's start by finding out what drive it got installed on
+			if (char *env_path = getenv ("windir"))
+			{
+				strcpy (shortcut_pathA, env_path);
+				shortcut_pathA[2] = '\0'; // Gives us just the drive letter and colon
+			}
+			else // Assume 'C:'
+				strcpy (shortcut_pathA, "C:");
+
+			strcat (shortcut_pathA, "\\Program Files (x86)\\Jack\\Start Jack.lnk");
+
+			MultiByteToWideChar (CP_ACP, MB_PRECOMPOSED, shortcut_pathA, -1, shortcut_pathW, MAX_PATH);
+
+			// If it did, load the shortcut into our persistent file
+			if (SUCCEEDED (ppf->Load(shortcut_pathW, 0)))
+			{
+				// Read the target information from the shortcut object
+				if (S_OK == (pISL->GetPath (target_path, MAX_PATH, NULL, SLGP_UNCPRIORITY)))
+				{
+					char *p = strrchr (target_path, '\\');
+
+					if (p)
+					{
+						*p = NULL;
+						sp.push_back (target_path);
+					}
+				}
+			}
+		}
+	}
+
+	if (ppf)
+		ppf->Release();
+
+	if (pISL)
+		pISL->Release();
+#endif
+
 	gchar *install_dir = g_win32_get_package_installation_directory_of_module (NULL);
 	if (install_dir) {
 		sp.push_back (install_dir);
