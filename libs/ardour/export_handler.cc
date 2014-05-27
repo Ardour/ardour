@@ -313,21 +313,20 @@ ExportHandler::finish_timespan ()
 
 #if 0			// would be nicer with C++11 initialiser...
 			std::map<char, std::string> subs {
-				{ 'f', filepath },
-				{ 'd', Glib::path_get_dirname(filepath) },
-				{ 'b', PBD::basename_nosuffix(filepath) },
-				{ 'u', upload_username },
-				{ 'p', upload_password}
+				{ 'f', filename },
+				{ 'd', Glib::path_get_dirname(filename)  + G_DIR_SEPARATOR },
+				{ 'b', PBD::basename_nosuffix(filename) },
+				...
 			};
 #endif
 
 			PBD::ScopedConnection command_connection;
 			std::map<char, std::string> subs;
 			subs.insert (std::pair<char, std::string> ('f', filename));
-			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname(filename)));
-			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix(filename)));
-                        subs.insert (std::pair<char, std::string> ('s', session.path ()));
-                        subs.insert (std::pair<char, std::string> ('n', session.name ()));
+			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname (filename) + G_DIR_SEPARATOR));
+			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix (filename)));
+			subs.insert (std::pair<char, std::string> ('s', session.path ()));
+			subs.insert (std::pair<char, std::string> ('n', session.name ()));
 
 			std::cerr << "running command: " << fmt->command() << "..." << std::endl;
                         ARDOUR::SystemExec *se = new SystemExec(fmt->command(), subs);
