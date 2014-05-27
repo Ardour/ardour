@@ -738,11 +738,9 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 		args.push_back ("-v");
 	}
 
-#ifndef PLATFORM_WINDOWS
 	if (options.temporary) {
 		args.push_back ("-T");
 	}
-#endif
 
 	if (options.driver == alsa_driver_name) {
 		if (options.midi_driver == alsa_seq_midi_driver_name) {
