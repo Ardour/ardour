@@ -611,10 +611,22 @@ vstfx_parse_vst_state (VSTState* vstfx)
 	  string with any name*/
 
 	char creator[65] = "Unknown\0";
+	char name[65] = "Unknown\0";
 
 	AEffect* plugin = vstfx->plugin;
 
-	info->name = strdup (vstfx->handle->name);
+
+	plugin->dispatcher (plugin, effGetEffectName, 0, 0, name, 0);
+
+	if (strlen(name) == 0) {
+		plugin->dispatcher (plugin, effGetProductString, 0, 0, name, 0);
+	}
+
+	if (strlen(name) == 0) {
+		info->name = strdup (vstfx->handle->name);
+	} else {
+		info->name = strdup (name);
+	}
 
 	/*If the plugin doesn't bother to implement GetVendorString we will
 	  have pre-stuffed the string with 'Unkown' */
