@@ -35,6 +35,12 @@ public:
 	    CatmullRomUniform,
 	    CatmullRomCentripetal,
     };
+
+    enum CurveFill {
+	    None,
+	    Inside,
+	    Outside,
+    };
     
     void compute_bounding_box () const;
     void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
@@ -43,12 +49,14 @@ public:
     void set_points_per_segment (uint32_t n);
 
     bool covers (Duple const &) const;
+    void set_fill_mode (CurveFill cf) { curve_fill = cf; }
 
   private:
     Points samples;
     Points::size_type n_samples;
     uint32_t points_per_segment;
     SplineType curve_type;
+    CurveFill curve_fill;
 
     void interpolate ();
 

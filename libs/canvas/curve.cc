@@ -34,6 +34,7 @@ Curve::Curve (Group* parent)
 	, n_samples (0)
 	, points_per_segment (16)
 	, curve_type (CatmullRomCentripetal)
+	, curve_fill (None)
 {
 }
 
@@ -305,7 +306,32 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		window_space = item_to_window (_points.back());
 		context->line_to (window_space.x, window_space.y);
 
-		context->stroke ();
+
+		switch (curve_fill) {
+			case None:
+				context->stroke();
+				break;
+			case Inside:
+				context->stroke_preserve ();
+				window_space = item_to_window (Duple(_points.back().x, draw.height()));
+				context->line_to (window_space.x, window_space.y);
+				window_space = item_to_window (Duple(_points.front().x, draw.height()));
+				context->line_to (window_space.x, window_space.y);
+				context->close_path();
+				setup_fill_context(context);
+				context->fill ();
+				break;
+			case Outside:
+				context->stroke_preserve ();
+				window_space = item_to_window (Duple(_points.back().x, 0.0));
+				context->line_to (window_space.x, window_space.y);
+				window_space = item_to_window (Duple(_points.front().x, 0.0));
+				context->line_to (window_space.x, window_space.y);
+				context->close_path();
+				setup_fill_context(context);
+				context->fill ();
+				break;
+		}
 
 	} else {
 
@@ -362,14 +388,37 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 			context->line_to (window_space.x, window_space.y);
 		}
 
-		context->stroke ();
+		switch (curve_fill) {
+			case None:
+				context->stroke();
+				break;
+			case Inside:
+				context->stroke_preserve ();
+				window_space = item_to_window (Duple (samples[right-1].x, draw.height()));
+				context->line_to (window_space.x, window_space.y);
+				window_space = item_to_window (Duple (samples[left].x, draw.height()));
+				context->line_to (window_space.x, window_space.y);
+				context->close_path();
+				setup_fill_context(context);
+				context->fill ();
+				break;
+			case Outside:
+				context->stroke_preserve ();
+				window_space = item_to_window (Duple (samples[right-1].x, 0.0));
+				context->line_to (window_space.x, window_space.y);
+				window_space = item_to_window (Duple (samples[left].x, 0.0));
+				context->line_to (window_space.x, window_space.y);
+				context->close_path();
+				setup_fill_context(context);
+				context->fill ();
+				break;
+		}
 		context->restore ();
 	}
 
-#if 1
+#if 0
 	/* add points */
-	
-	setup_fill_context (context);
+	setup_outline_context (context);
 	for (Points::const_iterator p = _points.begin(); p != _points.end(); ++p) {
 		Duple window_space (item_to_window (*p));
 		context->arc (window_space.x, window_space.y, 5.0, 0.0, 2 * M_PI);
