@@ -196,12 +196,10 @@ SystemExec::SystemExec (std::string command, const std::map<char, std::string> s
 	init ();
 	make_argp_escaped(command, subs);
 
-	if (find_file_in_search_path (Searchpath (Glib::getenv ("PATH")), argp[0], cmd)) {
-		// argp[0] exists in $PATH` - set it to the actual path where it was found
-		free (argp[0]);
-		argp[0] = strdup(cmd.c_str ());
+	if (!find_file_in_search_path (Searchpath (Glib::getenv ("PATH")), argp[0], cmd)) {
+		// not found in path - use as-is
+		cmd = argp[0];
 	}
-	// else argp[0] not found in path - leave it as-is, it might be an absolute path
 
 	// Glib::find_program_in_path () is only available in Glib >= 2.28
 	// cmd = Glib::find_program_in_path (argp[0]);
