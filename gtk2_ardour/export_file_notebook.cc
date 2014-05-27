@@ -91,7 +91,7 @@ ExportFileNotebook::sync_with_manager ()
 }
 
 void
-ExportFileNotebook::update_soundcloud_upload()
+ExportFileNotebook::update_soundcloud_upload ()
 {
 	int i;
 	ExportProfileManager::FormatStateList const & formats = profile_manager->get_formats ();
@@ -99,19 +99,14 @@ ExportFileNotebook::update_soundcloud_upload()
 
 	for (i = 0, format_it = formats.begin(); format_it != formats.end(); ++i, ++format_it) {
 		FilePage * page;
-		std::cerr << "get_nth_soundcloud_upload " << i << std::endl;
 		if ((page = dynamic_cast<FilePage *> (get_nth_page (i)))) {
-			(*format_it)->format->set_soundcloud_upload( page->get_soundcloud_upload () );
-			// profile_manager->soundcloud_upload_list.push_back (page->get_soundcloud_upload () );
-		} else  {
-			std::cerr << "not a page!" << std::endl;
+			(*format_it)->format->set_soundcloud_upload (page->get_soundcloud_upload ());
 		}
 	}
-
 }
 
 void
-ExportFileNotebook::update_example_filenames()
+ExportFileNotebook::update_example_filenames ()
 {
 	int i = 0;
 	FilePage * page;

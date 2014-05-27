@@ -58,7 +58,7 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 	void add_file_page (ARDOUR::ExportProfileManager::FormatStatePtr format_state, ARDOUR::ExportProfileManager::FilenameStatePtr filename_state);
 	void remove_file_page (FilePage * page);
 	void update_remove_file_page_sensitivity ();
-	void update_soundcloud_upload();
+	void update_soundcloud_upload ();
 
 	sigc::connection page_change_connection;
 	void handle_page_change (GtkNotebookPage*, uint32_t page);
