@@ -8,7 +8,7 @@
         <EventBox bgnormal="#282828">
           <HBox borderwidth="1" spacing ="1">
             <iconbutton id="tracks_button"
-                        width="52" height="51"
+                        width="48" height="51"
                         normalicon="tracks"
                         activeicon="tracks_active"
                         prelighticon="tracks_prelight"/>
