@@ -43,9 +43,12 @@
 #include <sys/resource.h>
 #endif
 
+#include <glibmm/miscutils.h>
 
 #define USE_VFORK
 
+#include "pbd/file_utils.h"
+#include "pbd/search_path.h"
 #include "pbd/system_exec.h"
 
 using namespace std;
@@ -192,8 +195,14 @@ SystemExec::SystemExec (std::string command, const std::map<char, std::string> s
 {
 	init ();
 	make_argp_escaped(command, subs);
-	cmd = argp[0];
-	// cmd = strdup(argp[0]);
+	if (!find_file_in_search_path (Searchpath (Glib::getenv ("PATH")), argp[0], cmd)) {
+		// not found in path - use as-is
+		cmd = argp[0];
+	}
+
+	// Glib::find_program_in_path () is only available in Glib >= 2.28
+	// cmd = Glib::find_program_in_path (argp[0]);
+
 	make_envp();
 }
 
