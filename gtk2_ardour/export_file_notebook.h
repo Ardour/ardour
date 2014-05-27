@@ -38,10 +38,7 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 
 	void set_session_and_manager (ARDOUR::Session * s, boost::shared_ptr<ARDOUR::ExportProfileManager> manager);
 	void sync_with_manager ();
-
 	void update_example_filenames();
-
-	std::string get_nth_format_name (uint32_t n);
 
 	sigc::signal<void> CriticalSelectionChanged;
 

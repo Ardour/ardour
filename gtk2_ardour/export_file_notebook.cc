@@ -115,16 +115,6 @@ ExportFileNotebook::update_example_filenames ()
 	}
 }
 
-std::string
-ExportFileNotebook::get_nth_format_name (uint32_t n)
-{
-	FilePage * page;
-	if ((page = dynamic_cast<FilePage *> (get_nth_page (n - 1)))) {
-		return page->get_format_name();
-	}
-	return "";
-}
-
 void
 ExportFileNotebook::add_new_file_page ()
 {
