@@ -142,7 +142,8 @@ private:
 		uint32_t input_latency;
 		uint32_t output_latency;
 		ChannelStateList input_channel_states;
-		ChannelStateList output_channel_states;
+		ChannelStateList multi_out_channel_states;
+        ChannelStateList stereo_out_channel_states;
 		//bool active;
 		std::string midi_option;
         
@@ -150,7 +151,8 @@ private:
         : input_latency (0)
         , output_latency (0)
         , input_channel_states (0)
-        , output_channel_states (0)
+        , multi_out_channel_states (0)
+        , stereo_out_channel_states (0)
         //, active (false)
         {
         }
@@ -190,8 +192,8 @@ private:
     void _set_last_active_state_as_current();
     // get gets available device channels from engine and updates internal controller state
     void _update_device_channels_state(bool reconnect_session_routes = true);
-    // change channel configuration to stereo out mode
-    void _switch_to_stereo_out_io();
+    // check stereo out channel state configuration and make it correcpond stereo out mode requirements
+    void _refresh_stereo_out_channel_states();
     ////////////////////////////////////////
     
     // internal helper functions////////////
