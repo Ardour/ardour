@@ -9,7 +9,7 @@
     bgactive="#454545"
     fghover="#CCCCCC"
     bghover="#898989"
-    fgdisabled ="959595"
+    fgdisabled ="#959595"
     bordercolor="#7E7E7E"
     borderwidth="1 1 0 0" />
 
@@ -140,7 +140,7 @@
         </Layout>
         <Button id="all_inputs_on_button"
           text="ALL"
-          style="generic_control"
+          style="generic_button"
           fgnormal="#D1D1D1"
           bgnormal="#606060"
           fgactive="#C9C9C9"
@@ -151,7 +151,7 @@
           x="111" y="35" width="29" height="19"/>
         <Button id="all_inputs_off_button"
           text="ALL"
-          style="generic_control"
+          style="generic_button"
           fgnormal="#D1D1D1"
           bgnormal="#606060"
           fgactive="#C9C9C9"
@@ -175,7 +175,7 @@
         </Layout>
         <Button id="all_outputs_on_button"
           text="ALL"
-          style="generic_control"
+          style="generic_button"
           fgnormal="#D1D1D1"
           bgnormal="#606060"
           fgactive="#C9C9C9"
@@ -186,7 +186,7 @@
           x="385" y="35" width="29" height="19"/>
         <Button id="all_outputs_off_button"
           text="ALL"
-          style="generic_control"
+          style="generic_button"
           fgnormal="#D1D1D1"
           bgnormal="#606060"
           fgactive="#C9C9C9"
