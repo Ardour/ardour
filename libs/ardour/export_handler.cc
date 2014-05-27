@@ -314,20 +314,19 @@ ExportHandler::finish_timespan ()
 #if 0			// would be nicer with C++11 initialiser...
 			std::map<char, std::string> subs {
 				{ 'f', filename },
-				{ 'd', Glib::path_get_dirname(filename) },
+				{ 'd', Glib::path_get_dirname(filename)  + G_DIR_SEPARATOR },
 				{ 'b', PBD::basename_nosuffix(filename) },
-				{ 'u', upload_username },
-				{ 'p', upload_password}
+				...
 			};
 #endif
 
 			PBD::ScopedConnection command_connection;
 			std::map<char, std::string> subs;
 			subs.insert (std::pair<char, std::string> ('f', filename));
-			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname(filename)));
-			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix(filename)));
-			subs.insert (std::pair<char, std::string> ('u', soundcloud_username));
-			subs.insert (std::pair<char, std::string> ('p', soundcloud_password));
+			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname (filename) + G_DIR_SEPARATOR));
+			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix (filename)));
+			subs.insert (std::pair<char, std::string> ('s', session.path ()));
+			subs.insert (std::pair<char, std::string> ('n', session.name ()));
 
 
 			std::cerr << "running command: " << fmt->command() << "..." << std::endl;
