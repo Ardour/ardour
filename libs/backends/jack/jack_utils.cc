@@ -105,7 +105,7 @@ get_none_string ()
 void
 ARDOUR::get_jack_audio_driver_names (vector<string>& audio_driver_names)
 {
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	audio_driver_names.push_back (portaudio_driver_name);
 #elif __APPLE__
 	audio_driver_names.push_back (coreaudio_driver_name);
@@ -543,7 +543,7 @@ ARDOUR::get_jack_audio_driver_supports_setting_period_count (const string& drive
 bool
 ARDOUR::get_jack_server_application_names (std::vector<std::string>& server_names)
 {
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	server_names.push_back ("jackd.exe");
 #else
 	server_names.push_back ("jackd");
@@ -583,7 +583,7 @@ ARDOUR::get_jack_server_dir_paths (vector<std::string>& server_dir_paths)
 
 	Searchpath sp(string(g_getenv("PATH")));
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	gchar *install_dir = g_win32_get_package_installation_directory_of_module (NULL);
 	if (install_dir) {
 		sp.push_back (install_dir);
@@ -692,7 +692,7 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 
 	args.push_back (options.server_path);
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	// must use sync mode on windows
 	args.push_back ("-S");
 
@@ -738,7 +738,7 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 		args.push_back ("-v");
 	}
 
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	if (options.temporary) {
 		args.push_back ("-T");
 	}
