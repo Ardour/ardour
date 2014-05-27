@@ -73,7 +73,7 @@ using namespace Editing;
 using namespace ArdourCanvas;
 
 static const int32_t sync_mark_width = 9;
-static double const handle_size = 15; /* height of fade handles */
+static double const handle_size = 10; /* height of fade handles */
 
 AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
 				  Gdk::Color const & basic_color)
@@ -297,9 +297,10 @@ AudioRegionView::fade_in_active_changed ()
 {
 	if (start_xfade_rect) {
 		if (audio_region()->fade_in_active()) {
-			start_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
+			start_xfade_rect->set_fill (false);
 		} else {
 			start_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_InactiveCrossfade());
+			start_xfade_rect->set_fill (true);
 		}
 	}
 }
@@ -309,9 +310,10 @@ AudioRegionView::fade_out_active_changed ()
 {
 	if (end_xfade_rect) {
 		if (audio_region()->fade_out_active()) {
-			end_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
+			end_xfade_rect->set_fill (false);
 		} else {	
 			end_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_InactiveCrossfade());
+			end_xfade_rect->set_fill (true);
 		}
 	}
 }
@@ -593,18 +595,18 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 	width = std::max ((framecnt_t) 64, width);
 
-	double const pwidth = trackview.editor().sample_to_pixel (width);
+	double const pwidth = rint(trackview.editor().sample_to_pixel (width));
 
 	/* the right edge should be right on the region frame is the pixel
 	 * width is zero. Hence the additional + 1.0 at the end.
 	 */
 
-	double const handle_right = trackview.editor().sample_to_pixel (_region->length()) + TimeAxisViewItem::RIGHT_EDGE_SHIFT - pwidth;
+	double const handle_right = rint(trackview.editor().sample_to_pixel (_region->length()) + TimeAxisViewItem::RIGHT_EDGE_SHIFT - pwidth);
 
 	/* Put the fade out handle so that its right side is at the end-of-fade line;
 	 */
-	fade_out_handle->set_x0 (handle_right - handle_size);
-	fade_out_handle->set_x1 (handle_right);
+	fade_out_handle->set_x0 (1 + handle_right - handle_size);
+	fade_out_handle->set_x1 (1 + handle_right);
 
 	/* don't show shape if its too small */
 
@@ -687,34 +689,38 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 		return;
 	}
 
-	if (!start_xfade_in) {
-		start_xfade_in = new ArdourCanvas::Curve (group);
-		CANVAS_DEBUG_NAME (start_xfade_in, string_compose ("xfade start in line for %1", region()->name()));
-		start_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
-		start_xfade_in->set_outline_width (1.5);
-		start_xfade_in->set_ignore_events (true);
-	}
-
 	if (!start_xfade_out) {
 		start_xfade_out = new ArdourCanvas::Curve (group);
 		CANVAS_DEBUG_NAME (start_xfade_out, string_compose ("xfade start out line for %1", region()->name()));
-		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128);
-		start_xfade_out->set_outline_color (col);
-		start_xfade_out->set_outline_width (2.0);
+		start_xfade_out->set_fill_color (UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade(), 32));
+		start_xfade_out->set_fill_mode (ArdourCanvas::Curve::Inside);
+		start_xfade_out->set_outline_color (UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128));
+		start_xfade_out->set_outline_width (1.0);
 		start_xfade_out->set_ignore_events (true);
+	}
+
+	if (!start_xfade_in) {
+		start_xfade_in = new ArdourCanvas::Curve (group);
+		CANVAS_DEBUG_NAME (start_xfade_in, string_compose ("xfade start in line for %1", region()->name()));
+		start_xfade_in->set_fill_color (UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 96));
+		start_xfade_in->set_fill_mode (ArdourCanvas::Curve::Outside);
+		start_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
+		start_xfade_in->set_outline_width (1.0);
+		start_xfade_in->set_ignore_events (true);
 	}
 
 	if (!start_xfade_rect) {
 		start_xfade_rect = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (start_xfade_rect, string_compose ("xfade start rect for %1", region()->name()));
-		start_xfade_rect->set_fill (true);
-		start_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
-		start_xfade_rect->set_outline (false);
+		start_xfade_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
+		start_xfade_rect->set_fill (false);
+		start_xfade_rect->set_outline (true);
+		start_xfade_rect->set_outline_width (0.5);
 		start_xfade_rect->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_start_xfade_event), start_xfade_rect, this));
 		start_xfade_rect->set_data ("regionview", this);
 	}
 
-	start_xfade_rect->set (ArdourCanvas::Rect (1.0, 0.0, rect_width, effective_height));
+	start_xfade_rect->set (ArdourCanvas::Rect (0.0, 0.0, rect_width + TimeAxisViewItem::RIGHT_EDGE_SHIFT, effective_height));
 
 	start_xfade_in->set (points);
 
@@ -788,29 +794,33 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 		return;
 	}
 
-	if (!end_xfade_in) {
-		end_xfade_in = new ArdourCanvas::Curve (group);
-		CANVAS_DEBUG_NAME (end_xfade_in, string_compose ("xfade end in line for %1", region()->name()));
-		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128);
-		end_xfade_in->set_outline_color (col);
-		end_xfade_in->set_outline_width (1.5);	
-		end_xfade_in->set_ignore_events (true);
-}
-
 	if (!end_xfade_out) {
 		end_xfade_out = new ArdourCanvas::Curve (group);
 		CANVAS_DEBUG_NAME (end_xfade_out, string_compose ("xfade end out line for %1", region()->name()));
-		end_xfade_out->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
-		end_xfade_out->set_outline_width (2.0);
+		end_xfade_out->set_fill_color (UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade(), 32));
+		end_xfade_out->set_fill_mode (ArdourCanvas::Curve::Inside);
+		end_xfade_out->set_outline_color (UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128));
+		end_xfade_out->set_outline_width (1.0);
 		end_xfade_out->set_ignore_events (true);
 	}
+
+	if (!end_xfade_in) {
+		end_xfade_in = new ArdourCanvas::Curve (group);
+		CANVAS_DEBUG_NAME (end_xfade_in, string_compose ("xfade end in line for %1", region()->name()));
+		end_xfade_in->set_fill_color (UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 96));
+		end_xfade_in->set_fill_mode (ArdourCanvas::Curve::Outside);
+		end_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
+		end_xfade_in->set_outline_width (1.0);
+		end_xfade_in->set_ignore_events (true);
+}
 
 	if (!end_xfade_rect) {
 		end_xfade_rect = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (end_xfade_rect, string_compose ("xfade end rect for %1", region()->name()));
-		end_xfade_rect->set_fill (true);
-		end_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
-		end_xfade_rect->set_outline (0);
+		end_xfade_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
+		end_xfade_rect->set_fill (false);
+		end_xfade_rect->set_outline (true);
+		end_xfade_rect->set_outline_width (0.5);
 		end_xfade_rect->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_end_xfade_event), end_xfade_rect, this));
 		end_xfade_rect->set_data ("regionview", this);
 	}
@@ -993,24 +1003,26 @@ AudioRegionView::set_colors ()
 
 	if (start_xfade_in) {
 		start_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
+		start_xfade_in->set_fill_color (UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 96));
 	}
 	if (start_xfade_out) {
-		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128);
-		start_xfade_out->set_outline_color (col);
+		start_xfade_out->set_outline_color (UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128));
+		start_xfade_out->set_fill_color (UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade(), 32));
 	}
 	if (end_xfade_in) {
 		end_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
+		end_xfade_in->set_fill_color (UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 96));
 	}
 	if (end_xfade_out) {
-		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128);
-		end_xfade_out->set_outline_color (col);
+		end_xfade_out->set_outline_color (UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128));
+		end_xfade_out->set_fill_color (UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade(), 32));
 	}
 
 	if (start_xfade_rect) {
-		start_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
+		start_xfade_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 	}
 	if (end_xfade_rect) {
-		end_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
+		end_xfade_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 	}
 }
 
