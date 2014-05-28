@@ -149,7 +149,7 @@ Editor::export_region ()
 			
 			checker.set_title (_("File Exists!"));
 
-			checker.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+			checker.add_button ("CANCEL", RESPONSE_CANCEL);
 			checker.add_button (_("Overwrite Existing File"), RESPONSE_ACCEPT);
 			checker.set_default_response (RESPONSE_CANCEL);
 			
