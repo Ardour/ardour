@@ -41,5 +41,5 @@ ConfigInfoDialog::ConfigInfoDialog ()
 	get_vbox()->pack_start (scroller, true, true);
 	set_size_request (400, 600);
 
-	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
+	add_button ("CLOSE", Gtk::RESPONSE_ACCEPT);
 }
