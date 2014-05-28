@@ -41,7 +41,7 @@ InterthreadProgressWindow::InterthreadProgressWindow (ARDOUR::InterThreadInfo* i
 
 	get_vbox()->pack_start (_bar, false, false);
 
-	Button* b = add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	Button* b = add_button ("CANCEL", RESPONSE_CANCEL);
 	b->signal_clicked().connect (sigc::mem_fun (*this, &InterthreadProgressWindow::cancel_clicked));
 
 	_cancel_label.set_text (c);
