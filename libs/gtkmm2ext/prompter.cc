@@ -53,7 +53,7 @@ Prompter::init ()
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("Prompter");
 	
-	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
 
 	/* 
 	   Alas a generic 'affirmative' button seems a bit useless sometimes.
