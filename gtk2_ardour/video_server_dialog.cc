@@ -160,8 +160,8 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	docroot_browse_button.signal_clicked().connect (sigc::mem_fun (*this, &VideoServerDialog::open_docroot_dialog));
 
 	show_all_children ();
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	add_button (Stock::EXECUTE, RESPONSE_ACCEPT);
+	add_button ("CANCEL", RESPONSE_CANCEL);
+	add_button ("EXECUTE", RESPONSE_ACCEPT);
 }
 
 VideoServerDialog::~VideoServerDialog ()
@@ -180,8 +180,8 @@ VideoServerDialog::open_path_dialog ()
 	Gtk::FileChooserDialog dialog(_("Set Video Server Executable"), Gtk::FILE_CHOOSER_ACTION_OPEN);
 	dialog.set_filename (path_entry.get_text());
 
-	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	dialog.add_button("CANCEL", Gtk::RESPONSE_CANCEL);
+	dialog.add_button("OK", Gtk::RESPONSE_OK);
 
 	int result = dialog.run();
 
@@ -200,8 +200,8 @@ VideoServerDialog::open_docroot_dialog ()
 	Gtk::FileChooserDialog dialog(_("Server docroot"), Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
 	dialog.set_filename (docroot_entry.get_text());
 
-	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	dialog.add_button("CANCEL", Gtk::RESPONSE_CANCEL);
+	dialog.add_button("OK", Gtk::RESPONSE_OK);
 
 	int result = dialog.run();
 
