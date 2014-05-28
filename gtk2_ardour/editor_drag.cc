@@ -361,16 +361,16 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 
 		if (event->motion.state & Gdk::BUTTON1_MASK || event->motion.state & Gdk::BUTTON2_MASK) {
 			if (!from_autoscroll) {
-				_editor->maybe_autoscroll (true, allow_vertical_autoscroll (), false);
+				bool const moving_left = _drags->current_pointer_x() < _last_pointer_x;
+				bool const moving_up = _drags->current_pointer_y() < _last_pointer_y;
+				_editor->maybe_autoscroll (true, allow_vertical_autoscroll (), moving_left, moving_up);
 			}
 
-			if (!_editor->autoscroll_active() || from_autoscroll) {
-				motion (event, _move_threshold_passed != old_move_threshold_passed);
-				
-				_last_pointer_x = _drags->current_pointer_x ();
-				_last_pointer_y = _drags->current_pointer_y ();
-				_last_pointer_frame = adjusted_current_frame (event);
-			}
+			motion (event, _move_threshold_passed != old_move_threshold_passed);
+
+			_last_pointer_x = _drags->current_pointer_x ();
+			_last_pointer_y = _drags->current_pointer_y ();
+			_last_pointer_frame = adjusted_current_frame (event);
 
 			return true;
 		}
@@ -3912,7 +3912,9 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		break;
 	}
 
-	_editor->maybe_autoscroll (true, false, false);
+	if (event->button.x >= _editor->horizontal_position() + _editor->_visible_canvas_width) {
+		_editor->start_canvas_autoscroll (1, 0);
+	}
 
 	if (start != end) {
 		switch (_operation) {
@@ -4101,7 +4103,9 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 		}
 	}
 
-	_editor->maybe_autoscroll (true, false, false);
+	if (event->button.x >= _editor->horizontal_position() + _editor->_visible_canvas_width) {
+		_editor->start_canvas_autoscroll (1, 0);
+	}
 
 	if (start != end) {
 		_editor->temp_location->set (start, end);
