@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog
+  title="Tracks Preferences"
+  width="619"
+  height="623">
+
+  <Layout bgcolor="#1F1F1F" x="0" y="0" width="619" height="623">
+    <Button
+      id="audio_settings_tab_button"
+      style="generic button" flat="true"
+      text="AUDIO\nSYSTEM\nSETTINGS"
+      x="2" y="3" width="107" height="65"/>
+    <Button
+      id="midi_settings_tab_button"
+      style="generic button" flat="true"
+      text="MIDI\nSYSTEM\nSETTINGS"
+      x="2" y="68" width="107" height="65"/>
+    <Layout id="audio_settings_layout" bgcolor="#000000" x="113" y="0" width="505" height="559">
+      <Layout bgcolor="#565656" x="0" y="0" width="505" height="100">
+        <Label text="AUDIO ENGINE" x="12" y="17"/>
+        <ComboBoxText id="engine_combo" x="97" y="12" width="126" height="20"/>
+
+        <Label text="INTERFACE" x="12" y="47"/>
+        <ComboBoxText id="device_combo" x="97" y="40" width="126" height="20"/>
+
+        <Label text="SAMPLE RATE" x="231" y="17"/>
+        <ComboBoxText id="sample_rate_combo" x="311" y="12" width="90" height="20"/>
+
+        <Label text="BUFFER SIZE" x="231" y="47"/>
+        <ComboBoxText id="buffer_size_combo" x="311" y="42" width="90" height="20"/>
+
+        <Button
+          id="control_panel_button"
+          style="generic button" flat="true"
+          text="DEVICE\nCONTROL\nPANEL"
+          x="407" y="12" width="84" height="48"/>
+
+        <Label id="latency_label" text="INPUT LATENCY:" x="16" y="74  " width="476"/>
+      </Layout>
+      <Layout bgcolor="#565656" x="0" y="101" width="505" height="39">
+        <Label text="CHANNEL CONFIGURATION MODE" x="17" y="15"/>
+        <Button
+          id="multi_out_button"
+          style="generic button" flat="true"
+          text="MULTI OUT"
+          x="281" y="6" width="106" height="28"/>
+        <Button
+          id="stereo_out_button"
+          style="generic button" flat="true"
+          text="STEREO OUT"
+          x="387" y="6" width="106" height="28"/>
+      </Layout>
+      <Layout bgcolor="#565656" x="0" y="141" width="505" height="417">
+        <Layout bgcolor="#862579" x="16" y="13" width="3" height="41"/>
+        <Layout bgcolor="#862579" x="22" y="13" width="265" height="19"/>
+        <Layout bgcolor="#862579" x="16" y="62" width="3" height="299"/>
+        <Layout bgcolor="#27ae36" x="290" y="13" width="3" height="41"/>
+        <Layout bgcolor="#27ae36" x="296" y="13" width="179" height="19"/>
+        <Layout bgcolor="#27ae36" x="290" y="62" width="3" height="299"/>
+        <Button
+          id="name_track_after_driver_button"
+          style="generic button" flat="true"
+          text="NAME TRACK\nAFTER DRIVER"
+          x="16" y="369" width="137" height="39"/>
+        <Button
+          id="reset_track_names_button"
+          style="generic button" flat="true"
+          text="RESET TRACK\nNAMES TO DEFAULT"
+          x="153" y="369" width="137" height="39"/>
+        <Button
+          id="yes_button"
+          style="generic button" flat="true"
+          text="YES"
+          x="292" y="369" width="53" height="39"/>
+        <Button
+          id="no_button"
+          style="generic button" flat="true"
+          text="NO"
+          x="345" y="369" width="53" height="39"/>
+      </Layout>
+    </Layout>
+    <Layout bgcolor="#565656" x="113" y="559" width="505" height="63">
+      <Button
+        id="ok_button"
+        style="generic button" flat="true"
+        text="OK"
+        x="277" y="18" width="71" height="28"/>
+      <Button
+        id="cancel_button"
+        style="generic button" flat="true"
+        text="CANCEL"
+        x="348" y="18" width="71" height="28"/>
+      <Button
+        id="apply_button"
+        style="generic button" flat="true"
+        text="APPLY"
+        x="419" y="18" width="71" height="28"/>
+    </Layout>
+
+    <Layout id="midi_settings_layout" bgcolor="#000000" x="113" y="0" width="505" height="559">
+    </Layout>
+  </Layout>
+</Dialog>
