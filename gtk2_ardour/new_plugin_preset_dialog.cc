@@ -39,8 +39,8 @@ NewPluginPresetDialog::NewPluginPresetDialog (boost::shared_ptr<ARDOUR::Plugin> 
 
 	get_vbox()->pack_start (_replace);
 
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	_add = add_button (Stock::ADD, RESPONSE_ACCEPT);
+	add_button ("CANCEL", RESPONSE_CANCEL);
+	_add = add_button ("ADD", RESPONSE_ACCEPT);
 	set_default_response (RESPONSE_ACCEPT);
 	_name.set_activates_default(true);
 
