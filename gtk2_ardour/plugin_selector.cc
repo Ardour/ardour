@@ -62,7 +62,7 @@ static const char* _filter_mode_strings[] = {
 
 PluginSelector::PluginSelector (PluginManager& mgr)
 	: ArdourDialog (_("Plugin Manager"), true, false)
-	, filter_button (Stock::CLEAR)
+	, filter_button ("CLEAR")
 	, manager (mgr)
 	  
 {
@@ -125,13 +125,13 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	ascroller.set_border_width(10);
 	ascroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	ascroller.add(added_list);
-	btn_add = manage(new Gtk::Button(Stock::ADD));
+	btn_add = manage(new Gtk::Button("ADD"));
 	ARDOUR_UI::instance()->set_tip(*btn_add, _("Add a plugin to the effect list"));
 	btn_add->set_sensitive (false);
-	btn_remove = manage(new Gtk::Button(Stock::REMOVE));
+	btn_remove = manage(new Gtk::Button("REMOVE"));
 	btn_remove->set_sensitive (false);
 	ARDOUR_UI::instance()->set_tip(*btn_remove, _("Remove a plugin from the effect list"));
-	Gtk::Button *btn_update = manage(new Gtk::Button(Stock::REFRESH));
+	Gtk::Button *btn_update = manage(new Gtk::Button("REFRESH"));
 	ARDOUR_UI::instance()->set_tip(*btn_update, _("Update available plugins"));
 
 	btn_add->set_name("PluginSelectorButton");
@@ -168,7 +168,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	table->attach(ascroller, 0, 7, 8, 10);
 
-	add_button (Stock::CLOSE, RESPONSE_CLOSE);
+	add_button ("CLOSE", RESPONSE_CLOSE);
 	add_button (_("Insert Plugin(s)"), RESPONSE_APPLY);
 	set_default_response (RESPONSE_APPLY);
 	set_response_sensitive (RESPONSE_APPLY, false);
