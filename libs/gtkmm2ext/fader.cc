@@ -78,6 +78,7 @@ Fader::Fader (Gtk::Adjustment& adj,
 
 	adjustment.signal_value_changed().connect (mem_fun (*this, &Fader::adjustment_changed));
 	adjustment.signal_changed().connect (mem_fun (*this, &Fader::adjustment_changed));
+    DrawingArea::set_size_request(_face_pixbuf->get_width(), _face_pixbuf->get_height());
 }
 
 Fader::~Fader ()
@@ -91,21 +92,16 @@ Fader::on_expose_event (GdkEventExpose* ev)
 	cairo_t* cr = context->cobj();
     
     cairo_rectangle (cr, 0, 0, get_width(), get_height());
-    gdk_cairo_set_source_pixbuf (cr, _face_pixbuf->gobj(), _face_pixbuf->get_width(), _face_pixbuf->get_height());
+    gdk_cairo_set_source_pixbuf (cr, _face_pixbuf->gobj(), 0, 0);
     cairo_fill (cr);
 
 	get_handle_position (_last_drawn_x, _last_drawn_y);
 
-    cairo_set_source_rgba (cr, 0, 0, 0, 0.0);
-    cairo_rectangle (cr, 
-					 _last_drawn_x - _handle_pixbuf->get_width()/2.0, 
-					 _last_drawn_y - _handle_pixbuf->get_height()/2.0,
-					 _handle_pixbuf->get_width(),
-					 _handle_pixbuf->get_height());
-    gdk_cairo_set_source_pixbuf (cr, 
+    cairo_rectangle (cr, 0, 0, get_width(), get_height());
+    gdk_cairo_set_source_pixbuf (cr,
 								 _handle_pixbuf->gobj(),
-								 _handle_pixbuf->get_width(),
-								 _handle_pixbuf->get_height());
+								 _last_drawn_x - _handle_pixbuf->get_width()/2.0,
+                                 _last_drawn_y - _handle_pixbuf->get_height()/2.0);
     cairo_fill (cr);
 
 	return true;
@@ -121,6 +117,7 @@ Fader::on_size_request (GtkRequisition* req)
 void
 Fader::on_size_allocate (Gtk::Allocation& alloc)
 {
+    DrawingArea::on_size_allocate(alloc);
 	update_unity_position ();
 }
 

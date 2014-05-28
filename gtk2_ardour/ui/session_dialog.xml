@@ -88,10 +88,14 @@
       </Layout>
     </Layout>
   </Layout>
-  <!--HBox height="100">
+  <!--HBox bgnormal="#006400">
     <Adjustment id="zoom_fader"/>
-    <Fader facesource="zoom_fader_face"
-           handlesource="zoom_fader_handle"
-           adjustment="oom_fader"/>
-  </HBox-->
+    <Fader facesource="zoom_fader_face.png"
+           handlesource="zoom_fader_handle.png"
+           adjustment="zoom_fader"
+           minposx="4"
+           minposy="13"
+           maxposx="54"
+           maxposy="4"/-->
+  </HBox>
 </Dialog>

@@ -102,6 +102,7 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, Wid
 											 xml_property (definition, "maxposx", styles, -1),
 											 xml_property (definition, "maxposy", styles, -1)));
 	} else if (widget_type == "ADJUSTMENT") {
+        dbg_msg("Creating ADJUSTMENT");
 		double min_value = xml_property (definition, "minvalue", styles, 0.0);
 		double max_value = xml_property (definition, "maxvalue", styles, 100.0);
 		double initial_value = xml_property (definition, "initialvalue", styles, min_value);
