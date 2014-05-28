@@ -39,23 +39,6 @@ function copydll () {
 # libpng15-15.dll == libpng16-16.dll
 # liblo-7.dll == liblo.dll
 
-ABANDONEDDLLS='
-jack-0.dll
-jackserver-0.dll
-libbz2-1.dll
-libcppunit-1-12-1.dll
-libexpat-1.dll
-libgnurx-0.dll
-libharfbuzz-0.dll
-libFLAC-8.dll
-libvorbis-0.dll
-libvorbisenc-2.dll
-libidn-11.dll
-libssh2-1.dll
-libssl-10.dll
-pthreadGC2.dll
-'
-
 DLLS='
 libiconv-2.dll
 libpng16-16.dll
@@ -109,6 +92,10 @@ libeay32.dll
 ssleay32.dll
 libregex-1.dll
 libportaudio-2.dll
+libtag.dll
+rubberband-2.dll
+vamp-hostsdk-3.dll
+vamp-sdk-2.dll
 '
 . ./win32-env.sh
 . ./print-env.sh
@@ -127,18 +114,19 @@ fi
 echo "./waf --destdir=$PACKAGE_DIR install"
 
 ./waf --destdir=$PACKAGE_DIR install || exit 1
-
 echo "Moving everything from $PACKAGE_DIR/msys to $PACKAGE_DIR ..."
 mv $PACKAGE_DIR/msys/* $PACKAGE_DIR || exit 1
 rmdir $PACKAGE_DIR/msys || exit 1
 
-
 echo "Moving Ardour dll's and executable to $PACKAGE_DIR ..."
 
-echo "mv $PACKAGE_DIR/lib/ardour3/*.dll $PACKAGE_DIR"
-echo "mv $PACKAGE_DIR/lib/ardour3/*.exe $PACKAGE_DIR"
+echo "mv $PACKAGE_DIR/lib/*.dll $PACKAGE_DIR"
+mv $PACKAGE_DIR/lib/*.dll $PACKAGE_DIR || exit 1
 
+echo "mv $PACKAGE_DIR/lib/ardour3/*.dll $PACKAGE_DIR"
 mv $PACKAGE_DIR/lib/ardour3/*.dll $PACKAGE_DIR || exit 1
+
+echo "mv $PACKAGE_DIR/lib/ardour3/*.exe $PACKAGE_DIR"
 mv $PACKAGE_DIR/lib/ardour3/*.exe $PACKAGE_DIR || exit 1
 
 echo "Deleting import libs ..."
@@ -168,8 +156,8 @@ cp -r $GTK/lib/gtk-2.0 $PACKAGE_DIR/lib || exit 1
 cp -r $GTK/lib/gdk-pixbuf-2.0 $PACKAGE_DIR/lib || exit 1
 cp $TOOLS_DIR/loaders.cache $PACKAGE_DIR/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache || exit 1
 
-mkdir -p $PACKAGE_DIR/lib/pango/1.6.0/modules || exit 1
-cp -r $GTK/lib/pango/1.6.0/modules/*.dll $PACKAGE_DIR/lib/pango/1.6.0/modules || exit 1
+mkdir -p $PACKAGE_DIR/etc/pango/lib/pango/1.6.0/modules || exit 1
+cp -r $GTK/lib/pango/1.6.0/modules/*.dll $PACKAGE_DIR/etc/pango/lib/pango/1.6.0/modules || exit 1
 
 cp -r $TOOLS_DIR/mingw64/* $PACKAGE_DIR/etc || exit 1
 
