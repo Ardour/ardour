@@ -61,7 +61,7 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 		)
 	: pixheight(0)
 	, pixwidth(0)
-	, _styleflags(styleflags)
+	, _styleflags(1)
 	, orientation(o)
 	, hold_cnt(hold)
 	, hold_state(0)
@@ -504,7 +504,7 @@ FastMeter::vertical_size_allocate (Gtk::Allocation &alloc)
 		pixwidth  = request_width - 2;
 	}
 
-	CairoWidget::on_size_allocate (alloc);
+	DrawingArea::on_size_allocate (alloc);
 }
 
 void
@@ -529,26 +529,31 @@ FastMeter::horizontal_size_allocate (Gtk::Allocation &alloc)
 		pixheight  = request_height - 2;
 	}
 
-	CairoWidget::on_size_allocate (alloc);
+	DrawingArea::on_size_allocate (alloc);
 }
 
-void
-FastMeter::render (cairo_t* cr, cairo_rectangle_t* area)
+bool
+FastMeter::on_expose_event (GdkEventExpose* ev)
 {
 	if (orientation == Vertical) {
-		return vertical_expose (cr, area);
+		return vertical_expose (ev);
 	} else {
-		return horizontal_expose (cr, area);
+		return horizontal_expose (ev);
 	}
 }
 
-void
-FastMeter::vertical_expose (cairo_t* cr, cairo_rectangle_t* area)
+bool
+FastMeter::vertical_expose (GdkEventExpose* ev)
 {
+	Glib::RefPtr<Gdk::Window> win = get_window ();
 	gint top_of_meter;
 	GdkRectangle intersection;
 	GdkRectangle background;
-	GdkRectangle eventarea;
+
+	cairo_t* cr = gdk_cairo_create (get_window ()->gobj());
+
+	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	cairo_clip (cr);
 
 	cairo_set_source_rgb (cr, 0, 0, 0); // black
 	rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
@@ -566,19 +571,14 @@ FastMeter::vertical_expose (cairo_t* cr, cairo_rectangle_t* area)
 	background.y = 1;
 	background.width = pixrect.width;
 	background.height = pixheight - top_of_meter;
-
-	eventarea.x = area->x;
-	eventarea.y = area->y;
-	eventarea.width = area->width;
-	eventarea.height = area->height;
-
-	if (gdk_rectangle_intersect (&background, &eventarea, &intersection)) {
+/*
+	if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
 		cairo_set_source (cr, bgpattern->cobj());
 		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
 		cairo_fill (cr);
 	}
-
-	if (gdk_rectangle_intersect (&pixrect, &eventarea, &intersection)) {
+*/
+	if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
 		// draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
 		cairo_set_source (cr, fgpattern->cobj());
 		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
@@ -590,10 +590,7 @@ FastMeter::vertical_expose (cairo_t* cr, cairo_rectangle_t* area)
 	if (hold_state) {
 		last_peak_rect.x = 1;
 		last_peak_rect.width = pixwidth;
-		last_peak_rect.y = max(1, 1 + pixheight - (int) floor (pixheight * current_peak));
-		if (_styleflags & 2) { // LED stripes
-			last_peak_rect.y = max(0, (last_peak_rect.y & (~1)));
-		}
+		last_peak_rect.y = max(1, 1 + pixheight - (gint) floor (pixheight * current_peak));
 		if (bright_hold || (_styleflags & 2)) {
 			last_peak_rect.height = max(0, min(3, pixheight - last_peak_rect.y - 1 ));
 		} else {
@@ -613,15 +610,24 @@ FastMeter::vertical_expose (cairo_t* cr, cairo_rectangle_t* area)
 		last_peak_rect.width = 0;
 		last_peak_rect.height = 0;
 	}
+
+	cairo_destroy (cr);
+
+	return TRUE;
 }
 
-void
-FastMeter::horizontal_expose (cairo_t* cr, cairo_rectangle_t* area)
+bool
+FastMeter::horizontal_expose (GdkEventExpose* ev)
 {
+	Glib::RefPtr<Gdk::Window> win = get_window ();
 	gint right_of_meter;
 	GdkRectangle intersection;
 	GdkRectangle background;
-	GdkRectangle eventarea;
+
+	cairo_t* cr = gdk_cairo_create (get_window ()->gobj());
+
+	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	cairo_clip (cr);
 
 	cairo_set_source_rgb (cr, 0, 0, 0); // black
 	rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
@@ -639,18 +645,13 @@ FastMeter::horizontal_expose (cairo_t* cr, cairo_rectangle_t* area)
 	background.width = pixwidth - right_of_meter;
 	background.height = pixheight;
 
-	eventarea.x = area->x;
-	eventarea.y = area->y;
-	eventarea.width = area->width;
-	eventarea.height = area->height;
-
-	if (gdk_rectangle_intersect (&background, &eventarea, &intersection)) {
+	if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
 		cairo_set_source (cr, bgpattern->cobj());
 		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
 		cairo_fill (cr);
 	}
 
-	if (gdk_rectangle_intersect (&pixrect, &eventarea, &intersection)) {
+	if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
 		cairo_set_source (cr, fgpattern->cobj());
 		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
 		cairo_fill (cr);
@@ -682,6 +683,10 @@ FastMeter::horizontal_expose (cairo_t* cr, cairo_rectangle_t* area)
 		last_peak_rect.width = 0;
 		last_peak_rect.height = 0;
 	}
+
+	cairo_destroy (cr);
+
+	return TRUE;
 }
 
 void
@@ -789,10 +794,7 @@ FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float ol
 			queue = true;
 		}
 		rect.x = 1;
-		rect.y = max(1, 1 + pixheight - (int) floor (pixheight * current_peak));
-		if (_styleflags & 2) { // LED stripes
-			rect.y = max(0, (rect.y & (~1)));
-		}
+		rect.y = max(1, 1 + pixheight - (gint) floor (pixheight * current_peak));
 		if (bright_hold || (_styleflags & 2)) {
 			rect.height = max(0, min(3, pixheight - last_peak_rect.y -1 ));
 		} else {
