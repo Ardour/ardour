@@ -323,8 +323,8 @@ ExportFilenameSelector::open_browse_dialog ()
 	//dialog.set_transient_for(*this);
 	dialog.set_filename (path_entry.get_text());
 
-	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	dialog.add_button("CANCEL", Gtk::RESPONSE_CANCEL);
+	dialog.add_button("OK", Gtk::RESPONSE_OK);
 
 	while (true) {
 		int result = dialog.run();
