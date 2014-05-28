@@ -109,7 +109,7 @@ ExportVideoDialog::ExportVideoDialog (Session* s, TimeSelection &tme, bool range
 		l->set_line_wrap();
 		vbox->pack_start (*l, false, false, 8);
 		get_vbox()->pack_start (*vbox, false, false);
-		add_button (Stock::OK, RESPONSE_CANCEL);
+		add_button ("OK", RESPONSE_CANCEL);
 		show_all_children ();
 		return;
 	}
@@ -343,7 +343,7 @@ ExportVideoDialog::ExportVideoDialog (Session* s, TimeSelection &tme, bool range
 	transcode_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportVideoDialog::launch_export));
 	abort_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportVideoDialog::abort_clicked));
 
-	cancel_button = add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	cancel_button = add_button ("CANCEL", RESPONSE_CANCEL);
 	get_action_area()->pack_start (transcode_button, false, false);
 	show_all_children ();
 	progress_box->hide();
@@ -985,8 +985,8 @@ ExportVideoDialog::open_outfn_dialog ()
 	Gtk::FileChooserDialog dialog(_("Save Exported Video File"), Gtk::FILE_CHOOSER_ACTION_SAVE);
 	dialog.set_filename (outfn_path_entry.get_text());
 
-	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	dialog.add_button("CANCEL", Gtk::RESPONSE_CANCEL);
+	dialog.add_button("OK", Gtk::RESPONSE_OK);
 
 	int result = dialog.run();
 
@@ -1005,8 +1005,8 @@ ExportVideoDialog::open_invid_dialog ()
 	Gtk::FileChooserDialog dialog(_("Save Exported Video File"), Gtk::FILE_CHOOSER_ACTION_SAVE);
 	dialog.set_filename (invid_path_entry.get_text());
 
-	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	dialog.add_button("CANCEL", Gtk::RESPONSE_CANCEL);
+	dialog.add_button("OK", Gtk::RESPONSE_OK);
 
 	int result = dialog.run();
 
