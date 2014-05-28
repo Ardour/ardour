@@ -208,7 +208,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
         }
 
 	controls_table.attach (route_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::AttachOptions (0), 3, 0);
+//	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::AttachOptions (0), 3, 0);
 
 	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
 	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));
@@ -258,7 +258,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	route_group_menu = new RouteGroupMenu (_session, plist);
 
-	gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
+//	gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 
 	gm.get_level_meter().signal_scroll_event().connect (sigc::mem_fun (*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 }
@@ -725,7 +725,7 @@ RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
 		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_track_mode, _1, mode, false));
 	} else {
 
-		bool needs_bounce = false;
+		bool needs_bounce;
 
 		if (!track()->can_use_mode (mode, needs_bounce)) {
 
@@ -855,7 +855,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 		reset_meter();
 
-		gm.get_gain_slider().show();
+//		gm.get_gain_slider().hide();
 		mute_button->show();
 		if (!_route || _route->is_monitor()) {
 			solo_button->hide();
@@ -876,7 +876,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 		reset_meter();
 
-		gm.get_gain_slider().hide();
+//		gm.get_gain_slider().hide();
 		mute_button->show();
 		if (!_route || _route->is_monitor()) {
 			solo_button->hide();
@@ -1055,7 +1055,7 @@ RouteTimeAxisView::use_copy_playlist (bool prompt, vector<boost::shared_ptr<Play
 		prompter.set_title (_("New Copy Playlist"));
 		prompter.set_prompt (_("Name for new playlist:"));
 		prompter.set_initial_text (name);
-		prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
+		prompter.add_button ("NEW", Gtk::RESPONSE_ACCEPT);
 		prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
 		prompter.show_all ();
 
@@ -1108,7 +1108,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 		prompter.set_title (_("New Playlist"));
 		prompter.set_prompt (_("Name for new playlist:"));
 		prompter.set_initial_text (name);
-		prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
+		prompter.add_button ("NEW", Gtk::RESPONSE_ACCEPT);
 		prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
 
 		switch (prompter.run ()) {
