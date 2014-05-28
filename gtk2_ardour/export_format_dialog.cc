@@ -133,9 +133,9 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 
 	/* Buttons */
 
-	revert_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	revert_button = add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
 	revert_button->signal_clicked().connect (sigc::mem_fun(*this, &ExportFormatDialog::revert));
-	close_button = add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_APPLY);
+	close_button = add_button ("SAVE", Gtk::RESPONSE_APPLY);
 	close_button->set_sensitive (false);
 	close_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportFormatDialog::end_dialog));
 	manager.CompleteChanged.connect (*this, invalidator (*this), boost::bind (&Gtk::Button::set_sensitive, close_button, _1), gui_context());
