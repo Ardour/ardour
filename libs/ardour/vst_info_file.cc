@@ -610,8 +610,8 @@ vstfx_parse_vst_state (VSTState* vstfx)
 	  fail to implement getVendorString, and so won't stuff the
 	  string with any name*/
 
-	char creator[65] = "Unknown\0";
-	char name[65] = "Unknown\0";
+	char creator[65] = "Unknown";
+	char name[65] = "";
 
 	AEffect* plugin = vstfx->plugin;
 
@@ -715,7 +715,7 @@ vstfx_info_from_plugin (const char *dllpath, VSTState* vstfx, vector<VSTInfo *> 
 		string path = vstfx->handle->path;
 
 		do {
-			char name[65] = "Unknown\0";
+			char name[65] = "Unknown";
 			id = plugin->dispatcher (plugin, effShellGetNextPlugin, 0, 0, name, 0);
 			ids.push_back(std::make_pair(id, name));
 		} while ( id != 0 );
