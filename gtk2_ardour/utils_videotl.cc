@@ -53,7 +53,7 @@ VideoUtils::confirm_video_outfn (std::string outfn, std::string docroot)
 		ArdourDialog confirm (_("Destination is outside Video Server's docroot. "), true);
 		Label m (_("The destination file path is outside of the Video Server's docroot. The file will not be readable by the Video Server. Do you still want to continue?"));
 		confirm.get_vbox()->pack_start (m, true, true);
-		confirm.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+		confirm.add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
 		confirm.add_button (_("Continue"), Gtk::RESPONSE_ACCEPT);
 		confirm.show_all ();
 		if (confirm.run() == RESPONSE_CANCEL) { return false; }
@@ -63,7 +63,7 @@ VideoUtils::confirm_video_outfn (std::string outfn, std::string docroot)
 		ArdourDialog confirm (_("Confirm Overwrite"), true);
 		Label m (_("A file with the same name already exists.  Do you want to overwrite it?"));
 		confirm.get_vbox()->pack_start (m, true, true);
-		confirm.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+		confirm.add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
 		confirm.add_button (_("Overwrite"), Gtk::RESPONSE_ACCEPT);
 		confirm.show_all ();
 		if (confirm.run() == RESPONSE_CANCEL) { return false; }
