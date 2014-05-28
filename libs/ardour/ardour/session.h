@@ -470,7 +470,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		);
 
 	void   remove_route (boost::shared_ptr<Route>);
-	void   resort_routes ();
+	void   resort_routes (bool reconnect_routes_io = false);
 	void   resort_routes_using (boost::shared_ptr<RouteList>);
 
 	AudioEngine & engine() { return _engine; }
@@ -891,6 +891,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
 	void set_frame_rate (framecnt_t nframes);
+	void reconnect_existing_routes (bool withLock);
 
   protected:
 	friend class Route;
