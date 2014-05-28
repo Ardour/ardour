@@ -174,8 +174,8 @@ AddRouteDialog::AddRouteDialog ()
 	   this dialog is shown, via ::on_show()
 	*/
 
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	add_button (Stock::ADD, RESPONSE_ACCEPT);
+	add_button ("CANCEL", RESPONSE_CANCEL);
+	add_button ("ADD", RESPONSE_ACCEPT);
 
 	track_type_chosen ();
 }
