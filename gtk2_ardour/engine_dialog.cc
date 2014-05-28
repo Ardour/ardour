@@ -257,9 +257,9 @@ EngineControl::EngineControl ()
 	control_app_button.signal_clicked().connect (mem_fun (*this, &EngineControl::control_app_button_clicked));
 	manage_control_app_sensitivity ();
 
-	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	ok_button = add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
-	apply_button = add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_APPLY);
+	cancel_button = add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
+	ok_button = add_button ("OK", Gtk::RESPONSE_OK);
+	apply_button = add_button ("APPLY", Gtk::RESPONSE_APPLY);
 
 	/* Pick up any existing audio setup configuration, if appropriate */
 
