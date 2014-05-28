@@ -80,9 +80,6 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void show_strip (MixerStrip *);
 	void hide_strip (MixerStrip *);
 
-	void maximise_mixer_space();
-	void restore_mixer_space();
-
 	void ensure_float (Gtk::Window&);
 
         MonitorSection* monitor_section() const { return _monitor_section; }
@@ -282,9 +279,6 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	bool _following_editor_selection;
 
 	void monitor_section_going_away ();
-
-	/// true if we are in fullscreen mode
-	bool _maximised;
 };
 
 #endif /* __ardour_mixer_ui_h__ */
