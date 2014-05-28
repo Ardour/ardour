@@ -207,7 +207,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	   account any scrolling offsets.
 	*/
 
-	framepos_t pixel_to_sample_from_event (double pixel) const {
+	framepos_t pixel_to_sample (double pixel) const {
 
 		/* pixel can be less than zero when motion events
 		   are processed. since we've already run the world->canvas
@@ -220,10 +220,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		} else {
 			return 0;
 		}
-	}
-
-	framepos_t pixel_to_sample (double pixel) const {
-		return pixel * samples_per_pixel;
 	}
 
         double sample_to_pixel (framepos_t sample) const {
@@ -352,8 +348,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void ensure_time_axis_view_is_visible (const TimeAxisView& tav);
 	void scroll_tracks_down_line ();
 	void scroll_tracks_up_line ();
-        bool scroll_up_one_track ();
-        bool scroll_down_one_track ();
 
 	void prepare_for_cleanup ();
 	void finish_cleanup ();
@@ -414,8 +408,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		return _drags;
 	}
 
-        void maybe_autoscroll (bool, bool, bool);
-        bool autoscroll_active() const;
+	void maybe_autoscroll (bool, bool, bool, bool);
 
 	Gdk::Cursor* get_canvas_cursor () const { return current_canvas_cursor; }
 	void set_canvas_cursor (Gdk::Cursor*, bool save=false);
@@ -1029,7 +1022,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	static int _idle_visual_changer (void *arg);
 	int idle_visual_changer ();
-        void visual_changer (const VisualChange&);
 	void ensure_visual_change_idle_handler ();
 
 	/* track views */
@@ -1079,6 +1071,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         void load_bindings ();
         Gtkmm2ext::ActionMap editor_action_map;
         Gtkmm2ext::Bindings  key_bindings;
+
+	int ensure_cursor (framepos_t* pos);
 
 	void cut_copy (Editing::CutCopyOp);
 	bool can_cut_copy () const;
@@ -1728,15 +1722,22 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* autoscrolling */
 
-        sigc::connection autoscroll_connection;
-        bool autoscroll_horizontal_allowed;
-        bool autoscroll_vertical_allowed;
-        uint32_t autoscroll_cnt;
-        Gtk::Widget* autoscroll_widget;
-        ArdourCanvas::Rect autoscroll_boundary;
+	bool autoscroll_active;
+	int autoscroll_timeout_tag;
+	int autoscroll_x;
+	int autoscroll_y;
+	int last_autoscroll_x;
+	int last_autoscroll_y;
+	uint32_t autoscroll_cnt;
+	framecnt_t autoscroll_x_distance;
+	double autoscroll_y_distance;
 
+	bool _autoscroll_fudging;
+	int autoscroll_fudge_threshold () const;
+
+	static gint _autoscroll_canvas (void *);
 	bool autoscroll_canvas ();
-        void start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary);
+	void start_canvas_autoscroll (int x, int y);
 	void stop_canvas_autoscroll ();
 
 	/* trimming */
