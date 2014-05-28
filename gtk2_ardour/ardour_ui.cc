@@ -82,6 +82,7 @@
 #include "ardour/session_utils.h"
 #include "ardour/slave.h"
 #include "ardour/system_exec.h"
+#include "ardour/directory_names.h"
 #include "dbg_msg.h"
 
 #ifdef WINDOWS_VST_SUPPORT
@@ -2830,14 +2831,107 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			if (likely_new && !nsm) {
 
 				std::string existing = Glib::build_filename (session_path, session_name);
+                
+                bool do_not_create_session = false;
 
-				if (!ask_about_loading_existing_session (existing)) {
-					ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
-					continue;
-				}
-			}
+                GDir *dir;
+                GError *error;
+                const gchar *file_name;
+                
+                dir = g_dir_open(session_path.c_str(), 0, &error);
+                
+                while ((file_name = g_dir_read_name(dir)))
+                {
+                    string ff = string(file_name);
+                    
+                    string full_file_name = g_build_filename(session_path.c_str(), file_name);
+                    
+                    string str_file_name = string(file_name);
+                    string interchange_debug = string(ARDOUR::interchange_dir_name);
+                    
+                    if( (g_file_test (full_file_name.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) &&
+                        (str_file_name == interchange_debug) )
+                    {
+                        cout<<endl<<full_file_name<<" WAS NOT deleted \n\n"<<flush;
+                        continue;
+                    }
 
-			_session_is_new = false;
+                    if( g_file_test (full_file_name.c_str(), GFileTest (G_FILE_TEST_EXISTS)) &&
+                        string(file_name) != string(ARDOUR::interchange_dir_name) )
+                    {
+                        
+                        try {
+                            if( g_remove(full_file_name.c_str() ) >=0 )
+                                cout<<full_file_name<<" file was deleted \n"<<flush;
+                            else
+                            {
+                                cout<<full_file_name<<" file was not deleted (ELSE) \n"<<flush;
+                                
+                                string message = "Can not replace session. File: file " + full_file_name + " can not be deleted";
+                                MessageDialog msg (message.c_str(),
+                                                   false,
+                                                   Gtk::MESSAGE_WARNING,
+                                                   Gtk::BUTTONS_OK,
+                                                   true);
+                                
+                                msg.set_position (Gtk::WIN_POS_MOUSE);
+                                msg.run();
+                                
+                                do_not_create_session = true;
+                                break;                           
+                            }
+    
+                        } catch (...) {
+                            cout<<full_file_name<<" file was not deleted (CATCH) \n"<<flush;
+                            
+                            string message = "Can not replace session. File: file " + full_file_name + " can not be deleted";
+                            MessageDialog msg (message.c_str(),
+                                               false,
+                                               Gtk::MESSAGE_WARNING,
+                                               Gtk::BUTTONS_OK,
+                                               true);
+                            
+                            msg.set_position (Gtk::WIN_POS_MOUSE);
+                            msg.run();
+                            
+                            do_not_create_session = true;
+                            break;
+                        }
+                        
+                        /*
+                        // file is a directory
+                        if( (Glib::file_test (full_file_name, Glib::FileTest (G_FILE_TEST_IS_DIR))) )
+                        {
+                            try {
+                                if( g_rmdir(full_file_name.c_str())>=0 )
+                                    cout<<full_file_name<<" directory was deleted \n"<<flush;
+                                else
+                                    cout<<full_file_name<<" directory was not deleted \n"<<flush;
+                            } catch (...) {
+                                cerr<<"ERROR :: Can not delete directroy: "<<file_name<<endl<<flush;
+                            }
+                        } else {
+                            // file is not a directory
+                            try {
+                                if(unlink(full_file_name.c_str())>=0)
+                                    cout<<full_file_name<<" file was deleted"<<endl<<flush;
+                                else
+                                    cout<<full_file_name<<" file was not deleted"<<endl<<flush;
+                            } catch (...) {
+                                cerr<<"ERROR :: Can not delete file: "<<file_name<<endl<<flush;    
+                            }
+                            
+                        }
+                         */
+                    }
+                }
+                
+                if( do_not_create_session )
+                    continue;
+                
+                _session_is_new = true;
+			} else
+                _session_is_new = false;
 
 		} else {
 

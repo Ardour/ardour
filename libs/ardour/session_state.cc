@@ -127,6 +127,19 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+namespace
+{
+    string
+    get_session_projectfile_name(string session_path)
+    {
+        string s0 = session_path;
+        string s1 = Glib::path_get_dirname (s0);
+        s0.erase(0, s1.size());
+        
+        return session_path + s0 + ".ardour";
+    }
+}
+
 void
 Session::pre_engine_init (string fullpath)
 {
@@ -144,10 +157,10 @@ Session::pre_engine_init (string fullpath)
 	if (_path[_path.length()-1] != G_DIR_SEPARATOR) {
 		_path += G_DIR_SEPARATOR;
 	}
-
+    
 	/* is it new ? */
 
-	_is_new = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+	_is_new = !Glib::file_test ( get_session_projectfile_name(fullpath), Glib::FileTest (G_FILE_TEST_EXISTS));
 
 	/* finish initialization that can't be done in a normal C++ constructor
 	   definition.
@@ -415,17 +428,20 @@ Session::ensure_subdirs ()
 
 	dir = session_directory().sound_path();
 
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
-	}
+    // if directory 'interchange' allready exists do not create it again
+    if ( !Glib::file_test (dir.c_str(), Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
+        if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+            error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+            return -1;
+        }
+    }
 
 	dir = session_directory().midi_path();
-
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session midi dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
-	}
+   
+    if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+        error << string_compose(_("Session: cannot create session midi dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+        return -1;
+    }
 
 	dir = session_directory().dead_path();
 
