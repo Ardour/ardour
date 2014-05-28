@@ -83,7 +83,7 @@ RhythmFerret::RhythmFerret (Editor& e)
 	, silence_threshold_scale (silence_threshold_adjustment)
 	, trigger_gap_adjustment (3, 0, 100, 1, 10)
 	, trigger_gap_spinner (trigger_gap_adjustment)
-	, action_button (Stock::APPLY)
+	, action_button ("APPLY")
 {
 	operation_strings = I18N (_operation_strings);
 	Gtkmm2ext::set_popdown_strings (operation_selector, operation_strings);
