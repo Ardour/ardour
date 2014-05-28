@@ -30,8 +30,8 @@ MidiChannelDialog::MidiChannelDialog (uint8_t active_channel)
 {
 	selector.show_all ();
 	get_vbox()->pack_start (selector);
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	add_button (Stock::OK, RESPONSE_OK);
+	add_button ("CANCEL", RESPONSE_CANCEL);
+	add_button ("OK", RESPONSE_OK);
 }
 
 uint8_t 
