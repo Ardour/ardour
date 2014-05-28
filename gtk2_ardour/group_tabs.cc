@@ -237,7 +237,7 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 }
 
 void
-GroupTabs::render (cairo_t* cr, cairo_rectangle_t*)
+GroupTabs::render (cairo_t* cr)
 {
 	if (_dragging == 0) {
 		_tabs = compute_tabs ();
