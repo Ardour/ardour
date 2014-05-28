@@ -341,7 +341,6 @@
 
     <menu name='View' action = 'View'>
       <menuitem action='ToggleMaximalEditor'/>
-      <menuitem action='ToggleMaximalMixer'/>
       <menuitem action='KeepTearoffs'/>
 
       <separator/>
@@ -491,7 +490,7 @@
       <menuitem action='show-marker-lines'/>
     </menu>
     <menu action = 'WindowMenu'>
-      <menuitem action='toggle-audio-midi-setup'/>
+      <menuitem action='toggle-tracks-control-panel'/>
       <separator/>
       <menuitem action='toggle-mixer'/>
       <menuitem action='toggle-meterbridge'/>
