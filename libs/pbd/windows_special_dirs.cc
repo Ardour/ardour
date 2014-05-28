@@ -52,7 +52,7 @@ PBD::get_win_special_folder (int csidl)
 		if (SHGetPathFromIDListW (pidl, path)) {
 			retval = g_utf16_to_utf8 ((const gunichar2*)path, -1, 0, 0, 0);
 		}
-		CoTaskMemFree (pidl);
+		// VK: SOLVE -lole32 AND UNCOMMENT: CoTaskMemFree (pidl);
 	}
 
 	return retval;
