@@ -1439,7 +1439,7 @@ ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams)
 	label.set_text(text);
 
 	dialog.get_vbox()->pack_start (label);
-	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
+	dialog.add_button ("OK", RESPONSE_ACCEPT);
 
 	dialog.set_name (X_("PluginIODialog"));
 	dialog.set_modal (true);
@@ -1834,7 +1834,7 @@ outputs will not work correctly."));
 
 	dialog.get_vbox()->set_border_width (12);
 	dialog.get_vbox()->pack_start (label);
-	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
+	dialog.add_button ("OK", RESPONSE_ACCEPT);
 
 	dialog.set_name (X_("PluginIODialog"));
 	dialog.set_modal (true);
