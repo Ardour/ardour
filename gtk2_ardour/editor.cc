@@ -313,8 +313,10 @@ Editor::Editor ()
 	bbt_beat_subdivision = 4;
 	_visible_canvas_width = 0;
 	_visible_canvas_height = 0;
-	autoscroll_horizontal_allowed = false;
-	autoscroll_vertical_allowed = false;
+	last_autoscroll_x = 0;
+	last_autoscroll_y = 0;
+	autoscroll_active = false;
+	autoscroll_timeout_tag = -1;
 	logo_item = 0;
 
 	analysis_window = 0;
@@ -2415,11 +2417,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("maximised"))) {
 		bool yn = string_is_affirmative (prop->value());
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleMaximalEditor"));
-		assert (act);
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		bool fs = tact && tact->get_active();
-		if (yn ^ fs) {
+		if (yn) {
 			ActionManager::do_action ("Common", "ToggleMaximalEditor");
 		}
 	}
@@ -3272,7 +3270,7 @@ Editor::duplicate_range (bool with_dialog)
 		label.show ();
 		spinner.show ();
 
-		win.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+		win.add_button ("CANCEL", RESPONSE_CANCEL);
 		win.add_button (_("Duplicate"), RESPONSE_ACCEPT);
 		win.set_default_response (RESPONSE_ACCEPT);
 
@@ -4293,45 +4291,35 @@ Editor::idle_visual_changer ()
 	pending_visual_change.idle_handler_id = -1;
 	pending_visual_change.being_handled = true;
 	
-	VisualChange vc = pending_visual_change;
-
+	VisualChange::Type p = pending_visual_change.pending;
 	pending_visual_change.pending = (VisualChange::Type) 0;
 
-	visual_changer (vc);
-
-	pending_visual_change.being_handled = false;
-
-	return 0; /* this is always a one-shot call */
-}
-
-void
-Editor::visual_changer (const VisualChange& vc)
-{
 	double const last_time_origin = horizontal_position ();
 
-	if (vc.pending & VisualChange::ZoomLevel) {
-		set_samples_per_pixel (vc.samples_per_pixel);
+
+	if (p & VisualChange::ZoomLevel) {
+		set_samples_per_pixel (pending_visual_change.samples_per_pixel);
 
 		compute_fixed_ruler_scale ();
 
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
 		
-		compute_current_bbt_points (vc.time_origin, pending_visual_change.time_origin + current_page_samples(),
+		compute_current_bbt_points (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_samples(),
 					    current_bbt_points_begin, current_bbt_points_end);
-		compute_bbt_ruler_scale (vc.time_origin, pending_visual_change.time_origin + current_page_samples(),
+		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_samples(),
 					 current_bbt_points_begin, current_bbt_points_end);
 		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end);
 
 		update_video_timeline();
 	}
 
-	if (vc.pending & VisualChange::TimeOrigin) {
-		set_horizontal_position (vc.time_origin / samples_per_pixel);
+	if (p & VisualChange::TimeOrigin) {
+		set_horizontal_position (pending_visual_change.time_origin / samples_per_pixel);
 	}
 
-	if (vc.pending & VisualChange::YOrigin) {
-		vertical_adjustment.set_value (vc.y_origin);
+	if (p & VisualChange::YOrigin) {
+		vertical_adjustment.set_value (pending_visual_change.y_origin);
 	}
 
 	if (last_time_origin == horizontal_position ()) {
@@ -4340,11 +4328,14 @@ Editor::visual_changer (const VisualChange& vc)
 		redisplay_tempo (true);
 	}
 
-	if (!(vc.pending & VisualChange::ZoomLevel)) {
+	if (!(p & VisualChange::ZoomLevel)) {
 		update_video_timeline();
 	}
 
 	_summary->set_overlays_dirty ();
+
+	pending_visual_change.being_handled = false;
+	return 0; /* this is always a one-shot call */
 }
 
 struct EditorOrderTimeAxisSorter {
