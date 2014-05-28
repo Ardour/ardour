@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis
+    Copyright (C) 2014 Valeriy Kamyshniy
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,21 +20,18 @@
 #ifndef __ardour_gtk_about_h__
 #define __ardour_gtk_about_h__
 
-#include <gtkmm/aboutdialog.h>
+#include "ardour_dialog.h"
+#include "ardour_button.h"
 
-#include "ardour/session_handle.h"
-
-class ConfigInfoDialog;
-
-class About : public Gtk::AboutDialog, public ARDOUR::SessionHandlePtr
+class About : public ArdourDialog
 {
-  public:
-	About ();
-	~About ();
+public:
+    About();
+    ~About();
 
-  private:
-	ConfigInfoDialog* config_info;
-	void show_config_info ();
+private:
+    bool close_button_pressed (GdkEventButton*);
+    void on_response (int);
 };
 
 #endif /* __ardour_gtk_about_h__ */
