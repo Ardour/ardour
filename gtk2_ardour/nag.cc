@@ -73,7 +73,7 @@ relies on a stable, sustainable income stream. Thanks for using Ardour!"));
 	get_vbox()->pack_start (button_box);
 
 	set_border_width (12);
-	add_button (Stock::OK, RESPONSE_ACCEPT);
+	add_button ("OK", RESPONSE_ACCEPT);
 }
 
 NagScreen::~NagScreen ()
