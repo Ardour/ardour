@@ -114,7 +114,7 @@ PatchChangeDialog::PatchChangeDialog (
 
 	get_vbox()->add (*t);
 
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button ("CANCEL", RESPONSE_CANCEL);
 	add_button (ok, RESPONSE_ACCEPT);
 	if (allow_delete) {
 		add_button (Gtk::StockID(GTK_STOCK_DELETE), RESPONSE_REJECT);
