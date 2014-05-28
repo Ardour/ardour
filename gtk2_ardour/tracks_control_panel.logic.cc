@@ -324,7 +324,10 @@ TracksControlPanel::populate_input_channels()
         }
         
         add_device_capture_control (input_iter->name, input_iter->active, number, track_name);
-    }    
+    }
+    
+    _all_inputs_on_button.set_sensitive(!input_states.empty() );
+    _all_inputs_off_button.set_sensitive(!input_states.empty() );
 }
 
 
@@ -351,6 +354,9 @@ TracksControlPanel::populate_output_channels()
         add_device_playback_control (output_iter->name, output_iter->active, number);
     }
     
+    bool stereo_out_disabled = (Config->get_output_auto_connect() & AutoConnectPhysical);
+    _all_outputs_on_button.set_sensitive(!output_states.empty() && stereo_out_disabled );
+    _all_outputs_off_button.set_sensitive(!output_states.empty() && stereo_out_disabled );
 }
 
 
