@@ -549,9 +549,9 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	, matches (0)
 	, _status (0)
 	, _done (false)
-	, ok_button (Stock::OK)
-	, cancel_button (Stock::CANCEL)
-	, apply_button (Stock::APPLY)
+	, ok_button ("OK")
+	, cancel_button ("CANCEL")
+	, apply_button ("APPLY")
 	, gm (0)
 {
 
