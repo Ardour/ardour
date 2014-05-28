@@ -158,6 +158,14 @@ public:
     /* this signal is emitted if the sample rate changes */
     
     PBD::Signal1<void, framecnt_t> SampleRateChanged;
+
+	 /* this signal is emitted if the buffer size changes */
+    
+    PBD::Signal1<void, pframes_t> BufferSizeChanged;
+    
+    /* this signal is emitted if the device list changed */
+    
+    PBD::Signal0<void> DeviceListChanged;
     
     /* this signal is sent if the backend ever disconnects us */
     
@@ -178,6 +186,7 @@ public:
      */
     int  process_callback (pframes_t nframes);
     int  buffer_size_change (pframes_t nframes);
+    int  device_list_change ();
     int  sample_rate_change (pframes_t nframes);
     void freewheel_callback (bool);
     void timebase_callback (TransportState state, pframes_t nframes, framepos_t pos, int new_position);
