@@ -628,19 +628,20 @@ style "small_entry" = "small_text"
 	text[ACTIVE] = @@COLPREFIX@_text
 	text[SELECTED] = @@COLPREFIX@_fg_selected
 
-	bg[NORMAL] = @@COLPREFIX@_base
-	bg[SELECTED] = @@COLPREFIX@_base
+	bg[NORMAL] = @@COLPREFIX@_darkest
+	bg[ACTIVE] = @@COLPREFIX@_base
 	bg[SELECTED] = @@COLPREFIX@_bg_selected
 
-	base[NORMAL] = @@COLPREFIX@_base
+	base[NORMAL] = @@COLPREFIX@_darkest
 	base[ACTIVE] = @@COLPREFIX@_base
 	base[SELECTED] = @@COLPREFIX@_bg_selected
 }
 
 style "red_active_small_entry" = "small_entry"
 {
-	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
-	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+	fg[ACTIVE] = @@COLPREFIX@_bright_bluegreen
+	fg[NORMAL] = @@COLPREFIX@_bright_bluegreen
+	fg[SELECTED] = @@COLPREFIX@_bright_bluegreen
 }
 
 style "small_bold_entry" = "small_bold_text"
@@ -871,9 +872,9 @@ style "inspector_track_list_display" = "track_list_display"
 
 style "processor_list" = "very_small_text"
 {
-	bg[NORMAL] = @@COLPREFIX@_darkest
-        bg[ACTIVE] = shade (1.8, @@COLPREFIX@_fg_selected)
-        fg[ACTIVE] = @@COLPREFIX@_darkest
+	bg[NORMAL] = @@COLPREFIX@_base
+    bg[ACTIVE] = shade (1.8, @@COLPREFIX@_fg_selected)
+    fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 # Colour of a processor frame when it is a send whose level is being controller by the fader
