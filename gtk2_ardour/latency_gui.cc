@@ -165,7 +165,7 @@ LatencyDialog::LatencyDialog (const std::string& title, Latent& l, framepos_t sr
 	  lwidget (l, sr, psz)
 {
 	get_vbox()->pack_start (lwidget);
-	add_button (Stock::CLOSE, RESPONSE_CLOSE);
+	add_button ("CLOSE", RESPONSE_CLOSE);
 
 	show_all ();
 	run ();
