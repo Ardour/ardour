@@ -98,7 +98,7 @@ typedef uint64_t microseconds_t;
 #include "audio_clock.h"
 #include "big_clock_window.h"
 #include "bundle_manager.h"
-#include "engine_dialog.h"
+//VKPRefs:#include "engine_dialog.h"
 #include "gain_meter.h"
 #include "global_port_matrix.h"
 #include "gui_object.h"
@@ -202,7 +202,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, about (X_("about"), _("About"))
 	, location_ui (X_("locations"), _("Locations"))
 	, route_params (X_("inspector"), _("Tracks and Busses"))
-	, audio_midi_setup (X_("audio-midi-setup"), _("Audio/MIDI Setup"))
+	//VKPRefs:, audio_midi_setup (X_("audio-midi-setup"), _("Audio/MIDI Setup"))
+	, tracks_control_panel (X_("tracks-control-panel"), _("PREFERENCES"))
 	, session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
 	, add_video_dialog (X_("add-video"), _("Add Tracks/Busses"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
@@ -282,7 +283,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	/* handle Audio/MIDI setup when session requires it */
 
-	ARDOUR::Session::AudioEngineSetupRequired.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::do_audio_midi_setup, this, _1));
+	//VKPRefs:ARDOUR::Session::AudioEngineSetupRequired.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::do_audio_midi_setup, this, _1));
+	ARDOUR::Session::AudioEngineSetupRequired.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::do_tracks_control_panel, this, _1));
 
 	/* handle sr mismatch with a dialog (PROBLEM: needs to return a value and thus cannot be x-thread) */
 
@@ -368,7 +370,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&add_route_dialog);
 	WM::Manager::instance().register_window (&add_video_dialog);
 	WM::Manager::instance().register_window (&route_params);
-	WM::Manager::instance().register_window (&audio_midi_setup);
+	//VKPRefs:WM::Manager::instance().register_window (&audio_midi_setup);
+	WM::Manager::instance().register_window (&tracks_control_panel);
 	WM::Manager::instance().register_window (&bundle_manager);
 	WM::Manager::instance().register_window (&location_ui);
 	WM::Manager::instance().register_window (&big_clock_window);
@@ -753,7 +756,8 @@ ARDOUR_UI::starting ()
 	 */
 	
 	try {
-		audio_midi_setup.get (true);
+		//VKPRefs:audio_midi_setup.get (true);
+		tracks_control_panel.get(true);
 	} catch (...) {
 		return -1;
 	}
@@ -1472,8 +1476,8 @@ ARDOUR_UI::build_session_selector ()
 
 	Gtk::ScrolledWindow *scroller = manage (new Gtk::ScrolledWindow);
 
-	session_selector_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	session_selector_window->add_button (Stock::OPEN, RESPONSE_ACCEPT);
+	session_selector_window->add_button ("CANCEL", RESPONSE_CANCEL);
+	session_selector_window->add_button ("OPEN", RESPONSE_ACCEPT);
 	session_selector_window->set_default_response (RESPONSE_ACCEPT);
 	recent_session_model = TreeStore::create (recent_session_columns);
 	recent_session_display.set_model (recent_session_model);
@@ -1581,8 +1585,8 @@ ARDOUR_UI::open_session ()
 		/* ardour sessions are folders */
 
 		open_session_selector = new Gtk::FileChooserDialog (_("Open Session"), FILE_CHOOSER_ACTION_OPEN);
-		open_session_selector->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-		open_session_selector->add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
+		open_session_selector->add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
+		open_session_selector->add_button ("OPEN", Gtk::RESPONSE_ACCEPT);
 		open_session_selector->set_default_response(Gtk::RESPONSE_ACCEPT);
 		
 		if (_session) {
@@ -2209,7 +2213,7 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 	string snapname;
 
 	prompter.set_name ("Prompter");
-	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	prompter.add_button ("SAVE", Gtk::RESPONSE_ACCEPT);
 	if (switch_to_it) {
 		prompter.set_title (_("Save as..."));
 		prompter.set_prompt (_("New session name"));
@@ -2255,7 +2259,7 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 			ArdourDialog confirm (_("Confirm Snapshot Overwrite"), true);
 			Label m (_("A snapshot already exists with that name.  Do you want to overwrite it?"));
 			confirm.get_vbox()->pack_start (m, true, true);
-			confirm.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+			confirm.add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
 			confirm.add_button (_("Overwrite"), Gtk::RESPONSE_ACCEPT);
 			confirm.show_all ();
 			switch (confirm.run()) {
@@ -2289,7 +2293,7 @@ ARDOUR_UI::rename_session ()
 	string name;
 
 	prompter.set_name ("Prompter");
-	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	prompter.add_button ("SAVE", Gtk::RESPONSE_ACCEPT);
 	prompter.set_title (_("Rename Session"));
 	prompter.set_prompt (_("New session name"));
 
@@ -2436,7 +2440,7 @@ ARDOUR_UI::save_template ()
 	prompter.set_title (_("Save Template"));
 	prompter.set_prompt (_("Name for template:"));
 	prompter.set_initial_text(_session->name() + _("-template"));
-	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	prompter.add_button ("SAVE", Gtk::RESPONSE_ACCEPT);
 
 	switch (prompter.run()) {
 	case RESPONSE_ACCEPT:
@@ -2688,6 +2692,9 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		}
 		
 		if (session_name[0] == G_DIR_SEPARATOR ||
+#if defined (WIN32)
+			session_name.length() > 2 && session_name[1] == ':' && G_IS_DIR_SEPARATOR (session_name[2]) ||
+#endif
 		    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == G_DIR_SEPARATOR) ||
 		    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == G_DIR_SEPARATOR)) {
 			
@@ -3173,7 +3180,7 @@ will release an additional %3 %4bytes of disk space.\n", removed),
 	ddhbox.pack_start (dvbox, true, false, 5);
 
 	results.get_vbox()->pack_start (ddhbox, true, false, 5);
-	results.add_button (Stock::CLOSE, RESPONSE_CLOSE);
+	results.add_button ("CLOSE", RESPONSE_CLOSE);
 	results.set_default_response (RESPONSE_CLOSE);
 	results.set_position (Gtk::WIN_POS_MOUSE);
 
@@ -3212,7 +3219,7 @@ ARDOUR_UI::cleanup ()
 ALL undo/redo information will be lost if you clean-up.\n\
 Clean-up will move all unused files to a \"dead\" location."));
 
-	checker.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	checker.add_button ("CANCEL", RESPONSE_CANCEL);
 	checker.add_button (_("Clean-up"), RESPONSE_ACCEPT);
 	checker.set_default_response (RESPONSE_CANCEL);
 
@@ -3412,7 +3419,7 @@ ARDOUR_UI::stop_video_server (bool ask_confirm)
 			ArdourDialog confirm (_("Stop Video-Server"), true);
 			Label m (_("Do you really want to stop the Video Server?"));
 			confirm.get_vbox()->pack_start (m, true, true);
-			confirm.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+			confirm.add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
 			confirm.add_button (_("Yes, Stop It"), Gtk::RESPONSE_ACCEPT);
 			confirm.show_all ();
 			if (confirm.run() == RESPONSE_CANCEL) {
@@ -4353,7 +4360,8 @@ ARDOUR_UI::reset_route_peak_display (Route* route)
 		reset_peak_display ();
 	}
 }
-
+//VKPRefs:
+/*
 int
 ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 {
@@ -4369,5 +4377,23 @@ ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 		return -1;
 	}
 }
+*/
+#define dbg_msg(a) MessageDialog(a, PROGRAM_NAME).run();
+int
+ARDOUR_UI::do_tracks_control_panel (uint32_t desired_sample_rate)
+{
+	tracks_control_panel->set_desired_sample_rate (desired_sample_rate);
+	tracks_control_panel->set_position (WIN_POS_CENTER);
 
+	switch (tracks_control_panel->run()) {
+        case Gtk::RESPONSE_OK:
+            return 0;
+        case Gtk::RESPONSE_APPLY:
+            return 0;
+        default:
+            break;
+	}
+    
+	return -1;
+}
 
