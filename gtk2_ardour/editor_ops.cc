@@ -1276,69 +1276,6 @@ Editor::scroll_tracks_up_line ()
 	reset_y_origin (vertical_adjustment.get_value() - 60);
 }
 
-bool
-Editor::scroll_down_one_track ()
-{
-	double vertical_pos = vertical_adjustment.get_value () + vertical_adjustment.get_page_size() - 1.0; 
-
-	TrackViewList::reverse_iterator next = track_views.rend();
-	std::pair<TimeAxisView*,double> res;
-
-	for (TrackViewList::reverse_iterator t = track_views.rbegin(); t != track_views.rend(); ++t) {
-		if ((*t)->hidden()) {
-			continue;
-		}
-		
-		res = (*t)->covers_y_position (vertical_pos);
-
-		if (res.first) {
-			break;
-		}
-
-		next = t;
-	}
-
-	/* move to the track below the first one that covers the */
-	
-	if (next != track_views.rend()) {
-		ensure_track_visible (*next);
-		return true;
-	}
-
-	return false;
-}	
-
-bool
-Editor::scroll_up_one_track ()
-{
-	double vertical_pos = vertical_adjustment.get_value ();
-
-	TrackViewList::iterator prev = track_views.end();
-	std::pair<TimeAxisView*,double> res;
-
-	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
-
-		if ((*t)->hidden()) {
-			continue;
-		}
-
-		res = (*t)->covers_y_position(vertical_pos);
-		
-		if (res.first) {
-			break;
-		}
-
-		prev = t;
-	}
-	
-	if (prev != track_views.end()) {
-		ensure_track_visible (*prev);
-		return true;
-	}
-
-	return false;
-}
-
 /* ZOOM */
 
 void
@@ -1772,7 +1709,7 @@ Editor::choose_new_marker_name(string &name) {
 	dialog.set_size_request (250, -1);
 	dialog.set_position (Gtk::WIN_POS_MOUSE);
 
-	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
+	dialog.add_button ("OK", RESPONSE_ACCEPT);
 	dialog.set_initial_text (name);
 
 	dialog.show ();
@@ -2439,8 +2376,8 @@ Editor::rename_region ()
 	d.get_vbox()->set_border_width (12);
 	d.get_vbox()->pack_start (hbox, false, false);
 
-	d.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	d.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	d.add_button("CANCEL", Gtk::RESPONSE_CANCEL);
+	d.add_button("OK", Gtk::RESPONSE_OK);
 
 	d.set_size_request (300, -1);
 
@@ -6270,8 +6207,8 @@ Editor::close_region_gaps ()
 	table.attach (*manage (new Label (_("ms"))), 2, 3, 1, 2);
 
 	dialog.get_vbox()->pack_start (table);
-	dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	dialog.add_button (_("Ok"), RESPONSE_ACCEPT);
+	dialog.add_button ("CANCEL", RESPONSE_CANCEL);
+	dialog.add_button (_("OK"), RESPONSE_ACCEPT);
 	dialog.show_all ();
 
 	if (dialog.run () == RESPONSE_CANCEL) {
