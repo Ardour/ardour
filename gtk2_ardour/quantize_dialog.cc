@@ -105,7 +105,7 @@ QuantizeDialog::QuantizeDialog (PublicEditor& e)
 	get_vbox()->pack_start (*table);
 	show_all ();
 
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button ("CANCEL", RESPONSE_CANCEL);
 	add_button (_("Quantize"), RESPONSE_OK);
 }
 
