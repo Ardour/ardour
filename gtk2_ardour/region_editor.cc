@@ -156,7 +156,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 
 	get_vbox()->pack_start (_table, true, true);
 
-	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
+	add_button ("CLOSE", Gtk::RESPONSE_ACCEPT);
 
 	set_name ("RegionEditorWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
