@@ -38,7 +38,7 @@ MAJOR = parts[0]
 other = parts[1].split ('-')
 MINOR = other[0]
 if len(other) > 1:
-    MICRO = other[0]
+    MICRO = other[1]
 else:
     MICRO = '0'
 
