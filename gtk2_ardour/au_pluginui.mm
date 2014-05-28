@@ -41,10 +41,10 @@ using namespace PBD;
 vector<string> AUPluginUI::automation_mode_strings;
 
 static const gchar* _automation_mode_strings[] = {
-	X_("Manual"),
-	X_("Play"),
-	X_("Write"),
-	X_("Touch"),
+	X_("OFF"),
+	X_("READ"),
+	X_("WRITE"),
+	X_("TOUCH"),
 	0
 };
 
