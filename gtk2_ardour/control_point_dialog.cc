@@ -52,8 +52,8 @@ ControlPointDialog::ControlPointDialog (ControlPoint* p)
 	get_vbox ()->pack_end (*b);
 	b->show_all ();
 
-	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_ACCEPT);
+	add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
+	add_button ("APPLY", Gtk::RESPONSE_ACCEPT);
 	set_default_response (Gtk::RESPONSE_ACCEPT);
 }
 
