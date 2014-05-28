@@ -224,8 +224,8 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	set_session_fps_checkbox.set_active(true);
 
 	/* Buttons */
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	ok_button = add_button (Stock::OK, RESPONSE_ACCEPT);
+	add_button ("CANCEL", RESPONSE_CANCEL);
+	ok_button = add_button ("OK", RESPONSE_ACCEPT);
 	//ok_button->set_sensitive(false);
 	set_action_ok(false);
 
