@@ -746,7 +746,7 @@ PortMatrix::remove_channel (ARDOUR::BundleChannel b)
 				ArdourDialog d (_("Port removal not allowed"));
 				Label l (_("This port cannot be removed.\nEither the first plugin in the track or buss cannot accept\nthe new number of inputs or the last plugin has more outputs."));
 				d.get_vbox()->pack_start (l);
-				d.add_button (Stock::OK, RESPONSE_ACCEPT);
+				d.add_button ("OK", RESPONSE_ACCEPT);
 				d.set_modal (true);
 				d.show_all ();
 				d.run ();
