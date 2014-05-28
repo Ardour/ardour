@@ -51,7 +51,7 @@ TransposeDialog::TransposeDialog ()
 	get_vbox()->set_spacing (6);
 	get_vbox()->pack_start (*t, false, false);
 
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button ("CANCEL", RESPONSE_CANCEL);
 	add_button (_("Transpose"), RESPONSE_ACCEPT);
 
 	show_all_children ();
