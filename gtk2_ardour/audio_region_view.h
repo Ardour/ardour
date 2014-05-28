@@ -30,7 +30,6 @@
 
 #include "canvas/fwd.h"
 #include "canvas/wave_view.h"
-#include "canvas/surface_group.h"
 
 #include "region_view.h"
 #include "time_axis_view_item.h"
@@ -205,8 +204,6 @@ class AudioRegionView : public RegionView
 	AutomationLine::VisibleAspects automation_line_visibility () const;
 
 private:
-	ArdourCanvas::SurfaceGroup *curve_surface;
-
 	void setup_fade_handle_positions ();
 
 	void parameter_changed (std::string const &);
