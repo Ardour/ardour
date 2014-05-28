@@ -92,8 +92,8 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 
 	get_vbox()->pack_start (*hbox, false, false);
 
-	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_OK);
+	add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
+	add_button ("APPLY", Gtk::RESPONSE_OK);
 	set_default_response (Gtk::RESPONSE_OK);
 
 	get_vbox()->pack_start (_progress_bar, true, true, 12);
