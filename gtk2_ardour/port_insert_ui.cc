@@ -169,8 +169,8 @@ PortInsertWindow::PortInsertWindow (ARDOUR::Session* sess, boost::shared_ptr<ARD
 
 	get_vbox()->pack_start (_portinsertui);
 
-	Gtk::Button* cancel_but = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	Gtk::Button* ok_but = add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	Gtk::Button* cancel_but = add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
+	Gtk::Button* ok_but = add_button ("OK", Gtk::RESPONSE_OK);
 
 	cancel_but->signal_clicked().connect (sigc::mem_fun (*this, &PortInsertWindow::cancel));
 	ok_but->signal_clicked().connect (sigc::mem_fun (*this, &PortInsertWindow::accept));
