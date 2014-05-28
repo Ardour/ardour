@@ -72,7 +72,8 @@
 #include "ardour_dialog.h"
 #include "ardour_window.h"
 #include "editing.h"
-#include "engine_dialog.h"
+//VKPRefs:#include "engine_dialog.h"
+#include "tracks_control_panel.h"
 #include "meterbridge.h"
 #include "ui_config.h"
 #include "enums.h"
@@ -174,7 +175,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void new_midi_tracer_window ();
 	void toggle_editing_space();
-	void toggle_mixer_space();
 	void toggle_keep_tearoffs();
 
 	Gtk::Tooltips& tooltips() { return _tooltips; }
@@ -606,7 +606,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         WM::Proxy<About> about;
         WM::Proxy<LocationUIWindow> location_ui;
         WM::Proxy<RouteParams_UI> route_params;
-        WM::Proxy<EngineControl> audio_midi_setup;
+        //VKPRefs:WM::Proxy<EngineControl> audio_midi_setup;
+        WM::Proxy<TracksControlPanel> tracks_control_panel;
 
         /* Windows/Dialogs that require a creator method */
 
@@ -756,7 +757,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         std::string _announce_string;
         void check_announcements ();
 
-        int do_audio_midi_setup (uint32_t);
+        //VKPRefs:int do_audio_midi_setup (uint32_t);
+		int do_tracks_control_panel(uint32_t);
 };
 
 #endif /* __ardour_gui_h__ */
