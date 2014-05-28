@@ -24,7 +24,9 @@ gtk2_ardour_sources = [
         'ambiguous_file_dialog.cc',
         'analysis_window.cc',
         'ardour_button.cc',
+        'waves_button.cc',
         'ardour_dialog.cc',
+        'waves_dialog.cc',
         'ardour_ui.cc',
         'ardour_ui2.cc',
         'ardour_ui_dependents.cc',
@@ -243,7 +245,9 @@ gtk2_ardour_sources = [
         'video_server_dialog.cc',
         'utils_videotl.cc',
         'export_video_dialog.cc',
-        'export_video_infobox.cc'
+        'export_video_infobox.cc',
+        'tracks_control_panel.cc',
+        'tracks_control_panel.logic.cc'
 ]
 
 def options(opt):
@@ -700,6 +704,7 @@ def build(bld):
     # Icons/Images
     bld.install_files('${DATADIR}/ardour3/icons', bld.path.ant_glob('icons/*.png'))
     bld.install_files('${DATADIR}/ardour3/pixmaps', bld.path.ant_glob('pixmaps/*.xpm'))
+    bld.install_files('${DATADIR}/ardour3/ui', bld.path.ant_glob('ui/*.*'))
     bld.install_files('${DATADIR}/ardour3', 'splash.png')
     bld.install_files('${DATADIR}/ardour3', 'small-splash.png')
     bld.install_files('${DATADIR}/ardour3', 'ArdourMono.ttf')
