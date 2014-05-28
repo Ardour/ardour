@@ -44,7 +44,7 @@
 #include "ardour_ui.h"
 #include "session_dialog.h"
 #include "opts.h"
-#include "engine_dialog.h"
+//VKPRefs:#include "engine_dialog.h"
 #include "i18n.h"
 #include "utils.h"
 
@@ -78,9 +78,9 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	set_position (WIN_POS_CENTER);
 	get_vbox()->set_spacing (6);
 
-	cancel_button = add_button ((cancel_not_quit ? Stock::CANCEL : Stock::QUIT), RESPONSE_CANCEL);
-	back_button = add_button (Stock::GO_BACK, RESPONSE_NO);
-	open_button = add_button (Stock::OPEN, RESPONSE_ACCEPT);
+	cancel_button = add_button ((cancel_not_quit ? "CANCEL" : "QUIT"), RESPONSE_CANCEL);
+	back_button = add_button ("BACK", RESPONSE_NO);
+	open_button = add_button ("OPEN", RESPONSE_ACCEPT);
 
 	back_button->signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::back_button_pressed), false);
 
@@ -1022,6 +1022,9 @@ SessionDialog::master_bus_button_clicked ()
 
 	_master_bus_channel_count.set_sensitive(yn);
 	_connect_outputs_to_master.set_sensitive(yn);
+    // GZ: activate correct connection type
+    _connect_outputs_to_master.set_active(yn);
+    _connect_outputs_to_physical.set_active(!yn);
 }
 
 void
