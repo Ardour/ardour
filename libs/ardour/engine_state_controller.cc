@@ -826,7 +826,7 @@ EngineStateController::_update_device_channels_state(bool reconnect_session_rout
     
     // update audio output states (stereo out mode)
     new_output_states.clear();
-    ChannelStateList &output_stereo_states = _current_state->multi_out_channel_states;
+    ChannelStateList &output_stereo_states = _current_state->stereo_out_channel_states;
     
     output_iter = phys_audio_outputs.begin();
     for (; output_iter != phys_audio_outputs.end(); ++output_iter) {
@@ -878,7 +878,8 @@ EngineStateController::_refresh_stereo_out_channel_states()
         pending_active_channels = 0;
     }
 
-    for (; iter != output_states.end(); ++iter) {
+    // drop the rest of the states to false (until we reach the end or first existing active channel)
+    for (; iter != output_states.end() && iter != active_iter; ++iter) {
         if (pending_active_channels) {
             iter->active = true;
             --pending_active_channels;
