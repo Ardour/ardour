@@ -145,7 +145,7 @@ SearchPathOption::remove_path (PathEntry* pe)
 }
 
 SearchPathOption::PathEntry::PathEntry (const std::string& path, bool removable)
-        : remove_button (Stock::REMOVE)
+        : remove_button ("REMOVE")
 {
         entry.set_text (path);
         entry.show ();
