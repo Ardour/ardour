@@ -89,7 +89,7 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session* target) :
 	get_vbox()->pack_start (session_scroll, false, false);
 
 	// Buttons
-	cancel_button = add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	cancel_button = add_button ("CANCEL", RESPONSE_CANCEL);
 	cancel_button->signal_clicked().connect (sigc::mem_fun (*this, &SessionImportDialog::end_dialog));
 	ok_button = add_button (_("Import"), RESPONSE_ACCEPT);
 	ok_button->signal_clicked().connect (sigc::mem_fun (*this, &SessionImportDialog::do_merge));
@@ -170,8 +170,8 @@ SessionImportDialog::browse ()
         dialog.add_filter (session_filter);
         dialog.set_filter (session_filter);
 
-	dialog.add_button(Stock::CANCEL, RESPONSE_CANCEL);
-	dialog.add_button(Stock::OK, RESPONSE_OK);
+	dialog.add_button("CANCEL", RESPONSE_CANCEL);
+	dialog.add_button("OK", RESPONSE_OK);
 
 	int result = dialog.run();
 
@@ -285,7 +285,7 @@ SessionImportDialog::open_rename_dialog (string text, string name)
 	string new_name;
 
 	prompter.set_name ("Prompter");
-	prompter.add_button (Stock::SAVE, RESPONSE_ACCEPT);
+	prompter.add_button ("SAVE", RESPONSE_ACCEPT);
 	prompter.set_prompt (text);
 	prompter.set_initial_text (name);
 
