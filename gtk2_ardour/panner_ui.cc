@@ -148,16 +148,16 @@ PannerUI::build_astate_menu ()
 	/** TRANSLATORS: this is `Manual' in the sense of automation not being played,
 	    so that changes to pan must be done by hand.
 	*/
-	pan_astate_menu->items().push_back (MenuElem (S_("Automation|Manual"), sigc::bind (
+	pan_astate_menu->items().push_back (MenuElem (S_("Automation|OFF"), sigc::bind (
 			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
 			(AutoState) ARDOUR::Off)));
-	pan_astate_menu->items().push_back (MenuElem (_("Play"), sigc::bind (
+	pan_astate_menu->items().push_back (MenuElem (_("READ"), sigc::bind (
 			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
 			(AutoState) Play)));
-	pan_astate_menu->items().push_back (MenuElem (_("Write"), sigc::bind (
+	pan_astate_menu->items().push_back (MenuElem (_("WRITE"), sigc::bind (
 			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
 			(AutoState) Write)));
-	pan_astate_menu->items().push_back (MenuElem (_("Touch"), sigc::bind (
+	pan_astate_menu->items().push_back (MenuElem (_("TOUCH"), sigc::bind (
 			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
 			(AutoState) Touch)));
 
