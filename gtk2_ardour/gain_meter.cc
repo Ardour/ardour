@@ -66,6 +66,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	, gain_automation_style_button ("")
 	, gain_automation_state_button ("")
 	, _data_type (DataType::AUDIO)
+    , gain_slider(0)
 
 {
 	using namespace Menu_Helpers;
@@ -81,6 +82,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 		gain_slider = manage (new HSliderController (&gain_adjustment, fader_length, fader_girth, false));
 	} else {
 		gain_slider = manage (new VSliderController (&gain_adjustment, fader_length, fader_girth, false));
+        gain_slider->set_image(::get_icon("fader_handle"));
 	}
 
 	level_meter = new LevelMeterHBox(_session);
@@ -191,16 +193,16 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 
 		gain_astate_menu.items().clear ();
 
-		gain_astate_menu.items().push_back (MenuElem (S_("Automation|Manual"),
+		gain_astate_menu.items().push_back (MenuElem (S_("Automation|OFF"),
 							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 									  Evoral::Parameter(GainAutomation), (AutoState) ARDOUR::Off)));
-		gain_astate_menu.items().push_back (MenuElem (_("Play"),
+		gain_astate_menu.items().push_back (MenuElem (_("READ"),
 							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 								    Evoral::Parameter(GainAutomation), (AutoState) Play)));
-		gain_astate_menu.items().push_back (MenuElem (_("Write"),
+		gain_astate_menu.items().push_back (MenuElem (_("WRITE"),
 							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 								    Evoral::Parameter(GainAutomation), (AutoState) Write)));
-		gain_astate_menu.items().push_back (MenuElem (_("Touch"),
+		gain_astate_menu.items().push_back (MenuElem (_("TOUCH"),
 							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 								    Evoral::Parameter(GainAutomation), (AutoState) Touch)));
 
@@ -765,16 +767,16 @@ GainMeterBase::_astate_string (AutoState state, bool shrt)
 
 	switch (state) {
 	case ARDOUR::Off:
-		sstr = (shrt ? "M" : _("M"));
+		sstr = (shrt ? "OFF" : _("OFF"));
 		break;
 	case Play:
-		sstr = (shrt ? "P" : _("P"));
+		sstr = (shrt ? "READ" : _("READ"));
 		break;
 	case Touch:
-		sstr = (shrt ? "T" : _("T"));
+		sstr = (shrt ? "TOUCH" : _("TOUCH"));
 		break;
 	case Write:
-		sstr = (shrt ? "W" : _("W"));
+		sstr = (shrt ? "WRITE" : _("WRITE"));
 		break;
 	}
 
@@ -1020,7 +1022,6 @@ GainMeter::get_gm_width ()
 {
 	Gtk::Requisition sz;
 	int min_w = 0;
-	sz.width = 0;
 	meter_metric_area.size_request (sz);
 	min_w += sz.width;
 	level_meter->size_request (sz);
