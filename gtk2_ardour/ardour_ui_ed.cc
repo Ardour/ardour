@@ -46,7 +46,7 @@
 #include "audio_clock.h"
 #include "keyboard.h"
 #include "monitor_section.h"
-#include "engine_dialog.h"
+//VKPRefs:#include "engine_dialog.h"
 #include "editor.h"
 #include "actions.h"
 #include "mixer_ui.h"
@@ -191,7 +191,6 @@ ARDOUR_UI::install_actions ()
 	/* windows visibility actions */
 
 	ActionManager::register_toggle_action (common_actions, X_("ToggleMaximalEditor"), _("Maximise Editor Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_editing_space));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleMaximalMixer"), _("Maximise Mixer Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixer_space));
 	act = ActionManager::register_toggle_action (common_actions, X_("KeepTearoffs"), _("Show Toolbars"), mem_fun (*this, &ARDOUR_UI::toggle_keep_tearoffs));
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -560,7 +559,7 @@ ARDOUR_UI::save_ardour_state ()
 	window_node->add_child_nocopy (*tearoff_node);
 
 	Config->add_extra_xml (*window_node);
-	Config->add_extra_xml (audio_midi_setup->get_state());
+	//VKPRefs:Config->add_extra_xml (audio_midi_setup->get_state());
 
 	Config->save_state();
 
