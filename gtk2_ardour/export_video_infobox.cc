@@ -63,8 +63,8 @@ ExportVideoInfobox::ExportVideoInfobox (Session* s)
 
 	showagain_checkbox.set_active(false);
 	show_all_children ();
-	add_button (Stock::YES, RESPONSE_YES);
-	add_button (Stock::NO, RESPONSE_NO);
+	add_button ("YES", RESPONSE_YES);
+	add_button ("NO", RESPONSE_NO);
 }
 
 ExportVideoInfobox::~ExportVideoInfobox ()
