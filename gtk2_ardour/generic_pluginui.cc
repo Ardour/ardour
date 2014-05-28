@@ -450,16 +450,16 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 	// AutomationControl::Changed() while the automation lock is taken
 	switch (insert->get_parameter_automation_state (cui->parameter()) & (ARDOUR::Off|Play|Touch|Write)) {
 	case ARDOUR::Off:
-		cui->automate_button.set_label (S_("Automation|Manual"));
+		cui->automate_button.set_label (S_("Automation|OFF"));
 		break;
 	case Play:
-		cui->automate_button.set_label (_("Play"));
+		cui->automate_button.set_label (_("READ"));
 		break;
 	case Write:
-		cui->automate_button.set_label (_("Write"));
+		cui->automate_button.set_label (_("WRITE"));
 		break;
 	case Touch:
-		cui->automate_button.set_label (_("Touch"));
+		cui->automate_button.set_label (_("TOUCH"));
 		break;
 	default:
 		cui->automate_button.set_label (_("???"));
@@ -771,13 +771,13 @@ GenericPluginUI::astate_clicked (ControlUI* cui, uint32_t /*port*/)
 	MenuList& items (automation_menu->items());
 
 	items.clear ();
-	items.push_back (MenuElem (S_("Automation|Manual"),
+	items.push_back (MenuElem (S_("Automation|OFF"),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) ARDOUR::Off, cui)));
-	items.push_back (MenuElem (_("Play"),
+	items.push_back (MenuElem (_("READ"),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Play, cui)));
-	items.push_back (MenuElem (_("Write"),
+	items.push_back (MenuElem (_("WRITE"),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Write, cui)));
-	items.push_back (MenuElem (_("Touch"),
+	items.push_back (MenuElem (_("TOUCH"),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Touch, cui)));
 
 	automation_menu->popup (1, gtk_get_current_event_time());
