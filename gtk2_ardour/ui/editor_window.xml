@@ -123,6 +123,23 @@
                         activeicon="tool_zoom_active"
                         prelighticon="tool_zoom_prelight"/>
             <HBox box.pack="end" spacing ="1">
+              <Adjustment id="zoom_fader"/>
+              <Fader facesource="vertical_zoom_fader_face.png"
+                     handlesource="zoom_fader_handle.png"
+                     activehandlesource="zoom_fader_handle_active.png"
+                     adjustment="zoom_fader"
+                     minposx="20"
+                     minposy="13"
+                     maxposx="66"
+                     maxposy="13"/>
+              <Fader facesource="horizontal_zoom_fader_face.png"
+                     handlesource="zoom_fader_handle.png"
+                     activehandlesource="zoom_fader_handle_active.png"
+                     adjustment="zoom_fader"
+                     minposx="20"
+                     minposy="13"
+                     maxposx="66"
+                     maxposy="13"/>
               <iconbutton id="tool_waveform_zoom_button"
                           tooltip="Waveform Zoom"
                           width="34" height="26"

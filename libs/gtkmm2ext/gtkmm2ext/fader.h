@@ -37,6 +37,7 @@ class LIBGTKMM2EXT_API Fader : public Gtk::DrawingArea
         Fader (Gtk::Adjustment& adjustment, 
 			   const std::string& face_image_file,
 			   const std::string& handle_image_file,
+			   const std::string& active_handle_image_file,
 			   int min_pos_x, 
 			   int min_pos_y,
 			   int max_pos_x,
@@ -62,6 +63,7 @@ class LIBGTKMM2EXT_API Fader : public Gtk::DrawingArea
 
   private:
     Glib::RefPtr<Gdk::Pixbuf> _handle_pixbuf;
+    Glib::RefPtr<Gdk::Pixbuf> _active_handle_pixbuf;
     Glib::RefPtr<Gdk::Pixbuf> _face_pixbuf;
 	Gtk::Adjustment& adjustment;
 	int _min_pos_x;

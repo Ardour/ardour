@@ -88,21 +88,24 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, Wid
 			dbg_msg("Fader's handlesource NOT SPECIFIED!");
 			throw std::exception();
 		}
+		std::string active_handle_image = xml_property (definition, "activehandlesource", styles, handle_image);
+		if (handle_image.empty()) {
+			dbg_msg("Fader's handlesource NOT SPECIFIED!");
+			throw std::exception();
+		}
 		std::string adjustment_id = xml_property (definition, "adjustment", styles, "");
 		if (adjustment_id.empty()) {
 			dbg_msg("Fader's adjustment_id NOT SPECIFIED!");
 			throw std::exception();
 		}
+		int minposx = xml_property (definition, "minposx", styles, -1);
+		int minposy = xml_property (definition, "minposy", styles, -1);
+		int maxposx = xml_property (definition, "maxposx", styles, minposx);
+		int maxposy = xml_property (definition, "maxposy", styles, minposy);
 		Gtk::Adjustment& adjustment = named_widgets.get_adjustment(adjustment_id.c_str());
-		child = manage (new Gtkmm2ext::Fader(adjustment,
-											 face_image,
-											 handle_image,
-											 xml_property (definition, "minposx", styles, -1),
-											 xml_property (definition, "minposy", styles, -1),
-											 xml_property (definition, "maxposx", styles, -1),
-											 xml_property (definition, "maxposy", styles, -1)));
+		child = manage (new Gtkmm2ext::Fader(adjustment, face_image, handle_image, active_handle_image, minposx, minposy, maxposx, maxposy));
 	} else if (widget_type == "ADJUSTMENT") {
-        dbg_msg("Creating ADJUSTMENT");
+        //dbg_msg("Creating ADJUSTMENT");
 		double min_value = xml_property (definition, "minvalue", styles, 0.0);
 		double max_value = xml_property (definition, "maxvalue", styles, 100.0);
 		double initial_value = xml_property (definition, "initialvalue", styles, min_value);

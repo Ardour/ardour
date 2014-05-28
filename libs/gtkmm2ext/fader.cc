@@ -40,9 +40,33 @@ using namespace std;
 #define CORNER_OFFSET 1
 #define FADER_RESERVE 5
 
+
+static void get_closest_point_on_line(double xa, double ya, double xb, double yb, double xp, double yp, double& xl, double& yl )
+{
+	// Finding the vector from A to B
+	// This step can be combined with the next
+	double a_to_b_x = xb - xa;
+	double a_to_b_y = yb - yb;
+                                        
+    // The vector perpendicular to a_to_b;
+    // This step can also be combined with the next
+	double perpendicular_x = -a_to_b_y;
+	double perpendicular_y = a_to_b_x;
+
+    // Finding Q, the point "in the right direction"
+    // If you want a mess, you can also combine this
+    // with the next step.
+	double xq = xp + perpendicular_x;
+	double yq = yp + perpendicular_y;
+
+	xl = ((xa*yb - ya*xb)*(xp - xq) - (xa-xb)*(xp*yq - yp*xq)) / ((xa - xb)*(yp-yq) - (ya - yb)*(yp-yq));
+	yl = ((xa*yb - ya*xb)*(yp - yq) - (ya-yb)*(xp*yq - yp*xq)) / ((xa - xb)*(yp-yq) - (ya - yb)*(yp-yq));
+}
+
 Fader::Fader (Gtk::Adjustment& adj,
 			  const std::string& face_image_file, 
 			  const std::string& handle_image_file,
+			  const std::string& active_handle_image_file,
 			  int min_pos_x, 
 			  int min_pos_y,
 			  int max_pos_x,
@@ -53,6 +77,7 @@ Fader::Fader (Gtk::Adjustment& adj,
 	, _max_pos_x (max_pos_x)
 	, _max_pos_y (max_pos_y)
 	, _default_value (adjustment.get_value())
+	, _dragging (false)
 {
 	PBD::Searchpath spath(ARDOUR::ardour_data_search_path());
 
@@ -68,6 +93,11 @@ Fader::Fader (Gtk::Adjustment& adj,
 
 	if (PBD::find_file_in_search_path (spath, handle_image_file, data_file_path)) {
 		_handle_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
+	} else {
+		throw failed_constructor(); 
+	}
+	if (PBD::find_file_in_search_path (spath, active_handle_image_file, data_file_path)) {
+		_active_handle_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
 	} else {
 		throw failed_constructor(); 
 	}
@@ -98,10 +128,17 @@ Fader::on_expose_event (GdkEventExpose* ev)
 	get_handle_position (_last_drawn_x, _last_drawn_y);
 
     cairo_rectangle (cr, 0, 0, get_width(), get_height());
-    gdk_cairo_set_source_pixbuf (cr,
-								 _handle_pixbuf->gobj(),
-								 _last_drawn_x - _handle_pixbuf->get_width()/2.0,
-                                 _last_drawn_y - _handle_pixbuf->get_height()/2.0);
+	if (_dragging) {
+		gdk_cairo_set_source_pixbuf (cr,
+									 _active_handle_pixbuf->gobj(),
+									 _last_drawn_x - _active_handle_pixbuf->get_width()/2.0,
+									 _last_drawn_y - _active_handle_pixbuf->get_height()/2.0);
+	} else {
+		gdk_cairo_set_source_pixbuf (cr,
+									 _handle_pixbuf->gobj(),
+									 _last_drawn_x - _handle_pixbuf->get_width()/2.0,
+									 _last_drawn_y - _handle_pixbuf->get_height()/2.0);
+	}
     cairo_fill (cr);
 
 	return true;
@@ -132,11 +169,35 @@ Fader::on_button_press_event (GdkEventButton* ev)
 		return false;
 	}
 
+	double hx;
+	double hy;
+	get_handle_position (hx, hy);
+
+	double hw = _handle_pixbuf->get_width();
+	double hh = _handle_pixbuf->get_height();
+
+	if ((ev->x < (hx - hw/2)) || (ev->x > (hx + hw/2)) || (ev->y < (hy - hh/2)) || (ev->y > (hy + hh/2))) {
+		return false;
+	}
+
+	double ev_pos_x;
+	double ev_pos_y;
+		
+	get_closest_point_on_line(_min_pos_x, _min_pos_y,
+								_max_pos_x, _max_pos_y, 
+								ev->x, ev->y,
+								ev_pos_x, ev_pos_y );
+	_grab_loc_x = ev_pos_x;
+	_grab_loc_y = ev_pos_y;
+
 	add_modal_grab ();
-	_grab_start_x = _grab_loc_x = ev->x;
-	_grab_start_y = _grab_loc_y = ev->y;
+	
+	_grab_start_x = _grab_loc_x = ev_pos_x;
+	_grab_start_y = _grab_loc_y = ev_pos_y;
+
 	_grab_window = ev->window;
 	_dragging = true;
+	
 	gdk_pointer_grab(ev->window,false,
 					 GdkEventMask (Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK),
 					 NULL,
@@ -146,6 +207,8 @@ Fader::on_button_press_event (GdkEventButton* ev)
 	if (ev->button == 2) {
 		set_adjustment_from_event (ev);
 	}
+
+	queue_draw();
 	
 	return true;
 }
@@ -153,6 +216,62 @@ Fader::on_button_press_event (GdkEventButton* ev)
 bool
 Fader::on_button_release_event (GdkEventButton* ev)
 {
+	if (_dragging) { //temp
+		remove_modal_grab();
+		_dragging = false;
+		gdk_pointer_ungrab (GDK_CURRENT_TIME);
+		queue_draw ();
+	}
+	/*
+	double const ev_pos_x = ev->x;
+	double const ev_posyx = ev->y;
+
+	switch (ev->button) {
+	case 1:
+		if (dragging) {
+			remove_modal_grab();
+			dragging = false;
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
+
+			if (!_hovering) {
+				Keyboard::magic_widget_drop_focus();
+				queue_draw ();
+			}
+
+			if ((ev_pos_x == grab_start_x) && (ev_pos_y == grab_start_y)) {
+
+				// no motion - just a click
+				if (ev->state & Keyboard::TertiaryModifier) {
+					adjustment.set_value (_default_value);
+				} else if (ev->state & Keyboard::GainFineScaleModifier) {
+					adjustment.set_value (adjustment.get_lower());
+				} else if ((_orien == VERT && ev_pos < display_span()) || (_orien == HORIZ && ev_pos > display_span())) {
+					// above the current display height, remember X Window coords
+					adjustment.set_value (adjustment.get_value() + adjustment.get_step_increment());
+				} else {
+					adjustment.set_value (adjustment.get_value() - adjustment.get_step_increment());
+				}
+			}
+			return true;
+		} 
+		break;
+		
+	case 2:
+		if (dragging) {
+			remove_modal_grab();
+			dragging = false;
+			set_adjustment_from_event (ev);
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
+			return true;
+		}
+		break;
+
+	default:
+		break;
+	}
+*/
+	return false;
+
 /*
 	double const ev_pos = (_orien == VERT) ? ev->y : ev->x;
 	
@@ -241,42 +360,40 @@ Fader::on_scroll_event (GdkEventScroll* ev)
 bool
 Fader::on_motion_notify_event (GdkEventMotion* ev)
 {
-	/*
 	if (_dragging) {
-		double scale = 1.0;
-		double const ev_pos = (_orien == VERT) ? ev->y : ev->x;
+		double ev_pos_x;
+		double ev_pos_y;
 		
-		if (ev->window != grab_window) {
-			grab_loc = ev_pos;
-			grab_window = ev->window;
+		get_closest_point_on_line(_min_pos_x, _min_pos_y,
+								  _max_pos_x, _max_pos_y, 
+								  ev->x, ev->y,
+								  ev_pos_x, ev_pos_y );
+
+		if (((_min_pos_x != _max_pos_x) && 
+			 ((ev_pos_x < _min_pos_x) && (ev_pos_x < _max_pos_x) ||
+			  (ev_pos_x > _max_pos_x) && (ev_pos_x > _min_pos_x))) ||
+			 ((_min_pos_x != _max_pos_x) && 
+			  ((ev_pos_y < _min_pos_x) && (ev_pos_y < _max_pos_y) ||
+			   (ev_pos_y > _max_pos_x) && (ev_pos_y > _min_pos_y)))) {
+			return true;
+		}
+
+		_grab_loc_x = ev_pos_x;
+		_grab_loc_y = ev_pos_y;
+
+		if (ev->window != _grab_window) {
+			_grab_window = ev->window;
 			return true;
 		}
 		
-		if (ev->state & Keyboard::GainFineScaleModifier) {
-			if (ev->state & Keyboard::GainExtraFineScaleModifier) {
-				scale = 0.05;
-			} else {
-				scale = 0.1;
-			}
-		}
+		double const fract = sqrt((ev_pos_x - _min_pos_x) * (ev_pos_x - _min_pos_x) +
+								  (ev_pos_y - _min_pos_y) * (ev_pos_y - _min_pos_y)) /
+							 sqrt((_max_pos_x - _min_pos_x) * (_max_pos_x - _min_pos_x) +
+								  (_max_pos_y - _min_pos_y) * (_max_pos_y - _min_pos_y));
 
-		double const delta = ev_pos - grab_loc;
-		grab_loc = ev_pos;
-
-		double fract = (delta / span);
-
-		fract = min (1.0, fract);
-		fract = max (-1.0, fract);
-
-		// X Window is top->bottom for 0..Y
 		
-		if (_orien == VERT) {
-			fract = -fract;
-		}
-
-		adjustment.set_value (adjustment.get_value() + scale * fract * (adjustment.get_upper() - adjustment.get_lower()));
+		adjustment.set_value (adjustment.get_lower() + (adjustment.get_upper() - adjustment.get_lower()) * fract);
 	}
-*/
 	return true;
 }
 
