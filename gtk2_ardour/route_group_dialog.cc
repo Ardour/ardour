@@ -150,11 +150,11 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	_gain.signal_toggled().connect(sigc::mem_fun (*this, &RouteGroupDialog::gain_toggled));
 
 	if (creating_new) {
-		add_button (Stock::CANCEL, RESPONSE_CANCEL);
-		add_button (Stock::NEW, RESPONSE_OK);
+		add_button ("CANCEL", RESPONSE_CANCEL);
+		add_button ("NEW", RESPONSE_OK);
 		set_default_response (RESPONSE_OK);
 	} else {
-		add_button (Stock::CLOSE, RESPONSE_CLOSE);
+		add_button ("CLOSE", RESPONSE_CLOSE);
 		set_default_response (RESPONSE_CLOSE);
 	}
 
