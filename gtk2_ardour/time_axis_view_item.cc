@@ -189,7 +189,7 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 
 	if (visibility & ShowFrame) {
 		frame = new ArdourCanvas::Rectangle (group, 
-						     ArdourCanvas::Rect (0.0, 0.0, 
+						     ArdourCanvas::Rect (0.0, 1.0, 
 									 trackview.editor().sample_to_pixel(duration) + RIGHT_EDGE_SHIFT, 
 									 trackview.current_height() - 1.0));
 
@@ -203,13 +203,13 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 			frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame());
 		}
 
-		frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::LEFT));
+		// frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::LEFT));
 
 	} else {
 
 		frame = 0;
 	}
-	
+
 	if (visibility & ShowNameHighlight) {
 
 		double width;
@@ -227,7 +227,7 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 							      ArdourCanvas::Rect (start, 
 										  trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, 
 										  width - 2.0 + RIGHT_EDGE_SHIFT,
-										  trackview.current_height() - 1.0));
+										  trackview.current_height()));
 		CANVAS_DEBUG_NAME (name_highlight, string_compose ("name highlight for %1", get_item_name()));
 		name_highlight->set_data ("timeaxisviewitem", this);
                 name_highlight->set_outline_what (ArdourCanvas::Rectangle::TOP);
@@ -660,80 +660,6 @@ TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
 	g = base_color.get_green()/256;
 	b = base_color.get_blue()/256;
 	fill_color = RGBA_TO_UINT(r,g,b,160);
-
-	/*  for minor colors:
-		if the overall saturation is strong, make the minor colors light.
-		if its weak, make them dark.
-
-   		we do this by moving an equal distance to the other side of the
-		central circle in the color wheel from where we started.
-	*/
-
-	radius = (unsigned char) rint (floor (sqrt (static_cast<double>(r*r + g*g + b+b))/3.0f));
-	minor_shift = 125 - radius;
-
-	/* LABEL: rotate around color wheel by 120 degrees anti-clockwise */
-
-	r = base_color.get_red()/256;
-	g = base_color.get_green()/256;
-	b = base_color.get_blue()/256;
-
-	if (r > b)
-	{
-		if (r > g)
-		{
-			/* red sector => green */
-			swap (r,g);
-		}
-		else
-		{
-			/* green sector => blue */
-			swap (g,b);
-		}
-	}
-	else
-	{
-		if (b > g)
-		{
-			/* blue sector => red */
-			swap (b,r);
-		}
-		else
-		{
-			/* green sector => blue */
-			swap (g,b);
-		}
-	}
-
-	r += minor_shift;
-	b += minor_shift;
-	g += minor_shift;
-
-	label_color = RGBA_TO_UINT(r,g,b,255);
-	r = (base_color.get_red()/256)   + 127;
-	g = (base_color.get_green()/256) + 127;
-	b = (base_color.get_blue()/256)  + 127;
-
-	label_color = RGBA_TO_UINT(r,g,b,255);
-
-	/* XXX can we do better than this ? */
-	/* We're trying;) */
-	/* NUKECOLORS */
-
-	//frame_color_r = 192;
-	//frame_color_g = 192;
-	//frame_color_b = 194;
-
-	//selected_frame_color_r = 182;
-	//selected_frame_color_g = 145;
-	//selected_frame_color_b = 168;
-
-	//handle_color_r = 25;
-	//handle_color_g = 0;
-	//handle_color_b = 255;
-	//lock_handle_color_r = 235;
-	//lock_handle_color_g = 16;
-	//lock_handle_color_b = 16;
 }
 
 /**
@@ -745,7 +671,7 @@ TimeAxisViewItem::set_colors()
 	set_frame_color();
 
 	if (name_highlight) {
-                name_highlight->set_fill_color (fill_color);
+		name_highlight->set_fill_color (fill_color);
 	}
 
 	if (name_text) {
@@ -824,6 +750,7 @@ TimeAxisViewItem::get_fill_color () const
 				f = ARDOUR_UI::config()->get_canvasvar_FrameBase();
 			} else {
 				f = fill_color;
+                f = UINT_RGBA_CHANGE_A (f, (ARDOUR_UI::config()->get_canvasvar_FrameBase() & 0x000000ff));
 			}
 		}
 	}
@@ -846,7 +773,7 @@ TimeAxisViewItem::set_frame_color()
 	f = get_fill_color ();
 
 	if (fill_opacity) {
-		f = UINT_RGBA_CHANGE_A (f, fill_opacity);
+		f = UINT_RGBA_CHANGE_A (f, (ARDOUR_UI::config()->get_canvasvar_FrameBase() & 0x000000ff));
 	}
 	
 	if (!rect_visible) {
@@ -886,17 +813,17 @@ TimeAxisViewItem::set_frame_gradient ()
 
 	/* need to get alpha value */
 	ArdourCanvas::color_to_rgba (f, r, g, b, a);
-	
-	stops.push_back (std::make_pair (0.0, f));
-	
+		
 	/* now a darker version */
 	
 	ArdourCanvas::color_to_hsv (f, h, s, v);
 
-	v = min (1.0, v * (1.0 - ARDOUR_UI::config()->get_timeline_item_gradient_depth()));
+	v = min (1.0, v * (1.0 + ARDOUR_UI::config()->get_timeline_item_gradient_depth()));
 	
-	ArdourCanvas::Color darker = ArdourCanvas::hsv_to_color (h, s, v, a);
-	stops.push_back (std::make_pair (1.0, darker));
+	ArdourCanvas::Color lighter = ArdourCanvas::hsv_to_color (h, s, v, a);
+	stops.push_back (std::make_pair (0.0, lighter));
+	stops.push_back (std::make_pair (0.37, f));
+	stops.push_back (std::make_pair (1.0, f));
 	
 	frame->set_gradient (stops, true);
 }
