@@ -7,10 +7,7 @@ import sys
 top = '.'
 out = 'build'
 
-backends = [ 'jack' ]
-
-if sys.platform == 'darwin':
-    backends += ['wavesaudio' ]
+backends = [ 'jack', 'wavesaudio' ]
 
 def options(opt):
     autowaf.set_options(opt)
