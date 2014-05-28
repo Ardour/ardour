@@ -421,9 +421,9 @@ template <typename DataSet>
 SessionMetadataDialog<DataSet>::SessionMetadataDialog (string const & name) :
   ArdourDialog (name, true)
 {
-	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	cancel_button = add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
 	cancel_button->signal_clicked().connect (sigc::mem_fun(*this, &SessionMetadataDialog::end_dialog));
-	save_button = add_button (Gtk::Stock::OK, Gtk::RESPONSE_ACCEPT);
+	save_button = add_button ("OK", Gtk::RESPONSE_ACCEPT);
 	save_button->signal_clicked().connect (sigc::mem_fun(*this, &SessionMetadataDialog::save_and_close));
 }
 
@@ -720,8 +720,8 @@ SessionMetadataImporter::run ()
 	/* Open session file selector */
 
 	Gtk::FileChooserDialog session_selector(_("Choose session to import metadata from"), Gtk::FILE_CHOOSER_ACTION_OPEN);
-	session_selector.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	session_selector.add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
+	session_selector.add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
+	session_selector.add_button ("OPEN", Gtk::RESPONSE_ACCEPT);
 	session_selector.set_default_response(Gtk::RESPONSE_ACCEPT);
 
 	Gtk::FileFilter session_filter;
