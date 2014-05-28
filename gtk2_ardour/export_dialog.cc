@@ -125,7 +125,7 @@ ExportDialog::init ()
 
 	/* Buttons */
 
-	cancel_button = add_button (Gtk::Stock::CANCEL, RESPONSE_CANCEL);
+	cancel_button = add_button ("CANCEL", RESPONSE_CANCEL);
 	export_button = add_button (_("Export"), RESPONSE_FAST);
 	set_default_response (RESPONSE_FAST);
 
@@ -294,7 +294,7 @@ ExportDialog::show_conflicting_files ()
 	label.set_markup (list_files_string);
 
 	dialog.get_vbox()->pack_start (label);
-	dialog.add_button (Gtk::Stock::OK, 0);
+	dialog.add_button ("OK", 0);
 	dialog.show_all_children ();
 
 	dialog.run();
