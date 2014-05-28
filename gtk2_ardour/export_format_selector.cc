@@ -28,9 +28,9 @@
 #include "i18n.h"
 
 ExportFormatSelector::ExportFormatSelector () :
-  edit_button (Gtk::Stock::EDIT),
-  remove_button (Gtk::Stock::REMOVE),
-  new_button (Gtk::Stock::NEW)
+  edit_button ("EDIT"),
+  remove_button ("REMOVE"),
+  new_button ("NEW")
 {
 	pack_start (format_combo, true, true, 0);
 	pack_start (edit_button, false, false, 3);
