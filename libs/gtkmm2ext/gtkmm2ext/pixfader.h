@@ -39,6 +39,7 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 
 	void set_default_value (float);
 	void set_text (const std::string&);
+	void set_image (const Glib::RefPtr<Gdk::Pixbuf>&);
 
   protected:
 	Glib::RefPtr<Pango::Layout> _layout;
@@ -48,6 +49,7 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 	double text_r;
 	double text_g;
 	double text_b;
+    Glib::RefPtr<Gdk::Pixbuf> _handle_pixbuf;
 
 	Gtk::Adjustment& adjustment;
 
