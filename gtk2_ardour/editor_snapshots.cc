@@ -134,7 +134,7 @@ EditorSnapshots::rename (std::string old_name)
 
 	prompter.set_name ("Prompter");
 	prompter.set_title (_("Rename Snapshot"));
-	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	prompter.add_button ("SAVE", Gtk::RESPONSE_ACCEPT);
 	prompter.set_prompt (_("New name of snapshot"));
 	prompter.set_initial_text (old_name);
 
