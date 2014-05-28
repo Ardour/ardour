@@ -87,7 +87,7 @@ InsertTimeDialog::InsertTimeDialog (PublicEditor& e)
 	tempo_box->pack_start (tempo_label, false, false);
 	get_vbox()->pack_start (*tempo_box);
 
-	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
 	add_button (_("Insert time"), Gtk::RESPONSE_OK);
 	show_all ();
 
