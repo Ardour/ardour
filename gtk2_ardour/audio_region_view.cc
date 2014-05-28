@@ -64,7 +64,7 @@
 
 #include "i18n.h"
 
-#define MUTED_ALPHA 48
+#define MUTED_ALPHA 255 //VK: 48
 
 using namespace std;
 using namespace ARDOUR;
@@ -1424,17 +1424,17 @@ AudioRegionView::set_one_waveform_color (ArdourCanvas::WaveView* wave)
 		}
 	}
 
-	if (ARDOUR_UI::config()->get_color_regions_using_track_color()) {
+	//if (ARDOUR_UI::config()->get_color_regions_using_track_color()) {
 
-		/* just use a slightly transparent version of the selected
-		 * color so that some of the track color bleeds through
-		 */
+	//	/* just use a slightly transparent version of the selected
+	//	 * color so that some of the track color bleeds through
+	//	 */
 
-		double r, g, b, a;
-		ArdourCanvas::color_to_rgba (fill, r, g, b, a);
-		fill = ArdourCanvas::rgba_to_color (r, g, b, 0.85); /* magic number, not user controllable */
-		outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
-	}
+	//	double r, g, b, a;
+	//	ArdourCanvas::color_to_rgba (fill, r, g, b, a);
+	//	fill = ArdourCanvas::rgba_to_color (r, g, b, 0.85); /* magic number, not user controllable */
+	//	outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
+	//}
 
 	wave->set_fill_color (fill);
 	wave->set_outline_color (outline);
@@ -1450,7 +1450,7 @@ AudioRegionView::set_frame_color ()
 	}
 
 	if (_region->opaque()) {
-		fill_opacity = 130;
+		fill_opacity = 0xff; //VK: 130;
 	} else {
 		fill_opacity = 0;
 	}
