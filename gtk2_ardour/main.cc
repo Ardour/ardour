@@ -79,7 +79,7 @@ gui_jack_error ()
 	                   Gtk::MESSAGE_INFO,
 	                   Gtk::BUTTONS_NONE);
 
-	win.add_button (Stock::QUIT, RESPONSE_CLOSE);
+	win.add_button ("QUIT", RESPONSE_CLOSE);
 	win.set_default_response (RESPONSE_CLOSE);
 
 	win.show_all ();
