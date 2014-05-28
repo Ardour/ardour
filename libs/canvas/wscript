@@ -51,7 +51,6 @@ canvas_sources = [
         'rectangle.cc',
         'root_group.cc',
         'stateful_image.cc',
-        'surface_group.cc',
         'text.cc',
         'types.cc',
         'utils.cc',

@@ -318,10 +318,8 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 				window_space = item_to_window (Duple(_points.front().x, draw.height()));
 				context->line_to (window_space.x, window_space.y);
 				context->close_path();
-				context->set_operator(Cairo::OPERATOR_SOURCE);
 				setup_fill_context(context);
 				context->fill ();
-				context->set_operator(Cairo::OPERATOR_OVER);
 				break;
 			case Outside:
 				context->stroke_preserve ();
@@ -330,10 +328,8 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 				window_space = item_to_window (Duple(_points.front().x, 0.0));
 				context->line_to (window_space.x, window_space.y);
 				context->close_path();
-				context->set_operator(Cairo::OPERATOR_SOURCE);
 				setup_fill_context(context);
 				context->fill ();
-				context->set_operator(Cairo::OPERATOR_OVER);
 				break;
 		}
 
@@ -407,9 +403,7 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 				context->line_to (window_space.x, window_space.y);
 				context->close_path();
 				setup_fill_context(context);
-				context->set_operator(Cairo::OPERATOR_SOURCE);
 				context->fill ();
-				context->set_operator(Cairo::OPERATOR_OVER);
 				break;
 			case Outside:
 				context->stroke_preserve ();
@@ -418,10 +412,8 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 				window_space = item_to_window (Duple (samples[left].x, 0.0));
 				context->line_to (window_space.x, window_space.y);
 				context->close_path();
-				context->set_operator(Cairo::OPERATOR_SOURCE);
 				setup_fill_context(context);
 				context->fill ();
-				context->set_operator(Cairo::OPERATOR_OVER);
 				break;
 		}
 		context->restore ();
