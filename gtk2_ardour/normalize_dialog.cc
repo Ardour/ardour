@@ -69,7 +69,7 @@ NormalizeDialog::NormalizeDialog (bool more_than_one)
 
 	show_all ();
 
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button ("CANCEL", RESPONSE_CANCEL);
 	add_button (_("Normalize"), RESPONSE_ACCEPT);
 	set_default_response (RESPONSE_ACCEPT);
 
