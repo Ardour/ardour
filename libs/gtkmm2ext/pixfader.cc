@@ -194,7 +194,21 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 {
 	Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
 	cairo_t* cr = context->cobj();
-
+    
+    if(_handle_pixbuf) {
+        if (_orien == VERT) {
+            int ds = display_span ();
+            double x,y;
+            x = (get_width() - _handle_pixbuf->get_width())/2.0;
+        
+            cairo_set_source_rgba (cr, 0, 0, 0, 0.0);
+            cairo_rectangle (cr, x, ds, _handle_pixbuf->get_width(), _handle_pixbuf->get_height());
+            gdk_cairo_set_source_pixbuf (cr, _handle_pixbuf->gobj(), x, ds);
+            cairo_fill (cr);
+            return true;
+        }
+    }
+    
 	if (!pattern) {
 		create_patterns();
 	}
@@ -240,7 +254,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	cairo_stroke_preserve(cr);
 
 	if (_orien == VERT) {
-
+/*
 		if (ds > h - FADER_RESERVE - CORNER_OFFSET) {
 			ds = h - FADER_RESERVE - CORNER_OFFSET;
 		}
@@ -249,7 +263,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 		cairo_matrix_init_translate (&matrix, 0, (h - ds));
 		cairo_pattern_set_matrix (pattern, &matrix);
 		cairo_fill (cr);
-
+*/
 	} else {
 
 		if (ds < FADER_RESERVE) {
@@ -619,6 +633,13 @@ PixFader::set_text (const std::string& str)
 	}
 
 	queue_resize ();
+}
+
+void
+PixFader::set_image (const Glib::RefPtr<Gdk::Pixbuf>& img)
+{
+	_handle_pixbuf = img;
+	queue_draw ();
 }
 
 void
