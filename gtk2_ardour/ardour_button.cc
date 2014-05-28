@@ -60,7 +60,7 @@ ArdourButton::ArdourButton (Element e)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (11.0)
-	, _corner_radius (4.0)
+	, _corner_radius (1.0)
 	, _corner_mask (0xf)
 	, _angle(0)
 	, _xalign(.5)
@@ -96,7 +96,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (11.0)
-	, _corner_radius (4.0)
+	, _corner_radius (1.0)
 	, _corner_mask (0xf)
 	, _angle(0)
 	, _xalign(.5)
@@ -195,7 +195,7 @@ ArdourButton::set_alignment (const float xa, const float ya)
 }
 
 void
-ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
+ArdourButton::render (cairo_t* cr)
 {
 	void (*rounded_function)(cairo_t*, double, double, double, double, double);
 
