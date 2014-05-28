@@ -270,8 +270,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void ensure_time_axis_view_is_visible (const TimeAxisView& tav) = 0;
 	virtual void scroll_tracks_down_line () = 0;
 	virtual void scroll_tracks_up_line () = 0;
-        virtual bool scroll_down_one_track () = 0;
-        virtual bool scroll_up_one_track () = 0;
 	virtual void prepare_for_cleanup () = 0;
 	virtual void finish_cleanup () = 0;
 	virtual void reset_x_origin (framepos_t frame) = 0;
@@ -305,6 +303,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, PBD::PropertyID) const = 0;
 
 	sigc::signal<void> ZoomChanged;
+	/** Emitted when the horizontal position of the editor view changes */
+	sigc::signal<void> HorizontalPositionChanged;
 	sigc::signal<void> Realized;
 	sigc::signal<void,framepos_t> UpdateAllTransportClocks;
 
@@ -382,9 +382,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual Gtkmm2ext::TearOff* tools_tearoff () const = 0;
 
 	virtual DragManager* drags () const = 0;
-        virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
+	virtual void maybe_autoscroll (bool, bool, bool, bool) = 0;
 	virtual void stop_canvas_autoscroll () = 0;
-        virtual bool autoscroll_active() const = 0;
 
 	virtual MouseCursors const * cursors () const = 0;
 	virtual VerboseCursor * verbose_cursor () const = 0;
