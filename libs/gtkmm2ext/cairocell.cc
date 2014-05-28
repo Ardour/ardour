@@ -201,7 +201,7 @@ CairoEditableText::CairoEditableText (boost::shared_ptr<CairoFontDescription> fo
 	, _draw_bg (true)
 	, max_cell_width (0)
 	, max_cell_height (0)
-	, _corner_radius (9)
+	, _corner_radius (1)
 	, _xpad (0)
 	, _ypad (0)
 {
