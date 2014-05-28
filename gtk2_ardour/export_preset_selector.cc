@@ -26,9 +26,9 @@
 
 ExportPresetSelector::ExportPresetSelector () :
   label (_("Preset"), Gtk::ALIGN_LEFT),
-  save_button (Gtk::Stock::SAVE),
-  remove_button (Gtk::Stock::REMOVE),
-  new_button (Gtk::Stock::NEW)
+  save_button ("SAVE"),
+  remove_button ("REMOVE"),
+  new_button ("NEW")
 {
 	list = Gtk::ListStore::create (cols);
         list->set_sort_column (cols.label, Gtk::SORT_ASCENDING);
