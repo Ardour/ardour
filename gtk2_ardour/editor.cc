@@ -5496,11 +5496,11 @@ Editor::setup_fade_images ()
 	_fade_out_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("fadeout-fast-cut")));
 	_fade_out_images[FadeConstantPower] = new Gtk::Image (get_icon_path (X_("fadeout-long-cut")));
 	
-	_xfade_in_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("fadeout-linear")));
-	_xfade_in_images[FadeSymmetric] = new Gtk::Image (get_icon_path (X_("fadeout-short-cut")));
-	_xfade_in_images[FadeFast] = new Gtk::Image (get_icon_path (X_("fadeout-slow-cut")));
-	_xfade_in_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("fadeout-fast-cut")));
-	_xfade_in_images[FadeConstantPower] = new Gtk::Image (get_icon_path (X_("fadeout-long-cut")));
+	_xfade_in_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("fadein-linear")));
+	_xfade_in_images[FadeSymmetric] = new Gtk::Image (get_icon_path (X_("fadein-short-cut")));
+	_xfade_in_images[FadeFast] = new Gtk::Image (get_icon_path (X_("fadein-slow-cut")));
+	_xfade_in_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("fadein-fast-cut")));
+	_xfade_in_images[FadeConstantPower] = new Gtk::Image (get_icon_path (X_("fadein-long-cut")));
 
 	_xfade_out_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("fadeout-linear")));
 	_xfade_out_images[FadeSymmetric] = new Gtk::Image (get_icon_path (X_("fadeout-short-cut")));
