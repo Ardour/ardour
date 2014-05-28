@@ -162,6 +162,16 @@ AudioEngine::buffer_size_change (pframes_t bufsiz)
 		last_monitor_check = 0;
 	}
 
+	BufferSizeChanged (bufsiz); /* EMIT SIGNAL */
+
+	return 0;
+}
+
+int
+AudioEngine::device_list_change ()
+{
+	DeviceListChanged (); /* EMIT SIGNAL */
+    
 	return 0;
 }
 
@@ -564,6 +574,7 @@ AudioEngine::drop_backend ()
 {
 	if (_backend) {
 		_backend->stop ();
+		_backend->drop_device ();
 		_backend.reset ();
 	}
 }
@@ -632,6 +643,8 @@ AudioEngine::start (bool for_latency)
 		if (_session->config.get_jack_time_master()) {
 			_backend->set_time_master (true);
 		}
+
+		_session->reconnect_existing_routes (true);
 	}
 	
 	start_metering_thread ();
