@@ -56,7 +56,7 @@ using namespace Gtkmm2ext;
 
 RouteParams_UI::RouteParams_UI ()
 	: ArdourWindow (_("Tracks and Busses")),
-	  latency_apply_button (Stock::APPLY),
+	  latency_apply_button ("APPLY"),
 	  track_menu(0)
 {
 	insert_box = 0;
