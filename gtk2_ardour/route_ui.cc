@@ -1713,7 +1713,7 @@ RouteUI::save_as_template ()
 
 	p.set_title (_("Save As Template"));
 	p.set_prompt (_("Template name:"));
-	p.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	p.add_button ("SAVE", Gtk::RESPONSE_ACCEPT);
 	switch (p.run()) {
 	case RESPONSE_ACCEPT:
 		break;
@@ -1804,8 +1804,8 @@ RouteUI::open_remote_control_id_dialog ()
 		hbox->pack_start (*spin);
 		dialog.get_vbox()->pack_start (*hbox);
 		
-		dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
-		dialog.add_button (Stock::APPLY, RESPONSE_ACCEPT);
+		dialog.add_button ("CANCEL", RESPONSE_CANCEL);
+		dialog.add_button ("APPLY", RESPONSE_ACCEPT);
 	} else {
 		Label* l = manage (new Label());
 		if (_route->is_master() || _route->is_monitor()) {
@@ -1826,7 +1826,7 @@ RouteUI::open_remote_control_id_dialog ()
 						       PROGRAM_NAME));
 		}
 		dialog.get_vbox()->pack_start (*l);
-		dialog.add_button (Stock::OK, RESPONSE_CANCEL);
+		dialog.add_button ("OK", RESPONSE_CANCEL);
 	}
 
 	dialog.show_all ();
