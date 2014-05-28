@@ -30,13 +30,17 @@ else:
 
 #
 # rev is now of the form MAJOR.MINOR-rev-commit
+# or, if right at the same rev as a release, MAJOR.MINOR
 #
 
 parts = rev.split ('.')
 MAJOR = parts[0]
 other = parts[1].split ('-')
 MINOR = other[0]
-MICRO = other[1]
+if len(other) > 1:
+    MICRO = other[1]
+else:
+    MICRO = '0'
 
 V = MAJOR + '.' + MINOR + '.' + MICRO
 #
