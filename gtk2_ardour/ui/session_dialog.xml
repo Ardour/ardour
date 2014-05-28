@@ -96,6 +96,6 @@
            minposx="4"
            minposy="13"
            maxposx="54"
-           maxposy="4"/-->
-  </HBox>
+           maxposy="4"/>
+  </HBox-->
 </Dialog>
