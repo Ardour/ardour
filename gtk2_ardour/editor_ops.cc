@@ -1777,23 +1777,41 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 	if (!_session) {
 		return;
 	}
-	double range_before = frame - leftmost_frame;
-	double new_fpp;
 
-	new_fpp = samples_per_pixel;
+	framecnt_t range_before = frame - leftmost_frame;
+	framecnt_t new_spp;
 
 	if (coarser) {
-		new_fpp *= 1.61803399;
-		range_before *= 1.61803399;
+		if (samples_per_pixel <= 1) {
+			new_spp = 2;
+		} else {
+			new_spp = samples_per_pixel + (samples_per_pixel/2);
+		}
+		range_before += range_before/2;
 	} else {
-		new_fpp = max(1.0,(new_fpp/1.61803399));
-		range_before /= 1.61803399;
+		if (samples_per_pixel >= 1) {
+			new_spp = samples_per_pixel - (samples_per_pixel/2);
+		} else {
+			/* could bail out here since we cannot zoom any finer,
+			   but leave that to the clamp_samples_per_pixel() and
+			   equality test below
+			*/
+			new_spp = samples_per_pixel;
+		}
+
+		range_before -= range_before/2;
 	}
 
-	if (new_fpp == samples_per_pixel)  {
+	clamp_samples_per_pixel (new_spp);
+
+	if (new_spp == samples_per_pixel)  {
 		return;
 	}
 
+	/* zoom focus is automatically taken as @param frame when this
+	   method is used.
+	*/
+	
 	framepos_t new_leftmost = frame - (framepos_t)range_before;
 
 	if (new_leftmost > frame) {
@@ -1804,7 +1822,7 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 		new_leftmost = 0;
 	}
 
-	reposition_and_zoom (new_leftmost, new_fpp);
+	reposition_and_zoom (new_leftmost, new_spp);
 }
 
 
