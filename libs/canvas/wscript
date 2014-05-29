@@ -55,7 +55,8 @@ canvas_sources = [
         'types.cc',
         'utils.cc',
         'wave_view.cc',
-        'xml_ui.cc'
+        'xml_ui.cc',
+        'xfade_curve.cc',
 ]
 
 def options(opt):
