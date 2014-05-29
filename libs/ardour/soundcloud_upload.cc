@@ -25,7 +25,6 @@
 
 #include "pbd/xml++.h"
 #include <pbd/error.h>
-//#include "pbd/filesystem.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -35,8 +34,6 @@
 #include "i18n.h"
 
 using namespace PBD;
-
-// static const std::string base_url = "http://api.soundcloud.com/tracks/13158665?client_id=";
 
 size_t
 WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
@@ -79,13 +76,13 @@ SoundcloudUploader::Get_Auth_Token( std::string username, std::string password )
 	curl_formadd(&formpost,
 			&lastptr,
 			CURLFORM_COPYNAME, "client_id",
-			CURLFORM_COPYCONTENTS, "e7ac891eef866f139773cf8102b7a719",
+			CURLFORM_COPYCONTENTS, "6dd9cf0ad281aa57e07745082cec580b",
 			CURLFORM_END);
 
 	curl_formadd(&formpost,
 			&lastptr,
 			CURLFORM_COPYNAME, "client_secret",
-			CURLFORM_COPYCONTENTS, "d78f34d19f09d26731801a0cb0f382c4",
+			CURLFORM_COPYCONTENTS, "53f5b0113fb338800f8a7a9904fc3569",
 			CURLFORM_END);
 
 	curl_formadd(&formpost,
@@ -120,13 +117,13 @@ SoundcloudUploader::Get_Auth_Token( std::string username, std::string password )
 
 	// perform online request
 	CURLcode res = curl_easy_perform(curl_handle);
-	if( res != 0 ) {
+	if (res != 0) {
 		DEBUG_TRACE (DEBUG::Soundcloud, string_compose ("curl error %1 (%2)", res, curl_easy_strerror(res) ) );
 		return "";
 	}
 
-	if(xml_page.memory){
-		//cheesy way to parse the json return value.  find access_token, then advance 3 quotes
+	if (xml_page.memory){
+		// cheesy way to parse the json return value.  find access_token, then advance 3 quotes
 
 		if ( strstr ( xml_page.memory , "access_token" ) == NULL) {
 			error << _("Upload to Soundcloud failed.  Perhaps your email or password are incorrect?\n") << endmsg;
