@@ -1401,185 +1401,48 @@ Editor::fill_xfade_menu (Menu_Helpers::MenuList& items, bool start)
 
 /** Pop up a context menu for when the user clicks on a start crossfade */
 void
-Editor::popup_xfade_in_context_menu (int button, int32_t time, ArdourCanvas::Item* /*item*/, ItemType /*item_type*/)
+Editor::popup_xfade_in_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType /*item_type*/)
 {
 	using namespace Menu_Helpers;
+	AudioRegionView* arv = static_cast<AudioRegionView*> (item->get_data ("regionview"));
+	assert(arv);
 
 	MenuList& items (xfade_in_context_menu.items());
+	items.clear ();
 
-	if (items.empty()) {
-		fill_xfade_menu (items, true);
+	if (arv->audio_region()->fade_in_active()) {
+		items.push_back (MenuElem (_("Deactivate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_active), false)));
+	} else {
+		items.push_back (MenuElem (_("Activate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_active), true)));
 	}
+
+	items.push_back (SeparatorElem());
+	fill_xfade_menu (items, true);
 
 	xfade_in_context_menu.popup (button, time);
 }
 
 /** Pop up a context menu for when the user clicks on an end crossfade */
 void
-Editor::popup_xfade_out_context_menu (int button, int32_t time, ArdourCanvas::Item* /*item*/, ItemType /*item_type*/)
-{
-	using namespace Menu_Helpers;
-
-	MenuList& items (xfade_out_context_menu.items());
-
-	if (items.empty()) {
-		fill_xfade_menu (items, false);
-	}
-
-	xfade_out_context_menu.popup (button, time);
-}
-
-
-/** Pop up a context menu for when the user clicks on a fade in or fade out */
-void
-Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType item_type)
+Editor::popup_xfade_out_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType /*item_type*/)
 {
 	using namespace Menu_Helpers;
 	AudioRegionView* arv = static_cast<AudioRegionView*> (item->get_data ("regionview"));
+	assert(arv);
 
-	if (arv == 0) {
-		fatal << _("programming error: fade in canvas item has no regionview data pointer!") << endmsg;
-		/*NOTREACHED*/
-	}
-
-	MenuList& items (fade_context_menu.items());
+	MenuList& items (xfade_out_context_menu.items());
 	items.clear ();
 
-	switch (item_type) {
-	case FadeInItem:
-	case FadeInHandleItem:
-		if (arv->audio_region()->fade_in_active()) {
-			items.push_back (MenuElem (_("Deactivate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_active), false)));
-		} else {
-			items.push_back (MenuElem (_("Activate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_active), true)));
-		}
-		
-		items.push_back (SeparatorElem());
-		
-		if (Profile->get_sae()) {
-			
-			items.push_back (MenuElem (_("Linear"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLinear)));
-			items.push_back (MenuElem (_("Slowest"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeFast)));
-			
-		} else {
-			
-			items.push_back (
-				ImageMenuElem (
-					_("Linear"),
-					*_fade_in_images[FadeLinear],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLinear)
-					)
-				);
-				
-			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-				
-			items.push_back (
-				ImageMenuElem (
-					_("Slow"),
-					*_fade_in_images[FadeSlow],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeSlow)
-					));
-				
-			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-				
-			items.push_back (
-				ImageMenuElem (
-					_("Fast"),
-					*_fade_in_images[FadeFast],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeFast)
-					));
-				
-			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-				
-			items.push_back (
-				ImageMenuElem (
-					_("Symmetric"),
-					*_fade_in_images[FadeSymmetric],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeSymmetric)
-					));
-				
-			items.push_back (
-				ImageMenuElem (
-					_("Constant power"),
-					*_fade_in_images[FadeConstantPower],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeConstantPower)
-					));
-
-			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-		}
-
-		break;
-
-	case FadeOutItem:
-	case FadeOutHandleItem:
-		if (arv->audio_region()->fade_out_active()) {
-			items.push_back (MenuElem (_("Deactivate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_active), false)));
-		} else {
-			items.push_back (MenuElem (_("Activate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_active), true)));
-		}
-
-		items.push_back (SeparatorElem());
-
-		if (Profile->get_sae()) {
-			items.push_back (MenuElem (_("Linear"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeLinear)));
-			items.push_back (MenuElem (_("Slowest"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeSlow)));
-		} else {
-
-			items.push_back (
-				ImageMenuElem (
-					_("Linear"),
-					*_fade_out_images[FadeLinear],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeLinear)
-					)
-				);
-
-			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-
-			items.push_back (
-				ImageMenuElem (
-					_("Slow"),
-					*_fade_out_images[FadeSlow],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeSlow)
-					));
-
-			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-
-			items.push_back (
-				ImageMenuElem (
-					_("Fast"),
-					*_fade_out_images[FadeFast],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeFast)
-					));
-
-			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-
-			items.push_back (
-				ImageMenuElem (
-					_("Symmetric"),
-					*_fade_out_images[FadeSymmetric],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeSymmetric)
-					));
-
-			items.push_back (
-				ImageMenuElem (
-					_("Constant power"),
-					*_fade_out_images[FadeConstantPower],
-					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeConstantPower)
-					));
-
-			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
-		}
-
-		break;
-
-	default:
-		fatal << _("programming error: ")
-		      << X_("non-fade canvas item passed to popup_fade_context_menu()")
-		      << endmsg;
-		/*NOTREACHED*/
+	if (arv->audio_region()->fade_out_active()) {
+		items.push_back (MenuElem (_("Deactivate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_active), false)));
+	} else {
+		items.push_back (MenuElem (_("Activate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_active), true)));
 	}
 
-	fade_context_menu.popup (button, time);
+	items.push_back (SeparatorElem());
+	fill_xfade_menu (items, false);
+
+	xfade_out_context_menu.popup (button, time);
 }
 
 void
