@@ -30,6 +30,7 @@
 
 #include "canvas/fwd.h"
 #include "canvas/wave_view.h"
+#include "canvas/xfade_curve.h"
 
 #include "region_view.h"
 #include "time_axis_view_item.h"
@@ -158,14 +159,12 @@ class AudioRegionView : public RegionView
 	ArdourCanvas::Rectangle*        fade_in_handle; ///< fade in handle, or 0
 	ArdourCanvas::Rectangle*        fade_out_handle; ///< fade out handle, or 0
 
-	ArdourCanvas::Curve*     start_xfade_in;
-	ArdourCanvas::Curve*     start_xfade_out;
-	ArdourCanvas::Rectangle* start_xfade_rect;
+	ArdourCanvas::XFadeCurve* start_xfade_curve;
+	ArdourCanvas::Rectangle*  start_xfade_rect;
 	bool _start_xfade_visible;
 
-	ArdourCanvas::Curve *end_xfade_in;
-	ArdourCanvas::Curve *end_xfade_out;
-	ArdourCanvas::Rectangle* end_xfade_rect;
+	ArdourCanvas::XFadeCurve* end_xfade_curve;
+	ArdourCanvas::Rectangle*  end_xfade_rect;
 	bool _end_xfade_visible;
 
 	boost::shared_ptr<AudioRegionGainLine> gain_line;
