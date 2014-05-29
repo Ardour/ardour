@@ -1558,15 +1558,12 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			switch (item_type) {
 			case FadeInItem:
 			case FadeInHandleItem:
-			case FadeOutItem:
-			case FadeOutHandleItem:
-				popup_fade_context_menu (1, event->button.time, item, item_type);
-				break;
-
 			case StartCrossFadeItem:
 				popup_xfade_in_context_menu (1, event->button.time, item, item_type);
 				break;
 
+			case FadeOutItem:
+			case FadeOutHandleItem:
 			case EndCrossFadeItem:
 				popup_xfade_out_context_menu (1, event->button.time, item, item_type);
 				break;
