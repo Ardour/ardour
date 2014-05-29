@@ -1035,9 +1035,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		for (int i = 2; i < num_steps; i++) {
 			const double offset = 1.0 - breakpoint;
 			float coeff = 1.0 - breakpoint;
-			for (int j = 0; j < i; j++) {
-				coeff *= 0.5;  //6dB drop per step
-			}
+			coeff *= powf(0.5, (i-1) * 7.0 / (double)num_steps); // -6dB per step for 7 steps
 			_fade_in->fast_simple_add (len * (breakpoint + (offset * (double)i / (double)num_steps)), coeff);
 		}
 		_fade_in->fast_simple_add (len, VERY_SMALL_SIGNAL);
@@ -1116,9 +1114,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		for (int i = 2; i < num_steps; i++) {
 			const double offset = 1.0 - breakpoint;
 			float coeff = 1.0 - breakpoint;
-			for (int j = 0; j < i; j++) {
-				coeff *= 0.5;  // 6dB drop per step
-			}
+			coeff *= powf(0.5, (i-1) * 7.0 / (double)num_steps); // -6dB per step for 7 steps
 			_fade_out->fast_simple_add (len * (breakpoint + (offset * (double)i / (double)num_steps)), coeff);
 		}
 		_fade_out->fast_simple_add (len, VERY_SMALL_SIGNAL);
