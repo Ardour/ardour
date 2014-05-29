@@ -991,7 +991,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 	_fade_in->clear ();
 	_inverse_fade_in->clear ();
 
-	const int num_steps = min((framecnt_t)256, max ((framecnt_t) 16, len / 512));
+	const int num_steps = 32;
 
 	switch (shape) {
 	case FadeLinear:
@@ -1069,7 +1069,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 	_fade_out->clear ();
 	_inverse_fade_out->clear ();
 
-	const int num_steps = min((framecnt_t)256, max ((framecnt_t) 16, len / 512));
+	const int num_steps = 32;
 
 	switch (shape) {
 	case FadeLinear:
