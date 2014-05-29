@@ -189,11 +189,14 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		window_space = item_to_window (Duple (samples[left].x, samples[left].y));
 		context->move_to (window_space.x, window_space.y);
 		Coord last_x = round(window_space.x);
+		Coord last_y = round(window_space.y);
 		for (uint32_t idx = left + 1; idx < right; ++idx) {
 			window_space = item_to_window (Duple (samples[idx].x, samples[idx].y));
 			if (last_x == round(window_space.x)) continue;
+			if (last_y == round(window_space.y)) continue;
 			last_x = round(window_space.x);
-			context->line_to (last_x - .5 , window_space.y);
+			last_y = round(window_space.y);
+			context->line_to (last_x - .5 , last_y + .5);
 		}
 
 		switch (curve_fill) {
