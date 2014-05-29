@@ -49,12 +49,10 @@ def configure(conf):
     autowaf.configure(conf)
 
     backends = backend_list()
-
     for i in backends:
         sub_config_and_use(conf, i)
 
 def build(bld):
     backends = backend_list()
-
     for i in backends:
         bld.recurse(i)
