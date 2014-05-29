@@ -198,6 +198,9 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 			last_y = round(window_space.y);
 			context->line_to (last_x - .5 , last_y + .5);
 		}
+		if (last_x != round(window_space.x) || last_y != round(window_space.y)) {
+			context->line_to (window_space.x - .5 , window_space.y + .5);
+		}
 
 		switch (curve_fill) {
 			case None:
