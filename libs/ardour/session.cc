@@ -3311,7 +3311,7 @@ Session::source_by_id (const PBD::ID& id)
 }
 
 boost::shared_ptr<AudioFileSource>
-Session::source_by_path_and_channel (const string& path, uint16_t chn) const
+Session::audio_source_by_path_and_channel (const string& path, uint16_t chn) const
 {
 	/* Restricted to audio files because only audio sources have channel
 	   as a property.
@@ -3332,7 +3332,7 @@ Session::source_by_path_and_channel (const string& path, uint16_t chn) const
 }
 
 boost::shared_ptr<MidiSource>
-Session::source_by_path (const std::string& path) const
+Session::midi_source_by_path (const std::string& path) const
 {
 	/* Restricted to MIDI files because audio sources require a channel
 	   for unique identification, in addition to a path.
@@ -3487,7 +3487,7 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 
 			string possible_path = Glib::build_filename (spath, buf);
 
-			if (source_by_path (possible_path)) {
+			if (audio_source_by_path_and_channel (possible_path, chan)) {
 				existing++;
 				break;
 			}
@@ -3553,7 +3553,7 @@ Session::new_midi_source_name (const string& owner_name)
 				existing++;
 			}
 
-			if (source_by_path (possible_path)) {
+			if (midi_source_by_path (possible_path)) {
 				existing++;
 			}
 		}
