@@ -32,7 +32,7 @@ using std::max;
 
 XFadeCurve::XFadeCurve (Group* parent)
 	: Item (parent)
-	, points_per_segment (24)
+	, points_per_segment (32)
 	, _xfadeposition (Start)
 	, _outline_color (0x000000ff)
 	, _fill_color (0x22448880)
@@ -41,7 +41,7 @@ XFadeCurve::XFadeCurve (Group* parent)
 
 XFadeCurve::XFadeCurve (Group* parent, XFadePosition pos)
 	: Item (parent)
-	, points_per_segment (24)
+	, points_per_segment (32)
 	, _xfadeposition (pos)
 	, _outline_color (0x000000ff)
 	, _fill_color (0x22448880)
