@@ -629,7 +629,7 @@ vstfx_parse_vst_state (VSTState* vstfx)
 	}
 
 	/*If the plugin doesn't bother to implement GetVendorString we will
-	  have pre-stuffed the string with 'Unkown' */
+	  have pre-stuffed the string with 'Unknown' */
 
 	plugin->dispatcher (plugin, effGetVendorString, 0, 0, creator, 0);
 
