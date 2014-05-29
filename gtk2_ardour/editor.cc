@@ -2127,7 +2127,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if ((prop = node.property ("zoom-focus"))) {
-		set_zoom_focus ((ZoomFocus) string_2_enum (prop->value(), zoom_focus));
+		zoom_focus_selection_done ((ZoomFocus) string_2_enum (prop->value(), zoom_focus));
 	}
 
 	if ((prop = node.property ("zoom"))) {
@@ -2143,11 +2143,11 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if ((prop = node.property ("snap-to"))) {
-		set_snap_to ((SnapType) string_2_enum (prop->value(), _snap_type));
+		snap_type_selection_done ((SnapType) string_2_enum (prop->value(), _snap_type));
 	}
 
 	if ((prop = node.property ("snap-mode"))) {
-		set_snap_mode ((SnapMode) string_2_enum (prop->value(), _snap_mode));
+		snap_mode_selection_done((SnapMode) string_2_enum (prop->value(), _snap_mode));
 	}
 
 	if ((prop = node.property ("internal-snap-to"))) {
