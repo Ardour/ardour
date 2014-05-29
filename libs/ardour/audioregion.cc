@@ -987,29 +987,27 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 	boost::shared_ptr<Evoral::ControlList> c2 (new Evoral::ControlList (FadeInAutomation));
 	boost::shared_ptr<Evoral::ControlList> c3 (new Evoral::ControlList (FadeInAutomation));
 
-	const int num_steps = min ((framecnt_t) 16, len);
-
 	_fade_in->freeze ();
 	_fade_in->clear ();
 	_inverse_fade_in->clear ();
 
 	switch (shape) {
 	case FadeLinear:
-		_fade_in->fast_simple_add (0.0, 0.0);
+		_fade_in->fast_simple_add (0.0, VERY_SMALL_SIGNAL);
 		_fade_in->fast_simple_add (len, 1.0);
 		reverse_curve (_inverse_fade_in.val(), _fade_in.val());
 		break;
 
 	case FadeFast:
-		generate_db_fade (_fade_in.val(), len, num_steps, -60);
+		generate_db_fade (_fade_in.val(), len, 10, -60);
 		reverse_curve (c1, _fade_in.val());
 		_fade_in->copy_events (*c1);
 		generate_inverse_power_curve (_inverse_fade_in.val(), _fade_in.val());
 		break;
 
 	case FadeSlow:
-		generate_db_fade (c1, len, num_steps/2, -1);  // start off with a slow fade
-		generate_db_fade (c2, len, num_steps/2, -80); // end with a fast fade
+		generate_db_fade (c1, len, 10, -1);  // start off with a slow fade
+		generate_db_fade (c2, len, 10, -80); // end with a fast fade
 		merge_curves (_fade_in.val(), c1, c2);
 		reverse_curve (c3, _fade_in.val());
 		_fade_in->copy_events (*c3);
@@ -1017,9 +1015,10 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		break;
 
 	case FadeConstantPower:
-		for (int i = 0; i < num_steps; ++i) {
-			float dist = (float) i / (num_steps+1.0);
-			_fade_in->fast_simple_add (len*dist, sin (dist*M_PI/2));
+		_fade_in->fast_simple_add (0.0, VERY_SMALL_SIGNAL);
+		for (int i = 1; i < 9; ++i) {
+			float dist = (float) i/10.f;
+			_fade_in->fast_simple_add (len*dist, sin (dist*M_PI/2.f));
 		}
 		_fade_in->fast_simple_add (len, 1.0);
 		reverse_curve (_inverse_fade_in.val(), _fade_in.val());
@@ -1031,12 +1030,12 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		_fade_in->fast_simple_add (0.5*len, 0.6);
 		//now generate a fade-out curve by successively applying a gain drop
 		const float breakpoint = 0.7;  //linear for first 70%
-		for (int i = 2; i < num_steps; i++) {
+		for (int i = 2; i < 9; i++) {
 			float coeff = (1.0-breakpoint);
 			for (int j = 0; j < i; j++) {
 				coeff *= 0.5;  //6dB drop per step
 			}
-			_fade_in->fast_simple_add (len* (breakpoint+((1.0-breakpoint)*(double)i/(double)num_steps)), coeff);
+			_fade_in->fast_simple_add (len* (breakpoint+((1.0-breakpoint)*(double)i/9.0)), coeff);
 		}
 		_fade_in->fast_simple_add (len, VERY_SMALL_SIGNAL);
 		reverse_curve (c3, _fade_in.val());
