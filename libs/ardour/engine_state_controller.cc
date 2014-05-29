@@ -57,6 +57,7 @@ EngineStateController::EngineStateController()
 	AudioEngine::instance ()->Halted.connect_same_thread (stopped_connection, boost::bind (&EngineStateController::_on_engine_stopped, this) );
     
 	/* Subscribe for udpates from AudioEngine */
+    AudioEngine::instance ()->PortRegisteredOrUnregistered.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_ports_registration_update, this) );
     AudioEngine::instance()->SampleRateChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_sample_rate_change, this, _1) );
 	AudioEngine::instance()->BufferSizeChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_buffer_size_change, this, _1) );
     AudioEngine::instance()->DeviceListChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_device_list_change, this) );
@@ -893,10 +894,9 @@ EngineStateController::_refresh_stereo_out_channel_states()
 void
 EngineStateController::_on_engine_running ()
 {
-    _update_device_channels_state();
     _serialize_and_save_current_state();
     
-    EngineRunning();
+    EngineRunning(); // emit a signal
 }
 
 
@@ -922,6 +922,15 @@ EngineStateController::_on_parameter_changed (const std::string& parameter_name)
         AudioEngine::instance()->reconnect_session_routes();
         OutputConfigChanged(); // emit a signal
     }
+}
+
+
+void
+EngineStateController::_on_ports_registration_update ()
+{
+    _update_device_channels_state();
+    
+    PortRegistrationChanged(); // emit a signal
 }
 
 

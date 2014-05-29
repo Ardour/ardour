@@ -127,6 +127,9 @@ public:
     PBD::Signal0<void> InputConfigChanged;
     PBD::Signal0<void> OutputConfigChanged;
     
+    /* this signal is emitted if new ports are registered or unregistered */
+    PBD::Signal0<void> PortRegistrationChanged;
+    
 private:
 
     EngineStateController(); // singleton
@@ -210,6 +213,7 @@ private:
     void _on_buffer_size_change(ARDOUR::pframes_t);
     void _on_device_list_change();
     void _on_parameter_changed (const std::string&);
+    void _on_ports_registration_update ();
     ////////////////////////////////////////
         
     ////////////////////////////////////////

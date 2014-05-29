@@ -85,6 +85,7 @@ TracksControlPanel::init ()
 	EngineStateController::instance ()->EngineHalted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_stopped, this), gui_context());
 
 	/* Subscribe for udpates from EngineStateController */
+    EngineStateController::instance()->PortRegistrationChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_port_registration_update, this), gui_context());
 	EngineStateController::instance()->BufferSizeChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_buffer_size_update, this), gui_context());
     EngineStateController::instance()->DeviceListChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_device_list_update, this, _1), gui_context());
     EngineStateController::instance()->InputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_input_configuration_changed, this), gui_context());
@@ -568,9 +569,6 @@ TracksControlPanel::sample_rate_changed()
 void
 TracksControlPanel::engine_running ()
 {
-    populate_input_channels();
-    populate_output_channels();
-
 	_buffer_size_combo.set_active_text (bufsize_as_string (EngineStateController::instance()->get_current_buffer_size() ) );
 
 	_sample_rate_combo.set_active_text (rate_as_string (EngineStateController::instance()->get_current_sample_rate() ) );
@@ -741,6 +739,13 @@ void TracksControlPanel::on_midi_capture_active_changed(DeviceConnectionControl*
 
 void TracksControlPanel::on_midi_playback_active_changed(DeviceConnectionControl* playback_control, bool active)
 {
+}
+
+
+void TracksControlPanel::on_port_registration_update()
+{
+    populate_input_channels();
+    populate_output_channels();
 }
 
 
