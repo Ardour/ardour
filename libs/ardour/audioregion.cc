@@ -1032,11 +1032,9 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		_fade_in->fast_simple_add (0.5 * len, 0.6);
 		//now generate a fade-out curve by successively applying a gain drop
 		const double breakpoint = 0.7;  //linear for first 70%
-		for (int i = max(2, (int)ceil(num_steps / 9.0)); i < num_steps; i++) {
-			const double offset = 1.0 - breakpoint;
-			float coeff = 1.0 - breakpoint;
-			coeff *= powf(0.5, i * 9.0 / (double)num_steps); // -6dB per step for 7 steps
-			_fade_in->fast_simple_add (len * (breakpoint + (offset * (double)i / (double)num_steps)), coeff);
+		for (int i = 2; i < 9; ++i) {
+			const float coeff = (1.f - breakpoint) * powf (0.5, i);
+			_fade_in->fast_simple_add (len * (breakpoint + ((1.0 - breakpoint) * (double)i / 9.0)), coeff);
 		}
 		_fade_in->fast_simple_add (len, VERY_SMALL_SIGNAL);
 		reverse_curve (c3, _fade_in.val());
@@ -1108,14 +1106,11 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		//start with a nearly linear cuve
 		_fade_out->fast_simple_add (0, 1);
 		_fade_out->fast_simple_add (0.5 * len, 0.6);
-
 		//now generate a fade-out curve by successively applying a gain drop
 		const double breakpoint = 0.7;  //linear for first 70%
-		for (int i = max(2, (int)ceil(num_steps / 9.0)); i < num_steps; i++) {
-			const double offset = 1.0 - breakpoint;
-			float coeff = 1.0 - breakpoint;
-			coeff *= powf(0.5, i * 9.0 / (double)num_steps); // -6dB per step for 7 steps
-			_fade_out->fast_simple_add (len * (breakpoint + (offset * (double)i / (double)num_steps)), coeff);
+		for (int i = 2; i < 9; ++i) {
+			const float coeff = (1.f - breakpoint) * powf (0.5, i);
+			_fade_out->fast_simple_add (len * (breakpoint + ((1.0 - breakpoint) * (double)i / 9.0)), coeff);
 		}
 		_fade_out->fast_simple_add (len, VERY_SMALL_SIGNAL);
 		reverse_curve (_inverse_fade_out.val(), _fade_out.val());
