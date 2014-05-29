@@ -1,16 +1,12 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
+from waflib import Options
 import os
 import sys
 
 # Mandatory variables
 top = '.'
 out = 'build'
-
-backends = [ 'jack', 'dummy' ]
-
-if sys.platform == 'darwin':
-    backends += ['wavesaudio' ]
 
 def options(opt):
     autowaf.set_options(opt)
@@ -23,9 +19,25 @@ def configure(conf):
     autowaf.set_recursive()
     autowaf.configure(conf)
 
+    backends = [ 'jack' ]
+
+    if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc':
+        backends += [ 'wavesaudio' ]
+
+    if Options.options.build_dummy: 
+        backends += [ 'dummy' ]
+
     for i in backends:
         sub_config_and_use(conf, i)
 
 def build(bld):
+    backends = [ 'jack' ]
+
+    if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc':
+        backends += [ 'wavesaudio' ]
+
+    if Options.options.build_dummy: 
+        backends += [ 'dummy' ]
+
     for i in backends:
         bld.recurse(i)

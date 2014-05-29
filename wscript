@@ -408,6 +408,8 @@ def options(opt):
                     help='Whether to build for TRX')
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler flags')
+    opt.add_option('--with-dummy', action='store_true', default=False, dest='build_dummy',
+                   help='Build the dummy backend (no audio/MIDI I/O, useful for profiling)')
     opt.add_option('--backtrace', action='store_true', default=True, dest='backtrace',
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
@@ -783,6 +785,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Build target',          conf.env['build_target'])
     write_config_text('CoreAudio',             conf.is_defined('HAVE_COREAUDIO'))
     write_config_text('Debug RT allocations',  conf.is_defined('DEBUG_RT_ALLOC'))
+    write_config_text('Dummy backend',         opts.build_dummy)
     write_config_text('Process thread timing', conf.is_defined('PT_TIMING'))
     write_config_text('Denormal exceptions',   conf.is_defined('DEBUG_DENORMAL_EXCEPTION'))
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
