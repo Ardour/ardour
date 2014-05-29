@@ -611,7 +611,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 
 				boost::shared_ptr<Source> s;
 
-				if ((s = _session->source_by_path_and_channel (path, n)) == 0) {
+				if ((s = _session->audio_source_by_path_and_channel (path, n)) == 0) {
 
 					source = boost::dynamic_pointer_cast<AudioFileSource> (
 						SourceFactory::createExternal (DataType::AUDIO, *_session,
