@@ -201,7 +201,7 @@ map_existing_mono_sources (const vector<string>& new_paths, Session& /*sess*/,
 	for (vector<string>::const_iterator i = new_paths.begin();
 	     i != new_paths.end(); ++i)
 	{
-		boost::shared_ptr<Source> source = session->source_by_path_and_channel(*i, 0);
+		boost::shared_ptr<Source> source = session->audio_source_by_path_and_channel(*i, 0);
 
 		if (source == 0) {
 			error << string_compose(_("Could not find a source for %1 even though we are updating this file!"), (*i)) << endl;
