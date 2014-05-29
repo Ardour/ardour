@@ -3,6 +3,8 @@
 	Adapted for Ardour by Ben Loftis, March 2012
 
 *****************************************************************************/
+#ifndef __soundcloud_export_selector_h__
+#define __soundcloud_export_selector_h__
 
 #include <string>
 #include <fstream>
@@ -41,3 +43,4 @@ class SoundcloudExportSelector : public Gtk::VBox, public ARDOUR::SessionHandleP
 	
 };
 
+#endif // __soundcloud_export_selector_h__
