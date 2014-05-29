@@ -21,27 +21,25 @@
 
 #include "canvas/visibility.h"
 
+#include "canvas/interpolated_curve.h"
 #include "canvas/poly_item.h"
 #include "canvas/fill.h"
 
 namespace ArdourCanvas {
 
-class LIBCANVAS_API Curve : public PolyItem, public Fill
+class XFadeCurve;
+
+class LIBCANVAS_API Curve : public PolyItem, public Fill, public InterpolatedCurve
 {
 public:
     Curve (Group *);
-
-    enum SplineType {
-	    CatmullRomUniform,
-	    CatmullRomCentripetal,
-    };
 
     enum CurveFill {
 	    None,
 	    Inside,
 	    Outside,
     };
-    
+
     void compute_bounding_box () const;
     void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
     void set (Points const &);
@@ -55,14 +53,12 @@ public:
     Points samples;
     Points::size_type n_samples;
     uint32_t points_per_segment;
-    SplineType curve_type;
+    InterpolatedCurve::SplineType curve_type;
     CurveFill curve_fill;
 
     void interpolate ();
-
-    static void interpolate (const Points& coordinates, uint32_t points_per_segment, SplineType, bool closed, Points& results);
 };
-	
+
 }
 
 #endif
