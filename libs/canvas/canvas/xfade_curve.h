@@ -21,6 +21,7 @@
 #define __CANVAS_XFADECURVE_H__
 
 #include "canvas/visibility.h"
+#include "canvas/item.h"
 #include "canvas/curve.h"
 
 namespace ArdourCanvas {

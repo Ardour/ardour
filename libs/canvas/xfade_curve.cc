@@ -22,9 +22,9 @@
 #include <exception>
 #include <algorithm>
 
-#include "canvas/utils.h"
 #include "canvas/xfade_curve.h"
 #include "canvas/interpolated_curve.h"
+#include "canvas/utils.h"
 
 using namespace ArdourCanvas;
 using std::min;
