@@ -250,6 +250,8 @@ Editor::Editor ()
 	, _tool_marker_button (get_waves_button ("tool_marker_button"))
 	, _tool_zoom_button (get_waves_button ("tool_zoom_button"))
 	, _tool_arrow_button (get_waves_button ("tool_arrow_button"))
+	, _temporal_zoom_adjustment (get_adjustment ("temporal_zoom_adjustment"))
+	, _vertical_zoom_adjustment (get_adjustment ("vertical_zoom_adjustment"))
 #ifdef TOP_MENUBAR
 	/*
 	 * This is needed for OS X primarily
@@ -2964,8 +2966,9 @@ Editor::setup_toolbar ()
 		_zoom_box.pack_start (zoom_out_full_button, false, false);
 		_zoom_box.pack_start (zoom_focus_selector, false, false);
 	} else {
-		mode_box->pack_start (zoom_out_button, false, false);
-		mode_box->pack_start (zoom_in_button, false, false);
+		_temporal_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::temporal_zoom_by_slider));
+		_vertical_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::vertical_zoom_by_slider));
+		ZoomChanged.connect (sigc::mem_fun (*this, &Editor::update_temporal_zoom_slider));
 	}
 
 	/* Track zoom buttons */
@@ -3087,8 +3090,10 @@ Editor::setup_toolbar ()
 
 	hbox->show_all ();
 
-	toolbar_base.set_name ("ToolBarBase");
-	toolbar_base.add (toolbar_hbox);
+	if (!ARDOUR::Profile->get_trx()) {
+		toolbar_base.set_name ("ToolBarBase");
+		toolbar_base.add (toolbar_hbox);
+	}
 
 	_toolbar_viewport.add (toolbar_base);
 	/* stick to the required height but allow width to vary if there's not enough room */

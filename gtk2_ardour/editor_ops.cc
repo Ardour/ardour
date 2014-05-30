@@ -92,6 +92,7 @@
 #include "utils.h"
 
 #include "i18n.h"
+#include "dbg_msg.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -1753,6 +1754,25 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 	reposition_and_zoom (new_leftmost, new_fpp);
 }
 
+void
+Editor::temporal_zoom_by_slider ()
+{
+	temporal_zoom (_temporal_zoom_adjustment.get_value());
+}
+
+void
+Editor::update_temporal_zoom_slider ()
+{
+	double value = samples_per_pixel;
+
+	if ( value < _temporal_zoom_adjustment.get_lower ()) {
+		value = _temporal_zoom_adjustment.get_lower ();
+	} else if ( value > _temporal_zoom_adjustment.get_upper ()) {
+		value = _temporal_zoom_adjustment.get_upper ();
+	}
+
+	_temporal_zoom_adjustment.set_value(samples_per_pixel);
+}
 
 bool
 Editor::choose_new_marker_name(string &name) {
@@ -6453,6 +6473,14 @@ Editor::set_track_height (Height h)
 
 	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
 		(*x)->set_height_enum (h);
+	}
+}
+
+void
+Editor::vertical_zoom_by_slider()
+{
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		(*i)->set_height (_vertical_zoom_adjustment.get_value()*22);
 	}
 }
 

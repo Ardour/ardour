@@ -1216,6 +1216,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void temporal_zoom (framecnt_t samples_per_pixel);
 	void temporal_zoom_by_frame (framepos_t start, framepos_t end);
 	void temporal_zoom_to_frame (bool coarser, framepos_t frame);
+	void temporal_zoom_by_slider ();
+	void update_temporal_zoom_slider ();
 
 	void insert_region_list_drag (boost::shared_ptr<ARDOUR::Region>, int x, int y);
 	void insert_region_list_selection (float times);
@@ -1596,6 +1598,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	WavesButton& _tool_arrow_button;
 	ArdourButton mouse_gain_button;
 	WavesButton& _tool_zoom_button;
+	Gtk::Adjustment& _temporal_zoom_adjustment;
+	Gtk::Adjustment& _vertical_zoom_adjustment;
+
 	ArdourButton mouse_timefx_button;
 	ArdourButton mouse_audition_button;
 
@@ -2012,6 +2017,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void fit_tracks (TrackViewList &);
 	void fit_selected_tracks ();
 	void set_track_height (Height);
+	void vertical_zoom_by_slider();
 
 	void remove_tracks ();
 	void toggle_tracks_active ();

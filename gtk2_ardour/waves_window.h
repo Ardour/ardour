@@ -6,12 +6,12 @@
 #include <gtkmm.h>
 #include "waves_ui.h"
 
-class WavesWindow : public Gtk::Window {  public:	WavesWindow (Gtk::WindowType window_type);	WavesWindow (Gtk::WindowType window_type, std::string layout_script);	Gtk::VBox& get_vbox (char* id) { return _children.get_vbox (id); }
-	Gtk::HBox& get_hbox (char* id) { return _children.get_hbox (id); }
-	Gtk::Layout& get_layout (char* id) { return _children.get_layout (id); }
-	Gtk::Label& get_label (char* id) { return _children.get_label (id); }
-	Gtk::ComboBoxText& get_combo_box_text (char* id) { return _children.get_combo_box_text (id); }
-	WavesButton& get_waves_button (char* id) { return _children.get_waves_button (id); }
-
+class WavesWindow : public Gtk::Window {  public:	WavesWindow (Gtk::WindowType window_type);	WavesWindow (Gtk::WindowType window_type, std::string layout_script);	Gtk::VBox& get_vbox (const char* id) { return _children.get_vbox (id); }
+	Gtk::HBox& get_hbox (const char* id) { return _children.get_hbox (id); }
+	Gtk::Layout& get_layout (const char* id) { return _children.get_layout (id); }
+	Gtk::Label& get_label (const char* id) { return _children.get_label (id); }
+	Gtk::ComboBoxText& get_combo_box_text (const char* id) { return _children.get_combo_box_text (id); }
+	WavesButton& get_waves_button (const char* id) { return _children.get_waves_button (id); }
+	Gtk::Adjustment& get_adjustment (const char* id) { return _children.get_adjustment (id); }
   private:	WavesUI::WidgetMap _children;};
 #endif // __waves_window_h__
