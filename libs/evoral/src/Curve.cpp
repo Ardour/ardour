@@ -402,17 +402,14 @@ Curve::multipoint_eval (double x)
 
 		double tdelta = x - before->when;
 		double trange = after->when - before->when;
-#if 1 // Linear Interpolation
-		return before->value + (vdelta * (tdelta / trange));
-#else // cubic spline
-		if (!after->coeff) {
-			return before->value + (vdelta * (tdelta / trange));
+
+		if (_list.interpolation() == ControlList::Curved && after->coeff) {
+				ControlEvent* ev = after;
+				double x2 = x * x;
+				return ev->coeff[0] + (ev->coeff[1] * x) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x);
 		} else {
-			ControlEvent* ev = after;
-			double x2 = x * x;
-			return ev->coeff[0] + (ev->coeff[1] * x) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x);
+			return before->value + (vdelta * (tdelta / trange));
 		}
-#endif
 	}
 
 	/* x is a control point in the data */
