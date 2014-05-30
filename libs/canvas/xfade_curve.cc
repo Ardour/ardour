@@ -139,9 +139,9 @@ XFadeCurve::get_path(Rect const & area, Cairo::RefPtr<Cairo::Context> context, C
 
 	if (c.points.size () == 2) {
 
-		window_space = item_to_window (c.points.front());
+		window_space = item_to_window (c.points.front(), false);
 		context->move_to (window_space.x, window_space.y);
-		window_space = item_to_window (c.points.back());
+		window_space = item_to_window (c.points.back(), false);
 		context->line_to (window_space.x, window_space.y);
 
 	} else {
@@ -152,30 +152,21 @@ XFadeCurve::get_path(Rect const & area, Cairo::RefPtr<Cairo::Context> context, C
 
 		for (Points::size_type idx = 0; idx < c.n_samples - 1; ++idx) {
 			left = idx;
-			window_space = item_to_window (Duple (c.samples[idx].x, 0.0));
+			window_space = item_to_window (Duple (c.samples[idx].x, 0.0), false);
 			if (window_space.x >= area.x0) break;
 		}
 		for (Points::size_type idx = c.n_samples; idx > left + 1; --idx) {
-			window_space = item_to_window (Duple (c.samples[idx].x, 0.0));
+			window_space = item_to_window (Duple (c.samples[idx].x, 0.0), false);
 			if (window_space.x <= area.x1) break;
 			right = idx;
 		}
 
 		/* draw line between samples */
-		window_space = item_to_window (Duple (c.samples[left].x, c.samples[left].y));
+		window_space = item_to_window (Duple (c.samples[left].x, c.samples[left].y), false);
 		context->move_to (window_space.x, window_space.y);
-		Coord last_x = round(window_space.x);
-		Coord last_y = round(window_space.y);
 		for (uint32_t idx = left + 1; idx < right; ++idx) {
-			window_space = item_to_window (Duple (c.samples[idx].x, c.samples[idx].y));
-			if (last_x == round(window_space.x)) continue;
-			if (last_y == round(window_space.y)) continue;
-			last_x = round(window_space.x);
-			last_y = round(window_space.y);
-			context->line_to (last_x - .5 , last_y + .5);
-		}
-		if (last_x != round(window_space.x) || last_y != round(window_space.y)) {
-			context->line_to (window_space.x - .5 , window_space.y + .5);
+			window_space = item_to_window (Duple (c.samples[idx].x, c.samples[idx].y), false);
+			context->line_to (window_space.x, window_space.y);
 		}
 	}
 	return context->copy_path ();
@@ -186,15 +177,15 @@ XFadeCurve::close_path(Rect const & area, Cairo::RefPtr<Cairo::Context> context,
 {
 	Duple window_space;
 	if (inside) {
-		window_space = item_to_window (Duple(c.points.back().x, area.height()));
+		window_space = item_to_window (Duple(c.points.back().x, area.height()), false);
 		context->line_to (window_space.x, window_space.y);
-		window_space = item_to_window (Duple(c.points.front().x, area.height()));
+		window_space = item_to_window (Duple(c.points.front().x, area.height()), false);
 		context->line_to (window_space.x, window_space.y);
 		context->close_path();
 	} else {
-		window_space = item_to_window (Duple(c.points.back().x, 0.0));
+		window_space = item_to_window (Duple(c.points.back().x, 0.0), false);
 		context->line_to (window_space.x, window_space.y);
-		window_space = item_to_window (Duple(c.points.front().x, 0.0));
+		window_space = item_to_window (Duple(c.points.front().x, 0.0), false);
 		context->line_to (window_space.x, window_space.y);
 		context->close_path();
 	}

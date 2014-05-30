@@ -193,14 +193,15 @@ Canvas::window_to_canvas (Duple const & d) const
 }
 
 Duple
-Canvas::canvas_to_window (Duple const & d) const
+Canvas::canvas_to_window (Duple const & d, bool rounded) const
 {
 	Duple wd = d.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
 
-	/* Note that this intentionally always returns integer coordinates */
-
-	wd.x = round (wd.x);
-	wd.y = round (wd.y);
+	/* Note that this intentionally almost always returns integer coordinates */
+	if (rounded) {
+		wd.x = round (wd.x);
+		wd.y = round (wd.y);
+	}
 
 	return wd;
 }	
@@ -212,16 +213,18 @@ Canvas::window_to_canvas (Rect const & r) const
 }
 
 Rect
-Canvas::canvas_to_window (Rect const & r) const
+Canvas::canvas_to_window (Rect const & r, bool rounded) const
 {
 	Rect wr = r.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
 
-	/* Note that this intentionally always returns integer coordinates */
+	/* Note that this intentionally almost always returns integer coordinates */
 
-	wr.x0 = round (wr.x0);
-	wr.x1 = round (wr.x1);
-	wr.y0 = round (wr.y0);
-	wr.y1 = round (wr.y1);
+	if (rounded) {
+		wr.x0 = round (wr.x0);
+		wr.x1 = round (wr.x1);
+		wr.y0 = round (wr.y0);
+		wr.y1 = round (wr.y1);
+	}
 
 	return wr;
 }	

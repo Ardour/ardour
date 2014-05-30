@@ -160,9 +160,9 @@ Item::canvas_to_item (Coord& x, Coord& y) const
 }
 
 Duple
-Item::item_to_window (ArdourCanvas::Duple const & d) const
+Item::item_to_window (ArdourCanvas::Duple const & d, bool rounded) const
 {
-	return _canvas->canvas_to_window (item_to_canvas (d));
+	return _canvas->canvas_to_window (item_to_canvas (d), rounded);
 }
 
 Duple
