@@ -233,6 +233,16 @@ PannerShell::set_state (const XMLNode& node, int version)
 						_current_panner_uri = (*p)->descriptor.panner_uri;
 						_panner_gui_uri = (*p)->descriptor.gui_uri;
 
+						if (_is_send) {
+							if (!_panlinked) {
+								_pannable_internal->set_panner(_panner);
+							} else {
+								_force_reselect = true;
+							}
+						} else {
+							_pannable_route->set_panner(_panner);
+						}
+
 						if (_panner->set_state (**niter, version) == 0) {
 							return -1;
 						}
