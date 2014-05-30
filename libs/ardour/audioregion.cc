@@ -1043,6 +1043,9 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		break;
 	}
 
+	_fade_in->set_interpolation(Evoral::ControlList::Curved);
+	_inverse_fade_in->set_interpolation(Evoral::ControlList::Curved);
+
 	_default_fade_in = false;
 	_fade_in->thaw ();
 	send_change (PropertyChange (Properties::fade_in));
@@ -1116,6 +1119,9 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		reverse_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
 	}
+
+	_fade_out->set_interpolation(Evoral::ControlList::Curved);
+	_inverse_fade_out->set_interpolation(Evoral::ControlList::Curved);
 
 	_default_fade_out = false;
 	_fade_out->thaw ();
