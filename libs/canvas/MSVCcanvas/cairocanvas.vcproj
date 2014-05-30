@@ -330,6 +330,10 @@
 				RelativePath="..\wave_view.cc"
 				>
 			</File>
+			<File
+				RelativePath="..\xfade_curve.cc"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -386,6 +390,10 @@
 			</File>
 			<File
 				RelativePath="..\canvas\image.h"
+				>
+			</File>
+			<File
+				RelativePath="..\canvas\interpolated_curve.h"
 				>
 			</File>
 			<File
@@ -450,6 +458,10 @@
 			</File>
 			<File
 				RelativePath="..\canvas\wave_view.h"
+				>
+			</File>
+			<File
+				RelativePath="..\canvas\xfade_curve.h"
 				>
 			</File>
 		</Filter>
