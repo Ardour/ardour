@@ -2015,8 +2015,9 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 					boost::shared_ptr<AudioRegion> ar (arv->audio_region());
 					framecnt_t len = ar->fade_in()->back()->when;
 					framecnt_t diff = ar->first_frame() - i->initial_position;
-					double new_length = len - diff;
-					i->anchored_fade_length = ar->verify_xfade_bounds (new_length, true  /*START*/ );
+					framepos_t new_length = len - diff;
+					i->anchored_fade_length = min (ar->length(), new_length);
+					//i->anchored_fade_length = ar->verify_xfade_bounds (new_length, true  /*START*/ );
 					arv->reset_fade_in_shape_width (ar, i->anchored_fade_length, true);
 				}
 			}
@@ -2032,8 +2033,9 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 					boost::shared_ptr<AudioRegion> ar (arv->audio_region());
 					framecnt_t len = ar->fade_out()->back()->when;
 					framecnt_t diff = 1 + ar->last_frame() - i->initial_end;
-					double new_length = len + diff;
-					i->anchored_fade_length = ar->verify_xfade_bounds (new_length, false  /*END*/ );
+					framepos_t new_length = len + diff;
+					i->anchored_fade_length = min (ar->length(), new_length);
+					//i->anchored_fade_length = ar->verify_xfade_bounds (new_length, false  /*END*/ );
 					arv->reset_fade_out_shape_width (ar, i->anchored_fade_length, true);
 				}
 			}
