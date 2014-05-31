@@ -1470,17 +1470,19 @@ void
 AudioRegionView::set_fade_visibility (bool yn)
 {
 	if (yn) {
-		if (fade_in_handle)       { fade_in_handle->show(); }
-		if (fade_out_handle)      { fade_out_handle->show(); }
-		if (fade_in_trim_handle)  { fade_in_trim_handle->show(); }
-		if (fade_out_trim_handle) { fade_out_trim_handle->show(); }
-		if (start_xfade_rect)     { start_xfade_rect->set_outline(true); }
-		if (end_xfade_rect)       { end_xfade_rect->set_outline(true); }
-	} else {
+		if (start_xfade_curve)    { start_xfade_curve->show (); }
+		if (end_xfade_curve)      { end_xfade_curve->show (); }
+		if (start_xfade_rect)     { start_xfade_rect->show (); }
+		if (end_xfade_rect)       { end_xfade_rect->show (); }
+		} else {
+		if (start_xfade_curve)    { start_xfade_curve->hide(); }
+		if (end_xfade_curve)      { end_xfade_curve->hide(); }
 		if (fade_in_handle)       { fade_in_handle->hide(); }
 		if (fade_out_handle)      { fade_out_handle->hide(); }
 		if (fade_in_trim_handle)  { fade_in_trim_handle->hide(); }
 		if (fade_out_trim_handle) { fade_out_trim_handle->hide(); }
+		if (start_xfade_rect)     { start_xfade_rect->hide (); }
+		if (end_xfade_rect)       { end_xfade_rect->hide (); }
 		if (start_xfade_rect)     { start_xfade_rect->set_outline (false); }
 		if (end_xfade_rect)       { end_xfade_rect->set_outline (false); }
 	}
