@@ -346,8 +346,6 @@ AutomationList::deserialize_events (const XMLNode& node)
 		fast_simple_add (x, y);
 	}
 
-	thin ();
-
 	if (!ok) {
 		clear ();
 		error << _("automation list: cannot load coordinates from XML, all points ignored") << endmsg;
@@ -410,9 +408,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 			fast_simple_add (x, y);
 		}
 
-		thin ();
-
-                thaw ();
+		thaw ();
 
 		return 0;
 	}
