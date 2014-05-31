@@ -81,7 +81,8 @@ class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	boost::scoped_ptr<ExportTimespanSelector> timespan_selector;
 	boost::scoped_ptr<ExportChannelSelector>  channel_selector;
 	boost::scoped_ptr<ExportFileNotebook>     file_notebook;
-	boost::scoped_ptr<SoundcloudExportSelector> soundcloud_selector;
+
+	boost::shared_ptr<SoundcloudExportSelector> soundcloud_selector;
 
 	Gtk::VBox                                 warning_widget;
 	Gtk::VBox                                 progress_widget;

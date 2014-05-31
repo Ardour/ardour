@@ -29,6 +29,7 @@
 
 #include "export_format_selector.h"
 #include "export_filename_selector.h"
+#include "soundcloud_export_selector.h"
 
 class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 {
@@ -39,6 +40,8 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 	void set_session_and_manager (ARDOUR::Session * s, boost::shared_ptr<ARDOUR::ExportProfileManager> manager);
 	void sync_with_manager ();
 	void update_example_filenames();
+
+	boost::shared_ptr<SoundcloudExportSelector> soundcloud_export_selector;
 
 	sigc::signal<void> CriticalSelectionChanged;
 
