@@ -2099,8 +2099,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	case StartSelectionTrimItem:
 	case EndSelectionTrimItem:
 	case PlayheadCursorItem:
-	case FadeInTrimHandleItem:
-	case FadeOutTrimHandleItem:
 
 		_over_region_trim_target = false;
 
@@ -2163,6 +2161,8 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 
 		break;
 
+	case FadeInTrimHandleItem:
+	case FadeOutTrimHandleItem:
 	case FadeInHandleItem:
 	case FadeOutHandleItem:
 		rv = static_cast<RegionView*>(item->get_data ("regionview"));
