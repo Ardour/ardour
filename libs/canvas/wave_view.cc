@@ -450,7 +450,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		return;
 	}
 
-	Rect self = item_to_window (Rect (0.0, 0.0, _region->length() / _samples_per_pixel, _height));
+	Rect self = item_to_window (Rect (0.5, 0.0, _region->length() / _samples_per_pixel, _height));
 	boost::optional<Rect> d = self.intersection (area);
 
 	if (!d) {
