@@ -94,15 +94,23 @@ void
 ExportFileNotebook::update_soundcloud_upload ()
 {
 	int i;
+	bool show_credentials_entry = false;
 	ExportProfileManager::FormatStateList const & formats = profile_manager->get_formats ();
 	ExportProfileManager::FormatStateList::const_iterator format_it;
 
 	for (i = 0, format_it = formats.begin(); format_it != formats.end(); ++i, ++format_it) {
 		FilePage * page;
 		if ((page = dynamic_cast<FilePage *> (get_nth_page (i)))) {
-			(*format_it)->format->set_soundcloud_upload (page->get_soundcloud_upload ());
+			bool this_soundcloud_upload = page->get_soundcloud_upload ();
+			(*format_it)->format->set_soundcloud_upload (this_soundcloud_upload);
+			if (this_soundcloud_upload) {
+				show_credentials_entry  = true;
+			}
 		}
 	}
+
+	soundcloud_export_selector->set_visible (show_credentials_entry);
+
 }
 
 void

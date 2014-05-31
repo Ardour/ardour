@@ -134,6 +134,8 @@ ExportDialog::init ()
 	cancel_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::close_dialog));
 	export_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::do_export));
 
+	file_notebook->soundcloud_export_selector = soundcloud_selector;
+
 	/* Done! */
 
 	show_all_children ();
