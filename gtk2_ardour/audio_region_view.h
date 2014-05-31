@@ -95,8 +95,8 @@ class AudioRegionView : public RegionView
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
-	void reset_fade_in_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, framecnt_t);
-	void reset_fade_out_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, framecnt_t);
+	void reset_fade_in_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, framecnt_t, bool drag_active = false);
+	void reset_fade_out_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, framecnt_t, bool drag_active = false);
 
 	framepos_t get_fade_in_shape_width ();
 	framepos_t get_fade_out_shape_width ();
@@ -158,6 +158,8 @@ class AudioRegionView : public RegionView
 	ArdourCanvas::Polygon*          sync_mark; ///< polgyon for sync position
 	ArdourCanvas::Rectangle*        fade_in_handle; ///< fade in handle, or 0
 	ArdourCanvas::Rectangle*        fade_out_handle; ///< fade out handle, or 0
+	ArdourCanvas::Rectangle*        fade_in_trim_handle; ///< fade in trim handle, or 0
+	ArdourCanvas::Rectangle*        fade_out_trim_handle; ///< fade out trim handle, or 0
 
 	ArdourCanvas::XFadeCurve* start_xfade_curve;
 	ArdourCanvas::Rectangle*  start_xfade_rect;
@@ -217,6 +219,9 @@ private:
 	 *  first list is for start xfades, second list is for end xfades.
 	 */
 	std::pair<std::list<AudioRegionView*>, std::list<AudioRegionView*> > _hidden_xfades;
+
+	bool trim_fade_in_drag_active;
+	bool trim_fade_out_drag_active;
 };
 
 #endif /* __gtk_ardour_audio_region_view_h__ */

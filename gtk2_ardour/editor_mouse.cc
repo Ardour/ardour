@@ -692,8 +692,10 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		break;
 
 	case FadeInHandleItem:
+	case FadeInTrimHandleItem:
 	case FadeInItem:
 	case FadeOutHandleItem:
+	case FadeOutTrimHandleItem:
 	case FadeOutItem:
 	case StartCrossFadeItem:
 	case EndCrossFadeItem:
@@ -1046,9 +1048,17 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case RegionViewNameHighlight:
 			case LeftFrameHandle:
-                        case RightFrameHandle:
+			case RightFrameHandle:
 				if (!clicked_regionview->region()->locked()) {
 					_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
+					return true;
+				}
+				break;
+
+			case FadeInTrimHandleItem:
+			case FadeOutTrimHandleItem:
+				if (!clicked_regionview->region()->locked()) {
+					_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer(), true), event);
 					return true;
 				}
 				break;
@@ -1272,12 +1282,12 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		switch (item_type) {
 		case RegionViewNameHighlight:
-                        _drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
-                        return true;
-                        break;
+			_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
+			return true;
+			break;
 
-                case LeftFrameHandle:
-                case RightFrameHandle:
+		case LeftFrameHandle:
+		case RightFrameHandle:
 			if (!internal_editing ()) {
 				_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
 			}
@@ -1558,12 +1568,14 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			switch (item_type) {
 			case FadeInItem:
 			case FadeInHandleItem:
+			case FadeInTrimHandleItem:
 			case StartCrossFadeItem:
 				popup_xfade_in_context_menu (1, event->button.time, item, item_type);
 				break;
 
 			case FadeOutItem:
 			case FadeOutHandleItem:
+			case FadeOutTrimHandleItem:
 			case EndCrossFadeItem:
 				popup_xfade_out_context_menu (1, event->button.time, item, item_type);
 				break;
@@ -1898,7 +1910,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if (is_drawable() && effective_mouse_mode() == MouseObject && !internal_editing() && entered_regionview) {
 			set_canvas_cursor_for_region_view (event->crossing.x, entered_regionview);
 		}
-                break;
+		break;
 
 	case RegionItem:
 		switch (effective_mouse_mode()) {
@@ -1999,6 +2011,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		break;
 
+	case FadeInTrimHandleItem:
 	case FadeInHandleItem:
 		if (mouse_mode == MouseObject && !internal_editing()) {
 			ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
@@ -2010,6 +2023,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		break;
 
+	case FadeOutTrimHandleItem:
 	case FadeOutHandleItem:
 		if (mouse_mode == MouseObject && !internal_editing()) {
 			ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
@@ -2085,6 +2099,8 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	case StartSelectionTrimItem:
 	case EndSelectionTrimItem:
 	case PlayheadCursorItem:
+	case FadeInTrimHandleItem:
+	case FadeOutTrimHandleItem:
 
 		_over_region_trim_target = false;
 
