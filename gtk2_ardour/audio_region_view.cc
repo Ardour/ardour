@@ -572,6 +572,11 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 		fade_in_trim_handle->set_x1 (handle_size);
 	}
 
+	if (fade_in_handle->visible()) {
+		//see comment for drag_start
+		entered(false);
+	}
+
 	if (pwidth < 5) {
 		hide_start_xfade();
 		return;
@@ -653,6 +658,10 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 		fade_out_trim_handle->set_x1 (1 + trim_handle_right);
 	}
 
+	if (fade_out_handle->visible()) {
+		//see comment for drag_start
+		entered(false);
+	}
 	/* don't show shape if its too small */
 
 	if (pwidth < 5) {
@@ -1331,12 +1340,22 @@ AudioRegionView::entered (bool internal_editing)
 			fade_out_handle->raise_to_top ();
 		}
 		if (fade_in_trim_handle) {
-			fade_in_trim_handle->show ();
-			fade_in_trim_handle->raise_to_top ();
+			boost::shared_ptr<AudioRegion> ar (audio_region());
+			if (!ar->locked() && (ar->fade_in()->back()->when > 64 || (ar->can_trim() & Trimmable::FrontTrimEarlier))) {
+				fade_in_trim_handle->show ();
+				fade_in_trim_handle->raise_to_top ();
+			} else {
+				fade_in_trim_handle->hide ();
+			}
 		}
 		if (fade_out_trim_handle) {
-			fade_out_trim_handle->show ();
-			fade_out_trim_handle->raise_to_top ();
+			boost::shared_ptr<AudioRegion> ar (audio_region());
+			if (!ar->locked() && (ar->fade_out()->back()->when > 64 || (ar->can_trim() & Trimmable::EndTrimLater))) {
+				fade_out_trim_handle->show ();
+				fade_out_trim_handle->raise_to_top ();
+			} else {
+				fade_out_trim_handle->hide ();
+			}
 		}
 	}
 }
@@ -1626,8 +1645,15 @@ void
 AudioRegionView::drag_end ()
 {
 	TimeAxisViewItem::drag_end ();
-
 	//see comment for drag_start
+
+	if (fade_in_handle && fade_in_handle->visible()) {
+		// lenght of region or fade changed, re-check
+		// if fade_in_trim_handle or fade_out_trim_handle should
+		// be visible. -- If the fade_in_handle is visible
+		// we have focus and are not in internal edit mode.
+		entered(false);
+	}
 }
 
 void
