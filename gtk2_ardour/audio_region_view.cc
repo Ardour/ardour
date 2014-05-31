@@ -528,6 +528,8 @@ AudioRegionView::set_height (gdouble height)
 	if (name_text) {
 		name_text->raise_to_top();
 	}
+
+	setup_fade_handle_positions();
 }
 
 void
