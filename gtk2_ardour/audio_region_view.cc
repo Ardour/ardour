@@ -417,6 +417,8 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 		if (fade_out_handle)      { fade_out_handle->hide(); }
 		if (fade_in_trim_handle)  { fade_in_trim_handle->hide(); }
 		if (fade_out_trim_handle) { fade_out_trim_handle->hide(); }
+		if (start_xfade_rect)     { start_xfade_rect->set_outline (false); }
+		if (end_xfade_rect)       { end_xfade_rect->set_outline (false); }
 	}
 
 	AnalysisFeatureList analysis_features = _region->transients();
@@ -744,7 +746,7 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 		CANVAS_DEBUG_NAME (start_xfade_rect, string_compose ("xfade start rect for %1", region()->name()));
 		start_xfade_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 		start_xfade_rect->set_fill (false);
-		start_xfade_rect->set_outline (true);
+		start_xfade_rect->set_outline (false);
 		start_xfade_rect->set_outline_width (0.5);
 		start_xfade_rect->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_start_xfade_event), start_xfade_rect, this));
 		start_xfade_rect->set_data ("regionview", this);
@@ -835,7 +837,7 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 		CANVAS_DEBUG_NAME (end_xfade_rect, string_compose ("xfade end rect for %1", region()->name()));
 		end_xfade_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 		end_xfade_rect->set_fill (false);
-		end_xfade_rect->set_outline (true);
+		end_xfade_rect->set_outline (false);
 		end_xfade_rect->set_outline_width (0.5);
 		end_xfade_rect->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_end_xfade_event), end_xfade_rect, this));
 		end_xfade_rect->set_data ("regionview", this);
@@ -1312,6 +1314,12 @@ AudioRegionView::entered (bool internal_editing)
 	}
 
 	if (!internal_editing) {
+		if (start_xfade_rect) {
+			start_xfade_rect->set_outline (true);
+		}
+		if (end_xfade_rect) {
+			end_xfade_rect->set_outline (true);
+		}
 		if (fade_in_handle) {
 			fade_in_handle->show ();
 			fade_in_handle->raise_to_top ();
@@ -1345,6 +1353,8 @@ AudioRegionView::exited ()
 	if (fade_out_handle)      { fade_out_handle->hide(); }
 	if (fade_in_trim_handle)  { fade_in_trim_handle->hide(); }
 	if (fade_out_trim_handle) { fade_out_trim_handle->hide(); }
+	if (start_xfade_rect)     { start_xfade_rect->set_outline (false); }
+	if (end_xfade_rect)       { end_xfade_rect->set_outline (false); }
 }
 
 void
@@ -1462,11 +1472,15 @@ AudioRegionView::set_fade_visibility (bool yn)
 		if (fade_out_handle)      { fade_out_handle->show(); }
 		if (fade_in_trim_handle)  { fade_in_trim_handle->show(); }
 		if (fade_out_trim_handle) { fade_out_trim_handle->show(); }
+		if (start_xfade_rect)     { start_xfade_rect->set_outline(true); }
+		if (end_xfade_rect)       { end_xfade_rect->set_outline(true); }
 	} else {
 		if (fade_in_handle)       { fade_in_handle->hide(); }
 		if (fade_out_handle)      { fade_out_handle->hide(); }
 		if (fade_in_trim_handle)  { fade_in_trim_handle->hide(); }
 		if (fade_out_trim_handle) { fade_out_trim_handle->hide(); }
+		if (start_xfade_rect)     { start_xfade_rect->set_outline (false); }
+		if (end_xfade_rect)       { end_xfade_rect->set_outline (false); }
 	}
 }
 
