@@ -477,7 +477,7 @@ Editor::canvas_fade_in_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRe
 }
 
 bool
-Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv)
+Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv, bool trim)
 {
 	bool ret = false;
 
@@ -493,11 +493,11 @@ Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, 
 		clicked_control_point = 0;
 		clicked_axisview = &rv->get_time_axis_view();
 		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
-		ret = button_press_handler (item, event, FadeInHandleItem);
+		ret = button_press_handler (item, event, trim ? FadeInTrimHandleItem : FadeInHandleItem);
 		break;
 
 	case GDK_BUTTON_RELEASE:
-		ret = button_release_handler (item, event, FadeInHandleItem);
+		ret = button_release_handler (item, event, trim ? FadeInTrimHandleItem : FadeInHandleItem);
 		maybe_locate_with_edit_preroll ( rv->region()->position() );
 		break;
 
@@ -506,11 +506,11 @@ Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, 
 		break;
 
 	case GDK_ENTER_NOTIFY:
-		ret = enter_handler (item, event, FadeInHandleItem);
+		ret = enter_handler (item, event, trim ? FadeInTrimHandleItem : FadeInHandleItem);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		ret = leave_handler (item, event, FadeInHandleItem);
+		ret = leave_handler (item, event, trim ? FadeInTrimHandleItem : FadeInHandleItem);
 		break;
 
 	default:
@@ -561,7 +561,7 @@ Editor::canvas_fade_out_event (GdkEvent *event, ArdourCanvas::Item* item, AudioR
 }
 
 bool
-Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv)
+Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv, bool trim)
 {
 	bool ret = false;
 
@@ -577,11 +577,11 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 		clicked_control_point = 0;
 		clicked_axisview = &rv->get_time_axis_view();
 		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
-		ret = button_press_handler (item, event, FadeOutHandleItem);
+		ret = button_press_handler (item, event, trim ? FadeOutTrimHandleItem : FadeOutHandleItem);
 		break;
 
 	case GDK_BUTTON_RELEASE:
-		ret = button_release_handler (item, event, FadeOutHandleItem);
+		ret = button_release_handler (item, event, trim ? FadeOutTrimHandleItem : FadeOutHandleItem);
 		maybe_locate_with_edit_preroll ( rv->region()->last_frame() - rv->get_fade_out_shape_width() );
 		break;
 
@@ -590,11 +590,11 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 		break;
 
 	case GDK_ENTER_NOTIFY:
-		ret = enter_handler (item, event, FadeOutHandleItem);
+		ret = enter_handler (item, event, trim ? FadeOutTrimHandleItem : FadeOutHandleItem);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		ret = leave_handler (item, event, FadeOutHandleItem);
+		ret = leave_handler (item, event, trim ? FadeOutTrimHandleItem : FadeOutHandleItem);
 		break;
 
 	default:
