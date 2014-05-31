@@ -747,12 +747,13 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 		start_xfade_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 		start_xfade_rect->set_fill (false);
 		start_xfade_rect->set_outline (false);
+		start_xfade_rect->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::RIGHT));
 		start_xfade_rect->set_outline_width (0.5);
 		start_xfade_rect->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_start_xfade_event), start_xfade_rect, this));
 		start_xfade_rect->set_data ("regionview", this);
 	}
 
-	start_xfade_rect->set (ArdourCanvas::Rect (0.0, 0.0, rect_width + TimeAxisViewItem::RIGHT_EDGE_SHIFT, effective_height));
+	start_xfade_rect->set (ArdourCanvas::Rect (0.0, 0.0, rect_width, effective_height));
 
 	/* fade out line */
 
@@ -838,6 +839,7 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 		end_xfade_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 		end_xfade_rect->set_fill (false);
 		end_xfade_rect->set_outline (false);
+		end_xfade_rect->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT));
 		end_xfade_rect->set_outline_width (0.5);
 		end_xfade_rect->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_end_xfade_event), end_xfade_rect, this));
 		end_xfade_rect->set_data ("regionview", this);
