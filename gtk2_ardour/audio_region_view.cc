@@ -91,6 +91,8 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, _end_xfade_visible (false)
 	, _amplitude_above_axis(1.0)
 	, fade_color(0)
+	, trim_fade_in_drag_active(false)
+	, trim_fade_out_drag_active(false)
 {
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&AudioRegionView::parameter_changed, this, _1), gui_context());
 }
@@ -111,6 +113,8 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, _end_xfade_visible (false)
 	, _amplitude_above_axis(1.0)
 	, fade_color(0)
+	, trim_fade_in_drag_active(false)
+	, trim_fade_out_drag_active(false)
 {
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&AudioRegionView::parameter_changed, this, _1), gui_context());
 }
@@ -129,6 +133,8 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 	, _end_xfade_visible (false)
 	, _amplitude_above_axis (other._amplitude_above_axis)
 	, fade_color(0)
+	, trim_fade_in_drag_active(false)
+	, trim_fade_out_drag_active(false)
 {
 	Gdk::Color c;
 	int r,g,b,a;
