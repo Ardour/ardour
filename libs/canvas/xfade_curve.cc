@@ -235,13 +235,13 @@ XFadeCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 	context->begin_new_path ();
 	context->append_path (IS ? *path_in : *path_out);
 	close_path(draw, context, IS ? _in : _out, true);
-	//context->set_fill_rule (Cairo::FILL_RULE_EVEN_ODD);
+	context->set_fill_rule (Cairo::FILL_RULE_EVEN_ODD);
 	context->clip ();
 	context->begin_new_path ();
 	context->append_path (IS ? *path_out: *path_in);
 	close_path(draw, context, IS ? _out : _in, true);
 	set_source_rgba (context, fill_shaded);
-	//context->set_fill_rule (Cairo::FILL_RULE_WINDING);
+	context->set_fill_rule (Cairo::FILL_RULE_WINDING);
 	context->fill ();
 	context->restore ();
 
