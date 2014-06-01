@@ -36,7 +36,7 @@ def build(bld):
     if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc':
         backends += [ 'wavesaudio' ]
 
-    if Options.options.build_dummy: 
+    if bld.is_defined('HAVE_DUMMY'):
         backends += [ 'dummy' ]
 
     for i in backends:
