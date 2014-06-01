@@ -274,13 +274,13 @@ DummyAudioBackend::set_midi_option (const std::string& opt)
 	else {
 		_n_midi_inputs = _n_midi_outputs = 0;
 	}
-	return -1;
+	return 0;
 }
 
 std::string
 DummyAudioBackend::midi_option () const
 {
-	return "";
+	return ""; // TODO
 }
 
 /* State Control */
@@ -374,7 +374,7 @@ DummyAudioBackend::raw_buffer_size (DataType t)
 {
 	switch (t) {
 		case DataType::AUDIO:
-			return _max_buffer_size * sizeof(Sample);
+			return _samples_per_period * sizeof(Sample);
 		case DataType::MIDI:
 			return _max_buffer_size; // XXX not really limited
 	}
@@ -424,8 +424,10 @@ DummyAudioBackend::create_process_thread (boost::function<void()> func)
 
 	if (pthread_create (&thread_id, &attr, dummy_process_thread, td)) {
 		PBD::error << _("AudioEngine: cannot create process thread.") << endmsg;
+		pthread_attr_destroy (&attr);
 		return -1;
 	}
+	pthread_attr_destroy (&attr);
 
 	_threads.push_back (thread_id);
 	return 0;
