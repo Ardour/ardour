@@ -925,7 +925,7 @@ DummyAudioBackend::get_physical_outputs (DataType type, std::vector<std::string>
 {
 	for (size_t i = 0; i < _ports.size (); ++i) {
 		DummyPort* port = _ports[i];
-		if ((port->type () == type) && port->is_output () && port->is_physical ()) {
+		if ((port->type () == type) && port->is_input () && port->is_physical ()) {
 			port_names.push_back (port->name ());
 		}
 	}
@@ -936,7 +936,7 @@ DummyAudioBackend::get_physical_inputs (DataType type, std::vector<std::string>&
 {
 	for (size_t i = 0; i < _ports.size (); ++i) {
 		DummyPort* port = _ports[i];
-		if ((port->type () == type) && port->is_input () && port->is_physical ()) {
+		if ((port->type () == type) && port->is_output () && port->is_physical ()) {
 			port_names.push_back (port->name ());
 		}
 	}
