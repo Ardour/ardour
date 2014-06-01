@@ -163,6 +163,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 
          set_location (loc);
          set_number (num);
+         cd_toggled(); // show/hide cd-track details
  }
 
  LocationEditRow::~LocationEditRow()
@@ -499,7 +500,7 @@ LocationEditRow::cd_toggled ()
 
 	location->set_cd (cd_check_button.get_active(), this);
 
-	if (location->is_cd_marker() && !(location->is_mark())) {
+	if (location->is_cd_marker()) {
 
 		show_cd_track_details ();
 
