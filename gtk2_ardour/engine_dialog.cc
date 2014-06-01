@@ -1614,6 +1614,8 @@ EngineControl::EngineControl ()
 			 input_latency.set_value (0);
 			 output_latency.set_value (0);
 
+			 push_state_to_backend(false);
+
 			 /* reset control */
 
 			 input_latency.set_value (il);
