@@ -271,10 +271,6 @@ EngineControl::EngineControl ()
 
 	backend_changed ();
 
-	if (audio_setup) {
-		set_state (*audio_setup);
-	}
-
 	/* Connect to signals */
 
 	driver_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::driver_changed));
@@ -287,6 +283,10 @@ EngineControl::EngineControl ()
 	output_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 	input_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 	output_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
+
+	if (audio_setup) {
+		set_state (*audio_setup);
+	}
 
 	notebook.signal_switch_page().connect (sigc::mem_fun (*this, &EngineControl::on_switch_page));
  }
@@ -633,10 +633,6 @@ EngineControl::EngineControl ()
  void
  EngineControl::backend_changed ()
  {
-	 if (ignore_changes) {
-		 return;
-	 }
-
 	 string backend_name = backend_combo.get_active_text();
 	 boost::shared_ptr<ARDOUR::AudioBackend> backend;
 
@@ -687,7 +683,9 @@ EngineControl::EngineControl ()
 		 }
 	 }
 
-	 maybe_display_saved_state ();
+	 if (!ignore_changes) {
+		 maybe_display_saved_state ();
+	 }
  }
 
  bool
@@ -759,25 +757,20 @@ EngineControl::EngineControl ()
  void
  EngineControl::driver_changed ()
  {
-	 if (ignore_changes) {
-		 return;
-	 }
-
 	 boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	 assert (backend);
 
 	 backend->set_driver (driver_combo.get_active_text());
 	 list_devices ();
 
-	 maybe_display_saved_state ();
+	 if (!ignore_changes) {
+		 maybe_display_saved_state ();
+	 }
  }
 
  void
  EngineControl::device_changed ()
  {
-	 if (ignore_changes) {
-		 return;
-	 }
 
 	 boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	 assert (backend);
@@ -875,8 +868,10 @@ EngineControl::EngineControl ()
 
 	 /* pick up any saved state for this device */
 
-	 maybe_display_saved_state ();
- }	
+	 if (!ignore_changes) {
+		 maybe_display_saved_state ();
+	 }
+ }
 
  string
  EngineControl::bufsize_as_string (uint32_t sz)
@@ -892,28 +887,24 @@ EngineControl::EngineControl ()
  void 
  EngineControl::sample_rate_changed ()
  {
-	 if (ignore_changes) {
-		 return;
-	 }
-
 	 /* reset the strings for buffer size to show the correct msec value
 	    (reflecting the new sample rate).
 	 */
 
 	 show_buffer_duration ();
-	 save_state ();
+	 if (!ignore_changes) {
+		 save_state ();
+	 }
 
  }
 
  void 
  EngineControl::buffer_size_changed ()
  {
-	 if (ignore_changes) {
-		 return;
-	 }
-
 	 show_buffer_duration ();
-	 save_state ();
+	 if (!ignore_changes) {
+		 save_state ();
+	 }
  }
 
  void
