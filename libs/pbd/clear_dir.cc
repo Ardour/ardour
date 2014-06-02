@@ -33,6 +33,7 @@ using PBD::closedir;
 #include <string.h>
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/error.h"

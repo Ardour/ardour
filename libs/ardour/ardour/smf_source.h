@@ -81,8 +81,6 @@ public:
 
 	void prevent_deletion ();
 
-	void prevent_deletion ();
-
   protected:
 	void set_path (const std::string& newpath);
 

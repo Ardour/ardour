@@ -29,8 +29,6 @@
 namespace PBD {
         LIBPBD_API int clear_directory (const std::string&, size_t* = 0, std::vector<std::string>* = 0);
         LIBPBD_API void remove_directory (const std::string& dir);
-        int clear_directory (const std::string&, size_t* = 0, std::vector<std::string>* = 0);
-        void remove_directory (const std::string& dir);
 }
 
 #endif /* __pbd_clear_dir_h__ */
