@@ -3,6 +3,7 @@ from waflib.extras import autowaf as autowaf
 from waflib import Options
 import os
 import sys
+import re
 
 # Mandatory variables
 top = '.'
@@ -27,6 +28,9 @@ def configure(conf):
     if Options.options.build_dummy: 
         backends += [ 'dummy' ]
 
+    if re.search ("linux", sys.platform) != None:
+        backends += [ 'alsa' ]
+
     for i in backends:
         sub_config_and_use(conf, i)
 
@@ -38,6 +42,10 @@ def build(bld):
 
     if bld.is_defined('HAVE_DUMMY'):
         backends += [ 'dummy' ]
+
+    if re.search ("linux", sys.platform) != None:
+        if bld.is_defined('HAVE_ALSA'):
+            backends += [ 'alsa' ]
 
     for i in backends:
         bld.recurse(i)
