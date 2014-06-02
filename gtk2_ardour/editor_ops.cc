@@ -1757,12 +1757,14 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 void
 Editor::temporal_zoom_by_slider ()
 {
-	temporal_zoom (_temporal_zoom_adjustment.get_value());
+	int64_t samples_per_pixel = (int64_t)(pow (2, _temporal_zoom_adjustment.get_value()) + 0.001);
+	temporal_zoom (samples_per_pixel);
 }
 
 void
 Editor::update_temporal_zoom_slider ()
 {
+	return;
 	double value = samples_per_pixel;
 
 	if ( value < _temporal_zoom_adjustment.get_lower ()) {
