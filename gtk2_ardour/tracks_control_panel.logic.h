@@ -89,6 +89,8 @@
     void on_all_inputs_off_button(WavesButton*);
     void on_all_outputs_on_button(WavesButton*);
     void on_all_outputs_off_button(WavesButton*);
+    void on_name_tracks_after_driver(WavesButton*);
+    void on_reset_tracks_name_to_default(WavesButton*);
 
 	void engine_changed ();
 	void device_changed (bool show_confirm_dial);

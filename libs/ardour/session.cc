@@ -138,6 +138,19 @@ PBD::Signal2<void,std::string,std::string> Session::VersionMismatch;
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
 
+namespace {
+    // if pattern is not found out_str == in_str
+    bool remove_pattern_from_string(const std::string& in_str, const std::string& pattern, std::string& out_str) {
+        if (in_str.find(pattern) != std::string::npos ) {
+            out_str = in_str.substr(pattern.size() );
+            return true;
+        } else {
+            out_str = in_str;
+            return false;
+        }
+    }
+}
+
 /** @param snapshot_name Snapshot name, without .ardour suffix */
 Session::Session (AudioEngine &eng,
                   const string& fullpath,
@@ -369,7 +382,26 @@ Session::Session (AudioEngine &eng,
             
             how_many = inputs.size();
             
-            list<boost::shared_ptr<AudioTrack> > tracks = new_audio_track (1, 1, Normal, 0, how_many, string() );
+            
+            list<boost::shared_ptr<AudioTrack> > tracks;
+            
+            // Track names after driver 
+            if( Config->get_tracks_auto_naming() == NameAfterDriver )
+            {
+                string track_name = "";
+                for( int i = 0; i < inputs.size(); ++i)
+                {
+                    string track_name;
+                    remove_pattern_from_string(inputs[i], "system:", track_name);
+                    
+                    list<boost::shared_ptr<AudioTrack> > single_track = new_audio_track (1, 1, Normal, 0, 1, track_name);
+                    tracks.insert(tracks.begin(), single_track.front());
+                }   
+            }
+            else
+            { // Default track names
+                tracks = new_audio_track (1, 1, Normal, 0, how_many, string());
+            }
             
             if (tracks.size() != how_many) {
                 destroy ();

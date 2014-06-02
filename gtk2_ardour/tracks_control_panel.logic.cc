@@ -99,6 +99,10 @@ TracksControlPanel::init ()
 	_sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::sample_rate_changed));
 	_buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::buffer_size_changed));
 
+    _name_tracks_after_driver.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_name_tracks_after_driver));
+    _reset_tracks_name_to_default.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_reset_tracks_name_to_default));
+
+    
 	populate_engine_combo ();
 	populate_output_mode();
 
@@ -458,8 +462,7 @@ void TracksControlPanel::device_changed (bool show_confirm_dial/*=true*/)
                            true);
         
         msg.set_position (Gtk::WIN_POS_MOUSE);
-        
-		set_keep_above(false);
+        msg.set_keep_above(true);
 
         switch (msg.run()) {
             case RESPONSE_NO:
@@ -467,11 +470,10 @@ void TracksControlPanel::device_changed (bool show_confirm_dial/*=true*/)
                 PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
                 
                 _device_combo.set_active_text (EngineStateController::instance()->get_current_device_name());
-				set_keep_above(true);
+
                 return;
         } 
 
-		set_keep_above(true);
     }
     
     if (EngineStateController::instance()->set_new_device_as_current(device_name) )
@@ -495,6 +497,78 @@ void
 TracksControlPanel::on_all_inputs_on_button(WavesButton*)
 {
     EngineStateController::instance()->set_state_to_all_inputs(true);
+}
+
+void
+TracksControlPanel::on_name_tracks_after_driver(WavesButton*)
+{
+    if( Config->get_tracks_auto_naming() == NameAfterDriver )
+    {
+        std::string message = _("Current mode is already active");
+        MessageDialog msg (message,
+                           false,
+                           Gtk::MESSAGE_WARNING,
+                           Gtk::BUTTONS_OK,
+                           true);
+        
+        msg.set_position (Gtk::WIN_POS_MOUSE);
+        
+        msg.set_keep_above(true);
+        msg.run();
+            
+        return;
+    }
+    
+    std::string message = _("Do you realy want to switch tracks naming?");
+    MessageDialog msg (message,
+                       false,
+                       Gtk::MESSAGE_WARNING,
+                       Gtk::BUTTONS_YES_NO,
+                       true);
+    
+    msg.set_position (Gtk::WIN_POS_MOUSE);
+    msg.set_keep_above(true);
+    
+    switch (msg.run()) {
+        case RESPONSE_YES:
+            Config->set_tracks_auto_naming(NameAfterDriver);
+    }
+}
+
+void
+TracksControlPanel::on_reset_tracks_name_to_default(WavesButton*)
+{
+    if( Config->get_tracks_auto_naming() == UseDefaultNames )
+    {
+        std::string message = _("Current mode is already active");
+        MessageDialog msg (message,
+                           false,
+                           Gtk::MESSAGE_WARNING,
+                           Gtk::BUTTONS_OK,
+                           true);
+        
+        msg.set_position (Gtk::WIN_POS_MOUSE);
+        
+        msg.set_keep_above(true);
+        msg.run();
+        
+        return;
+    }
+    
+    std::string message = _("Do you realy want to switch tracks naming?");
+    MessageDialog msg (message,
+                       false,
+                       Gtk::MESSAGE_WARNING,
+                       Gtk::BUTTONS_YES_NO,
+                       true);
+    
+    msg.set_position (Gtk::WIN_POS_MOUSE);
+    msg.set_keep_above(true);
+    
+    switch (msg.run()) {
+        case RESPONSE_YES:
+            Config->set_tracks_auto_naming(UseDefaultNames);
+    }
 }
 
 void
@@ -762,7 +836,7 @@ TracksControlPanel::on_device_list_update (bool current_device_disconnected)
     populate_device_combo();
     
     if (current_device_disconnected) {
-        std::string message = _("Audio Device Has Been Removed");
+        std::string message = _("Audio device has been removed");
         
         MessageDialog msg (message,
                            false,
@@ -771,6 +845,7 @@ TracksControlPanel::on_device_list_update (bool current_device_disconnected)
                            true);
         
         msg.set_position (Gtk::WIN_POS_MOUSE);
+        msg.set_keep_above(true);
         msg.run();
         
         return;

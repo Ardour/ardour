@@ -207,12 +207,12 @@
           </HBox>
         </ScrolledWindow>
         <Button
-          id="name_track_after_driver_button"
+          id="name_tracks_after_driver_button"
           text="NAME TRACK\nAFTER DRIVER"
           style="generic_button"
           x="16" y="369" width="136" height="39"/>
         <Button
-          id="reset_track_names_button"
+          id="reset_tracks_name_to_default_button"
           text="RESET TRACK\nNAMES TO DEFAULT"
           style="generic_button"
           x="153" y="369" width="136" height="39"/>

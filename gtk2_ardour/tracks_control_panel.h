@@ -63,10 +63,10 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
 	WavesButton& _apply_button;
 	WavesButton& _control_panel_button;
 	WavesButton& _no_button;
-	WavesButton& _name_track_after_driver_button;
-	WavesButton& _reset_track_names_button;
 	WavesButton& _yes_button;
     WavesButton& _browse_button;
+    WavesButton& _name_tracks_after_driver;
+    WavesButton& _reset_tracks_name_to_default;
 	Gtk::ComboBoxText& _engine_combo;
 	Gtk::ComboBoxText& _device_combo;
 	Gtk::ComboBoxText& _sample_rate_combo;
