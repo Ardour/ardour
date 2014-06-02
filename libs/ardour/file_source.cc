@@ -214,7 +214,7 @@ FileSource::move_to_trash (const string& trash_dir_name)
 
 	if (move_dependents_to_trash() != 0) {
 		/* try to back out */
-		rename (newpath.c_str(), _path.c_str());
+		::rename (newpath.c_str(), _path.c_str());
 		return -1;
 	}
 
@@ -581,3 +581,28 @@ FileSource::is_stub () const
 	return true;
 }
 		
+int
+FileSource::rename (const string& newpath)
+{
+	Glib::Threads::Mutex::Lock lm (_lock);
+	string oldpath = _path;
+
+	// Test whether newpath exists, if yes notify the user but continue.
+	if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
+		error << string_compose (_("Programming error! %1 tried to rename a file over another file! It's safe to continue working, but please report this to the developers."), PROGRAM_NAME) << endmsg;
+		return -1;
+	}
+
+	if (Glib::file_test (oldpath.c_str(), Glib::FILE_TEST_EXISTS)) { 
+		/* rename only needed if file exists on disk */
+		if (::rename (oldpath.c_str(), newpath.c_str()) != 0) {
+			error << string_compose (_("cannot rename file %1 to %2 (%3)"), oldpath, newpath, strerror(errno)) << endmsg;
+			return -1;
+		}
+	}
+
+	_name = Glib::path_get_basename (newpath);
+	_path = newpath;
+
+	return 0;
+}

@@ -1234,9 +1234,9 @@ MidiDiskstream::steal_write_source_name ()
 	 */
 
 	try {
-		string new_name = _session.new_midi_source_name (name());
+		string new_path = _session.new_midi_source_path (name());
 		
-		if (_write_source->rename (new_name)) {
+		if (_write_source->rename (new_path)) {
 			return string();
 		}
 	} catch (...) {

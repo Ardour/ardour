@@ -1262,7 +1262,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool add_channel_suffix);
 
 	int finish_bringing_in_material (boost::shared_ptr<ARDOUR::Region> region, uint32_t, uint32_t,  framepos_t& pos, Editing::ImportMode mode,
-				      boost::shared_ptr<ARDOUR::Track>& existing_track);
+					 boost::shared_ptr<ARDOUR::Track>& existing_track, const std::string& new_track_name);
 
 	boost::shared_ptr<ARDOUR::AudioTrack> get_nth_selected_audio_track (int nth) const;
 	boost::shared_ptr<ARDOUR::MidiTrack> get_nth_selected_midi_track (int nth) const;

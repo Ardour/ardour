@@ -1830,41 +1830,6 @@ Session::get_sources_as_xml ()
 	return *node;
 }
 
-string
-Session::path_from_region_name (DataType type, string name, string identifier)
-{
-	char buf[PATH_MAX+1];
-	uint32_t n;
-	SessionDirectory sdir(get_best_session_directory_for_new_source());
-	std::string source_dir = ((type == DataType::AUDIO)
-		? sdir.sound_path() : sdir.midi_path());
-
-        string ext = native_header_format_extension (config.get_native_file_header_format(), type);
-
-	for (n = 0; n < 999999; ++n) {
-		if (identifier.length()) {
-			snprintf (buf, sizeof(buf), "%s%s%" PRIu32 "%s", name.c_str(),
-				  identifier.c_str(), n, ext.c_str());
-		} else {
-			snprintf (buf, sizeof(buf), "%s-%" PRIu32 "%s", name.c_str(),
-					n, ext.c_str());
-		}
-
-		std::string source_path = Glib::build_filename (source_dir, buf);
-
-		if (!Glib::file_test (source_path, Glib::FILE_TEST_EXISTS)) {
-			return source_path;
-		}
-	}
-
-	error << string_compose (_("cannot create new file from region name \"%1\" with ident = \"%2\": too many existing files with similar names"),
-				 name, identifier)
-	      << endmsg;
-
-	return "";
-}
-
-
 int
 Session::load_sources (const XMLNode& node)
 {
@@ -2053,7 +2018,7 @@ Session::refresh_disk_space ()
 }
 
 string
-Session::get_best_session_directory_for_new_source ()
+Session::get_best_session_directory_for_new_audio ()
 {
 	vector<space_and_path>::iterator i;
 	string result = _session_dir->root_path();
