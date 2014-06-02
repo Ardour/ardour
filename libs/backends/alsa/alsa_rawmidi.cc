@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2010 Devin Anderson
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -335,6 +336,11 @@ retry:
 
 AlsaRawMidiIn::AlsaRawMidiIn (const char *device)
 		: AlsaRawMidiIO (device, true)
+		, _event(0,0)
+		, _unbuffered_bytes(0)
+		, _total_bytes(0)
+		, _expected_bytes(0)
+		, _status_byte(0)
 {
 }
 
@@ -450,23 +456,136 @@ AlsaRawMidiIn::main_process_thread ()
 			continue;
 		}
 
-		if (!(data[0] & 0x80)) {
-			_DEBUGPRINT("AlsaRawMidiIn: invalid midi message.\n");
-		}
-		// TODO parse MIDI-events? break on status-bytes
-		{
-			ssize_t size = err;
-			const uint32_t  buf_size = sizeof(MidiEventHeader) + size;
-			if (_rb->write_space() < buf_size) {
-				_DEBUGPRINT("AlsaRawMidiIn: ring buffer overflow\n");
-				continue;
-			}
-			struct MidiEventHeader h (time, size);
-			_rb->write ((uint8_t*) &h, sizeof(MidiEventHeader));
-			_rb->write (data, size);
-		}
+#if 0
+		queue_event (time, data, err);
+#else
+		parse_events (time, data, err);
+#endif
 	}
 
 	_DEBUGPRINT("AlsaRawMidiIn: MIDI IN THREAD STOPPED\n");
 	return 0;
+}
+
+int
+AlsaRawMidiIn::queue_event (const uint64_t time, const uint8_t *data, const size_t size) {
+	const uint32_t  buf_size = sizeof(MidiEventHeader) + size;
+	_event._pending = false;
+	if (_rb->write_space() < buf_size) {
+		_DEBUGPRINT("AlsaRawMidiIn: ring buffer overflow\n");
+		return -1;
+	}
+	struct MidiEventHeader h (time, size);
+	_rb->write ((uint8_t*) &h, sizeof(MidiEventHeader));
+	_rb->write (data, size);
+	return 0;
+}
+
+void
+AlsaRawMidiIn::parse_events (const uint64_t time, const uint8_t *data, const size_t size) {
+	if (_event._pending) {
+		if (queue_event (_event._time, _parser_buffer, _event._size)) {
+			return;
+		}
+	}
+	for (size_t i = 0; i < size; ++i) {
+		if (process_byte(time, data[i])) {
+			if (queue_event (_event._time, _parser_buffer, _event._size)) {
+				return;
+			}
+		}
+	}
+}
+
+// based on JackMidiRawInputWriteQueue by Devin Anderson //
+bool
+AlsaRawMidiIn::process_byte(const uint64_t time, const uint8_t byte)
+{
+	if (byte >= 0xf8) {
+		// Realtime
+		if (byte == 0xfd) {
+			return false;
+		}
+		_parser_buffer[0] = byte;
+		prepare_byte_event(time, byte);
+		return true;
+	}
+	if (byte == 0xf7) {
+		// Sysex end
+		if (_status_byte == 0xf0) {
+			record_byte(byte);
+			return prepare_buffered_event(time);
+		}
+    _total_bytes = 0;
+    _unbuffered_bytes = 0;
+		_expected_bytes = 0;
+		_status_byte = 0;
+		return false;
+	}
+	if (byte >= 0x80) {
+		// Non-realtime status byte
+		if (_total_bytes) {
+			_total_bytes = 0;
+			_unbuffered_bytes = 0;
+		}
+		_status_byte = byte;
+		switch (byte & 0xf0) {
+			case 0x80:
+			case 0x90:
+			case 0xa0:
+			case 0xb0:
+			case 0xe0:
+				// Note On, Note Off, Aftertouch, Control Change, Pitch Wheel
+				_expected_bytes = 3;
+				break;
+			case 0xc0:
+			case 0xd0:
+				// Program Change, Channel Pressure
+				_expected_bytes = 2;
+				break;
+			case 0xf0:
+				switch (byte) {
+					case 0xf0:
+						// Sysex
+						_expected_bytes = 0;
+						break;
+					case 0xf1:
+					case 0xf3:
+						// MTC Quarter Frame, Song Select
+						_expected_bytes = 2;
+						break;
+					case 0xf2:
+						// Song Position
+						_expected_bytes = 3;
+						break;
+					case 0xf4:
+					case 0xf5:
+						// Undefined
+						_expected_bytes = 0;
+						_status_byte = 0;
+						return false;
+					case 0xf6:
+						// Tune Request
+						prepare_byte_event(time, byte);
+						_expected_bytes = 0;
+						_status_byte = 0;
+						return true;
+				}
+		}
+		record_byte(byte);
+		return false;
+	}
+	// Data byte
+	if (! _status_byte) {
+		// Data bytes without a status will be discarded.
+		_total_bytes++;
+		_unbuffered_bytes++;
+		return false;
+	}
+	if (! _total_bytes) {
+		// Apply running status.
+		record_byte(_status_byte);
+	}
+	record_byte(byte);
+	return (_total_bytes == _expected_bytes) ? prepare_buffered_event(time) : false;
 }
