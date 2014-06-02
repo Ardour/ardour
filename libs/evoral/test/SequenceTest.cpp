@@ -23,7 +23,7 @@ SequenceTest::preserveEventOrderingTest ()
 	seq->start_write();
 
 	for (Notes::const_iterator i = test_notes.begin(); i != test_notes.end(); ++i) {
-		uint8_t buffer[2];
+		uint8_t buffer[3];
 		Event<Time>* event = new Event<Time>(
 				DummyTypeMap::CONTROL, (*i)->on_event().time(), 3, buffer, true
 		);

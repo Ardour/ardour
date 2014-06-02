@@ -102,7 +102,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "help", 0, 0, 'h' },
 		{ "no-announcements", 0, 0, 'a' },
 		{ "bindings", 0, 0, 'b' },
-		{ "disable-plugins", 1, 0, 'd' },
+		{ "disable-plugins", 0, 0, 'd' },
 		{ "debug", 1, 0, 'D' },
 		{ "no-splash", 0, 0, 'n' },
 		{ "menus", 1, 0, 'm' },

@@ -35,6 +35,7 @@
 #include <glibmm/fileutils.h>
 
 #include "evoral/Control.hpp"
+#include "evoral/evoral/SMF.hpp"
 
 #include "ardour/event_type_map.h"
 #include "ardour/midi_model.h"
@@ -49,6 +50,7 @@
 using namespace ARDOUR;
 using namespace Glib;
 using namespace PBD;
+using namespace Evoral;
 
 /** Constructor used for new internal-to-session files.  File cannot exist. */
 SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
@@ -73,6 +75,39 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 	/* file is not opened until write */
 
 	if (flags & Writable) {
+		return;
+	}
+
+	if (open (_path)) {
+		throw failed_constructor ();
+	}
+
+	_open = true;
+}
+
+/** Constructor used for external-to-session files.  File must exist. */
+SMFSource::SMFSource (Session& s, const string& path)
+	: Source(s, DataType::MIDI, path, Source::Flag (0))
+	, MidiSource(s, path, Source::Flag (0))
+	, FileSource(s, DataType::MIDI, path, string(), Source::Flag (0))
+	, Evoral::SMF()
+	, _last_ev_time_beats(0.0)
+	, _last_ev_time_frames(0)
+	, _smf_last_read_end (0)
+	, _smf_last_read_time (0)
+{
+	/* note that origin remains empty */
+
+	if (init (_path, false)) {
+		throw failed_constructor ();
+	}
+ 
+        assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
+
+	/* file is not opened until write */
+
+	if (_flags & Writable) {
 		return;
 	}
 
@@ -462,6 +497,15 @@ SMFSource::mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::Musical
 	/* data in the file now, not removable */
 
 	mark_nonremovable ();
+}
+
+bool
+SMFSource::valid_midi_file (const string& file)
+{
+	if (safe_midi_file_extension (file) ) {
+		return (SMF::test (file) );
+	}
+	return false;
 }
 
 bool

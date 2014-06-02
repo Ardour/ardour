@@ -85,6 +85,9 @@ public:
 	void existence_check ();
 	virtual void prevent_deletion ();
 
+	void existence_check ();
+	virtual void prevent_deletion ();
+
 protected:
 	FileSource (Session& session, DataType type,
 	            const std::string& path,

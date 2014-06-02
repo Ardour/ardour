@@ -339,7 +339,7 @@ This mode provides many different operations on both regions and control points,
 @trans|Transport/ToggleAutoPlay|5|toggle auto play
 @trans|Transport/ToggleAutoReturn|6|toggle auto return
 @trans|Transport/ToggleClick|7|toggle click (metronome)
-@ranges|Editor/set-tempo-from-region|9|set tempo (1 bar) from region(s)
+@ranges|Region/set-tempo-from-region|9|set tempo (1 bar) from region(s)
 @ranges|Editor/set-tempo-from-edit-range|0|set tempo (1 bar) from edit range
 
 ; mouse stuff

@@ -32,7 +32,7 @@ using PBD::closedir;
 #include <errno.h>
 #include <string.h>
 
-#include <glib/gstdio.h>
+#include <glib.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/error.h"
@@ -122,7 +122,7 @@ PBD::remove_directory (const std::string& dir) {
 		}
 
 		if (::g_unlink (fullpath.c_str())) {
-			error << string_compose (_("cannot remove file %1 (%2)"), fullpath, strerror (errno)) << endmsg;
+ 			error << string_compose (_("cannot remove file %1 (%2)"), fullpath, strerror (errno)) << endmsg;
 		}
 	}
 	if (::g_rmdir(dir.c_str())) {

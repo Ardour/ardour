@@ -36,9 +36,11 @@ template<typename T> class MidiRingBuffer;
 /** Standard Midi File (Type 0) Source */
 class LIBARDOUR_API SMFSource : public MidiSource, public FileSource, public Evoral::SMF {
 public:
+	/** Constructor for new internal-to-session files */
+	SMFSource (Session& session, const std::string& path, Source::Flag flags);
+
 	/** Constructor for existing external-to-session files */
-	SMFSource (Session& session, const std::string& path,
-			Source::Flag flags = Source::Flag(0));
+	SMFSource (Session& session, const std::string& path);
 
 	/** Constructor for existing in-session files */
 	SMFSource (Session& session, const XMLNode&, bool must_exist = false);
@@ -75,6 +77,9 @@ public:
 	void ensure_disk_file ();
 
 	static bool safe_midi_file_extension (const std::string& path);
+	static bool valid_midi_file (const std::string& path);
+
+	void prevent_deletion ();
 
 	void prevent_deletion ();
 

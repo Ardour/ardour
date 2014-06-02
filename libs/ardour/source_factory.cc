@@ -272,7 +272,7 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 
 	} else if (type == DataType::MIDI) {
 
-		boost::shared_ptr<SMFSource> src (new SMFSource (s, path, SMFSource::Flag(0)));
+		boost::shared_ptr<SMFSource> src (new SMFSource (s, path));
 		src->load_model (true, true);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 		// boost_debug_shared_ptr_mark_interesting (src, "Source");
