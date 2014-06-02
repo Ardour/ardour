@@ -26,6 +26,9 @@
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/adjustment.h>
 #include <gdkmm.h>
+#include <gtkmm2ext/binding_proxy.h>
+
+#include <boost/shared_ptr.hpp>
 
 #include "gtkmm2ext/visibility.h"
 
@@ -45,6 +48,8 @@ class LIBGTKMM2EXT_API Fader : public Gtk::DrawingArea
 
 	virtual ~Fader ();
 
+	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { binding_proxy.set_controllable (c); }
+
 	void set_default_value (float);
 
   protected:
@@ -61,11 +66,14 @@ class LIBGTKMM2EXT_API Fader : public Gtk::DrawingArea
 	bool on_enter_notify_event (GdkEventCrossing* ev);
 	bool on_leave_notify_event (GdkEventCrossing* ev);
 
+  protected:
+	Gtk::Adjustment& adjustment;
+	BindingProxy binding_proxy;
+
   private:
     Glib::RefPtr<Gdk::Pixbuf> _handle_pixbuf;
     Glib::RefPtr<Gdk::Pixbuf> _active_handle_pixbuf;
     Glib::RefPtr<Gdk::Pixbuf> _face_pixbuf;
-	Gtk::Adjustment& adjustment;
 	int _min_pos_x;
 	int _min_pos_y;
 	int _max_pos_x;

@@ -78,12 +78,11 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	next_release_selects = false;
 	_width = Wide;
 
-	if (horizontal) {
-		gain_slider = manage (new HSliderController (&gain_adjustment, fader_length, fader_girth, false));
-	} else {
-		gain_slider = manage (new VSliderController (&gain_adjustment, fader_length, fader_girth, false));
-        gain_slider->set_image(::get_icon("fader_handle"));
-	}
+	gain_slider = manage (new Fader (gain_adjustment, 
+									 "slider_controller_fader.png",
+									 "slider_controller_fader_handle.png",
+									 "slider_controller_fader_handle.png",
+									 10, 187, 10, 0));
 
 	level_meter = new LevelMeterHBox(_session);
 
@@ -555,7 +554,7 @@ void
 GainMeterBase::update_gain_sensitive ()
 {
 	bool x = !(_amp->gain_control()->alist()->automation_state() & Play);
-	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (x);
+	gain_slider->set_sensitive (x);
 }
 
 static MeterPoint

@@ -42,7 +42,7 @@
 
 #include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/focus_entry.h"
-#include "gtkmm2ext/slider_controller.h"
+#include "gtkmm2ext/fader.h"
 
 #include "enums.h"
 #include "level_meter.h"
@@ -90,7 +90,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	boost::shared_ptr<PBD::Controllable> get_controllable();
 
 	LevelMeterHBox& get_level_meter() const { return *level_meter; }
-	Gtkmm2ext::SliderController& get_gain_slider() const { return *gain_slider; }
+	Gtkmm2ext::Fader& get_gain_slider() const { return *gain_slider; }
 
 	/** Emitted in the GUI thread when a button is pressed over the level meter;
 	 *  return true if the event is handled.
@@ -111,7 +111,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	bool ignore_toggle;
 	bool next_release_selects;
 
-	Gtkmm2ext::SliderController *gain_slider;
+	Gtkmm2ext::Fader *gain_slider;
 	Gtk::Adjustment              gain_adjustment;
 	Gtkmm2ext::FocusEntry        gain_display;
 	Gtk::Button                  peak_display;
