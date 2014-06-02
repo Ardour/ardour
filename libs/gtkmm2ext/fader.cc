@@ -43,11 +43,26 @@ using namespace std;
 
 static void get_closest_point_on_line(double xa, double ya, double xb, double yb, double xp, double yp, double& xl, double& yl )
 {
-	// Finding the vector from A to B
-	// This step can be combined with the next
-	double a_to_b_x = xb - xa;
-	double a_to_b_y = yb - yb;
-                                        
+	// Storing vector A->B
+    double a_to_b_x = xb - xa;
+	double a_to_b_y = yb - ya;
+    
+	// Storing vector A->P
+    double a_to_p_x = xp - xa;
+	double a_to_p_y = yp - ya;
+    
+
+    // Basically finding the squared magnitude
+    // of a_to_b
+    double atb2 = a_to_b_x * a_to_b_x + a_to_b_y * a_to_b_y;
+ 
+    // The dot product of a_to_p and a_to_b
+    double atp_dot_atb = a_to_p_x * a_to_b_x + a_to_p_y * a_to_b_y;
+    
+    // The normalized "distance" from a to
+    // your closest point
+    double t = atp_dot_atb / atb2;
+    
     // The vector perpendicular to a_to_b;
     // This step can also be combined with the next
 	double perpendicular_x = -a_to_b_y;
@@ -59,8 +74,10 @@ static void get_closest_point_on_line(double xa, double ya, double xb, double yb
 	double xq = xp + perpendicular_x;
 	double yq = yp + perpendicular_y;
 
-	xl = ((xa*yb - ya*xb)*(xp - xq) - (xa-xb)*(xp*yq - yp*xq)) / ((xa - xb)*(yp-yq) - (ya - yb)*(yp-yq));
-	yl = ((xa*yb - ya*xb)*(yp - yq) - (ya-yb)*(xp*yq - yp*xq)) / ((xa - xb)*(yp-yq) - (ya - yb)*(yp-yq));
+    // Add the distance to A, moving
+    // towards B
+    xl = xa + a_to_b_x * t;
+    yl = ya + a_to_b_y * t;
 }
 
 Fader::Fader (Gtk::Adjustment& adj,
@@ -372,7 +389,7 @@ Fader::on_motion_notify_event (GdkEventMotion* ev)
 		if (((_min_pos_x != _max_pos_x) && 
 			 ((ev_pos_x < _min_pos_x) && (ev_pos_x < _max_pos_x) ||
 			  (ev_pos_x > _max_pos_x) && (ev_pos_x > _min_pos_x))) ||
-			 ((_min_pos_x != _max_pos_x) && 
+			 ((_min_pos_y != _max_pos_y) &&
 			  ((ev_pos_y < _min_pos_x) && (ev_pos_y < _max_pos_y) ||
 			   (ev_pos_y > _max_pos_x) && (ev_pos_y > _min_pos_y)))) {
 			return true;
