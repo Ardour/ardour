@@ -125,7 +125,7 @@
             <HBox box.pack="end" spacing ="1">
               <Adjustment id="temporal_zoom_adjustment"
                           minvalue="1"
-                          maxvalue="536870912"
+                          maxvalue="23698286"
                           initialvalue="20"
                           step="20"
                           pageincrement="20"/>
@@ -147,9 +147,9 @@
                      facesource="horizontal_zoom_fader_face.png"
                      handlesource="zoom_fader_handle.png"
                      activehandlesource="zoom_fader_handle_active.png"
-                     minposx="20"
+                     minposx="66"
                      minposy="13"
-                     maxposx="66"
+                     maxposx="20"
                      maxposy="13"/>
               <iconbutton id="tool_waveform_zoom_button"
                           tooltip="Waveform Zoom"
