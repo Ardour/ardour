@@ -1264,6 +1264,12 @@ DummyMidiPort::DummyMidiPort (DummyAudioBackend &b, const std::string& name, Por
 
 DummyMidiPort::~DummyMidiPort () { }
 
+struct MidiEventSorter {
+	bool operator() (const boost::shared_ptr<DummyMidiEvent>& a, const boost::shared_ptr<DummyMidiEvent>& b) {
+		return *a < *b;
+	}
+};
+
 void* DummyMidiPort::get_buffer (pframes_t /* nframes */)
 {
 	if (is_input ()) {
@@ -1276,7 +1282,7 @@ void* DummyMidiPort::get_buffer (pframes_t /* nframes */)
 				_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (**it)));
 			}
 		}
-		std::sort (_buffer.begin (), _buffer.end ());
+		std::sort (_buffer.begin (), _buffer.end (), MidiEventSorter());
 	} else if (is_output () && is_physical () && is_terminal()) {
 		_buffer.clear ();
 	}
