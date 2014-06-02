@@ -143,6 +143,7 @@ private:
 		}
 	} _event;
 
+	bool    _first_time;
 	size_t  _unbuffered_bytes;
 	size_t  _total_bytes;
 	size_t  _expected_bytes;

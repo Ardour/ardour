@@ -337,6 +337,7 @@ retry:
 AlsaRawMidiIn::AlsaRawMidiIn (const char *device)
 		: AlsaRawMidiIO (device, true)
 		, _event(0,0)
+		, _first_time(true)
 		, _unbuffered_bytes(0)
 		, _total_bytes(0)
 		, _expected_bytes(0)
@@ -471,6 +472,9 @@ int
 AlsaRawMidiIn::queue_event (const uint64_t time, const uint8_t *data, const size_t size) {
 	const uint32_t  buf_size = sizeof(MidiEventHeader) + size;
 	_event._pending = false;
+	if (size == 0) {
+		return -1;
+	}
 	if (_rb->write_space() < buf_size) {
 		_DEBUGPRINT("AlsaRawMidiIn: ring buffer overflow\n");
 		return -1;
@@ -489,6 +493,10 @@ AlsaRawMidiIn::parse_events (const uint64_t time, const uint8_t *data, const siz
 		}
 	}
 	for (size_t i = 0; i < size; ++i) {
+		if (_first_time && !(data[i] & 0x80)) {
+			continue;
+		}
+		_first_time = false; /// TODO optimize e.g. use fn pointer to different parse_events()
 		if (process_byte(time, data[i])) {
 			if (queue_event (_event._time, _parser_buffer, _event._size)) {
 				return;
