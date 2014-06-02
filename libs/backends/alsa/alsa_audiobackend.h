@@ -34,6 +34,7 @@
 #include "ardour/audio_backend.h"
 
 #include "zita-alsa-pcmi.h"
+#include "alsa_rawmidi.h"
 
 namespace ARDOUR {
 
@@ -282,8 +283,10 @@ class AlsaAudioBackend : public AudioBackend {
 		bool  _running;
 		bool  _freewheeling;
 
+		void enumerate_midi_devices (std::vector<std::string> &) const;
 		std::string _capture_device;
 		std::string _playback_device;
+		std::string _midi_device;
 
 		float  _samplerate;
 		size_t _samples_per_period;
@@ -293,9 +296,6 @@ class AlsaAudioBackend : public AudioBackend {
 
 		uint32_t _n_inputs;
 		uint32_t _n_outputs;
-
-		uint32_t _n_midi_inputs;
-		uint32_t _n_midi_outputs;
 
 		uint32_t _systemic_input_latency;
 		uint32_t _systemic_output_latency;
@@ -319,13 +319,18 @@ class AlsaAudioBackend : public AudioBackend {
 
 		/* port engine */
 		PortHandle add_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
-		int register_system_ports ();
+		int register_system_audio_ports ();
+		int register_system_midi_ports ();
 		void unregister_system_ports ();
 
 		std::vector<AlsaPort *> _ports;
-		std::vector<AlsaPort*> _system_inputs;
-		std::vector<AlsaPort*> _system_outputs;
+		std::vector<AlsaPort *> _system_inputs;
+		std::vector<AlsaPort *> _system_outputs;
+		std::vector<AlsaPort *> _system_midi_in;
+		std::vector<AlsaPort *> _system_midi_out;
 
+		std::vector<AlsaRawMidiOut *> _rmidi_out;
+		std::vector<AlsaRawMidiIn  *> _rmidi_in;
 
 		struct PortConnectData {
 			std::string a;
