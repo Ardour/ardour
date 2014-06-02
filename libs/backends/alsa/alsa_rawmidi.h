@@ -93,6 +93,61 @@ public:
 	void* main_process_thread ();
 
 	size_t recv_event (pframes_t &, uint8_t *, size_t &);
+
+private:
+	int queue_event (const uint64_t, const uint8_t *, const size_t);
+	void parse_events (const uint64_t, const uint8_t *, const size_t);
+	bool process_byte (const uint64_t, const uint8_t);
+
+	void record_byte(uint8_t byte) {
+		if (_total_bytes < sizeof(_parser_buffer)) {
+			_parser_buffer[_total_bytes] = byte;
+		} else {
+			++_unbuffered_bytes;
+		}
+		++_total_bytes;
+	}
+
+	void prepare_byte_event(const uint64_t time, const uint8_t byte) {
+		_parser_buffer[0] = byte;
+		_event.prepare(time, 1);
+	}
+
+	bool prepare_buffered_event(const uint64_t time) {
+		const bool result = !_unbuffered_bytes;
+		if (result) {
+			_event.prepare(time, _total_bytes);
+		}
+		_total_bytes = 0;
+		_unbuffered_bytes = 0;
+		if (_status_byte >= 0xf0) {
+			_expected_bytes = 0;
+			_status_byte = 0;
+		}
+		return result;
+	}
+
+	struct ParserEvent {
+		uint64_t _time;
+		size_t _size;
+		bool _pending;
+		ParserEvent (const uint64_t time, const size_t size)
+			: _time(time)
+			, _size(size)
+			, _pending(false) {}
+
+		void prepare(const uint64_t time, const size_t size) {
+			_time = time;
+			_size = size;
+			_pending = true;
+		}
+	} _event;
+
+	size_t  _unbuffered_bytes;
+	size_t  _total_bytes;
+	size_t  _expected_bytes;
+	uint8_t _status_byte;
+	uint8_t _parser_buffer[1024];
 };
 
 } // namespace
