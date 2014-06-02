@@ -28,8 +28,9 @@ def configure(conf):
     if Options.options.build_dummy: 
         backends += [ 'dummy' ]
 
-    if re.search ("linux", sys.platform) != None:
-        backends += [ 'alsa' ]
+    if Options.options.build_alsabackend:
+        if re.search ("linux", sys.platform) != None:
+            backends += [ 'alsa' ]
 
     for i in backends:
         sub_config_and_use(conf, i)
@@ -40,11 +41,11 @@ def build(bld):
     if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc':
         backends += [ 'wavesaudio' ]
 
-    if bld.is_defined('HAVE_DUMMY'):
+    if bld.env['BUILD_DUMMYBACKEND']:
         backends += [ 'dummy' ]
 
     if re.search ("linux", sys.platform) != None:
-        if bld.is_defined('HAVE_ALSA'):
+        if bld.env['BUILD_ALSABACKEND'] and bld.is_defined('HAVE_ALSA'):
             backends += [ 'alsa' ]
 
     for i in backends:

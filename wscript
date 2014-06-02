@@ -410,6 +410,8 @@ def options(opt):
                     help='Architecture-specific compiler flags')
     opt.add_option('--with-dummy', action='store_true', default=False, dest='build_dummy',
                    help='Build the dummy backend (no audio/MIDI I/O, useful for profiling)')
+    opt.add_option('--with-alsabackend', action='store_true', default=False, dest='build_alsabackend',
+                   help='Build the ALSA backend')
     opt.add_option('--backtrace', action='store_true', default=True, dest='backtrace',
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
@@ -740,6 +742,10 @@ def configure(conf):
         conf.env['DEBUG_DENORMAL_EXCEPTION'] = True
     if opts.build_tests:
         autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=True)
+    if opts.build_alsabackend:
+        conf.env['BUILD_ALSABACKEND'] = True
+    if opts.build_dummy:
+        conf.env['BUILD_DUMMYBACKEND'] = True
 
     set_compiler_flags (conf, Options.options)
 
@@ -778,6 +784,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Use External Libraries', conf.is_defined('USE_EXTERNAL_LIBS'))
     write_config_text('Library exports hidden', conf.is_defined('EXPORT_VISIBILITY_HIDDEN'))
 
+    write_config_text('ALSA Backend',          opts.build_alsabackend)
     write_config_text('Architecture flags',    opts.arch)
     write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))
     write_config_text('AudioUnits',            conf.is_defined('AUDIOUNIT_SUPPORT'))
