@@ -81,10 +81,12 @@ AlsaAudioBackend::enumerate_devices () const
 {
 	std::vector<AudioBackend::DeviceStatus> s;
 	int cardnum = -1;
+	int device = -1;
 	snd_ctl_card_info_t *info;
 	snd_ctl_card_info_alloca (&info);
+	snd_pcm_info_t *pcminfo;
+	snd_pcm_info_alloca (&pcminfo);
 
-	// TODO re-use code from libs/backends/jack/jack_utils.cc
 	while (snd_card_next (&cardnum) >= 0 && cardnum >= 0) {
 		snd_ctl_t *handle;
 
@@ -92,12 +94,32 @@ AlsaAudioBackend::enumerate_devices () const
 		devname += PBD::to_string (cardnum, std::dec);
 
 		if (snd_ctl_open (&handle, devname.c_str(), 0) >= 0 && snd_ctl_card_info (handle, info) >= 0) {
-			//string card_name = snd_ctl_card_info_get_name (info);
-			int device = -1;
-			if (snd_ctl_pcm_next_device (handle, &device) >= 0 && device >= 0) {
-				s.push_back (DeviceStatus (devname, true));
+			if (snd_ctl_card_info (handle, info) < 0) {
+				continue;
 			}
-			snd_ctl_close(handle);
+
+			std::string card_name = snd_ctl_card_info_get_name (info);
+			devname = "hw:";
+			devname += snd_ctl_card_info_get_id (info);
+
+			while (snd_ctl_pcm_next_device (handle, &device) >= 0 && device >= 0) {
+				snd_pcm_info_set_device (pcminfo, device);
+				snd_pcm_info_set_subdevice (pcminfo, 0);
+				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_CAPTURE);
+				if (snd_ctl_pcm_info (handle, pcminfo) < 0) {
+					continue;
+				}
+				snd_pcm_info_set_device (pcminfo, device);
+				snd_pcm_info_set_subdevice (pcminfo, 0);
+				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_PLAYBACK);
+				if (snd_ctl_pcm_info (handle, pcminfo) < 0) {
+					continue;
+				}
+				devname += ',';
+				devname += PBD::to_string (device, std::dec);
+				s.push_back (DeviceStatus (devname + " " + card_name, true));
+			}
+			snd_ctl_close (handle);
 		}
 	}
 	return s;
@@ -276,18 +298,82 @@ void
 AlsaAudioBackend::enumerate_midi_devices (std::vector<std::string> &m) const
 {
 	int cardnum = -1;
+	snd_ctl_card_info_t *cinfo;
+	snd_ctl_card_info_alloca (&cinfo);
 	while (snd_card_next (&cardnum) >= 0 && cardnum >= 0) {
 		snd_ctl_t *handle;
 		std::string devname = "hw:";
 		devname += PBD::to_string (cardnum, std::dec);
-
-		if (snd_ctl_open (&handle, devname.c_str(), 0) >= 0) {
+		if (snd_ctl_open (&handle, devname.c_str (), 0) >= 0 && snd_ctl_card_info (handle, cinfo) >= 0) {
 			int device = -1;
-			// TODO iterate over sub-devices
-			if (snd_ctl_rawmidi_next_device (handle, &device) >= 0 && device >= 0) {
-				m.push_back (devname);
+			while (snd_ctl_rawmidi_next_device (handle, &device) >= 0 && device >= 0) {
+				snd_rawmidi_info_t *info;
+				snd_rawmidi_info_alloca (&info);
+				snd_rawmidi_info_set_device (info, device);
+
+				int subs_in, subs_out;
+
+				snd_rawmidi_info_set_stream (info, SND_RAWMIDI_STREAM_INPUT);
+				if (snd_ctl_rawmidi_info (handle, info) >= 0) {
+					subs_in = snd_rawmidi_info_get_subdevices_count (info);
+				} else {
+					subs_in = 0;
+				}
+
+				snd_rawmidi_info_set_stream (info, SND_RAWMIDI_STREAM_OUTPUT);
+				if (snd_ctl_rawmidi_info (handle, info) >= 0) {
+					subs_out = snd_rawmidi_info_get_subdevices_count (info);
+				} else {
+					subs_out = 0;
+				}
+
+				const int subs = subs_in > subs_out ? subs_in : subs_out;
+				if (!subs) {
+					continue;
+				}
+
+				for (int sub = 0; sub < subs; ++sub) {
+					snd_rawmidi_info_set_stream (info, sub < subs_in ?
+							SND_RAWMIDI_STREAM_INPUT :
+							SND_RAWMIDI_STREAM_OUTPUT);
+
+					snd_rawmidi_info_set_subdevice (info, sub);
+					if (snd_ctl_rawmidi_info (handle, info) < 0) {
+						continue;
+					}
+
+					const char *sub_name = snd_rawmidi_info_get_subdevice_name (info);
+					if (sub == 0 && sub_name[0] == '\0') {
+						devname = "hw:";
+						devname += snd_ctl_card_info_get_id (cinfo);
+						devname += ",";
+						devname += PBD::to_string (device, std::dec);
+						devname += " ";
+						devname += snd_rawmidi_info_get_name (info);
+						devname += " (";
+						if (sub < subs_in) devname += "I";
+						if (sub < subs_out) devname += "O";
+						devname += ")";
+						m.push_back (devname);
+						break;
+					} else {
+						devname = "hw:";
+						devname += snd_ctl_card_info_get_id (cinfo);
+						devname += ",";
+						devname += PBD::to_string (device, std::dec);
+						devname += ",";
+						devname += PBD::to_string (sub, std::dec);
+						devname += " ";
+						devname += sub_name;
+						devname += " (";
+						if (sub < subs_in) devname += "I";
+						if (sub < subs_out) devname += "O";
+						devname += ")";
+						m.push_back (devname);
+					}
+				}
 			}
-			snd_ctl_close(handle);
+			snd_ctl_close (handle);
 		}
 	}
 }
@@ -348,8 +434,10 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	assert(_rmidi_out.size() == 0);
 	assert(_pcmi == 0);
 
-  _pcmi = new Alsa_pcmi (_capture_device.c_str(), _playback_device.c_str(), 0, _samplerate, _samples_per_period, _periods_per_cycle, 0);
+	unsigned int pos = _capture_device.find(" ");
+	_pcmi = new Alsa_pcmi (_capture_device.substr(0, pos).c_str(), _playback_device.substr(0, pos).c_str(), 0, _samplerate, _samples_per_period, _periods_per_cycle, 0);
 	if (_pcmi->state ()) {
+		// TODO get detailed error from _pcmi
 		PBD::error << _("AlsaAudioBackend: failed to open device (see stderr for details).") << endmsg;
 		delete _pcmi; _pcmi = 0;
 		return -1;
@@ -780,7 +868,8 @@ AlsaAudioBackend::register_system_midi_ports()
 	else if (_midi_device == _("-All-")) {
 		enumerate_midi_devices(devices);
 	} else {
-		devices.push_back(_midi_device);
+		unsigned int pos = _midi_device.find(" ");
+		devices.push_back(_midi_device.substr(0, pos));
 	}
 
 	for (std::vector<std::string>::const_iterator i = devices.begin (); i != devices.end (); ++i) {
