@@ -46,13 +46,15 @@ using namespace Glib;
 #define dbg_msg(a) MessageDialog (a, PROGRAM_NAME).run();
 
 namespace {
-    // if pattern is not found out_str == in_str
     bool remove_pattern_from_string(const std::string& in_str, const std::string& pattern, std::string& out_str) {
-        if (in_str.find(pattern) != std::string::npos ) {
-            out_str = in_str.substr(pattern.size() );
+        
+        out_str.assign(in_str);
+        
+        size_t pos = in_str.find(pattern);
+        if ( pos != std::string::npos ) {
+            out_str.erase(pos, pattern.length() );
             return true;
         } else {
-            out_str = in_str;
             return false;
         }
     }
