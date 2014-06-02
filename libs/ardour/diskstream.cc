@@ -738,4 +738,3 @@ Diskstream::disengage_record_enable ()
 {
 	g_atomic_int_set (&_record_enabled, 0);
 }
-
