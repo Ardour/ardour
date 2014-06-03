@@ -649,7 +649,7 @@ def configure(conf):
                   okmsg = 'ok',
                   errmsg = 'too old\nPlease install boost version 1.39 or higher.')
 
-    if re.search ("linux", sys.platform) != None:
+    if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw':
         autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
 
     autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2', mandatory=True)
