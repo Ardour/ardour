@@ -1333,8 +1333,6 @@ Editor::scroll_tracks_up_line ()
 bool
 Editor::scroll_down_one_track ()
 {
-	double vertical_pos = vertical_adjustment.get_value () + vertical_adjustment.get_page_size() - 1.0; 
-
 	TrackViewList::reverse_iterator next = track_views.rend();
 	std::pair<TimeAxisView*,double> res;
 
@@ -1343,7 +1341,8 @@ Editor::scroll_down_one_track ()
 			continue;
 		}
 		
-		res = (*t)->covers_y_position (vertical_pos);
+		/* find the trackview at the bottom of the trackview group */
+		res = (*t)->covers_y_position (_visible_canvas_height);
 
 		if (res.first) {
 			break;
@@ -1376,7 +1375,8 @@ Editor::scroll_up_one_track ()
 			continue;
 		}
 
-		res = (*t)->covers_y_position(vertical_pos);
+		/* find the trackview at the top of the trackview group */
+		res = (*t)->covers_y_position (0);
 		
 		if (res.first) {
 			break;

@@ -207,13 +207,53 @@ Canvas::item_changed (Item* item, boost::optional<Rect> pre_change_bounding_box)
 Duple
 Canvas::window_to_canvas (Duple const & d) const
 {
+	/* Find the scroll group that covers d (a window coordinate). Scroll groups are only allowed
+	 * as children of the root group, so we just scan its first level
+	 * children and see what we can find.
+	 */
+
+	std::list<Item*> const& root_children (_root.items());
+	ScrollGroup* sg = 0;
+
+	for (std::list<Item*>::const_iterator i = root_children.begin(); i != root_children.end(); ++i) {
+		if (((sg = dynamic_cast<ScrollGroup*>(*i)) != 0) && sg->covers_window (d)) {
+			break;
+		}
+	}
+
+	if (sg) {
+		return d.translate (sg->scroll_offset());
+	}
+
+	/* fallback to global canvas offset ... it would be nice to remove this */
+
 	return d.translate (_scroll_offset);
 }
 
 Duple
 Canvas::canvas_to_window (Duple const & d, bool rounded) const
 {
-	Duple wd = d.translate (-_scroll_offset);
+	/* Find the scroll group that covers d (a canvas coordinate). Scroll groups are only allowed
+	 * as children of the root group, so we just scan its first level
+	 * children and see what we can find.
+	 */
+
+	std::list<Item*> const& root_children (_root.items());
+	ScrollGroup* sg = 0;
+	Duple wd;
+
+	for (std::list<Item*>::const_iterator i = root_children.begin(); i != root_children.end(); ++i) {
+		if (((sg = dynamic_cast<ScrollGroup*>(*i)) != 0) && sg->covers_canvas (d)) {
+			break;
+		}
+	}
+	
+
+	if (sg) {
+		wd = d.translate (-sg->scroll_offset());
+	} else {
+		wd = d.translate (-_scroll_offset);
+	}
 
 	/* Note that this intentionally almost always returns integer coordinates */
 
@@ -224,29 +264,6 @@ Canvas::canvas_to_window (Duple const & d, bool rounded) const
 
 	return wd;
 }
-
-Rect
-Canvas::window_to_canvas (Rect const & r) const
-{
-	return r.translate (Duple (_scroll_offset.x, _scroll_offset.y));
-}
-
-Rect
-Canvas::canvas_to_window (Rect const & r, bool rounded) const
-{
-	Rect wr = r.translate (Duple (-_scroll_offset.x, -_scroll_offset.y));
-
-	/* Note that this intentionally almost always returns integer coordinates */
-
-	if (rounded) {
-		wr.x0 = round (wr.x0);
-		wr.x1 = round (wr.x1);
-		wr.y0 = round (wr.y0);
-		wr.y1 = round (wr.y1);
-	}
-
-	return wr;
-}	
 
 /** Called when an item has moved.
  *  @param item Item that has moved.

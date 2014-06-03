@@ -49,3 +49,29 @@ ScrollGroup::scroll_to (Duple const& d)
 		_scroll_offset.y = d.y;
 	}
 }
+
+bool
+ScrollGroup::covers_canvas (Duple const& d) const
+{
+	boost::optional<Rect> r = bounding_box ();
+
+	if (!r) {
+		return false;
+	}
+
+	return r->contains (d);
+}
+
+bool
+ScrollGroup::covers_window (Duple const& d) const
+{
+	boost::optional<Rect> r = bounding_box ();
+
+	if (!r) {
+		return false;
+	}
+
+	Rect w = r->translate (-_scroll_offset);
+
+	return w.contains (d);
+}

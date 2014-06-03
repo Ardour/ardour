@@ -1,4 +1,4 @@
-/*
+*
     Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
@@ -39,6 +39,8 @@
 #include "ardour/operations.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
+
+#include "canvas/scroll_group.h"
 
 #include "editor.h"
 #include "i18n.h"
@@ -654,7 +656,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	pair<TimeAxisView*, double> const r = _editor->trackview_by_y_position (_drags->current_pointer_y ());
 	TimeAxisView* tv = r.first;
 
-	if (tv) {
+	if (tv && tv->view()) {
 		double layer = r.second;
 	
 		if (first_move && tv->view()->layer_display() == Stacked) {
@@ -700,22 +702,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		}
 
 		if (first_move) {
-
 			rv->drag_start (); 
-
-			/* Reparent to a non scrolling group so that we can keep the
-			   region selection above all time axis views.
-			   Reparenting means that we will have to move the region view
-			   within its new parent, as the two parent groups have different coordinates.
-			*/
-
-			ArdourCanvas::Group* rvg = rv->get_canvas_group();
-			Duple rv_canvas_offset = rvg->item_to_canvas (Duple (0,0));
-
-			rv->get_canvas_group()->reparent (_editor->_region_motion_group);
-
 			rv->fake_set_opaque (true);
-			rvg->set_position (rv_canvas_offset);
+			rv->raise_to_top ();
 		}
 
 		/* If we have moved tracks, we'll fudge the layer delta so that the
@@ -730,7 +719,13 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 		if (tv) {
 
-			/* The TimeAxisView that this region is now on */
+			int track_index = i->time_axis_view + delta_time_axis_view;
+			 
+			if (track_index < 0 || track_index >= (int) _time_axis_views.size()) {
+				continue;
+			}
+
+			/* The TimeAxisView that this region is now over */
 			TimeAxisView* current_tv = _time_axis_views[i->time_axis_view + delta_time_axis_view];
 
 			/* Ensure it is moved from stacked -> expanded if appropriate */
@@ -762,39 +757,50 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			if (_brushing) {
 				_editor->mouse_brush_insert_region (rv, pending_region_position);
 			} else {
-				double x = 0;
-				double y = 0;
+				Duple track_origin;
 
-				/* Get the y coordinate of the top of the track that this region is now on */
-				current_tv->canvas_display()->item_to_canvas (x, y);
-
+				/* Get the y coordinate of the top of the track that this region is now over */
+				track_origin = current_tv->canvas_display()->item_to_canvas (track_origin);
+				
 				/* And adjust for the layer that it should be on */
 				StreamView* cv = current_tv->view ();
 				switch (cv->layer_display ()) {
 				case Overlaid:
 					break;
 				case Stacked:
-					y += (cv->layers() - i->layer - 1) * cv->child_height ();
+					track_origin.y += (cv->layers() - i->layer - 1) * cv->child_height ();
 					break;
 				case Expanded:
-					y += (cv->layers() - i->layer - 0.5) * 2 * cv->child_height ();
+					track_origin.y += (cv->layers() - i->layer - 0.5) * 2 * cv->child_height ();
 					break;
 				}
 
+				/* need to get the parent of the regionview
+				 * canvas group and get its position in
+				 * equivalent coordinate space as the trackview
+				 * we are now dragging over.
+				 */
+				
 				/* Now move the region view */
-				rv->move (x_delta, y - rv->get_canvas_group()->position().y);
+				rv->move (x_delta, track_origin.y - rv->get_canvas_group()->item_to_canvas (Duple (0, 0)).y);
 			}
 		} else {
-			double y = 0;
-			double x = 0;
-			
-			TimeAxisView* last = _time_axis_views.back();
-			last->canvas_display()->item_to_canvas (x, y);
-			y += last->effective_height();
-			rv->move (x_delta, y - rv->get_canvas_group()->position().y);
-			i->time_axis_view = -1;
-		}
 
+			/* Only move the region into the empty dropzone at the bottom if the pointer
+			 * is down there.
+			 */
+
+			if (_drags->current_pointer_y() >= _editor->get_trackview_group()->item_to_canvas (Duple (0,0)).y) {
+				Duple track_origin;
+				
+				TimeAxisView* last = _time_axis_views.back();
+				track_origin = last->canvas_display()->item_to_canvas (track_origin);
+				track_origin.y += last->effective_height();
+				rv->move (x_delta, track_origin.y - rv->get_canvas_group()->item_to_canvas (Duple (0,0)).y);
+				i->time_axis_view = -1;
+			}
+		}
+		
 	} /* foreach region */
 
 	_total_x_delta += x_delta;

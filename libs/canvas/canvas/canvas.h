@@ -90,8 +90,7 @@ public:
 	void item_moved (Item *, boost::optional<Rect>);
 
         virtual Cairo::RefPtr<Cairo::Context> context () = 0;
-        Rect canvas_to_window (Rect const&, bool rounded = true) const;
-        Rect window_to_canvas (Rect const&) const;
+
         Duple canvas_to_window (Duple const&, bool rounded = true) const;
         Duple window_to_canvas (Duple const&) const;
 

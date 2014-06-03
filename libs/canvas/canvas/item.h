@@ -129,6 +129,10 @@ public:
 		return _position;
 	}
 
+	Duple window_origin() const;
+
+	ScrollGroup* scroll_parent() const { return _scroll_parent; }
+
 	boost::optional<Rect> bounding_box () const;
         Coord height() const;
         Coord width() const;

@@ -744,9 +744,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* The group containing all trackviews. */
 	ArdourCanvas::Group* _trackview_group;
 
-	/* The group used for region motion.  Sits on top of _trackview_group */
-	ArdourCanvas::Group* _region_motion_group;
-
         /* a rect that sits at the bottom of all tracks to act as a drag-no-drop/clickable
 	 * target area.
 	 */

@@ -140,12 +140,6 @@ Editor::window_event_sample (GdkEvent const * event, double* pcx, double* pcy) c
 		return 0;
 	}
 
-	/* adjust for scrolling (the canvas used by Ardour has global scroll
-	 * disabled, so we have to do the adjustment explicitly).
-	 */
-
-	d.translate (ArdourCanvas::Duple (horizontal_adjustment.get_value(), vertical_adjustment.get_value()));
-
 	/* event coordinates are in window units, so convert to canvas
 	 */
 
@@ -2710,8 +2704,6 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 		return;
 	}
 
-	_region_motion_group->raise_to_top ();
-
 	if (Config->get_edit_mode() == Splice) {
 		_drags->add (new RegionSpliceDrag (this, item, region_view, selection->regions.by_layer()));
 	} else {
@@ -2727,8 +2719,6 @@ Editor::add_region_copy_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* r
 	if (!region_view->region()->playlist()) {
 		return;
 	}
-
-	_region_motion_group->raise_to_top ();
 
 	_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), false, true));
 }

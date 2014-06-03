@@ -37,6 +37,9 @@ class LIBCANVAS_API ScrollGroup : public Group
 	void scroll_to (Duple const& d);
 	Duple scroll_offset() const { return _scroll_offset; }
 
+	bool covers_canvas (Duple const& d) const;
+	bool covers_window (Duple const& d) const;
+
   private:
 	ScrollSensitivity _scroll_sensitivity;
 	Duple             _scroll_offset;

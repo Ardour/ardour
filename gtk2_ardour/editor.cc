@@ -2421,21 +2421,31 @@ Editor::get_state ()
 	return *node;
 }
 
-
-
-/** @param y y offset from the top of all trackviews.
+/** @param y y is in canvas coordinate space, in pixel units
+ *
  *  @return pair: TimeAxisView that y is over, layer index.
+ *
  *  TimeAxisView may be 0.  Layer index is the layer number if the TimeAxisView is valid and is
  *  in stacked or expanded region display mode, otherwise 0.
  */
 std::pair<TimeAxisView *, double>
 Editor::trackview_by_y_position (double y)
 {
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+	/* convert y into an offset within the trackview group */
 
-		std::pair<TimeAxisView*, double> const r = (*iter)->covers_y_position (y);
-		if (r.first) {
-			return r;
+	ArdourCanvas::Duple top_of_trackviews_canvas = _trackview_group->item_to_canvas (ArdourCanvas::Duple (0, 0));
+	
+	if (y >= top_of_trackviews_canvas.y) {
+		
+		y -= top_of_trackviews_canvas.y;
+
+		for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+			
+			std::pair<TimeAxisView*, double> const r = (*iter)->covers_y_position (y);
+			
+			if (r.first) {
+				return r;
+			}
 		}
 	}
 

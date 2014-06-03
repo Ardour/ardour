@@ -1151,9 +1151,12 @@ TimeAxisView::color_handler ()
 }
 
 /** @return Pair: TimeAxisView, layer index.
- * TimeAxisView is non-0 if this object covers y, or one of its children does.
+ * TimeAxisView is non-0 if this object covers @param y, or one of its children
+ * does. @param y is an offset from the top of the trackview area.
+ *
  * If the covering object is a child axis, then the child is returned.
  * TimeAxisView is 0 otherwise.
+ *
  * Layer index is the layer number (possibly fractional) if the TimeAxisView is valid
  * and is in stacked or expanded * region display mode, otherwise 0.
  */
