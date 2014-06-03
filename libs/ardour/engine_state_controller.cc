@@ -484,6 +484,60 @@ EngineStateController::get_physical_audio_outputs(std::vector<std::string>& port
 
 
 void
+EngineStateController::get_physical_midi_inputs (std::vector<std::string>& port_names)
+{
+    port_names.clear();
+    
+    boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
+	assert(backend);
+    
+    // update audio input states
+    std::vector<std::string> phys_midi_inputs;
+    backend->get_physical_inputs(DataType::MIDI, phys_midi_inputs);
+    
+    ChannelStateList& midi_input_states = _current_state->midi_in_channel_states;
+    
+    std::vector<std::string>::const_iterator midi_in_iter = phys_midi_inputs.begin();
+    for (; midi_in_iter != phys_midi_inputs.end(); ++midi_in_iter) {
+        
+        ChannelStateList::const_iterator found_state_iter;
+        found_state_iter = std::find(midi_input_states.begin(), midi_input_states.end(), ChannelState(*midi_in_iter) );
+        
+        if (found_state_iter != midi_input_states.end() && found_state_iter->active) {
+            port_names.push_back(found_state_iter->name);
+        }
+    }
+}
+
+
+void
+EngineStateController::get_physical_midi_outputs (std::vector<std::string>& port_names)
+{
+    port_names.clear();
+    
+    boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
+	assert(backend);
+    
+    // update audio input states
+    std::vector<std::string> phys_midi_outputs;
+    backend->get_physical_outputs(DataType::MIDI, phys_midi_outputs);
+    
+    ChannelStateList& midi_output_states = _current_state->midi_out_channel_states;
+    
+    std::vector<std::string>::const_iterator midi_out_iter = phys_midi_outputs.begin();
+    for (; midi_out_iter != phys_midi_outputs.end(); ++midi_out_iter) {
+        
+        ChannelStateList::const_iterator found_state_iter;
+        found_state_iter = std::find(midi_output_states.begin(), midi_output_states.end(), ChannelState(*midi_out_iter) );
+        
+        if (found_state_iter != midi_output_states.end() && found_state_iter->active) {
+            port_names.push_back(found_state_iter->name);
+        }
+    }
+}
+
+
+void
 EngineStateController::set_physical_audio_input_state(const std::string& port_name, bool state)
 {
     ChannelStateList &input_states = _current_state->input_channel_states;
@@ -617,6 +671,74 @@ EngineStateController::get_physical_audio_output_state(const std::string& port_n
 
 
 void
+EngineStateController::set_physical_midi_input_state(const std::string& port_name, bool state) {
+    ChannelStateList &midi_input_states = _current_state->midi_in_channel_states;
+    ChannelStateList::iterator found_state_iter;
+    found_state_iter = std::find(midi_input_states.begin(), midi_input_states.end(), ChannelState(port_name) );
+    
+    if (found_state_iter != midi_input_states.end() && found_state_iter->active != state ) {
+        found_state_iter->active = state;
+        
+        // ***************************
+        // add actions here
+        
+        MIDIInputConfigChanged();
+    }
+}
+
+
+void
+EngineStateController::set_physical_midi_output_state(const std::string& port_name, bool state) {
+    ChannelStateList &midi_output_states = _current_state->midi_out_channel_states;
+    ChannelStateList::iterator found_state_iter;
+    found_state_iter = std::find(midi_output_states.begin(), midi_output_states.end(), ChannelState(port_name) );
+    
+    if (found_state_iter != midi_output_states.end() && found_state_iter->active != state ) {
+        found_state_iter->active = state;
+        
+        // ***************************
+        // add actions here
+        
+        MIDIOutputConfigChanged();
+    }
+}
+
+
+bool
+EngineStateController::get_physical_midi_input_state(const std::string& port_name) {
+    
+    bool state = false;
+    
+    ChannelStateList &midi_input_states = _current_state->midi_in_channel_states;
+    ChannelStateList::iterator found_state_iter;
+    found_state_iter = std::find(midi_input_states.begin(), midi_input_states.end(), ChannelState(port_name) );
+    
+    if (found_state_iter != midi_input_states.end() ) {
+        state = found_state_iter->active;
+    }
+    
+    return state;
+}
+
+
+bool
+EngineStateController::get_physical_midi_output_state(const std::string& port_name) {
+    
+    bool state = false;
+    
+    ChannelStateList &midi_output_states = _current_state->midi_out_channel_states;
+    ChannelStateList::iterator found_state_iter;
+    found_state_iter = std::find(midi_output_states.begin(), midi_output_states.end(), ChannelState(port_name) );
+    
+    if (found_state_iter != midi_output_states.end() ) {
+        state = found_state_iter->active;
+    }
+    
+    return state;
+}
+
+
+void
 EngineStateController::set_state_to_all_inputs(bool state)
 {
     bool something_changed = false;
@@ -680,6 +802,23 @@ EngineStateController::get_physical_audio_output_states(std::vector<ChannelState
     }
     
     channel_states.assign(output_states->begin(), output_states->end());
+}
+
+
+void
+EngineStateController::get_physical_midi_input_states (std::vector<ChannelState>& channel_states)
+{
+    ChannelStateList& midi_input_states = _current_state->midi_in_channel_states;
+    
+    channel_states.assign(midi_input_states.begin(), midi_input_states.end() );
+}
+
+void
+EngineStateController::get_physical_midi_output_states (std::vector<ChannelState>& channel_states)
+{
+    ChannelStateList& midi_output_states = _current_state->midi_out_channel_states;
+    
+    channel_states.assign(midi_output_states.begin(), midi_output_states.end() );
 }
 
 
@@ -793,6 +932,7 @@ EngineStateController::_update_device_channels_state(bool reconnect_session_rout
     for (; input_iter != phys_audio_inputs.end(); ++input_iter) {
         
         ChannelState state(*input_iter);
+        state.active = true;
         ChannelStateList::const_iterator found_state_iter = std::find(input_states.begin(), input_states.end(), state);
         
         if (found_state_iter != input_states.end() ) {
@@ -814,6 +954,7 @@ EngineStateController::_update_device_channels_state(bool reconnect_session_rout
     for (; output_iter != phys_audio_outputs.end(); ++output_iter) {
         
         ChannelState state(*output_iter);
+        state.active = true;
         ChannelStateList::const_iterator found_state_iter = std::find(output_multi_states.begin(), output_multi_states.end(), state);
         
         if (found_state_iter != output_multi_states.end() ) {
@@ -833,6 +974,7 @@ EngineStateController::_update_device_channels_state(bool reconnect_session_rout
     for (; output_iter != phys_audio_outputs.end(); ++output_iter) {
         
         ChannelState state(*output_iter);
+        state.active = true;
         ChannelStateList::const_iterator found_state_iter = std::find(output_stereo_states.begin(), output_stereo_states.end(), state);
         
         if (found_state_iter != output_stereo_states.end() ) {
@@ -845,8 +987,53 @@ EngineStateController::_update_device_channels_state(bool reconnect_session_rout
     _current_state->stereo_out_channel_states = new_output_states;
     _refresh_stereo_out_channel_states();
     
-    // update midi channels
-    /* provide implementation */
+    // update midi input channels
+    std::vector<std::string> phys_midi_inputs;
+    backend->get_physical_inputs(DataType::MIDI, phys_midi_inputs);
+    
+    ChannelStateList new_midi_input_states;
+    ChannelStateList& midi_inputs_states = _current_state->midi_in_channel_states;
+    
+    std::vector<std::string>::const_iterator midi_input_iter = phys_midi_inputs.begin();
+    for (; midi_input_iter != phys_midi_inputs.end(); ++midi_input_iter) {
+        
+        ChannelState state(*midi_input_iter);
+        state.active = false;
+        ChannelStateList::const_iterator found_state_iter = std::find(midi_inputs_states.begin(), midi_inputs_states.end(), state);
+        
+        if (found_state_iter != midi_inputs_states.end() ) {
+            new_midi_input_states.push_back(*found_state_iter);
+        } else {
+            new_midi_input_states.push_back(state);
+        }
+    }
+
+    _current_state->midi_in_channel_states = new_midi_input_states;
+    
+    
+    // update midi output channels
+    std::vector<std::string> phys_midi_outputs;
+    backend->get_physical_outputs(DataType::MIDI, phys_midi_outputs);
+    
+    ChannelStateList new_midi_output_states;
+    ChannelStateList& midi_output_states = _current_state->midi_out_channel_states;
+    
+    std::vector<std::string>::const_iterator midi_output_iter = phys_midi_outputs.begin();
+    for (; midi_output_iter != phys_midi_outputs.end(); ++midi_output_iter) {
+        
+        ChannelState state(*midi_output_iter);
+        state.active = false;
+        ChannelStateList::const_iterator found_state_iter = std::find(midi_output_states.begin(), midi_output_states.end(), state);
+        
+        if (found_state_iter != midi_output_states.end() ) {
+            new_midi_output_states.push_back(*found_state_iter);
+        } else {
+            new_midi_output_states.push_back(state);
+        }
+    }
+    
+    _current_state->midi_out_channel_states = new_midi_output_states;
+    
     
     if (reconnect_session_routes) {
         AudioEngine::instance()->reconnect_session_routes();

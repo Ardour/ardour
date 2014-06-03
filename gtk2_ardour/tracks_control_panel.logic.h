@@ -65,10 +65,11 @@
 
 // methods
 	virtual void init();
-	DeviceConnectionControl& add_device_capture_control(std::string device_capture_name, bool active, uint16_t capture_number, std::string track_name);
-	DeviceConnectionControl& add_device_playback_control(std::string device_playback_name, bool active, uint16_t playback_number);
-	DeviceConnectionControl& add_midi_capture_control(std::string device_capture_name, bool active);
-	DeviceConnectionControl& add_midi_playback_control(bool active);
+	DeviceConnectionControl& add_device_capture_control(std::string port_name, bool active, uint16_t capture_number, std::string track_name);
+	DeviceConnectionControl& add_device_playback_control(std::string port_name, bool active, uint16_t playback_number);
+	MidiDeviceConnectionControl& add_midi_device_control(const std::string& midi_device_name,
+                                                         const std::string& capture_name, bool capture_active,
+                                                         const std::string& playback_name, bool playback_active);
 
 	void on_audio_settings (WavesButton*);
 	void on_midi_settings (WavesButton*);
@@ -83,8 +84,8 @@
 	void on_apply(WavesButton*);
 	void on_capture_active_changed (DeviceConnectionControl* capture_control, bool active);
 	void on_playback_active_changed (DeviceConnectionControl* playback_control, bool active);
-	void on_midi_capture_active_changed (DeviceConnectionControl* capture_control, bool active);
-	void on_midi_playback_active_changed (DeviceConnectionControl* playback_control, bool active);
+	void on_midi_capture_active_changed (MidiDeviceConnectionControl* control, bool active);
+	void on_midi_playback_active_changed (MidiDeviceConnectionControl* control, bool active);
     void on_all_inputs_on_button(WavesButton*);
     void on_all_inputs_off_button(WavesButton*);
     void on_all_outputs_on_button(WavesButton*);
@@ -106,6 +107,7 @@
 	void populate_output_mode ();
     void populate_input_channels();
     void populate_output_channels();
+    void populate_midi_channels();
     void populate_default_session_path();
 
     // Engine State update callback handlers
@@ -113,11 +115,14 @@
     void on_buffer_size_update ();
     void on_device_list_update (bool current_device_disconnected);
     void on_parameter_changed (const std::string& parameter_name);
-    void on_input_configuration_changed ();
-    void on_output_configuration_changed ();
+    void on_audio_input_configuration_changed ();
+    void on_audio_output_configuration_changed ();
+    void on_midi_input_configuration_changed ();
+    void on_midi_output_configuration_changed ();
 
     void cleanup_input_channels_list();
     void cleanup_output_channels_list();
+    void cleanup_midi_device_list();
 
 	std::string bufsize_as_string (uint32_t sz);
 

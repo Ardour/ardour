@@ -24,7 +24,6 @@
 #include <gtkmm/layout.h>
 #include "waves_ui.h"
 
-class XMLTree;
 
 class DeviceConnectionControl : public Gtk::Layout
 {

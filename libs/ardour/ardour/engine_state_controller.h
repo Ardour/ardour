@@ -30,13 +30,13 @@ public:
         
         ChannelState ()
         : name(""),
-        active(true)
+        active(false)
         {
         }
         
         ChannelState (const std::string& name)
         : name(name),
-        active(true)
+        active(false)
         {
         }
         
@@ -45,7 +45,6 @@ public:
     };
     
     typedef std::list<ChannelState> ChannelStateList;
-    
     
     static EngineStateController* instance();
     
@@ -70,9 +69,13 @@ public:
     uint32_t            get_available_inputs_count() const;
     uint32_t            get_available_outputs_count () const;
     
-    // get all enabled physical inputs/outputs names
+    // get all enabled physical input/output names
     void                get_physical_audio_inputs (std::vector<std::string>&);
     void                get_physical_audio_outputs (std::vector<std::string>&);
+    
+    // get all enabled midi input/output names
+    void                get_physical_midi_inputs (std::vector<std::string>&);
+    void                get_physical_midi_outputs (std::vector<std::string>&);
     
     // propagate new state to all inputs/outputs
     void                set_state_to_all_inputs(bool);
@@ -87,6 +90,16 @@ public:
     void                set_physical_audio_output_state(const std::string&, bool);
     bool                get_physical_audio_input_state(const std::string&);
     bool                get_physical_audio_output_state(const std::string&);
+    
+    // get all enabled midi input/output states
+    void                get_physical_midi_input_states (std::vector<ChannelState>&);
+    void                get_physical_midi_output_states (std::vector<ChannelState>&);
+    
+    // set/get the state for input or output
+    void                set_physical_midi_input_state(const std::string&, bool);
+    void                set_physical_midi_output_state(const std::string&, bool);
+    bool                get_physical_midi_input_state(const std::string&);
+    bool                get_physical_midi_output_state(const std::string&);
     
     bool                is_setup_required() const {return ARDOUR::AudioEngine::instance()->setup_required (); }
     
@@ -123,9 +136,13 @@ public:
     /* this signal is emitted if the backend ever disconnects us */
     PBD::Signal0<void> EngineHalted;
     
-    /* this signal is emitted if the i/o channel configuration changes */
+    /* this signals are emitted if the AUDIO i/o channel configuration changes */
     PBD::Signal0<void> InputConfigChanged;
     PBD::Signal0<void> OutputConfigChanged;
+    
+    /* this signals are emitted if the MIDI i/o channel configuration changes */
+    PBD::Signal0<void> MIDIInputConfigChanged;
+    PBD::Signal0<void> MIDIOutputConfigChanged;
     
     /* this signal is emitted if new ports are registered or unregistered */
     PBD::Signal0<void> PortRegistrationChanged;
@@ -147,6 +164,8 @@ private:
 		ChannelStateList input_channel_states;
 		ChannelStateList multi_out_channel_states;
         ChannelStateList stereo_out_channel_states;
+        ChannelStateList midi_in_channel_states;
+        ChannelStateList midi_out_channel_states;
 		//bool active;
 		std::string midi_option;
         

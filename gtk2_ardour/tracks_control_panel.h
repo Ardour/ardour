@@ -33,6 +33,7 @@
 
 #include "waves_dialog.h"
 #include "device_connection_control.h"
+#include "midi_device_connection_control.h"
 
 class WavesButton;
 
@@ -44,8 +45,7 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
   private:
 	Gtk::VBox& _device_capture_list;
 	Gtk::VBox& _device_playback_list;
-	Gtk::VBox& _midi_capture_list;
-	Gtk::VBox& _midi_playback_list;
+	Gtk::VBox& _midi_device_list;
     WavesButton& _all_inputs_on_button;
     WavesButton& _all_inputs_off_button;
     WavesButton& _all_outputs_on_button;

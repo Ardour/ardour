@@ -81,9 +81,7 @@
       <Layout bgnormal="#000000" x="447" y="20" width="14" height="19" />
       <ScrolledWindow x="21" y="62" bgnormal="#565656" width="440" height="218" hscroll="never" vscroll="auto">
         <HBox>
-          <VBox id="midi_capture_list">
-          </VBox>
-          <VBox id="midi_playback_list">
+          <VBox id="midi_device_list">
           </VBox>
         </HBox>
       </ScrolledWindow>

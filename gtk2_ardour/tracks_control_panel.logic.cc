@@ -28,7 +28,6 @@
 #include "ardour/engine_state_controller.h"
 #include "ardour/rc_configuration.h"
 
-#include "device_connection_control.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "utils.h"
@@ -58,6 +57,33 @@ namespace {
             return false;
         }
     }
+    
+    static const char* audio_port_name_prefix = "system:";
+    static const char* midi_port_name_prefix = "system_midi:";
+    static const char* midi_capture_suffix = " capture";
+    static const char* midi_playback_suffix = " playback";
+    
+    struct MidiDeviceDescriptor {
+        std::string name;
+        std::string capture_name;
+        bool capture_active;
+        std::string playback_name;
+        bool playback_active;
+        
+        MidiDeviceDescriptor(const std::string& name) :
+        name(name),
+        capture_name(""),
+        capture_active(false),
+        playback_name(""),
+        playback_active(false)
+        {}
+        
+        bool operator==(const MidiDeviceDescriptor& rhs) {
+            return name == rhs.name;
+        }
+    };
+    
+    typedef std::vector<MidiDeviceDescriptor> MidiDeviceDescriptorVec;
 }
 
 void
@@ -90,8 +116,10 @@ TracksControlPanel::init ()
     EngineStateController::instance()->PortRegistrationChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_port_registration_update, this), gui_context());
 	EngineStateController::instance()->BufferSizeChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_buffer_size_update, this), gui_context());
     EngineStateController::instance()->DeviceListChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_device_list_update, this, _1), gui_context());
-    EngineStateController::instance()->InputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_input_configuration_changed, this), gui_context());
-    EngineStateController::instance()->OutputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_output_configuration_changed, this), gui_context());
+    EngineStateController::instance()->InputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_audio_input_configuration_changed, this), gui_context());
+    EngineStateController::instance()->OutputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_audio_output_configuration_changed, this), gui_context());
+    EngineStateController::instance()->MIDIInputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_midi_input_configuration_changed, this), gui_context());
+    EngineStateController::instance()->MIDIOutputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_midi_output_configuration_changed, this), gui_context());
     
     /* Global configuration parameters update */
     Config->ParameterChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_parameter_changed, this, _1), gui_context());
@@ -110,21 +138,22 @@ TracksControlPanel::init ()
 
     populate_input_channels();
     populate_output_channels();
+    populate_midi_channels();
     populate_default_session_path();
     
 	_audio_settings_tab_button.set_active(true);
 }
 
-DeviceConnectionControl& TracksControlPanel::add_device_capture_control(std::string device_capture_name, bool active, uint16_t capture_number, std::string track_name)
+DeviceConnectionControl& TracksControlPanel::add_device_capture_control(std::string port_name, bool active, uint16_t capture_number, std::string track_name)
 {
-    std::string port_name("");
-    std::string pattern("system:");
-    remove_pattern_from_string(device_capture_name, pattern, port_name);
+    std::string device_capture_name("");
+    std::string pattern(audio_port_name_prefix);
+    remove_pattern_from_string(port_name, pattern, device_capture_name);
     
-	DeviceConnectionControl &capture_control = *manage (new DeviceConnectionControl(port_name, active, capture_number, track_name));
+	DeviceConnectionControl &capture_control = *manage (new DeviceConnectionControl(device_capture_name, active, capture_number, track_name));
     
-    char * id_str = new char [device_capture_name.length()+1];
-    std::strcpy (id_str, device_capture_name.c_str());
+    char * id_str = new char [port_name.length()+1];
+    std::strcpy (id_str, port_name.c_str());
     capture_control.set_data(DeviceConnectionControl::id_name, id_str);
 	
     _device_capture_list.pack_start (capture_control, false, false);
@@ -132,16 +161,16 @@ DeviceConnectionControl& TracksControlPanel::add_device_capture_control(std::str
 	return capture_control;
 }
 
-DeviceConnectionControl& TracksControlPanel::add_device_playback_control(std::string device_playback_name, bool active, uint16_t playback_number)
+DeviceConnectionControl& TracksControlPanel::add_device_playback_control(std::string port_name, bool active, uint16_t playback_number)
 {
-    std::string port_name("");
-    std::string pattern("system:");
-    remove_pattern_from_string(device_playback_name, pattern, port_name);
+    std::string device_playback_name("");
+    std::string pattern(audio_port_name_prefix);
+    remove_pattern_from_string(port_name, pattern, device_playback_name);
     
-	DeviceConnectionControl &playback_control = *manage (new DeviceConnectionControl(port_name, active, playback_number));
+	DeviceConnectionControl &playback_control = *manage (new DeviceConnectionControl(device_playback_name, active, playback_number));
     
-    char * id_str = new char [device_playback_name.length()+1];
-    std::strcpy (id_str, device_playback_name.c_str());
+    char * id_str = new char [port_name.length()+1];
+    std::strcpy (id_str, port_name.c_str());
     playback_control.set_data(DeviceConnectionControl::id_name, id_str);
     
 	_device_playback_list.pack_start (playback_control, false, false);
@@ -149,20 +178,28 @@ DeviceConnectionControl& TracksControlPanel::add_device_playback_control(std::st
 	return playback_control;
 }
 
-DeviceConnectionControl& TracksControlPanel::add_midi_capture_control(std::string device_capture_name, bool active)
+MidiDeviceConnectionControl& TracksControlPanel::add_midi_device_control(const std::string& midi_device_name,
+                                                                         const std::string& capture_name, bool capture_active,
+                                                                         const std::string& playback_name, bool playback_active)
 {
-	DeviceConnectionControl &capture_control = *manage (new DeviceConnectionControl(device_capture_name, active));
-	_midi_capture_list.pack_start (capture_control, false, false);
-	capture_control.signal_active_changed.connect (sigc::mem_fun (*this, &TracksControlPanel::on_midi_capture_active_changed));
-	return capture_control;
-}
-
-DeviceConnectionControl& TracksControlPanel::add_midi_playback_control(bool active)
-{
-	DeviceConnectionControl &playback_control = *manage (new DeviceConnectionControl(active));
-	_midi_playback_list.pack_start (playback_control, false, false);
-	playback_control.signal_active_changed.connect(sigc::mem_fun (*this, &TracksControlPanel::on_midi_playback_active_changed));
-	return playback_control;
+	MidiDeviceConnectionControl &midi_device_control = *manage (new MidiDeviceConnectionControl(midi_device_name, !capture_name.empty(), capture_active, !playback_name.empty(), playback_active));
+    
+    if (!capture_name.empty()) {
+        char * capture_id_str = new char [capture_name.length()+1];
+        std::strcpy (capture_id_str, capture_name.c_str());
+        midi_device_control.set_data(MidiDeviceConnectionControl::capture_id_name, capture_id_str);
+    }
+    
+    if (!playback_name.empty()) {
+        char * playback_id_str = new char [playback_name.length()+1];
+        std::strcpy (playback_id_str, playback_name.c_str());
+        midi_device_control.set_data(MidiDeviceConnectionControl::playback_id_name, playback_id_str);
+    }
+    
+	_midi_device_list.pack_start (midi_device_control, false, false);
+	midi_device_control.signal_capture_active_changed.connect (sigc::mem_fun (*this, &TracksControlPanel::on_midi_capture_active_changed));
+    midi_device_control.signal_playback_active_changed.connect(sigc::mem_fun (*this, &TracksControlPanel::on_midi_playback_active_changed));
+	return midi_device_control;
 }
 
 void
@@ -318,7 +355,7 @@ TracksControlPanel::populate_input_channels()
         if (input_iter->active) {
             
             std::string port_name("");
-            std::string pattern("system:");
+            std::string pattern(audio_port_name_prefix);
             remove_pattern_from_string(input_iter->name, pattern, port_name);
             
             number = number_count++;
@@ -367,16 +404,61 @@ TracksControlPanel::populate_output_channels()
 }
 
 
-
-void update_channel_numbers()
+void
+TracksControlPanel::populate_midi_channels()
 {
+    cleanup_midi_device_list();
     
-}
-
-
-void update_channel_names()
-{
+    std::vector<EngineStateController::ChannelState> midi_input_states, midi_output_states;
+    EngineStateController::instance()->get_physical_midi_input_states(midi_input_states);
+    EngineStateController::instance()->get_physical_midi_output_states(midi_output_states);
     
+    // now group corresponding inputs and outputs into a vector of midi device descriptors
+    MidiDeviceDescriptorVec midi_device_descriptors;
+    std::vector<EngineStateController::ChannelState>::const_iterator state_iter;
+    // process inputs
+    for (state_iter = midi_input_states.begin(); state_iter != midi_input_states.end(); ++state_iter) {
+        // strip the device name from input port name
+        std::string device_name("");
+        remove_pattern_from_string(state_iter->name, midi_port_name_prefix, device_name);
+        remove_pattern_from_string(device_name, midi_capture_suffix, device_name);
+        
+        MidiDeviceDescriptor device_descriptor(device_name);
+        device_descriptor.capture_name = state_iter->name;
+        device_descriptor.capture_active = state_iter->active;
+        midi_device_descriptors.push_back(device_descriptor);
+    }
+    
+    // process outputs
+    for (state_iter = midi_output_states.begin(); state_iter != midi_output_states.end(); ++state_iter){
+        // strip the device name from input port name
+        std::string device_name("");
+        remove_pattern_from_string(state_iter->name, midi_port_name_prefix, device_name);
+        remove_pattern_from_string(device_name, midi_playback_suffix, device_name);
+        
+        // check if we already have descriptor for this device
+        MidiDeviceDescriptor device_descriptor(device_name);
+        MidiDeviceDescriptorVec::iterator found_iter;
+        found_iter = std::find(midi_device_descriptors.begin(), midi_device_descriptors.end(), device_descriptor );
+        
+        if (found_iter != midi_device_descriptors.end() ) {
+            found_iter->playback_name = state_iter->name;
+            found_iter->playback_active = state_iter->active;
+        } else {
+            device_descriptor.capture_name.clear();
+            device_descriptor.playback_name = state_iter->name;
+            device_descriptor.playback_active = state_iter->active;
+            midi_device_descriptors.push_back(device_descriptor);
+        }
+    }
+    
+    // now add midi device controls
+    MidiDeviceDescriptorVec::iterator iter;
+    for (iter = midi_device_descriptors.begin(); iter != midi_device_descriptors.end(); ++iter ) {
+        add_midi_device_control(iter->name,
+                                                                       iter->capture_name, iter->capture_active,
+                                                                       iter->playback_name, iter->playback_active);
+    }
 }
 
 
@@ -417,6 +499,28 @@ TracksControlPanel::cleanup_output_channels_list()
         
         playback_controls.pop_back();
         _device_capture_list.remove(*item);
+        delete item;
+    }
+}
+
+
+void
+TracksControlPanel::cleanup_midi_device_list()
+{
+    std::vector<Gtk::Widget*> midi_device_controls = _midi_device_list.get_children();
+    
+    while (midi_device_controls.size() != 0) {
+        Gtk::Widget* item = midi_device_controls.back();
+        
+        MidiDeviceConnectionControl* control = dynamic_cast<MidiDeviceConnectionControl*>(item);
+        
+        if (control) {
+            control->remove_data(MidiDeviceConnectionControl::capture_id_name);
+            control->remove_data(MidiDeviceConnectionControl::capture_id_name);
+        }
+        
+        midi_device_controls.pop_back();
+        _midi_device_list.remove(*item);
         delete item;
     }
 }
@@ -808,13 +912,17 @@ void TracksControlPanel::on_playback_active_changed(DeviceConnectionControl* pla
 }
 
 
-void TracksControlPanel::on_midi_capture_active_changed(DeviceConnectionControl* capture_control, bool active)
+void TracksControlPanel::on_midi_capture_active_changed(MidiDeviceConnectionControl* control, bool active)
 {
+    const char * id_name = (char*)control->get_data(MidiDeviceConnectionControl::capture_id_name);
+    EngineStateController::instance()->set_physical_midi_input_state(id_name, active);
 }
 
 
-void TracksControlPanel::on_midi_playback_active_changed(DeviceConnectionControl* playback_control, bool active)
+void TracksControlPanel::on_midi_playback_active_changed(MidiDeviceConnectionControl* control, bool active)
 {
+    const char * id_name = (char*)control->get_data(MidiDeviceConnectionControl::playback_id_name);
+    EngineStateController::instance()->set_physical_midi_output_state(id_name, active);
 }
 
 
@@ -822,6 +930,7 @@ void TracksControlPanel::on_port_registration_update()
 {
     populate_input_channels();
     populate_output_channels();
+    populate_midi_channels();
 }
 
 
@@ -861,13 +970,13 @@ TracksControlPanel::on_parameter_changed (const std::string& parameter_name)
     if (parameter_name == "output-auto-connect") {
         populate_output_mode();
     } else if (parameter_name == "tracks-auto-naming") {
-        on_input_configuration_changed ();
+        on_audio_input_configuration_changed ();
     }
 }
 
 
 void
-TracksControlPanel::on_input_configuration_changed ()
+TracksControlPanel::on_audio_input_configuration_changed ()
 {
     std::vector<Gtk::Widget*> capture_controls = _device_capture_list.get_children();
     
@@ -905,7 +1014,7 @@ TracksControlPanel::on_input_configuration_changed ()
 
 
 void
-TracksControlPanel::on_output_configuration_changed()
+TracksControlPanel::on_audio_output_configuration_changed()
 {
     std::vector<Gtk::Widget*> playback_controls = _device_playback_list.get_children();
     
@@ -934,7 +1043,47 @@ TracksControlPanel::on_output_configuration_changed()
 
 }
 
-                                      
+
+void
+TracksControlPanel::on_midi_input_configuration_changed ()
+{
+    std::vector<Gtk::Widget*> midi_controls = _midi_device_list.get_children();
+    
+    std::vector<Gtk::Widget*>::iterator control_iter = midi_controls.begin();
+    
+    for (; control_iter != midi_controls.end(); ++control_iter) {
+        MidiDeviceConnectionControl* control = dynamic_cast<MidiDeviceConnectionControl*> (*control_iter);
+        
+        if (control) {
+            
+            const char* capture_id_name = (char*)control->get_data(MidiDeviceConnectionControl::capture_id_name);
+            bool new_state = EngineStateController::instance()->get_physical_midi_input_state(capture_id_name );
+            control->set_capture_active(new_state);
+        }
+    }
+}
+
+
+void
+TracksControlPanel::on_midi_output_configuration_changed ()
+{
+    std::vector<Gtk::Widget*> midi_controls = _midi_device_list.get_children();
+    
+    std::vector<Gtk::Widget*>::iterator control_iter = midi_controls.begin();
+    
+    for (; control_iter != midi_controls.end(); ++control_iter) {
+        MidiDeviceConnectionControl* control = dynamic_cast<MidiDeviceConnectionControl*> (*control_iter);
+        
+        if (control) {
+            
+            const char* playback_id_name = (char*)control->get_data(MidiDeviceConnectionControl::playback_id_name);
+            bool new_state = EngineStateController::instance()->get_physical_midi_output_state(playback_id_name);
+            control->set_playback_active(new_state);
+        }
+    }
+}
+
+
 std::string
 TracksControlPanel::bufsize_as_string (uint32_t sz)
 {
