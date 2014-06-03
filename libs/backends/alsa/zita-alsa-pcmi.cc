@@ -410,6 +410,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 		}
 	}
 
+	_state = -2;
 	if (_play_handle)
 	{
 		if (snd_pcm_hw_params_malloc (&_play_hwpar) < 0)
@@ -447,16 +448,19 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 		if (snd_pcm_hw_params_get_rate (_play_hwpar, &fsamp, &dir) || (fsamp != _fsamp) || dir)
 		{
 			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't get requested sample rate for playback.\n");
+			_state = -3;
 			return;
 		}
 		if (snd_pcm_hw_params_get_period_size (_play_hwpar, &fsize, &dir) || (fsize != _fsize) || dir)
 		{
 			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't get requested period size for playback.\n");
+			_state = -4;
 			return;
 		}
 		if (snd_pcm_hw_params_get_periods (_play_hwpar, &nfrag, &dir) || (nfrag != _nfrag) || dir)
 		{
 			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't get requested number of periods for playback.\n");
+			_state = -5;
 			return;
 		}
 
@@ -503,6 +507,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 
 			default:
 				if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't handle playback sample format.\n");
+				_state = -6;
 				return;
 		}
 #elif __BYTE_ORDER == __BIG_ENDIAN
@@ -540,6 +545,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 
 			default:
 				if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't handle playback sample format.\n");
+				_state = -6;
 				return;
 		}
 #else
@@ -554,16 +560,19 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 		if (snd_pcm_hw_params_get_rate (_capt_hwpar, &fsamp, &dir) || (fsamp != _fsamp) || dir)
 		{
 			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't get requested sample rate for capture.\n");
+			_state = -3;
 			return;
 		}
 		if (snd_pcm_hw_params_get_period_size (_capt_hwpar, &fsize, &dir) || (fsize != _fsize) || dir)
 		{
 			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't get requested period size for capture.\n");
+			_state = -4;
 			return;
 		}
 		if (snd_pcm_hw_params_get_periods (_capt_hwpar, &nfrag, &dir) || (nfrag != _nfrag) || dir)
 		{
 			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't get requested number of periods for capture.\n");
+			_state = -5;
 			return;
 		}
 
@@ -605,6 +614,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 
 			default:
 				if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't handle capture sample format.\n");
+				_state = -6;
 				return;
 		}
 #elif __BYTE_ORDER == __BIG_ENDIAN
@@ -636,6 +646,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 
 			default:
 				if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't handle capture sample format.\n");
+				_state = -6;
 				return;
 		}
 #else
