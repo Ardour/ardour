@@ -192,7 +192,7 @@ RegionExportChannelFactory::update_buffers (framecnt_t frames)
 		}
 		break;
 	case Processed:
-		track.export_stuff (buffers, position, frames, track.main_outs(), true, true);
+		track.export_stuff (buffers, position, frames, track.main_outs(), true, true, false);
 		break;
 	default:
 		throw ExportFailed ("Unhandled type in ExportChannelFactory::update_buffers");

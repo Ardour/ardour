@@ -96,7 +96,7 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	virtual boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, 
 							boost::shared_ptr<Processor> endpoint, bool include_endpoint) = 0;
 	virtual int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t nframes,
-				  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export) = 0;
+				  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) = 0;
 
 	XMLNode&    get_state();
 	XMLNode&    get_template();

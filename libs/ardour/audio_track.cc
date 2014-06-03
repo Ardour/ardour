@@ -383,7 +383,7 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 
 int
 AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nframes,
-			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export)
+			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze)
 {
 	boost::scoped_array<gain_t> gain_buffer (new gain_t[nframes]);
 	boost::scoped_array<Sample> mix_buffer (new Sample[nframes]);
@@ -417,7 +417,7 @@ AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nfram
 		}
 	}
 
-	bounce_process (buffers, start, nframes, endpoint, include_endpoint, for_export);
+	bounce_process (buffers, start, nframes, endpoint, include_endpoint, for_export, for_freeze);
 
 	return 0;
 }
@@ -490,7 +490,7 @@ AudioTrack::bounce_range (framepos_t start, framepos_t end, InterThreadInfo& itt
 			  boost::shared_ptr<Processor> endpoint, bool include_endpoint)
 {
 	vector<boost::shared_ptr<Source> > srcs;
-	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false);
+	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false, false);
 }
 
 void
@@ -533,8 +533,8 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 	boost::shared_ptr<Region> res;
 
-	if ((res = _session.write_one_track (*this, _session.current_start_frame(), _session.current_end_frame(), true, srcs, itt, 
-					     main_outs(), false, false)) == 0) {
+	if ((res = _session.write_one_track (*this, _session.current_start_frame(), _session.current_end_frame(),
+					true, srcs, itt, main_outs(), false, false, true)) == 0) {
 		return;
 	}
 
@@ -545,7 +545,10 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 		for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
-			if (!(*r)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*r)) {
+			if ((*r)->does_routing() && (*r)->active()) {
+				break;
+			}
+			if (!boost::dynamic_pointer_cast<PeakMeter>(*r)) {
 
 				FreezeRecordProcessorInfo* frii  = new FreezeRecordProcessorInfo ((*r)->get_state(), (*r));
 
@@ -553,9 +556,10 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 				_freeze_record.processor_info.push_back (frii);
 
-				/* now deactivate the processor */
-
-				(*r)->deactivate ();
+				/* now deactivate the processor, */
+				if (!boost::dynamic_pointer_cast<Amp>(*r)) {
+					(*r)->deactivate ();
+				}
 			}
 			
 			_session.set_dirty ();
