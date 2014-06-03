@@ -436,9 +436,17 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	unsigned int pos = _capture_device.find(" ");
 	_pcmi = new Alsa_pcmi (_capture_device.substr(0, pos).c_str(), _playback_device.substr(0, pos).c_str(), 0, _samplerate, _samples_per_period, _periods_per_cycle, 0);
+	switch (_pcmi->state ()) {
+		case 0: /* OK */ break;
+		case -1: PBD::error << _("AlsaAudioBackend: failed to open device.") << endmsg; break;
+		case -2: PBD::error << _("AlsaAudioBackend: failed to allocate parameters.") << endmsg; break;
+		case -3: PBD::error << _("AlsaAudioBackend: cannot set requested sample rate.") << endmsg; break;
+		case -4: PBD::error << _("AlsaAudioBackend: cannot set requested period size.") << endmsg; break;
+		case -5: PBD::error << _("AlsaAudioBackend: cannot set requested number of periods.") << endmsg; break;
+		case -6: PBD::error << _("AlsaAudioBackend: unsupported sample format.") << endmsg; break;
+		default: PBD::error << _("AlsaAudioBackend: initialization failed.") << endmsg; break;
+	}
 	if (_pcmi->state ()) {
-		// TODO get detailed error from _pcmi
-		PBD::error << _("AlsaAudioBackend: failed to open device (see stderr for details).") << endmsg;
 		delete _pcmi; _pcmi = 0;
 		return -1;
 	}
