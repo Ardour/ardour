@@ -17,7 +17,8 @@ def configure(conf):
 def build(bld):
     bld.shlib (
                source   = [ 'src/time.cc', 'src/bbt_time.cc' ],
-               target   = 'libtimecode',
+               name     = 'libtimecode',
+               target   = 'timecode',
                includes = ['.'],
                export_includes = ['.'],
                defines  = [ 'LIBTIMECODE_DLL_EXPORTS' ]
