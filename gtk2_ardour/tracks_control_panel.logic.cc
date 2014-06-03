@@ -516,7 +516,7 @@ TracksControlPanel::cleanup_midi_device_list()
         
         if (control) {
             control->remove_data(MidiDeviceConnectionControl::capture_id_name);
-            control->remove_data(MidiDeviceConnectionControl::capture_id_name);
+            control->remove_data(MidiDeviceConnectionControl::playback_id_name);
         }
         
         midi_device_controls.pop_back();

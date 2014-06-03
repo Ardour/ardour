@@ -45,8 +45,6 @@ MidiDeviceConnectionControl::MidiDeviceConnectionControl (const std::string& mid
     if (!has_capture) {
         _capture_on_button->hide();
         _capture_off_button->hide();
-        _capture_on_button = NULL;
-        _capture_off_button = NULL;
     }
 
     _playback_on_button = &_children.get_waves_button ("playback_on_button");
@@ -55,8 +53,6 @@ MidiDeviceConnectionControl::MidiDeviceConnectionControl (const std::string& mid
     if (!has_playback) {
         _playback_on_button->hide();
         _playback_off_button->hide();
-        _playback_on_button = NULL;
-        _playback_off_button = NULL;
     }
     
 	_name_label = &_children.get_label ("midi_device_name_label");
