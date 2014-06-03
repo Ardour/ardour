@@ -1757,23 +1757,25 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 void
 Editor::temporal_zoom_by_slider ()
 {
-	int64_t samples_per_pixel = (int64_t)(pow (2, _temporal_zoom_adjustment.get_value()) + 0.001);
-	temporal_zoom (samples_per_pixel);
+	double value = _temporal_zoom_adjustment.get_value();
+    int64_t spp = (int64_t)(pow (2.0f, (int)value) + 0.001);
+    set_zoom_focus ( ZoomFocusLeft);
+	temporal_zoom (spp);
 }
 
 void
 Editor::update_temporal_zoom_slider ()
 {
-	return;
 	double value = samples_per_pixel;
-
+    value = (int64_t)(log (value) * 1.44269504088896340736 + 0.001);
+    
 	if ( value < _temporal_zoom_adjustment.get_lower ()) {
 		value = _temporal_zoom_adjustment.get_lower ();
 	} else if ( value > _temporal_zoom_adjustment.get_upper ()) {
 		value = _temporal_zoom_adjustment.get_upper ();
 	}
 
-	_temporal_zoom_adjustment.set_value(samples_per_pixel);
+	_temporal_zoom_adjustment.set_value(value);
 }
 
 bool

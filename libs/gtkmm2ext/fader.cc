@@ -354,7 +354,7 @@ Fader::on_scroll_event (GdkEventScroll* ev)
 			scale = 0.05;
 		}
 	} else {
-		scale = 0.25;
+		scale = 1;
 	}
 
 	switch (ev->direction) {
