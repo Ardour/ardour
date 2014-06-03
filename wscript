@@ -868,7 +868,7 @@ def build(bld):
     for i in children:
         bld.recurse(i)
 
-    bld.install_files (bld.env['SYSCONFDIR'], 'ardour_system.rc')
+    bld.install_files (bld.env['CONFDIR'], 'ardour_system.rc')
 
     if bld.env['RUN_TESTS']:
         bld.add_post_fun(test)
