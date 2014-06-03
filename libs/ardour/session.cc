@@ -4124,7 +4124,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 			  bool /*overwrite*/, vector<boost::shared_ptr<Source> >& srcs,
 			  InterThreadInfo& itt, 
 			  boost::shared_ptr<Processor> endpoint, bool include_endpoint,
-			  bool for_export)
+			  bool for_export, bool for_freeze)
 {
 	boost::shared_ptr<Region> result;
 	boost::shared_ptr<Playlist> playlist;
@@ -4150,7 +4150,8 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 		return result;
 	}
 
-	diskstream_channels = track.bounce_get_output_streams (diskstream_channels, endpoint, include_endpoint, for_export);
+	diskstream_channels = track.bounce_get_output_streams (diskstream_channels, endpoint,
+			include_endpoint, for_export, for_freeze);
 
 	if (diskstream_channels.n_audio() < 1) {
 		error << _("Cannot write a range with no audio.") << endmsg;
@@ -4217,7 +4218,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 	position = start;
 	to_do = len;
-	latency_skip = track.bounce_get_latency (endpoint, include_endpoint, for_export);
+	latency_skip = track.bounce_get_latency (endpoint, include_endpoint, for_export, for_freeze);
 
 	/* create a set of reasonably-sized buffers */
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
@@ -4235,7 +4236,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 		this_chunk = min (to_do, bounce_chunk_size);
 
-		if (track.export_stuff (buffers, start, this_chunk, endpoint, include_endpoint, for_export)) {
+		if (track.export_stuff (buffers, start, this_chunk, endpoint, include_endpoint, for_export, for_freeze)) {
 			goto out;
 		}
 
@@ -4264,14 +4265,14 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	}
 
 	/* post-roll, pick up delayed processor output */
-	latency_skip = track.bounce_get_latency (endpoint, include_endpoint, for_export);
+	latency_skip = track.bounce_get_latency (endpoint, include_endpoint, for_export, for_freeze);
 
 	while (latency_skip && !itt.cancel) {
 		this_chunk = min (latency_skip, bounce_chunk_size);
 		latency_skip -= this_chunk;
 
 		buffers.silence (this_chunk, 0);
-		track.bounce_process (buffers, start, this_chunk, endpoint, include_endpoint, for_export);
+		track.bounce_process (buffers, start, this_chunk, endpoint, include_endpoint, for_export, for_freeze);
 
 		uint32_t n = 0;
 		for (vector<boost::shared_ptr<Source> >::iterator src=srcs.begin(); src != srcs.end(); ++src, ++n) {

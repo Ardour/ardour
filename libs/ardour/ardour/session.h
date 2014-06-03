@@ -608,7 +608,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	boost::shared_ptr<Region> write_one_track (AudioTrack&, framepos_t start, framepos_t end,
 						   bool overwrite, std::vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot,
-						   boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export);
+						   boost::shared_ptr<Processor> endpoint,
+							 bool include_endpoint, bool for_export, bool for_freeze);
 	int freeze_all (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */

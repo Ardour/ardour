@@ -538,7 +538,8 @@ Route::process_output_buffers (BufferSet& bufs,
 
 void
 Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
-			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export)
+		boost::shared_ptr<Processor> endpoint,
+		bool include_endpoint, bool for_export, bool for_freeze)
 {
 	/* If no processing is required, there's no need to go any further. */
 	if (!endpoint && !include_endpoint) {
@@ -558,6 +559,9 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 		if (!for_export && boost::dynamic_pointer_cast<PortInsert>(*i)) {
 			break;
 		}
+		if (!for_export && for_freeze && (*i)->does_routing() && (*i)->active()) {
+			break;
+		}
 
 		/* don't run any processors that does routing.
 		 * oh, and don't bother with the peak meter either.
@@ -574,7 +578,8 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 }
 
 framecnt_t
-Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export) const
+Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint,
+		bool include_endpoint, bool for_export, bool for_freeze) const
 {
 	framecnt_t latency = 0;
 	if (!endpoint && !include_endpoint) {
@@ -588,6 +593,9 @@ Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_e
 		if (!for_export && boost::dynamic_pointer_cast<PortInsert>(*i)) {
 			break;
 		}
+		if (!for_export && for_freeze && (*i)->does_routing() && (*i)->active()) {
+			break;
+		}
 		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
 			latency += (*i)->signal_latency ();
 		}
@@ -599,7 +607,8 @@ Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_e
 }
 
 ChanCount
-Route::bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export) const
+Route::bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint,
+		bool include_endpoint, bool for_export, bool for_freeze) const
 {
 	if (!endpoint && !include_endpoint) {
 		return cc;
@@ -610,6 +619,9 @@ Route::bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> en
 			break;
 		}
 		if (!for_export && boost::dynamic_pointer_cast<PortInsert>(*i)) {
+			break;
+		}
+		if (!for_export && for_freeze && (*i)->does_routing() && (*i)->active()) {
 			break;
 		}
 		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {

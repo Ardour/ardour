@@ -473,10 +473,10 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	virtual void bounce_process (BufferSet& bufs,
 	                             framepos_t start_frame, framecnt_t nframes,
 															 boost::shared_ptr<Processor> endpoint, bool include_endpoint,
-	                             bool for_export);
+	                             bool for_export, bool for_freeze);
 
-	framecnt_t   bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export) const;
-	ChanCount    bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export) const;
+	framecnt_t   bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
+	ChanCount    bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
 
 	boost::shared_ptr<IO> _input;
 	boost::shared_ptr<IO> _output;

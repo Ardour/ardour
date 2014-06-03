@@ -97,7 +97,7 @@ class LIBARDOUR_API Auditioner : public Track
 	boost::shared_ptr<Region> bounce_range (framepos_t, framepos_t, InterThreadInfo&, boost::shared_ptr<Processor>, bool)
 		{ return boost::shared_ptr<Region> (); }
 
-	int export_stuff (BufferSet&, framepos_t, framecnt_t, boost::shared_ptr<Processor>, bool, bool)
+	int export_stuff (BufferSet&, framepos_t, framecnt_t, boost::shared_ptr<Processor>, bool, bool, bool)
 		{ return -1; }
 
 	boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &)

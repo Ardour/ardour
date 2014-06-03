@@ -72,7 +72,8 @@ public:
 	                  framecnt_t                   end_frame,
 	                  boost::shared_ptr<Processor> endpoint,
 	                  bool                         include_endpoint,
-	                  bool                         for_export);
+	                  bool                         for_export,
+	                  bool                         for_freeze);
 
 	int set_state (const XMLNode&, int version);
 
