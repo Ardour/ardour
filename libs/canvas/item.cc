@@ -173,8 +173,10 @@ Item::item_to_window (ArdourCanvas::Duple const & d, bool rounded) const
 {
 	Duple ret = item_to_canvas (d).translate (-scroll_offset());
 
-	ret.x = round (ret.x);
-	ret.y = round (ret.y);
+	if (rounded) {
+		ret.x = round (ret.x);
+		ret.y = round (ret.y);
+	}
 
 	return ret;
 }

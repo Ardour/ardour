@@ -148,6 +148,11 @@ public:
         void canvas_to_item (Coord &, Coord &) const;
 	void item_to_canvas (Coord &, Coord &) const;
 
+        Duple canvas_to_item (Duple const&) const;
+	Rect item_to_canvas (Rect const&) const;
+        Duple item_to_canvas (Duple const&) const;
+	Rect canvas_to_item (Rect const&) const;
+
         Duple item_to_window (Duple const&, bool rounded = true) const;
         Duple window_to_item (Duple const&) const;
         Rect item_to_window (Rect const&) const;
