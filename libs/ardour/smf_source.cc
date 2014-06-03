@@ -35,7 +35,7 @@
 #include <glibmm/fileutils.h>
 
 #include "evoral/Control.hpp"
-#include "evoral/evoral/SMF.hpp"
+#include "evoral/SMF.hpp"
 
 #include "ardour/event_type_map.h"
 #include "ardour/midi_model.h"
