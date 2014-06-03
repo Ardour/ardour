@@ -455,9 +455,8 @@ TracksControlPanel::populate_midi_ports()
     // now add midi device controls
     MidiDeviceDescriptorVec::iterator iter;
     for (iter = midi_device_descriptors.begin(); iter != midi_device_descriptors.end(); ++iter ) {
-        add_midi_device_control(iter->name,
-                                                                       iter->capture_name, iter->capture_active,
-                                                                       iter->playback_name, iter->playback_active);
+        add_midi_device_control(iter->name, iter->capture_name, iter->capture_active,
+                                            iter->playback_name, iter->playback_active);
     }
 }
 
@@ -915,14 +914,14 @@ void TracksControlPanel::on_playback_active_changed(DeviceConnectionControl* pla
 void TracksControlPanel::on_midi_capture_active_changed(MidiDeviceConnectionControl* control, bool active)
 {
     const char * id_name = (char*)control->get_data(MidiDeviceConnectionControl::capture_id_name);
-    EngineStateController::instance()->set_physical_midi_input_state(id_name, active);
+    //EngineStateController::instance()->set_physical_midi_input_state(id_name, active);
 }
 
 
 void TracksControlPanel::on_midi_playback_active_changed(MidiDeviceConnectionControl* control, bool active)
 {
     const char * id_name = (char*)control->get_data(MidiDeviceConnectionControl::playback_id_name);
-    EngineStateController::instance()->set_physical_midi_output_state(id_name, active);
+    //EngineStateController::instance()->set_physical_midi_output_state(id_name, active);
 }
 
 
