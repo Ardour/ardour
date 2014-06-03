@@ -694,7 +694,18 @@ RegionView::move (double x_delta, double y_delta)
 		return;
 	}
 
-	get_canvas_group()->move (ArdourCanvas::Duple (x_delta, y_delta));
+	/* items will not prevent Item::move() moving
+	 * them to a negative x-axis coordinate, which
+	 * is legal, but we don't want that here.
+	 */
+
+	ArdourCanvas::Item *item = get_canvas_group ();
+	
+	if (item->position().x + x_delta < 0) {
+		x_delta = -item->position().x; /* move it to zero */
+	}
+
+	item->move (ArdourCanvas::Duple (x_delta, y_delta));
 
 	/* note: ghosts never leave their tracks so y_delta for them is always zero */
 

@@ -82,6 +82,20 @@ Item::~Item ()
 	}
 }
 
+Duple
+Item::window_origin () const 
+{
+	/* This is slightly subtle. Our _position is in the coordinate space of 
+	   our parent. So to find out where that is in window coordinates, we
+	   have to ask our parent.
+	*/
+	if (_parent) {
+		return _parent->item_to_window (_position);
+	} else {
+		return _parent->item_to_window (Duple (0,0));
+	}
+}
+
 ArdourCanvas::Rect
 Item::item_to_parent (ArdourCanvas::Rect const & r) const
 {

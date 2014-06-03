@@ -116,12 +116,8 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (time_line_group, "time line group");
 
 	_trackview_group = new ArdourCanvas::Group (hv_scroll_group);
-	//_trackview_group->set_scroll_sensitivity (ArdourCanvas::Group::ScrollSensitivity (ArdourCanvas::Group::ScrollsVertically|ArdourCanvas::Group::ScrollsHorizontally));	
 	CANVAS_DEBUG_NAME (_trackview_group, "Canvas TrackViews");
 	
-	_region_motion_group = new ArdourCanvas::Group (_trackview_group);
-	CANVAS_DEBUG_NAME (_region_motion_group, "Canvas Region Motion");
-
 	/* TIME BAR CANVAS */
 	
 	_time_markers_group = new ArdourCanvas::Group (h_scroll_group);
@@ -453,7 +449,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 
 	if (convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
 
-		/* D-n-D coordinates are window-relative, so convert to "world" coordinates
+		/* D-n-D coordinates are window-relative, so convert to canvas coordinates
 		 */
 
 		ev.type = GDK_BUTTON_RELEASE;
