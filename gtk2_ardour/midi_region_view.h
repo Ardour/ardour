@@ -21,7 +21,7 @@
 
 #include <string>
 #include <vector>
-
+#include <stdint.h>
 
 #include "pbd/signals.h"
 
