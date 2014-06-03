@@ -21,9 +21,13 @@
 
 #include <cassert>
 #include <list>
+#include <stdint.h>
+
 #include <boost/pool/pool.hpp>
 #include <boost/pool/pool_alloc.hpp>
+
 #include <glibmm/threads.h>
+
 #include "pbd/signals.h"
 
 #include "evoral/visibility.h"
