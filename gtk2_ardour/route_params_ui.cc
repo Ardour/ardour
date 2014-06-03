@@ -25,6 +25,7 @@
 #include <gtkmm2ext/window_title.h>
 
 #include "ardour/audioengine.h"
+#include "ardour/audio_track.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/plugin_manager.h"
@@ -215,6 +216,25 @@ RouteParams_UI::route_property_changed (const PropertyChange& what_changed, boos
 }
 
 void
+RouteParams_UI::map_frozen()
+{
+	ENSURE_GUI_THREAD (*this, &RouteParams_UI::map_frozen)
+	boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(_route);
+	if (at && insert_box) {
+		switch (at->freeze_state()) {
+			case AudioTrack::Frozen:
+				insert_box->set_sensitive (false);
+				//hide_redirect_editors (); // TODO hide editor windows
+				break;
+			default:
+				insert_box->set_sensitive (true);
+				// XXX need some way, maybe, to retoggle redirect editors
+				break;
+		}
+	}
+}
+
+void
 RouteParams_UI::setup_processor_boxes()
 {
 	if (_session && _route) {
@@ -226,6 +246,10 @@ RouteParams_UI::setup_processor_boxes()
 		insert_box = new ProcessorBox (_session, boost::bind (&RouteParams_UI::plugin_selector, this), _rr_selection, 0);
 		insert_box->set_route (_route);
 
+		boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(_route);
+		if (at) {
+			at->FreezeChange.connect (route_connections, invalidator (*this), boost::bind (&RouteParams_UI::map_frozen, this), gui_context());
+		}
 		redir_hpane.pack1 (*insert_box);
 
 		insert_box->ProcessorSelected.connect (sigc::mem_fun(*this, &RouteParams_UI::redirect_selected));
