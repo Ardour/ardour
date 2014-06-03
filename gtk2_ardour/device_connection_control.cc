@@ -25,6 +25,7 @@ const char * DeviceConnectionControl::id_name = "_id_name";
 DeviceConnectionControl::DeviceConnectionControl (const std::string& device_capture_name, bool active, uint16_t capture_number, const std::string& track_name)
 
 	: Gtk::Layout()
+    , _active(false)
 	, _active_on_button (NULL)
 	, _active_off_button (NULL)
 	, _name_label (NULL)
@@ -43,6 +44,7 @@ DeviceConnectionControl::DeviceConnectionControl (const std::string& device_capt
 DeviceConnectionControl::DeviceConnectionControl (const std::string& device_playback_name, bool active, uint16_t playback_number)
 
 	: Gtk::Layout()
+    , _active(false)
 	, _active_on_button (NULL)
 	, _active_off_button (NULL)
 	, _name_label (NULL)
@@ -57,36 +59,6 @@ DeviceConnectionControl::DeviceConnectionControl (const std::string& device_play
 	init(device_playback_name, active, playback_number);
 }
 
-DeviceConnectionControl::DeviceConnectionControl (const std::string& midi_capture_name, bool active)
-
-	: Gtk::Layout()
-	, _active_on_button (NULL)
-	, _active_off_button (NULL)
-	, _name_label (NULL)
-	, _track_name_label (NULL)
-	, _number_label (NULL)
-{
-	build_layout("midi_capture_control.xml");
-	_active_on_button = &_children.get_waves_button ("capture_on_button");
-	_active_off_button = &_children.get_waves_button ("capture_off_button");
-	_name_label = &_children.get_label ("capture_name_label");
-	init(midi_capture_name, active, NoNumber);
-}
-
-DeviceConnectionControl::DeviceConnectionControl (bool active)
-
-	: Gtk::Layout()
-	, _active_on_button (NULL)
-	, _active_off_button (NULL)
-	, _name_label (NULL)
-	, _track_name_label (NULL)
-	, _number_label (NULL)
-{
-	build_layout("midi_playback_control.xml");
-	_active_on_button = &_children.get_waves_button ("playback_on_button");
-	_active_off_button = &_children.get_waves_button ("playback_off_button");
-	init("", active, NoNumber);
-}
 
 void DeviceConnectionControl::init(const std::string& name, bool active, uint16_t number, const std::string& track_name)
 {

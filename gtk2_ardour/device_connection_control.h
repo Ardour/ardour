@@ -36,8 +36,6 @@ class DeviceConnectionControl : public Gtk::Layout
 
 	DeviceConnectionControl (const std::string& device_capture_name, bool active, uint16_t capture_number, const std::string& track_name);
 	DeviceConnectionControl (const std::string& device_playback_name, bool active, uint16_t playback_number);
-	DeviceConnectionControl (const std::string& midi_capture_name, bool active);
-	DeviceConnectionControl (bool active);
 
 	bool build_layout (const std::string& file_name);
 	void set_number (uint16_t number);
