@@ -138,7 +138,7 @@ TracksControlPanel::init ()
 
     populate_input_channels();
     populate_output_channels();
-    populate_midi_channels();
+    populate_midi_ports();
     populate_default_session_path();
     
 	_audio_settings_tab_button.set_active(true);
@@ -341,10 +341,10 @@ TracksControlPanel::populate_input_channels()
     cleanup_input_channels_list();
     
     // process captures (inputs)
-    std::vector<EngineStateController::ChannelState> input_states;
+    std::vector<EngineStateController::PortState> input_states;
     EngineStateController::instance()->get_physical_audio_input_states(input_states);
     
-    std::vector<EngineStateController::ChannelState>::const_iterator input_iter;
+    std::vector<EngineStateController::PortState>::const_iterator input_iter;
     
     uint16_t number_count = 1;
     for (input_iter = input_states.begin(); input_iter != input_states.end(); ++input_iter ) {
@@ -381,10 +381,10 @@ TracksControlPanel::populate_output_channels()
     cleanup_output_channels_list();
         
     // process captures (outputs)
-    std::vector<EngineStateController::ChannelState> output_states;
+    std::vector<EngineStateController::PortState> output_states;
     EngineStateController::instance()->get_physical_audio_output_states(output_states);
     
-    std::vector<EngineStateController::ChannelState>::const_iterator output_iter;
+    std::vector<EngineStateController::PortState>::const_iterator output_iter;
     
     uint16_t number_count = 1;
     for (output_iter = output_states.begin(); output_iter != output_states.end(); ++output_iter ) {
@@ -405,17 +405,17 @@ TracksControlPanel::populate_output_channels()
 
 
 void
-TracksControlPanel::populate_midi_channels()
+TracksControlPanel::populate_midi_ports()
 {
     cleanup_midi_device_list();
     
-    std::vector<EngineStateController::ChannelState> midi_input_states, midi_output_states;
+    std::vector<EngineStateController::PortState> midi_input_states, midi_output_states;
     EngineStateController::instance()->get_physical_midi_input_states(midi_input_states);
     EngineStateController::instance()->get_physical_midi_output_states(midi_output_states);
     
     // now group corresponding inputs and outputs into a vector of midi device descriptors
     MidiDeviceDescriptorVec midi_device_descriptors;
-    std::vector<EngineStateController::ChannelState>::const_iterator state_iter;
+    std::vector<EngineStateController::PortState>::const_iterator state_iter;
     // process inputs
     for (state_iter = midi_input_states.begin(); state_iter != midi_input_states.end(); ++state_iter) {
         // strip the device name from input port name
@@ -930,7 +930,7 @@ void TracksControlPanel::on_port_registration_update()
 {
     populate_input_channels();
     populate_output_channels();
-    populate_midi_channels();
+    populate_midi_ports();
 }
 
 

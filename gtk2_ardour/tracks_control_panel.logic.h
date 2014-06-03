@@ -23,29 +23,6 @@
   public:
 
   private:
-// data types:
-    struct State {
-		std::string backend;
-		std::string driver;
-		std::string device;
-		float sample_rate;
-		uint32_t buffer_size;
-		uint32_t input_latency;
-		uint32_t output_latency;
-		uint32_t input_channels;
-		uint32_t output_channels;
-		bool active;
-		std::string midi_option;
-
-		State() 
-			: input_latency (0)
-			, output_latency (0)
-			, input_channels (0)
-			, output_channels (0)
-			, active (false) {}
-    };
-
-    typedef std::list<State> StateList;
 
 // attributes
     uint32_t _desired_sample_rate;
@@ -55,8 +32,6 @@
 	// when we don need to process current combo-box change
 	uint32_t _ignore_changes;
     std::string _current_device;
-
-	StateList states;
 
 //	Sync stuff
 	PBD::ScopedConnectionList update_connections;
@@ -107,7 +82,7 @@
 	void populate_output_mode ();
     void populate_input_channels();
     void populate_output_channels();
-    void populate_midi_channels();
+    void populate_midi_ports();
     void populate_default_session_path();
 
     // Engine State update callback handlers

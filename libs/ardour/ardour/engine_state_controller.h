@@ -24,27 +24,27 @@ class EngineStateController
 public:
     
     // public data types:
-    struct ChannelState {
+    struct PortState {
         std::string name;
         bool active;
         
-        ChannelState ()
+        PortState ()
         : name(""),
         active(false)
         {
         }
         
-        ChannelState (const std::string& name)
+        PortState (const std::string& name)
         : name(name),
         active(false)
         {
         }
         
-        bool operator==(const ChannelState& rhs) {return rhs.name == name; }
+        bool operator==(const PortState& rhs) {return rhs.name == name; }
         
     };
     
-    typedef std::list<ChannelState> ChannelStateList;
+    typedef std::list<PortState> PortStateList;
     
     static EngineStateController* instance();
     
@@ -82,8 +82,8 @@ public:
     void                set_state_to_all_outputs(bool); // does nothing in Stereo Out mode
     
     // get states of all inputs/outputs
-    void                get_physical_audio_input_states(std::vector<ChannelState>&);
-    void                get_physical_audio_output_states(std::vector<ChannelState>&);
+    void                get_physical_audio_input_states(std::vector<PortState>&);
+    void                get_physical_audio_output_states(std::vector<PortState>&);
     
     // set/get the state for input or output
     void                set_physical_audio_input_state(const std::string&, bool);
@@ -92,8 +92,8 @@ public:
     bool                get_physical_audio_output_state(const std::string&);
     
     // get all enabled midi input/output states
-    void                get_physical_midi_input_states (std::vector<ChannelState>&);
-    void                get_physical_midi_output_states (std::vector<ChannelState>&);
+    void                get_physical_midi_input_states (std::vector<PortState>&);
+    void                get_physical_midi_output_states (std::vector<PortState>&);
     
     // set/get the state for input or output
     void                set_physical_midi_input_state(const std::string&, bool);
@@ -154,6 +154,9 @@ private:
     EngineStateController(const EngineStateController& ); // prohibited
     EngineStateController& operator=(const EngineStateController&); // prohibited
     
+    // private data structures
+    
+    // Engine state
     struct State {
 		std::string backend_name;
 		std::string device_name;
@@ -161,11 +164,9 @@ private:
 		ARDOUR::pframes_t buffer_size;
 		uint32_t input_latency;
 		uint32_t output_latency;
-		ChannelStateList input_channel_states;
-		ChannelStateList multi_out_channel_states;
-        ChannelStateList stereo_out_channel_states;
-        ChannelStateList midi_in_channel_states;
-        ChannelStateList midi_out_channel_states;
+		PortStateList input_channel_states;
+		PortStateList multi_out_channel_states;
+        PortStateList stereo_out_channel_states;
 		//bool active;
 		std::string midi_option;
         
@@ -206,9 +207,33 @@ private:
     typedef boost::shared_ptr<State> StatePtr;
     typedef std::list<StatePtr> StateList;
     
+    // MIDI device data structures
+    
+    struct MidiPortState
+    {
+        std::string name;
+        bool active;
+        bool available;
+        
+        MidiPortState(const std::string& name):
+        name(name),
+        active(false),
+        available(false)
+        {}
+        
+        bool operator==(const MidiPortState& rhs)
+        {
+            return name == rhs.name;
+        }
+    };
+    
+    typedef std::list<MidiPortState> MidiPortStateList;
+    
     // state control methods////////////////
-    void _deserialize_and_load_states();
-    void _serialize_and_save_current_state();
+    void _deserialize_and_load_engine_states();
+    void _deserialize_and_load_midi_port_states() {};
+    void _serialize_and_save_current_engine_state();
+    void _serialize_and_save_midi_port_states() {};
     // sets last active state as current state
     // if no last active state found it loads default state
     void _set_last_active_state_as_current();
@@ -240,6 +265,9 @@ private:
     StatePtr _current_state;
     // list of system states
     StateList _states;
+    
+    MidiPortStateList _midi_inputs;
+    MidiPortStateList _midi_outputs;
     
     // last active non-default (real) device
     std::string _last_used_real_device;

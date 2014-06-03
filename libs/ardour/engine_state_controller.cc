@@ -65,8 +65,9 @@ EngineStateController::EngineStateController()
     /* Global configuration parameters update */
     Config->ParameterChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_parameter_changed, this, _1) );
     
-    _deserialize_and_load_states();
+    _deserialize_and_load_engine_states();
     _set_last_active_state_as_current();
+    _deserialize_and_load_midi_port_states();
     
     // now push the sate to the backend
     push_current_state_to_backend(false);
@@ -80,14 +81,14 @@ EngineStateController::~EngineStateController()
 
 
 void
-EngineStateController::_deserialize_and_load_states()
+EngineStateController::_deserialize_and_load_engine_states()
 {
     
 }
 
 
 void
-EngineStateController::_serialize_and_save_current_state()
+EngineStateController::_serialize_and_save_current_engine_state()
 {
     // **** add code to save the state list to the file ****
 }
@@ -388,7 +389,7 @@ EngineStateController::get_available_inputs_count() const
 {
     uint32_t available_channel_count = 0;
     
-    ChannelStateList::const_iterator iter = _current_state->input_channel_states.begin();
+    PortStateList::const_iterator iter = _current_state->input_channel_states.begin();
     
     for (; iter != _current_state->input_channel_states.end(); ++iter) {
         if (iter->active) {
@@ -405,14 +406,14 @@ EngineStateController::get_available_outputs_count () const
 {
     uint32_t available_channel_count = 0;
     
-    ChannelStateList* output_states;
+    PortStateList* output_states;
     if (Config->get_output_auto_connect() & AutoConnectMaster) {
         output_states = &_current_state->stereo_out_channel_states;
     } else {
         output_states = &_current_state->multi_out_channel_states;
     }
     
-    ChannelStateList::const_iterator iter = output_states->begin();
+    PortStateList::const_iterator iter = output_states->begin();
     
     for (; iter != output_states->end(); ++iter) {
         if (iter->active) {
@@ -429,23 +430,12 @@ EngineStateController::get_physical_audio_inputs(std::vector<std::string>& port_
 {
     port_names.clear();
     
-    boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
-	assert(backend);
+    PortStateList &input_states = _current_state->input_channel_states;
     
-    // update audio input states
-    std::vector<std::string> phys_audio_inputs;
-    backend->get_physical_inputs(DataType::AUDIO, phys_audio_inputs);
-    
-    ChannelStateList &input_states = _current_state->input_channel_states;
-    
-    std::vector<std::string>::const_iterator input_iter = phys_audio_inputs.begin();
-    for (; input_iter != phys_audio_inputs.end(); ++input_iter) {
-        
-        ChannelStateList::const_iterator found_state_iter;
-        found_state_iter = std::find(input_states.begin(), input_states.end(), ChannelState(*input_iter) );
-        
-        if (found_state_iter != input_states.end() && found_state_iter->active) {
-            port_names.push_back(found_state_iter->name);
+    PortStateList::iterator iter = input_states.begin();
+    for (; iter != input_states.end(); ++iter) {
+        if (iter->active) {
+            port_names.push_back(iter->name);
         }
     }
 }
@@ -456,28 +446,17 @@ EngineStateController::get_physical_audio_outputs(std::vector<std::string>& port
 {
     port_names.clear();
     
-    boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
-	assert(backend);
-    
-    // update audio input states
-    std::vector<std::string> phys_audio_outputs;
-    backend->get_physical_outputs(DataType::AUDIO, phys_audio_outputs);
-    
-    ChannelStateList* output_states;
+    PortStateList* output_states;
     if (Config->get_output_auto_connect() & AutoConnectMaster) {
         output_states = &_current_state->stereo_out_channel_states;
     } else {
         output_states = &_current_state->multi_out_channel_states;
     }
     
-    std::vector<std::string>::const_iterator output_iter = phys_audio_outputs.begin();
-    for (; output_iter != phys_audio_outputs.end(); ++output_iter) {
-        
-        ChannelStateList::const_iterator found_state_iter;
-        found_state_iter = std::find(output_states->begin(), output_states->end(), ChannelState(*output_iter) );
-        
-        if (found_state_iter != output_states->end() && found_state_iter->active) {
-            port_names.push_back(found_state_iter->name);
+    PortStateList::iterator iter = output_states->begin();
+    for (; iter != output_states->end(); ++iter) {
+        if (iter->active) {
+            port_names.push_back(iter->name);
         }
     }
 }
@@ -488,23 +467,10 @@ EngineStateController::get_physical_midi_inputs (std::vector<std::string>& port_
 {
     port_names.clear();
     
-    boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
-	assert(backend);
-    
-    // update audio input states
-    std::vector<std::string> phys_midi_inputs;
-    backend->get_physical_inputs(DataType::MIDI, phys_midi_inputs);
-    
-    ChannelStateList& midi_input_states = _current_state->midi_in_channel_states;
-    
-    std::vector<std::string>::const_iterator midi_in_iter = phys_midi_inputs.begin();
-    for (; midi_in_iter != phys_midi_inputs.end(); ++midi_in_iter) {
-        
-        ChannelStateList::const_iterator found_state_iter;
-        found_state_iter = std::find(midi_input_states.begin(), midi_input_states.end(), ChannelState(*midi_in_iter) );
-        
-        if (found_state_iter != midi_input_states.end() && found_state_iter->active) {
-            port_names.push_back(found_state_iter->name);
+    MidiPortStateList::iterator iter = _midi_inputs.begin();
+    for (; iter != _midi_inputs.end(); ++iter) {
+        if (iter->available && iter->active) {
+            port_names.push_back(iter->name);
         }
     }
 }
@@ -515,23 +481,10 @@ EngineStateController::get_physical_midi_outputs (std::vector<std::string>& port
 {
     port_names.clear();
     
-    boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
-	assert(backend);
-    
-    // update audio input states
-    std::vector<std::string> phys_midi_outputs;
-    backend->get_physical_outputs(DataType::MIDI, phys_midi_outputs);
-    
-    ChannelStateList& midi_output_states = _current_state->midi_out_channel_states;
-    
-    std::vector<std::string>::const_iterator midi_out_iter = phys_midi_outputs.begin();
-    for (; midi_out_iter != phys_midi_outputs.end(); ++midi_out_iter) {
-        
-        ChannelStateList::const_iterator found_state_iter;
-        found_state_iter = std::find(midi_output_states.begin(), midi_output_states.end(), ChannelState(*midi_out_iter) );
-        
-        if (found_state_iter != midi_output_states.end() && found_state_iter->active) {
-            port_names.push_back(found_state_iter->name);
+    MidiPortStateList::iterator iter = _midi_outputs.begin();
+    for (; iter != _midi_outputs.end(); ++iter) {
+        if (iter->available && iter->active) {
+            port_names.push_back(iter->name);
         }
     }
 }
@@ -540,9 +493,9 @@ EngineStateController::get_physical_midi_outputs (std::vector<std::string>& port
 void
 EngineStateController::set_physical_audio_input_state(const std::string& port_name, bool state)
 {
-    ChannelStateList &input_states = _current_state->input_channel_states;
-    ChannelStateList::iterator found_state_iter;
-    found_state_iter = std::find(input_states.begin(), input_states.end(), ChannelState(port_name) );
+    PortStateList &input_states = _current_state->input_channel_states;
+    PortStateList::iterator found_state_iter;
+    found_state_iter = std::find(input_states.begin(), input_states.end(), PortState(port_name) );
     
     if (found_state_iter != input_states.end() && found_state_iter->active != state ) {
         found_state_iter->active = state;
@@ -556,15 +509,15 @@ EngineStateController::set_physical_audio_input_state(const std::string& port_na
 void
 EngineStateController::set_physical_audio_output_state(const std::string& port_name, bool state)
 {
-    ChannelStateList* output_states;
+    PortStateList* output_states;
     if (Config->get_output_auto_connect() & AutoConnectMaster) {
         output_states = &_current_state->stereo_out_channel_states;
     } else {
         output_states = &_current_state->multi_out_channel_states;
     }
     
-    ChannelStateList::iterator target_state_iter;
-    target_state_iter = std::find(output_states->begin(), output_states->end(), ChannelState(port_name) );
+    PortStateList::iterator target_state_iter;
+    target_state_iter = std::find(output_states->begin(), output_states->end(), PortState(port_name) );
     
     if (target_state_iter != output_states->end() && target_state_iter->active != state ) {
         target_state_iter->active = state;
@@ -573,7 +526,7 @@ EngineStateController::set_physical_audio_output_state(const std::string& port_n
         if (Config->get_output_auto_connect() & AutoConnectMaster) {
         
             // get next element
-            ChannelStateList::iterator next_state_iter(target_state_iter);
+            PortStateList::iterator next_state_iter(target_state_iter);
             
             // loopback
             if (++next_state_iter == output_states->end() ) {
@@ -635,9 +588,9 @@ EngineStateController::get_physical_audio_input_state(const std::string& port_na
 {
     bool state = false;
     
-    ChannelStateList &input_states = _current_state->input_channel_states;
-    ChannelStateList::iterator found_state_iter;
-    found_state_iter = std::find(input_states.begin(), input_states.end(), ChannelState(port_name) );
+    PortStateList &input_states = _current_state->input_channel_states;
+    PortStateList::iterator found_state_iter;
+    found_state_iter = std::find(input_states.begin(), input_states.end(), PortState(port_name) );
     
     if (found_state_iter != input_states.end() ) {
         state = found_state_iter->active;
@@ -652,15 +605,15 @@ EngineStateController::get_physical_audio_output_state(const std::string& port_n
 {
     bool state = false;
     
-    ChannelStateList* output_states;
+    PortStateList* output_states;
     if (Config->get_output_auto_connect() & AutoConnectMaster) {
         output_states = &_current_state->stereo_out_channel_states;
     } else {
         output_states = &_current_state->multi_out_channel_states;
     }
     
-    ChannelStateList::iterator found_state_iter;
-    found_state_iter = std::find(output_states->begin(), output_states->end(), ChannelState(port_name) );
+    PortStateList::iterator found_state_iter;
+    found_state_iter = std::find(output_states->begin(), output_states->end(), PortState(port_name) );
     
     if (found_state_iter != output_states->end() ) {
         state = found_state_iter->active;
@@ -672,16 +625,17 @@ EngineStateController::get_physical_audio_output_state(const std::string& port_n
 
 void
 EngineStateController::set_physical_midi_input_state(const std::string& port_name, bool state) {
-    ChannelStateList &midi_input_states = _current_state->midi_in_channel_states;
-    ChannelStateList::iterator found_state_iter;
-    found_state_iter = std::find(midi_input_states.begin(), midi_input_states.end(), ChannelState(port_name) );
     
-    if (found_state_iter != midi_input_states.end() && found_state_iter->active != state ) {
+    MidiPortStateList::iterator found_state_iter;
+    found_state_iter = std::find(_midi_inputs.begin(), _midi_inputs.end(), MidiPortState(port_name) );
+    
+    if (found_state_iter != _midi_inputs.end() && found_state_iter->available &&found_state_iter->active != state ) {
         found_state_iter->active = state;
         
         // ***************************
         // add actions here
         
+        _serialize_and_save_midi_port_states();
         MIDIInputConfigChanged();
     }
 }
@@ -689,16 +643,17 @@ EngineStateController::set_physical_midi_input_state(const std::string& port_nam
 
 void
 EngineStateController::set_physical_midi_output_state(const std::string& port_name, bool state) {
-    ChannelStateList &midi_output_states = _current_state->midi_out_channel_states;
-    ChannelStateList::iterator found_state_iter;
-    found_state_iter = std::find(midi_output_states.begin(), midi_output_states.end(), ChannelState(port_name) );
     
-    if (found_state_iter != midi_output_states.end() && found_state_iter->active != state ) {
+    MidiPortStateList::iterator found_state_iter;
+    found_state_iter = std::find(_midi_outputs.begin(), _midi_outputs.end(), MidiPortState(port_name) );
+    
+    if (found_state_iter != _midi_outputs.end() && found_state_iter->available && found_state_iter->active != state ) {
         found_state_iter->active = state;
         
         // ***************************
         // add actions here
         
+        _serialize_and_save_midi_port_states();
         MIDIOutputConfigChanged();
     }
 }
@@ -709,11 +664,10 @@ EngineStateController::get_physical_midi_input_state(const std::string& port_nam
     
     bool state = false;
     
-    ChannelStateList &midi_input_states = _current_state->midi_in_channel_states;
-    ChannelStateList::iterator found_state_iter;
-    found_state_iter = std::find(midi_input_states.begin(), midi_input_states.end(), ChannelState(port_name) );
+    MidiPortStateList::iterator found_state_iter;
+    found_state_iter = std::find(_midi_inputs.begin(), _midi_inputs.end(), MidiPortState(port_name) );
     
-    if (found_state_iter != midi_input_states.end() ) {
+    if (found_state_iter != _midi_inputs.end() && found_state_iter->available) {
         state = found_state_iter->active;
     }
     
@@ -726,11 +680,10 @@ EngineStateController::get_physical_midi_output_state(const std::string& port_na
     
     bool state = false;
     
-    ChannelStateList &midi_output_states = _current_state->midi_out_channel_states;
-    ChannelStateList::iterator found_state_iter;
-    found_state_iter = std::find(midi_output_states.begin(), midi_output_states.end(), ChannelState(port_name) );
+    MidiPortStateList::iterator found_state_iter;
+    found_state_iter = std::find(_midi_outputs.begin(), _midi_outputs.end(), MidiPortState(port_name) );
     
-    if (found_state_iter != midi_output_states.end() ) {
+    if (found_state_iter != _midi_outputs.end() && found_state_iter->available) {
         state = found_state_iter->active;
     }
     
@@ -743,7 +696,7 @@ EngineStateController::set_state_to_all_inputs(bool state)
 {
     bool something_changed = false;
     
-    ChannelStateList::iterator iter = _current_state->input_channel_states.begin();
+    PortStateList::iterator iter = _current_state->input_channel_states.begin();
     for (; iter != _current_state->input_channel_states.end(); ++iter) {
         if (iter->active != state) {
             iter->active = state;
@@ -768,7 +721,7 @@ EngineStateController::set_state_to_all_outputs(bool state)
     
     bool something_changed = false;
     
-    ChannelStateList::iterator iter = _current_state->multi_out_channel_states.begin();
+    PortStateList::iterator iter = _current_state->multi_out_channel_states.begin();
     for (; iter != _current_state->multi_out_channel_states.end(); ++iter) {
         if (iter->active != state) {
             iter->active = state;
@@ -784,17 +737,17 @@ EngineStateController::set_state_to_all_outputs(bool state)
 
 
 void
-EngineStateController::get_physical_audio_input_states(std::vector<ChannelState>& channel_states)
+EngineStateController::get_physical_audio_input_states(std::vector<PortState>& channel_states)
 {
-    ChannelStateList &input_states = _current_state->input_channel_states;
+    PortStateList &input_states = _current_state->input_channel_states;
     channel_states.assign(input_states.begin(), input_states.end());
 }
 
 
 void
-EngineStateController::get_physical_audio_output_states(std::vector<ChannelState>& channel_states)
+EngineStateController::get_physical_audio_output_states(std::vector<PortState>& channel_states)
 {
-    ChannelStateList* output_states;
+    PortStateList* output_states;
     if (Config->get_output_auto_connect() & AutoConnectMaster) {
         output_states = &_current_state->stereo_out_channel_states;
     } else {
@@ -806,19 +759,35 @@ EngineStateController::get_physical_audio_output_states(std::vector<ChannelState
 
 
 void
-EngineStateController::get_physical_midi_input_states (std::vector<ChannelState>& channel_states)
+EngineStateController::get_physical_midi_input_states (std::vector<PortState>& channel_states)
 {
-    ChannelStateList& midi_input_states = _current_state->midi_in_channel_states;
+    channel_states.clear();
     
-    channel_states.assign(midi_input_states.begin(), midi_input_states.end() );
+    MidiPortStateList::iterator iter = _midi_inputs.begin();
+    
+    for (; iter != _midi_inputs.end(); ++iter ) {
+        if (iter->available) {
+            PortState state(iter->name);
+            state.active = iter->active;
+            channel_states.push_back(state);
+        }
+    }    
 }
 
 void
-EngineStateController::get_physical_midi_output_states (std::vector<ChannelState>& channel_states)
+EngineStateController::get_physical_midi_output_states (std::vector<PortState>& channel_states)
 {
-    ChannelStateList& midi_output_states = _current_state->midi_out_channel_states;
+    channel_states.clear();
     
-    channel_states.assign(midi_output_states.begin(), midi_output_states.end() );
+    MidiPortStateList::iterator iter = _midi_outputs.begin();
+    
+    for (; iter != _midi_outputs.end(); ++iter ) {
+        if (iter->available) {
+            PortState state(iter->name);
+            state.active = iter->active;
+            channel_states.push_back(state);
+        }
+    }
 }
 
 
@@ -833,7 +802,6 @@ EngineStateController::_on_sample_rate_change(framecnt_t new_sample_rate)
 		// restore previous state in backend
 		push_current_state_to_backend(false);
 	}
-
 }
 
 
@@ -925,15 +893,15 @@ EngineStateController::_update_device_channels_state(bool reconnect_session_rout
     std::vector<std::string> phys_audio_inputs;
     backend->get_physical_inputs(DataType::AUDIO, phys_audio_inputs);
     
-    ChannelStateList new_input_states;
-    ChannelStateList &input_states = _current_state->input_channel_states;
+    PortStateList new_input_states;
+    PortStateList &input_states = _current_state->input_channel_states;
     
     std::vector<std::string>::const_iterator input_iter = phys_audio_inputs.begin();
     for (; input_iter != phys_audio_inputs.end(); ++input_iter) {
         
-        ChannelState state(*input_iter);
+        PortState state(*input_iter);
         state.active = true;
-        ChannelStateList::const_iterator found_state_iter = std::find(input_states.begin(), input_states.end(), state);
+        PortStateList::const_iterator found_state_iter = std::find(input_states.begin(), input_states.end(), state);
         
         if (found_state_iter != input_states.end() ) {
             new_input_states.push_back(*found_state_iter);
@@ -947,15 +915,15 @@ EngineStateController::_update_device_channels_state(bool reconnect_session_rout
     std::vector<std::string> phys_audio_outputs;
     backend->get_physical_outputs(DataType::AUDIO, phys_audio_outputs);
     
-    ChannelStateList new_output_states;
-    ChannelStateList &output_multi_states = _current_state->multi_out_channel_states;
+    PortStateList new_output_states;
+    PortStateList &output_multi_states = _current_state->multi_out_channel_states;
     
     std::vector<std::string>::const_iterator output_iter = phys_audio_outputs.begin();
     for (; output_iter != phys_audio_outputs.end(); ++output_iter) {
         
-        ChannelState state(*output_iter);
+        PortState state(*output_iter);
         state.active = true;
-        ChannelStateList::const_iterator found_state_iter = std::find(output_multi_states.begin(), output_multi_states.end(), state);
+        PortStateList::const_iterator found_state_iter = std::find(output_multi_states.begin(), output_multi_states.end(), state);
         
         if (found_state_iter != output_multi_states.end() ) {
             new_output_states.push_back(*found_state_iter);
@@ -968,14 +936,14 @@ EngineStateController::_update_device_channels_state(bool reconnect_session_rout
     
     // update audio output states (stereo out mode)
     new_output_states.clear();
-    ChannelStateList &output_stereo_states = _current_state->stereo_out_channel_states;
+    PortStateList &output_stereo_states = _current_state->stereo_out_channel_states;
     
     output_iter = phys_audio_outputs.begin();
     for (; output_iter != phys_audio_outputs.end(); ++output_iter) {
         
-        ChannelState state(*output_iter);
+        PortState state(*output_iter);
         state.active = true;
-        ChannelStateList::const_iterator found_state_iter = std::find(output_stereo_states.begin(), output_stereo_states.end(), state);
+        PortStateList::const_iterator found_state_iter = std::find(output_stereo_states.begin(), output_stereo_states.end(), state);
         
         if (found_state_iter != output_stereo_states.end() ) {
             new_output_states.push_back(*found_state_iter);
@@ -987,52 +955,62 @@ EngineStateController::_update_device_channels_state(bool reconnect_session_rout
     _current_state->stereo_out_channel_states = new_output_states;
     _refresh_stereo_out_channel_states();
     
-    // update midi input channels
+    
+    // update midi ports: unlike audio ports which states are saved per device
+    // each midi port state is saved individualy
+    // so get all midi ports from the backend
+    // and compare to the list of midi ports we have
+    // if physical port is new, add it to our state list
+    // if physical port is present in our state list - mark it available
+    // if there is no corresponding physical port to one we have in a list - leave it unavailable
+    MidiPortStateList::iterator iter = _midi_inputs.begin();
+    for (; iter != _midi_inputs.end(); ++iter) {
+        iter->available = false;
+    }
+    
+    for (iter = _midi_outputs.begin(); iter != _midi_outputs.end(); ++iter) {
+        iter->available = false;
+    }
+    
+    // update midi input ports
     std::vector<std::string> phys_midi_inputs;
     backend->get_physical_inputs(DataType::MIDI, phys_midi_inputs);
-    
-    ChannelStateList new_midi_input_states;
-    ChannelStateList& midi_inputs_states = _current_state->midi_in_channel_states;
     
     std::vector<std::string>::const_iterator midi_input_iter = phys_midi_inputs.begin();
     for (; midi_input_iter != phys_midi_inputs.end(); ++midi_input_iter) {
         
-        ChannelState state(*midi_input_iter);
+        MidiPortState state(*midi_input_iter);
         state.active = false;
-        ChannelStateList::const_iterator found_state_iter = std::find(midi_inputs_states.begin(), midi_inputs_states.end(), state);
+        state.available = true;
+        MidiPortStateList::iterator found_state_iter = std::find(_midi_inputs.begin(), _midi_inputs.end(), state);
         
-        if (found_state_iter != midi_inputs_states.end() ) {
-            new_midi_input_states.push_back(*found_state_iter);
+        if (found_state_iter != _midi_inputs.end() ) {
+            found_state_iter->available = true;
         } else {
-            new_midi_input_states.push_back(state);
+            _midi_inputs.push_back(state);
         }
     }
-
-    _current_state->midi_in_channel_states = new_midi_input_states;
     
-    
-    // update midi output channels
+    // update midi output ports
     std::vector<std::string> phys_midi_outputs;
     backend->get_physical_outputs(DataType::MIDI, phys_midi_outputs);
-    
-    ChannelStateList new_midi_output_states;
-    ChannelStateList& midi_output_states = _current_state->midi_out_channel_states;
     
     std::vector<std::string>::const_iterator midi_output_iter = phys_midi_outputs.begin();
     for (; midi_output_iter != phys_midi_outputs.end(); ++midi_output_iter) {
         
-        ChannelState state(*midi_output_iter);
+        MidiPortState state(*midi_output_iter);
         state.active = false;
-        ChannelStateList::const_iterator found_state_iter = std::find(midi_output_states.begin(), midi_output_states.end(), state);
+        state.available = true;
+        MidiPortStateList::iterator found_state_iter = std::find(_midi_outputs.begin(), _midi_outputs.end(), state);
         
-        if (found_state_iter != midi_output_states.end() ) {
-            new_midi_output_states.push_back(*found_state_iter);
+        if (found_state_iter != _midi_outputs.end() ) {
+            found_state_iter->available = true;
         } else {
-            new_midi_output_states.push_back(state);
+            _midi_outputs.push_back(state);
         }
     }
     
-    _current_state->midi_out_channel_states = new_midi_output_states;
+    _serialize_and_save_midi_port_states();
     
     
     if (reconnect_session_routes) {
@@ -1044,8 +1022,8 @@ EngineStateController::_update_device_channels_state(bool reconnect_session_rout
 void
 EngineStateController::_refresh_stereo_out_channel_states()
 {
-    ChannelStateList &output_states = _current_state->stereo_out_channel_states;
-    ChannelStateList::iterator active_iter = output_states.begin();
+    PortStateList &output_states = _current_state->stereo_out_channel_states;
+    PortStateList::iterator active_iter = output_states.begin();
 
     for (; active_iter != output_states.end(); ++active_iter) {
         if (active_iter->active) {
@@ -1054,7 +1032,7 @@ EngineStateController::_refresh_stereo_out_channel_states()
     }
     
     uint32_t pending_active_channels = 2;
-    ChannelStateList::iterator iter = output_states.begin();
+    PortStateList::iterator iter = output_states.begin();
     // if found active
     if (active_iter != output_states.end() ) {
         iter = active_iter;
@@ -1081,7 +1059,7 @@ EngineStateController::_refresh_stereo_out_channel_states()
 void
 EngineStateController::_on_engine_running ()
 {
-    _serialize_and_save_current_state();
+    _serialize_and_save_current_engine_state();
     
     EngineRunning(); // emit a signal
 }
