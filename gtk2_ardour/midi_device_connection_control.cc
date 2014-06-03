@@ -45,6 +45,8 @@ MidiDeviceConnectionControl::MidiDeviceConnectionControl (const std::string& mid
     if (!has_capture) {
         _capture_on_button->hide();
         _capture_off_button->hide();
+        _capture_on_button = NULL;
+        _capture_off_button = NULL;
     }
 
     _playback_on_button = &_children.get_waves_button ("playback_on_button");
@@ -53,6 +55,9 @@ MidiDeviceConnectionControl::MidiDeviceConnectionControl (const std::string& mid
     if (!has_playback) {
         _playback_on_button->hide();
         _playback_off_button->hide();
+        _playback_on_button = NULL;
+        _playback_off_button = NULL;
+
     }
     
 	_name_label = &_children.get_label ("midi_device_name_label");
@@ -62,11 +67,22 @@ MidiDeviceConnectionControl::MidiDeviceConnectionControl (const std::string& mid
 
 void MidiDeviceConnectionControl::init(const std::string& name, bool capture_active, bool playback_active )
 {
-	_capture_on_button->signal_clicked.connect (sigc::mem_fun (*this, &MidiDeviceConnectionControl::on_capture_active_on));
-	_capture_off_button->signal_clicked.connect (sigc::mem_fun (*this, &MidiDeviceConnectionControl::on_capture_active_off));
-    _playback_on_button->signal_clicked.connect (sigc::mem_fun (*this, &MidiDeviceConnectionControl::on_playback_active_on));
-	_playback_off_button->signal_clicked.connect (sigc::mem_fun (*this, &MidiDeviceConnectionControl::on_playback_active_off));
+    if (_capture_on_button != NULL) {
+        _capture_on_button->signal_clicked.connect (sigc::mem_fun (*this, &MidiDeviceConnectionControl::on_capture_active_on));
+    }
+	
+    if (_capture_off_button != NULL) {
+        _capture_off_button->signal_clicked.connect (sigc::mem_fun (*this, &MidiDeviceConnectionControl::on_capture_active_off));
+    }
+	
+    if (_playback_on_button != NULL) {
+        _playback_on_button->signal_clicked.connect (sigc::mem_fun (*this, &MidiDeviceConnectionControl::on_playback_active_on));
+    }
     
+    if (_playback_off_button != NULL) {
+        _playback_off_button->signal_clicked.connect (sigc::mem_fun (*this, &MidiDeviceConnectionControl::on_playback_active_off));
+    }
+
 	if (_name_label != NULL) {
 		_name_label->set_text (name);
 	}
