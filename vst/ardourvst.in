@@ -4,13 +4,13 @@
 # Running Ardour requires these 3 variables to be set
 #
 
-export ARDOUR_DATA_PATH=@DATADIR@/ardour3
-export ARDOUR_CONFIG_PATH=@SYSCONFDIR@/ardour3
-export ARDOUR_DLL_PATH=@LIBDIR@/ardour3
+export ARDOUR_DATA_PATH=@DATADIR@
+export ARDOUR_CONFIG_PATH=@CONFDIR@
+export ARDOUR_DLL_PATH=@LIBDIR@
 
-export GTK_PATH=@LIBDIR@/ardour3${GTK_PATH:+:$GTK_PATH}
-export LD_LIBRARY_PATH=@LIBDIR@/ardour3${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+export GTK_PATH=@LIBDIR@${GTK_PATH:+:$GTK_PATH}
+export LD_LIBRARY_PATH=@LIBDIR@${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
-exec wine @LIBDIR@/ardour3/ardour-@VERSION@-vst.exe.so "$@"
+exec wine @LIBDIR@/ardour-@VERSION@-vst.exe.so "$@"
 
 
