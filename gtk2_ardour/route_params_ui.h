@@ -127,6 +127,7 @@ class RouteParams_UI : public ArdourWindow, public PBD::ScopedConnectionList
 
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnection _route_processors_connection;
+	PBD::ScopedConnectionList route_connections;
 
 	boost::shared_ptr<ARDOUR::Processor> _processor;
 	PBD::ScopedConnection _processor_going_away_connection;
@@ -163,6 +164,7 @@ class RouteParams_UI : public ArdourWindow, public PBD::ScopedConnectionList
 
 	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route> route);
 	void route_removed (boost::weak_ptr<ARDOUR::Route> route);
+	void map_frozen ();
 
 
 	void route_selected();
