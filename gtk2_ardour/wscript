@@ -483,7 +483,7 @@ def build(bld):
             'INSTALL_PREFIX' : bld.env['PREFIX'],
             'LIBDIR'         : os.path.normpath(bld.env['DLLDIR']),
             'DATADIR'        : os.path.normpath(bld.env['DATADIR']),
-            'SYSCONFDIR'     : os.path.normpath(bld.env['CONFDIR']),
+            'CONFDIR'        : os.path.normpath(bld.env['CONFDIR']),
             'LIBS'           : 'build/libs',
             'VERSION'        : bld.env['VERSION'],
             'EXECUTABLE'     : 'build/gtk2_ardour/ardour-' + bld.env['VERSION']

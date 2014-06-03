@@ -5,9 +5,9 @@
 # and does a few checks before exec'ing the real executable.
 # 
 
-export GTK_PATH=@SYSCONFDIR@/ardour3:@LIBDIR@/ardour3${GTK_PATH:+:$GTK_PATH}
+export GTK_PATH=@CONFDIR@:@LIBDIR@${GTK_PATH:+:$GTK_PATH}
 
-export LD_LIBRARY_PATH=@LIBDIR@/ardour3${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=@LIBDIR@${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 ## Memlock check
 
@@ -23,7 +23,7 @@ fi
 
 ## Glib atomic test
 
-GLIB=$(ldd @LIBDIR@/ardour3/ardour-@VERSION@ 2> /dev/null | grep glib-2.0 | sed 's/.*=> \([^ ]*\) .*/\1/')
+GLIB=$(ldd @LIBDIR@/ardour-@VERSION@ 2> /dev/null | grep glib-2.0 | sed 's/.*=> \([^ ]*\) .*/\1/')
 
 if [ "$GLIB" = "" ]; then
 	echo "WARNING: Could not check your glib-2.0 for mutex locking atomic operations."
@@ -43,15 +43,15 @@ fi
 # Running Ardour requires these 3 variables to be set
 #
 
-export ARDOUR_DATA_PATH=@DATADIR@/ardour3
-export ARDOUR_CONFIG_PATH=@SYSCONFDIR@/ardour3
-export ARDOUR_DLL_PATH=@LIBDIR@/ardour3
+export ARDOUR_DATA_PATH=@DATADIR@
+export ARDOUR_CONFIG_PATH=@CONFDIR@
+export ARDOUR_DLL_PATH=@LIBDIR@
 
 #
 # VAMP has its own lookup path
 # 
 
-export VAMP_PATH=@LIBDIR@/ardour3/vamp
+export VAMP_PATH=@LIBDIR@/vamp
 
 if [ $# -gt 0 ] ; then
     case $1 in
@@ -59,6 +59,6 @@ if [ $# -gt 0 ] ; then
     esac
 fi
 
-exec $GDB @LIBDIR@/ardour3/ardour-@VERSION@ "$@"
+exec $GDB @LIBDIR@/ardour-@VERSION@ "$@"
 
 
