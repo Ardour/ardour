@@ -285,8 +285,7 @@ class AlsaAudioBackend : public AudioBackend {
 		bool  _freewheeling;
 
 		void enumerate_midi_devices (std::vector<std::string> &) const;
-		std::string _capture_device;
-		std::string _playback_device;
+		std::string _audio_device;
 		std::string _midi_device;
 
 		float  _samplerate;

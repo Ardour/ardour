@@ -31,7 +31,7 @@ def build(bld):
     obj.includes = ['.']
     obj.name     = 'alsa_audiobackend'
     obj.target   = 'alsa_audiobackend'
-    obj.use      = 'libardour libpbd'
+    obj.use      = 'libardour libpbd ardouralsautil'
     obj.uselib   = 'ALSA'
     obj.vnum     = ALSABACKEND_VERSION
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
