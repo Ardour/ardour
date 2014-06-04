@@ -714,6 +714,7 @@ AudioEngine::drop_backend ()
 		_backend->stop ();
 		_backend->drop_device ();
 		_backend.reset ();
+		_running = false;
 	}
 }
 
