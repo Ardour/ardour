@@ -1340,6 +1340,7 @@ AlsaAudioBackend::main_process_thread ()
 
 				if (engine.process_callback (_samples_per_period)) {
 					_pcmi->pcm_stop ();
+					_active = false;
 					return 0;
 				}
 
@@ -1412,6 +1413,9 @@ AlsaAudioBackend::main_process_thread ()
 	}
 	_pcmi->pcm_stop ();
 	_active = false;
+	if (_run) {
+		engine.halted_callback("ALSA I/O error.");
+	}
 	return 0;
 }
 
