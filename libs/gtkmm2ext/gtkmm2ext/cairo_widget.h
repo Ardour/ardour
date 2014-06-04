@@ -67,9 +67,10 @@ public:
 
 	static void provide_background_for_cairo_widget (Gtk::Widget& w, const Gdk::Color& bg);
 
+	virtual void render (cairo_t *, cairo_rectangle_t*) = 0;
+
 protected:
 	/** Render the widget to the given Cairo context */
-	virtual void render (cairo_t *, cairo_rectangle_t*) = 0;
 	virtual bool on_expose_event (GdkEventExpose *);
 	void on_size_allocate (Gtk::Allocation &);
 	void on_state_changed (Gtk::StateType);
