@@ -52,7 +52,6 @@ class LIBARDOUR_API AudioTrack : public Track
 
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
-	bool frozen_processor(PBD::ID const) const;
 
 	bool bounceable (boost::shared_ptr<Processor>, bool include_endpoint) const;
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
