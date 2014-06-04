@@ -39,8 +39,7 @@ size_t AlsaAudioBackend::_max_buffer_size = 8192;
 AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	: AudioBackend (e, info)
 	, _pcmi (0)
-	, _run (false)
-	, _active (false)
+	, _running (false)
 	, _freewheeling (false)
 	, _capture_device("")
 	, _playback_device("")
@@ -417,7 +416,7 @@ static void * pthread_process (void *arg)
 int
 AlsaAudioBackend::_start (bool for_latency_measurement)
 {
-	if (_active || _run) {
+	if (_running) {
 		PBD::error << _("AlsaAudioBackend: already active.") << endmsg;
 		return -1;
 	}
@@ -506,7 +505,6 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	engine.buffer_size_change (_samples_per_period);
 	engine.reconnect_ports ();
-	_run = true;
 
 	if (_realtime_pthread_create (SCHED_FIFO, -20,
 				&_main_thread, pthread_process, this))
@@ -515,7 +513,6 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		{
 			PBD::error << _("AlsaAudioBackend: failed to create process thread.") << endmsg;
 			delete _pcmi; _pcmi = 0;
-			_run = false;
 			return -1;
 		} else {
 			PBD::warning << _("AlsaAudioBackend: cannot acquire realtime permissions.") << endmsg;
@@ -523,12 +520,11 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	}
 
 	int timeout = 5000;
-	while (!_active && --timeout > 0) { Glib::usleep (1000); }
+	while (!_running && --timeout > 0) { Glib::usleep (1000); }
 
-	if (timeout == 0 || !_active) {
+	if (timeout == 0 || !_running) {
 		PBD::error << _("AlsaAudioBackend: failed to start process thread.") << endmsg;
 		delete _pcmi; _pcmi = 0;
-		_run = false;
 		return -1;
 	}
 
@@ -539,11 +535,11 @@ int
 AlsaAudioBackend::stop ()
 {
 	void *status;
-	if (!_active) {
+	if (!_running) {
 		return 0;
 	}
 
-	_run = false;
+	_running = false;
 	if (pthread_join (_main_thread, &status)) {
 		PBD::error << _("AlsaAudioBackend: failed to terminate.") << endmsg;
 		return -1;
@@ -564,7 +560,7 @@ AlsaAudioBackend::stop ()
 
 	unregister_system_ports();
 	delete _pcmi; _pcmi = 0;
-	return (_active == false) ? 0 : -1;
+	return 0;
 }
 
 int
@@ -705,7 +701,7 @@ AlsaAudioBackend::my_name () const
 bool
 AlsaAudioBackend::available () const
 {
-	return _run && _active;
+	return true;
 }
 
 uint32_t
@@ -1284,7 +1280,7 @@ void *
 AlsaAudioBackend::main_process_thread ()
 {
 	AudioEngine::thread_init_callback (this);
-	_active = true;
+	_running = true;
 	_processed_samples = 0;
 
 	uint64_t clock1, clock2;
@@ -1292,7 +1288,7 @@ AlsaAudioBackend::main_process_thread ()
 	_pcmi->pcm_start ();
 	int no_proc_errors = 0;
 
-	while (_run) {
+	while (_running) {
 		long nr;
 		bool xrun = false;
 		if (!_freewheeling) {
@@ -1411,7 +1407,6 @@ AlsaAudioBackend::main_process_thread ()
 
 	}
 	_pcmi->pcm_stop ();
-	_active = false;
 	return 0;
 }
 
