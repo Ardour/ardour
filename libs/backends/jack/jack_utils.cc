@@ -855,9 +855,9 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 			// capture and playback on two devices if supported
 			if (get_jack_audio_driver_supports_two_devices (options.driver)) {
 				args.push_back ("-C");
-				args.push_back (quote_string (command_line_input_device_name));
+				args.push_back (command_line_input_device_name);
 				args.push_back ("-P");
-				args.push_back (quote_string (command_line_output_device_name));
+				args.push_back (command_line_output_device_name);
 			} else {
 				return false;
 			}
@@ -910,7 +910,7 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 	if (options.driver != dummy_driver_name) {
 		if (options.input_device == options.output_device && options.input_device != default_device_name) {
 			args.push_back ("-d");
-			args.push_back (quote_string (command_line_input_device_name));
+			args.push_back (command_line_input_device_name);
 		}
 	}
 
