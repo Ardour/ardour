@@ -28,7 +28,9 @@
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
+#include "pbd/file_utils.h"
 #include "ardour/port_manager.h"
+#include "ardour/system_exec.h"
 #include "i18n.h"
 
 using namespace ARDOUR;
@@ -124,6 +126,72 @@ AlsaAudioBackend::enumerate_devices () const
 		}
 	}
 	return s;
+}
+
+static int card_to_num(const char* device_name)
+{
+	char* ctl_name;
+	const char * comma;
+	snd_ctl_t* ctl_handle;
+	int i = -1;
+
+	if (strncasecmp(device_name, "plughw:", 7) == 0) {
+		device_name += 4;
+	}
+  if (!(comma = strchr(device_name, ','))) {
+		ctl_name = strdup(device_name);
+	} else {
+		ctl_name = strndup(device_name, comma - device_name);
+	}
+
+	if (snd_ctl_open (&ctl_handle, ctl_name, 0) >= 0) {
+		snd_ctl_card_info_t *card_info;
+		snd_ctl_card_info_alloca (&card_info);
+		if (snd_ctl_card_info(ctl_handle, card_info) >= 0) {
+			i = snd_ctl_card_info_get_card(card_info);
+		}
+		snd_ctl_close(ctl_handle);
+	}
+	free(ctl_name);
+	return i;
+}
+
+static void acquire_device(const char* device_name)
+{
+	/* This is  quick hack, ideally we'll link against libdbus and implement a dbus-listener
+	 * that owns the device. here we try to get away by just requesting it and then block it...
+	 * (pulseaudio periodically checks anyway)
+	 *
+	 * dbus-send --session --print-reply --type=method_call --dest=org.freedesktop.ReserveDevice1.Audio2 /org/freedesktop/ReserveDevice1/Audio2 org.freedesktop.ReserveDevice1.RequestRelease int32:4
+	 * -> should not return  'boolean false'
+	 */
+	int device_number = card_to_num(device_name);
+	if (device_number < 0) return;
+
+	std::string dbus_send_path;
+	if (PBD::find_file_in_search_path (PBD::Searchpath(Glib::getenv("PATH")), X_("dbus-send"), dbus_send_path)) {
+		char **argp;
+		char tmp[128];
+		argp=(char**) calloc(8,sizeof(char*));
+		argp[0] = strdup(dbus_send_path.c_str());
+		argp[1] = strdup("--session");
+		argp[2] = strdup("--print-reply"); // need to wait for the receiver to act.
+		argp[3] = strdup("--type=method_call");
+		snprintf(tmp, sizeof(tmp), "--dest=org.freedesktop.ReserveDevice1.Audio%d", device_number);
+		argp[4] = strdup(tmp);
+		snprintf(tmp, sizeof(tmp), "/org/freedesktop/ReserveDevice1/Audio%d", device_number);
+		argp[5] = strdup(tmp);
+		argp[6] = strdup("org.freedesktop.ReserveDevice1.RequestRelease");
+		argp[7] = strdup("int32:4294967296");
+		snprintf(tmp, sizeof(tmp), "string:'org.freedesktop.ReserveDevice1.Audio%d'", device_number);
+		argp[7] = strdup(tmp);
+		argp[8] = 0;
+
+		ARDOUR::SystemExec process (dbus_send_path, argp);
+		if (!process.start(1)) {
+			process.wait();
+		}
+	}
 }
 
 std::vector<float>
@@ -436,6 +504,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	assert(_pcmi == 0);
 
 	unsigned int pos = _capture_device.find(" ");
+	acquire_device(_capture_device.substr(0, pos).c_str());
 	_pcmi = new Alsa_pcmi (_capture_device.substr(0, pos).c_str(), _playback_device.substr(0, pos).c_str(), 0, _samplerate, _samples_per_period, _periods_per_cycle, 0);
 	switch (_pcmi->state ()) {
 		case 0: /* OK */ break;
