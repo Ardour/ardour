@@ -914,14 +914,14 @@ void TracksControlPanel::on_playback_active_changed(DeviceConnectionControl* pla
 void TracksControlPanel::on_midi_capture_active_changed(MidiDeviceConnectionControl* control, bool active)
 {
     const char * id_name = (char*)control->get_data(MidiDeviceConnectionControl::capture_id_name);
-    //EngineStateController::instance()->set_physical_midi_input_state(id_name, active);
+    EngineStateController::instance()->set_physical_midi_input_state(id_name, active);
 }
 
 
 void TracksControlPanel::on_midi_playback_active_changed(MidiDeviceConnectionControl* control, bool active)
 {
     const char * id_name = (char*)control->get_data(MidiDeviceConnectionControl::playback_id_name);
-    //EngineStateController::instance()->set_physical_midi_output_state(id_name, active);
+    EngineStateController::instance()->set_physical_midi_output_state(id_name, active);
 }
 
 
@@ -988,25 +988,28 @@ TracksControlPanel::on_audio_input_configuration_changed ()
         if (control) {
             
             const char* id_name = (char*)control->get_data(DeviceConnectionControl::id_name);
-            bool new_state = EngineStateController::instance()->get_physical_audio_input_state(id_name );
             
-            uint16_t number = DeviceConnectionControl::NoNumber;
-            std::string track_name ("");
-            
-            if (new_state) {
-
-                number = number_count++;
+            if (id_name) {
+                bool new_state = EngineStateController::instance()->get_physical_audio_input_state(id_name );
                 
-                if (Config->get_tracks_auto_naming() & UseDefaultNames) {
-                    track_name = string_compose ("%1 %2", Session::default_trx_track_name_pattern, number);
-                } else if (Config->get_tracks_auto_naming() & NameAfterDriver) {
-                    track_name = control->get_port_name();
+                uint16_t number = DeviceConnectionControl::NoNumber;
+                std::string track_name ("");
+                
+                if (new_state) {
+
+                    number = number_count++;
+                    
+                    if (Config->get_tracks_auto_naming() & UseDefaultNames) {
+                        track_name = string_compose ("%1 %2", Session::default_trx_track_name_pattern, number);
+                    } else if (Config->get_tracks_auto_naming() & NameAfterDriver) {
+                        track_name = control->get_port_name();
+                    }
                 }
+                
+                control->set_track_name(track_name);
+                control->set_number(number);
+                control->set_active(new_state);
             }
-            
-            control->set_track_name(track_name);
-            control->set_number(number);
-            control->set_active(new_state);
         }
     }
 }
@@ -1027,16 +1030,18 @@ TracksControlPanel::on_audio_output_configuration_changed()
             
             const char * id_name = (char*)control->get_data(DeviceConnectionControl::id_name);
             
-            bool new_state = EngineStateController::instance()->get_physical_audio_output_state(id_name );
-            
-            uint16_t number = DeviceConnectionControl::NoNumber;
-            
-            if (new_state) {
-                number = number_count++;
+            if (id_name != NULL) {
+                bool new_state = EngineStateController::instance()->get_physical_audio_output_state(id_name );
+                
+                uint16_t number = DeviceConnectionControl::NoNumber;
+                
+                if (new_state) {
+                    number = number_count++;
+                }
+                
+                control->set_number(number);
+                control->set_active(new_state);
             }
-            
-            control->set_number(number);
-            control->set_active(new_state);
         }
     }
 
@@ -1053,11 +1058,14 @@ TracksControlPanel::on_midi_input_configuration_changed ()
     for (; control_iter != midi_controls.end(); ++control_iter) {
         MidiDeviceConnectionControl* control = dynamic_cast<MidiDeviceConnectionControl*> (*control_iter);
         
-        if (control) {
+        if (control && control->has_capture() ) {
             
             const char* capture_id_name = (char*)control->get_data(MidiDeviceConnectionControl::capture_id_name);
-            bool new_state = EngineStateController::instance()->get_physical_midi_input_state(capture_id_name );
-            control->set_capture_active(new_state);
+            
+            if (capture_id_name != NULL) {
+                bool new_state = EngineStateController::instance()->get_physical_midi_input_state(capture_id_name );
+                control->set_capture_active(new_state);
+            }
         }
     }
 }
@@ -1073,11 +1081,14 @@ TracksControlPanel::on_midi_output_configuration_changed ()
     for (; control_iter != midi_controls.end(); ++control_iter) {
         MidiDeviceConnectionControl* control = dynamic_cast<MidiDeviceConnectionControl*> (*control_iter);
         
-        if (control) {
+        if (control && control->has_playback() ) {
             
             const char* playback_id_name = (char*)control->get_data(MidiDeviceConnectionControl::playback_id_name);
-            bool new_state = EngineStateController::instance()->get_physical_midi_output_state(playback_id_name);
-            control->set_playback_active(new_state);
+            
+            if (playback_id_name != NULL) {
+                bool new_state = EngineStateController::instance()->get_physical_midi_output_state(playback_id_name);
+                control->set_playback_active(new_state);
+            }
         }
     }
 }
