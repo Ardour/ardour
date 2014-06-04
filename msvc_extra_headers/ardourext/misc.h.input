@@ -193,7 +193,7 @@ typedef _mode_t mode_t;
 
 // int64 abs()
 #ifdef __cplusplus // Normal 'C' doesn't permit over-ridden functions !!
-inline uint64_t abs(int64_t val)
+inline int64_t abs(int64_t val) throw()
 {
 	if (val < 0)
 		return val * (-1);
