@@ -31,6 +31,7 @@
 #include "pbd/file_utils.h"
 #include "ardour/port_manager.h"
 #include "ardour/system_exec.h"
+#include "ardouralsautil/devicelist.h"
 #include "i18n.h"
 
 using namespace ARDOUR;
@@ -44,8 +45,8 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _run (false)
 	, _active (false)
 	, _freewheeling (false)
-	, _capture_device("")
-	, _playback_device("")
+	, _audio_device("")
+	, _midi_device("")
 	, _samplerate (48000)
 	, _samples_per_period (1024)
 	, _periods_per_cycle (2)
@@ -83,77 +84,12 @@ std::vector<AudioBackend::DeviceStatus>
 AlsaAudioBackend::enumerate_devices () const
 {
 	std::vector<AudioBackend::DeviceStatus> s;
-	int cardnum = -1;
-	int device = -1;
-	snd_ctl_card_info_t *info;
-	snd_ctl_card_info_alloca (&info);
-	snd_pcm_info_t *pcminfo;
-	snd_pcm_info_alloca (&pcminfo);
-
-	while (snd_card_next (&cardnum) >= 0 && cardnum >= 0) {
-		snd_ctl_t *handle;
-
-		std::string devname = "hw:";
-		devname += PBD::to_string (cardnum, std::dec);
-
-		if (snd_ctl_open (&handle, devname.c_str(), 0) >= 0 && snd_ctl_card_info (handle, info) >= 0) {
-			if (snd_ctl_card_info (handle, info) < 0) {
-				continue;
-			}
-
-			std::string card_name = snd_ctl_card_info_get_name (info);
-			devname = "hw:";
-			devname += snd_ctl_card_info_get_id (info);
-
-			while (snd_ctl_pcm_next_device (handle, &device) >= 0 && device >= 0) {
-				snd_pcm_info_set_device (pcminfo, device);
-				snd_pcm_info_set_subdevice (pcminfo, 0);
-				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_CAPTURE);
-				if (snd_ctl_pcm_info (handle, pcminfo) < 0) {
-					continue;
-				}
-				snd_pcm_info_set_device (pcminfo, device);
-				snd_pcm_info_set_subdevice (pcminfo, 0);
-				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_PLAYBACK);
-				if (snd_ctl_pcm_info (handle, pcminfo) < 0) {
-					continue;
-				}
-				devname += ',';
-				devname += PBD::to_string (device, std::dec);
-				s.push_back (DeviceStatus (devname + " " + card_name, true));
-			}
-			snd_ctl_close (handle);
-		}
+	std::map<std::string, std::string> devices;
+	get_alsa_audio_device_names(devices);
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		s.push_back (DeviceStatus (i->first, true));
 	}
 	return s;
-}
-
-static int card_to_num(const char* device_name)
-{
-	char* ctl_name;
-	const char * comma;
-	snd_ctl_t* ctl_handle;
-	int i = -1;
-
-	if (strncasecmp(device_name, "plughw:", 7) == 0) {
-		device_name += 4;
-	}
-  if (!(comma = strchr(device_name, ','))) {
-		ctl_name = strdup(device_name);
-	} else {
-		ctl_name = strndup(device_name, comma - device_name);
-	}
-
-	if (snd_ctl_open (&ctl_handle, ctl_name, 0) >= 0) {
-		snd_ctl_card_info_t *card_info;
-		snd_ctl_card_info_alloca (&card_info);
-		if (snd_ctl_card_info(ctl_handle, card_info) >= 0) {
-			i = snd_ctl_card_info_get_card(card_info);
-		}
-		snd_ctl_close(ctl_handle);
-	}
-	free(ctl_name);
-	return i;
 }
 
 static void acquire_device(const char* device_name)
@@ -253,8 +189,7 @@ AlsaAudioBackend::can_change_buffer_size_when_running () const
 int
 AlsaAudioBackend::set_device_name (const std::string& d)
 {
-	_capture_device = d;
-	_playback_device = d;
+	_audio_device = d;
 	return 0;
 }
 
@@ -317,7 +252,7 @@ AlsaAudioBackend::set_systemic_output_latency (uint32_t sl)
 std::string
 AlsaAudioBackend::device_name () const
 {
-	return _capture_device;
+	return _audio_device;
 }
 
 float
@@ -363,96 +298,17 @@ AlsaAudioBackend::systemic_output_latency () const
 }
 
 /* MIDI */
-void
-AlsaAudioBackend::enumerate_midi_devices (std::vector<std::string> &m) const
-{
-	int cardnum = -1;
-	snd_ctl_card_info_t *cinfo;
-	snd_ctl_card_info_alloca (&cinfo);
-	while (snd_card_next (&cardnum) >= 0 && cardnum >= 0) {
-		snd_ctl_t *handle;
-		std::string devname = "hw:";
-		devname += PBD::to_string (cardnum, std::dec);
-		if (snd_ctl_open (&handle, devname.c_str (), 0) >= 0 && snd_ctl_card_info (handle, cinfo) >= 0) {
-			int device = -1;
-			while (snd_ctl_rawmidi_next_device (handle, &device) >= 0 && device >= 0) {
-				snd_rawmidi_info_t *info;
-				snd_rawmidi_info_alloca (&info);
-				snd_rawmidi_info_set_device (info, device);
-
-				int subs_in, subs_out;
-
-				snd_rawmidi_info_set_stream (info, SND_RAWMIDI_STREAM_INPUT);
-				if (snd_ctl_rawmidi_info (handle, info) >= 0) {
-					subs_in = snd_rawmidi_info_get_subdevices_count (info);
-				} else {
-					subs_in = 0;
-				}
-
-				snd_rawmidi_info_set_stream (info, SND_RAWMIDI_STREAM_OUTPUT);
-				if (snd_ctl_rawmidi_info (handle, info) >= 0) {
-					subs_out = snd_rawmidi_info_get_subdevices_count (info);
-				} else {
-					subs_out = 0;
-				}
-
-				const int subs = subs_in > subs_out ? subs_in : subs_out;
-				if (!subs) {
-					continue;
-				}
-
-				for (int sub = 0; sub < subs; ++sub) {
-					snd_rawmidi_info_set_stream (info, sub < subs_in ?
-							SND_RAWMIDI_STREAM_INPUT :
-							SND_RAWMIDI_STREAM_OUTPUT);
-
-					snd_rawmidi_info_set_subdevice (info, sub);
-					if (snd_ctl_rawmidi_info (handle, info) < 0) {
-						continue;
-					}
-
-					const char *sub_name = snd_rawmidi_info_get_subdevice_name (info);
-					if (sub == 0 && sub_name[0] == '\0') {
-						devname = "hw:";
-						devname += snd_ctl_card_info_get_id (cinfo);
-						devname += ",";
-						devname += PBD::to_string (device, std::dec);
-						devname += " ";
-						devname += snd_rawmidi_info_get_name (info);
-						devname += " (";
-						if (sub < subs_in) devname += "I";
-						if (sub < subs_out) devname += "O";
-						devname += ")";
-						m.push_back (devname);
-						break;
-					} else {
-						devname = "hw:";
-						devname += snd_ctl_card_info_get_id (cinfo);
-						devname += ",";
-						devname += PBD::to_string (device, std::dec);
-						devname += ",";
-						devname += PBD::to_string (sub, std::dec);
-						devname += " ";
-						devname += sub_name;
-						devname += " (";
-						if (sub < subs_in) devname += "I";
-						if (sub < subs_out) devname += "O";
-						devname += ")";
-						m.push_back (devname);
-					}
-				}
-			}
-			snd_ctl_close (handle);
-		}
-	}
-}
-
 std::vector<std::string>
 AlsaAudioBackend::enumerate_midi_options () const
 {
 	std::vector<std::string> m;
 	m.push_back (_("-None-"));
-	enumerate_midi_devices(m);
+	std::map<std::string, std::string> devices;
+	get_alsa_rawmidi_device_names(devices);
+
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		m.push_back (i->first);
+	}
 	if (m.size() > 2) {
 		m.push_back (_("-All-"));
 	}
@@ -503,9 +359,18 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	assert(_rmidi_out.size() == 0);
 	assert(_pcmi == 0);
 
-	unsigned int pos = _capture_device.find(" ");
-	acquire_device(_capture_device.substr(0, pos).c_str());
-	_pcmi = new Alsa_pcmi (_capture_device.substr(0, pos).c_str(), _playback_device.substr(0, pos).c_str(), 0, _samplerate, _samples_per_period, _periods_per_cycle, 0);
+	std::string alsa_device;
+	std::map<std::string, std::string> devices;
+	get_alsa_audio_device_names(devices);
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		if (i->first == _audio_device) {
+			alsa_device = i->second;
+			break;
+		}
+	}
+
+	acquire_device(alsa_device.c_str());
+	_pcmi = new Alsa_pcmi (alsa_device.c_str(), alsa_device.c_str(), 0, _samplerate, _samples_per_period, _periods_per_cycle, 0);
 	switch (_pcmi->state ()) {
 		case 0: /* OK */ break;
 		case -1: PBD::error << _("AlsaAudioBackend: failed to open device.") << endmsg; break;
@@ -947,10 +812,20 @@ AlsaAudioBackend::register_system_midi_ports()
 		return 0;
 	}
 	else if (_midi_device == _("-All-")) {
-		enumerate_midi_devices(devices);
+		std::map<std::string, std::string> devmap;
+		get_alsa_rawmidi_device_names(devmap);
+		for (std::map<std::string, std::string>::const_iterator i = devmap.begin (); i != devmap.end(); ++i) {
+			devices.push_back (i->second);
+		}
 	} else {
-		unsigned int pos = _midi_device.find(" ");
-		devices.push_back(_midi_device.substr(0, pos));
+		std::map<std::string, std::string> devmap;
+		get_alsa_rawmidi_device_names(devmap);
+		for (std::map<std::string, std::string>::const_iterator i = devmap.begin (); i != devmap.end(); ++i) {
+			if (i->first == _midi_device) {
+				devices.push_back (i->second);
+				break;
+			}
+		}
 	}
 
 	for (std::vector<std::string>::const_iterator i = devices.begin (); i != devices.end (); ++i) {

@@ -19,7 +19,7 @@
 */
 
 #ifdef HAVE_ALSA
-#include <alsa/asoundlib.h>
+#include "ardouralsautil/devicelist.h"
 #endif
 
 #ifdef __APPLE__
@@ -276,60 +276,7 @@ void
 ARDOUR::get_jack_alsa_device_names (device_map_t& devices)
 {
 #ifdef HAVE_ALSA
-	snd_ctl_t *handle;
-	snd_ctl_card_info_t *info;
-	snd_pcm_info_t *pcminfo;
-	snd_ctl_card_info_alloca(&info);
-	snd_pcm_info_alloca(&pcminfo);
-	string devname;
-	int cardnum = -1;
-	int device = -1;
-
-	while (snd_card_next (&cardnum) >= 0 && cardnum >= 0) {
-
-		devname = "hw:";
-		devname += PBD::to_string (cardnum, std::dec);
-
-		if (snd_ctl_open (&handle, devname.c_str(), 0) >= 0 && snd_ctl_card_info (handle, info) >= 0) {
-
-			if (snd_ctl_card_info (handle, info) < 0) {
-				continue;
-			}
-			
-			string card_name = snd_ctl_card_info_get_name (info);
-
-			/* change devname to use ID, not number */
-
-			devname = "hw:";
-			devname += snd_ctl_card_info_get_id (info);
-
-			while (snd_ctl_pcm_next_device (handle, &device) >= 0 && device >= 0) {
-				
-				/* only detect duplex devices here. more
-				 * complex arrangements are beyond our scope
-				 */
-
-				snd_pcm_info_set_device (pcminfo, device);
-				snd_pcm_info_set_subdevice (pcminfo, 0);
-				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_CAPTURE);
-				
-				if (snd_ctl_pcm_info (handle, pcminfo) >= 0) {
-
-					snd_pcm_info_set_device (pcminfo, device);
-					snd_pcm_info_set_subdevice (pcminfo, 0);
-					snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_PLAYBACK);
-
-					if (snd_ctl_pcm_info (handle, pcminfo) >= 0) {
-						devname += ',';
-						devname += PBD::to_string (device, std::dec);
-						devices.insert (std::make_pair (card_name, devname));
-					}
-				}
-			}
-
-			snd_ctl_close(handle);
-		}
-	}
+	get_alsa_audio_device_names(devices);
 #else
 	/* silence a compiler unused variable warning */
 	(void) devices;

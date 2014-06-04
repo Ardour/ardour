@@ -49,7 +49,7 @@ def build(bld):
         obj.uselib   = [ 'JACK', 'PORTAUDIO' ]
     else:
         obj.uselib   = [ 'JACK' ]
-    obj.use      = 'libardour libpbd'
+    obj.use      = 'libardour libpbd ardouralsautil'
     obj.vnum     = JACKBACKEND_VERSION
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"', 

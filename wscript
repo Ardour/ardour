@@ -81,6 +81,7 @@ children = [
         # shared helper binaries (plugin-scanner, exec-wrapper)
         'libs/fst',
         'libs/vfork',
+        'libs/ardouralsautil',
 ]
 
 i18n_children = [
