@@ -311,6 +311,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\scroll_group.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\stateful_image.cc"
 				>
 			</File>
@@ -438,6 +442,10 @@
 			</File>
 			<File
 				RelativePath="..\canvas\root_group.h"
+				>
+			</File>
+			<File
+				RelativePath="..\canvas\scroll_group.h"
 				>
 			</File>
 			<File
