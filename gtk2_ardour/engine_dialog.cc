@@ -682,6 +682,7 @@ EngineControl::EngineControl ()
 			 midi_option_combo.set_sensitive (false);
 		 }
 	 }
+	 started_at_least_once = false;
 
 	 if (!ignore_changes) {
 		 maybe_display_saved_state ();
