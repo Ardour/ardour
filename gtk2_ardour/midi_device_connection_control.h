@@ -36,22 +36,27 @@ public:
                                  bool has_capture, bool capture_active,
                                  bool has_playback, bool playback_active);
     
-	bool build_layout (const std::string& file_name);
-    void set_capture_active (bool active);
+    bool has_capture() {return _has_capture; }
+    bool has_playback() {return _has_playback; }
+	void set_capture_active (bool active);
     void set_playback_active (bool active);
     
     sigc::signal2<void, MidiDeviceConnectionControl*, bool> signal_capture_active_changed;
     sigc::signal2<void, MidiDeviceConnectionControl*, bool> signal_playback_active_changed;
     
 private:
-	void init(const std::string& name, bool capture_active, bool playback_active );
+    void init(const std::string& name, bool capture_active, bool playback_active );
+    bool build_layout (const std::string& file_name);
+
 	void on_capture_active_on(WavesButton*);
 	void on_capture_active_off(WavesButton*);
     void on_playback_active_on(WavesButton*);
 	void on_playback_active_off(WavesButton*);
     
     // flag which reflects control "active" state
+    bool _has_capture;
     bool _capture_active;
+    bool _has_playback;
     bool _playback_active;
 	
     WavesUI::WidgetMap _children;
