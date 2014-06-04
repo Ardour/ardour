@@ -601,6 +601,21 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 	FreezeChange(); /* EMIT SIGNAL */
 }
 
+bool
+AudioTrack::frozen_processor(PBD::ID const id) const
+{
+	if (freeze_state() != AudioTrack::Frozen) {
+		return false;
+	}
+
+	for (vector<FreezeRecordProcessorInfo*>::const_iterator ii = _freeze_record.processor_info.begin(); ii != _freeze_record.processor_info.end(); ++ii) {
+		if ((*ii)->id == id) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void
 AudioTrack::unfreeze ()
 {
