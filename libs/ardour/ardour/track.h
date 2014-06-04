@@ -88,6 +88,7 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 
 	virtual void freeze_me (InterThreadInfo&) = 0;
 	virtual void unfreeze () = 0;
+	virtual bool frozen_processor(PBD::ID const) const { return false; }
 
 	/** @return true if the track can be bounced, or false otherwise.
 	 */
