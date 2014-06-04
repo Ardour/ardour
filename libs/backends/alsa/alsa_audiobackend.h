@@ -280,7 +280,8 @@ class AlsaAudioBackend : public AudioBackend {
 		std::string _instance_name;
 		Alsa_pcmi *_pcmi;
 
-		bool  _running;
+		bool  _run; /* keep going or stop, ardour thread */
+		bool  _active; /* is running, process thread */
 		bool  _freewheeling;
 
 		void enumerate_midi_devices (std::vector<std::string> &) const;
