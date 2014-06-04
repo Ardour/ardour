@@ -554,6 +554,7 @@ JACKAudioBackend::_start (bool for_latency_measurement)
 int
 JACKAudioBackend::stop ()
 {
+	_running = false; // no 'engine halted message'.
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 	
 	_jack_connection->close ();
