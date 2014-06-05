@@ -90,8 +90,6 @@ class RegionView : public TimeAxisViewItem
 	void remove_ghost_in (TimeAxisView&);
 	void remove_ghost (GhostRegion*);
 
-	uint32_t get_fill_color ();
-
 	virtual void entered (bool) {}
 	virtual void exited () {}
 

@@ -740,12 +740,6 @@ RegionView::remove_ghost (GhostRegion* ghost)
 	}
 }
 
-uint32_t
-RegionView::get_fill_color ()
-{
-	return fill_color;
-}
-
 void
 RegionView::set_height (double h)
 {
