@@ -45,7 +45,7 @@ Widget::event_proxy (GdkEvent* ev)
 void
 Widget::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	std::cerr << "Render widget\n";
+	// std::cerr << "Render widget\n";
 
 	if (!_bounding_box) {
 		std::cerr << "no bbox\n";
@@ -67,7 +67,7 @@ Widget::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	crect.height = draw.height();
 	crect.width = draw.width();
 
-	std::cerr << "will draw " << draw << "\n";
+	// std::cerr << "will draw " << draw << "\n";
 	context->save ();
 	context->translate (-draw.x0, -draw.y0);
 	//context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
