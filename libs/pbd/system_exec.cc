@@ -627,7 +627,7 @@ SystemExec::terminate ()
 	close_stdin();
 
 	if (pid) {
-		::usleep(50000);
+		::usleep(200000);
 		sched_yield();
 		wait(WNOHANG);
 	}
@@ -638,7 +638,7 @@ SystemExec::terminate ()
 	
 	if (pid) {
 		::kill(pid, SIGTERM);
-		usleep(50000);
+		::usleep(250000);
 		sched_yield();
 		wait(WNOHANG);
 	}
