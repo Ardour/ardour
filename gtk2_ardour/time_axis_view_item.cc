@@ -674,12 +674,10 @@ TimeAxisViewItem::get_name_highlight()
 void
 TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
 {
-	unsigned char radius;
-	char minor_shift;
-
 	unsigned char r,g,b;
 
-	/* FILL: this is simple */
+	/* FILL: change opacity to a fixed value */
+
 	r = base_color.get_red()/256;
 	g = base_color.get_green()/256;
 	b = base_color.get_blue()/256;
