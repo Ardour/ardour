@@ -248,7 +248,9 @@ SessionDialog::session_folder ()
 		/* existing session chosen from file chooser */
 		return Glib::path_get_dirname (existing_session_chooser.get_current_folder ());
 	} else {
-		std::string legal_session_folder_name = legalize_for_path (new_name_entry.get_text());
+		std::string val = new_name_entry.get_text();
+		strip_whitespace_edges (val);
+		std::string legal_session_folder_name = legalize_for_path (val);
 		return Glib::build_filename (new_folder_chooser.get_current_folder(), legal_session_folder_name);
 	}
 }
