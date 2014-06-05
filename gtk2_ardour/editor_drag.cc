@@ -3948,25 +3948,34 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		TrackViewList to_be_removed_from_selection;
 		TrackViewList& all_tracks (_editor->track_views);
 
-		for (TrackViewList::const_iterator i = all_tracks.begin(); i != all_tracks.end(); ++i) {
+		// /* convert grab_y and current_pointer_y into offsets within the trackview group */
+		
+		ArdourCanvas::Duple const top_of_trackviews_canvas = _editor->get_trackview_group()->item_to_canvas (ArdourCanvas::Duple (0, 0));
+		ArdourCanvas::Coord const top = grab_y() - top_of_trackviews_canvas.y;
+		ArdourCanvas::Coord const bottom = _drags->current_pointer_y() - top_of_trackviews_canvas.y;
+
+		if (top >= 0 && bottom >= 0) {
+
+			for (TrackViewList::const_iterator i = all_tracks.begin(); i != all_tracks.end(); ++i) {
 			
-			if ((*i)->covered_by_y_range (grab_y(), _drags->current_pointer_y())) {
-				if (!(*i)->get_selected()) {
-					to_be_added_to_selection.push_back (*i);
-				}
-			} else {
-				if ((*i)->get_selected()) {
-					to_be_removed_from_selection.push_back (*i);
+				if ((*i)->covered_by_y_range (top, bottom)) {
+					if (!(*i)->get_selected()) {
+						to_be_added_to_selection.push_back (*i);
+					}
+				} else {
+					if ((*i)->get_selected()) {
+						to_be_removed_from_selection.push_back (*i);
+					}
 				}
 			}
-		}
 
-		if (!to_be_added_to_selection.empty()) {
-			_editor->selection->add (to_be_added_to_selection);
-		}
-
-		if (!to_be_removed_from_selection.empty()) {
-			_editor->selection->remove (to_be_removed_from_selection);
+			if (!to_be_added_to_selection.empty()) {
+				_editor->selection->add (to_be_added_to_selection);
+			}
+			
+			if (!to_be_removed_from_selection.empty()) {
+				_editor->selection->remove (to_be_removed_from_selection);
+			}
 		}
 	}
 	break;
