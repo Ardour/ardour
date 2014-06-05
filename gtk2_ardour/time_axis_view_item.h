@@ -239,12 +239,6 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	uint32_t selected_frame_color_g;
 	uint32_t selected_frame_color_b;
 
-	uint32_t handle_color_r;
-	uint32_t handle_color_g;
-	uint32_t handle_color_b;
-	uint32_t lock_handle_color_r;
-	uint32_t lock_handle_color_g;
-	uint32_t lock_handle_color_b;
 	uint32_t last_item_width;
 	int name_text_width;
 	bool wide_enough_for_name;
