@@ -1455,12 +1455,6 @@ AudioRegionView::set_one_waveform_color (ArdourCanvas::WaveView* wave)
 		ArdourCanvas::color_to_rgba (fill, r, g, b, a);
 		fill = ArdourCanvas::rgba_to_color (r, g, b, 0.85); /* magic number, not user controllable */
 		outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
-
-		if (!Config->get_show_name_highlight()) {
-			/* recolor name text because it needs to contrast with
-			   the waveform background, not the name highlight.
-			*/
-		}
 	}
 
 	wave->set_fill_color (fill);

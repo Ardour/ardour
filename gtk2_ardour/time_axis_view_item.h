@@ -73,6 +73,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	virtual void set_height(double h);
 	void set_y (double);
 	void set_color (Gdk::Color const &);
+	void set_name_text_color ();
 
         uint32_t get_fill_color () const;
 
