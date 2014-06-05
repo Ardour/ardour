@@ -755,12 +755,23 @@ TimeAxisViewItem::set_name_text_color ()
 uint32_t
 TimeAxisViewItem::get_fill_color () const
 {
-        uint32_t f = 0;
+        uint32_t f;
+	uint32_t o;
 
 	if (_selected) {
 
                 f = ARDOUR_UI::config()->get_canvasvar_SelectedFrameBase();
 
+		if (fill_opacity != 0) {
+			o = fill_opacity;
+		} else {
+			/* some condition of this item has set fill opacity to
+			 * zero, but it has been selected, so use a mid-way
+			 * alpha value to make it reasonably visible.
+			 */
+			o = 130;
+		}
+		
 	} else {
 
 		if (_recregion) {
@@ -773,9 +784,18 @@ TimeAxisViewItem::get_fill_color () const
 				f = fill_color;
 			}
 		}
+
+		/* tweak opacity */
+
+		if (!rect_visible) {
+			o = 0;
+		} else {
+			o = fill_opacity;
+		}
+
 	}
 
-	return f;
+	return UINT_RGBA_CHANGE_A (f, o);
 }
 
 /**
@@ -784,26 +804,16 @@ TimeAxisViewItem::get_fill_color () const
 void
 TimeAxisViewItem::set_frame_color()
 {
-        uint32_t f = 0;
-
 	if (!frame) {
 		return;
 	}
 
-	f = get_fill_color ();
-
-	if (fill_opacity) {
-		f = UINT_RGBA_CHANGE_A (f, fill_opacity);
-	}
-	
-	if (!rect_visible) {
-		f = UINT_RGBA_CHANGE_A (f, 0);
-	}
-
-        frame->set_fill_color (f);
+        frame->set_fill_color (get_fill_color());
 	set_frame_gradient ();
 
         if (!_recregion) {
+		uint32_t f;
+
                 if (_selected) {
                         f = ARDOUR_UI::config()->get_canvasvar_SelectedTimeAxisFrame();
                 } else {
@@ -811,6 +821,7 @@ TimeAxisViewItem::set_frame_color()
                 }
 
                 if (!rect_visible) {
+			/* make the frame outline be visible but rather transparent */
                         f = UINT_RGBA_CHANGE_A (f, 64);
                 }
 

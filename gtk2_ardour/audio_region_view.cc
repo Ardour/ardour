@@ -1419,7 +1419,7 @@ AudioRegionView::set_one_waveform_color (ArdourCanvas::WaveView* wave)
 {
 	ArdourCanvas::Color fill;
 	ArdourCanvas::Color outline;
-	
+
 	if (_selected) {
 		if (_region->muted()) {
 			/* hide outline with zero alpha */
@@ -1428,6 +1428,13 @@ AudioRegionView::set_one_waveform_color (ArdourCanvas::WaveView* wave)
 		} else {
 			outline = ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm();
 			fill = ARDOUR_UI::config()->get_canvasvar_SelectedWaveFormFill();
+
+			if (ARDOUR_UI::config()->get_color_regions_using_track_color()) {
+				/* just use a slightly transparent version of the selected
+				 * color so that some of the track color bleeds through
+				 */
+				fill = UINT_RGBA_CHANGE_A (fill, 217);
+			}
 		}
 	} else {
 		if (_recregion) {
@@ -1441,20 +1448,15 @@ AudioRegionView::set_one_waveform_color (ArdourCanvas::WaveView* wave)
 			} else {
 				outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
 				fill = ARDOUR_UI::config()->get_canvasvar_WaveFormFill();
+
+				if (ARDOUR_UI::config()->get_color_regions_using_track_color()) {
+					/* just use a slightly transparent version of the selected
+					 * color so that some of the track color bleeds through
+					 */
+					fill = UINT_RGBA_CHANGE_A (fill, 217);
+				}
 			}
 		}
-	}
-
-	if (ARDOUR_UI::config()->get_color_regions_using_track_color()) {
-
-		/* just use a slightly transparent version of the selected
-		 * color so that some of the track color bleeds through
-		 */
-
-		double r, g, b, a;
-		ArdourCanvas::color_to_rgba (fill, r, g, b, a);
-		fill = ArdourCanvas::rgba_to_color (r, g, b, 0.85); /* magic number, not user controllable */
-		outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
 	}
 
 	wave->set_fill_color (fill);
@@ -1470,13 +1472,7 @@ AudioRegionView::set_frame_color ()
 		return;
 	}
 
-	if (_region->opaque()) {
-		fill_opacity = 130;
-	} else {
-		fill_opacity = 0;
-	}
-
-	TimeAxisViewItem::set_frame_color ();
+	RegionView::set_frame_color ();
 
 	set_waveform_colors ();
 }
