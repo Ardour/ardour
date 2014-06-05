@@ -30,8 +30,9 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "ardour/types.h"
 #include "ardour/audio_backend.h"
+#include "ardour/system_exec.h"
+#include "ardour/types.h"
 
 #include "zita-alsa-pcmi.h"
 #include "alsa_rawmidi.h"
@@ -287,6 +288,14 @@ class AlsaAudioBackend : public AudioBackend {
 		void enumerate_midi_devices (std::vector<std::string> &) const;
 		std::string _audio_device;
 		std::string _midi_device;
+
+		/* audio device reservation */
+		ARDOUR::SystemExec *_device_reservation;
+		PBD::ScopedConnectionList _reservation_connection;
+		void reservation_stdout (std::string, size_t);
+		bool acquire_device(const char* device_name);
+		void release_device();
+		bool _reservation_succeeded;
 
 		float  _samplerate;
 		size_t _samples_per_period;
