@@ -535,8 +535,12 @@ RegionView::set_colors ()
 void
 RegionView::set_frame_color ()
 {
+	if (!frame) {
+		return;
+	}
+
 	if (_region->opaque()) {
-		fill_opacity = 130;
+		fill_opacity = 0xff; //VK: 130;
 	} else {
 		fill_opacity = 60;
 	}
