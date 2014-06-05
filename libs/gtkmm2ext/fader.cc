@@ -76,8 +76,49 @@ static void get_closest_point_on_line(double xa, double ya, double xb, double yb
 
     // Add the distance to A, moving
     // towards B
-    xl = xa + a_to_b_x * t;
-    yl = ya + a_to_b_y * t;
+    double x = xa + a_to_b_x * t;
+    double y = ya + a_to_b_y * t;
+
+	if ((xa != xb)) {
+		if ((x < xa) && (x < xb)) {
+			if (xa < xb) {
+				x = xa;
+				y = ya;
+			} else {
+				x = xb;
+				y = yb;
+			}
+		} else if ((x > xa) && (x > xb)) {
+			if (xb > xa) {
+				x = xb;
+				y = yb;
+			} else {
+				x = xa;
+				y = ya;
+			}
+		}
+	} else {
+		if ((y < ya) && (y < yb)) {
+			if (ya < yb) {
+				x = xa;
+				y = ya;
+			} else {
+				x = xb;
+				y = yb;
+			}
+		} else if ((y > ya) && (y > yb)) {
+			if (yb > ya) {
+				x = xb;
+				y = yb;
+			} else {
+				x = xa;
+				y = ya;
+			}
+		}
+	}
+
+	xl = x;
+	yl = y;
 }
 
 Fader::Fader (Gtk::Adjustment& adj,
@@ -386,15 +427,6 @@ Fader::on_motion_notify_event (GdkEventMotion* ev)
 								  ev->x, ev->y,
 								  ev_pos_x, ev_pos_y );
 
-		if (((_min_pos_x != _max_pos_x) && 
-			 ((ev_pos_x < _min_pos_x) && (ev_pos_x < _max_pos_x) ||
-			  (ev_pos_x > _max_pos_x) && (ev_pos_x > _min_pos_x))) ||
-			 ((_min_pos_y != _max_pos_y) &&
-			  ((ev_pos_y < _min_pos_x) && (ev_pos_y < _max_pos_y) ||
-			   (ev_pos_y > _max_pos_x) && (ev_pos_y > _min_pos_y)))) {
-			return true;
-		}
-
 		_grab_loc_x = ev_pos_x;
 		_grab_loc_y = ev_pos_y;
 
@@ -407,7 +439,6 @@ Fader::on_motion_notify_event (GdkEventMotion* ev)
 								  (ev_pos_y - _min_pos_y) * (ev_pos_y - _min_pos_y)) /
 							 sqrt((_max_pos_x - _min_pos_x) * (_max_pos_x - _min_pos_x) +
 								  (_max_pos_y - _min_pos_y) * (_max_pos_y - _min_pos_y));
-
 		
 		adjustment.set_value (adjustment.get_lower() + (adjustment.get_upper() - adjustment.get_lower()) * fract);
 	}
