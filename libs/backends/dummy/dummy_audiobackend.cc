@@ -648,7 +648,7 @@ DummyAudioBackend::register_system_ports()
 		snprintf(tmp, sizeof(tmp), "system:playback_%d", i);
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
-		set_latency_range (p, false, lr);
+		set_latency_range (p, true, lr);
 	}
 
 	/* midi ports */
@@ -667,7 +667,7 @@ DummyAudioBackend::register_system_ports()
 		snprintf(tmp, sizeof(tmp), "system:midi_playback_%d", i);
 		PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
-		set_latency_range (p, false, lr);
+		set_latency_range (p, true, lr);
 	}
 
 	return 0;
