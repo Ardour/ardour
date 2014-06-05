@@ -110,7 +110,9 @@ public:
 	Duple scroll_offset() const { return _scroll_offset; }
 	void add_scroller (ScrollGroup& i);
         
-        virtual Rect visible_area () const = 0;
+        virtual Rect  visible_area () const = 0;
+        virtual Coord width () const = 0;
+        virtual Coord height () const = 0;
 
         void zoomed();
     
@@ -148,6 +150,8 @@ public:
 	Cairo::RefPtr<Cairo::Context> context ();
 
 	Rect visible_area () const;
+	Coord width() const;
+	Coord height() const;
 
 protected:
 	bool on_expose_event (GdkEventExpose *);

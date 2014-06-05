@@ -772,7 +772,19 @@ GtkCanvas::on_leave_notify_event (GdkEventCrossing* ev)
 void
 GtkCanvas::request_redraw (Rect const & request)
 {
-	queue_draw_area (request.x0, request.y0, request.width(), request.height());
+	Rect real_area;
+
+	Coord const w = width ();
+	Coord const h = height ();
+
+	/* clamp area requested to actual visible window */
+
+	real_area.x0 = max (0.0, min (w, request.x0));
+	real_area.x1 = max (0.0, min (w, request.x1));
+	real_area.y0 = max (0.0, min (h, request.y0));
+	real_area.y1 = max (0.0, min (h, request.y1));
+
+	queue_draw_area (real_area.x0, real_area.y0, real_area.width(), real_area.height());
 }
 
 /** Called to request that we try to get a particular size for ourselves.
@@ -837,9 +849,19 @@ GtkCanvas::unfocus (Item* item)
 Rect
 GtkCanvas::visible_area () const
 {
-	Distance const xo = _scroll_offset.x;
-	Distance const yo = _scroll_offset.y;
-	return Rect (xo, yo, xo + get_allocation().get_width (), yo + get_allocation().get_height ());
+	return Rect (0, 0, get_allocation().get_width (), get_allocation().get_height ());
+}
+
+Coord
+GtkCanvas::width() const
+{
+	return get_allocation().get_width();
+}
+
+Coord
+GtkCanvas::height() const
+{
+	return get_allocation().get_height();
 }
 
 /** Create a GtkCanvaSViewport.
