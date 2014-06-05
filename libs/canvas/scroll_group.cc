@@ -20,6 +20,7 @@
 
 #include "pbd/compose.h"
 
+#include "canvas/canvas.h"
 #include "canvas/debug.h"
 #include "canvas/scroll_group.h"
 
@@ -36,6 +37,35 @@ ScrollGroup::ScrollGroup (Group* parent, Duple position, ScrollSensitivity s)
 	: Group (parent, position)
 	, _scroll_sensitivity (s)
 {
+}
+
+void
+ScrollGroup::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	/* clip the draw to the area that this scroll group nominally occupies
+	 * WITHOUT scroll offsets in effect
+	 */
+
+	boost::optional<Rect> r = bounding_box();
+
+	if (!r) {
+		return;
+	}
+
+	Rect self (_position.x, _position.y, _position.x + r.get().width(), _position.y + r.get().height());
+
+	self.x1 = min (_position.x + _canvas->width(), self.x1);
+	self.y1 = min (_position.y + _canvas->height(), self.y1);
+
+	context->save ();
+	context->rectangle (self.x0, self.y0, self.width(), self.height());
+	context->clip ();
+
+	Group::render (area, context);
+
+	context->restore ();
+
+
 }
 
 void

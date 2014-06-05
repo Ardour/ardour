@@ -40,6 +40,8 @@ class LIBCANVAS_API ScrollGroup : public Group
 	bool covers_canvas (Duple const& d) const;
 	bool covers_window (Duple const& d) const;
 
+	void render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
+
   private:
 	ScrollSensitivity _scroll_sensitivity;
 	Duple             _scroll_offset;
