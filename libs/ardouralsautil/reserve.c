@@ -33,6 +33,10 @@
 
 #include "ardouralsautil/reserve.h"
 
+#ifndef DBUS_TIMEOUT_USE_DEFAULT
+#define DBUS_TIMEOUT_USE_DEFAULT (-1)
+#endif
+
 struct rd_device {
 	int ref;
 
