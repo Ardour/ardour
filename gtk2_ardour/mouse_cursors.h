@@ -38,8 +38,6 @@ public:
 	Gdk::Cursor* left_side_trim_right_only;
 	Gdk::Cursor* fade_in;
 	Gdk::Cursor* fade_out;
-	Gdk::Cursor* fade_trim_in;
-	Gdk::Cursor* fade_trim_out;
 	Gdk::Cursor* selector;
 	Gdk::Cursor* grabber;
 	Gdk::Cursor* grabber_note;

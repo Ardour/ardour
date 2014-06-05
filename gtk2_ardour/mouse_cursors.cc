@@ -115,16 +115,6 @@ MouseCursors::MouseCursors ()
 	}
 
 	{
-		RefPtr<Pixbuf> p (::get_icon ("fade_in_cursor"));
-		fade_trim_in = new Cursor (Display::get_default(), p, 0, 0);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("fade_out_cursor"));
-		fade_trim_out = new Cursor (Display::get_default(), p, 29, 0);
-	}
-
-	{
 		RefPtr<Pixbuf> p (::get_icon ("resize_left_cursor"));
 		resize_left = new Cursor (Display::get_default(), p, 3, 10);
 	}

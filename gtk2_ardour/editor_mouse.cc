@@ -1999,6 +1999,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case FadeInHandleItem:
+	case FadeInTrimHandleItem:
 		if (mouse_mode == MouseObject && !internal_editing()) {
 			ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
 			if (rect) {
@@ -2009,35 +2010,14 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		break;
 
-	case FadeInTrimHandleItem:
-		if (mouse_mode == MouseObject && !internal_editing()) {
-			ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
-			if (rect) {
-				RegionView* rv = static_cast<RegionView*>(item->get_data ("regionview"));
-				rect->set_fill_color (rv->get_fill_color());
-				set_canvas_cursor (_cursors->fade_trim_in);
-			}
-		}
-		break;
-
 	case FadeOutHandleItem:
-		if (mouse_mode == MouseObject && !internal_editing()) {
-			ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
-			if (rect) {
-				RegionView* rv = static_cast<RegionView*>(item->get_data ("regionview"));
-				rect->set_fill_color (rv->get_fill_color ());
-				set_canvas_cursor (_cursors->fade_out);
-			}
-		}
-		break;
-
 	case FadeOutTrimHandleItem:
 		if (mouse_mode == MouseObject && !internal_editing()) {
 			ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
 			if (rect) {
 				RegionView* rv = static_cast<RegionView*>(item->get_data ("regionview"));
 				rect->set_fill_color (rv->get_fill_color ());
-				set_canvas_cursor (_cursors->fade_trim_out);
+				set_canvas_cursor (_cursors->fade_out);
 			}
 		}
 		break;
