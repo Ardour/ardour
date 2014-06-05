@@ -340,6 +340,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void setup_transport ();
 	void setup_transport_trx ();
 	void setup_clock ();
+    
+    bool delete_session_files(std::string session_path);
 
 	static ARDOUR_UI *theArdourUI;
 

@@ -83,6 +83,7 @@
 #include "ardour/slave.h"
 #include "ardour/system_exec.h"
 #include "ardour/directory_names.h"
+#include "ardour/filename_extensions.h"
 #include "dbg_msg.h"
 
 #ifdef WINDOWS_VST_SUPPORT
@@ -2670,6 +2671,105 @@ ARDOUR_UI::idle_load (const std::string& path)
 	}
 }
 
+namespace
+{
+    void run_message_dialog(std::string message)
+    {
+        MessageDialog msg (message.c_str(), false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+        msg.set_keep_above(true);
+        msg.set_position (Gtk::WIN_POS_MOUSE);
+        msg.run();
+    }
+    
+    void init_suffices(std::vector<std::string>& suffices)
+    {
+        suffices.push_back(template_suffix);
+        suffices.push_back(statefile_suffix);
+        suffices.push_back(pending_suffix);
+        suffices.push_back(peakfile_suffix);
+        suffices.push_back(backup_suffix);
+        suffices.push_back(temp_suffix);
+        suffices.push_back(history_suffix);
+        suffices.push_back(export_preset_suffix);
+        suffices.push_back(export_format_suffix);
+        suffices.push_back("instant.xml");
+    }
+    
+    void init_directories(std::vector<std::string>& directories)
+    {
+        directories.push_back(string(peak_dir_name));
+        directories.push_back(string(dead_dir_name));
+        directories.push_back(string(export_dir_name));
+        directories.push_back(string(analysis_dir_name)); 
+        directories.push_back(string(plugins_dir_name));
+        directories.push_back(string(externals_dir_name));
+        directories.push_back(string(".DS_Store"));
+    } 
+    
+    bool is_tracks_file(std::string full_file_name)
+    {
+        std::vector<std::string> suffices;
+        init_suffices(suffices);
+        
+        for(int i = 0; i < suffices.size(); i++)
+        {
+            int pos = full_file_name.rfind(suffices[i]);
+            // if suffix locates at the end of the full_file_name
+            if( pos == full_file_name.size() - suffices[i].size() )
+                return true;
+        }
+        
+        return false;
+    }
+    
+    /*@directory_name for example is "analysis", "example", etc. It is not a full path. */
+    bool is_tracks_directory(std::string directory_name)
+    {
+        std::vector<std::string> directories;
+        init_directories(directories);
+        
+        return std::find(directories.begin(), directories.end(), directory_name) != directories.end();
+    }
+
+}
+
+
+// return true if session was successfully deleted
+bool
+ARDOUR_UI::delete_session_files(std::string session_path)
+{
+    GDir *dir;
+    GError *error;
+    const gchar *file_name;
+    
+    dir = g_dir_open(session_path.c_str(), 0, &error);
+    
+    bool result = true;
+    
+    while ((file_name = g_dir_read_name(dir)))
+    {
+        string object_name = string(file_name);
+        string full_object_name = Glib::build_filename( session_path, string(file_name) );
+        
+        bool is_directory = Glib::file_test(full_object_name, Glib::FileTest (G_FILE_TEST_IS_DIR));
+        
+        if( is_directory && is_tracks_directory(file_name) )
+        {
+            result = result && delete_session_files(full_object_name);
+            g_remove(full_object_name.c_str());
+        } else {
+            if( !is_directory && is_tracks_file(full_object_name) )
+                if( g_remove(full_object_name.c_str()) == -1 )
+                {
+                    run_message_dialog("Can't remove file: " + full_object_name);
+                    result = false;
+                }
+        }
+    } 
+    
+    return result;
+}
+
 /** @param quit_on_cancel true if exit() should be called if the user clicks `cancel' in the new session dialog */
 int
 ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, string load_template)
@@ -2677,12 +2777,13 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	string session_name;
 	string session_path;
 	string template_name;
+    string full_session_name;
 	int ret = -1;
 	bool likely_new = false;
 	bool cancel_not_quit;
 
 	/* deal with any existing DIRTY session now, rather than later. don't
-	 * treat a non-dirty session this way, so that it stays visible 
+	 * treat a non-dirty session this way, so that it stays visible
 	 * as we bring up the new session dialog.
 	 */
 
@@ -2769,10 +2870,10 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		/* if we run the startup dialog again, offer more than just "new session" */
 		
 		should_be_new = false;
-		
-		session_name = session_dialog.session_name (likely_new);
+        
+		full_session_name = session_name = session_dialog.session_name (likely_new);
 		session_path = session_dialog.session_folder ();
-
+        
 		if (nsm) {
 		        likely_new = true;
 		}
@@ -2786,6 +2887,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		/* this shouldn't happen, but we catch it just in case it does */
 		
 		if (session_name.empty()) {
+            run_message_dialog("Session name is invalid");
 			continue;
 		}
 		
@@ -2825,108 +2927,36 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			}
 		}
 	
-		if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
+		if ( Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS)) ) {
 
 
 			if (likely_new && !nsm) {
-
-				std::string existing = Glib::build_filename (session_path, session_name);
                 
                 bool do_not_create_session = false;
-
-                GDir *dir;
-                GError *error;
-                const gchar *file_name;
                 
-                dir = g_dir_open(session_path.c_str(), 0, &error);
+                // Replace session only if file with extension '.ardour' was chosen
+                string suffix = string(statefile_suffix);
                 
-                while ((file_name = g_dir_read_name(dir)))
+                // if existed folder was choosen
+                if( Glib::file_test (full_session_name, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) )
                 {
-                    string ff = string(file_name);
-                    
-                    string full_file_name = g_build_filename(session_path.c_str(), file_name);
-                    
-                    string str_file_name = string(file_name);
-                    string interchange_debug = string(ARDOUR::interchange_dir_name);
-                    
-                    if( (g_file_test (full_file_name.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) &&
-                        (str_file_name == interchange_debug) )
-                    {
-                        cout<<endl<<full_file_name<<" WAS NOT deleted \n\n"<<flush;
-                        continue;
-                    }
-
-                    if( g_file_test (full_file_name.c_str(), GFileTest (G_FILE_TEST_EXISTS)) &&
-                        string(file_name) != string(ARDOUR::interchange_dir_name) )
-                    {
-                        
-                        try {
-                            if( g_remove(full_file_name.c_str() ) >=0 )
-                                cout<<full_file_name<<" file was deleted \n"<<flush;
-                            else
-                            {
-                                cout<<full_file_name<<" file was not deleted (ELSE) \n"<<flush;
-                                
-                                string message = "Can not replace session. File: file " + full_file_name + " can not be deleted";
-                                MessageDialog msg (message.c_str(),
-                                                   false,
-                                                   Gtk::MESSAGE_WARNING,
-                                                   Gtk::BUTTONS_OK,
-                                                   true);
-                                
-                                msg.set_position (Gtk::WIN_POS_MOUSE);
-                                msg.run();
-                                
-                                do_not_create_session = true;
-                                break;                           
-                            }
-    
-                        } catch (...) {
-                            cout<<full_file_name<<" file was not deleted (CATCH) \n"<<flush;
-                            
-                            string message = "Can not replace session. File: file " + full_file_name + " can not be deleted";
-                            MessageDialog msg (message.c_str(),
-                                               false,
-                                               Gtk::MESSAGE_WARNING,
-                                               Gtk::BUTTONS_OK,
-                                               true);
-                            
-                            msg.set_position (Gtk::WIN_POS_MOUSE);
-                            msg.run();
-                            
-                            do_not_create_session = true;
-                            break;
-                        }
-                        
-                        /*
-                        // file is a directory
-                        if( (Glib::file_test (full_file_name, Glib::FileTest (G_FILE_TEST_IS_DIR))) )
-                        {
-                            try {
-                                if( g_rmdir(full_file_name.c_str())>=0 )
-                                    cout<<full_file_name<<" directory was deleted \n"<<flush;
-                                else
-                                    cout<<full_file_name<<" directory was not deleted \n"<<flush;
-                            } catch (...) {
-                                cerr<<"ERROR :: Can not delete directroy: "<<file_name<<endl<<flush;
-                            }
-                        } else {
-                            // file is not a directory
-                            try {
-                                if(unlink(full_file_name.c_str())>=0)
-                                    cout<<full_file_name<<" file was deleted"<<endl<<flush;
-                                else
-                                    cout<<full_file_name<<" file was not deleted"<<endl<<flush;
-                            } catch (...) {
-                                cerr<<"ERROR :: Can not delete file: "<<file_name<<endl<<flush;    
-                            }
-                            
-                        }
-                         */
-                    }
+                    run_message_dialog("Can not replace session. Folder " + session_path + " allready exists. If you need to replace session please choose file " + full_session_name + suffix);
+                    continue;
                 }
+                    
+                int pos = full_session_name.rfind(suffix);
                 
-                if( do_not_create_session )
+                // if not *.ardour file was choosen
+                if( !(pos == full_session_name.size() - suffix.size()) )
+                {
+                    run_message_dialog("Invalid file name. In order to replace session select *" + suffix + " projectfile");
+                    
+                    continue;
+                }
+                    
+                
+                // .ardour file was choosen. Replace session: delete existing session
+                if( !delete_session_files(session_path) )
                     continue;
                 
                 _session_is_new = true;

@@ -127,19 +127,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-namespace
-{
-    string
-    get_session_projectfile_name(string session_path)
-    {
-        string s0 = session_path;
-        string s1 = Glib::path_get_dirname (s0);
-        s0.erase(0, s1.size());
-        
-        return session_path + s0 + ".ardour";
-    }
-}
-
 void
 Session::pre_engine_init (string fullpath)
 {
@@ -160,7 +147,10 @@ Session::pre_engine_init (string fullpath)
     
 	/* is it new ? */
 
-	_is_new = !Glib::file_test ( get_session_projectfile_name(fullpath), Glib::FileTest (G_FILE_TEST_EXISTS));
+    string full_session_name = Glib::build_filename( fullpath, _name );
+    full_session_name += statefile_suffix;
+    
+	_is_new = !Glib::file_test ( full_session_name, Glib::FileTest (G_FILE_TEST_EXISTS));
 
 	/* finish initialization that can't be done in a normal C++ constructor
 	   definition.
@@ -421,15 +411,17 @@ Session::ensure_subdirs ()
 
 	dir = session_directory().peak_path();
 
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session peakfile folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
-	}
-
+    // if directory allready exists do not create it again
+    if ( !Glib::file_test (dir.c_str(), Glib::FileTest (G_FILE_TEST_EXISTS))) {
+        if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+            error << string_compose(_("Session: cannot create session peakfile folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+            return -1;
+        }
+    }
+    
 	dir = session_directory().sound_path();
 
-    // if directory 'interchange' allready exists do not create it again
-    if ( !Glib::file_test (dir.c_str(), Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
+    if ( !Glib::file_test (dir.c_str(), Glib::FileTest (G_FILE_TEST_EXISTS))) {
         if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
             error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
             return -1;
@@ -438,45 +430,57 @@ Session::ensure_subdirs ()
 
 	dir = session_directory().midi_path();
    
-    if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-        error << string_compose(_("Session: cannot create session midi dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-        return -1;
+    if ( !Glib::file_test (dir.c_str(), Glib::FileTest (G_FILE_TEST_EXISTS))) {
+        if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+            error << string_compose(_("Session: cannot create session midi dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+            return -1;
+        }
     }
-
+    
 	dir = session_directory().dead_path();
 
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session dead sounds folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
-	}
+    if ( !Glib::file_test (dir.c_str(), Glib::FileTest (G_FILE_TEST_EXISTS))) {
+        if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+            error << string_compose(_("Session: cannot create session dead sounds folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+            return -1;
+        }
+    }
 
 	dir = session_directory().export_path();
 
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session export folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
-	}
+    if ( !Glib::file_test (dir.c_str(), Glib::FileTest (G_FILE_TEST_EXISTS))) {
+        if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+            error << string_compose(_("Session: cannot create session export folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+            return -1;
+        }
+    }
 
 	dir = analysis_dir ();
 
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session analysis folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
-	}
+    if ( !Glib::file_test (dir.c_str(), Glib::FileTest (G_FILE_TEST_EXISTS))) {
+        if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+            error << string_compose(_("Session: cannot create session analysis folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+            return -1;
+        }
+    }
 
 	dir = plugins_dir ();
 
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session plugins folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
-	}
+    if ( !Glib::file_test (dir.c_str(), Glib::FileTest (G_FILE_TEST_EXISTS))) {
+        if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+            error << string_compose(_("Session: cannot create session plugins folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+            return -1;
+        }
+    }
 
 	dir = externals_dir ();
 
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session externals folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
-	}
+    if ( !Glib::file_test (dir.c_str(), Glib::FileTest (G_FILE_TEST_EXISTS))) {
+        if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+            error << string_compose(_("Session: cannot create session externals folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+            return -1;
+        }
+    }
 
 	return 0;
 }
@@ -2207,25 +2211,25 @@ Session::get_best_session_directory_for_new_source ()
 string
 Session::automation_dir () const
 {
-	return Glib::build_filename (_path, "automation");
+	return Glib::build_filename (_path, automation_dir_name);
 }
 
 string
 Session::analysis_dir () const
 {
-	return Glib::build_filename (_path, "analysis");
+	return Glib::build_filename (_path, analysis_dir_name);
 }
 
 string
 Session::plugins_dir () const
 {
-	return Glib::build_filename (_path, "plugins");
+	return Glib::build_filename (_path, plugins_dir_name);
 }
 
 string
 Session::externals_dir () const
 {
-	return Glib::build_filename (_path, "externals");
+	return Glib::build_filename (_path, externals_dir_name);
 }
 
 int

@@ -39,6 +39,10 @@ const char* const surfaces_dir_name = X_("surfaces");
 const char* const ladspa_dir_name = X_("ladspa");
 const char* const panner_dir_name = X_("panners");
 const char* const backend_dir_name = X_("backends");
+const char* const automation_dir_name = X_("automation");
+const char* const analysis_dir_name = X_("analysis");
+const char* const plugins_dir_name = X_("plugins");
+const char* const externals_dir_name = X_("externals");
 
 char config_dir_name[] = X_(PROGRAM_NAME "3");
 #if defined (__APPLE__) || defined (PLATFORM_WINDOWS)
