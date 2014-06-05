@@ -37,7 +37,7 @@ def build(bld):
             obj.vnum     = '0.0.1'
             obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardouralsautil')
 
-        if bld.is_defined('HAVE_ALSA') and bld.is_defined('HAVE_DBUS'):
+        if bld.env['BUILD_ALSABACKEND'] and bld.is_defined('HAVE_ALSA') and bld.is_defined('HAVE_DBUS'):
             obj = bld(features = 'c cprogram')
             obj.source = [
                 'reserve.c',
