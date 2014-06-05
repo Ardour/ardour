@@ -844,7 +844,7 @@ AlsaAudioBackend::register_system_audio_ports()
 		snprintf(tmp, sizeof(tmp), "system:playback_%d", i);
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
-		set_latency_range (p, false, lr);
+		set_latency_range (p, true, lr);
 		_system_outputs.push_back(static_cast<AlsaPort*>(p));
 	}
 	return 0;
@@ -936,7 +936,7 @@ AlsaAudioBackend::register_system_midi_ports()
 		snprintf(tmp, sizeof(tmp), "system:midi_playback_%d", i);
 		PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
-		set_latency_range (p, false, lr);
+		set_latency_range (p, true, lr);
 		_system_midi_out.push_back(static_cast<AlsaPort*>(p));
 	}
 
