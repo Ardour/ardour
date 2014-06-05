@@ -713,6 +713,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
                         Duple rv_canvas_offset = rvg->parent()->item_to_canvas (Duple (0,0));
                         Duple dmg_canvas_offset = _editor->_drag_motion_group->item_to_canvas (Duple (0,0));
                         rv->get_canvas_group()->reparent (_editor->_drag_motion_group);
+			/* move the item so that it continues to appear at the
+			   same location now that its parent has changed.
+			*/
 			rvg->move (rv_canvas_offset - dmg_canvas_offset);
 		}
 
