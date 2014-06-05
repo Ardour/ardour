@@ -390,7 +390,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 		}
 	}
 
-	if (! _play_handle && ! _capt_handle) return;
+	if (! _play_handle || ! _capt_handle) return;
 
 	if (ctrl_name)
 	{
