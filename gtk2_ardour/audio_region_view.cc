@@ -1409,16 +1409,10 @@ AudioRegionView::color_handler ()
 void
 AudioRegionView::set_waveform_colors ()
 {
-        for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
-		set_one_waveform_color (*w);
-	}
-}
-
-void
-AudioRegionView::set_one_waveform_color (ArdourCanvas::WaveView* wave)
-{
 	ArdourCanvas::Color fill;
 	ArdourCanvas::Color outline;
+	ArdourCanvas::Color clip = ARDOUR_UI::config()->get_canvasvar_WaveFormClip();
+	ArdourCanvas::Color zero = ARDOUR_UI::config()->get_canvasvar_ZeroLine();
 
 	if (_selected) {
 		if (_region->muted()) {
@@ -1459,10 +1453,12 @@ AudioRegionView::set_one_waveform_color (ArdourCanvas::WaveView* wave)
 		}
 	}
 
-	wave->set_fill_color (fill);
-	wave->set_outline_color (outline);
-	wave->set_clip_color (ARDOUR_UI::config()->get_canvasvar_WaveFormClip());
-	wave->set_zero_color (ARDOUR_UI::config()->get_canvasvar_ZeroLine());
+        for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
+		(*w)->set_fill_color (fill);
+		(*w)->set_outline_color (outline);
+		(*w)->set_clip_color (clip);
+		(*w)->set_zero_color (zero);
+	}
 }
 
 void
