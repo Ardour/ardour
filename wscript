@@ -789,6 +789,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Library exports hidden', conf.is_defined('EXPORT_VISIBILITY_HIDDEN'))
 
     write_config_text('ALSA Backend',          opts.build_alsabackend)
+    write_config_text('ALSA DBus Reservation', conf.is_defined('HAVE_DBUS'))
     write_config_text('Architecture flags',    opts.arch)
     write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))
     write_config_text('AudioUnits',            conf.is_defined('AUDIOUNIT_SUPPORT'))
