@@ -138,11 +138,14 @@ AlsaAudioBackend::acquire_device(const char* device_name)
 	{
 		char **argp;
 		char tmp[128];
-		argp=(char**) calloc(3,sizeof(char*));
+		argp=(char**) calloc(5,sizeof(char*));
 		argp[0] = strdup(request_device_exe.c_str());
+		argp[1] = strdup("-P");
+		snprintf(tmp, sizeof(tmp), "%d", getpid());
+		argp[2] = strdup(tmp);
 		snprintf(tmp, sizeof(tmp), "Audio%d", device_number);
-		argp[1] = strdup(tmp);
-		argp[2] = 0;
+		argp[3] = strdup(tmp);
+		argp[4] = 0;
 
 		_device_reservation = new ARDOUR::SystemExec(request_device_exe, argp);
 		_device_reservation->ReadStdout.connect_same_thread (_reservation_connection, boost::bind (&AlsaAudioBackend::reservation_stdout, this, _1 ,_2));
