@@ -1046,9 +1046,3 @@ TimeAxisViewItem::parameter_changed (string p)
 		set_frame_gradient ();
 	}
 }
-
-void
-TimeAxisViewItem::visual_raise_to_top ()
-{
-	group->raise_to_top ();
-}
