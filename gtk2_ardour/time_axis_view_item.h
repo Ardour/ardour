@@ -76,6 +76,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	void set_name_text_color ();
 
         uint32_t get_fill_color () const;
+	void visual_raise_to_top ();
 
 	ArdourCanvas::Item* get_canvas_frame();
 	ArdourCanvas::Group* get_canvas_group();
