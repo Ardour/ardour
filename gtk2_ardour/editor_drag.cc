@@ -704,7 +704,16 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		if (first_move) {
 			rv->drag_start (); 
 			rv->fake_set_opaque (true);
-			rv->raise_to_top ();
+
+			/* reparent the regionview into a group above all
+			 * others
+			 */
+
+			ArdourCanvas::Group* rvg = rv->get_canvas_group();                                                                                                                                     
+                        Duple rv_canvas_offset = rvg->parent()->item_to_canvas (Duple (0,0));
+                        Duple dmg_canvas_offset = _editor->_drag_motion_group->item_to_canvas (Duple (0,0));
+                        rv->get_canvas_group()->reparent (_editor->_drag_motion_group);
+			rvg->move (rv_canvas_offset - dmg_canvas_offset);
 		}
 
 		/* If we have moved tracks, we'll fudge the layer delta so that the

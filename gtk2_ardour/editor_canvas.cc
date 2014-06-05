@@ -118,6 +118,12 @@ Editor::initialize_canvas ()
 	_trackview_group = new ArdourCanvas::Group (hv_scroll_group);
 	CANVAS_DEBUG_NAME (_trackview_group, "Canvas TrackViews");
 	
+	/* a group to hold stuff while it gets dragged around. Must be the
+	 * uppermost (last) group with hv_scroll_group as a parent
+	 */
+	_drag_motion_group = new ArdourCanvas::Group (hv_scroll_group);                                                                                                                                     
+        CANVAS_DEBUG_NAME (_drag_motion_group, "Canvas Drag Motion");
+
 	/* TIME BAR CANVAS */
 	
 	_time_markers_group = new ArdourCanvas::Group (h_scroll_group);
