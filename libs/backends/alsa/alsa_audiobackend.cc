@@ -54,8 +54,10 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _dsp_load (0)
 	, _n_inputs (0)
 	, _n_outputs (0)
-	, _systemic_input_latency (0)
-	, _systemic_output_latency (0)
+	, _systemic_audio_input_latency (0)
+	, _systemic_audio_output_latency (0)
+	, _systemic_midi_input_latency (0)
+	, _systemic_midi_output_latency (0)
 	, _processed_samples (0)
 	, _port_change_flag (false)
 {
@@ -278,14 +280,16 @@ AlsaAudioBackend::set_output_channels (uint32_t cc)
 int
 AlsaAudioBackend::set_systemic_input_latency (uint32_t sl)
 {
-	_systemic_input_latency = sl;
+	_systemic_audio_input_latency = sl;
+	_systemic_midi_input_latency = sl;
 	return 0;
 }
 
 int
 AlsaAudioBackend::set_systemic_output_latency (uint32_t sl)
 {
-	_systemic_output_latency = sl;
+	_systemic_audio_output_latency = sl;
+	_systemic_midi_output_latency = sl;
 	return 0;
 }
 
@@ -329,13 +333,13 @@ AlsaAudioBackend::output_channels () const
 uint32_t
 AlsaAudioBackend::systemic_input_latency () const
 {
-	return _systemic_input_latency;
+	return _systemic_audio_input_latency;
 }
 
 uint32_t
 AlsaAudioBackend::systemic_output_latency () const
 {
-	return _systemic_output_latency;
+	return _systemic_audio_output_latency;
 }
 
 /* MIDI */
@@ -464,8 +468,8 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	}
 
 	if (for_latency_measurement) {
-		_systemic_input_latency = 0;
-		_systemic_output_latency = 0;
+		_systemic_audio_input_latency = 0;
+		_systemic_audio_output_latency = 0;
 	}
 
 	register_system_midi_ports();
@@ -836,7 +840,7 @@ AlsaAudioBackend::register_system_audio_ports()
 	const int a_out = _n_outputs > 0 ? _n_outputs : 2;
 
 	/* audio ports */
-	lr.min = lr.max = _samples_per_period * _periods_per_cycle + _systemic_input_latency;
+	lr.min = lr.max = _samples_per_period + _systemic_audio_input_latency;
 	for (int i = 1; i <= a_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:capture_%d", i);
@@ -846,7 +850,7 @@ AlsaAudioBackend::register_system_audio_ports()
 		_system_inputs.push_back(static_cast<AlsaPort*>(p));
 	}
 
-	lr.min = lr.max = _samples_per_period * _periods_per_cycle + _systemic_output_latency;
+	lr.min = lr.max = _samples_per_period + _systemic_audio_output_latency;
 	for (int i = 1; i <= a_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:playback_%d", i);
@@ -928,7 +932,7 @@ AlsaAudioBackend::register_system_midi_ports()
 	const int m_ins = _rmidi_in.size();
 	const int m_out = _rmidi_out.size();
 
-	lr.min = lr.max = _samples_per_period + _systemic_input_latency;
+	lr.min = lr.max = _samples_per_period + _systemic_midi_input_latency;
 	for (int i = 1; i <= m_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:midi_capture_%d", i);
@@ -938,7 +942,7 @@ AlsaAudioBackend::register_system_midi_ports()
 		_system_midi_in.push_back(static_cast<AlsaPort*>(p));
 	}
 
-	lr.min = lr.max = _samples_per_period + _systemic_output_latency;
+	lr.min = lr.max = _samples_per_period + _systemic_midi_output_latency;
 	for (int i = 1; i <= m_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:midi_playback_%d", i);
