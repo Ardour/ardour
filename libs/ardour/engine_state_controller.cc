@@ -1167,30 +1167,16 @@ EngineStateController::get_physical_midi_output_states (std::vector<PortState>& 
 void
 EngineStateController::_on_sample_rate_change(framecnt_t new_sample_rate)
 {
-	// validate the change
-	if (set_new_sample_rate_in_controller(new_sample_rate)) {
-		SampleRateChanged(); // emit a signal if successful
-	
-	} else {
-		// restore previous state in backend
-		push_current_state_to_backend(false);
-	}
+	_current_state->sample_rate = new_sample_rate;
+	SampleRateChanged(); // emit a signal
 }
 
 
 void
 EngineStateController::_on_buffer_size_change(pframes_t new_buffer_size)
 {
-	// validate the change
-    if (set_new_buffer_size_in_controller(new_buffer_size) ) {
-		BufferSizeChanged(); // emit a signal if successful
-	
-	} else {
-		// restore previous state in backend
-		push_current_state_to_backend(false);
-	}
-    
-    
+    _current_state->buffer_size = new_buffer_size;
+    BufferSizeChanged(); // emit a signal
 }
 
 
