@@ -134,7 +134,7 @@ static void * pthread_process (void *arg)
 int
 AlsaRawMidiIO::start ()
 {
-	if (_realtime_pthread_create (SCHED_FIFO, -19,
+	if (_realtime_pthread_create (SCHED_FIFO, -21, 100000,
 				&_main_thread, pthread_process, this))
 	{
 		if (pthread_create (&_main_thread, NULL, pthread_process, this)) {

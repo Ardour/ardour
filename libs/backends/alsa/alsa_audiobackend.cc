@@ -491,7 +491,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	_run = true;
 	_port_change_flag = false;
 
-	if (_realtime_pthread_create (SCHED_FIFO, -20,
+	if (_realtime_pthread_create (SCHED_FIFO, -20, 100000,
 				&_main_thread, pthread_process, this))
 	{
 		if (pthread_create (&_main_thread, NULL, pthread_process, this))
@@ -620,16 +620,19 @@ AlsaAudioBackend::create_process_thread (boost::function<void()> func)
 	pthread_attr_t attr;
 	size_t stacksize = 100000;
 
-	pthread_attr_init (&attr);
-	pthread_attr_setstacksize (&attr, stacksize);
 	ThreadData* td = new ThreadData (this, func, stacksize);
 
-	if (pthread_create (&thread_id, &attr, alsa_process_thread, td)) {
-		PBD::error << _("AudioEngine: cannot create process thread.") << endmsg;
+	if (_realtime_pthread_create (SCHED_FIFO, -21, stacksize,
+				&thread_id, alsa_process_thread, td)) {
+		pthread_attr_init (&attr);
+		pthread_attr_setstacksize (&attr, stacksize);
+		if (pthread_create (&thread_id, &attr, alsa_process_thread, td)) {
+			PBD::error << _("AudioEngine: cannot create process thread.") << endmsg;
+			pthread_attr_destroy (&attr);
+			return -1;
+		}
 		pthread_attr_destroy (&attr);
-		return -1;
 	}
-	pthread_attr_destroy (&attr);
 
 	_threads.push_back (thread_id);
 	return 0;
