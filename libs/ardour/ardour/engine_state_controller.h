@@ -244,7 +244,7 @@ private:
     void _do_initial_engine_setup();
     bool _apply_state(const StatePtr& state);
     // get gets available device channels from engine and updates internal controller state
-    void _update_device_channels_state(bool reconnect_session_routes = true);
+    void _update_device_channels_state();
     // check stereo out channel state configuration and make it correcpond stereo out mode requirements
     void _refresh_stereo_out_channel_states();
     ////////////////////////////////////////

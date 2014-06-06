@@ -1243,7 +1243,7 @@ EngineStateController::_on_device_list_change()
 
 
 void
-EngineStateController::_update_device_channels_state(bool reconnect_session_routes/*=true*/)
+EngineStateController::_update_device_channels_state()
 {
     boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
 	assert(backend);
@@ -1368,11 +1368,6 @@ EngineStateController::_update_device_channels_state(bool reconnect_session_rout
             _midi_outputs.push_back(state);
         }
     }
-    
-    
-    if (reconnect_session_routes) {
-        AudioEngine::instance()->reconnect_session_routes();
-    }
 }
 
 
@@ -1416,6 +1411,7 @@ EngineStateController::_refresh_stereo_out_channel_states()
 void
 EngineStateController::_on_engine_running ()
 {
+    AudioEngine::instance()->reconnect_session_routes();
     _current_state->active = true;
     
     EngineRunning(); // emit a signal
