@@ -2939,13 +2939,16 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
                 
                 // Replace session only if file with extension '.ardour' was chosen
                 string suffix = string(statefile_suffix);
-                
-                // if existed folder was choosen
-                if( Glib::file_test (full_session_name, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) )
-                {
-                    run_message_dialog("Can not replace session. Folder " + session_path + " allready exists. If you need to replace session please choose file " + full_session_name + suffix);
-                    continue;
-                }
+
+			
+				// If existed folder was choosen 
+				if( Glib::file_test (full_session_name, Glib::FileTest (G_FILE_TEST_IS_DIR)) )
+				{
+					run_message_dialog("Can not replace session. Folder " + session_path + 
+							            " allready exists. If you need to replace session please choose file " + 
+							            full_session_name + suffix);
+					continue;
+				}
                     
                 int pos = full_session_name.rfind(suffix);
                 
