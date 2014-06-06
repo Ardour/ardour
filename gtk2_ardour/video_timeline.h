@@ -123,6 +123,9 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	std::string video_server_url;
 	std::string server_docroot;
 
+	void xjadeo_readversion (std::string d, size_t s);
+	std::string xjadeo_version;
+
 	typedef std::list<VideoImageFrame*> VideoFrames;
 	VideoFrames video_frames;
 	VideoImageFrame *get_video_frame (framepos_t vfn, int cut=0, int rightend = -1);
