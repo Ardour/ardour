@@ -138,19 +138,6 @@ PBD::Signal2<void,std::string,std::string> Session::VersionMismatch;
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
 
-namespace {
-    // if pattern is not found out_str == in_str
-    bool remove_pattern_from_string(const std::string& in_str, const std::string& pattern, std::string& out_str) {
-        if (in_str.find(pattern) != std::string::npos ) {
-            out_str = in_str.substr(pattern.size() );
-            return true;
-        } else {
-            out_str = in_str;
-            return false;
-        }
-    }
-}
-
 /** @param snapshot_name Snapshot name, without .ardour suffix */
 Session::Session (AudioEngine &eng,
                   const string& fullpath,

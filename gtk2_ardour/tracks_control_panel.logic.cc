@@ -28,6 +28,7 @@
 #include "ardour/engine_state_controller.h"
 #include "ardour/rc_configuration.h"
 
+#include "ardour/utils.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "utils.h"
@@ -45,19 +46,7 @@ using namespace Glib;
 #define dbg_msg(a) MessageDialog (a, PROGRAM_NAME).run();
 
 namespace {
-    bool remove_pattern_from_string(const std::string& in_str, const std::string& pattern, std::string& out_str) {
-        
-        out_str.assign(in_str);
-        
-        size_t pos = in_str.find(pattern);
-        if ( pos != std::string::npos ) {
-            out_str.erase(pos, pattern.length() );
-            return true;
-        } else {
-            return false;
-        }
-    }
-    
+
     static const char* audio_port_name_prefix = "system:";
     static const char* midi_port_name_prefix = "system_midi:";
     static const char* midi_capture_suffix = " capture";

@@ -170,6 +170,8 @@ LIBARDOUR_API bool matching_unsuffixed_filename_exists_in (const std::string& di
 
 LIBARDOUR_API uint32_t how_many_dsp_threads ();
 
+LIBARDOUR_API bool remove_pattern_from_string(const std::string& in_str, const std::string& pattern, std::string& out_str);
+
 #if __APPLE__
 LIBARDOUR_API std::string CFStringRefToStdString(CFStringRef stringRef);
 #endif // __APPLE__
