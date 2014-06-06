@@ -38,7 +38,7 @@ VideoMonitor::VideoMonitor (PublicEditor *ed, std::string xjadeo_bin_path)
 {
 	manually_seeked_frame = 0;
 	fps =0.0; // = _session->timecode_frames_per_second();
-	sync_by_manual_seek = false;
+	sync_by_manual_seek = true;
 	_restore_settings_mask = 0;
 	clock_connection = sigc::connection();
 	state_connection = sigc::connection();
@@ -47,7 +47,7 @@ VideoMonitor::VideoMonitor (PublicEditor *ed, std::string xjadeo_bin_path)
 	starting = 0;
 	osdmode = 10; // 1: frameno, 2: timecode, 8: box
 
-	process = new ARDOUR::SystemExec(xjadeo_bin_path, X_("-R"));
+	process = new ARDOUR::SystemExec(xjadeo_bin_path, X_("-R -J"));
 	process->ReadStdout.connect_same_thread (*this, boost::bind (&VideoMonitor::parse_output, this, _1 ,_2));
 	process->Terminated.connect (*this, invalidator (*this), boost::bind (&VideoMonitor::terminated, this), gui_context());
 	XJKeyEvent.connect (*this, invalidator (*this), boost::bind (&VideoMonitor::forward_keyevent, this, _1), gui_context());
