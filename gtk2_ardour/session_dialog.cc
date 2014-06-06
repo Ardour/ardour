@@ -653,9 +653,10 @@ SessionDialog::redisplay_recent_sessions ()
 
 		float sr;
 		SampleFormat sf;
-		std::string s = Glib::build_filename (dirname, state_file_names.front() + statefile_suffix);
+		std::string state_file_basename = state_file_names.front();
 
-		row[recent_session_columns.visible_name] = Glib::path_get_basename (dirname);
+		std::string s = Glib::build_filename (dirname, state_file_basename + statefile_suffix);
+
 		row[recent_session_columns.fullpath] = dirname; /* just the dir, but this works too */
 		row[recent_session_columns.tip] = Glib::Markup::escape_text (dirname);
 
@@ -680,9 +681,13 @@ SessionDialog::redisplay_recent_sessions ()
 		++session_snapshot_count;
 
 		if (state_file_names.size() > 1) {
+			// multiple session files in the session directory - show the directory name.
+			// if there's not a session file with the same name as the session directory,
+			// opening the parent item will fail, but expanding it will show the session
+			// files that actually exist, and the right one can then be opened.
+			row[recent_session_columns.visible_name] = Glib::path_get_basename (dirname);
 
 			// add the children
-
 			for (std::vector<std::string>::iterator i2 = state_file_names.begin(); i2 != state_file_names.end(); ++i2) {
 
 				Gtk::TreeModel::Row child_row = *(recent_session_model->append (row.children()));
@@ -712,6 +717,9 @@ SessionDialog::redisplay_recent_sessions ()
 
 				++session_snapshot_count;
 			}
+		} else {
+			// only a single session file in the directory - show its actual name.
+			row[recent_session_columns.visible_name] = state_file_basename;
 		}
 	}
 

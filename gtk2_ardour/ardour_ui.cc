@@ -1440,14 +1440,14 @@ ARDOUR_UI::redisplay_recent_sessions ()
 
 		Gtk::TreeModel::Row row = *(recent_session_model->append());
 
-		row[recent_session_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_session_columns.fullpath] = fullpath;
 		row[recent_session_columns.tip] = Glib::Markup::escape_text (fullpath);
 
 		if (state_file_names.size() > 1) {
+			// multiple session files in the session directory - show the directory name.
+			row[recent_session_columns.visible_name] = Glib::path_get_basename (fullpath);
 
 			// add the children
-
 			for (std::vector<std::string>::iterator i2 = state_file_names.begin();
 					i2 != state_file_names.end(); ++i2)
 			{
@@ -1458,6 +1458,9 @@ ARDOUR_UI::redisplay_recent_sessions ()
 				child_row[recent_session_columns.fullpath] = fullpath;
 				child_row[recent_session_columns.tip] = Glib::Markup::escape_text (fullpath);
 			}
+		} else {
+			// only a single session file in the directory - show its actual name.
+			row[recent_session_columns.visible_name] = state_file_names.front ();
 		}
 	}
 
