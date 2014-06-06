@@ -118,6 +118,15 @@ Editor::initialize_canvas ()
 	_trackview_group = new ArdourCanvas::Group (hv_scroll_group);
 	CANVAS_DEBUG_NAME (_trackview_group, "Canvas TrackViews");
 	
+	// used to show zoom mode active zooming
+	zoom_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
+	zoom_rect->hide();
+	zoom_rect->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
+
+	// used as rubberband rect
+	rubberband_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
+	rubberband_rect->hide();
+
 	/* a group to hold stuff while it gets dragged around. Must be the
 	 * uppermost (last) group with hv_scroll_group as a parent
 	 */
@@ -201,15 +210,6 @@ Editor::initialize_canvas ()
 	transport_punchout_line->set_x1 (0);
 	transport_punchout_line->set_y1 (ArdourCanvas::COORD_MAX);
 	transport_punchout_line->hide();
-
-	// used to show zoom mode active zooming
-	zoom_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
-	zoom_rect->hide();
-	zoom_rect->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
-
-	// used as rubberband rect
-	rubberband_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
-	rubberband_rect->hide();
 
 	tempo_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_tempo_bar_event), tempo_bar));
 	meter_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_meter_bar_event), meter_bar));
