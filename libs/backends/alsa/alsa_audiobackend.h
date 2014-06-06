@@ -306,8 +306,10 @@ class AlsaAudioBackend : public AudioBackend {
 		uint32_t _n_inputs;
 		uint32_t _n_outputs;
 
-		uint32_t _systemic_input_latency;
-		uint32_t _systemic_output_latency;
+		uint32_t _systemic_audio_input_latency;
+		uint32_t _systemic_audio_output_latency;
+		uint32_t _systemic_midi_input_latency;
+		uint32_t _systemic_midi_output_latency;
 
 		uint64_t _processed_samples;
 
