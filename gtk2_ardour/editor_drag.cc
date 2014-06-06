@@ -181,6 +181,9 @@ DragManager::motion_handler (GdkEvent* e, bool from_autoscroll)
 
 	for (list<Drag*>::iterator i = _drags.begin(); i != _drags.end(); ++i) {
 		bool const t = (*i)->motion_handler (e, from_autoscroll);
+		/* run all handlers; return true if at least one of them
+		   returns true (indicating that the event has been handled).
+		*/
 		if (t) {
 			r = true;
 		}
@@ -3577,28 +3580,28 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 		double x2 = _editor->sample_to_pixel (end);
 		const double min_dimension = 2.0;
 
-		_editor->rubberband_rect->set_x0 (x1);
 		if (_vertical_only) {
 			/* fixed 10 pixel width */
-			_editor->rubberband_rect->set_x1 (x1 + 10);
+			x2 = x1 + 10;
 		} else {
 			if (x2 < x1) {
 				x2 = min (x1 - min_dimension, x2);
 			} else {
 				x2 = max (x1 + min_dimension, x2);
 			}
-			_editor->rubberband_rect->set_x1 (x2);
 		} 
 
-		_editor->rubberband_rect->set_y0 (y1);
 		if (y2 < y1) {
 			y2 = min (y1 - min_dimension, y2);
 		} else {
 			y2 = max (y1 + min_dimension, y2);
 		}
 
-		_editor->rubberband_rect->set_y1 (y2);
-		
+		/* translate rect into item space and set */
+
+		Rect r (x1, y1, x2, y2);
+
+		_editor->rubberband_rect->set (_editor->rubberband_rect->canvas_to_item (r));
 		_editor->rubberband_rect->show();
 		_editor->rubberband_rect->raise_to_top();
 
