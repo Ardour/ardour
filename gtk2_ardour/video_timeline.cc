@@ -720,6 +720,11 @@ VideoTimeLine::set_video_server_docroot(std::string vsr) {
 
 /* video-monitor for this timeline */
 void
+VideoTimeLine::xjadeo_readversion (std::string d, size_t /* s */) {
+	xjadeo_version += d;
+}
+
+void
 VideoTimeLine::find_xjadeo () {
 	std::string xjadeo_file_path;
 #ifdef PLATFORM_WINDOWS
@@ -769,6 +774,45 @@ VideoTimeLine::find_xjadeo () {
 				"\n"
 				"see also http://manual.ardour.org/video-timeline/setup/")
 			<< endmsg;
+	}
+	if (found_xjadeo ()) {
+		ARDOUR::SystemExec version_check(_xjadeo_bin, X_("--version"));
+		xjadeo_version = "";
+		version_check.ReadStdout.connect_same_thread (*this, boost::bind (&VideoTimeLine::xjadeo_readversion, this, _1 ,_2));
+		version_check.Terminated.connect_same_thread (*this, boost::bind (&VideoTimeLine::xjadeo_readversion, this, "\n" ,1));
+		if (version_check.start(2)) {
+			warning << _(
+					"Video-monitor 'xjadeo' cannot be launched."
+					) << endmsg;
+			_xjadeo_bin = X_("");
+			return;
+		}
+
+		version_check.wait ();
+		int timeout = 300;
+		while (xjadeo_version.empty() && --timeout) {
+			Glib::usleep(10000);
+		}
+
+		bool v_ok = false;
+		size_t vo = xjadeo_version.find(" version ");
+		if (vo != string::npos) {
+			int v_major, v_minor, v_micro;
+			if(sscanf(xjadeo_version.substr(vo + 9, string::npos).c_str(),"%d.%d.%d",
+						&v_major, &v_minor, &v_micro) == 3)
+			{
+				if (v_major >= 1) v_ok = true;
+				else if (v_major == 0 && v_minor >= 8) v_ok = true;
+				else if (v_major == 0 && v_minor >= 7 && v_micro >= 7) v_ok = true;
+			}
+		}
+		if (!v_ok) {
+			_xjadeo_bin = X_("");
+			warning << _(
+					"Video-monitor 'xjadeo' is too old. "
+					"Please install xjadeo version 0.7.7 or later. http://xjadeo.sf.net/"
+					) << endmsg;
+		}
 	}
 }
 
