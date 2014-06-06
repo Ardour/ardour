@@ -24,7 +24,7 @@
 
 static int
 _realtime_pthread_create (
-		int policy, int priority,
+		const int policy, int priority, const size_t stacksize,
 		pthread_t *thread,
 		void *(*start_routine) (void *),
 		void *arg)
@@ -33,7 +33,6 @@ _realtime_pthread_create (
 
 	pthread_attr_t attr;
 	struct sched_param parm;
-	const size_t stacksize = 100000;
 
 	const int p_min = sched_get_priority_min (policy);
 	const int p_max = sched_get_priority_max (policy);
