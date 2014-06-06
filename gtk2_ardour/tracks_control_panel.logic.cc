@@ -120,7 +120,10 @@ TracksControlPanel::init ()
 
     _name_tracks_after_driver.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_name_tracks_after_driver));
     _reset_tracks_name_to_default.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_reset_tracks_name_to_default));
-
+    _yes_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_yes_button));
+    _no_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_no_button));
+    _yes_button.set_visible(false);
+    _no_button.set_visible(false);
     
 	populate_engine_combo ();
 	populate_output_mode();
@@ -596,73 +599,35 @@ TracksControlPanel::on_all_inputs_on_button(WavesButton*)
 void
 TracksControlPanel::on_name_tracks_after_driver(WavesButton*)
 {
-    if( Config->get_tracks_auto_naming() == NameAfterDriver )
-    {
-        std::string message = _("Current mode is already active");
-        MessageDialog msg (message,
-                           false,
-                           Gtk::MESSAGE_WARNING,
-                           Gtk::BUTTONS_OK,
-                           true);
-        
-        msg.set_position (Gtk::WIN_POS_MOUSE);
-        
-        msg.set_keep_above(true);
-        msg.run();
-            
-        return;
-    }
-    
-    std::string message = _("Do you realy want to switch tracks naming?");
-    MessageDialog msg (message,
-                       false,
-                       Gtk::MESSAGE_WARNING,
-                       Gtk::BUTTONS_YES_NO,
-                       true);
-    
-    msg.set_position (Gtk::WIN_POS_MOUSE);
-    msg.set_keep_above(true);
-    
-    switch (msg.run()) {
-        case RESPONSE_YES:
-            Config->set_tracks_auto_naming(NameAfterDriver);
-    }
+    _yes_button.set_visible(true);
+    _no_button.set_visible(true);
+
+    _tracks_naming_rule = NameAfterDriver;
 }
 
 void
 TracksControlPanel::on_reset_tracks_name_to_default(WavesButton*)
 {
-    if( Config->get_tracks_auto_naming() == UseDefaultNames )
-    {
-        std::string message = _("Current mode is already active");
-        MessageDialog msg (message,
-                           false,
-                           Gtk::MESSAGE_WARNING,
-                           Gtk::BUTTONS_OK,
-                           true);
-        
-        msg.set_position (Gtk::WIN_POS_MOUSE);
-        
-        msg.set_keep_above(true);
-        msg.run();
-        
-        return;
-    }
+    _yes_button.set_visible(true);
+    _no_button.set_visible(true);
     
-    std::string message = _("Do you realy want to switch tracks naming?");
-    MessageDialog msg (message,
-                       false,
-                       Gtk::MESSAGE_WARNING,
-                       Gtk::BUTTONS_YES_NO,
-                       true);
+    _tracks_naming_rule = UseDefaultNames;
+}
+
+void
+TracksControlPanel::on_yes_button(WavesButton*)
+{
+    Config->set_tracks_auto_naming(_tracks_naming_rule);
     
-    msg.set_position (Gtk::WIN_POS_MOUSE);
-    msg.set_keep_above(true);
-    
-    switch (msg.run()) {
-        case RESPONSE_YES:
-            Config->set_tracks_auto_naming(UseDefaultNames);
-    }
+    _yes_button.set_visible(false);
+    _no_button.set_visible(false);
+}
+
+void
+TracksControlPanel::on_no_button(WavesButton*)
+{
+    _yes_button.set_visible(false);
+    _no_button.set_visible(false);
 }
 
 void
