@@ -47,6 +47,7 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _systemic_input_latency (0)
 	, _systemic_output_latency (0)
 	, _processed_samples (0)
+	, _port_change_flag (false)
 {
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_port_callback_mutex, 0);
@@ -321,6 +322,7 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 	}
 
 	engine.reconnect_ports ();
+	_port_change_flag = false;
 
 	if (pthread_create (&_main_thread, NULL, pthread_process, this)) {
 		PBD::error << _("DummyAudioBackend: cannot start.") << endmsg;
@@ -671,7 +673,6 @@ DummyAudioBackend::register_system_ports()
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
 	}
-
 	return 0;
 }
 
@@ -1006,6 +1007,7 @@ DummyAudioBackend::main_process_thread ()
 	_running = true;
 	_processed_samples = 0;
 
+	manager.registration_callback();
 	manager.graph_order_callback();
 
 	uint64_t clock1, clock2;
@@ -1031,7 +1033,16 @@ DummyAudioBackend::main_process_thread ()
 		}
 		clock1 = g_get_monotonic_time();
 
+		bool connections_changed = false;
+		bool ports_changed = false;
 		if (!pthread_mutex_trylock (&_port_callback_mutex)) {
+			if (_port_change_flag) {
+				ports_changed = true;
+				_port_change_flag = false;
+			}
+			if (!_port_connection_queue.empty ()) {
+				connections_changed = true;
+			}
 			while (!_port_connection_queue.empty ()) {
 				PortConnectData *c = _port_connection_queue.back ();
 				manager.connect_callback (c->a, c->b, c->c);
@@ -1039,6 +1050,12 @@ DummyAudioBackend::main_process_thread ()
 				delete c;
 			}
 			pthread_mutex_unlock (&_port_callback_mutex);
+		}
+		if (ports_changed) {
+			manager.registration_callback();
+		}
+		if (connections_changed) {
+			manager.graph_order_callback();
 		}
 
 	}
@@ -1109,10 +1126,12 @@ DummyPort::DummyPort (DummyAudioBackend &b, const std::string& name, PortFlags f
 	_capture_latency_range.max = 0;
 	_playback_latency_range.min = 0;
 	_playback_latency_range.max = 0;
+	_dummy_backend.port_connect_add_remove_callback();
 }
 
 DummyPort::~DummyPort () {
 	disconnect_all ();
+	_dummy_backend.port_connect_add_remove_callback();
 }
 
 
