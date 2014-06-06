@@ -238,6 +238,88 @@ EngineStateController::_deserialize_and_load_engine_states()
 
 
 void
+EngineStateController::_deserialize_and_load_midi_port_states()
+{
+    XMLNode* audio_midi_settings_root = ARDOUR::Config->extra_xml ("AudioMidiSettings");
+    
+    if (!audio_midi_settings_root) {
+        return;
+    }
+    
+    XMLNode* midi_states = audio_midi_settings_root->child("MidiStates");
+    
+    if (!midi_states) {
+        return;
+    }
+    
+    XMLNodeList state_nodes_list = midi_states->children();
+    XMLNodeConstIterator state_node_iter = state_nodes_list.begin();
+    for (; state_node_iter != state_nodes_list.end(); ++state_node_iter) {
+        
+        XMLNode* state_node = *state_node_iter;
+        if (state_node->name() == "MidiInputs") {
+            
+            XMLNodeList input_state_nodes = state_node->children();
+            XMLNodeConstIterator input_state_node_iter = input_state_nodes.begin();
+            _midi_inputs.clear();
+            
+            for (; input_state_node_iter != input_state_nodes.end(); ++input_state_node_iter) {
+                
+                XMLNode* input_state_node = *input_state_node_iter;
+                XMLProperty* prop = NULL;
+                
+                if (input_state_node->name() != "input") {
+                    continue;
+                }
+                MidiPortState input_state (input_state_node->name() );
+                
+                if ((prop = input_state_node->property ("name")) == 0) {
+                    continue;
+                }
+                input_state.name = prop->value();
+                
+                if ((prop = input_state_node->property ("active")) == 0) {
+                    continue;
+                }
+                input_state.active = string_is_affirmative (prop->value ());
+                
+                _midi_inputs.push_back(input_state);
+            }
+            
+        } else if (state_node->name() == "MidiOutputs") {
+            
+            XMLNodeList output_state_nodes = state_node->children();
+            XMLNodeConstIterator output_state_node_iter = output_state_nodes.begin();
+            _midi_outputs.clear();
+            
+            for (; output_state_node_iter != output_state_nodes.end(); ++output_state_node_iter) {
+                
+                XMLNode* output_state_node = *output_state_node_iter;
+                XMLProperty* prop = NULL;
+                
+                if (output_state_node->name() != "output") {
+                    continue;
+                }
+                MidiPortState output_state (output_state_node->name() );
+                
+                if ((prop = output_state_node->property ("name")) == 0) {
+                    continue;
+                }
+                output_state.name = prop->value();
+                
+                if ((prop = output_state_node->property ("active")) == 0) {
+                    continue;
+                }
+                output_state.active = string_is_affirmative (prop->value ());
+                
+                _midi_outputs.push_back(output_state);
+            }
+        }
+    }
+}
+
+
+void
 EngineStateController::_serialize_engine_states(XMLNode* audio_midi_settings_node)
 {
     if (!audio_midi_settings_node) {
@@ -248,10 +330,6 @@ EngineStateController::_serialize_engine_states(XMLNode* audio_midi_settings_nod
     audio_midi_settings_node->remove_nodes_and_delete("EngineStates" );
     
     XMLNode* engine_states = new XMLNode("EngineStates" );
-    
-    if (!engine_states) {
-        return;
-    }
     
     StateList::const_iterator state_iter = _states.begin();
     for (; state_iter != _states.end(); ++state_iter) {
@@ -308,6 +386,42 @@ EngineStateController::_serialize_engine_states(XMLNode* audio_midi_settings_nod
     }
 
     audio_midi_settings_node->add_child_nocopy(*engine_states);
+}
+
+
+void
+EngineStateController::_serialize_midi_port_states(XMLNode* audio_midi_settings_node)
+{
+    if (!audio_midi_settings_node) {
+        return;
+    }
+    
+    // clean up state data first
+    audio_midi_settings_node->remove_nodes_and_delete("MidiStates" );
+    
+    XMLNode* midi_states_node = new XMLNode("MidiStates" );
+    
+    XMLNode* midi_input_states_node = new XMLNode("MidiInputs" );
+    MidiPortStateList::const_iterator midi_input_state_iter = _midi_inputs.begin();
+    for (; midi_input_state_iter != _midi_inputs.end(); ++midi_input_state_iter) {
+        XMLNode* midi_input_node = new XMLNode("input" );
+        midi_input_node->add_property ("name", midi_input_state_iter->name);
+        midi_input_node->add_property ("active", midi_input_state_iter->active ? "yes" : "no");
+        midi_input_states_node->add_child_nocopy(*midi_input_node);
+    }
+    midi_states_node->add_child_nocopy(*midi_input_states_node);
+    
+    XMLNode* midi_output_states_node = new XMLNode("MidiOutputs" );
+    MidiPortStateList::const_iterator midi_output_state_iter = _midi_outputs.begin();
+    for (; midi_output_state_iter != _midi_outputs.end(); ++midi_output_state_iter) {
+        XMLNode* midi_output_node = new XMLNode("output" );
+        midi_output_node->add_property ("name", midi_output_state_iter->name);
+        midi_output_node->add_property ("active", midi_output_state_iter->active ? "yes" : "no");
+        midi_output_states_node->add_child_nocopy(*midi_output_node);
+    }
+    midi_states_node->add_child_nocopy(*midi_output_states_node);
+
+    audio_midi_settings_node->add_child_nocopy(*midi_states_node);
 }
 
 

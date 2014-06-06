@@ -236,9 +236,9 @@ private:
     
     // state control methods////////////////
     void _deserialize_and_load_engine_states();
-    void _deserialize_and_load_midi_port_states() {};
+    void _deserialize_and_load_midi_port_states();
     void _serialize_engine_states(XMLNode*);
-    void _serialize_midi_port_states(XMLNode*) {};
+    void _serialize_midi_port_states(XMLNode*);
     // sets last active state as current state
     // if no last active state found it loads default state
     void _do_initial_engine_setup();
@@ -253,7 +253,7 @@ private:
     // make sure that current device parameters are supported and fit session requirements 
     void _validate_current_device_state();
     ////////////////////////////////////////
-        
+
     ////////////////////////////////////////
     // callbacks
     void _on_engine_running();
