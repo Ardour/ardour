@@ -66,7 +66,7 @@ EngineStateController::EngineStateController()
     Config->ParameterChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_parameter_changed, this, _1) );
     
     _deserialize_and_load_engine_states();
-    _set_last_active_state_as_current();
+    _do_initial_engine_setup();
     _deserialize_and_load_midi_port_states();
     
     // now push the sate to the backend
@@ -76,32 +76,283 @@ EngineStateController::EngineStateController()
 
 EngineStateController::~EngineStateController()
 {
+}
+
+
+XMLNode&
+EngineStateController::serialize_audio_midi_settings() {
     
+    XMLNode* root = new XMLNode ("AudioMidiSettings");
+    
+    _serialize_engine_states(root);
+    _serialize_midi_port_states(root);
+    
+    return *root;
 }
 
 
 void
 EngineStateController::_deserialize_and_load_engine_states()
 {
+    XMLNode* audio_midi_settings_root = ARDOUR::Config->extra_xml ("AudioMidiSettings");
     
+    if (!audio_midi_settings_root) {
+        return;
+    }
+    
+    XMLNode* engine_states = audio_midi_settings_root->child("EngineStates");
+    
+    if (!engine_states) {
+        return;
+    }
+    
+    XMLNodeList state_nodes_list = engine_states->children();
+    XMLNodeConstIterator state_node_iter = state_nodes_list.begin();
+    
+    for (; state_node_iter != state_nodes_list.end(); ++state_node_iter) {
+        
+        XMLNode* state_node = *state_node_iter;
+        StatePtr engine_state(new State);
+        XMLProperty* prop = NULL;
+        
+        if ((prop = state_node->property ("backend-name")) == 0) {
+            continue;
+        }
+        engine_state->backend_name = prop->value ();
+        
+        if ((prop = state_node->property ("device-name")) == 0) {
+            continue;
+        }
+        engine_state->device_name = prop->value ();
+        
+        if ((prop = state_node->property ("sample-rate")) == 0) {
+            continue;
+        }
+        engine_state->sample_rate = atoi (prop->value ());
+        
+        if ((prop = state_node->property ("buffer-size")) == 0) {
+            continue;
+        }
+        engine_state->buffer_size = atoi (prop->value ());
+        
+        if ((prop = state_node->property ("active")) == 0) {
+            continue;
+        }
+        engine_state->active = string_is_affirmative (prop->value ());
+        
+        XMLNodeList state_children_list = state_node->children();
+        XMLNodeConstIterator state_child_iter = state_children_list.begin();
+        
+            for (; state_child_iter != state_children_list.end(); ++state_child_iter) {
+                XMLNode* state_child = *state_child_iter;
+                
+                if (state_child->name() == "InputConfiguration") {
+                    
+                    XMLNodeList input_states_nodes = state_child->children();
+                    XMLNodeConstIterator input_state_node_iter = input_states_nodes.begin();
+                    PortStateList& input_states = engine_state->input_channel_states;
+                    
+                    for (; input_state_node_iter != input_states_nodes.end(); ++input_state_node_iter) {
+                        
+                        XMLNode* input_state_node = *input_state_node_iter;
+                        
+                        if (input_state_node->name() != "input") {
+                            continue;
+                        }
+                        PortState input_state (input_state_node->name() );
+                        
+                        if ((prop = input_state_node->property ("name")) == 0) {
+                            continue;
+                        }
+                        input_state.name = prop->value();
+                        
+                        
+                        if ((prop = input_state_node->property ("active")) == 0) {
+                            continue;
+                        }
+                        input_state.active = string_is_affirmative (prop->value ());
+                        
+                        input_states.push_back(input_state);
+                    }
+                    
+                } else if (state_child->name() == "MultiOutConfiguration") {
+                    
+                    XMLNodeList multi_out_state_nodes = state_child->children();
+                    XMLNodeConstIterator multi_out_state_node_iter = multi_out_state_nodes.begin();
+                    PortStateList& multi_out_states = engine_state->multi_out_channel_states;
+                    
+                    for (; multi_out_state_node_iter != multi_out_state_nodes.end(); ++multi_out_state_node_iter) {
+                        
+                        XMLNode* multi_out_state_node = *multi_out_state_node_iter;
+                        
+                        if (multi_out_state_node->name() != "output") {
+                            continue;
+                        }
+                        PortState multi_out_state (multi_out_state_node->name() );
+                        
+                        if ((prop = multi_out_state_node->property ("name")) == 0) {
+                            continue;
+                        }
+                        multi_out_state.name = prop->value();
+                        
+                        if ((prop = multi_out_state_node->property ("active")) == 0) {
+                            continue;
+                        }
+                        multi_out_state.active = string_is_affirmative (prop->value ());
+                        
+                        multi_out_states.push_back(multi_out_state);
+                    }
+                } else if (state_child->name() == "StereoOutConfiguration") {
+                    
+                    XMLNodeList stereo_out_state_nodes = state_child->children();
+                    XMLNodeConstIterator stereo_out_state_node_iter = stereo_out_state_nodes.begin();
+                    PortStateList& stereo_out_states = engine_state->stereo_out_channel_states;
+                    
+                    for (; stereo_out_state_node_iter != stereo_out_state_nodes.end(); ++stereo_out_state_node_iter) {
+                        
+                        XMLNode* stereo_out_state_node = *stereo_out_state_node_iter;
+                        
+                        if (stereo_out_state_node->name() != "output") {
+                            continue;
+                        }
+                        PortState stereo_out_state (stereo_out_state_node->name() );
+                        
+                        if ((prop = stereo_out_state_node->property ("name")) == 0) {
+                            continue;
+                        }
+                        stereo_out_state.name = prop->value();
+                        
+                        if ((prop = stereo_out_state_node->property ("active")) == 0) {
+                            continue;
+                        }                      
+                        stereo_out_state.active = string_is_affirmative (prop->value ());
+                        
+                        stereo_out_states.push_back(stereo_out_state);
+                    }
+                }
+            }
+        
+        _states.push_back (engine_state);
+    }
 }
 
 
 void
-EngineStateController::_serialize_and_save_current_engine_state()
+EngineStateController::_serialize_engine_states(XMLNode* audio_midi_settings_node)
 {
-    // **** add code to save the state list to the file ****
+    if (!audio_midi_settings_node) {
+        return;
+    }
+    
+    // clean up state data first
+    audio_midi_settings_node->remove_nodes_and_delete("EngineStates" );
+    
+    XMLNode* engine_states = new XMLNode("EngineStates" );
+    
+    if (!engine_states) {
+        return;
+    }
+    
+    StateList::const_iterator state_iter = _states.begin();
+    for (; state_iter != _states.end(); ++state_iter) {
+        
+        StatePtr state_ptr = *state_iter;
+        
+        // create new node for the state
+        XMLNode* state_node = new XMLNode("State");
+        
+        state_node->add_property ("backend-name", state_ptr->backend_name);
+        state_node->add_property ("device-name", state_ptr->device_name);
+        state_node->add_property ("sample-rate", state_ptr->sample_rate);
+        state_node->add_property ("buffer-size", state_ptr->buffer_size);
+        state_node->add_property ("active", state_ptr->active ? "yes" : "no");
+        
+        // store channel states:
+        // inputs
+        XMLNode* input_config_node = new XMLNode("InputConfiguration");
+        PortStateList& input_channels = state_ptr->input_channel_states;
+        PortStateList::const_iterator input_state_iter = input_channels.begin();
+        for (; input_state_iter != input_channels.end(); ++input_state_iter) {
+            XMLNode* input_state_node = new XMLNode("input");
+            input_state_node->add_property ("name", input_state_iter->name);
+            input_state_node->add_property ("active", input_state_iter->active ? "yes" : "no");
+            input_config_node->add_child_nocopy(*input_state_node);
+        }
+        state_node->add_child_nocopy(*input_config_node);
+        
+        // multi out outputs
+        XMLNode* multi_out_config_node = new XMLNode("MultiOutConfiguration");
+        PortStateList& multi_out_channels = state_ptr->multi_out_channel_states;
+        PortStateList::const_iterator multi_out_state_iter = multi_out_channels.begin();
+        for (; multi_out_state_iter != multi_out_channels.end(); ++multi_out_state_iter) {
+            XMLNode* multi_out_state_node = new XMLNode("output" );
+            multi_out_state_node->add_property ("name", multi_out_state_iter->name);
+            multi_out_state_node->add_property ("active", multi_out_state_iter->active ? "yes" : "no");
+            multi_out_config_node->add_child_nocopy(*multi_out_state_node);
+        }
+        state_node->add_child_nocopy(*multi_out_config_node);
+        
+        // stereo out outputs
+        XMLNode* stereo_out_config_node = new XMLNode("StereoOutConfiguration");
+        PortStateList& stereo_out_channels = state_ptr->stereo_out_channel_states;
+        PortStateList::const_iterator stereo_out_state_iter = stereo_out_channels.begin();
+        for (; stereo_out_state_iter != stereo_out_channels.end(); ++stereo_out_state_iter) {
+            XMLNode* stereo_out_state_node = new XMLNode("output" );
+            stereo_out_state_node->add_property ("name", stereo_out_state_iter->name);
+            stereo_out_state_node->add_property ("active", stereo_out_state_iter->active ? "yes" : "no");
+            stereo_out_config_node->add_child_nocopy(*stereo_out_state_node);
+        }
+        state_node->add_child_nocopy(*stereo_out_config_node);
+    
+        engine_states->add_child_nocopy(*state_node);
+    }
+
+    audio_midi_settings_node->add_child_nocopy(*engine_states);
+}
+
+
+bool
+EngineStateController::_apply_state(const StatePtr& state)
+{
+    bool applied = false;
+    
+    if (set_new_backend_as_current(state->backend_name) ) {
+        applied = set_new_device_as_current(state->device_name);
+    }
+    
+    return applied;
 }
 
 
 void
-EngineStateController::_set_last_active_state_as_current()
+EngineStateController::_do_initial_engine_setup()
 {
+    bool state_applied = false;
+    
     // if we have no saved state load default values
     if (!_states.empty() ) {
-    } else {
-        _current_state = boost::shared_ptr<State>(new State() );
         
+        // look for last active state first
+        StateList::const_iterator state_iter = _states.begin();
+        for (; state_iter != _states.end(); ++state_iter) {
+            if ( (*state_iter)->active ) {
+                state_applied = _apply_state(*state_iter);
+                break;
+            }
+        }
+        
+        // last active state was not applied
+        // try others
+        if (!state_applied) {
+            StateList::const_iterator state_iter = _states.begin();
+            for (; state_iter != _states.end(); ++state_iter) {
+                state_applied = _apply_state(*state_iter);
+                break;
+            }
+        }
+    }
+
+    if (!state_applied ){
         std::vector<const AudioBackendInfo*> backends = AudioEngine::instance()->available_backends();
         
         if (!backends.empty() ) {
@@ -257,11 +508,16 @@ EngineStateController::set_new_backend_as_current(const std::string& backend_nam
     boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->set_backend (backend_name, "ardour", "");
 	if (backend)
 	{
+        if (_current_state != NULL) {
+            _current_state->active = false;
+        }
+        
         StateList::iterator found_state_iter = find_if (_states.begin(), _states.end(),
                                                         State::StatePredicate(backend_name, "None") );
         
         if (found_state_iter != _states.end() ) {
             // we found a record for new engine with None device - switch to it
+            
             _current_state = *found_state_iter;
             
         } else {
@@ -273,6 +529,7 @@ EngineStateController::set_new_backend_as_current(const std::string& backend_nam
             _states.push_front(_current_state);
         }
         
+        push_current_state_to_backend(false);
         
 		return true;
 	}
@@ -306,6 +563,10 @@ EngineStateController::set_new_device_as_current(const std::string& device_name)
     // device is available
     if (device_iter != device_vector.end() ) {
     
+        if (_current_state != NULL) {
+            _current_state->active = false;
+        }
+        
         // look through state list and find the record for this device and current engine
         StateList::iterator found_state_iter = find_if (_states.begin(), _states.end(),
                                                         State::StatePredicate(backend->name(), device_name) );
@@ -635,7 +896,6 @@ EngineStateController::set_physical_midi_input_state(const std::string& port_nam
         // ***************************
         // add actions here
         
-        _serialize_and_save_midi_port_states();
         MIDIInputConfigChanged();
     }
 }
@@ -653,7 +913,6 @@ EngineStateController::set_physical_midi_output_state(const std::string& port_na
         // ***************************
         // add actions here
         
-        _serialize_and_save_midi_port_states();
         MIDIOutputConfigChanged();
     }
 }
@@ -1010,8 +1269,6 @@ EngineStateController::_update_device_channels_state(bool reconnect_session_rout
         }
     }
     
-    _serialize_and_save_midi_port_states();
-    
     
     if (reconnect_session_routes) {
         AudioEngine::instance()->reconnect_session_routes();
@@ -1059,7 +1316,7 @@ EngineStateController::_refresh_stereo_out_channel_states()
 void
 EngineStateController::_on_engine_running ()
 {
-    _serialize_and_save_current_engine_state();
+    _current_state->active = true;
     
     EngineRunning(); // emit a signal
 }

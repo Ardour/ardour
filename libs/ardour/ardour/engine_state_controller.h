@@ -119,6 +119,7 @@ public:
     // switch backend to session sample rate
     void        set_desired_sample_rate(framecnt_t);
 
+    XMLNode&    serialize_audio_midi_settings();
     
     //DATE UPDATE SIGNALS
     /* this signal is emitted if the sample rate changes */
@@ -162,27 +163,31 @@ private:
 		std::string device_name;
 		ARDOUR::framecnt_t sample_rate;
 		ARDOUR::pframes_t buffer_size;
-		uint32_t input_latency;
-		uint32_t output_latency;
+		//uint32_t input_latency; not used so far
+		//uint32_t output_latency; not used so far
 		PortStateList input_channel_states;
 		PortStateList multi_out_channel_states;
         PortStateList stereo_out_channel_states;
-		//bool active;
-		std::string midi_option;
+		bool active;
+		//std::string midi_option; not used so far
         
 		State()
-        : input_latency (0)
-        , output_latency (0)
+        : sample_rate(0)
+        , buffer_size(0)
         , input_channel_states (0)
         , multi_out_channel_states (0)
         , stereo_out_channel_states (0)
-        //, active (false)
+        , active (false)
         {
         }
         
         bool operator==(const State& rhs)
         {
             return (backend_name == rhs.backend_name) && (device_name == rhs.device_name);
+        }
+        
+        std::string form_state_name() {
+            return std::string("State:" + backend_name + ":" + device_name);
         }
         
         // predicates for search
@@ -232,11 +237,12 @@ private:
     // state control methods////////////////
     void _deserialize_and_load_engine_states();
     void _deserialize_and_load_midi_port_states() {};
-    void _serialize_and_save_current_engine_state();
-    void _serialize_and_save_midi_port_states() {};
+    void _serialize_engine_states(XMLNode*);
+    void _serialize_midi_port_states(XMLNode*) {};
     // sets last active state as current state
     // if no last active state found it loads default state
-    void _set_last_active_state_as_current();
+    void _do_initial_engine_setup();
+    bool _apply_state(const StatePtr& state);
     // get gets available device channels from engine and updates internal controller state
     void _update_device_channels_state(bool reconnect_session_routes = true);
     // check stereo out channel state configuration and make it correcpond stereo out mode requirements

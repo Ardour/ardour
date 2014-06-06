@@ -62,6 +62,7 @@
 #include "ardour/session.h"
 #include "ardour/profile.h"
 #include "ardour/audioengine.h"
+#include "ardour/engine_state_controller.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -564,7 +565,6 @@ ARDOUR_UI::save_ardour_state ()
 	window_node->add_child_nocopy (*tearoff_node);
 
 	Config->add_extra_xml (*window_node);
-	//VKPRefs:Config->add_extra_xml (audio_midi_setup->get_state());
 
 	Config->save_state();
 
