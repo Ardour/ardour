@@ -106,8 +106,9 @@ void
 AlsaAudioBackend::release_device()
 {
 	_reservation_connection.drop_connections();
-	delete _device_reservation;
+	ARDOUR::SystemExec * tmp = _device_reservation;
 	_device_reservation = 0;
+	delete tmp;
 }
 
 bool
