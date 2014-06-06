@@ -311,13 +311,15 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 		return -1;
 	}
 
+	engine.sample_rate_change (_samplerate);
+	engine.buffer_size_change (_samples_per_period);
+
 	if (engine.reestablish_ports ()) {
 		PBD::error << _("DummyAudioBackend: Could not re-establish ports.") << endmsg;
 		stop ();
 		return -1;
 	}
 
-	engine.buffer_size_change (_samples_per_period);
 	engine.reconnect_ports ();
 
 	if (pthread_create (&_main_thread, NULL, pthread_process, this)) {
@@ -1003,6 +1005,8 @@ DummyAudioBackend::main_process_thread ()
 	AudioEngine::thread_init_callback (this);
 	_running = true;
 	_processed_samples = 0;
+
+	manager.graph_order_callback();
 
 	uint64_t clock1, clock2;
 	clock1 = g_get_monotonic_time();

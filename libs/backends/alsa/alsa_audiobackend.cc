@@ -475,6 +475,9 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		return -1;
 	}
 
+	engine.sample_rate_change (_samplerate);
+	engine.buffer_size_change (_samples_per_period);
+
 	if (engine.reestablish_ports ()) {
 		PBD::error << _("AlsaAudioBackend: Could not re-establish ports.") << endmsg;
 		delete _pcmi; _pcmi = 0;
@@ -482,7 +485,6 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		return -1;
 	}
 
-	engine.buffer_size_change (_samples_per_period);
 	engine.reconnect_ports ();
 	_run = true;
 
@@ -1283,6 +1285,8 @@ AlsaAudioBackend::main_process_thread ()
 	clock1 = g_get_monotonic_time();
 	_pcmi->pcm_start ();
 	int no_proc_errors = 0;
+
+	manager.graph_order_callback();
 
 	while (_run) {
 		long nr;
