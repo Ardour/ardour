@@ -54,6 +54,7 @@ public:
 
 	static bool test(const std::string& path);
 	int  open(const std::string& path, int track=1) THROW_FILE_ERROR;
+	// XXX 19200 = 10 * Timecode::BBT_Time::ticks_per_beat
 	int  create(const std::string& path, int track=1, uint16_t ppqn=19200) THROW_FILE_ERROR;
 	void close() THROW_FILE_ERROR;
 

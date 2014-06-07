@@ -42,7 +42,8 @@ const MusicalTime MaxMusicalTime = DBL_MAX;
 const MusicalTime MinMusicalTime = DBL_MIN;
 
 static inline bool musical_time_equal (MusicalTime a, MusicalTime b) {
-	/* acceptable tolerance is 1 tick. Nice if there was no magic number here */
+	/* acceptable tolerance is 1 tick. Nice if there was no magic number here
+	 * -> Timecode::BBT_Time::ticks_per_beat */
 	return fabs (a - b) <= (1.0/1920.0);
 }
 
