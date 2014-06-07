@@ -46,7 +46,7 @@ def build(bld):
             obj.includes = ['.']
             obj.target   = 'ardour-request-device'
             obj.uselib   = [ 'DBUS' ]
-            obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardouralsautil')
+            obj.install_path = os.path.join(bld.env['LIBDIR'])
             obj.defines = [
                     '_POSIX_SOURCE',
                     '_XOPEN_SOURCE=500',
