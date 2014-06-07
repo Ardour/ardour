@@ -75,6 +75,7 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 	, _frames_read_from_ringbuffer(0)
 	, _frames_pending_write(0)
 	, _num_captured_loops(0)
+	, _accumulated_capture_offset(0)
 	, _gui_feed_buffer(AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 	in_set_state = true;
@@ -99,6 +100,7 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	, _frames_read_from_ringbuffer(0)
 	, _frames_pending_write(0)
 	, _num_captured_loops(0)
+	, _accumulated_capture_offset(0)
 	, _gui_feed_buffer(AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 	in_set_state = true;
@@ -362,6 +364,15 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 		Evoral::OverlapType ot = Evoral::coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
 
 		calculate_record_range(ot, transport_frame, nframes, rec_nframes, rec_offset);
+		/* For audio: not writing frames to the capture ringbuffer offsets
+		 * the recording. For midi: we need to keep track of the record range
+		 * and subtract the accumulated difference from the event time.
+		 */
+		if (rec_nframes) {
+			_accumulated_capture_offset += rec_offset;
+		} else {
+			_accumulated_capture_offset += nframes;
+		}
 
 		if (rec_nframes && !was_recording) {
 			if (loop_loc) {
@@ -394,6 +405,9 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 			Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
+			if (ev.time() + rec_offset > rec_nframes) {
+				break;
+			}
 #ifndef NDEBUG
 			if (DEBUG::MidiIO & PBD::debug_bits) {
 				const uint8_t* __data = ev.buffer();
@@ -416,23 +430,26 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 			   any desirable behaviour.  We don't want to send event with
 			   transport time here since that way the source can not
 			   reconstruct their actual time; future clever MIDI looping should
-			   probabl be implemented in the source instead of here.
+			   probably be implemented in the source instead of here.
 			*/
 			const framecnt_t loop_offset = _num_captured_loops * loop_length;
-			
+			const framepos_t event_time = transport_frame + loop_offset - _accumulated_capture_offset + ev.time();
+			if (event_time < 0 || event_time < first_recordable_frame) {
+				continue;
+			}
 			switch (mode) {
 			case AllChannels:
-				_capture_buf->write(transport_frame + loop_offset + ev.time(),
+				_capture_buf->write(event_time,
 						    ev.type(), ev.size(), ev.buffer());
 				break;
 			case FilterChannels:
 				if (ev.is_channel_event()) {
 					if ((1<<ev.channel()) & mask) {
-						_capture_buf->write(transport_frame + loop_offset + ev.time(),
+						_capture_buf->write(event_time,
 								    ev.type(), ev.size(), ev.buffer());
 					}
 				} else {
-					_capture_buf->write(transport_frame + loop_offset + ev.time(),
+					_capture_buf->write(event_time,
 							    ev.type(), ev.size(), ev.buffer());
 				}
 				break;
@@ -440,7 +457,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 				if (ev.is_channel_event()) {
 					ev.set_channel (PBD::ffs(mask) - 1);
 				}
-				_capture_buf->write(transport_frame + loop_offset + ev.time(),
+				_capture_buf->write(event_time,
 						    ev.type(), ev.size(), ev.buffer());
 				break;
 			}
@@ -472,6 +489,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 		if (was_recording) {
 			finish_capture ();
 		}
+		_accumulated_capture_offset = 0;
 
 	}
 
@@ -971,6 +989,10 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 				string region_name;
 
 				RegionFactory::region_name (region_name, _write_source->name(), false);
+
+				DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 capture start @ %2 length %3 add new region %4\n",
+							_name, (*ci)->start, (*ci)->frames, region_name));
+
 
 				// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
 
