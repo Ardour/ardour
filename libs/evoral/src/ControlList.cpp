@@ -1446,7 +1446,13 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 			assert(inclusive ? x >= start : x > start);
 			return true;
 		} else {
-			return false;
+			if (inclusive) {
+				x = next->when;
+			} else {
+				x = start;
+			}
+			_search_cache.left = x;
+			return true;
 		}
 
 		/* No points in the future, so no steps (towards them) in the future */

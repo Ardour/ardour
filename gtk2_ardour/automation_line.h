@@ -47,6 +47,7 @@ class TimeAxisView;
 class AutomationTimeAxisView;
 class Selectable;
 class Selection;
+class PublicEditor;
 
 
 /** A GUI representation of an ARDOUR::AutomationList */
@@ -183,7 +184,7 @@ public:
 		ContiguousControlPoints (AutomationLine& al);
 		double clamp_dx (double dx);
 		void move (double dx, double dy);
-		void compute_x_bounds ();
+		void compute_x_bounds (PublicEditor& e);
 private:
 		AutomationLine& line;
 		double before_x;

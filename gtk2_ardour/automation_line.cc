@@ -39,6 +39,7 @@
 #include "ardour/automation_list.h"
 #include "ardour/dB.h"
 #include "ardour/debug.h"
+#include "ardour/tempo.h"
 
 #include "evoral/Curve.hpp"
 
@@ -520,11 +521,12 @@ AutomationLine::ContiguousControlPoints::ContiguousControlPoints (AutomationLine
 }
 
 void
-AutomationLine::ContiguousControlPoints::compute_x_bounds ()
+AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 {
 	uint32_t sz = size();
 
 	if (sz > 0 && sz < line.npoints()) {
+		const TempoMap& map (e.session()->tempo_map());
 
 		/* determine the limits on x-axis motion for this 
 		   contiguous range of control points
@@ -532,14 +534,28 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds ()
 
 		if (front()->view_index() > 0) {
 			before_x = line.nth (front()->view_index() - 1)->get_x();
+
+			const framepos_t pos = e.pixel_to_sample(before_x);
+			const Meter& meter = map.meter_at (pos);
+			const framecnt_t len = ceil(meter.frames_per_bar (map.tempo_at (pos), e.session()->frame_rate()) / 1920.0 / meter.divisions_per_bar());
+			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
+
+			before_x += one_tick_in_pixels;
 		}
 
 		/* if our last point has a point after it in the line,
 		   we have an "after" bound
 		*/
 
-		if (back()->view_index() < (line.npoints() - 2)) {
+		if (back()->view_index() < (line.npoints() - 1)) {
 			after_x = line.nth (back()->view_index() + 1)->get_x();
+
+			const framepos_t pos = e.pixel_to_sample(after_x);
+			const Meter& meter = map.meter_at (pos);
+			const framecnt_t len = ceil(meter.frames_per_bar (map.tempo_at (pos), e.session()->frame_rate()) / 1920.0 / meter.divisions_per_bar());
+			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
+
+			after_x -= one_tick_in_pixels;
 		}
 	}
 }
@@ -643,7 +659,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		}
 
 		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
-			(*ccp)->compute_x_bounds ();
+			(*ccp)->compute_x_bounds (trackview.editor());
 		}
 	}	
 
