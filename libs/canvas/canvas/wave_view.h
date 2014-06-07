@@ -48,11 +48,25 @@ namespace ArdourCanvas {
 class LIBCANVAS_API WaveView : virtual public Item, public Outline, public Fill
 {
 public:
+
         enum Shape { 
 		Normal,
-		Rectified,
+		Rectified
         };
-
+	
+	struct CacheEntry {
+		int channel;
+		Coord height;
+		float amplitude;
+		framepos_t start;
+		framepos_t end;
+		Cairo::RefPtr<Cairo::ImageSurface> image;
+	CacheEntry() : 
+		channel (0), height (0), amplitude(0), start (0), end (0), image (0) {} 
+	CacheEntry(int chan, Coord hght, float amp, framepos_t strt, framepos_t ed, Cairo::RefPtr<Cairo::ImageSurface> img) :
+		channel (chan), height (hght), amplitude (amp), start (strt), end (ed), image (img) {} 
+	};
+	
     /* Displays a single channel of waveform data for the given Region.
 
        x = 0 in the waveview corresponds to the first waveform datum taken
@@ -132,7 +146,9 @@ private:
 
         friend class ::WaveViewTest;
 
-	void invalidate_image ();
+	static std::map <boost::shared_ptr<ARDOUR::AudioSource>, std::vector <CacheEntry> > _image_cache;
+	void consolidate_image_cache () const;
+	void invalidate_image_cache ();
 
 	boost::shared_ptr<ARDOUR::AudioRegion> _region;
 	int    _channel;
@@ -148,16 +164,12 @@ private:
         bool   _logscaled_independent;
         bool   _gradient_depth_independent;
         double _amplitude_above_axis;
+	float  _region_amplitude;
 
 	/** The `start' value to use for the region; we can't use the region's
 	 *  value as the crossfade editor needs to alter it.
 	 */
 	ARDOUR::frameoffset_t _region_start;
-    
-    
-        mutable ARDOUR::framepos_t _sample_start; 
-        mutable ARDOUR::framepos_t _sample_end; 
-        mutable Cairo::RefPtr<Cairo::ImageSurface> _image;
 
         PBD::ScopedConnectionList invalidation_connection;
 
@@ -172,9 +184,10 @@ private:
         void handle_visual_property_change ();
         void handle_clip_level_change ();
 
-        void ensure_cache (ARDOUR::framepos_t sample_start, ARDOUR::framepos_t sample_end) const;
+	void get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start, framepos_t end, double& image_offset) const;
+
         ArdourCanvas::Coord y_extent (double) const;
-        void draw_image (ARDOUR::PeakData*, int npeaks) const;
+	void draw_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int) const;
 };
 
 }
