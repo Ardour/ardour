@@ -90,7 +90,8 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     Gtk::Button       lm_measure_button;
     Gtk::Button       lm_use_button;
     Gtk::Button       lm_back_button;
-    ArdourButton      lm_button;
+    ArdourButton      lm_button_audio;
+    ArdourButton      lm_button_midi;
     Gtk::Label        lm_title;
     Gtk::Label        lm_results;
     Gtk::Table        lm_table;
@@ -196,7 +197,8 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     /* latency measurement */
     void latency_button_clicked ();
-    bool check_latency_measurement ();
+    bool check_audio_latency_measurement ();
+    bool check_midi_latency_measurement ();
     sigc::connection latency_timeout;
     void enable_latency_tab ();
     void disable_latency_tab ();
@@ -212,7 +214,9 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     PBD::ScopedConnection stopped_connection;
 
     void connect_disconnect_click ();
-    void calibrate_latency ();
+    void calibrate_audio_latency ();
+    void calibrate_midi_latency ();
+    bool _measure_midi;
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */
