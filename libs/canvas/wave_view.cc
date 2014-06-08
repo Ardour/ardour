@@ -460,9 +460,8 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	 */
 
 	if (_global_show_waveform_clipping) {
-		
-		set_source_rgba (context, _outline_color);
-		
+		set_source_rgba (context, _clip_color);
+
 		/* the height of the clip-indicator should be at most 7 pixels,
 		   or 5% of the height of the waveview item.
 		*/
@@ -475,25 +474,16 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				tips[i].clip_max;
 			
 			if (show_top_clip) {
-				set_source_rgba (context, _clip_color);
 				context->rel_line_to (0, clip_height);
-				set_source_rgba (context, _outline_color);
-			} else {
-				context->rel_line_to (0, 1.0);
 			}
 
 			if (_shape != WaveView::Rectified) {
 				context->move_to (i, tips[i].bot);
 				if (tips[i].clip_min) {
-					set_source_rgba (context, _clip_color);
 					context->rel_line_to (0, -clip_height);
-					set_source_rgba (context, _outline_color);
-				} else {
-					context->rel_line_to (0, -1.0);
 				}
 			}
 		}
-
 		context->stroke ();
 	}
 
