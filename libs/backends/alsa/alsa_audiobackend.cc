@@ -386,6 +386,11 @@ static void * pthread_process (void *arg)
 int
 AlsaAudioBackend::_start (bool for_latency_measurement)
 {
+	if (!_active && _run) {
+		// recover from 'halted', reap threads
+		stop();
+	}
+
 	if (_active || _run) {
 		PBD::error << _("AlsaAudioBackend: already active.") << endmsg;
 		return -1;
@@ -682,6 +687,8 @@ AlsaAudioBackend::process_thread_count ()
 void
 AlsaAudioBackend::update_latencies ()
 {
+	// trigger latency callback in RT thread (locked graph)
+	port_connect_add_remove_callback();
 }
 
 /* PORTENGINE API */
@@ -1297,6 +1304,8 @@ AlsaAudioBackend::main_process_thread ()
 	clock1 = g_get_monotonic_time();
 	_pcmi->pcm_start ();
 	int no_proc_errors = 0;
+	const int bailout = 2 * _samplerate / _samples_per_period;
+	const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
 
 	manager.registration_callback();
 	manager.graph_order_callback();
@@ -1311,7 +1320,7 @@ AlsaAudioBackend::main_process_thread ()
 				++no_proc_errors;
 				xrun = true;
 			}
-			if (_pcmi->state () < 0 || no_proc_errors > 50) {
+			if (_pcmi->state () < 0 || no_proc_errors > bailout) {
 				PBD::error << _("AlsaAudioBackend: I/O error. Audio Process Terminated.") << endmsg;
 				break;
 			}
@@ -1386,7 +1395,6 @@ AlsaAudioBackend::main_process_thread ()
 				/* calculate DSP load */
 				clock2 = g_get_monotonic_time();
 				const int64_t elapsed_time = clock2 - clock1;
-				const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
 				_dsp_load = elapsed_time / (float) nomial_time;
 			}
 
@@ -1437,6 +1445,10 @@ AlsaAudioBackend::main_process_thread ()
 		}
 		if (connections_changed) {
 			manager.graph_order_callback();
+		}
+		if (connections_changed || ports_changed) {
+			engine.latency_callback(false);
+			engine.latency_callback(true);
 		}
 
 	}
