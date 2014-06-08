@@ -457,38 +457,52 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 
 	/* now add dots to the top and bottom of each line (this is
 	 * modelled on pyramix, except that we add clipping indicators.
+	 *
+	 * the height of the clip-indicator should be at most 7 pixels,
+	 * or 5% of the height of the waveview item.
 	 */
 
-	if (_global_show_waveform_clipping) {
-		set_source_rgba (context, _clip_color);
+	const double clip_height = min (7.0, ceil (_height * 0.05));
 
-		/* the height of the clip-indicator should be at most 7 pixels,
-		   or 5% of the height of the waveview item.
-		*/
-		const double clip_height = min (7.0, ceil (_height * 0.05));
+	set_source_rgba (context, _outline_color);
 		
-		for (int i = 0; i < n_peaks; ++i) {
-			context->move_to (i, tips[i].top);
+	for (int i = 0; i < n_peaks; ++i) {
+		context->move_to (i, tips[i].top);
 			
-			bool show_top_clip = (_shape == WaveView::Rectified && (tips[i].clip_max || tips[i].clip_min)) ||
-				tips[i].clip_max;
+		bool show_top_clip =   _global_show_waveform_clipping && 
+			((_shape == WaveView::Rectified && (tips[i].clip_max || tips[i].clip_min)) ||
+			 tips[i].clip_max);
 			
-			if (show_top_clip) {
-				context->rel_line_to (0, clip_height);
-			}
+		if (show_top_clip) {
+			/* clip-indicating upper terminal line */
+			set_source_rgba (context, _clip_color);
+			context->rel_line_to (0, clip_height);
+			context->stroke ();
+			set_source_rgba (context, _outline_color);
+		} else {
+			/* normal upper terminal dot */
+			context->rel_line_to (0, 1.0);
+			context->stroke ();
+		}
 
-			if (_shape != WaveView::Rectified) {
-				context->move_to (i, tips[i].bot);
-				if (tips[i].clip_min) {
-					context->rel_line_to (0, -clip_height);
-				}
+
+		if (_global_show_waveform_clipping && _shape != WaveView::Rectified) {
+			context->move_to (i, tips[i].bot);
+			if (tips[i].clip_min) {
+				/* clip-indicating lower terminal line */
+				set_source_rgba (context, _clip_color);
+				context->rel_line_to (0, -clip_height);
+				context->stroke ();
+				set_source_rgba (context, _outline_color);
+			} else {
+				/* normal lower terminal dot */
+				context->rel_line_to (0, -1.0);
+				context->stroke ();
 			}
 		}
-		context->stroke ();
 	}
 
 	if (show_zero_line()) {
-
 		set_source_rgba (context, _zero_color);
 		context->set_line_width (1.0);
 		context->move_to (0, y_extent (0.0) + 0.5);
