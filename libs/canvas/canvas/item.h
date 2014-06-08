@@ -130,6 +130,7 @@ public:
 	}
 
 	Duple window_origin() const;
+	Duple canvas_origin() const;
 
 	ScrollGroup* scroll_parent() const { return _scroll_parent; }
 

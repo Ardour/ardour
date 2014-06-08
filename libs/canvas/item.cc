@@ -83,6 +83,12 @@ Item::~Item ()
 }
 
 Duple
+Item::canvas_origin () const
+{
+	return item_to_canvas (Duple (0,0));
+}
+
+Duple
 Item::window_origin () const 
 {
 	/* This is slightly subtle. Our _position is in the coordinate space of 
