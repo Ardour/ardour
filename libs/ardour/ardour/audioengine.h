@@ -54,6 +54,7 @@ namespace ARDOUR {
 
 class InternalPort;
 class MidiPort;
+class MIDIDM;
 class Port;
 class Session;
 class ProcessThread;
@@ -191,13 +192,23 @@ public:
 
     /* latency measurement */
 
-    MTDM* mtdm();
+    MTDM* mtdm() { return _mtdm; }
+    MIDIDM* mididm() { return _mididm; }
+
     int  prepare_for_latency_measurement ();
-    int  start_latency_detection ();
+    int  start_latency_detection (bool);
     void stop_latency_detection ();
     void set_latency_input_port (const std::string&);
     void set_latency_output_port (const std::string&);
     uint32_t latency_signal_delay () const { return _latency_signal_latency; }
+
+		enum LatencyMeasurement {
+			MeasureNone,
+			MeasureAudio,
+			MeasureMIDI
+		};
+
+		LatencyMeasurement measuring_latency () const { return _measuring_latency; }
 
   private:
     AudioEngine ();
@@ -221,7 +232,8 @@ public:
     Glib::Threads::Thread*     m_meter_thread;
     ProcessThread*            _main_thread;
     MTDM*                     _mtdm;
-    bool                      _measuring_latency;
+    MIDIDM*                   _mididm;
+		LatencyMeasurement        _measuring_latency;
     PortEngine::PortHandle    _latency_input_port;
     PortEngine::PortHandle    _latency_output_port;
     framecnt_t                _latency_flush_frames;

@@ -1699,7 +1699,7 @@ EngineControl::start_latency_detection ()
 	ARDOUR::AudioEngine::instance()->set_latency_input_port (lm_input_channel_combo.get_active_text());
 	ARDOUR::AudioEngine::instance()->set_latency_output_port (lm_output_channel_combo.get_active_text());
 
-	if (ARDOUR::AudioEngine::instance()->start_latency_detection () == 0) {
+	if (ARDOUR::AudioEngine::instance()->start_latency_detection (false) == 0) {
 		lm_results.set_markup (string_compose (results_markup, _("Detecting ...")));
 		latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_latency_measurement), 100);
 		lm_measure_label.set_text (_("Cancel"));

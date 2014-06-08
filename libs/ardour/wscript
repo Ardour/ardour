@@ -130,6 +130,7 @@ libardour_sources = [
         'mix.cc',
         'monitor_processor.cc',
         'mtc_slave.cc',
+        'mididm.cc',
         'mtdm.cc',
         'mute_master.cc',
         'onset_detector.cc',

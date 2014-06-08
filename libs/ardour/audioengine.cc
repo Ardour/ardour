@@ -48,6 +48,7 @@
 #include "ardour/meter.h"
 #include "ardour/midi_port.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/mididm.h"
 #include "ardour/mtdm.h"
 #include "ardour/port.h"
 #include "ardour/process_thread.h"
@@ -73,7 +74,8 @@ AudioEngine::AudioEngine ()
 	, m_meter_thread (0)
 	, _main_thread (0)
 	, _mtdm (0)
-	, _measuring_latency (false)
+	, _mididm (0)
+	, _measuring_latency (MeasureNone)
 	, _latency_input_port (0)
 	, _latency_output_port (0)
 	, _latency_flush_frames (0)
@@ -195,7 +197,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	bool return_after_remove_check = false;
 
-	if (_measuring_latency && _mtdm) {
+	if (_measuring_latency == MeasureAudio && _mtdm) {
 		/* run a normal cycle from the perspective of the PortManager
 		   so that we get silence on all registered ports.
 		   
@@ -213,6 +215,28 @@ AudioEngine::process_callback (pframes_t nframes)
 			Sample* out = (Sample*) pe.get_buffer (_latency_output_port, nframes);
 
 			_mtdm->process (nframes, in, out);
+		}
+
+		PortManager::cycle_end (nframes);
+		return_after_remove_check = true;
+
+	} else if (_measuring_latency == MeasureMIDI && _mididm) {
+		/* run a normal cycle from the perspective of the PortManager
+		   so that we get silence on all registered ports.
+
+		   we overwrite the silence on the two ports used for latency
+		   measurement.
+		*/
+
+		PortManager::cycle_start (nframes);
+		PortManager::silence (nframes);
+
+		if (_latency_input_port && _latency_output_port) {
+			PortEngine& pe (port_engine());
+
+			_mididm->process (nframes, pe,
+					pe.get_buffer (_latency_input_port, nframes),
+					pe.get_buffer (_latency_output_port, nframes));
 		}
 
 		PortManager::cycle_end (nframes);
@@ -660,7 +684,7 @@ AudioEngine::stop (bool for_latency)
 	
 	_running = false;
 	_processed_frames = 0;
-	_measuring_latency = false;
+	_measuring_latency = MeasureNone;
 	_latency_output_port = 0;
 	_latency_input_port = 0;
 	_started_for_latency = false;
@@ -1029,12 +1053,6 @@ AudioEngine::setup_required () const
 	return true;
 }
 
-MTDM*
-AudioEngine::mtdm() 
-{
-	return _mtdm;
-}
-
 int
 AudioEngine::prepare_for_latency_measurement ()
 {
@@ -1052,7 +1070,7 @@ AudioEngine::prepare_for_latency_measurement ()
 }
 
 int
-AudioEngine::start_latency_detection ()
+AudioEngine::start_latency_detection (bool for_midi)
 {
 	if (!running()) {
 		if (prepare_for_latency_measurement ()) {
@@ -1065,6 +1083,9 @@ AudioEngine::start_latency_detection ()
 	delete _mtdm;
 	_mtdm = 0;
 
+	delete _mididm;
+	_mididm = 0;
+
 	/* find the ports we will connect to */
 
 	PortEngine::PortHandle out = pe.get_port_by_name (_latency_output_name);
@@ -1076,27 +1097,57 @@ AudioEngine::start_latency_detection ()
 	}
 
 	/* create the ports we will use to read/write data */
-	
-	if ((_latency_output_port = pe.register_port ("latency_out", DataType::AUDIO, IsOutput)) == 0) {
-		stop (true);
-		return -1;
-	}
-	if (pe.connect (_latency_output_port, _latency_output_name)) {
-		pe.unregister_port (_latency_output_port);
-		stop (true);
-		return -1;
-	}
+	if (for_midi) {
+		if ((_latency_output_port = pe.register_port ("latency_out", DataType::MIDI, IsOutput)) == 0) {
+			stop (true);
+			return -1;
+		}
+		if (pe.connect (_latency_output_port, _latency_output_name)) {
+			pe.unregister_port (_latency_output_port);
+			stop (true);
+			return -1;
+		}
 
-	const string portname ("latency_in");
-	if ((_latency_input_port = pe.register_port (portname, DataType::AUDIO, IsInput)) == 0) {
-		pe.unregister_port (_latency_output_port);
-		stop (true);
-		return -1;
-	}
-	if (pe.connect (_latency_input_name, make_port_name_non_relative (portname))) {
-		pe.unregister_port (_latency_output_port);
-		stop (true);
-		return -1;
+		const string portname ("latency_in");
+		if ((_latency_input_port = pe.register_port (portname, DataType::MIDI, IsInput)) == 0) {
+			pe.unregister_port (_latency_output_port);
+			stop (true);
+			return -1;
+		}
+		if (pe.connect (_latency_input_name, make_port_name_non_relative (portname))) {
+			pe.unregister_port (_latency_output_port);
+			stop (true);
+			return -1;
+		}
+
+		_mididm = new MIDIDM (sample_rate());
+
+	} else {
+
+		if ((_latency_output_port = pe.register_port ("latency_out", DataType::AUDIO, IsOutput)) == 0) {
+			stop (true);
+			return -1;
+		}
+		if (pe.connect (_latency_output_port, _latency_output_name)) {
+			pe.unregister_port (_latency_output_port);
+			stop (true);
+			return -1;
+		}
+
+		const string portname ("latency_in");
+		if ((_latency_input_port = pe.register_port (portname, DataType::AUDIO, IsInput)) == 0) {
+			pe.unregister_port (_latency_output_port);
+			stop (true);
+			return -1;
+		}
+		if (pe.connect (_latency_input_name, make_port_name_non_relative (portname))) {
+			pe.unregister_port (_latency_output_port);
+			stop (true);
+			return -1;
+		}
+
+		_mtdm = new MTDM (sample_rate());
+
 	}
 
 	LatencyRange lr;
@@ -1107,10 +1158,8 @@ AudioEngine::start_latency_detection ()
 	_latency_signal_latency += lr.max;
 
 	/* all created and connected, lets go */
-
-	_mtdm = new MTDM (sample_rate());
-	_measuring_latency = true;
-        _latency_flush_frames = samples_per_cycle();
+	_latency_flush_frames = samples_per_cycle();
+	_measuring_latency = for_midi ? MeasureMIDI : MeasureAudio;
 
 	return 0;
 }
@@ -1118,7 +1167,7 @@ AudioEngine::start_latency_detection ()
 void
 AudioEngine::stop_latency_detection ()
 {
-	_measuring_latency = false;
+	_measuring_latency = MeasureNone;
 
 	if (_latency_output_port) {
 		port_engine().unregister_port (_latency_output_port);
