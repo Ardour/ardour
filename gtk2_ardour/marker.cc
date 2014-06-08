@@ -333,7 +333,7 @@ Marker::setup_line ()
 			_track_canvas_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 		}
 
-		ArdourCanvas::Duple g = group->item_to_canvas (ArdourCanvas::Duple (0, 0));
+		ArdourCanvas::Duple g = group->canvas_origin();
 		ArdourCanvas::Duple d = _track_canvas_line->canvas_to_item (ArdourCanvas::Duple (g.x + _shift, 0));
 
 		_track_canvas_line->set_x0 (d.x);

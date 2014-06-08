@@ -2421,7 +2421,7 @@ Editor::get_state ()
 	return *node;
 }
 
-/** @param y y is in canvas coordinate space, in pixel units
+/** @param y y is an offset into the trackview area, in pixel units
  *
  *  @return pair: TimeAxisView that y is over, layer index.
  *
@@ -2431,25 +2431,18 @@ Editor::get_state ()
 std::pair<TimeAxisView *, double>
 Editor::trackview_by_y_position (double y)
 {
-	/* convert y into an offset within the trackview group */
-
-	ArdourCanvas::Duple top_of_trackviews_canvas = _trackview_group->item_to_canvas (ArdourCanvas::Duple (0, 0));
-	
-	if (y >= top_of_trackviews_canvas.y) {
+	if (y < 0) {
+		return std::make_pair ( (TimeAxisView *) 0, 0);
+	}
 		
-		y -= top_of_trackviews_canvas.y;
-
-		for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 			
-			std::pair<TimeAxisView*, double> const r = (*iter)->covers_y_position (y);
+		std::pair<TimeAxisView*, double> const r = (*iter)->covers_y_position (y);
 			
-			if (r.first) {
-				return r;
-			}
+		if (r.first) {
+			return r;
 		}
 	}
-
-	return std::make_pair ( (TimeAxisView *) 0, 0);
 }
 
 /** Snap a position to the grid, if appropriate, taking into account current

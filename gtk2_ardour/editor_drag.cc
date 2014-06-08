@@ -222,10 +222,11 @@ DragManager::have_item (ArdourCanvas::Item* i) const
 	return j != _drags.end ();
 }
 
-Drag::Drag (Editor* e, ArdourCanvas::Item* i)
+Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
 	: _editor (e)
 	, _item (i)
 	, _pointer_frame_offset (0)
+	, _trackview_only (trackview_only)
 	, _move_threshold_passed (false)
 	, _was_double_click (false)
 	, _raw_grab_frame (0)
@@ -271,6 +272,11 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	_grab_frame = adjusted_frame (_raw_grab_frame, event);
 	_last_pointer_frame = _grab_frame;
 	_last_pointer_x = _grab_x;
+
+	if (_trackview_only) {
+		_grab_y = _grab_y - _editor->get_trackview_group()->canvas_origin().y;
+	}
+
 	_last_pointer_y = _grab_y;
 
 	if (cursor == 0) {
@@ -342,13 +348,23 @@ Drag::adjusted_current_frame (GdkEvent const * event, bool snap) const
 	return adjusted_frame (_drags->current_pointer_frame (), event, snap);
 }
 
+double
+Drag::current_pointer_y () const
+{
+	if (!_trackview_only) {
+		return _drags->current_pointer_y ();
+	}
+	
+	return _drags->current_pointer_y () - _editor->get_trackview_group()->canvas_origin().y;
+}
+
 bool
 Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 {
 	/* check to see if we have moved in any way that matters since the last motion event */
 	if (_move_threshold_passed &&
 	    (!x_movement_matters() || _last_pointer_frame == adjusted_current_frame (event)) &&
-	    (!y_movement_matters() || _last_pointer_y == _drags->current_pointer_y ()) ) {
+	    (!y_movement_matters() || _last_pointer_y == current_pointer_y ()) ) {
 		return false;
 	}
 
@@ -359,7 +375,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 	if (!from_autoscroll && !_move_threshold_passed) {
 
 		bool const xp = (::llabs (_drags->current_pointer_frame () - _raw_grab_frame) >= threshold.first);
-		bool const yp = (::fabs ((_drags->current_pointer_y () - _grab_y)) >= threshold.second);
+		bool const yp = (::fabs ((current_pointer_y () - _grab_y)) >= threshold.second);
 
 		_move_threshold_passed = ((xp && x_movement_matters()) || (yp && y_movement_matters()));
 	}
@@ -375,7 +391,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 				motion (event, _move_threshold_passed != old_move_threshold_passed);
 				
 				_last_pointer_x = _drags->current_pointer_x ();
-				_last_pointer_y = _drags->current_pointer_y ();
+				_last_pointer_y = current_pointer_y ();
 				_last_pointer_frame = adjusted_current_frame (event);
 			}
 
@@ -402,6 +418,13 @@ Drag::abort ()
 void
 Drag::show_verbose_cursor_time (framepos_t frame)
 {
+	/* We use DragManager::current_pointer_y() here 
+	   because we need to position the verbose canvas
+	   cursor within the overall canvas, regardless 
+	   of this particular drag's _trackview_only
+	   setting.
+	*/
+	   
 	_editor->verbose_cursor()->set_time (
 		frame,
 		_drags->current_pointer_x() + 10,
@@ -416,6 +439,13 @@ Drag::show_verbose_cursor_duration (framepos_t start, framepos_t end, double xof
 {
 	_editor->verbose_cursor()->show (xoffset);
 
+	/* We use DragManager::current_pointer_y() here 
+	   because we need to position the verbose canvas
+	   cursor within the overall canvas, regardless 
+	   of this particular drag's _trackview_only
+	   setting.
+	*/
+
 	_editor->verbose_cursor()->set_duration (
 		start, end,
 		_drags->current_pointer_x() + 10,
@@ -427,6 +457,13 @@ void
 Drag::show_verbose_cursor_text (string const & text)
 {
 	_editor->verbose_cursor()->show ();
+
+	/* We use DragManager::current_pointer_y() here 
+	   because we need to position the verbose canvas
+	   cursor within the overall canvas, regardless 
+	   of this particular drag's _trackview_only
+	   setting.
+	*/
 
 	_editor->verbose_cursor()->set (
 		text,
@@ -542,7 +579,7 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	show_verbose_cursor_time (_last_frame_position);
 
-	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (_drags->current_pointer_y ());
+	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (current_pointer_y ());
 	if (tv.first) {
 		_last_pointer_time_axis_view = find_time_axis_view (tv.first);
 		_last_pointer_layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
@@ -656,7 +693,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	/* Note: time axis views in this method are often expressed as an index into the _time_axis_views vector */
 
 	/* Find the TimeAxisView that the pointer is now over */
-	pair<TimeAxisView*, double> const r = _editor->trackview_by_y_position (_drags->current_pointer_y ());
+	pair<TimeAxisView*, double> const r = _editor->trackview_by_y_position (current_pointer_y ());
 	TimeAxisView* tv = r.first;
 
 	if (tv && tv->view()) {
@@ -713,8 +750,8 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			 */
 
 			ArdourCanvas::Group* rvg = rv->get_canvas_group();                                                                                                                                     
-                        Duple rv_canvas_offset = rvg->parent()->item_to_canvas (Duple (0,0));
-                        Duple dmg_canvas_offset = _editor->_drag_motion_group->item_to_canvas (Duple (0,0));
+                        Duple rv_canvas_offset = rvg->parent()->canvas_origin ();
+                        Duple dmg_canvas_offset = _editor->_drag_motion_group->canvas_origin ();
                         rv->get_canvas_group()->reparent (_editor->_drag_motion_group);
 			/* move the item so that it continues to appear at the
 			   same location now that its parent has changed.
@@ -797,7 +834,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 				 */
 				
 				/* Now move the region view */
-				rv->move (x_delta, track_origin.y - rv->get_canvas_group()->item_to_canvas (Duple (0, 0)).y);
+				rv->move (x_delta, track_origin.y - rv->get_canvas_group()->canvas_origin().y);
 			}
 		} else {
 
@@ -805,13 +842,17 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			 * is down there.
 			 */
 
-			if (_drags->current_pointer_y() >= _editor->get_trackview_group()->item_to_canvas (Duple (0,0)).y) {
-				Duple track_origin;
+			if (current_pointer_y() >= 0) {
 				
-				TimeAxisView* last = _time_axis_views.back();
-				track_origin = last->canvas_display()->item_to_canvas (track_origin);
-				track_origin.y += last->effective_height();
-				rv->move (x_delta, track_origin.y - rv->get_canvas_group()->item_to_canvas (Duple (0,0)).y);
+				Coord last_track_bottom_edge;
+				if (!_time_axis_views.empty()) {
+					TimeAxisView* last = _time_axis_views.back();
+					last_track_bottom_edge = last->canvas_display()->canvas_origin ().y + last->effective_height();
+				} else {
+					last_track_bottom_edge = 0;
+				}
+
+				rv->move (x_delta, last_track_bottom_edge - rv->get_canvas_group()->canvas_origin().y);
 				i->time_axis_view = -1;
 			}
 		}
@@ -1479,7 +1520,7 @@ RegionSpliceDrag::motion (GdkEvent* event, bool)
 {
 	/* Which trackview is this ? */
 
-	pair<TimeAxisView*, double> const tvp = _editor->trackview_by_y_position (_drags->current_pointer_y ());
+	pair<TimeAxisView*, double> const tvp = _editor->trackview_by_y_position (current_pointer_y ());
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
 
 	/* The region motion is only processed if the pointer is over
@@ -2493,7 +2534,7 @@ TempoMarkerDrag::aborted (bool moved)
 }
 
 CursorDrag::CursorDrag (Editor* e, EditorCursor& c, bool s)
-	: Drag (e, &c.track_canvas_item())
+	: Drag (e, &c.track_canvas_item(), false)
 	, _cursor (c)
 	, _stop (s)
 {
@@ -3258,7 +3299,7 @@ void
 ControlPointDrag::motion (GdkEvent* event, bool)
 {
 	double dx = _drags->current_pointer_x() - last_pointer_x();
-	double dy = _drags->current_pointer_y() - last_pointer_y();
+	double dy = current_pointer_y() - last_pointer_y();
 
 	if (event->button.state & Keyboard::SecondaryModifier) {
 		dx *= 0.1;
@@ -3400,7 +3441,7 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 void
 LineDrag::motion (GdkEvent* event, bool)
 {
-	double dy = _drags->current_pointer_y() - last_pointer_y();
+	double dy = current_pointer_y() - last_pointer_y();
 
 	if (event->button.state & Keyboard::SecondaryModifier) {
 		dy *= 0.1;
@@ -3565,14 +3606,13 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 		start = grab;
 	}
 
-	if (_drags->current_pointer_y() < grab_y()) {
-		y1 = _drags->current_pointer_y();
+	if (current_pointer_y() < grab_y()) {
+		y1 = current_pointer_y();
 		y2 = grab_y();
 	} else {
-		y2 = _drags->current_pointer_y();
+		y2 = current_pointer_y();
 		y1 = grab_y();
 	}
-
 
 	if (start != end || y1 != y2) {
 
@@ -3601,7 +3641,15 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 
 		Rect r (x1, y1, x2, y2);
 
-		_editor->rubberband_rect->set (_editor->rubberband_rect->canvas_to_item (r));
+		/* this drag is a _trackview_only == true drag, so the y1 and
+		 * y2 (computed using current_pointer_y() and grab_y()) will be
+		 * relative to the top of the trackview group). The
+		 * rubberband rect has the same parent/scroll offset as the
+		 * the trackview group, so we can use the "r" rect directly
+		 * to set the shape of the rubberband.
+		 */
+
+		_editor->rubberband_rect->set (r);
 		_editor->rubberband_rect->show();
 		_editor->rubberband_rect->raise_to_top();
 
@@ -3628,11 +3676,11 @@ RubberbandSelectDrag::do_select_things (GdkEvent* event, bool drag_in_progress)
 	double y1;
 	double y2;
 	
-	if (_drags->current_pointer_y() < grab_y()) {
-		y1 = _drags->current_pointer_y();
+	if (current_pointer_y() < grab_y()) {
+		y1 = current_pointer_y();
 		y2 = grab_y();
 	} else {
-		y2 = _drags->current_pointer_y();
+		y2 = current_pointer_y();
 		y1 = grab_y();
 	}
 
@@ -3860,7 +3908,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		show_verbose_cursor_time (adjusted_current_frame (event));
 	}
 
-	_original_pointer_time_axis = _editor->trackview_by_y_position (_drags->current_pointer_y ()).first->order ();
+	_original_pointer_time_axis = _editor->trackview_by_y_position (current_pointer_y ()).first->order ();
 }
 
 void
@@ -3951,11 +3999,8 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		TrackViewList to_be_removed_from_selection;
 		TrackViewList& all_tracks (_editor->track_views);
 
-		// /* convert grab_y and current_pointer_y into offsets within the trackview group */
-		
-		ArdourCanvas::Duple const top_of_trackviews_canvas = _editor->get_trackview_group()->item_to_canvas (ArdourCanvas::Duple (0, 0));
-		ArdourCanvas::Coord const top = grab_y() - top_of_trackviews_canvas.y;
-		ArdourCanvas::Coord const bottom = _drags->current_pointer_y() - top_of_trackviews_canvas.y;
+		ArdourCanvas::Coord const top = grab_y();
+		ArdourCanvas::Coord const bottom = current_pointer_y();
 
 		if (top >= 0 && bottom >= 0) {
 
@@ -4112,7 +4157,7 @@ SelectionDrag::aborted (bool)
 }
 
 RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
-	: Drag (e, i),
+	: Drag (e, i, false),
 	  _operation (o),
 	  _copy (false)
 {
@@ -4488,7 +4533,7 @@ NoteDrag::total_dy () const
 	MidiStreamView* msv = _region->midi_stream_view ();
 	double const y = _region->midi_view()->y_position ();
 	/* new current note */
-	uint8_t n = msv->y_to_note (_drags->current_pointer_y () - y);
+	uint8_t n = msv->y_to_note (current_pointer_y () - y);
 	/* clamp */
 	n = max (msv->lowest_note(), n);
 	n = min (msv->highest_note(), n);
@@ -4646,7 +4691,7 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	/* Get line states before we start changing things */
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
 		i->state = &i->line->get_state ();
-		i->original_fraction = y_fraction (i->line, _drags->current_pointer_y());
+		i->original_fraction = y_fraction (i->line, current_pointer_y());
 	}
 
 	if (_ranges.empty()) {
@@ -4752,7 +4797,7 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		i->line->start_drag_multiple (i->points, y_fraction (i->line, _drags->current_pointer_y()), i->state);
+		i->line->start_drag_multiple (i->points, y_fraction (i->line, current_pointer_y()), i->state);
 	}
 }
 
@@ -4764,7 +4809,7 @@ AutomationRangeDrag::motion (GdkEvent*, bool /*first_move*/)
 	}
 
 	for (list<Line>::iterator l = _lines.begin(); l != _lines.end(); ++l) {
-		float const f = y_fraction (l->line, _drags->current_pointer_y());
+		float const f = y_fraction (l->line, current_pointer_y());
 		/* we are ignoring x position for this drag, so we can just pass in anything */
 		uint32_t ignored;
 		l->line->drag_motion (0, f, true, false, ignored);
