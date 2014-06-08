@@ -1813,6 +1813,17 @@ void
 EngineControl::use_latency_button_clicked ()
 {
 	if (_measure_midi) {
+#if 0 // TODO
+		ARDOUR::MIDIDM* mididm = ARDOUR::AudioEngine::instance()->mididm ();
+		if (!mididm) {
+			return;
+		}
+		ARDOUR::framecnt_t frames_total = mididm->latency();
+		ARDOUR::framecnt_t extra = frames_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
+		uint32_t one_way = extra / 2;
+		// TODO assign to all or one specific device
+#endif
+	} else {
 		MTDM* mtdm = ARDOUR::AudioEngine::instance()->mtdm ();
 
 		if (!mtdm) {
