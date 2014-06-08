@@ -141,10 +141,13 @@ class AlsaMidiPort : public AlsaPort {
 		DataType type () const { return DataType::MIDI; };
 
 		void* get_buffer (pframes_t nframes);
-		const AlsaMidiBuffer const_buffer () const { return _buffer; }
+		const AlsaMidiBuffer const_buffer () const { return _buffer[_bufperiod]; }
+
+		void next_period() { get_buffer(0); _bufperiod = (_bufperiod + 1) % 2; }
 
 	private:
-		AlsaMidiBuffer _buffer;
+		AlsaMidiBuffer _buffer[2];
+		int _bufperiod;
 }; // class AlsaMidiPort
 
 class AlsaAudioBackend : public AudioBackend {
