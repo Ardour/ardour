@@ -334,7 +334,11 @@ GtkCanvas::pick_current_item (int state)
 
 	pick_current_item (Duple (x, y), state);
 }
-		
+
+/** Given @param point (a position in window coordinates)
+ *  and mouse state @param state, check to see if _current_item
+ *  (which will be used to deliver events) should change.
+ */
 void
 GtkCanvas::pick_current_item (Duple const & point, int state)
 {
@@ -344,7 +348,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 		return;
 	}
 
-	/* find the items at the given position */
+	/* find the items at the given window position */
 
 	vector<Item const *> items;
 	_root.add_items_at_point (point, items);
@@ -421,8 +425,14 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 	enter_event.mode = GDK_CROSSING_NORMAL;
 	enter_event.focus = FALSE;
 	enter_event.state = state;
-	enter_event.x = point.x;
-	enter_event.y = point.y;
+
+	/* Events delivered to canvas items are expected to be in canvas
+	 * coordinates but @param point is in window coordinates.
+	 */
+	
+	Duple c = window_to_canvas (point);
+	enter_event.x = c.x;
+	enter_event.y = c.y;
 
 	GdkEventCrossing leave_event = enter_event;
 	leave_event.type = GDK_LEAVE_NOTIFY;
@@ -738,7 +748,7 @@ GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 	/* Coordinates in "copy" will be canvas coordinates, 
 	*/
 
-	// DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas motion @ %1, %2\n", ev->x, ev->y));
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas motion @ %1, %2 canvas @ %3, %4\n", ev->x, ev->y, copy.motion.x, copy.motion.y));
 
 	pick_current_item (point, ev->state);
 
