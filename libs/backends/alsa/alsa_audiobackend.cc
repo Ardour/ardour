@@ -470,6 +470,8 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	if (for_latency_measurement) {
 		_systemic_audio_input_latency = 0;
 		_systemic_audio_output_latency = 0;
+		_systemic_midi_input_latency = 0;
+		_systemic_midi_output_latency = 0;
 	}
 
 	register_system_midi_ports();
@@ -528,7 +530,7 @@ int
 AlsaAudioBackend::stop ()
 {
 	void *status;
-	if (!_active) {
+	if (!_run) {
 		return 0;
 	}
 
@@ -1351,14 +1353,19 @@ AlsaAudioBackend::main_process_thread ()
 					return 0;
 				}
 
+				i = 0;
+				for (std::vector<AlsaPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
+					static_cast<AlsaMidiPort*>(*it)->next_period();
+				}
+
 				/* queue midi*/
 				i = 0;
 				for (std::vector<AlsaPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
 					assert (_rmidi_out.size() > i);
+					const AlsaMidiBuffer src = static_cast<const AlsaMidiPort*>(*it)->const_buffer();
 					AlsaRawMidiOut *rm = static_cast<AlsaRawMidiOut*>(_rmidi_out.at(i));
-					const AlsaMidiBuffer *src = static_cast<const AlsaMidiBuffer*>((*it)->get_buffer(0));
-					rm->sync_time (clock1); // ?? use clock pre DSP load?
-					for (AlsaMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
+					rm->sync_time (clock1);
+					for (AlsaMidiBuffer::const_iterator mit = src.begin (); mit != src.end (); ++mit) {
 						rm->send_event ((*mit)->timestamp(), (*mit)->data(), (*mit)->size());
 					}
 				}
@@ -1656,8 +1663,10 @@ void* AlsaAudioPort::get_buffer (pframes_t n_samples)
 
 AlsaMidiPort::AlsaMidiPort (AlsaAudioBackend &b, const std::string& name, PortFlags flags)
 	: AlsaPort (b, name, flags)
+	, _bufperiod (0)
 {
-	_buffer.clear ();
+	_buffer[0].clear ();
+	_buffer[1].clear ();
 }
 
 AlsaMidiPort::~AlsaMidiPort () { }
@@ -1671,18 +1680,18 @@ struct MidiEventSorter {
 void* AlsaMidiPort::get_buffer (pframes_t /* nframes */)
 {
 	if (is_input ()) {
-		_buffer.clear ();
+		(_buffer[_bufperiod]).clear ();
 		for (std::vector<AlsaPort*>::const_iterator i = get_connections ().begin ();
 				i != get_connections ().end ();
 				++i) {
 			const AlsaMidiBuffer src = static_cast<const AlsaMidiPort*>(*i)->const_buffer ();
 			for (AlsaMidiBuffer::const_iterator it = src.begin (); it != src.end (); ++it) {
-				_buffer.push_back (boost::shared_ptr<AlsaMidiEvent>(new AlsaMidiEvent (**it)));
+				(_buffer[_bufperiod]).push_back (boost::shared_ptr<AlsaMidiEvent>(new AlsaMidiEvent (**it)));
 			}
 		}
-		std::sort (_buffer.begin (), _buffer.end (), MidiEventSorter());
+		std::sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter());
 	}
-	return &_buffer;
+	return &(_buffer[_bufperiod]);
 }
 
 AlsaMidiEvent::AlsaMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size)
