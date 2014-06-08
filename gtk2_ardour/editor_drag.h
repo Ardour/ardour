@@ -103,7 +103,7 @@ private:
 class Drag
 {
 public:
-        Drag (Editor *, ArdourCanvas::Item *);
+        Drag (Editor *, ArdourCanvas::Item *, bool trackview_only = true);
 	virtual ~Drag () {}
 
 	void set_manager (DragManager* m) {
@@ -212,6 +212,8 @@ protected:
 		return _last_pointer_frame;
 	}
 
+	double current_pointer_y () const;
+
 	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*);
 
 	void show_verbose_cursor_time (framepos_t);
@@ -228,11 +230,11 @@ protected:
 	bool _was_rolling; ///< true if the session was rolling before the drag started, otherwise false
 
 private:
-
+	bool _trackview_only; ///< true if pointer y value should always be relative to the top of the trackview group
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
         bool _was_double_click; ///< true if drag initiated by a double click event
 	double _grab_x; ///< trackview x of the grab start position
-	double _grab_y; ///< trackview y of the grab start position
+	double _grab_y; ///< y of the grab start position, possibly adjusted if _trackview_only is true
 	double _last_pointer_x; ///< trackview x of the pointer last time a motion occurred
 	double _last_pointer_y; ///< trackview y of the pointer last time a motion occurred
 	ARDOUR::framepos_t _raw_grab_frame; ///< unsnapped frame that the mouse was at when start_grab was called, or 0
