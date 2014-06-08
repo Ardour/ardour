@@ -41,6 +41,9 @@ using namespace std;
 using namespace ARDOUR;
 using namespace ArdourCanvas;
 
+#define CACHE_HIGH_WATER (2)
+
+std::map <boost::shared_ptr<AudioSource>, std::vector<WaveView::CacheEntry> >  WaveView::_image_cache;
 double WaveView::_global_gradient_depth = 0.6;
 bool WaveView::_global_logscaled = false;
 WaveView::Shape WaveView::_global_shape = WaveView::Normal;
@@ -68,9 +71,8 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 	, _logscaled_independent (false)
 	, _gradient_depth_independent (false)
 	, _amplitude_above_axis (1.0)
+	, _region_amplitude (_region->scale_amplitude ())
 	, _region_start (region->start())
-	, _sample_start (-1)
-	, _sample_end (-1)
 {
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
 	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
@@ -78,6 +80,7 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 
 WaveView::~WaveView ()
 {
+	invalidate_image_cache ();
 }
 
 void
@@ -101,22 +104,28 @@ WaveView::handle_visual_property_change ()
 	}
 	
 	if (changed) {
-		invalidate_image ();
+		begin_visual_change ();
+		invalidate_image_cache ();
+		end_visual_change ();
 	}
 }
 
 void
 WaveView::handle_clip_level_change ()
 {
-	invalidate_image ();
+	begin_visual_change ();
+	invalidate_image_cache ();
+	end_visual_change ();
 }
 
 void
 WaveView::set_fill_color (Color c)
 {
 	if (c != _fill_color) {
-		invalidate_image ();
+		begin_visual_change ();
+		invalidate_image_cache ();
 		Fill::set_fill_color (c);
+		end_visual_change ();
 	}
 }
 
@@ -124,8 +133,10 @@ void
 WaveView::set_outline_color (Color c)
 {
 	if (c != _outline_color) {
-		invalidate_image ();
+		begin_visual_change ();
+		invalidate_image_cache ();
 		Outline::set_outline_color (c);
+		end_visual_change ();
 	}
 }
 
@@ -135,13 +146,11 @@ WaveView::set_samples_per_pixel (double samples_per_pixel)
 	if (samples_per_pixel != _samples_per_pixel) {
 		begin_change ();
 
+		invalidate_image_cache ();
 		_samples_per_pixel = samples_per_pixel;
-		
 		_bounding_box_dirty = true;
 		
 		end_change ();
-		
-		invalidate_image ();
 	}
 }
 
@@ -179,22 +188,114 @@ WaveView::set_clip_level (double dB)
 	}
 }
 
+void
+WaveView::invalidate_image_cache ()
+{
+	vector <uint32_t> deletion_list;
+	vector <CacheEntry> caches;
+
+	if (_image_cache.find (_region->audio_source ()) != _image_cache.end ()) {
+		caches = _image_cache.find (_region->audio_source ())->second;
+	} else {
+		return;
+	}
+
+	for (uint32_t i = 0; i < caches.size (); ++i) {
+
+		if (_channel != caches[i].channel || _height != caches[i].height || _region_amplitude != caches[i].amplitude) {
+			continue;
+		}
+
+		deletion_list.push_back (i);
+		
+	}
+
+	while (deletion_list.size() > 0) {
+		caches[deletion_list.back ()].image.clear ();
+		caches.erase (caches.begin() + deletion_list.back());
+		deletion_list.pop_back();
+	}
+
+	if (caches.size () == 0) {
+		_image_cache.erase(_region->audio_source ());
+	} else {
+		_image_cache[_region->audio_source ()] = caches;
+	}
+
+}
+
+void
+WaveView::consolidate_image_cache () const
+{
+	list <uint32_t> deletion_list;
+	vector <CacheEntry> caches;
+	uint32_t other_entries = 0;
+
+	if (_image_cache.find (_region->audio_source ()) != _image_cache.end ()) {
+		caches  = _image_cache.find (_region->audio_source ())->second;
+	}
+
+	for (uint32_t i = 0; i < caches.size (); ++i) {
+
+		if (_channel != caches[i].channel || _height != caches[i].height || _region_amplitude != caches[i].amplitude) {
+			other_entries++;
+			continue;
+		}
+
+		framepos_t segment_start = caches[i].start;
+		framepos_t segment_end = caches[i].end;
+
+		for (uint32_t j = i; j < caches.size (); ++j) {
+
+			if (i == j || _channel != caches[j].channel || _height != caches[i].height || _region_amplitude != caches[i].amplitude) {
+				continue;
+			}
+
+			if (caches[j].start >= segment_start && caches[j].end <= segment_end) {
+
+				deletion_list.push_back (j);
+			}
+		}
+	}
+
+	deletion_list.sort ();
+	deletion_list.unique ();
+
+	while (deletion_list.size() > 0) {
+		caches[deletion_list.back ()].image.clear ();
+		caches.erase (caches.begin() + deletion_list.back ());
+		deletion_list.pop_back();
+	}
+
+	/* We don't care if this channel/height/amplitude has anything in the cache - just drop the Last Added entries 
+	   until we reach a size where there is a maximum of CACHE_HIGH_WATER + other entries.
+	*/
+
+	while (caches.size() > CACHE_HIGH_WATER + other_entries) {
+		caches.front ().image.clear ();
+		caches.erase(caches.begin ());
+	}
+
+	if (caches.size () == 0) {
+		_image_cache.erase (_region->audio_source ());
+	} else {
+		_image_cache[_region->audio_source ()] = caches;
+	}
+}
+
 struct LineTips {
-    double top;
-    double bot;
-    bool clip_max;
-    bool clip_min;
-    
-    LineTips() : top (0.0), bot (0.0), clip_max (false), clip_min (false) {}
+	double top;
+	double bot;
+	bool clip_max;
+	bool clip_min;
+	
+	LineTips() : top (0.0), bot (0.0), clip_max (false), clip_min (false) {}
 };
 
 void
-WaveView::draw_image (PeakData* _peaks, int n_peaks) const
+WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peaks, int n_peaks) const
 {
-	_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, _height);
-
-	Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (_image);
-
+	Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (image);
 	boost::scoped_array<LineTips> tips (new LineTips[n_peaks]);
 
 	/* Clip level nominally set to -0.9dBFS to account for inter-sample
@@ -207,7 +308,7 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 	   has been scaled by scale_amplitude() already.
 	*/
 
-	const double clip_level = _clip_level * _region->scale_amplitude();
+	const double clip_level = _clip_level * _region_amplitude;
 
 	if (_shape == WaveView::Rectified) {
 
@@ -344,24 +445,23 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 		for (int i = 0; i < n_peaks; ++i) {
 			context->move_to (i, tips[i].top); /* down 1 pixel */
 			context->line_to (i, tips[i].bot);
-			context->stroke ();
 		}
 	} else {
 		for (int i = 0; i < n_peaks; ++i) {
 			context->move_to (i, tips[i].top);
 			context->line_to (i, tips[i].bot);
-			context->stroke ();
 		}
 	}
+
+	context->stroke ();
 
 	/* now add dots to the top and bottom of each line (this is
 	 * modelled on pyramix, except that we add clipping indicators.
 	 */
 
 	if (_global_show_waveform_clipping) {
-		
-		set_source_rgba (context, _outline_color);
-		
+		set_source_rgba (context, _clip_color);
+
 		/* the height of the clip-indicator should be at most 7 pixels,
 		   or 5% of the height of the waveview item.
 		*/
@@ -374,28 +474,17 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 				tips[i].clip_max;
 			
 			if (show_top_clip) {
-				set_source_rgba (context, _clip_color);
 				context->rel_line_to (0, clip_height);
-				context->stroke ();
-				set_source_rgba (context, _outline_color);
-			} else {
-				context->rel_line_to (0, 1.0);
-				context->stroke ();
 			}
 
 			if (_shape != WaveView::Rectified) {
 				context->move_to (i, tips[i].bot);
 				if (tips[i].clip_min) {
-					set_source_rgba (context, _clip_color);
 					context->rel_line_to (0, -clip_height);
-					context->stroke ();
-					set_source_rgba (context, _outline_color);
-				} else {
-					context->rel_line_to (0, -1.0);
-					context->stroke ();
 				}
 			}
 		}
+		context->stroke ();
 	}
 
 	if (show_zero_line()) {
@@ -409,36 +498,69 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 }
 
 void
-WaveView::ensure_cache (framepos_t start, framepos_t end) const
+WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start, framepos_t end, double& image_offset) const
 {
-	if (_image && _sample_start <= start && _sample_end >= end) {
-		/* cache already covers required range, do nothing */
-		return;
+	vector <CacheEntry> caches;
+
+	if (_image_cache.find (_region->audio_source ()) != _image_cache.end ()) {
+		
+		caches = _image_cache.find (_region->audio_source ())->second;
 	}
+
+	/* Find a suitable ImageSurface.
+	*/
+	for (uint32_t i = 0; i < caches.size (); ++i) {
+
+		if (_channel != caches[i].channel || _height != caches[i].height || _region_amplitude != caches[i].amplitude) {
+			continue;
+		}
+
+		framepos_t segment_start = caches[i].start;
+		framepos_t segment_end = caches[i].end;
+
+		if (end <= segment_end && start >= segment_start) {
+			image_offset = (segment_start - _region->start()) / _samples_per_pixel;
+			image = caches[i].image;
+
+			return;
+		}
+	}
+
+	consolidate_image_cache ();
 
 	/* sample position is canonical here, and we want to generate
 	 * an image that spans about twice the canvas width 
 	 */
 	
 	const framepos_t center = start + ((end - start) / 2);
-	const framecnt_t canvas_samples = 2 * (_canvas->visible_area().width() * _samples_per_pixel);
+	const framecnt_t canvas_samples = _canvas->visible_area().width() * _samples_per_pixel; /* one canvas width */
 
 	/* we can request data from anywhere in the Source, between 0 and its length
 	 */
 
-	_sample_start = max ((framepos_t) 0, (center - canvas_samples));
-	_sample_end = min (center + canvas_samples, _region->source_length (0));
+	framepos_t sample_start = max ((framepos_t) 0, (center - canvas_samples));
+	framepos_t sample_end = min (center + canvas_samples, _region->source_length (0));
 
-	const int n_peaks = llrintf ((_sample_end - _sample_start)/ (double) _samples_per_pixel);
+	const int n_peaks = llrintf ((sample_end - sample_start)/ (double) _samples_per_pixel);
 
 	boost::scoped_array<ARDOUR::PeakData> peaks (new PeakData[n_peaks]);
 
 	_region->read_peaks (peaks.get(), n_peaks, 
-			     _sample_start, _sample_end - _sample_start,
+			     sample_start, sample_end - sample_start,
 			     _channel, 
 			     _samples_per_pixel);
 
-	draw_image (peaks.get(), n_peaks);
+	image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, ((double)(sample_end - sample_start)) / _samples_per_pixel, _height);
+
+	draw_image (image, peaks.get(), n_peaks);
+
+	_image_cache[_region->audio_source ()].push_back (CacheEntry (_channel, _height, _region_amplitude, sample_start,  sample_end, image));
+
+	image_offset = (sample_start - _region->start()) / _samples_per_pixel;
+
+	//cerr << "_image_cache size is : " << _image_cache.size() << " entries for this audiosource : " << _image_cache.find (_region->audio_source ())->second.size() << endl;
+
+	return;
 }
 
 void
@@ -486,13 +608,10 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 	// cerr << "Sample space: " << sample_start << " .. " << sample_end << endl;
 
-	ensure_cache (sample_start, sample_end);
+	Cairo::RefPtr<Cairo::ImageSurface> image;
+	double image_offset = 0;
 
-	// cerr << "Cache contains " << _cache->pixel_start() << " .. " << _cache->pixel_end() << " / " 
-	// << _cache->sample_start() << " .. " << _cache->sample_end()
-	// << endl;
-
-	double image_offset = (_sample_start - _region->start()) / _samples_per_pixel;
+	get_image (image, sample_start, sample_end, image_offset);
 
 	// cerr << "Offset into image to place at zero: " << image_offset << endl;
 
@@ -509,7 +628,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	y = round (y);
 	context->device_to_user (x, y);
 
-	context->set_source (_image, x, y);
+	context->set_source (image, x, y);
 	context->fill ();
 }
 
@@ -530,13 +649,12 @@ WaveView::set_height (Distance height)
 {
 	if (height != _height) {
 		begin_change ();
-		
+
+		invalidate_image_cache ();
 		_height = height;
-		
+
 		_bounding_box_dirty = true;
 		end_change ();
-		
-		invalidate_image ();
 	}
 }
 
@@ -545,50 +663,43 @@ WaveView::set_channel (int channel)
 {
 	if (channel != _channel) {
 		begin_change ();
-		
+
+		invalidate_image_cache ();
 		_channel = channel;
-		
+
 		_bounding_box_dirty = true;
 		end_change ();
-		
-		invalidate_image ();
 	}
 }
-
-void
-WaveView::invalidate_image ()
-{
-	begin_visual_change ();
-
-	_image.clear ();
-	_sample_start  = -1;
-	_sample_end = -1;
-	
-	end_visual_change ();
-}
-
 
 void
 WaveView::set_logscaled (bool yn)
 {
 	if (_logscaled != yn) {
+		begin_visual_change ();
+		invalidate_image_cache ();
 		_logscaled = yn;
-		invalidate_image ();
+		end_visual_change ();
 	}
 }
 
 void
 WaveView::gain_changed ()
 {
-	invalidate_image ();
+	begin_visual_change ();
+	invalidate_image_cache ();
+	_region_amplitude = _region->scale_amplitude ();
+	end_visual_change ();
 }
 
 void
 WaveView::set_zero_color (Color c)
 {
 	if (_zero_color != c) {
+		begin_visual_change ();
+		invalidate_image_cache ();
 		_zero_color = c;
-		invalidate_image ();
+		end_visual_change ();
 	}
 }
 
@@ -596,8 +707,10 @@ void
 WaveView::set_clip_color (Color c)
 {
 	if (_clip_color != c) {
+		begin_visual_change ();
+		invalidate_image_cache ();
 		_clip_color = c;
-		invalidate_image ();
+		end_visual_change ();
 	}
 }
 
@@ -605,8 +718,10 @@ void
 WaveView::set_show_zero_line (bool yn)
 {
 	if (_show_zero != yn) {
+		begin_visual_change ();
+		invalidate_image_cache ();
 		_show_zero = yn;
-		invalidate_image ();
+		end_visual_change ();
 	}
 }
 
@@ -614,8 +729,10 @@ void
 WaveView::set_shape (Shape s)
 {
 	if (_shape != s) {
+		begin_visual_change ();
+		invalidate_image_cache ();
 		_shape = s;
-		invalidate_image ();
+		end_visual_change ();
 	}
 }
 
@@ -623,8 +740,10 @@ void
 WaveView::set_amplitude_above_axis (double a)
 {
 	if (_amplitude_above_axis != a) {
+		begin_visual_change ();
+		invalidate_image_cache ();
 		_amplitude_above_axis = a;
-		invalidate_image ();
+		end_visual_change ();
 	}
 }
 

@@ -936,6 +936,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 	_width = pixel_width;
 
 	manage_name_highlight ();
+	manage_name_text ();
 
 	if (pixel_width < 2.0) {
 
