@@ -40,6 +40,7 @@
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
 #include "ardour/mtdm.h"
+#include "ardour/mididm.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/types.h"
 
@@ -80,7 +81,8 @@ EngineControl::EngineControl ()
 	, lm_measure_label (_("Measure"))
 	, lm_use_button (_("Use results"))
 	, lm_back_button (_("Back to settings ... (ignore results)"))
-	, lm_button (_("Calibrate..."))
+	, lm_button_audio (_("Calibrate Audio"))
+	, lm_button_midi (_("Calibrate Midi"))
 	, lm_table (12, 3)
 	, have_lm_results (false)
 	, lm_running (false)
@@ -88,6 +90,7 @@ EngineControl::EngineControl ()
 	, ignore_changes (0)
 	, _desired_sample_rate (0)
 	, started_at_least_once (false)
+	, _measure_midi(false)
 {
 	using namespace Notebook_Helpers;
 	vector<string> strings;
@@ -335,8 +338,12 @@ EngineControl::EngineControl ()
 	 basic_packer.attach (*label, 0, 1, 0, 1, xopt, (AttachOptions) 0);
 	 basic_packer.attach (backend_combo, 1, 2, 0, 1, xopt, (AttachOptions) 0);
 
-	 lm_button.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_latency));
-	 lm_button.set_name ("generic button");
+	 lm_button_audio.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_audio_latency));
+	 lm_button_audio.set_name ("generic button");
+
+	 lm_button_midi.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_midi_latency));
+	 lm_button_midi.set_name ("generic button");
+
 	 if (_have_control) {
 		 build_full_control_notebook ();
 	 } else {
@@ -445,12 +452,13 @@ EngineControl::EngineControl ()
 
 	 /* button spans 2 rows */
 
-	 basic_packer.attach (lm_button, 3, 4, row-1, row+1, xopt, xopt);
+	 basic_packer.attach (lm_button_audio, 3, 4, row-1, row+1, xopt, xopt);
 	 ++row;
 
 	 label = manage (left_aligned_label (_("MIDI System")));
 	 basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
 	 basic_packer.attach (midi_option_combo, 1, 2, row, row + 1, SHRINK, (AttachOptions) 0);
+	 basic_packer.attach (lm_button_midi, 3, 4, row, row+1, xopt, xopt);
 	 row++;
  }
 
@@ -515,8 +523,9 @@ EngineControl::EngineControl ()
 	 vector<string> outputs;
 	 vector<string> inputs;
 
-	 ARDOUR::AudioEngine::instance()->get_physical_outputs (ARDOUR::DataType::AUDIO, outputs);
-	 ARDOUR::AudioEngine::instance()->get_physical_inputs (ARDOUR::DataType::AUDIO, inputs);
+	 ARDOUR::DataType const type = _measure_midi ? ARDOUR::DataType::MIDI : ARDOUR::DataType::AUDIO;
+	 ARDOUR::AudioEngine::instance()->get_physical_outputs (type, outputs);
+	 ARDOUR::AudioEngine::instance()->get_physical_inputs (type, inputs);
 
 	 if (inputs.empty() || outputs.empty()) {
 		 MessageDialog msg (_("Your selected audio configuration is playback- or capture-only.\n\nLatency calibration requires playback and capture"));
@@ -1639,58 +1648,117 @@ EngineControl::EngineControl ()
 
  /* latency measurement */
 
- bool
- EngineControl::check_latency_measurement ()
- {
-	 MTDM* mtdm = ARDOUR::AudioEngine::instance()->mtdm ();
+bool
+EngineControl::check_audio_latency_measurement ()
+{
+	MTDM* mtdm = ARDOUR::AudioEngine::instance()->mtdm ();
 
-	 if (mtdm->resolve () < 0) {
-		 lm_results.set_markup (string_compose (results_markup, _("No signal detected ")));
-		 return true;
-	 }
+	if (mtdm->resolve () < 0) {
+		lm_results.set_markup (string_compose (results_markup, _("No signal detected ")));
+		return true;
+	}
 
-	 if (mtdm->err () > 0.3) {
-		 mtdm->invert ();
-		 mtdm->resolve ();
-	 }
+	if (mtdm->err () > 0.3) {
+		mtdm->invert ();
+		mtdm->resolve ();
+	}
 
-	 char buf[128];
-	 ARDOUR::framecnt_t const sample_rate = ARDOUR::AudioEngine::instance()->sample_rate();
+	char buf[256];
+	ARDOUR::framecnt_t const sample_rate = ARDOUR::AudioEngine::instance()->sample_rate();
 
-	 if (sample_rate == 0) {
-		 lm_results.set_markup (string_compose (results_markup, _("Disconnected from audio engine")));
-		 ARDOUR::AudioEngine::instance()->stop_latency_detection ();
-		 return false;
-	 }
+	if (sample_rate == 0) {
+		lm_results.set_markup (string_compose (results_markup, _("Disconnected from audio engine")));
+		ARDOUR::AudioEngine::instance()->stop_latency_detection ();
+		return false;
+	}
 
-	 uint32_t frames_total = mtdm->del();
-	 uint32_t extra = frames_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
+	int frames_total = mtdm->del();
+	int extra = frames_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
 
-	 snprintf (buf, sizeof (buf), "%u samples / %.3lf ms", extra, extra * 1000.0f/sample_rate);
+	snprintf (buf, sizeof (buf), "%s%d samples (%.3lf ms)\n%s%d samples (%.3lf ms)",
+			_("Detected roundtrip latency: "),
+			frames_total, frames_total * 1000.0f/sample_rate,
+			_("Systemic latency: "),
+			extra, extra * 1000.0f/sample_rate);
 
-	 bool solid = true;
+	bool solid = true;
 
-	 if (mtdm->err () > 0.2) {
-		 strcat (buf, " ");
-		 strcat (buf, _("(signal detection error)"));
-		 solid = false;
-	 }
+	if (mtdm->err () > 0.2) {
+		strcat (buf, " ");
+		strcat (buf, _("(signal detection error)"));
+		solid = false;
+	}
 
-	 if (mtdm->inv ()) {
-		 strcat (buf, " ");
-		 strcat (buf, _("(inverted - bad wiring)"));
-		 solid = false;
-	 }
+	if (mtdm->inv ()) {
+		strcat (buf, " ");
+		strcat (buf, _("(inverted - bad wiring)"));
+		solid = false;
+	}
 
-	 if (solid) {
-		 end_latency_detection ();
-		 lm_use_button.set_sensitive (true);
-		 have_lm_results = true;
-        }
-	
-        lm_results.set_markup (string_compose (results_markup, string_compose (_("Detected roundtrip latency: %1"), buf)));
+	if (solid) {
+		end_latency_detection ();
+		lm_use_button.set_sensitive (true);
+		have_lm_results = true;
+	}
 
-        return true;
+	lm_results.set_markup (string_compose (results_markup, buf));
+
+	return true;
+}
+
+bool
+EngineControl::check_midi_latency_measurement ()
+{
+	ARDOUR::MIDIDM* mididm = ARDOUR::AudioEngine::instance()->mididm ();
+
+	if (!mididm->have_signal () || mididm->latency () == 0) {
+		lm_results.set_markup (string_compose (results_markup, _("No signal detected ")));
+		return true;
+	}
+
+	char buf[256];
+	ARDOUR::framecnt_t const sample_rate = ARDOUR::AudioEngine::instance()->sample_rate();
+
+	if (sample_rate == 0) {
+		lm_results.set_markup (string_compose (results_markup, _("Disconnected from audio engine")));
+		ARDOUR::AudioEngine::instance()->stop_latency_detection ();
+		return false;
+	}
+
+	ARDOUR::framecnt_t frames_total = mididm->latency();
+	ARDOUR::framecnt_t extra = frames_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
+	snprintf (buf, sizeof (buf), "%s%" PRId64" samples (%.1lf ms) dev: %.2f[spl]\n%s%" PRId64" samples (%.1lf ms)",
+			_("Detected roundtrip latency: "),
+			frames_total, frames_total * 1000.0f / sample_rate, mididm->deviation (),
+			_("Systemic latency: "),
+			extra, extra * 1000.0f / sample_rate);
+
+	bool solid = true;
+
+	if (!mididm->ok ()) {
+		strcat (buf, " ");
+		strcat (buf, _("(averaging)"));
+		solid = false;
+	}
+
+	if (mididm->deviation () > 50.0) {
+		strcat (buf, " ");
+		strcat (buf, _("(too large jitter)"));
+		solid = false;
+	} else if (mididm->deviation () > 10.0) {
+		strcat (buf, " ");
+		strcat (buf, _("(large jitter)"));
+	}
+
+	if (solid) {
+		end_latency_detection ();
+		lm_use_button.set_sensitive (false); // XXX TODO
+		have_lm_results = true;
+	}
+
+	lm_results.set_markup (string_compose (results_markup, buf));
+
+	return true;
 }
 
 void
@@ -1699,9 +1767,13 @@ EngineControl::start_latency_detection ()
 	ARDOUR::AudioEngine::instance()->set_latency_input_port (lm_input_channel_combo.get_active_text());
 	ARDOUR::AudioEngine::instance()->set_latency_output_port (lm_output_channel_combo.get_active_text());
 
-	if (ARDOUR::AudioEngine::instance()->start_latency_detection (false) == 0) {
+	if (ARDOUR::AudioEngine::instance()->start_latency_detection (_measure_midi) == 0) {
 		lm_results.set_markup (string_compose (results_markup, _("Detecting ...")));
-		latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_latency_measurement), 100);
+		if (_measure_midi) {
+			latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_midi_latency_measurement), 100);
+		} else {
+			latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_audio_latency_measurement), 100);
+		}
 		lm_measure_label.set_text (_("Cancel"));
 		have_lm_results = false;
 		lm_use_button.set_sensitive (false);
@@ -1734,24 +1806,26 @@ EngineControl::latency_button_clicked ()
 		start_latency_detection ();
 	} else {
 		end_latency_detection ();
-        }
+	}
 }
 
 void
 EngineControl::use_latency_button_clicked ()
 {
-        MTDM* mtdm = ARDOUR::AudioEngine::instance()->mtdm ();
+	if (_measure_midi) {
+		MTDM* mtdm = ARDOUR::AudioEngine::instance()->mtdm ();
 
-	if (!mtdm) {
-		return;
+		if (!mtdm) {
+			return;
+		}
+
+		uint32_t frames_total = mtdm->del();
+		uint32_t extra = frames_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
+		uint32_t one_way = extra/2;
+
+		input_latency_adjustment.set_value (one_way);
+		output_latency_adjustment.set_value (one_way);
 	}
-
-	uint32_t frames_total = mtdm->del();
-	uint32_t extra = frames_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
-	uint32_t one_way = extra/2;
-
-	input_latency_adjustment.set_value (one_way);
-	output_latency_adjustment.set_value (one_way);
 
 	/* back to settings page */
 
@@ -1809,8 +1883,16 @@ EngineControl::connect_disconnect_click()
 }
 
 void
-EngineControl::calibrate_latency ()
+EngineControl::calibrate_audio_latency ()
 {
+	_measure_midi = false;
+	notebook.set_current_page (latency_tab);
+}
+
+void
+EngineControl::calibrate_midi_latency ()
+{
+	_measure_midi = true;
 	notebook.set_current_page (latency_tab);
 }
 
