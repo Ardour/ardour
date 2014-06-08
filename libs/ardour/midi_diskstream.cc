@@ -1216,6 +1216,7 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 		return 1;
 	}
 
+	_accumulated_capture_offset = 0;
 	_write_source.reset();
 
 	try {
