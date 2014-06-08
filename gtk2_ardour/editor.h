@@ -1054,7 +1054,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* track views */
 	TrackViewList track_views;
-	std::pair<TimeAxisView*, double> trackview_by_y_position (double);
+	std::pair<TimeAxisView*, double> trackview_by_y_position (double, bool trackview_relative_offset = true);
 	RouteTimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const;
 
 	TrackViewList get_tracks_for_range_action () const;

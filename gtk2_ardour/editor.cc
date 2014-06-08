@@ -2421,7 +2421,8 @@ Editor::get_state ()
 	return *node;
 }
 
-/** @param y y is an offset into the trackview area, in pixel units
+/** if @param trackview_relative_offset is true, @param y y is an offset into the trackview area, in pixel units
+ *  if @param trackview_relative_offset is false, @param y y is a global canvas *  coordinate, in pixel units
  *
  *  @return pair: TimeAxisView that y is over, layer index.
  *
@@ -2429,12 +2430,16 @@ Editor::get_state ()
  *  in stacked or expanded region display mode, otherwise 0.
  */
 std::pair<TimeAxisView *, double>
-Editor::trackview_by_y_position (double y)
+Editor::trackview_by_y_position (double y, bool trackview_relative_offset)
 {
+	if (!trackview_relative_offset) {
+		y -= _trackview_group->canvas_origin().y;
+	}
+
 	if (y < 0) {
 		return std::make_pair ( (TimeAxisView *) 0, 0);
 	}
-		
+
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 			
 		std::pair<TimeAxisView*, double> const r = (*iter)->covers_y_position (y);
@@ -2443,6 +2448,8 @@ Editor::trackview_by_y_position (double y)
 			return r;
 		}
 	}
+
+	return std::make_pair ( (TimeAxisView *) 0, 0);
 }
 
 /** Snap a position to the grid, if appropriate, taking into account current

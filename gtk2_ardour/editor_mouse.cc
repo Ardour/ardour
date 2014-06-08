@@ -2839,7 +2839,7 @@ Editor::set_internal_edit (bool yn)
 }
 
 /** Update _join_object_range_state which indicate whether we are over the top or bottom half of a region view,
- *  used by the `join object/range' tool mode.
+ *  used by the `join object/range' tool mode. Coordinates in canvas space.
  */
 void
 Editor::update_join_object_range_location (double /*x*/, double y)
@@ -2864,7 +2864,7 @@ Editor::update_join_object_range_location (double /*x*/, double y)
 	}
 
 	/* XXX: maybe we should make entered_track work in all cases, rather than resorting to this */
-	pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
+	pair<TimeAxisView*, int> tvp = trackview_by_y_position (y, false);
 
 	if (tvp.first) {
 
