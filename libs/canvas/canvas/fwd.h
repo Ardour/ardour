@@ -24,6 +24,7 @@
 namespace ArdourCanvas {
 	class WaveView;
 	class Line;
+        class LineSet;
 	class Rectangle;
 	class Polygon;
 	class PolyLine;

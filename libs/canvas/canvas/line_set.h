@@ -17,6 +17,11 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifndef __CANVAS_LINESET_H__
+#define __CANVAS_LINESET_H__
+
+#include <vector>
+
 #include "canvas/visibility.h"
 #include "canvas/item.h"
 
@@ -30,29 +35,33 @@ public:
 		Horizontal
 	};
 
-	LineSet (Group *);
+	LineSet (Group *, Orientation o = Vertical);
 
 	void compute_bounding_box () const;
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 
         bool covers (Duple const &) const;
 
-	void set_height (Distance);
+	void set_extent (Distance);
+	Distance extent() const { return _extent; }
 
 	void add (Coord, Distance, Color);
 	void clear ();
 
 	struct Line {
-		Line (Coord y_, Distance width_, Color color_) : y (y_), width (width_), color (color_) {}
+		Line (Coord p, Distance width_, Color color_) : pos (p), width (width_), color (color_) {}
 		
-		Coord y;
+		Coord pos;
 		Distance width;
 		Color color;
 	};
 
 private:
-	std::list<Line> _lines;
-	Distance _height;
+	std::vector<Line> _lines;
+	Distance          _extent;
+	Orientation       _orientation;
 };
 
 }
+
+#endif /* __CANVAS_LINESET_H__ */
