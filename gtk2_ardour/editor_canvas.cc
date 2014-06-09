@@ -286,7 +286,7 @@ Editor::track_canvas_viewport_size_allocated ()
 	_visible_canvas_width  = _canvas_viewport_allocation.get_width ();
 	_visible_canvas_height = _canvas_viewport_allocation.get_height ();
 
-	_canvas_drop_zone->set_y1 (_canvas_drop_zone->y0() + _visible_canvas_height);
+	_canvas_drop_zone->set_y1 (_canvas_drop_zone->y0() + (_visible_canvas_height - 20.0));
 
 	// SHOWTRACKS
 
