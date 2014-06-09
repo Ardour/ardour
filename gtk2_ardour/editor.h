@@ -752,8 +752,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         /* a rect that sits at the bottom of all tracks to act as a drag-no-drop/clickable
 	 * target area.
 	 */
-        ArdourCanvas::Rectangle* _canvas_bottom_rect;
-        bool canvas_bottom_rect_event (GdkEvent* event);
+        ArdourCanvas::Rectangle* _canvas_drop_zone;
+        bool canvas_drop_zone_event (GdkEvent* event);
 
 	enum RulerType {
 		ruler_metric_timecode = 0,
