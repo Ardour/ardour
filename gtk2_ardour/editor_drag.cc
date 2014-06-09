@@ -698,7 +698,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 	if (tv && tv->view()) {
 		double layer = r.second;
-	
+
 		if (first_move && tv->view()->layer_display() == Stacked) {
 			tv->view()->set_layer_display (Expanded);
 		}
@@ -771,14 +771,20 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 		if (tv) {
 
-			int track_index = i->time_axis_view + delta_time_axis_view;
+			int track_index;
+			
+			if (i->time_axis_view >= 0) {
+				track_index = i->time_axis_view + delta_time_axis_view;
+			} else {
+				track_index = _time_axis_views.size() - 1 + delta_time_axis_view;
+			}
 			 
 			if (track_index < 0 || track_index >= (int) _time_axis_views.size()) {
 				continue;
 			}
 
 			/* The TimeAxisView that this region is now over */
-			TimeAxisView* current_tv = _time_axis_views[i->time_axis_view + delta_time_axis_view];
+			TimeAxisView* current_tv = _time_axis_views[track_index];
 
 			/* Ensure it is moved from stacked -> expanded if appropriate */
 			if (current_tv->view()->layer_display() == Stacked) {
@@ -803,7 +809,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			}
 
 			/* Update the DraggingView */
-			i->time_axis_view += delta_time_axis_view;
+			i->time_axis_view = track_index;
 			i->layer += this_delta_layer;
 
 			if (_brushing) {
