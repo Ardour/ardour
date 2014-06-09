@@ -107,7 +107,6 @@ public:
         }
 
         void scroll_to (Coord x, Coord y);
-	Duple scroll_offset() const { return _scroll_offset; }
 	void add_scroller (ScrollGroup& i);
         
         virtual Rect  visible_area () const = 0;
@@ -125,8 +124,6 @@ protected:
 	
 	/** our root group */
 	RootGroup _root;
-
-        Duple _scroll_offset;
 
         virtual void pick_current_item (int state) = 0;
         virtual void pick_current_item (Duple const &, int state) = 0;
