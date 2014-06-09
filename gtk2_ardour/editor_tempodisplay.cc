@@ -40,6 +40,7 @@
 
 #include "canvas/canvas.h"
 #include "canvas/item.h"
+#include "canvas/line_set.h"
 
 #include "editor.h"
 #include "marker.h"
@@ -176,7 +177,7 @@ Editor::draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	}
 
 	if (tempo_lines == 0) {
-		tempo_lines = new TempoLines (*_track_canvas, time_line_group, ArdourCanvas::COORD_MAX);
+		tempo_lines = new TempoLines (time_line_group, ArdourCanvas::LineSet::Vertical);
 	}
 	
 	tempo_lines->draw (begin, end);

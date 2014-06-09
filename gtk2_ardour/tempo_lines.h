@@ -19,12 +19,13 @@
 #ifndef __ardour_tempo_lines_h__
 #define __ardour_tempo_lines_h__
 
-#include <list>
 #include "ardour/tempo.h"
+
+#include "canvas/line_set.h"
 
 class TempoLines {
 public:
-	TempoLines(ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group, double screen_height);
+	TempoLines (ArdourCanvas::Group* group, double screen_height);
 
 	void tempo_map_changed();
 
@@ -35,12 +36,7 @@ public:
 	void hide();
 
 private:
-        typedef std::list<ArdourCanvas::Line*> Lines;
-	Lines _lines;
-        Lines _cache;
-
-        ArdourCanvas::Canvas& _canvas;
-	ArdourCanvas::Group*  _group;
+	ArdourCanvas::LineSet lines;
 	double                _height;
 };
 

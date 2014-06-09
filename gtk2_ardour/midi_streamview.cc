@@ -74,8 +74,8 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	/* put the note lines in the timeaxisview's group, so it
 	   can be put below ghost regions from MIDI underlays
 	*/
-	_note_lines = new ArdourCanvas::LineSet (_canvas_group);
-
+	_note_lines = new ArdourCanvas::LineSet (_canvas_group, ArdourCanvas::LineSet::Horizontal);
+	
 	_note_lines->Event.connect(
 		sigc::bind(sigc::mem_fun(_trackview.editor(),
 		                         &PublicEditor::canvas_stream_view_event),
@@ -273,7 +273,8 @@ void
 MidiStreamView::update_contents_height ()
 {
 	StreamView::update_contents_height();
-	_note_lines->set_height (child_height ());
+
+	_note_lines->set_extent (ArdourCanvas::COORD_MAX);
 
 	apply_note_range (lowest_note(), highest_note(), true);
 }
