@@ -48,8 +48,6 @@ Canvas::Canvas ()
 void
 Canvas::scroll_to (Coord x, Coord y)
 {
-	_scroll_offset = Duple (x, y);
-
 	/* We do things this way because we do not want to recurse through
 	   the canvas for every scroll. In the presence of large MIDI
 	   tracks this means traversing item lists that include
@@ -61,7 +59,7 @@ Canvas::scroll_to (Coord x, Coord y)
 	*/
 
 	for (list<ScrollGroup*>::iterator i = scrollers.begin(); i != scrollers.end(); ++i) {
-		(*i)->scroll_to (_scroll_offset);
+		(*i)->scroll_to (Duple (x, y));
 	}
 
 	pick_current_item (0); // no current mouse position 
@@ -225,9 +223,7 @@ Canvas::window_to_canvas (Duple const & d) const
 		return d.translate (sg->scroll_offset());
 	}
 
-	/* fallback to global canvas offset ... it would be nice to remove this */
-
-	return d.translate (_scroll_offset);
+	return d;
 }
 
 Duple
@@ -252,7 +248,7 @@ Canvas::canvas_to_window (Duple const & d, bool rounded) const
 	if (sg) {
 		wd = d.translate (-sg->scroll_offset());
 	} else {
-		wd = d.translate (-_scroll_offset);
+		wd = d;
 	}
 
 	/* Note that this intentionally almost always returns integer coordinates */

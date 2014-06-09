@@ -114,7 +114,7 @@ Item::scroll_offset () const
 	if (_scroll_parent) {
 		return _scroll_parent->scroll_offset();
 	} 
-	return _canvas->scroll_offset();
+	return Duple (0,0);
 }
 
 Duple
