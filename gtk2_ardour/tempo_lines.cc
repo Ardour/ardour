@@ -19,7 +19,6 @@
 
 #include "pbd/compose.h"
 
-#include "canvas/line.h"
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
 
@@ -29,35 +28,28 @@
 
 using namespace std;
 
-TempoLines::TempoLines (ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group, double h)
-	: _canvas (canvas)
-	, _group (group)
-	, _height (h)
+TempoLines::TempoLines (ArdourCanvas::Group* group, double)
+	: lines (group, ArdourCanvas::LineSet::Vertical)
 {
+	lines.set_extent (ArdourCanvas::COORD_MAX);
 }
 
 void
 TempoLines::tempo_map_changed()
 {
-	/* remove all lines from the group, put them in the cache (to avoid
-	 * unnecessary object destruction+construction later), and clear _lines
-	 */
-	 
-	_group->clear ();
-	_cache.insert (_cache.end(), _lines.begin(), _lines.end());
-	_lines.clear ();
+	lines.clear ();
 }
 
 void
 TempoLines::show ()
 {
-	_group->show ();
+	lines.show ();
 }
 
 void
 TempoLines::hide ()
 {
-	_group->hide ();
+	lines.hide ();
 }
 
 void
@@ -65,7 +57,6 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 		  const ARDOUR::TempoMap::BBTPointList::const_iterator& end)
 {
 	ARDOUR::TempoMap::BBTPointList::const_iterator i;
-	ArdourCanvas::Rect const visible = _group->window_to_item (_canvas.visible_area ());
 	double  beat_density;
 
 	uint32_t beats = 0;
@@ -79,15 +70,15 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	bars = (*i).bar - (*begin).bar; 
 	beats = distance (begin, end) - bars;
 
-	beat_density = (beats * 10.0f) / visible.width ();
+	beat_density = (beats * 10.0f) / lines.canvas()->width();
 
 	if (beat_density > 4.0f) {
 		/* if the lines are too close together, they become useless */
-		tempo_map_changed();
+		lines.clear ();
 		return;
 	}
 
-	tempo_map_changed ();
+	lines.clear ();
 
 	for (i = begin; i != end; ++i) {
 
@@ -102,24 +93,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 
 		ArdourCanvas::Coord xpos = PublicEditor::instance().sample_to_pixel_unrounded ((*i).frame);
 
-		ArdourCanvas::Line* line;
-
-		if (!_cache.empty()) {
-			line = _cache.back ();
-			_cache.pop_back ();
-			line->reparent (_group);
-		} else {
-			line = new ArdourCanvas::Line (_group);
-			CANVAS_DEBUG_NAME (line, string_compose ("tempo measure line @ %1", (*i).frame));
-			line->set_ignore_events (true);
-		}
-
-		line->set_x0 (xpos);
-		line->set_x1 (xpos);
-		line->set_y0 (0.0);
-		line->set_y1 (_height);
-		line->set_outline_color (color);
-		line->show ();
+		lines.add (xpos, 1.0, color);
 	}
 }
 
