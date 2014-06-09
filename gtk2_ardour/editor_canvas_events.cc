@@ -1010,9 +1010,8 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 }
 
 bool
-Editor::canvas_bottom_rect_event (GdkEvent* event)
+Editor::canvas_drop_zone_event (GdkEvent* event)
 {
-	cerr << "CBR event, type " << event << endl;
 	return true;
 }
 
