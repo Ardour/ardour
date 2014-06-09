@@ -495,11 +495,9 @@ Editor::Editor ()
 	controls_layout.add (*h);
 
 	controls_layout.set_name ("EditControlsBase");
-	controls_layout.add_events (Gdk::SCROLL_MASK);
-	controls_layout.signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
-
-	controls_layout.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
+	controls_layout.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::SCROLL_MASK);
 	controls_layout.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::edit_controls_button_release));
+	controls_layout.signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
 
 	_cursors = new MouseCursors;
 
@@ -3878,26 +3876,14 @@ Editor::transport_punch_location()
 bool
 Editor::control_layout_scroll (GdkEventScroll* ev)
 {
-	if (Keyboard::some_magic_widget_has_focus()) {
-		return false;
-	}
+	/* Just forward to the normal canvas scroll method. The coordinate
+	   systems are different but since the canvas is always larger than the
+	   track headers, and aligned with the trackview area, this will work.
 
-	switch (ev->direction) {
-	case GDK_SCROLL_UP:
-		scroll_tracks_up_line ();
-		return true;
-		break;
-
-	case GDK_SCROLL_DOWN:
-		scroll_tracks_down_line ();
-		return true;
-
-	default:
-		/* no left/right handling yet */
-		break;
-	}
-
-	return false;
+	   In the not too distant future this layout is going away anyway and
+	   headers will be on the canvas.
+	*/
+	return canvas_scroll_event (ev);
 }
 
 void

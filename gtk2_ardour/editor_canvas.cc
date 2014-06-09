@@ -236,7 +236,7 @@ Editor::initialize_canvas ()
 	   handlers.
 	*/
 
-	_track_canvas->signal_scroll_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_scroll_event));
+	_track_canvas->signal_scroll_event().connect (sigc::mem_fun (*this, &Editor::canvas_scroll_event));
 	_track_canvas->signal_motion_notify_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_motion_notify_event));
 	_track_canvas->signal_button_press_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_button_press_event));
 	_track_canvas->signal_button_release_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_button_release_event));

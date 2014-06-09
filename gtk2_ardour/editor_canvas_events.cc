@@ -60,6 +60,10 @@ using Gtkmm2ext::Keyboard;
 bool
 Editor::track_canvas_scroll (GdkEventScroll* ev)
 {
+	if (Keyboard::some_magic_widget_has_focus()) {
+		return false;
+	}
+	
 	framepos_t xdelta;
 	int direction = ev->direction;
 
@@ -156,7 +160,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 }
 
 bool
-Editor::track_canvas_scroll_event (GdkEventScroll *event)
+Editor::canvas_scroll_event (GdkEventScroll *event)
 {
 	_track_canvas->grab_focus();
 	return track_canvas_scroll (event);
@@ -1010,7 +1014,7 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 }
 
 bool
-Editor::canvas_drop_zone_event (GdkEvent* event)
+Editor::canvas_drop_zone_event (GdkEvent* /*event*/)
 {
 	return true;
 }
