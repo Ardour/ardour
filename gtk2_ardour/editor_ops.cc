@@ -6860,7 +6860,13 @@ Editor::fit_tracks (TrackViewList & tracks)
 		++visible_tracks;
 	}
 
-	uint32_t h = (uint32_t) floor ((_visible_canvas_height - child_heights) / visible_tracks);
+	/* compute the per-track height from:
+
+	   total canvas visible height - 
+                 height that will be taken by visible children of selected
+                 tracks - height of the ruler/hscroll area 
+	*/
+	uint32_t h = (uint32_t) floor ((_visible_canvas_height - (child_heights + _trackview_group->canvas_origin().y)) / visible_tracks);
 	double first_y_pos = DBL_MAX;
 
 	if (h < TimeAxisView::preset_height (HeightSmall)) {
@@ -6885,9 +6891,7 @@ Editor::fit_tracks (TrackViewList & tracks)
 
 	/* operate on all tracks, hide unselected ones that are in the middle of selected ones */
 
-	bool prev_was_selected = false;
-	bool is_selected = tracks.contains (all.front());
-	bool next_is_selected;
+	bool within_selected = false;
 
 	for (TrackViewList::iterator t = all.begin(); t != all.end(); ++t) {
 
@@ -6895,26 +6899,16 @@ Editor::fit_tracks (TrackViewList & tracks)
 
 		next = t;
 		++next;
-
-		if (next != all.end()) {
-			next_is_selected = tracks.contains (*next);
-		} else {
-			next_is_selected = false;
-		}
-
+		
 		if ((*t)->marked_for_display ()) {
-			if (is_selected) {
+			if (tracks.contains (*t)) { 
 				(*t)->set_height (h);
 				first_y_pos = std::min ((*t)->y_position (), first_y_pos);
-			} else {
-				if (prev_was_selected && next_is_selected) {
-					hide_track_in_display (*t);
-				}
+				within_selected = true;
+			} else if (within_selected) {
+				hide_track_in_display (*t);
 			}
 		}
-
-		prev_was_selected = is_selected;
-		is_selected = next_is_selected;
 	}
 
 	/*
