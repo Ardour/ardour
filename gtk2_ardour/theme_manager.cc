@@ -29,6 +29,7 @@
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/cell_renderer_color_selector.h"
+#include "gtkmm2ext/utils.h"
 
 #include "pbd/file_utils.h"
 #include "pbd/compose.h"
@@ -42,6 +43,7 @@
 #include "rgb_macros.h"
 #include "ardour_ui.h"
 #include "global_signals.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -66,6 +68,7 @@ ThemeManager::ThemeManager()
 	, timeline_item_gradient_depth (0, 1.0, 0.05)
 	, timeline_item_gradient_depth_label (_("Timeline item gradient depth"))
 	, all_dialogs (_("All floating windows are dialogs"))
+	, icon_set_label (_("Icon Set"))
 {
 	set_title (_("Theme Manager"));
 
@@ -107,7 +110,23 @@ ThemeManager::ThemeManager()
 	vbox->pack_start (region_color_button, PACK_SHRINK);
 	vbox->pack_start (show_clipping_button, PACK_SHRINK);
 
-	Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox());
+	Gtk::HBox* hbox;
+
+	vector<string> icon_sets = ::get_icon_sets ();
+
+	if (icon_sets.size() > 1) {
+		Gtkmm2ext::set_popdown_strings (icon_set_dropdown, icon_sets);
+		icon_set_dropdown.set_active_text (ARDOUR_UI::config()->get_icon_set());
+
+		hbox = Gtk::manage (new Gtk::HBox());
+		hbox->set_spacing (6);
+		hbox->pack_start (icon_set_label, false, false);
+		hbox->pack_start (icon_set_dropdown, true, true);
+		vbox->pack_start (*hbox, PACK_SHRINK);
+	}
+
+	
+	hbox = Gtk::manage (new Gtk::HBox());
 	hbox->set_spacing (6);
 	hbox->pack_start (waveform_gradient_depth, true, true);
 	hbox->pack_start (waveform_gradient_depth_label, false, false);
@@ -117,8 +136,8 @@ ThemeManager::ThemeManager()
 	hbox->set_spacing (6);
 	hbox->pack_start (timeline_item_gradient_depth, true, true);
 	hbox->pack_start (timeline_item_gradient_depth_label, false, false);
-
 	vbox->pack_start (*hbox, PACK_SHRINK);
+
 	vbox->pack_start (scroller);
 
 	vbox->show_all ();
