@@ -167,6 +167,7 @@ ThemeManager::ThemeManager()
 	waveform_gradient_depth.signal_value_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_waveform_gradient_depth_change));
 	timeline_item_gradient_depth.signal_value_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_timeline_item_gradient_depth_change));
 	all_dialogs.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_all_dialogs_toggled));
+	icon_set_dropdown.signal_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_icon_set_changed));
 
 	Gtkmm2ext::UI::instance()->set_tip (all_dialogs, 
 					    string_compose (_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\n"
@@ -346,6 +347,13 @@ ThemeManager::on_timeline_item_gradient_depth_change ()
 
 	ARDOUR_UI::config()->set_timeline_item_gradient_depth (v);
 	ARDOUR_UI::config()->set_dirty ();
+}
+
+void
+ThemeManager::on_icon_set_changed ()
+{
+	string new_set = icon_set_dropdown.get_active_text();
+	ARDOUR_UI::config()->set_icon_set (new_set);
 }
 
 void

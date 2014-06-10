@@ -49,6 +49,7 @@ class ThemeManager : public ArdourWindow
         void on_waveform_gradient_depth_change ();
         void on_timeline_item_gradient_depth_change ();
 	void on_all_dialogs_toggled ();
+	void on_icon_set_changed ();
 
   private:
 	struct ColorDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
