@@ -83,6 +83,8 @@ class ThemeManager : public ArdourWindow
         Gtk::Label timeline_item_gradient_depth_label;
 	Gtk::CheckButton all_dialogs;
 	Gtk::CheckButton gradient_waveforms;
+	Gtk::Label icon_set_label;
+	Gtk::ComboBoxText icon_set_dropdown;
 
 	bool button_press_event (GdkEventButton*);
 };
