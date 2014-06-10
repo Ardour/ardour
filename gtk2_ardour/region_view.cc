@@ -33,6 +33,7 @@
 #include "canvas/pixbuf.h"
 #include "canvas/text.h"
 #include "canvas/line.h"
+#include "canvas/utils.h"
 
 #include "ardour_ui.h"
 #include "global_signals.h"
@@ -525,8 +526,8 @@ RegionView::set_colors ()
 
 	if (sync_mark) {
 		/* XXX: make these colours themable */
-		sync_mark->set_fill_color (RGBA_TO_UINT (0, 255, 0, 255));
-		sync_line->set_outline_color (RGBA_TO_UINT (0, 255, 0, 255));
+		sync_mark->set_fill_color (ArdourCanvas::rgba_to_color (0, 1.0, 0, 1.0));
+		sync_line->set_outline_color (ArdourCanvas::rgba_to_color (0, 1.0, 0, 1.0));
 	}
 }
 
@@ -626,11 +627,11 @@ RegionView::region_sync_changed ()
 
 		sync_mark = new ArdourCanvas::Polygon (group);
 		CANVAS_DEBUG_NAME (sync_mark, string_compose ("sync mark for %1", get_item_name()));
-		sync_mark->set_fill_color (RGBA_TO_UINT(0,255,0,255));    // FIXME make a themeable colour
+		sync_mark->set_fill_color (ArdourCanvas::rgba_to_color (0, 1.0, 0, 1.0));    // FIXME make a themeable colour
 
 		sync_line = new ArdourCanvas::Line (group);
 		CANVAS_DEBUG_NAME (sync_line, string_compose ("sync mark for %1", get_item_name()));
-		sync_line->set_outline_color (RGBA_TO_UINT(0,255,0,255)); // FIXME make a themeable colour
+		sync_line->set_outline_color (ArdourCanvas::rgba_to_color (0, 1.0, 0, 1.0)); // FIXME make a themeable colour
 	}
 
 	/* this has to handle both a genuine change of position, a change of samples_per_pixel
