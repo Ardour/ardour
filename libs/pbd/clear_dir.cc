@@ -129,4 +129,5 @@ PBD::remove_directory (const std::string& dir) {
 	if (::g_rmdir(dir.c_str())) {
 		error << string_compose (_("cannot remove directory %1 (%2)"), dir, strerror (errno)) << endmsg;
 	}
+	::closedir (dead);
 }
