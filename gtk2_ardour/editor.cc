@@ -750,6 +750,7 @@ Editor::Editor ()
 	Session::AskAboutPlaylistDeletion.connect_same_thread (*this, boost::bind (&Editor::playlist_deletion_dialog, this, _1));
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&Editor::parameter_changed, this, _1), gui_context());
+	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &Editor::ui_parameter_changed));
 
     ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &Editor::on_ardour_ui_config_changed));
     
@@ -5567,3 +5568,11 @@ Editor::output_connection_mode_changed ()
     track_selection_changed ();
 }
 
+
+void
+Editor::ui_parameter_changed (string parameter)
+{
+	if (parameter == "icon-set") {
+		_cursors->set_cursor_set (ARDOUR_UI::config()->get_icon_set());
+	}
+}
