@@ -233,12 +233,6 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	uint32_t fill_opacity;
 	uint32_t fill_color;
 	uint32_t pre_drag_fill_color;
-	uint32_t frame_color_r;
-	uint32_t frame_color_g;
-	uint32_t frame_color_b;
-	uint32_t selected_frame_color_r;
-	uint32_t selected_frame_color_g;
-	uint32_t selected_frame_color_b;
 
 	uint32_t last_item_width;
 	int name_text_width;
