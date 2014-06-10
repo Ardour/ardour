@@ -3649,7 +3649,7 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 
 		/* translate rect into item space and set */
 
-		Rect r (x1, y1, x2, y2);
+                ArdourCanvas::Rect r (x1, y1, x2, y2);
 
 		/* this drag is a _trackview_only == true drag, so the y1 and
 		 * y2 (computed using current_pointer_y() and grab_y()) will be
