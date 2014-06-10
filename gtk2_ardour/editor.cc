@@ -500,6 +500,7 @@ Editor::Editor ()
 	controls_layout.signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
 
 	_cursors = new MouseCursors;
+	_cursors->set_cursor_set (ARDOUR_UI::config()->get_icon_set());
 
 	ArdourCanvas::GtkCanvas* time_pad = manage (new ArdourCanvas::GtkCanvas ());
 
