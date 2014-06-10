@@ -55,13 +55,13 @@ class AudioRegionView : public RegionView
 			 RouteTimeAxisView&,
 			 boost::shared_ptr<ARDOUR::AudioRegion>,
 			 double initial_samples_per_pixel,
-			 Gdk::Color const & basic_color);
+			 uint32_t base_color);
 
 	AudioRegionView (ArdourCanvas::Group *,
 			 RouteTimeAxisView&,
 			 boost::shared_ptr<ARDOUR::AudioRegion>,
 			 double samples_per_pixel,
-			 Gdk::Color const & basic_color,
+			 uint32_t base_color,
 			 bool recording,
 			 TimeAxisViewItem::Visibility);
 
@@ -69,7 +69,7 @@ class AudioRegionView : public RegionView
 
 	~AudioRegionView ();
 
-	virtual void init (Gdk::Color const & base_color, bool wait_for_data);
+	void init (bool wait_for_data);
 
 	boost::shared_ptr<ARDOUR::AudioRegion> audio_region() const;
 
@@ -173,8 +173,6 @@ class AudioRegionView : public RegionView
 
 	double _amplitude_above_axis;
 
-	uint32_t fade_color;
-
 	void reset_fade_shapes ();
 	void reset_fade_in_shape ();
 	void reset_fade_out_shape ();
@@ -193,7 +191,6 @@ class AudioRegionView : public RegionView
 
 	void set_colors ();
         void set_waveform_colors ();
-	void compute_colors (Gdk::Color const &);
 	void reset_width_dependent_items (double pixel_width);
 	void set_frame_color ();
 

@@ -30,22 +30,22 @@
 #include "gtkmm2ext/cell_renderer_color_selector.h"
 
 #include "ardour/route_group.h"
-
-#include "editor.h"
-#include "keyboard.h"
-#include "marker.h"
-#include "time_axis_view.h"
-#include "prompter.h"
-#include "gui_thread.h"
-#include "editor_group_tabs.h"
-#include "route_group_dialog.h"
-#include "route_time_axis.h"
-#include "editor_routes.h"
-#include "editor_route_groups.h"
-#include "ardour_ui.h"
-
 #include "ardour/route.h"
 #include "ardour/session.h"
+
+#include "ardour_ui.h"
+#include "editor.h"
+#include "editor_group_tabs.h"
+#include "editor_route_groups.h"
+#include "editor_routes.h"
+#include "gui_thread.h"
+#include "keyboard.h"
+#include "marker.h"
+#include "prompter.h"
+#include "route_group_dialog.h"
+#include "route_time_axis.h"
+#include "time_axis_view.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -72,6 +72,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 
 	Gtkmm2ext::CellRendererColorSelector* color_renderer = manage (new Gtkmm2ext::CellRendererColorSelector);
 	TreeViewColumn* color_column = manage (new TreeViewColumn ("", *color_renderer));
+
 	color_column->add_attribute (color_renderer->property_color(), _columns.gdkcolor);
 	
 	_display.append_column (*color_column);
@@ -268,8 +269,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
 	case 0: 
-		c = (*iter)[_columns.gdkcolor];
-
+		c =  (*iter)[_columns.gdkcolor];
 		color_dialog.get_colorsel()->set_previous_color (c);
 		color_dialog.get_colorsel()->set_current_color (c);
 
@@ -278,7 +278,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 			break;
 		case RESPONSE_ACCEPT:
 			c = color_dialog.get_colorsel()->get_current_color();
-			GroupTabs::set_group_color (group, c);
+			GroupTabs::set_group_color (group, gdk_color_to_rgba (c));
 			ARDOUR_UI::config()->set_dirty ();
 			break;
 			
@@ -409,7 +409,7 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 
 	group->apply_changes (plist);
 
-	GroupTabs::set_group_color ((*iter)[_columns.routegroup], (*iter)[_columns.gdkcolor]);
+	GroupTabs::set_group_color ((*iter)[_columns.routegroup], gdk_color_to_rgba ((*iter)[_columns.gdkcolor]));
 }
 
 void
@@ -430,7 +430,10 @@ EditorRouteGroups::add (RouteGroup* group)
 	row[_columns.active_shared] = group->is_route_active ();
 	row[_columns.active_state] = group->is_active ();
 	row[_columns.is_visible] = !group->is_hidden();
-	row[_columns.gdkcolor] = GroupTabs::group_color (group);
+	
+	Gdk::Color c;
+	set_color_from_rgba (c, GroupTabs::group_color (group));
+	row[_columns.gdkcolor] = c;
 	
 	_in_row_change = true;
 
@@ -500,7 +503,10 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange&)
 			(*iter)[_columns.active_shared] = group->is_route_active ();
 			(*iter)[_columns.active_state] = group->is_active ();
 			(*iter)[_columns.is_visible] = !group->is_hidden();
-			(*iter)[_columns.gdkcolor] = GroupTabs::group_color (group);
+
+			Gdk::Color c;
+			set_color_from_rgba (c, GroupTabs::group_color (group));
+			(*iter)[_columns.gdkcolor] = c;
 
 			break;
 		}

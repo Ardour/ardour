@@ -53,7 +53,7 @@ class RegionView : public TimeAxisViewItem
 	            TimeAxisView&        time_view,
 	            boost::shared_ptr<ARDOUR::Region> region,
 	            double               samples_per_pixel,
-	            Gdk::Color const &   basic_color,
+	            uint32_t             base_color,
 		    bool 		 automation = false);
 
 	RegionView (const RegionView& other);
@@ -61,7 +61,7 @@ class RegionView : public TimeAxisViewItem
 
 	~RegionView ();
 
-	virtual void init (Gdk::Color const & base_color, bool wait_for_data);
+	virtual void init (bool wait_for_data);
 
 	boost::shared_ptr<ARDOUR::Region> region() const { return _region; }
 
@@ -79,7 +79,6 @@ class RegionView : public TimeAxisViewItem
 	void lower_to_bottom ();
 
 	bool set_position(framepos_t pos, void* src, double* delta = 0);
-	void fake_set_opaque (bool yn);
 
 	virtual void show_region_editor ();
 	void hide_region_editor ();
@@ -133,7 +132,7 @@ class RegionView : public TimeAxisViewItem
 		    TimeAxisView&,
 		    boost::shared_ptr<ARDOUR::Region>,
 		    double samples_per_pixel,
-		    Gdk::Color const & basic_color,
+		    uint32_t basic_color,
 		    bool recording,
 		    TimeAxisViewItem::Visibility);
 

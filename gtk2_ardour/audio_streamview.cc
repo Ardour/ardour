@@ -110,7 +110,7 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 		break;
 	case Destructive:
 		region_view = new TapeAudioRegionView (_canvas_group, _trackview, region,
-				_samples_per_pixel, region_color);
+						       _samples_per_pixel, region_color);
 		break;
 	default:
 		fatal << string_compose (_("programming error: %1"), "illegal track mode in ::add_region_view_internal") << endmsg;
@@ -118,7 +118,7 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 
 	}
 
-	region_view->init (region_color, wait_for_waves);
+	region_view->init (wait_for_waves);
 	region_view->set_amplitude_above_axis(_amplitude_above_axis);
 	region_view->set_height (child_height ());
 

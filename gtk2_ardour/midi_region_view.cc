@@ -89,7 +89,7 @@ PBD::Signal1<void, MidiRegionView *> MidiRegionView::SelectionCleared;
 #define MIDI_BP_ZERO ((Config->get_first_midi_bank_is_zero())?0:1)
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
-                                boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color const & basic_color)
+                                boost::shared_ptr<MidiRegion> r, double spu, uint32_t basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, _current_range_min(0)
 	, _current_range_max(0)
@@ -125,7 +125,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 }
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
-                                boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color& basic_color,
+                                boost::shared_ptr<MidiRegion> r, double spu, uint32_t basic_color,
                                 TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, false, visibility)
 	, _current_range_min(0)
@@ -197,13 +197,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, pre_press_cursor (0)
 	, _note_player (0)
 {
-	Gdk::Color c;
-	int r,g,b,a;
-
-	UINT_TO_RGBA (other.fill_color, &r, &g, &b, &a);
-	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
-
-	init (c, false);
+	init (false);
 }
 
 MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<MidiRegion> region)
@@ -231,17 +225,11 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, pre_press_cursor (0)
 	, _note_player (0)
 {
-	Gdk::Color c;
-	int r,g,b,a;
-
-	UINT_TO_RGBA (other.fill_color, &r, &g, &b, &a);
-	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
-
-	init (c, true);
+	init (true);
 }
 
 void
-MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
+MidiRegionView::init (bool wfd)
 {
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
@@ -256,9 +244,7 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	_model = midi_region()->midi_source(0)->model();
 	_enable_display = false;
 
-	RegionView::init (basic_color, false);
-
-	compute_colors (basic_color);
+	RegionView::init (false);
 
 	set_height (trackview.current_height());
 

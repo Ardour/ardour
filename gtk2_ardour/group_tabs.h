@@ -50,9 +50,9 @@ public:
 
 	void run_new_group_dialog (ARDOUR::RouteList const &);
 
-	static void set_group_color (ARDOUR::RouteGroup *, Gdk::Color);
+	static void set_group_color (ARDOUR::RouteGroup *, uint32_t);
 	static std::string group_gui_id (ARDOUR::RouteGroup *);
-	static Gdk::Color group_color (ARDOUR::RouteGroup *);
+	static uint32_t group_color (ARDOUR::RouteGroup *);
 
 protected:
 
@@ -61,7 +61,7 @@ protected:
 
 		double from;
 		double to;
-		Gdk::Color color; ///< color
+		uint32_t color; ///< color
 		ARDOUR::RouteGroup* group; ///< route group
 	};
 

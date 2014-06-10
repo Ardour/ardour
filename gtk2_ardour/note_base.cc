@@ -170,18 +170,14 @@ NoteBase::base_color()
 	switch (mode) {
 	case TrackColor:
 	{
-		Gdk::Color color = _region.midi_stream_view()->get_region_color();
-		return UINT_INTERPOLATE (RGBA_TO_UINT(
-			                         SCALE_USHORT_TO_UINT8_T(color.get_red()),
-			                         SCALE_USHORT_TO_UINT8_T(color.get_green()),
-			                         SCALE_USHORT_TO_UINT8_T(color.get_blue()),
-			                         opacity), 
-		                         ARDOUR_UI::config()->get_canvasvar_MidiNoteSelected(), 0.5);
+		uint32_t color = _region.midi_stream_view()->get_region_color();
+		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (color, opacity), 
+		                         ARDOUR_UI::config()->get_canvasvar_MidiNoteSelected(), 
+					 0.5);
 	}
 
 	case ChannelColors:
-		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (NoteBase::midi_channel_colors[_note->channel()],
-		                                             opacity), 
+		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (NoteBase::midi_channel_colors[_note->channel()], opacity), 
 		                         ARDOUR_UI::config()->get_canvasvar_MidiNoteSelected(), 0.5);
 
 	default:

@@ -83,7 +83,6 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 	 */
 	static Gdk::Color unique_random_color();
 
-
 	Gdk::Color _color;
 
 	static std::list<Gdk::Color> used_colors;

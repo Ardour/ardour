@@ -45,7 +45,9 @@
 #include <gtkmm2ext/utils.h>
 #include "ardour/rc_configuration.h"
 #include "ardour/filesystem_paths.h"
+
 #include "canvas/item.h"
+#include "canvas/utils.h"
 
 #include "ardour_ui.h"
 #include "debug.h"
@@ -288,7 +290,7 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, s
 	if (state == Gtk::STATE_NORMAL && rgba) {
 		return (uint32_t) RGBA_TO_UINT(r,g,b,a);
 	} else {
-		return (uint32_t) RGB_TO_UINT(r,g,b);
+		return (uint32_t) RGBA_TO_UINT(r,g,b,255);
 	}
 }
 
@@ -340,9 +342,69 @@ rgba_p_from_style (string style, float *r, float *g, float *b, string attr, int 
 }
 
 void
-set_color (Gdk::Color& c, int rgb)
+set_color_from_rgb (Gdk::Color& c, uint32_t rgb)
 {
-	c.set_rgb((rgb >> 16)*256, ((rgb & 0xff00) >> 8)*256, (rgb & 0xff)*256);
+	/* Gdk::Color color ranges are 16 bit, so scale from 8 bit by
+	   multiplying by 256.
+	*/
+	c.set_rgb ((rgb >> 16)*256, ((rgb & 0xff00) >> 8)*256, (rgb & 0xff)*256);
+}
+
+void
+set_color_from_rgba (Gdk::Color& c, uint32_t rgba)
+{
+	/* Gdk::Color color ranges are 16 bit, so scale from 8 bit by
+	   multiplying by 256.
+	*/
+	c.set_rgb ((rgba >> 24)*256, ((rgba & 0xff0000) >> 16)*256, ((rgba & 0xff00) >> 8)*256);
+}
+
+uint32_t
+gdk_color_to_rgba (Gdk::Color const& c)
+{
+	/* since alpha value is not available from a Gdk::Color, it is
+	   hardcoded as 0xff (aka 255 or 1.0)
+	*/
+
+	const uint32_t r = c.get_red_p () * 255.0;
+	const uint32_t g = c.get_green_p () * 255.0;
+	const uint32_t b = c.get_blue_p () * 255.0;
+	const uint32_t a = 0xff;
+
+	return RGBA_TO_UINT (r,g,b,a);
+}
+
+uint32_t
+contrasting_text_color (uint32_t c)
+{
+	double r, g, b, a;
+	ArdourCanvas::color_to_rgba (c, r, g, b, a);
+
+	const double black_r = 0.0;
+	const double black_g = 0.0;
+	const double black_b = 0.0;
+
+	const double white_r = 1.0;
+	const double white_g = 1.0;
+	const double white_b = 1.0;
+
+	/* Use W3C contrast guideline calculation */
+
+	double white_contrast = (max (r, white_r) - min (r, white_r)) +
+		(max (g, white_g) - min (g, white_g)) + 
+		(max (b, white_b) - min (b, white_b));
+
+	double black_contrast = (max (r, black_r) - min (r, black_r)) +
+		(max (g, black_g) - min (g, black_g)) + 
+		(max (b, black_b) - min (b, black_b));
+
+	if (white_contrast > black_contrast) {		
+		/* use white */
+		return ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 1.0);
+	} else {
+		/* use black */
+		return ArdourCanvas::rgba_to_color (0.0, 0.0, 0.0, 1.0);
+	}
 }
 
 bool
