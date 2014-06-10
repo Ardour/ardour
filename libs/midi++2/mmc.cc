@@ -710,7 +710,7 @@ MachineControlCommand::fill_buffer (MachineControl* mmc, MIDI::byte* b) const
 	if (_command == MachineControl::cmdLocate) {
 		*b++ = 0x6; // byte count
 		*b++ = 0x1; // "TARGET" subcommand
-		*b++ = _time.hours;
+		*b++ = _time.hours & 0xff;
 		*b++ = _time.minutes;
 		*b++ = _time.seconds;
 		*b++ = _time.frames;
