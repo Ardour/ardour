@@ -880,6 +880,12 @@ Editor::horizontal_position () const
 void
 Editor::set_canvas_cursor (Gdk::Cursor* cursor, bool save)
 {
+	/* do not allow cursors to change during a drag */
+
+	if (_drags->active()) {
+		return;
+	}
+
 	if (save) {
 		current_canvas_cursor = cursor;
 	}
