@@ -153,28 +153,28 @@ AudioRegionView::init (bool wfd)
 	if (!_recregion) {
 		fade_in_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_in_handle, string_compose ("fade in handle for %1", region()->name()));
-		fade_in_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
+		fade_in_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
 		fade_in_handle->set_fill_color (ARDOUR_UI::config()->get_canvasvar_InactiveFadeHandle());
 		fade_in_handle->set_data ("regionview", this);
 		fade_in_handle->hide ();
 
 		fade_out_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_out_handle, string_compose ("fade out handle for %1", region()->name()));
-		fade_out_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
+		fade_out_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
 		fade_out_handle->set_fill_color (ARDOUR_UI::config()->get_canvasvar_InactiveFadeHandle());
 		fade_out_handle->set_data ("regionview", this);
 		fade_out_handle->hide ();
 
 		fade_in_trim_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_in_handle, string_compose ("fade in trim handle for %1", region()->name()));
-		fade_in_trim_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
+		fade_in_trim_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
 		fade_in_trim_handle->set_fill_color (ARDOUR_UI::config()->get_canvasvar_InactiveFadeHandle());
 		fade_in_trim_handle->set_data ("regionview", this);
 		fade_in_trim_handle->hide ();
 
 		fade_out_trim_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_out_handle, string_compose ("fade out trim handle for %1", region()->name()));
-		fade_out_trim_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
+		fade_out_trim_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
 		fade_out_trim_handle->set_fill_color (ARDOUR_UI::config()->get_canvasvar_InactiveFadeHandle());
 		fade_out_trim_handle->set_data ("regionview", this);
 		fade_out_trim_handle->hide ();
