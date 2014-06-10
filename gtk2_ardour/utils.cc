@@ -654,6 +654,42 @@ get_xpm (std::string name)
 	return xpm_map[name];
 }
 
+vector<string>
+get_icon_sets ()
+{
+	Searchpath spath(ARDOUR::ardour_data_search_path());
+	spath.add_subdirectory_to_paths ("icons");
+	vector<string> r;
+	
+	r.push_back (_("default"));
+
+	for (vector<string>::iterator s = spath.begin(); s != spath.end(); ++s) {
+
+		vector<string> entries;
+
+		get_files_in_directory (*s, entries);
+
+		for (vector<string>::iterator e = entries.begin(); e != entries.end(); ++e) {
+
+			string d = *e;
+
+			/* ignore dotfiles, . and .. */
+
+			if (d.empty() || d[0] == '.') {
+				continue;
+			}
+			
+			Glib::ustring path = Glib::build_filename (*s, *e);
+
+			if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
+				r.push_back (Glib::filename_to_utf8 (*e));
+			}
+		}
+	}
+
+	return r;
+}
+
 std::string
 get_icon_path (const char* cname, string icon_set)
 {
@@ -663,7 +699,7 @@ get_icon_path (const char* cname, string icon_set)
 
 	Searchpath spath(ARDOUR::ardour_data_search_path());
 	
-	if (!icon_set.empty() && icon_set != "default") {
+	if (!icon_set.empty() && icon_set != _("default")) {
 		string subdir = Glib::build_filename ("icons", icon_set);
 		spath.add_subdirectory_to_paths (subdir);
 		
@@ -672,7 +708,7 @@ get_icon_path (const char* cname, string icon_set)
 	
 	if (data_file_path.empty()) {
 		
-		if (!icon_set.empty() && icon_set != "default") {
+		if (!icon_set.empty() && icon_set != _("default")) {
 			warning << string_compose (_("icon \"%1\" not found for icon set \"%2\", fallback to default"), cname, icon_set) << endmsg;
 		}
 		
