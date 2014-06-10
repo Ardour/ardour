@@ -2179,11 +2179,16 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 				continue;
 			}
 
+			/* XXX as of June 2014, we always record to mono
+			   files. Since this Source is being created as part of
+			   crash recovery, we know that we need the first
+			   channel (the final argument to the SourceFactory
+			   call below). If we ever support non-mono files for
+			   capture, this will need rethinking.
+			*/
+
 			try {
-				fs = boost::dynamic_pointer_cast<AudioFileSource> (
-					SourceFactory::createWritable (
-						DataType::AUDIO, _session,
-						prop->value(), false, _session.frame_rate()));
+				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createForRecovery (DataType::AUDIO, _session, prop->value(), 0));
 			}
 
 			catch (failed_constructor& err) {
@@ -2214,21 +2219,31 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 		return -1;
 	}
 
-	boost::shared_ptr<AudioRegion> region;
-
 	try {
 
-		PropertyList plist;
+		boost::shared_ptr<AudioRegion> wf_region;
+		boost::shared_ptr<AudioRegion> region;
+		
+		/* First create the whole file region */
 
+		PropertyList plist;
+		
 		plist.add (Properties::start, 0);
 		plist.add (Properties::length, first_fs->length (first_fs->timeline_position()));
 		plist.add (Properties::name, region_name_from_path (first_fs->name(), true));
 
-		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, plist));
+		wf_region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, plist));
 
-		region->set_automatic (true);
-		region->set_whole_file (true);
-		region->special_set_position (0);
+		wf_region->set_automatic (true);
+		wf_region->set_whole_file (true);
+		wf_region->special_set_position (position);
+
+		/* Now create a region that isn't the whole file for adding to
+		 * the playlist */
+
+		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, plist));
+		
+		_playlist->add_region (region, position);
 	}
 
 	catch (failed_constructor& err) {
@@ -2239,7 +2254,6 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 		return -1;
 	}
 
-	_playlist->add_region (region, position);
 
 	return 0;
 }

@@ -342,6 +342,39 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 }
 
 boost::shared_ptr<Source>
+SourceFactory::createForRecovery (DataType type, Session& s, const std::string& path, int chn)
+{
+	/* this might throw failed_constructor(), which is OK */
+
+	if (type == DataType::AUDIO) {
+		Source* src = new SndFileSource (s, path, chn);
+
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
+		// boost_debug_shared_ptr_mark_interesting (src, "Source");
+#endif
+		boost::shared_ptr<Source> ret (src);
+
+		if (setup_peakfile (ret, false)) {
+			return boost::shared_ptr<Source>();
+		}
+
+		// no analysis data - this is still basically a new file (we
+		// crashed while recording.
+
+		// always announce these files
+
+		SourceCreated (ret);
+
+		return ret;
+
+	} else if (type == DataType::MIDI) {
+		error << _("Recovery attempted on a MIDI file - not implemented") << endmsg;
+	}
+
+	return boost::shared_ptr<Source> ();
+}
+
+boost::shared_ptr<Source>
 SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name,
 				   uint32_t chn, frameoffset_t start, framecnt_t len, bool copy, bool defer_peaks)
 {
