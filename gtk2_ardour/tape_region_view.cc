@@ -49,7 +49,7 @@ const TimeAxisViewItem::Visibility TapeAudioRegionView::default_tape_visibility
 TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
 					  boost::shared_ptr<AudioRegion> r,
 					  double spu,
-					  Gdk::Color const & basic_color)
+					  uint32_t basic_color)
 
 	: AudioRegionView (parent, tv, r, spu, basic_color, false,
 			   TimeAxisViewItem::Visibility ((r->position() != 0) ? default_tape_visibility :
@@ -58,13 +58,13 @@ TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, RouteTime
 }
 
 void
-TapeAudioRegionView::init (Gdk::Color const & basic_color, bool /*wfw*/)
+TapeAudioRegionView::init (bool /*wfw*/)
 {
 	/* never wait for data: always just create the waves, connect once and then
 	   we'll update whenever we need to.
 	*/
 
-	AudioRegionView::init(basic_color, false);
+	AudioRegionView::init (false);
 
 	/* every time the wave data changes and peaks are ready, redraw */
 
@@ -90,11 +90,4 @@ TapeAudioRegionView::update (uint32_t /*n*/)
 	ENSURE_GUI_THREAD (*this, &TapeAudioRegionView::update, n);
 	// CAIROCANVAS
 	// waves[n]->rebuild ();
-}
-
-void
-TapeAudioRegionView::set_frame_color ()
-{
-	fill_opacity = 255;
-	AudioRegionView::set_frame_color ();
 }

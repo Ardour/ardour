@@ -71,14 +71,14 @@ public:
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
 	                double initial_samples_per_pixel,
-	                Gdk::Color const & basic_color);
+	                uint32_t base_color);
 
 	MidiRegionView (const MidiRegionView& other);
 	MidiRegionView (const MidiRegionView& other, boost::shared_ptr<ARDOUR::MidiRegion>);
 
 	~MidiRegionView ();
 
-	virtual void init (Gdk::Color const & basic_color, bool wfd);
+	void init (bool wfd);
 
 	const boost::shared_ptr<ARDOUR::MidiRegion> midi_region() const;
 
@@ -313,7 +313,7 @@ protected:
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
 	                double samples_per_pixel,
-	                Gdk::Color& basic_color,
+	                uint32_t basic_color,
 	                TimeAxisViewItem::Visibility);
 
 	void region_resized (const PBD::PropertyChange&);

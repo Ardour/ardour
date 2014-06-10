@@ -65,7 +65,10 @@ bool rgba_p_from_style (std::string, float*, float*, float*, std::string = "fg",
 
 void decorate (Gtk::Window& w, Gdk::WMDecoration d);
 
-void set_color (Gdk::Color&, int);
+void set_color_from_rgb (Gdk::Color&, uint32_t);
+void set_color_from_rgba (Gdk::Color&, uint32_t);
+uint32_t gdk_color_to_rgba (Gdk::Color const&);
+uint32_t contrasting_text_color (uint32_t c);
 
 bool relay_key_press (GdkEventKey* ev, Gtk::Window* win);
 bool forward_key_press (GdkEventKey* ev);

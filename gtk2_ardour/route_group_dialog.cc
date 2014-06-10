@@ -17,15 +17,20 @@
 
 */
 
+#include <iostream>
+
+#include "ardour/route_group.h"
+#include "ardour/session.h"
+
 #include <gtkmm/table.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/messagedialog.h>
-#include "ardour/route_group.h"
-#include "ardour/session.h"
+
 #include "route_group_dialog.h"
 #include "group_tabs.h"
+#include "utils.h"
+
 #include "i18n.h"
-#include <iostream>
 
 using namespace Gtk;
 using namespace ARDOUR;
@@ -84,7 +89,10 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 
 	_name.set_text (_group->name ());
 	_active.set_active (_group->is_active ());
-	_color.set_color (GroupTabs::group_color (_group));
+
+	Gdk::Color c;
+	set_color_from_rgba (c, GroupTabs::group_color (_group));
+	_color.set_color (c);
 
 	VBox* options_box = manage (new VBox);
 	options_box->set_spacing (6);
@@ -212,7 +220,7 @@ RouteGroupDialog::update ()
 
 	_group->apply_changes (plist);
 	
-	GroupTabs::set_group_color (_group, _color.get_color ());
+	GroupTabs::set_group_color (_group, gdk_color_to_rgba (_color.get_color ()));
 }
 
 void

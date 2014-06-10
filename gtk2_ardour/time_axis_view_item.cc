@@ -120,7 +120,7 @@ TimeAxisViewItem::set_constant_heights ()
  * @param automation true if this is an automation region view
  */
 TimeAxisViewItem::TimeAxisViewItem(
-	const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color,
+	const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, uint32_t base_color,
 	framepos_t start, framecnt_t duration, bool recording, bool automation, Visibility vis
 	)
 	: trackview (tv)
@@ -148,25 +148,18 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	, _dragging (other._dragging)
 	, _width (0.0)
 {
-
-	Gdk::Color c;
-	int r,g,b,a;
-
-	UINT_TO_RGBA (other.fill_color, &r, &g, &b, &a);
-	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
-
 	/* share the other's parent, but still create a new group */
 
 	ArdourCanvas::Group* parent = other.group->parent();
 	
 	_selected = other._selected;
 	
-	init (parent, other.samples_per_pixel, c, other.frame_position,
+	init (parent, other.samples_per_pixel, other.fill_color, other.frame_position,
 	      other.item_duration, other.visibility, other.wide_enough_for_name, other.high_enough_for_name);
 }
 
 void
-TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color const & base_color, 
+TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, uint32_t base_color, 
 			framepos_t start, framepos_t duration, Visibility vis, 
 			bool wide, bool high)
 {
@@ -174,6 +167,8 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 	CANVAS_DEBUG_NAME (group, string_compose ("TAVI group for %1", get_item_name()));
 	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
 
+	fill_color = base_color;
+	pre_drag_fill_color = base_color;
 	samples_per_pixel = fpp;
 	frame_position = start;
 	item_duration = duration;
@@ -642,9 +637,10 @@ TimeAxisViewItem::manage_name_highlight ()
 }
 
 void
-TimeAxisViewItem::set_color (Gdk::Color const & base_color)
+TimeAxisViewItem::set_color (uint32_t base_color)
 {
-	compute_colors (base_color);
+	fill_color = base_color;
+	fill_opacity = UINT_RGBA_A (fill_color);
 	set_colors ();
 }
 
@@ -664,24 +660,6 @@ ArdourCanvas::Item*
 TimeAxisViewItem::get_name_highlight()
 {
 	return name_highlight;
-}
-
-/**
- * Calculate some contrasting color for displaying various parts of this item, based upon the base color.
- *
- * @param color the base color of the item
- */
-void
-TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
-{
-	unsigned char r,g,b;
-
-	/* FILL: change opacity to a fixed value */
-
-	r = base_color.get_red()/256;
-	g = base_color.get_green()/256;
-	b = base_color.get_blue()/256;
-	fill_color = RGBA_TO_UINT(r,g,b,160);
 }
 
 /**
@@ -707,15 +685,6 @@ TimeAxisViewItem::set_name_text_color ()
 		return;
 	}
 	
-	double r, g, b, a;
-
-	const double black_r = 0.0;
-	const double black_g = 0.0;
-	const double black_b = 0.0;
-
-	const double white_r = 1.0;
-	const double white_g = 1.0;
-	const double white_b = 1.0;
 
 	uint32_t f;
 	
@@ -731,25 +700,7 @@ TimeAxisViewItem::set_name_text_color ()
 		f = get_fill_color ();
 	}
 
-	ArdourCanvas::color_to_rgba (f, r, g, b, a);
-
-	/* Use W3C contrast guideline calculation */
-
-	double white_contrast = (max (r, white_r) - min (r, white_r)) +
-		(max (g, white_g) - min (g, white_g)) + 
-		(max (b, white_b) - min (b, white_b));
-
-	double black_contrast = (max (r, black_r) - min (r, black_r)) +
-		(max (g, black_g) - min (g, black_g)) + 
-		(max (b, black_b) - min (b, black_b));
-
-	if (white_contrast > black_contrast) {		
-		/* use white */
-		name_text->set_color (ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 1.0));
-	} else {
-		/* use black */
-		name_text->set_color (ArdourCanvas::rgba_to_color (0.0, 0.0, 0.0, 1.0));
-	}
+	name_text->set_color (contrasting_text_color (f));
 }
 
 uint32_t
@@ -777,22 +728,25 @@ TimeAxisViewItem::get_fill_color () const
 		if (_recregion) {
 			f = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
 		} else {
-
-			if (high_enough_for_name && !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
+			if ((!Config->get_show_name_highlight() || high_enough_for_name) && !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
 				f = ARDOUR_UI::config()->get_canvasvar_FrameBase();
+				/* use the opacity as set for the FrameBase color */
+				o = UINT_RGBA_A (f);
 			} else {
 				f = fill_color;
+				o = fill_opacity;
 			}
 		}
 
 		/* tweak opacity */
 
 		if (!rect_visible) {
+			/* if the frame/rect is marked as invisible, then the
+			 * fill should be transparent. simplest: set
+			 * alpha/opacity to zero.
+			 */
 			o = 0;
-		} else {
-			o = fill_opacity;
 		}
-
 	}
 
 	return UINT_RGBA_CHANGE_A (f, o);
@@ -827,6 +781,17 @@ TimeAxisViewItem::set_frame_color()
 
                 frame->set_outline_color (f);
         }
+}
+
+void
+TimeAxisViewItem::set_opacity_for_drag (bool drag_starting)
+{
+	if (drag_starting) {
+		fill_opacity = 130;
+	} else {
+		fill_opacity = UINT_RGBA_A (fill_color);
+	}
+	set_frame_color ();
 }
 
 void

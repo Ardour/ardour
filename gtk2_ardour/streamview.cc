@@ -343,7 +343,13 @@ StreamView::diskstream_changed ()
 }
 
 void
-StreamView::apply_color (Gdk::Color color, ColorTarget target)
+StreamView::apply_color (Gdk::Color const& c, ColorTarget target)
+{
+	return apply_color (gdk_color_to_rgba (c), target);
+}
+
+void
+StreamView::apply_color (uint32_t color, ColorTarget target)
 {
 	list<RegionView *>::iterator i;
 
@@ -356,7 +362,7 @@ StreamView::apply_color (Gdk::Color color, ColorTarget target)
 		break;
 
 	case StreamBaseColor:
-		stream_base_color = RGBA_TO_UINT (color.get_red_p(), color.get_green_p(), color.get_blue_p(), 255);
+		stream_base_color = color;
 		canvas_rect->set_fill_color (stream_base_color);
 		break;
 	}

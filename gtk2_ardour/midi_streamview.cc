@@ -110,7 +110,7 @@ MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool /*wfd*/, b
 	RegionView* region_view = new MidiRegionView (_canvas_group, _trackview, region,
 	                                              _samples_per_pixel, region_color);
 
-	region_view->init (region_color, false);
+	region_view->init (false);
 
 	return region_view;
 }

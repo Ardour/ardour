@@ -22,12 +22,17 @@
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/route_group.h"
+
+#include "canvas/utils.h"
+
 #include "mixer_group_tabs.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"
-#include "utils.h"
-#include "i18n.h"
+#include "rgb_macros.h"
 #include "route_group_dialog.h"
+#include "utils.h"
+
+#include "i18n.h"
 
 using namespace std;
 using namespace Gtk;
@@ -91,13 +96,19 @@ void
 MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 {
 	double const arc_radius = get_height();
-
+	double r, g, b, a;
+	
 	if (tab.group && tab.group->is_active()) {
-		cairo_set_source_rgba (cr, tab.color.get_red_p (), tab.color.get_green_p (), tab.color.get_blue_p (), 1);
+		ArdourCanvas::color_to_rgba (tab.color, r, g, b, a);
 	} else {
-		cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
+		r = 0.0;
+		g = 0.0;
+		b = 0.0;
 	}
+	
+	a = 1.0;
 
+	cairo_set_source_rgba (cr, r, g, b, a);
 	cairo_arc (cr, tab.from + arc_radius, get_height(), arc_radius, M_PI, 3 * M_PI / 2);
 	cairo_line_to (cr, tab.to - arc_radius, 0);
 	cairo_arc (cr, tab.to - arc_radius, get_height(), arc_radius, 3 * M_PI / 2, 2 * M_PI);
@@ -109,8 +120,11 @@ MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 
 		cairo_text_extents_t ext;
 		cairo_text_extents (cr, tab.group->name().c_str(), &ext);
+		
+		ArdourCanvas::Color c = contrasting_text_color (ArdourCanvas::rgba_to_color (r, g, b, a));
+		ArdourCanvas::color_to_rgba (c, r, g, b, a);
 
-		cairo_set_source_rgb (cr, 1, 1, 1);
+		cairo_set_source_rgb (cr, r, g, b);
 		cairo_move_to (cr, tab.from + (tab.to - tab.from - f.second) / 2, get_height() - ext.height / 2);
 		cairo_save (cr);
 		cairo_show_text (cr, f.first.c_str());

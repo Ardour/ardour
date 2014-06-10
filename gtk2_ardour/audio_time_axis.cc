@@ -83,7 +83,7 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	RouteTimeAxisView::set_route (rt);
 
-	_view->apply_color (color (), StreamView::RegionColor);
+	_view->apply_color (gdk_color_to_rgba (color()), StreamView::RegionColor);
 
 	// Make sure things are sane...
 	assert(!is_track() || is_audio_track());

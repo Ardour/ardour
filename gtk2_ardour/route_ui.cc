@@ -2015,7 +2015,9 @@ RouteUI::color () const
 	RouteGroup* g = _route->route_group ();
 	
 	if (g && g->is_color()) {
-		return GroupTabs::group_color (g);
+		Gdk::Color c;
+		set_color_from_rgba (c, GroupTabs::group_color (g));
+		return c;
 	}
 
 	return _color;

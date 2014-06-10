@@ -66,7 +66,7 @@ RegionView::RegionView (ArdourCanvas::Group*              parent,
                         TimeAxisView&                     tv,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                            spu,
-                        Gdk::Color const &                basic_color,
+                        uint32_t                          basic_color,
 			bool                              automation)
 	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), false, automation,
 			    (automation ? TimeAxisViewItem::ShowFrame :
@@ -131,7 +131,7 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
                         TimeAxisView&                tv,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                       spu,
-                        Gdk::Color const &           basic_color,
+                        uint32_t                     basic_color,
 			bool                         recording,
                         TimeAxisViewItem::Visibility visibility)
 	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), recording, false, visibility)
@@ -152,7 +152,7 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 }
 
 void
-RegionView::init (Gdk::Color const & basic_color, bool wfd)
+RegionView::init (bool wfd)
 {
 	editor        = 0;
 	valid         = true;
@@ -162,8 +162,6 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 	sync_line     = 0;
 	sync_mark     = 0;
 	sync_line     = 0;
-
-	compute_colors (basic_color);
 
 	if (name_highlight) {
 		name_highlight->set_data ("regionview", this);
@@ -539,25 +537,11 @@ RegionView::set_frame_color ()
 		return;
 	}
 
-	if (_region->opaque()) {
-		fill_opacity = 130;
-	} else {
+	if (!_region->opaque()) {
 		fill_opacity = 60;
 	}
 
 	TimeAxisViewItem::set_frame_color ();
-}
-
-void
-RegionView::fake_set_opaque (bool yn)
-{
-       if (yn) {
-               fill_opacity = 130;
-       } else {
-               fill_opacity = 60;
-       }
-
-       set_frame_color ();
 }
 
 void

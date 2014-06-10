@@ -72,8 +72,9 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	void set_name_text(const std::string&);
 	virtual void set_height(double h);
 	void set_y (double);
-	void set_color (Gdk::Color const &);
+	void set_color (uint32_t);
 	void set_name_text_color ();
+	void set_opacity_for_drag (bool drag_starting);
 
         uint32_t get_fill_color () const;
 
@@ -169,16 +170,15 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	};
 
   protected:
-	TimeAxisViewItem(const std::string &, ArdourCanvas::Group&, TimeAxisView&, double, Gdk::Color const &,
-			 framepos_t, framecnt_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
+	TimeAxisViewItem (const std::string &, ArdourCanvas::Group&, TimeAxisView&, double, uint32_t fill_color,
+			  framepos_t, framecnt_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
 
 	TimeAxisViewItem (const TimeAxisViewItem&);
 
-        void init (ArdourCanvas::Group*, double, Gdk::Color const &, framepos_t, framepos_t, Visibility, bool, bool);
+        void init (ArdourCanvas::Group*, double, uint32_t, framepos_t, framepos_t, Visibility, bool, bool);
 
         virtual bool canvas_group_event (GdkEvent*);
 
-	virtual void compute_colors (Gdk::Color const &);
 	virtual void set_colors();
 	virtual void set_frame_color();
 	virtual void set_frame_gradient ();
@@ -232,6 +232,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 
 	uint32_t fill_opacity;
 	uint32_t fill_color;
+	uint32_t pre_drag_fill_color;
 	uint32_t frame_color_r;
 	uint32_t frame_color_g;
 	uint32_t frame_color_b;

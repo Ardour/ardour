@@ -76,7 +76,7 @@ static const int32_t sync_mark_width = 9;
 static double const handle_size = 10; /* height of fade handles */
 
 AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
-				  Gdk::Color const & basic_color)
+				  uint32_t basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, sync_mark(0)
 	, fade_in_handle(0)
@@ -90,7 +90,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, end_xfade_rect (0)
 	, _end_xfade_visible (false)
 	, _amplitude_above_axis(1.0)
-	, fade_color(0)
 	, trim_fade_in_drag_active(false)
 	, trim_fade_out_drag_active(false)
 {
@@ -98,7 +97,7 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 }
 
 AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
-				  Gdk::Color const & basic_color, bool recording, TimeAxisViewItem::Visibility visibility)
+				  uint32_t basic_color, bool recording, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, recording, visibility)
 	, sync_mark(0)
 	, fade_in_handle(0)
@@ -112,7 +111,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, end_xfade_rect (0)
 	, _end_xfade_visible (false)
 	, _amplitude_above_axis(1.0)
-	, fade_color(0)
 	, trim_fade_in_drag_active(false)
 	, trim_fade_out_drag_active(false)
 {
@@ -132,32 +130,23 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 	, end_xfade_rect (0)
 	, _end_xfade_visible (false)
 	, _amplitude_above_axis (other._amplitude_above_axis)
-	, fade_color(0)
 	, trim_fade_in_drag_active(false)
 	, trim_fade_out_drag_active(false)
 {
-	Gdk::Color c;
-	int r,g,b,a;
-
-	UINT_TO_RGBA (other.fill_color, &r, &g, &b, &a);
-	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
-
-	init (c, true);
+	init (true);
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&AudioRegionView::parameter_changed, this, _1), gui_context());
 }
 
 void
-AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
+AudioRegionView::init (bool wfd)
 {
 	// FIXME: Some redundancy here with RegionView::init.  Need to figure out
 	// where order is important and where it isn't...
 
-	RegionView::init (basic_color, wfd);
+	RegionView::init (wfd);
 
 	_amplitude_above_axis = 1.0;
-
-	compute_colors (basic_color);
 
 	create_waves ();
 
@@ -993,16 +982,6 @@ AudioRegionView::set_amplitude_above_axis (gdouble a)
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		waves[n]->set_amplitude_above_axis (a);
 	}
-}
-
-void
-AudioRegionView::compute_colors (Gdk::Color const & basic_color)
-{
-	RegionView::compute_colors (basic_color);
-
-	/* gain color computed in envelope_active_changed() */
-
-	fade_color = UINT_RGBA_CHANGE_A (fill_color, 120);
 }
 
 void

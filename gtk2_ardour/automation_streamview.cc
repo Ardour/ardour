@@ -113,7 +113,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 		_samples_per_pixel, region_color
 		);
 
-	region_view->init (region_color, false);
+	region_view->init (false);
 	region_views.push_front (region_view);
 
 	/* follow global waveform setting */
