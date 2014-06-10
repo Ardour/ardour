@@ -38,7 +38,16 @@ class SndFileSource : public AudioFileSource {
 	               SampleFormat samp_format, HeaderFormat hdr_format, framecnt_t rate,
 	               Flag flags = SndFileSource::default_writable_flags);
 
-	/** Constructor to be called for existing in-session files */
+	/* Constructor to be called for recovering files being used for
+	 * capture. They are in-session, they already exist, they should not
+	 * be writable. They are an odd hybrid (from a constructor point of
+	 * view) of the previous two constructors.
+	 */
+	SndFileSource (Session&, const std::string& path, int chn);
+
+	/** Constructor to be called for existing in-session files during
+	 * session loading 
+	 */
 	SndFileSource (Session&, const XMLNode&);
 
 	~SndFileSource ();

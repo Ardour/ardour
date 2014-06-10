@@ -183,6 +183,34 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 	}
 }
 
+/** Constructor to be called for recovering files being used for
+ * capture. They are in-session, they already exist, they should not
+ * be writable. They are an odd hybrid (from a constructor point of
+ * view) of the previous two constructors.
+ */
+SndFileSource::SndFileSource (Session& s, const string& path, int chn)
+	: Source (s, DataType::AUDIO, path, Flag (0))
+	  /* the final boolean argument is not used, its value is irrelevant. see audiofilesource.h for explanation */
+	, AudioFileSource (s, path, Flag (0))
+	, _descriptor (0)
+	, _broadcast_info (0)
+	, _capture_start (false)
+	, _capture_end (false)
+	, file_pos (0)
+	, xfade_buf (0)
+{
+	_channel = chn;
+
+	init_sndfile ();
+
+        assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
+
+	if (open()) {
+		throw failed_constructor ();
+	}
+}
+
 void
 SndFileSource::init_sndfile ()
 {
@@ -256,6 +284,14 @@ SndFileSource::open ()
 		delete _broadcast_info;
 		_broadcast_info = 0;
 		_flags = Flag (_flags & ~Broadcast);
+	} 
+
+	/* Set the broadcast flag if the BWF info is already there. We need
+	 * this when recovering or using existing files.
+	 */
+	
+	if (bwf_info_exists) {
+		_flags = Flag (_flags | Broadcast);
 	}
 
 	if (writable()) {

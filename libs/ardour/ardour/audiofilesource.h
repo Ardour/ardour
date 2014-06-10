@@ -93,6 +93,12 @@ protected:
 	/** Constructor to be called for existing in-session files */
 	AudioFileSource (Session&, const XMLNode&, bool must_exist = true);
 
+	/** Constructor to be called for crash recovery. Final argument is not
+	 * used but exists to differentiate from the external-to-session
+	 * constructor above.
+	 */
+	AudioFileSource (Session&, const std::string& path, Source::Flag flags, bool);
+
 	int init (const std::string& idstr, bool must_exist);
 
 	virtual void set_header_timeline_position () = 0;

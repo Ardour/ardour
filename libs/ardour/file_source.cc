@@ -56,7 +56,7 @@ PBD::Signal3<int,std::string,std::string,std::vector<std::string> > FileSource::
 FileSource::FileSource (Session& session, DataType type, const string& path, const string& origin, Source::Flag flag)
 	: Source(session, type, path, flag)
 	, _path (path)
-	, _file_is_new (!origin.empty()) // origin empty => new file VS. origin !empty => new file
+	, _file_is_new (!origin.empty()) // if origin is left unspecified (empty string) then file must exist
 	, _channel (0)
         , _origin (origin)
         , _open (false)

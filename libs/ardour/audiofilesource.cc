@@ -115,6 +115,22 @@ AudioFileSource::AudioFileSource (Session& s, const string& path, const string& 
 	}
 }
 
+/** Constructor used for existing internal-to-session files during crash
+ * recovery. File must exist
+ */
+AudioFileSource::AudioFileSource (Session& s, const string& path, Source::Flag flags, bool /* ignored-exists-for-prototype differentiation */)
+	: Source (s, DataType::AUDIO, path, flags)
+	, AudioSource (s, path)
+	, FileSource (s, DataType::AUDIO, path, string(), flags)
+{
+        /* note that origin remains empty */
+
+	if (init (_path, true)) {
+		throw failed_constructor ();
+	}
+}
+
+
 /** Constructor used for existing internal-to-session files via XML.  File must exist. */
 AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exist)
 	: Source (s, node)

@@ -57,6 +57,9 @@ class SourceFactory {
 		 bool destructive, framecnt_t rate, bool announce = true, bool async = false);
 
 
+	static boost::shared_ptr<Source> createForRecovery
+		(DataType type, Session&, const std::string& path, int chn);
+
 	static boost::shared_ptr<Source> createFromPlaylist
 		(DataType type, Session& s, boost::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name,
 		 uint32_t chn, frameoffset_t start, framecnt_t len, bool copy, bool defer_peaks);
