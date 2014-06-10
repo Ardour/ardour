@@ -70,6 +70,7 @@
     void on_reset_tracks_name_to_default(WavesButton*);
     void on_yes_button(WavesButton*);
     void on_no_button(WavesButton*);
+    void on_control_panel_button(WavesButton*);
     ARDOUR::TracksAutoNamingRule _tracks_naming_rule;
 
 	void engine_changed ();

@@ -120,6 +120,9 @@ TracksControlPanel::init ()
 
     _name_tracks_after_driver.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_name_tracks_after_driver));
     _reset_tracks_name_to_default.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_reset_tracks_name_to_default));
+
+    _control_panel_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_control_panel_button));
+    
     _yes_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_yes_button));
     _no_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_no_button));
     _yes_button.set_visible(false);
@@ -628,6 +631,15 @@ TracksControlPanel::on_no_button(WavesButton*)
 {
     _yes_button.set_visible(false);
     _no_button.set_visible(false);
+}
+
+void
+TracksControlPanel::on_control_panel_button(WavesButton*)
+{
+    boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
+    assert(backend);
+    
+    backend->launch_control_app ();
 }
 
 void
