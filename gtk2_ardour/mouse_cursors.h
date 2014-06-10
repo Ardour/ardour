@@ -30,6 +30,9 @@ class MouseCursors
 public:
 	MouseCursors ();
 
+	void set_cursor_set (const std::string& name);
+	std::string cursor_set() const { return _cursor_set; }
+
 	Gdk::Cursor* cross_hair;
 	Gdk::Cursor* trimmer;
 	Gdk::Cursor* right_side_trim;
@@ -66,6 +69,11 @@ public:
 	Gdk::Cursor* move;
 	Gdk::Cursor* expand_left_right;
 	Gdk::Cursor* expand_up_down;
+
+    private:
+	std::string _cursor_set;
+	void drop_all ();
+
 };
 
 #endif /* __gtk2_ardour_mouse_cursors__ */

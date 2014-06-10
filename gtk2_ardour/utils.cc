@@ -655,22 +655,52 @@ get_xpm (std::string name)
 }
 
 std::string
-get_icon_path (const char* cname)
+get_icon_path (const char* cname, string icon_set)
 {
+	std::string data_file_path;
 	string name = cname;
 	name += X_(".png");
 
 	Searchpath spath(ARDOUR::ardour_data_search_path());
-
-	spath.add_subdirectory_to_paths("icons");
-
-	std::string data_file_path;
-
-	if (!find_file_in_search_path (spath, name, data_file_path)) {
-		fatal << string_compose (_("cannot find icon image for %1 using %2"), name, spath.to_string()) << endmsg;
+	
+	if (!icon_set.empty() && icon_set != "default") {
+		string subdir = Glib::build_filename ("icons", icon_set);
+		spath.add_subdirectory_to_paths (subdir);
+		
+		find_file_in_search_path (spath, name, data_file_path);
+	}
+	
+	if (data_file_path.empty()) {
+		
+		if (!icon_set.empty() && icon_set != "default") {
+			warning << string_compose (_("icon \"%1\" not found for icon set \"%2\", fallback to default"), cname, icon_set) << endmsg;
+		}
+		
+		Searchpath def (ARDOUR::ardour_data_search_path());
+		def.add_subdirectory_to_paths ("icons");
+	
+		if (!find_file_in_search_path (def, name, data_file_path)) {
+			fatal << string_compose (_("cannot find icon image for %1 using %2"), name, spath.to_string()) << endmsg;
+			/*NOTREACHED*/
+		}
 	}
 
 	return data_file_path;
+}
+
+Glib::RefPtr<Gdk::Pixbuf>
+get_icon (const char* cname, string icon_set)
+{
+	Glib::RefPtr<Gdk::Pixbuf> img;
+	try {
+		img = Gdk::Pixbuf::create_from_file (get_icon_path (cname, icon_set));
+	} catch (const Gdk::PixbufError &e) {
+		cerr << "Caught PixbufError: " << e.what() << endl;
+	} catch (...) {
+		error << string_compose (_("Caught exception while loading icon named %1"), cname) << endmsg;
+	}
+
+	return img;
 }
 
 Glib::RefPtr<Gdk::Pixbuf>
