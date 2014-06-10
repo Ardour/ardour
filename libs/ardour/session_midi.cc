@@ -417,7 +417,7 @@ Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 	msg[4] = 0x1;
 	msg[9] = 0xf7;
 
-	msg[5] = mtc_timecode_bits | timecode.hours;
+	msg[5] = (mtc_timecode_bits | timecode.hours) & 0x7f;
 	msg[6] = timecode.minutes;
 	msg[7] = timecode.seconds;
 	msg[8] = timecode.frames;
