@@ -45,12 +45,14 @@ public:
 
 	bool     push_back(const Evoral::MIDIEvent<TimeType>& event);
 	bool     push_back(TimeType time, size_t size, const uint8_t* data);
+
 	uint8_t* reserve(TimeType time, size_t size);
 
 	void resize(size_t);
 	size_t size() const { return _size; }
 	bool empty() const { return _size == 0; }
 
+	bool insert_event(const Evoral::MIDIEvent<TimeType>& event);
 	bool merge_in_place(const MidiBuffer &other);
 
 	template<typename BufferType, typename EventType>
@@ -84,6 +86,10 @@ public:
 			return EventType(EventTypeMap::instance().midi_event_type(*ev_start),
 					*((TimeType*)(buffer->_data + offset)),
 					event_size, ev_start);
+		}
+
+		inline TimeType * timeptr() {
+			return ((TimeType*)(buffer->_data + offset));
 		}
 
 		inline iterator_base<BufferType, EventType>& operator++() {
