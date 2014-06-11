@@ -26,6 +26,7 @@
 
 #include "ardour/ardour.h"
 #include "ardour/delivery.h"
+#include "ardour/delayline.h"
 
 namespace ARDOUR {
 
@@ -59,6 +60,12 @@ class LIBARDOUR_API Send : public Delivery
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 
+	/* latency compensation */
+	void set_delay_in (framecnt_t);
+	void set_delay_out (framecnt_t);
+	framecnt_t get_delay_in () const { return _delay_in; }
+	framecnt_t get_delay_out () const { return _delay_out; }
+
 	void activate ();
 	void deactivate ();
 
@@ -73,6 +80,7 @@ class LIBARDOUR_API Send : public Delivery
 	bool _metering;
 	boost::shared_ptr<Amp> _amp;
 	boost::shared_ptr<PeakMeter> _meter;
+	boost::shared_ptr<DelayLine> _delayline;
 
   private:
 	/* disallow copy construction */
@@ -82,6 +90,9 @@ class LIBARDOUR_API Send : public Delivery
 	int set_state_2X (XMLNode const &, int);
 
 	uint32_t  _bitslot;
+
+	framecnt_t _delay_in;
+	framecnt_t _delay_out;
 };
 
 } // namespace ARDOUR

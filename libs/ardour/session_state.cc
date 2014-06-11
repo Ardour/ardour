@@ -1421,7 +1421,13 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
                 ret = track;
 
 	} else {
-		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML")));
+		enum Route::Flag flags = Route::Flag(0);
+		const XMLProperty* prop = node.property("flags");
+		if (prop) {
+			flags = Route::Flag (string_2_enum (prop->value(), flags));
+		}
+
+		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
                 if (r->init () == 0 && r->set_state (node, version) == 0) {
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
@@ -1493,7 +1499,13 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
                 ret = track;
 
 	} else {
-		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML")));
+		enum Route::Flag flags = Route::Flag(0);
+		const XMLProperty* prop = node.property("flags");
+		if (prop) {
+			flags = Route::Flag (string_2_enum (prop->value(), flags));
+		}
+
+		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
                 if (r->init () == 0 && r->set_state (node, version) == 0) {
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS

@@ -54,6 +54,7 @@
 namespace ARDOUR {
 
 class Amp;
+class DelayLine;
 class Delivery;
 class IOProcessor;
 class Panner;
@@ -190,6 +191,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	PeakMeter&       peak_meter()       { return *_meter.get(); }
 	const PeakMeter& peak_meter() const { return *_meter.get(); }
 	boost::shared_ptr<PeakMeter> shared_peak_meter() const { return _meter; }
+	boost::shared_ptr<DelayLine> delay_line() const  { return _delayline; }
 
 	void flush_processors ();
 
@@ -547,6 +549,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	boost::shared_ptr<Amp>       _amp;
 	boost::shared_ptr<PeakMeter> _meter;
+	boost::shared_ptr<DelayLine> _delayline;
 
 	boost::shared_ptr<Processor> the_instrument_unlocked() const;
 
