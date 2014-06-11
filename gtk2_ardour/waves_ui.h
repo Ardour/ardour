@@ -36,36 +36,40 @@
 #include "waves_icon_button.h"
 
 using namespace ArdourCanvas::XMLUI;
-namespace WavesUI {
+class WavesUI : public std::map<std::string, Gtk::Object*> {
 
-	class WidgetMap : public std::map<std::string, Gtk::Object*>
-	{
-	  public:
-		Gtk::Adjustment& get_adjustment (const char* id);
-		Gtk::VBox& get_vbox (const char* id);
-		Gtk::HBox& get_hbox (const char* id);
-		Gtk::Layout& get_layout (const char* id);
-		Gtk::Label& get_label (const char* id);
-		Gtk::Image& get_image (const char* id);
-		Gtk::ComboBoxText& get_combo_box_text (const char* id);
-		WavesButton& get_waves_button (const char* id);
-		Gtkmm2ext::Fader& get_fader (const char* id);
-	  private:
-		Gtk::Object* get_object(const char *id);
-	};
+  public:
+	WavesUI (std::string layout_script_file, Gtk::Container& root);
 
-	const XMLTree* load_layout (const std::string xml_file_name);
-	void create_ui (const XMLTree& layout, Gtk::Container& root, WidgetMap& named_widgets);
-	void create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk::Container& root, WidgetMap& named_widgets);
-	Gtk::Widget* create_widget (const XMLNode& definition, const XMLNodeMap& styles, WidgetMap& named_widgets);
-	Gtk::Widget* add_widget (Gtk::Box& parent, const XMLNode& definition, const XMLNodeMap& styles, WidgetMap& named_widgets);
-	Gtk::Widget* add_widget (Gtk::ScrolledWindow& parent, const XMLNode& definition, const XMLNodeMap& styles, WidgetMap& named_widgets);
-	Gtk::Widget* add_widget (Gtk::Window& parent, const XMLNode& definition, const XMLNodeMap& styles, WidgetMap& named_widgets);
-	Gtk::Widget* add_widget (Gtk::Layout& parent, const XMLNode& definition, const XMLNodeMap& styles, WidgetMap& named_widgets);
-	Gtk::Widget* add_widget (Gtk::Container& parent, const XMLNode& definition, const XMLNodeMap& styles, WidgetMap& named_widgets);
-	Gtk::Widget* add_widget (Gtk::EventBox& parent, const XMLNode& definition, const XMLNodeMap& styles, WidgetMap& named_widgets);
+	Gtk::Adjustment& get_adjustment (const char* id);
+	Gtk::VBox& get_v_box (const char* id);
+	Gtk::HBox& get_h_box (const char* id);
+	Gtk::Layout& get_layout (const char* id);
+	Gtk::Label& get_label (const char* id);
+	Gtk::Image& get_image (const char* id);
+	Gtk::ComboBoxText& get_combo_box_text (const char* id);
+	WavesButton& get_waves_button (const char* id);
+	Gtkmm2ext::Fader& get_fader (const char* id);
+	const XMLTree* xml_tree() { return _xml_tree; }
+
+  protected:
 	void set_attributes (Gtk::Widget& widget, const XMLNode& definition, const XMLNodeMap& styles);
 
-}
+  private:
+	static std::map<std::string, const XMLTree*> __xml_tree_cache;
+	const XMLTree* _xml_tree;
+
+	Gtk::Object* get_object(const char *id);
+	const XMLTree* load_layout (const std::string xml_file_name);
+	void create_ui (const XMLTree& layout, Gtk::Container& root);
+	void create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk::Container& root);
+	Gtk::Widget* create_widget (const XMLNode& definition, const XMLNodeMap& styles);
+	Gtk::Widget* add_widget (Gtk::Box& parent, const XMLNode& definition, const XMLNodeMap& styles);
+	Gtk::Widget* add_widget (Gtk::ScrolledWindow& parent, const XMLNode& definition, const XMLNodeMap& styles);
+	Gtk::Widget* add_widget (Gtk::Window& parent, const XMLNode& definition, const XMLNodeMap& styles);
+	Gtk::Widget* add_widget (Gtk::Layout& parent, const XMLNode& definition, const XMLNodeMap& styles);
+	Gtk::Widget* add_widget (Gtk::Container& parent, const XMLNode& definition, const XMLNodeMap& styles);
+	Gtk::Widget* add_widget (Gtk::EventBox& parent, const XMLNode& definition, const XMLNodeMap& styles);
+};
 
 #endif //__WAVES_UI_H__

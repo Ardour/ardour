@@ -43,7 +43,7 @@ using namespace ARDOUR;
 
 SessionLockDialog::SessionLockDialog ()
 	: WavesDialog (_("session_lock_dialog.xml"), true, false)
-	, _ok_button (named_children ().get_waves_button ("ok_button"))
+	, _ok_button (get_waves_button ("ok_button"))
 {
 	set_keep_above (true);
 	set_position (WIN_POS_CENTER);

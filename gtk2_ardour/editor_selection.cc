@@ -813,7 +813,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 						int okey = closest->route()->order_key ();
 
 						if (okey > key) {
-							swap (okey, key);
+							std::swap (okey, key);
 						}
 
 						for (TrackViewList::iterator x = track_views.begin(); x != track_views.end(); ++x) {
@@ -830,7 +830,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 									   behaviour that feels wrong.
 									*/
 
-									if (find (already_in_selection.begin(),
+									if (std::find (already_in_selection.begin(),
 									          already_in_selection.end(),
 									          artv) == already_in_selection.end()) {
 
@@ -953,13 +953,13 @@ Editor::track_selection_changed ()
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 
-		bool yn = (find (selection->tracks.begin(), selection->tracks.end(), *i) != selection->tracks.end());
+		bool yn = (std::find (selection->tracks.begin(), selection->tracks.end(), *i) != selection->tracks.end());
 
 		(*i)->set_selected (yn);
 
 		TimeAxisView::Children c = (*i)->get_child_list ();
 		for (TimeAxisView::Children::iterator j = c.begin(); j != c.end(); ++j) {
-			(*j)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), j->get()) != selection->tracks.end());
+			(*j)->set_selected (std::find (selection->tracks.begin(), selection->tracks.end(), j->get()) != selection->tracks.end());
 		}
 
 		if (yn) {
@@ -1915,7 +1915,7 @@ Editor::get_edit_op_range (framepos_t& start, framepos_t& end) const
 	}
 
 	if (start > end) {
-		swap (start, end);
+		std::swap (start, end);
 	}
 
 	/* turn range into one delimited by start...end,

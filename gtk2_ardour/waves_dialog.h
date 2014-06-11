@@ -41,7 +41,7 @@ class XMLNode;
  * method of connecting and disconnecting from a Session with
  * all other objects that have a handle on a Session.
  */
-class WavesDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr
+class WavesDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr, public WavesUI
 {
   public:
 
@@ -55,17 +55,10 @@ class WavesDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr
 	void on_unmap ();
 	void on_show ();
 
-  protected:
-
-	  bool read_layout (std::string file_name);
-	  WavesUI::WidgetMap& named_children() { return _children; }
-
   private:
 
 	WM::ProxyTemporary* _proxy;
 	bool _splash_pushed;
-	
-	WavesUI::WidgetMap _children;
 	
 	static sigc::signal<void> CloseAllDialogs;
 };

@@ -21,6 +21,7 @@
 
 #include "waves_ui.h"
 #include "pbd/file_utils.h"
+#include "pbd/failed_constructor.h"
 #include "ardour/filesystem_paths.h"
 #include "utils.h"
 
@@ -30,8 +31,34 @@
 using namespace PBD;
 using namespace ARDOUR;
 
+std::map<std::string, const XMLTree*> WavesUI::__xml_tree_cache;
+
+WavesUI::WavesUI (std::string layout_script_file, Gtk::Container& root)
+	: _xml_tree (NULL)
+{
+	// To avoid a need of reading the same file many times:
+	std::map<std::string, const XMLTree*>::const_iterator it = __xml_tree_cache.find(layout_script_file);
+	if (it != __xml_tree_cache.end()) {
+		_xml_tree = (*it).second;
+	} else {
+		std::string layout_file; 
+		Searchpath spath (ardour_data_search_path());
+		spath.add_subdirectory_to_paths("ui");
+
+		if (!find_file_in_search_path (spath, layout_script_file, layout_file)) {
+			dbg_msg("File not found: " + layout_script_file);
+			throw failed_constructor ();
+		}
+
+		_xml_tree = new XMLTree (layout_file, false);
+		__xml_tree_cache[layout_script_file] = _xml_tree;
+	}
+
+	create_ui(_xml_tree, root);
+}
+
 Gtk::Widget*
-WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, WidgetMap& named_widgets)
+WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 {
 	Gtk::Object* child = NULL;
 	std::string widget_type = definition.name();
@@ -102,7 +129,7 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, Wid
 		int minposy = xml_property (definition, "minposy", styles, -1);
 		int maxposx = xml_property (definition, "maxposx", styles, minposx);
 		int maxposy = xml_property (definition, "maxposy", styles, minposy);
-		Gtk::Adjustment& adjustment = named_widgets.get_adjustment(adjustment_id.c_str());
+		Gtk::Adjustment& adjustment = get_adjustment(adjustment_id.c_str());
 		child = manage (new Gtkmm2ext::Fader(adjustment, face_image, handle_image, active_handle_image, minposx, minposy, maxposx, maxposy));
 	} else if (widget_type == "ADJUSTMENT") {
         //dbg_msg("Creating ADJUSTMENT");
@@ -121,7 +148,7 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, Wid
 
 	if (child != NULL) {
 		if (!widget_id.empty()) {
-			named_widgets[widget_id] = child;
+			(*this)[widget_id] = child;
 		}
 		if (dynamic_cast<Gtk::Widget*>(child)) {
 			set_attributes(*dynamic_cast<Gtk::Widget*>(child), definition, styles);
@@ -132,9 +159,9 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles, Wid
 
 
 Gtk::Widget*
-WavesUI::add_widget (Gtk::Box& parent, const XMLNode& definition, const XMLNodeMap& styles, WidgetMap& named_widgets)
+WavesUI::add_widget (Gtk::Box& parent, const XMLNode& definition, const XMLNodeMap& styles)
 {
-	Gtk::Widget* child = create_widget(definition, styles, named_widgets);
+	Gtk::Widget* child = create_widget(definition, styles);
 
 	if (child != NULL)
 	{
@@ -155,9 +182,9 @@ WavesUI::add_widget (Gtk::Box& parent, const XMLNode& definition, const XMLNodeM
 
 
 Gtk::Widget*
-WavesUI::add_widget (Gtk::ScrolledWindow& parent, const XMLNode& definition, const XMLNodeMap& styles, WidgetMap& named_widgets)
+WavesUI::add_widget (Gtk::ScrolledWindow& parent, const XMLNode& definition, const XMLNodeMap& styles)
 {
-	Gtk::Widget* child = create_widget(definition, styles, named_widgets);
+	Gtk::Widget* child = create_widget(definition, styles);
 
 	if (child != NULL)
 	{
@@ -168,9 +195,9 @@ WavesUI::add_widget (Gtk::ScrolledWindow& parent, const XMLNode& definition, con
 
 
 Gtk::Widget*
-WavesUI::add_widget (Gtk::Window& parent, const XMLNode& definition, const XMLNodeMap& styles, WidgetMap& named_widgets)
+WavesUI::add_widget (Gtk::Window& parent, const XMLNode& definition, const XMLNodeMap& styles)
 {
-	Gtk::Widget* child = create_widget(definition, styles, named_widgets);
+	Gtk::Widget* child = create_widget(definition, styles);
 
 	if (child != NULL)
 	{
@@ -181,9 +208,9 @@ WavesUI::add_widget (Gtk::Window& parent, const XMLNode& definition, const XMLNo
 
 
 Gtk::Widget*
-WavesUI::add_widget (Gtk::EventBox& parent, const XMLNode& definition, const XMLNodeMap& styles, WidgetMap& named_widgets)
+WavesUI::add_widget (Gtk::EventBox& parent, const XMLNode& definition, const XMLNodeMap& styles)
 {
-	Gtk::Widget* child = create_widget(definition, styles, named_widgets);
+	Gtk::Widget* child = create_widget(definition, styles);
 
 	if (child != NULL)
 	{
@@ -194,9 +221,9 @@ WavesUI::add_widget (Gtk::EventBox& parent, const XMLNode& definition, const XML
 
 
 Gtk::Widget*
-WavesUI::add_widget (Gtk::Layout& parent, const XMLNode& definition, const XMLNodeMap& styles, WidgetMap& named_widgets)
+WavesUI::add_widget (Gtk::Layout& parent, const XMLNode& definition, const XMLNodeMap& styles)
 {
-	Gtk::Widget* child = create_widget(definition, styles, named_widgets);
+	Gtk::Widget* child = create_widget(definition, styles);
 
 	if (child != NULL)
 	{
@@ -209,25 +236,25 @@ WavesUI::add_widget (Gtk::Layout& parent, const XMLNode& definition, const XMLNo
 
 
 Gtk::Widget*
-WavesUI::add_widget (Gtk::Container& parent, const XMLNode& definition, const XMLNodeMap& styles, WidgetMap& named_widgets)
+WavesUI::add_widget (Gtk::Container& parent, const XMLNode& definition, const XMLNodeMap& styles)
 {
 	Gtk::Widget* child = NULL;
 	if(dynamic_cast<Gtk::Layout*> (&parent)) {
-		child = WavesUI::add_widget (*dynamic_cast<Gtk::Layout*> (&parent), definition, styles, named_widgets);
+		child = WavesUI::add_widget (*dynamic_cast<Gtk::Layout*> (&parent), definition, styles);
 	} else if(dynamic_cast<Gtk::Box*> (&parent)) {
-		child = WavesUI::add_widget (*dynamic_cast<Gtk::Box*> (&parent), definition, styles, named_widgets);
+		child = WavesUI::add_widget (*dynamic_cast<Gtk::Box*> (&parent), definition, styles);
 	} else if(dynamic_cast<Gtk::ScrolledWindow*> (&parent)) {
-		child = WavesUI::add_widget (*dynamic_cast<Gtk::ScrolledWindow*> (&parent), definition, styles, named_widgets);
+		child = WavesUI::add_widget (*dynamic_cast<Gtk::ScrolledWindow*> (&parent), definition, styles);
 	} else if(dynamic_cast<Gtk::Window*> (&parent)) {
-		child = WavesUI::add_widget (*dynamic_cast<Gtk::Window*> (&parent), definition, styles, named_widgets);
+		child = WavesUI::add_widget (*dynamic_cast<Gtk::Window*> (&parent), definition, styles);
 	} else if(dynamic_cast<Gtk::EventBox*> (&parent)) {
-		child = WavesUI::add_widget (*dynamic_cast<Gtk::EventBox*> (&parent), definition, styles, named_widgets);
+		child = WavesUI::add_widget (*dynamic_cast<Gtk::EventBox*> (&parent), definition, styles);
 	}
 
 	Gtk::Container* container = dynamic_cast<Gtk::Container*>(child);
 
 	if (container != NULL) {
-		WavesUI::create_ui (definition.children(), styles, *container, named_widgets);
+		WavesUI::create_ui (definition.children(), styles, *container);
 		Gtk::ScrolledWindow* sw = dynamic_cast<Gtk::ScrolledWindow*>(child);
 		if (sw != NULL) {
 			Gtk::Viewport* vp = (Gtk::Viewport*)sw->get_child();
@@ -241,29 +268,27 @@ WavesUI::add_widget (Gtk::Container& parent, const XMLNode& definition, const XM
 }
 
 void
-WavesUI::create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk::Container& root, WidgetMap& named_widgets)
+WavesUI::create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk::Container& root)
 {
 	for (XMLNodeList::const_iterator i = definition.begin(); i != definition.end(); ++i) {
-		WavesUI::add_widget (root, **i, styles, named_widgets);
+		WavesUI::add_widget (root, **i, styles);
 	}
 }
 
 void
-WavesUI::create_ui (const XMLTree& layout, Gtk::Container& root, WidgetMap& named_widgets)
+WavesUI::create_ui (const XMLTree& layout, Gtk::Container& root)
 {
 	XMLNodeMap styles;
 	get_styles(layout, styles);
 	const XMLNodeList& definition = layout.root()->children();
-	WavesUI::create_ui (definition, styles, root, named_widgets);
+	WavesUI::create_ui (definition, styles, root);
 }
-
-static std::map<std::string, const XMLTree*> xml_tree_cache;
 
 const XMLTree*
 WavesUI::load_layout (const std::string xml_file_name)
 {
-	std::map<std::string, const XMLTree*>::const_iterator it = xml_tree_cache.find(xml_file_name);
-	if (it != xml_tree_cache.end()) {
+	std::map<std::string, const XMLTree*>::const_iterator it = __xml_tree_cache.find(xml_file_name);
+	if (it != __xml_tree_cache.end()) {
 		return (*it).second;
 	}
 
@@ -277,7 +302,7 @@ WavesUI::load_layout (const std::string xml_file_name)
 	}
 
 	const XMLTree* tree = new XMLTree (layout_file, false);
-	xml_tree_cache[xml_file_name] = tree;
+	__xml_tree_cache[xml_file_name] = tree;
 	
 	return tree;
 }
@@ -412,10 +437,10 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 }
 
 Gtk::Object* 
-WavesUI::WidgetMap::get_object(const char *id)
+WavesUI::get_object(const char *id)
 {
 	Gtk::Object* object = NULL;
-	WidgetMap::iterator it = find(id);
+	WavesUI::iterator it = find(id);
 	if(it != end())
 		object = it->second;
 
@@ -423,7 +448,7 @@ WavesUI::WidgetMap::get_object(const char *id)
 }
 
 Gtk::Adjustment&
-WavesUI::WidgetMap::get_adjustment(const char* id)
+WavesUI::get_adjustment(const char* id)
 {
 	Gtk::Adjustment* child = dynamic_cast<Gtk::Adjustment*> (get_object(id));
 	if (child == NULL ) {
@@ -434,7 +459,7 @@ WavesUI::WidgetMap::get_adjustment(const char* id)
 }
 
 Gtk::VBox&
-WavesUI::WidgetMap::get_vbox (const char* id)
+WavesUI::get_v_box (const char* id)
 {
 	Gtk::VBox* child = dynamic_cast<Gtk::VBox*> (get_object(id));
 	if (child == NULL ) {
@@ -446,7 +471,7 @@ WavesUI::WidgetMap::get_vbox (const char* id)
 
 
 Gtk::HBox&
-WavesUI::WidgetMap::get_hbox (const char* id)
+WavesUI::get_h_box (const char* id)
 {
 	Gtk::HBox* child = dynamic_cast<Gtk::HBox*> (get_object(id));
 	if (child == NULL ) {
@@ -458,7 +483,7 @@ WavesUI::WidgetMap::get_hbox (const char* id)
 
 
 Gtk::Layout&
-WavesUI::WidgetMap::get_layout (const char* id)
+WavesUI::get_layout (const char* id)
 {
 	Gtk::Layout* child = dynamic_cast<Gtk::Layout*> (get_object(id));
 	if (child == NULL ) {
@@ -470,7 +495,7 @@ WavesUI::WidgetMap::get_layout (const char* id)
 
 
 Gtk::Label&
-WavesUI::WidgetMap::get_label (const char* id)
+WavesUI::get_label (const char* id)
 {
 	Gtk::Label* child = dynamic_cast<Gtk::Label*> (get_object(id));
 	if (child == NULL ) {
@@ -482,7 +507,7 @@ WavesUI::WidgetMap::get_label (const char* id)
 
 
 Gtk::ComboBoxText&
-WavesUI::WidgetMap::get_combo_box_text (const char* id)
+WavesUI::get_combo_box_text (const char* id)
 {
 	Gtk::ComboBoxText* child = dynamic_cast<Gtk::ComboBoxText*> (get_object(id));
 	if (child == NULL ) {
@@ -494,7 +519,7 @@ WavesUI::WidgetMap::get_combo_box_text (const char* id)
 
 
 WavesButton&
-WavesUI::WidgetMap::get_waves_button (const char* id)
+WavesUI::get_waves_button (const char* id)
 {
 	WavesButton* child = dynamic_cast<WavesButton*> (get_object(id));
 	if (child == NULL ) {
@@ -505,7 +530,7 @@ WavesUI::WidgetMap::get_waves_button (const char* id)
 }
 
 Gtkmm2ext::Fader&
-WavesUI::WidgetMap::get_fader (const char* id)
+WavesUI::get_fader (const char* id)
 {
 	Gtkmm2ext::Fader* child = dynamic_cast<Gtkmm2ext::Fader*> (get_object(id));
 	if (child == NULL ) {

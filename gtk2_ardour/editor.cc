@@ -246,7 +246,7 @@ Editor::Editor ()
 	, cd_mark_label (_("CD Markers"))
 	, videotl_label (_("Video Timeline"))
 	, edit_packer (4, 4, true)
-	, vpacker (get_vbox ("vpacker"))
+	, vpacker (get_v_box ("vpacker"))
 	, _tool_marker_button (get_waves_button ("tool_marker_button"))
 	, _tool_zoom_button (get_waves_button ("tool_zoom_button"))
 	, _tool_arrow_button (get_waves_button ("tool_arrow_button"))
@@ -258,7 +258,7 @@ Editor::Editor ()
 	 * but also any other OS that uses a single
 	 * top menubar instead of per window menus
 	 */
-	, _status_bar_hpacker (get_hbox ("menu_bar_base"))
+	, _status_bar_hpacker (get_h_box ("menu_bar_base"))
 #endif
 
 	  /* the values here don't matter: layout widgets
@@ -5104,7 +5104,7 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 
 	TrackViewList::iterator i;
 
-	if ((i = find (track_views.begin(), track_views.end(), tv)) != track_views.end()) {
+	if ((i = std::find (track_views.begin(), track_views.end(), tv)) != track_views.end()) {
 		i = track_views.erase (i);
 	}
 

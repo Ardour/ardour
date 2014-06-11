@@ -1640,7 +1640,7 @@ Editor::temporal_zoom_region (bool both_axes)
 		_routes->suspend_redisplay ();
 
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			if (find (tracks.begin(), tracks.end(), (*i)) == tracks.end()) {
+			if (std::find (tracks.begin(), tracks.end(), (*i)) == tracks.end()) {
 				hide_track_in_display (*i);
 			}
 		}

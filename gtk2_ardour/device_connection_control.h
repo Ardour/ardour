@@ -25,7 +25,7 @@
 #include "waves_ui.h"
 
 
-class DeviceConnectionControl : public Gtk::Layout
+class DeviceConnectionControl : public Gtk::Layout, public WavesUI
 {
   public:
 	enum ConnectionNumber {
@@ -37,7 +37,6 @@ class DeviceConnectionControl : public Gtk::Layout
 	DeviceConnectionControl (const std::string& device_capture_name, bool active, uint16_t capture_number, const std::string& track_name);
 	DeviceConnectionControl (const std::string& device_playback_name, bool active, uint16_t playback_number);
 
-	bool build_layout (const std::string& file_name);
 	void set_number (uint16_t number);
 	void set_active (bool active);
     void set_track_name (const std::string& new_track_name);
@@ -52,7 +51,6 @@ class DeviceConnectionControl : public Gtk::Layout
     // flag which reflects control "active" state
     bool _active;
 	
-    WavesUI::WidgetMap _children;
 	WavesButton* _active_on_button; 
 	WavesButton* _active_off_button;
 	Gtk::Label* _name_label;

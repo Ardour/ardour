@@ -37,13 +37,13 @@
 #include "utils.h"
 #include "window_manager.h"
 
-using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace ARDOUR;
 
 WavesDialog::WavesDialog (std::string layout_script_file, bool modal, bool use_seperator)
-	: Dialog ("", modal, use_seperator)
+	: Gtk::Dialog ("", modal, use_seperator)
+	, WavesUI (layout_script_file, *get_vbox())
 	, _proxy (0)
     , _splash_pushed (false)
 {
@@ -76,7 +76,7 @@ WavesDialog::WavesDialog (std::string layout_script_file, bool modal, bool use_s
 		set_transient_for (*parent_window);
 	}
 
-	ARDOUR_UI::CloseAllDialogs.connect (sigc::bind (sigc::mem_fun (*this, &WavesDialog::response), RESPONSE_CANCEL));
+	ARDOUR_UI::CloseAllDialogs.connect (sigc::bind (sigc::mem_fun (*this, &WavesDialog::response), Gtk::RESPONSE_CANCEL));
 
 	_proxy = new WM::ProxyTemporary (get_title(), this);
 	WM::Manager::instance().register_window (_proxy);
@@ -84,7 +84,13 @@ WavesDialog::WavesDialog (std::string layout_script_file, bool modal, bool use_s
 	get_vbox()->set_spacing (0);
 	get_vbox()->set_border_width (0);
 
-	read_layout(layout_script_file);
+	XMLNode* root  = xml_tree()->root();
+	std::string title = xml_property (*root, "title", "");
+	set_title(title);
+	
+	bool resizeable = xml_property (*root, "resizeable", false);
+	property_allow_grow().set_value(resizeable);
+
 	set_position (Gtk::WIN_POS_MOUSE);
 }
 
@@ -147,30 +153,4 @@ WavesDialog::on_delete_event (GdkEventAny*)
 {
 	hide ();
 	return false;
-}
-
-
-// Layout
-
-bool
-WavesDialog::read_layout (std::string file_name)
-{
-	const XMLTree* layout = WavesUI::load_layout(file_name);
-	if (layout == NULL) {
-		return false;
-	}
-	XMLNode* root  = layout->root();
-	if ((root == NULL) || strcasecmp(root->name().c_str(), "dialog")) {
-		return false;
-	}
-
-	std::string title = xml_property (*root, "title", "");
-	set_title(title);
-	bool resizeable = xml_property (*root, "resizeable", false);
-	property_allow_grow().set_value(resizeable);
-
-	set_border_width(0);
-
-	WavesUI::create_ui(layout, *get_vbox(), _children);
-	return true;
 }

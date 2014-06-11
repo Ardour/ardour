@@ -27,32 +27,34 @@ const char * MidiDeviceConnectionControl::playback_id_name = "_playback_id_name"
 MidiDeviceConnectionControl::MidiDeviceConnectionControl (const std::string& midi_device_name,
                                                           bool has_capture, bool capture_active,
                                                           bool has_playback, bool playback_active)
-: Gtk::Layout()
-, _has_capture(has_capture)
-, _capture_active(capture_active)
-, _has_playback(has_playback)
-, _playback_active(playback_active)
+: Gtk::Layout ()
+, WavesUI ("midi_device_control.xml", *this)
+, _has_capture (has_capture)
+, _capture_active (capture_active)
+, _has_playback (has_playback)
+, _playback_active (playback_active)
 
 {
-	build_layout("midi_device_control.xml");
-    
-    _capture_on_button = &_children.get_waves_button ("capture_on_button");
-    _capture_off_button = &_children.get_waves_button ("capture_off_button");
+	XMLNode* root  = xml_tree()->root();
+	WavesUI::set_attributes(*this, *root, XMLNodeMap());
+
+    _capture_on_button = &get_waves_button ("capture_on_button");
+    _capture_off_button = &get_waves_button ("capture_off_button");
     
     if (!_has_capture) {
         _capture_on_button->hide();
         _capture_off_button->hide();
     }
 
-    _playback_on_button = &_children.get_waves_button ("playback_on_button");
-    _playback_off_button = &_children.get_waves_button ("playback_off_button");
+    _playback_on_button = &get_waves_button ("playback_on_button");
+    _playback_off_button = &get_waves_button ("playback_off_button");
     
     if (!_has_playback) {
         _playback_on_button->hide();
         _playback_off_button->hide();
     }
     
-    _name_label = &_children.get_label ("midi_device_name_label");
+    _name_label = &get_label ("midi_device_name_label");
     
 	init(midi_device_name, capture_active, playback_active);
 }
@@ -74,25 +76,6 @@ void MidiDeviceConnectionControl::init(const std::string& name, bool capture_act
     
 	set_capture_active(capture_active);
     set_playback_active(playback_active);
-}
-
-
-bool
-MidiDeviceConnectionControl::build_layout (const std::string& file_name)
-{
-	const XMLTree* layout = WavesUI::load_layout(file_name);
-	if (layout == NULL) {
-		return false;
-	}
-    
-	XMLNode* root  = layout->root();
-	if ((root == NULL) || strcasecmp(root->name().c_str(), "layout")) {
-		return false;
-	}
-    
-	WavesUI::set_attributes(*this, *root, XMLNodeMap());
-	WavesUI::create_ui(layout, *this, _children);
-	return true;
 }
 
 

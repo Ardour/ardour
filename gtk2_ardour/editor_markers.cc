@@ -232,7 +232,7 @@ Editor::check_marker_label (Marker* m)
 	/* Get a time-ordered list of markers from the last time anything changed */
 	std::list<Marker*>& sorted = _sorted_marker_lists[m->get_parent()];
 
-	list<Marker*>::iterator i = find (sorted.begin(), sorted.end(), m);
+	list<Marker*>::iterator i = std::find (sorted.begin(), sorted.end(), m);
 
 	list<Marker*>::iterator prev = sorted.end ();
 	list<Marker*>::iterator next = i;

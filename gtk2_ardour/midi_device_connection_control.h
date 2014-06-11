@@ -25,7 +25,7 @@
 #include "waves_ui.h"
 
 
-class MidiDeviceConnectionControl : public Gtk::Layout
+class MidiDeviceConnectionControl : public Gtk::Layout, public WavesUI
 {
 public:
 
@@ -46,7 +46,6 @@ public:
     
 private:
     void init(const std::string& name, bool capture_active, bool playback_active );
-    bool build_layout (const std::string& file_name);
 
 	void on_capture_active_on(WavesButton*);
 	void on_capture_active_off(WavesButton*);
@@ -59,7 +58,6 @@ private:
     bool _has_playback;
     bool _playback_active;
 	
-    WavesUI::WidgetMap _children;
 	WavesButton* _capture_on_button;
 	WavesButton* _capture_off_button;
     WavesButton* _playback_on_button;
