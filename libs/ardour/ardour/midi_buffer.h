@@ -124,7 +124,7 @@ public:
 
 		size_t total_data_deleted = sizeof(TimeType) + event_size;
 
-		if (i.offset + total_data_deleted >= _size) {
+		if (i.offset + total_data_deleted > _size) {
 			_size = 0;
 			return end();
 		}
