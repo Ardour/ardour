@@ -557,7 +557,7 @@ Delivery::set_name (const std::string& name)
 {
 	bool ret = IOProcessor::set_name (name);
 
-	if (ret) {
+	if (ret && _panshell) {
 		ret = _panshell->set_name (name);
 	}
 
