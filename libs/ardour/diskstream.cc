@@ -280,17 +280,17 @@ Diskstream::set_align_choice (AlignChoice a, bool force)
 	if ((a != _alignment_choice) || force) {
 		_alignment_choice = a;
 
-                switch (_alignment_choice) {
-                case Automatic:
-                        set_align_style_from_io ();
-                        break;
-                case UseExistingMaterial:
-                        set_align_style (ExistingMaterial);
-                        break;
-                case UseCaptureTime:
-                        set_align_style (CaptureTime);
-                        break;
-                }
+		switch (_alignment_choice) {
+			case Automatic:
+				set_align_style_from_io ();
+				break;
+			case UseExistingMaterial:
+				set_align_style (ExistingMaterial);
+				break;
+			case UseCaptureTime:
+				set_align_style (CaptureTime);
+				break;
+		}
 	}
 }
 
@@ -593,11 +593,11 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
 	const int transport_rolling = 0x4;
 	const int track_rec_enabled = 0x2;
 	const int global_rec_enabled = 0x1;
-        const int fully_rec_enabled = (transport_rolling|track_rec_enabled|global_rec_enabled);
+	const int fully_rec_enabled = (transport_rolling|track_rec_enabled|global_rec_enabled);
 
 	/* merge together the 3 factors that affect record status, and compute
-	   what has changed.
-	*/
+	 * what has changed.
+	 */
 
 	rolling = _session.transport_speed() != 0.0f;
 	possibly_recording = (rolling << 2) | ((int)record_enabled() << 1) | (int)can_record;
@@ -607,13 +607,13 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
 		return;
 	}
 
-        framecnt_t existing_material_offset = _session.worst_playback_latency();
+	framecnt_t existing_material_offset = _session.worst_playback_latency();
 
-        if (possibly_recording == fully_rec_enabled) {
+	if (possibly_recording == fully_rec_enabled) {
 
-                if (last_possibly_recording == fully_rec_enabled) {
-                        return;
-                }
+		if (last_possibly_recording == fully_rec_enabled) {
+			return;
+		}
 
 		capture_start_frame = _session.transport_frame();
 		first_recordable_frame = capture_start_frame + _capture_offset;
@@ -636,32 +636,32 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
                                                                               first_recordable_frame));
                 }
 
-                prepare_record_status (capture_start_frame);
+		prepare_record_status (capture_start_frame);
 
-        } else {
+	} else {
 
-                if (last_possibly_recording == fully_rec_enabled) {
+		if (last_possibly_recording == fully_rec_enabled) {
 
-                        /* we were recording last time */
+			/* we were recording last time */
 
-                        if (change & transport_rolling) {
+			if (change & transport_rolling) {
 
-                                /* transport-change (stopped rolling): last_recordable_frame was set in ::prepare_to_stop(). We
-                                   had to set it there because we likely rolled past the stopping point to declick out,
-                                   and then backed up.
-                                 */
+				/* transport-change (stopped rolling): last_recordable_frame was set in ::prepare_to_stop(). We
+				 * had to set it there because we likely rolled past the stopping point to declick out,
+				 * and then backed up.
+				 */
 
-                        } else {
-                                /* punch out */
+			} else {
+				/* punch out */
 
-                                last_recordable_frame = _session.transport_frame() + _capture_offset;
+				last_recordable_frame = _session.transport_frame() + _capture_offset;
 
-                                if (_alignment_style == ExistingMaterial) {
-                                        last_recordable_frame += existing_material_offset;
-                                }
-                        }
-                }
-        }
+				if (_alignment_style == ExistingMaterial) {
+					last_recordable_frame += existing_material_offset;
+				}
+			}
+		}
+	}
 
 	last_possibly_recording = possibly_recording;
 }
