@@ -73,6 +73,8 @@ Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_b
 Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, Role r, bool ignore_bitslot)
 	: Delivery (s, p, mm, name_and_id_new_send (s, r, _bitslot, ignore_bitslot), r)
 	, _metering (false)
+	, _delay_in (0)
+	, _delay_out (0)
 {
 	if (_role == Listen) {
 		/* we don't need to do this but it keeps things looking clean
@@ -85,6 +87,8 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 
 	_amp.reset (new Amp (_session));
 	_meter.reset (new PeakMeter (_session, name()));
+
+	_delayline.reset (new DelayLine (_session, name()));
 
 	add_control (_amp->gain_control ());
 
@@ -118,6 +122,30 @@ Send::deactivate ()
 }
 
 void
+Send::set_delay_in(framecnt_t delay)
+{
+	if (!_delayline) return;
+	if (_delay_in == delay) {
+		return;
+	}
+	_delay_in = delay;
+	cerr << "SEND DELAY Pre: " <<  delay << "\n";
+	_delayline.get()->set_delay(_delay_out + _delay_in);
+}
+
+void
+Send::set_delay_out(framecnt_t delay)
+{
+	if (!_delayline) return;
+	if (_delay_out == delay) {
+		return;
+	}
+	_delay_out = delay;
+	cerr << "SEND DELAY Post: " <<  delay << "\n";
+	_delayline.get()->set_delay(_delay_out + _delay_in);
+}
+
+void
 Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool)
 {
 	if (_output->n_ports() == ChanCount::ZERO) {
@@ -145,6 +173,8 @@ Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframe
 	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
 	_amp->setup_gain_automation (start_frame, end_frame, nframes);
 	_amp->run (sendbufs, start_frame, end_frame, nframes, true);
+
+	_delayline->run (sendbufs, start_frame, end_frame, nframes, true);
 
 	/* deliver to outputs */
 
@@ -298,6 +328,11 @@ Send::configure_io (ChanCount in, ChanCount out)
 	}
 
 	if (!_meter->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()))) {
+		return false;
+	}
+
+	if (_delayline && !_delayline->configure_io(in, out)) {
+		cerr << "send delayline config failed\n";
 		return false;
 	}
 

@@ -47,6 +47,7 @@
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
 #include "ardour/meter.h"
+#include "ardour/delayline.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_port.h"
 #include "ardour/monitor_processor.h"
@@ -138,6 +139,11 @@ Route::init ()
 
 	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
 	_output->PortCountChanging.connect_same_thread (*this, boost::bind (&Route::output_port_count_changing, this, _1));
+
+	if (!is_master() && !is_monitor() && !is_auditioner()) {
+		_delayline.reset (new DelayLine (_session, _name));
+		add_processor (_delayline, PreFader);
+	}
 
 	/* add amp processor  */
 
@@ -1428,7 +1434,7 @@ Route::clear_processors (Placement p)
 				seen_amp = true;
 			}
 
-			if ((*i) == _amp || (*i) == _meter || (*i) == _main_outs) {
+			if ((*i) == _amp || (*i) == _meter || (*i) == _main_outs || (*i) == _delayline) {
 
 				/* you can't remove these */
 
@@ -1495,7 +1501,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 
 	/* these can never be removed */
 
-	if (processor == _amp || processor == _meter || processor == _main_outs) {
+	if (processor == _amp || processor == _meter || processor == _main_outs || processor == _delayline) {
 		return 0;
 	}
 
@@ -1612,7 +1618,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 
 			/* these can never be removed */
 
-			if (processor == _amp || processor == _meter || processor == _main_outs) {
+			if (processor == _amp || processor == _meter || processor == _main_outs || processor == _delayline) {
 				++i;
 				continue;
 			}
@@ -2577,6 +2583,9 @@ Route::set_processor_state (const XMLNode& node)
 		} else if (prop->value() == "meter") {
 			_meter->set_state (**niter, Stateful::current_state_version);
 			new_order.push_back (_meter);
+		} else if (prop->value() == "delay") {
+			_delayline->set_state (**niter, Stateful::current_state_version);
+			new_order.push_back (_delayline);
 		} else if (prop->value() == "main-outs") {
 			_main_outs->set_state (**niter, Stateful::current_state_version);
 		} else if (prop->value() == "intreturn") {
@@ -4098,6 +4107,10 @@ Route::setup_invisible_processors ()
 		}
 	}
 
+	if (!is_master() && !is_monitor() && !is_auditioner()) {
+		new_processors.push_front (_delayline);
+	}
+
 	/* MONITOR CONTROL */
 
 	if (_monitor_control && is_monitor ()) {
@@ -4252,6 +4265,10 @@ Route::non_realtime_locate (framepos_t pos)
 {
 	if (_pannable) {
 		_pannable->transport_located (pos);
+	}
+
+	if (_delayline.get()) {
+		_delayline.get()->flush();
 	}
 
 	{

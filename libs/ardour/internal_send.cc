@@ -202,6 +202,8 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 	_amp->setup_gain_automation (start_frame, end_frame, nframes);
 	_amp->run (mixbufs, start_frame, end_frame, nframes, true);
 
+	_delayline->run (mixbufs, start_frame, end_frame, nframes, true);
+
 	/* consider metering */
 
 	if (_metering) {
