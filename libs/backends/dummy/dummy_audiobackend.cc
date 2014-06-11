@@ -475,6 +475,8 @@ DummyAudioBackend::process_thread_count ()
 void
 DummyAudioBackend::update_latencies ()
 {
+	// trigger latency callback in RT thread (locked graph)
+	port_connect_add_remove_callback();
 }
 
 /* PORTENGINE API */
@@ -1056,6 +1058,10 @@ DummyAudioBackend::main_process_thread ()
 		}
 		if (connections_changed) {
 			manager.graph_order_callback();
+		}
+		if (connections_changed || ports_changed) {
+			engine.latency_callback(false);
+			engine.latency_callback(true);
 		}
 
 	}
