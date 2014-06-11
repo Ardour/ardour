@@ -512,6 +512,8 @@ Route::process_output_buffers (BufferSet& bufs,
 	/* set this to be true if the meter will already have been ::run() earlier */
 	bool const meter_already_run = metering_state() == MeteringInput;
 
+	framecnt_t latency = 0;
+
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 		if (meter_already_run && boost::dynamic_pointer_cast<PeakMeter> (*i)) {
@@ -537,8 +539,16 @@ Route::process_output_buffers (BufferSet& bufs,
 		   do we catch route != active somewhere higher?
 		*/
 
+		if (boost::dynamic_pointer_cast<Send>(*i) != 0) {
+			boost::dynamic_pointer_cast<Send>(*i)->set_delay_in(_signal_latency - latency);
+		}
+
 		(*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
 		bufs.set_count ((*i)->output_streams());
+
+		if ((*i)->active ()) {
+			latency += (*i)->signal_latency ();
+		}
 	}
 }
 
