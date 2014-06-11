@@ -63,6 +63,7 @@ libardour_sources = [
         'data_type.cc',
         'default_click.cc',
         'debug.cc',
+        'delayline.cc',
         'delivery.cc',
         'directory_names.cc',
         'diskstream.cc',
