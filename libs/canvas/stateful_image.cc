@@ -19,8 +19,8 @@ using PBD::error;
 PBD::Searchpath StatefulImage::_image_search_path;
 StatefulImage::ImageCache StatefulImage::_image_cache;
 
-StatefulImage::StatefulImage (Group* group, const XMLNode& node)
-	: Item (group)
+StatefulImage::StatefulImage (Canvas* c, const XMLNode& node)
+	: Item (c)
 	, _state (0)
 	, _font (0)
 	, _text_x (0)

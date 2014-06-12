@@ -17,31 +17,34 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <cairomm/cairomm.h>
+
 #include "ardour/utils.h"
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
 
 #include "canvas/fill.h"
+#include "canvas/item.h"
+#include "canvas/types.h"
 #include "canvas/utils.h"
 
 using namespace std;
 using namespace ArdourCanvas;
 
-Fill::Fill (Group* parent)
-	: Item (parent)
+Fill::Fill (Item& self)
+	: _self (self)
 	, _fill_color (0x000000ff)
 	, _fill (true)
 	, _transparent (false)
 {
-
 }
 
 void
 Fill::set_fill_color (Color color)
 {
 	if (_fill_color != color) {
-		begin_visual_change ();
+		_self.begin_visual_change ();
 		_fill_color = color;
 
 		double r, g, b, a;
@@ -52,7 +55,7 @@ Fill::set_fill_color (Color color)
 			_transparent = false;
 		}
 
-		end_visual_change ();
+		_self.end_visual_change ();
 	}
 }
 
@@ -60,9 +63,9 @@ void
 Fill::set_fill (bool fill)
 {
 	if (_fill != fill) {
-		begin_visual_change ();
+		_self.begin_visual_change ();
 		_fill = fill;
-		end_visual_change ();
+		_self.end_visual_change ();
 	}
 }
 
@@ -95,7 +98,7 @@ Fill::setup_gradient_context (Cairo::RefPtr<Cairo::Context> context, Rect const 
 void
 Fill::set_gradient (StopList const & stops, bool vertical)
 {
-	begin_visual_change ();
+	_self.begin_visual_change ();
 
 	if (stops.empty()) {
 		_stops.clear ();
@@ -104,5 +107,5 @@ Fill::set_gradient (StopList const & stops, bool vertical)
 		_vertical_gradient = vertical;
 	}
 
-	end_visual_change ();
+	_self.end_visual_change ();
 }

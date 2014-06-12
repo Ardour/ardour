@@ -39,21 +39,18 @@ Group::Group (Canvas* canvas)
 	: Item (canvas)
 	, _lut (0)
 {
-	
 }
 
-Group::Group (Group* parent)
-	: Item (parent)
+Group::Group (Group* group)
+	: Item (group)
 	, _lut (0)
 {
-	
 }
 
-Group::Group (Group* parent, Duple position)
-	: Item (parent, position)
+Group::Group (Group* group, Duple const& p)
+	: Item (group, p)
 	, _lut (0)
 {
-	
 }
 
 Group::~Group ()
@@ -197,10 +194,9 @@ Group::add (Item* i)
 	/* XXX should really notify canvas about this */
 
 	_items.push_back (i);
+	i->reparent (this);
 	invalidate_lut ();
 	_bounding_box_dirty = true;
-
-	
 }
 
 void

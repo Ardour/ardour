@@ -22,17 +22,20 @@
 
 #include <stdint.h>
 
+#include <boost/noncopyable.hpp>
+
 #include "canvas/visibility.h"
 #include "canvas/types.h"
-#include "canvas/item.h"
 
 namespace ArdourCanvas {
 
-class LIBCANVAS_API Outline : virtual public Item
+class Item;
+
+class LIBCANVAS_API Outline : public boost::noncopyable
 {
 public:
-	Outline (Group *);
-	virtual ~Outline () {}
+	Outline (Item& self);
+	virtual ~Outline() {}
 
 	Color outline_color () const {
 		return _outline_color;
@@ -55,10 +58,11 @@ public:
 protected:
 
 	void setup_outline_context (Cairo::RefPtr<Cairo::Context>) const;
-	
-	Color _outline_color;
+
+	Item&    _self;
+	Color    _outline_color;
 	Distance _outline_width;
-	bool _outline;
+	bool     _outline;
 };
 
 }

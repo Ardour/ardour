@@ -55,8 +55,10 @@ public:
 		virtual void get_marks (std::vector<Mark>&, double lower, double upper, int maxchars) const = 0;
 	};
 	
-	Ruler (Group *, const Metric& m);
-	Ruler (Group *, const Metric& m, Rect const&);
+	Ruler (Canvas*, const Metric& m);
+	Ruler (Canvas*, const Metric& m, Rect const&);
+	Ruler (Group*, const Metric& m);
+	Ruler (Group*, const Metric& m, Rect const&);
 	
 	void set_range (double lower, double upper);
 	void set_font_description (Pango::FontDescription);

@@ -25,10 +25,14 @@
 using namespace std;
 using namespace ArdourCanvas;
 
+Pixbuf::Pixbuf (Canvas* c)
+	: Item (c)
+{
+}
+
 Pixbuf::Pixbuf (Group* g)
 	: Item (g)
 {
-	
 }
 
 void

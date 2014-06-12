@@ -22,6 +22,16 @@
 
 using namespace ArdourCanvas;
 
+Image::Image (Canvas* canvas, Cairo::Format fmt, int width, int height)
+	: Item (canvas)
+	, _format (fmt)
+	, _width (width)
+	, _height (height)
+	, _need_render (false)
+{
+	DataReady.connect (data_connections, MISSING_INVALIDATOR, boost::bind (&Image::accept_data, this), gui_context());
+}
+
 Image::Image (Group* group, Cairo::Format fmt, int width, int height)
 	: Item (group)
 	, _format (fmt)

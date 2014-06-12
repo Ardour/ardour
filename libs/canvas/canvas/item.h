@@ -30,6 +30,8 @@
 
 #include "canvas/visibility.h"
 #include "canvas/types.h"
+#include "canvas/fill.h"
+#include "canvas/outline.h"
 
 namespace ArdourCanvas
 {
@@ -50,12 +52,12 @@ class ScrollGroup;
  *  and all except the `root group' have a pointer to their parent group.
  */
 	
-class LIBCANVAS_API Item
+class LIBCANVAS_API Item : public Fill, public Outline
 {
 public:
 	Item (Canvas *);
 	Item (Group *);
-	Item (Group *, Duple);
+	Item (Group *, Duple const& p);
 	virtual ~Item ();
 
         void redraw () const;
@@ -219,6 +221,8 @@ public:
         std::string whatami() const;
 
 protected:
+	friend class Fill;
+	friend class Outline;
 
         /** To be called at the beginning of any property change that
 	 *  may alter the bounding box of this item

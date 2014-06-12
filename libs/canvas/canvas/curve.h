@@ -29,10 +29,11 @@ namespace ArdourCanvas {
 
 class XFadeCurve;
 
-class LIBCANVAS_API Curve : public PolyItem, public Fill, public InterpolatedCurve
+class LIBCANVAS_API Curve : public PolyItem, public InterpolatedCurve
 {
-public:
-    Curve (Group *);
+  public:
+    Curve (Canvas*);
+    Curve (Group*);
 
     enum CurveFill {
 	    None,

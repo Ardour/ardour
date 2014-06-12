@@ -49,6 +49,7 @@ class StatefulImage : public Item
 
   public:
 
+    StatefulImage (Canvas*, const XMLNode&);
     StatefulImage (Group*, const XMLNode&);
     ~StatefulImage ();
 

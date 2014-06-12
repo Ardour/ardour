@@ -30,8 +30,16 @@ public:
 	}
 };
 
-LineSet::LineSet (Group* parent, Orientation o)
-	: Item (parent)
+LineSet::LineSet (Canvas* c, Orientation o)
+	: Item (c)
+	, _extent (0)
+	, _orientation (o)
+{
+
+}
+
+LineSet::LineSet (Group* group, Orientation o)
+	: Item (group)
 	, _extent (0)
 	, _orientation (o)
 {

@@ -31,7 +31,8 @@ namespace ArdourCanvas {
 class LIBCANVAS_API Text : public Item
 {
 public:
-	Text (Group *);
+	Text (Canvas*);
+	Text (Group*);
        ~Text();
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;

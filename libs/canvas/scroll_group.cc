@@ -27,15 +27,15 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-ScrollGroup::ScrollGroup (Group* parent, ScrollSensitivity s)
-	: Group (parent)
+ScrollGroup::ScrollGroup (Canvas* c, ScrollSensitivity s)
+	: Group (c)
 	, _scroll_sensitivity (s)	
 {
 }
 
-ScrollGroup::ScrollGroup (Group* parent, Duple position, ScrollSensitivity s)
-	: Group (parent, position)
-	, _scroll_sensitivity (s)
+ScrollGroup::ScrollGroup (Group* g, ScrollSensitivity s)
+	: Group (g)
+	, _scroll_sensitivity (s)	
 {
 }
 

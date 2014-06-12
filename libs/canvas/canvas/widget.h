@@ -28,10 +28,11 @@
 namespace ArdourCanvas
 {
 
-class LIBCANVAS_API Widget : virtual public Item
+class LIBCANVAS_API Widget : public Item
 {
 public:
-	Widget (Group *, CairoWidget&);
+	Widget (Canvas*, CairoWidget&);
+	Widget (Group*, CairoWidget&);
 	
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;

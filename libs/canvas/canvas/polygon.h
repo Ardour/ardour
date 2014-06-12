@@ -27,10 +27,11 @@
 
 namespace ArdourCanvas {
 
-class LIBCANVAS_API Polygon : public PolyItem, public Fill
+class LIBCANVAS_API Polygon : public PolyItem
 {
 public:
-	Polygon (Group *);
+	Polygon (Canvas*);
+	Polygon (Group*);
         virtual ~Polygon();
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;

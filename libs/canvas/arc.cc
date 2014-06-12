@@ -31,15 +31,20 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-Arc::Arc (Group* parent)
-	: Item (parent)
-	, Outline (parent)
-	, Fill (parent)
+Arc::Arc (Canvas* c)
+	: Item (c)
 	, _radius (0.0)
 	, _arc_degrees (0.0)
 	, _start_degrees (0.0)
 {
+}
 
+Arc::Arc (Group* g)
+	: Item (g)
+	, _radius (0.0)
+	, _arc_degrees (0.0)
+	, _start_degrees (0.0)
+{
 }
 
 void

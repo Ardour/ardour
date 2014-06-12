@@ -29,8 +29,15 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-Widget::Widget (Group* parent, CairoWidget& w)
-	: Item (parent)
+Widget::Widget (Canvas* c, CairoWidget& w)
+	: Item (c)
+	, _widget (w)
+{
+	Event.connect (sigc::mem_fun (*this, &Widget::event_proxy));
+}
+
+Widget::Widget (Group* g, CairoWidget& w)
+	: Item (g)
 	, _widget (w)
 {
 	Event.connect (sigc::mem_fun (*this, &Widget::event_proxy));
@@ -39,6 +46,7 @@ Widget::Widget (Group* parent, CairoWidget& w)
 bool
 Widget::event_proxy (GdkEvent* ev)
 {
+	/* XXX need to translate coordinate into widget's own coordinate space */
 	return _widget.event (ev);
 }
 

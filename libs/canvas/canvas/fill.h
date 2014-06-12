@@ -23,15 +23,20 @@
 #include <vector>
 #include <stdint.h>
 
+#include <boost/noncopyable.hpp>
+
 #include "canvas/visibility.h"
-#include "canvas/item.h"
+#include "canvas/types.h"
 
 namespace ArdourCanvas {
 
-class LIBCANVAS_API Fill : virtual public Item
+class Item;
+
+class LIBCANVAS_API Fill : public boost::noncopyable
 {
 public:
-	Fill (Group *);
+	Fill (Item& self);
+	virtual ~Fill() {}
 
 	virtual void set_fill_color (Color);
 	virtual void set_fill (bool);
@@ -51,7 +56,8 @@ public:
 protected:
 	void setup_fill_context (Cairo::RefPtr<Cairo::Context>) const;
         void setup_gradient_context (Cairo::RefPtr<Cairo::Context>, Rect const &, Duple const &) const;
-       	
+
+       	Item& _self;
 	Color _fill_color;
 	bool _fill;
 	bool _transparent;

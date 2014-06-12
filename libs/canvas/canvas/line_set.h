@@ -35,7 +35,8 @@ public:
 		Horizontal
 	};
 
-	LineSet (Group *, Orientation o = Vertical);
+	LineSet (Canvas*, Orientation o = Vertical);
+	LineSet (Group*, Orientation o = Vertical);
 
 	void compute_bounding_box () const;
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
