@@ -1,0 +1,98 @@
+#!/bin/sh
+
+# Accepts two argument: the git reference (SHA-1 hash) that
+# corresponds to the current state of the Perforce repository.
+
+# Assumption: we are in the folder where the Perforce repository is
+# located and the paths that git will provided, when stripped of one
+# initial folder (e.g. a/b/c/d => b/c/d) will correctly reference
+# the files.
+
+if [ $# -lt 2 ] ; then
+   echo "usage: $0 SHA-1-describing-perforce /path/to/git/repo"
+   exit 1
+fi
+
+dry_run="--dry-run"
+
+while true ; do
+    case $1 in
+        -l|--live) dry_run= ; shift ;;
+        *) break ;;
+    esac
+done
+
+# Now check argument list again
+
+if [ $# -lt 2 ] ; then
+   echo "usage: $0 SHA-1-describing-perforce /path/to/git/repo"
+   exit 1
+fi
+
+earliest=$1
+gitdir=$2
+
+if [ ! -d $gitdir ] ; then
+   echo "Git repository $gitdir does not exist or is not a directory"
+   exit 1
+fi
+
+if [ ! -d $gitdir/.git ] ; then
+    echo "Git repository $gitdir does not appear to be a git repository (no .git folder)"
+    exit 1
+fi
+
+#
+# Let the user know what is about to happen
+#
+
+if [ x$dry_run != x ] ; then
+    echo "This will be a DRY RUN. No files will be modified. Press enter to continue"
+else
+    echo "This will be a live run. Files WILL be modified. Press enter to continue"
+fi
+read
+
+#
+# get a list of commits since $earliest (i.e. everything not yet present in the Perforce repo
+#
+
+commitlist=`(cd $gitdir && git log --reverse $earliest..HEAD) | grep '^commit' | cut -d' ' -f2`
+
+for commit in $commitlist ; do
+    printf "Next revision:
+
+      $(cd $gitdir && git log --pretty=oneline -n 1 $commit). 
+
+Press enter to try to apply this change:"
+
+    read
+
+    while [ true ] ; do 
+        if (cd $gitdir && git show $commit) | patch -p1 $dry_run ; then
+            echo "Completed successfully."
+            break;
+        else
+            echo "Git commit $commit did not apply cleanly."
+            printf "Type s to skip, w to wait (while you fix it) or enter to stop this merge: "
+            read r
+            case $r in
+                s|S) break;
+                    ;;
+                w|W) printf "OK, type enter when you're ready to continue or anything else to quit: "
+                    read rr
+                    if [ x$rr != x ] ; then
+                        echo "The commit that you stopped before merging was " $commit
+                        exit 1
+                    fi
+                    ;;
+                *) echo "When you restart, remember to use $commit as the first argument to this script."
+                    exit 1
+                    ;;
+            esac
+        fi
+    done
+done
+
+echo "The Perforce workspace at `pwd` is now current with the git repository at $gitdir"
+exit 0

@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# Generate a unified diff between two specified revisions in a
+# Perforce repository
+# 
+
+if [ $# -lt 3 ] ; then
+     echo "usage: $0 DEPOT-SPEC REV1 REV2"
+     echo "OR   : $0 DEPOT-SPEC REV1 DEPOT-SPEC REV2"
+     exit 1
+fi   
+
+if [ $# -eq 3 ] ; then
+   depot1=$1
+   depot2=$1
+   rev1=$2
+   rev2=$3
+elif [ $# -eq 4 ] ; then
+   depot1=$1
+   rev1=$2
+   depot2=$3
+   rev2=$4
+fi
+
+p4 diff2 -u ${depot1}...@${rev1} ${depot2}...@${rev2} | \
+    sed 's@//depot/@E:/Source/@g' | \
+    sed '/^+++\|---/s@/@\\@g'

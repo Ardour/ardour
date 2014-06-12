@@ -1,0 +1,9 @@
+cd $AD/tracks
+(
+	if [ "$1" != "rebuild" ] ; then
+		./waf build -v
+	else
+		./waf clean 
+		if ./waf configure --program-name=Tracks; then ./waf build -v; fi
+	fi
+) 2>&1 | tee $AD/buildlog.txt #"$AD/tracks-build-log.`date +%Y-%m-%d--%H.%M`.txt"
