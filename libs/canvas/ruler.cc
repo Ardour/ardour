@@ -33,8 +33,17 @@ using namespace ArdourCanvas;
 
 Ruler::Ruler (Group *p, const Metric& m)
 	: Item (p)
-	, Fill (p)
-	, Outline (p)
+	, Rectangle (p)
+	, _metric (m)
+	, _lower (0)
+	, _upper (0)
+	, _need_marks (true)
+{
+}
+
+Ruler::Ruler (Group *p, const Metric& m, Rect const& r)
+	: Item (p)
+	, Rectangle (p, r)
 	, _metric (m)
 	, _lower (0)
 	, _upper (0)
@@ -61,27 +70,6 @@ Ruler::set_font_description (Pango::FontDescription fd)
 }
 
 void
-Ruler::set_size (Rect const & area)
-{
-	if (_rect != area) {
-		begin_visual_change ();
-		_rect = area;
-		_bounding_box_dirty = true;
-		end_visual_change ();
-	}
-}
-
-void
-Ruler::compute_bounding_box () const
-{
-	if (!_rect.empty()) {
-		_bounding_box = _rect;
-	}
-
-	_bounding_box_dirty = false;
-}
-
-void
 Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 {
 	if (_lower == _upper) {
@@ -89,7 +77,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 		return;
 	}
 
-	Rect self (item_to_window (_rect));
+	Rect self (item_to_window (get()));
 	boost::optional<Rect> i = self.intersection (area);
 
 	if (!i) {
@@ -117,9 +105,15 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 	setup_outline_context (cr);
 
 	/* draw line on lower edge as a separator */
-	
-	cr->move_to (self.x0, self.y1-0.5);
-	cr->line_to (self.x1, self.y1-0.5);
+
+	if (_outline_width == 1.0) {
+		/* Cairo single pixel line correction */
+		cr->move_to (self.x0, self.y1-0.5);
+		cr->line_to (self.x1, self.y1-0.5);
+	} else {
+		cr->move_to (self.x0, self.y1);
+		cr->line_to (self.x1, self.y1);
+	}
 	cr->stroke ();
 
 	/* draw ticks + text */
@@ -136,6 +130,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 		pos.y = self.y1; /* bottom edge */
 
 		if (_outline_width == 1.0) {
+			/* Cairo single pixel line correction */
 			cr->move_to (pos.x + 0.5, pos.y);
 		} else {
 			cr->move_to (pos.x, pos.y);
