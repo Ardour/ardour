@@ -22,6 +22,8 @@
 #include <string>
 #include <vector>
 
+#include <pangomm/fontdescription.h>
+
 #include "canvas/item.h"
 #include "canvas/fill.h"
 #include "canvas/outline.h"
@@ -52,14 +54,15 @@ public:
 		/* lower and upper and sample positions, which are also canvas coordinates
 		 */
 		
-		virtual int get_marks (std::vector<Mark>&, double lower, double upper, int maxchars) const = 0;
+		virtual void get_marks (std::vector<Mark>&, double lower, double upper, int maxchars) const = 0;
 	};
 	
 	Ruler (Group *, const Metric& m);
 	
 	void set_range (double lower, double upper);
 	void set_size (Rect const&);
-
+	void set_font_description (Pango::FontDescription);
+	
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
 	
@@ -72,6 +75,10 @@ private:
 
 	Coord         _lower;
 	Coord         _upper;
+
+	Pango::FontDescription* _font_description;
+	mutable std::vector<Mark> marks;
+	mutable bool _need_marks;
 };
 
 }

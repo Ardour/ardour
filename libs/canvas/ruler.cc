@@ -19,7 +19,9 @@
 
 #include <algorithm>
 #include <cairomm/context.h>
-#include "pbd/compose.h"
+
+#include <pangomm/layout.h>
+
 #include "canvas/ruler.h"
 #include "canvas/types.h"
 #include "canvas/debug.h"
@@ -34,14 +36,30 @@ Ruler::Ruler (Group *p, const Metric& m)
 	, Fill (p)
 	, Outline (p)
 	, _metric (m)
+	, _lower (0)
+	, _upper (0)
+	, _need_marks (true)
 {
+	_fill_color = rgba_to_color (0, 0, 0, 1.0);
+	_outline_color = rgba_to_color (1.0, 1.0, 1.0, 1.0);
 }
 
 void
 Ruler::set_range (double l, double u)
 {
+	begin_visual_change ();
 	_lower = l;
 	_upper = u;
+	_need_marks = true;
+	end_visual_change ();
+}
+
+void
+Ruler::set_font_description (Pango::FontDescription fd)
+{
+	begin_visual_change ();
+	_font_description = new Pango::FontDescription (fd);
+	end_visual_change ();
 }
 
 void
@@ -68,18 +86,27 @@ Ruler::compute_bounding_box () const
 void
 Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 {
+	if (_lower == _upper) {
+		/* nothing to draw */
+		return;
+	}
+
 	Rect self (item_to_window (_rect));
 	boost::optional<Rect> i = self.intersection (area);
+
 	if (!i) {
 		return;
 	}
 
 	Rect intersection (i.get());
 
-	vector<Mark> marks;
 	Distance height = self.height();
 
-	_metric.get_marks (marks, _lower, _upper, 50);
+	if (_need_marks) {
+		marks.clear ();
+		_metric.get_marks (marks, _lower, _upper, 50);
+		_need_marks = false;
+	}
 
 	/* draw background */
 
@@ -87,30 +114,59 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 	cr->rectangle (intersection.x0, intersection.y0, intersection.width(), intersection.height());
 	cr->fill ();
 
-	/* draw ticks */
-	
+	/* switch to outline context */
+
 	setup_outline_context (cr);
+
+	/* draw line on lower edge as a separator */
+	
+	cr->move_to (self.x0, self.y1-0.5);
+	cr->line_to (self.x1, self.y1-0.5);
+	cr->stroke ();
+
+	/* draw ticks + text */
+	
+	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (cr);
+	if (_font_description) {
+		layout->set_font_description (*_font_description);
+	}
 
 	for (vector<Mark>::const_iterator m = marks.begin(); m != marks.end(); ++m) {
 		Duple pos;
 
-		pos.x = self.x0 + ((m->position - _lower) / _metric.units_per_pixel);
+		pos.x = floor ((m->position - _lower) / _metric.units_per_pixel);
 		pos.y = self.y1; /* bottom edge */
-		
-		cr->move_to (pos.x, pos.y);
+
+		if (_outline_width == 1.0) {
+			cr->move_to (pos.x + 0.5, pos.y);
+		} else {
+			cr->move_to (pos.x, pos.y);
+		}
 		
 		switch (m->style) {
 		case Mark::Major:
-			cr->rel_move_to (0, -height);
+			cr->rel_line_to (0, -height);
 			break;
 		case Mark::Minor:
-			cr->rel_move_to (0, -(height/2.0));
+			cr->rel_line_to (0, -height/2.0);
 			break;
 		case Mark::Micro:
-			cr->rel_move_to (0, pos.y-(height/4.0));
+			cr->rel_line_to (0, -height/4.0);
 			break;
 		}
 		cr->stroke ();
+
+		/* and the text */
+
+		if (!m->label.empty()) {
+			Pango::Rectangle logical;
+
+			layout->set_text (m->label);
+			logical = layout->get_pixel_logical_extents ();
+			
+			cr->move_to (pos.x + 2.0, self.y0 + logical.get_y());
+			layout->show_in_cairo_context (cr);
+		}
 	}
 
 	/* done! */
