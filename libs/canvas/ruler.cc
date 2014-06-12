@@ -40,8 +40,6 @@ Ruler::Ruler (Group *p, const Metric& m)
 	, _upper (0)
 	, _need_marks (true)
 {
-	_fill_color = rgba_to_color (0, 0, 0, 1.0);
-	_outline_color = rgba_to_color (1.0, 1.0, 1.0, 1.0);
 }
 
 void
