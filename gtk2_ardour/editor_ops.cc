@@ -1364,7 +1364,7 @@ Editor::scroll_down_one_track ()
 bool
 Editor::scroll_up_one_track ()
 {
-	double vertical_pos = vertical_adjustment.get_value ();
+	// double vertical_pos = vertical_adjustment.get_value ();
 
 	TrackViewList::iterator prev = track_views.end();
 	std::pair<TimeAxisView*,double> res;
@@ -1458,8 +1458,23 @@ Editor::clamp_samples_per_pixel (framecnt_t& fpp) const
 		clamped = true;
 	}
 
-	if (max_framepos / fpp < 800) {
-		fpp = max_framepos / 800;
+	framecnt_t sr;
+
+	if (_session) {
+		sr = _session->frame_rate ();
+	} else {
+		sr = 48000;
+	}
+
+	const framecnt_t three_days = 3 * 24 * 60 * 60 * sr;
+	const framecnt_t lots_of_pixels = 4000;
+
+	/* if the zoom level is greater than what you'd get trying to display 3
+	 * days of audio on a really big screen, scale it down.
+	 */
+
+	if (fpp * lots_of_pixels > three_days) {
+		fpp = three_days / _track_canvas->width();
 		clamped = true;
 	}
 
