@@ -39,6 +39,7 @@
 #include "ardour/profile.h"
 
 #include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/keyboard.h"
 
 #include "editor.h"
 #include "editing.h"
@@ -175,139 +176,9 @@ Editor::initialize_rulers ()
 }
 
 bool
-Editor::ruler_scroll (GdkEventScroll* event)
-{
-	framepos_t xdelta;
-	int direction = event->direction;
-	bool handled = false;
-
-	switch (direction) {
-	case GDK_SCROLL_UP:
-		temporal_zoom_step (false);
-		handled = true;
-		break;
-
-	case GDK_SCROLL_DOWN:
-		temporal_zoom_step (true);
-		handled = true;
-		break;
-
-	case GDK_SCROLL_LEFT:
-		xdelta = (current_page_samples() / 2);
-		if (leftmost_frame > xdelta) {
-			reset_x_origin (leftmost_frame - xdelta);
-		} else {
-			reset_x_origin (0);
-		}
-		handled = true;
-		break;
-
-	case GDK_SCROLL_RIGHT:
-		xdelta = (current_page_samples() / 2);
-		if (max_framepos - xdelta > leftmost_frame) {
-			reset_x_origin (leftmost_frame + xdelta);
-		} else {
-			reset_x_origin (max_framepos - current_page_samples());
-		}
-		handled = true;
-		break;
-
-	default:
-		/* what? */
-		break;
-	}
-
-	return handled;
-}
-
-
-bool
-Editor::ruler_button_press (GdkEventButton* /*ev*/)
-{
-	if (_session == 0) {
-		return false;
-	}
-
-#if 0
-
-	Widget * grab_widget = 0;
-
-	if (bbt_ruler->is_realized() && ev->window == bbt_ruler->get_window()->gobj()) {
-		grab_widget = bbt_ruler;
-	} else if (samples_ruler->is_realized() && ev->window == samples_ruler->get_window()->gobj()) {
-		grab_widget = samples_ruler;
-	} else if (minsec_ruler->is_realized() && ev->window == minsec_ruler->get_window()->gobj()) {
-		grab_widget = minsec_ruler;
-	}
-
-	if (grab_widget) {
-		grab_widget->add_modal_grab ();
-		ruler_grabbed_widget = grab_widget;
-	}
-
-	if (ev->button == 1) {
-		// Since we will locate the playhead on button release, cancel any running
-		// auditions.
-		if (_session->is_auditioning()) {
-			_session->cancel_audition ();
-		}
-
-		/* playhead cursor drag: CursorDrag expects an event with
-		 * canvas coordinates, so convert from window coordinates,
-		 * since for now, rulers are still Gtk::Widgets.
-		 */
-
-		GdkEventButton canvas_ev = *ev;
-		ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (ev->x, ev->y));
-		canvas_ev.x = rint (d.x);
-		canvas_ev.y = rint (d.y);
-
-		_drags->set (new CursorDrag (this, *playhead_cursor, false), reinterpret_cast<GdkEvent *> (&canvas_ev));
-		_dragging_playhead = true;
-	}
-#endif
-
-	return true;
-}
-
-bool
-Editor::ruler_button_release (GdkEventButton* ev)
-{
-	if (_session == 0) {
-		return false;
-	}
-
-	if (_drags->active ()) {
-		GdkEventButton canvas_ev = *ev;
-		ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (ev->x, ev->y));
-		canvas_ev.x = rint (d.x);
-		canvas_ev.x = rint (d.y);
-		_drags->end_grab (reinterpret_cast<GdkEvent*> (&canvas_ev));
-		_dragging_playhead = false;
-	}
-
-	if (ev->button == 3) {
-		
-		stop_canvas_autoscroll();
-
-		framepos_t where = window_event_sample ((GdkEvent*) ev);
-
-		snap_to (where);
-		popup_ruler_menu (where);
-	}
-
-	if (ruler_grabbed_widget) {
-		ruler_grabbed_widget->remove_modal_grab();
-		ruler_grabbed_widget = 0;
-	}
-
-	return true;
-}
-
-bool
 Editor::ruler_label_button_release (GdkEventButton* ev)
 {
-	if (ev->button == 3) {
+	if (Gtkmm2ext::Keyboard::is_context_menu_event (ev)) {
 		Gtk::Menu* m = dynamic_cast<Gtk::Menu*> (ActionManager::get_widget (X_("/RulerMenuPopup")));
 		if (m) {
 			m->popup (1, ev->time);
@@ -316,26 +187,6 @@ Editor::ruler_label_button_release (GdkEventButton* ev)
 
 	return true;
 }
-
-
-bool
-Editor::ruler_mouse_motion (GdkEventMotion* ev)
-{
-	if (_session == 0) {
-		return false;
-	}
-
-	if (_drags->active ()) {
-		GdkEventMotion canvas_ev = *ev;
-		ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (ev->x, ev->y));
-		canvas_ev.x = rint (d.x);
-		canvas_ev.y = rint (d.y);
-		_drags->window_motion_handler (reinterpret_cast<GdkEvent*> (&canvas_ev), false);
-	}
-
-	return true;
-}
-
 
 void
 Editor::popup_ruler_menu (framepos_t where, ItemType t)

@@ -789,11 +789,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Glib::RefPtr<Gtk::ToggleAction> ruler_cd_marker_action;
 	bool                            no_ruler_shown_update;
 
-	bool ruler_button_press (GdkEventButton*);
-	bool ruler_button_release (GdkEventButton*);
-	bool ruler_mouse_motion (GdkEventMotion*);
-	bool ruler_scroll (GdkEventScroll* event);
-
 	Gtk::Widget * ruler_grabbed_widget;
 
 	void initialize_rulers ();
