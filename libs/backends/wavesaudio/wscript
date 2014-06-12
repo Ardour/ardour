@@ -30,10 +30,10 @@ def build(bld):
 	obj = bld(features = 'cxx cxxshlib')
     else:
 	obj = bld(features = 'c cxx cxxshlib')
-
-    if bld.env['build_target'] == 'mountain_lion' or bld.env['build_target'] == 'snowleopard':
-         obj.framework = 'CoreMidi'
-	
+    
+    if sys.platform == 'darwin':
+        obj.framework = 'CoreMidi'
+  
     obj.source = [
             'waves_audiobackend.cc',
             'waves_audiobackend.latency.cc',
