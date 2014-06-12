@@ -31,8 +31,8 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-Text::Text (Group* parent)
-	: Item (parent)
+Text::Text (Canvas* c)
+	: Item (c)
 	, _color (0x000000ff)
 	, _font_description (0)
 	, _alignment (Pango::ALIGN_LEFT)
@@ -41,7 +41,18 @@ Text::Text (Group* parent)
 	, _need_redraw (false)
 	, _clamped_width (COORD_MAX)
 {
+}
 
+Text::Text (Group* g)
+	: Item (g)
+	, _color (0x000000ff)
+	, _font_description (0)
+	, _alignment (Pango::ALIGN_LEFT)
+	, _width (0)
+	, _height (0)
+	, _need_redraw (false)
+	, _clamped_width (COORD_MAX)
+{
 }
 
 Text::~Text ()

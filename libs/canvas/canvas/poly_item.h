@@ -26,10 +26,11 @@
 
 namespace ArdourCanvas {
 
-class LIBCANVAS_API PolyItem : virtual public Item, public Outline
+class LIBCANVAS_API PolyItem : public Item
 {
 public:
-	PolyItem (Group *);
+	PolyItem (Canvas*);
+	PolyItem (Group*);
 
 	void compute_bounding_box () const;
 

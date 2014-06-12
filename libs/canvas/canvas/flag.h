@@ -30,7 +30,8 @@ class Rectangle;
 class LIBCANVAS_API Flag : public Group
 {
 public:
-	Flag (Group *, Distance, Color, Color, Duple);
+	Flag (Canvas *, Distance, Color, Color, Duple);
+	Flag (Group*, Distance, Color, Color, Duple);
 
 	void set_text (std::string const &);
 	void set_height (Distance);
@@ -38,6 +39,8 @@ public:
         bool covers (Duple const &) const;
 	
 private:
+	void setup (Distance height, Duple position);
+
 	Color _outline_color;
 	Color _fill_color;
 	Text* _text;

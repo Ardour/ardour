@@ -25,12 +25,16 @@
 
 using namespace ArdourCanvas;
 
-PolyLine::PolyLine (Group* parent)
-	: Item (parent)
-	, PolyItem (parent)
+PolyLine::PolyLine (Canvas* c)
+	: PolyItem (c)
 	, _threshold (1.0)
 {
+}
 
+PolyLine::PolyLine (Group* g)
+	: PolyItem (g)
+	, _threshold (1.0)
+{
 }
 
 void

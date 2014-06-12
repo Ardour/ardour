@@ -27,10 +27,17 @@ using namespace ArdourCanvas;
 using std::min;
 using std::max;
 
-Curve::Curve (Group* parent)
-	: Item (parent)
-	, PolyItem (parent)
-	, Fill (parent)
+Curve::Curve (Canvas* c)
+	: PolyItem (c)
+	, n_samples (0)
+	, points_per_segment (16)
+	, curve_type (CatmullRomCentripetal)
+	, curve_fill (None)
+{
+}
+
+Curve::Curve (Group* g)
+	: PolyItem (g)
 	, n_samples (0)
 	, points_per_segment (16)
 	, curve_type (CatmullRomCentripetal)

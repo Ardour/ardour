@@ -30,8 +30,8 @@ using namespace ArdourCanvas;
 using std::min;
 using std::max;
 
-XFadeCurve::XFadeCurve (Group* parent)
-	: Item (parent)
+XFadeCurve::XFadeCurve (Canvas* c)
+	: Item (c)
 	, points_per_segment (32)
 	, _xfadeposition (Start)
 	, _outline_color (0x000000ff)
@@ -39,8 +39,26 @@ XFadeCurve::XFadeCurve (Group* parent)
 {
 }
 
-XFadeCurve::XFadeCurve (Group* parent, XFadePosition pos)
-	: Item (parent)
+XFadeCurve::XFadeCurve (Canvas* c, XFadePosition pos)
+	: Item (c)
+	, points_per_segment (32)
+	, _xfadeposition (pos)
+	, _outline_color (0x000000ff)
+	, _fill_color (0x22448880)
+{
+}
+
+XFadeCurve::XFadeCurve (Group* g)
+	: Item (g)
+	, points_per_segment (32)
+	, _xfadeposition (Start)
+	, _outline_color (0x000000ff)
+	, _fill_color (0x22448880)
+{
+}
+
+XFadeCurve::XFadeCurve (Group* g, XFadePosition pos)
+	: Item (g)
 	, points_per_segment (32)
 	, _xfadeposition (pos)
 	, _outline_color (0x000000ff)

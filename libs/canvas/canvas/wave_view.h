@@ -45,7 +45,7 @@ class WaveViewTest;
 	
 namespace ArdourCanvas {
 
-class LIBCANVAS_API WaveView : virtual public Item, public Outline, public Fill
+class LIBCANVAS_API WaveView : public Item
 {
 public:
 
@@ -86,7 +86,8 @@ public:
     */
 
 
-	WaveView (Group *, boost::shared_ptr<ARDOUR::AudioRegion>);
+	WaveView (Canvas *, boost::shared_ptr<ARDOUR::AudioRegion>);
+	WaveView (Group*, boost::shared_ptr<ARDOUR::AudioRegion>);
        ~WaveView ();
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;

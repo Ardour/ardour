@@ -34,7 +34,8 @@ namespace ArdourCanvas {
 class LIBCANVAS_API Pixbuf : public Item
 {
 public:
-	Pixbuf (Group *);
+	Pixbuf (Canvas*);
+	Pixbuf (Group*);
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;

@@ -21,15 +21,20 @@
 
 using namespace ArdourCanvas;
 
-Polygon::Polygon (Group* parent)
-	: Item (parent)
-	, PolyItem (parent)
-	, Fill (parent)
+Polygon::Polygon (Canvas* c)
+	: PolyItem (c)
 	, multiple (0)
 	, constant (0)
 	, cached_size (0)
 {
+}
 
+Polygon::Polygon (Group* g)
+	: PolyItem (g)
+	, multiple (0)
+	, constant (0)
+	, cached_size (0)
+{
 }
 
 Polygon::~Polygon ()

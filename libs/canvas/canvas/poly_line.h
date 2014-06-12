@@ -29,7 +29,8 @@ namespace ArdourCanvas {
 class LIBCANVAS_API PolyLine : public PolyItem
 {
   public:
-	PolyLine (Group *);
+	PolyLine (Canvas*);
+	PolyLine (Group*);
 	
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	

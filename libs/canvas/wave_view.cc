@@ -53,10 +53,31 @@ double WaveView::_clip_level = 0.98853;
 PBD::Signal0<void> WaveView::VisualPropertiesChanged;
 PBD::Signal0<void> WaveView::ClipLevelChanged;
 
-WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
-	: Item (parent)
-	, Outline (parent)
-	, Fill (parent)
+WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
+	: Item (c)
+	, _region (region)
+	, _channel (0)
+	, _samples_per_pixel (0)
+	, _height (64)
+	, _show_zero (false)
+	, _zero_color (0xff0000ff)
+	, _clip_color (0xff0000ff)
+	, _logscaled (_global_logscaled)
+	, _shape (_global_shape)
+	, _gradient_depth (_global_gradient_depth)
+	, _shape_independent (false)
+	, _logscaled_independent (false)
+	, _gradient_depth_independent (false)
+	, _amplitude_above_axis (1.0)
+	, _region_amplitude (_region->scale_amplitude ())
+	, _region_start (region->start())
+{
+	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
+	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
+}
+
+WaveView::WaveView (Group* g, boost::shared_ptr<ARDOUR::AudioRegion> region)
+	: Item (g)
 	, _region (region)
 	, _channel (0)
 	, _samples_per_pixel (0)

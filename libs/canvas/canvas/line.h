@@ -27,10 +27,11 @@
 
 namespace ArdourCanvas {
 
-class LIBCANVAS_API Line : virtual public Item, public Outline
+class LIBCANVAS_API Line : public Item
 {
-public:
-	Line (Group *);
+  public:
+	Line (Canvas*);
+	Line (Group*);
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;

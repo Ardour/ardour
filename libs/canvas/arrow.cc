@@ -34,11 +34,21 @@ using namespace ArdourCanvas;
 /** Construct an Arrow.
  *  @param parent Parent canvas group.
  */
-Arrow::Arrow (Group* parent)
-	: Group (parent)
+Arrow::Arrow (Canvas* c)
+	: Group (c)
 {
-	assert (parent);
+	setup ();
+}
 
+Arrow::Arrow (Group* g)
+	: Group (g)
+{
+	setup ();
+}
+
+void
+Arrow::setup ()
+{
 	/* set up default arrow heads at each end */
 	for (int i = 0; i < 2; ++i) {
 		_heads[i].polygon = new Polygon (this);
@@ -52,6 +62,7 @@ Arrow::Arrow (Group* parent)
 	_line = new Line (this);
 	CANVAS_DEBUG_NAME (_line, "arrow line");
 }
+
 
 /** Set whether to show an arrow head at one end or other
  *  of the line.

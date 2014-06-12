@@ -27,11 +27,14 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-PolyItem::PolyItem (Group* parent)
-	: Item (parent)
-	, Outline (parent)
+PolyItem::PolyItem (Canvas* c)
+	: Item (c)
 {
+}
 
+PolyItem::PolyItem (Group* g)
+	: Item (g)
+{
 }
 
 void

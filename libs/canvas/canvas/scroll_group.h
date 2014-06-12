@@ -31,8 +31,8 @@ class LIBCANVAS_API ScrollGroup : public Group
 		ScrollsHorizontally = 0x2
 	};
 	
-	explicit ScrollGroup (Group *, ScrollSensitivity);
-	explicit ScrollGroup (Group *, Duple, ScrollSensitivity);
+	ScrollGroup (Canvas*, ScrollSensitivity);
+	ScrollGroup (Group*, ScrollSensitivity);
 
 	void scroll_to (Duple const& d);
 	Duple scroll_offset() const { return _scroll_offset; }

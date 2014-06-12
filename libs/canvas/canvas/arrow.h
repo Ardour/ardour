@@ -31,6 +31,7 @@
 
 namespace ArdourCanvas {
 
+class Canvas;
 class Line;
 class Polygon;
 
@@ -48,7 +49,8 @@ class Polygon;
 class LIBCANVAS_API Arrow : public Group
 {
 public:
-	Arrow (Group *);
+	Arrow (Canvas*);
+	Arrow (Group*);
 
 	void set_show_head (int, bool);
 	void set_head_outward (int, bool);
@@ -68,6 +70,7 @@ public:
 
 private:
 	void setup_polygon (int);
+	void setup ();
 
 	/** Representation of a single arrow head */
 	struct Head {

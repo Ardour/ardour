@@ -33,9 +33,10 @@ namespace ArdourCanvas {
 class LIBCANVAS_API Group : public Item
 {
 public:
-	explicit Group (Group *);
-	explicit Group (Group *, Duple);
-	~Group ();
+	Group (Canvas*);
+	Group (Group*);
+	Group (Group*, Duple const& positon);
+	virtual ~Group ();
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	virtual void compute_bounding_box () const;
@@ -60,14 +61,9 @@ public:
 
 	static int default_items_per_cell;
 
-protected:
-	
-	explicit Group (Canvas *);
-	
 private:
 	friend class ::OptimizingLookupTableTest;
 	
-	Group (Group const &);
 	void ensure_lut () const;
 	void invalidate_lut () const;
 	void clear_items (bool with_delete);

@@ -34,41 +34,53 @@ using namespace PBD;
 using namespace ArdourCanvas;
 
 Item::Item (Canvas* canvas)
-	: _canvas (canvas)
+	: Fill (*this)
+	, Outline (*this)
+	,  _canvas (canvas)
 	, _parent (0)
+	, _visible (true)
+	, _bounding_box_dirty (true)
+	, _ignore_events (false)
 {
-	init ();
-}
+	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
+}	
 
 Item::Item (Group* parent)
-	: _canvas (parent->canvas ())
+	: Fill (*this)
+	, Outline (*this)
+	,  _canvas (parent->canvas())
 	, _parent (parent)
+	, _visible (true)
+	, _bounding_box_dirty (true)
+	, _ignore_events (false)
 {
-	init ();
-}
+	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 
-Item::Item (Group* parent, Duple position)
-	: _canvas (parent->canvas())
+	if (parent) {
+		_parent->add (this);
+	}
+
+	find_scroll_parent ();
+}	
+
+Item::Item (Group* parent, Duple const& p)
+	: Fill (*this)
+	, Outline (*this)
+	,  _canvas (parent->canvas())
 	, _parent (parent)
-	, _position (position)
+	, _position (p)
+	, _visible (true)
+	, _bounding_box_dirty (true)
+	, _ignore_events (false)
 {
-	init ();
-}
+	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 
-void
-Item::init ()
-{
-	_visible = true;
-	_bounding_box_dirty = true;
-	_ignore_events = false;
-	
-	if (_parent) {
+	if (parent) {
 		_parent->add (this);
 	}
 
 	find_scroll_parent ();
 
-	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 }	
 
 Item::~Item ()
@@ -98,7 +110,7 @@ Item::window_origin () const
 	if (_parent) {
 		return _parent->item_to_window (_position);
 	} else {
-		return _parent->item_to_window (Duple (0,0));
+		return _position;
 	}
 }
 
@@ -254,22 +266,25 @@ Item::set_y_position (Coord y)
 void
 Item::raise_to_top ()
 {
-	assert (_parent);
-	_parent->raise_child_to_top (this);
+	if (_parent) {
+		_parent->raise_child_to_top (this);
+	}
 }
 
 void
 Item::raise (int levels)
 {
-	assert (_parent);
-	_parent->raise_child (this, levels);
+	if (_parent) {
+		_parent->raise_child (this, levels);
+	}
 }
 
 void
 Item::lower_to_bottom ()
 {
-	assert (_parent);
-	_parent->lower_child_to_bottom (this);
+	if (_parent) {
+		_parent->lower_child_to_bottom (this);
+	}
 }
 
 void
@@ -318,7 +333,11 @@ Item::unparent ()
 void
 Item::reparent (Group* new_parent)
 {
-	assert (_canvas == _parent->canvas());
+	if (new_parent == _parent) {
+		return;
+	}
+
+	assert (_canvas == new_parent->canvas());
 
 	if (_parent) {
 		_parent->remove (this);
@@ -370,10 +389,16 @@ Item::common_ancestor_within (uint32_t limit, const Item& other) const
 
 	while (d1 != d2) {
 		if (d1 > d2) {
+			if (!i1) {
+				return false;
+			}
 			i1 = i1->parent();
 			d1--;
 			limit--;
 		} else {
+			if (!i2) {
+				return false;
+			}
 			i2 = i2->parent();
 			d2--;
 			limit--;
@@ -416,9 +441,15 @@ Item::closest_ancestor_with (const Item& other) const
 
 	while (d1 != d2) {
 		if (d1 > d2) {
+			if (!i1) {
+				return 0;
+			}
 			i1 = i1->parent();
 			d1--;
 		} else {
+			if (!i2) {
+				return 0;
+			}
 			i2 = i2->parent();
 			d2--;
 		}

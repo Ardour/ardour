@@ -30,22 +30,30 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-Rectangle::Rectangle (Group* parent)
-	: Item (parent)
-	, Outline (parent)
-	, Fill (parent)
+Rectangle::Rectangle (Canvas* c)
+	: Item (c)
 	, _outline_what ((What) (LEFT | RIGHT | TOP | BOTTOM))
 {
 }
 
-Rectangle::Rectangle (Group* parent, Rect const & rect)
-	: Item (parent)
-	, Outline (parent)
-	, Fill (parent)
+Rectangle::Rectangle (Canvas* c, Rect const & rect)
+	: Item (c)
 	, _rect (rect)
 	, _outline_what ((What) (LEFT | RIGHT | TOP | BOTTOM))
 {
-	
+}
+
+Rectangle::Rectangle (Group* g)
+	: Item (g)
+	, _outline_what ((What) (LEFT | RIGHT | TOP | BOTTOM))
+{
+}
+
+Rectangle::Rectangle (Group* g, Rect const & rect)
+	: Item (g)
+	, _rect (rect)
+	, _outline_what ((What) (LEFT | RIGHT | TOP | BOTTOM))
+{
 }
 
 void

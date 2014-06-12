@@ -20,10 +20,16 @@
 
 using namespace ArdourCanvas;
 
-Circle::Circle (Group* parent)
-	: Item (parent)
-	, Arc (parent)
+Circle::Circle (Canvas* c)
+	: Arc (c)
 {
 	set_arc (360.0);
 }
+
+Circle::Circle (Group* g)
+	: Arc (g)
+{
+	set_arc (360.0);
+}
+
 

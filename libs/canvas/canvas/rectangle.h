@@ -29,11 +29,13 @@
 namespace ArdourCanvas
 {
 
-class LIBCANVAS_API Rectangle : virtual public Item, public Outline, public Fill
+class LIBCANVAS_API Rectangle : public Item
 {
 public:
-	Rectangle (Group *);
-	Rectangle (Group *, Rect const &);
+	Rectangle (Canvas*);
+	Rectangle (Canvas*, Rect const &);
+	Rectangle (Group*);
+	Rectangle (Group*, Rect const &);
 	
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;

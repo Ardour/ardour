@@ -27,8 +27,9 @@ namespace ArdourCanvas {
 
 class LIBCANVAS_API Circle : public Arc
 {
-public:
-	Circle (Group *);
+  public:
+	Circle (Canvas*);
+	Circle (Group*);
 };
 	
 }

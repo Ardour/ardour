@@ -26,10 +26,13 @@
 
 namespace ArdourCanvas {
 
-class LIBCANVAS_API Arc : virtual public Item, public Outline, public Fill
+class Canvas;
+
+class LIBCANVAS_API Arc : public Item
 {
 public:
-	Arc (Group *);
+	Arc (Canvas*);
+	Arc (Group*);
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;

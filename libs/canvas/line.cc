@@ -29,11 +29,14 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-Line::Line (Group* parent)
-	: Item (parent)
-	, Outline (parent)
+Line::Line (Canvas* c)
+	: Item (c)
 {
+}
 
+Line::Line (Group* group)
+	: Item (group)
+{
 }
 
 void

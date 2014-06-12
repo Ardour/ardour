@@ -23,28 +23,29 @@
 #include "pbd/convert.h"
 
 #include "ardour/utils.h"
+
+#include "canvas/item.h"
 #include "canvas/outline.h"
 #include "canvas/utils.h"
 #include "canvas/debug.h"
 
 using namespace ArdourCanvas;
 
-Outline::Outline (Group* parent)
-	: Item (parent)
+Outline::Outline (Item& self)
+	: _self (self)
 	, _outline_color (0x000000ff)
 	, _outline_width (1.0)
 	, _outline (true)
 {
-
 }
 
 void
 Outline::set_outline_color (Color color)
 {
 	if (color != _outline_color) {
-		begin_visual_change ();
+		_self.begin_visual_change ();
 		_outline_color = color;
-		end_visual_change ();
+		_self.end_visual_change ();
 	}
 }
 
@@ -52,10 +53,10 @@ void
 Outline::set_outline_width (Distance width)
 {
 	if (width != _outline_width) {
-		begin_change ();
+		_self.begin_change ();
 		_outline_width = width;
-		_bounding_box_dirty = true;
-		end_change ();
+		_self._bounding_box_dirty = true;
+		_self.end_change ();
 	}
 }
 
@@ -63,10 +64,10 @@ void
 Outline::set_outline (bool outline)
 {
 	if (outline != _outline) {
-		begin_change ();
+		_self.begin_change ();
 		_outline = outline;
-		_bounding_box_dirty = true;
-		end_change ();
+		_self._bounding_box_dirty = true;
+		_self.end_change ();
 	}
 }
 

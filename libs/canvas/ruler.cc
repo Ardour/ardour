@@ -31,9 +31,8 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-Ruler::Ruler (Group *p, const Metric& m)
-	: Item (p)
-	, Rectangle (p)
+Ruler::Ruler (Canvas* c, const Metric& m)
+	: Rectangle (c)
 	, _metric (m)
 	, _lower (0)
 	, _upper (0)
@@ -41,9 +40,26 @@ Ruler::Ruler (Group *p, const Metric& m)
 {
 }
 
-Ruler::Ruler (Group *p, const Metric& m, Rect const& r)
-	: Item (p)
-	, Rectangle (p, r)
+Ruler::Ruler (Canvas* c, const Metric& m, Rect const& r)
+	: Rectangle (c, r)
+	, _metric (m)
+	, _lower (0)
+	, _upper (0)
+	, _need_marks (true)
+{
+}
+
+Ruler::Ruler (Group* g, const Metric& m)
+	: Rectangle (g)
+	, _metric (m)
+	, _lower (0)
+	, _upper (0)
+	, _need_marks (true)
+{
+}
+
+Ruler::Ruler (Group* g, const Metric& m, Rect const& r)
+	: Rectangle (g, r)
 	, _metric (m)
 	, _lower (0)
 	, _upper (0)

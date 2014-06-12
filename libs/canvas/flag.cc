@@ -25,10 +25,24 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-Flag::Flag (Group* parent, Distance height, Color outline_color, Color fill_color, Duple position)
-	: Group (parent)
+Flag::Flag (Canvas* canvas, Distance height, Color outline_color, Color fill_color, Duple position)
+	: Group (canvas)
 	, _outline_color (outline_color)
 	, _fill_color (fill_color)
+{
+	setup (height, position);
+}
+
+Flag::Flag (Group* group, Distance height, Color outline_color, Color fill_color, Duple position)
+	: Group (group)
+	, _outline_color (outline_color)
+	, _fill_color (fill_color)
+{
+	setup (height, position);
+}
+
+void 
+Flag::setup (Distance height, Duple position)
 {
 	_text = new Text (this);
 	_text->set_alignment (Pango::ALIGN_CENTER);
