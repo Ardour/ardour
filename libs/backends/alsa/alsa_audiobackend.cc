@@ -45,19 +45,18 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _run (false)
 	, _active (false)
 	, _freewheeling (false)
+	, _measure_latency (false)
 	, _audio_device("")
-	, _midi_device("")
+	, _midi_driver_option("")
 	, _device_reservation(0)
 	, _samplerate (48000)
 	, _samples_per_period (1024)
 	, _periods_per_cycle (2)
-	, _dsp_load (0)
 	, _n_inputs (0)
 	, _n_outputs (0)
 	, _systemic_audio_input_latency (0)
 	, _systemic_audio_output_latency (0)
-	, _systemic_midi_input_latency (0)
-	, _systemic_midi_output_latency (0)
+	, _dsp_load (0)
 	, _processed_samples (0)
 	, _port_change_flag (false)
 {
@@ -281,7 +280,6 @@ int
 AlsaAudioBackend::set_systemic_input_latency (uint32_t sl)
 {
 	_systemic_audio_input_latency = sl;
-	_systemic_midi_input_latency = sl;
 	return 0;
 }
 
@@ -289,7 +287,24 @@ int
 AlsaAudioBackend::set_systemic_output_latency (uint32_t sl)
 {
 	_systemic_audio_output_latency = sl;
-	_systemic_midi_output_latency = sl;
+	return 0;
+}
+
+int
+AlsaAudioBackend::set_systemic_midi_input_latency (std::string const device, uint32_t sl)
+{
+	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
+	if (!nfo) return -1;
+	nfo->systemic_input_latency = sl;
+	return 0;
+}
+
+int
+AlsaAudioBackend::set_systemic_midi_output_latency (std::string const device, uint32_t sl)
+{
+	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
+	if (!nfo) return -1;
+	nfo->systemic_output_latency = sl;
 	return 0;
 }
 
@@ -342,11 +357,47 @@ AlsaAudioBackend::systemic_output_latency () const
 	return _systemic_audio_output_latency;
 }
 
+uint32_t
+AlsaAudioBackend::systemic_midi_input_latency (std::string const device) const
+{
+	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
+	if (!nfo) return 0;
+	return nfo->systemic_input_latency;
+}
+
+uint32_t
+AlsaAudioBackend::systemic_midi_output_latency (std::string const device) const
+{
+	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
+	if (!nfo) return 0;
+	return nfo->systemic_output_latency;
+}
+
 /* MIDI */
+struct AlsaAudioBackend::AlsaMidiDeviceInfo *
+AlsaAudioBackend::midi_device_info(std::string const name) const {
+	for (std::map<std::string, struct AlsaMidiDeviceInfo*>::const_iterator i = _midi_devices.begin (); i != _midi_devices.end(); ++i) {
+		if (i->first == name) {
+			return (i->second);
+		}
+	}
+
+	std::map<std::string, std::string> devices;
+	get_alsa_rawmidi_device_names(devices);
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		if (i->first == name) {
+			_midi_devices[name] = new AlsaMidiDeviceInfo();
+			return _midi_devices[name];
+		}
+	}
+	return 0;
+}
+
 std::vector<std::string>
 AlsaAudioBackend::enumerate_midi_options () const
 {
 	std::vector<std::string> m;
+#if 1 // OLD GUI
 	m.push_back (_("-None-"));
 	std::map<std::string, std::string> devices;
 	get_alsa_rawmidi_device_names(devices);
@@ -357,20 +408,55 @@ AlsaAudioBackend::enumerate_midi_options () const
 	if (m.size() > 2) {
 		m.push_back (_("-All-"));
 	}
+#else
+	m.push_back (_("None"));
+	m.push_back (_("ALSA raw devices"));
+#endif
 	return m;
+}
+
+std::vector<AudioBackend::DeviceStatus>
+AlsaAudioBackend::enumerate_midi_devices () const
+{
+	std::vector<AudioBackend::DeviceStatus> s;
+
+	std::map<std::string, std::string> devices;
+	get_alsa_rawmidi_device_names(devices);
+
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		s.push_back (DeviceStatus (i->first, true));
+	}
+	return s;
 }
 
 int
 AlsaAudioBackend::set_midi_option (const std::string& opt)
 {
-	_midi_device = opt;
+	_midi_driver_option = opt;
 	return 0;
 }
 
 std::string
 AlsaAudioBackend::midi_option () const
 {
-	return _midi_device;
+	return _midi_driver_option;
+}
+
+int
+AlsaAudioBackend::set_midi_device_enabled (std::string const device, bool enable)
+{
+	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
+	if (!nfo) return -1;
+	nfo->enabled = enable;
+	return 0;
+}
+
+bool
+AlsaAudioBackend::midi_device_enabled (std::string const device) const
+{
+	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
+	if (!nfo) return false;
+	return nfo->enabled;
 }
 
 /* State Control */
@@ -472,12 +558,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		PBD::warning << _("AlsaAudioBackend: sample rate does not match.") << endmsg;
 	}
 
-	if (for_latency_measurement) {
-		_systemic_audio_input_latency = 0;
-		_systemic_audio_output_latency = 0;
-		_systemic_midi_input_latency = 0;
-		_systemic_midi_output_latency = 0;
-	}
+	_measure_latency = for_latency_measurement;
 
 	register_system_midi_ports();
 
@@ -849,7 +930,7 @@ AlsaAudioBackend::register_system_audio_ports()
 	const int a_out = _n_outputs > 0 ? _n_outputs : 2;
 
 	/* audio ports */
-	lr.min = lr.max = _samples_per_period + _systemic_audio_input_latency;
+	lr.min = lr.max = _samples_per_period + _measure_latency ? 0 : _systemic_audio_input_latency;
 	for (int i = 1; i <= a_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:capture_%d", i);
@@ -859,7 +940,7 @@ AlsaAudioBackend::register_system_audio_ports()
 		_system_inputs.push_back(static_cast<AlsaPort*>(p));
 	}
 
-	lr.min = lr.max = _samples_per_period + _systemic_audio_output_latency;
+	lr.min = lr.max = _samples_per_period + _measure_latency ? 0 : _systemic_audio_output_latency;
 	for (int i = 1; i <= a_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:playback_%d", i);
@@ -877,10 +958,11 @@ AlsaAudioBackend::register_system_midi_ports()
 	LatencyRange lr;
 	std::vector<std::string> devices;
 
-	if (_midi_device == _("-None-")) {
+	// TODO new API use midi_device_info();
+	if (_midi_driver_option == _("-None-")) {
 		return 0;
 	}
-	else if (_midi_device == _("-All-")) {
+	else if (_midi_driver_option == _("-All-")) {
 		std::map<std::string, std::string> devmap;
 		get_alsa_rawmidi_device_names(devmap);
 		for (std::map<std::string, std::string>::const_iterator i = devmap.begin (); i != devmap.end(); ++i) {
@@ -890,7 +972,7 @@ AlsaAudioBackend::register_system_midi_ports()
 		std::map<std::string, std::string> devmap;
 		get_alsa_rawmidi_device_names(devmap);
 		for (std::map<std::string, std::string>::const_iterator i = devmap.begin (); i != devmap.end(); ++i) {
-			if (i->first == _midi_device) {
+			if (i->first == _midi_driver_option) {
 				devices.push_back (i->second);
 				break;
 			}
@@ -941,7 +1023,7 @@ AlsaAudioBackend::register_system_midi_ports()
 	const int m_ins = _rmidi_in.size();
 	const int m_out = _rmidi_out.size();
 
-	lr.min = lr.max = _samples_per_period + _systemic_midi_input_latency;
+	lr.min = lr.max = _samples_per_period; // + _systemic_midi_input_latency;
 	for (int i = 1; i <= m_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:midi_capture_%d", i);
@@ -951,7 +1033,7 @@ AlsaAudioBackend::register_system_midi_ports()
 		_system_midi_in.push_back(static_cast<AlsaPort*>(p));
 	}
 
-	lr.min = lr.max = _samples_per_period + _systemic_midi_output_latency;
+	lr.min = lr.max = _samples_per_period; // + _systemic_midi_output_latency;
 	for (int i = 1; i <= m_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:midi_playback_%d", i);
