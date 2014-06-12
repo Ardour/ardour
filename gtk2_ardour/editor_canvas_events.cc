@@ -89,7 +89,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
-				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (event_coords.y);
+				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (event_coords.y, false);
 				current_stepping_trackview = p.first;
 				if (!current_stepping_trackview) {
 					return false;
@@ -118,7 +118,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
-				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (event_coords.y);
+				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (event_coords.y, false);
 				current_stepping_trackview = p.first;
 				if (!current_stepping_trackview) {
 					return false;
@@ -162,7 +162,8 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 bool
 Editor::canvas_scroll_event (GdkEventScroll *event)
 {
-	if (h_scroll_group->covers (Duple (event->x, event->y))) {
+	boost::optional<Rect> rulers = _time_markers_group->bounding_box();
+	if (rulers && rulers->contains (Duple (event->x, event->y))) {
 		return canvas_ruler_event ((GdkEvent*) event, timecode_ruler, TimecodeRulerItem);
 	}
 
