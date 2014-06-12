@@ -167,5 +167,9 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (StartCrossFadeItem);
 	REGISTER_ENUM (EndCrossFadeItem);
 	REGISTER_ENUM (CrossfadeViewItem);
+	REGISTER_ENUM (TimecodeRulerItem);
+	REGISTER_ENUM (MinsecRulerItem);
+	REGISTER_ENUM (BBTRulerItem);
+	REGISTER_ENUM (SamplesRulerItem);
 	REGISTER (item_type);
 }

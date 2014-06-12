@@ -1413,6 +1413,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, AutomationTimeAxisView*);
 	bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item *);
 
+	bool canvas_ruler_event (GdkEvent* event, ArdourCanvas::Item *, ItemType);
 	bool canvas_tempo_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_meter_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
