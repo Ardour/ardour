@@ -92,6 +92,13 @@ EngineStateController::serialize_audio_midi_settings() {
 
 
 void
+EngineStateController::save_audio_midi_settings() {
+    Config->add_extra_xml (serialize_audio_midi_settings() );
+    Config->save_state ();
+}
+
+
+void
 EngineStateController::_deserialize_and_load_engine_states()
 {
     XMLNode* audio_midi_settings_root = ARDOUR::Config->extra_xml ("AudioMidiSettings");
@@ -1514,6 +1521,8 @@ EngineStateController::push_current_state_to_backend(bool start)
             return false;
         }
 	}
+    
+    save_audio_midi_settings();
     
     return true;
 }

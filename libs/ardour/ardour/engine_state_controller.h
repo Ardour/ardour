@@ -120,6 +120,7 @@ public:
     void        set_desired_sample_rate(framecnt_t);
 
     XMLNode&    serialize_audio_midi_settings();
+    void        save_audio_midi_settings();
     
     //DATE UPDATE SIGNALS
     /* this signal is emitted if the sample rate changes */

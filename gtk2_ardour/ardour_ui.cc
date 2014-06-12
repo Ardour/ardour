@@ -588,9 +588,8 @@ ARDOUR_UI::update_ouput_operation_mode_buttons()
 
 ARDOUR_UI::~ARDOUR_UI ()
 {
-    Config->add_extra_xml(EngineStateController::instance()->serialize_audio_midi_settings() );
-    Config->save_state();
-    
+    EngineStateController::instance()->save_audio_midi_settings();
+
 	if (ui_config->dirty()) {
 		ui_config->save_state();
 	}
