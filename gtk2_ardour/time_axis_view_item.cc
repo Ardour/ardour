@@ -172,7 +172,6 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, uint32_t base_c
 	frame_position = start;
 	item_duration = duration;
 	name_connected = false;
-	fill_opacity = 60;
 	position_locked = false;
 	max_item_duration = ARDOUR::max_framepos;
 	min_item_duration = 0;
@@ -281,6 +280,7 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, uint32_t base_c
 	}
 
 	set_color (base_color);
+	set_opacity_for_drag (false);
 
 	set_duration (item_duration, this);
 	set_position (start, this);
@@ -639,7 +639,6 @@ void
 TimeAxisViewItem::set_color (uint32_t base_color)
 {
 	fill_color = base_color;
-	fill_opacity = UINT_RGBA_A (fill_color);
 	set_colors ();
 }
 
@@ -667,6 +666,10 @@ TimeAxisViewItem::get_name_highlight()
 void
 TimeAxisViewItem::set_colors()
 {
+	/* we cannot be dragging this item when changing colors,
+	   so reuse set_opacity_for_drag()
+	*/
+	set_opacity_for_drag (false);
 	set_frame_color();
 
 	if (name_highlight) {
@@ -788,7 +791,12 @@ TimeAxisViewItem::set_opacity_for_drag (bool drag_starting)
 	if (drag_starting) {
 		fill_opacity = 130;
 	} else {
-		fill_opacity = UINT_RGBA_A (fill_color);
+		/* use the alpha/opacity value from the basic color, no matter whether 
+		   we use the color of our time axis or not.
+		*/
+		
+		uint32_t col = ARDOUR_UI::config()->get_canvasvar_FrameBase();
+		fill_opacity = UINT_RGBA_A (col);
 	}
 	set_frame_color ();
 }
