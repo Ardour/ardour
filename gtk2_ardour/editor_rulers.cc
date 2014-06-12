@@ -164,10 +164,12 @@ Editor::initialize_rulers ()
 	lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(videotl_label, PACK_SHRINK, PACK_START));
 
-	// timecode_ruler->Event.connect (...);
-	// samples_ruler->Event.connect (...);
-	// bbt_ruler->Event.connect (...);
-	// minsec_ruler->Event.connect (...);
+	/* 1 event handler to bind them all ... */
+
+	timecode_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), timecode_ruler, TimecodeRulerItem));
+	minsec_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), minsec_ruler, MinsecRulerItem));
+	bbt_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), bbt_ruler, BBTRulerItem));
+	samples_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), samples_ruler, SamplesRulerItem));
 	
 	visible_timebars = 0; /*this will be changed below */
 }

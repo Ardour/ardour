@@ -56,7 +56,11 @@ enum ItemType {
 	StartCrossFadeItem,
 	EndCrossFadeItem,
 	CrossfadeViewItem,
-
+	TimecodeRulerItem,
+	MinsecRulerItem,
+	BBTRulerItem,
+	SamplesRulerItem,
+	
 	/* don't remove this */
 
 	NoItem

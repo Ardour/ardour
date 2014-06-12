@@ -162,6 +162,10 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 bool
 Editor::canvas_scroll_event (GdkEventScroll *event)
 {
+	if (h_scroll_group->covers (Duple (event->x, event->y))) {
+		return canvas_ruler_event ((GdkEvent*) event, timecode_ruler, TimecodeRulerItem);
+	}
+
 	_track_canvas->grab_focus();
 	return track_canvas_scroll (event);
 }
@@ -977,6 +981,59 @@ bool
 Editor::canvas_meter_marker_event (GdkEvent *event, ArdourCanvas::Item* item, MeterMarker* /*marker*/)
 {
 	return typed_event (item, event, MeterMarkerItem);
+}
+
+bool
+Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType type)
+{
+	framepos_t xdelta;
+	bool handled = false;
+
+	if (event->type == GDK_SCROLL) {
+		
+		/* scroll events in the rulers are handled a little differently from
+		   scrolling elsewhere in the canvas.
+		*/
+
+		switch (event->scroll.direction) {
+		case GDK_SCROLL_UP:
+			temporal_zoom_step (false);
+			handled = true;
+			break;
+			
+		case GDK_SCROLL_DOWN:
+			temporal_zoom_step (true);
+			handled = true;
+			break;
+			
+		case GDK_SCROLL_LEFT:
+			xdelta = (current_page_samples() / 2);
+			if (leftmost_frame > xdelta) {
+				reset_x_origin (leftmost_frame - xdelta);
+			} else {
+				reset_x_origin (0);
+			}
+			handled = true;
+			break;
+			
+		case GDK_SCROLL_RIGHT:
+			xdelta = (current_page_samples() / 2);
+			if (max_framepos - xdelta > leftmost_frame) {
+				reset_x_origin (leftmost_frame + xdelta);
+			} else {
+				reset_x_origin (max_framepos - current_page_samples());
+			}
+			handled = true;
+			break;
+			
+		default:
+			/* what? */
+			break;
+		}
+		return handled;
+	}
+
+	return typed_event (item, event, type);
 }
 
 bool
