@@ -31,6 +31,8 @@
 
 #include "canvas/group.h"
 #include "canvas/canvas.h"
+#include "canvas/ruler.h"
+#include "canvas/debug.h"
 
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -46,6 +48,7 @@
 #include "time_axis_view.h"
 #include "editor_drag.h"
 #include "editor_cursors.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -54,80 +57,106 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Editing;
 
-Editor *Editor::ruler_editor;
-
 /* the order here must match the "metric" enums in editor.h */
 
-GtkCustomMetric Editor::ruler_metrics[4] = {
-	{1, Editor::_metric_get_timecode },
-	{1, Editor::_metric_get_bbt },
-	{1, Editor::_metric_get_samples },
-	{1, Editor::_metric_get_minsec }
+class TimecodeMetric : public ArdourCanvas::Ruler::Metric
+{
+    public:
+	TimecodeMetric (Editor* e) : _editor (e) {}
+
+	void get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, double lower, double upper, int maxchars) const {
+		_editor->metric_get_timecode (marks, lower, upper, maxchars);
+	}
+
+    private:
+	Editor* _editor;
 };
+
+class SamplesMetric : public ArdourCanvas::Ruler::Metric
+{
+    public:
+	SamplesMetric (Editor* e) : _editor (e) {}
+
+	void get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, double lower, double upper, int maxchars) const {
+		_editor->metric_get_samples (marks, lower, upper, maxchars);
+	}
+
+    private:
+	Editor* _editor;
+};
+
+class BBTMetric : public ArdourCanvas::Ruler::Metric
+{
+    public:
+	BBTMetric (Editor* e) : _editor (e) {}
+
+	void get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, double lower, double upper, int maxchars) const {
+		_editor->metric_get_bbt (marks, lower, upper, maxchars);
+	}
+
+    private:
+	Editor* _editor;
+};
+
+class MinsecMetric : public ArdourCanvas::Ruler::Metric
+{
+    public:
+	MinsecMetric (Editor* e) : _editor (e) {}
+
+	void get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, double lower, double upper, int maxchars) const {
+		_editor->metric_get_minsec (marks, lower, upper, maxchars);
+	}
+
+    private:
+	Editor* _editor;
+};
+
+static ArdourCanvas::Ruler::Metric* _bbt_metric;
+static ArdourCanvas::Ruler::Metric* _timecode_metric;
+static ArdourCanvas::Ruler::Metric* _samples_metric;
+static ArdourCanvas::Ruler::Metric* _minsec_metric;
 
 void
 Editor::initialize_rulers ()
 {
-	ruler_editor = this;
 	ruler_grabbed_widget = 0;
+	Pango::FontDescription font = get_font_for_style ("editor_time_ruler");
 
-	_ruler_separator = new Gtk::HSeparator();
-	_ruler_separator->set_size_request(-1, 2);
-	_ruler_separator->set_name("TimebarPadding");
-	_ruler_separator->show();
-
-	_minsec_ruler = gtk_custom_hruler_new ();
-	minsec_ruler = Glib::wrap (_minsec_ruler);
-	minsec_ruler->set_name ("MinSecRuler");
-	minsec_ruler->set_size_request (-1, (int)timebar_height);
-	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_minsec_ruler), &ruler_metrics[ruler_metric_minsec]);
-	minsec_ruler->hide ();
-	minsec_ruler->set_no_show_all();
-
-	_timecode_ruler = gtk_custom_hruler_new ();
-	timecode_ruler = Glib::wrap (_timecode_ruler);
-	timecode_ruler->set_name ("TimecodeRuler");
-	timecode_ruler->set_size_request (-1, (int)timebar_height);
-	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_timecode_ruler), &ruler_metrics[ruler_metric_timecode]);
-	timecode_ruler->hide ();
-	timecode_ruler->set_no_show_all();
+	_timecode_metric = new TimecodeMetric (this);
+	_bbt_metric = new BBTMetric (this);
+	_minsec_metric = new MinsecMetric (this);
+	_samples_metric = new SamplesMetric (this);
+	
+	timecode_ruler = new ArdourCanvas::Ruler (_time_markers_group, *_timecode_metric);
+	timecode_ruler->set_size (ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
+	timecode_ruler->set_font_description (font);
+	CANVAS_DEBUG_NAME (timecode_ruler, "timecode ruler");
 	timecode_nmarks = 0;
 
-	_bbt_ruler = gtk_custom_hruler_new ();
-	bbt_ruler = Glib::wrap (_bbt_ruler);
-	bbt_ruler->set_name ("BBTRuler");
-	bbt_ruler->set_size_request (-1, (int)timebar_height);
-	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_bbt_ruler), &ruler_metrics[ruler_metric_bbt]);
-	bbt_ruler->hide ();
-	bbt_ruler->set_no_show_all();
-	bbt_nmarks = 0;
+	samples_ruler = new ArdourCanvas::Ruler (_time_markers_group, *_samples_metric);
+	samples_ruler->set_size (ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
+	samples_ruler->set_font_description (font);
+	CANVAS_DEBUG_NAME (samples_ruler, "samples ruler");
 
-	_samples_ruler = gtk_custom_hruler_new ();
-	samples_ruler = Glib::wrap (_samples_ruler);
-	samples_ruler->set_name ("SamplesRuler");
-	samples_ruler->set_size_request (-1, (int) timebar_height);
-	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER (_samples_ruler), &ruler_metrics[ruler_metric_samples]);
-	samples_ruler->hide ();
-	samples_ruler->set_no_show_all ();
-
-	_bbt_ruler = gtk_custom_hruler_new ();
-	bbt_ruler = Glib::wrap (_bbt_ruler);
-	bbt_ruler->set_name ("BBTRuler");
-	bbt_ruler->set_size_request (-1, (int)timebar_height);
-	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_bbt_ruler), &ruler_metrics[ruler_metric_bbt]);
-	bbt_ruler->hide ();
-	bbt_ruler->set_no_show_all();
-	minsec_ruler->hide ();
-	minsec_ruler->set_no_show_all();
+	minsec_ruler = new ArdourCanvas::Ruler (_time_markers_group, *_minsec_metric);
+	minsec_ruler->set_size (ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
+	minsec_ruler->set_font_description (font);
+	CANVAS_DEBUG_NAME (minsec_ruler, "minsec ruler");
 	minsec_nmarks = 0;
 
+	bbt_ruler = new ArdourCanvas::Ruler (_time_markers_group, *_bbt_metric);
+	bbt_ruler->set_size (ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
+	bbt_ruler->set_font_description (font);
+	CANVAS_DEBUG_NAME (bbt_ruler, "bbt ruler");
+	timecode_nmarks = 0;
+
 	using namespace Box_Helpers;
-	BoxList & ruler_lab_children =  ruler_label_vbox.children();
-	BoxList & ruler_children =  time_canvas_vbox.children();
 	BoxList & lab_children =  time_bars_vbox.children();
 
-	BoxList::iterator canvaspos = ruler_children.begin();
-
+	lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(timecode_label, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(samples_label, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(bbt_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(meter_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(tempo_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
@@ -136,40 +165,11 @@ Editor::initialize_rulers ()
 	lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(videotl_label, PACK_SHRINK, PACK_START));
 
-	ruler_lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
-	ruler_children.insert (canvaspos, Element(*minsec_ruler, PACK_SHRINK, PACK_START));
-	ruler_lab_children.push_back (Element(timecode_label, PACK_SHRINK, PACK_START));
-	ruler_children.insert (canvaspos, Element(*timecode_ruler, PACK_SHRINK, PACK_START));
-	ruler_lab_children.push_back (Element(samples_label, PACK_SHRINK, PACK_START));
-	ruler_children.insert (canvaspos, Element (*samples_ruler, PACK_SHRINK, PACK_START));
-	ruler_lab_children.push_back (Element(bbt_label, PACK_SHRINK, PACK_START));
-	ruler_children.insert (canvaspos, Element(*bbt_ruler, PACK_SHRINK, PACK_START));
-
-	timecode_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
-	bbt_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
-	samples_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
-	minsec_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
-
-	timecode_ruler->signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_release));
-	bbt_ruler->signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_release));
-	samples_ruler->signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_release));
-	minsec_ruler->signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_release));
-
-	timecode_ruler->signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_press));
-	bbt_ruler->signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_press));
-	samples_ruler->signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_press));
-	minsec_ruler->signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_press));
-
-	timecode_ruler->signal_motion_notify_event().connect (sigc::mem_fun(*this, &Editor::ruler_mouse_motion));
-	bbt_ruler->signal_motion_notify_event().connect (sigc::mem_fun(*this, &Editor::ruler_mouse_motion));
-	samples_ruler->signal_motion_notify_event().connect (sigc::mem_fun(*this, &Editor::ruler_mouse_motion));
-	minsec_ruler->signal_motion_notify_event().connect (sigc::mem_fun(*this, &Editor::ruler_mouse_motion));
-
-	timecode_ruler->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::ruler_scroll));
-	bbt_ruler->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::ruler_scroll));
-	samples_ruler->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::ruler_scroll));
-	minsec_ruler->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::ruler_scroll));
-
+	// timecode_ruler->Event.connect (...);
+	// samples_ruler->Event.connect (...);
+	// bbt_ruler->Event.connect (...);
+	// minsec_ruler->Event.connect (...);
+	
 	visible_timebars = 0; /*this will be changed below */
 }
 
@@ -221,17 +221,17 @@ Editor::ruler_scroll (GdkEventScroll* event)
 
 
 bool
-Editor::ruler_button_press (GdkEventButton* ev)
+Editor::ruler_button_press (GdkEventButton* /*ev*/)
 {
 	if (_session == 0) {
 		return false;
 	}
 
+#if 0
+
 	Widget * grab_widget = 0;
 
-	if (timecode_ruler->is_realized() && ev->window == timecode_ruler->get_window()->gobj()) {
-		grab_widget = timecode_ruler;
-	} else if (bbt_ruler->is_realized() && ev->window == bbt_ruler->get_window()->gobj()) {
+	if (bbt_ruler->is_realized() && ev->window == bbt_ruler->get_window()->gobj()) {
 		grab_widget = bbt_ruler;
 	} else if (samples_ruler->is_realized() && ev->window == samples_ruler->get_window()->gobj()) {
 		grab_widget = samples_ruler;
@@ -264,6 +264,7 @@ Editor::ruler_button_press (GdkEventButton* ev)
 		_drags->set (new CursorDrag (this, *playhead_cursor, false), reinterpret_cast<GdkEvent *> (&canvas_ev));
 		_dragging_playhead = true;
 	}
+#endif
 
 	return true;
 }
@@ -601,49 +602,18 @@ Editor::restore_ruler_visibility ()
 void
 Editor::update_ruler_visibility ()
 {
-	int visible_rulers = 0;
+	int visible_timebars = 0;
 
 	if (no_ruler_shown_update) {
 		return;
 	}
 
-	visible_timebars = 0;
-
-	if (ruler_minsec_action->get_active()) {
-		visible_rulers++;
-		minsec_label.show ();
-		minsec_ruler->show ();
-	} else {
-		minsec_label.hide ();
-		minsec_ruler->hide ();
-	}
-
-	if (ruler_timecode_action->get_active()) {
-		visible_rulers++;
-		timecode_label.show ();
-		timecode_ruler->show ();
-	} else {
-		timecode_label.hide ();
-		timecode_ruler->hide ();
-	}
-
-	if (ruler_samples_action->get_active()) {
-		visible_rulers++;
-		samples_label.show ();
-		samples_ruler->show ();
-	} else {
-		samples_label.hide ();
-		samples_ruler->hide ();
-	}
-
-	if (ruler_bbt_action->get_active()) {
-		visible_rulers++;
-		bbt_label.show ();
-		bbt_ruler->show ();
-	} else {
-		bbt_label.hide ();
-		bbt_ruler->hide ();
-	}
+	/* the order of the timebars is fixed, so we have to go through each one
+	 * and adjust its position depending on what is shown.
+	 *
+	 * Order: minsec, timecode, samples, bbt, meter, tempo, ranges,
+	 * loop/punch, cd markers, location markers
+	 */
 
 	double tbpos = 0.0;
 	double tbgpos = 0.0;
@@ -659,6 +629,67 @@ Editor::update_ruler_visibility ()
 	mark_label.hide();
 	videotl_label.hide();
 #endif
+
+	if (ruler_minsec_action->get_active()) {
+		old_unit_pos = minsec_ruler->position().y;
+		if (tbpos != old_unit_pos) {
+			minsec_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+		}
+		minsec_ruler->show();
+		minsec_label.show();
+		tbpos += timebar_height;
+		tbgpos += timebar_height;
+		visible_timebars++;
+	} else {
+		minsec_ruler->hide();
+		minsec_label.hide();
+	}
+
+	if (ruler_timecode_action->get_active()) {
+		old_unit_pos = timecode_ruler->position().y;
+		if (tbpos != old_unit_pos) {
+			timecode_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+		}
+		timecode_ruler->show();
+		timecode_label.show();
+		tbpos += timebar_height;
+		tbgpos += timebar_height;
+		visible_timebars++;
+	} else {
+		timecode_ruler->hide();
+		timecode_label.hide();
+	}
+
+	if (ruler_samples_action->get_active()) {
+		old_unit_pos = samples_ruler->position().y;
+		if (tbpos != old_unit_pos) {
+			samples_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+		}
+		samples_ruler->show();
+		samples_label.show();
+		tbpos += timebar_height;
+		tbgpos += timebar_height;
+		visible_timebars++;
+	} else {
+		samples_ruler->hide();
+		samples_label.hide();
+	}
+
+	if (ruler_bbt_action->get_active()) {
+		old_unit_pos = bbt_ruler->position().y;
+		if (tbpos != old_unit_pos) {
+			bbt_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+		}
+		bbt_ruler->show();
+		bbt_label.show();
+		tbpos += timebar_height;
+		tbgpos += timebar_height;
+		visible_timebars++;
+	} else {
+		bbt_ruler->hide();
+		bbt_label.hide();
+	}
+
 	if (ruler_meter_action->get_active()) {
 		old_unit_pos = meter_group->position().y;
 		if (tbpos != old_unit_pos) {
@@ -771,10 +802,10 @@ Editor::update_ruler_visibility ()
 		update_video_timeline(true);
 	}
 
-	ruler_label_vbox.set_size_request (-1, (int)(timebar_height * visible_rulers));
-	time_canvas_vbox.set_size_request (-1,-1);
+	time_bars_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars));
 
-	std::cerr << "place HV group at " << timebar_height * visible_timebars << std::endl;
+	/* move hv_scroll_group (trackviews) to the end of the timebars
+	 */
 
 	hv_scroll_group->set_y_position (timebar_height * visible_timebars);
 
@@ -800,8 +831,7 @@ Editor::update_just_timecode ()
 	framepos_t rightmost_frame = leftmost_frame + current_page_samples();
 
 	if (ruler_timecode_action->get_active()) {
-		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_timecode_ruler), leftmost_frame, rightmost_frame,
-					    leftmost_frame, _session->current_end_frame());
+		timecode_ruler->set_range (leftmost_frame, rightmost_frame);
 	}
 }
 
@@ -836,9 +866,9 @@ Editor::update_fixed_rulers ()
 
 	compute_fixed_ruler_scale ();
 
-	ruler_metrics[ruler_metric_timecode].units_per_pixel = samples_per_pixel;
-	ruler_metrics[ruler_metric_samples].units_per_pixel = samples_per_pixel;
-	ruler_metrics[ruler_metric_minsec].units_per_pixel = samples_per_pixel;
+	_timecode_metric->units_per_pixel = samples_per_pixel;
+	_samples_metric->units_per_pixel = samples_per_pixel;
+	_minsec_metric->units_per_pixel = samples_per_pixel;
 
 	rightmost_frame = leftmost_frame + current_page_samples();
 
@@ -847,18 +877,15 @@ Editor::update_fixed_rulers ()
 	*/
 
 	if (ruler_timecode_action->get_active()) {
-		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_timecode_ruler), leftmost_frame, rightmost_frame,
-					    leftmost_frame, _session->current_end_frame());
+		timecode_ruler->set_range (leftmost_frame, rightmost_frame);
 	}
 
 	if (ruler_samples_action->get_active()) {
-		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER (_samples_ruler), leftmost_frame, rightmost_frame,
-					    leftmost_frame, _session->current_end_frame());
+		samples_ruler->set_range (leftmost_frame, rightmost_frame);
 	}
 
 	if (ruler_minsec_action->get_active()) {
-		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_minsec_ruler), leftmost_frame, rightmost_frame,
-					    leftmost_frame, _session->current_end_frame());
+		minsec_ruler->set_range (leftmost_frame, rightmost_frame);
 	}
 }
 
@@ -873,38 +900,11 @@ Editor::update_tempo_based_rulers (ARDOUR::TempoMap::BBTPointList::const_iterato
 	compute_bbt_ruler_scale (leftmost_frame, leftmost_frame+current_page_samples(),
 				 begin, end);
 
-	ruler_metrics[ruler_metric_bbt].units_per_pixel = samples_per_pixel;
+	_bbt_metric->units_per_pixel = samples_per_pixel;
 
 	if (ruler_bbt_action->get_active()) {
-		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_bbt_ruler), leftmost_frame, leftmost_frame+current_page_samples(),
-					    leftmost_frame, _session->current_end_frame());
+		bbt_ruler->set_range (leftmost_frame, leftmost_frame+current_page_samples());
 	}
-}
-
-/* Mark generation */
-
-gint
-Editor::_metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
-{
-	return ruler_editor->metric_get_timecode (marks, lower, upper, maxchars);
-}
-
-gint
-Editor::_metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
-{
-	return ruler_editor->metric_get_bbt (marks, lower, upper, maxchars);
-}
-
-gint
-Editor::_metric_get_samples (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
-{
-	return ruler_editor->metric_get_samples (marks, lower, upper, maxchars);
-}
-
-gint
-Editor::_metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
-{
-	return ruler_editor->metric_get_minsec (marks, lower, upper, maxchars);
 }
 
 void
@@ -1006,17 +1006,18 @@ Editor::set_timecode_ruler_scale (framepos_t lower, framepos_t upper)
 
 }
 
-gint
-Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
+void
+Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
 {
 	framepos_t pos;
 	framecnt_t spacer;
 	Timecode::Time timecode;
 	gchar buf[16];
 	gint n;
+	ArdourCanvas::Ruler::Mark mark;
 
 	if (_session == 0) {
-		return 0;
+		return;
 	}
 
 	if (lower > (spacer = (framecnt_t)(128 * Editor::get_current_zoom ()))) {
@@ -1027,7 +1028,6 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 
 	pos = (framecnt_t) floor (lower);
 
-	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * timecode_nmarks);
 	switch (timecode_ruler_scale) {
 	case timecode_show_bits:
 
@@ -1038,19 +1038,21 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 			_session->timecode_to_sample(timecode, pos, true /* use_offset */, true /* use_subframes */ );
 			if ((timecode.subframes % timecode_mark_modulo) == 0) {
 				if (timecode.subframes == 0) {
-					(*marks)[n].style = GtkCustomRulerMarkMajor;
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
 					snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 				} else {
-					(*marks)[n].style = GtkCustomRulerMarkMinor;
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					snprintf (buf, sizeof(buf), ".%02u", timecode.subframes);
 				}
 			} else {
 				snprintf (buf, sizeof(buf)," ");
-				(*marks)[n].style = GtkCustomRulerMarkMicro;
-
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
+				
 			}
-			(*marks)[n].label = g_strdup (buf);
-			(*marks)[n].position = pos;
+			mark.label = buf;
+			mark.position = pos;
+
+			marks.push_back (mark);
 
 			// Increment subframes by one
 			Timecode::increment_subframes( timecode, _session->config.get_subframes_per_frame() );
@@ -1066,20 +1068,22 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.seconds % timecode_mark_modulo) == 0) {
 				if (timecode.seconds == 0) {
-					(*marks)[n].style = GtkCustomRulerMarkMajor;
-					(*marks)[n].position = pos;
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
+					mark.position = pos;
 				} else {
-					(*marks)[n].style = GtkCustomRulerMarkMinor;
-					(*marks)[n].position = pos;
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
+					mark.position = pos;
 				}
 				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
-				(*marks)[n].style = GtkCustomRulerMarkMicro;
-				(*marks)[n].position = pos;
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
+				mark.position = pos;
 
 			}
-			(*marks)[n].label = g_strdup (buf);
+			mark.label = buf;
+			marks.push_back (mark);
+
 			Timecode::increment_seconds( timecode, _session->config.get_subframes_per_frame() );
 		}
 	  break;
@@ -1093,19 +1097,19 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.minutes % timecode_mark_modulo) == 0) {
 				if (timecode.minutes == 0) {
-					(*marks)[n].style = GtkCustomRulerMarkMajor;
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
 				} else {
-					(*marks)[n].style = GtkCustomRulerMarkMinor;
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 				}
 				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
-				(*marks)[n].style = GtkCustomRulerMarkMicro;
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
 
 			}
-			(*marks)[n].label = g_strdup (buf);
-			(*marks)[n].position = pos;
-
+			mark.label = buf;
+			mark.position = pos;
+			marks.push_back (mark);
 			Timecode::increment_minutes( timecode, _session->config.get_subframes_per_frame() );
 		}
 
@@ -1119,16 +1123,16 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 		for (n = 0; n < timecode_nmarks; n++) {
 			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.hours % timecode_mark_modulo) == 0) {
-				(*marks)[n].style = GtkCustomRulerMarkMajor;
+				mark.style = ArdourCanvas::Ruler::Mark::Major;
 				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
-				(*marks)[n].style = GtkCustomRulerMarkMicro;
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
 
 			}
-			(*marks)[n].label = g_strdup (buf);
-			(*marks)[n].position = pos;
-
+			mark.label = buf;
+			mark.position = pos;
+			marks.push_back (mark);
 			Timecode::increment_hours( timecode, _session->config.get_subframes_per_frame() );
 		}
 	  break;
@@ -1142,27 +1146,27 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.frames % timecode_mark_modulo) == 0)  {
 				if (timecode.frames == 0) {
-				  (*marks)[n].style = GtkCustomRulerMarkMajor;
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
 				} else {
-				  (*marks)[n].style = GtkCustomRulerMarkMinor;
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 				}
-				(*marks)[n].position = pos;
+				mark.position = pos;
 				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
-				(*marks)[n].style = GtkCustomRulerMarkMicro;
-				(*marks)[n].position = pos;
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
+				mark.position = pos;
 
 			}
-			(*marks)[n].label = g_strdup (buf);
+			mark.label = buf;
+			marks.push_back (mark);
 			Timecode::increment( timecode, _session->config.get_subframes_per_frame() );
 		}
 
 	  break;
 	}
-
-	return timecode_nmarks;
 }
+
 
 
 void
@@ -1294,17 +1298,26 @@ Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper,
 	} else {
 		bbt_ruler_scale =  bbt_show_ticks_detail;
 	}
-
+	
 	if ((bbt_ruler_scale == bbt_show_ticks_detail) && (lower_beat.beats == upper_beat.beats) && (upper_beat.ticks - lower_beat.ticks <= Timecode::BBT_Time::ticks_per_beat / 4)) {
 		bbt_ruler_scale =  bbt_show_ticks_super_detail;
 	}
 }
 
-gint
-Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint /*maxchars*/)
+static void 
+edit_last_mark_label (std::vector<ArdourCanvas::Ruler::Mark>& marks, const std::string& newlabel)
+{
+	ArdourCanvas::Ruler::Mark copy = marks.back();
+	copy.label = newlabel;
+	marks.pop_back ();
+	marks.push_back (copy);
+}		
+
+void
+Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble lower, gdouble upper, gint /*maxchars*/)
 {
 	if (_session == 0) {
-		return 0;
+		return;
 	}
 
 	TempoMap::BBTPointList::const_iterator i;
@@ -1315,7 +1328,6 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 	Timecode::BBT_Time next_beat;
 	framepos_t next_beat_pos;
 	uint32_t beats = 0;
-
 	uint32_t tick = 0;
 	uint32_t skip;
 	uint32_t t;
@@ -1325,6 +1337,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 	double accumulated_error;
 	bool i_am_accented = false;
 	bool helper_active = false;
+	ArdourCanvas::Ruler::Mark mark;
 
 	ARDOUR::TempoMap::BBTPointList::const_iterator begin;
 	ARDOUR::TempoMap::BBTPointList::const_iterator end;
@@ -1332,7 +1345,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 	compute_current_bbt_points (lower, upper, begin, end);
 
 	if (distance (begin, end) == 0) {
-		return 0;
+		return;
 	}
 
 	switch (bbt_ruler_scale) {
@@ -1341,32 +1354,32 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 		beats = distance (begin, end);
 		bbt_nmarks = beats + 2;
 
-		*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
+		mark.label = "";
+		mark.position = lower;
+		mark.style = ArdourCanvas::Ruler::Mark::Micro;
+		marks.push_back (mark);
 
-		(*marks)[0].label = g_strdup(" ");
-		(*marks)[0].position = lower;
-		(*marks)[0].style = GtkCustomRulerMarkMicro;
-		
 		for (n = 1, i = begin; n < bbt_nmarks && i != end; ++i) {
 
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
-				(*marks)[0].label = g_strdup (buf);
+				edit_last_mark_label (marks, buf);
 				helper_active = true;
 			} else {
 
 				if ((*i).is_bar()) {
-					(*marks)[n].style = GtkCustomRulerMarkMajor;
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
 					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
 				} else if (((*i).beat % 2 == 1)) {
-					(*marks)[n].style = GtkCustomRulerMarkMinor;
-					snprintf (buf, sizeof(buf), " ");
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
+					buf[0] = '\0';
 				} else {
-					(*marks)[n].style = GtkCustomRulerMarkMicro;
-					snprintf (buf, sizeof(buf), " ");
+					mark.style = ArdourCanvas::Ruler::Mark::Micro;
+					buf[0] = '\0';
 				}
-				(*marks)[n].label =  g_strdup (buf);
-				(*marks)[n].position = (*i).frame;
+				mark.label = buf;
+				mark.position = (*i).frame;
+				marks.push_back (mark);
 				n++;
 			}
 		}
@@ -1378,32 +1391,35 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
 
 		bbt_position_of_helper = lower + (30 * Editor::get_current_zoom ());
-		*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
+		
+		// could do marks.assign() here to preallocate
 
-		(*marks)[0].label = g_strdup(" ");
-		(*marks)[0].position = lower;
-		(*marks)[0].style = GtkCustomRulerMarkMicro;
+		mark.label = "";
+		mark.position = lower;
+		mark.style = ArdourCanvas::Ruler::Mark::Micro;
+		marks.push_back (mark);
 
 		for (n = 1, i = begin; n < bbt_nmarks && i != end; ++i) {
 
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
-				(*marks)[0].label = g_strdup (buf);
+				edit_last_mark_label (marks, buf);
 				helper_active = true;
 			} else {
 
 			        if ((*i).is_bar()) {
-					(*marks)[n].style = GtkCustomRulerMarkMajor;
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
 					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
 				} else {
-					(*marks)[n].style = GtkCustomRulerMarkMinor;
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).beat);
 				}
 				if (((*i).frame < bbt_position_of_helper) && helper_active) {
-					snprintf (buf, sizeof(buf), " ");
+					buf[0] = '\0';
 				}
-				(*marks)[n].label =  g_strdup (buf);
-				(*marks)[n].position = (*i).frame;
+				mark.label =  buf;
+				mark.position = (*i).frame;
+				marks.push_back (mark);
 				n++;
 			}
 
@@ -1438,8 +1454,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 					i_am_accented = true;
 				}
 
-				snprintf (buf, sizeof(buf), " ");
-				(*marks)[n].label = g_strdup (buf);
+				mark.label = "";
 
 				/* Error compensation for float to framepos_t*/
 				accumulated_error += frame_skip_error;
@@ -1448,14 +1463,15 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 					accumulated_error -= 1.0f;
 				}
 
-				(*marks)[n].position = pos;
+				mark.position = pos;
 
 				if ((bbt_beat_subdivision > 4) && i_am_accented) {
-					(*marks)[n].style = GtkCustomRulerMarkMinor;
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 				} else {
-					(*marks)[n].style = GtkCustomRulerMarkMicro;
+					mark.style = ArdourCanvas::Ruler::Mark::Micro;
 				}
 				i_am_accented = false;
+				marks.push_back (mark);
 				n++;
 			}
 		}
@@ -1468,32 +1484,33 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
 
 		bbt_position_of_helper = lower + (30 * Editor::get_current_zoom ());
-		*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
 
-		(*marks)[0].label = g_strdup(" ");
-		(*marks)[0].position = lower;
-		(*marks)[0].style = GtkCustomRulerMarkMicro;
+		mark.label = "";
+		mark.position = lower;
+		mark.style = ArdourCanvas::Ruler::Mark::Micro;
+		marks.push_back (mark);
 
 		for (n = 1,   i = begin; n < bbt_nmarks && i != end; ++i) {
 
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 			        snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
-				(*marks)[0].label = g_strdup (buf);
+				edit_last_mark_label (marks, buf);
 				helper_active = true;
 			} else {
 
 				if ((*i).is_bar()) {
-					(*marks)[n].style = GtkCustomRulerMarkMajor;
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
 					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
 				} else {
-					(*marks)[n].style = GtkCustomRulerMarkMinor;
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).beat);
 				}
 				if (((*i).frame < bbt_position_of_helper) && helper_active) {
-					snprintf (buf, sizeof(buf), " ");
+					buf[0] = '\0';
 				}
-				(*marks)[n].label =  g_strdup (buf);
-				(*marks)[n].position = (*i).frame;
+				mark.label =  buf;
+				mark.position = (*i).frame;
+				marks.push_back (mark);
 				n++;
 			}
 
@@ -1531,10 +1548,10 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 				if (i_am_accented && (pos > bbt_position_of_helper)){
 				        snprintf (buf, sizeof(buf), "%" PRIu32, tick);
 				} else {
-				        snprintf (buf, sizeof(buf), " ");
+					buf[0] = '\0';
 				}
 
-				(*marks)[n].label = g_strdup (buf);
+				mark.label = buf;
 
 				/* Error compensation for float to framepos_t*/
 				accumulated_error += frame_skip_error;
@@ -1543,12 +1560,12 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 					accumulated_error -= 1.0f;
 				}
 
-				(*marks)[n].position = pos;
+				mark.position = pos;
 
 				if ((bbt_beat_subdivision > 4) && i_am_accented) {
-					(*marks)[n].style = GtkCustomRulerMarkMinor;
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 				} else {
-					(*marks)[n].style = GtkCustomRulerMarkMicro;
+					mark.style = ArdourCanvas::Ruler::Mark::Micro;
 				}
 				i_am_accented = false;
 				n++;
@@ -1563,32 +1580,33 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
 
 		bbt_position_of_helper = lower + (30 * Editor::get_current_zoom ());
-		*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
 
-		(*marks)[0].label = g_strdup(" ");
-		(*marks)[0].position = lower;
-		(*marks)[0].style = GtkCustomRulerMarkMicro;
+		mark.label = "";
+		mark.position = lower;
+		mark.style = ArdourCanvas::Ruler::Mark::Micro;
+		marks.push_back (mark);
 
 		for (n = 1,   i = begin; n < bbt_nmarks && i != end; ++i) {
 
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 				  snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
-				  (*marks)[0].label = g_strdup (buf);
+				  edit_last_mark_label (marks, buf);
 				  helper_active = true;
 			} else {
 
 				  if ((*i).is_bar()) {
-					  (*marks)[n].style = GtkCustomRulerMarkMajor;
+					  mark.style = ArdourCanvas::Ruler::Mark::Major;
 					  snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
 				  } else {
-					  (*marks)[n].style = GtkCustomRulerMarkMinor;
+					  mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					  snprintf (buf, sizeof(buf), "%" PRIu32, (*i).beat);
 				  }
 				  if (((*i).frame < bbt_position_of_helper) && helper_active) {
-					  snprintf (buf, sizeof(buf), " ");
+					  buf[0] = '\0';
 				  }
-				  (*marks)[n].label =  g_strdup (buf);
-				  (*marks)[n].position = (*i).frame;
+				  mark.label =  buf;
+				  mark.position = (*i).frame;
+				  marks.push_back (mark);
 				  n++;
 			}
 
@@ -1626,10 +1644,10 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 				  if (pos > bbt_position_of_helper) {
  					  snprintf (buf, sizeof(buf), "%" PRIu32, tick);
 				  } else {
-					  snprintf (buf, sizeof(buf), " ");
+					  buf[0] = '\0';
 				  }
 
-				  (*marks)[n].label = g_strdup (buf);
+				  mark.label = buf;
 
 				  /* Error compensation for float to framepos_t*/
 				  accumulated_error += frame_skip_error;
@@ -1638,14 +1656,15 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 					  accumulated_error -= 1.0f;
 				  }
 
-				  (*marks)[n].position = pos;
+				  mark.position = pos;
 
 				  if ((bbt_beat_subdivision > 4) && i_am_accented) {
-					  (*marks)[n].style = GtkCustomRulerMarkMinor;
+					  mark.style = ArdourCanvas::Ruler::Mark::Minor;
 				  } else {
-					  (*marks)[n].style = GtkCustomRulerMarkMicro;
+					  mark.style = ArdourCanvas::Ruler::Mark::Micro;
 				  }
 				  i_am_accented = false;
+				  marks.push_back (mark);
 				  n++;
 			}
 		}
@@ -1654,35 +1673,34 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 
 	case bbt_over:
 	                bbt_nmarks = 1;
-			*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
 			snprintf (buf, sizeof(buf), "cannot handle %" PRIu32 " bars", bbt_bars );
-        		(*marks)[0].style = GtkCustomRulerMarkMajor;
-        		(*marks)[0].label = g_strdup (buf);
-			(*marks)[0].position = lower;
-			n = 1;
+        		mark.style = ArdourCanvas::Ruler::Mark::Major;
+        		mark.label = buf;
+			mark.position = lower;
+			marks.push_back (mark);
 
 	  break;
 
 	case bbt_show_64:
         		bbt_nmarks = (gint) (bbt_bars / 64) + 1;
-			*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
 			for (n = 0,   i = begin; i != end && n < bbt_nmarks; i++) {
 				if ((*i).is_bar()) {
 					if ((*i).bar % 64 == 1) {
 						if ((*i).bar % 256 == 1) {
 							snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-							(*marks)[n].style = GtkCustomRulerMarkMajor;
+							mark.style = ArdourCanvas::Ruler::Mark::Major;
 						} else {
-							snprintf (buf, sizeof(buf), " ");
+							buf[0] = '\0';
 							if ((*i).bar % 256 == 129)  {
-								(*marks)[n].style = GtkCustomRulerMarkMinor;
+								mark.style = ArdourCanvas::Ruler::Mark::Minor;
 							} else {
-								(*marks)[n].style = GtkCustomRulerMarkMicro;
+								mark.style = ArdourCanvas::Ruler::Mark::Micro;
 							}
 						}
-						(*marks)[n].label = g_strdup (buf);
-						(*marks)[n].position = (*i).frame;
-						n++;
+						mark.label = buf;
+						mark.position = (*i).frame;
+						marks.push_back (mark);
+						++n;
 					}
 				}
 			}
@@ -1690,24 +1708,24 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 
 	case bbt_show_16:
        		bbt_nmarks = (bbt_bars / 16) + 1;
-	        *marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
 		for (n = 0,  i = begin; i != end && n < bbt_nmarks; i++) {
 		        if ((*i).is_bar()) {
 			  if ((*i).bar % 16 == 1) {
 			        if ((*i).bar % 64 == 1) {
 				        snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-					(*marks)[n].style = GtkCustomRulerMarkMajor;
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
 				} else {
-				        snprintf (buf, sizeof(buf), " ");
+					buf[0] = '\0';
 					if ((*i).bar % 64 == 33)  {
-					        (*marks)[n].style = GtkCustomRulerMarkMinor;
+					        mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					} else {
-					        (*marks)[n].style = GtkCustomRulerMarkMicro;
+					        mark.style = ArdourCanvas::Ruler::Mark::Micro;
 					}
 				}
-				(*marks)[n].label = g_strdup (buf);
-				(*marks)[n].position = (*i).frame;
-				n++;
+				mark.label = buf;
+				mark.position = (*i).frame;
+				marks.push_back (mark);
+				++n;
 			  }
 			}
 		}
@@ -1715,58 +1733,54 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble upper
 
 	case bbt_show_4:
 		bbt_nmarks = (bbt_bars / 4) + 1;
- 		*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks);
 		for (n = 0,   i = begin; i != end && n < bbt_nmarks; ++i) {
 		        if ((*i).is_bar()) {
 			  if ((*i).bar % 4 == 1) {
 			        if ((*i).bar % 16 == 1) {
 				        snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-					(*marks)[n].style = GtkCustomRulerMarkMajor;
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
 				} else {
-				        snprintf (buf, sizeof(buf), " ");
+					buf[0] = '\0';
 					if ((*i).bar % 16 == 9)  {
-					        (*marks)[n].style = GtkCustomRulerMarkMinor;
+					        mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					} else {
-					        (*marks)[n].style = GtkCustomRulerMarkMicro;
+					        mark.style = ArdourCanvas::Ruler::Mark::Micro;
 					}
 				}
-				(*marks)[n].label = g_strdup (buf);
-				(*marks)[n].position = (*i).frame;
-				n++;
+				mark.label = buf;
+				mark.position = (*i).frame;
+				marks.push_back (mark);
+				++n;
 			  }
 			}
 		}
 	  break;
 
 	case bbt_show_1:
-  //	default:
+//	default:
 	        bbt_nmarks = bbt_bars + 2;
-	        *marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * bbt_nmarks );
-		for (n = 0,  i = begin; i != end && n < bbt_nmarks; i++) {
+		for (n = 0,  i = begin; i != end && n < bbt_nmarks; ++i) {
 		        if ((*i).is_bar()) {
 			  if ((*i).bar % 4 == 1) {
 				        snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-					(*marks)[n].style = GtkCustomRulerMarkMajor;
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
 			  } else {
-			        snprintf (buf, sizeof(buf), " ");
-				if ((*i).bar % 4 == 3)  {
-				        (*marks)[n].style = GtkCustomRulerMarkMinor;
-				} else {
-				        (*marks)[n].style = GtkCustomRulerMarkMicro;
-				}
+				  buf[0] = '\0';
+				  if ((*i).bar % 4 == 3)  {
+					  mark.style = ArdourCanvas::Ruler::Mark::Minor;
+				  } else {
+					  mark.style = ArdourCanvas::Ruler::Mark::Micro;
+				  }
 			  }
-			(*marks)[n].label = g_strdup (buf);
-			(*marks)[n].position = (*i).frame;
-			n++;
+			  mark.label = buf;
+			  mark.position = (*i).frame;
+			  marks.push_back (mark);
+			  ++n;
 			}
 		}
-
-	break;
+		break;
 
 	}
-
-	return n; //return the actual number of marks made, since we might have skipped some from fractional time signatures
-
 }
 
 void
@@ -1775,29 +1789,28 @@ Editor::set_samples_ruler_scale (framepos_t lower, framepos_t upper)
 	_samples_ruler_interval = (upper - lower) / 5;
 }
 
-gint
-Editor::metric_get_samples (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
+void
+Editor::metric_get_samples (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
 {
 	framepos_t pos;
 	framepos_t const ilower = (framepos_t) floor (lower);
 	gchar buf[16];
 	gint nmarks;
 	gint n;
+	ArdourCanvas::Ruler::Mark mark;
 
 	if (_session == 0) {
-		return 0;
+		return;
 	}
 
 	nmarks = 5;
-	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);
 	for (n = 0, pos = ilower; n < nmarks; pos += _samples_ruler_interval, ++n) {
 		snprintf (buf, sizeof(buf), "%" PRIi64, pos);
-		(*marks)[n].label = g_strdup (buf);
-		(*marks)[n].position = pos;
-		(*marks)[n].style = GtkCustomRulerMarkMajor;
+		mark.label = buf;
+		mark.position = pos;
+		mark.style = ArdourCanvas::Ruler::Mark::Major;
+		marks.push_back (mark);
 	}
-
-	return nmarks;
 }
 
 static void
@@ -1930,17 +1943,18 @@ Editor::set_minsec_ruler_scale (framepos_t lower, framepos_t upper)
 	minsec_nmarks = 2 + (range / minsec_mark_interval);
 }
 
-gint
-Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
+void
+Editor::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
 {
 	framepos_t pos;
 	framepos_t spacer;
 	long hrs, mins, secs, millisecs;
 	gchar buf[16];
 	gint n;
+	ArdourCanvas::Ruler::Mark mark;
 
 	if (_session == 0) {
-		return 0;
+		return;
 	}
 
 	/* to prevent 'flashing' */
@@ -1950,7 +1964,6 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
 		lower = 0;
 	}
 
-	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * minsec_nmarks);
 	pos = (((1000 * (framepos_t) floor(lower)) + (minsec_mark_interval/2))/minsec_mark_interval) * minsec_mark_interval;
 	switch (minsec_ruler_scale) {
 	case minsec_show_seconds:
@@ -1958,17 +1971,18 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
                 	sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
               	  	if (secs % minsec_mark_modulo == 0) {
 				if (secs == 0) {
-					(*marks)[n].style = GtkCustomRulerMarkMajor;
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
 				} else {
-					(*marks)[n].style = GtkCustomRulerMarkMinor;
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 				}
 				snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld.%03ld", hrs, mins, secs, millisecs);
                 	} else {
-                        	snprintf (buf, sizeof(buf), " ");
-	                        (*marks)[n].style = GtkCustomRulerMarkMicro;
+				buf[0] = '\0';
+	                        mark.style = ArdourCanvas::Ruler::Mark::Micro;
         	        }
-                	(*marks)[n].label = g_strdup (buf);
-			(*marks)[n].position = pos/1000.0;
+                	mark.label = buf;
+			mark.position = pos/1000.0;
+			marks.push_back (mark);
 		}
 	  break;
 	case minsec_show_minutes:
@@ -1976,31 +1990,33 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
                         sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
                         if (mins % minsec_mark_modulo == 0) {
                                 if (mins == 0) {
-                                        (*marks)[n].style = GtkCustomRulerMarkMajor;
+                                        mark.style = ArdourCanvas::Ruler::Mark::Major;
                                 } else {
-                                        (*marks)[n].style = GtkCustomRulerMarkMinor;
+                                        mark.style = ArdourCanvas::Ruler::Mark::Minor;
                                 }
 				snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld.%03ld", hrs, mins, secs, millisecs);
                         } else {
-                                snprintf (buf, sizeof(buf), " ");
-                                (*marks)[n].style = GtkCustomRulerMarkMicro;
+				buf[0] = '\0';
+                                mark.style = ArdourCanvas::Ruler::Mark::Micro;
                         }
-                        (*marks)[n].label = g_strdup (buf);
-                        (*marks)[n].position = pos/1000.0;
+                        mark.label = buf;
+                        mark.position = pos/1000.0;
+			marks.push_back (mark);
                 }
 	  break;
 	case minsec_show_hours:
 		 for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
                         sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
                         if (hrs % minsec_mark_modulo == 0) {
-                                (*marks)[n].style = GtkCustomRulerMarkMajor;
+                                mark.style = ArdourCanvas::Ruler::Mark::Major;
                                 snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld.%03ld", hrs, mins, secs, millisecs);
                         } else {
-                                snprintf (buf, sizeof(buf), " ");
-                                (*marks)[n].style = GtkCustomRulerMarkMicro;
+				buf[0] = '\0';
+                                mark.style = ArdourCanvas::Ruler::Mark::Micro;
                         }
-                        (*marks)[n].label = g_strdup (buf);
-                        (*marks)[n].position = pos/1000.0;
+                        mark.label = buf;
+                        mark.position = pos/1000.0;
+			marks.push_back (mark);
                 }
 	      break;
 	case minsec_show_frames:
@@ -2008,20 +2024,19 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
 			sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
 			if (millisecs % minsec_mark_modulo == 0) {
 				if (millisecs == 0) {
-					(*marks)[n].style = GtkCustomRulerMarkMajor;
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
 				} else {
-					(*marks)[n].style = GtkCustomRulerMarkMinor;
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 				}
 				snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld.%03ld", hrs, mins, secs, millisecs);
 			} else {
-				snprintf (buf, sizeof(buf), " ");
-				(*marks)[n].style = GtkCustomRulerMarkMicro;
+				buf[0] = '\0';
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
 			}
-			(*marks)[n].label = g_strdup (buf);
-			(*marks)[n].position = pos/1000.0;
+			mark.label = buf;
+			mark.position = pos/1000.0;
+			marks.push_back (mark);
 		}
 	  break;
 	}
-
-	return minsec_nmarks;
 }
