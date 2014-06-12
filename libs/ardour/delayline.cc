@@ -115,6 +115,7 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 		_buf = _pending_buf;
 		_bsiz = _pending_bsiz;
 		_pending_bsiz = 0;
+		_pending_buf.reset();
 	}
 
 	/* there may be no buffer when delay == 0.
