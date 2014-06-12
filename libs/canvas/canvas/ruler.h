@@ -24,14 +24,12 @@
 
 #include <pangomm/fontdescription.h>
 
-#include "canvas/item.h"
-#include "canvas/fill.h"
-#include "canvas/outline.h"
+#include "canvas/rectangle.h"
 
 namespace ArdourCanvas
 {
 	
-class LIBCANVAS_API Ruler : virtual public Item, public Fill, public Outline
+class LIBCANVAS_API Ruler : public Rectangle
 {
 public:
 	struct Mark {
@@ -58,17 +56,15 @@ public:
 	};
 	
 	Ruler (Group *, const Metric& m);
+	Ruler (Group *, const Metric& m, Rect const&);
 	
 	void set_range (double lower, double upper);
-	void set_size (Rect const&);
 	void set_font_description (Pango::FontDescription);
 	
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
-	void compute_bounding_box () const;
 	
 private:
 	const Metric& _metric;
-	Rect          _rect;
 
 	/* lower and upper and sample positions, which are also canvas coordinates
 	 */
