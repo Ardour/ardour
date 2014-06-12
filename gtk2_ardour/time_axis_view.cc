@@ -287,6 +287,36 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 bool
 TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 {
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
+			/* See Editor::_stepping_axis_view for notes on this hack */
+			Editor& e = dynamic_cast<Editor&> (_editor);
+			if (!e.stepping_axis_view ()) {
+				e.set_stepping_axis_view (this);
+			}
+			e.stepping_axis_view()->step_height (false);
+			return true;
+		} 
+		break;
+
+	case GDK_SCROLL_DOWN:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
+			/* See Editor::_stepping_axis_view for notes on this hack */
+			Editor& e = dynamic_cast<Editor&> (_editor);
+			if (!e.stepping_axis_view ()) {
+				e.set_stepping_axis_view (this);
+			}
+			e.stepping_axis_view()->step_height (true);
+			return true;
+		} 
+		break;
+
+	default:
+		/* no handling for left/right, yet */
+		break;
+	}
+
 	/* Just forward to the normal canvas scroll method. The coordinate
 	   systems are different but since the canvas is always larger than the
 	   track headers, and aligned with the trackview area, this will work.
