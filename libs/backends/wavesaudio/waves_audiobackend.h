@@ -121,6 +121,10 @@ class WavesMidiPort;
 
     virtual int set_systemic_output_latency (uint32_t);
 
+    int set_systemic_midi_input_latency (std::string const, uint32_t) { return 0; }
+
+    int set_systemic_midi_output_latency (std::string const, uint32_t) { return 0; }
+
     virtual std::string device_name () const;
     
     virtual float sample_rate () const;
@@ -139,6 +143,10 @@ class WavesMidiPort;
     
     virtual uint32_t systemic_output_latency () const;
 
+    uint32_t systemic_midi_input_latency (std::string const) const { return 0; }
+
+    uint32_t systemic_midi_output_latency (std::string const) const { return 0; }
+
     virtual std::string control_app_name () const;
 
     virtual void launch_control_app ();
@@ -148,6 +156,19 @@ class WavesMidiPort;
     virtual int set_midi_option (const std::string& option);
 
     virtual std::string midi_option () const;
+
+    std::vector<DeviceStatus> enumerate_midi_devices () const {
+	return std::vector<AudioBackend::DeviceStatus> ();
+    }
+    int set_midi_device_enabled (std::string const, bool) {
+	return 0;
+    }
+    bool midi_device_enabled (std::string const) const {
+	return true;
+    }
+    bool can_set_systemic_midi_latencies () const {
+	return false;
+    }
 
     virtual int _start (bool for_latency_measurement);
 

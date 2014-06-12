@@ -178,6 +178,8 @@ class AlsaAudioBackend : public AudioBackend {
 		int set_output_channels (uint32_t);
 		int set_systemic_input_latency (uint32_t);
 		int set_systemic_output_latency (uint32_t);
+		int set_systemic_midi_input_latency (std::string const, uint32_t);
+		int set_systemic_midi_output_latency (std::string const, uint32_t);
 
 		/* Retrieving parameters */
 		std::string  device_name () const;
@@ -188,6 +190,10 @@ class AlsaAudioBackend : public AudioBackend {
 		uint32_t     output_channels () const;
 		uint32_t     systemic_input_latency () const;
 		uint32_t     systemic_output_latency () const;
+		uint32_t     systemic_midi_input_latency (std::string const) const;
+		uint32_t     systemic_midi_output_latency (std::string const) const;
+
+		bool can_set_systemic_midi_latencies () const { return true; }
 
 		/* External control app */
 		std::string control_app_name () const { return std::string (); }
@@ -197,6 +203,10 @@ class AlsaAudioBackend : public AudioBackend {
 		std::vector<std::string> enumerate_midi_options () const;
 		int set_midi_option (const std::string&);
 		std::string midi_option () const;
+
+		std::vector<DeviceStatus> enumerate_midi_devices () const;
+		int set_midi_device_enabled (std::string const, bool);
+		bool midi_device_enabled (std::string const) const;
 
 		/* State Control */
 	protected:
@@ -287,10 +297,10 @@ class AlsaAudioBackend : public AudioBackend {
 		bool  _run; /* keep going or stop, ardour thread */
 		bool  _active; /* is running, process thread */
 		bool  _freewheeling;
+		bool  _measure_latency;
 
-		void enumerate_midi_devices (std::vector<std::string> &) const;
 		std::string _audio_device;
-		std::string _midi_device;
+		std::string _midi_driver_option;
 
 		/* audio device reservation */
 		ARDOUR::SystemExec *_device_reservation;
@@ -300,10 +310,10 @@ class AlsaAudioBackend : public AudioBackend {
 		void release_device();
 		bool _reservation_succeeded;
 
+		/* audio settings */
 		float  _samplerate;
 		size_t _samples_per_period;
 		size_t _periods_per_cycle;
-		float  _dsp_load;
 		static size_t _max_buffer_size;
 
 		uint32_t _n_inputs;
@@ -311,11 +321,25 @@ class AlsaAudioBackend : public AudioBackend {
 
 		uint32_t _systemic_audio_input_latency;
 		uint32_t _systemic_audio_output_latency;
-		uint32_t _systemic_midi_input_latency;
-		uint32_t _systemic_midi_output_latency;
 
+		/* midi settings */
+		struct AlsaMidiDeviceInfo {
+			bool     enabled;
+			uint32_t systemic_input_latency;
+			uint32_t systemic_output_latency;
+			AlsaMidiDeviceInfo()
+				: enabled (true)
+				, systemic_input_latency (0)
+				, systemic_output_latency (0)
+			{}
+		};
+
+		mutable std::map<std::string, struct AlsaMidiDeviceInfo *> _midi_devices;
+		struct AlsaMidiDeviceInfo * midi_device_info(std::string const) const;
+
+		/* processing */
+		float  _dsp_load;
 		uint64_t _processed_samples;
-
 		pthread_t _main_thread;
 
 		/* process threads */

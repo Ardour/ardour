@@ -263,6 +263,14 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      * external D-A/D-A converters. Units are samples.
      */
     virtual int set_systemic_output_latency (uint32_t) = 0;
+    /** Set the (additional) input latency for a specific midi device,
+     * or if the identifier is empty, apply to all midi devices.
+     */
+    virtual int set_systemic_midi_input_latency (std::string const, uint32_t) = 0;
+    /** Set the (additional) output latency for a specific midi device,
+     * or if the identifier is empty, apply to all midi devices.
+     */
+    virtual int set_systemic_midi_output_latency (std::string const, uint32_t) = 0;
 
     /* Retrieving parameters */
 
@@ -274,6 +282,8 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     virtual uint32_t     output_channels () const = 0;
     virtual uint32_t     systemic_input_latency () const = 0;
     virtual uint32_t     systemic_output_latency () const = 0;
+    virtual uint32_t     systemic_midi_input_latency (std::string const) const = 0;
+    virtual uint32_t     systemic_midi_output_latency (std::string const) const = 0;
 
     /** override this if this implementation returns true from
      * requires_driver_selection()
@@ -311,7 +321,19 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     virtual int set_midi_option (const std::string& option) = 0;
 
     virtual std::string midi_option () const = 0;
-    
+
+    /** Detailed MIDI device list - if available */
+    virtual std::vector<DeviceStatus> enumerate_midi_devices () const = 0;
+
+    /** mark a midi-devices as enabled */
+    virtual int set_midi_device_enabled (std::string const, bool) = 0;
+
+    /** query if a midi-device is enabled */
+    virtual bool midi_device_enabled (std::string const) const = 0;
+
+    /** if backend supports systemic_midi_[in|ou]tput_latency() */
+    virtual bool can_set_systemic_midi_latencies () const = 0;
+
     /* State Control */
  
     /** Start using the device named in the most recent call

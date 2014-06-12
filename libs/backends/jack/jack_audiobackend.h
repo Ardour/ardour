@@ -73,6 +73,8 @@ class JACKAudioBackend : public AudioBackend {
     int set_output_channels (uint32_t);
     int set_systemic_input_latency (uint32_t);
     int set_systemic_output_latency (uint32_t);
+    int set_systemic_midi_input_latency (std::string const, uint32_t) { return 0; }
+    int set_systemic_midi_output_latency (std::string const, uint32_t) { return 0; }
 
     std::string  device_name () const;
     float        sample_rate () const;
@@ -82,6 +84,8 @@ class JACKAudioBackend : public AudioBackend {
     uint32_t     output_channels () const;
     uint32_t     systemic_input_latency () const;
     uint32_t     systemic_output_latency () const;
+    uint32_t     systemic_midi_input_latency (std::string const) const { return 0; }
+    uint32_t     systemic_midi_output_latency (std::string const) const { return 0; }
     std::string  driver_name() const;
 
     std::string control_app_name () const;
@@ -148,6 +152,19 @@ class JACKAudioBackend : public AudioBackend {
     std::vector<std::string> enumerate_midi_options () const;
     int set_midi_option (const std::string&);
     std::string midi_option () const;
+
+    std::vector<DeviceStatus> enumerate_midi_devices () const {
+	return std::vector<AudioBackend::DeviceStatus> ();
+    }
+    int set_midi_device_enabled (std::string const, bool) {
+	return 0;
+    }
+    bool midi_device_enabled (std::string const) const {
+	return true;
+    }
+    bool can_set_systemic_midi_latencies () const {
+	return false;
+    }
 
     int      midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index);
     int      midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);
