@@ -43,7 +43,6 @@
 #include "editor.h"
 #include "editing.h"
 #include "actions.h"
-#include "gtk-custom-hruler.h"
 #include "gui_thread.h"
 #include "time_axis_view.h"
 #include "editor_drag.h"

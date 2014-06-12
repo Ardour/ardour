@@ -50,7 +50,6 @@
 #include "canvas/fwd.h"
 #include "canvas/ruler.h"
 
-#include "gtk-custom-ruler.h"
 #include "ardour_button.h"
 #include "ardour_dialog.h"
 #include "ardour_dropdown.h"
