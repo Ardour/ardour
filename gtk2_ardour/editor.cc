@@ -470,7 +470,6 @@ Editor::Editor ()
 	transport_mark_label.set_no_show_all();
 
 	initialize_canvas ();
-	initialize_rulers ();
 
 	_summary = new EditorSummary (this);
 

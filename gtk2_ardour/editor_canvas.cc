@@ -266,6 +266,8 @@ Editor::initialize_canvas ()
 
 	_track_canvas_viewport->signal_size_allocate().connect (sigc::mem_fun(*this, &Editor::track_canvas_viewport_allocate));
 
+	initialize_rulers ();
+
 	ColorsChanged.connect (sigc::mem_fun (*this, &Editor::color_handler));
 	color_handler();
 
@@ -597,7 +599,7 @@ Editor::autoscroll_canvas ()
 
 	if (autoscroll_vertical_allowed) {
 		
-		const double vertical_pos = vertical_adjustment.get_value();
+		// const double vertical_pos = vertical_adjustment.get_value();
 		const int speed_factor = 20;
 
 		/* vertical */ 
@@ -811,6 +813,17 @@ Editor::set_horizontal_position (double p)
 void
 Editor::color_handler()
 {
+	ArdourCanvas::Color base = ARDOUR_UI::config()->get_canvasvar_RulerBase();
+	ArdourCanvas::Color text = ARDOUR_UI::config()->get_canvasvar_RulerText();
+	timecode_ruler->set_fill_color (base);
+	timecode_ruler->set_outline_color (text);
+	minsec_ruler->set_fill_color (base);
+	minsec_ruler->set_outline_color (text);
+	samples_ruler->set_fill_color (base);
+	samples_ruler->set_outline_color (text);
+	bbt_ruler->set_fill_color (base);
+	bbt_ruler->set_outline_color (text);
+	
 	playhead_cursor->set_color (ARDOUR_UI::config()->get_canvasvar_PlayHead());
 	_verbose_cursor->set_color (ARDOUR_UI::config()->get_canvasvar_VerboseCanvasCursor());
 
