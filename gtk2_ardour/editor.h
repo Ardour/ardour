@@ -47,6 +47,7 @@
 #include "ardour/types.h"
 
 #include "canvas/fwd.h"
+#include "canvas/ruler.h"
 
 #include "gtk-custom-ruler.h"
 #include "ardour_button.h"
@@ -455,6 +456,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
         void override_visible_track_count ();
 
+	/* Ruler metrics methods */
+
+	void metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>&, gdouble, gdouble, gint);
+	void metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>&, gdouble, gdouble, gint);
+	void metric_get_samples (std::vector<ArdourCanvas::Ruler::Mark>&, gdouble, gdouble, gint);
+	void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, gdouble, gdouble, gint);
+
   protected:
 	void map_transport_state ();
 	void map_position_change (framepos_t);
@@ -706,9 +714,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	bool track_canvas_motion (GdkEvent*);
 
-	Gtk::EventBox             time_canvas_event_box;
 	Gtk::EventBox             time_bars_event_box;
-	Gtk::EventBox             ruler_label_event_box;
+	Gtk::VBox                 time_bars_vbox;
 
 	ArdourCanvas::Pixbuf     *logo_item;
 #if 0    
@@ -771,7 +778,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		ruler_video_timeline = 10,
 	};
 
-	static GtkCustomMetric ruler_metrics[4];
 	Glib::RefPtr<Gtk::ToggleAction> ruler_timecode_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_bbt_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_samples_action;
@@ -805,11 +811,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool ruler_label_button_release (GdkEventButton*);
 	void store_ruler_visibility ();
 	void restore_ruler_visibility ();
-
-	static gint _metric_get_timecode (GtkCustomRulerMark **, gdouble, gdouble, gint);
-	static gint _metric_get_bbt (GtkCustomRulerMark **, gdouble, gdouble, gint);
-	static gint _metric_get_samples (GtkCustomRulerMark **, gdouble, gdouble, gint);
-	static gint _metric_get_minsec (GtkCustomRulerMark **, gdouble, gdouble, gint);
 
 	enum MinsecRulerScale {
 		minsec_show_seconds,
@@ -864,21 +865,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 				      ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin,
 				      ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end);
 
-	gint metric_get_timecode (GtkCustomRulerMark **, gdouble, gdouble, gint);
-	gint metric_get_bbt (GtkCustomRulerMark **, gdouble, gdouble, gint);
-	gint metric_get_samples (GtkCustomRulerMark **, gdouble, gdouble, gint);
-	gint metric_get_minsec (GtkCustomRulerMark **, gdouble, gdouble, gint);
-
-	Gtk::Widget        *_ruler_separator;
-	GtkWidget          *_timecode_ruler;
-	GtkWidget          *_bbt_ruler;
-	GtkWidget          *_samples_ruler;
-	GtkWidget          *_minsec_ruler;
-	Gtk::Widget        *timecode_ruler;
-	Gtk::Widget        *bbt_ruler;
-	Gtk::Widget        *samples_ruler;
-	Gtk::Widget        *minsec_ruler;
-	static Editor      *ruler_editor;
+	ArdourCanvas::Ruler* timecode_ruler;
+	ArdourCanvas::Ruler* bbt_ruler;
+	ArdourCanvas::Ruler* samples_ruler;
+	ArdourCanvas::Ruler* minsec_ruler;
 
 	static const double timebar_height;
 	guint32 visible_timebars;
@@ -925,8 +915,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	int get_videotl_bar_height () const { return videotl_bar_height; }
 	void export_video (bool range = false);
 	void toggle_region_video_lock ();
-
-	Gtk::VBox          time_bars_vbox;
 
 	friend class EditorCursor;
 
@@ -1000,9 +988,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Menu *edit_controls_left_menu;
 	Gtk::Menu *edit_controls_right_menu;
 
-	Gtk::VBox           ruler_label_vbox;
 	Gtk::VBox           track_canvas_vbox;
-	Gtk::VBox           time_canvas_vbox;
 	Gtk::VBox           edit_controls_vbox;
 	Gtk::HBox           edit_controls_hbox;
 

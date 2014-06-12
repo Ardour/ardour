@@ -469,8 +469,8 @@ Editor::Editor ()
 	transport_mark_label.hide();
 	transport_mark_label.set_no_show_all();
 
-	initialize_rulers ();
 	initialize_canvas ();
+	initialize_rulers ();
 
 	_summary = new EditorSummary (this);
 
@@ -512,36 +512,22 @@ Editor::Editor ()
 	// CAIROCANVAS
 	time_pad->show();
 
-	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
-	time_canvas_vbox.set_size_request (-1, -1);
-
-	ruler_label_event_box.add (ruler_label_vbox);
-	ruler_label_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	ruler_label_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
-
-	time_bars_event_box.add (time_bars_vbox);
-	time_bars_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	time_bars_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
-
-	time_canvas_event_box.add (time_canvas_vbox);
-	time_canvas_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
-
 	edit_packer.set_col_spacings (0);
 	edit_packer.set_row_spacings (0);
 	edit_packer.set_homogeneous (false);
 	edit_packer.set_border_width (0);
 	edit_packer.set_name ("EditorWindow");
 
-	/* labels for the rulers */
-	edit_packer.attach (ruler_label_event_box,   1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
-	/* labels for the marker "tracks" (time bars) */
-	edit_packer.attach (time_bars_event_box,     1, 2, 1, 2,    FILL,        SHRINK, 0, 0);
-	/* the rulers */
-	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
+	time_bars_event_box.add (time_bars_vbox);
+	time_bars_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	time_bars_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
+
+	/* labels for the time bars */
+	edit_packer.attach (time_bars_event_box,     0, 1, 0, 1,    FILL,        SHRINK, 0, 0);
 	/* track controls */
-	edit_packer.attach (controls_layout,         0, 2, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
-	/* track canvas */
-	edit_packer.attach (*_track_canvas_viewport,  2, 3, 1, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
+	edit_packer.attach (controls_layout,         0, 1, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
+	/* canvas */
+	edit_packer.attach (*_track_canvas_viewport,  1, 2, 0, 2,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
 	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
