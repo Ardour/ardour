@@ -672,13 +672,6 @@ style "small_red_on_black_entry"  = "small_bold_text"
        bg[ACTIVE] = @@COLPREFIX@_base
 }
 
-style "editor_time_ruler" = "small_text"
-{
-	fg[NORMAL] = @@COLPREFIX@_fg
-	bg[NORMAL] = @@COLPREFIX@_base
-        ythickness = 0
-}
-
 style "audio_bus_base" = "very_small_text"
 {
   fg[NORMAL] = @@COLPREFIX@_fg
