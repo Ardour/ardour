@@ -793,6 +793,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MarkerBarItem:
 	case TempoBarItem:
 	case MeterBarItem:
+	case TimecodeRulerItem:
+	case SamplesRulerItem:
+	case MinsecRulerItem:
+	case BBTRulerItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
 		}
@@ -1379,7 +1383,11 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		case CdMarkerBarItem:
 		case TransportMarkerBarItem:
 		case StreamItem:
-			/* button press on these events never does anything to
+		case TimecodeRulerItem:
+		case SamplesRulerItem:
+		case MinsecRulerItem:
+		case BBTRulerItem:
+			/* button press on these items never does anything to
 			   change the editing mode.
 			*/
 			break;
@@ -1596,6 +1604,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case TempoBarItem:
 			case MeterBarItem:
 			case VideoBarItem:
+			case TimecodeRulerItem:
+			case SamplesRulerItem:
+			case MinsecRulerItem:
+			case BBTRulerItem:
 				popup_ruler_menu (where, item_type);
 				break;
 
@@ -1705,6 +1717,13 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			if (!_dragging_playhead) {
 				mouse_add_new_meter_event (pixel_to_sample (event->button.x));
 			}
+			return true;
+			break;
+
+		case TimecodeRulerItem:
+		case SamplesRulerItem:
+		case MinsecRulerItem:
+		case BBTRulerItem:
 			return true;
 			break;
 
@@ -1981,6 +2000,10 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case CdMarkerBarItem:
 	case MeterBarItem:
 	case TempoBarItem:
+	case TimecodeRulerItem:
+	case SamplesRulerItem:
+	case MinsecRulerItem:
+	case BBTRulerItem:
 		if (is_drawable()) {
 			set_canvas_cursor (_cursors->timebar);
 		}
@@ -2127,6 +2150,10 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	case MeterBarItem:
 	case TempoBarItem:
 	case MarkerBarItem:
+	case TimecodeRulerItem:
+	case SamplesRulerItem:
+	case MinsecRulerItem:
+	case BBTRulerItem:
 		if (is_drawable()) {
 			set_canvas_cursor (current_canvas_cursor);
 		}
