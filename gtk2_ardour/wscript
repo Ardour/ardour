@@ -101,8 +101,6 @@ gtk2_ardour_sources = [
         'ghostregion.cc',
         'global_port_matrix.cc',
         'group_tabs.cc',
-        'gtk-custom-hruler.c',
-        'gtk-custom-ruler.c',
         'gtk_pianokeyboard.c',
         'gui_object.cc',
         'insert_time_dialog.cc',
