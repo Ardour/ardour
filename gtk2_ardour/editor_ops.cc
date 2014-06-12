@@ -70,7 +70,6 @@
 #include "editor_drag.h"
 #include "editor_regions.h"
 #include "editor_routes.h"
-#include "gtk-custom-hruler.h"
 #include "gui_thread.h"
 #include "insert_time_dialog.h"
 #include "interthread_progress_window.h"
