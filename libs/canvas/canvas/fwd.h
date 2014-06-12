@@ -26,6 +26,7 @@ namespace ArdourCanvas {
 	class Line;
         class LineSet;
 	class Rectangle;
+        class Ruler;
 	class Polygon;
 	class PolyLine;
 	class GtkCanvas;
