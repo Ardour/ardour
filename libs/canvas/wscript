@@ -34,7 +34,6 @@ canvas_sources = [
         'circle.cc',
         'curve.cc',
         'debug.cc',
-        'drag_handle.cc',
         'item.cc',
         'fill.cc',
         'flag.cc',
