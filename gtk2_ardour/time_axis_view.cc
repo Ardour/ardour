@@ -324,7 +324,7 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 	   In the not too distant future this layout is going away anyway and
 	   headers will be on the canvas.
 	*/
-	return _editor.canvas_scroll_event (ev);
+	return _editor.canvas_scroll_event (ev, false);
 }
 
 bool

@@ -1383,7 +1383,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* Canvas event handlers */
 
-	bool canvas_scroll_event (GdkEventScroll* event);
+	bool canvas_scroll_event (GdkEventScroll* event, bool from_canvas);
 	bool canvas_control_point_event (GdkEvent* event,ArdourCanvas::Item*, ControlPoint*);
 	bool canvas_line_event (GdkEvent* event,ArdourCanvas::Item*, AutomationLine*);
 	bool canvas_selection_rect_event (GdkEvent* event,ArdourCanvas::Item*, SelectionRect*);
