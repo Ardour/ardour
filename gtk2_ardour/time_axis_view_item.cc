@@ -167,7 +167,6 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, uint32_t base_c
 	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
 
 	fill_color = base_color;
-	pre_drag_fill_color = base_color;
 	samples_per_pixel = fpp;
 	frame_position = start;
 	item_duration = duration;
@@ -280,7 +279,6 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, uint32_t base_c
 	}
 
 	set_color (base_color);
-	set_opacity_for_drag (false);
 
 	set_duration (item_duration, this);
 	set_position (start, this);
@@ -666,11 +664,7 @@ TimeAxisViewItem::get_name_highlight()
 void
 TimeAxisViewItem::set_colors()
 {
-	/* we cannot be dragging this item when changing colors,
-	   so reuse set_opacity_for_drag()
-	*/
-	set_opacity_for_drag (false);
-	set_frame_color();
+	set_frame_color ();
 
 	if (name_highlight) {
                 name_highlight->set_fill_color (fill_color);
@@ -706,18 +700,38 @@ TimeAxisViewItem::set_name_text_color ()
 }
 
 uint32_t
+TimeAxisViewItem::fill_opacity () const
+{
+	if (!rect_visible) {
+		/* if the frame/rect is marked as invisible, then the
+		 * fill should be transparent. simplest: set
+		 
+		 * alpha/opacity to zero.
+		 */
+		return 0;
+	}
+
+	if (_dragging) {
+		return 130;
+	}
+
+	uint32_t col = ARDOUR_UI::config()->get_canvasvar_FrameBase();
+	return UINT_RGBA_A (col);
+}
+
+uint32_t
 TimeAxisViewItem::get_fill_color () const
 {
         uint32_t f;
 	uint32_t o;
 
+	o = fill_opacity ();
+
 	if (_selected) {
 
                 f = ARDOUR_UI::config()->get_canvasvar_SelectedFrameBase();
 
-		if (fill_opacity != 0) {
-			o = fill_opacity;
-		} else {
+		if (o == 0) {
 			/* some condition of this item has set fill opacity to
 			 * zero, but it has been selected, so use a mid-way
 			 * alpha value to make it reasonably visible.
@@ -732,22 +746,9 @@ TimeAxisViewItem::get_fill_color () const
 		} else {
 			if ((!Config->get_show_name_highlight() || high_enough_for_name) && !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
 				f = ARDOUR_UI::config()->get_canvasvar_FrameBase();
-				/* use the opacity as set for the FrameBase color */
-				o = UINT_RGBA_A (f);
 			} else {
 				f = fill_color;
-				o = fill_opacity;
 			}
-		}
-
-		/* tweak opacity */
-
-		if (!rect_visible) {
-			/* if the frame/rect is marked as invisible, then the
-			 * fill should be transparent. simplest: set
-			 * alpha/opacity to zero.
-			 */
-			o = 0;
 		}
 	}
 
@@ -783,22 +784,6 @@ TimeAxisViewItem::set_frame_color()
 
                 frame->set_outline_color (f);
         }
-}
-
-void
-TimeAxisViewItem::set_opacity_for_drag (bool drag_starting)
-{
-	if (drag_starting) {
-		fill_opacity = 130;
-	} else {
-		/* use the alpha/opacity value from the basic color, no matter whether 
-		   we use the color of our time axis or not.
-		*/
-		
-		uint32_t col = ARDOUR_UI::config()->get_canvasvar_FrameBase();
-		fill_opacity = UINT_RGBA_A (col);
-	}
-	set_frame_color ();
 }
 
 void
@@ -1016,4 +1001,18 @@ TimeAxisViewItem::parameter_changed (string p)
 	} else if (p == "timeline-item-gradient-depth") {
 		set_frame_gradient ();
 	}
+}
+
+void
+TimeAxisViewItem::drag_start ()
+{
+	_dragging = true;
+	set_frame_color ();
+}
+
+void
+TimeAxisViewItem::drag_end ()
+{
+	_dragging = false;
+	set_frame_color ();
 }

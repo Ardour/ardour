@@ -743,7 +743,6 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 		if (first_move) {
 			rv->drag_start (); 
-			rv->set_opacity_for_drag (true);
 
 			/* reparent the regionview into a group above all
 			 * others
@@ -938,10 +937,6 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 void
 RegionMotionDrag::finished (GdkEvent *, bool)
 {
-	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
-		i->view->set_opacity_for_drag (false);
-	}
-
 	for (vector<TimeAxisView*>::iterator i = _time_axis_views.begin(); i != _time_axis_views.end(); ++i) {
 		if (!(*i)->view()) {
 			continue;
@@ -1200,7 +1195,7 @@ RegionMoveDrag::finished_no_copy (
 			   visible.
 			*/
 			rv->hide_region_editor();
-			rv->set_opacity_for_drag (false);
+
 
 			remove_region_from_playlist (rv->region(), i->initial_playlist, modified_playlists);
 
@@ -1435,7 +1430,6 @@ RegionMotionDrag::aborted (bool)
 		rv->get_canvas_group()->reparent (rtv->view()->canvas_item());
 		rv->get_canvas_group()->set_y_position (0);
 		rv->drag_end ();
-		rv->set_opacity_for_drag (false);
 		rv->move (-_total_x_delta, 0);
 		rv->set_height (rtv->view()->child_height ());
 	}
@@ -1837,7 +1831,6 @@ VideoTimeLineDrag::motion (GdkEvent* event, bool first_move)
 		DEBUG_TRACE (DEBUG::Drags, string_compose("SHIFT REGION at %1 by %2\n", i->initial_position, dt));
 		if (first_move) {
 			rv->drag_start ();
-			rv->set_opacity_for_drag (true);
 			rv->region()->clear_changes ();
 			rv->region()->suspend_property_changes();
 		}
@@ -1885,7 +1878,6 @@ VideoTimeLineDrag::finished (GdkEvent * /*event*/, bool movement_occurred)
 
 	for (list<AVDraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 		i->view->drag_end();
-		i->view->set_opacity_for_drag (false);
 		i->view->region()->resume_property_changes ();
 
 		_editor->session()->add_command (new StatefulDiffCommand (i->view->region()));
@@ -2021,7 +2013,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 			RegionView* rv = i->view;
-			rv->set_opacity_for_drag (false);
 			rv->enable_display (false);
 			rv->region()->playlist()->clear_owned_changes ();
 
@@ -2204,7 +2195,6 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
                                 i->view->thaw_after_trim ();
 				i->view->enable_display (true);
-				i->view->set_opacity_for_drag (true);
 
 				/* Trimming one region may affect others on the playlist, so we need
 				   to get undo Commands from the whole playlist rather than just the

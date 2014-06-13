@@ -154,6 +154,8 @@ class RegionView : public TimeAxisViewItem
 	virtual void set_frame_color ();
 	virtual void reset_width_dependent_items (double pixel_width);
 
+	uint32_t fill_opacity () const;
+
 	virtual void color_handler () {}
 
 	boost::shared_ptr<ARDOUR::Region> _region;
