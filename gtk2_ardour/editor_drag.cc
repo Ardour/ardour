@@ -281,11 +281,10 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 
 	if (cursor == 0) {
 		_item->grab ();
-			     
 	} else {
 		/* CAIROCANVAS need a variant here that passes *cursor */
 		_item->grab ();
-
+		_editor->push_canvas_cursor (cursor);
 	}
 
 	if (_editor->session() && _editor->session()->transport_rolling()) {
@@ -322,6 +321,7 @@ Drag::end_grab (GdkEvent* event)
 	finished (event, _move_threshold_passed);
 
 	_editor->verbose_cursor()->hide ();
+	_editor->pop_canvas_cursor ();
 
 	return _move_threshold_passed;
 }
@@ -1932,6 +1932,8 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 
 	framepos_t const pf = adjusted_current_frame (event);
 
+	cerr << "Button state = " << hex << event->button.state << dec << endl;
+
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 		/* Move the contents of the region around without changing the region bounds */
 		_operation = ContentsTrim;
@@ -1941,11 +1943,22 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		if (pf < (region_start + region_length/2)) {
 			/* closer to front */
 			_operation = StartTrim;
-			Drag::start_grab (event, _editor->cursors()->left_side_trim);
+
+			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+				cerr << "start anchored leftdrag\n";
+				Drag::start_grab (event, _editor->cursors()->anchored_left_side_trim);
+			} else {
+				Drag::start_grab (event, _editor->cursors()->left_side_trim);
+			}
 		} else {
 			/* closer to end */
 			_operation = EndTrim;
-			Drag::start_grab (event, _editor->cursors()->right_side_trim);
+			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+				Drag::start_grab (event, _editor->cursors()->anchored_right_side_trim);
+				cerr << "start anchored right drag\n";
+			} else {
+				Drag::start_grab (event, _editor->cursors()->right_side_trim);
+			}
 		}
 	}
 
@@ -1983,6 +1996,8 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 	frameoffset_t frame_delta = 0;
+
+	cerr << "trim drag @ " << this << " motion\n";
 
 	if (tv && tv->is_track()) {
 		speed = tv->track()->speed();

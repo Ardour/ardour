@@ -500,6 +500,7 @@ Editor::Editor ()
 
 	_cursors = new MouseCursors;
 	_cursors->set_cursor_set (ARDOUR_UI::config()->get_icon_set());
+	cerr << "Set cursor set to " << ARDOUR_UI::config()->get_icon_set() << endl;
 
 	ArdourCanvas::GtkCanvas* time_pad = manage (new ArdourCanvas::GtkCanvas ());
 
@@ -5428,6 +5429,9 @@ void
 Editor::ui_parameter_changed (string parameter)
 {
 	if (parameter == "icon-set") {
+		while (!_cursor_stack.empty()) {
+			_cursor_stack.pop();
+		}
 		_cursors->set_cursor_set (ARDOUR_UI::config()->get_icon_set());
 	}
 }

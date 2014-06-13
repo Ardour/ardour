@@ -36,7 +36,9 @@ public:
 	Gdk::Cursor* cross_hair;
 	Gdk::Cursor* trimmer;
 	Gdk::Cursor* right_side_trim;
+	Gdk::Cursor* anchored_right_side_trim;
 	Gdk::Cursor* left_side_trim;
+	Gdk::Cursor* anchored_left_side_trim;
 	Gdk::Cursor* right_side_trim_left_only;
 	Gdk::Cursor* left_side_trim_right_only;
 	Gdk::Cursor* fade_in;

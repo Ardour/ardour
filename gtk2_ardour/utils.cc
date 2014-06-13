@@ -698,10 +698,12 @@ get_icon_path (const char* cname, string icon_set)
 	name += X_(".png");
 
 	Searchpath spath(ARDOUR::ardour_data_search_path());
-	
+
 	if (!icon_set.empty() && icon_set != _("default")) {
-		string subdir = Glib::build_filename ("icons", icon_set);
-		spath.add_subdirectory_to_paths (subdir);
+
+		/* add "icons/icon_set" but .. not allowed to add both of these at once */
+		spath.add_subdirectory_to_paths ("icons");
+		spath.add_subdirectory_to_paths (icon_set);
 		
 		find_file_in_search_path (spath, name, data_file_path);
 	}

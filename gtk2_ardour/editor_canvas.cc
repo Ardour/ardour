@@ -904,6 +904,25 @@ Editor::set_canvas_cursor (Gdk::Cursor* cursor, bool save)
 	}
 }
 
+void
+Editor::push_canvas_cursor (Gdk::Cursor* cursor)
+{
+	if (cursor) {
+		_cursor_stack.push (cursor);
+		set_canvas_cursor (cursor, false);
+	}
+}
+
+void
+Editor::pop_canvas_cursor ()
+{
+	if (!_cursor_stack.empty()) {
+		Gdk::Cursor* cursor = _cursor_stack.top ();
+		_cursor_stack.pop ();
+		set_canvas_cursor (cursor, false);
+	}
+}
+
 bool
 Editor::track_canvas_key_press (GdkEventKey*)
 {
