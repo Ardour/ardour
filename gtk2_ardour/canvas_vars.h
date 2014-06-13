@@ -255,3 +255,5 @@ CLOCK_VARS(PunchClock, "punch clock")
 CLOCK_VARS(SelectionClock, "selection clock")
 CLOCK_VARS(NudgeClock, "nudge clock")
 CLOCK_VARS(GenericClock, "clock")
+
+CANVAS_STRING_VARIABLE(canvasvar_RulerFont, "ruler font")
