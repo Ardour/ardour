@@ -1,0 +1,30 @@
+function die () {
+    echo "*******************************************************************************"
+	echo $*
+    echo "*******************************************************************************"
+    exit 1
+}
+
+build="yes"
+clean="no"
+
+if [ "$1" == "rebuild" ] ; then clean="yes" ; fi
+if [ "$1" == "clean" ] ; then clean="yes" build="no"; fi
+
+if [ "$clean" == "yes" ] ; then
+	rm -fr $WINA3/inst || die "rm -fr $WINA3/inst failed"
+	rm -fr $WINA3/source || die "rm -fr $WINA3/source failed"
+	rm -fr $WINA3/buildlog || die "rm -fr $WINA3/buildlog failed"
+	rm -fr $WINA3/*.done || die "rm -fr $WINA3/*.done failed"
+fi
+
+if [ "$build" != "yes" ] ; then exit 0 ; fi
+
+if [ "$clean" == "yes" ] ; then
+	cd $WINA3
+	action load
+fi
+
+if [ ! -d "$WINA3/buildlog" ] ; then mkdir "$WINA3/buildlog" ; fi
+#sh -vx $WINA3/build 2>&1 | tee "$WINA3/buildlog/wina3log.`date +%Y-%m-%d--%H.%M`.txt"
+sh -vx $WINA3/build 2>&1 | tee "$WINA3/buildlog/wina3log.txt"

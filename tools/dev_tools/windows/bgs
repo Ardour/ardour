@@ -1,0 +1,29 @@
+function die () {
+    echo "*******************************************************************************"
+	echo $*
+    echo "*******************************************************************************"
+    exit 1
+}
+
+build="yes"
+clean="no"
+
+if [ "$1" == "rebuild" ] ; then clean="yes" ; fi
+if [ "$1" == "clean" ] ; then clean="yes" build="no"; fi
+
+if [ "$clean" == "yes" ] ; then
+	rm -fr $WINGTK/inst || die "rm -fr $WINGTK/inst failed"
+	rm -fr $WINGTK/source || die "rm -fr $WINGTK/source failed"
+	rm -fr $WINGTK/buildlog || die "rm -fr $WINGTK/buildlog failed"
+	rm -fr $WINGTK/*.done || die "rm -fr $WINGTK/*.done failed"
+fi
+
+if [ "$build" != "yes" ] ; then exit 0 ; fi
+
+if [ "$clean" == "yes" ] ; then
+	cd $WINGTK
+	action load
+fi
+
+if [ ! -d "$WINGTK/buildlog" ] ; then mkdir "$WINGTK/buildlog" ; fi
+sh -vx $WINGTK/build 2>&1 | tee "$WINGTK/buildlog/wingtklog.`date +%Y-%m-%d--%H.%M`.txt"
