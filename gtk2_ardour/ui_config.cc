@@ -45,8 +45,8 @@ UIConfiguration::UIConfiguration ()
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,val) var (name,val),
-#define CANVAS_VARIABLE(var,val) var (val),
-#define CANVAS_STRING_VARIABLE(var,val) var (val),
+#define CANVAS_VARIABLE(var,name) var (name),
+#define CANVAS_STRING_VARIABLE(var,name) var (name),
 #include "ui_config_vars.h"
 #include "canvas_vars.h"
 #undef  UI_CONFIG_VARIABLE
@@ -54,7 +54,6 @@ UIConfiguration::UIConfiguration ()
 #undef  CANVAS_STRING_VARIABLE
 	_dirty (false)
 {
-	std::cerr << "Ruler FOnt in constructor " << canvasvar_RulerFont.get() << "\n";
 	load_state();
 }
 
