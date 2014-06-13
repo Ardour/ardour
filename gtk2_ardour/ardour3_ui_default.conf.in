@@ -550,6 +550,40 @@
     <Option name="clock: text" value="6bb620ff"/>
     <Option name="clock: edited text" value="ffa500ff"/>
     <Option name="clock: cursor" value="ffa500ff"/>
-    <Option name="ruler font" value="@FONT_SMALL@"/>
+
+    <Option name="small font" value="@FONT_SMALL@"/>
+    <Option name="smaller font" value="@FONT_SMALLER@"/>
+    <Option name="normal font" value="@FONT_NORMAL@"/>
+    <Option name="big font" value="@FONT_BIG@"/>
+    <Option name="large font" value="@FONT_LARGE@"/>
+    <Option name="larger font" value="@FONT_LARGER@"/>
+    <Option name="huger font" value="@FONT_HUGER@"/>
+    <Option name="massive font" value="@FONT_MASSIVE@"/>
+    <Option name="small bold font" value="bold @FONT_SMALL@"/>
+    <Option name="smaller bold font" value="bold @FONT_SMALLER@"/>
+    <Option name="normal bold font" value="bold @FONT_NORMAL@"/>
+    <Option name="big bold font" value="bold @FONT_BIG@"/>
+    <Option name="large bold font" value="bold @FONT_LARGE@"/>
+    <Option name="larger bold font" value="bold @FONT_LARGER@"/>
+    <Option name="huger bold font" value="bold @FONT_HUGER@"/>
+    <Option name="massive bold font" value="bold @FONT_MASSIVE@"/>
+    <Option name="small italic font" value="italic @FONT_SMALL@"/>
+    <Option name="smaller italic font" value="italic @FONT_SMALLER@"/>
+    <Option name="normal italic font" value="italic @FONT_NORMAL@"/>
+    <Option name="big italic font" value="italic @FONT_BIG@"/>
+    <Option name="large italic font" value="italic @FONT_LARGE@"/>
+    <Option name="larger italic font" value="italic @FONT_LARGER@"/>
+    <Option name="huger italic font" value="italic @FONT_HUGER@"/>
+    <Option name="massive italic font" value="italic @FONT_MASSIVE@"/>
+    <Option name="small monospace font" value="@MONOSPACE@ @FONT_SMALL@"/>
+    <Option name="smaller monospace font" value="@MONOSPACE@ @FONT_SMALLER@"/>
+    <Option name="normal monospace font" value="@MONOSPACE@ @FONT_NORMAL@"/>
+    <Option name="big monospace font" value="@MONOSPACE@ @FONT_BIG@"/>
+    <Option name="large monospace font" value="@MONOSPACE@ @FONT_LARGE@"/>
+    <Option name="larger monospace font" value="@MONOSPACE@ @FONT_LARGER@"/>
+    <Option name="huger monospace font" value="@MONOSPACE@ @FONT_HUGER@"/>
+    <Option name="massive monospace font" value="@MONOSPACE@ @FONT_MASSIVE@"/>
+
+
   </Canvas>
 </Ardour>
