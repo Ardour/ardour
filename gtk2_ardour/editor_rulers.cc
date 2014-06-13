@@ -121,7 +121,7 @@ void
 Editor::initialize_rulers ()
 {
 	ruler_grabbed_widget = 0;
-	Pango::FontDescription font (ARDOUR_UI::config()->get_canvasvar_RulerFont());
+	Pango::FontDescription font (ARDOUR_UI::config()->get_canvasvar_SmallFont());
 
 	_timecode_metric = new TimecodeMetric (this);
 	_bbt_metric = new BBTMetric (this);
