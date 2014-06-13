@@ -101,11 +101,16 @@ class UIConfiguration : public PBD::Stateful
 #include "ui_config_vars.h"
 #undef  UI_CONFIG_VARIABLE
 #undef CANVAS_VARIABLE
+#undef CANVAS_STRING_VARIABLE
 #define CANVAS_VARIABLE(var,name) \
 	uint32_t get_##var () const { return var.get(); } \
 	bool set_##var (uint32_t val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
+#define CANVAS_STRING_VARIABLE(var,name) \
+	std::string get_##var () const { return var.get(); }			\
+	bool set_##var (const std::string& val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
 #include "canvas_vars.h"
 #undef  CANVAS_VARIABLE
+#undef CANVAS_STRING_VARIABLE
 
   private:
 
@@ -118,8 +123,10 @@ class UIConfiguration : public PBD::Stateful
 
 #undef CANVAS_VARIABLE
 #define CANVAS_VARIABLE(var,name) UIConfigVariable<uint32_t> var;
+#define CANVAS_STRING_VARIABLE(var,name) UIConfigVariable<std::string> var;
 #include "canvas_vars.h"
 #undef  CANVAS_VARIABLE
+#undef CANVAS_STRING_VARIABLE
 
 	XMLNode& state ();
 	bool _dirty;
