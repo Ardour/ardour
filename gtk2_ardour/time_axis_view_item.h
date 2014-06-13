@@ -74,7 +74,6 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	void set_y (double);
 	void set_color (uint32_t);
 	void set_name_text_color ();
-	void set_opacity_for_drag (bool drag_starting);
 
         uint32_t get_fill_color () const;
 
@@ -86,8 +85,8 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 
 	double get_samples_per_pixel () const;
 
-	virtual void drag_start() { _dragging = true; }
-	virtual void drag_end() { _dragging = false; }
+	virtual void drag_start();
+	virtual void drag_end();
 	bool dragging() const { return _dragging; }
 
 	virtual void raise () { return; }
@@ -230,9 +229,9 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	/** true if a small vestigial rect should be shown when the item gets very narrow */
 	bool show_vestigial;
 
-	uint32_t fill_opacity;
 	uint32_t fill_color;
-	uint32_t pre_drag_fill_color;
+
+	virtual uint32_t fill_opacity() const;
 
 	uint32_t last_item_width;
 	int name_text_width;
