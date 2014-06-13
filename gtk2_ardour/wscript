@@ -519,6 +519,7 @@ def build(bld):
 
     dark_rc_subst_dict = {}
     light_rc_subst_dict = {}
+    ui_conf_dict = {}
     font_sizes      = {}
     base_font       = ""
 
@@ -579,18 +580,21 @@ def build(bld):
 
             dark_rc_subst_dict[key] = fontstyle
             light_rc_subst_dict[key] = fontstyle
-
+            ui_conf_dict[key] = points
+            
     # @FONT_SIZE_XXXX@
     for sizename,points in iter(font_sizes.items()):
             key = "_".join (['FONT_SIZE',sizename])
             dark_rc_subst_dict[key] = points
             light_rc_subst_dict[key] = points
+            ui_conf_dict[key] = points
 
     # various font names, eg @BOLD_MONOSPACE@
     for font_sym,text in iter(font_names.items()):
         key = font_sym
         dark_rc_subst_dict[key] = text
         light_rc_subst_dict[key] = text
+        ui_conf_dict[key] = text
 
     # RC files
     dark_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme(
@@ -654,6 +658,12 @@ def build(bld):
     obj.source += _doPyp (bld.path.find_resource ('ardour3_ui_light.rc.in').srcpath(), True)
     obj.target = 'ardour3_ui_light.rc'
     obj.install_path = bld.env['CONFDIR']
+
+    obj              = bld(features = 'subst')
+    obj.source       = [ 'ardour3_ui_default.conf.in' ]
+    obj.target       = 'ardour3_ui_default.conf'
+    obj.install_path = None
+    set_subst_dict(obj, ui_conf_dict)
 
     # Menus
     menus_argv = []
