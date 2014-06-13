@@ -151,6 +151,10 @@ style "meterbridge_label" = "small_text"
 {
 }
 
+style "midi_device" = "very_small_text"
+{
+}
+
 style "solo_isolate" = "very_small_text"
 {
 }
