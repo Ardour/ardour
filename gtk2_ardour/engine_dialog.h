@@ -126,7 +126,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     void setup_midi_tab_for_backend ();
     void setup_midi_tab_for_jack ();
-    void refresh_midi_display ();
+    void refresh_midi_display (std::string focus = "");
     
     std::string bufsize_as_string (uint32_t);
 
@@ -249,7 +249,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     MidiDeviceSettings _measure_midi;
     void midi_latency_adjustment_changed(Gtk::Adjustment *, MidiDeviceSettings, bool);
-    bool midi_device_enabled_toggled(GdkEventButton* ev, ArdourButton *, MidiDeviceSettings);
+    void midi_device_enabled_toggled(ArdourButton *, MidiDeviceSettings);
     sigc::connection lm_back_button_signal;
 };
 
