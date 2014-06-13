@@ -550,6 +550,6 @@
     <Option name="clock: text" value="6bb620ff"/>
     <Option name="clock: edited text" value="ffa500ff"/>
     <Option name="clock: cursor" value="ffa500ff"/>
-    <Option name="ruler font" value="sans @FONT_SMALL@"/>
+    <Option name="ruler font" value="@FONT_SMALL@"/>
   </Canvas>
 </Ardour>
