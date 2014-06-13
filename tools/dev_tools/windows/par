@@ -1,0 +1,2 @@
+cd $AD/tracks/tools/windows_packaging || exit 1
+package_win32.sh || exit 1

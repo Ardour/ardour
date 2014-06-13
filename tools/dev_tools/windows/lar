@@ -1,0 +1,6 @@
+if [ "$ADWIN" == "" ] ; then
+  echo "ADWIN is not defined!"
+  exit 0
+fi
+
+cmd "/C $ADWIN\\Tracks\\gtk2_ardour\\ardev.cmd $*" 2>&1 | tee $AD/arlog.txt
