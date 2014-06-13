@@ -23,6 +23,7 @@
 #include <list>
 #include <map>
 #include <set>
+#include <stack>
 #include <string>
 #include <sys/time.h>
 #include <cmath>
@@ -431,6 +432,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gdk::Cursor* get_canvas_cursor () const { return current_canvas_cursor; }
 	void set_canvas_cursor (Gdk::Cursor*, bool save=false);
+	
+	void push_canvas_cursor (Gdk::Cursor*);
+	void pop_canvas_cursor ();
+
 	void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>);
 	void set_current_movable (boost::shared_ptr<ARDOUR::Movable>);
 
@@ -705,6 +710,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	MasterBusUI*    _master_bus_ui;
 	Gtk::VBox&      vpacker;
 
+	std::stack<Gdk::Cursor*> _cursor_stack;
 	Gdk::Cursor*          current_canvas_cursor;
 	Gdk::Cursor* which_grabber_cursor ();
 	void set_canvas_cursor ();

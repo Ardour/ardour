@@ -26,7 +26,9 @@ MouseCursors::MouseCursors ()
 	: cross_hair (0)
 	, trimmer (0)
 	, right_side_trim (0)
+	, anchored_right_side_trim (0)
 	, left_side_trim (0)
+	, anchored_left_side_trim (0)
 	, right_side_trim_left_only (0)
 	, left_side_trim_right_only (0)
 	, fade_in (0)
@@ -68,7 +70,9 @@ MouseCursors::drop_all ()
 	delete cross_hair; cross_hair = 0;
 	delete trimmer; trimmer = 0;
 	delete right_side_trim; right_side_trim = 0;
+	delete anchored_right_side_trim; anchored_right_side_trim = 0;
 	delete left_side_trim; left_side_trim = 0;
+	delete anchored_left_side_trim; anchored_left_side_trim = 0;
 	delete right_side_trim_left_only; right_side_trim_left_only = 0;
 	delete left_side_trim_right_only; left_side_trim_right_only = 0;
 	delete fade_in; fade_in = 0;
@@ -175,8 +179,18 @@ MouseCursors::set_cursor_set (const std::string& name)
 	}
 
 	{
+		RefPtr<Pixbuf> p (::get_icon ("anchored_trim_left_cursor", _cursor_set));
+		anchored_left_side_trim = new Cursor (Display::get_default(), p, 5, 11);
+	}
+
+	{
 		RefPtr<Pixbuf> p (::get_icon ("trim_right_cursor", _cursor_set));
 		right_side_trim = new Cursor (Display::get_default(), p, 23, 11);
+	}
+
+	{
+		RefPtr<Pixbuf> p (::get_icon ("anchored_trim_right_cursor", _cursor_set));
+		anchored_right_side_trim = new Cursor (Display::get_default(), p, 23, 11);
 	}
 
 	{
