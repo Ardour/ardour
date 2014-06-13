@@ -65,7 +65,10 @@ ArdourDialog::~ArdourDialog ()
 bool
 ArdourDialog::on_key_press_event (GdkEventKey* ev)
 {
-	return relay_key_press (ev, this);
+	if (!relay_key_press (ev, this)) {
+		return Gtk::Window::on_key_press_event(ev);
+	}
+	return true;
 }
 
 bool
