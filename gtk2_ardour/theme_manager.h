@@ -62,7 +62,7 @@ class ThemeManager : public ArdourWindow
 
 	    Gtk::TreeModelColumn<std::string>  name;
 	    Gtk::TreeModelColumn<Gdk::Color>   gdkcolor;
-	    Gtk::TreeModelColumn<UIConfigVariable<uint32_t> *> pVar;
+	    Gtk::TreeModelColumn<ColorVariable<uint32_t> *> pVar;
 	    Gtk::TreeModelColumn<uint32_t>     rgba;
 	};
 
