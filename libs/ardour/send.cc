@@ -24,12 +24,13 @@
 #include "pbd/boost_debug.h"
 
 #include "ardour/amp.h"
+#include "ardour/buffer_set.h"
+#include "ardour/debug.h"
+#include "ardour/io.h"
+#include "ardour/meter.h"
+#include "ardour/panner_shell.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
-#include "ardour/buffer_set.h"
-#include "ardour/meter.h"
-#include "ardour/io.h"
-#include "ardour/panner_shell.h"
 
 #include "i18n.h"
 
@@ -129,7 +130,10 @@ Send::set_delay_in(framecnt_t delay)
 		return;
 	}
 	_delay_in = delay;
-	cerr << "SEND DELAY Pre: " <<  delay << "\n";
+
+	DEBUG_TRACE (DEBUG::LatencyCompensation,
+			string_compose ("Send::set_delay_in(%1) + %2 = %3\n",
+				delay, _delay_out, _delay_out + _delay_in));
 	_delayline.get()->set_delay(_delay_out + _delay_in);
 }
 
@@ -141,7 +145,9 @@ Send::set_delay_out(framecnt_t delay)
 		return;
 	}
 	_delay_out = delay;
-	cerr << "SEND DELAY Post: " <<  delay << "\n";
+	DEBUG_TRACE (DEBUG::LatencyCompensation,
+			string_compose ("Send::set_delay_out(%1) + %2 = %3\n",
+				delay, _delay_in, _delay_out + _delay_in));
 	_delayline.get()->set_delay(_delay_out + _delay_in);
 }
 
