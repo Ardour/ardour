@@ -86,6 +86,7 @@ ArdourButton::ArdourButton (Element e)
 	, _fixed_diameter (true)
 	, _distinct_led_click (false)
 	, _hovering (false)
+	, _focused (false)
 {
 	ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 }
@@ -122,6 +123,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _fixed_diameter (true)
 	, _distinct_led_click (false)
 	, _hovering (false)
+	, _focused (false)
 {
 	set_text (str);
 }
@@ -446,6 +448,14 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
 			cairo_fill (cr);
 		}
+	}
+	if (_focused) {
+		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
+		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.5);
+		double dashes = 1;
+		cairo_set_dash (cr, &dashes, 1, 0);
+		cairo_stroke (cr);
+		cairo_set_dash (cr, 0, 0, 0);
 	}
 }
 
@@ -921,6 +931,37 @@ ArdourButton::set_visual_state (Gtkmm2ext::VisualState s)
 	}
 }
 	
+
+bool
+ArdourButton::on_focus_in_event (GdkEventFocus* ev)
+{
+	_focused = true;
+	queue_draw ();
+	return CairoWidget::on_focus_in_event (ev);
+}
+
+bool
+ArdourButton::on_focus_out_event (GdkEventFocus* ev)
+{
+	_focused = false;
+	queue_draw ();
+	return CairoWidget::on_focus_out_event (ev);
+}
+
+bool
+ArdourButton::on_key_release_event (GdkEventKey *ev) {
+	if (_focused &&
+			(ev->keyval == GDK_KEY_space || ev->keyval == GDK_Return))
+	{
+		signal_clicked();
+		if (_action) {
+			_action->activate ();
+		}
+		return true;
+	}
+	return CairoWidget::on_key_release_event (ev);
+}
+
 bool
 ArdourButton::on_enter_notify_event (GdkEventCrossing* ev)
 {

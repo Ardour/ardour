@@ -108,6 +108,9 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void on_name_changed ();
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
+	bool on_focus_in_event (GdkEventFocus*);
+	bool on_focus_out_event (GdkEventFocus*);
+	bool on_key_release_event (GdkEventKey *);
 
 	void controllable_changed ();
 	PBD::ScopedConnection watch_connection;
@@ -168,6 +171,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	bool _fixed_diameter;
 	bool _distinct_led_click;
 	bool _hovering;
+	bool _focused;
     
 	static bool _flat_buttons;
 
