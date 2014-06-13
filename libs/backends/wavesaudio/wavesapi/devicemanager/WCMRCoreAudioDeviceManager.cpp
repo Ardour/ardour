@@ -2055,6 +2055,18 @@ WTErr WCMRCoreAudioDevice::ShowConfigPanel (void */*pParam*/)
         {
             LSOpenFSRef(&theAppFSRef, NULL);
         }
+        else
+        {
+            // open default AudioMIDISetup if device app is not found
+            CFStringRef audiMidiSetupApp = CFStringCreateWithCString(kCFAllocatorDefault, "com.apple.audio.AudioMIDISetup", kCFStringEncodingMacRoman);
+            theError = LSFindApplicationForInfo(kLSUnknownCreator, audiMidiSetupApp, NULL, &theAppFSRef, NULL);
+            
+            if (!theError)
+            {
+                LSOpenFSRef(&theAppFSRef, NULL);
+            }
+        }
+        
         CFRelease (configAP);
     }
     
