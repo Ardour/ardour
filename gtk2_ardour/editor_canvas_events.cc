@@ -160,11 +160,13 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 }
 
 bool
-Editor::canvas_scroll_event (GdkEventScroll *event)
+Editor::canvas_scroll_event (GdkEventScroll *event, bool from_canvas)
 {
-	boost::optional<Rect> rulers = _time_markers_group->bounding_box();
-	if (rulers && rulers->contains (Duple (event->x, event->y))) {
-		return canvas_ruler_event ((GdkEvent*) event, timecode_ruler, TimecodeRulerItem);
+	if (from_canvas) {
+		boost::optional<Rect> rulers = _time_markers_group->bounding_box();
+		if (rulers && rulers->contains (Duple (event->x, event->y))) {
+			return canvas_ruler_event ((GdkEvent*) event, timecode_ruler, TimecodeRulerItem);
+		}
 	}
 
 	_track_canvas->grab_focus();
