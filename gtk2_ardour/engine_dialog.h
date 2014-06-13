@@ -79,6 +79,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     Gtk::Label      have_control_text;
     Gtk::Button     control_app_button;
+    ArdourButton    midi_devices_button;
 
     Gtk::Button     connect_disconnect_button;
 
@@ -91,7 +92,6 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     Gtk::Button       lm_use_button;
     Gtk::Button       lm_back_button;
     ArdourButton      lm_button_audio;
-    ArdourButton      lm_button_midi;
     Gtk::Label        lm_title;
     Gtk::Label        lm_results;
     Gtk::Table        lm_table;
@@ -106,7 +106,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     /* MIDI Tab */
 
     Gtk::VBox midi_vbox;
-    Gtk::Button midi_refresh_button;
+    Gtk::Button midi_back_button;
     Gtk::Table midi_device_table;
 
     /* MIDI ... JACK */
@@ -145,6 +145,35 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void list_devices ();
     void show_buffer_duration ();
 
+    void configure_midi_devices ();
+
+    struct MidiDeviceSetting {
+	std::string name;
+	bool enabled;
+	uint32_t input_latency;
+	uint32_t output_latency;
+
+	MidiDeviceSetting (std::string n, bool en = true, uint32_t inl = 0, uint32_t oul = 0)
+	    : name (n)
+	    , enabled (en)
+	    , input_latency (inl)
+	    , output_latency (oul)
+	{}
+    };
+
+    typedef boost::shared_ptr<MidiDeviceSetting> MidiDeviceSettings;
+    bool _can_set_midi_latencies;
+    std::vector<MidiDeviceSettings> _midi_devices;
+
+    MidiDeviceSettings find_midi_device(std::string devicename) const {
+	for (std::vector<MidiDeviceSettings>::const_iterator p = _midi_devices.begin(); p != _midi_devices.end(); ++p) {
+	    if ((*p)->name == devicename) {
+		return *p;
+	    }
+	}
+	return MidiDeviceSettings();
+    }
+
     struct State {
 	std::string backend;
 	std::string driver;
@@ -157,6 +186,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	uint32_t output_channels;
 	bool active;
 	std::string midi_option;
+	std::vector<MidiDeviceSettings> midi_devices;
 
 	State() 
 		: input_latency (0)
@@ -215,8 +245,12 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     void connect_disconnect_click ();
     void calibrate_audio_latency ();
-    void calibrate_midi_latency ();
-    bool _measure_midi;
+    void calibrate_midi_latency (MidiDeviceSettings);
+
+    MidiDeviceSettings _measure_midi;
+    void midi_latency_adjustment_changed(Gtk::Adjustment *, MidiDeviceSettings, bool);
+    bool midi_device_enabled_toggled(GdkEventButton* ev, ArdourButton *, MidiDeviceSettings);
+    sigc::connection lm_back_button_signal;
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */
