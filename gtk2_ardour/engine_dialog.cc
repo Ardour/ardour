@@ -258,6 +258,7 @@ EngineControl::EngineControl ()
 	midi_devices_button.signal_clicked.connect (mem_fun (*this, &EngineControl::configure_midi_devices));
 	midi_devices_button.set_sensitive (false);
 	midi_devices_button.set_name ("generic button");
+	midi_devices_button.set_can_focus(true);
 
 	control_app_button.signal_clicked().connect (mem_fun (*this, &EngineControl::control_app_button_clicked));
 	manage_control_app_sensitivity ();
@@ -343,6 +344,7 @@ EngineControl::build_notebook ()
 
 	lm_button_audio.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_audio_latency));
 	lm_button_audio.set_name ("generic button");
+	lm_button_audio.set_can_focus(true);
 
 	if (_have_control) {
 		build_full_control_notebook ();
@@ -587,19 +589,15 @@ EngineControl::midi_latency_adjustment_changed (Gtk::Adjustment *a, MidiDeviceSe
 	}
 }
 
-bool
-EngineControl::midi_device_enabled_toggled (GdkEventButton* ev, ArdourButton *b, MidiDeviceSettings device) {
-	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS) {
-		return true;
-	}
+void
+EngineControl::midi_device_enabled_toggled (ArdourButton *b, MidiDeviceSettings device) {
 	b->set_active (!b->get_active());
 	device->enabled = b->get_active();
-	refresh_midi_display();
-	return true;
+	refresh_midi_display(device->name);
 }
 
 void
-EngineControl::refresh_midi_display ()
+EngineControl::refresh_midi_display (std::string focus)
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
@@ -639,10 +637,14 @@ EngineControl::refresh_midi_display ()
 
 		m = manage (new ArdourButton ((*p)->name, ArdourButton::led_default_elements));
 		m->set_name ("midi device");
+		m->set_can_focus (Gtk::CAN_FOCUS);
 		m->add_events (Gdk::BUTTON_RELEASE_MASK);
 		m->set_active (enabled);
-		m->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &EngineControl::midi_device_enabled_toggled), m, *p));
+		m->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &EngineControl::midi_device_enabled_toggled), m, *p));
 		midi_device_table.attach (*m, 0, 1, row, row + 1, xopt, AttachOptions (0)); m->show ();
+		if ((*p)->name == focus) {
+			m->grab_focus();
+		}
 
 		a = manage (new Gtk::Adjustment (0, 0, 99999, 1));
 		s = manage (new Gtk::SpinButton (*a));
