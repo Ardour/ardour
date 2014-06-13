@@ -528,8 +528,8 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 
 	get_window()->get_pointer (x, y, mask);
 
-	if ((allow_horiz && (x < scrolling_boundary.x0 || x >= scrolling_boundary.x1)) ||
-	    (allow_vert && (y < scrolling_boundary.y0 || y >= scrolling_boundary.y1))) {
+	if ((allow_horiz && ((x < scrolling_boundary.x0 && leftmost_frame > 0) || x >= scrolling_boundary.x1)) ||
+	    (allow_vert && ((y < scrolling_boundary.y0 && vertical_adjustment.get_value() > 0)|| y >= scrolling_boundary.y1))) {
 		start_canvas_autoscroll (allow_horiz, allow_vert, scrolling_boundary);
 	}
 }
