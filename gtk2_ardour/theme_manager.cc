@@ -197,7 +197,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 	int cellx;
 	int celly;
 
-	UIConfigVariable<uint32_t> *ccvar;
+	ColorVariable<uint32_t> *ccvar;
 
 	if (!color_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		return false;
@@ -211,7 +211,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 	case 1: /* color */
 		if ((iter = color_list->get_iter (path))) {
 
-			UIConfigVariable<uint32_t>* var = (*iter)[columns.pVar];
+			ColorVariable<uint32_t>* var = (*iter)[columns.pVar];
 			if (!var) {
 				/* parent row, do nothing */
 				return false;
@@ -392,10 +392,10 @@ ThemeManager::setup_theme ()
 
 	color_list->clear();
 
-	for (std::map<std::string,UIConfigVariable<uint32_t> *>::iterator i = ARDOUR_UI::config()->canvas_colors.begin(); i != ARDOUR_UI::config()->canvas_colors.end(); i++) {
+	for (std::map<std::string,ColorVariable<uint32_t> *>::iterator i = ARDOUR_UI::config()->canvas_colors.begin(); i != ARDOUR_UI::config()->canvas_colors.end(); i++) {
 
 
-		UIConfigVariable<uint32_t>* var = i->second;
+		ColorVariable<uint32_t>* var = i->second;
 
 		TreeModel::Children rows = color_list->children();
 		TreeModel::Row row;

@@ -45,13 +45,16 @@ UIConfiguration::UIConfiguration ()
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,val) var (name,val),
-#define CANVAS_VARIABLE(var,name) var (name),
+#define CANVAS_VARIABLE(var,val) var (val),
+#define CANVAS_STRING_VARIABLE(var,val) var (val),
 #include "ui_config_vars.h"
 #include "canvas_vars.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_VARIABLE
+#undef  CANVAS_STRING_VARIABLE
 	_dirty (false)
 {
+	std::cerr << "Ruler FOnt in constructor " << canvasvar_RulerFont.get() << "\n";
 	load_state();
 }
 
@@ -215,10 +218,12 @@ UIConfiguration::get_variables (std::string which_node)
 #undef  CANVAS_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,Name,value) if (node->name() == "UI") { var.add_to_node (*node); }
 #define CANVAS_VARIABLE(var,Name) if (node->name() == "Canvas") { var.add_to_node (*node); }
+#define CANVAS_STRING_VARIABLE(var,Name) if (node->name() == "Canvas") { var.add_to_node (*node); }
 #include "ui_config_vars.h"
 #include "canvas_vars.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_VARIABLE
+#undef  CANVAS_STRING_VARIABLE
 
 	return *node;
 }
@@ -262,25 +267,32 @@ UIConfiguration::set_variables (const XMLNode& node)
          if (var.set_from_node (node)) { \
 		 ParameterChanged (name); \
 		 }
+#define CANVAS_STRING_VARIABLE(var,name)	\
+         if (var.set_from_node (node)) { \
+		 ParameterChanged (name); \
+		 }
 #include "ui_config_vars.h"
 #include "canvas_vars.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_VARIABLE
+#undef  CANVAS_STRING_VARIABLE
 }
 
 void
 UIConfiguration::pack_canvasvars ()
 {
 #undef  CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,name) canvas_colors.insert (std::pair<std::string,UIConfigVariable<uint32_t>* >(name,&var));
+#define CANVAS_VARIABLE(var,name) canvas_colors.insert (std::pair<std::string,ColorVariable<uint32_t>* >(name,&var));
+#define CANVAS_STRING_VARIABLE(var,name) 
 #include "canvas_vars.h"
 #undef  CANVAS_VARIABLE
+#undef  CANVAS_STRING_VARIABLE
 }
 
 uint32_t
 UIConfiguration::color_by_name (const std::string& name)
 {
-	map<std::string,UIConfigVariable<uint32_t>* >::iterator i = canvas_colors.find (name);
+	map<std::string,ColorVariable<uint32_t>* >::iterator i = canvas_colors.find (name);
 
 	if (i != canvas_colors.end()) {
 		return i->second->get();
