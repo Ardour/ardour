@@ -41,6 +41,7 @@
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/keyboard.h"
 
+#include "ardour_ui.h"
 #include "editor.h"
 #include "editing.h"
 #include "actions.h"
@@ -120,7 +121,7 @@ void
 Editor::initialize_rulers ()
 {
 	ruler_grabbed_widget = 0;
-	Pango::FontDescription font = get_font_for_style ("editor_time_ruler");
+	Pango::FontDescription font (ARDOUR_UI::config()->get_canvasvar_RulerFont());
 
 	_timecode_metric = new TimecodeMetric (this);
 	_bbt_metric = new BBTMetric (this);
