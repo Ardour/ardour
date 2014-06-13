@@ -1068,20 +1068,20 @@ EngineControl::save_state ()
 	if (!_have_control) {
 		return 0;
 	}
-
-	bool existing = true;
-	State* state = get_saved_state_for_currently_displayed_backend_and_device ();
-
-	if (!state) {
-		existing = false;
-		state = new State;
-	}
-
+	State* state = new State;
 	store_state (*state);
 
-	if (!existing) {
-		states.push_back (*state);
+	for (StateList::iterator i = states.begin(); i != states.end();) {
+		if ((*i).backend == state->backend &&
+				(*i).driver == state->driver &&
+				(*i).device == state->device) {
+			i =  states.erase(i);
+		} else {
+			++i;
+		}
 	}
+
+	states.push_back (*state);
 
 	return state;
 }
@@ -1290,6 +1290,21 @@ EngineControl::set_state (const XMLNode& root)
 					state.midi_devices.push_back (ptr);
 				}
 			}
+
+#if 1
+			/* remove accumulated duplicates (due to bug in ealier version)
+			 * this can be removed again before release
+			 */
+			for (StateList::iterator i = states.begin(); i != states.end();) {
+				if ((*i).backend == state.backend &&
+						(*i).driver == state.driver &&
+						(*i).device == state.device) {
+					i =  states.erase(i);
+				} else {
+					++i;
+				}
+			}
+#endif
 
 			states.push_back (state);
 		}
@@ -1667,7 +1682,11 @@ EngineControl::get_backend () const
 string
 EngineControl::get_driver () const
 {
-	return driver_combo.get_active_text ();
+	if (driver_combo.get_sensitive() && driver_combo.get_parent()) {
+		return driver_combo.get_active_text ();
+	} else {
+		return "";
+	}
 }
 
 string
