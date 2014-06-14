@@ -802,8 +802,13 @@ EngineControl::list_devices ()
 		output_latency.set_sensitive (false);
 		input_channels.set_sensitive (false);
 		output_channels.set_sensitive (false);
-		ok_button->set_sensitive (false);
-		apply_button->set_sensitive (false);
+		if (_have_control) {
+			ok_button->set_sensitive (false);
+			apply_button->set_sensitive (false);
+		} else {
+			ok_button->set_sensitive (true);
+			apply_button->set_sensitive (true);
+		}
 	}
 }
 
