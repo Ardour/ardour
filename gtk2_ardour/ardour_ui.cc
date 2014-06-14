@@ -755,6 +755,7 @@ ARDOUR_UI::starting ()
 	try {
 		audio_midi_setup.get (true);
 	} catch (...) {
+		std::cerr << "audio-midi engine setup failed."<< std::endl;
 		return -1;
 	}
 
@@ -841,6 +842,7 @@ ARDOUR_UI::starting ()
 		const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || brand_new_user);
 
 		if (get_session_parameters (false, new_session_required, ARDOUR_COMMAND_LINE::load_template)) {
+			std::cerr << "Cannot get session parameters."<< std::endl;
 			return -1;
 		}
 	}
