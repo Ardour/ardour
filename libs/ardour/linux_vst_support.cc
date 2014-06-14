@@ -152,8 +152,8 @@ void* vstfx_load_vst_library(const char* path)
 	len2 = strlen(path);
 
 	/*Try all the possibilities in the path - deliminated by : */
-
-	lxvst_path = strtok (envdup, ":");
+	char *saveptr;
+	lxvst_path = strtok_r (envdup, ":", &saveptr);
 	
 	while (lxvst_path != 0)
 	{
@@ -177,7 +177,7 @@ void* vstfx_load_vst_library(const char* path)
 	
 		/*Try again*/
 
-		lxvst_path = strtok (0, ":");
+		lxvst_path = strtok_r (0, ":", &saveptr);
 	}
 
 	/*Free the path*/
