@@ -24,6 +24,7 @@
 using PBD::readdir;
 using PBD::opendir;
 using PBD::closedir;
+#define strtok_r strtok_s // @john: this should probably go to msvc_extra_headers/ardourext/misc.h.input instead of the current define there
 #else
 #include <dirent.h>
 #include <cstdlib>
@@ -105,8 +106,9 @@ PathScanner::run_scan_internal (vector<string *> *result,
 	string search_str;
 	string *newstr;
 	long nfound = 0;
+	char *saveptr;
 
-	if ((thisdir = strtok (pathcopy, G_SEARCHPATH_SEPARATOR_S)) == 0 ||
+	if ((thisdir = strtok_r (pathcopy, G_SEARCHPATH_SEPARATOR_S, &saveptr)) == 0 ||
 	    strlen (thisdir) == 0) {
 		free (pathcopy);
 		return 0;
@@ -170,7 +172,7 @@ PathScanner::run_scan_internal (vector<string *> *result,
 		}
 		closedir (dir);
 		
-	} while ((limit < 0 || (nfound < limit)) && (thisdir = strtok (0, G_SEARCHPATH_SEPARATOR_S)));
+	} while ((limit < 0 || (nfound < limit)) && (thisdir = strtok_r (0, G_SEARCHPATH_SEPARATOR_S, &saveptr)));
 
 	free (pathcopy);
 	return result;
