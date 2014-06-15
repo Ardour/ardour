@@ -450,10 +450,12 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		}
 	}
 	if (_focused) {
-		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
-		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.5);
+		rounded_function (cr, 1.5, 1.5, get_width() - 3, get_height() - 3, _corner_radius);
+		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.8);
 		double dashes = 1;
 		cairo_set_dash (cr, &dashes, 1, 0);
+		cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
+		cairo_set_line_width (cr, 1.0);
 		cairo_stroke (cr);
 		cairo_set_dash (cr, 0, 0, 0);
 	}
