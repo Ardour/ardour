@@ -851,7 +851,7 @@ GtkCanvas::unfocus (Item* item)
 	}
 }
 
-/** @return The visible area of the canvas, in canvas coordinates */
+/** @return The visible area of the canvas, in window coordinates */
 Rect
 GtkCanvas::visible_area () const
 {
