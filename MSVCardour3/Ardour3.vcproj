@@ -619,62 +619,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\gtk-custom-hruler.c"
-				>
-				<FileConfiguration
-					Name="Debug 32|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						CompileAs="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release 32|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						CompileAs="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release 32 with Debugging Capability|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						CompileAs="1"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\gtk-custom-ruler.c"
-				>
-				<FileConfiguration
-					Name="Debug 32|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						CompileAs="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release 32|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						CompileAs="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release 32 with Debugging Capability|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						CompileAs="1"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\gtk_pianokeyboard.c"
 				>
 			</File>
@@ -1566,14 +1510,6 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\group_tabs.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\gtk-custom-hruler.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\gtk-custom-ruler.h"
 				>
 			</File>
 			<File
