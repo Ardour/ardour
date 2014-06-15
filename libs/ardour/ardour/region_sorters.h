@@ -36,6 +36,19 @@ struct LIBARDOUR_API RegionSortByLayer {
 	}
 };
 
+/* sort by RegionSortByLayerAndPosition()
+ * is equivalent to
+ * stable_sort by RegionSortByPosition();
+ * stable_sort by RegionSortByLayer();
+ */
+struct LIBARDOUR_API RegionSortByLayerAndPosition {
+	bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
+		return
+			   (a->layer() < b->layer()  && a->position() < b->position())
+			|| (a->layer() == b->layer() && a->position() < b->position());
+	}
+};
+
 } // namespace
 
 #endif /* __libardour_region_sorters_h__ */

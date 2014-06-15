@@ -2809,7 +2809,14 @@ Playlist::combine (const RegionList& r)
 
 	pl->in_partition = true;
 
-	for (RegionList::const_iterator i = r.begin(); i != r.end(); ++i) {
+	/* sort by position then layer.
+	 * route_time_axis passes 'selected_regions' - which is not sorted.
+	 * here we need the top-most first, then every layer's region softed by position.
+	 */
+	RegionList sorted(r);
+	sorted.sort(RegionSortByLayerAndPosition());
+
+	for (RegionList::const_iterator i = sorted.begin(); i != sorted.end(); ++i) {
 
 		/* copy the region */
 
@@ -3050,6 +3057,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 	for (vector<boost::shared_ptr<Region> >::iterator i = originals.begin(); i != originals.end(); ++i) {
 		add_region ((*i), (*i)->position());
+		set_layer((*i), (*i)->layer());
 	}
 
 	in_partition = false;
