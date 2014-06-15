@@ -25,6 +25,7 @@
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
 #include "pbd/convert.h"
+#include "pbd/stl_delete.h"
 
 #include "ardour/filesystem_paths.h"
 
@@ -509,6 +510,7 @@ DeviceInfo::reload_device_info ()
 		}
 	}
 
+	vector_delete (devinfos);
 	delete devinfos;
 }
 

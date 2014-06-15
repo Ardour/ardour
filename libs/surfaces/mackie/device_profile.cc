@@ -25,6 +25,7 @@
 #include "pbd/xml++.h"
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
+#include "pbd/stl_delete.h"
 #include "pbd/replace_all.h"
 
 #include "ardour/filesystem_paths.h"
@@ -126,6 +127,7 @@ DeviceProfile::reload_device_profiles ()
 		}
 	}
 
+	vector_delete (devprofiles);
 	delete devprofiles;
 }
 
