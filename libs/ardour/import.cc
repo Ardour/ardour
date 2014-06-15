@@ -522,6 +522,11 @@ Session::import_files (ImportStatus& status)
 			}
 		}
 
+		if (channels == 0) {
+			error << _("Import: file contains no channels.") << endmsg;
+			continue;
+		}
+
 		vector<string> new_paths = get_paths_for_new_sources (config.get_native_file_header_format(),
 		                                                      status.replace_existing_source, *p,
 		                                                      get_best_session_directory_for_new_source (),
