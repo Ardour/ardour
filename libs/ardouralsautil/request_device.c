@@ -189,6 +189,7 @@ int main(int argc, char **argv) {
 
 	if (parent_pid > 0 && kill (parent_pid, 0)) {
 		fprintf(stderr, "Given PID to watch is not running.\n");
+		free(name);
 		return EXIT_FAILURE;
 	}
 
