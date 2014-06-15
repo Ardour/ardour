@@ -42,14 +42,14 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
   public:
     EngineControl ();
     ~EngineControl ();
-    
+
     static bool need_setup ();
-    
+
     XMLNode& get_state ();
     void set_state (const XMLNode&);
-    
+
     void set_desired_sample_rate (uint32_t);
-    
+
   private:
     Gtk::Notebook notebook;
 
@@ -110,9 +110,9 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     Gtk::Table midi_device_table;
 
     /* MIDI ... JACK */
-    
+
     Gtk::CheckButton aj_button;
-    
+
     uint32_t ignore_changes;
     uint32_t _desired_sample_rate;
     bool     started_at_least_once;
@@ -127,7 +127,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void setup_midi_tab_for_backend ();
     void setup_midi_tab_for_jack ();
     void refresh_midi_display (std::string focus = "");
-    
+
     std::string bufsize_as_string (uint32_t);
 
     float get_rate() const;
@@ -174,7 +174,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	return MidiDeviceSettings();
     }
 
-    struct State {
+    struct StateStruct {
 	std::string backend;
 	std::string driver;
 	std::string device;
@@ -188,7 +188,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	std::string midi_option;
 	std::vector<MidiDeviceSettings> midi_devices;
 
-	State() 
+	StateStruct()
 		: input_latency (0)
 		, output_latency (0)
 		, input_channels (0)
@@ -196,18 +196,19 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 		, active (false) {}
 
     };
-    
+
+    typedef boost::shared_ptr<StateStruct> State;
     typedef std::list<State> StateList;
 
     StateList states;
 
-    State* get_matching_state (const std::string& backend,
+    State get_matching_state (const std::string& backend,
 			       const std::string& driver,
 			       const std::string& device);
-    State* get_saved_state_for_currently_displayed_backend_and_device ();
+    State get_saved_state_for_currently_displayed_backend_and_device ();
     void maybe_display_saved_state ();
-    State* save_state ();
-    void store_state (State&);
+    State save_state ();
+    void store_state (State);
 
     bool  _have_control;
 
@@ -234,7 +235,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void disable_latency_tab ();
     void start_latency_detection ();
     void end_latency_detection ();
-    
+
     void on_switch_page (GtkNotebookPage*, guint page_num);
     bool on_delete_event (GdkEventAny*);
 
