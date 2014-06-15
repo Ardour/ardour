@@ -39,9 +39,11 @@ public:
 
 	void set_session (ARDOUR::Session *);
 	void set_overlays_dirty ();
+	void set_background_dirty ();
 	void routes_added (std::list<RouteTimeAxisView*> const &);
 
 private:
+	void on_size_allocate (Gtk::Allocation& alloc);
 
 	enum Position {
 		LEFT,
@@ -120,6 +122,9 @@ private:
 	Position _zoom_position;
 
 	bool _old_follow_playhead;
+	cairo_surface_t* _image;
+	void render_background_image ();
+	bool _background_dirty;
 
 	PBD::ScopedConnectionList position_connection;
 	PBD::ScopedConnection route_ctrl_id_connection;
