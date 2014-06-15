@@ -143,7 +143,7 @@ Text::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) cons
 		redraw (context);
 	}
 	
-	Rect self = item_to_window (Rect (0, 0, min (_clamped_width, _width), _height));
+	Rect self = item_to_window (Rect (0, 0, min (_clamped_width, (double)_image->get_width ()), _image->get_height ()));
 	
 	context->rectangle (self.x0, self.y0, self.width(), self.height());
 	context->set_source (_image, self.x0, self.y0);

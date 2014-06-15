@@ -543,10 +543,12 @@ Item::begin_change ()
 void
 Item::end_change ()
 {
-	_canvas->item_changed (this, _pre_change_bounding_box);
+	if (_visible) {
+		_canvas->item_changed (this, _pre_change_bounding_box);
 	
-	if (_parent) {
-		_parent->child_changed ();
+		if (_parent) {
+			_parent->child_changed ();
+		}
 	}
 }
 
@@ -558,7 +560,9 @@ Item::begin_visual_change ()
 void
 Item::end_visual_change ()
 {
-	_canvas->item_visual_property_changed (this);
+	if (_visible) {
+		_canvas->item_visual_property_changed (this);
+	}
 }
 
 void

@@ -165,7 +165,9 @@ Canvas::item_shown_or_hidden (Item* item)
 {
 	boost::optional<Rect> bbox = item->bounding_box ();
 	if (bbox) {
-		queue_draw_item_area (item, bbox.get ());
+		if (item->item_to_window (*bbox).intersection (visible_area ())) {
+			queue_draw_item_area (item, bbox.get ());
+		}
 	}
 }
 
@@ -178,7 +180,9 @@ Canvas::item_visual_property_changed (Item* item)
 {
 	boost::optional<Rect> bbox = item->bounding_box ();
 	if (bbox) {
-		queue_draw_item_area (item, bbox.get ());
+		if (item->item_to_window (*bbox).intersection (visible_area ())) {
+			queue_draw_item_area (item, bbox.get ());
+		}
 	}
 }
 
@@ -190,15 +194,24 @@ Canvas::item_visual_property_changed (Item* item)
 void
 Canvas::item_changed (Item* item, boost::optional<Rect> pre_change_bounding_box)
 {
+	
+	Rect window_bbox = visible_area ();
+
 	if (pre_change_bounding_box) {
-		/* request a redraw of the item's old bounding box */
-		queue_draw_item_area (item, pre_change_bounding_box.get ());
+
+		if (item->item_to_window (*pre_change_bounding_box).intersection (window_bbox)) {
+			/* request a redraw of the item's old bounding box */
+			queue_draw_item_area (item, pre_change_bounding_box.get ());
+		}
 	}
 
 	boost::optional<Rect> post_change_bounding_box = item->bounding_box ();
 	if (post_change_bounding_box) {
-		/* request a redraw of the item's new bounding box */
-		queue_draw_item_area (item, post_change_bounding_box.get ());
+		
+		if (item->item_to_window (*post_change_bounding_box).intersection (window_bbox)) {
+			/* request a redraw of the item's new bounding box */
+			queue_draw_item_area (item, post_change_bounding_box.get ());
+		}
 	}
 }
 
