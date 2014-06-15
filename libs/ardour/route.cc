@@ -562,9 +562,12 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 		return;
 	}
 
+	// TODO cache this value.
+	framecnt_t latency = bounce_get_latency(_amp, false, for_export, for_freeze);
 	_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
-	_amp->setup_gain_automation (start, start + nframes, nframes);
+	_amp->setup_gain_automation (start - latency, start - latency + nframes, nframes);
 
+	latency = 0;
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 		if (!include_endpoint && (*i) == endpoint) {
@@ -583,8 +586,9 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 		 * oh, and don't bother with the peak meter either.
 		 */
 		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
-			(*i)->run (buffers, start, start+nframes, nframes, true);
+			(*i)->run (buffers, start - latency, start - latency + nframes, nframes, true);
 			buffers.set_count ((*i)->output_streams());
+			latency += (*i)->signal_latency ();
 		}
 
 		if ((*i) == endpoint) {
