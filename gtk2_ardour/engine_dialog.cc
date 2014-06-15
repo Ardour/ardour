@@ -1041,23 +1041,23 @@ EngineControl::parameter_changed ()
 	}
 }
 
-EngineControl::State*
+EngineControl::State
 EngineControl::get_matching_state (
 		const string& backend,
 		const string& driver,
 		const string& device)
 {
 	for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
-		if ((*i).backend == backend &&
-				(*i).driver == driver &&
-				(*i).device == device) {
-			return &(*i);
+		if ((*i)->backend == backend &&
+				(*i)->driver == driver &&
+				(*i)->device == device) {
+			return (*i);
 		}
 	}
-	return 0;
+	return State();
 }
 
-EngineControl::State*
+EngineControl::State
 EngineControl::get_saved_state_for_currently_displayed_backend_and_device ()
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
@@ -1074,44 +1074,44 @@ EngineControl::get_saved_state_for_currently_displayed_backend_and_device ()
 			device_combo.get_active_text());
 }
 
-EngineControl::State*
+EngineControl::State
 EngineControl::save_state ()
 {
 	if (!_have_control) {
-		return 0;
+		return State();
 	}
-	State* state = new State;
-	store_state (*state);
+	State state (new StateStruct);
+	store_state (state);
 
 	for (StateList::iterator i = states.begin(); i != states.end();) {
-		if ((*i).backend == state->backend &&
-				(*i).driver == state->driver &&
-				(*i).device == state->device) {
+		if ((*i)->backend == state->backend &&
+				(*i)->driver == state->driver &&
+				(*i)->device == state->device) {
 			i =  states.erase(i);
 		} else {
 			++i;
 		}
 	}
 
-	states.push_back (*state);
+	states.push_back (state);
 
 	return state;
 }
 
 void
-EngineControl::store_state (State& state)
+EngineControl::store_state (State state)
 {
-	state.backend = get_backend ();
-	state.driver = get_driver ();
-	state.device = get_device_name ();
-	state.sample_rate = get_rate ();
-	state.buffer_size = get_buffer_size ();
-	state.input_latency = get_input_latency ();
-	state.output_latency = get_output_latency ();
-	state.input_channels = get_input_channels ();
-	state.output_channels = get_output_channels ();
-	state.midi_option = get_midi_option ();
-	state.midi_devices = _midi_devices;
+	state->backend = get_backend ();
+	state->driver = get_driver ();
+	state->device = get_device_name ();
+	state->sample_rate = get_rate ();
+	state->buffer_size = get_buffer_size ();
+	state->input_latency = get_input_latency ();
+	state->output_latency = get_output_latency ();
+	state->input_channels = get_input_channels ();
+	state->output_channels = get_output_channels ();
+	state->midi_option = get_midi_option ();
+	state->midi_devices = _midi_devices;
 }
 
 void
@@ -1121,7 +1121,7 @@ EngineControl::maybe_display_saved_state ()
 		return;
 	}
 
-	State* state = get_saved_state_for_currently_displayed_backend_and_device ();
+	State state = get_saved_state_for_currently_displayed_backend_and_device ();
 
 	if (state) {
 		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
@@ -1157,20 +1157,20 @@ EngineControl::get_state ()
 
 			XMLNode* node = new XMLNode ("State");
 
-			node->add_property ("backend", (*i).backend);
-			node->add_property ("driver", (*i).driver);
-			node->add_property ("device", (*i).device);
-			node->add_property ("sample-rate", (*i).sample_rate);
-			node->add_property ("buffer-size", (*i).buffer_size);
-			node->add_property ("input-latency", (*i).input_latency);
-			node->add_property ("output-latency", (*i).output_latency);
-			node->add_property ("input-channels", (*i).input_channels);
-			node->add_property ("output-channels", (*i).output_channels);
-			node->add_property ("active", (*i).active ? "yes" : "no");
-			node->add_property ("midi-option", (*i).midi_option);
+			node->add_property ("backend", (*i)->backend);
+			node->add_property ("driver", (*i)->driver);
+			node->add_property ("device", (*i)->device);
+			node->add_property ("sample-rate", (*i)->sample_rate);
+			node->add_property ("buffer-size", (*i)->buffer_size);
+			node->add_property ("input-latency", (*i)->input_latency);
+			node->add_property ("output-latency", (*i)->output_latency);
+			node->add_property ("input-channels", (*i)->input_channels);
+			node->add_property ("output-channels", (*i)->output_channels);
+			node->add_property ("active", (*i)->active ? "yes" : "no");
+			node->add_property ("midi-option", (*i)->midi_option);
 
 			XMLNode* midi_devices = new XMLNode ("MIDIDevices");
-			for (std::vector<MidiDeviceSettings>::const_iterator p = (*i).midi_devices.begin(); p != (*i).midi_devices.end(); ++p) {
+			for (std::vector<MidiDeviceSettings>::const_iterator p = (*i)->midi_devices.begin(); p != (*i)->midi_devices.end(); ++p) {
 				XMLNode* midi_device_stuff = new XMLNode ("MIDIDevice");
 				midi_device_stuff->add_property (X_("name"), (*p)->name);
 				midi_device_stuff->add_property (X_("enabled"), (*p)->enabled);
@@ -1217,7 +1217,7 @@ EngineControl::set_state (const XMLNode& root)
 		cclist = child->children();
 
 		for (cciter = cclist.begin(); cciter != cclist.end(); ++cciter) {
-			State state;
+			State state (new StateStruct);
 
 			grandchild = *cciter;
 
@@ -1228,59 +1228,59 @@ EngineControl::set_state (const XMLNode& root)
 			if ((prop = grandchild->property ("backend")) == 0) {
 				continue;
 			}
-			state.backend = prop->value ();
+			state->backend = prop->value ();
 
 			if ((prop = grandchild->property ("driver")) == 0) {
 				continue;
 			}
-			state.driver = prop->value ();
+			state->driver = prop->value ();
 
 			if ((prop = grandchild->property ("device")) == 0) {
 				continue;
 			}
-			state.device = prop->value ();
+			state->device = prop->value ();
 
 			if ((prop = grandchild->property ("sample-rate")) == 0) {
 				continue;
 			}
-			state.sample_rate = atof (prop->value ());
+			state->sample_rate = atof (prop->value ());
 
 			if ((prop = grandchild->property ("buffer-size")) == 0) {
 				continue;
 			}
-			state.buffer_size = atoi (prop->value ());
+			state->buffer_size = atoi (prop->value ());
 
 			if ((prop = grandchild->property ("input-latency")) == 0) {
 				continue;
 			}
-			state.input_latency = atoi (prop->value ());
+			state->input_latency = atoi (prop->value ());
 
 			if ((prop = grandchild->property ("output-latency")) == 0) {
 				continue;
 			}
-			state.output_latency = atoi (prop->value ());
+			state->output_latency = atoi (prop->value ());
 
 			if ((prop = grandchild->property ("input-channels")) == 0) {
 				continue;
 			}
-			state.input_channels = atoi (prop->value ());
+			state->input_channels = atoi (prop->value ());
 
 			if ((prop = grandchild->property ("output-channels")) == 0) {
 				continue;
 			}
-			state.output_channels = atoi (prop->value ());
+			state->output_channels = atoi (prop->value ());
 
 			if ((prop = grandchild->property ("active")) == 0) {
 				continue;
 			}
-			state.active = string_is_affirmative (prop->value ());
+			state->active = string_is_affirmative (prop->value ());
 
 			if ((prop = grandchild->property ("midi-option")) == 0) {
 				continue;
 			}
-			state.midi_option = prop->value ();
+			state->midi_option = prop->value ();
 
-			state.midi_devices.clear();
+			state->midi_devices.clear();
 			XMLNode* midinode;
 			if ((midinode = find_named_node (*grandchild, "MIDIDevices")) != 0) {
 				const XMLNodeList mnc = midinode->children();
@@ -1299,7 +1299,7 @@ EngineControl::set_state (const XMLNode& root)
 								atoi ((*n)->property (X_("input-latency"))->value ()),
 								atoi ((*n)->property (X_("output-latency"))->value ())
 								));
-					state.midi_devices.push_back (ptr);
+					state->midi_devices.push_back (ptr);
 				}
 			}
 
@@ -1308,9 +1308,9 @@ EngineControl::set_state (const XMLNode& root)
 			 * this can be removed again before release
 			 */
 			for (StateList::iterator i = states.begin(); i != states.end();) {
-				if ((*i).backend == state.backend &&
-						(*i).driver == state.driver &&
-						(*i).device == state.device) {
+				if ((*i)->backend == state->backend &&
+						(*i)->driver == state->driver &&
+						(*i)->device == state->device) {
 					i =  states.erase(i);
 				} else {
 					++i;
@@ -1326,16 +1326,16 @@ EngineControl::set_state (const XMLNode& root)
 
 	for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
 
-		if ((*i).active) {
+		if ((*i)->active) {
 			ignore_changes++;
-			backend_combo.set_active_text ((*i).backend);
-			driver_combo.set_active_text ((*i).driver);
-			device_combo.set_active_text ((*i).device);
-			sample_rate_combo.set_active_text (rate_as_string ((*i).sample_rate));
-			buffer_size_combo.set_active_text (bufsize_as_string ((*i).buffer_size));
-			input_latency.set_value ((*i).input_latency);
-			output_latency.set_value ((*i).output_latency);
-			midi_option_combo.set_active_text ((*i).midi_option);
+			backend_combo.set_active_text ((*i)->backend);
+			driver_combo.set_active_text ((*i)->driver);
+			device_combo.set_active_text ((*i)->device);
+			sample_rate_combo.set_active_text (rate_as_string ((*i)->sample_rate));
+			buffer_size_combo.set_active_text (bufsize_as_string ((*i)->buffer_size));
+			input_latency.set_value ((*i)->input_latency);
+			output_latency.set_value ((*i)->output_latency);
+			midi_option_combo.set_active_text ((*i)->midi_option);
 			ignore_changes--;
 			break;
 		}
@@ -1601,7 +1601,7 @@ EngineControl::post_push ()
 	 */
 
 	if (_have_control) {
-		State* state = get_saved_state_for_currently_displayed_backend_and_device ();
+		State state = get_saved_state_for_currently_displayed_backend_and_device ();
 
 		if (!state) {
 			state = save_state ();
@@ -1611,7 +1611,7 @@ EngineControl::post_push ()
 		/* all off */
 
 		for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
-			(*i).active = false;
+			(*i)->active = false;
 		}
 
 		/* mark this one active (to be used next time the dialog is
