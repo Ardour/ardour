@@ -247,10 +247,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\drag_handle.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\fill.cc"
 				>
 			</File>
@@ -366,10 +362,6 @@
 			</File>
 			<File
 				RelativePath="..\canvas\debug.h"
-				>
-			</File>
-			<File
-				RelativePath="..\canvas\drag_handle.h"
 				>
 			</File>
 			<File
