@@ -124,6 +124,8 @@ PannerManager::panner_discover (string path)
 		if (i == panner_info.end()) {
 			panner_info.push_back (pinfo);
 			DEBUG_TRACE (DEBUG::Panning, string_compose(_("Panner discovered: \"%1\" in %2\n"), pinfo->descriptor.name, path));
+		} else {
+			delete pinfo;
 		}
 	}
 

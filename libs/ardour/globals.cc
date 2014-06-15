@@ -393,6 +393,8 @@ ARDOUR::cleanup ()
 #ifdef LXVST_SUPPORT
 	vstfx_exit();
 #endif
+	delete &PluginManager::instance();
+	delete Config;
 	PBD::cleanup ();
 
 	return;
