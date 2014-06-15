@@ -796,6 +796,7 @@ EngineControl::list_devices ()
 		apply_button->set_sensitive (true);
 
 	} else {
+		device_combo.clear();
 		sample_rate_combo.set_sensitive (false);
 		buffer_size_combo.set_sensitive (false);
 		input_latency.set_sensitive (false);
