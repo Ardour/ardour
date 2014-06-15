@@ -222,10 +222,12 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 				}
 			}
 
-			// delay events in current-buffer, in place.
-			for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
-				MidiBuffer::TimeType *t = m.timeptr();
-				*t += _delay;
+			if (_delay != 0) {
+				// delay events in current-buffer, in place.
+				for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
+					MidiBuffer::TimeType *t = m.timeptr();
+					*t += _delay;
+				}
 			}
 
 			// move events from dly-buffer into current-buffer until nsamples
@@ -239,16 +241,22 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 				m = dly->erase(m);
 			}
 
-			// move events after nsamples from current-buffer into dly-buffer
-			// and trim current-buffer after nsamples
-			for (MidiBuffer::iterator m = mb.begin(); m != mb.end();) {
-				const Evoral::MIDIEvent<MidiBuffer::TimeType> ev (*m, false);
-				if (ev.time() < nsamples) {
-					++m;
-					continue;
+			/* For now, this is only relevant if there is there's a positive delay.
+			 * In the future this could also be used to delay 'too early' events
+			 * (ie '_global_port_buffer_offset + _port_buffer_offset' - midi_port.cc)
+			 */
+			if (_delay != 0) {
+				// move events after nsamples from current-buffer into dly-buffer
+				// and trim current-buffer after nsamples
+				for (MidiBuffer::iterator m = mb.begin(); m != mb.end();) {
+					const Evoral::MIDIEvent<MidiBuffer::TimeType> ev (*m, false);
+					if (ev.time() < nsamples) {
+						++m;
+						continue;
+					}
+					dly->insert_event(ev);
+					m = mb.erase(m);
 				}
-				dly->insert_event(ev);
-				m = mb.erase(m);
 			}
 		}
 	}
