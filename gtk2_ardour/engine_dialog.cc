@@ -1806,6 +1806,7 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 
 	} else {
 		if (lm_running) {
+			end_latency_detection ();
 			ARDOUR::AudioEngine::instance()->stop_latency_detection();
 		}
 	}
@@ -2067,7 +2068,10 @@ EngineControl::connect_disconnect_click()
 void
 EngineControl::calibrate_audio_latency ()
 {
-	_measure_midi.reset();
+	_measure_midi.reset ();
+	have_lm_results = false;
+	lm_use_button.set_sensitive (false);
+	lm_results.set_markup (string_compose (results_markup, _("No measurement results yet")));
 	notebook.set_current_page (latency_tab);
 }
 
@@ -2075,6 +2079,9 @@ void
 EngineControl::calibrate_midi_latency (MidiDeviceSettings s)
 {
 	_measure_midi = s;
+	have_lm_results = false;
+	lm_use_button.set_sensitive (false);
+	lm_results.set_markup (string_compose (results_markup, _("No measurement results yet")));
 	notebook.set_current_page (latency_tab);
 }
 
