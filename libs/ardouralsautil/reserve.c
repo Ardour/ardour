@@ -326,7 +326,7 @@ static DBusHandlerResult filter_handler(
 				const char *un;
 
 				if ((un = dbus_bus_get_unique_name(c)) && rd_dbus_get_name_owner(c, d->service_name, &name_owner, &error) == 0)
-					if (strcmp(name_owner, un) == 0)
+					if (name_owner && strcmp(name_owner, un) == 0)
 						goto invalid; /* Name still owned by us */
 			}
 
