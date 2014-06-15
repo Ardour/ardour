@@ -307,6 +307,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ruler.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\scroll_group.cc"
 				>
 			</File>
@@ -328,6 +332,10 @@
 			</File>
 			<File
 				RelativePath="..\wave_view.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\widget.cc"
 				>
 			</File>
 			<File
@@ -437,6 +445,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\canvas\ruler.h"
+				>
+			</File>
+			<File
 				RelativePath="..\canvas\scroll_group.h"
 				>
 			</File>
@@ -458,6 +470,10 @@
 			</File>
 			<File
 				RelativePath="..\canvas\wave_view.h"
+				>
+			</File>
+			<File
+				RelativePath="..\canvas\widget.h"
 				>
 			</File>
 			<File
