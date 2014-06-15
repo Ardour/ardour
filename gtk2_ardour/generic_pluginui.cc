@@ -636,7 +636,6 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 			control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox");
 			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
 			if (desc.midinote) {
-				printf("MIDI NOTE\n");
 				control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midinote_printer), control_ui));
 			} else {
 				control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
