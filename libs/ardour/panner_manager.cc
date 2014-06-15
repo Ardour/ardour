@@ -103,6 +103,7 @@ PannerManager::discover_panners ()
 	}
 
 	vector_delete (panner_modules);
+	delete (panner_modules);
 }
 
 int

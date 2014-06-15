@@ -31,6 +31,7 @@
 #include "pbd/replace_all.h"
 #include "pbd/whitespace.h"
 #include "pbd/stacktrace.h"
+#include "pbd/stl_delete.h"
 #include "pbd/openuri.h"
 
 #include "ardour/audioengine.h"
@@ -642,6 +643,8 @@ SessionDialog::redisplay_recent_sessions ()
 			/* no state file? */
 			continue;
 		}
+		vector_delete (states);
+		delete (states);
 
 		std::vector<string> state_file_names(get_file_names_no_extension (state_file_paths));
 

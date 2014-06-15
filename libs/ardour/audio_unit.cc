@@ -2082,6 +2082,7 @@ AUPlugin::find_presets ()
 		delete *x;
 	}
 
+	vector_delete (preset_files);
 	delete preset_files;
 
 	/* now fill the vector<string> with the names we have */

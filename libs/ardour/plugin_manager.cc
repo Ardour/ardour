@@ -252,6 +252,7 @@ PluginManager::clear_vst_cache ()
 			}
 		}
 		vector_delete(fsi_files);
+		delete(fsi_files);
 	}
 #endif
 
@@ -266,6 +267,7 @@ PluginManager::clear_vst_cache ()
 			}
 		}
 		vector_delete(fsi_files);
+		delete(fsi_files);
 	}
 #endif
 
@@ -281,6 +283,7 @@ PluginManager::clear_vst_cache ()
 			}
 		}
 		vector_delete(fsi_files);
+		delete(fsi_files);
 	}
 #endif
 }
@@ -300,6 +303,7 @@ PluginManager::clear_vst_blacklist ()
 			}
 		}
 		vector_delete(fsi_files);
+		delete(fsi_files);
 	}
 #endif
 
@@ -314,6 +318,7 @@ PluginManager::clear_vst_blacklist ()
 			}
 		}
 		vector_delete(fsi_files);
+		delete(fsi_files);
 	}
 #endif
 
@@ -330,6 +335,7 @@ PluginManager::clear_vst_blacklist ()
 			}
 		}
 		vector_delete(fsi_files);
+		delete(fsi_files);
 	}
 #endif
 }
@@ -424,6 +430,7 @@ PluginManager::add_presets(string domain)
 		}
 
 		vector_delete (presets);
+		delete (presets);
 	}
 #endif
 }
@@ -448,6 +455,7 @@ PluginManager::add_lrdf_data (const string &path)
 		}
 
 		vector_delete (rdf_files);
+		delete (rdf_files);
 	}
 #endif
 }
@@ -669,6 +677,7 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 		}
 
 		vector_delete (plugin_objects);
+		delete (plugin_objects);
 	}
 
 	return ret;
@@ -793,6 +802,7 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 		}
 
 		vector_delete (plugin_objects);
+		delete (plugin_objects);
 	}
 
 	return ret;

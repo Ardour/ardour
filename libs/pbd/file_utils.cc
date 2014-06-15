@@ -238,6 +238,7 @@ copy_files(const std::string & from_path, const std::string & to_dir)
 			copy_file (from, to);
 		}
 		vector_delete (files);
+		delete (files);
 	}
 }
 

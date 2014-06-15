@@ -50,6 +50,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
 #include "pbd/openuri.h"
+#include "pbd/stl_delete.h"
 #include "pbd/file_utils.h"
 #include "pbd/localtime_r.h"
 
@@ -1437,6 +1438,8 @@ ARDOUR_UI::redisplay_recent_sessions ()
 			/* no state file? */
 			continue;
 		}
+		vector_delete(states);
+		delete(states);
 
 		std::vector<string> state_file_names(get_file_names_no_extension (state_file_paths));
 

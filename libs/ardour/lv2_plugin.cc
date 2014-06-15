@@ -33,6 +33,7 @@
 
 #include "pbd/clear_dir.h"
 #include "pbd/pathscanner.h"
+#include "pbd/stl_delete.h"
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/xml++.h"
@@ -2027,6 +2028,7 @@ LV2World::load_bundled_plugins()
 				lilv_node_free(node);
 			}
 		}
+		vector_delete (plugin_objects);
 		delete (plugin_objects);
 
 		_bundle_checked = true;

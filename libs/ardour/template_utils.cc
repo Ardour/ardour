@@ -24,6 +24,7 @@
 
 #include "pbd/basename.h"
 #include "pbd/pathscanner.h"
+#include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
 
 #include "ardour/template_utils.h"
@@ -110,6 +111,7 @@ find_session_templates (vector<TemplateInfo>& template_names)
 		template_names.push_back (rti);
 	}
 
+	vector_delete (templates);
 	delete templates;
 }
 
@@ -145,6 +147,7 @@ find_route_templates (vector<TemplateInfo>& template_names)
 		template_names.push_back (rti);
 	}
 
+	vector_delete (templates);
 	delete templates;
 }
 
