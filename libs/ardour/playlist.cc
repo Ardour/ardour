@@ -2811,7 +2811,7 @@ Playlist::combine (const RegionList& r)
 
 	/* sort by position then layer.
 	 * route_time_axis passes 'selected_regions' - which is not sorted.
-	 * here we need the top-most first, then every layer's region softed by position.
+	 * here we need the top-most first, then every layer's region sorted by position.
 	 */
 	RegionList sorted(r);
 	sorted.sort(RegionSortByLayerAndPosition());
