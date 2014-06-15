@@ -444,6 +444,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\delayline.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\delivery.cc"
 				>
 			</File>
@@ -701,6 +705,10 @@
 			</File>
 			<File
 				RelativePath="..\midi_ui.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\mididm.cc"
 				>
 			</File>
 			<File
@@ -1490,6 +1498,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\delayline.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\delivery.h"
 				>
 			</File>
@@ -1759,6 +1771,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\midi_ui.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\mididm.h"
 				>
 			</File>
 			<File
