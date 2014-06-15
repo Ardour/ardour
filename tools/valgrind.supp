@@ -2,13 +2,17 @@
   name
   Memcheck:Leak
   fun:*alloc
+  ...
   obj:/usr/lib/*.so.*
+  ...
 }
 {
   name
   Memcheck:Leak
   fun:*alloc
+  ...
   obj:/usr/lib/*-linux-gnu/*.so.*
+  ...
 }
 {
   name
