@@ -211,6 +211,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
                                         if (vec.buf[0]->invalidation) {
                                                 vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
                                         }
+                                        delete vec.buf[0];
                                         i->second->increment_read_ptr (1);
                                 }
                         } 
@@ -326,6 +327,7 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 		*/
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 direct dispatch of request type %3\n", name(), pthread_name(), req->type));
 		do_request (req);
+		delete req;
 	} else {	
 
 		/* If called from a different thread, we first check to see if

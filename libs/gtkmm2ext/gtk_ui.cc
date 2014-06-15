@@ -70,6 +70,7 @@ template class AbstractUI<Gtkmm2ext::UIRequest>;
 UI::UI (string namestr, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (namestr)
 	, _receiver (*this)
+	, errors (0)
 	  
 {
 	theMain = new Main (argc, argv);
@@ -124,6 +125,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 UI::~UI ()
 {
 	_receiver.hangup ();
+	delete (errors);
 }
 
 bool

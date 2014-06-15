@@ -138,6 +138,8 @@ MidiDiskstream::init ()
 MidiDiskstream::~MidiDiskstream ()
 {
 	Glib::Threads::Mutex::Lock lm (state_lock);
+	delete _playback_buf;
+	delete _capture_buf;
 }
 
 
