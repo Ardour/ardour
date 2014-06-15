@@ -485,6 +485,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	bool           _active;
 	framecnt_t     _signal_latency;
+	framecnt_t     _signal_latency_at_amp_position;
 	framecnt_t     _initial_delay;
 	framecnt_t     _roll_delay;
 

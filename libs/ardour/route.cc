@@ -80,6 +80,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, GraphNode (sess._process_graph)
 	, _active (true)
 	, _signal_latency (0)
+	, _signal_latency_at_amp_position (0)
 	, _initial_delay (0)
 	, _roll_delay (0)
 	, _flags (flg)
@@ -434,7 +435,10 @@ Route::process_output_buffers (BufferSet& bufs,
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {
 		_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
-		_amp->setup_gain_automation (start_frame, end_frame, nframes);
+		_amp->setup_gain_automation (
+				start_frame + _signal_latency_at_amp_position,
+				end_frame + _signal_latency_at_amp_position,
+				nframes);
 	} else {
 		_amp->apply_gain_automation (false);
 	}
@@ -543,7 +547,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			boost::dynamic_pointer_cast<Send>(*i)->set_delay_in(_signal_latency - latency);
 		}
 
-		(*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
+		(*i)->run (bufs, start_frame - latency, end_frame - latency, nframes, *i != _processors.back());
 		bufs.set_count ((*i)->output_streams());
 
 		if ((*i)->active ()) {
@@ -562,7 +566,6 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 		return;
 	}
 
-	// TODO cache this value.
 	framecnt_t latency = bounce_get_latency(_amp, false, for_export, for_freeze);
 	_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
 	_amp->setup_gain_automation (start - latency, start - latency + nframes, nframes);
@@ -3313,15 +3316,24 @@ framecnt_t
 Route::update_signal_latency ()
 {
 	framecnt_t l = _output->user_latency();
+	framecnt_t lamp = 0;
+	bool before_amp = true;
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->active ()) {
 			l += (*i)->signal_latency ();
 		}
+		if ((*i) == _amp) {
+			before_amp = false;
+		}
+		if (before_amp) {
+			lamp = l;
+		}
 	}
 
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: internal signal latency = %2\n", _name, l));
 
+	_signal_latency_at_amp_position = lamp;
 	if (_signal_latency != l) {
 		_signal_latency = l;
 		signal_latency_changed (); /* EMIT SIGNAL */
