@@ -1,0 +1,185 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Scripts">
+      <UniqueIdentifier>{00655d4c-8951-46f7-a9f1-c3817b8a4e35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WavesAPI">
+      <UniqueIdentifier>{19d7771f-1a21-4135-a918-4a961ee5cce2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\waves_audiobackend.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\waves_audiobackend.latency.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\waves_audiobackend.midi.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\waves_audiobackend.port_engine.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\waves_audioport.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\waves_dataport.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\waves_midi_buffer.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\waves_midi_device.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\waves_midi_device_manager.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\waves_midi_event.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\waves_midiport.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wavesapi\devicemanager\WCMRAudioDeviceManager.cpp">
+      <Filter>WavesAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wavesapi\devicemanager\WCMRCoreAudioDeviceManager.cpp">
+      <Filter>WavesAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wavesapi\devicemanager\WCMRNativeAudio.cpp">
+      <Filter>WavesAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wavesapi\devicemanager\WCMRPortAudioDeviceManager.cpp">
+      <Filter>WavesAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wavesapi\miscutils\UMicroseconds.cpp">
+      <Filter>WavesAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wavesapi\refmanager\WCRefManager.cpp">
+      <Filter>WavesAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wavesapi\threads\WCThreadSafe.cpp">
+      <Filter>WavesAPI</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\wscript">
+      <Filter>Scripts</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\waves_audiobackend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\waves_audioport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\waves_dataport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\waves_midi_buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\waves_midi_device.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\waves_midi_device_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\waves_midi_event.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\waves_midiport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\wavespublicapi\1.0\WavesPublicAPI_Defines.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\wavespublicapi\wstdint.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\wavespublicapi\WTErr.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\akupara\basics.hpp">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\akupara\compiletime_functions.hpp">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\akupara\threading\atomic_ops.hpp">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\akupara\threading\atomic_ops_gcc_x86.hpp">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\BasicTypes\WCFourCC.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\BasicTypes\WTByteOrder.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\BasicTypes\WUComPtr.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\BasicTypes\WUDefines.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\BasicTypes\WUMathConsts.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\BasicTypes\WUTypes.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\devicemanager\IncludeWindows.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\devicemanager\WCMRAudioDeviceManager.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\devicemanager\WCMRCoreAudioDeviceManager.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\devicemanager\WCMRNativeAudio.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\devicemanager\WCMRPortAudioDeviceManager.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\miscutils\MinMaxUtilities.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\miscutils\safe_delete.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\miscutils\UMicroseconds.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\miscutils\WCFixedString.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\miscutils\WUErrors.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\refmanager\WCRefManager.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wavesapi\threads\WCThreadSafe.h">
+      <Filter>WavesAPI</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

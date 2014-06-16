@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B529298A-F38C-45FF-812D-260E79CD3341}</ProjectGuid>
+    <RootNamespace>waves_audiobackend</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\wavesapi\devicemanager\WCMRAudioDeviceManager.cpp" />
+    <ClCompile Include="..\wavesapi\devicemanager\WCMRCoreAudioDeviceManager.cpp" />
+    <ClCompile Include="..\wavesapi\devicemanager\WCMRNativeAudio.cpp" />
+    <ClCompile Include="..\wavesapi\devicemanager\WCMRPortAudioDeviceManager.cpp" />
+    <ClCompile Include="..\wavesapi\miscutils\UMicroseconds.cpp" />
+    <ClCompile Include="..\wavesapi\refmanager\WCRefManager.cpp" />
+    <ClCompile Include="..\wavesapi\threads\WCThreadSafe.cpp" />
+    <ClCompile Include="..\waves_audiobackend.cc" />
+    <ClCompile Include="..\waves_audiobackend.latency.cc" />
+    <ClCompile Include="..\waves_audiobackend.midi.cc" />
+    <ClCompile Include="..\waves_audiobackend.port_engine.cc" />
+    <ClCompile Include="..\waves_audioport.cc" />
+    <ClCompile Include="..\waves_dataport.cc" />
+    <ClCompile Include="..\waves_midiport.cc" />
+    <ClCompile Include="..\waves_midi_buffer.cc" />
+    <ClCompile Include="..\waves_midi_device.cc" />
+    <ClCompile Include="..\waves_midi_device_manager.cc" />
+    <ClCompile Include="..\waves_midi_event.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\wscript" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\wavesapi\akupara\basics.hpp" />
+    <ClInclude Include="..\wavesapi\akupara\compiletime_functions.hpp" />
+    <ClInclude Include="..\wavesapi\akupara\threading\atomic_ops.hpp" />
+    <ClInclude Include="..\wavesapi\akupara\threading\atomic_ops_gcc_x86.hpp" />
+    <ClInclude Include="..\wavesapi\BasicTypes\WCFourCC.h" />
+    <ClInclude Include="..\wavesapi\BasicTypes\WTByteOrder.h" />
+    <ClInclude Include="..\wavesapi\BasicTypes\WUComPtr.h" />
+    <ClInclude Include="..\wavesapi\BasicTypes\WUDefines.h" />
+    <ClInclude Include="..\wavesapi\BasicTypes\WUMathConsts.h" />
+    <ClInclude Include="..\wavesapi\BasicTypes\WUTypes.h" />
+    <ClInclude Include="..\wavesapi\devicemanager\IncludeWindows.h" />
+    <ClInclude Include="..\wavesapi\devicemanager\WCMRAudioDeviceManager.h" />
+    <ClInclude Include="..\wavesapi\devicemanager\WCMRCoreAudioDeviceManager.h" />
+    <ClInclude Include="..\wavesapi\devicemanager\WCMRNativeAudio.h" />
+    <ClInclude Include="..\wavesapi\devicemanager\WCMRPortAudioDeviceManager.h" />
+    <ClInclude Include="..\wavesapi\miscutils\MinMaxUtilities.h" />
+    <ClInclude Include="..\wavesapi\miscutils\safe_delete.h" />
+    <ClInclude Include="..\wavesapi\miscutils\UMicroseconds.h" />
+    <ClInclude Include="..\wavesapi\miscutils\WCFixedString.h" />
+    <ClInclude Include="..\wavesapi\miscutils\WUErrors.h" />
+    <ClInclude Include="..\wavesapi\refmanager\WCRefManager.h" />
+    <ClInclude Include="..\wavesapi\threads\WCThreadSafe.h" />
+    <ClInclude Include="..\wavesapi\wavespublicapi\1.0\WavesPublicAPI_Defines.h" />
+    <ClInclude Include="..\wavesapi\wavespublicapi\wstdint.h" />
+    <ClInclude Include="..\wavesapi\wavespublicapi\WTErr.h" />
+    <ClInclude Include="..\waves_audiobackend.h" />
+    <ClInclude Include="..\waves_audioport.h" />
+    <ClInclude Include="..\waves_dataport.h" />
+    <ClInclude Include="..\waves_midiport.h" />
+    <ClInclude Include="..\waves_midi_buffer.h" />
+    <ClInclude Include="..\waves_midi_device.h" />
+    <ClInclude Include="..\waves_midi_device_manager.h" />
+    <ClInclude Include="..\waves_midi_event.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
