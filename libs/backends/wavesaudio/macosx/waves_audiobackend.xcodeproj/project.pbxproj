@@ -1,0 +1,517 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		43278FF0194EFB30003C9FEA /* basics.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 43278FC8194EFB30003C9FEA /* basics.hpp */; };
+		43278FF1194EFB30003C9FEA /* compiletime_functions.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 43278FC9194EFB30003C9FEA /* compiletime_functions.hpp */; };
+		43278FF2194EFB30003C9FEA /* atomic_ops.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 43278FCB194EFB30003C9FEA /* atomic_ops.hpp */; };
+		43278FF3194EFB30003C9FEA /* atomic_ops_gcc_x86.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 43278FCC194EFB30003C9FEA /* atomic_ops_gcc_x86.hpp */; };
+		43278FF4194EFB30003C9FEA /* WCFourCC.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FCE194EFB30003C9FEA /* WCFourCC.h */; };
+		43278FF5194EFB30003C9FEA /* WTByteOrder.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FCF194EFB30003C9FEA /* WTByteOrder.h */; };
+		43278FF6194EFB30003C9FEA /* WUComPtr.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FD0194EFB30003C9FEA /* WUComPtr.h */; };
+		43278FF7194EFB30003C9FEA /* WUDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FD1194EFB30003C9FEA /* WUDefines.h */; };
+		43278FF8194EFB30003C9FEA /* WUMathConsts.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FD2194EFB30003C9FEA /* WUMathConsts.h */; };
+		43278FF9194EFB30003C9FEA /* WUTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FD3194EFB30003C9FEA /* WUTypes.h */; };
+		43278FFA194EFB30003C9FEA /* IncludeWindows.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FD5194EFB30003C9FEA /* IncludeWindows.h */; };
+		43278FFB194EFB30003C9FEA /* WCMRAudioDeviceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43278FD6194EFB30003C9FEA /* WCMRAudioDeviceManager.cpp */; };
+		43278FFC194EFB30003C9FEA /* WCMRAudioDeviceManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FD7194EFB30003C9FEA /* WCMRAudioDeviceManager.h */; };
+		43278FFD194EFB30003C9FEA /* WCMRCoreAudioDeviceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43278FD8194EFB30003C9FEA /* WCMRCoreAudioDeviceManager.cpp */; };
+		43278FFE194EFB30003C9FEA /* WCMRCoreAudioDeviceManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FD9194EFB30003C9FEA /* WCMRCoreAudioDeviceManager.h */; };
+		43278FFF194EFB30003C9FEA /* WCMRNativeAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43278FDA194EFB30003C9FEA /* WCMRNativeAudio.cpp */; };
+		43279000194EFB30003C9FEA /* WCMRNativeAudio.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FDB194EFB30003C9FEA /* WCMRNativeAudio.h */; };
+		43279001194EFB30003C9FEA /* WCMRPortAudioDeviceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43278FDC194EFB30003C9FEA /* WCMRPortAudioDeviceManager.cpp */; };
+		43279002194EFB30003C9FEA /* WCMRPortAudioDeviceManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FDD194EFB30003C9FEA /* WCMRPortAudioDeviceManager.h */; };
+		43279003194EFB30003C9FEA /* MinMaxUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FDF194EFB30003C9FEA /* MinMaxUtilities.h */; };
+		43279004194EFB30003C9FEA /* safe_delete.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FE0194EFB30003C9FEA /* safe_delete.h */; };
+		43279005194EFB30003C9FEA /* UMicroseconds.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43278FE1194EFB30003C9FEA /* UMicroseconds.cpp */; };
+		43279006194EFB30003C9FEA /* UMicroseconds.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FE2194EFB30003C9FEA /* UMicroseconds.h */; };
+		43279007194EFB30003C9FEA /* WCFixedString.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FE3194EFB30003C9FEA /* WCFixedString.h */; };
+		43279008194EFB30003C9FEA /* WUErrors.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FE4194EFB30003C9FEA /* WUErrors.h */; };
+		43279009194EFB30003C9FEA /* WCRefManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43278FE6194EFB30003C9FEA /* WCRefManager.cpp */; };
+		4327900A194EFB30003C9FEA /* WCRefManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FE7194EFB30003C9FEA /* WCRefManager.h */; };
+		4327900B194EFB30003C9FEA /* WCThreadSafe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43278FE9194EFB30003C9FEA /* WCThreadSafe.cpp */; };
+		4327900C194EFB30003C9FEA /* WCThreadSafe.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FEA194EFB30003C9FEA /* WCThreadSafe.h */; };
+		4327900D194EFB30003C9FEA /* WavesPublicAPI_Defines.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FED194EFB30003C9FEA /* WavesPublicAPI_Defines.h */; };
+		4327900E194EFB30003C9FEA /* wstdint.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FEE194EFB30003C9FEA /* wstdint.h */; };
+		4327900F194EFB30003C9FEA /* WTErr.h in Headers */ = {isa = PBXBuildFile; fileRef = 43278FEF194EFB30003C9FEA /* WTErr.h */; };
+		43AA86F0194EED8900A67B56 /* waves_audiobackend.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA86E5194EED8900A67B56 /* waves_audiobackend.cc */; };
+		43AA86F1194EED8900A67B56 /* waves_audiobackend.latency.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA86E6194EED8900A67B56 /* waves_audiobackend.latency.cc */; };
+		43AA86F2194EED8900A67B56 /* waves_audiobackend.midi.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA86E7194EED8900A67B56 /* waves_audiobackend.midi.cc */; };
+		43AA86F3194EED8900A67B56 /* waves_audiobackend.port_engine.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA86E8194EED8900A67B56 /* waves_audiobackend.port_engine.cc */; };
+		43AA86F4194EED8900A67B56 /* waves_audioport.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA86E9194EED8900A67B56 /* waves_audioport.cc */; };
+		43AA86F5194EED8900A67B56 /* waves_dataport.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA86EA194EED8900A67B56 /* waves_dataport.cc */; };
+		43AA86F6194EED8900A67B56 /* waves_midi_buffer.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA86EB194EED8900A67B56 /* waves_midi_buffer.cc */; };
+		43AA86F7194EED8900A67B56 /* waves_midi_device_manager.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA86EC194EED8900A67B56 /* waves_midi_device_manager.cc */; };
+		43AA86F8194EED8900A67B56 /* waves_midi_device.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA86ED194EED8900A67B56 /* waves_midi_device.cc */; };
+		43AA86F9194EED8900A67B56 /* waves_midi_event.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA86EE194EED8900A67B56 /* waves_midi_event.cc */; };
+		43AA86FA194EED8900A67B56 /* waves_midiport.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA86EF194EED8900A67B56 /* waves_midiport.cc */; };
+		43AA8703194EEDAC00A67B56 /* waves_audiobackend.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA86FB194EEDAC00A67B56 /* waves_audiobackend.h */; };
+		43AA8704194EEDAC00A67B56 /* waves_audioport.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA86FC194EEDAC00A67B56 /* waves_audioport.h */; };
+		43AA8705194EEDAC00A67B56 /* waves_dataport.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA86FD194EEDAC00A67B56 /* waves_dataport.h */; };
+		43AA8706194EEDAC00A67B56 /* waves_midi_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA86FE194EEDAC00A67B56 /* waves_midi_buffer.h */; };
+		43AA8707194EEDAC00A67B56 /* waves_midi_device_manager.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA86FF194EEDAC00A67B56 /* waves_midi_device_manager.h */; };
+		43AA8708194EEDAC00A67B56 /* waves_midi_device.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA8700194EEDAC00A67B56 /* waves_midi_device.h */; };
+		43AA8709194EEDAC00A67B56 /* waves_midi_event.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA8701194EEDAC00A67B56 /* waves_midi_event.h */; };
+		43AA870A194EEDAC00A67B56 /* waves_midiport.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA8702194EEDAC00A67B56 /* waves_midiport.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		43278FC8194EFB30003C9FEA /* basics.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = basics.hpp; path = ../wavesapi/akupara/basics.hpp; sourceTree = SOURCE_ROOT; };
+		43278FC9194EFB30003C9FEA /* compiletime_functions.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = compiletime_functions.hpp; path = ../wavesapi/akupara/compiletime_functions.hpp; sourceTree = SOURCE_ROOT; };
+		43278FCB194EFB30003C9FEA /* atomic_ops.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = atomic_ops.hpp; path = ../wavesapi/akupara/threading/atomic_ops.hpp; sourceTree = SOURCE_ROOT; };
+		43278FCC194EFB30003C9FEA /* atomic_ops_gcc_x86.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = atomic_ops_gcc_x86.hpp; path = ../wavesapi/akupara/threading/atomic_ops_gcc_x86.hpp; sourceTree = SOURCE_ROOT; };
+		43278FCE194EFB30003C9FEA /* WCFourCC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WCFourCC.h; path = ../wavesapi/BasicTypes/WCFourCC.h; sourceTree = SOURCE_ROOT; };
+		43278FCF194EFB30003C9FEA /* WTByteOrder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WTByteOrder.h; path = ../wavesapi/BasicTypes/WTByteOrder.h; sourceTree = SOURCE_ROOT; };
+		43278FD0194EFB30003C9FEA /* WUComPtr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WUComPtr.h; path = ../wavesapi/BasicTypes/WUComPtr.h; sourceTree = SOURCE_ROOT; };
+		43278FD1194EFB30003C9FEA /* WUDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WUDefines.h; path = ../wavesapi/BasicTypes/WUDefines.h; sourceTree = SOURCE_ROOT; };
+		43278FD2194EFB30003C9FEA /* WUMathConsts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WUMathConsts.h; path = ../wavesapi/BasicTypes/WUMathConsts.h; sourceTree = SOURCE_ROOT; };
+		43278FD3194EFB30003C9FEA /* WUTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WUTypes.h; path = ../wavesapi/BasicTypes/WUTypes.h; sourceTree = SOURCE_ROOT; };
+		43278FD5194EFB30003C9FEA /* IncludeWindows.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IncludeWindows.h; path = ../wavesapi/devicemanager/IncludeWindows.h; sourceTree = SOURCE_ROOT; };
+		43278FD6194EFB30003C9FEA /* WCMRAudioDeviceManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WCMRAudioDeviceManager.cpp; path = ../wavesapi/devicemanager/WCMRAudioDeviceManager.cpp; sourceTree = SOURCE_ROOT; };
+		43278FD7194EFB30003C9FEA /* WCMRAudioDeviceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WCMRAudioDeviceManager.h; path = ../wavesapi/devicemanager/WCMRAudioDeviceManager.h; sourceTree = SOURCE_ROOT; };
+		43278FD8194EFB30003C9FEA /* WCMRCoreAudioDeviceManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WCMRCoreAudioDeviceManager.cpp; path = ../wavesapi/devicemanager/WCMRCoreAudioDeviceManager.cpp; sourceTree = SOURCE_ROOT; };
+		43278FD9194EFB30003C9FEA /* WCMRCoreAudioDeviceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WCMRCoreAudioDeviceManager.h; path = ../wavesapi/devicemanager/WCMRCoreAudioDeviceManager.h; sourceTree = SOURCE_ROOT; };
+		43278FDA194EFB30003C9FEA /* WCMRNativeAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WCMRNativeAudio.cpp; path = ../wavesapi/devicemanager/WCMRNativeAudio.cpp; sourceTree = SOURCE_ROOT; };
+		43278FDB194EFB30003C9FEA /* WCMRNativeAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WCMRNativeAudio.h; path = ../wavesapi/devicemanager/WCMRNativeAudio.h; sourceTree = SOURCE_ROOT; };
+		43278FDC194EFB30003C9FEA /* WCMRPortAudioDeviceManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WCMRPortAudioDeviceManager.cpp; path = ../wavesapi/devicemanager/WCMRPortAudioDeviceManager.cpp; sourceTree = SOURCE_ROOT; };
+		43278FDD194EFB30003C9FEA /* WCMRPortAudioDeviceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WCMRPortAudioDeviceManager.h; path = ../wavesapi/devicemanager/WCMRPortAudioDeviceManager.h; sourceTree = SOURCE_ROOT; };
+		43278FDF194EFB30003C9FEA /* MinMaxUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MinMaxUtilities.h; path = ../wavesapi/miscutils/MinMaxUtilities.h; sourceTree = SOURCE_ROOT; };
+		43278FE0194EFB30003C9FEA /* safe_delete.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = safe_delete.h; path = ../wavesapi/miscutils/safe_delete.h; sourceTree = SOURCE_ROOT; };
+		43278FE1194EFB30003C9FEA /* UMicroseconds.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UMicroseconds.cpp; path = ../wavesapi/miscutils/UMicroseconds.cpp; sourceTree = SOURCE_ROOT; };
+		43278FE2194EFB30003C9FEA /* UMicroseconds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UMicroseconds.h; path = ../wavesapi/miscutils/UMicroseconds.h; sourceTree = SOURCE_ROOT; };
+		43278FE3194EFB30003C9FEA /* WCFixedString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WCFixedString.h; path = ../wavesapi/miscutils/WCFixedString.h; sourceTree = SOURCE_ROOT; };
+		43278FE4194EFB30003C9FEA /* WUErrors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WUErrors.h; path = ../wavesapi/miscutils/WUErrors.h; sourceTree = SOURCE_ROOT; };
+		43278FE6194EFB30003C9FEA /* WCRefManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WCRefManager.cpp; path = ../wavesapi/refmanager/WCRefManager.cpp; sourceTree = SOURCE_ROOT; };
+		43278FE7194EFB30003C9FEA /* WCRefManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WCRefManager.h; path = ../wavesapi/refmanager/WCRefManager.h; sourceTree = SOURCE_ROOT; };
+		43278FE9194EFB30003C9FEA /* WCThreadSafe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WCThreadSafe.cpp; path = ../wavesapi/threads/WCThreadSafe.cpp; sourceTree = SOURCE_ROOT; };
+		43278FEA194EFB30003C9FEA /* WCThreadSafe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WCThreadSafe.h; path = ../wavesapi/threads/WCThreadSafe.h; sourceTree = SOURCE_ROOT; };
+		43278FED194EFB30003C9FEA /* WavesPublicAPI_Defines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WavesPublicAPI_Defines.h; path = ../wavesapi/wavespublicapi/1.0/WavesPublicAPI_Defines.h; sourceTree = SOURCE_ROOT; };
+		43278FEE194EFB30003C9FEA /* wstdint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = wstdint.h; path = ../wavesapi/wavespublicapi/wstdint.h; sourceTree = SOURCE_ROOT; };
+		43278FEF194EFB30003C9FEA /* WTErr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WTErr.h; path = ../wavesapi/wavespublicapi/WTErr.h; sourceTree = SOURCE_ROOT; };
+		43AA86DC194EECE000A67B56 /* libwaves_audiobackend.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libwaves_audiobackend.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		43AA86E5194EED8900A67B56 /* waves_audiobackend.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_audiobackend.cc; path = ../waves_audiobackend.cc; sourceTree = SOURCE_ROOT; };
+		43AA86E6194EED8900A67B56 /* waves_audiobackend.latency.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_audiobackend.latency.cc; path = ../waves_audiobackend.latency.cc; sourceTree = SOURCE_ROOT; };
+		43AA86E7194EED8900A67B56 /* waves_audiobackend.midi.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_audiobackend.midi.cc; path = ../waves_audiobackend.midi.cc; sourceTree = SOURCE_ROOT; };
+		43AA86E8194EED8900A67B56 /* waves_audiobackend.port_engine.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_audiobackend.port_engine.cc; path = ../waves_audiobackend.port_engine.cc; sourceTree = SOURCE_ROOT; };
+		43AA86E9194EED8900A67B56 /* waves_audioport.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_audioport.cc; path = ../waves_audioport.cc; sourceTree = SOURCE_ROOT; };
+		43AA86EA194EED8900A67B56 /* waves_dataport.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_dataport.cc; path = ../waves_dataport.cc; sourceTree = SOURCE_ROOT; };
+		43AA86EB194EED8900A67B56 /* waves_midi_buffer.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_midi_buffer.cc; path = ../waves_midi_buffer.cc; sourceTree = SOURCE_ROOT; };
+		43AA86EC194EED8900A67B56 /* waves_midi_device_manager.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_midi_device_manager.cc; path = ../waves_midi_device_manager.cc; sourceTree = SOURCE_ROOT; };
+		43AA86ED194EED8900A67B56 /* waves_midi_device.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_midi_device.cc; path = ../waves_midi_device.cc; sourceTree = SOURCE_ROOT; };
+		43AA86EE194EED8900A67B56 /* waves_midi_event.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_midi_event.cc; path = ../waves_midi_event.cc; sourceTree = SOURCE_ROOT; };
+		43AA86EF194EED8900A67B56 /* waves_midiport.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_midiport.cc; path = ../waves_midiport.cc; sourceTree = SOURCE_ROOT; };
+		43AA86FB194EEDAC00A67B56 /* waves_audiobackend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_audiobackend.h; path = ../waves_audiobackend.h; sourceTree = SOURCE_ROOT; };
+		43AA86FC194EEDAC00A67B56 /* waves_audioport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_audioport.h; path = ../waves_audioport.h; sourceTree = SOURCE_ROOT; };
+		43AA86FD194EEDAC00A67B56 /* waves_dataport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_dataport.h; path = ../waves_dataport.h; sourceTree = SOURCE_ROOT; };
+		43AA86FE194EEDAC00A67B56 /* waves_midi_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_midi_buffer.h; path = ../waves_midi_buffer.h; sourceTree = SOURCE_ROOT; };
+		43AA86FF194EEDAC00A67B56 /* waves_midi_device_manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_midi_device_manager.h; path = ../waves_midi_device_manager.h; sourceTree = SOURCE_ROOT; };
+		43AA8700194EEDAC00A67B56 /* waves_midi_device.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_midi_device.h; path = ../waves_midi_device.h; sourceTree = SOURCE_ROOT; };
+		43AA8701194EEDAC00A67B56 /* waves_midi_event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_midi_event.h; path = ../waves_midi_event.h; sourceTree = SOURCE_ROOT; };
+		43AA8702194EEDAC00A67B56 /* waves_midiport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_midiport.h; path = ../waves_midiport.h; sourceTree = SOURCE_ROOT; };
+		43AA870B194EEDC600A67B56 /* wscript */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = wscript; path = ../wscript; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		43AA86D9194EECE000A67B56 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		43278FC6194EFB30003C9FEA /* wavesapi */ = {
+			isa = PBXGroup;
+			children = (
+				43278FC7194EFB30003C9FEA /* akupara */,
+				43278FCD194EFB30003C9FEA /* BasicTypes */,
+				43278FD4194EFB30003C9FEA /* devicemanager */,
+				43278FDE194EFB30003C9FEA /* miscutils */,
+				43278FE5194EFB30003C9FEA /* refmanager */,
+				43278FE8194EFB30003C9FEA /* threads */,
+				43278FEB194EFB30003C9FEA /* wavespublicapi */,
+			);
+			name = wavesapi;
+			path = ../wavesapi;
+			sourceTree = SOURCE_ROOT;
+		};
+		43278FC7194EFB30003C9FEA /* akupara */ = {
+			isa = PBXGroup;
+			children = (
+				43278FC8194EFB30003C9FEA /* basics.hpp */,
+				43278FC9194EFB30003C9FEA /* compiletime_functions.hpp */,
+				43278FCA194EFB30003C9FEA /* threading */,
+			);
+			path = akupara;
+			sourceTree = "<group>";
+		};
+		43278FCA194EFB30003C9FEA /* threading */ = {
+			isa = PBXGroup;
+			children = (
+				43278FCB194EFB30003C9FEA /* atomic_ops.hpp */,
+				43278FCC194EFB30003C9FEA /* atomic_ops_gcc_x86.hpp */,
+			);
+			path = threading;
+			sourceTree = "<group>";
+		};
+		43278FCD194EFB30003C9FEA /* BasicTypes */ = {
+			isa = PBXGroup;
+			children = (
+				43278FCE194EFB30003C9FEA /* WCFourCC.h */,
+				43278FCF194EFB30003C9FEA /* WTByteOrder.h */,
+				43278FD0194EFB30003C9FEA /* WUComPtr.h */,
+				43278FD1194EFB30003C9FEA /* WUDefines.h */,
+				43278FD2194EFB30003C9FEA /* WUMathConsts.h */,
+				43278FD3194EFB30003C9FEA /* WUTypes.h */,
+			);
+			path = BasicTypes;
+			sourceTree = "<group>";
+		};
+		43278FD4194EFB30003C9FEA /* devicemanager */ = {
+			isa = PBXGroup;
+			children = (
+				43278FD5194EFB30003C9FEA /* IncludeWindows.h */,
+				43278FD6194EFB30003C9FEA /* WCMRAudioDeviceManager.cpp */,
+				43278FD7194EFB30003C9FEA /* WCMRAudioDeviceManager.h */,
+				43278FD8194EFB30003C9FEA /* WCMRCoreAudioDeviceManager.cpp */,
+				43278FD9194EFB30003C9FEA /* WCMRCoreAudioDeviceManager.h */,
+				43278FDA194EFB30003C9FEA /* WCMRNativeAudio.cpp */,
+				43278FDB194EFB30003C9FEA /* WCMRNativeAudio.h */,
+				43278FDC194EFB30003C9FEA /* WCMRPortAudioDeviceManager.cpp */,
+				43278FDD194EFB30003C9FEA /* WCMRPortAudioDeviceManager.h */,
+			);
+			path = devicemanager;
+			sourceTree = "<group>";
+		};
+		43278FDE194EFB30003C9FEA /* miscutils */ = {
+			isa = PBXGroup;
+			children = (
+				43278FDF194EFB30003C9FEA /* MinMaxUtilities.h */,
+				43278FE0194EFB30003C9FEA /* safe_delete.h */,
+				43278FE1194EFB30003C9FEA /* UMicroseconds.cpp */,
+				43278FE2194EFB30003C9FEA /* UMicroseconds.h */,
+				43278FE3194EFB30003C9FEA /* WCFixedString.h */,
+				43278FE4194EFB30003C9FEA /* WUErrors.h */,
+			);
+			path = miscutils;
+			sourceTree = "<group>";
+		};
+		43278FE5194EFB30003C9FEA /* refmanager */ = {
+			isa = PBXGroup;
+			children = (
+				43278FE6194EFB30003C9FEA /* WCRefManager.cpp */,
+				43278FE7194EFB30003C9FEA /* WCRefManager.h */,
+			);
+			path = refmanager;
+			sourceTree = "<group>";
+		};
+		43278FE8194EFB30003C9FEA /* threads */ = {
+			isa = PBXGroup;
+			children = (
+				43278FE9194EFB30003C9FEA /* WCThreadSafe.cpp */,
+				43278FEA194EFB30003C9FEA /* WCThreadSafe.h */,
+			);
+			path = threads;
+			sourceTree = "<group>";
+		};
+		43278FEB194EFB30003C9FEA /* wavespublicapi */ = {
+			isa = PBXGroup;
+			children = (
+				43278FEC194EFB30003C9FEA /* 1.0 */,
+				43278FEE194EFB30003C9FEA /* wstdint.h */,
+				43278FEF194EFB30003C9FEA /* WTErr.h */,
+			);
+			path = wavespublicapi;
+			sourceTree = "<group>";
+		};
+		43278FEC194EFB30003C9FEA /* 1.0 */ = {
+			isa = PBXGroup;
+			children = (
+				43278FED194EFB30003C9FEA /* WavesPublicAPI_Defines.h */,
+			);
+			path = 1.0;
+			sourceTree = "<group>";
+		};
+		43AA86D3194EECE000A67B56 = {
+			isa = PBXGroup;
+			children = (
+				43278FC6194EFB30003C9FEA /* wavesapi */,
+				43AA870C194EEDCA00A67B56 /* scripts */,
+				43AA86E4194EECF300A67B56 /* headers */,
+				43AA86E3194EECEB00A67B56 /* source */,
+				43AA86DD194EECE000A67B56 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		43AA86DD194EECE000A67B56 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				43AA86DC194EECE000A67B56 /* libwaves_audiobackend.dylib */,
+			);
+			name = Products;
+			sourceTree = SOURCE_ROOT;
+		};
+		43AA86E3194EECEB00A67B56 /* source */ = {
+			isa = PBXGroup;
+			children = (
+				43AA86E5194EED8900A67B56 /* waves_audiobackend.cc */,
+				43AA86E6194EED8900A67B56 /* waves_audiobackend.latency.cc */,
+				43AA86E7194EED8900A67B56 /* waves_audiobackend.midi.cc */,
+				43AA86E8194EED8900A67B56 /* waves_audiobackend.port_engine.cc */,
+				43AA86E9194EED8900A67B56 /* waves_audioport.cc */,
+				43AA86EA194EED8900A67B56 /* waves_dataport.cc */,
+				43AA86EB194EED8900A67B56 /* waves_midi_buffer.cc */,
+				43AA86EC194EED8900A67B56 /* waves_midi_device_manager.cc */,
+				43AA86ED194EED8900A67B56 /* waves_midi_device.cc */,
+				43AA86EE194EED8900A67B56 /* waves_midi_event.cc */,
+				43AA86EF194EED8900A67B56 /* waves_midiport.cc */,
+			);
+			name = source;
+			sourceTree = SOURCE_ROOT;
+		};
+		43AA86E4194EECF300A67B56 /* headers */ = {
+			isa = PBXGroup;
+			children = (
+				43AA86FB194EEDAC00A67B56 /* waves_audiobackend.h */,
+				43AA86FC194EEDAC00A67B56 /* waves_audioport.h */,
+				43AA86FD194EEDAC00A67B56 /* waves_dataport.h */,
+				43AA86FE194EEDAC00A67B56 /* waves_midi_buffer.h */,
+				43AA86FF194EEDAC00A67B56 /* waves_midi_device_manager.h */,
+				43AA8700194EEDAC00A67B56 /* waves_midi_device.h */,
+				43AA8701194EEDAC00A67B56 /* waves_midi_event.h */,
+				43AA8702194EEDAC00A67B56 /* waves_midiport.h */,
+			);
+			name = headers;
+			sourceTree = SOURCE_ROOT;
+		};
+		43AA870C194EEDCA00A67B56 /* scripts */ = {
+			isa = PBXGroup;
+			children = (
+				43AA870B194EEDC600A67B56 /* wscript */,
+			);
+			name = scripts;
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		43AA86DA194EECE000A67B56 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43AA8703194EEDAC00A67B56 /* waves_audiobackend.h in Headers */,
+				43AA8704194EEDAC00A67B56 /* waves_audioport.h in Headers */,
+				43AA8705194EEDAC00A67B56 /* waves_dataport.h in Headers */,
+				43AA8706194EEDAC00A67B56 /* waves_midi_buffer.h in Headers */,
+				43AA8707194EEDAC00A67B56 /* waves_midi_device_manager.h in Headers */,
+				43AA8708194EEDAC00A67B56 /* waves_midi_device.h in Headers */,
+				43AA8709194EEDAC00A67B56 /* waves_midi_event.h in Headers */,
+				43AA870A194EEDAC00A67B56 /* waves_midiport.h in Headers */,
+				43278FF0194EFB30003C9FEA /* basics.hpp in Headers */,
+				43278FF1194EFB30003C9FEA /* compiletime_functions.hpp in Headers */,
+				43278FF2194EFB30003C9FEA /* atomic_ops.hpp in Headers */,
+				43278FF3194EFB30003C9FEA /* atomic_ops_gcc_x86.hpp in Headers */,
+				43278FF4194EFB30003C9FEA /* WCFourCC.h in Headers */,
+				43278FF5194EFB30003C9FEA /* WTByteOrder.h in Headers */,
+				43278FF6194EFB30003C9FEA /* WUComPtr.h in Headers */,
+				43278FF7194EFB30003C9FEA /* WUDefines.h in Headers */,
+				43278FF8194EFB30003C9FEA /* WUMathConsts.h in Headers */,
+				43278FF9194EFB30003C9FEA /* WUTypes.h in Headers */,
+				43278FFA194EFB30003C9FEA /* IncludeWindows.h in Headers */,
+				43278FFC194EFB30003C9FEA /* WCMRAudioDeviceManager.h in Headers */,
+				43278FFE194EFB30003C9FEA /* WCMRCoreAudioDeviceManager.h in Headers */,
+				43279000194EFB30003C9FEA /* WCMRNativeAudio.h in Headers */,
+				43279002194EFB30003C9FEA /* WCMRPortAudioDeviceManager.h in Headers */,
+				43279003194EFB30003C9FEA /* MinMaxUtilities.h in Headers */,
+				43279004194EFB30003C9FEA /* safe_delete.h in Headers */,
+				43279006194EFB30003C9FEA /* UMicroseconds.h in Headers */,
+				43279007194EFB30003C9FEA /* WCFixedString.h in Headers */,
+				43279008194EFB30003C9FEA /* WUErrors.h in Headers */,
+				4327900A194EFB30003C9FEA /* WCRefManager.h in Headers */,
+				4327900C194EFB30003C9FEA /* WCThreadSafe.h in Headers */,
+				4327900D194EFB30003C9FEA /* WavesPublicAPI_Defines.h in Headers */,
+				4327900E194EFB30003C9FEA /* wstdint.h in Headers */,
+				4327900F194EFB30003C9FEA /* WTErr.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		43AA86DB194EECE000A67B56 /* waves_audiobackend */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 43AA86E0194EECE000A67B56 /* Build configuration list for PBXNativeTarget "waves_audiobackend" */;
+			buildPhases = (
+				43AA86D8194EECE000A67B56 /* Sources */,
+				43AA86D9194EECE000A67B56 /* Frameworks */,
+				43AA86DA194EECE000A67B56 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = waves_audiobackend;
+			productName = waves_audiobackend;
+			productReference = 43AA86DC194EECE000A67B56 /* libwaves_audiobackend.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		43AA86D4194EECE000A67B56 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0460;
+				ORGANIZATIONNAME = Waves;
+			};
+			buildConfigurationList = 43AA86D7194EECE000A67B56 /* Build configuration list for PBXProject "waves_audiobackend" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 43AA86D3194EECE000A67B56;
+			productRefGroup = 43AA86DD194EECE000A67B56 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				43AA86DB194EECE000A67B56 /* waves_audiobackend */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		43AA86D8194EECE000A67B56 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43AA86F0194EED8900A67B56 /* waves_audiobackend.cc in Sources */,
+				43AA86F1194EED8900A67B56 /* waves_audiobackend.latency.cc in Sources */,
+				43AA86F2194EED8900A67B56 /* waves_audiobackend.midi.cc in Sources */,
+				43AA86F3194EED8900A67B56 /* waves_audiobackend.port_engine.cc in Sources */,
+				43AA86F4194EED8900A67B56 /* waves_audioport.cc in Sources */,
+				43AA86F5194EED8900A67B56 /* waves_dataport.cc in Sources */,
+				43AA86F6194EED8900A67B56 /* waves_midi_buffer.cc in Sources */,
+				43AA86F7194EED8900A67B56 /* waves_midi_device_manager.cc in Sources */,
+				43AA86F8194EED8900A67B56 /* waves_midi_device.cc in Sources */,
+				43AA86F9194EED8900A67B56 /* waves_midi_event.cc in Sources */,
+				43AA86FA194EED8900A67B56 /* waves_midiport.cc in Sources */,
+				43278FFB194EFB30003C9FEA /* WCMRAudioDeviceManager.cpp in Sources */,
+				43278FFD194EFB30003C9FEA /* WCMRCoreAudioDeviceManager.cpp in Sources */,
+				43278FFF194EFB30003C9FEA /* WCMRNativeAudio.cpp in Sources */,
+				43279001194EFB30003C9FEA /* WCMRPortAudioDeviceManager.cpp in Sources */,
+				43279005194EFB30003C9FEA /* UMicroseconds.cpp in Sources */,
+				43279009194EFB30003C9FEA /* WCRefManager.cpp in Sources */,
+				4327900B194EFB30003C9FEA /* WCThreadSafe.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		43AA86DE194EECE000A67B56 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		43AA86DF194EECE000A67B56 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		43AA86E1194EECE000A67B56 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		43AA86E2194EECE000A67B56 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		43AA86D7194EECE000A67B56 /* Build configuration list for PBXProject "waves_audiobackend" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				43AA86DE194EECE000A67B56 /* Debug */,
+				43AA86DF194EECE000A67B56 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		43AA86E0194EECE000A67B56 /* Build configuration list for PBXNativeTarget "waves_audiobackend" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				43AA86E1194EECE000A67B56 /* Debug */,
+				43AA86E2194EECE000A67B56 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 43AA86D4194EECE000A67B56 /* Project object */;
+}
