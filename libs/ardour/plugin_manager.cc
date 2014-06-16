@@ -243,31 +243,23 @@ PluginManager::clear_vst_cache ()
 #ifdef WINDOWS_VST_SUPPORT
 	{
 		PathScanner scanner;
-		vector<string *> *fsi_files;
+		vector<string> fsi_files;
 
 		fsi_files = scanner (Config->get_plugin_path_vst(), "\\.fsi$", true, true, -1, false);
-		if (fsi_files) {
-			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
-				::g_unlink((*i)->c_str());
-			}
+		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
+			::g_unlink(i->c_str());
 		}
-		vector_delete(fsi_files);
-		delete(fsi_files);
 	}
 #endif
 
 #ifdef LXVST_SUPPORT
 	{
 		PathScanner scanner;
-		vector<string *> *fsi_files;
+		vector<string> fsi_files;
 		fsi_files = scanner (Config->get_plugin_path_lxvst(), "\\.fsi$", true, true, -1, false);
-		if (fsi_files) {
-			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
-				::g_unlink((*i)->c_str());
-			}
+		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
+			::g_unlink(i->c_str());
 		}
-		vector_delete(fsi_files);
-		delete(fsi_files);
 	}
 #endif
 
@@ -275,15 +267,11 @@ PluginManager::clear_vst_cache ()
 	{
 		string personal = get_personal_vst_info_cache_dir();
 		PathScanner scanner;
-		vector<string *> *fsi_files;
+		vector<string> fsi_files;
 		fsi_files = scanner (personal, "\\.fsi$", true, true, -1, false);
-		if (fsi_files) {
-			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
-				::g_unlink((*i)->c_str());
-			}
+		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
+			::g_unlink(i->c_str());
 		}
-		vector_delete(fsi_files);
-		delete(fsi_files);
 	}
 #endif
 }
@@ -294,31 +282,23 @@ PluginManager::clear_vst_blacklist ()
 #ifdef WINDOWS_VST_SUPPORT
 	{
 		PathScanner scanner;
-		vector<string *> *fsi_files;
+		vector<string> fsi_files;
 
 		fsi_files = scanner (Config->get_plugin_path_vst(), "\\.fsb$", true, true, -1, false);
-		if (fsi_files) {
-			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
-				::g_unlink((*i)->c_str());
-			}
+		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
+			::g_unlink(i->c_str());
 		}
-		vector_delete(fsi_files);
-		delete(fsi_files);
 	}
 #endif
 
 #ifdef LXVST_SUPPORT
 	{
 		PathScanner scanner;
-		vector<string *> *fsi_files;
+		vector<string> fsi_files;
 		fsi_files = scanner (Config->get_plugin_path_lxvst(), "\\.fsb$", true, true, -1, false);
-		if (fsi_files) {
-			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
-				::g_unlink((*i)->c_str());
-			}
+		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
+			::g_unlink(i->c_str());
 		}
-		vector_delete(fsi_files);
-		delete(fsi_files);
 	}
 #endif
 
@@ -327,15 +307,11 @@ PluginManager::clear_vst_blacklist ()
 		string personal = get_personal_vst_blacklist_dir();
 
 		PathScanner scanner;
-		vector<string *> *fsi_files;
+		vector<string> fsi_files;
 		fsi_files = scanner (personal, "\\.fsb$", true, true, -1, false);
-		if (fsi_files) {
-			for (vector<string *>::iterator i = fsi_files->begin(); i != fsi_files->end (); ++i) {
-				::g_unlink((*i)->c_str());
-			}
+		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
+			::g_unlink(i->c_str());
 		}
-		vector_delete(fsi_files);
-		delete(fsi_files);
 	}
 #endif
 }
@@ -410,8 +386,8 @@ PluginManager::add_presets(string domain)
 {
 #ifdef HAVE_LRDF
 	PathScanner scanner;
-	vector<string *> *presets;
-	vector<string *>::iterator x;
+	vector<string> presets;
+	vector<string>::iterator x;
 
 	char* envvar;
 	if ((envvar = getenv ("HOME")) == 0) {
@@ -421,17 +397,13 @@ PluginManager::add_presets(string domain)
 	string path = string_compose("%1/.%2/rdf", envvar, domain);
 	presets = scanner (path, rdf_filter, 0, false, true);
 
-	if (presets) {
-		for (x = presets->begin(); x != presets->end (); ++x) {
-			string file = "file:" + **x;
-			if (lrdf_read_file(file.c_str())) {
-				warning << string_compose(_("Could not parse rdf file: %1"), *x) << endmsg;
-			}
+	for (x = presets.begin(); x != presets.end (); ++x) {
+		string file = "file:" + *x;
+		if (lrdf_read_file(file.c_str())) {
+			warning << string_compose(_("Could not parse rdf file: %1"), *x) << endmsg;
 		}
-
-		vector_delete (presets);
-		delete (presets);
 	}
+
 #endif
 }
 
@@ -440,22 +412,17 @@ PluginManager::add_lrdf_data (const string &path)
 {
 #ifdef HAVE_LRDF
 	PathScanner scanner;
-	vector<string *>* rdf_files;
-	vector<string *>::iterator x;
+	vector<string> rdf_files;
+	vector<string>::iterator x;
 
 	rdf_files = scanner (path, rdf_filter, 0, false, true);
 
-	if (rdf_files) {
-		for (x = rdf_files->begin(); x != rdf_files->end (); ++x) {
-			const string uri(string("file://") + **x);
+	for (x = rdf_files.begin(); x != rdf_files.end (); ++x) {
+		const string uri(string("file://") + *x);
 
-			if (lrdf_read_file(uri.c_str())) {
-				warning << "Could not parse rdf file: " << uri << endmsg;
-			}
+		if (lrdf_read_file(uri.c_str())) {
+			warning << "Could not parse rdf file: " << uri << endmsg;
 		}
-
-		vector_delete (rdf_files);
-		delete (rdf_files);
 	}
 #endif
 }
@@ -662,22 +629,17 @@ int
 PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 {
 	PathScanner scanner;
-	vector<string *> *plugin_objects;
-	vector<string *>::iterator x;
+	vector<string> plugin_objects;
+	vector<string>::iterator x;
 	int ret = 0;
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("detecting Windows VST plugins along %1\n", path));
 
 	plugin_objects = scanner (Config->get_plugin_path_vst(), windows_vst_filter, 0, false, true);
 
-	if (plugin_objects) {
-		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
-			ARDOUR::PluginScanMessage(_("VST"), **x, !cache_only && !cancelled());
-			windows_vst_discover (**x, cache_only || cancelled());
-		}
-
-		vector_delete (plugin_objects);
-		delete (plugin_objects);
+	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
+		ARDOUR::PluginScanMessage(_("VST"), *x, !cache_only && !cancelled());
+		windows_vst_discover (*x, cache_only || cancelled());
 	}
 
 	return ret;
@@ -783,8 +745,8 @@ int
 PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 {
 	PathScanner scanner;
-	vector<string *> *plugin_objects;
-	vector<string *>::iterator x;
+	vector<string> plugin_objects;
+	vector<string>::iterator x;
 	int ret = 0;
 
 #ifndef NDEBUG
@@ -795,14 +757,9 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 
 	plugin_objects = scanner (Config->get_plugin_path_lxvst(), lxvst_filter, 0, false, true);
 
-	if (plugin_objects) {
-		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
-			ARDOUR::PluginScanMessage(_("LXVST"), **x, !cache_only && !cancelled());
-			lxvst_discover (**x, cache_only || cancelled());
-		}
-
-		vector_delete (plugin_objects);
-		delete (plugin_objects);
+	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
+		ARDOUR::PluginScanMessage(_("LXVST"), *x, !cache_only && !cancelled());
+		lxvst_discover (*x, cache_only || cancelled());
 	}
 
 	return ret;
