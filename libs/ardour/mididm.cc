@@ -50,6 +50,9 @@ int MIDIDM::process (pframes_t nframes, PortEngine &pe, void *midi_in, void *mid
 
 	/* process incoming */
 	const pframes_t nevents = pe.get_midi_event_count (midi_in);
+#if 1 //DEBUG
+		printf("MIDI SEND: @%8"PRId64", recv: %d \n", _monotonic_cnt, nevents);
+#endif
 	for (pframes_t n = 0; n < nevents; ++n) {
 		pframes_t timestamp;
 		size_t size;
@@ -64,10 +67,11 @@ int MIDIDM::process (pframes_t nframes, PortEngine &pe, void *midi_in, void *mid
 #define MODX (16384)  // 1<<(2*7)
 #define MASK (0x3fff) // MODX - 1
 		const int64_t tc = (_monotonic_cnt + timestamp) & MASK;
-		const int64_t ti = (buf[2] << 7) | buf[1];
+		const int64_t ti = ((buf[2] & 0x7f) << 7) | (buf[1] & 0x7f);
 		const int64_t tdiff = (MODX + tc - ti) % MODX;
 #if 1 //DEBUG
-		printf("MIDI DELAY: # %4"PRId64" %4"PRId64" [samples]\n", _cnt_total, tdiff);
+		printf("MIDI DELAY: # %5"PRId64" %5"PRId64" [samples] (%5"PRId64" - %8"PRId64") @(%5"PRId64" + %d)\n",
+				_cnt_total, tdiff, tc, ti, _monotonic_cnt, timestamp);
 #endif
 
 		/* running variance */
