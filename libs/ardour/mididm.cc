@@ -51,7 +51,7 @@ int MIDIDM::process (pframes_t nframes, PortEngine &pe, void *midi_in, void *mid
 	/* process incoming */
 	const pframes_t nevents = pe.get_midi_event_count (midi_in);
 #if 1 //DEBUG
-		printf("MIDI SEND: @%8"PRId64", recv: %d \n", _monotonic_cnt, nevents);
+		printf("MIDI SEND: @%8"PRId64", recv: %d systime:%"PRId64"\n", _monotonic_cnt, nevents, g_get_monotonic_time());
 #endif
 	for (pframes_t n = 0; n < nevents; ++n) {
 		pframes_t timestamp;
