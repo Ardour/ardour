@@ -2059,9 +2059,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		43AA82A8194EEAAF00A67B56 /* ardour */ = {
+		43AA82A8194EEAAF00A67B56 /* libardour */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 43AA82AA194EEAAF00A67B56 /* Build configuration list for PBXNativeTarget "ardour" */;
+			buildConfigurationList = 43AA82AA194EEAAF00A67B56 /* Build configuration list for PBXNativeTarget "libardour" */;
 			buildPhases = (
 				43AA82A5194EEAAF00A67B56 /* Sources */,
 				43AA82A6194EEAAF00A67B56 /* Frameworks */,
@@ -2071,7 +2071,7 @@
 			);
 			dependencies = (
 			);
-			name = ardour;
+			name = libardour;
 			productName = ardour;
 			productReference = 43AA82A9194EEAAF00A67B56 /* libardour.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
@@ -2097,7 +2097,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				43AA82A8194EEAAF00A67B56 /* ardour */,
+				43AA82A8194EEAAF00A67B56 /* libardour */,
 			);
 		};
 /* End PBXProject section */
@@ -2443,7 +2443,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		43AA82AA194EEAAF00A67B56 /* Build configuration list for PBXNativeTarget "ardour" */ = {
+		43AA82AA194EEAAF00A67B56 /* Build configuration list for PBXNativeTarget "libardour" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				43AA82AB194EEAAF00A67B56 /* Debug */,
