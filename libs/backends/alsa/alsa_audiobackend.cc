@@ -1386,7 +1386,6 @@ AlsaAudioBackend::main_process_thread ()
 				PBD::error << _("AlsaAudioBackend: I/O error. Audio Process Terminated.") << endmsg;
 				break;
 			}
-			int gop = 0;
 			while (nr >= (long)_samples_per_period) {
 				uint32_t i = 0;
 				clock1 = g_get_monotonic_time();
@@ -1459,10 +1458,6 @@ AlsaAudioBackend::main_process_thread ()
 				clock2 = g_get_monotonic_time();
 				const int64_t elapsed_time = clock2 - clock1;
 				_dsp_load = elapsed_time / (float) nomial_time;
-				++gop;
-			}
-			if (gop != 1) {
-				fprintf(stderr, "grouped audio periods %d != 1\n", gop);
 			}
 
 			if (xrun && (_pcmi->capt_xrun() > 0 || _pcmi->play_xrun() > 0)) {

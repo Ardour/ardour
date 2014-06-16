@@ -50,7 +50,7 @@ int MIDIDM::process (pframes_t nframes, PortEngine &pe, void *midi_in, void *mid
 
 	/* process incoming */
 	const pframes_t nevents = pe.get_midi_event_count (midi_in);
-#if 1 //DEBUG
+#if 0 //DEBUG
 		printf("MIDI SEND: @%8"PRId64", recv: %d systime:%"PRId64"\n", _monotonic_cnt, nevents, g_get_monotonic_time());
 #endif
 	for (pframes_t n = 0; n < nevents; ++n) {
@@ -69,7 +69,7 @@ int MIDIDM::process (pframes_t nframes, PortEngine &pe, void *midi_in, void *mid
 		const int64_t tc = (_monotonic_cnt + timestamp) & MASK;
 		const int64_t ti = ((buf[2] & 0x7f) << 7) | (buf[1] & 0x7f);
 		const int64_t tdiff = (MODX + tc - ti) % MODX;
-#if 1 //DEBUG
+#if 0 //DEBUG
 		printf("MIDI DELAY: # %5"PRId64" %5"PRId64" [samples] (%5"PRId64" - %8"PRId64") @(%5"PRId64" + %d)\n",
 				_cnt_total, tdiff, tc, ti, _monotonic_cnt, timestamp);
 #endif
