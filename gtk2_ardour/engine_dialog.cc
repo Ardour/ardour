@@ -62,7 +62,7 @@ using namespace Glib;
 static const unsigned int midi_tab = 2;
 static const unsigned int latency_tab = 1; /* zero-based, page zero is the main setup page */
 
-static const char* results_markup = X_("<span foreground=\"red\" style=\"italic\" size=\"larger\">%1</span>");
+static const char* results_markup = X_("<span style=\"bold\" size=\"larger\">%1</span>");
 
 EngineControl::EngineControl ()
 	: ArdourDialog (_("Audio/MIDI Setup"))
