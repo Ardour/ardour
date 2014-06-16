@@ -93,6 +93,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     Gtk::Button       lm_back_button;
     ArdourButton      lm_button_audio;
     Gtk::Label        lm_title;
+    Gtk::Label        lm_preamble;
     Gtk::Label        lm_results;
     Gtk::Table        lm_table;
     Gtk::VBox         lm_vbox;
