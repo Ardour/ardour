@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "43AA82A8194EEAAF00A67B56"
-               BuildableName = "libardour.dylib"
+               BuildableName = "liblibardour.dylib"
                BlueprintName = "libardour"
                ReferencedContainer = "container:libardour.xcodeproj">
             </BuildableReference>
