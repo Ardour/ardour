@@ -1920,6 +1920,12 @@ EngineControl::check_midi_latency_measurement ()
 		end_latency_detection ();
 		lm_use_button.set_sensitive (true);
 		have_lm_results = true;
+		return false;
+	} else if (mididm->processed () > 400) {
+		have_lm_results = false;
+		end_latency_detection ();
+		lm_results.set_markup (string_compose (results_markup, _("Timeout - large MIDI jitter.")));
+		return false;
 	}
 
 	lm_results.set_markup (string_compose (results_markup, buf));

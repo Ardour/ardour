@@ -66,6 +66,9 @@ int MIDIDM::process (pframes_t nframes, PortEngine &pe, void *midi_in, void *mid
 		const int64_t tc = (_monotonic_cnt + timestamp) & MASK;
 		const int64_t ti = (buf[2] << 7) | buf[1];
 		const int64_t tdiff = (MODX + tc - ti) % MODX;
+#if 1 //DEBUG
+		printf("MIDI DELAY: # %4"PRId64" %4"PRId64" [samples]\n", _cnt_total, tdiff);
+#endif
 
 		/* running variance */
 		if (_cnt_total == 0) {
