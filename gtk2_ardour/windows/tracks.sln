@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tracks", "tracks.vcxproj", "{72A9BC9A-064A-4D41-B0D6-A2EF39010895}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libardour", "..\..\libs\ardour\windows\libardour.vcxproj", "{31A7AE35-5000-4B9C-A3D6-E277F4091305}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "waves_audiobackend", "..\..\libs\backends\wavesaudio\windows\waves_audiobackend.vcxproj", "{B529298A-F38C-45FF-812D-260E79CD3341}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpbd", "..\..\libs\pbd\windows\libpbd.vcxproj", "{2C6D630F-CBB5-4B91-84EB-B5CD3F043575}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{72A9BC9A-064A-4D41-B0D6-A2EF39010895}.Debug|Win32.ActiveCfg = Debug|Win32
+		{72A9BC9A-064A-4D41-B0D6-A2EF39010895}.Debug|Win32.Build.0 = Debug|Win32
+		{72A9BC9A-064A-4D41-B0D6-A2EF39010895}.Release|Win32.ActiveCfg = Release|Win32
+		{72A9BC9A-064A-4D41-B0D6-A2EF39010895}.Release|Win32.Build.0 = Release|Win32
+		{31A7AE35-5000-4B9C-A3D6-E277F4091305}.Debug|Win32.ActiveCfg = Debug|Win32
+		{31A7AE35-5000-4B9C-A3D6-E277F4091305}.Debug|Win32.Build.0 = Debug|Win32
+		{31A7AE35-5000-4B9C-A3D6-E277F4091305}.Release|Win32.ActiveCfg = Release|Win32
+		{31A7AE35-5000-4B9C-A3D6-E277F4091305}.Release|Win32.Build.0 = Release|Win32
+		{B529298A-F38C-45FF-812D-260E79CD3341}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B529298A-F38C-45FF-812D-260E79CD3341}.Debug|Win32.Build.0 = Debug|Win32
+		{B529298A-F38C-45FF-812D-260E79CD3341}.Release|Win32.ActiveCfg = Release|Win32
+		{B529298A-F38C-45FF-812D-260E79CD3341}.Release|Win32.Build.0 = Release|Win32
+		{2C6D630F-CBB5-4B91-84EB-B5CD3F043575}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2C6D630F-CBB5-4B91-84EB-B5CD3F043575}.Debug|Win32.Build.0 = Debug|Win32
+		{2C6D630F-CBB5-4B91-84EB-B5CD3F043575}.Release|Win32.ActiveCfg = Release|Win32
+		{2C6D630F-CBB5-4B91-84EB-B5CD3F043575}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

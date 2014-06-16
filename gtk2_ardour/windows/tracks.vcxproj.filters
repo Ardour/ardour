@@ -1,0 +1,2172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{44ddc30b-5f7a-4f39-ae54-5a1c76167880}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\version.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\about.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\actions.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\add_route_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\add_video_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ambiguous_file_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\analysis_window.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ardour_button.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ardour_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ardour_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ardour_ui_dependents.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ardour_ui_dialogs.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ardour_ui_ed.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ardour_ui_mixer.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ardour_ui_options.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ardour_ui2.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ardour_window.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio_clock.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio_region_editor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio_region_view.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio_streamview.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\audio_time_axis.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\automation_controller.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\automation_line.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\automation_region_view.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\automation_streamview.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\automation_time_axis.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\axis_view.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\big_clock_window.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\bundle_env_cocoa.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\bundle_env_linux.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\bundle_env_mingw.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\bundle_env_msvc.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\bundle_manager.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\button_joiner.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\canvas_patch_change.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\clock_group.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\configinfo.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\control_point.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\control_point_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\crossfade_edit.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\curvetest.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\debug.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\device_connection_control.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\edit_note_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editing.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_actions.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_audio_import.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_audiotrack.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_canvas.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_canvas_events.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_component.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_cursors.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_drag.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_export_audio.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_group_tabs.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_keys.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_locations.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_markers.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_mixer.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_mouse.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_ops.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_regions.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_route_groups.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_routes.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_rulers.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_selection.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_snapshots.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_summary.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_tempodisplay.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_timefx.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\editor_videotimeline.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\engine_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\enums.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\evtest.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\export_channel_selector.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\export_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\export_file_notebook.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\export_filename_selector.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\export_format_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\export_format_selector.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\export_preset_selector.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\export_range_markers_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\export_timespan_selector.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\export_video_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\export_video_infobox.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fft.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fft_graph.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fft_result.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gain_meter.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\generic_pluginui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ghostregion.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\global_port_matrix.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\group_tabs.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gui_object.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hit.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\insert_time_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\interthread_progress_window.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\io_selector.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\keyboard.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\keyeditor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\latency_gui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\led.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\level_meter.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\linux_vst_gui_support.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\location_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lv2_plugin_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lxvst_plugin_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main_clock.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\marker.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\meter_patterns.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\meter_strip.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\meterbridge.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_automation_line.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_channel_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_channel_selector.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_cut_buffer.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_device_connection_control.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_export_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_list_editor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_port_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_region_view.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_scroomer.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_selection.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_streamview.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_time_axis.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_tracer.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\midi_velocity_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\missing_file_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\missing_plugin_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mixer_actor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mixer_group_tabs.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mixer_strip.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mixer_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\monitor_section.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mono_panner.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mono_panner_editor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mouse_cursors.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mtest.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nag.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\new_plugin_preset_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\normalize_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\note.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\note_base.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\note_player.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nsm.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nsmclient.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\open_file_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\option_editor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\opts.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\panner_editor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\panner_interface.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\panner_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\panner2d.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\patch_change.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\patch_change_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\piano_roll_header.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\pingback.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\playlist_selector.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\plugin_eq_gui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\plugin_selector.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\plugin_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port_group.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port_insert_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port_matrix.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port_matrix_body.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port_matrix_column_labels.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port_matrix_component.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port_matrix_grid.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port_matrix_labels.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\port_matrix_row_labels.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\processor_box.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\progress_reporter.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\prompter.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\public_editor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\quantize_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rc_option_editor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\region_editor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\region_gain_line.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\region_layering_order_editor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\region_selection.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\region_view.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\return_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\rhythm_ferret.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\route_group_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\route_group_menu.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\route_params_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\route_processor_selection.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\route_time_axis.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\route_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\search_path_option.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\selection.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\send_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\session_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\session_dialog.logic.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\session_import_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\session_lock_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\session_metadata_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\session_option_editor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sfdb_freesound_mootcher.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sfdb_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shuttle_control.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\speaker_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\splash.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\startup.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\step_editor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\step_entry.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stereo_panner.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stereo_panner_editor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\streamview.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\strip_silence_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sys_ex.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tape_region_view.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tempo_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tempo_lines.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\theme_manager.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\time_axis_view.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\time_axis_view_item.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\time_fx_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\time_info_box.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\time_selection.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\timecode_tester.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\track_selection.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\track_view_list.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tracks_control_panel.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tracks_control_panel.logic.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\transcode_ffmpeg.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\transcode_video_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\transpose_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ui_config.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\utils.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\utils_videotl.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\verbose_cursor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video_image_frame.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video_monitor.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video_server_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\video_timeline.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\visibility_group.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\volume_controller.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vst_plugin_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\waves_button.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\waves_dialog.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\waves_icon_button.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\waves_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\window_manager.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\windows_vst_plugin_ui.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\macosx\tracks\AppDelegate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\about.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\actions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\add_route_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\add_video_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ambiguous_file_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\analysis_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ardour_button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ardour_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ardour_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ardour_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\au_pluginui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio_clock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio_region_editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio_region_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio_streamview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\audio_time_axis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\automation_controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\automation_line.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\automation_region_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\automation_selection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\automation_streamview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\automation_time_axis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\axis_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\big_clock_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\bundle_env.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\bundle_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\button_joiner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\canvas_vars.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\canvas-waveview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\clock_group.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\configinfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\control_point.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\control_point_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\crossfade_edit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\crossfade_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\crossfade_xpms.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dbg_msg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\device_connection_control.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\edit_note_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editing_syms.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor_component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor_cursors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor_drag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor_enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor_group_tabs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor_items.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor_locations.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor_regions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor_route_groups.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor_routes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor_snapshots.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\editor_summary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\engine_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\export_channel_selector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\export_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\export_file_notebook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\export_filename_selector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\export_format_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\export_format_selector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\export_preset_selector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\export_range_markers_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\export_timespan_selector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\export_video_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\export_video_infobox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fft.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fft_graph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fft_result.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fix_carbon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gain_meter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gettext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ghostregion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\global_port_matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\global_signals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\group_tabs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gtk_pianokeyboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gtk-custom-hruler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gtk-custom-ruler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gui_object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gui_thread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\i18n.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\insert_time_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\interthread_progress_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\io_selector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\keyboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\keyeditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\latency_gui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\led.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\level_meter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\location_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\logmeter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lv2_external_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lv2_plugin_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lxvst_plugin_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main_clock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\marker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\marker_selection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\meter_patterns.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\meter_strip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\meterbridge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_automation_line.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_channel_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_channel_selector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_cut_buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_device_connection_control.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_export_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_list_editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_port_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_region_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_scroomer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_selection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_streamview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_time_axis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_tracer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\midi_velocity_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\missing_file_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\missing_plugin_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\mixer_actor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\mixer_group_tabs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\mixer_strip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\mixer_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\monitor_section.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\mono_panner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\mono_panner_editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\mouse_cursors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\new_plugin_preset_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\normalize_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\note.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\note_base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\note_player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nsm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nsmclient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\open_file_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\open_file_dialog_proxy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\option_editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\opts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\panner_editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\panner_interface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\panner_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\panner2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\patch_change.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\patch_change_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\piano_roll_header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\pingback.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\playlist_selection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\playlist_selector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\plugin_eq_gui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\plugin_interest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\plugin_selector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\plugin_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\point_selection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\port_group.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\port_insert_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\port_matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\port_matrix_body.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\port_matrix_column_labels.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\port_matrix_component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\port_matrix_grid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\port_matrix_labels.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\port_matrix_row_labels.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\port_matrix_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\processor_box.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\processor_selection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\progress_reporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\prompter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public_editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\quantize_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rc_option_editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\region_editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\region_gain_line.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\region_layering_order_editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\region_selection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\region_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\return_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rgb_macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\rhythm_ferret.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\route_group_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\route_group_menu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\route_params_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\route_processor_selection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\route_sorter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\route_time_axis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\route_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\route_ui_selection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\search_path_option.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\selectable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\selection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\selection_templates.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\send_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\session_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\session_dialog.logic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\session_import_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\session_lock_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\session_metadata_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\session_option_editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sfdb_freesound_mootcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sfdb_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shuttle_control.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\speaker_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\splash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\startup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\step_editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\step_entry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\stereo_panner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\stereo_panner_editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\streamview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\strip_selection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\strip_silence_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sys_ex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tape_region_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tempo_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tempo_lines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\theme_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\time_axis_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\time_axis_view_item.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\time_fx_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\time_info_box.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\time_selection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\track_selection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\track_view_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tracks_control_panel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tracks_control_panel.logic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\transcode_ffmpeg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\transcode_video_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\transpose_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ui_config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ui_config_vars.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\utils_videotl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\verbose_cursor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video_image_frame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video_monitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video_server_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\video_timeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\visibility_group.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\volume_controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vst_plugin_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\waves_button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\waves_dialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\waves_icon_button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\waves_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\window_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\windows_vst_plugin_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\small-splash.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\splash.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\act-disabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\add.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\application-x-ardour_16px.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\application-x-ardour_22px.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\application-x-ardour_32px.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\application-x-ardour_48px.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\ardour_icon_16px.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\ardour_icon_22px.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\ardour_icon_32px.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\ardour_icon_48px.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\ardour_icon_256px.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\ardour-app-icon_osx.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\ardour-app-icon_osx_mask.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\chord.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\close.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\computer_keyboard.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\computer_keyboard_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\display_clock_mockup.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\display_metrics_mockup.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\eighthnote.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\expand_left_right_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\expand_up_down_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fade_in_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fade_out_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadein-constant-power.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadein-fast-cut.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadein-linear.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadein-long-cut.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadein-S1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadein-S2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadein-short-cut.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadein-slow-cut.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadeout-constant-power.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadeout-fast-cut.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadeout-linear.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadeout-long-cut.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadeout-S1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadeout-S2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadeout-short-cut.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fadeout-slow-cut.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fader_belt.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fader_belt_desensitised.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fader_belt_h.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fader_belt_h_desensitised.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fader_belt_h_medium.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fader_belt_h_medium_desensitised.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fader_belt_h_thin.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fader_belt_h_thin_desensitised.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fader_handle.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\ferret_02.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\forte.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fortissimo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\fortississimo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\grabber.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\grabber_edit_point.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\grabber_note.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\halfnote.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\hide.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\horizontal_zoom_fader_face.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\i_beam_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\inspector_on.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\inspector_on_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\inspector_on_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\join_tools.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\knob.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\lock_session.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\lock_session_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\lock_session_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\media_button.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\media_button_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\media_button_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\meter_bridge_on.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\meter_bridge_on_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\meter_bridge_on_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\metronome.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\mezzforte.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\mezzoforte.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\mezzopiano.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\midi_panic.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\midi_socket_small.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\midi_sound_notes.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\midi_tool_erase.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\midi_tool_pencil.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\midi_tool_select.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\midi-input-active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\midi-input-inactive.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\mixer_on.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\mixer_on_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\mixer_on_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\mode_multi_out.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\mode_multi_out_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\mode_multi_out_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\mode_stereo_out.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\mode_stereo_out_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\mode_stereo_out_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\move_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\muted-by-others.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\mute-disabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\mute-enabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\nudge_left.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\nudge_right.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\pianissimo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\pianississimo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\piano.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\quarternote.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\rec-enabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\rec-in-progress.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\record_disabled_grey.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\record_normal_red.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\record_tape_red.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\record-normal-disabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\record-normal-enabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\record-normal-in-progress.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\record-step.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\resize_bottom_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\resize_bottom_left_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\resize_bottom_right_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\resize_left_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\resize_right_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\resize_top_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\resize_top_left_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\resize_top_right_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\sae.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\sessionlock.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\sixteenthnote.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\sixtyfourthnote.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\slider_controller_fader.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\slider_controller_fader_handle.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\solo-disabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\soloed-by-others.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\solo-enabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\solo-isolated.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\solo-isolate-disabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\solo-isolate-enabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\solo-safe-disabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\solo-safe-enabled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\solo-safe-icon.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\step-editing.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\strip_width.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\systemlock.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tav_exp.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tav_shrink.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\thirtysecondnote.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_arrow.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_arrow_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_arrow_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_audition.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_cut.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_cut_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_cut_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_gain.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_marker.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_marker_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_marker_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_note.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_object.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_object_range.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_range.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_stretch.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_waveform_zoom.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_waveform_zoom_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_waveform_zoom_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_zoom.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_zoom_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_zoom_ardour.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tool_zoom_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tracks.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tracks_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\tracks_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_end.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_end_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_end_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_loop.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_loop_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_loop_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_play.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_play_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_play_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_range.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_record.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_record_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_record_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_start.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_start_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_start_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_stop.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_stop_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\transport_stop_prelight.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\trim_bottom_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\trim_left_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\trim_left_cursor_5.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\trim_left_cursor_right_only.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\trim_right_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\trim_right_cursor_5.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\trim_right_cursor_left_only.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\trim_top_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\vertical_zoom_fader_face.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\wholenote.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\zoom_fader_handle.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\zoom_fader_handle_active.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\zoom_full.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\zoom_in.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\zoom_in_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\zoom_out.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\icons\zoom_out_cursor.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\icons\export_icons.sh">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\ui\tracks_preferences.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\device_capture_control.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\device_playback_control.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\editor_window.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\midi_device_control.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\session_dialog.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\session_lock_dialog.xml">
+      <Filter>ui</Filter>
+    </Xml>
+  </ItemGroup>
+</Project>
