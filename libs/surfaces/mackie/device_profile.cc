@@ -90,25 +90,20 @@ DeviceProfile::reload_device_profiles ()
 {
 	DeviceProfile dp;
 	vector<string> s;
-	vector<string *> *devprofiles;
+	vector<string> devprofiles;
 	PathScanner scanner;
 	Searchpath spath (devprofile_search_path());
 
 	devprofiles = scanner (spath.to_string(), devprofile_filter, 0, false, true);
 	device_profiles.clear ();
 
-	if (!devprofiles) {
+	if (devprofiles.empty()) {
 		error << "No MCP device info files found using " << spath.to_string() << endmsg;
 		return;
 	}
 
-	if (devprofiles->empty()) {
-		error << "No MCP device info files found using " << spath.to_string() << endmsg;
-		return;
-	}
-
-	for (vector<string*>::iterator i = devprofiles->begin(); i != devprofiles->end(); ++i) {
-		string fullpath = *(*i);
+	for (vector<string>::iterator i = devprofiles.begin(); i != devprofiles.end(); ++i) {
+		string fullpath = *i;
 
 		XMLTree tree;
 
@@ -126,9 +121,6 @@ DeviceProfile::reload_device_profiles ()
 			device_profiles[dp.name()] = dp;
 		}
 	}
-
-	vector_delete (devprofiles);
-	delete devprofiles;
 }
 
 int

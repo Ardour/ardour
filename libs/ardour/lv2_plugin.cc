@@ -2013,23 +2013,20 @@ void
 LV2World::load_bundled_plugins()
 {
 	if (!_bundle_checked) {
-		cout << "Scanning folders for bundled LV2s: " << ARDOUR::lv2_bundled_search_path().to_string() << endl;
 		PathScanner scanner;
-		vector<string *> *plugin_objects = scanner (ARDOUR::lv2_bundled_search_path().to_string(), lv2_filter, 0, true, true);
-		if (plugin_objects) {
-			for ( vector<string *>::iterator x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
+		cout << "Scanning folders for bundled LV2s: " << ARDOUR::lv2_bundled_search_path().to_string() << endl;
+
+		vector<string> plugin_objects = scanner (ARDOUR::lv2_bundled_search_path().to_string(), lv2_filter, 0, true, true);
+		for ( vector<string>::iterator x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
 #ifdef PLATFORM_WINDOWS
-				string uri = "file:///" + **x + "/";
+			string uri = "file:///" + *x + "/";
 #else
-				string uri = "file://" + **x + "/";
+			string uri = "file://" + *x + "/";
 #endif
-				LilvNode *node = lilv_new_uri(world, uri.c_str());
-				lilv_world_load_bundle(world, node);
-				lilv_node_free(node);
-			}
+			LilvNode *node = lilv_new_uri(world, uri.c_str());
+			lilv_world_load_bundle(world, node);
+			lilv_node_free(node);
 		}
-		vector_delete (plugin_objects);
-		delete (plugin_objects);
 
 		_bundle_checked = true;
 	}

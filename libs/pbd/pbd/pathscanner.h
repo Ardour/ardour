@@ -34,13 +34,13 @@ class LIBPBD_API PathScanner
 
 {
   public:
-	std::vector<std::string *> *operator() (const std::string &dirpath,
-						bool (*filter)(const std::string &, void *arg),
-						void *arg, 
-						bool match_fullpath = true,
-						bool return_fullpath = true,
-						long limit = -1,
-						bool recurse = false) {
+	std::vector<std::string> operator() (const std::string &dirpath,
+	                                     bool (*filter)(const std::string &, void *arg),
+	                                     void *arg,
+	                                     bool match_fullpath = true,
+	                                     bool return_fullpath = true,
+	                                     long limit = -1,
+	                                     bool recurse = false) {
 		return run_scan (dirpath,
 				 (bool (PathScanner::*)(const std::string &)) 0, 
 				 filter, 
@@ -50,23 +50,23 @@ class LIBPBD_API PathScanner
 				 limit, recurse);
 	}
 
-	std::vector<std::string *> *operator() (const std::string &dirpath,
-						const std::string &regexp,
-						bool match_fullpath = true,
-						bool return_fullpath = true,
-						long limit = -1,
-						bool recurse = false);
+	std::vector<std::string> operator() (const std::string &dirpath,
+	                                     const std::string &regexp,
+	                                     bool match_fullpath = true,
+	                                     bool return_fullpath = true,
+	                                     long limit = -1,
+	                                     bool recurse = false);
 	
-	std::string *find_first (const std::string &dirpath,
-				 const std::string &regexp,
-				 bool match_fullpath = true,
-				 bool return_fullpath = true);
+	std::string find_first (const std::string &dirpath,
+	                        const std::string &regexp,
+	                        bool match_fullpath = true,
+	                        bool return_fullpath = true);
 	
-	std::string *find_first (const std::string &dirpath,
-				 bool (*filter)(const std::string &, void *),
-				 void *arg,
-				 bool match_fullpath = true,
-				 bool return_fullpath = true);
+	std::string find_first (const std::string &dirpath,
+	                        bool (*filter)(const std::string &, void *),
+	                        void *arg,
+	                        bool match_fullpath = true,
+	                        bool return_fullpath = true);
 	
   private:
 	regex_t compiled_pattern;
@@ -75,24 +75,24 @@ class LIBPBD_API PathScanner
 		return regexec (&compiled_pattern, str.c_str(), 0, 0, 0) == 0;
 	}
 	
-	std::vector<std::string *> *run_scan (const std::string &dirpath,
-					      bool (PathScanner::*mfilter) (const std::string &),
-					      bool (*filter)(const std::string &, void *),
-					      void *arg,
-					      bool match_fullpath,
-					      bool return_fullpath,
-					      long limit,
-					      bool recurse = false);
+	std::vector<std::string> run_scan (const std::string &dirpath,
+	                                   bool (PathScanner::*mfilter) (const std::string &),
+	                                   bool (*filter)(const std::string &, void *),
+	                                   void *arg,
+	                                   bool match_fullpath,
+	                                   bool return_fullpath,
+	                                   long limit,
+	                                   bool recurse = false);
 
-	std::vector<std::string *> *run_scan_internal (std::vector<std::string*>*, 
-						       const std::string &dirpath,
-						       bool (PathScanner::*mfilter) (const std::string &),
-						       bool (*filter)(const std::string &, void *),
-						       void *arg,
-						       bool match_fullpath,
-						       bool return_fullpath,
-						       long limit,
-						       bool recurse = false);
+	void run_scan_internal (std::vector<std::string>&,
+	                        const std::string &dirpath,
+	                        bool (PathScanner::*mfilter) (const std::string &),
+	                        bool (*filter)(const std::string &, void *),
+	                        void *arg,
+	                        bool match_fullpath,
+	                        bool return_fullpath,
+	                        long limit,
+	                        bool recurse = false);
 };
 
 #endif // __libmisc_pathscanner_h__

@@ -471,30 +471,23 @@ DeviceInfo::reload_device_info ()
 {
 	DeviceInfo di;
 	vector<string> s;
-	vector<string *> *devinfos;
+	vector<string> devinfos;
 	PathScanner scanner;
 	Searchpath spath (devinfo_search_path());
 
 	devinfos = scanner (spath.to_string(), devinfo_filter, 0, false, true);
 	device_info.clear ();
 
-	if (!devinfos) {
+	if (devinfos.empty()) {
 		error << "No MCP device info files found using " << spath.to_string() << endmsg;
 		std::cerr << "No MCP device info files found using " << spath.to_string() << std::endl;
 		return;
 	}
 
-	if (devinfos->empty()) {
-		error << "No MCP device info files found using " << spath.to_string() << endmsg;
-		std::cerr << "No MCP device info files found using " << spath.to_string() << std::endl;
-		return;
-	}
-
-	for (vector<string*>::iterator i = devinfos->begin(); i != devinfos->end(); ++i) {
-		string fullpath = *(*i);
+	for (vector<string>::iterator i = devinfos.begin(); i != devinfos.end(); ++i) {
+		string fullpath = *i;
 
 		XMLTree tree;
-
 
 		if (!tree.read (fullpath.c_str())) {
 			continue;
@@ -509,9 +502,6 @@ DeviceInfo::reload_device_info ()
 			device_info[di.name()] = di;
 		}
 	}
-
-	vector_delete (devinfos);
-	delete devinfos;
 }
 
 std::ostream& operator<< (std::ostream& os, const Mackie::DeviceInfo& di)

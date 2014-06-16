@@ -40,12 +40,11 @@ using PBD::closedir;
 #include "pbd/error.h"
 #include "pbd/pathexpand.h"
 #include "pbd/pathscanner.h"
-#include "pbd/stl_delete.h"
 
 using namespace std;
 using namespace PBD;
 
-vector<string *> *
+vector<string>
 PathScanner::operator() (const string &dirpath, const string &regexp,
 			 bool match_fullpath, bool return_fullpath, 
 			 long limit, bool recurse)
@@ -65,7 +64,7 @@ PathScanner::operator() (const string &dirpath, const string &regexp,
 		      << ")" 
 		      << endmsg;
 		
-		return 0;
+		return vector<string>();
 	}
 	
 	return run_scan (dirpath, &PathScanner::regexp_filter, 
@@ -76,7 +75,7 @@ PathScanner::operator() (const string &dirpath, const string &regexp,
 			 limit, recurse);
 }	
 
-vector<string *> *
+vector<string>
 PathScanner::run_scan (const string &dirpath, 
 		       bool (PathScanner::*memberfilter)(const string &),
 		       bool (*filter)(const string &, void *),
@@ -85,11 +84,13 @@ PathScanner::run_scan (const string &dirpath,
 		       long limit,
 		       bool recurse)
 {
-	return run_scan_internal ((vector<string*>*) 0, dirpath, memberfilter, filter, arg, match_fullpath, return_fullpath, limit, recurse);
+	vector<string> result;
+	run_scan_internal (result, dirpath, memberfilter, filter, arg, match_fullpath, return_fullpath, limit, recurse);
+	return result;
 }
 	
-vector<string *> *
-PathScanner::run_scan_internal (vector<string *> *result,
+void
+PathScanner::run_scan_internal (vector<string>& result,
 				const string &dirpath, 
 				bool (PathScanner::*memberfilter)(const string &),
 				bool (*filter)(const string &, void *),
@@ -104,18 +105,13 @@ PathScanner::run_scan_internal (vector<string *> *result,
 	char *thisdir;
 	string fullpath;
 	string search_str;
-	string *newstr;
 	long nfound = 0;
 	char *saveptr;
 
 	if ((thisdir = strtok_r (pathcopy, G_SEARCHPATH_SEPARATOR_S, &saveptr)) == 0 ||
 	    strlen (thisdir) == 0) {
 		free (pathcopy);
-		return 0;
-	}
-
-	if (result == 0) {
-		result = new vector<string *>;
+		return;
 	}
 
 	do {
@@ -161,12 +157,11 @@ PathScanner::run_scan_internal (vector<string *> *result,
 				}
 
 				if (return_fullpath) {
-					newstr = new string (fullpath);
+					result.push_back(fullpath);
 				} else {
-					newstr = new string (finfo->d_name);
+					result.push_back(finfo->d_name);
 				} 
 				
-				result->push_back (newstr);
 				nfound++;
 			}
 		}
@@ -175,17 +170,16 @@ PathScanner::run_scan_internal (vector<string *> *result,
 	} while ((limit < 0 || (nfound < limit)) && (thisdir = strtok_r (0, G_SEARCHPATH_SEPARATOR_S, &saveptr)));
 
 	free (pathcopy);
-	return result;
+	return;
 }
 
-string *
+string
 PathScanner::find_first (const string &dirpath,
 			 const string &regexp,
 			 bool match_fullpath,
 			 bool return_fullpath)
 {
-	vector<string *> *res;
-	string *ret;
+	vector<string> res;
 	int err;
 	char msg[256];
 
@@ -197,51 +191,45 @@ PathScanner::find_first (const string &dirpath,
 		
 		error << "Cannot compile soundfile regexp for use (" << msg << ")" << endmsg;
 
-		
 		return 0;
 	}
 	
-	res = run_scan (dirpath, 
-			&PathScanner::regexp_filter,
-			(bool (*)(const string &, void *)) 0,
-			0,
-			match_fullpath,
-			return_fullpath, 
-			1);
+	run_scan_internal (res, dirpath,
+	                   &PathScanner::regexp_filter,
+	                   (bool (*)(const string &, void *)) 0,
+	                   0,
+	                   match_fullpath,
+	                   return_fullpath,
+	                   1);
 	
-	if (res->size() == 0) {
-		ret = 0;
-	} else {
-		ret = res->front();
+	if (res.size() == 0) {
+		return string();
 	}
-	vector_delete (res);
-	delete res;
-	return ret;
+
+	return res.front();
 }
 
-string *
+string
 PathScanner::find_first (const string &dirpath,
 			 bool (*filter)(const string &, void *),
 			 void * /*arg*/,
 			 bool match_fullpath,
 			 bool return_fullpath)
 {
-	vector<string *> *res;
-	string *ret;
+	vector<string> res;
+	string ret;
 
-	res = run_scan (dirpath, 
-			(bool (PathScanner::*)(const string &)) 0,
-			filter,
-			0,
-			match_fullpath,
-			return_fullpath, 1);
+	run_scan_internal (res,
+	                   dirpath,
+	                   (bool (PathScanner::*)(const string &)) 0,
+	                   filter,
+	                   0,
+	                   match_fullpath,
+	                   return_fullpath, 1);
 	
-	if (res->size() == 0) {
-		ret = 0;
-	} else {
-		ret = res->front();
+	if (res.size() == 0) {
+		return string();
 	}
-	vector_delete (res);
-	delete res;
-	return ret;
+
+	return res.front();
 }

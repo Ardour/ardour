@@ -621,7 +621,7 @@ SessionDialog::redisplay_recent_sessions ()
 
 		get_state_files_in_directory (*i, state_file_paths);
 
-		vector<string*>* states;
+		vector<string> states;
 		vector<const gchar*> item;
 		string dirname = *i;
 
@@ -639,12 +639,12 @@ SessionDialog::redisplay_recent_sessions ()
 
 		/* now get available states for this session */
 
-		if ((states = Session::possible_states (dirname)) == 0) {
+		states = Session::possible_states (dirname);
+
+		if (states.empty()) {
 			/* no state file? */
 			continue;
 		}
-		vector_delete (states);
-		delete (states);
 
 		std::vector<string> state_file_names(get_file_names_no_extension (state_file_paths));
 
