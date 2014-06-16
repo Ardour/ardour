@@ -141,16 +141,14 @@ EngineControl::EngineControl ()
 	lm_table.attach (lm_title, 0, 3, row, row+1, xopt, (AttachOptions) 0);
 	row++;
 
-	Gtk::Label* preamble;
+	lm_preamble.set_width_chars (60);
+	lm_preamble.set_line_wrap (true);
+	lm_preamble.set_markup (_("<span weight=\"bold\">Turn down the volume on your audio equipment to a very low level.</span>"));
 
-	preamble = manage (new Label);
-	preamble->set_width_chars (60);
-	preamble->set_line_wrap (true);
-	preamble->set_markup (_("<span weight=\"bold\">Turn down the volume on your audio equipment to a very low level.</span>"));
-
-	lm_table.attach (*preamble, 0, 3, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
+	lm_table.attach (lm_preamble, 0, 3, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
 	row++;
 
+	Gtk::Label* preamble;
 	preamble = manage (new Label);
 	preamble->set_width_chars (60);
 	preamble->set_line_wrap (true);
@@ -532,6 +530,12 @@ EngineControl::enable_latency_tab ()
 	ARDOUR::DataType const type = _measure_midi ? ARDOUR::DataType::MIDI : ARDOUR::DataType::AUDIO;
 	ARDOUR::AudioEngine::instance()->get_physical_outputs (type, outputs);
 	ARDOUR::AudioEngine::instance()->get_physical_inputs (type, inputs);
+
+	if (_measure_midi) {
+		lm_preamble.set_markup (_(""));
+	} else {
+		lm_preamble.set_markup (_("<span weight=\"bold\">Turn down the volume on your audio equipment to a very low level.</span>"));
+	}
 
 	if (inputs.empty() || outputs.empty()) {
 		MessageDialog msg (_("Your selected audio configuration is playback- or capture-only.\n\nLatency calibration requires playback and capture"));
