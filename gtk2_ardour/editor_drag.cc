@@ -177,6 +177,12 @@ DragManager::motion_handler (GdkEvent* e, bool from_autoscroll)
 {
 	bool r = false;
 
+	/* calling this implies that we expect the event to have canvas
+	 * coordinates 
+	 *
+	 * Can we guarantee that this is true?
+	 */
+
 	_current_pointer_frame = _editor->canvas_event_sample (e, &_current_pointer_x, &_current_pointer_y);
 
 	for (list<Drag*>::iterator i = _drags.begin(); i != _drags.end(); ++i) {
@@ -184,24 +190,6 @@ DragManager::motion_handler (GdkEvent* e, bool from_autoscroll)
 		/* run all handlers; return true if at least one of them
 		   returns true (indicating that the event has been handled).
 		*/
-		if (t) {
-			r = true;
-		}
-
-	}
-
-	return r;
-}
-
-bool
-DragManager::window_motion_handler (GdkEvent* e, bool from_autoscroll)
-{
-	bool r = false;
-
-	_current_pointer_frame = _editor->canvas_event_sample (e, &_current_pointer_x, &_current_pointer_y);
-
-	for (list<Drag*>::iterator i = _drags.begin(); i != _drags.end(); ++i) {
-		bool const t = (*i)->motion_handler (e, from_autoscroll);
 		if (t) {
 			r = true;
 		}
@@ -398,6 +386,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 			return true;
 		}
 	}
+
 	return false;
 }
 
@@ -711,7 +700,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 		delta_time_axis_view = current_pointer_time_axis_view - _last_pointer_time_axis_view;
 		delta_layer = current_pointer_layer - _last_pointer_layer;
-	}
+	} 
 	
 	/* Work out the change in x */
 	framepos_t pending_region_position;
@@ -1932,8 +1921,6 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 
 	framepos_t const pf = adjusted_current_frame (event);
 
-	cerr << "Button state = " << hex << event->button.state << dec << endl;
-
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 		/* Move the contents of the region around without changing the region bounds */
 		_operation = ContentsTrim;
@@ -1996,8 +1983,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 	frameoffset_t frame_delta = 0;
-
-	cerr << "trim drag @ " << this << " motion\n";
 
 	if (tv && tv->is_track()) {
 		speed = tv->track()->speed();

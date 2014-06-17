@@ -1334,20 +1334,24 @@ Editor::scroll_down_one_track ()
 {
 	TrackViewList::reverse_iterator next = track_views.rend();
 	std::pair<TimeAxisView*,double> res;
+	const double bottom_of_trackviews = vertical_adjustment.get_value() + vertical_adjustment.get_page_size() - 1;
 
 	for (TrackViewList::reverse_iterator t = track_views.rbegin(); t != track_views.rend(); ++t) {
 		if ((*t)->hidden()) {
 			continue;
 		}
 		
-		/* find the trackview at the bottom of the trackview group */
-		res = (*t)->covers_y_position (_visible_canvas_height);
+		/* If this is the bottom visible trackview, we want to display
+		   the next one.
+		*/
+
+		res = (*t)->covers_y_position (bottom_of_trackviews);
 
 		if (res.first) {
 			break;
 		}
 
-		next = t;
+		++next; // moves "next" towards the "front" since it is a reverse iterator
 	}
 
 	/* move to the track below the first one that covers the */
@@ -1363,7 +1367,7 @@ Editor::scroll_down_one_track ()
 bool
 Editor::scroll_up_one_track ()
 {
-	// double vertical_pos = vertical_adjustment.get_value ();
+	double vertical_pos = vertical_adjustment.get_value ();
 
 	TrackViewList::iterator prev = track_views.end();
 	std::pair<TimeAxisView*,double> res;
@@ -1375,9 +1379,10 @@ Editor::scroll_up_one_track ()
 		}
 
 		/* find the trackview at the top of the trackview group */
-		res = (*t)->covers_y_position (0);
+		res = (*t)->covers_y_position (vertical_pos);
 		
 		if (res.first) {
+			cerr << res.first->name() << " covers the top\n";
 			break;
 		}
 
@@ -5733,16 +5738,21 @@ Editor::select_prev_route()
 void
 Editor::ensure_track_visible(TimeAxisView *track)
 {
-	if (track->hidden())
+	if (track->hidden()) {
 		return;
+	}
+
+	/* compute visible area of trackview group, as offsets from top of
+	 * trackview group.
+	 */
 
 	double const current_view_min_y = vertical_adjustment.get_value();
-	double const current_view_max_y = vertical_adjustment.get_value() + vertical_adjustment.get_page_size();
+	double const current_view_max_y = current_view_min_y + vertical_adjustment.get_page_size();
 
 	double const track_min_y = track->y_position ();
 	double const track_max_y = track->y_position () + track->effective_height ();
 
-	if (track_min_y >= current_view_min_y &&
+	if (track_min_y > current_view_min_y &&
 	    track_max_y <= current_view_max_y) {
 		return;
 	}
