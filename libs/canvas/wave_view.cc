@@ -223,7 +223,12 @@ WaveView::invalidate_image_cache ()
 
 	for (uint32_t i = 0; i < caches.size (); ++i) {
 
-		if (_channel != caches[i].channel || _height != caches[i].height || _region_amplitude != caches[i].amplitude) {
+		if (_channel != caches[i].channel 
+		    || _height != caches[i].height
+		    || _region_amplitude != caches[i].amplitude 
+		    || _fill_color != caches[i].fill_color 
+		    || _outline_color != caches[i].outline_color) {
+
 			continue;
 		}
 
@@ -258,7 +263,12 @@ WaveView::consolidate_image_cache () const
 
 	for (uint32_t i = 0; i < caches.size (); ++i) {
 
-		if (_channel != caches[i].channel || _height != caches[i].height || _region_amplitude != caches[i].amplitude) {
+		if (_channel != caches[i].channel 
+		    || _height != caches[i].height
+		    || _region_amplitude != caches[i].amplitude 
+		    || _fill_color != caches[i].fill_color 
+		    || _outline_color != caches[i].outline_color) {
+
 			other_entries++;
 			continue;
 		}
@@ -268,7 +278,12 @@ WaveView::consolidate_image_cache () const
 
 		for (uint32_t j = i; j < caches.size (); ++j) {
 
-			if (i == j || _channel != caches[j].channel || _height != caches[i].height || _region_amplitude != caches[i].amplitude) {
+			if (i == j || _channel != caches[j].channel 
+			    || _height != caches[i].height 
+			    || _region_amplitude != caches[i].amplitude 
+			    || _fill_color != caches[i].fill_color 
+			    || _outline_color != caches[i].outline_color) {
+
 				continue;
 			}
 
@@ -546,7 +561,12 @@ WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start
 	*/
 	for (uint32_t i = 0; i < caches.size (); ++i) {
 
-		if (_channel != caches[i].channel || _height != caches[i].height || _region_amplitude != caches[i].amplitude) {
+		if (_channel != caches[i].channel 
+		    || _height != caches[i].height
+		    || _region_amplitude != caches[i].amplitude 
+		    || _fill_color != caches[i].fill_color 
+		    || _outline_color != caches[i].outline_color) {
+
 			continue;
 		}
 
@@ -589,7 +609,7 @@ WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start
 
 	draw_image (image, peaks.get(), n_peaks);
 
-	_image_cache[_region->audio_source ()].push_back (CacheEntry (_channel, _height, _region_amplitude, sample_start,  sample_end, image));
+	_image_cache[_region->audio_source ()].push_back (CacheEntry (_channel, _height, _region_amplitude, _fill_color, _outline_color, sample_start,  sample_end, image));
 
 	image_offset = (sample_start - _region->start()) / _samples_per_pixel;
 
