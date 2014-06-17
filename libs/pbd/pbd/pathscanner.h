@@ -41,12 +41,12 @@ class LIBPBD_API PathScanner
 	                                     bool return_fullpath = true,
 	                                     long limit = -1,
 	                                     bool recurse = false) {
-		return run_scan (dirpath,
-				 filter, 
-				 arg,
-				 match_fullpath,
-				 return_fullpath, 
-				 limit, recurse);
+		std::vector<std::string> result;
+		run_scan_internal (result, dirpath,
+		                   filter, arg,
+		                   match_fullpath, return_fullpath,
+		                   limit, recurse);
+		return result;
 	}
 
 	std::vector<std::string> operator() (const std::string &dirpath,
@@ -76,14 +76,6 @@ class LIBPBD_API PathScanner
 			bool return_fullpath,
 			long limit,
 			bool recurse = false);
-
-	std::vector<std::string> run_scan (const std::string &dirpath,
-	                                   bool (*filter)(const std::string &, void *),
-	                                   void *arg,
-	                                   bool match_fullpath,
-	                                   bool return_fullpath,
-	                                   long limit,
-	                                   bool recurse = false);
 
 	void run_scan_internal (std::vector<std::string>&,
 	                        const std::string &dirpath,
