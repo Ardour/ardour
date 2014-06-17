@@ -110,10 +110,15 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 
 		_root.render (*draw, context);
 
-		// This outlines the rect being rendered, after it has been drawn.
-		// context->rectangle (draw->x0, draw->y0, draw->x1 - draw->x0, draw->y1 - draw->y0);
-		// context->set_source_rgba (1.0, 0, 0, 1.0);
-		// context->stroke ();
+#if 0
+		// This transparently colors the rect being rendered, after it has been drawn.
+		double r = (random() % 65536) /65536.0;
+		double g = (random() % 65536) /65536.0;
+		double b = (random() % 65536) /65536.0;
+		context->rectangle (draw->x0, draw->y0, draw->x1 - draw->x0, draw->y1 - draw->y0);
+		context->set_source_rgba (r, g, b, 0.25);
+		context->fill ();
+#endif
 
 	}
 
