@@ -41,6 +41,8 @@ public:
 	bool       have_signal (void) { return (_monotonic_cnt - _last_signal_tme) < (uint64_t) _sample_rate ; }
 
 private:
+	int64_t parse_mclk (uint8_t* buf, pframes_t timestamp) const;
+	int64_t parse_mtc  (uint8_t* buf, pframes_t timestamp) const;
 
 	framecnt_t _sample_rate;
 
