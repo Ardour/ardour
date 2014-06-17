@@ -19,7 +19,6 @@
 */
 
 #include <glibmm/miscutils.h>
-#include "pbd/pathscanner.h"
 #include "pbd/file_utils.h"
 #include "pbd/error.h"
 

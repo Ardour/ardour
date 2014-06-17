@@ -25,8 +25,6 @@
 #include <glibmm.h>
 #include <gdkmm.h>
 
-#include "pbd/pathscanner.h"
-
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/selector.h"
 #include "gtkmm2ext/utils.h"

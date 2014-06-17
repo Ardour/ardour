@@ -26,7 +26,6 @@
 #include <errno.h>
 #include <regex.h>
 
-#include "pbd/pathscanner.h"
 #include "pbd/stl_delete.h"
 #include "pbd/strsplit.h"
 
