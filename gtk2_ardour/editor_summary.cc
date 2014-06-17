@@ -54,15 +54,24 @@ EditorSummary::EditorSummary (Editor* e)
 	  _view_rectangle_x (0, 0),
 	  _view_rectangle_y (0, 0),
 	  _zoom_dragging (false),
-	  _old_follow_playhead (false)
+	  _old_follow_playhead (false),
+	  _background_dirty (true)
 {
-	Region::RegionPropertyChanged.connect (region_property_connection, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
-	Route::RemoteControlIDChange.connect (route_ctrl_id_connection, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
-	_editor->playhead_cursor->PositionChanged.connect (position_connection, invalidator (*this), boost::bind (&EditorSummary::playhead_position_changed, this, _1), gui_context());
-
 	add_events (Gdk::POINTER_MOTION_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 	set_flags (get_flags() | Gtk::CAN_FOCUS);
 }
+
+/** Handle a size allocation.
+ *  @param alloc GTK allocation.
+ */
+void
+EditorSummary::on_size_allocate (Gtk::Allocation& alloc)
+{
+	Gtk::EventBox::on_size_allocate (alloc);
+	_background_dirty = true;
+	set_dirty ();
+}
+
 
 /** Connect to a session.
  *  @param s Session.
@@ -80,26 +89,26 @@ EditorSummary::set_session (Session* s)
 	 */
 
 	if (_session) {
+		Region::RegionPropertyChanged.connect (region_property_connection, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context());
+		Route::RemoteControlIDChange.connect (route_ctrl_id_connection, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context());
+		_editor->playhead_cursor->PositionChanged.connect (position_connection, invalidator (*this), boost::bind (&EditorSummary::playhead_position_changed, this, _1), gui_context());
 		_session->StartTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
 		_session->EndTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
+		_editor->selection->RegionsChanged.connect (sigc::mem_fun(*this, &EditorSummary::set_background_dirty));
 	}
 }
 
-/** Render the required regions to a cairo context.
- *  @param cr Context.
- */
 void
-EditorSummary::render (cairo_t* cr, cairo_rectangle_t*)
+EditorSummary::render_background_image ()
 {
-	/* background (really just the dividing lines between tracks */
+	_image = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, get_width (), get_height ());
+	cairo_t* cr = cairo_create (_image);
+
+       /* background (really just the dividing lines between tracks */
 
 	cairo_set_source_rgb (cr, 0, 0, 0);
 	cairo_rectangle (cr, 0, 0, get_width(), get_height());
 	cairo_fill (cr);
-
-	if (_session == 0) {
-		return;
-	}
 
 	/* compute start and end points for the summary */
 
@@ -160,6 +169,30 @@ EditorSummary::render (cairo_t* cr, cairo_rectangle_t*)
 
 		y += _track_height;
 	}
+	cairo_destroy (cr);
+}
+
+/** Render the required regions to a cairo context.
+ *  @param cr Context.
+ */
+void
+EditorSummary::render (cairo_t* cr, cairo_rectangle_t*)
+{
+
+	if (_session == 0) {
+		return;
+	}
+
+	if (!_image || _background_dirty) {
+		render_background_image ();
+		_background_dirty = false;
+	}
+
+	cairo_push_group (cr);
+	
+	cairo_rectangle (cr, 0, 0, get_width(), get_height());
+	cairo_set_source_surface (cr, _image, 0, 0);
+	cairo_paint (cr);
 
 	/* start and end markers */
 
@@ -169,7 +202,6 @@ EditorSummary::render (cairo_t* cr, cairo_rectangle_t*)
 	const double p = (_session->current_start_frame() - _start) * _x_scale;
 	cairo_move_to (cr, p, 0);
 	cairo_line_to (cr, p, get_height());
-	cairo_stroke (cr);
 
 	double const q = (_session->current_end_frame() - _start) * _x_scale;
 	cairo_move_to (cr, q, 0);
@@ -185,11 +217,9 @@ EditorSummary::render (cairo_t* cr, cairo_rectangle_t*)
 		get_editor (&_view_rectangle_x, &_view_rectangle_y);
 	}
 
-	cairo_move_to (cr, _view_rectangle_x.first, _view_rectangle_y.first);
-	cairo_line_to (cr, _view_rectangle_x.second, _view_rectangle_y.first);
-	cairo_line_to (cr, _view_rectangle_x.second, _view_rectangle_y.second);
-	cairo_line_to (cr, _view_rectangle_x.first, _view_rectangle_y.second);
-	cairo_line_to (cr, _view_rectangle_x.first, _view_rectangle_y.first);
+	int32_t width = _view_rectangle_x.second - _view_rectangle_x.first;
+	int32_t height = _view_rectangle_y.second - _view_rectangle_y.first;
+	cairo_rectangle (cr, _view_rectangle_x.first, _view_rectangle_y.first, width, height); 
 	cairo_set_source_rgba (cr, 1, 1, 1, 0.25);
 	cairo_fill_preserve (cr);
 	cairo_set_line_width (cr, 1);
@@ -206,6 +236,8 @@ EditorSummary::render (cairo_t* cr, cairo_rectangle_t*)
 	cairo_move_to (cr, ph, 0);
 	cairo_line_to (cr, ph, get_height());
 	cairo_stroke (cr);
+	cairo_pop_group_to_source (cr);
+	cairo_paint (cr);
 	_last_playhead = ph;
 
 }
@@ -234,6 +266,13 @@ EditorSummary::render_region (RegionView* r, cairo_t* cr, double y) const
 	}
 
 	cairo_stroke (cr);
+}
+
+void
+EditorSummary::set_background_dirty ()
+{
+	_background_dirty = true;
+	set_dirty ();
 }
 
 /** Set the summary so that just the overlays (viewbox, playhead etc.) will be re-rendered */
@@ -981,10 +1020,11 @@ EditorSummary::routes_added (list<RouteTimeAxisView*> const & r)
 		(*i)->route()->gui_changed.connect (*this, invalidator (*this), boost::bind (&EditorSummary::route_gui_changed, this, _1), gui_context ());
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> ((*i)->route ());
 		if (tr) {
-			tr->PlaylistChanged.connect (*this, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context ());
+			tr->PlaylistChanged.connect (*this, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context ());
 		}
 	}
 
+	_background_dirty = true;
 	set_dirty ();
 }
 
@@ -992,6 +1032,7 @@ void
 EditorSummary::route_gui_changed (string c)
 {
 	if (c == "color") {
+		_background_dirty = true;
 		set_dirty ();
 	}
 }
