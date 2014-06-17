@@ -36,43 +36,88 @@ MIDIDM::MIDIDM (framecnt_t sample_rate)
 
 }
 
+int64_t
+MIDIDM::parse_mclk (uint8_t* buf, pframes_t timestamp) const
+{
+	/* calculate time difference */
+#define MODCLK (16384)  // 1<<(2*7)
+	const int64_t tc = (_monotonic_cnt + timestamp) & 0x3fff; // MODCLK - 1;
+	const int64_t ti = ((buf[2] & 0x7f) << 7) | (buf[1] & 0x7f);
+	const int64_t tdiff = (MODCLK + tc - ti) % MODCLK;
+#ifdef DEBUG_MIDIDM
+		printf("MCLK DELAY: # %5"PRId64" %5"PRId64" [samples] (%5"PRId64" - %8"PRId64") @(%5"PRId64" + %d)\n",
+				_cnt_total, tdiff, tc, ti, _monotonic_cnt, timestamp);
+#endif
+	return tdiff;
+}
+
+int64_t
+MIDIDM::parse_mtc (uint8_t* buf, pframes_t timestamp) const
+{
+#define MODTC (2097152)  // 1<<(3*7)
+	const int64_t tc = (_monotonic_cnt + timestamp) & 0x001FFFFF;
+	const int64_t ti = (buf[5] & 0x7f)
+		| ((buf[6] & 0x7f) << 7)
+		| ((buf[7] & 0x7f) << 14)
+		| ((buf[8] & 0x7f) << 21);
+	const int64_t tdiff = (MODTC + tc - ti) % MODTC;
+#ifdef DEBUG_MIDIDM
+		printf("MTC DELAY: # %5"PRId64" %5"PRId64" [samples] (%5"PRId64" - %8"PRId64") @(%5"PRId64" + %d)\n",
+				_cnt_total, tdiff, tc, ti, _monotonic_cnt, timestamp);
+#endif
+	return tdiff;
+}
 
 int MIDIDM::process (pframes_t nframes, PortEngine &pe, void *midi_in, void *midi_out)
 {
 	/* send midi event */
+	pe.midi_clear(midi_out);
+#ifndef USE_MTC // use 3-byte song position
 	uint8_t obuf[3];
 	obuf[0] = 0xf2;
 	obuf[1] = (_monotonic_cnt)      & 0x7f;
 	obuf[2] = (_monotonic_cnt >> 7) & 0x7f;
-
-	pe.midi_clear(midi_out);
 	pe.midi_event_put (midi_out, 0, obuf, 3);
+#else // sysex MTC frame
+	uint8_t obuf[9];
+	obuf[0] = 0xf0;
+	obuf[1] = 0x7f;
+	obuf[2] = 0x7f;
+	obuf[3] = 0x01;
+	obuf[4] = 0x01;
+	obuf[9] = 0xf7;
+	obuf[5] = (_monotonic_cnt      ) & 0x7f;
+	obuf[6] = (_monotonic_cnt >>  7) & 0x7f;
+	obuf[7] = (_monotonic_cnt >> 14) & 0x7f;
+	obuf[8] = (_monotonic_cnt >> 21) & 0x7f;
+	pe.midi_event_put (midi_out, 0, obuf, 10);
+#endif
 
 	/* process incoming */
 	const pframes_t nevents = pe.get_midi_event_count (midi_in);
-#if 0 //DEBUG
+#ifdef DEBUG_MIDIDM
 		printf("MIDI SEND: @%8"PRId64", recv: %d systime:%"PRId64"\n", _monotonic_cnt, nevents, g_get_monotonic_time());
 #endif
 	for (pframes_t n = 0; n < nevents; ++n) {
 		pframes_t timestamp;
 		size_t size;
 		uint8_t* buf;
+		int64_t tdiff;
 		pe.midi_event_get (timestamp, size, &buf, midi_in, n);
 
-		if (size != 3 || buf[0] != 0xf2 ) continue;
+		if (size == 3 && buf[0] == 0xf2 )
+		{
+			tdiff = parse_mclk(buf, timestamp);
+		} else if (size == 10 && buf[0] == 0xf0)
+		{
+			tdiff = parse_mtc(buf, timestamp);
+		}
+		else
+		{
+			continue;
+		}
 
 		_last_signal_tme = _monotonic_cnt;
-
-		/* calculate time difference */
-#define MODX (16384)  // 1<<(2*7)
-#define MASK (0x3fff) // MODX - 1
-		const int64_t tc = (_monotonic_cnt + timestamp) & MASK;
-		const int64_t ti = ((buf[2] & 0x7f) << 7) | (buf[1] & 0x7f);
-		const int64_t tdiff = (MODX + tc - ti) % MODX;
-#if 0 //DEBUG
-		printf("MIDI DELAY: # %5"PRId64" %5"PRId64" [samples] (%5"PRId64" - %8"PRId64") @(%5"PRId64" + %d)\n",
-				_cnt_total, tdiff, tc, ti, _monotonic_cnt, timestamp);
-#endif
 
 		/* running variance */
 		if (_cnt_total == 0) {
