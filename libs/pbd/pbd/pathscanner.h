@@ -55,18 +55,7 @@ class LIBPBD_API PathScanner
 	                                     bool return_fullpath = true,
 	                                     long limit = -1,
 	                                     bool recurse = false);
-	
-	std::string find_first (const std::string &dirpath,
-	                        const std::string &regexp,
-	                        bool match_fullpath = true,
-	                        bool return_fullpath = true);
-	
-	std::string find_first (const std::string &dirpath,
-	                        bool (*filter)(const std::string &, void *),
-	                        void *arg,
-	                        bool match_fullpath = true,
-	                        bool return_fullpath = true);
-	
+
   private:
 
 	void find_files_matching_regex (std::vector<std::string>& results,
