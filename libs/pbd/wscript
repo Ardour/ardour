@@ -57,7 +57,6 @@ libpbd_sources = [
     'mountpoint.cc',
     'openuri.cc',
     'pathexpand.cc',
-    'pathscanner.cc',
     'pbd.cc',
     'pool.cc',
     'property_list.cc',
