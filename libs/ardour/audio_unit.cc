@@ -28,7 +28,7 @@
 #include "pbd/xml++.h"
 #include "pbd/convert.h"
 #include "pbd/whitespace.h"
-#include "pbd/pathscanner.h"
+#include "pbd/file_utils.h"
 #include "pbd/locale_guard.h"
 
 #include <glibmm/threads.h>
@@ -2049,20 +2049,19 @@ AUPlugin::current_preset() const
 void
 AUPlugin::find_presets ()
 {
-	vector<string*>* preset_files;
-	PathScanner scanner;
+	vector<string> preset_files;
 
 	user_preset_map.clear ();
 
-	preset_files = scanner (preset_search_path, au_preset_filter, this, true, true, -1, true);
+	find_files_matching_filter (preset_files, preset_search_path, au_preset_filter, this, true, true, -1, true);
 
-	if (!preset_files) {
+	if (preset_files.empty()) {
 		return;
 	}
 
-	for (vector<string*>::iterator x = preset_files->begin(); x != preset_files->end(); ++x) {
+	for (vector<string>::iterator x = preset_files.begin(); x != preset_files.end(); ++x) {
 
-		string path = *(*x);
+		string path = *x;
 		string preset_name;
 
 		/* make an initial guess at the preset name using the path */
@@ -2079,11 +2078,7 @@ AUPlugin::find_presets ()
 			user_preset_map[preset_name] = path;
 		}
 
-		delete *x;
 	}
-
-	vector_delete (preset_files);
-	delete preset_files;
 
 	/* now fill the vector<string> with the names we have */
 

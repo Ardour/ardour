@@ -402,8 +402,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	PBD::Signal0<void> StateReady;
 	PBD::Signal0<void> SaveSession;
 
-	std::vector<std::string*>* possible_states() const;
-	static std::vector<std::string*>* possible_states (std::string path);
+	std::vector<std::string> possible_states() const;
+	static std::vector<std::string> possible_states (std::string path);
 
 	XMLNode& get_state();
 	int      set_state(const XMLNode& node, int version); // not idempotent

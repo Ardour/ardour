@@ -92,6 +92,32 @@ find_file_in_search_path (const Searchpath& search_path,
                           const std::string& filename,
                           std::string& result);
 
+
+/**
+ * @return files in dirpath that match a regular expression
+ */
+LIBPBD_API void
+find_files_matching_regex (std::vector<std::string>& results,
+                           const std::string& dirpath,
+                           const std::string& regexp,
+                           bool match_fullpath,
+                           bool return_fullpath,
+                           long limit = -1,
+                           bool recurse = false);
+
+/**
+ * @return files in dirpath that match a supplied filter(functor)
+ */
+LIBPBD_API void
+find_files_matching_filter (std::vector<std::string>&,
+                            const std::string &dirpath,
+                            bool (*filter)(const std::string &, void *),
+                            void *arg,
+                            bool match_fullpath,
+                            bool return_fullpath,
+                            long limit = -1,
+                            bool recurse = false);
+
 /**
  * Attempt to copy the contents of the file from_path to a new file
  * at path to_path. If to_path exists it is overwritten.

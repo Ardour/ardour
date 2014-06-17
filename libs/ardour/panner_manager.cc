@@ -24,7 +24,7 @@
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
-#include "pbd/pathscanner.h"
+#include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
 
 #include "ardour/debug.h"
@@ -90,20 +90,16 @@ static bool panner_filter (const string& str, void */*arg*/)
 void
 PannerManager::discover_panners ()
 {
-	PathScanner scanner;
-	std::vector<std::string *> *panner_modules;
+	std::vector<std::string> panner_modules;
 	std::string search_path = panner_search_path().to_string();
 
 	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for panners in %1\n"), search_path));
 
-	panner_modules = scanner (search_path, panner_filter, 0, false, true, 1, true);
+	find_files_matching_filter (panner_modules, search_path, panner_filter, 0, false, true, 1, true);
 
-	for (vector<std::string *>::iterator i = panner_modules->begin(); i != panner_modules->end(); ++i) {
-		panner_discover (**i);
+	for (vector<std::string>::iterator i = panner_modules.begin(); i != panner_modules.end(); ++i) {
+		panner_discover (*i);
 	}
-
-	vector_delete (panner_modules);
-	delete (panner_modules);
 }
 
 int

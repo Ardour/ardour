@@ -38,7 +38,6 @@
 
 #include "pbd/error.h"
 #include "pbd/boost_debug.h"
-#include "pbd/pathscanner.h"
 #include "pbd/stl_delete.h"
 #include "pbd/basename.h"
 #include "pbd/stacktrace.h"

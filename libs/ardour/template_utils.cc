@@ -23,7 +23,7 @@
 #include <glibmm.h>
 
 #include "pbd/basename.h"
-#include "pbd/pathscanner.h"
+#include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
 
@@ -81,21 +81,20 @@ session_template_dir_to_file (string const & dir)
 void
 find_session_templates (vector<TemplateInfo>& template_names)
 {
-	vector<string *> *templates;
-	PathScanner scanner;
+	vector<string> templates;
 	Searchpath spath (template_search_path());
 
-	templates = scanner (spath.to_string(), template_filter, 0, true, true);
+	find_files_matching_filter (templates, spath.to_string(), template_filter, 0, true, true);
 
-	if (!templates) {
+	if (templates.empty()) {
 		cerr << "Found nothing along " << spath.to_string() << endl;
 		return;
 	}
 
-	cerr << "Found " << templates->size() << " along " << spath.to_string() << endl;
+	cerr << "Found " << templates.size() << " along " << spath.to_string() << endl;
 
-	for (vector<string*>::iterator i = templates->begin(); i != templates->end(); ++i) {
-		string file = session_template_dir_to_file (**i);
+	for (vector<string>::iterator i = templates.begin(); i != templates.end(); ++i) {
+		string file = session_template_dir_to_file (*i);
 
 		XMLTree tree;
 
@@ -105,31 +104,27 @@ find_session_templates (vector<TemplateInfo>& template_names)
 
 		TemplateInfo rti;
 
-		rti.name = basename_nosuffix (**i);
-		rti.path = **i;
+		rti.name = basename_nosuffix (*i);
+		rti.path = *i;
 
 		template_names.push_back (rti);
 	}
-
-	vector_delete (templates);
-	delete templates;
 }
 
 void
 find_route_templates (vector<TemplateInfo>& template_names)
 {
-	vector<string *> *templates;
-	PathScanner scanner;
+	vector<string> templates;
 	Searchpath spath (route_template_search_path());
 
-	templates = scanner (spath.to_string(), route_template_filter, 0, false, true);
+	find_files_matching_filter (templates, spath.to_string(), route_template_filter, 0, false, true);
 
-	if (!templates) {
+	if (templates.empty()) {
 		return;
 	}
 
-	for (vector<string*>::iterator i = templates->begin(); i != templates->end(); ++i) {
-		string fullpath = *(*i);
+	for (vector<string>::iterator i = templates.begin(); i != templates.end(); ++i) {
+		string fullpath = *i;
 
 		XMLTree tree;
 
@@ -146,9 +141,6 @@ find_route_templates (vector<TemplateInfo>& template_names)
 
 		template_names.push_back (rti);
 	}
-
-	vector_delete (templates);
-	delete templates;
 }
 
 }

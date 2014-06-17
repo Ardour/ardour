@@ -69,7 +69,6 @@
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/pathexpand.h"
-#include "pbd/pathscanner.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
 #include "pbd/convert.h"
@@ -2299,16 +2298,10 @@ state_file_filter (const string &str, void* /*arg*/)
 		str.find (statefile_suffix) == (str.length() - strlen (statefile_suffix)));
 }
 
-struct string_cmp {
-	bool operator()(const string* a, const string* b) {
-		return *a < *b;
-	}
-};
-
-static string*
-remove_end(string* state)
+static string
+remove_end(string state)
 {
-	string statename(*state);
+	string statename(state);
 
 	string::size_type start,end;
 	if ((start = statename.find_last_of (G_DIR_SEPARATOR)) != string::npos) {
@@ -2319,24 +2312,23 @@ remove_end(string* state)
 		end = statename.length();
 	}
 
-	return new string(statename.substr (0, end));
+	return string(statename.substr (0, end));
 }
 
-vector<string *> *
+vector<string>
 Session::possible_states (string path)
 {
-	PathScanner scanner;
-	vector<string*>* states = scanner (path, state_file_filter, 0, false, false);
+	vector<string> states;
+	find_files_matching_filter (states, path, state_file_filter, 0, false, false);
 
-	transform(states->begin(), states->end(), states->begin(), remove_end);
+	transform(states.begin(), states.end(), states.begin(), remove_end);
 
-	string_cmp cmp;
-	sort (states->begin(), states->end(), cmp);
+	sort (states.begin(), states.end());
 
 	return states;
 }
 
-vector<string *> *
+vector<string>
 Session::possible_states () const
 {
 	return possible_states(_path);
@@ -2560,8 +2552,7 @@ Session::find_all_sources (string path, set<string>& result)
 int
 Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_this_snapshot)
 {
-	PathScanner scanner;
-	vector<string*>* state_files;
+	vector<string> state_files;
 	string ripped;
 	string this_snapshot_path;
 
@@ -2573,9 +2564,9 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 		ripped = ripped.substr (0, ripped.length() - 1);
 	}
 
-	state_files = scanner (ripped, accept_all_state_files, (void *) 0, true, true);
+	find_files_matching_filter (state_files, ripped, accept_all_state_files, (void *) 0, true, true);
 
-	if (state_files == 0) {
+	if (state_files.empty()) {
 		/* impossible! */
 		return 0;
 	}
@@ -2584,13 +2575,13 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 	this_snapshot_path += legalize_for_path (_current_snapshot_name);
 	this_snapshot_path += statefile_suffix;
 
-	for (vector<string*>::iterator i = state_files->begin(); i != state_files->end(); ++i) {
+	for (vector<string>::iterator i = state_files.begin(); i != state_files.end(); ++i) {
 
-		if (exclude_this_snapshot && **i == this_snapshot_path) {
+		if (exclude_this_snapshot && *i == this_snapshot_path) {
 			continue;
 		}
 
-		if (find_all_sources (**i, result) < 0) {
+		if (find_all_sources (*i, result) < 0) {
 			return -1;
 		}
 	}
@@ -2640,13 +2631,11 @@ Session::cleanup_sources (CleanupReport& rep)
 	// FIXME: needs adaptation to midi
 
 	vector<boost::shared_ptr<Source> > dead_sources;
-	PathScanner scanner;
 	string audio_path;
 	string midi_path;
 	vector<space_and_path>::iterator i;
 	vector<space_and_path>::iterator nexti;
-	vector<string*>* candidates;
-	vector<string*>* candidates2;
+	vector<string> candidates;
 	vector<string> unused;
 	set<string> all_sources;
 	bool used;
@@ -2728,21 +2717,8 @@ Session::cleanup_sources (CleanupReport& rep)
 		i = nexti;
 	}
 
-	candidates = scanner (audio_path, accept_all_audio_files, (void *) 0, true, true);
-	candidates2 = scanner (midi_path, accept_all_midi_files, (void *) 0, true, true);
-
-        /* merge them */
-
-        if (candidates) {
-                if (candidates2) {
-                        for (vector<string*>::iterator i = candidates2->begin(); i != candidates2->end(); ++i) {
-                                candidates->push_back (*i);
-                        }
-                        delete candidates2;
-                }
-        } else {
-                candidates = candidates2; // might still be null
-        }
+	find_files_matching_filter (candidates, audio_path, accept_all_audio_files, (void *) 0, true, true);
+	find_files_matching_filter (candidates, midi_path, accept_all_midi_files, (void *) 0, true, true);
 
 	/* find all sources, but don't use this snapshot because the
 	   state file on disk still references sources we may have already
@@ -2782,32 +2758,26 @@ Session::cleanup_sources (CleanupReport& rep)
                 i = tmp;
 	}
 
-        if (candidates) {
-                for (vector<string*>::iterator x = candidates->begin(); x != candidates->end(); ++x) {
+	for (vector<string>::iterator x = candidates.begin(); x != candidates.end(); ++x) {
 
-                        used = false;
-                        spath = **x;
+		used = false;
+		spath = *x;
 
-                        for (set<string>::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
+		for (set<string>::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
 
-				tmppath1 = canonical_path (spath);
-				tmppath2 = canonical_path ((*i));
+			tmppath1 = canonical_path (spath);
+			tmppath2 = canonical_path ((*i));
 
-				if (tmppath1 == tmppath2) {
-                                        used = true;
-                                        break;
-                                }
-                        }
+			if (tmppath1 == tmppath2) {
+				used = true;
+				break;
+			}
+		}
 
-                        if (!used) {
-                                unused.push_back (spath);
-                        }
-
-                        delete *x;
-                }
-
-                delete candidates;
-        }
+		if (!used) {
+			unused.push_back (spath);
+		}
+	}
 
 	/* now try to move all unused files into the "dead" directory(ies) */
 
