@@ -102,7 +102,7 @@ find_files_matching_regex (std::vector<std::string>& results,
                            const std::string& regexp,
                            bool match_fullpath,
                            bool return_fullpath,
-                           long limit,
+                           long limit = -1,
                            bool recurse = false);
 
 /**
@@ -115,7 +115,7 @@ find_files_matching_filter (std::vector<std::string>&,
                             void *arg,
                             bool match_fullpath,
                             bool return_fullpath,
-                            long limit,
+                            long limit = -1,
                             bool recurse = false);
 
 /**
