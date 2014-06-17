@@ -1,4 +1,5 @@
 CFBundleName = "@APPNAME@";
 CFBundleShortVersionString = "@VERSION@";
 CFBundleGetInfoString = "@APPNAME@ v @VERSION@ Copyright 2001-2011 Paul Davis";
-NSHumanReadableCopyright = "Copyright 2001-20011 Paul Davis.";
+NSHumanReadableCopyright = "Copyright 2001-2014 Paul Davis.
+Waves Audio Ltd. 2013-2014";
