@@ -54,7 +54,19 @@ class LIBPBD_API PathScanner
 	                                     bool match_fullpath = true,
 	                                     bool return_fullpath = true,
 	                                     long limit = -1,
-	                                     bool recurse = false);
+	                                     bool recurse = false)
+	{
+		std::vector<std::string> result;
+
+		find_files_matching_regex (result,
+		                           dirpath,
+		                           regexp,
+		                           match_fullpath,
+		                           return_fullpath,
+		                           limit, recurse);
+
+		return result;
+	}
 
   private:
 
