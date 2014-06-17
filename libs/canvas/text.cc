@@ -106,15 +106,15 @@ Text::_redraw (Glib::RefPtr<Pango::Layout> layout) const
 	}
 
 	layout->set_alignment (_alignment);
-	
+
 	int w;
 	int h;
 
-	layout->get_size (w, h);
-	
-	_width = w / Pango::SCALE;
-	_height = h / Pango::SCALE;
-	
+	layout->get_pixel_size (w, h);
+
+	_width = w;
+	_height = h;
+
 	_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _width, _height);
 
 	Cairo::RefPtr<Cairo::Context> img_context = Cairo::Context::create (_image);
@@ -133,9 +133,16 @@ Text::_redraw (Glib::RefPtr<Pango::Layout> layout) const
 }
 
 void
-Text::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) const
+Text::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	if (_text.empty()) {
+		return;
+	}
+
+	Rect self = item_to_window (Rect (0, 0, min (_clamped_width, (double)_image->get_width ()), _image->get_height ()));
+	boost::optional<Rect> i = self.intersection (area);
+	
+	if (!i) {
 		return;
 	}
 
@@ -143,9 +150,9 @@ Text::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) cons
 		redraw (context);
 	}
 	
-	Rect self = item_to_window (Rect (0, 0, min (_clamped_width, _width), _height));
-	
-	context->rectangle (self.x0, self.y0, self.width(), self.height());
+	Rect intersection (i.get());
+
+	context->rectangle (intersection.x0, intersection.y0, intersection.width(), intersection.height());
 	context->set_source (_image, self.x0, self.y0);
 	context->fill ();
 }
