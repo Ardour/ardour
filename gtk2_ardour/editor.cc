@@ -4807,13 +4807,13 @@ Editor::located ()
 void
 Editor::region_view_added (RegionView *)
 {
-	_summary->set_dirty ();
+	_summary->set_background_dirty ();
 }
 
 void
 Editor::region_view_removed ()
 {
-	_summary->set_dirty ();
+	_summary->set_background_dirty ();
 }
 
 RouteTimeAxisView*
