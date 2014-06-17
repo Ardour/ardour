@@ -35,10 +35,10 @@ else:
 
 parts = rev.split ('.')
 MAJOR = parts[0]
-other = parts[1].split ('-')
-MINOR = other[0]
+MINOR = parts[1]
+other = parts[2].split ('-')
 if len(other) > 1:
-    MICRO = other[1]
+    MICRO = other[0]
 else:
     MICRO = '0'
 
@@ -530,6 +530,7 @@ def configure(conf):
     conf.env['VERSION'] = VERSION
     conf.env['MAJOR'] = MAJOR
     conf.env['MINOR'] = MINOR
+    conf.env['MICRO'] = MICRO
     conf.line_just = 52
     autowaf.set_recursive()
     autowaf.configure(conf)
