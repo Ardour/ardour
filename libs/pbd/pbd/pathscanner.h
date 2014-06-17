@@ -69,6 +69,14 @@ class LIBPBD_API PathScanner
 	
   private:
 
+	void find_files_matching_regex (std::vector<std::string>& results,
+			const std::string& dirpath,
+			const std::string& regexp,
+			bool match_fullpath,
+			bool return_fullpath,
+			long limit,
+			bool recurse = false);
+
 	std::vector<std::string> run_scan (const std::string &dirpath,
 	                                   bool (*filter)(const std::string &, void *),
 	                                   void *arg,
