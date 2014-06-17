@@ -52,16 +52,17 @@ regexp_filter (const string& str, void *arg)
 	return regexec (pattern, str.c_str(), 0, 0, 0) == 0;
 }
 
-vector<string>
-PathScanner::operator() (const string &dirpath, const string &regexp,
-			 bool match_fullpath, bool return_fullpath, 
-			 long limit, bool recurse)
-
+void
+PathScanner::find_files_matching_regex (vector<string>& result,
+		const std::string& dirpath,
+		const std::string& regexp,
+		bool match_fullpath, bool return_fullpath,
+		long limit,
+		bool recurse)
 {
 	int err;
 	char msg[256];
 	regex_t compiled_pattern;
-	vector<string> result;
 
 	if ((err = regcomp (&compiled_pattern, regexp.c_str(),
 			    REG_EXTENDED|REG_NOSUB))) {
@@ -74,17 +75,33 @@ PathScanner::operator() (const string &dirpath, const string &regexp,
 		      << ")" 
 		      << endmsg;
 		
-		return vector<string>();
+		return;
 	}
-	
-	result =  run_scan (dirpath,
-	                    regexp_filter,
-	                    &compiled_pattern,
-	                    match_fullpath,
-	                    return_fullpath,
-	                    limit, recurse);
+
+	result = run_scan (dirpath,
+		regexp_filter,
+		&compiled_pattern,
+		match_fullpath,
+		return_fullpath,
+		limit, recurse);
 
 	regfree (&compiled_pattern);
+}
+
+vector<string>
+PathScanner::operator() (const string &dirpath, const string &regexp,
+			 bool match_fullpath, bool return_fullpath,
+			 long limit, bool recurse)
+
+{
+	vector<string> result;
+
+	find_files_matching_regex (result,
+			dirpath,
+			regexp,
+			match_fullpath,
+			return_fullpath,
+			limit, recurse);
 
 	return result;
 }	
@@ -184,30 +201,10 @@ PathScanner::find_first (const string &dirpath,
 			 bool return_fullpath)
 {
 	vector<string> res;
-	int err;
-	char msg[256];
-	regex_t compiled_pattern;
 
-	if ((err = regcomp (&compiled_pattern, regexp.c_str(),
-			    REG_EXTENDED|REG_NOSUB))) {
-		
-		regerror (err, &compiled_pattern,
-			  msg, sizeof (msg));
-		
-		error << "Cannot compile soundfile regexp for use (" << msg << ")" << endmsg;
-
-		return 0;
-	}
+	find_files_matching_regex (res, dirpath, regexp,
+	                           match_fullpath, return_fullpath, 1);
 	
-	run_scan_internal (res, dirpath,
-	                   &regexp_filter,
-			   &compiled_pattern,
-	                   match_fullpath,
-	                   return_fullpath,
-	                   1);
-	
-	regfree (&compiled_pattern);
-
 	if (res.size() == 0) {
 		return string();
 	}
