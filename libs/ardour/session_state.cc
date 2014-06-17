@@ -69,7 +69,6 @@
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/pathexpand.h"
-#include "pbd/pathscanner.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
 #include "pbd/convert.h"
@@ -2319,8 +2318,8 @@ remove_end(string state)
 vector<string>
 Session::possible_states (string path)
 {
-	PathScanner scanner;
-	vector<string> states = scanner (path, state_file_filter, 0, false, false);
+	vector<string> states;
+	find_files_matching_filter (states, path, state_file_filter, 0, false, false);
 
 	transform(states.begin(), states.end(), states.begin(), remove_end);
 
@@ -2553,7 +2552,6 @@ Session::find_all_sources (string path, set<string>& result)
 int
 Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_this_snapshot)
 {
-	PathScanner scanner;
 	vector<string> state_files;
 	string ripped;
 	string this_snapshot_path;
@@ -2566,7 +2564,7 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 		ripped = ripped.substr (0, ripped.length() - 1);
 	}
 
-	state_files = scanner (ripped, accept_all_state_files, (void *) 0, true, true);
+	find_files_matching_filter (state_files, ripped, accept_all_state_files, (void *) 0, true, true);
 
 	if (state_files.empty()) {
 		/* impossible! */
@@ -2633,13 +2631,11 @@ Session::cleanup_sources (CleanupReport& rep)
 	// FIXME: needs adaptation to midi
 
 	vector<boost::shared_ptr<Source> > dead_sources;
-	PathScanner scanner;
 	string audio_path;
 	string midi_path;
 	vector<space_and_path>::iterator i;
 	vector<space_and_path>::iterator nexti;
 	vector<string> candidates;
-	vector<string> candidates2;
 	vector<string> unused;
 	set<string> all_sources;
 	bool used;
@@ -2721,14 +2717,8 @@ Session::cleanup_sources (CleanupReport& rep)
 		i = nexti;
 	}
 
-	candidates = scanner (audio_path, accept_all_audio_files, (void *) 0, true, true);
-	candidates2 = scanner (midi_path, accept_all_midi_files, (void *) 0, true, true);
-
-        /* merge them */
-
-	for (vector<string>::iterator i = candidates2.begin(); i != candidates2.end(); ++i) {
-		candidates.push_back (*i);
-	}
+	find_files_matching_filter (candidates, audio_path, accept_all_audio_files, (void *) 0, true, true);
+	find_files_matching_filter (candidates, midi_path, accept_all_midi_files, (void *) 0, true, true);
 
 	/* find all sources, but don't use this snapshot because the
 	   state file on disk still references sources we may have already

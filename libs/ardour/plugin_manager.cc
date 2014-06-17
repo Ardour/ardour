@@ -50,7 +50,6 @@
 #include <glibmm/miscutils.h>
 #include <glibmm/pattern.h>
 
-#include "pbd/pathscanner.h"
 #include "pbd/whitespace.h"
 #include "pbd/file_utils.h"
 
@@ -242,10 +241,8 @@ PluginManager::clear_vst_cache ()
 	// see also libs/ardour/vst_info_file.cc - vstfx_infofile_path()
 #ifdef WINDOWS_VST_SUPPORT
 	{
-		PathScanner scanner;
 		vector<string> fsi_files;
-
-		fsi_files = scanner (Config->get_plugin_path_vst(), "\\.fsi$", true, true, -1, false);
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.fsi$", true, true, -1, false);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -254,9 +251,8 @@ PluginManager::clear_vst_cache ()
 
 #ifdef LXVST_SUPPORT
 	{
-		PathScanner scanner;
 		vector<string> fsi_files;
-		fsi_files = scanner (Config->get_plugin_path_lxvst(), "\\.fsi$", true, true, -1, false);
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.fsi$", true, true, -1, false);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -266,9 +262,8 @@ PluginManager::clear_vst_cache ()
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
 	{
 		string personal = get_personal_vst_info_cache_dir();
-		PathScanner scanner;
 		vector<string> fsi_files;
-		fsi_files = scanner (personal, "\\.fsi$", true, true, -1, false);
+		find_files_matching_regex (fsi_files, personal, "\\.fsi$", true, true, -1, false);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -281,10 +276,8 @@ PluginManager::clear_vst_blacklist ()
 {
 #ifdef WINDOWS_VST_SUPPORT
 	{
-		PathScanner scanner;
 		vector<string> fsi_files;
-
-		fsi_files = scanner (Config->get_plugin_path_vst(), "\\.fsb$", true, true, -1, false);
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.fsb$", true, true, -1, false);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -293,9 +286,8 @@ PluginManager::clear_vst_blacklist ()
 
 #ifdef LXVST_SUPPORT
 	{
-		PathScanner scanner;
 		vector<string> fsi_files;
-		fsi_files = scanner (Config->get_plugin_path_lxvst(), "\\.fsb$", true, true, -1, false);
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.fsb$", true, true, -1, false);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -306,9 +298,8 @@ PluginManager::clear_vst_blacklist ()
 	{
 		string personal = get_personal_vst_blacklist_dir();
 
-		PathScanner scanner;
 		vector<string> fsi_files;
-		fsi_files = scanner (personal, "\\.fsb$", true, true, -1, false);
+		find_files_matching_regex (fsi_files, personal, "\\.fsb$", true, true, -1, false);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -385,7 +376,6 @@ void
 PluginManager::add_presets(string domain)
 {
 #ifdef HAVE_LRDF
-	PathScanner scanner;
 	vector<string> presets;
 	vector<string>::iterator x;
 
@@ -395,7 +385,7 @@ PluginManager::add_presets(string domain)
 	}
 
 	string path = string_compose("%1/.%2/rdf", envvar, domain);
-	presets = scanner (path, rdf_filter, 0, false, true);
+	find_files_matching_filter (presets, path, rdf_filter, 0, false, true);
 
 	for (x = presets.begin(); x != presets.end (); ++x) {
 		string file = "file:" + *x;
@@ -411,11 +401,10 @@ void
 PluginManager::add_lrdf_data (const string &path)
 {
 #ifdef HAVE_LRDF
-	PathScanner scanner;
 	vector<string> rdf_files;
 	vector<string>::iterator x;
 
-	rdf_files = scanner (path, rdf_filter, 0, false, true);
+	find_files_matching_filter (rdf_files, path, rdf_filter, 0, false, true);
 
 	for (x = rdf_files.begin(); x != rdf_files.end (); ++x) {
 		const string uri(string("file://") + *x);
@@ -628,14 +617,13 @@ static bool windows_vst_filter (const string& str, void * /*arg*/)
 int
 PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 {
-	PathScanner scanner;
 	vector<string> plugin_objects;
 	vector<string>::iterator x;
 	int ret = 0;
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("detecting Windows VST plugins along %1\n", path));
 
-	plugin_objects = scanner (Config->get_plugin_path_vst(), windows_vst_filter, 0, false, true);
+	find_files_matching_filter (plugin_objects, Config->get_plugin_path_vst(), windows_vst_filter, 0, false, true);
 
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
 		ARDOUR::PluginScanMessage(_("VST"), *x, !cache_only && !cancelled());
@@ -744,7 +732,6 @@ static bool lxvst_filter (const string& str, void *)
 int
 PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 {
-	PathScanner scanner;
 	vector<string> plugin_objects;
 	vector<string>::iterator x;
 	int ret = 0;
@@ -755,7 +742,7 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Discovering linuxVST plugins along %1\n", path));
 
-	plugin_objects = scanner (Config->get_plugin_path_lxvst(), lxvst_filter, 0, false, true);
+	find_files_matching_filter (plugin_objects, Config->get_plugin_path_lxvst(), lxvst_filter, 0, false, true);
 
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
 		ARDOUR::PluginScanMessage(_("LXVST"), *x, !cache_only && !cancelled());

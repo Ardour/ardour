@@ -23,7 +23,7 @@
 #include <glibmm.h>
 
 #include "pbd/basename.h"
-#include "pbd/pathscanner.h"
+#include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
 
@@ -82,10 +82,9 @@ void
 find_session_templates (vector<TemplateInfo>& template_names)
 {
 	vector<string> templates;
-	PathScanner scanner;
 	Searchpath spath (template_search_path());
 
-	templates = scanner (spath.to_string(), template_filter, 0, true, true);
+	find_files_matching_filter (templates, spath.to_string(), template_filter, 0, true, true);
 
 	if (templates.empty()) {
 		cerr << "Found nothing along " << spath.to_string() << endl;
@@ -116,10 +115,9 @@ void
 find_route_templates (vector<TemplateInfo>& template_names)
 {
 	vector<string> templates;
-	PathScanner scanner;
 	Searchpath spath (route_template_search_path());
 
-	templates = scanner (spath.to_string(), route_template_filter, 0, false, true);
+	find_files_matching_filter (templates, spath.to_string(), route_template_filter, 0, false, true);
 
 	if (templates.empty()) {
 		return;

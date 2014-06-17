@@ -28,7 +28,7 @@
 #include "pbd/controllable_descriptor.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
-#include "pbd/pathscanner.h"
+#include "pbd/file_utils.h"
 #include "pbd/xml++.h"
 
 #include "midi++/port.h"
@@ -137,11 +137,10 @@ void
 GenericMidiControlProtocol::reload_maps ()
 {
 	vector<string> midi_maps;
-	PathScanner scanner;
 	Searchpath spath (system_midi_map_search_path());
 	spath += user_midi_map_directory ();
 
-	midi_maps = scanner (spath.to_string(), midi_map_filter, 0, false, true);
+	find_files_matching_filter (midi_maps, spath.to_string(), midi_map_filter, 0, false, true);
 
 	if (midi_maps.empty()) {
 		cerr << "No MIDI maps found using " << spath.to_string() << endl;
