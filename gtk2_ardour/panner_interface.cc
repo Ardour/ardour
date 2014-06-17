@@ -34,6 +34,7 @@ using namespace Gtkmm2ext;
 PannerInterface::PannerInterface (boost::shared_ptr<Panner> p)
 	: _panner (p)
 	, _tooltip (this)
+	, _send_mode (false)
 	, _editor (0)
 {
         set_flags (Gtk::CAN_FOCUS);
@@ -107,6 +108,14 @@ PannerInterface::edit ()
 	delete _editor;
 	_editor = editor ();
 	_editor->show ();
+}
+
+void
+PannerInterface::set_send_drawing_mode(bool onoff) {
+	if (_send_mode != onoff) {
+		_send_mode = onoff;
+		queue_draw ();
+	}
 }
 
 PannerPersistentTooltip::PannerPersistentTooltip (Gtk::Widget* w)

@@ -75,6 +75,7 @@ Panner2d::Panner2d (boost::shared_ptr<PannerShell> p, int32_t h)
 	, height (h)
 	, last_width (0)
 	, have_elevation (false)
+	, _send_mode (false)
 {
 	panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
 
@@ -378,6 +379,15 @@ Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
 	return closest;
 }
 
+void
+Panner2d::set_send_drawing_mode (bool onoff)
+{
+	if (_send_mode != onoff) {
+		_send_mode = onoff;
+		queue_draw ();
+	}
+}
+
 bool
 Panner2d::on_motion_notify_event (GdkEventMotion *ev)
 {
@@ -412,10 +422,16 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	/* background */
 
 	cairo_rectangle (cr, event->area.x, event->area.y, event->area.width, event->area.height);
+
+	float r, g, b;
+	r = g = b = 0.1;
+	if (_send_mode) {
+		rgba_p_from_style("SendStripBase", &r, &g, &b, "fg");
+	}
 	if (!panner_shell->bypassed()) {
-		cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, 1.0);
+		cairo_set_source_rgba (cr, r, g, b, 1.0);
 	} else {
-		cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, 0.2);
+		cairo_set_source_rgba (cr, r, g, b , 0.2);
 	}
 	cairo_fill_preserve (cr);
 	cairo_clip (cr);

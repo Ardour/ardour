@@ -178,6 +178,11 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 		r  = 0x606060ff;
 	}
 
+	if (_send_mode) {
+		b = rgba_from_style("SendStripBase",
+				UINT_RGBA_R(b), UINT_RGBA_G(b), UINT_RGBA_B(b), 255,
+				"fg");
+	}
 	/* background */
 
 	context->set_source_rgba (UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));

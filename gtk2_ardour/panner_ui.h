@@ -74,6 +74,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void set_width (Width);
 	void setup_pan ();
 	void set_available_panners(std::map<std::string,std::string>);
+	void set_send_drawing_mode (bool);
 
 	void effective_pan_display ();
 
@@ -97,6 +98,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	int _current_nouts;
 	int _current_nins;
 	std::string _current_uri;
+	bool _send_mode;
 
 	static const int pan_bar_height;
 

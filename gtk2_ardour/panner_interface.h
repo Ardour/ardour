@@ -59,6 +59,7 @@ public:
 	}
 
 	void edit ();
+	void set_send_drawing_mode (bool);
 
 protected:
 	virtual void set_tooltip () = 0;
@@ -73,6 +74,8 @@ protected:
 
 	boost::shared_ptr<ARDOUR::Panner> _panner;
 	PannerPersistentTooltip _tooltip;
+
+	bool _send_mode;
 
 private:
 	virtual PannerEditor* editor () = 0;

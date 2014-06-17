@@ -50,6 +50,7 @@ PannerUI::PannerUI (Session* s)
 	: _current_nouts (-1)
 	, _current_nins (-1)
 	, _current_uri ("")
+	, _send_mode (false)
 	, pan_automation_style_button ("")
 	, pan_automation_state_button ("")
 	, _panner_list()
@@ -251,6 +252,7 @@ PannerUI::setup_pan ()
 
 		_stereo_panner = new StereoPanner (_panshell);
 		_stereo_panner->set_size_request (-1, pan_bar_height);
+		_stereo_panner->set_send_drawing_mode (_send_mode);
 		pan_vbox.pack_start (*_stereo_panner, false, false);
 
 		boost::shared_ptr<AutomationControl> ac;
@@ -286,6 +288,7 @@ PannerUI::setup_pan ()
 		_mono_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
 
 		_mono_panner->set_size_request (-1, pan_bar_height);
+		_mono_panner->set_send_drawing_mode (_send_mode);
 
 		update_pan_sensitive ();
 		pan_vbox.pack_start (*_mono_panner, false, false);
@@ -305,6 +308,7 @@ PannerUI::setup_pan ()
 			big_window->reset (nins);
 		}
 		twod_panner->set_size_request (-1, 61);
+		twod_panner->set_send_drawing_mode (_send_mode);
 
 		/* and finally, add it to the panner frame */
 
@@ -321,6 +325,19 @@ PannerUI::setup_pan ()
 	}
 
 	pan_vbox.show_all ();
+}
+
+void
+PannerUI::set_send_drawing_mode (bool onoff)
+{
+	if (_stereo_panner) {
+		_stereo_panner->set_send_drawing_mode (onoff);
+	} else if (_mono_panner) {
+		_mono_panner->set_send_drawing_mode (onoff);
+	} else if (twod_panner) {
+		twod_panner->set_send_drawing_mode (onoff);
+	}
+	_send_mode = onoff;
 }
 
 void

@@ -1900,6 +1900,7 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	panner_ui().set_panner (_current_delivery->panner_shell(), _current_delivery->panner());
 	panner_ui().set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
 	panner_ui().setup_pan ();
+	panner_ui().set_send_drawing_mode (true);
 	panner_ui().show_all ();
 
 	input_button.set_sensitive (false);
@@ -1935,6 +1936,7 @@ MixerStrip::revert_to_default_display ()
 	panner_ui().set_panner (_route->main_outs()->panner_shell(), _route->main_outs()->panner());
 	update_panner_choices();
 	panner_ui().setup_pan ();
+	panner_ui().set_send_drawing_mode (false);
 
 	if (has_audio_outputs ()) {
 		panners.show_all ();
