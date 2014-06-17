@@ -42,10 +42,10 @@ class LIBPBD_API PathScanner
 	                                     long limit = -1,
 	                                     bool recurse = false) {
 		std::vector<std::string> result;
-		run_scan_internal (result, dirpath,
-		                   filter, arg,
-		                   match_fullpath, return_fullpath,
-		                   limit, recurse);
+		find_files_matching_filter (result, dirpath,
+		                            filter, arg,
+		                            match_fullpath, return_fullpath,
+		                            limit, recurse);
 		return result;
 	}
 
@@ -77,14 +77,14 @@ class LIBPBD_API PathScanner
 			long limit,
 			bool recurse = false);
 
-	void run_scan_internal (std::vector<std::string>&,
-	                        const std::string &dirpath,
-	                        bool (*filter)(const std::string &, void *),
-	                        void *arg,
-	                        bool match_fullpath,
-	                        bool return_fullpath,
-	                        long limit,
-	                        bool recurse = false);
+	void find_files_matching_filter (std::vector<std::string>&,
+	                                const std::string &dirpath,
+	                                bool (*filter)(const std::string &, void *),
+	                                void *arg,
+	                                bool match_fullpath,
+	                                bool return_fullpath,
+	                                long limit,
+	                                bool recurse = false);
 };
 
 #endif // __libmisc_pathscanner_h__

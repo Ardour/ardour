@@ -78,10 +78,10 @@ PathScanner::find_files_matching_regex (vector<string>& result,
 		return;
 	}
 
-	run_scan_internal (result, dirpath,
-	                   regexp_filter, &compiled_pattern,
-	                   match_fullpath, return_fullpath,
-	                   limit, recurse);
+	find_files_matching_filter (result, dirpath,
+	                            regexp_filter, &compiled_pattern,
+	                            match_fullpath, return_fullpath,
+	                            limit, recurse);
 
 	regfree (&compiled_pattern);
 }
@@ -105,13 +105,13 @@ PathScanner::operator() (const string &dirpath, const string &regexp,
 }	
 	
 void
-PathScanner::run_scan_internal (vector<string>& result,
-				const string &dirpath, 
-				bool (*filter)(const string &, void *),
-				void *arg,
-				bool match_fullpath, bool return_fullpath,
-				long limit,
-				bool recurse)
+PathScanner::find_files_matching_filter (vector<string>& result,
+				         const string &dirpath,
+				         bool (*filter)(const string &, void *),
+				         void *arg,
+				         bool match_fullpath, bool return_fullpath,
+				         long limit,
+				         bool recurse)
 {
 	DIR *dir;
 	struct dirent *finfo;
@@ -149,7 +149,7 @@ PathScanner::run_scan_internal (vector<string>& result,
 			}
 
 			if (statbuf.st_mode & S_IFDIR && recurse) {
-				run_scan_internal (result, fullpath, filter, arg, match_fullpath, return_fullpath, limit, recurse);
+				find_files_matching_filter (result, fullpath, filter, arg, match_fullpath, return_fullpath, limit, recurse);
 			} else {
 				
 				if (match_fullpath) {
@@ -205,14 +205,9 @@ PathScanner::find_first (const string &dirpath,
 			 bool return_fullpath)
 {
 	vector<string> res;
-	string ret;
 
-	run_scan_internal (res,
-	                   dirpath,
-	                   filter,
-	                   0,
-	                   match_fullpath,
-	                   return_fullpath, 1);
+	find_files_matching_filter (res, dirpath, filter, 0,
+	                            match_fullpath, return_fullpath, 1);
 	
 	if (res.size() == 0) {
 		return string();
