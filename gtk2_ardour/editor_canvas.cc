@@ -493,18 +493,46 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 void
 Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 {
-	if (!Config->get_autoscroll_editor ()) {
+	if (!Config->get_autoscroll_editor () || autoscroll_active ()) {
 		return;
 	}
 
+	/* define a rectangular boundary for scrolling. If the mouse moves
+	 * outside of this area and/or continue to be outside of this area,
+	 * then we will continuously auto-scroll the canvas in the appropriate
+	 * direction(s)
+	 *
+	 * the boundary is defined in coordinates relative to the toplevel
+	 * window since that is what we're going to call ::get_pointer() on
+	 * during autoscrolling to determine if we're still outside the
+	 * boundary or not.
+	 */
+
 	ArdourCanvas::Rect scrolling_boundary;
 	Gtk::Allocation alloc;
-	
+	int cx, cy;
+
 	if (from_headers) {
 		alloc = controls_layout.get_allocation ();
-	} else {
+	} else {	
 		alloc = _track_canvas_viewport->get_allocation ();
+		cx = alloc.get_x();
+		cy = alloc.get_y();
+
+		/* reduce height by the height of the timebars, which happens
+		   to correspond to the position of the hv_scroll_group.
+		*/
 		
+		alloc.set_height (alloc.get_height() - hv_scroll_group->position().y);
+		alloc.set_y (alloc.get_y() + hv_scroll_group->position().y);
+
+		/* now reduce it again so that we start autoscrolling before we
+		 * move off the top or bottom of the canvas
+		 */
+
+		alloc.set_height (alloc.get_height() - 20);
+		alloc.set_y (alloc.get_y() + 10);
+
 		/* the effective width of the autoscroll boundary so
 		   that we start scrolling before we hit the edge.
 		   
@@ -517,11 +545,10 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 			alloc.set_width (alloc.get_width() - 20);
 			alloc.set_x (alloc.get_x() + 10);
 		} 
+
 	}
 	
-	scrolling_boundary = ArdourCanvas::Rect (alloc.get_x(), alloc.get_y(), 
-						 alloc.get_x() + alloc.get_width(), 
-						 alloc.get_y() + alloc.get_height());
+	scrolling_boundary = ArdourCanvas::Rect (alloc.get_x(), alloc.get_y(), alloc.get_x() + alloc.get_width(), alloc.get_y() + alloc.get_height());
 	
 	int x, y;
 	Gdk::ModifierType mask;
@@ -552,6 +579,7 @@ Editor::autoscroll_canvas ()
 	get_window()->get_pointer (x, y, mask);
 
 	VisualChange vc;
+	bool vertical_motion = false;
 
 	if (autoscroll_horizontal_allowed) {
 
@@ -600,7 +628,7 @@ Editor::autoscroll_canvas ()
 	if (autoscroll_vertical_allowed) {
 		
 		// const double vertical_pos = vertical_adjustment.get_value();
-		const int speed_factor = 20;
+		const int speed_factor = 10;
 
 		/* vertical */ 
 		
@@ -610,20 +638,21 @@ Editor::autoscroll_canvas ()
 
 			if (autoscroll_cnt && (autoscroll_cnt % speed_factor == 0)) {
 				y_motion = scroll_up_one_track ();
+				vertical_motion = true;
 			}
 
 		} else if (y > autoscroll_boundary.y1) {
 
 			if (autoscroll_cnt && (autoscroll_cnt % speed_factor == 0)) {
 				y_motion = scroll_down_one_track ();
-				
+				vertical_motion = true;
 			}
 		}
 
 		no_stop = true;
 	}
 
-	if (vc.pending) {
+	if (vc.pending || vertical_motion) {
 
 		/* change horizontal first */
 
@@ -642,26 +671,33 @@ Editor::autoscroll_canvas ()
 		
 		/* the motion handler expects events in canvas coordinate space */
 
-		/* first convert from Editor window coordinates to canvas
-		 * window coordinates
+		/* we asked for the mouse position above (::get_pointer()) via
+		 * our own top level window (we being the Editor). Convert into 
+		 * coordinates within the canvas window.
 		 */
 
 		int cx;
 		int cy;
 
-		/* clamp x and y to remain within the visible area */
+		translate_coordinates (*_track_canvas, x, y, cx, cy);
 
-		x = min (max ((ArdourCanvas::Coord) x, autoscroll_boundary.x0), autoscroll_boundary.x1);
-		y = min (max ((ArdourCanvas::Coord) y, autoscroll_boundary.y0), autoscroll_boundary.y1);
+		/* clamp x and y to remain within the autoscroll boundary,
+		 * which is defined in window coordinates
+		 */
 
-		translate_coordinates (*_track_canvas_viewport, x, y, cx, cy);
+		x = min (max ((ArdourCanvas::Coord) cx, autoscroll_boundary.x0), autoscroll_boundary.x1);
+		y = min (max ((ArdourCanvas::Coord) cy, autoscroll_boundary.y0), autoscroll_boundary.y1);
+
+		/* now convert from Editor window coordinates to canvas
+		 * window coordinates
+		 */
 
 		ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (cx, cy));
 		ev.x = d.x;
 		ev.y = d.y;
 
 		motion_handler (0, (GdkEvent*) &ev, true);
-
+		
 	} else if (no_stop) {
 
 		/* not changing visual state but pointer is outside the scrolling boundary
@@ -701,7 +737,7 @@ Editor::autoscroll_canvas ()
 		ev.y = d.y;
 
 		motion_handler (0, (GdkEvent*) &ev, true);
-
+		
 	} else {
 		stop_canvas_autoscroll ();
 		return false;

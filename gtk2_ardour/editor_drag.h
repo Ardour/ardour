@@ -54,7 +54,6 @@ public:
 	~DragManager ();
 
 	bool motion_handler (GdkEvent *, bool);
-	bool window_motion_handler (GdkEvent *, bool);
 
 	void abort ();
 	void add (Drag *);
