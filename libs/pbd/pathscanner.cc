@@ -44,6 +44,14 @@ using PBD::closedir;
 using namespace std;
 using namespace PBD;
 
+static
+bool
+regexp_filter (const string& str, void *arg)
+{
+	regex_t* pattern = (regex_t*)arg;
+	return regexec (pattern, str.c_str(), 0, 0, 0) == 0;
+}
+
 vector<string>
 PathScanner::operator() (const string &dirpath, const string &regexp,
 			 bool match_fullpath, bool return_fullpath, 
@@ -52,6 +60,8 @@ PathScanner::operator() (const string &dirpath, const string &regexp,
 {
 	int err;
 	char msg[256];
+	regex_t compiled_pattern;
+	vector<string> result;
 
 	if ((err = regcomp (&compiled_pattern, regexp.c_str(),
 			    REG_EXTENDED|REG_NOSUB))) {
@@ -67,17 +77,20 @@ PathScanner::operator() (const string &dirpath, const string &regexp,
 		return vector<string>();
 	}
 	
-	return run_scan (dirpath, &PathScanner::regexp_filter, 
-			 (bool (*)(const string &, void *)) 0,
-			 0,
-			 match_fullpath,
-			 return_fullpath,
-			 limit, recurse);
+	result =  run_scan (dirpath,
+	                    regexp_filter,
+	                    &compiled_pattern,
+	                    match_fullpath,
+	                    return_fullpath,
+	                    limit, recurse);
+
+	regfree (&compiled_pattern);
+
+	return result;
 }	
 
 vector<string>
 PathScanner::run_scan (const string &dirpath, 
-		       bool (PathScanner::*memberfilter)(const string &),
 		       bool (*filter)(const string &, void *),
 		       void *arg,
 		       bool match_fullpath, bool return_fullpath,
@@ -85,14 +98,13 @@ PathScanner::run_scan (const string &dirpath,
 		       bool recurse)
 {
 	vector<string> result;
-	run_scan_internal (result, dirpath, memberfilter, filter, arg, match_fullpath, return_fullpath, limit, recurse);
+	run_scan_internal (result, dirpath, filter, arg, match_fullpath, return_fullpath, limit, recurse);
 	return result;
 }
 	
 void
 PathScanner::run_scan_internal (vector<string>& result,
 				const string &dirpath, 
-				bool (PathScanner::*memberfilter)(const string &),
 				bool (*filter)(const string &, void *),
 				void *arg,
 				bool match_fullpath, bool return_fullpath,
@@ -135,7 +147,7 @@ PathScanner::run_scan_internal (vector<string>& result,
 			}
 
 			if (statbuf.st_mode & S_IFDIR && recurse) {
-				run_scan_internal (result, fullpath, memberfilter, filter, arg, match_fullpath, return_fullpath, limit, recurse);
+				run_scan_internal (result, fullpath, filter, arg, match_fullpath, return_fullpath, limit, recurse);
 			} else {
 				
 				if (match_fullpath) {
@@ -144,16 +156,8 @@ PathScanner::run_scan_internal (vector<string>& result,
 					search_str = finfo->d_name;
 				}
 				
-				/* handle either type of function ptr */
-				
-				if (memberfilter) {
-					if (!(this->*memberfilter)(search_str)) {
-						continue;
-					} 
-				} else {
-					if (!filter(search_str, arg)) {
-						continue;
-					}
+				if (!filter(search_str, arg)) {
+					continue;
 				}
 
 				if (return_fullpath) {
@@ -182,6 +186,7 @@ PathScanner::find_first (const string &dirpath,
 	vector<string> res;
 	int err;
 	char msg[256];
+	regex_t compiled_pattern;
 
 	if ((err = regcomp (&compiled_pattern, regexp.c_str(),
 			    REG_EXTENDED|REG_NOSUB))) {
@@ -195,13 +200,14 @@ PathScanner::find_first (const string &dirpath,
 	}
 	
 	run_scan_internal (res, dirpath,
-	                   &PathScanner::regexp_filter,
-	                   (bool (*)(const string &, void *)) 0,
-	                   0,
+	                   &regexp_filter,
+			   &compiled_pattern,
 	                   match_fullpath,
 	                   return_fullpath,
 	                   1);
 	
+	regfree (&compiled_pattern);
+
 	if (res.size() == 0) {
 		return string();
 	}
@@ -221,7 +227,6 @@ PathScanner::find_first (const string &dirpath,
 
 	run_scan_internal (res,
 	                   dirpath,
-	                   (bool (PathScanner::*)(const string &)) 0,
 	                   filter,
 	                   0,
 	                   match_fullpath,
