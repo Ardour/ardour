@@ -78,12 +78,10 @@ PathScanner::find_files_matching_regex (vector<string>& result,
 		return;
 	}
 
-	result = run_scan (dirpath,
-		regexp_filter,
-		&compiled_pattern,
-		match_fullpath,
-		return_fullpath,
-		limit, recurse);
+	run_scan_internal (result, dirpath,
+	                   regexp_filter, &compiled_pattern,
+	                   match_fullpath, return_fullpath,
+	                   limit, recurse);
 
 	regfree (&compiled_pattern);
 }
@@ -105,19 +103,6 @@ PathScanner::operator() (const string &dirpath, const string &regexp,
 
 	return result;
 }	
-
-vector<string>
-PathScanner::run_scan (const string &dirpath, 
-		       bool (*filter)(const string &, void *),
-		       void *arg,
-		       bool match_fullpath, bool return_fullpath,
-		       long limit,
-		       bool recurse)
-{
-	vector<string> result;
-	run_scan_internal (result, dirpath, filter, arg, match_fullpath, return_fullpath, limit, recurse);
-	return result;
-}
 	
 void
 PathScanner::run_scan_internal (vector<string>& result,
