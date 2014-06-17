@@ -30,6 +30,8 @@
 
 #include "pbd/libpbd_visibility.h"
 
+#include "pbd/file_utils.h"
+
 class LIBPBD_API PathScanner
 
 {
@@ -42,10 +44,10 @@ class LIBPBD_API PathScanner
 	                                     long limit = -1,
 	                                     bool recurse = false) {
 		std::vector<std::string> result;
-		find_files_matching_filter (result, dirpath,
-		                            filter, arg,
-		                            match_fullpath, return_fullpath,
-		                            limit, recurse);
+		PBD::find_files_matching_filter (result, dirpath,
+		                                 filter, arg,
+		                                 match_fullpath, return_fullpath,
+		                                 limit, recurse);
 		return result;
 	}
 
@@ -58,34 +60,15 @@ class LIBPBD_API PathScanner
 	{
 		std::vector<std::string> result;
 
-		find_files_matching_regex (result,
-		                           dirpath,
-		                           regexp,
-		                           match_fullpath,
-		                           return_fullpath,
-		                           limit, recurse);
+		PBD::find_files_matching_regex (result,
+		                                dirpath,
+		                                regexp,
+		                                match_fullpath,
+		                                return_fullpath,
+		                                limit, recurse);
 
 		return result;
 	}
-
-  private:
-
-	void find_files_matching_regex (std::vector<std::string>& results,
-			const std::string& dirpath,
-			const std::string& regexp,
-			bool match_fullpath,
-			bool return_fullpath,
-			long limit,
-			bool recurse = false);
-
-	void find_files_matching_filter (std::vector<std::string>&,
-	                                const std::string &dirpath,
-	                                bool (*filter)(const std::string &, void *),
-	                                void *arg,
-	                                bool match_fullpath,
-	                                bool return_fullpath,
-	                                long limit,
-	                                bool recurse = false);
 };
 
 #endif // __libmisc_pathscanner_h__
