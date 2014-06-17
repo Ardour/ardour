@@ -23,7 +23,7 @@
 
 #include "pbd/xml++.h"
 #include "pbd/error.h"
-#include "pbd/pathscanner.h"
+#include "pbd/file_utils.h"
 #include "pbd/convert.h"
 #include "pbd/stl_delete.h"
 
@@ -472,10 +472,9 @@ DeviceInfo::reload_device_info ()
 	DeviceInfo di;
 	vector<string> s;
 	vector<string> devinfos;
-	PathScanner scanner;
 	Searchpath spath (devinfo_search_path());
 
-	devinfos = scanner (spath.to_string(), devinfo_filter, 0, false, true);
+	find_files_matching_filter (devinfos, spath.to_string(), devinfo_filter, 0, false, true);
 	device_info.clear ();
 
 	if (devinfos.empty()) {

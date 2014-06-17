@@ -58,7 +58,6 @@
 #include "pbd/file_utils.h"
 #include "pbd/debug.h"
 #include "pbd/error.h"
-#include "pbd/pathscanner.h"
 #include "pbd/pathexpand.h"
 #include "pbd/stl_delete.h"
 
@@ -354,8 +353,8 @@ bool accept_all_files (string const &, void *)
 void
 copy_files(const std::string & from_path, const std::string & to_dir)
 {
-	PathScanner scanner;
-	vector<string> files = scanner (from_path, accept_all_files, 0, true, false);
+	vector<string> files;
+	find_files_matching_filter (files, from_path, accept_all_files, 0, true, false);
 
 	for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
 		std::string from = Glib::build_filename (from_path, *i);
