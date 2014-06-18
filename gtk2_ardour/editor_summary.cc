@@ -92,8 +92,8 @@ EditorSummary::set_session (Session* s)
 		Region::RegionPropertyChanged.connect (region_property_connection, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context());
 		Route::RemoteControlIDChange.connect (route_ctrl_id_connection, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context());
 		_editor->playhead_cursor->PositionChanged.connect (position_connection, invalidator (*this), boost::bind (&EditorSummary::playhead_position_changed, this, _1), gui_context());
-		_session->StartTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
-		_session->EndTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
+		_session->StartTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context());
+		_session->EndTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context());
 		_editor->selection->RegionsChanged.connect (sigc::mem_fun(*this, &EditorSummary::set_background_dirty));
 	}
 }
@@ -101,7 +101,12 @@ EditorSummary::set_session (Session* s)
 void
 EditorSummary::render_background_image ()
 {
-	_image = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, get_width (), get_height ());
+	int stride;
+	unsigned char *data;
+	stride = cairo_format_stride_for_width (CAIRO_FORMAT_RGB24, get_width ());
+	data = (unsigned char*) malloc (stride * get_height ());
+	_image = cairo_image_surface_create_for_data (data, CAIRO_FORMAT_RGB24, get_width (), get_height (), stride);
+
 	cairo_t* cr = cairo_create (_image);
 
        /* background (really just the dividing lines between tracks */
@@ -169,6 +174,21 @@ EditorSummary::render_background_image ()
 
 		y += _track_height;
 	}
+
+	/* start and end markers */
+
+	cairo_set_line_width (cr, 1);
+	cairo_set_source_rgb (cr, 1, 1, 0);
+
+	const double p = (_session->current_start_frame() - _start) * _x_scale;
+	cairo_move_to (cr, p, 0);
+	cairo_line_to (cr, p, get_height());
+
+	double const q = (_session->current_end_frame() - _start) * _x_scale;
+	cairo_move_to (cr, q, 0);
+	cairo_line_to (cr, q, get_height());
+	cairo_stroke (cr);
+
 	cairo_destroy (cr);
 }
 
@@ -190,23 +210,11 @@ EditorSummary::render (cairo_t* cr, cairo_rectangle_t*)
 
 	cairo_push_group (cr);
 	
+	/* Fill with the background image */
+
 	cairo_rectangle (cr, 0, 0, get_width(), get_height());
 	cairo_set_source_surface (cr, _image, 0, 0);
-	cairo_paint (cr);
-
-	/* start and end markers */
-
-	cairo_set_line_width (cr, 1);
-	cairo_set_source_rgb (cr, 1, 1, 0);
-
-	const double p = (_session->current_start_frame() - _start) * _x_scale;
-	cairo_move_to (cr, p, 0);
-	cairo_line_to (cr, p, get_height());
-
-	double const q = (_session->current_end_frame() - _start) * _x_scale;
-	cairo_move_to (cr, q, 0);
-	cairo_line_to (cr, q, get_height());
-	cairo_stroke (cr);
+	cairo_fill (cr);
 
 	/* Render the view rectangle.  If there is an editor visual pending, don't update
 	   the view rectangle now --- wait until the expose event that we'll get after
