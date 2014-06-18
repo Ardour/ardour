@@ -66,8 +66,8 @@ EngineStateController::EngineStateController()
     Config->ParameterChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_parameter_changed, this, _1) );
     
     _deserialize_and_load_engine_states();
-    _do_initial_engine_setup();
     _deserialize_and_load_midi_port_states();
+    _do_initial_engine_setup();
     
     // now push the sate to the backend
     push_current_state_to_backend(false);
