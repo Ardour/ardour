@@ -38,9 +38,9 @@ then
 	# Figure out the Build Type
 	if grep -q "DEBUG = True" $BUILD_CACHE_FILE; then
 		DEBUG=1
-		PACKAGE_DIR="$HOME/$APPNAME-win32-dbg"
+		PACKAGE_DIR="$HOME/$APPNAME-${release_version}-win32-dbg"
 	else
-		PACKAGE_DIR="$HOME/$APPNAME-win32"
+		PACKAGE_DIR="$HOME/$APPNAME-${release_version}-win32"
 	fi
 
 	if grep -q "BUILD_TESTS = True" $BUILD_CACHE_FILE; then
