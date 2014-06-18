@@ -1259,11 +1259,13 @@ AudioEngine::start_latency_detection (bool for_midi)
 
 		const string portname ("latency_in");
 		if ((_latency_input_port = pe.register_port (portname, DataType::MIDI, IsInput)) == 0) {
+			pe.unregister_port (_latency_input_port);
 			pe.unregister_port (_latency_output_port);
 			stop (true);
 			return -1;
 		}
 		if (pe.connect (_latency_input_name, make_port_name_non_relative (portname))) {
+			pe.unregister_port (_latency_input_port);
 			pe.unregister_port (_latency_output_port);
 			stop (true);
 			return -1;
@@ -1285,11 +1287,13 @@ AudioEngine::start_latency_detection (bool for_midi)
 
 		const string portname ("latency_in");
 		if ((_latency_input_port = pe.register_port (portname, DataType::AUDIO, IsInput)) == 0) {
+			pe.unregister_port (_latency_input_port);
 			pe.unregister_port (_latency_output_port);
 			stop (true);
 			return -1;
 		}
 		if (pe.connect (_latency_input_name, make_port_name_non_relative (portname))) {
+			pe.unregister_port (_latency_input_port);
 			pe.unregister_port (_latency_output_port);
 			stop (true);
 			return -1;
