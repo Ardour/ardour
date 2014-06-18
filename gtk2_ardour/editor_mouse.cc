@@ -185,51 +185,6 @@ Editor::canvas_event_sample (GdkEvent const * event, double* pcx, double* pcy) c
 	return pixel_to_sample_from_event (x);
 }
 
-Gdk::Cursor*
-Editor::which_grabber_cursor ()
-{
-	Gdk::Cursor* c = _cursors->grabber;
-
-	if (_internal_editing) {
-		switch (mouse_mode) {
-		case MouseDraw:
-			c = _cursors->midi_pencil;
-			break;
-
-		case MouseObject:
-			c = _cursors->grabber_note;
-			break;
-
-		case MouseTimeFX:
-			c = _cursors->midi_resize;
-			break;
-			
-		case MouseRange:
-			c = _cursors->grabber_note;
-			break;
-
-		default:
-			break;
-		}
-
-	} else {
-
-		switch (_edit_point) {
-		case EditAtMouse:
-			c = _cursors->grabber_edit_point;
-			break;
-		default:
-			boost::shared_ptr<Movable> m = _movable.lock();
-			if (m && m->locked()) {
-				c = _cursors->speaker;
-			}
-			break;
-		}
-	}
-
-	return c;
-}
-
 void
 Editor::set_current_trimmable (boost::shared_ptr<Trimmable> t)
 {
@@ -237,7 +192,6 @@ Editor::set_current_trimmable (boost::shared_ptr<Trimmable> t)
 
 	if (!st || st == t) {
 		_trimmable = t;
-		set_canvas_cursor ();
 	}
 }
 
@@ -248,95 +202,7 @@ Editor::set_current_movable (boost::shared_ptr<Movable> m)
 
 	if (!sm || sm != m) {
 		_movable = m;
-		set_canvas_cursor ();
 	}
-}
-
-void
-Editor::set_canvas_cursor ()
-{
-	switch (mouse_mode) {
-	case MouseRange:
-		current_canvas_cursor = _cursors->selector;
-		if (_internal_editing) {
-			current_canvas_cursor = which_grabber_cursor();
-		}
-		break;
-
-	case MouseObject:
-		current_canvas_cursor = which_grabber_cursor();
-		break;
-
-	case MouseDraw:
-		current_canvas_cursor = _cursors->midi_pencil;
-		break;
-
-	case MouseGain:
-		current_canvas_cursor = _cursors->cross_hair;
-		break;
-
-	case MouseZoom:
-		if (Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
-			current_canvas_cursor = _cursors->zoom_out;
-		} else {
-			current_canvas_cursor = _cursors->zoom_in;
-		}
-		break;
-
-	case MouseTimeFX:
-		current_canvas_cursor = _cursors->time_fx; // just use playhead
-		break;
-
-	case MouseAudition:
-		current_canvas_cursor = _cursors->speaker;
-		break;
-	}
-
-	if (!_internal_editing) {
-		switch (_join_object_range_state) {
-		case JOIN_OBJECT_RANGE_NONE:
-			break;
-		case JOIN_OBJECT_RANGE_OBJECT:
-			current_canvas_cursor = which_grabber_cursor ();
-			break;
-		case JOIN_OBJECT_RANGE_RANGE:
-			current_canvas_cursor = _cursors->selector;
-			break;
-		}
-	}
-
-	/* up-down cursor as a cue that automation can be dragged up and down when in join object/range mode */
-	if (!_internal_editing && get_smart_mode() ) {
-
-		double x, y;
-		get_pointer_position (x, y);
-
-		if (x >= 0 && y >= 0) {
-			
-			vector<ArdourCanvas::Item const *> items;
-
-			/* Note how we choose a specific scroll group to get
-			 * items from. This could be problematic.
-			 */
-			
-			hv_scroll_group->add_items_at_point (ArdourCanvas::Duple (x,y), items);
-			
-			// first item will be the upper most 
-			
-			if (!items.empty()) {
-				const ArdourCanvas::Item* i = items.front();
-				
-				if (i && i->parent() && i->parent()->get_data (X_("timeselection"))) {
-					pair<TimeAxisView*, int> tvp = trackview_by_y_position (_last_motion_y);
-					if (dynamic_cast<AutomationTimeAxisView*> (tvp.first)) {
-						current_canvas_cursor = _cursors->up_down;
-					}
-				}
-			}
-		}
-	}
-
-	set_canvas_cursor (current_canvas_cursor, true);
 }
 
 void
@@ -499,7 +365,7 @@ Editor::mouse_mode_toggled (MouseMode m)
 	}
 */
 	
-	set_canvas_cursor ();
+	reset_canvas_cursor ();
 	set_gain_envelope_visibility ();
 	
 	update_time_selection_display ();
@@ -1247,7 +1113,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		scrub_reverse_distance = 0;
 		last_scrub_x = event->button.x;
 		scrubbing_direction = 0;
-		set_canvas_cursor (_cursors->transparent);
+		push_canvas_cursor (_cursors->transparent);
 		return true;
 		break;
 
@@ -1777,7 +1643,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case MouseAudition:
-			set_canvas_cursor (current_canvas_cursor);
+			pop_canvas_cursor ();
 			if (scrubbing_direction == 0) {
 				/* no drag, just a click */
 				switch (item_type) {
@@ -1858,6 +1724,15 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	double fraction;
         bool ret = true;
 
+	/* by the time we reach here, entered_regionview and entered trackview
+	 * will have already been set as appropriate. Things are done this 
+	 * way because this method isn't passed a pointer to a variable type of
+	 * thing that is entered (which may or may not be canvas item).
+	 * (e.g. the actual entered regionview)
+	 */
+
+	choose_canvas_cursor_on_entry (&event->crossing, item_type);
+
 	switch (item_type) {
 	case ControlPointItem:
 		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
@@ -1873,10 +1748,6 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 			fraction = 1.0 - (cp->get_y() / cp->line().height());
 
-			if (is_drawable() && !_drags->active ()) {
-			        set_canvas_cursor (_cursors->fader);
-			}
-
 			_verbose_cursor->set (cp->line().get_verbose_cursor_string (fraction), at_x, at_y);
 			_verbose_cursor->show ();
 		}
@@ -1888,9 +1759,6 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			if (line) {
 				line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_EnteredGainLine());
 			}
-			if (is_drawable()) {
-				set_canvas_cursor (_cursors->fader);
-			}
 		}
 		break;
 
@@ -1900,112 +1768,14 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			if (line) {
 				line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_EnteredAutomationLine());
 			}
-			if (is_drawable()) {
-				set_canvas_cursor (_cursors->fader);
-			}
 		}
 		break;
-
-	case RegionViewNameHighlight:
-		if (is_drawable() && effective_mouse_mode() == MouseObject && entered_regionview) {
-			set_canvas_cursor_for_region_view (event->crossing.x, entered_regionview);
-			_over_region_trim_target = true;
-		}
-		break;
-
-	case LeftFrameHandle:
-	case RightFrameHandle:
-		if (is_drawable() && effective_mouse_mode() == MouseObject && !internal_editing() && entered_regionview) {
-			set_canvas_cursor_for_region_view (event->crossing.x, entered_regionview);
-		}
-		break;
-
-	case RegionItem:
-		switch (effective_mouse_mode()) {
-		case MouseRange:
-			set_canvas_cursor (_cursors->selector);
-			break;
-		default:
-			set_canvas_cursor (which_grabber_cursor());
-			break;
-		}
-		break;	
-
-	case StartSelectionTrimItem:
-		if (is_drawable()) {
-			set_canvas_cursor (_cursors->left_side_trim);
-		}
-		break;
-	case EndSelectionTrimItem:
-		if (is_drawable()) {
-			set_canvas_cursor (_cursors->right_side_trim);
-		}
-		break;
-
-	case PlayheadCursorItem:
-		if (is_drawable()) {
-			switch (_edit_point) {
-			case EditAtMouse:
-				set_canvas_cursor (_cursors->grabber_edit_point);
-				break;
-			default:
-				set_canvas_cursor (_cursors->grabber);
-				break;
-			}
-		}
-		break;
-
-
-	case RegionViewName:
-
-		/* when the name is not an active item, the entire name highlight is for trimming */
-
-		if (!reinterpret_cast<RegionView *> (item->get_data ("regionview"))->name_active()) {
-			if (mouse_mode == MouseObject && is_drawable()) {
-				set_canvas_cursor_for_region_view (event->crossing.x, entered_regionview);
-				_over_region_trim_target = true;
-			}
-		}
-		break;
-
 
 	case AutomationTrackItem:
-		if (is_drawable()) {
-			Gdk::Cursor *cursor;
-			switch (mouse_mode) {
-			case MouseRange:
-				cursor = _cursors->selector;
-				break;
-			case MouseZoom:
-	 			cursor = _cursors->zoom_in;
-				break;
-			default:
-				cursor = _cursors->cross_hair;
-				break;
-			}
-
-			set_canvas_cursor (cursor);
-
-			AutomationTimeAxisView* atv;
-			if ((atv = static_cast<AutomationTimeAxisView*>(item->get_data ("trackview"))) != 0) {
-				clear_entered_track = false;
-				set_entered_track (atv);
-			}
-		}
-		break;
-
-	case MarkerBarItem:
-	case RangeMarkerBarItem:
-	case TransportMarkerBarItem:
-	case CdMarkerBarItem:
-	case MeterBarItem:
-	case TempoBarItem:
-	case TimecodeRulerItem:
-	case SamplesRulerItem:
-	case MinsecRulerItem:
-	case BBTRulerItem:
-		if (is_drawable()) {
-			set_canvas_cursor (_cursors->timebar);
+		AutomationTimeAxisView* atv;
+		if ((atv = static_cast<AutomationTimeAxisView*>(item->get_data ("trackview"))) != 0) {
+			clear_entered_track = false;
+			set_entered_track (atv);
 		}
 		break;
 
@@ -2018,9 +1788,6 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		// fall through
 	case MeterMarkerItem:
 	case TempoMarkerItem:
-		if (is_drawable()) {
-			set_canvas_cursor (_cursors->timebar);
-		}
 		break;
 
 	case FadeInHandleItem:
@@ -2030,7 +1797,6 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			if (rect) {
 				RegionView* rv = static_cast<RegionView*>(item->get_data ("regionview"));
 				rect->set_fill_color (rv->get_fill_color());
-				set_canvas_cursor (_cursors->fade_in);
 			}
 		}
 		break;
@@ -2042,7 +1808,6 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			if (rect) {
 				RegionView* rv = static_cast<RegionView*>(item->get_data ("regionview"));
 				rect->set_fill_color (rv->get_fill_color ());
-				set_canvas_cursor (_cursors->fade_out);
 			}
 		}
 		break;
@@ -2055,16 +1820,13 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	break;
 
 	case SelectionItem:
-		if ( get_smart_mode() ) {
-			set_canvas_cursor ();
-		}
 		break;
 
 	default:
 		break;
 	}
 
-	/* second pass to handle entered track status in a comprehensible way.
+	/* third pass to handle entered track status in a comprehensible way.
 	 */
 
 	switch (item_type) {
@@ -2080,7 +1842,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	default:
-		set_entered_track (0);
+
 		break;
 	}
 
@@ -2098,25 +1860,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 
 	switch (item_type) {
 	case ControlPointItem:
-		if (is_drawable()) {
-			set_canvas_cursor (current_canvas_cursor);
-		}
-
 		_verbose_cursor->hide ();
-		break;
-
-	case RegionViewNameHighlight:
-	case LeftFrameHandle:
-	case RightFrameHandle:
-	case StartSelectionTrimItem:
-	case EndSelectionTrimItem:
-	case PlayheadCursorItem:
-
-		_over_region_trim_target = false;
-
-		if (is_drawable()) {
-			set_canvas_cursor (current_canvas_cursor);
-		}
 		break;
 
 	case GainLineItem:
@@ -2127,35 +1871,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 			if (line) {
 				line->set_outline_color (al->get_line_color());
 			}
-		}
-		if (is_drawable()) {
-			set_canvas_cursor (current_canvas_cursor);
-		}
-		break;
-
-	case RegionViewName:
-		/* see enter_handler() for notes */
-		_over_region_trim_target = false;
-
-		if (!reinterpret_cast<RegionView *> (item->get_data ("regionview"))->name_active()) {
-			if (is_drawable() && mouse_mode == MouseObject) {
-				set_canvas_cursor (current_canvas_cursor);
-			}
-		}
-		break;
-
-	case RangeMarkerBarItem:
-	case TransportMarkerBarItem:
-	case CdMarkerBarItem:
-	case MeterBarItem:
-	case TempoBarItem:
-	case MarkerBarItem:
-	case TimecodeRulerItem:
-	case SamplesRulerItem:
-	case MinsecRulerItem:
-	case BBTRulerItem:
-		if (is_drawable()) {
-			set_canvas_cursor (current_canvas_cursor);
 		}
 		break;
 
@@ -2170,55 +1885,35 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 		// fall through
 	case MeterMarkerItem:
 	case TempoMarkerItem:
-
-		if (is_drawable()) {
-			set_canvas_cursor (current_canvas_cursor);
-		}
-
 		break;
 
 	case FadeInTrimHandleItem:
 	case FadeOutTrimHandleItem:
 	case FadeInHandleItem:
 	case FadeOutHandleItem:
-		{
-			ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
-			if (rect) {
-				rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_InactiveFadeHandle());
-			}
+	{
+		ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
+		if (rect) {
+			rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_InactiveFadeHandle());
 		}
-		set_canvas_cursor (current_canvas_cursor);
-		break;
+	}
+	break;
 
 	case AutomationTrackItem:
-		if (is_drawable()) {
-			set_canvas_cursor (current_canvas_cursor);
-			clear_entered_track = true;
-			Glib::signal_idle().connect (sigc::mem_fun(*this, &Editor::left_automation_track));
-		}
 		break;
+
 	case FeatureLineItem:
-		{
-			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
-			line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_ZeroLine());
-		}
-		break;
+	{
+		ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
+		line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_ZeroLine());
+	}
+	break;
 
 	default:
 		break;
 	}
 
 	return ret;
-}
-
-gint
-Editor::left_automation_track ()
-{
-	if (clear_entered_track) {
-		set_entered_track (0);
-		clear_entered_track = false;
-	}
-	return false;
 }
 
 void
@@ -2331,16 +2026,7 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 		return true;
 	}
 
-	JoinObjectRangeState const old = _join_object_range_state;
-	update_join_object_range_location (event->motion.x, event->motion.y);
-
-	if (!_internal_editing && _join_object_range_state != old) {
-		set_canvas_cursor ();
-	}
-
-	if (!_internal_editing && _over_region_trim_target) {
-		set_canvas_cursor_for_region_view (event->motion.x, entered_regionview);
-	}
+	update_join_object_range_location (event->motion.y);
 
 	bool handled = false;
 	if (_drags->active ()) {
@@ -2427,19 +2113,19 @@ Editor::edit_notes (TimeAxisViewItem& tavi)
 	if (s.empty ()) {
 		return;
 	}
-	
+
 	EditNoteDialog* d = new EditNoteDialog (&(*s.begin())->region_view(), s);
-        d->show_all ();
+	d->show_all ();
 	ensure_float (*d);
 
-        d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &Editor::note_edit_done), d));
+	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &Editor::note_edit_done), d));
 }
 
 void
 Editor::note_edit_done (int r, EditNoteDialog* d)
 {
-        d->done (r);
-        delete d;
+	d->done (r);
+	delete d;
 }
 
 void
@@ -2509,7 +2195,7 @@ Editor::collect_new_region_view (RegionView* rv)
 void
 Editor::collect_and_select_new_region_view (RegionView* rv)
 {
- 	selection->add(rv);
+	selection->add(rv);
 	latest_regionviews.push_back (rv);
 }
 
@@ -2527,7 +2213,7 @@ Editor::cancel_selection ()
 void
 Editor::cancel_time_selection ()
 {
-    for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(*i)->hide_selection ();
 	}
 	selection->time.clear ();
@@ -2831,15 +2517,15 @@ Editor::set_internal_edit (bool yn)
 	}
 
 	_internal_editing = yn;
-	
+
 	if (yn) {
-                pre_internal_mouse_mode = mouse_mode;
+		pre_internal_mouse_mode = mouse_mode;
 		pre_internal_snap_type = _snap_type;
 		pre_internal_snap_mode = _snap_mode;
 
-                for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-                        (*i)->enter_internal_edit_mode ();
-                }
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			(*i)->enter_internal_edit_mode ();
+		}
 
 		set_snap_to (internal_snap_type);
 		set_snap_mode (internal_snap_mode);
@@ -2849,40 +2535,35 @@ Editor::set_internal_edit (bool yn)
 		internal_snap_mode = _snap_mode;
 		internal_snap_type = _snap_type;
 
-                for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-                        (*i)->leave_internal_edit_mode ();
-                }
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			(*i)->leave_internal_edit_mode ();
+		}
 
-                if (mouse_mode == MouseDraw && pre_internal_mouse_mode != MouseDraw) {
-                        /* we were drawing .. flip back to something sensible */
-                        set_mouse_mode (pre_internal_mouse_mode);
-                }
+		if (mouse_mode == MouseDraw && pre_internal_mouse_mode != MouseDraw) {
+			/* we were drawing .. flip back to something sensible */
+			set_mouse_mode (pre_internal_mouse_mode);
+		}
 
 		set_snap_to (pre_internal_snap_type);
 		set_snap_mode (pre_internal_snap_mode);
 	}
-	
-	set_canvas_cursor ();
+
+	reset_canvas_cursor ();
 }
 
-/** Update _join_object_range_state which indicate whether we are over the top or bottom half of a region view,
- *  used by the `join object/range' tool mode. Coordinates in canvas space.
+/** Update _join_object_range_state which indicate whether we are over the top
+ *  or bottom half of a route view, used by the `join object/range' tool
+ *  mode. Coordinates in canvas space.
  */
 void
-Editor::update_join_object_range_location (double /*x*/, double y)
+Editor::update_join_object_range_location (double y)
 {
-	/* XXX: actually, this decides based on whether the mouse is in the top
-	   or bottom half of a the waveform part RouteTimeAxisView;
-
-	   Note that entered_{track,regionview} is not always setup (e.g. if
-	   the mouse is over a TimeSelection), and to get a Region
-	   that we're over requires searching the playlist.
-	*/
-
-	if ( !get_smart_mode() ) {
+	if (_internal_editing || !get_smart_mode()) {
 		_join_object_range_state = JOIN_OBJECT_RANGE_NONE;
 		return;
 	}
+
+	JoinObjectRangeState const old = _join_object_range_state;
 
 	if (mouse_mode == MouseObject) {
 		_join_object_range_state = JOIN_OBJECT_RANGE_OBJECT;
@@ -2890,21 +2571,35 @@ Editor::update_join_object_range_location (double /*x*/, double y)
 		_join_object_range_state = JOIN_OBJECT_RANGE_RANGE;
 	}
 
-	/* XXX: maybe we should make entered_track work in all cases, rather than resorting to this */
-	pair<TimeAxisView*, int> tvp = trackview_by_y_position (y, false);
+	cerr << "Entered RV = " << entered_regionview << " track = " << entered_track << endl;
 
-	if (tvp.first) {
+	if (entered_regionview) {
 
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
-		if (rtv) {
+		ArdourCanvas::Duple const item_space = entered_regionview->get_canvas_group()->canvas_to_item (ArdourCanvas::Duple (0, y));
+		double const c = item_space.y / entered_regionview->height();
+			
+		_join_object_range_state = c <= 0.5 ? JOIN_OBJECT_RANGE_RANGE : JOIN_OBJECT_RANGE_OBJECT;
+		
+		if (_join_object_range_state != old) {
+			set_canvas_cursor (which_region_cursor ());
+		}
 
-			double cx = 0;
-			double cy = y;
-			rtv->canvas_display()->canvas_to_item (cx, cy);
+	} else if (entered_track) {
 
-			double const c = cy / (rtv->view()->child_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE);
-
-			_join_object_range_state = c <= 0.5 ? JOIN_OBJECT_RANGE_RANGE : JOIN_OBJECT_RANGE_OBJECT;
+		RouteTimeAxisView* entered_route_view = dynamic_cast<RouteTimeAxisView*> (entered_track);
+		
+		if (entered_route_view) {
+			/* track/bus ... but not in a region ... use range mode */
+			_join_object_range_state = JOIN_OBJECT_RANGE_RANGE;
+			if (_join_object_range_state != old) {
+				set_canvas_cursor (which_region_cursor ());
+			}
+		} else {
+			/* Other kinds of tracks use object mode */
+			_join_object_range_state = JOIN_OBJECT_RANGE_OBJECT;
+			if (_join_object_range_state != old) {
+				set_canvas_cursor (which_region_cursor ());
+			}
 		}
 	}
 }
@@ -2928,51 +2623,6 @@ Editor::remove_midi_note (ArdourCanvas::Item* item, GdkEvent *)
 	assert (e);
 
 	e->region_view().delete_note (e->note ());
-}
-
-void
-Editor::set_canvas_cursor_for_region_view (double x, RegionView* rv)
-{
-	/* XXX: this check should not be necessary */
-	if (rv == 0) {
-		return;
-	}
-
-	ArdourCanvas::Group* g = rv->get_canvas_group ();
-	ArdourCanvas::Group* p = g->parent ();
-
-	/* Compute x in region view parent coordinates */
-	double dy = 0;
-	p->canvas_to_item (x, dy);
-
-	boost::optional<ArdourCanvas::Rect> item_bbox = g->bounding_box ();
-	assert (item_bbox);
-	ArdourCanvas::Rect parent_bbox = g->item_to_parent (item_bbox.get ());
-
-	/* First or last 10% of region is used for trimming, if the whole
-	   region is wider than 20 pixels at the current zoom level.
-	*/
-
-	double const w = parent_bbox.width();
-
-	if (w > 20.0 && x >= parent_bbox.x0 && x < parent_bbox.x1) {
-		
-		Trimmable::CanTrim ct = rv->region()->can_trim ();
-
-		if (((x - parent_bbox.x0) / w) < 0.10) {
-			if (ct & Trimmable::FrontTrimEarlier) {
-				set_canvas_cursor (_cursors->left_side_trim, true);
-			} else {
-				set_canvas_cursor (_cursors->left_side_trim_right_only, true);
-			}
-		} else if (((parent_bbox.x1 - x) / w) < 0.10) {
-			if (ct & Trimmable::EndTrimLater) {
-				set_canvas_cursor (_cursors->right_side_trim, true);
-			} else {
-				set_canvas_cursor (_cursors->right_side_trim_left_only, true);
-			}
-		}
-	}
 }
 
 /** Obtain the pointer position in canvas coordinates */

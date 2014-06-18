@@ -743,7 +743,6 @@ Editor::Editor ()
 	_popup_region_menu_item = 0;
 
 	_show_marker_lines = false;
-	_over_region_trim_target = false;
 
         /* Button bindings */
 
@@ -794,7 +793,7 @@ Editor::add_toplevel_controls (Container& cont)
 bool
 Editor::get_smart_mode () const
 {
-	return ( (current_mouse_mode() == Editing::MouseObject) && smart_mode_action->get_active() );
+	return ((current_mouse_mode() == Editing::MouseObject) && smart_mode_action->get_active());
 }
 
 void
@@ -819,8 +818,6 @@ Editor::catch_vanishing_regionview (RegionView *rv)
 	if (!_all_region_actions_sensitized) {
 		sensitize_all_region_actions (true);
 	}
-
-	_over_region_trim_target = false;
 }
 
 void
@@ -834,7 +831,9 @@ Editor::set_entered_regionview (RegionView* rv)
 		entered_regionview->exited ();
 	}
 
-	if ((entered_regionview = rv) != 0) {
+	entered_regionview = rv;
+
+	if (entered_regionview  != 0) {
 		entered_regionview->entered (internal_editing ());
 	}
 
@@ -853,7 +852,9 @@ Editor::set_entered_track (TimeAxisView* tav)
 		entered_track->exited ();
 	}
 
-	if ((entered_track = tav) != 0) {
+	entered_track = tav;
+
+	if (entered_track) {
 		entered_track->entered ();
 	}
 }
@@ -2010,7 +2011,7 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 		edit_point_selector.set_text (str);
 	}
 
-	set_canvas_cursor ();
+	reset_canvas_cursor ();
 
 	if (!force && !changed) {
 		return;
@@ -2416,7 +2417,7 @@ Editor::get_state ()
  *  in stacked or expanded region display mode, otherwise 0.
  */
 std::pair<TimeAxisView *, double>
-Editor::trackview_by_y_position (double y, bool trackview_relative_offset)
+Editor::trackview_by_y_position (double y, bool trackview_relative_offset) const
 {
 	if (!trackview_relative_offset) {
 		y -= _trackview_group->canvas_origin().y;
@@ -2426,7 +2427,7 @@ Editor::trackview_by_y_position (double y, bool trackview_relative_offset)
 		return std::make_pair ( (TimeAxisView *) 0, 0);
 	}
 
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+	for (TrackViewList::const_iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 			
 		std::pair<TimeAxisView*, double> const r = (*iter)->covers_y_position (y);
 			

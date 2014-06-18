@@ -278,16 +278,14 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 		break;
 
 	case GDK_ENTER_NOTIFY:
-		if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-			set_entered_regionview (rv);
-			ret = true;
-		}
+		set_entered_regionview (rv);
+		ret = enter_handler (item, event, RegionItem);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
 		if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
 			set_entered_regionview (0);
-			ret = true;
+			ret = leave_handler (item, event, RegionItem);
 		}
 		break;
 
@@ -297,6 +295,42 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 
 	return ret;
 }
+
+bool
+Editor::canvas_wave_view_event (GdkEvent *event, ArdourCanvas::Item* item, RegionView* rv)
+{
+	/* we only care about enter events here, required for mouse/cursor
+	 * tracking. there is a non-linear (non-child/non-parent) relationship
+	 * between various components of a regionview and so when we leave one
+	 * of them (e.g. a trim handle) and enter another (e.g. the waveview)
+	 * no other items get notified. enter/leave handling does not propagate
+	 * in the same way as other events, so we need to catch this because
+	 * entering (and leaving) the waveview is equivalent to
+	 * entering/leaving the regionview (which is why it is passed in as a
+	 * third argument).
+	 *
+	 * And in fact, we really only care about enter events.
+	 */
+
+	bool ret = false;
+
+	if (!rv->sensitive ()) {
+		return false;
+	}
+
+	switch (event->type) {
+	case GDK_ENTER_NOTIFY:
+		set_entered_regionview (rv);
+		ret = enter_handler (item, event, WaveItem);
+		break;
+
+	default:
+		break;
+	}
+
+	return ret;
+}	 
+
 
 bool
 Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, RouteTimeAxisView *tv)
@@ -324,11 +358,14 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, Rou
 
 	case GDK_ENTER_NOTIFY:
 		set_entered_track (tv);
-		ret = true;
+		ret = enter_handler (item, event, StreamItem);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		set_entered_track (0);
+		if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			set_entered_track (0);
+		}
+		ret = leave_handler (item, event, StreamItem);
 		break;
 
 	default:

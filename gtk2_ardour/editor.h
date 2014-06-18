@@ -535,7 +535,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	JoinObjectRangeState _join_object_range_state;
 
-	void update_join_object_range_location (double, double);
+	void update_join_object_range_location (double);
 
 	boost::optional<int>  pre_notebook_shrink_pane_width;
 
@@ -703,8 +703,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	std::stack<Gdk::Cursor*> _cursor_stack;
 	Gdk::Cursor*          current_canvas_cursor;
-	Gdk::Cursor* which_grabber_cursor ();
-	void set_canvas_cursor ();
+	Gdk::Cursor* which_grabber_cursor () const;
+	Gdk::Cursor* which_region_cursor () const;
+	Gdk::Cursor* which_mode_cursor () const;
+	Gdk::Cursor* which_trim_cursor (bool left_side) const;
+	bool reset_canvas_cursor ();
+	void choose_canvas_cursor_on_entry (GdkEventCrossing*, ItemType);
 
 	ArdourCanvas::GtkCanvas* _track_canvas;
 	ArdourCanvas::GtkCanvasViewport* _track_canvas_viewport;
@@ -1041,7 +1045,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* track views */
 	TrackViewList track_views;
-	std::pair<TimeAxisView*, double> trackview_by_y_position (double, bool trackview_relative_offset = true);
+	std::pair<TimeAxisView*, double> trackview_by_y_position (double, bool trackview_relative_offset = true) const;
 	RouteTimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const;
 
 	TrackViewList get_tracks_for_range_action () const;
@@ -1402,6 +1406,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool canvas_fade_out_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
 	bool canvas_fade_out_handle_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*, bool trim = false);
 	bool canvas_region_view_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
+	bool canvas_wave_view_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_frame_handle_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_highlight_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
@@ -1438,9 +1443,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	friend class DragManager;
 	friend class EditorRouteGroups;
 	friend class EditorRegions;
-
-	/** true if the mouse is over a place where region trim can happen */
-	bool _over_region_trim_target;
 
 	/* non-public event handlers */
 
@@ -2058,8 +2060,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gtk::MenuItem& action_menu_item (std::string const &);
 	void action_pre_activated (Glib::RefPtr<Gtk::Action> const &);
-
-	void set_canvas_cursor_for_region_view (double, RegionView *);
 
 	MouseCursors* _cursors;
 

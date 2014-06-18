@@ -487,7 +487,6 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 		enter_detail = GDK_NOTIFY_INFERIOR;
 		leave_detail = GDK_NOTIFY_ANCESTOR;
 
-
 	} else if (_new_current_item->is_descendant_of (*_current_item)) {
 		/* move from ancestor to descendant (X: "_new_current_item is
 		 * an inferior ("child") of _current_item")
