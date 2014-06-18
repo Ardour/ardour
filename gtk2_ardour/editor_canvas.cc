@@ -35,6 +35,7 @@
 #include "canvas/debug.h"
 
 #include "ardour_ui.h"
+#include "automation_time_axis.h"
 #include "editor.h"
 #include "global_signals.h"
 #include "editing.h"
@@ -926,39 +927,6 @@ Editor::horizontal_position () const
 	return sample_to_pixel (leftmost_frame);
 }
 
-void
-Editor::set_canvas_cursor (Gdk::Cursor* cursor, bool save)
-{
-	if (save) {
-		current_canvas_cursor = cursor;
-	}
-
-	Glib::RefPtr<Gdk::Window> win = _track_canvas->get_window();
-
-	if (win) {
-	        _track_canvas->get_window()->set_cursor (*cursor);
-	}
-}
-
-void
-Editor::push_canvas_cursor (Gdk::Cursor* cursor)
-{
-	if (cursor) {
-		_cursor_stack.push (cursor);
-		set_canvas_cursor (cursor, false);
-	}
-}
-
-void
-Editor::pop_canvas_cursor ()
-{
-	if (!_cursor_stack.empty()) {
-		Gdk::Cursor* cursor = _cursor_stack.top ();
-		_cursor_stack.pop ();
-		set_canvas_cursor (cursor, false);
-	}
-}
-
 bool
 Editor::track_canvas_key_press (GdkEventKey*)
 {
@@ -1003,4 +971,353 @@ ArdourCanvas::GtkCanvasViewport*
 Editor::get_track_canvas() const
 {
 	return _track_canvas_viewport;
+}
+
+void
+Editor::set_canvas_cursor (Gdk::Cursor* cursor, bool save)
+{
+	if (save) {
+		current_canvas_cursor = cursor;
+	}
+
+	Glib::RefPtr<Gdk::Window> win = _track_canvas->get_window();
+
+	if (win) {
+	        _track_canvas->get_window()->set_cursor (*cursor);
+	}
+}
+
+void
+Editor::push_canvas_cursor (Gdk::Cursor* cursor)
+{
+	if (cursor) {
+		_cursor_stack.push (cursor);
+		set_canvas_cursor (cursor, false);
+	}
+}
+
+void
+Editor::pop_canvas_cursor ()
+{
+	if (!_cursor_stack.empty()) {
+		Gdk::Cursor* cursor = _cursor_stack.top ();
+		_cursor_stack.pop ();
+		set_canvas_cursor (cursor, false);
+	}
+}
+
+Gdk::Cursor*
+Editor::which_grabber_cursor () const
+{
+	Gdk::Cursor* c = _cursors->grabber;
+
+	if (_internal_editing) {
+		switch (mouse_mode) {
+		case MouseDraw:
+			c = _cursors->midi_pencil;
+			break;
+
+		case MouseObject:
+			c = _cursors->grabber_note;
+			break;
+
+		case MouseTimeFX:
+			c = _cursors->midi_resize;
+			break;
+			
+		case MouseRange:
+			c = _cursors->grabber_note;
+			break;
+
+		default:
+			break;
+		}
+
+	} else {
+
+		switch (_edit_point) {
+		case EditAtMouse:
+			c = _cursors->grabber_edit_point;
+			break;
+		default:
+			boost::shared_ptr<Movable> m = _movable.lock();
+			if (m && m->locked()) {
+				c = _cursors->speaker;
+			}
+			break;
+		}
+	}
+
+	return c;
+}
+
+Gdk::Cursor*
+Editor::which_trim_cursor (bool left) const
+{
+	if (!entered_regionview) {
+		return 0;
+	}
+
+	Trimmable::CanTrim ct = entered_regionview->region()->can_trim ();
+		
+	if (left) {
+		
+		if (ct & Trimmable::FrontTrimEarlier) {
+			return _cursors->left_side_trim;
+		} else {
+			return _cursors->left_side_trim_right_only;
+		}
+	} else {
+		if (ct & Trimmable::EndTrimLater) {
+			return _cursors->right_side_trim;
+		} else {
+			return _cursors->right_side_trim_left_only;
+		}
+	}
+}
+
+Gdk::Cursor*
+Editor::which_mode_cursor () const
+{
+	Gdk::Cursor* mode_cursor = 0;
+
+	switch (mouse_mode) {
+	case MouseRange:
+		mode_cursor = _cursors->selector;
+		if (_internal_editing) {
+			mode_cursor = which_grabber_cursor();
+		}
+		break;
+
+	case MouseObject:
+		/* don't use mode cursor, pick a grabber cursor based on the item */
+		break;
+
+	case MouseDraw:
+		mode_cursor = _cursors->midi_pencil;
+		break;
+
+	case MouseGain:
+		mode_cursor = _cursors->cross_hair;
+		break;
+
+	case MouseZoom:
+		if (Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
+			mode_cursor = _cursors->zoom_out;
+		} else {
+			mode_cursor = _cursors->zoom_in;
+		}
+		break;
+
+	case MouseTimeFX:
+		mode_cursor = _cursors->time_fx; // just use playhead
+		break;
+
+	case MouseAudition:
+		mode_cursor = _cursors->speaker;
+		break;
+	}
+
+	/* up-down cursor as a cue that automation can be dragged up and down when in join object/range mode */
+	if (!_internal_editing && get_smart_mode() ) {
+
+		double x, y;
+		get_pointer_position (x, y);
+
+		if (x >= 0 && y >= 0) {
+			
+			vector<ArdourCanvas::Item const *> items;
+
+			/* Note how we choose a specific scroll group to get
+			 * items from. This could be problematic.
+			 */
+			
+			hv_scroll_group->add_items_at_point (ArdourCanvas::Duple (x,y), items);
+			
+			// first item will be the upper most 
+			
+			if (!items.empty()) {
+				const ArdourCanvas::Item* i = items.front();
+				
+				if (i && i->parent() && i->parent()->get_data (X_("timeselection"))) {
+					pair<TimeAxisView*, int> tvp = trackview_by_y_position (_last_motion_y);
+					if (dynamic_cast<AutomationTimeAxisView*> (tvp.first)) {
+						mode_cursor = _cursors->up_down;
+					}
+				}
+			}
+		}
+	}
+
+	return mode_cursor;
+}
+
+Gdk::Cursor*
+Editor::which_region_cursor () const
+{
+	Gdk::Cursor* cursor = 0;
+
+	assert (mouse_mode == MouseObject || get_smart_mode());
+
+	if (!_internal_editing) {
+		switch (_join_object_range_state) {
+		case JOIN_OBJECT_RANGE_NONE:
+		case JOIN_OBJECT_RANGE_OBJECT:
+			cursor = which_grabber_cursor ();
+			cerr << "region use grabber\n";
+			break;
+		case JOIN_OBJECT_RANGE_RANGE:
+			cursor = _cursors->selector;
+			cerr << "region use selector\n";
+			break;
+		}
+	}
+
+	return cursor;
+}
+
+bool
+Editor::reset_canvas_cursor ()
+{
+	if (!is_drawable()) {
+		return false;
+	}
+
+	Gdk::Cursor* cursor = which_mode_cursor ();
+
+	if (cursor) {
+		set_canvas_cursor (cursor);
+		return true;
+	}
+
+	return false;
+}
+
+void
+Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType type)
+{
+	Gdk::Cursor* cursor = 0;
+
+	cerr << "entered new item type " << enum_2_string (type) << endl;
+
+	if (_drags->active()) {
+		return;
+	}
+
+	cursor = which_mode_cursor ();
+
+	if (mouse_mode == MouseObject || get_smart_mode ()) {
+
+		/* find correct cursor to use in object/smart mode */
+
+		switch (type) {
+		case RegionItem:
+		case RegionViewNameHighlight:
+		case RegionViewName:
+		case WaveItem:
+			cursor = which_region_cursor ();
+			break;
+		case PlayheadCursorItem:
+			switch (_edit_point) {
+			case EditAtMouse:
+				cursor = _cursors->grabber_edit_point;
+				break;
+			default:
+				cursor = _cursors->grabber;
+				break;
+			}
+			break;
+		case SelectionItem:
+			cursor = _cursors->selector;
+			break;
+		case ControlPointItem:
+			cursor = _cursors->fader;
+			break;
+		case GainLineItem:
+			cursor = _cursors->fader;
+			break;
+		case AutomationLineItem:
+			cursor = _cursors->cross_hair;
+			break;
+		case StartSelectionTrimItem:
+			break;
+		case EndSelectionTrimItem:
+			break;
+		case AutomationTrackItem:
+			cursor = _cursors->cross_hair;
+			break;
+		case FadeInItem:
+			cursor = _cursors->fade_in;
+			break;
+		case FadeInHandleItem:
+			cursor = _cursors->fade_in;
+			break;
+		case FadeInTrimHandleItem:
+			cursor = _cursors->fade_in;
+			break;
+		case FadeOutItem:
+			cursor = _cursors->fade_out;
+			break;
+		case FadeOutHandleItem:
+			cursor = _cursors->fade_out;
+			break;
+		case FadeOutTrimHandleItem:
+			cursor = _cursors->fade_out;
+			break;
+		case NoteItem:
+			cursor = which_grabber_cursor();
+			break;
+		case FeatureLineItem:
+			cursor = _cursors->cross_hair;
+			break;
+		case LeftFrameHandle:
+			cursor = which_trim_cursor (true);
+			break;
+		case RightFrameHandle:
+			cursor = which_trim_cursor (false);
+			break;
+		case StartCrossFadeItem:
+			cursor = _cursors->fade_in;
+			break;
+		case EndCrossFadeItem:
+			cursor = _cursors->fade_out;
+			break;
+		case CrossfadeViewItem:
+			cursor = _cursors->cross_hair;
+			break;
+		default:
+			break;
+		}
+	}
+
+	switch (type) {
+		/* These items use the timebar cursor at all times */
+	case TimecodeRulerItem:
+	case MinsecRulerItem:
+	case BBTRulerItem:
+	case SamplesRulerItem:
+		cursor = _cursors->timebar;
+		break;
+
+		/* These items use the grabber cursor at all times */
+	case MeterMarkerItem:
+	case TempoMarkerItem:
+	case MeterBarItem:
+	case TempoBarItem:
+	case MarkerItem:
+	case MarkerBarItem:
+	case RangeMarkerBarItem:
+	case CdMarkerBarItem:
+	case VideoBarItem:
+	case TransportMarkerBarItem:
+		cursor = which_grabber_cursor();
+		break;
+
+	default:
+		break;
+	}
+
+	if (cursor) {
+		set_canvas_cursor (cursor, false);
+	}
 }

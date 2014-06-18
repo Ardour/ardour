@@ -71,6 +71,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	TimeAxisView& get_time_axis_view () const;
 	void set_name_text(const std::string&);
 	virtual void set_height(double h);
+	virtual double height() const { return _height; }
 	void set_y (double);
 	void set_color (uint32_t);
 	void set_name_text_color ();

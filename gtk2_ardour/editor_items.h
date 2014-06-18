@@ -23,6 +23,7 @@
 enum ItemType {
 	RegionItem,
 	StreamItem,
+	WaveItem,
 	PlayheadCursorItem,
 	MarkerItem,
 	MarkerBarItem,

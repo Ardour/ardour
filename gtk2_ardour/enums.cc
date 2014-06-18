@@ -135,6 +135,7 @@ setup_gtk_ardour_enums ()
 	REGISTER (zoom_focus);
 
 	REGISTER_ENUM (RegionItem);
+	REGISTER_ENUM (WaveItem);
 	REGISTER_ENUM (StreamItem);
 	REGISTER_ENUM (PlayheadCursorItem);
 	REGISTER_ENUM (MarkerItem);

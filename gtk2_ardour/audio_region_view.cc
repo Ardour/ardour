@@ -407,7 +407,7 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 	RegionView::reset_width_dependent_items(pixel_width);
 	assert(_pixel_width == pixel_width);
 
-	if (pixel_width <= 6.0 || _height < 5.0 || !trackview.session()->config.get_show_region_fades()) {
+	if (pixel_width <= 20.0 || _height < 5.0 || !trackview.session()->config.get_show_region_fades()) {
 		if (fade_in_handle)       { fade_in_handle->hide(); }
 		if (fade_out_handle)      { fade_out_handle->hide(); }
 		if (fade_in_trim_handle)  { fade_in_trim_handle->hide(); }
@@ -1144,6 +1144,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	wave->set_samples_per_pixel (samples_per_pixel);
 	wave->set_show_zero_line (true);
 	wave->set_clip_level (Config->get_waveform_clip_level ());
+
+	wave->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_wave_view_event), wave, this));
 	
 	switch (Config->get_waveform_shape()) {
 	case Rectified:
