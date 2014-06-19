@@ -273,11 +273,15 @@ EngineControl::EngineControl ()
 	ARDOUR::AudioEngine::instance()->Stopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context());
 	ARDOUR::AudioEngine::instance()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context());
 
+	if (audio_setup)
 	{
+		set_state (*audio_setup);
+	}
+	{
+		/* ignore: don't save state */
 		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 		backend_changed ();
 	}
-	maybe_display_saved_state();
 
 	/* Connect to signals */
 
@@ -291,10 +295,6 @@ EngineControl::EngineControl ()
 	output_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 	input_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 	output_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
-
-	if (audio_setup) {
-		set_state (*audio_setup);
-	}
 
 	notebook.signal_switch_page().connect (sigc::mem_fun (*this, &EngineControl::on_switch_page));
 }
