@@ -62,6 +62,7 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	, position_binder (position_control)
 	, _dragging (false)
 {
+
 	if (_knob_image[0] == 0) {
 		for (size_t i=0; i < (sizeof(_knob_image)/sizeof(_knob_image[0])); i++) {
 			_knob_image[i] = load_pixbuf (_knob_image_files[i]);

@@ -613,7 +613,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 	Pango::AttrFontDesc* font_attr;
 	Pango::FontDescription font;
 
-	font = Pango::FontDescription ("ArdourMono");
+	font = Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_SmallMonospaceFont());
 	double fixfontsize = 81920.0 / (double) ARDOUR::Config->get_font_scale();
 
 	font.set_weight (Pango::WEIGHT_NORMAL);

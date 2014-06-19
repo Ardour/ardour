@@ -72,7 +72,7 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
 void
 TimeAxisViewItem::set_constant_heights ()
 {
-        NAME_FONT = get_font_for_style (X_("TimeAxisViewItemName"));
+        NAME_FONT = Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_SmallFont());
 
         Gtk::Window win;
         Gtk::Label foo;
