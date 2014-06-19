@@ -2053,7 +2053,7 @@ AUPlugin::find_presets ()
 
 	user_preset_map.clear ();
 
-	find_files_matching_filter (preset_files, preset_search_path, au_preset_filter, this, true, true, -1, true);
+	find_files_matching_filter (preset_files, preset_search_path, au_preset_filter, this, true, true, true);
 
 	if (preset_files.empty()) {
 		return;
