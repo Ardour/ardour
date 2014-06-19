@@ -205,6 +205,7 @@ private:
 
 	void parameter_changed (std::string const &);
 	void setup_waveform_visibility ();
+	void set_some_waveform_colors (std::vector<ArdourCanvas::WaveView*>& waves_to_color);
 
 	/** A ScopedConnection for each PeaksReady callback (one per channel).  Each member
 	 *  may be 0 if no connection exists.
