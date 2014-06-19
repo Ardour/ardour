@@ -110,14 +110,15 @@ get_files_in_directory (const std::string& directory_path, vector<string>& resul
 }
 
 void
-find_matching_files_in_directory (const std::string& directory,
-                                  const Glib::PatternSpec& pattern,
-                                  vector<std::string>& result)
+find_files_matching_pattern (vector<string>& result,
+                             const Searchpath& paths,
+                             const Glib::PatternSpec& pattern)
 {
 	vector<string> tmp_files;
 
-	get_files_in_directory (directory, tmp_files);
-	result.reserve(tmp_files.size());
+	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+		get_files_in_directory (*i, tmp_files);
+	}
 
 	for (vector<string>::iterator file_iter = tmp_files.begin();
 			file_iter != tmp_files.end();
@@ -133,6 +134,15 @@ find_matching_files_in_directory (const std::string& directory,
 
 		result.push_back(*file_iter);
 	}
+
+}
+
+void
+find_matching_files_in_directory (const std::string& directory,
+                                  const Glib::PatternSpec& pattern,
+                                  vector<std::string>& result)
+{
+	find_files_matching_pattern (result, directory, pattern);
 }
 
 void
@@ -140,12 +150,7 @@ find_matching_files_in_directories (const vector<std::string>& paths,
                                     const Glib::PatternSpec& pattern,
                                     vector<std::string>& result)
 {
-	for (vector<std::string>::const_iterator path_iter = paths.begin();
-			path_iter != paths.end();
-			++path_iter)
-	{
-		find_matching_files_in_directory (*path_iter, pattern, result);
-	}		
+	find_files_matching_pattern (result, paths, pattern);
 }
 
 void
@@ -153,7 +158,7 @@ find_matching_files_in_search_path (const Searchpath& search_path,
                                     const Glib::PatternSpec& pattern,
                                     vector<std::string>& result)
 {
-	find_matching_files_in_directories (search_path, pattern, result);    
+	find_files_matching_pattern (result, search_path, pattern);
 }
 
 bool
