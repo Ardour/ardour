@@ -26,6 +26,7 @@
 
 #ifdef COMPILER_MINGW
 #include <io.h> // For W_OK
+#define strtok_r strtok_s
 #endif
 
 #include <glibmm/fileutils.h>
@@ -48,10 +49,6 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <regex.h>
-#endif
-
-#ifdef PLATFORM_WINDOWS
-#define strtok_r strtok_s
 #endif
 
 #include "pbd/compose.h"
