@@ -528,8 +528,8 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 	SoundFileInfo finfo;
 	int ret = 0;
 
-	set_canvas_cursor (_cursors->wait);
-	gdk_flush ();
+        push_canvas_cursor (_cursors->wait);
+        gdk_flush ();
 
 	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
 
@@ -601,8 +601,6 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 			}
 		}
 
-		set_canvas_cursor (_cursors->wait);
-
 		for (int n = 0; n < finfo.channels; ++n) {
 
 			try {
@@ -644,7 +642,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 	ret = add_sources (paths, sources, pos, disposition, mode, target_regions, target_tracks, track, true);
 
   out:
-	set_canvas_cursor (current_canvas_cursor);
+	pop_canvas_cursor ();
 	return ret;
 }
 
