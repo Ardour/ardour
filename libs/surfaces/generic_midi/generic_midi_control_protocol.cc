@@ -140,7 +140,7 @@ GenericMidiControlProtocol::reload_maps ()
 	Searchpath spath (system_midi_map_search_path());
 	spath += user_midi_map_directory ();
 
-	find_files_matching_filter (midi_maps, spath.to_string(), midi_map_filter, 0, false, true);
+	find_files_matching_filter (midi_maps, spath, midi_map_filter, 0, false, true);
 
 	if (midi_maps.empty()) {
 		cerr << "No MIDI maps found using " << spath.to_string() << endl;
