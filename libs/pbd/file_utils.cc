@@ -205,10 +205,7 @@ regexp_filter (const string& str, void *arg)
 void
 find_files_matching_regex (vector<string>& result,
                            const std::string& dirpath,
-                           const std::string& regexp,
-                           bool match_fullpath, bool return_fullpath,
-                           long limit,
-                           bool recurse)
+                           const std::string& regexp)
 {
 	int err;
 	char msg[256];
@@ -230,8 +227,7 @@ find_files_matching_regex (vector<string>& result,
 
 	find_files_matching_filter (result, dirpath,
 	                            regexp_filter, &compiled_pattern,
-	                            match_fullpath, return_fullpath,
-	                            limit, recurse);
+	                            true, true, -1, false);
 
 	regfree (&compiled_pattern);
 }

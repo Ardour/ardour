@@ -115,11 +115,7 @@ find_file_in_search_path (const Searchpath& search_path,
 LIBPBD_API void
 find_files_matching_regex (std::vector<std::string>& results,
                            const std::string& dirpath,
-                           const std::string& regexp,
-                           bool match_fullpath,
-                           bool return_fullpath,
-                           long limit = -1,
-                           bool recurse = false);
+                           const std::string& regexp);
 
 /**
  * @return files in dirpath that match a supplied filter(functor)
