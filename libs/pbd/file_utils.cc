@@ -46,7 +46,6 @@
 #include <io.h> // Microsoft's nearest equivalent to <unistd.h>
 #include <ardourext/misc.h>
 #else
-#include <dirent.h>
 #include <unistd.h>
 #include <regex.h>
 #endif
@@ -240,68 +239,41 @@ find_files_matching_filter (vector<string>& result,
                             bool match_fullpath, bool return_fullpath,
                             bool recurse)
 {
-	DIR *dir;
-	struct dirent *finfo;
-	char *pathcopy = strdup (search_path_expand (dirpath).c_str());
-	char *thisdir;
-	string fullpath;
-	string search_str;
-	long nfound = 0;
-	char *saveptr;
+	vector<string> all_files;
 
-	if ((thisdir = strtok_r (pathcopy, G_SEARCHPATH_SEPARATOR_S, &saveptr)) == 0 ||
-	    strlen (thisdir) == 0) {
-		free (pathcopy);
-		return;
+	Searchpath spath(dirpath);
+
+	for (vector<string>::iterator i = spath.begin(); i != spath.end(); ++i)
+	{
+		string expanded_path = path_expand (*i);
+		get_directory_contents (expanded_path, all_files, true, recurse);
 	}
 
-	do {
+	for (vector<string>::iterator i = all_files.begin(); i != all_files.end(); ++i) {
 
-		if ((dir = opendir (thisdir)) == 0) {
+		string fullpath = *i;
+		string filename = Glib::path_get_basename (*i);
+		string search_str;
+
+		if (match_fullpath) {
+			search_str = *i;
+		} else {
+			search_str = filename;
+		}
+
+		if (!filter(search_str, arg)) {
 			continue;
 		}
 
-		while ((finfo = readdir (dir)) != 0) {
+		DEBUG_TRACE (DEBUG::FileUtils,
+		             string_compose("Found file %1 matching filter\n", search_str));
 
-			if ((finfo->d_name[0] == '.' && finfo->d_name[1] == '\0') ||
-			    (finfo->d_name[0] == '.' && finfo->d_name[1] == '.' && finfo->d_name[2] == '\0')) {
-				continue;
-			}
-
-			fullpath = Glib::build_filename (thisdir, finfo->d_name);
-
-			struct stat statbuf;
-			if (stat (fullpath.c_str(), &statbuf) < 0) {
-				continue;
-			}
-
-			if (statbuf.st_mode & S_IFDIR && recurse) {
-				find_files_matching_filter (result, fullpath, filter, arg, match_fullpath, return_fullpath, recurse);
-			} else {
-
-				if (match_fullpath) {
-					search_str = fullpath;
-				} else {
-					search_str = finfo->d_name;
-				}
-
-				if (!filter(search_str, arg)) {
-					continue;
-				}
-
-				if (return_fullpath) {
-					result.push_back(fullpath);
-				} else {
-					result.push_back(finfo->d_name);
-				}
-			}
+		if (return_fullpath) {
+			result.push_back(fullpath);
+		} else {
+			result.push_back(filename);
 		}
-		closedir (dir);
-
-	} while ((thisdir = strtok_r (0, G_SEARCHPATH_SEPARATOR_S, &saveptr)));
-
-	free (pathcopy);
-	return;
+	}
 }
 
 bool
