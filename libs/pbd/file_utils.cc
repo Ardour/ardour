@@ -138,6 +138,15 @@ find_files_matching_pattern (vector<string>& result,
 }
 
 void
+find_files_matching_pattern (vector<string>& result,
+                             const Searchpath& paths,
+                             const string& pattern)
+{
+	Glib::PatternSpec tmp(pattern);
+	find_files_matching_pattern (result, paths, tmp);
+}
+
+void
 find_matching_files_in_directory (const std::string& directory,
                                   const Glib::PatternSpec& pattern,
                                   vector<std::string>& result)
