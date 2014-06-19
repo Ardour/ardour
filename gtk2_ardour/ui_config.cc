@@ -47,11 +47,13 @@ UIConfiguration::UIConfiguration ()
 #define UI_CONFIG_VARIABLE(Type,var,name,val) var (name,val),
 #define CANVAS_VARIABLE(var,name) var (name),
 #define CANVAS_STRING_VARIABLE(var,name) var (name),
+#define CANVAS_FONT_VARIABLE(var,name) var (name),
 #include "ui_config_vars.h"
 #include "canvas_vars.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_VARIABLE
 #undef  CANVAS_STRING_VARIABLE
+#undef  CANVAS_FONT_VARIABLE
 	_dirty (false)
 {
 	load_state();
@@ -218,11 +220,13 @@ UIConfiguration::get_variables (std::string which_node)
 #define UI_CONFIG_VARIABLE(Type,var,Name,value) if (node->name() == "UI") { var.add_to_node (*node); }
 #define CANVAS_VARIABLE(var,Name) if (node->name() == "Canvas") { var.add_to_node (*node); }
 #define CANVAS_STRING_VARIABLE(var,Name) if (node->name() == "Canvas") { var.add_to_node (*node); }
+#define CANVAS_FONT_VARIABLE(var,Name) if (node->name() == "Canvas") { var.add_to_node (*node); }
 #include "ui_config_vars.h"
 #include "canvas_vars.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_VARIABLE
 #undef  CANVAS_STRING_VARIABLE
+#undef  CANVAS_FONT_VARIABLE
 
 	return *node;
 }
@@ -270,11 +274,16 @@ UIConfiguration::set_variables (const XMLNode& node)
          if (var.set_from_node (node)) { \
 		 ParameterChanged (name); \
 		 }
+#define CANVAS_FONT_VARIABLE(var,name)	\
+         if (var.set_from_node (node)) { \
+		 ParameterChanged (name); \
+		 }
 #include "ui_config_vars.h"
 #include "canvas_vars.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_VARIABLE
 #undef  CANVAS_STRING_VARIABLE
+#undef  CANVAS_FONT_VARIABLE
 }
 
 void
@@ -283,9 +292,11 @@ UIConfiguration::pack_canvasvars ()
 #undef  CANVAS_VARIABLE
 #define CANVAS_VARIABLE(var,name) canvas_colors.insert (std::pair<std::string,ColorVariable<uint32_t>* >(name,&var));
 #define CANVAS_STRING_VARIABLE(var,name) 
+#define CANVAS_FONT_VARIABLE(var,name) 
 #include "canvas_vars.h"
 #undef  CANVAS_VARIABLE
 #undef  CANVAS_STRING_VARIABLE
+#undef  CANVAS_FONT_VARIABLE
 }
 
 uint32_t

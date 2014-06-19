@@ -28,6 +28,8 @@
 #include "pbd/xml++.h"
 #include "ardour/configuration_variable.h"
 
+#include "utils.h"
+
 /* This is very similar to ARDOUR::ConfigVariable but expects numeric values to
  * be in hexadecimal. This is because it is intended for use with color
  * specifications which are easier to scan for issues in "rrggbbaa" format than
@@ -113,9 +115,13 @@ class UIConfiguration : public PBD::Stateful
 #define CANVAS_STRING_VARIABLE(var,name) \
 	std::string get_##var () const { return var.get(); }			\
 	bool set_##var (const std::string& val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
+#define CANVAS_FONT_VARIABLE(var,name) \
+	Pango::FontDescription get_##var () const { return sanitized_font (var.get()); } \
+	bool set_##var (const std::string& val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
 #include "canvas_vars.h"
 #undef  CANVAS_VARIABLE
 #undef CANVAS_STRING_VARIABLE
+#undef CANVAS_FONT_VARIABLE
 
   private:
 
@@ -129,9 +135,11 @@ class UIConfiguration : public PBD::Stateful
 #undef CANVAS_VARIABLE
 #define CANVAS_VARIABLE(var,name) ColorVariable<uint32_t> var;
 #define CANVAS_STRING_VARIABLE(var,name) ARDOUR::ConfigVariable<std::string> var;
+#define CANVAS_FONT_VARIABLE(var,name) ARDOUR::ConfigVariable<std::string> var;
 #include "canvas_vars.h"
 #undef  CANVAS_VARIABLE
 #undef CANVAS_STRING_VARIABLE
+#undef CANVAS_FONT_VARIABLE
 
 	XMLNode& state ();
 	bool _dirty;

@@ -207,6 +207,18 @@ xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
 }
 
 Pango::FontDescription
+sanitized_font (std::string const& name)
+{
+	Pango::FontDescription fd (name);
+
+	if (fd.get_family().empty()) {
+		fd.set_family ("Sans");
+	}
+
+	return fd;
+}
+
+Pango::FontDescription
 get_font_for_style (string widgetname)
 {
 	Gtk::Window window (WINDOW_TOPLEVEL);
