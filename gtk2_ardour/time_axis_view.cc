@@ -114,7 +114,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess,
 	CANVAS_DEBUG_NAME (selection_group, "selection for TAV");
 	selection_group->set_data (X_("timeselection"), (void *) 1);
 	selection_group->hide();
-
+	
 	_ghost_group = new Group (_canvas_display);
 	CANVAS_DEBUG_NAME (_ghost_group, "ghost for TAV");
 	_ghost_group->lower_to_bottom();
@@ -901,12 +901,12 @@ TimeAxisView::get_selection_rect (uint32_t id)
 		rect->rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SelectionRect());
 
 		rect->start_trim = new ArdourCanvas::Rectangle (selection_group);
-		CANVAS_DEBUG_NAME (rect->rect, "selection rect start trim");
+		CANVAS_DEBUG_NAME (rect->start_trim, "selection rect start trim");
 		rect->start_trim->set_outline (false);
 		rect->start_trim->set_fill (false);
 
 		rect->end_trim = new ArdourCanvas::Rectangle (selection_group);
-		CANVAS_DEBUG_NAME (rect->rect, "selection rect end trim");
+		CANVAS_DEBUG_NAME (rect->end_trim, "selection rect end trim");
 		rect->end_trim->set_outline (false);
 		rect->end_trim->set_fill (false);
 
