@@ -696,13 +696,8 @@ get_icon_sets ()
 		get_files_in_directory (*s, entries);
 
 		for (vector<string>::iterator e = entries.begin(); e != entries.end(); ++e) {
-
-			string d = *e;
-
-			Glib::ustring path = Glib::build_filename (*s, *e);
-
-			if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
-				r.push_back (Glib::filename_to_utf8 (*e));
+			if (Glib::file_test (*e, Glib::FILE_TEST_IS_DIR)) {
+				r.push_back (Glib::filename_to_utf8 (Glib::path_get_basename(*e)));
 			}
 		}
 	}
