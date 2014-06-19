@@ -295,6 +295,15 @@ Item::hide ()
 {
 	if (_visible) {
 		_visible = false;
+
+		/* recompute parent bounding box, which may alter now that this
+		 * child is hidden.
+		 */
+
+		if (_parent) {
+			_parent->child_changed ();
+		}
+
 		_canvas->item_shown_or_hidden (this);
 	}
 }
@@ -304,6 +313,13 @@ Item::show ()
 {
 	if (!_visible) {
 		_visible = true;
+
+		/* bounding box may have changed while we were hidden */
+
+		if (_parent) {
+			_parent->child_changed ();
+		}
+
 		_canvas->item_shown_or_hidden (this);
 	}
 }
@@ -547,7 +563,7 @@ Item::end_change ()
 {
 	if (_visible) {
 		_canvas->item_changed (this, _pre_change_bounding_box);
-	
+		
 		if (_parent) {
 			_parent->child_changed ();
 		}
