@@ -203,7 +203,7 @@ regexp_filter (const string& str, void *arg)
 
 void
 find_files_matching_regex (vector<string>& result,
-                           const std::string& dirpath,
+                           const Searchpath& paths,
                            const std::string& regexp)
 {
 	int err;
@@ -224,7 +224,7 @@ find_files_matching_regex (vector<string>& result,
 		return;
 	}
 
-	find_files_matching_filter (result, dirpath,
+	find_files_matching_filter (result, paths,
 	                            regexp_filter, &compiled_pattern,
 	                            true, true, false);
 
@@ -233,7 +233,7 @@ find_files_matching_regex (vector<string>& result,
 
 void
 find_files_matching_filter (vector<string>& result,
-                            const string &dirpath,
+                            const Searchpath& paths,
                             bool (*filter)(const string &, void *),
                             void *arg,
                             bool match_fullpath, bool return_fullpath,
@@ -241,10 +241,7 @@ find_files_matching_filter (vector<string>& result,
 {
 	vector<string> all_files;
 
-	Searchpath spath(dirpath);
-
-	for (vector<string>::iterator i = spath.begin(); i != spath.end(); ++i)
-	{
+	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 		string expanded_path = path_expand (*i);
 		get_directory_contents (expanded_path, all_files, true, recurse);
 	}

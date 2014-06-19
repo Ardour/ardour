@@ -474,7 +474,7 @@ DeviceInfo::reload_device_info ()
 	vector<string> devinfos;
 	Searchpath spath (devinfo_search_path());
 
-	find_files_matching_filter (devinfos, spath.to_string(), devinfo_filter, 0, false, true);
+	find_files_matching_filter (devinfos, spath, devinfo_filter, 0, false, true);
 	device_info.clear ();
 
 	if (devinfos.empty()) {

@@ -93,7 +93,7 @@ DeviceProfile::reload_device_profiles ()
 	vector<string> devprofiles;
 	Searchpath spath (devprofile_search_path());
 
-	find_files_matching_filter (devprofiles, spath.to_string(), devprofile_filter, 0, false, true);
+	find_files_matching_filter (devprofiles, spath, devprofile_filter, 0, false, true);
 	device_profiles.clear ();
 
 	if (devprofiles.empty()) {

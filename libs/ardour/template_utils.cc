@@ -82,16 +82,15 @@ void
 find_session_templates (vector<TemplateInfo>& template_names)
 {
 	vector<string> templates;
-	Searchpath spath (template_search_path());
 
-	find_files_matching_filter (templates, spath.to_string(), template_filter, 0, true, true);
+	find_files_matching_filter (templates, template_search_path(), template_filter, 0, true, true);
 
 	if (templates.empty()) {
-		cerr << "Found nothing along " << spath.to_string() << endl;
+		cerr << "Found nothing along " << template_search_path().to_string() << endl;
 		return;
 	}
 
-	cerr << "Found " << templates.size() << " along " << spath.to_string() << endl;
+	cerr << "Found " << templates.size() << " along " << template_search_path().to_string() << endl;
 
 	for (vector<string>::iterator i = templates.begin(); i != templates.end(); ++i) {
 		string file = session_template_dir_to_file (*i);
@@ -115,9 +114,8 @@ void
 find_route_templates (vector<TemplateInfo>& template_names)
 {
 	vector<string> templates;
-	Searchpath spath (route_template_search_path());
 
-	find_files_matching_filter (templates, spath.to_string(), route_template_filter, 0, false, true);
+	find_files_matching_filter (templates, route_template_search_path(), route_template_filter, 0, false, true);
 
 	if (templates.empty()) {
 		return;
