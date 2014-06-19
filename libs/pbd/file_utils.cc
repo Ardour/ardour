@@ -107,17 +107,7 @@ get_directory_contents (const std::string& directory_path,
 void
 get_files_in_directory (const std::string& directory_path, vector<string>& result)
 {
-	if (!Glib::file_test (directory_path, Glib::FILE_TEST_IS_DIR)) return;
-
-	try
-	{
-		Glib::Dir dir(directory_path);
-		std::copy(dir.begin(), dir.end(), std::back_inserter(result));
-	}
-	catch (Glib::FileError& err)
-	{
-		warning << err.what() << endmsg;
-	}
+	return get_directory_contents (directory_path, result, true, false);
 }
 
 void
@@ -134,17 +124,15 @@ find_matching_files_in_directory (const std::string& directory,
 			file_iter != tmp_files.end();
 			++file_iter)
 	{
-		if (!pattern.match(*file_iter)) continue;
-
-		std::string full_path(directory);
-		full_path = Glib::build_filename (full_path, *file_iter);
+		string filename = Glib::path_get_basename (*file_iter);
+		if (!pattern.match(filename)) continue;
 
 		DEBUG_TRACE (
 			DEBUG::FileUtils,
-			string_compose("Found file %1\n", full_path)
+			string_compose("Found file %1\n", *file_iter)
 			);
 
-		result.push_back(full_path);
+		result.push_back(*file_iter);
 	}
 }
 
