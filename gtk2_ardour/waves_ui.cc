@@ -45,7 +45,7 @@ WavesUI::WavesUI (const std::string& layout_script_file, Gtk::Container& root)
 		Searchpath spath (ardour_data_search_path());
 		spath.add_subdirectory_to_paths("ui");
 
-		if (!find_file_in_search_path (spath, layout_script_file, layout_file)) {
+		if (!find_file (spath, layout_script_file, layout_file)) {
 			dbg_msg("File not found: " + layout_script_file);
 			throw failed_constructor ();
 		}
@@ -86,7 +86,7 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 
 		spath.add_subdirectory_to_paths("icons");
     
-		if (find_file_in_search_path (spath, 
+		if (find_file (spath, 
 									  xml_property (definition, "source", styles, ""),
 									  image_path)) {
 			Gtk::Image& icon = *manage (new Gtk::Image(image_path));
@@ -460,7 +460,7 @@ WavesUI::load_layout (const std::string& xml_file_name)
 	Searchpath spath (ardour_data_search_path());
 	spath.add_subdirectory_to_paths("ui");
 
-	if (!find_file_in_search_path (spath, xml_file_name, layout_file)) {
+	if (!find_file (spath, xml_file_name, layout_file)) {
 		dbg_msg("File not found: " + xml_file_name);
 		return NULL;
 	}

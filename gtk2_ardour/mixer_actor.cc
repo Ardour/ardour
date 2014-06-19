@@ -85,7 +85,7 @@ MixerActor::load_bindings ()
 
 	std::string binding_file;
 
-	if (find_file_in_search_path (ardour_config_search_path(), "mixer.bindings", binding_file)) {
+	if (find_file (ardour_config_search_path(), "mixer.bindings", binding_file)) {
                 bindings.load (binding_file);
 		info << string_compose (_("Loaded mixer bindings from %1"), binding_file) << endmsg;
         } else {

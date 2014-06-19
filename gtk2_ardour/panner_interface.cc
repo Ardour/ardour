@@ -62,7 +62,7 @@ PannerInterface::load_pixbuf (const std::string& name)
 
 	std::string data_file_path;
 
-	if (!PBD::find_file_in_search_path (spath, name, data_file_path)) {
+	if (!PBD::find_file (spath, name, data_file_path)) {
 		PBD::fatal << string_compose (_("cannot find icon image for %1 using %2"), name, spath.to_string()) << endmsg;
 	}
 

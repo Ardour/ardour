@@ -147,9 +147,9 @@ find_files_matching_pattern (vector<string>& result,
 }
 
 bool
-find_file_in_search_path(const Searchpath& search_path,
-                         const string& filename,
-                         std::string& result)
+find_file (const Searchpath& search_path,
+           const string& filename,
+           std::string& result)
 {
 	vector<std::string> tmp;
 

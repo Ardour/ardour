@@ -34,20 +34,20 @@ About::About ()
 {
 	set_modal (true);
 	set_resizable (false);
-    
+        
 	get_vbox()->set_spacing (0);
-
+        
 	string image_path;
-    
-	if (find_file_in_search_path (ardour_data_search_path(), "splash.png", image_path)) {
+        
+	if (find_file (ardour_data_search_path(), "splash.png", image_path)) {
 		Gtk::Image* image;
 		if ((image = manage (new Gtk::Image (image_path))) != 0) {
 			get_vbox()->pack_start (*image, false, false);
 		}
 	}
     
-    add_button("CLOSE", RESPONSE_OK);
-    set_default_response(RESPONSE_OK);
+        add_button("CLOSE", RESPONSE_OK);
+        set_default_response(RESPONSE_OK);
 	show_all ();
 }
 void

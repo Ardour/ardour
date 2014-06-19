@@ -101,7 +101,7 @@ VideoServerDialog::VideoServerDialog (Session* s)
 #endif
 
 	std::string icsd_file_path;
-	if (find_file_in_search_path (PBD::Searchpath(Glib::getenv("PATH")), X_("harvid"), icsd_file_path)) {
+	if (find_file (PBD::Searchpath(Glib::getenv("PATH")), X_("harvid"), icsd_file_path)) {
 		path_entry.set_text(icsd_file_path);
 	}
 #ifdef PLATFORM_WINDOWS

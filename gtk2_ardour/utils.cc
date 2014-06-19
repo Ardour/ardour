@@ -666,7 +666,7 @@ get_xpm (std::string name)
 
 		std::string data_file_path;
 
-		if(!find_file_in_search_path (spath, name, data_file_path)) {
+		if(!find_file (spath, name, data_file_path)) {
 			fatal << string_compose (_("cannot find XPM file for %1"), name) << endmsg;
 		}
 
@@ -720,7 +720,7 @@ get_icon_path (const char* cname, string icon_set)
 		spath.add_subdirectory_to_paths ("icons");
 		spath.add_subdirectory_to_paths (icon_set);
 		
-		find_file_in_search_path (spath, name, data_file_path);
+		find_file (spath, name, data_file_path);
 	}
 	
 	if (data_file_path.empty()) {
@@ -732,7 +732,7 @@ get_icon_path (const char* cname, string icon_set)
 		Searchpath def (ARDOUR::ardour_data_search_path());
 		def.add_subdirectory_to_paths ("icons");
 	
-		if (!find_file_in_search_path (def, name, data_file_path)) {
+		if (!find_file (def, name, data_file_path)) {
 			fatal << string_compose (_("cannot find icon image for %1 using %2"), name, spath.to_string()) << endmsg;
 			/*NOTREACHED*/
 		}

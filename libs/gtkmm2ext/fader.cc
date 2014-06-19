@@ -147,14 +147,14 @@ Fader::Fader (Gtk::Adjustment& adj,
 
 	std::string data_file_path;
 
-	if (PBD::find_file_in_search_path (spath, face_image_file, data_file_path)) {
+	if (PBD::find_file (spath, face_image_file, data_file_path)) {
 		_face_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
 	} else {
 		throw failed_constructor(); 
 	}
 	
 	if (active_face_image_file.length ()) {
-		if (PBD::find_file_in_search_path (spath, active_face_image_file, data_file_path)) {
+		if (PBD::find_file (spath, active_face_image_file, data_file_path)) {
 			_active_face_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
 		} else {
 			throw failed_constructor(); 
@@ -162,19 +162,19 @@ Fader::Fader (Gtk::Adjustment& adj,
 	}
 
 	if (underlay_image_file.length ()) {
-		if (PBD::find_file_in_search_path (spath, underlay_image_file, data_file_path)) {
+		if (PBD::find_file (spath, underlay_image_file, data_file_path)) {
 			_underlay_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
 		} else {
 			throw failed_constructor(); 
 		}
 	}
 
-	if (PBD::find_file_in_search_path (spath, handle_image_file, data_file_path)) {
+	if (PBD::find_file (spath, handle_image_file, data_file_path)) {
 		_handle_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
 	} else {
 		throw failed_constructor(); 
 	}
-	if (PBD::find_file_in_search_path (spath, active_handle_image_file, data_file_path)) {
+	if (PBD::find_file (spath, active_handle_image_file, data_file_path)) {
 		_active_handle_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
 	} else {
 		throw failed_constructor(); 

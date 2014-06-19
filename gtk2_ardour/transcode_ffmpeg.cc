@@ -52,7 +52,7 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 #endif
 
 	std::string ff_file_path;
-	if (find_file_in_search_path (Searchpath(Glib::getenv("PATH")), X_("ffmpeg_harvid"), ff_file_path)) { ffmpeg_exe = ff_file_path; }
+	if (find_file (Searchpath(Glib::getenv("PATH")), X_("ffmpeg_harvid"), ff_file_path)) { ffmpeg_exe = ff_file_path; }
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffmpeg.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
 	}
@@ -60,7 +60,7 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
 	}
 
-	if (find_file_in_search_path (Searchpath(Glib::getenv("PATH")), X_("ffprobe_harvid"), ff_file_path)) { ffprobe_exe = ff_file_path; }
+	if (find_file (Searchpath(Glib::getenv("PATH")), X_("ffprobe_harvid"), ff_file_path)) { ffprobe_exe = ff_file_path; }
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffprobe.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffprobe_exe = X_("C:\\Program Files\\ffmpeg\\ffprobe.exe");
 	}
