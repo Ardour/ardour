@@ -210,12 +210,12 @@ MidiDeviceConnectionControl& TracksControlPanel::add_midi_device_control(const s
 }
 
 namespace  {
-    // Strings which show to user in the Preference panel
+    // Strings which are shown to user in the Preference panel
     const std::string string_CAF = "Caf";
     const std::string string_BWav = "BWav";
     const std::string string_Aiff = "Aiff";
     const std::string string_Wav64 = "Wave64";
-    // Strings which stores in projectfiles
+    // Strings which are stored in session config file
     const std::string xml_string_CAF = "CAF";
     const std::string xml_string_BWav = "BWF";
     const std::string xml_string_Aiff = "AIFF";
@@ -361,11 +361,11 @@ TracksControlPanel::populate_file_type_combo()
 }
 
 namespace {
-    // Strings which show to user in the Preference panel
+    // Strings which are shown to user in the Preference panel
     const std::string string_bit32 = "32 bit floating point";
     const std::string string_bit24 = "24 bit";
     const std::string string_bit16 = "16 bit";
-    // Strings which stores in projectfiles
+    // Strings which are stored in session config file
     const std::string xml_string_bit32 = "FormatFloat";
     const std::string xml_string_bit24 = "FormatInt24";
     const std::string xml_string_bit16 = "FormatInt16";
