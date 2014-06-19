@@ -247,7 +247,7 @@ class RegionDrag;
 class DraggingView
 {
 public:
-	DraggingView (RegionView *, RegionDrag *);
+	DraggingView (RegionView *, RegionDrag *, TimeAxisView* original_tav);
 
 	RegionView* view; ///< the view
 	/** index into RegionDrag::_time_axis_views of the view that this region is currently being displayed on,
@@ -264,6 +264,7 @@ public:
 	framepos_t initial_end; ///< initial end position of the region
 	framepos_t anchored_fade_length; ///< fade_length when anchored during drag
 	boost::shared_ptr<ARDOUR::Playlist> initial_playlist;
+	TimeAxisView* initial_time_axis_view;
 };
 
 /** Abstract base class for drags that involve region(s) */
@@ -380,7 +381,7 @@ private:
 	void add_stateful_diff_commands_for_playlists (PlaylistSet const &);
 
 	void collect_new_region_view (RegionView *);
-	RouteTimeAxisView* create_destination_time_axis (boost::shared_ptr<ARDOUR::Region>);
+	RouteTimeAxisView* create_destination_time_axis (boost::shared_ptr<ARDOUR::Region>, TimeAxisView* original);
 
 	bool _copy;
 	RegionView* _new_region_view;

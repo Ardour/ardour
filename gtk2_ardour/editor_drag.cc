@@ -513,7 +513,7 @@ RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Re
 	 */
 
 	for (list<RegionView*>::const_iterator i = v.begin(); i != v.end(); ++i) {
-		_views.push_back (DraggingView (*i, this));
+		_views.push_back (DraggingView (*i, this, &(*i)->get_time_axis_view()));
 	}
 
 	RegionView::RegionViewGoingAway.connect (death_connection, invalidator (*this), boost::bind (&RegionDrag::region_going_away, this, _1), gui_context());
@@ -713,7 +713,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		delta_layer = 0;
 	}
 
-	if (x_delta == 0 && delta_time_axis_view == 0 && delta_layer == 0 && !first_move) {
+	if (x_delta == 0 && (tv && tv->view() && delta_time_axis_view == 0) && delta_layer == 0 && !first_move) {
 		/* haven't reached next snap point, and we're not switching
 		   trackviews nor layers. nothing to do.
 		*/
@@ -897,7 +897,7 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 			}
 
 			nrv->get_canvas_group()->show ();
-			new_regionviews.push_back (DraggingView (nrv, this));
+			new_regionviews.push_back (DraggingView (nrv, this, i->initial_time_axis_view));
 
 			/* swap _primary to the copy */
 
@@ -999,7 +999,7 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 }
 
 RouteTimeAxisView*
-RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region)
+RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, TimeAxisView* original)
 {			
 	/* Add a new track of the correct type, and return the RouteTimeAxisView that is created to display the
 	   new track.
@@ -1009,12 +1009,20 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region)
 		if (boost::dynamic_pointer_cast<AudioRegion> (region)) {
 			list<boost::shared_ptr<AudioTrack> > audio_tracks;
 			audio_tracks = _editor->session()->new_audio_track (region->n_channels(), region->n_channels(), ARDOUR::Normal, 0, 1, region->name());
-			return _editor->axis_view_from_route (audio_tracks.front());
+			RouteTimeAxisView* rtav = _editor->axis_view_from_route (audio_tracks.front());
+			if (rtav) {
+				rtav->set_height (original->current_height());
+			}
+			return rtav;
 		} else {
 			ChanCount one_midi_port (DataType::MIDI, 1);
 			list<boost::shared_ptr<MidiTrack> > midi_tracks;
 			midi_tracks = _editor->session()->new_midi_track (one_midi_port, one_midi_port, boost::shared_ptr<ARDOUR::PluginInfo>(), ARDOUR::Normal, 0, 1, region->name());
-			return _editor->axis_view_from_route (midi_tracks.front());
+			RouteTimeAxisView* rtav = _editor->axis_view_from_route (midi_tracks.front());
+			if (rtav) {
+				rtav->set_height (original->current_height());
+			}
+			return rtav;
 		}						
 	} catch (...) {
 		error << _("Could not create new track after region placed in the drop zone") << endmsg;
@@ -1065,7 +1073,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 		
 		if (i->time_axis_view < 0) {
 			if (!new_time_axis_view) {
-				new_time_axis_view = create_destination_time_axis (i->view->region());
+				new_time_axis_view = create_destination_time_axis (i->view->region(), i->initial_time_axis_view);
 			}
 			dest_rtv = new_time_axis_view;
 		} else {
@@ -1140,7 +1148,7 @@ RegionMoveDrag::finished_no_copy (
 		
 		if (i->time_axis_view < 0) {
 			if (!new_time_axis_view) {
-				new_time_axis_view = create_destination_time_axis (rv->region());
+				new_time_axis_view = create_destination_time_axis (rv->region(), i->initial_time_axis_view);
 			}
 			dest_rtv = new_time_axis_view;
 		} else {
@@ -1460,7 +1468,7 @@ RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, Rout
 
 	_primary->get_canvas_group()->show ();
 	_primary->set_position (pos, 0);
-	_views.push_back (DraggingView (_primary, this));
+	_views.push_back (DraggingView (_primary, this, v));
 
 	_last_frame_position = pos;
 
@@ -1932,7 +1940,6 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 			_operation = StartTrim;
 
 			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
-				cerr << "start anchored leftdrag\n";
 				Drag::start_grab (event, _editor->cursors()->anchored_left_side_trim);
 			} else {
 				Drag::start_grab (event, _editor->cursors()->left_side_trim);
@@ -1942,7 +1949,6 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 			_operation = EndTrim;
 			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
 				Drag::start_grab (event, _editor->cursors()->anchored_right_side_trim);
-				cerr << "start anchored right drag\n";
 			} else {
 				Drag::start_grab (event, _editor->cursors()->right_side_trim);
 			}
@@ -4840,9 +4846,13 @@ AutomationRangeDrag::aborted (bool)
 	}
 }
 
-DraggingView::DraggingView (RegionView* v, RegionDrag* parent)
+DraggingView::DraggingView (RegionView* v, RegionDrag* parent, TimeAxisView* itav)
 	: view (v)
+	, initial_time_axis_view (itav)
 {
+	/* note that time_axis_view may be null if the regionview was created
+	 * as part of a copy operation.
+	 */
 	time_axis_view = parent->find_time_axis_view (&v->get_time_axis_view ());
 	layer = v->region()->layer ();
 	initial_y = v->get_canvas_group()->position().y;
