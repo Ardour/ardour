@@ -413,7 +413,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 	}
 
 
-	std::pair<TimeAxisView*, int> const tvp = trackview_by_y_position (ypos);
+	std::pair<TimeAxisView*, int> const tvp = trackview_by_y_position (ypos, false);
 	if (tvp.first == 0) {
 
 		/* drop onto canvas background: create new tracks */
