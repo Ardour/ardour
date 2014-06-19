@@ -72,6 +72,24 @@ find_files_matching_pattern (std::vector<std::string>& result,
                              const Glib::PatternSpec& pattern);
 
 /**
+ * Takes a Searchpath and returns all the files contained in the
+ * directory paths that match a particular pattern.
+ *
+ * This is a convenience method to avoid explicitly declaring
+ * temporary variables such as:
+ * find_files_matching_pattern (result, paths, string("*.ext"))
+ *
+ * @param result A vector in which to place the resulting matches.
+ * @param paths A Searchpath
+ * @param pattern A string representing the Glib::PatternSpec used
+ * to match the files.
+ */
+LIBPBD_API void
+find_files_matching_pattern (std::vector<std::string>& result,
+                             const Searchpath& paths,
+                             const std::string& pattern);
+
+/**
  * Takes a directory path and returns all the files in the directory
  * matching a particular pattern.
  *
