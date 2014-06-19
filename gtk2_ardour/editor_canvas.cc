@@ -982,8 +982,8 @@ Editor::set_canvas_cursor (Gdk::Cursor* cursor, bool save)
 
 	Glib::RefPtr<Gdk::Window> win = _track_canvas->get_window();
 
-	if (win) {
-	        _track_canvas->get_window()->set_cursor (*cursor);
+	if (win && cursor) {
+	        win->set_cursor (*cursor);
 	}
 }
 
