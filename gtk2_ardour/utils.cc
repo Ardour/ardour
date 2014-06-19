@@ -699,12 +699,6 @@ get_icon_sets ()
 
 			string d = *e;
 
-			/* ignore dotfiles, . and .. */
-
-			if (d.empty() || d[0] == '.') {
-				continue;
-			}
-			
 			Glib::ustring path = Glib::build_filename (*s, *e);
 
 			if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
