@@ -991,6 +991,15 @@ Editor::time_selection_changed ()
 		return;
 	}
 
+	/* XXX this is superficially inefficient. Hide the selection in all
+	 * tracks, then show it in all selected tracks.
+	 *
+	 * However, if you investigate what this actually does, it isn't
+	 * anywhere nearly as bad as it may appear. Remember: nothing is
+	 * redrawn or even recomputed during these two loops - that only
+	 * happens when we next render ...
+	 */
+
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(*i)->hide_selection ();
 	}
