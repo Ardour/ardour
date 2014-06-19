@@ -374,10 +374,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\pathscanner.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\pbd.cc"
 				>
 			</File>
@@ -705,10 +701,6 @@
 			</File>
 			<File
 				RelativePath="..\pbd\pathexpand.h"
-				>
-			</File>
-			<File
-				RelativePath="..\pbd\pathscanner.h"
 				>
 			</File>
 			<File
