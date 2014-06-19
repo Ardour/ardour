@@ -531,35 +531,32 @@ EngineControl::enable_latency_tab ()
 	ARDOUR::AudioEngine::instance()->get_physical_outputs (type, outputs);
 	ARDOUR::AudioEngine::instance()->get_physical_inputs (type, inputs);
 
+	if (!ARDOUR::AudioEngine::instance()->running()) {
+		MessageDialog msg (_("Failed to start or connect to audio-engine.\n\nLatency calibration requires a working audio interface."));
+		notebook.set_current_page (0);
+		msg.run ();
+		return;
+	}
+	else if (inputs.empty() || outputs.empty()) {
+		MessageDialog msg (_("Your selected audio configuration is playback- or capture-only.\n\nLatency calibration requires playback and capture"));
+		notebook.set_current_page (0);
+		msg.run ();
+		return;
+	}
+
 	if (_measure_midi) {
 		lm_preamble.set_markup (_(""));
 	} else {
 		lm_preamble.set_markup (_("<span weight=\"bold\">Turn down the volume on your audio equipment to a very low level.</span>"));
 	}
 
-	if (inputs.empty() || outputs.empty()) {
-		MessageDialog msg (_("Your selected audio configuration is playback- or capture-only.\n\nLatency calibration requires playback and capture"));
-		lm_measure_button.set_sensitive (false);
-		notebook.set_current_page (0);
-		msg.run ();
-		return;
-	}
+	set_popdown_strings (lm_output_channel_combo, outputs);
+	lm_output_channel_combo.set_active_text (outputs.front());
+	lm_output_channel_combo.set_sensitive (true);
 
-	if (!outputs.empty()) {
-		set_popdown_strings (lm_output_channel_combo, outputs);
-		lm_output_channel_combo.set_active_text (outputs.front());
-		lm_output_channel_combo.set_sensitive (true);
-	} else {
-		lm_output_channel_combo.set_sensitive (false);
-	}
-
-	if (!inputs.empty()) {
-		set_popdown_strings (lm_input_channel_combo, inputs);
-		lm_input_channel_combo.set_active_text (inputs.front());
-		lm_input_channel_combo.set_sensitive (true);
-	} else {
-		lm_input_channel_combo.set_sensitive (false);
-	}
+	set_popdown_strings (lm_input_channel_combo, inputs);
+	lm_input_channel_combo.set_active_text (inputs.front());
+	lm_input_channel_combo.set_sensitive (true);
 
 	lm_measure_button.set_sensitive (true);
 }
@@ -1866,9 +1863,10 @@ EngineControl::check_audio_latency_measurement ()
 	}
 
 	if (solid) {
+		have_lm_results = true;
 		end_latency_detection ();
 		lm_use_button.set_sensitive (true);
-		have_lm_results = true;
+		return false;
 	}
 
 	lm_results.set_markup (string_compose (results_markup, buf));
@@ -1921,9 +1919,9 @@ EngineControl::check_midi_latency_measurement ()
 	}
 
 	if (solid) {
+		have_lm_results = true;
 		end_latency_detection ();
 		lm_use_button.set_sensitive (true);
-		have_lm_results = true;
 		return false;
 	} else if (mididm->processed () > 400) {
 		have_lm_results = false;
@@ -1973,8 +1971,6 @@ EngineControl::end_latency_detection ()
 	ARDOUR::AudioEngine::instance()->stop_latency_detection ();
 	lm_measure_label.set_text (_("Measure"));
 	if (!have_lm_results) {
-		lm_results.set_markup (string_compose (results_markup, _("No measurement results yet")));
-	} else {
 		lm_use_button.set_sensitive (false);
 	}
 	lm_input_channel_combo.set_sensitive (true);
