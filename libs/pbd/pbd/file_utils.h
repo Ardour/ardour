@@ -31,6 +31,22 @@
 namespace PBD {
 
 /**
+ * Get a contents of directory.
+ * @note paths in result will be absolute
+ *
+ * @param path An absolute path to a directory in the filename encoding
+ * @param result A vector of absolute paths to the directory entries in filename
+ * encoding.
+ * @param files_only Only include file entries in result
+ * @param recurse Recurse into child directories
+ */
+LIBPBD_API void
+get_directory_contents (const std::string& path,
+                        std::vector<std::string>& result,
+			bool files_only = true,
+			bool recurse = false);
+
+/**
  * Get a list of files in a directory.
  * @note You must join path with result to get the absolute path
  * to the file.
