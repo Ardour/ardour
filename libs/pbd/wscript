@@ -37,7 +37,6 @@ libpbd_sources = [
     'convert.cc',
     'controllable.cc',
     'controllable_descriptor.cc',
-    'clear_dir.cc',
     'cpus.cc',
     'debug.cc',
     'enumwriter.cc',

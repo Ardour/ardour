@@ -31,7 +31,6 @@
 
 #include <boost/utility.hpp>
 
-#include "pbd/clear_dir.h"
 #include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
 #include "pbd/compose.h"

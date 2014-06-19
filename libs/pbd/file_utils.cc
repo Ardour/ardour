@@ -404,4 +404,53 @@ exists_and_writable (const std::string & p)
 	return true;
 }
 
+int
+remove_directory_internal (const string& dir, size_t* size, vector<string>* paths,
+                           bool just_remove_files)
+{
+	vector<string> tmp_paths;
+	struct stat statbuf;
+	int ret = 0;
+
+	get_directory_contents (dir, tmp_paths, just_remove_files, true);
+
+	for (vector<string>::const_iterator i = tmp_paths.begin();
+	     i != tmp_paths.end(); ++i) {
+
+                if (g_stat (i->c_str(), &statbuf)) {
+			continue;
+		}
+
+                if (::g_remove (i->c_str())) {
+                        error << string_compose (_("cannot remove path %1 (%2)"), *i, strerror (errno))
+                              << endmsg;
+                        ret = 1;
+                }
+
+                if (paths) {
+                        paths->push_back (Glib::path_get_basename(*i));
+                }
+
+                if (size) {
+                        *size += statbuf.st_size;
+                }
+
+	}
+
+        return ret;
+}
+
+int
+clear_directory (const string& dir, size_t* size, vector<string>* paths)
+{
+	return remove_directory_internal (dir, size, paths, true);
+}
+
+// rm -rf <dir> -- used to remove saved plugin state
+void
+remove_directory (const std::string& dir)
+{
+	remove_directory_internal (dir, 0, 0, false);
+}
+
 } // namespace PBD

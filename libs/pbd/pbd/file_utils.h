@@ -160,6 +160,26 @@ LIBPBD_API bool equivalent_paths (const std::string &p1, const std::string &p2);
 /// @return true if path at p exists and is writable, false otherwise
 LIBPBD_API bool exists_and_writable(const std::string & p);
 
+/**
+ * Remove all the files in a directory recursively leaving the directory
+ * structure in place.
+ * @note dir will not be removed
+ *
+ * @param dir The directory to clear of files.
+ * @param size of removed files in bytes.
+ * @param list of files that were removed.
+ */
+LIBPBD_API int clear_directory (const std::string& dir, size_t* size = 0,
+                                std::vector<std::string>* removed_files = 0);
+
+/**
+ * Remove all the contents of a directory recursively.
+ * @note dir will not be removed
+ *
+ * @param dir The directory to remove files from.
+ */
+LIBPBD_API void remove_directory (const std::string& dir);
+
 } // namespace PBD
 
 #endif
