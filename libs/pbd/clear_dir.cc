@@ -46,14 +46,14 @@ using namespace PBD;
 using namespace std;
 
 int
-PBD::clear_directory (const string& dir, size_t* size, vector<string>* paths)
+remove_directory_internal (const string& dir, size_t* size, vector<string>* paths,
+                           bool just_remove_files)
 {
 	vector<string> tmp_paths;
 	struct stat statbuf;
 	int ret = 0;
 
-	// we are only removing files, not the directory structure
-	get_directory_contents (dir, tmp_paths, true, true);
+	get_directory_contents (dir, tmp_paths, just_remove_files, true);
 
 	for (vector<string>::const_iterator i = tmp_paths.begin();
 	     i != tmp_paths.end(); ++i) {
@@ -62,8 +62,8 @@ PBD::clear_directory (const string& dir, size_t* size, vector<string>* paths)
 			continue;
 		}
 
-                if (::g_unlink (i->c_str())) {
-                        error << string_compose (_("cannot remove file %1 (%2)"), *i, strerror (errno))
+                if (::g_remove (i->c_str())) {
+                        error << string_compose (_("cannot remove path %1 (%2)"), *i, strerror (errno))
                               << endmsg;
                         ret = 1;
                 }
@@ -81,7 +81,15 @@ PBD::clear_directory (const string& dir, size_t* size, vector<string>* paths)
         return ret;
 }
 
+int
+PBD::clear_directory (const string& dir, size_t* size, vector<string>* paths)
+{
+	return remove_directory_internal (dir, size, paths, true);
+}
+
 // rm -rf <dir> -- used to remove saved plugin state
+
+#ifdef USE_WAVES_RMDIR_IMPLEMENTATION
 void
 PBD::remove_directory (const std::string& dir) {
 	DIR* dead;
@@ -115,4 +123,13 @@ PBD::remove_directory (const std::string& dir) {
 		error << string_compose (_("cannot remove directory %1 (%2)"), dir, strerror (errno)) << endmsg;
 	}
 	::closedir (dead);
+} 
+#else 
+
+void
+PBD::remove_directory (const std::string& dir)
+{
+	remove_directory_internal (dir, 0, 0, false);
 }
+
+#endif
