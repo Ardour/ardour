@@ -206,6 +206,20 @@ xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
 	return (savergb);
 }
 
+/** Returns a Pango::FontDescription given a string describing the font. 
+ *
+ * If the returned FontDescription does not specify a family, then
+ * the family is set to "Sans". This mirrors GTK's behaviour in
+ * gtkstyle.c. 
+ *
+ * Some environments will force Pango to specify the family
+ * even if it was not specified in the string describing the font.
+ * Such environments should be left unaffected by this function, 
+ * since the font family will be left alone.
+ *
+ * There may be other similar font specification enforcement
+ * that we might add here later.
+ */
 Pango::FontDescription
 sanitized_font (std::string const& name)
 {
