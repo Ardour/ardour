@@ -46,7 +46,7 @@ VerboseCursor::VerboseCursor (Editor* editor)
 	_canvas_item = new ArdourCanvas::Text (_editor->get_hvscroll_group());
 	CANVAS_DEBUG_NAME (_canvas_item, "verbose canvas cursor");
 	_canvas_item->set_ignore_events (true);
-	_canvas_item->set_font_description (get_font_for_style (N_("VerboseCanvasCursor")));
+	_canvas_item->set_font_description (Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_LargerBoldFont()));
 }
 
 ArdourCanvas::Item *
@@ -55,6 +55,8 @@ VerboseCursor::canvas_item () const
 	return _canvas_item;
 }
 
+/** Set the contents and position of the cursor. Coordinates are in window space 
+ */
 void
 VerboseCursor::set (string const & text, double x, double y)
 {
@@ -255,6 +257,8 @@ VerboseCursor::set_color (uint32_t color)
 /** Set the position of the verbose cursor.  Any x/y offsets
  *  passed to the last call to show() will be applied to the
  *  coordinates passed in here.
+ * 
+ *  Coordinates are in window space.
  */
 void
 VerboseCursor::set_position (double x, double y)
