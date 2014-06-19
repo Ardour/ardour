@@ -123,7 +123,7 @@ ArdourKeyboard::setup_keybindings ()
 			/* not absolute - look in the usual places */
 			std::string keybindings_file;
 
-			if ( ! find_file_in_search_path (ardour_config_search_path(), keybindings_path, keybindings_file)) {
+			if ( ! find_file (ardour_config_search_path(), keybindings_path, keybindings_file)) {
 
 				if (keybindings_path == default_bindings) {
 					error << string_compose (_("Default keybindings not found - %1 will be hard to use!"), PROGRAM_NAME) << endmsg;

@@ -153,7 +153,7 @@ void load_custom_fonts()
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
 	std::string ardour_mono_file;
 
-	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
+	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
 		cerr << _("Cannot find ArdourMono TrueType font") << endl;
 	}
 

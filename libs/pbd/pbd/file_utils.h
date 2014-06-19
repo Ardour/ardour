@@ -90,15 +90,15 @@ find_files_matching_pattern (std::vector<std::string>& result,
                              const std::string& pattern);
 
 /**
- * Takes a search path and a file name and place the full path
+ * Takes a search path and a file name and places the full path
  * to that file in result if it is found within the search path.
  *
  * @return true If file is found within the search path.
  */
 LIBPBD_API bool
-find_file_in_search_path (const Searchpath& search_path,
-                          const std::string& filename,
-                          std::string& result);
+find_file (const Searchpath& search_path,
+           const std::string& filename,
+           std::string& result);
 
 
 /**
