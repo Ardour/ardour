@@ -227,7 +227,7 @@ find_files_matching_regex (vector<string>& result,
 
 	find_files_matching_filter (result, dirpath,
 	                            regexp_filter, &compiled_pattern,
-	                            true, true, -1, false);
+	                            true, true, false);
 
 	regfree (&compiled_pattern);
 }
@@ -238,7 +238,6 @@ find_files_matching_filter (vector<string>& result,
                             bool (*filter)(const string &, void *),
                             void *arg,
                             bool match_fullpath, bool return_fullpath,
-                            long limit,
                             bool recurse)
 {
 	DIR *dir;
@@ -277,7 +276,7 @@ find_files_matching_filter (vector<string>& result,
 			}
 
 			if (statbuf.st_mode & S_IFDIR && recurse) {
-				find_files_matching_filter (result, fullpath, filter, arg, match_fullpath, return_fullpath, limit, recurse);
+				find_files_matching_filter (result, fullpath, filter, arg, match_fullpath, return_fullpath, recurse);
 			} else {
 
 				if (match_fullpath) {
@@ -295,13 +294,11 @@ find_files_matching_filter (vector<string>& result,
 				} else {
 					result.push_back(finfo->d_name);
 				}
-
-				nfound++;
 			}
 		}
 		closedir (dir);
 
-	} while ((limit < 0 || (nfound < limit)) && (thisdir = strtok_r (0, G_SEARCHPATH_SEPARATOR_S, &saveptr)));
+	} while ((thisdir = strtok_r (0, G_SEARCHPATH_SEPARATOR_S, &saveptr)));
 
 	free (pathcopy);
 	return;

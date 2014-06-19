@@ -127,7 +127,6 @@ find_files_matching_filter (std::vector<std::string>&,
                             void *arg,
                             bool match_fullpath,
                             bool return_fullpath,
-                            long limit = -1,
                             bool recurse = false);
 
 /**

@@ -95,7 +95,7 @@ PannerManager::discover_panners ()
 
 	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for panners in %1\n"), search_path));
 
-	find_files_matching_filter (panner_modules, search_path, panner_filter, 0, false, true, 1, true);
+	find_files_matching_filter (panner_modules, search_path, panner_filter, 0, false, true, true);
 
 	for (vector<std::string>::iterator i = panner_modules.begin(); i != panner_modules.end(); ++i) {
 		panner_discover (*i);
