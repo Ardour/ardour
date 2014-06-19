@@ -704,7 +704,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	std::stack<Gdk::Cursor*> _cursor_stack;
 	Gdk::Cursor*          current_canvas_cursor;
 	Gdk::Cursor* which_grabber_cursor () const;
-	Gdk::Cursor* which_region_cursor () const;
+	Gdk::Cursor* which_track_cursor () const;
 	Gdk::Cursor* which_mode_cursor () const;
 	Gdk::Cursor* which_trim_cursor (bool left_side) const;
 	bool reset_canvas_cursor ();

@@ -2571,7 +2571,6 @@ Editor::update_join_object_range_location (double y)
 		_join_object_range_state = JOIN_OBJECT_RANGE_RANGE;
 	}
 
-	cerr << "Entered RV = " << entered_regionview << " track = " << entered_track << endl;
 
 	if (entered_regionview) {
 
@@ -2581,7 +2580,7 @@ Editor::update_join_object_range_location (double y)
 		_join_object_range_state = c <= 0.5 ? JOIN_OBJECT_RANGE_RANGE : JOIN_OBJECT_RANGE_OBJECT;
 		
 		if (_join_object_range_state != old) {
-			set_canvas_cursor (which_region_cursor ());
+			set_canvas_cursor (which_track_cursor ());
 		}
 
 	} else if (entered_track) {
@@ -2592,13 +2591,13 @@ Editor::update_join_object_range_location (double y)
 			/* track/bus ... but not in a region ... use range mode */
 			_join_object_range_state = JOIN_OBJECT_RANGE_RANGE;
 			if (_join_object_range_state != old) {
-				set_canvas_cursor (which_region_cursor ());
+				set_canvas_cursor (which_track_cursor ());
 			}
 		} else {
 			/* Other kinds of tracks use object mode */
 			_join_object_range_state = JOIN_OBJECT_RANGE_OBJECT;
 			if (_join_object_range_state != old) {
-				set_canvas_cursor (which_region_cursor ());
+				set_canvas_cursor (which_track_cursor ());
 			}
 		}
 	}
