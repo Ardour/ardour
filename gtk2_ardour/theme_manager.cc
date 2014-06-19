@@ -275,7 +275,7 @@ load_rc_file (const string& filename, bool themechange)
 {
 	std::string rc_file_path;
 
-	if (!find_file_in_search_path (ardour_config_search_path(), filename, rc_file_path)) {
+	if (!find_file (ardour_config_search_path(), filename, rc_file_path)) {
 		warning << string_compose (_("Unable to find UI style file %1 in search path %2. %3 will look strange"),
                                            filename, ardour_config_search_path().to_string(), PROGRAM_NAME)
 				<< endmsg;

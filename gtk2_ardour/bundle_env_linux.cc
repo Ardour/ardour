@@ -151,7 +151,7 @@ load_custom_fonts()
 {
 	std::string ardour_mono_file;
 
-	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
+	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
 		cerr << _("Cannot find ArdourMono TrueType font") << endl;
 	}
 

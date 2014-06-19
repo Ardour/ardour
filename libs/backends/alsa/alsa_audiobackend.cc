@@ -132,7 +132,7 @@ AlsaAudioBackend::acquire_device(const char* device_name)
 	_reservation_succeeded = false;
 
 	std::string request_device_exe;
-	if (!PBD::find_file_in_search_path (
+	if (!PBD::find_file (
 				PBD::Searchpath(Glib::build_filename(ARDOUR::ardour_dll_directory(), "ardouralsautil")
 					+ G_SEARCHPATH_SEPARATOR_S + ARDOUR::ardour_dll_directory()),
 				"ardour-request-device", request_device_exe))

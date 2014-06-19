@@ -238,7 +238,7 @@ string fonts_conf_file;
 		fonts_conf_file += PROGRAM_NAME;
 		fonts_conf_file += FONTS_CONF_LOCATION;
 #else
-	if (PBD::find_file_in_search_path (ARDOUR::ardour_config_search_path(), "fonts.conf", fonts_conf_file)) {
+	if (PBD::find_file (ARDOUR::ardour_config_search_path(), "fonts.conf", fonts_conf_file)) {
 #endif
 		Glib::setenv ("FONTCONFIG_FILE", fonts_conf_file, true);
 
@@ -271,7 +271,7 @@ string pango_modules_file;
 #endif
 		pango_modules_path.resize (pango_modules_path.size()-14); // Remove "/pango.modules" from the end
 #else
-	if (PBD::find_file_in_search_path (ARDOUR::ardour_config_search_path(), "pango.modules", pango_modules_file)) {
+	if (PBD::find_file (ARDOUR::ardour_config_search_path(), "pango.modules", pango_modules_file)) {
 
 		Glib::ustring pango_modules_path = pango_modules_file;
 		pango_modules_path.resize (pango_modules_path.size()-14); // Remove "/pango.modules" from the end
@@ -301,7 +301,7 @@ string gdk_pixbuf_loaders_file;
 		gdk_pixbuf_loaders_file += PROGRAM_NAME;
 		gdk_pixbuf_loaders_file += PIXBUFLOADERS_CONF_LOCATION;
 #else
-	if (PBD::find_file_in_search_path (ARDOUR::ardour_config_search_path(), "gdk-pixbuf.loaders", gdk_pixbuf_loaders_file)) {
+	if (PBD::find_file (ARDOUR::ardour_config_search_path(), "gdk-pixbuf.loaders", gdk_pixbuf_loaders_file)) {
 #endif
 		// Set an environment variable so we can find our pixbuf modules.
 		Glib::setenv ("GDK_PIXBUF_MODULE_FILE", Glib::filename_from_utf8(gdk_pixbuf_loaders_file), true);
@@ -327,7 +327,7 @@ string clearlooks_la_file;
 		clearlooks_la_file += PROGRAM_NAME;
 		clearlooks_la_file += CLEARLOOKS_CONF_LOCATION;
 #else
-	if (PBD::find_file_in_search_path (ARDOUR::ardour_config_search_path(), "libclearlooks.la", clearlooks_la_file)) {
+	if (PBD::find_file (ARDOUR::ardour_config_search_path(), "libclearlooks.la", clearlooks_la_file)) {
 #endif
 		// Set an environment variable so we can find our clearlooks engine.
 		// Note that this requires a modified version of libgtk (gtkthemes.c)
@@ -485,7 +485,7 @@ void load_custom_fonts()
 {
 	std::string ardour_mono_file;
 
-	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
+	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
 		cerr << _("Cannot find ArdourMono TrueType font") << endl;
 	}
 

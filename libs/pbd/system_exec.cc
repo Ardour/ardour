@@ -195,7 +195,7 @@ SystemExec::SystemExec (std::string command, const std::map<char, std::string> s
 {
 	init ();
 	make_argp_escaped(command, subs);
-	if (!find_file_in_search_path (Searchpath (Glib::getenv ("PATH")), argp[0], cmd)) {
+	if (!find_file (Searchpath (Glib::getenv ("PATH")), argp[0], cmd)) {
 		// not found in path - use as-is
 		cmd = argp[0];
 	}

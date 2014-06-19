@@ -76,7 +76,7 @@ RCConfiguration::load_state ()
 
 	/* load system configuration first */
 
-	if (find_file_in_search_path (ardour_config_search_path(), "ardour_system.rc", rcfile)) {
+	if (find_file (ardour_config_search_path(), "ardour_system.rc", rcfile)) {
 
 		/* stupid XML Parser hates empty files */
 
@@ -104,7 +104,7 @@ RCConfiguration::load_state ()
 
 	/* now load configuration file for user */
 
-	if (find_file_in_search_path (ardour_config_search_path(), "ardour.rc", rcfile)) {
+	if (find_file (ardour_config_search_path(), "ardour.rc", rcfile)) {
 
 		/* stupid XML parser hates empty files */
 

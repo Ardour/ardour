@@ -565,7 +565,7 @@ About::About ()
 
 	Searchpath spath(ardour_data_search_path());
 
-	if (find_file_in_search_path (spath, "splash.png", splash_file)) {
+	if (find_file (spath, "splash.png", splash_file)) {
 		set_logo (Gdk::Pixbuf::create_from_file (splash_file));
 	} else {
 		error << "Could not find splash file" << endmsg;

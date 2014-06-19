@@ -86,7 +86,7 @@ UIConfiguration::load_defaults ()
 		rcfile = "ardour3_ui_default.conf";
 	}
 
-	if (find_file_in_search_path (ardour_config_search_path(), rcfile, default_ui_rc_file) ) {
+	if (find_file (ardour_config_search_path(), rcfile, default_ui_rc_file) ) {
 		XMLTree tree;
 		found = 1;
 
@@ -117,7 +117,7 @@ UIConfiguration::load_state ()
 
 	std::string default_ui_rc_file;
 
-	if ( find_file_in_search_path (ardour_config_search_path(), "ardour3_ui_default.conf", default_ui_rc_file)) {
+	if ( find_file (ardour_config_search_path(), "ardour3_ui_default.conf", default_ui_rc_file)) {
 		XMLTree tree;
 		found = true;
 
@@ -138,7 +138,7 @@ UIConfiguration::load_state ()
 
 	std::string user_ui_rc_file;
 
-	if (find_file_in_search_path (ardour_config_search_path(), "ardour3_ui.conf", user_ui_rc_file)) {
+	if (find_file (ardour_config_search_path(), "ardour3_ui.conf", user_ui_rc_file)) {
 		XMLTree tree;
 		found = true;
 

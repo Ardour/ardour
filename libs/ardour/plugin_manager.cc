@@ -116,7 +116,7 @@ PluginManager::PluginManager ()
 	string lrdf_path;
 
 	string  scan_p = Glib::build_filename(ARDOUR::ardour_dll_directory(), "fst");
-	if (!PBD::find_file_in_search_path ( PBD::Searchpath(scan_p), "ardour-vst-scanner", scanner_bin_path)) {
+	if (!PBD::find_file ( PBD::Searchpath(scan_p), "ardour-vst-scanner", scanner_bin_path)) {
 		PBD::warning << "VST scanner app (ardour-vst-scanner) not found in path " << scan_p <<  endmsg;
 	}
 

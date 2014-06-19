@@ -134,7 +134,7 @@ StatefulImage::find_image (const std::string& name)
 
 	std::string path;
 
-	if (!find_file_in_search_path (_image_search_path, name, path)) {
+	if (!find_file (_image_search_path, name, path)) {
 		error << string_compose (_("Image named %1 not found"),
 					 name) << endmsg;
 		return ImageHandle();
