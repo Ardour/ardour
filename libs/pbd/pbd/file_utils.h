@@ -59,6 +59,19 @@ get_files_in_directory (const std::string& path,
                         std::vector<std::string>& result);
 
 /**
+ * Takes a Searchpath and returns all the files contained in the
+ * directory paths that match a particular pattern.
+ *
+ * @param result A vector in which to place the resulting matches.
+ * @param paths A Searchpath
+ * @param pattern A Glib::PatternSpec used to match the files.
+ */
+LIBPBD_API void
+find_files_matching_pattern (std::vector<std::string>& result,
+                             const Searchpath& paths,
+                             const Glib::PatternSpec& pattern);
+
+/**
  * Takes a directory path and returns all the files in the directory
  * matching a particular pattern.
  *
