@@ -1429,7 +1429,7 @@ AlsaAudioBackend::main_process_thread ()
 					static_cast<AlsaMidiPort*>(*it)->next_period();
 				}
 
-				/* queue midi*/
+				/* queue midi */
 				i = 0;
 				for (std::vector<AlsaPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
 					assert (_rmidi_out.size() > i);
