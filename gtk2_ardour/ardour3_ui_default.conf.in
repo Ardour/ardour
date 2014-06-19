@@ -583,7 +583,13 @@
     <Option name="larger monospace font" value="@MONOSPACE@ @FONT_LARGER@"/>
     <Option name="huger monospace font" value="@MONOSPACE@ @FONT_HUGER@"/>
     <Option name="massive monospace font" value="@MONOSPACE@ @FONT_MASSIVE@"/>
-
-
+    <Option name="small bold monospace font" value="bold @MONOSPACE@ @FONT_SMALL@"/>
+    <Option name="smaller bold monospace font" value="bold @MONOSPACE@ @FONT_SMALLER@"/>
+    <Option name="normal bold monospace font" value="bold @MONOSPACE@ @FONT_NORMAL@"/>
+    <Option name="big bold monospace font" value="bold @MONOSPACE@ @FONT_BIG@"/>
+    <Option name="large bold monospace font" value="bold @MONOSPACE@ @FONT_LARGE@"/>
+    <Option name="larger bold monospace font" value="bold @MONOSPACE@ @FONT_LARGER@"/>
+    <Option name="huger bold monospace font" value="bold @MONOSPACE@ @FONT_HUGER@"/>
+    <Option name="massive bold monospace font" value="bold @MONOSPACE@ @FONT_MASSIVE@"/>
   </Canvas>
 </Ardour>
