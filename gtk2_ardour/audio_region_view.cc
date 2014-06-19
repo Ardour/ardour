@@ -1157,6 +1157,10 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		
 	wave->set_logscaled (Config->get_waveform_scale() == Logarithmic);
 
+	vector<ArdourCanvas::WaveView*> v;
+	v.push_back (wave);
+	set_some_waveform_colors (v);
+
 	if (!Config->get_show_waveforms ()) {
 		wave->hide();
 	}
@@ -1391,6 +1395,12 @@ AudioRegionView::color_handler ()
 void
 AudioRegionView::set_waveform_colors ()
 {
+	set_some_waveform_colors (waves);
+}
+
+void
+AudioRegionView::set_some_waveform_colors (vector<ArdourCanvas::WaveView*>& waves_to_color)
+{
 	ArdourCanvas::Color fill;
 	ArdourCanvas::Color outline;
 	ArdourCanvas::Color clip = ARDOUR_UI::config()->get_canvasvar_WaveFormClip();
@@ -1435,7 +1445,7 @@ AudioRegionView::set_waveform_colors ()
 		}
 	}
 
-        for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
+        for (vector<ArdourCanvas::WaveView*>::iterator w = waves_to_color.begin(); w != waves_to_color.end(); ++w) {
 		(*w)->set_fill_color (fill);
 		(*w)->set_outline_color (outline);
 		(*w)->set_clip_color (clip);
