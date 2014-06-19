@@ -45,7 +45,7 @@ MIDIDM::parse_mclk (uint8_t* buf, pframes_t timestamp) const
 	const int64_t ti = ((buf[2] & 0x7f) << 7) | (buf[1] & 0x7f);
 	const int64_t tdiff = (MODCLK + tc - ti) % MODCLK;
 #ifdef DEBUG_MIDIDM
-		printf("MCLK DELAY: # %5"PRId64" %5"PRId64" [samples] (%5"PRId64" - %8"PRId64") @(%5"PRId64" + %d)\n",
+		printf("MCLK DELAY: #%5"PRId64" dt:%6"PRId64" [spl] (%6"PRId64" - %8"PRId64") @(%8"PRId64" + %d)\n",
 				_cnt_total, tdiff, tc, ti, _monotonic_cnt, timestamp);
 #endif
 	return tdiff;
@@ -62,7 +62,7 @@ MIDIDM::parse_mtc (uint8_t* buf, pframes_t timestamp) const
 		| ((buf[8] & 0x7f) << 21);
 	const int64_t tdiff = (MODTC + tc - ti) % MODTC;
 #ifdef DEBUG_MIDIDM
-		printf("MTC DELAY: # %5"PRId64" %5"PRId64" [samples] (%5"PRId64" - %8"PRId64") @(%5"PRId64" + %d)\n",
+		printf("MTC DELAY: #%5"PRId64" dt:%6"PRId64" [spl] (%6"PRId64" - %8"PRId64") @(%8"PRId64" + %d)\n",
 				_cnt_total, tdiff, tc, ti, _monotonic_cnt, timestamp);
 #endif
 	return tdiff;
@@ -79,7 +79,7 @@ int MIDIDM::process (pframes_t nframes, PortEngine &pe, void *midi_in, void *mid
 	obuf[2] = (_monotonic_cnt >> 7) & 0x7f;
 	pe.midi_event_put (midi_out, 0, obuf, 3);
 #else // sysex MTC frame
-	uint8_t obuf[9];
+	uint8_t obuf[10];
 	obuf[0] = 0xf0;
 	obuf[1] = 0x7f;
 	obuf[2] = 0x7f;
