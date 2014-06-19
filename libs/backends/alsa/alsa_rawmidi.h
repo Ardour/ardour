@@ -114,7 +114,7 @@ private:
 	}
 
 	bool prepare_buffered_event(const uint64_t time) {
-		const bool result = !_unbuffered_bytes;
+		const bool result = _unbuffered_bytes == 0;
 		if (result) {
 			_event.prepare(time, _total_bytes);
 		}

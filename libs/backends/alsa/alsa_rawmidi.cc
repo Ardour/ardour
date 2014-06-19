@@ -57,6 +57,7 @@ AlsaRawMidiIO::AlsaRawMidiIO (const char *device, const bool input)
 AlsaRawMidiIO::~AlsaRawMidiIO ()
 {
 	if (_device) {
+		snd_rawmidi_drain (_device);
 		snd_rawmidi_close (_device);
 		_device = 0;
 	}
@@ -243,6 +244,7 @@ AlsaRawMidiOut::main_process_thread ()
 {
 	_running = true;
 	pthread_mutex_lock (&_notify_mutex);
+	bool need_drain = false;
 	while (_running) {
 		bool have_data = false;
 		struct MidiEventHeader h(0,0);
@@ -269,13 +271,22 @@ AlsaRawMidiOut::main_process_thread ()
 		}
 
 		if (!have_data) {
+			if (need_drain) {
+				snd_rawmidi_drain (_device);
+				need_drain = false;
+			}
 			pthread_cond_wait (&_notify_ready, &_notify_mutex);
 			continue;
 		}
 
 		uint64_t now = g_get_monotonic_time();
 		while (h.time > now + 500) {
-			select_sleep(h.time - now);
+			if (need_drain) {
+				snd_rawmidi_drain (_device);
+				need_drain = false;
+			} else {
+				select_sleep(h.time - now);
+			}
 			now = g_get_monotonic_time();
 		}
 
@@ -309,7 +320,11 @@ retry:
 
 		ssize_t err = snd_rawmidi_write (_device, data, h.size);
 
-		if ((err == -EAGAIN) || (err == -EWOULDBLOCK)) {
+		if ((err == -EAGAIN)) {
+			snd_rawmidi_drain (_device);
+			goto retry;
+		}
+		if (err == -EWOULDBLOCK) {
 			select_sleep (1000);
 			goto retry;
 		}
@@ -323,7 +338,7 @@ retry:
 			h.size -= err;
 			goto retry;
 		}
-		snd_rawmidi_drain (_device);
+		need_drain = true;
 	}
 
 	pthread_mutex_unlock (&_notify_mutex);
@@ -472,6 +487,7 @@ int
 AlsaRawMidiIn::queue_event (const uint64_t time, const uint8_t *data, const size_t size) {
 	const uint32_t  buf_size = sizeof(MidiEventHeader) + size;
 	_event._pending = false;
+
 	if (size == 0) {
 		return -1;
 	}
@@ -488,6 +504,7 @@ AlsaRawMidiIn::queue_event (const uint64_t time, const uint8_t *data, const size
 void
 AlsaRawMidiIn::parse_events (const uint64_t time, const uint8_t *data, const size_t size) {
 	if (_event._pending) {
+		_DEBUGPRINT("AlsaRawMidiIn: queue pending event\n");
 		if (queue_event (_event._time, _parser_buffer, _event._size)) {
 			return;
 		}
@@ -533,6 +550,13 @@ AlsaRawMidiIn::process_byte(const uint64_t time, const uint8_t byte)
 	if (byte >= 0x80) {
 		// Non-realtime status byte
 		if (_total_bytes) {
+			_DEBUGPRINT("AlsaRawMidiIn: discarded bogus midi message\n");
+#if 0
+			for (size_t i=0; i < _total_bytes; ++i) {
+				printf("%02x ", _parser_buffer[i]);
+			}
+			printf("\n");
+#endif
 			_total_bytes = 0;
 			_unbuffered_bytes = 0;
 		}
@@ -591,7 +615,7 @@ AlsaRawMidiIn::process_byte(const uint64_t time, const uint8_t byte)
 		return false;
 	}
 	if (! _total_bytes) {
-		// Apply running status.
+		_DEBUGPRINT("AlsaRawMidiIn: apply running status\n");
 		record_byte(_status_byte);
 	}
 	record_byte(byte);
