@@ -12,6 +12,9 @@
   <accelerator action='track-mute-toggle'/>
   <accelerator action='toggle-edit-mode'/>
   <accelerator action='toggle-midi-input-active'/>
+#ifdef GTKOSX
+  <accelerator action='Quit'/>
+#endif
   
   <menubar name='Main' action='MainMenu'>
     <menu name='Session' action='Session'>
