@@ -1153,7 +1153,7 @@ Editor::which_mode_cursor () const
 }
 
 Gdk::Cursor*
-Editor::which_region_cursor () const
+Editor::which_track_cursor () const
 {
 	Gdk::Cursor* cursor = 0;
 
@@ -1215,7 +1215,9 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 		case RegionViewNameHighlight:
 		case RegionViewName:
 		case WaveItem:
-			cursor = which_region_cursor ();
+		case StreamItem:
+		case AutomationTrackItem:
+			cursor = which_track_cursor ();
 			break;
 		case PlayheadCursorItem:
 			switch (_edit_point) {
@@ -1240,11 +1242,10 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 			cursor = _cursors->cross_hair;
 			break;
 		case StartSelectionTrimItem:
+			cursor = _cursors->left_side_trim;
 			break;
 		case EndSelectionTrimItem:
-			break;
-		case AutomationTrackItem:
-			cursor = _cursors->cross_hair;
+			cursor = _cursors->right_side_trim;
 			break;
 		case FadeInItem:
 			cursor = _cursors->fade_in;
