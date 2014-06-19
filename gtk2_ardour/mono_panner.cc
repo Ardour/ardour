@@ -80,9 +80,7 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	if (!have_font) {
 		Pango::FontDescription font;
 		Pango::AttrFontDesc* font_attr;
-		font = Pango::FontDescription ("ArdourMono");
-		font.set_weight (Pango::WEIGHT_BOLD);
-		font.set_size(9 * PANGO_SCALE);
+		font = Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_SmallBoldMonospaceFont());
 		font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 		panner_font_attributes.change(*font_attr);
 		delete font_attr;
