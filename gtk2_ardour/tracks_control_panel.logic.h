@@ -22,6 +22,7 @@
 
 // class TracksControlPanel : public WavesDialog {
   public:
+    void refresh_session_settings_info ();
 
   private:
 
@@ -50,7 +51,6 @@
 	void on_audio_settings (WavesButton*);
 	void on_midi_settings (WavesButton*);
 	void on_session_settings (WavesButton*);
-	void on_control_panel (WavesButton*);
     void on_multi_out (WavesButton*);
     void on_stereo_out (WavesButton*);
     void on_browse_button (WavesButton*);
@@ -58,6 +58,7 @@
 	void on_ok(WavesButton*);
 	void on_cancel(WavesButton*);
 	void on_apply(WavesButton*);
+    void update_session_config();
 	void on_capture_active_changed (DeviceConnectionControl* capture_control, bool active);
 	void on_playback_active_changed (DeviceConnectionControl* playback_control, bool active);
 	void on_midi_capture_active_changed (MidiDeviceConnectionControl* control, bool active);
@@ -79,6 +80,9 @@
 	void sample_rate_changed ();
     void engine_running ();
     void engine_stopped ();
+    void file_type_changed ();
+    void bit_depth_changed ();
+    void frame_rate_changed ();
 
 	void populate_engine_combo ();
 	void populate_device_combo ();
@@ -89,6 +93,12 @@
     void populate_output_channels();
     void populate_midi_ports();
     void populate_default_session_path();
+
+    // Session Settings
+    void populate_file_type_combo();
+    void populate_bit_depth_combo();
+    void populate_frame_rate_combo();
+    void populate_auto_lock_timer();
 
     // Engine State update callback handlers
     void on_port_registration_update();

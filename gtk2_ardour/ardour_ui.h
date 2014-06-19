@@ -301,6 +301,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         int disconnect_from_engine ();
         int reconnect_to_engine ();
 
+    void set_sample_format(ARDOUR::SampleFormat sf) {_sample_format = sf;}
+    void set_header_format(ARDOUR::HeaderFormat hf) {_header_format = hf;}
+    void update_format ();
+    
   protected:
 	friend class PublicEditor;
 
@@ -551,7 +555,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void update_sample_rate (ARDOUR::framecnt_t);
 
 	Gtk::Label    format_label;
-	void update_format ();
 	
 	gint every_second ();
 	gint every_point_one_seconds ();
@@ -771,6 +774,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     void check_announcements ();
 
 	int do_engine_setup(ARDOUR::framecnt_t desired_sample_rate);
+    
+    ARDOUR::SampleFormat _sample_format;
+    ARDOUR::HeaderFormat _header_format;
+    
 };
 
 #endif /* __ardour_gui_h__ */

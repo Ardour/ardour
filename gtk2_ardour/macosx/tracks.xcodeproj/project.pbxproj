@@ -269,6 +269,7 @@
 		43279460194F0062003C9FEA /* tracks_preferences.xml in Resources */ = {isa = PBXBuildFile; fileRef = 43279430194F0062003C9FEA /* tracks_preferences.xml */; };
 		4327947F194F009E003C9FEA /* tracks.menus.in in Resources */ = {isa = PBXBuildFile; fileRef = 43279475194F009E003C9FEA /* tracks.menus.in */; };
 		43B351ED194F04E00038C140 /* step_editing.bindings in Resources */ = {isa = PBXBuildFile; fileRef = 43B351C0194F04E00038C140 /* step_editing.bindings */; };
+		CEDB41321951C668006E6F77 /* buildlog.txt in Resources */ = {isa = PBXBuildFile; fileRef = CEDB41311951C668006E6F77 /* buildlog.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1075,6 +1076,7 @@
 		43B351EE194F12FB0038C140 /* waves_audiobackend.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = waves_audiobackend.xcodeproj; path = ../../libs/backends/wavesaudio/macosx/waves_audiobackend.xcodeproj; sourceTree = "<group>"; };
 		43B351F4194F130C0038C140 /* libardour.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libardour.xcodeproj; path = ../../libs/ardour/macosx/libardour.xcodeproj; sourceTree = "<group>"; };
 		43B351FA194F131D0038C140 /* pbd.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = pbd.xcodeproj; path = ../../libs/pbd/macosx/pbd.xcodeproj; sourceTree = "<group>"; };
+		CEDB41311951C668006E6F77 /* buildlog.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = buildlog.txt; path = ../../../buildlog.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1092,6 +1094,7 @@
 		43279039194EFF24003C9FEA = {
 			isa = PBXGroup;
 			children = (
+				CEDB41311951C668006E6F77 /* buildlog.txt */,
 				43B351FA194F131D0038C140 /* pbd.xcodeproj */,
 				43B351F4194F130C0038C140 /* libardour.xcodeproj */,
 				43B351EE194F12FB0038C140 /* waves_audiobackend.xcodeproj */,
@@ -1110,6 +1113,8 @@
 		43279040194EFF38003C9FEA /* source */ = {
 			isa = PBXGroup;
 			children = (
+				43279210194EFFBA003C9FEA /* tracks_control_panel.cc */,
+				43279212194EFFBA003C9FEA /* tracks_control_panel.logic.cc */,
 				43279043194EFFB9003C9FEA /* actions.cc */,
 				43279045194EFFB9003C9FEA /* add_route_dialog.cc */,
 				43279047194EFFB9003C9FEA /* add_video_dialog.cc */,
@@ -1344,8 +1349,6 @@
 				4327920B194EFFBA003C9FEA /* timecode_tester.cc */,
 				4327920C194EFFBA003C9FEA /* track_selection.cc */,
 				4327920E194EFFBA003C9FEA /* track_view_list.cc */,
-				43279210194EFFBA003C9FEA /* tracks_control_panel.cc */,
-				43279212194EFFBA003C9FEA /* tracks_control_panel.logic.cc */,
 				43279214194EFFBA003C9FEA /* transcode_ffmpeg.cc */,
 				43279216194EFFBA003C9FEA /* transcode_video_dialog.cc */,
 				43279218194EFFBA003C9FEA /* transpose_dialog.cc */,
@@ -1718,6 +1721,8 @@
 		43279480194F00CB003C9FEA /* headers */ = {
 			isa = PBXGroup;
 			children = (
+				43B351D4194F04E00038C140 /* tracks_control_panel.h */,
+				43B351D5194F04E00038C140 /* tracks_control_panel.logic.h */,
 				43B350F0194F04E00038C140 /* about.h */,
 				43B350F1194F04E00038C140 /* actions.h */,
 				43B350F2194F04E00038C140 /* add_route_dialog.h */,
@@ -1945,8 +1950,6 @@
 				43B351D1194F04E00038C140 /* time_selection.h */,
 				43B351D2194F04E00038C140 /* track_selection.h */,
 				43B351D3194F04E00038C140 /* track_view_list.h */,
-				43B351D4194F04E00038C140 /* tracks_control_panel.h */,
-				43B351D5194F04E00038C140 /* tracks_control_panel.logic.h */,
 				43B351D6194F04E00038C140 /* transcode_ffmpeg.h */,
 				43B351D7194F04E00038C140 /* transcode_video_dialog.h */,
 				43B351D8194F04E00038C140 /* transpose_dialog.h */,
@@ -2345,6 +2348,7 @@
 				43279460194F0062003C9FEA /* tracks_preferences.xml in Resources */,
 				4327947F194F009E003C9FEA /* tracks.menus.in in Resources */,
 				43B351ED194F04E00038C140 /* step_editing.bindings in Resources */,
+				CEDB41321951C668006E6F77 /* buildlog.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
