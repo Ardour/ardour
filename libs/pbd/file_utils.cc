@@ -127,10 +127,8 @@ find_files_matching_pattern (vector<string>& result,
 		string filename = Glib::path_get_basename (*file_iter);
 		if (!pattern.match(filename)) continue;
 
-		DEBUG_TRACE (
-			DEBUG::FileUtils,
-			string_compose("Found file %1\n", *file_iter)
-			);
+		DEBUG_TRACE (DEBUG::FileUtils,
+		             string_compose("Found file %1\n", *file_iter));
 
 		result.push_back(*file_iter);
 	}
@@ -155,29 +153,24 @@ find_file (const Searchpath& search_path,
 
 	find_files_matching_pattern (tmp, search_path, filename);
 
-	if (tmp.size() == 0)
-	{
-		DEBUG_TRACE (
-			DEBUG::FileUtils,
-			string_compose("No file matching %1 found in Path: %2\n", filename, search_path.to_string())
-			    );
+	if (tmp.size() == 0) {
+		DEBUG_TRACE (DEBUG::FileUtils,
+		             string_compose("No file matching %1 found in Path: %2\n",
+		             filename, search_path.to_string()));
 		return false;
 	}
 
-	if (tmp.size() != 1)
-	{
-		DEBUG_TRACE (
-			DEBUG::FileUtils,
-			string_compose("Found more that one file matching %1 in Path: %2\n", filename, search_path.to_string())
-			    );
+	if (tmp.size() != 1) {
+		DEBUG_TRACE (DEBUG::FileUtils,
+		             string_compose("Found more that one file matching %1 in Path: %2\n",
+		             filename, search_path.to_string()));
 	}
 
 	result = tmp.front();
 
-	DEBUG_TRACE (
-		DEBUG::FileUtils,
-		string_compose("Found file %1 in Path: %2\n", filename, search_path.to_string())
-		    );
+	DEBUG_TRACE (DEBUG::FileUtils,
+	             string_compose("Found file %1 in Path: %2\n",
+	             filename, search_path.to_string()));
 
 	return true;
 }
