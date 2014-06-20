@@ -215,11 +215,6 @@ namespace  {
     const std::string string_BWav = "BWav";
     const std::string string_Aiff = "Aiff";
     const std::string string_Wav64 = "Wave64";
-    // Strings which are stored in session config file
-    const std::string xml_string_CAF = "CAF";
-    const std::string xml_string_BWav = "BWF";
-    const std::string xml_string_Aiff = "AIFF";
-    const std::string xml_string_Wav64 = "WAVE64";
 
     std::string
     HeaderFormat_to_string(HeaderFormat header_format)
@@ -365,39 +360,32 @@ namespace {
     const std::string string_bit32 = "32 bit floating point";
     const std::string string_bit24 = "24 bit";
     const std::string string_bit16 = "16 bit";
-    // Strings which are stored in session config file
-    const std::string xml_string_bit32 = "FormatFloat";
-    const std::string xml_string_bit24 = "FormatInt24";
-    const std::string xml_string_bit16 = "FormatInt16";
     
     std::string
     xml_string_to_user_string(std::string xml_string)
     {
-        // Sample format (Bit depth)
-        if(xml_string == xml_string_bit32)
+        // Bit depth format
+        if(xml_string == enum_2_string (FormatFloat))
             return string_bit32;
         
-        if(xml_string == xml_string_bit24)
+        if(xml_string == enum_2_string (FormatInt24))
             return string_bit24;
         
-        if(xml_string == xml_string_bit32)
-            return string_bit32;
-        
-        if(xml_string == xml_string_bit16)
+        if(xml_string == enum_2_string (FormatInt16))
             return string_bit16;
         
         
         // Header format (File type)
-        if(xml_string == xml_string_CAF)
+        if(xml_string == enum_2_string(CAF))
             return string_CAF;
         
-        if(xml_string == xml_string_BWav)
+        if(xml_string == enum_2_string(BWF))
             return string_BWav;
         
-        if(xml_string == xml_string_Aiff)
+        if(xml_string == enum_2_string(AIFF))
             return string_Aiff;
         
-        if(xml_string == xml_string_Wav64)
+        if(xml_string == enum_2_string(WAVE64))
             return string_Wav64;
         
         
@@ -464,6 +452,17 @@ TracksControlPanel::populate_bit_depth_combo()
 	}
    
     return;
+}
+
+namespace  {
+    const std::string string_24 = "24 fps";
+    const std::string string_25 = "25 fps";
+    const std::string string_30 = "30 fps";
+    const std::string string_23976 = "23.976 fps";
+    const std::string string_2997 = "29.97 fps";
+    
+    
+
 }
 
 void
