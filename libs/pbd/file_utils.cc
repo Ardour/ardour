@@ -26,7 +26,6 @@
 
 #ifdef COMPILER_MINGW
 #include <io.h> // For W_OK
-#define strtok_r strtok_s
 #endif
 
 #include <glibmm/fileutils.h>
