@@ -26,6 +26,7 @@ def build(bld):
     obj.source = [
             'alsa_audiobackend.cc',
             'alsa_rawmidi.cc',
+            'alsa_sequencer.cc',
             'zita-alsa-pcmi.cc',
             ]
     obj.includes = ['.']
