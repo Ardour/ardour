@@ -70,13 +70,14 @@ struct ColumnInfo {
 
 EditorRoutes::EditorRoutes (Editor* e)
 	: EditorComponent (e)
-    , _ignore_reorder (false)
-    , _no_redisplay (false)
-    , _adding_routes (false)
-    , _menu (0)
-    , old_focus (0)
-    , selection_countdown (0)
-    , name_editable (0)
+        , _ignore_reorder (false)
+        , _no_redisplay (false)
+        , _adding_routes (false)
+        , _route_deletion_in_progress (false)
+        , _menu (0)
+        , old_focus (0)
+        , selection_countdown (0)
+        , name_editable (0)
 {
 	static const int column_width = 22;
 
@@ -274,7 +275,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	active_col->set_fixed_width (30);
 	active_col->set_alignment (ALIGN_CENTER);
 	
-	_model->signal_row_deleted().connect (sigc::mem_fun (*this, &EditorRoutes::route_deleted));
+	_model->signal_row_deleted().connect (sigc::mem_fun (*this, &EditorRoutes::row_deleted));
 	_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &EditorRoutes::reordered));
 
 	_display.signal_button_press_event().connect (sigc::mem_fun (*this, &EditorRoutes::button_press), false);
@@ -563,18 +564,38 @@ EditorRoutes::redisplay ()
 }
 
 void
-EditorRoutes::route_deleted (Gtk::TreeModel::Path const &)
+EditorRoutes::row_deleted (Gtk::TreeModel::Path const &)
 {
-	/* this happens as the second step of a DnD within the treeview as well
-	   as when a row/route is actually deleted.
+	/* this happens as the second step of a DnD within the treeview, and
+	   when a route is actually removed. we don't differentiate between
+	   the two cases.
+	   
+	   note that the sync_orders_keys() step may not actually change any
+	   RID's (e.g. the last track may be removed, so all other tracks keep
+	   the same RID), which means that no redisplay would happen. so we 
+           have to force a redisplay.
 	*/
+
 	DEBUG_TRACE (DEBUG::OrderKeys, "editor routes treeview row deleted\n");
+
+        if (_route_deletion_in_progress) {
+                suspend_redisplay ();
+        }
+
 	sync_order_keys_from_treeview ();
+
+        if (_route_deletion_in_progress) {
+                resume_redisplay ();
+        }
 }
 
 void
 EditorRoutes::reordered (TreeModel::Path const &, TreeModel::iterator const &, int* /*what*/)
 {
+	/* reordering implies that RID's will change, so sync_order_keys() will
+	   cause a redisplay.
+	*/
+
 	DEBUG_TRACE (DEBUG::OrderKeys, "editor routes treeview reordered\n");
 	sync_order_keys_from_treeview ();
 }
@@ -737,10 +758,13 @@ EditorRoutes::route_removed (TimeAxisView *tv)
 
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator ri;
+	bool found = false;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[_columns.tv] == tv) {
+                        PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
 			_model->erase (ri);
+			found = true;
 			break;
 		}
 	}

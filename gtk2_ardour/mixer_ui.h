@@ -272,6 +272,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	    it during a session teardown.
 	*/
 	bool _in_group_rebuild_or_clear;
+        bool _route_deletion_in_progress;
 
 	void update_title ();
 	MixerStrip* strip_by_x (int x);
