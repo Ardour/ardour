@@ -30,8 +30,8 @@ Pixbuf::Pixbuf (Canvas* c)
 {
 }
 
-Pixbuf::Pixbuf (Group* g)
-	: Item (g)
+Pixbuf::Pixbuf (Item* parent)
+	: Item (parent)
 {
 }
 

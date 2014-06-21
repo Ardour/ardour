@@ -76,8 +76,8 @@ WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
 }
 
-WaveView::WaveView (Group* g, boost::shared_ptr<ARDOUR::AudioRegion> region)
-	: Item (g)
+WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
+	: Item (parent)
 	, _region (region)
 	, _channel (0)
 	, _samples_per_pixel (0)

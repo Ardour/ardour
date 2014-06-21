@@ -32,7 +32,7 @@ class LIBCANVAS_API Arc : public Item
 {
 public:
 	Arc (Canvas*);
-	Arc (Group*);
+	Arc (Item*);
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;

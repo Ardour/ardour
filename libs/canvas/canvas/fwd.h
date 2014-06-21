@@ -33,6 +33,7 @@ namespace ArdourCanvas {
 	class GtkCanvasViewport;
 	class Text;
 	class Curve;
+        class ScrollGroup;
 }
 
 #endif /* __canvas_canvas_fwd_h__ */

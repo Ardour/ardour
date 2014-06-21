@@ -34,8 +34,8 @@ class LIBCANVAS_API Rectangle : public Item
 public:
 	Rectangle (Canvas*);
 	Rectangle (Canvas*, Rect const &);
-	Rectangle (Group*);
-	Rectangle (Group*, Rect const &);
+	Rectangle (Item*);
+	Rectangle (Item*, Rect const &);
 	
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;

@@ -32,8 +32,8 @@ PolyItem::PolyItem (Canvas* c)
 {
 }
 
-PolyItem::PolyItem (Group* g)
-	: Item (g)
+PolyItem::PolyItem (Item* parent)
+	: Item (parent)
 {
 }
 

@@ -21,19 +21,18 @@
 #define __CANVAS_ROOT_GROUP_H__
 
 #include "canvas/visibility.h"
-#include "canvas/group.h"
+#include "canvas/layout.h"
 
 namespace ArdourCanvas {
 
-class LIBCANVAS_API RootGroup : public Group
+class LIBCANVAS_API Root : public Layout
 {
 private:
 	friend class Canvas;
 	
-	RootGroup (Canvas *);
+	Root (Canvas *);
 
 	void compute_bounding_box () const;
-	void child_changed ();
 };
 
 }

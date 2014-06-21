@@ -36,8 +36,8 @@ public:
 
 	XFadeCurve (Canvas *);
 	XFadeCurve (Canvas *, XFadePosition);
-	XFadeCurve (Group*);
-	XFadeCurve (Group*, XFadePosition);
+	XFadeCurve (Item*);
+	XFadeCurve (Item*, XFadePosition);
 
 	void set_fade_position (XFadePosition xfp) { _xfadeposition = xfp; }
 	

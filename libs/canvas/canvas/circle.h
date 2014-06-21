@@ -29,7 +29,7 @@ class LIBCANVAS_API Circle : public Arc
 {
   public:
 	Circle (Canvas*);
-	Circle (Group*);
+	Circle (Item*);
 };
 	
 }

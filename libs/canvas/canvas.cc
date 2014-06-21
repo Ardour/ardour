@@ -396,7 +396,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 
 		/* We ignore invisible items, groups and items that ignore events */
 
-		if (!new_item->visible() || new_item->ignore_events() || dynamic_cast<Group const *>(new_item) != 0) {
+		if (!new_item->visible() || new_item->ignore_events() || dynamic_cast<Container const *>(new_item) != 0) {
 			continue;
 		}
 		

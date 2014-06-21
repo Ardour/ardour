@@ -92,7 +92,7 @@ public:
 
 
 	WaveView (Canvas *, boost::shared_ptr<ARDOUR::AudioRegion>);
-	WaveView (Group*, boost::shared_ptr<ARDOUR::AudioRegion>);
+	WaveView (Item*, boost::shared_ptr<ARDOUR::AudioRegion>);
        ~WaveView ();
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;

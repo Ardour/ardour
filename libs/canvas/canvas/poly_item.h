@@ -30,7 +30,7 @@ class LIBCANVAS_API PolyItem : public Item
 {
 public:
 	PolyItem (Canvas*);
-	PolyItem (Group*);
+	PolyItem (Item*);
 
 	void compute_bounding_box () const;
 
