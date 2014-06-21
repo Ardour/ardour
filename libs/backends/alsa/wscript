@@ -25,6 +25,7 @@ def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = [
             'alsa_audiobackend.cc',
+            'alsa_midi.cc',
             'alsa_rawmidi.cc',
             'alsa_sequencer.cc',
             'zita-alsa-pcmi.cc',

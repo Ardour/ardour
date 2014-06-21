@@ -382,8 +382,15 @@ AlsaAudioBackend::midi_device_info(std::string const name) const {
 		}
 	}
 
+	assert(_midi_driver_option != _("None"));
+
 	std::map<std::string, std::string> devices;
-	get_alsa_rawmidi_device_names(devices);
+	if (_midi_driver_option == _("ALSA raw devices")) {
+		get_alsa_rawmidi_device_names(devices);
+	} else {
+		get_alsa_sequencer_names (devices);
+	}
+
 	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
 		if (i->first == name) {
 			_midi_devices[name] = new AlsaMidiDeviceInfo();
@@ -399,6 +406,7 @@ AlsaAudioBackend::enumerate_midi_options () const
 	std::vector<std::string> m;
 	m.push_back (_("None"));
 	m.push_back (_("ALSA raw devices"));
+	m.push_back (_("ALSA sequencer"));
 	return m;
 }
 
@@ -406,12 +414,16 @@ std::vector<AudioBackend::DeviceStatus>
 AlsaAudioBackend::enumerate_midi_devices () const
 {
 	std::vector<AudioBackend::DeviceStatus> s;
-	if (_midi_driver_option == _("None")) {
+	std::map<std::string, std::string> devices;
+
+	if (_midi_driver_option == _("ALSA raw devices")) {
+		get_alsa_rawmidi_device_names (devices);
+	}
+	else if (_midi_driver_option == _("ALSA sequencer")) {
+		get_alsa_sequencer_names (devices);
+	} else {
 		return s;
 	}
-
-	std::map<std::string, std::string> devices;
-	get_alsa_rawmidi_device_names(devices);
 
 	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
 		s.push_back (DeviceStatus (i->first, true));
@@ -422,7 +434,7 @@ AlsaAudioBackend::enumerate_midi_devices () const
 int
 AlsaAudioBackend::set_midi_option (const std::string& opt)
 {
-	if (opt != _("None") && opt != _("ALSA raw devices")) {
+	if (opt != _("None") && opt != _("ALSA raw devices") && opt != _("ALSA sequencer")) {
 		return -1;
 	}
 	_midi_driver_option = opt;
@@ -620,13 +632,13 @@ AlsaAudioBackend::stop ()
 	}
 
 	while (!_rmidi_out.empty ()) {
-		AlsaRawMidiIO *m = _rmidi_out.back ();
+		AlsaMidiIO *m = _rmidi_out.back ();
 		m->stop();
 		_rmidi_out.pop_back ();
 		delete m;
 	}
 	while (!_rmidi_in.empty ()) {
-		AlsaRawMidiIO *m = _rmidi_in.back ();
+		AlsaMidiIO *m = _rmidi_in.back ();
 		m->stop();
 		_rmidi_in.pop_back ();
 		delete m;
@@ -954,18 +966,27 @@ AlsaAudioBackend::register_system_midi_ports()
 
 	if (_midi_driver_option == _("None")) {
 		return 0;
+	} else if (_midi_driver_option == _("ALSA raw devices")) {
+		get_alsa_rawmidi_device_names(devices);
+	} else {
+		get_alsa_sequencer_names (devices);
 	}
-	get_alsa_rawmidi_device_names(devices);
 
 	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
 		struct AlsaMidiDeviceInfo * nfo = midi_device_info(i->first);
 		if (!nfo) continue;
 		if (!nfo->enabled) continue;
 
-		AlsaRawMidiOut *mout = new AlsaRawMidiOut (i->second.c_str());
+		AlsaMidiOut *mout;
+		if (_midi_driver_option == _("ALSA raw devices")) {
+			mout = new AlsaRawMidiOut (i->second.c_str());
+		} else {
+			mout = new AlsaSeqMidiOut (i->second.c_str());
+		}
+
 		if (mout->state ()) {
 			PBD::warning << string_compose (
-					_("AlsaRawMidiOut: failed to open midi device '%1'."), i->second)
+					_("AlsaMidiOut: failed to open midi device '%1'."), i->second)
 				<< endmsg;
 			delete mout;
 		} else {
@@ -973,7 +994,7 @@ AlsaAudioBackend::register_system_midi_ports()
 			mout->sync_time (g_get_monotonic_time());
 			if (mout->start ()) {
 				PBD::warning << string_compose (
-						_("AlsaRawMidiOut: failed to start midi device '%1'."), i->second)
+						_("AlsaMidiOut: failed to start midi device '%1'."), i->second)
 					<< endmsg;
 				delete mout;
 			} else {
@@ -992,10 +1013,16 @@ AlsaAudioBackend::register_system_midi_ports()
 			}
 		}
 
-		AlsaRawMidiIn *midin = new AlsaRawMidiIn (i->second.c_str());
+		AlsaMidiIn *midin;
+		if (_midi_driver_option == _("ALSA raw devices")) {
+			midin = new AlsaRawMidiIn (i->second.c_str());
+		} else {
+			midin = new AlsaSeqMidiIn (i->second.c_str());
+		}
+
 		if (midin->state ()) {
 			PBD::warning << string_compose (
-					_("AlsaRawMidiIn: failed to open midi device '%1'."), i->second)
+					_("AlsaMidiIn: failed to open midi device '%1'."), i->second)
 				<< endmsg;
 			delete midin;
 		} else {
@@ -1003,7 +1030,7 @@ AlsaAudioBackend::register_system_midi_ports()
 			midin->sync_time (g_get_monotonic_time());
 			if (midin->start ()) {
 				PBD::warning << string_compose (
-						_("AlsaRawMidiIn: failed to start midi device '%1'."), i->second)
+						_("AlsaMidiIn: failed to start midi device '%1'."), i->second)
 					<< endmsg;
 				delete midin;
 			} else {
@@ -1401,10 +1428,10 @@ AlsaAudioBackend::main_process_thread ()
 				i = 0;
 				for (std::vector<AlsaPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
 					assert (_rmidi_in.size() > i);
-					AlsaRawMidiIn *rm = static_cast<AlsaRawMidiIn*>(_rmidi_in.at(i));
+					AlsaMidiIn *rm = static_cast<AlsaMidiIn*>(_rmidi_in.at(i));
 					void *bptr = (*it)->get_buffer(0);
 					pframes_t time;
-					uint8_t data[64]; // match MaxAlsaRawEventSize in alsa_rawmidi.cc
+					uint8_t data[64]; // match MaxAlsaEventSize in alsa_rawmidi.cc
 					size_t size = sizeof(data);
 					midi_clear(bptr);
 					while (rm->recv_event (time, data, size)) {
@@ -1434,7 +1461,7 @@ AlsaAudioBackend::main_process_thread ()
 				for (std::vector<AlsaPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
 					assert (_rmidi_out.size() > i);
 					const AlsaMidiBuffer src = static_cast<const AlsaMidiPort*>(*it)->const_buffer();
-					AlsaRawMidiOut *rm = static_cast<AlsaRawMidiOut*>(_rmidi_out.at(i));
+					AlsaMidiOut *rm = static_cast<AlsaMidiOut*>(_rmidi_out.at(i));
 					rm->sync_time (clock1);
 					for (AlsaMidiBuffer::const_iterator mit = src.begin (); mit != src.end (); ++mit) {
 						rm->send_event ((*mit)->timestamp(), (*mit)->data(), (*mit)->size());
