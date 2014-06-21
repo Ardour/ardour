@@ -170,6 +170,58 @@ ARDOUR::get_alsa_rawmidi_device_names (std::map<std::string, std::string>& devic
 	}
 }
 
+void
+ARDOUR::get_alsa_sequencer_names (std::map<std::string, std::string>& devices)
+{
+	snd_seq_t *seq= NULL;
+	snd_seq_client_info_t *cinfo;
+	snd_seq_port_info_t *pinfo;
+
+	snd_seq_client_info_alloca (&cinfo);
+	snd_seq_port_info_alloca (&pinfo);
+
+	if (snd_seq_open (&seq, "hw", SND_SEQ_OPEN_DUPLEX, 0) < 0) {
+		return;
+	}
+
+	snd_seq_client_info_set_client(cinfo, -1);
+	while (snd_seq_query_next_client (seq, cinfo) >= 0) {
+		int client = snd_seq_client_info_get_client (cinfo);
+		if (client == SND_SEQ_CLIENT_SYSTEM) {
+			continue;
+		}
+		if (!strcmp (snd_seq_client_info_get_name(cinfo), "Midi Through")) {
+			continue;
+		}
+		snd_seq_port_info_set_client (pinfo, client);
+		snd_seq_port_info_set_port (pinfo, -1);
+
+		while (snd_seq_query_next_port (seq, pinfo) >= 0) {
+			int caps = snd_seq_port_info_get_capability(pinfo);
+			if (0 == (caps & (SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_WRITE))) {
+				continue;
+			}
+			if (caps & SND_SEQ_PORT_CAP_NO_EXPORT) {
+				continue;
+			}
+			std::string card_name;
+			card_name = snd_seq_port_info_get_name (pinfo);
+
+			card_name += " (";
+			if (caps & SND_SEQ_PORT_CAP_READ) card_name += "I";
+			if (caps & SND_SEQ_PORT_CAP_WRITE) card_name += "O";
+			card_name += ")";
+
+			std::string devname;
+			devname = PBD::to_string(snd_seq_port_info_get_client (pinfo), std::dec);
+			devname += ":";
+			devname += PBD::to_string(snd_seq_port_info_get_port (pinfo), std::dec);
+			devices.insert (std::make_pair (card_name, devname));
+		}
+	}
+	snd_seq_close (seq);
+}
+
 int
 ARDOUR::card_to_num(const char* device_name)
 {
