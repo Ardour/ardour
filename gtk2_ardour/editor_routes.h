@@ -73,7 +73,7 @@ private:
 	void build_menu ();
 	void show_menu ();
         void sync_treeview_from_order_keys ();
-	void route_deleted (Gtk::TreeModel::Path const &);
+	void row_deleted (Gtk::TreeModel::Path const &);
 	void visible_changed (std::string const &);
 	void active_changed (std::string const &);
 	void reordered (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &, int *);
@@ -156,6 +156,7 @@ private:
 	bool _ignore_reorder;
 	bool _no_redisplay;
         bool _adding_routes;
+        bool _route_deletion_in_progress;
 
 	Gtk::Menu* _menu;
         Gtk::Widget* old_focus;

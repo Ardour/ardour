@@ -92,6 +92,9 @@ Mixer_UI::Mixer_UI ()
 	, _strip_width (Config->get_default_narrow_ms() ? Narrow : Wide)
 	, ignore_reorder (false)
 	, _following_editor_selection (false)
+        , _in_group_rebuild_or_clear (false)
+        , _route_deletion_in_progress (false)
+	, _maximised (false)
 {
 	/* allow this window to become the key focus window */
 	set_flags (CAN_FOCUS);
@@ -238,9 +241,6 @@ Mixer_UI::Mixer_UI ()
 	out_packer.show();
 	list_hpane.show();
 	group_display.show();
-
-	_in_group_rebuild_or_clear = false;
-	_maximised = false;
 
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 
@@ -420,6 +420,7 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 	
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[track_columns.strip] == strip) {
+                        PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
 			track_model->erase (ri);
 			break;
 		}
@@ -997,9 +998,17 @@ Mixer_UI::track_list_delete (const Gtk::TreeModel::Path&)
 {
 	/* this happens as the second step of a DnD within the treeview as well
 	   as when a row/route is actually deleted.
+           
+           if it was a deletion then we have to force a redisplay because
+           order keys may not have changed.
 	*/
+
 	DEBUG_TRACE (DEBUG::OrderKeys, "mixer UI treeview row deleted\n");
 	sync_order_keys_from_treeview ();
+
+        if (_route_deletion_in_progress) {
+                redisplay_track_list ();
+        }
 }
 
 void
