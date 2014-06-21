@@ -75,7 +75,7 @@ using namespace ArdourCanvas;
 static const int32_t sync_mark_width = 9;
 static double const handle_size = 10; /* height of fade handles */
 
-AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
+AudioRegionView::AudioRegionView (ArdourCanvas::Layout *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
 				  uint32_t basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, sync_mark(0)
@@ -96,7 +96,7 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&AudioRegionView::parameter_changed, this, _1), gui_context());
 }
 
-AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
+AudioRegionView::AudioRegionView (ArdourCanvas::Layout *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
 				  uint32_t basic_color, bool recording, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, recording, visibility)
 	, sync_mark(0)

@@ -26,7 +26,7 @@
 class MidiAutomationLine : public AutomationLine
 {
 public:
-	MidiAutomationLine (const std::string&, TimeAxisView&, ArdourCanvas::Group&,
+	MidiAutomationLine (const std::string&, TimeAxisView&, ArdourCanvas::Item&,
 	                    boost::shared_ptr<ARDOUR::AutomationList>,
 	                    boost::shared_ptr<ARDOUR::MidiRegion>,
 	                    Evoral::Parameter,

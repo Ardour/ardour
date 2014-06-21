@@ -29,10 +29,11 @@
 
 #include <gtk/gtkaction.h>
 
-#include "canvas/group.h"
+#include "canvas/layout.h"
 #include "canvas/canvas.h"
 #include "canvas/ruler.h"
 #include "canvas/debug.h"
+#include "canvas/scroll_group.h"
 
 #include "ardour/session.h"
 #include "ardour/tempo.h"

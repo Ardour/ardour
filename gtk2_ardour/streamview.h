@@ -42,7 +42,7 @@ namespace ARDOUR {
 
 namespace ArdourCanvas {
 	class Rectangle;
-	class Group;
+	class Layout;
 }
 
 struct RecBoxInfo {
@@ -82,7 +82,7 @@ public:
  	void set_layer_display (LayerDisplay);
 	LayerDisplay layer_display () const { return _layer_display; }
 
-	ArdourCanvas::Group* canvas_item() { return _canvas_group; }
+	ArdourCanvas::Layout* canvas_item() { return _canvas_group; }
 
 	enum ColorTarget {
 		RegionColor,
@@ -128,7 +128,7 @@ public:
 	sigc::signal<void> ContentsHeightChanged;
 
 protected:
-       StreamView (RouteTimeAxisView&, ArdourCanvas::Group* canvas_group = 0);
+       StreamView (RouteTimeAxisView&, ArdourCanvas::Layout* canvas_group = 0);
 
 	void         transport_changed();
 	void         transport_looped();
@@ -151,7 +151,7 @@ protected:
 	virtual void color_handler () = 0;
 
 	RouteTimeAxisView&        _trackview;
-	ArdourCanvas::Group*      _canvas_group;
+	ArdourCanvas::Layout*      _canvas_group;
 	ArdourCanvas::Rectangle*   canvas_rect; /* frame around the whole thing */
 
 	typedef std::list<RegionView* > RegionViewList;

@@ -38,7 +38,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& r, ArdourCanvas::Group& parent, boost::shared_ptr<AutomationList> l)
+AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& r, ArdourCanvas::Layout& parent, boost::shared_ptr<AutomationList> l)
 	: AutomationLine (name, r.get_time_axis_view(), parent, l)
 	, rv (r)
 {

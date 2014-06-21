@@ -736,8 +736,8 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			/* reparent the regionview into a group above all
 			 * others
 			 */
-
-			ArdourCanvas::Group* rvg = rv->get_canvas_group();                                                                                                                                     
+			
+			ArdourCanvas::Item* rvg = rv->get_canvas_group();
                         Duple rv_canvas_offset = rvg->parent()->canvas_origin ();
                         Duple dmg_canvas_offset = _editor->_drag_motion_group->canvas_origin ();
                         rv->get_canvas_group()->reparent (_editor->_drag_motion_group);

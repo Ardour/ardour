@@ -101,7 +101,7 @@ Editor::initialize_canvas ()
 	}
 
 	/*a group to hold global rects like punch/loop indicators */
-	global_rect_group = new ArdourCanvas::Group (hv_scroll_group);
+	global_rect_group = new ArdourCanvas::Layout (hv_scroll_group);
 	CANVAS_DEBUG_NAME (global_rect_group, "global rect group");
 
         transport_loop_range_rect = new ArdourCanvas::Rectangle (global_rect_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
@@ -113,10 +113,10 @@ Editor::initialize_canvas ()
 	transport_punch_range_rect->hide();
 
 	/*a group to hold time (measure) lines */
-	time_line_group = new ArdourCanvas::Group (hv_scroll_group);
+	time_line_group = new ArdourCanvas::Layout (hv_scroll_group);
 	CANVAS_DEBUG_NAME (time_line_group, "time line group");
 
-	_trackview_group = new ArdourCanvas::Group (hv_scroll_group);
+	_trackview_group = new ArdourCanvas::Layout (hv_scroll_group);
 	CANVAS_DEBUG_NAME (_trackview_group, "Canvas TrackViews");
 	
 	// used to show zoom mode active zooming
@@ -131,30 +131,30 @@ Editor::initialize_canvas ()
 	/* a group to hold stuff while it gets dragged around. Must be the
 	 * uppermost (last) group with hv_scroll_group as a parent
 	 */
-	_drag_motion_group = new ArdourCanvas::Group (hv_scroll_group);                                                                                                                                     
+	_drag_motion_group = new ArdourCanvas::Layout (hv_scroll_group);                                                                                                                                     
         CANVAS_DEBUG_NAME (_drag_motion_group, "Canvas Drag Motion");
 
 	/* TIME BAR CANVAS */
 	
-	_time_markers_group = new ArdourCanvas::Group (h_scroll_group);
+	_time_markers_group = new ArdourCanvas::Layout (h_scroll_group);
 	CANVAS_DEBUG_NAME (_time_markers_group, "time bars");
 
-	cd_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
+	cd_marker_group = new ArdourCanvas::Layout (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
 	CANVAS_DEBUG_NAME (cd_marker_group, "cd marker group");
 	/* the vide is temporarily placed a the same location as the
 	   cd_marker_group, but is moved later.
 	*/
-	videotl_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple(0.0, 0.0));
+	videotl_group = new ArdourCanvas::Layout (_time_markers_group, ArdourCanvas::Duple(0.0, 0.0));
 	CANVAS_DEBUG_NAME (videotl_group, "videotl group");
-	marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height + 1.0));
+	marker_group = new ArdourCanvas::Layout (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height + 1.0));
 	CANVAS_DEBUG_NAME (marker_group, "marker group");
-	transport_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 2.0) + 1.0));
+	transport_marker_group = new ArdourCanvas::Layout (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 2.0) + 1.0));
 	CANVAS_DEBUG_NAME (transport_marker_group, "transport marker group");
-	range_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 3.0) + 1.0));
+	range_marker_group = new ArdourCanvas::Layout (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 3.0) + 1.0));
 	CANVAS_DEBUG_NAME (range_marker_group, "range marker group");
-	tempo_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 4.0) + 1.0));
+	tempo_group = new ArdourCanvas::Layout (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 4.0) + 1.0));
 	CANVAS_DEBUG_NAME (tempo_group, "tempo group");
-	meter_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
+	meter_group = new ArdourCanvas::Layout (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
 	CANVAS_DEBUG_NAME (meter_group, "meter group");
 
 	meter_bar = new ArdourCanvas::Rectangle (meter_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
