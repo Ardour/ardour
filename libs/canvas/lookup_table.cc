@@ -17,14 +17,14 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "canvas/item.h"
 #include "canvas/lookup_table.h"
-#include "canvas/group.h"
 
 using namespace std;
 using namespace ArdourCanvas;
 
-LookupTable::LookupTable (Group const & group)
-	: _group (group)
+LookupTable::LookupTable (Item const & item)
+	: _item (item)
 {
 
 }
@@ -34,8 +34,8 @@ LookupTable::~LookupTable ()
 
 }
 
-DumbLookupTable::DumbLookupTable (Group const & group)
-	: LookupTable (group)
+DumbLookupTable::DumbLookupTable (Item const & item)
+	: LookupTable (item)
 {
 
 }
@@ -43,7 +43,7 @@ DumbLookupTable::DumbLookupTable (Group const & group)
 vector<Item *>
 DumbLookupTable::get (Rect const &)
 {
-	list<Item *> const & items = _group.items ();
+	list<Item *> const & items = _item.items ();
 	vector<Item *> vitems;
 	copy (items.begin(), items.end(), back_inserter (vitems));
 	return vitems;
@@ -54,7 +54,7 @@ DumbLookupTable::items_at_point (Duple const & point) const
 {
 	/* Point is in window coordinate system */
 
-	list<Item *> const & items (_group.items ());
+	list<Item *> const & items (_item.items ());
 	vector<Item *> vitems;
 
 	for (list<Item *>::const_iterator i = items.begin(); i != items.end(); ++i) {
@@ -73,7 +73,7 @@ DumbLookupTable::has_item_at_point (Duple const & point) const
 {
 	/* Point is in window coordinate system */
 
-	list<Item *> const & items (_group.items ());
+	list<Item *> const & items (_item.items ());
 	vector<Item *> vitems;
 
 	for (list<Item *>::const_iterator i = items.begin(); i != items.end(); ++i) {
@@ -92,12 +92,12 @@ DumbLookupTable::has_item_at_point (Duple const & point) const
 	return false;
 }
 
-OptimizingLookupTable::OptimizingLookupTable (Group const & group, int items_per_cell)
-	: LookupTable (group)
+OptimizingLookupTable::OptimizingLookupTable (Item const & item, int items_per_cell)
+	: LookupTable (item)
 	, _items_per_cell (items_per_cell)
 	, _added (false)
 {
-	list<Item*> const & items = _group.items ();
+	list<Item*> const & items = _item.items ();
 
 	/* number of cells */
 	int const cells = items.size() / _items_per_cell;
@@ -109,8 +109,8 @@ OptimizingLookupTable::OptimizingLookupTable (Group const & group, int items_per
 		_cells[i] = new Cell[_dimension];
 	}
 
-	/* our group's bounding box in its coordinates */
-	boost::optional<Rect> bbox = _group.bounding_box ();
+	/* our item's bounding box in its coordinates */
+	boost::optional<Rect> bbox = _item.bounding_box ();
 	if (!bbox) {
 		return;
 	}
@@ -130,11 +130,11 @@ OptimizingLookupTable::OptimizingLookupTable (Group const & group, int items_per
 			continue;
 		}
 
-		/* and in the group's coordinates */
-		Rect const item_bbox_in_group = (*i)->item_to_parent (item_bbox.get ());
+		/* and in the item's coordinates */
+		Rect const item_bbox_in_item = (*i)->item_to_parent (item_bbox.get ());
 
 		int x0, y0, x1, y1;
-		area_to_indices (item_bbox_in_group, x0, y0, x1, y1);
+		area_to_indices (item_bbox_in_item, x0, y0, x1, y1);
 
 		/* XXX */
 		assert (x0 >= 0);
@@ -147,19 +147,19 @@ OptimizingLookupTable::OptimizingLookupTable (Group const & group, int items_per
 		//assert (y1 <= _dimension);
 
 		if (x0 > _dimension) {
-			cout << "WARNING: item outside bbox by " << (item_bbox_in_group.x0 - bbox.get().x0) << "\n";
+			cout << "WARNING: item outside bbox by " << (item_bbox_in_item.x0 - bbox.get().x0) << "\n";
 			x0 = _dimension;
 		}
 		if (x1 > _dimension) {
-			cout << "WARNING: item outside bbox by " << (item_bbox_in_group.x1 - bbox.get().x1) << "\n";
+			cout << "WARNING: item outside bbox by " << (item_bbox_in_item.x1 - bbox.get().x1) << "\n";
 			x1 = _dimension;
 		}
 		if (y0 > _dimension) {
-			cout << "WARNING: item outside bbox by " << (item_bbox_in_group.y0 - bbox.get().y0) << "\n";
+			cout << "WARNING: item outside bbox by " << (item_bbox_in_item.y0 - bbox.get().y0) << "\n";
 			y0 = _dimension;
 		}
 		if (y1 > _dimension) {
-			cout << "WARNING: item outside bbox by " << (item_bbox_in_group.y1 - bbox.get().y1) << "\n";
+			cout << "WARNING: item outside bbox by " << (item_bbox_in_item.y1 - bbox.get().y1) << "\n";
 			y1 = _dimension;
 		}
 
@@ -284,7 +284,7 @@ OptimizingLookupTable::has_item_at_point (Duple const & point) const
 	return false;
 }
 	
-/** @param area Area in our owning group's coordinates */
+/** @param area Area in our owning item's coordinates */
 vector<Item*>
 OptimizingLookupTable::get (Rect const & area)
 {

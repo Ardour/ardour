@@ -35,7 +35,7 @@ class LIBCANVAS_API Pixbuf : public Item
 {
 public:
 	Pixbuf (Canvas*);
-	Pixbuf (Group*);
+	Pixbuf (Item*);
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;

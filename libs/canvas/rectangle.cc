@@ -43,14 +43,14 @@ Rectangle::Rectangle (Canvas* c, Rect const & rect)
 {
 }
 
-Rectangle::Rectangle (Group* g)
-	: Item (g)
+Rectangle::Rectangle (Item* parent)
+	: Item (parent)
 	, _outline_what ((What) (LEFT | RIGHT | TOP | BOTTOM))
 {
 }
 
-Rectangle::Rectangle (Group* g, Rect const & rect)
-	: Item (g)
+Rectangle::Rectangle (Item* parent, Rect const & rect)
+	: Item (parent)
 	, _rect (rect)
 	, _outline_what ((What) (LEFT | RIGHT | TOP | BOTTOM))
 {

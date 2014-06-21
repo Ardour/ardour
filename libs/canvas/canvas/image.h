@@ -35,7 +35,7 @@ class LIBCANVAS_API Image : public Item
 {
 public:
     Image (Canvas *, Cairo::Format, int width, int height);
-    Image (Group*, Cairo::Format, int width, int height);
+    Image (Item*, Cairo::Format, int width, int height);
     
     struct Data {
 	Data (uint8_t *d, int w, int h, int s, Cairo::Format fmt)

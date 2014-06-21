@@ -32,8 +32,8 @@ Image::Image (Canvas* canvas, Cairo::Format fmt, int width, int height)
 	DataReady.connect (data_connections, MISSING_INVALIDATOR, boost::bind (&Image::accept_data, this), gui_context());
 }
 
-Image::Image (Group* group, Cairo::Format fmt, int width, int height)
-	: Item (group)
+Image::Image (Item* parent, Cairo::Format fmt, int width, int height)
+	: Item (parent)
 	, _format (fmt)
 	, _width (width)
 	, _height (height)

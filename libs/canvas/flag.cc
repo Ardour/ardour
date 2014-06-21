@@ -26,15 +26,15 @@ using namespace std;
 using namespace ArdourCanvas;
 
 Flag::Flag (Canvas* canvas, Distance height, Color outline_color, Color fill_color, Duple position)
-	: Group (canvas)
+	: Layout (canvas)
 	, _outline_color (outline_color)
 	, _fill_color (fill_color)
 {
 	setup (height, position);
 }
 
-Flag::Flag (Group* group, Distance height, Color outline_color, Color fill_color, Duple position)
-	: Group (group)
+Flag::Flag (Item* parent, Distance height, Color outline_color, Color fill_color, Duple position)
+	: Layout (parent)
 	, _outline_color (outline_color)
 	, _fill_color (fill_color)
 {

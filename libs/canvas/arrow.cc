@@ -35,13 +35,13 @@ using namespace ArdourCanvas;
  *  @param parent Parent canvas group.
  */
 Arrow::Arrow (Canvas* c)
-	: Group (c)
+	: Layout (c)
 {
 	setup ();
 }
 
-Arrow::Arrow (Group* g)
-	: Group (g)
+Arrow::Arrow (Item* parent)
+	: Layout (parent)
 {
 	setup ();
 }

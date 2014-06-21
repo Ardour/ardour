@@ -48,8 +48,8 @@ XFadeCurve::XFadeCurve (Canvas* c, XFadePosition pos)
 {
 }
 
-XFadeCurve::XFadeCurve (Group* g)
-	: Item (g)
+XFadeCurve::XFadeCurve (Item* parent)
+	: Item (parent)
 	, points_per_segment (32)
 	, _xfadeposition (Start)
 	, _outline_color (0x000000ff)
@@ -57,8 +57,8 @@ XFadeCurve::XFadeCurve (Group* g)
 {
 }
 
-XFadeCurve::XFadeCurve (Group* g, XFadePosition pos)
-	: Item (g)
+XFadeCurve::XFadeCurve (Item* parent, XFadePosition pos)
+	: Item (parent)
 	, points_per_segment (32)
 	, _xfadeposition (pos)
 	, _outline_color (0x000000ff)

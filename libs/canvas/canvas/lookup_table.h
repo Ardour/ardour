@@ -31,12 +31,11 @@ class OptimizingLookupTableTest;
 namespace ArdourCanvas {
 
 class Item;
-class Group;
 
 class LIBCANVAS_API LookupTable
 {
 public:
-    LookupTable (Group const &);
+    LookupTable (Item const &);
     virtual ~LookupTable ();
     
     virtual std::vector<Item*> get (Rect const &) = 0;
@@ -45,13 +44,13 @@ public:
 
 protected:
 	
-    Group const & _group;
+    Item const & _item;
 };
 
 class LIBCANVAS_API DumbLookupTable : public LookupTable
 {
 public:
-    DumbLookupTable (Group const &);
+	DumbLookupTable (Item const &);
     
     std::vector<Item*> get (Rect const &);
     std::vector<Item*> items_at_point (Duple const &) const;
@@ -61,7 +60,7 @@ public:
 class LIBCANVAS_API OptimizingLookupTable : public LookupTable
 {
 public:
-    OptimizingLookupTable (Group const &, int);
+    OptimizingLookupTable (Item const &, int);
     ~OptimizingLookupTable ();
     std::vector<Item*> get (Rect const &);
     std::vector<Item*> items_at_point (Duple const &) const;

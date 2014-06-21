@@ -50,7 +50,7 @@ class StatefulImage : public Item
   public:
 
     StatefulImage (Canvas*, const XMLNode&);
-    StatefulImage (Group*, const XMLNode&);
+    StatefulImage (Item*, const XMLNode&);
     ~StatefulImage ();
 
     bool set_state (States::size_type);

@@ -32,7 +32,7 @@ class LIBCANVAS_API Widget : public Item
 {
 public:
 	Widget (Canvas*, CairoWidget&);
-	Widget (Group*, CairoWidget&);
+	Widget (Item*, CairoWidget&);
 	
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;

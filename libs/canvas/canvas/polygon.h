@@ -31,7 +31,7 @@ class LIBCANVAS_API Polygon : public PolyItem
 {
 public:
 	Polygon (Canvas*);
-	Polygon (Group*);
+	Polygon (Item*);
         virtual ~Polygon();
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;

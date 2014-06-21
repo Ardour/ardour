@@ -30,7 +30,7 @@ class LIBCANVAS_API PolyLine : public PolyItem
 {
   public:
 	PolyLine (Canvas*);
-	PolyLine (Group*);
+	PolyLine (Item*);
 	
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	

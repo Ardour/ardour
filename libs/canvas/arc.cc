@@ -39,8 +39,8 @@ Arc::Arc (Canvas* c)
 {
 }
 
-Arc::Arc (Group* g)
-	: Item (g)
+Arc::Arc (Item* parent)
+	: Item (parent)
 	, _radius (0.0)
 	, _arc_degrees (0.0)
 	, _start_degrees (0.0)

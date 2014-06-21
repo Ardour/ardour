@@ -25,13 +25,14 @@
 
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
-#include "canvas/group.h"
 #include "canvas/item.h"
 #include "canvas/scroll_group.h"
 
 using namespace std;
 using namespace PBD;
 using namespace ArdourCanvas;
+
+int Item::default_items_per_cell = 64;
 
 Item::Item (Canvas* canvas)
 	: Fill (*this)
@@ -41,12 +42,13 @@ Item::Item (Canvas* canvas)
 	, _scroll_parent (0)
 	, _visible (true)
 	, _bounding_box_dirty (true)
+	, _lut (0)
 	, _ignore_events (false)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 }	
 
-Item::Item (Group* parent)
+Item::Item (Item* parent)
 	: Fill (*this)
 	, Outline (*this)
 	,  _canvas (parent->canvas())
@@ -54,6 +56,7 @@ Item::Item (Group* parent)
 	, _scroll_parent (0)
 	, _visible (true)
 	, _bounding_box_dirty (true)
+	, _lut (0)
 	, _ignore_events (false)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
@@ -65,7 +68,7 @@ Item::Item (Group* parent)
 	find_scroll_parent ();
 }	
 
-Item::Item (Group* parent, Duple const& p)
+Item::Item (Item* parent, Duple const& p)
 	: Fill (*this)
 	, Outline (*this)
 	,  _canvas (parent->canvas())
@@ -74,6 +77,7 @@ Item::Item (Group* parent, Duple const& p)
 	, _position (p)
 	, _visible (true)
 	, _bounding_box_dirty (true)
+	, _lut (0)
 	, _ignore_events (false)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
@@ -95,6 +99,9 @@ Item::~Item ()
 	if (_canvas) {
 		_canvas->item_going_away (this, _bounding_box);
 	}
+
+	clear_items (true);
+	delete _lut;
 }
 
 Duple
@@ -350,7 +357,7 @@ Item::unparent ()
 }
 
 void
-Item::reparent (Group* new_parent)
+Item::reparent (Item* new_parent)
 {
 	if (new_parent == _parent) {
 		return;
@@ -516,6 +523,7 @@ Item::bounding_box () const
 	if (_bounding_box_dirty) {
 		compute_bounding_box ();
 		assert (!_bounding_box_dirty);
+		add_child_bounding_boxes ();
 	}
 
 	return _bounding_box;
@@ -626,30 +634,6 @@ Item::set_ignore_events (bool ignore)
 	_ignore_events = ignore;
 }
 
-void
-Item::dump (ostream& o) const
-{
-	boost::optional<ArdourCanvas::Rect> bb = bounding_box();
-
-	o << _canvas->indent() << whatami() << ' ' << this << " Visible ? " << _visible;
-	o << " @ " << position();
-	
-#ifdef CANVAS_DEBUG
-	if (!name.empty()) {
-		o << ' ' << name;
-	}
-#endif
-
-	if (bb) {
-		o << endl << _canvas->indent() << "\tbbox: " << bb.get();
-		o << endl << _canvas->indent() << "\tCANVAS bbox: " << item_to_canvas (bb.get());
-	} else {
-		o << " bbox unset";
-	}
-
-	o << endl;
-}
-
 std::string
 Item::whatami () const 
 {
@@ -685,6 +669,276 @@ Item::covers (Duple const & point) const
 	}
 
 	return r.get().contains (p);
+}
+
+/* nesting/grouping API */
+
+void
+Item::add_child_bounding_boxes() const
+{
+	boost::optional<Rect> self;
+	Rect bbox;
+	bool have_one = false;
+
+	if (_bounding_box) {
+		bbox = _bounding_box.get();
+		have_one = true;
+	}
+
+	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
+
+		boost::optional<Rect> item_bbox = (*i)->bounding_box ();
+
+		if (!item_bbox) {
+			continue;
+		}
+
+		Rect group_bbox = (*i)->item_to_parent (item_bbox.get ());
+		if (have_one) {
+			bbox = bbox.extend (group_bbox);
+		} else {
+			bbox = group_bbox;
+			have_one = true;
+		}
+	}
+
+	if (!have_one) {
+		_bounding_box = boost::optional<Rect> ();
+	} else {
+		_bounding_box = bbox;
+	}
+}
+
+void
+Item::add (Item* i)
+{
+	/* XXX should really notify canvas about this */
+
+	_items.push_back (i);
+	i->reparent (this);
+	invalidate_lut ();
+	_bounding_box_dirty = true;
+}
+
+void
+Item::remove (Item* i)
+{
+
+	if (i->parent() != this) {
+		return;
+	}
+
+	/* we cannot call bounding_box() here because that will iterate over
+	   _items, one of which (the argument, i) may be in the middle of
+	   deletion, making it impossible to call compute_bounding_box()
+	   on it.
+	*/
+
+	if (_bounding_box) {
+		_pre_change_bounding_box = _bounding_box;
+	} else {
+		_pre_change_bounding_box = Rect();
+	}
+
+	i->unparent ();
+	_items.remove (i);
+	invalidate_lut ();
+	_bounding_box_dirty = true;
+	
+	end_change ();
+}
+
+void
+Item::clear (bool with_delete)
+{
+	begin_change ();
+
+	clear_items (with_delete);
+
+	invalidate_lut ();
+	_bounding_box_dirty = true;
+
+	end_change ();
+}
+
+void
+Item::clear_items (bool with_delete)
+{
+	for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ) {
+
+		list<Item*>::iterator tmp = i;
+		Item *item = *i;
+
+		++tmp;
+
+		/* remove from list before doing anything else, because we
+		 * don't want to find the item in _items during any activity
+		 * driven by unparent-ing or deletion.
+		 */
+
+		_items.erase (i);
+		item->unparent ();
+		
+		if (with_delete) {
+			delete item;
+		}
+
+		i = tmp;
+	}
+}
+
+void
+Item::raise_child_to_top (Item* i)
+{
+	if (!_items.empty()) {
+		if (_items.back() == i) {
+			return;
+		}
+	}
+
+	_items.remove (i);
+	_items.push_back (i);
+	invalidate_lut ();
+}
+
+void
+Item::raise_child (Item* i, int levels)
+{
+	list<Item*>::iterator j = find (_items.begin(), _items.end(), i);
+	assert (j != _items.end ());
+
+	++j;
+	_items.remove (i);
+
+	while (levels > 0 && j != _items.end ()) {
+		++j;
+		--levels;
+	}
+
+	_items.insert (j, i);
+	invalidate_lut ();
+}
+
+void
+Item::lower_child_to_bottom (Item* i)
+{
+	if (!_items.empty()) {
+		if (_items.front() == i) {
+			return;
+		}
+	}
+	_items.remove (i);
+	_items.push_front (i);
+	invalidate_lut ();
+}
+
+void
+Item::ensure_lut () const
+{
+	if (!_lut) {
+		_lut = new DumbLookupTable (*this);
+	}
+}
+
+void
+Item::invalidate_lut () const
+{
+	delete _lut;
+	_lut = 0;
+}
+
+void
+Item::child_changed ()
+{
+	invalidate_lut ();
+	_bounding_box_dirty = true;
+
+	if (_parent) {
+		_parent->child_changed ();
+	}
+}
+
+void
+Item::add_items_at_point (Duple const point, vector<Item const *>& items) const
+{
+	boost::optional<Rect> const bbox = bounding_box ();
+
+	/* Point is in window coordinate system */
+
+	if (!bbox || !item_to_window (bbox.get()).contains (point)) {
+		return;
+	}
+
+	/* recurse and add any items within our group that contain point */
+
+	vector<Item*> our_items;
+
+	if (!_items.empty()) {
+		ensure_lut ();
+		our_items = _lut->items_at_point (point);
+	}
+
+	if (!our_items.empty() || covers (point)) {
+		/* this adds this item itself to the list of items at point */
+		items.push_back (this);
+	}
+
+	for (vector<Item*>::iterator i = our_items.begin(); i != our_items.end(); ++i) {
+		(*i)->add_items_at_point (point, items);
+	}
+}
+
+void
+Item::dump (ostream& o) const
+{
+	boost::optional<ArdourCanvas::Rect> bb = bounding_box();
+
+	o << _canvas->indent() << whatami() << ' ' << this << " Visible ? " << _visible;
+	o << " @ " << position();
+	
+#ifdef CANVAS_DEBUG
+	if (!name.empty()) {
+		o << ' ' << name;
+	}
+#endif
+
+	if (bb) {
+		o << endl << _canvas->indent() << "\tbbox: " << bb.get();
+		o << endl << _canvas->indent() << "\tCANVAS bbox: " << item_to_canvas (bb.get());
+	} else {
+		o << " bbox unset";
+	}
+
+	o << endl;
+
+	if (!_items.empty()) {
+
+#ifdef CANVAS_DEBUG
+		o << _canvas->indent();
+		o << " @ " << position();
+		o << " Items: " << _items.size();
+		o << " Visible ? " << _visible;
+		
+		boost::optional<Rect> bb = bounding_box();
+		
+		if (bb) {
+			o << endl << _canvas->indent() << "  bbox: " << bb.get();
+			o << endl << _canvas->indent() << "  CANVAS bbox: " << item_to_canvas (bb.get());
+		} else {
+			o << "  bbox unset";
+		}
+		
+		o << endl;
+#endif
+		
+		ArdourCanvas::dump_depth++;
+		
+		for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
+			o << **i;
+		}
+		
+		ArdourCanvas::dump_depth--;
+	}
 }
 
 ostream&

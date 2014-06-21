@@ -26,8 +26,8 @@ Circle::Circle (Canvas* c)
 	set_arc (360.0);
 }
 
-Circle::Circle (Group* g)
-	: Arc (g)
+Circle::Circle (Item * parent)
+	: Arc (parent)
 {
 	set_arc (360.0);
 }

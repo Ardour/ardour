@@ -32,7 +32,7 @@ class LIBCANVAS_API Text : public Item
 {
 public:
 	Text (Canvas*);
-	Text (Group*);
+	Text (Item*);
        ~Text();
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
