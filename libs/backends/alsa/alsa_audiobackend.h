@@ -36,6 +36,7 @@
 
 #include "zita-alsa-pcmi.h"
 #include "alsa_rawmidi.h"
+#include "alsa_sequencer.h"
 
 namespace ARDOUR {
 
@@ -367,8 +368,8 @@ class AlsaAudioBackend : public AudioBackend {
 		std::vector<AlsaPort *> _system_midi_in;
 		std::vector<AlsaPort *> _system_midi_out;
 
-		std::vector<AlsaRawMidiOut *> _rmidi_out;
-		std::vector<AlsaRawMidiIn  *> _rmidi_in;
+		std::vector<AlsaMidiOut *> _rmidi_out;
+		std::vector<AlsaMidiIn  *> _rmidi_in;
 
 		struct PortConnectData {
 			std::string a;

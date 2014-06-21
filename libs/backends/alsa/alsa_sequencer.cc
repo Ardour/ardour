@@ -17,16 +17,19 @@
  */
 
 #include <unistd.h>
-
 #include <glibmm.h>
 
+#include "select_sleep.h"
 #include "alsa_sequencer.h"
-#include "rt_thread.h"
 
 #include "pbd/error.h"
 #include "i18n.h"
 
 using namespace ARDOUR;
+
+/* max bytes per individual midi-event
+ * events larger than this are ignored */
+#define MaxAlsaSeqEventSize (64)
 
 #ifndef NDEBUG
 #define _DEBUGPRINT(STR) fprintf(stderr, STR);
@@ -35,17 +38,9 @@ using namespace ARDOUR;
 #endif
 
 AlsaSeqMidiIO::AlsaSeqMidiIO (const char *device, const bool input)
-	: _state (-1)
-	, _running (false)
+	: AlsaMidiIO()
 	, _seq (0)
-	, _pfds (0)
-	, _sample_length_us (1e6 / 48000.0)
-	, _period_length_us (1.024e6 / 48000.0)
-	, _samples_per_period (1024)
-	, _rb (0)
 {
-	pthread_mutex_init (&_notify_mutex, 0);
-	pthread_cond_init (&_notify_ready, 0);
 	init (device, input);
 }
 
@@ -55,10 +50,6 @@ AlsaSeqMidiIO::~AlsaSeqMidiIO ()
 		snd_seq_close (_seq);
 		_seq = 0;
 	}
-	delete _rb;
-	pthread_mutex_destroy (&_notify_mutex);
-	pthread_cond_destroy (&_notify_ready);
-	free (_pfds);
 }
 
 void
@@ -102,23 +93,17 @@ AlsaSeqMidiIO::init (const char *device_name, const bool input)
 
 	if (input) {
 		if (snd_seq_connect_from (_seq, _port, port.client, port.port) < 0) {
-			_DEBUGPRINT("AlsaSeqMidiIO: cannot connect port.\n");
+			_DEBUGPRINT("AlsaSeqMidiIO: cannot connect input port.\n");
 			goto initerr;
 		}
 	} else {
 		if (snd_seq_connect_to (_seq, _port, port.client, port.port) < 0) {
-			_DEBUGPRINT("AlsaSeqMidiIO: cannot connect port.\n");
+			_DEBUGPRINT("AlsaSeqMidiIO: cannot connect output port.\n");
 			goto initerr;
 		}
 	}
 
 	snd_seq_nonblock(_seq, 1);
-
-	// MIDI (hw port) 31.25 kbaud
-	// worst case here is  8192 SPP and 8KSPS for which we'd need
-	// 4000 bytes sans MidiEventHeader.
-	// since we're not always in sync, let's use 4096.
-	_rb = new RingBuffer<uint8_t>(4096 + 4096 * sizeof(MidiEventHeader));
 
 	_state = 0;
 	return;
@@ -130,122 +115,13 @@ initerr:
 	return;
 }
 
-static void * pthread_process (void *arg)
-{
-	AlsaSeqMidiIO *d = static_cast<AlsaSeqMidiIO *>(arg);
-	d->main_process_thread ();
-	pthread_exit (0);
-	return 0;
-}
-
-int
-AlsaSeqMidiIO::start ()
-{
-	if (_realtime_pthread_create (SCHED_FIFO, -21, 100000,
-				&_main_thread, pthread_process, this))
-	{
-		if (pthread_create (&_main_thread, NULL, pthread_process, this)) {
-			PBD::error << _("AlsaSeqMidiIO: Failed to create process thread.") << endmsg;
-			return -1;
-		} else {
-			PBD::warning << _("AlsaSeqMidiIO: Cannot acquire realtime permissions.") << endmsg;
-		}
-	}
-	int timeout = 5000;
-	while (!_running && --timeout > 0) { Glib::usleep (1000); }
-	if (timeout == 0 || !_running) {
-		return -1;
-	}
-	return 0;
-}
-
-int
-AlsaSeqMidiIO::stop ()
-{
-	void *status;
-	if (!_running) {
-		return 0;
-	}
-
-	_running = false;
-
-	pthread_mutex_lock (&_notify_mutex);
-	pthread_cond_signal (&_notify_ready);
-	pthread_mutex_unlock (&_notify_mutex);
-
-	if (pthread_join (_main_thread, &status)) {
-		PBD::error << _("AlsaSeqMidiIO: Failed to terminate.") << endmsg;
-		return -1;
-	}
-	return 0;
-}
-
-void
-AlsaSeqMidiIO::setup_timing (const size_t samples_per_period, const float samplerate)
-{
-	_period_length_us = (double) samples_per_period * 1e6 / samplerate;
-	_sample_length_us = 1e6 / samplerate;
-	_samples_per_period = samples_per_period;
-}
-
-void
-AlsaSeqMidiIO::sync_time (const uint64_t tme)
-{
-	// TODO consider a PLL, if this turns out to be the bottleneck for jitter
-	// also think about using
-	// snd_pcm_status_get_tstamp() and snd_rawmidi_status_get_tstamp()
-	// instead of monotonic clock.
-#ifdef DEBUG_TIMING
-	double tdiff = (_clock_monotonic + _period_length_us - tme) / 1000.0;
-	if (abs(tdiff) >= .05) {
-		printf("AlsaSeqMidiIO MJ: %.1f ms\n", tdiff);
-	}
-#endif
-	_clock_monotonic = tme;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-// select sleeps _at most_ (compared to usleep() which sleeps at least)
-static void select_sleep (uint32_t usec) {
-	if (usec <= 10) return;
-	fd_set fd;
-	int max_fd=0;
-	struct timeval tv;
-	tv.tv_sec = usec / 1000000;
-	tv.tv_usec = usec % 1000000;
-	FD_ZERO (&fd);
-	select (max_fd, &fd, NULL, NULL, &tv);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 AlsaSeqMidiOut::AlsaSeqMidiOut (const char *device)
 		: AlsaSeqMidiIO (device, false)
+		, AlsaMidiOut ()
 {
 }
-
-
-int
-AlsaSeqMidiOut::send_event (const pframes_t time, const uint8_t *data, const size_t size)
-{
-	const uint32_t  buf_size = sizeof (MidiEventHeader) + size;
-	if (_rb->write_space() < buf_size) {
-		_DEBUGPRINT("AlsaSeqMidiOut: ring buffer overflow\n");
-		return -1;
-	}
-	struct MidiEventHeader h (_clock_monotonic + time * _sample_length_us, size);
-	_rb->write ((uint8_t*) &h, sizeof(MidiEventHeader));
-	_rb->write (data, size);
-
-	if (pthread_mutex_trylock (&_notify_mutex) == 0) {
-		pthread_cond_signal (&_notify_ready);
-		pthread_mutex_unlock (&_notify_mutex);
-	}
-	return 0;
-}
-
-#define MaxAlsaSeqEventSize 64
 
 void *
 AlsaSeqMidiOut::main_process_thread ()
@@ -353,88 +229,8 @@ retry:
 
 AlsaSeqMidiIn::AlsaSeqMidiIn (const char *device)
 		: AlsaSeqMidiIO (device, true)
+		, AlsaMidiIn ()
 {
-}
-
-size_t
-AlsaSeqMidiIn::recv_event (pframes_t &time, uint8_t *data, size_t &size)
-{
-	const uint32_t read_space = _rb->read_space();
-	struct MidiEventHeader h(0,0);
-
-	if (read_space <= sizeof(MidiEventHeader)) {
-		return 0;
-	}
-
-#if 1
-	// check if event is in current cycle
-	RingBuffer<uint8_t>::rw_vector vector;
-	_rb->get_read_vector(&vector);
-	if (vector.len[0] >= sizeof(MidiEventHeader)) {
-		memcpy((uint8_t*)&h, vector.buf[0], sizeof(MidiEventHeader));
-	} else {
-		if (vector.len[0] > 0) {
-			memcpy ((uint8_t*)&h, vector.buf[0], vector.len[0]);
-		}
-		memcpy (((uint8_t*)&h) + vector.len[0], vector.buf[1], sizeof(MidiEventHeader) - vector.len[0]);
-	}
-
-	if (h.time >= _clock_monotonic + _period_length_us ) {
-#ifdef DEBUG_TIMING
-		printf("AlsaSeqMidiIn DEBUG: POSTPONE EVENT TO NEXT CYCLE: %.1f spl\n", ((h.time - _clock_monotonic) / _sample_length_us));
-#endif
-		return 0;
-	}
-	_rb->increment_read_idx (sizeof(MidiEventHeader));
-#else
-	if (_rb->read ((uint8_t*)&h, sizeof(MidiEventHeader)) != sizeof(MidiEventHeader)) {
-		_DEBUGPRINT("AlsaSeqMidiIn::recv_event Garbled MIDI EVENT HEADER!!\n");
-		return 0;
-	}
-#endif
-	assert (h.size > 0);
-	if (h.size > size) {
-		_DEBUGPRINT("AlsaSeqMidiIn::recv_event MIDI event too large!\n");
-		_rb->increment_read_idx (h.size);
-		return 0;
-	}
-	if (_rb->read (&data[0], h.size) != h.size) {
-		_DEBUGPRINT("AlsaSeqMidiIn::recv_event Garbled MIDI EVENT DATA!!\n");
-		return 0;
-	}
-	if (h.time < _clock_monotonic) {
-#ifdef DEBUG_TIMING
-		printf("AlsaSeqMidiIn DEBUG: MIDI TIME < 0 %.1f spl\n", ((_clock_monotonic - h.time) / -_sample_length_us));
-#endif
-		time = 0;
-	} else if (h.time >= _clock_monotonic + _period_length_us ) {
-#ifdef DEBUG_TIMING
-		printf("AlsaSeqMidiIn DEBUG: MIDI TIME > PERIOD %.1f spl\n", ((h.time - _clock_monotonic) / _sample_length_us));
-#endif
-		time = _samples_per_period - 1;
-	} else {
-		time = floor ((h.time - _clock_monotonic) / _sample_length_us);
-	}
-	assert(time < _samples_per_period);
-	size = h.size;
-	return h.size;
-}
-
-int
-AlsaSeqMidiIn::queue_event (const uint64_t time, const uint8_t *data, const size_t size) {
-	const uint32_t  buf_size = sizeof(MidiEventHeader) + size;
-
-	if (size == 0) {
-		return -1;
-	}
-	if (_rb->write_space() < buf_size) {
-		_DEBUGPRINT("AlsaSeqMidiIn: ring buffer overflow\n");
-		return -1;
-	}
-	struct MidiEventHeader h (time, size);
-	_rb->write ((uint8_t*) &h, sizeof(MidiEventHeader));
-	_rb->write (data, size);
-	return 0;
 }
 
 void *

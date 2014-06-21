@@ -27,75 +27,39 @@
 
 #include "pbd/ringbuffer.h"
 #include "ardour/types.h"
+#include "alsa_midi.h"
 
 namespace ARDOUR {
 
-class AlsaRawMidiIO {
+class AlsaRawMidiIO : virtual public AlsaMidiIO {
 public:
 	AlsaRawMidiIO (const char *device, const bool input);
 	virtual ~AlsaRawMidiIO ();
 
-	int state (void) const { return _state; }
-	int start ();
-	int stop ();
-
-	void setup_timing (const size_t samples_per_period, const float samplerate);
-	void sync_time(uint64_t);
-
-	virtual void* main_process_thread () = 0;
-
 protected:
-	pthread_t _main_thread;
-	pthread_mutex_t _notify_mutex;
-	pthread_cond_t _notify_ready;
-
-	int  _state;
-	bool  _running;
-
 	snd_rawmidi_t *_device;
-	int _npfds;
-	struct pollfd *_pfds;
-
-	double _sample_length_us;
-	double _period_length_us;
-	size_t _samples_per_period;
-	uint64_t _clock_monotonic;
-
-	struct MidiEventHeader {
-		uint64_t time;
-		size_t size;
-		MidiEventHeader(const uint64_t t, const size_t s)
-			: time(t)
-			, size(s) {}
-	};
-
-	RingBuffer<uint8_t>* _rb;
 
 private:
 	void init (const char *device_name, const bool input);
-
 };
 
-class AlsaRawMidiOut : public AlsaRawMidiIO
+class AlsaRawMidiOut : public AlsaRawMidiIO, public AlsaMidiOut
 {
 public:
 	AlsaRawMidiOut (const char *device);
-
 	void* main_process_thread ();
-	int send_event (const pframes_t, const uint8_t *, const size_t);
 };
 
-class AlsaRawMidiIn : public AlsaRawMidiIO
+class AlsaRawMidiIn : public AlsaRawMidiIO, public AlsaMidiIn
 {
 public:
 	AlsaRawMidiIn (const char *device);
 
 	void* main_process_thread ();
 
-	size_t recv_event (pframes_t &, uint8_t *, size_t &);
-
-private:
+protected:
 	int queue_event (const uint64_t, const uint8_t *, const size_t);
+private:
 	void parse_events (const uint64_t, const uint8_t *, const size_t);
 	bool process_byte (const uint64_t, const uint8_t);
 
