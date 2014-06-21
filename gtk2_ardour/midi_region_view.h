@@ -67,7 +67,7 @@ public:
 	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
 	typedef Evoral::Sequence<Evoral::MusicalTime>::Notes Notes;
 
-	MidiRegionView (ArdourCanvas::Group *,
+	MidiRegionView (ArdourCanvas::Layout *,
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
 	                double initial_samples_per_pixel,
@@ -309,7 +309,7 @@ protected:
 	/** Allows derived types to specify their visibility requirements
 	 * to the TimeAxisViewItem parent class.
 	 */
-	MidiRegionView (ArdourCanvas::Group *,
+	MidiRegionView (ArdourCanvas::Layout *,
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
 	                double samples_per_pixel,
@@ -387,7 +387,7 @@ private:
 	PatchChanges                         _patch_changes;
 	SysExes                              _sys_exes;
 	Note**                               _active_notes;
-	ArdourCanvas::Group*                 _note_group;
+	ArdourCanvas::Layout*                 _note_group;
 	ARDOUR::MidiModel::NoteDiffCommand*  _note_diff_command;
 	Note*                                _ghost_note;
 	double                               _last_ghost_x;
@@ -401,7 +401,7 @@ private:
 	/** A group used to temporarily reparent _note_group to during start trims, so
 	 *  that the notes don't move with the parent region view.
 	 */
-	ArdourCanvas::Group*                 _temporary_note_group;
+	ArdourCanvas::Layout*                 _temporary_note_group;
 
 	MouseState _mouse_state;
 	int _pressed_button;

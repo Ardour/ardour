@@ -30,10 +30,10 @@
 using namespace ARDOUR;
 using namespace ArdourCanvas;
 
-Hit::Hit (MidiRegionView& region, Group* group, double size, const boost::shared_ptr<NoteType> note, bool with_events) 
+Hit::Hit (MidiRegionView& region, Item* parent, double size, const boost::shared_ptr<NoteType> note, bool with_events) 
 	: NoteBase (region, with_events, note)
 {
-	_polygon = new ArdourCanvas::Polygon (group);
+	_polygon = new ArdourCanvas::Polygon (parent);
 	CANVAS_DEBUG_NAME (_polygon, "note");
 	set_item (_polygon);
 	set_height (size);

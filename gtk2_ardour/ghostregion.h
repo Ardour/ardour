@@ -36,7 +36,7 @@ class TimeAxisView;
 class GhostRegion : public sigc::trackable
 {
 public:
-	GhostRegion(ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
+	GhostRegion(ArdourCanvas::Layout* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
 	virtual ~GhostRegion();
 
 	virtual void set_samples_per_pixel (double) = 0;
@@ -52,7 +52,7 @@ public:
 	TimeAxisView& trackview;
 	/** TimeAxisView that we are a ghost for */
 	TimeAxisView& source_trackview;
-	ArdourCanvas::Group* group;
+	ArdourCanvas::Layout* group;
 	ArdourCanvas::Rectangle* base_rect;
 
 	static PBD::Signal1<void,GhostRegion*> CatchDeletion;
@@ -73,7 +73,7 @@ class MidiGhostRegion : public GhostRegion {
 public:
 	class GhostEvent : public sigc::trackable {
 	  public:
-	    GhostEvent(::NoteBase *, ArdourCanvas::Group *);
+	    GhostEvent(::NoteBase *, ArdourCanvas::Layout *);
 	    virtual ~GhostEvent ();
 	    
 	    NoteBase* event;

@@ -46,7 +46,7 @@ const TimeAxisViewItem::Visibility TapeAudioRegionView::default_tape_visibility
 		TimeAxisViewItem::HideFrameRight |
 		TimeAxisViewItem::FullWidthNameHighlight);
 
-TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
+TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Layout *parent, RouteTimeAxisView &tv,
 					  boost::shared_ptr<AudioRegion> r,
 					  double spu,
 					  uint32_t basic_color)

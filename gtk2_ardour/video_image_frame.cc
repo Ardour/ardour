@@ -24,7 +24,7 @@
 #include "video_image_frame.h"
 #include "public_editor.h"
 #include "utils.h"
-#include "canvas/group.h"
+#include "canvas/layout.h"
 #include "utils_videotl.h"
 
 #include <gtkmm2ext/utils.h>
@@ -43,7 +43,7 @@ static void freedata_cb (uint8_t *d, void* /*arg*/) {
 	free (d);
 }
 
-VideoImageFrame::VideoImageFrame (PublicEditor& ed, ArdourCanvas::Group& parent, int w, int h, std::string vsurl, std::string vfn)
+VideoImageFrame::VideoImageFrame (PublicEditor& ed, ArdourCanvas::Layout& parent, int w, int h, std::string vsurl, std::string vfn)
 	: editor (ed)
 	, _parent(&parent)
 	, clip_width(w)

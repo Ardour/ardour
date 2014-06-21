@@ -23,6 +23,7 @@
 #include "ardour/profile.h"
 
 #include "canvas/debug.h"
+#include "canvas/scroll_group.h"
 
 #include "ardour_ui.h"
 #include "audio_clock.h"

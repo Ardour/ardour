@@ -64,7 +64,7 @@ Editor::add_new_location (Location *location)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::add_new_location, location);
 
-	ArdourCanvas::Group* group = add_new_location_internal (location);
+	ArdourCanvas::Layout* group = add_new_location_internal (location);
 
 	/* Do a full update of the markers in this group */
 	update_marker_labels (group);
@@ -82,14 +82,14 @@ Editor::add_new_location (Location *location)
  *  the caller must call update_marker_labels () after calling this.
  *  @return canvas group that the location's marker was added to.
  */
-ArdourCanvas::Group*
+ArdourCanvas::Layout*
 Editor::add_new_location_internal (Location* location)
 {
 	LocationMarkers *lam = new LocationMarkers;
 	uint32_t color;
 
 	/* make a note here of which group this marker ends up in */
-	ArdourCanvas::Group* group = 0;
+	ArdourCanvas::Layout* group = 0;
 
 	if (location->is_cd_marker()) {
 		color = location_cd_marker_color;
@@ -311,14 +311,14 @@ struct MarkerComparator {
 void
 Editor::update_marker_labels ()
 {
-	for (std::map<ArdourCanvas::Group *, std::list<Marker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
+	for (std::map<ArdourCanvas::Layout *, std::list<Marker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
 		update_marker_labels (i->first);
 	}
 }
 
 /** Look at all markers in a group and update label widths */
 void
-Editor::update_marker_labels (ArdourCanvas::Group* group)
+Editor::update_marker_labels (ArdourCanvas::Layout* group)
 {
 	list<Marker*>& sorted = _sorted_marker_lists[group];
 
@@ -1576,7 +1576,7 @@ Editor::toggle_marker_lines ()
 void
 Editor::remove_sorted_marker (Marker* m)
 {
-	for (std::map<ArdourCanvas::Group *, std::list<Marker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
+	for (std::map<ArdourCanvas::Layout *, std::list<Marker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
 		i->second.remove (m);
 	}
 }
