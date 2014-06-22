@@ -1111,8 +1111,19 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 }
 
 bool
-Editor::canvas_drop_zone_event (GdkEvent* /*event*/)
+Editor::canvas_drop_zone_event (GdkEvent* event)
 {
+	switch (event->type) {
+	case GDK_BUTTON_RELEASE:
+		if (event->button.button == 1) {
+			selection->clear_objects ();
+			selection->clear_tracks ();
+		}
+		break;
+	default:
+		break;
+	}
+
 	return true;
 }
 
