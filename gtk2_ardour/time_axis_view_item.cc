@@ -28,7 +28,7 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/gui_thread.h"
 
-#include "canvas/layout.h"
+#include "canvas/container.h"
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"
 #include "canvas/text.h"
@@ -162,7 +162,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 			framepos_t start, framepos_t duration, Visibility vis, 
 			bool wide, bool high)
 {
-	group = new ArdourCanvas::Layout (parent);
+	group = new ArdourCanvas::Container (parent);
 	CANVAS_DEBUG_NAME (group, string_compose ("TAVI group for %1", get_item_name()));
 	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
 

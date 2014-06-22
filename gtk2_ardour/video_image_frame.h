@@ -32,7 +32,7 @@
 #include "ardour/ardour.h"
 #include "pbd/signals.h"
 
-#include "canvas/layout.h"
+#include "canvas/container.h"
 #include "canvas/pixbuf.h"
 #include "canvas/image.h"
 
@@ -49,7 +49,7 @@ class PublicEditor;
 class VideoImageFrame : public sigc::trackable
 {
 	public:
-	VideoImageFrame (PublicEditor&, ArdourCanvas::Layout&, int, int, std::string, std::string);
+	VideoImageFrame (PublicEditor&, ArdourCanvas::Container&, int, int, std::string, std::string);
 	virtual ~VideoImageFrame ();
 
 	void set_position (framepos_t);
@@ -69,7 +69,7 @@ class VideoImageFrame : public sigc::trackable
 	protected:
 
 	PublicEditor& editor;
-	ArdourCanvas::Layout *_parent;
+	ArdourCanvas::Container *_parent;
 	ArdourCanvas::Image *image;
 	boost::shared_ptr<ArdourCanvas::Image::Data> img;
 

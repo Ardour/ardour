@@ -283,6 +283,7 @@ protected:
 	std::list<Item*> _items;
 
 	void add_child_bounding_boxes() const;
+	void render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 
 private:
 	void init ();

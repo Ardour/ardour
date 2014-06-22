@@ -29,7 +29,7 @@
 
 #include <gtk/gtkaction.h>
 
-#include "canvas/layout.h"
+#include "canvas/container.h"
 #include "canvas/canvas.h"
 #include "canvas/ruler.h"
 #include "canvas/debug.h"

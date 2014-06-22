@@ -38,6 +38,12 @@ Container::Container (Item* parent, Duple const & p)
 }
 
 void
+Container::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	Item::render_children (area, context);
+}
+
+void
 Container::compute_bounding_box () const
 {
 	_bounding_box = boost::none;

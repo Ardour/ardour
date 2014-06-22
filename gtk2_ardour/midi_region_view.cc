@@ -88,13 +88,13 @@ PBD::Signal1<void, MidiRegionView *> MidiRegionView::SelectionCleared;
 
 #define MIDI_BP_ZERO ((Config->get_first_midi_bank_is_zero())?0:1)
 
-MidiRegionView::MidiRegionView (ArdourCanvas::Layout *parent, RouteTimeAxisView &tv,
+MidiRegionView::MidiRegionView (ArdourCanvas::Container *parent, RouteTimeAxisView &tv,
                                 boost::shared_ptr<MidiRegion> r, double spu, uint32_t basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, _current_range_min(0)
 	, _current_range_max(0)
 	, _active_notes(0)
-	, _note_group (new ArdourCanvas::Layout (group))
+	, _note_group (new ArdourCanvas::Container (group))
 	, _note_diff_command (0)
 	, _ghost_note(0)
 	, _step_edit_cursor (0)
@@ -124,14 +124,14 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Layout *parent, RouteTimeAxisView 
 	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
 }
 
-MidiRegionView::MidiRegionView (ArdourCanvas::Layout *parent, RouteTimeAxisView &tv,
+MidiRegionView::MidiRegionView (ArdourCanvas::Container *parent, RouteTimeAxisView &tv,
                                 boost::shared_ptr<MidiRegion> r, double spu, uint32_t basic_color,
                                 TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, false, visibility)
 	, _current_range_min(0)
 	, _current_range_max(0)
 	, _active_notes(0)
-	, _note_group (new ArdourCanvas::Layout (parent))
+	, _note_group (new ArdourCanvas::Container (parent))
 	, _note_diff_command (0)
 	, _ghost_note(0)
 	, _step_edit_cursor (0)
@@ -177,7 +177,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _current_range_min(0)
 	, _current_range_max(0)
 	, _active_notes(0)
-	, _note_group (new ArdourCanvas::Layout (get_canvas_group()))
+	, _note_group (new ArdourCanvas::Container (get_canvas_group()))
 	, _note_diff_command (0)
 	, _ghost_note(0)
 	, _step_edit_cursor (0)
@@ -205,7 +205,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _current_range_min(0)
 	, _current_range_max(0)
 	, _active_notes(0)
-	, _note_group (new ArdourCanvas::Layout (get_canvas_group()))
+	, _note_group (new ArdourCanvas::Container (get_canvas_group()))
 	, _note_diff_command (0)
 	, _ghost_note(0)
 	, _step_edit_cursor (0)
@@ -3610,7 +3610,7 @@ void
 MidiRegionView::show_step_edit_cursor (Evoral::MusicalTime pos)
 {
 	if (_step_edit_cursor == 0) {
-		ArdourCanvas::Layout* const group = (ArdourCanvas::Layout*)get_canvas_group();
+		ArdourCanvas::Item* const group = get_canvas_group();
 
 		_step_edit_cursor = new ArdourCanvas::Rectangle (group);
 		_step_edit_cursor->set_y0 (0);
@@ -3725,7 +3725,7 @@ MidiRegionView::trim_front_starting ()
 	/* Reparent the note group to the region view's parent, so that it doesn't change
 	   when the region view is trimmed.
 	*/
-	_temporary_note_group = new ArdourCanvas::Layout (group->parent ());
+	_temporary_note_group = new ArdourCanvas::Container (group->parent ());
 	_temporary_note_group->move (group->position ());
 	_note_group->reparent (_temporary_note_group);
 }

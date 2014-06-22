@@ -35,7 +35,7 @@ class PatchChange
 public:
 	PatchChange(
 		MidiRegionView& region,
-		ArdourCanvas::Layout* parent,
+		ArdourCanvas::Container* parent,
 		const string&   text,
 		double          height,
 		double          x,

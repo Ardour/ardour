@@ -33,7 +33,7 @@ namespace ArdourCanvas {
 	class Pixbuf;
 	class Rectangle;
 	class Item;
-        class Layout;
+        class Container;
  	class Text;
 }
 
@@ -240,7 +240,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	bool high_enough_for_name;
         bool rect_visible;
 
-	ArdourCanvas::Layout*      group;
+	ArdourCanvas::Container*      group;
 	ArdourCanvas::Rectangle* vestigial_frame;
 	ArdourCanvas::Rectangle* frame;
 	ArdourCanvas::Text*      name_text;

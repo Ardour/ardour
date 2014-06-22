@@ -26,7 +26,7 @@ using namespace std;
 
 SysEx::SysEx (
 	MidiRegionView& region,
-	ArdourCanvas::Layout* parent,
+	ArdourCanvas::Container* parent,
 	string&         text,
 	double          height,
 	double          x,

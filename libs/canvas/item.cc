@@ -674,6 +674,96 @@ Item::covers (Duple const & point) const
 /* nesting/grouping API */
 
 void
+Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	if (_items.empty()) {
+		return;
+	}
+
+	ensure_lut ();
+	std::vector<Item*> items = _lut->get (area);
+
+#ifdef CANVAS_DEBUG
+	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+		cerr << string_compose ("%1%7 %2 @ %7 render %5 @ %6 %3 items out of %4\n", 
+					_canvas->render_indent(), (name.empty() ? string ("[unnamed]") : name), items.size(), _items.size(), area, _position, this,
+					whatami());
+	}
+#endif
+
+	++render_depth;
+		
+	for (std::vector<Item*>::const_iterator i = items.begin(); i != items.end(); ++i) {
+
+		if (!(*i)->visible ()) {
+#ifdef CANVAS_DEBUG
+			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+				cerr << _canvas->render_indent() << "Item " << (*i)->whatami() << " [" << (*i)->name << "] invisible - skipped\n";
+			}
+#endif
+			continue;
+		}
+		
+		boost::optional<Rect> item_bbox = (*i)->bounding_box ();
+
+		if (!item_bbox) {
+#ifdef CANVAS_DEBUG
+			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+				cerr << _canvas->render_indent() << "Item " << (*i)->whatami() << " [" << (*i)->name << "] empty - skipped\n";
+			}
+#endif
+			continue;
+		}
+		
+		Rect item = (*i)->item_to_window (item_bbox.get());
+		boost::optional<Rect> d = item.intersection (area);
+		
+		if (d) {
+			Rect draw = d.get();
+			if (draw.width() && draw.height()) {
+#ifdef CANVAS_DEBUG
+				if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+					if (dynamic_cast<Container*>(*i) == 0) {
+						cerr << _canvas->render_indent() << "render "
+						     << ' ' 
+						     << (*i)
+						     << ' '
+						     << (*i)->whatami()
+						     << ' '
+						     << (*i)->name
+						     << " item "
+						     << item_bbox.get()
+						     << " window = " 
+						     << item
+						     << " intersect = "
+						     << draw
+						     << " @ " 
+						     << _position
+						     << endl;
+					}
+				}
+#endif
+
+				(*i)->render (area, context);
+				++render_count;
+			}
+
+		} else {
+
+#ifdef CANVAS_DEBUG
+			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+				cerr << string_compose ("%1skip render of %2 %3, no intersection between %4 and %5\n", _canvas->render_indent(), (*i)->whatami(),
+							(*i)->name, item, area);
+			}
+#endif
+
+		}
+	}
+
+	--render_depth;
+}
+
+void
 Item::add_child_bounding_boxes() const
 {
 	boost::optional<Rect> self;

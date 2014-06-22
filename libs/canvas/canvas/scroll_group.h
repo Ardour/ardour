@@ -19,7 +19,7 @@
 #ifndef __CANVAS_SCROLL_GROUP_H__
 #define __CANVAS_SCROLL_GROUP_H__
 
-#include "canvas/layout.h"
+#include "canvas/container.h"
 
 namespace ArdourCanvas {
 
@@ -27,7 +27,7 @@ namespace ArdourCanvas {
  *  its children in a way that reflects the most recent
  *  call to its scroll_to() method.
  */
-class LIBCANVAS_API ScrollGroup : public Layout
+class LIBCANVAS_API ScrollGroup : public Container
 {
   public:
 	enum ScrollSensitivity {

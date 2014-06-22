@@ -365,7 +365,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual Gtk::HBox& get_status_bar_packer() = 0;
 #endif
 
-	virtual ArdourCanvas::Layout* get_trackview_group () const = 0;
+	virtual ArdourCanvas::Container* get_trackview_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_hscroll_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_vscroll_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_hvscroll_group () const = 0;

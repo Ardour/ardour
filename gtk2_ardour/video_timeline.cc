@@ -51,7 +51,7 @@ using namespace PBD;
 using namespace Timecode;
 using namespace VideoUtils;
 
-VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Layout *vbg, int initial_height)
+VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Container *vbg, int initial_height)
 	: editor (ed)
 		, videotl_group(vbg)
 		, bar_height(initial_height)

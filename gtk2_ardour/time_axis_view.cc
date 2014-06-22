@@ -97,16 +97,16 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 		compute_heights ();
 	}
 
-	_canvas_display = new ArdourCanvas::Layout (ed.get_trackview_group (), ArdourCanvas::Duple (0.0, 0.0));
+	_canvas_display = new ArdourCanvas::Container (ed.get_trackview_group (), ArdourCanvas::Duple (0.0, 0.0));
 	CANVAS_DEBUG_NAME (_canvas_display, "main for TAV");
 	_canvas_display->hide(); // reveal as needed
 
-	selection_group = new ArdourCanvas::Layout (_canvas_display);
+	selection_group = new ArdourCanvas::Container (_canvas_display);
 	CANVAS_DEBUG_NAME (selection_group, "selection for TAV");
 	selection_group->set_data (X_("timeselection"), (void *) 1);
 	selection_group->hide();
 	
-	_ghost_group = new ArdourCanvas::Layout (_canvas_display);
+	_ghost_group = new ArdourCanvas::Container (_canvas_display);
 	CANVAS_DEBUG_NAME (_ghost_group, "ghost for TAV");
 	_ghost_group->lower_to_bottom();
 	_ghost_group->show();

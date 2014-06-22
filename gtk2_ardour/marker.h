@@ -56,7 +56,7 @@ class Marker : public sigc::trackable
 	};
 
 
-	Marker (PublicEditor& editor, ArdourCanvas::Layout &, guint32 rgba, const std::string& text, Type,
+	Marker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Type,
 		framepos_t frame = 0, bool handle_events = true);
 
 	virtual ~Marker ();
@@ -76,8 +76,8 @@ class Marker : public sigc::trackable
 
 	framepos_t position() const { return frame_position; }
 
-	ArdourCanvas::Layout * get_parent() { return _parent; }
-	void reparent (ArdourCanvas::Layout & parent);
+	ArdourCanvas::Container * get_parent() { return _parent; }
+	void reparent (ArdourCanvas::Container & parent);
 
 	void hide ();
 	void show ();
@@ -98,8 +98,8 @@ class Marker : public sigc::trackable
 
 	Pango::FontDescription name_font;
 
-	ArdourCanvas::Layout* _parent;
-	ArdourCanvas::Layout *group;
+	ArdourCanvas::Container* _parent;
+	ArdourCanvas::Container *group;
 	ArdourCanvas::Polygon *mark;
         ArdourCanvas::Text *_name_item;
 	ArdourCanvas::Points *points;
@@ -134,7 +134,7 @@ private:
 class TempoMarker : public Marker
 {
   public:
-        TempoMarker (PublicEditor& editor, ArdourCanvas::Layout &, guint32 rgba, const std::string& text, ARDOUR::TempoSection&);
+        TempoMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, ARDOUR::TempoSection&);
 	~TempoMarker ();
 
 	ARDOUR::TempoSection& tempo() const { return _tempo; }
@@ -146,7 +146,7 @@ class TempoMarker : public Marker
 class MeterMarker : public Marker
 {
   public:
-        MeterMarker (PublicEditor& editor, ArdourCanvas::Layout &, guint32 rgba, const std::string& text, ARDOUR::MeterSection&);
+        MeterMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, ARDOUR::MeterSection&);
 	~MeterMarker ();
 
 	ARDOUR::MeterSection& meter() const { return _meter; }

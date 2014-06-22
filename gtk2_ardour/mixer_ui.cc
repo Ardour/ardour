@@ -91,9 +91,9 @@ Mixer_UI::Mixer_UI ()
 	, _monitor_section (0)
 	, _strip_width (Config->get_default_narrow_ms() ? Narrow : Wide)
 	, ignore_reorder (false)
-	, _following_editor_selection (false)
         , _in_group_rebuild_or_clear (false)
         , _route_deletion_in_progress (false)
+	, _following_editor_selection (false)
 	, _maximised (false)
 {
 	/* allow this window to become the key focus window */

@@ -99,7 +99,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	terminal_points_can_slide = true;
 	_height = 0;
 
-	group = new ArdourCanvas::Layout (&parent);
+	group = new ArdourCanvas::Container (&parent);
 	CANVAS_DEBUG_NAME (group, "region gain envelope group");
 
 	line = new ArdourCanvas::PolyLine (group);

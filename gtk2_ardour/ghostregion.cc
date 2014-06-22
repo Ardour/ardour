@@ -18,7 +18,7 @@
 */
 
 #include "evoral/Note.hpp"
-#include "canvas/layout.h"
+#include "canvas/container.h"
 #include "canvas/rectangle.h"
 #include "canvas/wave_view.h"
 #include "canvas/debug.h"
@@ -38,11 +38,11 @@ using namespace ARDOUR;
 
 PBD::Signal1<void,GhostRegion*> GhostRegion::CatchDeletion;
 
-GhostRegion::GhostRegion (ArdourCanvas::Layout* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_pos)
+GhostRegion::GhostRegion (ArdourCanvas::Container* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_pos)
 	: trackview (tv)
 	, source_trackview (source_tv)
 {
-	group = new ArdourCanvas::Layout (parent);
+	group = new ArdourCanvas::Container (parent);
 	CANVAS_DEBUG_NAME (group, "ghost region");
 	group->set_position (ArdourCanvas::Duple (initial_pos, 0));
 
@@ -191,7 +191,7 @@ MidiGhostRegion::~MidiGhostRegion()
 	clear_events ();
 }
 
-MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Layout* g)
+MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g)
 	: event (e)
 {
 	rect = new ArdourCanvas::Rectangle (g, ArdourCanvas::Rect (e->x0(), e->y0(), e->x1(), e->y1()));

@@ -25,7 +25,7 @@
 
 class TempoLines {
 public:
-	TempoLines (ArdourCanvas::Layout* group, double screen_height);
+	TempoLines (ArdourCanvas::Container* group, double screen_height);
 
 	void tempo_map_changed();
 
