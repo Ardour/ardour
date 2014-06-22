@@ -20,6 +20,7 @@
 
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
+#include "ardour/route.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -41,7 +42,7 @@ InternalReturn::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*e
 	
 	if (lm.locked ()) {
 		for (list<InternalSend*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
-			if ((*i)->active ()) {
+			if ((*i)->active () && (!(*i)->source_route() || (*i)->source_route()->active())) {
 				bufs.merge_from ((*i)->get_buffers(), nframes);
 			}
 		}

@@ -2111,8 +2111,8 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 				boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
 				XMLNode n (**niter);
-                                InternalSend* s = new InternalSend (*_session, sendpan, _route->mute_master(),
-								    boost::shared_ptr<Route>(), Delivery::Aux); 
+				InternalSend* s = new InternalSend (*_session, sendpan, _route->mute_master(),
+						_route, boost::shared_ptr<Route>(), Delivery::Aux);
 
 				IOProcessor::prepare_for_reset (n, s->name());
 

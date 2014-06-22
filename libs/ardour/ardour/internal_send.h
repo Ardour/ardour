@@ -28,7 +28,7 @@ namespace ARDOUR {
 class LIBARDOUR_API InternalSend : public Send
 {
   public:
-	InternalSend (Session&, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster>, boost::shared_ptr<Route> send_to, Delivery::Role role = Delivery::Aux, bool ignore_bitslot = false);
+	InternalSend (Session&, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster>, boost::shared_ptr<Route> send_from, boost::shared_ptr<Route> send_to, Delivery::Role role = Delivery::Aux, bool ignore_bitslot = false);
 	virtual ~InternalSend ();
 
 	std::string display_name() const;
@@ -46,6 +46,7 @@ class LIBARDOUR_API InternalSend : public Send
 	bool configure_io (ChanCount in, ChanCount out);
 	int  set_block_size (pframes_t);
 
+	boost::shared_ptr<Route> source_route() const { return _send_from; }
 	boost::shared_ptr<Route> target_route() const { return _send_to; }
 	const PBD::ID& target_id() const { return _send_to_id; }
 
@@ -60,6 +61,7 @@ class LIBARDOUR_API InternalSend : public Send
 
   private:
 	BufferSet mixbufs;
+	boost::shared_ptr<Route> _send_from;
 	boost::shared_ptr<Route> _send_to;
 	PBD::ID _send_to_id;
 	PBD::ScopedConnection connect_c;
