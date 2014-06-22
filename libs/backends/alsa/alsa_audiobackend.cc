@@ -1008,6 +1008,7 @@ AlsaAudioBackend::register_system_midi_ports()
 				LatencyRange lr;
 				lr.min = lr.max = _samples_per_period + (_measure_latency ? 0 : nfo->systemic_output_latency);
 				set_latency_range (p, false, lr);
+				static_cast<AlsaMidiPort*>(p)->set_n_periods(2);
 				_system_midi_out.push_back(static_cast<AlsaPort*>(p));
 				_rmidi_out.push_back (mout);
 			}
@@ -1428,7 +1429,7 @@ AlsaAudioBackend::main_process_thread ()
 				i = 0;
 				for (std::vector<AlsaPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
 					assert (_rmidi_in.size() > i);
-					AlsaMidiIn *rm = static_cast<AlsaMidiIn*>(_rmidi_in.at(i));
+					AlsaMidiIn *rm = _rmidi_in.at(i);
 					void *bptr = (*it)->get_buffer(0);
 					pframes_t time;
 					uint8_t data[64]; // match MaxAlsaEventSize in alsa_rawmidi.cc
@@ -1461,7 +1462,7 @@ AlsaAudioBackend::main_process_thread ()
 				for (std::vector<AlsaPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
 					assert (_rmidi_out.size() > i);
 					const AlsaMidiBuffer src = static_cast<const AlsaMidiPort*>(*it)->const_buffer();
-					AlsaMidiOut *rm = static_cast<AlsaMidiOut*>(_rmidi_out.at(i));
+					AlsaMidiOut *rm = _rmidi_out.at(i);
 					rm->sync_time (clock1);
 					for (AlsaMidiBuffer::const_iterator mit = src.begin (); mit != src.end (); ++mit) {
 						rm->send_event ((*mit)->timestamp(), (*mit)->data(), (*mit)->size());
@@ -1764,6 +1765,7 @@ void* AlsaAudioPort::get_buffer (pframes_t n_samples)
 
 AlsaMidiPort::AlsaMidiPort (AlsaAudioBackend &b, const std::string& name, PortFlags flags)
 	: AlsaPort (b, name, flags)
+	, _n_periods (1)
 	, _bufperiod (0)
 {
 	_buffer[0].clear ();
