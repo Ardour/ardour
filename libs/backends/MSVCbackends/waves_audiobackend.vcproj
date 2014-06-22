@@ -4,7 +4,7 @@
 	Version="8.00"
 	Name="waves_backend"
 	ProjectGUID="{D7B1537C-C244-4D86-BBBF-74A1801AB984}"
-	RootNamespace="waves_backend"
+	RootNamespace="waves_audiobackend"
 	>
 	<Platforms>
 		<Platform
