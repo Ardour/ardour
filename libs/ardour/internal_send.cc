@@ -40,14 +40,21 @@ using namespace std;
 
 PBD::Signal1<void, pframes_t> InternalSend::CycleStart;
 
-InternalSend::InternalSend (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, boost::shared_ptr<Route> sendto, Delivery::Role role, bool ignore_bitslot)
+InternalSend::InternalSend (Session& s,
+		boost::shared_ptr<Pannable> p,
+		boost::shared_ptr<MuteMaster> mm,
+		boost::shared_ptr<Route> sendfrom,
+		boost::shared_ptr<Route> sendto,
+		Delivery::Role role,
+		bool ignore_bitslot)
 	: Send (s, p, mm, role, ignore_bitslot)
+	, _send_from (sendfrom)
 {
-        if (sendto) {
-                if (use_target (sendto)) {
-                        throw failed_constructor();
-                }
-        }
+	if (sendto) {
+		if (use_target (sendto)) {
+			throw failed_constructor();
+		}
+	}
 
 	init_gain ();
 

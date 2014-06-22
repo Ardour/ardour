@@ -2643,7 +2643,7 @@ Route::set_processor_state (const XMLNode& node)
 
 				if (prop->value() == "intsend") {
 
-					processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<Route>(), Delivery::Aux, true));
+					processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<ARDOUR::Route>(this), boost::shared_ptr<Route>(), Delivery::Aux, true));
 
 				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 				           prop->value() == "lv2" ||
@@ -2812,7 +2812,7 @@ Route::enable_monitor_send ()
 
 	/* make sure we have one */
 	if (!_monitor_send) {
-		_monitor_send.reset (new InternalSend (_session, _pannable, _mute_master, _session.monitor_out(), Delivery::Listen));
+		_monitor_send.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<ARDOUR::Route>(this), _session.monitor_out(), Delivery::Listen));
 		_monitor_send->set_display_to_user (false);
 	}
 
@@ -2850,7 +2850,7 @@ Route::add_aux_send (boost::shared_ptr<Route> route, boost::shared_ptr<Processor
 		{
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 			boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
-			listener.reset (new InternalSend (_session, sendpan, _mute_master, route, Delivery::Aux));
+			listener.reset (new InternalSend (_session, sendpan, _mute_master, boost::shared_ptr<ARDOUR::Route>(this), route, Delivery::Aux));
 		}
 
 		add_processor (listener, before);
