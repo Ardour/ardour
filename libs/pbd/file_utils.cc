@@ -133,47 +133,20 @@ run_functor_for_paths (vector<string>& result,
 	}
 }
 
+static
+bool accept_all_files (string const &, void *)
+{
+	return true;
+}
+
 void
 get_paths (vector<string>& result,
            const std::string& directory_path,
            bool files_only,
            bool recurse)
 {
-	// perhaps we don't need this check assuming an exception is thrown
-	// as it would save checking that the path is a directory twice when
-	// recursing
-	if (!Glib::file_test (directory_path, Glib::FILE_TEST_IS_DIR)) return;
-
-	try
-	{
-		Glib::Dir dir(directory_path);
-		Glib::DirIterator i = dir.begin();
-
-		while (i != dir.end()) {
-
-			string fullpath = Glib::build_filename (directory_path, *i);
-
-			bool is_dir = Glib::file_test (fullpath, Glib::FILE_TEST_IS_DIR);
-
-			if (is_dir && recurse) {
-				DEBUG_TRACE (DEBUG::FileUtils,
-				                string_compose("Descending into directory:  %1\n",
-				                fullpath));
-				get_paths (result, fullpath, files_only, recurse);
-			}
-
-			i++;
-
-			if (is_dir && files_only) {
-				continue;
-			}
-			result.push_back (fullpath);
-		}
-	}
-	catch (Glib::FileError& err)
-	{
-		warning << err.what() << endmsg;
-	}
+	run_functor_for_paths (result, directory_path, accept_all_files, 0,
+	                       files_only, true, true, recurse);
 }
 
 void
@@ -359,12 +332,6 @@ copy_error:
 			from_path, to_path, strerror(saved_errno))
 		<< endmsg;
 	return false;
-}
-
-static
-bool accept_all_files (string const &, void *)
-{
-	return true;
 }
 
 void
