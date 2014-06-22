@@ -710,6 +710,7 @@ RouteTimeAxisView::build_display_menu ()
 	} else if (active > 0 && inactive > 0) {
 		i->set_inconsistent (true);
 	}
+	i->set_sensitive(! _session->transport_rolling());
 	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), click_sets_active, true));
 
 	items.push_back (SeparatorElem());

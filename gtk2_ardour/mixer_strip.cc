@@ -1526,6 +1526,7 @@ MixerStrip::build_route_ops_menu ()
 	items.push_back (CheckMenuElem (_("Active")));
 	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 	i->set_active (_route->active());
+	i->set_sensitive(! _session->transport_rolling());
 	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
 
 	items.push_back (SeparatorElem());
