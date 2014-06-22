@@ -42,7 +42,7 @@ namespace ArdourCanvas
 {
 
 class Rect;
-class Group;	
+class Item;
 class ScrollGroup;
 
 /** The base class for our different types of canvas.
@@ -78,7 +78,7 @@ public:
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context> const &) const;
 
 	/** @return root group */
-	Group* root () {
+	Item* root () {
 		return &_root;
 	}
 
@@ -122,8 +122,8 @@ public:
 protected:
 	void queue_draw_item_area (Item *, Rect);
 	
-	/** our root group */
-	RootGroup _root;
+	/** our root item */
+	Root _root;
 
         virtual void pick_current_item (int state) = 0;
         virtual void pick_current_item (Duple const &, int state) = 0;

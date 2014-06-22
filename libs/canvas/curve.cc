@@ -36,8 +36,8 @@ Curve::Curve (Canvas* c)
 {
 }
 
-Curve::Curve (Group* g)
-	: PolyItem (g)
+Curve::Curve (Item* parent)
+	: PolyItem (parent)
 	, n_samples (0)
 	, points_per_segment (16)
 	, curve_type (CatmullRomCentripetal)

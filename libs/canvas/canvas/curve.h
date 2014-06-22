@@ -33,7 +33,7 @@ class LIBCANVAS_API Curve : public PolyItem, public InterpolatedCurve
 {
   public:
     Curve (Canvas*);
-    Curve (Group*);
+    Curve (Item*);
 
     enum CurveFill {
 	    None,

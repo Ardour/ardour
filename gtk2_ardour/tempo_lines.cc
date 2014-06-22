@@ -28,7 +28,7 @@
 
 using namespace std;
 
-TempoLines::TempoLines (ArdourCanvas::Group* group, double)
+TempoLines::TempoLines (ArdourCanvas::Layout* group, double)
 	: lines (group, ArdourCanvas::LineSet::Vertical)
 {
 	lines.set_extent (ArdourCanvas::COORD_MAX);

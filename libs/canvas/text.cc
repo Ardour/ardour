@@ -43,8 +43,8 @@ Text::Text (Canvas* c)
 {
 }
 
-Text::Text (Group* g)
-	: Item (g)
+Text::Text (Item* parent)
+	: Item (parent)
 	, _color (0x000000ff)
 	, _font_description (0)
 	, _alignment (Pango::ALIGN_LEFT)

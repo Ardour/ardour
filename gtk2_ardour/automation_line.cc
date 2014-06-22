@@ -70,7 +70,7 @@ using namespace Editing;
 /** @param converter A TimeConverter whose origin_b is the start time of the AutomationList in session frames.
  *  This will not be deleted by AutomationLine.
  */
-AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanvas::Group& parent,
+AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanvas::Item& parent,
                                 boost::shared_ptr<AutomationList> al,
                                 Evoral::TimeConverter<double, framepos_t>* converter)
 	: trackview (tv)
@@ -99,7 +99,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	terminal_points_can_slide = true;
 	_height = 0;
 
-	group = new ArdourCanvas::Group (&parent);
+	group = new ArdourCanvas::Layout (&parent);
 	CANVAS_DEBUG_NAME (group, "region gain envelope group");
 
 	line = new ArdourCanvas::PolyLine (group);

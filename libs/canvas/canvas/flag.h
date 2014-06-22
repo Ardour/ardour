@@ -18,8 +18,8 @@
 */
 
 #include "canvas/visibility.h"
-#include "canvas/group.h"
 #include "canvas/types.h"
+#include "canvas/layout.h"
 
 namespace ArdourCanvas {
 
@@ -27,11 +27,11 @@ class Text;
 class Line;
 class Rectangle;
 
-class LIBCANVAS_API Flag : public Group
+class LIBCANVAS_API Flag : public Layout
 {
 public:
 	Flag (Canvas *, Distance, Color, Color, Duple);
-	Flag (Group*, Distance, Color, Color, Duple);
+	Flag (Item*, Distance, Color, Color, Duple);
 
 	void set_text (std::string const &);
 	void set_height (Distance);

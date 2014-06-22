@@ -31,8 +31,8 @@ PolyLine::PolyLine (Canvas* c)
 {
 }
 
-PolyLine::PolyLine (Group* g)
-	: PolyItem (g)
+PolyLine::PolyLine (Item* parent)
+	: PolyItem (parent)
 	, _threshold (1.0)
 {
 }

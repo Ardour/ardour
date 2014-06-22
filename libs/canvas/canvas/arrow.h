@@ -26,8 +26,7 @@
 #define __CANVAS_ARROW_H__
 
 #include "canvas/visibility.h"
-
-#include "canvas/group.h"
+#include "canvas/layout.h"
 
 namespace ArdourCanvas {
 
@@ -46,11 +45,11 @@ class Polygon;
  *  to draw lines at any angle.
  */
 	
-class LIBCANVAS_API Arrow : public Group
+class LIBCANVAS_API Arrow : public Layout
 {
 public:
 	Arrow (Canvas*);
-	Arrow (Group*);
+	Arrow (Item*);
 
 	void set_show_head (int, bool);
 	void set_head_outward (int, bool);

@@ -31,9 +31,9 @@ using namespace ARDOUR;
 using namespace ArdourCanvas;
 
 Note::Note (
-	MidiRegionView& region, Group* group, const boost::shared_ptr<NoteType> note, bool with_events)
+	MidiRegionView& region, Item* parent, const boost::shared_ptr<NoteType> note, bool with_events)
 	: NoteBase (region, with_events, note)
-	, _rectangle (new ArdourCanvas::Rectangle (group))
+	, _rectangle (new ArdourCanvas::Rectangle (parent))
 {
 	CANVAS_DEBUG_NAME (_rectangle, "note");
 	set_item (_rectangle);

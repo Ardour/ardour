@@ -392,15 +392,14 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 
 	for (i = items.begin(); i != items.end(); ++i) {
 
-		Item const * new_item = *i;
+		Item const * possible_item = *i;
 
-		/* We ignore invisible items, groups and items that ignore events */
+		/* We ignore invisible items, containers and items that ignore events */
 
-		if (!new_item->visible() || new_item->ignore_events() || dynamic_cast<Group const *>(new_item) != 0) {
+		if (!possible_item->visible() || possible_item->ignore_events() || dynamic_cast<ArdourCanvas::Container const *>(possible_item) != 0) {
 			continue;
 		}
-		
-		within_items.push_front (new_item);
+		within_items.push_front (possible_item);
 	}
 
 	if (within_items.empty()) {

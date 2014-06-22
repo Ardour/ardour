@@ -19,11 +19,15 @@
 #ifndef __CANVAS_SCROLL_GROUP_H__
 #define __CANVAS_SCROLL_GROUP_H__
 
-#include "canvas/group.h"
+#include "canvas/layout.h"
 
 namespace ArdourCanvas {
 
-class LIBCANVAS_API ScrollGroup : public Group
+/** A ScrollGroup has no contents of its own, but renders
+ *  its children in a way that reflects the most recent
+ *  call to its scroll_to() method.
+ */
+class LIBCANVAS_API ScrollGroup : public Layout
 {
   public:
 	enum ScrollSensitivity {
@@ -32,7 +36,7 @@ class LIBCANVAS_API ScrollGroup : public Group
 	};
 	
 	ScrollGroup (Canvas*, ScrollSensitivity);
-	ScrollGroup (Group*, ScrollSensitivity);
+	ScrollGroup (Item*, ScrollSensitivity);
 
 	void scroll_to (Duple const& d);
 	Duple scroll_offset() const { return _scroll_offset; }

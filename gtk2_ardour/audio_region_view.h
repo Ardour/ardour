@@ -51,13 +51,13 @@ class RouteTimeAxisView;
 class AudioRegionView : public RegionView
 {
   public:
-	AudioRegionView (ArdourCanvas::Group *,
+	AudioRegionView (ArdourCanvas::Layout *,
 			 RouteTimeAxisView&,
 			 boost::shared_ptr<ARDOUR::AudioRegion>,
 			 double initial_samples_per_pixel,
 			 uint32_t base_color);
 
-	AudioRegionView (ArdourCanvas::Group *,
+	AudioRegionView (ArdourCanvas::Layout *,
 			 RouteTimeAxisView&,
 			 boost::shared_ptr<ARDOUR::AudioRegion>,
 			 double samples_per_pixel,

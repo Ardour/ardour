@@ -32,12 +32,12 @@
 #include "canvas/types.h"
 #include "canvas/fill.h"
 #include "canvas/outline.h"
+#include "canvas/lookup_table.h"
 
 namespace ArdourCanvas
 {
 
 class Canvas;
-class Group;
 class Rect;	
 class ScrollGroup;
 
@@ -56,8 +56,8 @@ class LIBCANVAS_API Item : public Fill, public Outline
 {
 public:
 	Item (Canvas *);
-	Item (Group *);
-	Item (Group *, Duple const& p);
+	Item (Item *);
+	Item (Item *, Duple const& p);
 	virtual ~Item ();
 
         void redraw () const;
@@ -80,13 +80,11 @@ public:
 	 *
 	 * Note that Item::add_items_at_window_point() is only intended to be 
 	 * called on items already looked up in a LookupTable (i.e. by a
-	 * parent group) and thus known to cover @param point already.
+	 * parent) and thus known to cover @param point already.
 	 *
-	 * Derived classes may add more items than themselves (e.g. Group).
+	 * Derived classes may add more items than themselves (e.g. containers).
 	 */
-	virtual void add_items_at_point (Duple /*point*/, std::vector<Item const *>& items) const {
-		items.push_back (this);
-	}
+	virtual void add_items_at_point (Duple /*point*/, std::vector<Item const *>& items) const;
 
         virtual bool covers (Duple const &) const;
 
@@ -97,10 +95,10 @@ public:
 	void ungrab ();
 	
 	void unparent ();
-	void reparent (Group *);
+	void reparent (Item *);
 
 	/** @return Parent group, or 0 if this is the root group */
-	Group* parent () const {
+	Item* parent () const {
 		return _parent;
 	}
     
@@ -123,8 +121,6 @@ public:
 	void set_x_position (Coord);
 	void set_y_position (Coord);
 	void move (Duple);
-
-	virtual void scroll_to (Duple const&) {}
 
 	/** @return Position of this item in the parent's coordinates */
 	Duple position () const {
@@ -187,6 +183,21 @@ public:
 
 	void set_data (std::string const &, void *);
 	void* get_data (std::string const &) const;
+
+	/* nested item ("grouping") API */
+	void add (Item *);
+	void remove (Item *);
+        void clear (bool with_delete = false);
+	std::list<Item*> const & items () const {
+		return _items;
+	}
+	void raise_child_to_top (Item *);
+	void raise_child (Item *, int);
+	void lower_child_to_bottom (Item *);
+	void child_changed ();
+
+	static int default_items_per_cell;
+
 	
 	/* This is a sigc++ signal because it is solely
 	   concerned with GUI stuff and is thus single-threaded
@@ -243,7 +254,7 @@ protected:
 
 	Canvas* _canvas;
 	/** parent group; may be 0 if we are the root group or if we have been unparent()ed */
-	Group* _parent;
+	Item* _parent;
 	/** scroll parent group; may be 0 if we are the root group or if we have been unparent()ed */
 	ScrollGroup* _scroll_parent;
 	/** position of this item in parent coordinates */
@@ -260,6 +271,18 @@ protected:
 
 	/* XXX: this is a bit grubby */
 	std::map<std::string, void *> _data;
+
+	/* nesting ("grouping") API */
+
+	void invalidate_lut () const;
+	void clear_items (bool with_delete);
+
+	void ensure_lut () const;
+	mutable LookupTable* _lut;
+	/* our items, from lowest to highest in the stack */
+	std::list<Item*> _items;
+
+	void add_child_bounding_boxes() const;
 
 private:
 	void init ();

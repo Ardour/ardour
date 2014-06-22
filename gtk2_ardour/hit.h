@@ -33,7 +33,7 @@ public:
 	typedef Evoral::Note<double> NoteType;
 
 	Hit (MidiRegionView&                   region,
-	     ArdourCanvas::Group*              group,
+	     ArdourCanvas::Item*               parent,
 	     double                            size,
 	     const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>(),
 	     bool with_events = true);

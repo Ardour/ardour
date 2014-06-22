@@ -26,7 +26,7 @@
 #include "midi_util.h"
 
 namespace ArdourCanvas {
-	class Group;
+	class Layout;
 }
 
 class Note : public NoteBase
@@ -35,7 +35,7 @@ public:
 	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
 
 	Note (MidiRegionView&                   region,
-	      ArdourCanvas::Group*              group,
+	      ArdourCanvas::Item*               parent,
 	      const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>(),
 	      bool with_events = true);
 

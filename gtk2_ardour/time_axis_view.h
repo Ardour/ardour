@@ -59,7 +59,7 @@ namespace Gtk {
 
 namespace ArdourCanvas {
 	class Canvas;
-	class Group;
+	class Layout;
 	class Item;
 }
 
@@ -104,8 +104,8 @@ class TimeAxisView : public virtual AxisView
         virtual void enter_internal_edit_mode () {}
         virtual void leave_internal_edit_mode () {}
 
-	ArdourCanvas::Group* canvas_display () { return _canvas_display; }
-	ArdourCanvas::Group* ghost_group () { return _ghost_group; }
+	ArdourCanvas::Layout* canvas_display () { return _canvas_display; }
+	ArdourCanvas::Layout* ghost_group () { return _ghost_group; }
 
 	/** @return effective height (taking children into account) in canvas units, or
 	    0 if this TimeAxisView has not yet been shown */
@@ -212,15 +212,15 @@ class TimeAxisView : public virtual AxisView
 	std::string            controls_base_selected_name;
 	Gtk::Menu*             display_menu; /* The standard LHS Track control popup-menus */
 	TimeAxisView*          parent;
-	ArdourCanvas::Group*   selection_group;
-	ArdourCanvas::Group*  _ghost_group;
+	ArdourCanvas::Layout*   selection_group;
+	ArdourCanvas::Layout*  _ghost_group;
 	std::list<GhostRegion*> ghosts;
 	std::list<SelectionRect*> free_selection_rects;
 	std::list<SelectionRect*> used_selection_rects;
 	bool                  _hidden;
 	bool                   in_destructor;
 	Gtk::Menu*            _size_menu;
-	ArdourCanvas::Group*  _canvas_display;
+	ArdourCanvas::Layout*  _canvas_display;
 	double                _y_position;
 	PublicEditor&         _editor;
 

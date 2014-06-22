@@ -31,7 +31,7 @@ class LIBCANVAS_API Line : public Item
 {
   public:
 	Line (Canvas*);
-	Line (Group*);
+	Line (Item*);
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;

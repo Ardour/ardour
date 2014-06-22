@@ -36,8 +36,8 @@ Widget::Widget (Canvas* c, CairoWidget& w)
 	Event.connect (sigc::mem_fun (*this, &Widget::event_proxy));
 }
 
-Widget::Widget (Group* g, CairoWidget& w)
-	: Item (g)
+Widget::Widget (Item* parent, CairoWidget& w)
+	: Item (parent)
 	, _widget (w)
 {
 	Event.connect (sigc::mem_fun (*this, &Widget::event_proxy));

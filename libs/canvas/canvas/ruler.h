@@ -57,8 +57,8 @@ public:
 	
 	Ruler (Canvas*, const Metric& m);
 	Ruler (Canvas*, const Metric& m, Rect const&);
-	Ruler (Group*, const Metric& m);
-	Ruler (Group*, const Metric& m, Rect const&);
+	Ruler (Item*, const Metric& m);
+	Ruler (Item*, const Metric& m, Rect const&);
 	
 	void set_range (double lower, double upper);
 	void set_font_description (Pango::FontDescription);

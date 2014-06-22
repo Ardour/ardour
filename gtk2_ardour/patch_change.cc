@@ -43,7 +43,7 @@ using namespace std;
  */
 PatchChange::PatchChange(
 		MidiRegionView& region,
-		ArdourCanvas::Group* parent,
+		ArdourCanvas::Layout* parent,
 		const string&   text,
 		double          height,
 		double          x,

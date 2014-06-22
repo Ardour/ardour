@@ -49,8 +49,8 @@ Ruler::Ruler (Canvas* c, const Metric& m, Rect const& r)
 {
 }
 
-Ruler::Ruler (Group* g, const Metric& m)
-	: Rectangle (g)
+Ruler::Ruler (Item* parent, const Metric& m)
+	: Rectangle (parent)
 	, _metric (m)
 	, _lower (0)
 	, _upper (0)
@@ -58,8 +58,8 @@ Ruler::Ruler (Group* g, const Metric& m)
 {
 }
 
-Ruler::Ruler (Group* g, const Metric& m, Rect const& r)
-	: Rectangle (g, r)
+Ruler::Ruler (Item* parent, const Metric& m, Rect const& r)
+	: Rectangle (parent, r)
 	, _metric (m)
 	, _lower (0)
 	, _upper (0)

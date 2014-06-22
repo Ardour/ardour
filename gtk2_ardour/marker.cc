@@ -21,11 +21,12 @@
 #include "ardour/tempo.h"
 
 #include "canvas/rectangle.h"
-#include "canvas/group.h"
+#include "canvas/layout.h"
 #include "canvas/line.h"
 #include "canvas/polygon.h"
 #include "canvas/text.h"
 #include "canvas/canvas.h"
+#include "canvas/scroll_group.h"
 #include "canvas/debug.h"
 
 #include "ardour_ui.h"
@@ -52,7 +53,7 @@ PBD::Signal1<void,Marker*> Marker::CatchDeletion;
 
 static const double marker_height = 13.0;
 
-Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, const string& annotation,
+Marker::Marker (PublicEditor& ed, ArdourCanvas::Layout& parent, guint32 rgba, const string& annotation,
 		Type type, framepos_t frame, bool handle_events)
 
 	: editor (ed)
@@ -241,7 +242,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	unit_position = editor.sample_to_pixel (frame);
 	unit_position -= _shift;
 
-	group = new ArdourCanvas::Group (&parent, ArdourCanvas::Duple (unit_position, 0));
+	group = new ArdourCanvas::Layout (&parent, ArdourCanvas::Duple (unit_position, 0));
 #ifdef CANVAS_DEBUG
 	group->name = string_compose ("Marker::group for %1", annotation);
 #endif	
@@ -301,7 +302,7 @@ Marker::~Marker ()
 	delete _track_canvas_line;
 }
 
-void Marker::reparent(ArdourCanvas::Group & parent)
+void Marker::reparent(ArdourCanvas::Layout & parent)
 {
 	group->reparent (&parent);
 	_parent = &parent;
@@ -500,7 +501,7 @@ Marker::set_right_label_limit (double p)
 
 /***********************************************************************/
 
-TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text,
+TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Layout& parent, guint32 rgba, const string& text,
 			  ARDOUR::TempoSection& temp)
 	: Marker (editor, parent, rgba, text, Tempo, 0, false),
 	  _tempo (temp)
@@ -515,7 +516,7 @@ TempoMarker::~TempoMarker ()
 
 /***********************************************************************/
 
-MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text,
+MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Layout& parent, guint32 rgba, const string& text,
 			  ARDOUR::MeterSection& m)
 	: Marker (editor, parent, rgba, text, Meter, 0, false),
 	  _meter (m)

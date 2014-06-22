@@ -39,7 +39,7 @@
 
 #include "i18n.h"
 
-AutomationRegionView::AutomationRegionView (ArdourCanvas::Group*                      parent,
+AutomationRegionView::AutomationRegionView (ArdourCanvas::Layout*                      parent,
 					    AutomationTimeAxisView&                   time_axis,
 					    boost::shared_ptr<ARDOUR::Region>         region,
 					    const Evoral::Parameter&                  param,

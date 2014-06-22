@@ -29,8 +29,8 @@ Polygon::Polygon (Canvas* c)
 {
 }
 
-Polygon::Polygon (Group* g)
-	: PolyItem (g)
+Polygon::Polygon (Item* parent)
+	: PolyItem (parent)
 	, multiple (0)
 	, constant (0)
 	, cached_size (0)

@@ -451,10 +451,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		_stepping_axis_view = v;
 	}
 
- 	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
-        ArdourCanvas::Group* get_hscroll_group () const { return h_scroll_group; }
-        ArdourCanvas::Group* get_vscroll_group () const { return v_scroll_group; }
-        ArdourCanvas::Group* get_hvscroll_group () const { return hv_scroll_group; }
+ 	ArdourCanvas::Layout* get_trackview_group () const { return _trackview_group; }
+        ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
+        ArdourCanvas::ScrollGroup* get_vscroll_group () const { return v_scroll_group; }
+        ArdourCanvas::ScrollGroup* get_hvscroll_group () const { return hv_scroll_group; }
 
         ArdourCanvas::GtkCanvasViewport* get_track_canvas () const;
 
@@ -560,7 +560,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void refresh_location_display ();
 	void refresh_location_display_internal (ARDOUR::Locations::LocationList&);
 	void add_new_location (ARDOUR::Location *);
-	ArdourCanvas::Group* add_new_location_internal (ARDOUR::Location *);
+	ArdourCanvas::Layout* add_new_location_internal (ARDOUR::Location *);
 	void location_gone (ARDOUR::Location *);
 	void remove_marker (ArdourCanvas::Item&, GdkEvent*);
 	gint really_remove_marker (ARDOUR::Location* loc);
@@ -606,7 +606,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	LocationMarkerMap location_markers;
 
 	void update_marker_labels ();
-	void update_marker_labels (ArdourCanvas::Group *);
+	void update_marker_labels (ArdourCanvas::Layout *);
 	void check_marker_label (Marker *);
 
 	/** A set of lists of Markers that are in each of the canvas groups
@@ -615,7 +615,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	 *  a marker has moved we can decide whether we need to update the labels
 	 *  for all markers or for just a few.
 	 */
-	std::map<ArdourCanvas::Group *, std::list<Marker *> > _sorted_marker_lists;
+	std::map<ArdourCanvas::Layout *, std::list<Marker *> > _sorted_marker_lists;
 	void remove_sorted_marker (Marker *);
 
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
@@ -729,42 +729,42 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Pixbuf     *logo_item;
 #if 0    
     /* these will be needed when we have canvas rulers */
-	ArdourCanvas::Group      *minsec_group;
-	ArdourCanvas::Group      *bbt_group;
-	ArdourCanvas::Group      *timecode_group;
-	ArdourCanvas::Group      *frame_group;
+	ArdourCanvas::Layout      *minsec_group;
+	ArdourCanvas::Layout      *bbt_group;
+	ArdourCanvas::Layout      *timecode_group;
+	ArdourCanvas::Layout      *frame_group;
 #endif
 
-	ArdourCanvas::Group      *tempo_group;
-	ArdourCanvas::Group      *meter_group;
-	ArdourCanvas::Group      *marker_group;
-	ArdourCanvas::Group      *range_marker_group;
-	ArdourCanvas::Group      *transport_marker_group;
-	ArdourCanvas::Group*      cd_marker_group;
+	ArdourCanvas::Layout      *tempo_group;
+	ArdourCanvas::Layout      *meter_group;
+	ArdourCanvas::Layout      *marker_group;
+	ArdourCanvas::Layout      *range_marker_group;
+	ArdourCanvas::Layout      *transport_marker_group;
+	ArdourCanvas::Layout*      cd_marker_group;
 
 	/* parent for groups which themselves contain time markers */
-	ArdourCanvas::Group*     _time_markers_group;
+	ArdourCanvas::Layout*     _time_markers_group;
 
 	/* The group containing all other groups that are scrolled vertically
 	   and horizontally.
 	*/
-        ArdourCanvas::Group* hv_scroll_group;
+        ArdourCanvas::ScrollGroup* hv_scroll_group;
 
 	/* The group containing all other groups that are scrolled vertically ONLY
 	*/
-        ArdourCanvas::Group* v_scroll_group;
+        ArdourCanvas::ScrollGroup* v_scroll_group;
 
 	/* The group containing all other groups that are scrolled horizontally ONLY
 	*/
-        ArdourCanvas::Group* h_scroll_group;
+        ArdourCanvas::ScrollGroup* h_scroll_group;
 
 	/* The group containing all trackviews. */
-	ArdourCanvas::Group* _trackview_group;
+	ArdourCanvas::Layout* _trackview_group;
 
 	/* The group holding things (mostly regions) while dragging so they
 	 * are on top of everything else
 	 */
-	ArdourCanvas::Group* _drag_motion_group;
+	ArdourCanvas::Layout* _drag_motion_group;
 
         /* a rect that sits at the bottom of all tracks to act as a drag-no-drop/clickable
 	 * target area.
@@ -898,7 +898,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* videtimline related actions */
 	Gtk::Label                videotl_label;
-	ArdourCanvas::Group*      videotl_group;
+	ArdourCanvas::Layout*      videotl_group;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_video_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_proc_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_ontop_action;
@@ -1478,8 +1478,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	TempoLines* tempo_lines;
 
-	ArdourCanvas::Group* global_rect_group;
-	ArdourCanvas::Group* time_line_group;
+	ArdourCanvas::Layout* global_rect_group;
+	ArdourCanvas::Layout* time_line_group;
 
 	void hide_measures ();
         void draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,

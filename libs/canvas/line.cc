@@ -34,8 +34,8 @@ Line::Line (Canvas* c)
 {
 }
 
-Line::Line (Group* group)
-	: Item (group)
+Line::Line (Item* parent)
+	: Item (parent)
 {
 }
 

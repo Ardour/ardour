@@ -37,7 +37,7 @@
 #include "ardour/types.h"
 
 #include "canvas/types.h"
-#include "canvas/group.h"
+#include "canvas/layout.h"
 #include "canvas/poly_line.h"
 
 class AutomationLine;
@@ -60,7 +60,7 @@ public:
 		SelectedControlPoints = 0x4
 	};
 	
-	AutomationLine (const std::string& name, TimeAxisView&, ArdourCanvas::Group&,
+	AutomationLine (const std::string& name, TimeAxisView&, ArdourCanvas::Item&,
 	                boost::shared_ptr<ARDOUR::AutomationList>,
 	                Evoral::TimeConverter<double, ARDOUR::framepos_t>* converter = 0);
 	virtual ~AutomationLine ();
@@ -105,7 +105,7 @@ public:
 
 	TimeAxisView& trackview;
 
-	ArdourCanvas::Group& canvas_group() const { return *group; }
+	ArdourCanvas::Layout& canvas_group() const { return *group; }
 	ArdourCanvas::Item&  parent_group() const { return _parent_group; }
 	ArdourCanvas::Item&  grab_item() const { return *line; }
 
@@ -173,8 +173,8 @@ protected:
 	/** true if we did a push at any point during the current drag */
 	bool    did_push;
 
-	ArdourCanvas::Group&        _parent_group;
-	ArdourCanvas::Group*        group;
+	ArdourCanvas::Item&        _parent_group;
+	ArdourCanvas::Layout*       group;
 	ArdourCanvas::PolyLine*     line; /* line */
 	ArdourCanvas::Points        line_points; /* coordinates for canvas line */
 	std::vector<ControlPoint*>  control_points; /* visible control points */

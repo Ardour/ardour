@@ -33,8 +33,8 @@ namespace ArdourCanvas {
 	class Pixbuf;
 	class Rectangle;
 	class Item;
-	class Group;
-	class Text;
+        class Layout;
+ 	class Text;
 }
 
 using ARDOUR::framepos_t;
@@ -79,7 +79,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
         uint32_t get_fill_color () const;
 
 	ArdourCanvas::Item* get_canvas_frame();
-	ArdourCanvas::Group* get_canvas_group();
+	ArdourCanvas::Item* get_canvas_group();
 	ArdourCanvas::Item* get_name_highlight();
 
 	virtual void set_samples_per_pixel (double);
@@ -170,12 +170,12 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	};
 
   protected:
-	TimeAxisViewItem (const std::string &, ArdourCanvas::Group&, TimeAxisView&, double, uint32_t fill_color,
+	TimeAxisViewItem (const std::string &, ArdourCanvas::Item&, TimeAxisView&, double, uint32_t fill_color,
 			  framepos_t, framecnt_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
 
 	TimeAxisViewItem (const TimeAxisViewItem&);
 
-        void init (ArdourCanvas::Group*, double, uint32_t, framepos_t, framepos_t, Visibility, bool, bool);
+        void init (ArdourCanvas::Item*, double, uint32_t, framepos_t, framepos_t, Visibility, bool, bool);
 
         virtual bool canvas_group_event (GdkEvent*);
 
@@ -240,7 +240,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	bool high_enough_for_name;
         bool rect_visible;
 
-	ArdourCanvas::Group*      group;
+	ArdourCanvas::Layout*      group;
 	ArdourCanvas::Rectangle* vestigial_frame;
 	ArdourCanvas::Rectangle* frame;
 	ArdourCanvas::Text*      name_text;

@@ -23,8 +23,8 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-RootGroup::RootGroup (Canvas* canvas)
-	: Group (canvas)
+Root::Root (Canvas* canvas)
+	: Layout (canvas)
 {
 #ifdef CANVAS_DEBUG
 	name = "ROOT";
@@ -32,11 +32,12 @@ RootGroup::RootGroup (Canvas* canvas)
 }
 
 void
-RootGroup::compute_bounding_box () const
+Root::compute_bounding_box () const
 {
-	Group::compute_bounding_box ();
+	Layout::compute_bounding_box ();
 
 	if (_bounding_box) {
-		_canvas->request_size (Duple (_bounding_box.get().width (), _bounding_box.get().height ()));
+		Rect r (_bounding_box.get());
+		_canvas->request_size (Duple (r.width (), r.height ()));
 	}
 }

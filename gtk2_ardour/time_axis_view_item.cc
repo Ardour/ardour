@@ -28,7 +28,7 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/gui_thread.h"
 
-#include "canvas/group.h"
+#include "canvas/layout.h"
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"
 #include "canvas/text.h"
@@ -119,7 +119,7 @@ TimeAxisViewItem::set_constant_heights ()
  * @param automation true if this is an automation region view
  */
 TimeAxisViewItem::TimeAxisViewItem(
-	const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, uint32_t base_color,
+	const string & it_name, ArdourCanvas::Item& parent, TimeAxisView& tv, double spu, uint32_t base_color,
 	framepos_t start, framecnt_t duration, bool recording, bool automation, Visibility vis
 	)
 	: trackview (tv)
@@ -149,7 +149,7 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 {
 	/* share the other's parent, but still create a new group */
 
-	ArdourCanvas::Group* parent = other.group->parent();
+	ArdourCanvas::Item* parent = other.group->parent();
 	
 	_selected = other._selected;
 	
@@ -158,11 +158,11 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 }
 
 void
-TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, uint32_t base_color, 
+TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_color, 
 			framepos_t start, framepos_t duration, Visibility vis, 
 			bool wide, bool high)
 {
-	group = new ArdourCanvas::Group (parent);
+	group = new ArdourCanvas::Layout (parent);
 	CANVAS_DEBUG_NAME (group, string_compose ("TAVI group for %1", get_item_name()));
 	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
 
@@ -646,7 +646,7 @@ TimeAxisViewItem::get_canvas_frame()
 	return frame;
 }
 
-ArdourCanvas::Group*
+ArdourCanvas::Item*
 TimeAxisViewItem::get_canvas_group()
 {
 	return group;
