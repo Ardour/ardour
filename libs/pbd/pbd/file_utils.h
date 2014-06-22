@@ -31,7 +31,8 @@
 namespace PBD {
 
 /**
- * Get a contents of directory.
+ * Get a list of path entries in a directory or within a directory tree
+ * if recursing.
  * @note paths in result will be absolute
  *
  * @param path An absolute path to a directory in the filename encoding
@@ -41,10 +42,10 @@ namespace PBD {
  * @param recurse Recurse into child directories
  */
 LIBPBD_API void
-get_directory_contents (const std::string& path,
-                        std::vector<std::string>& result,
-			bool files_only = true,
-			bool recurse = false);
+get_paths (std::vector<std::string>& result,
+           const std::string& directory_path,
+           bool files_only = true,
+           bool recurse = false);
 
 /**
  * Get a list of files in a directory.
