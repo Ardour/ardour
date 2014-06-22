@@ -1200,6 +1200,50 @@ MixerStrip::show_passthru_color ()
 	reset_strip_style ();
 }
 
+<<<<<<< HEAD
+=======
+void
+MixerStrip::build_route_ops_menu ()
+{
+	using namespace Menu_Helpers;
+	route_ops_menu = new Menu;
+	route_ops_menu->set_name ("ArdourContextMenu");
+
+	MenuList& items = route_ops_menu->items();
+
+	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &MixerStrip::open_comment_editor)));
+	if (!_route->is_master()) {
+		items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
+	}
+	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
+	rename_menu_item = &items.back();
+
+	items.push_back (SeparatorElem());
+	items.push_back (CheckMenuElem (_("Active")));
+	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+	i->set_active (_route->active());
+	i->set_sensitive(! _session->transport_rolling());
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
+
+	items.push_back (SeparatorElem());
+
+	items.push_back (MenuElem (_("Adjust Latency..."), sigc::mem_fun (*this, &RouteUI::adjust_latency)));
+
+	items.push_back (SeparatorElem());
+	items.push_back (CheckMenuElem (_("Protect Against Denormals"), sigc::mem_fun (*this, &RouteUI::toggle_denormal_protection)));
+	denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+	denormal_menu_item->set_active (_route->denormal_protection());
+
+	if (!Profile->get_sae()) {
+		items.push_back (SeparatorElem());
+		items.push_back (MenuElem (_("Remote Control ID..."), sigc::mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
+	}
+
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), false)));
+}
+
+>>>>>>> 14c6dfa... Do not allow to de/activate a track while the transport is rolling.
 gboolean
 MixerStrip::name_button_button_press (GdkEventButton* ev)
 {
