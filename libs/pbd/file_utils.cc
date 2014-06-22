@@ -63,6 +63,77 @@ using namespace std;
 namespace PBD {
 
 void
+run_functor_for_paths (vector<string>& result,
+                       const Searchpath& paths,
+                       bool (*functor)(const string &, void *),
+                       void *arg,
+                       bool pass_files_only,
+                       bool pass_fullpath, bool return_fullpath,
+                       bool recurse)
+{
+	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+		string expanded_path = path_expand (*i);
+		DEBUG_TRACE (DEBUG::FileUtils,
+				string_compose("Find files in expanded path: %1\n", expanded_path));
+
+		if (!Glib::file_test (expanded_path, Glib::FILE_TEST_IS_DIR)) continue;
+
+		try
+		{
+			Glib::Dir dir(expanded_path);
+
+			for (Glib::DirIterator di = dir.begin(); di != dir.end(); di++) {
+
+				string fullpath = Glib::build_filename (expanded_path, *di);
+				string basename = *di;
+
+				bool is_dir = Glib::file_test (fullpath, Glib::FILE_TEST_IS_DIR);
+
+				if (is_dir && recurse) {
+					DEBUG_TRACE (DEBUG::FileUtils,
+							string_compose("Descending into directory:  %1\n",
+								fullpath));
+					run_functor_for_paths (result, fullpath, functor, arg, pass_files_only,
+					                       pass_fullpath, return_fullpath, recurse);
+				}
+
+				if (is_dir && pass_files_only) {
+					continue;
+				}
+
+				string functor_str;
+
+				if (pass_fullpath) {
+					functor_str = fullpath;
+				} else {
+					functor_str = basename;
+				}
+
+				DEBUG_TRACE (DEBUG::FileUtils,
+						string_compose("Run Functor using string: %1\n", functor_str));
+
+				if (!functor(functor_str, arg)) {
+					continue;
+				}
+
+				DEBUG_TRACE (DEBUG::FileUtils,
+						string_compose("Found file %1 matching functor\n", functor_str));
+
+				if (return_fullpath) {
+					result.push_back(fullpath);
+				} else {
+					result.push_back(basename);
+				}
+			}
+		}
+		catch (Glib::FileError& err)
+		{
+			warning << err.what() << endmsg;
+		}
+	}
+}
+
+void
 get_directory_contents (const std::string& directory_path,
                        vector<string>& result,
                        bool files_only,
