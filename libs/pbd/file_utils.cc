@@ -85,6 +85,9 @@ get_directory_contents (const std::string& directory_path,
 			bool is_dir = Glib::file_test (fullpath, Glib::FILE_TEST_IS_DIR);
 
 			if (is_dir && recurse) {
+				DEBUG_TRACE (DEBUG::FileUtils,
+				                string_compose("Descending into directory:  %1\n",
+				                fullpath));
 				get_directory_contents (fullpath, result, files_only, recurse);
 			}
 
@@ -205,6 +208,9 @@ find_files_matching_regex (vector<string>& result,
 		return;
 	}
 
+	DEBUG_TRACE (DEBUG::FileUtils,
+			string_compose("Matching files using regexp: %1\n", regexp));
+
 	find_files_matching_filter (result, paths,
 	                            regexp_filter, &compiled_pattern,
 	                            true, true, false);
@@ -224,6 +230,8 @@ find_files_matching_filter (vector<string>& result,
 
 	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 		string expanded_path = path_expand (*i);
+		DEBUG_TRACE (DEBUG::FileUtils,
+		             string_compose("Find files in expanded path: %1\n", expanded_path));
 		get_directory_contents (expanded_path, all_files, true, recurse);
 	}
 
@@ -238,6 +246,9 @@ find_files_matching_filter (vector<string>& result,
 		} else {
 			search_str = filename;
 		}
+
+		DEBUG_TRACE (DEBUG::FileUtils,
+		             string_compose("Filter using string: %1\n", search_str));
 
 		if (!filter(search_str, arg)) {
 			continue;
