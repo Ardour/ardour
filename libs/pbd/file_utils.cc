@@ -297,43 +297,7 @@ find_files_matching_filter (vector<string>& result,
                             bool match_fullpath, bool return_fullpath,
                             bool recurse)
 {
-	vector<string> all_files;
-
-	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
-		string expanded_path = path_expand (*i);
-		DEBUG_TRACE (DEBUG::FileUtils,
-		             string_compose("Find files in expanded path: %1\n", expanded_path));
-		get_directory_contents (expanded_path, all_files, true, recurse);
-	}
-
-	for (vector<string>::iterator i = all_files.begin(); i != all_files.end(); ++i) {
-
-		string fullpath = *i;
-		string filename = Glib::path_get_basename (*i);
-		string search_str;
-
-		if (match_fullpath) {
-			search_str = *i;
-		} else {
-			search_str = filename;
-		}
-
-		DEBUG_TRACE (DEBUG::FileUtils,
-		             string_compose("Filter using string: %1\n", search_str));
-
-		if (!filter(search_str, arg)) {
-			continue;
-		}
-
-		DEBUG_TRACE (DEBUG::FileUtils,
-		             string_compose("Found file %1 matching filter\n", search_str));
-
-		if (return_fullpath) {
-			result.push_back(fullpath);
-		} else {
-			result.push_back(filename);
-		}
-	}
+	run_functor_for_paths (result, paths, filter, arg, true, match_fullpath, return_fullpath, recurse);
 }
 
 bool
