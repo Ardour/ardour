@@ -4,7 +4,7 @@
 	Version="8.00"
 	Name="jack_backend"
 	ProjectGUID="{4A58CE49-541E-43D9-92CD-7E85EA7C96AF}"
-	RootNamespace="jack_backend"
+	RootNamespace="jack_audiobackend"
 	>
 	<Platforms>
 		<Platform
