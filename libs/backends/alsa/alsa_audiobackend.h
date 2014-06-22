@@ -144,10 +144,12 @@ class AlsaMidiPort : public AlsaPort {
 		void* get_buffer (pframes_t nframes);
 		const AlsaMidiBuffer const_buffer () const { return _buffer[_bufperiod]; }
 
-		void next_period() { get_buffer(0); _bufperiod = (_bufperiod + 1) % 2; }
+		void next_period() { if (_n_periods > 1) { get_buffer(0); _bufperiod = (_bufperiod + 1) % _n_periods; } }
+		void set_n_periods(int n) { if (n > 0 && n < 3) { _n_periods = n; } }
 
 	private:
 		AlsaMidiBuffer _buffer[2];
+		int _n_periods;
 		int _bufperiod;
 }; // class AlsaMidiPort
 
