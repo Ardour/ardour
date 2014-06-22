@@ -177,7 +177,7 @@ get_paths (vector<string>& result,
 }
 
 void
-get_files_in_directory (const std::string& directory_path, vector<string>& result)
+get_files (vector<string>& result, const std::string& directory_path)
 {
 	return get_paths (result, directory_path, true, false);
 }
