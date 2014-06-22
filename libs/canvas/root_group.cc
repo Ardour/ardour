@@ -24,7 +24,7 @@ using namespace std;
 using namespace ArdourCanvas;
 
 Root::Root (Canvas* canvas)
-	: Layout (canvas)
+	: Container (canvas)
 {
 #ifdef CANVAS_DEBUG
 	name = "ROOT";
@@ -34,7 +34,7 @@ Root::Root (Canvas* canvas)
 void
 Root::compute_bounding_box () const
 {
-	Layout::compute_bounding_box ();
+	Container::compute_bounding_box ();
 
 	if (_bounding_box) {
 		Rect r (_bounding_box.get());

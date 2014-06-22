@@ -28,13 +28,13 @@ using namespace std;
 using namespace ArdourCanvas;
 
 ScrollGroup::ScrollGroup (Canvas* c, ScrollSensitivity s)
-	: Layout (c)
+	: Container (c)
 	, _scroll_sensitivity (s)	
 {
 }
 
 ScrollGroup::ScrollGroup (Item* parent, ScrollSensitivity s)
-	: Layout (parent)
+	: Container (parent)
 	, _scroll_sensitivity (s)	
 {
 }
@@ -61,7 +61,7 @@ ScrollGroup::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 	context->rectangle (self.x0, self.y0, self.width(), self.height());
 	context->clip ();
 	
-	Layout::render (area, context);
+	Container::render (area, context);
 
 	context->restore ();
 }

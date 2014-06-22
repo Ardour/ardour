@@ -46,7 +46,7 @@ namespace Gtk {
 }
 
 namespace Pango {
-	class Layout;
+	class Container;
 }
 
 class Panner2dWindow;

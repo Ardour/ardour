@@ -26,7 +26,7 @@
 #include "midi_util.h"
 
 namespace ArdourCanvas {
-	class Layout;
+	class Container;
 }
 
 class Note : public NoteBase

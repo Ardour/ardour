@@ -37,7 +37,7 @@
 #include "ardour/types.h"
 
 #include "canvas/types.h"
-#include "canvas/layout.h"
+#include "canvas/container.h"
 #include "canvas/poly_line.h"
 
 class AutomationLine;
@@ -105,7 +105,7 @@ public:
 
 	TimeAxisView& trackview;
 
-	ArdourCanvas::Layout& canvas_group() const { return *group; }
+	ArdourCanvas::Container& canvas_group() const { return *group; }
 	ArdourCanvas::Item&  parent_group() const { return _parent_group; }
 	ArdourCanvas::Item&  grab_item() const { return *line; }
 
@@ -174,7 +174,7 @@ protected:
 	bool    did_push;
 
 	ArdourCanvas::Item&        _parent_group;
-	ArdourCanvas::Layout*       group;
+	ArdourCanvas::Container*       group;
 	ArdourCanvas::PolyLine*     line; /* line */
 	ArdourCanvas::Points        line_points; /* coordinates for canvas line */
 	std::vector<ControlPoint*>  control_points; /* visible control points */

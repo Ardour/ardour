@@ -68,7 +68,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	, _updates_suspended (false)
 {
 	/* use a group dedicated to MIDI underlays. Audio underlays are not in this group. */
-	midi_underlay_group = new ArdourCanvas::Layout (_canvas_group);
+	midi_underlay_group = new ArdourCanvas::Container (_canvas_group);
 	midi_underlay_group->lower_to_bottom();
 
 	/* put the note lines in the timeaxisview's group, so it

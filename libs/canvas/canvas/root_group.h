@@ -21,11 +21,11 @@
 #define __CANVAS_ROOT_GROUP_H__
 
 #include "canvas/visibility.h"
-#include "canvas/layout.h"
+#include "canvas/container.h"
 
 namespace ArdourCanvas {
 
-class LIBCANVAS_API Root : public Layout
+class LIBCANVAS_API Root : public Container
 {
 private:
 	friend class Canvas;

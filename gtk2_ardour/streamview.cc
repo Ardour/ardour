@@ -52,9 +52,9 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
 
-StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Layout* canvas_group)
+StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Container* canvas_group)
 	: _trackview (tv)
-	, _canvas_group (canvas_group ? canvas_group : new ArdourCanvas::Layout (_trackview.canvas_display()))
+	, _canvas_group (canvas_group ? canvas_group : new ArdourCanvas::Container (_trackview.canvas_display()))
 	, _samples_per_pixel (_trackview.editor().get_current_zoom ())
 	, rec_updating(false)
 	, rec_active(false)

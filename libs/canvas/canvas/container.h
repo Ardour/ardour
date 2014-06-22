@@ -30,7 +30,7 @@ namespace ArdourCanvas
  *
  * Imagined examples of containers:
  *
- *   Layout: renders each child at the child's self-determined position
+ *   Container: renders each child at the child's self-determined position
  *   Box: renders each child along an axis (vertical or horizontal)
  *   Table/Grid: renders each child within a two-dimensional grid
  *
@@ -47,8 +47,12 @@ public:
 	 * in all containers (the union of the children's bounding boxes).
 	 * It can be overriden as necessary.
 	 */
-
 	void compute_bounding_box () const;
+
+	/** The render() method is likely to be identical in all containers
+	 *  (just call Item::render_children()). It can be overridden as necessary.
+	 */ 
+	void render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 };
 
 }

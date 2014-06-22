@@ -29,7 +29,7 @@
 #include "video_image_frame.h"
 #include "video_monitor.h"
 #include "pbd/signals.h"
-#include "canvas/layout.h"
+#include "canvas/container.h"
 
 namespace ARDOUR {
 	class Session;
@@ -55,7 +55,7 @@ class PublicEditor;
 class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList, public PBD::StatefulDestructible
 {
 	public:
-	VideoTimeLine (PublicEditor*, ArdourCanvas::Layout*, int);
+	VideoTimeLine (PublicEditor*, ArdourCanvas::Container*, int);
 	virtual ~VideoTimeLine ();
 
 	void set_session (ARDOUR::Session *s);
@@ -102,7 +102,7 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	protected:
 
 	PublicEditor *editor;
-	ArdourCanvas::Layout *videotl_group;
+	ArdourCanvas::Container *videotl_group;
 	int bar_height;
 
 	std::string _xjadeo_bin;

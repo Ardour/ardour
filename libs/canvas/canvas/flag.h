@@ -19,7 +19,7 @@
 
 #include "canvas/visibility.h"
 #include "canvas/types.h"
-#include "canvas/layout.h"
+#include "canvas/container.h"
 
 namespace ArdourCanvas {
 
@@ -27,7 +27,7 @@ class Text;
 class Line;
 class Rectangle;
 
-class LIBCANVAS_API Flag : public Layout
+class LIBCANVAS_API Flag : public Container
 {
 public:
 	Flag (Canvas *, Distance, Color, Color, Duple);

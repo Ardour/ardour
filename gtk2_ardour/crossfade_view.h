@@ -36,7 +36,7 @@ namespace ArdourCanvas {
 class CrossfadeView : public TimeAxisViewItem
 {
 public:
-	CrossfadeView (ArdourCanvas::Layout*,
+	CrossfadeView (ArdourCanvas::Container*,
 		       RouteTimeAxisView&,
 		       boost::shared_ptr<ARDOUR::Crossfade>,
 		       double initial_samples_per_pixel,

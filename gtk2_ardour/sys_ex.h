@@ -31,7 +31,7 @@ class SysEx
 public:
 	SysEx (
 			MidiRegionView& region,
-			ArdourCanvas::Layout* parent,
+			ArdourCanvas::Container* parent,
 			std::string&    text,
 			double          height,
 			double          x,

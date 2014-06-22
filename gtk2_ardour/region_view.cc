@@ -63,7 +63,7 @@ static const int32_t sync_mark_width = 9;
 
 PBD::Signal1<void,RegionView*> RegionView::RegionViewGoingAway;
 
-RegionView::RegionView (ArdourCanvas::Layout*              parent,
+RegionView::RegionView (ArdourCanvas::Container*              parent,
                         TimeAxisView&                     tv,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                            spu,
@@ -128,7 +128,7 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RegionView::remove_ghost, this, _1), gui_context());
 }
 
-RegionView::RegionView (ArdourCanvas::Layout*         parent,
+RegionView::RegionView (ArdourCanvas::Container*         parent,
                         TimeAxisView&                tv,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                       spu,
