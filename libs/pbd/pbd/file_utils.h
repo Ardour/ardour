@@ -35,28 +35,28 @@ namespace PBD {
  * if recursing.
  * @note paths in result will be absolute
  *
- * @param path An absolute path to a directory in the filename encoding
  * @param result A vector of absolute paths to the directory entries in filename
  * encoding.
+ * @param paths A Searchpath
  * @param files_only Only include file entries in result
  * @param recurse Recurse into child directories
  */
 LIBPBD_API void
 get_paths (std::vector<std::string>& result,
-           const std::string& directory_path,
+           const Searchpath& paths,
            bool files_only = true,
            bool recurse = false);
 
 /**
- * Get a list of files in a directory.
+ * Get a list of files in a Searchpath.
  * @note paths in result will be absolute.
  *
- * @param path An Absolute path to a directory
+ * @param path A Searchpath
  * @param result A vector of paths to files.
  */
 LIBPBD_API void
 get_files (std::vector<std::string>& result,
-           const std::string& path);
+           const Searchpath& paths);
 
 /**
  * Takes a Searchpath and returns all the files contained in the
