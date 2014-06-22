@@ -182,30 +182,22 @@ get_files_in_directory (const std::string& directory_path, vector<string>& resul
 	return get_directory_contents (directory_path, result, true, false);
 }
 
+static
+bool
+pattern_filter (const string& str, void *arg)
+{
+	Glib::PatternSpec* pattern = (Glib::PatternSpec*)arg;
+	return pattern->match(str);
+}
+
 void
 find_files_matching_pattern (vector<string>& result,
                              const Searchpath& paths,
                              const Glib::PatternSpec& pattern)
 {
-	vector<string> tmp_files;
-
-	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
-		get_files_in_directory (*i, tmp_files);
-	}
-
-	for (vector<string>::iterator file_iter = tmp_files.begin();
-			file_iter != tmp_files.end();
-			++file_iter)
-	{
-		string filename = Glib::path_get_basename (*file_iter);
-		if (!pattern.match(filename)) continue;
-
-		DEBUG_TRACE (DEBUG::FileUtils,
-		             string_compose("Found file %1\n", *file_iter));
-
-		result.push_back(*file_iter);
-	}
-
+	run_functor_for_paths (result, paths, pattern_filter,
+	                       const_cast<Glib::PatternSpec*>(&pattern),
+	                       true, false, true, false);
 }
 
 void
