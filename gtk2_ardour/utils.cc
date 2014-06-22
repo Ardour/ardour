@@ -693,7 +693,7 @@ get_icon_sets ()
 
 		vector<string> entries;
 
-		get_files_in_directory (*s, entries);
+		get_paths (entries, *s, false, false);
 
 		for (vector<string>::iterator e = entries.begin(); e != entries.end(); ++e) {
 			if (Glib::file_test (*e, Glib::FILE_TEST_IS_DIR)) {
