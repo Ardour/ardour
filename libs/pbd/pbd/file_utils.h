@@ -110,6 +110,19 @@ find_files_matching_regex (std::vector<std::string>& results,
                            const std::string& regexp);
 
 /**
+ * @return paths in a Searchpath that match a supplied filter(functor)
+ * @note results include files and directories
+ */
+LIBPBD_API void
+find_paths_matching_filter (std::vector<std::string>&,
+                            const Searchpath& paths,
+                            bool (*filter)(const std::string &, void *),
+                            void *arg,
+                            bool match_fullpath,
+                            bool return_fullpath,
+                            bool recurse = false);
+
+/**
  * @return files in a Searchpath that match a supplied filter(functor)
  */
 LIBPBD_API void

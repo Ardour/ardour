@@ -290,6 +290,17 @@ find_files_matching_regex (vector<string>& result,
 }
 
 void
+find_paths_matching_filter (vector<string>& result,
+                            const Searchpath& paths,
+                            bool (*filter)(const string &, void *),
+                            void *arg,
+                            bool match_fullpath, bool return_fullpath,
+                            bool recurse)
+{
+	run_functor_for_paths (result, paths, filter, arg, false, match_fullpath, return_fullpath, recurse);
+}
+
+void
 find_files_matching_filter (vector<string>& result,
                             const Searchpath& paths,
                             bool (*filter)(const string &, void *),
