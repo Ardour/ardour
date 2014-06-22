@@ -141,18 +141,18 @@ bool accept_all_files (string const &, void *)
 
 void
 get_paths (vector<string>& result,
-           const std::string& directory_path,
+           const Searchpath& paths,
            bool files_only,
            bool recurse)
 {
-	run_functor_for_paths (result, directory_path, accept_all_files, 0,
+	run_functor_for_paths (result, paths, accept_all_files, 0,
 	                       files_only, true, true, recurse);
 }
 
 void
-get_files (vector<string>& result, const std::string& directory_path)
+get_files (vector<string>& result, const Searchpath& paths)
 {
-	return get_paths (result, directory_path, true, false);
+	return get_paths (result, paths, true, false);
 }
 
 static
