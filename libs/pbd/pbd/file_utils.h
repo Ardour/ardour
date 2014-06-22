@@ -49,15 +49,14 @@ get_paths (std::vector<std::string>& result,
 
 /**
  * Get a list of files in a directory.
- * @note You must join path with result to get the absolute path
- * to the file.
+ * @note paths in result will be absolute.
  *
  * @param path An Absolute path to a directory
- * @param result A vector of filenames.
+ * @param result A vector of paths to files.
  */
 LIBPBD_API void
-get_files_in_directory (const std::string& path,
-                        std::vector<std::string>& result);
+get_files (std::vector<std::string>& result,
+           const std::string& path);
 
 /**
  * Takes a Searchpath and returns all the files contained in the
