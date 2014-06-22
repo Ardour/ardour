@@ -2015,7 +2015,7 @@ LV2World::load_bundled_plugins()
 		cout << "Scanning folders for bundled LV2s: " << ARDOUR::lv2_bundled_search_path().to_string() << endl;
 
 		vector<string> plugin_objects;
-		find_files_matching_filter (plugin_objects, ARDOUR::lv2_bundled_search_path(), lv2_filter, 0, true, true);
+		find_paths_matching_filter (plugin_objects, ARDOUR::lv2_bundled_search_path(), lv2_filter, 0, true, true, true);
 		for ( vector<string>::iterator x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
 #ifdef PLATFORM_WINDOWS
 			string uri = "file:///" + *x + "/";
