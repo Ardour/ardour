@@ -134,10 +134,10 @@ run_functor_for_paths (vector<string>& result,
 }
 
 void
-get_directory_contents (const std::string& directory_path,
-                       vector<string>& result,
-                       bool files_only,
-                       bool recurse)
+get_paths (vector<string>& result,
+           const std::string& directory_path,
+           bool files_only,
+           bool recurse)
 {
 	// perhaps we don't need this check assuming an exception is thrown
 	// as it would save checking that the path is a directory twice when
@@ -159,7 +159,7 @@ get_directory_contents (const std::string& directory_path,
 				DEBUG_TRACE (DEBUG::FileUtils,
 				                string_compose("Descending into directory:  %1\n",
 				                fullpath));
-				get_directory_contents (fullpath, result, files_only, recurse);
+				get_paths (result, fullpath, files_only, recurse);
 			}
 
 			i++;
@@ -179,7 +179,7 @@ get_directory_contents (const std::string& directory_path,
 void
 get_files_in_directory (const std::string& directory_path, vector<string>& result)
 {
-	return get_directory_contents (directory_path, result, true, false);
+	return get_paths (result, directory_path, true, false);
 }
 
 static
@@ -453,7 +453,7 @@ remove_directory_internal (const string& dir, size_t* size, vector<string>* path
 	struct stat statbuf;
 	int ret = 0;
 
-	get_directory_contents (dir, tmp_paths, just_remove_files, true);
+	get_paths (tmp_paths, dir, just_remove_files, true);
 
 	for (vector<string>::const_iterator i = tmp_paths.begin();
 	     i != tmp_paths.end(); ++i) {
