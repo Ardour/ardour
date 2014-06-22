@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="jack_backend"
+	Name="jack_audiobackend"
 	ProjectGUID="{4A58CE49-541E-43D9-92CD-7E85EA7C96AF}"
 	RootNamespace="jack_audiobackend"
 	>
