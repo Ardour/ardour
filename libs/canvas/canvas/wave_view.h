@@ -192,7 +192,7 @@ private:
 
 	void get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start, framepos_t end, double& image_offset) const;
 
-        ArdourCanvas::Coord y_extent (double) const;
+        ArdourCanvas::Coord y_extent (double, bool) const;
 	void draw_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int) const;
 };
 
