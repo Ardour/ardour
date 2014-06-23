@@ -33,6 +33,7 @@ using namespace ARDOUR;
 static std::string s_instance_name;
 size_t DummyAudioBackend::_max_buffer_size = 8192;
 std::vector<std::string> DummyAudioBackend::_midi_options;
+std::vector<AudioBackend::DeviceStatus> DummyAudioBackend::_device_status;
 
 DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	: AudioBackend (e, info)
@@ -76,9 +77,10 @@ DummyAudioBackend::is_realtime () const
 std::vector<AudioBackend::DeviceStatus>
 DummyAudioBackend::enumerate_devices () const
 {
-	std::vector<AudioBackend::DeviceStatus> s;
-	s.push_back (DeviceStatus (_("Dummy"), true));
-	return s;
+	if (_device_status.empty()) {
+		_device_status.push_back (DeviceStatus (_("Dummy"), true));
+	}
+	return _device_status;
 }
 
 std::vector<float>

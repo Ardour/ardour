@@ -39,6 +39,8 @@ using namespace ARDOUR;
 static std::string s_instance_name;
 size_t AlsaAudioBackend::_max_buffer_size = 8192;
 std::vector<std::string> AlsaAudioBackend::_midi_options;
+std::vector<AudioBackend::DeviceStatus> AlsaAudioBackend::_audio_device_status;
+std::vector<AudioBackend::DeviceStatus> AlsaAudioBackend::_midi_device_status;
 
 AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	: AudioBackend (e, info)
@@ -87,13 +89,13 @@ AlsaAudioBackend::is_realtime () const
 std::vector<AudioBackend::DeviceStatus>
 AlsaAudioBackend::enumerate_devices () const
 {
-	std::vector<AudioBackend::DeviceStatus> s;
+	_audio_device_status.clear();
 	std::map<std::string, std::string> devices;
 	get_alsa_audio_device_names(devices);
 	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		s.push_back (DeviceStatus (i->first, true));
+		_audio_device_status.push_back (DeviceStatus (i->first, true));
 	}
-	return s;
+	return _audio_device_status;
 }
 
 void
@@ -415,7 +417,7 @@ AlsaAudioBackend::enumerate_midi_options () const
 std::vector<AudioBackend::DeviceStatus>
 AlsaAudioBackend::enumerate_midi_devices () const
 {
-	std::vector<AudioBackend::DeviceStatus> s;
+	_midi_device_status.clear();
 	std::map<std::string, std::string> devices;
 
 	if (_midi_driver_option == _("ALSA raw devices")) {
@@ -423,14 +425,12 @@ AlsaAudioBackend::enumerate_midi_devices () const
 	}
 	else if (_midi_driver_option == _("ALSA sequencer")) {
 		get_alsa_sequencer_names (devices);
-	} else {
-		return s;
 	}
 
 	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		s.push_back (DeviceStatus (i->first, true));
+		_midi_device_status.push_back (DeviceStatus (i->first, true));
 	}
-	return s;
+	return _midi_device_status;
 }
 
 int

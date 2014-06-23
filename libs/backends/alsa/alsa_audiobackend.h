@@ -303,6 +303,9 @@ class AlsaAudioBackend : public AudioBackend {
 		bool  _measure_latency;
 
 		static std::vector<std::string> _midi_options;
+		static std::vector<AudioBackend::DeviceStatus> _audio_device_status;
+		static std::vector<AudioBackend::DeviceStatus> _midi_device_status;
+
 		std::string _audio_device;
 		std::string _midi_driver_option;
 
