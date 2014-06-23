@@ -356,7 +356,7 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInputs()
             memset (pStreamBuffers, 0, propSize);
         
             // Get the Input channels
-            err = AudioDeviceGetProperty (m_DeviceID, 0, 1/* Input */, kAudioDevicePropertyStreamConfiguration, &propSize, pStreamBuffers);
+            err = AudioDeviceGetProperty (m_DeviceID, 0, true/* Input */, kAudioDevicePropertyStreamConfiguration, &propSize, pStreamBuffers);
             if (err == kAudioHardwareNoError)
             {
                 // Calculate the number of input channels
@@ -387,11 +387,42 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInputs()
     
     // Update input channels
     m_InputChannels.clear();
+    
     for (int channel = 0; channel < maxInputChannels; channel++)
     {
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioObjectPropertyElementName;
+        pa.mScope = kAudioObjectPropertyScopeInput;
+        pa.mElement = channel + 1;
+        
+        CFStringRef cfName;
         std::stringstream chNameStream;
-        //A better implementation would be to retrieve the names from ASIO or CoreAudio interfaces
-        chNameStream << "Input " << (channel+1);
+        UInt32 nameSize = 0;
+        OSStatus error = kAudioHardwareNoError;
+        
+        bool hasChannelNames = AudioObjectHasProperty(m_DeviceID, &pa);
+        
+        if (hasChannelNames) {
+            error = AudioObjectGetPropertyDataSize(m_DeviceID, &pa, 0, 0, &nameSize );
+        
+            if (error == kAudioHardwareNoError) {
+                error = AudioObjectGetPropertyData (m_DeviceID, &pa, 0, 0, &nameSize, &cfName);
+            }
+        }        
+        
+        if (hasChannelNames && (error == kAudioHardwareNoError) )
+        {
+            CFIndex length = CFStringGetLength(cfName);
+            CFIndex maxSize = CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8);
+            
+            char* cstr_name = new char[maxSize];
+            CFStringGetCString(cfName, cstr_name, maxSize, kCFStringEncodingUTF8);
+            
+            chNameStream << cstr_name;
+        } else {
+            chNameStream << "Input " << (channel+1);
+        }
+
         m_InputChannels.push_back (chNameStream.str());
     }
     
@@ -470,9 +501,39 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceOutputs()
     m_OutputChannels.clear();
     for (int channel = 0; channel < maxOutputChannels; channel++)
     {
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioObjectPropertyElementName;
+        pa.mScope = kAudioObjectPropertyScopeOutput;
+        pa.mElement = channel + 1;
+        
+        CFStringRef cfName;
         std::stringstream chNameStream;
-        //A better implementation would be to retrieve the names from ASIO or CoreAudio interfaces
-        chNameStream << "Output " << (channel+1);
+        UInt32 nameSize = 0;
+        OSStatus error = kAudioHardwareNoError;
+        
+        bool hasChannelNames = AudioObjectHasProperty(m_DeviceID, &pa);
+        
+        if (hasChannelNames) {
+            error = AudioObjectGetPropertyDataSize(m_DeviceID, &pa, 0, 0, &nameSize );
+            
+            if (error == kAudioHardwareNoError) {
+                error = AudioObjectGetPropertyData (m_DeviceID, &pa, 0, 0, &nameSize, &cfName);
+            }
+        }
+        
+        if (hasChannelNames && (error == kAudioHardwareNoError) )
+        {
+            CFIndex length = CFStringGetLength(cfName);
+            CFIndex maxSize = CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8);
+            
+            char* cstr_name = new char[maxSize];
+            CFStringGetCString(cfName, cstr_name, maxSize, kCFStringEncodingUTF8);
+            
+            chNameStream << cstr_name;
+        } else {
+            chNameStream << "Output " << (channel+1);
+        }
+        
         m_OutputChannels.push_back (chNameStream.str());
     }
     

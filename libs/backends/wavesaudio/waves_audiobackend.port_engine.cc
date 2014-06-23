@@ -594,10 +594,11 @@ WavesAudioBackend::_register_system_audio_ports ()
     for (std::vector<std::string>::iterator it = input_channels.begin (); 
          (port_number < channels) && (it != input_channels.end ());
         ++it) {
-        std::ostringstream port_name;
-        port_name << "capture_" << ++port_number;
-
-        WavesDataPort* port = _register_port ("system:" + port_name.str (), DataType::AUDIO , static_cast<PortFlags> (IsOutput | IsPhysical | IsTerminal));
+        
+        std::ostringstream port_name(*it);
+        WavesDataPort* port = _register_port ("system:capture:" + port_name.str (), DataType::AUDIO ,
+                                              static_cast<PortFlags> (IsOutput | IsPhysical | IsTerminal));
+        
         if (port == NULL) {
             std::cerr << "WavesAudioBackend::_create_system_audio_ports (): Failed registering port [" << port_name << "] for [" << _device->DeviceName () << "]" << std::endl;
             return-1;
@@ -616,9 +617,11 @@ WavesAudioBackend::_register_system_audio_ports ()
     for (std::vector<std::string>::iterator it = output_channels.begin ();
          (port_number < channels) && (it != output_channels.end ());
         ++it) {
-        std::ostringstream port_name;
-        port_name << "playback_" << ++port_number;
-        WavesDataPort* port = _register_port ("system:" + port_name.str (), DataType::AUDIO , static_cast<PortFlags> (IsInput| IsPhysical | IsTerminal));
+        
+        std::ostringstream port_name(*it);
+        WavesDataPort* port = _register_port ("system:playback:" + port_name.str (), DataType::AUDIO ,
+                                              static_cast<PortFlags> (IsInput| IsPhysical | IsTerminal));
+        
         if (port == NULL) {
             std::cerr << "WavesAudioBackend::_create_system_audio_ports (): Failed registering port ]" << port_name << "] for [" << _device->DeviceName () << "]" << std::endl;
             return-1;

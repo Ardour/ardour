@@ -47,7 +47,8 @@ using namespace Glib;
 
 namespace {
 
-    static const char* audio_port_name_prefix = "system:";
+    static const char* audio_capture_name_prefix = "system:capture:";
+    static const char* audio_playback_name_prefix = "system:playback:";
     static const char* midi_port_name_prefix = "system_midi:";
     static const char* midi_capture_suffix = " capture";
     static const char* midi_playback_suffix = " playback";
@@ -142,7 +143,7 @@ TracksControlPanel::init ()
 DeviceConnectionControl& TracksControlPanel::add_device_capture_control(std::string port_name, bool active, uint16_t capture_number, std::string track_name)
 {
     std::string device_capture_name("");
-    std::string pattern(audio_port_name_prefix);
+    std::string pattern(audio_capture_name_prefix);
     remove_pattern_from_string(port_name, pattern, device_capture_name);
     
 	DeviceConnectionControl &capture_control = *manage (new DeviceConnectionControl(device_capture_name, active, capture_number, track_name));
@@ -159,7 +160,7 @@ DeviceConnectionControl& TracksControlPanel::add_device_capture_control(std::str
 DeviceConnectionControl& TracksControlPanel::add_device_playback_control(std::string port_name, bool active, uint16_t playback_number)
 {
     std::string device_playback_name("");
-    std::string pattern(audio_port_name_prefix);
+    std::string pattern(audio_playback_name_prefix);
     remove_pattern_from_string(port_name, pattern, device_playback_name);
     
 	DeviceConnectionControl &playback_control = *manage (new DeviceConnectionControl(device_playback_name, active, playback_number));
@@ -350,7 +351,7 @@ TracksControlPanel::populate_input_channels()
         if (input_iter->active) {
             
             std::string port_name("");
-            std::string pattern(audio_port_name_prefix);
+            std::string pattern(audio_capture_name_prefix);
             remove_pattern_from_string(input_iter->name, pattern, port_name);
             
             number = number_count++;
