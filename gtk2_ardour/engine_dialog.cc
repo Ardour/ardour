@@ -1053,8 +1053,8 @@ EngineControl::get_matching_state (
 {
 	for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
 		if ((*i)->backend == backend &&
-				(*i)->driver == driver &&
-				(*i)->device == device) {
+				(!_have_control || ((*i)->driver == driver && (*i)->device == device)))
+		{
 			return (*i);
 		}
 	}
@@ -1081,11 +1081,19 @@ EngineControl::get_saved_state_for_currently_displayed_backend_and_device ()
 EngineControl::State
 EngineControl::save_state ()
 {
+	State state;
+
 	if (!_have_control) {
-		return State();
+		state = get_matching_state (backend_combo.get_active_text(), string(), string());
+		if (state) {
+			return state;
+		}
+		state.reset(new StateStruct);
+		state->backend = get_backend ();
+	} else {
+		state.reset(new StateStruct);
+		store_state (state);
 	}
-	State state (new StateStruct);
-	store_state (state);
 
 	for (StateList::iterator i = states.begin(); i != states.end();) {
 		if ((*i)->backend == state->backend &&
@@ -1604,26 +1612,26 @@ EngineControl::post_push ()
 	 * necessary
 	 */
 
-	if (_have_control) {
-		State state = get_saved_state_for_currently_displayed_backend_and_device ();
+	State state = get_saved_state_for_currently_displayed_backend_and_device ();
 
-		if (!state) {
-			state = save_state ();
-			assert (state);
-		}
+	if (!state) {
+		state = save_state ();
+		assert (state);
+	}
 
-		/* all off */
+	/* all off */
 
-		for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
-			(*i)->active = false;
-		}
+	for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
+		(*i)->active = false;
+	}
 
-		/* mark this one active (to be used next time the dialog is
-		 * shown)
-		 */
+	/* mark this one active (to be used next time the dialog is
+	 * shown)
+	 */
 
-		state->active = true;
+	state->active = true;
 
+	if (_have_control) { // XXX
 		manage_control_app_sensitivity ();
 	}
 
