@@ -540,6 +540,7 @@ TimeAxisViewItem::set_selected(bool yn)
 	if (_selected != yn) {
 		Selectable::set_selected (yn);
 		set_frame_color ();
+		set_name_text_color ();
 	}
 }
 
