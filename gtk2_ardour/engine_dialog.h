@@ -190,7 +190,9 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	std::vector<MidiDeviceSettings> midi_devices;
 
 	StateStruct()
-		: input_latency (0)
+		: sample_rate (48000)
+		, buffer_size (1024)
+		, input_latency (0)
 		, output_latency (0)
 		, input_channels (0)
 		, output_channels (0)
