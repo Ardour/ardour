@@ -319,9 +319,39 @@ WaveView::consolidate_image_cache () const
 	}
 }
 
+Coord
+WaveView::y_extent (double s, bool round_to_lower_edge) const
+{
+	/* it is important that this returns an integral value, so that we 
+	   can ensure correct single pixel behaviour.
+	 */
+
+	Coord pos;
+
+	switch (_shape) {
+	case Rectified:
+		if (round_to_lower_edge) {
+			pos = ceil (_height - (s * _height));
+		} else {
+			pos = floor (_height - (s * _height));
+		}
+		break;
+	default:
+		if (round_to_lower_edge) {
+			pos = ceil ((1.0-s) * (_height/2.0));
+		} else {
+			pos = floor ((1.0-s) * (_height/2.0));
+		}
+		break;
+	}
+
+	return min (_height, (max (0.0, pos)));
+}
+
 struct LineTips {
 	double top;
 	double bot;
+	double spread;
 	bool clip_max;
 	bool clip_min;
 	
@@ -355,8 +385,11 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 
 		if (_logscaled) {
 			for (int i = 0; i < n_peaks; ++i) {
+
 				tips[i].bot = height();
-				tips[i].top = y_extent (alt_log_meter (fast_coefficient_to_dB (max (fabs (_peaks[i].max), fabs (_peaks[i].min)))));
+				const double p = alt_log_meter (fast_coefficient_to_dB (max (fabs (_peaks[i].max), fabs (_peaks[i].min))));
+				tips[i].top = y_extent (p, false);
+				tips[i].spread = (1.0 - p) * _height;
 
 				if (fabs (_peaks[i].max) >= clip_level) {
 					tips[i].clip_max = true;
@@ -366,9 +399,12 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 					tips[i].clip_min = true;
 				}
 			}
+
 		} else {for (int i = 0; i < n_peaks; ++i) {
+
 				tips[i].bot = height();
-				tips[i].top = y_extent (max (fabs (_peaks[i].max), fabs (_peaks[i].min)));
+				tips[i].top = y_extent (max (fabs (_peaks[i].max), fabs (_peaks[i].min)), true);
+				tips[i].spread = (1.0 - fabs(_peaks[i].max - _peaks[i].min)) * _height;
 
 				if (fabs (_peaks[i].max) >= clip_level) {
 					tips[i].clip_max = true;
@@ -384,35 +420,36 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 
 		if (_logscaled) {
 			for (int i = 0; i < n_peaks; ++i) {
-				Coord top = _peaks[i].min;
-				Coord bot = _peaks[i].max;
+				double top = _peaks[i].min;
+				double bot = _peaks[i].max;
 
 				if (fabs (top) >= clip_level) {
 					tips[i].clip_max = true;
 				}
 
-				if (fabs (bot) >= clip_level) {
+				if (fabs (top) >= clip_level) {
 					tips[i].clip_min = true;
 				}
 
 				if (top > 0.0) {
-					top = y_extent (alt_log_meter (fast_coefficient_to_dB (top)));
+					top = alt_log_meter (fast_coefficient_to_dB (top));
 				} else if (top < 0.0) {
-					top = y_extent (-alt_log_meter (fast_coefficient_to_dB (-top)));
+					top =-alt_log_meter (fast_coefficient_to_dB (-top));
 				} else {
-					top = y_extent (0.0);
+					top = 0.0;
 				}
 
 				if (bot > 0.0) {
-					bot = y_extent (alt_log_meter (fast_coefficient_to_dB (bot)));
+					bot = alt_log_meter (fast_coefficient_to_dB (bot));
 				} else if (bot < 0.0) {
-					bot = y_extent (-alt_log_meter (fast_coefficient_to_dB (-bot)));
+					bot = -alt_log_meter (fast_coefficient_to_dB (-bot));
 				} else {
-					bot = y_extent (0.0);
+					bot = 0.0;
 				}
 
-				tips[i].top = top;
-				tips[i].bot = bot;
+				tips[i].spread = fabs (((1.0 - top) * (_height/2.0)) - ((1.0 - bot) * _height/2.0));
+				tips[i].top = y_extent (top, false);
+				tips[i].bot = y_extent (bot, true);
 			} 
 
 		} else {
@@ -426,11 +463,11 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 					tips[i].clip_min = true;
 				}
 
-				tips[i].top = y_extent (_peaks[i].min);
-				tips[i].bot = y_extent (_peaks[i].max);
-
-
+				tips[i].top = y_extent (_peaks[i].min, false);
+				tips[i].bot = y_extent (_peaks[i].max, true);
+				tips[i].spread = fabs (((1.0 - _peaks[i].max) * (_height/2.0)) - ((1.0 - _peaks[i].min) * (_height/2.0)));
 			}
+			
 		}
 	}
 
@@ -477,72 +514,94 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 
 	/* draw the lines */
 
-	if (_shape == WaveView::Rectified) {
-		for (int i = 0; i < n_peaks; ++i) {
-			context->move_to (i, tips[i].top); /* down 1 pixel */
-			context->line_to (i, tips[i].bot);
-		}
-	} else {
-		for (int i = 0; i < n_peaks; ++i) {
-			context->move_to (i, tips[i].top);
-			context->line_to (i, tips[i].bot);
-		}
-	}
 
-	context->stroke ();
-
-	/* zero line goes next, so that the outline/clip is on top of it 
-	 */
-	
-	if (show_zero_line()) {
-		set_source_rgba (context, _zero_color);
-		context->set_line_width (1.0);
-		context->move_to (0, y_extent (0.0) + 0.5);
-		context->line_to (n_peaks, y_extent (0.0) + 0.5);
-		context->stroke ();
-	}
-
-	/* now add dots to the top and bottom of each line (this is
-	 * modelled on pyramix, except that we also visual indicate 
-	 * clipping if it occurs).
-	 *
-	 * the height of the clip-indicator should be at most 7 pixels,
+	/* the height of the clip-indicator should be at most 7 pixels,
 	 * or 5% of the height of the waveview item.
 	 */
-
 	const double clip_height = min (7.0, ceil (_height * 0.05));
+	
+	if (_shape == WaveView::Rectified) {
 
-	set_source_rgba (context, _outline_color);
+		for (int i = 0; i < n_peaks; ++i) {
 
-	for (int i = 0; i < n_peaks; ++i) {
+			if (tips[i].spread >= 2.0) {
+				context->move_to (i, tips[i].top);
+				context->line_to (i, tips[i].bot);
+				context->stroke ();
+			}
+			
+			context->save ();
+			context->move_to (i, tips[i].top);
+			
+			if (_global_show_waveform_clipping && (tips[i].clip_max || tips[i].clip_min)) {
+				/* clip-indicating upper terminal line */
+				set_source_rgba (context, _clip_color);
+				context->rel_line_to (0, clip_height);
+				context->stroke ();
+			} else {
+				/* normal upper terminal dot */
+				set_source_rgba (context, _outline_color);
+				context->rel_line_to (0, 1.0);
+				context->stroke ();
+			}
 
-		context->move_to (i, tips[i].top);
-		if (_global_show_waveform_clipping && ((_shape == WaveView::Rectified && (tips[i].clip_max || tips[i].clip_min)) || tips[i].clip_max)) {
-			/* clip-indicating upper terminal line */
-			set_source_rgba (context, _clip_color);
-			context->rel_line_to (0, clip_height);
-			context->stroke ();
-			set_source_rgba (context, _outline_color);
-		} else {
-			/* normal upper terminal dot */
-			context->rel_line_to (0, 1.0);
-			context->stroke ();
+			context->restore ();
 		}
+		
+	} else {
+		for (int i = 0; i < n_peaks; ++i) {
 
-		context->move_to (i, tips[i].bot);
-		if (_global_show_waveform_clipping && _shape != WaveView::Rectified && tips[i].clip_min) {
-			/* clip-indicating lower terminal line */
-			set_source_rgba (context, _clip_color);
-			context->rel_line_to (0, -clip_height);
-			context->stroke ();
-			set_source_rgba (context, _outline_color);
-		} else {
-			/* normal lower terminal dot */
-			context->rel_line_to (0, -1.0);
-			context->stroke ();
+			if (tips[i].spread >= 3.0) {
+				context->move_to (i, tips[i].top);
+				context->line_to (i, tips[i].bot);
+				context->stroke ();
+			}
+
+			if (tips[i].spread >= 3.0 && show_zero_line()) {
+				context->save ();
+				set_source_rgba (context, _zero_color);
+				context->move_to (0, _height/2.0);
+				context->rel_line_to (0, 0.5);
+				context->stroke ();
+				context->restore ();
+			}
+			
+			context->save ();
+
+			context->move_to (i, tips[i].top);
+			if (_global_show_waveform_clipping && ((_shape == WaveView::Rectified && (tips[i].clip_max || tips[i].clip_min)) || tips[i].clip_max)) {
+				/* clip-indicating upper terminal line */
+				set_source_rgba (context, _clip_color);
+				context->rel_line_to (0, clip_height);
+				context->stroke ();
+			} else {
+				/* normal upper terminal dot */
+				set_source_rgba (context, _outline_color);
+				context->rel_line_to (0, 1.0);
+				context->stroke ();
+			}
+
+			context->restore ();
+			
+			if (tips[i].spread >= 2.0) {
+				context->save ();
+				context->move_to (i, tips[i].bot);
+				if (_global_show_waveform_clipping && _shape != WaveView::Rectified && tips[i].clip_min) {
+					/* clip-indicating lower terminal line */
+					set_source_rgba (context, _clip_color);
+					context->rel_line_to (0, -clip_height);
+					context->stroke ();
+				} else {
+					/* normal lower terminal dot */
+					set_source_rgba (context, _outline_color);
+					context->rel_line_to (0, -1.0);
+					context->stroke ();
+				}
+				
+				context->restore ();
+			}
 		}
 	}
-
 }
 
 void
@@ -837,27 +896,6 @@ WaveView::region_resized ()
 	compute_bounding_box ();
 
 	end_change ();
-}
-
-Coord
-WaveView::y_extent (double s) const
-{
-	/* it is important that this returns an integral value, so that we 
-	   can ensure correct single pixel behaviour.
-	 */
-
-	Coord pos;
-
-	switch (_shape) {
-	case Rectified:
-		pos = floor (_height - (s * _height));
-		break;
-	default:
-		pos = floor ((1.0-s) * (_height / 2.0));
-		break;
-	}
-
-	return min (_height, (max (0.0, pos)));
 }
 
 void
