@@ -3204,6 +3204,7 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
     
     new_session->config.set_native_file_header_format(this->_header_format);
     new_session->config.set_native_file_data_format  (this->_sample_format);
+    new_session->config.set_timecode_format(this->_timecode_format);
 
 	/* Give the new session the default GUI state, if such things exist */
 

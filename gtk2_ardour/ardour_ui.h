@@ -95,6 +95,9 @@
 
 #include "waves_ui.h"
 
+#include "timecode/time.h"
+#include "time.h"
+
 class VideoTimeLine;
 class ArdourKeyboard;
 class AudioClock;
@@ -303,7 +306,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
     void set_sample_format(ARDOUR::SampleFormat sf) {_sample_format = sf;}
     void set_header_format(ARDOUR::HeaderFormat hf) {_header_format = hf;}
+    void set_timecode_format(Timecode::TimecodeFormat tc) {_timecode_format = tc;}
     void update_format ();
+    void update_timecode_format ();
     
   protected:
 	friend class PublicEditor;
@@ -543,7 +548,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void update_disk_space ();
 
 	Gtk::Label   timecode_format_label;
-	void update_timecode_format ();
 
 	Gtk::Label   cpu_load_label;
 	void update_cpu_load ();
@@ -777,6 +781,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     
     ARDOUR::SampleFormat _sample_format;
     ARDOUR::HeaderFormat _header_format;
+    Timecode::TimecodeFormat _timecode_format;
     
 };
 

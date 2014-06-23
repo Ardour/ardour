@@ -37,6 +37,9 @@
 #include "i18n.h"
 #include "pbd/convert.h"
 
+#include "timecode/time.h"
+#include "time.h"
+
 #include "open_file_dialog_proxy.h"
 
 using namespace ARDOUR;
@@ -261,7 +264,8 @@ namespace  {
     
     enum SessionProperty {
         Native_File_Header_Format,
-        Native_File_Data_Format
+        Native_File_Data_Format,
+        Timecode_Format
     };
     
     std::string
@@ -304,8 +308,10 @@ namespace  {
                 case Native_File_Data_Format:
                     required_property_name = "native-file-data-format";
                     break;
+                case Timecode_Format:
+                    required_property_name = "timecode-format";
+                    break;
                 default:
-
                     return string("");
             }
             
@@ -455,19 +461,86 @@ TracksControlPanel::populate_bit_depth_combo()
 }
 
 namespace  {
-    const std::string string_24 = "24 fps";
-    const std::string string_25 = "25 fps";
-    const std::string string_30 = "30 fps";
-    const std::string string_23976 = "23.976 fps";
-    const std::string string_2997 = "29.97 fps";
+    const std::string string_24fps = "24 fps";
+    const std::string string_25fps = "25 fps";
+    const std::string string_30fps = "30 fps";
+    const std::string string_23976fps = "23.976 fps";
+    const std::string string_2997fps = "29.97 fps";
     
+    std::string
+    TimecodeFormat_to_string(Timecode::TimecodeFormat timecode_format)
+    {
+        using namespace std;
+        using namespace Timecode;
+        
+        switch (timecode_format) {
+            case timecode_24:
+                return string_24fps;
+            case timecode_25:
+                return string_25fps;
+            case timecode_30:
+                return string_30fps;
+            case timecode_23976:
+                return string_23976fps;
+            case timecode_2997:
+                return string_2997fps;
+                
+            default:
+                return string("");
+        }
+        
+        return string("");
+    }
     
-
+    Timecode::TimecodeFormat
+    string_to_TimecodeFormat(std::string s)
+    {
+        using namespace Timecode;
+        
+        if(s == string_24fps)
+            return timecode_24;
+        if(s == string_25fps)
+            return timecode_25;
+        if(s == string_30fps)
+            return timecode_30;
+        if(s == string_23976fps)
+            return timecode_23976;
+        if(s == string_2997fps)
+            return timecode_2997;
+        
+        //defaul value
+        return timecode_25;
+    }
 }
 
 void
 TracksControlPanel::populate_frame_rate_combo()
 {
+    using namespace std;
+    
+    vector<string> frame_rate_strings;
+    frame_rate_strings.push_back(string_24fps);
+    frame_rate_strings.push_back(string_25fps);
+    frame_rate_strings.push_back(string_30fps);
+    frame_rate_strings.push_back(string_23976fps);
+    frame_rate_strings.push_back(string_2997fps);
+    
+    // Get FRAME_RATE from last used session
+    string last_used_frame_rate = read_property_from_last_session(Timecode_Format);
+    
+    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
+    Timecode::TimecodeFormat timecode_format = string_to_TimecodeFormat(last_used_frame_rate);
+//    ardour_ui->set_timecode_format( timecode_format );
+    
+    {
+		// set _ignore_changes flag to ignore changes in combo-box callbacks
+		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
+		set_popdown_strings (_frame_rate_combo, frame_rate_strings);
+		_frame_rate_combo.set_sensitive (frame_rate_strings.size() > 1);
+        _frame_rate_combo.set_active_text ( string_25fps );
+	}
+    
+    return;
 }
 
 void
@@ -482,7 +555,7 @@ TracksControlPanel::refresh_session_settings_info()
         return;
     _bit_depth_combo.set_active_text( SampleFormat_to_string(session->config.get_native_file_data_format()) );
     _file_type_combo.set_active_text( HeaderFormat_to_string(session->config.get_native_file_header_format()) );
-    
+    _frame_rate_combo.set_active_text( TimecodeFormat_to_string(session->config.get_timecode_format()) );
 }
 
 void
@@ -978,7 +1051,15 @@ TracksControlPanel::bit_depth_changed()
 void
 TracksControlPanel::frame_rate_changed()
 {
+    if (_ignore_changes) {
+		return;
+	}
+
+    std::string s = _frame_rate_combo.get_active_text();
+    Timecode::TimecodeFormat timecode_format = string_to_TimecodeFormat(s);
     
+    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
+    ardour_ui->set_timecode_format(timecode_format);    
 }
 
 void 
@@ -1164,13 +1245,14 @@ void TracksControlPanel::update_session_config ()
         
         if( session )
         {
-            session->config.set_native_file_header_format( string_to_HeaderFormat(_file_type_combo.get_active_text()) );
-            session->config.set_native_file_data_format  ( string_to_SampleFormat(_bit_depth_combo.get_active_text()) );
+            session->config.set_native_file_header_format( string_to_HeaderFormat(_file_type_combo.get_active_text() ) );
+            session->config.set_native_file_data_format  ( string_to_SampleFormat(_bit_depth_combo.get_active_text() ) );
+            session->config.set_timecode_format(           string_to_TimecodeFormat(_frame_rate_combo.get_active_text() ) );
             
             ardour_ui->update_format();
+            ardour_ui->update_timecode_format();
         }
     }
-    
 }
 
 void
