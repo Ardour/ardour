@@ -379,7 +379,7 @@ Session::Session (AudioEngine &eng,
                 for( int i = 0; i < inputs.size(); ++i)
                 {
                     string track_name;
-                    remove_pattern_from_string(inputs[i], "system:", track_name);
+                    remove_pattern_from_string(inputs[i], "system:capture:", track_name);
                     
                     list<boost::shared_ptr<AudioTrack> > single_track = new_audio_track (1, 1, Normal, 0, 1, track_name);
                     tracks.insert(tracks.begin(), single_track.front());

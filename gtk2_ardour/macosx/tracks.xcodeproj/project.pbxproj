@@ -269,6 +269,8 @@
 		43279460194F0062003C9FEA /* tracks_preferences.xml in Resources */ = {isa = PBXBuildFile; fileRef = 43279430194F0062003C9FEA /* tracks_preferences.xml */; };
 		4327947F194F009E003C9FEA /* tracks.menus.in in Resources */ = {isa = PBXBuildFile; fileRef = 43279475194F009E003C9FEA /* tracks.menus.in */; };
 		43B351ED194F04E00038C140 /* step_editing.bindings in Resources */ = {isa = PBXBuildFile; fileRef = 43B351C0194F04E00038C140 /* step_editing.bindings */; };
+		CEAFC770195445560016ACF0 /* bbt_time.cc in Sources */ = {isa = PBXBuildFile; fileRef = CEAFC76E195445560016ACF0 /* bbt_time.cc */; };
+		CEAFC771195445560016ACF0 /* time.cc in Sources */ = {isa = PBXBuildFile; fileRef = CEAFC76F195445560016ACF0 /* time.cc */; };
 		CEDB41321951C668006E6F77 /* buildlog.txt in Resources */ = {isa = PBXBuildFile; fileRef = CEDB41311951C668006E6F77 /* buildlog.txt */; };
 /* End PBXBuildFile section */
 
@@ -1076,6 +1078,11 @@
 		43B351EE194F12FB0038C140 /* waves_audiobackend.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = waves_audiobackend.xcodeproj; path = ../../libs/backends/wavesaudio/macosx/waves_audiobackend.xcodeproj; sourceTree = "<group>"; };
 		43B351F4194F130C0038C140 /* libardour.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libardour.xcodeproj; path = ../../libs/ardour/macosx/libardour.xcodeproj; sourceTree = "<group>"; };
 		43B351FA194F131D0038C140 /* pbd.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = pbd.xcodeproj; path = ../../libs/pbd/macosx/pbd.xcodeproj; sourceTree = "<group>"; };
+		CEAFC76E195445560016ACF0 /* bbt_time.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bbt_time.cc; path = ../../libs/timecode/src/bbt_time.cc; sourceTree = "<group>"; };
+		CEAFC76F195445560016ACF0 /* time.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = time.cc; path = ../../libs/timecode/src/time.cc; sourceTree = "<group>"; };
+		CEAFC775195445D90016ACF0 /* bbt_time.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bbt_time.h; path = ../../libs/timecode/timecode/bbt_time.h; sourceTree = "<group>"; };
+		CEAFC776195445D90016ACF0 /* time.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time.h; path = ../../libs/timecode/timecode/time.h; sourceTree = "<group>"; };
+		CEAFC777195445D90016ACF0 /* visibility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = visibility.h; path = ../../libs/timecode/timecode/visibility.h; sourceTree = "<group>"; };
 		CEDB41311951C668006E6F77 /* buildlog.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = buildlog.txt; path = ../../../buildlog.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1113,6 +1120,8 @@
 		43279040194EFF38003C9FEA /* source */ = {
 			isa = PBXGroup;
 			children = (
+				CEAFC76E195445560016ACF0 /* bbt_time.cc */,
+				CEAFC76F195445560016ACF0 /* time.cc */,
 				43279210194EFFBA003C9FEA /* tracks_control_panel.cc */,
 				43279212194EFFBA003C9FEA /* tracks_control_panel.logic.cc */,
 				43279043194EFFB9003C9FEA /* actions.cc */,
@@ -1721,6 +1730,9 @@
 		43279480194F00CB003C9FEA /* headers */ = {
 			isa = PBXGroup;
 			children = (
+				CEAFC775195445D90016ACF0 /* bbt_time.h */,
+				CEAFC776195445D90016ACF0 /* time.h */,
+				CEAFC777195445D90016ACF0 /* visibility.h */,
 				43B351D4194F04E00038C140 /* tracks_control_panel.h */,
 				43B351D5194F04E00038C140 /* tracks_control_panel.logic.h */,
 				43B350F0194F04E00038C140 /* about.h */,
@@ -2361,6 +2373,8 @@
 			files = (
 				43279254194EFFF1003C9FEA /* main.m in Sources */,
 				4327925B194EFFF1003C9FEA /* AppDelegate.m in Sources */,
+				CEAFC770195445560016ACF0 /* bbt_time.cc in Sources */,
+				CEAFC771195445560016ACF0 /* time.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
