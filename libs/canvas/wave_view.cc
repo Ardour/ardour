@@ -512,7 +512,6 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	context->set_line_width (0.5);
 	context->translate (0.5, 0.0);
 
-
 	/* the height of the clip-indicator should be at most 7 pixels,
 	 * or 5% of the height of the waveview item.
 	 */
@@ -598,7 +597,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 			if (tips[i].spread >= 5.0 && show_zero_line()) {
 				context->save ();
 				set_source_rgba (context, _zero_color);
-				context->move_to (0, _height/2.0);
+				context->move_to (i, _height/2.0);
 				context->rel_line_to (0, 0.5);
 				context->stroke ();
 				context->restore ();
