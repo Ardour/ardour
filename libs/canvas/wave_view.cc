@@ -512,44 +512,80 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	context->set_line_width (0.5);
 	context->translate (0.5, 0.0);
 
-	/* draw the lines */
-
 
 	/* the height of the clip-indicator should be at most 7 pixels,
 	 * or 5% of the height of the waveview item.
 	 */
+
 	const double clip_height = min (7.0, ceil (_height * 0.05));
 	
+	/* There are 3 possible components to draw at each x-axis position: the
+	   waveform "line", the zero line and an outline/clip indicator.  We
+	   have to decide which of the 3 to draw at each position, pixel by
+	   pixel. This makes the rendering less efficient but it is the only
+	   way I can see to do this correctly.
+
+	   With only 1 pixel of spread between the top and bottom of the line,
+	   we just draw the upper outline/clip indicator.
+
+	   With 2 pixels of spread, we draw the upper and lower outline clip
+	   indicators. 
+	   
+	   With 3 pixels of spread we draw the upper and lower outline/clip 
+	   indicators and at least 1 pixel of the waveform line.
+	   
+	   With 5 pixels of spread, we draw all components.
+
+	   We can do rectified as two separate passes because we have a much
+	   easier decision regarding whether to draw the waveform line. We
+	   always draw the clip/outline indicators.
+	*/
+
 	if (_shape == WaveView::Rectified) {
 
 		for (int i = 0; i < n_peaks; ++i) {
 
+			/* waveform line */
+
 			if (tips[i].spread >= 2.0) {
 				context->move_to (i, tips[i].top);
 				context->line_to (i, tips[i].bot);
-				context->stroke ();
 			}
-			
-			context->save ();
+		}
+
+		context->stroke ();
+
+		/* outline/clip indicators */
+
+		set_source_rgba (context, _outline_color);
+		
+		for (int i = 0; i < n_peaks; ++i) {
+
 			context->move_to (i, tips[i].top);
 			
 			if (_global_show_waveform_clipping && (tips[i].clip_max || tips[i].clip_min)) {
 				/* clip-indicating upper terminal line */
 				set_source_rgba (context, _clip_color);
-				context->rel_line_to (0, clip_height);
+				context->rel_line_to (0, min (clip_height, floor (tips[i].spread)));
 				context->stroke ();
+				set_source_rgba (context, _outline_color);
 			} else {
 				/* normal upper terminal dot */
-				set_source_rgba (context, _outline_color);
 				context->rel_line_to (0, 1.0);
 				context->stroke ();
 			}
-
-			context->restore ();
 		}
 		
 	} else {
+
+		/* Note the use of cairo save/restore pairs to retain the drawing
+		   context for the waveform lines, which is already set
+		   correctly when we reach here.
+		*/
+
 		for (int i = 0; i < n_peaks; ++i) {
+
+			/* waveform line */
 
 			if (tips[i].spread >= 3.0) {
 				context->move_to (i, tips[i].top);
@@ -557,7 +593,9 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				context->stroke ();
 			}
 
-			if (tips[i].spread >= 3.0 && show_zero_line()) {
+			/* zero line */
+
+			if (tips[i].spread >= 5.0 && show_zero_line()) {
 				context->save ();
 				set_source_rgba (context, _zero_color);
 				context->move_to (0, _height/2.0);
@@ -568,11 +606,13 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 			
 			context->save ();
 
+			/* upper outline/clip indicator */
+
 			context->move_to (i, tips[i].top);
 			if (_global_show_waveform_clipping && ((_shape == WaveView::Rectified && (tips[i].clip_max || tips[i].clip_min)) || tips[i].clip_max)) {
 				/* clip-indicating upper terminal line */
 				set_source_rgba (context, _clip_color);
-				context->rel_line_to (0, clip_height);
+				context->rel_line_to (0, min (clip_height, floor (tips[i].spread)));
 				context->stroke ();
 			} else {
 				/* normal upper terminal dot */
@@ -584,12 +624,15 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 			context->restore ();
 			
 			if (tips[i].spread >= 2.0) {
+
+				/* lower outline/clip indicator */
+
 				context->save ();
 				context->move_to (i, tips[i].bot);
 				if (_global_show_waveform_clipping && _shape != WaveView::Rectified && tips[i].clip_min) {
 					/* clip-indicating lower terminal line */
 					set_source_rgba (context, _clip_color);
-					context->rel_line_to (0, -clip_height);
+					context->rel_line_to (0, -(min (clip_height, floor (tips[i].spread))));
 					context->stroke ();
 				} else {
 					/* normal lower terminal dot */
