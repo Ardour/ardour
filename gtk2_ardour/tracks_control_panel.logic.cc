@@ -27,6 +27,8 @@
 
 #include "ardour/engine_state_controller.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/recent_sessions.h"
+#include "ardour/filename_extensions.h"
 
 #include "ardour/utils.h"
 #include "ardour_ui.h"
@@ -86,7 +88,6 @@ TracksControlPanel::init ()
 	_audio_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_audio_settings));
 	_midi_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_midi_settings));
 	_session_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_session_settings));
-	_control_panel_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_control_panel));
     
     _all_inputs_on_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_all_inputs_on_button));
     _all_inputs_off_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_all_inputs_off_button));
@@ -118,6 +119,11 @@ TracksControlPanel::init ()
 	_device_combo.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &TracksControlPanel::device_changed), true) );
 	_sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::sample_rate_changed));
 	_buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::buffer_size_changed));
+    
+    /* Session configuration parameters update */
+    _file_type_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::file_type_changed));
+    _bit_depth_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::bit_depth_changed));
+    _frame_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::frame_rate_changed));
 
     _name_tracks_after_driver.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_name_tracks_after_driver));
     _reset_tracks_name_to_default.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_reset_tracks_name_to_default));
@@ -136,6 +142,12 @@ TracksControlPanel::init ()
     populate_output_channels();
     populate_midi_ports();
     populate_default_session_path();
+    
+    // Init session Settings
+    populate_file_type_combo();
+    populate_bit_depth_combo();
+    populate_frame_rate_combo();
+    populate_auto_lock_timer();
     
 	_audio_settings_tab_button.set_active(true);
 }
@@ -196,6 +208,287 @@ MidiDeviceConnectionControl& TracksControlPanel::add_midi_device_control(const s
 	midi_device_control.signal_capture_active_changed.connect (sigc::mem_fun (*this, &TracksControlPanel::on_midi_capture_active_changed));
     midi_device_control.signal_playback_active_changed.connect(sigc::mem_fun (*this, &TracksControlPanel::on_midi_playback_active_changed));
 	return midi_device_control;
+}
+
+namespace  {
+    // Strings which are shown to user in the Preference panel
+    const std::string string_CAF = "Caf";
+    const std::string string_BWav = "BWav";
+    const std::string string_Aiff = "Aiff";
+    const std::string string_Wav64 = "Wave64";
+
+    std::string
+    HeaderFormat_to_string(HeaderFormat header_format)
+    {
+        using namespace std;
+        
+        switch (header_format) {
+            case CAF:
+                return string_CAF;
+            case BWF:
+                return string_BWav;
+            case AIFF:
+                return string_Aiff;
+            case WAVE64:
+                return string_Wav64;
+            default:
+                return string("");
+        }
+        
+        return string("");
+    }
+    
+    HeaderFormat
+    string_to_HeaderFormat(std::string s)
+    {
+        if(s == string_CAF)
+            return CAF;
+        
+        if(s == string_BWav)
+            return BWF;
+        
+        if(s == string_Aiff)
+            return AIFF;
+        
+        if(s == string_Wav64)
+            return WAVE64;
+        
+        //defaul value
+        return BWF;
+    }
+    
+    std::string
+    xml_string_to_user_string(std::string xml_string);
+    
+    enum SessionProperty {
+        Native_File_Header_Format,
+        Native_File_Data_Format
+    };
+    
+    std::string
+    read_property_from_last_session(SessionProperty session_property)
+    {        
+        using namespace std;
+        
+        ARDOUR::RecentSessions rs;
+        ARDOUR::read_recent_sessions (rs);
+        
+        if( rs.size() > 0 )
+        {
+            string full_session_name = Glib::build_filename( rs[0].second, rs[0].first );
+            full_session_name += statefile_suffix;
+            
+            // read property from session projectfile
+            boost::shared_ptr<XMLTree> state_tree(new XMLTree());
+            
+            if (!state_tree->read (full_session_name))
+                return string("");
+            
+            XMLNode& root (*state_tree->root());
+
+            if (root.name() != X_("Session"))
+                return string("");
+            
+            XMLNode* config_main_node = root.child ("Config");
+            if( !config_main_node )
+                return string("");
+
+            XMLNodeList config_nodes_list = config_main_node->children();
+            XMLNodeConstIterator config_node_iter = config_nodes_list.begin();
+            
+            string required_property_name;
+            
+            switch (session_property) {
+                case Native_File_Header_Format:
+                    required_property_name = "native-file-header-format";
+                    break;
+                case Native_File_Data_Format:
+                    required_property_name = "native-file-data-format";
+                    break;
+                default:
+
+                    return string("");
+            }
+            
+            for (; config_node_iter != config_nodes_list.end(); ++config_node_iter)
+            {
+                XMLNode* config_node = *config_node_iter;
+                XMLProperty* prop = NULL;
+                
+                if ( (prop = config_node->property ("name")) != 0 )
+                    if( prop->value() == required_property_name )
+                        if ( (prop = config_node->property ("value")) != 0 )
+                            return xml_string_to_user_string( prop->value() );
+            }
+        } 
+        
+        return string("");
+    }
+}
+
+
+void
+TracksControlPanel::populate_file_type_combo()
+{
+    using namespace std;
+    
+    vector<string> file_type_strings;
+    file_type_strings.push_back( HeaderFormat_to_string(CAF) );
+    file_type_strings.push_back( HeaderFormat_to_string(BWF) );
+    file_type_strings.push_back( HeaderFormat_to_string(AIFF) );
+    file_type_strings.push_back( HeaderFormat_to_string(WAVE64) );
+    
+    // Get FILE_TYPE from last used session
+    string header_format_string = read_property_from_last_session(Native_File_Header_Format);
+    
+    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
+    HeaderFormat header_format = string_to_HeaderFormat(header_format_string);
+    ardour_ui->set_header_format( header_format );
+    
+    {
+		// set _ignore_changes flag to ignore changes in combo-box callbacks
+		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
+		set_popdown_strings (_file_type_combo, file_type_strings);
+		_file_type_combo.set_sensitive (file_type_strings.size() > 1);
+        _file_type_combo.set_active_text( HeaderFormat_to_string(header_format) );
+	}
+
+    return;
+}
+
+namespace {
+    // Strings which are shown to user in the Preference panel
+    const std::string string_bit32 = "32 bit floating point";
+    const std::string string_bit24 = "24 bit";
+    const std::string string_bit16 = "16 bit";
+    
+    std::string
+    xml_string_to_user_string(std::string xml_string)
+    {
+        // Bit depth format
+        if(xml_string == enum_2_string (FormatFloat))
+            return string_bit32;
+        
+        if(xml_string == enum_2_string (FormatInt24))
+            return string_bit24;
+        
+        if(xml_string == enum_2_string (FormatInt16))
+            return string_bit16;
+        
+        
+        // Header format (File type)
+        if(xml_string == enum_2_string(CAF))
+            return string_CAF;
+        
+        if(xml_string == enum_2_string(BWF))
+            return string_BWav;
+        
+        if(xml_string == enum_2_string(AIFF))
+            return string_Aiff;
+        
+        if(xml_string == enum_2_string(WAVE64))
+            return string_Wav64;
+        
+        
+        return std::string("");
+    }
+
+    std::string
+    SampleFormat_to_string(SampleFormat sample_format)
+    {
+        using namespace std;
+        
+        switch (sample_format) {
+            case FormatFloat:
+                return string_bit32;
+            case FormatInt24:
+                return string_bit24;
+            case FormatInt16:
+                return string_bit16;
+        }
+        
+        return string("");
+    }
+
+    SampleFormat
+    string_to_SampleFormat(std::string s)
+    {
+        if(s == string_bit32)
+            return FormatFloat;
+        
+        if(s == string_bit24)
+            return FormatInt24;
+        
+        if(s == string_bit16)
+            return FormatInt16;
+        
+        // default value
+        return FormatInt24;
+    }
+}
+
+void
+TracksControlPanel::populate_bit_depth_combo()
+{
+    using namespace std;
+    
+    vector<string> bit_depth_strings;
+    bit_depth_strings.push_back(SampleFormat_to_string(FormatInt16));
+    bit_depth_strings.push_back(SampleFormat_to_string(FormatInt24));
+    bit_depth_strings.push_back(SampleFormat_to_string(FormatFloat));
+    
+    // Get BIT_DEPTH from last used session
+    string sample_format_string = read_property_from_last_session(Native_File_Data_Format);
+    
+    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
+    SampleFormat sample_format = string_to_SampleFormat(sample_format_string);
+    ardour_ui->set_sample_format( sample_format );
+    
+    {
+		// set _ignore_changes flag to ignore changes in combo-box callbacks
+		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
+		set_popdown_strings (_bit_depth_combo, bit_depth_strings);
+		_bit_depth_combo.set_sensitive (bit_depth_strings.size() > 1);
+        _bit_depth_combo.set_active_text ( SampleFormat_to_string(sample_format) );
+	}
+   
+    return;
+}
+
+namespace  {
+    const std::string string_24 = "24 fps";
+    const std::string string_25 = "25 fps";
+    const std::string string_30 = "30 fps";
+    const std::string string_23976 = "23.976 fps";
+    const std::string string_2997 = "29.97 fps";
+    
+    
+
+}
+
+void
+TracksControlPanel::populate_frame_rate_combo()
+{
+}
+
+void
+TracksControlPanel::refresh_session_settings_info()
+{
+    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
+    if( !ardour_ui )
+        return;
+    
+    Session* session = ardour_ui->the_session();
+    if( !session )
+        return;
+    _bit_depth_combo.set_active_text( SampleFormat_to_string(session->config.get_native_file_data_format()) );
+    _file_type_combo.set_active_text( HeaderFormat_to_string(session->config.get_native_file_header_format()) );
+    
+}
+
+void
+TracksControlPanel::populate_auto_lock_timer()
+{
 }
 
 void
@@ -520,12 +813,6 @@ TracksControlPanel::cleanup_midi_device_list()
     }
 }
 
-
-void
-TracksControlPanel::on_control_panel(WavesButton*)
-{
-}
-
 void TracksControlPanel::engine_changed ()
 {
 	if (_ignore_changes) {
@@ -659,6 +946,40 @@ void
 TracksControlPanel::on_all_outputs_off_button(WavesButton*)
 {
     EngineStateController::instance()->set_state_to_all_outputs(false);
+}
+
+void
+TracksControlPanel::file_type_changed()
+{ 
+    if (_ignore_changes) {
+		return;
+	}
+    
+    std::string s = _file_type_combo.get_active_text();
+    ARDOUR::HeaderFormat header_format = string_to_HeaderFormat(s);
+    
+    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
+    ardour_ui->set_header_format( header_format );
+}
+
+void
+TracksControlPanel::bit_depth_changed()
+{
+    if (_ignore_changes) {
+		return;
+	}
+    
+    std::string s = _bit_depth_combo.get_active_text();
+    ARDOUR::SampleFormat sample_format = string_to_SampleFormat(s);
+    
+    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
+    ardour_ui->set_sample_format( sample_format );
+}
+
+void
+TracksControlPanel::frame_rate_changed()
+{
+    
 }
 
 void 
@@ -834,6 +1155,25 @@ TracksControlPanel::save_default_session_path()
     }
 }
 
+void TracksControlPanel::update_session_config ()
+{
+    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
+    
+    if( ardour_ui )
+    {
+        ARDOUR::Session* session = ardour_ui->the_session();
+        
+        if( session )
+        {
+            session->config.set_native_file_header_format( string_to_HeaderFormat(_file_type_combo.get_active_text()) );
+            session->config.set_native_file_data_format  ( string_to_SampleFormat(_bit_depth_combo.get_active_text()) );
+            
+            ardour_ui->update_format();
+        }
+    }
+    
+}
+
 void
 TracksControlPanel::on_ok (WavesButton*)
 {
@@ -841,6 +1181,7 @@ TracksControlPanel::on_ok (WavesButton*)
 	EngineStateController::instance()->push_current_state_to_backend(true);
 	response(Gtk::RESPONSE_OK);
     
+    update_session_config();
     save_default_session_path();    
 }
 
@@ -860,6 +1201,7 @@ TracksControlPanel::on_apply (WavesButton*)
 	EngineStateController::instance()->push_current_state_to_backend(true);
 	response(Gtk::RESPONSE_APPLY);
     
+    update_session_config();
     save_default_session_path();  
 }
 

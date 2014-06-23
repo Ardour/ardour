@@ -71,6 +71,9 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
 	Gtk::ComboBoxText& _device_combo;
 	Gtk::ComboBoxText& _sample_rate_combo;
 	Gtk::ComboBoxText& _buffer_size_combo;
+    Gtk::ComboBoxText& _file_type_combo;
+    Gtk::ComboBoxText& _bit_depth_combo;
+    Gtk::ComboBoxText& _frame_rate_combo;
 	Gtk::Label& _latency_label;
     Gtk::Label& _default_open_path;
 

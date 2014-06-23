@@ -2934,8 +2934,6 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 			if (likely_new && !nsm) {
                 
-                bool do_not_create_session = false;
-                
                 // Replace session only if file with extension '.ardour' was chosen
                 string suffix = string(statefile_suffix);
 
@@ -3140,7 +3138,6 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		(void) msg.run ();
 		msg.hide ();
 	}
-	
 
 	/* Now the session been created, add the transport controls */
 	new_session->add_controllable(roll_controllable);
@@ -3154,6 +3151,8 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 	set_session (new_session);
 
 	session_loaded = true;
+    
+    tracks_control_panel->refresh_session_settings_info();
 
 	goto_editor_window ();
 
@@ -3202,6 +3201,9 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 		msg.run ();
 		return -1;
 	}
+    
+    new_session->config.set_native_file_header_format(this->_header_format);
+    new_session->config.set_native_file_data_format  (this->_sample_format);
 
 	/* Give the new session the default GUI state, if such things exist */
 
