@@ -4129,7 +4129,6 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	boost::shared_ptr<Playlist> playlist;
 	boost::shared_ptr<AudioFileSource> fsource;
 	uint32_t x;
-	char buf[PATH_MAX+1];
 	ChanCount diskstream_channels (track.n_channels());
 	framepos_t position;
 	framecnt_t this_chunk;
@@ -4142,6 +4141,8 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	bool need_block_size_reset = false;
 	string ext;
 	ChanCount const max_proc = track.max_processor_streams ();
+	string legal_playlist_name;
+	string possible_path;
 
 	if (end <= start) {
 		error << string_compose (_("Cannot write a range where end <= start (e.g. %1 <= %2)"),
@@ -4177,13 +4178,15 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 		goto out;
 	}
 
+	legal_playlist_name = legalize_for_path (playlist->name());
+
 	ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
 
 	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n_audio(); ++chan_n) {
 
 		for (x = 0; x < 99999; ++x) {
-			snprintf (buf, sizeof(buf), "%s/%s-%d-bounce-%" PRIu32 "%s", sound_dir.c_str(), playlist->name().c_str(), chan_n, x+1, ext.c_str());
-			if (!Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
+			possible_path = Glib::build_filename (sound_dir, string_compose ("%1-%2-bounce-%3%4", legal_playlist_name.c_str(), chan_n, x+1, ext.c_str()));
+			if (!Glib::file_test (possible_path, Glib::FILE_TEST_EXISTS)) {
 				break;
 			}
 		}
@@ -4195,11 +4198,11 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 		try {
 			fsource = boost::dynamic_pointer_cast<AudioFileSource> (
-				SourceFactory::createWritable (DataType::AUDIO, *this, buf, false, frame_rate()));
+				SourceFactory::createWritable (DataType::AUDIO, *this, possible_path, false, frame_rate()));
 		}
 
 		catch (failed_constructor& err) {
-			error << string_compose (_("cannot create new audio file \"%1\" for %2"), buf, track.name()) << endmsg;
+			error << string_compose (_("cannot create new audio file \"%1\" for %2"), possible_path, track.name()) << endmsg;
 			goto out;
 		}
 
