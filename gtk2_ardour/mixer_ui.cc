@@ -41,6 +41,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/route_group.h"
+#include "ardour/route_sorters.h"
 #include "ardour/session.h"
 
 #include "keyboard.h"
@@ -1100,28 +1101,12 @@ Mixer_UI::strip_width_changed ()
 
 }
 
-struct SignalOrderRouteSorter {
-    bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-	    if (a->is_master() || a->is_monitor()) {
-		    /* "a" is a special route (master, monitor, etc), and comes
-		     * last in the mixer ordering
-		     */
-		    return false;
-	    } else if (b->is_master() || b->is_monitor()) {
-		    /* everything comes before b */
-		    return true;
-	    }
-	    return a->order_key () < b->order_key ();
-
-    }
-};
-
 void
 Mixer_UI::initial_track_display ()
 {
 	boost::shared_ptr<RouteList> routes = _session->get_routes();
 	RouteList copy (*routes);
-	SignalOrderRouteSorter sorter;
+	ARDOUR::SignalOrderRouteSorter sorter;
 
 	copy.sort (sorter);
 
