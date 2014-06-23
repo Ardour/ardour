@@ -292,6 +292,8 @@ class DummyAudioBackend : public AudioBackend {
 
 	private:
 		std::string _instance_name;
+		static std::vector<std::string> _midi_options;
+
 		bool  _running;
 		bool  _freewheeling;
 

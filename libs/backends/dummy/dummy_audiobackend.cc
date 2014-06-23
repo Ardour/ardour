@@ -32,6 +32,7 @@ using namespace ARDOUR;
 
 static std::string s_instance_name;
 size_t DummyAudioBackend::_max_buffer_size = 8192;
+std::vector<std::string> DummyAudioBackend::_midi_options;
 
 DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	: AudioBackend (e, info)
@@ -249,15 +250,17 @@ DummyAudioBackend::systemic_output_latency () const
 	return _systemic_output_latency;
 }
 
+
 /* MIDI */
 std::vector<std::string>
 DummyAudioBackend::enumerate_midi_options () const
 {
-	std::vector<std::string> m;
-	m.push_back (_("1 in, 1 out"));
-	m.push_back (_("2 in, 2 out"));
-	m.push_back (_("8 in, 8 out"));
-	return m;
+	if (_midi_options.empty()) {
+		_midi_options.push_back (_("1 in, 1 out"));
+		_midi_options.push_back (_("2 in, 2 out"));
+		_midi_options.push_back (_("8 in, 8 out"));
+	}
+	return _midi_options;
 }
 
 int

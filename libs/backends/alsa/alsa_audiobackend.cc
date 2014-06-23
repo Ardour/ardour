@@ -38,6 +38,7 @@ using namespace ARDOUR;
 
 static std::string s_instance_name;
 size_t AlsaAudioBackend::_max_buffer_size = 8192;
+std::vector<std::string> AlsaAudioBackend::_midi_options;
 
 AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	: AudioBackend (e, info)
@@ -403,11 +404,12 @@ AlsaAudioBackend::midi_device_info(std::string const name) const {
 std::vector<std::string>
 AlsaAudioBackend::enumerate_midi_options () const
 {
-	std::vector<std::string> m;
-	m.push_back (_("None"));
-	m.push_back (_("ALSA raw devices"));
-	m.push_back (_("ALSA sequencer"));
-	return m;
+	if (_midi_options.empty()) {
+		_midi_options.push_back (_("None"));
+		_midi_options.push_back (_("ALSA raw devices"));
+		_midi_options.push_back (_("ALSA sequencer"));
+	}
+	return _midi_options;
 }
 
 std::vector<AudioBackend::DeviceStatus>
