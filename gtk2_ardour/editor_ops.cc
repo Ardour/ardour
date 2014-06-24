@@ -7129,7 +7129,7 @@ Editor::lock ()
 
 		ArdourButton* b = manage (new ArdourButton);
 		b->set_name ("lock button");
-		b->set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Click me to unlock")));
+		b->set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Click to unlock")));
 		b->signal_clicked.connect (sigc::mem_fun (*this, &Editor::unlock));
 		lock_dialog->get_vbox()->pack_start (*b);
 		
