@@ -23,4 +23,6 @@
 
 PBD::Searchpath test_search_path ();
 
+std::string test_output_directory (std::string prefix);
+
 #endif
