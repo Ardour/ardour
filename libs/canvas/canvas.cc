@@ -689,6 +689,32 @@ GtkCanvas::context ()
 	return w->create_cairo_context ();
 }
 
+/** Handler for GDK scroll events.
+ *  @param ev Event.
+ *  @return true if the event was handled.
+ */
+bool
+GtkCanvas::on_scroll_event (GdkEventScroll* ev)
+{
+	/* translate event coordinates from window to canvas */
+
+	GdkEvent copy = *((GdkEvent*)ev);
+	Duple winpos = Duple (ev->x, ev->y);
+	Duple where = window_to_canvas (winpos);
+	
+	pick_current_item (winpos, ev->state);
+
+	copy.button.x = where.x;
+	copy.button.y = where.y;
+	
+	/* Coordinates in the event will be canvas coordinates, correctly adjusted
+	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
+	*/
+
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas scroll @ %1, %2 => %3\n", ev->x, ev->y, where));
+	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
+}
+
 /** Handler for GDK button press events.
  *  @param ev Event.
  *  @return true if the event was handled.

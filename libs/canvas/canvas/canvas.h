@@ -151,6 +151,7 @@ public:
 	Coord height() const;
 
 protected:
+	bool on_scroll_event (GdkEventScroll *);
 	bool on_expose_event (GdkEventExpose *);
 	bool on_button_press_event (GdkEventButton *);
 	bool on_button_release_event (GdkEventButton* event);
