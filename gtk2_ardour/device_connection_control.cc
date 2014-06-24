@@ -75,6 +75,7 @@ void DeviceConnectionControl::init(const std::string& name, bool active, uint16_
 
 	if (_name_label != NULL) {
 		_name_label->set_text (name);
+		_name_label->set_tooltip_text(name);
 	}
 
 	if (_number_label != NULL) {
@@ -121,6 +122,7 @@ DeviceConnectionControl::set_track_name (const std::string& new_track_name)
 {
     if (_track_name_label != NULL ) {
 		_track_name_label->set_text (new_track_name);
+		_track_name_label->set_tooltip_text(new_track_name);
         if (new_track_name.empty() ) {
             _track_name_label->get_parent()->hide();
         } else {
