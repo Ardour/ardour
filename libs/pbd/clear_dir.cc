@@ -39,6 +39,7 @@ using PBD::closedir;
 #include "pbd/error.h"
 #include "pbd/compose.h"
 #include "pbd/clear_dir.h"
+#include "pbd/file_utils.h"
 
 #include "i18n.h"
 
@@ -48,50 +49,35 @@ using namespace std;
 int
 PBD::clear_directory (const string& dir, size_t* size, vector<string>* paths)
 {
-	struct dirent* dentry;
+	vector<string> tmp_paths;
 	struct stat statbuf;
-	DIR* dead;
-        int ret = 0;
+	int ret = 0;
 
-        if ((dead = ::opendir (dir.c_str())) == 0) {
-                return -1;
-        }
-        
-        while ((dentry = ::readdir (dead)) != 0) {
-                
-                /* avoid '.' and '..' */
-                
-                if ((dentry->d_name[0] == '.' && dentry->d_name[1] == '\0') ||
-                    (dentry->d_name[2] == '\0' && dentry->d_name[0] == '.' && dentry->d_name[1] == '.')) {
-                        continue;
-                }
-                
-                string fullpath = Glib::build_filename (dir, dentry->d_name);
+	// we are only removing files, not the directory structure
+	get_directory_contents (dir, tmp_paths, true, true);
 
-                if (::stat (fullpath.c_str(), &statbuf)) {
-                        continue;
-                }
-                
-                if (!S_ISREG (statbuf.st_mode)) {
-                        continue;
-                }
-                
-                if (::g_unlink (fullpath.c_str())) {
-                        error << string_compose (_("cannot remove file %1 (%2)"), fullpath, strerror (errno))
+	for (vector<string>::const_iterator i = tmp_paths.begin();
+	     i != tmp_paths.end(); ++i) {
+
+		if (g_stat (i->c_str(), &statbuf)) {
+			continue;
+		}
+
+                if (::g_unlink (i->c_str())) {
+                        error << string_compose (_("cannot remove file %1 (%2)"), *i, strerror (errno))
                               << endmsg;
                         ret = 1;
                 }
 
                 if (paths) {
-                        paths->push_back (dentry->d_name);
+                        paths->push_back (Glib::path_get_basename(*i));
                 }
 
                 if (size) {
                         *size += statbuf.st_size;
                 }
-        }
-        
-        ::closedir (dead);
+
+	}
 
         return ret;
 }
