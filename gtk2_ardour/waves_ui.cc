@@ -90,12 +90,14 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 	} else if (widget_type == "COMBOBOXTEXT") {
 		child = manage (new Gtk::ComboBoxText);
 	} else if (widget_type == "LABEL") {
-		child = manage (new Gtk::Label(text));
+		child = manage (new Gtk::Label (text));
+	} else if (widget_type == "ENTRY") {
+		child = manage (new Gtk::Entry ());
 	} else if (widget_type == "LAYOUT") {
 		child = manage (new Gtk::Layout);
 	} else if (widget_type == "CANVAS") {
 		std::map<std::string, ArdourCanvas::Item*> named_items;
-		child = manage (new ArdourCanvas::GtkCanvas(definition, styles, named_items));
+		child = manage (new ArdourCanvas::GtkCanvas (definition, styles, named_items));
 	} else if (widget_type == "SCROLLEDWINDOW") {
 		child = manage (new Gtk::ScrolledWindow);
 	} else if (widget_type == "VBOX") {
@@ -372,6 +374,24 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 	property = xml_property (definition, "tooltip", styles, "");
 	if (!property.empty ()) {
 		widget.set_tooltip_text (property);
+	}
+
+	Gtk::Label* label = dynamic_cast<Gtk::Label*> (&widget);
+	if (label) {
+		property = xml_property (definition, "justify", styles, "left");
+		Gtk::Justification justification = Gtk::JUSTIFY_LEFT;
+		if (property == "left") {
+			justification = Gtk::JUSTIFY_LEFT;
+		} else if (property == "right") {
+			justification = Gtk::JUSTIFY_RIGHT;
+		} else if (property == "center") {
+			justification = Gtk::JUSTIFY_CENTER;
+		} else if (property == "fill") {
+			justification = Gtk::JUSTIFY_FILL;
+		} else {
+			dbg_msg ("Invalid justification for Gtk::Label !");
+		}
+		label->set_justify (justification);
 	}
 
 	Gtk::Box* box = dynamic_cast<Gtk::Box*> (&widget);
