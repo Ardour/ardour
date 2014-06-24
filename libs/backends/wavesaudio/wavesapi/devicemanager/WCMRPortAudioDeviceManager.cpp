@@ -409,9 +409,20 @@ void WCMRPortAudioDevice::updateDeviceInfo (bool callerIsWaiting/*=false*/)
 		m_InputChannels.clear();
 		for (int channel = 0; channel < maxInputChannels; channel++)
 		{
+			const char* channelName[32]; // 32 is max leth declared by PortAudio for this operation
 			std::stringstream chNameStream;
-			//A better implementation would be to retrieve the names from ASIO or CoreAudio interfaces
-			chNameStream << "Input " << (channel+1);
+
+			PaError error = PaAsio_GetInputChannelName(m_DeviceID, channel, channelName);
+
+			if (error == paNoError)
+			{
+				chNameStream << *channelName;
+			}
+			else
+			{
+				chNameStream << "Input " << (channel+1);
+			}
+
 			m_InputChannels.push_back (chNameStream.str());
 		}
 	
@@ -420,9 +431,20 @@ void WCMRPortAudioDevice::updateDeviceInfo (bool callerIsWaiting/*=false*/)
 		m_OutputChannels.clear();
 		for (int channel = 0; channel < maxOutputChannels; channel++)
 		{
+			const char* channelName[32]; // 32 is max leth declared by PortAudio for this operation
 			std::stringstream chNameStream;
-			//A better implementation would be to retrieve the names from ASIO or CoreAudio interfaces
-			chNameStream << "Output " << (channel+1);
+			
+			PaError error = PaAsio_GetOutputChannelName(m_DeviceID, channel, channelName);
+			
+			if (error == paNoError)
+			{
+				chNameStream << *channelName;
+			}
+			else
+			{
+				chNameStream << "Output " << (channel+1);
+			}
+			
 			m_OutputChannels.push_back (chNameStream.str());
 		}
 	}
