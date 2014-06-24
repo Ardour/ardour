@@ -7,11 +7,13 @@
 #include <glibmm/thread.h>
 #include "scalar_properties.h"
 
+#include "pbd/pbd.h"
+
 
 int
 main ()
 {
-	Glib::thread_init();
+	if (!PBD::init ()) return 1;
 
 	ScalarPropertiesTest::make_property_quarks ();
 	
@@ -29,6 +31,9 @@ main ()
 	
 	CppUnit::CompilerOutputter compileroutputter (&collectedresults, std::cerr);
 	compileroutputter.write ();
-	
+
+	PBD::cleanup ();
+
 	return collectedresults.wasSuccessful () ? 0 : 1;
+
 }
