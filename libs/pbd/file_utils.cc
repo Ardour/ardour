@@ -294,12 +294,12 @@ copy_file(const std::string & from_path, const std::string & to_path)
 	char buf[4096]; // BUFSIZ  ??
 	ssize_t nread;
 
-	fd_from = ::open(from_path.c_str(), READ_FLAGS);
+	fd_from = g_open(from_path.c_str(), READ_FLAGS, 0444);
 	if (fd_from < 0) {
 		goto copy_error;
 	}
 
-	fd_to = ::open(to_path.c_str(), WRITE_FLAGS, 0666);
+	fd_to = g_open(to_path.c_str(), WRITE_FLAGS, 0666);
 	if (fd_to < 0) {
 		goto copy_error;
 	}
