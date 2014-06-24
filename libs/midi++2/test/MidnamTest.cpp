@@ -160,7 +160,7 @@ MidnamTest::load_all_midnams_test ()
     Glib::PatternSpec pattern(string("*.midnam"));
     vector<std::string> result;
 
-    PBD::find_matching_files_in_directory (prefix, pattern, result);
+    PBD::find_files_matching_pattern (result, prefix, pattern);
 
     cout << "Loading " << result.size() << " MIDI patches from " << prefix << endl;
 

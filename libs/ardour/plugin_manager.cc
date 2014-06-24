@@ -326,18 +326,9 @@ PluginManager::ladspa_refresh ()
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("LADSPA: search along: [%1]\n", ladspa_search_path().to_string()));
 
-	Glib::PatternSpec so_extension_pattern("*.so");
-	Glib::PatternSpec dylib_extension_pattern("*.dylib");
-	Glib::PatternSpec dll_extension_pattern("*.dll");
-
-	find_matching_files_in_search_path (ladspa_search_path (),
-					    so_extension_pattern, ladspa_modules);
-
-	find_matching_files_in_search_path (ladspa_search_path (),
-					    dylib_extension_pattern, ladspa_modules);
-
-	find_matching_files_in_search_path (ladspa_search_path (),
-					    dll_extension_pattern, ladspa_modules);
+	find_files_matching_pattern (ladspa_modules, ladspa_search_path (), "*.so");
+	find_files_matching_pattern (ladspa_modules, ladspa_search_path (), "*.dylib");
+	find_files_matching_pattern (ladspa_modules, ladspa_search_path (), "*.dll");
 
 	for (vector<std::string>::iterator i = ladspa_modules.begin(); i != ladspa_modules.end(); ++i) {
 		ARDOUR::PluginScanMessage(_("LADSPA"), *i, false);

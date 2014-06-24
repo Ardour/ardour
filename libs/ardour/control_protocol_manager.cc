@@ -268,14 +268,14 @@ ControlProtocolManager::discover_control_protocols ()
 	Glib::PatternSpec so_extension_pattern("*.so");
 	Glib::PatternSpec dylib_extension_pattern("*.dylib");
 
-	find_matching_files_in_search_path (control_protocol_search_path (),
-					    dll_extension_pattern, cp_modules);
+	find_files_matching_pattern (cp_modules, control_protocol_search_path (),
+	                             dll_extension_pattern);
 
-	find_matching_files_in_search_path (control_protocol_search_path (),
-					    so_extension_pattern, cp_modules);
+	find_files_matching_pattern (cp_modules, control_protocol_search_path (),
+	                             so_extension_pattern);
 
-	find_matching_files_in_search_path (control_protocol_search_path (),
-					    dylib_extension_pattern, cp_modules);
+	find_files_matching_pattern (cp_modules, control_protocol_search_path (),
+	                             dylib_extension_pattern);
 
 	DEBUG_TRACE (DEBUG::ControlProtocols, 
 		     string_compose (_("looking for control protocols in %1\n"), control_protocol_search_path().to_string()));

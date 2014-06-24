@@ -616,8 +616,7 @@ ARDOUR::get_jack_server_paths (const vector<std::string>& server_dir_paths,
 		vector<std::string>& server_paths)
 {
 	for (vector<string>::const_iterator i = server_names.begin(); i != server_names.end(); ++i) {
-                Glib::PatternSpec ps (*i);
-		find_matching_files_in_directories (server_dir_paths, ps, server_paths);
+		find_files_matching_pattern (server_paths, server_dir_paths, *i);
 	}
 	return !server_paths.empty();
 }
