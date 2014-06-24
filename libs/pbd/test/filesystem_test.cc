@@ -1,7 +1,13 @@
+#include "filesystem_test.h"
+
 #include <unistd.h>
 #include <stdlib.h>
-#include "filesystem_test.h"
+
+#include <glibmm/miscutils.h>
+
 #include "pbd/file_utils.h"
+
+#include "test_common.h"
 
 using namespace std;
 
@@ -35,3 +41,17 @@ FilesystemTest::testPathIsWithin ()
 #endif
 }
 
+void
+FilesystemTest::testCopyFile ()
+{
+	std::string testdata_path;
+	CPPUNIT_ASSERT (find_file (test_search_path (), "RosegardenPatchFile.xml", testdata_path));
+
+	std::string output_path = test_output_directory ("CopyFile");
+
+	output_path = Glib::build_filename (output_path, "RosegardenPatchFile.xml");
+
+	cerr << "CopyFile test output path: " << output_path << endl;
+
+	CPPUNIT_ASSERT (PBD::copy_file (testdata_path, output_path));
+}
