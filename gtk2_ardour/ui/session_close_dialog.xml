@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title=" " resizeable="False">
+  <style name="generic_control" font ="Arial 10"/>
+  <style name="generic_button"
+  style="generic_control"
+  fgnormal="#BFBFBF"
+  bgnormal="#6C6C6C"
+  fgactive="#BFBFBF"
+  bgactive="#454545"
+  fghover="#CCCCCC"
+  bghover="#898989"
+  fgdisabled ="#959595"
+  bordercolor="#7E7E7E"
+  borderwidth="0 0 0 0" />
+    
+    <Layout width="400" height="170">
+        
+        <Label style ="generic_control"
+        id="top_label"
+        justify="center"
+        font="14"
+        text="??\n??\n??\n??\n??"
+        x="20" y="40" width="360" height="30"/>
+        
+        <Label style ="generic_control"
+        id="bottom_label"
+        justify="center"
+        text="??\n??\n??\n??\n??"
+        font="12"
+        x="20" y="80" width="360" height="30"/>
+
+    <Button style="generic_button"
+        id="cancel_button"
+        text="CANCEL"        
+        x="10" y="128" width="80" height="32"/>
+        
+    <Button style="generic_button"
+        id="dont_save_button"
+        text="DON'T SAVE"
+        x="220" y="128" width="80" height="32"/>
+        
+    <Button style="generic_button"
+        id="save_button"
+        text="SAVE"
+        x="310" y="128" width="80" height="32"/>
+        
+    </Layout>
+</Dialog>

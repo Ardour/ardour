@@ -143,3 +143,15 @@ tags
 /libs/taglib/taglib/xingheader.h
 /libs/taglib/taglib/tlist.tcc
 /libs/taglib/taglib/tmap.tcc
+gtk2_ardour/macosx/tracks.xcodeproj/xcuserdata/user.xcuserdatad/xcdebugger/Breakpoints.xcbkptlist
+gtk2_ardour/macosx/tracks.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+gtk2_ardour/macosx/tracks.xcodeproj/project.xcworkspace/xcuserdata/user.xcuserdatad/xcdebugger/Expressions.xcexplist
+libs/ardour/macosx/libardour.xcodeproj/xcuserdata/user.xcuserdatad/xcschemes/libardour.xcscheme
+libs/pbd/macosx/pbd.xcodeproj/xcuserdata/user.xcuserdatad/xcschemes/pbd.xcscheme
+gtk2_ardour/macosx/tracks.xcodeproj/xcuserdata/user.xcuserdatad/xcschemes/Tracks.xcscheme
+gtk2_ardour/macosx/tracks.xcodeproj/project.xcworkspace/xcuserdata/user.xcuserdatad/UserInterfaceState.xcuserstate
+libs/backends/wavesaudio/macosx/waves_audiobackend.xcodeproj/xcuserdata/user.xcuserdatad/xcschemes/waves_audiobackend.xcscheme
+gtk2_ardour/macosx/tracks.xcodeproj/xcuserdata/user.xcuserdatad/xcschemes/xcschememanagement.plist
+libs/ardour/macosx/libardour.xcodeproj/xcuserdata/user.xcuserdatad/xcschemes/xcschememanagement.plist
+libs/backends/wavesaudio/macosx/waves_audiobackend.xcodeproj/xcuserdata/user.xcuserdatad/xcschemes/xcschememanagement.plist
+libs/pbd/macosx/pbd.xcodeproj/xcuserdata/user.xcuserdatad/xcschemes/xcschememanagement.plist

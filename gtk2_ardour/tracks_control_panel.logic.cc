@@ -369,37 +369,6 @@ namespace {
     const std::string string_bit16 = "16 bit";
     
     std::string
-    xml_string_to_user_string(std::string xml_string)
-    {
-        // Bit depth format
-        if(xml_string == enum_2_string (FormatFloat))
-            return string_bit32;
-        
-        if(xml_string == enum_2_string (FormatInt24))
-            return string_bit24;
-        
-        if(xml_string == enum_2_string (FormatInt16))
-            return string_bit16;
-        
-        
-        // Header format (File type)
-        if(xml_string == enum_2_string(CAF))
-            return string_CAF;
-        
-        if(xml_string == enum_2_string(BWF))
-            return string_BWav;
-        
-        if(xml_string == enum_2_string(AIFF))
-            return string_Aiff;
-        
-        if(xml_string == enum_2_string(WAVE64))
-            return string_Wav64;
-        
-        
-        return std::string("");
-    }
-
-    std::string
     SampleFormat_to_string(SampleFormat sample_format)
     {
         using namespace std;
@@ -512,6 +481,53 @@ namespace  {
         //defaul value
         return timecode_25;
     }
+    
+    std::string
+    xml_string_to_user_string(std::string xml_string)
+    {
+        // Bit depth format
+        if(xml_string == enum_2_string (FormatFloat))
+            return string_bit32;
+        
+        if(xml_string == enum_2_string (FormatInt24))
+            return string_bit24;
+        
+        if(xml_string == enum_2_string (FormatInt16))
+            return string_bit16;
+        
+        
+        // Header format (File type)
+        if(xml_string == enum_2_string(CAF))
+            return string_CAF;
+        
+        if(xml_string == enum_2_string(BWF))
+            return string_BWav;
+        
+        if(xml_string == enum_2_string(AIFF))
+            return string_Aiff;
+        
+        if(xml_string == enum_2_string(WAVE64))
+            return string_Wav64;
+        
+        // fps (Timecode)
+        if(xml_string == enum_2_string(Timecode::timecode_24))
+            return string_24fps;
+        
+        if(xml_string == enum_2_string(Timecode::timecode_25))
+            return string_25fps;
+        
+        if(xml_string == enum_2_string(Timecode::timecode_30))
+            return string_30fps;
+        
+        if(xml_string == enum_2_string(Timecode::timecode_23976))
+            return string_23976fps;
+        
+        if(xml_string == enum_2_string(Timecode::timecode_2997))
+            return string_2997fps;
+        
+        return std::string("");
+    }
+
 }
 
 void
@@ -531,14 +547,14 @@ TracksControlPanel::populate_frame_rate_combo()
     
     ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
     Timecode::TimecodeFormat timecode_format = string_to_TimecodeFormat(last_used_frame_rate);
-//    ardour_ui->set_timecode_format( timecode_format );
+    ardour_ui->set_timecode_format( timecode_format );
     
     {
 		// set _ignore_changes flag to ignore changes in combo-box callbacks
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
 		set_popdown_strings (_frame_rate_combo, frame_rate_strings);
 		_frame_rate_combo.set_sensitive (frame_rate_strings.size() > 1);
-        _frame_rate_combo.set_active_text ( string_25fps );
+        _frame_rate_combo.set_active_text ( TimecodeFormat_to_string(timecode_format) );
 	}
     
     return;

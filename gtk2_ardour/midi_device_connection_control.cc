@@ -73,6 +73,7 @@ void MidiDeviceConnectionControl::init(const std::string& name, bool capture_act
     }
 
     _name_label->set_text (name);
+	_name_label->set_tooltip_text(name);
     
 	set_capture_active(capture_active);
     set_playback_active(playback_active);
