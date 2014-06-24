@@ -404,11 +404,9 @@ ARDOUR::find_bindings_files (map<string,string>& files)
 	Searchpath spath = ardour_config_search_path();
 
 	if (getenv ("ARDOUR_SAE")) {
-		Glib::PatternSpec pattern("*SAE-*.bindings");
-		find_matching_files_in_search_path (spath, pattern, found);
+		find_files_matching_pattern (found, spath, "*SAE-*.bindings");
 	} else {
-		Glib::PatternSpec pattern("*.bindings");
-		find_matching_files_in_search_path (spath, pattern, found);
+		find_files_matching_pattern (found, spath, "*.bindings");
 	}
 
 	if (found.empty()) {
