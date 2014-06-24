@@ -39,15 +39,17 @@ using namespace ArdourCanvas::XMLUI;
 class WavesUI : public std::map<std::string, Gtk::Object*> {
 
   public:
-	WavesUI (std::string layout_script_file, Gtk::Container& root);
+	WavesUI (const std::string& layout_script_file, Gtk::Container& root);
 
 	Gtk::Adjustment& get_adjustment (const char* id);
+	Gtk::Box& get_box (const char* id);
 	Gtk::VBox& get_v_box (const char* id);
 	Gtk::HBox& get_h_box (const char* id);
 	Gtk::Layout& get_layout (const char* id);
 	Gtk::Label& get_label (const char* id);
 	Gtk::Image& get_image (const char* id);
 	Gtk::ComboBoxText& get_combo_box_text (const char* id);
+	Gtk::Entry& get_entry(const char* id);
 	WavesButton& get_waves_button (const char* id);
 	Gtkmm2ext::Fader& get_fader (const char* id);
 	const XMLTree* xml_tree() { return _xml_tree; }
@@ -60,7 +62,7 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	const XMLTree* _xml_tree;
 
 	Gtk::Object* get_object(const char *id);
-	const XMLTree* load_layout (const std::string xml_file_name);
+	const XMLTree* load_layout (const std::string& xml_file_name);
 	void create_ui (const XMLTree& layout, Gtk::Container& root);
 	void create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk::Container& root);
 	Gtk::Widget* create_widget (const XMLNode& definition, const XMLNodeMap& styles);

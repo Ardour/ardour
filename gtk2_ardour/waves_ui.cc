@@ -33,7 +33,7 @@ using namespace ARDOUR;
 
 std::map<std::string, const XMLTree*> WavesUI::__xml_tree_cache;
 
-WavesUI::WavesUI (std::string layout_script_file, Gtk::Container& root)
+WavesUI::WavesUI (const std::string& layout_script_file, Gtk::Container& root)
 	: _xml_tree (NULL)
 {
 	// To avoid a need of reading the same file many times:
@@ -287,7 +287,7 @@ WavesUI::create_ui (const XMLTree& layout, Gtk::Container& root)
 }
 
 const XMLTree*
-WavesUI::load_layout (const std::string xml_file_name)
+WavesUI::load_layout (const std::string& xml_file_name)
 {
 	std::map<std::string, const XMLTree*>::const_iterator it = __xml_tree_cache.find(xml_file_name);
 	if (it != __xml_tree_cache.end()) {
@@ -478,6 +478,19 @@ WavesUI::get_adjustment(const char* id)
 	return *child;
 }
 
+
+Gtk::Box&
+WavesUI::get_box (const char* id)
+{
+	Gtk::Box* child = dynamic_cast<Gtk::Box*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::Box ") + id + " not found !");
+		throw std::exception();
+	}
+	return *child;
+}
+
+
 Gtk::VBox&
 WavesUI::get_v_box (const char* id)
 {
@@ -537,6 +550,17 @@ WavesUI::get_combo_box_text (const char* id)
 	return *child;
 }
 
+
+Gtk::Entry&
+WavesUI::get_entry(const char* id)
+{
+	Gtk::Entry* child = dynamic_cast<Gtk::Entry*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::Entry ") + id + " not found !");
+		throw std::exception();
+	}
+	return *child;
+}
 
 WavesButton&
 WavesUI::get_waves_button (const char* id)
