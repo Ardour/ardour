@@ -1358,6 +1358,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void escape ();
 	void lock ();
 	void unlock ();
+	ArdourDialog* lock_dialog;
 
 	Gtk::Menu fade_context_menu;
 

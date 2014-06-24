@@ -7121,11 +7121,22 @@ Editor::toggle_midi_input_active (bool flip_others)
 void
 Editor::lock ()
 {
+	if (!lock_dialog) {
+		lock_dialog = new ArdourDialog (string_compose (_("%1 is Locked"), PROGRAM_NAME), true);
+		Gtk::Button* b = manage (new Gtk::Button (_("Click me to unlock")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &Editor::unlock));
+		
+		lock_dialog->get_vbox()->pack_start (*b);
+		lock_dialog->get_vbox()->show_all ();
+	}
+	
 	ActionManager::disable_all_actions ();
+	lock_dialog->present ();
 }
 
 void
 Editor::unlock ()
 {
+	lock_dialog->hide ();
 	ActionManager::pop_action_state ();
 }
