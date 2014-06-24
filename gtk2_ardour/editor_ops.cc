@@ -7122,12 +7122,19 @@ void
 Editor::lock ()
 {
 	if (!lock_dialog) {
-		lock_dialog = new ArdourDialog (string_compose (_("%1 is Locked"), PROGRAM_NAME), true);
-		Gtk::Button* b = manage (new Gtk::Button (_("Click me to unlock")));
-		b->signal_clicked().connect (sigc::mem_fun (*this, &Editor::unlock));
-		
+		lock_dialog = new ArdourDialog (string_compose (_("%1: Locked"), PROGRAM_NAME), true);
+
+		Gtk::Image* padlock = manage (new Gtk::Image (::get_icon ("padlock_closed")));
+		lock_dialog->get_vbox()->pack_start (*padlock);
+
+		ArdourButton* b = manage (new ArdourButton);
+		b->set_name ("lock button");
+		b->set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Click me to unlock")));
+		b->signal_clicked.connect (sigc::mem_fun (*this, &Editor::unlock));
 		lock_dialog->get_vbox()->pack_start (*b);
+		
 		lock_dialog->get_vbox()->show_all ();
+		lock_dialog->set_size_request (200, 200);
 	}
 	
 	ActionManager::disable_all_actions ();
