@@ -271,6 +271,8 @@
 		43B351ED194F04E00038C140 /* step_editing.bindings in Resources */ = {isa = PBXBuildFile; fileRef = 43B351C0194F04E00038C140 /* step_editing.bindings */; };
 		CEAFC770195445560016ACF0 /* bbt_time.cc in Sources */ = {isa = PBXBuildFile; fileRef = CEAFC76E195445560016ACF0 /* bbt_time.cc */; };
 		CEAFC771195445560016ACF0 /* time.cc in Sources */ = {isa = PBXBuildFile; fileRef = CEAFC76F195445560016ACF0 /* time.cc */; };
+		CEB0A9F219583F96006D269A /* session_close_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = CEB0A9F119583F96006D269A /* session_close_dialog.cc */; };
+		CEB0A9F41958447C006D269A /* session_close_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB0A9F31958447C006D269A /* session_close_dialog.xml */; };
 		CEDB41321951C668006E6F77 /* buildlog.txt in Resources */ = {isa = PBXBuildFile; fileRef = CEDB41311951C668006E6F77 /* buildlog.txt */; };
 /* End PBXBuildFile section */
 
@@ -1083,6 +1085,9 @@
 		CEAFC775195445D90016ACF0 /* bbt_time.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bbt_time.h; path = ../../libs/timecode/timecode/bbt_time.h; sourceTree = "<group>"; };
 		CEAFC776195445D90016ACF0 /* time.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = time.h; path = ../../libs/timecode/timecode/time.h; sourceTree = "<group>"; };
 		CEAFC777195445D90016ACF0 /* visibility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = visibility.h; path = ../../libs/timecode/timecode/visibility.h; sourceTree = "<group>"; };
+		CEB0A45A19583F3F006D269A /* session_close_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = session_close_dialog.h; path = ../session_close_dialog.h; sourceTree = "<group>"; };
+		CEB0A9F119583F96006D269A /* session_close_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = session_close_dialog.cc; path = ../session_close_dialog.cc; sourceTree = "<group>"; };
+		CEB0A9F31958447C006D269A /* session_close_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = session_close_dialog.xml; sourceTree = "<group>"; };
 		CEDB41311951C668006E6F77 /* buildlog.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = buildlog.txt; path = ../../../buildlog.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1120,6 +1125,7 @@
 		43279040194EFF38003C9FEA /* source */ = {
 			isa = PBXGroup;
 			children = (
+				CEB0A9F119583F96006D269A /* session_close_dialog.cc */,
 				CEAFC76E195445560016ACF0 /* bbt_time.cc */,
 				CEAFC76F195445560016ACF0 /* time.cc */,
 				43279210194EFFBA003C9FEA /* tracks_control_panel.cc */,
@@ -1707,6 +1713,7 @@
 		43279429194F0062003C9FEA /* ui */ = {
 			isa = PBXGroup;
 			children = (
+				CEB0A9F31958447C006D269A /* session_close_dialog.xml */,
 				4327942A194F0062003C9FEA /* device_capture_control.xml */,
 				4327942B194F0062003C9FEA /* device_playback_control.xml */,
 				4327942C194F0062003C9FEA /* editor_window.xml */,
@@ -1730,6 +1737,7 @@
 		43279480194F00CB003C9FEA /* headers */ = {
 			isa = PBXGroup;
 			children = (
+				CEB0A45A19583F3F006D269A /* session_close_dialog.h */,
 				CEAFC775195445D90016ACF0 /* bbt_time.h */,
 				CEAFC776195445D90016ACF0 /* time.h */,
 				CEAFC777195445D90016ACF0 /* visibility.h */,
@@ -2361,6 +2369,7 @@
 				4327947F194F009E003C9FEA /* tracks.menus.in in Resources */,
 				43B351ED194F04E00038C140 /* step_editing.bindings in Resources */,
 				CEDB41321951C668006E6F77 /* buildlog.txt in Resources */,
+				CEB0A9F41958447C006D269A /* session_close_dialog.xml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2375,6 +2384,7 @@
 				4327925B194EFFF1003C9FEA /* AppDelegate.m in Sources */,
 				CEAFC770195445560016ACF0 /* bbt_time.cc in Sources */,
 				CEAFC771195445560016ACF0 /* time.cc in Sources */,
+				CEB0A9F219583F96006D269A /* session_close_dialog.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

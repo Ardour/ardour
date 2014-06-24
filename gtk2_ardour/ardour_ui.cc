@@ -137,6 +137,7 @@ typedef uint64_t microseconds_t;
 #include "video_server_dialog.h"
 #include "add_video_dialog.h"
 #include "transcode_video_dialog.h"
+#include "session_close_dialog.h"
 
 #include "i18n.h"
 
@@ -1055,68 +1056,39 @@ If you still wish to quit, please use the\n\n\
 int
 ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
 {
-	ArdourDialog window (_("Unsaved Session"));
-	Gtk::HBox dhbox;  // the hbox for the image and text
-	Gtk::Label  prompt_label;
-	Gtk::Image* dimage = manage (new Gtk::Image(Stock::DIALOG_WARNING,  Gtk::ICON_SIZE_DIALOG));
-
-	string msg;
-
-	assert (actions.size() >= 3);
-
-	window.add_button (actions[0], RESPONSE_REJECT);
-	window.add_button (actions[1], RESPONSE_APPLY);
-	window.add_button (actions[2], RESPONSE_ACCEPT);
-
-	window.set_default_response (RESPONSE_ACCEPT);
-
-	Gtk::Button noquit_button (msg);
-	noquit_button.set_name ("EditorGTKButton");
-
-	string prompt;
-
-	if (_session->snap_name() == _session->name()) {
-		prompt = string_compose(_("The session \"%1\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"),
-					_session->snap_name());
+    SessionCloseDialog session_close_dialog;
+    
+    string prompt;
+    string bottom_prompt;
+    
+    if (_session->snap_name() == _session->name()) {
+		prompt = string_compose(_("Do you want to save changes to \"%1\"?\n"), _session->snap_name());
+        bottom_prompt = _("Changes will be lost if you choose \"Don't Save\"\n");
+        
+        session_close_dialog._top_label.set_text(prompt);
+        
+        
+        session_close_dialog._bottom_label.set_text(bottom_prompt);
+        session_close_dialog._bottom_label.set_alignment(ALIGN_CENTER);
 	} else {
 		prompt = string_compose(_("The snapshot \"%1\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"),
-					_session->snap_name());
+                                _session->snap_name());
 	}
-
-	prompt_label.set_text (prompt);
-	prompt_label.set_name (X_("PrompterLabel"));
-	prompt_label.set_alignment(ALIGN_LEFT, ALIGN_TOP);
-
-	dimage->set_alignment(ALIGN_CENTER, ALIGN_TOP);
-	dhbox.set_homogeneous (false);
-	dhbox.pack_start (*dimage, false, false, 5);
-	dhbox.pack_start (prompt_label, true, false, 5);
-	window.get_vbox()->pack_start (dhbox);
-
-	window.set_name (_("Prompter"));
-	window.set_modal (true);
-	window.set_resizable (false);
-
-	dhbox.show();
-	prompt_label.show();
-	dimage->show();
-	window.show();
-	window.set_keep_above (true);
-	window.present ();
-
-	ResponseType r = (ResponseType) window.run();
-
-	window.hide ();
-
-	switch (r) {
-	case RESPONSE_ACCEPT: // save and get out of here
-		return 1;
-	case RESPONSE_APPLY:  // get out of here
-		return 0;
-	default:
-		break;
+    
+    int result = session_close_dialog.run();
+    
+	switch (result) {
+            // button "SAVE" was pressed
+        case RESPONSE_YES: // save and get out of here
+            return 1;
+            // button "DON'T SAVE" was pressed
+        case RESPONSE_NO:  // get out of here
+            return 0;
+        default:
+            break;
 	}
-
+    
+    // button "CANCEL" was pressed
 	return -1;
 }
 
