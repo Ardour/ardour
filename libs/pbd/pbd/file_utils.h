@@ -93,6 +93,11 @@ find_files_matching_pattern (std::vector<std::string>& result,
  * Takes a search path and a file name and places the full path
  * to that file in result if it is found within the search path.
  *
+ * @note the parameter order of this function doesn't match the
+ * others. At the time of writing it is the most widely used file
+ * utility function so I didn't change it but it may be worth
+ * doing at some point if it causes any confusion.
+ *
  * @return true If file is found within the search path.
  */
 LIBPBD_API bool
@@ -102,35 +107,57 @@ find_file (const Searchpath& search_path,
 
 
 /**
- * @return files in dirpath that match a regular expression
+ * Find files in paths that match a regular expression
+ * @note This function does not recurse.
+ *
+ * @param result A vector in which to place the resulting matches.
+ * @param paths A Searchpath
+ * @param regexp A regular expression
  */
 LIBPBD_API void
 find_files_matching_regex (std::vector<std::string>& results,
-                           const Searchpath& dirpath,
+                           const Searchpath& paths,
                            const std::string& regexp);
 
 /**
- * @return paths in a Searchpath that match a supplied filter(functor)
- * @note results include files and directories
+ * Find paths in a Searchpath that match a supplied filter(functor)
+ * @note results include files and directories.
+ *
+ * @param result A vector in which to place the resulting matches.
+ * @param paths A Searchpath
+ * @param filter A functor to use to filter paths
+ * @param arg additonal argument to filter if required
+ * @param pass_fullpath pass the full path to the filter or just the basename
+ * @param return_fullpath put the full path in results or just the basename
+ * @param recurse Recurse into child directories to find paths.
  */
 LIBPBD_API void
-find_paths_matching_filter (std::vector<std::string>&,
+find_paths_matching_filter (std::vector<std::string>& results,
                             const Searchpath& paths,
                             bool (*filter)(const std::string &, void *),
                             void *arg,
-                            bool match_fullpath,
+                            bool pass_fullpath,
                             bool return_fullpath,
                             bool recurse = false);
 
 /**
- * @return files in a Searchpath that match a supplied filter(functor)
+ * Find paths in a Searchpath that match a supplied filter(functor)
+ * @note results include only files.
+ *
+ * @param result A vector in which to place the resulting matches.
+ * @param paths A Searchpath
+ * @param filter A functor to use to filter paths
+ * @param arg additonal argument to filter if required
+ * @param pass_fullpath pass the full path to the filter or just the basename
+ * @param return_fullpath put the full path in results or just the basename
+ * @param recurse Recurse into child directories to find files.
  */
 LIBPBD_API void
-find_files_matching_filter (std::vector<std::string>&,
+find_files_matching_filter (std::vector<std::string>& results,
                             const Searchpath& paths,
                             bool (*filter)(const std::string &, void *),
                             void *arg,
-                            bool match_fullpath,
+                            bool pass_fullpath,
                             bool return_fullpath,
                             bool recurse = false);
 
