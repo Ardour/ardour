@@ -84,3 +84,15 @@ FilesystemTest::testCopyFileUTF8Filename ()
 		CPPUNIT_ASSERT (PBD::copy_file (input_path, output_path));
 	}
 }
+
+void
+FilesystemTest::testFindFilesMatchingPattern ()
+{
+	vector<string> patch_files;
+
+	PBD::find_files_matching_pattern (patch_files, test_search_path (), "*PatchFile*");
+
+	CPPUNIT_ASSERT(test_search_path ().size() == 1);
+
+	CPPUNIT_ASSERT(patch_files.size() == 2);
+}
