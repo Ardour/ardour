@@ -129,9 +129,9 @@
     <Option name="ruler text" value="e5e5e5ff"/>
     <Option name="selected crossfade editor line" value="00dbdbff"/>
     <Option name="selected crossfade editor wave" value="f9ea14a0"/>
-    <Option name="selected region base" value="51518a97"/>
-    <Option name="selected waveform fill" value="25e2e9c8"/>
-    <Option name="selected waveform outline" value="0f0f0fcc"/>
+    <Option name="selected region base" value="596559ff"/>
+    <Option name="selected waveform fill" value="ffa500ff"/>
+    <option name="selected waveform outline" value="0f0f0fcc"/>
     <Option name="selection rect" value="e8f4d377"/>
     <Option name="selection" value="636363b2"/>
     <Option name="shuttle" value="6bb620ff"/>
@@ -176,7 +176,7 @@
     <Option name="waveform outline" value="000000ff"/>
     <Option name="clipped waveform" value="ff0000e5"/>
     <Option name="waveform fill" value="ffffffff"/>
-    <Option name="zero line" value="7f7f7f58"/>
+    <Option name="zero line" value="7f7f7fe0"/>
     <Option name="zoom rect" value="c6d1b26d"/>
     <Option name="monitor knob" value="329edfff"/>
     <Option name="button border" value="000000f0"/>
