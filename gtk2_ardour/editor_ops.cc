@@ -57,6 +57,7 @@
 
 #include "canvas/canvas.h"
 
+#include "actions.h"
 #include "ardour_ui.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
@@ -7115,4 +7116,16 @@ Editor::toggle_midi_input_active (bool flip_others)
 	}
 	
 	_session->set_exclusive_input_active (rl, onoff, flip_others);
+}
+
+void
+Editor::lock ()
+{
+	ActionManager::disable_all_actions ();
+}
+
+void
+Editor::unlock ()
+{
+	ActionManager::pop_action_state ();
 }

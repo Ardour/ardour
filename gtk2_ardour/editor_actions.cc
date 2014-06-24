@@ -150,6 +150,11 @@ Editor::register_actions ()
 
 	ActionManager::register_action (editor_actions, "escape", _("Break drag or deselect all"), sigc::mem_fun (*this, &Editor::escape));
 
+	/* We don't bother registering "unlock" because it would be insensitive
+	   when required. Editor::unlock() must be invoked directly.
+	*/
+	ActionManager::register_action (editor_actions, "lock", _("Lock"), sigc::mem_fun (*this, &Editor::lock));
+
 	toggle_reg_sens (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	toggle_reg_sens (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Editor::editor_list_button_toggled));
 

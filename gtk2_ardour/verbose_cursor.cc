@@ -44,7 +44,7 @@ VerboseCursor::VerboseCursor (Editor* editor)
 	, _xoffset (0)
 	, _yoffset (0)
 {
-	_canvas_item = new ArdourCanvas::Text (_editor->get_hvscroll_group());
+	_canvas_item = new ArdourCanvas::Text (_editor->get_noscroll_group());
 	CANVAS_DEBUG_NAME (_canvas_item, "verbose canvas cursor");
 	_canvas_item->set_ignore_events (true);
 	_canvas_item->set_font_description (Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_LargerBoldFont()));

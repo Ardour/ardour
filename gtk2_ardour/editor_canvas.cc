@@ -68,6 +68,11 @@ Editor::initialize_canvas ()
 	_track_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 	_track_canvas = _track_canvas_viewport->canvas ();
 
+	/* scroll group for items that should not automatically scroll
+	 *  (e.g verbose cursor). It shares the canvas coordinate space.
+	*/
+	no_scroll_group = new ArdourCanvas::Container (_track_canvas->root());
+
 	ArdourCanvas::ScrollGroup* hsg; 
 	ArdourCanvas::ScrollGroup* hg;
 	ArdourCanvas::ScrollGroup* vg;
