@@ -68,10 +68,9 @@ MidiPatchManager::add_session_patches ()
 
 	assert (Glib::file_test (path_to_patches, Glib::FILE_TEST_IS_DIR));
 
-	Glib::PatternSpec pattern(string("*.midnam"));
 	vector<std::string> result;
 
-	find_matching_files_in_directory (path_to_patches, pattern, result);
+	find_files_matching_pattern (result, path_to_patches, "*.midnam");
 
 	info << "Loading " << result.size() << " MIDI patches from " << path_to_patches << endmsg;
 
@@ -104,10 +103,9 @@ MidiPatchManager::refresh()
 	_all_models.clear();
 
 	Searchpath search_path = midi_patch_search_path ();
-	Glib::PatternSpec pattern (string("*.midnam"));
 	vector<std::string> result;
 
-	find_matching_files_in_search_path (search_path, pattern, result);
+	find_files_matching_pattern (result, search_path, "*.midnam");
 
 	info << "Loading " << result.size() << " MIDI patches from " << search_path.to_string() << endmsg;
 

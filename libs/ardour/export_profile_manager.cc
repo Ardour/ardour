@@ -332,8 +332,7 @@ ExportProfileManager::find_file (std::string const & pattern)
 {
 	vector<std::string> found;
 
-	Glib::PatternSpec pattern_spec (pattern);
-	find_matching_files_in_search_path (search_path, pattern_spec, found);
+	find_files_matching_pattern (found, search_path, pattern);
 
 	return found;
 }
