@@ -21,7 +21,10 @@
 #include <vector>
 #include <string>
 #include <list>
+#include <stack>
 #include <stdint.h>
+
+#include <boost/shared_ptr.hpp>
 
 #include <gtk/gtkaccelmap.h>
 #include <gtk/gtkuimanager.h>
@@ -229,6 +232,81 @@ ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, ve
 			keys.push_back (get_key_representation (accel_path, key));
 			bindings.push_back (AccelKey (key.get_key(), Gdk::ModifierType (key.get_mod())));
 		}
+	}
+}
+
+struct ActionState {
+	GtkAction* action;
+	bool       sensitive;
+	ActionState (GtkAction* a, bool s) : action (a), sensitive (s) {}
+};
+
+typedef std::vector<ActionState> ActionStates;
+
+static std::stack<boost::shared_ptr<ActionStates> > state_stack;
+
+static boost::shared_ptr<ActionStates>
+get_action_state ()
+{
+	boost::shared_ptr<ActionStates> state = boost::shared_ptr<ActionStates>(new ActionStates);
+	
+	/* the C++ API for functions used here appears to be broken in
+	   gtkmm2.6, so we fall back to the C level.
+	*/
+
+	GList* list = gtk_ui_manager_get_action_groups (ActionManager::ui_manager->gobj());
+	GList* node;
+	GList* acts;
+
+	for (node = list; node; node = g_list_next (node)) {
+
+		GtkActionGroup* group = (GtkActionGroup*) node->data;
+
+		/* first pass: collect them all */
+
+		typedef std::list<Glib::RefPtr<Gtk::Action> > action_list;
+		action_list the_acts;
+
+		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
+			GtkAction* action = (GtkAction*) acts->data;
+
+			state->push_back (ActionState (action, gtk_action_get_sensitive (action)));
+		}
+	}
+	
+	return state;
+}
+
+void
+ActionManager::push_action_state ()
+{
+	state_stack.push (get_action_state());
+}
+
+void
+ActionManager::pop_action_state ()
+{
+	if (state_stack.empty()) {
+		warning << string_compose (_("programming error: %1"), X_("ActionManager::pop_action_state called with empty stack")) << endmsg;
+		return;
+	}
+
+	boost::shared_ptr<ActionStates> as = state_stack.top ();
+	state_stack.pop ();
+	
+	for (ActionStates::iterator i = as->begin(); i != as->end(); ++i) {
+		gtk_action_set_sensitive ((*i).action, (*i).sensitive);
+	}
+}
+
+void
+ActionManager::disable_all_actions ()
+{
+	push_action_state ();
+	boost::shared_ptr<ActionStates> as = state_stack.top ();
+	
+	for (ActionStates::iterator i = as->begin(); i != as->end(); ++i) {
+		gtk_action_set_sensitive ((*i).action, false);
 	}
 }
 
