@@ -276,6 +276,14 @@ find_files_matching_filter (vector<string>& result,
 	run_functor_for_paths (result, paths, filter, arg, true, pass_fullpath, return_fullpath, recurse);
 }
 
+#ifdef PLATFORM_WINDOWS
+#define WRITE_FLAGS O_RDWR | O_CREAT | O_BINARY
+#define READ_FLAGS O_RDONLY | O_BINARY
+#else
+#define WRITE_FLAGS O_RDWR | O_CREAT
+#define READ_FLAGS O_RDONLY
+#endif
+
 bool
 copy_file(const std::string & from_path, const std::string & to_path)
 {
@@ -286,12 +294,12 @@ copy_file(const std::string & from_path, const std::string & to_path)
 	char buf[4096]; // BUFSIZ  ??
 	ssize_t nread;
 
-	fd_from = ::open(from_path.c_str(), O_RDONLY);
+	fd_from = ::open(from_path.c_str(), READ_FLAGS);
 	if (fd_from < 0) {
 		goto copy_error;
 	}
 
-	fd_to = ::open(to_path.c_str(), O_WRONLY | O_CREAT, 0666);
+	fd_to = ::open(to_path.c_str(), WRITE_FLAGS, 0666);
 	if (fd_to < 0) {
 		goto copy_error;
 	}
