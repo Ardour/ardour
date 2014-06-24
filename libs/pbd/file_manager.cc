@@ -233,7 +233,7 @@ FdFileDescriptor::open ()
 	 * or it treats the file as a text stream and puts in
 	 * line endings in etc
 	 */
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 #define WRITE_FLAGS O_RDWR | O_CREAT | O_BINARY
 #define READ_FLAGS O_RDONLY | O_BINARY
 #else
