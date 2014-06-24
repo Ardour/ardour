@@ -7087,7 +7087,6 @@ Editor::toggle_midi_input_active (bool flip_others)
 	_session->set_exclusive_input_active (rl, onoff, flip_others);
 }
 
-
 void
 Editor::lock ()
 {

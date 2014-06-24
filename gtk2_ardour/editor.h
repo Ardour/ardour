@@ -462,6 +462,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	}
 
  	ArdourCanvas::Container* get_trackview_group () const { return _trackview_group; }
+        ArdourCanvas::Container* get_noscroll_group () const { return no_scroll_group; }
         ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
         ArdourCanvas::ScrollGroup* get_vscroll_group () const { return v_scroll_group; }
         ArdourCanvas::ScrollGroup* get_hvscroll_group () const { return hv_scroll_group; }
@@ -765,6 +766,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* The group containing all other groups that are scrolled horizontally ONLY
 	*/
         ArdourCanvas::ScrollGroup* h_scroll_group;
+
+	/* The group containing all trackviews. */
+	ArdourCanvas::Container* no_scroll_group;
 
 	/* The group containing all trackviews. */
 	ArdourCanvas::Container* _trackview_group;
