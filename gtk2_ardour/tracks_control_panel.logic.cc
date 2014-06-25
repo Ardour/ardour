@@ -1265,9 +1265,6 @@ void TracksControlPanel::update_session_config ()
             session->config.set_native_file_header_format( string_to_HeaderFormat(_file_type_combo.get_active_text() ) );
             session->config.set_native_file_data_format  ( string_to_SampleFormat(_bit_depth_combo.get_active_text() ) );
             session->config.set_timecode_format(           string_to_TimecodeFormat(_frame_rate_combo.get_active_text() ) );
-            
-            ardour_ui->update_format();
-            ardour_ui->update_timecode_format();
         }
     }
 }

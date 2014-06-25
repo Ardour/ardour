@@ -279,6 +279,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
 	point_zero_something_second_connection.disconnect();
+    connection_with_session_config.disconnect();
 
 	if (editor_meter) {
 		meter_box.remove(*editor_meter);
