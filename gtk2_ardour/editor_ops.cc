@@ -7067,7 +7067,10 @@ void
 Editor::lock ()
 {
 	if (!lock_dialog) {
-		lock_dialog = new ArdourDialog (string_compose (_("%1: Locked"), PROGRAM_NAME), true);
+                /* the lock dialog must be a completely "vanilla" Dialog that does not forward
+                   events in anyway. Using a class like ArdourDialog breaks this.
+                */
+		lock_dialog = new Gtk::Dialog (string_compose (_("%1: Locked"), PROGRAM_NAME), true);
 
 		Gtk::Image* padlock = manage (new Gtk::Image (::get_icon ("padlock_closed")));
 		lock_dialog->get_vbox()->pack_start (*padlock);
@@ -7101,4 +7104,6 @@ Editor::unlock ()
 #ifdef __APPLE__
 	ActionManager::pop_action_state ();
 #endif	
+
+        start_lock_event_timing ();
 }
