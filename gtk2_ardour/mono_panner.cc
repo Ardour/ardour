@@ -50,6 +50,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace ARDOUR_UI_UTILS;
 
 MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	: PannerInterface (p->panner())

@@ -68,7 +68,6 @@
 #include "rgb_macros.h"
 #include "selection.h"
 #include "streamview.h"
-#include "utils.h"
 #include "patch_change_dialog.h"
 #include "verbose_cursor.h"
 #include "ardour_ui.h"

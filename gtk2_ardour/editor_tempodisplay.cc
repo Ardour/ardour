@@ -50,7 +50,6 @@
 #include "time_axis_view.h"
 #include "ardour_ui.h"
 #include "tempo_lines.h"
-#include "utils.h"
 
 #include "i18n.h"
 

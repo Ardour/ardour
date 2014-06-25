@@ -89,7 +89,6 @@
 #include "strip_silence_dialog.h"
 #include "time_axis_view.h"
 #include "transpose_dialog.h"
-#include "utils.h"
 
 #include "i18n.h"
 #include "dbg_msg.h"

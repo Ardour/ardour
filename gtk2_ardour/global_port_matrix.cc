@@ -32,6 +32,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 GlobalPortMatrix::GlobalPortMatrix (Gtk::Window* p, Session* s, DataType t)
 	: PortMatrix (p, s, t)

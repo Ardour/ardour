@@ -30,6 +30,7 @@ using namespace Gdk;
 using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 #define dbg_msg(a) MessageDialog (a, PROGRAM_NAME).run();
 

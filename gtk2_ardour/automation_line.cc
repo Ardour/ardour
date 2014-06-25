@@ -51,7 +51,6 @@
 #include "rgb_macros.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
-#include "utils.h"
 #include "selection.h"
 #include "time_axis_view.h"
 #include "point_selection.h"

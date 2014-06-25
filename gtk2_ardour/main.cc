@@ -49,7 +49,6 @@
 #include <gtkmm2ext/utils.h>
 
 #include "version.h"
-#include "utils.h"
 #include "ardour_ui.h"
 #include "opts.h"
 #include "enums.h"

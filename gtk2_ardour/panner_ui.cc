@@ -31,7 +31,6 @@
 #include "ardour_ui.h"
 #include "panner_ui.h"
 #include "panner2d.h"
-#include "utils.h"
 #include "gui_thread.h"
 #include "stereo_panner.h"
 #include "mono_panner.h"

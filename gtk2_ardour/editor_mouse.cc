@@ -60,7 +60,6 @@
 #include "automation_time_axis.h"
 #include "control_point.h"
 #include "prompter.h"
-#include "utils.h"
 #include "selection.h"
 #include "keyboard.h"
 #include "editing.h"

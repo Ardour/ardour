@@ -23,7 +23,6 @@
 #include "ardour_ui.h"
 #include "video_image_frame.h"
 #include "public_editor.h"
-#include "utils.h"
 #include "canvas/container.h"
 #include "utils_videotl.h"
 

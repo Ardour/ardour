@@ -58,6 +58,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace Glib;
+using namespace ARDOUR_UI_UTILS;
 
 static const unsigned int midi_tab = 2;
 static const unsigned int latency_tab = 1; /* zero-based, page zero is the main setup page */

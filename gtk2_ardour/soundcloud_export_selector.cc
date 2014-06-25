@@ -71,7 +71,7 @@ SoundcloudExportSelector::SoundcloudExportSelector () :
 	sc_table.set_row_spacings (5);
 	sc_frame->add (sc_table);
 
-	sc_table.attach ( *(Gtk::manage (new Gtk::Image (get_icon (X_("soundcloud"))))) , 0, 1,  0, 2);
+	sc_table.attach ( *(Gtk::manage (new Gtk::Image (ARDOUR_UI_UTILS::get_icon (X_("soundcloud"))))) , 0, 1,  0, 2);
 
 	sc_table.attach (soundcloud_username_label,    0, 1,  1, 2);
 	sc_table.attach (soundcloud_username_entry,    1, 3,  1, 2);

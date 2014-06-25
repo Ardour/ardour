@@ -36,7 +36,6 @@
 
 #include "gtkmm2ext/actions.h"
 
-#include "utils.h"
 #include "actions.h"
 #include "i18n.h"
 

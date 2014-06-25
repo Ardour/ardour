@@ -57,7 +57,6 @@
 #include "control_point.h"
 #include "ghostregion.h"
 #include "audio_time_axis.h"
-#include "utils.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "ardour_ui.h"

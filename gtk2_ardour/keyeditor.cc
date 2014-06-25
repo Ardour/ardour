@@ -38,7 +38,6 @@
 #include "actions.h"
 #include "keyboard.h"
 #include "keyeditor.h"
-#include "utils.h"
 
 #include "i18n.h"
 

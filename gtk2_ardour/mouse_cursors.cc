@@ -22,6 +22,8 @@
 #include "mouse_cursors.h"
 #include "editor_xpms"
 
+using namespace ARDOUR_UI_UTILS;
+
 MouseCursors::MouseCursors ()
 	: cross_hair (0)
 	, trimmer (0)

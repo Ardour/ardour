@@ -24,7 +24,6 @@
 
 #include "midi_region_view.h"
 #include "public_editor.h"
-#include "utils.h"
 #include "hit.h"
 
 using namespace ARDOUR;

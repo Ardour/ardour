@@ -45,7 +45,6 @@
 #include "ardour_ui.h"
 #include "prompter.h"
 #include "plugin_ui.h"
-#include "utils.h"
 #include "gui_thread.h"
 #include "automation_controller.h"
 

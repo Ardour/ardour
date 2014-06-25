@@ -52,7 +52,6 @@
 #include "audio_time_axis.h"
 #include "midi_time_axis.h"
 #include "session_import_dialog.h"
-#include "utils.h"
 #include "gui_thread.h"
 #include "interthread_progress_window.h"
 #include "mouse_cursors.h"

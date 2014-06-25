@@ -41,7 +41,6 @@
 #include "ardour_ui.h"
 #include "gui_thread.h"
 
-#include "utils.h"
 #include "opts.h"
 #include "transcode_video_dialog.h"
 #include "utils_videotl.h"

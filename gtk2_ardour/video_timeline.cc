@@ -34,7 +34,6 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "gui_thread.h"
-#include "utils.h"
 #include "utils_videotl.h"
 #include "rgb_macros.h"
 #include "video_timeline.h"

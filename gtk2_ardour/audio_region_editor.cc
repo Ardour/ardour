@@ -32,7 +32,6 @@
 #include "audio_region_editor.h"
 #include "audio_region_view.h"
 #include "ardour_ui.h"
-#include "utils.h"
 #include "gui_thread.h"
 
 #include "i18n.h"

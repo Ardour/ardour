@@ -116,7 +116,7 @@ class UIConfiguration : public PBD::Stateful
 	std::string get_##var () const { return var.get(); }			\
 	bool set_##var (const std::string& val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
 #define CANVAS_FONT_VARIABLE(var,name) \
-	Pango::FontDescription get_##var () const { return sanitized_font (var.get()); } \
+	Pango::FontDescription get_##var () const { return ARDOUR_UI_UTILS::sanitized_font (var.get()); } \
 	bool set_##var (const std::string& val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
 #include "canvas_vars.h"
 #undef  CANVAS_VARIABLE

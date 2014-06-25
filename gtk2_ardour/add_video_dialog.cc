@@ -33,7 +33,6 @@
 #include "ardour/session.h"
 #include "ardour_ui.h"
 
-#include "utils.h"
 #include "add_video_dialog.h"
 #include "utils_videotl.h"
 #include "i18n.h"

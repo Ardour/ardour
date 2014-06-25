@@ -32,6 +32,7 @@ using namespace std;
 using namespace PBD;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 EditorSnapshots::EditorSnapshots (Editor* e)
 	: EditorComponent (e)

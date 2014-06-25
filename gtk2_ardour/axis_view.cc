@@ -43,6 +43,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 list<Gdk::Color> AxisView::used_colors;
 

@@ -56,6 +56,7 @@ using namespace Editing;
 using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace Gtkmm2ext;
 
 Pango::FontDescription TimeAxisViewItem::NAME_FONT;

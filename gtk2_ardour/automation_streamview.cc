@@ -40,7 +40,6 @@
 #include "ardour_ui.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
-#include "utils.h"
 
 using namespace std;
 using namespace ARDOUR;

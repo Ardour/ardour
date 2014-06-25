@@ -27,7 +27,6 @@
 #include "control_point.h"
 #include "region_gain_line.h"
 #include "audio_region_view.h"
-#include "utils.h"
 
 #include "time_axis_view.h"
 #include "editor.h"

@@ -64,7 +64,9 @@ using namespace Glib;
 using namespace PBD;
 using Gtkmm2ext::Keyboard;
 
-sigc::signal<void>  DPIReset;
+namespace ARDOUR_UI_UTILS {
+	sigc::signal<void>  DPIReset;
+}
 
 #ifdef PLATFORM_WINDOWS
 #define random() rand()
@@ -77,7 +79,7 @@ sigc::signal<void>  DPIReset;
  * @param s true to make sensitive, false to make insensitive
  */
 void
-add_item_with_sensitivity (Menu_Helpers::MenuList& m, Menu_Helpers::MenuElem e, bool s)
+ARDOUR_UI_UTILS::add_item_with_sensitivity (Menu_Helpers::MenuList& m, Menu_Helpers::MenuElem e, bool s)
 {
 	m.push_back (e);
 	if (!s) {
@@ -87,7 +89,7 @@ add_item_with_sensitivity (Menu_Helpers::MenuList& m, Menu_Helpers::MenuElem e, 
 
 
 gint
-just_hide_it (GdkEventAny */*ev*/, Gtk::Window *win)
+ARDOUR_UI_UTILS::just_hide_it (GdkEventAny */*ev*/, Gtk::Window *win)
 {
 	win->hide ();
 	return 0;
@@ -102,7 +104,7 @@ just_hide_it (GdkEventAny */*ev*/, Gtk::Window *win)
 */
 
 unsigned char*
-xpm2rgb (const char** xpm, uint32_t& w, uint32_t& h)
+ARDOUR_UI_UTILS::xpm2rgb (const char** xpm, uint32_t& w, uint32_t& h)
 {
 	static long vals[256], val;
 	uint32_t t, x, y, colors, cpp;
@@ -144,7 +146,7 @@ xpm2rgb (const char** xpm, uint32_t& w, uint32_t& h)
 }
 
 unsigned char*
-xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
+ARDOUR_UI_UTILS::xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
 {
 	static long vals[256], val;
 	uint32_t t, x, y, colors, cpp;
@@ -221,7 +223,7 @@ xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
  * that we might add here later.
  */
 Pango::FontDescription
-sanitized_font (std::string const& name)
+ARDOUR_UI_UTILS::sanitized_font (std::string const& name)
 {
 	Pango::FontDescription fd (name);
 
@@ -233,7 +235,7 @@ sanitized_font (std::string const& name)
 }
 
 Pango::FontDescription
-get_font_for_style (string widgetname)
+ARDOUR_UI_UTILS::get_font_for_style (string widgetname)
 {
 	Gtk::Window window (WINDOW_TOPLEVEL);
 	Gtk::Label foobar;
@@ -262,7 +264,7 @@ get_font_for_style (string widgetname)
 }
 
 uint32_t
-rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, string attr, int state, bool rgba)
+ARDOUR_UI_UTILS::rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, string attr, int state, bool rgba)
 {
 	/* In GTK+2, styles aren't set up correctly if the widget is not
 	   attached to a toplevel window that has a screen pointer.
@@ -321,7 +323,7 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, s
 }
 
 bool
-rgba_p_from_style (string style, float *r, float *g, float *b, string attr, int state)
+ARDOUR_UI_UTILS::rgba_p_from_style (string style, float *r, float *g, float *b, string attr, int state)
 {
 	static Gtk::Window* window = 0;
 	assert (r && g && b);
@@ -368,7 +370,7 @@ rgba_p_from_style (string style, float *r, float *g, float *b, string attr, int 
 }
 
 void
-set_color_from_rgb (Gdk::Color& c, uint32_t rgb)
+ARDOUR_UI_UTILS::set_color_from_rgb (Gdk::Color& c, uint32_t rgb)
 {
 	/* Gdk::Color color ranges are 16 bit, so scale from 8 bit by
 	   multiplying by 256.
@@ -377,7 +379,7 @@ set_color_from_rgb (Gdk::Color& c, uint32_t rgb)
 }
 
 void
-set_color_from_rgba (Gdk::Color& c, uint32_t rgba)
+ARDOUR_UI_UTILS::set_color_from_rgba (Gdk::Color& c, uint32_t rgba)
 {
 	/* Gdk::Color color ranges are 16 bit, so scale from 8 bit by
 	   multiplying by 256.
@@ -386,7 +388,7 @@ set_color_from_rgba (Gdk::Color& c, uint32_t rgba)
 }
 
 uint32_t
-gdk_color_to_rgba (Gdk::Color const& c)
+ARDOUR_UI_UTILS::gdk_color_to_rgba (Gdk::Color const& c)
 {
 	/* since alpha value is not available from a Gdk::Color, it is
 	   hardcoded as 0xff (aka 255 or 1.0)
@@ -401,7 +403,7 @@ gdk_color_to_rgba (Gdk::Color const& c)
 }
 
 uint32_t
-contrasting_text_color (uint32_t c)
+ARDOUR_UI_UTILS::contrasting_text_color (uint32_t c)
 {
 	double r, g, b, a;
 	ArdourCanvas::color_to_rgba (c, r, g, b, a);
@@ -434,7 +436,7 @@ contrasting_text_color (uint32_t c)
 }
 
 bool
-relay_key_press (GdkEventKey* ev, Gtk::Window* win)
+ARDOUR_UI_UTILS::relay_key_press (GdkEventKey* ev, Gtk::Window* win)
 {
 	PublicEditor& ed (PublicEditor::instance());
 
@@ -450,13 +452,13 @@ relay_key_press (GdkEventKey* ev, Gtk::Window* win)
 }
 
 bool
-forward_key_press (GdkEventKey* ev)
+ARDOUR_UI_UTILS::forward_key_press (GdkEventKey* ev)
 {
-        return PublicEditor::instance().on_key_press_event(ev);
+	return PublicEditor::instance().on_key_press_event(ev);
 }
 
 bool
-emulate_key_event (Gtk::Widget* w, unsigned int keyval)
+ARDOUR_UI_UTILS::emulate_key_event (Gtk::Widget* w, unsigned int keyval)
 {
 	GdkDisplay  *display = gtk_widget_get_display (GTK_WIDGET(w->gobj()));
 	GdkKeymap   *keymap  = gdk_keymap_get_for_display (display);
@@ -485,7 +487,7 @@ emulate_key_event (Gtk::Widget* w, unsigned int keyval)
 }
 
 bool
-key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
+ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 {
 	GtkWindow* win = window.gobj();
 	GtkWidget* focus = gtk_window_get_focus (win);
@@ -656,7 +658,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 }
 
 Glib::RefPtr<Gdk::Pixbuf>
-get_xpm (std::string name)
+ARDOUR_UI_UTILS::get_xpm (std::string name)
 {
 	if (!xpm_map[name]) {
 
@@ -681,7 +683,7 @@ get_xpm (std::string name)
 }
 
 vector<string>
-get_icon_sets ()
+ARDOUR_UI_UTILS::get_icon_sets ()
 {
 	Searchpath spath(ARDOUR::ardour_data_search_path());
 	spath.add_subdirectory_to_paths ("icons");
@@ -706,7 +708,7 @@ get_icon_sets ()
 }
 
 std::string
-get_icon_path (const char* cname, string icon_set)
+ARDOUR_UI_UTILS::get_icon_path (const char* cname, string icon_set)
 {
 	std::string data_file_path;
 	string name = cname;
@@ -742,7 +744,7 @@ get_icon_path (const char* cname, string icon_set)
 }
 
 Glib::RefPtr<Gdk::Pixbuf>
-get_icon (const char* cname, string icon_set)
+ARDOUR_UI_UTILS::get_icon (const char* cname, string icon_set)
 {
 	Glib::RefPtr<Gdk::Pixbuf> img;
 	try {
@@ -756,6 +758,7 @@ get_icon (const char* cname, string icon_set)
 	return img;
 }
 
+namespace ARDOUR_UI_UTILS {
 Glib::RefPtr<Gdk::Pixbuf>
 get_icon (const char* cname)
 {
@@ -770,9 +773,10 @@ get_icon (const char* cname)
 
 	return img;
 }
+}
 
 string
-longest (vector<string>& strings)
+ARDOUR_UI_UTILS::longest (vector<string>& strings)
 {
 	if (strings.empty()) {
 		return string ("");
@@ -800,7 +804,7 @@ longest (vector<string>& strings)
 }
 
 bool
-key_is_legal_for_numeric_entry (guint keyval)
+ARDOUR_UI_UTILS::key_is_legal_for_numeric_entry (guint keyval)
 {
 	/* we assume that this does not change over the life of the process 
 	 */
@@ -883,8 +887,9 @@ key_is_legal_for_numeric_entry (guint keyval)
 
 	return false;
 }
+
 void
-set_pango_fontsize ()
+ARDOUR_UI_UTILS::set_pango_fontsize ()
 {
 	long val = ARDOUR::Config->get_font_scale();
 
@@ -900,7 +905,7 @@ set_pango_fontsize ()
 }
 
 void
-reset_dpi ()
+ARDOUR_UI_UTILS::reset_dpi ()
 {
 	long val = ARDOUR::Config->get_font_scale();
 	set_pango_fontsize ();
@@ -912,7 +917,7 @@ reset_dpi ()
 }
 
 void
-resize_window_to_proportion_of_monitor (Gtk::Window* window, int max_width, int max_height)
+ARDOUR_UI_UTILS::resize_window_to_proportion_of_monitor (Gtk::Window* window, int max_width, int max_height)
 {
 	Glib::RefPtr<Gdk::Screen> screen = window->get_screen ();
 	Gdk::Rectangle monitor_rect;
@@ -927,7 +932,7 @@ resize_window_to_proportion_of_monitor (Gtk::Window* window, int max_width, int 
 
 /** Replace _ with __ in a string; for use with menu item text to make underscores displayed correctly */
 string
-escape_underscores (string const & s)
+ARDOUR_UI_UTILS::escape_underscores (string const & s)
 {
 	string o;
 	string::size_type const N = s.length ();
@@ -945,7 +950,7 @@ escape_underscores (string const & s)
 
 /** Replace < and > with &lt; and &gt; respectively to make < > display correctly in markup strings */
 string
-escape_angled_brackets (string const & s)
+ARDOUR_UI_UTILS::escape_angled_brackets (string const & s)
 {
 	string o = s;
 	boost::replace_all (o, "<", "&lt;");
@@ -954,7 +959,7 @@ escape_angled_brackets (string const & s)
 }
 
 Gdk::Color
-unique_random_color (list<Gdk::Color>& used_colors)
+ARDOUR_UI_UTILS::unique_random_color (list<Gdk::Color>& used_colors)
 {
   	Gdk::Color newcolor;
 
@@ -995,7 +1000,7 @@ unique_random_color (list<Gdk::Color>& used_colors)
 }
 
 string 
-rate_as_string (float r)
+ARDOUR_UI_UTILS::rate_as_string (float r)
 {
 	char buf[32];
 	if (fmod (r, 1000.0f)) {

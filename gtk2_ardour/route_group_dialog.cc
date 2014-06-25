@@ -34,6 +34,7 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace std;
 using namespace PBD;
 

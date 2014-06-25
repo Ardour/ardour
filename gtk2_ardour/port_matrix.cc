@@ -43,6 +43,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 /** PortMatrix constructor.
  *  @param session Our session.

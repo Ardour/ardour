@@ -18,6 +18,7 @@
 */
 
 #include "pbd/signals.h"
+#include "ardour/types.h"
 
 #include "canvas/arrow.h"
 #include "canvas/line.h"

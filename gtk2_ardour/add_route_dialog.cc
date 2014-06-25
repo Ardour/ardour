@@ -46,6 +46,7 @@ using namespace Gtkmm2ext;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 std::vector<std::string> AddRouteDialog::channel_combo_strings;
 

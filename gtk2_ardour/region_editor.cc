@@ -33,7 +33,6 @@
 #include "main_clock.h"
 #include "gui_thread.h"
 #include "region_editor.h"
-#include "utils.h"
 
 #include "i18n.h"
 

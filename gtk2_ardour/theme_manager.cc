@@ -51,9 +51,12 @@ using namespace std;
 using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
-sigc::signal<void> ColorsChanged;
-sigc::signal<void,uint32_t> ColorChanged;
+namespace ARDOUR_UI_UTILS {
+	sigc::signal<void> ColorsChanged;
+	sigc::signal<void,uint32_t> ColorChanged;
+}
 
 ThemeManager::ThemeManager()
 	: ArdourWindow (_("Theme Manager"))

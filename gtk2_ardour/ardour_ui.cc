@@ -146,6 +146,7 @@ typedef uint64_t microseconds_t;
 #include "open_file_dialog_proxy.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;

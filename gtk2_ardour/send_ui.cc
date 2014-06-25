@@ -24,7 +24,6 @@
 #include "ardour/send.h"
 #include "ardour/rc_configuration.h"
 
-#include "utils.h"
 #include "send_ui.h"
 #include "io_selector.h"
 #include "ardour_ui.h"

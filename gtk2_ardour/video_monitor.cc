@@ -32,6 +32,7 @@
 
 using namespace std;
 using namespace PBD;
+using namespace ARDOUR_UI_UTILS;
 
 VideoMonitor::VideoMonitor (PublicEditor *ed, std::string xjadeo_bin_path)
 	: editor (ed)
