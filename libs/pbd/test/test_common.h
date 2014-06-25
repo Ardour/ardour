@@ -25,4 +25,6 @@ PBD::Searchpath test_search_path ();
 
 std::string test_output_directory (std::string prefix);
 
+void get_utf8_test_strings (std::vector<std::string>& results);
+
 #endif
