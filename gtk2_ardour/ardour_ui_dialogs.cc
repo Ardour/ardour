@@ -189,6 +189,7 @@ ARDOUR_UI::set_session (Session *s)
 	point_zero_something_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_zero_something_seconds), 40);
 
 	update_format ();
+    update_timecode_format();
 
 	if (meter_box.get_parent()) {
 		transport_tearoff_hbox.remove (meter_box);
@@ -279,6 +280,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
 	point_zero_something_second_connection.disconnect();
+    connection_with_session_config.disconnect();
 
 	if (editor_meter) {
 		meter_box.remove(*editor_meter);

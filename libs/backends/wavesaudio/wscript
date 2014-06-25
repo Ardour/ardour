@@ -32,8 +32,11 @@ def build(bld):
 	obj = bld(features = 'c cxx cxxshlib')
     
     if sys.platform == 'darwin':
-        obj.framework = 'CoreMidi'
-  
+        if bld.env['build_target'] not in [ 'lion' ]:
+            obj.framework = 'CoreMidi'
+        else:
+            obj.framework = 'CoreMIDI'
+
     obj.source = [
             'waves_audiobackend.cc',
             'waves_audiobackend.latency.cc',
