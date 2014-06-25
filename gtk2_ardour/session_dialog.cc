@@ -55,6 +55,7 @@ using namespace Gdk;
 using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 static string poor_mans_glob (string path)
 {

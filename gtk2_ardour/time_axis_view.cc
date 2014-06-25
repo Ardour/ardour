@@ -58,6 +58,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gdk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;

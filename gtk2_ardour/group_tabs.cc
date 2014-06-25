@@ -34,6 +34,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using Gtkmm2ext::Keyboard;
 
 list<Gdk::Color> GroupTabs::_used_colors;

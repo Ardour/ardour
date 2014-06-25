@@ -51,7 +51,6 @@
 #include "time_axis_view.h"
 #include "editor_drag.h"
 #include "editor_cursors.h"
-#include "utils.h"
 
 #include "i18n.h"
 

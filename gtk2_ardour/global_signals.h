@@ -22,7 +22,9 @@
 
 #include <sigc++/signal.h>
 
+namespace ARDOUR_UI_UTILS {
 extern sigc::signal<void>  ColorsChanged;
 extern sigc::signal<void>  DPIReset;
+} // namespace
 
 #endif /* __gtk_ardour_global_signals_h__ */

@@ -88,7 +88,7 @@ ArdourButton::ArdourButton (Element e)
 	, _hovering (false)
 	, _focused (false)
 {
-	ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
+	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 }
 
 ArdourButton::ArdourButton (const std::string& str, Element e)

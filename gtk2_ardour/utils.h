@@ -47,6 +47,8 @@ namespace ArdourCanvas {
 	class Item;
 }
 
+namespace ARDOUR_UI_UTILS {
+
 extern sigc::signal<void>  DPIReset;
 
 gint   just_hide_it (GdkEventAny*, Gtk::Window*);
@@ -96,4 +98,5 @@ Gdk::Color unique_random_color (std::list<Gdk::Color> &);
 
 std::string rate_as_string (float r);
 
+} // namespace
 #endif /* __ardour_gtk_utils_h__ */

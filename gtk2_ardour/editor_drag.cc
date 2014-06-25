@@ -50,7 +50,6 @@
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "control_point.h"
-#include "utils.h"
 #include "region_gain_line.h"
 #include "editor_drag.h"
 #include "audio_time_axis.h"

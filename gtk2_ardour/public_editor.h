@@ -84,6 +84,11 @@ class VerboseCursor;
 class XMLNode;
 struct SelectionRect;
 
+namespace ARDOUR_UI_UTILS {
+bool relay_key_press (GdkEventKey* ev, Gtk::Window* win);
+bool forward_key_press (GdkEventKey* ev);
+}
+
 using ARDOUR::framepos_t;
 using ARDOUR::framecnt_t;
 
@@ -408,8 +413,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 
 	static PublicEditor* _instance;
 
-	friend bool relay_key_press (GdkEventKey*, Gtk::Window*);
-	friend bool forward_key_press (GdkEventKey*);
+	friend bool ARDOUR_UI_UTILS::relay_key_press (GdkEventKey*, Gtk::Window*);
+	friend bool ARDOUR_UI_UTILS::forward_key_press (GdkEventKey*);
 
 	PBD::Signal0<void> SnapChanged;
 	PBD::Signal0<void> MouseModeChanged;

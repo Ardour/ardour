@@ -42,6 +42,7 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 static void
 _note_off_event_handler (GtkWidget* /*widget*/, int note, gpointer arg)

@@ -29,7 +29,6 @@
 
 #include "option_editor.h"
 #include "gui_thread.h"
-#include "utils.h"
 #include "i18n.h"
 
 using namespace std;

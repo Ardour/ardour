@@ -26,7 +26,6 @@
 #include "ardour/rc_configuration.h"
 
 #include "tempo_dialog.h"
-#include "utils.h"
 
 #include "i18n.h"
 

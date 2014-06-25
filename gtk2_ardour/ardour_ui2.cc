@@ -64,6 +64,7 @@ using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace Glib;
+using namespace ARDOUR_UI_UTILS;
 
 int
 ARDOUR_UI::setup_windows ()

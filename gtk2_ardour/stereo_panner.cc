@@ -49,6 +49,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace ARDOUR_UI_UTILS;
 
 static const int pos_box_size = 8;
 static const int lr_box_size = 15;

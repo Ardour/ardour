@@ -23,7 +23,6 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/return.h"
 
-#include "utils.h"
 #include "return_ui.h"
 #include "io_selector.h"
 #include "ardour_ui.h"

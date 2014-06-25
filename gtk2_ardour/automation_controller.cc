@@ -28,7 +28,6 @@
 #include "ardour/session.h"
 
 #include "ardour_ui.h"
-#include "utils.h"
 #include "automation_controller.h"
 #include "gui_thread.h"
 

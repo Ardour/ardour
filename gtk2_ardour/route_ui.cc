@@ -58,6 +58,7 @@
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 
 uint32_t RouteUI::_max_invert_buttons = 3;

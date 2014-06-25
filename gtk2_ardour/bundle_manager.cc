@@ -34,6 +34,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 BundleEditorMatrix::BundleEditorMatrix (Gtk::Window* parent, Session* session, boost::shared_ptr<Bundle> bundle)
 	: PortMatrix (parent, session, DataType::NIL)

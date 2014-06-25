@@ -24,7 +24,6 @@
 #include "canvas/debug.h"
 #include "canvas/scroll_group.h"
 
-#include "utils.h"
 #include "editor_cursors.h"
 #include "editor.h"
 

@@ -64,7 +64,6 @@
 #include "prompter.h"
 #include "sfdb_ui.h"
 #include "editing.h"
-#include "utils.h"
 #include "gain_meter.h"
 #include "main_clock.h"
 #include "public_editor.h"

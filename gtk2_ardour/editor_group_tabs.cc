@@ -35,6 +35,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 EditorGroupTabs::EditorGroupTabs (Editor* e)
 	: EditorComponent (e)

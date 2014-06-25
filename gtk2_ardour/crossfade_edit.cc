@@ -49,7 +49,6 @@
 #include "crossfade_edit.h"
 #include "rgb_macros.h"
 #include "keyboard.h"
-#include "utils.h"
 #include "gui_thread.h"
 #include "actions.h"
 

@@ -27,6 +27,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 
 ExportFileNotebook::ExportFileNotebook () :

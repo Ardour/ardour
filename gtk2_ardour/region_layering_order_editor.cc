@@ -36,6 +36,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
 	: ArdourWindow (_("RegionLayeringOrderEditor"))

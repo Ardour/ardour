@@ -30,7 +30,6 @@
 #include "ardour/version.h"
 #include "ardour/filesystem_paths.h"
 
-#include "utils.h"
 #include "version.h"
 
 #include "about.h"

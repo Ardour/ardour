@@ -89,7 +89,6 @@
 #include "strip_silence_dialog.h"
 #include "time_axis_view.h"
 #include "transpose_dialog.h"
-#include "utils.h"
 
 #include "i18n.h"
 
@@ -7043,7 +7042,7 @@ Editor::lock ()
 	if (!lock_dialog) {
 		lock_dialog = new Gtk::Dialog (string_compose (_("%1: Locked"), PROGRAM_NAME), true);
 
-		Gtk::Image* padlock = manage (new Gtk::Image (::get_icon ("padlock_closed")));
+		Gtk::Image* padlock = manage (new Gtk::Image (ARDOUR_UI_UTILS::get_icon ("padlock_closed")));
 		lock_dialog->get_vbox()->pack_start (*padlock);
 
 		ArdourButton* b = manage (new ArdourButton);

@@ -61,6 +61,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 class ClickOptions : public OptionEditorBox
 {
