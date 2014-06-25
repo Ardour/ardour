@@ -10,6 +10,7 @@
 #include "test_common.h"
 
 using namespace std;
+using namespace PBD;
 
 CPPUNIT_TEST_SUITE_REGISTRATION (FilesystemTest);
 
@@ -42,16 +43,44 @@ FilesystemTest::testPathIsWithin ()
 }
 
 void
-FilesystemTest::testCopyFile ()
+FilesystemTest::testCopyFileASCIIFilename ()
 {
-	std::string testdata_path;
+	string testdata_path;
 	CPPUNIT_ASSERT (find_file (test_search_path (), "RosegardenPatchFile.xml", testdata_path));
 
-	std::string output_path = test_output_directory ("CopyFile");
+	string output_path = test_output_directory ("CopyFile");
 
 	output_path = Glib::build_filename (output_path, "RosegardenPatchFile.xml");
 
+	cerr << endl;
 	cerr << "CopyFile test output path: " << output_path << endl;
 
 	CPPUNIT_ASSERT (PBD::copy_file (testdata_path, output_path));
+}
+
+void
+FilesystemTest::testCopyFileUTF8Filename ()
+{
+	vector<string> i18n_files;
+
+	Searchpath i18n_path(test_search_path());
+	i18n_path.add_subdirectory_to_paths("i18n_test");
+
+	PBD::find_files_matching_pattern (i18n_files, i18n_path, "*.tst");
+
+	cerr << endl;
+	cerr << "Copying " << i18n_files.size() << " test files from: "
+	     << i18n_path.to_string () << endl;
+
+	for (vector<string>::iterator i = i18n_files.begin(); i != i18n_files.end(); ++i) {
+		string input_path = *i;
+		string output_file = Glib::path_get_basename(*i);
+		string output_path = test_output_directory ("CopyFile");
+		output_path = Glib::build_filename (output_path, output_file);
+
+		cerr << "Copying test file: " << input_path
+		     << " To " << output_path << endl;
+
+		CPPUNIT_ASSERT (PBD::copy_file (input_path, output_path));
+	}
 }
