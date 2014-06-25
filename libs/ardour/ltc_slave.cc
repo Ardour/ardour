@@ -590,7 +590,7 @@ LTC_Slave::approximate_current_delta() const
 	} else if ((monotonic_cnt - last_timestamp) > 2 * frames_per_ltc_frame) {
 		snprintf(delta, sizeof(delta), "%s", _("flywheel"));
 	} else {
-		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%" PRIi64 "</span>sm",
+		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%lld</span>sm",
 				LEADINGZERO(llabs(current_delta)), PLUSMINUS(-current_delta), llabs(current_delta));
 	}
 	return std::string(delta);
