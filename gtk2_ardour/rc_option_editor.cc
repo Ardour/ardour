@@ -44,6 +44,7 @@
 
 #include "canvas/wave_view.h"
 
+#include "ardour_ui.h"
 #include "ardour_window.h"
 #include "ardour_dialog.h"
 #include "gui_thread.h"
@@ -2173,6 +2174,21 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_super_rapid_clock_update),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_super_rapid_clock_update)
 			    ));
+
+	/* Lock GUI timeout */
+
+	Gtk::Adjustment *lts = manage (new Gtk::Adjustment(0, 0, 1000, 1, 10));
+	HSliderOption *slts = new HSliderOption("lock-gui-after-seconds",
+						_("Lock timeout (seconds)"),
+						lts,
+						sigc::mem_fun (*ARDOUR_UI::config(), &UIConfiguration::get_lock_gui_after_seconds),
+						sigc::mem_fun (*ARDOUR_UI::config(), &UIConfiguration::set_lock_gui_after_seconds)
+			);
+	slts->scale().set_digits (0);
+	Gtkmm2ext::UI::instance()->set_tip
+		(slts->tip_widget(),
+		 _("Lock GUI after this many idle seconds (zero to never lock)"));
+	add_option (S_("Preferences|GUI"), slts);
 
 	/* The names of these controls must be the same as those given in MixerStrip
 	   for the actual widgets being controlled.
