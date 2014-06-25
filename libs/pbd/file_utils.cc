@@ -50,6 +50,7 @@
 #endif
 
 #include "pbd/compose.h"
+#include "pbd/file_manager.h"
 #include "pbd/file_utils.h"
 #include "pbd/debug.h"
 #include "pbd/error.h"
@@ -276,32 +277,24 @@ find_files_matching_filter (vector<string>& result,
 	run_functor_for_paths (result, paths, filter, arg, true, pass_fullpath, return_fullpath, recurse);
 }
 
-#ifdef PLATFORM_WINDOWS
-#define WRITE_FLAGS O_RDWR | O_CREAT | O_BINARY
-#define READ_FLAGS O_RDONLY | O_BINARY
-#else
-#define WRITE_FLAGS O_RDWR | O_CREAT
-#define READ_FLAGS O_RDONLY
-#endif
-
 bool
 copy_file(const std::string & from_path, const std::string & to_path)
 {
 	if (!Glib::file_test (from_path, Glib::FILE_TEST_EXISTS)) return false;
 
-	int fd_from = -1;
-	int fd_to = -1;
+	FdFileDescriptor from_file(from_path, false, 0444);
+	FdFileDescriptor to_file(to_path, true, 0666);
+
+	int fd_from = from_file.allocate ();
+	int fd_to = to_file.allocate ();
 	char buf[4096]; // BUFSIZ  ??
 	ssize_t nread;
 
-	fd_from = g_open(from_path.c_str(), READ_FLAGS, 0444);
-	if (fd_from < 0) {
-		goto copy_error;
-	}
-
-	fd_to = g_open(to_path.c_str(), WRITE_FLAGS, 0666);
-	if (fd_to < 0) {
-		goto copy_error;
+	if ((fd_from < 0) || (fd_to < 0)) {
+		error << string_compose (_("Unable to Open files %1 to %2 for Copying(%3)"),
+				from_path, to_path, g_strerror(errno))
+		      << endmsg;
+		return false;
 	}
 
 	while (nread = ::read(fd_from, buf, sizeof(buf)), nread > 0) {
@@ -312,34 +305,15 @@ copy_file(const std::string & from_path, const std::string & to_path)
 				nread -= nwritten;
 				out_ptr += nwritten;
 			} else if (errno != EINTR) {
-				goto copy_error;
+				error << string_compose (_("Unable to Copy files %1 to %2(%3)"),
+						from_path, to_path, g_strerror(errno))
+					<< endmsg;
+				return false;
 			}
 		} while (nread > 0);
 	}
 
-	if (nread == 0) {
-		if (::close(fd_to)) {
-			fd_to = -1;
-			goto copy_error;
-		}
-		::close(fd_from);
-		return true;
-	}
-
-copy_error:
-	int saved_errno = errno;
-
-	if (fd_from >= 0) {
-		::close(fd_from);
-	}
-	if (fd_to >= 0) {
-		::close(fd_to);
-	}
-
-	error << string_compose (_("Unable to Copy file %1 to %2 (%3)"),
-			from_path, to_path, strerror(saved_errno))
-		<< endmsg;
-	return false;
+	return true;
 }
 
 void
