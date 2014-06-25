@@ -7137,7 +7137,14 @@ Editor::lock ()
 		lock_dialog->set_size_request (200, 200);
 	}
 	
+#ifdef __APPLE__
+	/* The global menu bar continues to be accessible to applications
+	   with modal dialogs, which means that we need to desensitize
+	   all items in the menu bar. Since those items are really just
+	   proxies for actions, that means disabling all actions.
+	*/
 	ActionManager::disable_all_actions ();
+#endif
 	lock_dialog->present ();
 }
 
@@ -7145,5 +7152,11 @@ void
 Editor::unlock ()
 {
 	lock_dialog->hide ();
+	
+#ifdef __APPLE__
 	ActionManager::pop_action_state ();
+#endif	
+
+	start_lock_event_timing ();
+	
 }

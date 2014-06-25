@@ -45,6 +45,7 @@
 #include "pbd/unknown_type.h"
 #include "pbd/unwind.h"
 #include "pbd/stacktrace.h"
+#include "pbd/timersub.h"
 
 #include <glibmm/miscutils.h>
 #include <glibmm/uriutils.h>
@@ -1108,6 +1109,58 @@ Editor::on_realize ()
 {
 	Window::on_realize ();
 	Realized ();
+
+	start_lock_event_timing ();
+	signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
+}
+
+void
+Editor::start_lock_event_timing ()
+{
+	/* check if we should lock the GUI every 30 seconds */
+
+	Glib::signal_timeout().connect (sigc::mem_fun (*this, &Editor::lock_timeout_callback), 30 * 1000);
+}
+
+bool
+Editor::generic_event_handler (GdkEvent* ev)
+{
+	switch (ev->type) {
+	case GDK_BUTTON_PRESS:
+	case GDK_BUTTON_RELEASE:
+	case GDK_MOTION_NOTIFY:
+	case GDK_KEY_PRESS:
+	case GDK_KEY_RELEASE:
+		gettimeofday (&last_event_time, 0);
+		break;
+	default:
+		break;
+	}
+	return false;
+}
+
+bool
+Editor::lock_timeout_callback ()
+{
+	struct timeval now, delta;
+	const uint32_t lock_timeout_secs = 5; /* 2 minutes */
+
+	gettimeofday (&now, 0);
+
+	timersub (&now, &last_event_time, &delta);
+
+	if (delta.tv_sec > lock_timeout_secs) {
+		lock ();
+		/* don't call again. Returning false will effectively
+		   disconnect us from the timer callback.
+
+		   unlock() will call start_lock_event_timing() to get things
+		   started again.
+		*/
+		return false;
+	}
+
+	return true;
 }
 
 void

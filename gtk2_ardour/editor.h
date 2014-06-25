@@ -1360,6 +1360,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void unlock ();
 	ArdourDialog* lock_dialog;
 
+	struct timeval last_event_time;
+	bool generic_event_handler (GdkEvent*);
+	bool lock_timeout_callback ();
+	void start_lock_event_timing ();
+
 	Gtk::Menu fade_context_menu;
 
 	Gtk::Menu xfade_in_context_menu;
