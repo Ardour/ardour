@@ -163,6 +163,10 @@ style "solo_safe" = "very_small_text"
 {
 }
 
+style "tracknumber_label" = "medium_monospace_text"
+{
+}
+
 style "solo_button" = "small_button"
 {
   bg[NORMAL] = mix(0.1,@@COLPREFIX@_solo,@@COLPREFIX@_bg)
