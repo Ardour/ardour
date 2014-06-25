@@ -7122,7 +7122,7 @@ void
 Editor::lock ()
 {
 	if (!lock_dialog) {
-		lock_dialog = new ArdourDialog (string_compose (_("%1: Locked"), PROGRAM_NAME), true);
+		lock_dialog = new Gtk::Dialog (string_compose (_("%1: Locked"), PROGRAM_NAME), true);
 
 		Gtk::Image* padlock = manage (new Gtk::Image (::get_icon ("padlock_closed")));
 		lock_dialog->get_vbox()->pack_start (*padlock);
