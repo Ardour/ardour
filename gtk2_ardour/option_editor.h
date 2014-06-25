@@ -189,17 +189,22 @@ public:
 	EntryOption (std::string const &, std::string const &, sigc::slot<std::string>, sigc::slot<bool, std::string>);
 	void set_state_from_config ();
 	void add_to_page (OptionEditorPage*);
+	void set_sensitive (bool);
+	void set_invalid_chars (std::string i) { _invalid = i; }
 
-        Gtk::Widget& tip_widget() { return *_entry; }
+	Gtk::Widget& tip_widget() { return *_entry; }
 
 private:
 
 	void activated ();
+	bool focus_out (GdkEventFocus*);
+	void filter_text (const Glib::ustring&, int*);
 
 	sigc::slot<std::string> _get; ///< slot to get the configuration variable's value
 	sigc::slot<bool, std::string> _set;  ///< slot to set the configuration variable's value
 	Gtk::Label* _label; ///< UI label
 	Gtk::Entry* _entry; ///< UI entry
+	std::string _invalid;
 };
 
 
