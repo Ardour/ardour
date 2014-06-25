@@ -1358,7 +1358,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void escape ();
 	void lock ();
 	void unlock ();
-	ArdourDialog* lock_dialog;
+	Gtk::Dialog* lock_dialog;
 
 	struct timeval last_event_time;
 	bool generic_event_handler (GdkEvent*);
