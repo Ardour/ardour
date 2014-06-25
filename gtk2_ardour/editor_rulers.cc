@@ -232,12 +232,10 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 
 	case TempoBarItem:
 		ruler_items.push_back (MenuElem (_("New Tempo"), sigc::bind ( sigc::mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
-		ruler_items.push_back (SeparatorElem ());
 		break;
 
 	case MeterBarItem:
 		ruler_items.push_back (MenuElem (_("New Meter"), sigc::bind ( sigc::mem_fun(*this, &Editor::mouse_add_new_meter_event), where)));
-		ruler_items.push_back (SeparatorElem ());
 		break;
 
 	case VideoBarItem:
@@ -256,70 +254,19 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 
 		ruler_items.push_back (CheckMenuElem (_("Lock")));
 		{
-		Gtk::CheckMenuItem* vtl_lock = static_cast<Gtk::CheckMenuItem*>(&ruler_items.back());
-		vtl_lock->set_active(is_video_timeline_locked());
-		vtl_lock->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_video_timeline_locked));
+			Gtk::CheckMenuItem* vtl_lock = static_cast<Gtk::CheckMenuItem*>(&ruler_items.back());
+			vtl_lock->set_active(is_video_timeline_locked());
+			vtl_lock->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_video_timeline_locked));
 		}
-
-		ruler_items.push_back (SeparatorElem ());
 		break;
 
 	default:
 		break;
 	}
 
-	Glib::RefPtr<Action> action;
-
-	action = ActionManager::get_action ("Rulers", "toggle-minsec-ruler");
-	if (action) {
-		ruler_items.push_back (MenuElem (*action->create_menu_item()));
+	if (!ruler_items.empty()) {
+		editor_ruler_menu->popup (1, gtk_get_current_event_time());
 	}
-	if (!Profile->get_sae()) {
-		action = ActionManager::get_action ("Rulers", "toggle-timecode-ruler");
-		if (action) {
-			ruler_items.push_back (MenuElem (*action->create_menu_item()));
-		}
-	}
-	action = ActionManager::get_action ("Rulers", "toggle-samples-ruler");
-	if (action) {
-		ruler_items.push_back (MenuElem (*action->create_menu_item()));
-	}
-	action = ActionManager::get_action ("Rulers", "toggle-bbt-ruler");
-	if (action) {
-		ruler_items.push_back (MenuElem (*action->create_menu_item()));
-	}
-	action = ActionManager::get_action ("Rulers", "toggle-meter-ruler");
-	if (action) {
-		ruler_items.push_back (MenuElem (*action->create_menu_item()));
-	}
-	action = ActionManager::get_action ("Rulers", "toggle-tempo-ruler");
-	if (action) {
-		ruler_items.push_back (MenuElem (*action->create_menu_item()));
-	}
-	if (!Profile->get_sae()) {
-		action = ActionManager::get_action ("Rulers", "toggle-range-ruler");
-		if (action) {
-			ruler_items.push_back (MenuElem (*action->create_menu_item()));
-		}
-	}
-	action = ActionManager::get_action ("Rulers", "toggle-loop-punch-ruler");
-	if (action) {
-		ruler_items.push_back (MenuElem (*action->create_menu_item()));
-	}
-	action = ActionManager::get_action ("Rulers", "toggle-cd-marker-ruler");
-	if (action) {
-		ruler_items.push_back (MenuElem (*action->create_menu_item()));
-	}
-	action = ActionManager::get_action ("Rulers", "toggle-marker-ruler");
-	if (action) {
-		ruler_items.push_back (MenuElem (*action->create_menu_item()));
-	}
-	action = ActionManager::get_action ("Rulers", "toggle-video-ruler");
-	if (action) {
-		ruler_items.push_back (MenuElem (*action->create_menu_item()));
-	}
-
-	editor_ruler_menu->popup (1, gtk_get_current_event_time());
 
 	no_ruler_shown_update = false;
 }
