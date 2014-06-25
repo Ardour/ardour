@@ -57,6 +57,7 @@
 
 #include "canvas/canvas.h"
 
+#include "actions.h"
 #include "ardour_ui.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
