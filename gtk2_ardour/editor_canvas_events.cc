@@ -1234,7 +1234,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 
 	framepos_t const pos = window_event_sample (&event, &px, &py);
 
-	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
+	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py, false);
 
 	if (tv.first != 0) {
 
