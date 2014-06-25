@@ -116,7 +116,7 @@ VolumeController::to_control_value (double display_value)
 	if (_linear) {
 		v = _controllable->lower() + ((_controllable->upper() - _controllable->lower()) * display_value);
 	} else {
-		v = slider_position_to_gain_with_max (display_value, ARDOUR::Config->get_max_gain());
+		v = ARDOUR::slider_position_to_gain_with_max (display_value, ARDOUR::Config->get_max_gain());
 	}
 
 	return v;
@@ -130,7 +130,7 @@ VolumeController::to_display_value (double control_value)
 	if (_linear) {
 		v = (control_value - _controllable->lower ()) / (_controllable->upper() - _controllable->lower());
 	} else {
-		v = gain_to_slider_position_with_max (control_value, _controllable->upper());
+		v = ARDOUR::gain_to_slider_position_with_max (control_value, _controllable->upper());
 	}
 
 	return v;
@@ -151,13 +151,13 @@ VolumeController::adjust (double control_delta)
 		 */
 #if 0
 		/* convert to linear/fractional slider position domain */
-		v = gain_to_slider_position_with_max (_controllable->get_value (), _controllable->upper());
+		v = ARDOUR::gain_to_slider_position_with_max (_controllable->get_value (), _controllable->upper());
 		/* increment in this domain */
 		v += control_delta;
 		/* clamp to appropriate range for linear/fractional slider domain */
 		v = std::max (0.0, std::min (1.0, v));
 		/* convert back to gain coefficient domain */
-		v = slider_position_to_gain_with_max (v, _controllable->upper());
+		v = ARDOUR::slider_position_to_gain_with_max (v, _controllable->upper());
 		/* clamp in controller domain */
 		v = std::max (_controllable->lower(), std::min (_controllable->upper(), v));
 		/* convert to dB domain */

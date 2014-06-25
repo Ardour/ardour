@@ -1294,7 +1294,7 @@ EngineControl::set_state (const XMLNode& root)
 
 			state->midi_devices.clear();
 			XMLNode* midinode;
-			if ((midinode = find_named_node (*grandchild, "MIDIDevices")) != 0) {
+			if ((midinode = ARDOUR::find_named_node (*grandchild, "MIDIDevices")) != 0) {
 				const XMLNodeList mnc = midinode->children();
 				for (XMLNodeList::const_iterator n = mnc.begin(); n != mnc.end(); ++n) {
 					if ((*n)->property (X_("name")) == 0
