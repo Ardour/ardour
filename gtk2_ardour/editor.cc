@@ -1110,7 +1110,10 @@ Editor::on_realize ()
 	Window::on_realize ();
 	Realized ();
 
-	start_lock_event_timing ();
+	if (ARDOUR_UI::config()->get_lock_gui_after_seconds()) {
+		start_lock_event_timing ();
+	}
+
 	signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
 }
 
@@ -1143,13 +1146,12 @@ bool
 Editor::lock_timeout_callback ()
 {
 	struct timeval now, delta;
-	const uint32_t lock_timeout_secs = 5; /* 2 minutes */
 
 	gettimeofday (&now, 0);
 
 	timersub (&now, &last_event_time, &delta);
 
-	if (delta.tv_sec > lock_timeout_secs) {
+	if (delta.tv_sec > ARDOUR_UI::config()->get_lock_gui_after_seconds()) {
 		lock ();
 		/* don't call again. Returning false will effectively
 		   disconnect us from the timer callback.
