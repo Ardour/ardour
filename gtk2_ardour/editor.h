@@ -117,6 +117,7 @@ class PlaylistSelector;
 class PluginSelector;
 class ProgressReporter;
 class RhythmFerret;
+class RulerDialog;
 class Selection;
 class SoundFileOmega;
 class StreamView;
@@ -804,6 +805,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool                            no_ruler_shown_update;
 
 	Gtk::Widget * ruler_grabbed_widget;
+
+	RulerDialog* ruler_dialog;
 
 	void initialize_rulers ();
 	void update_just_timecode ();

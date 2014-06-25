@@ -303,6 +303,7 @@ Editor::Editor ()
         pre_press_cursor = 0;
 	_drags = new DragManager (this);
 	lock_dialog = 0;
+	ruler_dialog = 0;
 	current_mixer_strip = 0;
 	tempo_lines = 0;
 
