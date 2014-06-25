@@ -47,6 +47,7 @@
 #include "editing.h"
 #include "actions.h"
 #include "gui_thread.h"
+#include "ruler_dialog.h"
 #include "time_axis_view.h"
 #include "editor_drag.h"
 #include "editor_cursors.h"
@@ -181,10 +182,10 @@ bool
 Editor::ruler_label_button_release (GdkEventButton* ev)
 {
 	if (Gtkmm2ext::Keyboard::is_context_menu_event (ev)) {
-		Gtk::Menu* m = dynamic_cast<Gtk::Menu*> (ActionManager::get_widget (X_("/RulerMenuPopup")));
-		if (m) {
-			m->popup (1, ev->time);
+		if (!ruler_dialog) {
+			ruler_dialog = new RulerDialog ();
 		}
+		ruler_dialog->present ();
 	}
 
 	return true;
