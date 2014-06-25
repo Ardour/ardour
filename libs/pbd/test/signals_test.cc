@@ -64,11 +64,11 @@ SignalsTest::testDestruction ()
 	CPPUNIT_ASSERT (true);
 }
 
-class Receiver : public PBD::ScopedConnectionList
+class AReceiver : public PBD::ScopedConnectionList
 {
 public:
-	Receiver (Emitter* e) {
-		e->Fred.connect_same_thread (*this, boost::bind (&Receiver::receiver, this));
+	AReceiver (Emitter* e) {
+		e->Fred.connect_same_thread (*this, boost::bind (&AReceiver::receiver, this));
 	}
 
 	void receiver () {
@@ -80,7 +80,7 @@ void
 SignalsTest::testScopedConnectionList ()
 {
 	Emitter* e = new Emitter;
-	Receiver* r = new Receiver (e);
+	AReceiver* r = new AReceiver (e);
 
 	N = 0;
 	e->emit ();
