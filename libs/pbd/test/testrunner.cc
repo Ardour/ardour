@@ -8,12 +8,20 @@
 #include "scalar_properties.h"
 
 #include "pbd/pbd.h"
-
+#include "pbd/error.h"
+#include "pbd/textreceiver.h"
 
 int
 main ()
 {
+	TextReceiver text_receiver ("pbd_test");
+
 	if (!PBD::init ()) return 1;
+
+	text_receiver.listen_to (PBD::error);
+	text_receiver.listen_to (PBD::info);
+	text_receiver.listen_to (PBD::fatal);
+	text_receiver.listen_to (PBD::warning);
 
 	ScalarPropertiesTest::make_property_quarks ();
 	
@@ -35,5 +43,4 @@ main ()
 	PBD::cleanup ();
 
 	return collectedresults.wasSuccessful () ? 0 : 1;
-
 }
