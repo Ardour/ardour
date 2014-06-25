@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
 
 #include "pbd/file_utils.h"
 
@@ -95,4 +96,107 @@ FilesystemTest::testFindFilesMatchingPattern ()
 	CPPUNIT_ASSERT(test_search_path ().size() == 1);
 
 	CPPUNIT_ASSERT(patch_files.size() == 2);
+}
+
+string
+create_test_directory (std::string test_dir)
+{
+	vector<string> test_files;
+	vector<string> i18n_files;
+
+	Searchpath spath(test_search_path());
+	PBD::get_files (test_files, spath);
+
+	spath.add_subdirectory_to_paths("i18n_test");
+
+	PBD::get_files (i18n_files, spath);
+
+	string output_dir = test_output_directory (test_dir);
+
+	CPPUNIT_ASSERT (test_search_path().size () != 0);
+
+	string test_dir_path = test_search_path()[0];
+
+	cerr << endl;
+	cerr << "Copying " << test_files.size() << " test files from: "
+	     << test_dir_path << " to " << output_dir << endl;
+
+	PBD::copy_files (test_dir_path, output_dir);
+
+	vector<string> copied_files;
+
+	PBD::get_files (copied_files, output_dir);
+
+	CPPUNIT_ASSERT (copied_files.size() == test_files.size());
+
+	string subdir_path = Glib::build_filename (output_dir, "subdir");
+
+	CPPUNIT_ASSERT (g_mkdir_with_parents (subdir_path.c_str(), 0755) == 0);
+
+	cerr << endl;
+	cerr << "Copying " << i18n_files.size() << " i18n test files to: "
+	     << subdir_path << endl;
+
+	for (vector<string>::iterator i = i18n_files.begin(); i != i18n_files.end(); ++i) {
+		string input_filepath = *i;
+		string output_filename = Glib::path_get_basename(*i);
+		string output_filepath = Glib::build_filename (subdir_path, output_filename);
+
+		CPPUNIT_ASSERT (PBD::copy_file (input_filepath, output_filepath));
+	}
+
+	copied_files.clear();
+	PBD::get_files (copied_files, subdir_path);
+
+	CPPUNIT_ASSERT (copied_files.size() == i18n_files.size());
+
+	return output_dir;
+}
+
+void
+FilesystemTest::testClearDirectory ()
+{
+	string output_dir_path = create_test_directory ("ClearDirectory");
+
+	vector<string> files_in_output_dir;
+
+	PBD::get_paths (files_in_output_dir, output_dir_path, true, true);
+
+	size_t removed_file_size = 0;
+	vector<string> removed_files;
+
+	CPPUNIT_ASSERT (PBD::clear_directory (output_dir_path, &removed_file_size, &removed_files) ==0);
+
+	cerr << "Removed " << removed_files.size() << " files of total size: "
+	     << removed_file_size << endl;
+
+	CPPUNIT_ASSERT (removed_files.size () == files_in_output_dir.size ());
+
+	string subdir_path = Glib::build_filename (output_dir_path, "subdir");
+
+	// make sure the directory structure is still there
+	CPPUNIT_ASSERT (Glib::file_test (subdir_path, Glib::FILE_TEST_IS_DIR));
+}
+
+void
+FilesystemTest::testRemoveDirectory ()
+{
+	string output_dir_path = create_test_directory ("RemoveDirectory");
+
+	vector<string> files_in_output_dir;
+
+	PBD::get_paths (files_in_output_dir, output_dir_path, false, true);
+
+	CPPUNIT_ASSERT (files_in_output_dir.size () != 0);
+
+	PBD::remove_directory (output_dir_path);
+
+	// doesn't actually remove directory though...just contents
+	CPPUNIT_ASSERT (Glib::file_test (output_dir_path, Glib::FILE_TEST_IS_DIR));
+
+	files_in_output_dir.clear ();
+
+	PBD::get_paths (files_in_output_dir, output_dir_path, false, true);
+
+	CPPUNIT_ASSERT (files_in_output_dir.size () == 0);
 }
