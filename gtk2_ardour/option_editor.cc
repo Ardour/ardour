@@ -16,6 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#include <algorithm>
 
 #include <gtkmm/box.h>
 #include <gtkmm/alignment.h>
@@ -146,6 +147,8 @@ EntryOption::EntryOption (string const & i, string const & n, sigc::slot<string>
 	_label = manage (left_aligned_label (n + ":"));
 	_entry = manage (new Entry);
 	_entry->signal_activate().connect (sigc::mem_fun (*this, &EntryOption::activated));
+	_entry->signal_focus_out_event().connect (sigc::mem_fun (*this, &EntryOption::focus_out));
+	_entry->signal_insert_text().connect (sigc::mem_fun (*this, &EntryOption::filter_text));
 }
 
 void
@@ -161,9 +164,34 @@ EntryOption::set_state_from_config ()
 }
 
 void
+EntryOption::set_sensitive (bool s)
+{
+	_entry->set_sensitive (s);
+}
+
+void
+EntryOption::filter_text (const Glib::ustring&, int*)
+{
+	std::string text = _entry->get_text ();
+	for (size_t i = 0; i < _invalid.length(); ++i) {
+		text.erase (std::remove(text.begin(), text.end(), _invalid.at(i)), text.end());
+	}
+	if (text != _entry->get_text ()) {
+		_entry->set_text (text);
+	}
+}
+
+void
 EntryOption::activated ()
 {
 	_set (_entry->get_text ());
+}
+
+bool
+EntryOption::focus_out (GdkEventFocus*)
+{
+	_set (_entry->get_text ());
+	return true;
 }
 
 /** Construct a BoolComboOption.
