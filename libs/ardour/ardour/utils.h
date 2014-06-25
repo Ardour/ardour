@@ -39,6 +39,8 @@
 
 class XMLNode;
 
+namespace ARDOUR {
+
 LIBARDOUR_API std::string legalize_for_path (const std::string& str);
 LIBARDOUR_API std::string legalize_for_universal_path (const std::string& str);
 LIBARDOUR_API std::string legalize_for_uri (const std::string& str);
@@ -175,6 +177,8 @@ LIBARDOUR_API bool remove_pattern_from_string(const std::string& in_str, const s
 #if __APPLE__
 LIBARDOUR_API std::string CFStringRefToStdString(CFStringRef stringRef);
 #endif // __APPLE__
+
+} //namespave
 
 #endif /* __ardour_utils_h__ */
 
