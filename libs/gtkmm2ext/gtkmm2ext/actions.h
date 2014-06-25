@@ -91,6 +91,11 @@ namespace ActionManager {
 	LIBGTKMM2EXT_API extern void check_toggleaction (std::string);
 	LIBGTKMM2EXT_API extern void uncheck_toggleaction (std::string);
 	LIBGTKMM2EXT_API extern void set_toggleaction_state (std::string, bool);
+
+       
+        LIBGTKMM2EXT_API extern void push_action_state ();
+        LIBGTKMM2EXT_API extern void pop_action_state ();
+        LIBGTKMM2EXT_API extern void disable_all_actions ();
 };
 
 #endif /* __libgtkmm2ext_actions_h__ */

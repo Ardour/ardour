@@ -1359,6 +1359,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	DragManager* _drags;
 
 	void escape ();
+        void lock ();
+        void unlock ();
+        /* This dialog must NOT forward events */
+        Gtk::Dialog *lock_dialog;
+
+        struct timeval last_event_time;
+        bool generic_event_handler (GdkEvent*);
+        bool lock_timeout_callback ();
+        void start_lock_event_timing ();
 
 	Gtk::Menu fade_context_menu;
 	void popup_fade_context_menu (int, int, ArdourCanvas::Item*, ItemType);

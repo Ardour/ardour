@@ -85,7 +85,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, _mixer(mx)
 	, _mixer_owned (in_mixer)
 	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, in_mixer)
-	, gpm (sess, 250)
+	, gpm (sess, "inspector_gain_meter.xml")
 	, panners (sess)
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, button_table (1, 1)
@@ -94,7 +94,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, middle_button_table (4, 1)
 	, bottom_button_table (1, 2)
     , auto_n_io_table(7,1)
-	, meter_point_button (_("pre"))
 	, midi_input_enable_button (0)
 	, _comment_button (_("Comments"))
 	, _visibility (X_("mixer-strip-visibility"))
@@ -116,14 +115,13 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, _mixer(mx)
 	, _mixer_owned (in_mixer)
 	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, in_mixer)
-	, gpm (sess, 250)
+	, gpm (sess, "inspector_gain_meter.xml")
 	, panners (sess)
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, button_table (1, 1)
 	, middle_button_table (4, 1)
 	, bottom_button_table (1, 2)
     , auto_n_io_table(7,1)
-	, meter_point_button (_("pre"))
 	, midi_input_enable_button (0)
 	, _comment_button (_("Comments"))
 	, _visibility (X_("mixer-strip-visibility"))
@@ -154,33 +152,6 @@ MixerStrip::init ()
 		t += string_compose (_("\n%1-%2-click to toggle the width of all strips."), Keyboard::primary_modifier_name(), Keyboard::tertiary_modifier_name ());
 	}
 		
-    input_button.set_text (_("Input"));
-	input_button.set_name ("mixer strip button");
-	input_button.set_size_request (-1, 20);
-	input_button_box.pack_start (input_button, true, true);
-
-	output_button.set_text (_("Output"));
-	output_button.set_name ("mixer strip button");
-	Gtkmm2ext::set_size_request_to_display_given_text (output_button, longest_label.c_str(), 4, 4);
-    
-    automation_label.set_name("meterbridge label");
-    automation_label.set_text(_("AUTOMATION"));
-    io_label.set_name("meterbridge label");
-    io_label.set_text(_("I/O"));
-
-	ARDOUR_UI::instance()->set_tip (&meter_point_button, _("Click to select metering point"), "");
-	meter_point_button.set_name ("mixer strip button");
-
-	/* TRANSLATORS: this string should be longest of the strings
-	   used to describe meter points. In english, it's "input".
-	*/
-	set_size_request_to_display_given_text (meter_point_button, _("tupni"), 5, 5);
-
-	middle_button_table.attach (meter_point_button, 0, 1, 0, 1);
-
-	meter_point_button.signal_button_press_event().connect (sigc::mem_fun (gpm, &GainMeter::meter_press), false);
-	meter_point_button.signal_button_release_event().connect (sigc::mem_fun (gpm, &GainMeter::meter_release), false);
-
 	top_button_table.set_homogeneous (true);
 	top_button_table.set_spacings (2);
 	top_button_table.attach (*monitor_input_button, 1, 2, 0, 1);// 0, 1, 0, 1);
@@ -199,10 +170,6 @@ MixerStrip::init ()
 
     name_button.add_elements ( ArdourButton::Inset );
     top_button_table.attach (name_button, 0, 2, 2, 3);
-	auto_n_io_table.attach (automation_label, 0, 1, 0, 1);
-    automation_label.show();
-	auto_n_io_table.attach (io_label, 0, 1, 3, 4);
-    io_label.show();
 
 	auto_n_io_table.attach (input_button_box, 0, 1, 4, 5);
 
@@ -212,7 +179,6 @@ MixerStrip::init ()
     
 	auto_n_io_table.set_spacings (2);
 	auto_n_io_table.set_homogeneous (true);
-	auto_n_io_table.attach (gpm.gain_automation_state_button, 0, 1, 1, 2);
 
 	name_button.set_name ("mixer strip button");
 	name_button.set_text (" "); /* non empty text, forces creation of the layout */
@@ -253,7 +219,6 @@ MixerStrip::init ()
 	global_vpacker.pack_start (middle_button_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (top_button_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table, Gtk::PACK_SHRINK);
-	auto_n_io_table.attach (output_button, 0, 1, 5, 6);
 	global_vpacker.pack_start (_comment_button, Gtk::PACK_SHRINK);
 
 	global_frame.add (global_vpacker);
@@ -272,9 +237,6 @@ MixerStrip::init ()
 
 	_session->engine().Stopped.connect (*this, invalidator (*this), boost::bind (&MixerStrip::engine_stopped, this), gui_context());
 	_session->engine().Running.connect (*this, invalidator (*this), boost::bind (&MixerStrip::engine_running, this), gui_context());
-
-	input_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::input_press), false);
-	output_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::output_press), false);
 
 	/* ditto for this button and busses */
 
@@ -318,7 +280,6 @@ MixerStrip::init ()
 	//_visibility.add (solo_isolated_led, X_("SoloIsolated"), _("Solo Isolated"), true, boost::bind (&MixerStrip::override_solo_visibility, this));
 	_visibility.add (&_comment_button, X_("Comments"), _("Comments"));
 	_visibility.add (&group_button, X_("Group"), _("Group"));
-	_visibility.add (&meter_point_button, X_("MeterPoint"), _("Meter Point"));
 
 	parameter_changed (X_("mixer-strip-visibility"));
 
@@ -371,18 +332,18 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	   table
 	*/
 	
-	if (gpm.peak_display.get_parent()) {
-		gpm.peak_display.get_parent()->remove (gpm.peak_display);
+	if (gpm.peak_display_button.get_parent()) {
+		gpm.peak_display_button.get_parent()->remove (gpm.peak_display_button);
 	}
-	if (gpm.gain_display.get_parent()) {
-		gpm.gain_display.get_parent()->remove (gpm.gain_display);
+	if (gpm.gain_display_entry.get_parent()) {
+		gpm.gain_display_entry.get_parent()->remove (gpm.gain_display_entry);
 	}
 
 	gpm.set_type (rt->meter_type());
 	
-	middle_button_table.attach (gpm.peak_display,0,1,1,2, EXPAND|FILL, EXPAND);
+	middle_button_table.attach (gpm.peak_display_button,0,1,1,2, EXPAND|FILL, EXPAND);
 	middle_button_table.attach (gpm,0,1,2,3);
-	middle_button_table.attach (gpm.gain_display,0,1,3,4);
+	middle_button_table.attach (gpm.gain_display_entry,0,1,3,4);
 
 	if (solo_button->get_parent()) {
 		top_button_table.remove (*solo_button);
@@ -471,8 +432,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-	meter_point_button.set_text (meter_point_string (_route->meter_point()));
-
 	delete route_ops_menu;
 	route_ops_menu = 0;
 
@@ -528,8 +487,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	gpm.reset_peak_display ();
-	gpm.gain_display.show ();
-	gpm.peak_display.show ();
+	gpm.gain_display_entry.show ();
+	gpm.peak_display_button.show ();
 
 	//width_button.show();
 	width_hide_box.show();
@@ -541,13 +500,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
     auto_n_io_table.show();
 	bottom_button_table.show();
 	gpm.show_all ();
-	meter_point_button.show();
 	input_button_box.show_all();
-	output_button.show();
 	name_button.show();
 	_comment_button.show();
 	group_button.show();
-	gpm.gain_automation_state_button.show();
 
 	parameter_changed ("mixer-strip-visibility");
 
@@ -593,11 +549,6 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			show_sends_button->layout()->set_alignment (Pango::ALIGN_CENTER);
 		}
 
-		gpm.gain_automation_style_button.set_text (
-				gpm.astyle_string(gain_automation->automation_style()));
-		gpm.gain_automation_state_button.set_text (
-				gpm.astate_string(gain_automation->automation_state()));
-
 		if (_route->panner()) {
 			((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (
 					panners.astyle_string(_route->panner()->automation_style()));
@@ -616,10 +567,6 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			show_sends_button->set_text (_("Snd"));
 		}
 
-		gpm.gain_automation_style_button.set_text (
-				gpm.short_astyle_string(gain_automation->automation_style()));
-		gpm.gain_automation_state_button.set_text (
-				gpm.short_astate_string(gain_automation->automation_state()));
 		gain_meter().setup_meters (); // recalc meter width
 
 		if (_route->panner()) {
@@ -1165,12 +1112,6 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	tooltip_cstr = new char[tooltip.str().size() + 1];
 	strcpy(tooltip_cstr, tooltip.str().c_str());
 
-	if (for_input) {
-		ARDOUR_UI::instance()->set_tip (&input_button, tooltip_cstr, "");
-  	} else {
-		ARDOUR_UI::instance()->set_tip (&output_button, tooltip_cstr, "");
-	}
-
 	if (each_io_has_one_connection) {
 		if (total_connection_count == ardour_connection_count) {
 			// all connections are to the same track in ardour
@@ -1212,12 +1153,6 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 		label_string = label.str().substr(0, 3);
 		break;
   	}
-
-	if (for_input) {
-		input_button.set_text (label_string);
-	} else {
-		output_button.set_text (label_string);
-	}
 }
 
 void
@@ -1767,7 +1702,6 @@ MixerStrip::meter_point_string (MeterPoint mp)
 void
 MixerStrip::meter_changed ()
 {
-	meter_point_button.set_text (meter_point_string (_route->meter_point()));
 	gpm.setup_meters ();
 	// reset peak when meter point changes
 	gpm.reset_peak_display();
@@ -1804,11 +1738,8 @@ MixerStrip::drop_send ()
 	}
 
 	send_gone_connection.disconnect ();
-	input_button.set_sensitive (true);
-	output_button.set_sensitive (true);
 	group_button.set_sensitive (true);
 	set_invert_sensitive (true);
-	meter_point_button.set_sensitive (true);
 	mute_button->set_sensitive (true);
 	solo_button->set_sensitive (true);
 	rec_enable_button->set_sensitive (true);
@@ -1850,10 +1781,8 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	panner_ui().setup_pan ();
 	panner_ui().show_all ();
 
-	input_button.set_sensitive (false);
 	group_button.set_sensitive (false);
 	set_invert_sensitive (false);
-	meter_point_button.set_sensitive (false);
 	mute_button->set_sensitive (false);
 	solo_button->set_sensitive (false);
 	rec_enable_button->set_sensitive (false);
@@ -1862,10 +1791,6 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	monitor_input_button->set_sensitive (false);
 	//monitor_disk_button->set_sensitive (false);
 	_comment_button.set_sensitive (false);
-
-	if (boost::dynamic_pointer_cast<InternalSend>(send)) {
-		output_button.set_sensitive (false);
-	}
 
 	reset_strip_style ();
 }
@@ -1951,12 +1876,6 @@ MixerStrip::set_button_names ()
 		//solo_isolated_led->set_text (_("i"));
 		//solo_safe_led->set_text (_("L"));
 		break;
-	}
-
-	if (_route) {
-		meter_point_button.set_text (meter_point_string (_route->meter_point()));
-	} else {
-		meter_point_button.set_text ("");
 	}
 }
 

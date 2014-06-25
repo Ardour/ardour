@@ -44,6 +44,7 @@
 #include "gtkmm2ext/focus_entry.h"
 #include "gtkmm2ext/fader.h"
 
+#include "waves_ui.h"
 #include "enums.h"
 #include "level_meter.h"
 
@@ -64,11 +65,11 @@ namespace Gtk {
 	class Menu;
 }
 
-class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
+class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, public Gtk::VBox, public WavesUI
 {
   public:
-        GainMeterBase (ARDOUR::Session*, bool horizontal, int, int);
-	virtual ~GainMeterBase ();
+    GainMeter (ARDOUR::Session*, const std::string& layout_script_file);
+	virtual ~GainMeter ();
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
 				   boost::shared_ptr<ARDOUR::PeakMeter> meter,
@@ -79,7 +80,6 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 
 	void effective_gain_display ();
 	void set_width (Width, int len=0);
-	void set_meter_strip_name (const char * name);
 	void set_fader_name (const char * name);
 
 	void set_flat_buttons ();
@@ -89,13 +89,18 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 
 	boost::shared_ptr<PBD::Controllable> get_controllable();
 
-	LevelMeterHBox& get_level_meter() const { return *level_meter; }
-	Gtkmm2ext::Fader& get_gain_slider() const { return *gain_slider; }
+	LevelMeterHBox& get_level_meter() { return level_meter; }
+	Gtkmm2ext::Fader& get_gain_slider() { return gain_slider; }
 
 	/** Emitted in the GUI thread when a button is pressed over the level meter;
 	 *  return true if the event is handled.
 	 */
 	PBD::Signal1<bool, GdkEventButton *> LevelMeterButtonPress;
+
+	//
+	int get_gm_width ();
+	void route_active_changed ();
+
 
   protected:
 
@@ -111,30 +116,19 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	bool ignore_toggle;
 	bool next_release_selects;
 
-	Gtkmm2ext::Fader *gain_slider;
-	Gtk::Adjustment              gain_adjustment;
-	Gtkmm2ext::FocusEntry        gain_display;
-	Gtk::Button                  peak_display;
-	Gtk::DrawingArea             meter_metric_area;
-	Gtk::DrawingArea             meter_ticks1_area;
-	Gtk::DrawingArea             meter_ticks2_area;
-	LevelMeterHBox              *level_meter;
+	Gtkmm2ext::Fader&      gain_slider;
+	Gtk::Adjustment&       gain_adjustment;
+	Gtk::Box&              gain_display_home;
+	Gtkmm2ext::FocusEntry  gain_display_entry;
+	WavesButton&           peak_display_button;
+	Gtk::Box&              level_meter_home;
+	LevelMeterHBox         level_meter;
 
 	sigc::connection gain_watching;
 
-	ArdourButton gain_automation_style_button;
-	ArdourButton gain_automation_state_button;
 
 	Gtk::Menu gain_astate_menu;
 	Gtk::Menu gain_astyle_menu;
-
-	gint gain_automation_style_button_event (GdkEventButton *);
-	gint gain_automation_state_button_event (GdkEventButton *);
-	gint pan_automation_style_button_event (GdkEventButton *);
-	gint pan_automation_state_button_event (GdkEventButton *);
-
-	void gain_automation_state_changed();
-	void gain_automation_style_changed();
 
 	void setup_gain_adjustment ();
 
@@ -196,42 +190,11 @@ private:
 
 	bool level_meter_button_press (GdkEventButton *);
 	PBD::ScopedConnection _level_meter_connection;
-};
 
-class GainMeter : public GainMeterBase, public Gtk::VBox
-{
-  public:
-         GainMeter (ARDOUR::Session*, int);
-	virtual ~GainMeter ();
-
-	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
-				   boost::shared_ptr<ARDOUR::PeakMeter> meter,
-				   boost::shared_ptr<ARDOUR::Amp> amp);
-
-	int get_gm_width ();
-	void setup_meters (int len=0);
-	void set_type (ARDOUR::MeterType);
-	void route_active_changed ();
-
-  protected:
-	void hide_all_meters ();
-
-	gint meter_metrics_expose (GdkEventExpose *);
-	gint meter_ticks1_expose (GdkEventExpose *);
-	gint meter_ticks2_expose (GdkEventExpose *);
-
-  private:
-
+	//
 	void meter_configuration_changed (ARDOUR::ChanCount);
 	void meter_type_changed (ARDOUR::MeterType);
 
-	Gtk::HBox  gain_display_box;
-	Gtk::HBox  fader_box;
-	Gtk::VBox* fader_vbox;
-	Gtk::HBox  hbox;
-	Gtk::HBox  meter_hbox;
-	Gtk::Alignment fader_alignment;
-	Gtk::Alignment meter_alignment;
 	std::vector<ARDOUR::DataType> _types;
 };
 

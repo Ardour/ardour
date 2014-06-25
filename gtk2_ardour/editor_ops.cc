@@ -57,6 +57,7 @@
 
 #include "canvas/canvas.h"
 
+#include "actions.h"
 #include "ardour_ui.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
@@ -7059,4 +7060,50 @@ Editor::toggle_midi_input_active (bool flip_others)
 	}
 	
 	_session->set_exclusive_input_active (rl, onoff, flip_others);
+}
+
+
+void
+Editor::lock ()
+{
+	if (!lock_dialog) {
+                /* the lock dialog must be a completely "vanilla" Dialog that does not forward
+                   events in anyway. Using a class like ArdourDialog breaks this.
+                */
+		lock_dialog = new Gtk::Dialog (string_compose (_("%1: Locked"), PROGRAM_NAME), true);
+
+		Gtk::Image* padlock = manage (new Gtk::Image (::get_icon ("padlock_closed")));
+		lock_dialog->get_vbox()->pack_start (*padlock);
+
+		ArdourButton* b = manage (new ArdourButton);
+		b->set_name ("lock button");
+		b->set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Click to unlock")));
+		b->signal_clicked.connect (sigc::mem_fun (*this, &Editor::unlock));
+		lock_dialog->get_vbox()->pack_start (*b);
+		
+		lock_dialog->get_vbox()->show_all ();
+		lock_dialog->set_size_request (200, 200);
+	}
+	
+#ifdef __APPLE__
+	/* The global menu bar continues to be accessible to applications
+	   with modal dialogs, which means that we need to desensitize
+	   all items in the menu bar. Since those items are really just
+	   proxies for actions, that means disabling all actions.
+	*/
+	ActionManager::disable_all_actions ();
+#endif
+	lock_dialog->present ();
+}
+
+void
+Editor::unlock ()
+{
+	lock_dialog->hide ();
+
+#ifdef __APPLE__
+	ActionManager::pop_action_state ();
+#endif	
+
+        start_lock_event_timing ();
 }

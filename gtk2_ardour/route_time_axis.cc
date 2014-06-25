@@ -104,7 +104,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, playlist_action_menu (0)
 	, mode_menu (0)
 	, color_mode_menu (0)
-	, gm (sess, true, 125, 18)
+	, gm (sess, "inspector_gain_meter.xml")
 	, _ignore_set_layer_display (false)
 {
 }
@@ -124,7 +124,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gm.get_level_meter().set_no_show_all();
-	gm.get_level_meter().setup_meters(50, meter_width);
+	gm.get_level_meter().setup_meters(meter_width);
 	gm.update_gain_sensitive ();
 
 	string str = gui_property ("height");
@@ -846,7 +846,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 	if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
 		meter_width = 6;
 	}
-	gm.get_level_meter().setup_meters (gmlen, meter_width);
+	gm.get_level_meter().setup_meters (meter_width);
 
 	TimeAxisView::set_height (h);
 
@@ -2239,7 +2239,7 @@ RouteTimeAxisView::reset_meter ()
 		if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
 			meter_width = 6;
 		}
-		gm.get_level_meter().setup_meters (height - 9, meter_width);
+		gm.get_level_meter().setup_meters (meter_width);
 	} else {
 		hide_meter ();
 	}
