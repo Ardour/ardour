@@ -31,11 +31,11 @@ def build(bld):
     else:
         obj = bld(features = 'c cxx cxxshlib')
 
-   if sys.platform == 'darwin':                                                                                                                                                                               
-        if bld.env['build_target'] not in [ 'lion' ]:                                                                                                                                                          
-            obj.framework = 'CoreMidi'                                                                                                                                                                         
-        else:                                                                                                                                                                                                  
-            obj.framework = 'CoreMIDI'                                                                                                                                                                         
+    if sys.platform == 'darwin':
+        if bld.env['build_target'] not in [ 'lion' ]:
+            obj.framework = 'CoreMidi'
+        else:
+            obj.framework = 'CoreMIDI'
 
     obj.source = [
             'waves_audiobackend.cc',
