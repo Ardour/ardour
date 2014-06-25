@@ -287,6 +287,21 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	PBD::Signal1<void,void*> mute_changed;
 	PBD::Signal0<void>       mute_points_changed;
 
+	/** track numbers - assigned by session
+	 * nubers > 0 indicate tracks (audio+midi)
+	 * nubers < 0 indicate busses
+	 * zero is reserved for unnumbered special busses.
+	 * */
+	PBD::Signal0<void> track_number_changed;
+	int64_t track_number() const { return _track_number; }
+
+	void set_track_number(int64_t tn) {
+		if (tn == _track_number) { return; }
+		_track_number = tn;
+		track_number_changed();
+		PropertyChanged (ARDOUR::Properties::name);
+	}
+
 	/** the processors have changed; the parameter indicates what changed */
 	PBD::Signal1<void,RouteProcessorChange> processors_changed;
 	PBD::Signal1<void,void*> record_enable_changed;
@@ -561,6 +576,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
  	uint32_t _order_key;
 	bool _has_order_key;
         uint32_t _remote_control_id;
+
+	int64_t _track_number;
 
 	void input_change_handler (IOChange, void *src);
 	void output_change_handler (IOChange, void *src);

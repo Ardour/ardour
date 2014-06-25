@@ -81,6 +81,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/route_graph.h"
 #include "ardour/route_group.h"
+#include "ardour/route_sorters.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
@@ -234,6 +235,7 @@ Session::Session (AudioEngine &eng,
 	, routes (new RouteList)
 	, _adding_routes_in_progress (false)
 	, destructive_index (0)
+	, _track_number_decimals(1)
 	, solo_update_disabled (false)
 	, default_fade_steepness (0)
 	, default_fade_msecs (0)
@@ -2349,6 +2351,8 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 		save_state (_current_snapshot_name);
 	}
 	
+	reassign_track_numbers();
+
 	RouteAdded (new_routes); /* EMIT SIGNAL */
 }
 
@@ -2626,6 +2630,7 @@ Session::remove_route (boost::shared_ptr<Route> route)
 	if (save_state (_current_snapshot_name)) {
 		save_history (_current_snapshot_name);
 	}
+	reassign_track_numbers();
 }
 
 void
@@ -3040,6 +3045,40 @@ Session::route_by_remote_id (uint32_t id)
 	}
 
 	return boost::shared_ptr<Route> ((Route*) 0);
+}
+
+
+void
+Session::reassign_track_numbers ()
+{
+	int64_t tn = 0;
+	int64_t bn = 0;
+	RouteList r (*(routes.reader ()));
+	SignalOrderRouteSorter sorter;
+	r.sort (sorter);
+
+	for (RouteList::iterator i = r.begin(); i != r.end(); ++i) {
+		if (boost::dynamic_pointer_cast<Track> (*i)) {
+			(*i)->set_track_number(++tn);
+		}
+		else if (!(*i)->is_master() && !(*i)->is_monitor() && !(*i)->is_auditioner()) {
+			(*i)->set_track_number(--bn);
+		}
+	}
+	const uint32_t decimals = ceilf (log10f (tn + 1));
+	const bool decimals_changed = _track_number_decimals != decimals;
+	_track_number_decimals = decimals;
+
+	if (decimals_changed && config.get_track_name_number ()) {
+		for (RouteList::iterator i = r.begin(); i != r.end(); ++i) {
+			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*i);
+			if (t) {
+				t->resync_track_name();
+			}
+		}
+		// trigger GUI re-layout
+		config.ParameterChanged("track-name-number");
+	}
 }
 
 void
@@ -5003,6 +5042,8 @@ Session::sync_order_keys ()
 	*/
 
 	DEBUG_TRACE (DEBUG::OrderKeys, "Sync Order Keys.\n");
+
+	reassign_track_numbers();
 
 	Route::SyncOrderKeys (); /* EMIT SIGNAL */
 

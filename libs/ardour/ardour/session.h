@@ -260,6 +260,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool route_name_unique (std::string) const;
 	bool route_name_internal (std::string) const;
 
+	uint32_t track_number_decimals () const {
+		return _track_number_decimals;
+	}
+
 	bool get_record_enabled() const {
 		return (record_status () >= Enabled);
 	}
@@ -1341,6 +1345,11 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	                         bool with_lock, bool connect_inputs = true,
 	                         ChanCount input_start = ChanCount (), ChanCount output_start = ChanCount ());
 	void midi_output_change_handler (IOChange change, void* /*src*/, boost::weak_ptr<Route> midi_track);
+
+	/* track numbering */
+
+	void reassign_track_numbers ();
+	uint32_t _track_number_decimals;
 
 	/* mixer stuff */
 
