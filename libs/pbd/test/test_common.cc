@@ -57,3 +57,17 @@ test_output_directory (std::string prefix)
 	} while (g_mkdir_with_parents (new_test_dir.c_str(), 0755) != 0);
 	return new_test_dir;
 }
+
+void
+get_utf8_test_strings (std::vector<std::string>& result)
+{
+	// These are all translations of "Ardour" from google translate
+	result.push_back ("Ardour"); // Reference
+	result.push_back ("\320\277\321\213\320\273"); // Russian
+	result.push_back ("\305\276ar"); // Croatian
+	result.push_back ("\340\270\204\340\270\247\340\270\262\340\270\241\340\270\201\340\270\243\340\270\260\340\270\225\340\270\267\340\270\255\340\270\243\340\270\267\340\270\255\340\270\243\340\271\211\340\270\231"); // Thai
+	result.push_back ("\325\245\325\274\325\241\325\266\325\244"); // Armenian
+	result.push_back ("\340\246\254\340\247\215\340\246\257\340\246\227\340\247\215\340\246\260\340\246\244\340\246\276"); // Bengali
+	result.push_back ("\346\203\205\347\206\261"); // Japanese
+	result.push_back ("\347\203\255\346\203\205"); // Chinese (Simplified)
+}
