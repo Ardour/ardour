@@ -1216,10 +1216,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void temporal_zoom_by_frame (framepos_t start, framepos_t end);
 	void temporal_zoom_to_frame (bool coarser, framepos_t frame);
 
-	void insert_region_list_drag (boost::shared_ptr<ARDOUR::Region>, int x, int y);
 	void insert_region_list_selection (float times);
-
-	void insert_route_list_drag (boost::shared_ptr<ARDOUR::Route>, int x, int y);
 
 	/* import & embed */
 
