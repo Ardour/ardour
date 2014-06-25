@@ -45,6 +45,7 @@ class RulerDialog : public ArdourDialog
 	Gtk::CheckButton range_button;
 	Gtk::CheckButton mark_button;
 	Gtk::CheckButton cdmark_button;
+	Gtk::CheckButton video_button;
 
 	void connect_action (Gtk::CheckButton& button, std::string const &action_name_part);
 	void on_response (int);
