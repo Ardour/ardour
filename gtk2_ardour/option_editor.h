@@ -347,6 +347,7 @@ public:
 	}
 
 	Gtk::Widget& tip_widget() { return *_hscale; }
+	Gtk::HScale& scale() { return *_hscale; }
 
 private:
 	sigc::slot<float> _get;
