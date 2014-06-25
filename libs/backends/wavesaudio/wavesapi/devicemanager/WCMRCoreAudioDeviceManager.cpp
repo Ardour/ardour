@@ -390,27 +390,30 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInputs()
     
     for (int channel = 0; channel < maxInputChannels; channel++)
     {
-        AudioObjectPropertyAddress pa;
-        pa.mSelector = kAudioObjectPropertyElementName;
-        pa.mScope = kAudioObjectPropertyScopeInput;
-        pa.mElement = channel + 1;
-        
         CFStringRef cfName;
         std::stringstream chNameStream;
         UInt32 nameSize = 0;
         OSStatus error = kAudioHardwareNoError;
         
-        bool hasChannelNames = AudioObjectHasProperty(m_DeviceID, &pa);
+        error = AudioDeviceGetPropertyInfo (m_DeviceID,
+                                            channel + 1,
+                                            true /* Input */,
+                                            kAudioDevicePropertyChannelNameCFString,
+                                            &nameSize,
+                                            NULL);
         
-        if (hasChannelNames) {
-            error = AudioObjectGetPropertyDataSize(m_DeviceID, &pa, 0, 0, &nameSize );
+        if (error == kAudioHardwareNoError)
+        {
+            error = AudioDeviceGetProperty (m_DeviceID,
+                                            channel + 1,
+                                            true /* Input */,
+                                            kAudioDevicePropertyChannelNameCFString,
+                                            &nameSize,
+                                            &cfName);
+        }
+  
         
-            if (error == kAudioHardwareNoError) {
-                error = AudioObjectGetPropertyData (m_DeviceID, &pa, 0, 0, &nameSize, &cfName);
-            }
-        }        
-        
-        if (hasChannelNames && (error == kAudioHardwareNoError) )
+        if (error == kAudioHardwareNoError)
         {
             CFIndex length = CFStringGetLength(cfName);
             CFIndex maxSize = CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8);
@@ -419,7 +422,9 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInputs()
             CFStringGetCString(cfName, cstr_name, maxSize, kCFStringEncodingUTF8);
             
             chNameStream << cstr_name;
-        } else {
+        }
+        else
+        {
             chNameStream << "Input " << (channel+1);
         }
 
@@ -501,27 +506,29 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceOutputs()
     m_OutputChannels.clear();
     for (int channel = 0; channel < maxOutputChannels; channel++)
     {
-        AudioObjectPropertyAddress pa;
-        pa.mSelector = kAudioObjectPropertyElementName;
-        pa.mScope = kAudioObjectPropertyScopeOutput;
-        pa.mElement = channel + 1;
-        
         CFStringRef cfName;
         std::stringstream chNameStream;
         UInt32 nameSize = 0;
         OSStatus error = kAudioHardwareNoError;
         
-        bool hasChannelNames = AudioObjectHasProperty(m_DeviceID, &pa);
+        error = AudioDeviceGetPropertyInfo (m_DeviceID,
+                                            channel + 1,
+                                            false /* Output */,
+                                            kAudioDevicePropertyChannelNameCFString,
+                                            &nameSize,
+                                            NULL);
         
-        if (hasChannelNames) {
-            error = AudioObjectGetPropertyDataSize(m_DeviceID, &pa, 0, 0, &nameSize );
-            
-            if (error == kAudioHardwareNoError) {
-                error = AudioObjectGetPropertyData (m_DeviceID, &pa, 0, 0, &nameSize, &cfName);
-            }
+        if (error == kAudioHardwareNoError)
+        {
+            error = AudioDeviceGetProperty (m_DeviceID,
+                                                channel + 1,
+                                                false /* Output */,
+                                                kAudioDevicePropertyChannelNameCFString,
+                                                &nameSize,
+                                                &cfName);
         }
         
-        if (hasChannelNames && (error == kAudioHardwareNoError) )
+        if (error == kAudioHardwareNoError )
         {
             CFIndex length = CFStringGetLength(cfName);
             CFIndex maxSize = CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8);
@@ -530,7 +537,9 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceOutputs()
             CFStringGetCString(cfName, cstr_name, maxSize, kCFStringEncodingUTF8);
             
             chNameStream << cstr_name;
-        } else {
+        }
+        else
+        {
             chNameStream << "Output " << (channel+1);
         }
         
