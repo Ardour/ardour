@@ -29,8 +29,6 @@ RulerDialog::RulerDialog ()
 {
 	add_button (Gtk::Stock::OK, Gtk::RESPONSE_ACCEPT);
 
-	get_vbox()->set_spacing (6);
-
 	get_vbox()->pack_start (samples_button);
 	get_vbox()->pack_start (timecode_button);
 	get_vbox()->pack_start (minsec_button);
