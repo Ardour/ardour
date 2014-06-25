@@ -3175,6 +3175,8 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 		return -1;
 	}
     
+    _session->config.ParameterChanged.connect_same_thread (connection_with_session_config, boost::bind (&ARDOUR_UI::on_parameter_changed, this, _1));
+    
     new_session->config.set_native_file_header_format(this->_header_format);
     new_session->config.set_native_file_data_format  (this->_sample_format);
     new_session->config.set_timecode_format(this->_timecode_format);
@@ -3199,10 +3201,7 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	}
 
 	set_session (new_session);
-
-	session_loaded = true;
-    
-    _session->config.ParameterChanged.connect_same_thread (connection_with_session_config, boost::bind (&ARDOUR_UI::on_parameter_changed, this, _1));
+    session_loaded = true;
     
 	new_session->save_state(new_session->name());
 
