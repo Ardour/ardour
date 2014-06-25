@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GainSlider>
+  <Button id="peak_display_button"
+          width="96" height="20" />
+  <Layout bgnormal="#383838" width="96"
+          height="220">
+    <Adjustment id="gain_adjustment"
+              minvalue="0"
+              maxvalue="1"/>
+    <VBox id="level_meter_home"
+          x="0"
+          y="18"
+          width="42"
+          height="187"/>
+    <Fader id="gain_slider"
+           adjustment="gain_adjustment"
+           facesource="slider_controller_fader.png"
+           handlesource="slider_controller_fader_handle.png"
+           activehandlesource="slider_controller_fader_handle.png"
+           minposx="10"
+           minposy="187"
+           maxposx="10"
+           maxposy="0"
+           x="44"
+           y="18"/>
+    <icon source="inspector_background.png" x="60"/>
+  </Layout>
+  <VBox id="gain_display_home"/>
+</GainSlider>
