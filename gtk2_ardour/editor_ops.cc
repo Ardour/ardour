@@ -7157,6 +7157,7 @@ Editor::unlock ()
 	ActionManager::pop_action_state ();
 #endif	
 
-	start_lock_event_timing ();
-	
+	if (ARDOUR_UI::config()->get_lock_gui_after_seconds()) {
+		start_lock_event_timing ();
+	}
 }
