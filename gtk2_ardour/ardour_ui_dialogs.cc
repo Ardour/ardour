@@ -164,8 +164,9 @@ ARDOUR_UI::set_session (Session *s)
 	_session->locations()->added.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
 	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());
-
-	/* Clocks are on by default after we are connected to a session, so show that here.
+    _session->config.ParameterChanged.connect_same_thread (connection_with_session_config, boost::bind (&ARDOUR_UI::on_parameter_changed, this, _1));
+    
+    /* Clocks are on by default after we are connected to a session, so show that here.
 	*/
 
 	connect_dependents_to_session (s);
@@ -188,8 +189,9 @@ ARDOUR_UI::set_session (Session *s)
 	point_one_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_one_seconds), 100);
 	point_zero_something_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_zero_something_seconds), 40);
 
-	update_format ();
-    update_timecode_format();
+    _session->config.set_native_file_header_format(this->_header_format);
+    _session->config.set_native_file_data_format  (this->_sample_format);
+    _session->config.set_timecode_format(this->_timecode_format);
 
 	if (meter_box.get_parent()) {
 		transport_tearoff_hbox.remove (meter_box);
