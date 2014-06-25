@@ -175,15 +175,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Table bottom_button_table;
 	Gtk::Table auto_n_io_table;
     
-    Gtk::Label automation_label;
-    Gtk::Label io_label;
-
-	ArdourButton                 meter_point_button;
-
 	void meter_changed ();
-
-	ArdourButton input_button;
-	ArdourButton output_button;
 
 	ArdourButton* midi_input_enable_button;
 	Gtk::HBox   input_button_box;

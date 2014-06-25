@@ -188,11 +188,11 @@ LevelMeterBase::parameter_changed (string p)
 	}
 	else if (p == "meter-line-up-level") {
 		color_changed = true;
-		setup_meters (meter_length, regular_meter_width, thin_meter_width);
+		_setup_meters ();
 	}
 	else if (p == "meter-style-led") {
 		color_changed = true;
-		setup_meters (meter_length, regular_meter_width, thin_meter_width);
+		_setup_meters ();
 	}
 	else if (p == "meter-peak") {
 		vector<MeterInfo>::iterator i;
@@ -208,7 +208,7 @@ void
 LevelMeterBase::configuration_changed (ChanCount /*in*/, ChanCount /*out*/)
 {
 	color_changed = true;
-	setup_meters (meter_length, regular_meter_width, thin_meter_width);
+	_setup_meters ();
 }
 
 void
@@ -216,7 +216,7 @@ LevelMeterBase::meter_type_changed (MeterType t)
 {
 	meter_type = t;
 	color_changed = true;
-	setup_meters (meter_length, regular_meter_width, thin_meter_width);
+	_setup_meters ();
 	MeterTypeChanged(t);
 }
 
@@ -232,7 +232,7 @@ LevelMeterBase::hide_all_meters ()
 }
 
 void
-LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
+LevelMeterBase::_setup_meters ()
 {
 	hide_all_meters ();
 
@@ -242,9 +242,6 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 
 	int32_t nmidi = _meter->input_streams().n_midi();
 	uint32_t nmeters = _meter->input_streams().n_total();
-	regular_meter_width = initial_width;
-	thin_meter_width = thin_width;
-	meter_length = len;
 
 	guint16 width;
 
@@ -262,7 +259,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		meters.push_back (MeterInfo());
 	}
 
-	//cerr << "LevelMeterBase::setup_meters() called color_changed = " << color_changed << " colors: " << endl;//DEBUG
+	//cerr << "LevelMeterBase::_setup_meters() called color_changed = " << color_changed << " colors: " << endl;//DEBUG
 
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
 		uint32_t c[10];
@@ -394,20 +391,22 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 				}
 			}
 		}
-		if (meters[n].width != width || meters[n].length != len || color_changed || meter_type != visible_meter_type) {
+		if (meters[n].width != width || meters[n].length != meter_length || color_changed || meter_type != visible_meter_type) {
 			bool hl = meters[n].meter ? meters[n].meter->get_highlight() : false;
 			meters[n].packed = false;
 			delete meters[n].meter;
-			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, _meter_orientation, len,
+			std::cout << "\n\n\n   b[0]=" << std::hex << b[0] << std::dec; 
+			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, _meter_orientation, meter_length,
 					c[0], c[1], c[2], c[3], c[4],
 					c[5], c[6], c[7], c[8], c[9],
 					b[0], b[1], b[2], b[3],
 					stp[0], stp[1], stp[2], stp[3],
 					styleflags
 					);
+			
 			meters[n].meter->set_highlight(hl);
 			meters[n].width = width;
-			meters[n].length = len;
+			meters[n].length = meter_length;
 			meters[n].meter->add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
 			meters[n].meter->signal_button_press_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_press));
 			meters[n].meter->signal_button_release_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_release));
@@ -468,7 +467,7 @@ void
 LevelMeterBase::color_handler ()
 {
 	color_changed = true;
-	setup_meters (meter_length, regular_meter_width, thin_meter_width);
+	_setup_meters ();
 }
 
 LevelMeterHBox::LevelMeterHBox(Session* s)
@@ -478,8 +477,18 @@ LevelMeterHBox::LevelMeterHBox(Session* s)
 	show();
 }
 
-
 LevelMeterHBox::~LevelMeterHBox() {}
+
+void
+LevelMeterHBox::setup_meters (int width /* =3 */, int thin /* = 2 */)
+{
+	Gtk::Requisition sz;
+	size_request (sz);
+	meter_length = sz.height;
+	regular_meter_width = width;
+	thin_meter_width = thin;
+	_setup_meters ();
+}
 
 void
 LevelMeterHBox::mtr_pack(Gtk::Widget &w) {
@@ -499,6 +508,17 @@ LevelMeterVBox::LevelMeterVBox(Session* s)
 	show();
 }
 LevelMeterVBox::~LevelMeterVBox() {}
+
+void
+LevelMeterVBox::setup_meters (int width /* =3 */, int thin /* = 2 */)
+{
+	Gtk::Requisition sz;
+	size_request (sz);
+	meter_length = sz.width;
+	regular_meter_width = width;
+	thin_meter_width = thin;
+	_setup_meters ();
+}
 
 void
 LevelMeterVBox::mtr_pack(Gtk::Widget &w) {

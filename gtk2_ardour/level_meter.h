@@ -64,7 +64,7 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr
 	void update_meters_falloff ();
 	void clear_meters (bool reset_highlight = true);
 	void hide_meters ();
-	void setup_meters (int len=0, int width=3, int thin=2);
+	virtual void setup_meters (int width=3, int thin=2) = 0;
 
 	void set_type (ARDOUR::MeterType);
 	ARDOUR::MeterType get_type () { return meter_type; }
@@ -74,9 +74,14 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr
 	PBD::Signal1<bool, GdkEventButton *> ButtonRelease;
 	PBD::Signal1<void, ARDOUR::MeterType> MeterTypeChanged;
 
-	protected:
+  protected:
 	virtual void mtr_pack(Gtk::Widget &w) = 0;
 	virtual void mtr_remove(Gtk::Widget &w) = 0;
+	void _setup_meters ();
+
+	guint16                regular_meter_width;
+	int                    meter_length;
+	guint16                thin_meter_width;
 
   private:
 	PBD::EventLoop::InvalidationRecord* parent_invalidator;
@@ -101,9 +106,6 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr
 	    }
 	};
 
-	guint16                regular_meter_width;
-	int                    meter_length;
-	guint16                thin_meter_width;
 	std::vector<MeterInfo> meters;
 	float                  max_peak;
 	ARDOUR::MeterType      meter_type;
@@ -132,8 +134,9 @@ class LevelMeterHBox : public LevelMeterBase, public Gtk::HBox
   public:
 	LevelMeterHBox (ARDOUR::Session*);
 	~LevelMeterHBox();
+	virtual void setup_meters (int width=3, int thin=2);
 
-	protected:
+  protected:
 	void mtr_pack(Gtk::Widget &w);
 	void mtr_remove(Gtk::Widget &w);
 };
@@ -143,6 +146,7 @@ class LevelMeterVBox : public LevelMeterBase, public Gtk::VBox
   public:
 	LevelMeterVBox (ARDOUR::Session*);
 	~LevelMeterVBox();
+	virtual void setup_meters (int width=3, int thin=2);
 
 	protected:
 	void mtr_pack(Gtk::Widget &w);

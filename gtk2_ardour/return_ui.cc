@@ -37,7 +37,7 @@ using namespace PBD;
 
 ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session* session)
 	:_return (r)
-	, _gpm (session, 250)
+	, _gpm (session, "inspector_gain_meter.xml")
 {
  	_gpm.set_controls (boost::shared_ptr<Route>(), r->meter(), r->amp());
 

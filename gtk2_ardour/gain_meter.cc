@@ -61,16 +61,25 @@ using namespace std;
 using Gtkmm2ext::Keyboard;
 using namespace ArdourMeter;
 
-GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int fader_girth)
-	: gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0.0, 1.0, 0.01, 0.1)
-	, gain_automation_style_button ("")
-	, gain_automation_state_button ("")
-	, _data_type (DataType::AUDIO)
-    , gain_slider(0)
+GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
+	: Gtk::VBox ()
+	, WavesUI (layout_script_file, *this)
+    , gain_slider (get_fader ("gain_slider"))
+	, gain_adjustment (get_adjustment ("gain_adjustment"))
+	, gain_display_home (get_box ("gain_display_home"))
+	, peak_display_button (get_waves_button ("peak_display_button"))
+	, level_meter_home (get_box ("level_meter_home"))
+	, level_meter (_session)
+    , _data_type (DataType::AUDIO)
 
 {
 	using namespace Menu_Helpers;
-
+	//gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0.0, 1.0, 0.01, 0.1)
+	gain_adjustment.set_value (gain_to_slider_position_with_max (1.0, Config->get_max_gain()));
+	gain_adjustment.set_lower (0.0);
+	gain_adjustment.set_upper (1.0);
+	gain_adjustment.set_step_increment (0.01);
+	gain_adjustment.set_page_increment (0.1);
 	set_session (s);
 
 	ignore_toggle = false;
@@ -78,46 +87,25 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	next_release_selects = false;
 	_width = Wide;
 
-	gain_slider = manage (new Fader (gain_adjustment, 
-									 "slider_controller_fader.png",
-									 "slider_controller_fader_handle.png",
-									 "slider_controller_fader_handle.png",
-									 10, 187, 10, 0));
+	level_meter_home.pack_start(level_meter);
+	level_meter.ButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&GainMeter::level_meter_button_press, this, _1));
 
-	level_meter = new LevelMeterHBox(_session);
+	gain_slider.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_press), false);
+	gain_slider.signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_release), false);
 
-	level_meter->ButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&GainMeterBase::level_meter_button_press, this, _1));
-	meter_metric_area.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeterBase::level_meter_button_press));
-	meter_metric_area.add_events (Gdk::BUTTON_PRESS_MASK);
+	gain_display_entry.set_name ("MixerStripGainDisplay");
+	set_size_request_to_display_given_text (gain_display_entry, "-80.g", 2, 6); /* note the descender */
+	gain_display_entry.signal_activate().connect (sigc::mem_fun (*this, &GainMeter::gain_activated));
+	gain_display_entry.signal_focus_in_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
+	gain_display_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
+	gain_display_entry.set_alignment(1.0);
 
-	gain_slider->signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_press), false);
-	gain_slider->signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_release), false);
-	gain_slider->set_name ("GainFader");
-
-	gain_display.set_name ("MixerStripGainDisplay");
-	set_size_request_to_display_given_text (gain_display, "-80.g", 2, 6); /* note the descender */
-	gain_display.signal_activate().connect (sigc::mem_fun (*this, &GainMeter::gain_activated));
-	gain_display.signal_focus_in_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
-	gain_display.signal_focus_out_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
-	gain_display.set_alignment(1.0);
-
-	peak_display.set_name ("MixerStripPeakDisplay");
-	set_size_request_to_display_given_text (peak_display, "-80.g", 2, 6); /* note the descender */
+	peak_display_button.set_name ("MixerStripPeakDisplay");
+	set_size_request_to_display_given_text (peak_display_button, "-80.g", 2, 6); /* note the descender */
 	max_peak = minus_infinity();
-	peak_display.set_label (_("-inf"));
-	peak_display.unset_flags (Gtk::CAN_FOCUS);
+	peak_display_button.set_text (_("-inf"));
+	peak_display_button.unset_flags (Gtk::CAN_FOCUS);
 
-	gain_automation_style_button.set_name ("mixer strip button");
-	gain_automation_state_button.set_name ("mixer strip button");
-
-	ARDOUR_UI::instance()->set_tip (gain_automation_state_button, _("Fader automation mode"));
-	ARDOUR_UI::instance()->set_tip (gain_automation_style_button, _("Fader automation type"));
-
-	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
-	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
-
-	gain_automation_state_button.set_size_request(15, 15);
-	gain_automation_style_button.set_size_request(15, 15);
 
 	gain_astyle_menu.items().push_back (MenuElem (_("Trim")));
 	gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
@@ -125,37 +113,33 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_astate_menu.set_name ("ArdourContextMenu");
 	gain_astyle_menu.set_name ("ArdourContextMenu");
 
-	gain_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &GainMeterBase::gain_adjusted));
-	peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeterBase::peak_button_release), false);
-	gain_display.signal_key_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_key_press), false);
+	gain_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &GainMeter::gain_adjusted));
+	peak_display_button.signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::peak_button_release), false);
+	gain_display_entry.signal_key_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_key_press), false);
 
-	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &GainMeterBase::reset_peak_display));
-	ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &GainMeterBase::reset_route_peak_display));
-	ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &GainMeterBase::reset_group_peak_display));
-	RedrawMetrics.connect (sigc::mem_fun(*this, &GainMeterBase::redraw_metrics));
+	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &GainMeter::reset_peak_display));
+	ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &GainMeter::reset_route_peak_display));
+	ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &GainMeter::reset_group_peak_display));
+	RedrawMetrics.connect (sigc::mem_fun(*this, &GainMeter::redraw_metrics));
 
-	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &GainMeterBase::on_theme_changed));
-	ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), false));
-	DPIReset.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), true));
-	
-//	PBD::ScopedConnection _config_connection;
-//	Config->ParameterChanged.connect ( _config_connection, MISSING_INVALIDATOR, boost::bind(&GainMeterBase::set_flat_buttons, this, _1), gui_context() );
+	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &GainMeter::on_theme_changed));
+	ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeter::color_handler), false));
+	DPIReset.connect (sigc::bind(sigc::mem_fun (*this, &GainMeter::color_handler), true));
 }
 
 void
-GainMeterBase::set_flat_buttons ()
+GainMeter::set_flat_buttons ()
 {
 //	gain_slider->set_flat_buttons( ARDOUR_UI::config()->flat_buttons.get() );
 }
 
-GainMeterBase::~GainMeterBase ()
+GainMeter::~GainMeter ()
 {
 	delete meter_menu;
-	delete level_meter;
 }
 
 void
-GainMeterBase::set_controls (boost::shared_ptr<Route> r,
+GainMeter::set_controls (boost::shared_ptr<Route> r,
 			     boost::shared_ptr<PeakMeter> pm,
 			     boost::shared_ptr<Amp> amp)
 {
@@ -163,8 +147,8 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 	model_connections.drop_connections ();
 
 	if (!pm && !amp) {
-		level_meter->set_meter (0);
-		gain_slider->set_controllable (boost::shared_ptr<PBD::Controllable>());
+		level_meter.set_meter (0);
+		gain_slider.set_controllable (boost::shared_ptr<PBD::Controllable>());
 		_meter.reset ();
 		_amp.reset ();
 		_route.reset ();
@@ -175,12 +159,12 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 	_amp = amp;
 	_route = r;
 
- 	level_meter->set_meter (pm.get());
-	gain_slider->set_controllable (amp->gain_control());
+ 	level_meter.set_meter (pm.get());
+	gain_slider.set_controllable (amp->gain_control());
 
 	if (amp) {
 		amp->ConfigurationChanged.connect (
-			model_connections, invalidator (*this), boost::bind (&GainMeterBase::setup_gain_adjustment, this), gui_context ()
+			model_connections, invalidator (*this), boost::bind (&GainMeter::setup_gain_adjustment, this), gui_context ()
 			);
 	}
 
@@ -205,26 +189,44 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 								    Evoral::Parameter(GainAutomation), (AutoState) Touch)));
 
-		connections.push_back (gain_automation_style_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_style_button_event), false));
-		connections.push_back (gain_automation_state_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
 
 		boost::shared_ptr<AutomationControl> gc = amp->gain_control();
-
-		gc->alist()->automation_state_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::gain_automation_state_changed, this), gui_context());
-		gc->alist()->automation_style_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::gain_automation_style_changed, this), gui_context());
-
-		gain_automation_state_changed ();
 	}
 
-	amp->gain_control()->Changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeterBase::gain_changed, this), gui_context());
+	amp->gain_control()->Changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::gain_changed, this), gui_context());
 
 	gain_changed ();
 	show_gain ();
 	update_gain_sensitive ();
+//
+
+	if (_meter) {
+		_meter->ConfigurationChanged.connect (
+			model_connections, invalidator (*this), boost::bind (&GainMeter::meter_configuration_changed, this, _1), gui_context()
+			);
+		_meter->TypeChanged.connect (
+			model_connections, invalidator (*this), boost::bind (&GainMeter::meter_type_changed, this, _1), gui_context()
+			);
+
+		meter_configuration_changed (_meter->input_streams ());
+	}
+
+
+	if (_route) {
+		_route->active_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::route_active_changed, this), gui_context ());
+	}
+
+	/*
+	   if we have a non-hidden route (ie. we're not the click or the auditioner),
+	   pack some route-dependent stuff.
+	*/
+
+
+	setup_meters ();
 }
 
 void
-GainMeterBase::setup_gain_adjustment ()
+GainMeter::setup_gain_adjustment ()
 {
 	if (!_amp) {
 		return;
@@ -242,14 +244,14 @@ GainMeterBase::setup_gain_adjustment ()
 		gain_adjustment.set_upper (1.0);
 		gain_adjustment.set_step_increment (0.01);
 		gain_adjustment.set_page_increment (0.1);
-		gain_slider->set_default_value (gain_to_slider_position (1));
+		gain_slider.set_default_value (gain_to_slider_position (1));
 	} else {
 		_data_type = DataType::MIDI;
 		gain_adjustment.set_lower (0.0);
 		gain_adjustment.set_upper (2.0);
 		gain_adjustment.set_step_increment (1.0/128.0);
 		gain_adjustment.set_page_increment (10.0/128.0);
-		gain_slider->set_default_value (1.0);
+		gain_slider.set_default_value (1.0);
 	}
 
 	ignore_toggle = false;
@@ -260,19 +262,13 @@ GainMeterBase::setup_gain_adjustment ()
 }
 
 void
-GainMeterBase::hide_all_meters ()
-{
-	level_meter->hide_meters();
-}
-
-void
 GainMeter::hide_all_meters ()
 {
-	GainMeterBase::hide_all_meters ();
+	level_meter.hide_meters();
 }
 
 void
-GainMeterBase::setup_meters (int len)
+GainMeter::setup_meters (int len)
 {
 	int meter_width = 5;
 	uint32_t meter_channels = 0;
@@ -284,53 +280,28 @@ GainMeterBase::setup_meters (int len)
 
 	switch (_width) {
 		case Wide:
-			//meter_ticks1_area.show();
-			//meter_ticks2_area.show();
-			meter_metric_area.show();
 			if (meter_channels == 1) {
-				meter_width = 10;
+				meter_width = 6;
 			}
 			break;
 		case Narrow:
 			if (meter_channels > 1) {
-				meter_width = 4;
+				meter_width = 5;
 			}
-			//meter_ticks1_area.hide();
-			//meter_ticks2_area.hide();
-			meter_metric_area.hide();
 			break;
 	}
-	level_meter->setup_meters(len, meter_width);
-}
 
-void
-GainMeterBase::set_type (MeterType t)
-{
-	level_meter->set_type(t);
-}
-
-void
-GainMeter::setup_meters (int len)
-{
-	switch (_width) {
-		case Wide:
-			hbox.set_homogeneous(true);
-			break;
-		case Narrow:
-			hbox.set_homogeneous(false);
-			break;
-	}
-	GainMeterBase::setup_meters (len);
+	level_meter.setup_meters (meter_width, meter_width);
 }
 
 void
 GainMeter::set_type (MeterType t)
 {
-	GainMeterBase::set_type (t);
+	level_meter.set_type(t);
 }
 
 bool
-GainMeterBase::gain_key_press (GdkEventKey* ev)
+GainMeter::gain_key_press (GdkEventKey* ev)
 {
 	if (key_is_legal_for_numeric_entry (ev->keyval)) {
 		/* drop through to normal handling */
@@ -341,7 +312,7 @@ GainMeterBase::gain_key_press (GdkEventKey* ev)
 }
 
 bool
-GainMeterBase::peak_button_release (GdkEventButton* ev)
+GainMeter::peak_button_release (GdkEventButton* ev)
 {
 	/* reset peak label */
 
@@ -359,17 +330,17 @@ GainMeterBase::peak_button_release (GdkEventButton* ev)
 }
 
 void
-GainMeterBase::reset_peak_display ()
+GainMeter::reset_peak_display ()
 {
 	_meter->reset_max();
-	level_meter->clear_meters();
+	level_meter.clear_meters();
 	max_peak = -INFINITY;
-	peak_display.set_label (_("-inf"));
-	peak_display.set_name ("MixerStripPeakDisplay");
+	peak_display_button.set_text (_("-inf"));
+	peak_display_button.set_name ("MixerStripPeakDisplay");
 }
 
 void
-GainMeterBase::reset_route_peak_display (Route* route)
+GainMeter::reset_route_peak_display (Route* route)
 {
 	if (_route && _route.get() == route) {
 		reset_peak_display ();
@@ -377,7 +348,7 @@ GainMeterBase::reset_route_peak_display (Route* route)
 }
 
 void
-GainMeterBase::reset_group_peak_display (RouteGroup* group)
+GainMeter::reset_group_peak_display (RouteGroup* group)
 {
 	if (_route && group == _route->route_group()) {
 		reset_peak_display ();
@@ -385,7 +356,7 @@ GainMeterBase::reset_group_peak_display (RouteGroup* group)
 }
 
 void
-GainMeterBase::popup_meter_menu (GdkEventButton *ev)
+GainMeter::popup_meter_menu (GdkEventButton *ev)
 {
 	using namespace Menu_Helpers;
 
@@ -406,18 +377,18 @@ GainMeterBase::popup_meter_menu (GdkEventButton *ev)
 }
 
 bool
-GainMeterBase::gain_focused (GdkEventFocus* ev)
+GainMeter::gain_focused (GdkEventFocus* ev)
 {
 	if (ev->in) {
-		gain_display.select_region (0, -1);
+		gain_display_entry.select_region (0, -1);
 	} else {
-		gain_display.select_region (0, 0);
+		gain_display_entry.select_region (0, 0);
 	}
 	return false;
 }
 
 void
-GainMeterBase::gain_activated ()
+GainMeter::gain_activated ()
 {
 	float f;
 
@@ -427,7 +398,7 @@ GainMeterBase::gain_activated ()
 		// we will honor them.
 
 		PBD::LocaleGuard lg ("");
-		if (sscanf (gain_display.get_text().c_str(), "%f", &f) != 1) {
+		if (sscanf (gain_display_entry.get_text().c_str(), "%f", &f) != 1) {
 			return;
 		}
 	}
@@ -441,8 +412,8 @@ GainMeterBase::gain_activated ()
 		_amp->set_gain (f, this);
 	}
 
-	if (gain_display.has_focus()) {
-		Gtk::Widget* w = gain_display.get_toplevel();
+	if (gain_display_entry.has_focus()) {
+		Gtk::Widget* w = gain_display_entry.get_toplevel();
 		if (w) {
 			Gtk::Window* win = dynamic_cast<Gtk::Window*> (w);
 
@@ -460,7 +431,7 @@ GainMeterBase::gain_activated ()
 }
 
 void
-GainMeterBase::show_gain ()
+GainMeter::show_gain ()
 {
 	char buf[32];
 
@@ -479,11 +450,11 @@ GainMeterBase::show_gain ()
 		break;
 	}
 
-	gain_display.set_text (buf);
+	gain_display_entry.set_text (buf);
 }
 
 void
-GainMeterBase::gain_adjusted ()
+GainMeter::gain_adjusted ()
 {
 	gain_t value;
 
@@ -507,7 +478,7 @@ GainMeterBase::gain_adjusted ()
 }
 
 void
-GainMeterBase::effective_gain_display ()
+GainMeter::effective_gain_display ()
 {
 	float value = 0.0;
 
@@ -528,33 +499,22 @@ GainMeterBase::effective_gain_display ()
 }
 
 void
-GainMeterBase::gain_changed ()
+GainMeter::gain_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&GainMeterBase::effective_gain_display, this));
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&GainMeter::effective_gain_display, this));
 }
 
 void
-GainMeterBase::set_meter_strip_name (const char * name)
+GainMeter::set_fader_name (const char * name)
 {
-	char tmp[256];
-	meter_metric_area.set_name (name);
-	sprintf(tmp, "Mark%sLeft", name);
-	meter_ticks1_area.set_name (tmp);
-	sprintf(tmp, "Mark%sRight", name);
-	meter_ticks2_area.set_name (tmp);
+//	gain_slider.set_name (name);
 }
 
 void
-GainMeterBase::set_fader_name (const char * name)
-{
-	gain_slider->set_name (name);
-}
-
-void
-GainMeterBase::update_gain_sensitive ()
+GainMeter::update_gain_sensitive ()
 {
 	bool x = !(_amp->gain_control()->alist()->automation_state() & Play);
-	gain_slider->set_sensitive (x);
+	gain_slider.set_sensitive (x);
 }
 
 static MeterPoint
@@ -587,7 +547,7 @@ next_meter_point (MeterPoint mp)
 }
 
 gint
-GainMeterBase::meter_press(GdkEventButton* ev)
+GainMeter::meter_press(GdkEventButton* ev)
 {
 	wait_for_release = false;
 
@@ -620,7 +580,7 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 
 					/* Primary+Tertiary-click applies change to all routes */
 
-					_session->foreach_route (this, &GainMeterBase::set_meter_point, next_meter_point (_route->meter_point()));
+					_session->foreach_route (this, &GainMeter::set_meter_point, next_meter_point (_route->meter_point()));
 
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
@@ -650,7 +610,7 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 }
 
 gint
-GainMeterBase::meter_release(GdkEventButton*)
+GainMeter::meter_release(GdkEventButton*)
 {
 	if (!ignore_toggle) {
 		if (wait_for_release) {
@@ -666,13 +626,13 @@ GainMeterBase::meter_release(GdkEventButton*)
 }
 
 void
-GainMeterBase::set_meter_point (Route& route, MeterPoint mp)
+GainMeter::set_meter_point (Route& route, MeterPoint mp)
 {
 	route.set_meter_point (mp);
 }
 
 void
-GainMeterBase::set_route_group_meter_point (Route& route, MeterPoint mp)
+GainMeter::set_route_group_meter_point (Route& route, MeterPoint mp)
 {
 	RouteGroup* route_group;
 
@@ -684,7 +644,7 @@ GainMeterBase::set_route_group_meter_point (Route& route, MeterPoint mp)
 }
 
 void
-GainMeterBase::meter_point_clicked ()
+GainMeter::meter_point_clicked ()
 {
 	if (_route) {
 		/* WHAT? */
@@ -692,7 +652,7 @@ GainMeterBase::meter_point_clicked ()
 }
 
 bool
-GainMeterBase::gain_slider_button_press (GdkEventButton* ev)
+GainMeter::gain_slider_button_press (GdkEventButton* ev)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
@@ -706,61 +666,26 @@ GainMeterBase::gain_slider_button_press (GdkEventButton* ev)
 }
 
 bool
-GainMeterBase::gain_slider_button_release (GdkEventButton*)
+GainMeter::gain_slider_button_release (GdkEventButton*)
 {
 	_amp->gain_control()->stop_touch (false, _amp->session().transport_frame());
 	return false;
 }
 
-gint
-GainMeterBase::gain_automation_state_button_event (GdkEventButton *ev)
-{
-	if (ev->type == GDK_BUTTON_RELEASE) {
-		return TRUE;
-	}
-
-	switch (ev->button) {
-		case 1:
-			gain_astate_menu.popup (1, ev->time);
-			break;
-		default:
-			break;
-	}
-
-	return TRUE;
-}
-
-gint
-GainMeterBase::gain_automation_style_button_event (GdkEventButton *ev)
-{
-	if (ev->type == GDK_BUTTON_RELEASE) {
-		return TRUE;
-	}
-
-	switch (ev->button) {
-	case 1:
-		gain_astyle_menu.popup (1, ev->time);
-		break;
-	default:
-		break;
-	}
-	return TRUE;
-}
-
 string
-GainMeterBase::astate_string (AutoState state)
+GainMeter::astate_string (AutoState state)
 {
 	return _astate_string (state, false);
 }
 
 string
-GainMeterBase::short_astate_string (AutoState state)
+GainMeter::short_astate_string (AutoState state)
 {
 	return _astate_string (state, true);
 }
 
 string
-GainMeterBase::_astate_string (AutoState state, bool shrt)
+GainMeter::_astate_string (AutoState state, bool shrt)
 {
 	string sstr;
 
@@ -783,19 +708,19 @@ GainMeterBase::_astate_string (AutoState state, bool shrt)
 }
 
 string
-GainMeterBase::astyle_string (AutoStyle style)
+GainMeter::astyle_string (AutoStyle style)
 {
 	return _astyle_string (style, false);
 }
 
 string
-GainMeterBase::short_astyle_string (AutoStyle style)
+GainMeter::short_astyle_string (AutoStyle style)
 {
 	return _astyle_string (style, true);
 }
 
 string
-GainMeterBase::_astyle_string (AutoStyle style, bool shrt)
+GainMeter::_astyle_string (AutoStyle style, bool shrt)
 {
 	if (style & Trim) {
 		return _("Trim");
@@ -807,266 +732,69 @@ GainMeterBase::_astyle_string (AutoStyle style, bool shrt)
 }
 
 void
-GainMeterBase::gain_automation_style_changed ()
-{
-	switch (_width) {
-	case Wide:
-		gain_automation_style_button.set_text (astyle_string(_amp->gain_control()->alist()->automation_style()));
-		break;
-	case Narrow:
-		gain_automation_style_button.set_text  (short_astyle_string(_amp->gain_control()->alist()->automation_style()));
-		break;
-	}
-}
-
-void
-GainMeterBase::gain_automation_state_changed ()
-{
-	ENSURE_GUI_THREAD (*this, &GainMeterBase::gain_automation_state_changed)
-
-	bool x;
-
-	switch (_width) {
-	case Wide:
-		gain_automation_state_button.set_text (astate_string(_amp->gain_control()->alist()->automation_state()));
-		break;
-	case Narrow:
-		gain_automation_state_button.set_text (short_astate_string(_amp->gain_control()->alist()->automation_state()));
-		break;
-	}
-
-	x = (_amp->gain_control()->alist()->automation_state() != ARDOUR::Off);
-
-	if (gain_automation_state_button.get_active() != x) {
-		ignore_toggle = true;
-		gain_automation_state_button.set_active (x);
-		ignore_toggle = false;
-	}
-
-	update_gain_sensitive ();
-
-	/* start watching automation so that things move */
-
-	gain_watching.disconnect();
-
-	if (x) {
-		gain_watching = ARDOUR_UI::RapidScreenUpdate.connect (sigc::mem_fun (*this, &GainMeterBase::effective_gain_display));
-	}
-}
-
-void
-GainMeterBase::update_meters()
+GainMeter::update_meters()
 {
 	char buf[32];
-	float mpeak = level_meter->update_meters();
+	float mpeak = level_meter.update_meters();
 
 	if (mpeak > max_peak) {
 		max_peak = mpeak;
 		if (mpeak <= -200.0f) {
-			peak_display.set_label (_("-inf"));
+			peak_display_button.set_text (_("-inf"));
 		} else {
 			snprintf (buf, sizeof(buf), "%.1f", mpeak);
-			peak_display.set_label (buf);
+			peak_display_button.set_text (buf);
 		}
 	}
 	if (mpeak >= Config->get_meter_peak()) {
-		peak_display.set_name ("MixerStripPeakDisplayPeak");
+		peak_display_button.set_name ("MixerStripPeakDisplayPeak");
 	}
 }
 
-void GainMeterBase::color_handler(bool /*dpi*/)
+void GainMeter::color_handler(bool /*dpi*/)
 {
 	setup_meters();
 }
 
 void
-GainMeterBase::set_width (Width w, int len)
+GainMeter::set_width (Width w, int len)
 {
 	_width = w;
 	int meter_width = 5;
 	if (_width == Wide && _route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
 		meter_width = 10;
 	}
-	level_meter->setup_meters(len, meter_width);
+	level_meter.setup_meters(meter_width, meter_width);
 }
 
 
 void
-GainMeterBase::on_theme_changed()
+GainMeter::on_theme_changed()
 {
 }
 
 void
-GainMeterBase::redraw_metrics()
+GainMeter::redraw_metrics()
 {
-	meter_metric_area.queue_draw ();
-	meter_ticks1_area.queue_draw ();
-	meter_ticks2_area.queue_draw ();
-}
-
-GainMeter::GainMeter (Session* s, int fader_length)
-	: GainMeterBase (s, false, fader_length, 24)
-	, gain_display_box(true, 0)
-	, hbox(true, 2)
-{
-	if (gain_display.get_parent()) {
-		gain_display.get_parent()->remove (gain_display);
-	}
-	gain_display_box.pack_start (gain_display, true, true);
-
-	if (peak_display.get_parent()) {
-		peak_display.get_parent()->remove (gain_display);
-	}
-	gain_display_box.pack_start (peak_display, true, true);
-
-	meter_metric_area.set_name ("AudioTrackMetrics");
-	meter_metric_area.set_size_request(24, -1);
-
-	gain_automation_style_button.set_name ("mixer strip button");
-	gain_automation_state_button.set_name ("mixer strip button");
-
-	ARDOUR_UI::instance()->set_tip (gain_automation_state_button, _("Fader automation mode"));
-	ARDOUR_UI::instance()->set_tip (gain_automation_style_button, _("Fader automation type"));
-
-	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
-	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
-
-	gain_automation_state_button.set_size_request(15, 15);
-	gain_automation_style_button.set_size_request(15, 15);
-
-	fader_vbox = manage (new Gtk::VBox());
-	fader_vbox->set_spacing (0);
-	fader_vbox->pack_start (*gain_slider, true, true);
-
-	fader_alignment.set (0.5, 0.5, 0.0, 1.0);
-	fader_alignment.add (*fader_vbox);
-
-	hbox.pack_start (fader_alignment, true, true);
-
-	set_spacing (2);
-
-	pack_start (gain_display_box, Gtk::PACK_SHRINK);
-	pack_start (hbox, Gtk::PACK_SHRINK);
-
-	meter_alignment.set (0.5, 0.5, 0.0, 1.0);
-	meter_alignment.add (*level_meter);
-
-	meter_metric_area.signal_expose_event().connect (
-		sigc::mem_fun(*this, &GainMeter::meter_metrics_expose));
-
-	meter_ticks1_area.set_size_request(3,-1);
-	meter_ticks2_area.set_size_request(3,-1);
-
-	meter_ticks1_area.signal_expose_event().connect (
-			sigc::mem_fun(*this, &GainMeter::meter_ticks1_expose));
-	meter_ticks2_area.signal_expose_event().connect (
-			sigc::mem_fun(*this, &GainMeter::meter_ticks2_expose));
-
-	meter_hbox.pack_start (meter_ticks1_area, false, false);
-	meter_hbox.pack_start (meter_alignment, false, false);
-	meter_hbox.pack_start (meter_ticks2_area, false, false);
-	meter_hbox.pack_start (meter_metric_area, false, false);
-}
-
-GainMeter::~GainMeter () { }
-
-void
-GainMeter::set_controls (boost::shared_ptr<Route> r,
-			 boost::shared_ptr<PeakMeter> meter,
-			 boost::shared_ptr<Amp> amp)
-{
-	if (meter_hbox.get_parent()) {
-		hbox.remove (meter_hbox);
-	}
-
-//	if (gain_automation_state_button.get_parent()) {
-//		fader_vbox->remove (gain_automation_state_button);
-//	}
-
-	GainMeterBase::set_controls (r, meter, amp);
-
-	if (_meter) {
-		_meter->ConfigurationChanged.connect (
-			model_connections, invalidator (*this), boost::bind (&GainMeter::meter_configuration_changed, this, _1), gui_context()
-			);
-		_meter->TypeChanged.connect (
-			model_connections, invalidator (*this), boost::bind (&GainMeter::meter_type_changed, this, _1), gui_context()
-			);
-
-		meter_configuration_changed (_meter->input_streams ());
-	}
-
-
-	if (_route) {
-		_route->active_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::route_active_changed, this), gui_context ());
-	}
-
-	/*
-	   if we have a non-hidden route (ie. we're not the click or the auditioner),
-	   pack some route-dependent stuff.
-	*/
-
-	hbox.pack_start (meter_hbox, true, true);
-
-//	if (r && !r->is_auditioner()) {
-//		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
-//	}
-
-	hbox.show_all ();
-	setup_meters ();
 }
 
 int
 GainMeter::get_gm_width ()
 {
+	//rework it
+
 	Gtk::Requisition sz;
 	int min_w = 0;
 	sz.width = 0;
-	meter_metric_area.size_request (sz);
-	min_w += sz.width;
-	level_meter->size_request (sz);
+	level_meter.size_request (sz);
 	min_w += sz.width;
 
-	fader_alignment.size_request (sz);
-	if (_width == Wide)
-		return max(sz.width * 2, min_w * 2) + 6;
-	else
-		return sz.width + min_w + 6;
-
-}
-
-gint
-GainMeter::meter_metrics_expose (GdkEventExpose *ev)
-{
-	if (!_route) {
-		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
-		return meter_expose_metrics(ev, MeterPeak, _types, &meter_metric_area);
-	}
-	return meter_expose_metrics(ev, _route->meter_type(), _types, &meter_metric_area);
-}
-
-gint
-GainMeter::meter_ticks1_expose (GdkEventExpose *ev)
-{
-	if (!_route) {
-		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
-		return meter_expose_ticks(ev, MeterPeak, _types, &meter_ticks1_area);
-	}
-	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks1_area);
-}
-
-gint
-GainMeter::meter_ticks2_expose (GdkEventExpose *ev)
-{
-	if (!_route) {
-		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
-		return meter_expose_ticks(ev, MeterPeak, _types, &meter_ticks2_area);
-	}
-	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks2_area);
+	gain_slider.size_request (sz);
+	return sz.width + min_w + 6;
 }
 
 boost::shared_ptr<PBD::Controllable>
-GainMeterBase::get_controllable()
+GainMeter::get_controllable()
 {
 	if (_amp) {
 		return _amp->gain_control();
@@ -1076,7 +804,7 @@ GainMeterBase::get_controllable()
 }
 
 bool
-GainMeterBase::level_meter_button_press (GdkEventButton* ev)
+GainMeter::level_meter_button_press (GdkEventButton* ev)
 {
 	return LevelMeterButtonPress (ev); /* EMIT SIGNAL */
 }
@@ -1091,40 +819,6 @@ GainMeter::meter_configuration_changed (ChanCount c)
 		if (c.get (*i) > 0) {
 			_types.push_back (*i);
 			type |= 1 << (*i);
-		}
-	}
-
-	if (_route
-			&& boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
-			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0
-			) {
-		if (_route->active()) {
-			set_meter_strip_name ("AudioBusMetrics");
-		} else {
-			set_meter_strip_name ("AudioBusMetricsInactive");
-		}
-	}
-	else if (
-			   (type == (1 << DataType::MIDI))
-			|| (_route && boost::dynamic_pointer_cast<MidiTrack>(_route))
-			) {
-		if (!_route || _route->active()) {
-			set_meter_strip_name ("MidiTrackMetrics");
-		} else {
-			set_meter_strip_name ("MidiTrackMetricsInactive");
-		}
-	}
-	else if (type == (1 << DataType::AUDIO)) {
-		if (!_route || _route->active()) {
-			set_meter_strip_name ("AudioTrackMetrics");
-		} else {
-			set_meter_strip_name ("AudioTrackMetricsInactive");
-		}
-	} else {
-		if (!_route || _route->active()) {
-			set_meter_strip_name ("AudioMidiTrackMetrics");
-		} else {
-			set_meter_strip_name ("AudioMidiTrackMetricsInactive");
 		}
 	}
 

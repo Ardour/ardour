@@ -287,7 +287,7 @@ protected:
 
 	void post_construct ();
 
-	GainMeterBase gm;
+	GainMeter gm;
 
 	XMLNode* underlay_xml_node;
 	bool set_underlay_state();

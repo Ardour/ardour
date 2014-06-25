@@ -138,7 +138,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
 	level_meter->set_type (_route->meter_type());
-	level_meter->setup_meters (220, meter_width, 6);
+	level_meter->setup_meters (meter_width, 6);
 	level_meter->ButtonRelease.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_release, this, _1));
 	level_meter->MeterTypeChanged.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::meter_type_changed, this, _1));
 
@@ -393,7 +393,7 @@ MeterStrip::on_theme_changed()
 		if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
 			meter_width = 12;
 		}
-		level_meter->setup_meters (220, meter_width, 6);
+		level_meter->setup_meters (meter_width, 6);
 	}
 }
 

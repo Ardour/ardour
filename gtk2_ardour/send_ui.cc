@@ -38,7 +38,7 @@ using namespace PBD;
 
 SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session)
 	: _send (s)
-	, _gpm (session, 250)
+	, _gpm (session, "inspector_gain_meter.xml")
 	, _panners (session)
 {
 	assert (_send);

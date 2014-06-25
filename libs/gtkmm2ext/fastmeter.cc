@@ -101,8 +101,8 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 
 	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
-	pixrect.x = 1;
-	pixrect.y = 1;
+	pixrect.x = 0;
+	pixrect.y = 0;
 
 	if (!len) {
 		len = 250;
@@ -110,21 +110,21 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	if (orientation == Vertical) {
 		pixheight = len;
 		pixwidth = dimen;
-		fgpattern = request_vertical_meter(pixwidth + 2, pixheight + 2, _clr, _stp, _styleflags);
-		bgpattern = request_vertical_background (pixwidth + 2, pixheight + 2, _bgc, false);
+		fgpattern = request_vertical_meter(pixwidth, pixheight, _clr, _stp, _styleflags);
+		bgpattern = request_vertical_background (pixwidth, pixheight, _bgc, false);
 
 	} else {
 		pixheight = dimen;
 		pixwidth = len;
-		fgpattern = request_horizontal_meter(pixwidth + 2, pixheight + 2, _clr, _stp, _styleflags);
-		bgpattern = request_horizontal_background (pixwidth + 2, pixheight + 2, _bgc, false);
+		fgpattern = request_horizontal_meter(pixwidth, pixheight, _clr, _stp, _styleflags);
+		bgpattern = request_horizontal_background (pixwidth, pixheight, _bgc, false);
 	}
 
 	pixrect.width = pixwidth;
 	pixrect.height = pixheight;
 
-	request_width = pixrect.width + 2;
-	request_height= pixrect.height + 2;
+	request_width = pixrect.width;
+	request_height= pixrect.height;
 
 	clear ();
 }
@@ -500,8 +500,8 @@ FastMeter::vertical_size_allocate (Gtk::Allocation &alloc)
 	if (pixheight != h) {
 		fgpattern = request_vertical_meter (request_width, h, _clr, _stp, _styleflags);
 		bgpattern = request_vertical_background (request_width, h, highlight ? _bgh : _bgc, highlight);
-		pixheight = h - 2;
-		pixwidth  = request_width - 2;
+		pixheight = h;
+		pixwidth  = request_width;
 	}
 
 	DrawingArea::on_size_allocate (alloc);
@@ -525,8 +525,8 @@ FastMeter::horizontal_size_allocate (Gtk::Allocation &alloc)
 	if (pixwidth != w) {
 		fgpattern = request_horizontal_meter (w, request_height, _clr, _stp, _styleflags);
 		bgpattern = request_horizontal_background (w, request_height, highlight ? _bgh : _bgc, highlight);
-		pixwidth = w - 2;
-		pixheight  = request_height - 2;
+		pixwidth = w;
+		pixheight  = request_height;
 	}
 
 	DrawingArea::on_size_allocate (alloc);
@@ -555,9 +555,9 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
 
-	cairo_set_source_rgb (cr, 0, 0, 0); // black
-	rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
-	cairo_stroke (cr);
+	//cairo_set_source_rgb (cr, 0, 0, 0); // black
+	//rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
+	//cairo_stroke (cr);
 
 	top_of_meter = (gint) floor (pixheight * current_level);
 
@@ -565,22 +565,23 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	 */
 
 	pixrect.height = top_of_meter;
-	pixrect.y = 1 + pixheight - top_of_meter;
+	pixrect.y = pixheight - top_of_meter;
 
-	background.x = 1;
-	background.y = 1;
+	background.x = 0;
+	background.y = 0;
 	background.width = pixrect.width;
 	background.height = pixheight - top_of_meter;
-/*
+
 	if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
 		cairo_set_source (cr, bgpattern->cobj());
 		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
 		cairo_fill (cr);
 	}
-*/
+
 	if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
 		// draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
-		cairo_set_source (cr, fgpattern->cobj());
+		//cairo_set_source (cr, fgpattern->cobj());
+		cairo_set_source_rgba (cr, 0.69, 0.69, 0.69, 1);
 		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
 		cairo_fill (cr);
 	}
@@ -588,13 +589,13 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	// draw peak bar
 
 	if (hold_state) {
-		last_peak_rect.x = 1;
+		last_peak_rect.x = 0;
 		last_peak_rect.width = pixwidth;
-		last_peak_rect.y = max(1, 1 + pixheight - (gint) floor (pixheight * current_peak));
+		last_peak_rect.y = max(0, pixheight - (gint) floor (pixheight * current_peak));
 		if (bright_hold || (_styleflags & 2)) {
-			last_peak_rect.height = max(0, min(3, pixheight - last_peak_rect.y - 1 ));
+			last_peak_rect.height = max(0, min(3, pixheight - last_peak_rect.y ));
 		} else {
-			last_peak_rect.height = max(0, min(2, pixheight - last_peak_rect.y - 1 ));
+			last_peak_rect.height = max(0, min(2, pixheight - last_peak_rect.y ));
 		}
 
 		cairo_set_source (cr, fgpattern->cobj());
@@ -629,9 +630,9 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
 
-	cairo_set_source_rgb (cr, 0, 0, 0); // black
-	rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
-	cairo_stroke (cr);
+	//cairo_set_source_rgb (cr, 0, 0, 0); // black
+	//rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
+	//cairo_stroke (cr);
 
 	right_of_meter = (gint) floor (pixwidth * current_level);
 
@@ -742,10 +743,10 @@ FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float ol
 
 	gint new_top = (gint) floor (pixheight * current_level);
 
-	rect.x = 1;
+	rect.x = 0;
 	rect.width = pixwidth;
 	rect.height = new_top;
-	rect.y = 1 + pixheight - new_top;
+	rect.y = pixheight - new_top;
 
 	if (current_level > old_level) {
 		/* colored/pixbuf got larger, just draw the new section */

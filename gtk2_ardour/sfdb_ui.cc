@@ -823,7 +823,7 @@ SoundFileBrowser::add_gain_meter ()
 {
 	delete gm;
 
-	gm = new GainMeter (_session, 250);
+	gm = new GainMeter (_session, "inspector_gain_meter.xml");
 
 	boost::shared_ptr<Route> r = _session->the_auditioner ();
 
