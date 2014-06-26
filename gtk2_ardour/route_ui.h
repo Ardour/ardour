@@ -56,7 +56,6 @@ class RouteUI : public virtual AxisView
 {
   public:
 	RouteUI(ARDOUR::Session*);
-	RouteUI(boost::shared_ptr<ARDOUR::Route>, ARDOUR::Session*);
 
 	virtual ~RouteUI();
 
