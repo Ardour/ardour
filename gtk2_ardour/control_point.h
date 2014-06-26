@@ -38,6 +38,7 @@ class Selection;
 namespace ArdourCanvas {
 	class Rectangle;
 	class Diamond;
+	class Item;
 }
 
 class ControlPoint : public Selectable
@@ -74,7 +75,7 @@ class ControlPoint : public Selectable
 	uint32_t view_index() const         { return _view_index; }
 	void     set_view_index(uint32_t i) { _view_index = i; }
 
-	void i2w (double &, double &) const;
+	ArdourCanvas::Item& item() const;
 
 	ARDOUR::AutomationList::iterator model() const { return _model; }
 	AutomationLine&                  line()  const { return _line; }
