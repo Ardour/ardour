@@ -80,8 +80,6 @@
     <Option name="midi meter fill: 7" value="8fc78eff"/>
     <Option name="midi meter fill: 8" value="8fc78eff"/>
     <Option name="midi meter fill: 9" value="00f45600"/>
-    <Option name="meter background: bottom" value="333333ff"/>
-    <Option name="meter background: top" value="444444ff"/>
     <Option name="meterbridge peakindicator: fill start" value="444444ff"/>
     <Option name="meterbridge peakindicator: fill end" value="333333ff"/>
     <Option name="meterbridge peakindicator on: fill start" value="ff0000ff"/>
