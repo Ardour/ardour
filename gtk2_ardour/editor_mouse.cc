@@ -1738,16 +1738,9 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			cp = static_cast<ControlPoint*>(item->get_data ("control_point"));
 			cp->show ();
 
-			double at_x, at_y;
-			at_x = cp->get_x();
-			at_y = cp->get_y ();
-			cp->i2w (at_x, at_y);
-			at_x += 10.0;
-			at_y += 10.0;
-
 			fraction = 1.0 - (cp->get_y() / cp->line().height());
 
-			_verbose_cursor->set (cp->line().get_verbose_cursor_string (fraction), at_x, at_y);
+			_verbose_cursor->set (cp->line().get_verbose_cursor_string (fraction));
 			_verbose_cursor->show ();
 		}
 		break;
@@ -1859,7 +1852,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 
 	switch (item_type) {
 	case ControlPointItem:
-		_verbose_cursor->hide ();
+		_verbose_cursor->hide (); 
 		break;
 
 	case GainLineItem:
@@ -2019,25 +2012,19 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 		current_stepping_trackview = 0;
 		step_timeout.disconnect ();
 	}
-
+	
 	if (_session && _session->actively_recording()) {
 		/* Sorry. no dragging stuff around while we record */
 		return true;
 	}
-
+	
 	update_join_object_range_location (event->motion.y);
-
-	bool handled = false;
+	
 	if (_drags->active ()) {
-		handled = _drags->motion_handler (event, from_autoscroll);
+	 	return _drags->motion_handler (event, from_autoscroll);
 	}
 
-	if (!handled) {
-		return false;
-	}
-
-	track_canvas_motion (event);
-	return true;
+	return false;
 }
 
 bool

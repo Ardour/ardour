@@ -24,6 +24,7 @@
 
 #include "canvas/debug.h"
 #include "canvas/scroll_group.h"
+#include "canvas/tracking_text.h"
 
 #include "ardour_ui.h"
 #include "audio_clock.h"
@@ -39,13 +40,9 @@ using namespace ARDOUR;
 
 VerboseCursor::VerboseCursor (Editor* editor)
 	: _editor (editor)
-	, _visible (false)
-	, _xoffset (0)
-	, _yoffset (0)
 {
-	_canvas_item = new ArdourCanvas::Text (_editor->get_noscroll_group());
+	_canvas_item = new ArdourCanvas::TrackingText (_editor->get_noscroll_group());
 	CANVAS_DEBUG_NAME (_canvas_item, "verbose canvas cursor");
-	_canvas_item->set_ignore_events (true);
 	_canvas_item->set_font_description (Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_LargerBoldFont()));
 }
 
@@ -55,63 +52,38 @@ VerboseCursor::canvas_item () const
 	return _canvas_item;
 }
 
-/** Set the contents and position of the cursor. Coordinates are in window space 
+/** Set the contents of the cursor.
  */
 void
-VerboseCursor::set (string const & text, double x, double y)
-{
-	set_text (text);
-	set_position (x, y);
-}
-
-void
-VerboseCursor::set_text (string const & text)
+VerboseCursor::set (string const & text)
 {
 	_canvas_item->set (text);
 }
 
-/** @param xoffset x offset to be applied on top of any set_position() call
- *  before the next show ().
- *  @param yoffset y offset as above.
- */
 void
-VerboseCursor::show (double xoffset, double yoffset)
+VerboseCursor::show ()
 {
-	_xoffset = xoffset;
-	_yoffset = yoffset;
-
-	if (_visible) {
-		return;
-	}
-
-	_canvas_item->raise_to_top ();
-	_canvas_item->show ();
-	_visible = true;
+	_canvas_item->show_and_track (true, true);
+	_canvas_item->parent()->raise_to_top ();
 }
 
 void
 VerboseCursor::hide ()
 {
 	_canvas_item->hide ();
-	_visible = false;
-}
-
-double
-VerboseCursor::clamp_x (double x)
-{
-	_editor->clamp_verbose_cursor_x (x);
-	return x;
-}
-
-double
-VerboseCursor::clamp_y (double y)
-{
-	_editor->clamp_verbose_cursor_y (y);
-	return y;
+	_canvas_item->parent()->lower_to_bottom ();
+	/* reset back to a sensible default for the next time we display the VC */
+	_canvas_item->set_offset (ArdourCanvas::Duple (10, 10));
 }
 
 void
-VerboseCursor::set_time (framepos_t frame, double x, double y)
+VerboseCursor::set_offset (ArdourCanvas::Duple const & d)
+{
+	_canvas_item->set_offset (d);
+}
+
+void
+VerboseCursor::set_time (framepos_t frame)
 {
 	char buf[128];
 	Timecode::Time timecode;
@@ -159,11 +131,11 @@ VerboseCursor::set_time (framepos_t frame, double x, double y)
 		break;
 	}
 
-	set (buf, x, y);
+	_canvas_item->set (buf);
 }
 
 void
-VerboseCursor::set_duration (framepos_t start, framepos_t end, double x, double y)
+VerboseCursor::set_duration (framepos_t start, framepos_t end)
 {
 	char buf[128];
 	Timecode::Time timecode;
@@ -245,7 +217,7 @@ VerboseCursor::set_duration (framepos_t start, framepos_t end, double x, double 
 		break;
 	}
 
-	set (buf, x, y);
+	_canvas_item->set (buf);
 }
 
 void
@@ -254,21 +226,8 @@ VerboseCursor::set_color (uint32_t color)
 	_canvas_item->set_color (color);
 }
 
-/** Set the position of the verbose cursor.  Any x/y offsets
- *  passed to the last call to show() will be applied to the
- *  coordinates passed in here.
- * 
- *  Coordinates are in window space.
- */
-void
-VerboseCursor::set_position (double x, double y)
-{
-	_canvas_item->set_x_position (clamp_x (x + _xoffset));
-	_canvas_item->set_y_position (clamp_y (y + _yoffset));
-}
-
 bool
 VerboseCursor::visible () const
 {
-	return _visible;
+	return _canvas_item->visible();
 }

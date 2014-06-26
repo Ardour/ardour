@@ -18,10 +18,13 @@
 */
 
 #include "ardour/types.h"
-#include "canvas/text.h"
 #include "canvas/canvas.h"
 
 class Editor;
+
+namespace ArdourCanvas {
+     class TrackingText;
+}
 
 class VerboseCursor
 {
@@ -33,24 +36,15 @@ public:
 
 	void set_color (uint32_t);
 
-	void set (std::string const &, double, double);
-	void set_text (std::string const &);
-	void set_position (double, double);
-	void set_time (framepos_t, double, double);
-	void set_duration (framepos_t, framepos_t, double, double);
+	void set (std::string const &);
+	void set_time (framepos_t);
+	void set_duration (framepos_t, framepos_t);
+	void set_offset (ArdourCanvas::Duple const&);
 
-	void show (double xoffset = 0, double yoffset = 0);
+	void show ();
 	void hide ();
 
-         ArdourCanvas::Item& item() { return *_canvas_item; }
-
 private:
-	double clamp_x (double);
-	double clamp_y (double);
-
-	Editor*             _editor;
-	ArdourCanvas::Text* _canvas_item;
-	bool                _visible;
-	double              _xoffset;
-	double              _yoffset;
+	Editor*                     _editor;
+	ArdourCanvas::TrackingText* _canvas_item;
 };
