@@ -167,8 +167,8 @@ ControlPoint::move_to (double x, double y, ShapeType shape)
 	_shape = shape;
 }
 
-void
-ControlPoint::i2w (double& x, double& y) const
+ArdourCanvas::Item&
+ControlPoint::item() const 
 {
-	_item->item_to_canvas (x, y);
+	return *_item;
 }
