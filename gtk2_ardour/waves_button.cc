@@ -53,7 +53,7 @@ WavesButton::WavesButton ()
 	, _right_border_width (0)
 	, _bottom_border_width (0)
 {
-	ColorsChanged.connect (sigc::mem_fun (*this, &WavesButton::color_handler));
+        ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &WavesButton::color_handler));
 }
 
 WavesButton::WavesButton (const std::string& str)

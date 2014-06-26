@@ -55,7 +55,7 @@
 
 	struct RecentSessionsSorter {
 	    bool operator() (std::pair<std::string,std::string> a, std::pair<std::string,std::string> b) const {
-		    return cmp_nocase(a.first, b.first) == -1;
+		    return ARDOUR::cmp_nocase(a.first, b.first) == -1;
 	    }
 	};
 

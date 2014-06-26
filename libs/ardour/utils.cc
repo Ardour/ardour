@@ -763,17 +763,19 @@ ARDOUR::slider_position_to_gain_with_max (double g, double max_gain)
 	return slider_position_to_gain (g * max_gain/2.0);
 }
 
-bool remove_pattern_from_string(const std::string& in_str, const std::string& pattern, std::string& out_str) {
+bool
+ARDOUR::remove_pattern_from_string(const std::string& in_str, const std::string& pattern, std::string& out_str) 
+{
     
-    out_str.assign(in_str);
-    
-    size_t pos = in_str.find(pattern);
-    if ( pos != std::string::npos ) {
-        out_str.erase(pos, pattern.length() );
-        return true;
-    } else {
-        return false;
-    }
+        out_str.assign(in_str);
+        
+        size_t pos = in_str.find(pattern);
+        if ( pos != std::string::npos ) {
+                out_str.erase(pos, pattern.length() );
+                return true;
+        } else {
+                return false;
+        }
 }
 
 extern "C" {

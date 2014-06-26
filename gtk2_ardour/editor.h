@@ -731,10 +731,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void parameter_changed (std::string);
 	void ui_parameter_changed (std::string);
 
-	bool track_canvas_motion (GdkEvent*);
-
-	Gtk::EventBox&            time_bars_event_box;
-	Gtk::VBox&                time_bars_vbox;
+	Gtk::EventBox&             time_bars_event_box;
+	Gtk::VBox&                 time_bars_vbox;
 
 	ArdourCanvas::Pixbuf     *logo_item;
 #if 0    

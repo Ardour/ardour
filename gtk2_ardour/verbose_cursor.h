@@ -33,7 +33,7 @@ public:
 
 	void set_color (uint32_t);
 
-	void set (std::string const &, double, double);
+	void set (std::string const &);
 	void set_text (std::string const &);
 	void set_position (double, double);
 	void set_time (framepos_t, double, double);

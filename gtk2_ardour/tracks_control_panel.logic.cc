@@ -163,7 +163,7 @@ DeviceConnectionControl& TracksControlPanel::add_device_capture_control(std::str
 {
     std::string device_capture_name("");
     std::string pattern(audio_capture_name_prefix);
-    remove_pattern_from_string(port_name, pattern, device_capture_name);
+    ARDOUR::remove_pattern_from_string(port_name, pattern, device_capture_name);
     
 	DeviceConnectionControl &capture_control = *manage (new DeviceConnectionControl(device_capture_name, active, capture_number, track_name));
     
@@ -180,7 +180,7 @@ DeviceConnectionControl& TracksControlPanel::add_device_playback_control(std::st
 {
     std::string device_playback_name("");
     std::string pattern(audio_playback_name_prefix);
-    remove_pattern_from_string(port_name, pattern, device_playback_name);
+    ARDOUR::remove_pattern_from_string(port_name, pattern, device_playback_name);
     
 	DeviceConnectionControl &playback_control = *manage (new DeviceConnectionControl(device_playback_name, active, playback_number));
     
@@ -726,7 +726,7 @@ TracksControlPanel::populate_sample_rate_combo()
 	
 	std::vector<std::string> s;
 	for (std::vector<float>::const_iterator x = sample_rates.begin(); x != sample_rates.end(); ++x) {
-		s.push_back (rate_as_string (*x));
+		s.push_back (ARDOUR_UI_UTILS::rate_as_string (*x));
 	}
 
 	{
@@ -736,7 +736,7 @@ TracksControlPanel::populate_sample_rate_combo()
 		_sample_rate_combo.set_sensitive (s.size() > 1);
 
 		if (!s.empty() ) {
-			std::string active_sr = rate_as_string(EngineStateController::instance()->get_current_sample_rate() );
+			std::string active_sr = ARDOUR_UI_UTILS::rate_as_string(EngineStateController::instance()->get_current_sample_rate() );
 			_sample_rate_combo.set_active_text(active_sr);
 		}
 	}
@@ -798,7 +798,7 @@ TracksControlPanel::populate_input_channels()
             
             std::string port_name("");
             std::string pattern(audio_capture_name_prefix);
-            remove_pattern_from_string(input_iter->name, pattern, port_name);
+            ARDOUR::remove_pattern_from_string(input_iter->name, pattern, port_name);
             
             number = number_count++;
             
@@ -862,8 +862,8 @@ TracksControlPanel::populate_midi_ports()
     for (state_iter = midi_input_states.begin(); state_iter != midi_input_states.end(); ++state_iter) {
         // strip the device name from input port name
         std::string device_name("");
-        remove_pattern_from_string(state_iter->name, midi_port_name_prefix, device_name);
-        remove_pattern_from_string(device_name, midi_capture_suffix, device_name);
+        ARDOUR::remove_pattern_from_string(state_iter->name, midi_port_name_prefix, device_name);
+        ARDOUR::remove_pattern_from_string(device_name, midi_capture_suffix, device_name);
         
         MidiDeviceDescriptor device_descriptor(device_name);
         device_descriptor.capture_name = state_iter->name;
@@ -875,8 +875,8 @@ TracksControlPanel::populate_midi_ports()
     for (state_iter = midi_output_states.begin(); state_iter != midi_output_states.end(); ++state_iter){
         // strip the device name from input port name
         std::string device_name("");
-        remove_pattern_from_string(state_iter->name, midi_port_name_prefix, device_name);
-        remove_pattern_from_string(device_name, midi_playback_suffix, device_name);
+        ARDOUR::remove_pattern_from_string(state_iter->name, midi_port_name_prefix, device_name);
+        ARDOUR::remove_pattern_from_string(device_name, midi_playback_suffix, device_name);
         
         // check if we already have descriptor for this device
         MidiDeviceDescriptor device_descriptor(device_name);
@@ -1186,7 +1186,7 @@ TracksControlPanel::sample_rate_changed()
 		// set _ignore_changes flag to ignore changes in combo-box callbacks
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
         // restore previous buffer size value in combo box
-        std::string sample_rate_str = rate_as_string (EngineStateController::instance()->get_current_sample_rate() );
+                std::string sample_rate_str = ARDOUR_UI_UTILS::rate_as_string (EngineStateController::instance()->get_current_sample_rate() );
         _sample_rate_combo.set_active_text(sample_rate_str);
     }
 	

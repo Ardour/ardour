@@ -28,6 +28,7 @@
 
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 std::map<std::string, const XMLTree*> WavesUI::__xml_tree_cache;
 

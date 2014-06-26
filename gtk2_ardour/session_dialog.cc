@@ -22,6 +22,7 @@
 #endif
 
 #include "session_dialog.h"
+#include "utils.h"
 #include "i18n.h"
 
 using namespace std;

@@ -40,6 +40,7 @@
 using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 WavesDialog::WavesDialog (std::string layout_script_file, bool modal, bool use_seperator)
 	: Gtk::Dialog ("", modal, use_seperator)

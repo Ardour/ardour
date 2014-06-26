@@ -58,10 +58,9 @@ VerboseCursor::canvas_item () const
 /** Set the contents and position of the cursor. Coordinates are in window space 
  */
 void
-VerboseCursor::set (string const & text, double x, double y)
+VerboseCursor::set (string const & text)
 {
 	set_text (text);
-	set_position (x, y);
 }
 
 void
@@ -159,7 +158,7 @@ VerboseCursor::set_time (framepos_t frame, double x, double y)
 		break;
 	}
 
-	set (buf, x, y);
+	set (buf);
 }
 
 void
@@ -245,7 +244,7 @@ VerboseCursor::set_duration (framepos_t start, framepos_t end, double x, double 
 		break;
 	}
 
-	set (buf, x, y);
+	set (buf);
 }
 
 void

@@ -453,11 +453,7 @@ Drag::show_verbose_cursor_text (string const & text)
 	   setting.
 	*/
 
-	_editor->verbose_cursor()->set (
-		text,
-		_drags->current_pointer_x() + 10,
-		_drags->current_pointer_y() + 10
-		);
+	_editor->verbose_cursor()->set (text);
 }
 
 boost::shared_ptr<Region>
@@ -2029,7 +2025,7 @@ VideoTimeLineDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	Timecode::Time timecode;
 	_editor->session()->sample_to_timecode(abs(_startdrag_video_offset), timecode, true /* use_offset */, false /* use_subframes */ );
 	snprintf (buf, sizeof (buf), "Video Start:\n%c%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, (_startdrag_video_offset<0?'-':' '), timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
-	_editor->verbose_cursor()->set(buf, event->button.x + 10, event->button.y + 10);
+	_editor->verbose_cursor()->set(buf);
 	_editor->verbose_cursor()->show ();
 }
 
@@ -2079,7 +2075,7 @@ VideoTimeLineDrag::motion (GdkEvent* event, bool first_move)
 			, _("Diff:"),
 				(dt<0?'-':' '), timediff.hours, timediff.minutes, timediff.seconds, timediff.frames
 				);
-	_editor->verbose_cursor()->set(buf, event->button.x + 10, event->button.y + 10);
+	_editor->verbose_cursor()->set(buf);
 	_editor->verbose_cursor()->show ();
 }
 
@@ -3519,8 +3515,7 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	_point->line().start_drag_single (_point, _fixed_grab_x, fraction);
 
-	_editor->verbose_cursor()->set (_point->line().get_verbose_cursor_string (fraction),
-					event->button.x + 10, event->button.y + 10);
+	_editor->verbose_cursor()->set (_point->line().get_verbose_cursor_string (fraction));
 
 	_editor->verbose_cursor()->show ();
 
@@ -3668,8 +3663,7 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	_line->start_drag_line (before, after, fraction);
 
-	_editor->verbose_cursor()->set (_line->get_verbose_cursor_string (fraction),
-					event->button.x + 10, event->button.y + 10);
+	_editor->verbose_cursor()->set (_line->get_verbose_cursor_string (fraction));
 
 	_editor->verbose_cursor()->show ();
 }
