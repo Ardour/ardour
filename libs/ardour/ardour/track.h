@@ -44,6 +44,7 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	int init ();
 
 	bool set_name (const std::string& str);
+	void resync_track_name ();
 
 	TrackMode mode () const { return _mode; }
 	virtual int set_mode (TrackMode /*m*/) { return false; }
@@ -228,6 +229,9 @@ private:
 	void diskstream_record_enable_changed ();
 	void diskstream_speed_changed ();
 	void diskstream_alignment_style_changed ();
+	void parameter_changed (std::string const & p);
+
+	std::string _diskstream_name;
 };
 
 }; /* namespace ARDOUR*/
