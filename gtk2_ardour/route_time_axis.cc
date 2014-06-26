@@ -193,7 +193,10 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	Gtk::VBox *mtrbox = manage(new Gtk::VBox());
-	mtrbox->pack_start(gm.get_level_meter(), false, false, 2);
+	if (gm.get_level_meter().get_parent()) {
+		gm.get_level_meter().get_parent()->remove (gm.get_level_meter());
+	}
+	mtrbox->pack_start(gm.get_level_meter(), true, true, 2);
 	controls_hbox.pack_start(*mtrbox, false, false, 4);
 	mtrbox->show();
 
