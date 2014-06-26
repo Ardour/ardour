@@ -41,6 +41,7 @@ private:
 	bool get_use_monitor_section ();
 
 	ComboOption<float>* _vpu;
+	EntryOption* _take_name;
 };
 
 #endif /* __gtk_ardour_session_option_editor_h__ */
