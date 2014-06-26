@@ -93,7 +93,9 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 		child = manage (new Gtk::Label (text));
 	} else if (widget_type == "ENTRY") {
 		child = manage (new Gtk::Entry ());
-	} else if (widget_type == "LAYOUT") {
+	} else if (widget_type == "SPINBUTTON") {
+		child = manage (new Gtk::SpinButton ());
+    } else if (widget_type == "LAYOUT") {
 		child = manage (new Gtk::Layout);
 	} else if (widget_type == "CANVAS") {
 		std::map<std::string, ArdourCanvas::Item*> named_items;
@@ -557,6 +559,17 @@ WavesUI::get_entry(const char* id)
 	Gtk::Entry* child = dynamic_cast<Gtk::Entry*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtk::Entry ") + id + " not found !");
+		throw std::exception();
+	}
+	return *child;
+}
+
+Gtk::SpinButton&
+WavesUI::get_spin_button(const char* id)
+{
+	Gtk::SpinButton* child = dynamic_cast<Gtk::SpinButton*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::SpinButton ") + id + " not found !");
 		throw std::exception();
 	}
 	return *child;

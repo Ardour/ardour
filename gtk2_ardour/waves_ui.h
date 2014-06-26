@@ -50,6 +50,7 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	Gtk::Image& get_image (const char* id);
 	Gtk::ComboBoxText& get_combo_box_text (const char* id);
 	Gtk::Entry& get_entry(const char* id);
+    Gtk::SpinButton& get_spin_button(const char* id);
 	WavesButton& get_waves_button (const char* id);
 	Gtkmm2ext::Fader& get_fader (const char* id);
 	const XMLTree* xml_tree() { return _xml_tree; }
