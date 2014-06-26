@@ -534,6 +534,11 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	if (did_record) {
 		commit_reversible_command ();
+		/* increase take name */
+		if (config.get_track_name_take () && !config.get_take_name ().empty()) {
+			string newname = config.get_take_name();
+			config.set_take_name(bump_name_number (newname));
+		}
 	}
 
 	if (_engine.running()) {
