@@ -10,7 +10,7 @@
     <VBox id="level_meter_home"
           x="0"
           y="18"
-          width="42"
+          width="22"
           height="187"/>
     <Fader id="gain_slider"
            adjustment="gain_adjustment"
@@ -21,9 +21,9 @@
            minposy="187"
            maxposx="10"
            maxposy="0"
-           x="44"
+           x="57"
            y="18"/>
-    <icon source="inspector_background.png" x="60"/>
+    <icon source="inspector_background.png" x="24"/>
   </Layout>
   <VBox id="gain_display_home"/>
 </GainSlider>
