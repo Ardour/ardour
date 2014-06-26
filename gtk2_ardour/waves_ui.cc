@@ -480,6 +480,17 @@ WavesUI::get_adjustment(const char* id)
 	return *child;
 }
 
+Gtk::EventBox&
+WavesUI::get_event_box (const char* id)
+{
+	Gtk::EventBox* child = dynamic_cast<Gtk::EventBox*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::EventBox ") + id + " not found !");
+		throw std::exception();
+	}
+	return *child;
+}
+
 
 Gtk::Box&
 WavesUI::get_box (const char* id)
