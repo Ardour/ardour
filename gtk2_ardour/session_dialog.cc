@@ -344,7 +344,7 @@ SessionDialog::setup_initial_choice_box ()
 	recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &SessionDialog::recent_row_activated));
 	
 	centering_vbox->pack_start (recent_label, false, false, 12);
-	centering_vbox->pack_start (recent_scroller, false, true);
+	centering_vbox->pack_start (recent_scroller, true, true);
 
 	/* Browse button */
 	
