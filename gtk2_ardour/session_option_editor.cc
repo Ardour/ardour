@@ -198,20 +198,57 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Media"), hf);
 
-	add_option (_("Media"), new OptionEditorHeading (_("File locations")));
+	add_option (_("Locations"), new OptionEditorHeading (_("File locations")));
 
         SearchPathOption* spo = new SearchPathOption ("audio-search-path", _("Search for audio files in:"),
 						      _session->path(),
                                                       sigc::mem_fun (*_session_config, &SessionConfiguration::get_audio_search_path),
                                                       sigc::mem_fun (*_session_config, &SessionConfiguration::set_audio_search_path));
-        add_option (_("Media"), spo);
+        add_option (_("Locations"), spo);
 
         spo = new SearchPathOption ("midi-search-path", _("Search for MIDI files in:"),
 				    _session->path(),
                                     sigc::mem_fun (*_session_config, &SessionConfiguration::get_midi_search_path),
                                     sigc::mem_fun (*_session_config, &SessionConfiguration::set_midi_search_path));
 
-        add_option (_("Media"), spo);
+        add_option (_("Locations"), spo);
+
+	/* File Naming  */
+
+	add_option (_("Filenames"), new OptionEditorHeading (_("File Naming")));
+
+	BoolOption *bo;
+
+	bo = new BoolOption (
+			"track-name-number",
+			_("Prefix Track number"),
+			sigc::mem_fun (*_session_config, &SessionConfiguration::get_track_name_number),
+			sigc::mem_fun (*_session_config, &SessionConfiguration::set_track_name_number)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("Adds the current track number to the beginning of the recorded file name."));
+	add_option (_("Filenames"), bo);
+
+	bo = new BoolOption (
+			"track-name-take",
+			_("Prefix Take Name"),
+			sigc::mem_fun (*_session_config, &SessionConfiguration::get_track_name_take),
+			sigc::mem_fun (*_session_config, &SessionConfiguration::set_track_name_take)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("Adds the Take Name to the beginning of the recorded file name."));
+	add_option (_("Filenames"), bo);
+
+	_take_name = new EntryOption (
+		"take-name",
+		_("Take Name"),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_take_name),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_take_name)
+		);
+	_take_name->set_invalid_chars(".");
+	_take_name->set_sensitive(_session_config->get_track_name_take());
+
+	add_option (_("Filenames"), _take_name);
 
 	/* Monitoring */
 
@@ -347,10 +384,13 @@ SessionOptionEditor::parameter_changed (std::string const & p)
 			_vpu->set_sensitive(true);
 		}
 	}
-	if (p == "timecode-format") {
+	else if (p == "timecode-format") {
 		/* update offset clocks */
 		parameter_changed("timecode-generator-offset");
 		parameter_changed("slave-timecode-offset");
+	}
+	else if (p == "track-name-take") {
+		_take_name->set_sensitive(_session_config->get_track_name_take());
 	}
 }
 
