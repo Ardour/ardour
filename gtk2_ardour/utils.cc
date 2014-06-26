@@ -1010,3 +1010,28 @@ ARDOUR_UI_UTILS::rate_as_string (float r)
 	}
 	return buf;
 }
+
+
+string
+ARDOUR_UI_UTILS::track_number_to_string (
+		int64_t tracknumber,
+		std::string sep,
+		std::string postfix
+		)
+{
+	string rv;
+	if (tracknumber > 0) {
+		rv = "<span weight=\"bold\" font_family=\"ArdourMono, Mono\">";
+		rv += PBD::to_string (tracknumber, std::dec);
+		rv += "</span>";
+		rv += sep;
+	}
+	else if (tracknumber < 0) {
+		rv = "<span weight=\"bold\" font_family=\"ArdourMono, Mono\">";
+		rv += PBD::to_string (-tracknumber, std::dec);
+		rv += "</span>";
+		rv += sep;
+	}
+	rv += Glib::Markup::escape_text(postfix);
+	return rv;
+}
