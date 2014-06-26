@@ -30,6 +30,7 @@
 
 #include "canvas/canvas.h"
 #include "canvas/text.h"
+#include "canvas/scroll_group.h"
 
 #include "editor.h"
 #include "keyboard.h"
@@ -196,16 +197,6 @@ Editor::track_canvas_motion_notify_event (GdkEventMotion */*event*/)
 	int x, y;
 	/* keep those motion events coming */
 	_track_canvas->get_pointer (x, y);
-	return false;
-}
-
-bool
-Editor::track_canvas_motion (GdkEvent *ev)
-{
-	if (_verbose_cursor->visible ()) {
-		_verbose_cursor->set_position (ev->motion.x + 10, ev->motion.y + 10);
-	}
-
 	return false;
 }
 
