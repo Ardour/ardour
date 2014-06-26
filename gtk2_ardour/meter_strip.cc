@@ -526,7 +526,7 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 	}
 	int tnh = 0;
 	if (_session && _session->config.get_track_name_number()) {
-		tnh = 3 + _session->track_number_decimals() * 8;
+		tnh = 4 + _session->track_number_decimals() * 8;
 	}
 	namebx.set_size_request(18, nh + tnh);
 	namenumberbx.set_size_request(18, nh + tnh);
@@ -744,6 +744,7 @@ MeterStrip::parameter_changed (std::string const & p)
 	}
 	else if (p == "track-name-number") {
 		name_changed();
+		queue_resize();
 	}
 }
 
@@ -762,7 +763,7 @@ MeterStrip::name_changed () {
 			number_label.set_text (PBD::to_string (abs(_route->track_number ()), std::dec));
 			number_label.show();
 		}
-		number_label.set_size_request(18, 3 + _session->track_number_decimals() * 8);
+		number_label.set_size_request(18, 4 + _session->track_number_decimals() * 8);
 	} else {
 		number_label.hide();
 	}
