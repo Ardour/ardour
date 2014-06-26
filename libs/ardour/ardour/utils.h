@@ -58,6 +58,7 @@ static inline float f_max(float x, float a) {
 }
 
 LIBARDOUR_API std::string bump_name_once(const std::string& s, char delimiter);
+LIBARDOUR_API std::string bump_name_number(const std::string& s);
 
 LIBARDOUR_API int cmp_nocase (const std::string& s, const std::string& s2);
 LIBARDOUR_API int cmp_nocase_utf8 (const std::string& s1, const std::string& s2);

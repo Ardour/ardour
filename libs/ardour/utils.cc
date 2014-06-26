@@ -196,6 +196,31 @@ ARDOUR::bump_name_once (const std::string& name, char delimiter)
 
 }
 
+string
+ARDOUR::bump_name_number (const std::string& name)
+{
+	size_t pos = name.length();
+	bool have_number = false;
+	while (pos > 0 && isdigit(name.at(--pos))) {
+		have_number = true;
+	}
+
+	string newname;
+	if (have_number) {
+		++pos;
+		int32_t num = strtol (name.c_str() + pos, (char **)NULL, 10);
+		char buf[32];
+		snprintf (buf, sizeof(buf), "%d", num + 1);
+		newname = name.substr (0, pos);
+		newname += buf;
+	} else {
+		newname = name;
+		newname += "1";
+	}
+
+	return newname;
+}
+
 XMLNode *
 ARDOUR::find_named_node (const XMLNode& node, string name)
 {
