@@ -53,6 +53,7 @@ canvas_sources = [
         'scroll_group.cc',
         'stateful_image.cc',
         'text.cc',
+        'tracking_text.cc',
         'types.cc',
         'utils.cc',
         'wave_view.cc',
