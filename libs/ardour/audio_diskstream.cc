@@ -1908,7 +1908,7 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 
 	try {
 		if ((chan->write_source = _session.create_audio_source_for_session (
-			     n_channels().n_audio(), name(), n, destructive())) == 0) {
+			     n_channels().n_audio(), write_source_name(), n, destructive())) == 0) {
 			throw failed_constructor();
 		}
 	}
@@ -2451,6 +2451,9 @@ AudioDiskstream::ChannelInfo::~ChannelInfo ()
 bool
 AudioDiskstream::set_name (string const & name)
 {
+	if (_name == name) {
+		return true;
+	}
 	Diskstream::set_name (name);
 
 	/* get a new write source so that its name reflects the new diskstream name */
@@ -2463,5 +2466,26 @@ AudioDiskstream::set_name (string const & name)
 		use_new_write_source (n);
 	}
 
+	return true;
+}
+
+bool
+AudioDiskstream::set_write_source_name (const std::string& str) {
+	if (_write_source_name == str) {
+		return true;
+	}
+
+	Diskstream::set_write_source_name (str);
+
+	if (_write_source_name == name()) {
+		return true;
+	}
+	boost::shared_ptr<ChannelList> c = channels.reader();
+	ChannelList::iterator i;
+	int n = 0;
+
+	for (n = 0, i = c->begin(); i != c->end(); ++i, ++n) {
+		use_new_write_source (n);
+	}
 	return true;
 }

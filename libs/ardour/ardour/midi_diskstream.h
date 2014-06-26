@@ -76,6 +76,7 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 	int use_copy_playlist ();
 
 	bool set_name (std::string const &);
+	bool set_write_source_name (const std::string& str);
 
 	/* stateful */
 	XMLNode& get_state(void);

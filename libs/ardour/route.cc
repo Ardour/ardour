@@ -3562,14 +3562,14 @@ Route::save_as_template (const string& path, const string& name)
 bool
 Route::set_name (const string& str)
 {
-	bool ret;
-	string ioproc_name;
-	string name;
+	if (str == name()) {
+		return true;
+	}
 
-	name = Route::ensure_track_or_route_name (str, _session);
+	string name = Route::ensure_track_or_route_name (str, _session);
 	SessionObject::set_name (name);
 
-	ret = (_input->set_name(name) && _output->set_name(name));
+	bool ret = (_input->set_name(name) && _output->set_name(name));
 
 	if (ret) {
 		/* rename the main outs. Leave other IO processors
