@@ -252,6 +252,7 @@ protected:
 	ArdourButton route_group_button;
 	ArdourButton playlist_button;
 	ArdourButton automation_button;
+	ArdourButton number_label;
 
 	Gtk::Menu           subplugin_menu;
 	Gtk::Menu*          automation_action_menu;
@@ -303,6 +304,8 @@ private:
 
 	void remove_child (boost::shared_ptr<TimeAxisView>);
 	void update_playlist_tip ();
+	void parameter_changed (std::string const & p);
+	void update_track_number_visibility();
 };
 
 #endif /* __ardour_route_time_axis_h__ */

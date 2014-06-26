@@ -305,7 +305,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	VisibilityGroup _visibility;
 	boost::optional<bool> override_solo_visibility () const;
 
-	PBD::ScopedConnection _config_connection;
+	PBD::ScopedConnectionList _config_connection;
 
 	void add_input_port (ARDOUR::DataType);
 	void add_output_port (ARDOUR::DataType);

@@ -380,6 +380,7 @@ MixerStrip::init ()
 	parameter_changed (X_("mixer-strip-visibility"));
 
 	Config->ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
+	_session->config.ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 
 	gpm.LevelMeterButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&MixerStrip::level_meter_button_press, this, _1));
 }
@@ -1602,10 +1603,19 @@ MixerStrip::name_changed ()
 {
 	switch (_width) {
 	case Wide:
-		name_button.set_text (_route->name());
+		if (_session->config.get_track_name_number()) {
+			name_button.set_markup(track_number_to_string (_route->track_number (), " ", _route->name ()));
+		} else {
+			name_button.set_text (_route->name());
+		}
 		break;
 	case Narrow:
-		name_button.set_text (PBD::short_version (_route->name(), 5));
+		if (_session->config.get_track_name_number()) {
+			name_button.set_markup(track_number_to_string (_route->track_number (), " ",
+						PBD::short_version (_route->name (), 5)));
+		} else {
+			name_button.set_text (PBD::short_version (_route->name(), 5));
+		}
 		break;
 	}
 
@@ -2078,6 +2088,9 @@ MixerStrip::parameter_changed (string p)
 		   our VisibilityGroup to reflect these changes in our widgets.
 		*/
 		_visibility.set_state (Config->get_mixer_strip_visibility ());
+	}
+	else if (p == "track-name-number") {
+		name_changed ();
 	}
 }
 

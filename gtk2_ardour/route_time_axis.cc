@@ -108,6 +108,11 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, gm (sess, true, 125, 18)
 	, _ignore_set_layer_display (false)
 {
+	number_label.set_corner_radius(2);
+	number_label.set_name("tracknumber label");
+	number_label.set_alignment(.5, .5);
+
+	sess->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::parameter_changed, this, _1), gui_context());
 }
 
 void
@@ -201,6 +206,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
 	_route->input()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
+	_route->track_number_changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::label_view, this), gui_context());
 
 	controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
@@ -223,6 +229,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		ARDOUR_UI::instance()->set_tip(automation_button, _("Automation"));
 	}
 
+	update_track_number_visibility();
 	label_view ();
 
 	if (!ARDOUR::Profile->get_trx()) {
@@ -337,12 +344,53 @@ RouteTimeAxisView::playlist_changed ()
 void
 RouteTimeAxisView::label_view ()
 {
-	string x = _route->name();
-
-	if (x != name_label.get_text()) {
+	string x = _route->name ();
+	if (x != name_label.get_text ()) {
 		name_label.set_text (x);
 	}
+	const int64_t track_number = _route->track_number ();
+	if (track_number == 0) {
+		number_label.set_text ("");
+	} else {
+		number_label.set_text (PBD::to_string (abs(_route->track_number ()), std::dec));
+	}
+}
 
+void
+RouteTimeAxisView::update_track_number_visibility ()
+{
+	bool show_label = _session->config.get_track_name_number();
+
+	if (_route && _route->is_master()) {
+		show_label = false;
+	}
+
+	//if (show_label == number_label.is_visible()) { return; }
+	if (number_label.get_parent()) {
+		controls_table.remove (number_label);
+	}
+	if (name_hbox.get_parent()) {
+		controls_table.remove (name_hbox);
+	}
+	if (show_label) {
+		controls_table.attach (number_label, 0, 1, 0, 1,  Gtk::SHRINK, Gtk::FILL|Gtk::EXPAND, 3, 0);
+		controls_table.attach (name_hbox, 1, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
+		number_label.set_size_request(3 + _session->track_number_decimals() * 8, -1);
+		name_hbox.show ();
+		number_label.show ();
+	} else {
+		controls_table.attach (name_hbox, 0, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
+		name_hbox.show ();
+		number_label.hide ();
+	}
+}
+
+void
+RouteTimeAxisView::parameter_changed (string const & p)
+{
+	if (p == "track-name-number") {
+		update_track_number_visibility();
+	}
 }
 
 void

@@ -163,8 +163,12 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	peakbx.pack_start(peak_align, true, true, 3);
 	peakbx.set_size_request(-1, 14);
 
-	// add track-name label
-	name_label.set_text(_route->name());
+	// add track-name & -number label
+	number_label.set_text("-");
+	number_label.set_size_request(18, 18);
+
+	name_changed();
+
 	name_label.set_corner_radius(2);
 	name_label.set_name("meterbridge label");
 	name_label.set_angle(-90.0);
@@ -175,8 +179,16 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
 	ARDOUR_UI::instance()->set_tip (*level_meter, _route->name());
 
+	number_label.set_corner_radius(2);
+	number_label.set_name("tracknumber label");
+	number_label.set_angle(-90.0);
+	number_label.layout()->set_width(18 * PANGO_SCALE);
+	number_label.set_alignment(.5, .5);
+
 	namebx.set_size_request(18, 52);
-	namebx.pack_start(name_label, true, false, 3);
+	namebx.pack_start(namenumberbx, true, false, 0);
+	namenumberbx.pack_start(name_label, true, false, 0);
+	namenumberbx.pack_start(number_label, false, false, 0);
 
 	mon_in_box.pack_start(*monitor_input_button, true, false);
 	btnbox.pack_start(mon_in_box, false, false, 1);
@@ -246,6 +258,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	mtr_container.show();
 	mtr_hsep.show();
 	nfo_vbox.show();
+	namenumberbx.show();
 
 	if (boost::dynamic_pointer_cast<Track>(_route)) {
 		monitor_input_button->show();
@@ -371,8 +384,8 @@ MeterStrip::strip_property_changed (const PropertyChange& what_changed)
 	if (!what_changed.contains (ARDOUR::Properties::name)) {
 		return;
 	}
-	ENSURE_GUI_THREAD (*this, &MeterStrip::strip_name_changed, what_changed)
-	name_label.set_text(_route->name());
+	ENSURE_GUI_THREAD (*this, &MeterStrip::strip_name_changed, what_changed);
+	name_changed();
 	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
 	if (level_meter) {
 		ARDOUR_UI::instance()->set_tip (*level_meter, _route->name());
@@ -510,10 +523,15 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 			nh = 148;
 			break;
 	}
-	namebx.set_size_request(18, nh);
+	int tnh = 0;
+	if (_session && _session->config.get_track_name_number()) {
+		tnh = 3 + _session->track_number_decimals() * 8;
+	}
+	namebx.set_size_request(18, nh + tnh);
+	namenumberbx.set_size_request(18, nh + tnh);
 	if (_route) {
-		name_label.set_size_request(18, nh-2);
-		name_label.layout()->set_width((nh-4) * PANGO_SCALE);
+		name_label.set_size_request(18, nh + (_route->is_master() ? tnh : -1));
+		name_label.layout()->set_width((nh - 4 + (_route->is_master() ? tnh : 0)) * PANGO_SCALE);
 	}
 	VBox::on_size_allocate(a);
 }
@@ -722,6 +740,30 @@ MeterStrip::parameter_changed (std::string const & p)
 	}
 	else if (p == "meterbridge-label-height") {
 		queue_resize();
+	}
+	else if (p == "track-name-number") {
+		name_changed();
+	}
+}
+
+void
+MeterStrip::name_changed () {
+	if (!_route) {
+		return;
+	}
+	name_label.set_text(_route->name ());
+	if (_session && _session->config.get_track_name_number()) {
+		const int64_t track_number = _route->track_number ();
+		if (track_number == 0) {
+			number_label.set_text("-");
+			number_label.hide();
+		} else {
+			number_label.set_text (PBD::to_string (abs(_route->track_number ()), std::dec));
+			number_label.show();
+		}
+		number_label.set_size_request(18, 3 + _session->track_number_decimals() * 8);
+	} else {
+		number_label.hide();
 	}
 }
 

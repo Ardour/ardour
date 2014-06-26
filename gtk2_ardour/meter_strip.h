@@ -100,7 +100,9 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	Gtk::HBox meterbox;
 	Gtk::HBox spacer;
 	Gtk::HBox namebx;
+	Gtk::VBox namenumberbx;
 	ArdourButton name_label;
+	ArdourButton number_label;
 	Gtk::DrawingArea meter_metric_area;
 	Gtk::DrawingArea meter_ticks1_area;
 	Gtk::DrawingArea meter_ticks2_area;
@@ -128,7 +130,6 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 
 	LevelMeterHBox *level_meter;
 
-	PBD::ScopedConnection _config_connection;
 	void strip_property_changed (const PBD::PropertyChange&);
 	void meter_configuration_changed (ARDOUR::ChanCount);
 	void meter_type_changed (ARDOUR::MeterType);
@@ -140,6 +141,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void redraw_metrics ();
 	void update_button_box ();
 	void update_name_box ();
+	void name_changed ();
 
 	bool _suspend_menu_callbacks;
 	bool level_meter_button_release (GdkEventButton* ev);
