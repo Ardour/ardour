@@ -108,6 +108,7 @@ class LIBARDOUR_API AudioDiskstream : public Diskstream
 	int remove_channel (uint32_t how_many);
 
 	bool set_name (std::string const &);
+	bool set_write_source_name (const std::string& str);
 
 	/* stateful */
 

@@ -70,6 +70,15 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	virtual ~Diskstream();
 
 	virtual bool set_name (const std::string& str);
+	virtual bool set_write_source_name (const std::string& str);
+
+	std::string write_source_name () const {
+		if (_write_source_name.empty()) {
+			return name();
+		} else {
+			return _write_source_name;
+		}
+	}
 
 	virtual std::string steal_write_source_name () { return std::string(); }
 
@@ -311,6 +320,8 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	framepos_t     playback_sample;
 
 	bool          in_set_state;
+
+	std::string   _write_source_name;
 
 	Glib::Threads::Mutex state_lock;
 

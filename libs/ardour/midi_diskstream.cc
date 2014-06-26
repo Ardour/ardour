@@ -1223,7 +1223,7 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 
 	try {
 		_write_source = boost::dynamic_pointer_cast<SMFSource>(
-			_session.create_midi_source_for_session (name ()));
+			_session.create_midi_source_for_session (write_source_name ()));
 
 		if (!_write_source) {
 			throw failed_constructor();
@@ -1441,11 +1441,27 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 bool
 MidiDiskstream::set_name (string const & name)
 {
+	if (_name == name) {
+		return true;
+	}
 	Diskstream::set_name (name);
 
 	/* get a new write source so that its name reflects the new diskstream name */
 	use_new_write_source (0);
 
+	return true;
+}
+
+bool
+MidiDiskstream::set_write_source_name (const std::string& str) {
+	if (_write_source_name == str) {
+		return true;
+	}
+	Diskstream::set_write_source_name (str);
+	if (_write_source_name == name()) {
+		return true;
+	}
+	use_new_write_source (0);
 	return true;
 }
 

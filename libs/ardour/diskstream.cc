@@ -437,7 +437,13 @@ Diskstream::set_name (const string& str)
 		playlist()->set_name (str);
 		SessionObject::set_name(str);
 	}
-        return true;
+	return true;
+}
+
+bool
+Diskstream::set_write_source_name (const std::string& str) {
+	_write_source_name = str;
+	return true;
 }
 
 XMLNode&
