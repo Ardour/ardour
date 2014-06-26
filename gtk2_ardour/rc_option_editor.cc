@@ -1360,6 +1360,7 @@ RCOptionEditor::RCOptionEditor ()
 	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
 					    string_compose (_("<b>When enabled</b> %1 will stop recording if an over- or underrun is detected by the audio engine"),
 							    PROGRAM_NAME));
+	add_option (_("Transport"), tsf);
 
 	tsf = new BoolOption (
 		     "loop-is-mode",
