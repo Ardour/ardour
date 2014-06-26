@@ -1852,7 +1852,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 
 	switch (item_type) {
 	case ControlPointItem:
-		_verbose_cursor->hide ();
+		_verbose_cursor->hide (); 
 		break;
 
 	case GainLineItem:
@@ -2012,24 +2012,19 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 		current_stepping_trackview = 0;
 		step_timeout.disconnect ();
 	}
-
+	
 	if (_session && _session->actively_recording()) {
 		/* Sorry. no dragging stuff around while we record */
 		return true;
 	}
-
+	
 	update_join_object_range_location (event->motion.y);
-
-	bool handled = false;
+	
 	if (_drags->active ()) {
-		handled = _drags->motion_handler (event, from_autoscroll);
+	 	return _drags->motion_handler (event, from_autoscroll);
 	}
 
-	if (!handled) {
-		return false;
-	}
-
-	return true;
+	return false;
 }
 
 bool

@@ -44,6 +44,7 @@
 #include "evoral/midi_util.h"
 
 #include "canvas/debug.h"
+#include "canvas/text.h"
 
 #include "automation_region_view.h"
 #include "automation_time_axis.h"
@@ -3809,28 +3810,9 @@ MidiRegionView::show_verbose_cursor (boost::shared_ptr<NoteType> n) const
 void
 MidiRegionView::show_verbose_cursor (string const & text, double xoffset, double yoffset) const
 {
-	double wx, wy;
-
-	trackview.editor().verbose_cursor()->set_text (text);
-	trackview.editor().get_pointer_position (wx, wy);
-
-	wx += xoffset;
-	wy += yoffset;
-
-	/* Flip the cursor above the mouse pointer if it would overlap the bottom of the canvas */
-
-	boost::optional<ArdourCanvas::Rect> bbo = trackview.editor().verbose_cursor()->item().bounding_box();
-
-	assert (bbo);
-	
-	ArdourCanvas::Rect bb = bbo.get();
-
-	if ((wy + bb.y1 - bb.y0) > trackview.editor().visible_canvas_height()) {
-		wy -= (bb.y1 - bb.y0) + 2 * yoffset;
-	}
-
-	trackview.editor().verbose_cursor()->set_position (wx, wy);
+	trackview.editor().verbose_cursor()->set (text);
 	trackview.editor().verbose_cursor()->show ();
+	trackview.editor().verbose_cursor()->set_offset (ArdourCanvas::Duple (xoffset, yoffset));
 }
 
 /** @param p A session framepos.

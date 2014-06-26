@@ -406,54 +406,22 @@ Drag::abort ()
 void
 Drag::show_verbose_cursor_time (framepos_t frame)
 {
-	/* We use DragManager::current_pointer_y() here 
-	   because we need to position the verbose canvas
-	   cursor within the overall canvas, regardless 
-	   of this particular drag's _trackview_only
-	   setting.
-	*/
-	   
-	_editor->verbose_cursor()->set_time (
-		frame,
-		_drags->current_pointer_x() + 10,
-		_drags->current_pointer_y() + 10
-		);
-
+	_editor->verbose_cursor()->set_time (frame);
 	_editor->verbose_cursor()->show ();
 }
 
 void
-Drag::show_verbose_cursor_duration (framepos_t start, framepos_t end, double xoffset)
+Drag::show_verbose_cursor_duration (framepos_t start, framepos_t end, double /*xoffset*/)
 {
-	_editor->verbose_cursor()->show (xoffset);
-
-	/* We use DragManager::current_pointer_y() here 
-	   because we need to position the verbose canvas
-	   cursor within the overall canvas, regardless 
-	   of this particular drag's _trackview_only
-	   setting.
-	*/
-
-	_editor->verbose_cursor()->set_duration (
-		start, end,
-		_drags->current_pointer_x() + 10,
-		_drags->current_pointer_y() + 10
-		);
+	_editor->verbose_cursor()->set_duration (start, end);
+	_editor->verbose_cursor()->show ();
 }
 
 void
 Drag::show_verbose_cursor_text (string const & text)
 {
-	_editor->verbose_cursor()->show ();
-
-	/* We use DragManager::current_pointer_y() here 
-	   because we need to position the verbose canvas
-	   cursor within the overall canvas, regardless 
-	   of this particular drag's _trackview_only
-	   setting.
-	*/
-
 	_editor->verbose_cursor()->set (text);
+	_editor->verbose_cursor()->show ();
 }
 
 boost::shared_ptr<Region>
@@ -1535,6 +1503,8 @@ RegionSpliceDrag::motion (GdkEvent* event, bool)
 		*/
 		_editor->verbose_cursor()->hide ();
 		return;
+	} else {
+		_editor->verbose_cursor()->show ();
 	}
 
 	int dir;
@@ -2025,8 +1995,7 @@ VideoTimeLineDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	Timecode::Time timecode;
 	_editor->session()->sample_to_timecode(abs(_startdrag_video_offset), timecode, true /* use_offset */, false /* use_subframes */ );
 	snprintf (buf, sizeof (buf), "Video Start:\n%c%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, (_startdrag_video_offset<0?'-':' '), timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
-	_editor->verbose_cursor()->set(buf);
-	_editor->verbose_cursor()->show ();
+	show_verbose_cursor_text (buf);
 }
 
 void
@@ -2075,8 +2044,7 @@ VideoTimeLineDrag::motion (GdkEvent* event, bool first_move)
 			, _("Diff:"),
 				(dt<0?'-':' '), timediff.hours, timediff.minutes, timediff.seconds, timediff.frames
 				);
-	_editor->verbose_cursor()->set(buf);
-	_editor->verbose_cursor()->show ();
+	show_verbose_cursor_text (buf);
 }
 
 void
@@ -3515,9 +3483,7 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	_point->line().start_drag_single (_point, _fixed_grab_x, fraction);
 
-	_editor->verbose_cursor()->set (_point->line().get_verbose_cursor_string (fraction));
-
-	_editor->verbose_cursor()->show ();
+	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (fraction));
 
 	_pushing = Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
 
@@ -3577,7 +3543,7 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 
 	_point->line().drag_motion (_editor->sample_to_pixel_unrounded (cx_frames), fraction, false, _pushing, _final_index);
 
-	_editor->verbose_cursor()->set_text (_point->line().get_verbose_cursor_string (fraction));
+	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (fraction));
 }
 
 void
@@ -3663,9 +3629,7 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	_line->start_drag_line (before, after, fraction);
 
-	_editor->verbose_cursor()->set (_line->get_verbose_cursor_string (fraction));
-
-	_editor->verbose_cursor()->show ();
+	show_verbose_cursor_text (_line->get_verbose_cursor_string (fraction));
 }
 
 void
@@ -3690,7 +3654,7 @@ LineDrag::motion (GdkEvent* event, bool)
 	/* we are ignoring x position for this drag, so we can just pass in anything */
 	_line->drag_motion (0, fraction, true, false, ignored);
 
-	_editor->verbose_cursor()->set_text (_line->get_verbose_cursor_string (fraction));
+	show_verbose_cursor_text (_line->get_verbose_cursor_string (fraction));
 }
 
 void
