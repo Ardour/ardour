@@ -767,6 +767,28 @@ GtkCanvas::on_button_release_event (GdkEventButton* ev)
 	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
 }
 
+bool
+GtkCanvas::get_mouse_position (Duple& winpos) const
+{
+	int x;
+	int y;
+	Gdk::ModifierType mask;
+	Glib::RefPtr<Gdk::Window> self = Glib::RefPtr<Gdk::Window>::cast_const (get_window ());
+
+	if (!self) {
+		std::cerr << " no self window\n";
+		winpos = Duple (0, 0);
+		return false;
+	}
+
+	Glib::RefPtr<Gdk::Window> win = self->get_pointer (x, y, mask);
+
+	winpos.x = x;
+	winpos.y = y;
+
+	return true;
+}
+
 /** Handler for GDK motion events.
  *  @param ev Event.
  *  @return true if the event was handled.
@@ -787,6 +809,8 @@ GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 	*/
 
 	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas motion @ %1, %2 canvas @ %3, %4\n", ev->x, ev->y, copy.motion.x, copy.motion.y));
+
+	MouseMotion (point); /* EMIT SIGNAL */
 
 	pick_current_item (point, ev->state);
 

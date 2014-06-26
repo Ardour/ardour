@@ -113,6 +113,23 @@ public:
         virtual Coord width () const = 0;
         virtual Coord height () const = 0;
 
+	/** Store the coordinates of the mouse pointer in window coordinates in
+	   @param winpos. Return true if the position was within the window,
+	   false otherwise.
+	*/
+	virtual bool get_mouse_position (Duple& winpos) const = 0;
+
+	/** Signal to be used by items that need to track the mouse position
+	   within the window.
+	*/
+	sigc::signal<void,Duple const&> MouseMotion;
+
+	/** Ensures that the position given by @param winpos (in window
+	    coordinates) is within the current window area, possibly reduced by
+	    @param border.
+	*/
+	Duple clamp_to_window (Duple const& winpos, Duple border = Duple());
+
         void zoomed();
     
         std::string indent() const;
@@ -149,6 +166,8 @@ public:
 	Rect visible_area () const;
 	Coord width() const;
 	Coord height() const;
+
+	bool get_mouse_position (Duple& winpos) const;
 
 protected:
 	bool on_scroll_event (GdkEventScroll *);
