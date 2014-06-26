@@ -74,7 +74,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 
   protected:
 	boost::shared_ptr<ARDOUR::Route> _route;
-	PBD::ScopedConnectionList route_connections;
+	PBD::ScopedConnectionList meter_route_connections;
 	PBD::ScopedConnectionList level_meter_connection;
 	void self_delete ();
 
