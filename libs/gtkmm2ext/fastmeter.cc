@@ -111,13 +111,13 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 		pixheight = len;
 		pixwidth = dimen;
 		fgpattern = request_vertical_meter(pixwidth, pixheight, _clr, _stp, _styleflags);
-		bgpattern = request_vertical_background (pixwidth, pixheight, _bgc, false);
+		bgpattern = request_vertical_background (pixwidth, pixheight, _bgc);
 
 	} else {
 		pixheight = dimen;
 		pixwidth = len;
 		fgpattern = request_horizontal_meter(pixwidth, pixheight, _clr, _stp, _styleflags);
-		bgpattern = request_horizontal_background (pixwidth, pixheight, _bgc, false);
+		bgpattern = request_horizontal_background (pixwidth, pixheight, _bgc);
 	}
 
 	pixrect.width = pixwidth;
@@ -354,13 +354,13 @@ FastMeter::request_vertical_meter(
 
 Cairo::RefPtr<Cairo::Pattern>
 FastMeter::request_vertical_background(
-		int width, int height, int *bgc, bool shade)
+		int width, int height, int *bgc)
 {
 	height = max(height, min_pattern_metric_size);
 	height = min(height, max_pattern_metric_size);
 	height += 2;
 
-	const PatternBgMapKey key (width, height, bgc[0], bgc[1], shade);
+	const PatternBgMapKey key (width, height, bgc[0], bgc[1], false);
 	PatternBgMap::iterator i;
 	if ((i = vb_pattern_cache.find (key)) != vb_pattern_cache.end()) {
 		return i->second;
@@ -368,7 +368,7 @@ FastMeter::request_vertical_background(
 	// TODO flush pattern cache if it gets too large
 
 	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_background (
-		width, height, bgc, shade, false);
+		width, height, bgc, false, false);
 	vb_pattern_cache[key] = p;
 
 	return p;
@@ -402,13 +402,13 @@ FastMeter::request_horizontal_meter(
 
 Cairo::RefPtr<Cairo::Pattern>
 FastMeter::request_horizontal_background(
-		int width, int height, int *bgc, bool shade)
+		int width, int height, int *bgc)
 {
 	width = max(width, min_pattern_metric_size);
 	width = min(width, max_pattern_metric_size);
 	width += 2;
 
-	const PatternBgMapKey key (width, height, bgc[0], bgc[1], shade);
+	const PatternBgMapKey key (width, height, bgc[0], bgc[1], false);
 	PatternBgMap::iterator i;
 	if ((i = hb_pattern_cache.find (key)) != hb_pattern_cache.end()) {
 		return i->second;
@@ -416,7 +416,7 @@ FastMeter::request_horizontal_background(
 	// TODO flush pattern cache if it gets too large
 
 	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_background (
-		height, width, bgc, shade, true);
+		height, width, bgc, false, true);
 
 	hb_pattern_cache[key] = p;
 
@@ -499,7 +499,7 @@ FastMeter::vertical_size_allocate (Gtk::Allocation &alloc)
 
 	if (pixheight != h) {
 		fgpattern = request_vertical_meter (request_width, h, _clr, _stp, _styleflags);
-		bgpattern = request_vertical_background (request_width, h, highlight ? _bgh : _bgc, highlight);
+		bgpattern = request_vertical_background (request_width, h, highlight ? _bgh : _bgc);
 		pixheight = h;
 		pixwidth  = request_width;
 	}
@@ -524,7 +524,7 @@ FastMeter::horizontal_size_allocate (Gtk::Allocation &alloc)
 
 	if (pixwidth != w) {
 		fgpattern = request_horizontal_meter (w, request_height, _clr, _stp, _styleflags);
-		bgpattern = request_horizontal_background (w, request_height, highlight ? _bgh : _bgc, highlight);
+		bgpattern = request_horizontal_background (w, request_height, highlight ? _bgh : _bgc);
 		pixwidth = w;
 		pixheight  = request_height;
 	}
@@ -893,9 +893,9 @@ FastMeter::set_highlight (bool onoff)
 	}
 	highlight = onoff;
 	if (orientation == Vertical) {
-		bgpattern = request_vertical_background (pixwidth + 2, pixheight + 2, highlight ? _bgh : _bgc, highlight);
+		bgpattern = request_vertical_background (pixwidth + 2, pixheight + 2, highlight ? _bgh : _bgc);
 	} else {
-		bgpattern = request_horizontal_background (pixwidth + 2, pixheight + 2, highlight ? _bgh : _bgc, highlight);
+		bgpattern = request_horizontal_background (pixwidth + 2, pixheight + 2, highlight ? _bgh : _bgc);
 	}
 	queue_draw ();
 }

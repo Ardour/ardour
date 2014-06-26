@@ -118,9 +118,9 @@ private:
 	static Cairo::RefPtr<Cairo::Pattern> generate_meter_background (
 		int, int, int *, bool, bool);
 	static Cairo::RefPtr<Cairo::Pattern> request_vertical_background (
-		int, int, int *, bool);
+		int, int, int *);
 	static Cairo::RefPtr<Cairo::Pattern> request_horizontal_background (
-		int, int, int *, bool);
+		int, int, int *);
 
 	struct Pattern10MapKey {
 		Pattern10MapKey (
