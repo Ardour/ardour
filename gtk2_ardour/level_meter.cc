@@ -395,7 +395,6 @@ LevelMeterBase::_setup_meters ()
 			bool hl = meters[n].meter ? meters[n].meter->get_highlight() : false;
 			meters[n].packed = false;
 			delete meters[n].meter;
-			std::cout << "\n\n\n   b[0]=" << std::hex << b[0] << std::dec; 
 			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, _meter_orientation, meter_length,
 					c[0], c[1], c[2], c[3], c[4],
 					c[5], c[6], c[7], c[8], c[9],

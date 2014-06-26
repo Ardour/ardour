@@ -71,7 +71,6 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	, level_meter_home (get_box ("level_meter_home"))
 	, level_meter (_session)
     , _data_type (DataType::AUDIO)
-
 {
 	using namespace Menu_Helpers;
 	//gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0.0, 1.0, 0.01, 0.1)
