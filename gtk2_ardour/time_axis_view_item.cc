@@ -255,6 +255,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 			name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, NAME_Y_OFFSET));
 		}
 		name_text->set_font_description (NAME_FONT);
+		name_text->set_ignore_events (true);
 	} else {
 		name_text = 0;
 	}
