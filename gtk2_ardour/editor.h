@@ -180,7 +180,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_internal_edit (bool yn);
 	bool toggle_internal_editing_from_double_click (GdkEvent*);
 
-        void _ensure_time_axis_view_is_visible (const TimeAxisView& tav, bool at_top);
+        void _ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top);
 	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
 	void add_to_idle_resize (TimeAxisView*, int32_t);
 
@@ -1949,7 +1949,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool entered_track_canvas (GdkEventCrossing*);
 	void set_entered_track (TimeAxisView*);
 	void set_entered_regionview (RegionView*);
-	void ensure_track_visible (TimeAxisView*);
 	gint left_automation_track ();
 
 	void reset_canvas_action_sensitivity (bool);

@@ -1357,7 +1357,7 @@ Editor::scroll_down_one_track ()
 	/* move to the track below the first one that covers the */
 	
 	if (next != track_views.rend()) {
-		ensure_track_visible (*next);
+		ensure_time_axis_view_is_visible (**next);
 		return true;
 	}
 
@@ -1390,7 +1390,7 @@ Editor::scroll_up_one_track ()
 	}
 	
 	if (prev != track_views.end()) {
-		ensure_track_visible (*prev);
+		ensure_time_axis_view_is_visible (**prev);
 		return true;
 	}
 
@@ -5620,7 +5620,7 @@ Editor::select_next_route()
 
 	selection->set(current);
 
-	ensure_track_visible(current);
+	ensure_time_axis_view_is_visible (*current);
 }
 
 void
@@ -5651,42 +5651,7 @@ Editor::select_prev_route()
 
 	selection->set (current);
 
-	ensure_track_visible(current);
-}
-
-void
-Editor::ensure_track_visible(TimeAxisView *track)
-{
-	if (track->hidden()) {
-		return;
-	}
-
-	/* compute visible area of trackview group, as offsets from top of
-	 * trackview group.
-	 */
-
-	double const current_view_min_y = vertical_adjustment.get_value();
-	double const current_view_max_y = current_view_min_y + vertical_adjustment.get_page_size();
-
-	double const track_min_y = track->y_position ();
-	double const track_max_y = track->y_position () + track->effective_height ();
-
-	if (track_min_y > current_view_min_y &&
-	    track_max_y <= current_view_max_y) {
-		return;
-	}
-
-	double new_value;
-
-	if (track_min_y < current_view_min_y) {
-		// Track is above the current view
-		new_value = track_min_y;
-	} else {
-		// Track is below the current view
-		new_value = track->y_position () + track->effective_height() - vertical_adjustment.get_page_size();
-	}
-
-	vertical_adjustment.set_value(new_value);
+	ensure_time_axis_view_is_visible (*current);
 }
 
 void
