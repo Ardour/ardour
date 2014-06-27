@@ -231,8 +231,21 @@ Canvas::window_to_canvas (Duple const & d) const
 	std::list<Item*> const& root_children (_root.items());
 	ScrollGroup* sg = 0;
 
+	/* if the coordinates are negative, clamp to zero and find the item
+	 * that covers that "edge" position.
+	 */
+
+	Duple in_window (d);
+
+	if (in_window.x < 0) {
+		in_window.x = 0;
+	}
+	if (in_window.y < 0) {
+		in_window.y = 0;
+	}
+
 	for (std::list<Item*>::const_iterator i = root_children.begin(); i != root_children.end(); ++i) {
-		if (((sg = dynamic_cast<ScrollGroup*>(*i)) != 0) && sg->covers_window (d)) {
+		if (((sg = dynamic_cast<ScrollGroup*>(*i)) != 0) && sg->covers_window (in_window)) {
 			break;
 		}
 	}
