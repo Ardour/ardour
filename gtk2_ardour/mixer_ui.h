@@ -85,7 +85,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	void ensure_float (Gtk::Window&);
 
-        MonitorSection* monitor_section() const { return _monitor_section; }
+    MonitorSection* monitor_section() const { return _monitor_section; }
 
   protected:
 	void set_route_targets_for_operation ();
@@ -204,7 +204,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void track_column_click (gint);
 	void build_track_menu ();
 
-        MonitorSection* _monitor_section;
+    MonitorSection* _monitor_section;
 	PluginSelector    *_plugin_selector;
 
 	void strip_property_changed (const PBD::PropertyChange&, MixerStrip *);
