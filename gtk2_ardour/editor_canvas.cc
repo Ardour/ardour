@@ -868,7 +868,6 @@ Editor::color_handler()
 	bbt_ruler->set_outline_color (text);
 	
 	playhead_cursor->set_color (ARDOUR_UI::config()->get_canvasvar_PlayHead());
-	_verbose_cursor->set_color (ARDOUR_UI::config()->get_canvasvar_VerboseCanvasCursor());
 
 	meter_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_MeterBar());
 	meter_bar->set_outline_color (ARDOUR_UI::config()->get_canvasvar_MarkerBarSeparator());

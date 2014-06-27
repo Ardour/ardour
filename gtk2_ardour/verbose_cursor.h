@@ -34,8 +34,6 @@ public:
 	ArdourCanvas::Item* canvas_item () const;
 	bool visible () const;
 
-	void set_color (uint32_t);
-
 	void set (std::string const &);
 	void set_time (framepos_t);
 	void set_duration (framepos_t, framepos_t);
