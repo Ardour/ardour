@@ -59,7 +59,7 @@ PolyItem::compute_bounding_box () const
 			++i;
 		}
 
-		_bounding_box = bbox.expand (_outline_width);
+		_bounding_box = bbox.expand (_outline_width + 0.5);
 
 		
 	} else {
