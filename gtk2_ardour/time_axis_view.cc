@@ -847,9 +847,9 @@ TimeAxisView::show_selection (TimeSelection& ts)
 
 		x1 = _editor.sample_to_pixel (start);
 		x2 = _editor.sample_to_pixel (start + cnt - 1);
-		y2 = current_height();
+		y2 = current_height() - 1;
 
-		rect->rect->set (ArdourCanvas::Rect (x1, 1, x2, y2));
+		rect->rect->set (ArdourCanvas::Rect (x1, 0, x2, y2));
 
 		// trim boxes are at the top for selections
 
