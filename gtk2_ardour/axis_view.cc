@@ -66,7 +66,14 @@ AxisView::unique_random_color()
 string
 AxisView::gui_property (const string& property_name) const
 {
-	return gui_object_state().get_string (state_id(), property_name);
+	if (property_hashtable.count(property_name)) {
+		return property_hashtable[property_name];
+	} else {
+	  string rv = gui_object_state().get_string (state_id(), property_name);
+		property_hashtable.erase(property_name);
+		property_hashtable.emplace(property_name, rv);
+		return rv;
+	}
 }
 
 bool
@@ -84,7 +91,6 @@ AxisView::set_marked_for_display (bool yn)
 		set_gui_property ("visible", yn);
 		return true; // things changed
 	}
-
 	return false;
 }
 

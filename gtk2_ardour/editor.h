@@ -404,6 +404,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void center_screen (framepos_t);
 
 	TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const;
+
 	Gtkmm2ext::TearOff* mouse_mode_tearoff () const { return _mouse_mode_tearoff; }
 	Gtkmm2ext::TearOff* tools_tearoff () const { return _tools_tearoff; }
 
