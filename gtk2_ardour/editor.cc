@@ -4804,6 +4804,22 @@ Editor::axis_views_from_routes (boost::shared_ptr<RouteList> r) const
 }
 
 void
+Editor::suspend_route_redisplay ()
+{
+	if (_routes) {
+		_routes->suspend_redisplay();
+	}
+}
+
+void
+Editor::resume_route_redisplay ()
+{
+	if (_routes) {
+		_routes->resume_redisplay();
+	}
+}
+
+void
 Editor::add_routes (RouteList& routes)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::handle_new_route, routes)

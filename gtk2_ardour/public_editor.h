@@ -84,6 +84,8 @@ class VerboseCursor;
 class XMLNode;
 struct SelectionRect;
 
+class DisplaySuspender;
+
 namespace ARDOUR_UI_UTILS {
 bool relay_key_press (GdkEventKey* ev, Gtk::Window* win);
 bool forward_key_press (GdkEventKey* ev);
@@ -428,6 +430,25 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	   (and protected) method here does not have a default value.
 	*/
        virtual void _ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top) = 0;
+
+	friend class DisplaySuspender;
+	virtual void suspend_route_redisplay () = 0;
+	virtual void resume_route_redisplay () = 0;
+	gint _suspend_route_redisplay_counter;
+};
+
+class DisplaySuspender {
+	public:
+		DisplaySuspender() {
+			if (g_atomic_int_add(&PublicEditor::instance()._suspend_route_redisplay_counter, 1) == 0) {
+				PublicEditor::instance().suspend_route_redisplay ();
+			}
+		}
+		~DisplaySuspender () {
+			if (g_atomic_int_dec_and_test (&PublicEditor::instance()._suspend_route_redisplay_counter)) {
+				PublicEditor::instance().resume_route_redisplay ();
+			}
+		}
 };
 
 #endif // __gtk_ardour_public_editor_h__
