@@ -52,9 +52,15 @@ Searchpath::Searchpath (const vector<std::string>& paths)
 void
 Searchpath::add_directory (const std::string& directory_path)
 {
-	if (!directory_path.empty()) {
-		push_back(directory_path);
+	if (directory_path.empty()) {
+		return;
 	}
+	for (vector<std::string>::const_iterator i = begin(); i != end(); ++i) {
+		if (*i == directory_path) {
+			return;
+		}
+	}
+	push_back(directory_path);
 }
 
 void
