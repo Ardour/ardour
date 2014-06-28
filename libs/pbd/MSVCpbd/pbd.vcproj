@@ -278,10 +278,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\clear_dir.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\command.cc"
 				>
 			</File>
