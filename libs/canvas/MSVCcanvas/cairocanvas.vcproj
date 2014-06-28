@@ -255,10 +255,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\group.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\image.cc"
 				>
 			</File>
@@ -382,10 +378,6 @@
 			</File>
 			<File
 				RelativePath="..\canvas\fwd.h"
-				>
-			</File>
-			<File
-				RelativePath="..\canvas\group.h"
 				>
 			</File>
 			<File
