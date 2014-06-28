@@ -991,6 +991,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\ruler_dialog.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\search_path_option.cc"
 				>
 			</File>
@@ -1934,6 +1938,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\route_ui_selection.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\ruler_dialog.h"
 				>
 			</File>
 			<File

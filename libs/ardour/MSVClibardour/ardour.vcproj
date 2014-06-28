@@ -1990,6 +1990,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\route_sorters.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\runtime_functions.h"
 				>
 			</File>
