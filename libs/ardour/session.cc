@@ -1963,6 +1963,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 
   failed:
 	if (!new_routes.empty()) {
+		StateProtector sp (this);
 		add_routes (new_routes, true, true, true);
 
 		if (instrument) {
@@ -2418,6 +2419,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
   failed:
 	if (!new_routes.empty()) {
+		StateProtector sp (this);
 		add_routes (new_routes, true, true, true);
 	}
 
@@ -2585,6 +2587,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 
   failure:
 	if (!ret.empty()) {
+		StateProtector sp (this);
 		add_routes (ret, false, true, true); // autoconnect outputs only
 	}
 
@@ -2701,6 +2704,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 
   out:
 	if (!ret.empty()) {
+		StateProtector sp (this);
 		add_routes (ret, true, true, true);
 		IO::enable_connecting ();
 	}
@@ -3464,6 +3468,8 @@ Session::reassign_track_numbers ()
 	RouteList r (*(routes.reader ()));
 	SignalOrderRouteSorter sorter;
 	r.sort (sorter);
+
+	StateProtector sp (this);
 
 	for (RouteList::iterator i = r.begin(); i != r.end(); ++i) {
 		if (boost::dynamic_pointer_cast<Track> (*i)) {
