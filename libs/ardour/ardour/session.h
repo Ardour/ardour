@@ -429,6 +429,23 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	StateOfTheState state_of_the_state() const { return _state_of_the_state; }
 
+	class StateProtector {
+		public:
+			StateProtector (Session* s) : _session (s) {
+				g_atomic_int_inc (&s->_suspend_save);
+			}
+			~StateProtector () {
+				if (g_atomic_int_dec_and_test (&_session->_suspend_save)) {
+					while (_session->_save_queued) {
+						_session->_save_queued = false;
+						_session->save_state ("");
+					}
+				}
+			}
+		private:
+			Session * _session;
+	};
+
 	void add_route_group (RouteGroup *);
 	void remove_route_group (RouteGroup&);
 	void reorder_route_groups (std::list<RouteGroup*>);
@@ -1099,6 +1116,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool             state_was_pending;
 	StateOfTheState _state_of_the_state;
 
+	friend class    StateProtector;
+	gint            _suspend_save; /* atomic */
+	volatile bool   _save_queued;
+
 	void     auto_save();
 	int      load_options (const XMLNode&);
 	int      load_state (std::string snapshot_name);
@@ -1647,6 +1668,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	
 	static int get_session_info_from_path (XMLTree& state_tree, const std::string& xmlpath);
 };
+
 
 } // namespace ARDOUR
 

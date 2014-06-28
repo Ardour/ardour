@@ -669,6 +669,12 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		return 1;
 	}
 
+	if (g_atomic_int_get(&_suspend_save)) {
+		_save_queued = true;
+		return 1;
+	}
+	_save_queued = false;
+
 	if (!_engine.connected ()) {
 		error << string_compose (_("the %1 audio engine is not connected and state saving would lose all I/O connections. Session not saved"),
                                          PROGRAM_NAME)
