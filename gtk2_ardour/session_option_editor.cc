@@ -18,6 +18,7 @@
 */
 
 #include "ardour/session.h"
+#include "ardour/session_directory.h"
 
 #include "gui_thread.h"
 #include "session_option_editor.h"
@@ -198,6 +199,21 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Media"), hf);
 
+	add_option (_("Locations"), new OptionEditorHeading (_("Record Folders")));
+
+	add_option (_("Locations"), new DirectoryOption ("session-root-hack",
+				_("Audio:"),
+				sigc::mem_fun (*this, &SessionOptionEditor::get_audio_source_dir),
+				sigc::mem_fun (*this, &SessionOptionEditor::set_audio_source_dir)
+				));
+
+	add_option (_("Locations"), new DirectoryOption ("session-root-hack",
+				_("Midi:"),
+				sigc::mem_fun (*this, &SessionOptionEditor::get_midi_source_dir),
+				sigc::mem_fun (*this, &SessionOptionEditor::set_midi_source_dir)
+				));
+
+
 	add_option (_("Locations"), new OptionEditorHeading (_("File locations")));
 
         SearchPathOption* spo = new SearchPathOption ("audio-search-path", _("Search for audio files in:"),
@@ -212,6 +228,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
                                     sigc::mem_fun (*_session_config, &SessionConfiguration::set_midi_search_path));
 
         add_option (_("Locations"), spo);
+
 
 	/* File Naming  */
 
@@ -420,4 +437,36 @@ bool
 SessionOptionEditor::get_use_monitor_section ()
 {
 	return _session->monitor_out() != 0;
+}
+
+bool
+SessionOptionEditor::set_audio_source_dir (std::string s)
+{
+	_session->set_audio_source_dir(s);
+	return true;
+}
+
+std::string SessionOptionEditor::get_audio_source_dir ()
+{
+	std::string s = _session->custom_audio_source_dir();
+	if (s.empty()) {
+		s =_session->session_directory().sound_path();
+	}
+	return s;
+}
+
+bool
+SessionOptionEditor::set_midi_source_dir (std::string s)
+{
+	_session->set_midi_source_dir(s);
+	return true;
+}
+
+std::string SessionOptionEditor::get_midi_source_dir ()
+{
+	std::string s = _session->custom_midi_source_dir();
+	if (s.empty()) {
+		s =_session->session_directory().midi_path();
+	}
+	return s;
 }

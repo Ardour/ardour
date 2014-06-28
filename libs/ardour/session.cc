@@ -3427,19 +3427,115 @@ Session::new_source_path_from_name (DataType type, const string& name)
 {
 	assert(name.find("/") == string::npos);
 
-	SessionDirectory sdir(get_best_session_directory_for_new_source());
-
 	std::string p;
 	if (type == DataType::AUDIO) {
-		p = sdir.sound_path();
+		if (_custom_audio_source_dir.empty()) {
+			SessionDirectory sdir(get_best_session_directory_for_new_source());
+			p = sdir.sound_path();
+		} else {
+			p = _custom_audio_source_dir;
+		}
 	} else if (type == DataType::MIDI) {
-		p = sdir.midi_path();
+		if (_custom_midi_source_dir.empty()) {
+			SessionDirectory sdir(get_best_session_directory_for_new_source());
+			p = sdir.midi_path();
+		} else {
+			p = _custom_midi_source_dir;
+		}
 	} else {
 		error << "Unknown source type, unable to create file path" << endmsg;
 		return "";
 	}
 
 	return Glib::build_filename (p, name);
+}
+
+bool
+Session::set_audio_source_dir (std::string dir)
+{
+	bool changed = true;
+	if (get_record_enabled() && actively_recording()) {
+		/* this messes things up if done while recording */
+		return false;
+	}
+	if (dir == _custom_audio_source_dir) {
+		return true;
+	}
+	SessionDirectory sdir(get_best_session_directory_for_new_source ());
+	if (dir == sdir.sound_path() || dir.empty()) {
+		if (_custom_audio_source_dir.empty()) {
+			changed = false;
+		} else {
+			_custom_audio_source_dir = "";
+		}
+	} else {
+		if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+			error << string_compose(_("Session: cannot create new media location \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+			return false;
+		}
+		_custom_audio_source_dir = dir;
+		Searchpath asp (config.get_audio_search_path());
+		asp += dir;
+		config.set_audio_search_path(asp.to_string());
+	}
+
+	if (changed) {
+		StateProtector sp (this);
+
+		RouteList r (*(routes.reader ()));
+		for (RouteList::iterator i = r.begin(); i != r.end(); ++i) {
+			boost::shared_ptr<AudioTrack> t = boost::dynamic_pointer_cast<AudioTrack> (*i);
+			if (t) {
+				t->reset_write_sources(false, true);
+			}
+		}
+	}
+	return true;
+}
+
+bool
+Session::set_midi_source_dir (std::string dir)
+{
+	bool changed = true;
+	if (get_record_enabled() && actively_recording()) {
+		/* this messes things up if done while recording */
+		return false;
+	}
+	if (dir == _custom_midi_source_dir) {
+		return true;
+	}
+
+	SessionDirectory sdir(get_best_session_directory_for_new_source ());
+	if (dir == sdir.midi_path() || dir.empty()) {
+		if (_custom_midi_source_dir.empty()) {
+			changed = false;
+		} else {
+			_custom_midi_source_dir = "";
+		}
+	} else {
+		if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+			error << string_compose(_("Session: cannot create new media location \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+			return false;
+		}
+
+		_custom_midi_source_dir = dir;
+		Searchpath msp (config.get_midi_search_path());
+		msp += dir;
+		config.set_midi_search_path(msp.to_string());
+	}
+
+	if (changed) {
+		StateProtector sp (this);
+
+		RouteList r (*(routes.reader ()));
+		for (RouteList::iterator i = r.begin(); i != r.end(); ++i) {
+			boost::shared_ptr<MidiTrack> t = boost::dynamic_pointer_cast<MidiTrack> (*i);
+			if (t) {
+				t->reset_write_sources(false, true);
+			}
+		}
+	}
+	return true;
 }
 
 string
@@ -3461,13 +3557,23 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 	buf[0] = '\0';
 	legalized = legalize_for_path (base);
 
+	std::vector<string> sdirs;
+	vector<space_and_path>::iterator i;
+
+	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+		SessionDirectory sdir((*i).path);
+		sdirs.push_back(sdir.sound_path());
+	}
+	if (!_custom_audio_source_dir.empty()) {
+		sdirs.push_back(_custom_audio_source_dir);
+	}
+
 	// Find a "version" of the base name that doesn't exist in any of the possible directories.
 	for (cnt = (destructive ? ++destructive_index : 1); cnt <= limit; ++cnt) {
 
-		vector<space_and_path>::iterator i;
 		uint32_t existing = 0;
 
-		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+		for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
 
 			if (destructive) {
 
@@ -3507,9 +3613,7 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 				}
 			}
 
-			SessionDirectory sdir((*i).path);
-
-			string spath = sdir.sound_path();
+			string spath = (*i);
 
 			/* note that we search *without* the extension so that
 			   we don't end up both "Audio 1-1.wav" and "Audio 1-1.caf"
@@ -3579,21 +3683,29 @@ Session::new_midi_source_name (const string& owner_name)
 	buf[0] = '\0';
 	legalized = legalize_for_path (owner_name);
 
+	std::vector<string> sdirs;
+	vector<space_and_path>::iterator i;
+
+	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+		SessionDirectory sdir((*i).path);
+		sdirs.push_back(sdir.midi_path());
+	}
+	if (!_custom_midi_source_dir.empty()) {
+		sdirs.push_back(_custom_midi_source_dir);
+	}
+
 	// Find a "version" of the file name that doesn't exist in any of the possible directories.
 
 	for (cnt = 1; cnt <= limit; ++cnt) {
 
-		vector<space_and_path>::iterator i;
 		uint32_t existing = 0;
 
-		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+		for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
 
-			SessionDirectory sdir((*i).path);
-			
 			snprintf (buf, sizeof(buf), "%s-%u.mid", legalized.c_str(), cnt);
 			possible_name = buf;
 
-			std::string possible_path = Glib::build_filename (sdir.midi_path(), possible_name);
+			std::string possible_path = Glib::build_filename (*i, possible_name);
 			
 			if (Glib::file_test (possible_path, Glib::FILE_TEST_EXISTS)) {
 				existing++;
@@ -4182,7 +4294,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	framepos_t to_do;
 	framepos_t latency_skip;
 	BufferSet buffers;
-	SessionDirectory sdir(get_best_session_directory_for_new_source ());
+	SessionDirectory sdir(get_best_session_directory_for_new_source ()); // XXX use _custom_audio_source_dir ??
 	const string sound_dir = sdir.sound_path();
 	framepos_t len = end - start;
 	bool need_block_size_reset = false;

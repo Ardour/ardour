@@ -43,6 +43,7 @@
 #include "pbd/rcu.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/signals.h"
+#include "pbd/search_path.h"
 #include "pbd/undo.h"
 
 #include "evoral/types.hpp"
@@ -183,6 +184,11 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	PBD::Signal0<void> DirtyChanged;
 
 	const SessionDirectory& session_directory () const { return *(_session_dir.get()); }
+
+	bool set_audio_source_dir (std::string);
+	bool set_midi_source_dir (std::string);
+	std::string custom_audio_source_dir () const { return _custom_audio_source_dir; }
+	std::string custom_midi_source_dir () const { return _custom_midi_source_dir; }
 
 	static PBD::Signal1<void,std::string> Dialog;
 
@@ -1485,6 +1491,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool no_questions_about_missing_files;
 
 	std::string get_best_session_directory_for_new_source ();
+
+	std::string _custom_audio_source_dir;
+	std::string _custom_midi_source_dir;
 
 	mutable gint _playback_load;
 	mutable gint _capture_load;

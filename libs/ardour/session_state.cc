@@ -2123,7 +2123,7 @@ Session::get_best_session_directory_for_new_source ()
 	/* handle common case without system calls */
 
 	if (session_dirs.size() == 1) {
-		return result;
+		return session_dirs[0].path;
 	}
 
 	/* OK, here's the algorithm we're following here:

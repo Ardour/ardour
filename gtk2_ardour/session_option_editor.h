@@ -42,6 +42,11 @@ private:
 
 	ComboOption<float>* _vpu;
 	EntryOption* _take_name;
+
+	std::string get_audio_source_dir();
+	bool set_audio_source_dir(std::string);
+	std::string get_midi_source_dir();
+	bool set_midi_source_dir(std::string);
 };
 
 #endif /* __gtk_ardour_session_option_editor_h__ */
