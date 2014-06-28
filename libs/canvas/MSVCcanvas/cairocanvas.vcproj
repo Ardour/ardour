@@ -239,6 +239,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\container.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\curve.cc"
 				>
 			</File>
@@ -319,6 +323,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\tracking_text.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\types.cc"
 				>
 			</File>
@@ -358,6 +366,10 @@
 			</File>
 			<File
 				RelativePath="..\canvas\circle.h"
+				>
+			</File>
+			<File
+				RelativePath="..\canvas\container.h"
 				>
 			</File>
 			<File
@@ -450,6 +462,10 @@
 			</File>
 			<File
 				RelativePath="..\canvas\text.h"
+				>
+			</File>
+			<File
+				RelativePath="..\canvas\tracking_text.h"
 				>
 			</File>
 			<File
