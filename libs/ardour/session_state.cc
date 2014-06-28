@@ -2632,8 +2632,6 @@ Session::cleanup_sources (CleanupReport& rep)
 	vector<boost::shared_ptr<Source> > dead_sources;
 	string audio_path;
 	string midi_path;
-	vector<space_and_path>::iterator i;
-	vector<space_and_path>::iterator nexti;
 	vector<string> candidates;
 	vector<string> unused;
 	set<string> all_sources;
@@ -2642,6 +2640,8 @@ Session::cleanup_sources (CleanupReport& rep)
 	int ret = -1;
 	string tmppath1;
 	string tmppath2;
+	Searchpath asp;
+	Searchpath msp;
 
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state | InCleanup);
 
@@ -2683,38 +2683,20 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	/* build a list of all the possible audio directories for the session */
 
-	for (i = session_dirs.begin(); i != session_dirs.end(); ) {
-
-		nexti = i;
-		++nexti;
-
+	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 		SessionDirectory sdir ((*i).path);
-		audio_path += sdir.sound_path();
-
-		if (nexti != session_dirs.end()) {
-			audio_path += G_SEARCHPATH_SEPARATOR;
-		}
-
-		i = nexti;
+		asp += sdir.sound_path();
 	}
+	audio_path += asp.to_string();
 
 
 	/* build a list of all the possible midi directories for the session */
 
-	for (i = session_dirs.begin(); i != session_dirs.end(); ) {
-
-		nexti = i;
-		++nexti;
-
+	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 		SessionDirectory sdir ((*i).path);
-		midi_path += sdir.midi_path();
-
-		if (nexti != session_dirs.end()) {
-			midi_path += G_SEARCHPATH_SEPARATOR;
-		}
-
-		i = nexti;
+		msp += sdir.midi_path();
 	}
+	midi_path += msp.to_string();
 
 	find_files_matching_filter (candidates, audio_path, accept_all_audio_files, (void *) 0, true, true);
 	find_files_matching_filter (candidates, midi_path, accept_all_midi_files, (void *) 0, true, true);
