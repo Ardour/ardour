@@ -205,6 +205,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 
 	rec_enable_button->set_corner_radius(2);
 	rec_enable_button->set_size_request(16, 16);
+	rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
 
 	mute_button->set_corner_radius(2);
 	mute_button->set_size_request(16, 16);
@@ -355,7 +356,6 @@ MeterStrip::set_button_names()
 {
 	mute_button->set_text (_("M"));
 	rec_enable_button->set_text ("");
-	rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
 
 	if (_route && _route->solo_safe()) {
 		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
