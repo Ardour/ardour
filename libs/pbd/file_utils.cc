@@ -399,7 +399,7 @@ remove_directory_internal (const string& dir, size_t* size, vector<string>* path
                            bool just_remove_files)
 {
 	vector<string> tmp_paths;
-	struct stat statbuf;
+	GStatBuf statbuf;
 	int ret = 0;
 
 	get_paths (tmp_paths, dir, just_remove_files, true);
