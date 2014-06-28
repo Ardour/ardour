@@ -485,6 +485,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void on_realize();
 	MasterBusUI* master_bus_ui () { return _master_bus_ui; }
 
+	void suspend_route_redisplay ();
+	void resume_route_redisplay ();
+
   private:
 
 	void color_handler ();

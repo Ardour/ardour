@@ -32,6 +32,7 @@ PublicEditor::PublicEditor (std::string layout_script)
   	: Window (Gtk::WINDOW_TOPLEVEL)
 	, WavesUI (layout_script, *this)
 	, VisibilityTracker (*((Gtk::Window*)this))
+	, _suspend_route_redisplay_counter (0)
 {
 }
 
