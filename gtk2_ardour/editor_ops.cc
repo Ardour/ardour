@@ -6565,8 +6565,11 @@ edit your ardour.rc file to set the\n\
 		return;
 	}
 
-	for (vector<boost::shared_ptr<Route> >::iterator x = routes.begin(); x != routes.end(); ++x) {
-		_session->remove_route (*x);
+	{
+		Session::StateProtector sp (_session);
+		for (vector<boost::shared_ptr<Route> >::iterator x = routes.begin(); x != routes.end(); ++x) {
+			_session->remove_route (*x);
+		}
 	}
 }
 
