@@ -42,6 +42,8 @@ private:
 
 	ComboOption<float>* _vpu;
 	EntryOption* _take_name;
+
+	void save_defaults ();
 };
 
 #endif /* __gtk_ardour_session_option_editor_h__ */

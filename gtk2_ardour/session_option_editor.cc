@@ -309,6 +309,12 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_regions_to_bars_and_beats)
 			    ));
 
+	add_option (_("Misc"), new OptionEditorHeading (_("Defaults")));
+
+	Gtk::Button* btn = Gtk::manage (new Gtk::Button (_("Use these settings as defaults")));
+	btn->signal_clicked().connect (sigc::mem_fun (*this, &SessionOptionEditor::save_defaults));
+	add_option (_("Misc"), new FooOption (btn));
+
 	add_option (_("Meterbridge"), new OptionEditorHeading (_("Route Display")));
 
 	add_option (_("Meterbridge"), new BoolOption (
@@ -420,4 +426,10 @@ bool
 SessionOptionEditor::get_use_monitor_section ()
 {
 	return _session->monitor_out() != 0;
+}
+
+void
+SessionOptionEditor::save_defaults ()
+{
+	_session->save_default_options();
 }
