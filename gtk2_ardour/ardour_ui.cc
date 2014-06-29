@@ -3570,7 +3570,9 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	setup_order_hint();
 
 	ChanCount input_chan = _add_tracks_dialog->input_channels ();
+	DisplaySuspender ds;
 	ChanCount output_chan;
+
     // NP: output_channels amount will be validated and changed accordingly to Master BUS config in Session::reconnect_existing_routes
     // during AudioTracks auto connection process
 	/*if (Config->get_output_auto_connect() & AutoConnectMaster) {
