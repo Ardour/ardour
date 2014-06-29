@@ -30,7 +30,7 @@
 #include "canvas/visibility.h"
 
 namespace Cairo {
-	struct Context;
+ 	class Context;
 }
 
 namespace ArdourCanvas
