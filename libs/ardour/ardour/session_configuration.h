@@ -35,6 +35,9 @@ public:
 	XMLNode& get_variables ();
 	void set_variables (XMLNode const &);
 
+	bool load_state ();
+	bool save_state ();
+
 	/* define accessor methods */
 
 #undef  CONFIG_VARIABLE

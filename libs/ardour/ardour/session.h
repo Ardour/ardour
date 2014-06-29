@@ -401,6 +401,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	int rename (const std::string&);
 	bool get_nsm_state () const { return _under_nsm_control; }
 	void set_nsm_state (bool state) { _under_nsm_control = state; }
+	bool save_default_options ();
 
 	PBD::Signal1<void,std::string> StateSaved;
 	PBD::Signal0<void> StateReady;
