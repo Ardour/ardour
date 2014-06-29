@@ -181,6 +181,23 @@ private:
 	Gtk::Label*            _label; ///< label for button, so we can use markup
 };
 
+/** Component which allows to add any GTK Widget - intended for single buttons and custom stateless objects */
+class FooOption : public OptionEditorComponent
+{
+public:
+	FooOption (Gtk::Widget *w) : _w (w) {}
+
+	void add_to_page (OptionEditorPage* p) {
+		add_widget_to_page (p, _w);
+	}
+
+	Gtk::Widget& tip_widget() { return *_w; }
+	void set_state_from_config () {}
+	void parameter_changed (std::string const &) {}
+private:
+	Gtk::Widget *_w;
+};
+
 /** Component which provides the UI to handle a string option using a GTK Entry */
 class EntryOption : public Option
 {
