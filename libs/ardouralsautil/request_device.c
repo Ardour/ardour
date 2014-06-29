@@ -31,6 +31,16 @@
 
 #include "ardouralsautil/reserve.h"
 
+#ifndef ARD_PROG_NAME
+#define ARD_PROG_NAME "alsa_request_device"
+#endif
+#ifndef ARD_APPL_NAME
+#define ARD_APPL_NAME "ALSA User"
+#endif
+#ifndef VERSION
+#define VERSION "v0.3"
+#endif
+
 static int run = 1;
 static int release_wait_for_signal = 0;
 static pid_t parent_pid = 0;
@@ -48,7 +58,7 @@ static int stdin_available(void) {
 }
 
 static void print_version(int status) {
-	printf ("ardour-request-device 0.2\n\n");
+	printf (ARD_PROG_NAME " " VERSION "\n\n");
 	printf (
 		"Copyright (C) 2014 Robin Gareus <robin@gareus.org>\n"
 		"This is free software; see the source for copying conditions.  There is NO\n"
@@ -58,8 +68,8 @@ static void print_version(int status) {
 }
 
 static void usage(int status) {
-	printf ("ardour-request-device - DBus Audio Reservation Utility.\n");
-	printf ("Usage: ardour-request-device [ OPTIONS ] <Audio-Device-ID>\n");
+	printf (ARD_PROG_NAME " - DBus Audio Reservation Utility.\n");
+	printf ("Usage: " ARD_PROG_NAME " [ OPTIONS ] <Audio-Device-ID>\n");
 	printf ("Options:\n\
       -h, --help                 display this help and exit\n\
       -p, --priority <int>       reservation priority (default: int32_max)\n\
@@ -74,23 +84,23 @@ This tool issues a dbus request to reserve an ALSA Audio-device.\n\
 If successful other users of the device (e.g. pulseaudio) will\n\
 release the device.\n\
 \n\
-ardour-request-device by default announces itself as \"Ardour ALSA Backend\"\n\
+" ARD_PROG_NAME " by default announces itself as \"" ARD_APPL_NAME "\"\n\
 and uses the maximum possible priority for requesting the device.\n\
 These settings can be overriden using the -n and -p options respectively.\n\
 \n\
 If a PID is given the tool will watch the process and if that is not running\n\
-release the device and exit.  Otherwise ardour-request-device runs until\n\
+release the device and exit.  Otherwise " ARD_PROG_NAME " runs until\n\
 either stdin is closed, a SIGINT or SIGTERM is received or some other\n\
 application requests the device with a higher priority.\n\
 \n\
-Without the -w option, ardour-request-device yields the device after 500ms to\n\
+Without the -w option, " ARD_PROG_NAME " yields the device after 500ms to\n\
 any higher-priority request. With the -w option this tool waits until it\n\
 for SIGINT or SIGTERM - but at most 4 sec to acknowledge before releasing.\n\
 \n\
 The audio-device-id is a string e.g. 'Audio1'\n\
 \n\
 Examples:\n\
-ardour-request-device Audio0\n\
+" ARD_PROG_NAME " Audio0\n\
 \n");
 
 	printf ("Report bugs to Robin Gareus <robin@gareus.org>\n");
@@ -140,7 +150,7 @@ int main(int argc, char **argv) {
 	int ret, c;
 
 	int32_t priority = INT32_MAX;
-	char *name = strdup("Ardour ALSA Backend");
+	char *name = strdup(ARD_APPL_NAME);
 
 	while ((c = getopt_long (argc, argv,
 					"h"  /* help */

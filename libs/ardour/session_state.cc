@@ -879,6 +879,12 @@ Session::load_options (const XMLNode& node)
 	return 0;
 }
 
+bool
+Session::save_default_options ()
+{
+	return config.save_state();
+}
+
 XMLNode&
 Session::get_state()
 {

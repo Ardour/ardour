@@ -47,6 +47,8 @@ private:
 	bool set_audio_source_dir(std::string);
 	std::string get_midi_source_dir();
 	bool set_midi_source_dir(std::string);
+
+	void save_defaults ();
 };
 
 #endif /* __gtk_ardour_session_option_editor_h__ */

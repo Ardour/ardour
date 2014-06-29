@@ -300,6 +300,9 @@ Session::Session (AudioEngine &eng,
 			throw failed_constructor ();
 		}
 
+		/* load default session properties - if any */
+		config.load_state();
+
 	} else {
 
 		if (load_state (_current_snapshot_name)) {
