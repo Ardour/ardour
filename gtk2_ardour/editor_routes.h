@@ -42,10 +42,6 @@ public:
 		_no_redisplay = true;
 	}
 
-        void allow_redisplay () { 
-		_no_redisplay = false;
-	}
-
 	void resume_redisplay () {
 		_no_redisplay = false;
 		redisplay ();

@@ -4168,8 +4168,7 @@ void
 Editor::use_visual_state (VisualState& vs)
 {
 	PBD::Unwinder<bool> nsv (no_save_visual, true);
-
-	_routes->suspend_redisplay ();
+	DisplaySuspender ds;
 
 	vertical_adjustment.set_value (vs.y_position);
 
@@ -4185,7 +4184,6 @@ Editor::use_visual_state (VisualState& vs)
 	}
 
 	_routes->update_visibility ();
-	_routes->resume_redisplay ();
 }
 
 /** This is the core function that controls the zoom level of the canvas. It is called

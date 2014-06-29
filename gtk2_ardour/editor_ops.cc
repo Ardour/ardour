@@ -1402,7 +1402,7 @@ Editor::scroll_up_one_track ()
 void
 Editor::tav_zoom_step (bool coarser)
 {
-	_routes->suspend_redisplay ();
+	DisplaySuspender ds;
 
 	TrackViewList* ts;
 
@@ -1416,14 +1416,12 @@ Editor::tav_zoom_step (bool coarser)
 		TimeAxisView *tv = (static_cast<TimeAxisView*>(*i));
 			tv->step_height (coarser);
 	}
-
-	_routes->resume_redisplay ();
 }
 
 void
 Editor::tav_zoom_smooth (bool coarser, bool force_all)
 {
-	_routes->suspend_redisplay ();
+	DisplaySuspender ds;
 
 	TrackViewList* ts;
 
@@ -1448,8 +1446,6 @@ Editor::tav_zoom_smooth (bool coarser, bool force_all)
 			tv->set_height (h + 5);
 		}
 	}
-
-	_routes->resume_redisplay ();
 }
 
 bool
@@ -1709,15 +1705,13 @@ Editor::temporal_zoom_region (bool both_axes)
 
 		/* hide irrelevant tracks */
 
-		_routes->suspend_redisplay ();
+		DisplaySuspender ds;
 
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if (find (tracks.begin(), tracks.end(), (*i)) == tracks.end()) {
 				hide_track_in_display (*i);
 			}
 		}
-
-		_routes->resume_redisplay ();
 
 		vertical_adjustment.set_value (0.0);
 	}

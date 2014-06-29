@@ -349,6 +349,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 						_mute_release->routes = copy;
 					}
 
+					DisplaySuspender ds;
 					_session->set_mute (copy, !_route->muted());
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
@@ -373,6 +374,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 							rl->push_back (_route);
 						}
 
+						DisplaySuspender ds;
 						_session->set_mute (rl, !_route->muted(), Session::rt_cleanup, true);
 					}
 
@@ -403,6 +405,7 @@ RouteUI::mute_release (GdkEventButton*)
 {
 	if (!_i_am_the_modifier) {
 		if (_mute_release){
+			DisplaySuspender ds;
 			_session->set_mute (_mute_release->routes, _mute_release->active, Session::rt_cleanup, true);
 			delete _mute_release;
 			_mute_release = 0;
@@ -461,6 +464,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 						_solo_release->routes = _session->get_routes ();
 					}
 
+					DisplaySuspender ds;
 					if (Config->get_solo_control_is_listen_control()) {
 						_session->set_listen (_session->get_routes(), !_route->listening_via_monitor(),  Session::rt_cleanup, true);
 					} else {
@@ -488,6 +492,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					if (Config->get_solo_control_is_listen_control()) {
 						/* ??? we need a just_one_listen() method */
 					} else {
+						DisplaySuspender ds;
 						_session->set_just_one_solo (_route, true);
 					}
 
@@ -525,6 +530,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 							rl->push_back (_route);
 						}
 
+						DisplaySuspender ds;
 						if (Config->get_solo_control_is_listen_control()) {
 							_session->set_listen (rl, !_route->listening_via_monitor(),  Session::rt_cleanup, true);
 						} else {
@@ -543,6 +549,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 						_solo_release->routes = rl;
 					}
 
+					DisplaySuspender ds;
 					if (Config->get_solo_control_is_listen_control()) {
 						_session->set_listen (rl, !_route->listening_via_monitor());
 					} else {
@@ -566,11 +573,12 @@ RouteUI::solo_release (GdkEventButton*)
 			if (_solo_release->exclusive) {
 
 			} else {
-                                if (Config->get_solo_control_is_listen_control()) {
-                                        _session->set_listen (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
-                                } else {
-                                        _session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
-                                }
+				DisplaySuspender ds;
+				if (Config->get_solo_control_is_listen_control()) {
+					_session->set_listen (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
+				} else {
+					_session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
+				}
 			}
 
 			delete _solo_release;
@@ -613,6 +621,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
+			DisplaySuspender ds;
 			_session->set_record_enabled (_session->get_routes(), !rec_enable_button->active_state());
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
@@ -633,7 +642,8 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 					rl.reset (new RouteList);
 					rl->push_back (_route);
 				}
-				
+
+				DisplaySuspender ds;
 				_session->set_record_enabled (rl, !rec_enable_button->active_state(), Session::rt_cleanup, true);
 			}
 
@@ -645,6 +655,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 			boost::shared_ptr<RouteList> rl (new RouteList);
 			rl->push_back (route());
+			DisplaySuspender ds;
 			_session->set_record_enabled (rl, !rec_enable_button->active_state());
 		}
 	}
@@ -762,6 +773,7 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 		rl->push_back (route());
 	}
 
+	DisplaySuspender ds;
 	_session->set_monitoring (rl, mc, Session::rt_cleanup, true);		
 
 	return true;
@@ -1320,36 +1332,38 @@ RouteUI::muting_change ()
 bool
 RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 {
-        if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS) {
-                return true;
-        }
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS) {
+		return true;
+	}
 
-        bool view = solo_isolated_led->active_state();
-        bool model = _route->solo_isolated();
+	bool view = solo_isolated_led->active_state();
+	bool model = _route->solo_isolated();
 
-        /* called BEFORE the view has changed */
+	/* called BEFORE the view has changed */
 
-        if (ev->button == 1) {
-                if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
+	if (ev->button == 1) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-                        if (model) {
-                                /* disable isolate for all routes */
-                                _session->set_solo_isolated (_session->get_routes(), false, Session::rt_cleanup, true);
-                        }
+			if (model) {
+				/* disable isolate for all routes */
+				DisplaySuspender ds;
+				_session->set_solo_isolated (_session->get_routes(), false, Session::rt_cleanup, true);
+			}
 
-                } else {
-                        if (model == view) {
+		} else {
+			if (model == view) {
 
-                                /* flip just this route */
+				/* flip just this route */
 
-                                boost::shared_ptr<RouteList> rl (new RouteList);
-                                rl->push_back (_route);
-                                _session->set_solo_isolated (rl, !view, Session::rt_cleanup, true);
-                        }
-                }
-        }
+				boost::shared_ptr<RouteList> rl (new RouteList);
+				rl->push_back (_route);
+				DisplaySuspender ds;
+				_session->set_solo_isolated (rl, !view, Session::rt_cleanup, true);
+			}
+		}
+	}
 
-        return true;
+	return true;
 }
 
 bool

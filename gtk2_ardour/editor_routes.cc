@@ -562,15 +562,8 @@ EditorRoutes::row_deleted (Gtk::TreeModel::Path const &)
 
 	DEBUG_TRACE (DEBUG::OrderKeys, "editor routes treeview row deleted\n");
 
-        if (_route_deletion_in_progress) {
-                suspend_redisplay ();
-        }
-
+	DisplaySuspender ds;
 	sync_order_keys_from_treeview ();
-
-        if (_route_deletion_in_progress) {
-                resume_redisplay ();
-        }
 }
 
 void
@@ -591,6 +584,7 @@ EditorRoutes::visible_changed (std::string const & path)
 		return;
 	}
 
+	DisplaySuspender ds;
 	TreeIter iter;
 
 	if ((iter = _model->get_iter (path))) {
@@ -639,7 +633,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		_editor->selection->tracks.clear();
 	} 
 
-	suspend_redisplay ();
+	DisplaySuspender ds;
 
 	_display.set_model (Glib::RefPtr<ListStore>());
 
@@ -708,7 +702,6 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 	update_input_active_display ();
 	update_active_display ();
 
-	resume_redisplay ();
 	_display.set_model (_model);
 
 	/* now update route order keys from the treeview/track display order */
@@ -803,7 +796,7 @@ EditorRoutes::update_visibility ()
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 
-	suspend_redisplay ();
+	DisplaySuspender ds ();
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[_columns.tv];
@@ -814,8 +807,6 @@ EditorRoutes::update_visibility ()
 	 */
 
 	sync_order_keys_from_treeview ();
-
-	resume_redisplay ();
 }
 
 void
@@ -1033,7 +1024,7 @@ EditorRoutes::hide_all_tracks (bool /*with_select*/)
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 
-	suspend_redisplay ();
+	DisplaySuspender ds;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 
@@ -1046,8 +1037,6 @@ EditorRoutes::hide_all_tracks (bool /*with_select*/)
 
 		row[_columns.visible] = false;
 	}
-
-	resume_redisplay ();
 }
 
 void
@@ -1056,7 +1045,7 @@ EditorRoutes::set_all_tracks_visibility (bool yn)
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 
-	suspend_redisplay ();
+	DisplaySuspender ds;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 
@@ -1075,8 +1064,6 @@ EditorRoutes::set_all_tracks_visibility (bool yn)
 	 */
 
 	sync_order_keys_from_treeview ();
-
-	resume_redisplay ();
 }
 
 void
@@ -1085,7 +1072,7 @@ EditorRoutes::set_all_audio_midi_visibility (int tracks, bool yn)
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 
-	suspend_redisplay ();
+	DisplaySuspender ds;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 
@@ -1137,8 +1124,6 @@ EditorRoutes::set_all_audio_midi_visibility (int tracks, bool yn)
 	 */
 
 	sync_order_keys_from_treeview ();
-
-	resume_redisplay ();
 }
 
 void
@@ -1383,11 +1368,10 @@ struct EditorOrderRouteSorter {
 void
 EditorRoutes::initial_display ()
 {
-	suspend_redisplay ();
+	DisplaySuspender ds;
 	_model->clear ();
 
 	if (!_session) {
-		resume_redisplay ();
 		return;
 	}
 
@@ -1414,8 +1398,6 @@ EditorRoutes::initial_display ()
 		_editor->add_routes (r);
 		
 	}
-
-	resume_redisplay ();
 }
 
 void
@@ -1724,14 +1706,11 @@ EditorRoutes::show_tracks_with_regions_at_playhead ()
 		}
 	}
 
-	suspend_redisplay ();
+	DisplaySuspender ds;
 
 	TreeModel::Children rows = _model->children ();
 	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView* tv = (*i)[_columns.tv];
 		(*i)[_columns.visible] = (show.find (tv) != show.end());
 	}
-
-	resume_redisplay ();
 }
-

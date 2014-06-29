@@ -3393,6 +3393,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	setup_order_hint();
 
 	string template_path = add_route_dialog->track_template();
+	DisplaySuspender ds;
 
 	if (!template_path.empty()) {
 		if (add_route_dialog->name_template_is_default())  {
