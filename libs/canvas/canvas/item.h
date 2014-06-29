@@ -36,9 +36,9 @@
 
 namespace ArdourCanvas
 {
+struct Rect;	
 
 class Canvas;
-class Rect;	
 class ScrollGroup;
 
 /** The parent class for anything that goes on the canvas.

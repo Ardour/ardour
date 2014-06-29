@@ -40,8 +40,8 @@
 
 namespace ArdourCanvas
 {
+struct Rect;
 
-class Rect;
 class Item;
 class ScrollGroup;
 
