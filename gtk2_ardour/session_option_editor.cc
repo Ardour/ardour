@@ -265,56 +265,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*this, &SessionOptionEditor::get_use_monitor_section),
 			    sigc::mem_fun (*this, &SessionOptionEditor::set_use_monitor_section)
 			    ));
-
-        /* Misc */
-
-	add_option (_("Misc"), new OptionEditorHeading (_("MIDI Options")));
-
-        add_option (_("Misc"), new BoolOption (
-			    "midi-copy-is-fork",
-			    _("MIDI region copies are independent"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_midi_copy_is_fork),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_midi_copy_is_fork)
-			    ));
-
-	ComboOption<InsertMergePolicy>* li = new ComboOption<InsertMergePolicy> (
-		"insert-merge-policy",
-		_("Policy for handling overlapping notes\n on the same MIDI channel"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_insert_merge_policy),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_insert_merge_policy)
-		);
-
-        li->add (InsertMergeReject, _("never allow them"));
-        li->add (InsertMergeRelax, _("don't do anything in particular"));
-        li->add (InsertMergeReplace, _("replace any overlapped existing note"));
-        li->add (InsertMergeTruncateExisting, _("shorten the overlapped existing note"));
-        li->add (InsertMergeTruncateAddition, _("shorten the overlapping new note"));
-        li->add (InsertMergeExtend, _("replace both overlapping notes with a single note"));
-
-	add_option (_("Misc"), li);
-
-	add_option (_("Misc"), new OptionEditorHeading (_("Glue to bars and beats")));
-
-	add_option (_("Misc"), new BoolOption (
-			    "glue-new-markers-to-bars-and-beats",
-			    _("Glue new markers to bars and beats"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_glue_new_markers_to_bars_and_beats),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_markers_to_bars_and_beats)
-			    ));
-
-	add_option (_("Misc"), new BoolOption (
-			    "glue-new-regions-to-bars-and-beats",
-			    _("Glue new regions to bars and beats"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_glue_new_regions_to_bars_and_beats),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_regions_to_bars_and_beats)
-			    ));
-
-	add_option (_("Misc"), new OptionEditorHeading (_("Defaults")));
-
-	Gtk::Button* btn = Gtk::manage (new Gtk::Button (_("Use these settings as defaults")));
-	btn->signal_clicked().connect (sigc::mem_fun (*this, &SessionOptionEditor::save_defaults));
-	add_option (_("Misc"), new FooOption (btn));
-
+	/* Meterbridge */
 	add_option (_("Meterbridge"), new OptionEditorHeading (_("Route Display")));
 
 	add_option (_("Meterbridge"), new BoolOption (
@@ -376,6 +327,55 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_name_on_meterbridge),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_name_on_meterbridge)
 			    ));
+
+	/* Misc */
+
+	add_option (_("Misc"), new OptionEditorHeading (_("MIDI Options")));
+
+	add_option (_("Misc"), new BoolOption (
+				"midi-copy-is-fork",
+				_("MIDI region copies are independent"),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::get_midi_copy_is_fork),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::set_midi_copy_is_fork)
+				));
+
+	ComboOption<InsertMergePolicy>* li = new ComboOption<InsertMergePolicy> (
+			"insert-merge-policy",
+			_("Policy for handling overlapping notes\n on the same MIDI channel"),
+			sigc::mem_fun (*_session_config, &SessionConfiguration::get_insert_merge_policy),
+			sigc::mem_fun (*_session_config, &SessionConfiguration::set_insert_merge_policy)
+			);
+
+	li->add (InsertMergeReject, _("never allow them"));
+	li->add (InsertMergeRelax, _("don't do anything in particular"));
+	li->add (InsertMergeReplace, _("replace any overlapped existing note"));
+	li->add (InsertMergeTruncateExisting, _("shorten the overlapped existing note"));
+	li->add (InsertMergeTruncateAddition, _("shorten the overlapping new note"));
+	li->add (InsertMergeExtend, _("replace both overlapping notes with a single note"));
+
+	add_option (_("Misc"), li);
+
+	add_option (_("Misc"), new OptionEditorHeading (_("Glue to bars and beats")));
+
+	add_option (_("Misc"), new BoolOption (
+				"glue-new-markers-to-bars-and-beats",
+				_("Glue new markers to bars and beats"),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::get_glue_new_markers_to_bars_and_beats),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_markers_to_bars_and_beats)
+				));
+
+	add_option (_("Misc"), new BoolOption (
+				"glue-new-regions-to-bars-and-beats",
+				_("Glue new regions to bars and beats"),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::get_glue_new_regions_to_bars_and_beats),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_regions_to_bars_and_beats)
+				));
+
+	add_option (_("Misc"), new OptionEditorHeading (_("Defaults")));
+
+	Gtk::Button* btn = Gtk::manage (new Gtk::Button (_("Use these settings as defaults")));
+	btn->signal_clicked().connect (sigc::mem_fun (*this, &SessionOptionEditor::save_defaults));
+	add_option (_("Misc"), new FooOption (btn));
 
 }
 
