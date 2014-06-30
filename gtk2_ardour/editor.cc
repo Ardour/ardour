@@ -4922,6 +4922,10 @@ Editor::add_routes (RouteList& routes)
 void
 Editor::timeaxisview_deleted (TimeAxisView *tv)
 {
+	if (tv == entered_track) {
+		entered_track = 0;
+	}
+
 	if (_session && _session->deletion_in_progress()) {
 		/* the situation is under control */
 		return;
@@ -4932,10 +4936,6 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tv);
 
 	_routes->route_removed (tv);
-
-	if (tv == entered_track) {
-		entered_track = 0;
-	}
 
 	TimeAxisView::Children c = tv->get_child_list ();
 	for (TimeAxisView::Children::const_iterator i = c.begin(); i != c.end(); ++i) {
