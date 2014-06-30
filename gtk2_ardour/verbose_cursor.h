@@ -41,8 +41,10 @@ public:
 
 	void show ();
 	void hide ();
-
+	
 private:
 	Editor*                     _editor;
 	ArdourCanvas::TrackingText* _canvas_item;
+
+	void color_handler ();
 };
