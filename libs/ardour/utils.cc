@@ -200,18 +200,19 @@ string
 ARDOUR::bump_name_number (const std::string& name)
 {
 	size_t pos = name.length();
+	size_t num = 0;
 	bool have_number = false;
 	while (pos > 0 && isdigit(name.at(--pos))) {
 		have_number = true;
+		num = pos;
 	}
 
 	string newname;
 	if (have_number) {
-		++pos;
-		int32_t num = strtol (name.c_str() + pos, (char **)NULL, 10);
+		int32_t seq = strtol (name.c_str() + num, (char **)NULL, 10);
 		char buf[32];
-		snprintf (buf, sizeof(buf), "%d", num + 1);
-		newname = name.substr (0, pos);
+		snprintf (buf, sizeof(buf), "%d", seq + 1);
+		newname = name.substr (0, num);
 		newname += buf;
 	} else {
 		newname = name;
