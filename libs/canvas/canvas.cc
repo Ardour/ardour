@@ -416,6 +416,8 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 		within_items.push_front (possible_item);
 	}
 
+	DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("after filtering insensitive + containers, we have  %1 items\n", within_items.size()));
+
 	if (within_items.empty()) {
 
 		/* no items at point, just send leave event below */
