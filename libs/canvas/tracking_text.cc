@@ -46,6 +46,7 @@ TrackingText::init ()
 {
 	_canvas->MouseMotion.connect (sigc::mem_fun (*this, &TrackingText::pointer_motion));
 	set_ignore_events (true);
+	set_outline (true);
 	hide ();
 }
 
