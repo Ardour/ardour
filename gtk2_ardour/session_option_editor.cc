@@ -132,18 +132,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	/* FADES */
 
-	ComboOption<CrossfadeChoice>* cfc = new ComboOption<CrossfadeChoice> (
-		"xfade-choice",
-		_("Default crossfade type"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_xfade_choice),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_xfade_choice)
-		);
-
-	cfc->add (ConstantPowerMinus3dB, _("Constant power (-3dB) crossfade"));
-	cfc->add (ConstantPowerMinus6dB, _("Linear (-6dB) crossfade"));
-
-	add_option (_("Fades"), cfc);
-
 	add_option (_("Fades"), new SpinOption<float> (
 		_("destructive-xfade-seconds"),
 		_("Destructive crossfade length"),

@@ -74,8 +74,6 @@ setup_enum_writer ()
 	AFLPosition _AFLPosition;
 	RemoteModel _RemoteModel;
 	DenormalModel _DenormalModel;
-	CrossfadeModel _CrossfadeModel;
-	CrossfadeChoice _CrossfadeChoice;
 	InsertMergePolicy _InsertMergePolicy;
 	ListenPosition _ListenPosition;
 	SampleFormat _SampleFormat;
@@ -288,15 +286,6 @@ setup_enum_writer ()
 	 * editor / mixer ordering.
 	*/
 	enum_writer.add_to_hack_table ("EditorOrdered", "MixerOrdered");
-
-	REGISTER_ENUM (FullCrossfade);
-	REGISTER_ENUM (ShortCrossfade);
-	REGISTER (_CrossfadeModel);
-
-	REGISTER_ENUM (RegionFades);
-	REGISTER_ENUM (ConstantPowerMinus3dB);
-	REGISTER_ENUM (ConstantPowerMinus6dB);
-	REGISTER (_CrossfadeChoice);
 
         REGISTER_ENUM (InsertMergeReject);
         REGISTER_ENUM (InsertMergeRelax);
@@ -789,34 +778,6 @@ std::istream& operator>>(std::istream& o, InsertMergePolicy& var)
 	return o;
 }
 std::ostream& operator<<(std::ostream& o, const InsertMergePolicy& var)
-{
-	std::string s = enum_2_string (var);
-	return o << s;
-}
-
-std::istream& operator>>(std::istream& o, CrossfadeModel& var)
-{
-	std::string s;
-	o >> s;
-	var = (CrossfadeModel) string_2_enum (s, var);
-	return o;
-}
-
-std::ostream& operator<<(std::ostream& o, const CrossfadeModel& var)
-{
-	std::string s = enum_2_string (var);
-	return o << s;
-}
-
-std::istream& operator>>(std::istream& o, CrossfadeChoice& var)
-{
-	std::string s;
-	o >> s;
-	var = (CrossfadeChoice) string_2_enum (s, var);
-	return o;
-}
-
-std::ostream& operator<<(std::ostream& o, const CrossfadeChoice& var)
 {
 	std::string s = enum_2_string (var);
 	return o << s;
