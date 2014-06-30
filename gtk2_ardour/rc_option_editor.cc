@@ -2142,6 +2142,14 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
+		     "draggable-playhead",
+		     _("Allow dragging of playhead"),
+		     sigc::mem_fun (*ARDOUR_UI::config(), &UIConfiguration::get_draggable_playhead),
+		     sigc::mem_fun (*ARDOUR_UI::config(), &UIConfiguration::set_draggable_playhead)
+		     ));
+
+	add_option (S_("Preferences|GUI"),
+	     new BoolOption (
 		     "widget-prelight",
 		     _("Graphically indicate mouse pointer hovering over various widgets"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_widget_prelight),
