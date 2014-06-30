@@ -31,5 +31,7 @@ namespace ArdourCanvas {
 	extern LIBCANVAS_API void set_source_rgba (Cairo::RefPtr<Cairo::Context>, Color);
 
 	Distance LIBCANVAS_API distance_to_segment_squared (Duple const & p, Duple const & p1, Duple const & p2, double& t, Duple& at);
+
+        uint32_t LIBCANVAS_API contrasting_text_color (uint32_t c);
 }
 

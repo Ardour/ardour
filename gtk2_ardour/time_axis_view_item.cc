@@ -699,7 +699,7 @@ TimeAxisViewItem::set_name_text_color ()
 		f = get_fill_color ();
 	}
 
-	name_text->set_color (contrasting_text_color (f));
+	name_text->set_color (ArdourCanvas::contrasting_text_color (f));
 }
 
 uint32_t
