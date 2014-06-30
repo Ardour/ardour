@@ -490,13 +490,27 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	   to cut notes or regions.
 	*/
 
-	MouseMode eff_mouse_mode = mouse_mode;
+	MouseMode eff_mouse_mode = effective_mouse_mode ();
 
 	if (get_smart_mode() && eff_mouse_mode == MouseRange && event->button.button == 3 && item_type == RegionItem) {
 		/* context clicks are always about object properties, even if
 		   we're in range mode within smart mode.
 		*/
 		eff_mouse_mode = MouseObject;
+	}
+
+	/* special case: allow drag of region fade in/out in object mode with join object/range enabled */
+	if (get_smart_mode()) {
+		switch (item_type) {
+		  case FadeInHandleItem:
+		  case FadeInTrimHandleItem:
+		  case FadeOutHandleItem:
+		  case FadeOutTrimHandleItem:
+			  eff_mouse_mode = MouseObject;
+			  break;
+		default:
+			break;
+		}
 	}
 
 	if (((mouse_mode != MouseObject) &&
@@ -567,7 +581,6 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	case StartCrossFadeItem:
 	case EndCrossFadeItem:
 		if (eff_mouse_mode != MouseRange) {
-			cerr << "Should be setting selected regionview\n";
 			set_selected_regionview_from_click (press, op);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			set_selected_track_as_side_effect (op);
@@ -717,8 +730,17 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	Editing::MouseMode eff = effective_mouse_mode ();
 
 	/* special case: allow drag of region fade in/out in object mode with join object/range enabled */
-	if (item_type == FadeInHandleItem || item_type == FadeOutHandleItem) {
-		eff = MouseObject;
+	if (get_smart_mode()) { 
+		switch (item_type) {
+		  case FadeInHandleItem:
+		  case FadeInTrimHandleItem:
+		  case FadeOutHandleItem:
+		  case FadeOutTrimHandleItem:
+			eff = MouseObject;
+			break;
+		default:
+			break;
+		}
 	}
 
 	/* there is no Range mode when in internal edit mode */
