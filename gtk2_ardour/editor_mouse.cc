@@ -565,13 +565,6 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
  	case RegionViewName:
 	case LeftFrameHandle:
 	case RightFrameHandle:
-		if (eff_mouse_mode != MouseRange) {
-			set_selected_regionview_from_click (press, op);
-		} else if (event->type == GDK_BUTTON_PRESS) {
-			set_selected_track_as_side_effect (op);
-		}
-		break;
-
 	case FadeInHandleItem:
 	case FadeInTrimHandleItem:
 	case FadeInItem:
@@ -580,7 +573,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	case FadeOutItem:
 	case StartCrossFadeItem:
 	case EndCrossFadeItem:
-		if (eff_mouse_mode != MouseRange) {
+		if (get_smart_mode() || eff_mouse_mode != MouseRange) {
 			set_selected_regionview_from_click (press, op);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			set_selected_track_as_side_effect (op);
