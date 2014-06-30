@@ -43,7 +43,7 @@ CONFIG_VARIABLE_SPECIAL(std::string, audio_search_path, "audio-search-path", "",
 CONFIG_VARIABLE_SPECIAL(std::string, midi_search_path, "midi-search-path", "", PBD::search_path_expand)
 CONFIG_VARIABLE (bool, track_name_number, "track-name-number", false)
 CONFIG_VARIABLE (bool, track_name_take, "track-name-take", false)
-CONFIG_VARIABLE (std::string, take_name, "take-name", "Take")
+CONFIG_VARIABLE (std::string, take_name, "take-name", "Take1")
 CONFIG_VARIABLE (bool, jack_time_master, "jack-time-master", true)
 CONFIG_VARIABLE (bool, use_video_sync, "use-video-sync", false)
 CONFIG_VARIABLE (float, video_pullup, "video-pullup", 0.0f)
