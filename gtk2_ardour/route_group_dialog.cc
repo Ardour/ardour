@@ -88,16 +88,6 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	
 	main_vbox->pack_start (*top_vbox, false, false);
 
-	if (_group->name ().empty()) {
-		_initial_name = "1";
-		while (!unique_name (_initial_name)) {
-			_initial_name = bump_name_number (_initial_name);
-		}
-		_name.set_text (_initial_name);
-		update();
-	}
-
-	_name.set_text (_group->name ());
 	_active.set_active (_group->is_active ());
 
 	Gdk::Color c;
@@ -111,8 +101,6 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true);
 
-	_name.signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &Dialog::response), RESPONSE_OK));
-
 	_gain.set_active (_group->is_gain());
 	_relative.set_active (_group->is_relative());
 	_mute.set_active (_group->is_mute());
@@ -123,6 +111,18 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	_share_color.set_active (_group->is_color());
 	_share_monitoring.set_active (_group->is_monitoring());
 
+	if (_group->name ().empty()) {
+		_initial_name = "1";
+		while (!unique_name (_initial_name)) {
+			_initial_name = bump_name_number (_initial_name);
+		}
+		_name.set_text (_initial_name);
+		update();
+	} else {
+		_name.set_text (_initial_name);
+	}
+
+	_name.signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &Dialog::response), RESPONSE_OK));
 	_name.signal_changed().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_color.signal_color_set().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
