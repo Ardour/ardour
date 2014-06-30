@@ -41,6 +41,7 @@ Text::Text (Canvas* c)
 	, _need_redraw (false)
 	, _clamped_width (COORD_MAX)
 {
+	_outline = false;
 }
 
 Text::Text (Item* parent)
@@ -53,6 +54,7 @@ Text::Text (Item* parent)
 	, _need_redraw (false)
 	, _clamped_width (COORD_MAX)
 {
+	_outline = false;
 }
 
 Text::~Text ()
@@ -121,9 +123,17 @@ Text::_redraw (Glib::RefPtr<Pango::Layout> layout) const
 
 	/* and draw, in the appropriate color of course */
 
-	set_source_rgba (img_context, _color);
-
-	layout->show_in_cairo_context (img_context);
+	if (_outline) {
+		set_source_rgba (img_context, _outline_color);
+		layout->update_from_cairo_context (img_context);
+		pango_cairo_layout_path (img_context->cobj(), layout->gobj());
+		img_context->stroke_preserve ();
+		set_source_rgba (img_context, _color);
+		img_context->fill ();
+	} else {
+		set_source_rgba (img_context, _color);
+		layout->show_in_cairo_context (img_context);
+	}
 
 	/* text has now been rendered in _image and is ready for blit in
 	 * ::render 
@@ -211,6 +221,9 @@ Text::set_color (Color color)
 	begin_change ();
 
 	_color = color;
+	if (_outline) {
+		set_outline_color (contrasting_text_color (_color));
+	}
 	_need_redraw = true;
 
 	end_change ();
