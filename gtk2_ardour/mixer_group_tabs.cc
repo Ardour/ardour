@@ -121,7 +121,7 @@ MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 		cairo_text_extents_t ext;
 		cairo_text_extents (cr, tab.group->name().c_str(), &ext);
 		
-		ArdourCanvas::Color c = contrasting_text_color (ArdourCanvas::rgba_to_color (r, g, b, a));
+		ArdourCanvas::Color c = ArdourCanvas::contrasting_text_color (ArdourCanvas::rgba_to_color (r, g, b, a));
 		ArdourCanvas::color_to_rgba (c, r, g, b, a);
 
 		cairo_set_source_rgb (cr, r, g, b);
