@@ -123,6 +123,7 @@
 #include "time_axis_view.h"
 #include "master_bus_ui.h"
 #include "utils.h"
+#include "verbose_cursor.h"
 
 #include "i18n.h"
 
@@ -768,9 +769,14 @@ Editor::Editor ()
         }
 
 	constructed = true;
-	instant_save ();
+
+	/* grab current parameter state */
+	boost::function<void (string)> pc (boost::bind (&Editor::ui_parameter_changed, this, _1));
+	ARDOUR_UI::config()->map_parameters (pc);
 
 	setup_fade_images ();
+
+	instant_save ();
 }
 
 Editor::~Editor()
@@ -5583,5 +5589,9 @@ Editor::ui_parameter_changed (string parameter)
 			_cursor_stack.pop();
 		}
 		_cursors->set_cursor_set (ARDOUR_UI::config()->get_icon_set());
+	} else if (parameter == "draggable-playhead") {
+		if (_verbose_cursor) {
+			playhead_cursor->set_sensitive (ARDOUR_UI::config()->get_draggable_playhead());
+		}
 	}
 }

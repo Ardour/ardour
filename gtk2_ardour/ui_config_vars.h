@@ -28,4 +28,5 @@ UI_CONFIG_VARIABLE (bool, show_waveform_clipping, "show-waveform-clipping", true
 UI_CONFIG_VARIABLE (int, auto_lock_timer, "auto-lock-timer", 0)
 UI_CONFIG_VARIABLE (int, auto_save_timer, "auto-save-timer", 0)
 UI_CONFIG_VARIABLE (int, pre_record_buffer, "pre-record-buffer", 0)
+UI_CONFIG_VARIABLE (bool, draggable_playhead, "draggable-playhead", true)
 
