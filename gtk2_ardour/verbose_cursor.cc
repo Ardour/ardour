@@ -106,13 +106,9 @@ VerboseCursor::set_time (framepos_t frame)
 		return;
 	}
 
-	AudioClock::Mode m;
+	/* Take clock mode from the primary clock */
 
-	if (Profile->get_sae() || Profile->get_small_screen() || Profile->get_trx()) {
-		m = ARDOUR_UI::instance()->primary_clock->mode();
-	} else {
-		m = ARDOUR_UI::instance()->secondary_clock->mode();
-	}
+	AudioClock::Mode m = ARDOUR_UI::instance()->primary_clock->mode();
 
 	switch (m) {
 	case AudioClock::BBT:
