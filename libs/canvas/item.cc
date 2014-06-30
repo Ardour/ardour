@@ -960,12 +960,13 @@ Item::add_items_at_point (Duple const point, vector<Item const *>& items) const
 	}
 
 	/* recurse and add any items within our group that contain point.
-	   Our children are only considered visible if we are 
+	   Our children are only considered visible if we are, and similarly
+	   only if we do not ignore events.
 	*/
 
 	vector<Item*> our_items;
 
-	if (!_items.empty() && visible()) {
+	if (!_items.empty() && visible() && !_ignore_events) {
 		ensure_lut ();
 		our_items = _lut->items_at_point (point);
 	}
