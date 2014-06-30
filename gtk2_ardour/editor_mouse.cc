@@ -1454,6 +1454,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case FadeInHandleItem:
 			case FadeInTrimHandleItem:
 			case StartCrossFadeItem:
+			case LeftFrameHandle:
 				popup_xfade_in_context_menu (1, event->button.time, item, item_type);
 				break;
 
@@ -1461,6 +1462,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case FadeOutHandleItem:
 			case FadeOutTrimHandleItem:
 			case EndCrossFadeItem:
+			case RightFrameHandle:
 				popup_xfade_out_context_menu (1, event->button.time, item, item_type);
 				break;
 
@@ -1470,8 +1472,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case RegionItem:
 			case RegionViewNameHighlight:
-			case LeftFrameHandle:
-			case RightFrameHandle:
 			case RegionViewName:
 				popup_track_context_menu (1, event->button.time, item_type, false);
 				break;
