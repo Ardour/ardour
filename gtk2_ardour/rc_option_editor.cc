@@ -1540,6 +1540,14 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* EDITOR */
 
+	add_option (S_("Editor"),
+	     new BoolOption (
+		     "draggable-playhead",
+		     _("Allow dragging of playhead"),
+		     sigc::mem_fun (*ARDOUR_UI::config(), &UIConfiguration::get_draggable_playhead),
+		     sigc::mem_fun (*ARDOUR_UI::config(), &UIConfiguration::set_draggable_playhead)
+		     ));
+
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "link-region-and-track-selection",
@@ -2139,14 +2147,6 @@ RCOptionEditor::RCOptionEditor ()
 #endif
 
 	/* INTERFACE */
-
-	add_option (S_("Preferences|GUI"),
-	     new BoolOption (
-		     "draggable-playhead",
-		     _("Allow dragging of playhead"),
-		     sigc::mem_fun (*ARDOUR_UI::config(), &UIConfiguration::get_draggable_playhead),
-		     sigc::mem_fun (*ARDOUR_UI::config(), &UIConfiguration::set_draggable_playhead)
-		     ));
 
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
