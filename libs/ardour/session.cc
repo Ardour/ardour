@@ -561,6 +561,14 @@ Session::destroy ()
 
 	clear_clicks ();
 
+	/* need to remove auditioner before monitoring section
+	 * otherwise it is re-connected */
+	auditioner.reset ();
+
+	/* drop references to routes held by the monitoring section
+	 * specifically _monitor_out aux/listen references */
+	remove_monitor_section();
+
 	/* clear out any pending dead wood from RCU managed objects */
 
 	routes.flush ();
@@ -580,7 +588,6 @@ Session::destroy ()
 
 	/* reset these three references to special routes before we do the usual route delete thing */
 
-	auditioner.reset ();
 	_master_out.reset ();
 	_monitor_out.reset ();
     _master_track.reset ();
@@ -4148,6 +4155,9 @@ Session::audition_region (boost::shared_ptr<Region> r)
 void
 Session::cancel_audition ()
 {
+	if (!auditioner) {
+		return;
+	}
 	if (auditioner->auditioning()) {
 		auditioner->cancel_audition ();
 		AuditionActive (false); /* EMIT SIGNAL */
