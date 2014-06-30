@@ -250,8 +250,6 @@
          <menuitem action='combine-regions'/>
          <menuitem action='uncombine-regions'/>
          <menuitem action='analyze-region'/>
-         <menuitem action='toggle-opaque-region'/>
-         <menuitem action='toggle-region-mute'/>
          <menuitem action='pitch-shift-region'/>
          <menuitem action='split-region'/>
          <menuitem action='split-multichannel-region'/>
@@ -275,6 +273,8 @@
         <menuitem action='show-region-list-editor'/>
       </menu>
       <menu action='RegionMenuGain'>
+        <menuitem action='toggle-opaque-region'/>
+        <menuitem action='toggle-region-mute'/>
         <menuitem action='normalize-region'/>
         <menuitem action='boost-region-gain'/>
         <menuitem action='cut-region-gain'/>      		   
@@ -625,8 +625,6 @@
        <menuitem action='uncombine-regions'/>
        <menuitem action='split-region'/>
        <menuitem action='split-multichannel-region'/>
-       <menuitem action='toggle-opaque-region'/>
-       <menuitem action='toggle-region-mute'/>
        <menuitem action='pitch-shift-region'/>
        <menuitem action='reverse-region'/>    
        <menuitem action='close-region-gaps'/>
@@ -677,6 +675,8 @@
       <menuitem action='set-selection-from-region'/>
     </menu>
     <menu action='RegionMenuGain'>
+      <menuitem action='toggle-opaque-region'/>
+      <menuitem action='toggle-region-mute'/>
       <menuitem action='normalize-region'/>
       <menuitem action='boost-region-gain'/>
       <menuitem action='cut-region-gain'/>      		   
