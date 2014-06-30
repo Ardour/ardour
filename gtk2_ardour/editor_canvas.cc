@@ -1182,11 +1182,9 @@ Editor::which_track_cursor () const
 		case JOIN_OBJECT_RANGE_NONE:
 		case JOIN_OBJECT_RANGE_OBJECT:
 			cursor = which_grabber_cursor ();
-			cerr << "region use grabber\n";
 			break;
 		case JOIN_OBJECT_RANGE_RANGE:
 			cursor = _cursors->selector;
-			cerr << "region use selector\n";
 			break;
 		}
 	}
@@ -1215,8 +1213,6 @@ void
 Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType type)
 {
 	Gdk::Cursor* cursor = 0;
-
-	cerr << "entered new item type " << enum_2_string (type) << endl;
 
 	if (_drags->active()) {
 		return;
