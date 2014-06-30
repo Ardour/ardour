@@ -73,7 +73,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	 */
 
 	Duple event_coords = _track_canvas->window_to_canvas (Duple (ev->x, ev->y));
-	
+
   retry:
 	switch (direction) {
 	case GDK_SCROLL_UP:
@@ -1104,6 +1104,9 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 bool
 Editor::canvas_drop_zone_event (GdkEvent* event)
 {
+	GdkEventScroll scroll;	
+	ArdourCanvas::Duple winpos;
+	
 	switch (event->type) {
 	case GDK_BUTTON_RELEASE:
 		if (event->button.button == 1) {
@@ -1111,6 +1114,18 @@ Editor::canvas_drop_zone_event (GdkEvent* event)
 			selection->clear_tracks ();
 		}
 		break;
+
+	case GDK_SCROLL:
+		/* convert coordinates back into window space so that
+		   we can just call canvas_scroll_event().
+		*/
+		winpos = _track_canvas->canvas_to_window (Duple (event->scroll.x, event->scroll.y));
+		scroll = event->scroll;
+		scroll.x = winpos.x;
+		scroll.y = winpos.y;
+		return canvas_scroll_event (&scroll, true);
+		break;
+
 	default:
 		break;
 	}
