@@ -2603,6 +2603,13 @@ Session::remove_route (boost::shared_ptr<Route> route)
 		}
 	}
 
+	/* if the monitoring section had a pointer to this route, remove it */
+	if (_monitor_out && !route->is_master() && !route->is_monitor()) {
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Unwinder<bool> uw (ignore_route_processor_changes, true);
+		route->remove_aux_or_listen (_monitor_out);
+	}
+
 	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (route);
 	if (mt && mt->step_editing()) {
 		if (_step_editors > 0) {
