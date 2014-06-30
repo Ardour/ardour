@@ -45,6 +45,7 @@
     <Option name="image track" value="ddddd8ff"/>
     <Option name="inactive crossfade" value="e8ed3d77"/>
     <Option name="inactive fade handle" value="bbbbbbaa"/>
+    <Option name="inactive group tab" value="000000aa"/>
     <Option name="location cd marker" value="1ee8c4ff"/>
     <Option name="location loop" value="35964fff"/>
     <Option name="location marker" value="c4f411ff"/>

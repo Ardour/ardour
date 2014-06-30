@@ -23,6 +23,7 @@
 
 #include "canvas/utils.h"
 
+#include "ardour_ui.h"
 #include "editor.h"
 #include "editor_group_tabs.h"
 #include "editor_route_groups.h"
@@ -94,9 +95,7 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 	if (tab.group && tab.group->is_active()) {
 		ArdourCanvas::color_to_rgba (tab.color, r, g, b, a);
 	} else {
-		r = 0.0;
-		g = 0.0;
-		b = 0.0;
+		ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->get_canvasvar_InactiveGroupTab(), r, g, b, a);
 	}
 
 	a = 1.0;
