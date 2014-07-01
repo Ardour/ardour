@@ -196,10 +196,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	std::string peak_path (std::string) const;
 
 	std::string peak_path_from_audio_path (std::string) const;
-	std::string new_audio_source_name (const std::string&, uint32_t nchans, uint32_t chan, bool destructive);
-	std::string new_midi_source_name (const std::string&);
-	std::string new_source_path_from_name (DataType type, const std::string&);
+	std::string new_audio_source_path (const std::string&, uint32_t nchans, uint32_t chan, bool destructive, bool take_required);
+	std::string new_midi_source_path (const std::string&);
         RouteList new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name);
+	std::vector<std::string> get_paths_for_new_sources (bool allow_replacing, const std::string& import_file_path, uint32_t channels);
 
 	void process (pframes_t nframes);
 
@@ -548,8 +548,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	/* region info  */
 
 	boost::shared_ptr<Region> find_whole_file_parent (boost::shared_ptr<Region const>) const;
-
-	std::string path_from_region_name (DataType type, std::string name, std::string identifier);
 
 	boost::shared_ptr<Region>      XMLRegionFactory (const XMLNode&, bool full);
 	boost::shared_ptr<AudioRegion> XMLAudioRegionFactory (const XMLNode&, bool full);
@@ -1485,7 +1483,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	bool no_questions_about_missing_files;
 
-	std::string get_best_session_directory_for_new_source ();
+	std::string get_best_session_directory_for_new_audio ();
 
 	mutable gint _playback_load;
 	mutable gint _capture_load;

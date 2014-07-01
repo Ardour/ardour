@@ -654,7 +654,8 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 	uint32_t input_chan = 0;
 	uint32_t output_chan = 0;
 	bool use_timestamp;
-	
+	vector<string> track_names;
+
 	use_timestamp = (pos == -1);
 
 	// kludge (for MIDI we're abusing "channel" for "track" here)
@@ -691,6 +692,11 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 
 		regions.push_back (r);
 
+		/* if we're creating a new track, name it after the cleaned-up
+		 * and "merged" region name.
+		 */
+
+		track_names.push_back (region_name);
 
 	} else if (target_regions == -1 || target_regions > 1) {
 
@@ -721,29 +727,26 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 					region_name = (*x)->name();
 				}
 				
-				switch (sources.size()) {
-					/* zero and one channel handled
-					   by previous if() condition
-					*/
-				case 2:
+				if (sources.size() == 2) {
 					if (n == 0) {
 						region_name += "-L";
 					} else {
 						region_name += "-R";
 					}
-					break;
-				default:
-					region_name += (char) '-';
-					region_name += (char) ('1' + n);
-					break;
+				} else if (sources.size() > 2) {
+					region_name += string_compose ("-%1", n+1);
 				}
+				
+				track_names.push_back (region_name);
 				
 			} else {
 				if (fs) {
 					region_name = region_name_from_path (fs->path(), false, false, sources.size(), n);
-				} else{
+				} else {
 					region_name = (*x)->name();
 				}
+
+				track_names.push_back (PBD::basename_nosuffix (paths[n]));
 			}
 
 			PropertyList plist;
@@ -795,6 +798,12 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 	framepos_t rlen = 0;
 
 	begin_reversible_command (Operations::insert_file);
+
+	/* we only use tracks names when importing to new tracks, but we
+	 * require that one is defined for every region, just to keep
+	 * the API simpler.
+	 */
+	assert (regions.size() == track_names.size());
 	
 	for (vector<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*r);
@@ -827,9 +836,8 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
                                 pos = get_preferred_edit_position ();
                         }
                 }
-
-
-		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track);
+		
+		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track, track_names[n]);
 
 		rlen = (*r)->length();
 
@@ -856,7 +864,7 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 
 int
 Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t in_chans, uint32_t out_chans, framepos_t& pos,
-				     ImportMode mode, boost::shared_ptr<Track>& existing_track)
+				     ImportMode mode, boost::shared_ptr<Track>& existing_track, const string& new_track_name)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(region);
 	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
@@ -913,7 +921,11 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 				existing_track = mt.front();
 			}
 
-			existing_track->set_name (region->name());
+			if (!new_track_name.empty()) {
+				existing_track->set_name (new_track_name);
+			} else {
+				existing_track->set_name (region->name());
+			}
 		}
 
 		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
