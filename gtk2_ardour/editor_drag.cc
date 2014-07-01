@@ -1489,8 +1489,7 @@ RegionRippleDrag::add_all_after_to_views(TimeAxisView *tav, framepos_t where, co
 {
 	RegionSelection to_ripple;
 	TrackViewList tracks;
-	tracks.push_back (tav); // rv.get_time_axis_view ());
-
+	tracks.push_back (tav);
 	_editor->get_regions_after (to_ripple, where, tracks);
 
 	for (RegionSelection::iterator i = to_ripple.begin(); i != to_ripple.end(); ++i) {
@@ -1498,8 +1497,11 @@ RegionRippleDrag::add_all_after_to_views(TimeAxisView *tav, framepos_t where, co
 			// the selection has already been added to _views
 
 			if (drag_in_progress) {
+				// do the same things that RegionMotionDrag::motion does when first_move
+				// is true for the region views that we're adding to _views this time
+
 				(*i)->drag_start();
-				ArdourCanvas::Group* rvg = (*i)->get_canvas_group();
+				ArdourCanvas::Item* rvg = (*i)->get_canvas_group();
 				Duple rv_canvas_offset = rvg->item_to_canvas (Duple (0,0));
 				rvg->reparent (_editor->_region_motion_group);
 				(*i)->fake_set_opaque (true);
@@ -1511,7 +1513,7 @@ RegionRippleDrag::add_all_after_to_views(TimeAxisView *tav, framepos_t where, co
 }
 
 void
-RegionRippleDrag::remove_unselected_from_views(framecnt_t amount)
+RegionRippleDrag::remove_unselected_from_views(framecnt_t amount, bool move_regions)
 {
 
 	for (std::list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ) {
@@ -1523,19 +1525,27 @@ RegionRippleDrag::remove_unselected_from_views(framecnt_t amount)
 			// and then ripple them back by the length of the regions that were dragged away
 			// do the same things as RegionMotionDrag::aborted
 
-			if (_item) {
-				_item->ungrab ();
-			}
-
 			RegionView *rv = to_erase->view;
+			TimeAxisView* tv = &(rv->get_time_axis_view ());
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+			assert (rtv);
 
-			rv->get_canvas_group()->reparent(prev_tav->view()->canvas_item());
+			std::cerr << "rtv = " << rtv->name() << std::endl;
+
+			// plonk them back onto their own track
+			rv->get_canvas_group()->reparent(rtv->view()->canvas_item());
 			rv->get_canvas_group()->set_y_position (0);
 			rv->drag_end ();
-			rv->fake_set_opaque (false);
-			rv->move(-amount, 0);	// second parameter is y delta - seems 0 is OK
-			// rv->set_height (rtv->view()->child_height ());
 
+			if (move_regions) {
+				// move the underlying region to match the view
+				rv->region()->set_position (rv->region()->position() + amount);
+			} else {
+				// restore the view to match the underlying region's original position
+				rv->move(-amount, 0);	// second parameter is y delta - seems 0 is OK
+			}
+
+			rv->set_height (rtv->view()->child_height ());
 			_views.erase (to_erase);
 		}
 	}
@@ -1641,8 +1651,9 @@ RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 			// and add the regions after the drop point on the new playlist to _views instead.
 			// undo the effect of rippling the previous playlist, and include the effect of removing
 			// the dragged region(s) from this track
+			std::cerr << "dragged from " << prev_tav->name() << " to " << tv->name() << std::endl;
 
-			remove_unselected_from_views (prev_amount);
+			remove_unselected_from_views (prev_amount, false);
 			// ripple previous playlist according to the regions that have been removed onto the new playlist
 			prev_tav->playlist()->ripple(prev_position, -selection_length, exclude);
 			prev_amount = 0;
@@ -1666,13 +1677,14 @@ RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 
 		// remember what we've done to this playlist so we can undo it if the selection is dragged to another track
 		prev_position = where;
-		if (!_x_constrained) {
-			prev_amount += amount;
-		}
 	} else {
 		// selection encompasses multiple tracks - just drag
 		// cross-track drags are forbidden
 		RegionMoveDrag::motion(event, first_move); 
+	}
+
+	if (!_x_constrained) {
+		prev_amount += amount;
 	}
 
 	_last_frame_position = after;
@@ -1687,19 +1699,51 @@ RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	_editor->begin_reversible_command(_("Ripple drag"));
 	
-	// if regions were dragged across tracks, we've rippled any later
-	// regions on the track the regions were dragged off, so we need
-	// to add the original track to the undo record
-	if (orig_tav) {
-		vector<Command*> cmds;
-		orig_tav->playlist()->rdiff (cmds);
-		_editor->session()->add_commands (cmds);
+	// remove the regions being rippled from the dragging view, updating them to 
+	// their new positions
+	remove_unselected_from_views (prev_amount, true);
+
+	if (allow_moves_across_tracks) {
+		if (orig_tav) {
+			// if regions were dragged across tracks, we've rippled any later
+			// regions on the track the regions were dragged off, so we need
+			// to add the original track to the undo record
+			std::cerr << "adding orig_tav " << orig_tav->name() << " to undo" << std::endl;
+			orig_tav->playlist()->clear_changes();
+			vector<Command*> cmds;
+			orig_tav->playlist()->rdiff (cmds);
+			_editor->session()->add_commands (cmds);
+		}
+		if (prev_tav && prev_tav != orig_tav) {
+			std::cerr << "adding prev_tav " << prev_tav->name() << " to undo" << std::endl;
+			prev_tav->playlist()->clear_changes();
+			vector<Command*> cmds;
+			prev_tav->playlist()->rdiff (cmds);
+			_editor->session()->add_commands (cmds);
+		} else if (prev_tav) {
+			std::cerr << "prev_tav == orig_tav" << std::endl;
+		}
+	} else {
+		// selection spanned multiple tracks - all will need adding to undo record
+
+		std::set<boost::shared_ptr<ARDOUR::Playlist> > playlists = _editor->selection->regions.playlists();
+		std::set<boost::shared_ptr<ARDOUR::Playlist> >::const_iterator pi;
+
+		for (pi = playlists.begin(); pi != playlists.end(); ++pi) {
+
+			std::cerr << "adding playlist with selection " << (*pi)->name() << " to undo" << std::endl;
+			(*pi)->clear_changes();
+			vector<Command*> cmds;
+			(*pi)->rdiff (cmds);
+			_editor->session()->add_commands (cmds);
+		}
+
 	}
+
 
 	// other modified playlists are added to undo by RegionMoveDrag::finished()
 	RegionMoveDrag::finished (event, movement_occurred);
 	_editor->commit_reversible_command();
-
 }
 
 void

@@ -432,7 +432,7 @@ private:
 	bool allow_moves_across_tracks; // only if all selected regions are on one track
 	ARDOUR::RegionList *exclude;
 	void add_all_after_to_views (TimeAxisView *tav, framepos_t where, const RegionSelection &exclude, bool drag_in_progress);
-	void remove_unselected_from_views (framecnt_t amount);
+	void remove_unselected_from_views (framecnt_t amount, bool move_regions);
 
 };
 
