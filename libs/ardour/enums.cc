@@ -238,6 +238,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (Ripple); // XXX do the old enum values have to stay in order?
 	REGISTER_ENUM (Lock);
 	REGISTER (_EditMode);
+	/*
+	 * Splice mode is undefined, undocumented, and basically fubar'ed
+	 * perhaps someday we will make it work.  but for now, avoid it
+	*/
+	enum_writer.add_to_hack_table ("Splice", "Slide");
 
 	REGISTER_ENUM (Start);
 	REGISTER_ENUM (End);

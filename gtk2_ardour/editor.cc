@@ -3040,7 +3040,7 @@ Editor::build_edit_mode_menu ()
 	using namespace Menu_Helpers;
 
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Slide), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Slide)));
-	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Splice), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Splice)));
+//	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Splice), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Splice)));
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Ripple), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Ripple)));
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Lock), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode)  Lock)));
 }
@@ -3356,7 +3356,7 @@ Editor::cycle_edit_mode ()
 			Config->set_edit_mode (Ripple);
 		}
 		break;
-	case Splice:
+//	case Splice:
 	case Ripple:
 		Config->set_edit_mode (Lock);
 		break;
