@@ -669,12 +669,11 @@ TracksControlPanel::populate_sample_rate_combo()
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
 		set_popdown_strings (_sample_rate_combo, s);
 		_sample_rate_combo.set_sensitive (s.size() > 1);
-	}
 
-	if (!s.empty() ) {
-		std::string active_sr = rate_as_string(EngineStateController::instance()->get_current_sample_rate() );
-        
-		_sample_rate_combo.set_active_text(active_sr);
+		if (!s.empty() ) {
+			std::string active_sr = rate_as_string(EngineStateController::instance()->get_current_sample_rate() );
+			_sample_rate_combo.set_active_text(active_sr);
+		}
 	}
 }
 
@@ -694,11 +693,11 @@ TracksControlPanel::populate_buffer_size_combo()
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
 		set_popdown_strings (_buffer_size_combo, s);
 		_buffer_size_combo.set_sensitive (s.size() > 1);
-	}
 
-	if (!s.empty() ) {
-		std::string active_bs = bufsize_as_string(EngineStateController::instance()->get_current_buffer_size());
-		_buffer_size_combo.set_active_text(active_bs);
+		if (!s.empty() ) {
+			std::string active_bs = bufsize_as_string(EngineStateController::instance()->get_current_buffer_size());
+			_buffer_size_combo.set_active_text(active_bs);
+		}
 	}
 }
 
@@ -1133,12 +1132,8 @@ TracksControlPanel::sample_rate_changed()
 void
 TracksControlPanel::engine_running ()
 {
-	_buffer_size_combo.set_active_text (bufsize_as_string (EngineStateController::instance()->get_current_buffer_size() ) );
-
-	_sample_rate_combo.set_active_text (rate_as_string (EngineStateController::instance()->get_current_sample_rate() ) );
-
-	_buffer_size_combo.set_sensitive (true);
-	_sample_rate_combo.set_sensitive (true);
+	populate_buffer_size_combo();
+	populate_sample_rate_combo();
 }
 
 

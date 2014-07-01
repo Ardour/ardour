@@ -28,13 +28,16 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
     switch (reason) {
         case WCMRAudioDeviceManagerClient::DeviceDebugInfo:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::DeviceDebugInfo -- " << (char*)parameter << std::endl;
-        break;
+            break;
         case WCMRAudioDeviceManagerClient::BufferSizeChanged:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::BufferSizeChanged: " << *(uint32_t*)parameter << std::endl;
 			_buffer_size_change(*(uint32_t*)parameter);
-        break;
+            break;
         case WCMRAudioDeviceManagerClient::RequestReset:
+        {
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::RequestReset" << std::endl;
+            engine.request_backend_reset();
+        }
             break;
         case WCMRAudioDeviceManagerClient::RequestResync:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::RequestResync" << std::endl;
@@ -42,6 +45,9 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
         case WCMRAudioDeviceManagerClient::SamplingRateChanged:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::SamplingRateChanged: " << *(float*)parameter << std::endl;
 			set_sample_rate(*(float*)parameter);
+            break;
+        case WCMRAudioDeviceManagerClient::Dropout:
+            std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::Dropout: " << std::endl;
             break;
         case WCMRAudioDeviceManagerClient::DeviceDroppedSamples:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::DeviceDroppedSamples" << std::endl;
@@ -816,7 +822,7 @@ WavesAudioBackend::_audio_device_callback (const float* input_buffer,
     uint64_t dsp_end_time_nanos = __get_time_nanos();
     
     _dsp_load_accumulator -= *_dsp_load_history.begin();
-    _dsp_load_history.pop_front();
+        _dsp_load_history.pop_front();
     uint64_t dsp_load_nanos = dsp_end_time_nanos - dsp_start_time_nanos;
     _dsp_load_accumulator += dsp_load_nanos;
     _dsp_load_history.push_back(dsp_load_nanos);

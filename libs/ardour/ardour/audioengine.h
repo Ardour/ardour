@@ -107,6 +107,8 @@ public:
     bool           in_process_thread ();
     uint32_t       process_thread_count ();
 
+	void		   request_backend_reset();
+
     bool           is_realtime() const;
     bool           connected() const;
 
@@ -230,6 +232,7 @@ public:
     /// the number of frames processed since start() was called
     framecnt_t                _processed_frames;
     Glib::Threads::Thread*     m_meter_thread;
+	Glib::Threads::Thread*     m_hw_event_thread;
     ProcessThread*            _main_thread;
     MTDM*                     _mtdm;
     bool                      _measuring_latency;
@@ -242,6 +245,9 @@ public:
     bool                      _stopped_for_latency;
     bool                      _started_for_latency;
     bool                      _in_destructor;
+
+	void do_reset_backend();
+	void wait_hw_event_processing_complete();
 
     void meter_thread ();
     void start_metering_thread ();

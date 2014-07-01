@@ -998,9 +998,6 @@ void WCMRPortAudioDevice::resetDevice (bool callerIsWaiting /*=false*/ )
 	bool wasStreaming = Streaming();
 	bool wasActive = Active();
 
-	// Notify the Application about reset
-	m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
-
 	// Reset the device
 	stopStreaming();
 	deactivateDevice();
@@ -1080,7 +1077,7 @@ long WCMRPortAudioDevice::ASIOMessageHook (long selector, long WCUNUSEDPARAM(val
 		case kAsioResetRequest:
 			m_ResetRequested++;
 			std::cout << "\t\t\tWCMRPortAudioDevice::ASIOMessageHook -- kAsioResetRequest" << std::endl;
-			SetEvent(m_hResetFromDevRequestedEvent);
+			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
 			break;
 
 		case kAsioResyncRequest:

@@ -89,6 +89,7 @@ AudioEngine::~AudioEngine ()
 {
 	_in_destructor = true;
 	stop_metering_thread ();
+	wait_hw_event_processing_complete();
 	drop_backend ();
 }
 
@@ -360,6 +361,44 @@ AudioEngine::process_callback (pframes_t nframes)
 	
 	return 0;
 }
+
+
+void
+AudioEngine::request_backend_reset()
+{
+	if (m_hw_event_thread != 0) {
+		m_hw_event_thread->join ();
+		m_hw_event_thread = 0;
+	}
+
+	m_hw_event_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_reset_backend, this));
+}
+
+
+void
+AudioEngine::do_reset_backend()
+{
+	SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 512);
+
+	if (_backend) {
+		std::string name = _backend->device_name ();
+		stop();
+		_backend->drop_device();
+		_backend->set_device_name(name);
+		start();
+		SampleRateChanged(_backend->sample_rate() );
+		BufferSizeChanged(_backend->buffer_size() );
+	}
+}
+
+
+void
+AudioEngine::wait_hw_event_processing_complete()
+{
+	m_hw_event_thread->join ();
+	m_hw_event_thread = 0;
+}
+
 
 
 void
@@ -653,7 +692,6 @@ AudioEngine::start (bool for_latency)
 			_backend->set_time_master (true);
 		}
 
-		_session->reconnect_existing_routes (true, true);
 	}
 	
 	start_metering_thread ();
