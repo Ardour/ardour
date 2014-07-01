@@ -1572,10 +1572,16 @@ RegionSpliceDrag::aborted (bool)
 void
 RegionRippleDrag::add_all_after_to_views(TimeAxisView *tav, framepos_t where, const RegionSelection &exclude, bool drag_in_progress)
 {
+
+	boost::shared_ptr<RegionList> rl = tav->playlist()->regions_with_start_within (Evoral::Range<framepos_t>(where, max_framepos));
+
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tav);
 	RegionSelection to_ripple;
-	TrackViewList tracks;
-	tracks.push_back (tav);
-	_editor->get_regions_after (to_ripple, where, tracks);
+	for (RegionList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		if ((*i)->position() >= where) {
+			to_ripple.push_back (rtv->view()->find_view(*i));
+		}
+	}
 
 	for (RegionSelection::iterator i = to_ripple.begin(); i != to_ripple.end(); ++i) {
 		if (!exclude.contains (*i)) {
@@ -1691,7 +1697,7 @@ RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 		assert (first_selected_on_this_track); // we should always find the region in one of the playlists...
 		add_all_after_to_views (
 				&first_selected_on_this_track->get_time_axis_view(),
-				first_selected_on_this_track->region()->position() + first_selected_on_this_track->region()->length(),
+				first_selected_on_this_track->region()->position(),
 				selected_regions, false);
 	}
 
