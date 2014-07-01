@@ -1434,13 +1434,18 @@ RouteTimeAxisView::paste (framepos_t pos, float times, Selection& selection, siz
                 DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("modified paste to %1\n", pos));
 	}
 
-        pl->clear_changes ();
+	pl->clear_changes ();
 	if (Config->get_edit_mode() == Ripple) {
 		std::pair<framepos_t, framepos_t> extent = (*p)->get_extent();
 		framecnt_t amount = extent.second - extent.first;
 		pl->ripple(pos, amount * times, boost::shared_ptr<Region>());
 	}
 	pl->paste (*p, pos, times);
+
+	vector<Command*> cmds;
+	pl->rdiff (cmds);
+	_session->add_commands (cmds);
+
 	_session->add_command (new StatefulDiffCommand (pl));
 
 	return true;
