@@ -279,6 +279,23 @@ EnumWriter::read_distinct (EnumRegistration& er, string str)
 	vector<int>::iterator i;
 	vector<string>::iterator s;
 
+	/* first, check to see if there a hack for the name we're looking up */
+
+	map<string,string>::iterator x;
+
+	if ((x  = hack_table.find (str)) != hack_table.end()) {
+
+		cerr << "found hack for " << str << " = " << x->second << endl;
+
+		str = x->second;
+
+		for (i = er.values.begin(), s = er.names.begin(); i != er.values.end(); ++i, ++s) {
+			if (str == (*s) || nocase_cmp (str, *s) == 0) {
+				return (*i);
+			}
+		}
+	}
+
 	/* catch old-style hex numerics */
 
 	if (str.length() > 2 && str[0] == '0' && str[1] == 'x') {
@@ -296,23 +313,6 @@ EnumWriter::read_distinct (EnumRegistration& er, string str)
 	for (i = er.values.begin(), s = er.names.begin(); i != er.values.end(); ++i, ++s) {
 		if (str == (*s) || nocase_cmp (str, *s) == 0) {
 			return (*i);
-		}
-	}
-
-	/* failed to find it as-is. check to see if there a hack for the name we're looking up */
-
-	map<string,string>::iterator x;
-
-	if ((x  = hack_table.find (str)) != hack_table.end()) {
-
-		cerr << "found hack for " << str << " = " << x->second << endl;
-
-		str = x->second;
-
-		for (i = er.values.begin(), s = er.names.begin(); i != er.values.end(); ++i, ++s) {
-			if (str == (*s) || nocase_cmp (str, *s) == 0) {
-				return (*i);
-			}
 		}
 	}
 
