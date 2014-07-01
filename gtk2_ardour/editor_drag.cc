@@ -1582,8 +1582,9 @@ RegionRippleDrag::add_all_after_to_views(TimeAxisView *tav, framepos_t where, co
 			// the selection has already been added to _views
 
 			if (drag_in_progress) {
-				// do the same things that RegionMotionDrag::motion does when first_move
-				// is true for the region views that we're adding to _views this time
+				// do the same things that RegionMotionDrag::motion does when
+				// first_move is true, for the region views that we're adding
+				// to _views this time
 
 				(*i)->drag_start();
 				ArdourCanvas::Item* rvg = (*i)->get_canvas_group();
@@ -1591,11 +1592,7 @@ RegionRippleDrag::add_all_after_to_views(TimeAxisView *tav, framepos_t where, co
 				Duple dmg_canvas_offset = _editor->_drag_motion_group->canvas_origin ();
 				rvg->reparent (_editor->_drag_motion_group);
 
-				// XXX without the following, things jump in the y direction during drags
-				// with it, they jump in the x direction
-				// so we need to do the move in the y direction only
-				// rvg->move (rv_canvas_offset - dmg_canvas_offset);
-				std::cerr << "rv_canvas_offset = " << rv_canvas_offset << ", dmg_canvas_offset = " << dmg_canvas_offset << std::endl;
+				// we only need to move in the y direction
 				Duple fudge = rv_canvas_offset - dmg_canvas_offset;
 				fudge.x = 0;
 				rvg->move (fudge);
@@ -1623,8 +1620,6 @@ RegionRippleDrag::remove_unselected_from_views(framecnt_t amount, bool move_regi
 			TimeAxisView* tv = &(rv->get_time_axis_view ());
 			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 			assert (rtv);
-
-			std::cerr << "rtv = " << rtv->name() << std::endl;
 
 			// plonk them back onto their own track
 			rv->get_canvas_group()->reparent(rtv->view()->canvas_item());
@@ -1745,7 +1740,6 @@ RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 			// and add the regions after the drop point on the new playlist to _views instead.
 			// undo the effect of rippling the previous playlist, and include the effect of removing
 			// the dragged region(s) from this track
-			std::cerr << "dragged from " << prev_tav->name() << " to " << tv->name() << std::endl;
 
 			remove_unselected_from_views (prev_amount, false);
 			// ripple previous playlist according to the regions that have been removed onto the new playlist
@@ -1802,20 +1796,16 @@ RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
 			// if regions were dragged across tracks, we've rippled any later
 			// regions on the track the regions were dragged off, so we need
 			// to add the original track to the undo record
-			std::cerr << "adding orig_tav " << orig_tav->name() << " to undo" << std::endl;
 			orig_tav->playlist()->clear_changes();
 			vector<Command*> cmds;
 			orig_tav->playlist()->rdiff (cmds);
 			_editor->session()->add_commands (cmds);
 		}
 		if (prev_tav && prev_tav != orig_tav) {
-			std::cerr << "adding prev_tav " << prev_tav->name() << " to undo" << std::endl;
 			prev_tav->playlist()->clear_changes();
 			vector<Command*> cmds;
 			prev_tav->playlist()->rdiff (cmds);
 			_editor->session()->add_commands (cmds);
-		} else if (prev_tav) {
-			std::cerr << "prev_tav == orig_tav" << std::endl;
 		}
 	} else {
 		// selection spanned multiple tracks - all will need adding to undo record
@@ -1824,16 +1814,12 @@ RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
 		std::set<boost::shared_ptr<ARDOUR::Playlist> >::const_iterator pi;
 
 		for (pi = playlists.begin(); pi != playlists.end(); ++pi) {
-
-			std::cerr << "adding playlist with selection " << (*pi)->name() << " to undo" << std::endl;
 			(*pi)->clear_changes();
 			vector<Command*> cmds;
 			(*pi)->rdiff (cmds);
 			_editor->session()->add_commands (cmds);
 		}
-
 	}
-
 
 	// other modified playlists are added to undo by RegionMoveDrag::finished()
 	RegionMoveDrag::finished (event, movement_occurred);
