@@ -3438,6 +3438,8 @@ Route::MuteControllable::set_value (double val)
 		return;
 	}
 
+	cerr << " _route->mute with val = " << val << endl;
+
 	rl->push_back (r);
 	_session.set_mute (rl, bval);
 }
