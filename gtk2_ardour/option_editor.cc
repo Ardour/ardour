@@ -257,6 +257,7 @@ FaderOption::FaderOption (string const & i, string const & n, sigc::slot<gain_t>
 	_db_slider = manage (new HSliderController (&_db_adjustment, 115, 18, false));
 
 	_label.set_text (n + ":");
+	_label.set_alignment (0, 0.5);
 	_label.set_name (X_("OptionsLabel"));
 
 	_fader_centering_box.pack_start (*_db_slider, true, false);
@@ -466,7 +467,10 @@ DirectoryOption::set_state_from_config ()
 void
 DirectoryOption::add_to_page (OptionEditorPage* p)
 {
-	add_widgets_to_page (p, manage (new Label (_name)), &_file_chooser);
+	Gtk::Label *label = manage (new Label (_name));
+	label->set_alignment (0, 0.5);
+	label->set_name (X_("OptionsLabel"));
+	add_widgets_to_page (p, label, &_file_chooser);
 }
 
 void
