@@ -2134,6 +2134,8 @@ Editor::unhide_ranges ()
 	}
 }
 
+/* INSERT/REPLACE */
+
 void
 Editor::insert_region_list_selection (float times)
 {
