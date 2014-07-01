@@ -2400,10 +2400,17 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 		return;
 	}
 
-	if (Config->get_edit_mode() == Splice) {
-		_drags->add (new RegionSpliceDrag (this, item, region_view, selection->regions.by_layer()));
-	} else {
-		_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), false, false));
+	switch (Config->get_edit_mode()) {
+		case Splice:
+			_drags->add (new RegionSpliceDrag (this, item, region_view, selection->regions.by_layer()));
+			break;
+		case Ripple:
+			_drags->add (new RegionRippleDrag (this, item, region_view, selection->regions.by_layer()));
+			break;
+		default:
+			_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), false, false));
+			break;
+
 	}
 }
 
@@ -2428,7 +2435,7 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
 		return;
 	}
 
-	if (Config->get_edit_mode() == Splice) {
+	if (Config->get_edit_mode() == Splice || Config->get_edit_mode() == Ripple) {
 		return;
 	}
 

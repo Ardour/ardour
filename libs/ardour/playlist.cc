@@ -172,6 +172,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 	in_set_state--;
 
 	_splicing  = other->_splicing;
+	_rippling  = other->_rippling;
 	_nudging   = other->_nudging;
 	_edit_mode = other->_edit_mode;
 
@@ -302,6 +303,7 @@ Playlist::init (bool hide)
 	_refcnt = 0;
 	_hidden = hide;
 	_splicing = false;
+	_rippling = false;
 	_shuffling = false;
 	_nudging = false;
 	in_set_state = 0;
@@ -706,7 +708,7 @@ Playlist::flush_notifications (bool from_undo)
 		 }
 	 }
 
-	 possibly_splice_unlocked (position, (pos + length) - position, boost::shared_ptr<Region>());
+	 possibly_splice_unlocked (position, (pos + length) - position, region);
  }
 
  void
@@ -1399,7 +1401,7 @@ Playlist::flush_notifications (bool from_undo)
 
 	 if (_edit_mode == Splice) {
 		 splice_locked (at, distance, exclude);
-	 }
+	 } 
  }
 
  void
@@ -1456,12 +1458,63 @@ Playlist::flush_notifications (bool from_undo)
 	 _splicing = false;
 
 	 notify_contents_changed ();
- }
+}
 
- void
- Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shared_ptr<Region> region)
- {
-	 if (in_set_state || _splicing || _nudging || _shuffling) {
+void
+Playlist::ripple_locked (framepos_t at, framecnt_t distance, RegionList *exclude)
+{
+	{
+		RegionWriteLock rl (this);
+		core_ripple (at, distance, exclude);
+	}
+}
+
+void
+Playlist::ripple_unlocked (framepos_t at, framecnt_t distance, RegionList *exclude)
+{
+	core_ripple (at, distance, exclude);
+}
+
+void
+Playlist::core_ripple (framepos_t at, framecnt_t distance, RegionList *exclude)
+{
+	if (distance == 0) {
+		return;
+	}
+
+	_rippling = true;
+	RegionListProperty copy = regions;
+	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
+		assert (i != copy.end());
+
+		if (exclude) {
+			if (std::find(exclude->begin(), exclude->end(), (*i)) != exclude->end()) {
+				continue;
+			}
+		}
+
+		if ((*i)->position() >= at) {
+			framepos_t new_pos = (*i)->position() + distance;
+			framepos_t limit = max_framepos - (*i)->length();
+			if (new_pos < 0) {
+				new_pos = 0;
+			} else if (new_pos >= limit ) {
+				new_pos = limit;
+			} 
+				
+			(*i)->set_position (new_pos);
+		}
+	}
+
+	_rippling = false;
+	notify_contents_changed ();
+}
+
+
+void
+Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shared_ptr<Region> region)
+{
+	 if (in_set_state || _splicing || _rippling || _nudging || _shuffling) {
 		 return;
 	 }
 
@@ -2692,6 +2745,12 @@ Playlist::region_is_shuffle_constrained (boost::shared_ptr<Region>)
 	}
 
 	return false;
+}
+
+void
+Playlist::ripple (framepos_t at, framecnt_t distance, RegionList *exclude)
+{
+	ripple_locked (at, distance, exclude);
 }
 
 void

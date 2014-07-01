@@ -2825,12 +2825,6 @@ Editor::setup_toolbar ()
 
 	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
 
-	edit_mode_strings.push_back (edit_mode_to_string (Slide));
-	if (!Profile->get_sae()) {
-		edit_mode_strings.push_back (edit_mode_to_string (Splice));
-	}
-	edit_mode_strings.push_back (edit_mode_to_string (Lock));
-
 	edit_mode_selector.set_name ("mouse mode button");
 	edit_mode_selector.set_size_request (65, -1);
 	edit_mode_selector.add_elements (ArdourButton::Inset);
@@ -3047,6 +3041,7 @@ Editor::build_edit_mode_menu ()
 
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Slide), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Slide)));
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Splice), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Splice)));
+	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Ripple), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Ripple)));
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Lock), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode)  Lock)));
 }
 
@@ -3358,10 +3353,11 @@ Editor::cycle_edit_mode ()
 		if (Profile->get_sae()) {
 			Config->set_edit_mode (Lock);
 		} else {
-			Config->set_edit_mode (Splice);
+			Config->set_edit_mode (Ripple);
 		}
 		break;
 	case Splice:
+	case Ripple:
 		Config->set_edit_mode (Lock);
 		break;
 	case Lock:

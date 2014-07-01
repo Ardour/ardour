@@ -341,6 +341,7 @@ namespace ARDOUR {
 	enum EditMode {
 		Slide,
 		Splice,
+		Ripple,
 		Lock
 	};
 
