@@ -237,11 +237,13 @@ protected:
 	void color_handler ();
 	void region_view_added (RegionView*);
 	void create_gain_automation_child (const Evoral::Parameter &, bool);
+	void create_mute_automation_child (const Evoral::Parameter &, bool);
 	void setup_processor_menu_and_curves ();
 	void route_color_changed ();
         bool can_edit_name() const;
 
 	boost::shared_ptr<AutomationTimeAxisView> gain_track;
+	boost::shared_ptr<AutomationTimeAxisView> mute_track;
 
 	StreamView*           _view;
 	ArdourCanvas::Canvas& parent_canvas;

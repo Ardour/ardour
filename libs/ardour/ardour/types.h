@@ -137,7 +137,7 @@ namespace ARDOUR {
 		FadeInAutomation,
 		FadeOutAutomation,
 		EnvelopeAutomation,
-		RecEnableAutomation
+		RecEnableAutomation,
 	};
 
 	enum AutoState {

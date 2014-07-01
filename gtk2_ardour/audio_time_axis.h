@@ -105,9 +105,11 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void update_control_names ();
 
 	void update_gain_track_visibility ();
+	void update_mute_track_visibility ();
 	void update_pan_track_visibility ();
 
 	Gtk::CheckMenuItem* gain_automation_item;
+	Gtk::CheckMenuItem* mute_automation_item;
 	std::list<boost::shared_ptr<AutomationTimeAxisView> > pan_tracks;
 	Gtk::CheckMenuItem* pan_automation_item;
 };

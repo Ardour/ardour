@@ -171,6 +171,11 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		create_automation_child (GainAutomation, false);
 	}
 
+	/* if set_state above didn't create a mute automation child, we need to make one */
+	if (automation_child (MuteAutomation) == 0) {
+		create_automation_child (MuteAutomation, false);
+	}
+
 	if (_route->panner_shell()) {
 		_route->panner_shell()->Changed.connect (*this, invalidator (*this), boost::bind (&MidiTimeAxisView::ensure_pan_views, this, false), gui_context());
 	}
@@ -1263,6 +1268,10 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 
 	case GainAutomation:
 		create_gain_automation_child (param, show);
+		break;
+
+	case MuteAutomation:
+		create_mute_automation_child (param, show);
 		break;
 
 	case PluginAutomation:

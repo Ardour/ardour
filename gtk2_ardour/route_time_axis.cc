@@ -2526,6 +2526,30 @@ RouteTimeAxisView::create_gain_automation_child (const Evoral::Parameter& param,
 	add_automation_child (Evoral::Parameter(GainAutomation), gain_track, show);
 }
 
+void
+RouteTimeAxisView::create_mute_automation_child (const Evoral::Parameter& param, bool show)
+{
+	boost::shared_ptr<AutomationControl> c = _route->mute_control();
+	if (!c) {
+		error << "Route has no mute automation, unable to add automation track view." << endmsg;
+		return;
+	}
+
+	mute_track.reset (new AutomationTimeAxisView (_session,
+						      _route, _route, c, param,
+						      _editor,
+						      *this,
+						      false,
+						      parent_canvas,
+						      _route->describe_parameter(param)));
+
+	if (_view) {
+		_view->foreach_regionview (sigc::mem_fun (*mute_track.get(), &TimeAxisView::add_ghost));
+	}
+
+	add_automation_child (Evoral::Parameter(MuteAutomation), mute_track, show);
+}
+
 static
 void add_region_to_list (RegionView* rv, RegionList* l)
 {
