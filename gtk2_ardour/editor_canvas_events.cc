@@ -1126,6 +1126,12 @@ Editor::canvas_drop_zone_event (GdkEvent* event)
 		return canvas_scroll_event (&scroll, true);
 		break;
 
+	case GDK_ENTER_NOTIFY:
+		return typed_event (_canvas_drop_zone, event, DropZoneItem);
+
+	case GDK_LEAVE_NOTIFY:
+		return typed_event (_canvas_drop_zone, event, DropZoneItem);
+
 	default:
 		break;
 	}
