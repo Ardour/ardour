@@ -1842,98 +1842,102 @@ Editor::select_range_between ()
 bool
 Editor::get_edit_op_range (framepos_t& start, framepos_t& end) const
 {
-	framepos_t m;
-	bool ignored;
+//	framepos_t m;
+//	bool ignored;
 
 	/* if an explicit range exists, use it */
 
-	if (!selection->time.empty()) {
+	if ( (mouse_mode == MouseRange || get_smart_mode() ) &&  !selection->time.empty()) {
 		/* we know that these are ordered */
 		start = selection->time.start();
 		end = selection->time.end_frame();
 		return true;
-	}
-
-	if (!mouse_frame (m, ignored)) {
-		/* mouse is not in a canvas, try playhead+selected marker.
-		   this is probably most true when using menus.
-		*/
-
-		if (selection->markers.empty()) {
-			return false;
-		}
-
-		start = selection->markers.front()->position();
-		end = _session->audible_frame();
-
 	} else {
-
-		switch (_edit_point) {
-		case EditAtPlayhead:
-			if (selection->markers.empty()) {
-				/* use mouse + playhead */
-				start = m;
-				end = _session->audible_frame();
-			} else {
-				/* use playhead + selected marker */
-				start = _session->audible_frame();
-				end = selection->markers.front()->position();
-			}
-			break;
-
-		case EditAtMouse:
-			/* use mouse + selected marker */
-			if (selection->markers.empty()) {
-				start = m;
-				end = _session->audible_frame();
-			} else {
-				start = selection->markers.front()->position();
-				end = m;
-			}
-			break;
-
-		case EditAtSelectedMarker:
-			/* use mouse + selected marker */
-			if (selection->markers.empty()) {
-
-				MessageDialog win (_("No edit range defined"),
-				                   false,
-				                   MESSAGE_INFO,
-				                   BUTTONS_OK);
-
-				win.set_secondary_text (
-					_("the edit point is Selected Marker\nbut there is no selected marker."));
-
-
-				win.set_default_response (RESPONSE_CLOSE);
-				win.set_position (Gtk::WIN_POS_MOUSE);
-				win.show_all();
-
-				win.run ();
-
-				return false; // NO RANGE
-			}
-			start = selection->markers.front()->position();
-			end = m;
-			break;
-		}
-	}
-
-	if (start == end) {
+		start = 0;
+		end = 0;
 		return false;
 	}
+	
+//	if (!mouse_frame (m, ignored)) {
+//		/* mouse is not in a canvas, try playhead+selected marker.
+//		   this is probably most true when using menus.
+//		*/
+//
+//		if (selection->markers.empty()) {
+//			return false;
+//		}
 
-	if (start > end) {
-		swap (start, end);
-	}
+//		start = selection->markers.front()->position();
+//		end = _session->audible_frame();
+
+//	} else {
+
+//		switch (_edit_point) {
+//		case EditAtPlayhead:
+//			if (selection->markers.empty()) {
+//				/* use mouse + playhead */
+//				start = m;
+//				end = _session->audible_frame();
+//			} else {
+//				/* use playhead + selected marker */
+//				start = _session->audible_frame();
+//				end = selection->markers.front()->position();
+//			}
+//			break;
+
+//		case EditAtMouse:
+//			/* use mouse + selected marker */
+//			if (selection->markers.empty()) {
+//				start = m;
+//				end = _session->audible_frame();
+//			} else {
+//				start = selection->markers.front()->position();
+//				end = m;
+//			}
+//			break;
+
+//		case EditAtSelectedMarker:
+//			/* use mouse + selected marker */
+//			if (selection->markers.empty()) {
+
+//				MessageDialog win (_("No edit range defined"),
+//				                   false,
+//				                   MESSAGE_INFO,
+//				                   BUTTONS_OK);
+
+//				win.set_secondary_text (
+//					_("the edit point is Selected Marker\nbut there is no selected marker."));
+
+
+//				win.set_default_response (RESPONSE_CLOSE);
+//				win.set_position (Gtk::WIN_POS_MOUSE);
+//				win.show_all();
+
+//				win.run ();
+
+//				return false; // NO RANGE
+//			}
+//			start = selection->markers.front()->position();
+//			end = m;
+//			break;
+//		}
+//	}
+
+//	if (start == end) {
+//		return false;
+//	}
+
+//	if (start > end) {
+//		swap (start, end);
+//	}
 
 	/* turn range into one delimited by start...end,
 	   not start...end-1
 	*/
 
-	end++;
+//	end++;
 
-	return true;
+//	return true;
 }
 
 void
