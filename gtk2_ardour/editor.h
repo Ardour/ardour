@@ -1578,8 +1578,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void editor_mixer_button_toggled ();
 	void editor_list_button_toggled ();
 
-	AudioClock*               zoom_range_clock;
-
 	ArdourButton              zoom_in_button;
 	ArdourButton              zoom_out_button;
 	ArdourButton              zoom_out_full_button;

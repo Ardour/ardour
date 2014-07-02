@@ -264,7 +264,6 @@ Editor::Editor ()
 
 	  /* tool bar related */
 
-	, zoom_range_clock (new AudioClock (X_("zoomrange"), false, X_("zoom range"), true, false, true))
 	, toolbar_selection_clock_table (2,3)
 	, _mouse_mode_tearoff (0)
 	, automation_mode_button (_("mode"))
@@ -393,8 +392,6 @@ Editor::Editor ()
 	samples_per_pixel = 2048; /* too early to use reset_zoom () */
 
 	_scroll_callbacks = 0;
-
-	zoom_range_clock->ValueChanged.connect (sigc::mem_fun(*this, &Editor::zoom_adjustment_changed));
 
 	bbt_label.set_name ("EditorRulerLabel");
 	bbt_label.set_size_request (-1, (int)timebar_height);
@@ -921,23 +918,6 @@ Editor::instant_save ()
 }
 
 void
-Editor::zoom_adjustment_changed ()
-{
-	if (_session == 0) {
-		return;
-	}
-
-	framecnt_t fpu = llrintf (zoom_range_clock->current_duration() / _visible_canvas_width);
-	bool clamped = clamp_samples_per_pixel (fpu);
-	
-	if (clamped) {
-		zoom_range_clock->set ((framepos_t) floor (fpu * _visible_canvas_width));
-	}
-
-	temporal_zoom (fpu);
-}
-
-void
 Editor::control_vertical_zoom_in_all ()
 {
 	tav_zoom_smooth (false, true);
@@ -1254,7 +1234,6 @@ Editor::set_session (Session *t)
 		return;
 	}
 
-	zoom_range_clock->set_session (_session);
 	_playlist_selector->set_session (_session);
 	nudge_clock->set_session (_session);
 	_summary->set_session (_session);
@@ -4202,14 +4181,6 @@ Editor::set_samples_per_pixel (framecnt_t spp)
 		tempo_lines->tempo_map_changed();
 	}
 
-	/* convert fpu to frame count */
-
-	framepos_t frames = samples_per_pixel * _visible_canvas_width;
-
-	if (samples_per_pixel != zoom_range_clock->current_duration()) {
-		zoom_range_clock->set (frames);
-	}
-
 	bool const showing_time_selection = selection->time.length() > 0;
 
 	if (showing_time_selection && selection->time.start () != selection->time.end_frame ()) {
@@ -5322,7 +5293,6 @@ Editor::session_going_away ()
 	}
 	track_views.clear ();
 
-	zoom_range_clock->set_session (0);
 	nudge_clock->set_session (0);
 
 	editor_list_button.set_active(false);
