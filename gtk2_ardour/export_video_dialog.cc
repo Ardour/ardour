@@ -611,7 +611,8 @@ ExportVideoDialog::encode_pass (int pass)
 	ffs.clear();
 
 	if (fps_checkbox.get_active()) {
-	  ffs["-r"] = fps_combo.get_active_text();
+		ffs["-r"] = fps_combo.get_active_text();
+		transcoder->set_fps(atof(fps_combo.get_active_text()));
 	}
 
 	if (scale_checkbox.get_active()) {
@@ -731,11 +732,7 @@ ExportVideoDialog::encode_pass (int pass)
 
 	std::ostringstream osstream; osstream << duration_s;
 	ffs["-t"] = osstream.str();
-	if (fps_checkbox.get_active()) {
-		transcoder->set_duration(duration_s * atof(fps_combo.get_active_text()));
-	} else {
-		transcoder->set_duration(duration_s * transcoder->get_fps());
-	}
+	transcoder->set_duration(duration_s * transcoder->get_fps());
 
 	if (insnd_combo.get_active_row_number() == 0 || insnd_combo.get_active_row_number() == 2) {
 		framepos_t start, snend;
