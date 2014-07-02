@@ -3456,6 +3456,8 @@ Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t cha
 	possible_name[0] = '\0';
 	legalized = legalize_for_path (base);
 
+	std::vector<string> sdirs = source_search_path(DataType::AUDIO);
+
 	// Find a "version" of the base name that doesn't exist in any of the possible directories.
 
 	for (cnt = (destructive ? ++destructive_index : 1); cnt <= limit; ++cnt) {
@@ -3463,7 +3465,7 @@ Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t cha
 		vector<space_and_path>::iterator i;
 		uint32_t existing = 0;
 
-		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+		for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
 
 			ostringstream sstr;
 
@@ -3494,8 +3496,7 @@ Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t cha
 			sstr << ext;
 
 			possible_name = sstr.str();
-			SessionDirectory sdir((*i).path);
-			const string spath = sdir.sound_path();
+			const string spath = (*i);
 
 			/* note that we search *without* the extension so that
 			   we don't end up both "Audio 1-1.wav" and "Audio 1-1.caf"
@@ -3567,20 +3568,29 @@ Session::new_midi_source_path (const string& base)
 	legalized = legalize_for_path (base);
 
 	// Find a "version" of the file name that doesn't exist in any of the possible directories.
+	std::vector<string> sdirs = source_search_path(DataType::MIDI);
+
+	/* - the main session folder is the first in the vector.
+	 * - after checking all locations for file-name uniqueness,
+	 *   we keep the one from the last iteration as new file name
+	 * - midi files are small and should just be kept in the main session-folder
+	 *
+	 * -> reverse the array, check main session folder last and use that as location
+	 *    for MIDI files.
+	 */
+	std::reverse(sdirs.begin(), sdirs.end());
 
 	for (cnt = 1; cnt <= limit; ++cnt) {
 
 		vector<space_and_path>::iterator i;
 		uint32_t existing = 0;
 		
-		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+		for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
 
-			SessionDirectory sdir((*i).path);
-			
 			snprintf (buf, sizeof(buf), "%s-%u.mid", legalized.c_str(), cnt);
 			possible_name = buf;
 
-			possible_path = Glib::build_filename (sdir.midi_path(), possible_name);
+			possible_path = Glib::build_filename (*i, possible_name);
 			
 			if (Glib::file_test (possible_path, Glib::FILE_TEST_EXISTS)) {
 				existing++;
