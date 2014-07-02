@@ -13,6 +13,10 @@
   <accelerator action='toggle-edit-mode'/>
   <accelerator action='toggle-midi-input-active'/>
   <accelerator action='escape'/>
+
+  <accelerator action='alt-start-range'/>
+  <accelerator action='alt-finish-range'/>
+
 #ifdef GTKOSX
   <accelerator action='Quit'/>
 #endif
@@ -191,7 +195,6 @@
         <menuitem action='move-range-end-to-next-region-boundary'/>
         <menuitem action='start-range'/>
         <menuitem action='finish-range'/>
-        <menuitem action='finish-add-range'/>
         <separator/>
         <menuitem action='select-next-route'/>
         <menuitem action='select-prev-route'/>
