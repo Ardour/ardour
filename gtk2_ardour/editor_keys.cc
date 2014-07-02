@@ -63,8 +63,8 @@ Editor::keyboard_selection_finish (bool add)
 		selection->set (start, end);
 
 		//if session is playing a range, cancel that
-//		if (_session->get_play_range())
-//			_session->request_cancel_play_range();
+		if (_session->get_play_range())
+			_session->request_cancel_play_range();
 
 	}
 }
@@ -99,60 +99,9 @@ Editor::keyboard_selection_begin ()
 
 		//if session is playing a range, cancel that
 		if (_session->get_play_range())
-			_session->request_transport_speed ( 1.0 );
-
-		//if join playhead, locate to the newly selected start
-//		if ( !_session->transport_rolling() && Config->get_join_play_range() )
-//			_session->request_cancel_play_range();
+			_session->request_cancel_play_range();
 	}
 }
-
-/*
-void
-Editor::keyboard_selection_finish (bool add)
-{
-	if (_session && have_pending_keyboard_selection) {
-
-		framepos_t end;
-		bool ignored;
-
-		if (_session->transport_rolling()) {
-			end = _session->audible_frame();
-		} else {
-			if (!mouse_frame (end, ignored)) {
-				return;
-			}
-		}
-
-		if (add) {
-			selection->add (pending_keyboard_selection_start, end);
-		} else {
-			selection->set (pending_keyboard_selection_start, end);
-		}
-
-		have_pending_keyboard_selection = false;
-	}
-}
-
-void
-Editor::keyboard_selection_begin ()
-{
-	if (_session) {
-		if (_session->transport_rolling()) {
-			pending_keyboard_selection_start = _session->audible_frame();
-			have_pending_keyboard_selection = true;
-		} else {
-			bool ignored;
-			framepos_t where; // XXX fix me
-
-			if (mouse_frame (where, ignored)) {
-				pending_keyboard_selection_start = where;
-				have_pending_keyboard_selection = true;
-			}
-
-		}
-	}
-}*/
 
 void
 Editor::keyboard_paste ()

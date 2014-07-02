@@ -763,6 +763,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	/* ranges */
 
 	void request_play_range (std::list<AudioRange>*, bool leave_rolling = false);
+	void request_cancel_play_range ();
 	bool get_play_range () const { return _play_range; }
 
 	void maybe_update_session_range (framepos_t, framepos_t);
