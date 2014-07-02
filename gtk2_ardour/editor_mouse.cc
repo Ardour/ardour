@@ -2579,7 +2579,6 @@ Editor::update_join_object_range_location (double y)
 		_join_object_range_state = JOIN_OBJECT_RANGE_RANGE;
 	}
 
-
 	if (entered_regionview) {
 
 		ArdourCanvas::Duple const item_space = entered_regionview->get_canvas_group()->canvas_to_item (ArdourCanvas::Duple (0, y));
@@ -2596,17 +2595,32 @@ Editor::update_join_object_range_location (double y)
 		RouteTimeAxisView* entered_route_view = dynamic_cast<RouteTimeAxisView*> (entered_track);
 		
 		if (entered_route_view) {
-			/* track/bus ... but not in a region ... use range mode */
-			_join_object_range_state = JOIN_OBJECT_RANGE_RANGE;
-			if (_join_object_range_state != old) {
-				set_canvas_cursor (which_track_cursor ());
+
+			double cx = 0;
+			double cy = y;
+
+			entered_route_view->canvas_display()->canvas_to_item (cx, cy);
+
+			double track_height = entered_route_view->view()->child_height();
+			if (Config->get_show_name_highlight()) {
+				track_height -= TimeAxisViewItem::NAME_HIGHLIGHT_SIZE;
 			}
+			double const c = cy / track_height;
+
+
+			if (c <= 0.5) {
+				_join_object_range_state = JOIN_OBJECT_RANGE_RANGE;
+			} else {
+				_join_object_range_state = JOIN_OBJECT_RANGE_OBJECT;
+			}
+
 		} else {
 			/* Other kinds of tracks use object mode */
 			_join_object_range_state = JOIN_OBJECT_RANGE_OBJECT;
-			if (_join_object_range_state != old) {
-				set_canvas_cursor (which_track_cursor ());
-			}
+		}
+
+		if (_join_object_range_state != old) {
+			set_canvas_cursor (which_track_cursor ());
 		}
 	}
 }
