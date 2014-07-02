@@ -246,11 +246,11 @@ public:
     bool                      _in_destructor;
 
     Glib::Threads::Thread*     _hw_reset_event_thread;
-    uint16_t                   _hw_reset_request_count;
-    bool                       _stop_hw_reset_processing;
+    gint                       _hw_reset_request_count;
+    gint                       _stop_hw_reset_processing;
     Glib::Threads::Thread*     _hw_devicelist_update_thread;
-    uint16_t                   _hw_devicelist_update_count;
-    uint16_t                   _stop_hw_devicelist_processing;
+    gint                       _hw_devicelist_update_count;
+    gint                       _stop_hw_devicelist_processing;
     
     void start_hw_event_processing();
 	void stop_hw_event_processing();
