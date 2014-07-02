@@ -108,6 +108,7 @@ public:
     uint32_t       process_thread_count ();
 
 	void		   request_backend_reset();
+    void           request_device_list_update();
 
     bool           is_realtime() const;
     bool           connected() const;
@@ -190,7 +191,6 @@ public:
      */
     int  process_callback (pframes_t nframes);
     int  buffer_size_change (pframes_t nframes);
-    int  device_list_change ();
     int  sample_rate_change (pframes_t nframes);
     void freewheel_callback (bool);
     void timebase_callback (TransportState state, pframes_t nframes, framepos_t pos, int new_position);
@@ -232,7 +232,6 @@ public:
     /// the number of frames processed since start() was called
     framecnt_t                _processed_frames;
     Glib::Threads::Thread*     m_meter_thread;
-	Glib::Threads::Thread*     m_hw_event_thread;
     ProcessThread*            _main_thread;
     MTDM*                     _mtdm;
     bool                      _measuring_latency;
@@ -246,8 +245,17 @@ public:
     bool                      _started_for_latency;
     bool                      _in_destructor;
 
+    Glib::Threads::Thread*     _hw_reset_event_thread;
+    uint16_t                   _hw_reset_request_count;
+    bool                       _stop_hw_reset_processing;
+    Glib::Threads::Thread*     _hw_devicelist_update_thread;
+    uint16_t                   _hw_devicelist_update_count;
+    bool                       _stop_hw_devicelist_processing;
+    
+    void start_hw_event_processing();
+	void stop_hw_event_processing();
 	void do_reset_backend();
-	void wait_hw_event_processing_complete();
+    void do_devicelist_update();
 
     void meter_thread ();
     void start_metering_thread ();

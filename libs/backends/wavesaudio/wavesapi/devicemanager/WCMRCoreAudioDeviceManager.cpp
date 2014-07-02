@@ -1248,12 +1248,17 @@ WTErr WCMRCoreAudioDevice::EnableListeners()
         goto Exit;
     }
 
-#if ENABLE_DEVICE_CHANGE_LISTNER    
+#if ENABLE_DEVICE_CHANGE_LISTNER
     {
         //listner for device change...
-        err = AudioDeviceAddPropertyListener(m_DeviceID, 0, 0, kAudioDevicePropertyDeviceHasChanged,
-                                             StaticPropertyChangeProc, this);
         
+        err = AudioDeviceAddPropertyListener (m_DeviceID,
+                                              kAudioPropertyWildcardChannel,
+                                              true,
+                                              kAudioDevicePropertyDeviceHasChanged,
+                                              StaticPropertyChangeProc,
+                                              this);
+                
         if (err)
         {
             DEBUG_MSG("Couldn't Setup device change Property Listner, error = " << err);
@@ -1309,14 +1314,18 @@ WTErr WCMRCoreAudioDevice::DisableListeners()
 
 #if ENABLE_DEVICE_CHANGE_LISTNER    
     {
-        err = AudioDeviceRemovePropertyListener(m_DeviceID, 0, 0, kAudioDevicePropertyDeviceHasChanged,
-                                                StaticPropertyChangeProc);
-            
+        err = AudioDeviceRemovePropertyListener (m_DeviceID,
+                                                 kAudioPropertyWildcardChannel,
+                                                 true/* Input */,
+                                                 kAudioDevicePropertyDeviceHasChanged,
+                                                 StaticPropertyChangeProc);
+        
         if (err)
         {
-            DEBUG_MSG("Couldn't Cleanup device change Property Listner, error = " << err);
+            DEBUG_MSG("Couldn't Cleanup device input stream change Property Listner, error = " << err);
             //not sure if we need to report this...
         }
+        
     }
 #endif //ENABLE_DEVICE_CHANGE_LISTNER   
 
@@ -1385,15 +1394,19 @@ void WCMRCoreAudioDevice::PropertyChangeProc (AudioDevicePropertyID inPropertyID
     case kAudioDevicePropertyDeviceHasChanged:
         {
             m_ResetRequested++;
+            m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
         }
         break;
 #endif //ENABLE_DEVICE_CHANGE_LISTNER   
     case kAudioDeviceProcessorOverload:
+        {
         if (m_IgnoreThisDrop)
             m_IgnoreThisDrop = false; //We'll ignore once, just once!
         else
             m_DropsDetected++;
+            m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::Dropout );
         break;
+        }
     default:
         break;
     }
@@ -1659,35 +1672,7 @@ WTErr WCMRCoreAudioDevice::SetupAUHAL()
     retVal = EnableListeners();
     if (retVal != eNoErr)
         goto Exit;
-
-    //also prepare the buffer list for input...
-    if (!m_InputChannels.empty())
-    {
-        
-        //now setup the buffer list.
-        memset (&m_InputAudioBufferList, 0, sizeof (m_InputAudioBufferList));
-        m_InputAudioBufferList.mNumberBuffers = 1;
-        m_InputAudioBufferList.mBuffers[0].mNumberChannels = m_InputChannels.size();
-        m_InputAudioBufferList.mBuffers[0].mDataByteSize = m_InputAudioBufferList.mBuffers[0].mNumberChannels *
-            m_CurrentBufferSize * sizeof(float);
-        //allocate the data buffer...
-        try
-        {
-            m_pInputData = new float[m_InputAudioBufferList.mBuffers[0].mNumberChannels * m_CurrentBufferSize];
-        }
-        catch (...)
-        {
-            retVal = eMemNewFailed;
-            goto Exit;
-        }
-        
-        m_InputAudioBufferList.mBuffers[0].mData = m_pInputData;
-        
-        //zero it out...
-        memset (m_InputAudioBufferList.mBuffers[0].mData, 0, m_InputAudioBufferList.mBuffers[0].mDataByteSize);
     
-    }
-
     //initialize the audio-unit now!
     err = AudioUnitInitialize(m_AUHALAudioUnit);
     if (err != kAudioHardwareNoError)
@@ -1727,8 +1712,6 @@ WTErr WCMRCoreAudioDevice::TearDownAUHAL()
         CloseComponent(m_AUHALAudioUnit);
         m_AUHALAudioUnit = NULL;
     }
-    
-    safe_delete_array(m_pInputData);
 
     return retVal;
 }
@@ -1759,7 +1742,6 @@ WTErr WCMRCoreAudioDevice::SetActive (bool newState)
 
     if (newState)
     {
-        
         m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)"Setting up AUHAL.");
         retVal = SetupAUHAL();
 
@@ -1907,7 +1889,6 @@ WTErr WCMRCoreAudioDevice::SetStreaming (bool newState)
         SetupToneGenerator ();
 #endif //WV_USE_TONE_GEN
 
-        m_StopRequested = false;
         m_SampleCountAtLastIdle = 0;
         m_StalledSampleCounter = 0;
         m_SampleCounter = 0;
@@ -1924,6 +1905,8 @@ WTErr WCMRCoreAudioDevice::SetStreaming (bool newState)
         
         err = AudioOutputUnitStart (m_AUHALAudioUnit);
         
+        m_StopRequested = false;
+        
         if(err)
         {
             DEBUG_MSG( "Failed to start AudioUnit, err " << err );
@@ -1938,11 +1921,11 @@ WTErr WCMRCoreAudioDevice::SetStreaming (bool newState)
         err = AudioOutputUnitStop (m_AUHALAudioUnit);
         if (!err)
         {
-            if (!m_InputChannels.empty());
+            //if (!m_InputChannels.empty());
             {
                 err = AudioUnitReset (m_AUHALAudioUnit, kAudioUnitScope_Global, AUHAL_INPUT_ELEMENT);
             }
-            if (!m_OutputChannels.empty());
+            //if (!m_OutputChannels.empty());
             {
                 err = AudioUnitReset (m_AUHALAudioUnit, kAudioUnitScope_Global, AUHAL_OUTPUT_ELEMENT);
             }
@@ -1981,6 +1964,7 @@ Exit:
 //**********************************************************************************************
 WTErr WCMRCoreAudioDevice::DoIdle ()
 {
+    /*
     if (m_BufferSizeChangeRequested != m_BufferSizeChangeReported)
     {
         m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::BufferSizeChanged);
@@ -2033,7 +2017,7 @@ WTErr WCMRCoreAudioDevice::DoIdle ()
             m_StalledSampleCounter = 0;
             m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceStoppedStreaming, (void *)currentSampleCount);
         }
-    }
+    }*/
 
     
     return (eNoErr);
@@ -2198,19 +2182,38 @@ OSStatus WCMRCoreAudioDevice::AudioIOProc(AudioUnitRenderActionFlags *  ioAction
     OSStatus retVal = 0;
     
     if (m_StopRequested)
-        goto Exit;
+        return retVal;
 
     if (m_IOProcThreadPort == 0)
         m_IOProcThreadPort = mach_thread_self ();
     
     //cannot really deal with it unless the number of frames are the same as our buffer size!
     if (inNumberFrames != (UInt32)m_CurrentBufferSize)
-        goto Exit;
+        return retVal;
     
     //Retrieve the input data...
     if (!m_InputChannels.empty())
     {
-        retVal = AudioUnitRender(m_AUHALAudioUnit, ioActionFlags, inTimeStamp, AUHAL_INPUT_ELEMENT, inNumberFrames, &m_InputAudioBufferList);
+        UInt32 expectedDataSize = m_InputChannels.size() * m_CurrentBufferSize * sizeof(float);
+        AudioBufferList inputAudioBufferList;
+        inputAudioBufferList.mNumberBuffers = 1;
+        inputAudioBufferList.mBuffers[0].mNumberChannels = m_InputChannels.size();
+        inputAudioBufferList.mBuffers[0].mDataByteSize = expectedDataSize*10;
+        inputAudioBufferList.mBuffers[0].mData = NULL;//new float[expectedDataSize]; // we are going to get buffer from CoreAudio
+        
+        retVal = AudioUnitRender(m_AUHALAudioUnit, ioActionFlags, inTimeStamp, AUHAL_INPUT_ELEMENT, inNumberFrames, &inputAudioBufferList);
+        
+        if (retVal == kAudioHardwareNoError &&
+            inputAudioBufferList.mBuffers[0].mNumberChannels == m_InputChannels.size() &&
+            inputAudioBufferList.mBuffers[0].mDataByteSize == expectedDataSize )
+        {
+            m_pInputData = (float*)inputAudioBufferList.mBuffers[0].mData;
+        }
+        else
+        {
+            m_pInputData = NULL;
+            return retVal;
+        }
     }
     
     //is this an input only device?
@@ -2219,7 +2222,6 @@ OSStatus WCMRCoreAudioDevice::AudioIOProc(AudioUnitRenderActionFlags *  ioAction
     else if ((!m_OutputChannels.empty()) && (ioData->mBuffers[0].mNumberChannels == m_OutputChannels.size()))
         AudioCallback ((float *)ioData->mBuffers[0].mData, inNumberFrames, (uint32_t)inTimeStamp->mSampleTime, theStartTime);
     
-Exit:   
     return retVal;
 }
 
@@ -2398,7 +2400,7 @@ WCMRCoreAudioDeviceManager::WCMRCoreAudioDeviceManager(WCMRAudioDeviceManagerCli
     }
 
     //add a listener to find out when devices change...
-    AudioHardwareAddPropertyListener (kAudioHardwarePropertyDevices, DevicePropertyChangeCallback, this);
+    AudioHardwareAddPropertyListener (kAudioHardwarePropertyDevices, HardwarePropertyChangeCallback, this);
     
     //Always add the None device first...
     m_NoneDevice = new WCMRNativeAudioNoneDevice(this);
@@ -2929,7 +2931,7 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceBufferSizesImpl(const std::string & d
 }
 
 
-OSStatus WCMRCoreAudioDeviceManager::DevicePropertyChangeCallback (AudioHardwarePropertyID inPropertyID, void* inClientData)
+OSStatus WCMRCoreAudioDeviceManager::HardwarePropertyChangeCallback (AudioHardwarePropertyID inPropertyID, void* inClientData)
 {
     switch (inPropertyID)
     {
@@ -2940,6 +2942,7 @@ OSStatus WCMRCoreAudioDeviceManager::DevicePropertyChangeCallback (AudioHardware
                     pManager->updateDeviceListImpl();
             }
             break;
+            
         default:
             break;
     }

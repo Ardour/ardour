@@ -80,8 +80,15 @@ AudioEngine::AudioEngine ()
 	, _latency_signal_latency (0)
 	, _stopped_for_latency (false)
 	, _in_destructor (false)
+    , _hw_reset_event_thread(0)
+    , _hw_reset_request_count(0)
+    , _stop_hw_reset_processing(false)
+    , _hw_devicelist_update_thread(0)
+    , _hw_devicelist_update_count(0)
+    , _stop_hw_devicelist_processing(false)
 {
 	g_atomic_int_set (&m_meter_exit, 0);
+    start_hw_event_processing();
 	discover_backends ();
 }
 
@@ -89,7 +96,7 @@ AudioEngine::~AudioEngine ()
 {
 	_in_destructor = true;
 	stop_metering_thread ();
-	wait_hw_event_processing_complete();
+	stop_hw_event_processing();
 	drop_backend ();
 }
 
@@ -165,14 +172,6 @@ AudioEngine::buffer_size_change (pframes_t bufsiz)
 
 	BufferSizeChanged (bufsiz); /* EMIT SIGNAL */
 
-	return 0;
-}
-
-int
-AudioEngine::device_list_change ()
-{
-	DeviceListChanged (); /* EMIT SIGNAL */
-    
 	return 0;
 }
 
@@ -366,37 +365,98 @@ AudioEngine::process_callback (pframes_t nframes)
 void
 AudioEngine::request_backend_reset()
 {
-	if (m_hw_event_thread != 0) {
-		m_hw_event_thread->join ();
-		m_hw_event_thread = 0;
-	}
-
-	m_hw_event_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_reset_backend, this));
+    g_atomic_int_inc(&_hw_reset_request_count);
 }
 
 
 void
 AudioEngine::do_reset_backend()
 {
-	SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 512);
-
-	if (_backend) {
-		std::string name = _backend->device_name ();
-		stop();
-		_backend->drop_device();
-		_backend->set_device_name(name);
-		start();
-		SampleRateChanged(_backend->sample_rate() );
-		BufferSizeChanged(_backend->buffer_size() );
-	}
+    SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 512);
+    
+    while (!_stop_hw_reset_processing) {
+        
+        if (_hw_reset_request_count && _backend) {
+            
+            g_atomic_int_dec_and_test (&_hw_reset_request_count);
+            
+            // backup the device name
+            std::string name = _backend->device_name ();
+            
+            stop();
+            
+            // "hard reset" the device
+            _backend->drop_device();
+            _backend->set_device_name(name);
+            
+            start();
+            
+            // inform about possible changes
+            SampleRateChanged(_backend->sample_rate() );
+            BufferSizeChanged(_backend->buffer_size() );
+        }
+        
+        g_usleep(0);
+    }
 }
 
 
 void
-AudioEngine::wait_hw_event_processing_complete()
+AudioEngine::request_device_list_update()
 {
-	m_hw_event_thread->join ();
-	m_hw_event_thread = 0;
+    g_atomic_int_inc (&_hw_devicelist_update_count);
+}
+
+
+void
+AudioEngine::do_devicelist_update()
+{
+    SessionEvent::create_per_thread_pool (X_("Device list update processing thread"), 512);
+    
+    while (!_stop_hw_devicelist_processing) {
+        if (_hw_devicelist_update_count) {
+            g_atomic_int_dec_and_test (&_hw_devicelist_update_count);
+            DeviceListChanged (); /* EMIT SIGNAL */
+        }
+        g_usleep(0);
+    }
+}
+
+
+void
+AudioEngine::start_hw_event_processing()
+{   
+    if (_hw_reset_event_thread == 0) {
+        g_atomic_int_set(&_hw_reset_request_count, 0);
+        g_atomic_int_set(&_stop_hw_reset_processing, 0);
+        _hw_reset_event_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_reset_backend, this));
+    }
+    
+    if (_hw_devicelist_update_thread == 0) {
+        g_atomic_int_set(&_hw_devicelist_update_count, 0);
+        g_atomic_int_set(&_stop_hw_devicelist_processing, 0);
+        _hw_devicelist_update_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_devicelist_update, this));
+    }
+}
+
+
+void
+AudioEngine::stop_hw_event_processing()
+{
+    if (_hw_reset_event_thread) {
+        g_atomic_int_set(&_stop_hw_reset_processing, 1);
+        g_atomic_int_set(&_hw_reset_request_count, 0);
+        _hw_reset_event_thread->join ();
+        _hw_reset_event_thread = 0;
+    }
+    
+    if (_hw_devicelist_update_thread) {
+        g_atomic_int_set(&_stop_hw_devicelist_processing, 1);
+        g_atomic_int_set(&_hw_devicelist_update_count, 0);
+        _hw_devicelist_update_thread->join ();
+        _hw_devicelist_update_thread = 0;
+    }
+	
 }
 
 

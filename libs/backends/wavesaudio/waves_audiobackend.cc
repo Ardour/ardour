@@ -64,11 +64,11 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
             break;
         case WCMRAudioDeviceManagerClient::DeviceListChanged:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::DeviceListChanged" << std::endl;
-            _device_list_change();
+            engine.request_device_list_update();
             break;
         case WCMRAudioDeviceManagerClient::IODeviceDisconnected:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::DeviceListChanged" << std::endl;
-            _device_list_change();
+            engine.request_device_list_update();
             break;
         case WCMRAudioDeviceManagerClient::AudioCallback:
             if (parameter) {
@@ -582,14 +582,6 @@ WavesAudioBackend::_sample_rate_change (float new_sample_rate)
 	_sample_rate = new_sample_rate;
     _init_dsp_load_history();
     return engine.sample_rate_change (new_sample_rate);
-}
-
-
-int
-WavesAudioBackend::_device_list_change ()
-{
-	// requires GZ changes for device list update
-    return engine.device_list_change ();
 }
 
 

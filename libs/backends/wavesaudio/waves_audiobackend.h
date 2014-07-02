@@ -331,8 +331,6 @@ class WavesMidiPort;
 	int _buffer_size_change(uint32_t new_buffer_size);
 	int _sample_rate_change(float new_sample_rate);
     
-    int _device_list_change();
-    
     int _register_system_audio_ports ();
     int _register_system_midi_ports ();
 
