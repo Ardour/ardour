@@ -365,7 +365,8 @@ AudioEngine::process_callback (pframes_t nframes)
 void
 AudioEngine::request_backend_reset()
 {
-    g_atomic_int_inc(&_hw_reset_request_count);
+    //g_atomic_int_inc(&_hw_reset_request_count);
+	_hw_reset_request_count++;
 }
 
 
@@ -378,8 +379,9 @@ AudioEngine::do_reset_backend()
         
         if (_hw_reset_request_count && _backend) {
             
-            g_atomic_int_dec_and_test (&_hw_reset_request_count);
-            
+            //g_atomic_int_dec_and_test (&_hw_reset_request_count);
+            _hw_reset_request_count--;
+
             // backup the device name
             std::string name = _backend->device_name ();
             
@@ -409,7 +411,8 @@ AudioEngine::do_reset_backend()
 void
 AudioEngine::request_device_list_update()
 {
-    g_atomic_int_inc (&_hw_devicelist_update_count);
+    //g_atomic_int_inc (&_hw_devicelist_update_count);
+	_hw_devicelist_update_count++;
 }
 
 
@@ -420,8 +423,9 @@ AudioEngine::do_devicelist_update()
     
     while (!_stop_hw_devicelist_processing) {
         if (_hw_devicelist_update_count) {
-            g_atomic_int_dec_and_test (&_hw_devicelist_update_count);
-            DeviceListChanged (); /* EMIT SIGNAL */
+            //g_atomic_int_dec_and_test (&_hw_devicelist_update_count);
+            _hw_devicelist_update_count--;
+			DeviceListChanged (); /* EMIT SIGNAL */
         }
         g_usleep(0);
     }
@@ -432,14 +436,18 @@ void
 AudioEngine::start_hw_event_processing()
 {   
     if (_hw_reset_event_thread == 0) {
-        g_atomic_int_set(&_hw_reset_request_count, 0);
-        g_atomic_int_set(&_stop_hw_reset_processing, 0);
+        //g_atomic_int_set(&_hw_reset_request_count, 0);
+        //g_atomic_int_set(&_stop_hw_reset_processing, 0);
+		_hw_reset_request_count = 0;
+		_stop_hw_reset_processing = 0;
         _hw_reset_event_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_reset_backend, this));
     }
     
     if (_hw_devicelist_update_thread == 0) {
-        g_atomic_int_set(&_hw_devicelist_update_count, 0);
-        g_atomic_int_set(&_stop_hw_devicelist_processing, 0);
+        //g_atomic_int_set(&_hw_devicelist_update_count, 0);
+        //g_atomic_int_set(&_stop_hw_devicelist_processing, 0);
+		_hw_devicelist_update_count = 0;
+		_stop_hw_devicelist_processing = 0;
         _hw_devicelist_update_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_devicelist_update, this));
     }
 }
@@ -449,15 +457,19 @@ void
 AudioEngine::stop_hw_event_processing()
 {
     if (_hw_reset_event_thread) {
-        g_atomic_int_set(&_stop_hw_reset_processing, 1);
-        g_atomic_int_set(&_hw_reset_request_count, 0);
+        //g_atomic_int_set(&_stop_hw_reset_processing, 1);
+        //g_atomic_int_set(&_hw_reset_request_count, 0);
+		_stop_hw_reset_processing = 1;
+		_hw_reset_request_count = 0;
         _hw_reset_event_thread->join ();
         _hw_reset_event_thread = 0;
     }
     
     if (_hw_devicelist_update_thread) {
-        g_atomic_int_set(&_stop_hw_devicelist_processing, 1);
-        g_atomic_int_set(&_hw_devicelist_update_count, 0);
+        //g_atomic_int_set(&_stop_hw_devicelist_processing, 1);
+        //g_atomic_int_set(&_hw_devicelist_update_count, 0);
+		_stop_hw_devicelist_processing = 1;
+		_hw_devicelist_update_count = 0;
         _hw_devicelist_update_thread->join ();
         _hw_devicelist_update_thread = 0;
     }

@@ -250,7 +250,7 @@ public:
     bool                       _stop_hw_reset_processing;
     Glib::Threads::Thread*     _hw_devicelist_update_thread;
     uint16_t                   _hw_devicelist_update_count;
-    bool                       _stop_hw_devicelist_processing;
+    uint16_t                   _stop_hw_devicelist_processing;
     
     void start_hw_event_processing();
 	void stop_hw_event_processing();
