@@ -12,6 +12,7 @@
   <accelerator action='track-mute-toggle'/>
   <accelerator action='toggle-edit-mode'/>
   <accelerator action='toggle-midi-input-active'/>
+  <accelerator action='escape'/>
 #ifdef GTKOSX
   <accelerator action='Quit'/>
 #endif
