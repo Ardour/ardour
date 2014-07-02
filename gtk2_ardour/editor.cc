@@ -3335,7 +3335,7 @@ Editor::cycle_edit_mode ()
 			Config->set_edit_mode (Ripple);
 		}
 		break;
-//	case Splice:
+	case Splice:
 	case Ripple:
 		Config->set_edit_mode (Lock);
 		break;
@@ -4056,8 +4056,6 @@ Editor::reset_y_origin (double y)
 void
 Editor::reset_zoom (framecnt_t spp)
 {
-	clamp_samples_per_pixel (spp);
-
 	if (spp == samples_per_pixel) {
 		return;
 	}
@@ -4169,12 +4167,26 @@ Editor::use_visual_state (VisualState& vs)
 
 /** This is the core function that controls the zoom level of the canvas. It is called
  *  whenever one or more calls are made to reset_zoom().  It executes in an idle handler.
- *  @param fpu New frames per unit; should already have been clamped so that it is sensible.
+ *  @param spp new number of samples per pixel
  */
 void
 Editor::set_samples_per_pixel (framecnt_t spp)
 {
-	clamp_samples_per_pixel (spp);
+	if (spp < 1) {
+		return;
+	}
+
+	const framecnt_t three_days = 3 * 24 * 60 * 60 * (_session ? _session->frame_rate() : 48000);
+	const framecnt_t lots_of_pixels = 4000;
+
+	/* if the zoom level is greater than what you'd get trying to display 3
+	 * days of audio on a really big screen, then it's too big.
+	 */
+
+	if (spp * lots_of_pixels > three_days) {
+		return;
+	}
+
 	samples_per_pixel = spp;
 
 	if (tempo_lines) {

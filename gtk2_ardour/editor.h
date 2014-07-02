@@ -520,7 +520,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Editing::ZoomFocus zoom_focus;
 
 	void set_samples_per_pixel (framecnt_t);
-        bool clamp_samples_per_pixel (framecnt_t &) const;
 
 	Editing::MouseMode mouse_mode;
 	Editing::MouseMode pre_internal_mouse_mode;

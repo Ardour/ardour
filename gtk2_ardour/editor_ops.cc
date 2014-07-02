@@ -1448,38 +1448,6 @@ Editor::tav_zoom_smooth (bool coarser, bool force_all)
 	}
 }
 
-bool
-Editor::clamp_samples_per_pixel (framecnt_t& fpp) const
-{
-	bool clamped = false;
-	
-	if (fpp < 1) {
-		fpp = 1;
-		clamped = true;
-	}
-
-	framecnt_t sr;
-
-	if (_session) {
-		sr = _session->frame_rate ();
-	} else {
-		sr = 48000;
-	}
-
-	const framecnt_t three_days = 3 * 24 * 60 * 60 * sr;
-	const framecnt_t lots_of_pixels = 4000;
-
-	/* if the zoom level is greater than what you'd get trying to display 3
-	 * days of audio on a really big screen, scale it down.
-	 */
-
-	if (fpp * lots_of_pixels > three_days) {
-		fpp = three_days / _track_canvas->width();
-		clamped = true;
-	}
-
-	return clamped;
-}
 
 void
 Editor::temporal_zoom_step (bool coarser)
@@ -1516,7 +1484,6 @@ Editor::temporal_zoom (framecnt_t fpp)
 	framecnt_t nfpp;
 	double l;
 
-	clamp_samples_per_pixel (fpp);
 	if (fpp == samples_per_pixel) {
 		return;
 	}
@@ -1806,16 +1773,13 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 			new_spp = samples_per_pixel - (samples_per_pixel/2);
 		} else {
 			/* could bail out here since we cannot zoom any finer,
-			   but leave that to the clamp_samples_per_pixel() and
-			   equality test below
+			   but leave that to the equality test below
 			*/
 			new_spp = samples_per_pixel;
 		}
 
 		range_before -= range_before/2;
 	}
-
-	clamp_samples_per_pixel (new_spp);
 
 	if (new_spp == samples_per_pixel)  {
 		return;
