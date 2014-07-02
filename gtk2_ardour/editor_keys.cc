@@ -37,7 +37,77 @@
 
 using namespace ARDOUR;
 using namespace PBD;
+using namespace Editing;
 
+void
+Editor::keyboard_selection_finish (bool add)
+{
+	if (_session) {
+
+		framepos_t start = selection->time.start();
+		framepos_t end;
+		
+		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
+			end = _session->audible_frame();
+		} else {
+			end = get_preferred_edit_position();
+		}
+
+		//snap the selection start/end
+		snap_to(start);
+		
+		//if no tracks are selected and we're working from the keyboard, enable all tracks (_something_ has to be selected for any range selection)
+		if ( (_edit_point == EditAtPlayhead) && selection->tracks.empty() )
+			select_all_tracks();
+
+		selection->set (start, end);
+
+		//if session is playing a range, cancel that
+//		if (_session->get_play_range())
+//			_session->request_cancel_play_range();
+
+	}
+}
+
+void
+Editor::keyboard_selection_begin ()
+{
+	if (_session) {
+
+		framepos_t start;
+		framepos_t end = selection->time.end_frame();  //0 if no current selection
+
+		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
+			start = _session->audible_frame();
+		} else {
+			start = get_preferred_edit_position();
+		}
+		
+		//snap the selection start/end
+		snap_to(start);
+		
+		//if there's not already a sensible selection endpoint, go "forever"
+		if ( start > end ) {
+			end = max_framepos;
+		}
+		
+		//if no tracks are selected and we're working from the keyboard, enable all tracks (_something_ has to be selected for any range selection)
+		if ( selection->tracks.empty() )
+			select_all_tracks();
+					
+		selection->set (start, end);
+
+		//if session is playing a range, cancel that
+		if (_session->get_play_range())
+			_session->request_transport_speed ( 1.0 );
+
+		//if join playhead, locate to the newly selected start
+//		if ( !_session->transport_rolling() && Config->get_join_play_range() )
+//			_session->request_cancel_play_range();
+	}
+}
+
+/*
 void
 Editor::keyboard_selection_finish (bool add)
 {
@@ -82,7 +152,7 @@ Editor::keyboard_selection_begin ()
 
 		}
 	}
-}
+}*/
 
 void
 Editor::keyboard_paste ()

@@ -1378,17 +1378,7 @@ Editor::select_all (Selection::Operation op)
 {
 	list<Selectable *> touched;
 
-	TrackViewList ts;
-
-	if (selection->tracks.empty()) {
-		if (entered_track) {
-			ts.push_back (entered_track);
-		} else {
-			ts = track_views;
-		}
-	} else {
-		ts = selection->tracks;
-	}
+	TrackViewList ts  = track_views;
 
 	if (_internal_editing) {
 
@@ -1418,7 +1408,9 @@ Editor::select_all (Selection::Operation op)
 			continue;
 		}
 		(*iter)->get_selectables (0, max_framepos, 0, DBL_MAX, touched);
+		selection->add (*iter);
 	}
+
 
 	begin_reversible_command (_("select all"));
 	switch (op) {
