@@ -384,6 +384,11 @@ AudioEngine::do_reset_backend()
             std::string name = _backend->device_name ();
             
             stop();
+            if (_session) {
+                // it's not a halt, but should be handled the same way:
+                // disable record, stop transport and I/O processign but save the data.
+                _session->engine_halted();
+            }
             
             // "hard reset" the device
             _backend->drop_device();
