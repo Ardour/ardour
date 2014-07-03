@@ -4349,7 +4349,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 			if ( s->get_play_range() && s->transport_rolling() ) {
 				s->request_play_range (&_editor->selection->time, true);
 			} else {
-				if (Config->get_always_play_range() && !s->transport_rolling()) {
+				if (Config->get_follow_edits() && !s->transport_rolling()) {
 					s->request_locate (_editor->get_selection().time.start());
 				}
 			}

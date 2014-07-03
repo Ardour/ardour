@@ -2213,7 +2213,7 @@ Editor::get_preroll ()
 void
 Editor::maybe_locate_with_edit_preroll ( framepos_t location )
 {
-	if ( _session->transport_rolling() || !Config->get_always_play_range() )
+	if ( _session->transport_rolling() || !Config->get_follow_edits() )
 		return;
 
 	location -= get_preroll();
@@ -5535,7 +5535,7 @@ Editor::set_playhead_cursor ()
 		}
 	}
 
-	if ( Config->get_always_play_range() )
+	if ( Config->get_follow_edits() )
 		cancel_time_selection();
 }
 

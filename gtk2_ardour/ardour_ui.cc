@@ -1909,7 +1909,7 @@ ARDOUR_UI::transport_roll ()
 			}
 		} 
 
-	} else if (_session->get_play_range () && !Config->get_always_play_range()) {
+	} else if (_session->get_play_range () ) {
 		/* stop playing a range if we currently are */
 		_session->request_play_range (0, true);
 	}
@@ -1976,10 +1976,10 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		if (rolling) {
 			_session->request_stop (with_abort, true);
 		} else {
-			if ( Config->get_always_play_range() ) {
+			if ( Config->get_follow_edits() && ( editor->get_selection().time.front().start == _session->transport_frame() ) ) {  //if playhead is exactly at the start of a range, we can assume it was placed there by follow_edits
 				_session->request_play_range (&editor->get_selection().time, true);
+				_session->set_requested_return_frame( editor->get_selection().time.front().start );  //force an auto-return here
 			}
-
 			_session->request_transport_speed (1.0f);
 		}
 	}
@@ -2153,7 +2153,7 @@ ARDOUR_UI::map_transport_state ()
 			auto_loop_button.set_active (false);
 		}
 
-		if (Config->get_always_play_range()) {
+		if (Config->get_follow_edits()) {
 			/* light up both roll and play-selection if they are joined */
 			roll_button.set_active (true);
 			play_selection_button.set_active (true);

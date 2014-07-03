@@ -1014,7 +1014,7 @@ Editor::time_selection_changed ()
 		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, true);
 	}
 
-	if (_session && Config->get_always_play_range() && !_session->transport_rolling() && !selection->time.empty()) {
+	if (_session && Config->get_follow_edits() && !_session->transport_rolling() && !selection->time.empty()) {
 		_session->request_locate (selection->time.start());
 	}
 }

@@ -502,6 +502,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	framepos_t transport_frame () const {return _transport_frame; }
 	framepos_t audible_frame () const;
 	framepos_t requested_return_frame() const { return _requested_return_frame; }
+	void set_requested_return_frame(framepos_t return_to);
 
 	enum PullupFormat {
 		pullup_Plus4Plus1,
