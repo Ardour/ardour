@@ -920,23 +920,35 @@ WaveView::set_global_logscaled (bool yn)
 }
 
 void
-WaveView::region_resized ()
+WaveView::set_region_start (frameoffset_t start)
 {
 	if (!_region) {
 		return;
 	}
 
-	/* special: do not use _region->length() here to compute
-	   bounding box because it will already have changed.
-	   
-	   if we have a bounding box, use it.
+	if (_region_start == start) {
+		return;
+	}
+
+	begin_change ();
+	_region_start = start;
+	_bounding_box_dirty = true;
+	end_change ();
+}
+
+void
+WaveView::region_resized ()
+{
+	/* Called when the region start or end (thus length) has changed.
 	*/
 
-	_pre_change_bounding_box = _bounding_box;
+	if (!_region) {
+		return;
+	}
 
+	begin_change ();
+	_region_start = _region->start();
 	_bounding_box_dirty = true;
-	compute_bounding_box ();
-
 	end_change ();
 }
 
