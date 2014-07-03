@@ -4350,7 +4350,10 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 				s->request_play_range (&_editor->selection->time, true);
 			} else {
 				if (Config->get_follow_edits() && !s->transport_rolling()) {
-					s->request_locate (_editor->get_selection().time.start());
+					if (_operation == SelectionEndTrim)
+						_editor->maybe_locate_with_edit_preroll( _editor->get_selection().time.end_frame());
+					else
+						s->request_locate (_editor->get_selection().time.start());
 				}
 			}
 		}
