@@ -104,6 +104,11 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		create_automation_child (GainAutomation, false);
 	}
 
+	/* if set_state above didn't create a mute automation child, we need to make one */
+	if (automation_child (MuteAutomation) == 0) {
+		create_automation_child (MuteAutomation, false);
+	}
+
 	if (_route->panner_shell()) {
 		_route->panner_shell()->Changed.connect (*this, invalidator (*this),
                                                          boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
@@ -202,6 +207,11 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 
 		/* handled elsewhere */
 
+	} else if (param.type() == MuteAutomation) {
+
+		create_mute_automation_child (param, show);
+		
+
 	} else {
 		error << "AudioTimeAxisView: unknown automation child " << EventTypeMap::instance().to_symbol(param) << endmsg;
 	}
@@ -274,6 +284,22 @@ AudioTimeAxisView::update_gain_track_visibility ()
 
 	if (showit != string_is_affirmative (gain_track->gui_property ("visible"))) {
 		gain_track->set_marked_for_display (showit);
+
+		/* now trigger a redisplay */
+
+		if (!no_redraw) {
+			 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+		}
+	}
+}
+
+void
+AudioTimeAxisView::update_mute_track_visibility ()
+{
+	bool const showit = mute_automation_item->get_active();
+
+	if (showit != string_is_affirmative (mute_track->gui_property ("visible"))) {
+		mute_track->set_marked_for_display (showit);
 
 		/* now trigger a redisplay */
 
@@ -403,6 +429,13 @@ AudioTimeAxisView::build_automation_action_menu (bool for_selection)
 					  (gain_track && string_is_affirmative (gain_track->gui_property ("visible"))));
 
 	_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
+
+	automation_items.push_back (CheckMenuElem (_("Mute"), sigc::mem_fun (*this, &AudioTimeAxisView::update_mute_track_visibility)));
+	mute_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&automation_items.back ());
+	mute_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) && 
+					  (mute_track && string_is_affirmative (mute_track->gui_property ("visible"))));
+
+	_main_automation_menu_map[Evoral::Parameter(MuteAutomation)] = mute_automation_item;
 
 	if (!pan_tracks.empty()) {
 		automation_items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &AudioTimeAxisView::update_pan_track_visibility)));

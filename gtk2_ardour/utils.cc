@@ -402,38 +402,6 @@ ARDOUR_UI_UTILS::gdk_color_to_rgba (Gdk::Color const& c)
 	return RGBA_TO_UINT (r,g,b,a);
 }
 
-uint32_t
-ARDOUR_UI_UTILS::contrasting_text_color (uint32_t c)
-{
-	double r, g, b, a;
-	ArdourCanvas::color_to_rgba (c, r, g, b, a);
-
-	const double black_r = 0.0;
-	const double black_g = 0.0;
-	const double black_b = 0.0;
-
-	const double white_r = 1.0;
-	const double white_g = 1.0;
-	const double white_b = 1.0;
-
-	/* Use W3C contrast guideline calculation */
-
-	double white_contrast = (max (r, white_r) - min (r, white_r)) +
-		(max (g, white_g) - min (g, white_g)) + 
-		(max (b, white_b) - min (b, white_b));
-
-	double black_contrast = (max (r, black_r) - min (r, black_r)) +
-		(max (g, black_g) - min (g, black_g)) + 
-		(max (b, black_b) - min (b, black_b));
-
-	if (white_contrast > black_contrast) {		
-		/* use white */
-		return ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 1.0);
-	} else {
-		/* use black */
-		return ArdourCanvas::rgba_to_color (0.0, 0.0, 0.0, 1.0);
-	}
-}
 
 bool
 ARDOUR_UI_UTILS::relay_key_press (GdkEventKey* ev, Gtk::Window* win)
@@ -618,8 +586,8 @@ ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEv
 		/* no special handling or there are modifiers in effect: accelerate first */
 
                 DEBUG_TRACE (DEBUG::Accelerators, "\tactivate, then propagate\n");
-		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tevent send-event:%1 time:%2 length:%3 string:%4 hardware_keycode:%5 group:%6\n",
-					ev->send_event, ev->time, ev->length, ev->string, ev->hardware_keycode, ev->group));
+		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tevent send-event:%1 time:%2 length:%3 name %7 string:%4 hardware_keycode:%5 group:%6\n",
+								  ev->send_event, ev->time, ev->length, ev->string, ev->hardware_keycode, ev->group, gdk_keyval_name (ev->keyval)));
 
 		if (allow_activating) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\tsending to window\n");

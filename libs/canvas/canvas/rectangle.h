@@ -23,8 +23,6 @@
 #include "canvas/visibility.h"
 #include "canvas/item.h"
 #include "canvas/types.h"
-#include "canvas/outline.h"
-#include "canvas/fill.h"
 
 namespace ArdourCanvas
 {

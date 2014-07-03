@@ -1448,38 +1448,6 @@ Editor::tav_zoom_smooth (bool coarser, bool force_all)
 	}
 }
 
-bool
-Editor::clamp_samples_per_pixel (framecnt_t& fpp) const
-{
-	bool clamped = false;
-	
-	if (fpp < 1) {
-		fpp = 1;
-		clamped = true;
-	}
-
-	framecnt_t sr;
-
-	if (_session) {
-		sr = _session->frame_rate ();
-	} else {
-		sr = 48000;
-	}
-
-	const framecnt_t three_days = 3 * 24 * 60 * 60 * sr;
-	const framecnt_t lots_of_pixels = 4000;
-
-	/* if the zoom level is greater than what you'd get trying to display 3
-	 * days of audio on a really big screen, scale it down.
-	 */
-
-	if (fpp * lots_of_pixels > three_days) {
-		fpp = three_days / _track_canvas->width();
-		clamped = true;
-	}
-
-	return clamped;
-}
 
 void
 Editor::temporal_zoom_step (bool coarser)
@@ -1516,7 +1484,6 @@ Editor::temporal_zoom (framecnt_t fpp)
 	framecnt_t nfpp;
 	double l;
 
-	clamp_samples_per_pixel (fpp);
 	if (fpp == samples_per_pixel) {
 		return;
 	}
@@ -1806,16 +1773,13 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 			new_spp = samples_per_pixel - (samples_per_pixel/2);
 		} else {
 			/* could bail out here since we cannot zoom any finer,
-			   but leave that to the clamp_samples_per_pixel() and
-			   equality test below
+			   but leave that to the equality test below
 			*/
 			new_spp = samples_per_pixel;
 		}
 
 		range_before -= range_before/2;
 	}
-
-	clamp_samples_per_pixel (new_spp);
 
 	if (new_spp == samples_per_pixel)  {
 		return;
@@ -2110,6 +2074,8 @@ Editor::unhide_ranges ()
 	}
 }
 
+/* INSERT/REPLACE */
+
 void
 Editor::insert_region_list_selection (float times)
 {
@@ -2142,6 +2108,9 @@ Editor::insert_region_list_selection (float times)
 	begin_reversible_command (_("insert region"));
 	playlist->clear_changes ();
 	playlist->add_region ((RegionFactory::create (region, true)), get_preferred_edit_position(), times);
+	if (Config->get_edit_mode() == Ripple)
+		playlist->ripple (get_preferred_edit_position(), region->length() * times, boost::shared_ptr<Region>());
+
 	_session->add_command(new StatefulDiffCommand (playlist));
 	commit_reversible_command ();
 }
@@ -3726,7 +3695,7 @@ Editor::can_cut_copy () const
 
 
 /** Cut, copy or clear selected regions, automation points or a time range.
- * @param op Operation (Cut, Copy or Clear)
+ * @param op Operation (Delete, Cut, Copy or Clear)
  */
 void
 Editor::cut_copy (CutCopyOp op)
@@ -3762,7 +3731,7 @@ Editor::cut_copy (CutCopyOp op)
 		}
 	}
 
-	if ( op != Clear )  //"Delete" doesn't change copy/paste buf
+	if ( op != Delete )  //"Delete" doesn't change copy/paste buf
 		cut_buffer->clear ();
 
 	if (entered_marker) {
@@ -4002,10 +3971,11 @@ Editor::remove_clicked_region ()
 
 	boost::shared_ptr<Playlist> playlist = clicked_routeview->playlist();
 
-	begin_reversible_command (_("remove region"));
 	playlist->clear_changes ();
 	playlist->clear_owned_changes ();
 	playlist->remove_region (clicked_regionview->region());
+	if (Config->get_edit_mode() == Ripple)
+		playlist->ripple (clicked_regionview->region()->position(), -clicked_regionview->region()->length(), boost::shared_ptr<Region>());
 
 	/* We might have removed regions, which alters other regions' layering_index,
 	   so we need to do a recursive diff here.
@@ -4068,6 +4038,9 @@ Editor::remove_selected_regions ()
 		playlist->clear_owned_changes ();
 		playlist->freeze ();
 		playlist->remove_region (*rl);
+		if (Config->get_edit_mode() == Ripple)
+			playlist->ripple ((*rl)->position(), -(*rl)->length(), boost::shared_ptr<Region>());
+
 	}
 
 	vector<boost::shared_ptr<Playlist> >::iterator pl;
@@ -4197,12 +4170,16 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		switch (op) {
 		case Delete:
 			pl->remove_region (r);
+			if (Config->get_edit_mode() == Ripple)
+				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
 			break;
 			
 		case Cut:
 			_xx = RegionFactory::create (r);
 			npl->add_region (_xx, r->position() - first_position);
 			pl->remove_region (r);
+			if (Config->get_edit_mode() == Ripple)
+				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
 			break;
 
 		case Copy:
@@ -4211,7 +4188,9 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			break;
 
 		case Clear:
-			pl->remove_region (r);	
+			pl->remove_region (r);
+			if (Config->get_edit_mode() == Ripple)
+				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
 			break;
 		}
 

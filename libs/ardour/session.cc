@@ -36,6 +36,7 @@
 
 #include <boost/algorithm/string/erase.hpp>
 
+#include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/boost_debug.h"
 #include "pbd/stl_delete.h"
@@ -500,6 +501,14 @@ Session::destroy ()
 
 	clear_clicks ();
 
+	/* need to remove auditioner before monitoring section
+	 * otherwise it is re-connected */
+	auditioner.reset ();
+
+	/* drop references to routes held by the monitoring section
+	 * specifically _monitor_out aux/listen references */
+	remove_monitor_section();
+
 	/* clear out any pending dead wood from RCU managed objects */
 
 	routes.flush ();
@@ -519,7 +528,6 @@ Session::destroy ()
 
 	/* reset these three references to special routes before we do the usual route delete thing */
 
-	auditioner.reset ();
 	_master_out.reset ();
 	_monitor_out.reset ();
 
@@ -2603,6 +2611,13 @@ Session::remove_route (boost::shared_ptr<Route> route)
 		}
 	}
 
+	/* if the monitoring section had a pointer to this route, remove it */
+	if (_monitor_out && !route->is_master() && !route->is_monitor()) {
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		PBD::Unwinder<bool> uw (ignore_route_processor_changes, true);
+		route->remove_aux_or_listen (_monitor_out);
+	}
+
 	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (route);
 	if (mt && mt->step_editing()) {
 		if (_step_editors > 0) {
@@ -3421,38 +3436,6 @@ Session::count_sources_by_origin (const string& path)
 	return cnt;
 }
 
-/** Return the full path (in some session directory) for a new within-session source.
- * \a name must be a session-unique name that does not contain slashes
- *         (e.g. as returned by new_*_source_name)
- */
-string
-Session::new_source_path_from_name (DataType type, const string& name)
-{
-	assert(name.find("/") == string::npos);
-
-	std::string p;
-	if (type == DataType::AUDIO) {
-		if (_custom_audio_source_dir.empty()) {
-			SessionDirectory sdir(get_best_session_directory_for_new_source());
-			p = sdir.sound_path();
-		} else {
-			p = _custom_audio_source_dir;
-		}
-	} else if (type == DataType::MIDI) {
-		if (_custom_midi_source_dir.empty()) {
-			SessionDirectory sdir(get_best_session_directory_for_new_source());
-			p = sdir.midi_path();
-		} else {
-			p = _custom_midi_source_dir;
-		}
-	} else {
-		error << "Unknown source type, unable to create file path" << endmsg;
-		return "";
-	}
-
-	return Glib::build_filename (p, name);
-}
-
 bool
 Session::set_audio_source_dir (std::string dir)
 {
@@ -3464,7 +3447,7 @@ Session::set_audio_source_dir (std::string dir)
 	if (dir == _custom_audio_source_dir) {
 		return true;
 	}
-	SessionDirectory sdir(get_best_session_directory_for_new_source ());
+	SessionDirectory sdir(get_best_session_directory_for_new_audio ());
 	if (dir == sdir.sound_path() || dir.empty()) {
 		if (_custom_audio_source_dir.empty()) {
 			changed = false;
@@ -3508,7 +3491,7 @@ Session::set_midi_source_dir (std::string dir)
 		return true;
 	}
 
-	SessionDirectory sdir(get_best_session_directory_for_new_source ());
+	SessionDirectory sdir(session_dirs[0].path);
 	if (dir == sdir.midi_path() || dir.empty()) {
 		if (_custom_midi_source_dir.empty()) {
 			changed = false;
@@ -3549,74 +3532,60 @@ Session::peak_path (string base) const
 
 /** Return a unique name based on \a base for a new internal audio source */
 string
-Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t chan, bool destructive)
+Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t chan, bool destructive, bool take_required)
 {
 	uint32_t cnt;
-	char buf[PATH_MAX+1];
-	const uint32_t limit = 10000;
+	string possible_name;
+	const uint32_t limit = 9999; // arbitrary limit on number of files with the same basic name
 	string legalized;
 	string ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
+	bool some_related_source_name_exists = false;
 
-	buf[0] = '\0';
+	possible_name[0] = '\0';
 	legalized = legalize_for_path (base);
 
-	std::vector<string> sdirs;
-	vector<space_and_path>::iterator i;
+	std::vector<string> sdirs = source_search_path(DataType::AUDIO);
 
-	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		SessionDirectory sdir((*i).path);
-		sdirs.push_back(sdir.sound_path());
-	}
 	if (!_custom_audio_source_dir.empty()) {
 		sdirs.push_back(_custom_audio_source_dir);
 	}
 
 	// Find a "version" of the base name that doesn't exist in any of the possible directories.
+
 	for (cnt = (destructive ? ++destructive_index : 1); cnt <= limit; ++cnt) {
 
 		uint32_t existing = 0;
 
 		for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
 
+			ostringstream sstr;
+
 			if (destructive) {
-
-				if (nchan < 2) {
-					snprintf (buf, sizeof(buf), "T%04d-%s%s",
-					          cnt, legalized.c_str(), ext.c_str());
-				} else if (nchan == 2) {
-					if (chan == 0) {
-						snprintf (buf, sizeof(buf), "T%04d-%s%%L%s",
-						          cnt, legalized.c_str(), ext.c_str());
-					} else {
-						snprintf (buf, sizeof(buf), "T%04d-%s%%R%s",
-						          cnt, legalized.c_str(), ext.c_str());
-					}
-				} else if (nchan < 26) {
-					snprintf (buf, sizeof(buf), "T%04d-%s%%%c%s",
-					          cnt, legalized.c_str(), 'a' + chan, ext.c_str());
-				} else {
-					snprintf (buf, sizeof(buf), "T%04d-%s%s",
-					          cnt, legalized.c_str(), ext.c_str());
-				}
-
+				sstr << 'T';
+				sstr << setfill ('0') << setw (4) << cnt;
+				sstr << legalized;
 			} else {
-
-				if (nchan < 2) {
-					snprintf (buf, sizeof(buf), "%s-%u%s", legalized.c_str(), cnt, ext.c_str());
-				} else if (nchan == 2) {
-					if (chan == 0) {
-						snprintf (buf, sizeof(buf), "%s-%u%%L%s", legalized.c_str(), cnt, ext.c_str());
-					} else {
-						snprintf (buf, sizeof(buf), "%s-%u%%R%s", legalized.c_str(), cnt, ext.c_str());
-					}
-				} else if (nchan < 26) {
-					snprintf (buf, sizeof(buf), "%s-%u%%%c%s", legalized.c_str(), cnt, 'a' + chan, ext.c_str());
-				} else {
-					snprintf (buf, sizeof(buf), "%s-%u%s", legalized.c_str(), cnt, ext.c_str());
+				sstr << legalized;
+				
+				if (take_required || some_related_source_name_exists) {
+					sstr << '-';
+					sstr << cnt;
 				}
 			}
+			
+			if (nchan == 2) {
+				if (chan == 0) {
+					sstr << "%L";
+				} else {
+					sstr << "%R";
+				}
+			} else if (nchan > 2 && nchan < 26) {
+				sstr << '%';
+				sstr << 'a' + chan;
+			} 
 
-			string spath = (*i);
+			sstr << ext;
+			possible_name = sstr.str();
 
 			/* note that we search *without* the extension so that
 			   we don't end up both "Audio 1-1.wav" and "Audio 1-1.caf"
@@ -3624,7 +3593,7 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 			   a file format change.
 			*/
 
-			if (matching_unsuffixed_filename_exists_in (spath, buf)) {
+			if (matching_unsuffixed_filename_exists_in (*i, possible_name)) {
 				existing++;
 				break;
 			}
@@ -3638,7 +3607,7 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 			 * notions of their removability.
 			 */
 
-			string possible_path = Glib::build_filename (spath, buf);
+			string possible_path = Glib::build_filename (*i, possible_name);
 
 			if (audio_source_by_path_and_channel (possible_path, chan)) {
 				existing++;
@@ -3650,6 +3619,8 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 			break;
 		}
 
+		some_related_source_name_exists = true;
+
 		if (cnt > limit) {
 			error << string_compose(
 					_("There are already %1 recordings for %2, which I consider too many."),
@@ -3659,56 +3630,59 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 		}
 	}
 
-	return Glib::path_get_basename (buf);
-}
+	/* We've established that the new name does not exist in any session
+	 * directory, so now find out which one we should use for this new
+	 * audio source.
+	 */
 
-/** Create a new within-session audio source */
-boost::shared_ptr<AudioFileSource>
-Session::create_audio_source_for_session (size_t n_chans, string const & n, uint32_t chan, bool destructive)
-{
-	const string name    = new_audio_source_name (n, n_chans, chan, destructive);
-	const string path    = new_source_path_from_name(DataType::AUDIO, name);
-
-	return boost::dynamic_pointer_cast<AudioFileSource> (
-		SourceFactory::createWritable (DataType::AUDIO, *this, path, destructive, frame_rate()));
+	std::string s;
+	if (!_custom_audio_source_dir.empty()) {
+		s = Glib::build_filename (_custom_audio_source_dir, possible_name);
+	} else {
+		SessionDirectory sdir(get_best_session_directory_for_new_audio ());
+		s = Glib::build_filename (sdir.sound_path(), possible_name);
+	}
+	return s;
 }
 
 /** Return a unique name based on \a owner_name for a new internal MIDI source */
 string
-Session::new_midi_source_name (const string& owner_name)
+Session::new_midi_source_path (const string& base)
 {
 	uint32_t cnt;
 	char buf[PATH_MAX+1];
 	const uint32_t limit = 10000;
 	string legalized;
+	string possible_path;
 	string possible_name;
 
 	buf[0] = '\0';
-	legalized = legalize_for_path (owner_name);
+	legalized = legalize_for_path (base);
 
-	std::vector<string> sdirs;
-	vector<space_and_path>::iterator i;
+	// Find a "version" of the file name that doesn't exist in any of the possible directories.
+	std::vector<string> sdirs = source_search_path(DataType::MIDI);
+	/* - the main session folder is the first in the vector.
+	 * - after checking all locations for file-name uniqueness,
+	 *   we keep the one from the last iteration as new file name
+	 * - midi files are small and should just be kept in the main session-folder
+	 *
+	 * -> reverse the array, check main session folder last and use that as location
+	 *    for MIDI files.
+	 */
+	std::reverse(sdirs.begin(), sdirs.end());
 
-	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		SessionDirectory sdir((*i).path);
-		sdirs.push_back(sdir.midi_path());
-	}
 	if (!_custom_midi_source_dir.empty()) {
 		sdirs.push_back(_custom_midi_source_dir);
 	}
 
-	// Find a "version" of the file name that doesn't exist in any of the possible directories.
-
 	for (cnt = 1; cnt <= limit; ++cnt) {
 
 		uint32_t existing = 0;
-
+		
 		for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
-
 			snprintf (buf, sizeof(buf), "%s-%u.mid", legalized.c_str(), cnt);
 			possible_name = buf;
-
-			std::string possible_path = Glib::build_filename (*i, possible_name);
+			possible_path = Glib::build_filename (*i, possible_name);
 			
 			if (Glib::file_test (possible_path, Glib::FILE_TEST_EXISTS)) {
 				existing++;
@@ -3726,31 +3700,47 @@ Session::new_midi_source_name (const string& owner_name)
 		if (cnt > limit) {
 			error << string_compose(
 					_("There are already %1 recordings for %2, which I consider too many."),
-					limit, owner_name) << endmsg;
+					limit, base) << endmsg;
 			destroy ();
-			throw failed_constructor();
+			return 0;
 		}
 	}
 
-	return possible_name;
+	/* No need to "find best location" for software/app-based RAID, because
+	   MIDI is so small that we always put it in the same place.
+	*/
+
+	return possible_path;
 }
 
+
+/** Create a new within-session audio source */
+boost::shared_ptr<AudioFileSource>
+Session::create_audio_source_for_session (size_t n_chans, string const & base, uint32_t chan, bool destructive)
+{
+	const string path = new_audio_source_path (base, n_chans, chan, destructive, true);
+
+	if (!path.empty()) {
+		return boost::dynamic_pointer_cast<AudioFileSource> (
+			SourceFactory::createWritable (DataType::AUDIO, *this, path, destructive, frame_rate()));
+	} else {
+		throw failed_constructor ();
+	}
+}
 
 /** Create a new within-session MIDI source */
 boost::shared_ptr<MidiSource>
 Session::create_midi_source_for_session (string const & basic_name)
 {
-	std::string name;
-
-	if (name.empty()) {
-		name = new_midi_source_name (basic_name);
+	const string path = new_midi_source_path (basic_name);
+	
+	if (!path.empty()) {
+		return boost::dynamic_pointer_cast<SMFSource> (
+			SourceFactory::createWritable (
+				DataType::MIDI, *this, path, false, frame_rate()));
+	} else {
+		throw failed_constructor ();
 	}
-
-	const string path = new_source_path_from_name (DataType::MIDI, name);
-
-	return boost::dynamic_pointer_cast<SMFSource> (
-		SourceFactory::createWritable (
-			DataType::MIDI, *this, path, false, frame_rate()));
 }
 
 /** Create a new within-session MIDI source */
@@ -3784,7 +3774,7 @@ Session::create_midi_source_by_stealing_name (boost::shared_ptr<Track> track)
 		return boost::shared_ptr<MidiSource>();
 	}
 
-	const string path = new_source_path_from_name (DataType::MIDI, name);
+	const string path = new_midi_source_path (name);
 
 	return boost::dynamic_pointer_cast<SMFSource> (
 		SourceFactory::createWritable (
@@ -3862,6 +3852,9 @@ Session::audition_region (boost::shared_ptr<Region> r)
 void
 Session::cancel_audition ()
 {
+	if (!auditioner) {
+		return;
+	}
 	if (auditioner->auditioning()) {
 		auditioner->cancel_audition ();
 		AuditionActive (false); /* EMIT SIGNAL */
@@ -4290,18 +4283,14 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	boost::shared_ptr<Region> result;
 	boost::shared_ptr<Playlist> playlist;
 	boost::shared_ptr<AudioFileSource> fsource;
-	uint32_t x;
 	ChanCount diskstream_channels (track.n_channels());
 	framepos_t position;
 	framecnt_t this_chunk;
 	framepos_t to_do;
 	framepos_t latency_skip;
 	BufferSet buffers;
-	SessionDirectory sdir(get_best_session_directory_for_new_source ()); // XXX use _custom_audio_source_dir ??
-	const string sound_dir = sdir.sound_path();
 	framepos_t len = end - start;
 	bool need_block_size_reset = false;
-	string ext;
 	ChanCount const max_proc = track.max_processor_streams ();
 	string legal_playlist_name;
 	string possible_path;
@@ -4342,29 +4331,22 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 	legal_playlist_name = legalize_for_path (playlist->name());
 
-	ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
-
 	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n_audio(); ++chan_n) {
 
-		for (x = 0; x < 99999; ++x) {
-			possible_path = Glib::build_filename (sound_dir, string_compose ("%1-%2-bounce-%3%4", legal_playlist_name.c_str(), chan_n, x+1, ext.c_str()));
-			if (!Glib::file_test (possible_path, Glib::FILE_TEST_EXISTS)) {
-				break;
-			}
-		}
-
-		if (x == 99999) {
-			error << string_compose (_("too many bounced versions of playlist \"%1\""), playlist->name()) << endmsg;
+		string base_name = string_compose ("%1-%2-bounce", playlist->name(), chan_n);
+		string path = new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, false, true);
+		
+		if (path.empty()) {
 			goto out;
 		}
 
 		try {
 			fsource = boost::dynamic_pointer_cast<AudioFileSource> (
-				SourceFactory::createWritable (DataType::AUDIO, *this, possible_path, false, frame_rate()));
+				SourceFactory::createWritable (DataType::AUDIO, *this, path, false, frame_rate()));
 		}
 
 		catch (failed_constructor& err) {
-			error << string_compose (_("cannot create new audio file \"%1\" for %2"), possible_path, track.name()) << endmsg;
+			error << string_compose (_("cannot create new audio file \"%1\" for %2"), path, track.name()) << endmsg;
 			goto out;
 		}
 

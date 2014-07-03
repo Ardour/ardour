@@ -46,41 +46,54 @@ public:
 
 	template <typename Function>
 	void foreach_route_ui (Function f) {
-		for (iterator i = begin(); i != end(); ++i) {
+		for (iterator i = begin(); i != end(); ) {
+			iterator tmp = i;
+			++tmp;
+
 			RouteUI* t = dynamic_cast<RouteUI*> (*i);
 			if (t) {
 				f (t);
 			}
+			i = tmp;
 		}
 	}
 
 	template <typename Function>
 	void foreach_route_time_axis (Function f) {
-		for (iterator i = begin(); i != end(); ++i) {
+		for (iterator i = begin(); i != end(); ) {
+			iterator tmp = i;
+			++tmp;
 			RouteTimeAxisView* t = dynamic_cast<RouteTimeAxisView*> (*i);
 			if (t) {
 				f (t);
 			}
+			i = tmp;
 		}
 	}
 
 	template <typename Function>
 	void foreach_audio_time_axis (Function f) {
-		for (iterator i = begin(); i != end(); ++i) {
+		for (iterator i = begin(); i != end(); ) {
+			iterator tmp = i;
+			++tmp;
 			AudioTimeAxisView* t = dynamic_cast<AudioTimeAxisView*> (*i);
 			if (t) {
 				f (t);
 			}
+			i = tmp;
 		}
 	}
 
 	template <typename Function>
 	void foreach_midi_time_axis (Function f) {
-		for (iterator i = begin(); i != end(); ++i) {
+		for (iterator i = begin(); i != end(); ) {
+			iterator tmp = i;
+			++tmp;
 			MidiTimeAxisView* t = dynamic_cast<MidiTimeAxisView*> (*i);
 			if (t) {
 				f (t);
 			}
+			i = tmp;
 		}
 	}
 

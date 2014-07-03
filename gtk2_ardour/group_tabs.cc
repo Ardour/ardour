@@ -24,6 +24,7 @@
 
 #include "gui_thread.h"
 #include "route_group_dialog.h"
+#include "global_signals.h"
 #include "group_tabs.h"
 #include "keyboard.h"
 #include "i18n.h"
@@ -45,6 +46,7 @@ GroupTabs::GroupTabs ()
 	, _dragging_new_tab (0)
 {
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
+	ColorsChanged.connect (sigc::mem_fun (*this, &GroupTabs::queue_draw));	
 }
 
 GroupTabs::~GroupTabs ()

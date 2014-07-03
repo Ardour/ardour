@@ -117,78 +117,31 @@ open_importable_source (const string& path, framecnt_t samplerate, ARDOUR::SrcQu
 	}
 }
 
-static std::string
-get_non_existent_filename (HeaderFormat hf, DataType type, const bool allow_replacing, const std::string& destdir, const std::string& basename, uint32_t channel, uint32_t channels)
-{
-	char buf[PATH_MAX+1];
-	bool goodfile = false;
-	string base = basename;
-	string ext = native_header_format_extension (hf, type);
-	uint32_t cnt = 1;
-
-	do {
-
-		if (type == DataType::AUDIO && channels == 2) {
-			if (channel == 0) {
-				if (cnt == 1) {
-					snprintf (buf, sizeof(buf), "%s-L%s", base.c_str(), ext.c_str());
-				} else {
-					snprintf (buf, sizeof(buf), "%s-%d-L%s", base.c_str(), cnt, ext.c_str());
-				}
-			} else {
-				if (cnt == 1) {
-					snprintf (buf, sizeof(buf), "%s-R%s", base.c_str(), ext.c_str());
-				} else {
-					snprintf (buf, sizeof(buf), "%s-%d-R%s", base.c_str(), cnt, ext.c_str());
-				}
-			}
-		} else if (channels > 1) {
-			if (cnt == 1) {
-				snprintf (buf, sizeof(buf), "%s-c%d%s", base.c_str(), channel, ext.c_str());
-			} else {
-				snprintf (buf, sizeof(buf), "%s-%d-c%d%s", base.c_str(), cnt, channel, ext.c_str());
-			}
-		} else {
-			if (cnt == 1) {
-				snprintf (buf, sizeof(buf), "%s%s", base.c_str(), ext.c_str());
-			} else {
-				snprintf (buf, sizeof(buf), "%s-%d%s", base.c_str(), cnt, ext.c_str());
-			}
-		}
-
-		string tempname = destdir + "/" + buf;
-
-		if (!allow_replacing && Glib::file_test (tempname, Glib::FILE_TEST_EXISTS)) {
-
-			cnt++;
-
-		} else {
-
-			goodfile = true;
-		}
-
-	} while (!goodfile);
-
-	return buf;
-}
-
-static vector<string>
-get_paths_for_new_sources (HeaderFormat hf, const bool allow_replacing, const string& import_file_path, const string& session_dir, uint32_t channels)
+vector<string>
+Session::get_paths_for_new_sources (bool /*allow_replacing*/, const string& import_file_path, uint32_t channels)
 {
 	vector<string> new_paths;
 	const string basename = basename_nosuffix (import_file_path);
 
-	SessionDirectory sdir(session_dir);
-
 	for (uint32_t n = 0; n < channels; ++n) {
 
 		const DataType type = SMFSource::safe_midi_file_extension (import_file_path) ? DataType::MIDI : DataType::AUDIO;
+		string filepath;
 
-		std::string filepath = (type == DataType::MIDI)
-			? sdir.midi_path() : sdir.sound_path();
+		switch (type) {
+		  case DataType::MIDI:
+			filepath = new_midi_source_path (basename);
+			break;
+		case DataType::AUDIO:
+			filepath = new_audio_source_path (basename, channels, n, false, false);
+			break;
+		}
 
-		filepath = Glib::build_filename (filepath,
-		                                 get_non_existent_filename (hf, type, allow_replacing, filepath, basename, n, channels));
+		if (filepath.empty()) {
+			error << string_compose (_("Cannot find new filename for imported file %1"), import_file_path) << endmsg;
+			return vector<string>();
+		}
+
 		new_paths.push_back (filepath);
 	}
 
@@ -325,7 +278,7 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 		progress_base = 0.5;
 	}
 
-	uint32_t read_count = 0;
+	framecnt_t read_count = 0;
 
 	while (!status.cancel) {
 
@@ -521,16 +474,13 @@ Session::import_files (ImportStatus& status)
 				return;
 			}
 		}
-
+		
 		if (channels == 0) {
 			error << _("Import: file contains no channels.") << endmsg;
 			continue;
 		}
 
-		vector<string> new_paths = get_paths_for_new_sources (config.get_native_file_header_format(),
-		                                                      status.replace_existing_source, *p,
-		                                                      get_best_session_directory_for_new_source (),
-		                                                      channels);
+		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source, *p, channels);
 		Sources newfiles;
 		framepos_t natural_position = source ? source->natural_position() : 0;
 

@@ -4,7 +4,7 @@
     <Option name="ui-rc-file" value="ardour3_ui_dark.rc"/>
     <Option name="flat-buttons" value="00000000"/>
     <Option name="waveform-gradient-depth" value="0"/>
-    <Option name="timeline-item-gradient-depth" value="00000.95"/>
+    <Option name="timeline-item-gradient-depth" value="00000.5"/>
     <Option name="all-floating-windows-are-dialogs" value="00000000"/>
     <Option name="color-regions-using-track-color" value="00000000"/>
     <Option name="show-waveform-clipping" value="00000001"/>
@@ -45,6 +45,7 @@
     <Option name="image track" value="ddddd8ff"/>
     <Option name="inactive crossfade" value="e8ed3d77"/>
     <Option name="inactive fade handle" value="bbbbbbaa"/>
+    <Option name="inactive group tab" value="434343ff"/>
     <Option name="location cd marker" value="1ee8c4ff"/>
     <Option name="location loop" value="35964fff"/>
     <Option name="location marker" value="c4f411ff"/>
@@ -172,7 +173,7 @@
     <Option name="verbose canvas cursor" value="fffd2ebc"/>
     <Option name="vestigial frame" value="0000000f"/>
     <Option name="video timeline bar" value="303030ff"/>
-    <Option name="region base" value="99a7b5a0"/>
+    <Option name="region base" value="b1c9b1ff"/>
     <Option name="region area covered by another region" value="505050b0"/>
     <Option name="waveform outline" value="000000ff"/>
     <Option name="clipped waveform" value="ff0000e5"/>

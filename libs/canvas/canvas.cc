@@ -387,9 +387,9 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 	if (DEBUG_ENABLED(PBD::DEBUG::CanvasEnterLeave)) {
 		for (vector<Item const*>::const_iterator it = items.begin(); it != items.end(); ++it) {
 #ifdef CANVAS_DEBUG
-			std::cerr << "\tItem " << (*it)->whatami() << '/' << (*it)->name << std::endl;
+			std::cerr << "\tItem " << (*it)->whatami() << '/' << (*it)->name << " ignore events ? " << (*it)->ignore_events() << " vis ? " << (*it)->visible() << std::endl;
 #else
-			std::cerr << "\tItem " << (*it)->whatami() << std::endl;
+			std::cerr << "\tItem " << (*it)->whatami() << '/' << " ignore events ? " << (*it)->ignore_events() << " vis ? " << (*it)->visible() << std::endl;
 #endif
 		}
 	}
@@ -415,6 +415,8 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 		}
 		within_items.push_front (possible_item);
 	}
+
+	DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("after filtering insensitive + containers, we have  %1 items\n", within_items.size()));
 
 	if (within_items.empty()) {
 

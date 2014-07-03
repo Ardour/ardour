@@ -348,6 +348,12 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 		argp[a++] = strdup("-metadata");
 		argp[a++] = format_metadata(it->first.c_str(), it->second.c_str());
 	}
+
+	if (m_fps > 0) {
+		m_lead_in  = rint (m_lead_in * m_fps) / m_fps;
+		m_lead_out = rint (m_lead_out * m_fps) / m_fps;
+	}
+
 	if (m_lead_in != 0 && m_lead_out != 0) {
 		std::ostringstream osstream;
 		argp[a++] = strdup("-vf");

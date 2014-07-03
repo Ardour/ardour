@@ -1142,6 +1142,10 @@ Session::process_event (SessionEvent* ev)
 		set_play_range (ev->audio_range, (ev->speed == 1.0f));
 		break;
 
+	case SessionEvent::CancelPlayAudioRange:
+		unset_play_range();
+		break;
+
 	case SessionEvent::RealTimeOperation:
 		process_rtop (ev);
 		del = false; // other side of RT request needs to clean up

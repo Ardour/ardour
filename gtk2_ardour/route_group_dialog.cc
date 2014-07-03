@@ -88,7 +88,6 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	
 	main_vbox->pack_start (*top_vbox, false, false);
 
-	_name.set_text (_group->name ());
 	_active.set_active (_group->is_active ());
 
 	Gdk::Color c;
@@ -102,8 +101,6 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true);
 
-	_name.signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &Dialog::response), RESPONSE_OK));
-
 	_gain.set_active (_group->is_gain());
 	_relative.set_active (_group->is_relative());
 	_mute.set_active (_group->is_mute());
@@ -114,6 +111,18 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	_share_color.set_active (_group->is_color());
 	_share_monitoring.set_active (_group->is_monitoring());
 
+	if (_group->name ().empty()) {
+		_initial_name = "1";
+		while (!unique_name (_initial_name)) {
+			_initial_name = bump_name_number (_initial_name);
+		}
+		_name.set_text (_initial_name);
+		update();
+	} else {
+		_name.set_text (_initial_name);
+	}
+
+	_name.signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &Dialog::response), RESPONSE_OK));
 	_name.signal_changed().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_color.signal_color_set().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
@@ -181,14 +190,14 @@ RouteGroupDialog::do_run ()
 			return Gtk::RESPONSE_CANCEL;
 		}
 
-		if (unique_name ()) {
+		if (unique_name (_name.get_text())) {
 			/* not cancelled and the name is ok, so all is well */
 			return false;
 		}
 
 		_group->set_name (_initial_name);
 		MessageDialog msg (
-			_("A route group of this name already exists.  Please use a different name."),
+			_("The group name is not unique. Please use a different name."),
 			false,
 			Gtk::MESSAGE_ERROR,
 			Gtk::BUTTONS_OK,
@@ -232,11 +241,12 @@ RouteGroupDialog::gain_toggled ()
 
 /** @return true if the current group's name is unique accross the session */
 bool
-RouteGroupDialog::unique_name () const
+RouteGroupDialog::unique_name (std::string const name) const
 {
+	if (name.empty()) return false; // do not allow empty name, empty means unset.
 	list<RouteGroup*> route_groups = _group->session().route_groups ();
 	list<RouteGroup*>::iterator i = route_groups.begin ();
-	while (i != route_groups.end() && ((*i)->name() != _name.get_text() || *i == _group)) {
+	while (i != route_groups.end() && ((*i)->name() != name || *i == _group)) {
 		++i;
 	}
 

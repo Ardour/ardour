@@ -490,13 +490,27 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	   to cut notes or regions.
 	*/
 
-	MouseMode eff_mouse_mode = mouse_mode;
+	MouseMode eff_mouse_mode = effective_mouse_mode ();
 
 	if (get_smart_mode() && eff_mouse_mode == MouseRange && event->button.button == 3 && item_type == RegionItem) {
 		/* context clicks are always about object properties, even if
 		   we're in range mode within smart mode.
 		*/
 		eff_mouse_mode = MouseObject;
+	}
+
+	/* special case: allow drag of region fade in/out in object mode with join object/range enabled */
+	if (get_smart_mode()) {
+		switch (item_type) {
+		  case FadeInHandleItem:
+		  case FadeInTrimHandleItem:
+		  case FadeOutHandleItem:
+		  case FadeOutTrimHandleItem:
+			  eff_mouse_mode = MouseObject;
+			  break;
+		default:
+			break;
+		}
 	}
 
 	if (((mouse_mode != MouseObject) &&
@@ -551,13 +565,6 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
  	case RegionViewName:
 	case LeftFrameHandle:
 	case RightFrameHandle:
-		if (eff_mouse_mode != MouseRange) {
-			set_selected_regionview_from_click (press, op);
-		} else if (event->type == GDK_BUTTON_PRESS) {
-			set_selected_track_as_side_effect (op);
-		}
-		break;
-
 	case FadeInHandleItem:
 	case FadeInTrimHandleItem:
 	case FadeInItem:
@@ -566,8 +573,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	case FadeOutItem:
 	case StartCrossFadeItem:
 	case EndCrossFadeItem:
-		if (eff_mouse_mode != MouseRange) {
-			cerr << "Should be setting selected regionview\n";
+		if (get_smart_mode() || eff_mouse_mode != MouseRange) {
 			set_selected_regionview_from_click (press, op);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			set_selected_track_as_side_effect (op);
@@ -717,8 +723,17 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	Editing::MouseMode eff = effective_mouse_mode ();
 
 	/* special case: allow drag of region fade in/out in object mode with join object/range enabled */
-	if (item_type == FadeInHandleItem || item_type == FadeOutHandleItem) {
-		eff = MouseObject;
+	if (get_smart_mode()) { 
+		switch (item_type) {
+		  case FadeInHandleItem:
+		  case FadeInTrimHandleItem:
+		  case FadeOutHandleItem:
+		  case FadeOutTrimHandleItem:
+			eff = MouseObject;
+			break;
+		default:
+			break;
+		}
 	}
 
 	/* there is no Range mode when in internal edit mode */
@@ -1432,6 +1447,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case FadeInHandleItem:
 			case FadeInTrimHandleItem:
 			case StartCrossFadeItem:
+			case LeftFrameHandle:
 				popup_xfade_in_context_menu (1, event->button.time, item, item_type);
 				break;
 
@@ -1439,6 +1455,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case FadeOutHandleItem:
 			case FadeOutTrimHandleItem:
 			case EndCrossFadeItem:
+			case RightFrameHandle:
 				popup_xfade_out_context_menu (1, event->button.time, item, item_type);
 				break;
 
@@ -1448,8 +1465,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case RegionItem:
 			case RegionViewNameHighlight:
-			case LeftFrameHandle:
-			case RightFrameHandle:
 			case RegionViewName:
 				popup_track_context_menu (1, event->button.time, item_type, false);
 				break;
@@ -2385,10 +2400,17 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 		return;
 	}
 
-	if (Config->get_edit_mode() == Splice) {
-		_drags->add (new RegionSpliceDrag (this, item, region_view, selection->regions.by_layer()));
-	} else {
-		_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), false, false));
+	switch (Config->get_edit_mode()) {
+		case Splice:
+			_drags->add (new RegionSpliceDrag (this, item, region_view, selection->regions.by_layer()));
+			break;
+		case Ripple:
+			_drags->add (new RegionRippleDrag (this, item, region_view, selection->regions.by_layer()));
+			break;
+		default:
+			_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), false, false));
+			break;
+
 	}
 }
 
@@ -2413,7 +2435,7 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
 		return;
 	}
 
-	if (Config->get_edit_mode() == Splice) {
+	if (Config->get_edit_mode() == Splice || Config->get_edit_mode() == Ripple) {
 		return;
 	}
 
@@ -2557,7 +2579,6 @@ Editor::update_join_object_range_location (double y)
 		_join_object_range_state = JOIN_OBJECT_RANGE_RANGE;
 	}
 
-
 	if (entered_regionview) {
 
 		ArdourCanvas::Duple const item_space = entered_regionview->get_canvas_group()->canvas_to_item (ArdourCanvas::Duple (0, y));
@@ -2574,17 +2595,32 @@ Editor::update_join_object_range_location (double y)
 		RouteTimeAxisView* entered_route_view = dynamic_cast<RouteTimeAxisView*> (entered_track);
 		
 		if (entered_route_view) {
-			/* track/bus ... but not in a region ... use range mode */
-			_join_object_range_state = JOIN_OBJECT_RANGE_RANGE;
-			if (_join_object_range_state != old) {
-				set_canvas_cursor (which_track_cursor ());
+
+			double cx = 0;
+			double cy = y;
+
+			entered_route_view->canvas_display()->canvas_to_item (cx, cy);
+
+			double track_height = entered_route_view->view()->child_height();
+			if (Config->get_show_name_highlight()) {
+				track_height -= TimeAxisViewItem::NAME_HIGHLIGHT_SIZE;
 			}
+			double const c = cy / track_height;
+
+
+			if (c <= 0.5) {
+				_join_object_range_state = JOIN_OBJECT_RANGE_RANGE;
+			} else {
+				_join_object_range_state = JOIN_OBJECT_RANGE_OBJECT;
+			}
+
 		} else {
 			/* Other kinds of tracks use object mode */
 			_join_object_range_state = JOIN_OBJECT_RANGE_OBJECT;
-			if (_join_object_range_state != old) {
-				set_canvas_cursor (which_track_cursor ());
-			}
+		}
+
+		if (_join_object_range_state != old) {
+			set_canvas_cursor (which_track_cursor ());
 		}
 	}
 }

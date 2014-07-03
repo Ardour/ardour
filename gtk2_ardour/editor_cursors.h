@@ -37,6 +37,7 @@ class EditorCursor {
 	void show ();
 	void hide ();
 	void set_color (ArdourCanvas::Color);
+	void set_sensitive (bool);
 
 	framepos_t current_frame () const {
 		return _current_frame;

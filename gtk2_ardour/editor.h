@@ -520,7 +520,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Editing::ZoomFocus zoom_focus;
 
 	void set_samples_per_pixel (framecnt_t);
-        bool clamp_samples_per_pixel (framecnt_t &) const;
 
 	Editing::MouseMode mouse_mode;
 	Editing::MouseMode pre_internal_mouse_mode;
@@ -1251,7 +1250,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool add_channel_suffix);
 
 	int finish_bringing_in_material (boost::shared_ptr<ARDOUR::Region> region, uint32_t, uint32_t,  framepos_t& pos, Editing::ImportMode mode,
-				      boost::shared_ptr<ARDOUR::Track>& existing_track);
+					 boost::shared_ptr<ARDOUR::Track>& existing_track, const std::string& new_track_name);
 
 	boost::shared_ptr<ARDOUR::AudioTrack> get_nth_selected_audio_track (int nth) const;
 	boost::shared_ptr<ARDOUR::MidiTrack> get_nth_selected_midi_track (int nth) const;
@@ -1578,8 +1577,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void editor_mixer_button_toggled ();
 	void editor_list_button_toggled ();
 
-	AudioClock*               zoom_range_clock;
-
 	ArdourButton              zoom_in_button;
 	ArdourButton              zoom_out_button;
 	ArdourButton              zoom_out_full_button;
@@ -1626,7 +1623,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void edit_mode_selection_done ( ARDOUR::EditMode m );
 	void build_edit_mode_menu ();
 	Gtk::VBox         edit_mode_box;
-	std::vector<std::string> edit_mode_strings;
 
 	void set_edit_mode (ARDOUR::EditMode);
 	void cycle_edit_mode ();
@@ -2102,6 +2098,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	friend class RegionDrag;
 	friend class RegionMoveDrag;
 	friend class RegionSpliceDrag;
+	friend class RegionRippleDrag;
 	friend class TrimDrag;
 	friend class MeterMarkerDrag;
 	friend class TempoMarkerDrag;

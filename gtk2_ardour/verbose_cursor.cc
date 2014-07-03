@@ -30,6 +30,7 @@
 #include "audio_clock.h"
 #include "editor.h"
 #include "editor_drag.h"
+#include "global_signals.h"
 #include "main_clock.h"
 #include "verbose_cursor.h"
 
@@ -44,6 +45,14 @@ VerboseCursor::VerboseCursor (Editor* editor)
 	_canvas_item = new ArdourCanvas::TrackingText (_editor->get_noscroll_group());
 	CANVAS_DEBUG_NAME (_canvas_item, "verbose canvas cursor");
 	_canvas_item->set_font_description (Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_LargerBoldFont()));
+	color_handler ();
+
+	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &VerboseCursor::color_handler));
+}
+
+void
+VerboseCursor::color_handler ()
+{
 	_canvas_item->set_color (ARDOUR_UI::config()->get_canvasvar_VerboseCanvasCursor());
 }
 
@@ -97,13 +106,9 @@ VerboseCursor::set_time (framepos_t frame)
 		return;
 	}
 
-	AudioClock::Mode m;
+	/* Take clock mode from the primary clock */
 
-	if (Profile->get_sae() || Profile->get_small_screen() || Profile->get_trx()) {
-		m = ARDOUR_UI::instance()->primary_clock->mode();
-	} else {
-		m = ARDOUR_UI::instance()->secondary_clock->mode();
-	}
+	AudioClock::Mode m = ARDOUR_UI::instance()->primary_clock->mode();
 
 	switch (m) {
 	case AudioClock::BBT:

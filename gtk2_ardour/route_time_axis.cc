@@ -1413,6 +1413,10 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	switch (op) {
 	case Delete:
 		if (playlist->cut (time) != 0) {
+			if (Config->get_edit_mode() == Ripple)
+				playlist->ripple(time.start(), -time.length(), NULL);
+				// no need to exclude any regions from rippling here
+
                         vector<Command*> cmds;
                         playlist->rdiff (cmds);
                         _session->add_commands (cmds);
@@ -1424,6 +1428,10 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	case Cut:
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
+			if (Config->get_edit_mode() == Ripple)
+				playlist->ripple(time.start(), -time.length(), NULL);
+				// no need to exclude any regions from rippling here
+
                         vector<Command*> cmds;
                         playlist->rdiff (cmds);
                         _session->add_commands (cmds);
@@ -1439,6 +1447,9 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 
 	case Clear:
 		if ((what_we_got = playlist->cut (time)) != 0) {
+			if (Config->get_edit_mode() == Ripple)
+				playlist->ripple(time.start(), -time.length(), NULL);
+				// no need to exclude any regions from rippling here
 
                         vector<Command*> cmds;
                         playlist->rdiff (cmds);
@@ -1473,8 +1484,18 @@ RouteTimeAxisView::paste (framepos_t pos, float times, Selection& selection, siz
                 DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("modified paste to %1\n", pos));
 	}
 
-        pl->clear_changes ();
+	pl->clear_changes ();
+	if (Config->get_edit_mode() == Ripple) {
+		std::pair<framepos_t, framepos_t> extent = (*p)->get_extent();
+		framecnt_t amount = extent.second - extent.first;
+		pl->ripple(pos, amount * times, boost::shared_ptr<Region>());
+	}
 	pl->paste (*p, pos, times);
+
+	vector<Command*> cmds;
+	pl->rdiff (cmds);
+	_session->add_commands (cmds);
+
 	_session->add_command (new StatefulDiffCommand (pl));
 
 	return true;
@@ -2503,6 +2524,30 @@ RouteTimeAxisView::create_gain_automation_child (const Evoral::Parameter& param,
 	}
 
 	add_automation_child (Evoral::Parameter(GainAutomation), gain_track, show);
+}
+
+void
+RouteTimeAxisView::create_mute_automation_child (const Evoral::Parameter& param, bool show)
+{
+	boost::shared_ptr<AutomationControl> c = _route->mute_control();
+	if (!c) {
+		error << "Route has no mute automation, unable to add automation track view." << endmsg;
+		return;
+	}
+
+	mute_track.reset (new AutomationTimeAxisView (_session,
+						      _route, _route, c, param,
+						      _editor,
+						      *this,
+						      false,
+						      parent_canvas,
+						      _route->describe_parameter(param)));
+
+	if (_view) {
+		_view->foreach_regionview (sigc::mem_fun (*mute_track.get(), &TimeAxisView::add_ghost));
+	}
+
+	add_automation_child (Evoral::Parameter(MuteAutomation), mute_track, show);
 }
 
 static

@@ -275,10 +275,10 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/nudge-forward|KP_Add|nudge forward
 @-group|Editor/nudge-next-forward|<@PRIMARY@>KP_Add|some text
 
-@-group|Editor/start-range|<@PRIMARY@>KP_Down|some text
-
-@-group|Editor/finish-range|<@PRIMARY@>KP_Up|some text
-@-group|Editor/finish-add-range|<@TERTIARY@><@PRIMARY@>KP_Up|some text
+@-group|Editor/start-range|comma|some text
+@-group|Editor/finish-range|period|some text
+@-group|Editor/alt-start-range|<@PRIMARY@>KP_Down|some text
+@-group|Editor/alt-finish-range|<@PRIMARY@>KP_Up|some text
 
 @markers|Editor/add-location-from-playhead|KP_Enter|add mark at playhead
 @wvis|Transport/focus-on-clock|KP_Divide|focus on main clock

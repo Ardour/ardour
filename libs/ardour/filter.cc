@@ -59,10 +59,9 @@ Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, s
 			}
 		}
 
-		string path = session.path_from_region_name (region->data_type(),
-				PBD::basename_nosuffix (names[i]), string (""));
+		string path = session.new_audio_source_path (name, region->n_channels(), i, false, false);
 
-		if (path.length() == 0) {
+		if (path.empty()) {
 			error << string_compose (_("filter: error creating name for new file based on %1"), region->name())
 			      << endmsg;
 			return -1;

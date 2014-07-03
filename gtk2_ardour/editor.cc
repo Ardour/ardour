@@ -121,6 +121,7 @@
 #include "tempo_lines.h"
 #include "time_axis_view.h"
 #include "utils.h"
+#include "verbose_cursor.h"
 
 #include "i18n.h"
 
@@ -263,7 +264,6 @@ Editor::Editor ()
 
 	  /* tool bar related */
 
-	, zoom_range_clock (new AudioClock (X_("zoomrange"), false, X_("zoom range"), true, false, true))
 	, toolbar_selection_clock_table (2,3)
 	, _mouse_mode_tearoff (0)
 	, automation_mode_button (_("mode"))
@@ -392,8 +392,6 @@ Editor::Editor ()
 	samples_per_pixel = 2048; /* too early to use reset_zoom () */
 
 	_scroll_callbacks = 0;
-
-	zoom_range_clock->ValueChanged.connect (sigc::mem_fun(*this, &Editor::zoom_adjustment_changed));
 
 	bbt_label.set_name ("EditorRulerLabel");
 	bbt_label.set_size_request (-1, (int)timebar_height);
@@ -760,9 +758,14 @@ Editor::Editor ()
         }
 
 	constructed = true;
-	instant_save ();
+
+	/* grab current parameter state */
+	boost::function<void (string)> pc (boost::bind (&Editor::ui_parameter_changed, this, _1));
+	ARDOUR_UI::config()->map_parameters (pc);
 
 	setup_fade_images ();
+
+	instant_save ();
 }
 
 Editor::~Editor()
@@ -912,23 +915,6 @@ Editor::instant_save ()
 	} else {
 		Config->add_instant_xml(get_state());
 	}
-}
-
-void
-Editor::zoom_adjustment_changed ()
-{
-	if (_session == 0) {
-		return;
-	}
-
-	framecnt_t fpu = llrintf (zoom_range_clock->current_duration() / _visible_canvas_width);
-	bool clamped = clamp_samples_per_pixel (fpu);
-	
-	if (clamped) {
-		zoom_range_clock->set ((framepos_t) floor (fpu * _visible_canvas_width));
-	}
-
-	temporal_zoom (fpu);
 }
 
 void
@@ -1248,7 +1234,6 @@ Editor::set_session (Session *t)
 		return;
 	}
 
-	zoom_range_clock->set_session (_session);
 	_playlist_selector->set_session (_session);
 	nudge_clock->set_session (_session);
 	_summary->set_session (_session);
@@ -2819,12 +2804,6 @@ Editor::setup_toolbar ()
 
 	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
 
-	edit_mode_strings.push_back (edit_mode_to_string (Slide));
-	if (!Profile->get_sae()) {
-		edit_mode_strings.push_back (edit_mode_to_string (Splice));
-	}
-	edit_mode_strings.push_back (edit_mode_to_string (Lock));
-
 	edit_mode_selector.set_name ("mouse mode button");
 	edit_mode_selector.set_size_request (65, -1);
 	edit_mode_selector.add_elements (ArdourButton::Inset);
@@ -3040,7 +3019,8 @@ Editor::build_edit_mode_menu ()
 	using namespace Menu_Helpers;
 
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Slide), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Slide)));
-	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Splice), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Splice)));
+//	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Splice), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Splice)));
+	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Ripple), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Ripple)));
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Lock), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode)  Lock)));
 }
 
@@ -3352,10 +3332,11 @@ Editor::cycle_edit_mode ()
 		if (Profile->get_sae()) {
 			Config->set_edit_mode (Lock);
 		} else {
-			Config->set_edit_mode (Splice);
+			Config->set_edit_mode (Ripple);
 		}
 		break;
 	case Splice:
+	case Ripple:
 		Config->set_edit_mode (Lock);
 		break;
 	case Lock:
@@ -4075,8 +4056,6 @@ Editor::reset_y_origin (double y)
 void
 Editor::reset_zoom (framecnt_t spp)
 {
-	clamp_samples_per_pixel (spp);
-
 	if (spp == samples_per_pixel) {
 		return;
 	}
@@ -4188,24 +4167,30 @@ Editor::use_visual_state (VisualState& vs)
 
 /** This is the core function that controls the zoom level of the canvas. It is called
  *  whenever one or more calls are made to reset_zoom().  It executes in an idle handler.
- *  @param fpu New frames per unit; should already have been clamped so that it is sensible.
+ *  @param spp new number of samples per pixel
  */
 void
 Editor::set_samples_per_pixel (framecnt_t spp)
 {
-	clamp_samples_per_pixel (spp);
+	if (spp < 1) {
+		return;
+	}
+
+	const framecnt_t three_days = 3 * 24 * 60 * 60 * (_session ? _session->frame_rate() : 48000);
+	const framecnt_t lots_of_pixels = 4000;
+
+	/* if the zoom level is greater than what you'd get trying to display 3
+	 * days of audio on a really big screen, then it's too big.
+	 */
+
+	if (spp * lots_of_pixels > three_days) {
+		return;
+	}
+
 	samples_per_pixel = spp;
 
 	if (tempo_lines) {
 		tempo_lines->tempo_map_changed();
-	}
-
-	/* convert fpu to frame count */
-
-	framepos_t frames = samples_per_pixel * _visible_canvas_width;
-
-	if (samples_per_pixel != zoom_range_clock->current_duration()) {
-		zoom_range_clock->set (frames);
 	}
 
 	bool const showing_time_selection = selection->time.length() > 0;
@@ -4561,10 +4546,7 @@ Editor::get_regions_from_selection_and_edit_point ()
 
 	if (_edit_point == EditAtMouse && entered_regionview && !selection->regions.contains (entered_regionview)) {
 		regions.add (entered_regionview);
-	} else {
-		regions = selection->regions;
 	}
-
 
 	if (regions.empty() && _edit_point != EditAtMouse) {
 		TrackViewList tracks = selection->tracks;
@@ -4874,6 +4856,10 @@ Editor::add_routes (RouteList& routes)
 void
 Editor::timeaxisview_deleted (TimeAxisView *tv)
 {
+	if (tv == entered_track) {
+		entered_track = 0;
+	}
+
 	if (_session && _session->deletion_in_progress()) {
 		/* the situation is under control */
 		return;
@@ -4884,10 +4870,6 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tv);
 
 	_routes->route_removed (tv);
-
-	if (tv == entered_track) {
-		entered_track = 0;
-	}
 
 	TimeAxisView::Children c = tv->get_child_list ();
 	for (TimeAxisView::Children::const_iterator i = c.begin(); i != c.end(); ++i) {
@@ -5320,7 +5302,6 @@ Editor::session_going_away ()
 	}
 	track_views.clear ();
 
-	zoom_range_clock->set_session (0);
 	nudge_clock->set_session (0);
 
 	editor_list_button.set_active(false);
@@ -5506,5 +5487,9 @@ Editor::ui_parameter_changed (string parameter)
 			_cursor_stack.pop();
 		}
 		_cursors->set_cursor_set (ARDOUR_UI::config()->get_icon_set());
+	} else if (parameter == "draggable-playhead") {
+		if (_verbose_cursor) {
+			playhead_cursor->set_sensitive (ARDOUR_UI::config()->get_draggable_playhead());
+		}
 	}
 }

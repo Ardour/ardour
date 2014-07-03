@@ -85,6 +85,10 @@ public:
 	void existence_check ();
 	virtual void prevent_deletion ();
 
+	/** Rename the file on disk referenced by this source to \param newname
+	 */
+	int rename (const std::string& name);
+
 protected:
 	FileSource (Session& session, DataType type,
 	            const std::string& path,

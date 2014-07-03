@@ -137,7 +137,7 @@ namespace ARDOUR {
 		FadeInAutomation,
 		FadeOutAutomation,
 		EnvelopeAutomation,
-		RecEnableAutomation
+		RecEnableAutomation,
 	};
 
 	enum AutoState {
@@ -341,6 +341,7 @@ namespace ARDOUR {
 	enum EditMode {
 		Slide,
 		Splice,
+		Ripple,
 		Lock
 	};
 
@@ -417,17 +418,6 @@ namespace ARDOUR {
 	enum RemoteModel {
 		UserOrdered,
 		MixerOrdered
-	};
-
-	enum CrossfadeModel {
-		FullCrossfade,
-		ShortCrossfade
-	};
-
-	enum CrossfadeChoice {
-		RegionFades,
-		ConstantPowerMinus3dB,
-		ConstantPowerMinus6dB,
 	};
 
 	enum ListenPosition {
@@ -622,8 +612,6 @@ std::istream& operator>>(std::istream& o, ARDOUR::AFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::RemoteModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ListenPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::InsertMergePolicy& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeModel& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeChoice& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::SyncSource& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
@@ -646,8 +634,6 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::AFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::RemoteModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ListenPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::InsertMergePolicy& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::CrossfadeModel& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::CrossfadeChoice& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::SyncSource& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleBehaviour& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleUnits& sf);

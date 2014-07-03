@@ -54,6 +54,7 @@ public:
 		Audition,
 		InputConfigurationChange,
 		SetPlayAudioRange,
+		CancelPlayAudioRange,
 		RealTimeOperation,
 		AdjustPlaybackBuffering,
 		AdjustCaptureBuffering,

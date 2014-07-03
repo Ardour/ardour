@@ -228,6 +228,14 @@ Session::request_play_range (list<AudioRange>* range, bool leave_rolling)
 }
 
 void
+Session::request_cancel_play_range ()
+{
+	SessionEvent* ev = new SessionEvent (SessionEvent::CancelPlayAudioRange, SessionEvent::Add, SessionEvent::Immediate, 0, 0);
+	queue_event (ev);
+}
+
+
+void
 Session::realtime_stop (bool abort, bool clear_state)
 {
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("realtime stop @ %1\n", _transport_frame));

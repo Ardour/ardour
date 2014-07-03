@@ -88,3 +88,9 @@ EditorCursor::set_color (ArdourCanvas::Color color)
 {
 	_track_canvas_item->set_color (color);
 }
+
+void
+EditorCursor::set_sensitive (bool yn)
+{
+	_track_canvas_item->set_ignore_events (!yn);
+}
