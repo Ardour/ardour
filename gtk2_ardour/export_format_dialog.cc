@@ -51,7 +51,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
   silence_end_checkbox (_("Add silence at end:")),
   silence_end_clock ("silence_end", true, "", true, false, true),
 
-  command_label(_("Command to run post-export\n(%f=full path & filename, %d=directory, %b=basename):")),
+  command_label(_("Command to run post-export\n(%f=full path & filename, %d=directory, %b=basename):"), Gtk::ALIGN_LEFT),
 
   format_table (3, 4),
   compatibility_label (_("Compatibility"), Gtk::ALIGN_LEFT),
@@ -114,6 +114,8 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	silence_table.attach (trim_end_checkbox, 0, 1, 2, 3);
 	silence_table.attach (silence_end_checkbox, 1, 2, 2, 3);
 	silence_table.attach (silence_end_clock, 2, 3, 2, 3);
+
+	/* Post-export hook script */
 
 	get_vbox()->pack_start (command_label, false, false);
 	get_vbox()->pack_start (command_entry, false, false);
