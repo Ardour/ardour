@@ -55,9 +55,11 @@
     void on_stereo_out (WavesButton*);
     void on_browse_button (WavesButton*);
     void save_default_session_path();
+    void save_auto_lock_time();
 	void on_ok(WavesButton*);
 	void on_cancel(WavesButton*);
 	void on_apply(WavesButton*);
+    void update_configs();
     void update_session_config();
 	void on_capture_active_changed (DeviceConnectionControl* capture_control, bool active);
 	void on_playback_active_changed (DeviceConnectionControl* playback_control, bool active);

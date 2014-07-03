@@ -93,6 +93,7 @@ TracksControlPanel::TracksControlPanel ()
     , _bit_depth_combo (get_combo_box_text ("bit_depth_combo"))
     , _frame_rate_combo (get_combo_box_text ("frame_rate_combo"))
     , _browse_button(get_waves_button("browse_default_folder"))
+    , _auto_lock_timer_spin_button(get_spin_button("auto_lock_timer_spin_button"))
     , _have_control (false)
 	, _ignore_changes (0)
 {

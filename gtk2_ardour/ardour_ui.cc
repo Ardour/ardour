@@ -386,6 +386,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&audio_port_matrix);
 	WM::Manager::instance().register_window (&midi_port_matrix);
 
+    session_lock_dialog->set_deletable (false);
+    
 	/* We need to instantiate the theme manager because it loads our
 	   theme files. This should really change so that its window
 	   and its functionality are separate 
@@ -2272,10 +2274,29 @@ ARDOUR_UI::stop_blinking ()
 }
 
 void
-ARDOUR_UI::lock_session () {
-	session_lock_dialog->run ();
+ARDOUR_UI::on_lock_button_pressed () {
+    
+    lock_button_was_pressed();
 }
 
+void
+ARDOUR_UI::lock_session () {
+    
+    if( screen_lock_is_allowed () )
+        session_lock_dialog->run ();
+}
+
+bool
+ARDOUR_UI::screen_lock_is_allowed() const
+{
+    if(!_session)
+        return false;
+    
+    if( (_session->record_status() == Session::Recording) && (ARDOUR_UI::config()->get_auto_lock_timer () != 0) )
+        return true;
+    else
+        return false;
+}
 
 /** Ask the user for the name of a new snapshot and then take it.
  */

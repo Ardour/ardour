@@ -314,7 +314,7 @@ Editor::Editor ()
 	last_update_frame = 0;
         pre_press_cursor = 0;
 	_drags = new DragManager (this);
-        lock_dialog = 0;
+
 	current_mixer_strip = 0;
 	tempo_lines = 0;
 
@@ -725,7 +725,7 @@ Editor::Editor ()
 
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 	signal_delete_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::exit_on_main_window_close));
-
+    
 	Gtkmm2ext::Keyboard::the_keyboard().ZoomVerticalModifierReleased.connect (sigc::mem_fun (*this, &Editor::zoom_vertical_modifier_released));
 	
 	/* allow external control surfaces/protocols to do various things */
@@ -759,6 +759,11 @@ Editor::Editor ()
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&Editor::parameter_changed, this, _1), gui_context());
 
+    ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &Editor::on_ardour_ui_config_changed));
+    
+    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
+    ardour_ui->lock_button_was_pressed.connect( *this, invalidator (*this), boost::bind (&Editor::lock, this), gui_context() );
+    
 	TimeAxisView::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Editor::timeaxisview_deleted, this, _1), gui_context());
 
 	_ignore_region_action = false;
@@ -1131,16 +1136,32 @@ Editor::on_realize ()
 	Window::on_realize ();
 	Realized ();
 
-        start_lock_event_timing ();
         signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
+}
+
+// Update lock time
+void
+Editor::on_ardour_ui_config_changed(const std::string& param)
+{
+    if (param=="auto-lock-timer" && ARDOUR_UI::instance()->screen_lock_is_allowed())
+    {
+        start_lock_event_timing();
+    }
 }
 
 void
 Editor::start_lock_event_timing ()
 {
-        /* check if we should lock the GUI every 30 seconds */
-
-        Glib::signal_timeout().connect (sigc::mem_fun (*this, &Editor::lock_timeout_callback), 30 * 1000);
+    
+    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
+    
+    timeout_connection.disconnect();
+    
+    if( !ardour_ui->screen_lock_is_allowed() )
+        return;
+    
+    gettimeofday(&last_event_time, 0);
+    timeout_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &Editor::lock_timeout_callback), 1 * 1000);
 }
 
 bool
@@ -1163,25 +1184,28 @@ Editor::generic_event_handler (GdkEvent* ev)
 bool
 Editor::lock_timeout_callback ()
 {
-        struct timeval now, delta;
-        const uint32_t lock_timeout_secs = 5; /* 2 minutes */
+    struct timeval now, delta;
 
-        gettimeofday (&now, 0);
+    gettimeofday (&now, 0);
 
-        timersub (&now, &last_event_time, &delta);
-
-        if (delta.tv_sec > lock_timeout_secs) {
-                lock ();
+    timersub (&now, &last_event_time, &delta);
+    
+    if( !ARDOUR_UI::instance()->screen_lock_is_allowed() ) 
+        return false; // Returning false will effectively disconnect us from the timer callback.
+    
+    if (delta.tv_sec > ARDOUR_UI::config()->get_auto_lock_timer ())
+    {
+        lock ();
                 /* don't call again. Returning false will effectively
                       disconnect us from the timer callback.
 
                          unlock() will call start_lock_event_timing() to get things
                             started again.
                 */
-                return false;
-        }
+        return false;
+    }
 
-        return true;
+    return true;
 }
 
 void
@@ -1338,7 +1362,8 @@ Editor::set_session (Session *t)
 	_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->locations()->StateChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
-
+    _session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&Editor::start_lock_event_timing, this), gui_context());
+    
 	playhead_cursor->show ();
 
 	boost::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));

@@ -168,7 +168,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	/// @return true if session was successfully unloaded.
 	int unload_session (bool hide_stuff = false);
 	void close_session();
-
+    void lock_session ();
+    
 	int  save_state_canfail (std::string state_name = "", bool switch_to_it = false);
 	void save_state (const std::string & state_name = "", bool switch_to_it = false);
 
@@ -307,6 +308,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     void set_sample_format(ARDOUR::SampleFormat sf) {_sample_format = sf;}
     void set_header_format(ARDOUR::HeaderFormat hf) {_header_format = hf;}
     void set_timecode_format(Timecode::TimecodeFormat tc) {_timecode_format = tc;}
+    
+    bool screen_lock_is_allowed() const;
+    void on_lock_button_pressed ();
+    PBD::Signal0<void> lock_button_was_pressed;
     
   protected:
 	friend class PublicEditor;
@@ -604,7 +609,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	guint32  last_key_press_time;
 
-	void lock_session ();
 	void snapshot_session (bool switch_to_it);
 	void rename_session ();
 	void setup_order_hint ();
@@ -629,7 +633,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         WM::Proxy<RouteParams_UI> route_params;
         WM::Proxy<TracksControlPanel> tracks_control_panel;
         WM::Proxy<SessionLockDialog> session_lock_dialog;
-
+    
         /* Windows/Dialogs that require a creator method */
 
         WM::ProxyWithConstructor<SessionOptionEditor> session_option_editor;
