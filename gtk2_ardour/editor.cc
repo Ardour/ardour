@@ -4546,6 +4546,8 @@ Editor::get_regions_from_selection_and_edit_point ()
 
 	if (_edit_point == EditAtMouse && entered_regionview && !selection->regions.contains (entered_regionview)) {
 		regions.add (entered_regionview);
+	} else {
+		regions = selection->regions;
 	}
 
 	if (regions.empty() && _edit_point != EditAtMouse) {
