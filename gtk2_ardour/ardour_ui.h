@@ -561,6 +561,15 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void set_transport_sensitivity (bool);
 
+	//stuff for ProTools-style numpad
+	void transport_numpad_event (int num);
+	void transport_numpad_decimal ();
+	bool _numpad_locate_happening;
+	int _pending_locate_num;
+	gint transport_numpad_timeout ();
+	sigc::connection _numpad_timeout_connection;
+
+	void transport_goto_nth_marker (int nth);
 	void transport_goto_zero ();
 	void transport_goto_start ();
 	void transport_goto_end ();

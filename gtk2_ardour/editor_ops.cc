@@ -1892,6 +1892,35 @@ Editor::add_location_from_playhead_cursor ()
 	add_location_mark (_session->audible_frame());
 }
 
+void
+Editor::remove_location_at_playhead_cursor ()
+{
+	if (_session) {
+
+		//set up for undo
+		_session->begin_reversible_command (_("remove marker"));
+		XMLNode &before = _session->locations()->get_state();
+		bool removed = false;
+
+		//find location(s) at this time
+		Locations::LocationList locs;
+		_session->locations()->find_all_between (_session->audible_frame(), _session->audible_frame()+1, locs, Location::Flags(0));
+		for (Locations::LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
+			if ((*i)->is_mark()) {
+				_session->locations()->remove (*i);
+				removed = true;
+			}
+		}
+		
+		//store undo
+		if (removed) {
+			XMLNode &after = _session->locations()->get_state();
+			_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+			_session->commit_reversible_command ();
+		}
+	}
+}
+
 /** Add a range marker around each selected region */
 void
 Editor::add_locations_from_region ()

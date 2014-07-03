@@ -14,8 +14,42 @@
   <accelerator action='toggle-midi-input-active'/>
   <accelerator action='escape'/>
 
+  <accelerator action='alternate-add-location-from-playhead'/>
+  <accelerator action='alternate-remove-location-from-playhead'/>
+
+  <accelerator action='alternate-editor-delete'/>
+
   <accelerator action='alt-start-range'/>
   <accelerator action='alt-finish-range'/>
+
+<accelerator action='alternate-ToggleRoll'/>
+<accelerator action='alternate-record-roll'/>
+<accelerator action='alternate-GotoStart'/>
+
+<accelerator action='alternate-redo'/>
+<accelerator action='alternate-alternate-redo'/>
+
+<accelerator action='alternate-select-all-after-edit-cursor'/>
+<accelerator action='alternate-select-all-after-edit-cursor'/>
+<accelerator action='alternate-set-fade-in-length'/>
+<accelerator action='alternate-set-fade-out-length'/>
+<accelerator action='alternate-tab-to-transient-forwards'/>
+<accelerator action='alternate-tab-to-transient-backwards'/>
+<accelerator action='alternate-nudge-forward'/>
+<accelerator action='alternate-nudge-backward'/>
+
+<accelerator action='numpad-0'/>
+<accelerator action='numpad-1'/>
+<accelerator action='numpad-2'/>
+<accelerator action='numpad-3'/>
+<accelerator action='numpad-4'/>
+<accelerator action='numpad-5'/>
+<accelerator action='numpad-6'/>
+<accelerator action='numpad-7'/>
+<accelerator action='numpad-8'/>
+<accelerator action='numpad-9'/>
+<accelerator action='numpad-decimal'/>
+
 
 #ifdef GTKOSX
   <accelerator action='Quit'/>
@@ -135,13 +169,11 @@
         <menuitem action='selected-marker-to-previous-region-boundary'/>
         <menuitem action='edit-cursor-to-next-region-sync'/>
         <menuitem action='edit-cursor-to-previous-region-sync'/>
-        <separator/>
-        <menuitem action='edit-to-playhead'/>
-        <menuitem action='set-edit-point'/>
       </menu>
 
       <menu action="MarkerMenu">
         <menuitem action='add-location-from-playhead'/>
+		<menuitem action='remove-location-from-playhead'/>
         <separator/>
         <menuitem action='goto-mark-1'/>
         <menuitem action='goto-mark-2'/>
@@ -188,11 +220,11 @@
         <menuitem action='select-all-in-punch-range'/>
         <menuitem action='select-all-in-loop-range'/>
         <separator/>
-        <menuitem action='select-range-between-cursors'/>
         <menuitem action='move-range-start-to-previous-region-boundary'/>
         <menuitem action='move-range-start-to-next-region-boundary'/>
         <menuitem action='move-range-end-to-previous-region-boundary'/>
         <menuitem action='move-range-end-to-next-region-boundary'/>
+        <separator/>
         <menuitem action='start-range'/>
         <menuitem action='finish-range'/>
         <separator/>
@@ -357,6 +389,7 @@
       <separator/>
 
       <menu action="PrimaryClockMenu">
+		<menuitem action='focus-on-clock'/>
         <menuitem action="primary-clock-timecode"/>
         <menuitem action="primary-clock-bbt"/>
         <menuitem action="primary-clock-minsec"/>
