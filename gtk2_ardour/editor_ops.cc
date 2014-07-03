@@ -133,7 +133,8 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 {
 	bool frozen = false;
 
-	list <boost::shared_ptr<Playlist > > used_playlists;
+	list<boost::shared_ptr<Playlist> > used_playlists;
+	list<RouteTimeAxisView*> used_trackviews;
 
 	if (regions.empty()) {
 		return;
@@ -188,8 +189,15 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 
 			/* remember used playlists so we can thaw them later */
 			used_playlists.push_back(pl);
+
+			TimeAxisView& tv = (*a)->get_time_axis_view();
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
+			if (rtv) {
+				used_trackviews.push_back (rtv);
+			}
 			pl->freeze();
 		}
+
 
 		if (pl) {
 			pl->clear_changes ();
@@ -200,17 +208,34 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 		a = tmp;
 	}
 
+	vector<sigc::connection> region_added_connections;
+
+	for (list<RouteTimeAxisView*>::iterator i = used_trackviews.begin(); i != used_trackviews.end(); ++i) {
+		region_added_connections.push_back ((*i)->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view)));
+	}
+	
+	latest_regionviews.clear ();
+
 	while (used_playlists.size() > 0) {
 		list <boost::shared_ptr<Playlist > >::iterator i = used_playlists.begin();
 		(*i)->thaw();
 		used_playlists.pop_front();
 	}
 
+	for (vector<sigc::connection>::iterator c = region_added_connections.begin(); c != region_added_connections.end(); ++c) {
+		(*c).disconnect ();
+	}
+	
 	commit_reversible_command ();
 
 	if (frozen){
 		EditorThaw(); /* Emit Signal */
 	}
+
+	if (!latest_regionviews.empty()) {
+		selection->add (latest_regionviews);
+	}
+
 }
 
 /** Move one extreme of the current range selection.  If more than one range is selected,
