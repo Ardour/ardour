@@ -128,6 +128,7 @@ Session::get_paths_for_new_sources (bool /*allow_replacing*/, const string& impo
 		const DataType type = SMFSource::safe_midi_file_extension (import_file_path) ? DataType::MIDI : DataType::AUDIO;
 		string filepath;
 
+		// XXX - always import to session dir?
 		switch (type) {
 		  case DataType::MIDI:
 			filepath = new_midi_source_path (basename);

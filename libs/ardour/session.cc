@@ -4334,6 +4334,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n_audio(); ++chan_n) {
 
 		string base_name = string_compose ("%1-%2-bounce", playlist->name(), chan_n);
+		// XXX - always use session-folder for bounce ?
 		string path = new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, false, true);
 		
 		if (path.empty()) {
