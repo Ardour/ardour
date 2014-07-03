@@ -1289,7 +1289,7 @@ void
 TracksControlPanel::on_apply (WavesButton*)
 {
 	EngineStateController::instance()->push_current_state_to_backend(true);
-	response(Gtk::RESPONSE_APPLY);
+	//response(Gtk::RESPONSE_APPLY);
     
     update_session_config();
     save_default_session_path();  
