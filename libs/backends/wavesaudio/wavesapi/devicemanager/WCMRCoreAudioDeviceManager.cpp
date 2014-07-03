@@ -2198,7 +2198,7 @@ OSStatus WCMRCoreAudioDevice::AudioIOProc(AudioUnitRenderActionFlags *  ioAction
         AudioBufferList inputAudioBufferList;
         inputAudioBufferList.mNumberBuffers = 1;
         inputAudioBufferList.mBuffers[0].mNumberChannels = m_InputChannels.size();
-        inputAudioBufferList.mBuffers[0].mDataByteSize = expectedDataSize*10;
+        inputAudioBufferList.mBuffers[0].mDataByteSize = expectedDataSize;
         inputAudioBufferList.mBuffers[0].mData = NULL;//new float[expectedDataSize]; // we are going to get buffer from CoreAudio
         
         retVal = AudioUnitRender(m_AUHALAudioUnit, ioActionFlags, inTimeStamp, AUHAL_INPUT_ELEMENT, inNumberFrames, &inputAudioBufferList);

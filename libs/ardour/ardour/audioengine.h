@@ -247,9 +247,13 @@ public:
 
     Glib::Threads::Thread*     _hw_reset_event_thread;
     gint                       _hw_reset_request_count;
+    Glib::Threads::Cond        _hw_reset_condition;
+    Glib::Threads::Mutex       _reset_request_lock;
     gint                       _stop_hw_reset_processing;
     Glib::Threads::Thread*     _hw_devicelist_update_thread;
     gint                       _hw_devicelist_update_count;
+    Glib::Threads::Cond        _hw_devicelist_update_condition;
+    Glib::Threads::Mutex       _devicelist_update_lock;
     gint                       _stop_hw_devicelist_processing;
     
     void start_hw_event_processing();

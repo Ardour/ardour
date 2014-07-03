@@ -365,7 +365,9 @@ AudioEngine::process_callback (pframes_t nframes)
 void
 AudioEngine::request_backend_reset()
 {
-    g_atomic_int_inc(&_hw_reset_request_count);
+    Glib::Threads::Mutex::Lock guard (_reset_request_lock);
+    g_atomic_int_inc (&_hw_reset_request_count);
+    _hw_reset_condition.signal ();
 }
 
 
@@ -374,9 +376,13 @@ AudioEngine::do_reset_backend()
 {
     SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 512);
     
+    Glib::Threads::Mutex::Lock guard (_reset_request_lock);
+    
     while (!_stop_hw_reset_processing) {
         
         if (_hw_reset_request_count && _backend) {
+            
+            _reset_request_lock.unlock();
             
             g_atomic_int_dec_and_test (&_hw_reset_request_count);
 
@@ -387,21 +393,26 @@ AudioEngine::do_reset_backend()
             if (_session) {
                 // it's not a halt, but should be handled the same way:
                 // disable record, stop transport and I/O processign but save the data.
-                _session->engine_halted();
+                _session->engine_halted ();
             }
             
             // "hard reset" the device
-            _backend->drop_device();
-            _backend->set_device_name(name);
+            _backend->drop_device ();
+            _backend->set_device_name (name);
             
-            start();
+            start ();
             
             // inform about possible changes
-            SampleRateChanged(_backend->sample_rate() );
-            BufferSizeChanged(_backend->buffer_size() );
+            SampleRateChanged (_backend->sample_rate() );
+            BufferSizeChanged (_backend->buffer_size() );
+            
+            _reset_request_lock.lock();
+            
+        } else {
+            
+            _hw_reset_condition.wait (_reset_request_lock);
+            
         }
-        
-        g_usleep(0);
     }
 }
 
@@ -409,7 +420,9 @@ AudioEngine::do_reset_backend()
 void
 AudioEngine::request_device_list_update()
 {
+    Glib::Threads::Mutex::Lock guard (_devicelist_update_lock);
     g_atomic_int_inc (&_hw_devicelist_update_count);
+    _hw_devicelist_update_condition.signal ();
 }
 
 
@@ -418,12 +431,22 @@ AudioEngine::do_devicelist_update()
 {
     SessionEvent::create_per_thread_pool (X_("Device list update processing thread"), 512);
     
+    Glib::Threads::Mutex::Lock guard (_devicelist_update_lock);
+    
     while (!_stop_hw_devicelist_processing) {
+        
         if (_hw_devicelist_update_count) {
+            
+            _devicelist_update_lock.unlock();
+            
             g_atomic_int_dec_and_test (&_hw_devicelist_update_count);
-			DeviceListChanged (); /* EMIT SIGNAL */
+            DeviceListChanged (); /* EMIT SIGNAL */
+        
+            _devicelist_update_lock.lock();
+            
+        } else {
+            _hw_devicelist_update_condition.wait (_devicelist_update_lock);
         }
-        g_usleep(0);
     }
 }
 
@@ -451,6 +474,7 @@ AudioEngine::stop_hw_event_processing()
     if (_hw_reset_event_thread) {
         g_atomic_int_set(&_stop_hw_reset_processing, 1);
         g_atomic_int_set(&_hw_reset_request_count, 0);
+        _hw_reset_condition.signal ();
         _hw_reset_event_thread->join ();
         _hw_reset_event_thread = 0;
     }
@@ -458,6 +482,7 @@ AudioEngine::stop_hw_event_processing()
     if (_hw_devicelist_update_thread) {
         g_atomic_int_set(&_stop_hw_devicelist_processing, 1);
         g_atomic_int_set(&_hw_devicelist_update_count, 0);
+        _hw_devicelist_update_condition.signal ();
         _hw_devicelist_update_thread->join ();
         _hw_devicelist_update_thread = 0;
     }
