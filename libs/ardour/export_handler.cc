@@ -336,6 +336,8 @@ ExportHandler::finish_timespan ()
 					// wait for system exec to terminate
 					Glib::usleep (1000);
 				}
+			} else {
+				error << "post-export hook failed! " << fmt->command() << endmsg;
 			}
 			delete (se);
 		}
