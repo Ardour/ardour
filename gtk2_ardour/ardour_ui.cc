@@ -220,6 +220,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	Gtkmm2ext::init(localedir);
 
 
+	_numpad_locate_happening = false;
+
 	if (theArdourUI == 0) {
 		theArdourUI = this;
 	}
@@ -4574,4 +4576,49 @@ ARDOUR_UI::do_engine_setup (framecnt_t desired_sample_rate)
     ARDOUR::EngineStateController::instance()->set_desired_sample_rate (desired_sample_rate);
     
 	return 0;
+}
+
+gint
+ARDOUR_UI::transport_numpad_timeout ()
+{
+	_numpad_locate_happening = false;
+	if (_numpad_timeout_connection.connected() )
+		_numpad_timeout_connection.disconnect();
+	return 1;
+}
+
+void
+ARDOUR_UI::transport_numpad_decimal ()
+{
+	_numpad_timeout_connection.disconnect();
+
+	if (_numpad_locate_happening) {
+		if (editor) editor->goto_nth_marker(_pending_locate_num - 1);
+		_numpad_locate_happening = false;
+	} else {
+		_pending_locate_num = 0;
+		_numpad_locate_happening = true;
+		_numpad_timeout_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::transport_numpad_timeout), 2*1000);
+	}
+}
+
+void
+ARDOUR_UI::transport_numpad_event (int num)
+{
+	if ( _numpad_locate_happening ) {
+		_pending_locate_num = _pending_locate_num*10 + num;
+	} else {
+		switch (num) {		
+			case 0:  toggle_roll(false, false); 		break;
+			case 1:  transport_rewind(1); 				break;
+			case 2:  transport_forward(1); 				break;
+			case 3:  transport_record(true); 			break;
+			case 4:  if (_session) _session->request_play_loop(true);					break;
+			case 5:  if (_session) _session->request_play_loop(true); transport_record(false); 	break;
+			case 6:  toggle_punch(); 						break;
+			case 7:  toggle_click(); 				break;
+			case 8:  toggle_auto_return();			break;
+			case 9:  toggle_follow_edits();		break;
+		}
+	}
 }

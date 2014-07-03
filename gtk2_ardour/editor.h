@@ -1338,6 +1338,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_punch_range (framepos_t start, framepos_t end, std::string cmd);
 
 	void add_location_from_playhead_cursor ();
+	void remove_location_at_playhead_cursor ();
 	bool select_new_marker;
 
 	void reverse_selection ();
