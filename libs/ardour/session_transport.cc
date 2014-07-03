@@ -1635,6 +1635,13 @@ Session::request_bounded_roll (framepos_t start, framepos_t end)
 	lar.push_back (ar);
 	request_play_range (&lar, true);
 }
+
+void
+Session::set_requested_return_frame (framepos_t return_to)
+{
+	_requested_return_frame = return_to;
+}
+
 void
 Session::request_roll_at_and_return (framepos_t start, framepos_t return_to)
 {

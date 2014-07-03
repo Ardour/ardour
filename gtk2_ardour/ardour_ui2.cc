@@ -601,7 +601,7 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 }
 
 void
-ARDOUR_UI::toggle_always_play_range ()
+ARDOUR_UI::toggle_follow_edits ()
 {
 	RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
 	assert (act);
@@ -609,7 +609,7 @@ ARDOUR_UI::toggle_always_play_range ()
 	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
 	assert (tact);
 
-	Config->set_always_play_range (tact->get_active ());
+	Config->set_follow_edits (tact->get_active ());
 }
 
 	
