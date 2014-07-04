@@ -1337,6 +1337,21 @@ EngineControl::set_state (const XMLNode& root)
 
 	/* now see if there was an active state and switch the setup to it */
 
+	// purge states of backend that are not available in this built
+	vector<const ARDOUR::AudioBackendInfo*> backends = ARDOUR::AudioEngine::instance()->available_backends();
+	vector<std::string> backend_names;
+
+	for (vector<const ARDOUR::AudioBackendInfo*>::const_iterator i = backends.begin(); i != backends.end(); ++i) {
+		backend_names.push_back((*i)->name);
+	}
+	for (StateList::iterator i = states.begin(); i != states.end();) {
+		if (std::find(backend_names.begin(), backend_names.end(), (*i)->backend) == backend_names.end()) {
+			i = states.erase(i);
+		} else {
+			++i;
+		}
+	}
+
 	for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
 
 		if ((*i)->active) {
