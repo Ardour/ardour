@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RouteUI>
+  <VBox>
+    <HBox>
+      <Button id="hide_button"/>
+      <Button id="auto_button"/>
+    </HBox>
+    <EventBox id="controller_home"/>
+    <VBox id="gain_meter_home"/>
+    <VBox id="name_label_home">
+      <Label id="name_label"/>
+    </VBox>
+    <EventBox id="controls_event_box"/>
+    <VBox id="time_axis_vbox"/>
+    <FocusEntry id="name_entry" font ="Arial 10" justify="left" height="40" width="200"/>
+  </VBox>
+</RouteUI>

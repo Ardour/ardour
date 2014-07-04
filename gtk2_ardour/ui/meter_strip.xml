@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<RouteUI>
+  <VBox>
+    <HBox id="level_meter_home"></HBox>
+    <Vbox>
+      <!--RouteUI-->
+      <HBox id="invert_button_box"/>
+      <Button id="mute_button" />
+      <Button id="solo_button" />
+      <Button id="rec_enable_button" />
+      <Button id="show_sends_button" />
+      <Button id="monitor_input_button" />
+      <Button id="monitor_disk_button" />
+      <!--End of RouteUI-->
+      <Button id="name_label" />
+      <Button id="group_button" />
+      <Button id="peak_display" />
+    </Vbox>
+  </VBox>
+</RouteUI>
