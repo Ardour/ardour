@@ -503,7 +503,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, "set-edit-ripple", _("Ripple"), bind (mem_fun (*this, &Editor::set_edit_mode), Ripple));
 	ActionManager::register_action (editor_actions, "set-edit-slide", _("Slide"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Slide));
 	ActionManager::register_action (editor_actions, "set-edit-lock", _("Lock"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Lock));
-	ActionManager::register_action (editor_actions, "toggle-edit-mode", _("Toggle Edit Mode"), sigc::mem_fun (*this, &Editor::cycle_edit_mode));
+	ActionManager::register_action (editor_actions, "cycle-edit-mode", _("Cycle Edit Mode"), sigc::mem_fun (*this, &Editor::cycle_edit_mode));
 
 	ActionManager::register_action (editor_actions, X_("SnapTo"), _("Snap to"));
 	ActionManager::register_action (editor_actions, X_("SnapMode"), _("Snap Mode"));
