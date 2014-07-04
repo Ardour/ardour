@@ -303,13 +303,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void get_onscreen_tracks (TrackViewList&);
 
-	Width editor_mixer_strip_width;
-	void maybe_add_mixer_strip_width (XMLNode&);
+//	Width editor_mixer_strip_width;
+//	void maybe_add_mixer_strip_width (XMLNode&);
 	void show_editor_mixer (bool yn);
 	void create_editor_mixer ();
 	void show_editor_list (bool yn);
 	void set_selected_mixer_strip (TimeAxisView&);
-	void mixer_strip_width_changed ();
+//	void mixer_strip_width_changed ();
 	void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false);
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */

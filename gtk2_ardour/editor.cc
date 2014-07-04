@@ -360,7 +360,7 @@ Editor::Editor ()
 	tempo_or_meter_marker_menu = 0;
 	transport_marker_menu = 0;
 	new_transport_marker_menu = 0;
-	editor_mixer_strip_width = Wide;
+//	editor_mixer_strip_width = Wide;
 	show_editor_mixer_when_tracks_arrive = false;
 	region_edit_menu_split_multichannel_item = 0;
 	region_edit_menu_split_item = 0;
@@ -2318,9 +2318,9 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		playhead_cursor->set_position (0);
 	}
 
-	if ((prop = node.property ("mixer-width"))) {
-		editor_mixer_strip_width = Width (string_2_enum (prop->value(), editor_mixer_strip_width));
-	}
+	//if ((prop = node.property ("mixer-width"))) {
+	//	editor_mixer_strip_width = Width (string_2_enum (prop->value(), editor_mixer_strip_width));
+	//}
 
 	if ((prop = node.property ("zoom-focus"))) {
 		set_zoom_focus ((ZoomFocus) string_2_enum (prop->value(), zoom_focus));
@@ -2552,7 +2552,7 @@ Editor::get_state ()
 		node->add_child_nocopy (*geometry);
 	}
 
-	maybe_add_mixer_strip_width (*node);
+	//maybe_add_mixer_strip_width (*node);
 
 	node->add_property ("zoom-focus", enum_2_string (zoom_focus));
 
