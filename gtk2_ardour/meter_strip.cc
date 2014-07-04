@@ -46,6 +46,7 @@
 #include "meter_patterns.h"
 
 #include "i18n.h"
+#include "dbg_msg.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -59,53 +60,58 @@ PBD::Signal0<void> MeterStrip::MetricChanged;
 PBD::Signal0<void> MeterStrip::ConfigurationChanged;
 
 MeterStrip::MeterStrip (int metricmode, MeterType mt)
-	: AxisView(0)
-	, RouteUI(0)
+	: AxisView (0)
+	, RouteUI (0, "meter_strip.xml")
+
+	, name_label (get_waves_button ("name_label"))
+	, peak_display (get_waves_button ("peak_display"))
+	, level_meter_home (get_box ("level_meter_home"))
 {
+	std::cout << "a) MeterStrip::MeterStrip ()" << std::endl;
 	level_meter = 0;
 	_strip_type = 0;
 	_tick_bar = 0;
 	_metricmode = -1;
 	metric_type = MeterPeak;
-	mtr_vbox.set_spacing(2);
-	nfo_vbox.set_spacing(2);
-	peakbx.set_size_request(-1, 14);
-	namebx.set_size_request(18, 52);
-	spacer.set_size_request(-1,0);
+//	mtr_vbox.set_spacing(2);
+//	nfo_vbox.set_spacing(2);
+//	peakbx.set_size_request(-1, 14);
+//	namebx.set_size_request(18, 52);
+//	spacer.set_size_request(-1,0);
 
 	set_metric_mode(metricmode, mt);
 
-	meter_metric_area.set_size_request(25, 10);
-	meter_metric_area.signal_expose_event().connect (
-			sigc::mem_fun(*this, &MeterStrip::meter_metrics_expose));
-	RedrawMetrics.connect (sigc::mem_fun(*this, &MeterStrip::redraw_metrics));
+//	meter_metric_area.set_size_request(25, 10);
+//	meter_metric_area.signal_expose_event().connect (
+//			sigc::mem_fun(*this, &MeterStrip::meter_metrics_expose));
+//	RedrawMetrics.connect (sigc::mem_fun(*this, &MeterStrip::redraw_metrics));
 
-	meterbox.pack_start(meter_metric_area, true, false);
+//	meterbox.pack_start(meter_metric_area, true, false);
 
-	mtr_vbox.pack_start (peakbx, false, false);
-	mtr_vbox.pack_start (meterbox, true, true);
-	mtr_vbox.pack_start (spacer, false, false);
-	mtr_container.add(mtr_vbox);
+//	mtr_vbox.pack_start (peakbx, false, false);
+//	mtr_vbox.pack_start (meterbox, true, true);
+//	mtr_vbox.pack_start (spacer, false, false);
+//	mtr_container.add(mtr_vbox);
 
-	mtr_hsep.set_size_request(-1,1);
-	mtr_hsep.set_name("BlackSeparator");
+//	mtr_hsep.set_size_request(-1,1);
+//	mtr_hsep.set_name("BlackSeparator");
 
-	nfo_vbox.pack_start (mtr_hsep, false, false);
-	nfo_vbox.pack_start (btnbox, false, false);
-	nfo_vbox.pack_start (namebx, false, false);
+//	nfo_vbox.pack_start (mtr_hsep, false, false);
+//	nfo_vbox.pack_start (btnbox, false, false);
+//	nfo_vbox.pack_start (namebx, false, false);
 
-	pack_start (mtr_container, true, true);
-	pack_start (nfo_vbox, false, false);
+//	pack_start (mtr_container, true, true);
+//	pack_start (nfo_vbox, false, false);
 
-	peakbx.show();
-	btnbox.show();
-	meter_metric_area.show();
-	meterbox.show();
-	spacer.show();
-	mtr_vbox.show();
-	mtr_container.show();
-	mtr_hsep.show();
-	nfo_vbox.show();
+//	peakbx.show();
+//	btnbox.show();
+//	meter_metric_area.show();
+//	meterbox.show();
+//	spacer.show();
+//	mtr_vbox.show();
+//	mtr_container.show();
+//	mtr_hsep.show();
+//	nfo_vbox.show();
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
@@ -114,12 +120,16 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 
 MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	: AxisView(sess)
-	, RouteUI(sess)
+	, RouteUI(sess, "meter_strip.xml")
 	, _route(rt)
-	, peak_display()
+
+	, name_label (get_waves_button ("name_label"))
+	, peak_display (get_waves_button ("peak_display"))
+	, level_meter_home (get_box ("level_meter_home"))
 {
-	mtr_vbox.set_spacing(2);
-	nfo_vbox.set_spacing(2);
+	std::cout << "b) MeterStrip::MeterStrip ()" << std::endl;
+//	mtr_vbox.set_spacing(2);
+//	nfo_vbox.set_spacing(2);
 	RouteUI::set_route (rt);
 	SessionHandlePtr::set_session (sess);
 
@@ -141,112 +151,110 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	level_meter->setup_meters (meter_width, 6);
 	level_meter->ButtonRelease.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_release, this, _1));
 	level_meter->MeterTypeChanged.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::meter_type_changed, this, _1));
+	level_meter_home.add (*level_meter);
 
-	meter_align.set(0.5, 0.5, 0.0, 1.0);
-	meter_align.add(*level_meter);
+//	meter_align.set(0.5, 0.5, 0.0, 1.0);
+//	meter_align.add(*level_meter);
 
-	meterbox.pack_start(meter_ticks1_area, true, false);
-	meterbox.pack_start(meter_align, true, true);
-	meterbox.pack_start(meter_ticks2_area, true, false);
+//	meterbox.pack_start(meter_ticks1_area, true, false);
+//	meterbox.pack_start(meter_align, true, true);
+//	meterbox.pack_start(meter_ticks2_area, true, false);
 
 	// peak display
-	peak_display.set_name ("meterbridge peakindicator");
-	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+//	peak_display.set_name ("meterbridge peakindicator");
+//	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 	max_peak = minus_infinity();
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
-	peak_display.set_size_request(12, 8);
-	peak_display.set_corner_radius(2);
+//	peak_display.set_size_request(12, 8);
+//	peak_display.set_corner_radius(2);
 
-	peak_align.set(0.5, 1.0, 1.0, 0.8);
-	peak_align.add(peak_display);
-	peakbx.pack_start(peak_align, true, true, 3);
-	peakbx.set_size_request(-1, 14);
+//	peak_align.set(0.5, 1.0, 1.0, 0.8);
+//	peak_align.add(peak_display);
+//	peakbx.pack_start(peak_align, true, true, 3);
+//	peakbx.set_size_request(-1, 14);
 
 	// add track-name label
 	name_label.set_text(_route->name());
-	name_label.set_corner_radius(2);
-	name_label.set_name("meterbridge label");
 	name_label.set_angle(-90.0);
 	name_label.layout()->set_ellipsize (Pango::ELLIPSIZE_END);
 	name_label.layout()->set_width(48 * PANGO_SCALE);
 	name_label.set_size_request(18, 50);
-	name_label.set_alignment(-1.0, .5);
 	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
 	ARDOUR_UI::instance()->set_tip (*level_meter, _route->name());
 
-	namebx.set_size_request(18, 52);
-	namebx.pack_start(name_label, true, false, 3);
+//	namebx.set_size_request(18, 52);
+//	namebx.pack_start(name_label, true, false, 3);
 
-	mon_in_box.pack_start(*monitor_input_button, true, false);
-	btnbox.pack_start(mon_in_box, false, false, 1);
-	mon_disk_box.pack_start(*monitor_disk_button, true, false);
-	btnbox.pack_start(mon_disk_box, false, false, 1);
+//	mon_in_box.pack_start(*monitor_input_button, true, false);
+//	btnbox.pack_start(mon_in_box, false, false, 1);
+//	mon_disk_box.pack_start(*monitor_disk_button, true, false);
+//	btnbox.pack_start(mon_disk_box, false, false, 1);
 
-	recbox.pack_start(*rec_enable_button, true, false);
-	btnbox.pack_start(recbox, false, false, 1);
-	mutebox.pack_start(*mute_button, true, false);
-	btnbox.pack_start(mutebox, false, false, 1);
-	solobox.pack_start(*solo_button, true, false);
-	btnbox.pack_start(solobox, false, false, 1);
+//	recbox.pack_start(*rec_enable_button, true, false);
+//	btnbox.pack_start(recbox, false, false, 1);
+//	mutebox.pack_start(*mute_button, true, false);
+//	btnbox.pack_start(mutebox, false, false, 1);
+//	solobox.pack_start(*solo_button, true, false);
+//	btnbox.pack_start(solobox, false, false, 1);
 
-	rec_enable_button->set_corner_radius(2);
-	rec_enable_button->set_size_request(16, 16);
+	rec_enable_button.set_corner_radius(2);
+	rec_enable_button.set_size_request(16, 16);
 
-	mute_button->set_corner_radius(2);
-	mute_button->set_size_request(16, 16);
+	mute_button.set_corner_radius(2);
+	mute_button.set_size_request(16, 16);
 
-	solo_button->set_corner_radius(2);
-	solo_button->set_size_request(16, 16);
+	solo_button.set_corner_radius(2);
+	solo_button.set_size_request(16, 16);
 
-	monitor_input_button->set_corner_radius(2);
-	monitor_input_button->set_size_request(16, 16);
+	monitor_input_button.set_corner_radius(2);
+	monitor_input_button.set_size_request(16, 16);
 
-	monitor_disk_button->set_corner_radius(2);
-	monitor_disk_button->set_size_request(16, 16);
+	monitor_disk_button.set_corner_radius(2);
+	monitor_disk_button.set_size_request(16, 16);
 
-	mutebox.set_size_request(16, 16);
-	solobox.set_size_request(16, 16);
-	recbox.set_size_request(16, 16);
-	mon_in_box.set_size_request(16, 16);
-	mon_disk_box.set_size_request(16, 16);
-	spacer.set_size_request(-1,0);
+//	mutebox.set_size_request(16, 16);
+//	solobox.set_size_request(16, 16);
+//	recbox.set_size_request(16, 16);
+//	mon_in_box.set_size_request(16, 16);
+//	mon_disk_box.set_size_request(16, 16);
+//	spacer.set_size_request(-1,0);
 
 	update_button_box();
 	update_name_box();
 	update_background (_route->meter_type());
 
-	mtr_vbox.pack_start (peakbx, false, false);
-	mtr_vbox.pack_start (meterbox, true, true);
-	mtr_vbox.pack_start (spacer, false, false);
-	mtr_container.add(mtr_vbox);
+//	mtr_vbox.pack_start (peakbx, false, false);
+//	mtr_vbox.pack_start (meterbox, true, true);
+//	mtr_vbox.pack_start (spacer, false, false);
+//	mtr_container.add(mtr_vbox);
 
-	mtr_hsep.set_size_request(-1,1);
-	mtr_hsep.set_name("BlackSeparator");
+//	mtr_hsep.set_size_request(-1,1);
+//	mtr_hsep.set_name("BlackSeparator");
 
-	nfo_vbox.pack_start (mtr_hsep, false, false);
-	nfo_vbox.pack_start (btnbox, false, false);
-	nfo_vbox.pack_start (namebx, false, false);
+//	nfo_vbox.pack_start (mtr_hsep, false, false);
+//	nfo_vbox.pack_start (btnbox, false, false);
+//	nfo_vbox.pack_start (namebx, false, false);
 
-	pack_start (mtr_container, true, true);
-	pack_start (nfo_vbox, false, false);
+//	pack_start (mtr_container, true, true);
+//	pack_start (nfo_vbox, false, false);
 
-	name_label.show();
-	peak_display.show();
-	peakbx.show();
-	meter_ticks1_area.show();
-	meter_ticks2_area.show();
-	meterbox.show();
-	spacer.show();
-	level_meter->show();
-	meter_align.show();
-	peak_align.show();
-	btnbox.show();
-	mtr_vbox.show();
-	mtr_container.show();
-	mtr_hsep.show();
-	nfo_vbox.show();
-	monitor_input_button->show();
-	monitor_disk_button->show();
+//	name_label.show();
+//	peak_display.show();
+//	peakbx.show();
+//	meter_ticks1_area.show();
+//	meter_ticks2_area.show();
+//	meterbox.show();
+//	spacer.show();
+//	level_meter->show();
+//	meter_align.show();
+//	peak_align.show();
+//	btnbox.show();
+//	mtr_vbox.show();
+//	mtr_container.show();
+//	mtr_hsep.show();
+//	nfo_vbox.show();
+	monitor_input_button.show();
+	monitor_disk_button.show();
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
 			route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_configuration_changed, this, _1), gui_context()
@@ -255,15 +263,15 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &MeterStrip::reset_peak_display));
 	ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &MeterStrip::reset_route_peak_display));
 	ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &MeterStrip::reset_group_peak_display));
-	RedrawMetrics.connect (sigc::mem_fun(*this, &MeterStrip::redraw_metrics));
+//	RedrawMetrics.connect (sigc::mem_fun(*this, &MeterStrip::redraw_metrics));
 	SetMeterTypeMulti.connect (sigc::mem_fun(*this, &MeterStrip::set_meter_type_multi));
 
 	meter_configuration_changed (_route->shared_peak_meter()->input_streams ());
 
-	meter_ticks1_area.set_size_request(3,-1);
-	meter_ticks2_area.set_size_request(3,-1);
-	meter_ticks1_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks1_expose));
-	meter_ticks2_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks2_expose));
+//	meter_ticks1_area.set_size_request(3,-1);
+//	meter_ticks2_area.set_size_request(3,-1);
+//	meter_ticks1_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks1_expose));
+//	meter_ticks2_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks2_expose));
 
 	_route->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::self_delete, this), gui_context());
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::strip_property_changed, this, _1), gui_context());
@@ -332,30 +340,32 @@ MeterStrip::state_id() const
 void
 MeterStrip::set_button_names()
 {
-	mute_button->set_text (_("M"));
-	rec_enable_button->set_text ("");
-	rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
+	/*
+	mute_button.set_text (_("M"));
+	rec_enable_button.set_text ("");
+	rec_enable_button.set_image (::get_icon (X_("record_normal_red")));
 
 	if (_route && _route->solo_safe()) {
-		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
+		solo_button.set_visual_state (Gtkmm2ext::VisualState (solo_button.visual_state() | Gtkmm2ext::Insensitive));
 	} else {
-		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
+		solo_button.set_visual_state (Gtkmm2ext::VisualState (solo_button.visual_state() & ~Gtkmm2ext::Insensitive));
 	}
 	if (!Config->get_solo_control_is_listen_control()) {
-		solo_button->set_text (_("S"));
+		solo_button.set_text (_("S"));
 	} else {
 		switch (Config->get_listen_position()) {
 		case AfterFaderListen:
-			solo_button->set_text (_("A"));
+			solo_button.set_text (_("A"));
 			break;
 		case PreFaderListen:
-			solo_button->set_text (_("P"));
+			solo_button.set_text (_("P"));
 			break;
 		}
 	}
 
 	monitor_input_button->set_text (_("I"));
 	monitor_disk_button->set_text (_("D"));
+	*/
 }
 
 void
@@ -380,7 +390,7 @@ MeterStrip::fast_update ()
 		max_peak = mpeak;
 		if (mpeak >= Config->get_meter_peak()) {
 			peak_display.set_name ("meterbridge peakindicator on");
-			peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+//			peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 		}
 	}
 }
@@ -414,31 +424,32 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 	if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
 			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0
 			) {
-		meter_ticks1_area.set_name ("MyAudioBusMetricsLeft");
-		meter_ticks2_area.set_name ("MyAudioBusMetricsRight");
+//		meter_ticks1_area.set_name ("MyAudioBusMetricsLeft");
+//		meter_ticks2_area.set_name ("MyAudioBusMetricsRight");
 		_has_midi = false;
 	}
 	else if (type == (1 << DataType::AUDIO)) {
-		meter_ticks1_area.set_name ("MyAudioTrackMetricsLeft");
-		meter_ticks2_area.set_name ("MyAudioTrackMetricsRight");
+//		meter_ticks1_area.set_name ("MyAudioTrackMetricsLeft");
+//		meter_ticks2_area.set_name ("MyAudioTrackMetricsRight");
 		_has_midi = false;
 	}
 	else if (type == (1 << DataType::MIDI)) {
-		meter_ticks1_area.set_name ("MidiTrackMetricsLeft");
-		meter_ticks2_area.set_name ("MidiTrackMetricsRight");
+//		meter_ticks1_area.set_name ("MidiTrackMetricsLeft");
+//		meter_ticks2_area.set_name ("MidiTrackMetricsRight");
 		_has_midi = true;
 	} else {
-		meter_ticks1_area.set_name ("AudioMidiTrackMetricsLeft");
-		meter_ticks2_area.set_name ("AudioMidiTrackMetricsRight");
+//		meter_ticks1_area.set_name ("AudioMidiTrackMetricsLeft");
+//		meter_ticks2_area.set_name ("AudioMidiTrackMetricsRight");
 		_has_midi = true;
 	}
-	set_tick_bar(_tick_bar);
+//	set_tick_bar(_tick_bar);
 
 	on_theme_changed();
 	if (old_has_midi != _has_midi) MetricChanged();
 	else ConfigurationChanged();
 }
 
+/*
 void
 MeterStrip::set_tick_bar (int m)
 {
@@ -467,11 +478,12 @@ MeterStrip::set_tick_bar (int m)
 		}
 	}
 }
+*/
 
 void
 MeterStrip::on_size_request (Gtk::Requisition* r)
 {
-	VBox::on_size_request(r);
+	RouteUI::on_size_request(r);
 }
 
 void
@@ -503,14 +515,15 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 			nh = 148;
 			break;
 	}
-	namebx.set_size_request(18, nh);
+//	namebx.set_size_request(18, nh);
 	if (_route) {
 		name_label.set_size_request(18, nh-2);
 		name_label.layout()->set_width((nh-4) * PANGO_SCALE);
 	}
-	VBox::on_size_allocate(a);
+	RouteUI::on_size_allocate(a);
 }
 
+/*
 gint
 MeterStrip::meter_metrics_expose (GdkEventExpose *ev)
 {
@@ -520,6 +533,7 @@ MeterStrip::meter_metrics_expose (GdkEventExpose *ev)
 		return meter_expose_metrics(ev, metric_type, _types, &meter_metric_area);
 	}
 }
+*/
 
 void
 MeterStrip::set_metric_mode (int metricmode, ARDOUR::MeterType mt)
@@ -533,25 +547,25 @@ MeterStrip::set_metric_mode (int metricmode, ARDOUR::MeterType mt)
 	_types.clear ();
 	switch(metricmode) {
 		case 0:
-			meter_metric_area.set_name ("MidiTrackMetricsLeft");
+//			meter_metric_area.set_name ("MidiTrackMetricsLeft");
 			_types.push_back (DataType::MIDI);
 			break;
 		case 1:
-			meter_metric_area.set_name ("AudioTrackMetricsLeft");
+//			meter_metric_area.set_name ("AudioTrackMetricsLeft");
 			_types.push_back (DataType::AUDIO);
 			break;
 		case 2:
-			meter_metric_area.set_name ("MidiTrackMetricsRight");
+//			meter_metric_area.set_name ("MidiTrackMetricsRight");
 			_types.push_back (DataType::MIDI);
 			break;
 		case 3:
 		default:
-			meter_metric_area.set_name ("AudioTrackMetricsRight");
+//			meter_metric_area.set_name ("AudioTrackMetricsRight");
 			_types.push_back (DataType::AUDIO);
 			break;
 	}
 	update_background (mt);
-	meter_metric_area.queue_draw ();
+//	meter_metric_area.queue_draw ();
 }
 
 void
@@ -565,13 +579,13 @@ MeterStrip::update_background(MeterType type)
 		case MeterK12:
 		case MeterK14:
 		case MeterK20:
-			mtr_container.set_name ("meterstripPPM");
+//			mtr_container.set_name ("meterstripPPM");
 			break;
 		case MeterVU:
-			mtr_container.set_name ("meterstripVU");
+//			mtr_container.set_name ("meterstripVU");
 			break;
 		default:
-			mtr_container.set_name ("meterstripDPM");
+;//			mtr_container.set_name ("meterstripDPM");
 	}
 }
 
@@ -583,6 +597,7 @@ MeterStrip::meter_type()
 	return _route->meter_type();
 }
 
+/*
 gint
 MeterStrip::meter_ticks1_expose (GdkEventExpose *ev)
 {
@@ -596,6 +611,7 @@ MeterStrip::meter_ticks2_expose (GdkEventExpose *ev)
 	assert(_route);
 	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks2_area);
 }
+*/
 
 void
 MeterStrip::reset_route_peak_display (Route* route)
@@ -604,6 +620,7 @@ MeterStrip::reset_route_peak_display (Route* route)
 		reset_peak_display ();
 	}
 }
+
 
 void
 MeterStrip::reset_group_peak_display (RouteGroup* group)
@@ -619,8 +636,8 @@ MeterStrip::reset_peak_display ()
 	_route->shared_peak_meter()->reset_max();
 	level_meter->clear_meters();
 	max_peak = -INFINITY;
-	peak_display.set_name ("meterbridge peakindicator");
-	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+//	peak_display.set_name ("meterbridge peakindicator");
+//	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 }
 
 bool
@@ -638,6 +655,7 @@ MeterStrip::peak_button_release (GdkEventButton* ev)
 	return true;
 }
 
+/*
 void
 MeterStrip::redraw_metrics ()
 {
@@ -645,6 +663,7 @@ MeterStrip::redraw_metrics ()
 	meter_ticks1_area.queue_draw();
 	meter_ticks2_area.queue_draw();
 }
+*/
 
 void
 MeterStrip::update_button_box ()
@@ -653,31 +672,31 @@ MeterStrip::update_button_box ()
 	int height = 0;
 	if (_session->config.get_show_mute_on_meterbridge()) {
 		height += 18;
-		mutebox.show();
+		mute_button.show();
 	} else {
-		mutebox.hide();
+		mute_button.hide();
 	}
 	if (_session->config.get_show_solo_on_meterbridge()) {
 		height += 18;
-		solobox.show();
+		solo_button.show();
 	} else {
-		solobox.hide();
+		solo_button.hide();
 	}
 	if (_session->config.get_show_rec_on_meterbridge()) {
 		height += 18;
-		recbox.show();
+		rec_enable_button.show();
 	} else {
-		recbox.hide();
+		rec_enable_button.hide();
 	}
 	if (_session->config.get_show_monitor_on_meterbridge()) {
 		height += 18 + 18;
-		mon_in_box.show();
-		mon_disk_box.show();
+		monitor_input_button.show();
+		monitor_disk_button.show();
 	} else {
-		mon_in_box.hide();
-		mon_disk_box.hide();
+		monitor_input_button.hide();
+		monitor_disk_button.hide();
 	}
-	btnbox.set_size_request(16, height);
+//	btnbox.set_size_request(16, height);
 	check_resize();
 }
 
@@ -686,9 +705,9 @@ MeterStrip::update_name_box ()
 {
 	if (!_session) return;
 	if (_session->config.get_show_name_on_meterbridge()) {
-		namebx.show();
+		name_label.show();
 	} else {
-		namebx.hide();
+		name_label.hide();
 	}
 }
 

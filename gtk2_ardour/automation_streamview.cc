@@ -48,7 +48,7 @@ using namespace PBD;
 using namespace Editing;
 
 AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
-	: StreamView (*dynamic_cast<RouteTimeAxisView*>(tv.get_parent()),
+	: StreamView (*dynamic_cast<RouteTimeAxisView*>(tv.TimeAxisView::get_parent()),
 		      tv.canvas_display())
 	, _automation_view(tv)
 	, _pending_automation_state (Off)

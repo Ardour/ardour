@@ -74,7 +74,10 @@ class RouteGroupMenu;
 class RouteTimeAxisView : public RouteUI, public TimeAxisView
 {
 public:
- 	RouteTimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
+ 	RouteTimeAxisView (PublicEditor&, 
+					   ARDOUR::Session*,
+					   ArdourCanvas::Canvas& canvas,
+					   const std::string& layout_script_file);
  	virtual ~RouteTimeAxisView ();
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
@@ -219,13 +222,13 @@ protected:
 
 	void set_align_choice (Gtk::RadioMenuItem*, ARDOUR::AlignChoice, bool apply_to_selection = false);
 
-	void         playlist_click ();
+	void         playlist_click (WavesButton*);
 	void         show_playlist_selector ();
 	void         playlist_changed ();
 
 	void rename_current_playlist ();
 
-	void         automation_click ();
+	void         automation_click (WavesButton*);
 
 	virtual void show_all_automation (bool apply_to_selection = false);
 	virtual void show_existing_automation (bool apply_to_selection = false);
@@ -247,11 +250,11 @@ protected:
 	ArdourCanvas::Canvas& parent_canvas;
 	bool                  no_redraw;
 
-	Gtk::HBox   other_button_hbox;
-	Gtk::Table  button_table;
-	ArdourButton route_group_button;
-	ArdourButton playlist_button;
-	ArdourButton automation_button;
+//	Gtk::HBox   other_button_hbox;
+//	Gtk::Table  button_table;
+	WavesButton& route_group_button;
+	WavesButton& playlist_button;
+	WavesButton& automation_button;
 
 	Gtk::Menu           subplugin_menu;
 	Gtk::Menu*          automation_action_menu;
@@ -287,6 +290,7 @@ protected:
 
 	void post_construct ();
 
+	Gtk::Box& gain_meter_home;
 	GainMeter gm;
 
 	XMLNode* underlay_xml_node;

@@ -57,6 +57,7 @@
 #include "utils.h"
 
 #include "i18n.h"
+#include "dbg_msg.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -66,8 +67,9 @@ using namespace Editing;
 
 AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
 	: AxisView(sess)
-	, RouteTimeAxisView(ed, sess, canvas)
+	, RouteTimeAxisView(ed, sess, canvas, "audio_time_axis.xml")
 {
+	std::cout << "AudioTimeAxisView::AudioTimeAxisView ()" << std::endl;
 }
 
 void
@@ -92,11 +94,11 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	ignore_toggle = false;
 
-	if (is_audio_track()) {
-		controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
-	} else { // bus
-		controls_ebox.set_name ("AudioBusControlsBaseUnselected");
-	}
+	//if (is_audio_track()) {
+	//	controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
+	//} else { // bus
+	//	controls_ebox.set_name ("AudioBusControlsBaseUnselected");
+	//}
 
 	/* if set_state above didn't create a gain automation child, we need to make one */
 	if (automation_child (GainAutomation) == 0) {
@@ -380,11 +382,11 @@ AudioTimeAxisView::update_control_names ()
 		}
 	}
 
-	if (get_selected()) {
-		controls_ebox.set_name (controls_base_selected_name);
-	} else {
-		controls_ebox.set_name (controls_base_unselected_name);
-	}
+	//if (get_selected()) {
+	//	controls_ebox.set_name (controls_base_selected_name);
+	//} else {
+	//	controls_ebox.set_name (controls_base_unselected_name);
+	//}
 }
 
 void

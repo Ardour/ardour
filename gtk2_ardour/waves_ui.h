@@ -30,6 +30,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/scrolledwindow.h>
 #include "gtkmm2ext/fader.h"
+#include "gtkmm2ext/focus_entry.h"
 #include "canvas/canvas.h"
 #include "canvas/xml_ui.h"
 #include "waves_button.h"
@@ -42,6 +43,7 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	WavesUI (const std::string& layout_script_file, Gtk::Container& root);
 
 	Gtk::Adjustment& get_adjustment (const char* id);
+	Gtk::Container& get_container (const char* id);
 	Gtk::EventBox& get_event_box (const char* id);
 	Gtk::Box& get_box (const char* id);
 	Gtk::VBox& get_v_box (const char* id);
@@ -51,10 +53,12 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	Gtk::Image& get_image (const char* id);
 	Gtk::ComboBoxText& get_combo_box_text (const char* id);
 	Gtk::Entry& get_entry(const char* id);
+	Gtkmm2ext::FocusEntry& get_focus_entry(const char* id);
     Gtk::SpinButton& get_spin_button(const char* id);
 	WavesButton& get_waves_button (const char* id);
 	Gtkmm2ext::Fader& get_fader (const char* id);
 	const XMLTree* xml_tree() { return _xml_tree; }
+	Gtk::Container& root () { return _root_container; }
 
   protected:
 	void set_attributes (Gtk::Widget& widget, const XMLNode& definition, const XMLNodeMap& styles);
@@ -62,6 +66,8 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
   private:
 	static std::map<std::string, const XMLTree*> __xml_tree_cache;
 	const XMLTree* _xml_tree;
+	const std::string _scrip_file_name;
+	Gtk::Container& _root_container;
 
 	Gtk::Object* get_object(const char *id);
 	const XMLTree* load_layout (const std::string& xml_file_name);

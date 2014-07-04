@@ -20,6 +20,7 @@
 #define __ardour_mixer_strip__
 
 #include <vector>
+#include <string>
 
 #include <cmath>
 
@@ -74,16 +75,16 @@ class MotionController;
 class RouteGroupMenu;
 class ArdourWindow;
 
-class MixerStrip : public RouteUI, public Gtk::EventBox
+class MixerStrip : public RouteUI
 {
   public:
-	MixerStrip (Mixer_UI&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, bool in_mixer = true);
-	MixerStrip (Mixer_UI&, ARDOUR::Session*, bool in_mixer = true);
+	MixerStrip (Mixer_UI&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, const std::string& layout_script_file);
+	MixerStrip (Mixer_UI&, ARDOUR::Session*, const std::string& layout_script_file);
 	~MixerStrip ();
 
-	void set_width_enum (Width, void* owner);
-	Width get_width_enum () const { return _width; }
-	void* width_owner () const { return _width_owner; }
+	//void set_width_enum (Width, void* owner);
+//	Width get_width_enum () const { return _width; }
+//	void* width_owner () const { return _width_owner; }
 
 	GainMeter&      gain_meter()      { return gpm; }
 	PannerUI&       panner_ui()       { return panners; }
@@ -110,7 +111,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	void hide_things ();
 
-	sigc::signal<void> WidthChanged;
+	//sigc::signal<void> WidthChanged;
 
 	/** The delivery that we are handling the level for with our fader has changed */
 	PBD::Signal1<void, boost::weak_ptr<ARDOUR::Delivery> > DeliveryChanged;
@@ -146,39 +147,37 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	bool  _embedded;
 	bool  _packed;
 	bool  _mixer_owned;
-	Width _width;
-	void*  _width_owner;
+//	Width _width;
+//	void*  _width_owner;
 
-	ArdourButton         hide_button;
-	ArdourButton         width_button;
-	Gtk::HBox           width_hide_box;
-	Gtk::VBox           whvbox;
-	Gtk::EventBox       top_event_box;
-	Gtk::EventBox*      spacer;
+//	Gtk::HBox        width_hide_box;
+//	Gtk::VBox        whvbox;
+//	Gtk::EventBox    top_event_box;
+//	Gtk::EventBox*   spacer;
 
 	void hide_clicked();
-	bool width_button_pressed (GdkEventButton *);
+//	bool width_button_pressed (GdkEventButton *);
 
-	Gtk::Frame          global_frame;
-	Gtk::VBox           global_vpacker;
+//	Gtk::Frame          global_frame;
+//	Gtk::VBox           global_vpacker;
 
+	Gtk::EventBox&       panners_home;
 	ProcessorBox processor_box;
 	GainMeter    gpm;
 	PannerUI     panners;
 
-	Glib::RefPtr<Gtk::SizeGroup> button_size_group;
+//	Glib::RefPtr<Gtk::SizeGroup> button_size_group;
 
-	Gtk::Table button_table;
-	Gtk::Table rec_solo_table;
-	Gtk::Table top_button_table;
-	Gtk::Table middle_button_table;
-	Gtk::Table bottom_button_table;
-	Gtk::Table auto_n_io_table;
+	//Gtk::Table top_button_table;
+	//Gtk::Table middle_button_table;
+	//Gtk::Table bottom_button_table;
+	//Gtk::Table auto_n_io_table;
     
 	void meter_changed ();
 
-	ArdourButton* midi_input_enable_button;
-	Gtk::HBox   input_button_box;
+	Gtk::Box& gain_meter_home;
+	WavesButton &midi_input_enable_button;
+	//Gtk::HBox   input_button_box;
 
 	std::string longest_label;
 
@@ -189,19 +188,19 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	gint    mark_update_safe ();
 	guint32 mode_switch_in_progress;
 
-	ArdourButton   name_button;
+	WavesButton&   name_button;
 
 	ArdourWindow*  comment_window;
 	Gtk::TextView* comment_area;
-	ArdourButton   _comment_button;
+	WavesButton&   _comment_button;
 
 	void comment_editor_done_editing ();
 	void setup_comment_editor ();
 	void open_comment_editor ();
-	void toggle_comment_editor ();
+	void toggle_comment_editor (WavesButton*);
 	void setup_comment_button ();
 
-	ArdourButton   group_button;
+	WavesButton&   group_button;
 	RouteGroupMenu *group_menu;
 
 	gint input_press (GdkEventButton *);
@@ -264,7 +263,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void show_passthru_color ();
 
 	void property_changed (const PBD::PropertyChange&);
-	void name_button_resized (Gtk::Allocation&);
+//	void name_button_resized (Gtk::Allocation&);
 	void name_changed ();
 	void update_speed_display ();
 	void map_frozen ();
@@ -288,7 +287,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	static int scrollbar_height;
 
-	void update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width width, bool input_button);
+//	void update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width width, bool input_button);
+	void update_io_button (boost::shared_ptr<ARDOUR::Route> route, bool input_button);
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
 
 	/** A VisibilityGroup to manage the visibility of some of our controls.
@@ -319,3 +319,5 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 };
 
 #endif /* __ardour_mixer_strip__ */
+
+// How to see comment_area on the screen?

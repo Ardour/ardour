@@ -578,6 +578,18 @@ TracksControlPanel::refresh_session_settings_info()
 void
 TracksControlPanel::populate_auto_lock_timer()
 {
+    using namespace std;
+    using namespace Gtk;
+    
+    _auto_lock_timer_spin_button.set_max_length(3);
+    _auto_lock_timer_spin_button.set_numeric(true);
+    
+    _auto_lock_timer_spin_button.set_update_policy(UPDATE_ALWAYS);
+    _auto_lock_timer_spin_button.set_range(0, 999);
+    _auto_lock_timer_spin_button.set_increments(1,1);
+    
+    int time = ARDOUR_UI::config()->get_auto_lock_timer();    
+    _auto_lock_timer_spin_button.set_value(time);
 }
 
 void
@@ -1247,6 +1259,18 @@ TracksControlPanel::save_default_session_path()
     }
 }
 
+void
+TracksControlPanel::save_auto_lock_time()
+{
+    using namespace std;
+    
+    string s = _auto_lock_timer_spin_button.get_text();
+    int time = atoi(s);
+    
+    ARDOUR_UI::config()->set_auto_lock_timer(time);
+    ARDOUR_UI::config()->save_state();
+}
+
 void TracksControlPanel::update_session_config ()
 {
     ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
@@ -1265,14 +1289,24 @@ void TracksControlPanel::update_session_config ()
 }
 
 void
+TracksControlPanel::update_configs()
+{
+    // update session config
+    update_session_config();
+    
+    // update global config
+    save_default_session_path();
+    save_auto_lock_time();
+}
+
+void
 TracksControlPanel::on_ok (WavesButton*)
 {
 	hide();
 	EngineStateController::instance()->push_current_state_to_backend(true);
 	response(Gtk::RESPONSE_OK);
     
-    update_session_config();
-    save_default_session_path();    
+    update_configs();
 }
 
 
@@ -1291,8 +1325,7 @@ TracksControlPanel::on_apply (WavesButton*)
 	EngineStateController::instance()->push_current_state_to_backend(true);
 	//response(Gtk::RESPONSE_APPLY);
     
-    update_session_config();
-    save_default_session_path();  
+    update_configs(); 
 }
 
 

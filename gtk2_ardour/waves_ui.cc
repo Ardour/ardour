@@ -35,8 +35,11 @@ std::map<std::string, const XMLTree*> WavesUI::__xml_tree_cache;
 
 WavesUI::WavesUI (const std::string& layout_script_file, Gtk::Container& root)
 	: _xml_tree (NULL)
+	, _scrip_file_name (layout_script_file)
+	, _root_container (root)
 {
 	// To avoid a need of reading the same file many times:
+	std::cout << "WavesUI::WavesUI (" << layout_script_file << ")" << std::endl;
 	std::map<std::string, const XMLTree*>::const_iterator it = __xml_tree_cache.find(layout_script_file);
 	if (it != __xml_tree_cache.end()) {
 		_xml_tree = (*it).second;
@@ -93,6 +96,8 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 		child = manage (new Gtk::Label (text));
 	} else if (widget_type == "ENTRY") {
 		child = manage (new Gtk::Entry ());
+	} else if (widget_type == "FOCUSENTRY") {
+		child = manage (new Gtkmm2ext::FocusEntry ());
 	} else if (widget_type == "SPINBUTTON") {
 		child = manage (new Gtk::SpinButton ());
     } else if (widget_type == "LAYOUT") {
@@ -136,7 +141,6 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 		Gtk::Adjustment& adjustment = get_adjustment(adjustment_id.c_str());
 		child = manage (new Gtkmm2ext::Fader(adjustment, face_image, handle_image, active_handle_image, minposx, minposy, maxposx, maxposy));
 	} else if (widget_type == "ADJUSTMENT") {
-        //dbg_msg("Creating ADJUSTMENT");
 		double min_value = xml_property (definition, "minvalue", styles, 0.0);
 		double max_value = xml_property (definition, "maxvalue", styles, 100.0);
 		double initial_value = xml_property (definition, "initialvalue", styles, min_value);
@@ -367,11 +371,8 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		widget.modify_font(Pango::FontDescription(property));
 	}
 
-	if (xml_property (definition, "visible", styles, true)) {
-		widget.show();
-	} else {
-		widget.hide();
-	}
+	widget.set_visible (xml_property (definition, "visible", styles, true));
+	widget.set_no_show_all (xml_property (definition, "noshowall", styles, false));
 
 	property = xml_property (definition, "tooltip", styles, "");
 	if (!property.empty ()) {
@@ -474,18 +475,30 @@ WavesUI::get_adjustment(const char* id)
 {
 	Gtk::Adjustment* child = dynamic_cast<Gtk::Adjustment*> (get_object(id));
 	if (child == NULL ) {
-		dbg_msg (std::string("Adjustment ") + id + " not found !");
+		dbg_msg (std::string("Adjustment ") + id + " not found in " + _scrip_file_name + "!");
 		throw std::exception();
 	}
 	return *child;
 }
+
+Gtk::Container&
+WavesUI::get_container (const char* id)
+{
+	Gtk::Container* child = dynamic_cast<Gtk::Container*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::Container ") + id + " not found in " + _scrip_file_name + "!");
+		throw std::exception();
+	}
+	return *child;
+}
+
 
 Gtk::EventBox&
 WavesUI::get_event_box (const char* id)
 {
 	Gtk::EventBox* child = dynamic_cast<Gtk::EventBox*> (get_object(id));
 	if (child == NULL ) {
-		dbg_msg (std::string("Gtk::EventBox ") + id + " not found !");
+		dbg_msg (std::string("Gtk::EventBox ") + id + " not found in " + _scrip_file_name + "!");
 		throw std::exception();
 	}
 	return *child;
@@ -497,7 +510,7 @@ WavesUI::get_box (const char* id)
 {
 	Gtk::Box* child = dynamic_cast<Gtk::Box*> (get_object(id));
 	if (child == NULL ) {
-		dbg_msg (std::string("Gtk::Box ") + id + " not found !");
+		dbg_msg (std::string("Gtk::Box ") + id + " not found in " + _scrip_file_name + "!");
 		throw std::exception();
 	}
 	return *child;
@@ -509,7 +522,7 @@ WavesUI::get_v_box (const char* id)
 {
 	Gtk::VBox* child = dynamic_cast<Gtk::VBox*> (get_object(id));
 	if (child == NULL ) {
-		dbg_msg (std::string("Gtk::VBox ") + id + " not found !");
+		dbg_msg (std::string("Gtk::VBox ") + id + " not found in " + _scrip_file_name + "!");
 		throw std::exception();
 	}
 	return *child;
@@ -521,7 +534,7 @@ WavesUI::get_h_box (const char* id)
 {
 	Gtk::HBox* child = dynamic_cast<Gtk::HBox*> (get_object(id));
 	if (child == NULL ) {
-		dbg_msg (std::string("Gtk::HBox ") + id + " not found !");
+		dbg_msg (std::string("Gtk::HBox ") + id + " not found in " + _scrip_file_name + "!");
 		throw std::exception();
 	}
 	return *child;
@@ -533,7 +546,7 @@ WavesUI::get_layout (const char* id)
 {
 	Gtk::Layout* child = dynamic_cast<Gtk::Layout*> (get_object(id));
 	if (child == NULL ) {
-		dbg_msg (std::string("Gtk::Layout ") + id + " not found !");
+		dbg_msg (std::string("Gtk::Layout ") + id + " not found in " + _scrip_file_name + "!");
 		throw std::exception();
 	}
 	return *child;
@@ -545,7 +558,7 @@ WavesUI::get_label (const char* id)
 {
 	Gtk::Label* child = dynamic_cast<Gtk::Label*> (get_object(id));
 	if (child == NULL ) {
-		dbg_msg (std::string("Gtk::Label ") + id + " not found !");
+		dbg_msg (std::string("Gtk::Label ") + id + " not found in " + _scrip_file_name + "!");
 		throw std::exception();
 	}
 	return *child;
@@ -557,7 +570,7 @@ WavesUI::get_combo_box_text (const char* id)
 {
 	Gtk::ComboBoxText* child = dynamic_cast<Gtk::ComboBoxText*> (get_object(id));
 	if (child == NULL ) {
-		dbg_msg (std::string("Gtk::ComboBoxText ") + id + " not found !");
+		dbg_msg (std::string("Gtk::ComboBoxText ") + id + " not found in " + _scrip_file_name + "!");
 		throw std::exception();
 	}
 	return *child;
@@ -569,7 +582,18 @@ WavesUI::get_entry(const char* id)
 {
 	Gtk::Entry* child = dynamic_cast<Gtk::Entry*> (get_object(id));
 	if (child == NULL ) {
-		dbg_msg (std::string("Gtk::Entry ") + id + " not found !");
+		dbg_msg (std::string("Gtk::Entry ") + id + " not found in " + _scrip_file_name + "!");
+		throw std::exception();
+	}
+	return *child;
+}
+
+Gtkmm2ext::FocusEntry&
+WavesUI::get_focus_entry(const char* id)
+{
+	Gtkmm2ext::FocusEntry* child = dynamic_cast<Gtkmm2ext::FocusEntry*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtkmm2ext::FocusEntry ") + id + " not found in " + _scrip_file_name + "!");
 		throw std::exception();
 	}
 	return *child;
@@ -580,7 +604,7 @@ WavesUI::get_spin_button(const char* id)
 {
 	Gtk::SpinButton* child = dynamic_cast<Gtk::SpinButton*> (get_object(id));
 	if (child == NULL ) {
-		dbg_msg (std::string("Gtk::SpinButton ") + id + " not found !");
+		dbg_msg (std::string("Gtk::SpinButton ") + id + " not found in " + _scrip_file_name + "!");
 		throw std::exception();
 	}
 	return *child;
@@ -591,7 +615,7 @@ WavesUI::get_waves_button (const char* id)
 {
 	WavesButton* child = dynamic_cast<WavesButton*> (get_object(id));
 	if (child == NULL ) {
-		dbg_msg (std::string("WavesButton ") + id + " not found !");
+		dbg_msg (std::string("WavesButton ") + id + " not found in " + _scrip_file_name + "!");
 		throw std::exception();
 	}
 	return *child;
@@ -602,9 +626,8 @@ WavesUI::get_fader (const char* id)
 {
 	Gtkmm2ext::Fader* child = dynamic_cast<Gtkmm2ext::Fader*> (get_object(id));
 	if (child == NULL ) {
-		dbg_msg (std::string("Gtkmm2ext::Fader ") + id + " not found !");
+		dbg_msg (std::string("Gtkmm2ext::Fader ") + id + " not found in " + _scrip_file_name + "!");
 		throw std::exception();
 	}
 	return *child;
 }
-

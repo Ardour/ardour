@@ -91,6 +91,7 @@ void SessionDialog::init()
     EngineStateController::instance ()->InputConfigChanged.connect  (_system_config_update, invalidator (*this), boost::bind (&SessionDialog::on_system_configuration_change, this), gui_context());
     EngineStateController::instance ()->OutputConfigChanged.connect (_system_config_update, invalidator (*this), boost::bind (&SessionDialog::on_system_configuration_change, this), gui_context());
     EngineStateController::instance ()->EngineRunning.connect       (_system_config_update, invalidator (*this), boost::bind (&SessionDialog::on_system_configuration_change, this), gui_context());
+    EngineStateController::instance ()->PortRegistrationChanged.connect(_system_config_update, invalidator (*this), boost::bind (&SessionDialog::on_system_configuration_change, this), gui_context());
     
     for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
 		_recent_session_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_recent_session ));

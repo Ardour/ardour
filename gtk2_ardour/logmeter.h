@@ -68,6 +68,7 @@ log_meter (float db)
 		def = 115.0f;
 	}
 
+	*/
 	/* 115 is the deflection %age that would be
        when db=6.0. this is an arbitrary
        endpoint for our scaling.

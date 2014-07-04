@@ -698,23 +698,23 @@ Meterbridge::sync_order_keys ()
 				vis++;
 		}
 
-		(*i).s->set_tick_bar(0);
+		//(*i).s->set_tick_bar(0);
 
 		MeterType nmt = (*i).s->meter_type();
 		if (nmt == MeterKrms) nmt = MeterPeak; // identical metrics
-		if (vis == 1) {
-			(*i).s->set_tick_bar(1);
-		}
+		//if (vis == 1) {
+		//	(*i).s->set_tick_bar(1);
+		//}
 
 		if ((*i).visible && nmt != lmt && vis == 1) {
 			lmt = nmt;
 			metrics_left.set_metric_mode(1, lmt);
 		} else if ((*i).visible && nmt != lmt) {
 
-			if (last) {
-				last->set_tick_bar(last->get_tick_bar() | 2);
-			}
-			(*i).s->set_tick_bar((*i).s->get_tick_bar() | 1);
+			//if (last) {
+			//	last->set_tick_bar(last->get_tick_bar() | 2);
+			//}
+			//(*i).s->set_tick_bar((*i).s->get_tick_bar() | 1);
 
 			if (_metrics.size() <= metrics) {
 				_metrics.push_back(new MeterStrip(have_midi ? 2 : 3, lmt));
@@ -752,9 +752,9 @@ Meterbridge::sync_order_keys ()
 		}
 	}
 
-	if (last) {
-		last->set_tick_bar(last->get_tick_bar() | 2);
-	}
+	//if (last) {
+	//	last->set_tick_bar(last->get_tick_bar() | 2);
+	//}
 
 	metrics_right.set_metric_mode(have_midi ? 2 : 3, lmt);
 

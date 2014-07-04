@@ -102,7 +102,7 @@ static const uint32_t KEYBOARD_MIN_HEIGHT = 130;
 
 MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
 	: AxisView(sess) // virtually inherited
-	, RouteTimeAxisView(ed, sess, canvas)
+	, RouteTimeAxisView(ed, sess, canvas, "midi_time_axis.xml")
 	, _ignore_signals(false)
 	, _range_scroomer(0)
 	, _piano_roll_header(0)
@@ -117,6 +117,14 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	, _step_edit_item (0)
 	, controller_menu (0)
 	, _step_editor (0)
+
+	, _range_scroomer_home (get_box ("range_scroomer_home"))
+	, _piano_home (get_box ("piano_home"))
+	, _playback_channel_status (get_label ("playback_channel_status"))
+	, _capture_channel_status (get_label ("capture_channel_status"))
+	, _channel_selector_button (get_waves_button ("channel_selector_button"))
+	, _midnam_model_selector (get_combo_box_text ("midnam_model_selector"))
+	, _midnam_custom_device_mode_selector (get_combo_box_text ("midnam_custom_device_mode_selector"))
 {
 }
 
@@ -159,10 +167,10 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	ignore_toggle = false;
 
 	if (is_midi_track()) {
-		controls_ebox.set_name ("MidiTimeAxisViewControlsBaseUnselected");
+		//controls_ebox.set_name ("MidiTimeAxisViewControlsBaseUnselected");
 		_note_mode = midi_track()->note_mode();
 	} else { // MIDI bus (which doesn't exist yet..)
-		controls_ebox.set_name ("MidiBusControlsBaseUnselected");
+		//controls_ebox.set_name ("MidiBusControlsBaseUnselected");
 	}
 
 	/* if set_state above didn't create a gain automation child, we need to make one */
@@ -203,17 +211,19 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		   label so that they can be reduced in height for stacked-view
 		   tracks.
 		*/
-		VBox* v = manage (new VBox);
-		HBox* h = manage (new HBox);
-		h->pack_start (*_range_scroomer);
-		h->pack_start (*_piano_roll_header);
-		v->pack_start (*h, false, false);
-		v->pack_start (*manage (new Label ("")), true, true);
-		v->show ();
-		h->show ();
-		controls_hbox.pack_start(*v, false, false);
+		//VBox* v = manage (new VBox);
+		//HBox* h = manage (new HBox);
+		//h->pack_start (*_range_scroomer);
+		//h->pack_start (*_piano_roll_header);
+		//v->pack_start (*h, false, false);
+		//v->pack_start (*manage (new Label ("")), true, true);
+		//v->show ();
+		//h->show ();
+		//controls_hbox.pack_start(*v, false, false);
+		_range_scroomer_home.pack_start (*_range_scroomer);
+		_piano_home.pack_start (*_piano_roll_header);
 
-		controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
+//		controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
 		controls_base_selected_name = "MidiTrackControlsBaseSelected";
 		controls_base_unselected_name = "MidiTrackControlsBaseUnselected";
 
@@ -272,13 +282,13 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	ARDOUR_UI::instance()->set_tip (_midnam_model_selector, _("External MIDI Device"));
 	ARDOUR_UI::instance()->set_tip (_midnam_custom_device_mode_selector, _("External Device Mode"));
 
-	_midi_controls_box.set_homogeneous(false);
-	_midi_controls_box.set_border_width (10);
+//	_midi_controls_box.set_homogeneous(false);
+//	_midi_controls_box.set_border_width (10);
 
-	_channel_status_box.set_homogeneous (false);
-	_channel_status_box.set_spacing (6);
+//	_channel_status_box.set_homogeneous (false);
+//	_channel_status_box.set_spacing (6);
 	
-	_channel_selector_button.set_label (_("Chns"));
+	_channel_selector_button.set_text (_("Chns"));
 	ARDOUR_UI::instance()->set_tip (_channel_selector_button, _("Click to edit channel settings"));
 	
 	/* fixed sized labels to prevent silly nonsense (though obviously,
@@ -288,27 +298,27 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_playback_channel_status.set_size_request (65, -1);
 	_capture_channel_status.set_size_request (60, -1);
 
-	_channel_status_box.pack_start (_playback_channel_status, false, false);
-	_channel_status_box.pack_start (_capture_channel_status, false, false);
-	_channel_status_box.pack_start (_channel_selector_button, false, false);
-	_channel_status_box.show_all ();
+//	_channel_status_box.pack_start (_playback_channel_status, false, false);
+//	_channel_status_box.pack_start (_capture_channel_status, false, false);
+//	_channel_status_box.pack_start (_channel_selector_button, false, false);
+//	_channel_status_box.show_all ();
 
-	_channel_selector_button.signal_clicked().connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_channel_selector));
+	_channel_selector_button.signal_clicked.connect (sigc::mem_fun (*this, &MidiTimeAxisView::channel_selector_click));
 	
-	_midi_controls_box.pack_start (_channel_status_box, false, false, 10);
+//	_midi_controls_box.pack_start (_channel_status_box, false, false, 10);
 
 	if (!patch_manager.all_models().empty()) {
 
 		_midnam_model_selector.set_size_request(22, 30);
 		_midnam_model_selector.set_border_width(2);
 		_midnam_model_selector.show ();
-		_midi_controls_box.pack_start (_midnam_model_selector);
+//		_midi_controls_box.pack_start (_midnam_model_selector);
 
 		_midnam_custom_device_mode_selector.set_size_request(10, 30);
 		_midnam_custom_device_mode_selector.set_border_width(2);
 		_midnam_custom_device_mode_selector.show ();
 
-		_midi_controls_box.pack_start (_midnam_custom_device_mode_selector);
+//		_midi_controls_box.pack_start (_midnam_custom_device_mode_selector);
 	} 
 
 	model_changed();
@@ -319,7 +329,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_midnam_custom_device_mode_selector.signal_changed().connect(
 		sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed));
 
-	controls_vbox.pack_start(_midi_controls_box, false, false);
+//	controls_vbox.pack_start(_midi_controls_box, false, false);
 
 	const string color_mode = gui_property ("color-mode");
 	if (!color_mode.empty()) {
@@ -451,9 +461,9 @@ void
 MidiTimeAxisView::set_height (uint32_t h)
 {
 	if (h >= MIDI_CONTROLS_BOX_MIN_HEIGHT) {
-		_midi_controls_box.show ();
+//		_midi_controls_box.show ();
 	} else {
-		_midi_controls_box.hide();
+//		_midi_controls_box.hide();
 	}
 	
 	if (h >= KEYBOARD_MIN_HEIGHT) {
@@ -513,6 +523,12 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 	}
 	
 	items.push_back (SeparatorElem ());
+}
+
+void
+MidiTimeAxisView::channel_selector_click (WavesButton*)
+{
+	toggle_channel_selector ();
 }
 
 void
@@ -1318,21 +1334,21 @@ MidiTimeAxisView::route_active_changed ()
 
 	if (is_track()) {
 		if (_route->active()) {
-			controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
+//			controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
 			controls_base_selected_name = "MidiTrackControlsBaseSelected";
 			controls_base_unselected_name = "MidiTrackControlsBaseUnselected";
 		} else {
-			controls_ebox.set_name ("MidiTrackControlsBaseInactiveUnselected");
+//			controls_ebox.set_name ("MidiTrackControlsBaseInactiveUnselected");
 			controls_base_selected_name = "MidiTrackControlsBaseInactiveSelected";
 			controls_base_unselected_name = "MidiTrackControlsBaseInactiveUnselected";
 		}
 	} else {
 		if (_route->active()) {
-			controls_ebox.set_name ("BusControlsBaseUnselected");
+//			controls_ebox.set_name ("BusControlsBaseUnselected");
 			controls_base_selected_name = "BusControlsBaseSelected";
 			controls_base_unselected_name = "BusControlsBaseUnselected";
 		} else {
-			controls_ebox.set_name ("BusControlsBaseInactiveUnselected");
+//			controls_ebox.set_name ("BusControlsBaseInactiveUnselected");
 			controls_base_selected_name = "BusControlsBaseInactiveSelected";
 			controls_base_unselected_name = "BusControlsBaseInactiveUnselected";
 		}

@@ -74,6 +74,7 @@ class RegionView;
 class GhostRegion;
 class StreamView;
 class ArdourDialog;
+class WavesUI;
 
 /** Abstract base class for time-axis views (horizontal editor 'strips')
  *
@@ -81,6 +82,7 @@ class ArdourDialog;
  * extended to create functional time-axis based views.
  */
 class TimeAxisView : public virtual AxisView
+					 
 {
   private:
 	enum NamePackingBits {
@@ -90,7 +92,11 @@ class TimeAxisView : public virtual AxisView
 
   public:
 
-	TimeAxisView(ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
+	TimeAxisView (ARDOUR::Session* sess,
+		          PublicEditor& ed,
+				  TimeAxisView* parent,
+				  ArdourCanvas::Canvas& canvas,
+				  WavesUI& ui);
 	virtual ~TimeAxisView ();
 
 	static PBD::Signal1<void,TimeAxisView*> CatchDeletion;
@@ -101,8 +107,8 @@ class TimeAxisView : public virtual AxisView
 	/** @return maximum allowable value of order */
 	static int max_order () { return _max_order; }
 
-        virtual void enter_internal_edit_mode () {}
-        virtual void leave_internal_edit_mode () {}
+    virtual void enter_internal_edit_mode () {}
+    virtual void leave_internal_edit_mode () {}
 
 	ArdourCanvas::Group* canvas_display () { return _canvas_display; }
 	ArdourCanvas::Group* ghost_group () { return _ghost_group; }
@@ -199,15 +205,14 @@ class TimeAxisView : public virtual AxisView
 
   protected:
 	/* The Standard LHS Controls */
-	Gtk::HBox              controls_hbox;
-	Gtk::Table             controls_table;
-	Gtk::EventBox          controls_ebox;
-	Gtk::VBox              controls_vbox;
-	Gtk::VBox              time_axis_vbox;
-	Gtk::HBox              name_hbox;
-	Gtk::Label             name_label;
-        bool                  _name_editing;
-        uint32_t               height;  /* in canvas units */
+	//Gtk::HBox              controls_hbox;
+	//Gtk::Table             controls_table;
+	Gtk::Container& controls_event_box;
+	//Gtk::VBox              controls_vbox;
+	Gtk::Container& time_axis_box;
+	Gtk::Label&    name_label;
+    bool                  _name_editing;
+    uint32_t               height;  /* in canvas units */
 	std::string            controls_base_unselected_name;
 	std::string            controls_base_selected_name;
 	Gtk::Menu*             display_menu; /* The standard LHS Track control popup-menus */
@@ -224,15 +229,15 @@ class TimeAxisView : public virtual AxisView
 	double                _y_position;
 	PublicEditor&         _editor;
 
-        virtual bool can_edit_name() const;
+    virtual bool can_edit_name() const;
 
 	bool name_entry_key_release (GdkEventKey *ev);
 	bool name_entry_key_press (GdkEventKey *ev);
 	bool name_entry_focus_out (GdkEventFocus *ev);
 
-        Gtk::Entry* name_entry;
-        void begin_name_edit ();
-        void end_name_edit (int);
+    Gtk::Entry& name_entry;
+    void begin_name_edit ();
+    void end_name_edit (int);
 
 	/* derived classes can override these */
 
