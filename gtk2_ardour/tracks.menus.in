@@ -1,17 +1,4 @@
 <ui>
-  <accelerator action='set-mouse-mode-object'/>
-  <accelerator action='set-mouse-mode-range'/>
-  <accelerator action='set-mouse-mode-gain'/>
-  <accelerator action='set-mouse-mode-draw'/>
-  <accelerator action='set-mouse-mode-zoom'/>
-  <accelerator action='set-mouse-mode-timefx'/>
-  <accelerator action='set-mouse-mode-object-range'/>
-  <accelerator action='toggle-internal-edit'/>
-  <accelerator action='focus-on-clock'/>
-  <accelerator action='track-solo-toggle'/>
-  <accelerator action='track-mute-toggle'/>
-  <accelerator action='toggle-edit-mode'/>
-  <accelerator action='toggle-midi-input-active'/>
 
 <!--
         <menuitem action='goto-mark-1'/>
