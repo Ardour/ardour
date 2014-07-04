@@ -104,11 +104,10 @@ This mode provides many different operations on both regions and control points,
 @trans|Transport/ToggleRollForgetCapture|<@PRIMARY@>space|stop and destroy
 @trans|Transport/record-roll|<@TERTIARY@>space|start recording
 
-@trans|Transport/add-location-from-playhead|Tab|add marker
-@trans|Transport/remove-location-from-playhead|<@PRIMARY@>nabla|add marker
-;@trans|Transport/GotoStart|3270_enter|Return
-;@trans|Transport/GotoStart|F35|Return (numpad)
-@movp|Transport/alternate-GotoStart|Return|to edit point   THIS KEYBINDING WORKS.  WHY!!???!
+@trans|Editor/add-location-from-playhead|nabla|add marker
+@trans|Editor/remove-location-from-playhead|<@PRIMARY@>nabla|add marker
+;@trans|Transport/GotoStart|Return|to start marker
+@movp|Transport/alternate-GotoStart|KP_Return|to edit point
 
 @rop|Region/set-fade-in-length|slash|set fade in length
 @rop|Region/toggle-region-fade-out|<@PRIMARY@>slash|toggle fade in active
