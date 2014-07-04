@@ -492,8 +492,6 @@ ARDOUR_UI::post_engine ()
 
 	_tooltips.enable();
 
-	ActionManager::load_menus (ARDOUR_COMMAND_LINE::menus_file);
-
 	if (setup_windows ()) {
 		throw failed_constructor ();
 	}
