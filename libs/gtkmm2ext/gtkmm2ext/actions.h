@@ -50,6 +50,7 @@ namespace ActionManager {
 	LIBGTKMM2EXT_API extern void set_toggle_action (const char* group, const char* name, bool);
 
 	LIBGTKMM2EXT_API extern void add_action_group (Glib::RefPtr<Gtk::ActionGroup>);
+	LIBGTKMM2EXT_API extern void enable_accelerators ();
 
 	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
 						   const char * name, const char * label);
