@@ -2789,7 +2789,6 @@ Editor::separate_regions_between (const TimeSelection& ts)
 
 	if (in_command)	{
 		selection->set (new_selection);
-		set_mouse_mode (MouseObject);
 
 		commit_reversible_command ();
 	}
@@ -3726,23 +3725,8 @@ Editor::copy ()
 bool
 Editor::can_cut_copy () const
 {
-	switch (effective_mouse_mode()) {
-
-	case MouseObject:
-		if (!selection->regions.empty() || !selection->points.empty()) {
-			return true;
-		}
-		break;
-
-	case MouseRange:
-		if (!selection->time.empty()) {
-			return true;
-		}
-		break;
-
-	default:
-		break;
-	}
+	if (!selection->time.empty() || !selection->regions.empty() || !selection->points.empty())
+		return true;
 
 	return false;
 }
@@ -3821,77 +3805,60 @@ Editor::cut_copy (CutCopyOp op)
 
 	bool did_edit = false;
 
-	switch (effective_mouse_mode()) {
-	case MouseGain:
+	if (!selection->points.empty()) {
+		begin_reversible_command (opname + _(" points"));
+		did_edit = true;
+		cut_copy_points (op);
+		if (op == Cut || op == Delete) {
+			selection->clear_points ();
+		}
+	} else if (!selection->regions.empty() || !selection->points.empty()) {
+
+		string thing_name;
+
+		if (selection->regions.empty()) {
+			thing_name = _("points");
+		} else if (selection->points.empty()) {
+			thing_name = _("regions");
+		} else {
+			thing_name = _("objects");
+		}
+	
+		begin_reversible_command (opname + ' ' + thing_name);
+		did_edit = true;
+
+		if (!selection->regions.empty()) {
+			cut_copy_regions (op, selection->regions);
+			
+			if (op == Cut || op == Delete) {
+				selection->clear_regions ();
+			}
+		}
+		
 		if (!selection->points.empty()) {
-			begin_reversible_command (opname + _(" points"));
-			did_edit = true;
 			cut_copy_points (op);
+			
 			if (op == Cut || op == Delete) {
 				selection->clear_points ();
 			}
 		}
-		break;
-		
-	case MouseObject: 
-
-		if (!selection->regions.empty() || !selection->points.empty()) {
-
-			string thing_name;
-
-			if (selection->regions.empty()) {
-				thing_name = _("points");
-			} else if (selection->points.empty()) {
-				thing_name = _("regions");
-			} else {
-				thing_name = _("objects");
-			}
-		
-			begin_reversible_command (opname + ' ' + thing_name);
-			did_edit = true;
-
-			if (!selection->regions.empty()) {
-				cut_copy_regions (op, selection->regions);
-				
-				if (op == Cut || op == Delete) {
-					selection->clear_regions ();
-				}
-			}
-			
-			if (!selection->points.empty()) {
-				cut_copy_points (op);
-				
-				if (op == Cut || op == Delete) {
-					selection->clear_points ();
-				}
-			}
-		} 
-		break;
-			
-	case MouseRange:
-		if (selection->time.empty()) {
-			framepos_t start, end;
-			/* no time selection, see if we can get an edit range
-			   and use that.
-			*/
-			if (get_edit_op_range (start, end)) {
-				selection->set (start, end);
-			}
+	} else if (selection->time.empty()) {
+		framepos_t start, end;
+		/* no time selection, see if we can get an edit range
+		   and use that.
+		*/
+		if (get_edit_op_range (start, end)) {
+			selection->set (start, end);
 		}
-		if (!selection->time.empty()) {
-			begin_reversible_command (opname + _(" range"));
+	} else if (!selection->time.empty()) {
+		begin_reversible_command (opname + _(" range"));
 
-			did_edit = true;
-			cut_copy_ranges (op);
-			
-			if (op == Cut || op == Delete) {
-				selection->clear_time ();
-			}
-		}
-		break;
+		did_edit = true;
+		cut_copy_ranges (op);
 		
-	default:
-		break;
+		if (op == Cut || op == Delete) {
+			selection->clear_time ();
+		}
 	}
 	
 	if (did_edit) {
