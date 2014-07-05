@@ -23,6 +23,7 @@
 #include "ardour/filesystem_paths.h"
 
 #include "ardour_ui.h"
+#include "public_editor.h"
 #include "keyboard.h"
 #include "opts.h"
 

@@ -1293,7 +1293,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 	}
 
 	//not rolling, range mode click + join_play_range :  locate the PH here
-	if ( !_drags->active () && !_session->transport_rolling() && ( effective_mouse_mode() == MouseRange ) && Config->get_always_play_range() ) {
+	if ( !_drags->active () && !_session->transport_rolling() && ( effective_mouse_mode() == MouseRange ) && Config->get_follow_edits() ) {
 		framepos_t where = canvas_event_sample (event);
 		snap_to(where);
 		_session->request_locate (where, false);

@@ -145,10 +145,12 @@ Route::init ()
 	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
 	_output->PortCountChanging.connect_same_thread (*this, boost::bind (&Route::output_port_count_changing, this, _1));
 
+#if 0 // not used - just yet
 	if (!is_master() && !is_monitor() && !is_auditioner()) {
 		_delayline.reset (new DelayLine (_session, _name));
 		add_processor (_delayline, PreFader);
 	}
+#endif
 
 	/* add amp processor  */
 
@@ -2605,8 +2607,10 @@ Route::set_processor_state (const XMLNode& node)
 			_meter->set_state (**niter, Stateful::current_state_version);
 			new_order.push_back (_meter);
 		} else if (prop->value() == "delay") {
-			_delayline->set_state (**niter, Stateful::current_state_version);
-			new_order.push_back (_delayline);
+			if (_delayline) {
+				_delayline->set_state (**niter, Stateful::current_state_version);
+				new_order.push_back (_delayline);
+			}
 		} else if (prop->value() == "main-outs") {
 			_main_outs->set_state (**niter, Stateful::current_state_version);
 		} else if (prop->value() == "intreturn") {
@@ -4141,9 +4145,11 @@ Route::setup_invisible_processors ()
 		}
 	}
 
+#if 0 // not used - just yet
 	if (!is_master() && !is_monitor() && !is_auditioner()) {
 		new_processors.push_front (_delayline);
 	}
+#endif
 
 	/* MONITOR CONTROL */
 

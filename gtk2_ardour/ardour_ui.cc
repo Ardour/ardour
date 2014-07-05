@@ -221,6 +221,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	splash = 0;
 
+	_numpad_locate_happening = false;
+
 	if (theArdourUI == 0) {
 		theArdourUI = this;
 	}
@@ -489,8 +491,6 @@ ARDOUR_UI::post_engine ()
 	AudioEngine::instance()->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 
 	_tooltips.enable();
-
-	ActionManager::load_menus (ARDOUR_COMMAND_LINE::menus_file);
 
 	if (setup_windows ()) {
 		throw failed_constructor ();
@@ -1909,7 +1909,7 @@ ARDOUR_UI::transport_roll ()
 			}
 		} 
 
-	} else if (_session->get_play_range () && !Config->get_always_play_range()) {
+	} else if (_session->get_play_range () ) {
 		/* stop playing a range if we currently are */
 		_session->request_play_range (0, true);
 	}
@@ -1976,10 +1976,10 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		if (rolling) {
 			_session->request_stop (with_abort, true);
 		} else {
-			if ( Config->get_always_play_range() ) {
+			if ( Config->get_follow_edits() && ( editor->get_selection().time.front().start == _session->transport_frame() ) ) {  //if playhead is exactly at the start of a range, we can assume it was placed there by follow_edits
 				_session->request_play_range (&editor->get_selection().time, true);
+				_session->set_requested_return_frame( editor->get_selection().time.front().start );  //force an auto-return here
 			}
-
 			_session->request_transport_speed (1.0f);
 		}
 	}
@@ -2153,7 +2153,7 @@ ARDOUR_UI::map_transport_state ()
 			auto_loop_button.set_active (false);
 		}
 
-		if (Config->get_always_play_range()) {
+		if (Config->get_follow_edits()) {
 			/* light up both roll and play-selection if they are joined */
 			roll_button.set_active (true);
 			play_selection_button.set_active (true);
@@ -4411,3 +4411,47 @@ ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 }
 
 
+gint
+ARDOUR_UI::transport_numpad_timeout ()
+{
+	_numpad_locate_happening = false;
+	if (_numpad_timeout_connection.connected() )
+		_numpad_timeout_connection.disconnect();
+	return 1;
+}
+
+void
+ARDOUR_UI::transport_numpad_decimal ()
+{
+	_numpad_timeout_connection.disconnect();
+
+	if (_numpad_locate_happening) {
+		if (editor) editor->goto_nth_marker(_pending_locate_num - 1);
+		_numpad_locate_happening = false;
+	} else {
+		_pending_locate_num = 0;
+		_numpad_locate_happening = true;
+		_numpad_timeout_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::transport_numpad_timeout), 2*1000);
+	}
+}
+
+void
+ARDOUR_UI::transport_numpad_event (int num)
+{
+	if ( _numpad_locate_happening ) {
+		_pending_locate_num = _pending_locate_num*10 + num;
+	} else {
+		switch (num) {		
+			case 0:  toggle_roll(false, false); 		break;
+			case 1:  transport_rewind(1); 				break;
+			case 2:  transport_forward(1); 				break;
+			case 3:  transport_record(true); 			break;
+			case 4:  if (_session) _session->request_play_loop(true);					break;
+			case 5:  if (_session) _session->request_play_loop(true); transport_record(false); 	break;
+			case 6:  toggle_punch(); 						break;
+			case 7:  toggle_click(); 				break;
+			case 8:  toggle_auto_return();			break;
+			case 9:  toggle_follow_edits();		break;
+		}
+	}
+}

@@ -133,7 +133,8 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 {
 	bool frozen = false;
 
-	list <boost::shared_ptr<Playlist > > used_playlists;
+	list<boost::shared_ptr<Playlist> > used_playlists;
+	list<RouteTimeAxisView*> used_trackviews;
 
 	if (regions.empty()) {
 		return;
@@ -188,8 +189,15 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 
 			/* remember used playlists so we can thaw them later */
 			used_playlists.push_back(pl);
+
+			TimeAxisView& tv = (*a)->get_time_axis_view();
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
+			if (rtv) {
+				used_trackviews.push_back (rtv);
+			}
 			pl->freeze();
 		}
+
 
 		if (pl) {
 			pl->clear_changes ();
@@ -200,17 +208,34 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 		a = tmp;
 	}
 
+	vector<sigc::connection> region_added_connections;
+
+	for (list<RouteTimeAxisView*>::iterator i = used_trackviews.begin(); i != used_trackviews.end(); ++i) {
+		region_added_connections.push_back ((*i)->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view)));
+	}
+	
+	latest_regionviews.clear ();
+
 	while (used_playlists.size() > 0) {
 		list <boost::shared_ptr<Playlist > >::iterator i = used_playlists.begin();
 		(*i)->thaw();
 		used_playlists.pop_front();
 	}
 
+	for (vector<sigc::connection>::iterator c = region_added_connections.begin(); c != region_added_connections.end(); ++c) {
+		(*c).disconnect ();
+	}
+	
 	commit_reversible_command ();
 
 	if (frozen){
 		EditorThaw(); /* Emit Signal */
 	}
+
+	if (!latest_regionviews.empty()) {
+		selection->add (latest_regionviews);
+	}
+
 }
 
 /** Move one extreme of the current range selection.  If more than one range is selected,
@@ -1892,6 +1917,35 @@ Editor::add_location_from_playhead_cursor ()
 	add_location_mark (_session->audible_frame());
 }
 
+void
+Editor::remove_location_at_playhead_cursor ()
+{
+	if (_session) {
+
+		//set up for undo
+		_session->begin_reversible_command (_("remove marker"));
+		XMLNode &before = _session->locations()->get_state();
+		bool removed = false;
+
+		//find location(s) at this time
+		Locations::LocationList locs;
+		_session->locations()->find_all_between (_session->audible_frame(), _session->audible_frame()+1, locs, Location::Flags(0));
+		for (Locations::LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
+			if ((*i)->is_mark()) {
+				_session->locations()->remove (*i);
+				removed = true;
+			}
+		}
+		
+		//store undo
+		if (removed) {
+			XMLNode &after = _session->locations()->get_state();
+			_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+			_session->commit_reversible_command ();
+		}
+	}
+}
+
 /** Add a range marker around each selected region */
 void
 Editor::add_locations_from_region ()
@@ -2213,7 +2267,7 @@ Editor::get_preroll ()
 void
 Editor::maybe_locate_with_edit_preroll ( framepos_t location )
 {
-	if ( _session->transport_rolling() || !Config->get_always_play_range() )
+	if ( _session->transport_rolling() || !Config->get_follow_edits() )
 		return;
 
 	location -= get_preroll();
@@ -5535,7 +5589,7 @@ Editor::set_playhead_cursor ()
 		}
 	}
 
-	if ( Config->get_always_play_range() )
+	if ( Config->get_follow_edits() )
 		cancel_time_selection();
 }
 
