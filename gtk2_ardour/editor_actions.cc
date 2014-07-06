@@ -191,7 +191,8 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "playhead-to-range-start", _("Playhead to Range Start"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_to_selection_start), playhead_cursor));
 	reg_sens (editor_actions, "playhead-to-range-end", _("Playhead to Range End"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_to_selection_end), playhead_cursor));
 
-	reg_sens (editor_actions, "select-all", _("Select All"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all), Selection::Set));
+	reg_sens (editor_actions, "select-all-regions", _("Select All Regions"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_regions), Selection::Set));
+	reg_sens (editor_actions, "select-all-tracks", _("Select All Tracks"), sigc::mem_fun(*this, &Editor::select_all_tracks));
 	reg_sens (editor_actions, "deselect-all", _("Deselect All"), sigc::mem_fun(*this, &Editor::deselect_all));
 	reg_sens (editor_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection));
 

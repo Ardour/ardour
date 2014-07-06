@@ -133,7 +133,7 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 {
 	bool frozen = false;
 
-	bool operating_on_region_selection = !selection->regions.empty();
+	RegionSelection pre_selected_regions = selection->regions;
 
 	list<boost::shared_ptr<Playlist> > used_playlists;
 	list<RouteTimeAxisView*> used_trackviews;
@@ -234,12 +234,10 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 		EditorThaw(); /* Emit Signal */
 	}
 
-	//IFF we had a selected region, then we should select both sides of the new region after the split.
-	//(if there is no region selection then we are working on a range selection, so no changes to region selection are necessary)
-	if( operating_on_region_selection ) {
-		if (!latest_regionviews.empty()) {
-			selection->add (latest_regionviews);
-		}
+	//IFF we were working on selected regions, then we should select both sides of the new region after the split.
+	if( !pre_selected_regions.empty() ) {
+		selection->add (latest_regionviews);  //these are the new regions, created after the split
+		selection->add (pre_selected_regions);  //these were the old selected regions, they got lost in the freeze/thaw
 	}
 
 }
