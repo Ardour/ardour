@@ -1836,7 +1836,7 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	select_menu->set_name ("ArdourContextMenu");
 
 	select_items.push_back (MenuElem (_("Select All in Track"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_in_track), Selection::Set)));
-	select_items.push_back (MenuElem (_("Select All Regions"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_regions), Selection::Set)));
+	select_items.push_back (MenuElem (_("Select All Objects"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_objects), Selection::Set)));
 	select_items.push_back (MenuElem (_("Invert Selection in Track"), sigc::mem_fun(*this, &Editor::invert_selection_in_track)));
 	select_items.push_back (MenuElem (_("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection)));
 	select_items.push_back (SeparatorElem());
@@ -1913,7 +1913,7 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	select_menu->set_name ("ArdourContextMenu");
 
 	select_items.push_back (MenuElem (_("Select All in Track"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_in_track), Selection::Set)));
-	select_items.push_back (MenuElem (_("Select All Regions"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_regions), Selection::Set)));
+	select_items.push_back (MenuElem (_("Select All Objects"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_objects), Selection::Set)));
 	select_items.push_back (MenuElem (_("Invert Selection in Track"), sigc::mem_fun(*this, &Editor::invert_selection_in_track)));
 	select_items.push_back (MenuElem (_("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection)));
 	select_items.push_back (SeparatorElem());
