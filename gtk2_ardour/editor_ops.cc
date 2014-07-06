@@ -133,6 +133,8 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 {
 	bool frozen = false;
 
+	bool operating_on_region_selection = !selection->regions.empty();
+
 	list<boost::shared_ptr<Playlist> > used_playlists;
 	list<RouteTimeAxisView*> used_trackviews;
 
@@ -232,8 +234,12 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 		EditorThaw(); /* Emit Signal */
 	}
 
-	if (!latest_regionviews.empty()) {
-		selection->add (latest_regionviews);
+	//IFF we had a selected region, then we should select both sides of the new region after the split.
+	//(if there is no region selection then we are working on a range selection, so no changes to region selection are necessary)
+	if( operating_on_region_selection ) {
+		if (!latest_regionviews.empty()) {
+			selection->add (latest_regionviews);
+		}
 	}
 
 }
@@ -2788,7 +2794,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 	}
 
 	if (in_command)	{
-		selection->set (new_selection);
+//		selection->set (new_selection);
 
 		commit_reversible_command ();
 	}

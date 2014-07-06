@@ -4521,22 +4521,14 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
 
 /** Get regions using the following method:
  *
- *  Make a region list using the selected regions, unless
- *  the edit point is `mouse' and the mouse is over an unselected
- *  region.  In this case, use just that region.
+ *  Make a region list using:
+ *   (a) any selected regions
+ *   (b) the intersection of any selected tracks and the edit point(*)
+ *   (c) if neither exists, and edit_point == mouse, then whatever region is under the mouse
  *
- *  If the edit point is not 'mouse', and there are no regions selected,
- *  search the list of selected tracks and return regions that are under
- *  the edit point on these tracks. If there are no selected tracks and
- *  'No Selection = All Tracks' is active, search all tracks,
+ *  (*) NOTE: in this case, if 'No Selection = All Tracks' is active, search all tracks
  *
- *  The rationale here is that the mouse edit point is special in that
- *  its position describes both a time and a track; the other edit
- *  modes only describe a time.  Hence if the edit point is `mouse' we
- *  ignore selected tracks, as we assume the user means something by
- *  pointing at a particular track.  Also in this case we take note of
- *  the region directly under the edit point, as there is always just one
- *  (rather than possibly several with non-mouse edit points).
+ *  Note that we have forced the rule that selected regions and selected tracks are mutually exclusive
  */
 
 RegionSelection
@@ -4544,13 +4536,13 @@ Editor::get_regions_from_selection_and_edit_point ()
 {
 	RegionSelection regions;
 
-	if (_edit_point == EditAtMouse && entered_regionview && !selection->regions.contains (entered_regionview)) {
+	if (_edit_point == EditAtMouse && entered_regionview && selection->tracks.empty() && selection->regions.empty() ) {
 		regions.add (entered_regionview);
 	} else {
 		regions = selection->regions;
 	}
 
-	if (regions.empty() && _edit_point != EditAtMouse) {
+	if ( regions.empty() ) {
 		TrackViewList tracks = selection->tracks;
 
 		if (_route_groups->all_group_active_button().get_active() && tracks.empty()) {
@@ -4568,6 +4560,7 @@ Editor::get_regions_from_selection_and_edit_point ()
 			get_regions_at(regions, where, tracks);
 		}
 	}
+
 	return regions;
 }
 
