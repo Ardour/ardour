@@ -239,7 +239,9 @@ Editor::register_actions ()
 	}
 
 	reg_sens (editor_actions, "jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
+	reg_sens (editor_actions, "alternate-jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
 	reg_sens (editor_actions, "jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
+	reg_sens (editor_actions, "alternate-jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
 
 	reg_sens (editor_actions, "add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
 	reg_sens (editor_actions, "alternate-add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));

@@ -130,7 +130,9 @@ This mode provides many different operations on both regions and control points,
 ;; TOP ROW
 
 @sess|Common/Quit|<@PRIMARY@>q|quit
-@rop|Region/quantize-region|q|quantize MIDI notes \linebreak[4] in selected region(s)
+@rop|Region/quantize-region|<@SECONDARY@>q|quantize MIDI notes \linebreak[4] in selected region(s)
+@movp|Editor/jump-forward-to-mark|w|to next mark
+@movp|Editor/jump-backward-to-mark|q|to previous mark
 
 ;; note that ctrl-w is special and consumed by the keyboard snooper
 
@@ -143,14 +145,13 @@ This mode provides many different operations on both regions and control points,
 @wvis|Common/goto-editor|<@WINDOW@>e|toggle editor window
 @mmode|MouseMode/set-mouse-mode-range|r|range mode
 @edit|Editor/redo|<@PRIMARY@>r|redo
-@edit|Editor/alternate-redo|<@PRIMARY@>y|redo
-@edit|Editor/alternate-alternate-redo|<@PRIMARY@><@TERTIARY@>z|redo
 @rop|Region/reverse-region|<@SECONDARY@>r|reverse
 @trans|Transport/Record|<@TERTIARY@>r|engage record
 @mmode|MouseMode/set-mouse-mode-timefx|t|timefx mode
 @rop|Region/pitch-shift-region|<@SECONDARY@>t|transpose
 @eep|Editor/insert-time|<@PRIMARY@>t|insert time
 @mmode|MouseMode/set-mouse-mode-object-range|y|link object/range tools
+@edit|Editor/alternate-redo|<@PRIMARY@>y|redo
 @select|Editor/select-all-between-cursors|<@PRIMARY@>u|all enclosed by edit range
 @select|Editor/select-all-within-cursors|u|all present in edit range
 @eep|Region/insert-region-from-region-list|i|insert from region list
@@ -206,6 +207,7 @@ This mode provides many different operations on both regions and control points,
 
 @mmode|MouseMode/set-mouse-mode-zoom|z|zoom mode
 @edit|Editor/undo|<@PRIMARY@>z|undo
+@edit|Editor/alternate-alternate-redo|<@PRIMARY@><@TERTIARY@>z|redo
 @vis|Editor/zoom-to-region|<@PRIMARY@><@SECONDARY@>z|zoom (x) to selected region(s)
 @vis|Editor/zoom-to-region-both-axes|<@SECONDARY@>z|zoom (x+y) to selected region
 @vis|Editor/toggle-zoom|<@TERTIARY@>z|toggle last 2 zoom states
@@ -268,8 +270,8 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/nudge-backward|KP_Subtract|nudge backward
 @-group|Editor/nudge-next-backward|<@PRIMARY@>KP_Subtract|some text
 
-@movp|Editor/jump-forward-to-mark|<@PRIMARY@>KP_Right|to next mark
-@movp|Editor/jump-backward-to-mark|<@PRIMARY@>KP_Left|to previous mark
+@movp|Editor/alternate-jump-forward-to-mark|<@PRIMARY@>KP_Right|to next mark
+@movp|Editor/alternate-jump-backward-to-mark|<@PRIMARY@>KP_Left|to previous mark
 
 @rop|Region/nudge-forward|KP_Add|nudge forward
 @-group|Editor/nudge-next-forward|<@PRIMARY@>KP_Add|some text
