@@ -154,7 +154,8 @@
       <menuitem action='editor-paste'/>
       <separator/>       
       <menu action="SelectMenu">	   
-        <menuitem action='select-all'/>
+        <menuitem action='select-all-regions'/>
+        <menuitem action='select-all-tracks'/>
         <menuitem action='deselect-all'/>
         <menuitem action='invert-selection'/>
         <menuitem action='select-all-after-edit-cursor'/>
