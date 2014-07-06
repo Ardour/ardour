@@ -867,7 +867,16 @@ SystemExec::output_interposer()
 	for (;fcntl(rfd, F_GETFL)!=-1;) {
 		r = read(rfd, buf, sizeof(buf));
 		if (r < 0 && (errno == EINTR || errno == EAGAIN)) {
-			::usleep(1000);
+			fd_set rfds;
+			struct timeval tv;
+			FD_ZERO(&rfds);
+			FD_SET(rfd, &rfds);
+			tv.tv_sec = 0;
+			tv.tv_usec = 10000;
+			int rv = select(1, &rfds, NULL, NULL, &tv);
+			if (rv == -1) {
+				break;
+			}
 			continue;
 		}
 		if (r <= 0) {
