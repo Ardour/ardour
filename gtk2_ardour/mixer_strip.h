@@ -151,6 +151,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	ArdourButton         hide_button;
 	ArdourButton         width_button;
+	ArdourButton         number_label;
 	Gtk::HBox           width_hide_box;
 	Gtk::VBox           whvbox;
 	Gtk::EventBox       top_event_box;

@@ -292,6 +292,14 @@ MixerStrip::init ()
 	width_hide_box.pack_start (top_event_box, true, true);
 	width_hide_box.pack_end (hide_button, false, true);
 
+	number_label.set_text ("-");
+	number_label.set_no_show_all ();
+	number_label.set_name ("tracknumber label");
+	number_label.set_fixed_colors (0x80808080, 0x80808080);
+	number_label.set_elements (ArdourButton::Element(ArdourButton::Body | ArdourButton::Text));
+	number_label.set_alignment (.5, .5);
+	top_event_box.add (number_label);
+
 	whvbox.pack_start (width_hide_box, true, true);
 
 	global_vpacker.set_spacing (2);
@@ -335,6 +343,7 @@ MixerStrip::init ()
 
 	/* ditto for this button and busses */
 
+	number_label.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::name_button_button_press), false);
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::name_button_button_press), false);
 	group_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::select_route_group), false);
 
@@ -586,6 +595,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (!route()->is_master() && !route()->is_monitor()) {
 		/* we don't allow master or control routes to be hidden */
 		hide_button.show();
+		number_label.show();
 	}
 
 	gpm.reset_peak_display ();
@@ -1500,6 +1510,7 @@ MixerStrip::route_color_changed ()
 {
 	name_button.modify_bg (STATE_NORMAL, color());
 	top_event_box.modify_bg (STATE_NORMAL, color());
+	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
 	reset_strip_style ();
 }
 
@@ -1605,12 +1616,21 @@ MixerStrip::name_changed ()
 	switch (_width) {
 	case Wide:
 		if (_session->config.get_track_name_number()) {
-			name_button.set_markup(track_number_to_string (_route->track_number (), " ", _route->name ()));
+			const int64_t track_number = _route->track_number ();
+			if (track_number == 0) {
+				number_label.set_text ("-");
+				number_label.hide();
+			} else {
+				number_label.set_text (PBD::to_string (abs(_route->track_number ()), std::dec));
+				number_label.show();
+			}
 		} else {
-			name_button.set_text (_route->name());
+			number_label.hide();
 		}
+		name_button.set_text (_route->name());
 		break;
 	case Narrow:
+		number_label.hide();
 		if (_session->config.get_track_name_number()) {
 			name_button.set_markup(track_number_to_string (_route->track_number (), " ",
 						PBD::short_version (_route->name (), 5)));
