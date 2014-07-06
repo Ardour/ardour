@@ -87,6 +87,7 @@ ArdourButton::ArdourButton (Element e)
 	, _distinct_led_click (false)
 	, _hovering (false)
 	, _focused (false)
+	, _fixed_colors_set (false)
 {
 	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 }
@@ -124,6 +125,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _distinct_led_click (false)
 	, _hovering (false)
 	, _focused (false)
+	, _fixed_colors_set (false)
 {
 	set_text (str);
 }
@@ -532,6 +534,9 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 void
 ArdourButton::set_colors ()
 {
+	if (_fixed_colors_set) {
+		return;
+	}
 	std::string name = get_name();
 
 	border_color = ARDOUR_UI::config()->color_by_name ("button border");
@@ -555,9 +560,7 @@ ArdourButton::set_colors ()
  */
 void ArdourButton::set_fixed_colors (const uint32_t color_active, const uint32_t color_inactive)
 {
-	set_name (""); /* this will trigger a "style-changed" message and then
-			  set_colors()
-		       */
+	_fixed_colors_set = true;
 
 	fill_start_active_color = fill_end_active_color = color_active;
 
@@ -582,6 +585,7 @@ void ArdourButton::set_fixed_colors (const uint32_t color_active, const uint32_t
 	/* XXX what about led colors ? */
 
 	build_patterns ();
+	set_name (""); /* this will trigger a "style-changed" message and then set_colors() */
 }
 
 void
