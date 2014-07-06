@@ -160,9 +160,6 @@ Selection::clear_regions ()
 	if (!regions.empty()) {
 		regions.clear_all ();
 		RegionsChanged();
-		if (Config->get_link_region_and_track_selection()) {
-			clear_tracks ();
-		}
 	}
 }
 
@@ -463,9 +460,6 @@ Selection::add (vector<RegionView*>& v)
 	for (vector<RegionView*>::iterator i = v.begin(); i != v.end(); ++i) {
 		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
 			changed = regions.add ((*i));
-			if (Config->get_link_region_and_track_selection() && changed) {
-				add (&(*i)->get_time_axis_view());
-			}
 		}
 	}
 
@@ -488,9 +482,6 @@ Selection::add (const RegionSelection& rs)
 	for (RegionSelection::const_iterator i = rs.begin(); i != rs.end(); ++i) {
 		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
 			changed = regions.add ((*i));
-			if (Config->get_link_region_and_track_selection() && changed) {
-				add (&(*i)->get_time_axis_view());
-			}
 		}
 	}
 
@@ -507,12 +498,9 @@ Selection::add (RegionView* r)
 
 	if (find (regions.begin(), regions.end(), r) == regions.end()) {
 		bool changed = regions.add (r);
-                if (Config->get_link_region_and_track_selection() && changed) {
-                        add (&r->get_time_axis_view());
-                }
-                if (changed) {
-                        RegionsChanged ();
-                }
+        if (changed) {
+            RegionsChanged ();
+        }
 	}
 }
 
@@ -525,11 +513,6 @@ Selection::add (MidiRegionView* mrv)
 	if (find (midi_regions.begin(), midi_regions.end(), mrv) == midi_regions.end()) {
 		midi_regions.push_back (mrv);
 		/* XXX should we do this? */
-#if 0
-		if (Config->get_link_region_and_track_selection()) {
-			add (&mrv->get_time_axis_view());
-		}
-#endif
 		MidiRegionsChanged ();
 	}
 }
@@ -720,10 +703,6 @@ Selection::remove (RegionView* r)
 	if (regions.remove (r)) {
 		RegionsChanged ();
 	}
-
-	if (Config->get_link_region_and_track_selection() && !regions.involves (r->get_time_axis_view())) {
-		remove (&r->get_time_axis_view());
-	}
 }
 
 void
@@ -735,13 +714,6 @@ Selection::remove (MidiRegionView* mrv)
 		midi_regions.erase (x);
 		MidiRegionsChanged ();
 	}
-
-#if 0
-	/* XXX fix this up ? */
-	if (Config->get_link_region_and_track_selection() && !regions.involves (r->get_time_axis_view())) {
-		remove (&r->get_time_axis_view());
-	}
-#endif
 }
 
 
@@ -839,17 +811,11 @@ Selection::set (MidiRegionView* mrv)
 }
 
 void
-Selection::set (RegionView* r, bool also_clear_tracks)
+Selection::set (RegionView* r, bool /*also_clear_tracks*/)
 {
 	clear_time();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
 	clear_objects ();
-	if (also_clear_tracks && !Config->get_link_region_and_track_selection()) {
-		/* clear_regions() will have done this if the link preference
-		 * is enabled
-		 */
-		clear_tracks ();
-	}
 	add (r);
 }
 
@@ -862,18 +828,6 @@ Selection::set (vector<RegionView*>& v)
 	clear_tracks();  //enforce object/track exclusivity
 	clear_objects();
 
-	if (Config->get_link_region_and_track_selection()) {
-		if (had_regions) {
-			/* there were regions before, so we're changing the
-			 * region selection (likely), thus link region/track
-			 * selection. relevant tracks will get selected
-			 * as we ::add() below.
-			 */
-			clear_tracks ();
-			// make sure to deselect any automation selections
-			clear_points();
-		}
-	}
 	add (v);
 }
 
@@ -1066,10 +1020,6 @@ Selection::set (list<Selectable*> const & selectables)
 	clear_time ();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
 	clear_objects ();
-
-	if (Config->get_link_region_and_track_selection ()) {
-		clear_tracks ();
-	}
 
 	add (selectables);
 }

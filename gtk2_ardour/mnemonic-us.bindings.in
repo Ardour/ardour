@@ -174,7 +174,7 @@ This mode provides many different operations on both regions and control points,
 ;; MIDDLE ROW
 
 @aep|Region/align-regions-sync-relative|a|align sync points (relative)
-@select|Editor/select-all-regions|<@PRIMARY@>a|select all regions
+@select|Editor/select-all-objects|<@PRIMARY@>a|select all objects
 @aep|Region/align-regions-end|<@SECONDARY@>a|align end(s)
 @aep|Region/align-regions-sync|<@TERTIARY@>a|align sync points
 @aep|Region/align-regions-start|<@PRIMARY@><@LEVEL4@>a|align start(s)

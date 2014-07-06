@@ -1550,14 +1550,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"),
 	     new BoolOption (
-		     "link-region-and-track-selection",
-		     _("Link selection of regions and tracks"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_region_and_track_selection),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_region_and_track_selection)
-		     ));
-
-	add_option (_("Editor"),
-	     new BoolOption (
 		     "automation-follows-regions",
 		     _("Move relevant automation when audio regions are moved"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_follows_regions),

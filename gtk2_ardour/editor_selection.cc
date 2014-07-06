@@ -1443,7 +1443,7 @@ Editor::select_all_internal_edit (Selection::Operation)
 }
 
 void
-Editor::select_all_regions (Selection::Operation op)
+Editor::select_all_objects (Selection::Operation op)
 {
 	list<Selectable *> touched;
 
