@@ -64,7 +64,6 @@ struct ColumnInfo {
 
 EditorRouteGroups::EditorRouteGroups (Editor* e)
 	: EditorComponent (e)
-	, _all_group_active_button (_("No Selection = All Tracks?"))
 	, _in_row_change (false)
 	, _in_rebuild (false)
 {
@@ -188,15 +187,8 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	button_box->pack_start (*add_button);
 	button_box->pack_start (*remove_button);
 
-	_all_group_active_button.show ();
-
 	_display_packer.pack_start (_scroller, true, true);
-	_display_packer.pack_start (_all_group_active_button, false, false);
 	_display_packer.pack_start (*button_box, false, false);
-
-	_all_group_active_button.signal_toggled().connect (sigc::mem_fun (*this, &EditorRouteGroups::all_group_toggled));
-	_all_group_active_button.set_name (X_("EditorRouteGroupsAllGroupButton"));
-	ARDOUR_UI::instance()->set_tip (_all_group_active_button, _("Activate this button to operate on all tracks when none are selected."));
 }
 
 void
@@ -561,8 +553,6 @@ EditorRouteGroups::set_session (Session* s)
 
 		RouteGroup& arg (_session->all_route_group());
 
-		arg.PropertyChanged.connect (all_route_groups_changed_connection, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::all_group_changed, this, _1), gui_context());
-
 		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::add, this, _1), gui_context());
 		_session->route_group_removed.connect (
 			_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::groups_changed, this), gui_context()
@@ -575,7 +565,6 @@ EditorRouteGroups::set_session (Session* s)
 	PBD::PropertyChange pc;
 	pc.add (Properties::select);
 	pc.add (Properties::active);
-	all_group_changed (pc);
 
 	groups_changed ();
 }
@@ -586,25 +575,6 @@ EditorRouteGroups::run_new_group_dialog ()
 	RouteList rl;
 
 	return _editor->_group_tabs->run_new_group_dialog (rl);
-}
-
-void
-EditorRouteGroups::all_group_toggled ()
-{
-	if (_session) {
-		_session->all_route_group().set_select (_all_group_active_button.get_active());
-	}
-}
-
-void
-EditorRouteGroups::all_group_changed (const PropertyChange&)
-{
-	if (_session) {
-		RouteGroup& arg (_session->all_route_group());
-		_all_group_active_button.set_active (arg.is_active() && arg.is_select());
-	} else {
-		_all_group_active_button.set_active (false);
-	}
 }
 
 /** Called when a model row is deleted, but also when the model is

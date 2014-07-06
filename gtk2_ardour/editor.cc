@@ -4548,13 +4548,6 @@ Editor::get_regions_from_selection_and_edit_point ()
 	if ( regions.empty() ) {
 		TrackViewList tracks = selection->tracks;
 
-		if (_route_groups->all_group_active_button().get_active() && tracks.empty()) {
-			/* tracks is empty (no track selected), and 'No Selection = All Tracks'
-			 * is enabled, so consider all tracks
-			 */
-			tracks = track_views; 
-		}
-
 		if (!tracks.empty()) {
 			/* no region selected or entered, but some selected tracks:
 			 * act on all regions on the selected tracks at the edit point
