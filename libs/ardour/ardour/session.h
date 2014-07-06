@@ -1121,7 +1121,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	gint            _suspend_save; /* atomic */
 	volatile bool   _save_queued;
 
-	void     auto_save();
 	int      load_options (const XMLNode&);
 	int      load_state (std::string snapshot_name);
 

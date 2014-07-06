@@ -2261,12 +2261,6 @@ Session::load_route_groups (const XMLNode& node, int version)
 	return 0;
 }
 
-void
-Session::auto_save()
-{
-	save_state (_current_snapshot_name);
-}
-
 static bool
 state_file_filter (const string &str, void* /*arg*/)
 {
