@@ -52,9 +52,24 @@ EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,Ardour
 	_current_frame = 1; /* force redraw at 0 */
 }
 
+EditorCursor::EditorCursor (Editor& ed)
+	: _editor (ed)
+	, _track_canvas_item (new ArdourCanvas::Arrow (_editor.get_hscroll_group()))
+	, _length (1.0)
+{
+	CANVAS_DEBUG_NAME (_track_canvas_item, "track canvas cursor");
+
+	_track_canvas_item->set_show_head (0, false);
+	_track_canvas_item->set_show_head (1, false);
+	_track_canvas_item->set_y1 (ArdourCanvas::COORD_MAX);
+	_track_canvas_item->set_ignore_events (true);
+	
+	_current_frame = 1; /* force redraw at 0 */
+}
+
 EditorCursor::~EditorCursor ()
 {
-	
+	delete _track_canvas_item;
 }
 
 void
