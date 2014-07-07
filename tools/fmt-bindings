@@ -18,7 +18,7 @@ $group_number = 0;
 %merge_bindings;
 
 $platform = linux;
-$winkey = 'Mod4\>\<Super';
+$winkey = 'Win';
 $make_cheatsheet = 1;
 $make_accelmap = 0;
 $merge_from = "";
@@ -56,7 +56,7 @@ if ($platform eq "darwin") {
     $gtk_modifier_map{'PRIMARY'} = 'Control';
     $gtk_modifier_map{'SECONDARY'} = 'Alt';
     $gtk_modifier_map{'TERTIARY'} = 'Shift';
-    $gtk_modifier_map{'LEVEL4'} = $winkey;
+    $gtk_modifier_map{'LEVEL4'} = 'window';
     $gtk_modifier_map{'WINDOW'} = 'Alt';
     $gtk_modifier_map{$winkey} => 'Win';
 

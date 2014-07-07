@@ -1311,7 +1311,7 @@ AudioRegionView::entered (bool internal_editing)
 		gain_line->add_visibility (AutomationLine::ControlPoints);
 	}
 
-	if (!internal_editing) {
+	if (!internal_editing &&  ( trackview.editor().current_mouse_mode() == Editing::MouseObject ) ) {
 		if (start_xfade_rect) {
 			start_xfade_rect->set_outline (true);
 		}
