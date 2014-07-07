@@ -822,8 +822,6 @@ Selection::set (RegionView* r, bool /*also_clear_tracks*/)
 void
 Selection::set (vector<RegionView*>& v)
 {
-	bool had_regions = !regions.empty();
-
 	clear_time();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
 	clear_objects();
