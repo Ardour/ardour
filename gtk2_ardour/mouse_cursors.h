@@ -34,6 +34,7 @@ public:
 	std::string cursor_set() const { return _cursor_set; }
 
 	Gdk::Cursor* cross_hair;
+	Gdk::Cursor* scissors;
 	Gdk::Cursor* trimmer;
 	Gdk::Cursor* right_side_trim;
 	Gdk::Cursor* anchored_right_side_trim;
