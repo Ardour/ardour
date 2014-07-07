@@ -295,7 +295,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void update_tearoff_visibility () = 0;
 	virtual framepos_t get_preferred_edit_position (bool ignore_playhead = false, bool from_context_menu = false) = 0;
 	virtual void toggle_meter_updating() = 0;
-	virtual void split_region () = 0;
+	virtual void split_regions_at (framepos_t, RegionSelection&) = 0;
 	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
 	virtual void mouse_add_new_marker (framepos_t where, bool is_cd=false, bool is_xrun=false) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
@@ -416,6 +416,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void snap_to_with_modifier (framepos_t &, GdkEvent const *, int32_t direction = 0, bool for_mark = false) = 0;
 
 	virtual void get_regions_at (RegionSelection &, framepos_t where, TrackViewList const &) const = 0;
+	virtual RegionSelection get_regions_from_selection_and_mouse () = 0;
 
 	/// Singleton instance, set up by Editor::Editor()
 

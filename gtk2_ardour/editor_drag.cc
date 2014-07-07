@@ -5449,11 +5449,12 @@ CrossfadeEdgeDrag::aborted (bool)
 	}
 }
 
-RegionCutDrag::RegionCutDrag (Editor* e, ArdourCanvas::Item* item)
+RegionCutDrag::RegionCutDrag (Editor* e, ArdourCanvas::Item* item, framepos_t pos)
 	: Drag (e, item, true)
 	, line (new EditorCursor (*e))
 {
-	line->set_position (_editor->get_preferred_edit_position());
+	line->set_position (pos);
+	line->show ();
 }
 
 RegionCutDrag::~RegionCutDrag ()
@@ -5471,7 +5472,14 @@ void
 RegionCutDrag::finished (GdkEvent*, bool)
 {
 	line->hide ();
-	_editor->split_region ();
+
+	RegionSelection rs = _editor->get_regions_from_selection_and_mouse ();
+
+	if (rs.empty()) {
+		return;
+	}
+
+	_editor->split_regions_at (_drags->current_pointer_frame(), rs);
 }
 
 void

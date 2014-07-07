@@ -4560,6 +4560,50 @@ Editor::get_regions_from_selection_and_edit_point ()
 	return regions;
 }
 
+/** Get regions using the following method:
+ *
+ *  Make a region list using:
+ *   (a) any selected regions
+ *   (b) the intersection of any selected tracks and the edit point(*)
+ *   (c) if neither exists, then whatever region is under the mouse
+ *
+ *  (*) NOTE: in this case, if 'No Selection = All Tracks' is active, search all tracks
+ *
+ *  Note that we have forced the rule that selected regions and selected tracks are mutually exclusive
+ */
+RegionSelection
+Editor::get_regions_from_selection_and_mouse ()
+{
+	RegionSelection regions;
+
+	if (entered_regionview && selection->tracks.empty() && selection->regions.empty() ) {
+		regions.add (entered_regionview);
+	} else {
+		regions = selection->regions;
+	}
+
+	if ( regions.empty() ) {
+		TrackViewList tracks = selection->tracks;
+
+		if (_route_groups->all_group_active_button().get_active() && tracks.empty()) {
+			/* tracks is empty (no track selected), and 'No Selection = All Tracks'
+			 * is enabled, so consider all tracks
+			 */
+			tracks = track_views; 
+		}
+
+		if (!tracks.empty()) {
+			/* no region selected or entered, but some selected tracks:
+			 * act on all regions on the selected tracks at the edit point
+			 */ 
+			framepos_t const where = get_preferred_edit_position ();
+			get_regions_at(regions, where, tracks);
+		}
+	}
+
+	return regions;
+}
+
 /** Start with regions that are selected, or the entered regionview if none are selected.
  *  Then add equivalent regions on tracks in the same active edit-enabled route group as any
  *  of the regions that we started with.

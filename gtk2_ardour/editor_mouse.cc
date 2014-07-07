@@ -857,7 +857,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case FeatureLineItem:
 		case RegionViewNameHighlight:
 		case RegionViewName:
-			_drags->set (new RegionCutDrag (this, item), event, current_canvas_cursor);
+			_drags->set (new RegionCutDrag (this, item, canvas_event_sample (event)), event, current_canvas_cursor);
 			return true;
 			break;
 		default:
