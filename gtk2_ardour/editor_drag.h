@@ -445,9 +445,14 @@ class RegionCutDrag : public Drag
 {
     public:
 	RegionCutDrag (Editor*, ArdourCanvas::Item*);
+	~RegionCutDrag ();
+
 	void motion (GdkEvent*, bool);
 	void finished (GdkEvent*, bool);
 	void aborted (bool);
+
+    private:
+	EditorCursor* line;
 };
 
 /** Drags to create regions */
