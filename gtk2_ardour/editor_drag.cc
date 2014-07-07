@@ -94,6 +94,8 @@ DragManager::abort ()
 {
 	_ending = true;
 
+	cerr << "Aborting drag\n";
+
 	for (list<Drag*>::const_iterator i = _drags.begin(); i != _drags.end(); ++i) {
 		(*i)->abort ();
 		delete *i;
@@ -5449,18 +5451,26 @@ CrossfadeEdgeDrag::aborted (bool)
 
 RegionCutDrag::RegionCutDrag (Editor* e, ArdourCanvas::Item* item)
 	: Drag (e, item, true)
+	, line (new EditorCursor (*e))
 {
+	line->set_position (_editor->get_preferred_edit_position());
+}
 
+RegionCutDrag::~RegionCutDrag ()
+{
+	delete line;
 }
 
 void
 RegionCutDrag::motion (GdkEvent*, bool)
 {
+	line->set_position (_drags->current_pointer_frame());
 }
 
 void
 RegionCutDrag::finished (GdkEvent*, bool)
 {
+	line->hide ();
 	_editor->split_region ();
 }
 
