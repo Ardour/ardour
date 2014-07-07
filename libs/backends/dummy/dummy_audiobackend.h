@@ -125,8 +125,36 @@ class DummyAudioPort : public DummyPort {
 		const Sample* const_buffer () const { return _buffer; }
 		void* get_buffer (pframes_t nframes);
 
+		enum GeneratorType {
+			Silence,
+			WhiteNoise,
+			PinkNoise,
+			PonyNoise,
+			SineWave,
+		};
+		void next_period () { _gen_cycle = false; }
+		void setup_generator (GeneratorType const, float const);
+
 	private:
 		Sample _buffer[8192];
+
+		// signal generator ('fake' physical inputs)
+		void generate (pframes_t n_samples);
+		GeneratorType _gen_type;
+		bool _gen_cycle;
+
+		// generator buffers
+		// (used for pink-noise filters and sine-phase)
+		float _b0, _b1, _b2, _b3, _b4, _b5, _b6;
+
+		// (per thread) random seed
+		unsigned int _rseed;
+
+		// gaussian noise generator
+		float grandf ();
+		bool _pass;
+		float _rn1;
+
 }; // class DummyAudioPort
 
 class DummyMidiPort : public DummyPort {
@@ -298,6 +326,8 @@ class DummyAudioBackend : public AudioBackend {
 		bool  _running;
 		bool  _freewheeling;
 
+		std::string _device;
+
 		float  _samplerate;
 		size_t _samples_per_period;
 		float  _dsp_load;
@@ -334,6 +364,7 @@ class DummyAudioBackend : public AudioBackend {
 		int register_system_ports ();
 		void unregister_system_ports ();
 
+		std::vector<DummyAudioPort *> _system_inputs;
 		std::vector<DummyPort *> _ports;
 
 
