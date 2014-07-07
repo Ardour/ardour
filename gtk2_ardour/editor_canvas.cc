@@ -1290,10 +1290,12 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 			cursor = _cursors->cross_hair;
 			break;
 		case LeftFrameHandle:
-			cursor = which_trim_cursor (true);
+			if ( effective_mouse_mode() == MouseObject )  // (smart mode): if the user is in the top half, override the trim cursor, since they are in the range zone
+				cursor = which_trim_cursor (true);  //alternatively, one could argue that we _should_ allow trims here, and disallow range selection
 			break;
 		case RightFrameHandle:
-			cursor = which_trim_cursor (false);
+			if ( effective_mouse_mode() == MouseObject )  //see above
+				cursor = which_trim_cursor (false);
 			break;
 		case StartCrossFadeItem:
 			cursor = _cursors->fade_in;
