@@ -240,7 +240,7 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		break;
 
 	case MouseCut:
-		act = ActionManager::get_action (X_("MouseCut"), X_("set-mouse-mode-cut"));
+		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-cut"));
 		break;
 
 	case MouseObject:
@@ -849,6 +849,23 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 			break;
 
+		default:
+			break;
+		}
+		break;
+
+	case MouseCut:
+		switch (item_type) {
+		case RegionItem:
+		case FadeInHandleItem:
+		case FadeOutHandleItem:
+		case LeftFrameHandle:
+		case RightFrameHandle:
+		case FeatureLineItem:
+		case RegionViewNameHighlight:
+		case RegionViewName:
+			_drags->set (new RegionCutDrag (this, item), event, current_canvas_cursor);
+			break;
 		default:
 			break;
 		}

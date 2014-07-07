@@ -470,6 +470,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void metric_get_samples (std::vector<ArdourCanvas::Ruler::Mark>&, gdouble, gdouble, gint);
 	void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, gdouble, gdouble, gint);
 
+	/* editing operations that need to be public */
+	void mouse_add_new_marker (framepos_t where, bool is_cd=false, bool is_xrun=false);
+	void split_region ();
+	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
+	
   protected:
 	void map_transport_state ();
 	void map_position_change (framepos_t);
@@ -625,7 +630,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
-	void mouse_add_new_marker (framepos_t where, bool is_cd=false, bool is_xrun=false);
 	void mouse_add_new_range (framepos_t);
 	bool choose_new_marker_name(std::string &name);
 	void update_cd_marker_display ();
@@ -1135,7 +1139,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void lower_region_to_bottom ();
 	void split_regions_at (framepos_t, RegionSelection&);
 	void split_region_at_transients ();
-	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
 	void crop_region_to_selection ();
 	void crop_region_to (framepos_t start, framepos_t end);
 	void set_sync_point (framepos_t, const RegionSelection&);
@@ -1186,8 +1189,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void naturalize_region ();
 
 	void reset_focus ();
-
-	void split_region ();
 
 	void delete_ ();
 	void cut ();

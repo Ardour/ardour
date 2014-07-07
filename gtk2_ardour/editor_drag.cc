@@ -5447,3 +5447,24 @@ CrossfadeEdgeDrag::aborted (bool)
 	}
 }
 
+RegionCutDrag::RegionCutDrag (Editor* e, ArdourCanvas::Item* item)
+	: Drag (e, item, true)
+{
+
+}
+
+void
+RegionCutDrag::motion (GdkEvent*, bool)
+{
+}
+
+void
+RegionCutDrag::finished (GdkEvent*, bool)
+{
+	_editor->split_region ();
+}
+
+void
+RegionCutDrag::aborted (bool)
+{
+}
