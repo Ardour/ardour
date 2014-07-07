@@ -250,11 +250,11 @@ protected:
 	ArdourCanvas::Canvas& parent_canvas;
 	bool                  no_redraw;
 
-//	Gtk::HBox   other_button_hbox;
-//	Gtk::Table  button_table;
 	WavesButton& route_group_button;
 	WavesButton& playlist_button;
 	WavesButton& automation_button;
+	Gtk::Container& selected_track_color_box;
+	Gtk::Container& track_color_box;
 
 	Gtk::Menu           subplugin_menu;
 	Gtk::Menu*          automation_action_menu;
@@ -307,6 +307,7 @@ private:
 
 	void remove_child (boost::shared_ptr<TimeAxisView>);
 	void update_playlist_tip ();
+	void display_route_color ();
 };
 
 #endif /* __ardour_route_time_axis_h__ */

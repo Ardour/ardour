@@ -50,6 +50,7 @@
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
+#include "ardour/audio_track.h"
 
 #include "evoral/Parameter.hpp"
 
@@ -78,6 +79,7 @@
 #include "ardour/track.h"
 
 #include "i18n.h"
+#include "dbg_msg.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -97,10 +99,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed,
 	, _view (0)
 	, parent_canvas (canvas)
 	, no_redraw (false)
-	//, button_table (3, 3)
-	//, route_group_button (_("g"))
-	//, playlist_button (_("p"))
-	//, automation_button (_("a"))
 	, route_group_button (get_waves_button ("route_group_button"))
 	, playlist_button (get_waves_button ("playlist_button"))
 	, automation_button (get_waves_button ("automation_button"))
@@ -112,8 +110,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed,
 	, color_mode_menu (0)
 	, gm (sess, "track_header_gain_meter.xml")
 	, _ignore_set_layer_display (false)
-
 	, gain_meter_home (get_box ("gain_meter_home"))
+	, selected_track_color_box (get_container ("selected_track_color_box"))
+	, track_color_box (get_container ("track_color_box"))
 {
 }
 
@@ -132,7 +131,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
-//	gm.get_level_meter().set_no_show_all();
 	gm.get_level_meter().setup_meters(meter_width);
 	gm.update_gain_sensitive ();
 
@@ -159,55 +157,20 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	ignore_toggle = false;
 
-	//route_group_button.set_name ("route button");
-	//playlist_button.set_name ("route button");
-	//automation_button.set_name ("route button");
-
  	route_group_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::route_group_click), false);
 	playlist_button.signal_clicked.connect (sigc::mem_fun(*this, &RouteTimeAxisView::playlist_click));
 	automation_button.signal_clicked.connect (sigc::mem_fun(*this, &RouteTimeAxisView::automation_click));
 
 	if (is_track()) {
-
-		/* use icon */
-		/*
-		switch (track()->mode()) {
-		case ARDOUR::Normal:
-		case ARDOUR::NonLayered:
-			rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
-			break;
-		case ARDOUR::Destructive:
-			rec_enable_button->set_image (::get_icon (X_("record_tape_red")));
-			break;
-		}
-		*/
-		// controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-
-		//if (is_midi_track()) {
-		//	ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
-		//	gm.set_fader_name ("MidiTrackFader");
-		//} else {
-		//	ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record"));
-		//	gm.set_fader_name ("AudioTrackFader");
-		//}
-
 		rec_enable_button.set_sensitive (_session->writable());
 		
 		/* set playlist button tip to the current playlist, and make it update when it changes */
 		update_playlist_tip ();
 		track()->PlaylistChanged.connect (*this, invalidator (*this), ui_bind(&RouteTimeAxisView::update_playlist_tip, this), gui_context());
-	} else {
-//		gm.set_fader_name ("AudioBusFader");
 	}
+
 	playlist_button.set_visible(is_track() && track()->mode() == ARDOUR::Normal);
 
-	//Gtk::VBox *mtrbox = manage(new Gtk::VBox());
-	//if (gm.get_level_meter().get_parent()) {
-	//	gm.get_level_meter().get_parent()->remove (gm.get_level_meter());
-	//}
-	//mtrbox->pack_start(gm.get_level_meter(), true, true, 2);
-	//controls_hbox.pack_start(*mtrbox, false, false, 4);
-	//mtrbox->show();
 	LevelMeterHBox& level_meter = gm.get_level_meter();
 
 	if (level_meter.get_parent ()) {
@@ -219,16 +182,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_route->input()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 
-	// controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-
-    //if (!_route->is_master()) {
-    //        controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-    //}
-	//if (!ARDOUR::Profile->get_trx()) {
-	//	controls_table.attach (route_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	//	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::AttachOptions (0), 3, 0);
-	//}
-
 	if (is_midi_track()) {
 		ARDOUR_UI::instance()->set_tip(automation_button, _("MIDI Controllers and Automation"));
 	} else {
@@ -236,10 +189,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	label_view ();
-
-	//if (!ARDOUR::Profile->get_trx() && is_track() && track()->mode() == ARDOUR::Normal) {
-	//	controls_table.attach (playlist_button, 5, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	//}
 
 	_y_position = -1;
 
@@ -271,6 +220,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	route_group_menu = new RouteGroupMenu (_session, plist);
 	gm.get_level_meter().signal_scroll_event().connect (sigc::mem_fun (*this, &RouteTimeAxisView::controls_ebox_scroll), false);
+	display_route_color ();
 }
 
 RouteTimeAxisView::~RouteTimeAxisView ()
@@ -846,7 +796,6 @@ RouteTimeAxisView::show_selection (TimeSelection& ts)
 void
 RouteTimeAxisView::set_height (uint32_t h)
 {
-	int gmlen = h - 9;
 	bool height_changed = (height == 0) || (h != height);
 
 	int meter_width = 3;
@@ -910,9 +859,18 @@ RouteTimeAxisView::set_height (uint32_t h)
 void
 RouteTimeAxisView::route_color_changed ()
 {
+	display_route_color();
 	if (_view) {
 		_view->apply_color (color(), StreamView::RegionColor);
 	}
+}
+
+void
+RouteTimeAxisView::display_route_color ()
+{
+	selected_track_color_box.modify_bg (STATE_ACTIVE, color ());
+	track_color_box.modify_bg (STATE_NORMAL, color());
+	track_color_box.modify_bg (STATE_ACTIVE, color());
 }
 
 void
@@ -1596,7 +1554,6 @@ RouteTimeAxisView::update_playlist_tip ()
 	/* set the playlist button tooltip to the playlist name */
 	ARDOUR_UI::instance()->set_tip (playlist_button, _("Playlist") + std::string(": ") + Glib::Markup::escape_text(track()->playlist()->name()));
 }
-
 
 void
 RouteTimeAxisView::show_playlist_selector ()

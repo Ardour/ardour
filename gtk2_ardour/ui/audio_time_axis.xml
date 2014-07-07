@@ -5,7 +5,7 @@
     <VBox>
       <EventBox height="1" bgnormal="#494949" bgactive="#494949"/>
       <HBox box.expand="true" box.fill="true">
-        <EventBox width="29" bgactive="#5BA55C">
+        <EventBox id="selected_track_color_box" width="29" bgactive="#5BA55C">
           <HBox>
             <HBox width="12"/>
             <VBox>
@@ -13,7 +13,7 @@
             </VBox>
           </HBox>
         </EventBox>
-        <EventBox width="6" bgnormal="#5BA55C" bgactive="#5BA55C"/>
+        <EventBox id="track_color_box" width="6" bgnormal="#5BA55C" bgactive="#5BA55C"/>
         <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
       </HBox>
       <EventBox height="1" bgnormal="#000000" bgactive="#000000" box.pack="end"/>
