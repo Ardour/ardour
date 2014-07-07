@@ -353,26 +353,14 @@ Editor::mouse_mode_toggled (MouseMode m)
 
 	instant_save ();
 
-	//TODO:  set button styles for smart buttons
-/*
-	if ( smart_mode_action->get_active() ) {
-		if( mouse_mode == MouseObject ) { //smart active and object active
-			smart_mode_button.set_active(1);
-			smart_mode_button.set_name("smart mode button");
-			mouse_move_button.set_name("smart mode button");
-		} else {  //smart active but object inactive
-			smart_mode_button.set_active(0);
-			smart_mode_button.set_name("smart mode button");
-			mouse_move_button.set_name("mouse mode button");
-		}
-	} else {
-		smart_mode_button.set_active(0);
-		smart_mode_button.set_name("mouse mode button");
-		mouse_move_button.set_name("mouse mode button");
+	/* this should generate a new enter event which will
+	   trigger the appropiate cursor.
+	*/
+
+	if (_track_canvas) {
+		_track_canvas->re_enter ();
 	}
-*/
-	
-	reset_canvas_cursor ();
+
 	set_gain_envelope_visibility ();
 	
 	update_time_selection_display ();
@@ -504,6 +492,11 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	*/
 
 	MouseMode eff_mouse_mode = effective_mouse_mode ();
+
+	if (eff_mouse_mode == MouseCut) {
+		/* never change selection in cut mode */
+		return;
+	}
 
 	if (get_smart_mode() && eff_mouse_mode == MouseRange && event->button.button == 3 && item_type == RegionItem) {
 		/* context clicks are always about object properties, even if
@@ -865,6 +858,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case RegionViewNameHighlight:
 		case RegionViewName:
 			_drags->set (new RegionCutDrag (this, item), event, current_canvas_cursor);
+			return true;
 			break;
 		default:
 			break;
