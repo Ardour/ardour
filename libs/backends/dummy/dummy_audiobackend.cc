@@ -19,6 +19,7 @@
 
 #include <sys/time.h>
 #include <regex.h>
+#include <stdlib.h>
 
 #include <glibmm.h>
 
@@ -39,6 +40,7 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	: AudioBackend (e, info)
 	, _running (false)
 	, _freewheeling (false)
+	, _device ("")
 	, _samplerate (48000)
 	, _samples_per_period (1024)
 	, _dsp_load (0)
@@ -78,7 +80,11 @@ std::vector<AudioBackend::DeviceStatus>
 DummyAudioBackend::enumerate_devices () const
 {
 	if (_device_status.empty()) {
-		_device_status.push_back (DeviceStatus (_("Dummy"), true));
+		_device_status.push_back (DeviceStatus (_("Silence"), true));
+		_device_status.push_back (DeviceStatus (_("Sine Wave"), true));
+		_device_status.push_back (DeviceStatus (_("White Noise"), true));
+		_device_status.push_back (DeviceStatus (_("Pink Noise"), true));
+		_device_status.push_back (DeviceStatus (_("Pink Noise (low CPU)"), true));
 	}
 	return _device_status;
 }
@@ -143,8 +149,9 @@ DummyAudioBackend::can_change_buffer_size_when_running () const
 }
 
 int
-DummyAudioBackend::set_device_name (const std::string&)
+DummyAudioBackend::set_device_name (const std::string& d)
 {
+	_device = d;
 	return 0;
 }
 
@@ -207,7 +214,7 @@ DummyAudioBackend::set_systemic_output_latency (uint32_t sl)
 std::string
 DummyAudioBackend::device_name () const
 {
-	return _("Dummy Device");
+	return _device;
 }
 
 float
@@ -309,6 +316,7 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 
 	if (_ports.size()) {
 		PBD::warning << _("DummyAudioBackend: recovering from unclean shutdown, port registry is not empty.") << endmsg;
+		_system_inputs.clear();
 		_ports.clear();
 	}
 
@@ -637,6 +645,18 @@ int
 DummyAudioBackend::register_system_ports()
 {
 	LatencyRange lr;
+	enum DummyAudioPort::GeneratorType gt;
+	if (_device == _("White Noise")) {
+		gt = DummyAudioPort::WhiteNoise;
+	} else if (_device == _("Pink Noise")) {
+		gt = DummyAudioPort::PinkNoise;
+	} else if (_device == _("Pink Noise (low CPU)")) {
+		gt = DummyAudioPort::PonyNoise;
+	} else if (_device == _("Sine Wave")) {
+		gt = DummyAudioPort::SineWave;
+	} else {
+		gt = DummyAudioPort::Silence;
+	}
 
 	const int a_ins = _n_inputs > 0 ? _n_inputs : 8;
 	const int a_out = _n_outputs > 0 ? _n_outputs : 8;
@@ -651,6 +671,8 @@ DummyAudioBackend::register_system_ports()
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
+		_system_inputs.push_back (static_cast<DummyAudioPort*>(p));
+		static_cast<DummyAudioPort*>(p)->setup_generator (gt, _samplerate);
 	}
 
 	lr.min = lr.max = _samples_per_period + _systemic_output_latency;
@@ -687,6 +709,7 @@ void
 DummyAudioBackend::unregister_system_ports()
 {
 	size_t i = 0;
+	_system_inputs.clear();
 	while (i <  _ports.size ()) {
 		DummyPort* port = _ports[i];
 		if (port->is_physical () && port->is_terminal ()) {
@@ -1020,6 +1043,12 @@ DummyAudioBackend::main_process_thread ()
 	uint64_t clock1, clock2;
 	clock1 = g_get_monotonic_time();
 	while (_running) {
+
+		// re-set input buffers, generate on demand.
+		for (std::vector<DummyAudioPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+			(*it)->next_period();
+		}
+
 		if (engine.process_callback (_samples_per_period)) {
 			return 0;
 		}
@@ -1257,11 +1286,132 @@ bool DummyPort::is_physically_connected () const
 
 DummyAudioPort::DummyAudioPort (DummyAudioBackend &b, const std::string& name, PortFlags flags)
 	: DummyPort (b, name, flags)
+	, _gen_type (Silence)
+	, _gen_cycle (false)
+	, _pass (false)
 {
 	memset (_buffer, 0, sizeof (_buffer));
 }
 
 DummyAudioPort::~DummyAudioPort () { }
+
+void DummyAudioPort::setup_generator (GeneratorType const g, float const samplerate)
+{
+	_gen_type = g;
+	_rseed = g_get_monotonic_time() % UINT_MAX;
+	_pass = false;
+
+	switch (_gen_type) {
+		case Silence:
+			break;
+		case SineWave:
+			_b1 = 0;
+			{
+#ifdef COMPILER_MSVC
+				srand (_rseed);
+				const unsigned int k = rand () % 128;
+#else
+				const unsigned int k = rand_r (&_rseed) % 128;
+#endif
+				// midi note, chromatic scale
+				_b0 = (440.f / 32.f) * powf(2, (k - 9.0) / 12.0) / samplerate;
+				assert (_b0 < M_PI/2); // fine when samplerate >= 8K
+			}
+			break;
+		case PinkNoise:
+		case PonyNoise:
+			_b0 = _b1 = _b2 = _b3 = _b4 = _b5 = _b6 = 0.f;
+			// fall trhu, no break
+		case WhiteNoise:
+#ifdef COMPILER_MSVC
+			srand (_rseed);
+#endif
+			break;
+	}
+}
+
+static inline float randf (unsigned int *seedp) {
+	static const float rmf = RAND_MAX / 2.0;
+	// TODO this should use a better uniform random generator
+#ifdef COMPILER_MSVC
+	return ((float)rand () / rmf) - 1.f;
+#else
+	return ((float)rand_r (seedp) / rmf) - 1.f;
+#endif
+}
+
+float DummyAudioPort::grandf ()
+{
+	// Gaussian White Noise
+	// http://www.musicdsp.org/archive.php?classid=0#109
+	float x1, x2, r;
+
+	if (_pass) {
+		_pass = false;
+		return _rn1;
+	}
+
+	do {
+		x1 = randf (&_rseed);
+		x2 = randf (&_rseed);
+		r = x1 * x1 + x2 * x2;
+	} while ((r >= 1.0f) || (r < 1e-22f));
+
+	r = sqrtf (-2.f * logf (r) / r);
+
+	_pass = true;
+	_rn1 = r * x2;
+	return r * x1;
+}
+
+void DummyAudioPort::generate (pframes_t n_samples)
+{
+	switch (_gen_type) {
+		case Silence:
+			memset (_buffer, 0, n_samples * sizeof (Sample));
+			break;
+		case SineWave:
+			for (pframes_t i = 0 ; i < n_samples; ++i) {
+				_buffer[i] = .12589f * sinf(2.0 * M_PI * _b1);
+				_b1 += _b0;
+				if (_b1 > 1.0) _b1 -= 2.0;
+			}
+			break;
+		case WhiteNoise:
+			for (pframes_t i = 0 ; i < n_samples; ++i) {
+				_buffer[i] = .089125f * grandf();
+			}
+			break;
+		case PinkNoise:
+			for (pframes_t i = 0 ; i < n_samples; ++i) {
+				// Paul Kellet's refined method
+				// http://www.musicdsp.org/files/pink.txt
+				// NB. If 'white' consists of uniform random numbers,
+				// the pink noise will have an almost gaussian distribution.
+				const float white = .0498f * randf(&_rseed);
+				_b0 = .99886f * _b0 + white * .0555179f;
+				_b1 = .99332f * _b1 + white * .0750759f;
+				_b2 = .96900f * _b2 + white * .1538520f;
+				_b3 = .86650f * _b3 + white * .3104856f;
+				_b4 = .55000f * _b4 + white * .5329522f;
+				_b5 = -.7616f * _b5 - white * .0168980f;
+				_buffer[i] = _b0 + _b1 + _b2 + _b3 + _b4 + _b5 + _b6 + white * 0.5362;
+				_b6 = white * 0.115926;
+			}
+			break;
+		case PonyNoise:
+			for (pframes_t i = 0 ; i < n_samples; ++i) {
+				const float white = 0.0498f * randf(&_rseed);
+				// Paul Kellet's economy method
+				// http://www.musicdsp.org/files/pink.txt
+				_b0 = 0.99765 * _b0 + white * 0.0990460;
+				_b1 = 0.96300 * _b1 + white * 0.2965164;
+				_b2 = 0.57000 * _b2 + white * 1.0526913;
+				_buffer[i] = _b0 + _b1 + _b2 + white * 0.1848;
+			}
+			break;
+	}
+}
 
 void* DummyAudioPort::get_buffer (pframes_t n_samples)
 {
@@ -1270,13 +1420,19 @@ void* DummyAudioPort::get_buffer (pframes_t n_samples)
 		if (it == get_connections ().end ()) {
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 		} else {
-			DummyAudioPort const * source = static_cast<const DummyAudioPort*>(*it);
+			DummyAudioPort * source = static_cast<DummyAudioPort*>(*it);
 			assert (source && source->is_output ());
+			if (source->is_physical() && source->is_terminal()) {
+				source->get_buffer(n_samples); // generate signal.
+			}
 			memcpy (_buffer, source->const_buffer (), n_samples * sizeof (Sample));
 			while (++it != get_connections ().end ()) {
-				source = static_cast<const DummyAudioPort*>(*it);
+				source = static_cast<DummyAudioPort*>(*it);
 				assert (source && source->is_output ());
 				Sample* dst = buffer ();
+				if (source->is_physical() && source->is_terminal()) {
+					source->get_buffer(n_samples); // generate signal.
+				}
 				const Sample* src = source->const_buffer ();
 				for (uint32_t s = 0; s < n_samples; ++s, ++dst, ++src) {
 					*dst += *src;
@@ -1284,7 +1440,10 @@ void* DummyAudioPort::get_buffer (pframes_t n_samples)
 			}
 		}
 	} else if (is_output () && is_physical () && is_terminal()) {
-		memset (_buffer, 0, n_samples * sizeof (Sample));
+		if (!_gen_cycle) {
+			_gen_cycle = true;
+			generate(n_samples);
+		}
 	}
 	return _buffer;
 }
