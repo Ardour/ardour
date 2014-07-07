@@ -836,7 +836,6 @@ long
 Selection::set (framepos_t start, framepos_t end)
 {
 	clear_objects();  //enforce region/object exclusivity
-	clear_tracks();  //enforce object/track exclusivity
 	clear_time();
 
 	if ((start == 0 && end == 0) || end < start) {
