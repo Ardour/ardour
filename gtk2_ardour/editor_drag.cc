@@ -5471,15 +5471,17 @@ RegionCutDrag::motion (GdkEvent*, bool)
 void
 RegionCutDrag::finished (GdkEvent*, bool)
 {
+	framepos_t pos = _drags->current_pointer_frame();
+
 	line->hide ();
 
-	RegionSelection rs = _editor->get_regions_from_selection_and_mouse ();
+	RegionSelection rs = _editor->get_regions_from_selection_and_mouse (pos);
 
 	if (rs.empty()) {
 		return;
 	}
 
-	_editor->split_regions_at (_drags->current_pointer_frame(), rs);
+	_editor->split_regions_at (pos, rs);
 }
 
 void

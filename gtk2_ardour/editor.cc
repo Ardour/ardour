@@ -4572,7 +4572,7 @@ Editor::get_regions_from_selection_and_edit_point ()
  *  Note that we have forced the rule that selected regions and selected tracks are mutually exclusive
  */
 RegionSelection
-Editor::get_regions_from_selection_and_mouse ()
+Editor::get_regions_from_selection_and_mouse (framepos_t pos)
 {
 	RegionSelection regions;
 
@@ -4585,19 +4585,11 @@ Editor::get_regions_from_selection_and_mouse ()
 	if ( regions.empty() ) {
 		TrackViewList tracks = selection->tracks;
 
-		if (_route_groups->all_group_active_button().get_active() && tracks.empty()) {
-			/* tracks is empty (no track selected), and 'No Selection = All Tracks'
-			 * is enabled, so consider all tracks
-			 */
-			tracks = track_views; 
-		}
-
 		if (!tracks.empty()) {
 			/* no region selected or entered, but some selected tracks:
 			 * act on all regions on the selected tracks at the edit point
 			 */ 
-			framepos_t const where = get_preferred_edit_position ();
-			get_regions_at(regions, where, tracks);
+			get_regions_at(regions, pos, tracks);
 		}
 	}
 
