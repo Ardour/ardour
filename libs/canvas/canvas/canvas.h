@@ -135,6 +135,11 @@ public:
         std::string indent() const;
         std::string render_indent() const;
         void dump (std::ostream&) const;
+
+	/** Ask the canvas to pick the current item again, and generate
+	    an enter event for it.
+	*/
+	virtual void re_enter () = 0;
     
 protected:
 	void queue_draw_item_area (Item *, Rect);
@@ -168,6 +173,8 @@ public:
 	Coord height() const;
 
 	bool get_mouse_position (Duple& winpos) const;
+
+	void re_enter ();
 
 protected:
 	bool on_scroll_event (GdkEventScroll *);
