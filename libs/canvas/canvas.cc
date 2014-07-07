@@ -454,9 +454,15 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 {
 	/* setup enter & leave event structures */
 
+	Glib::RefPtr<Gdk::Window> win = get_window();
+
+	if (!win) {
+		return;
+	}
+
 	GdkEventCrossing enter_event;
 	enter_event.type = GDK_ENTER_NOTIFY;
-	enter_event.window = get_window()->gobj();
+	enter_event.window = win->gobj();
 	enter_event.send_event = 0;
 	enter_event.subwindow = 0;
 	enter_event.mode = GDK_CROSSING_NORMAL;
