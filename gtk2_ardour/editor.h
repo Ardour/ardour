@@ -481,8 +481,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* editing operations that need to be public */
 	void mouse_add_new_marker (framepos_t where, bool is_cd=false, bool is_xrun=false);
-	void split_region ();
+	void split_regions_at (framepos_t, RegionSelection&);
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
+	RegionSelection get_regions_from_selection_and_mouse ();
 	
   protected:
 	void map_transport_state ();
@@ -1145,7 +1146,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void change_region_layering_order (bool from_context_menu);
 	void lower_region ();
 	void lower_region_to_bottom ();
-	void split_regions_at (framepos_t, RegionSelection&);
 	void split_region_at_transients ();
 	void crop_region_to_selection ();
 	void crop_region_to (framepos_t start, framepos_t end);
@@ -1197,6 +1197,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void naturalize_region ();
 
 	void reset_focus ();
+
+	void split_region ();
 
 	void delete_ ();
 	void cut ();

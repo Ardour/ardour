@@ -444,7 +444,7 @@ private:
 class RegionCutDrag : public Drag
 {
     public:
-	RegionCutDrag (Editor*, ArdourCanvas::Item*);
+	RegionCutDrag (Editor*, ArdourCanvas::Item*, framepos_t);
 	~RegionCutDrag ();
 
 	void motion (GdkEvent*, bool);
