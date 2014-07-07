@@ -21,33 +21,8 @@
 #include "gtk2ardour-config.h"
 #endif
 
-//#include <fstream>
-//#include <algorithm>
-//
-//#include "waves_button.h"
-//
-//#include <gtkmm/filechooser.h>
-//
-//#include "pbd/failed_constructor.h"
-//#include "pbd/file_utils.h"
-//#include "pbd/replace_all.h"
-//#include "pbd/whitespace.h"
-//#include "pbd/stacktrace.h"
-//#include "pbd/openuri.h"
-//
-//#include "ardour/audioengine.h"
-//#include "ardour/filesystem_paths.h"
-//#include "ardour/recent_sessions.h"
-//#include "ardour/session.h"
-//#include "ardour/session_state_utils.h"
-//#include "ardour/template_utils.h"
-//#include "ardour/filename_extensions.h"
-//
-//#include "ardour_ui.h"
 #include "session_dialog.h"
-//#include "opts.h"
 #include "i18n.h"
-//#include "utils.h"
 
 using namespace std;
 using namespace Gtk;
