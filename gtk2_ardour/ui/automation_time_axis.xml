@@ -13,5 +13,6 @@
     <EventBox id="controls_event_box"/>
     <VBox id="time_axis_vbox"/>
     <FocusEntry id="name_entry" font ="Arial 10" justify="left" height="40" width="200"/>
+    <Label id="number_label" text="32" fgnormal="#ffffff" fgactive="#ffffff" font ="Calibri 12"/>
   </VBox>
 </RouteUI>

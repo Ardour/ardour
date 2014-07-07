@@ -100,9 +100,9 @@ WavesIconButton::render (cairo_t* cr)
 		cairo_fill (cr);
 	}
 
-	rounded_function (cr, _left_border_width, _top_border_width, get_width()-_left_border_width-_right_border_width, get_height()-_top_border_width-_bottom_border_width, _corner_radius);
-	cairo_set_source_rgba (cr, bgcolor.get_red_p(), bgcolor.get_green_p(), bgcolor.get_blue_p(), 1);
-	cairo_fill (cr);
+	//rounded_function (cr, _left_border_width, _top_border_width, get_width()-_left_border_width-_right_border_width, get_height()-_top_border_width-_bottom_border_width, _corner_radius);
+	//cairo_set_source_rgba (cr, bgcolor.get_red_p(), bgcolor.get_green_p(), bgcolor.get_blue_p(), 1);
+	//cairo_fill (cr);
 
 	// pixbuf, if any
 	if (pixbuf) {

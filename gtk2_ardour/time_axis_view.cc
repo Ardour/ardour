@@ -77,7 +77,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess,
 							Canvas& /*canvas*/,
 							WavesUI& ui)
 	: AxisView (sess)
-//	, controls_table (2, 8)
 	, _name_editing (false)
 	, height (0)
 	, display_menu (0)
@@ -97,10 +96,11 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess,
 	, _preresize_cursor (0)
 	, _have_preresize_cursor (false)
 	, _ebox_release_can_act (true)
-	, controls_event_box (ui.get_container ("controls_event_box"))
-	, time_axis_box (ui.root())
+	, controls_event_box (ui.root ())//ui.get_container ("controls_event_box"))
+	, time_axis_box (ui.root ())
 	, name_entry (ui.get_entry ("name_entry"))
 	, name_label (ui.get_label ("name_label"))
+	, number_label (ui.get_label ("number_label"))
 {
 	std::cout << "TimeAxisView::TimeAxisView ()" << std::endl;
 	if (extra_height == 0) {
@@ -132,33 +132,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess,
 	name_entry.set_text (name_label.get_text());
 	name_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisView::end_name_edit), RESPONSE_OK));
 
-//	name_hbox.pack_start (name_label, true, true);
-//	name_hbox.show ();
-//	name_label.show ();
-	
-	//controls_table.set_size_request (200);
-	//controls_table.set_row_spacings (2);
-	//controls_table.set_col_spacings (2);
-	//controls_table.set_border_width (2);
-	//controls_table.set_homogeneous (true);
-
-	//controls_table.attach (name_hbox, 0, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
-	//controls_table.show_all ();
-	//controls_table.set_no_show_all ();
-
-	//HSeparator* separator = manage (new HSeparator());
-	//separator->set_name("TrackSeparator");
-	//separator->set_size_request(-1, 1);
-	//separator->show();
-
-	//controls_vbox.pack_start (controls_table, false, false);
-	//controls_vbox.show ();
-
-	//controls_hbox.pack_start (controls_vbox, true, true);
-	//controls_hbox.show ();
-
-	//controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
-	//controls_event_box.add (controls_hbox);
 	controls_event_box.add_events (Gdk::BUTTON_PRESS_MASK|
 								   Gdk::BUTTON_RELEASE_MASK|
 								   Gdk::POINTER_MOTION_MASK|
@@ -173,10 +146,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess,
 	controls_event_box.signal_button_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_button_release));
 	controls_event_box.signal_motion_notify_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_motion));
 	controls_event_box.signal_leave_notify_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_leave));
-
-	//time_axis_vbox.pack_start (controls_event_box, true, true, 0);
-	//time_axis_vbox.pack_end (*separator, false, false);
-	//time_axis_vbox.show();
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
 
@@ -257,6 +226,7 @@ TimeAxisView::hide ()
 guint32
 TimeAxisView::show_at (double y, int& nth, VBox *parent)
 {
+	time_axis_box.show ();
 	if (control_parent) {
 		control_parent->reorder_child (time_axis_box, nth);
 	} else {
@@ -266,6 +236,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	}
 
 	_order = nth;
+	number_label.set_text (string_compose (_("%1"), _order));
 
 	if (_y_position != y) {
 		_canvas_display->set_y_position (y);
@@ -722,20 +693,15 @@ TimeAxisView::set_selected (bool yn)
 	Selectable::set_selected (yn);
 
 	if (_selected) {
-		//controls_ebox.set_name (controls_base_selected_name);
-		//time_axis_vbox.set_name (controls_base_selected_name);
-		//controls_vbox.set_name (controls_base_selected_name);
+		controls_event_box.set_state (Gtk::STATE_ACTIVE);
 	} else {
-		//controls_ebox.set_name (controls_base_unselected_name);
-		//time_axis_vbox.set_name (controls_base_unselected_name);
-		//controls_vbox.set_name (controls_base_unselected_name);
+		controls_event_box.set_state (Gtk::STATE_NORMAL);
 		hide_selection ();
 
 		/* children will be set for the yn=true case. but when deselecting
 		   the editor only has a list of top-level trackviews, so we
 		   have to do this here.
 		*/
-
 		for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 			(*i)->set_selected (false);
 		}
@@ -752,7 +718,7 @@ TimeAxisView::build_display_menu ()
 	display_menu = new Menu;
 	display_menu->set_name ("ArdourContextMenu");
 
-	// Just let implementing classes define what goes into the manu
+	// Just let implementing classes define what goes into the menu
 }
 
 void

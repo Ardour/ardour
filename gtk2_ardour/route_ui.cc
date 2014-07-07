@@ -83,6 +83,7 @@ RouteUI::RouteUI (ARDOUR::Session* sess, const std::string& layout_script_file)
 	, monitor_input_button (get_waves_button ("monitor_input_button"))
 	, monitor_disk_button (get_waves_button ("monitor_disk_button"))
 {
+	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 	std::cout << "RouteUI::RouteUI (" << layout_script_file << ")" << std::endl;
 	if (sess) init ();
 }

@@ -205,12 +205,10 @@ class TimeAxisView : public virtual AxisView
 
   protected:
 	/* The Standard LHS Controls */
-	//Gtk::HBox              controls_hbox;
-	//Gtk::Table             controls_table;
 	Gtk::Container& controls_event_box;
-	//Gtk::VBox              controls_vbox;
 	Gtk::Container& time_axis_box;
 	Gtk::Label&    name_label;
+	Gtk::Label&    number_label;
     bool                  _name_editing;
     uint32_t               height;  /* in canvas units */
 	std::string            controls_base_unselected_name;

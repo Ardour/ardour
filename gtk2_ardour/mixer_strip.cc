@@ -285,9 +285,6 @@ MixerStrip::init ()
 	   must be the same as those used in RCOptionEditor so that the configuration changes
 	   are recognised when they occur.
 	*/
-	//_visibility.add (&_invert_button_box, X_("PhaseInvert"), _("Phase Invert"));
-	//_visibility.add (solo_safe_led, X_("SoloSafe"), _("Solo Safe"), true, boost::bind (&MixerStrip::override_solo_visibility, this));
-	//_visibility.add (solo_isolated_led, X_("SoloIsolated"), _("Solo Isolated"), true, boost::bind (&MixerStrip::override_solo_visibility, this));
 	_visibility.add (&_comment_button, X_("Comments"), _("Comments"));
 	_visibility.add (&group_button, X_("Group"), _("Group"));
 
