@@ -29,6 +29,7 @@ class Editor;
 class EditorCursor {
   public:
         EditorCursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
+        EditorCursor (Editor&);
        ~EditorCursor ();
 
 	void set_position (framepos_t);
