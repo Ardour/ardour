@@ -44,10 +44,10 @@ class ThemeManager : public ArdourWindow
 	void on_dark_theme_button_toggled ();
 	void on_light_theme_button_toggled ();
 	void on_flat_buttons_toggled ();
-        void on_region_color_toggled ();
-        void on_show_clip_toggled ();
-        void on_waveform_gradient_depth_change ();
-        void on_timeline_item_gradient_depth_change ();
+    void on_region_color_toggled ();
+    void on_show_clip_toggled ();
+    void on_waveform_gradient_depth_change ();
+    void on_timeline_item_gradient_depth_change ();
 	void on_all_dialogs_toggled ();
 
   private:
@@ -77,10 +77,10 @@ class ThemeManager : public ArdourWindow
 	Gtk::CheckButton flat_buttons;
 	Gtk::CheckButton region_color_button;
 	Gtk::CheckButton show_clipping_button;
-        Gtk::HScale waveform_gradient_depth;
-        Gtk::Label waveform_gradient_depth_label;
-        Gtk::HScale timeline_item_gradient_depth;
-        Gtk::Label timeline_item_gradient_depth_label;
+    Gtk::HScale waveform_gradient_depth;
+    Gtk::Label waveform_gradient_depth_label;
+    Gtk::HScale timeline_item_gradient_depth;
+    Gtk::Label timeline_item_gradient_depth_label;
 	Gtk::CheckButton all_dialogs;
 	Gtk::CheckButton gradient_waveforms;
 

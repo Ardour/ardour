@@ -165,7 +165,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void redisplay_track_list ();
 	bool no_track_list_redisplay;
 	bool track_display_button_press (GdkEventButton*);
-	void strip_width_changed ();
+	//void strip_width_changed ();
 
 	void track_list_delete (const Gtk::TreeModel::Path&);
 	void track_list_reorder (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* new_order);

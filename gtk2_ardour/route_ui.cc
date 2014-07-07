@@ -55,6 +55,9 @@
 #include "ardour/template_utils.h"
 
 #include "i18n.h"
+
+#include "dbg_msg.h"
+
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
@@ -64,14 +67,23 @@ uint32_t RouteUI::_max_invert_buttons = 3;
 PBD::Signal1<void, boost::shared_ptr<Route> > RouteUI::BusSendDisplayChanged;
 boost::weak_ptr<Route> RouteUI::_showing_sends_to;
 
-RouteUI::RouteUI (ARDOUR::Session* sess)
-	: AxisView(sess)
-	, mute_menu(0)
-	, solo_menu(0)
-	, sends_menu(0)
-	, record_menu(0)
-	, _invert_menu(0)
+RouteUI::RouteUI (ARDOUR::Session* sess, const std::string& layout_script_file)
+	: AxisView (sess)
+	, Gtk::EventBox ()
+	, WavesUI (layout_script_file, *this)
+	, mute_menu (0)
+	, solo_menu (0)
+	, sends_menu (0)
+	, record_menu (0)
+	, _invert_menu (0)
+	, mute_button (get_waves_button ("mute_button"))
+	, solo_button (get_waves_button ("solo_button"))
+	, rec_enable_button (get_waves_button ("rec_enable_button"))
+	, show_sends_button (get_waves_button ("show_sends_button"))
+	, monitor_input_button (get_waves_button ("monitor_input_button"))
+	, monitor_disk_button (get_waves_button ("monitor_disk_button"))
 {
+	std::cout << "RouteUI::RouteUI (" << layout_script_file << ")" << std::endl;
 	if (sess) init ();
 }
 
@@ -94,55 +106,23 @@ RouteUI::init ()
 	mute_menu = 0;
 	solo_menu = 0;
 	sends_menu = 0;
-        record_menu = 0;
+    record_menu = 0;
 	_invert_menu = 0;
 	pre_fader_mute_check = 0;
 	post_fader_mute_check = 0;
 	listen_mute_check = 0;
 	main_mute_check = 0;
-        solo_safe_check = 0;
-        solo_isolated_check = 0;
-        solo_isolated_led = 0;
-        solo_safe_led = 0;
+    solo_safe_check = 0;
+    solo_isolated_check = 0;
 	_solo_release = 0;
 	_mute_release = 0;
 	denormal_menu_item = 0;
-        step_edit_item = 0;
+    step_edit_item = 0;
 	multiple_mute_change = false;
 	multiple_solo_change = false;
 	_i_am_the_modifier = 0;
 
 	setup_invert_buttons ();
-
-	mute_button = manage (new ArdourButton);
-	mute_button->set_name ("mute button");
-	UI::instance()->set_tip (mute_button, _("Mute this track"), "");
-
-	solo_button = manage (new ArdourButton);
-	solo_button->set_name ("solo button");
-	UI::instance()->set_tip (solo_button, _("Mute other (non-soloed) tracks"), "");
-	solo_button->set_no_show_all (true);
-
-	rec_enable_button = manage (new ArdourButton);
-	rec_enable_button->set_name ("record enable button");
-	rec_enable_button->set_tweaks (ArdourButton::ImplicitUsesSolidColor);
-	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
-
-	show_sends_button = manage (new ArdourButton);
-	show_sends_button->set_name ("send alert button");
-	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
-
-	monitor_input_button = manage (new ArdourButton (ArdourButton::default_elements));
-	monitor_input_button->set_name ("monitor button");
-	monitor_input_button->set_text (_("In"));
-	UI::instance()->set_tip (monitor_input_button, _("Monitor input"), "");
-	monitor_input_button->set_no_show_all (true);
-	
-	monitor_disk_button = manage (new ArdourButton (ArdourButton::default_elements));
-	monitor_disk_button->set_name ("monitor button");
-	monitor_disk_button->set_text (_("Disk"));
-	UI::instance()->set_tip (monitor_disk_button, _("Monitor playback"), "");
-	monitor_disk_button->set_no_show_all (true);
 
 	_session->SoloChanged.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::solo_changed_so_update_mute, this), gui_context());
 	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::check_rec_enable_sensitivity, this), gui_context());
@@ -151,25 +131,25 @@ RouteUI::init ()
 	_session->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteUI::parameter_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteUI::parameter_changed, this, _1), gui_context());
 
-	rec_enable_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_press), false);
-	rec_enable_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_release), false);
+	rec_enable_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_press), false);
+	rec_enable_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_release), false);
 
-	show_sends_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_press), false);
-	show_sends_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_release));
+	show_sends_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_press), false);
+	show_sends_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_release));
 
-	solo_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::solo_press), false);
-	solo_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::solo_release), false);
-	mute_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::mute_press), false);
-	mute_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::mute_release), false);
+	solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::solo_press), false);
+	solo_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::solo_release), false);
+	mute_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::mute_press), false);
+	mute_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::mute_release), false);
 	
-	monitor_input_button->set_distinct_led_click (false);
-	monitor_disk_button->set_distinct_led_click (false);
+//	monitor_input_button.set_distinct_led_click (false);
+//	monitor_disk_button.set_distinct_led_click (false);
 
-	monitor_input_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_press));
-	monitor_input_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_release));
+	monitor_input_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_press));
+	monitor_input_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_release));
 
-	monitor_disk_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_press));
-	monitor_disk_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_release));
+	monitor_disk_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_press));
+	monitor_disk_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_release));
 
 	BusSendDisplayChanged.connect_same_thread (*this, boost::bind(&RouteUI::bus_send_display_changed, this, _1));
 }
@@ -209,8 +189,8 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		rp->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::self_delete, this), gui_context());
 	}
 
-	mute_button->set_controllable (_route->mute_control());
-	solo_button->set_controllable (_route->solo_control());
+	mute_button.set_controllable (_route->mute_control());
+	solo_button.set_controllable (_route->solo_control());
 
 	_route->active_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_active_changed, this), gui_context());
 	_route->mute_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::mute_changed, this, _1), gui_context());
@@ -231,8 +211,8 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 		t->RecordEnableChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
 		
-		rec_enable_button->show();
- 		rec_enable_button->set_controllable (t->rec_enable_control());
+		rec_enable_button.show();
+ 		rec_enable_button.set_controllable (t->rec_enable_control());
 
                 if (is_midi_track()) {
                         midi_track()->StepEditStatusChange.connect (route_connections, invalidator (*this),
@@ -254,15 +234,15 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		update_monitoring_display ();
 	}
 
-	mute_button->unset_flags (Gtk::CAN_FOCUS);
-	solo_button->unset_flags (Gtk::CAN_FOCUS);
+	mute_button.unset_flags (Gtk::CAN_FOCUS);
+	solo_button.unset_flags (Gtk::CAN_FOCUS);
 
-	mute_button->show();
+	mute_button.show();
 
 	if (_route->is_monitor() || _route->is_master()) {
-		solo_button->hide ();
+		solo_button.hide ();
 	} else {
-		solo_button->show();
+		solo_button.show();
 	}
 
 	map_frozen ();
@@ -297,31 +277,22 @@ RouteUI::mute_press (GdkEventButton* ev)
 	multiple_mute_change = false;
 
 	if (!_i_am_the_modifier) {
-
 		if (Keyboard::is_context_menu_event (ev)) {
-
 			if (mute_menu == 0){
 				build_mute_menu();
 			}
-
 			mute_menu->popup(0,ev->time);
-
 		} else {
-
 			if (Keyboard::is_button2_event (ev)) {
 				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
-
-
-				if (mute_button->on_button_press_event (ev)) {
-                                        return true;
-                                }
-
+				if (mute_button.on_button_press_event (ev)) {
+					return true;
+				}
 				_mute_release = new SoloMuteRelease (_route->muted ());
 			}
 
 			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
-
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
 					/* toggle mute on everything (but
@@ -423,30 +394,23 @@ RouteUI::solo_press(GdkEventButton* ev)
 	multiple_solo_change = false;
 
 	if (!_i_am_the_modifier) {
-
 		if (Keyboard::is_context_menu_event (ev)) {
-
-                        if (! (solo_isolated_led && solo_isolated_led->is_visible()) ||
+			/*
+			if (! (solo_isolated_led && solo_isolated_led->is_visible()) ||
 			    ! (solo_safe_led && solo_safe_led->is_visible())) {
-
-                                if (solo_menu == 0) {
-                                        build_solo_menu ();
-                                }
-
-                                solo_menu->popup (1, ev->time);
-                        }
-
+                    if (solo_menu == 0) {
+                        build_solo_menu ();
+                    }
+                    solo_menu->popup (1, ev->time);
+            }
+			*/
 		} else {
-
 			if (Keyboard::is_button2_event (ev)) {
-
 				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
-
-                                if (solo_button->on_button_press_event (ev)) {
-                                        return true;
-                                }
-
+                if (solo_button.on_button_press_event (ev)) {
+                        return true;
+                }
 				_solo_release = new SoloMuteRelease (_route->self_soloed());
 			}
 
@@ -603,16 +567,17 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
                 }
         }
 
-	if (!_i_am_the_modifier && is_track() && rec_enable_button) {
+//	if (!_i_am_the_modifier && is_track() && rec_enable_button) {
+	if (!_i_am_the_modifier && is_track()) {
 
 		if (Keyboard::is_button2_event (ev)) {
 
 			// do nothing on midi sigc::bind event
-			return rec_enable_button->on_button_press_event (ev);
+			return rec_enable_button.on_button_press_event (ev);
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-			_session->set_record_enabled (_session->get_routes(), !rec_enable_button->active_state());
+			_session->set_record_enabled (_session->get_routes(), !rec_enable_button.active_state());
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -633,7 +598,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 					rl->push_back (_route);
 				}
 				
-				_session->set_record_enabled (rl, !rec_enable_button->active_state(), Session::rt_cleanup, true);
+				_session->set_record_enabled (rl, !rec_enable_button.active_state(), Session::rt_cleanup, true);
 			}
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
@@ -644,7 +609,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 			boost::shared_ptr<RouteList> rl (new RouteList);
 			rl->push_back (route());
-			_session->set_record_enabled (rl, !rec_enable_button->active_state());
+			_session->set_record_enabled (rl, !rec_enable_button.active_state());
 		}
 	}
 
@@ -673,22 +638,22 @@ RouteUI::update_monitoring_display ()
 	MonitorState ms = t->monitoring_state();
 
 	if (t->monitoring_choice() & MonitorInput) {
-		monitor_input_button->set_active_state (Gtkmm2ext::ExplicitActive);
+		monitor_input_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		if (ms & MonitoringInput) {
-			monitor_input_button->set_active_state (Gtkmm2ext::ImplicitActive);
+			monitor_input_button.set_active_state (Gtkmm2ext::ImplicitActive);
 		} else {
-			monitor_input_button->unset_active_state ();
+			monitor_input_button.unset_active_state ();
 		}
 	}
 
 	if (t->monitoring_choice() & MonitorDisk) {
-		monitor_disk_button->set_active_state (Gtkmm2ext::ExplicitActive);
+		monitor_disk_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		if (ms & MonitoringDisk) {
-			monitor_disk_button->set_active_state (Gtkmm2ext::ImplicitActive);
+			monitor_disk_button.set_active_state (Gtkmm2ext::ImplicitActive);
 		} else {
-			monitor_disk_button->unset_active_state ();
+			monitor_disk_button.unset_active_state ();
 		}
 	}
 }
@@ -807,29 +772,19 @@ RouteUI::toggle_step_edit ()
 void
 RouteUI::step_edit_changed (bool yn)
 {
-        if (yn) {
-                if (rec_enable_button) {
-                        rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
-                }
-
-                start_step_editing ();
-
-                if (step_edit_item) {
-                        step_edit_item->set_active (true);
-                }
-
-        } else {
-
-                if (rec_enable_button) {
-                        rec_enable_button->unset_active_state ();
-                }
-
-                stop_step_editing ();
-
-                if (step_edit_item) {
-                        step_edit_item->set_active (false);
-                }
+    if (yn) {
+        rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
+        start_step_editing ();
+        if (step_edit_item) {
+            step_edit_item->set_active (true);
         }
+    } else {
+        rec_enable_button.unset_active_state ();
+        stop_step_editing ();
+        if (step_edit_item) {
+            step_edit_item->set_active (false);
+        }
+    }
 }
 
 bool
@@ -944,7 +899,7 @@ RouteUI::show_sends_press(GdkEventButton* ev)
 		return true;
 	}
 
-	if (!_i_am_the_modifier && !is_track() && show_sends_button) {
+	if (!_i_am_the_modifier && !is_track()) {
 
 		if (Keyboard::is_button2_event (ev) && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -983,14 +938,10 @@ RouteUI::show_sends_release (GdkEventButton*)
 void
 RouteUI::send_blink (bool onoff)
 {
-	if (!show_sends_button) {
-		return;
-	}
-
 	if (onoff) {
-		show_sends_button->set_active_state (Gtkmm2ext::ExplicitActive);
+		show_sends_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
-		show_sends_button->unset_active_state ();
+		show_sends_button.unset_active_state ();
 	}
 }
 
@@ -1065,30 +1016,29 @@ RouteUI::update_solo_display ()
 		solo_isolated_check->set_active (yn);
 	}
 
-        set_button_names ();
+    set_button_names ();
 
-        if (solo_isolated_led) {
+/*	if (solo_isolated_led) {
 		if (_route->solo_isolated()) {
 			solo_isolated_led->set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
 			solo_isolated_led->unset_active_state ();
 		}
-        }
+    }*/
 
-        if (solo_safe_led) {
+/*	if (solo_safe_led) {
 		if (_route->solo_safe()) {
-			solo_safe_led->set_active_state (Gtkmm2ext::ExplicitActive);
+			solo_safe_led.set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
-			solo_safe_led->unset_active_state ();
+			solo_safe_led.unset_active_state ();
 		}
-        }
+    }*/
 
-	solo_button->set_active_state (solo_active_state (_route));
+	solo_button.set_active_state (solo_active_state (_route));
 
-        /* some changes to solo status can affect mute display, so catch up
-         */
-
-        update_mute_display ();
+    /* some changes to solo status can affect mute display, so catch up
+     */
+    update_mute_display ();
 }
 
 void
@@ -1145,7 +1095,7 @@ RouteUI::update_mute_display ()
                 return;
         }
 
-        mute_button->set_active_state (mute_active_state (_session, _route));
+        mute_button.set_active_state (mute_active_state (_session, _route));
 }
 
 void
@@ -1165,29 +1115,29 @@ RouteUI::session_rec_enable_changed ()
 void
 RouteUI::update_rec_display ()
 {
-	if (!rec_enable_button || !_route) {
+//	if (!rec_enable_button || !_route) {
+	if (!_route) {
 		return;
 	}
 
 	if (_route->record_enabled()) {
-                switch (_session->record_status ()) {
-                case Session::Recording:
-                        rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
-                        break;
+        switch (_session->record_status ()) {
+        case Session::Recording:
+                rec_enable_button.set_active_state (Gtkmm2ext::ExplicitActive);
+                break;
 
-                case Session::Disabled:
-                case Session::Enabled:
-                        rec_enable_button->set_active_state (Gtkmm2ext::ImplicitActive);
-                        break;
+        case Session::Disabled:
+        case Session::Enabled:
+                rec_enable_button.set_active_state (Gtkmm2ext::ImplicitActive);
+                break;
 
-                }
+        }
 
-                if (step_edit_item) {
-                        step_edit_item->set_sensitive (false);
-                }
-
+        if (step_edit_item) {
+                step_edit_item->set_sensitive (false);
+        }
 	} else {
-		rec_enable_button->unset_active_state ();
+		rec_enable_button.unset_active_state ();
 
                 if (step_edit_item) {
                         step_edit_item->set_sensitive (true);
@@ -1316,6 +1266,8 @@ RouteUI::muting_change ()
 	}
 }
 
+
+/*
 bool
 RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 {
@@ -1323,23 +1275,23 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
                 return true;
         }
 
-        bool view = solo_isolated_led->active_state();
+        bool view = solo_isolated_led.active_state();
         bool model = _route->solo_isolated();
 
-        /* called BEFORE the view has changed */
+        *//* called BEFORE the view has changed *//*
 
         if (ev->button == 1) {
                 if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
                         if (model) {
-                                /* disable isolate for all routes */
+                                *//* disable isolate for all routes *//*
                                 _session->set_solo_isolated (_session->get_routes(), false, Session::rt_cleanup, true);
                         }
 
                 } else {
                         if (model == view) {
 
-                                /* flip just this route */
+                                *//* flip just this route *//*
 
                                 boost::shared_ptr<RouteList> rl (new RouteList);
                                 rl->push_back (_route);
@@ -1350,16 +1302,19 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 
         return true;
 }
+*/
 
+/*
 bool
 RouteUI::solo_safe_button_release (GdkEventButton* ev)
 {
 	if (ev->button == 1) {
-		_route->set_solo_safe (!solo_safe_led->active_state(), this);
+		_route->set_solo_safe (!solo_safe_led.active_state(), this);
 		return true;
 	}
 	return false;
 }
+*/
 
 void
 RouteUI::toggle_solo_isolated (Gtk::CheckMenuItem* check)
@@ -1680,10 +1635,10 @@ RouteUI::map_frozen ()
 	if (at) {
 		switch (at->freeze_state()) {
 		case AudioTrack::Frozen:
-			rec_enable_button->set_sensitive (false);
+			rec_enable_button.set_sensitive (false);
 			break;
 		default:
-			rec_enable_button->set_sensitive (true);
+			rec_enable_button.set_sensitive (true);
 			break;
 		}
 	}
@@ -1735,10 +1690,10 @@ RouteUI::save_as_template ()
 void
 RouteUI::check_rec_enable_sensitivity ()
 {
-	if (_session->transport_rolling() && rec_enable_button->active_state() && Config->get_disable_disarm_during_roll()) {
-		rec_enable_button->set_sensitive (false);
+	if (_session->transport_rolling() && rec_enable_button.active_state() && Config->get_disable_disarm_during_roll()) {
+		rec_enable_button.set_sensitive (false);
 	} else {
-		rec_enable_button->set_sensitive (true);
+		rec_enable_button.set_sensitive (true);
 	}
 
 	update_monitoring_display ();
@@ -1842,7 +1797,7 @@ RouteUI::setup_invert_buttons ()
 {
 	/* remove old invert buttons */
 	for (vector<ArdourButton*>::iterator i = _invert_buttons.begin(); i != _invert_buttons.end(); ++i) {
-		_invert_button_box.remove (**i);
+		//_invert_button_box.remove (**i);
 	}
 
 	_invert_buttons.clear ();
@@ -1879,11 +1834,11 @@ RouteUI::setup_invert_buttons ()
 		}
 
 		_invert_buttons.push_back (b);
-		_invert_button_box.pack_start (*b);
+		//_invert_button_box.pack_start (*b);
 	}
 
-	_invert_button_box.set_spacing (1);
-	_invert_button_box.show_all ();
+	//_invert_button_box.set_spacing (1);
+//	_invert_button_box.show_all ();
 }
 
 void
@@ -2032,10 +1987,10 @@ void
 RouteUI::bus_send_display_changed (boost::shared_ptr<Route> send_to)
 {
 	if (_route == send_to) {
-		show_sends_button->set_active (true);
+		show_sends_button.set_active (true);
 		send_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun (*this, &RouteUI::send_blink));
 	} else {
-		show_sends_button->set_active (false);
+		show_sends_button.set_active (false);
 		send_blink_connection.disconnect ();
 	}
 }

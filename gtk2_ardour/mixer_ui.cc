@@ -290,7 +290,7 @@ Mixer_UI::show_window ()
 
 		for (ri = rows.begin(); ri != rows.end(); ++ri) {
 			ms = (*ri)[track_columns.strip];
-			ms->set_width_enum (ms->get_width_enum (), ms->width_owner());
+			//ms->set_width_enum (ms->get_width_enum (), ms->width_owner());
 			/* Fix visibility of mixer strip stuff */
 			ms->parameter_changed (X_("mixer-strip-visibility"));
 		}
@@ -366,14 +366,14 @@ Mixer_UI::add_strips (RouteList& routes)
 				continue;
 			}
 			
-			strip = new MixerStrip (*this, _session, route);
+			strip = new MixerStrip (*this, _session, route, "mixer_strip.xml");
 			strips.push_back (strip);
 
 			Config->get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
 			
-			if (strip->width_owner() != strip) {
-				strip->set_width_enum (_strip_width, this);
-			}
+			//if (strip->width_owner() != strip) {
+			//	strip->set_width_enum (_strip_width, this);
+			//}
 			
 			show_strip (strip);
 			
@@ -389,7 +389,7 @@ Mixer_UI::add_strips (RouteList& routes)
 			
 			route->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::strip_property_changed, this, _1, strip), gui_context());
 			
-			strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
+			//strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
 			strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 		}
 
@@ -1066,32 +1066,32 @@ Mixer_UI::redisplay_track_list ()
 	_group_tabs->set_dirty ();
 }
 
-void
-Mixer_UI::strip_width_changed ()
-{
-	_group_tabs->set_dirty ();
-
-#ifdef GTKOSX
-	TreeModel::Children rows = track_model->children();
-	TreeModel::Children::iterator i;
-	long order;
-
-	for (order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
-		MixerStrip* strip = (*i)[track_columns.strip];
-
-		if (strip == 0) {
-			continue;
-		}
-
-		bool visible = (*i)[track_columns.visible];
-
-		if (visible) {
-			strip->queue_draw();
-		}
-	}
-#endif
-
-}
+//void
+//Mixer_UI::strip_width_changed ()
+//{
+//	_group_tabs->set_dirty ();
+//
+//#ifdef GTKOSX
+//	TreeModel::Children rows = track_model->children();
+//	TreeModel::Children::iterator i;
+//	long order;
+//
+//	for (order = 0, i = rows.begin(); i != rows.end(); ++i, ++order) {
+//		MixerStrip* strip = (*i)[track_columns.strip];
+//
+//		if (strip == 0) {
+//			continue;
+//		}
+//
+//		bool visible = (*i)[track_columns.visible];
+//
+//		if (visible) {
+//			strip->queue_draw();
+//		}
+//	}
+//#endif
+//
+//}
 
 struct SignalOrderRouteSorter {
     bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
@@ -1485,9 +1485,9 @@ Mixer_UI::set_strip_width (Width w, bool save)
 {
 	_strip_width = w;
 
-	for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		(*i)->set_width_enum (w, save ? (*i)->width_owner() : this);
-	}
+	//for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
+	//	(*i)->set_width_enum (w, save ? (*i)->width_owner() : this);
+	//}
 }
 
 void
@@ -1779,10 +1779,10 @@ Mixer_UI::parameter_changed (string const & p)
 			_group_tabs->hide ();
 		}
 	} else if (p == "default-narrow_ms") {
-		bool const s = Config->get_default_narrow_ms ();
-		for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
-			(*i)->set_width_enum (s ? Narrow : Wide, this);
-		}
+		//bool const s = Config->get_default_narrow_ms ();
+		//for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		//	(*i)->set_width_enum (s ? Narrow : Wide, this);
+		//}
 	} else if (p == "remote-model") {
 		reset_remote_control_ids ();
 	}

@@ -93,14 +93,16 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	gain_slider.signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_release), false);
 
 	gain_display_entry.set_name ("MixerStripGainDisplay");
-	set_size_request_to_display_given_text (gain_display_entry, "-80.g", 2, 6); /* note the descender */
+	//set_size_request_to_display_given_text (gain_display_entry, "-80.g", 2, 6); /* note the descender */
 	gain_display_entry.signal_activate().connect (sigc::mem_fun (*this, &GainMeter::gain_activated));
 	gain_display_entry.signal_focus_in_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
 	gain_display_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
 	gain_display_entry.set_alignment(1.0);
+	gain_display_home.pack_start(gain_display_entry, true, true);
+	gain_display_entry.show();
 
-	peak_display_button.set_name ("MixerStripPeakDisplay");
-	set_size_request_to_display_given_text (peak_display_button, "-80.g", 2, 6); /* note the descender */
+//	peak_display_button.set_name ("MixerStripPeakDisplay");
+//	set_size_request_to_display_given_text (peak_display_button, "-80.g", 2, 6); /* note the descender */
 	max_peak = minus_infinity();
 	peak_display_button.set_text (_("-inf"));
 	peak_display_button.unset_flags (Gtk::CAN_FOCUS);
@@ -277,19 +279,6 @@ GainMeter::setup_meters (int len)
 		meter_channels = _route->shared_peak_meter()->input_streams().n_total();
 	}
 
-	switch (_width) {
-		case Wide:
-			if (meter_channels == 1) {
-				meter_width = 6;
-			}
-			break;
-		case Narrow:
-			if (meter_channels > 1) {
-				meter_width = 5;
-			}
-			break;
-	}
-
 	level_meter.setup_meters (meter_width, meter_width);
 }
 
@@ -335,7 +324,8 @@ GainMeter::reset_peak_display ()
 	level_meter.clear_meters();
 	max_peak = -INFINITY;
 	peak_display_button.set_text (_("-inf"));
-	peak_display_button.set_name ("MixerStripPeakDisplay");
+	peak_display_button.set_active_state(Gtkmm2ext::Off);
+//	peak_display_button.set_name ("MixerStripPeakDisplay");
 }
 
 void
@@ -746,7 +736,8 @@ GainMeter::update_meters()
 		}
 	}
 	if (mpeak >= Config->get_meter_peak()) {
-		peak_display_button.set_name ("MixerStripPeakDisplayPeak");
+		//peak_display_button.set_name ("MixerStripPeakDisplayPeak");
+		peak_display_button.set_active_state(Gtkmm2ext::ExplicitActive);
 	}
 }
 
@@ -754,18 +745,6 @@ void GainMeter::color_handler(bool /*dpi*/)
 {
 	setup_meters();
 }
-
-void
-GainMeter::set_width (Width w, int len)
-{
-	_width = w;
-	int meter_width = 5;
-	if (_width == Wide && _route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
-		meter_width = 10;
-	}
-	level_meter.setup_meters(meter_width, meter_width);
-}
-
 
 void
 GainMeter::on_theme_changed()

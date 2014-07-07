@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<RouteUI>
+  <VBox>
+    <VBox box.pack="end">
+      <EventBox id="panners_home" width="95" height="60"/>
+      <HBox id="level_meter_home"/>
+      <Vbox>
+        <HBox id="gain_meter_home"/>
+        <!--RouteUI-->
+        <HBox id="invert_button_box" visible="false"/>
+        <EventBox bgnormal="#000000" width="50">
+          <VBox borderwidth="1" spacing="1">
+            <HBox spacing="1">
+              <iconbutton id="rec_enable_button"
+                          width="47"
+                          height="20"
+                          normalicon="inspector_record"
+                          activeicon="inspector_record_active"
+                          prelighticon="inspector_record_prelight"/>
+              <iconbutton id="monitor_input_button"
+                          width="47"
+                          height="20"
+                          normalicon="inspector_monitor_input"
+                          activeicon="inspector_monitor_input_active"
+                          prelighticon="inspector_monitor_input_prelight"/>
+            </HBox>
+            <HBox spacing="1">
+              <iconbutton id="mute_button"
+                          width="47"
+                          height="20"
+                          normalicon="inspector_mute"
+                          activeicon="inspector_mute_active"
+                          prelighticon="inspector_mute_prelight"/>
+              <iconbutton id="solo_button"
+                          width="47"
+                          height="20"
+                          normalicon="inspector_solo"
+                          activeicon="inspector_solo_active"
+                          prelighticon="inspector_solo_prelight"/>
+            </HBox>
+            <Button id="name_button"
+                    width="95"
+                    height="47"
+                    fgnormal="#D7D7D7"/>
+          </VBox>
+        </EventBox>
+        <Button id="show_sends_button"  visible="false" noshowall="true"/>
+        <Button id="monitor_disk_button"  visible="false" noshowall="true"/>
+        <Button id="comment_button"  visible="false" noshowall="true"/>
+        <Button id="midi_input_enable_button"  visible="false" noshowall="true"/>
+        <Button id="group_button" text="Grp" visible="false" noshowall="true"/>
+      </Vbox>
+    </VBox>
+  </VBox>
+</RouteUI>

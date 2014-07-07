@@ -41,7 +41,9 @@ namespace XMLUI {
 	extern LIBCANVAS_API double xml_property (const XMLNode& node, const char* prop_name, const XMLNodeMap& styles, double default_value);
 	extern LIBCANVAS_API double xml_property (const XMLNode& node, const char* prop_name, double default_value);
 	extern LIBCANVAS_API int32_t xml_property (const XMLNode& node, const char* prop_name, const XMLNodeMap& styles, int32_t default_value);
+	extern LIBCANVAS_API int32_t xml_property (const XMLNode& node, const char* prop_name, int32_t default_value);
 	extern LIBCANVAS_API uint32_t xml_property (const XMLNode& node, const char* prop_name, const XMLNodeMap& styles, uint32_t default_value);
+	extern LIBCANVAS_API uint32_t xml_property (const XMLNode& node, const char* prop_name, uint32_t default_value);
 
 	extern LIBCANVAS_API bool xml_property (const XMLNode& node, const char* prop_name, const XMLNodeMap& styles, bool default_value);
 	extern LIBCANVAS_API bool xml_property (const XMLNode& node, const char* prop_name, bool default_value);

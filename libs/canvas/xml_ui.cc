@@ -53,6 +53,13 @@ xml_property (const XMLNode &node, const char *prop_name, const XMLNodeMap& styl
 	return atof(property.c_str());
 }
 
+double
+xml_property (const XMLNode &node, const char *prop_name, double default_value)
+{
+	return xml_property (node, prop_name, XMLNodeMap(), default_value);
+}
+
+
 int32_t
 xml_property (const XMLNode &node, const char *prop_name, const XMLNodeMap& styles, int32_t default_value)
 {
@@ -78,6 +85,14 @@ xml_property (const XMLNode &node, const char *prop_name, const XMLNodeMap& styl
 	return value;
 }
 
+
+int32_t
+xml_property (const XMLNode &node, const char *prop_name, int32_t default_value)
+{
+	return xml_property (node, prop_name, XMLNodeMap(), default_value);
+}
+
+
 uint32_t
 xml_property (const XMLNode &node, const char *prop_name, const XMLNodeMap& styles, uint32_t default_value)
 {
@@ -101,6 +116,12 @@ xml_property (const XMLNode &node, const char *prop_name, const XMLNodeMap& styl
 	}
 
 	return value;
+}
+
+uint32_t
+xml_property (const XMLNode &node, const char *prop_name, uint32_t default_value)
+{
+	return xml_property (node, prop_name, XMLNodeMap(), default_value);
 }
 
 bool

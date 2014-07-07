@@ -87,25 +87,33 @@ using namespace Editing;
 using namespace std;
 using std::list;
 
-RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
-	: AxisView(sess)
-	, RouteUI(sess)
-	, TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas)
+RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed,
+									  Session* sess,
+									  ArdourCanvas::Canvas& canvas,
+									  const std::string& layout_script_file)
+	: AxisView (sess)
+	, RouteUI (sess, layout_script_file)
+	, TimeAxisView (sess, ed, (TimeAxisView*)0, canvas, *this)
 	, _view (0)
 	, parent_canvas (canvas)
 	, no_redraw (false)
-	, button_table (3, 3)
-	, route_group_button (_("g"))
-	, playlist_button (_("p"))
-	, automation_button (_("a"))
+	//, button_table (3, 3)
+	//, route_group_button (_("g"))
+	//, playlist_button (_("p"))
+	//, automation_button (_("a"))
+	, route_group_button (get_waves_button ("route_group_button"))
+	, playlist_button (get_waves_button ("playlist_button"))
+	, automation_button (get_waves_button ("automation_button"))
 	, automation_action_menu (0)
 	, plugins_submenu_item (0)
 	, route_group_menu (0)
 	, playlist_action_menu (0)
 	, mode_menu (0)
 	, color_mode_menu (0)
-	, gm (sess, "inspector_gain_meter.xml")
+	, gm (sess, "track_header_gain_meter.xml")
 	, _ignore_set_layer_display (false)
+
+	, gain_meter_home (get_box ("gain_meter_home"))
 {
 }
 
@@ -122,8 +130,9 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
 		meter_width = 6;
 	}
+
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
-	gm.get_level_meter().set_no_show_all();
+//	gm.get_level_meter().set_no_show_all();
 	gm.get_level_meter().setup_meters(meter_width);
 	gm.update_gain_sensitive ();
 
@@ -143,16 +152,16 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	mute_changed (0);
-        update_solo_display ();
+    update_solo_display ();
 
 	timestretch_rect = 0;
 	no_redraw = false;
 
 	ignore_toggle = false;
 
-	route_group_button.set_name ("route button");
-	playlist_button.set_name ("route button");
-	automation_button.set_name ("route button");
+	//route_group_button.set_name ("route button");
+	//playlist_button.set_name ("route button");
+	//automation_button.set_name ("route button");
 
  	route_group_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::route_group_click), false);
 	playlist_button.signal_clicked.connect (sigc::mem_fun(*this, &RouteTimeAxisView::playlist_click));
@@ -161,7 +170,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	if (is_track()) {
 
 		/* use icon */
-		
+		/*
 		switch (track()->mode()) {
 		case ARDOUR::Normal:
 		case ARDOUR::NonLayered:
@@ -171,52 +180,54 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 			rec_enable_button->set_image (::get_icon (X_("record_tape_red")));
 			break;
 		}
+		*/
+		// controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
-		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+		//if (is_midi_track()) {
+		//	ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
+		//	gm.set_fader_name ("MidiTrackFader");
+		//} else {
+		//	ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record"));
+		//	gm.set_fader_name ("AudioTrackFader");
+		//}
 
-                if (is_midi_track()) {
-                        ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
-			gm.set_fader_name ("MidiTrackFader");
-                } else {
-                        ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record"));
-			gm.set_fader_name ("AudioTrackFader");
-                }
-
-		rec_enable_button->set_sensitive (_session->writable());
+		rec_enable_button.set_sensitive (_session->writable());
 		
 		/* set playlist button tip to the current playlist, and make it update when it changes */
 		update_playlist_tip ();
 		track()->PlaylistChanged.connect (*this, invalidator (*this), ui_bind(&RouteTimeAxisView::update_playlist_tip, this), gui_context());
-
 	} else {
-		gm.set_fader_name ("AudioBusFader");
+//		gm.set_fader_name ("AudioBusFader");
 	}
+	playlist_button.set_visible(is_track() && track()->mode() == ARDOUR::Normal);
 
-	Gtk::VBox *mtrbox = manage(new Gtk::VBox());
-	if (gm.get_level_meter().get_parent()) {
-		gm.get_level_meter().get_parent()->remove (gm.get_level_meter());
+	//Gtk::VBox *mtrbox = manage(new Gtk::VBox());
+	//if (gm.get_level_meter().get_parent()) {
+	//	gm.get_level_meter().get_parent()->remove (gm.get_level_meter());
+	//}
+	//mtrbox->pack_start(gm.get_level_meter(), true, true, 2);
+	//controls_hbox.pack_start(*mtrbox, false, false, 4);
+	//mtrbox->show();
+	LevelMeterHBox& level_meter = gm.get_level_meter();
+
+	if (level_meter.get_parent ()) {
+		level_meter.get_parent ()->remove (level_meter);
 	}
-	mtrbox->pack_start(gm.get_level_meter(), true, true, 2);
-	controls_hbox.pack_start(*mtrbox, false, false, 4);
-	mtrbox->show();
+	gain_meter_home.pack_start(level_meter, true, true);
 
 	_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
 	_route->input()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 
-	controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	// controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
-        if (!_route->is_master()) {
-                controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-        }
-	if (!ARDOUR::Profile->get_trx()) {
-		controls_table.attach (route_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+    //if (!_route->is_master()) {
+    //        controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+    //}
+	//if (!ARDOUR::Profile->get_trx()) {
+	//	controls_table.attach (route_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	//	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::AttachOptions (0), 3, 0);
-	}
-
-	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
-	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));
-	ARDOUR_UI::instance()->set_tip(route_group_button, _("Route Group"));
+	//}
 
 	if (is_midi_track()) {
 		ARDOUR_UI::instance()->set_tip(automation_button, _("MIDI Controllers and Automation"));
@@ -226,13 +237,9 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	label_view ();
 
-	if (!ARDOUR::Profile->get_trx()) {
-		controls_table.attach (automation_button, 6, 7, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	}
-
-	if (!ARDOUR::Profile->get_trx() && is_track() && track()->mode() == ARDOUR::Normal) {
-		controls_table.attach (playlist_button, 5, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	}
+	//if (!ARDOUR::Profile->get_trx() && is_track() && track()->mode() == ARDOUR::Normal) {
+	//	controls_table.attach (playlist_button, 5, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	//}
 
 	_y_position = -1;
 
@@ -263,9 +270,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	plist->add (ARDOUR::Properties::solo, true);
 
 	route_group_menu = new RouteGroupMenu (_session, plist);
-
-//	gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
-
 	gm.get_level_meter().signal_scroll_event().connect (sigc::mem_fun (*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 }
 
@@ -363,7 +367,7 @@ RouteTimeAxisView::take_name_changed (void *src)
 }
 
 void
-RouteTimeAxisView::playlist_click ()
+RouteTimeAxisView::playlist_click (WavesButton*)
 {
  	build_playlist_menu ();
 	conditionally_add_to_selection ();
@@ -371,7 +375,7 @@ RouteTimeAxisView::playlist_click ()
 }
 
 void
-RouteTimeAxisView::automation_click ()
+RouteTimeAxisView::automation_click (WavesButton*)
 {
 	conditionally_add_to_selection ();
 	build_automation_action_menu (false);
@@ -746,21 +750,21 @@ RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
 
 		track()->set_mode (mode);
 
-		rec_enable_button->remove ();
+		rec_enable_button.remove ();
 
-		switch (mode) {
-		case ARDOUR::NonLayered:
-		case ARDOUR::Normal:
-			rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
-			rec_enable_button->set_text (string());
-			break;
-		case ARDOUR::Destructive:
-			rec_enable_button->set_image (::get_icon (X_("record_tape_red")));
-			rec_enable_button->set_text (string());
-			break;
-		}
+		//switch (mode) {
+		//case ARDOUR::NonLayered:
+		//case ARDOUR::Normal:
+		//	rec_enable_button.set_image (::get_icon (X_("record_normal_red")));
+		//	rec_enable_button.set_text (string());
+		//	break;
+		//case ARDOUR::Destructive:
+		//	rec_enable_button.set_image (::get_icon (X_("record_tape_red")));
+		//	rec_enable_button.set_text (string());
+		//	break;
+		//}
 
-		rec_enable_button->show_all ();
+		rec_enable_button.show_all ();
 	}
 }
 
@@ -862,43 +866,39 @@ RouteTimeAxisView::set_height (uint32_t h)
 		reset_meter();
 
 //		gm.get_gain_slider().hide();
-		mute_button->show();
+		mute_button.show();
 		if (!_route || _route->is_monitor()) {
-			solo_button->hide();
+			solo_button.hide();
 		} else {
-			solo_button->show();
+			solo_button.show();
 		}
-		if (rec_enable_button)
-			rec_enable_button->show();
+
+		rec_enable_button.show();
 
 		route_group_button.show();
 		automation_button.show();
 
-		if (is_track() && track()->mode() == ARDOUR::Normal) {
-			playlist_button.show();
-		}
-
+		//if (is_track() && track()->mode() == ARDOUR::Normal) {
+		//	playlist_button.show();
+		//}
 	} else {
-
 		reset_meter();
 
 //		gm.get_gain_slider().hide();
-		mute_button->show();
+		mute_button.show();
 		if (!_route || _route->is_monitor()) {
-			solo_button->hide();
+			solo_button.hide();
 		} else {
-			solo_button->show();
+			solo_button.show();
 		}
-		if (rec_enable_button)
-			rec_enable_button->show();
+		rec_enable_button.show();
 
 		route_group_button.hide ();
 		automation_button.hide ();
 
-		if (is_track() && track()->mode() == ARDOUR::Normal) {
-			playlist_button.hide ();
-		}
-
+		//if (is_track() && track()->mode() == ARDOUR::Normal) {
+		//	playlist_button.hide ();
+		//}
 	}
 
 	if (height_changed && !no_redraw) {
@@ -1288,7 +1288,7 @@ RouteTimeAxisView::name_entry_changed ()
 {
 	TimeAxisView::name_entry_changed ();
 
-	string x = name_entry->get_text ();
+	string x = name_entry.get_text ();
 
 	if (x == _route->name()) {
 		return;
@@ -1297,18 +1297,18 @@ RouteTimeAxisView::name_entry_changed ()
 	strip_whitespace_edges (x);
 
 	if (x.length() == 0) {
-		name_entry->set_text (_route->name());
+		name_entry.set_text (_route->name());
 		return;
 	}
 
 	if (_session->route_name_internal (x)) {
 		ARDOUR_UI::instance()->popup_error (string_compose (_("You cannot create a track with that name as it is reserved for %1"),
 								    PROGRAM_NAME));
-		name_entry->grab_focus ();
+		name_entry.grab_focus ();
 	} else if (RouteUI::verify_new_route_name (x)) {
 		_route->set_name (x);
 	} else {
-		name_entry->grab_focus ();
+		name_entry.grab_focus ();
 	}
 }
 
@@ -1616,11 +1616,11 @@ RouteTimeAxisView::map_frozen ()
 	switch (track()->freeze_state()) {
 	case Track::Frozen:
 		playlist_button.set_sensitive (false);
-		rec_enable_button->set_sensitive (false);
+		rec_enable_button.set_sensitive (false);
 		break;
 	default:
 		playlist_button.set_sensitive (true);
-		rec_enable_button->set_sensitive (true);
+		rec_enable_button.set_sensitive (true);
 		break;
 	}
 }
@@ -2337,8 +2337,8 @@ RouteTimeAxisView::add_underlay (StreamView* v, bool /*update_xml*/)
 
 	RouteTimeAxisView& other = v->trackview();
 
-	if (find(_underlay_streams.begin(), _underlay_streams.end(), v) == _underlay_streams.end()) {
-		if (find(other._underlay_mirrors.begin(), other._underlay_mirrors.end(), this) != other._underlay_mirrors.end()) {
+	if (std::find(_underlay_streams.begin(), _underlay_streams.end(), v) == _underlay_streams.end()) {
+		if (std::find(other._underlay_mirrors.begin(), other._underlay_mirrors.end(), this) != other._underlay_mirrors.end()) {
 			fatal << _("programming error: underlay reference pointer pairs are inconsistent!") << endmsg;
 			/*NOTREACHED*/
 		}
@@ -2369,11 +2369,11 @@ RouteTimeAxisView::remove_underlay (StreamView* v)
 		return;
 	}
 
-	UnderlayList::iterator it = find(_underlay_streams.begin(), _underlay_streams.end(), v);
+	UnderlayList::iterator it = std::find(_underlay_streams.begin(), _underlay_streams.end(), v);
 	RouteTimeAxisView& other = v->trackview();
 
 	if (it != _underlay_streams.end()) {
-		UnderlayMirrorList::iterator gm = find(other._underlay_mirrors.begin(), other._underlay_mirrors.end(), this);
+		UnderlayMirrorList::iterator gm = std::find(other._underlay_mirrors.begin(), other._underlay_mirrors.end(), this);
 
 		if (gm == other._underlay_mirrors.end()) {
 			fatal << _("programming error: underlay reference pointer pairs are inconsistent!") << endmsg;
@@ -2394,27 +2394,27 @@ RouteTimeAxisView::remove_underlay (StreamView* v)
 void
 RouteTimeAxisView::set_button_names ()
 {
-	if (_route && _route->solo_safe()) {
-		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
-	} else {
-		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
-	}
-	if (Config->get_solo_control_is_listen_control()) {
-		switch (Config->get_listen_position()) {
-			case AfterFaderListen:
-				solo_button->set_text (_("A"));
-				ARDOUR_UI::instance()->set_tip (*solo_button, _("After-fade listen (AFL)"));
-				break;
-			case PreFaderListen:
-				solo_button->set_text (_("P"));
-				ARDOUR_UI::instance()->set_tip (*solo_button, _("Pre-fade listen (PFL)"));
-			break;
-		}
-	} else {
-		solo_button->set_text (_("s"));
-		ARDOUR_UI::instance()->set_tip (*solo_button, _("Solo"));
-	}
-	mute_button->set_text (_("m"));
+	//if (_route && _route->solo_safe()) {
+	//	solo_button.set_visual_state (Gtkmm2ext::VisualState (solo_button.visual_state() | Gtkmm2ext::Insensitive));
+	//} else {
+	//	solo_button.set_visual_state (Gtkmm2ext::VisualState (solo_button.visual_state() & ~Gtkmm2ext::Insensitive));
+	//}
+	//if (Config->get_solo_control_is_listen_control()) {
+	//	switch (Config->get_listen_position()) {
+	//		case AfterFaderListen:
+	//			solo_button.set_text (_("A"));
+	//			ARDOUR_UI::instance()->set_tip (*solo_button, _("After-fade listen (AFL)"));
+	//			break;
+	//		case PreFaderListen:
+	//			solo_button.set_text (_("P"));
+	//			ARDOUR_UI::instance()->set_tip (*solo_button, _("Pre-fade listen (PFL)"));
+	//		break;
+	//	}
+	//} else {
+	//	solo_button.set_text (_("s"));
+	//	ARDOUR_UI::instance()->set_tip (*solo_button, _("Solo"));
+	//}
+	//mute_button->set_text (_("m"));
 }
 
 Gtk::CheckMenuItem*

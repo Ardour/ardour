@@ -143,7 +143,7 @@ Editor::show_editor_mixer (bool yn)
 
 		if (r) {
 			current_mixer_strip->set_route (r);
-			current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
+			//current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
 		}
 
 	} else {
@@ -175,13 +175,12 @@ void
 Editor::create_editor_mixer ()
 {
 	current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
-					      _session,
-					      false);
+					      _session, "editor_mixer.xml");
 	current_mixer_strip->Hiding.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_hidden));
-	current_mixer_strip->WidthChanged.connect (sigc::mem_fun (*this, &Editor::mixer_strip_width_changed));
+//	current_mixer_strip->WidthChanged.connect (sigc::mem_fun (*this, &Editor::mixer_strip_width_changed));
 
 #ifdef GTKOSX
-	current_mixer_strip->WidthChanged.connect (sigc::mem_fun(*this, &Editor::ensure_all_elements_drawn));
+//	current_mixer_strip->WidthChanged.connect (sigc::mem_fun(*this, &Editor::ensure_all_elements_drawn));
 #endif
 	current_mixer_strip->set_embedded (true);
 }
@@ -242,7 +241,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 
 	if (route) {
 		current_mixer_strip->set_route (route);
-		current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
+		//current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
 	}
 }
 
@@ -256,23 +255,23 @@ Editor::current_mixer_strip_hidden ()
 	}
 }
 
-void
-Editor::maybe_add_mixer_strip_width (XMLNode& node)
-{
-	if (current_mixer_strip) {
-		node.add_property ("mixer-width", enum_2_string (editor_mixer_strip_width));
-	}
-}
+//void
+//Editor::maybe_add_mixer_strip_width (XMLNode& node)
+//{
+//	if (current_mixer_strip) {
+//		//node.add_property ("mixer-width", enum_2_string (editor_mixer_strip_width));
+//	}
+//}
 
-void
-Editor::mixer_strip_width_changed ()
-{
-#ifdef GTKOSX
-	ensure_all_elements_drawn ();
-#endif
-
-	editor_mixer_strip_width = current_mixer_strip->get_width_enum ();
-}
+//void
+//Editor::mixer_strip_width_changed ()
+//{
+//#ifdef GTKOSX
+//	ensure_all_elements_drawn ();
+//#endif
+//
+////	editor_mixer_strip_width = current_mixer_strip->get_width_enum ();
+//}
 
 void
 Editor::track_mixer_selection ()

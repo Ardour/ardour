@@ -133,14 +133,16 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Gtk::RadioMenuItem*          _meter_color_mode_item;
 	Gtk::RadioMenuItem*          _channel_color_mode_item;
 	Gtk::RadioMenuItem*          _track_color_mode_item;
-        Gtk::Label                   _playback_channel_status;
-        Gtk::Label                   _capture_channel_status;
- 	Gtk::HBox                    _channel_status_box;
-        Gtk::Button                  _channel_selector_button;
-	Gtk::VBox                    _midi_controls_box;
+ 	Gtk::Box&                    _range_scroomer_home;
+ 	Gtk::Box&                    _piano_home;
+    Gtk::Label&                  _playback_channel_status;
+    Gtk::Label&                  _capture_channel_status;
+// 	Gtk::HBox                    _channel_status_box;
+    WavesButton&                 _channel_selector_button;
+//	Gtk::VBox                    _midi_controls_box;
 	MidiChannelSelectorWindow*   _channel_selector;
-	Gtk::ComboBoxText            _midnam_model_selector;
-	Gtk::ComboBoxText            _midnam_custom_device_mode_selector;
+	Gtk::ComboBoxText&           _midnam_model_selector;
+	Gtk::ComboBoxText&           _midnam_custom_device_mode_selector;
 
 	Gtk::CheckMenuItem*          _step_edit_item;
 	Gtk::Menu*                    default_channel_menu;
@@ -154,8 +156,9 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void add_single_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 	void add_multi_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 	void build_controller_menu ();
-        void toggle_channel_selector ();
-        void channel_selector_hidden ();
+    void channel_selector_click (WavesButton*);
+    void toggle_channel_selector ();
+    void channel_selector_hidden ();
 	void set_channel_mode (ARDOUR::ChannelMode, uint16_t);
 
 	void set_note_selection (uint8_t note);
@@ -176,8 +179,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	StepEditor* _step_editor;
 
-        void capture_channel_mode_changed();
-        void playback_channel_mode_changed();
+    void capture_channel_mode_changed();
+    void playback_channel_mode_changed();
 
 	void ensure_pan_views (bool show = true);
 

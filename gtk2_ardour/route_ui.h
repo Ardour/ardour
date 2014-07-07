@@ -35,6 +35,7 @@
 #include "ardour/route_group.h"
 #include "ardour/track.h"
 
+#include "waves_ui.h"
 #include "axis_view.h"
 #include "selectable.h"
 
@@ -52,10 +53,10 @@ namespace Gtk {
 class BindableToggleButton;
 class ArdourButton;
 
-class RouteUI : public virtual AxisView
+class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 {
   public:
-	RouteUI(ARDOUR::Session*);
+	RouteUI(ARDOUR::Session*, const std::string& layout_script_file);
 
 	virtual ~RouteUI();
 
@@ -92,18 +93,17 @@ class RouteUI : public virtual AxisView
 	bool multiple_mute_change;
 	bool multiple_solo_change;
 
-	Gtk::HBox _invert_button_box;
-	ArdourButton* mute_button;
-	ArdourButton* solo_button;
-	ArdourButton* rec_enable_button; /* audio tracks */
-	ArdourButton* show_sends_button; /* busses */
-	ArdourButton* monitor_input_button;
-	ArdourButton* monitor_disk_button;
+	WavesButton& mute_button;
+	WavesButton& solo_button;
+	WavesButton& rec_enable_button; /* audio tracks */
+	WavesButton& show_sends_button; /* busses */
+	WavesButton& monitor_input_button;
+	WavesButton& monitor_disk_button;
 
 	Glib::RefPtr<Gdk::Pixbuf> solo_safe_pixbuf;
 
-        ArdourButton* solo_safe_led;
-        ArdourButton* solo_isolated_led;
+//    WavesButton& solo_safe_led;
+//    WavesButton& solo_isolated_led;
 
 	Gtk::Label monitor_input_button_label;
 	Gtk::Label monitor_disk_button_label;
@@ -157,8 +157,8 @@ class RouteUI : public virtual AxisView
 	void solo_isolated_toggle (void*, Gtk::CheckMenuItem*);
 	void toggle_solo_isolated (Gtk::CheckMenuItem*);
 
-        bool solo_isolate_button_release (GdkEventButton*);
-        bool solo_safe_button_release (GdkEventButton*);
+//	bool solo_isolate_button_release (GdkEventButton*);
+//	bool solo_safe_button_release (GdkEventButton*);
 
 	void solo_safe_toggle (void*, Gtk::CheckMenuItem*);
 	void toggle_solo_safe (Gtk::CheckMenuItem*);
@@ -188,8 +188,8 @@ class RouteUI : public virtual AxisView
 	virtual void route_active_changed () {}
 	void set_route_active (bool, bool);
 
-        Gtk::Menu* record_menu;
-        void build_record_menu ();
+    Gtk::Menu* record_menu;
+    void build_record_menu ();
 
 	Gtk::CheckMenuItem *step_edit_item;
 	void toggle_step_edit ();
@@ -226,7 +226,7 @@ class RouteUI : public virtual AxisView
 	 */
 	static PBD::Signal1<void, boost::shared_ptr<ARDOUR::Route> > BusSendDisplayChanged;
 
-   protected:
+  protected:
 	PBD::ScopedConnectionList route_connections;
 	bool self_destruct;
 
@@ -234,10 +234,10 @@ class RouteUI : public virtual AxisView
  	void reset ();
 
 	void self_delete ();
-        virtual void start_step_editing () {}
-        virtual void stop_step_editing() {}
+    virtual void start_step_editing () {}
+    virtual void stop_step_editing() {}
 
-        void set_invert_sensitive (bool);
+    void set_invert_sensitive (bool);
 	bool verify_new_route_name (const std::string& name);
 
 	void route_gui_changed (std::string);

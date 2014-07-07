@@ -51,7 +51,7 @@ Glib::RefPtr<Gdk::Pixbuf> MonitorSection::little_knob_pixbuf;
 
 MonitorSection::MonitorSection (Session* s)
 	: AxisView (s)
-	, RouteUI (s)
+	, RouteUI (s, "monitor_section.xml")
 	, _tearoff (0)
 	, channel_table_viewport (*channel_table_scroller.get_hadjustment(),
 					*channel_table_scroller.get_vadjustment ())

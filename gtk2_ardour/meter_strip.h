@@ -43,7 +43,7 @@ namespace Gtk {
 	class Style;
 }
 
-class MeterStrip : public Gtk::VBox, public RouteUI
+class MeterStrip :public RouteUI
 {
   public:
 	MeterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
@@ -66,7 +66,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 
 	void set_metric_mode (int, ARDOUR::MeterType);
 	int  get_metric_mode() { return _metricmode; }
-	void set_tick_bar (int);
+//	void set_tick_bar (int);
 	int  get_tick_bar() { return _tick_bar; }
 	bool has_midi() { return _has_midi; }
 	bool is_metric_display() { return _strip_type == 0; }
@@ -78,9 +78,9 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	PBD::ScopedConnectionList level_meter_connection;
 	void self_delete ();
 
-	gint meter_metrics_expose (GdkEventExpose *);
-	gint meter_ticks1_expose (GdkEventExpose *);
-	gint meter_ticks2_expose (GdkEventExpose *);
+	//gint meter_metrics_expose (GdkEventExpose *);
+	//gint meter_ticks1_expose (GdkEventExpose *);
+	//gint meter_ticks2_expose (GdkEventExpose *);
 
 	void on_theme_changed ();
 
@@ -93,29 +93,29 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void set_button_names ();
 
   private:
-	Gtk::VBox mtr_vbox;
-	Gtk::VBox nfo_vbox;
-	Gtk::EventBox mtr_container;
-	Gtk::HSeparator mtr_hsep;
-	Gtk::HBox meterbox;
-	Gtk::HBox spacer;
-	Gtk::HBox namebx;
-	ArdourButton name_label;
-	Gtk::DrawingArea meter_metric_area;
-	Gtk::DrawingArea meter_ticks1_area;
-	Gtk::DrawingArea meter_ticks2_area;
+//	Gtk::VBox mtr_vbox;
+//	Gtk::VBox nfo_vbox;
+//	Gtk::EventBox mtr_container;
+//	Gtk::HSeparator mtr_hsep;
+//	Gtk::HBox meterbox;
+//	Gtk::HBox spacer;
+//	Gtk::HBox namebx;
+	WavesButton& name_label;
+//	Gtk::DrawingArea meter_metric_area;
+//	Gtk::DrawingArea meter_ticks1_area;
+//	Gtk::DrawingArea meter_ticks2_area;
 
-	Gtk::HBox mutebox;
-	Gtk::HBox solobox;
-	Gtk::HBox recbox;
-	Gtk::HBox mon_in_box;
-	Gtk::HBox mon_disk_box;
+//	Gtk::HBox mutebox;
+//	Gtk::HBox solobox;
+//	Gtk::HBox recbox;
+//	Gtk::HBox mon_in_box;
+//	Gtk::HBox mon_disk_box;
 
-	Gtk::Alignment meter_align;
-	Gtk::Alignment peak_align;
-	Gtk::HBox peakbx;
-	Gtk::VBox btnbox;
-	ArdourButton peak_display;
+//	Gtk::Alignment meter_align;
+//	Gtk::Alignment peak_align;
+//	Gtk::HBox peakbx;
+//	Gtk::VBox btnbox;
+	WavesButton& peak_display;
 
 	std::vector<ARDOUR::DataType> _types;
 	ARDOUR::MeterType metric_type;
@@ -126,7 +126,8 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	int _strip_type;
 	int _metricmode;
 
-	LevelMeterHBox *level_meter;
+	Gtk::Box&       level_meter_home;
+	LevelMeterHBox* level_meter;
 
 	PBD::ScopedConnection _config_connection;
 	void strip_property_changed (const PBD::PropertyChange&);
@@ -137,7 +138,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	bool peak_button_release (GdkEventButton*);
 
 	void parameter_changed (std::string const & p);
-	void redraw_metrics ();
+//	void redraw_metrics ();
 	void update_button_box ();
 	void update_name_box ();
 

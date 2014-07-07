@@ -32,6 +32,7 @@
 
 #include "canvas/rectangle.h"
 
+#include "waves_ui.h"
 #include "time_axis_view.h"
 #include "automation_controller.h"
 
@@ -52,7 +53,7 @@ class AutomationStreamView;
 class AutomationController;
 
 
-class AutomationTimeAxisView : public TimeAxisView {
+class AutomationTimeAxisView : public Gtk::EventBox, public WavesUI, public TimeAxisView {
   public:
 	AutomationTimeAxisView (ARDOUR::Session*,
 				boost::shared_ptr<ARDOUR::Route>,
@@ -143,8 +144,9 @@ class AutomationTimeAxisView : public TimeAxisView {
 	bool    ignore_toggle;
 	bool    first_call_to_set_height;
 
-	Gtk::Button        hide_button;
-	Gtk::Button        auto_button;
+	WavesButton&        hide_button;
+	WavesButton&        auto_button;
+	Gtk::EventBox& controller_home; 
 	Gtk::Menu*         automation_menu;
 	Gtk::Label*        plugname;
 	bool               plugname_packed;
@@ -162,8 +164,9 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void add_line (boost::shared_ptr<AutomationLine>);
 
 	void clear_clicked ();
+	void hide_button_clicked (WavesButton*);
 	void hide_clicked ();
-	void auto_clicked ();
+	void auto_button_clicked (WavesButton*);
 
 	void build_display_menu ();
 
