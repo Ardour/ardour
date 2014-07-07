@@ -147,39 +147,16 @@ class MixerStrip : public RouteUI
 	bool  _embedded;
 	bool  _packed;
 	bool  _mixer_owned;
-//	Width _width;
-//	void*  _width_owner;
-
-//	Gtk::HBox        width_hide_box;
-//	Gtk::VBox        whvbox;
-//	Gtk::EventBox    top_event_box;
-//	Gtk::EventBox*   spacer;
-
-	void hide_clicked();
-//	bool width_button_pressed (GdkEventButton *);
-
-//	Gtk::Frame          global_frame;
-//	Gtk::VBox           global_vpacker;
 
 	Gtk::EventBox&       panners_home;
 	ProcessorBox processor_box;
 	GainMeter    gpm;
 	PannerUI     panners;
 
-//	Glib::RefPtr<Gtk::SizeGroup> button_size_group;
-
-	//Gtk::Table top_button_table;
-	//Gtk::Table middle_button_table;
-	//Gtk::Table bottom_button_table;
-	//Gtk::Table auto_n_io_table;
-    
 	void meter_changed ();
 
 	Gtk::Box& gain_meter_home;
 	WavesButton &midi_input_enable_button;
-	//Gtk::HBox   input_button_box;
-
-	std::string longest_label;
 
 	void midi_input_status_changed ();
 	bool input_active_button_press (GdkEventButton*);
@@ -193,6 +170,7 @@ class MixerStrip : public RouteUI
 	ArdourWindow*  comment_window;
 	Gtk::TextView* comment_area;
 	WavesButton&   _comment_button;
+	WavesButton* color_button[15];
 
 	void comment_editor_done_editing ();
 	void setup_comment_editor ();
@@ -316,6 +294,8 @@ class MixerStrip : public RouteUI
 	PBD::ScopedConnection _level_meter_connection;
 
 	std::string meter_point_string (ARDOUR::MeterPoint);
+	void color_button_clicked (WavesButton *button);
+	static char* XMLColor[15];
 };
 
 #endif /* __ardour_mixer_strip__ */
