@@ -734,7 +734,7 @@ def configure(conf):
 	else:
 	    conf.define('LXVST_SUPPORT', 1)
 	    conf.env['LXVST_SUPPORT'] = True
-    conf.define('WINDOWS_KEY', opts.windows_key)
+    conf.env['WINDOWS_KEY'] = opts.windows_key
     if opts.rt_alloc_debug:
         conf.define('DEBUG_RT_ALLOC', 1)
         conf.env['DEBUG_RT_ALLOC'] = True
