@@ -26,6 +26,7 @@ using namespace ARDOUR_UI_UTILS;
 
 MouseCursors::MouseCursors ()
 	: cross_hair (0)
+	, scissors (0)
 	, trimmer (0)
 	, right_side_trim (0)
 	, anchored_right_side_trim (0)
@@ -70,6 +71,7 @@ void
 MouseCursors::drop_all ()
 {
 	delete cross_hair; cross_hair = 0;
+	delete scissors; scissors = 0;
 	delete trimmer; trimmer = 0;
 	delete right_side_trim; right_side_trim = 0;
 	delete anchored_right_side_trim; anchored_right_side_trim = 0;
@@ -155,6 +157,11 @@ MouseCursors::set_cursor_set (const std::string& name)
 		RefPtr<Bitmap> bits = Bitmap::create (pix, 2, 2);
 		Color c;
 		transparent = new Cursor (bits, bits, c, c, 0, 0);
+	}
+
+	{
+		RefPtr<Pixbuf> p (::get_icon ("scissors", _cursor_set));
+		scissors = new Cursor (Display::get_default(), p, 5, 0);
 	}
 
 	{

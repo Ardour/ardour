@@ -2768,6 +2768,7 @@ Editor::setup_toolbar ()
 	Glib::RefPtr<SizeGroup> mouse_mode_size_group = SizeGroup::create (SIZE_GROUP_BOTH);
 //	mouse_mode_size_group->add_widget (smart_mode_button);
 	mouse_mode_size_group->add_widget (mouse_move_button);
+	mouse_mode_size_group->add_widget (mouse_cut_button);
 	mouse_mode_size_group->add_widget (mouse_select_button);
 	mouse_mode_size_group->add_widget (mouse_zoom_button);
 	mouse_mode_size_group->add_widget (mouse_gain_button);
@@ -2787,6 +2788,7 @@ Editor::setup_toolbar ()
 
 	mouse_mode_hbox->pack_start (mouse_move_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_select_button, false, false);
+	mouse_mode_hbox->pack_start (mouse_cut_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_zoom_button, false, false);
 
 	if (!ARDOUR::Profile->get_trx()) {
@@ -3076,6 +3078,7 @@ Editor::setup_tooltips ()
 {
 	ARDOUR_UI::instance()->set_tip (smart_mode_button, _("Smart Mode (add Range functions to Object mode)"));
 	ARDOUR_UI::instance()->set_tip (mouse_move_button, _("Object Mode (select/move Objects)"));
+	ARDOUR_UI::instance()->set_tip (mouse_cut_button, _("Cut Mode (split Regions)"));
 	ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Range Mode (select/move Ranges)"));
 	ARDOUR_UI::instance()->set_tip (mouse_draw_button, _("Draw/Edit MIDI Notes"));
 	ARDOUR_UI::instance()->set_tip (mouse_gain_button, _("Draw Region Gain"));

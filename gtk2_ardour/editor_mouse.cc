@@ -239,6 +239,10 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-range"));
 		break;
 
+	case MouseCut:
+		act = ActionManager::get_action (X_("MouseCut"), X_("set-mouse-mode-cut"));
+		break;
+
 	case MouseObject:
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-object"));
 		break;
@@ -289,6 +293,10 @@ Editor::mouse_mode_toggled (MouseMode m)
 
 	case MouseObject:
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-object"));
+		break;
+
+	case MouseCut:
+		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-cut"));
 		break;
 
 	case MouseDraw:
@@ -410,11 +418,16 @@ Editor::step_mouse_mode (bool next)
 
 	case MouseRange:
 		if (next) set_mouse_mode (MouseDraw);
-		else set_mouse_mode (MouseObject);
+		else set_mouse_mode (MouseCut);
+		break;
+
+	case MouseCut:
+		if (next) set_mouse_mode (MouseRange);
+		else set_mouse_mode (MouseDraw);
 		break;
 
 	case MouseDraw:
-		if (next) set_mouse_mode (MouseZoom);
+		if (next) set_mouse_mode (MouseCut);
 		else set_mouse_mode (MouseRange);
 		break;
 
