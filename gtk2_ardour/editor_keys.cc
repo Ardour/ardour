@@ -40,7 +40,7 @@ using namespace PBD;
 using namespace Editing;
 
 void
-Editor::keyboard_selection_finish (bool add)
+Editor::keyboard_selection_finish (bool /*add*/)
 {
 	if (_session) {
 

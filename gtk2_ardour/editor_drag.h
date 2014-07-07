@@ -440,6 +440,16 @@ private:
 
 };
 
+/** "Drag" to cut a region (action only on button release) */
+class RegionCutDrag : public Drag
+{
+    public:
+	RegionCutDrag (Editor*, ArdourCanvas::Item*);
+	void motion (GdkEvent*, bool);
+	void finished (GdkEvent*, bool);
+	void aborted (bool);
+};
+
 /** Drags to create regions */
 class RegionCreateDrag : public Drag
 {
