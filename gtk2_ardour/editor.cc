@@ -744,6 +744,8 @@ Editor::Editor ()
 	_last_region_menu_was_main = false;
 	_popup_region_menu_item = 0;
 
+	_ignore_follow_edits = false;
+
 	_show_marker_lines = false;
 
         /* Button bindings */

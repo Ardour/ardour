@@ -134,7 +134,8 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 	bool frozen = false;
 
 	RegionSelection pre_selected_regions = selection->regions;
-
+	bool working_on_selection = !pre_selected_regions.empty();
+	
 	list<boost::shared_ptr<Playlist> > used_playlists;
 	list<RouteTimeAxisView*> used_trackviews;
 
@@ -234,11 +235,13 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 		EditorThaw(); /* Emit Signal */
 	}
 
-	//IFF we were working on selected regions, then we should select both sides of the new region after the split.
-	if( !pre_selected_regions.empty() ) {
-		selection->add (latest_regionviews);  //these are the new regions, created after the split
-		selection->add (pre_selected_regions);  //these were the old selected regions, they got lost in the freeze/thaw
+	//IFF we were working on selected regions, try to reinstate the other region selections that existed before the freeze/thaw.
+	_ignore_follow_edits = true;  //a split will change the region selection in mysterious ways;  its not practical or wanted to follow this edit
+	if( working_on_selection ) {
+		selection->add ( pre_selected_regions );
+		selection->add (latest_regionviews);  //these are the new regions created after the split
 	}
+	_ignore_follow_edits = false;
 
 }
 
@@ -2271,7 +2274,7 @@ Editor::get_preroll ()
 void
 Editor::maybe_locate_with_edit_preroll ( framepos_t location )
 {
-	if ( _session->transport_rolling() || !Config->get_follow_edits() )
+	if ( _session->transport_rolling() || !Config->get_follow_edits() || _ignore_follow_edits )
 		return;
 
 	location -= get_preroll();
