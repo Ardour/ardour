@@ -337,6 +337,9 @@ def set_compiler_flags (conf,opt):
                 "-fstrength-reduce"
                 ]
 
+    if opt.debug_symbols:
+        optimization_flags += [ '-g' ]
+
     if opt.stl_debug:
         cxx_flags.append("-D_GLIBCXX_DEBUG")
 
@@ -419,6 +422,8 @@ def options(opt):
                     help='Compile without support for AU Plugins with only CARBON UI (needed for 64bit)')
     opt.add_option('--boost-sp-debug', action='store_true', default=False, dest='boost_sp_debug',
                     help='Compile with Boost shared pointer debugging')
+    opt.add_option('--debug-symbols', action='store_true', default=False, dest='debug_symbols',
+                    help='Add debug-symbols to optimized builds')
     opt.add_option('--depstack-root', type='string', default='~', dest='depstack_root',
                     help='Directory/folder where dependency stack trees (gtk, a3) can be found (defaults to ~)')
     opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
@@ -797,6 +802,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Build target',          conf.env['build_target'])
     write_config_text('CoreAudio',             conf.is_defined('HAVE_COREAUDIO'))
     write_config_text('Debug RT allocations',  conf.is_defined('DEBUG_RT_ALLOC'))
+    write_config_text('Debug Symbols',         conf.is_defined('debug_symbols') or conf.env['DEBUG'])
     write_config_text('Dummy backend',         opts.build_dummy)
     write_config_text('Process thread timing', conf.is_defined('PT_TIMING'))
     write_config_text('Denormal exceptions',   conf.is_defined('DEBUG_DENORMAL_EXCEPTION'))
