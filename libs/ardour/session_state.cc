@@ -3773,3 +3773,92 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 
 	return !(found_sr && found_data_format); // zero if they are both found
 }
+
+typedef std::vector<boost::shared_ptr<FileSource> > SeveralFileSources;
+typedef std::map<std::string,SeveralFileSources> SourcePathMap;
+
+int
+Session::bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,string)> callback)
+{
+	uint32_t total = 0;
+	uint32_t n = 0;
+	SourcePathMap source_path_map;
+	string new_path;
+	boost::shared_ptr<AudioFileSource> afs;
+	int ret = 0;
+
+	{
+
+		Glib::Threads::Mutex::Lock lm (source_lock);
+		
+		cerr << " total sources = " << sources.size();
+		
+		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
+			
+			if (!fs) {
+				continue;
+			}
+			
+			if (fs->within_session()) {
+				cerr << "skip " << fs->name() << endl;
+				continue;
+			}
+			
+			if (source_path_map.find (fs->path()) != source_path_map.end()) {
+				source_path_map[fs->path()].push_back (fs);
+			} else {
+				SeveralFileSources v;
+				v.push_back (fs);
+				source_path_map.insert (make_pair (fs->path(), v));
+			}
+			
+			total++;
+		}
+		
+		cerr << " fsources = " << total << endl;
+		
+		for (SourcePathMap::iterator i = source_path_map.begin(); i != source_path_map.end(); ++i) {
+			
+			/* tell caller where we are */
+			
+			string old_path = i->first;
+			
+			callback (n, total, old_path);
+			
+			cerr << old_path << endl;
+			
+			new_path.clear ();
+			
+			switch (i->second.front()->type()) {
+			case DataType::AUDIO:
+				new_path = new_audio_source_path_for_embedded (old_path);
+				break;
+				
+			case DataType::MIDI:
+				break;
+			}
+			
+			cerr << "Move " << old_path << " => " << new_path << endl;
+			
+			if (!copy_file (old_path, new_path)) {
+				cerr << "failed !\n";
+				ret = -1;
+			}
+			
+			/* make sure we stop looking in the external
+			   dir/folder. Remember, this is an all-or-nothing
+			   operations, it doesn't merge just some files.
+			*/
+			remove_dir_from_search_path (Glib::path_get_dirname (old_path), i->second.front()->type());
+
+			for (SeveralFileSources::iterator f = i->second.begin(); f != i->second.end(); ++f) {
+				(*f)->set_path (new_path);
+			}
+		}
+	}
+
+	save_state ("", false, false);
+
+	return ret;
+}

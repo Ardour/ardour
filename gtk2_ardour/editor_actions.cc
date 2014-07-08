@@ -701,6 +701,10 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, X_("importFromSession"), _("Import From Session"), sigc::mem_fun(*this, &Editor::session_import_dialog));
 	ActionManager::write_sensitive_actions.push_back (act);
 
+
+	act = ActionManager::register_action (editor_actions, X_("bring-into-session"), _("Bring all media into session folder"), sigc::mem_fun(*this, &Editor::bring_all_sources_into_session));
+	ActionManager::write_sensitive_actions.push_back (act);
+
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleSummary"), _("Show Summary"), sigc::mem_fun (*this, &Editor::set_summary));
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleGroupTabs"), _("Show Group Tabs"), sigc::mem_fun (*this, &Editor::set_group_tabs));

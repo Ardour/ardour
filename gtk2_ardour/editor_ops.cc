@@ -7045,3 +7045,39 @@ Editor::unlock ()
 		start_lock_event_timing ();
 	}
 }
+
+void
+Editor::bring_in_callback (Gtk::Label* label, uint32_t n, uint32_t total, string name)
+{
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&Editor::update_bring_in_message, this, label, n, total, name));
+}
+
+void
+Editor::update_bring_in_message (Gtk::Label* label, uint32_t n, uint32_t total, string name)
+{
+	label->set_text (string_compose ("Copying %1, %2 of %3", name, n, total));
+	Gtkmm2ext::UI::instance()->flush_pending ();
+}
+
+void
+Editor::bring_all_sources_into_session ()
+{
+	if (!_session) {
+		return;
+	}
+
+	Gtk::Label msg;
+	ArdourDialog w (_("Moving embedded files into session folder"));
+	w.get_vbox()->pack_start (msg);
+	w.present ();
+	
+	/* flush all pending GUI events because we're about to start copying
+	 * files
+	 */
+	
+	Gtkmm2ext::UI::instance()->flush_pending ();
+
+	cerr << " Do it\n";
+
+	_session->bring_all_sources_into_session (boost::bind (&Editor::bring_in_callback, this, &msg, _1, _2, _3));
+}

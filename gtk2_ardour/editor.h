@@ -2099,6 +2099,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	TimeAxisView* _stepping_axis_view;
 	void zoom_vertical_modifier_released();
 
+	void bring_in_callback (Gtk::Label*, uint32_t n, uint32_t total, std::string name);
+	void update_bring_in_message (Gtk::Label* label, uint32_t n, uint32_t total, std::string name);
+	void bring_all_sources_into_session ();
+
 	friend class Drag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;

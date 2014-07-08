@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <regex.h>
 
+#include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
 #include "pbd/strsplit.h"
 
@@ -717,4 +718,5 @@ SMFSource::prevent_deletion ()
   
 	_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
 }
-
+		
+	

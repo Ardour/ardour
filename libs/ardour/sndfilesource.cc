@@ -1016,3 +1016,12 @@ SndFileSource::set_path (const string& p)
                 _descriptor->set_path (_path);
         }
 }
+
+void
+SndFileSource::release_descriptor ()
+{
+	if (_descriptor) {
+		_descriptor->release ();
+		_descriptor = 0;
+	}
+}

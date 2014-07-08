@@ -32,6 +32,7 @@
 
 #include "pbd/convert.h"
 #include "pbd/basename.h"
+#include "pbd/file_utils.h"
 #include "pbd/mountpoint.h"
 #include "pbd/stl_delete.h"
 #include "pbd/strsplit.h"
@@ -413,3 +414,4 @@ AudioFileSource::get_interleave_buffer (framecnt_t size)
 
 	return ssb->buf;
 }
+	

@@ -44,6 +44,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/file_utils.h"
 #include "pbd/convert.h"
+#include "pbd/md5.h"
 #include "pbd/unwind.h"
 #include "pbd/search_path.h"
 
@@ -3442,6 +3443,146 @@ Session::peak_path (string base) const
 	return Glib::build_filename (_session_dir->peak_path(), base + peakfile_suffix);
 }
 
+string
+Session::new_audio_source_path_for_embedded (const std::string& path)
+{
+	/* embedded source: 
+	 *
+	 * we know that the filename is already unique because it exists
+	 * out in the filesystem. 
+	 *
+	 * However, when we bring it into the session, we could get a
+	 * collision.
+	 *
+	 * Eg. two embedded files:
+	 * 
+	 *          /foo/bar/baz.wav
+	 *          /frob/nic/baz.wav
+	 *
+	 * When merged into session, these collide. 
+	 *
+	 * There will not be a conflict with in-memory sources
+	 * because when the source was created we already picked
+	 * a unique name for it.
+	 *
+	 * This collision is not likely to be common, but we have to guard
+	 * against it.  So, if there is a collision, take the md5 hash of the
+	 * the path, and use that as the filename instead.
+	 */
+
+	SessionDirectory sdir (get_best_session_directory_for_new_audio());
+	string base = Glib::path_get_basename (path);
+	string newpath = Glib::build_filename (sdir.sound_path(), base);
+	
+	if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
+
+		MD5 md5;
+
+		md5.digestString (path.c_str());
+		md5.writeToString ();
+		base = md5.digestChars;
+
+		/* XXX base needs suffix from path */
+		
+		newpath = Glib::build_filename (sdir.sound_path(), base);
+
+		/* if this collides, we're screwed */
+
+		if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
+			error << string_compose (_("Merging embedded file %1: name collision AND md5 hash collision!"), path) << endmsg;
+			return string();
+		}
+
+	}
+
+	return newpath;
+}
+
+bool
+Session::audio_source_name_is_unique (const string& name, uint32_t chan)
+{
+	std::vector<string> sdirs = source_search_path (DataType::AUDIO);
+	vector<space_and_path>::iterator i;
+	uint32_t existing = 0;
+	string basename = PBD::basename_nosuffix (name);
+
+	for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
+		
+		/* note that we search *without* the extension so that
+		   we don't end up both "Audio 1-1.wav" and "Audio 1-1.caf"
+		   in the event that this new name is required for
+		   a file format change.
+		*/
+
+		const string spath = *i;
+		
+		if (matching_unsuffixed_filename_exists_in (spath, basename)) {
+			existing++;
+			break;
+		}
+		
+		/* it is possible that we have the path already
+		 * assigned to a source that has not yet been written
+		 * (ie. the write source for a diskstream). we have to
+		 * check this in order to make sure that our candidate
+		 * path isn't used again, because that can lead to
+		 * two Sources point to the same file with different
+		 * notions of their removability.
+		 */
+		
+		
+		string possible_path = Glib::build_filename (spath, name);
+
+		if (audio_source_by_path_and_channel (possible_path, chan)) {
+			existing++;
+			break;
+		}
+	}
+	
+	return (existing == 0);
+}
+
+string
+Session::format_audio_source_name (const string& legalized_base, uint32_t nchan, uint32_t chan, bool destructive, bool take_required, uint32_t cnt, bool related_exists)
+{
+	ostringstream sstr;
+	const string ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
+	
+	if (destructive) {
+		sstr << 'T';
+		sstr << setfill ('0') << setw (4) << cnt;
+		sstr << legalized_base;
+	} else {
+		sstr << legalized_base;
+		
+		if (take_required || related_exists) {
+			sstr << '-';
+			sstr << cnt;
+		}
+	}
+	
+	if (nchan == 2) {
+		if (chan == 0) {
+			sstr << "%L";
+		} else {
+			sstr << "%R";
+		}
+	} else if (nchan > 2) {
+		if (nchan < 26) {
+			sstr << '%';
+			sstr << 'a' + chan;
+		} else {
+			/* XXX what? more than 26 channels! */
+			sstr << '%';
+			sstr << chan+1;
+		}
+	}
+	
+	sstr << ext;
+
+	return sstr.str();
+}
+
 /** Return a unique name based on \a base for a new internal audio source */
 string
 Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t chan, bool destructive, bool take_required)
@@ -3450,86 +3591,20 @@ Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t cha
 	string possible_name;
 	const uint32_t limit = 9999; // arbitrary limit on number of files with the same basic name
 	string legalized;
-	string ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
 	bool some_related_source_name_exists = false;
 
-	possible_name[0] = '\0';
 	legalized = legalize_for_path (base);
-
-	std::vector<string> sdirs = source_search_path(DataType::AUDIO);
 
 	// Find a "version" of the base name that doesn't exist in any of the possible directories.
 
 	for (cnt = (destructive ? ++destructive_index : 1); cnt <= limit; ++cnt) {
 
-		vector<space_and_path>::iterator i;
-		uint32_t existing = 0;
-
-		for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
-
-			ostringstream sstr;
-
-			if (destructive) {
-				sstr << 'T';
-				sstr << setfill ('0') << setw (4) << cnt;
-				sstr << legalized;
-			} else {
-				sstr << legalized;
-				
-				if (take_required || some_related_source_name_exists) {
-					sstr << '-';
-					sstr << cnt;
-				}
-			}
-			
-			if (nchan == 2) {
-				if (chan == 0) {
-					sstr << "%L";
-				} else {
-					sstr << "%R";
-				}
-			} else if (nchan > 2 && nchan < 26) {
-				sstr << '%';
-				sstr << 'a' + chan;
-			} 
-
-			sstr << ext;
-
-			possible_name = sstr.str();
-			const string spath = (*i);
-
-			/* note that we search *without* the extension so that
-			   we don't end up both "Audio 1-1.wav" and "Audio 1-1.caf"
-			   in the event that this new name is required for
-			   a file format change.
-			*/
-
-			if (matching_unsuffixed_filename_exists_in (spath, possible_name)) {
-				existing++;
-				break;
-			}
-
-			/* it is possible that we have the path already
-			 * assigned to a source that has not yet been written
-			 * (ie. the write source for a diskstream). we have to
-			 * check this in order to make sure that our candidate
-			 * path isn't used again, because that can lead to
-			 * two Sources point to the same file with different
-			 * notions of their removability.
-			 */
-
-			string possible_path = Glib::build_filename (spath, possible_name);
-
-			if (audio_source_by_path_and_channel (possible_path, chan)) {
-				existing++;
-				break;
-			}
-		}
-
-		if (existing == 0) {
+		possible_name = format_audio_source_name (legalized, nchan, chan, destructive, take_required, cnt, some_related_source_name_exists);
+		
+		if (audio_source_name_is_unique (possible_name, chan)) {
 			break;
 		}
-
+		
 		some_related_source_name_exists = true;
 
 		if (cnt > limit) {
@@ -4774,6 +4849,33 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 		config.set_midi_search_path (sp.to_string());
 		break;
 	}
+}
+
+void
+Session::remove_dir_from_search_path (const string& dir, DataType type)
+{
+	Searchpath sp;
+
+	switch (type) {
+	case DataType::AUDIO:
+		sp = Searchpath(config.get_audio_search_path ());
+		break;
+	case DataType::MIDI:
+		sp = Searchpath (config.get_midi_search_path ());
+		break;
+	}
+
+	sp -= dir;
+
+	switch (type) {
+	case DataType::AUDIO:
+		config.set_audio_search_path (sp.to_string());
+		break;
+	case DataType::MIDI:
+		config.set_midi_search_path (sp.to_string());
+		break;
+	}
+
 }
 
 boost::shared_ptr<Speakers>
