@@ -1313,9 +1313,6 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 {
 	_gen_type = g;
 	_rseed = g_get_monotonic_time() % UINT_MAX;
-#ifdef COMPILER_MSVC
-	srand (_rseed);
-#endif
 
 	switch (_gen_type) {
 		case PinkNoise:
@@ -1325,12 +1322,7 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 			break;
 		case SineWave:
 			{
-#ifdef COMPILER_MSVC
-				const unsigned int rnd = rand ();
-#else
-				const unsigned int rnd = rand_r (&_rseed);
-#endif
-				_tbl_length = 5 + rnd % (int)(samplerate / 20.f);
+				_tbl_length = 5 + randi() % (int)(samplerate / 20.f);
 				_wavetable = (Sample*) malloc( _tbl_length * sizeof(Sample));
 				for (uint32_t i = 0 ; i < _tbl_length; ++i) {
 					_wavetable[i] = .12589f * sinf(2.0 * M_PI * (float)i / (float)_tbl_length);
@@ -1340,14 +1332,29 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 	}
 }
 
-static inline float randf (unsigned int *seedp) {
-	static const float rmf = RAND_MAX / 2.0;
-	// TODO this should use a better uniform random generator
-#ifdef COMPILER_MSVC
-	return ((float)rand () / rmf) - 1.f;
+inline uint32_t
+DummyAudioPort::randi ()
+{
+	// 31bit Park-Miller-Carta Pseudo-Random Number Generator
+	// http://www.firstpr.com.au/dsp/rand31/
+	uint32_t hi, lo;
+	lo = 16807 * (_rseed & 0xffff);
+	hi = 16807 * (_rseed >> 16);
+
+	lo += (hi & 0x7fff) << 16;
+	lo += hi >> 15;
+#if 1
+	lo = (lo & 0x7fffffff) + (lo >> 31);
 #else
-	return ((float)rand_r (seedp) / rmf) - 1.f;
+	if (lo > 0x7fffffff) { lo -= 0x7fffffff; }
 #endif
+	return (_rseed = lo);
+}
+
+inline float
+DummyAudioPort::randf ()
+{
+	return (randi() / 1073741824.f) - 1.f;
 }
 
 float DummyAudioPort::grandf ()
@@ -1362,8 +1369,8 @@ float DummyAudioPort::grandf ()
 	}
 
 	do {
-		x1 = randf (&_rseed);
-		x2 = randf (&_rseed);
+		x1 = randf ();
+		x2 = randf ();
 		r = x1 * x1 + x2 * x2;
 	} while ((r >= 1.0f) || (r < 1e-22f));
 
@@ -1411,7 +1418,7 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 				// http://www.musicdsp.org/files/pink.txt
 				// NB. If 'white' consists of uniform random numbers,
 				// the pink noise will have an almost gaussian distribution.
-				const float white = .0498f * randf(&_rseed);
+				const float white = .0498f * randf ();
 				_b0 = .99886f * _b0 + white * .0555179f;
 				_b1 = .99332f * _b1 + white * .0750759f;
 				_b2 = .96900f * _b2 + white * .1538520f;
@@ -1424,7 +1431,7 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 			break;
 		case PonyNoise:
 			for (pframes_t i = 0 ; i < n_samples; ++i) {
-				const float white = 0.0498f * randf(&_rseed);
+				const float white = 0.0498f * randf ();
 				// Paul Kellet's economy method
 				// http://www.musicdsp.org/files/pink.txt
 				_b0 = 0.99765 * _b0 + white * 0.0990460;

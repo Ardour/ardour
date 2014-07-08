@@ -152,8 +152,10 @@ class DummyAudioPort : public DummyPort {
 		uint32_t _tbl_length;
 		uint32_t _tbl_offset;
 
-		// (per thread) random seed
-		unsigned int _rseed;
+		// random number generator
+		inline float    randf ();
+		inline uint32_t randi ();
+		uint32_t _rseed;
 
 		// gaussian noise generator
 		float grandf ();
