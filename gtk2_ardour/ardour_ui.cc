@@ -387,6 +387,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&midi_port_matrix);
 
     session_lock_dialog->set_deletable (false);
+	session_lock_dialog->set_modal (true); 
     
 	/* We need to instantiate the theme manager because it loads our
 	   theme files. This should really change so that its window
