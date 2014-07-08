@@ -182,6 +182,13 @@ LIBPBD_API void copy_files(const std::string & from_path, const std::string & to
 LIBPBD_API std::string get_absolute_path (const std::string &);
 
 /**
+ * Take a path/filename and return the suffix (characters beyond the last '.'
+ * @return A string containing the suffix, which will be empty
+ * if there are no '.' characters in the path/filename.
+ */
+LIBPBD_API std::string get_suffix (const std::string &);
+
+/**
  * Find out if `needle' is a file or directory within the
  * directory `haystack'.
  * @return true if it is.
