@@ -29,6 +29,7 @@ class WavesIconButton : public WavesButton
 
 	void set_normal_image (const Glib::RefPtr<Gdk::Pixbuf>& img);
 	void set_active_image (const Glib::RefPtr<Gdk::Pixbuf>& img);
+	void set_implicit_active_image (const Glib::RefPtr<Gdk::Pixbuf>& img);
 	void set_inactive_image (const Glib::RefPtr<Gdk::Pixbuf>& img);	
 	void set_prelight_image (const Glib::RefPtr<Gdk::Pixbuf>& img);	
 
@@ -38,6 +39,7 @@ class WavesIconButton : public WavesButton
   private:
 	Glib::RefPtr<Gdk::Pixbuf>   _normal_pixbuf;
 	Glib::RefPtr<Gdk::Pixbuf>   _active_pixbuf;
+	Glib::RefPtr<Gdk::Pixbuf>   _implicit_active_pixbuf;
 	Glib::RefPtr<Gdk::Pixbuf>   _inactive_pixbuf;
 	Glib::RefPtr<Gdk::Pixbuf>   _prelight_pixbuf;
 };

@@ -129,12 +129,14 @@
                           height="20"
                           normalicon="inspector_mute"
                           activeicon="inspector_mute_active"
+                          implicitactiveicon="inspector_mute_implicit"
                           prelighticon="inspector_mute_prelight"/>
               <iconbutton id="solo_button"
                           width="47"
                           height="20"
                           normalicon="inspector_solo"
                           activeicon="inspector_solo_active"
+                          implicitactiveicon="inspector_solo_safe"
                           prelighticon="inspector_solo_prelight"/>
             </HBox>
             <Button id="name_button"

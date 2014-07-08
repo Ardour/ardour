@@ -418,19 +418,23 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 	if (iconbutton) {
 		property = xml_property (definition, "normalicon", styles, "");
 		if (!property.empty ()) {
-			iconbutton->set_normal_image(get_icon(property.c_str()));
+			iconbutton->set_normal_image (get_icon (property.c_str ()));
 		}
 		property = xml_property (definition, "activeicon", styles, "");
 		if (!property.empty ()) {
-			iconbutton->set_active_image(get_icon(property.c_str()));
+			iconbutton->set_active_image (get_icon (property.c_str ()));
 		}
 		property = xml_property (definition, "prelighticon", styles, "");
 		if (!property.empty ()) {
-			iconbutton->set_prelight_image(get_icon(property.c_str()));
+			iconbutton->set_prelight_image (get_icon (property.c_str ()));
 		}
 		property = xml_property (definition, "inactiveicon", styles, "");
 		if (!property.empty ()) {
-			iconbutton->set_inactive_image(get_icon(property.c_str()));
+			iconbutton->set_inactive_image (get_icon (property.c_str ()));
+		}
+		property = xml_property (definition, "implicitactiveicon", styles, "");
+		if (!property.empty ()) {
+			iconbutton->set_implicit_active_image (get_icon (property.c_str ()));
 		}
 	}
 

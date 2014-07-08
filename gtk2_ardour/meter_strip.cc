@@ -182,77 +182,10 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
 	ARDOUR_UI::instance()->set_tip (*level_meter, _route->name());
 
-//	namebx.set_size_request(18, 52);
-//	namebx.pack_start(name_label, true, false, 3);
-
-//	mon_in_box.pack_start(*monitor_input_button, true, false);
-//	btnbox.pack_start(mon_in_box, false, false, 1);
-//	mon_disk_box.pack_start(*monitor_disk_button, true, false);
-//	btnbox.pack_start(mon_disk_box, false, false, 1);
-
-//	recbox.pack_start(*rec_enable_button, true, false);
-//	btnbox.pack_start(recbox, false, false, 1);
-//	mutebox.pack_start(*mute_button, true, false);
-//	btnbox.pack_start(mutebox, false, false, 1);
-//	solobox.pack_start(*solo_button, true, false);
-//	btnbox.pack_start(solobox, false, false, 1);
-
-	rec_enable_button.set_corner_radius(2);
-	rec_enable_button.set_size_request(16, 16);
-
-	mute_button.set_corner_radius(2);
-	mute_button.set_size_request(16, 16);
-
-	solo_button.set_corner_radius(2);
-	solo_button.set_size_request(16, 16);
-
-	monitor_input_button.set_corner_radius(2);
-	monitor_input_button.set_size_request(16, 16);
-
-	monitor_disk_button.set_corner_radius(2);
-	monitor_disk_button.set_size_request(16, 16);
-
-//	mutebox.set_size_request(16, 16);
-//	solobox.set_size_request(16, 16);
-//	recbox.set_size_request(16, 16);
-//	mon_in_box.set_size_request(16, 16);
-//	mon_disk_box.set_size_request(16, 16);
-//	spacer.set_size_request(-1,0);
-
 	update_button_box();
 	update_name_box();
 	update_background (_route->meter_type());
 
-//	mtr_vbox.pack_start (peakbx, false, false);
-//	mtr_vbox.pack_start (meterbox, true, true);
-//	mtr_vbox.pack_start (spacer, false, false);
-//	mtr_container.add(mtr_vbox);
-
-//	mtr_hsep.set_size_request(-1,1);
-//	mtr_hsep.set_name("BlackSeparator");
-
-//	nfo_vbox.pack_start (mtr_hsep, false, false);
-//	nfo_vbox.pack_start (btnbox, false, false);
-//	nfo_vbox.pack_start (namebx, false, false);
-
-//	pack_start (mtr_container, true, true);
-//	pack_start (nfo_vbox, false, false);
-
-//	name_label.show();
-//	peak_display.show();
-//	peakbx.show();
-//	meter_ticks1_area.show();
-//	meter_ticks2_area.show();
-//	meterbox.show();
-//	spacer.show();
-//	level_meter->show();
-//	meter_align.show();
-//	peak_align.show();
-//	btnbox.show();
-//	mtr_vbox.show();
-//	mtr_container.show();
-//	mtr_hsep.show();
-//	nfo_vbox.show();
 	monitor_input_button.show();
 	monitor_disk_button.show();
 
@@ -267,11 +200,6 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	SetMeterTypeMulti.connect (sigc::mem_fun(*this, &MeterStrip::set_meter_type_multi));
 
 	meter_configuration_changed (_route->shared_peak_meter()->input_streams ());
-
-//	meter_ticks1_area.set_size_request(3,-1);
-//	meter_ticks2_area.set_size_request(3,-1);
-//	meter_ticks1_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks1_expose));
-//	meter_ticks2_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks2_expose));
 
 	_route->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::self_delete, this), gui_context());
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::strip_property_changed, this, _1), gui_context());
@@ -340,32 +268,6 @@ MeterStrip::state_id() const
 void
 MeterStrip::set_button_names()
 {
-	/*
-	mute_button.set_text (_("M"));
-	rec_enable_button.set_text ("");
-	rec_enable_button.set_image (::get_icon (X_("record_normal_red")));
-
-	if (_route && _route->solo_safe()) {
-		solo_button.set_visual_state (Gtkmm2ext::VisualState (solo_button.visual_state() | Gtkmm2ext::Insensitive));
-	} else {
-		solo_button.set_visual_state (Gtkmm2ext::VisualState (solo_button.visual_state() & ~Gtkmm2ext::Insensitive));
-	}
-	if (!Config->get_solo_control_is_listen_control()) {
-		solo_button.set_text (_("S"));
-	} else {
-		switch (Config->get_listen_position()) {
-		case AfterFaderListen:
-			solo_button.set_text (_("A"));
-			break;
-		case PreFaderListen:
-			solo_button.set_text (_("P"));
-			break;
-		}
-	}
-
-	monitor_input_button->set_text (_("I"));
-	monitor_disk_button->set_text (_("D"));
-	*/
 }
 
 void
@@ -424,61 +326,21 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 	if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
 			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0
 			) {
-//		meter_ticks1_area.set_name ("MyAudioBusMetricsLeft");
-//		meter_ticks2_area.set_name ("MyAudioBusMetricsRight");
 		_has_midi = false;
 	}
 	else if (type == (1 << DataType::AUDIO)) {
-//		meter_ticks1_area.set_name ("MyAudioTrackMetricsLeft");
-//		meter_ticks2_area.set_name ("MyAudioTrackMetricsRight");
 		_has_midi = false;
 	}
 	else if (type == (1 << DataType::MIDI)) {
-//		meter_ticks1_area.set_name ("MidiTrackMetricsLeft");
-//		meter_ticks2_area.set_name ("MidiTrackMetricsRight");
 		_has_midi = true;
 	} else {
-//		meter_ticks1_area.set_name ("AudioMidiTrackMetricsLeft");
-//		meter_ticks2_area.set_name ("AudioMidiTrackMetricsRight");
 		_has_midi = true;
 	}
-//	set_tick_bar(_tick_bar);
 
 	on_theme_changed();
 	if (old_has_midi != _has_midi) MetricChanged();
 	else ConfigurationChanged();
 }
-
-/*
-void
-MeterStrip::set_tick_bar (int m)
-{
-	std::string n;
-	_tick_bar = m;
-	if (_tick_bar & 1) {
-		n = meter_ticks1_area.get_name();
-		if (n.substr(0,3) != "Bar") {
-			meter_ticks1_area.set_name("Bar" + n);
-		}
-	} else {
-		n = meter_ticks1_area.get_name();
-		if (n.substr(0,3) == "Bar") {
-			meter_ticks1_area.set_name(n.substr(3,-1));
-		}
-	}
-	if (_tick_bar & 2) {
-		n = meter_ticks2_area.get_name();
-		if (n.substr(0,3) != "Bar") {
-			meter_ticks2_area.set_name("Bar" + n);
-		}
-	} else {
-		n = meter_ticks2_area.get_name();
-		if (n.substr(0,3) == "Bar") {
-			meter_ticks2_area.set_name(n.substr(3,-1));
-		}
-	}
-}
-*/
 
 void
 MeterStrip::on_size_request (Gtk::Requisition* r)
@@ -515,25 +377,12 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 			nh = 148;
 			break;
 	}
-//	namebx.set_size_request(18, nh);
 	if (_route) {
 		name_label.set_size_request(18, nh-2);
 		name_label.layout()->set_width((nh-4) * PANGO_SCALE);
 	}
 	RouteUI::on_size_allocate(a);
 }
-
-/*
-gint
-MeterStrip::meter_metrics_expose (GdkEventExpose *ev)
-{
-	if (_route) {
-		return meter_expose_metrics(ev, _route->meter_type(), _types, &meter_metric_area);
-	} else {
-		return meter_expose_metrics(ev, metric_type, _types, &meter_metric_area);
-	}
-}
-*/
 
 void
 MeterStrip::set_metric_mode (int metricmode, ARDOUR::MeterType mt)
@@ -547,25 +396,20 @@ MeterStrip::set_metric_mode (int metricmode, ARDOUR::MeterType mt)
 	_types.clear ();
 	switch(metricmode) {
 		case 0:
-//			meter_metric_area.set_name ("MidiTrackMetricsLeft");
 			_types.push_back (DataType::MIDI);
 			break;
 		case 1:
-//			meter_metric_area.set_name ("AudioTrackMetricsLeft");
 			_types.push_back (DataType::AUDIO);
 			break;
 		case 2:
-//			meter_metric_area.set_name ("MidiTrackMetricsRight");
 			_types.push_back (DataType::MIDI);
 			break;
 		case 3:
 		default:
-//			meter_metric_area.set_name ("AudioTrackMetricsRight");
 			_types.push_back (DataType::AUDIO);
 			break;
 	}
 	update_background (mt);
-//	meter_metric_area.queue_draw ();
 }
 
 void

@@ -699,22 +699,8 @@ RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
 		}
 
 		track()->set_mode (mode);
-
 		rec_enable_button.remove ();
-
-		//switch (mode) {
-		//case ARDOUR::NonLayered:
-		//case ARDOUR::Normal:
-		//	rec_enable_button.set_image (::get_icon (X_("record_normal_red")));
-		//	rec_enable_button.set_text (string());
-		//	break;
-		//case ARDOUR::Destructive:
-		//	rec_enable_button.set_image (::get_icon (X_("record_tape_red")));
-		//	rec_enable_button.set_text (string());
-		//	break;
-		//}
-
-		rec_enable_button.show_all ();
+		rec_enable_button.show ();
 	}
 }
 
@@ -814,7 +800,6 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 		reset_meter();
 
-//		gm.get_gain_slider().hide();
 		mute_button.show();
 		if (!_route || _route->is_monitor()) {
 			solo_button.hide();
@@ -826,14 +811,9 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 		route_group_button.show();
 		automation_button.show();
-
-		//if (is_track() && track()->mode() == ARDOUR::Normal) {
-		//	playlist_button.show();
-		//}
 	} else {
 		reset_meter();
 
-//		gm.get_gain_slider().hide();
 		mute_button.show();
 		if (!_route || _route->is_monitor()) {
 			solo_button.hide();
@@ -844,10 +824,6 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 		route_group_button.hide ();
 		automation_button.hide ();
-
-		//if (is_track() && track()->mode() == ARDOUR::Normal) {
-		//	playlist_button.hide ();
-		//}
 	}
 
 	if (height_changed && !no_redraw) {
@@ -2351,27 +2327,6 @@ RouteTimeAxisView::remove_underlay (StreamView* v)
 void
 RouteTimeAxisView::set_button_names ()
 {
-	//if (_route && _route->solo_safe()) {
-	//	solo_button.set_visual_state (Gtkmm2ext::VisualState (solo_button.visual_state() | Gtkmm2ext::Insensitive));
-	//} else {
-	//	solo_button.set_visual_state (Gtkmm2ext::VisualState (solo_button.visual_state() & ~Gtkmm2ext::Insensitive));
-	//}
-	//if (Config->get_solo_control_is_listen_control()) {
-	//	switch (Config->get_listen_position()) {
-	//		case AfterFaderListen:
-	//			solo_button.set_text (_("A"));
-	//			ARDOUR_UI::instance()->set_tip (*solo_button, _("After-fade listen (AFL)"));
-	//			break;
-	//		case PreFaderListen:
-	//			solo_button.set_text (_("P"));
-	//			ARDOUR_UI::instance()->set_tip (*solo_button, _("Pre-fade listen (PFL)"));
-	//		break;
-	//	}
-	//} else {
-	//	solo_button.set_text (_("s"));
-	//	ARDOUR_UI::instance()->set_tip (*solo_button, _("Solo"));
-	//}
-	//mute_button->set_text (_("m"));
 }
 
 Gtk::CheckMenuItem*

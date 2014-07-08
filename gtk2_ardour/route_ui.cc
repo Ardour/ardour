@@ -396,15 +396,10 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 	if (!_i_am_the_modifier) {
 		if (Keyboard::is_context_menu_event (ev)) {
-			/*
-			if (! (solo_isolated_led && solo_isolated_led->is_visible()) ||
-			    ! (solo_safe_led && solo_safe_led->is_visible())) {
-                    if (solo_menu == 0) {
-                        build_solo_menu ();
-                    }
-                    solo_menu->popup (1, ev->time);
+            if (solo_menu == 0) {
+                build_solo_menu ();
             }
-			*/
+            solo_menu->popup (1, ev->time);
 		} else {
 			if (Keyboard::is_button2_event (ev)) {
 				// Primary-button2 click is the midi binding click
@@ -1158,24 +1153,20 @@ RouteUI::build_solo_menu (void)
 	solo_menu->set_name ("ArdourContextMenu");
 	MenuList& items = solo_menu->items();
 	Gtk::CheckMenuItem* check;
-
+	/*
 	check = new Gtk::CheckMenuItem(_("Solo Isolate"));
 	check->set_active (_route->solo_isolated());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_isolated), check));
 	items.push_back (CheckMenuElem(*check));
-        solo_isolated_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
+    solo_isolated_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	check->show_all();
-
+	*/
 	check = new Gtk::CheckMenuItem(_("Solo Safe"));
 	check->set_active (_route->solo_safe());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_safe), check));
 	items.push_back (CheckMenuElem(*check));
-        solo_safe_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
+    solo_safe_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	check->show_all();
-
-	//items.push_back (SeparatorElem());
-	// items.push_back (MenuElem (_("MIDI Bind"), sigc::mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
-
 }
 
 void

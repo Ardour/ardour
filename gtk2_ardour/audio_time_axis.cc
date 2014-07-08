@@ -94,12 +94,6 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	ignore_toggle = false;
 
-	//if (is_audio_track()) {
-	//	controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
-	//} else { // bus
-	//	controls_ebox.set_name ("AudioBusControlsBaseUnselected");
-	//}
-
 	/* if set_state above didn't create a gain automation child, we need to make one */
 	if (automation_child (GainAutomation) == 0) {
 		create_automation_child (GainAutomation, false);
@@ -111,7 +105,6 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	/* map current state of the route */
-
 	processors_changed (RouteProcessorChange ());
 	reset_processor_automation_curves ();
 	ensure_pan_views (false);

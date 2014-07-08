@@ -72,7 +72,7 @@ WavesIconButton::render (cairo_t* cr)
 	}
 
 	Glib::RefPtr<Gtk::Style> style = get_style();
-	
+	/*
 	Gdk::Color bgcolor = style->get_bg ((get_state() == Gtk::STATE_INSENSITIVE) ? Gtk::STATE_INSENSITIVE : 
 											(_hovering ? 
 												(_pushed ? 
@@ -80,16 +80,21 @@ WavesIconButton::render (cairo_t* cr)
 													Gtk::STATE_PRELIGHT ) :
 												(get_active() ? 
 													Gtk::STATE_ACTIVE :
-													Gtk::STATE_NORMAL)));
+													Gtk::STATE_NORMAL)));*/
 
-	Glib::RefPtr<Gdk::Pixbuf> pixbuf = (get_state() == Gtk::STATE_INSENSITIVE) ? (_inactive_pixbuf ? _inactive_pixbuf : _normal_pixbuf) : 
-											(_hovering ? 
-												(_pushed ? 
-													(_active_pixbuf ? _active_pixbuf : _normal_pixbuf) :
-													(_prelight_pixbuf ? _prelight_pixbuf : _normal_pixbuf)) :
-												(get_active() ? 
-													(_active_pixbuf ? _active_pixbuf : _normal_pixbuf) :
-													_normal_pixbuf));
+	Glib::RefPtr<Gdk::Pixbuf> pixbuf = ((CairoWidget::active_state() == Gtkmm2ext::ImplicitActive) ? _implicit_active_pixbuf : Glib::RefPtr<Gdk::Pixbuf>(0));
+
+	if (pixbuf == 0) {
+		pixbuf = (get_state() == Gtk::STATE_INSENSITIVE) ? 
+												(_inactive_pixbuf ? _inactive_pixbuf : _normal_pixbuf) : 
+												(_hovering ? 
+													(_pushed ? 
+														(_active_pixbuf ? _active_pixbuf : _normal_pixbuf) :
+														(_prelight_pixbuf ? _prelight_pixbuf : _normal_pixbuf)) :
+													(get_active() ? 
+														(_active_pixbuf ? _active_pixbuf : _normal_pixbuf) :
+														_normal_pixbuf));
+	}
 
 	if ((_left_border_width != 0) ||
 		(_top_border_width != 0) ||
@@ -127,6 +132,13 @@ void
 WavesIconButton::set_active_image (const RefPtr<Gdk::Pixbuf>& img)
 {
 	_active_pixbuf = img;
+	queue_draw ();
+}
+
+void
+WavesIconButton::set_implicit_active_image (const RefPtr<Gdk::Pixbuf>& img)
+{
+	_implicit_active_pixbuf = img;
 	queue_draw ();
 }
 

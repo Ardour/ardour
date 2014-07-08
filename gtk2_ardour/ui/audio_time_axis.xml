@@ -65,6 +65,7 @@
                       height="19"
                       normalicon="time_axis_solo"
                       activeicon="time_axis_solo_active"
+                      implicitactiveicon="time_axis_solo_safe"
                       prelighticon="time_axis_solo_prelight"/>
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
           </VBox>
@@ -76,6 +77,7 @@
                       height="19"
                       normalicon="time_axis_mute"
                       activeicon="time_axis_mute_active"
+                      implicitactiveicon="time_axis_mute_implicit"
                       prelighticon="time_axis_mute_prelight"/>
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
           </VBox>
