@@ -978,7 +978,7 @@ void TracksControlPanel::device_changed (bool show_confirm_dial/*=true*/)
         _device_combo.set_active_text (EngineStateController::instance()->get_current_device_name() );
 	}
     
-    MessageDialog( _("Selected device is not available for current engine"), PROGRAM_NAME).run();
+    MessageDialog( _("Error activating selected device"), PROGRAM_NAME).run();
 }
 
 void

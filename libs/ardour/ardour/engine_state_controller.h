@@ -54,7 +54,6 @@ public:
     const std::string&  get_current_backend_name() const;
     
     const std::string&  get_current_device_name() const;
-    void                change_current_device_to(const std::string&) const;
     void                enumerate_devices (std::vector<ARDOUR::AudioBackend::DeviceStatus>&) const;
     
     ARDOUR::framecnt_t  get_current_sample_rate() const;
@@ -252,7 +251,7 @@ private:
     
     // internal helper functions////////////
     // make sure that current device parameters are supported and fit session requirements 
-    void _validate_current_device_state();
+    bool _validate_current_device_state();
     ////////////////////////////////////////
 
     ////////////////////////////////////////

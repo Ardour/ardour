@@ -487,7 +487,7 @@ EngineStateController::_do_initial_engine_setup()
 }
 
 
-void
+bool
 EngineStateController::_validate_current_device_state()
 {
     boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
@@ -499,21 +499,19 @@ EngineStateController::_validate_current_device_state()
     
     // check if session desired sample rate (if it's set) could be used with this device
     if (_desired_sample_rate != 0) {
-        std::vector<float>::iterator sr_iter = std::find (sample_rates.begin(), sample_rates.end(), (float)_desired_sample_rate);
         
-        if (sr_iter != sample_rates.end() ) {
-            _current_state->sample_rate = _desired_sample_rate;
-        } else {
-            _current_state->sample_rate = backend->default_sample_rate();
+        if ( !set_new_sample_rate_in_controller (_desired_sample_rate) ) {
+            if ( !set_new_sample_rate_in_controller (backend->default_sample_rate() ) ) {
+                return false;
+            }
         }
     
     } else {
         // check if current sample rate is supported because we have no session desired sample rate value
-        std::vector<float>::iterator sr_iter = std::find (sample_rates.begin(), sample_rates.end(), (float)_current_state->sample_rate);
-        // switch to default if current sample rate is not supported
-        if (sr_iter == sample_rates.end() ) {
-            
-            _current_state->sample_rate = backend->default_sample_rate();
+        if ( !set_new_sample_rate_in_controller (_current_state->sample_rate) ) {
+            if ( !set_new_sample_rate_in_controller (backend->default_sample_rate() ) ) {
+                return false;
+            }
         }
     }
     
@@ -535,7 +533,7 @@ EngineStateController::_validate_current_device_state()
 
 	}
 
-	
+	return true;
 }
 
 
@@ -666,12 +664,6 @@ EngineStateController::set_new_device_as_current(const std::string& device_name)
         return true;
     }
     
-    _last_used_real_device.clear();
-    
-    if (device_name != "None") {
-        _last_used_real_device = device_name;
-    }
-    
     boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
     assert(backend);
     
@@ -683,10 +675,8 @@ EngineStateController::set_new_device_as_current(const std::string& device_name)
     
     // device is available
     if (device_iter != device_vector.end() ) {
-    
-        if (_current_state != NULL) {
-            _current_state->active = false;
-        }
+        
+        boost::shared_ptr<State> previous_state (_current_state);
         
         // look through state list and find the record for this device and current engine
         StateList::iterator found_state_iter = find_if (_states.begin(), _states.end(),
@@ -695,8 +685,13 @@ EngineStateController::set_new_device_as_current(const std::string& device_name)
         if (found_state_iter != _states.end() )
         {
             // we found a record for current engine and provided device name - switch to it
+            
             _current_state = *found_state_iter;
-            _validate_current_device_state();
+            
+            if (!_validate_current_device_state() ) {
+                _current_state = previous_state;
+                return false;
+            }
         
         } else {
        
@@ -705,12 +700,27 @@ EngineStateController::set_new_device_as_current(const std::string& device_name)
             
             _current_state->backend_name = backend->name();
             _current_state->device_name = device_name;
-            _validate_current_device_state();
+            
+            if (_validate_current_device_state() ) {
+                _current_state = previous_state;
+                return false;
+            }
+            
             _states.push_front(_current_state);
+        }
+        
+        if (previous_state != NULL) {
+            previous_state->active = false;
         }
         
 		push_current_state_to_backend(false);
 
+        _last_used_real_device.clear();
+        
+        if (device_name != "None") {
+            _last_used_real_device = device_name;
+        }
+        
         return true;
     }
     
@@ -723,10 +733,6 @@ EngineStateController::set_new_device_as_current(const std::string& device_name)
 bool
 EngineStateController::set_new_sample_rate_in_controller(framecnt_t sample_rate)
 {
-    if (_current_state->sample_rate == sample_rate) {
-        return true;
-    }
-    
     boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
     assert(backend);
     
@@ -746,11 +752,7 @@ EngineStateController::set_new_sample_rate_in_controller(framecnt_t sample_rate)
 
 bool
 EngineStateController::set_new_buffer_size_in_controller(pframes_t buffer_size)
-{
-    if (_current_state->buffer_size == buffer_size) {
-        return true;
-    }
-    
+{    
     boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
     assert(backend);
     
@@ -1174,16 +1176,35 @@ EngineStateController::get_physical_midi_output_states (std::vector<PortState>& 
 void
 EngineStateController::_on_sample_rate_change(framecnt_t new_sample_rate)
 {
-	_current_state->sample_rate = new_sample_rate;
-	SampleRateChanged(); // emit a signal
+	if (_current_state->sample_rate != new_sample_rate) {
+        
+        // if sample rate has been changed
+        framecnt_t sample_rate_to_set = new_sample_rate;
+        if (AudioEngine::instance()->session() ) {
+            // and we have current session we should restore it back to the one tracks uses
+            framecnt_t sample_rate_to_set = _current_state->sample_rate;
+        }
+        
+        if ( set_new_sample_rate_in_controller (sample_rate_to_set) ) {
+            push_current_state_to_backend(false);
+            SampleRateChanged(); // emit a signal
+        } else {
+            // if sample rate can't be set
+            // switch to NONE device
+            set_new_device_as_current ("None");
+            DeviceListChanged(true);
+        }
+    }
 }
 
 
 void
 EngineStateController::_on_buffer_size_change(pframes_t new_buffer_size)
 {
-    _current_state->buffer_size = new_buffer_size;
-    BufferSizeChanged(); // emit a signal
+    if (_current_state->buffer_size != new_buffer_size) {
+        _current_state->buffer_size = new_buffer_size;
+        BufferSizeChanged(); // emit a signal
+    }
 }
 
 
@@ -1237,9 +1258,10 @@ EngineStateController::_on_device_list_change()
             
             if (found_state_iter != _states.end() ) {
                 _current_state = *found_state_iter;
-                _validate_current_device_state();
                 
-                push_current_state_to_backend(false);
+                if (_validate_current_device_state() ) {
+                    push_current_state_to_backend(false);
+                }
             }
         }
         
@@ -1535,11 +1557,10 @@ EngineStateController::set_desired_sample_rate(framecnt_t session_desired_sr)
         return;
     }
     
-    _desired_sample_rate = session_desired_sr;
-    _validate_current_device_state();
+    _desired_sample_rate = session_desired_sr;  
     
     // if we swithced to new desired sample rate successfuly - push the new state to the backend
-    if (_current_state->sample_rate == session_desired_sr) {
+    if (set_new_sample_rate_in_controller (session_desired_sr) ) {
         push_current_state_to_backend(false);
     }
 }
