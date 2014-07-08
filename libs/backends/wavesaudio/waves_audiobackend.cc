@@ -34,10 +34,8 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
 			_buffer_size_change(*(uint32_t*)parameter);
             break;
         case WCMRAudioDeviceManagerClient::RequestReset:
-        {
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::RequestReset" << std::endl;
             engine.request_backend_reset();
-        }
             break;
         case WCMRAudioDeviceManagerClient::RequestResync:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::RequestResync" << std::endl;
@@ -188,17 +186,18 @@ WavesAudioBackend::available_sample_rates (const std::string& device_name) const
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::available_sample_rates (): [" << device_name << "]" << std::endl;
 
-	DeviceInfo devInfo;
-    WTErr err = _audio_device_manager.GetDeviceInfoByName(device_name, devInfo);
+    std::vector<int> sr;
     
-	if (eNoErr != err) {
+    WTErr retVal = _audio_device_manager.GetDeviceSampleRates(device_name, sr);
+    
+	if (eNoErr != retVal) {
         std::cerr << "WavesAudioBackend::available_sample_rates (): Failed to find device [" << device_name << "]" << std::endl;
         return std::vector<float> ();
     }
 
     // COMMENTED DBG LOGS */ std::cout << "\tFound " << devInfo.m_AvailableSampleRates.size () << " sample rates for " << device_name << ":";
 
-    std::vector<float> sample_rates (devInfo.m_AvailableSampleRates.begin (), devInfo.m_AvailableSampleRates.end ());
+    std::vector<float> sample_rates (sr.begin (), sr.end ());
     
     // COMMENTED DBG LOGS */ for (std::vector<float>::iterator i = sample_rates.begin ();  i != sample_rates.end (); ++i) std::cout << " " << *i; std::cout << std::endl;
 
@@ -220,8 +219,7 @@ WavesAudioBackend::available_buffer_sizes (const std::string& device_name) const
 
 	std::vector<int> bs;
 
-	WTErr retVal;
-	retVal = _audio_device_manager.GetDeviceBufferSizes(device_name, bs);
+	WTErr retVal = _audio_device_manager.GetDeviceBufferSizes(device_name, bs);
 
     if (retVal != eNoErr) {
         std::cerr << "WavesAudioBackend::available_buffer_sizes (): Failed to get buffer size for device [" << device_name << "]" << std::endl;

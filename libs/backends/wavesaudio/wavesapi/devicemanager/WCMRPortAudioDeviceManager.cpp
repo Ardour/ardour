@@ -1656,6 +1656,19 @@ WTErr WCMRPortAudioDeviceManager::generateDeviceListImpl()
 }
 
 
+WTErr WCMRPortAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & deviceName, std::vector<int>& sampleRates) const
+{
+    sampleRates.clear ();
+    
+    WTErr retVal = eNoErr;
+    
+    DeviceInfo devInfo;
+	retVal = GetDeviceInfoByName(deviceName, devInfo);
+    
+    sampleRates.assign(devInfo.m_AvailableSampleRates.begin(), devInfo.m_AvailableSampleRates.end() );
+}
+
+
 WTErr WCMRPortAudioDeviceManager::getDeviceBufferSizesImpl(const std::string & deviceName, std::vector<int>& buffers) const
 {
 	WTErr retVal = eNoErr;

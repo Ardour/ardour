@@ -173,6 +173,7 @@ protected:
 	virtual void				destroyCurrentDeviceImpl();
 	virtual WTErr				generateDeviceListImpl();
     virtual WTErr				updateDeviceListImpl();
+    virtual WTErr               getDeviceSampleRatesImpl(const std::string & deviceName, std::vector<int>& sampleRates) const;
 	virtual WTErr				getDeviceBufferSizesImpl(const std::string & deviceName, std::vector<int>& bufferSizes) const;
     
 	bool m_UseMultithreading; ///< Flag indicates whether to use multi-threading for audio processing.

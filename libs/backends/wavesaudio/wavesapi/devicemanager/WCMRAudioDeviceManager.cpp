@@ -631,6 +631,13 @@ WTErr WCMRAudioDeviceManager::GetDeviceInfoByName(const std::string & nameToMatc
 }
 
 
+WTErr WCMRAudioDeviceManager::GetDeviceSampleRates(const std::string & nameToMatch, std::vector<int>& sampleRates) const
+{
+	return getDeviceSampleRatesImpl(nameToMatch, sampleRates);
+}
+
+
+
 WTErr WCMRAudioDeviceManager::GetDeviceBufferSizes(const std::string & nameToMatch, std::vector<int>& bufferSizes) const
 {
 	return getDeviceBufferSizesImpl(nameToMatch, bufferSizes);

@@ -218,6 +218,7 @@ public://< Public functions for the class.
 	void				DestroyCurrentDevice();
 	const DeviceInfoVec DeviceInfoList () const;
     WTErr               GetDeviceInfoByName(const std::string & nameToMatch, DeviceInfo & devInfo) const;
+    WTErr               GetDeviceSampleRates(const std::string & nameToMatch, std::vector<int>& sampleRates) const;
 	WTErr				GetDeviceBufferSizes(const std::string & nameToMatch, std::vector<int>& bufferSizes) const;
 
     //virtual void		EnableVerboseLogging(bool /*bEnable*/, const std::string& /*logFilePath*/) { };
@@ -238,6 +239,7 @@ private:
 	// made private to avoid pure virtual function call
 	virtual WCMRAudioDevice*	initNewCurrentDeviceImpl(const std::string & deviceName) = 0;
 	virtual void				destroyCurrentDeviceImpl() = 0;
+    virtual WTErr				getDeviceSampleRatesImpl(const std::string & deviceName, std::vector<int>& sampleRates) const = 0;
 	virtual WTErr				getDeviceBufferSizesImpl(const std::string & deviceName, std::vector<int>& bufferSizes) const = 0;
     virtual WTErr				generateDeviceListImpl() = 0;
     virtual WTErr				updateDeviceListImpl() = 0;

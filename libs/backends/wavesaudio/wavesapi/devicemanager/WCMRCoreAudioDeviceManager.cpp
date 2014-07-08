@@ -2870,6 +2870,79 @@ WTErr WCMRCoreAudioDeviceManager::updateDeviceListImpl()
 }
 
 
+WTErr WCMRCoreAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & deviceName, std::vector<int>& sampleRates) const
+{
+    AUTO_FUNC_DEBUG;
+    
+    WTErr retVal = eNoErr;
+    OSStatus err = kAudioHardwareNoError;
+    UInt32 propSize = 0;
+    
+    sampleRates.clear();
+    
+    //first check if the request has been made for None device
+	if (deviceName == m_NoneDevice->DeviceName() )
+	{
+		sampleRates = m_NoneDevice->SamplingRates();
+		return retVal;
+	}
+
+    DeviceInfo devInfo;
+    retVal = GetDeviceInfoByName(deviceName, devInfo);
+    
+    //! 1. Get sample rate property size.
+    err = AudioDeviceGetPropertyInfo(devInfo.m_DeviceId, 0, 0, kAudioDevicePropertyAvailableNominalSampleRates, &propSize, NULL);
+    
+    if (err == kAudioHardwareNoError)
+    {
+        //! 2. Get property: cannels output.
+        
+        // Allocate size accrding to the number of audio values
+        int numRates = propSize / sizeof(AudioValueRange);
+        AudioValueRange* supportedRates = new AudioValueRange[numRates];
+        
+        // Get sampling rates from Audio device
+        err = AudioDeviceGetProperty(devInfo.m_DeviceId, 0, 0, kAudioDevicePropertyAvailableNominalSampleRates, &propSize, supportedRates);
+        
+        if (err == kAudioHardwareNoError)
+        {
+            //! 3. Update sample rates
+            
+            // now iterate through our standard SRs
+            for(int ourSR=0; gAllSampleRates[ourSR] > 0; ourSR++)
+            {
+                //check to see if our SR is in the supported rates...
+                for (int deviceSR = 0; deviceSR < numRates; deviceSR++)
+                {
+                    if ((supportedRates[deviceSR].mMinimum <= gAllSampleRates[ourSR]) &&
+                        (supportedRates[deviceSR].mMaximum >= gAllSampleRates[ourSR]))
+                    {
+                        sampleRates.push_back ((int)gAllSampleRates[ourSR]);
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            retVal = eCoreAudioFailed;
+            DEBUG_MSG("Failed to get device Sample rates. Device Name: " << m_DeviceName.c_str());
+        }
+        
+        delete [] supportedRates;
+    }
+    else
+    {
+        retVal = eCoreAudioFailed;
+        DEBUG_MSG("Failed to get device Sample rates property size. Device Name: " << m_DeviceName.c_str());
+    }
+
+    devInfo.m_AvailableSampleRates.assign(sampleRates.begin(), sampleRates.end() );
+    
+    return retVal;
+}
+
+
 WTErr WCMRCoreAudioDeviceManager::getDeviceBufferSizesImpl(const std::string & deviceName, std::vector<int>& bufferSizes) const
 {
     AUTO_FUNC_DEBUG;
