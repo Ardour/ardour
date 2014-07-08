@@ -36,17 +36,17 @@
 
 #include <boost/algorithm/string/erase.hpp>
 
+#include "pbd/basename.h"
+#include "pbd/boost_debug.h"
+#include "pbd/convert.h"
 #include "pbd/convert.h"
 #include "pbd/error.h"
-#include "pbd/boost_debug.h"
-#include "pbd/stl_delete.h"
-#include "pbd/basename.h"
-#include "pbd/stacktrace.h"
 #include "pbd/file_utils.h"
-#include "pbd/convert.h"
 #include "pbd/md5.h"
-#include "pbd/unwind.h"
 #include "pbd/search_path.h"
+#include "pbd/stacktrace.h"
+#include "pbd/stl_delete.h"
+#include "pbd/unwind.h"
 
 #include "ardour/amp.h"
 #include "ardour/analyser.h"
@@ -3481,8 +3481,13 @@ Session::new_audio_source_path_for_embedded (const std::string& path)
 		md5.digestString (path.c_str());
 		md5.writeToString ();
 		base = md5.digestChars;
+		
+		string ext = get_suffix (path);
 
-		/* XXX base needs suffix from path */
+		if (!ext.empty()) {
+			base += '.';
+			base += ext;
+		}
 		
 		newpath = Glib::build_filename (sdir.sound_path(), base);
 
