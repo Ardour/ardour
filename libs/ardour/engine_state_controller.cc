@@ -700,7 +700,7 @@ EngineStateController::set_new_device_as_current(const std::string& device_name)
             _current_state->backend_name = backend->name();
             _current_state->device_name = device_name;
             
-            if (_validate_current_device_state() ) {
+            if (!_validate_current_device_state() ) {
                 _current_state = previous_state;
                 return false;
             }
