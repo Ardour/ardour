@@ -53,6 +53,7 @@ libpbd_sources = [
     'locale_guard.cc',
     'localtime_r.cc',
     'malign.cc',
+    'md5.cc',
     'mountpoint.cc',
     'openuri.cc',
     'pathexpand.cc',
