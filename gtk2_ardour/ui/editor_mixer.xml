@@ -3,6 +3,11 @@
 <RouteUI>
   <VBox>
     <VBox>
+      <iconbutton id="color_palette_button"
+                  width="95"
+                  height="17"
+                  normalicon="inspector_color_close"
+                  activeicon="inspector_color_open"/>
       <HBox>
         <iconbutton id="color_button_1"
                     width="19"

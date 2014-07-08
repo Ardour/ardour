@@ -523,13 +523,12 @@ RouteUI::solo_release (GdkEventButton*)
 		if (_solo_release) {
 
 			if (_solo_release->exclusive) {
-
 			} else {
-                                if (Config->get_solo_control_is_listen_control()) {
-                                        _session->set_listen (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
-                                } else {
-                                        _session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
-                                }
+				if (Config->get_solo_control_is_listen_control()) {
+						_session->set_listen (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
+				} else {
+						_session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
+				}
 			}
 
 			delete _solo_release;
@@ -955,17 +954,16 @@ RouteUI::solo_active_state (boost::shared_ptr<Route> r)
 		} else {
 			return Gtkmm2ext::Off;
 		}
-
 	}
 
 	if (r->soloed()) {
-                if (!r->self_soloed()) {
-                        return Gtkmm2ext::ImplicitActive;
-                } else {
-                        return Gtkmm2ext::ExplicitActive;
-                }
+        if (!r->self_soloed()) {
+            return Gtkmm2ext::ImplicitActive;
+        } else {
+            return Gtkmm2ext::ExplicitActive;
+        }
 	} else {
-		return Gtkmm2ext::Off;
+		return r->solo_isolated() ? Gtkmm2ext::ImplicitActive : Gtkmm2ext::Off;
 	}
 }
 
@@ -1153,20 +1151,20 @@ RouteUI::build_solo_menu (void)
 	solo_menu->set_name ("ArdourContextMenu");
 	MenuList& items = solo_menu->items();
 	Gtk::CheckMenuItem* check;
-	/*
-	check = new Gtk::CheckMenuItem(_("Solo Isolate"));
+	check = new Gtk::CheckMenuItem(_("Solo Safe"));
 	check->set_active (_route->solo_isolated());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_isolated), check));
 	items.push_back (CheckMenuElem(*check));
     solo_isolated_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	check->show_all();
-	*/
+	/*
 	check = new Gtk::CheckMenuItem(_("Solo Safe"));
 	check->set_active (_route->solo_safe());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_safe), check));
 	items.push_back (CheckMenuElem(*check));
     solo_safe_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	check->show_all();
+	*/
 }
 
 void
@@ -1311,14 +1309,14 @@ RouteUI::solo_safe_button_release (GdkEventButton* ev)
 void
 RouteUI::toggle_solo_isolated (Gtk::CheckMenuItem* check)
 {
-        bool view = check->get_active();
-        bool model = _route->solo_isolated();
+    bool view = check->get_active();
+    bool model = _route->solo_isolated();
 
-        /* called AFTER the view has changed */
+    /* called AFTER the view has changed */
 
-        if (model != view) {
-                _route->set_solo_isolated (view, this);
-        }
+    if (model != view) {
+        _route->set_solo_isolated (view, this);
+    }
 }
 
 void
