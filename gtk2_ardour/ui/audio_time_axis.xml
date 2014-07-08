@@ -50,11 +50,12 @@
           <VBox>
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
             <iconbutton id="rec_enable_button"
-                      width="19"
-                      height="19"
-                      normalicon="time_axis_record"
-                      activeicon="time_axis_record_active"
-                      prelighticon="time_axis_record_prelight"/>
+                        width="19"
+                        height="19"
+                        normalicon="time_axis_record"
+                        activeicon="time_axis_record_active"
+                        prelighticon="time_axis_record_prelight"
+                        tooltip="Record Enable"/>
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
           </VBox>
           <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
