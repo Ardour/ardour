@@ -336,6 +336,16 @@ get_absolute_path (const std::string & p)
 	return Glib::build_filename (Glib::get_current_dir(), p);
 }
 
+std::string
+get_suffix (const std::string & p)
+{
+	string::size_type period = p.find_last_of ('.');
+	if (period == string::npos || period == p.length() - 1) {
+		return string();
+	}
+	return p.substr (period+1);
+}
+
 bool
 equivalent_paths (const std::string& a, const std::string& b)
 {
