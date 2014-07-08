@@ -1665,7 +1665,16 @@ WTErr WCMRPortAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & d
     DeviceInfo devInfo;
 	retVal = GetDeviceInfoByName(deviceName, devInfo);
     
-    sampleRates.assign(devInfo.m_AvailableSampleRates.begin(), devInfo.m_AvailableSampleRates.end() );
+	if (eNoErr == retVal)
+	{
+		sampleRates.assign(devInfo.m_AvailableSampleRates.begin(), devInfo.m_AvailableSampleRates.end() );
+	}
+	else
+	{
+		std::cout << "API::PortAudioDeviceManager::GetSampleRates: Device not found: "<< deviceName << std::endl;
+	}
+
+	return retVal;
 }
 
 
