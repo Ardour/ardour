@@ -5465,7 +5465,10 @@ RegionCutDrag::~RegionCutDrag ()
 void
 RegionCutDrag::motion (GdkEvent*, bool)
 {
-	line->set_position (_drags->current_pointer_frame());
+	framepos_t where = _drags->current_pointer_frame();
+	_editor->snap_to (where);
+
+	line->set_position (where);
 }
 
 void
