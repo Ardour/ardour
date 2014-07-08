@@ -2279,8 +2279,7 @@ ARDOUR_UI::on_lock_button_pressed () {
 void
 ARDOUR_UI::lock_session () {
     
-    if( screen_lock_is_allowed () )
-        session_lock_dialog->run ();
+    session_lock_dialog->run ();
 }
 
 bool
