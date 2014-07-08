@@ -25,10 +25,11 @@
       <menuitem action='CloseVideo'/>
 
       <menu name='Export' action='Export'>
-        <menuitem action='ExportAudio'/>
+       <menuitem action='ExportAudio'/>
         <menuitem action='StemExport'/>
         <menuitem action='ExportVideo'/>
       </menu>
+      <menuitem action='bring-into-session'/>
       <menu name='Cleanup' action='Cleanup'>
         <menuitem action='CleanupUnused'/>
         <menuitem action='FlushWastebasket'/>

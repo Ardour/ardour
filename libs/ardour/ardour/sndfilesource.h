@@ -75,6 +75,8 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 
 	static int get_soundfile_info (const std::string& path, SoundFileInfo& _info, std::string& error_msg);
 
+	void release_descriptor ();
+
   protected:
 	void set_path (const std::string& p);
 	void set_header_timeline_position ();

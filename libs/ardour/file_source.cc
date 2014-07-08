@@ -546,6 +546,12 @@ void
 FileSource::set_path (const std::string& newpath)
 {
         _path = newpath;
+	set_within_session_from_path (newpath);
+	if (_within_session) {
+		_origin = Glib::path_get_basename (newpath);
+	} else {
+		_origin = newpath;
+	}
 }
 
 void
@@ -597,3 +603,5 @@ FileSource::rename (const string& newpath)
 
 	return 0;
 }
+
+	
