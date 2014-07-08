@@ -856,6 +856,7 @@ ARDOUR_UI::starting ()
 			return -1;
 		}
 
+        goto_editor_window ();
 	} else  {
 		
 		if (brand_new_user) {
@@ -881,8 +882,6 @@ ARDOUR_UI::starting ()
 	}
 
 	use_config ();
-
-	goto_editor_window ();
 
 	WM::Manager::instance().show_visible ();
 
@@ -2788,14 +2787,14 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	   on the SessionDialog so that we don't Quit directly
 	*/
 	cancel_not_quit = (_session != 0);
-
-	if (_session && _session->dirty()) {
-		if (unload_session (false)) {
-			/* unload cancelled by user */
-			return 0;
-		}
-		ARDOUR_COMMAND_LINE::session_name = "";
-	}
+    
+    if (_session) {
+        if (unload_session (true)) {
+    		/* unload cancelled by user */
+            return 0;
+        }
+        ARDOUR_COMMAND_LINE::session_name = "";
+    }
 
 	if (!load_template.empty()) {
 		should_be_new = true;
@@ -3007,6 +3006,8 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		}
 	}
 
+    goto_editor_window ();
+    
 	return ret;
 }
 
@@ -3026,8 +3027,6 @@ ARDOUR_UI::close_session()
 	if (get_session_parameters (true, false)) {
 		exit (1);
 	}
-
-	goto_editor_window ();
 }
 
 /** @param snap_name Snapshot name (without .ardour suffix).
