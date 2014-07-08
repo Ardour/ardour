@@ -98,6 +98,16 @@ public:
 	LIBPBD_TEMPLATE_MEMBER_API Searchpath& operator+ (const std::string& directory_path);
 
 	/**
+	 * Remove all the directories in path from this.
+	 */
+	LIBPBD_TEMPLATE_MEMBER_API Searchpath& operator-= (const Searchpath& spath);
+
+	/**
+	 * Remove a directory path from the search path.
+	 */
+	LIBPBD_TEMPLATE_MEMBER_API Searchpath& operator-= (const std::string& directory_path);
+
+	/**
 	 * Add a sub-directory to each path in the search path.
 	 * @param subdir The directory name, it should not contain 
 	 * any path separating tokens.
@@ -108,6 +118,8 @@ protected:
 
 	LIBPBD_TEMPLATE_MEMBER_API void add_directory (const std::string& directory_path);
 	LIBPBD_TEMPLATE_MEMBER_API void add_directories (const std::vector<std::string>& paths);
+	LIBPBD_TEMPLATE_MEMBER_API void remove_directory (const std::string& directory_path);
+	LIBPBD_TEMPLATE_MEMBER_API void remove_directories (const std::vector<std::string>& paths);
 };
 
 LIBPBD_API void export_search_path (const std::string& base_dir, const char* varname, const char* dir);

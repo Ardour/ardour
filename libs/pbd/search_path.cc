@@ -50,6 +50,30 @@ Searchpath::Searchpath (const vector<std::string>& paths)
 }
 
 void
+Searchpath::remove_directory (const std::string& directory_path)
+{
+	if (directory_path.empty()) {
+		return;
+	}
+
+	for (vector<std::string>::iterator i = begin(); i != end();) {
+		if (*i == directory_path) {
+			i = erase (i);
+		} else {
+			++i;
+		}
+	}
+}
+
+void
+Searchpath::remove_directories (const vector<std::string>& paths)
+{
+	for(vector<std::string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+		remove_directory (*i);
+	}
+}
+
+void
 Searchpath::add_directory (const std::string& directory_path)
 {
 	if (directory_path.empty()) {
@@ -114,6 +138,21 @@ Searchpath::operator+ (const Searchpath& spath)
 	insert(end(), spath.begin(), spath.end());
 	return *this;
 }
+
+Searchpath&
+Searchpath::operator-= (const Searchpath& spath)
+{
+	remove_directories (spath);
+	return *this;
+}
+
+Searchpath&
+Searchpath::operator-= (const std::string& directory_path)
+{
+	remove_directory (directory_path);
+	return *this;
+}
+
 
 Searchpath&
 Searchpath::add_subdirectory_to_paths (const string& subdir)
