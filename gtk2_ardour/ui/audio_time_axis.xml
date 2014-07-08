@@ -9,7 +9,7 @@
           <HBox>
             <HBox width="12"/>
             <VBox>
-              <Label id="number_label" text="32" fgnormal="#ffffff" fgactive="#ffffff" font ="Calibri 12"/>
+              <Label id="number_label" text="32" fgnormal="#ffffff" fgactive="#ffffff" font ="Helvetica 10"/>
             </VBox>
           </HBox>
         </EventBox>
@@ -24,13 +24,13 @@
             id="name_label_home">
         <HBox width="5"/>
         <Label id="name_label"
-               font ="Calibri 12"
+               font ="Helvetica 10"
                fgnormal="#ffffff"
                fgactive="#ffffff"/>
         <FocusEntry id="name_entry"
                     width="100"
                     height="20"
-                    font ="Calibri 12"
+                    font ="Helvetica 10"
                     noshowall="true"
                     visible="false"/>
       </HBox>
@@ -62,24 +62,26 @@
           <VBox>
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
             <iconbutton id="solo_button"
-                      width="19"
-                      height="19"
-                      normalicon="time_axis_solo"
-                      activeicon="time_axis_solo_active"
-                      implicitactiveicon="time_axis_solo_safe"
-                      prelighticon="time_axis_solo_prelight"/>
+                        width="19"
+                        height="19"
+                        normalicon="time_axis_solo"
+                        activeicon="time_axis_solo_active"
+                        implicitactiveicon="time_axis_solo_safe"
+                        prelighticon="time_axis_solo_prelight"
+                        tooltip="Solo"/>
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
           </VBox>
           <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
           <VBox>
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
             <iconbutton id="mute_button"
-                      width="19"
-                      height="19"
-                      normalicon="time_axis_mute"
-                      activeicon="time_axis_mute_active"
-                      implicitactiveicon="time_axis_mute_implicit"
-                      prelighticon="time_axis_mute_prelight"/>
+                        width="19"
+                        height="19"
+                        normalicon="time_axis_mute"
+                        activeicon="time_axis_mute_active"
+                        implicitactiveicon="time_axis_mute_implicit"
+                        prelighticon="time_axis_mute_prelight"
+                        tooltip="Mute"/>
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
           </VBox>
           <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
@@ -90,13 +92,12 @@
         <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
         <VBox>
           <iconbutton id="monitor_input_button"
-                  x="1"
-                  y="0"
-                  width="19"
-                  height="19"
-                  normalicon="time_axis_monitor_input"
-                  activeicon="time_axis_monitor_input_active"
-                  prelighticon="time_axis_monitor_input_prelight"/>
+                      width="19"
+                      height="19"
+                      normalicon="time_axis_monitor_input"
+                      activeicon="time_axis_monitor_input_active"
+                      prelighticon="time_axis_monitor_input_prelight"
+                      tooltip="Input Monitoring"/>
           <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
         </VBox>
         <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
