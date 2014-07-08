@@ -636,9 +636,8 @@ EngineStateController::set_new_backend_as_current(const std::string& backend_nam
         
         if (found_state_iter != _states.end() ) {
             // we found a record for new engine with None device - switch to it
-            
             _current_state = *found_state_iter;
-            
+            _validate_current_device_state();
         } else {
             // create new record for this engine with default device
             _current_state = boost::shared_ptr<State>(new State() );
@@ -1233,6 +1232,7 @@ EngineStateController::_on_device_list_change()
             if (found_state_iter != _states.end() ) {
                 // found the record - switch to it
                 _current_state = *found_state_iter;
+                _validate_current_device_state();
             } else {
                 // create new record for this engine with default device
                 _current_state = boost::shared_ptr<State>(new State() );
@@ -1257,14 +1257,19 @@ EngineStateController::_on_device_list_change()
                                                                                   _last_used_real_device) );
             
             if (found_state_iter != _states.end() ) {
+                
+                boost::shared_ptr<State> previous_state (_current_state);
                 _current_state = *found_state_iter;
                 
                 if (_validate_current_device_state() ) {
                     push_current_state_to_backend(false);
+                } else {
+                    // cannot use this device right now
+                    _last_used_real_device.clear();
+                    _current_state = previous_state;
                 }
             }
         }
-        
     }
     
     DeviceListChanged(current_device_disconnected); // emit a signal    
