@@ -139,13 +139,18 @@ class DummyAudioPort : public DummyPort {
 		Sample _buffer[8192];
 
 		// signal generator ('fake' physical inputs)
-		void generate (pframes_t n_samples);
+		void generate (const pframes_t n_samples);
 		GeneratorType _gen_type;
-		bool _gen_cycle;
+		Glib::Threads::Mutex generator_lock;
+		volatile bool _gen_cycle;
 
 		// generator buffers
-		// (used for pink-noise filters and sine-phase)
+		// pink-noise filters
 		float _b0, _b1, _b2, _b3, _b4, _b5, _b6;
+		// generated sinf() samples
+		Sample * _wavetable;
+		uint32_t _tbl_length;
+		uint32_t _tbl_offset;
 
 		// (per thread) random seed
 		unsigned int _rseed;

@@ -1288,44 +1288,54 @@ DummyAudioPort::DummyAudioPort (DummyAudioBackend &b, const std::string& name, P
 	: DummyPort (b, name, flags)
 	, _gen_type (Silence)
 	, _gen_cycle (false)
+	, _b0 (0)
+	, _b1 (0)
+	, _b2 (0)
+	, _b3 (0)
+	, _b4 (0)
+	, _b5 (0)
+	, _b6 (0)
+	, _wavetable (0)
+	, _tbl_length (0)
+	, _tbl_offset (0)
 	, _pass (false)
+	, _rn1 (0)
 {
 	memset (_buffer, 0, sizeof (_buffer));
 }
 
-DummyAudioPort::~DummyAudioPort () { }
+DummyAudioPort::~DummyAudioPort () {
+	free(_wavetable);
+	_wavetable = 0;
+}
 
 void DummyAudioPort::setup_generator (GeneratorType const g, float const samplerate)
 {
 	_gen_type = g;
 	_rseed = g_get_monotonic_time() % UINT_MAX;
-	_pass = false;
+#ifdef COMPILER_MSVC
+	srand (_rseed);
+#endif
 
 	switch (_gen_type) {
+		case PinkNoise:
+		case PonyNoise:
+		case WhiteNoise:
 		case Silence:
 			break;
 		case SineWave:
-			_b1 = 0;
 			{
 #ifdef COMPILER_MSVC
-				srand (_rseed);
-				const unsigned int k = rand () % 128;
+				const unsigned int rnd = rand ();
 #else
-				const unsigned int k = rand_r (&_rseed) % 128;
+				const unsigned int rnd = rand_r (&_rseed);
 #endif
-				// midi note, chromatic scale
-				_b0 = (440.f / 32.f) * powf(2, (k - 9.0) / 12.0) / samplerate;
-				assert (_b0 < M_PI/2); // fine when samplerate >= 8K
+				_tbl_length = 5 + rnd % (int)(samplerate / 20.f);
+				_wavetable = (Sample*) malloc( _tbl_length * sizeof(Sample));
+				for (uint32_t i = 0 ; i < _tbl_length; ++i) {
+					_wavetable[i] = .12589f * sinf(2.0 * M_PI * (float)i / (float)_tbl_length);
+				}
 			}
-			break;
-		case PinkNoise:
-		case PonyNoise:
-			_b0 = _b1 = _b2 = _b3 = _b4 = _b5 = _b6 = 0.f;
-			// fall trhu, no break
-		case WhiteNoise:
-#ifdef COMPILER_MSVC
-			srand (_rseed);
-#endif
 			break;
 	}
 }
@@ -1364,17 +1374,30 @@ float DummyAudioPort::grandf ()
 	return r * x1;
 }
 
-void DummyAudioPort::generate (pframes_t n_samples)
+void DummyAudioPort::generate (const pframes_t n_samples)
 {
+	Glib::Threads::Mutex::Lock lm (generator_lock);
+	if (_gen_cycle) {
+		return;
+	}
+
 	switch (_gen_type) {
 		case Silence:
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 			break;
 		case SineWave:
-			for (pframes_t i = 0 ; i < n_samples; ++i) {
-				_buffer[i] = .12589f * sinf(2.0 * M_PI * _b1);
-				_b1 += _b0;
-				if (_b1 > 1.0) _b1 -= 2.0;
+			assert(_wavetable && _tbl_length > 0);
+			{
+				pframes_t written = 0;
+				while (written < n_samples) {
+					const uint32_t remain = n_samples - written;
+					const uint32_t to_copy = std::min(remain, _tbl_length - _tbl_offset);
+					memcpy((void*)&_buffer[written],
+							(void*)&_wavetable[_tbl_offset],
+							to_copy * sizeof(Sample));
+					written += to_copy;
+					_tbl_offset = (_tbl_offset + to_copy) % _tbl_length;
+				}
 			}
 			break;
 		case WhiteNoise:
@@ -1411,6 +1434,7 @@ void DummyAudioPort::generate (pframes_t n_samples)
 			}
 			break;
 	}
+	_gen_cycle = true;
 }
 
 void* DummyAudioPort::get_buffer (pframes_t n_samples)
@@ -1441,7 +1465,6 @@ void* DummyAudioPort::get_buffer (pframes_t n_samples)
 		}
 	} else if (is_output () && is_physical () && is_terminal()) {
 		if (!_gen_cycle) {
-			_gen_cycle = true;
 			generate(n_samples);
 		}
 	}
