@@ -160,7 +160,6 @@ AudioDiskstream::non_realtime_input_change ()
 		boost::shared_ptr<ChannelList> cr = channels.reader();
 		if (!cr->empty() && !cr->front()->write_source) {
 			need_write_sources = true;
-			cerr << name() << " no write sources!\n";
 		}
 
 		if (input_change_pending.type == IOChange::ConfigurationChanged) {
