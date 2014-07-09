@@ -34,6 +34,7 @@ public:
 		SAE,
 		SinglePackage,
 		Trx,
+		Mixbus,
 		LastElement,
 	};
 
@@ -48,6 +49,9 @@ public:
 
     bool get_trx() const { return bits[Trx]; }
     void set_trx() { bits[Trx] = true; }
+
+    bool get_mixbus() const { return bits[Mixbus]; }
+    void set_mixbus() { bits[Mixbus] = true; }
 
     void set_single_package () { bits[SinglePackage] = true; }
     bool get_single_package () const { return bits[SinglePackage]; }

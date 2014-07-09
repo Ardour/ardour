@@ -2913,7 +2913,7 @@ Editor::setup_toolbar ()
 	_mouse_mode_tearoff->set_name ("MouseModeBase");
 	_mouse_mode_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &_mouse_mode_tearoff->tearoff_window()), false);
 
-	if (Profile->get_sae()) {
+	if (Profile->get_sae() || Profile->get_mixbus() ) {
 		_mouse_mode_tearoff->set_can_be_torn_off (false);
 	}
 
@@ -2948,17 +2948,21 @@ Editor::setup_toolbar ()
 	zoom_focus_selector.set_name ("transport option button");
 //	zoom_focus_selector.add_elements (ArdourButton::Inset);
 
-	if (!ARDOUR::Profile->get_trx()) {
+	if (ARDOUR::Profile->get_mixbus()) {
 		_zoom_box.pack_start (zoom_out_button, false, false);
 		_zoom_box.pack_start (zoom_in_button, false, false);
 		_zoom_box.pack_start (zoom_out_full_button, false, false);
 		_zoom_box.pack_start (zoom_focus_selector, false, false);
-	} else {
+	} else if (ARDOUR::Profile->get_trx()) {
 		_temporal_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::temporal_zoom_by_slider));
 		_vertical_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::vertical_zoom_by_slider));
 		ZoomChanged.connect (sigc::mem_fun (*this, &Editor::update_temporal_zoom_slider));
-        
-        _vertical_zoom_fader.signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::vertical_fader_pressed), false);
+                _vertical_zoom_fader.signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::vertical_fader_pressed), false);
+	} else {
+		_zoom_box.pack_start (zoom_out_button, false, false);
+		_zoom_box.pack_start (zoom_in_button, false, false);
+		_zoom_box.pack_start (zoom_out_full_button, false, false);
+		_zoom_box.pack_start (zoom_focus_selector, false, false);
 	}
 
 	/* Track zoom buttons */
@@ -2988,6 +2992,10 @@ Editor::setup_toolbar ()
 		_zoom_tearoff = manage (new TearOff (_zoom_box));
 		
 	} 
+
+	if (Profile->get_sae() || Profile->get_mixbus() ) {
+		_zoom_tearoff->set_can_be_torn_off (false);
+	}
 
 	snap_box.set_spacing (2);
 	snap_box.set_border_width (2);
@@ -3031,7 +3039,7 @@ Editor::setup_toolbar ()
 	_tools_tearoff->set_name ("MouseModeBase");
 	_tools_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &_tools_tearoff->tearoff_window()), false);
 
-	if (Profile->get_sae()) {
+	if (Profile->get_sae() || Profile->get_mixbus()) {
 		_tools_tearoff->set_can_be_torn_off (false);
 	}
 

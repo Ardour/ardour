@@ -4451,7 +4451,7 @@ ARDOUR_UI::setup_profile ()
 		Profile->set_single_package ();
 	}
 
-    Profile->set_trx ();
+        Profile->set_trx ();
 }
 
 int

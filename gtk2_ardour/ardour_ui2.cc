@@ -230,21 +230,21 @@ ARDOUR_UI::setup_transport ()
 	editor->get_waves_button ("lock_session_button").set_related_action (act);
     
 	act = ActionManager::get_action (X_("Main"), X_("ToggleMultiOutMode"));
-    editor->get_waves_button ("mode_multi_out_button").set_related_action (act);
-    
+        editor->get_waves_button ("mode_multi_out_button").set_related_action (act);
+        
 	act = ActionManager::get_action (X_("Main"), X_("ToggleStereoOutMode"));
-    editor->get_waves_button ("mode_stereo_out_button").set_related_action (act);
-
+        editor->get_waves_button ("mode_stereo_out_button").set_related_action (act);
+        
 	act = ActionManager::get_action (X_("Common"), X_("toggle-mixer"));
 	editor->get_waves_button ("mixer_on_button").set_related_action (act);
-
+        
 	act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 	editor->get_waves_button ("inspector_on_button").set_related_action (act);
-
+        
 	act = ActionManager::get_action (X_("Common"), X_("toggle-meterbridge"));	
 	editor->get_waves_button ("meter_bridge_on_button").set_related_action (act);
-    
-    update_output_operation_mode_buttons();
+        
+        update_output_operation_mode_buttons();
     
 	transport_base.set_name ("TransportBase");
 	transport_base.add (transport_hbox);
