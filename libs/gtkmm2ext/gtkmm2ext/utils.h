@@ -66,9 +66,14 @@ namespace Gtkmm2ext {
 								      gint vpadding);
 	
 	LIBGTKMM2EXT_API void set_size_request_to_display_given_text (Gtk::Widget &w,
+								      std::string const & text,
+								      gint hpadding,
+								      gint vpadding);
+	LIBGTKMM2EXT_API void set_size_request_to_display_given_text (Gtk::Widget &w,
 								      const std::vector<std::string>&,
 								      gint hpadding,
 								      gint vpadding);
+
 
 	LIBGTKMM2EXT_API Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_string (const std::string& name, 
 								       const Pango::FontDescription& font, 
