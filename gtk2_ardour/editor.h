@@ -1988,6 +1988,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void edit_point_chosen (Editing::EditPoint);
 	Glib::RefPtr<Gtk::RadioAction> edit_point_action (Editing::EditPoint);
 	std::vector<std::string> edit_point_strings;
+	std::vector<std::string> edit_mode_strings;
 
 	void selected_marker_moved (ARDOUR::Location*);
 

@@ -188,6 +188,14 @@ static const gchar *_edit_point_strings[] = {
 	0
 };
 
+static const gchar *_edit_mode_strings[] = {
+	N_("Slide"),
+	N_("Splice"),
+	N_("Ripple"),
+	N_("Lock"),
+	0
+};
+
 static const gchar *_zoom_focus_strings[] = {
 	N_("Left"),
 	N_("Right"),
@@ -311,6 +319,7 @@ Editor::Editor ()
 	snap_type_strings =  I18N (_snap_type_strings);
 	snap_mode_strings =  I18N (_snap_mode_strings);
 	zoom_focus_strings = I18N (_zoom_focus_strings);
+	edit_mode_strings = I18N (_edit_mode_strings);
 	edit_point_strings = I18N (_edit_point_strings);
 #ifdef USE_RUBBERBAND
 	rb_opt_strings = I18N (_rb_opt_strings);
@@ -2813,7 +2822,6 @@ Editor::setup_toolbar ()
 	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
 
 	edit_mode_selector.set_name ("mouse mode button");
-	set_size_request_to_display_given_text (edit_mode_selector, _("Ripple"), 30, 2);
 	edit_mode_selector.add_elements (ArdourButton::Inset);
 
 	if (!ARDOUR::Profile->get_trx()) {
@@ -2867,7 +2875,6 @@ Editor::setup_toolbar ()
 	zoom_out_full_button.set_related_action (act);
 
 	zoom_focus_selector.set_name ("zoom button");
-	set_size_request_to_display_given_text (zoom_focus_selector, _("Edit Point"), 30, 2);
 //	zoom_focus_selector.add_elements (ArdourButton::Inset);
 
 	if (ARDOUR::Profile->get_mixbus()) {
@@ -2933,15 +2940,12 @@ Editor::setup_toolbar ()
 
 	snap_type_selector.set_name ("mouse mode button");
 	snap_type_selector.add_elements (ArdourButton::Inset);
-	set_size_request_to_display_given_text (snap_type_selector, _("Region starts"), 34, 2);
 
 	snap_mode_selector.set_name ("mouse mode button");
 	snap_mode_selector.add_elements (ArdourButton::Inset);
-	set_size_request_to_display_given_text (snap_mode_selector, _("Magnetic"), 34, 2);
 
 	edit_point_selector.set_name ("mouse mode button");
 	edit_point_selector.add_elements (ArdourButton::Inset);
-	set_size_request_to_display_given_text (edit_point_selector, _("Playhead"), 34, 2);
 
 	snap_box.pack_start (snap_mode_selector, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
@@ -3027,17 +3031,21 @@ Editor::build_edit_point_menu ()
 	edit_point_selector.AddMenuElem (MenuElem ( edit_point_strings[(int)EditAtPlayhead], sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_selection_done), (EditPoint) EditAtPlayhead)));
 	edit_point_selector.AddMenuElem (MenuElem ( edit_point_strings[(int)EditAtSelectedMarker], sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_selection_done), (EditPoint) EditAtSelectedMarker)));
 	edit_point_selector.AddMenuElem (MenuElem ( edit_point_strings[(int)EditAtMouse], sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_selection_done), (EditPoint) EditAtMouse)));
+
+	set_size_request_to_display_given_text (edit_point_selector, longest(edit_point_strings), 30, 2);
 }
 
 void
 Editor::build_edit_mode_menu ()
 {
 	using namespace Menu_Helpers;
+	
+	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_strings[(int)Slide], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Slide)));
+//	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_strings[(int)Splice], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Splice)));
+	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_strings[(int)Ripple], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Ripple)));
+	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_strings[(int)Lock], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode)  Lock)));
 
-	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Slide), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Slide)));
-//	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Splice), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Splice)));
-	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Ripple), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Ripple)));
-	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_to_string(Lock), sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode)  Lock)));
+	set_size_request_to_display_given_text (edit_mode_selector, longest(edit_mode_strings), 30, 2);
 }
 
 void
@@ -3048,6 +3056,8 @@ Editor::build_snap_mode_menu ()
 	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapOff], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapOff)));
 	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapNormal], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapNormal)));
 	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapMagnetic], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapMagnetic)));
+
+	set_size_request_to_display_given_text (snap_mode_selector, longest(snap_mode_strings), 34, 2);
 }
 
 void
@@ -3085,6 +3095,9 @@ Editor::build_snap_type_menu ()
 	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionEnd], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionEnd)));
 	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionSync], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionSync)));
 	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionBoundary], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionBoundary)));
+
+	set_size_request_to_display_given_text (snap_type_selector, longest(snap_type_strings), 34, 2);
+
 }
 
 void
@@ -3424,6 +3437,8 @@ Editor::build_zoom_focus_menu ()
 	zoom_focus_selector.AddMenuElem (MenuElem ( zoom_focus_strings[(int)ZoomFocusPlayhead], sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done), (ZoomFocus) ZoomFocusPlayhead)));
 	zoom_focus_selector.AddMenuElem (MenuElem ( zoom_focus_strings[(int)ZoomFocusMouse], sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done), (ZoomFocus) ZoomFocusMouse)));
 	zoom_focus_selector.AddMenuElem (MenuElem ( zoom_focus_strings[(int)ZoomFocusEdit], sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done), (ZoomFocus) ZoomFocusEdit)));
+
+	set_size_request_to_display_given_text (zoom_focus_selector, longest (zoom_focus_strings), 30, 2);
 }
 
 void
