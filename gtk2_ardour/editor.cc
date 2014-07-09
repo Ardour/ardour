@@ -2768,7 +2768,7 @@ Editor::setup_toolbar ()
 	Alignment* mouse_mode_align = manage (new Alignment);
 
 	Glib::RefPtr<SizeGroup> mouse_mode_size_group = SizeGroup::create (SIZE_GROUP_BOTH);
-//	mouse_mode_size_group->add_widget (smart_mode_button);
+	//mouse_mode_size_group->add_widget (smart_mode_button);
 	mouse_mode_size_group->add_widget (mouse_move_button);
 	mouse_mode_size_group->add_widget (mouse_cut_button);
 	mouse_mode_size_group->add_widget (mouse_select_button);
@@ -2779,9 +2779,13 @@ Editor::setup_toolbar ()
 	mouse_mode_size_group->add_widget (mouse_draw_button);
 	mouse_mode_size_group->add_widget (internal_edit_button);
 
-	/* make them just a bit bigger */
-	mouse_move_button.set_size_request (-1, 30);
-
+	if (!ARDOUR::Profile->get_small_screen()) {
+		/* make them just a bit bigger */
+		mouse_move_button.set_size_request (24, 30);
+	} else {
+		/* make them just a bit taller */
+		mouse_move_button.set_size_request (-1, 30);
+	}
 	mouse_mode_hbox->set_spacing (2);
 
 	if (!ARDOUR::Profile->get_trx()) {
@@ -2809,7 +2813,11 @@ Editor::setup_toolbar ()
 	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
 
 	edit_mode_selector.set_name ("mouse mode button");
-	edit_mode_selector.set_size_request (65, -1);
+	if (!ARDOUR::Profile->get_small_screen()) {
+		edit_mode_selector.set_size_request (65, -1);
+	} else {
+		edit_mode_selector.set_size_request (55, -1);
+	}
 	edit_mode_selector.add_elements (ArdourButton::Inset);
 
 	if (!ARDOUR::Profile->get_trx()) {
@@ -2920,16 +2928,28 @@ Editor::setup_toolbar ()
 	snap_box.set_border_width (2);
 
 	snap_type_selector.set_name ("mouse mode button");
-	snap_type_selector.set_size_request (140, -1);
 	snap_type_selector.add_elements (ArdourButton::Inset);
+	if (!ARDOUR::Profile->get_small_screen()) {
+		snap_type_selector.set_size_request (140, -1);
+	} else {
+		snap_type_selector.set_size_request (120, -1);
+	}
 
 	snap_mode_selector.set_name ("mouse mode button");
-	snap_mode_selector.set_size_request (85, -1);
 	snap_mode_selector.add_elements (ArdourButton::Inset);
+	if (!ARDOUR::Profile->get_small_screen()) {
+		snap_mode_selector.set_size_request (85, -1);
+	} else {
+		snap_mode_selector.set_size_request (75, -1);
+	}
 
 	edit_point_selector.set_name ("mouse mode button");
-	edit_point_selector.set_size_request (85, -1);
 	edit_point_selector.add_elements (ArdourButton::Inset);
+	if (!ARDOUR::Profile->get_small_screen()) {
+		edit_point_selector.set_size_request (85, -1);
+	} else {
+		edit_point_selector.set_size_request (75, -1);
+	}
 
 	snap_box.pack_start (snap_mode_selector, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
