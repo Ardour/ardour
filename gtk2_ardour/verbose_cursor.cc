@@ -98,9 +98,6 @@ VerboseCursor::set_time (framepos_t frame)
 	char buf[128];
 	Timecode::Time timecode;
 	Timecode::BBT_Time bbt;
-	int hours, mins;
-	framepos_t frame_rate;
-	float secs;
 
 	if (_editor->_session == 0) {
 		return;
@@ -122,14 +119,7 @@ VerboseCursor::set_time (framepos_t frame)
 		break;
 
 	case AudioClock::MinSec:
-		/* XXX this is copied from show_verbose_duration_cursor() */
-		frame_rate = _editor->_session->frame_rate();
-		hours = frame / (frame_rate * 3600);
-		frame = frame % (frame_rate * 3600);
-		mins = frame / (frame_rate * 60);
-		frame = frame % (frame_rate * 60);
-		secs = (float) frame / (float) frame_rate;
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%07.4f", hours, mins, secs);
+		AudioClock::print_minsec (frame, buf, sizeof (buf), _editor->_session->frame_rate());
 		break;
 
 	default:
@@ -147,9 +137,7 @@ VerboseCursor::set_duration (framepos_t start, framepos_t end)
 	Timecode::Time timecode;
 	Timecode::BBT_Time sbbt;
 	Timecode::BBT_Time ebbt;
-	int hours, mins;
-	framepos_t distance, frame_rate;
-	float secs;
+	framepos_t frame_rate;
 	Meter meter_at_start (_editor->_session->tempo_map().meter_at(start));
 
 	if (_editor->_session == 0) {
@@ -201,15 +189,7 @@ VerboseCursor::set_duration (framepos_t start, framepos_t end)
 		break;
 
 	case AudioClock::MinSec:
-		/* XXX this stuff should be elsewhere.. */
-		distance = end - start;
-		frame_rate = _editor->_session->frame_rate();
-		hours = distance / (frame_rate * 3600);
-		distance = distance % (frame_rate * 3600);
-		mins = distance / (frame_rate * 60);
-		distance = distance % (frame_rate * 60);
-		secs = (float) distance / (float) frame_rate;
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%07.4f", hours, mins, secs);
+		AudioClock::print_minsec (end - start, buf, sizeof (buf), _editor->_session->frame_rate());
 		break;
 
 	default:

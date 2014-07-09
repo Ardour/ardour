@@ -1100,15 +1100,43 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 }
 
 void
-AudioClock::set_minsec (framepos_t when, bool /*force*/)
+AudioClock::print_minsec (framepos_t when, char* buf, size_t bufsize, float frame_rate)
 {
-	char buf[32];
 	framecnt_t left;
 	int hrs;
 	int mins;
 	int secs;
 	int millisecs;
-	bool negative = false;
+	bool negative;
+
+	if (when < 0) {
+		when = -when;
+		negative = true;
+	} else {
+		negative = false;
+	}
+
+	left = when;
+	hrs = (int) floor (left / (frame_rate * 60.0f * 60.0f));
+	left -= (framecnt_t) floor (hrs * frame_rate * 60.0f * 60.0f);
+	mins = (int) floor (left / (frame_rate * 60.0f));
+	left -= (framecnt_t) floor (mins * frame_rate * 60.0f);
+	secs = (int) floor (left / (float) frame_rate);
+	left -= (framecnt_t) floor ((double)(secs * frame_rate));
+	millisecs = floor (left * 1000.0 / (float) frame_rate);
+
+	if (negative) {
+		snprintf (buf, bufsize, "-%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
+	} else {
+		snprintf (buf, bufsize, " %02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
+	}
+
+}
+
+void
+AudioClock::set_minsec (framepos_t when, bool /*force*/)
+{
+	char buf[32];
 
 	if (_off) {
 		_layout->set_text (" --:--:--.---");
@@ -1121,25 +1149,7 @@ AudioClock::set_minsec (framepos_t when, bool /*force*/)
 		return;
 	}
 
-	if (when < 0) {
-		when = -when;
-		negative = true;
-	}
-
-	left = when;
-	hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
-	left -= (framecnt_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
-	mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-	left -= (framecnt_t) floor (mins * _session->frame_rate() * 60.0f);
-	secs = (int) floor (left / (float) _session->frame_rate());
-	left -= (framecnt_t) floor ((double)(secs * _session->frame_rate()));
-	millisecs = floor (left * 1000.0 / (float) _session->frame_rate());
-
-	if (negative) {
-		snprintf (buf, sizeof (buf), "-%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
-	} else {
-		snprintf (buf, sizeof (buf), " %02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
-	}
+	print_minsec (when, buf, sizeof (buf), _session->frame_rate());
 
 	_layout->set_text (buf);
 	set_slave_info();
