@@ -26,11 +26,12 @@
            handlesource="slider_controller_fader_handle.png"
            activehandlesource="slider_controller_fader_handle.png"
            minposx="10"
-           minposy="187"
+           minposy="200"
            maxposx="10"
-           maxposy="0"
+           maxposy="10"
            x="66"
-           y="35"/>
+           y="25"
+           bgnormal="#383838"/>
     <VBox id="gain_display_home" x="1" y="237" width="95" height="16"/>
   </Layout>
 </GainSlider>

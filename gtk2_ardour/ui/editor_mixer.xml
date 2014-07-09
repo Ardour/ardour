@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<RouteUI>
+<RouteUI bgnormal="#383838">
   <VBox>
-    <EventBox id="color_palette_home" borderwidth="1">
+    <EventBox id="color_palette_home" borderwidth="1" bgnormal="#383838">
       <VBox>
         <iconbutton id="color_palette_button"
                     width="95"
                     height="17"
                     normalicon="inspector_color_close"
                     activeicon="inspector_color_open"/>
-        <VBox id="color_buttons_home">
+        <VBox id="color_buttons_home" visible="false">
           <HBox>
             <iconbutton id="color_button_1"
                         width="19"
@@ -110,7 +110,7 @@
       </VBox>
     </EventBox>
     <VBox box.pack="end">
-      <EventBox id="panners_home" bgnormal="#FF0000" width="95" height="60"/>
+      <EventBox id="panners_home" bgnormal="#383838" width="95" height="60"/>
       <HBox id="level_meter_home"/>
       <Vbox>
         <HBox id="gain_meter_home"/>
