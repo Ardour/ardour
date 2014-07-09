@@ -2813,11 +2813,7 @@ Editor::setup_toolbar ()
 	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
 
 	edit_mode_selector.set_name ("mouse mode button");
-	if (!ARDOUR::Profile->get_small_screen()) {
-		edit_mode_selector.set_size_request (65, -1);
-	} else {
-		edit_mode_selector.set_size_request (55, -1);
-	}
+	set_size_request_to_display_given_text (edit_mode_selector, _("Ripple"), 30, 2);
 	edit_mode_selector.add_elements (ArdourButton::Inset);
 
 	if (!ARDOUR::Profile->get_trx()) {
@@ -2871,7 +2867,7 @@ Editor::setup_toolbar ()
 	zoom_out_full_button.set_related_action (act);
 
 	zoom_focus_selector.set_name ("zoom button");
-	zoom_focus_selector.set_size_request (80, -1);
+	set_size_request_to_display_given_text (zoom_focus_selector, _("Edit Point"), 30, 2);
 //	zoom_focus_selector.add_elements (ArdourButton::Inset);
 
 	if (!ARDOUR::Profile->get_trx()) {
@@ -2929,27 +2925,15 @@ Editor::setup_toolbar ()
 
 	snap_type_selector.set_name ("mouse mode button");
 	snap_type_selector.add_elements (ArdourButton::Inset);
-	if (!ARDOUR::Profile->get_small_screen()) {
-		snap_type_selector.set_size_request (140, -1);
-	} else {
-		snap_type_selector.set_size_request (120, -1);
-	}
+	set_size_request_to_display_given_text (snap_type_selector, _("Region starts"), 34, 2);
 
 	snap_mode_selector.set_name ("mouse mode button");
 	snap_mode_selector.add_elements (ArdourButton::Inset);
-	if (!ARDOUR::Profile->get_small_screen()) {
-		snap_mode_selector.set_size_request (85, -1);
-	} else {
-		snap_mode_selector.set_size_request (75, -1);
-	}
+	set_size_request_to_display_given_text (snap_mode_selector, _("Magnetic"), 34, 2);
 
 	edit_point_selector.set_name ("mouse mode button");
 	edit_point_selector.add_elements (ArdourButton::Inset);
-	if (!ARDOUR::Profile->get_small_screen()) {
-		edit_point_selector.set_size_request (85, -1);
-	} else {
-		edit_point_selector.set_size_request (75, -1);
-	}
+	set_size_request_to_display_given_text (edit_point_selector, _("Playhead"), 34, 2);
 
 	snap_box.pack_start (snap_mode_selector, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
