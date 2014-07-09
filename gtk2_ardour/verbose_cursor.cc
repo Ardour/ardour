@@ -115,7 +115,7 @@ VerboseCursor::set_time (framepos_t frame)
 
 	case AudioClock::Timecode:
 		_editor->_session->timecode_time (frame, timecode);
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+		snprintf (buf, sizeof (buf), "%s", Timecode::timecode_format_time (timecode).c_str());
 		break;
 
 	case AudioClock::MinSec:
@@ -185,7 +185,7 @@ VerboseCursor::set_duration (framepos_t start, framepos_t end)
 
 	case AudioClock::Timecode:
 		_editor->_session->timecode_duration (end - start, timecode);
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+		snprintf (buf, sizeof (buf), "%s", Timecode::timecode_format_time (timecode).c_str());
 		break;
 
 	case AudioClock::MinSec:
