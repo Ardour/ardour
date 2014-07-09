@@ -230,8 +230,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		return routes.reader ();
 	}
 
+	boost::shared_ptr<RouteList> get_tracks() const;
 	boost::shared_ptr<RouteList> get_routes_with_internal_returns() const;
-
 	boost::shared_ptr<RouteList> get_routes_with_regions_at (framepos_t const) const;
 
 	uint32_t nroutes() const { return routes.reader()->size(); }

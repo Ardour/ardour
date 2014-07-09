@@ -4636,6 +4636,20 @@ Session::route_removed_from_route_group (RouteGroup* rg, boost::weak_ptr<Route> 
 }
 
 boost::shared_ptr<RouteList>
+Session::get_tracks () const
+{
+	boost::shared_ptr<RouteList> rl = routes.reader ();
+	boost::shared_ptr<RouteList> tl (new RouteList);
+
+	for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
+		if (boost::dynamic_pointer_cast<Track> (*r)) {
+			tl->push_back (*r);
+		}
+	}
+	return tl;
+}
+
+boost::shared_ptr<RouteList>
 Session::get_routes_with_regions_at (framepos_t const p) const
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
