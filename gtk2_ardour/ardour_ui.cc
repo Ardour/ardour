@@ -1589,11 +1589,11 @@ ARDOUR_UI::open_session ()
     
 #ifdef _WIN32 
 	// Open the file save dialog, and choose the file name
-//	string fileName;
-//	if (open_file_dialog(fileName, Config->get_default_open_path(), _("Select Saved Session"))) {
-//
-//		session_path = fileName;
-//    } 
+	string fileName;
+	if (open_file_dialog(fileName, Config->get_default_open_path(), _("Select Saved Session"))) {
+
+		session_path = fileName;
+    } 
 #endif
     
     // cancel was pressed
