@@ -3057,7 +3057,7 @@ Editor::build_snap_mode_menu ()
 	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapNormal], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapNormal)));
 	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapMagnetic], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapMagnetic)));
 
-	set_size_request_to_display_given_text (snap_mode_selector, longest(snap_mode_strings), 34, 2);
+	set_size_request_to_display_given_text (snap_mode_selector, longest(snap_mode_strings), 40, 2);
 }
 
 void
@@ -3096,7 +3096,7 @@ Editor::build_snap_type_menu ()
 	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionSync], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionSync)));
 	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionBoundary], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionBoundary)));
 
-	set_size_request_to_display_given_text (snap_type_selector, longest(snap_type_strings), 34, 2);
+	set_size_request_to_display_given_text (snap_type_selector, longest(snap_type_strings), 40, 2);
 
 }
 
