@@ -21,6 +21,7 @@
 #define __ardour_automation_event_h__
 
 #include <stdint.h>
+#include <cstdlib>
 #include <list>
 #include <cmath>
 
@@ -71,7 +72,6 @@ class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Ev
 	virtual boost::shared_ptr<Evoral::ControlList> create(Evoral::Parameter id);
 
 	AutomationList& operator= (const AutomationList&);
-	bool operator== (const AutomationList&);
 
 	void thaw ();
 
@@ -116,6 +116,8 @@ class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Ev
 	AutoState    _state;
 	AutoStyle    _style;
 	gint         _touching;
+
+	bool operator== (const AutomationList&) const { /* not called */ abort(); return false; }
 };
 
 } // namespace
