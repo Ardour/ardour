@@ -148,13 +148,19 @@ AudioDiskstream::free_working_buffers()
 void
 AudioDiskstream::non_realtime_input_change ()
 {
-	bool need_new_write_sources = false;
+	bool need_write_sources = false;
 
 	{
 		Glib::Threads::Mutex::Lock lm (state_lock);
 
 		if (input_change_pending.type == IOChange::NoChange) {
 			return;
+		}
+
+		boost::shared_ptr<ChannelList> cr = channels.reader();
+		if (!cr->empty() && !cr->front()->write_source) {
+			need_write_sources = true;
+			cerr << name() << " no write sources!\n";
 		}
 
 		if (input_change_pending.type == IOChange::ConfigurationChanged) {
@@ -169,7 +175,7 @@ AudioDiskstream::non_realtime_input_change ()
 				remove_channel_from (c, _n_channels.n_audio() - _io->n_ports().n_audio());
 			}
 
-			need_new_write_sources = true;
+			need_write_sources = true;
 		}
 
 		if (input_change_pending.type & IOChange::ConnectionsChanged) {
@@ -183,7 +189,7 @@ AudioDiskstream::non_realtime_input_change ()
 		/* implicit unlock */
 	}
 
-	if (need_new_write_sources) {
+	if (need_write_sources) {
 		reset_write_sources (false);
 	}
 
