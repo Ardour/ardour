@@ -141,6 +141,8 @@ typedef uint64_t microseconds_t;
 
 #include "i18n.h"
 
+#include "open_file_dialog_proxy.h"
+
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtkmm2ext;
@@ -1580,56 +1582,25 @@ ARDOUR_UI::open_session ()
 
 	}
 
-	/* popup selector window */
-
-	if (open_session_selector == 0) {
-
-		/* ardour sessions are folders */
-
-		open_session_selector = new Gtk::FileChooserDialog (_("Open Session"), FILE_CHOOSER_ACTION_OPEN);
-		open_session_selector->add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
-		open_session_selector->add_button ("OPEN", Gtk::RESPONSE_ACCEPT);
-		open_session_selector->set_default_response(Gtk::RESPONSE_ACCEPT);
-		
-		if (_session) {
-			string session_parent_dir = Glib::path_get_dirname(_session->path());
-			string::size_type last_dir_sep = session_parent_dir.rfind(G_DIR_SEPARATOR);
-			session_parent_dir = session_parent_dir.substr(0, last_dir_sep);
-			open_session_selector->set_current_folder(session_parent_dir);
-		} else {
-			open_session_selector->set_current_folder(Config->get_default_open_path());
-		}
-
-		string default_session_folder = Config->get_default_open_path();
-		try {
-			/* add_shortcut_folder throws an exception if the folder being added already has a shortcut */
-			open_session_selector->add_shortcut_folder (default_session_folder);
-		}
-		catch (Glib::Error & e) {
-			std::cerr << "open_session_selector->add_shortcut_folder (" << default_session_folder << ") threw Glib::Error " << e.what() << std::endl;
-		}
-
-		FileFilter session_filter;
-		session_filter.add_pattern ("*.ardour");
-		session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
-		open_session_selector->add_filter (session_filter);
-		open_session_selector->set_filter (session_filter);
-  	}
-
-	int response = open_session_selector->run();
-	open_session_selector->hide ();
-
-	switch (response) {
-	case RESPONSE_ACCEPT:
-		break;
-	default:
-		open_session_selector->hide();
-		return;
-	}
-
-	open_session_selector->hide();
-	string session_path = open_session_selector->get_filename();
-	string path, name;
+    string session_path = "";
+#ifdef __APPLE__	
+    session_path = ARDOUR::open_file_dialog(Config->get_default_open_path(), _("Select Saved Session"));
+#endif
+    
+#ifdef _WIN32 
+	// Open the file save dialog, and choose the file name
+//	string fileName;
+//	if (open_file_dialog(fileName, Config->get_default_open_path(), _("Select Saved Session"))) {
+//
+//		session_path = fileName;
+//    } 
+#endif
+    
+    // cancel was pressed
+    if(session_path == "")
+        return;
+    
+    string path, name;
 	bool isnew;
 
 	if (session_path.length() > 0) {
