@@ -1833,10 +1833,36 @@ ARDOUR_UI::transport_stop ()
 	_session->request_stop (false, true);
 }
 
+bool
+ARDOUR_UI::trx_record_enable_all_tracks ()
+{
+	if (!_session) {
+		return false;
+	}
+
+	boost::shared_ptr<RouteList> rl = _session->get_tracks ();
+	bool none_record_enabled = true;
+
+	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
+		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*r);
+		assert (t);
+
+		if (t->record_enabled()) {
+			none_record_enabled = false;
+			break;
+		}
+	}
+
+	if (none_record_enabled) {
+		_session->set_record_enabled (rl, true, Session::rt_cleanup);
+	} 
+
+	return none_record_enabled;
+}
+
 void
 ARDOUR_UI::transport_record (bool roll)
 {
-
 	if (_session) {
 		switch (_session->record_status()) {
 		case Session::Disabled:
@@ -1844,6 +1870,9 @@ ARDOUR_UI::transport_record (bool roll)
 				MessageDialog msg (*editor, _("Please create one or more tracks before trying to record.\nYou can do this with the \"Add Track or Bus\" option in the Session menu."));
 				msg.run ();
 				return;
+			}
+			if (Profile->get_trx()) {
+				roll = trx_record_enable_all_tracks ();
 			}
 			_session->maybe_enable_record ();
 			if (roll) {
