@@ -665,6 +665,10 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	XMLTree tree;
 	std::string xml_path(_session_dir->root_path());
 
+	/* prevent concurrent saves from different threads */
+
+	Glib::Threads::Mutex::Lock lm (save_state_lock);
+
 	if (!_writable || (_state_of_the_state & CannotSave)) {
 		return 1;
 	}
