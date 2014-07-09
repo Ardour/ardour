@@ -2889,8 +2889,9 @@ Editor::setup_toolbar ()
 	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
 
 	edit_mode_selector.set_name ("mouse mode button");
-	edit_mode_selector.set_size_request (65, -1);
-	//edit_mode_selector.add_elements (ArdourButton::FlatFace);
+
+	set_size_request_to_display_given_text (edit_mode_selector, _("Ripple"), 30, 2);
+	edit_mode_selector.add_elements (ArdourButton::Inset);
 
 	if (!ARDOUR::Profile->get_trx()) {
 		mode_box->pack_start (edit_mode_selector, false, false);
@@ -2933,9 +2934,15 @@ Editor::setup_toolbar ()
 	act = ActionManager::get_action (X_("Editor"), X_("zoom-to-session"));
 	zoom_out_full_button.set_related_action (act);
 
+<<<<<<< HEAD
 	zoom_focus_selector.set_name ("transport option button");
 	zoom_focus_selector.set_size_request (80, -1);
 //	zoom_focus_selector.add_elements (ArdourButton::FlatFace);
+=======
+	zoom_focus_selector.set_name ("zoom button");
+	set_size_request_to_display_given_text (zoom_focus_selector, _("Edit Point"), 30, 2);
+//	zoom_focus_selector.add_elements (ArdourButton::Inset);
+>>>>>>> ea311d4... automatically set ArdourDropdown box width.
 
 	if (!ARDOUR::Profile->get_trx()) {
 		_zoom_box.pack_start (zoom_out_button, false, false);
@@ -2982,6 +2989,7 @@ Editor::setup_toolbar ()
 	snap_box.set_border_width (2);
 
 	snap_type_selector.set_name ("mouse mode button");
+<<<<<<< HEAD
 	snap_type_selector.set_size_request (140, -1);
 	//snap_type_selector.add_elements (ArdourButton::FlatFace);
 
@@ -2992,6 +3000,18 @@ Editor::setup_toolbar ()
 	edit_point_selector.set_name ("mouse mode button");
 	edit_point_selector.set_size_request (85, -1);
 	//edit_point_selector.add_elements (ArdourButton::FlatFace);
+=======
+	snap_type_selector.add_elements (ArdourButton::Inset);
+	set_size_request_to_display_given_text (snap_type_selector, _("Region starts"), 34, 2);
+
+	snap_mode_selector.set_name ("mouse mode button");
+	snap_mode_selector.add_elements (ArdourButton::Inset);
+	set_size_request_to_display_given_text (snap_mode_selector, _("Magnetic"), 34, 2);
+
+	edit_point_selector.set_name ("mouse mode button");
+	edit_point_selector.add_elements (ArdourButton::Inset);
+	set_size_request_to_display_given_text (edit_point_selector, _("Playhead"), 34, 2);
+>>>>>>> ea311d4... automatically set ArdourDropdown box width.
 
 	snap_box.pack_start (snap_mode_selector, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
