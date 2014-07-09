@@ -40,6 +40,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 
+#include "canvas/canvas.h"
 #include "canvas/scroll_group.h"
 
 #include "editor.h"
@@ -5474,8 +5475,10 @@ RegionCutDrag::motion (GdkEvent*, bool)
 void
 RegionCutDrag::finished (GdkEvent*, bool)
 {
-	framepos_t pos = _drags->current_pointer_frame();
+	_editor->get_track_canvas()->canvas()->re_enter();
 
+	framepos_t pos = _drags->current_pointer_frame();
+	
 	line->hide ();
 
 	RegionSelection rs = _editor->get_regions_from_selection_and_mouse (pos);
