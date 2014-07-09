@@ -617,6 +617,7 @@ Editor::Editor ()
 	HBox *hbox = manage (new HBox);
 	hbox->pack_start (edit_pane, true, true);
 
+	global_vpacker.pack_start (top_hbox, false, false);
 	global_vpacker.pack_start (*hbox, true, true);
 
 	global_hpacker.pack_start (global_vpacker, true, true);
@@ -628,7 +629,6 @@ Editor::Editor ()
 
 	vpacker.pack_end (status_bar_hpacker, false, false);
 	vpacker.pack_end (global_hpacker, true, true);
-	vpacker.pack_end (top_hbox, false, false);
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 
