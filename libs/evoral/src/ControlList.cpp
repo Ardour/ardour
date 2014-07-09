@@ -75,7 +75,7 @@ ControlList::ControlList (const Parameter& id)
 
 ControlList::ControlList (const ControlList& other)
 	: _parameter(other._parameter)
-	, _interpolation(Linear)
+	, _interpolation(other._interpolation)
 	, _curve(0)
 {
 	_frozen = 0;
@@ -99,7 +99,7 @@ ControlList::ControlList (const ControlList& other)
 
 ControlList::ControlList (const ControlList& other, double start, double end)
 	: _parameter(other._parameter)
-	, _interpolation(Linear)
+	, _interpolation(other._interpolation)
 	, _curve(0)
 {
 	_frozen = 0;
@@ -156,6 +156,9 @@ ControlList::operator= (const ControlList& other)
 
 		_min_yval = other._min_yval;
 		_max_yval = other._max_yval;
+
+
+		_interpolation = other._interpolation;
 		_default_value = other._default_value;
 		
 		copy_events (other);
