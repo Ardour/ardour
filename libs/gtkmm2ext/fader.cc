@@ -123,6 +123,8 @@ static void get_closest_point_on_line(double xa, double ya, double xb, double yb
 
 Fader::Fader (Gtk::Adjustment& adj,
 			  const std::string& face_image_file, 
+			  const std::string& active_face_image_file,
+			  const std::string& underlay_image_file,
 			  const std::string& handle_image_file,
 			  const std::string& active_handle_image_file,
 			  int min_pos_x, 
@@ -147,6 +149,22 @@ Fader::Fader (Gtk::Adjustment& adj,
 		_face_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
 	} else {
 		throw failed_constructor(); 
+	}
+	
+	if (active_face_image_file.length ()) {
+		if (PBD::find_file_in_search_path (spath, active_face_image_file, data_file_path)) {
+			_active_face_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
+		} else {
+			throw failed_constructor(); 
+		}
+	}
+
+	if (underlay_image_file.length ()) {
+		if (PBD::find_file_in_search_path (spath, underlay_image_file, data_file_path)) {
+			_underlay_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
+		} else {
+			throw failed_constructor(); 
+		}
 	}
 
 	if (PBD::find_file_in_search_path (spath, handle_image_file, data_file_path)) {
@@ -179,11 +197,25 @@ Fader::on_expose_event (GdkEventExpose* ev)
 	Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
 	cairo_t* cr = context->cobj();
     
-    cairo_rectangle (cr, 0, 0, get_width(), get_height());
-    gdk_cairo_set_source_pixbuf (cr, _face_pixbuf->gobj(), 0, 0);
-    cairo_fill (cr);
-
 	get_handle_position (_last_drawn_x, _last_drawn_y);
+
+	if (_underlay_pixbuf != 0) {
+	    cairo_rectangle (cr, 0, 0, get_width(), get_height());
+		gdk_cairo_set_source_pixbuf (cr,
+									 _underlay_pixbuf->gobj(),
+									 _last_drawn_x - _underlay_pixbuf->get_width()/2.0,
+									 _last_drawn_y - _underlay_pixbuf->get_height()/2.0);
+	    cairo_fill (cr);
+	}
+
+	cairo_rectangle (cr, 0, 0, get_width(), get_height());
+	gdk_cairo_set_source_pixbuf (cr, 
+								 ((get_state () == Gtk::STATE_ACTIVE) && (_active_face_pixbuf != 0)) ? 
+									_active_face_pixbuf->gobj() : 
+									_face_pixbuf->gobj(),
+								 0,
+								 0);
+	cairo_fill (cr);
 
     cairo_rectangle (cr, 0, 0, get_width(), get_height());
 	if (_dragging) {
@@ -280,106 +312,7 @@ Fader::on_button_release_event (GdkEventButton* ev)
 		gdk_pointer_ungrab (GDK_CURRENT_TIME);
 		queue_draw ();
 	}
-	/*
-	double const ev_pos_x = ev->x;
-	double const ev_posyx = ev->y;
-
-	switch (ev->button) {
-	case 1:
-		if (dragging) {
-			remove_modal_grab();
-			dragging = false;
-			gdk_pointer_ungrab (GDK_CURRENT_TIME);
-
-			if (!_hovering) {
-				Keyboard::magic_widget_drop_focus();
-				queue_draw ();
-			}
-
-			if ((ev_pos_x == grab_start_x) && (ev_pos_y == grab_start_y)) {
-
-				// no motion - just a click
-				if (ev->state & Keyboard::TertiaryModifier) {
-					adjustment.set_value (_default_value);
-				} else if (ev->state & Keyboard::GainFineScaleModifier) {
-					adjustment.set_value (adjustment.get_lower());
-				} else if ((_orien == VERT && ev_pos < display_span()) || (_orien == HORIZ && ev_pos > display_span())) {
-					// above the current display height, remember X Window coords
-					adjustment.set_value (adjustment.get_value() + adjustment.get_step_increment());
-				} else {
-					adjustment.set_value (adjustment.get_value() - adjustment.get_step_increment());
-				}
-			}
-			return true;
-		} 
-		break;
-		
-	case 2:
-		if (dragging) {
-			remove_modal_grab();
-			dragging = false;
-			set_adjustment_from_event (ev);
-			gdk_pointer_ungrab (GDK_CURRENT_TIME);
-			return true;
-		}
-		break;
-
-	default:
-		break;
-	}
-*/
 	return false;
-
-/*
-	double const ev_pos = (_orien == VERT) ? ev->y : ev->x;
-	
-	switch (ev->button) {
-	case 1:
-		if (dragging) {
-			remove_modal_grab();
-			dragging = false;
-			gdk_pointer_ungrab (GDK_CURRENT_TIME);
-
-			if (!_hovering) {
-				Keyboard::magic_widget_drop_focus();
-				queue_draw ();
-			}
-
-			if (ev_pos == grab_start) {
-
-				// no motion - just a click
-
-				if (ev->state & Keyboard::TertiaryModifier) {
-					adjustment.set_value (_default_value);
-				} else if (ev->state & Keyboard::GainFineScaleModifier) {
-					adjustment.set_value (adjustment.get_lower());
-				} else if ((_orien == VERT && ev_pos < display_span()) || (_orien == HORIZ && ev_pos > display_span())) {
-					// above the current display height, remember X Window coords
-					adjustment.set_value (adjustment.get_value() + adjustment.get_step_increment());
-				} else {
-					adjustment.set_value (adjustment.get_value() - adjustment.get_step_increment());
-				}
-			}
-			return true;
-		} 
-		break;
-		
-	case 2:
-		if (dragging) {
-			remove_modal_grab();
-			dragging = false;
-			set_adjustment_from_event (ev);
-			gdk_pointer_ungrab (GDK_CURRENT_TIME);
-			return true;
-		}
-		break;
-
-	default:
-		break;
-	}
-
-	return false;
-	*/
 }
 
 bool

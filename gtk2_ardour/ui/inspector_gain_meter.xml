@@ -23,6 +23,7 @@
     <Fader id="gain_slider"
            adjustment="gain_adjustment"
            facesource="slider_controller_fader.png"
+           underlaysource="slider_controller_fader_underlay.png"
            handlesource="slider_controller_fader_handle.png"
            activehandlesource="slider_controller_fader_handle.png"
            minposx="10"
