@@ -42,7 +42,7 @@ class MonoPanner : public PannerInterface
 	MonoPanner (boost::shared_ptr<ARDOUR::PannerShell>);
 	~MonoPanner ();
 
-        boost::shared_ptr<PBD::Controllable> get_controllable() const { return position_control; }
+    boost::shared_ptr<PBD::Controllable> get_controllable() const { return position_control; }
 
 	sigc::signal<void> StartGesture;
 	sigc::signal<void> StopGesture;
@@ -52,43 +52,27 @@ class MonoPanner : public PannerInterface
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 	bool on_motion_notify_event (GdkEventMotion*);
-        bool on_scroll_event (GdkEventScroll*);
-        bool on_key_press_event (GdkEventKey*);
+    bool on_scroll_event (GdkEventScroll*);
+    bool on_key_press_event (GdkEventKey*);
 
   private:
 	PannerEditor* editor ();
 	boost::shared_ptr<ARDOUR::PannerShell> _panner_shell;
 	
-        boost::shared_ptr<PBD::Controllable> position_control;
-        PBD::ScopedConnectionList panvalue_connections;
-        PBD::ScopedConnectionList panshell_connections;
-        int drag_start_x;
-        int last_drag_x;
-        double accumulated_delta;
-        bool detented;
+    boost::shared_ptr<PBD::Controllable> position_control;
+    PBD::ScopedConnectionList panvalue_connections;
+    PBD::ScopedConnectionList panshell_connections;
+    int drag_start_x;
+    int last_drag_x;
+    double accumulated_delta;
+    bool detented;
 
-        BindingProxy position_binder;
+    BindingProxy position_binder;
 
-        void set_tooltip ();
-
-        struct ColorScheme {
-            uint32_t outline;
-            uint32_t fill;
-            uint32_t text;
-            uint32_t background;
-            uint32_t pos_outline;
-            uint32_t pos_fill;
-        };
+    void set_tooltip ();
 
 	bool _dragging;
 
-	static Pango::AttrList panner_font_attributes;
-	static bool have_font;
-
-        static ColorScheme colors;
-        static void set_colors ();
-        static bool have_colors;
-	void color_handler ();
 	void bypass_handler ();
 	void pannable_handler ();
 };

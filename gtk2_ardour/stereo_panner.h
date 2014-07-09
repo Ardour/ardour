@@ -55,54 +55,39 @@ class StereoPanner : public PannerInterface
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 	bool on_motion_notify_event (GdkEventMotion*);
-        bool on_scroll_event (GdkEventScroll*);
-        bool on_key_press_event (GdkEventKey*);
+    bool on_scroll_event (GdkEventScroll*);
+    bool on_key_press_event (GdkEventKey*);
 
   private:
 	PannerEditor* editor ();
 	boost::shared_ptr<ARDOUR::PannerShell> _panner_shell;
 		   
-        boost::shared_ptr<PBD::Controllable> position_control;
-        boost::shared_ptr<PBD::Controllable> width_control;
-        PBD::ScopedConnectionList panvalue_connections;
-        PBD::ScopedConnectionList panshell_connections;
-        bool dragging;
-        bool dragging_position;
-        bool dragging_left;
-        bool dragging_right;
-        int drag_start_x;
-        int last_drag_x;
-        double accumulated_delta;
-        bool detented;
+    boost::shared_ptr<PBD::Controllable> position_control;
+    boost::shared_ptr<PBD::Controllable> width_control;
+    PBD::ScopedConnectionList panvalue_connections;
+    PBD::ScopedConnectionList panshell_connections;
+    bool dragging;
+    bool dragging_position;
+    bool dragging_left;
+    bool dragging_right;
+    int drag_start_x;
+    int last_drag_x;
+    double accumulated_delta;
+    bool detented;
 
-        BindingProxy position_binder;
-        BindingProxy width_binder;
+    BindingProxy position_binder;
+    BindingProxy width_binder;
 
-        void set_tooltip ();
+    void set_tooltip ();
 
-        struct ColorScheme {
-            uint32_t outline;
-            uint32_t fill;
-            uint32_t text;
-            uint32_t background;
-            uint32_t rule;
-        };
-
-        enum State {
-                Normal,
-                Mono,
-                Inverted
-        };
+    enum State {
+            Normal,
+            Mono,
+            Inverted
+    };
 
 	bool _dragging;
 
-	static Pango::AttrList panner_font_attributes;
-	static bool have_font;
-
-        static ColorScheme colors[3];
-        static void set_colors ();
-        static bool have_colors;
-	void color_handler ();
 	void bypass_handler ();
 	void pannable_handler ();
 };

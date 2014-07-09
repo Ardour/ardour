@@ -61,10 +61,10 @@ PannerUI::PannerUI (Session* s)
 	pan_astate_menu = 0;
 	pan_astyle_menu = 0;
 	in_pan_update = false;
-        _stereo_panner = 0;
+    _stereo_panner = 0;
 	_mono_panner = 0;
-        _ignore_width_change = false;
-        _ignore_position_change = false;
+    _ignore_width_change = false;
+    _ignore_position_change = false;
 
 	pan_automation_style_button.set_name ("MixerAutomationModeButton");
 	pan_automation_state_button.set_name ("MixerAutomationPlaybackButton");
@@ -93,8 +93,8 @@ PannerUI::PannerUI (Session* s)
 void
 PannerUI::set_panner (boost::shared_ptr<PannerShell> ps, boost::shared_ptr<Panner> p)
 {
-        /* note that the panshell might not change here (i.e. ps == _panshell)
-         */
+    /* note that the panshell might not change here (i.e. ps == _panshell)
+    */
 
  	connections.drop_connections ();
 
@@ -104,17 +104,17 @@ PannerUI::set_panner (boost::shared_ptr<PannerShell> ps, boost::shared_ptr<Panne
 	delete pan_astate_menu;
 	pan_astate_menu = 0;
 
-        _panshell = ps;
+    _panshell = ps;
 	_panner = p;
 
 	delete twod_panner;
 	twod_panner = 0;
 
-        delete _stereo_panner;
-        _stereo_panner = 0;
+    delete _stereo_panner;
+    _stereo_panner = 0;
 
-        delete _mono_panner;
-        _mono_panner = 0;
+    delete _mono_panner;
+    _mono_panner = 0;
 
 	if (!_panner) {
 		return;
@@ -122,13 +122,13 @@ PannerUI::set_panner (boost::shared_ptr<PannerShell> ps, boost::shared_ptr<Panne
 
 	_panshell->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::panshell_changed, this), gui_context());
 
-        /* new panner object, force complete reset of panner GUI
-         */
+    /* new panner object, force complete reset of panner GUI
+        */
 
-        _current_nouts = 0;
-        _current_nins = 0;
+    _current_nouts = 0;
+    _current_nins = 0;
 
-        setup_pan ();
+    setup_pan ();
 	update_pan_sensitive ();
 	pan_automation_state_changed ();
 }
@@ -198,8 +198,8 @@ PannerUI::~PannerUI ()
 	delete pan_menu;
 	delete pan_astyle_menu;
 	delete pan_astate_menu;
-        delete _stereo_panner;
-        delete _mono_panner;
+    delete _stereo_panner;
+    delete _mono_panner;
 }
 
 void
@@ -250,8 +250,8 @@ PannerUI::setup_pan ()
 		boost::shared_ptr<Pannable> pannable = _panner->pannable();
 
 		_stereo_panner = new StereoPanner (_panshell);
-		_stereo_panner->set_size_request (-1, pan_bar_height);
-		pan_vbox.pack_start (*_stereo_panner, false, false);
+//		_stereo_panner->set_size_request (-1, pan_bar_height);
+		pan_vbox.pack_start (*_stereo_panner, true, true);
 
 		boost::shared_ptr<AutomationControl> ac;
 
@@ -285,10 +285,10 @@ PannerUI::setup_pan ()
 
 		_mono_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
 
-		_mono_panner->set_size_request (-1, pan_bar_height);
+//		_mono_panner->set_size_request (-1, pan_bar_height);
 
 		update_pan_sensitive ();
-		pan_vbox.pack_start (*_mono_panner, false, false);
+		pan_vbox.pack_start (*_mono_panner, true, true);
 	}
 	else if (_current_uri == "http://ardour.org/plugin/panner_vbap#ui")
 	{

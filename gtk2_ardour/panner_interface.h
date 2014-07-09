@@ -65,14 +65,18 @@ protected:
 
 	void value_change ();
 	
-        bool on_enter_notify_event (GdkEventCrossing *);
-        bool on_leave_notify_event (GdkEventCrossing *);
+    bool on_enter_notify_event (GdkEventCrossing *);
+    bool on_leave_notify_event (GdkEventCrossing *);
 	bool on_key_release_event  (GdkEventKey *);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 
 	boost::shared_ptr<ARDOUR::Panner> _panner;
 	PannerPersistentTooltip _tooltip;
+
+	static Glib::RefPtr<Gdk::Pixbuf> load_pixbuf (const std::string& name);
+	static Glib::RefPtr<Gdk::Pixbuf> _knob_image[101];
+	static const char* _knob_image_files[101];
 
 private:
 	virtual PannerEditor* editor () = 0;

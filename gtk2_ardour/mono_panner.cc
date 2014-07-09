@@ -51,17 +51,6 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-static const int pos_box_size = 9;
-static const int lr_box_size = 15;
-static const int step_down = 10;
-static const int top_step = 2;
-
-MonoPanner::ColorScheme MonoPanner::colors;
-bool MonoPanner::have_colors = false;
-
-Pango::AttrList MonoPanner::panner_font_attributes;
-bool            MonoPanner::have_font = false;
-
 MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	: PannerInterface (p->panner())
 	, _panner_shell (p)
@@ -73,27 +62,16 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	, position_binder (position_control)
 	, _dragging (false)
 {
-	if (!have_colors) {
-		set_colors ();
-		have_colors = true;
-	}
-	if (!have_font) {
-		Pango::FontDescription font;
-		Pango::AttrFontDesc* font_attr;
-		font = Pango::FontDescription ("ArdourMono");
-		font.set_weight (Pango::WEIGHT_BOLD);
-		font.set_size(9 * PANGO_SCALE);
-		font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
-		panner_font_attributes.change(*font_attr);
-		delete font_attr;
-		have_font = true;
+	if (_knob_image[0] == 0) {
+		for (size_t i=0; i < (sizeof(_knob_image)/sizeof(_knob_image[0])); i++) {
+			_knob_image[i] = load_pixbuf (_knob_image_files[i]);
+		}
 	}
 
 	position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
 
 	_panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::bypass_handler, this), gui_context());
 	_panner_shell->PannableChanged.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::pannable_handler, this), gui_context());
-	ColorsChanged.connect (sigc::mem_fun (*this, &MonoPanner::color_handler));
 
 	set_tooltip ();
 }
@@ -130,149 +108,16 @@ MonoPanner::set_tooltip ()
 bool
 MonoPanner::on_expose_event (GdkEventExpose*)
 {
-	Glib::RefPtr<Gdk::Window> win (get_window());
-	Glib::RefPtr<Gdk::GC> gc (get_style()->get_base_gc (get_state()));
 	Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
+	unsigned pos = (unsigned)(rint (100.0 * position_control->get_value ())); /* 0..100 */
 
-	int width, height;
-	double pos = position_control->get_value (); /* 0..1 */
-	uint32_t o, f, t, b, pf, po;
-	const double corner_radius = 5;
+	double x = (get_width() - _knob_image[pos]->get_width())/2.0;
+	double y = (get_height() - _knob_image[pos]->get_height())/2.0;
 
-	width = get_width();
-	height = get_height ();
+	cairo_rectangle (context->cobj(), x, y, _knob_image[pos]->get_width(), _knob_image[pos]->get_height());
 
-	o = colors.outline;
-	f = colors.fill;
-	t = colors.text;
-	b = colors.background;
-	pf = colors.pos_fill;
-	po = colors.pos_outline;
-
-	if (_panner_shell->bypassed()) {
-		b  = 0x20202040;
-		f  = 0x404040ff;
-		o  = 0x606060ff;
-		po = 0x606060ff;
-		pf = 0x404040ff;
-		t  = 0x606060ff;
-	}
-
-	/* background */
-	context->set_source_rgba (UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
-	context->rectangle (0, 0, width, height);
-	context->fill ();
-
-
-	double usable_width = width - pos_box_size;
-
-	/* compute the centers of the L/R boxes based on the current stereo width */
-	if (fmod (usable_width,2.0) == 0) {
-		usable_width -= 1.0;
-	}
-	const double half_lr_box = lr_box_size/2.0;
-	const double left = 4 + half_lr_box; // center of left box
-	const double right = width - 4 - half_lr_box; // center of right box
-
-	/* center line */
-	context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-	context->set_line_width (1.0);
-	context->move_to ((pos_box_size/2.0) + (usable_width/2.0), 0);
-	context->line_to ((pos_box_size/2.0) + (usable_width/2.0), height);
-	context->stroke ();
-
-	context->set_line_width (1.0);
-	/* left box */
-
-	rounded_left_half_rectangle (context,
-			left - half_lr_box + .5,
-			half_lr_box + step_down,
-			lr_box_size, lr_box_size, corner_radius);
-	context->set_source_rgba (UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
-	context->fill_preserve ();
-	context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-	context->stroke();
-
-	/* add text */
-	int tw, th;
-	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create(get_pango_context());
-	layout->set_attributes (panner_font_attributes);
-
-	layout->set_text (_("L"));
-	layout->get_pixel_size(tw, th);
-	context->move_to (rint(left - tw/2), rint(lr_box_size + step_down - th/2));
-	context->set_source_rgba (UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
-	pango_cairo_show_layout (context->cobj(), layout->gobj());
-
-	/* right box */
-	rounded_right_half_rectangle (context,
-			right - half_lr_box - .5,
-			half_lr_box + step_down,
-			lr_box_size, lr_box_size, corner_radius);
-	context->set_source_rgba (UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
-	context->fill_preserve ();
-	context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-	context->stroke();
-
-	/* add text */
-	layout->set_text (_("R"));
-	layout->get_pixel_size(tw, th);
-	context->move_to (rint(right - tw/2), rint(lr_box_size + step_down - th/2));
-	context->set_source_rgba (UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
-	pango_cairo_show_layout (context->cobj(), layout->gobj());
-
-	/* 2 lines that connect them both */
-	context->set_line_width (1.0);
-
-	if (_panner_shell->panner_gui_uri() != "http://ardour.org/plugin/panner_balance#ui") {
-		context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-		context->move_to (left  + half_lr_box, half_lr_box + step_down);
-		context->line_to (right - half_lr_box, half_lr_box + step_down);
-		context->stroke ();
-
-		context->move_to (left  + half_lr_box, half_lr_box+step_down+lr_box_size);
-		context->line_to (right - half_lr_box, half_lr_box+step_down+lr_box_size);
-		context->stroke ();
-	} else {
-		context->move_to (left  + half_lr_box, half_lr_box+step_down+lr_box_size);
-		context->line_to (left  + half_lr_box, half_lr_box + step_down);
-		context->line_to ((pos_box_size/2.0) + (usable_width/2.0), half_lr_box+step_down+lr_box_size);
-		context->line_to (right - half_lr_box, half_lr_box + step_down);
-		context->line_to (right - half_lr_box, half_lr_box+step_down+lr_box_size);
-		context->close_path();
-
-		context->set_source_rgba (UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
-		context->fill_preserve ();
-		context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-		context->stroke ();
-	}
-
-	/* draw the position indicator */
-	double spos = (pos_box_size/2.0) + (usable_width * pos);
-
-	context->set_line_width (2.0);
-	context->move_to (spos + (pos_box_size/2.0), top_step); /* top right */
-	context->rel_line_to (0.0, pos_box_size); /* lower right */
-	context->rel_line_to (-pos_box_size/2.0, 4.0); /* bottom point */
-	context->rel_line_to (-pos_box_size/2.0, -4.0); /* lower left */
-	context->rel_line_to (0.0, -pos_box_size); /* upper left */
-	context->close_path ();
-
-
-	context->set_source_rgba (UINT_RGBA_R_FLT(po), UINT_RGBA_G_FLT(po), UINT_RGBA_B_FLT(po), UINT_RGBA_A_FLT(po));
-	context->stroke_preserve ();
-	context->set_source_rgba (UINT_RGBA_R_FLT(pf), UINT_RGBA_G_FLT(pf), UINT_RGBA_B_FLT(pf), UINT_RGBA_A_FLT(pf));
-	context->fill ();
-
-	/* marker line */
-	context->set_line_width (1.0);
-	context->move_to (spos, pos_box_size + 5);
-	context->rel_line_to (0, half_lr_box+step_down);
-	context->set_source_rgba (UINT_RGBA_R_FLT(po), UINT_RGBA_G_FLT(po), UINT_RGBA_B_FLT(po), UINT_RGBA_A_FLT(po));
-	context->stroke ();
-
-	/* done */
-
+	gdk_cairo_set_source_pixbuf (context->cobj(), _knob_image[pos]->gobj(), x, y);
+	cairo_fill (context->cobj());
 	return true;
 }
 
@@ -480,24 +325,6 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
 	}
 
 	return true;
-}
-
-void
-MonoPanner::set_colors ()
-{
-        colors.fill = ARDOUR_UI::config()->get_canvasvar_MonoPannerFill();
-        colors.outline = ARDOUR_UI::config()->get_canvasvar_MonoPannerOutline();
-        colors.text = ARDOUR_UI::config()->get_canvasvar_MonoPannerText();
-        colors.background = ARDOUR_UI::config()->get_canvasvar_MonoPannerBackground();
-        colors.pos_outline = ARDOUR_UI::config()->get_canvasvar_MonoPannerPositionOutline();
-        colors.pos_fill = ARDOUR_UI::config()->get_canvasvar_MonoPannerPositionFill();
-}
-
-void
-MonoPanner::color_handler ()
-{
-	set_colors ();
-	queue_draw ();
 }
 
 void
