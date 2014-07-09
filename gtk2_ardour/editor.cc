@@ -2061,6 +2061,10 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 	_edit_point = ep;
 	string str = edit_point_strings[(int)ep];
 
+	if (Profile->get_mixbus())
+		if (ep == EditAtSelectedMarker)
+			ep = EditAtPlayhead;
+	
 	if (str != edit_point_selector.get_text ()) {
 		edit_point_selector.set_text (str);
 	}
@@ -3029,7 +3033,8 @@ Editor::build_edit_point_menu ()
 	using namespace Menu_Helpers;
 
 	edit_point_selector.AddMenuElem (MenuElem ( edit_point_strings[(int)EditAtPlayhead], sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_selection_done), (EditPoint) EditAtPlayhead)));
-	edit_point_selector.AddMenuElem (MenuElem ( edit_point_strings[(int)EditAtSelectedMarker], sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_selection_done), (EditPoint) EditAtSelectedMarker)));
+	if(!Profile->get_mixbus())
+		edit_point_selector.AddMenuElem (MenuElem ( edit_point_strings[(int)EditAtSelectedMarker], sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_selection_done), (EditPoint) EditAtSelectedMarker)));
 	edit_point_selector.AddMenuElem (MenuElem ( edit_point_strings[(int)EditAtMouse], sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_selection_done), (EditPoint) EditAtMouse)));
 
 	set_size_request_to_display_given_text (edit_point_selector, edit_point_strings, 30, 2);
@@ -3403,6 +3408,9 @@ Editor::snap_mode_selection_done (SnapMode mode)
 void
 Editor::cycle_edit_point (bool with_marker)
 {
+	if(Profile->get_mixbus())
+		with_marker = false;
+
 	switch (_edit_point) {
 	case EditAtMouse:
 		set_edit_point_preference (EditAtPlayhead);
@@ -4372,6 +4380,10 @@ Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_men
 	framepos_t where = 0;
 	EditPoint ep = _edit_point;
 
+	if(Profile->get_mixbus())
+		if (ep == EditAtSelectedMarker)
+			ep=EditAtPlayhead;
+		
 	if (from_context_menu && (ep == EditAtMouse)) {
 		return  canvas_event_sample (&context_click_event, 0, 0);
 	}

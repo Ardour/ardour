@@ -4259,7 +4259,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 			TrackViewList grouped_add = new_selection;
 			for (TrackViewList::const_iterator i = new_selection.begin(); i != new_selection.end(); ++i) {
 				RouteTimeAxisView *n = dynamic_cast<RouteTimeAxisView *>(*i);
-				if ( n && n->route()->route_group() && n->route()->route_group()->is_active() ) {
+				if ( n && n->route()->route_group() && n->route()->route_group()->is_active() && n->route()->route_group()->enabled_property (ARDOUR::Properties::select.property_id) ) {
 					for (TrackViewList::const_iterator j = all_tracks.begin(); j != all_tracks.end(); ++j) {
 						RouteTimeAxisView *check = dynamic_cast<RouteTimeAxisView *>(*j);
 						if ( check && (n != check) && (check->route()->route_group() == n->route()->route_group()) )
