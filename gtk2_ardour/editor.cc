@@ -2825,7 +2825,7 @@ Editor::setup_toolbar ()
 	_mouse_mode_tearoff->set_name ("MouseModeBase");
 	_mouse_mode_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &_mouse_mode_tearoff->tearoff_window()), false);
 
-	if (Profile->get_sae()) {
+	if (Profile->get_sae() || Profile->get_mixbus() ) {
 		_mouse_mode_tearoff->set_can_be_torn_off (false);
 	}
 
@@ -2870,14 +2870,18 @@ Editor::setup_toolbar ()
 	set_size_request_to_display_given_text (zoom_focus_selector, _("Edit Point"), 30, 2);
 //	zoom_focus_selector.add_elements (ArdourButton::Inset);
 
-	if (!ARDOUR::Profile->get_trx()) {
+	if (ARDOUR::Profile->get_mixbus()) {
+		_zoom_box.pack_start (zoom_out_button, false, false);
+		_zoom_box.pack_start (zoom_in_button, false, false);
+		_zoom_box.pack_start (zoom_out_full_button, false, false);
+	} else if (ARDOUR::Profile->get_trx()) {
+		mode_box->pack_start (zoom_out_button, false, false);
+		mode_box->pack_start (zoom_in_button, false, false);
+	} else {
 		_zoom_box.pack_start (zoom_out_button, false, false);
 		_zoom_box.pack_start (zoom_in_button, false, false);
 		_zoom_box.pack_start (zoom_out_full_button, false, false);
 		_zoom_box.pack_start (zoom_focus_selector, false, false);
-	} else {
-		mode_box->pack_start (zoom_out_button, false, false);
-		mode_box->pack_start (zoom_in_button, false, false);
 	}
 
 	/* Track zoom buttons */
@@ -2919,6 +2923,10 @@ Editor::setup_toolbar ()
 		_zoom_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
 							    &_zoom_tearoff->tearoff_window(), 0));
 	} 
+
+	if (Profile->get_sae() || Profile->get_mixbus() ) {
+		_zoom_tearoff->set_can_be_torn_off (false);
+	}
 
 	snap_box.set_spacing (2);
 	snap_box.set_border_width (2);
@@ -2965,7 +2973,7 @@ Editor::setup_toolbar ()
 	_tools_tearoff->set_name ("MouseModeBase");
 	_tools_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &_tools_tearoff->tearoff_window()), false);
 
-	if (Profile->get_sae()) {
+	if (Profile->get_sae() || Profile->get_mixbus()) {
 		_tools_tearoff->set_can_be_torn_off (false);
 	}
 

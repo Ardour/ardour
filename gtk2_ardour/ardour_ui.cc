@@ -4305,6 +4305,10 @@ ARDOUR_UI::setup_profile ()
 	if (g_getenv ("TRX")) {
 		Profile->set_trx ();
 	}
+
+	if (g_getenv ("MIXBUS")) {
+		Profile->set_mixbus ();
+	}
 }
 
 int
