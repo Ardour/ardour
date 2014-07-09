@@ -90,12 +90,12 @@ public:
 	/**
 	 * Concatenate another Searchpath onto this.
 	 */
-	LIBPBD_TEMPLATE_MEMBER_API Searchpath& operator+ (const Searchpath& other);
+	LIBPBD_TEMPLATE_MEMBER_API const Searchpath operator+ (const Searchpath& other);
 	
 	/**
 	 * Add another path to the search path.
 	 */
-	LIBPBD_TEMPLATE_MEMBER_API Searchpath& operator+ (const std::string& directory_path);
+	LIBPBD_TEMPLATE_MEMBER_API const Searchpath operator+ (const std::string& directory_path);
 
 	/**
 	 * Remove all the directories in path from this.

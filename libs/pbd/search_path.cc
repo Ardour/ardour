@@ -124,19 +124,16 @@ Searchpath::operator+= (const std::string& directory_path)
 	return *this;
 }
 
-Searchpath&
+const Searchpath
 Searchpath::operator+ (const std::string& directory_path)
 {
-	add_directory (directory_path);
-	return *this;
+	return Searchpath (*this) += directory_path;
 }
 
-Searchpath&
+const Searchpath
 Searchpath::operator+ (const Searchpath& spath)
 {
-	// concatenate paths into new Searchpath
-	insert(end(), spath.begin(), spath.end());
-	return *this;
+	return Searchpath (*this) += spath;
 }
 
 Searchpath&
