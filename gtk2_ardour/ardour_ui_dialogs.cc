@@ -164,7 +164,6 @@ ARDOUR_UI::set_session (Session *s)
 	_session->locations()->added.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
 	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());
-    _session->config.ParameterChanged.connect_same_thread (connection_with_session_config, boost::bind (&ARDOUR_UI::on_parameter_changed, this, _1));
     
     /* Clocks are on by default after we are connected to a session, so show that here.
 	*/

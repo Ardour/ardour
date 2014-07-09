@@ -3143,7 +3143,6 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 	session_loaded = true;
     
     tracks_control_panel->refresh_session_settings_info();
-    _session->config.ParameterChanged.connect_same_thread (connection_with_session_config, boost::bind (&ARDOUR_UI::on_parameter_changed, this, _1));
 
 	goto_editor_window ();
 
@@ -3218,15 +3217,6 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	new_session->save_state(new_session->name());
 
 	return 0;
-}
-
-void
-ARDOUR_UI::on_parameter_changed(std::string param)
-{
-    if (param == "native-file-data-format" || param == "native-file-header-format")
-        update_format();
-    if ( param == "timecode-format")
-        update_timecode_format();
 }
 
 void

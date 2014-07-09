@@ -725,7 +725,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_use_osc ();
 
 	void parameter_changed (std::string);
-	void session_parameter_changed (std::string);
+	void session_parameter_changed (const std::string& param);
 
 	bool first_idle ();
 
@@ -788,7 +788,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     ARDOUR::HeaderFormat _header_format;
     Timecode::TimecodeFormat _timecode_format;
     
-    void on_parameter_changed(std::string);
     PBD::ScopedConnection connection_with_session_config;
 };
 
