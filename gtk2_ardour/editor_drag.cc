@@ -4252,23 +4252,37 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 			for (TrackViewList::const_iterator i = all_tracks.begin(); i != all_tracks.end(); ++i) {
 			
 				if ((*i)->covered_by_y_range (top, bottom)) {
-					if (!(*i)->get_selected()) {
-						to_be_added_to_selection.push_back (*i);
-					}
-				} else {
-					if ((*i)->get_selected()) {
-						to_be_removed_from_selection.push_back (*i);
+					to_be_added_to_selection.push_back (*i);
+				}
+			}
+
+			//add any tracks that are GROUPED with the tracks we selected
+			TrackViewList grouped_add = to_be_added_to_selection;
+			for (TrackViewList::const_iterator i = to_be_added_to_selection.begin(); i != to_be_added_to_selection.end(); ++i) {
+				RouteTimeAxisView *add = dynamic_cast<RouteTimeAxisView *>(*i);
+				if ( add && add->route()->route_group() && add->route()->route_group()->is_active() ) {
+					for (TrackViewList::const_iterator j = all_tracks.begin(); j != all_tracks.end(); ++j) {
+						RouteTimeAxisView *rem = dynamic_cast<RouteTimeAxisView *>(*j);
+						if ( rem && (add != rem) && (rem->route()->route_group() == add->route()->route_group()) )
+							grouped_add.push_back (*j);
 					}
 				}
 			}
 
-			if (!to_be_added_to_selection.empty()) {
-				_editor->selection->add (to_be_added_to_selection);
-			}
+			//now compare our list with the current selection, and add or remove as necessary  ( most mouse moves don't change the selection so we can't just SET it for every mouse move; it gets clunky )
+			TrackViewList tracks_to_add;
+			TrackViewList tracks_to_remove;
+			for (TrackViewList::const_iterator i = grouped_add.begin(); i != grouped_add.end(); ++i)
+				if ( !_editor->selection->tracks.contains ( *i ) )
+					tracks_to_add.push_back ( *i );
+			for (TrackViewList::const_iterator i = _editor->selection->tracks.begin(); i != _editor->selection->tracks.end(); ++i)
+				if ( !grouped_add.contains ( *i ) )
+					tracks_to_remove.push_back ( *i );
+					
+			_editor->selection->add(tracks_to_add);
+			_editor->selection->remove(tracks_to_remove);
 			
-			if (!to_be_removed_from_selection.empty()) {
-				_editor->selection->remove (to_be_removed_from_selection);
-			}
+
 		}
 	}
 	break;
