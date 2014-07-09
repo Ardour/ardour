@@ -21,9 +21,11 @@
           width="17"
           height="187"/>
     <icon source="mixer_strip_meter_marks.png" x="22" y="18"/>
-    <Fader id="gain_slider" bgnormal="#380000" bgactive="#6A0000"
+    <Fader id="gain_slider" bgnormal="#303030" bgactive="#545454"
            adjustment="gain_adjustment"
            facesource="slider_controller_fader.png"
+           activefacesource="slider_controller_active_fader.png"
+           underlaysource="slider_controller_fader_underlay.png"
            handlesource="slider_controller_fader_handle.png"
            activehandlesource="slider_controller_fader_handle.png"
            minposx="10"
