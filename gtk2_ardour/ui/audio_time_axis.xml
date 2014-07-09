@@ -24,7 +24,7 @@
             id="name_label_home">
         <HBox width="5"/>
         <Label id="name_label"
-               font ="Helvetica 10"
+               font="Helvetica 10"
                fgnormal="#ffffff"
                fgactive="#ffffff"/>
         <FocusEntry id="name_entry"
@@ -122,5 +122,3 @@
     </HBox>
   </HBox>
 </RouteUI>
-
-

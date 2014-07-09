@@ -82,10 +82,6 @@ class MixerStrip : public RouteUI
 	MixerStrip (Mixer_UI&, ARDOUR::Session*, const std::string& layout_script_file);
 	~MixerStrip ();
 
-	//void set_width_enum (Width, void* owner);
-//	Width get_width_enum () const { return _width; }
-//	void* width_owner () const { return _width_owner; }
-
 	GainMeter&      gain_meter()      { return gpm; }
 	PannerUI&       panner_ui()       { return panners; }
 	PluginSelector* plugin_selector();
@@ -110,8 +106,6 @@ class MixerStrip : public RouteUI
 	}
 
 	void hide_things ();
-
-	//sigc::signal<void> WidthChanged;
 
 	/** The delivery that we are handling the level for with our fader has changed */
 	PBD::Signal1<void, boost::weak_ptr<ARDOUR::Delivery> > DeliveryChanged;
@@ -166,6 +160,9 @@ class MixerStrip : public RouteUI
 	guint32 mode_switch_in_progress;
 
 	WavesButton&   name_button;
+	WavesButton&   color_palette_button;
+	Gtk::Container& color_palette_home;
+	Gtk::Container& color_buttons_home;
 
 	ArdourWindow*  comment_window;
 	Gtk::TextView* comment_area;
@@ -295,7 +292,8 @@ class MixerStrip : public RouteUI
 
 	std::string meter_point_string (ARDOUR::MeterPoint);
 	void color_button_clicked (WavesButton *button);
-	static char* XMLColor[15];
+	void color_palette_button_clicked (WavesButton *button);
+	static const char* XMLColor[15];
 };
 
 #endif /* __ardour_mixer_strip__ */

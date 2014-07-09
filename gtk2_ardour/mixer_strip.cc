@@ -79,9 +79,9 @@ using namespace ArdourMeter;
 
 int MixerStrip::scrollbar_height = 0;
 PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
-char* MixerStrip::XMLColor[15] = {	"#346B8B", "#2888C0", "#484AA0", "#6948A0", "#8247C4",
-									"#327C25", "#439B68", "#5BA55C", "#4FCD50", "#05D7C6", 
-									"#BC7904", "#8A5A07", "#8A7607", "#BCA904", "#CCBF4D" };
+const char* MixerStrip::XMLColor[15] = { "#346B8B", "#2888C0", "#484AA0", "#6948A0", "#8247C4",
+										 "#327C25", "#439B68", "#5BA55C", "#4FCD50", "#05D7C6", 
+										 "#BC7904", "#8A5A07", "#8A7607", "#BCA904", "#CCBF4D" };
 
 MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, const std::string& layout_script_file)
 	: AxisView(sess)
@@ -97,10 +97,12 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, const std::string& layout_s
 	, _comment_button (get_waves_button ("comment_button"))
 	, midi_input_enable_button (get_waves_button ("midi_input_enable_button"))
 	, name_button (get_waves_button ("name_button"))
+	, color_palette_button (get_waves_button ("color_palette_button"))
+	, color_palette_home (get_container ("color_palette_home"))
+	, color_buttons_home (get_container ("color_buttons_home"))
 	, group_button (get_waves_button ("group_button"))
 	, panners_home (get_event_box ("panners_home"))
 {
-	std::cout << "a) MixerStrip::MixerStrip (" << layout_script_file << ")" << std::endl;
 	init ();
 
 	if (!_mixer_owned) {
@@ -125,10 +127,12 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, _comment_button (get_waves_button ("comment_button"))
 	, midi_input_enable_button (get_waves_button ("midi_input_enable_button"))
 	, name_button (get_waves_button ("name_button"))
+	, color_palette_button (get_waves_button ("color_palette_button"))
+	, color_palette_home (get_container ("color_palette_home"))
+	, color_buttons_home (get_container ("color_buttons_home"))
 	, group_button (get_waves_button ("group_button"))
 	, panners_home (get_event_box ("panners_home"))
 {
-	std::cout << "b) MixerStrip::MixerStrip (" << layout_script_file << ")" << std::endl;
 	init ();
 	set_route (rt);
 	name_button.set_text (_route->name());
@@ -152,6 +156,8 @@ MixerStrip::init ()
 	color_button[12] = &get_waves_button ("color_button_13");
 	color_button[13] = &get_waves_button ("color_button_14");
 	color_button[14] = &get_waves_button ("color_button_15");
+
+	color_palette_button.signal_clicked.connect (sigc::mem_fun (*this, &MixerStrip::color_palette_button_clicked));
 
 	for (size_t i=0; i<(sizeof(color_button)/sizeof(color_button[0])); i++) {
 		color_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &MixerStrip::color_button_clicked));
@@ -1029,28 +1035,6 @@ MixerStrip::setup_comment_button ()
 		_comment_button.modify_bg (STATE_NORMAL, color ());
 		_comment_button.set_text (_("*Comments*"));
 	}
-	//switch (_width) {
-
-	//case Wide:
-	//	if (_route->comment().empty ()) {
-	//		_comment_button.unset_bg (STATE_NORMAL);
-	//		_comment_button.set_text (_("Comments"));
-	//	} else {
-	//		_comment_button.modify_bg (STATE_NORMAL, color ());
-	//		_comment_button.set_text (_("*Comments*"));
-	//	}
-	//	break;
-
-	//case Narrow:
-	//	if (_route->comment().empty ()) {
-	//		_comment_button.unset_bg (STATE_NORMAL);
-	//		_comment_button.set_text (_("Cmt"));
-	//	} else {
-	//		_comment_button.modify_bg (STATE_NORMAL, color ());
-	//		_comment_button.set_text (_("*Cmt*"));
-	//	}
-	//	break;
-	//}
 
 	ARDOUR_UI::instance()->set_tip (
 		_comment_button, _route->comment().empty() ? _("Click to Add/Edit Comments") : _route->comment()
@@ -1178,6 +1162,9 @@ MixerStrip::route_color_changed ()
 	}
 	
 	name_button.modify_bg (STATE_NORMAL, new_color);
+	color_palette_home.modify_bg (STATE_NORMAL, new_color);
+	color_palette_home.modify_bg (STATE_ACTIVE, new_color);
+	color_palette_home.queue_draw ();
 	reset_strip_style ();
 }
 
@@ -1254,6 +1241,7 @@ MixerStrip::list_route_operations ()
 void
 MixerStrip::set_selected (bool yn)
 {
+	root().set_state (yn ? Gtk::STATE_ACTIVE : Gtk::STATE_NORMAL);
 	AxisView::set_selected (yn);
 }
 
@@ -1820,6 +1808,13 @@ MixerStrip::set_meter_type (MeterType t)
 {
 	if (_suspend_menu_callbacks) return;
 	gpm.set_type (t);
+}
+
+void
+MixerStrip::color_palette_button_clicked (WavesButton *button)
+{
+	color_buttons_home.set_visible (!color_buttons_home.is_visible ());
+	color_palette_button.set_active (color_buttons_home.is_visible ());
 }
 
 void
