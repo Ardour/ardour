@@ -827,8 +827,8 @@ void WCMRPortAudioDevice::activateDevice (bool callerIsWaiting/*=false*/)
 		else
 		{
 			//failed, do not update device state
-			std::cout << "Failed to open pa stream stream " << paErr << std::endl;
-			DEBUG_MSG( "Failed to open pa stream stream " << paErr );
+			std::cout << "Failed to open pa stream " << paErr << std::endl;
+			DEBUG_MSG( "Failed to open pa stream " << paErr );
 			m_ConnectionStatus = DeviceErrors;
 			m_lastErr = eAsioFailed;
 		}
