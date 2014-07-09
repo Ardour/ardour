@@ -363,7 +363,7 @@ ExportHandler::finish_timespan ()
 					open_uri(path.c_str());  // open the soundcloud website to the new file
 				}
 			} else {
-				error << _("upload to Soundcloud failed.  Perhaps your email or password are incorrect?\n") << endmsg;
+				error << _("upload to Soundcloud failed. Perhaps your email or password are incorrect?\n") << endmsg;
 			}
 			delete soundcloud_uploader;
 		}

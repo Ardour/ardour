@@ -1955,7 +1955,7 @@ Session::XMLSourceFactory (const XMLNode& node)
 	}
 
 	catch (failed_constructor& err) {
-		error << string_compose (_("Found a sound file that cannot be used by %1. Talk to the progammers."), PROGRAM_NAME) << endmsg;
+		error << string_compose (_("Found a sound file that cannot be used by %1. Talk to the programmers."), PROGRAM_NAME) << endmsg;
 		return boost::shared_ptr<Source>();
 	}
 }

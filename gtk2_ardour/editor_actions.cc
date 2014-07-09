@@ -347,10 +347,10 @@ Editor::register_actions ()
 	toggle_reg_sens (editor_actions, "toggle-log-window", _("Log"),
 			sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::toggle_errors));
 
-	reg_sens (editor_actions, "tab-to-transient-forwards", _("Move Later to Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), true));
-	reg_sens (editor_actions, "alternate-tab-to-transient-forwards", _("Move Later to Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), true));
-	reg_sens (editor_actions, "tab-to-transient-backwards", _("Move Earlier to Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), false));
-	reg_sens (editor_actions, "alternate-tab-to-transient-backwards", _("Move Earlier to Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), false));
+	reg_sens (editor_actions, "alternate-tab-to-transient-forwards", _("Move to Next Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), true));
+	reg_sens (editor_actions, "alternate-tab-to-transient-backwards", _("Move to Previous Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), false));
+	reg_sens (editor_actions, "tab-to-transient-forwards", _("Move to Next Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), true));
+	reg_sens (editor_actions, "tab-to-transient-backwards", _("Move to Previous Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), false));
 
 	reg_sens (editor_actions, "crop", _("Crop"), sigc::mem_fun(*this, &Editor::crop_region_to_selection));
 

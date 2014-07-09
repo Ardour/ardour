@@ -279,8 +279,8 @@ StepEntry::StepEntry (StepEditor& seditor)
 	ARDOUR_UI::instance()->set_tip (&velocity_mp_button, _("Set volume (velocity) to mezzo-piano"), "");
 	ARDOUR_UI::instance()->set_tip (&velocity_mf_button, _("Set volume (velocity) to mezzo-forte"), "");
 	ARDOUR_UI::instance()->set_tip (&velocity_f_button, _("Set volume (velocity) to forte"), "");
-	ARDOUR_UI::instance()->set_tip (&velocity_ff_button, _("Set volume (velocity) to forteissimo"), "");
-	ARDOUR_UI::instance()->set_tip (&velocity_fff_button, _("Set volume (velocity) to forteississimo"), "");
+	ARDOUR_UI::instance()->set_tip (&velocity_ff_button, _("Set volume (velocity) to fortissimo"), "");
+	ARDOUR_UI::instance()->set_tip (&velocity_fff_button, _("Set volume (velocity) to fortississimo"), "");
 
 	note_velocity_box.pack_start (velocity_ppp_button, false, false);
 	note_velocity_box.pack_start (velocity_pp_button, false, false);

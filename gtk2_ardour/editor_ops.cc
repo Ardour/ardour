@@ -6565,6 +6565,7 @@ edit your ardour.rc file to set the\n\
 		return;
 	}
 
+	// XXX should be using gettext plural forms, maybe?
 	if (ntracks > 1) {
 		trackstr = _("tracks");
 	} else {
@@ -6591,7 +6592,7 @@ edit your ardour.rc file to set the\n\
 		}
 	} else if (nbusses) {
 		prompt  = string_compose (_("Do you really want to remove %1 %2?\n\n"
-		                            "This action cannot be undon, and the session file will be overwritten"),
+		                            "This action cannot be undone, and the session file will be overwritten"),
 					  nbusses, busstr);
 	}
 
