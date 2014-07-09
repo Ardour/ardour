@@ -142,9 +142,9 @@ const double Editor::timebar_height = 15.0;
 
 static const gchar *_snap_type_strings[] = {
 	N_("CD Frames"),
-	N_("Timecode Frames"),
-	N_("Timecode Seconds"),
-	N_("Timecode Minutes"),
+	N_("TC Frames"),
+	N_("TC Seconds"),
+	N_("TC Minutes"),
 	N_("Seconds"),
 	N_("Minutes"),
 	N_("Beats/128"),
