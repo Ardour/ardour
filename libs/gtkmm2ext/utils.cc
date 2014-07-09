@@ -77,6 +77,17 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *
 }
 
 void
+Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, std::string const & text,
+						   gint hpadding, gint vpadding)
+{
+	int width, height;
+	w.ensure_style ();
+	
+	get_pixel_size (w.create_pango_layout (text), width, height);
+	w.set_size_request(width + hpadding, height + vpadding);
+}
+
+void
 Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, 
 						   const std::vector<std::string>& strings,
 						   gint hpadding, gint vpadding)
