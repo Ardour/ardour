@@ -4643,7 +4643,9 @@ Session::get_tracks () const
 
 	for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
 		if (boost::dynamic_pointer_cast<Track> (*r)) {
-			tl->push_back (*r);
+			if (!(*r)->is_auditioner()) {
+				tl->push_back (*r);
+			}
 		}
 	}
 	return tl;
