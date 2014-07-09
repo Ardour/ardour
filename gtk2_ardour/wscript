@@ -723,6 +723,7 @@ def build(bld):
 
     # Icons/Images
     bld.install_files('${DATADIR}/ardour3/icons', bld.path.ant_glob('icons/*.png'))
+    bld.install_files('${DATADIR}/ardour3/icons/stereo_panner', bld.path.ant_glob('icons/stereo_panner/*.png'))
     bld.install_files('${DATADIR}/ardour3/pixmaps', bld.path.ant_glob('pixmaps/*.xpm'))
     bld.install_files('${DATADIR}/ardour3/ui', bld.path.ant_glob('ui/*.*'))
     bld.install_files('${DATADIR}/ardour3', 'splash.png')
