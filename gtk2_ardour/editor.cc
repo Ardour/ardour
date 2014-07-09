@@ -2760,7 +2760,7 @@ Editor::setup_toolbar ()
 {
 	HBox* mode_box = manage(new HBox);
 	mode_box->set_border_width (2);
-	mode_box->set_spacing(4);
+	mode_box->set_spacing(2);
 
 	HBox* mouse_mode_box = manage (new HBox);
 	HBox* mouse_mode_hbox = manage (new HBox);
@@ -2802,7 +2802,7 @@ Editor::setup_toolbar ()
 		mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_audition_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
-		mouse_mode_hbox->pack_start (internal_edit_button, false, false, 8);
+		mouse_mode_hbox->pack_start (internal_edit_button, false, false, 4);
 	}
 
 	mouse_mode_vbox->pack_start (*mouse_mode_hbox);
@@ -2959,7 +2959,7 @@ Editor::setup_toolbar ()
 	/* Pack everything in... */
 
 	HBox* hbox = manage (new HBox);
-	hbox->set_spacing(10);
+	hbox->set_spacing(2);
 
 	_tools_tearoff = manage (new TearOff (*hbox));
 	_tools_tearoff->set_name ("MouseModeBase");
@@ -2978,7 +2978,7 @@ Editor::setup_toolbar ()
 	_tools_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
 	                                             &_tools_tearoff->tearoff_window(), 0));
 
-	toolbar_hbox.set_spacing (10);
+	toolbar_hbox.set_spacing (2);
 	toolbar_hbox.set_border_width (1);
 
 	toolbar_hbox.pack_start (*_mouse_mode_tearoff, false, false);
