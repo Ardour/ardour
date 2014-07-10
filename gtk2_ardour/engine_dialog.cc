@@ -555,10 +555,10 @@ EngineControl::enable_latency_tab ()
 	lm_back_button_signal.disconnect();
 	if (_measure_midi) {
 		lm_back_button_signal = lm_back_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (notebook, &Gtk::Notebook::set_current_page), midi_tab));
-		lm_preamble.set_markup (_(""));
+		lm_preamble.hide ();
 	} else {
 		lm_back_button_signal = lm_back_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (notebook, &Gtk::Notebook::set_current_page), 0));
-		lm_preamble.set_markup (_("<span weight=\"bold\">Turn down the volume on your audio equipment to a very low level.</span>"));
+		lm_preamble.show ();
 	}
 
 	set_popdown_strings (lm_output_channel_combo, outputs);
