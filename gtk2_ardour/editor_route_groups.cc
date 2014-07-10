@@ -551,8 +551,6 @@ EditorRouteGroups::set_session (Session* s)
 
 	if (_session) {
 
-		RouteGroup& arg (_session->all_route_group());
-
 		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::add, this, _1), gui_context());
 		_session->route_group_removed.connect (
 			_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::groups_changed, this), gui_context()
