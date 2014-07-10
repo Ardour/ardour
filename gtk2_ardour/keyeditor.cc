@@ -103,7 +103,7 @@ KeyEditor::KeyEditor ()
 	reset_button.show ();
 	reset_label.show ();
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::reset));
-	vpacker.pack_start (reset_box);
+	vpacker.pack_start (reset_box, false, false);
 
 	add (vpacker);
 
