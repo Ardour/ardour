@@ -3509,7 +3509,6 @@ Session::audio_source_name_is_unique (const string& name, uint32_t chan)
 	std::vector<string> sdirs = source_search_path (DataType::AUDIO);
 	vector<space_and_path>::iterator i;
 	uint32_t existing = 0;
-	string basename = PBD::basename_nosuffix (name);
 
 	for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
 		
@@ -3521,7 +3520,7 @@ Session::audio_source_name_is_unique (const string& name, uint32_t chan)
 
 		const string spath = *i;
 		
-		if (matching_unsuffixed_filename_exists_in (spath, basename)) {
+		if (matching_unsuffixed_filename_exists_in (spath, name)) {
 			existing++;
 			break;
 		}
@@ -3543,7 +3542,7 @@ Session::audio_source_name_is_unique (const string& name, uint32_t chan)
 			break;
 		}
 	}
-	
+
 	return (existing == 0);
 }
 
