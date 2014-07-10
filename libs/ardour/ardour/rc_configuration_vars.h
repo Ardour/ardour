@@ -36,10 +36,6 @@ CONFIG_VARIABLE (AutoConnectOption, input_auto_connect, "input-auto-connect", Au
 /* Naming */
 CONFIG_VARIABLE (TracksAutoNamingRule, tracks_auto_naming, "tracks-auto-naming", UseDefaultNames)
 
-/* Paths */
-CONFIG_VARIABLE (std::string, default_open_path, "default-open-path", Glib::get_home_dir() )
-
-
 /* MIDI and MIDI related */
 
 CONFIG_VARIABLE (bool, trace_midi_input, "trace-midi-input", false)
@@ -193,6 +189,7 @@ CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)
 CONFIG_VARIABLE (bool, name_new_markers, "name-new-markers", false)
 CONFIG_VARIABLE (bool, rubberbanding_snaps_to_grid, "rubberbanding-snaps-to-grid", false)
 CONFIG_VARIABLE (long, font_scale, "font-scale", 81920)
+CONFIG_VARIABLE (std::string, default_session_parent_dir, "default-session-parent-dir", Glib::get_home_dir())
 CONFIG_VARIABLE (bool, show_waveforms, "show-waveforms", true)
 CONFIG_VARIABLE (bool, show_waveforms_while_recording, "show-waveforms-while-recording", true)
 CONFIG_VARIABLE (WaveformScale, waveform_scale, "waveform-scale", Linear)

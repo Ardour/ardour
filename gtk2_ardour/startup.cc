@@ -207,9 +207,10 @@ using the program.</span> \
 void
 ArdourStartup::default_dir_changed ()
 {
-	// make new session folder chooser point to the new default
-	new_folder_chooser.set_current_folder (Config->get_default_open_path());
-	config_changed ();
+	Config->set_default_session_parent_dir (default_dir_chooser->get_filename());
+ 	// make new session folder chooser point to the new default
+    new_folder_chooser.set_current_folder (Config->get_default_session_parent_dir());
+ 	config_changed ();
 }
 
 void
@@ -242,7 +243,8 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 	vbox->pack_start (*txt, false, false);
 	vbox->pack_start (*hbox, false, true);
 
-	default_dir_chooser->set_current_folder (poor_mans_glob (Config->get_default_open_path()));
+    cerr << "set default folder to " << poor_mans_glob (Config->get_default_session_parent_dir()) << endl;
+	default_dir_chooser->set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 	default_dir_chooser->signal_current_folder_changed().connect (sigc::mem_fun (*this, &ArdourStartup::default_dir_changed));
 	default_dir_chooser->show ();
 
@@ -404,6 +406,10 @@ ArdourStartup::on_apply ()
 {
 	if (config_modified) {
 
+        if (default_dir_chooser) {
+			Config->set_default_session_parent_dir (default_dir_chooser->get_filename());
+		}
+        
 		if (monitor_via_hardware_button.get_active()) {
 			Config->set_monitoring_model (ExternalMonitoring);
 		} else if (monitor_via_ardour_button.get_active()) {

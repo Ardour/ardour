@@ -595,13 +595,13 @@ TracksControlPanel::populate_auto_lock_timer()
 void
 TracksControlPanel::populate_default_session_path()
 {
-    std::string std_path = Config->get_default_open_path();
+    std::string std_path = Config->get_default_session_parent_dir();
     bool folderExist = Glib::file_test(std_path, FILE_TEST_EXISTS);
     
     if ( !folderExist )
-        Config->set_default_open_path(Glib::get_home_dir());
+        Config->set_default_session_parent_dir(Glib::get_home_dir());
     
-    _default_open_path.set_text(Config->get_default_open_path());
+    _default_open_path.set_text(Config->get_default_session_parent_dir());
 }
 
 void
@@ -1218,13 +1218,13 @@ TracksControlPanel::on_browse_button (WavesButton*)
     
 #ifdef __APPLE__
     set_keep_above(false);
-    _default_path_name = ARDOUR::choose_folder_dialog(Config->get_default_open_path(), _("Choose Default Path"));
+    _default_path_name = ARDOUR::choose_folder_dialog(Config->get_default_session_parent_dir(), _("Choose Default Path"));
     set_keep_above(true);    
     
     if( !_default_path_name.empty() )
         _default_open_path.set_text(_default_path_name);
     else
-        _default_open_path.set_text(Config->get_default_open_path());
+        _default_open_path.set_text(Config->get_default_session_parent_dir());
 	
     return;
 #endif
@@ -1243,7 +1243,7 @@ TracksControlPanel::on_browse_button (WavesButton*)
     if (!_default_path_name.empty())
         _default_open_path.set_text(_default_path_name);
     else
-        _default_open_path.set_text(Config->get_default_open_path());
+        _default_open_path.set_text(Config->get_default_session_parent_dir());
     
 	return;
 #endif // _WIN32
@@ -1254,7 +1254,7 @@ TracksControlPanel::save_default_session_path()
 {
     if(!_default_path_name.empty())
     {
-        Config->set_default_open_path(_default_path_name);
+        Config->set_default_session_parent_dir(_default_path_name);
         Config->save_state();
     }
 }
@@ -1315,7 +1315,7 @@ TracksControlPanel::on_cancel (WavesButton*)
 {
 	hide();
 	response(Gtk::RESPONSE_CANCEL);    
-    _default_open_path.set_text(Config->get_default_open_path());
+    _default_open_path.set_text(Config->get_default_session_parent_dir());
 }
 
 
@@ -1402,6 +1402,9 @@ TracksControlPanel::on_parameter_changed (const std::string& parameter_name)
         populate_output_mode();
     } else if (parameter_name == "tracks-auto-naming") {
         on_audio_input_configuration_changed ();
+    } else if (parameter_name == "default-session-parent-dir")
+    {
+        _default_open_path.set_text(Config->get_default_session_parent_dir());
     }
 }
 

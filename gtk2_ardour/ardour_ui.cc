@@ -1584,13 +1584,13 @@ ARDOUR_UI::open_session ()
 
     string session_path = "";
 #ifdef __APPLE__	
-    session_path = ARDOUR::open_file_dialog(Config->get_default_open_path(), _("Select Saved Session"));
+    session_path = ARDOUR::open_file_dialog(Config->get_default_session_parent_dir(), _("Select Saved Session"));
 #endif
     
 #ifdef _WIN32 
 	// Open the file save dialog, and choose the file name
 	string fileName;
-	if (open_file_dialog(fileName, Config->get_default_open_path(), _("Select Saved Session"))) {
+	if (open_file_dialog(fileName, Config->get_default_session_parent_dir(), _("Select Saved Session"))) {
 
 		session_path = fileName;
     } 
