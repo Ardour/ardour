@@ -102,6 +102,10 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, const std::string& layout_s
 	, color_buttons_home (get_container ("color_buttons_home"))
 	, group_button (get_waves_button ("group_button"))
 	, panners_home (get_event_box ("panners_home"))
+    , info_panel_button (get_waves_button ("info_panel_button"))
+	, info_panel_home (get_container ("info_panel_home"))
+	, input_info_label (get_label ("input_info_label"))
+	, output_info_label (get_label ("input_info_label"))
 {
 	init ();
 
@@ -132,6 +136,10 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, color_buttons_home (get_container ("color_buttons_home"))
 	, group_button (get_waves_button ("group_button"))
 	, panners_home (get_event_box ("panners_home"))
+    , info_panel_button (get_waves_button ("info_panel_button"))
+	, info_panel_home (get_container ("info_panel_home"))
+	, input_info_label (get_label ("input_info_label"))
+	, output_info_label (get_label ("input_info_label"))
 {
 	init ();
 	set_route (rt);
@@ -158,6 +166,7 @@ MixerStrip::init ()
 	color_button[14] = &get_waves_button ("color_button_15");
 
 	color_palette_button.signal_clicked.connect (sigc::mem_fun (*this, &MixerStrip::color_palette_button_clicked));
+	info_panel_button.signal_clicked.connect (sigc::mem_fun (*this, &MixerStrip::info_panel_button_clicked));
 
 	for (size_t i=0; i<(sizeof(color_button)/sizeof(color_button[0])); i++) {
 		color_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &MixerStrip::color_button_clicked));
@@ -1831,4 +1840,11 @@ MixerStrip::color_button_clicked (WavesButton *button)
 			RouteUI::set_color (Gdk::Color (XMLColor[i]));
 		}
 	}
+}
+
+void
+MixerStrip::info_panel_button_clicked (WavesButton *button)
+{
+	info_panel_home.set_visible (!info_panel_home.is_visible ());
+	info_panel_button.set_active (info_panel_home.is_visible ());
 }

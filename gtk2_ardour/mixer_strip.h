@@ -160,9 +160,15 @@ class MixerStrip : public RouteUI
 	guint32 mode_switch_in_progress;
 
 	WavesButton&   name_button;
+
 	WavesButton&   color_palette_button;
 	Gtk::Container& color_palette_home;
 	Gtk::Container& color_buttons_home;
+
+	WavesButton&   info_panel_button;
+	Gtk::Container& info_panel_home;
+	Gtk::Label& input_info_label;
+	Gtk::Label& output_info_label;
 
 	ArdourWindow*  comment_window;
 	Gtk::TextView* comment_area;
@@ -238,7 +244,6 @@ class MixerStrip : public RouteUI
 	void show_passthru_color ();
 
 	void property_changed (const PBD::PropertyChange&);
-//	void name_button_resized (Gtk::Allocation&);
 	void name_changed ();
 	void update_speed_display ();
 	void map_frozen ();
@@ -293,6 +298,7 @@ class MixerStrip : public RouteUI
 	std::string meter_point_string (ARDOUR::MeterPoint);
 	void color_button_clicked (WavesButton *button);
 	void color_palette_button_clicked (WavesButton *button);
+	void info_panel_button_clicked (WavesButton *button);
 	static const char* XMLColor[15];
 };
 
