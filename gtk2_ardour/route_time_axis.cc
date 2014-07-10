@@ -1385,6 +1385,41 @@ RouteTimeAxisView::find_next_region_boundary (framepos_t pos, int32_t dir)
 }
 
 void
+RouteTimeAxisView::fade_range (TimeSelection& selection)
+{
+	boost::shared_ptr<Playlist> what_we_got;
+	boost::shared_ptr<Track> tr = track ();
+	boost::shared_ptr<Playlist> playlist;
+
+	if (tr == 0) {
+		/* route is a bus, not a track */
+		return;
+	}
+
+	playlist = tr->playlist();
+
+	TimeSelection time (selection);
+	float const speed = tr->speed();
+	if (speed != 1.0f) {
+		for (TimeSelection::iterator i = time.begin(); i != time.end(); ++i) {
+			(*i).start = session_frame_to_track_frame((*i).start, speed);
+			(*i).end   = session_frame_to_track_frame((*i).end,   speed);
+		}
+	}
+
+        playlist->clear_changes ();
+        playlist->clear_owned_changes ();
+
+	playlist->fade_range (time);
+
+	vector<Command*> cmds;
+	playlist->rdiff (cmds);
+	_session->add_commands (cmds);
+	_session->add_command (new StatefulDiffCommand (playlist));
+
+}
+
+void
 RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
 	boost::shared_ptr<Playlist> what_we_got;

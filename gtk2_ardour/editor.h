@@ -1385,6 +1385,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_fade_in_active (bool);
 	void set_fade_out_active (bool);
 
+	void fade_range ();
+
 	std::set<boost::shared_ptr<ARDOUR::Playlist> > motion_frozen_playlists;
 
 	bool _dragging_playhead;

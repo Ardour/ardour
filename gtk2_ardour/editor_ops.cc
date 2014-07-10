@@ -5260,6 +5260,22 @@ Editor::toggle_solo_isolate ()
 {
 }
 
+
+void
+Editor::fade_range ()
+{
+	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+
+	begin_reversible_command (_("fade range"));
+
+	for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
+		(*i)->fade_range (selection->time);
+	}
+
+	commit_reversible_command ();
+}
+
+
 void
 Editor::set_fade_length (bool in)
 {
