@@ -17,6 +17,7 @@
 
 */
 
+#include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 
@@ -60,7 +61,9 @@ ArdourKeyboard::setup_keybindings ()
 
 	/* set up the per-user bindings path */
 
-	user_keybindings_path = Glib::build_filename (user_config_directory(), "ardour.bindings");
+	string lowercase_program_name = downcase (PROGRAM_NAME);
+
+	user_keybindings_path = Glib::build_filename (user_config_directory(), lowercase_program_name + ".bindings");
 
 	if (Glib::file_test (user_keybindings_path, Glib::FILE_TEST_EXISTS)) {
 		std::pair<string,string> newpair;
@@ -154,9 +157,6 @@ ArdourKeyboard::setup_keybindings ()
 					error << string_compose (_("Default keybindings not found - %1 will be hard to use!"), PROGRAM_NAME) << endmsg;
 					return;
 				} else {
-					warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"),
-								   keybindings_path)
-						<< endmsg;
 					keybindings_path = default_bindings;
 				}
 
