@@ -776,31 +776,31 @@ AudioClock::parse_as_timecode_distance (const std::string& str)
 	case 1:
 	case 2:
 		sscanf (str.c_str(), "%" PRId32, &frames);
-		return lrint ((frames/(float)fps) * sr);
+		return llrint ((frames/(float)fps) * sr);
 
 	case 3:
 		sscanf (str.c_str(), "%1" PRId32 "%" PRId32, &secs, &frames);
-		return (secs * sr) + lrint ((frames/(float)fps) * sr);
+		return (secs * sr) + llrint ((frames/(float)fps) * sr);
 
 	case 4:
 		sscanf (str.c_str(), "%2" PRId32 "%" PRId32, &secs, &frames);
-		return (secs * sr) + lrint ((frames/(float)fps) * sr);
+		return (secs * sr) + llrint ((frames/(float)fps) * sr);
 
 	case 5:
 		sscanf (str.c_str(), "%1" PRId32 "%2" PRId32 "%" PRId32, &mins, &secs, &frames);
-		return (mins * 60 * sr) + (secs * sr) + lrint ((frames/(float)fps) * sr);
+		return (mins * 60 * sr) + (secs * sr) + llrint ((frames/(float)fps) * sr);
 
 	case 6:
 		sscanf (str.c_str(), "%2" PRId32 "%2" PRId32 "%" PRId32, &mins, &secs, &frames);
-		return (mins * 60 * sr) + (secs * sr) + lrint ((frames/(float)fps) * sr);
+		return (mins * 60 * sr) + (secs * sr) + llrint ((frames/(float)fps) * sr);
 
 	case 7:
 		sscanf (str.c_str(), "%1" PRId32 "%2" PRId32 "%2" PRId32 "%" PRId32, &hrs, &mins, &secs, &frames);
-		return (hrs * 3600 * sr) + (mins * 60 * sr) + (secs * sr) + lrint ((frames/(float)fps) * sr);
+		return (hrs * 3600 * sr) + (mins * 60 * sr) + (secs * sr) + llrint ((frames/(float)fps) * sr);
 
 	case 8:
 		sscanf (str.c_str(), "%2" PRId32 "%2" PRId32 "%2" PRId32 "%" PRId32, &hrs, &mins, &secs, &frames);
-		return (hrs * 3600 * sr) + (mins * 60 * sr) + (secs * sr) + lrint ((frames/(float)fps) * sr);
+		return (hrs * 3600 * sr) + (mins * 60 * sr) + (secs * sr) + llrint ((frames/(float)fps) * sr);
 
 	default:
 		break;
