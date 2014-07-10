@@ -110,6 +110,40 @@
           </VBox>
         </VBox>
       </EventBox>
+      <VBox borderwidth="1" 
+            noshowall="true"
+            visible="false">
+        <iconbutton id="info_panel_button"
+                    width="95"
+                    height="17"
+                    normalicon="inspector_info_close"
+                    activeicon="inspector_info_open"/>
+        <VBox id="info_panel_home"
+              noshowall="true"
+              visible="false">
+          <VBox height="1"/>
+          <EventBox bgnormal="#4F4F4F" width="95">
+            <VBox>
+              <HBox box.padding="4">
+                <HBox width="7"/>
+                <Label id="input_info_label"
+                       text="IN Grisha, Kolya"
+                       font="Arial Bold 7"/>
+                <HBox box.fill="true" box.expand="true"/>
+              </HBox>
+              <HBox>
+                <HBox width="7"/>
+                <Label id="output_info_label"
+                       text="OUT please code it"
+                       font="Arial Bold 7"/>
+                <HBox box.fill="true" box.expand="true"/>
+              </HBox>
+              <HBox height="5"/>
+            </VBox>
+          </EventBox>
+        </VBox>
+      </VBox>
+
       <VBox box.pack="end">
         <EventBox id="panners_home" bgnormal="#383838" bgactive="#545454" width="57" height="60"/>
         <HBox id="level_meter_home"/>
