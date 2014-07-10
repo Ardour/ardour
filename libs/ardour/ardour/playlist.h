@@ -142,6 +142,7 @@ public:
 	void nudge_after (framepos_t start, framecnt_t distance, bool forwards);
 	boost::shared_ptr<Region> combine (const RegionList&);
 	void uncombine (boost::shared_ptr<Region>);
+	void fade_range (std::list<AudioRange>&);
 
 	void shuffle (boost::shared_ptr<Region>, int dir);
 	void ripple (framepos_t at, framecnt_t distance, RegionList *exclude);

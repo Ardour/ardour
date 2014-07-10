@@ -224,6 +224,8 @@ class LIBARDOUR_API Region
 	void trim_end (framepos_t new_position);
 	void trim_to (framepos_t position, framecnt_t length);
 
+	virtual void fade_range (framepos_t, framepos_t) {}
+
 	void cut_front (framepos_t new_position);
 	void cut_end (framepos_t new_position);
 

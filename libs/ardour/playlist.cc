@@ -3123,6 +3123,16 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	thaw ();
 }
 
+void
+Playlist::fade_range (list<AudioRange>& ranges)
+{
+	 for (list<AudioRange>::iterator r = ranges.begin(); r != ranges.end(); ++r) {
+		 for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+			 (*i)->fade_range ((*r).start, (*r).end);
+		 }
+	 }
+}
+
 uint32_t
 Playlist::max_source_level () const
 {
