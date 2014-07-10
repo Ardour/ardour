@@ -1833,6 +1833,9 @@ ARDOUR_UI::transport_stop ()
 	_session->request_stop (false, true);
 }
 
+/** Check if any tracks are record enabled. If none are, record enable all of them.
+ * @return true if track record-enabled status was changed, false otherwise.
+ */  
 bool
 ARDOUR_UI::trx_record_enable_all_tracks ()
 {
