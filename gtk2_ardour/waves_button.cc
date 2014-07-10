@@ -337,14 +337,14 @@ WavesButton::set_controllable (boost::shared_ptr<Controllable> c)
 void
 WavesButton::watch ()
 {
-        boost::shared_ptr<Controllable> c (binding_proxy.get_controllable ());
+    boost::shared_ptr<Controllable> c (binding_proxy.get_controllable ());
 
-        if (!c) {
-                warning << _("button cannot watch state of non-existing Controllable\n") << endmsg;
-                return;
-        }
+    if (!c) {
+        warning << _("button cannot watch state of non-existing Controllable\n") << endmsg;
+        return;
+    }
 
-        c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&WavesButton::controllable_changed, this), gui_context());
+    c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&WavesButton::controllable_changed, this), gui_context());
 }
 
 void

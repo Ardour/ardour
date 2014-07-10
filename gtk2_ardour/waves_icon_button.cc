@@ -54,46 +54,27 @@ WavesIconButton::render (cairo_t* cr)
 {
 	void (*rounded_function)(cairo_t*, double, double, double, double, double);
 
-	switch (_corner_mask) {
-	case 0x1: /* upper left only */
-		rounded_function = Gtkmm2ext::rounded_top_left_rectangle;
-		break;
-	case 0x2: /* upper right only */
-		rounded_function = Gtkmm2ext::rounded_top_right_rectangle;
-		break;
-	case 0x3: /* upper only */
-		rounded_function = Gtkmm2ext::rounded_top_rectangle;
-		break;
-		/* should really have functions for lower right, lower left,
-		   lower only, but for now, we don't
-		*/
-	default:
-		rounded_function = Gtkmm2ext::rounded_rectangle;
-	}
-
-	Glib::RefPtr<Gtk::Style> style = get_style();
-	/*
-	Gdk::Color bgcolor = style->get_bg ((get_state() == Gtk::STATE_INSENSITIVE) ? Gtk::STATE_INSENSITIVE : 
-											(_hovering ? 
-												(_pushed ? 
-													Gtk::STATE_ACTIVE :
-													Gtk::STATE_PRELIGHT ) :
-												(get_active() ? 
-													Gtk::STATE_ACTIVE :
-													Gtk::STATE_NORMAL)));*/
-
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf = ((CairoWidget::active_state() == Gtkmm2ext::ImplicitActive) ? _implicit_active_pixbuf : Glib::RefPtr<Gdk::Pixbuf>(0));
 
 	if (pixbuf == 0) {
 		pixbuf = (get_state() == Gtk::STATE_INSENSITIVE) ? 
-												(_inactive_pixbuf ? _inactive_pixbuf : _normal_pixbuf) : 
-												(_hovering ? 
-													(_pushed ? 
-														(_active_pixbuf ? _active_pixbuf : _normal_pixbuf) :
-														(_prelight_pixbuf ? _prelight_pixbuf : _normal_pixbuf)) :
-													(get_active() ? 
-														(_active_pixbuf ? _active_pixbuf : _normal_pixbuf) :
-														_normal_pixbuf));
+						(_inactive_pixbuf ? _inactive_pixbuf : _normal_pixbuf) : 
+						(_hovering ? 
+							(_pushed ? (_active_pixbuf ?
+											_active_pixbuf : 
+											_normal_pixbuf) :
+									   (_prelight_pixbuf ? 
+											_prelight_pixbuf :
+											(get_active() ? 
+								(_active_pixbuf ? 
+									_active_pixbuf :
+									_normal_pixbuf) :
+								_normal_pixbuf))) :
+							(get_active() ? 
+								(_active_pixbuf ? 
+									_active_pixbuf :
+									_normal_pixbuf) :
+								_normal_pixbuf));
 	}
 
 	if ((_left_border_width != 0) ||

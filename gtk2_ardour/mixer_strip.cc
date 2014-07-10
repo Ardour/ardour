@@ -1161,7 +1161,9 @@ MixerStrip::route_color_changed ()
 		color_button[i]->set_active (new_color == Gdk::Color (XMLColor[i]));
 	}
 	
-	name_button.modify_bg (STATE_NORMAL, new_color);
+	name_button.modify_bg (Gtk::STATE_NORMAL, new_color);
+	name_button.modify_bg (Gtk::STATE_ACTIVE, new_color);
+	name_button.modify_bg (Gtk::STATE_PRELIGHT, new_color);
 	color_palette_home.modify_bg (STATE_NORMAL, new_color);
 	color_palette_home.modify_bg (STATE_ACTIVE, new_color);
 	color_palette_home.queue_draw ();

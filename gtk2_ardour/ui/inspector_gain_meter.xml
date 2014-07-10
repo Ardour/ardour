@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GainSlider meterwidth="6" thinmeterwidth="6">
   <Adjustment id="gain_adjustment"
-          minvalue="0"
-          maxvalue="1"/>
-  <Layout Layout="" bgnormal="#383838" width="97" height="253">
+              minvalue="0"
+              maxvalue="1"/>
+  <Layout bgnormal="#383838"
+          width="97"
+          height="260">
     <Button id="peak_display_button"
             x="0" y="0"
             width="97" height="18"
@@ -19,7 +21,9 @@
           y="36"
           width="27"
           height="187"/>
-    <icon source="inspector_background.png" x="33" y="18"/>
+    <icon source="inspector_background.png"
+          x="33"
+          y="18"/>
     <Fader id="gain_slider"
            adjustment="gain_adjustment"
            facesource="slider_controller_fader.png"
@@ -27,12 +31,16 @@
            handlesource="slider_controller_fader_handle.png"
            activehandlesource="slider_controller_fader_handle.png"
            minposx="10"
-           minposy="200"
+           minposy="196"
            maxposx="10"
            maxposy="10"
            x="66"
-           y="25"
+           y="26"
            bgnormal="#383838"/>
-    <VBox id="gain_display_home" x="1" y="237" width="95" height="16"/>
+    <VBox id="gain_display_home"
+          x="1"
+          y="244"
+          width="95"
+          height="16"/>
   </Layout>
 </GainSlider>
