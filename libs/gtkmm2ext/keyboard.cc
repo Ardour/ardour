@@ -23,7 +23,10 @@
 #include <fstream>
 #include <iostream>
 
+#include <cerrno>
 #include <ctype.h>
+
+#include <glib/gstdio.h>
 
 #include <gtkmm/widget.h>
 #include <gtkmm/window.h>
@@ -31,10 +34,12 @@
 #include <gdk/gdkkeysyms.h>
 
 #include "pbd/error.h"
+#include "pbd/convert.h"
 #include "pbd/file_utils.h"
 #include "pbd/search_path.h"
 #include "pbd/xml++.h"
 #include "pbd/debug.h"
+#include "pbd/unwind.h"
 
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/actions.h"
@@ -585,3 +590,24 @@ Keyboard::load_keybindings (string path)
 	return true;
 }
 
+int
+Keyboard::reset_bindings ()
+{
+	if (Glib::file_test (user_keybindings_path,  Glib::FILE_TEST_EXISTS)) {
+
+		string new_path = user_keybindings_path;
+		new_path += ".old";
+		
+		if (::g_rename (user_keybindings_path.c_str(), new_path.c_str())) {
+			error << string_compose (_("Cannot rename your own keybinding file (%1)"), strerror (errno)) << endmsg;
+			return -1;
+		} 
+	}
+
+	{
+		PBD::Unwinder<bool> uw (can_save_keybindings, false);
+		setup_keybindings ();
+	}
+
+	return 0;
+}

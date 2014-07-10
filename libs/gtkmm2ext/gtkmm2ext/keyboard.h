@@ -156,6 +156,8 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static std::string current_binding_name () { return _current_binding_name; }
 	static std::map<std::string,std::string> binding_files;
 
+	int reset_bindings ();
+
 	struct AccelKeyLess {
 	    bool operator() (const Gtk::AccelKey a, const Gtk::AccelKey b) const {
 		    if (a.get_key() != b.get_key()) {
