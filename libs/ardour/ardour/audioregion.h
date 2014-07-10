@@ -115,6 +115,8 @@ class LIBARDOUR_API AudioRegion : public Region
 	XMLNode& get_basic_state ();
 	int set_state (const XMLNode&, int version);
 
+	void fade_range (framepos_t, framepos_t);
+
 	bool fade_in_is_default () const;
 	bool fade_out_is_default () const;
 

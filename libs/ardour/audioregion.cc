@@ -958,6 +958,34 @@ AudioRegion::set_state (const XMLNode& node, int version)
 }
 
 void
+AudioRegion::fade_range (framepos_t start, framepos_t end)
+{
+	framepos_t s, e;
+
+	switch (coverage (start, end)) {
+	case Evoral::OverlapStart:
+		s = _position;
+		e = end;
+		set_fade_in (FadeConstantPower, e - s);
+		break;
+	case Evoral::OverlapEnd:
+		s = start;
+		e = _position + _length;
+		set_fade_out (FadeConstantPower, e - s);
+		break;
+	case Evoral::OverlapInternal:
+		/* needs addressing, perhaps. Difficult to do if we can't
+		 * control one edge of the fade relative to the relevant edge
+		 * of the region, which we cannot - fades are currently assumed
+		 * to start/end at the start/end of the region
+		 */
+		break;
+	default:
+		return;
+	}
+}
+
+void
 AudioRegion::set_fade_in_shape (FadeShape shape)
 {
 	set_fade_in (shape, (framecnt_t) _fade_in->back()->when);
