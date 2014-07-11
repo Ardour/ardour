@@ -305,9 +305,21 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		x = (get_width() - _pixbuf->get_width())/2.0;
 		y = (get_height() - _pixbuf->get_height())/2.0;
 
+		//if this is a DropDown with an icon, then we need to 
+		  //move the icon left slightly to accomomodate the arrow
+		if (((_elements & Menu)==Menu)) {
+			cairo_save (cr);
+			cairo_translate (cr, -8,0 );
+		}
+		
 		cairo_rectangle (cr, x, y, _pixbuf->get_width(), _pixbuf->get_height());
 		gdk_cairo_set_source_pixbuf (cr, _pixbuf->gobj(), x, y);
 		cairo_fill (cr);
+
+		//..and then return to our previous drawing position
+		if (((_elements & Menu)==Menu)) {
+			cairo_restore (cr);
+		}
 	}
 
 	/* text, if any */
@@ -374,16 +386,18 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	
 		cairo_save (cr);
 
-		cairo_translate (cr, 0,0 );
-		
-		//white arrow
+		//menu arrow
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.4);
 		cairo_move_to(cr, get_width() - ((_diameter/2.0) + 6.0), get_height()/2.0 +_diameter/4);
 		cairo_rel_line_to(cr, -_diameter/2, -_diameter/2);
 		cairo_rel_line_to(cr, _diameter, 0);
 		cairo_close_path(cr);
-		cairo_fill(cr);
-			
+		cairo_set_source_rgba (cr, 1, 1, 1, 0.4);
+		cairo_fill_preserve(cr);
+		cairo_set_source_rgba (cr, 0, 0, 0, 0.8);
+		cairo_set_line_width(cr, 0.5);
+		cairo_stroke(cr);
+	
 		cairo_restore (cr);
 	}
 	
