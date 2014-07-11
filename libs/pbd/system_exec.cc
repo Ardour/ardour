@@ -805,6 +805,10 @@ SystemExec::start (int stderr_mode, const char *vfork_exec_wrapper)
 #else
 	signal(SIGPIPE, SIG_DFL);
 #endif
+	if (!vfork_exec_wrapper) {
+		error << _("Cannot start external process, no vfork wrapper") << endmsg;
+		return -1;
+	}
 
 	int good_fds[2] = { pok[1],  -1 };
 	close_allv(good_fds);
