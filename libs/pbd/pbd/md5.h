@@ -26,7 +26,9 @@
 #include <string.h>
 #include <stdint.h>
 
-class MD5
+#include "pbd/libpbd_visibility.h"
+
+class LIBPBD_API MD5
 {
     public:
 	MD5();
