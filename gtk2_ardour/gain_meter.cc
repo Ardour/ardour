@@ -52,6 +52,7 @@
 #include "ardour/midi_track.h"
 
 #include "i18n.h"
+#include "dbg_msg.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -66,7 +67,8 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	, WavesUI (layout_script_file, *this)
     , gain_slider (get_fader ("gain_slider"))
 	, gain_adjustment (get_adjustment ("gain_adjustment"))
-	, gain_display_home (get_box ("gain_display_home"))
+	, gain_display_home (get_event_box ("gain_display_home"))
+	, gain_display_button (get_waves_button ("gain_display_button"))
 	, peak_display_button (get_waves_button ("peak_display_button"))
 	, level_meter_home (get_box ("level_meter_home"))
 	, level_meter (_session)
@@ -93,20 +95,19 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	gain_slider.signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_release), false);
 
 	gain_display_entry.set_name ("MixerStripGainDisplay");
-	//set_size_request_to_display_given_text (gain_display_entry, "-80.g", 2, 6); /* note the descender */
 	gain_display_entry.signal_activate().connect (sigc::mem_fun (*this, &GainMeter::gain_activated));
 	gain_display_entry.signal_focus_in_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
 	gain_display_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
 	gain_display_entry.set_alignment(1.0);
-	gain_display_home.pack_start(gain_display_entry, true, true);
-	gain_display_entry.show();
+	gain_display_home.add(gain_display_entry);
 
-//	peak_display_button.set_name ("MixerStripPeakDisplay");
-//	set_size_request_to_display_given_text (peak_display_button, "-80.g", 2, 6); /* note the descender */
+	gain_display_button.signal_clicked.connect (sigc::mem_fun (*this, &GainMeter::gain_display_button_clicked));
+
 	max_peak = minus_infinity();
 	peak_display_button.set_text (_("-inf"));
 	peak_display_button.unset_flags (Gtk::CAN_FOCUS);
 
+	gain_display_button.unset_flags (Gtk::CAN_FOCUS);
 
 	gain_astyle_menu.items().push_back (MenuElem (_("Trim")));
 	gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
@@ -126,6 +127,9 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &GainMeter::on_theme_changed));
 	ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeter::color_handler), false));
 	DPIReset.connect (sigc::bind(sigc::mem_fun (*this, &GainMeter::color_handler), true));
+
+	//gain_display_home.hide();
+	//gain_display_button.show();
 }
 
 void
@@ -376,6 +380,16 @@ GainMeter::gain_focused (GdkEventFocus* ev)
 	return false;
 }
 
+
+void
+GainMeter::gain_display_button_clicked (WavesButton* button)
+{
+	gain_display_button.hide();
+	gain_display_home.show();
+	gain_display_entry.show();
+	gain_display_entry.grab_focus();
+}
+
 void
 GainMeter::gain_activated ()
 {
@@ -412,11 +426,12 @@ GainMeter::gain_activated ()
 				GtkWidget* f = gtk_window_get_default_widget (win->gobj());
 				if (f) {
 					gtk_widget_grab_focus (f);
-					return;
 				}
 			}
 		}
 	}
+	gain_display_home.hide();
+	gain_display_button.show();
 }
 
 void
@@ -440,6 +455,7 @@ GainMeter::show_gain ()
 	}
 
 	gain_display_entry.set_text (buf);
+	gain_display_button.set_text (buf);
 }
 
 void

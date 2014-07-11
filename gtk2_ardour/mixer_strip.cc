@@ -1324,6 +1324,7 @@ MixerStrip::hide_processor_editor (boost::weak_ptr<Processor> p)
 void
 MixerStrip::reset_strip_style ()
 {
+	return;
 	if (_current_delivery && boost::dynamic_pointer_cast<Send>(_current_delivery)) {
 
 		gpm.set_fader_name ("SendStripBase");

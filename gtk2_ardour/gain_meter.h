@@ -118,8 +118,9 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
 
 	Gtkmm2ext::Fader&      gain_slider;
 	Gtk::Adjustment&       gain_adjustment;
-	Gtk::Box&              gain_display_home;
+	Gtk::EventBox&         gain_display_home;
 	Gtkmm2ext::FocusEntry  gain_display_entry;
+	WavesButton&           gain_display_button;
 	WavesButton&           peak_display_button;
 	Gtk::Box&              level_meter_home;
 	LevelMeterHBox         level_meter;
@@ -145,6 +146,7 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
 	void show_gain ();
 	void gain_activated ();
 	bool gain_focused (GdkEventFocus*);
+	void gain_display_button_clicked (WavesButton* button);
 
 	float max_peak;
 
