@@ -6817,9 +6817,9 @@ Editor::fit_tracks (TrackViewList & tracks)
 		}
 	}
 
-	/* operate on all tracks, hide unselected ones that are in the middle of selected ones */
-
-	bool within_selected = false;
+	bool prev_was_selected = false;
+	bool is_selected = tracks.contains (all.front());
+	bool next_is_selected;
 
 	for (TrackViewList::iterator t = all.begin(); t != all.end(); ++t) {
 
@@ -6827,16 +6827,26 @@ Editor::fit_tracks (TrackViewList & tracks)
 
 		next = t;
 		++next;
-		
+
+		if (next != all.end()) {
+			next_is_selected = tracks.contains (*next);
+		} else {
+			next_is_selected = false;
+		}
+
 		if ((*t)->marked_for_display ()) {
-			if (tracks.contains (*t)) { 
+			if (is_selected) {
 				(*t)->set_height (h);
 				first_y_pos = std::min ((*t)->y_position (), first_y_pos);
-				within_selected = true;
-			} else if (within_selected) {
-				hide_track_in_display (*t);
+			} else {
+				if (prev_was_selected && next_is_selected) {
+					hide_track_in_display (*t);
+				}
 			}
 		}
+
+		prev_was_selected = is_selected;
+		is_selected = next_is_selected;
 	}
 
 	/*
