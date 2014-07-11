@@ -109,6 +109,7 @@ ExportFormats=$Shared/export
 Templates=$Shared/templates
 PatchFiles=$Shared/patchfiles
 MackieControl=$Shared/mcp
+VFork=$Frameworks/vfork
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -145,6 +146,7 @@ mkdir -p $Frameworks/modules
 mkdir -p $Etc
 mkdir -p $MackieControl
 mkdir -p $PatchFiles
+mkdir -p $VFork
 
 # maybe set variables
 env=""
@@ -382,7 +384,7 @@ cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $Frameworks/ || true
 
 # vfork wrapper
 mkdir $Frameworks/vfork
-cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $Frameworks/vfork/
+cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $VFork
 
 
 while [ true ] ; do 
