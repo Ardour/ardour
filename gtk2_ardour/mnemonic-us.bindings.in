@@ -109,10 +109,11 @@ This mode provides many different operations on both regions and control points,
 ;@trans|Transport/GotoStart|Return|to start marker
 @movp|Transport/alternate-GotoStart|KP_Return|to edit point
 
-@rop|Region/set-fade-in-length|slash|set fade in length
-@rop|Region/toggle-region-fade-out|<@PRIMARY@>slash|toggle fade in active
-@rop|Region/set-fade-out-length|backslash|set fade out length
-@rop|Region/toggle-region-fade-out|<@PRIMARY@>backslash|toggle fade out active
+@trans|Editor/editor-fade-range|slash|fade range selection
+@rop|Region/set-fade-in-length|<@PRIMARY@>slash|set fade in length
+;;@rop|Region/toggle-region-fade-out|<@PRIMARY@>slash|toggle fade in active
+@rop|Region/set-fade-out-length|<@PRIMARY@>backslash|set fade out length
+;;@rop|Region/toggle-region-fade-out|<@PRIMARY@>backslash|toggle fade out active
 
 @eep|Editor/trim-to-previous-region|<@PRIMARY@>j|trim region to end of prev region
 @eep|Editor/trim-to-next-region|<@PRIMARY@>k|trim region to start of next region
@@ -188,8 +189,7 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/duplicate-region|<@SECONDARY@>d|duplicate region (once)
 @rop|Region/multi-duplicate-region|<@TERTIARY@>d|duplicate region (multi)
 @select|Editor/select-all-in-punch-range|<@PRIMARY@>d|select all in punch range
-@trans|Editor/editor-fade-range|f|fade range selection
-;;@vis|Editor/fit-tracks|f|fit tracks vertically
+@vis|Editor/fit-tracks|f|fit tracks vertically
 @trans|Editor/toggle-follow-playhead|<@PRIMARY@>f|toggle playhead tracking
 @trans|Transport/ToggleFollowEdits|<@TERTIARY@>f|toggle playhead follows edits
 @wvis|Common/ToggleMaximalEditor|<@PRIMARY@><@SECONDARY@>f|maximise editor space
