@@ -37,7 +37,8 @@ static char *vfork_exec_wrapper_path() {
 	if (!PBD::find_file (
 				PBD::Searchpath(Glib::build_filename(ARDOUR::ardour_dll_directory(), "vfork")),
 				"ardour-exec-wrapper", vfork_exec_wrapper)) {
-		PBD::warning << "vfork exec wrapper not found..'" << endmsg;
+		PBD::fatal << "vfork exec wrapper 'ardour-exec-wrapper' was not found in $PATH." << endmsg;
+		/* not reached */
 		return NULL;
 	}
 	return strdup(vfork_exec_wrapper.c_str());
