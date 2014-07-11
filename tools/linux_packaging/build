@@ -473,6 +473,8 @@ while [ true ] ; do
 			if echo $dep | grep -qs 'libc\.' ; then continue; fi
 			# don't include libstdc++
 			if echo $dep | grep -qs libstdc++ ; then continue; fi
+                        # don't include libdbus
+			if echo $dep | grep -qs libdbus ; then continue; fi
 
 			base=`basename $dep`
 			if ! test -f $Libraries/$base; then
