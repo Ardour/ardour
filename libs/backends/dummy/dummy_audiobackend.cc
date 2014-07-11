@@ -82,7 +82,8 @@ DummyAudioBackend::enumerate_devices () const
 	if (_device_status.empty()) {
 		_device_status.push_back (DeviceStatus (_("Silence"), true));
 		_device_status.push_back (DeviceStatus (_("Sine Wave"), true));
-		_device_status.push_back (DeviceStatus (_("White Noise"), true));
+		_device_status.push_back (DeviceStatus (_("Uniform White Noise"), true));
+		_device_status.push_back (DeviceStatus (_("Gaussian White Noise"), true));
 		_device_status.push_back (DeviceStatus (_("Pink Noise"), true));
 		_device_status.push_back (DeviceStatus (_("Pink Noise (low CPU)"), true));
 	}
@@ -646,8 +647,10 @@ DummyAudioBackend::register_system_ports()
 {
 	LatencyRange lr;
 	enum DummyAudioPort::GeneratorType gt;
-	if (_device == _("White Noise")) {
-		gt = DummyAudioPort::WhiteNoise;
+	if (_device == _("Uniform White Noise")) {
+		gt = DummyAudioPort::UniformWhiteNoise;
+	} else if (_device == _("Gaussian White Noise")) {
+		gt = DummyAudioPort::GaussianWhiteNoise;
 	} else if (_device == _("Pink Noise")) {
 		gt = DummyAudioPort::PinkNoise;
 	} else if (_device == _("Pink Noise (low CPU)")) {
@@ -1317,7 +1320,8 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 	switch (_gen_type) {
 		case PinkNoise:
 		case PonyNoise:
-		case WhiteNoise:
+		case UniformWhiteNoise:
+		case GaussianWhiteNoise:
 		case Silence:
 			break;
 		case SineWave:
@@ -1407,7 +1411,12 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 				}
 			}
 			break;
-		case WhiteNoise:
+		case UniformWhiteNoise:
+			for (pframes_t i = 0 ; i < n_samples; ++i) {
+				_buffer[i] = .158489f * randf();
+			}
+			break;
+		case GaussianWhiteNoise:
 			for (pframes_t i = 0 ; i < n_samples; ++i) {
 				_buffer[i] = .089125f * grandf();
 			}
