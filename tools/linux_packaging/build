@@ -165,6 +165,7 @@ Locale=$Shared/locale
 MidiMaps=$Shared/midi_maps
 PatchFiles=$Shared/patchfiles
 MackieControl=$Shared/mcp
+VFork=$Libraries/vfork
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -205,6 +206,7 @@ mkdir -p $Panners
 mkdir -p $Backends
 mkdir -p $Templates
 mkdir -p $Shared/doc
+mkdir -p $VFork
 
 # maybe set variables
 ENVIRONMENT=environment
@@ -403,13 +405,13 @@ cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Libraries
 # (if build with wine: ardour-vst-scanner is a wrapper
 #  script for ardour-vst-scanner.exe.so, if VST is disabled
 #  neither binary nor script exists)
-cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $APPLIB/ || true
+cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $APPLIB || true
 
 # vfork wrapper
-cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $APPLIB/
+cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $VFork
 
 # ALSA device reservation tool (if available)
-cp $BUILD_ROOT/libs/ardouralsautil/ardour-request-device $APPLIB/
+cp $BUILD_ROOT/libs/ardouralsautil/ardour-request-device $APPLIB/ || true
 
 OURLIBDIR=$BUILD_ROOT/libs
 OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/rubberband:$OURLIBDIR/soundtouch:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/sigc++2:$OURLIBDIR/glibmm2:$OURLIBDIR/gtkmm2/atk:$OURLIBDIR/gtkmm2/pango:$OURLIBDIR/gtkmm2/gdk:$OURLIBDIR/gtkmm2/gtk:$OURLIBDIR/canvas:$OURLIBDIR/libsndfile:$OURLIBDIR/evoral:$OURLIBDIR/evoral/src/libsmf:$OURLIBDIR/audiographer:$OURLIBDIR/timecode:$OURLIBDIR/taglib:$OURLIBDIR/libltc:$OURLIBDIR/qm-dsp:$OURLIBDIR/ardouralsautil
