@@ -413,8 +413,7 @@ int
 SystemExec::wait (int options)
 {
 	while (is_running()) {
-		WaitForSingleObject(pid->hProcess, INFINITE);
-		Sleep(20);
+		WaitForSingleObject(pid->hProcess, 40);
 	}
 	return 0;
 }
@@ -422,7 +421,12 @@ SystemExec::wait (int options)
 bool
 SystemExec::is_running ()
 {
-	return pid?true:false;
+	if (!pid) return false;
+	DWORD exit_code;
+	if (GetExitCodeProcess(pid->hProcess, &exit_code)) {
+		if (exit_code == STILL_ACTIVE) return true;
+	}
+	return false;
 }
 
 int
