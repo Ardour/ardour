@@ -470,12 +470,14 @@ Editor::register_actions ()
 	mouse_gain_button.add_elements (ArdourButton::Inset );
 	mouse_gain_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseZoom));	
-	mouse_zoom_button.set_related_action (act);
-	mouse_zoom_button.set_image (::get_icon("tool_zoom"));
-	mouse_zoom_button.add_elements (ArdourButton::Inset );
-	mouse_zoom_button.set_name ("mouse mode button");
-
+	if(!Profile->get_mixbus()) {
+		act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseZoom));	
+		mouse_zoom_button.set_related_action (act);
+		mouse_zoom_button.set_image (::get_icon("tool_zoom"));
+		mouse_zoom_button.add_elements (ArdourButton::Inset );
+		mouse_zoom_button.set_name ("mouse mode button");
+	}
+	
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));	
 	mouse_audition_button.set_related_action (act);
 	mouse_audition_button.set_image (::get_icon("tool_audition"));
@@ -488,12 +490,14 @@ Editor::register_actions ()
 	mouse_timefx_button.add_elements (ArdourButton::Inset );
 	mouse_timefx_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseCut));
-	mouse_cut_button.set_related_action (act);
-	mouse_cut_button.set_image (::get_icon("tool_cut"));
-	mouse_cut_button.add_elements (ArdourButton::Inset );
-	mouse_cut_button.set_name ("mouse mode button");
-
+	if(!Profile->get_mixbus()) {
+		act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseCut));
+		mouse_cut_button.set_related_action (act);
+		mouse_cut_button.set_image (::get_icon("tool_cut"));
+		mouse_cut_button.add_elements (ArdourButton::Inset );
+		mouse_cut_button.set_name ("mouse mode button");
+	}
+	
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), sigc::bind (sigc::mem_fun(*this, &Editor::step_mouse_mode), true));
 
 	act = ActionManager::register_toggle_action (mouse_mode_actions, "toggle-internal-edit", _("Edit MIDI"), sigc::mem_fun(*this, &Editor::toggle_internal_editing));

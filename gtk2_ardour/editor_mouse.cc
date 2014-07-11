@@ -232,6 +232,11 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		return;
 	}
 
+	if (ARDOUR::Profile->get_mixbus()) {
+		if ( m == MouseZoom) m = MouseObject;
+		if ( m == MouseCut) m = MouseObject;
+	}
+
 	Glib::RefPtr<Action> act;
 
 	switch (m) {
@@ -285,6 +290,11 @@ Editor::mouse_mode_toggled (MouseMode m)
 {
 	Glib::RefPtr<Action> act;
 	Glib::RefPtr<ToggleAction> tact;
+
+	if (ARDOUR::Profile->get_mixbus()) {
+		if ( m == MouseZoom) m = MouseObject;
+		if ( m == MouseCut)  m = MouseObject;
+	}
 
 	switch (m) {
 	case MouseRange:
