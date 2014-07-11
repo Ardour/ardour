@@ -60,6 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="$(DllPrefix)pbd32D.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32D.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				GenerateDebugInformation="true"
@@ -88,7 +89,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Debug32TargetFolder)\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Debug32TestSuiteFolder)\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).lib&quot; &quot;$(GenericWin32LibraryFolder)\$(TargetName).lib&quot;"
+				CommandLine="copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Debug32TargetFolder)\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Debug32TestSuiteFolder)\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).lib&quot; &quot;$(GenericWin32LibraryFolder)\$(TargetName).lib&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -139,6 +140,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="$(DllPrefix)pbd32.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				SubSystem="2"
@@ -218,6 +220,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="$(DllPrefix)pbd32RDC.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32RDC.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				GenerateDebugInformation="true"
