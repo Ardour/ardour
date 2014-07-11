@@ -358,6 +358,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\md5.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\mountpoint.cc"
 				>
 			</File>
@@ -685,6 +689,10 @@
 			</File>
 			<File
 				RelativePath="..\pbd\localtime_r.h"
+				>
+			</File>
+			<File
+				RelativePath="..\pbd\md5.h"
 				>
 			</File>
 			<File
