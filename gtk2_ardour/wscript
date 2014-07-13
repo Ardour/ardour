@@ -375,7 +375,7 @@ def build(bld):
                              'libgtkmm2ext',
                              'libcanvas'
                              ]
-        obj.target = 'ardour-' + bld.env['VERSION'] + '-vst.exe.so'
+        obj.target = 'ardour-' + str (bld.env['VERSION']) + '-vst.exe.so'
         obj.includes  = [ '../libs/fst', '.' ]
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
         obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
@@ -392,7 +392,7 @@ def build(bld):
         # just the normal executable version of the GTK GUI
         obj = bld (features = 'cxx c cxxprogram')
         obj.source    = gtk2_ardour_sources
-        obj.target = 'ardour-' + bld.env['VERSION']
+        obj.target = 'ardour-' + str (bld.env['VERSION'])
         obj.includes = ['.']
         obj.ldflags = ['-no-undefined']
 
@@ -415,7 +415,7 @@ def build(bld):
 
     obj.defines = [
         'PACKAGE="' + I18N_PACKAGE + '"',
-        'VERSIONSTRING="' + bld.env['VERSION'] + '"',
+        'VERSIONSTRING="' + str (bld.env['VERSION']) + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
@@ -474,10 +474,6 @@ def build(bld):
 
     # Wrappers
 
-        print 'DLL = ' + bld.env['DLLDIR'], '\n'
-        print 'DATADIR = ' + bld.env['DATADIR'], '\n'
-        print 'CONF = ' + bld.env['CONFDIR'], '\n'
-
     wrapper_subst_dict = {
             'INSTALL_PREFIX' : bld.env['PREFIX'],
             'LIBDIR'         : os.path.normpath(bld.env['DLLDIR']),
@@ -485,7 +481,7 @@ def build(bld):
             'CONFDIR'        : os.path.normpath(bld.env['CONFDIR']),
             'LIBS'           : 'build/libs',
             'VERSION'        : bld.env['VERSION'],
-            'EXECUTABLE'     : 'build/gtk2_ardour/ardour-' + bld.env['VERSION']
+            'EXECUTABLE'     : 'build/gtk2_ardour/ardour-' + str (bld.env['VERSION'])
     }
 
     def set_subst_dict(obj, dict):

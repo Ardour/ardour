@@ -38,7 +38,7 @@ def build(bld):
     # this program does not do the whole hidden symbols thing
     obj.cxxflags = [ '-fvisibility=default' ]
     obj.source    = hardour_sources
-    obj.target = 'hardour-' + bld.env['VERSION']
+    obj.target = 'hardour-' + str (bld.env['VERSION'])
     obj.includes = ['.']
 
     # at this point, "obj" refers to either the normal native executable
@@ -52,7 +52,7 @@ def build(bld):
                      ]
 
     obj.defines = [
-        'VERSIONSTRING="' + bld.env['VERSION'] + '"',
+        'VERSIONSTRING="' + str(bld.env['VERSION']) + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
@@ -84,7 +84,7 @@ def build(bld):
             'CONFDIR'        : os.path.normpath(bld.env['CONFDIR']),
             'LIBS'           : 'build/libs',
             'VERSION'        : bld.env['VERSION'],
-            'EXECUTABLE'     : 'build/headless/hardour-' + bld.env['VERSION']
+            'EXECUTABLE'     : 'build/headless/hardour-' + str(bld.env['VERSION'])
     }
 
     def set_subst_dict(obj, dict):

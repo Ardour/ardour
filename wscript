@@ -16,7 +16,7 @@ def fetch_git_revision ():
 
 def fetch_tarball_revision ():
     if not os.path.exists ('libs/ardour/revision.cc'):
-        print 'This tarball was not created correctly - it is missing libs/ardour/revision.cc'
+        print ('This tarball was not created correctly - it is missing libs/ardour/revision.cc')
         sys.exit (1)
     with open('libs/ardour/revision.cc') as f:
         content = f.readlines()
@@ -736,9 +736,9 @@ def configure(conf):
             conf.env['LXVST_SUPPORT'] = False
         elif Options.options.dist_target == 'mingw':
             conf.env['LXVST_SUPPORT'] = False
-	else:
-	    conf.define('LXVST_SUPPORT', 1)
-	    conf.env['LXVST_SUPPORT'] = True
+        else:
+            conf.define('LXVST_SUPPORT', 1)
+            conf.env['LXVST_SUPPORT'] = True
     conf.env['WINDOWS_KEY'] = opts.windows_key
     if opts.rt_alloc_debug:
         conf.define('DEBUG_RT_ALLOC', 1)
