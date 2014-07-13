@@ -445,7 +445,7 @@ def build(bld):
 
     obj.defines = [
         'PACKAGE="' + I18N_PACKAGE + '"',
-        'VERSIONSTRING="' + bld.env['VERSION'] + '"',
+        'VERSIONSTRING="' + str (bld.env['VERSION']) + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
