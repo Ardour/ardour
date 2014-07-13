@@ -168,7 +168,7 @@ def normpath(path):
 def ensure_visible_symbols(bld, visible):
     if bld.env['MSVC_COMPILER']:
         if visible:
-            print '*** WARNING: MSVC does not allow symbols to be visible/exported by default while building ' + bld.name
+            print ('*** WARNING: MSVC does not allow symbols to be visible/exported by default while building ' + bld.name)
         else:
             pass
     else:        
