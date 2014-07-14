@@ -332,7 +332,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		text_margin = 10;
 	}
 
-	if ( ((_elements & Text)==Text) && !_text.empty()) {
+	if ( !_pixbuf && ((_elements & Text)==Text) && !_text.empty()) {
 		cairo_save (cr);
 		cairo_rectangle (cr, 2, 1, get_width()-4, get_height()-2);
 		cairo_clip(cr);
