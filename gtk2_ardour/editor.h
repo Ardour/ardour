@@ -688,8 +688,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void add_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView *);
 
-	Gtk::HBox           global_hpacker;
-	Gtk::VBox           global_vpacker;
+	Gtk::HBox&           global_hpacker;
+	Gtk::VBox&           global_vpacker;
+	Gtk::Container&       inspector_home;
+	Gtk::Container&       master_bus_ui_home;
 	Gtk::VBox&           vpacker;
 
 	Gdk::Cursor*          current_canvas_cursor;
@@ -1905,7 +1907,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	MixerStrip *current_mixer_strip;
 	bool show_editor_mixer_when_tracks_arrive;
-	Gtk::VBox current_mixer_strip_vbox;
 	void cms_new (boost::shared_ptr<ARDOUR::Route>);
 	void current_mixer_strip_hidden ();
 

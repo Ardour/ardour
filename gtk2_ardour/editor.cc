@@ -247,6 +247,10 @@ Editor::Editor ()
 	, cd_mark_label (_("CD Markers"))
 	, videotl_label (_("Video Timeline"))
 	, edit_packer (4, 4, true)
+	, global_hpacker (get_h_box ("global_hpacker"))
+	, global_vpacker (get_v_box ("global_vpacker"))
+	, inspector_home (get_container ("inspector_home"))
+	, master_bus_ui_home (get_container ("master_bus_ui_home"))
 	, vpacker (get_v_box ("vpacker"))
 	, _tool_marker_button (get_waves_button ("tool_marker_button"))
 	, _tool_zoom_button (get_waves_button ("tool_zoom_button"))
@@ -295,6 +299,7 @@ Editor::Editor ()
 	, _following_mixer_selection (false)
 	, _control_point_toggled_on_press (false)
 	, _stepping_axis_view (0)
+	, current_mixer_strip (0)
 {
 	constructed = false;
 
@@ -315,7 +320,6 @@ Editor::Editor ()
         pre_press_cursor = 0;
 	_drags = new DragManager (this);
 
-	current_mixer_strip = 0;
 	tempo_lines = 0;
 
 	snap_type_strings =  I18N (_snap_type_strings);
@@ -646,12 +650,8 @@ Editor::Editor ()
 	global_vpacker.pack_start (top_hbox, false, false);
 	global_vpacker.pack_start (*hbox, true, true);
 
-	global_hpacker.pack_start (global_vpacker, true, true);
-
 	set_name ("EditorWindow");
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
-
-	vpacker.pack_end (global_hpacker, true, true);
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 
@@ -5590,7 +5590,7 @@ Editor::session_going_away ()
 
 	if (current_mixer_strip) {
 		if (current_mixer_strip->get_parent() != 0) {
-			global_hpacker.remove (*current_mixer_strip);
+			current_mixer_strip->get_parent()->remove (*current_mixer_strip);
 		}
 		delete current_mixer_strip;
 		current_mixer_strip = 0;

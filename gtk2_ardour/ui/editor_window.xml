@@ -168,5 +168,20 @@
         </EventBox>
       </VBox>
     </EventBox>
+    <HBox id="global_hpacker"
+          box.pack="end"
+          box.fill="true"
+          box.expand="true">
+      <VBox>
+        <EventBox id="master_bus_ui_home" height="99" bgnormal="#ffff00"/>
+        <EventBox id="inspector_home"
+            box.fill="true"
+            box.expand="true"/>
+      </VBox>
+      <VBox id="global_vpacker"
+            box.fill="true"
+            box.expand="true">
+      </VBox>
+    </HBox>
   </VBox>
 </Window>

@@ -42,6 +42,7 @@
 #include "mixer_strip.h"
 #include "mixer_ui.h"
 #include "selection.h"
+#include "master_bus_ui.h"
 
 #include "i18n.h"
 
@@ -136,8 +137,7 @@ Editor::show_editor_mixer (bool yn)
 		}
 
 		if (current_mixer_strip && current_mixer_strip->get_parent() == 0) {
-			global_hpacker.pack_start (*current_mixer_strip, Gtk::PACK_SHRINK );
- 			global_hpacker.reorder_child (*current_mixer_strip, 0);
+			inspector_home.add (*current_mixer_strip);
 			current_mixer_strip->show ();
 		}
 
@@ -147,10 +147,9 @@ Editor::show_editor_mixer (bool yn)
 		}
 
 	} else {
-
 		if (current_mixer_strip) {
 			if (current_mixer_strip->get_parent() != 0) {
-				global_hpacker.remove (*current_mixer_strip);
+				current_mixer_strip->get_parent()->remove (*current_mixer_strip);
 			}
 		}
 	}
@@ -175,14 +174,12 @@ void
 Editor::create_editor_mixer ()
 {
 	current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
-					      _session, "editor_mixer.xml");
+									      _session,
+										  "editor_mixer.xml");
 	current_mixer_strip->Hiding.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_hidden));
-//	current_mixer_strip->WidthChanged.connect (sigc::mem_fun (*this, &Editor::mixer_strip_width_changed));
-
-#ifdef GTKOSX
-//	current_mixer_strip->WidthChanged.connect (sigc::mem_fun(*this, &Editor::ensure_all_elements_drawn));
-#endif
 	current_mixer_strip->set_embedded (true);
+	MasterBusUI* mbu = new MasterBusUI (*this, _session);
+	master_bus_ui_home.add (*mbu);
 }
 
 void
@@ -254,24 +251,6 @@ Editor::current_mixer_strip_hidden ()
 		tact->set_active (false);
 	}
 }
-
-//void
-//Editor::maybe_add_mixer_strip_width (XMLNode& node)
-//{
-//	if (current_mixer_strip) {
-//		//node.add_property ("mixer-width", enum_2_string (editor_mixer_strip_width));
-//	}
-//}
-
-//void
-//Editor::mixer_strip_width_changed ()
-//{
-//#ifdef GTKOSX
-//	ensure_all_elements_drawn ();
-//#endif
-//
-////	editor_mixer_strip_width = current_mixer_strip->get_width_enum ();
-//}
 
 void
 Editor::track_mixer_selection ()
