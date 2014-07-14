@@ -478,6 +478,10 @@
       <menuitem action='ToggleSummary'/>
       <menuitem action='ToggleGroupTabs'/>
       <menuitem action='show-marker-lines'/>
+
+      <separator/>
+      <menuitem action='show-ui-prefs'/>
+
     </menu>
     <menu action = 'WindowMenu'>
       <menuitem action='toggle-audio-midi-setup'/>

@@ -277,6 +277,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void maximise_editing_space ();
 	void restore_editing_space ();
 
+	void show_ui_prefs ();
+
 	void update_tearoff_visibility ();
 
 	void setup_profile ();
