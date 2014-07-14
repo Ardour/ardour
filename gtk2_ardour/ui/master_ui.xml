@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<RouteUI bgnormal="#383838" bgactive="#6A6A6A">
+  <HBox>
+    <EventBox bgnormal="#000000">
+      <VBox spacing="1" borderwidth="1">
+        <iconbutton id="master_mute_button"
+                    width="47"
+                    height="27"
+                    normalicon="master_mute"
+                    activeicon="master_mute_active"
+                    prelighticon="master_mute_prelight"/>
+        <iconbutton id="clear_solo_button"
+                    width="47"
+                    height="27"
+                    normalicon="master_mute"
+                    activeicon="master_mute_active"
+                    prelighticon="master_mute_prelight"/>
+        <iconbutton id="global_rec_button"
+                    width="47"
+                    height="27"
+                    normalicon="master_mute"
+                    activeicon="master_mute_active"
+                    prelighticon="master_mute_prelight"/>
+      </VBox>
+    </EventBox>
+    <VBox  id="gain_meter_home"/>
+    <VBox visible="false" noshowall="true">
+      <button id="rec_enable_button"/>
+      <button id="solo_button"/>
+      <button id="mute_button"/>
+      <button id="monitor_input_button"/>
+      <Button id="show_sends_button"/>
+      <Button id="monitor_disk_button"/>
+      <Button id="comment_button"/>
+      <Button id="midi_input_enable_button"/>
+      <Button id="group_button" text="Grp"/>
+      <Button id="route_group_button"/>
+      <Button id="automation_button"/>
+    </VBox>
+  </HBox>
+</RouteUI>
