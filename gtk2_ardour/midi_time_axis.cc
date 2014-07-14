@@ -1202,15 +1202,54 @@ MidiTimeAxisView::update_pan_track_visibility ()
 void
 MidiTimeAxisView::show_all_automation (bool apply_to_selection)
 {
+	using namespace MIDI::Name;
+
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_midi_time_axis (
 			boost::bind (&MidiTimeAxisView::show_all_automation, _1, false));
 	} else {
 		if (midi_track()) {
+			// Show existing automation
 			const set<Evoral::Parameter> params = midi_track()->midi_playlist()->contained_automation();
 
 			for (set<Evoral::Parameter>::const_iterator i = params.begin(); i != params.end(); ++i) {
 				create_automation_child(*i, true);
+			}
+
+			// Show automation for all controllers named in midnam file
+			boost::shared_ptr<MasterDeviceNames> device_names = get_device_names();
+			if (device_names && !device_names->controls().empty()) {
+				const std::string device_mode       = _midnam_custom_device_mode_selector.get_active_text();
+				const uint16_t    selected_channels = midi_track()->get_playback_channel_mask();
+				for (uint32_t chn = 0; chn < 16; ++chn) {
+					if ((selected_channels & (0x0001 << chn)) == 0) {
+						// Channel not in use
+						continue;
+					}
+
+					boost::shared_ptr<ChannelNameSet> chan_names = device_names->channel_name_set_by_channel(
+						device_mode, chn);
+					if (!chan_names) {
+						continue;
+					}
+
+					boost::shared_ptr<ControlNameList> control_names = device_names->control_name_list(
+						chan_names->control_list_name());
+					if (!control_names) {
+						continue;
+					}
+
+					for (ControlNameList::Controls::const_iterator c = control_names->controls().begin();
+					     c != control_names->controls().end();
+					     ++c) {
+						const uint16_t ctl = c->second->number();
+						if (ctl != MIDI_CTL_MSB_BANK && ctl != MIDI_CTL_LSB_BANK) {
+							/* Skip bank select controllers since they're handled specially */
+							const Evoral::Parameter param(MidiCCAutomation, chn, ctl);
+							create_automation_child(param, true);
+						}
+					}
+				}
 			}
 		}
 
