@@ -5257,11 +5257,11 @@ Editor::scroll_press (Direction dir)
 		break;
 
 	case UP:
-		scroll_tracks_up_line ();
+		scroll_up_one_track ();
 		break;
 
 	case DOWN:
-		scroll_tracks_down_line ();
+		scroll_down_one_track ();
 		break;
 	}
 
