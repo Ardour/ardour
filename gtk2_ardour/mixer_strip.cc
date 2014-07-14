@@ -409,12 +409,20 @@ MixerStrip::~MixerStrip ()
 void
 MixerStrip::set_route (boost::shared_ptr<Route> rt)
 {
+	//the rec/monitor stuff only shows up for tracks.
+	//the show_sends only shows up for buses.
+	//remove them all here, and we may add them back later
+	if (show_sends_button->get_parent()) {
+		rec_mon_table.remove (*show_sends_button);
+	}
 	if (rec_enable_button->get_parent()) {
 		rec_mon_table.remove (*rec_enable_button);
 	}
-
-	if (show_sends_button->get_parent()) {
-		rec_mon_table.remove (*show_sends_button);
+	if (monitor_input_button->get_parent()) {
+		rec_mon_table.remove (*monitor_input_button);
+	}
+	if (monitor_disk_button->get_parent()) {
+		rec_mon_table.remove (*monitor_disk_button);
 	}
 
 	RouteUI::set_route (rt);
