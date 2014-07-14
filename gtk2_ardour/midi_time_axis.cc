@@ -757,7 +757,7 @@ MidiTimeAxisView::add_single_channel_controller_item(Menu_Helpers::MenuList& ctl
 			Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
 			ctl_items.push_back (
 				CheckMenuElem (
-					string_compose ("<b>%1</b>: %2 [%3]", ctl, name, int (chn)),
+					string_compose ("<b>%1</b>: %2 [%3]", ctl, name, int (chn + 1)),
 					sigc::bind (
 						sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
 						fully_qualified_param)));
