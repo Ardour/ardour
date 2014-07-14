@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>David Robillard</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Korg</Manufacturer>
+    <Model>Volca Beats</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="10" NameSet="Names"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Names">
+      <AvailableForChannels>
+        <AvailableChannel Channel="10" Available="true"/>
+      </AvailableForChannels>
+      <UsesNoteNameList Name="Notes"/>
+      <UsesControlNameList Name="Controls"/>
+      <PatchBank Name="User Patches">
+        <PatchNameList Name="User Patches"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <NoteNameList Name="Notes">
+      <Note Number="37" Name="Kick"/>
+      <Note Number="39" Name="Snare"/>
+      <Note Number="40" Name="Clap"/>
+      <Note Number="43" Name="Closed Hi-hat"/>
+      <Note Number="44" Name="Low Tom"/>
+      <Note Number="47" Name="Open Hi-hat"/>
+      <Note Number="50" Name="Crash Cymbal"/>
+      <Note Number="51" Name="High Tom"/>
+      <Note Number="68" Name="Agogô"/>
+      <Note Number="76" Name="Claves"/>
+    </NoteNameList>
+    <ControlNameList Name="Controls">
+      <Control Type="7bit" Number="40" Name="Kick Level"/>
+      <Control Type="7bit" Number="41" Name="Snare Level"/>
+      <Control Type="7bit" Number="42" Name="Low Tom Level"/>
+      <Control Type="7bit" Number="43" Name="High Tom Level"/>
+      <Control Type="7bit" Number="44" Name="Closed Hat Level"/>
+      <Control Type="7bit" Number="45" Name="Open Hat Level"/>
+      <Control Type="7bit" Number="46" Name="Clap Level"/>
+      <Control Type="7bit" Number="47" Name="Claves Level"/>
+      <Control Type="7bit" Number="48" Name="Agogo Level"/>
+      <Control Type="7bit" Number="49" Name="Crash Level"/>
+      <Control Type="7bit" Number="50" Name="Clap PCM Speed"/>
+      <Control Type="7bit" Number="51" Name="Claves PCM Speed"/>
+      <Control Type="7bit" Number="52" Name="Agogo PCM Speed"/>
+      <Control Type="7bit" Number="53" Name="Crash PCM Speed"/>
+      <Control Type="7bit" Number="54" Name="Stutter Time"/>
+      <Control Type="7bit" Number="55" Name="Stutter Depth"/>
+      <Control Type="7bit" Number="56" Name="Tom Decay"/>
+      <Control Type="7bit" Number="57" Name="Closed Hat Decay"/>
+      <Control Type="7bit" Number="58" Name="Open Hat Decay"/>
+      <Control Type="7bit" Number="59" Name="Hat Grain"/>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

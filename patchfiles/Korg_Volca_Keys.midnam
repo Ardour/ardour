@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>David Robillard</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Korg</Manufacturer>
+    <Model>Volca Keys</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Names"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Names">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="Controls"/>
+      <PatchBank Name="User Patches">
+        <PatchNameList Name="User Patches"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <ControlNameList Name="Controls">
+      <Control Type="7bit" Number="5" Name="Portamento"/>
+      <Control Type="7bit" Number="11" Name="Expression"/>
+      <Control Type="7bit" Number="40" Name="Voice"/>
+      <Control Type="7bit" Number="41" Name="Octave"/>
+      <Control Type="7bit" Number="42" Name="Detune"/>
+      <Control Type="7bit" Number="43" Name="VCO EG Int"/>
+      <Control Type="7bit" Number="44" Name="Cutoff"/>
+      <Control Type="7bit" Number="45" Name="VCF EG Int"/>
+      <Control Type="7bit" Number="46" Name="LFO Rate"/>
+      <Control Type="7bit" Number="47" Name="LFO Pitch Int"/>
+      <Control Type="7bit" Number="48" Name="LFO Cutoff Int"/>
+      <Control Type="7bit" Number="49" Name="EG Attack"/>
+      <Control Type="7bit" Number="50" Name="EG Decay/Release"/>
+      <Control Type="7bit" Number="51" Name="EG Sustain"/>
+      <Control Type="7bit" Number="52" Name="Delay Time"/>
+      <Control Type="7bit" Number="53" Name="Delay Feedback"/>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>David Robillard</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Korg</Manufacturer>
+    <Model>Volca Bass</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Names"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Names">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="Controls"/>
+      <PatchBank Name="User Patches">
+        <PatchNameList Name="User Patches"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <ControlNameList Name="Controls">
+      <Control Type="7bit" Number="5" Name="Slide Time"/>
+      <Control Type="7bit" Number="11" Name="Expression"/>
+      <Control Type="7bit" Number="40" Name="Octave"/>
+      <Control Type="7bit" Number="41" Name="LFO Rate"/>
+      <Control Type="7bit" Number="42" Name="LFO Int"/>
+      <Control Type="7bit" Number="43" Name="VCO Pitch 1"/>
+      <Control Type="7bit" Number="44" Name="VCO Pitch 2"/>
+      <Control Type="7bit" Number="45" Name="VCO Pitch 3"/>
+      <Control Type="7bit" Number="46" Name="EG Attack"/>
+      <Control Type="7bit" Number="47" Name="EG Decay/Release"/>
+      <Control Type="7bit" Number="48" Name="Cutoff EG Int"/>
+      <Control Type="7bit" Number="49" Name="Gate Time"/>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>
