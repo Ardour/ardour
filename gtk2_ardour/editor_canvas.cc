@@ -805,7 +805,7 @@ Editor::entered_track_canvas (GdkEventCrossing */*ev*/)
 }
 
 void
-Editor::_ensure_time_axis_view_is_visible (TimeAxisView const & track, bool at_top)
+Editor::ensure_time_axis_view_is_visible (TimeAxisView const & track, bool at_top)
 {
 	if (track.hidden()) {
 		return;
@@ -822,19 +822,28 @@ Editor::_ensure_time_axis_view_is_visible (TimeAxisView const & track, bool at_t
 	double const track_max_y = track.y_position () + track.effective_height ();
 
 	if (!at_top && 
-	    (track_min_y > current_view_min_y &&
-	     track_max_y <= current_view_max_y)) {
+	    (track_min_y >= current_view_min_y &&
+	     track_max_y < current_view_max_y)) {
+		/* already visible, and caller did not ask to place it at the
+		 * top of the track canvas
+		 */
 		return;
 	}
 
 	double new_value;
 
-	if (track_min_y < current_view_min_y) {
-		// Track is above the current view
+	if (at_top) {
 		new_value = track_min_y;
 	} else {
-		// Track is below the current view
-		new_value = track.y_position () + track.effective_height() - vertical_adjustment.get_page_size();
+		if (track_min_y < current_view_min_y) {
+			// Track is above the current view
+			new_value = track_min_y;
+		} else if (track_max_y > current_view_max_y) {
+			// Track is below the current view
+			new_value = track.y_position () + track.effective_height() - vertical_adjustment.get_page_size();
+		} else {
+			new_value = track_min_y;
+		}
 	}
 
 	vertical_adjustment.set_value(new_value);

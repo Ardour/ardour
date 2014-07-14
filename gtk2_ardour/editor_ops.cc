@@ -1364,32 +1364,35 @@ Editor::scroll_tracks_up_line ()
 bool
 Editor::scroll_down_one_track ()
 {
-	TrackViewList::reverse_iterator next = track_views.rend();
+	TrackViewList::reverse_iterator next = track_views.rbegin();
 	std::pair<TimeAxisView*,double> res;
-	const double bottom_of_trackviews = vertical_adjustment.get_value() + vertical_adjustment.get_page_size() - 1;
+	const double top_of_trackviews = vertical_adjustment.get_value();
 
 	for (TrackViewList::reverse_iterator t = track_views.rbegin(); t != track_views.rend(); ++t) {
 		if ((*t)->hidden()) {
 			continue;
 		}
-		
-		/* If this is the bottom visible trackview, we want to display
-		   the next one.
+
+		next = t;
+		if (next != track_views.rbegin()) {
+			--next; // moves "next" towards the lower/later tracks since it is a reverse iterator
+		}
+
+		/* If this is the upper-most visible trackview, we want to display
+		   the one above it (next)
 		*/
 
-		res = (*t)->covers_y_position (bottom_of_trackviews);
+		res = (*t)->covers_y_position (top_of_trackviews);
 
 		if (res.first) {
 			break;
 		}
-
-		++next; // moves "next" towards the "front" since it is a reverse iterator
 	}
 
 	/* move to the track below the first one that covers the */
 	
-	if (next != track_views.rend()) {
-		ensure_time_axis_view_is_visible (**next);
+	if (next != track_views.rbegin()) {
+		ensure_time_axis_view_is_visible (**next, true);
 		return true;
 	}
 
@@ -1399,11 +1402,10 @@ Editor::scroll_down_one_track ()
 bool
 Editor::scroll_up_one_track ()
 {
-	double vertical_pos = vertical_adjustment.get_value ();
-
 	TrackViewList::iterator prev = track_views.end();
 	std::pair<TimeAxisView*,double> res;
-
+	double top_of_trackviews = vertical_adjustment.get_value ();
+	
 	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
 
 		if ((*t)->hidden()) {
@@ -1411,10 +1413,9 @@ Editor::scroll_up_one_track ()
 		}
 
 		/* find the trackview at the top of the trackview group */
-		res = (*t)->covers_y_position (vertical_pos);
+		res = (*t)->covers_y_position (top_of_trackviews);
 		
 		if (res.first) {
-			cerr << res.first->name() << " covers the top\n";
 			break;
 		}
 
@@ -1422,7 +1423,7 @@ Editor::scroll_up_one_track ()
 	}
 	
 	if (prev != track_views.end()) {
-		ensure_time_axis_view_is_visible (**prev);
+		ensure_time_axis_view_is_visible (**prev, true);
 		return true;
 	}
 
@@ -5637,7 +5638,7 @@ Editor::select_next_route()
 
 	selection->set(current);
 
-	ensure_time_axis_view_is_visible (*current);
+	ensure_time_axis_view_is_visible (*current, false);
 }
 
 void
@@ -5668,7 +5669,7 @@ Editor::select_prev_route()
 
 	selection->set (current);
 
-	ensure_time_axis_view_is_visible (*current);
+	ensure_time_axis_view_is_visible (*current, false);
 }
 
 void

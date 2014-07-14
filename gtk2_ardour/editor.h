@@ -180,7 +180,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_internal_edit (bool yn);
 	bool toggle_internal_editing_from_double_click (GdkEvent*);
 
-        void _ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top);
 	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
 	void add_to_idle_resize (TimeAxisView*, int32_t);
 
@@ -285,6 +284,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	framecnt_t         get_current_zoom () const { return samples_per_pixel; }
         void               cycle_zoom_focus ();
 	void temporal_zoom_step (bool coarser);
+        void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top);
 	void tav_zoom_step (bool coarser);
 	void tav_zoom_smooth (bool coarser, bool force_all);
 

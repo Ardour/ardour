@@ -276,11 +276,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual framecnt_t current_page_samples() const = 0;
 	virtual double visible_canvas_height () const = 0;
 	virtual void temporal_zoom_step (bool coarser) = 0;
-	/* The virtual version, without a default argument, is protected below.
-	 */
-        void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top = false) { 
-		_ensure_time_axis_view_is_visible (tav, at_top);
-	}
+        virtual void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top = false) = 0;
         virtual void override_visible_track_count () = 0;
 	virtual void scroll_tracks_down_line () = 0;
 	virtual void scroll_tracks_up_line () = 0;
@@ -429,13 +425,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	PBD::Signal0<void> MouseModeChanged;
 
   protected:
-	/* This _ variant of ensure_time_axis_view_is_visible exists because
-	   C++ doesn't really like default values for virtual methods. So the
-	   public version is non-virtual, with a default value; the virtual
-	   (and protected) method here does not have a default value.
-	*/
-       virtual void _ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top) = 0;
-
 	friend class DisplaySuspender;
 	virtual void suspend_route_redisplay () = 0;
 	virtual void resume_route_redisplay () = 0;
