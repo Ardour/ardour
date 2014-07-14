@@ -100,7 +100,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			current_stepping_trackview->step_height (false);
 			return true;
 		} else {
-			scroll_tracks_up_line ();
+			scroll_up_one_track ();
 			return true;
 		}
 		break;
@@ -129,7 +129,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			current_stepping_trackview->step_height (true);
 			return true;
 		} else {
-			scroll_tracks_down_line ();
+			scroll_down_one_track ();
 			return true;
 		}
 		break;
