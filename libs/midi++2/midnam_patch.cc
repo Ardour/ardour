@@ -724,14 +724,13 @@ MasterDeviceNames::note_name(const std::string& mode_name,
 		return "";
 	}
 
+	boost::shared_ptr<const NoteNameList> note_names;
 	boost::shared_ptr<const Patch> patch(
 		find_patch(mode_name, channel, PatchPrimaryKey(program, bank)));
-	if (!patch) {
-		return "";
+	if (patch) {
+		note_names = note_name_list(patch->note_list_name());
 	}
 
-	boost::shared_ptr<const NoteNameList> note_names(
-		note_name_list(patch->note_list_name()));
 	if (!note_names) {
 		/* No note names specific to this patch, check the ChannelNameSet */
 		boost::shared_ptr<ChannelNameSet> chan_names = channel_name_set_by_channel(
