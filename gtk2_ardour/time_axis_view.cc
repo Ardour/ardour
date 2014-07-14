@@ -626,7 +626,7 @@ TimeAxisView::end_name_edit (int response)
 		}
 
 		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
-			_editor.ensure_time_axis_view_is_visible (**i);
+			_editor.ensure_time_axis_view_is_visible (**i, false);
 			(*i)->begin_name_edit ();
 		} 
 
@@ -657,7 +657,7 @@ TimeAxisView::end_name_edit (int response)
 		}
 		
 		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
-			_editor.ensure_time_axis_view_is_visible (**i);
+			_editor.ensure_time_axis_view_is_visible (**i, false);
 			(*i)->begin_name_edit ();
 		} 
 	}
