@@ -89,9 +89,9 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, panners (sess)
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, button_table (3, 1)
-	, rec_solo_table (2, 2)
-	, top_button_table (1, 2)
-	, middle_button_table (1, 2)
+	, rec_mon_table (2, 2)
+	, solo_iso_table (1, 2)
+	, mute_solo_table (1, 2)
 	, bottom_button_table (1, 3)
 	, meter_point_button (_("pre"))
 	, midi_input_enable_button (0)
@@ -119,7 +119,9 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, panners (sess)
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, button_table (3, 1)
-	, middle_button_table (1, 2)
+	, rec_mon_table (2, 2)
+	, solo_iso_table (1, 2)
+	, mute_solo_table (1, 2)
 	, bottom_button_table (1, 3)
 	, meter_point_button (_("pre"))
 	, midi_input_enable_button (0)
@@ -208,22 +210,22 @@ MixerStrip::init ()
 	solo_safe_led->set_text (_("lock"));
 	solo_isolated_led->set_text (_("iso"));
 
-	top_button_table.set_homogeneous (true);
-	top_button_table.set_spacings (2);
+	solo_iso_table.set_homogeneous (true);
+	solo_iso_table.set_spacings (2);
 	if (!ARDOUR::Profile->get_trx()) {
-		top_button_table.attach (*monitor_input_button, 0, 1, 0, 1);
-		top_button_table.attach (*monitor_disk_button, 1, 2, 0, 1);
+		solo_iso_table.attach (*solo_isolated_led, 0, 1, 0, 1);
+		solo_iso_table.attach (*solo_safe_led, 1, 2, 0, 1);
 	}
-	top_button_table.show ();
+	solo_iso_table.show ();
 
-	rec_solo_table.set_homogeneous (true);
-	rec_solo_table.set_row_spacings (2);
-	rec_solo_table.set_col_spacings (2);
+	rec_mon_table.set_homogeneous (true);
+	rec_mon_table.set_row_spacings (2);
+	rec_mon_table.set_col_spacings (2);
 	if (!ARDOUR::Profile->get_trx()) {
-		rec_solo_table.attach (*solo_isolated_led, 1, 2, 0, 1);
-		rec_solo_table.attach (*solo_safe_led, 1, 2, 1, 2);
+		rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
+		rec_mon_table.attach (*monitor_disk_button, 1, 2, 1, 2);
 	}
-        rec_solo_table.show ();
+	rec_mon_table.show ();
 
 	button_table.set_homogeneous (false);
 	button_table.set_spacings (2);
@@ -253,8 +255,8 @@ MixerStrip::init ()
 		button_table_row++;
 	}
 
-	middle_button_table.set_homogeneous (true);
-	middle_button_table.set_spacings (2);
+	mute_solo_table.set_homogeneous (true);
+	mute_solo_table.set_spacings (2);
 
 	bottom_button_table.set_spacings (2);
 	bottom_button_table.set_homogeneous (false);
@@ -309,9 +311,9 @@ MixerStrip::init ()
 		global_vpacker.pack_start (processor_box, true, true);
 	}
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (top_button_table, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (rec_solo_table, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (middle_button_table, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (rec_mon_table, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (solo_iso_table, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (mute_solo_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table, Gtk::PACK_SHRINK);
 	if (!ARDOUR::Profile->get_trx()) {
@@ -379,12 +381,13 @@ MixerStrip::init ()
 	   must be the same as those used in RCOptionEditor so that the configuration changes
 	   are recognised when they occur.
 	*/
-	_visibility.add (&_invert_button_box, X_("PhaseInvert"), _("Phase Invert"));
-	_visibility.add (solo_safe_led, X_("SoloSafe"), _("Solo Safe"), true, boost::bind (&MixerStrip::override_solo_visibility, this));
-	_visibility.add (solo_isolated_led, X_("SoloIsolated"), _("Solo Isolated"), true, boost::bind (&MixerStrip::override_solo_visibility, this));
-	_visibility.add (&_comment_button, X_("Comments"), _("Comments"));
-	_visibility.add (&group_button, X_("Group"), _("Group"));
-	_visibility.add (&meter_point_button, X_("MeterPoint"), _("Meter Point"));
+	_visibility.add (&_invert_button_box, X_("PhaseInvert"), _("Phase Invert"), false);
+	_visibility.add (&rec_mon_table, X_("RecMon"), _("Record & Monitor"), false);
+	_visibility.add (&solo_iso_table, X_("SoloIsoLock"), _("Solo Iso / Lock"), false);
+	_visibility.add (&group_button, X_("Group"), _("Group"), false);
+	_visibility.add (&meter_point_button, X_("MeterPoint"), _("Meter Point"), false);
+	_visibility.add (&output_button, X_("Output"), _("Output"), false);
+	_visibility.add (&_comment_button, X_("Comments"), _("Comments"), false);
 
 	parameter_changed (X_("mixer-strip-visibility"));
 
@@ -407,11 +410,11 @@ void
 MixerStrip::set_route (boost::shared_ptr<Route> rt)
 {
 	if (rec_enable_button->get_parent()) {
-		rec_solo_table.remove (*rec_enable_button);
+		rec_mon_table.remove (*rec_enable_button);
 	}
 
 	if (show_sends_button->get_parent()) {
-		rec_solo_table.remove (*show_sends_button);
+		rec_mon_table.remove (*show_sends_button);
 	}
 
 	RouteUI::set_route (rt);
@@ -447,28 +450,28 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	gpm.set_type (rt->meter_type());
 	
-	middle_button_table.attach (gpm.gain_display,0,1,1,2, EXPAND|FILL, EXPAND);
-	middle_button_table.attach (gpm.peak_display,1,2,1,2);
+	mute_solo_table.attach (gpm.gain_display,0,1,1,2, EXPAND|FILL, EXPAND);
+	mute_solo_table.attach (gpm.peak_display,1,2,1,2);
 
 	if (solo_button->get_parent()) {
-		middle_button_table.remove (*solo_button);
+		mute_solo_table.remove (*solo_button);
 	}
 
 	if (mute_button->get_parent()) {
-		middle_button_table.remove (*mute_button);
+		mute_solo_table.remove (*mute_button);
 	}
 
 	if (route()->is_master()) {
-		middle_button_table.attach (*mute_button, 0, 2, 0, 1);
+		mute_solo_table.attach (*mute_button, 0, 2, 0, 1);
 		solo_button->hide ();
 		mute_button->show ();
-		rec_solo_table.hide ();
+		rec_mon_table.hide ();
 	} else {
-		middle_button_table.attach (*mute_button, 0, 1, 0, 1);
-		middle_button_table.attach (*solo_button, 1, 2, 0, 1);
+		mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
+		mute_solo_table.attach (*solo_button, 1, 2, 0, 1);
 		mute_button->show ();
 		solo_button->show ();
-		rec_solo_table.show ();
+		rec_mon_table.show ();
 	}
 
 	if (_mixer_owned && (route()->is_master() || route()->is_monitor())) {
@@ -523,12 +526,15 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	if (is_track ()) {
 
-		rec_solo_table.attach (*rec_enable_button, 0, 1, 0, 2);
+		rec_mon_table.attach (*rec_enable_button, 0, 1, 0, 2);
 		rec_enable_button->set_sensitive (_session->writable());
 		rec_enable_button->show();
 
 		if (ARDOUR::Profile->get_trx()) {
-			rec_solo_table.attach (*monitor_input_button, 1, 2, 0, 2);
+			rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 2);
+		} else {
+			rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
+			rec_mon_table.attach (*monitor_disk_button, 1, 2, 1, 2);
 		}
 
 	} else {
@@ -536,7 +542,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		/* non-master bus */
 
 		if (!_route->is_master()) {
-			rec_solo_table.attach (*show_sends_button, 0, 1, 0, 2);
+			rec_mon_table.attach (*show_sends_button, 0, 1, 0, 2);
 			show_sends_button->show();
 		}
 	}
@@ -609,7 +615,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	global_frame.show();
 	global_vpacker.show();
 	button_table.show();
-	middle_button_table.show();
+	mute_solo_table.show();
 	bottom_button_table.show();
 	gpm.show_all ();
 	meter_point_button.show();

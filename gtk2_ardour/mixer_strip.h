@@ -170,9 +170,9 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Glib::RefPtr<Gtk::SizeGroup> button_size_group;
 
 	Gtk::Table button_table;
-	Gtk::Table rec_solo_table;
-	Gtk::Table top_button_table;
-	Gtk::Table middle_button_table;
+	Gtk::Table rec_mon_table;
+	Gtk::Table solo_iso_table;
+	Gtk::Table mute_solo_table;
 	Gtk::Table bottom_button_table;
 
 	ArdourButton                 meter_point_button;

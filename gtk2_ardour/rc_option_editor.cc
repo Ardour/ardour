@@ -2196,11 +2196,12 @@ RCOptionEditor::RCOptionEditor ()
 	   for the actual widgets being controlled.
 	*/
 	_mixer_strip_visibility.add (0, X_("PhaseInvert"), _("Phase Invert"));
-	_mixer_strip_visibility.add (0, X_("SoloSafe"), _("Solo Safe"));
-	_mixer_strip_visibility.add (0, X_("SoloIsolated"), _("Solo Isolated"));
-	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
+	_mixer_strip_visibility.add (0, X_("RecMon"), _("Record & Monitor"));
+	_mixer_strip_visibility.add (0, X_("SoloIsoLock"), _("Solo Iso / Lock"));
 	_mixer_strip_visibility.add (0, X_("Group"), _("Group"));
 	_mixer_strip_visibility.add (0, X_("MeterPoint"), _("Meter Point"));
+	_mixer_strip_visibility.add (0, X_("Output"), _("Output"));
+	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
 	
 	add_option (
 		S_("Preferences|GUI"),
