@@ -105,16 +105,6 @@ class MeterStrip :public RouteUI
 //	Gtk::DrawingArea meter_ticks1_area;
 //	Gtk::DrawingArea meter_ticks2_area;
 
-//	Gtk::HBox mutebox;
-//	Gtk::HBox solobox;
-//	Gtk::HBox recbox;
-//	Gtk::HBox mon_in_box;
-//	Gtk::HBox mon_disk_box;
-
-//	Gtk::Alignment meter_align;
-//	Gtk::Alignment peak_align;
-//	Gtk::HBox peakbx;
-//	Gtk::VBox btnbox;
 	WavesButton& peak_display;
 
 	std::vector<ARDOUR::DataType> _types;

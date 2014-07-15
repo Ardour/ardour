@@ -69,7 +69,6 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	: AxisView(sess)
 	, RouteTimeAxisView(ed, sess, canvas, "audio_time_axis.xml")
 {
-	std::cout << "AudioTimeAxisView::AudioTimeAxisView ()" << std::endl;
 }
 
 void

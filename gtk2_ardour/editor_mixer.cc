@@ -178,8 +178,8 @@ Editor::create_editor_mixer ()
 										  "editor_mixer.xml");
 	current_mixer_strip->Hiding.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_hidden));
 	current_mixer_strip->set_embedded (true);
-	MasterBusUI* mbu = new MasterBusUI (*this, _session);
-	master_bus_ui_home.add (*mbu);
+	_master_bus_ui = new MasterBusUI (*this, _session);
+	master_bus_ui_home.add (*_master_bus_ui);
 }
 
 void
@@ -238,7 +238,6 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 
 	if (route) {
 		current_mixer_strip->set_route (route);
-		//current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
 	}
 }
 

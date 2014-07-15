@@ -39,7 +39,6 @@ WavesUI::WavesUI (const std::string& layout_script_file, Gtk::Container& root)
 	, _root_container (root)
 {
 	// To avoid a need of reading the same file many times:
-	std::cout << "WavesUI::WavesUI (" << layout_script_file << ")" << std::endl;
 	std::map<std::string, const XMLTree*>::const_iterator it = __xml_tree_cache.find(layout_script_file);
 	if (it != __xml_tree_cache.end()) {
 		_xml_tree = (*it).second;

@@ -91,6 +91,8 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
 
 	LevelMeterHBox& get_level_meter() { return level_meter; }
 	Gtkmm2ext::Fader& get_gain_slider() { return gain_slider; }
+	WavesButton& get_gain_display_button () { return gain_display_button; }
+	WavesButton& get_peak_display_button () { return peak_display_button; }
 
 	/** Emitted in the GUI thread when a button is pressed over the level meter;
 	 *  return true if the event is handled.

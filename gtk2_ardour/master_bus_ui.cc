@@ -88,33 +88,63 @@ using namespace Editing;
 using namespace std;
 using std::list;
 
+PBD::Signal1<void,MasterBusUI*> MasterBusUI::CatchDeletion;
+
 MasterBusUI::MasterBusUI (PublicEditor& ed,
 						  Session* sess)
 	: AxisView (sess)
 	, RouteUI (sess, "master_ui.xml")
-	, gain_meter_home (get_box ("gain_meter_home"))
-	, gm (sess, "master_ui_gain_meter.xml")
+	, peak_display_button (get_waves_button ("peak_display_button"))
+	, level_meter_home (get_box ("level_meter_home"))
 {
-	LevelMeterHBox& level_meter = gm.get_level_meter();
-	if (level_meter.get_parent ()) {
-		level_meter.get_parent ()->remove (level_meter);
-	}
+	level_meter = new LevelMeterHBox(sess);
+	//level_meter->ButtonRelease.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_release, this, _1));
+	//level_meter->MeterTypeChanged.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::meter_type_changed, this, _1));
+	level_meter_home.pack_start (*level_meter, true, true);
+	peak_display_button.unset_flags (Gtk::CAN_FOCUS);
+}
 
-	gain_meter_home.pack_start(level_meter, true, true);
+MasterBusUI::~MasterBusUI ()
+{
+	if (level_meter) {
+		delete level_meter;
+		CatchDeletion (this);
+	}
 }
 
 void
 MasterBusUI::set_route (boost::shared_ptr<Route> rt)
 {
-	RouteUI::set_route (rt);
-}
-
-MasterBusUI::~MasterBusUI ()
-{
+	level_meter->set_meter (rt->shared_peak_meter().get());
+	level_meter->clear_meters();
+	level_meter->set_type (rt->meter_type());
+	level_meter->setup_meters (6, 6);
+    RouteUI::set_route(rt);
 }
 
 void MasterBusUI::set_button_names ()
 {
+}
+
+void
+MasterBusUI::fast_update ()
+{
+	if (_route) {
+		Gtk::Requisition sz;
+		size_request (sz);
+		if (sz.height == 0) {
+			return;
+		}
+		float mpeak = level_meter->update_meters();
+/*
+		if (mpeak > max_peak) {
+			max_peak = mpeak;
+			if (mpeak >= Config->get_meter_peak()) {
+				peak_display.set_name ("meterbridge peakindicator on");
+			}
+		}
+ */
+	}
 }
 
 std::string

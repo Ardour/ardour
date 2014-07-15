@@ -102,7 +102,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess,
 	, name_label (ui.get_label ("name_label"))
 	, number_label (ui.get_label ("number_label"))
 {
-	std::cout << "TimeAxisView::TimeAxisView ()" << std::endl;
 	if (extra_height == 0) {
 		compute_heights ();
 	}

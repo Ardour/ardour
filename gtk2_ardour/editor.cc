@@ -117,6 +117,7 @@
 #include "sfdb_ui.h"
 #include "tempo_lines.h"
 #include "time_axis_view.h"
+#include "master_bus_ui.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -5494,6 +5495,10 @@ Editor::super_rapid_screen_update ()
 	if (current_mixer_strip) {
 		current_mixer_strip->fast_update ();
 	}
+    
+    if (_master_bus_ui) {
+        _master_bus_ui->fast_update ();
+    }
 
 	/* PLAYHEAD AND VIEWPORT */
 

@@ -42,6 +42,7 @@
 #include "audio_time_axis.h"
 #include "midi_time_axis.h"
 #include "mixer_strip.h"
+#include "master_bus_ui.h"
 #include "gui_thread.h"
 #include "actions.h"
 #include "utils.h"
@@ -50,6 +51,7 @@
 #include "editor_routes.h"
 
 #include "i18n.h"
+#include "dbg_msg.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -67,13 +69,13 @@ struct ColumnInfo {
 
 EditorRoutes::EditorRoutes (Editor* e)
 	: EditorComponent (e)
-        , _ignore_reorder (false)
-        , _no_redisplay (false)
-        , _adding_routes (false)
-        , _menu (0)
-        , old_focus (0)
-        , selection_countdown (0)
-        , name_editable (0)
+    , _ignore_reorder (false)
+    , _no_redisplay (false)
+    , _adding_routes (false)
+    , _menu (0)
+    , old_focus (0)
+    , selection_countdown (0)
+    , name_editable (0)
 {
 	static const int column_width = 22;
 
@@ -515,6 +517,9 @@ EditorRoutes::redisplay ()
 		}
         
         if (route->is_master()) {
+			if (_editor->master_bus_ui ()) {
+				_editor->master_bus_ui ()->set_route (route);
+			}
             continue;
         }
 

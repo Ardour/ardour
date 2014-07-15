@@ -173,7 +173,7 @@
           box.fill="true"
           box.expand="true">
       <VBox>
-        <EventBox id="master_bus_ui_home" height="99" bgnormal="#ffff00"/>
+        <EventBox id="master_bus_ui_home"/>
         <EventBox id="inspector_home"
             box.fill="true"
             box.expand="true"/>

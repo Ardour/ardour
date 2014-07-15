@@ -124,6 +124,7 @@ class TimeFXDialog;
 class TimeSelection;
 class RegionLayeringOrderEditor;
 class VerboseCursor;
+class MasterBusUI;
 
 class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
@@ -303,13 +304,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void get_onscreen_tracks (TrackViewList&);
 
-//	Width editor_mixer_strip_width;
-//	void maybe_add_mixer_strip_width (XMLNode&);
 	void show_editor_mixer (bool yn);
 	void create_editor_mixer ();
 	void show_editor_list (bool yn);
 	void set_selected_mixer_strip (TimeAxisView&);
-//	void mixer_strip_width_changed ();
 	void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false);
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
@@ -461,8 +459,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
   protected:
 	void map_transport_state ();
 	void map_position_change (framepos_t);
-
 	void on_realize();
+	MasterBusUI* master_bus_ui () { return _master_bus_ui; }
 
   private:
 
@@ -688,11 +686,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void add_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView *);
 
-	Gtk::HBox&           global_hpacker;
-	Gtk::VBox&           global_vpacker;
-	Gtk::Container&       inspector_home;
-	Gtk::Container&       master_bus_ui_home;
-	Gtk::VBox&           vpacker;
+	Gtk::HBox&      global_hpacker;
+	Gtk::VBox&      global_vpacker;
+	Gtk::Container& inspector_home;
+	Gtk::Container& master_bus_ui_home;
+	Gtk::VBox&      vpacker;
+	MasterBusUI*    _master_bus_ui;
 
 	Gdk::Cursor*          current_canvas_cursor;
 	Gdk::Cursor* which_grabber_cursor ();

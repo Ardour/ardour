@@ -59,8 +59,8 @@ public:
 	std::list<TimeAxisView*> views () const;
 	void hide_all_tracks (bool);
 	void clear ();
-        void sync_order_keys_from_treeview ();
-        void reset_remote_control_ids ();
+    void sync_order_keys_from_treeview ();
+    void reset_remote_control_ids ();
 
 private:
 	void initial_display ();
@@ -98,14 +98,20 @@ private:
 	void show_all_miditracks ();
 	void hide_all_miditracks ();
 	void show_tracks_with_regions_at_playhead ();
-        void selection_changed ();
+    void selection_changed ();
 
-	void display_drag_data_received (
-		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint
-		);
+	void display_drag_data_received (Glib::RefPtr<Gdk::DragContext> const &,
+								     gint,
+									 gint,
+									 Gtk::SelectionData const &,
+									 guint,
+									 guint);
 
-	bool selection_filter (Glib::RefPtr<Gtk::TreeModel> const &, Gtk::TreeModel::Path const &, bool);
-	void name_edit (std::string const &, std::string const &);
+	bool selection_filter (Glib::RefPtr<Gtk::TreeModel> const &,
+						   Gtk::TreeModel::Path const &,
+						   bool);
+	void name_edit (std::string const &,
+					std::string const &);
 	void solo_changed_so_update_mute ();
 
 	struct ModelColumns : public Gtk::TreeModel::ColumnRecord {
@@ -155,21 +161,21 @@ private:
 
 	bool _ignore_reorder;
 	bool _no_redisplay;
-        bool _adding_routes;
+    bool _adding_routes;
 
 	Gtk::Menu* _menu;
-        Gtk::Widget* old_focus;
-        uint32_t selection_countdown;
-        Gtk::CellEditable* name_editable;
+    Gtk::Widget* old_focus;
+    uint32_t selection_countdown;
+    Gtk::CellEditable* name_editable;
 
-        bool key_press (GdkEventKey* ev);
-        bool focus_in (GdkEventFocus*);
-        bool focus_out (GdkEventFocus*);
-        bool enter_notify (GdkEventCrossing*);
-        bool leave_notify (GdkEventCrossing*);
-        void name_edit_started (Gtk::CellEditable*, const Glib::ustring&);
+    bool key_press (GdkEventKey* ev);
+    bool focus_in (GdkEventFocus*);
+    bool focus_out (GdkEventFocus*);
+    bool enter_notify (GdkEventCrossing*);
+    bool leave_notify (GdkEventCrossing*);
+    void name_edit_started (Gtk::CellEditable*, const Glib::ustring&);
 
-        bool get_relevant_routes (boost::shared_ptr<ARDOUR::RouteList> rl);
+    bool get_relevant_routes (boost::shared_ptr<ARDOUR::RouteList> rl);
 };
 
 #endif /* __ardour_gtk_editor_route_h__ */

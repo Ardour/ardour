@@ -66,52 +66,13 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	, name_label (get_waves_button ("name_label"))
 	, peak_display (get_waves_button ("peak_display"))
 	, level_meter_home (get_box ("level_meter_home"))
+	, level_meter (0)
+	, _strip_type (0)
+	, _tick_bar (0)
+	, _metricmode (-1)
+	, metric_type (MeterPeak)
 {
-	std::cout << "a) MeterStrip::MeterStrip ()" << std::endl;
-	level_meter = 0;
-	_strip_type = 0;
-	_tick_bar = 0;
-	_metricmode = -1;
-	metric_type = MeterPeak;
-//	mtr_vbox.set_spacing(2);
-//	nfo_vbox.set_spacing(2);
-//	peakbx.set_size_request(-1, 14);
-//	namebx.set_size_request(18, 52);
-//	spacer.set_size_request(-1,0);
-
 	set_metric_mode(metricmode, mt);
-
-//	meter_metric_area.set_size_request(25, 10);
-//	meter_metric_area.signal_expose_event().connect (
-//			sigc::mem_fun(*this, &MeterStrip::meter_metrics_expose));
-//	RedrawMetrics.connect (sigc::mem_fun(*this, &MeterStrip::redraw_metrics));
-
-//	meterbox.pack_start(meter_metric_area, true, false);
-
-//	mtr_vbox.pack_start (peakbx, false, false);
-//	mtr_vbox.pack_start (meterbox, true, true);
-//	mtr_vbox.pack_start (spacer, false, false);
-//	mtr_container.add(mtr_vbox);
-
-//	mtr_hsep.set_size_request(-1,1);
-//	mtr_hsep.set_name("BlackSeparator");
-
-//	nfo_vbox.pack_start (mtr_hsep, false, false);
-//	nfo_vbox.pack_start (btnbox, false, false);
-//	nfo_vbox.pack_start (namebx, false, false);
-
-//	pack_start (mtr_container, true, true);
-//	pack_start (nfo_vbox, false, false);
-
-//	peakbx.show();
-//	btnbox.show();
-//	meter_metric_area.show();
-//	meterbox.show();
-//	spacer.show();
-//	mtr_vbox.show();
-//	mtr_container.show();
-//	mtr_hsep.show();
-//	nfo_vbox.show();
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
@@ -127,9 +88,6 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	, peak_display (get_waves_button ("peak_display"))
 	, level_meter_home (get_box ("level_meter_home"))
 {
-	std::cout << "b) MeterStrip::MeterStrip ()" << std::endl;
-//	mtr_vbox.set_spacing(2);
-//	nfo_vbox.set_spacing(2);
 	RouteUI::set_route (rt);
 	SessionHandlePtr::set_session (sess);
 
@@ -153,25 +111,9 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	level_meter->MeterTypeChanged.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::meter_type_changed, this, _1));
 	level_meter_home.add (*level_meter);
 
-//	meter_align.set(0.5, 0.5, 0.0, 1.0);
-//	meter_align.add(*level_meter);
-
-//	meterbox.pack_start(meter_ticks1_area, true, false);
-//	meterbox.pack_start(meter_align, true, true);
-//	meterbox.pack_start(meter_ticks2_area, true, false);
-
 	// peak display
-//	peak_display.set_name ("meterbridge peakindicator");
-//	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 	max_peak = minus_infinity();
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
-//	peak_display.set_size_request(12, 8);
-//	peak_display.set_corner_radius(2);
-
-//	peak_align.set(0.5, 1.0, 1.0, 0.8);
-//	peak_align.add(peak_display);
-//	peakbx.pack_start(peak_align, true, true, 3);
-//	peakbx.set_size_request(-1, 14);
 
 	// add track-name label
 	name_label.set_text(_route->name());
@@ -292,7 +234,6 @@ MeterStrip::fast_update ()
 		max_peak = mpeak;
 		if (mpeak >= Config->get_meter_peak()) {
 			peak_display.set_name ("meterbridge peakindicator on");
-//			peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 		}
 	}
 }
@@ -480,8 +421,6 @@ MeterStrip::reset_peak_display ()
 	_route->shared_peak_meter()->reset_max();
 	level_meter->clear_meters();
 	max_peak = -INFINITY;
-//	peak_display.set_name ("meterbridge peakindicator");
-//	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 }
 
 bool

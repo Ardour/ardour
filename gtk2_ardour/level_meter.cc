@@ -124,12 +124,12 @@ static float vu_standard() {
 float
 LevelMeterBase::update_meters ()
 {
-	vector<MeterInfo>::iterator i;
-	uint32_t n;
-
 	if (!_meter) {
 		return 0.0f;
 	}
+
+	vector<MeterInfo>::iterator i;
+	uint32_t n;
 
 	uint32_t nmidi = _meter->input_streams().n_midi();
 

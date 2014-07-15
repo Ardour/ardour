@@ -72,13 +72,17 @@ public:
 				 ARDOUR::Session*);
  	virtual ~MasterBusUI ();
 
+    void fast_update ();
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	virtual void set_button_names ();
 	virtual std::string state_id () const;
 
+	static PBD::Signal1<void,MasterBusUI*> CatchDeletion;
+
 private:
-	Gtk::Box& gain_meter_home;
-	GainMeter gm;
+	Gtk::Box& level_meter_home;
+	LevelMeterHBox* level_meter;
+	WavesButton& peak_display_button;
 };
 
 #endif /* __tracks_master_bus_ui_h__ */
