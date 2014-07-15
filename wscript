@@ -152,16 +152,17 @@ def set_compiler_flags (conf,opt):
     # waf adds -O0 -g itself. thanks waf!
     is_clang = conf.env['CXX'][0].endswith('clang++')
     
-    if platform == "darwin":
-        cxx_flags.append('-stdlib=libc++')
-        linker_flags.append('-lc++')
-    
     if conf.options.cxx11:
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
         if platform == "darwin":
             # Prevents visibility issues in standard headers
+            cxx_flags.append('-stdlib=libc++')
+            linker_flags.append('-lc++')
             conf.define("_DARWIN_C_SOURCE", 1)
+
+    if conf.options.mac_stdlib:
+        cxx_flags.append('-stdlib=libc++')
 
     if conf.options.asan:
         conf.check_cxx(cxxflags=["-fsanitize=address", "-fno-omit-frame-pointer"], linkflags=["-fsanitize=address"])
@@ -516,6 +517,8 @@ def options(opt):
     opt.add_option('--noconfirm', action='store_true', default=False, dest='noconfirm',
                     help='Do not ask questions that require confirmation during the build')
     opt.add_option('--cxx11', action='store_true', default=False, dest='cxx11',
+                    help='Turn on c++11 compiler flags (-std=c++11)')
+    opt.add_option('--mac-stdlib', action='store_true', default=False, dest='mac_stdlib',
                     help='Turn on c++11 compiler flags (-std=c++11)')
     opt.add_option('--address-sanitizer', action='store_true', default=False, dest='asan',
                     help='Turn on AddressSanitizer (requires GCC >= 4.8 or clang >= 3.1)')
