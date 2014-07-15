@@ -407,7 +407,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		throw failed_constructor();
 	}
 
-#ifdef HAVE_NEW_LILV
+#ifdef HAVE_LILV_0_16_0
 	// Load default state
 	LilvState* state = lilv_state_new_from_world(
 		_world.world, _uri_map.urid_map(), lilv_plugin_get_uri(_impl->plugin));
@@ -1077,6 +1077,10 @@ LV2Plugin::do_save_preset(string name)
 	std::string uri = Glib::filename_to_uri(Glib::build_filename(bundle, file_name));
 	LilvNode *node_bundle = lilv_new_uri(_world.world, Glib::filename_to_uri(Glib::build_filename(bundle, "/")).c_str());
 	LilvNode *node_preset = lilv_new_uri(_world.world, uri.c_str());
+#ifdef HAVE_LILV_0_19_2
+	lilv_world_unload_resource(_world.world, node_preset);
+	lilv_world_unload_bundle(_world.world, node_bundle);
+#endif
 	lilv_world_load_bundle(_world.world, node_bundle);
 	lilv_world_load_resource(_world.world, node_preset);
 	lilv_node_free(node_bundle);
