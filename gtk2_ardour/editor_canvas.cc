@@ -1352,3 +1352,13 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 		set_canvas_cursor (cursor, false);
 	}
 }
+
+double
+Editor::trackviews_height() const
+{
+	if (!_trackview_group) {
+		return 0;
+	}
+
+	return _visible_canvas_height - _trackview_group->canvas_origin().y;
+}

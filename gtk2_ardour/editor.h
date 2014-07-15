@@ -149,6 +149,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	double visible_canvas_height () const {
 		return _visible_canvas_height;
 	}
+	double trackviews_height() const;
 
 	void cycle_snap_mode ();
 	void next_snap_choice ();

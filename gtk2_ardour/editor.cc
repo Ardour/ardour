@@ -3491,6 +3491,7 @@ Editor::build_track_count_menu ()
 		visible_tracks_selector.AddMenuElem (MenuElem (X_("24"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 24)));
 		visible_tracks_selector.AddMenuElem (MenuElem (X_("32"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 32)));
 		visible_tracks_selector.AddMenuElem (MenuElem (X_("64"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 64)));
+		visible_tracks_selector.AddMenuElem (MenuElem (_("Selected"), sigc::mem_fun(*this, &Editor::fit_selected_tracks)));
 		visible_tracks_selector.AddMenuElem (MenuElem (_("All"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 0)));
 	} else {
 		visible_tracks_selector.AddMenuElem (MenuElem (_("Fit current tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 0)));
@@ -3545,15 +3546,21 @@ Editor::set_visible_track_count (int32_t n)
 
 	int h;
 	string str;
-
+	
 	if (_visible_track_count > 0) {
-		h = _visible_canvas_height / _visible_track_count;
+		h = trackviews_height() / _visible_track_count;
 		std::ostringstream s;
 		s << _visible_track_count;
 		str = s.str();
 	} else if (_visible_track_count == 0) {
-		h = _visible_canvas_height / track_views.size();
-		str = _("all");
+		uint32_t n = 0;
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			if ((*i)->marked_for_display()) {
+				++n;
+			}
+		}
+		h = trackviews_height() / n;
+		str = _("All");
 	} else {
 		/* negative value means that the visible track count has 
 		   been overridden by explicit track height changes.

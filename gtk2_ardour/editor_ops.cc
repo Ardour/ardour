@@ -6767,6 +6767,7 @@ Editor::fit_selected_tracks ()
                         }
                 }
         }
+
 }
 
 void
@@ -6795,7 +6796,7 @@ Editor::fit_tracks (TrackViewList & tracks)
                  height that will be taken by visible children of selected
                  tracks - height of the ruler/hscroll area 
 	*/
-	uint32_t h = (uint32_t) floor ((_visible_canvas_height - (child_heights + _trackview_group->canvas_origin().y)) / visible_tracks);
+	uint32_t h = (uint32_t) floor ((trackviews_height() - child_heights) / visible_tracks);
 	double first_y_pos = DBL_MAX;
 
 	if (h < TimeAxisView::preset_height (HeightSmall)) {
@@ -6859,6 +6860,8 @@ Editor::fit_tracks (TrackViewList & tracks)
 	vertical_adjustment.set_value (first_y_pos);
 
 	redo_visual_stack.push_back (current_visual_state (true));
+
+	visible_tracks_selector.set_text (_("Sel"));
 }
 
 void
