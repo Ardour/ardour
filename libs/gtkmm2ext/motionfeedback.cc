@@ -602,152 +602,98 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double size, double progress_
 
 	cairo_scale (cr, scale_factor, scale_factor);
 
-        pattern = prolooks_create_gradient_str (pxs + 32.0, pys + 16.0, pxs + 75.0, pys + 16.0, "#d4c8b9", "#ae977b", 1.0, 1.0);
-        cairo_set_source (cr, pattern);
-	cairo_pattern_destroy (pattern);
-	cairo_set_line_width (cr, 2.0);
-	cairo_arc (cr, xc, yc, 31.5, 0.0, 2 * G_PI);
-	cairo_stroke (cr);
-
-        pattern = prolooks_create_gradient_str (pxs + 20.0, pys + 20.0, pxs + 89.0, pys + 87.0, "#2f2f4c", "#090a0d", 1.0, 1.0);
-	cairo_set_source (cr, pattern);
-	cairo_pattern_destroy (pattern);
+	//dark arc background
+	cairo_set_source_rgb (cr, 0.3, 0.3, 0.3 );
 	cairo_set_line_width (cr, progress_width);
 	cairo_arc (cr, xc, yc, progress_radius, start_angle, end_angle);
 	cairo_stroke (cr);
 
-        pattern = prolooks_create_gradient (pxs + 20.0, pys + 20.0, pxs + 89.0, pys + 87.0, bright, dark, 1.0, 1.0);
-	cairo_set_source (cr, pattern);
-	cairo_pattern_destroy (pattern);
+	
+	float r = (value) * (((float)bright->red)/G_MAXUINT16) + (1.0-value)*(((float)dark->red)/G_MAXUINT16);
+	float g = (value) * (((float)bright->green)/G_MAXUINT16) + (1.0-value)*(((float)dark->green)/G_MAXUINT16);
+	float b = (value) * (((float)bright->blue)/G_MAXUINT16) + (1.0-value)*(((float)dark->blue)/G_MAXUINT16);
+
+	//colored arc
+	cairo_set_source_rgb (cr, r,g,b);
 	cairo_set_line_width (cr, progress_width);
 	cairo_arc (cr, xc, yc, progress_radius, start_angle, value_angle);
 	cairo_stroke (cr);
 
+	//overall shade
+	cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, progress_radius_outer);
+	cairo_pattern_add_color_stop_rgba (shade_pattern, 0, 1,1,1, 0.3);
+	cairo_pattern_add_color_stop_rgba (shade_pattern, 1, 1,1,1, 0.0);
+	cairo_set_source (cr, shade_pattern);
+	cairo_arc (cr, xc, yc, progress_radius_outer-1, 0, 2.0*G_PI);
+	cairo_fill (cr);
+	cairo_pattern_destroy (shade_pattern);
+		
+	//black border
+	cairo_set_source_rgb (cr, 0, 0, 0 );
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
-	progress_rim_width = 2.0;
-	cairo_set_line_width (cr, progress_rim_width);
-        pattern = prolooks_create_gradient_str (pxs + 18.0, pys + 79.0, pxs + 35.0, pys + 79.0, "#dfd5c9", "#dfd5c9", 1.0, 0.0);
-	cairo_set_source (cr, pattern);
-	cairo_pattern_destroy (pattern);
+	cairo_set_line_width (cr, 1.0/scale_factor);
 	cairo_move_to (cr, xc + (progress_radius_outer * start_angle_x), yc + (progress_radius_outer * start_angle_y));
 	cairo_line_to (cr, xc + (progress_radius_inner * start_angle_x), yc + (progress_radius_inner * start_angle_y));
 	cairo_stroke (cr);
-
-	prolooks_set_source_color_string (cr, "#000000", 1.0);
 	cairo_move_to (cr, xc + (progress_radius_outer * end_angle_x), yc + (progress_radius_outer * end_angle_y));
 	cairo_line_to (cr, xc + (progress_radius_inner * end_angle_x), yc + (progress_radius_inner * end_angle_y));
 	cairo_stroke (cr);
-
-        // pattern = prolooks_create_gradient_str (95.0, 6.0, 5.0, 44.0, "#dfd5c9", "#b0a090", 1.0, 1.0);
-        pattern = prolooks_create_gradient_str (pxs + 95.0, pys + 6.0, pxs + 5.0, pys + 44.0, "#000000", "#000000", 1.0, 1.0);
-	cairo_set_source (cr, pattern);
-	cairo_pattern_destroy (pattern);
 	cairo_arc (cr, xc, yc, progress_radius_outer, start_angle, end_angle);
 	cairo_stroke (cr);
-
-	cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
-        pattern = prolooks_create_gradient (pxs + 20.0, pys + 20.0, pxs + 89.0, pys + 87.0, bright, dark, 0.25, 0.25);
-	cairo_set_source (cr, pattern);
-	cairo_pattern_destroy (pattern);
-	cairo_set_line_width (cr, progress_width);
-	cairo_arc (cr, xc, yc, progress_radius, start_angle, value_angle + (G_PI / 180.0));
+	cairo_arc (cr, xc, yc, progress_radius_inner, start_angle, end_angle);
 	cairo_stroke (cr);
 
-        progress_shine = prolooks_create_gradient_str (pxs + 89.0, pys + 73.0, pxs + 34.0, pys + 16.0, "#ffffff", "#ffffff", 0.3, 0.04);
-        cairo_pattern_add_color_stop_rgba (progress_shine, 0.5, 1.0, 1.0, 1.0, 0.0);
-        if (size > 50) {
-                cairo_pattern_add_color_stop_rgba (progress_shine, 0.75, 1.0, 1.0, 1.0, 0.3);
-        } else {
-                cairo_pattern_add_color_stop_rgba (progress_shine, 0.75, 1.0, 1.0, 1.0, 0.2);
-        }
-        cairo_set_source (cr, progress_shine);
-        cairo_set_line_width (cr, progress_width);
-        cairo_arc (cr, xc, yc, progress_radius, start_angle, end_angle);
-        cairo_stroke (cr);
-        cairo_pattern_destroy (progress_shine);
-
-	cairo_set_line_width (cr, 1.0);
-	cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-	cairo_arc (cr, xc, yc, progress_radius_inner, 0.0, 2 * G_PI);
-        pattern = prolooks_create_gradient_str (pxs + 35.0, pys + 31.0, pxs + 75.0, pys + 72.0, "#68625c", "#44494b", 1.0, 1.0);
-	cairo_set_source (cr, pattern);
-	cairo_pattern_destroy (pattern);
+	//knob shadow
+	cairo_save(cr);
+	cairo_translate(cr, 6, 6 );
+	cairo_set_source_rgba (cr, 0,0,0,0.1 );
+	cairo_arc (cr, xc, yc, progress_radius_inner-1, 0, 2.0*G_PI);
 	cairo_fill (cr);
-	cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-	cairo_arc (cr, xc, yc, progress_radius_inner, 0.0, 2 * G_PI);
+	cairo_restore(cr);
+
+	//inner circle
+	cairo_set_source_rgba (cr, 0.3, 0.3, 0.3, 1 );
+	cairo_arc (cr, xc, yc, progress_radius_inner-1, 0, 2.0*G_PI);
+	cairo_fill (cr);
+		
+	//knob shade
+	shade_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, progress_radius_outer);
+	cairo_pattern_add_color_stop_rgba (shade_pattern, 0, 1,1,1, 0.5);
+	cairo_pattern_add_color_stop_rgba (shade_pattern, 1, 0,0,0, 0.3);
+	cairo_set_source (cr, shade_pattern);
+	cairo_arc (cr, xc, yc, progress_radius_inner-1, 0, 2.0*G_PI);
+	cairo_fill (cr);
+	cairo_pattern_destroy (shade_pattern);
+		
+	//inner circle
+	cairo_set_source_rgba (cr, 0.3, 0.3, 0.3, 0.5 );
+	cairo_arc (cr, xc, yc, progress_radius_inner-5, 0, 2.0*G_PI);
+	cairo_fill (cr);
+
+	//line
+	cairo_save(cr);
+	cairo_translate(cr, 2, 2 );
+	cairo_set_source_rgba (cr, 0,0,0,0.5 );
+	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
+	cairo_set_line_width (cr, 4);
+	cairo_move_to (cr, xc + (progress_radius_inner * value_x), yc + (progress_radius_inner * value_y));
+	cairo_line_to (cr, xc + ((progress_radius_inner*0.4) * value_x), yc + ((progress_radius_inner*0.4) * value_y));
+	cairo_stroke (cr);
+	cairo_restore(cr);
+	cairo_set_source_rgba (cr, 1,1,1,0.7 );
+	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
+	cairo_set_line_width (cr, 4.0);
+	cairo_move_to (cr, xc + (progress_radius_inner * value_x), yc + (progress_radius_inner * value_y));
+	cairo_line_to (cr, xc + ((progress_radius_inner*0.4) * value_x), yc + ((progress_radius_inner*0.4) * value_y));
 	cairo_stroke (cr);
 
-        pattern = prolooks_create_gradient_str (pxs + 42.0, pys + 34.0, pxs + 68.0, pys + 70.0, "#e7ecef", "#9cafb8", 1.0, 1.0);
-	cairo_set_source (cr, pattern);
-	cairo_pattern_destroy (pattern);
-	cairo_arc (cr, xc, yc, knob_disc_radius, 0.0, 2 * G_PI);
-	cairo_fill (cr);
 
-	cairo_set_line_width (cr, 2.0);
-	degrees = G_PI / 180.0;
-        pattern = prolooks_create_gradient_str (pxs + 38.0, pys + 34.0, pxs + 70.0, pys + 68.0, "#ffffff", "#caddf2", 0.2, 0.2);
-        cairo_set_source (cr, pattern);
-	cairo_pattern_destroy (pattern);
-	cairo_move_to (cr, xc, yc);
-	cairo_arc (cr, xc, yc, knob_disc_radius - 1, (-154) * degrees, (-120) * degrees);
-	cairo_move_to (cr, xc, yc);
-	cairo_arc (cr, xc, yc, knob_disc_radius - 1, (G_PI / 2.0) - (60 * degrees), (G_PI / 2.0) - (29 * degrees));
-	cairo_fill (cr);
-
-        pattern = prolooks_create_gradient_str (pxs + 50.0, pys + 40.0, pxs + 62.0, pys + 60.0, "#a1adb6", "#47535c", 0.07, 0.15);
-	cairo_set_source (cr, pattern);
-	cairo_pattern_destroy (pattern);
-	cairo_move_to (cr, xc, yc);
-	cairo_arc (cr, xc, yc, knob_disc_radius - 1, (-67) * degrees, (-27) * degrees);
-	cairo_move_to (cr, xc, yc);
-	cairo_arc (cr, xc, yc, knob_disc_radius - 1, G_PI - (67 * degrees), G_PI - (27 * degrees));
-	cairo_fill (cr);
-
-	knob_ripples = cairo_pattern_create_radial (xc, yc, 0.0, xc, yc, 4.0);
-	prolooks_add_color_stop_str (knob_ripples, 0.0, "#e7ecef", 0.05);
-	prolooks_add_color_stop_str (knob_ripples, 0.5, "#58717d", 0.05);
-	prolooks_add_color_stop_str (knob_ripples, 0.75, "#d1d9de", 0.05);
-	prolooks_add_color_stop_str (knob_ripples, 1.0, "#5d7682", 0.05);
-	cairo_pattern_set_extend (knob_ripples, CAIRO_EXTEND_REPEAT);
-	cairo_set_line_width (cr, 0.0);
-	cairo_set_source (cr, knob_ripples);
-	cairo_arc (cr, xc, yc, knob_disc_radius, 0.0, 2 * G_PI);
-	cairo_fill (cr);
-
-	cairo_save (cr);
-	cairo_translate (cr, xc + (knob_disc_radius * value_x), yc + (knob_disc_radius * value_y));
-	cairo_rotate (cr, value_angle - G_PI);
-        pattern = prolooks_create_gradient_str (pxs + 16.0, pys + -2.0, pxs + 9.0, pys + 13.0, "#e7ecef", "#9cafb8", 0.8, 0.8);
-	cairo_set_source (cr, pattern);
-	cairo_pattern_destroy (pattern);
-	cairo_move_to (cr, 0.0, 4.0);
-	cairo_line_to (cr, 17.0, 4.0);
-	cairo_curve_to (cr, 19.0, 4.0, 21.0, 2.0, 21.0, 0.0);
-	cairo_curve_to (cr, 21.0, -2.0, 19.0, -4.0, 17.0, -4.0);
-	cairo_line_to (cr, 0.0, -4.0);
-	cairo_close_path (cr);
-	cairo_fill (cr);
-
-        pattern = prolooks_create_gradient_str (pxs + 9.0, pys + -2.0, pxs + 9.0, pys + 2.0, "#68625c", "#44494b", 1.0, 1.0);
-	cairo_set_source (cr, pattern);
-	cairo_pattern_destroy (pattern);
-	cairo_move_to (cr, 0.0, 2.0);
-	cairo_line_to (cr, 16.0, 2.0);
-	cairo_curve_to (cr, 17.0, 2.0, 18.0, 1.0, 18.0, 0.0);
-	cairo_curve_to (cr, 18.0, -1.0, 17.0, -2.0, 16.0, -2.0);
-	cairo_line_to (cr, 0.0, -2.0);
-	cairo_close_path (cr);
-	cairo_fill (cr);
-
-	cairo_restore (cr);
-	cairo_set_line_width (cr, 2.0);
-        pattern = prolooks_create_gradient_str (pxs + 38.0, pys + 32.0, pxs + 70.0, pys + 67.0, "#3d3d3d", "#000000", 1.0, 1.0); 
-        cairo_set_source (cr, pattern);
-	cairo_pattern_destroy (pattern);
-	cairo_arc (cr, xc, yc, knob_disc_radius, 0.0, 2 * G_PI);
-	cairo_stroke (cr);
-
-	cairo_pattern_destroy (knob_ripples);
+	//highlight if focused  (damn, this is a cached image which doesn't (yet) have a "focused" state
+//	if (pixwin.has_focus()) {
+//		cairo_set_source_rgba (cr, 1,1,1, 0.5 );
+//		cairo_arc (cr, xc, yc, progress_radius_inner-1, 0, 2.0*G_PI);
+//		cairo_fill (cr);
+//	}
 }
 
 void
