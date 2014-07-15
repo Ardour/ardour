@@ -169,6 +169,9 @@ class MixerStrip : public RouteUI
 	Gtk::Container& info_panel_home;
 	Gtk::Label& input_info_label;
 	Gtk::Label& output_info_label;
+    
+    void update_inspector_info_panel ();
+    PBD::ScopedConnectionList _input_output_channels_update;
 
 	ArdourWindow*  comment_window;
 	Gtk::TextView* comment_area;

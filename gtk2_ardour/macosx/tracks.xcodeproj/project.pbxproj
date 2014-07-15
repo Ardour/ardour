@@ -273,6 +273,16 @@
 		CEAFC771195445560016ACF0 /* time.cc in Sources */ = {isa = PBXBuildFile; fileRef = CEAFC76F195445560016ACF0 /* time.cc */; };
 		CEB0A9F219583F96006D269A /* session_close_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = CEB0A9F119583F96006D269A /* session_close_dialog.cc */; };
 		CEB0A9F41958447C006D269A /* session_close_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB0A9F31958447C006D269A /* session_close_dialog.xml */; };
+		CEB9D791197516BE00B21780 /* audio_time_axis.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB9D787197516BE00B21780 /* audio_time_axis.xml */; };
+		CEB9D792197516BE00B21780 /* automation_time_axis.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB9D788197516BE00B21780 /* automation_time_axis.xml */; };
+		CEB9D793197516BE00B21780 /* editor_mixer.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB9D789197516BE00B21780 /* editor_mixer.xml */; };
+		CEB9D794197516BE00B21780 /* inspector_gain_meter.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB9D78A197516BE00B21780 /* inspector_gain_meter.xml */; };
+		CEB9D795197516BE00B21780 /* master_ui_gain_meter.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB9D78B197516BE00B21780 /* master_ui_gain_meter.xml */; };
+		CEB9D796197516BE00B21780 /* master_ui.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB9D78C197516BE00B21780 /* master_ui.xml */; };
+		CEB9D797197516BE00B21780 /* meter_strip.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB9D78D197516BE00B21780 /* meter_strip.xml */; };
+		CEB9D798197516BE00B21780 /* mixer_gain_meter.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB9D78E197516BE00B21780 /* mixer_gain_meter.xml */; };
+		CEB9D799197516BE00B21780 /* mixer_strip.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB9D78F197516BE00B21780 /* mixer_strip.xml */; };
+		CEB9D79A197516BE00B21780 /* track_header_gain_meter.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB9D790197516BE00B21780 /* track_header_gain_meter.xml */; };
 		CEDB41321951C668006E6F77 /* buildlog.txt in Resources */ = {isa = PBXBuildFile; fileRef = CEDB41311951C668006E6F77 /* buildlog.txt */; };
 /* End PBXBuildFile section */
 
@@ -1088,6 +1098,16 @@
 		CEB0A45A19583F3F006D269A /* session_close_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = session_close_dialog.h; path = ../session_close_dialog.h; sourceTree = "<group>"; };
 		CEB0A9F119583F96006D269A /* session_close_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = session_close_dialog.cc; path = ../session_close_dialog.cc; sourceTree = "<group>"; };
 		CEB0A9F31958447C006D269A /* session_close_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = session_close_dialog.xml; sourceTree = "<group>"; };
+		CEB9D787197516BE00B21780 /* audio_time_axis.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = audio_time_axis.xml; sourceTree = "<group>"; };
+		CEB9D788197516BE00B21780 /* automation_time_axis.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = automation_time_axis.xml; sourceTree = "<group>"; };
+		CEB9D789197516BE00B21780 /* editor_mixer.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = editor_mixer.xml; sourceTree = "<group>"; };
+		CEB9D78A197516BE00B21780 /* inspector_gain_meter.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = inspector_gain_meter.xml; sourceTree = "<group>"; };
+		CEB9D78B197516BE00B21780 /* master_ui_gain_meter.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = master_ui_gain_meter.xml; sourceTree = "<group>"; };
+		CEB9D78C197516BE00B21780 /* master_ui.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = master_ui.xml; sourceTree = "<group>"; };
+		CEB9D78D197516BE00B21780 /* meter_strip.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = meter_strip.xml; sourceTree = "<group>"; };
+		CEB9D78E197516BE00B21780 /* mixer_gain_meter.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = mixer_gain_meter.xml; sourceTree = "<group>"; };
+		CEB9D78F197516BE00B21780 /* mixer_strip.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = mixer_strip.xml; sourceTree = "<group>"; };
+		CEB9D790197516BE00B21780 /* track_header_gain_meter.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = track_header_gain_meter.xml; sourceTree = "<group>"; };
 		CEDB41311951C668006E6F77 /* buildlog.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = buildlog.txt; path = ../../../buildlog.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1713,6 +1733,16 @@
 		43279429194F0062003C9FEA /* ui */ = {
 			isa = PBXGroup;
 			children = (
+				CEB9D787197516BE00B21780 /* audio_time_axis.xml */,
+				CEB9D788197516BE00B21780 /* automation_time_axis.xml */,
+				CEB9D789197516BE00B21780 /* editor_mixer.xml */,
+				CEB9D78A197516BE00B21780 /* inspector_gain_meter.xml */,
+				CEB9D78B197516BE00B21780 /* master_ui_gain_meter.xml */,
+				CEB9D78C197516BE00B21780 /* master_ui.xml */,
+				CEB9D78D197516BE00B21780 /* meter_strip.xml */,
+				CEB9D78E197516BE00B21780 /* mixer_gain_meter.xml */,
+				CEB9D78F197516BE00B21780 /* mixer_strip.xml */,
+				CEB9D790197516BE00B21780 /* track_header_gain_meter.xml */,
 				CEB0A9F31958447C006D269A /* session_close_dialog.xml */,
 				4327942A194F0062003C9FEA /* device_capture_control.xml */,
 				4327942B194F0062003C9FEA /* device_playback_control.xml */,
@@ -2370,6 +2400,16 @@
 				43B351ED194F04E00038C140 /* step_editing.bindings in Resources */,
 				CEDB41321951C668006E6F77 /* buildlog.txt in Resources */,
 				CEB0A9F41958447C006D269A /* session_close_dialog.xml in Resources */,
+				CEB9D791197516BE00B21780 /* audio_time_axis.xml in Resources */,
+				CEB9D792197516BE00B21780 /* automation_time_axis.xml in Resources */,
+				CEB9D793197516BE00B21780 /* editor_mixer.xml in Resources */,
+				CEB9D794197516BE00B21780 /* inspector_gain_meter.xml in Resources */,
+				CEB9D795197516BE00B21780 /* master_ui_gain_meter.xml in Resources */,
+				CEB9D796197516BE00B21780 /* master_ui.xml in Resources */,
+				CEB9D797197516BE00B21780 /* meter_strip.xml in Resources */,
+				CEB9D798197516BE00B21780 /* mixer_gain_meter.xml in Resources */,
+				CEB9D799197516BE00B21780 /* mixer_strip.xml in Resources */,
+				CEB9D79A197516BE00B21780 /* track_header_gain_meter.xml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

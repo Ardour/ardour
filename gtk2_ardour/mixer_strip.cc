@@ -52,6 +52,9 @@
 #include "ardour/session.h"
 #include "ardour/types.h"
 #include "ardour/user_bundle.h"
+#include "ardour/data_type.h"
+#include "ardour/audio_backend.h"
+#include "ardour/engine_state_controller.h"
 
 #include "ardour_ui.h"
 #include "ardour_window.h"
@@ -105,7 +108,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, const std::string& layout_s
     , info_panel_button (get_waves_button ("info_panel_button"))
 	, info_panel_home (get_container ("info_panel_home"))
 	, input_info_label (get_label ("input_info_label"))
-	, output_info_label (get_label ("input_info_label"))
+	, output_info_label (get_label ("output_info_label"))
 {
 	init ();
 
@@ -139,7 +142,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
     , info_panel_button (get_waves_button ("info_panel_button"))
 	, info_panel_home (get_container ("info_panel_home"))
 	, input_info_label (get_label ("input_info_label"))
-	, output_info_label (get_label ("input_info_label"))
+	, output_info_label (get_label ("output_info_label"))
 {
 	init ();
 	set_route (rt);
@@ -240,6 +243,10 @@ MixerStrip::init ()
 	Config->ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 
 	gpm.LevelMeterButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&MixerStrip::level_meter_button_press, this, _1));
+    
+    Session* session = ARDOUR_UI::instance()->the_session();
+    if( session )
+        session->session_routes_reconnected.connect(_input_output_channels_update, invalidator (*this), boost::bind (&MixerStrip::update_inspector_info_panel, this), gui_context());
 }
 
 MixerStrip::~MixerStrip ()
@@ -1632,6 +1639,7 @@ MixerStrip::parameter_changed (string p)
 		   our VisibilityGroup to reflect these changes in our widgets.
 		*/
 		_visibility.set_state (Config->get_mixer_strip_visibility ());
+        update_inspector_info_panel();
 	}
 }
 
@@ -1841,6 +1849,57 @@ MixerStrip::color_button_clicked (WavesButton *button)
 			RouteUI::set_color (Gdk::Color (XMLColor[i]));
 		}
 	}
+}
+
+void
+MixerStrip::update_inspector_info_panel ()
+{
+    if( !_route )
+        return;
+    
+    // Input label
+    string input_text;
+	PortSet& in_ports (_route->input()->ports() );
+    
+	for (PortSet::iterator i = in_ports.begin(); i != in_ports.end(); ++i)
+    {
+        vector<string> connections_string;
+        i->get_connections(connections_string);
+
+        for(unsigned int j = 0; j < connections_string.size(); ++j)
+        {
+            if( connections_string[j].find("system:capture:") != string::npos )
+                connections_string[j].erase(0, 15);
+            
+            input_text += connections_string[j] + " ";
+        }
+    }
+    
+    input_text = "In " + input_text;
+    input_info_label.set_text (input_text);
+    input_info_label.set_tooltip_text (input_text);
+    
+    // Output label
+    string output_text;
+    PortSet& out_ports (_route->output()->ports() );
+
+	for (PortSet::iterator i = out_ports.begin(); i != out_ports.end(); ++i)
+    {
+        vector<string> connections_string;
+        i->get_connections(connections_string);
+        
+        for(unsigned int j = 0; j < connections_string.size(); ++j)
+        {
+            if( connections_string[j].find("system:playback:") != string::npos )
+                connections_string[j].erase(0, 16);
+            
+            output_text += connections_string[j] + " ";
+        }
+    }
+    
+    output_text = "Out " + output_text;
+    output_info_label.set_text(output_text);
+    output_info_label.set_tooltip_text(output_text);
 }
 
 void
