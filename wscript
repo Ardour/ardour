@@ -259,7 +259,7 @@ def set_compiler_flags (conf,opt):
     if conf.env['FPU_OPTIMIZATION']:
         if sys.platform == 'darwin':
             compiler_flags.append("-DBUILD_VECLIB_OPTIMIZATIONS");
-            linker_flags.append("-framework Accelerate")
+            linker_flags.append(['-framework', 'Accelerate'])
         elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
             compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
