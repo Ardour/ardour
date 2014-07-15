@@ -161,9 +161,6 @@ def set_compiler_flags (conf,opt):
             linker_flags.append('-lc++')
             conf.define("_DARWIN_C_SOURCE", 1)
 
-    if conf.options.mac_stdlib:
-        cxx_flags.append('-stdlib=libc++')
-
     if conf.options.asan:
         conf.check_cxx(cxxflags=["-fsanitize=address", "-fno-omit-frame-pointer"], linkflags=["-fsanitize=address"])
         cxx_flags.append('-fsanitize=address')
@@ -193,8 +190,10 @@ def set_compiler_flags (conf,opt):
                 conf.env['build_target'] = 'snowleopard'
             elif re.search ("^11[.]", version) != None:
                 conf.env['build_target'] = 'lion'
-            else:
+            elif re.search ("^12[.]", version) != None:
                 conf.env['build_target'] = 'mountainlion'
+            else:
+                conf.env['build_target'] = 'mavericks'
         else:
             match = re.search(
                     "(?P<cpu>i[0-6]86|x86_64|powerpc|ppc|ppc64|arm|s390x?)",
@@ -207,6 +206,9 @@ def set_compiler_flags (conf,opt):
                 conf.env['build_target'] = 'none'
     else:
         conf.env['build_target'] = opt.dist_target
+
+    if conf.env['build_target'] == 'mavericks':
+        cxx_flags.append('-stdlib=libc++')
 
     if conf.env['build_target'] == 'snowleopard':
         #
@@ -277,7 +279,11 @@ def set_compiler_flags (conf,opt):
     if conf.env['FPU_OPTIMIZATION']:
         if sys.platform == 'darwin':
             compiler_flags.append("-DBUILD_VECLIB_OPTIMIZATIONS");
-            #linker_flags.append("-framework Accelerate")
+            if conf.env['build_target'] == 'mavericks':
+                conf.env.append_value ('CFLAGS', '-D__ACCELERATE__')
+                conf.env.append_value ('CXXFLAGS', '-D__ACCELERATE__')
+            else:
+                linker_flags.append("-framework Accelerate")
         elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
             compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
@@ -319,6 +325,10 @@ def set_compiler_flags (conf,opt):
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1070",
                  '-mmacosx-version-min=10.7'))
+    elif conf.env['build_target'] in ['mavericks']:
+        compiler_flags.extend(
+                ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1090",
+                 '-mmacosx-version-min=10.9'))
     else:
         conf.define ('IS_OSX', 0)
 
@@ -517,8 +527,6 @@ def options(opt):
     opt.add_option('--noconfirm', action='store_true', default=False, dest='noconfirm',
                     help='Do not ask questions that require confirmation during the build')
     opt.add_option('--cxx11', action='store_true', default=False, dest='cxx11',
-                    help='Turn on c++11 compiler flags (-std=c++11)')
-    opt.add_option('--mac-stdlib', action='store_true', default=False, dest='mac_stdlib',
                     help='Turn on c++11 compiler flags (-std=c++11)')
     opt.add_option('--address-sanitizer', action='store_true', default=False, dest='asan',
                     help='Turn on AddressSanitizer (requires GCC >= 4.8 or clang >= 3.1)')
