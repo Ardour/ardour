@@ -487,6 +487,8 @@ WavesAudioBackend::port_is_physical (PortHandle port_handle) const
 void
 WavesAudioBackend::get_physical_outputs (DataType type, std::vector<std::string>& names)
 {
+    names.clear();
+    
     // COMMENTED DBG LOGS */ std::cout  << "WavesAudioBackend::get_physical_outputs ():" << std::endl << "\tdatatype = " << type << std::endl;
 
     switch (type) {
@@ -511,6 +513,8 @@ WavesAudioBackend::get_physical_outputs (DataType type, std::vector<std::string>
 void
 WavesAudioBackend::get_physical_inputs (DataType type, std::vector<std::string>& names)
 {
+     names.clear();
+    
     // COMMENTED DBG LOGS */ std::cout  << "WavesAudioBackend::get_physical_inputs ():" << std::endl << "\tdatatype = " << type << std::endl;
     switch (type) {
         case ARDOUR::DataType::AUDIO: {
