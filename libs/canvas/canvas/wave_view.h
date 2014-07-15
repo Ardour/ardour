@@ -53,24 +53,24 @@ public:
 		Normal,
 		Rectified
         };
-	
+
 	struct CacheEntry {
 		int channel;
 		Coord height;
 		float amplitude;
 		Color fill_color;
-		Color outline_color;
 		framepos_t start;
 		framepos_t end;
 		Cairo::RefPtr<Cairo::ImageSurface> image;
-	CacheEntry() : 
-		channel (0), height (0), amplitude(0), fill_color (0), 
-			outline_color (0), start (0), end (0), image (0) {} 
-	CacheEntry(int chan, Coord hght, float amp, Color fcol, Color ocol, 
-		   framepos_t strt, framepos_t ed, Cairo::RefPtr<Cairo::ImageSurface> img) :
-		channel (chan), height (hght), amplitude (amp), fill_color (fcol),
-			outline_color (ocol), start (strt), end (ed), image (img) {} 
+
+	CacheEntry(int chan, Coord hght, float amp, Color fcl, framepos_t strt, framepos_t ed, Cairo::RefPtr<Cairo::ImageSurface> img)  :
+		
+		channel (chan), height (hght), amplitude (amp), fill_color (fcl), 
+			start (strt), end (ed), image (img) {} 
 	};
+
+	/* final ImageSurface rendered with colours */
+	Cairo::RefPtr<Cairo::ImageSurface> _image;
 	
     /* Displays a single channel of waveform data for the given Region.
 
