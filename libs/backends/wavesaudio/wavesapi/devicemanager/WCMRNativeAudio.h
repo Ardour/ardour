@@ -17,6 +17,10 @@
 #include "WCRefManager.h"
 #include "WCMRAudioDeviceManager.h"
 
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9
+#include <unistd.h>
+#endif
+
 class WCMRNativeAudioDevice; //forward
 
 

@@ -152,12 +152,14 @@ def set_compiler_flags (conf,opt):
     # waf adds -O0 -g itself. thanks waf!
     is_clang = conf.env['CXX'][0].endswith('clang++')
     
+    if platform == "darwin":
+        cxx_flags.append('-stdlib=libc++')
+        linker_flags.append('-lc++')
+    
     if conf.options.cxx11:
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
         if platform == "darwin":
-            cxx_flags.append('-stdlib=libc++')
-            link_flags.append('-lc++')
             # Prevents visibility issues in standard headers
             conf.define("_DARWIN_C_SOURCE", 1)
 
@@ -274,7 +276,7 @@ def set_compiler_flags (conf,opt):
     if conf.env['FPU_OPTIMIZATION']:
         if sys.platform == 'darwin':
             compiler_flags.append("-DBUILD_VECLIB_OPTIMIZATIONS");
-            linker_flags.append("-framework Accelerate")
+            #linker_flags.append("-framework Accelerate")
         elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
             compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
