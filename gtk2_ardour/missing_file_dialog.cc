@@ -32,7 +32,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataType type)
-        : ArdourDialog (_("Missing File!"), true, false)
+        : ArdourDialog (_("Missing File"), true, false)
         , filetype (type)
         , chooser (_("Select a folder to search"), FILE_CHOOSER_ACTION_SELECT_FOLDER)
         , use_chosen (_("Add chosen folder to search path, and try again"))
@@ -66,7 +66,7 @@ MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataT
 		oss << *i << endl;
 	}
 
-        msg.set_justify (JUSTIFY_CENTER);
+        msg.set_justify (JUSTIFY_LEFT);
         msg.set_markup (string_compose (_("%1 cannot find the %2 file\n\n<i>%3</i>\n\nin any of these folders:\n\n\
 <tt>%4</tt>\n\n"), PROGRAM_NAME, typestr, Glib::Markup::escape_text(path), Glib::Markup::escape_text (oss.str())));
 
