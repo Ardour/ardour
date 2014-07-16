@@ -301,6 +301,7 @@ Editor::Editor ()
 	, _control_point_toggled_on_press (false)
 	, _stepping_axis_view (0)
 	, current_mixer_strip (0)
+	, _master_bus_ui (0)
 {
 	constructed = false;
 
