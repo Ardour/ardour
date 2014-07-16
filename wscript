@@ -48,7 +48,7 @@ V = MAJOR + '.' + MINOR + '.' + MICRO
 # because if it is, it breaks waf somehow.
 #
 VERSION = V.encode ('ascii', 'ignore')
-APPNAME = 'Ardour' + MAJOR
+PROGRAM_VERSION = MAJOR.encode ('ascii', 'ignore')
 
 # Mandatory variables
 top = '.'
@@ -380,6 +380,7 @@ def set_compiler_flags (conf,opt):
         compiler_flags.append('-DENABLE_NLS')
 
     compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
+    compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
 
     if opt.debug:
         conf.env.append_value('CFLAGS', debug_flags)

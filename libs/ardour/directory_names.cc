@@ -40,7 +40,7 @@ const char* const ladspa_dir_name = X_("ladspa");
 const char* const panner_dir_name = X_("panners");
 const char* const backend_dir_name = X_("backends");
 
-char config_dir_name[] = X_(PROGRAM_NAME "3");
+char config_dir_name[] = X_(PROGRAM_NAME PROGRAM_VERSION);
 #if defined (__APPLE__) || defined (PLATFORM_WINDOWS)
 const char* const user_config_dir_name = config_dir_name;
 #else
