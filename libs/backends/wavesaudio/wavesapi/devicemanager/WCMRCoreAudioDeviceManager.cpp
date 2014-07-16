@@ -412,15 +412,18 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInputs()
                                             &cfName);
         }
   
-        
+        char* cstr_name = 0;
         if (error == kAudioHardwareNoError)
         {
             CFIndex length = CFStringGetLength(cfName);
             CFIndex maxSize = CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8);
-            
-            char* cstr_name = new char[maxSize];
+            cstr_name = new char[maxSize];
             CFStringGetCString(cfName, cstr_name, maxSize, kCFStringEncodingUTF8);
-            
+        }
+        
+        chNameStream << (channel+1) << " - ";
+        
+        if (cstr_name && (0 != std::strlen(cstr_name) ) ) {
             chNameStream << cstr_name;
         }
         else
@@ -429,6 +432,8 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInputs()
         }
 
         m_InputChannels.push_back (chNameStream.str());
+        
+        delete [] cstr_name;
     }
     
     return retVal;
@@ -528,14 +533,18 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceOutputs()
                                                 &cfName);
         }
         
+        char* cstr_name = 0;
         if (error == kAudioHardwareNoError )
         {
             CFIndex length = CFStringGetLength(cfName);
             CFIndex maxSize = CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8);
-            
-            char* cstr_name = new char[maxSize];
+            cstr_name = new char[maxSize];
             CFStringGetCString(cfName, cstr_name, maxSize, kCFStringEncodingUTF8);
-            
+        }
+        
+        chNameStream << (channel+1) << " - ";
+        
+        if (cstr_name && (0 != std::strlen(cstr_name) ) ) {
             chNameStream << cstr_name;
         }
         else
@@ -544,6 +553,8 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceOutputs()
         }
         
         m_OutputChannels.push_back (chNameStream.str());
+        
+        delete [] cstr_name;
     }
     
     return retVal;
