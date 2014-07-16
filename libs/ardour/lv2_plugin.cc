@@ -1888,6 +1888,7 @@ LV2Plugin::latency_compute_run()
 
 	// Run the plugin so that it can set its latency parameter
 
+	bool was_activated = _was_activated;
 	activate();
 
 	uint32_t port_index = 0;
@@ -1918,6 +1919,9 @@ LV2Plugin::latency_compute_run()
 
 	run(bufsize);
 	deactivate();
+	if (was_activated) {
+		activate();
+	}
 }
 
 const LilvPort*
