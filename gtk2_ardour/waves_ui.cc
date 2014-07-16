@@ -394,6 +394,7 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 	Gtk::Label* label = dynamic_cast<Gtk::Label*> (&widget);
 	if (label) {
 		property = xml_property (definition, "justify", styles, "left");
+		std::transform(property.begin(), property.end(), property.begin(), ::tolower);
 		Gtk::Justification justification = Gtk::JUSTIFY_LEFT;
 		if (property == "left") {
 			justification = Gtk::JUSTIFY_LEFT;
@@ -407,6 +408,22 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 			dbg_msg ("Invalid justification for Gtk::Label !");
 		}
 		label->set_justify (justification);
+		
+		property = xml_property (definition, "ellipsize", styles, "none");
+		std::transform(property.begin(), property.end(), property.begin(), ::tolower);
+		Pango::EllipsizeMode ellipsize_mode = Pango::ELLIPSIZE_NONE;
+		if (property == "none") {
+			ellipsize_mode = Pango::ELLIPSIZE_NONE;
+		} else if (property == "start") {
+			ellipsize_mode = Pango::ELLIPSIZE_START;
+		} else if (property == "middle") {
+			ellipsize_mode = Pango::ELLIPSIZE_MIDDLE;
+		} else if (property == "end") {
+			ellipsize_mode = Pango::ELLIPSIZE_END;
+		} else {
+			dbg_msg ("Invalid ellipsize mode for Gtk::Label !");
+		}
+		label->set_ellipsize (ellipsize_mode);
 	}
 
 	Gtk::Box* box = dynamic_cast<Gtk::Box*> (&widget);

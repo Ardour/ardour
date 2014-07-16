@@ -13,23 +13,23 @@
     <HBox box.pack="end" spacing="1">
       <VBox spacing="1">
         <iconbutton id="master_mute_button"
-        width="47"
-        height="27"
-        normalicon="master_mute"
-        activeicon="master_mute_active"
-        prelighticon="master_mute_prelight"/>
+                    width="47"
+                    height="27"
+                    normalicon="master_mute"
+                    activeicon="master_mute_active"
+                    prelighticon="master_mute_prelight"/>
         <iconbutton id="clear_solo_button"
-        width="47"
-        height="27"
-        normalicon="master_mute"
-        activeicon="master_mute_active"
-        prelighticon="master_mute_prelight"/>
+                    width="47"
+                    height="27"
+                    normalicon="master_clear_solo"
+                    activeicon="master_clear_solo_active"
+                    prelighticon="master_clear_solo_prelight"/>
         <iconbutton id="global_rec_button"
-        width="47"
-        height="27"
-        normalicon="master_mute"
-        activeicon="master_mute_active"
-        prelighticon="master_mute_prelight"/>
+                    width="47"
+                    height="27"
+                    normalicon="master_global_rec"
+                    activeicon="master_global_rec_active"
+                    prelighticon="master_global_rec_prelight"/>
       </VBox>
       <Layout bgnormal="#383838" width="47" height="83">
         <VBox id="level_meter_home" height="77" x="18" y="3"/>
