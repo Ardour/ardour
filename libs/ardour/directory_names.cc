@@ -44,7 +44,7 @@ const char* const analysis_dir_name = X_("analysis");
 const char* const plugins_dir_name = X_("plugins");
 const char* const externals_dir_name = X_("externals");
 
-char config_dir_name[] = X_(PROGRAM_NAME "3");
+char config_dir_name[] = X_(PROGRAM_NAME);
 #if defined (__APPLE__) || defined (PLATFORM_WINDOWS)
 const char* const user_config_dir_name = config_dir_name;
 #else
