@@ -280,8 +280,7 @@ def set_compiler_flags (conf,opt):
         if sys.platform == 'darwin':
             compiler_flags.append("-DBUILD_VECLIB_OPTIMIZATIONS");
             if conf.env['build_target'] == 'mavericks':
-                conf.env.append_value ('CFLAGS', '-D__ACCELERATE__')
-                conf.env.append_value ('CXXFLAGS', '-D__ACCELERATE__')
+                conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'Accelerate'])
             else:
                 linker_flags.append("-framework Accelerate")
         elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
