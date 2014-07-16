@@ -11,6 +11,8 @@
 #undef check // stupid gtk, stupid apple
 
 #include <gtkmm/button.h>
+
+#define nil 0 // stupid apple
 #include <gdk/gdkquartz.h>
 
 #include <gtkmm2ext/utils.h>
