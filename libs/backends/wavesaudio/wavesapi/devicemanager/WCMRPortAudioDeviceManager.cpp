@@ -414,6 +414,8 @@ void WCMRPortAudioDevice::updateDeviceInfo (bool callerIsWaiting/*=false*/)
 
 			PaError error = PaAsio_GetInputChannelName(m_DeviceID, channel, channelName);
 
+			chNameStream << (channel+1) << " - ";
+
 			if (error == paNoError)
 			{
 				chNameStream << *channelName;
@@ -436,6 +438,8 @@ void WCMRPortAudioDevice::updateDeviceInfo (bool callerIsWaiting/*=false*/)
 			
 			PaError error = PaAsio_GetOutputChannelName(m_DeviceID, channel, channelName);
 			
+			chNameStream << (channel+1) << " - ";
+
 			if (error == paNoError)
 			{
 				chNameStream << *channelName;
