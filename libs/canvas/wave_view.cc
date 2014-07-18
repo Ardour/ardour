@@ -70,7 +70,6 @@ WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, _gradient_depth_independent (false)
 	, _amplitude_above_axis (1.0)
 	, _region_amplitude (_region->scale_amplitude ())
-	, _region_start (region->start())
 {
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
 	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
@@ -93,7 +92,6 @@ WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, _gradient_depth_independent (false)
 	, _amplitude_above_axis (1.0)
 	, _region_amplitude (_region->scale_amplitude ())
-	, _region_start (region->start())
 {
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
 	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
@@ -693,7 +691,7 @@ WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start
 	 */
 
 	framepos_t sample_start = max ((framepos_t) 0, (center - canvas_samples));
-	framepos_t sample_end = min (center + canvas_samples, _region->source_length (0));
+	framepos_t sample_end = min (center + canvas_samples, _region->source_length (_channel));
 
 	const int n_peaks = llrintf ((sample_end - sample_start)/ (double) _samples_per_pixel);
 
@@ -704,7 +702,7 @@ WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start
 			     _channel, 
 			     _samples_per_pixel);
 
-	image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, ((double)(sample_end - sample_start)) / _samples_per_pixel, _height);
+	image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, _height);
 
 	draw_image (image, peaks.get(), n_peaks);
 
@@ -757,8 +755,8 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	// cerr << "Image/WV space: " << image_start << " .. " << image_end << endl;
 
 	/* sample coordinates - note, these are not subject to rounding error */
-	framepos_t sample_start = _region_start + (image_start * _samples_per_pixel);
-	framepos_t sample_end   = _region_start + (image_end * _samples_per_pixel);
+	framepos_t sample_start = _region->start () + (image_start * _samples_per_pixel);
+	framepos_t sample_end   = _region->start () + (image_end * _samples_per_pixel);
 
 	// cerr << "Sample space: " << sample_start << " .. " << sample_end << endl;
 

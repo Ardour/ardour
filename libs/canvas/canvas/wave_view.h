@@ -101,7 +101,6 @@ public:
 	void set_samples_per_pixel (double);
 	void set_height (Distance);
 	void set_channel (int);
-	void set_region_start (ARDOUR::frameoffset_t);
 
         void set_fill_color (Color);
         void set_outline_color (Color);
@@ -171,11 +170,6 @@ private:
         bool   _gradient_depth_independent;
         double _amplitude_above_axis;
 	float  _region_amplitude;
-
-	/** The `start' value to use for the region; we can't use the region's
-	 *  value as the crossfade editor needs to alter it.
-	 */
-	ARDOUR::frameoffset_t _region_start;
 
         PBD::ScopedConnectionList invalidation_connection;
 
