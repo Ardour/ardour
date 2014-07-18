@@ -168,19 +168,30 @@
         </EventBox>
       </VBox>
     </EventBox>
+    <HBox>
+      <EventBox id="master_bus_ui_home"/>
+      <EventBox bgnormal="#D9E99F"
+              width="100"
+              box.fill="true"
+              box.expand="true"/>
+    </HBox>
     <HBox id="global_hpacker"
           box.pack="end"
           box.fill="true"
           box.expand="true">
       <VBox>
-        <EventBox id="master_bus_ui_home"/>
         <EventBox id="inspector_home"
             box.fill="true"
             box.expand="true"/>
       </VBox>
-      <VBox id="global_vpacker"
+      <VBox box.fill="true"
+            box.expand="true">
+        <VBox id="global_vpacker"
             box.fill="true"
             box.expand="true">
+        </VBox>
+        <EventBox id="mixer_ui_home"
+                  box.pack="end"/>
       </VBox>
     </HBox>
   </VBox>

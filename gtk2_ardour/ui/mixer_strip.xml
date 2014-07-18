@@ -3,7 +3,7 @@
 <RouteUI>
   <EventBox bgnormal="#383838" bgactive="#545454">
     <VBox>
-      <EventBox id="color_palette_home" borderwidth="1" visible="false">
+      <EventBox id="color_palette_home" borderwidth="1" noshowall="true" visible="false">
         <VBox>
           <iconbutton id="color_palette_button"
                       width="95"
