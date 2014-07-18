@@ -226,8 +226,7 @@ WaveView::invalidate_image_cache ()
 		if (_channel != caches[i].channel 
 		    || _height != caches[i].height
 		    || _region_amplitude != caches[i].amplitude 
-		    || _fill_color != caches[i].fill_color 
-		    || _outline_color != caches[i].outline_color) {
+		    || _fill_color != caches[i].fill_color) {
 
 			continue;
 		}
@@ -265,9 +264,8 @@ WaveView::consolidate_image_cache () const
 
 		if (_channel != caches[i].channel 
 		    || _height != caches[i].height
-		    || _region_amplitude != caches[i].amplitude 
-		    || _fill_color != caches[i].fill_color 
-		    || _outline_color != caches[i].outline_color) {
+		    || _region_amplitude != caches[i].amplitude
+		    || _fill_color != caches[i].fill_color) {
 
 			other_entries++;
 			continue;
@@ -280,9 +278,8 @@ WaveView::consolidate_image_cache () const
 
 			if (i == j || _channel != caches[j].channel 
 			    || _height != caches[i].height 
-			    || _region_amplitude != caches[i].amplitude 
-			    || _fill_color != caches[i].fill_color 
-			    || _outline_color != caches[i].outline_color) {
+			    || _region_amplitude != caches[i].amplitude
+			    || _fill_color != caches[i].fill_color) {
 
 				continue;
 			}
@@ -358,10 +355,32 @@ struct LineTips {
 	LineTips() : top (0.0), bot (0.0), clip_max (false), clip_min (false) {}
 };
 
+struct ImageSet {
+	Cairo::RefPtr<Cairo::ImageSurface> wave;
+	Cairo::RefPtr<Cairo::ImageSurface> outline;
+	Cairo::RefPtr<Cairo::ImageSurface> clip;
+	Cairo::RefPtr<Cairo::ImageSurface> zero;
+
+	ImageSet() : 
+		wave (0), outline (0), clip (0), zero (0) {} 
+};
+
 void
 WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peaks, int n_peaks) const
 {
-	Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (image);
+
+	ImageSet images;
+
+	images.wave = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, _height);
+	images.outline = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, _height);
+	images.clip = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, _height);
+	images.zero = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, _height);
+
+	Cairo::RefPtr<Cairo::Context> wave_context = Cairo::Context::create (images.wave);
+	Cairo::RefPtr<Cairo::Context> outline_context = Cairo::Context::create (images.outline);
+	Cairo::RefPtr<Cairo::Context> clip_context = Cairo::Context::create (images.clip);
+	Cairo::RefPtr<Cairo::Context> zero_context = Cairo::Context::create (images.zero);
+
 	boost::scoped_array<LineTips> tips (new LineTips[n_peaks]);
 
 	/* Clip level nominally set to -0.9dBFS to account for inter-sample
@@ -470,47 +489,26 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 			
 		}
 	}
+	Color alpha_one = rgba_to_color (0, 0, 0, 1.0);
 
-	if (gradient_depth() != 0.0) {
-			
-		Cairo::RefPtr<Cairo::LinearGradient> gradient (Cairo::LinearGradient::create (0, 0, 0, _height));
-			
-		double stops[3];
-			
-		double r, g, b, a;
-
-		if (_shape == Rectified) {
-			stops[0] = 0.1;
-			stops[0] = 0.3;
-			stops[0] = 0.9;
-		} else {
-			stops[0] = 0.1;
-			stops[1] = 0.5;
-			stops[2] = 0.9;
-		}
-
-		color_to_rgba (_fill_color, r, g, b, a);
-		gradient->add_color_stop_rgba (stops[0], r, g, b, a);
-		gradient->add_color_stop_rgba (stops[2], r, g, b, a);
-
-		/* generate a new color for the middle of the gradient */
-		double h, s, v;
-		color_to_hsv (_fill_color, h, s, v);
-		/* change v towards white */
-		v *= 1.0 - gradient_depth();
-		Color center = hsv_to_color (h, s, v, a);
-		color_to_rgba (center, r, g, b, a);
-		gradient->add_color_stop_rgba (stops[1], r, g, b, a);
-			
-		context->set_source (gradient);
-	} else {
-		set_source_rgba (context, _fill_color);
-	}
+	set_source_rgba (wave_context, alpha_one);
+	set_source_rgba (outline_context, alpha_one);
+	set_source_rgba (clip_context, alpha_one);
+	set_source_rgba (zero_context, alpha_one);
 
 	/* ensure single-pixel lines */
 		
-	context->set_line_width (0.5);
-	context->translate (0.5, 0.0);
+	wave_context->set_line_width (0.5);
+	wave_context->translate (0.5, 0.0);
+
+	outline_context->set_line_width (0.5);
+	outline_context->translate (0.5, 0.0);
+
+	clip_context->set_line_width (0.5);
+	clip_context->translate (0.5, 0.0);
+
+	zero_context->set_line_width (0.5);
+	zero_context->translate (0.5, 0.0);
 
 	/* the height of the clip-indicator should be at most 7 pixels,
 	 * or 5% of the height of the waveview item.
@@ -523,6 +521,9 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	   have to decide which of the 3 to draw at each position, pixel by
 	   pixel. This makes the rendering less efficient but it is the only
 	   way I can see to do this correctly.
+
+	   To avoid constant source swapping and stroking, we draw the components separately
+	   onto four alpha only image surfaces for use as a mask.
 
 	   With only 1 pixel of spread between the top and bottom of the line,
 	   we just draw the upper outline/clip indicator.
@@ -547,103 +548,132 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 			/* waveform line */
 
 			if (tips[i].spread >= 2.0) {
-				context->move_to (i, tips[i].top);
-				context->line_to (i, tips[i].bot);
+				wave_context->move_to (i, tips[i].top);
+				wave_context->line_to (i, tips[i].bot);
 			}
-		}
 
-		context->stroke ();
-
-		/* outline/clip indicators */
-
-		set_source_rgba (context, _outline_color);
-		
-		for (int i = 0; i < n_peaks; ++i) {
-
-			context->move_to (i, tips[i].top);
-			
 			if (_global_show_waveform_clipping && (tips[i].clip_max || tips[i].clip_min)) {
+				clip_context->move_to (i, tips[i].top);
 				/* clip-indicating upper terminal line */
-				set_source_rgba (context, _clip_color);
-				context->rel_line_to (0, min (clip_height, floor (tips[i].spread)));
-				context->stroke ();
-				set_source_rgba (context, _outline_color);
+				clip_context->rel_line_to (0, min (clip_height, floor (tips[i].spread)));
 			} else {
+				outline_context->move_to (i, tips[i].top);
 				/* normal upper terminal dot */
-				context->rel_line_to (0, 1.0);
-				context->stroke ();
+				outline_context->rel_line_to (0, 1.0);
 			}
 		}
-		
-	} else {
 
-		/* Note the use of cairo save/restore pairs to retain the drawing
-		   context for the waveform lines, which is already set
-		   correctly when we reach here.
-		*/
+		wave_context->stroke ();
+		clip_context->stroke ();
+		outline_context->stroke ();
+
+	} else {
 
 		for (int i = 0; i < n_peaks; ++i) {
 
 			/* waveform line */
 
 			if (tips[i].spread >= 3.0) {
-				context->move_to (i, tips[i].top);
-				context->line_to (i, tips[i].bot);
-				context->stroke ();
+				wave_context->move_to (i, tips[i].top);
+				wave_context->line_to (i, tips[i].bot);
 			}
 
 			/* zero line */
 
 			if (tips[i].spread >= 5.0 && show_zero_line()) {
-				context->save ();
-				set_source_rgba (context, _zero_color);
-				context->move_to (i, _height/2.0);
-				context->rel_line_to (0, 0.5);
-				context->stroke ();
-				context->restore ();
+				zero_context->move_to (i, _height/2.0);
+				zero_context->rel_line_to (0, 0.5);
 			}
 			
-			context->save ();
-
 			/* upper outline/clip indicator */
 
-			context->move_to (i, tips[i].top);
-			if (_global_show_waveform_clipping && ((_shape == WaveView::Rectified && (tips[i].clip_max || tips[i].clip_min)) || tips[i].clip_max)) {
+			if (_global_show_waveform_clipping && tips[i].clip_max) {
+				clip_context->move_to (i, tips[i].top);
 				/* clip-indicating upper terminal line */
-				set_source_rgba (context, _clip_color);
-				context->rel_line_to (0, min (clip_height, floor (tips[i].spread)));
-				context->stroke ();
+				clip_context->rel_line_to (0, min (clip_height, floor (tips[i].spread)));
 			} else {
+				outline_context->move_to (i, tips[i].top);
 				/* normal upper terminal dot */
-				set_source_rgba (context, _outline_color);
-				context->rel_line_to (0, 1.0);
-				context->stroke ();
+				outline_context->rel_line_to (0, 1.0);
 			}
 
-			context->restore ();
-			
 			if (tips[i].spread >= 2.0) {
 
 				/* lower outline/clip indicator */
 
-				context->save ();
-				context->move_to (i, tips[i].bot);
-				if (_global_show_waveform_clipping && _shape != WaveView::Rectified && tips[i].clip_min) {
+				if (_global_show_waveform_clipping && tips[i].clip_min) {
+					clip_context->move_to (i, tips[i].bot);
 					/* clip-indicating lower terminal line */
-					set_source_rgba (context, _clip_color);
-					context->rel_line_to (0, -(min (clip_height, floor (tips[i].spread))));
-					context->stroke ();
+					clip_context->rel_line_to (0, -(min (clip_height, floor (tips[i].spread))));
 				} else {
+					outline_context->move_to (i, tips[i].bot);
 					/* normal lower terminal dot */
-					set_source_rgba (context, _outline_color);
-					context->rel_line_to (0, -1.0);
-					context->stroke ();
+					outline_context->rel_line_to (0, -1.0);
 				}
-				
-				context->restore ();
 			}
 		}
+
+		wave_context->stroke ();
+		outline_context->stroke ();
+		clip_context->stroke ();
+		zero_context->stroke ();
 	}
+
+	Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (image);
+
+	/* Here we set a source colour and use the various components as a mask. */
+
+	if (gradient_depth() != 0.0) {
+			
+		Cairo::RefPtr<Cairo::LinearGradient> gradient (Cairo::LinearGradient::create (0, 0, 0, _height));
+			
+		double stops[3];
+			
+		double r, g, b, a;
+
+		if (_shape == Rectified) {
+			stops[0] = 0.1;
+			stops[1] = 0.3;
+			stops[2] = 0.9;
+		} else {
+			stops[0] = 0.1;
+			stops[1] = 0.5;
+			stops[2] = 0.9;
+		}
+
+		color_to_rgba (_fill_color, r, g, b, a);
+		gradient->add_color_stop_rgba (stops[1], r, g, b, a);
+		/* generate a new color for the middle of the gradient */
+		double h, s, v;
+		color_to_hsv (_fill_color, h, s, v);
+		/* change v towards white */
+		v *= 1.0 - gradient_depth();
+		Color center = hsv_to_color (h, s, v, a);
+		color_to_rgba (center, r, g, b, a);
+			
+		gradient->add_color_stop_rgba (stops[0], r, g, b, a);
+		gradient->add_color_stop_rgba (stops[2], r, g, b, a);
+
+		context->set_source (gradient);
+	} else {
+		set_source_rgba (context, _fill_color);
+	}
+
+	context->mask (images.wave, 0, 0);
+	context->fill ();	
+
+	set_source_rgba (context, _outline_color);
+	context->mask (images.outline, 0, 0);
+	context->fill ();
+
+	set_source_rgba (context, _clip_color);
+	context->mask (images.clip, 0, 0);
+	context->fill ();
+
+	set_source_rgba (context, _zero_color);
+	context->mask (images.zero, 0, 0);
+	context->fill ();
+
 }
 
 void
@@ -662,9 +692,8 @@ WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start
 
 		if (_channel != caches[i].channel 
 		    || _height != caches[i].height
-		    || _region_amplitude != caches[i].amplitude 
-		    || _fill_color != caches[i].fill_color 
-		    || _outline_color != caches[i].outline_color) {
+		    || _region_amplitude != caches[i].amplitude
+		    || _fill_color != caches[i].fill_color) {
 
 			continue;
 		}
@@ -673,7 +702,7 @@ WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start
 		framepos_t segment_end = caches[i].end;
 
 		if (end <= segment_end && start >= segment_start) {
-			image_offset = (segment_start - _region->start()) / _samples_per_pixel;
+			image_offset = (segment_start - _region_start) / _samples_per_pixel;
 			image = caches[i].image;
 
 			return;
@@ -704,11 +733,11 @@ WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start
 			     _channel, 
 			     _samples_per_pixel);
 
-	image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, ((double)(sample_end - sample_start)) / _samples_per_pixel, _height);
+	image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, _height);
 
 	draw_image (image, peaks.get(), n_peaks);
 
-	_image_cache[_region->audio_source ()].push_back (CacheEntry (_channel, _height, _region_amplitude, _fill_color, _outline_color, sample_start,  sample_end, image));
+	_image_cache[_region->audio_source ()].push_back (CacheEntry (_channel, _height, _region_amplitude, _fill_color, sample_start,  sample_end, image));
 
 	image_offset = (sample_start - _region->start()) / _samples_per_pixel;
 
@@ -784,6 +813,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 	context->set_source (image, x, y);
 	context->fill ();
+
 }
 
 void
