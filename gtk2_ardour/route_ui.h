@@ -172,7 +172,6 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 
 	void toggle_mute_menu(ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
 	void muting_change ();
-	void build_mute_menu(void);
 	void init_mute_menu(ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
 
 	int  set_color_from_route ();

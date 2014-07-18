@@ -358,6 +358,9 @@ PannerUI::pan_button_event (GdkEventButton* ev)
 		break;
 
 	case 3:
+        // NP: do not call context menu on button click so far
+        // we may be need this in future
+        return true;
 		if (pan_menu == 0) {
 			pan_menu = manage (new Menu);
 			pan_menu->set_name ("ArdourContextMenu");

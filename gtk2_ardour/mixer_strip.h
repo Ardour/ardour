@@ -225,10 +225,7 @@ class MixerStrip : public RouteUI
 
 	void set_automated_controls_sensitivity (bool yn);
 
-	Gtk::Menu* route_ops_menu;
-	void build_route_ops_menu ();
 	gboolean name_button_button_press (GdkEventButton*);
-	void list_route_operations ();
 
 	gint comment_key_release_handler (GdkEventKey*);
 	void comment_changed (void *src);

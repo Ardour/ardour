@@ -269,100 +269,82 @@ RouteUI::polarity_changed ()
 
 bool
 RouteUI::mute_press (GdkEventButton* ev)
-{
-	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
+{    
+	if (ev->button != 1) {
 		return true;
 	}
 
 	multiple_mute_change = false;
 
 	if (!_i_am_the_modifier) {
-		if (Keyboard::is_context_menu_event (ev)) {
-			if (mute_menu == 0){
-				build_mute_menu();
-			}
-			mute_menu->popup(0,ev->time);
-		} else {
-			if (Keyboard::is_button2_event (ev)) {
-				// Primary-button2 click is the midi binding click
-				// button2-click is "momentary"
-				if (mute_button.on_button_press_event (ev)) {
-					return true;
-				}
-				_mute_release = new SoloMuteRelease (_route->muted ());
-			}
+			
+        if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
-				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
+            /* toggle mute on everything (but
+             * exclude the master and monitor)
+             *
+             * because we are going to erase
+             * elements of the list we need to work
+             * on a copy.
+             */
+            
+            boost::shared_ptr<RouteList> copy (new RouteList);
 
-					/* toggle mute on everything (but
-					 * exclude the master and monitor)
-					 *
-					 * because we are going to erase
-					 * elements of the list we need to work
-					 * on a copy.
-					 */
-					
-					boost::shared_ptr<RouteList> copy (new RouteList);
+            *copy = *_session->get_routes ();
 
-					*copy = *_session->get_routes ();
+            for (RouteList::iterator i = copy->begin(); i != copy->end(); ) {
+                if ((*i)->is_master() || (*i)->is_monitor()) {
+                    i = copy->erase (i);
+                } else {
+                    ++i;
+                }
+            }
 
-					for (RouteList::iterator i = copy->begin(); i != copy->end(); ) {
-						if ((*i)->is_master() || (*i)->is_monitor()) {
-							i = copy->erase (i);
-						} else {
-							++i;
-						}
-					}
+            if (_mute_release) {
+                _mute_release->routes = copy;
+            }
 
-					if (_mute_release) {
-						_mute_release->routes = copy;
-					}
+            _session->set_mute (copy, !_route->muted());
 
-					_session->set_mute (copy, !_route->muted());
+        } else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
-				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+            /* Primary-button1 applies change to the mix group even if it is not active
+               NOTE: Primary-button2 is MIDI learn.
+            */
 
-					/* Primary-button1 applies change to the mix group even if it is not active
-					   NOTE: Primary-button2 is MIDI learn.
-					*/
+            boost::shared_ptr<RouteList> rl;
 
-					boost::shared_ptr<RouteList> rl;
+            if (ev->button == 1) { 
 
-					if (ev->button == 1) { 
+                if (_route->route_group()) {
+                    
+                    rl = _route->route_group()->route_list();
+                    
+                    if (_mute_release) {
+                        _mute_release->routes = rl;
+                    }
+                } else {
+                    rl.reset (new RouteList);
+                    rl->push_back (_route);
+                }
 
-						if (_route->route_group()) {
-							
-							rl = _route->route_group()->route_list();
-							
-							if (_mute_release) {
-								_mute_release->routes = rl;
-							}
-						} else {
-							rl.reset (new RouteList);
-							rl->push_back (_route);
-						}
+                _session->set_mute (rl, !_route->muted(), Session::rt_cleanup, true);
+            }
 
-						_session->set_mute (rl, !_route->muted(), Session::rt_cleanup, true);
-					}
+        } else {
 
-				} else {
+            /* plain click applies change to this route */
 
-					/* plain click applies change to this route */
+            boost::shared_ptr<RouteList> rl (new RouteList);
+            rl->push_back (_route);
+            
+            if (_mute_release) {
+                _mute_release->routes = rl;
+            }
 
-					boost::shared_ptr<RouteList> rl (new RouteList);
-					rl->push_back (_route);
-					
-					if (_mute_release) {
-						_mute_release->routes = rl;
-					}
+            _session->set_mute (rl, !_route->muted());
 
-					_session->set_mute (rl, !_route->muted());
-
-				}
-			}
-		}
-
+        }
 	}
 
 	return true;
@@ -387,7 +369,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 {
 	/* ignore double/triple clicks */
 
-	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS || ev->button == 2 ) {
 		return true;
 	}
 
@@ -1164,46 +1146,6 @@ RouteUI::build_solo_menu (void)
     solo_safe_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	check->show_all();
 	*/
-}
-
-void
-RouteUI::build_mute_menu(void)
-{
-	using namespace Menu_Helpers;
-
-	mute_menu = new Menu;
-	mute_menu->set_name ("ArdourContextMenu");
-
-	MenuList& items = mute_menu->items();
-
-	pre_fader_mute_check = manage (new Gtk::CheckMenuItem(_("Pre Fader Sends")));
-	init_mute_menu(MuteMaster::PreFader, pre_fader_mute_check);
-	pre_fader_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::PreFader, pre_fader_mute_check));
-	items.push_back (CheckMenuElem(*pre_fader_mute_check));
-	pre_fader_mute_check->show_all();
-
-	post_fader_mute_check = manage (new Gtk::CheckMenuItem(_("Post Fader Sends")));
-	init_mute_menu(MuteMaster::PostFader, post_fader_mute_check);
-	post_fader_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::PostFader, post_fader_mute_check));
-	items.push_back (CheckMenuElem(*post_fader_mute_check));
-	post_fader_mute_check->show_all();
-
-	listen_mute_check = manage (new Gtk::CheckMenuItem(_("Control Outs")));
-	init_mute_menu(MuteMaster::Listen, listen_mute_check);
-	listen_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::Listen, listen_mute_check));
-	items.push_back (CheckMenuElem(*listen_mute_check));
-	listen_mute_check->show_all();
-
-	main_mute_check = manage (new Gtk::CheckMenuItem(_("Main Outs")));
-	init_mute_menu(MuteMaster::Main, main_mute_check);
-	main_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::Main, main_mute_check));
-	items.push_back (CheckMenuElem(*main_mute_check));
-	main_mute_check->show_all();
-
-	//items.push_back (SeparatorElem());
-	// items.push_back (MenuElem (_("MIDI Bind"), sigc::mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
-
-	_route->mute_points_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::muting_change, this), gui_context());
 }
 
 void
