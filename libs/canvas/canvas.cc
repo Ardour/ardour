@@ -435,6 +435,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 
 		if (within_items.front() == _current_item) {
 			/* uppermost item at point is already _current_item */
+			DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("CURRENT ITEM %1/%2\n", _new_current_item->whatami(), _current_item->name));
 			return;
 		}
 	
@@ -444,6 +445,13 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 	if (_new_current_item != _current_item) {
 		deliver_enter_leave (point, state);
 	}
+
+	if (_current_item) {
+		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("CURRENT ITEM %1/%2\n", _new_current_item->whatami(), _current_item->name));
+	} else {
+		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, "--- no current item\n");
+	}
+
 }
 
 /** Deliver a series of enter & leave events based on the pointer position being at window
