@@ -46,7 +46,8 @@ class LIBGTKMM2EXT_API Fader : public Gtk::DrawingArea
 			   int min_pos_x, 
 			   int min_pos_y,
 			   int max_pos_x,
-			   int max_pos_y);
+			   int max_pos_y,
+			   bool read_only);
 
 	virtual ~Fader ();
 
@@ -96,6 +97,7 @@ class LIBGTKMM2EXT_API Fader : public Gtk::DrawingArea
 	bool _dragging;
 	float _default_value;
 	int _unity_loc;
+	bool _read_only;
 
 	void adjustment_changed ();
 	void set_adjustment_from_event (GdkEventButton *);

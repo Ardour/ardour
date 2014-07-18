@@ -357,7 +357,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	static ARDOUR_UI *theArdourUI;
 
-        int starting ();
+    int starting ();
 
 	int  ask_about_saving_session (const std::vector<std::string>& actions);
 
@@ -764,6 +764,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool click_button_clicked (GdkEventButton *);
 
 	VisibilityGroup _status_bar_visibility;
+	Gtk::Adjustment* _dsp_load_adjustment;
 
 	/** A ProcessThread so that we have some thread-local buffers for use by
 	 *  PluginEqGui::impulse_analysis ().

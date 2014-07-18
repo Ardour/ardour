@@ -80,6 +80,7 @@ ARDOUR_UI::create_editor ()
 {
 	try {
 		editor = new Editor ();
+		_dsp_load_adjustment = &editor->get_adjustment ("dsp_load_adjustment");
 	}
 
 	catch (failed_constructor& err) {

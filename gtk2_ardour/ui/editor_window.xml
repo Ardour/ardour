@@ -12,8 +12,27 @@
                         normalicon="tracks"
                         activeicon="tracks_active"
                         prelighticon="tracks_prelight"/>
-            <icon source="display_clock_mockup.png" tooltip="--------------------&#xA;This is a mockup&#xA;--------------------" />
-            <icon source="display_metrics_mockup.png" tooltip="--------------------&#xA;This is a mockup&#xA;--------------------" box.pack="end"/>
+            <icon source="display_clock_mockup.png"
+                  tooltip="--------------------&#xA;This is a mockup&#xA;--------------------" />
+            <Layout box.pack="end" width="114">
+              <Adjustment id="dsp_load_adjustment"
+                          minvalue="1"
+                          maxvalue="100"
+                          initialvalue="50"
+                          readonly="fals"/>
+              <Fader adjustment="dsp_load_adjustment"
+                     facesource="dsp_load_fader_face.png"
+                     handlesource="dsp_load_fader_handle.png"
+                     minposx="0"
+                     minposy="3"
+                     maxposx="78"
+                     maxposy="3"
+                     readonly="true"
+                     x="28"
+                     y="8"/>
+              <icon source="metrics_display.png"
+                    tooltip="--------------------&#xA;This is a mockup&#xA;--------------------"/>
+            </Layout>
             <EventBox bgnormal="#383838" box.expand="false" box.fill="false" width="420" box.padding="4">
               <EventBox bgnormal="#474747" borderwidth="1"/>
             </EventBox>

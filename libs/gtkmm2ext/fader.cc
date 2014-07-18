@@ -130,7 +130,8 @@ Fader::Fader (Gtk::Adjustment& adj,
 			  int min_pos_x, 
 			  int min_pos_y,
 			  int max_pos_x,
-			  int max_pos_y)
+			  int max_pos_y,
+			  bool read_only)
 	: adjustment (adj)
 	, _min_pos_x (min_pos_x)
 	, _min_pos_y (min_pos_y)
@@ -138,6 +139,7 @@ Fader::Fader (Gtk::Adjustment& adj,
 	, _max_pos_y (max_pos_y)
 	, _default_value (adjustment.get_value())
 	, _dragging (false)
+	, _read_only (read_only)
 {
 	PBD::Searchpath spath(ARDOUR::ardour_data_search_path());
 
@@ -180,7 +182,9 @@ Fader::Fader (Gtk::Adjustment& adj,
 
 	update_unity_position ();
 
-	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
+	if (!_read_only) {
+		add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
+	}
 
 	adjustment.signal_value_changed().connect (mem_fun (*this, &Fader::adjustment_changed));
 	adjustment.signal_changed().connect (mem_fun (*this, &Fader::adjustment_changed));
@@ -251,6 +255,10 @@ Fader::on_size_allocate (Gtk::Allocation& alloc)
 bool
 Fader::on_button_press_event (GdkEventButton* ev)
 {
+	if (_read_only) {
+		return false;
+	}
+
 	if (ev->type != GDK_BUTTON_PRESS) {
 		return true;
 	}
@@ -306,6 +314,10 @@ Fader::on_button_press_event (GdkEventButton* ev)
 bool
 Fader::on_button_release_event (GdkEventButton* ev)
 {
+	if (_read_only) {
+		return false;
+	}
+
 	if (_dragging) { //temp
 		remove_modal_grab();
 		_dragging = false;
@@ -318,9 +330,12 @@ Fader::on_button_release_event (GdkEventButton* ev)
 bool
 Fader::on_scroll_event (GdkEventScroll* ev)
 {
-	double scale;
-	bool ret = false;
+	if (_read_only) {
+		return false;
+	}
 
+	bool ret = false;
+	double scale;
 	if (ev->state & Keyboard::GainFineScaleModifier) {
 		if (ev->state & Keyboard::GainExtraFineScaleModifier) {
 			scale = 0.01;
@@ -351,6 +366,10 @@ Fader::on_scroll_event (GdkEventScroll* ev)
 bool
 Fader::on_motion_notify_event (GdkEventMotion* ev)
 {
+	if (_read_only) {
+		return false;
+	}
+
 	if (_dragging) {
 		double ev_pos_x;
 		double ev_pos_y;
@@ -412,6 +431,10 @@ Fader::on_enter_notify_event (GdkEventCrossing*)
 bool
 Fader::on_leave_notify_event (GdkEventCrossing*)
 {
+	if (_read_only) {
+		return false;
+	}
+
 	if (!_dragging) {
 		_hovering = false;
 		Keyboard::magic_widget_drop_focus();

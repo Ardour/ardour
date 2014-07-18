@@ -142,6 +142,8 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 		int maxposx = xml_property (definition, "maxposx", styles, minposx);
 		int maxposy = xml_property (definition, "maxposy", styles, minposy);
 		Gtk::Adjustment& adjustment = get_adjustment(adjustment_id.c_str());
+		bool read_only = xml_property (definition, "readonly", styles, false);
+
 		child = manage (new Gtkmm2ext::Fader(adjustment, 
 											 face_image,
 											 active_face_image,
@@ -151,7 +153,8 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 											 minposx,
 											 minposy,
 											 maxposx,
-											 maxposy));
+											 maxposy,
+											 read_only));
 	} else if (widget_type == "ADJUSTMENT") {
 		double min_value = xml_property (definition, "minvalue", styles, 0.0);
 		double max_value = xml_property (definition, "maxvalue", styles, 100.0);

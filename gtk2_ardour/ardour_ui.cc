@@ -161,27 +161,19 @@ sigc::signal<void>      ARDOUR_UI::CloseAllDialogs;
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
-	
 	, gui_object_state (new GUIObjectState)
-
 	, primary_clock (new MainClock (X_("primary"), false, X_("transport"), true, true, true, false, true))
 	, secondary_clock (new MainClock (X_("secondary"), false, X_("secondary"), true, true, false, false, true))
-
 	  /* big clock */
-
 	, big_clock (new AudioClock (X_("bigclock"), false, "big", true, true, false, false))
 	, video_timeline(0)
-
 	  /* start of private members */
-
 	, nsm (0)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
 	, first_time_engine_run (true)
 	, blink_timeout_tag (-1)
-
 	  /* transport */
-
 	, roll_controllable (new TransportControllable ("transport roll", *this, TransportControllable::Roll))
 	, stop_controllable (new TransportControllable ("transport stop", *this, TransportControllable::Stop))
 	, goto_start_controllable (new TransportControllable ("transport goto start", *this, TransportControllable::GotoStart))
@@ -189,18 +181,14 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, auto_loop_controllable (new TransportControllable ("transport auto loop", *this, TransportControllable::AutoLoop))
 	, play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection))
 	, rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable))
-
 	, auto_return_button (ArdourButton::led_default_elements)
 	, follow_edits_button (ArdourButton::led_default_elements)
 	, auto_input_button (ArdourButton::led_default_elements)
-
 	, auditioning_alert_button (_("audition"))
 	, solo_alert_button (_("solo"))
 	, feedback_alert_button (_("feedback"))
-
 	, editor_meter(0)
 	, editor_meter_peak_display()
-
 	, speaker_config_window (X_("speaker-config"), _("Speaker Configuration"))
 	, theme_manager (X_("theme-manager"), _("Theme Manager"))
 	, key_editor (X_("key-editor"), _("Key Bindings"))
@@ -217,15 +205,17 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, big_clock_window (X_("big-clock"), _("Big Clock"), boost::bind (&ARDOUR_UI::create_big_clock_window, this))
 	, audio_port_matrix (X_("audio-connection-manager"), _("Audio Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::AUDIO))
 	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
-
 	, error_log_button (_("Errors"))
-
 	, _status_bar_visibility (X_("status-bar"))
 	, _feedback_exists (false)
+	, _dsp_load_adjustment (0)
+	, editor (0)
+	, mixer (0)
+	, meterbridge (0)
+	, splash (0)
 {
 	Gtkmm2ext::init(localedir);
 
-	splash = 0;
 
 	if (theArdourUI == 0) {
 		theArdourUI = this;
@@ -237,10 +227,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	ui_config->map_parameters (pc);
 
-	editor = 0;
-	mixer = 0;
-	meterbridge = 0;
-	editor = 0;
 	_session_is_new = false;
 	session_selector_window = 0;
 	last_key_press_time = 0;
@@ -1244,6 +1230,7 @@ ARDOUR_UI::update_cpu_load ()
 	float const c = AudioEngine::instance()->get_dsp_load ();
 	snprintf (buf, sizeof (buf), _("DSP: <span foreground=\"%s\">%5.1f%%</span>"), c >= 90 ? X_("red") : X_("green"), c);
 	cpu_load_label.set_markup (buf);
+	_dsp_load_adjustment->set_value (c);
 }
 
 void
