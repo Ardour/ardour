@@ -43,6 +43,15 @@ public:
         void set_value (double v) { if (_setter (v)) { Changed(); /* EMIT SIGNAL */ } }
         double get_value () const { return _getter (); }
 
+		double internal_to_user (double i) const { return accurate_coefficient_to_dB (i);}
+		double user_to_internal (double u) const { return dB_to_coefficient(u) ;}
+
+		std::string get_user_string () const
+		{
+			char theBuf[32]; sprintf( theBuf, "%3.1f dB", accurate_coefficient_to_dB (get_value()));
+			return std::string(theBuf);
+		}
+
 private:
 	boost::function1<bool,double> _setter;
 	boost::function0<double> _getter;

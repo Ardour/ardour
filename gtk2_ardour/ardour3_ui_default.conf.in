@@ -180,7 +180,7 @@
     <Option name="waveform fill" value="ffffffff"/>
     <Option name="zero line" value="7f7f7fe0"/>
     <Option name="zoom rect" value="c6d1b26d"/>
-    <Option name="monitor knob" value="329edfff"/>
+    <Option name="monitor knob" value="555050ff"/>
     <Option name="button border" value="000000f0"/>
     <Option name="border color" value="00000000"/>
     <Option name="processor prefader: fill start" value="873c3cff"/>

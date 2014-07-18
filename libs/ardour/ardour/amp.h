@@ -90,6 +90,8 @@ public:
 		double internal_to_interface (double) const;
 		double interface_to_internal (double) const;
 		double internal_to_user (double) const;
+		double user_to_internal (double) const;
+		std::string get_user_string () const;
 
 		Amp* _amp;
 	};

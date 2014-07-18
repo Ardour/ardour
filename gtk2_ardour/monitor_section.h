@@ -23,6 +23,8 @@
 #include "gtkmm2ext/bindable_button.h"
 
 #include "ardour_button.h"
+#include "ardour_knob.h"
+#include "ardour_display.h"
 #include "axis_view.h"
 #include "level_meter.h"
 #include "route_ui.h"
@@ -74,11 +76,16 @@ class MonitorSection : public RouteUI
         typedef std::vector<ChannelButtonSet*> ChannelButtons;
         ChannelButtons _channel_buttons;
 
-        VolumeController* gain_control;
-        VolumeController* dim_control;
-        VolumeController* solo_boost_control;
-        VolumeController* solo_cut_control;
+        ArdourKnob* gain_control;
+        ArdourKnob* dim_control;
+        ArdourKnob* solo_boost_control;
+        ArdourKnob* solo_cut_control;
 
+		ArdourDisplay*  gain_display;
+		ArdourDisplay*  dim_display;
+		ArdourDisplay*  solo_boost_display;
+		ArdourDisplay*  solo_cut_display;
+		
         void populate_buttons ();
         void map_state ();
 

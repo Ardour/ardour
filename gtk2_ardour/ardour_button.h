@@ -115,7 +115,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void controllable_changed ();
 	PBD::ScopedConnection watch_connection;
 
-  private:
+  protected:
 	Glib::RefPtr<Pango::Layout> _layout;
 	Glib::RefPtr<Gdk::Pixbuf>   _pixbuf;
 	std::string                 _text;

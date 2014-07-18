@@ -154,6 +154,39 @@ ArdourCanvas::set_source_rgba (Cairo::RefPtr<Cairo::Context> context, Color colo
 		);
 }
 
+void
+ArdourCanvas::set_source_rgb_a (Cairo::RefPtr<Cairo::Context> context, Color color, float alpha)
+{
+	context->set_source_rgba (
+		((color >> 24) & 0xff) / 255.0,
+		((color >> 16) & 0xff) / 255.0,
+		((color >>  8) & 0xff) / 255.0,
+		alpha
+		);
+}
+
+void
+ArdourCanvas::set_source_rgba (cairo_t *cr, Color color)
+{
+	cairo_set_source_rgba ( cr,
+		((color >> 24) & 0xff) / 255.0,
+		((color >> 16) & 0xff) / 255.0,
+		((color >>  8) & 0xff) / 255.0,
+		((color >>  0) & 0xff) / 255.0
+		);
+}
+
+void
+ArdourCanvas::set_source_rgb_a (cairo_t *cr, Color color, float alpha)
+{
+	cairo_set_source_rgba ( cr,
+		((color >> 24) & 0xff) / 255.0,
+		((color >> 16) & 0xff) / 255.0,
+		((color >>  8) & 0xff) / 255.0,
+		alpha
+		);
+}
+
 ArdourCanvas::Distance
 ArdourCanvas::distance_to_segment_squared (Duple const & p, Duple const & p1, Duple const & p2, double& t, Duple& at)
 {
