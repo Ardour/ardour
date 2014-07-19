@@ -625,7 +625,6 @@ Meterbridge::remove_strip (MeterStrip* strip)
 		return;
 	}
 
-	list<MeterBridgeStrip>::iterator i;
 	for (list<MeterBridgeStrip>::iterator i = strips.begin(); i != strips.end(); ++i) {
 		if ( (*i).s == strip) {
 			strips.erase (i);

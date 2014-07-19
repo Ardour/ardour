@@ -15,11 +15,15 @@
             bordercolor="#C9C9C9"
             borderwidth="1 1 0 0"/>
     <HBox>
-      <VBox id="level_meter_home"
-            x="1"
-            y="36"
-            width="17"
-            height="187"/>
+      <VBox>
+        <HBox height ="10"/>
+        <VBox id="level_meter_home"
+              x="1"
+              y="36"
+              width="17"
+              height="187"/>
+        <HBox height ="13"/>
+      </VBox>
       <icon source="mixer_strip_meter_marks.png"/>
       <Fader id="gain_slider" bgnormal="#303030" bgactive="#545454"
              adjustment="gain_adjustment"

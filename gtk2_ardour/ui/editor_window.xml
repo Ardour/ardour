@@ -189,10 +189,11 @@
     </EventBox>
     <HBox>
       <EventBox id="master_bus_ui_home"/>
-      <EventBox bgnormal="#D9E99F"
-              width="100"
-              box.fill="true"
-              box.expand="true"/>
+      <EventBox id="compact_meter_bridge_home"
+                bgnormal="#383838"
+                box.expand="true"
+                box.fill="true">
+      </EventBox>
     </HBox>
     <HBox id="global_hpacker"
           box.pack="end"

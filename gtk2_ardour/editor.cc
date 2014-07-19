@@ -251,7 +251,8 @@ Editor::Editor ()
 	, global_hpacker (get_h_box ("global_hpacker"))
 	, global_vpacker (get_v_box ("global_vpacker"))
 	, inspector_home (get_container ("inspector_home"))
-	, master_bus_ui_home (get_container ("master_bus_ui_home"))
+	, _master_bus_ui_home (get_container ("master_bus_ui_home"))
+	, _compact_meter_bridge_home (get_container ("compact_meter_bridge_home"))
 	, vpacker (get_v_box ("vpacker"))
 	, _tool_marker_button (get_waves_button ("tool_marker_button"))
 	, _tool_zoom_button (get_waves_button ("tool_zoom_button"))
@@ -308,6 +309,7 @@ Editor::Editor ()
 	/* we are a singleton */
 
 	PublicEditor::_instance = this;
+	_compact_meter_bridge_home.add (_compact_meter_bridge);
 
 	_have_idled = false;
 
@@ -1301,6 +1303,7 @@ Editor::set_session (Session *t)
 	_snapshots->set_session (_session);
 	_routes->set_session (_session);
 	_locations->set_session (_session);
+	_compact_meter_bridge.set_session (_session);
 
 	if (rhythm_ferret) {
 		rhythm_ferret->set_session (_session);

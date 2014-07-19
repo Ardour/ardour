@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<CompactMeterStrip>
+  <VBox>
+      <Hbox id="level_meter_home" height="51"/>
+  </VBox>
+</CompactMeterStrip>

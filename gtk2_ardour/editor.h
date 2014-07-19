@@ -56,6 +56,7 @@
 #include "enums.h"
 #include "editor_items.h"
 #include "region_selection.h"
+#include "compact_meter_bridge.h"
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -689,9 +690,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::HBox&      global_hpacker;
 	Gtk::VBox&      global_vpacker;
 	Gtk::Container& inspector_home;
-	Gtk::Container& master_bus_ui_home;
-	Gtk::VBox&      vpacker;
+	Gtk::Container& _master_bus_ui_home;
+	Gtk::Container& _compact_meter_bridge_home;
 	MasterBusUI*    _master_bus_ui;
+	Gtk::VBox&      vpacker;
 
 	Gdk::Cursor*          current_canvas_cursor;
 	Gdk::Cursor* which_grabber_cursor ();
@@ -1905,6 +1907,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* editor-mixer strip */
 
 	MixerStrip *current_mixer_strip;
+	CompactMeterbridge _compact_meter_bridge;
 	bool show_editor_mixer_when_tracks_arrive;
 	void cms_new (boost::shared_ptr<ARDOUR::Route>);
 	void current_mixer_strip_hidden ();

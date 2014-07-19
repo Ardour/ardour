@@ -179,7 +179,7 @@ Editor::create_editor_mixer ()
 	current_mixer_strip->Hiding.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_hidden));
 	current_mixer_strip->set_embedded (true);
 	_master_bus_ui = new MasterBusUI (*this, _session);
-	master_bus_ui_home.add (*_master_bus_ui);
+	_master_bus_ui_home.add (*_master_bus_ui);
 }
 
 void

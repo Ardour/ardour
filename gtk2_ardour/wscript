@@ -155,6 +155,8 @@ gtk2_ardour_sources = [
 		'master_bus_ui.cc',
         'meterbridge.cc',
         'meter_strip.cc',
+		'compact_meter_strip.cc',
+		'compact_meter_bridge.cc',
         'meter_patterns.cc',
         'monitor_section.cc',
         'mono_panner.cc',
