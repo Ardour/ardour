@@ -185,9 +185,10 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		set_color (unique_random_color());
 	}
 
-	if (self_destruct) {
-		rp->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::self_delete, this), gui_context());
-	}
+	rp->DropReferences.connect (route_connections, 
+								invalidator (*this),
+								boost::bind (self_destruct ? &RouteUI::self_delete : &RouteUI::reset,
+											 this), gui_context());
 
 	mute_button.set_controllable (_route->mute_control());
 	solo_button.set_controllable (_route->solo_control());
