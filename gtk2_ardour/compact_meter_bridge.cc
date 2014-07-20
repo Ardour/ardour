@@ -180,7 +180,7 @@ CompactMeterbridge::remove_strip (CompactMeterStrip* strip)
 	}
 
 	for (list<CompactMeterStrip*>::iterator i = _strips.begin(); i != _strips.end(); ++i) {
-		if ( (*i) == strip) {
+		if ((*i) == strip) {
 			_strips.erase (i);
 			break;
 		}

@@ -43,9 +43,10 @@ class CompactMeterStrip :public Gtk::EventBox, public WavesUI
 	void self_delete ();
 
   private:
-	Gtk::Box&       level_meter_home;
-	LevelMeterHBox level_meter;
-	PBD::ScopedConnectionList route_connections;
+	Gtk::Box&      _level_meter_home;
+	LevelMeterHBox _level_meter;
+	Gtk::EventBox& _record_indicator;
+	PBD::ScopedConnectionList _route_connections;
 	static int __meter_width;
 	void meter_configuration_changed (ARDOUR::ChanCount);
 	void update_rec_display ();

@@ -504,7 +504,7 @@ FastMeter::vertical_size_allocate (Gtk::Allocation &alloc)
 		pixwidth  = request_width;
 	}
 
-	DrawingArea::on_size_allocate (alloc);
+	CairoWidget::on_size_allocate (alloc);
 }
 
 void
@@ -529,31 +529,28 @@ FastMeter::horizontal_size_allocate (Gtk::Allocation &alloc)
 		pixheight  = request_height;
 	}
 
-	DrawingArea::on_size_allocate (alloc);
+	CairoWidget::on_size_allocate (alloc);
 }
 
-bool
-FastMeter::on_expose_event (GdkEventExpose* ev)
+void
+FastMeter::render (cairo_t* cr)
 {
 	if (orientation == Vertical) {
-		return vertical_expose (ev);
+		vertical_render (cr);
 	} else {
-		return horizontal_expose (ev);
+		horizontal_render (cr);
 	}
 }
 
-bool
-FastMeter::vertical_expose (GdkEventExpose* ev)
+void
+FastMeter::vertical_render (cairo_t* cr)
 {
-	Glib::RefPtr<Gdk::Window> win = get_window ();
 	gint top_of_meter;
 	GdkRectangle intersection;
 	GdkRectangle background;
 
-	cairo_t* cr = gdk_cairo_create (get_window ()->gobj());
-
-	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cairo_clip (cr);
+	//cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	//cairo_clip (cr);
 
 	//cairo_set_source_rgb (cr, 0, 0, 0); // black
 	//rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
@@ -572,19 +569,22 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	background.width = pixrect.width;
 	background.height = pixheight - top_of_meter;
 
-	if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
-		cairo_set_source (cr, bgpattern->cobj());
-		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
-		cairo_fill (cr);
-	}
+	// Switching to CAIRO we would like to draw on the container's bkg.
+	//if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
+	//	cairo_set_source (cr, bgpattern->cobj());
+	//	cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
+	//	cairo_fill (cr);
+	//}
 
-	if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
+	// MEMO: Normaly MATURE OS clips so called invalidated rects itself making APP free of
+	//       heavy operations which OS does with graphic HW
+	//if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
 		// draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
 		//cairo_set_source (cr, fgpattern->cobj());
 		cairo_set_source_rgba (cr, 0.69, 0.69, 0.69, 1);
-		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
+		cairo_rectangle (cr, pixrect.x, pixrect.y, pixrect.width, pixrect.height);
 		cairo_fill (cr);
-	}
+	//}
 
 	// draw peak bar
 
@@ -611,24 +611,17 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 		last_peak_rect.width = 0;
 		last_peak_rect.height = 0;
 	}
-
-	cairo_destroy (cr);
-
-	return TRUE;
 }
 
-bool
-FastMeter::horizontal_expose (GdkEventExpose* ev)
+void
+FastMeter::horizontal_render (cairo_t* cr)
 {
-	Glib::RefPtr<Gdk::Window> win = get_window ();
 	gint right_of_meter;
 	GdkRectangle intersection;
 	GdkRectangle background;
 
-	cairo_t* cr = gdk_cairo_create (get_window ()->gobj());
-
-	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cairo_clip (cr);
+	//cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	//cairo_clip (cr);
 
 	//cairo_set_source_rgb (cr, 0, 0, 0); // black
 	//rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
@@ -646,17 +639,17 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 	background.width = pixwidth - right_of_meter;
 	background.height = pixheight;
 
-	if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
-		cairo_set_source (cr, bgpattern->cobj());
-		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
-		cairo_fill (cr);
-	}
+	//if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
+	//	cairo_set_source (cr, bgpattern->cobj());
+	//	cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
+	//	cairo_fill (cr);
+	//}
 
-	if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
-		cairo_set_source (cr, fgpattern->cobj());
-		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
-		cairo_fill (cr);
-	}
+	//if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
+	//	cairo_set_source (cr, fgpattern->cobj());
+	//	cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
+	//	cairo_fill (cr);
+	//}
 
 	// draw peak bar
 
@@ -684,10 +677,6 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 		last_peak_rect.width = 0;
 		last_peak_rect.height = 0;
 	}
-
-	cairo_destroy (cr);
-
-	return TRUE;
 }
 
 void

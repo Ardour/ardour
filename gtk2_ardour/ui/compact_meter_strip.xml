@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<CompactMeterStrip>
-  <VBox>
-      <Hbox id="level_meter_home" height="51"/>
+<CompactMeterStrip bgnormal="#353535">
+  <VBox spacing="6">
+    <Hbox id="level_meter_home"
+          height="51"/>
+    <EventBox id="record_indicator"
+              bgnormal="#000000"
+              bgactive="#FF0000"
+              height="2"/>
   </VBox>
 </CompactMeterStrip>

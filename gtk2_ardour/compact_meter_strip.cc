@@ -17,6 +17,7 @@
 */
 
 #include "ardour/meter.h"
+#include "ardour/track.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "meter_patterns.h"
@@ -38,24 +39,42 @@ CompactMeterStrip::CompactMeterStrip (Session* sess, boost::shared_ptr<ARDOUR::R
 	: EventBox()
 	, WavesUI ("compact_meter_strip.xml", *this)
 	, _route(rt)
-	, level_meter_home (get_box ("level_meter_home"))
-	, level_meter (sess)
+	, _level_meter_home (get_box ("level_meter_home"))
+	, _level_meter (sess)
+	, _record_indicator (get_event_box ("record_indicator"))
 {
-	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
+	const XMLNode& definition = *xml_tree ()->root ();
+	XMLNodeMap nothing;
+	set_attributes (*this, *xml_tree ()->root (), nothing);
 
-	level_meter.set_meter (_route->shared_peak_meter().get());
-	level_meter.clear_meters();
-	level_meter.set_type (_route->meter_type());
-	level_meter.setup_meters (__meter_width, __meter_width);
-	level_meter_home.add (level_meter);
+	_level_meter.set_meter (_route->shared_peak_meter().get());
+	_level_meter.clear_meters();
+	_level_meter.set_type (_route->meter_type());
+	_level_meter.setup_meters (__meter_width, __meter_width);
+	_level_meter_home.add (_level_meter);
 
-	_route->shared_peak_meter()->ConfigurationChanged.connect (
-			route_connections, invalidator (*this), boost::bind (&CompactMeterStrip::meter_configuration_changed, this, _1), gui_context()
-			);
+	_route->shared_peak_meter()->ConfigurationChanged.connect (_route_connections,
+		                                                       invalidator (*this),
+															   boost::bind (&CompactMeterStrip::meter_configuration_changed, 
+															                this,
+																			_1), 
+															   gui_context());
 
 	meter_configuration_changed (_route->shared_peak_meter()->input_streams ());
 
-	_route->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&CompactMeterStrip::self_delete, this), gui_context());
+	_route->DropReferences.connect (_route_connections,
+									invalidator (*this),
+									boost::bind (&CompactMeterStrip::self_delete,
+												 this),
+									gui_context());
+	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_route);
+	if (t) {
+		t->RecordEnableChanged.connect (_route_connections,
+										invalidator (*this),
+										boost::bind (&CompactMeterStrip::update_rec_display,
+													 this), gui_context());
+		update_rec_display ();
+	}
 }
 
 CompactMeterStrip::~CompactMeterStrip ()
@@ -72,17 +91,18 @@ CompactMeterStrip::self_delete ()
 void
 CompactMeterStrip::update_rec_display ()
 {
+	_record_indicator.set_state ((_route && _route->record_enabled ()) ? Gtk::STATE_ACTIVE : Gtk::STATE_NORMAL);
 }
 
 void
 CompactMeterStrip::fast_update ()
 {
-	level_meter.update_meters();
+	_level_meter.update_meters();
 }
 
 void
 CompactMeterStrip::meter_configuration_changed (ChanCount c)
 {
-	level_meter.setup_meters (__meter_width, __meter_width);
+	_level_meter.setup_meters (__meter_width, __meter_width);
 }
 

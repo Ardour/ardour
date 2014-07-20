@@ -6,7 +6,7 @@
       <icon source="meter_bridge_level_scale.png"/>
     </VBox>
     <VBox>
-      <Hbox height="13"/>
+      <Hbox height="10"/>
       <Hbox id="compact_meter_strips_home" spacing="2"/>
     </VBox>
   </HBox>

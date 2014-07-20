@@ -646,12 +646,10 @@ Editor::Editor ()
 	Glib::PropertyProxy<int> proxy = edit_pane.property_position();
 	proxy.signal_changed().connect (bind (sigc::ptr_fun (pane_size_watcher), static_cast<Paned*> (&edit_pane)));
 
-	top_hbox.pack_start (toolbar_frame);
 
 	HBox *hbox = manage (new HBox);
 	hbox->pack_start (edit_pane, true, true);
 
-	global_vpacker.pack_start (top_hbox, false, false);
 	global_vpacker.pack_start (*hbox, true, true);
 
 	set_name ("EditorWindow");
@@ -3003,15 +3001,6 @@ Editor::setup_toolbar ()
 		_mouse_mode_tearoff->set_can_be_torn_off (false);
 	}
 
-	_mouse_mode_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-	                                                 &_mouse_mode_tearoff->tearoff_window()));
-	_mouse_mode_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-	                                                 &_mouse_mode_tearoff->tearoff_window(), 1));
-	_mouse_mode_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-	                                                 &_mouse_mode_tearoff->tearoff_window()));
-	_mouse_mode_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-	                                                  &_mouse_mode_tearoff->tearoff_window(), 1));
-
 	/* Zoom */
 
 	_zoom_box.set_spacing (2);
@@ -3085,14 +3074,6 @@ Editor::setup_toolbar ()
 	if (!ARDOUR::Profile->get_trx()) {
 		_zoom_tearoff = manage (new TearOff (_zoom_box));
 		
-		_zoom_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-							   &_zoom_tearoff->tearoff_window()));
-		_zoom_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-							   &_zoom_tearoff->tearoff_window(), 0));
-		_zoom_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-							   &_zoom_tearoff->tearoff_window()));
-		_zoom_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-							    &_zoom_tearoff->tearoff_window(), 0));
 	} 
 
 	snap_box.set_spacing (2);
@@ -3143,15 +3124,6 @@ Editor::setup_toolbar ()
 	if (Profile->get_sae()) {
 		_tools_tearoff->set_can_be_torn_off (false);
 	}
-
-	_tools_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-	                                            &_tools_tearoff->tearoff_window()));
-	_tools_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-	                                            &_tools_tearoff->tearoff_window(), 0));
-	_tools_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-	                                            &_tools_tearoff->tearoff_window()));
-	_tools_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-	                                             &_tools_tearoff->tearoff_window(), 0));
 
 	toolbar_hbox.set_spacing (10);
 	toolbar_hbox.set_border_width (1);
@@ -3926,24 +3898,6 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 		}
 
 		done = (Pane) (done | Vertical);
-	}
-}
-
-void
-Editor::detach_tearoff (Box* /*b*/, Window* /*w*/)
-{
-	if ((_tools_tearoff->torn_off() || !_tools_tearoff->visible()) && 
-	    (_mouse_mode_tearoff->torn_off() || !_mouse_mode_tearoff->visible()) && 
-	    (_zoom_tearoff && (_zoom_tearoff->torn_off() || !_zoom_tearoff->visible()))) {
-		top_hbox.remove (toolbar_frame);
-	}
-}
-
-void
-Editor::reattach_tearoff (Box* /*b*/, Window* /*w*/, int32_t /*n*/)
-{
-	if (toolbar_frame.get_parent() == 0) {
-		top_hbox.pack_end (toolbar_frame);
 	}
 }
 

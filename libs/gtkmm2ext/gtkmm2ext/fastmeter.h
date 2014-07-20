@@ -24,14 +24,14 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <cairomm/pattern.h>
-#include <gtkmm/drawingarea.h>
 #include <gdkmm/pixbuf.h>
 
+#include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/visibility.h"
 
 namespace Gtkmm2ext {
 
-class LIBGTKMM2EXT_API FastMeter : public Gtk::DrawingArea {
+class LIBGTKMM2EXT_API FastMeter : public CairoWidget {
   public:
 	enum Orientation {
 		Horizontal,
@@ -67,7 +67,8 @@ class LIBGTKMM2EXT_API FastMeter : public Gtk::DrawingArea {
 	bool get_highlight () { return highlight; }
 
 protected:
-	bool on_expose_event (GdkEventExpose*);
+	//bool on_expose_event (GdkEventExpose*);
+	void render (cairo_t* cr);
 	void on_size_request (GtkRequisition*);
 	void on_size_allocate (Gtk::Allocation&);
 private:
@@ -96,12 +97,12 @@ private:
 	float current_user_level;
 	bool highlight;
 
-	bool vertical_expose (GdkEventExpose*);
+	void vertical_render (cairo_t* cr);
 	void vertical_size_request (GtkRequisition*);
 	void vertical_size_allocate (Gtk::Allocation&);
 	void queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>&, float);
 
-	bool horizontal_expose (GdkEventExpose*);
+	void horizontal_render (cairo_t* cr);
 	void horizontal_size_request (GtkRequisition*);
 	void horizontal_size_allocate (Gtk::Allocation&);
 	void queue_horizontal_redraw (const Glib::RefPtr<Gdk::Window>&, float);

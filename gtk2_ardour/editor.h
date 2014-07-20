@@ -959,7 +959,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	std::vector<ARDOUR::framepos_t> region_boundary_cache;
 	void build_region_boundary_cache ();
 
-	Gtk::HBox           top_hbox;
 	Gtk::HBox           bottom_hbox;
 
 	Gtk::Table          edit_packer;
@@ -1912,8 +1911,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void cms_new (boost::shared_ptr<ARDOUR::Route>);
 	void current_mixer_strip_hidden ();
 
-	void detach_tearoff (Gtk::Box* b, Gtk::Window* w);
-	void reattach_tearoff (Gtk::Box* b, Gtk::Window* w, int32_t n);
 #ifdef GTKOSX
 	void ensure_all_elements_drawn ();
 #endif
