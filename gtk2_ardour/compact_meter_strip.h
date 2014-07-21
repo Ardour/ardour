@@ -27,7 +27,7 @@ namespace ARDOUR {
 	class Session;
 }
 
-class CompactMeterStrip :public Gtk::EventBox, public WavesUI
+class CompactMeterStrip : public Gtk::EventBox, public WavesUI
 {
   public:
 	CompactMeterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
