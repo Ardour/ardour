@@ -41,6 +41,7 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 
   public:
 	WavesUI (const std::string& layout_script_file, Gtk::Container& root);
+	virtual ~WavesUI () {}
 
 	Gtk::Adjustment& get_adjustment (const char* id);
 	Gtk::Container& get_container (const char* id);
