@@ -1800,20 +1800,31 @@ MixerStrip::update_inspector_info_panel ()
     
     // Input label
     string input_text;
+    
+    AutoConnectOption auto_connection_options;
+    auto_connection_options = Config->get_output_auto_connect();
+    
 	PortSet& in_ports (_route->input()->ports() );
     
-	for (PortSet::iterator i = in_ports.begin(); i != in_ports.end(); ++i)
+    string track_name = _route->name();
+    
+    if( track_name != "master")
     {
-        vector<string> connections_string;
-        i->get_connections(connections_string);
-
-        for(unsigned int j = 0; j < connections_string.size(); ++j)
+        for (PortSet::iterator i = in_ports.begin(); i != in_ports.end(); ++i)
         {
-            if( connections_string[j].find("system:capture:") != string::npos )
-                connections_string[j].erase(0, 15);
-            
-            input_text += connections_string[j] + " ";
+            vector<string> connections_string;
+            i->get_connections(connections_string);
+
+            for(unsigned int j = 0; j < connections_string.size(); ++j)
+            {
+                if( connections_string[j].find("system:capture:") != string::npos )
+                    connections_string[j].erase(0, 15);
+                
+                input_text += connections_string[j] + " ";
+            }
         }
+    } else {
+        input_text = track_name; // track_name = "master"
     }
     
     input_text = "In " + input_text;
@@ -1823,19 +1834,50 @@ MixerStrip::update_inspector_info_panel ()
     // Output label
     string output_text;
     PortSet& out_ports (_route->output()->ports() );
-
-	for (PortSet::iterator i = out_ports.begin(); i != out_ports.end(); ++i)
+    
+    if( track_name != "master")
     {
-        vector<string> connections_string;
-        i->get_connections(connections_string);
-        
-        for(unsigned int j = 0; j < connections_string.size(); ++j)
+        // if multi out mode
+        if( auto_connection_options == AutoConnectPhysical )
         {
-            if( connections_string[j].find("system:playback:") != string::npos )
-                connections_string[j].erase(0, 16);
-            
-            output_text += connections_string[j] + " ";
+            for (PortSet::iterator i = out_ports.begin(); i != out_ports.end(); ++i)
+            {
+                vector<string> connections_string;
+                i->get_connections(connections_string);
+                
+                for(unsigned int j = 0; j < connections_string.size(); ++j)
+                {
+                    if( connections_string[j].find("system:playback:") != string::npos )
+                        connections_string[j].erase(0, 16);
+                    
+                    output_text += connections_string[j] + " ";
+                    
+                    if( j == 1 )
+                        output_text = "\n" + output_text;
+                    if( j > 1 )
+                        output_text += "\n";
+                }
+            }
+        } else { // stereo out mode
+            output_text = "Master Bus";
         }
+        
+    } else {
+        
+        for (PortSet::iterator i = out_ports.begin(); i != out_ports.end(); ++i)
+        {
+            vector<string> connections_string;
+            i->get_connections(connections_string);
+            
+            for(unsigned int j = 0; j < connections_string.size(); ++j)
+            {
+                if( connections_string[j].find("system:playback:") != string::npos )
+                    connections_string[j].erase(0, 16);
+                
+                output_text += connections_string[j] + " ";
+            }
+        }
+
     }
     
     output_text = "Out " + output_text;
