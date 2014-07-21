@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis
+	Copyright (C) 2014 Waves Audio Ltd.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@
 #include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/utils.h>
 
+#include "meter_patterns.h"
 #include "ardour/amp.h"
 #include "ardour/meter.h"
 #include "ardour/event_type_map.h"
@@ -87,43 +88,71 @@ using namespace Gtk;
 using namespace Editing;
 using namespace std;
 using std::list;
+using namespace ArdourMeter;
 
+int MasterBusUI::__meter_width = 6;
 PBD::Signal1<void,MasterBusUI*> MasterBusUI::CatchDeletion;
 
-MasterBusUI::MasterBusUI (PublicEditor& ed,
-						  Session* sess)
-	: AxisView (sess)
-	, RouteUI (sess, "master_ui.xml")
-	, peak_display_button (get_waves_button ("peak_display_button"))
-	, level_meter_home (get_box ("level_meter_home"))
+MasterBusUI::MasterBusUI (Session* sess)
+	: WavesUI ("master_ui.xml", *this)
+	, _max_peak (minus_infinity())
+	, _peak_treshold (xml_property(*xml_tree()->root(), "peaktreshold", -144.4)) // Think about having it in config
+	, _level_meter_home (get_box ("level_meter_home"))
+	, _level_meter (sess)
+	, _peak_display_button (get_waves_button ("peak_display_button"))
+	, _master_mute_button (get_waves_button ("master_mute_button"))
+	, _clear_solo_button (get_waves_button ("clear_solo_button"))
+	, _global_rec_button (get_waves_button ("global_rec_button"))
 {
-	level_meter = new LevelMeterHBox(sess);
-	//level_meter->ButtonRelease.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_release, this, _1));
-	//level_meter->MeterTypeChanged.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::meter_type_changed, this, _1));
-	level_meter_home.pack_start (*level_meter, true, true);
-	peak_display_button.unset_flags (Gtk::CAN_FOCUS);
+	_level_meter_home.pack_start (_level_meter, true, true);
+	_peak_display_button.unset_flags (Gtk::CAN_FOCUS);
+	_master_mute_button.unset_flags (Gtk::CAN_FOCUS);
+	_clear_solo_button.unset_flags (Gtk::CAN_FOCUS);
+	_global_rec_button.unset_flags (Gtk::CAN_FOCUS);
+
+	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &MasterBusUI::reset_peak_display));
+	ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &MasterBusUI::reset_route_peak_display));
+	ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &MasterBusUI::reset_group_peak_display));
+
+	_peak_display_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_peak_display_button));
+	_master_mute_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_master_mute_button));
+	_clear_solo_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_clear_solo_button));
+	_global_rec_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_global_rec_button));
+
 }
 
 MasterBusUI::~MasterBusUI ()
 {
-	if (level_meter) {
-		delete level_meter;
-		CatchDeletion (this);
-	}
+	CatchDeletion (this);
 }
 
 void
 MasterBusUI::set_route (boost::shared_ptr<Route> rt)
 {
-	level_meter->set_meter (rt->shared_peak_meter().get());
-	level_meter->clear_meters();
-	level_meter->set_type (rt->meter_type());
-	level_meter->setup_meters (6, 6);
-    RouteUI::set_route(rt);
+	reset ();
+	_route = rt;
+	_level_meter.set_meter (_route->shared_peak_meter().get());
+	_level_meter.clear_meters();
+	_level_meter.set_type (_route->meter_type());
+	_level_meter.setup_meters (__meter_width, __meter_width);
+	_route->shared_peak_meter()->ConfigurationChanged.connect (_route_connections,
+		                                                       invalidator (*this),
+															   boost::bind (&MasterBusUI::meter_configuration_changed, 
+															                this,
+																			_1), 
+															   gui_context());
+	_route->DropReferences.connect (_route_connections,
+									invalidator (*this),
+									boost::bind (&MasterBusUI::reset,
+												 this),
+									gui_context());
 }
 
-void MasterBusUI::set_button_names ()
+void
+MasterBusUI::reset ()
 {
+	_route_connections.drop_connections ();
+	_route = boost::shared_ptr<ARDOUR::Route>(); // It's to have it "false"
 }
 
 void
@@ -135,20 +164,70 @@ MasterBusUI::fast_update ()
 		if (sz.height == 0) {
 			return;
 		}
-		float mpeak = level_meter->update_meters();
-/*
-		if (mpeak > max_peak) {
-			max_peak = mpeak;
+		float mpeak = _level_meter.update_meters();
+		if (mpeak > _max_peak) {
+			_max_peak = mpeak;
 			if (mpeak >= Config->get_meter_peak()) {
-				peak_display.set_name ("meterbridge peakindicator on");
+				_peak_display_button.set_active_state (Gtkmm2ext::ExplicitActive);
+			}
+			char buf[32];
+			if (mpeak <= _peak_treshold) {
+				_peak_display_button.set_text ("- inf");
+			} else {
+				snprintf (buf, sizeof(buf), "%.1f", mpeak);
+				_peak_display_button.set_text (buf);
 			}
 		}
- */
+ 	}
+}
+
+void
+MasterBusUI::meter_configuration_changed (ChanCount c)
+{
+	_level_meter.setup_meters (__meter_width, __meter_width);
+}
+
+void
+MasterBusUI::reset_peak_display ()
+{
+	_level_meter.clear_meters();
+	_max_peak = -INFINITY;
+	_peak_display_button.set_text (_("- inf"));
+	_peak_display_button.set_active_state(Gtkmm2ext::Off);
+}
+
+void
+MasterBusUI::reset_route_peak_display (Route* route)
+{
+	if (_route && _route.get() == route) {
+		reset_peak_display ();
 	}
 }
 
-std::string
-MasterBusUI::state_id () const
+void
+MasterBusUI::reset_group_peak_display (RouteGroup* group)
 {
-	return string_compose ("master %1", _route->id().to_s());
+	if (_route && group == _route->route_group()) {
+		reset_peak_display ();
+	}
+}
+
+void 
+MasterBusUI::on_peak_display_button (WavesButton*)
+{
+	if (_route) {
+		ResetRoutePeakDisplays (_route.get());
+	}
+}
+
+void MasterBusUI::on_master_mute_button (WavesButton*)
+{
+}
+
+void MasterBusUI::on_clear_solo_button (WavesButton*)
+{
+}
+
+void MasterBusUI::on_global_rec_button (WavesButton*)
+{
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis
+	Copyright (C) 2014 Waves Audio Ltd.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,47 +42,40 @@
 #include "enums.h"
 #include "gain_meter.h"
 
-namespace ARDOUR {
-	class Session;
-	class Region;
-	class RouteGroup;
-	class IOProcessor;
-	class Processor;
-	class Location;
-	class Playlist;
-}
-
-
-class PublicEditor;
-class RegionView;
-class StreamView;
-class Selection;
-class RegionSelection;
-class Selectable;
-class AutomationTimeAxisView;
-class AutomationLine;
-class ProcessorAutomationLine;
-class TimeSelection;
-class RouteGroupMenu;
-
-class MasterBusUI : public RouteUI
+class MasterBusUI : public Gtk::EventBox, public WavesUI
 {
 public:
- 	MasterBusUI (PublicEditor&, 
-				 ARDOUR::Session*);
+ 	MasterBusUI (ARDOUR::Session*);
  	virtual ~MasterBusUI ();
 
     void fast_update ();
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
-	virtual void set_button_names ();
-	virtual std::string state_id () const;
-
 	static PBD::Signal1<void,MasterBusUI*> CatchDeletion;
 
 private:
-	Gtk::Box& level_meter_home;
-	LevelMeterHBox* level_meter;
-	WavesButton& peak_display_button;
+	static int __meter_width;
+	float _max_peak;
+	float _peak_treshold;
+
+ 	void reset ();
+	void meter_configuration_changed (ARDOUR::ChanCount);
+	void reset_peak_display ();
+	void reset_route_peak_display (ARDOUR::Route* route);
+	void reset_group_peak_display (ARDOUR::RouteGroup* group);
+	void on_peak_display_button (WavesButton*);
+	void on_master_mute_button (WavesButton*);
+	void on_clear_solo_button (WavesButton*);
+	void on_global_rec_button (WavesButton*);
+
+	boost::shared_ptr<ARDOUR::Route> _route;
+	PBD::ScopedConnectionList _route_connections;
+
+	Gtk::Box& _level_meter_home;
+	LevelMeterHBox _level_meter;
+	WavesButton& _peak_display_button;
+	WavesButton& _master_mute_button;
+	WavesButton& _clear_solo_button;
+	WavesButton& _global_rec_button;
 };
 
 #endif /* __tracks_master_bus_ui_h__ */
