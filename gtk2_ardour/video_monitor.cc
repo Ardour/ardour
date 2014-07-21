@@ -136,15 +136,17 @@ VideoMonitor::open (std::string filename)
 	process->write_to_stdin("window ontop on\n");
 	process->write_to_stdin("set seekmode 1\n");
 	/* override bitwise flags -- see xjadeo.h
-	 * 0x01 : ignore 'q', ESC  / quite
-	 * 0x02 : ignore "window closed by WM" / quit
-	 * 0x04 : (osx only) menu-exit / quit
-	 * 0x08 : ignore mouse-button 1 -- resize
-	 * 0x10 : no A/V offset
-	 * 0x20 : don't use jack-session
-	 * 0x40 : no jack-transport control play/pause/rewind
+	 * 0x0001 : ignore 'q', ESC  / quit
+	 * 0x0002 : ignore "window closed by WM" / quit
+	 * 0x0004 : (osx only) menu-exit / quit
+	 * 0x0008 : ignore mouse-button 1 -- resize
+	 * 0x0010 : no A/V offset control with keyboard
+	 * 0x0020 : don't use jack-session
+	 * 0x0040 : disable jack transport control
+	 * 0x0080 : disallow sync source change (OSX menu)
+	 * 0x0100 : disallow file open (OSX menu, X11 DnD)
 	 */
-	process->write_to_stdin("set override 120\n");
+	process->write_to_stdin("set override 504\n");
 	process->write_to_stdin("notify keyboard\n");
 	process->write_to_stdin("notify settings\n");
 	process->write_to_stdin("window letterbox on\n");
