@@ -259,6 +259,7 @@ Editor::Editor ()
 	, _tool_arrow_button (get_waves_button ("tool_arrow_button"))
 	, _temporal_zoom_adjustment (get_adjustment ("temporal_zoom_adjustment"))
 	, _vertical_zoom_adjustment (get_adjustment ("vertical_zoom_adjustment"))
+    , _vertical_zoom_fader (get_fader ("vertical_zoom_fader"))
 #ifdef TOP_MENUBAR
 	/*
 	 * This is needed for OS X primarily
@@ -2935,6 +2936,22 @@ Editor::snap_to_internal (framepos_t& start, int32_t direction, bool for_mark)
 	}
 }
 
+bool
+Editor::vertical_fader_pressed(GdkEventButton* ev)
+{
+    if (Keyboard::modifier_state_equals (ev->state, Keyboard::Level4Modifier)) {
+    
+        for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+            (*i)->set_height ( 2*22 ); // set height to default value 2*22 pix
+        }
+        
+        _vertical_zoom_adjustment.set_value(2);
+        
+        return true; // do not propagate this event
+    }
+    
+    return false; // propagate this event
+}
 
 void
 Editor::setup_toolbar ()
@@ -3042,6 +3059,8 @@ Editor::setup_toolbar ()
 		_temporal_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::temporal_zoom_by_slider));
 		_vertical_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::vertical_zoom_by_slider));
 		ZoomChanged.connect (sigc::mem_fun (*this, &Editor::update_temporal_zoom_slider));
+        
+        _vertical_zoom_fader.signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::vertical_fader_pressed), false);
 	}
 
 	/* Track zoom buttons */

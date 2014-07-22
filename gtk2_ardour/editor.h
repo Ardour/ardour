@@ -37,6 +37,7 @@
 #include "gtkmm2ext/dndtreeview.h"
 #include "gtkmm2ext/stateful_button.h"
 #include "gtkmm2ext/bindings.h"
+#include "gtkmm2ext/fader.h"
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
@@ -1614,6 +1615,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	WavesButton& _tool_zoom_button;
 	Gtk::Adjustment& _temporal_zoom_adjustment;
 	Gtk::Adjustment& _vertical_zoom_adjustment;
+    Gtkmm2ext::Fader& _vertical_zoom_fader;
 
 	ArdourButton mouse_timefx_button;
 	ArdourButton mouse_audition_button;
@@ -1675,6 +1677,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtkmm2ext::TearOff* _zoom_tearoff;
 	void                zoom_adjustment_changed();
 
+    bool vertical_fader_pressed(GdkEventButton* ev);
 	void setup_toolbar ();
 
 	void setup_tooltips ();

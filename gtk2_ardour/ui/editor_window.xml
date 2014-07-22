@@ -154,7 +154,8 @@
                           initialvalue="1"
                           step="1"
                           pageincrement="1"/>
-              <Fader adjustment="vertical_zoom_adjustment"
+              <Fader id="vertical_zoom_fader"
+                     adjustment="vertical_zoom_adjustment"
                      facesource="vertical_zoom_fader_face.png"
                      handlesource="zoom_fader_handle.png"
                      activehandlesource="zoom_fader_handle_active.png"
