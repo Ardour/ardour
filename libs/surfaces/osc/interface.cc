@@ -46,15 +46,15 @@ probe_osc_protocol (ControlProtocolDescriptor* /*descriptor*/)
 }
 
 static ControlProtocolDescriptor osc_descriptor = {
-	name : "Open Sound Control (OSC)",
-	id : "uri://ardour.org/surfaces/osc:0",
-	ptr : 0,
-	module : 0,
-	mandatory : 0,
-	supports_feedback : true,
-	probe : probe_osc_protocol,
-	initialize : new_osc_protocol,
-	destroy : delete_osc_protocol
+	/*name :              */   "Open Sound Control (OSC)",
+	/*id :                */   "uri://ardour.org/surfaces/osc:0",
+	/*ptr :               */   0,
+	/*module :            */   0,
+	/*mandatory :         */   0,
+	/*supports_feedback : */   true,
+	/*probe :             */   probe_osc_protocol,
+	/*initialize :        */   new_osc_protocol,
+	/*destroy :           */   delete_osc_protocol
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &osc_descriptor; }
