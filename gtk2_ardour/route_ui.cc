@@ -432,9 +432,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 						_session->set_just_one_solo (_route, true);
 					}
 
-				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 
-					// shift-click: toggle solo isolated status
+					// control-click (SecondaryModifier): toggle solo isolated status
 
 					_route->set_solo_isolated (!_route->solo_isolated(), this);
 					delete _solo_release;
