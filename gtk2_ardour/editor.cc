@@ -2939,7 +2939,16 @@ Editor::snap_to_internal (framepos_t& start, int32_t direction, bool for_mark)
 bool
 Editor::vertical_fader_pressed(GdkEventButton* ev)
 {
-    if (Keyboard::modifier_state_equals (ev->state, Keyboard::Level4Modifier)) {
+    int alt_modifier;
+#ifdef __APPLE__
+    alt_modifier = Keyboard::Level4Modifier;
+#endif
+    
+#ifdef _WIN32
+    alt_modifier = Keyboard::SecondaryModifier;
+#endif
+    
+    if (Keyboard::modifier_state_equals (ev->state, alt_modifier)) {
     
         for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
             (*i)->set_height ( 2*22 ); // set height to default value 2*22 pix
