@@ -335,6 +335,13 @@ ArdourKnob::on_button_press_event (GdkEventButton *ev)
 bool
 ArdourKnob::on_button_release_event (GdkEventButton *ev)
 {
+	if ( (_grabbed_y == ev->y) && Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {  //no move, shift-click sets to default
+		boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
+		if (!c) return false;
+		c->set_value (c->normal());
+        return true;
+	}
+
 	_grabbed = false;
 	unset_active_state ();
 

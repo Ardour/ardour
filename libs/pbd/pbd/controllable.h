@@ -103,6 +103,7 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 
         virtual double lower() const { return 0.0; }
         virtual double upper() const { return 1.0; }
+        virtual double normal() const { return 0.0; }  //the default value
 
 	Flag flags() const { return _flags; }
 	void set_flags (Flag f);

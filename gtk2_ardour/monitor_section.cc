@@ -192,6 +192,7 @@ MonitorSection::MonitorSection (Session* s)
 		solo_cut_display->add_controllable_preset("-6 dB", -6.0);
 		solo_cut_display->add_controllable_preset("-12 dB", -12.0);
 		solo_cut_display->add_controllable_preset("-20 dB", -20.0);
+		solo_cut_display->add_controllable_preset("OFF", -1200.0);
        
         spin_label = manage (new Label (_("SiP Cut")));
         spin_packer = manage (new VBox);
@@ -218,7 +219,6 @@ MonitorSection::MonitorSection (Session* s)
 		dim_display->add_controllable_preset("-6 dB", -6.0);
 		dim_display->add_controllable_preset("-12 dB", -12.0);
 		dim_display->add_controllable_preset("-20 dB", -20.0);
-		dim_display->add_controllable_preset("-30 dB", -30.0);
         
         HBox* dim_packer = manage (new HBox);
         dim_packer->show ();
