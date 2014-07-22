@@ -376,6 +376,15 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 	multiple_solo_change = false;
 
+	int control_modifier;
+#ifdef __APPLE__
+    control_modifier = Keyboard::SecondaryModifier;
+#endif
+    
+#ifdef _WIN32
+    control_modifier = Keyboard::PrimaryModifier;
+#endif
+
 	if (!_i_am_the_modifier) {
 		if (Keyboard::is_context_menu_event (ev)) {
             if (solo_menu == 0) {
@@ -432,7 +441,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 						_session->set_just_one_solo (_route, true);
 					}
 
-				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+				} else if (Keyboard::modifier_state_equals (ev->state, control_modifier)) {
 
 					// control-click (SecondaryModifier): toggle solo isolated status
 
