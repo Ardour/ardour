@@ -185,6 +185,7 @@ Editor::create_editor_mixer ()
 	current_mixer_strip->set_embedded (true);
 	
 	current_mixer_strip->signal_enter_notify_event().connect (sigc::mem_fun(*this, &Editor::mixer_strip_enter_event ));
+	current_mixer_strip->signal_leave_notify_event().connect (sigc::mem_fun(*this, &Editor::mixer_strip_leave_event ));
 
 }
 
@@ -192,6 +193,17 @@ bool
 Editor::mixer_strip_enter_event (GdkEventCrossing *ev)
 {
 	current_mixer_strip->set_selected(true);
+	return false;
+}
+
+bool
+Editor::mixer_strip_leave_event (GdkEventCrossing *ev)
+{
+	//if we have moved outside our strip, but not into a child view, then deselect ourselves
+	if ( !(ev->detail == GDK_NOTIFY_INFERIOR) ) {
+		current_mixer_strip->set_selected(false);
+	}
+	
 	return false;
 }
 

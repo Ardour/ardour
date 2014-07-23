@@ -76,6 +76,7 @@
 #include "interthread_progress_window.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
+#include "mixer_strip.h"
 #include "mouse_cursors.h"
 #include "normalize_dialog.h"
 #include "patch_change_dialog.h"
@@ -3731,7 +3732,13 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 void
 Editor::delete_ ()
 {
-	cut_copy (Delete);
+	//special case: if the user is pointing in the editor/mixer strip, they may be trying to delete a plugin.
+	//we need this because the editor-mixer strip is in the editor window, so it doesn't get the bindings from the mix window
+	//TODO:  perhaps someday we need to accomodate the other bindings such as mute, solo, etc.
+	if ( current_mixer_strip && current_mixer_strip->is_selected() )
+		current_mixer_strip->delete_processors ();
+	else
+		cut_copy (Delete);
 }
 
 /** Cut selected regions, automation points or a time range */

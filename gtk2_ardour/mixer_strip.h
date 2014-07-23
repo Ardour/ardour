@@ -131,6 +131,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void ab_plugins ();
 
 	void set_selected(bool yn);
+	bool is_selected() {return _selected;}
 
   protected:
 	friend class Mixer_UI;

@@ -1612,6 +1612,11 @@ MixerStrip::set_selected (bool yn)
 		global_frame.set_name ("MixerStripFrame");
 	}
 	global_frame.queue_draw ();
+	
+	if (!yn) {  //if deselected, clear keyboard focus in the gain display.  this is cheesy but fixes a longstanding bug
+		gpm.gain_display.set_sensitive(false);
+		gpm.gain_display.set_sensitive(true);
+	}
 }
 
 void
