@@ -356,6 +356,8 @@
         <menuitem action='zoom-to-session'/>
         <menuitem action='zoom-to-region'/>
         <menuitem action='zoom-to-region-both-axes'/>
+        <menuitem action='zoom-to-range'/>
+        <menuitem action='zoom-to-range-both-axes'/>
         <menuitem action='toggle-zoom'/>
         <menuitem action='expand-tracks'/>
         <menuitem action='shrink-tracks'/>

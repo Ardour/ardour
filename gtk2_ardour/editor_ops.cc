@@ -1629,6 +1629,38 @@ Editor::temporal_zoom (framecnt_t fpp)
 }
 
 void
+Editor::calc_extra_zoom_edges(framepos_t &start, framepos_t &end)
+{
+	/* this func helps make sure we leave a little space
+	   at each end of the editor so that the zoom doesn't fit the region
+	   precisely to the screen.
+	*/
+
+	GdkScreen* screen = gdk_screen_get_default ();
+	gint pixwidth = gdk_screen_get_width (screen);
+	gint mmwidth = gdk_screen_get_width_mm (screen);
+	double pix_per_mm = (double) pixwidth/ (double) mmwidth;
+	double one_centimeter_in_pixels = pix_per_mm * 10.0;
+
+	framepos_t range = end - start;
+	double new_fpp = (double) range / (double) _visible_canvas_width;
+	framepos_t extra_samples = (framepos_t) floor (one_centimeter_in_pixels * new_fpp);
+
+	if (start > extra_samples) {
+		start -= extra_samples;
+	} else {
+		start = 0;
+	}
+
+	if (max_framepos - extra_samples > end) {
+		end += extra_samples;
+	} else {
+		end = max_framepos;
+	}
+}
+
+
+void
 Editor::temporal_zoom_region (bool both_axes)
 {
 	framepos_t start = max_framepos;
@@ -1654,36 +1686,11 @@ Editor::temporal_zoom_region (bool both_axes)
 		tracks.insert (&((*i)->get_time_axis_view()));
 	}
 
-	/* now comes an "interesting" hack ... make sure we leave a little space
-	   at each end of the editor so that the zoom doesn't fit the region
-	   precisely to the screen.
-	*/
-
-	GdkScreen* screen = gdk_screen_get_default ();
-	gint pixwidth = gdk_screen_get_width (screen);
-	gint mmwidth = gdk_screen_get_width_mm (screen);
-	double pix_per_mm = (double) pixwidth/ (double) mmwidth;
-	double one_centimeter_in_pixels = pix_per_mm * 10.0;
-
 	if ((start == 0 && end == 0) || end < start) {
 		return;
 	}
 
-	framepos_t range = end - start;
-	double new_fpp = (double) range / (double) _visible_canvas_width;
-	framepos_t extra_samples = (framepos_t) floor (one_centimeter_in_pixels * new_fpp);
-
-	if (start > extra_samples) {
-		start -= extra_samples;
-	} else {
-		start = 0;
-	}
-
-	if (max_framepos - extra_samples > end) {
-		end += extra_samples;
-	} else {
-		end = max_framepos;
-	}
+	calc_extra_zoom_edges(start, end);
 
 	/* if we're zooming on both axes we need to save track heights etc.
 	 */
@@ -1726,18 +1733,28 @@ Editor::zoom_to_region (bool both_axes)
 }
 
 void
-Editor::temporal_zoom_selection ()
+Editor::temporal_zoom_selection (bool both_axes)
 {
 	if (!selection) return;
 
-	if (selection->time.empty()) {
-		return;
+	//if a range is selected, zoom to that
+	if (!selection->time.empty()) {
+
+		framepos_t start = selection->time.start();
+		framepos_t end = selection->time.end_frame();
+
+		calc_extra_zoom_edges(start, end);
+
+		temporal_zoom_by_frame (start, end);
+
+		if (both_axes)
+			fit_selected_tracks();
+
+	} else {
+		temporal_zoom_region(both_axes);
 	}
 
-	framepos_t start = selection->time[clicked_selection].start;
-	framepos_t end = selection->time[clicked_selection].end;
 
-	temporal_zoom_by_frame (start, end);
 }
 
 void
@@ -1746,13 +1763,16 @@ Editor::temporal_zoom_session ()
 	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_session)
 
 	if (_session) {
-		framecnt_t const l = _session->current_end_frame() - _session->current_start_frame();
-		double s = _session->current_start_frame() - l * 0.01;
-		if (s < 0) {
-			s = 0;
+		framecnt_t start = _session->current_start_frame();
+		framecnt_t end = _session->current_end_frame();
+
+		if ((start == 0 && end == 0) || end < start) {
+			return;
 		}
-		framecnt_t const e = _session->current_end_frame() + l * 0.01;
-		temporal_zoom_by_frame (framecnt_t (s), e);
+
+		calc_extra_zoom_edges(start, end);
+
+		temporal_zoom_by_frame (start, end);
 	}
 }
 
