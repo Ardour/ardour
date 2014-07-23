@@ -638,7 +638,9 @@ Mixer_UI::strip_by_route (boost::shared_ptr<Route> r)
 bool
 Mixer_UI::strip_enter_event (GdkEventCrossing *ev, MixerStrip *strip)
 {
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		;  //don't change the current selection, user is doing it manually
+	} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 		_selection.add (strip);
 	} else
 		_selection.set (strip);
