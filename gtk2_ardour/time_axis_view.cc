@@ -1174,15 +1174,15 @@ TimeAxisView::preset_height (Height h)
 {
 	switch (h) {
 	case HeightLargest:
-		return (button_height * 2) + extra_height + 260;
+		return 132;
 	case HeightLarger:
-		return (button_height * 2) + extra_height + 160;
+		return 88;
 	case HeightLarge:
-		return (button_height * 2) + extra_height + 60;
+		return 66;
 	case HeightNormal:
-		return (button_height * 2) + extra_height + 10;
+		return 44;
 	case HeightSmall:
-		return button_height + extra_height;
+		return 22;
 	}
 
 	/* NOTREACHED */
@@ -1219,11 +1219,11 @@ TimeAxisView::build_size_menu ()
 	_size_menu->set_name ("ArdourContextMenu");
 	MenuList& items = _size_menu->items();
 
-	items.push_back (MenuElem (_("Largest"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLargest, true)));
-	items.push_back (MenuElem (_("Larger"),  sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarger, true)));
-	items.push_back (MenuElem (_("Large"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarge, true)));
+	items.push_back (MenuElem (_("Small"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightSmall, true)));
 	items.push_back (MenuElem (_("Normal"),  sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightNormal, true)));
-	items.push_back (MenuElem (_("Small"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightSmall, true)));
+	items.push_back (MenuElem (_("Medium"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarge, true)));
+	items.push_back (MenuElem (_("Large"),  sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarger, true)));
+	items.push_back (MenuElem (_("XLarge"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLargest, true)));
 }
 
 void
