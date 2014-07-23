@@ -256,6 +256,10 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 		add_region_internal (new_region, position);
 	}
 
+	//keep track of any dead space at end (for pasting into Ripple or Splice mode)
+	//at the end of construction, any length of cnt beyond the extents of the regions is end_space
+	_end_space = cnt - (get_extent().second - get_extent().first);
+
 	in_set_state--;
 	first_set_state = false;
 }
@@ -315,6 +319,7 @@ Playlist::init (bool hide)
 	_frozen = false;
 	_capture_insertion_underway = false;
 	_combine_ops = 0;
+	_end_space = 0;
 
 	_session.history().BeginUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::begin_undo, this));
 	_session.history().EndUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::end_undo, this));
@@ -1104,6 +1109,10 @@ Playlist::flush_notifications (bool from_undo)
 
 		 in_partition = false;
 	 }
+
+	//keep track of any dead space at end (for pasting into Ripple or Splice mode)
+	framepos_t wanted_length = end-start;
+	_end_space = wanted_length - get_extent().second-get_extent().first;
  }
 
  boost::shared_ptr<Playlist>
@@ -1188,7 +1197,8 @@ Playlist::flush_notifications (bool from_undo)
 	 new_name += '.';
 	 new_name += buf;
 
-	 cnt = min (_get_extent().second - start, cnt);
+	// cnt = min (_get_extent().second - start, cnt);  (We need the full range length when copy/pasting in Ripple.  Why was this limit here?  It's not in CUT... )
+
 	 return PlaylistFactory::create (shared_from_this(), start, cnt, new_name, result_is_hidden);
  }
 
@@ -2240,6 +2250,14 @@ Playlist::get_extent () const
 {
 	RegionReadLock rlock (const_cast<Playlist *>(this));
 	return _get_extent ();
+}
+
+pair<framepos_t, framepos_t>
+Playlist::get_extent_with_endspace () const
+{
+	pair<framepos_t, framepos_t> l = get_extent();
+	l.second += _end_space;
+	return l;
 }
 
 pair<framepos_t, framepos_t>

@@ -120,6 +120,7 @@ public:
 	uint32_t n_regions() const;
 	bool all_regions_empty() const;
 	std::pair<framepos_t, framepos_t> get_extent () const;
+	std::pair<framepos_t, framepos_t> get_extent_with_endspace() const;
 	layer_t top_layer() const;
 
 	EditMode get_edit_mode() const { return _edit_mode; }
@@ -396,6 +397,8 @@ public:
 	void setup_layering_indices (RegionList const &);
 	void coalesce_and_check_crossfades (std::list<Evoral::Range<framepos_t> >);
 	boost::shared_ptr<RegionList> find_regions_at (framepos_t);
+
+	framepos_t _end_space;  //this is used when we are pasting a range with extra space at the end
 };
 
 } /* namespace ARDOUR */
