@@ -151,7 +151,7 @@
               <Adjustment id="vertical_zoom_adjustment"
                           minvalue="1"
                           maxvalue="40"
-                          initialvalue="1"
+                          initialvalue="2"
                           step="1"
                           pageincrement="1"/>
               <Fader id="vertical_zoom_fader"
