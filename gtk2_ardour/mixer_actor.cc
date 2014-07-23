@@ -172,6 +172,7 @@ MixerActor::unity_gain_action ()
 {
 	set_route_targets_for_operation ();
 
+printf("setting gain to unity (?)");
 	BOOST_FOREACH(RouteUI* r, _route_targets) {
 		boost::shared_ptr<Route> rp = r->route();
 		if (rp) {
