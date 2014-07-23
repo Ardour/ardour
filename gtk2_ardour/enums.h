@@ -49,7 +49,8 @@ enum Height {
 	HeightLarger,
 	HeightLarge,
 	HeightNormal,
-	HeightSmall
+	HeightSmall,
+    HeightMaximum
 };
 
 extern void setup_gtk_ardour_enums ();

@@ -488,6 +488,10 @@ TimeAxisView::set_height (uint32_t h)
 	if (h < preset_height (HeightSmall)) {
 		h = preset_height (HeightSmall);
 	}
+    
+    if (h > preset_height (HeightMaximum) ) {
+        h = preset_height (HeightMaximum);
+    }
 
 	time_axis_box.property_height_request () = h;
 	height = h;
@@ -1183,6 +1187,8 @@ TimeAxisView::preset_height (Height h)
 		return 44;
 	case HeightSmall:
 		return 22;
+    case HeightMaximum:
+        return 22*40;
 	}
 
 	/* NOTREACHED */
