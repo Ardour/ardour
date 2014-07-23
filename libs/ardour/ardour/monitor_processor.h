@@ -46,6 +46,7 @@ public:
 	MPControl (T initial, const std::string& name, PBD::Controllable::Flag flag,
 	           float lower = 0.0f, float upper = 1.0f)
 		: PBD::Controllable (name, flag)
+		, _normal (initial)
 		, _value (initial)
 		, _lower (lower)
 		, _upper (upper)
@@ -76,6 +77,7 @@ public:
 
 	double lower () const { return _lower; }
 	double upper () const { return _upper; }
+	double normal () const { return _normal; }
 
 	/* "access as T" API */
 
@@ -114,6 +116,7 @@ protected:
 	T _value;
 	T _lower;
 	T _upper;
+	T _normal;
 };
 
 class LIBARDOUR_API MonitorProcessor : public Processor
