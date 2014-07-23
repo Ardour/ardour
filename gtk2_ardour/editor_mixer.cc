@@ -183,6 +183,16 @@ Editor::create_editor_mixer ()
 	current_mixer_strip->WidthChanged.connect (sigc::mem_fun(*this, &Editor::ensure_all_elements_drawn));
 #endif
 	current_mixer_strip->set_embedded (true);
+	
+	current_mixer_strip->signal_enter_notify_event().connect (sigc::mem_fun(*this, &Editor::mixer_strip_enter_event ));
+
+}
+
+bool
+Editor::mixer_strip_enter_event (GdkEventCrossing *ev)
+{
+	current_mixer_strip->set_selected(true);
+	return false;
 }
 
 void

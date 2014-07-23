@@ -130,12 +130,13 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void toggle_processors ();
 	void ab_plugins ();
 
+	void set_selected(bool yn);
+
   protected:
 	friend class Mixer_UI;
 	void set_packed (bool yn);
 	bool packed () { return _packed; }
 
-	void set_selected(bool yn);
 	void set_stuff_from_route ();
 
   private:
