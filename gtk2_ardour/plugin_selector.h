@@ -123,6 +123,7 @@ class PluginSelector : public ArdourDialog
 	void btn_remove_clicked();
 	void btn_update_clicked();
 	void added_list_selection_changed();
+	void added_row_clicked(GdkEventButton* event);
 	void display_selection_changed();
 	void btn_apply_clicked();
 	ARDOUR::PluginPtr load_plugin (ARDOUR::PluginInfoPtr);

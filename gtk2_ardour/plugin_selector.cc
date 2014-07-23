@@ -187,6 +187,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	btn_add->signal_clicked().connect(sigc::mem_fun(*this, &PluginSelector::btn_add_clicked));
 	btn_remove->signal_clicked().connect(sigc::mem_fun(*this, &PluginSelector::btn_remove_clicked));
 	added_list.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginSelector::added_list_selection_changed));
+	added_list.signal_button_press_event().connect_notify (mem_fun(*this, &PluginSelector::added_row_clicked));
 
 	refill ();
 }
@@ -200,6 +201,13 @@ void
 PluginSelector::row_activated(Gtk::TreeModel::Path, Gtk::TreeViewColumn*)
 {
 	btn_add_clicked();
+}
+
+void
+PluginSelector::added_row_clicked(GdkEventButton* event)
+{
+	if (event->type == GDK_2BUTTON_PRESS)
+		btn_remove_clicked();
 }
 
 bool
