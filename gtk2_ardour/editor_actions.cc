@@ -263,6 +263,8 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "zoom-to-session", _("Zoom to Session"), sigc::mem_fun(*this, &Editor::temporal_zoom_session));
 	reg_sens (editor_actions, "zoom-to-region", _("Zoom to Region"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_to_region), false));
 	reg_sens (editor_actions, "zoom-to-region-both-axes", _("Zoom to Region (Width and Height)"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_to_region), true));
+	reg_sens (editor_actions, "zoom-to-range", _("Zoom to Range"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), false));
+	reg_sens (editor_actions, "zoom-to-range-both-axes", _("Zoom to Range (Width and Height)"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), true));
 	reg_sens (editor_actions, "toggle-zoom", _("Toggle Zoom State"), sigc::mem_fun(*this, &Editor::swap_visual_state));
 
 	reg_sens (editor_actions, "expand-tracks", _("Expand Track Height"), sigc::bind (sigc::mem_fun (*this, &Editor::tav_zoom_step), false));
