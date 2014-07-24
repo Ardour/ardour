@@ -1912,8 +1912,7 @@ Mixer_UI::set_route_targets_for_operation ()
 		return;
 	}
 
-	/* nothing selected ... try to get mixer strip at mouse */
-
+/*  removed "implicit" selections of strips and plugins, after discussion on IRC
 	int x, y;
 	get_pointer (x, y);
 	
@@ -1922,6 +1921,8 @@ Mixer_UI::set_route_targets_for_operation ()
 	if (ms) {
 		_route_targets.insert (ms);
 	}
+*/
+
 }
 
 void

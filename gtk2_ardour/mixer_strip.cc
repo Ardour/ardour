@@ -2219,10 +2219,10 @@ MixerStrip::select_all_processors ()
 	processor_box.processor_operation (ProcessorBox::ProcessorsSelectAll);
 }
 
-void
+bool
 MixerStrip::delete_processors ()
 {
-	processor_box.processor_operation (ProcessorBox::ProcessorsDelete);
+	return processor_box.processor_operation (ProcessorBox::ProcessorsDelete);
 }
 
 void

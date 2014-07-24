@@ -1195,14 +1195,18 @@ ProcessorBox::leave_notify (GdkEventCrossing*)
 	return false;
 }
 
-void
+bool
 ProcessorBox::processor_operation (ProcessorOperation op) 
 {
 	ProcSelection targets;
 
 	get_selected_processors (targets);
 
-	if (targets.empty()) {
+	if ((op == ProcessorsDelete) && targets.empty())
+		return false;  //special case:  editor-mixer needs to know that nothing got deleted;  the user probably meant to delete something in the editor
+
+/* removed "implicit" selections of strips and plugins, after discussion on IRC
+ 	if (targets.empty()) {
 
 		int x, y;
 		processor_display.get_pointer (x, y);
@@ -1213,6 +1217,7 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 			targets.push_back (pointer.first->processor ());
 		}
 	}
+*/
 
 	switch (op) {
 	case ProcessorsSelectAll:
@@ -1256,6 +1261,8 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 	default:
 		break;
 	}
+	
+	return true;
 }
 
 ProcessorWindowProxy* 

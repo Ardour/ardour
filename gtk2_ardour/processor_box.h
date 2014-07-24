@@ -280,7 +280,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void set_width (Width);
 
-	void processor_operation (ProcessorOperation);
+	bool processor_operation (ProcessorOperation);
 
 	void select_all_processors ();
 	void deselect_all_processors ();
