@@ -430,8 +430,6 @@ MixerStrip::mixer_strip_leave_event (GdkEventCrossing *ev)
 	if ( !(ev->detail == GDK_NOTIFY_INFERIOR) ) {
 		_entered_mixer_strip= 0;
 
-//		processor_box.deselect_all_processors();
-
 		//clear keyboard focus in the gain display.  this is cheesy but fixes a longstanding bug.
 		gpm.gain_display.set_sensitive(false);
 		gpm.gain_display.set_sensitive(true);
