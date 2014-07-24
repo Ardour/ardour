@@ -128,7 +128,6 @@ VideoMonitor::open (std::string filename)
 	if (!is_started()) return;
 	manually_seeked_frame = 0;
 	osdmode = 10; // 1: frameno, 2: timecode, 8: box
-	sync_by_manual_seek = false;
 	starting = 15;
 	process->write_to_stdin("load " + filename + "\n");
 	process->write_to_stdin("set fps -1\n");
@@ -162,6 +161,8 @@ VideoMonitor::open (std::string filename)
 		/* TODO once every two second or so -- state_clk_divide hack below */
 		state_connection = ARDOUR_UI::RapidScreenUpdate.connect (sigc::mem_fun (*this, &VideoMonitor::querystate));
 	}
+	sync_by_manual_seek = true;
+	clock_connection = ARDOUR_UI::SuperRapidScreenUpdate.connect (sigc::mem_fun (*this, &VideoMonitor::srsupdate));
 	xjadeo_sync_setup();
 }
 
