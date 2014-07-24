@@ -3734,8 +3734,8 @@ Editor::delete_ ()
 {
 	//special case: if the user is pointing in the editor/mixer strip, they may be trying to delete a plugin.
 	//we need this because the editor-mixer strip is in the editor window, so it doesn't get the bindings from the mix window
-	//TODO:  perhaps someday we need to accomodate the other bindings such as mute, solo, etc.
-	if ( current_mixer_strip && current_mixer_strip->is_selected() )
+	MixerStrip *entered = MixerStrip::entered_mixer_strip();
+	if ( current_mixer_strip && current_mixer_strip == entered )
 		current_mixer_strip->delete_processors ();
 	else
 		cut_copy (Delete);

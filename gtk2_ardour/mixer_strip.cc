@@ -76,6 +76,8 @@ using namespace Gtkmm2ext;
 using namespace std;
 using namespace ArdourMeter;
 
+MixerStrip* MixerStrip::_entered_mixer_strip;
+
 int MixerStrip::scrollbar_height = 0;
 PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
 
@@ -137,6 +139,7 @@ MixerStrip::init ()
 {
 	int button_table_row = 0;
 
+	_entered_mixer_strip= 0;
 	input_selector = 0;
 	output_selector = 0;
 	group_menu = 0;
@@ -394,6 +397,10 @@ MixerStrip::init ()
 	Config->ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 	_session->config.ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 
+	//watch for mouse enter/exit so we can do some stuff
+	signal_enter_notify_event().connect (sigc::mem_fun(*this, &MixerStrip::mixer_strip_enter_event ));
+	signal_leave_notify_event().connect (sigc::mem_fun(*this, &MixerStrip::mixer_strip_leave_event ));
+
 	gpm.LevelMeterButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&MixerStrip::level_meter_button_press, this, _1));
 }
 
@@ -401,9 +408,36 @@ MixerStrip::~MixerStrip ()
 {
 	CatchDeletion (this);
 
+	if (this ==_entered_mixer_strip)
+		_entered_mixer_strip = NULL;
+
 	delete input_selector;
 	delete output_selector;
 	delete comment_window;
+}
+
+bool
+MixerStrip::mixer_strip_enter_event (GdkEventCrossing *ev)
+{
+	_entered_mixer_strip = this;
+	return false;
+}
+
+bool
+MixerStrip::mixer_strip_leave_event (GdkEventCrossing *ev)
+{
+	//if we have moved outside our strip, but not into a child view, then deselect ourselves
+	if ( !(ev->detail == GDK_NOTIFY_INFERIOR) ) {
+		_entered_mixer_strip= 0;
+
+//		processor_box.deselect_all_processors();
+
+		//clear keyboard focus in the gain display.  this is cheesy but fixes a longstanding bug.
+		gpm.gain_display.set_sensitive(false);
+		gpm.gain_display.set_sensitive(true);
+	}
+	
+	return false;
 }
 
 void
@@ -1613,10 +1647,6 @@ MixerStrip::set_selected (bool yn)
 	}
 	global_frame.queue_draw ();
 	
-	if (!yn) {  //if deselected, clear keyboard focus in the gain display.  this is cheesy but fixes a longstanding bug
-		gpm.gain_display.set_sensitive(false);
-		gpm.gain_display.set_sensitive(true);
-	}
 }
 
 void

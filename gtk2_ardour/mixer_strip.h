@@ -133,6 +133,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void set_selected(bool yn);
 	bool is_selected() {return _selected;}
 
+	static MixerStrip* entered_mixer_strip() { return _entered_mixer_strip; }
+
   protected:
 	friend class Mixer_UI;
 	void set_packed (bool yn);
@@ -280,6 +282,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	bool ignore_speed_adjustment;
 
+	static MixerStrip* _entered_mixer_strip;
+
 	void engine_running();
 	void engine_stopped();
 
@@ -297,6 +301,9 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	void update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width width, bool input_button);
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
+
+	bool mixer_strip_enter_event ( GdkEventCrossing * );
+	bool mixer_strip_leave_event ( GdkEventCrossing * );
 
 	/** A VisibilityGroup to manage the visibility of some of our controls.
 	 *  We fill it with the controls that are being managed, using the same names

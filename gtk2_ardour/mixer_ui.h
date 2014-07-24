@@ -249,7 +249,6 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void group_display_selection_changed ();
 
 	bool strip_button_release_event (GdkEventButton*, MixerStrip*);
-	bool strip_enter_event (GdkEventCrossing*, MixerStrip*);
 
 	Width _strip_width;
 

@@ -392,7 +392,6 @@ Mixer_UI::add_strips (RouteList& routes)
 			
 			strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
 			strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
-			strip->signal_enter_notify_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_enter_event), strip));
 		}
 
 	} catch (...) {
@@ -634,19 +633,6 @@ Mixer_UI::strip_by_route (boost::shared_ptr<Route> r)
 
 	return 0;
 }
-
-bool
-Mixer_UI::strip_enter_event (GdkEventCrossing *ev, MixerStrip *strip)
-{
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-		;  //don't change the current selection, user is doing it manually
-	} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-		_selection.add (strip);
-	} else
-		_selection.set (strip);
-	return false;
-}
-
 
 bool
 Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
