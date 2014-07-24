@@ -311,6 +311,11 @@
 
     <menu action='TrackMenu'>
       <menuitem action='AddTrackBus'/>	
+      <separator/>
+      <menuitem action='track-record-enable-toggle'/>
+      <menuitem action='track-solo-toggle'/>
+      <menuitem action='track-mute-toggle'/>
+      <separator/>
       <menuitem action='insert-time'/>
       <menuitem action="move-selected-tracks-up"/>
       <menuitem action="move-selected-tracks-down"/>
@@ -322,8 +327,8 @@
         <menuitem action='track-height-normal'/>
         <menuitem action='track-height-small'/>
       </menu>
-      <menuitem action='track-record-enable-toggle'/>
-      <menuitem action='toggle-track-active'/>	
+      <separator/>
+     <menuitem action='toggle-track-active'/>	
       <menuitem action='remove-track'/>	
     </menu>
 

@@ -405,7 +405,8 @@ Editor::register_actions ()
 	}
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
-	reg_sens (editor_actions, "fit-tracks", _("Fit Selected Tracks"), sigc::mem_fun(*this, &Editor::fit_selected_tracks));
+	act = reg_sens (editor_actions, "fit-tracks", _("Fit Selected Tracks"), sigc::mem_fun(*this, &Editor::fit_selected_tracks));
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "track-height-largest", _("Largest"), sigc::bind (
 				sigc::mem_fun(*this, &Editor::set_track_height), HeightLargest));
