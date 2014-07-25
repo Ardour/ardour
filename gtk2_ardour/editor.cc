@@ -2367,6 +2367,37 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		nudge_clock->set (_session->frame_rate() * 5, true);
 	}
 
+	XMLNode* vi_state;
+	if (_session && (vi_state = ARDOUR::find_named_node (node, "Visual-States")) != 0) {
+		visual_states.clear(); // XXX we ought to free the old states' mem and also clear this list on session load/close -> FN
+		XMLNodeList children = vi_state->children ();
+		for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+			bool ok = true;
+
+			VisualState* vs = new VisualState (true);  // TODO check, if we don't have childs.. leave gui_state == 0 ?
+			if ((prop = (*i)->property ("y-position"))) {
+				vs->y_position = atof(prop->value());
+			} else { ok = false; }
+			if ((prop = (*i)->property ("samples-per-pixel"))) {
+				sscanf (prop->value().c_str(), "%" PRId64, &vs->samples_per_pixel);
+			} else { ok = false; }
+			if ((prop = (*i)->property ("leftmost-frame"))) {
+				sscanf (prop->value().c_str(), "%" PRId64, &vs->leftmost_frame);
+			} else { ok = false; }
+			if ((prop = (*i)->property ("zoom-focus"))) {
+				vs->zoom_focus = Editing::ZoomFocus (string_2_enum (prop->value(), vs->zoom_focus));
+			} else { ok = false; }
+
+			vs->gui_state->set_state(*(*i)); // XXX copy state ??
+			if (ok) {
+				visual_states.push_back(vs);
+			} else {
+				delete vs;
+				visual_states.push_back (0); // retain numbering
+			}
+		}
+	}
+
 	return 0;
 }
 
@@ -2466,6 +2497,27 @@ Editor::get_state ()
 	snprintf (buf, sizeof (buf), "%" PRId64, nudge_clock->current_duration());
 	node->add_property ("nudge-clock-value", buf);
 
+	if (_session) {
+		// do not save visual states globally, only with session
+		// XXX ^^ does not work yet :(
+		int nid = 0;
+		XMLNode * vstates = new XMLNode (X_("Visual-States"));
+		for (std::vector<VisualState*>::const_iterator i = visual_states.begin(); i != visual_states.end(); ++i) {
+			VisualState *vs = *i;
+
+			XMLNode * vstate = new XMLNode (X_("Visual-State"));
+			vstate->add_property (X_("id"), ++nid); // do we need the numeric ID here?
+			vstate->add_property (X_("y-position"), vs->y_position);
+			vstate->add_property (X_("samples-per-pixel"), vs->samples_per_pixel);
+			vstate->add_property (X_("leftmost-frame"), vs->leftmost_frame);
+			vstate->add_property (X_("zoom-focus"), vs->zoom_focus); // enum
+			vstate->add_child_nocopy (vs->gui_state->get_state ());
+			vstates->add_child_nocopy (*vstate);
+		}
+		if (nid > 0) {
+			node->add_child_nocopy (*vstates);
+		}
+	}
 	return *node;
 }
 
