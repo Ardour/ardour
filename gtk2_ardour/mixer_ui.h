@@ -87,6 +87,9 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
         MonitorSection* monitor_section() const { return _monitor_section; }
 
+	void deselect_all_strip_processors();
+	void delete_processors();
+
   protected:
 	void set_route_targets_for_operation ();
 

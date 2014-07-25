@@ -1202,11 +1202,7 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 
 	get_selected_processors (targets);
 
-	if ((op == ProcessorsDelete) && targets.empty())
-		return false;  //special case:  editor-mixer needs to know that nothing got deleted;  the user probably meant to delete something in the editor
-
-/* removed "implicit" selections of strips and plugins, after discussion on IRC
- 	if (targets.empty()) {
+/*	if (targets.empty()) {
 
 		int x, y;
 		processor_display.get_pointer (x, y);
@@ -1219,9 +1215,16 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 	}
 */
 
+	if ( (op == ProcessorsDelete) && targets.empty() )
+		return false;  //nothing to delete.  return false so the editor-mixer, because the user was probably intending to delete something in the editor
+	
 	switch (op) {
 	case ProcessorsSelectAll:
 		processor_display.select_all ();
+		break;
+
+	case ProcessorsSelectNone:
+		processor_display.select_none ();
 		break;
 
 	case ProcessorsCopy:

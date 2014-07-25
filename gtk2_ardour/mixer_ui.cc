@@ -405,6 +405,23 @@ Mixer_UI::add_strips (RouteList& routes)
 }
 
 void
+Mixer_UI::deselect_all_strip_processors ()
+{
+	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		(*i)->deselect_all_processors();
+	}
+}
+
+void
+Mixer_UI::delete_processors ()
+{
+	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		(*i)->delete_processors();
+	}
+}
+
+
+void
 Mixer_UI::remove_strip (MixerStrip* strip)
 {
 	if (_session && _session->deletion_in_progress()) {
@@ -1912,16 +1929,7 @@ Mixer_UI::set_route_targets_for_operation ()
 		return;
 	}
 
-/*  removed "implicit" selections of strips and plugins, after discussion on IRC
-	int x, y;
-	get_pointer (x, y);
-	
-	MixerStrip* ms = strip_by_x (x);
-	
-	if (ms) {
-		_route_targets.insert (ms);
-	}
-*/
+//  removed "implicit" selections of strips, after discussion on IRC
 
 }
 

@@ -269,6 +269,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 		ProcessorsPaste,
 		ProcessorsDelete,
 		ProcessorsSelectAll,
+		ProcessorsSelectNone,
 		ProcessorsToggleActive,
 		ProcessorsAB,
 	};

@@ -186,7 +186,7 @@ MixerStrip::init ()
 
 	meter_point_button.signal_button_press_event().connect (sigc::mem_fun (gpm, &GainMeter::meter_press), false);
 	meter_point_button.signal_button_release_event().connect (sigc::mem_fun (gpm, &GainMeter::meter_release), false);
-
+	
 	hide_button.set_events (hide_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
 	monitor_input_button->set_diameter (3);
@@ -420,6 +420,11 @@ bool
 MixerStrip::mixer_strip_enter_event (GdkEventCrossing *ev)
 {
 	_entered_mixer_strip = this;
+	
+	//although we are triggering on the "enter", to the user it will appear that it is happenin on the "leave"
+	//because the mixerstrip control is a parent that encompasses the strip
+	ARDOUR_UI::instance()->the_mixer()->deselect_all_strip_processors();
+
 	return false;
 }
 
@@ -433,6 +438,9 @@ MixerStrip::mixer_strip_leave_event (GdkEventCrossing *ev)
 		//clear keyboard focus in the gain display.  this is cheesy but fixes a longstanding bug.
 		gpm.gain_display.set_sensitive(false);
 		gpm.gain_display.set_sensitive(true);
+
+		//if we leave this mixer strip we need to clear out any selections
+		//processor_box.processor_display.select_none();  //but this doesn't work, because it gets triggered when (for example) you open the menu or start a drag
 	}
 	
 	return false;
@@ -1645,6 +1653,8 @@ MixerStrip::set_selected (bool yn)
 	}
 	global_frame.queue_draw ();
 	
+//	if (!yn)
+//		processor_box.deselect_all_processors();
 }
 
 void
@@ -2217,6 +2227,12 @@ void
 MixerStrip::select_all_processors ()
 {
 	processor_box.processor_operation (ProcessorBox::ProcessorsSelectAll);
+}
+
+void
+MixerStrip::deselect_all_processors ()
+{
+	processor_box.processor_operation (ProcessorBox::ProcessorsSelectNone);
 }
 
 bool
