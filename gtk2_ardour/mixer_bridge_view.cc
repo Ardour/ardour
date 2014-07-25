@@ -441,3 +441,8 @@ void MixerBridgeView::parent_on_size_allocate (Gtk::Allocation& alloc)
 {
 	_mixer_strips_home.set_size_request (alloc.get_width (), -1);
 }
+
+void MixerBridgeView::delete_processors ()
+{
+        /* does nothing in Tracks */
+}

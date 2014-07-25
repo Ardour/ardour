@@ -121,7 +121,8 @@ class MixerStrip : public RouteUI
 	void cut_processors ();
 	void paste_processors ();
 	void select_all_processors ();
-	void delete_processors ();
+	void deselect_all_processors ();
+	bool delete_processors ();  //note: returns false if nothing was deleted
 	void toggle_processors ();
 	void ab_plugins ();
 

@@ -251,7 +251,7 @@ RouteParams_UI::setup_processor_boxes()
 		}
 		redir_hpane.pack1 (*insert_box);
 
-		insert_box->ProcessorSelected.connect (sigc::mem_fun(*this, &RouteParams_UI::redirect_selected));
+		insert_box->ProcessorSelected.connect (sigc::mem_fun(*this, &RouteParams_UI::redirect_selected));  //note:  this indicates a double-click activation, not just a "selection"
 		insert_box->ProcessorUnselected.connect (sigc::mem_fun(*this, &RouteParams_UI::redirect_selected));
 
 		redir_hpane.show_all();

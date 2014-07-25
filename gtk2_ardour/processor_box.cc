@@ -1196,13 +1196,14 @@ ProcessorBox::leave_notify (GdkEventCrossing*)
 	return false;
 }
 
-void
+bool
 ProcessorBox::processor_operation (ProcessorOperation op) 
 {
 	ProcSelection targets;
 
 	get_selected_processors (targets);
 
+#if 0
 	if (targets.empty()) {
 
 		int x, y;
@@ -1214,10 +1215,18 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 			targets.push_back (pointer.first->processor ());
 		}
 	}
+#endif
 
+	if ( (op == ProcessorsDelete) && targets.empty() )
+		return false;  //nothing to delete.  return false so the editor-mixer, because the user was probably intending to delete something in the editor
+	
 	switch (op) {
 	case ProcessorsSelectAll:
 		processor_display.select_all ();
+		break;
+
+	case ProcessorsSelectNone:
+		processor_display.select_none ();
 		break;
 
 	case ProcessorsCopy:
@@ -1257,6 +1266,8 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 	default:
 		break;
 	}
+
+        return true;
 }
 
 ProcessorWindowProxy* 

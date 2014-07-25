@@ -192,7 +192,6 @@ MixerStrip::init ()
 	if (_mixer_owned) {
 		t += string_compose (_("\n%1-%2-click to toggle the width of all strips."), Keyboard::primary_modifier_name(), Keyboard::tertiary_modifier_name ());
 	}
-		
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &MixerStrip::toggle_comment_editor));
 
 	panners_home.add (panners);
@@ -1698,6 +1697,12 @@ MixerStrip::select_all_processors ()
 }
 
 void
+MixerStrip::deselect_all_processors ()
+{
+	processor_box.processor_operation (ProcessorBox::ProcessorsSelectNone);
+}
+
+bool
 MixerStrip::delete_processors ()
 {
 	processor_box.processor_operation (ProcessorBox::ProcessorsDelete);

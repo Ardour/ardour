@@ -54,7 +54,8 @@ class MixerBridgeView :
 
   protected:
 	void set_route_targets_for_operation ();
-    void toggle_midi_input_active (bool flip_others);
+        void toggle_midi_input_active (bool flip_others);
+        void delete_processors ();
 
   private:
 	Gtk::Container& _mixer_strips_home;

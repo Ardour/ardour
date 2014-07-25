@@ -230,18 +230,6 @@ MixerActor::select_all_processors ()
 	}
 }
 void
-MixerActor::delete_processors ()
-{
-	set_route_targets_for_operation ();
-
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
-		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
-		if (ms) {
-			ms->delete_processors ();
-		}
-	}
-}
-void
 MixerActor::toggle_processors ()
 {
 	set_route_targets_for_operation ();
