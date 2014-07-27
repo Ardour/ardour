@@ -2,6 +2,20 @@
 
 <Window>
   <VBox id="vpacker">
+    <Adjustment id="vertical_adjustment"
+                initial_value="0"
+                min_value="0"
+                max_value="10"
+                step="400"/>
+    <Adjustment id="horizontal_adjustment"
+                initial_value="0"
+                min_value="0"
+                max_value="10000000000000000"/>
+    <Adjustment id="unused_adjustment"
+                initial_value="0"
+                min_value="0"
+                max_value="10"
+                step="400"/>
     <HBox id="menu_bar_base"/>
     <EventBox bgnormal="#000000">
       <VBox borderwidth="2" spacing ="3">
@@ -196,8 +210,7 @@
                 box.fill="true">
       </EventBox>
     </HBox>
-    <HBox id="global_hpacker"
-          box.pack="end"
+    <HBox box.pack="end"
           box.fill="true"
           box.expand="true">
       <VBox>
@@ -207,10 +220,60 @@
       </VBox>
       <VBox box.fill="true"
             box.expand="true">
-        <VBox id="global_vpacker"
-            box.fill="true"
-            box.expand="true">
-        </VBox>
+        <HPaned id="edit_pane"
+                box.fill="true"
+                box.expand="true">
+          <VPaned id="editor_summary_pane"
+                  paned.resize="true"
+                  paned.shrink="true">
+            <Table id="edit_packer"
+                   rows="4"
+                   columns="4">
+              <EventBox id="ruler_label_event_box"
+                        table.leftattach="1"
+                        table.rightattach="2"
+                        table.topattach="0"
+                        table.bottomattach="1"
+                        table.xfill="true"
+                        table.yshrink="true">
+                <VBox id="ruler_label_vbox" ui.orphan="true" />
+              </EventBox>
+              <EventBox id="time_bars_event_box"
+                        table.leftattach="1"
+                        table.rightattach="2"
+                        table.topattach="1"
+                        table.bottomattach="2"
+                        table.xfill="true"
+                        table.yshrink="true">
+                <VBox id="time_bars_vbox"/>
+              </EventBox>
+              <EventBox id="time_canvas_event_box"
+                        table.leftattach="2"
+                        table.rightattach="3"
+                        table.topattach="0"
+                        table.bottomattach="1"
+                        table.xfill="true"
+                        table.xexpand="true"
+                        table.yfill="true">
+                <VBox id="time_canvas_vbox"/>
+              </EventBox>
+              <Layout id="controls_layout"
+                      hadjustment="unused_adjustment"
+                      vadjustment="vertical_adjustment"
+                      table.leftattach="0"
+                      table.rightattach="2"
+                      table.topattach="2"
+                      table.bottomattach="3"
+                      table.xfill="true"
+                      table.yfill="true"
+                      table.yexpand="true">
+                <HBox>
+                  <VBox id="edit_controls_vbox"/>
+                </HBox>
+              </Layout>
+            </Table>
+          </VPaned>
+        </HPaned>
         <EventBox id="mixer_ui_home"
                   box.pack="end"/>
       </VBox>

@@ -537,11 +537,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void add_notebook_page (std::string const &, Gtk::Widget &);
 	bool notebook_tab_clicked (GdkEventButton *, Gtk::Widget *);
 
-	Gtk::HPaned   edit_pane;
-	Gtk::VPaned   editor_summary_pane;
+	Gtk::HPaned&   edit_pane;
+	Gtk::VPaned&   editor_summary_pane;
 
-	Gtk::EventBox meter_base;
-	Gtk::HBox     meter_box;
 	Gtk::EventBox marker_base;
 	Gtk::HBox     marker_box;
 	Gtk::VBox     scrollers_rulers_markers_box;
@@ -688,8 +686,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void add_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView *);
 
-	Gtk::HBox&      global_hpacker;
-	Gtk::VBox&      global_vpacker;
 	Gtk::Container& inspector_home;
 	Gtk::Container& _master_bus_ui_home;
 	Gtk::Container& _compact_meter_bridge_home;
@@ -715,9 +711,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	bool track_canvas_motion (GdkEvent*);
 
-	Gtk::EventBox             time_canvas_event_box;
-	Gtk::EventBox             time_bars_event_box;
-	Gtk::EventBox             ruler_label_event_box;
+	Gtk::EventBox&             time_canvas_event_box;
+	Gtk::EventBox&             time_bars_event_box;
+	Gtk::EventBox&             ruler_label_event_box;
 
 	ArdourCanvas::Group      *minsec_group;
 	ArdourCanvas::Pixbuf     *logo_item;
@@ -923,7 +919,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void export_video (bool range = false);
 	void toggle_region_video_lock ();
 
-	Gtk::VBox          time_bars_vbox;
+	Gtk::VBox& time_bars_vbox;
 
 	friend class EditorCursor;
 
@@ -960,16 +956,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	std::vector<ARDOUR::framepos_t> region_boundary_cache;
 	void build_region_boundary_cache ();
 
-	Gtk::HBox           bottom_hbox;
-
-	Gtk::Table          edit_packer;
+	Gtk::Table&          edit_packer;
 
 	/** the adjustment that controls the overall editor vertical scroll position */
-	Gtk::Adjustment     vertical_adjustment;
-        Gtk::Adjustment     horizontal_adjustment;
-
-        Gtk::Adjustment     unused_adjustment; // yes, really; Gtk::Layout constructor requires refs
-	Gtk::Layout         controls_layout;
+	Gtk::Adjustment&     vertical_adjustment;
+    Gtk::Adjustment&     horizontal_adjustment;
+    Gtk::Adjustment&     unused_adjustment; // yes, really; Gtk::Layout constructor requires refs
+	Gtk::Layout&         controls_layout;
 	bool control_layout_scroll (GdkEventScroll* ev);
 	void reset_controls_layout_width ();
 	void reset_controls_layout_height (int32_t height);
@@ -996,11 +989,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Menu *edit_controls_left_menu;
 	Gtk::Menu *edit_controls_right_menu;
 
-	Gtk::VBox           ruler_label_vbox;
-	Gtk::VBox           track_canvas_vbox;
-	Gtk::VBox           time_canvas_vbox;
-	Gtk::VBox           edit_controls_vbox;
-	Gtk::HBox           edit_controls_hbox;
+	Gtk::VBox&           ruler_label_vbox;
+	Gtk::VBox&           time_canvas_vbox;
+	Gtk::VBox&           edit_controls_vbox;
 
 	void control_vertical_zoom_in_all ();
 	void control_vertical_zoom_out_all ();

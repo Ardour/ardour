@@ -37,11 +37,12 @@
 #include "waves_icon_button.h"
 
 using namespace ArdourCanvas::XMLUI;
+
 class WavesUI : public std::map<std::string, Gtk::Object*> {
 
   public:
 	WavesUI (const std::string& layout_script_file, Gtk::Container& root);
-	virtual ~WavesUI () {}
+	virtual ~WavesUI (); 
 
 	Gtk::Adjustment& get_adjustment (const char* id);
 	Gtk::Container& get_container (const char* id);
@@ -49,6 +50,10 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	Gtk::Box& get_box (const char* id);
 	Gtk::VBox& get_v_box (const char* id);
 	Gtk::HBox& get_h_box (const char* id);
+	Gtk::Paned& get_paned (const char* id);
+	Gtk::HPaned& get_h_paned (const char* id);
+	Gtk::VPaned& get_v_paned (const char* id);
+	Gtk::Table& get_table (const char* id);
 	Gtk::Layout& get_layout (const char* id);
 	Gtk::Label& get_label (const char* id);
 	Gtk::Image& get_image (const char* id);
@@ -66,6 +71,7 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 
   private:
 	static std::map<std::string, const XMLTree*> __xml_tree_cache;
+	std::list<Gtk::Object*> _orphan_objects;
 	const XMLTree* _xml_tree;
 	const std::string _scrip_file_name;
 	Gtk::Container& _root_container;
@@ -76,6 +82,8 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	void create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk::Container& root);
 	Gtk::Widget* create_widget (const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::Box& parent, const XMLNode& definition, const XMLNodeMap& styles);
+	Gtk::Widget* add_widget (Gtk::Paned& parent, const XMLNode& definition, const XMLNodeMap& styles);
+	Gtk::Widget* add_widget (Gtk::Table& parent, const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::ScrolledWindow& parent, const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::Window& parent, const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::Layout& parent, const XMLNode& definition, const XMLNodeMap& styles);

@@ -17,8 +17,6 @@
 
 */
 
-#include <exception>
-
 #include "waves_ui.h"
 #include "pbd/file_utils.h"
 #include "pbd/failed_constructor.h"
@@ -57,6 +55,13 @@ WavesUI::WavesUI (const std::string& layout_script_file, Gtk::Container& root)
 	}
 
 	create_ui(_xml_tree, root);
+}
+
+WavesUI::~WavesUI ()
+{
+	for (std::list<Gtk::Object*>::iterator i = _orphan_objects.begin (); i != _orphan_objects.end(); ++i) {
+		delete *i;
+	}
 }
 
 Gtk::Widget*
@@ -100,7 +105,22 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 	} else if (widget_type == "SPINBUTTON") {
 		child = manage (new Gtk::SpinButton ());
     } else if (widget_type == "LAYOUT") {
-		child = manage (new Gtk::Layout);
+		std::string hadjustment_id = xml_property (definition, "hadjustment", styles, "");
+		std::string vadjustment_id = xml_property (definition, "vadjustment", styles, "");
+		if (hadjustment_id.empty() && vadjustment_id.empty()) {
+			child = manage (new Gtk::Layout);
+		} else {
+			if (hadjustment_id.empty()) {
+				dbg_msg("Layout's hadjustment is NOT SPECIFIED!");
+				abort ();
+			}
+			if (vadjustment_id.empty()) {
+				dbg_msg("Layout's vadjustment is NOT SPECIFIED!");
+				abort ();
+			}
+			child = manage (new Gtk::Layout (get_adjustment(hadjustment_id.c_str()), 
+											 get_adjustment(vadjustment_id.c_str())));
+		}
 	} else if (widget_type == "CANVAS") {
 		std::map<std::string, ArdourCanvas::Item*> named_items;
 		child = manage (new ArdourCanvas::GtkCanvas (definition, styles, named_items));
@@ -112,11 +132,19 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 		child = manage (new Gtk::HBox);
 	} else if (widget_type == "EVENTBOX") {
 		child = manage (new Gtk::EventBox);
+	} else if (widget_type == "HPANED") {
+		child = manage (new Gtk::HPaned);
+	} else if (widget_type == "VPANED") {
+		child = manage (new Gtk::VPaned);
+	} else if (widget_type == "TABLE") {
+		child = manage (new Gtk::Table (xml_property (definition, "rows", styles, 1),
+									    xml_property (definition, "columns", styles, 1),
+									    xml_property (definition, "homogeneous", styles, false)));
 	} else if (widget_type == "FADER") {
 		std::string face_image = xml_property (definition, "facesource", styles, "");
 		if (face_image.empty()) {
 			dbg_msg("Fader's facesource NOT SPECIFIED!");
-			throw std::exception();
+			abort ();
 		}
 
 		std::string underlay_image = xml_property (definition, "underlaysource", styles, "");
@@ -125,17 +153,17 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 		std::string handle_image = xml_property (definition, "handlesource", styles, "");
 		if (handle_image.empty()) {
 			dbg_msg("Fader's handlesource NOT SPECIFIED!");
-			throw std::exception();
+			abort ();
 		}
 		std::string active_handle_image = xml_property (definition, "activehandlesource", styles, handle_image);
 		if (handle_image.empty()) {
 			dbg_msg("Fader's handlesource NOT SPECIFIED!");
-			throw std::exception();
+			abort ();
 		}
 		std::string adjustment_id = xml_property (definition, "adjustment", styles, "");
 		if (adjustment_id.empty()) {
-			dbg_msg("Fader's adjustment_id NOT SPECIFIED!");
-			throw std::exception();
+			dbg_msg("Fader's adjustment NOT SPECIFIED!");
+			abort ();
 		}
 		int minposx = xml_property (definition, "minposx", styles, -1);
 		int minposy = xml_property (definition, "minposy", styles, -1);
@@ -167,17 +195,31 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 											 max_value,
 											 step,
 											 page_increment));
+	} else if (widget_type != "STYLE") {
+		dbg_msg (std::string("Illegal object type (" + 
+							  definition.name() +
+							  ") occurred in " +
+							  _scrip_file_name +
+							  "!"));
+		abort ();
 	}
 
 	if (child != NULL) {
 		if (!widget_id.empty()) {
 			(*this)[widget_id] = child;
 		}
-		if (dynamic_cast<Gtk::Widget*>(child)) {
-			set_attributes(*dynamic_cast<Gtk::Widget*>(child), definition, styles);
+		if (dynamic_cast<Gtk::Widget*> (child)) {
+			set_attributes(*dynamic_cast<Gtk::Widget*> (child), definition, styles);
 		}
 	}
-	return dynamic_cast<Gtk::Widget*>(child);
+	
+	Gtk::Widget* widget = (xml_property (definition, "ui.orphan", styles, false) ? 0 : dynamic_cast<Gtk::Widget*> (child));
+	
+	if (child && !widget) {
+		_orphan_objects.push_back (child);
+	}
+
+	return widget;
 }
 
 
@@ -203,6 +245,65 @@ WavesUI::add_widget (Gtk::Box& parent, const XMLNode& definition, const XMLNodeM
 	return child;
 }
 
+Gtk::Widget*
+WavesUI::add_widget (Gtk::Paned& parent, const XMLNode& definition, const XMLNodeMap& styles)
+{
+	Gtk::Widget* child = create_widget(definition, styles);
+
+	if (child != NULL)
+	{
+		unsigned pane = xml_property (definition, "paned.pack", styles, 1);
+		bool resize = xml_property (definition, "paned.resize", styles, false);
+		bool shrink = xml_property (definition, "paned.shrink", styles, false);
+		
+		switch (pane) {
+			case 1:
+				parent.pack1(*child, resize, shrink);
+			break;
+			case 2:
+				parent.pack2(*child, resize, shrink);
+			break;
+			default:
+				dbg_msg (std::string("Illegal panned.pack property used in " + _scrip_file_name + "!"));
+				abort ();
+			break;
+		}
+
+	}
+	return child;
+}
+
+Gtk::Widget*
+WavesUI::add_widget (Gtk::Table& parent, const XMLNode& definition, const XMLNodeMap& styles)
+{
+	Gtk::Widget* child = create_widget(definition, styles);
+
+	if (child != NULL)
+	{
+		unsigned left_attach = xml_property (definition, "table.leftattach", styles, 0);
+		unsigned right_attach = xml_property (definition, "table.rightattach", styles, 0);
+		unsigned top_attach = xml_property (definition, "table.topattach", styles, 0);
+		unsigned bottom_attach = xml_property (definition, "table.bottomattach", styles, 0);
+		Gtk::AttachOptions xoptions = (xml_property (definition, "table.xfill", styles, false) ? Gtk::FILL : Gtk::AttachOptions(0)) |
+									  (xml_property (definition, "table.xexpand", styles, false) ? Gtk::EXPAND : Gtk::AttachOptions(0)) |
+									  (xml_property (definition, "table.xshrink", styles, false) ? Gtk::SHRINK : Gtk::AttachOptions(0));
+		Gtk::AttachOptions yoptions = (xml_property (definition, "table.yfill", styles, false) ? Gtk::FILL : Gtk::AttachOptions(0)) |
+									  (xml_property (definition, "table.yexpand", styles, false) ? Gtk::EXPAND : Gtk::AttachOptions(0)) |
+									  (xml_property (definition, "table.yshrink", styles, false) ? Gtk::SHRINK : Gtk::AttachOptions(0));
+		unsigned xpadding =  xml_property (definition, "table.xpadding", styles, 0);
+	    unsigned ypadding =  xml_property (definition, "table.ypadding", styles, 0);
+		parent.attach (*child, 
+					   left_attach,
+					   right_attach,
+					   top_attach,
+					   bottom_attach,
+					   xoptions,
+					   yoptions,
+					   xpadding,
+					   ypadding);
+	}
+	return child;
+}
 
 Gtk::Widget*
 WavesUI::add_widget (Gtk::ScrolledWindow& parent, const XMLNode& definition, const XMLNodeMap& styles)
@@ -266,6 +367,10 @@ WavesUI::add_widget (Gtk::Container& parent, const XMLNode& definition, const XM
 		child = WavesUI::add_widget (*dynamic_cast<Gtk::Layout*> (&parent), definition, styles);
 	} else if(dynamic_cast<Gtk::Box*> (&parent)) {
 		child = WavesUI::add_widget (*dynamic_cast<Gtk::Box*> (&parent), definition, styles);
+	} else if(dynamic_cast<Gtk::Paned*> (&parent)) {
+		child = WavesUI::add_widget (*dynamic_cast<Gtk::Paned*> (&parent), definition, styles);
+	} else if(dynamic_cast<Gtk::Table*> (&parent)) {
+		child = WavesUI::add_widget (*dynamic_cast<Gtk::Table*> (&parent), definition, styles);
 	} else if(dynamic_cast<Gtk::ScrolledWindow*> (&parent)) {
 		child = WavesUI::add_widget (*dynamic_cast<Gtk::ScrolledWindow*> (&parent), definition, styles);
 	} else if(dynamic_cast<Gtk::Window*> (&parent)) {
@@ -274,11 +379,11 @@ WavesUI::add_widget (Gtk::Container& parent, const XMLNode& definition, const XM
 		child = WavesUI::add_widget (*dynamic_cast<Gtk::EventBox*> (&parent), definition, styles);
 	}
 
-	Gtk::Container* container = dynamic_cast<Gtk::Container*>(child);
+	Gtk::Container* container = dynamic_cast<Gtk::Container*> (child);
 
 	if (container != NULL) {
 		WavesUI::create_ui (definition.children(), styles, *container);
-		Gtk::ScrolledWindow* sw = dynamic_cast<Gtk::ScrolledWindow*>(child);
+		Gtk::ScrolledWindow* sw = dynamic_cast<Gtk::ScrolledWindow*> (child);
 		if (sw != NULL) {
 			Gtk::Viewport* vp = (Gtk::Viewport*)sw->get_child();
 			if (vp != NULL) {
@@ -293,8 +398,10 @@ WavesUI::add_widget (Gtk::Container& parent, const XMLNode& definition, const XM
 void
 WavesUI::create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk::Container& root)
 {
-	for (XMLNodeList::const_iterator i = definition.begin(); i != definition.end(); ++i) {
-		WavesUI::add_widget (root, **i, styles);
+	for (XMLNodeList::const_iterator i = definition.begin (); i != definition.end (); ++i) {
+        if (!(**i).is_content()) {
+			WavesUI::add_widget (root, **i, styles);
+		}
 	}
 }
 
@@ -324,9 +431,14 @@ WavesUI::load_layout (const std::string& xml_file_name)
 		return NULL;
 	}
 
-	const XMLTree* tree = new XMLTree (layout_file, false);
-	__xml_tree_cache[xml_file_name] = tree;
-	
+	const XMLTree* tree = 0;
+	try {
+		tree = new XMLTree (layout_file, false);
+		__xml_tree_cache[xml_file_name] = tree;
+	} catch (...) {
+		dbg_msg("Failure to load UI script!\nUI Script: \n\n\t" + layout_file);
+		abort ();
+	}
 	return tree;
 }
 
@@ -470,8 +582,13 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		}
 	}
 
-	Gtk::ScrolledWindow* scrolled_window = dynamic_cast<Gtk::ScrolledWindow*> (&widget);
+	Gtk::Table* table = dynamic_cast<Gtk::Table*> (&widget);
+	if (table) {
+		table->set_col_spacings (xml_property (definition, "columnspacing", styles, 0));
+		table->set_row_spacings (xml_property (definition, "rowspacing", styles, 0));
+	}
 
+	Gtk::ScrolledWindow* scrolled_window = dynamic_cast<Gtk::ScrolledWindow*> (&widget);
 	if (scrolled_window) {
 		Gtk::PolicyType hscrollbar_policy = Gtk::POLICY_AUTOMATIC; 
 		Gtk::PolicyType vscrollbar_policy = Gtk::POLICY_AUTOMATIC;
@@ -512,7 +629,7 @@ WavesUI::get_adjustment(const char* id)
 	Gtk::Adjustment* child = dynamic_cast<Gtk::Adjustment*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Adjustment ") + id + " not found in " + _scrip_file_name + "!");
-		throw std::exception();
+		abort ();
 	}
 	return *child;
 }
@@ -523,7 +640,7 @@ WavesUI::get_container (const char* id)
 	Gtk::Container* child = dynamic_cast<Gtk::Container*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtk::Container ") + id + " not found in " + _scrip_file_name + "!");
-		throw std::exception();
+		abort ();
 	}
 	return *child;
 }
@@ -535,7 +652,7 @@ WavesUI::get_event_box (const char* id)
 	Gtk::EventBox* child = dynamic_cast<Gtk::EventBox*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtk::EventBox ") + id + " not found in " + _scrip_file_name + "!");
-		throw std::exception();
+		abort ();
 	}
 	return *child;
 }
@@ -547,7 +664,7 @@ WavesUI::get_box (const char* id)
 	Gtk::Box* child = dynamic_cast<Gtk::Box*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtk::Box ") + id + " not found in " + _scrip_file_name + "!");
-		throw std::exception();
+		abort ();
 	}
 	return *child;
 }
@@ -559,7 +676,7 @@ WavesUI::get_v_box (const char* id)
 	Gtk::VBox* child = dynamic_cast<Gtk::VBox*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtk::VBox ") + id + " not found in " + _scrip_file_name + "!");
-		throw std::exception();
+		abort ();
 	}
 	return *child;
 }
@@ -571,11 +688,54 @@ WavesUI::get_h_box (const char* id)
 	Gtk::HBox* child = dynamic_cast<Gtk::HBox*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtk::HBox ") + id + " not found in " + _scrip_file_name + "!");
-		throw std::exception();
+		abort ();
 	}
 	return *child;
 }
 
+Gtk::Paned&
+WavesUI::get_paned (const char* id)
+{
+	Gtk::Paned* child = dynamic_cast<Gtk::Paned*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::Paned ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+
+Gtk::HPaned&
+WavesUI::get_h_paned (const char* id)
+{
+	Gtk::HPaned* child = dynamic_cast<Gtk::HPaned*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::HPaned ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+
+Gtk::VPaned&
+WavesUI::get_v_paned (const char* id)
+{
+	Gtk::VPaned* child = dynamic_cast<Gtk::VPaned*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::VPaned ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+
+Gtk::Table& 
+WavesUI::get_table (const char* id)
+{
+	Gtk::Table* child = dynamic_cast<Gtk::Table*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::Table ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
 
 Gtk::Layout&
 WavesUI::get_layout (const char* id)
@@ -583,7 +743,7 @@ WavesUI::get_layout (const char* id)
 	Gtk::Layout* child = dynamic_cast<Gtk::Layout*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtk::Layout ") + id + " not found in " + _scrip_file_name + "!");
-		throw std::exception();
+		abort ();
 	}
 	return *child;
 }
@@ -595,7 +755,7 @@ WavesUI::get_label (const char* id)
 	Gtk::Label* child = dynamic_cast<Gtk::Label*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtk::Label ") + id + " not found in " + _scrip_file_name + "!");
-		throw std::exception();
+		abort ();
 	}
 	return *child;
 }
@@ -607,7 +767,7 @@ WavesUI::get_combo_box_text (const char* id)
 	Gtk::ComboBoxText* child = dynamic_cast<Gtk::ComboBoxText*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtk::ComboBoxText ") + id + " not found in " + _scrip_file_name + "!");
-		throw std::exception();
+		abort ();
 	}
 	return *child;
 }
@@ -619,7 +779,7 @@ WavesUI::get_entry(const char* id)
 	Gtk::Entry* child = dynamic_cast<Gtk::Entry*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtk::Entry ") + id + " not found in " + _scrip_file_name + "!");
-		throw std::exception();
+		abort ();
 	}
 	return *child;
 }
@@ -630,7 +790,7 @@ WavesUI::get_focus_entry(const char* id)
 	Gtkmm2ext::FocusEntry* child = dynamic_cast<Gtkmm2ext::FocusEntry*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtkmm2ext::FocusEntry ") + id + " not found in " + _scrip_file_name + "!");
-		throw std::exception();
+		abort ();
 	}
 	return *child;
 }
@@ -641,7 +801,7 @@ WavesUI::get_spin_button(const char* id)
 	Gtk::SpinButton* child = dynamic_cast<Gtk::SpinButton*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtk::SpinButton ") + id + " not found in " + _scrip_file_name + "!");
-		throw std::exception();
+		abort ();
 	}
 	return *child;
 }
@@ -652,7 +812,7 @@ WavesUI::get_waves_button (const char* id)
 	WavesButton* child = dynamic_cast<WavesButton*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("WavesButton ") + id + " not found in " + _scrip_file_name + "!");
-		throw std::exception();
+		abort ();
 	}
 	return *child;
 }
@@ -663,7 +823,7 @@ WavesUI::get_fader (const char* id)
 	Gtkmm2ext::Fader* child = dynamic_cast<Gtkmm2ext::Fader*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtkmm2ext::Fader ") + id + " not found in " + _scrip_file_name + "!");
-		throw std::exception();
+		abort ();
 	}
 	return *child;
 }

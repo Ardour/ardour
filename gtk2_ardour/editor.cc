@@ -247,9 +247,8 @@ Editor::Editor ()
 	, transport_mark_label (_("Loop/Punch Ranges"))
 	, cd_mark_label (_("CD Markers"))
 	, videotl_label (_("Video Timeline"))
-	, edit_packer (4, 4, true)
-	, global_hpacker (get_h_box ("global_hpacker"))
-	, global_vpacker (get_v_box ("global_vpacker"))
+	, edit_pane (get_h_paned ("edit_pane"))
+	, editor_summary_pane (get_v_paned ("editor_summary_pane"))
 	, inspector_home (get_container ("inspector_home"))
 	, _master_bus_ui_home (get_container ("master_bus_ui_home"))
 	, _compact_meter_bridge_home (get_container ("compact_meter_bridge_home"))
@@ -260,6 +259,18 @@ Editor::Editor ()
 	, _temporal_zoom_adjustment (get_adjustment ("temporal_zoom_adjustment"))
 	, _vertical_zoom_adjustment (get_adjustment ("vertical_zoom_adjustment"))
     , _vertical_zoom_fader (get_fader ("vertical_zoom_fader"))
+	, vertical_adjustment (get_adjustment ("vertical_adjustment"))
+    , horizontal_adjustment (get_adjustment ("horizontal_adjustment"))
+    , unused_adjustment (get_adjustment ("unused_adjustment"))
+	, edit_packer (get_table ("edit_packer"))
+	, time_canvas_event_box (get_event_box ("time_canvas_event_box"))
+	, time_bars_event_box (get_event_box ("time_bars_event_box"))
+	, ruler_label_event_box (get_event_box ("ruler_label_event_box"))
+	, ruler_label_vbox (get_v_box ("ruler_label_vbox"))
+	, time_canvas_vbox (get_v_box ("time_canvas_vbox"))
+	, edit_controls_vbox (get_v_box ("edit_controls_vbox"))
+	, controls_layout (get_layout ("controls_layout"))
+	, time_bars_vbox (get_v_box ("time_bars_vbox"))
 #ifdef TOP_MENUBAR
 	/*
 	 * This is needed for OS X primarily
@@ -272,12 +283,6 @@ Editor::Editor ()
 	  /* the values here don't matter: layout widgets
 	     reset them as needed.
 	  */
-
-	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
-	, horizontal_adjustment (0.0, 0.0, 1e16)
-	, unused_adjustment (0.0, 0.0, 10.0, 400.0)
-
-	, controls_layout (unused_adjustment, vertical_adjustment)
 
 	  /* tool bar related */
 
@@ -369,7 +374,6 @@ Editor::Editor ()
 	tempo_or_meter_marker_menu = 0;
 	transport_marker_menu = 0;
 	new_transport_marker_menu = 0;
-//	editor_mixer_strip_width = Wide;
 	show_editor_mixer_when_tracks_arrive = false;
 	region_edit_menu_split_multichannel_item = 0;
 	region_edit_menu_split_item = 0;
@@ -502,18 +506,10 @@ Editor::Editor ()
 	selection->PointsChanged.connect (sigc::mem_fun(*this, &Editor::point_selection_changed));
 	selection->MarkersChanged.connect (sigc::mem_fun(*this, &Editor::marker_selection_changed));
 
-	edit_controls_vbox.set_spacing (0);
 	vertical_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &Editor::tie_vertical_scrolling), true);
 	_track_canvas->signal_map_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_map_handler));
 
-	HBox* h = manage (new HBox);
 	_group_tabs = new EditorGroupTabs (this);
-	if (!ARDOUR::Profile->get_trx()) {
-		h->pack_start (*_group_tabs, PACK_SHRINK);
-	}
-	h->pack_start (edit_controls_vbox);
-	controls_layout.add (*h);
-
 	controls_layout.set_name ("EditControlsBase");
 	controls_layout.add_events (Gdk::SCROLL_MASK);
 	controls_layout.signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
@@ -536,38 +532,29 @@ Editor::Editor ()
 	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
 	time_canvas_vbox.set_size_request (-1, -1);
 
-	ruler_label_event_box.add (ruler_label_vbox);
+	//ruler_label_event_box.add (ruler_label_vbox);
 	ruler_label_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	ruler_label_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
 
-	time_bars_event_box.add (time_bars_vbox);
+	//time_bars_event_box.add (time_bars_vbox);
 	time_bars_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	time_bars_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
 
-	time_canvas_event_box.add (time_canvas_vbox);
+	//time_canvas_event_box.add (time_canvas_vbox);
 	time_canvas_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 
-	edit_packer.set_col_spacings (0);
-	edit_packer.set_row_spacings (0);
-	edit_packer.set_homogeneous (false);
-	edit_packer.set_border_width (0);
-	edit_packer.set_name ("EditorWindow");
-
 	/* labels for the rulers */
-	edit_packer.attach (ruler_label_event_box,   1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
+//	edit_packer.attach (ruler_label_event_box,   1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
 	/* labels for the marker "tracks" (time bars) */
-	edit_packer.attach (time_bars_event_box,     1, 2, 1, 2,    FILL,        SHRINK, 0, 0);
+//	edit_packer.attach (time_bars_event_box,     1, 2, 1, 2,    FILL,        SHRINK, 0, 0);
 	/* the rulers */
-	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
+	//edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
 	/* track controls */
-	edit_packer.attach (controls_layout,         0, 2, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
+	//edit_packer.attach (controls_layout,         0, 2, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
 	/* time bars canvas */
 	edit_packer.attach (*_time_bars_canvas_viewport, 2, 3, 1, 2,    FILL,    FILL, 0, 0);
 	/* track canvas */
 	edit_packer.attach (*_track_canvas_viewport,  2, 3, 2, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
-
-	bottom_hbox.set_border_width (2);
-	bottom_hbox.set_spacing (3);
 
 	_route_groups = new EditorRouteGroups (this);
 	_routes = new EditorRoutes (this);
@@ -588,8 +575,6 @@ Editor::Editor ()
 	_the_notebook.show_all ();
 
 	_notebook_shrunk = false;
-
-	editor_summary_pane.pack1(edit_packer);
 
 	Button* summary_arrows_left_left = manage (new Button);
 	summary_arrows_left_left->add (*manage (new Arrow (ARROW_LEFT, SHADOW_NONE)));
@@ -633,7 +618,6 @@ Editor::Editor ()
 		editor_summary_pane.pack2 (_summary_hbox);
 	}
 
-	edit_pane.pack1 (editor_summary_pane, true, true);
 	if (!ARDOUR::Profile->get_trx()) {
 		edit_pane.pack2 (_the_notebook, false, true);
 	}
@@ -646,12 +630,6 @@ Editor::Editor ()
 
 	Glib::PropertyProxy<int> proxy = edit_pane.property_position();
 	proxy.signal_changed().connect (bind (sigc::ptr_fun (pane_size_watcher), static_cast<Paned*> (&edit_pane)));
-
-
-	HBox *hbox = manage (new HBox);
-	hbox->pack_start (edit_pane, true, true);
-
-	global_vpacker.pack_start (*hbox, true, true);
 
 	set_name ("EditorWindow");
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
@@ -795,7 +773,7 @@ Editor::Editor ()
 
 Editor::~Editor()
 {
-        delete button_bindings;
+    delete button_bindings;
 	delete _routes;
 	delete _route_groups;
 	delete _time_bars_canvas_viewport;
