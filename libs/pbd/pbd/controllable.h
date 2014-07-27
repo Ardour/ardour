@@ -30,6 +30,9 @@
 
 #include "pbd/statefuldestructible.h"
 
+using std::min;
+using std::max;
+
 class XMLNode;
 
 namespace PBD {
@@ -72,7 +75,7 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 
 	/** Get and Set `interface' value  (typically, percent of knob travel) */
 	virtual float get_interface() const { return (internal_to_interface(get_value())); }
-	virtual void set_interface (float percent) { percent = std::min( std::max(0.0f, percent), 1.0f);  set_value(interface_to_internal(percent)); }
+	virtual void set_interface (float percent) { percent = min( max(0.0f, percent), 1.0f);  set_value(interface_to_internal(percent)); }
 
 	/** Get and Set `user' value  ( dB or milliseconds, etc.  This MIGHT be the same as the internal value, but in a few cases it is not ) */
 	virtual float get_user() const { return (internal_to_user(get_value())); }
