@@ -303,7 +303,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\ardour_display.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\ardour_dropdown.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\ardour_knob.cc"
 				>
 			</File>
 			<File
@@ -1241,7 +1249,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\ardour_display.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\ardour_dropdown.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\ardour_knob.h"
 				>
 			</File>
 			<File
