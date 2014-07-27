@@ -87,6 +87,7 @@ CompactMeterbridge::CompactMeterbridge ()
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
+	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&CompactMeterbridge::sync_order_keys, this), gui_context());
 	CompactMeterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&CompactMeterbridge::remove_strip, this, _1), gui_context());
 }
 
@@ -120,8 +121,8 @@ CompactMeterbridge::session_going_away ()
 {
 	ENSURE_GUI_THREAD (*this, &CompactMeterbridge::session_going_away);
 
-	for (list<CompactMeterStrip*>::iterator i = _strips.begin(); i != _strips.end(); ++i) {
-		delete *i;
+	for (std::map <boost::shared_ptr<ARDOUR::Route>, CompactMeterStrip*>::iterator i = _strips.begin(); i != _strips.end(); ++i) {
+		delete (*i).second;
 	}
 
 	_strips.clear ();
@@ -151,8 +152,8 @@ CompactMeterbridge::fast_update_strips ()
 	if (!is_mapped () || !_session) {
 		return;
 	}
-	for (list<CompactMeterStrip*>::iterator i = _strips.begin(); i != _strips.end(); ++i) {
-		(*i)->fast_update ();
+	for (std::map <boost::shared_ptr<ARDOUR::Route>, CompactMeterStrip*>::iterator i = _strips.begin(); i != _strips.end(); ++i) {
+		(*i).second->fast_update ();
 	}
 }
 
@@ -166,7 +167,8 @@ CompactMeterbridge::add_strips (RouteList& routes)
 		}
 
 		CompactMeterStrip* strip = new CompactMeterStrip (_session, route);
-		_strips.push_back (strip);
+		strip->set_tooltip_text (route->name ()); //just for dbg purposes
+		_strips [route] = strip;
 		strip->show();
 		_compact_meter_strips_home.pack_start (*strip, false, false);
 	}
@@ -179,10 +181,41 @@ CompactMeterbridge::remove_strip (CompactMeterStrip* strip)
 		return;
 	}
 
-	for (list<CompactMeterStrip*>::iterator i = _strips.begin(); i != _strips.end(); ++i) {
-		if ((*i) == strip) {
-			_strips.erase (i);
-			break;
+	boost::shared_ptr<ARDOUR::Route> route = strip->route ();
+	std::map <boost::shared_ptr<ARDOUR::Route>, CompactMeterStrip*>::iterator i = _strips.find (route);
+	if (i != _strips.end ()) {
+		_strips.erase (i);
+	}
+}
+
+void
+CompactMeterbridge::sync_order_keys ()
+{
+	Glib::Threads::Mutex::Lock lm (_resync_mutex);
+
+	if (!_session) {
+		return;
+	}
+
+	SignalOrderRouteSorter sorter;
+	boost::shared_ptr<RouteList> routes = _session->get_routes();
+
+	RouteList copy(*routes);
+	copy.sort(sorter);
+
+	for (std::map<boost::shared_ptr<ARDOUR::Route>, CompactMeterStrip*>::iterator i = _strips.begin(); i != _strips.end(); ++i) {
+		_compact_meter_strips_home.remove (*(*i).second); // we suppose _compact_meter_strips_home is
+		                                                  // the parnet. 
+	}
+
+	for (RouteList::iterator x = copy.begin(); x != copy.end(); ++x) {
+		boost::shared_ptr<Route> route = (*x);
+		if (route->is_auditioner() || route->is_monitor() || route->is_master()) {
+			continue;
+		}
+		std::map <boost::shared_ptr<ARDOUR::Route>, CompactMeterStrip*>::iterator i = _strips.find (route);
+		if (i != _strips.end ()) {
+			_compact_meter_strips_home.pack_start (*(*i).second, false, false);
 		}
 	}
 }
