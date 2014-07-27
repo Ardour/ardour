@@ -104,12 +104,9 @@ CompactMeterbridge::set_session (Session* s)
 		return;
 	}
 
-	SignalOrderRouteSorter sorter;
 	boost::shared_ptr<RouteList> routes = _session->get_routes();
 
-	RouteList copy(*routes);
-	copy.sort(sorter);
-	add_strips(copy);
+	add_strips(*routes);
 
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&CompactMeterbridge::add_strips, this, _1), gui_context());
 
@@ -160,6 +157,13 @@ CompactMeterbridge::fast_update_strips ()
 void
 CompactMeterbridge::add_strips (RouteList& routes)
 {
+	// First detach all the prviously added strips from the ui tree.
+	for (std::map<boost::shared_ptr<ARDOUR::Route>, CompactMeterStrip*>::iterator i = _strips.begin(); i != _strips.end(); ++i) {
+		_compact_meter_strips_home.remove (*(*i).second); // we suppose _compact_meter_strips_home is
+		                                                  // the parnet. 
+	}
+
+	// Now create the strips for newly added routes
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 		if (route->is_auditioner() || route->is_monitor() || route->is_master()) {
@@ -170,7 +174,22 @@ CompactMeterbridge::add_strips (RouteList& routes)
 		strip->set_tooltip_text (route->name ()); //just for dbg purposes
 		_strips [route] = strip;
 		strip->show();
-		_compact_meter_strips_home.pack_start (*strip, false, false);
+	}
+
+	// Now sort the session's routes and pack the strips accordingly
+	SignalOrderRouteSorter sorter;
+	RouteList copy(*_session->get_routes());
+	copy.sort(sorter);
+
+	for (RouteList::iterator x = copy.begin(); x != copy.end(); ++x) {
+		boost::shared_ptr<Route> route = (*x);
+		if (route->is_auditioner() || route->is_monitor() || route->is_master()) {
+			continue;
+		}
+		std::map <boost::shared_ptr<ARDOUR::Route>, CompactMeterStrip*>::iterator i = _strips.find (route);
+		if (i != _strips.end ()) {
+			_compact_meter_strips_home.pack_start (*(*i).second, false, false);
+		}
 	}
 }
 
@@ -200,13 +219,13 @@ CompactMeterbridge::sync_order_keys ()
 	SignalOrderRouteSorter sorter;
 	boost::shared_ptr<RouteList> routes = _session->get_routes();
 
-	RouteList copy(*routes);
-	copy.sort(sorter);
-
 	for (std::map<boost::shared_ptr<ARDOUR::Route>, CompactMeterStrip*>::iterator i = _strips.begin(); i != _strips.end(); ++i) {
 		_compact_meter_strips_home.remove (*(*i).second); // we suppose _compact_meter_strips_home is
 		                                                  // the parnet. 
 	}
+
+	RouteList copy(*routes);
+	copy.sort(sorter);
 
 	for (RouteList::iterator x = copy.begin(); x != copy.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
