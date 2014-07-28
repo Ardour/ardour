@@ -97,7 +97,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, meter_point_button (_("pre"))
 	, midi_input_enable_button (0)
 	, _comment_button (_("Comments"))
-	, _visibility (X_("mixer-strip-visibility"))
+	, _visibility (X_("mixer-element-visibility"))
 {
 	init ();
 
@@ -127,7 +127,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, meter_point_button (_("pre"))
 	, midi_input_enable_button (0)
 	, _comment_button (_("Comments"))
-	, _visibility (X_("mixer-strip-visibility"))
+	, _visibility (X_("mixer-element-visibility"))
 {
 	init ();
 	set_route (rt);
@@ -383,15 +383,14 @@ MixerStrip::init ()
 	   must be the same as those used in RCOptionEditor so that the configuration changes
 	   are recognised when they occur.
 	*/
+	_visibility.add (&input_button, X_("Input"), _("Input"), false);
 	_visibility.add (&_invert_button_box, X_("PhaseInvert"), _("Phase Invert"), false);
 	_visibility.add (&rec_mon_table, X_("RecMon"), _("Record & Monitor"), false);
 	_visibility.add (&solo_iso_table, X_("SoloIsoLock"), _("Solo Iso / Lock"), false);
-	_visibility.add (&group_button, X_("Group"), _("Group"), false);
-	_visibility.add (&meter_point_button, X_("MeterPoint"), _("Meter Point"), false);
 	_visibility.add (&output_button, X_("Output"), _("Output"), false);
 	_visibility.add (&_comment_button, X_("Comments"), _("Comments"), false);
 
-	parameter_changed (X_("mixer-strip-visibility"));
+	parameter_changed (X_("mixer-element-visibility"));
 
 	Config->ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 	_session->config.ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
@@ -672,7 +671,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	group_button.show();
 	gpm.gain_automation_state_button.show();
 
-	parameter_changed ("mixer-strip-visibility");
+	parameter_changed ("mixer-element-visibility");
 
 	show ();
 }

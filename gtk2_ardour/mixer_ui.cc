@@ -293,7 +293,7 @@ Mixer_UI::show_window ()
 			ms = (*ri)[track_columns.strip];
 			ms->set_width_enum (ms->get_width_enum (), ms->width_owner());
 			/* Fix visibility of mixer strip stuff */
-			ms->parameter_changed (X_("mixer-strip-visibility"));
+			ms->parameter_changed (X_("mixer-element-visibility"));
 		}
 	}
 	
@@ -415,10 +415,7 @@ Mixer_UI::deselect_all_strip_processors ()
 void
 Mixer_UI::select_none ()
 {
-	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		(*i)->set_selected(false);
-	}
-	
+	_selection.clear_routes();
 	deselect_all_strip_processors();
 }
 

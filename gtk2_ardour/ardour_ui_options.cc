@@ -326,7 +326,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
 		}
 
-	} else if (p == "always-play-range") {
+	} else if (p == "follow-edits") {
 
 		ActionManager::map_some_state ("Transport", "ToggleFollowEdits", &RCConfiguration::get_follow_edits);
 

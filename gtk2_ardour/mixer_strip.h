@@ -308,7 +308,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	 *  We fill it with the controls that are being managed, using the same names
 	 *  as those used with _mixer_strip_visibility in RCOptionEditor.  Then
 	 *  this VisibilityGroup is configured by changes to the RC variable
-	 *  mixer-strip-visibility, which happen when the user makes changes in
+	 *  mixer-element-visibility, which happen when the user makes changes in
 	 *  the RC option editor.
 	 */
 	VisibilityGroup _visibility;

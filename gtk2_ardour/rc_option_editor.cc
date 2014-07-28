@@ -1230,7 +1230,7 @@ private:
 RCOptionEditor::RCOptionEditor ()
 	: OptionEditor (Config, string_compose (_("%1 Preferences"), PROGRAM_NAME))
         , _rc_config (Config)
-	, _mixer_strip_visibility ("mixer-strip-visibility")
+	, _mixer_strip_visibility ("mixer-element-visibility")
 {
 	/* MISC */
 
@@ -2195,11 +2195,10 @@ RCOptionEditor::RCOptionEditor ()
 	/* The names of these controls must be the same as those given in MixerStrip
 	   for the actual widgets being controlled.
 	*/
+	_mixer_strip_visibility.add (0, X_("Input"), _("Input"));
 	_mixer_strip_visibility.add (0, X_("PhaseInvert"), _("Phase Invert"));
 	_mixer_strip_visibility.add (0, X_("RecMon"), _("Record & Monitor"));
 	_mixer_strip_visibility.add (0, X_("SoloIsoLock"), _("Solo Iso / Lock"));
-	_mixer_strip_visibility.add (0, X_("Group"), _("Group"));
-	_mixer_strip_visibility.add (0, X_("MeterPoint"), _("Meter Point"));
 	_mixer_strip_visibility.add (0, X_("Output"), _("Output"));
 	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
 	

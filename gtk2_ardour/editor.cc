@@ -919,7 +919,7 @@ Editor::show_window ()
 
 		if (current_mixer_strip) {
 			current_mixer_strip->hide_things ();
-			current_mixer_strip->parameter_changed ("mixer-strip-visibility");
+			current_mixer_strip->parameter_changed ("mixer-element-visibility");
 		}
 	}
 
