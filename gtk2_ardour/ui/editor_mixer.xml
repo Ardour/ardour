@@ -152,6 +152,8 @@
       </VBox>
     </EventBox>
     <VBox box.pack="end">
+      <EventBox height="1"
+                bgnormal="#5D5D5D"/>
       <EventBox id="panners_home"
                 bgnormal="#383838"
                 width="95"

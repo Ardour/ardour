@@ -43,9 +43,7 @@ CompactMeterStrip::CompactMeterStrip (Session* sess, boost::shared_ptr<ARDOUR::R
 	, _level_meter (sess)
 	, _record_indicator (get_event_box ("record_indicator"))
 {
-	const XMLNode& definition = *xml_tree ()->root ();
-	XMLNodeMap nothing;
-	set_attributes (*this, *xml_tree ()->root (), nothing);
+	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 
 	_level_meter.set_meter (_route->shared_peak_meter().get());
 	_level_meter.clear_meters();

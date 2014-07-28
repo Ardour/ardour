@@ -3,7 +3,7 @@
 <RouteUI width="97" 
          height="99"
          bgnormal="#000000"
-         bgactive="#6A6A6A"
+         bgactive="#000000"
          peaktreshold="-144.4">
   <VBox  borderwidth="1" spacing="1">
     <Button id="peak_display_button"

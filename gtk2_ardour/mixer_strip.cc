@@ -82,9 +82,9 @@ using namespace ArdourMeter;
 
 int MixerStrip::scrollbar_height = 0;
 PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
-const char* MixerStrip::XMLColor[15] = { "#346B8B", "#2888C0", "#484AA0", "#6948A0", "#8247C4",
-										 "#327C25", "#439B68", "#5BA55C", "#4FCD50", "#05D7C6", 
-										 "#BC7904", "#8A5A07", "#8A7607", "#BCA904", "#CCBF4D" };
+const char* MixerStrip::XMLColor[15] = { "#9a2f16", "#9a4618", "#9a5f1a", "#f48e16", "#f4ad16",
+										 "#4b7c0d", "#1c9a4a", "#1c9b7f", "#1d9b9b", "#197f9a",
+										 "#4937a3", "#6f2ba1", "#7e1a99", "#9a177e", "#242424"};
 
 MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, const std::string& layout_script_file)
 	: AxisView(sess)

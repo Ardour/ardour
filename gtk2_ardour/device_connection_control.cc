@@ -33,8 +33,7 @@ DeviceConnectionControl::DeviceConnectionControl (const std::string& device_capt
 	, _track_name_label (NULL)
 	, _number_label (NULL)
 {
-	XMLNode* root  = xml_tree()->root();
-	WavesUI::set_attributes(*this, *root, XMLNodeMap());
+	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 
 	_active_on_button = &get_waves_button ("capture_on_button");
 	_active_off_button = &get_waves_button ("capture_off_button");
@@ -56,8 +55,7 @@ DeviceConnectionControl::DeviceConnectionControl (const std::string& device_play
 	, _track_name_label (NULL)
 	, _number_label (NULL)
 {
-	XMLNode* root  = xml_tree()->root();
-	WavesUI::set_attributes(*this, *root, XMLNodeMap());
+	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 
 	_active_on_button = &get_waves_button ("playback_on_button");
 	_active_off_button = &get_waves_button ("playback_off_button");

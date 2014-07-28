@@ -104,6 +104,7 @@ MasterBusUI::MasterBusUI (Session* sess)
 	, _clear_solo_button (get_waves_button ("clear_solo_button"))
 	, _global_rec_button (get_waves_button ("global_rec_button"))
 {
+	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 	_level_meter_home.pack_start (_level_meter, true, true);
 	_peak_display_button.unset_flags (Gtk::CAN_FOCUS);
 	_master_mute_button.unset_flags (Gtk::CAN_FOCUS);
@@ -118,7 +119,6 @@ MasterBusUI::MasterBusUI (Session* sess)
 	_master_mute_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_master_mute_button));
 	_clear_solo_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_clear_solo_button));
 	_global_rec_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_global_rec_button));
-
 }
 
 MasterBusUI::~MasterBusUI ()
