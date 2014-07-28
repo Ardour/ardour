@@ -41,6 +41,9 @@ public:
 
 	/** Set the child's visual state */
 	virtual void set_visual_state (VisualState, bool onoff) = 0;
+
+	/** @return True if the child can be selected in the list ( if you don't want it to copy/paste/drag then turn this off ) */
+	virtual bool is_selectable () const = 0;
 };
 
 /** A VBox whose contents can be dragged and dropped */
@@ -565,6 +568,8 @@ private:
 	
 	void add_to_selection (T* child)
 	{
+		if ( !child->is_selectable() )
+			return;
 		_selection.push_back (child);
 		setup_child_state (child);
 	}
