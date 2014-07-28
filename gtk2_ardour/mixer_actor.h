@@ -66,6 +66,9 @@ class MixerActor : virtual public sigc::trackable
 	//BUT... note that we have used mixerstrip's "Enter" to enforce the rule that only one strip will have an active selection
 	virtual void delete_processors () = 0;
 
+	virtual void select_none () = 0;
+
+
         /* these actions need access to a Session, do defer to
 	   a derived class
 	*/

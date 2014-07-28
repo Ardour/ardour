@@ -67,7 +67,7 @@ MixerActor::register_actions ()
 	myactions.register_action ("Mixer", "select-all-processors", _("Select All (visible) Processors"), sigc::mem_fun (*this, &MixerActor::select_all_processors));
 	myactions.register_action ("Mixer", "toggle-processors", _("Toggle Selected Processors"), sigc::mem_fun (*this, &MixerActor::toggle_processors));
 	myactions.register_action ("Mixer", "ab-plugins", _("Toggle Selected Plugins"), sigc::mem_fun (*this, &MixerActor::ab_plugins));
-
+	myactions.register_action ("Mixer", "select-none", _("Deselect all srips and processors"), sigc::mem_fun (*this, &MixerActor::select_none));
 
 	myactions.register_action ("Mixer", "scroll-left", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &MixerActor::scroll_left));
 	myactions.register_action ("Mixer", "scroll-right", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &MixerActor::scroll_right));
