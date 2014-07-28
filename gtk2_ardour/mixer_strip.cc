@@ -261,11 +261,9 @@ MixerStrip::init ()
 	mute_solo_table.set_spacings (2);
 
 	bottom_button_table.set_spacings (2);
-	bottom_button_table.set_homogeneous (false);
-	button_table_row = 0;
-	bottom_button_table.attach (group_button, 0, 1, button_table_row, button_table_row+1);
-	bottom_button_table.attach (gpm.gain_automation_state_button, 1, 2, button_table_row, button_table_row+1);
-	button_table_row++;
+	bottom_button_table.set_homogeneous (true);
+	bottom_button_table.attach (group_button, 1, 2, 0, 1);
+	bottom_button_table.attach (gpm.gain_automation_state_button, 0, 1, 0, 1);
 
 	name_button.set_name ("mixer strip button");
 	name_button.set_text (" "); /* non empty text, forces creation of the layout */
@@ -277,7 +275,7 @@ MixerStrip::init ()
 
 	ARDOUR_UI::instance()->set_tip (&group_button, _("Mix group"), "");
 	group_button.set_name ("mixer strip button");
-	Gtkmm2ext::set_size_request_to_display_given_text (group_button, "Group", 2, 2);
+	Gtkmm2ext::set_size_request_to_display_given_text (group_button, "Grp", 2, 2);
 
 	_comment_button.set_name (X_("mixer strip button"));
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &MixerStrip::toggle_comment_editor));
@@ -462,7 +460,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (monitor_disk_button->get_parent()) {
 		rec_mon_table.remove (*monitor_disk_button);
 	}
-
+	if (group_button.get_parent()) {
+		bottom_button_table.remove (group_button);
+	}
+	
 	RouteUI::set_route (rt);
 
 	/* ProcessorBox needs access to _route so that it can read
@@ -513,6 +514,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		mute_button->show ();
 		rec_mon_table.hide ();
 	} else {
+		bottom_button_table.attach (group_button, 1, 2, 0, 1);
 		mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
 		mute_solo_table.attach (*solo_button, 1, 2, 0, 1);
 		mute_button->show ();
