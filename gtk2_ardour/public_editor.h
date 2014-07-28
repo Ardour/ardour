@@ -238,7 +238,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void export_range () = 0;
 
 	virtual void register_actions () = 0;
-	virtual void add_toplevel_controls (Gtk::Container&) = 0;
+	virtual void add_transport_frame (Gtk::Container&) = 0;
+	virtual void add_toplevel_menu (Gtk::Container&) = 0;
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
 	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
 	virtual framecnt_t get_current_zoom () const = 0;

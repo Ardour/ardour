@@ -802,10 +802,22 @@ Editor::button_settings () const
 }
 
 void
-Editor::add_toplevel_controls (Container& cont)
+Editor::add_toplevel_menu (Container& cont)
 {
 	vpacker.pack_start (cont, false, false);
 	cont.show_all ();
+}
+
+void
+Editor::add_transport_frame (Container& cont)
+{
+	if(ARDOUR::Profile->get_mixbus()) {
+		global_vpacker.pack_start (cont, false, false);
+		global_vpacker.reorder_child (cont, 0);
+		cont.show_all ();
+	} else {
+		vpacker.pack_start (cont, false, false);
+	}
 }
 
 bool
@@ -3023,7 +3035,7 @@ Editor::setup_toolbar ()
 
 	if (!ARDOUR::Profile->get_trx()) {
 		hbox->pack_start (snap_box, false, false);
-		if (!Profile->get_small_screen()) {
+		if ( !Profile->get_small_screen() || Profile->get_mixbus() ) {
 			hbox->pack_start (*nudge_box, false, false);
 		} else {
 			ARDOUR_UI::instance()->editor_transport_box().pack_start (*nudge_box, false, false);

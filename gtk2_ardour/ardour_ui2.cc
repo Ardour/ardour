@@ -112,9 +112,9 @@ ARDOUR_UI::setup_windows ()
 	top_packer.pack_start (menu_bar_base, false, false);
 #endif
 
-	top_packer.pack_start (transport_frame, false, false);
+	editor->add_toplevel_menu (top_packer);
 
-	editor->add_toplevel_controls (top_packer);
+	editor->add_transport_frame (transport_frame);
 
 	setup_transport();
 

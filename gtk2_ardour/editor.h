@@ -277,7 +277,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void export_range ();
 	void export_region ();
 
-	void add_toplevel_controls (Gtk::Container&);
+	void add_transport_frame (Gtk::Container&);
+	void add_toplevel_menu (Gtk::Container&);
 	Gtk::HBox& get_status_bar_packer()  { return status_bar_hpacker; }
 
 	void               set_zoom_focus (Editing::ZoomFocus);
@@ -968,6 +969,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	std::vector<ARDOUR::framepos_t> region_boundary_cache;
 	void build_region_boundary_cache ();
+
+	Gtk::HBox           toplevel_hpacker;
 
 	Gtk::HBox           top_hbox;
 	Gtk::HBox           bottom_hbox;
