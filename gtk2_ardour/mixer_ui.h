@@ -90,6 +90,8 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void deselect_all_strip_processors();
 	void delete_processors();
 
+	void select_none ();
+
   protected:
 	void set_route_targets_for_operation ();
 

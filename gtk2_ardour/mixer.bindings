@@ -18,5 +18,6 @@
      <Binding key="Return" action="Mixer/toggle-processors"/>
      <Binding key="Primary-a" action="Mixer/select-all-processors"/>
      <Binding key="Slash" action="Mixer/ab-plugins"/>
+     <Binding key="Escape" action="Mixer/select-none"/>
   </Press>
 </Bindings>

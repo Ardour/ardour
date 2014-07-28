@@ -413,6 +413,16 @@ Mixer_UI::deselect_all_strip_processors ()
 }
 
 void
+Mixer_UI::select_none ()
+{
+	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		(*i)->set_selected(false);
+	}
+	
+	deselect_all_strip_processors();
+}
+
+void
 Mixer_UI::delete_processors ()
 {
 	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
