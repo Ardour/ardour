@@ -547,7 +547,7 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 	}
 
 	Gtk::Container* container = dynamic_cast<Gtk::Container*> (&widget);
-	if (container) {
+	if (container && !dynamic_cast<WavesButton*> (&widget)) {
 		container->set_border_width (xml_property (definition, "borderwidth", styles, 0));
 	}
 

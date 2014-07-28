@@ -115,25 +115,6 @@ WavesButton::set_angle (const double angle)
 void
 WavesButton::render (cairo_t* cr)
 {
-	void (*rounded_function)(cairo_t*, double, double, double, double, double);
-
-	switch (_corner_mask) {
-	case 0x1: /* upper left only */
-		rounded_function = Gtkmm2ext::rounded_top_left_rectangle;
-		break;
-	case 0x2: /* upper right only */
-		rounded_function = Gtkmm2ext::rounded_top_right_rectangle;
-		break;
-	case 0x3: /* upper only */
-		rounded_function = Gtkmm2ext::rounded_top_rectangle;
-		break;
-		/* should really have functions for lower right, lower left,
-		   lower only, but for now, we don't
-		*/
-	default:
-		rounded_function = Gtkmm2ext::rounded_rectangle;
-	}
-
 	Glib::RefPtr<Gtk::Style> style = get_style();
 	
 	Gdk::Color bgcolor = style->get_bg ((get_state() == Gtk::STATE_INSENSITIVE) ? Gtk::STATE_INSENSITIVE : 
@@ -145,21 +126,48 @@ WavesButton::render (cairo_t* cr)
 													Gtk::STATE_ACTIVE :
 													Gtk::STATE_NORMAL)));
 
-	if ((_left_border_width != 0) ||
-		(_top_border_width != 0) ||
-		(_right_border_width != 0) ||
-		(_bottom_border_width != 0)) {
-		cairo_set_source_rgba (cr, _border_color.get_red_p(), _border_color.get_blue_p(), _border_color.get_green_p(), 1);
-		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
-		cairo_fill (cr);
+	int width = get_width ();
+	int height = get_height();
+
+	cairo_set_source_rgb (cr, _border_color.get_red_p(), _border_color.get_green_p(), _border_color.get_blue_p());
+	if (_left_border_width) {
+		cairo_set_line_width (cr, _left_border_width);
+		cairo_move_to (cr, _left_border_width/2.0, height);
+		cairo_line_to (cr, _left_border_width/2.0, 0);
+		cairo_stroke (cr);
 	}
 
-	rounded_function (cr, _left_border_width, _top_border_width, get_width()-_left_border_width-_right_border_width, get_height()-_top_border_width-_bottom_border_width, _corner_radius);
-	cairo_set_source_rgba (cr, bgcolor.get_red_p(), bgcolor.get_green_p(), bgcolor.get_blue_p(), 1);
+	if (_top_border_width) {
+		cairo_set_line_width (cr, _top_border_width);
+		cairo_move_to (cr, 0, _top_border_width/2.0);
+		cairo_line_to (cr, width, _top_border_width/2.0);
+		cairo_stroke (cr);
+	}
+
+	if (_right_border_width) {
+		cairo_set_line_width (cr, _right_border_width);
+		cairo_move_to (cr, width-_right_border_width/2.0, 0);
+		cairo_line_to (cr, width-_right_border_width/2.0, height);
+		cairo_stroke (cr);
+	}
+
+	if (_bottom_border_width != 0) {
+		cairo_set_line_width (cr, _bottom_border_width);
+		cairo_move_to (cr, width, height-_bottom_border_width/2.0);
+		cairo_line_to (cr, 0, height-_bottom_border_width/2.0);
+		cairo_stroke (cr);
+	}
+
+	cairo_rectangle (cr, 
+					 _left_border_width,
+					 _top_border_width,
+					 width-_left_border_width-_right_border_width,
+					 height-_top_border_width-_bottom_border_width);
+
+	cairo_set_source_rgb (cr, bgcolor.get_red_p(), bgcolor.get_green_p(), bgcolor.get_blue_p());
 	cairo_fill (cr);
 
 	// text, if any
-
 	if (!_text.empty()) {
 		cairo_save (cr);
 		cairo_rectangle (cr, 2, 1, get_width()-4, get_height()-2);

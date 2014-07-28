@@ -3,10 +3,9 @@
   <Adjustment id="gain_adjustment"
           minvalue="0"
           maxvalue="1"/>
-  <VBox Layout="" bgnormal="#380000" bgactive="#6A0000" width="57" height="260">
+  <VBox>
     <Button id="peak_display_button"
-            x="0" y="0"
-            width="59" height="18"
+            width="57" height="16"
             bgnormal="#B1B1B1"
             bgactive="#D83838"
             fgnormal="#000000"
@@ -52,6 +51,6 @@
             fgactive="#000000"
             bghover="#C47474"
             bordercolor="#C9C9C9"
-            _borderwidth="1 1 0 0"/>
+            borderwidth="1 1 0 0"/>
   </VBox>
 </GainSlider>

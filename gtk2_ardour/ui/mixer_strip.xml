@@ -4,12 +4,15 @@
   <HBox>
     <EventBox bgnormal="#383838" bgactive="#545454">
       <VBox>
-        <EventBox id="panners_home" bgnormal="#383838" bgactive="#545454" width="57" height="60"/>
+        <EventBox id="panners_home" bgnormal="#383838" bgactive="#545454" height="60"/>
         <HBox id="level_meter_home"/>
         <Vbox>
           <HBox id="gain_meter_home"/>
-          <EventBox borderwidth="1" bgnormal="#383838" bgactive="#545454">
+            <EventBox bgnormal="#383838" bgactive="#545454">
             <VBox>
+              <EventBox bgnormal="#000000"
+                        bgactive="#000000"
+                        height="1"/>
               <HBox>
                 <iconbutton id="rec_enable_button"
                             width="28"
@@ -55,9 +58,16 @@
               <Button id="name_button"
                       width="57"
                       height="28"/>
+              <EventBox bgnormal="#000000"
+                        bgactive="#000000"
+                        height="1"/>
             </VBox>
           </EventBox>
         </Vbox>
+        <EventBox bgnormal="#000000"
+                  bgactive="#000000"
+                  height="1"
+                  box.pack="end"/>
       </VBox>
     </EventBox>
     <EventBox bgnormal="#000000"
