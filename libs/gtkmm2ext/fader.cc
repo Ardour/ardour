@@ -204,8 +204,8 @@ Fader::render (cairo_t* cr)
 	    cairo_rectangle (cr, 0, 0, get_width(), get_height());
 		gdk_cairo_set_source_pixbuf (cr,
 									 _underlay_pixbuf->gobj(),
-									 _last_drawn_x - _underlay_pixbuf->get_width()/2.0,
-									 _last_drawn_y - _underlay_pixbuf->get_height()/2.0);
+									 _last_drawn_x - (int)(_underlay_pixbuf->get_width()/2.0 + 0.5),
+									 _last_drawn_y - (int)(_underlay_pixbuf->get_height()/2.0 + 0.5));
 	    cairo_fill (cr);
 	}
 
@@ -222,13 +222,13 @@ Fader::render (cairo_t* cr)
 	if (_dragging) {
 		gdk_cairo_set_source_pixbuf (cr,
 									 _active_handle_pixbuf->gobj(),
-									 _last_drawn_x - _active_handle_pixbuf->get_width()/2.0,
-									 _last_drawn_y - _active_handle_pixbuf->get_height()/2.0);
+									 _last_drawn_x - (int)(_active_handle_pixbuf->get_width()/2.0 + 0.5),
+									 _last_drawn_y - (int)(_active_handle_pixbuf->get_height()/2.0 + 0.5));
 	} else {
 		gdk_cairo_set_source_pixbuf (cr,
 									 _handle_pixbuf->gobj(),
-									 _last_drawn_x - _handle_pixbuf->get_width()/2.0,
-									 _last_drawn_y - _handle_pixbuf->get_height()/2.0);
+									 _last_drawn_x - (int)(_handle_pixbuf->get_width()/2.0 + 0.5),
+									 _last_drawn_y - (int)(_handle_pixbuf->get_height()/2.0 + 0.5));
 	}
     cairo_fill (cr);
 }
@@ -410,8 +410,8 @@ Fader::get_handle_position (double& x, double& y)
 {
 	double fract = (adjustment.get_value () - adjustment.get_lower()) / ((adjustment.get_upper() - adjustment.get_lower()));
 
-	x = _min_pos_x + (_max_pos_x - _min_pos_x) * fract;
-	y = _min_pos_y + (_max_pos_y - _min_pos_y) * fract;
+	x = (int)(_min_pos_x + (_max_pos_x - _min_pos_x) * fract);
+	y = (int)(_min_pos_y + (_max_pos_y - _min_pos_y) * fract);
 }
 
 bool

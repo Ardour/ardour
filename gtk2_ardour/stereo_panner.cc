@@ -117,8 +117,8 @@ StereoPanner::render (cairo_t* cr)
 {
 	unsigned pos = (unsigned)(rint (100.0 * position_control->get_value ())); /* 0..100 */
 
-	double x = (get_width() - _knob_image[pos]->get_width())/2.0;
-	double y = (get_height() - _knob_image[pos]->get_height())/2.0;
+	int x = (int)((get_width() - _knob_image[pos]->get_width())/2.0);
+	int y = (int)((get_height() - _knob_image[pos]->get_height())/2.0);
 
 	cairo_rectangle (cr, x, y, _knob_image[pos]->get_width(), _knob_image[pos]->get_height());
 

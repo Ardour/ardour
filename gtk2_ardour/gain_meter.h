@@ -143,8 +143,6 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
 	std::string short_astyle_string (ARDOUR::AutoStyle);
 	std::string _astyle_string (ARDOUR::AutoStyle, bool);
 
-	Width _width;
-
 	void show_gain ();
 	void gain_activated ();
 	bool gain_focused (GdkEventFocus*);
@@ -195,11 +193,13 @@ private:
 	bool level_meter_button_press (GdkEventButton *);
 	PBD::ScopedConnection _level_meter_connection;
 
-	//
 	void meter_configuration_changed (ARDOUR::ChanCount);
 	void meter_type_changed (ARDOUR::MeterType);
 
 	std::vector<ARDOUR::DataType> _types;
+
+	int _meter_width;
+	int _thin_meter_width;
 };
 
 #endif /* __ardour_gtk_gain_meter_h__ */

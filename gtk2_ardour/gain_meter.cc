@@ -73,6 +73,8 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	, level_meter_home (get_box ("level_meter_home"))
 	, level_meter (_session)
     , _data_type (DataType::AUDIO)
+	, _meter_width (xml_property (*xml_tree ()->root (), "meterwidth", 5))
+	, _thin_meter_width (xml_property (*xml_tree ()->root (), "thinmeterwidth", 5))
 {
 	using namespace Menu_Helpers;
 	//gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0.0, 1.0, 0.01, 0.1)
@@ -86,7 +88,6 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	ignore_toggle = false;
 	meter_menu = 0;
 	next_release_selects = false;
-	_width = Wide;
 
 	level_meter_home.pack_start(level_meter);
 	level_meter.ButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&GainMeter::level_meter_button_press, this, _1));
@@ -275,15 +276,7 @@ GainMeter::hide_all_meters ()
 void
 GainMeter::setup_meters (int len)
 {
-	int meter_width = 5;
-	uint32_t meter_channels = 0;
-	if (_meter) {
-		meter_channels = _meter->input_streams().n_total();
-	} else if (_route) {
-		meter_channels = _route->shared_peak_meter()->input_streams().n_total();
-	}
-
-	level_meter.setup_meters (meter_width, meter_width);
+	level_meter.setup_meters (_meter_width, _thin_meter_width);
 }
 
 void
@@ -329,7 +322,6 @@ GainMeter::reset_peak_display ()
 	max_peak = -INFINITY;
 	peak_display_button.set_text (_("-inf"));
 	peak_display_button.set_active_state(Gtkmm2ext::Off);
-//	peak_display_button.set_name ("MixerStripPeakDisplay");
 }
 
 void

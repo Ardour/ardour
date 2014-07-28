@@ -4,7 +4,7 @@
   <HBox>
     <EventBox bgnormal="#383838" bgactive="#545454">
       <VBox>
-        <EventBox id="panners_home" bgnormal="#383838" bgactive="#545454" height="60"/>
+        <EventBox id="panners_home" bgnormal="#383838" bgactive="#545454" height="59"/>
         <HBox id="level_meter_home"/>
         <Vbox>
           <HBox id="gain_meter_home"/>
