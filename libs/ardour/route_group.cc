@@ -79,7 +79,7 @@ RouteGroup::make_property_quarks ()
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for monitoring = %1\n",       Properties::monitoring.property_id));
 }
 
-#define ROUTE_GROUP_DEFAULT_PROPERTIES  _relative (Properties::relative, false) \
+#define ROUTE_GROUP_DEFAULT_PROPERTIES  _relative (Properties::relative, true) \
 	, _active (Properties::active, false) \
 	, _hidden (Properties::hidden, false) \
 	, _gain (Properties::gain, false) \
