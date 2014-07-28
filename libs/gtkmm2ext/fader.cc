@@ -188,19 +188,16 @@ Fader::Fader (Gtk::Adjustment& adj,
 
 	adjustment.signal_value_changed().connect (mem_fun (*this, &Fader::adjustment_changed));
 	adjustment.signal_changed().connect (mem_fun (*this, &Fader::adjustment_changed));
-    DrawingArea::set_size_request(_face_pixbuf->get_width(), _face_pixbuf->get_height());
+    CairoWidget::set_size_request(_face_pixbuf->get_width(), _face_pixbuf->get_height());
 }
 
 Fader::~Fader ()
 {
 }
 
-bool
-Fader::on_expose_event (GdkEventExpose* ev)
+void
+Fader::render (cairo_t* cr)
 {
-	Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
-	cairo_t* cr = context->cobj();
-    
 	get_handle_position (_last_drawn_x, _last_drawn_y);
 
 	if (_underlay_pixbuf != 0) {
@@ -234,8 +231,6 @@ Fader::on_expose_event (GdkEventExpose* ev)
 									 _last_drawn_y - _handle_pixbuf->get_height()/2.0);
 	}
     cairo_fill (cr);
-
-	return true;
 }
 
 void
@@ -248,7 +243,7 @@ Fader::on_size_request (GtkRequisition* req)
 void
 Fader::on_size_allocate (Gtk::Allocation& alloc)
 {
-    DrawingArea::on_size_allocate(alloc);
+    CairoWidget::on_size_allocate(alloc);
 	update_unity_position ();
 }
 

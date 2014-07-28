@@ -1,200 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <RouteUI>
-  <EventBox bgnormal="#383838" bgactive="#545454">
-    <VBox>
-      <EventBox id="color_palette_home" borderwidth="1" noshowall="true" visible="false">
-        <VBox>
-          <iconbutton id="color_palette_button"
-                      width="95"
-                      height="17"
-                      normalicon="inspector_color_close"
-                      activeicon="inspector_color_open"/>
-          <VBox id="color_buttons_home">
-            <HBox>
-              <iconbutton id="color_button_1"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_1"
-                          activeicon="inspector_color_1_active"
-                          prelighticon="inspector_color_1_prelight"/>
-              <iconbutton id="color_button_2"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_2"
-                          activeicon="inspector_color_2_active"
-                          prelighticon="inspector_color_2_prelight"/>
-              <iconbutton id="color_button_3"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_3"
-                          activeicon="inspector_color_3_active"
-                          prelighticon="inspector_color_3_prelight"/>
-              <iconbutton id="color_button_4"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_4"
-                          activeicon="inspector_color_4_active"
-                          prelighticon="inspector_color_4_prelight"/>
-              <iconbutton id="color_button_5"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_5"
-                          activeicon="inspector_color_5_active"
-                          prelighticon="inspector_color_5_prelight"/>
-            </HBox>
-            <HBox>
-              <iconbutton id="color_button_6"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_6"
-                          activeicon="inspector_color_6_active"
-                          prelighticon="inspector_color_6_prelight"/>
-              <iconbutton id="color_button_7"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_7"
-                          activeicon="inspector_color_7_active"
-                          prelighticon="inspector_color_7_prelight"/>
-              <iconbutton id="color_button_8"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_8"
-                          activeicon="inspector_color_8_active"
-                          prelighticon="inspector_color_8_prelight"/>
-              <iconbutton id="color_button_9"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_9"
-                          activeicon="inspector_color_9_active"
-                          prelighticon="inspector_color_9_prelight"/>
-              <iconbutton id="color_button_10"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_10"
-                          activeicon="inspector_color_10_active"
-                          prelighticon="inspector_color_10_prelight"/>
-            </HBox>
-            <HBox>
-              <iconbutton id="color_button_11"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_11"
-                          activeicon="inspector_color_11_active"
-                          prelighticon="inspector_color_11_prelight"/>
-              <iconbutton id="color_button_12"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_12"
-                          activeicon="inspector_color_12_active"
-                          prelighticon="inspector_color_12_prelight"/>
-              <iconbutton id="color_button_13"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_13"
-                          activeicon="inspector_color_13_active"
-                          prelighticon="inspector_color_13_prelight"/>
-              <iconbutton id="color_button_14"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_14"
-                          activeicon="inspector_color_14_active"
-                          prelighticon="inspector_color_14_prelight"/>
-              <iconbutton id="color_button_15"
-                          width="19"
-                          height="19"
-                          normalicon="inspector_color_15"
-                          activeicon="inspector_color_15_active"
-                          prelighticon="inspector_color_15_prelight"/>
-            </HBox>
-          </VBox>
-        </VBox>
-      </EventBox>
-      <VBox borderwidth="1" 
-            noshowall="true"
-            visible="false">
-        <iconbutton id="info_panel_button"
-                    width="95"
-                    height="17"
-                    normalicon="inspector_info_close"
-                    activeicon="inspector_info_open"/>
-        <VBox id="info_panel_home"
-              noshowall="true"
-              visible="false">
-          <VBox height="1"/>
-          <EventBox bgnormal="#4F4F4F" width="95">
-            <VBox>
-              <HBox box.padding="4">
-                <HBox width="7"/>
-                <Label id="input_info_label"
-                       text="IN Grisha, Kolya"
-                       font="Arial Bold 7"/>
-                <HBox box.fill="true" box.expand="true"/>
-              </HBox>
-              <HBox>
-                <HBox width="7"/>
-                <Label id="output_info_label"
-                       text="OUT please code it"
-                       font="Arial Bold 7"/>
-                <HBox box.fill="true" box.expand="true"/>
-              </HBox>
-              <HBox height="5"/>
-            </VBox>
-          </EventBox>
-        </VBox>
-      </VBox>
-
-      <VBox box.pack="end">
+  <HBox>
+    <EventBox bgnormal="#383838" bgactive="#545454">
+      <VBox>
         <EventBox id="panners_home" bgnormal="#383838" bgactive="#545454" width="57" height="60"/>
         <HBox id="level_meter_home"/>
         <Vbox>
           <HBox id="gain_meter_home"/>
-          <!--RouteUI-->
-          <HBox id="invert_button_box" visible="false"/>
-          <EventBox bgnormal="#000000" width="50">
-            <EventBox borderwidth="1" bgnormal="#383838" bgactive="#545454">
-              <VBox spacing="1">
-                <HBox spacing="1">
-                  <iconbutton id="rec_enable_button"
-                              width="28"
-                              height="20"
-                              normalicon="mixer_record"
-                              activeicon="mixer_record_active"
-                              prelighticon="mixer_record_prelight"/>
-                  <iconbutton id="monitor_input_button"
-                              width="28"
-                              height="20"
-                              normalicon="mixer_monitor_input"
-                              activeicon="mixer_monitor_input_active"
-                              prelighticon="mixer_monitor_input_prelight"/>
-                </HBox>
-                <HBox spacing="1">
-                  <iconbutton id="mute_button"
-                              width="28"
-                              height="20"
-                              normalicon="mixer_mute"
-                              activeicon="mixer_mute_active"
-                              prelighticon="mixer_mute_prelight"/>
-                  <iconbutton id="solo_button"
-                              width="28"
-                              height="20"
-                              normalicon="mixer_solo"
-                              activeicon="mixer_solo_active"
-                              prelighticon="mixer_solo_prelight"/>
-                </HBox>
-                <Button id="name_button"
-                        width="57"
-                        height="28"/>
-              </VBox>
-            </EventBox>
+          <EventBox borderwidth="1" bgnormal="#383838" bgactive="#545454">
+            <VBox>
+              <HBox>
+                <iconbutton id="rec_enable_button"
+                            width="28"
+                            height="20"
+                            normalicon="mixer_record"
+                            activeicon="mixer_record_active"
+                            prelighticon="mixer_record_prelight"/>
+                <EventBox bgnormal="#000000"
+                          bgactive="#000000"
+                          width="1"/>
+                <iconbutton id="monitor_input_button"
+                            width="28"
+                            height="20"
+                            normalicon="mixer_monitor_input"
+                            activeicon="mixer_monitor_input_active"
+                            prelighticon="mixer_monitor_input_prelight"/>
+              </HBox>
+              <EventBox bgnormal="#000000"
+                        bgactive="#000000"
+                        height="1"/>
+              <HBox>
+                <iconbutton id="mute_button"
+                            width="28"
+                            height="20"
+                            normalicon="mixer_mute"
+                            activeicon="mixer_mute_active"
+                            implicitactiveicon="mixer_mute_implicit"
+                            prelighticon="mixer_mute_prelight"/>
+                <EventBox bgnormal="#000000"
+                          bgactive="#000000"
+                          width="1"/>
+                <iconbutton id="solo_button"
+                            width="28"
+                            height="20"
+                            normalicon="mixer_solo"
+                            activeicon="mixer_solo_active"
+                            implicitactiveicon="mixer_solo_safe"
+                            prelighticon="mixer_solo_prelight"/>
+              </HBox>
+              <EventBox bgnormal="#000000"
+                        bgactive="#000000"
+                        height="1"/>
+              <Button id="name_button"
+                      width="57"
+                      height="28"/>
+            </VBox>
           </EventBox>
-          <Button id="show_sends_button"  visible="false" noshowall="true"/>
-          <Button id="monitor_disk_button"  visible="false" noshowall="true"/>
-          <Button id="comment_button"  visible="false" noshowall="true"/>
-          <Button id="midi_input_enable_button"  visible="false" noshowall="true"/>
-          <Button id="group_button" text="Grp" visible="false" noshowall="true"/>
         </Vbox>
       </VBox>
-    </VBox>
-  </EventBox>
+    </EventBox>
+    <EventBox bgnormal="#000000"
+              bgactive="#000000"
+              width="1"/>
+  </HBox>
+  <Button id="show_sends_button" ui.orphan="true"/>
+  <Button id="monitor_disk_button" ui.orphan="true"/>
+  <Button id="comment_button" ui.orphan="true"/>
+  <Button id="midi_input_enable_button" ui.orphan="true"/>
+  <Button id="group_button" text="Grp" ui.orphan="true"/>
+  <HBox id="invert_button_box" ui.orphan="true"/>
+  <button id="color_palette_button" ui.orphan="true"/>
+  <button id="color_button_1" ui.orphan="true"/>
+  <button id="color_button_2" ui.orphan="true"/>
+  <button id="color_button_3" ui.orphan="true"/>
+  <button id="color_button_4" ui.orphan="true"/>
+  <button id="color_button_5" ui.orphan="true"/>
+  <button id="color_button_6" ui.orphan="true"/>
+  <button id="color_button_7" ui.orphan="true"/>
+  <button id="color_button_8" ui.orphan="true"/>
+  <button id="color_button_9" ui.orphan="true"/>
+  <button id="color_button_10" ui.orphan="true"/>
+  <button id="color_button_11" ui.orphan="true"/>
+  <button id="color_button_12" ui.orphan="true"/>
+  <button id="color_button_13" ui.orphan="true"/>
+  <button id="color_button_14" ui.orphan="true"/>
+  <button id="color_button_15" ui.orphan="true"/>
+  <EventBox id="color_palette_home" ui.orphan="true"/>
+  <VBox id="color_buttons_home" ui.orphan="true"/>
+  <Button id="info_panel_button" ui.orphan="true"/>
+  <Label id="input_info_label" ui.orphan="true"/>
+  <Label id="output_info_label" ui.orphan="true"/>
+  <VBox id="info_panel_home" ui.orphan="true"/>
 </RouteUI>

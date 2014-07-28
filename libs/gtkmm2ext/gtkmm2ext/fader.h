@@ -23,10 +23,10 @@
 #include <cmath>
 #include <stdint.h>
 
-#include <gtkmm/drawingarea.h>
 #include <gtkmm/adjustment.h>
 #include <gdkmm.h>
 #include <gtkmm2ext/binding_proxy.h>
+#include "gtkmm2ext/cairo_widget.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -34,7 +34,7 @@
 
 namespace Gtkmm2ext {
 
-class LIBGTKMM2EXT_API Fader : public Gtk::DrawingArea
+class LIBGTKMM2EXT_API Fader : public CairoWidget
 {
   public:
         Fader (Gtk::Adjustment& adjustment, 
@@ -61,7 +61,7 @@ class LIBGTKMM2EXT_API Fader : public Gtk::DrawingArea
 	void on_size_request (GtkRequisition*);
 	void on_size_allocate (Gtk::Allocation& alloc);
 
-	bool on_expose_event (GdkEventExpose*);
+	void render (cairo_t* cr);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 	bool on_motion_notify_event (GdkEventMotion*);

@@ -255,6 +255,7 @@ void
 Editor::track_mixer_selection ()
 {
 	Mixer_UI::instance()->selection().RoutesChanged.connect (sigc::mem_fun (*this, &Editor::follow_mixer_selection));
+	_mixer_bridge_view.track_editor_selection ();
 }
 
 void

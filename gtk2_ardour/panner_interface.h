@@ -21,10 +21,10 @@
 #define __gtk_ardour_panner_interface_h__
 
 #include <boost/shared_ptr.hpp>
-#include <gtkmm/drawingarea.h>
 #include <gtkmm/label.h>
 #include "gtkmm2ext/persistent_tooltip.h"
 #include "pbd/destructible.h"
+#include "gtkmm2ext/cairo_widget.h"
 
 namespace ARDOUR {
 	class Panner;
@@ -48,7 +48,7 @@ private:
 	
 
 /** Parent class for some panner UI classes that contains some common code */
-class PannerInterface : public Gtk::DrawingArea, public PBD::Destructible
+class PannerInterface : public CairoWidget, public PBD::Destructible
 {
 public:
 	PannerInterface (boost::shared_ptr<ARDOUR::Panner>);

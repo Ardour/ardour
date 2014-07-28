@@ -58,6 +58,7 @@
 #include "editor_items.h"
 #include "region_selection.h"
 #include "compact_meter_bridge.h"
+#include "mixer_bridge_view.h"
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -688,7 +689,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gtk::Container& inspector_home;
 	Gtk::Container& _master_bus_ui_home;
-	Gtk::Container& _compact_meter_bridge_home;
 	MasterBusUI*    _master_bus_ui;
 	Gtk::VBox&      vpacker;
 
@@ -1901,6 +1901,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	MixerStrip *current_mixer_strip;
 	CompactMeterbridge _compact_meter_bridge;
+	MixerBridgeView _mixer_bridge_view;
 	bool show_editor_mixer_when_tracks_arrive;
 	void cms_new (boost::shared_ptr<ARDOUR::Route>);
 	void current_mixer_strip_hidden ();

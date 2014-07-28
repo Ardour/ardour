@@ -112,20 +112,18 @@ StereoPanner::set_tooltip ()
 	_tooltip.set_tip (buf);
 }
 
-bool
-StereoPanner::on_expose_event (GdkEventExpose*)
+void
+StereoPanner::render (cairo_t* cr)
 {
-	Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
 	unsigned pos = (unsigned)(rint (100.0 * position_control->get_value ())); /* 0..100 */
 
 	double x = (get_width() - _knob_image[pos]->get_width())/2.0;
 	double y = (get_height() - _knob_image[pos]->get_height())/2.0;
 
-	cairo_rectangle (context->cobj(), x, y, _knob_image[pos]->get_width(), _knob_image[pos]->get_height());
+	cairo_rectangle (cr, x, y, _knob_image[pos]->get_width(), _knob_image[pos]->get_height());
 
-	gdk_cairo_set_source_pixbuf (context->cobj(), _knob_image[pos]->gobj(), x, y);
-	cairo_fill (context->cobj());
-	return true;
+	gdk_cairo_set_source_pixbuf (cr, _knob_image[pos]->gobj(), x, y);
+	cairo_fill (cr);
 }
 
 bool

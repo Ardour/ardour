@@ -3,7 +3,7 @@
   <Adjustment id="gain_adjustment"
           minvalue="0"
           maxvalue="1"/>
-  <VBox Layout="" bgnormal="#380000" bgactive="#6A0000" width="57" height="252">
+  <VBox Layout="" bgnormal="#380000" bgactive="#6A0000" width="57" height="260">
     <Button id="peak_display_button"
             x="0" y="0"
             width="59" height="18"
@@ -16,26 +16,27 @@
             borderwidth="1 1 0 0"/>
     <HBox>
       <VBox>
-        <HBox height ="10"/>
-        <VBox id="level_meter_home"
-              x="1"
-              y="36"
-              width="17"
-              height="187"/>
-        <HBox height ="13"/>
+        <HBox box.padding="18" spacing="4">
+          <VBox id="level_meter_home"
+                width="17"
+                height="187"/>
+           <icon source="mixer_strip_meter_marks.png"/>
+        </HBox>
       </VBox>
-      <icon source="mixer_strip_meter_marks.png"/>
-      <Fader id="gain_slider" bgnormal="#303030" bgactive="#545454"
-             adjustment="gain_adjustment"
-             facesource="slider_controller_fader.png"
-             underlaysource="slider_controller_fader_underlay.png"
-             handlesource="slider_controller_fader_handle.png"
-             activehandlesource="slider_controller_fader_handle.png"
-             minposx="10"
-             minposy="196"
-             maxposx="10"
-             maxposy="10"
-             height="210"/>
+      <VBox>
+        <Fader id="gain_slider"
+               adjustment="gain_adjustment"
+               facesource="slider_controller_fader.png"
+               activefacesource="slider_controller_active_fader.png"
+               underlaysource="slider_controller_fader_underlay.png"
+               handlesource="slider_controller_fader_handle.png"
+               activehandlesource="slider_controller_fader_handle.png"
+               minposx="10"
+               minposy="196"
+               maxposx="10"
+               maxposy="10"
+               box.padding="8"/>
+      </VBox>
     </HBox>
     <EventBox id="gain_display_home"
               width="57"
