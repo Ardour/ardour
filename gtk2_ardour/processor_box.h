@@ -119,6 +119,9 @@ public:
 	std::string drag_text () const;
 	void set_visual_state (Gtkmm2ext::VisualState, bool);
 
+	bool is_selectable() const {return _selectable;}
+	void set_selectable(bool s) { _selectable = s; }
+	
 	enum Position {
 		PreFader,
 		Fader,
@@ -149,6 +152,7 @@ protected:
 	virtual void setup_visuals ();
 
 private:
+	bool _selectable;
 	void led_clicked();
 	void processor_active_changed ();
 	void processor_property_changed (const PBD::PropertyChange&);

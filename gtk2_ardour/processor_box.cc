@@ -103,6 +103,7 @@ static const uint32_t midi_port_color = 0x960909FF; //Red
 ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processor> p, Width w)
 	: _button (ArdourButton::led_default_elements)
 	, _position (PreFader)
+	, _selectable(true)
 	, _parent (parent)
 	, _processor (p)
 	, _width (w)
@@ -1753,12 +1754,20 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	}
 
 	boost::shared_ptr<PluginInsert> plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (processor);
+	
 	ProcessorEntry* e = 0;
 	if (plugin_insert) {
 		e = new PluginInsertProcessorEntry (this, plugin_insert, _width);
 	} else {
 		e = new ProcessorEntry (this, processor, _width);
 	}
+
+	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
+	boost::shared_ptr<PortInsert> ext = boost::dynamic_pointer_cast<PortInsert> (processor);
+	
+	//faders and meters are not deletable, copy/paste-able, so they shouldn't be selectable
+	if (!send && !plugin_insert && !ext)
+		e->set_selectable(false);
 
 	/* Set up this entry's state from the GUIObjectState */
 	XMLNode* proc = entry_gui_object_state (e);
