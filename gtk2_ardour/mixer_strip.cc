@@ -78,7 +78,6 @@ using namespace ArdourMeter;
 
 MixerStrip* MixerStrip::_entered_mixer_strip;
 
-int MixerStrip::scrollbar_height = 0;
 PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
 
 MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
@@ -522,17 +521,16 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		rec_mon_table.show ();
 	}
 
-	if (_mixer_owned && (route()->is_master() || route()->is_monitor())) {
+	if (_mixer_owned && route()->is_master() ) {
 
-		if (scrollbar_height == 0) {
-			HScrollbar scrollbar;
-			Gtk::Requisition requisition(scrollbar.size_request ());
-			scrollbar_height = requisition.height;
-		}
+		HScrollbar scrollbar;
+		Gtk::Requisition requisition(scrollbar.size_request ());
+		int scrollbar_height = requisition.height;
 
 		spacer = manage (new EventBox);
-		spacer->set_size_request (-1, scrollbar_height);
+		spacer->set_size_request (-1, scrollbar_height+2);
 		global_vpacker.pack_start (*spacer, false, false);
+		spacer->show();
 	}
 
 	if (is_track()) {

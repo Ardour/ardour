@@ -120,7 +120,7 @@ Mixer_UI::Mixer_UI ()
 	b->show_all ();
 
 	scroller.add (*b);
-	scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
 
 	setup_track_display ();
 

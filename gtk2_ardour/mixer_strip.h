@@ -298,8 +298,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	void reset_strip_style ();
 
-	static int scrollbar_height;
-
 	void update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width width, bool input_button);
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
 
