@@ -2095,6 +2095,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void follow_mixer_selection ();
 	bool _following_mixer_selection;
 
+	void follow_mixer_bridge_view_selection ();
+	bool _following_mixer_bridge_view_selection;
+
 	int time_fx (ARDOUR::RegionList&, float val, bool pitching);
         void note_edit_done (int, EditNoteDialog*);
 	void toggle_sound_midi_notes ();

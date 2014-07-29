@@ -304,6 +304,7 @@ Editor::Editor ()
 
 	, _region_selection_change_updates_region_list (true)
 	, _following_mixer_selection (false)
+	, _following_mixer_bridge_view_selection (false)
 	, _control_point_toggled_on_press (false)
 	, _stepping_axis_view (0)
 	, current_mixer_strip (0)

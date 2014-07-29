@@ -255,13 +255,14 @@ void
 Editor::track_mixer_selection ()
 {
 	Mixer_UI::instance()->selection().RoutesChanged.connect (sigc::mem_fun (*this, &Editor::follow_mixer_selection));
+	_mixer_bridge_view.selection().RoutesChanged.connect (sigc::mem_fun (*this, &Editor::follow_mixer_bridge_view_selection));
 	_mixer_bridge_view.track_editor_selection ();
 }
 
 void
 Editor::follow_mixer_selection ()
 {
-	if (!ARDOUR::Config->get_link_editor_and_mixer_selection() || _following_mixer_selection) {
+	if (/*!ARDOUR::Config->get_link_editor_and_mixer_selection() ||*/ _following_mixer_selection) {
 		return;
 	}
 
@@ -280,6 +281,33 @@ Editor::follow_mixer_selection ()
 	}
 
 	_following_mixer_selection = false;
+	selection->block_tracks_changed (false);
+	selection->TracksChanged (); /* EMIT SIGNAL */
+}
+
+
+void
+Editor::follow_mixer_bridge_view_selection ()
+{
+	if (/*!ARDOUR::Config->get_link_editor_and_mixer_selection() || */_following_mixer_bridge_view_selection) {
+		return;
+	}
+
+	_following_mixer_bridge_view_selection = true;
+	selection->block_tracks_changed (true);
+
+	RouteUISelection& s (_mixer_bridge_view.selection().routes);
+
+	selection->clear_tracks ();
+
+	for (RouteUISelection::iterator i = s.begin(); i != s.end(); ++i) {
+		TimeAxisView* tav = get_route_view_by_route_id ((*i)->route()->id());
+		if (tav) {
+			selection->add (tav);
+		}
+	}
+
+	_following_mixer_bridge_view_selection = false;
 	selection->block_tracks_changed (false);
 	selection->TracksChanged (); /* EMIT SIGNAL */
 }
