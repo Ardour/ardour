@@ -223,7 +223,11 @@ MixerStrip::init ()
 	rec_mon_table.set_homogeneous (true);
 	rec_mon_table.set_row_spacings (2);
 	rec_mon_table.set_col_spacings (2);
-	if (!ARDOUR::Profile->get_trx()) {
+	if (ARDOUR::Profile->get_mixbus()) {
+		rec_mon_table.resize (1, 3);
+		rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
+		rec_mon_table.attach (*monitor_disk_button, 2, 3, 0, 1);
+	} else if (!ARDOUR::Profile->get_trx()) {
 		rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
 		rec_mon_table.attach (*monitor_disk_button, 1, 2, 1, 2);
 	}
@@ -238,16 +242,19 @@ MixerStrip::init ()
 	if (solo_safe_led) {
 		button_size_group->add_widget (*solo_safe_led);
 	}
-	if (rec_enable_button) {
-		button_size_group->add_widget (*rec_enable_button);
-	}
-	if (monitor_disk_button) {
-		button_size_group->add_widget (*monitor_disk_button);
-	}
-	if (monitor_input_button) {
-		button_size_group->add_widget (*monitor_input_button);
-	}
 
+	if (!ARDOUR::Profile->get_mixbus()) {
+		if (rec_enable_button) {
+			button_size_group->add_widget (*rec_enable_button);
+		}
+		if (monitor_disk_button) {
+			button_size_group->add_widget (*monitor_disk_button);
+		}
+		if (monitor_input_button) {
+			button_size_group->add_widget (*monitor_input_button);
+		}
+	}
+	
 	if (!ARDOUR::Profile->get_trx()) {
 		button_table.attach (name_button, 0, 1, button_table_row, button_table_row+1);
 		button_table_row++;
@@ -381,7 +388,7 @@ MixerStrip::init ()
 	   must be the same as those used in RCOptionEditor so that the configuration changes
 	   are recognised when they occur.
 	*/
-	_visibility.add (&input_button, X_("Input"), _("Input"), false);
+	_visibility.add (&input_button_box, X_("Input"), _("Input"), false);
 	_visibility.add (&_invert_button_box, X_("PhaseInvert"), _("Phase Invert"), false);
 	_visibility.add (&rec_mon_table, X_("RecMon"), _("Record & Monitor"), false);
 	_visibility.add (&solo_iso_table, X_("SoloIsoLock"), _("Solo Iso / Lock"), false);
@@ -573,11 +580,14 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	if (is_track ()) {
 
-		rec_mon_table.attach (*rec_enable_button, 0, 1, 0, 2);
+		rec_mon_table.attach (*rec_enable_button, 0, 1, 0, ARDOUR::Profile->get_mixbus() ? 1 : 2);
 		rec_enable_button->set_sensitive (_session->writable());
 		rec_enable_button->show();
 
-		if (ARDOUR::Profile->get_trx()) {
+		if (ARDOUR::Profile->get_mixbus()) {
+			rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
+			rec_mon_table.attach (*monitor_disk_button, 2, 3, 0, 1);
+		} else if (ARDOUR::Profile->get_trx()) {
 			rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 2);
 		} else {
 			rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
