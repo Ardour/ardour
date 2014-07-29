@@ -42,6 +42,7 @@ CompactMeterStrip::CompactMeterStrip (Session* sess, boost::shared_ptr<ARDOUR::R
 	, _level_meter_home (get_box ("level_meter_home"))
 	, _level_meter (sess)
 	, _record_indicator (get_event_box ("record_indicator"))
+	, _serial_number (0)
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 

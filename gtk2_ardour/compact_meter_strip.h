@@ -33,10 +33,13 @@ class CompactMeterStrip : public Gtk::EventBox, public WavesUI
 	CompactMeterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
 	~CompactMeterStrip ();
 
+	size_t get_serial_number () { 	return _serial_number; }
+	void set_serial_number ( size_t serial_number ) { _serial_number = serial_number; }
+
 	void fast_update ();
 	boost::shared_ptr<ARDOUR::Route> route() { return _route; }
 	static PBD::Signal1<void,CompactMeterStrip*> CatchDeletion;
-
+	
 
   protected:
 	boost::shared_ptr<ARDOUR::Route> _route;
@@ -48,6 +51,7 @@ class CompactMeterStrip : public Gtk::EventBox, public WavesUI
 	Gtk::EventBox& _record_indicator;
 	PBD::ScopedConnectionList _route_connections;
 	static int __meter_width;
+	size_t _serial_number; 
 	void meter_configuration_changed (ARDOUR::ChanCount);
 	void update_rec_display ();
 };

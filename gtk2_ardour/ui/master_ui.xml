@@ -6,6 +6,10 @@
          bgactive="#000000"
          peaktreshold="-144.4">
   <VBox  borderwidth="1" spacing="1">
+    <EventBox id="no_peak_display_box"
+              width="95"
+              height="13"
+              bgnormal="#B1B1B1"/>
     <Button id="peak_display_button"
             width="95"
             height="13"
@@ -13,7 +17,9 @@
             bgactive="#D83838"
             fgnormal="#000000"
             fgactive="#000000"
-            bghover="#C47474"/>
+            bghover="#C47474"
+            visible="false"
+            noshowall="true"/>
     <HBox box.pack="end"
           spacing="1">
       <VBox spacing="1">
@@ -36,8 +42,17 @@
                     activeicon="master_global_rec_active"
                     prelighticon="master_global_rec_prelight"/>
       </VBox>
-      <Layout bgnormal="#383838" width="47" height="83">
-        <VBox id="level_meter_home" height="77" x="18" y="3"/>
+      <Layout bgnormal="#383838"
+              width="47"
+              height="83">
+        <icon id="maste_bus_multi_out_mode_icon"
+              source="maste_bus_multi_out_mode.png"/>
+        <VBox id="level_meter_home"
+              height="77"
+              x="18"
+              y="3"
+              visible="false"
+              noshowall="true"/>
       </Layout>
     </HBox>
   </VBox>

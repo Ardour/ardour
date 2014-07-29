@@ -157,6 +157,10 @@ CompactMeterbridge::fast_update_strips ()
 void
 CompactMeterbridge::add_strips (RouteList& routes)
 {
+
+	// WARNING: This is a rapid implementation. It must be OPTIMIZED in order to
+	// eliminate the code duplicating (see sync_reorder_keys())
+
 	// First detach all the prviously added strips from the ui tree.
 	for (std::map<boost::shared_ptr<ARDOUR::Route>, CompactMeterStrip*>::iterator i = _strips.begin(); i != _strips.end(); ++i) {
 		_compact_meter_strips_home.remove (*(*i).second); // we suppose _compact_meter_strips_home is
@@ -181,6 +185,7 @@ CompactMeterbridge::add_strips (RouteList& routes)
 	RouteList copy(*_session->get_routes());
 	copy.sort(sorter);
 
+	size_t serial_number = 0;
 	for (RouteList::iterator x = copy.begin(); x != copy.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 		if (route->is_auditioner() || route->is_monitor() || route->is_master()) {
@@ -189,6 +194,7 @@ CompactMeterbridge::add_strips (RouteList& routes)
 		std::map <boost::shared_ptr<ARDOUR::Route>, CompactMeterStrip*>::iterator i = _strips.find (route);
 		if (i != _strips.end ()) {
 			_compact_meter_strips_home.pack_start (*(*i).second, false, false);
+			(*i).second->set_serial_number (++serial_number);
 		}
 	}
 }
@@ -216,17 +222,18 @@ CompactMeterbridge::sync_order_keys ()
 		return;
 	}
 
-	SignalOrderRouteSorter sorter;
-	boost::shared_ptr<RouteList> routes = _session->get_routes();
-
+	// First detach all the prviously added strips from the ui tree.
 	for (std::map<boost::shared_ptr<ARDOUR::Route>, CompactMeterStrip*>::iterator i = _strips.begin(); i != _strips.end(); ++i) {
 		_compact_meter_strips_home.remove (*(*i).second); // we suppose _compact_meter_strips_home is
 		                                                  // the parnet. 
 	}
 
-	RouteList copy(*routes);
+	// Now sort the session's routes and pack the strips accordingly
+	SignalOrderRouteSorter sorter;	
+	RouteList copy(*_session->get_routes());
 	copy.sort(sorter);
 
+	size_t serial_number = 0;
 	for (RouteList::iterator x = copy.begin(); x != copy.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 		if (route->is_auditioner() || route->is_monitor() || route->is_master()) {
@@ -235,6 +242,7 @@ CompactMeterbridge::sync_order_keys ()
 		std::map <boost::shared_ptr<ARDOUR::Route>, CompactMeterStrip*>::iterator i = _strips.find (route);
 		if (i != _strips.end ()) {
 			_compact_meter_strips_home.pack_start (*(*i).second, false, false);
+			(*i).second->set_serial_number (++serial_number);
 		}
 	}
 }
