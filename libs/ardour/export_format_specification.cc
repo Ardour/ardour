@@ -184,6 +184,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const
 	: session (s)
 	, _silence_beginning (s)
 	, _silence_end (s)
+	, _soundcloud_upload (false)
 {
 	_silence_beginning.type = Time::Timecode;
 	_silence_end.type = Time::Timecode;
@@ -196,6 +197,7 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 	, session (other.session)
 	, _silence_beginning (other.session)
 	, _silence_end (other.session)
+	, _soundcloud_upload (false)
 {
 	if (modify_name) {
 		set_name (other.name() + " (copy)");
