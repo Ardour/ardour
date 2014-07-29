@@ -17,9 +17,9 @@
     <HBox>
       <VBox>
         <HBox height="18"/>
-        <HBox spacing="4">
+        <HBox spacing="4" width="32">
           <VBox id="level_meter_home"
-                width="17"
+                width="18"
                 height="187"/>
            <icon source="mixer_strip_meter_marks.png"/>
         </HBox>
