@@ -565,6 +565,7 @@ void
 TimeAxisView::begin_name_edit ()
 {
 	if (can_edit_name()) {
+		name_entry.set_text (name_label.get_text());
 		name_label.hide();
 		name_entry.show ();
 
