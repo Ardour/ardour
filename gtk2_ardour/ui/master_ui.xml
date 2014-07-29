@@ -46,7 +46,7 @@
               height="83">
         <VBox id="the_icon_home">
           <icon id="master_bus_multi_out_mode_icon"
-                source="maste_bus_multi_out_mode.png"/>
+                source="master_bus_multi_out_mode.png"/>
         </VBox>
         <VBox id="level_meter_home"
               height="77"
