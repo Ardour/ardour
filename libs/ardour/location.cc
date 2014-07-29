@@ -340,7 +340,7 @@ Location::set_cd (bool yn, void *src)
 	// XXX this really needs to be session start
 	// but its not available here - leave to GUI
 
-	if (_start == 0) {
+	if (yn && _start == 0) {
 		error << _("You cannot put a CD marker at this position") << endmsg;
 		return;
 	}
