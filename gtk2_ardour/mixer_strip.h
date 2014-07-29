@@ -158,8 +158,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	ArdourButton         width_button;
 	ArdourButton         number_label;
 	Gtk::HBox           width_hide_box;
-	Gtk::VBox           whvbox;
-	Gtk::EventBox       top_event_box;
 	Gtk::EventBox*      spacer;
 
 	void hide_clicked();
@@ -201,14 +199,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	ArdourButton   name_button;
 
-	ArdourWindow*  comment_window;
-	Gtk::TextView* comment_area;
 	ArdourButton   _comment_button;
 
-	void comment_editor_done_editing ();
-	void setup_comment_editor ();
-	void open_comment_editor ();
-	void toggle_comment_editor ();
 	void setup_comment_button ();
 
 	ArdourButton   group_button;
@@ -255,12 +247,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Menu* route_ops_menu;
 	void build_route_ops_menu ();
 	gboolean name_button_button_press (GdkEventButton*);
+	gboolean number_button_button_press (GdkEventButton*);
 	void list_route_operations ();
-
-	gint comment_key_release_handler (GdkEventKey*);
-	void comment_changed (void *src);
-	void comment_edited ();
-	bool ignore_comment_edit;
 
 	bool select_route_group (GdkEventButton *);
 	void route_group_changed ();

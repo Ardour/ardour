@@ -71,6 +71,7 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 	, solo_menu(0)
 	, sends_menu(0)
 	, record_menu(0)
+	, comment_window(0)
 	, _invert_menu(0)
 {
 	if (sess) init ();
@@ -86,6 +87,7 @@ RouteUI::~RouteUI()
 	delete sends_menu;
         delete record_menu;
 	delete _invert_menu;
+	delete comment_window;
 }
 
 void
@@ -215,6 +217,8 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	_route->active_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_active_changed, this), gui_context());
 	_route->mute_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::mute_changed, this, _1), gui_context());
+
+	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::comment_changed, this, _1), gui_context());
 
 	_route->solo_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->solo_safe_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
@@ -1383,8 +1387,7 @@ RouteUI::toggle_solo_safe (Gtk::CheckMenuItem* check)
 	_route->set_solo_safe (check->get_active(), this);
 }
 
-/** Ask the user to choose a colour, and then set all selected tracks
- *  to that colour.
+/** Ask the user to choose a colour, and then apply that color to my route
  */
 void
 RouteUI::choose_color ()
@@ -1393,9 +1396,7 @@ RouteUI::choose_color ()
 	Gdk::Color const color = Gtkmm2ext::UI::instance()->get_color (_("Color Selection"), picked, &_color);
 
 	if (picked) {
-		ARDOUR_UI::instance()->the_editor().get_selection().tracks.foreach_route_ui (
-			boost::bind (&RouteUI::set_color, _1, color)
-			);
+		set_color(color);
 	}
 }
 
@@ -1578,6 +1579,79 @@ RouteUI::property_changed (const PropertyChange& what_changed)
 	if (what_changed.contains (ARDOUR::Properties::name)) {
 		name_label.set_text (_route->name());
 	}
+}
+
+void
+RouteUI::toggle_comment_editor ()
+{
+//	if (ignore_toggle) {
+//		return;
+//	}
+
+	if (comment_window && comment_window->is_visible ()) {
+		comment_window->hide ();
+	} else {
+		open_comment_editor ();
+	}
+}
+
+
+void
+RouteUI::open_comment_editor ()
+{
+	if (comment_window == 0) {
+		setup_comment_editor ();
+	}
+
+	string title;
+	title = _route->name();
+	title += _(": comment editor");
+
+	comment_window->set_title (title);
+	comment_window->present();
+}
+
+void
+RouteUI::setup_comment_editor ()
+{
+	comment_window = new ArdourWindow (""); // title will be reset to show route
+	comment_window->set_skip_taskbar_hint (true);
+	comment_window->signal_hide().connect (sigc::mem_fun(*this, &MixerStrip::comment_editor_done_editing));
+	comment_window->set_default_size (400, 200);
+
+	comment_area = manage (new TextView());
+	comment_area->set_name ("MixerTrackCommentArea");
+	comment_area->set_wrap_mode (WRAP_WORD);
+	comment_area->set_editable (true);
+	comment_area->get_buffer()->set_text (_route->comment());
+	comment_area->show ();
+
+	comment_window->add (*comment_area);
+}
+
+void
+RouteUI::comment_changed (void *src)
+{
+	ENSURE_GUI_THREAD (*this, &MixerStrip::comment_changed, src)
+
+	if (src != this) {
+		ignore_comment_edit = true;
+		if (comment_area) {
+			comment_area->get_buffer()->set_text (_route->comment());
+		}
+		ignore_comment_edit = false;
+	}
+}
+
+void
+RouteUI::comment_editor_done_editing ()
+{
+	string const str = comment_area->get_buffer()->get_text();
+	if (str == _route->comment ()) {
+		return;
+	}
+
+	_route->set_comment (str, this);
 }
 
 void

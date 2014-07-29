@@ -145,7 +145,6 @@ MixerStrip::init ()
 	route_ops_menu = 0;
 	ignore_comment_edit = false;
 	ignore_toggle = false;
-	comment_window = 0;
 	comment_area = 0;
 	_width_owner = 0;
 	spacer = 0;
@@ -285,35 +284,32 @@ MixerStrip::init ()
 	Gtkmm2ext::set_size_request_to_display_given_text (group_button, "Grp", 2, 2);
 
 	_comment_button.set_name (X_("mixer strip button"));
-	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &MixerStrip::toggle_comment_editor));
+	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
 
 	global_vpacker.set_border_width (0);
 	global_vpacker.set_spacing (0);
 
 	width_button.set_name ("mixer strip button");
 	hide_button.set_name ("mixer strip button");
-	top_event_box.set_name ("mixer strip button");
 
 	width_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::width_button_pressed), false);
 	hide_button.signal_clicked.connect (sigc::mem_fun(*this, &MixerStrip::hide_clicked));
 
+	width_hide_box.set_border_width (2);
+	width_hide_box.set_spacing (2);
 	width_hide_box.pack_start (width_button, false, true);
-	width_hide_box.pack_start (top_event_box, true, true);
+	width_hide_box.pack_start (number_label, true, true);
 	width_hide_box.pack_end (hide_button, false, true);
 
 	number_label.set_text ("-");
 	number_label.set_no_show_all ();
 	number_label.set_name ("tracknumber label");
 	number_label.set_fixed_colors (0x80808080, 0x80808080);
-	number_label.set_elements (ArdourButton::Element(ArdourButton::Body | ArdourButton::Text));
 	number_label.set_alignment (.5, .5);
-	top_event_box.add (number_label);
-
-	whvbox.pack_start (width_hide_box, true, true);
 
 	global_vpacker.set_spacing (2);
 	if (!ARDOUR::Profile->get_trx()) {
-		global_vpacker.pack_start (whvbox, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (width_hide_box, Gtk::PACK_SHRINK);
 		global_vpacker.pack_start (button_table, Gtk::PACK_SHRINK);
 		global_vpacker.pack_start (processor_box, true, true);
 	}
@@ -352,7 +348,7 @@ MixerStrip::init ()
 
 	/* ditto for this button and busses */
 
-	number_label.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::name_button_button_press), false);
+	number_label.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::number_button_button_press), false);
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::name_button_button_press), false);
 	group_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::select_route_group), false);
 
@@ -416,7 +412,6 @@ MixerStrip::~MixerStrip ()
 
 	delete input_selector;
 	delete output_selector;
-	delete comment_window;
 }
 
 bool
@@ -625,7 +620,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		audio_track()->DiskstreamChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::diskstream_changed, this), gui_context());
 	}
 
-	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::comment_changed, this, _1), gui_context());
+	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::setup_comment_button, this), gui_context());
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::property_changed, this, _1), gui_context());
 
 	set_stuff_from_route ();
@@ -665,10 +660,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	gpm.gain_display.show ();
 	gpm.peak_display.show ();
 
-	top_event_box.show();
 	width_button.show();
 	width_hide_box.show();
-	whvbox.show ();
 	global_frame.show();
 	global_vpacker.show();
 	button_table.show();
@@ -1447,79 +1440,6 @@ MixerStrip::setup_comment_button ()
 		);
 }
 
-void
-MixerStrip::comment_editor_done_editing ()
-{
-	string const str = comment_area->get_buffer()->get_text();
-	if (str == _route->comment ()) {
-		return;
-	}
-
-	_route->set_comment (str, this);
-	setup_comment_button ();
-}
-
-void
-MixerStrip::toggle_comment_editor ()
-{
-	if (ignore_toggle) {
-		return;
-	}
-
-	if (comment_window && comment_window->is_visible ()) {
-		comment_window->hide ();
-	} else {
-		open_comment_editor ();
-	}
-}
-
-void
-MixerStrip::open_comment_editor ()
-{
-	if (comment_window == 0) {
-		setup_comment_editor ();
-	}
-
-	string title;
-	title = _route->name();
-	title += _(": comment editor");
-
-	comment_window->set_title (title);
-	comment_window->present();
-}
-
-void
-MixerStrip::setup_comment_editor ()
-{
-	comment_window = new ArdourWindow (""); // title will be reset to show route
-	comment_window->set_skip_taskbar_hint (true);
-	comment_window->signal_hide().connect (sigc::mem_fun(*this, &MixerStrip::comment_editor_done_editing));
-	comment_window->set_default_size (400, 200);
-
-	comment_area = manage (new TextView());
-	comment_area->set_name ("MixerTrackCommentArea");
-	comment_area->set_wrap_mode (WRAP_WORD);
-	comment_area->set_editable (true);
-	comment_area->get_buffer()->set_text (_route->comment());
-	comment_area->show ();
-
-	comment_window->add (*comment_area);
-}
-
-void
-MixerStrip::comment_changed (void *src)
-{
-	ENSURE_GUI_THREAD (*this, &MixerStrip::comment_changed, src)
-
-	if (src != this) {
-		ignore_comment_edit = true;
-		if (comment_area) {
-			comment_area->get_buffer()->set_text (_route->comment());
-		}
-		ignore_comment_edit = false;
-	}
-}
-
 bool
 MixerStrip::select_route_group (GdkEventButton *ev)
 {
@@ -1572,7 +1492,6 @@ void
 MixerStrip::route_color_changed ()
 {
 	name_button.modify_bg (STATE_NORMAL, color());
-	top_event_box.modify_bg (STATE_NORMAL, color());
 	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
 	reset_strip_style ();
 }
@@ -1592,7 +1511,9 @@ MixerStrip::build_route_ops_menu ()
 
 	MenuList& items = route_ops_menu->items();
 
-	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &MixerStrip::open_comment_editor)));
+	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
+
+	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
 	if (!_route->is_master()) {
 		items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
 	}
@@ -1632,6 +1553,20 @@ MixerStrip::name_button_button_press (GdkEventButton* ev)
 	*/
 
 	if (ev->button == 3 || ev->button == 1) {
+		list_route_operations ();
+
+		/* do not allow rename if the track is record-enabled */
+		rename_menu_item->set_sensitive (!_route->record_enabled());
+		route_ops_menu->popup (1, ev->time);
+	}
+
+	return false;
+}
+
+gboolean
+MixerStrip::number_button_button_press (GdkEventButton* ev)
+{
+	if (  ev->button == 3 ) {
 		list_route_operations ();
 
 		/* do not allow rename if the track is record-enabled */
@@ -1685,18 +1620,15 @@ MixerStrip::name_changed ()
 			const int64_t track_number = _route->track_number ();
 			if (track_number == 0) {
 				number_label.set_text ("-");
-				number_label.hide();
 			} else {
 				number_label.set_text (PBD::to_string (abs(_route->track_number ()), std::dec));
-				number_label.show();
 			}
 		} else {
-			number_label.hide();
+			number_label.set_text ("");
 		}
 		name_button.set_text (_route->name());
 		break;
 	case Narrow:
-		number_label.hide();
 		if (_session->config.get_track_name_number()) {
 			name_button.set_markup(track_number_to_string (_route->track_number (), " ",
 						PBD::short_version (_route->name (), 5)));

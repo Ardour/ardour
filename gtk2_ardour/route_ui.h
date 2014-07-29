@@ -25,6 +25,8 @@
 #include "pbd/xml++.h"
 #include "pbd/signals.h"
 
+#include <gtkmm/textview.h>
+
 #include "gtkmm2ext/widget_state.h"
 
 #include "ardour/ardour.h"
@@ -51,6 +53,7 @@ namespace Gtk {
 
 class BindableToggleButton;
 class ArdourButton;
+class ArdourWindow;
 
 class RouteUI : public virtual AxisView
 {
@@ -227,7 +230,21 @@ class RouteUI : public virtual AxisView
 	 */
 	static PBD::Signal1<void, boost::shared_ptr<ARDOUR::Route> > BusSendDisplayChanged;
 
+	void comment_editor_done_editing ();
+	void setup_comment_editor ();
+	void open_comment_editor ();
+	void toggle_comment_editor ();
+
+	gint comment_key_release_handler (GdkEventKey*);
+	void comment_changed (void *src);
+	void comment_edited ();
+	bool ignore_comment_edit;
+
    protected:
+
+	ArdourWindow*  comment_window;
+	Gtk::TextView* comment_area;
+
 	PBD::ScopedConnectionList route_connections;
 	bool self_destruct;
 

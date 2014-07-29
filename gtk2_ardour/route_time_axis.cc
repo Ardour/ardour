@@ -108,7 +108,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, gm (sess, true, 125, 18)
 	, _ignore_set_layer_display (false)
 {
-	number_label.set_corner_radius(2);
 	number_label.set_name("tracknumber label");
 	number_label.set_alignment(.5, .5);
 
@@ -149,7 +148,8 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	mute_changed (0);
-        update_solo_display ();
+	update_solo_display ();
+	route_color_changed();
 
 	timestretch_rect = 0;
 	no_redraw = false;
@@ -365,7 +365,6 @@ RouteTimeAxisView::update_track_number_visibility ()
 		show_label = false;
 	}
 
-	//if (show_label == number_label.is_visible()) { return; }
 	if (number_label.get_parent()) {
 		controls_table.remove (number_label);
 	}
@@ -479,6 +478,8 @@ RouteTimeAxisView::build_display_menu ()
 	display_menu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
+
+	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
 
 	if (_size_menu) {
 		detach_menu (*_size_menu);
@@ -961,6 +962,8 @@ RouteTimeAxisView::route_color_changed ()
 	if (_view) {
 		_view->apply_color (color(), StreamView::RegionColor);
 	}
+
+	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
 }
 
 void
