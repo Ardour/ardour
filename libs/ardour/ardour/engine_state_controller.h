@@ -140,6 +140,7 @@ public:
     /* this signals are emitted if the AUDIO i/o channel configuration changes */
     PBD::Signal0<void> InputConfigChanged;
     PBD::Signal0<void> OutputConfigChanged;
+    PBD::Signal0<void> OutputConnectionModeChanged;
     
     /* this signals are emitted if the MIDI i/o channel configuration changes */
     PBD::Signal0<void> MIDIInputConfigChanged;

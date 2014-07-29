@@ -1473,6 +1473,7 @@ EngineStateController::_on_parameter_changed (const std::string& parameter_name)
         
         AudioEngine::instance()->reconnect_session_routes();
         OutputConfigChanged(); // emit a signal
+        OutputConnectionModeChanged(); // emit signal
     }
 }
 
