@@ -5078,7 +5078,8 @@ Editor::add_routes (RouteList& routes)
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
-		if (route->is_auditioner() || route->is_monitor()) {
+		if (route->is_auditioner() || route->is_monitor() ||
+			!boost::dynamic_pointer_cast<Track> (route)) {
 			continue;
 		}
 

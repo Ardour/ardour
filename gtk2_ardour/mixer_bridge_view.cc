@@ -67,12 +67,12 @@ using PBD::atoi;
 
 struct SignalOrderRouteSorter {
 	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		if (a->is_master() || a->is_monitor()) {
+		if (a->is_master() || a->is_monitor() || !boost::dynamic_pointer_cast<Track>(a)) {
 			/* "a" is a special route (master, monitor, etc), and comes
 			 * last in the mixer ordering
 			 */
 			return false;
-		} else if (b->is_master() || b->is_monitor()) {
+		} else if (b->is_master() || b->is_monitor() || !boost::dynamic_pointer_cast<Track>(b)) {
 			/* everything comes before b */
 			return true;
 		}
@@ -173,7 +173,8 @@ MixerBridgeView::add_strips (RouteList& routes)
 	// Now create the strips for newly added routes
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
-		if (route->is_auditioner() || route->is_monitor() || route->is_master()) {
+		if (route->is_auditioner() || route->is_monitor() || route->is_master() ||
+			!boost::dynamic_pointer_cast<Track> (route)) {
 			continue;
 		}
 
@@ -190,7 +191,8 @@ MixerBridgeView::add_strips (RouteList& routes)
 
 	for (RouteList::iterator x = copy.begin(); x != copy.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
-		if (route->is_auditioner() || route->is_monitor() || route->is_master()) {
+		if (route->is_auditioner() || route->is_monitor() || route->is_master() ||
+			!boost::dynamic_pointer_cast<Track> (route)) {
 			continue;
 		}
 		std::map <boost::shared_ptr<ARDOUR::Route>, MixerStrip*>::iterator i = _strips.find (route);
@@ -236,7 +238,8 @@ MixerBridgeView::sync_order_keys ()
 
 	for (RouteList::iterator x = copy.begin(); x != copy.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
-		if (route->is_auditioner() || route->is_monitor() || route->is_master()) {
+		if (route->is_auditioner() || route->is_monitor() || route->is_master() ||
+			!boost::dynamic_pointer_cast<Track> (route)) {
 			continue;
 		}
 		std::map <boost::shared_ptr<ARDOUR::Route>, MixerStrip*>::iterator i = _strips.find (route);
