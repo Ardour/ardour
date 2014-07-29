@@ -3434,9 +3434,6 @@ Route::set_name (const string& str)
 	SessionObject::set_name (name);
 
 	ret = (_input->set_name(name) && _output->set_name(name));
-
-    //emit signal
-    name_changed ();
     
 	if (ret) {
 		/* rename the main outs. Leave other IO processors

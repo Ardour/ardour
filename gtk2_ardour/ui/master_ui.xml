@@ -5,21 +5,20 @@
          bgnormal="#000000"
          bgactive="#000000"
          peaktreshold="-144.4">
-  <VBox  borderwidth="1" spacing="1">
+  <VBox  id="peak_display_button_home" borderwidth="1" spacing="1">
     <EventBox id="no_peak_display_box"
               width="95"
               height="13"
               bgnormal="#B1B1B1"/>
     <Button id="peak_display_button"
+            text="- inf"
             width="95"
             height="13"
             bgnormal="#B1B1B1"
             bgactive="#D83838"
             fgnormal="#000000"
             fgactive="#000000"
-            bghover="#C47474"
-            visible="false"
-            noshowall="true"/>
+      bghover="#C47474"/>
     <HBox box.pack="end"
           spacing="1">
       <VBox spacing="1">
@@ -45,14 +44,14 @@
       <Layout bgnormal="#383838"
               width="47"
               height="83">
-        <icon id="maste_bus_multi_out_mode_icon"
-              source="maste_bus_multi_out_mode.png"/>
+        <VBox id="the_icon_home">
+          <icon id="master_bus_multi_out_mode_icon"
+                source="maste_bus_multi_out_mode.png"/>
+        </VBox>
         <VBox id="level_meter_home"
               height="77"
               x="18"
-              y="3"
-              visible="false"
-              noshowall="true"/>
+              y="3"/>
       </Layout>
     </HBox>
   </VBox>

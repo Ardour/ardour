@@ -66,9 +66,11 @@ private:
 	void on_master_mute_button (WavesButton*);
 	void on_clear_solo_button (WavesButton*);
 	void on_global_rec_button (WavesButton*);
+    void on_output_connection_mode_changed();
 
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList _route_connections;
+    PBD::ScopedConnection _mode_connection;
 
 	Gtk::Box& _level_meter_home;
 	LevelMeterHBox _level_meter;
@@ -76,6 +78,8 @@ private:
 	WavesButton& _master_mute_button;
 	WavesButton& _clear_solo_button;
 	WavesButton& _global_rec_button;
+    Gtk::EventBox& _no_peak_display_box;
+    Gtk::Image& _master_bus_multi_out_mode_icon;
 };
 
 #endif /* __tracks_master_bus_ui_h__ */

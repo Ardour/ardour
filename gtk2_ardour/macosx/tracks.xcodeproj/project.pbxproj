@@ -269,6 +269,9 @@
 		43279460194F0062003C9FEA /* tracks_preferences.xml in Resources */ = {isa = PBXBuildFile; fileRef = 43279430194F0062003C9FEA /* tracks_preferences.xml */; };
 		4327947F194F009E003C9FEA /* tracks.menus.in in Resources */ = {isa = PBXBuildFile; fileRef = 43279475194F009E003C9FEA /* tracks.menus.in */; };
 		43B351ED194F04E00038C140 /* step_editing.bindings in Resources */ = {isa = PBXBuildFile; fileRef = 43B351C0194F04E00038C140 /* step_editing.bindings */; };
+		CE1C6DCE19879F04006BDB03 /* compact_meter_bridge.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE1C6DCC19879F04006BDB03 /* compact_meter_bridge.cc */; };
+		CE1C6DCF19879F04006BDB03 /* compact_meter_strip.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE1C6DCD19879F04006BDB03 /* compact_meter_strip.cc */; };
+		CE1C6DE01987A924006BDB03 /* master_bus_ui.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE1C6DDF1987A924006BDB03 /* master_bus_ui.cc */; };
 		CEAFC770195445560016ACF0 /* bbt_time.cc in Sources */ = {isa = PBXBuildFile; fileRef = CEAFC76E195445560016ACF0 /* bbt_time.cc */; };
 		CEAFC771195445560016ACF0 /* time.cc in Sources */ = {isa = PBXBuildFile; fileRef = CEAFC76F195445560016ACF0 /* time.cc */; };
 		CEB0A9F219583F96006D269A /* session_close_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = CEB0A9F119583F96006D269A /* session_close_dialog.cc */; };
@@ -1090,6 +1093,12 @@
 		43B351EE194F12FB0038C140 /* waves_audiobackend.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = waves_audiobackend.xcodeproj; path = ../../libs/backends/wavesaudio/macosx/waves_audiobackend.xcodeproj; sourceTree = "<group>"; };
 		43B351F4194F130C0038C140 /* libardour.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libardour.xcodeproj; path = ../../libs/ardour/macosx/libardour.xcodeproj; sourceTree = "<group>"; };
 		43B351FA194F131D0038C140 /* pbd.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = pbd.xcodeproj; path = ../../libs/pbd/macosx/pbd.xcodeproj; sourceTree = "<group>"; };
+		CE1C6DCC19879F04006BDB03 /* compact_meter_bridge.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = compact_meter_bridge.cc; path = ../compact_meter_bridge.cc; sourceTree = "<group>"; };
+		CE1C6DCD19879F04006BDB03 /* compact_meter_strip.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = compact_meter_strip.cc; path = ../compact_meter_strip.cc; sourceTree = "<group>"; };
+		CE1C6DD319879F1B006BDB03 /* compact_meter_bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = compact_meter_bridge.h; path = ../compact_meter_bridge.h; sourceTree = "<group>"; };
+		CE1C6DD419879F1B006BDB03 /* compact_meter_strip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = compact_meter_strip.h; path = ../compact_meter_strip.h; sourceTree = "<group>"; };
+		CE1C6DDB1987A910006BDB03 /* master_bus_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = master_bus_ui.h; path = ../master_bus_ui.h; sourceTree = "<group>"; };
+		CE1C6DDF1987A924006BDB03 /* master_bus_ui.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = master_bus_ui.cc; path = ../master_bus_ui.cc; sourceTree = "<group>"; };
 		CEAFC76E195445560016ACF0 /* bbt_time.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bbt_time.cc; path = ../../libs/timecode/src/bbt_time.cc; sourceTree = "<group>"; };
 		CEAFC76F195445560016ACF0 /* time.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = time.cc; path = ../../libs/timecode/src/time.cc; sourceTree = "<group>"; };
 		CEAFC775195445D90016ACF0 /* bbt_time.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bbt_time.h; path = ../../libs/timecode/timecode/bbt_time.h; sourceTree = "<group>"; };
@@ -1145,6 +1154,9 @@
 		43279040194EFF38003C9FEA /* source */ = {
 			isa = PBXGroup;
 			children = (
+				CE1C6DDF1987A924006BDB03 /* master_bus_ui.cc */,
+				CE1C6DCC19879F04006BDB03 /* compact_meter_bridge.cc */,
+				CE1C6DCD19879F04006BDB03 /* compact_meter_strip.cc */,
 				CEB0A9F119583F96006D269A /* session_close_dialog.cc */,
 				CEAFC76E195445560016ACF0 /* bbt_time.cc */,
 				CEAFC76F195445560016ACF0 /* time.cc */,
@@ -1767,6 +1779,9 @@
 		43279480194F00CB003C9FEA /* headers */ = {
 			isa = PBXGroup;
 			children = (
+				CE1C6DDB1987A910006BDB03 /* master_bus_ui.h */,
+				CE1C6DD319879F1B006BDB03 /* compact_meter_bridge.h */,
+				CE1C6DD419879F1B006BDB03 /* compact_meter_strip.h */,
 				CEB0A45A19583F3F006D269A /* session_close_dialog.h */,
 				CEAFC775195445D90016ACF0 /* bbt_time.h */,
 				CEAFC776195445D90016ACF0 /* time.h */,
@@ -2425,6 +2440,9 @@
 				CEAFC770195445560016ACF0 /* bbt_time.cc in Sources */,
 				CEAFC771195445560016ACF0 /* time.cc in Sources */,
 				CEB0A9F219583F96006D269A /* session_close_dialog.cc in Sources */,
+				CE1C6DCE19879F04006BDB03 /* compact_meter_bridge.cc in Sources */,
+				CE1C6DCF19879F04006BDB03 /* compact_meter_strip.cc in Sources */,
+				CE1C6DE01987A924006BDB03 /* master_bus_ui.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

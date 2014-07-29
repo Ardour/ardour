@@ -72,10 +72,10 @@ CompactMeterStrip::CompactMeterStrip (Session* sess, boost::shared_ptr<ARDOUR::R
 										invalidator (*this),
 										boost::bind (&CompactMeterStrip::update_rec_display,
 													 this), gui_context());
-		t->name_changed.connect(_route_connections,
-                                invalidator (*this),
-                                boost::bind (&CompactMeterStrip::update_tooltip,
-                                             this), gui_context());
+//		t->name_changed.connect(_route_connections,
+//                                invalidator (*this),
+//                                boost::bind (&CompactMeterStrip::update_tooltip,
+//                                             this), gui_context());
         
         update_rec_display ();
 	}

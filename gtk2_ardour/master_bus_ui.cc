@@ -52,6 +52,7 @@
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
 #include "ardour/audio_track.h"
+#include "ardour/engine_state_controller.h"
 
 #include "evoral/Parameter.hpp"
 
@@ -103,6 +104,8 @@ MasterBusUI::MasterBusUI (Session* sess)
 	, _master_mute_button (get_waves_button ("master_mute_button"))
 	, _clear_solo_button (get_waves_button ("clear_solo_button"))
 	, _global_rec_button (get_waves_button ("global_rec_button"))
+    , _no_peak_display_box (get_event_box("no_peak_display_box") )
+    , _master_bus_multi_out_mode_icon (get_image("master_bus_multi_out_mode_icon"))
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 	_level_meter_home.pack_start (_level_meter, true, true);
@@ -119,6 +122,60 @@ MasterBusUI::MasterBusUI (Session* sess)
 	_master_mute_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_master_mute_button));
 	_clear_solo_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_clear_solo_button));
 	_global_rec_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_global_rec_button));
+    
+    EngineStateController::instance()->OutputConnectionModeChanged.connect (_mode_connection, MISSING_INVALIDATOR, boost::bind (&MasterBusUI::on_output_connection_mode_changed, this), gui_context ());
+    set_route (sess->master_out ());
+    on_output_connection_mode_changed();
+}
+
+void
+MasterBusUI::on_output_connection_mode_changed()
+{
+    
+    if (Config->get_output_auto_connect() & AutoConnectPhysical) {
+        if (_peak_display_button.get_parent ()) {
+            get_box ("peak_display_button_home").remove (_peak_display_button);
+        }
+        
+        if (_level_meter.get_parent ()) {
+            _level_meter_home.remove (_level_meter);
+        }
+        
+        if( !_no_peak_display_box.get_parent ()) {
+            get_box ("peak_display_button_home").pack_start (_no_peak_display_box);
+        }
+        
+        if (!_master_bus_multi_out_mode_icon.get_parent ()) {
+            get_box ("the_icon_home").pack_start (_master_bus_multi_out_mode_icon);
+        }
+       /* _peak_display_button.hide();
+        _level_meter.hide();
+        
+        _no_peak_display_box.show();
+        _master_bus_multi_out_mode_icon.show(); */
+    } else if (Config->get_output_auto_connect() & AutoConnectMaster) {
+        if (_no_peak_display_box.get_parent ()) {
+            get_box ("peak_display_button_home").remove (_no_peak_display_box);
+        }
+        
+        if (_master_bus_multi_out_mode_icon.get_parent ()) {
+            get_box ("the_icon_home").remove (_master_bus_multi_out_mode_icon);
+        }
+        
+        if (!_peak_display_button.get_parent ()) {
+            get_box ("peak_display_button_home").pack_start (_peak_display_button);
+        }
+        
+        if (!_level_meter.get_parent ()) {
+            _level_meter_home.pack_start (_level_meter);
+        }
+        
+        /*_no_peak_display_box.hide();
+        _master_bus_multi_out_mode_icon.hide();
+        
+        _peak_display_button.show_all();
+        _level_meter.show_all(); */
+    }
 }
 
 MasterBusUI::~MasterBusUI ()
