@@ -760,6 +760,17 @@ WavesUI::get_label (const char* id)
 	return *child;
 }
 
+Gtk::Image&
+WavesUI::get_image (const char* id)
+{
+	Gtk::Image* child = dynamic_cast<Gtk::Image*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::Image ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+
 
 Gtk::ComboBoxText&
 WavesUI::get_combo_box_text (const char* id)
