@@ -288,7 +288,9 @@
           height="4"/>
         <EventBox id="mixer_bridge_view_home"
                   height="409"
-                  box.pack="end"/>
+                  box.pack="end"
+                  visible="false"
+                  noshowall="true"/>
       </VBox>
     </HBox>
   </VBox>

@@ -379,9 +379,11 @@ ARDOUR_UI::toggle_mixer_window ()
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 
 	if (tact->get_active()) {
-		goto_mixer_window ();
+		//goto_mixer_window ();
+		editor->get_container ("mixer_bridge_view_home").show ();
 	} else {
-		mixer->hide ();
+		editor->get_container ("mixer_bridge_view_home").hide ();
+		//mixer->hide ();
 	}
 }
 
