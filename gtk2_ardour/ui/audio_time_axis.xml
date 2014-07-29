@@ -30,7 +30,12 @@
         <FocusEntry id="name_entry"
                     width="100"
                     height="20"
+                    fgnormal="#ffffff"
                     font ="Helvetica 10"
+                    cssname="EditorTrackNameDisplay"
+                    textcolornormal="#ffffff"
+                    textcoloractive="#ffffff"
+                    textcolorselected="#ffffff"                    
                     noshowall="true"
                     visible="false"/>
       </HBox>

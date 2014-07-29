@@ -445,11 +445,36 @@ WavesUI::load_layout (const std::string& xml_file_name)
 void 
 WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const XMLNodeMap& styles)
 {
+	std::string property = xml_property (definition, "cssname", styles, "");
+	if (!property.empty ()) {
+		widget.set_name (property);
+	} else {
+		widget.unset_name ();
+	}
+
 	int height = xml_property (definition, "height", styles, -1);
 	int width = xml_property (definition, "width", styles, -1);
 	widget.set_size_request (width, height);
 		
-	std::string property = xml_property (definition, "bgnormal", styles, "");
+	property = xml_property (definition, "textcolornormal", styles, "");
+	if (!property.empty ()) {
+		widget.unset_text(Gtk::STATE_NORMAL);
+		widget.modify_text(Gtk::STATE_NORMAL, Gdk::Color(property));
+	}
+
+	property = xml_property (definition, "textcoloractive", styles, "");
+	if (!property.empty ()) {
+		widget.unset_text(Gtk::STATE_ACTIVE);
+		widget.modify_text(Gtk::STATE_ACTIVE, Gdk::Color(property));
+	}
+
+	property = xml_property (definition, "textcolorselected", styles, "");
+	if (!property.empty ()) {
+		widget.unset_text(Gtk::STATE_SELECTED);
+		widget.modify_text(Gtk::STATE_SELECTED, Gdk::Color(property));
+	}
+
+	property = xml_property (definition, "bgnormal", styles, "");
 	if (!property.empty ()) {
 		widget.unset_bg(Gtk::STATE_NORMAL);
 		widget.modify_bg(Gtk::STATE_NORMAL, Gdk::Color(property));
