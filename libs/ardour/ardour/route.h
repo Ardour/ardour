@@ -274,6 +274,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	framecnt_t initial_delay() const { return _initial_delay; }
 	framecnt_t signal_latency() const { return _signal_latency; }
 
+    PBD::Signal0<void>       name_changed;
 	PBD::Signal0<void>       active_changed;
 	PBD::Signal0<void>       phase_invert_changed;
 	PBD::Signal0<void>       denormal_protection_changed;

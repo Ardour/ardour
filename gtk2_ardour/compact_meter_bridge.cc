@@ -195,6 +195,7 @@ CompactMeterbridge::add_strips (RouteList& routes)
 		if (i != _strips.end ()) {
 			_compact_meter_strips_home.pack_start (*(*i).second, false, false);
 			(*i).second->set_serial_number (++serial_number);
+            (*i).second->update_tooltip ();
 		}
 	}
 }
@@ -243,6 +244,7 @@ CompactMeterbridge::sync_order_keys ()
 		if (i != _strips.end ()) {
 			_compact_meter_strips_home.pack_start (*(*i).second, false, false);
 			(*i).second->set_serial_number (++serial_number);
+            (*i).second->update_tooltip ();
 		}
 	}
 }

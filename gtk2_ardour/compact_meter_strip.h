@@ -35,7 +35,8 @@ class CompactMeterStrip : public Gtk::EventBox, public WavesUI
 
 	size_t get_serial_number () { 	return _serial_number; }
 	void set_serial_number ( size_t serial_number ) { _serial_number = serial_number; }
-
+    void update_tooltip ();
+    
 	void fast_update ();
 	boost::shared_ptr<ARDOUR::Route> route() { return _route; }
 	static PBD::Signal1<void,CompactMeterStrip*> CatchDeletion;

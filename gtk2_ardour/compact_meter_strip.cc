@@ -72,7 +72,12 @@ CompactMeterStrip::CompactMeterStrip (Session* sess, boost::shared_ptr<ARDOUR::R
 										invalidator (*this),
 										boost::bind (&CompactMeterStrip::update_rec_display,
 													 this), gui_context());
-		update_rec_display ();
+		t->name_changed.connect(_route_connections,
+                                invalidator (*this),
+                                boost::bind (&CompactMeterStrip::update_tooltip,
+                                             this), gui_context());
+        
+        update_rec_display ();
 	}
 }
 
@@ -88,9 +93,19 @@ CompactMeterStrip::self_delete ()
 }
 
 void
+CompactMeterStrip::update_tooltip ()
+{
+    string record_status = _route->record_enabled() ? "Record Enabled" : "Record Disabled";
+    stringstream ss;
+    ss<<_serial_number;
+    this->set_tooltip_text ("Track " + ss.str() + "\n" + _route->name () + "\n" + record_status);
+}
+
+void
 CompactMeterStrip::update_rec_display ()
 {
 	_record_indicator.set_state ((_route && _route->record_enabled ()) ? Gtk::STATE_ACTIVE : Gtk::STATE_NORMAL);
+    update_tooltip ();    
 }
 
 void

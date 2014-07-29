@@ -3435,6 +3435,9 @@ Route::set_name (const string& str)
 
 	ret = (_input->set_name(name) && _output->set_name(name));
 
+    //emit signal
+    name_changed ();
+    
 	if (ret) {
 		/* rename the main outs. Leave other IO processors
 		 * with whatever name they already have, because its
@@ -3446,12 +3449,12 @@ Route::set_name (const string& str)
 			if (_main_outs->set_name (name)) {
 				/* XXX returning false here is stupid because
 				   we already changed the route name.
-				*/
+				*/                                
 				return false;
 			}
 		}
 	}
-
+    
 	return ret;
 }
 
