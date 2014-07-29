@@ -21,6 +21,7 @@
 
 #include "waves_ui.h"
 #include "level_meter.h"
+#include "ardour/ardour.h"
 
 namespace ARDOUR {
 	class Route;
@@ -55,6 +56,7 @@ class CompactMeterStrip : public Gtk::EventBox, public WavesUI
 	size_t _serial_number; 
 	void meter_configuration_changed (ARDOUR::ChanCount);
 	void update_rec_display ();
+    void route_property_changed(const PBD::PropertyChange& what_changed);
 };
 
 #endif /* __tracks_compact_meter_strip__ */

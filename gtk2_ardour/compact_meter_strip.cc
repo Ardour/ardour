@@ -72,10 +72,10 @@ CompactMeterStrip::CompactMeterStrip (Session* sess, boost::shared_ptr<ARDOUR::R
 										invalidator (*this),
 										boost::bind (&CompactMeterStrip::update_rec_display,
 													 this), gui_context());
-//		t->name_changed.connect(_route_connections,
-//                                invalidator (*this),
-//                                boost::bind (&CompactMeterStrip::update_tooltip,
-//                                             this), gui_context());
+        _route->PropertyChanged.connect(_route_connections,
+                                        invalidator (*this),
+                                        boost::bind (&CompactMeterStrip::route_property_changed, this, _1),
+                                        gui_context());
         
         update_rec_display ();
 	}
@@ -90,6 +90,14 @@ void
 CompactMeterStrip::self_delete ()
 {
 	delete this;
+}
+
+void
+CompactMeterStrip::route_property_changed(const PropertyChange& what_changed)
+{
+	if (what_changed.contains (ARDOUR::Properties::name)) {
+		update_tooltip();
+	}
 }
 
 void
