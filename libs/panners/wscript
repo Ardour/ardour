@@ -5,8 +5,11 @@ import os
 # Mandatory variables
 top = '.'
 out = 'build'
-
-panners = [ '2in2out', '1in2out', 'vbap', 'stereobalance' ]
+# This is for Ardour:
+#panners = [ '2in2out', '1in2out', 'vbap', 'stereobalance' ]
+#
+#As this is for TRACKS:
+panners = [ '1in2out', 'vbap', 'stereobalance' ]
 
 def options(opt):
     autowaf.set_options(opt)
