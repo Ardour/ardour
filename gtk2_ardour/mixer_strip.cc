@@ -291,7 +291,7 @@ MixerStrip::init ()
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
 	Gtkmm2ext::set_size_request_to_display_given_text_width (_comment_button, "Cmt", 2, _button_vpad);
 
-	global_vpacker.set_border_width (0);
+	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (0);
 
 	width_button.set_name ("mixer strip button");
