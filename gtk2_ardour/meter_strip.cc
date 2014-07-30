@@ -129,7 +129,6 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	update_background (_route->meter_type());
 
 	monitor_input_button.show();
-	monitor_disk_button.show();
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
 			route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_configuration_changed, this, _1), gui_context()
@@ -473,10 +472,8 @@ MeterStrip::update_button_box ()
 	if (_session->config.get_show_monitor_on_meterbridge()) {
 		height += 18 + 18;
 		monitor_input_button.show();
-		monitor_disk_button.show();
 	} else {
 		monitor_input_button.hide();
-		monitor_disk_button.hide();
 	}
 //	btnbox.set_size_request(16, height);
 	check_resize();

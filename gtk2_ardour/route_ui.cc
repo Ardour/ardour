@@ -81,7 +81,6 @@ RouteUI::RouteUI (ARDOUR::Session* sess, const std::string& layout_script_file)
 	, rec_enable_button (get_waves_button ("rec_enable_button"))
 	, show_sends_button (get_waves_button ("show_sends_button"))
 	, monitor_input_button (get_waves_button ("monitor_input_button"))
-	, monitor_disk_button (get_waves_button ("monitor_disk_button"))
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 	if (sess) init ();
@@ -143,13 +142,9 @@ RouteUI::init ()
 	mute_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::mute_release), false);
 	
 //	monitor_input_button.set_distinct_led_click (false);
-//	monitor_disk_button.set_distinct_led_click (false);
 
 	monitor_input_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_press));
 	monitor_input_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_release));
-
-	monitor_disk_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_press));
-	monitor_disk_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_release));
 
 	BusSendDisplayChanged.connect_same_thread (*this, boost::bind(&RouteUI::bus_send_display_changed, this, _1));
 }
@@ -621,26 +616,10 @@ RouteUI::update_monitoring_display ()
 		return;
 	}
 
-	MonitorState ms = t->monitoring_state();
-
 	if (t->monitoring_choice() & MonitorInput) {
 		monitor_input_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
-		if (ms & MonitoringInput) {
-			monitor_input_button.set_active_state (Gtkmm2ext::ImplicitActive);
-		} else {
-			monitor_input_button.unset_active_state ();
-		}
-	}
-
-	if (t->monitoring_choice() & MonitorDisk) {
-		monitor_disk_button.set_active_state (Gtkmm2ext::ExplicitActive);
-	} else {
-		if (ms & MonitoringDisk) {
-			monitor_disk_button.set_active_state (Gtkmm2ext::ImplicitActive);
-		} else {
-			monitor_disk_button.unset_active_state ();
-		}
+        monitor_input_button.unset_active_state ();
 	}
 }
 
