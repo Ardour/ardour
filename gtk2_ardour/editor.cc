@@ -2844,7 +2844,6 @@ Editor::setup_toolbar ()
 	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
 
 	edit_mode_selector.set_name ("mouse mode button");
-	edit_mode_selector.add_elements (ArdourButton::Inset);
 
 	if (!ARDOUR::Profile->get_trx()) {
 		mode_box->pack_start (edit_mode_selector, false, false);
@@ -2973,13 +2972,10 @@ Editor::setup_toolbar ()
 	snap_box.set_border_width (2);
 
 	snap_type_selector.set_name ("mouse mode button");
-	snap_type_selector.add_elements (ArdourButton::Inset);
 
 	snap_mode_selector.set_name ("mouse mode button");
-	snap_mode_selector.add_elements (ArdourButton::Inset);
 
 	edit_point_selector.set_name ("mouse mode button");
-	edit_point_selector.add_elements (ArdourButton::Inset);
 
 	snap_box.pack_start (snap_mode_selector, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
