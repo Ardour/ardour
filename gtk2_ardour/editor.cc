@@ -2921,7 +2921,7 @@ Editor::setup_toolbar ()
 		visible_tracks_selector.set_image(::get_icon ("tav_exp"));
 		visible_tracks_selector.set_size_request (42, -1);
 	} else {
-		set_size_request_to_display_given_text (visible_tracks_selector, _("All"), 40, 2);
+		set_size_request_to_display_given_text (visible_tracks_selector, _("All"), 30, 2);
 	}
 
 	tav_expand_button.set_name ("zoom button");
@@ -3088,7 +3088,7 @@ Editor::build_snap_mode_menu ()
 	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapNormal], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapNormal)));
 	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapMagnetic], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapMagnetic)));
 
-	set_size_request_to_display_given_text (snap_mode_selector, snap_mode_strings, 34, 2);
+	set_size_request_to_display_given_text (snap_mode_selector, snap_mode_strings, 30, 2);
 }
 
 void
@@ -3127,7 +3127,7 @@ Editor::build_snap_type_menu ()
 	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionSync], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionSync)));
 	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionBoundary], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionBoundary)));
 
-	set_size_request_to_display_given_text (snap_type_selector, snap_type_strings, 34, 2);
+	set_size_request_to_display_given_text (snap_type_selector, snap_type_strings, 30, 2);
 
 }
 
