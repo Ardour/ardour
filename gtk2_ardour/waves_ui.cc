@@ -474,6 +474,24 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		widget.modify_text(Gtk::STATE_SELECTED, Gdk::Color(property));
 	}
 
+	property = xml_property (definition, "basecolornormal", styles, "");
+	if (!property.empty ()) {
+		widget.unset_base(Gtk::STATE_NORMAL);
+		widget.modify_base(Gtk::STATE_NORMAL, Gdk::Color(property));
+	}
+
+	property = xml_property (definition, "basecoloractive", styles, "");
+	if (!property.empty ()) {
+		widget.unset_base(Gtk::STATE_ACTIVE);
+		widget.modify_base(Gtk::STATE_ACTIVE, Gdk::Color(property));
+	}
+
+	property = xml_property (definition, "basecolorselected", styles, "");
+	if (!property.empty ()) {
+		widget.unset_base(Gtk::STATE_SELECTED);
+		widget.modify_base(Gtk::STATE_SELECTED, Gdk::Color(property));
+	}
+
 	property = xml_property (definition, "bgnormal", styles, "");
 	if (!property.empty ()) {
 		widget.unset_bg(Gtk::STATE_NORMAL);
