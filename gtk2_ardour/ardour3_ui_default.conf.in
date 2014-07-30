@@ -424,10 +424,10 @@
     <Option name="transport option button: led active" value="ffa500ff"/>
     <Option name="transport option button: text" value="c7c7d8ff"/>
     <Option name="transport option button: text active" value="c8c8d9ff"/>
-    <Option name="transport active option button: fill start" value="606b60ff"/>
-    <Option name="transport active option button: fill end" value="495348ff"/>
-    <Option name="transport active option button: fill start active" value="154515ff"/>
-    <Option name="transport active option button: fill end active" value="20a320ff"/>
+    <Option name="transport active option button: fill start" value="616268ff"/>
+    <Option name="transport active option button: fill end" value="505159ff"/>
+    <Option name="transport active option button: fill start active" value="257f25ff"/>
+    <Option name="transport active option button: fill end active" value="23b223ff"/>
     <Option name="transport active option button: led" value="4f3300ff"/>
     <Option name="transport active option button: led active" value="ffa500ff"/>
     <Option name="transport active option button: text" value="c7c7d8ff"/>
@@ -448,10 +448,10 @@
     <Option name="punch button: led active" value="00000000"/>
     <Option name="punch button: text" value="a5a5a5ff"/>
     <Option name="punch button: text active" value="d8d8d8ff"/>
-    <Option name="mouse mode button: fill start" value="606b60ff"/>
-    <Option name="mouse mode button: fill end" value="495348ff"/>
-    <Option name="mouse mode button: fill start active" value="1d7a05ff"/>
-    <Option name="mouse mode button: fill end active" value="00a300ff"/>
+    <Option name="mouse mode button: fill start" value="616268ff"/>
+    <Option name="mouse mode button: fill end" value="505159ff"/>
+    <Option name="mouse mode button: fill start active" value="1e7f05ff"/>
+    <Option name="mouse mode button: fill end active" value="00b200ff"/>
     <Option name="mouse mode button: led" value="4f3300ff"/>
     <Option name="mouse mode button: led active" value="ffa500ff"/>
     <Option name="mouse mode button: text" value="c7c7d8ff"/>
@@ -472,8 +472,8 @@
     <Option name="zoom menu: led active" value="ffa500ff"/>
     <Option name="zoom menu: text" value="c7c7d8ff"/>
     <Option name="zoom menu: text active" value="c8c8d9ff"/>
-    <Option name="zoom button: fill start" value="606b60ff"/>
-    <Option name="zoom button: fill end" value="495348ff"/>
+    <Option name="zoom button: fill start" value="616268ff"/>
+    <Option name="zoom button: fill end" value="505159ff"/>
     <Option name="zoom button: fill start active" value="1d7a05ff"/>
     <Option name="zoom button: fill end active" value="00a300ff"/>
     <Option name="zoom button: led" value="4f3300ff"/>
