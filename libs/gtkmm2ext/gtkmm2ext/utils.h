@@ -65,6 +65,13 @@ namespace Gtkmm2ext {
 								      gint hpadding,
 								      gint vpadding);
 	
+	LIBGTKMM2EXT_API void set_size_request_to_display_given_text_width (Gtk::Widget& w,
+	                                                                    const gchar* htext,
+	                                                                    gint         hpadding,
+	                                                                    gint         vpadding);
+
+	LIBGTKMM2EXT_API void set_height_request_to_display_any_text (Gtk::Widget& w, gint vpadding);
+
 	LIBGTKMM2EXT_API void set_size_request_to_display_given_text (Gtk::Widget &w,
 								      std::string const & text,
 								      gint hpadding,
@@ -72,6 +79,10 @@ namespace Gtkmm2ext {
 	LIBGTKMM2EXT_API void set_size_request_to_display_given_text (Gtk::Widget &w,
 								      const std::vector<std::string>&,
 								      gint hpadding,
+								      gint vpadding);
+	LIBGTKMM2EXT_API void set_size_request_to_display_given_text (Gtk::Widget &w,
+								      const std::vector<std::string>&,
+								      const std::string& hpadding,
 								      gint vpadding);
 
 

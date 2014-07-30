@@ -80,6 +80,8 @@ MixerStrip* MixerStrip::_entered_mixer_strip;
 
 PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
 
+static const int _button_vpad = 2;
+
 MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	: AxisView(sess)
 	, RouteUI (sess)
@@ -167,10 +169,12 @@ MixerStrip::init ()
 	input_button.set_name ("mixer strip button");
 	input_button.set_size_request (-1, 20);
 	input_button_box.pack_start (input_button, true, true);
+	Gtkmm2ext::set_height_request_to_display_any_text (input_button, _button_vpad);
 
 	output_button.set_text (_("Output"));
 	output_button.set_name ("mixer strip button");
 	Gtkmm2ext::set_size_request_to_display_given_text (output_button, longest_label.c_str(), 4, 4);
+	Gtkmm2ext::set_height_request_to_display_any_text (output_button, _button_vpad);
 
 	ARDOUR_UI::instance()->set_tip (&meter_point_button, _("Click to select metering point"), "");
 	meter_point_button.set_name ("mixer strip button");
@@ -178,7 +182,7 @@ MixerStrip::init ()
 	/* TRANSLATORS: this string should be longest of the strings
 	   used to describe meter points. In english, it's "input".
 	*/
-	set_size_request_to_display_given_text (meter_point_button, _("tupni"), 5, 5);
+	set_size_request_to_display_given_text_width (meter_point_button, _("tupni"), 2, _button_vpad);
 
 	bottom_button_table.attach (meter_point_button, 2, 3, 0, 1);
 
@@ -276,15 +280,16 @@ MixerStrip::init ()
 	name_button.set_text (""); /* back to empty */
 	name_button.layout()->set_ellipsize (Pango::ELLIPSIZE_END);
 	name_button.signal_size_allocate().connect (sigc::mem_fun (*this, &MixerStrip::name_button_resized));
-	Gtkmm2ext::set_size_request_to_display_given_text (name_button, longest_label.c_str(), 2, 2);
 	name_button.set_size_request (-1, 20);
+	Gtkmm2ext::set_height_request_to_display_any_text (name_button, _button_vpad);
 
 	ARDOUR_UI::instance()->set_tip (&group_button, _("Mix group"), "");
 	group_button.set_name ("mixer strip button");
-	Gtkmm2ext::set_size_request_to_display_given_text (group_button, "Grp", 2, 2);
+	Gtkmm2ext::set_size_request_to_display_given_text_width (group_button, "Grp", 2, _button_vpad);
 
 	_comment_button.set_name (X_("mixer strip button"));
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
+	Gtkmm2ext::set_size_request_to_display_given_text_width (_comment_button, "Cmt", 2, _button_vpad);
 
 	global_vpacker.set_border_width (0);
 	global_vpacker.set_spacing (0);
@@ -733,7 +738,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 		}
 
 
-		Gtkmm2ext::set_size_request_to_display_given_text (name_button, longest_label.c_str(), 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text_width (name_button, longest_label.c_str(), 2, _button_vpad);
 		set_size_request (-1, -1);
 		break;
 
@@ -756,7 +761,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			panners.short_astate_string(_route->panner()->automation_state()));
 		}
 
-		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text_width (name_button, "long", 2, _button_vpad);
 		set_size_request (max (50, gpm.get_gm_width()), -1);
 		break;
 	}
@@ -1438,6 +1443,9 @@ MixerStrip::setup_comment_button ()
 	ARDOUR_UI::instance()->set_tip (
 		_comment_button, _route->comment().empty() ? _("Click to Add/Edit Comments") : _route->comment()
 		);
+
+	Gtkmm2ext::set_size_request_to_display_given_text_width (
+		_comment_button, _comment_button.get_text().c_str(), 2, _button_vpad);
 }
 
 bool
@@ -1637,6 +1645,9 @@ MixerStrip::name_changed ()
 		}
 		break;
 	}
+
+	Gtkmm2ext::set_size_request_to_display_given_text_width (
+		name_button, name_button.get_text().c_str(), 2, _button_vpad);
 
 	ARDOUR_UI::instance()->set_tip (name_button, _route->name());
 }
@@ -2043,6 +2054,22 @@ MixerStrip::set_button_names ()
 	} else {
 		meter_point_button.set_text ("");
 	}
+
+	// Update size request of changed buttons
+	Gtkmm2ext::set_size_request_to_display_given_text_width (
+		*rec_enable_button, rec_enable_button->get_text().c_str(), 2, _button_vpad);
+	Gtkmm2ext::set_size_request_to_display_given_text_width (
+		*mute_button, mute_button->get_text().c_str(), 2, _button_vpad);
+	Gtkmm2ext::set_size_request_to_display_given_text_width (
+		*monitor_input_button, monitor_input_button->get_text().c_str(), 2, _button_vpad);
+	Gtkmm2ext::set_size_request_to_display_given_text_width (
+		*monitor_disk_button, monitor_disk_button->get_text().c_str(), 2, _button_vpad);
+	Gtkmm2ext::set_size_request_to_display_given_text_width (
+		*solo_button, solo_button->get_text().c_str(), 2, _button_vpad);
+	Gtkmm2ext::set_size_request_to_display_given_text_width (
+		*solo_isolated_led, solo_isolated_led->get_text().c_str(), 2, _button_vpad);
+	Gtkmm2ext::set_size_request_to_display_given_text_width (
+		*solo_safe_led, solo_safe_led->get_text().c_str(), 2, _button_vpad);
 }
 
 PluginSelector*

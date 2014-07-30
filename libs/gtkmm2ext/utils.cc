@@ -76,6 +76,40 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *
 	w.set_size_request(width + hpadding, height + vpadding);
 }
 
+/** Set width request to display given text, and height to display anything.
+    This is useful for setting many widgets to the same height for consistency. */
+void
+Gtkmm2ext::set_size_request_to_display_given_text_width (Gtk::Widget& w,
+                                                         const gchar* htext,
+                                                         gint         hpadding,
+                                                         gint         vpadding)
+{
+	static const gchar* vtext = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	w.ensure_style ();
+
+	int hwidth, hheight;
+	get_pixel_size (w.create_pango_layout (htext), hwidth, hheight);
+
+	int vwidth, vheight;
+	get_pixel_size (w.create_pango_layout (vtext), vwidth, vheight);
+
+	w.set_size_request(hwidth + hpadding, vheight + vpadding);
+}
+
+void
+Gtkmm2ext::set_height_request_to_display_any_text (Gtk::Widget& w, gint vpadding)
+{
+	static const gchar* vtext = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	w.ensure_style ();
+
+	int width, height;
+	get_pixel_size (w.create_pango_layout (vtext), width, height);
+
+	w.set_size_request(-1, height + vpadding);
+}
+
 void
 Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, std::string const & text,
 						   gint hpadding, gint vpadding)
@@ -123,6 +157,33 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w,
 	}
 
 	w.set_size_request(width_max + hpadding, height_max + vpadding);
+}
+
+/** This version specifies horizontal padding in text to avoid assumptions
+    about font size.  Should be used anywhere padding is used to avoid text,
+    like combo boxes. */
+void
+Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget&                    w,
+                                                   const std::vector<std::string>& strings,
+                                                   const std::string&              hpadding,
+                                                   gint                            vpadding)
+{
+	int width_max = 0;
+	int height_max = 0;
+	w.ensure_style ();
+
+	for (vector<string>::const_iterator i = strings.begin(); i != strings.end(); ++i) {
+		int width, height;
+		get_pixel_size (w.create_pango_layout (*i), width, height);
+		width_max = max(width_max,width);
+		height_max = max(height_max, height);
+	}
+
+	int pad_width;
+	int pad_height;
+	get_pixel_size (w.create_pango_layout (hpadding), pad_width, pad_height);
+
+	w.set_size_request(width_max + pad_width, height_max + vpadding);
 }
 
 static inline guint8

@@ -23,6 +23,7 @@
 #include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/barcontroller.h>
 #include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/utils.h>
 
 #include "ardour/route_group.h"
 #include "ardour/dB.h"
@@ -64,6 +65,8 @@ using namespace PBD;
 uint32_t RouteUI::_max_invert_buttons = 3;
 PBD::Signal1<void, boost::shared_ptr<Route> > RouteUI::BusSendDisplayChanged;
 boost::weak_ptr<Route> RouteUI::_showing_sends_to;
+
+static const int _button_vpad = 2;
 
 RouteUI::RouteUI (ARDOUR::Session* sess)
 	: AxisView(sess)
@@ -1935,6 +1938,7 @@ RouteUI::setup_invert_buttons ()
 	for (uint32_t i = 0; i < to_add; ++i) {
 		ArdourButton* b = manage (new ArdourButton);
 		b->set_size_request(20,20);
+		Gtkmm2ext::set_height_request_to_display_any_text (*b, _button_vpad);
 		b->signal_button_press_event().connect (sigc::mem_fun (*this, &RouteUI::invert_press));
 		b->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::invert_release), i));
 
