@@ -396,7 +396,7 @@ Session::Session (AudioEngine &eng,
             }
         }
     } else {
-        reconnect_existing_routes(true, true);
+        reconnect_existing_routes(true);
     }
     
     _is_new = false;
@@ -2141,7 +2141,7 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
 
 
 void
-Session::reconnect_existing_routes (bool withLock, bool reconnect_master)
+Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool reconnect_inputs, bool reconnect_outputs)
 {
     Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
     
@@ -2151,8 +2151,8 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master)
     
     // We need to disconnect the route's inputs and outputs first
     // basing on autoconnect configuration
-    bool reconnectIputs = !(Config->get_input_auto_connect() & ManualConnect);
-    bool reconnectOutputs = !(Config->get_output_auto_connect() & ManualConnect);
+    bool reconnectIputs = !(Config->get_input_auto_connect() & ManualConnect) && reconnect_inputs;
+    bool reconnectOutputs = !(Config->get_output_auto_connect() & ManualConnect) && reconnect_outputs;
     
     ChanCount existing_inputs;
     ChanCount existing_outputs;
@@ -2866,7 +2866,7 @@ Session::remove_route (boost::shared_ptr<Route> route)
      * Wave Tracks: reconnect routes
 	 */
     if (ARDOUR::Profile->get_trx () ) {
-        reconnect_existing_routes(true);
+        reconnect_existing_routes(true, false);
     } else {
         resort_routes ();
     }
@@ -5232,7 +5232,7 @@ Session::notify_remote_id_change ()
      * TODO: move it to GUI
      */
     if (ARDOUR::Profile->get_trx () ) {
-        reconnect_existing_routes(true);
+        reconnect_existing_routes(true, false);
     }
 }
 

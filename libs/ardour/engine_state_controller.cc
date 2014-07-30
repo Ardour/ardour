@@ -882,7 +882,7 @@ EngineStateController::set_physical_audio_input_state(const std::string& port_na
     
     if (found_state_iter != input_states.end() && found_state_iter->active != state ) {
         found_state_iter->active = state;
-        AudioEngine::instance()->reconnect_session_routes();
+        AudioEngine::instance()->reconnect_session_routes(true, false);
         
         InputConfigChanged();
     }
@@ -960,7 +960,7 @@ EngineStateController::set_physical_audio_output_state(const std::string& port_n
             }
         }
             
-        AudioEngine::instance()->reconnect_session_routes();
+        AudioEngine::instance()->reconnect_session_routes(false, true);
         OutputConfigChanged();
     }
 }
@@ -1086,7 +1086,7 @@ EngineStateController::set_state_to_all_inputs(bool state)
     }
     
     if (something_changed) {
-        AudioEngine::instance()->reconnect_session_routes();
+        AudioEngine::instance()->reconnect_session_routes(true, false);
         InputConfigChanged();
     }
 }
@@ -1111,7 +1111,7 @@ EngineStateController::set_state_to_all_outputs(bool state)
     }
     
     if (something_changed) {
-        AudioEngine::instance()->reconnect_session_routes();
+        AudioEngine::instance()->reconnect_session_routes(false, true);
         OutputConfigChanged();
     }
 }
@@ -1445,7 +1445,7 @@ EngineStateController::_refresh_stereo_out_channel_states()
 void
 EngineStateController::_on_engine_running ()
 {
-    AudioEngine::instance()->reconnect_session_routes();
+    AudioEngine::instance()->reconnect_session_routes(true, true);
     _current_state->active = true;
     
     EngineRunning(); // emit a signal
@@ -1471,7 +1471,7 @@ EngineStateController::_on_parameter_changed (const std::string& parameter_name)
 {
     if (parameter_name == "output-auto-connect") {
         
-        AudioEngine::instance()->reconnect_session_routes();
+        AudioEngine::instance()->reconnect_session_routes(false, true);
         OutputConfigChanged(); // emit a signal
         OutputConnectionModeChanged(); // emit signal
     }
