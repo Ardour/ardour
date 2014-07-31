@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<RouteUI width="97" 
+<RouteUI width="97"
          height="99"
          bgnormal="#000000"
          bgactive="#000000"
@@ -44,14 +44,24 @@
       <Layout bgnormal="#383838"
               width="47"
               height="83">
+        <EventBox bgnormal="#4E4E4E"
+                  width="1"
+                  height="83"/>
+        <EventBox bgnormal="#4E4E4E"
+                  width="47"
+                  height="1"/>
+        <icon id="master_bus_master_label"
+              source="master_bus_master_label.png"
+              x="1"
+              y="1"/>
         <VBox id="the_icon_home">
           <icon id="master_bus_multi_out_mode_icon"
                 source="master_bus_multi_out_mode.png"/>
         </VBox>
         <VBox id="level_meter_home"
-              height="77"
+              height="61"
               x="18"
-              y="3"/>
+              y="15"/>
       </Layout>
     </HBox>
   </VBox>

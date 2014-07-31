@@ -2,16 +2,18 @@
 
 <CompactMeterbridge bgnormal="#353535">
   <HBox>
+    <VBox width="11"/>
     <VBox>
-      <icon source="meter_bridge_level_scale.png"/>
+      <icon source="meter_bridge_level_scale.png" box.padding="8"/>
     </VBox>
+    <VBox width="9"/>
     <ScrolledWindow hscroll="always"
                     vscroll="never"
                     box.expand="true"
                     box.fill="true">
-      <EventBox bgnormal="#383838">
+      <EventBox bgnormal="#353535">
         <VBox>
-          <Hbox height="10"/>
+          <Hbox height="8"/>
           <Hbox id="compact_meter_strips_home" spacing="2"/>
         </VBox>
       </EventBox>        
