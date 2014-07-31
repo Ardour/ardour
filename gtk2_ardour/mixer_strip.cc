@@ -259,7 +259,7 @@ MixerStrip::init ()
 	}
 	
 	if (!ARDOUR::Profile->get_trx()) {
-		button_table.attach (name_button, 0, 1, button_table_row, button_table_row+1);
+		button_table.attach (name_button, 0, 2, button_table_row, button_table_row+1);
 		button_table_row++;
 		button_table.attach (input_button_box, 0, 2, button_table_row, button_table_row+1);
 		button_table_row++;
@@ -300,7 +300,7 @@ MixerStrip::init ()
 	width_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::width_button_pressed), false);
 	hide_button.signal_clicked.connect (sigc::mem_fun(*this, &MixerStrip::hide_clicked));
 
-	width_hide_box.set_border_width (2);
+//	width_hide_box.set_border_width (1);
 	width_hide_box.set_spacing (2);
 	width_hide_box.pack_start (width_button, false, true);
 	width_hide_box.pack_start (number_label, true, true);
