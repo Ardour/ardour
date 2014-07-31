@@ -80,7 +80,7 @@ MixerStrip* MixerStrip::_entered_mixer_strip;
 
 PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
 
-static const int _button_vpad = 2;
+static const int _button_vpad = 4;
 
 MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	: AxisView(sess)
@@ -2066,10 +2066,6 @@ MixerStrip::set_button_names ()
 		*monitor_disk_button, monitor_disk_button->get_text().c_str(), 2, _button_vpad);
 	Gtkmm2ext::set_size_request_to_display_given_text_width (
 		*solo_button, solo_button->get_text().c_str(), 2, _button_vpad);
-	Gtkmm2ext::set_size_request_to_display_given_text_width (
-		*solo_isolated_led, solo_isolated_led->get_text().c_str(), 2, _button_vpad);
-	Gtkmm2ext::set_size_request_to_display_given_text_width (
-		*solo_safe_led, solo_safe_led->get_text().c_str(), 2, _button_vpad);
 }
 
 PluginSelector*
