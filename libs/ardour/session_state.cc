@@ -540,7 +540,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
                 ChanCount count(DataType::AUDIO, bus_profile->master_out_channels);
 
 		if (bus_profile->master_out_channels) {
-			boost::shared_ptr<Route> r (new Route (*this, _("master"), Route::MasterOut, DataType::AUDIO));
+			boost::shared_ptr<Route> r (new Route (*this, _("Master"), Route::MasterOut, DataType::AUDIO));
                         if (r->init ()) {
                                 return -1;
                         }
@@ -2969,7 +2969,7 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 	case ControllableDescriptor::NamedRoute:
 	{
 		std::string str = desc.top_level_name();
-		if (str == "master") {
+		if (str == "Master" || str == "master") {
 			r = _master_out;
 		} else if (str == "control" || str == "listen") {
 			r = _monitor_out;

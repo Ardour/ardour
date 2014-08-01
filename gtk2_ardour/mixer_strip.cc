@@ -210,8 +210,8 @@ MixerStrip::init ()
         solo_safe_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_safe_button_release));
 	UI::instance()->set_tip (solo_safe_led, _("Lock Solo Status"), "");
 
-	solo_safe_led->set_text (_("lock"));
-	solo_isolated_led->set_text (_("iso"));
+	solo_safe_led->set_text (_("Lock"));
+	solo_isolated_led->set_text (_("Iso"));
 
 	solo_iso_table.set_homogeneous (true);
 	solo_iso_table.set_spacings (2);
@@ -1747,48 +1747,48 @@ MixerStrip::meter_point_string (MeterPoint mp)
 	case Wide:
 		switch (mp) {
 		case MeterInput:
-			return _("in");
+			return _("In");
 			break;
 			
 		case MeterPreFader:
-			return _("pre");
+			return _("Pre");
 			break;
 			
 		case MeterPostFader:
-			return _("post");
+			return _("Post");
 			break;
 			
 		case MeterOutput:
-			return _("out");
+			return _("Out");
 			break;
 			
 		case MeterCustom:
 		default:
-			return _("custom");
+			return _("Custom");
 			break;
 		}
 		break;
 	case Narrow:
 		switch (mp) {
 		case MeterInput:
-			return _("in");
+			return _("In");
 			break;
 			
 		case MeterPreFader:
-			return _("pr");
+			return _("Pr");
 			break;
 			
 		case MeterPostFader:
-			return _("po");
+			return _("Po");
 			break;
 			
 		case MeterOutput:
-			return _("o");
+			return _("O");
 			break;
 			
 		case MeterCustom:
 		default:
-			return _("c");
+			return _("C");
 			break;
 		}
 		break;
@@ -1956,8 +1956,8 @@ MixerStrip::set_button_names ()
 				break;
 			}
 		}
-		solo_isolated_led->set_text (_("iso"));
-		solo_safe_led->set_text (_("lock"));
+		solo_isolated_led->set_text (_("Iso"));
+		solo_safe_led->set_text (_("Lock"));
 		break;
 
 	default:
@@ -1984,7 +1984,7 @@ MixerStrip::set_button_names ()
 			}
 		}
 
-		solo_isolated_led->set_text (_("i"));
+		solo_isolated_led->set_text (_("I"));
 		solo_safe_led->set_text (_("L"));
 		break;
 	}

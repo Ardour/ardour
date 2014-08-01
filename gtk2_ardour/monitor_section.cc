@@ -94,15 +94,15 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Rude Solo */
 
-	rude_solo_button.set_text (_("soloing"));
+	rude_solo_button.set_text (_("Soloing"));
 	rude_solo_button.set_name ("rude solo");
         rude_solo_button.show ();
 
-	rude_iso_button.set_text (_("isolated"));
+	rude_iso_button.set_text (_("Isolated"));
 	rude_iso_button.set_name ("rude isolate");
         rude_iso_button.show ();
 
-	rude_audition_button.set_text (_("auditioning"));
+	rude_audition_button.set_text (_("Auditioning"));
 	rude_audition_button.set_name ("rude audition");
         rude_audition_button.show ();
 
@@ -233,7 +233,7 @@ MonitorSection::MonitorSection (Session* s)
 
         dim_packer->pack_start (*spin_packer, true, false);
 
-		exclusive_solo_button.set_text (_("excl. solo"));
+		exclusive_solo_button.set_text (_("Excl. Solo"));
         exclusive_solo_button.set_name (X_("monitor solo exclusive"));
         ARDOUR_UI::instance()->set_tip (&exclusive_solo_button, _("Exclusive solo means that only 1 solo is active at a time"));
 
@@ -242,7 +242,7 @@ MonitorSection::MonitorSection (Session* s)
 		exclusive_solo_button.set_related_action (act);
         }
 
-	solo_mute_override_button.set_text (_("solo » mute"));
+	solo_mute_override_button.set_text (_("Solo » Mute"));
         solo_mute_override_button.set_name (X_("monitor solo override"));
         ARDOUR_UI::instance()->set_tip (&solo_mute_override_button, _("If enabled, solo will override mute\n(a soloed & muted track or bus will be audible)"));
 
@@ -270,7 +270,7 @@ MonitorSection::MonitorSection (Session* s)
         upper_packer.pack_start (*solo_opt_box, false, false);
         upper_packer.pack_start (*solo_packer, false, false, 12);
 
-        cut_all_button.set_text (_("mute"));
+        cut_all_button.set_text (_("Mute"));
 	cut_all_button.set_name ("monitor section cut");
         cut_all_button.set_name (X_("monitor section cut"));
         cut_all_button.set_size_request (-1,50);
@@ -281,14 +281,14 @@ MonitorSection::MonitorSection (Session* s)
 		cut_all_button.set_related_action (act);
 	}
 
-	dim_all_button.set_text (_("dim"));
+	dim_all_button.set_text (_("Dim"));
 	dim_all_button.set_name ("monitor section dim");
         act = ActionManager::get_action (X_("Monitor"), X_("monitor-dim-all"));
         if (act) {
 		dim_all_button.set_related_action (act);
         }
 
-	mono_button.set_text (_("mono"));
+	mono_button.set_text (_("Mono"));
 	mono_button.set_name ("monitor section mono");
         act = ActionManager::get_action (X_("Monitor"), X_("monitor-mono"));
         if (act) {
@@ -342,21 +342,27 @@ MonitorSection::MonitorSection (Session* s)
 	channel_size_group->add_widget (channel_table);
 
 	channel_table_header.resize (1, 5);
-        Label* l1 = manage (new Label (X_("out")));
+
+	Label* l1 = manage (new Label (X_("  ")));
 	l1->set_name (X_("MonitorSectionLabel"));
-        channel_table_header.attach (*l1, 0, 1, 0, 1, EXPAND|FILL);
-        l1 = manage (new Label (X_("mute")));
+	channel_table_header.attach (*l1, 0, 1, 0, 1, EXPAND|FILL);
+
+	l1 = manage (new Label (X_("Mute")));
 	l1->set_name (X_("MonitorSectionLabel"));
-        channel_table_header.attach (*l1, 1, 2, 0, 1, EXPAND|FILL);
-        l1 = manage (new Label (X_("dim")));
+	channel_table_header.attach (*l1, 1, 2, 0, 1, EXPAND|FILL);
+
+	l1 = manage (new Label (X_("Dim")));
 	l1->set_name (X_("MonitorSectionLabel"));
-        channel_table_header.attach (*l1, 2, 3, 0, 1, EXPAND|FILL);
-        l1 = manage (new Label (X_("solo")));
+	channel_table_header.attach (*l1, 2, 3, 0, 1, EXPAND|FILL);
+
+	l1 = manage (new Label (X_("Solo")));
 	l1->set_name (X_("MonitorSectionLabel"));
-        channel_table_header.attach (*l1, 3, 4, 0, 1, EXPAND|FILL);
-        l1 = manage (new Label (X_("inv")));
+	channel_table_header.attach (*l1, 3, 4, 0, 1, EXPAND|FILL);
+
+	l1 = manage (new Label (X_("Inv")));
 	l1->set_name (X_("MonitorSectionLabel"));
-        channel_table_header.attach (*l1, 4, 5, 0, 1, EXPAND|FILL);
+	channel_table_header.attach (*l1, 4, 5, 0, 1, EXPAND|FILL);
+
 	channel_table_header.show ();
 
 	table_hpacker.pack_start (channel_table, true, true);

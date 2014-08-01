@@ -190,9 +190,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, follow_edits_button (ArdourButton::led_default_elements)
 	, auto_input_button (ArdourButton::led_default_elements)
 
-	, auditioning_alert_button (_("audition"))
-	, solo_alert_button (_("solo"))
-	, feedback_alert_button (_("feedback"))
+	, auditioning_alert_button (_("Audition"))
+	, solo_alert_button (_("Solo"))
+	, feedback_alert_button (_("Feedback"))
 
 	, editor_meter(0)
 	, editor_meter_peak_display()
