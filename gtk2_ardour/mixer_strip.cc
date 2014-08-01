@@ -426,7 +426,7 @@ MixerStrip::mixer_strip_enter_event (GdkEventCrossing *ev)
 	
 	//although we are triggering on the "enter", to the user it will appear that it is happenin on the "leave"
 	//because the mixerstrip control is a parent that encompasses the strip
-	ARDOUR_UI::instance()->the_mixer()->deselect_all_strip_processors();
+	deselect_all_processors();
 
 	return false;
 }
@@ -438,8 +438,9 @@ MixerStrip::mixer_strip_leave_event (GdkEventCrossing *ev)
 	if ( !(ev->detail == GDK_NOTIFY_INFERIOR) ) {
 		_entered_mixer_strip= 0;
 
-		//clear keyboard focus in the gain display.  this is cheesy but fixes a longstanding bug.
+		//clear keyboard focus in the gain display.  this is cheesy but fixes a longstanding "bug" where the user starts typing in the gain entry, and leaves it active, thereby prohibiting other keybindings from working
 		gpm.gain_display.set_sensitive(false);
+		gpm.show_gain();
 		gpm.gain_display.set_sensitive(true);
 
 		//if we leave this mixer strip we need to clear out any selections
