@@ -881,7 +881,7 @@ Session::add_monitor_section ()
 		return;
 	}
 
-	boost::shared_ptr<Route> r (new Route (*this, _("monitor"), Route::MonitorOut, DataType::AUDIO));
+	boost::shared_ptr<Route> r (new Route (*this, _("Monitor"), Route::MonitorOut, DataType::AUDIO));
 
 	if (r->init ()) {
 		return;

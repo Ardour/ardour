@@ -718,7 +718,8 @@ MixerStrip::set_width_enum (Width w, void* owner)
 
 
 		Gtkmm2ext::set_size_request_to_display_given_text_width (name_button, longest_label.c_str(), 2, _button_vpad);
-		set_size_request (-1, -1);
+		set_size_request (max (110, gpm.get_gm_width()+5), -1);
+//		set_size_request (-1, -1);
 		break;
 
 	case Narrow:

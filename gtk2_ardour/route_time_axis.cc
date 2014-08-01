@@ -96,9 +96,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, parent_canvas (canvas)
 	, no_redraw (false)
 	, button_table (3, 3)
-	, route_group_button (_("g"))
-	, playlist_button (_("p"))
-	, automation_button (_("a"))
+	, route_group_button (_("G"))
+	, playlist_button (_("P"))
+	, automation_button (_("A"))
 	, automation_action_menu (0)
 	, plugins_submenu_item (0)
 	, route_group_menu (0)
@@ -2524,10 +2524,10 @@ RouteTimeAxisView::set_button_names ()
 			break;
 		}
 	} else {
-		solo_button->set_text (_("s"));
+		solo_button->set_text (_("S"));
 		ARDOUR_UI::instance()->set_tip (*solo_button, _("Solo"));
 	}
-	mute_button->set_text (_("m"));
+	mute_button->set_text (_("M"));
 }
 
 Gtk::CheckMenuItem*
