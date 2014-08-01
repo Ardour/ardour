@@ -91,7 +91,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
-	, button_table (3, 1)
 	, rec_mon_table (2, 2)
 	, solo_iso_table (1, 2)
 	, mute_solo_table (1, 2)
@@ -121,7 +120,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, gpm (sess, 250)
 	, panners (sess)
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
-	, button_table (3, 1)
 	, rec_mon_table (2, 2)
 	, solo_iso_table (1, 2)
 	, mute_solo_table (1, 2)
@@ -163,6 +161,8 @@ MixerStrip::init ()
 	hide_button.set_image(::get_icon("hide"));
 	ARDOUR_UI::instance()->set_tip (&hide_button, _("Hide this mixer strip"));
 
+	input_button_box.set_spacing(2);
+	
 	input_button.set_text (_("Input"));
 	input_button.set_name ("mixer strip button");
 	input_button.set_size_request (-1, 20);
@@ -234,9 +234,6 @@ MixerStrip::init ()
 	}
 	rec_mon_table.show ();
 
-	button_table.set_homogeneous (false);
-	button_table.set_spacings (2);
-
 	if (solo_isolated_led) {
 		button_size_group->add_widget (*solo_isolated_led);
 	}
@@ -256,15 +253,6 @@ MixerStrip::init ()
 		}
 	}
 	
-	if (!ARDOUR::Profile->get_trx()) {
-		button_table.attach (name_button, 0, 2, button_table_row, button_table_row+1);
-		button_table_row++;
-		button_table.attach (input_button_box, 0, 2, button_table_row, button_table_row+1);
-		button_table_row++;
-		button_table.attach (_invert_button_box, 0, 2, button_table_row, button_table_row+1);
-		button_table_row++;
-	}
-
 	mute_solo_table.set_homogeneous (true);
 	mute_solo_table.set_spacings (2);
 
@@ -313,7 +301,9 @@ MixerStrip::init ()
 	global_vpacker.set_spacing (2);
 	if (!ARDOUR::Profile->get_trx()) {
 		global_vpacker.pack_start (width_hide_box, Gtk::PACK_SHRINK);
-		global_vpacker.pack_start (button_table, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (input_button_box, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (_invert_button_box, Gtk::PACK_SHRINK);
 		global_vpacker.pack_start (processor_box, true, true);
 	}
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
@@ -659,7 +649,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	width_hide_box.show();
 	global_frame.show();
 	global_vpacker.show();
-	button_table.show();
 	mute_solo_table.show();
 	bottom_button_table.show();
 	gpm.show_all ();
