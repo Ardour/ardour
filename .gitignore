@@ -155,3 +155,6 @@ gtk2_ardour/macosx/tracks.xcodeproj/xcuserdata/user.xcuserdatad/xcschemes/xcsche
 libs/ardour/macosx/libardour.xcodeproj/xcuserdata/user.xcuserdatad/xcschemes/xcschememanagement.plist
 libs/backends/wavesaudio/macosx/waves_audiobackend.xcodeproj/xcuserdata/user.xcuserdatad/xcschemes/xcschememanagement.plist
 libs/pbd/macosx/pbd.xcodeproj/xcuserdata/user.xcuserdatad/xcschemes/xcschememanagement.plist
+/MSVCMixbus3/MSVCMixbus3.vsprops
+/MSVCardour3/MSVCMixbus3.vsprops
+/icons/win32/msvc_resources.rc
