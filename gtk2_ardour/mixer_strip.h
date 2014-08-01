@@ -69,7 +69,6 @@ namespace Gtk {
 }
 
 class Mixer_UI;
-class IOSelectorWindow;
 class MotionController;
 class RouteGroupMenu;
 class ArdourWindow;
@@ -220,9 +219,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void bundle_input_chosen (boost::shared_ptr<ARDOUR::Bundle>);
 	void bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle>);
 
-	void edit_input_configuration ();
-	void edit_output_configuration ();
-
 	void diskstream_changed ();
 	void io_changed_proxy ();
 
@@ -253,9 +249,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	bool select_route_group (GdkEventButton *);
 	void route_group_changed ();
 
-	IOSelectorWindow *input_selector;
-	IOSelectorWindow *output_selector;
-
 	Gtk::Style *passthru_style;
 
 	void route_color_changed ();
@@ -279,7 +272,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	virtual void bus_send_display_changed (boost::shared_ptr<ARDOUR::Route>);
 
 	void set_current_delivery (boost::shared_ptr<ARDOUR::Delivery>);
-	boost::shared_ptr<ARDOUR::Delivery> _current_delivery;
 
 	void drop_send ();
 	PBD::ScopedConnection send_gone_connection;

@@ -51,9 +51,9 @@ namespace Gtk {
 	class Widget;
 }
 
-class BindableToggleButton;
 class ArdourButton;
 class ArdourWindow;
+class IOSelectorWindow;
 
 class RouteUI : public virtual AxisView
 {
@@ -119,6 +119,8 @@ class RouteUI : public virtual AxisView
 	Gtk::Menu* solo_menu;
 	Gtk::Menu* sends_menu;
 
+	boost::shared_ptr<ARDOUR::Delivery> _current_delivery;
+
 	bool mute_press(GdkEventButton*);
 	bool mute_release(GdkEventButton*);
 	bool solo_press(GdkEventButton*);
@@ -135,6 +137,9 @@ class RouteUI : public virtual AxisView
 	bool monitor_disk_release(GdkEventButton*);
 	void monitoring_changed ();
 	void update_monitoring_display ();
+
+	void edit_input_configuration ();
+	void edit_output_configuration ();
 
 	void step_gain_up ();
 	void step_gain_down ();
@@ -244,6 +249,8 @@ class RouteUI : public virtual AxisView
 
 	ArdourWindow*  comment_window;
 	Gtk::TextView* comment_area;
+	IOSelectorWindow *input_selector;
+	IOSelectorWindow *output_selector;
 
 	PBD::ScopedConnectionList route_connections;
 	bool self_destruct;

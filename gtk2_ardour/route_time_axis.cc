@@ -481,6 +481,12 @@ RouteTimeAxisView::build_display_menu ()
 
 	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
 
+	items.push_back (MenuElem (_("Inputs..."), sigc::mem_fun (*this, &RouteUI::edit_input_configuration)));
+
+	items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
+
+	items.push_back (SeparatorElem());
+
 	if (_size_menu) {
 		detach_menu (*_size_menu);
 	}

@@ -51,6 +51,8 @@
 #include "ardour/audioengine.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/midi_track.h"
+#include "ardour/internal_send.h"
+#include "ardour/send.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/template_utils.h"
@@ -91,6 +93,8 @@ RouteUI::~RouteUI()
         delete record_menu;
 	delete _invert_menu;
 	delete comment_window;
+	delete input_selector;
+	delete output_selector;
 }
 
 void
@@ -117,6 +121,9 @@ RouteUI::init ()
 	multiple_mute_change = false;
 	multiple_solo_change = false;
 	_i_am_the_modifier = 0;
+
+	input_selector = 0;
+	output_selector = 0;
 
 	setup_invert_buttons ();
 
@@ -214,6 +221,12 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	if (self_destruct) {
 		rp->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::self_delete, this), gui_context());
 	}
+
+	delete input_selector;
+	input_selector = 0;
+
+	delete output_selector;
+	output_selector = 0;
 
 	mute_button->set_controllable (_route->mute_control());
 	solo_button->set_controllable (_route->solo_control());
@@ -414,6 +427,52 @@ RouteUI::mute_release (GdkEventButton*)
 	}
 
 	return true;
+}
+
+void
+RouteUI::edit_output_configuration ()
+{
+	if (output_selector == 0) {
+
+		boost::shared_ptr<Send> send;
+		boost::shared_ptr<IO> output;
+
+		if ((send = boost::dynamic_pointer_cast<Send>(_current_delivery)) != 0) {
+			if (!boost::dynamic_pointer_cast<InternalSend>(send)) {
+				output = send->output();
+			} else {
+				output = _route->output ();
+			}
+		} else {
+			output = _route->output ();
+		}
+
+		output_selector = new IOSelectorWindow (_session, output);
+	}
+
+	if (output_selector->is_visible()) {
+		output_selector->get_toplevel()->get_window()->raise();
+	} else {
+		output_selector->present ();
+	}
+
+	output_selector->set_keep_above (true);
+}
+
+void
+RouteUI::edit_input_configuration ()
+{
+	if (input_selector == 0) {
+		input_selector = new IOSelectorWindow (_session, _route->input());
+	}
+
+	if (input_selector->is_visible()) {
+		input_selector->get_toplevel()->get_window()->raise();
+	} else {
+		input_selector->present ();
+	}
+
+	input_selector->set_keep_above (true);
 }
 
 bool

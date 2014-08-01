@@ -141,8 +141,6 @@ MixerStrip::init ()
 	int button_table_row = 0;
 
 	_entered_mixer_strip= 0;
-	input_selector = 0;
-	output_selector = 0;
 	group_menu = 0;
 	route_ops_menu = 0;
 	ignore_comment_edit = false;
@@ -414,9 +412,6 @@ MixerStrip::~MixerStrip ()
 
 	if (this ==_entered_mixer_strip)
 		_entered_mixer_strip = NULL;
-
-	delete input_selector;
-	delete output_selector;
 }
 
 bool
@@ -483,12 +478,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	mute_changed (0);
 	update_solo_display ();
-
-	delete input_selector;
-	input_selector = 0;
-
-	delete output_selector;
-	output_selector = 0;
 
 	revert_to_default_display ();
 
@@ -871,52 +860,6 @@ MixerStrip::output_press (GdkEventButton *ev)
 		break;
 	}
 	return TRUE;
-}
-
-void
-MixerStrip::edit_output_configuration ()
-{
-	if (output_selector == 0) {
-
-		boost::shared_ptr<Send> send;
-		boost::shared_ptr<IO> output;
-
-		if ((send = boost::dynamic_pointer_cast<Send>(_current_delivery)) != 0) {
-			if (!boost::dynamic_pointer_cast<InternalSend>(send)) {
-				output = send->output();
-			} else {
-				output = _route->output ();
-			}
-		} else {
-			output = _route->output ();
-		}
-
-		output_selector = new IOSelectorWindow (_session, output);
-	}
-
-	if (output_selector->is_visible()) {
-		output_selector->get_toplevel()->get_window()->raise();
-	} else {
-		output_selector->present ();
-	}
-
-	output_selector->set_keep_above (true);
-}
-
-void
-MixerStrip::edit_input_configuration ()
-{
-	if (input_selector == 0) {
-		input_selector = new IOSelectorWindow (_session, _route->input());
-	}
-
-	if (input_selector->is_visible()) {
-		input_selector->get_toplevel()->get_window()->raise();
-	} else {
-		input_selector->present ();
-	}
-
-	input_selector->set_keep_above (true);
 }
 
 gint
@@ -1523,6 +1466,13 @@ MixerStrip::build_route_ops_menu ()
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
 
 	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
+
+	items.push_back (MenuElem (_("Inputs..."), sigc::mem_fun (*this, &RouteUI::edit_input_configuration)));
+
+	items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
+
+	items.push_back (SeparatorElem());
+
 	if (!_route->is_master()) {
 		items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
 	}
