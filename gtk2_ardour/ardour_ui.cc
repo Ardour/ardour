@@ -3619,6 +3619,24 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 }
 
 void
+ARDOUR_UI::add_audio_track_instantly ()
+{
+	int count;
+    
+	if (!_session) {
+		return;
+	}
+    
+	if (add_route_dialog->is_visible()) {
+		/* we're already doing this */
+		return;
+	}
+    
+	_session->new_audio_track (1, 1, Normal, 0, 1, string() );
+}
+
+
+void
 ARDOUR_UI::stop_video_server (bool ask_confirm)
 {
 	if (!video_server_process && ask_confirm) {

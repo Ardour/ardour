@@ -516,6 +516,7 @@ Editor::Editor ()
 	controls_layout.signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
 
 	controls_layout.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
+    controls_layout.signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::edit_controls_button_press));
 	controls_layout.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::edit_controls_button_release));
 
 	_cursors = new MouseCursors;
@@ -3772,11 +3773,20 @@ Editor::override_visible_track_count ()
 }
 
 bool
+Editor::edit_controls_button_press (GdkEventButton* ev)
+{
+	if (ev->type == GDK_2BUTTON_PRESS) {
+        ARDOUR_UI::instance()->add_audio_track_instantly ();
+	}
+    
+	return true;
+}
+
+
+bool
 Editor::edit_controls_button_release (GdkEventButton* ev)
 {
-	if (Keyboard::is_context_menu_event (ev)) {
-		ARDOUR_UI::instance()->add_route (this);
-	} else if (ev->button == 1) {
+	if (ev->button == 1) {
 		selection->clear_tracks ();
 	}
 

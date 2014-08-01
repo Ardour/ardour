@@ -986,6 +986,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool track_canvas_map_handler (GdkEventAny*);
 
 	bool edit_controls_button_release (GdkEventButton*);
+    bool edit_controls_button_press (GdkEventButton*);
 	Gtk::Menu *edit_controls_left_menu;
 	Gtk::Menu *edit_controls_right_menu;
 

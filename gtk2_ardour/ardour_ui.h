@@ -240,6 +240,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         void add_routes_part_two ();
         void add_routes_thread ();
 
+    void add_audio_track_instantly ();
+    
 	void add_video (Gtk::Window* float_window);
 	void remove_video ();
 	void start_video_server_menu (Gtk::Window* float_window);
