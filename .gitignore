@@ -143,3 +143,7 @@ tags
 /libs/taglib/taglib/xingheader.h
 /libs/taglib/taglib/tlist.tcc
 /libs/taglib/taglib/tmap.tcc
+
+/MSVCMixbus3/MSVCMixbus3.vsprops
+/MSVCardour3/MSVCMixbus3.vsprops
+/icons/win32/msvc_resources.rc
