@@ -1767,6 +1767,18 @@ Editor::temporal_zoom_session ()
 		framecnt_t start = _session->current_start_frame();
 		framecnt_t end = _session->current_end_frame();
 
+		if (_session->actively_recording () ) {
+			framepos_t cur = playhead_cursor->current_frame ();
+			if (cur > end) {
+				/* recording beyond the end marker; zoom out
+				 * by 5 seconds more so that if 'follow
+				 * playhead' is active we don't immediately
+				 * scroll.
+				 */
+				end = cur + _session->frame_rate() * 5;
+			}
+		}
+
 		if ((start == 0 && end == 0) || end < start) {
 			return;
 		}
