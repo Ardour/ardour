@@ -558,7 +558,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	bool const auto_return_enabled =
-		(!config.get_external_sync() && config.get_auto_return());
+		(!config.get_external_sync() && (config.get_auto_return() || abort));
 
 	if (auto_return_enabled ||
 	    (ptw & PostTransportLocate) ||
@@ -618,6 +618,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 						_transport_frame = _last_roll_location;
 						do_locate = true;
 					}
+				} else if (abort) {
+
+					_transport_frame = _last_roll_location;
+					do_locate = true;
 				}
 			}
 
