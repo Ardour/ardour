@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)glibmm32-2.4-0D.lib $(DllPrefix)giomm32-2.4-0D.lib $(DllPrefix)gtkmm32$(GlibDllSuffix)D.lib $(DllPrefix)gdkmm32$(GlibDllSuffix)D.lib $(DllPrefix)pangomm32$(DllSuffix)D.lib $(DllPrefix)cairomm32$(DllSuffix)D.lib pthreadVCE2.lib $(DllPrefix)gthread32-2.0-0D.lib $(DllPrefix)gobject32-2.0-0D.lib $(DllPrefix)gmodule32-2.0-0D.lib $(DllPrefix)glib32-2.0-0D.lib $(DllPrefix)gio32-2.0-0D.lib $(DllPrefix)gtk32$(GlibDllSuffix)D.lib $(DllPrefix)gdk32$(GlibDllSuffix)D.lib $(DllPrefix)gdk-pixbuf32$(GlibDllSuffix)D.lib $(DllPrefix)cairo32$(CairoDllSuffix)D.lib $(DllPrefix)pango32$(PangoDllSuffix)D.lib $(DllPrefix)pangocairo32$(PangoDllSuffix)D.lib $(DllPrefix)sigc++32-2.0D.lib $(DllPrefix)timecode32D.lib $(DllPrefix)ardour32D.lib $(DllPrefix)ardour_cp32D.lib $(DllPrefix)evoral32D.lib $(DllPrefix)midi++32D.lib $(DllPrefix)pbd32D.lib intlD.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib winmm.lib"
+				AdditionalDependencies="$(DllPrefix)glibmm32$(GlibmmDllSuffix)D.lib $(DllPrefix)giomm32$(GlibmmDllSuffix)D.lib $(DllPrefix)gtkmm32$(GtkmmDllSuffix)D.lib $(DllPrefix)gdkmm32$(GtkmmDllSuffix)D.lib $(DllPrefix)pangomm32$(PangommDllSuffix)D.lib $(DllPrefix)cairomm32$(CairommDllSuffix)D.lib pthreadVCE2.lib $(DllPrefix)gthread32$(GlibDllSuffix)D.lib $(DllPrefix)gobject32$(GlibDllSuffix)D.lib $(DllPrefix)gmodule32$(GlibDllSuffix)D.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)gio32$(GlibDllSuffix)D.lib $(DllPrefix)gtk32$(GtkDllSuffix)D.lib $(DllPrefix)gdk32$(GtkDllSuffix)D.lib $(DllPrefix)gdk-pixbuf32$(GdkPixbufDllSuffix)D.lib $(DllPrefix)cairo32$(CairoDllSuffix)D.lib $(DllPrefix)pango32$(PangoDllSuffix)D.lib $(DllPrefix)pangocairo32$(PangoDllSuffix)D.lib $(DllPrefix)sigc++32-2.0D.lib $(DllPrefix)timecode32D.lib $(DllPrefix)ardour32D.lib $(DllPrefix)ardour_cp32D.lib $(DllPrefix)evoral32D.lib $(DllPrefix)midi++32D.lib $(DllPrefix)pbd32D.lib intlD.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib winmm.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32D.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				IgnoreDefaultLibraryNames="libboost_regex-vc80-mt-gd-1_40.lib;msvcrt.lib;dsound.lib"
@@ -142,7 +142,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)glibmm32-2.4-0.lib $(DllPrefix)giomm32-2.4-0.lib $(DllPrefix)gtkmm32$(GlibDllSuffix).lib $(DllPrefix)gdkmm32$(GlibDllSuffix).lib $(DllPrefix)pangomm32$(DllSuffix).lib $(DllPrefix)cairomm32$(DllSuffix).lib pthreadVCE2.lib $(DllPrefix)gthread32-2.0-0.lib $(DllPrefix)gobject32-2.0-0.lib $(DllPrefix)gmodule32-2.0-0.lib $(DllPrefix)glib32-2.0-0.lib $(DllPrefix)gio32-2.0-0.lib $(DllPrefix)gtk32$(GlibDllSuffix).lib $(DllPrefix)gdk32$(GlibDllSuffix).lib $(DllPrefix)gdk-pixbuf32$(GlibDllSuffix).lib $(DllPrefix)cairo32$(CairoDllSuffix).lib $(DllPrefix)pango32$(PangoDllSuffix).lib $(DllPrefix)pangocairo32$(PangoDllSuffix).lib $(DllPrefix)sigc++32-2.0.lib $(DllPrefix)timecode32.lib $(DllPrefix)ardour32.lib $(DllPrefix)ardour_cp32.lib $(DllPrefix)evoral32.lib $(DllPrefix)midi++32.lib $(DllPrefix)pbd32.lib intl.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib winmm.lib"
+				AdditionalDependencies="$(DllPrefix)glibmm32$(GlibmmDllSuffix).lib $(DllPrefix)giomm32$(GlibmmDllSuffix).lib $(DllPrefix)gtkmm32$(GtkmmDllSuffix).lib $(DllPrefix)gdkmm32$(GtkmmDllSuffix).lib $(DllPrefix)pangomm32$(PangommDllSuffix).lib $(DllPrefix)cairomm32$(CairommDllSuffix).lib pthreadVCE2.lib $(DllPrefix)gthread32$(GlibDllSuffix).lib $(DllPrefix)gobject32$(GlibDllSuffix).lib $(DllPrefix)gmodule32$(GlibDllSuffix).lib $(DllPrefix)glib32$(GlibDllSuffix).lib $(DllPrefix)gio32$(GlibDllSuffix).lib $(DllPrefix)gtk32$(GtkDllSuffix).lib $(DllPrefix)gdk32$(GtkDllSuffix).lib $(DllPrefix)gdk-pixbuf32$(GdkPixbufDllSuffix).lib $(DllPrefix)cairo32$(CairoDllSuffix).lib $(DllPrefix)pango32$(PangoDllSuffix).lib $(DllPrefix)pangocairo32$(PangoDllSuffix).lib $(DllPrefix)sigc++32-2.0.lib $(DllPrefix)timecode32.lib $(DllPrefix)ardour32.lib $(DllPrefix)ardour_cp32.lib $(DllPrefix)evoral32.lib $(DllPrefix)midi++32.lib $(DllPrefix)pbd32.lib intl.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib winmm.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				IgnoreDefaultLibraryNames="libboost_regex-vc80-mt-gd-1_40.lib;dsound.lib"
@@ -224,7 +224,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)glibmm32-2.4-0RDC.lib $(DllPrefix)giomm32-2.4-0RDC.lib $(DllPrefix)gtkmm32$(GlibDllSuffix)RDC.lib $(DllPrefix)gdkmm32$(GlibDllSuffix)RDC.lib $(DllPrefix)pangomm32$(DllSuffix)RDC.lib $(DllPrefix)cairomm32$(DllSuffix)RDC.lib pthreadVCE2.lib $(DllPrefix)gthread32-2.0-0RDC.lib $(DllPrefix)gobject32-2.0-0RDC.lib $(DllPrefix)gmodule32-2.0-0RDC.lib $(DllPrefix)glib32-2.0-0RDC.lib $(DllPrefix)gio32-2.0-0RDC.lib $(DllPrefix)gtk32$(GlibDllSuffix)RDC.lib $(DllPrefix)gdk32$(GlibDllSuffix)RDC.lib $(DllPrefix)gdk-pixbuf32$(GlibDllSuffix)RDC.lib $(DllPrefix)cairo32$(CairoDllSuffix)RDC.lib $(DllPrefix)pango32$(PangoDllSuffix)RDC.lib $(DllPrefix)pangocairo32$(PangoDllSuffix)RDC.lib $(DllPrefix)sigc++32-2.0RDC.lib $(DllPrefix)timecode32RDC.lib $(DllPrefix)ardour32RDC.lib $(DllPrefix)ardour_cp32RDC.lib $(DllPrefix)evoral32RDC.lib $(DllPrefix)midi++32RDC.lib $(DllPrefix)pbd32RDC.lib intlRDC.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib winmm.lib"
+				AdditionalDependencies="$(DllPrefix)glibmm32$(GlibmmDllSuffix)RDC.lib $(DllPrefix)giomm32$(GlibmmDllSuffix)RDC.lib $(DllPrefix)gtkmm32$(GtkmmDllSuffix)RDC.lib $(DllPrefix)gdkmm32$(GtkmmDllSuffix)RDC.lib $(DllPrefix)pangomm32$(PangommDllSuffix)RDC.lib $(DllPrefix)cairomm32$(CairommDllSuffix)RDC.lib pthreadVCE2.lib $(DllPrefix)gthread32$(GlibDllSuffix)RDC.lib $(DllPrefix)gobject32$(GlibDllSuffix)RDC.lib $(DllPrefix)gmodule32$(GlibDllSuffix)RDC.lib $(DllPrefix)glib32$(GlibDllSuffix)RDC.lib $(DllPrefix)gio32$(GlibDllSuffix)RDC.lib $(DllPrefix)gtk32$(GtkDllSuffix)RDC.lib $(DllPrefix)gdk32$(GtkDllSuffix)RDC.lib $(DllPrefix)gdk-pixbuf32$(GdkPixbufDllSuffix)RDC.lib $(DllPrefix)cairo32$(CairoDllSuffix)RDC.lib $(DllPrefix)pango32$(PangoDllSuffix)RDC.lib $(DllPrefix)pangocairo32$(PangoDllSuffix)RDC.lib $(DllPrefix)sigc++32-2.0RDC.lib $(DllPrefix)timecode32RDC.lib $(DllPrefix)ardour32RDC.lib $(DllPrefix)ardour_cp32RDC.lib $(DllPrefix)evoral32RDC.lib $(DllPrefix)midi++32RDC.lib $(DllPrefix)pbd32RDC.lib intlRDC.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib winmm.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32RDC.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				IgnoreDefaultLibraryNames="libboost_regex-vc80-mt-gd-1_40.lib;dsound.lib"
@@ -447,6 +447,16 @@
 			</File>
 			<File
 				RelativePath="..\types.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
+			<File
+				RelativePath="..\..\..\..\icons\win32\msvc_resources.rc"
 				>
 			</File>
 		</Filter>

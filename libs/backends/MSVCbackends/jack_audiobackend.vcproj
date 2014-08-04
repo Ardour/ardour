@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libjackD.lib $(DllPrefix)glibmm32-2.4-0D.lib $(DllPrefix)giomm32-2.4-0D.lib jack_portaudio_x86D.lib pthreadVCE2.lib $(DllPrefix)gthread32-2.0-0D.lib $(DllPrefix)gobject32-2.0-0D.lib $(DllPrefix)gmodule32-2.0-0D.lib $(DllPrefix)glib32-2.0-0D.lib $(DllPrefix)gio32-2.0-0D.lib $(DllPrefix)sigc++32-2.0D.lib $(DllPrefix)timecode32D.lib $(DllPrefix)pbd32D.lib intlD.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib winmm.lib setupapi.lib"
+				AdditionalDependencies="libjackD.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix)D.lib $(DllPrefix)giomm32$(GlibmmDllSuffix)D.lib jack_portaudio_x86D.lib pthreadVCE2.lib $(DllPrefix)gthread32$(GlibDllSuffix)D.lib $(DllPrefix)gobject32$(GlibDllSuffix)D.lib $(DllPrefix)gmodule32$(GlibDllSuffix)D.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)gio32$(GlibDllSuffix)D.lib $(DllPrefix)sigc++32-2.0D.lib $(DllPrefix)timecode32D.lib $(DllPrefix)pbd32D.lib intlD.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib winmm.lib setupapi.lib"
 				OutputFile="$(OutDir)\$(ProjectName)D.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				IgnoreDefaultLibraryNames="libboost_regex-vc80-mt-gd-1_40.lib;msvcrt.lib;dsound.lib"
@@ -142,7 +142,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libjack.lib $(DllPrefix)glibmm32-2.4-0.lib $(DllPrefix)giomm32-2.4-0.lib jack_portaudio_x86.lib pthreadVCE2.lib $(DllPrefix)gthread32-2.0-0.lib $(DllPrefix)gobject32-2.0-0.lib $(DllPrefix)gmodule32-2.0-0.lib $(DllPrefix)glib32-2.0-0.lib $(DllPrefix)gio32-2.0-0.lib $(DllPrefix)sigc++32-2.0.lib $(DllPrefix)timecode32.lib $(DllPrefix)pbd32.lib intl.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib winmm.lib setupapi.lib"
+				AdditionalDependencies="libjack.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix).lib $(DllPrefix)giomm32$(GlibmmDllSuffix).lib jack_portaudio_x86.lib pthreadVCE2.lib $(DllPrefix)gthread32$(GlibDllSuffix).lib $(DllPrefix)gobject32$(GlibDllSuffix).lib $(DllPrefix)gmodule32$(GlibDllSuffix).lib $(DllPrefix)glib32$(GlibDllSuffix).lib $(DllPrefix)gio32$(GlibDllSuffix).lib $(DllPrefix)sigc++32-2.0.lib $(DllPrefix)timecode32.lib $(DllPrefix)pbd32.lib intl.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib winmm.lib setupapi.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				IgnoreDefaultLibraryNames="libboost_regex-vc80-mt-gd-1_40.lib;dsound.lib"
@@ -224,7 +224,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libjack.lib $(DllPrefix)glibmm32-2.4-0RDC.lib $(DllPrefix)giomm32-2.4-0RDC.lib jack_portaudio_x86RDC.lib pthreadVCE2.lib $(DllPrefix)gthread32-2.0-0RDC.lib $(DllPrefix)gobject32-2.0-0RDC.lib $(DllPrefix)gmodule32-2.0-0RDC.lib $(DllPrefix)glib32-2.0-0RDC.lib $(DllPrefix)gio32-2.0-0RDC.lib $(DllPrefix)sigc++32-2.0RDC.lib $(DllPrefix)timecode32RDC.lib $(DllPrefix)pbd32RDC.lib intlRDC.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib winmm.lib setupapi.lib"
+				AdditionalDependencies="libjack.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix)RDC.lib $(DllPrefix)giomm32$(GlibmmDllSuffix)RDC.lib jack_portaudio_x86RDC.lib pthreadVCE2.lib $(DllPrefix)gthread32$(GlibDllSuffix)RDC.lib $(DllPrefix)gobject32$(GlibDllSuffix)RDC.lib $(DllPrefix)gmodule32$(GlibDllSuffix)RDC.lib $(DllPrefix)glib32$(GlibDllSuffix)RDC.lib $(DllPrefix)gio32$(GlibDllSuffix)RDC.lib $(DllPrefix)sigc++32-2.0RDC.lib $(DllPrefix)timecode32RDC.lib $(DllPrefix)pbd32RDC.lib intlRDC.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib winmm.lib setupapi.lib"
 				OutputFile="$(OutDir)\$(ProjectName)RDC.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				IgnoreDefaultLibraryNames="libboost_regex-vc80-mt-gd-1_40.lib;dsound.lib"
@@ -307,6 +307,16 @@
 			</File>
 			<File
 				RelativePath="..\jack\jack_utils.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
+			<File
+				RelativePath="..\..\..\icons\win32\msvc_resources.rc"
 				>
 			</File>
 		</Filter>

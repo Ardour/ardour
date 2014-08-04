@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)glibmm32-2.4-0D.lib pthreadVCE2.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)pbd32D.lib $(DllPrefix)timecode32D.lib $(DllPrefix)sigc++32-2.0D.lib ws2_32.lib"
+				AdditionalDependencies="$(DllPrefix)glibmm32$(GlibmmDllSuffix)D.lib pthreadVCE2.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)pbd32D.lib $(DllPrefix)timecode32D.lib $(DllPrefix)sigc++32-2.0D.lib ws2_32.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32D.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				GenerateDebugInformation="true"
@@ -140,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)glibmm32-2.4-0.lib pthreadVCE2.lib $(DllPrefix)glib32$(GlibDllSuffix).lib $(DllPrefix)pbd32.lib $(DllPrefix)timecode32.lib $(DllPrefix)sigc++32-2.0.lib ws2_32.lib"
+				AdditionalDependencies="$(DllPrefix)glibmm32$(GlibmmDllSuffix).lib pthreadVCE2.lib $(DllPrefix)glib32$(GlibDllSuffix).lib $(DllPrefix)pbd32.lib $(DllPrefix)timecode32.lib $(DllPrefix)sigc++32-2.0.lib ws2_32.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				SubSystem="2"
@@ -220,7 +220,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)glibmm32-2.4-0RDC.lib pthreadVCE2.lib $(DllPrefix)glib32$(GlibDllSuffix)RDC.lib $(DllPrefix)pbd32RDC.lib $(DllPrefix)timecode32RDC.lib $(DllPrefix)sigc++32-2.0RDC.lib ws2_32.lib"
+				AdditionalDependencies="$(DllPrefix)glibmm32$(GlibmmDllSuffix)RDC.lib pthreadVCE2.lib $(DllPrefix)glib32$(GlibDllSuffix)RDC.lib $(DllPrefix)pbd32RDC.lib $(DllPrefix)timecode32RDC.lib $(DllPrefix)sigc++32-2.0RDC.lib ws2_32.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32RDC.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				GenerateDebugInformation="true"
@@ -345,6 +345,16 @@
 			</File>
 			<File
 				RelativePath="..\midi++\types.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
+			<File
+				RelativePath="..\..\..\icons\win32\msvc_resources.rc"
 				>
 			</File>
 		</Filter>
