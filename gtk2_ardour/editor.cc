@@ -3757,9 +3757,10 @@ Editor::set_visible_track_count (int32_t n)
 		return;
 	}
 
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		(*i)->set_height (h);
-	}
+// NP: track's height is inited from .xml
+//	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+//		(*i)->set_height (h);
+//	}
 	
 	if (str != visible_tracks_selector.get_active_text()) {
 		visible_tracks_selector.set_active_text (str);
