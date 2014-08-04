@@ -64,6 +64,7 @@
 
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
+#include "ardour/engine_state_controller.h"
 #include "ardour/audioregion.h"
 #include "ardour/location.h"
 #include "ardour/profile.h"
@@ -501,7 +502,9 @@ Editor::Editor ()
 
 	selection->TimeChanged.connect (sigc::mem_fun(*this, &Editor::time_selection_changed));
 	selection->TracksChanged.connect (sigc::mem_fun(*this, &Editor::track_selection_changed));
-
+    
+    EngineStateController::instance()->OutputConnectionModeChanged.connect (*this, invalidator (*this),  boost::bind (&Editor::output_connection_mode_changed, this), gui_context() );
+    
 	editor_regions_selection_changed_connection = selection->RegionsChanged.connect (sigc::mem_fun(*this, &Editor::region_selection_changed));
 
 	selection->PointsChanged.connect (sigc::mem_fun(*this, &Editor::point_selection_changed));
@@ -1385,6 +1388,7 @@ Editor::set_session (Session *t)
 	ActionManager::ui_manager->signal_pre_activate().connect (sigc::mem_fun (*this, &Editor::action_pre_activated));
 
 	start_updating_meters ();
+    
 }
 
 void
@@ -5089,8 +5093,11 @@ Editor::add_routes (RouteList& routes)
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
+        bool is_master_visible = (Config->get_output_auto_connect() & AutoConnectMaster);
+        
 		if (route->is_auditioner() || route->is_monitor() ||
-			!boost::dynamic_pointer_cast<Track> (route)) {
+			(!boost::dynamic_pointer_cast<Track> (route) &&
+             (route->is_master() && !is_master_visible ) ) ) {
 			continue;
 		}
 
@@ -5187,7 +5194,7 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 		}
 
 
-		if (next_tv) {
+		if (next_tv ) {
 			set_selected_mixer_strip (*next_tv);
 		} else {
 			/* make the editor mixer strip go away setting the
@@ -5763,3 +5770,28 @@ Editor::zoom_vertical_modifier_released()
 {
 	_stepping_axis_view = 0;
 }
+
+void
+Editor::output_connection_mode_changed ()
+{
+    if (!_session) {
+        return;
+    }
+    
+    if (Config->get_output_auto_connect() & AutoConnectMaster) {
+        
+        if (_session->master_out() && !axis_view_from_route(_session->master_out() ) ) {
+            RouteList list;
+            list.push_back(_session->master_out() );
+            add_routes(list);
+        }
+    } else {
+        TimeAxisView* tv = 0;
+        if (_session->master_out() && (tv = axis_view_from_route(_session->master_out() ) ) ) {
+            delete tv;
+        }
+    }
+    
+    track_selection_changed ();
+}
+

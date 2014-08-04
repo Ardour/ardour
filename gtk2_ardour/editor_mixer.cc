@@ -49,6 +49,7 @@
 using namespace std;
 using namespace Gtkmm2ext;
 using namespace PBD;
+using namespace ARDOUR;
 
 void
 Editor::editor_mixer_button_toggled ()
@@ -108,14 +109,24 @@ Editor::show_editor_mixer (bool yn)
 				return;
 			}
 
-			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-				RouteTimeAxisView* atv;
-
-				if ((atv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
+            // check if master is available: try to find it's view
+            TimeAxisView* tv;
+            if ( tv = axis_view_from_route (_session->master_out() ) ) {
+                RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*> (tv);
+                if ( atv != 0 ) {
 					r = atv->route();
-					break;
 				}
-			}
+                
+            } else {
+                // set the first track visible in inspector
+                for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+                    RouteTimeAxisView* atv;
+                    if ( atv = dynamic_cast<RouteTimeAxisView*> (*i) ) {
+                        r = atv->route();
+                        break;
+                    }
+                }
+            }
 
 		} else {
 			sort_track_selection (selection->tracks);

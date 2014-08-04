@@ -941,13 +941,39 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* /*ev*/, StreamView*
 void
 Editor::track_selection_changed ()
 {
-	switch (selection->tracks.size()) {
-	case 0:
-		break;
-	default:
-		set_selected_mixer_strip (*(selection->tracks.front()));
-		break;
-	}
+    if (!selection->tracks.empty() ) {
+        set_selected_mixer_strip (*(selection->tracks.front()));
+    } else {
+        // set master bus visible if it's available
+        RouteTimeAxisView* rtv = 0;
+        bool set_master_bus = false;
+        
+        if (_session ) {
+            TimeAxisView* tv = axis_view_from_route (_session->master_out() );
+            rtv = dynamic_cast <RouteTimeAxisView*> (tv);
+            
+            if (rtv) {
+                set_master_bus = true;
+            }
+        }
+        
+        // if master bus is not available (Multi Out mode)
+        if (!set_master_bus && !track_views.empty() ) {
+            
+            TrackViewList::const_iterator iter = track_views.begin();
+            for (; iter != track_views.end() ; ++iter) {
+                
+                if ( ( rtv = dynamic_cast <RouteTimeAxisView*> (*iter ) ) &&
+                     !(rtv->route()->is_master() )) {
+                    break;
+                }
+            }
+        }
+
+        if (rtv) {
+            set_selected_mixer_strip (*rtv );
+        }
+    }
 
 	RouteNotificationListPtr routes (new RouteNotificationList);
 

@@ -1694,6 +1694,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void time_selection_changed ();
         void update_time_selection_display ();
 	void track_selection_changed ();
+    void output_connection_mode_changed ();
 	void region_selection_changed ();
 	sigc::connection editor_regions_selection_changed_connection;
 	void sensitize_all_region_actions (bool);
