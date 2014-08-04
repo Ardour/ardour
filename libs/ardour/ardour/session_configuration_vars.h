@@ -58,7 +58,7 @@ CONFIG_VARIABLE (bool, glue_new_regions_to_bars_and_beats, "glue-new-regions-to-
 CONFIG_VARIABLE (bool, use_video_file_fps, "use-video-file-fps", false)
 CONFIG_VARIABLE (bool, videotimeline_pullup, "videotimeline-pullup", true)
 CONFIG_VARIABLE (bool, show_busses_on_meterbridge, "show-busses-on-meterbridge", false)
-CONFIG_VARIABLE (bool, show_master_on_meterbridge, "show-master-on-meterbridge", true)
+CONFIG_VARIABLE (bool, show_master_on_meterbridge, "show-master-on-meterbridge", false)
 CONFIG_VARIABLE (bool, show_midi_on_meterbridge, "show-midi-on-meterbridge", true)
 CONFIG_VARIABLE (bool, show_rec_on_meterbridge, "show-rec-on-meterbridge", true)
 CONFIG_VARIABLE (bool, show_mute_on_meterbridge, "show-mute-on-meterbridge", false)

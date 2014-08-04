@@ -101,6 +101,7 @@ Meterbridge::Meterbridge ()
 	, VisibilityTracker (*((Gtk::Window*) this))
 	, _visible (false)
 	, _show_busses (false)
+    , _show_master (false)
 	, metrics_left (1, MeterPeak)
 	, metrics_right (2, MeterPeak)
 	, cur_max_width (-1)
@@ -659,7 +660,8 @@ Meterbridge::sync_order_keys ()
 			(*i).visible = false;
 		}
 		else if ((*i).s->route()->is_master()) {
-			if (_show_master) {
+			// never show master
+            if (false/*_show_master*/) {
 				(*i).s->show();
 				(*i).visible = true;
 				vis++;
@@ -672,7 +674,8 @@ Meterbridge::sync_order_keys ()
 				&& boost::dynamic_pointer_cast<MidiTrack>((*i).s->route()) == 0
 				) {
 			/* non-master bus */
-			if (_show_busses) {
+            // never show buses
+            if (false/*_show_busses*/) {
 				(*i).s->show();
 				(*i).visible = true;
 				vis++;
