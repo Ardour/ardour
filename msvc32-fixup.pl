@@ -22,6 +22,10 @@ sub process_file
 	open (OUTPUT, "> $outfilename") || exit 1;
 	
 	while (<INPUT>) {
+	    s/\@GLIB_API_VERSION@/$glib_api_version/g;
+	    s/\@GTK_API_VERSION@/$gtk_api_version/g;
+	    s/\@ATK_API_VERSION@/$atk_api_version/g;
+	    s/\@PANGO_API_VERSION@/$pango_api_version/g;
 	    s/\@GDK_PIXBUF_API_VERSION@/$gdk_pixbuf_api_version/g;
 	    s/\@MSVC_MIXBUS_VERSION@/$msvc_mixbus_version/g;
 	    s/\@MSVC_MIXBUS_MAJOR\@/$major/g;
