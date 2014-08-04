@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)gtkmm32-2.0-0D.lib $(DllPrefix)gdkmm32-2.0-0D.lib $(DllPrefix)glibmm32-2.4-0D.lib $(DllPrefix)giomm32-2.4-0D.lib $(DllPrefix)cairomm32-2.0-0D.lib $(DllPrefix)pangomm32-2.0-0D.lib pthreadVCE2.lib $(DllPrefix)pango32-1.0-0D.lib $(DllPrefix)pangoft232-1.0-0D.lib $(DllPrefix)pangowin32-1.0-0D.lib $(DllPrefix)pangocairo32-1.0-0D.lib $(DllPrefix)cairo32-2D.lib $(DllPrefix)gthread32-2.0-0D.lib $(DllPrefix)gobject32-2.0-0D.lib $(DllPrefix)gmodule32-2.0-0D.lib $(DllPrefix)glib32-2.0-0D.lib $(DllPrefix)gio32-2.0-0D.lib $(DllPrefix)gtk32-2.0-0D.lib $(DllPrefix)gdk32-2.0-0D.lib $(DllPrefix)gdk-pixbuf32-2.0-0D.lib $(DllPrefix)sigc++32-2.0D.lib intlD.lib"
+				AdditionalDependencies="$(DllPrefix)gtkmm32$(GtkmmDllSuffix)D.lib $(DllPrefix)gdkmm32$(GtkmmDllSuffix)D.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix)D.lib $(DllPrefix)giomm32$(GlibmmDllSuffix)D.lib $(DllPrefix)cairomm32$(CairommDllSuffix)D.lib $(DllPrefix)pangomm32$(PangommDllSuffix)D.lib pthreadVCE2.lib $(DllPrefix)pango32$(PangoDllSuffix)D.lib $(DllPrefix)pangoft232$(PangoDllSuffix)D.lib $(DllPrefix)pangowin32$(PangoDllSuffix)D.lib $(DllPrefix)pangocairo32$(PangoDllSuffix)D.lib $(DllPrefix)cairo32$(CairoDllSuffix)D.lib $(DllPrefix)gthread32$(GlibDllSuffix)D.lib $(DllPrefix)gobject32$(GlibDllSuffix)D.lib $(DllPrefix)gmodule32$(GlibDllSuffix)D.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)gio32$(GlibDllSuffix)D.lib $(DllPrefix)gtk32$(GtkDllSuffix)D.lib $(DllPrefix)gdk32$(GtkDllSuffix)D.lib $(DllPrefix)gdk-pixbuf32$(GdkPixbufDllSuffix)D.lib $(DllPrefix)sigc++32-2.0D.lib intlD.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32D.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				GenerateDebugInformation="true"
@@ -140,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)gtkmm32-2.0-0.lib $(DllPrefix)gdkmm32-2.0-0.lib $(DllPrefix)glibmm32-2.4-0.lib $(DllPrefix)giomm32-2.4-0.lib $(DllPrefix)cairomm32-2.0-0.lib $(DllPrefix)pangomm32-2.0-0.lib pthreadVCE2.lib $(DllPrefix)pango32-1.0-0.lib $(DllPrefix)pangoft232-1.0-0.lib $(DllPrefix)pangowin32-1.0-0.lib $(DllPrefix)pangocairo32-1.0-0.lib $(DllPrefix)cairo32-2.lib $(DllPrefix)gthread32-2.0-0.lib $(DllPrefix)gobject32-2.0-0.lib $(DllPrefix)gmodule32-2.0-0.lib $(DllPrefix)glib32-2.0-0.lib $(DllPrefix)gio32-2.0-0.lib $(DllPrefix)gtk32-2.0-0.lib $(DllPrefix)gdk32-2.0-0.lib $(DllPrefix)gdk-pixbuf32-2.0-0.lib $(DllPrefix)sigc++32-2.0.lib intl.lib"
+				AdditionalDependencies="$(DllPrefix)gtkmm32$(GtkmmDllSuffix).lib $(DllPrefix)gdkmm32$(GtkmmDllSuffix).lib $(DllPrefix)glibmm32$(GlibmmDllSuffix).lib $(DllPrefix)giomm32$(GlibmmDllSuffix).lib $(DllPrefix)cairomm32$(CairommDllSuffix).lib $(DllPrefix)pangomm32$(PangommDllSuffix).lib pthreadVCE2.lib $(DllPrefix)pango32$(PangoDllSuffix).lib $(DllPrefix)pangoft232$(PangoDllSuffix).lib $(DllPrefix)pangowin32$(PangoDllSuffix).lib $(DllPrefix)pangocairo32$(PangoDllSuffix).lib $(DllPrefix)cairo32$(CairoDllSuffix).lib $(DllPrefix)gthread32$(GlibDllSuffix).lib $(DllPrefix)gobject32$(GlibDllSuffix).lib $(DllPrefix)gmodule32$(GlibDllSuffix).lib $(DllPrefix)glib32$(GlibDllSuffix).lib $(DllPrefix)gio32$(GlibDllSuffix).lib $(DllPrefix)gtk32$(GtkDllSuffix).lib $(DllPrefix)gdk32$(GtkDllSuffix).lib $(DllPrefix)gdk-pixbuf32$(GdkPixbufDllSuffix).lib $(DllPrefix)sigc++32-2.0.lib intl.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				SubSystem="2"
@@ -220,7 +220,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)gtkmm32-2.0-0RDC.lib $(DllPrefix)gdkmm32-2.0-0RDC.lib $(DllPrefix)glibmm32-2.4-0RDC.lib $(DllPrefix)giomm32-2.4-0RDC.lib $(DllPrefix)cairomm32-2.0-0RDC.lib $(DllPrefix)pangomm32-2.0-0RDC.lib pthreadVCE2.lib $(DllPrefix)pango32-1.0-0RDC.lib $(DllPrefix)pangoft232-1.0-0RDC.lib $(DllPrefix)pangowin32-1.0-0RDC.lib $(DllPrefix)pangocairo32-1.0-0RDC.lib $(DllPrefix)cairo32-2RDC.lib $(DllPrefix)gthread32-2.0-0RDC.lib $(DllPrefix)gobject32-2.0-0RDC.lib $(DllPrefix)gmodule32-2.0-0RDC.lib $(DllPrefix)glib32-2.0-0RDC.lib $(DllPrefix)gio32-2.0-0RDC.lib $(DllPrefix)gtk32-2.0-0RDC.lib $(DllPrefix)gdk32-2.0-0RDC.lib $(DllPrefix)gdk-pixbuf32-2.0-0RDC.lib $(DllPrefix)sigc++32-2.0RDC.lib intlRDC.lib"
+				AdditionalDependencies="$(DllPrefix)gtkmm32$(GtkmmDllSuffix)RDC.lib $(DllPrefix)gdkmm32$(GtkmmDllSuffix)RDC.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix)RDC.lib $(DllPrefix)giomm32$(GlibmmDllSuffix)RDC.lib $(DllPrefix)cairomm32$(CairommDllSuffix)RDC.lib $(DllPrefix)pangomm32$(PangommDllSuffix)RDC.lib pthreadVCE2.lib $(DllPrefix)pango32$(PangoDllSuffix)RDC.lib $(DllPrefix)pangoft232$(PangoDllSuffix)RDC.lib $(DllPrefix)pangowin32$(PangoDllSuffix)RDC.lib $(DllPrefix)pangocairo32$(PangoDllSuffix)RDC.lib $(DllPrefix)cairo32$(CairoDllSuffix)RDC.lib $(DllPrefix)gthread32$(GlibDllSuffix)RDC.lib $(DllPrefix)gobject32$(GlibDllSuffix)RDC.lib $(DllPrefix)gmodule32$(GlibDllSuffix)RDC.lib $(DllPrefix)glib32$(GlibDllSuffix)RDC.lib $(DllPrefix)gio32$(GlibDllSuffix)RDC.lib $(DllPrefix)gtk32$(GtkDllSuffix)RDC.lib $(DllPrefix)gdk32$(GtkDllSuffix)RDC.lib $(DllPrefix)gdk-pixbuf32$(GdkPixbufDllSuffix)RDC.lib $(DllPrefix)sigc++32-2.0RDC.lib intlRDC.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32RDC.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				GenerateDebugInformation="true"
@@ -641,6 +641,16 @@
 			</File>
 			<File
 				RelativePath="..\gtkmm2ext\window_title.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
+			<File
+				RelativePath="..\..\..\icons\win32\msvc_resources.rc"
 				>
 			</File>
 		</Filter>

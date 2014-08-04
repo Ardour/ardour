@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)gdk-pixbuf32$(DllSuffix)D.lib $(DllPrefix)gdk32$(DllSuffix)D.lib $(DllPrefix)gtk32$(DllSuffix)D.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)gobject32$(GlibDllSuffix)D.lib $(DllPrefix)gthread32$(GlibDllSuffix)D.lib $(DllPrefix)cairo32-2D.lib"
+				AdditionalDependencies="$(DllPrefix)gdk-pixbuf32$(GdkPixbufDllSuffix)D.lib $(DllPrefix)gdk32$(GtkDllSuffix)D.lib $(DllPrefix)gtk32$(GtkDllSuffix)D.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)gobject32$(GlibDllSuffix)D.lib $(DllPrefix)gthread32$(GlibDllSuffix)D.lib $(DllPrefix)cairo32$(CairoDllSuffix)D.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32D.dll"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
@@ -141,7 +141,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)gdk-pixbuf32$(DllSuffix).lib $(DllPrefix)gdk32$(DllSuffix).lib $(DllPrefix)gtk32$(DllSuffix).lib $(DllPrefix)glib32$(GlibDllSuffix).lib $(DllPrefix)gobject32$(GlibDllSuffix).lib $(DllPrefix)gthread32$(GlibDllSuffix).lib $(DllPrefix)cairo32-2.lib"
+				AdditionalDependencies="$(DllPrefix)gdk-pixbuf32$(GdkPixbufDllSuffix).lib $(DllPrefix)gdk32$(GtkDllSuffix).lib $(DllPrefix)gtk32$(GtkDllSuffix).lib $(DllPrefix)glib32$(GlibDllSuffix).lib $(DllPrefix)gobject32$(GlibDllSuffix).lib $(DllPrefix)gthread32$(GlibDllSuffix).lib $(DllPrefix)cairo32$(CairoDllSuffix).lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32.dll"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -221,7 +221,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)gdk-pixbuf32$(DllSuffix)RDC.lib $(DllPrefix)gdk32$(DllSuffix)RDC.lib $(DllPrefix)gtk32$(DllSuffix)RDC.lib $(DllPrefix)glib32$(GlibDllSuffix)RDC.lib $(DllPrefix)gobject32$(GlibDllSuffix)RDC.lib $(DllPrefix)gthread32$(GlibDllSuffix)RDC.lib $(DllPrefix)cairo32-2RDC.lib"
+				AdditionalDependencies="$(DllPrefix)gdk-pixbuf32$(GdkPixbufDllSuffix)RDC.lib $(DllPrefix)gdk32$(GtkDllSuffix)RDC.lib $(DllPrefix)gtk32$(GtkDllSuffix)RDC.lib $(DllPrefix)glib32$(GlibDllSuffix)RDC.lib $(DllPrefix)gobject32$(GlibDllSuffix)RDC.lib $(DllPrefix)gthread32$(GlibDllSuffix)RDC.lib $(DllPrefix)cairo32$(CairoDllSuffix)RDC.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32RDC.dll"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -354,6 +354,16 @@
 			</File>
 			<File
 				RelativePath="..\widget-information.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
+			<File
+				RelativePath="..\..\..\icons\win32\msvc_resources.rc"
 				>
 			</File>
 		</Filter>
