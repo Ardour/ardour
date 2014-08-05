@@ -145,6 +145,8 @@ void MasterBusUI::init(ARDOUR::Session *session)
     update_master();
     
     ARDOUR_UI::Blink.connect (sigc::mem_fun (*this, &MasterBusUI::solo_blink));
+    
+    _level_meter.set_session(session);
 }
 
 void MasterBusUI::on_output_connection_mode_changed()
