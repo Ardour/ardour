@@ -53,6 +53,8 @@ public:
     void fast_update ();
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	static PBD::Signal1<void,MasterBusUI*> CatchDeletion;
+    
+    PBD::Signal0<void> MasterMeterClicked;
 
 private:
 	static int __meter_width;
@@ -68,7 +70,8 @@ private:
 	void on_master_mute_button (WavesButton*);
     void on_clear_solo_button (WavesButton*);
 	void on_global_rec_button (WavesButton*);
-    void on_output_connection_mode_changed();
+    void on_output_connection_mode_changed ();
+    bool on_level_meter_button_release (GdkEventButton*);
     
     // MASTER staff
     void connect_route_state_signals(ARDOUR::RouteList& tracks);

@@ -198,6 +198,23 @@ Editor::create_editor_mixer ()
     } else {
         _master_bus_ui->init(_session);
     }
+    
+    _master_bus_ui->MasterMeterClicked.connect(*this, invalidator (*this),  boost::bind (&Editor::master_meter_clicked, this), gui_context() );
+}
+
+void
+Editor::master_meter_clicked ()
+{
+    if (!_session) {
+        return;
+    }
+    
+    TimeAxisView* tv = axis_view_from_route (_session->master_out() );
+    if (tv) {
+        TrackViewList selected;
+        selected.push_back(tv);
+        get_selection().set(selected);
+    }
 }
 
 void
