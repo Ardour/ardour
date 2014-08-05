@@ -50,6 +50,7 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	Gtk::Box& get_box (const char* id);
 	Gtk::VBox& get_v_box (const char* id);
 	Gtk::HBox& get_h_box (const char* id);
+	Gtk::Fixed& get_fixed (const char* id);
 	Gtk::Paned& get_paned (const char* id);
 	Gtk::HPaned& get_h_paned (const char* id);
 	Gtk::VPaned& get_v_paned (const char* id);
@@ -82,6 +83,7 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	void create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk::Container& root);
 	Gtk::Widget* create_widget (const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::Box& parent, const XMLNode& definition, const XMLNodeMap& styles);
+	Gtk::Widget* add_widget (Gtk::Fixed& parent, const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::Paned& parent, const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::Table& parent, const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::ScrolledWindow& parent, const XMLNode& definition, const XMLNodeMap& styles);

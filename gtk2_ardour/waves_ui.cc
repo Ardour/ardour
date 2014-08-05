@@ -126,6 +126,8 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 		child = manage (new ArdourCanvas::GtkCanvas (definition, styles, named_items));
 	} else if (widget_type == "SCROLLEDWINDOW") {
 		child = manage (new Gtk::ScrolledWindow);
+	} else if (widget_type == "FIXED") {
+		child = manage (new Gtk::Fixed);
 	} else if (widget_type == "VBOX") {
 		child = manage (new Gtk::VBox);
 	} else if (widget_type == "HBOX") {
@@ -241,6 +243,20 @@ WavesUI::add_widget (Gtk::Box& parent, const XMLNode& definition, const XMLNodeM
 			parent.pack_end(*child, expand, fill, padding);
 		}
 
+	}
+	return child;
+}
+
+Gtk::Widget*
+WavesUI::add_widget (Gtk::Fixed& parent, const XMLNode& definition, const XMLNodeMap& styles)
+{
+	Gtk::Widget* child = create_widget(definition, styles);
+
+	if (child != NULL)
+	{
+		parent.put (*child,
+					xml_property (definition, "x", styles, 0), 
+					xml_property (definition, "y", styles, 0));
 	}
 	return child;
 }
@@ -367,6 +383,8 @@ WavesUI::add_widget (Gtk::Container& parent, const XMLNode& definition, const XM
 		child = WavesUI::add_widget (*dynamic_cast<Gtk::Layout*> (&parent), definition, styles);
 	} else if(dynamic_cast<Gtk::Box*> (&parent)) {
 		child = WavesUI::add_widget (*dynamic_cast<Gtk::Box*> (&parent), definition, styles);
+	} else if(dynamic_cast<Gtk::Fixed*> (&parent)) {
+		child = WavesUI::add_widget (*dynamic_cast<Gtk::Fixed*> (&parent), definition, styles);
 	} else if(dynamic_cast<Gtk::Paned*> (&parent)) {
 		child = WavesUI::add_widget (*dynamic_cast<Gtk::Paned*> (&parent), definition, styles);
 	} else if(dynamic_cast<Gtk::Table*> (&parent)) {
@@ -735,6 +753,19 @@ WavesUI::get_h_box (const char* id)
 	}
 	return *child;
 }
+
+
+Gtk::Fixed&
+WavesUI::get_fixed (const char* id)
+{
+	Gtk::Fixed* child = dynamic_cast<Gtk::Fixed*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::Fixed ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+
 
 Gtk::Paned&
 WavesUI::get_paned (const char* id)
