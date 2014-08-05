@@ -4239,6 +4239,14 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 			}
 		}
 		
+		//if user is selecting a range on an automation track, bail out here before we get to the grouped stuff, 
+		// because the grouped stuff will start working on tracks (routeTAVs), and end up removing this 
+		AutomationTimeAxisView *atest = dynamic_cast<AutomationTimeAxisView *>(_editor->clicked_axisview);
+		if (atest) {
+			_editor->selection->add (atest);
+			break; 
+		}
+		
 		/* select all tracks within the rectangle that we've marked out so far */
 		TrackViewList new_selection;
 		TrackViewList& all_tracks (_editor->track_views);
@@ -4991,8 +4999,8 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				double const p = j->line->time_converter().from (i->start - j->line->time_converter().origin_b ());
 				double const q = j->line->time_converter().from (a - j->line->time_converter().origin_b ());
 
-				the_list->add (p, the_list->eval (p));
-				the_list->add (q, the_list->eval (q));
+				the_list->editor_add (p, the_list->eval (p));
+				the_list->editor_add (q, the_list->eval (q));
 			}
 
 			/* same thing for the end */
@@ -5017,8 +5025,8 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				double const p = j->line->time_converter().from (b - j->line->time_converter().origin_b ());
 				double const q = j->line->time_converter().from (i->end - j->line->time_converter().origin_b ());
 
-				the_list->add (p, the_list->eval (p));
-				the_list->add (q, the_list->eval (q));
+				the_list->editor_add (p, the_list->eval (p));
+				the_list->editor_add (q, the_list->eval (q));
 			}
 		}
 

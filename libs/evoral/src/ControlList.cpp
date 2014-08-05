@@ -444,6 +444,39 @@ ControlList::in_write_pass () const
 }
 
 void
+ControlList::editor_add (double when, double value)
+{
+	/* this is for making changes from a graphical line editor
+	*/
+
+	if (!clamp_value (when, value)) {
+		return;
+	}
+
+	if (_events.empty()) {
+		
+		/* as long as the point we're adding is not at zero,
+		 * add an "anchor" point there.
+		 */
+
+		if (when >= 1) {
+			_events.insert (_events.end(), new ControlEvent (0, _default_value));
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added default value %2 at zero\n", this, _default_value));
+		}
+	}
+
+	ControlEvent cp (when, 0.0f);
+	iterator i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+	DEBUG_TRACE (DEBUG::ControlList, string_compose ("editor_add: actually add when= %1 value= %1\n", when, value));
+	_events.insert (i, new ControlEvent (when, value));
+
+	mark_dirty ();
+
+	maybe_signal_changed ();
+
+}
+
+void
 ControlList::add (double when, double value, bool with_guards)
 {
 	/* this is for making changes from some kind of user interface or

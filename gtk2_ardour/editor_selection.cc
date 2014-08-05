@@ -185,12 +185,12 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 		return;
 	}
 
-	if (!clicked_routeview) {
-		return;
+	RouteGroup* group = NULL;
+	if (clicked_routeview) {
+		group = clicked_routeview->route()->route_group();
 	}
 
 	bool had_tracks = !selection->tracks.empty();
-	RouteGroup* group = clicked_routeview->route()->route_group();
 	RouteGroup& arg (_session->all_route_group());
 
 	switch (op) {

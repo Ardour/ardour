@@ -776,19 +776,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				/* grab selection for moving */
 				_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionMove), event);
 			} else {
-				double const y = event->button.y;
-				pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
-				if (tvp.first) {
-					AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
-					if ( get_smart_mode() && atv) {
-						/* smart "join" mode: drag automation */
-						_drags->set (new AutomationRangeDrag (this, atv, selection->time), event, _cursors->up_down);
-					} else {
-						/* this was debated, but decided the more common action was to
-						   make a new selection */
-						_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
-					}
-				}
+				/* this was debated, but decided the more common action was to
+				   make a new selection */
+				_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
 			}
 			break;
 
@@ -1048,45 +1038,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case SelectionItem:
 			{
-				if ( get_smart_mode() ) {
-					/* we're in "smart" joined mode, and we've clicked on a Selection */
-					double const y = event->button.y;
-					pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
-					if (tvp.first) {
-						/* if we're over an automation track, start a drag of its data */
-						AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
-						if (atv) {
-							_drags->set (new AutomationRangeDrag (this, atv, selection->time), event, _cursors->up_down);
-						}
-
-						/* if we're over a track and a region, and in the `object' part of a region,
-						   put a selection around the region and drag both
-						*/
-/*						RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
-						if (rtv && _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
-							boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (rtv->route ());
-							if (t) {
-								boost::shared_ptr<Playlist> pl = t->playlist ();
-								if (pl) {
-
-									boost::shared_ptr<Region> r = pl->top_region_at (canvas_event_sample (event));
-									if (r) {
-										RegionView* rv = rtv->view()->find_view (r);
-										clicked_selection = select_range (rv->region()->position(), 
-														  rv->region()->last_frame()+1);
-										_drags->add (new SelectionDrag (this, item, SelectionDrag::SelectionMove));
-										list<RegionView*> rvs;
-										rvs.push_back (rv);
-										_drags->add (new RegionMoveDrag (this, item, rv, rvs, false, false));
-										_drags->start_grab (event);
-										return true;
-									}
-								}
-							}
-						}
-*/
-					}
-				}
 				break;
 			}
 
@@ -1118,6 +1069,17 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			if (arv) {
 				_drags->set (new AutomationRangeDrag (this, arv, selection->time), event, _cursors->up_down);
 				_drags->start_grab (event);
+			} else {
+				double const y = event->button.y;
+				pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
+				if (tvp.first) {
+					AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
+					if ( atv) {
+						/* smart "join" mode: drag automation */
+						_drags->set (new AutomationRangeDrag (this, atv, selection->time), event, _cursors->up_down);
+						_drags->start_grab (event);
+					}
+				}
 			}
 			return true;
 			break;

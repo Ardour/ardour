@@ -121,7 +121,9 @@ public:
 
 	virtual bool clamp_value (double& /*when*/, double& /*value*/) const { return true; }
 
-        virtual void add (double when, double value, bool with_guards=true);
+	virtual void add (double when, double value, bool with_guards=true);
+	virtual void editor_add (double when, double value);
+	
 	void fast_simple_add (double when, double value);
 
 	void erase_range (double start, double end);
