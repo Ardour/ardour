@@ -37,6 +37,7 @@
 
 #include "ardour/playlist.h"
 #include "ardour/types.h"
+#include "ardour/route_group.h"
 
 #include "route_ui.h"
 #include "enums.h"
@@ -46,6 +47,7 @@ class MasterBusUI : public Gtk::EventBox, public WavesUI
 {
 public:
  	MasterBusUI (ARDOUR::Session*);
+    void init(ARDOUR::Session* session);
  	virtual ~MasterBusUI ();
 
     void fast_update ();
@@ -64,12 +66,30 @@ private:
 	void reset_group_peak_display (ARDOUR::RouteGroup* group);
 	void on_peak_display_button (WavesButton*);
 	void on_master_mute_button (WavesButton*);
-	void on_clear_solo_button (WavesButton*);
+    void on_clear_solo_button (WavesButton*);
 	void on_global_rec_button (WavesButton*);
     void on_output_connection_mode_changed();
-
+    
+    // MASTER staff
+    void connect_route_state_signals(ARDOUR::RouteList& tracks);
+    void update_master();
+    
+    // GLOBAL RECORD staff
+    PBD::ScopedConnectionList _route_state_connections;
+    PBD::ScopedConnectionList _session_connections;
+    
+    void record_state_changed ();
+    bool check_all_tracks_are_record_armed ();
+    
+    // MASTER MUTE staff
+    void route_mute_state_changed (void* );
+    bool check_all_tracks_are_muted();
+    
+    // CLEAR SOLO staff
+    void solo_blink (bool onoff);
+    bool exists_soloed_track();
+        
 	boost::shared_ptr<ARDOUR::Route> _route;
-	PBD::ScopedConnectionList _route_connections;
     PBD::ScopedConnection _mode_connection;
 
 	Gtk::Box& _level_meter_home;
