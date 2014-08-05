@@ -3780,7 +3780,7 @@ Editor::override_visible_track_count ()
 bool
 Editor::edit_controls_button_press (GdkEventButton* ev)
 {
-	if (ev->type == GDK_2BUTTON_PRESS) {
+	if ( (ev->button == 1) && (ev->type == GDK_2BUTTON_PRESS) ) {
         ARDOUR_UI::instance()->add_audio_track_instantly ();
 	}
     
