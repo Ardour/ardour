@@ -71,7 +71,7 @@ private:
     void on_clear_solo_button (WavesButton*);
 	void on_global_rec_button (WavesButton*);
     void on_output_connection_mode_changed ();
-    bool on_level_meter_button_release (GdkEventButton*);
+    bool on_level_meter_button_press (GdkEventButton*);
     
     // MASTER staff
     void connect_route_state_signals(ARDOUR::RouteList& tracks);

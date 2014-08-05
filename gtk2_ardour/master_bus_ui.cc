@@ -147,7 +147,7 @@ void MasterBusUI::init(ARDOUR::Session *session)
     ARDOUR_UI::Blink.connect (sigc::mem_fun (*this, &MasterBusUI::solo_blink));
     
     _level_meter.set_session(session);
-    _level_meter.ButtonRelease.connect_same_thread (_session_connections, boost::bind (&MasterBusUI::on_level_meter_button_release, this, _1) );
+    _level_meter.ButtonPress.connect_same_thread (_session_connections, boost::bind (&MasterBusUI::on_level_meter_button_press, this, _1) );
 }
 
 void MasterBusUI::on_output_connection_mode_changed()
@@ -191,7 +191,7 @@ void MasterBusUI::on_output_connection_mode_changed()
 }
 
 bool
-MasterBusUI::on_level_meter_button_release (GdkEventButton *ev)
+MasterBusUI::on_level_meter_button_press (GdkEventButton *ev)
 {
     // EMIT SIGNAL
     MasterMeterClicked ();
