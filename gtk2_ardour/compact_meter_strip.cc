@@ -33,7 +33,6 @@ using namespace std;
 using namespace ArdourMeter;
 
 PBD::Signal1<void,CompactMeterStrip*> CompactMeterStrip::CatchDeletion;
-int CompactMeterStrip::__meter_width = 4;
 
 CompactMeterStrip::CompactMeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	: EventBox()
@@ -43,13 +42,16 @@ CompactMeterStrip::CompactMeterStrip (Session* sess, boost::shared_ptr<ARDOUR::R
 	, _level_meter (sess)
 	, _record_indicator (get_event_box ("record_indicator"))
 	, _serial_number (0)
+	, _meter_width (xml_property (*xml_tree ()->root (), "meterwidth", 1))
+	, _thin_meter_width (xml_property (*xml_tree ()->root (), "thinmeterwidth", 1))
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 
 	_level_meter.set_meter (_route->shared_peak_meter().get());
 	_level_meter.clear_meters();
 	_level_meter.set_type (_route->meter_type());
-	_level_meter.setup_meters (__meter_width, __meter_width);
+	int width = (_route->n_inputs().n_total() < 2 ) ? _meter_width : _thin_meter_width;
+	_level_meter.setup_meters (width, width);
 	_level_meter_home.add (_level_meter);
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (_route_connections,
@@ -125,6 +127,7 @@ CompactMeterStrip::fast_update ()
 void
 CompactMeterStrip::meter_configuration_changed (ChanCount c)
 {
-	_level_meter.setup_meters (__meter_width, __meter_width);
+	int width = (c.n_total() < 2 ) ? _meter_width : _thin_meter_width;
+	_level_meter.setup_meters (width, width);
 }
 

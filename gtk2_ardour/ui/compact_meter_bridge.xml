@@ -14,7 +14,7 @@
       <EventBox bgnormal="#353535">
         <VBox>
           <Hbox height="8"/>
-          <Hbox id="compact_meter_strips_home" spacing="2"/>
+          <Hbox id="compact_meter_strips_home" spacing="3"/>
         </VBox>
       </EventBox>        
     </ScrolledWindow>

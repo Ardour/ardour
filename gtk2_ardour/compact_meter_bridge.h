@@ -67,7 +67,6 @@ class CompactMeterbridge :
 
 	std::map <boost::shared_ptr<ARDOUR::Route>, CompactMeterStrip*> _strips;
 	mutable Glib::Threads::Mutex _resync_mutex;
-
 };
 
 #endif //__ardour_compact_meter_bridge_h__

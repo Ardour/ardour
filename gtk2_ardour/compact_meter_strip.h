@@ -52,7 +52,8 @@ class CompactMeterStrip : public Gtk::EventBox, public WavesUI
 	LevelMeterHBox _level_meter;
 	Gtk::EventBox& _record_indicator;
 	PBD::ScopedConnectionList _route_connections;
-	static int __meter_width;
+	int _meter_width;
+	int _thin_meter_width;
 	size_t _serial_number; 
 	void meter_configuration_changed (ARDOUR::ChanCount);
 	void update_rec_display ();
