@@ -73,6 +73,8 @@ private:
     void on_output_connection_mode_changed ();
     bool on_level_meter_button_press (GdkEventButton*);
     
+    PBD::ScopedConnection _route_meter_connection;
+    
     // MASTER staff
     void connect_route_state_signals(ARDOUR::RouteList& tracks);
     void update_master();

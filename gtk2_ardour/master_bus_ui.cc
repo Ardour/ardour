@@ -213,13 +213,13 @@ MasterBusUI::set_route (boost::shared_ptr<Route> rt)
 	_level_meter.clear_meters();
 	_level_meter.set_type (_route->meter_type());
 	_level_meter.setup_meters (__meter_width, __meter_width);
-	_route->shared_peak_meter()->ConfigurationChanged.connect (_route_state_connections,
+	_route->shared_peak_meter()->ConfigurationChanged.connect (_route_meter_connection,
 		                                                       invalidator (*this),
 															   boost::bind (&MasterBusUI::meter_configuration_changed, 
 															                this,
 																			_1), 
 															   gui_context());
-	_route->DropReferences.connect (_route_state_connections,
+	_route->DropReferences.connect (_route_meter_connection,
 									invalidator (*this),
 									boost::bind (&MasterBusUI::reset,
 												 this),
@@ -229,7 +229,7 @@ MasterBusUI::set_route (boost::shared_ptr<Route> rt)
 void
 MasterBusUI::reset ()
 {
-	_route_state_connections.drop_connections ();
+	_route_meter_connection.disconnect ();
 	_route = boost::shared_ptr<ARDOUR::Route>(); // It's to have it "false"
 }
 
@@ -323,6 +323,12 @@ void MasterBusUI::connect_route_state_signals(RouteList& tracks)
                                      gui_context() );
     }
     
+    Route* master = ARDOUR_UI::instance()->the_session()->master_out().get();
+    master->mute_changed.connect (_route_state_connections,
+                                  invalidator (*this),
+                                  boost::bind (&MasterBusUI::route_mute_state_changed, this, _1),
+                                  gui_context() );
+    
     update_master();
 }
 
@@ -368,7 +374,7 @@ void MasterBusUI::on_master_mute_button (WavesButton*)
     if (Config->get_output_auto_connect() & AutoConnectPhysical) // Multi out
     {
         boost::shared_ptr<RouteList> tracks = session->get_tracks();
-        bool all_tracks_are_muted = this->check_all_tracks_are_muted();
+        bool all_tracks_are_muted = this->check_all_tracks_are_muted();        
         session->set_mute(tracks, !all_tracks_are_muted);
         _master_mute_button.set_active( !all_tracks_are_muted );
     } else if (Config->get_output_auto_connect() & AutoConnectMaster) // Stereo out
@@ -380,7 +386,7 @@ void MasterBusUI::on_master_mute_button (WavesButton*)
 }
 
 void MasterBusUI::route_mute_state_changed (void* )
-{
+{   
     Session* session = ARDOUR_UI::instance()->the_session();
     
     if( !session )
@@ -480,8 +486,7 @@ void MasterBusUI::on_global_rec_button (WavesButton*)
     
     boost::shared_ptr<RouteList> rl = session->get_tracks ();
     
-    bool all_tracks_are_record_armed = this->check_all_tracks_are_record_armed();
-    
+    bool all_tracks_are_record_armed = this->check_all_tracks_are_record_armed();    
     session->set_record_enabled (rl, !all_tracks_are_record_armed);
     _global_rec_button.set_active(!all_tracks_are_record_armed);
 }
