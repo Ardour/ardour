@@ -1053,7 +1053,7 @@ AudioRegionView::update_envelope_visibility ()
 		return;
 	}
 
-	if (Config->get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseGain) {
+	if (Config->get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseGain || trackview.editor().current_mouse_mode() == Editing::MouseRange ) {
 		gain_line->add_visibility (AutomationLine::Line);
 	} else {
 		gain_line->hide ();

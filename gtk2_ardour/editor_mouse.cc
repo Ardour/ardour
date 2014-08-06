@@ -1068,7 +1068,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			AudioRegionView* arv = dynamic_cast<AudioRegionView *> (clicked_regionview);
 			if (arv) {
 				_drags->set (new AutomationRangeDrag (this, arv, selection->time), event, _cursors->up_down);
-				_drags->start_grab (event);
 			} else {
 				double const y = event->button.y;
 				pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
@@ -1077,7 +1076,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					if ( atv) {
 						/* smart "join" mode: drag automation */
 						_drags->set (new AutomationRangeDrag (this, atv, selection->time), event, _cursors->up_down);
-						_drags->start_grab (event);
 					}
 				}
 			}
