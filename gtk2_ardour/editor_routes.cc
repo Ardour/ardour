@@ -520,6 +520,7 @@ EditorRoutes::redisplay ()
 			if (_editor->master_bus_ui ()) {
 				_editor->master_bus_ui ()->set_route (route);
 			}
+            continue;
         }
 
 		bool visible = tv->marked_for_display ();
@@ -904,7 +905,7 @@ EditorRoutes::sync_order_keys_from_treeview ()
 	TreeModel::Children::iterator ri;
 	bool changed = false;
 	bool rid_change = false;
-	uint32_t order = 1;
+	uint32_t order = 0;
 	uint32_t rid = 1;
 	uint32_t invisible_key = UINT32_MAX;
 
@@ -912,17 +913,12 @@ EditorRoutes::sync_order_keys_from_treeview ()
 
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
 		bool visible = (*ri)[_columns.visible];
-        
+
 		uint32_t old_key = route->order_key ();
 
 		if (order != old_key) {
-            
-            if (route->is_master() ) {
-                route->set_order_key (0);
-            } else {
-                route->set_order_key (order);
-            }
-            
+			route->set_order_key (order);
+
 			changed = true;
 		}
 
