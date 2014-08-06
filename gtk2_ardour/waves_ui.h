@@ -33,6 +33,7 @@
 #include "gtkmm2ext/focus_entry.h"
 #include "canvas/canvas.h"
 #include "canvas/xml_ui.h"
+#include "waves_grid.h"
 #include "waves_button.h"
 #include "waves_icon_button.h"
 
@@ -51,6 +52,7 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	Gtk::VBox& get_v_box (const char* id);
 	Gtk::HBox& get_h_box (const char* id);
 	Gtk::Fixed& get_fixed (const char* id);
+	WavesGrid& get_waves_grid (const char* id);
 	Gtk::Paned& get_paned (const char* id);
 	Gtk::HPaned& get_h_paned (const char* id);
 	Gtk::VPaned& get_v_paned (const char* id);
@@ -84,6 +86,7 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	Gtk::Widget* create_widget (const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::Box& parent, const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::Fixed& parent, const XMLNode& definition, const XMLNodeMap& styles);
+	Gtk::Widget* add_widget (WavesGrid& parent, const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::Paned& parent, const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::Table& parent, const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::ScrolledWindow& parent, const XMLNode& definition, const XMLNodeMap& styles);

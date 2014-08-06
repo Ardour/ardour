@@ -128,6 +128,8 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 		child = manage (new Gtk::ScrolledWindow);
 	} else if (widget_type == "FIXED") {
 		child = manage (new Gtk::Fixed);
+	} else if (widget_type == "WAVESGRID") {
+		child = manage (new WavesGrid);
 	} else if (widget_type == "VBOX") {
 		child = manage (new Gtk::VBox);
 	} else if (widget_type == "HBOX") {
@@ -257,6 +259,18 @@ WavesUI::add_widget (Gtk::Fixed& parent, const XMLNode& definition, const XMLNod
 		parent.put (*child,
 					xml_property (definition, "x", styles, 0), 
 					xml_property (definition, "y", styles, 0));
+	}
+	return child;
+}
+
+Gtk::Widget*
+WavesUI::add_widget (WavesGrid& parent, const XMLNode& definition, const XMLNodeMap& styles)
+{
+	Gtk::Widget* child = create_widget(definition, styles);
+
+	if (child != NULL)
+	{
+		parent.pack (*child);
 	}
 	return child;
 }
@@ -766,6 +780,16 @@ WavesUI::get_fixed (const char* id)
 	return *child;
 }
 
+WavesGrid&
+WavesUI::get_waves_grid (const char* id)
+{
+	WavesGrid* child = dynamic_cast<WavesGrid*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("WavesGrid ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
 
 Gtk::Paned&
 WavesUI::get_paned (const char* id)
