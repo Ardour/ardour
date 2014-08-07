@@ -444,7 +444,7 @@ def options(opt):
     opt.load('compiler_c')
     opt.load('compiler_cxx')
     autowaf.set_options(opt, debug_by_default=True)
-    opt.add_option('--program-name', type='string', action='store', default='Ardour', dest='program_name',
+    opt.add_option('--program-name', type='string', action='store', default='Tracks', dest='program_name',
                     help='The user-visible name of the program being built')
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler flags')
