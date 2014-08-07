@@ -96,7 +96,7 @@ typedef uint64_t microseconds_t;
 
 #include "about.h"
 #include "actions.h"
-#include "add_route_dialog.h"
+#include "add_tracks_dialog.h"
 #include "ambiguous_file_dialog.h"
 #include "ardour_ui.h"
 #include "audio_clock.h"
@@ -193,12 +193,12 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, theme_manager (X_("theme-manager"), _("Theme Manager"))
 	, key_editor (X_("key-editor"), _("Key Bindings"))
 	, rc_option_editor (X_("rc-options-editor"), _("Preferences"))
-	, add_route_dialog (X_("add-routes"), _("Add Tracks/Busses"))
 	, about (X_("about"), _("About"))
 	, location_ui (X_("locations"), _("Locations"))
 	, route_params (X_("inspector"), _("Tracks and Busses"))
 	, tracks_control_panel (X_("tracks-control-panel"), _("PREFERENCES"))
 	, session_lock_dialog (X_("session-lock-dialog"), _("SESSION LOCK"))
+    , _add_tracks_dialog(new AddTracksDialog())
 	, session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
 	, add_video_dialog (X_("add-video"), _("Add Tracks/Busses"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
@@ -347,7 +347,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		session_option_editor.set_state (*ui_xml);
 		speaker_config_window.set_state (*ui_xml);
 		about.set_state (*ui_xml);
-		add_route_dialog.set_state (*ui_xml);
 		add_video_dialog.set_state (*ui_xml);
 		route_params.set_state (*ui_xml);
 		bundle_manager.set_state (*ui_xml);
@@ -363,7 +362,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&session_option_editor);
 	WM::Manager::instance().register_window (&speaker_config_window);
 	WM::Manager::instance().register_window (&about);
-	WM::Manager::instance().register_window (&add_route_dialog);
 	WM::Manager::instance().register_window (&add_video_dialog);
 	WM::Manager::instance().register_window (&route_params);
 	WM::Manager::instance().register_window (&tracks_control_panel);
@@ -373,7 +371,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&big_clock_window);
 	WM::Manager::instance().register_window (&audio_port_matrix);
 	WM::Manager::instance().register_window (&midi_port_matrix);
-
+    
     session_lock_dialog->set_deletable (false);
 	session_lock_dialog->set_modal (true); 
     
@@ -1051,7 +1049,7 @@ ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
     
     if (_session->snap_name() == _session->name()) {
 		prompt = string_compose(_("Do you want to save changes to \"%1\"?\n"), _session->snap_name());
-        bottom_prompt = _("Changes will be lost if you choose \"Don't Save\"\n");
+        bottom_prompt = _("Changes will be lost if you choose \"don't save\"\n");
         
         session_close_dialog._top_label.set_text(prompt);
         
@@ -3492,8 +3490,8 @@ ARDOUR_UI::setup_order_hint ()
 	  we want the new routes to have their order keys set starting from 
 	  the highest order key in the selection + 1 (if available).
 	*/
-	if (add_route_dialog->get_transient_for () == mixer->get_toplevel()) {
-		for (RouteUISelection::iterator s = mixer->selection().routes.begin(); s != mixer->selection().routes.end(); ++s) {
+    if (_add_tracks_dialog->get_transient_for () == mixer->get_toplevel()) {
+        for (RouteUISelection::iterator s = mixer->selection().routes.begin(); s != mixer->selection().routes.end(); ++s) {
 			if ((*s)->route()->order_key() > order_hint) {
 				order_hint = (*s)->route()->order_key();
 			}
@@ -3529,7 +3527,7 @@ ARDOUR_UI::setup_order_hint ()
 		}
 
 		if (rt->order_key () >= order_hint) {
-			rt->set_order_key (rt->order_key () + add_route_dialog->count());
+			rt->set_order_key (rt->order_key () + _add_tracks_dialog->count());
 		}
 	}
 }
@@ -3537,97 +3535,44 @@ ARDOUR_UI::setup_order_hint ()
 void
 ARDOUR_UI::add_route (Gtk::Window* float_window)
 {
-	int count;
-
 	if (!_session) {
 		return;
 	}
 
-	if (add_route_dialog->is_visible()) {
-		/* we're already doing this */
-		return;
-	}
-
-	if (float_window) {
-		add_route_dialog->unset_transient_for ();
-		add_route_dialog->set_transient_for (*float_window);
-	}
-
-	ResponseType r = (ResponseType) add_route_dialog->run ();
-
-	add_route_dialog->hide();
-
+    _add_tracks_dialog->setup();
+    int r = _add_tracks_dialog->run();
+    
 	switch (r) {
-		case RESPONSE_ACCEPT:
+		case Gtk::RESPONSE_YES:
 			break;
 		default:
 			return;
-			break;
 	}
-
-	if ((count = add_route_dialog->count()) <= 0) {
-		return;
-	}
-
+    
 	setup_order_hint();
 
-	PBD::ScopedConnection idle_connection;
-
-	string template_path = add_route_dialog->track_template();
-
-	if (!template_path.empty()) {
-		if (add_route_dialog->name_template_is_default())  {
-			_session->new_route_from_template (count, template_path, string());
-		} else {
-			_session->new_route_from_template (count, template_path, add_route_dialog->name_template());
-		}
-		return;
-	}
-
-	ChanCount input_chan= add_route_dialog->channels ();
+	ChanCount input_chan = _add_tracks_dialog->input_channels ();
 	ChanCount output_chan;
-	string name_template = add_route_dialog->name_template ();
-	PluginInfoPtr instrument = add_route_dialog->requested_instrument ();
-	RouteGroup* route_group = add_route_dialog->route_group ();
-	AutoConnectOption oac = Config->get_output_auto_connect();
-
-	if (oac & AutoConnectMaster) {
-		output_chan.set (DataType::AUDIO, (_session->master_out() ? _session->master_out()->n_inputs().n_audio() : input_chan.n_audio()));
+    // NP: output_channels amount will be validated and changed accordingly to Master BUS config in Session::reconnect_existing_routes
+    // during AudioTracks auto connection process
+	/*if (Config->get_output_auto_connect() & AutoConnectMaster) {
+        output_chan.set (DataType::AUDIO, (_session->master_out() ? _session->master_out()->n_inputs().n_audio() : input_chan.n_audio()));
 		output_chan.set (DataType::MIDI, 0);
-	} else {
+	} else */ {
 		output_chan = input_chan;
 	}
 
-	/* XXX do something with name template */
-
-	switch (add_route_dialog->type_wanted()) {
-	case AddRouteDialog::AudioTrack:
-		session_add_audio_track (input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template);
-		break;
-	case AddRouteDialog::MidiTrack:
-		session_add_midi_track (route_group, count, name_template, instrument);
-		break;
-	case AddRouteDialog::MixedTrack:
-		session_add_mixed_track (input_chan, output_chan, route_group, count, name_template, instrument);
-		break;
-	case AddRouteDialog::AudioBus:
-		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template);
-		break;
-	}
-
-	/* idle connection will end at scope end */
+	session_add_audio_track (input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, NULL, _add_tracks_dialog->count(), "");
 }
 
 void
 ARDOUR_UI::add_audio_track_instantly ()
-{
-	int count;
-    
+{    
 	if (!_session) {
 		return;
 	}
     
-	if (add_route_dialog->is_visible()) {
+	if (_add_tracks_dialog->is_visible()) {
 		/* we're already doing this */
 		return;
 	}

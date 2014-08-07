@@ -80,7 +80,7 @@
 #include "visibility_group.h"
 #include "window_manager.h"
 
-#include "add_route_dialog.h"
+#include "add_tracks_dialog.h"
 #include "add_video_dialog.h"
 #include "big_clock_window.h"
 #include "bundle_manager.h"
@@ -630,7 +630,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         WM::Proxy<ThemeManager> theme_manager;
         WM::Proxy<KeyEditor> key_editor;
         WM::Proxy<RCOptionEditor> rc_option_editor;
-        WM::Proxy<AddRouteDialog> add_route_dialog;
+        boost::shared_ptr<AddTracksDialog> _add_tracks_dialog;
         WM::Proxy<About> about;
         WM::Proxy<LocationUIWindow> location_ui;
         WM::Proxy<RouteParams_UI> route_params;
