@@ -1,10 +1,21 @@
-//
-//  OpenFileDialog.m
-//  Tracks
-//
-//  Created by User on 5/8/14.
-//
-//
+/*
+    Copyright (C) 2014 Waves Audio Ltd.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
 
 #import "open_file_dialog.h"
 #import <Cocoa/Cocoa.h>
@@ -15,13 +26,10 @@
 
 using namespace std;
 
-@implementation FileDialog 
-
-namespace ARDOUR
+/* ====== "trampoline" functions to invoke Objective-C method ====== */
+string 
+ARDOUR::open_file_dialog (std::string initial_path, string title)
 {
-    // ====== C "trampoline" functions to invoke Objective-C method ====== //
-    string open_file_dialog(std::string initial_path, string title)
-    {
         NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
         
         //NP: we should find some gentle way to do this
@@ -31,10 +39,11 @@ namespace ARDOUR
         string stdPath = [nsPath UTF8String];
         
         return stdPath;
-    }
+}
 
-    string save_file_dialog(std::string initial_path, string title)
-    {
+string 
+ARDOUR::save_file_dialog (std::string initial_path, string title)
+{
         NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
         
         //NP: we should find some gentle way to do this
@@ -44,10 +53,11 @@ namespace ARDOUR
         string stdPath = [nsPath UTF8String];    
         
         return stdPath;
-    }
+}
     
-    string choose_folder_dialog(std::string initial_path, string title)
-    {
+string
+ARDOUR::choose_folder_dialog(std::string initial_path, string title)
+{
         NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
         
         //NP: we should find some gentle way to do this
@@ -59,11 +69,12 @@ namespace ARDOUR
         
         return stdPath;
     }  
-}// namespace ARDOUR
 
-// ====== Objective-C functions called from C++ functions ====== //
+/* ====== Objective-C functions called from C++ functions ====== */
 
-// On open saved session
+@implementation FileDialog 
+
+/* On open saved session */
 + (NSString*) class_open_file_dialog:(NSString *)title withArg2:(NSString *)initial_path
 {
     // Create a File Open Dialog class.
@@ -102,7 +113,7 @@ namespace ARDOUR
     return @"";
 }
 
-// On create new session
+/* On create new session */
 + (NSString*) class_save_file_dialog:(NSString *)title withArg2:(NSString *)initial_path
 {    
     // Create a File Open Dialog class.

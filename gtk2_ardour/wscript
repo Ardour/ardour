@@ -272,8 +272,10 @@ gtk2_ardour_sources = [
 
 if sys.platform == 'darwin':
     gtk2_ardour_sources.append('open_file_dialog.mm')
+elif sys.platform == 'mingw' or sys.platform == 'msvc':
+    gtk2_ardour_sources.append('open_file_dialog_windows.cc')
 else:
-    gtk2_ardour_sources.append('open_file_dialog.cc')
+    gtk2_ardour_sources.append('open_file_dialog_nix.cc')
     
 def options(opt):
     autowaf.set_options(opt)

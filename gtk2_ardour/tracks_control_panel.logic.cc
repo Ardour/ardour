@@ -1269,37 +1269,15 @@ TracksControlPanel::on_browse_button (WavesButton*)
 {
     using namespace std;
     
-#ifdef __APPLE__
-    set_keep_above(false);
+    set_keep_above (false);
     _default_path_name = ARDOUR::choose_folder_dialog(Config->get_default_session_parent_dir(), _("Choose Default Path"));
-    set_keep_above(true);    
+    set_keep_above (true);    
     
-    if( !_default_path_name.empty() )
+    if (!_default_path_name.empty()) {
         _default_open_path.set_text(_default_path_name);
-    else
+    } else {
         _default_open_path.set_text(Config->get_default_session_parent_dir());
-	
-    return;
-#endif
-    
-#ifdef _WIN32
-	string fileTitle;
-	set_keep_above(false);
-	bool result = ARDOUR::choose_folder_dialog(fileTitle, _("Choose Default Path"));
-	set_keep_above(true);
-
-	// if path was chosen in dialog
-	if (result) {
-		_default_path_name = fileTitle;
-	}
-
-    if (!_default_path_name.empty())
-        _default_open_path.set_text(_default_path_name);
-    else
-        _default_open_path.set_text(Config->get_default_session_parent_dir());
-    
-	return;
-#endif // _WIN32
+    }
 }
 
 void

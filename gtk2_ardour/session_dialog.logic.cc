@@ -148,62 +148,19 @@ SessionDialog::session_selected ()
 void
 SessionDialog::on_new_session (WavesButton*)
 {
-#ifdef __APPLE__  
     set_keep_above(false);
-    string temp_session_full_file_name = ARDOUR::save_file_dialog(Config->get_default_session_parent_dir(),_("Create New Session"));
+    _selected_session_full_file_name = ARDOUR::save_file_dialog(Config->get_default_session_parent_dir(),_("Create New Session"));
     set_keep_above(true);
     
-    if(!temp_session_full_file_name.empty()) {
-        _selected_session_full_name = temp_session_full_file_name;
-        for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
-            _recent_session_button[i]->set_active (false);
-		}
- 
-		hide();
-        _selection_type = NewSession;
-		response (Gtk::RESPONSE_ACCEPT);
+    if (!_selected_session_full_name.empty()) {
+            for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
+                    _recent_session_button[i]->set_active (false);
+            }
+            
+            hide();
+            _selection_type = NewSession;
+            response (Gtk::RESPONSE_ACCEPT);
     }
-    
-	return;
-#endif
-  
-#ifdef _WIN32 	 	
-	set_keep_above(false);	 
-	string fileTitle;		 
-	// Open the file save dialog, and choose the file name
-	if ( ARDOUR::save_file_dialog(fileTitle, Config->get_default_session_parent_dir(), _("Create New Session")) ) {
-		set_keep_above(true);
-		_selected_session_full_name = fileTitle;
-		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
-            _recent_session_button[i]->set_active (false);
-		}
-		hide();
-        _selection_type = NewSession;
-		response (Gtk::RESPONSE_ACCEPT);
-	}
-
-	return;
-#endif // _WIN32 
-   
-    Gtk::FileChooserDialog dialog(*this, _("Create New Session"), Gtk::FILE_CHOOSER_ACTION_SAVE);
-
-	dialog.add_button ("CANCEL", Gtk::RESPONSE_CANCEL);
-	dialog.add_button ("OK", Gtk::RESPONSE_OK);
-	
-	set_keep_above(false);
-	int responce = dialog.run ();
-	set_keep_above(true);
-
-    if (responce == Gtk::RESPONSE_OK) {
-		_selected_session_full_name = dialog.get_filename ();
-        
-		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNTS; i++) {
-            _recent_session_button[i]->set_active (false);
-		}
-		hide();
-        _selection_type = NewSession;
-		response (Gtk::RESPONSE_ACCEPT);
-	}
 }
 
 void
