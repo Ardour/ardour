@@ -37,7 +37,7 @@ AddTracksDialog::AddTracksDialog ()
 , _tracks_format_combo (get_combo_box_text ("tracks_format_combo"))
 , _tracks_counter_entry (get_entry("tracks_counter_entry"))
 {
-    populate_tracks_mode_combo();
+    populate_tracks_format_combo();
     _tracks_counter_entry.set_text("1");
     
     _cancel_button.signal_clicked.connect (sigc::mem_fun (*this, &AddTracksDialog::on_cancel_button));
@@ -47,7 +47,7 @@ AddTracksDialog::AddTracksDialog ()
 }
 
 void
-AddTracksDialog::populate_tracks_mode_combo ()
+AddTracksDialog::populate_tracks_format_combo ()
 {
     std::vector<std::string> track_format_strings;
     track_format_strings.push_back(TrackFormat::FormatMono);

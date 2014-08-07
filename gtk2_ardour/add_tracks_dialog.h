@@ -35,11 +35,7 @@ private:
     Gtk::ComboBoxText& _tracks_format_combo;
     Gtk::Entry& _tracks_counter_entry;
     
-	void on_cancel(WavesButton*);
-    void on_dont_save(WavesButton*);
-    void on_save(WavesButton*);
-    
-    void populate_tracks_mode_combo();
+    void populate_tracks_format_combo();
     
     void on_cancel_button (WavesButton*);
     void on_ok_button (WavesButton*);
