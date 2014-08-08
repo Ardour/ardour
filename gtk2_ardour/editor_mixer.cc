@@ -29,6 +29,7 @@
 #include "pbd/enumwriter.h"
 
 #include "ardour/rc_configuration.h"
+#include "ardour/audio_track.h"
 
 #include "actions.h"
 #include "ardour_ui.h"
@@ -100,6 +101,16 @@ Editor::show_editor_mixer (bool yn)
 		return;
 	}
 
+    // check if master is available: try to find it's view
+    TimeAxisView* tv;
+    boost::shared_ptr<ARDOUR::Route> master_bus;
+    if ( tv = axis_view_from_route (_session->master_out() ) ) {
+        RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*> (tv);
+        if ( atv != 0 ) {
+            master_bus = atv->route();
+        }
+    }
+    
 	if (yn) {
 
 		if (selection->tracks.empty()) {
@@ -108,7 +119,7 @@ Editor::show_editor_mixer (bool yn)
 				show_editor_mixer_when_tracks_arrive = true;
 				return;
 			}
-
+            
             // check if master is available: try to find it's view
             TimeAxisView* tv;
             if ( tv = axis_view_from_route (_session->master_out() ) ) {
@@ -134,8 +145,15 @@ Editor::show_editor_mixer (bool yn)
 			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 				RouteTimeAxisView* atv;
 
-				if ((atv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
-					r = atv->route();
+				if ((atv = dynamic_cast<RouteTimeAxisView*> (*i) ) != 0) {
+					
+                    AudioTrack* atr = dynamic_cast<AudioTrack*> (atv->route().get() );
+                    if (atr && atr->is_master_track() ) {
+                        r = master_bus;
+                    } else {
+                        r = atv->route();
+                    }
+                    
 					break;
 				}
 			}

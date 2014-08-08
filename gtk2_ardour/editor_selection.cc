@@ -27,6 +27,7 @@
 #include "ardour/profile.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
+#include "ardour/audio_track.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -942,7 +943,25 @@ void
 Editor::track_selection_changed ()
 {
     if (!selection->tracks.empty() ) {
-        set_selected_mixer_strip (*(selection->tracks.front()));
+
+        bool master_bus_set = false;
+        TimeAxisView* tv = selection->tracks.front();
+        RouteTimeAxisView* rtv = dynamic_cast <RouteTimeAxisView*> (tv);
+        if (rtv) {
+            AudioTrack* atr = dynamic_cast <AudioTrack*> (rtv->route().get() );
+            if (atr && _session && atr->is_master_track() ) {
+                TimeAxisView* master_bus_tv = axis_view_from_route (_session->master_out() );
+                if (master_bus_tv) {
+                    set_selected_mixer_strip (*master_bus_tv);
+                    master_bus_set = true;
+                }
+            }
+        }
+        
+        if (!master_bus_set) {
+            set_selected_mixer_strip(*tv);
+        }
+        
     } else {
         // set master bus visible if it's available
         RouteTimeAxisView* rtv = 0;
@@ -950,7 +969,7 @@ Editor::track_selection_changed ()
         
         if (_session ) {
             TimeAxisView* tv = axis_view_from_route (_session->master_out() );
-            rtv = dynamic_cast <RouteTimeAxisView*> (tv);
+            rtv = dynamic_cast<RouteTimeAxisView*> (tv);
             
             if (rtv) {
                 set_master_bus = true;
