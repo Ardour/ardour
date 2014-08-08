@@ -77,7 +77,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	enum Flag {
 		Auditioner = 0x1,
 		MasterOut = 0x2,
-		MonitorOut = 0x4
+		MonitorOut = 0x4,
+        MasterTrack = 0x8
 	};
 
 	Route (Session&, std::string name, Flag flags = Flag(0), DataType default_type = DataType::AUDIO);

@@ -362,6 +362,10 @@ Session::Session (AudioEngine &eng,
      */
     if (_is_new ) {
         if ( ARDOUR::Profile->get_trx () ) {
+            
+            // Waves Tracks: always create master track
+            create_master_track();
+            
             uint32_t how_many (0);
             
             std::vector<std::string> inputs;
@@ -566,6 +570,7 @@ Session::destroy ()
 	auditioner.reset ();
 	_master_out.reset ();
 	_monitor_out.reset ();
+    _master_track.reset ();
 
 	{
 		RCUWriter<RouteList> writer (routes);
@@ -2178,32 +2183,34 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
         RouteList::iterator rIter = existing_routes.begin();
         for (; rIter != existing_routes.end(); ++rIter) {
             
-            if (*rIter == _master_out || *rIter == _monitor_out) {
+            if (*rIter == _master_out || *rIter == _monitor_out ) {
                 continue;
             }
             
             if (reconnectIputs) {
                 (*rIter)->input()->disconnect (this); //GZ: check this; could be heavy
                 
-                for (uint32_t route_input_n = 0; route_input_n < (*rIter)->n_inputs().get(DataType::AUDIO); ++route_input_n) {
-                    
-                    if (Config->get_input_auto_connect() & AutoConnectPhysical) {
+                if (*rIter != _master_track) { // do not connect master to phys inputs ever
+                    for (uint32_t route_input_n = 0; route_input_n < (*rIter)->n_inputs().get(DataType::AUDIO); ++route_input_n) {
                         
-                        if ( input_n == physinputs.size() ) {
-                            break;
+                        if (Config->get_input_auto_connect() & AutoConnectPhysical) {
+                            
+                            if ( input_n == physinputs.size() ) {
+                                break;
+                            }
+                            
+                            string port = physinputs[input_n];
+                        
+                            if (port.empty() ) {
+                                error << "Physical Input number "<< input_n << " is unavailable and cannot be connected" << endmsg;
+                            }
+                            
+                            //GZ: check this; could be heavy
+                            (*rIter)->input()->connect ((*rIter)->input()->ports().port(DataType::AUDIO, route_input_n), port, this);
+                            ++input_n;
                         }
-                        
-                        string port = physinputs[input_n];
-                    
-                        if (port.empty() ) {
-                            error << "Physical Input number "<< input_n << " is unavailable and cannot be connected" << endmsg;
-                        }
-                        
-                        //GZ: check this; could be heavy
-                        (*rIter)->input()->connect ((*rIter)->input()->ports().port(DataType::AUDIO, route_input_n), port, this);
-                        ++input_n;
                     }
-				}
+                }
 
             }
             
@@ -2233,12 +2240,18 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
                         (*rIter)->output()->ensure_io(ChanCount(DataType::AUDIO, master_inputs_count), false, this );
                     } else {
                         error << error << "Master bus is not available" << endmsg;
+                        break;
                     }
-                        
+                    
+                    if (!_master_track) {
+                        error << error << "Master track is not available" << endmsg;
+                        break;
+                    }
                 }
                 
                 for (uint32_t route_output_n = 0; route_output_n < (*rIter)->n_outputs().get(DataType::AUDIO); ++route_output_n) {
-                    if (Config->get_output_auto_connect() & AutoConnectPhysical) {
+                    if ((Config->get_output_auto_connect() & AutoConnectPhysical) &&
+                        *rIter != _master_track ) {
                         
                         if ( output_n == physoutputs.size() ) {
                             break;
@@ -2260,15 +2273,28 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
                             break;
                         }
                         
+                        // connect to master bus
                         string port = _master_out->input()->ports().port(DataType::AUDIO, route_output_n)->name();
                     
                         if (port.empty() ) {
                             error << "MasterBus Input number "<< route_output_n << " is unavailable and cannot be connected" << endmsg;
                         }
                         
+                            
                         //GZ: check this; could be heavy
                         (*rIter)->output()->connect ((*rIter)->output()->ports().port(DataType::AUDIO, route_output_n), port, this);
-                        
+                            
+                            // connect to master track
+                        if (*rIter != _master_track) { // do not connect Master Track to itself
+                            port = _master_track->input()->ports().port(DataType::AUDIO, route_output_n)->name();
+                            
+                            if (port.empty() ) {
+                                error << "MasterTrack Input number "<< route_output_n << " is unavailable and cannot be connected" << endmsg;
+                            }
+                            
+                            //GZ: check this; could be heavy
+                            (*rIter)->output()->connect ((*rIter)->output()->ports().port(DataType::AUDIO, route_output_n), port, this);
+                        }
                     }
                 }
             }
@@ -2385,6 +2411,84 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 	return ret;
 }
+
+/** Caller must not hold process lock
+ *  @param name_template string to use for the start of the name, or "" to use "Audio".
+ */
+bool
+Session::create_master_track ()
+{
+    if (!_master_out) {
+        return false;
+    }
+    
+    uint32_t input_channels = _master_out->n_inputs().get(DataType::AUDIO);
+    // use the same amount of autputs because master track will be connected to master bus
+    uint32_t output_channels = input_channels;
+    
+    std::string track_name = "Master Track";
+	uint32_t track_id = 0;
+	string port;
+	RouteList new_routes;
+    boost::shared_ptr<AudioTrack> track;
+        
+    try {
+        track.reset (new AudioTrack (*this, track_name, Route::MasterTrack, Normal));
+        
+        if (track->init ()) {
+            return false;
+        }
+        
+        track->use_new_diskstream();
+        
+        {
+            Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+            
+            if (track->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
+                error << string_compose (
+                                         _("cannot configure %1 in/%2 out configuration for new audio track"),
+                                         input_channels, output_channels)
+                << endmsg;
+                return false;
+            }
+            
+            if (track->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
+                error << string_compose (
+                                         _("cannot configure %1 in/%2 out configuration for new audio track"),
+                                         input_channels, output_channels)
+                << endmsg;
+                return false;
+            }
+        }
+        
+        track->non_realtime_input_change();
+        
+        track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
+        if (Config->get_remote_model() == UserOrdered) {
+            track->set_remote_control_id (next_control_id());
+        }
+        
+        new_routes.push_back (track);
+    }
+    
+    catch (failed_constructor &err) {
+        error << _("Session: could not create Master Track.") << endmsg;
+        return false;
+    }
+    
+    catch (AudioEngine::PortRegistrationFailure& pfe) {
+        
+        error << pfe.what() << endmsg;
+        return false;
+    }
+
+	if (!new_routes.empty()) {
+		add_routes (new_routes, false, false, true);
+	}
+    
+	return true;
+}
+
 
 /** Caller must not hold process lock.
  *  @param name_template string to use for the start of the name, or "" to use "Bus".
@@ -2665,6 +2769,15 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (r);
 		if (tr) {
+            
+            boost::shared_ptr<AudioTrack> atr = boost::dynamic_pointer_cast<AudioTrack> (r);
+            if (atr) {
+                
+                if (atr->is_master_track()) {
+                    _master_track = r;
+                }
+            }
+            
 			tr->PlaylistChanged.connect_same_thread (*this, boost::bind (&Session::track_playlist_changed, this, boost::weak_ptr<Track> (tr)));
 			track_playlist_changed (boost::weak_ptr<Track> (tr));
 			tr->RecordEnableChanged.connect_same_thread (*this, boost::bind (&Session::update_have_rec_enabled_track, this));
@@ -2675,8 +2788,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
                                 mt->output()->changed.connect_same_thread (*this, boost::bind (&Session::midi_output_change_handler, this, _1, _2, boost::weak_ptr<Route>(mt)));
 			}
 		}
-
-
+        
 		if (input_auto_connect || output_auto_connect) {
 			auto_connect_route (r, existing_inputs, existing_outputs, true, input_auto_connect);
 		}
@@ -2804,7 +2916,7 @@ Session::add_internal_send (boost::shared_ptr<Route> dest, boost::shared_ptr<Pro
 void
 Session::remove_route (boost::shared_ptr<Route> route)
 {
-	if (route == _master_out) {
+	if (route == _master_out || route == _master_track) {
 		return;
 	}
 
@@ -2828,6 +2940,10 @@ Session::remove_route (boost::shared_ptr<Route> route)
 		if (route == _monitor_out) {
 			_monitor_out.reset ();
 		}
+        
+        if (route = _master_track) {
+            _master_track.reset ();
+        }
 
 		/* writer goes out of scope, forces route list update */
 	}
