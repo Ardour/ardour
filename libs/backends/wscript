@@ -14,13 +14,12 @@ def backend_list():
         # Ardour
         backends = [ 'jack' ]
 
-        # These will come over from Ardour at some point soon (PD)
-        #if Options.options.build_dummy: 
-        #    backends += [ 'dummy' ]
+        if Options.options.build_dummy: 
+            backends += [ 'dummy' ]
 
-        #if Options.options.build_alsabackend:
-        #        if re.search ("linux", sys.platform) != None:
-        #            backends += [ 'alsa' ]
+        if Options.options.build_alsabackend:
+                if re.search ("linux", sys.platform) != None:
+                    backends += [ 'alsa' ]
 
     else:
         # Not Ardour
