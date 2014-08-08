@@ -73,6 +73,10 @@
 #include "i18n.h"
 #include "dbg_msg.h"
 
+#ifdef _WIN32
+#define random() rand()
+#endif
+
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
