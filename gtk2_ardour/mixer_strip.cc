@@ -257,6 +257,13 @@ MixerStrip::~MixerStrip ()
 	delete comment_window;
 }
 
+Gdk::Color
+MixerStrip::palette_random_color()
+{
+    int number_of_colors_in_palette = sizeof(MixerStrip::XMLColor)/sizeof(*MixerStrip::XMLColor);
+    return (Gdk::Color)(MixerStrip::XMLColor[random() % number_of_colors_in_palette]);
+}
+
 void
 MixerStrip::set_route (boost::shared_ptr<Route> rt)
 {
@@ -1787,7 +1794,8 @@ MixerStrip::color_button_clicked (WavesButton *button)
 		if (button != color_button[i]) {
 			color_button[i]->set_active (false);
 		} else {
-			RouteUI::set_color (Gdk::Color (XMLColor[i]));
+			TrackSelection& track_selection =  ARDOUR_UI::instance()->the_editor().get_selection().tracks;
+            track_selection.foreach_route_ui (boost::bind (&RouteUI::set_color, _1, Gdk::Color (XMLColor[i])));
 		}
 	}
 }

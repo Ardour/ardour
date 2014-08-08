@@ -310,6 +310,7 @@ Editor::Editor ()
 	, _stepping_axis_view (0)
 	, current_mixer_strip (0)
 	, _master_bus_ui (0)
+    , _set_session_in_progress(false)
 {
 	constructed = false;
 
@@ -1269,6 +1270,8 @@ Editor::update_title ()
 void
 Editor::set_session (Session *t)
 {
+    _set_session_in_progress = true;
+    
 	SessionHandlePtr::set_session (t);
 
 	if (!_session) {
@@ -1389,6 +1392,7 @@ Editor::set_session (Session *t)
 
 	start_updating_meters ();
     
+    _set_session_in_progress = false;
 }
 
 void

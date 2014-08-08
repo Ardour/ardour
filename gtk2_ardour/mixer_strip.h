@@ -125,6 +125,9 @@ class MixerStrip : public RouteUI
 	void toggle_processors ();
 	void ab_plugins ();
 
+    static Gdk::Color palette_random_color();
+    static const char* XMLColor[15];
+    
   protected:
 	friend class Mixer_UI;
 	void set_packed (bool yn);
@@ -299,7 +302,6 @@ class MixerStrip : public RouteUI
 	void color_button_clicked (WavesButton *button);
 	void color_palette_button_clicked (WavesButton *button);
 	void info_panel_button_clicked (WavesButton *button);
-	static const char* XMLColor[15];
 };
 
 #endif /* __ardour_mixer_strip__ */

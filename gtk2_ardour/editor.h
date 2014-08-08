@@ -136,6 +136,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	~Editor ();
 
 	void             set_session (ARDOUR::Session *);
+    bool set_session_in_progress() const { return _set_session_in_progress; }
 	ARDOUR::Session* session() const { return _session; }
 
 	void             first_idle ();
@@ -470,6 +471,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void color_handler ();
 
 	bool                 constructed;
+    bool                 _set_session_in_progress;
 
 	// to keep track of the playhead position for control_scroll
 	boost::optional<framepos_t> _control_scroll_target;

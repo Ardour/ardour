@@ -177,7 +177,15 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route = rp;
 
 	if (set_color_from_route()) {
-		set_color (unique_random_color());
+        Gdk::Color color;
+        Editor* editor = dynamic_cast<Editor*>( &(ARDOUR_UI::instance()->the_editor()) );
+        
+        if( editor!=NULL && editor->set_session_in_progress() )
+            color = MixerStrip::palette_random_color();
+        else
+            color = (Gdk::Color)(MixerStrip::XMLColor[14]);
+		
+        set_color (color);
 	}
 
 	rp->DropReferences.connect (route_connections, 
