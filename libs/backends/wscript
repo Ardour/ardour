@@ -9,6 +9,34 @@ import re
 top = '.'
 out = 'build'
 
+def backend_list():
+    if Options.options.program_name == 'Ardour':
+        # Ardour
+        backends = [ 'jack' ]
+
+        # These will come over from Ardour at some point soon (PD)
+        #if Options.options.build_dummy: 
+        #    backends += [ 'dummy' ]
+
+        #if Options.options.build_alsabackend:
+        #        if re.search ("linux", sys.platform) != None:
+        #            backends += [ 'alsa' ]
+
+    else:
+        # Not Ardour
+        if re.search ("linux", sys.platform) != None:
+            # Can't build this till the ALSA backend is merged because of a dependency (on Linux) on a shared utility library
+            # created for the ALSA backend and JACK.
+            # backends = [ 'jack' ]
+            backends = [ ]
+        else:
+            backends = [ ]
+
+    if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc':
+        backends += [ 'wavesaudio' ]
+
+    return backends
+
 def options(opt):
     autowaf.set_options(opt)
 
@@ -20,33 +48,13 @@ def configure(conf):
     autowaf.set_recursive()
     autowaf.configure(conf)
 
-    backends = [ 'jack' ]
-
-    if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc':
-        backends += [ 'wavesaudio' ]
-
-    if Options.options.build_dummy: 
-        backends += [ 'dummy' ]
-
-    if Options.options.build_alsabackend:
-        if re.search ("linux", sys.platform) != None:
-            backends += [ 'alsa' ]
+    backends = backend_list()
 
     for i in backends:
         sub_config_and_use(conf, i)
 
 def build(bld):
-    backends = [ 'jack' ]
-
-    if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc':
-        backends += [ 'wavesaudio' ]
-
-    if bld.env['BUILD_DUMMYBACKEND']:
-        backends += [ 'dummy' ]
-
-    if re.search ("linux", sys.platform) != None:
-        if bld.env['BUILD_ALSABACKEND'] and bld.is_defined('HAVE_ALSA'):
-            backends += [ 'alsa' ]
+    backends = backend_list()
 
     for i in backends:
         bld.recurse(i)
