@@ -29,6 +29,7 @@
 
 #include "ardour/debug.h"
 #include "ardour/route.h"
+#include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/session.h"
 
@@ -915,20 +916,20 @@ EditorRoutes::sync_order_keys_from_treeview ()
 		bool visible = (*ri)[_columns.visible];
 
 		uint32_t old_key = route->order_key ();
-
+        
 		if (order != old_key) {
 			route->set_order_key (order);
-
-			changed = true;
+            
+            changed = true;
 		}
 
-		if ((Config->get_remote_model() == MixerOrdered) && !route->is_master() && !route->is_monitor()) {
-
+		if ((Config->get_remote_model() == MixerOrdered) && !route->is_master() && !route->is_monitor() ) {
+            
 			uint32_t new_rid = (visible ? rid : invisible_key--);
 
 			if (new_rid != route->remote_control_id()) {
-				route->set_remote_control_id_explicit (new_rid);	
-				rid_change = true;
+                    route->set_remote_control_id_explicit (new_rid);
+                rid_change = true;
 			}
 			
 			if (visible) {
@@ -1433,7 +1434,7 @@ EditorRoutes::move_selected_tracks (bool up)
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		TimeAxisView* tv = (*ri)[_columns.tv];
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
-
+        
 		view_routes.push_back (ViewRoute (tv, route));
 	}
 
@@ -1448,7 +1449,17 @@ EditorRoutes::move_selected_tracks (bool up)
 		++leading;
 
 		while (leading != view_routes.end()) {
-			if (_editor->selection->selected (leading->first)) {
+            
+            //skip master track if it's in scope
+            bool master_track_in_scope = false;
+            AudioTrack* atr_l = dynamic_cast<AudioTrack*>(leading->second.get() );
+            AudioTrack* atr_t = dynamic_cast<AudioTrack*>(trailing->second.get() );
+            
+            if ((atr_l && atr_l->is_master_track() ) || (atr_t && atr_t->is_master_track() ) ) {
+                master_track_in_scope = true;
+            }
+            
+			if (_editor->selection->selected (leading->first) && !master_track_in_scope ) {
 				view_routes.insert (trailing, ViewRoute (leading->first, leading->second));
 				leading = view_routes.erase (leading);
 			} else {
@@ -1472,8 +1483,17 @@ EditorRoutes::move_selected_tracks (bool up)
 		--trailing;
 
 		while (1) {
-
-			if (_editor->selection->selected (leading->first)) {
+            
+            //skip master track if it's in scope
+            bool master_track_in_scope = false;
+            AudioTrack* atr_l = dynamic_cast<AudioTrack*>(leading->second.get() );
+            AudioTrack* atr_t = dynamic_cast<AudioTrack*>(trailing->second.get() );
+            
+            if ((atr_l && atr_l->is_master_track() ) || (atr_t && atr_t->is_master_track() ) ) {
+                master_track_in_scope = true;
+            }
+            
+			if (_editor->selection->selected (leading->first) && !master_track_in_scope ) {
 				list<ViewRoute>::iterator tmp;
 
 				/* need to insert *after* trailing, not *before* it,

@@ -393,14 +393,18 @@ RouteTimeAxisView::build_display_menu ()
 	build_size_menu ();
 	items.push_back (MenuElem (_("Height"), *_size_menu));
 
-	items.push_back (SeparatorElem());
-
-	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), true)));
-	} else {
-		items.push_front (SeparatorElem());
-		items.push_front (MenuElem (_("Delete"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), true)));
-	}
+    AudioTrack* atr = dynamic_cast<AudioTrack*>(route().get() );
+    if (! (atr && atr->is_master_track() ) ) {
+        
+        items.push_back (SeparatorElem());
+        
+        if (!Profile->get_sae()) {
+            items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), true)));
+        } else {
+            items.push_front (SeparatorElem());
+            items.push_front (MenuElem (_("Delete"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), true)));
+        }
+    }
 }
 
 void
