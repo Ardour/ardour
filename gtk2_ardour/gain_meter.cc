@@ -274,7 +274,7 @@ GainMeter::hide_all_meters ()
 }
 
 void
-GainMeter::setup_meters (int len)
+GainMeter::setup_meters ()
 {
 	level_meter.setup_meters (_meter_width, _thin_meter_width);
 }

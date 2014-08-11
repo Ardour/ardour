@@ -249,7 +249,7 @@ LevelMeterBase::_setup_meters ()
 		return;
 	}
 
-	if (nmeters <= 2) {
+	if (nmeters < 2) {
 		width = regular_meter_width;
 	} else {
 		width = thin_meter_width;

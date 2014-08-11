@@ -1001,7 +1001,6 @@ MixerStrip::update_input_display ()
 void
 MixerStrip::update_output_display ()
 {
-//	update_io_button (_route, _width, false);
 	update_io_button (_route, false);
   	gpm.setup_meters ();
   	panners.setup_pan ();

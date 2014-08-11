@@ -50,8 +50,7 @@ CompactMeterStrip::CompactMeterStrip (Session* sess, boost::shared_ptr<ARDOUR::R
 	_level_meter.set_meter (_route->shared_peak_meter().get());
 	_level_meter.clear_meters();
 	_level_meter.set_type (_route->meter_type());
-	int width = (_route->n_inputs().n_total() < 2 ) ? _meter_width : _thin_meter_width;
-	_level_meter.setup_meters (width, width);
+	_level_meter.setup_meters (_meter_width, _thin_meter_width);
 	_level_meter_home.add (_level_meter);
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (_route_connections,
@@ -127,7 +126,6 @@ CompactMeterStrip::fast_update ()
 void
 CompactMeterStrip::meter_configuration_changed (ChanCount c)
 {
-	int width = (c.n_total() < 2 ) ? _meter_width : _thin_meter_width;
-	_level_meter.setup_meters (width, width);
+	_level_meter.setup_meters (_meter_width, _thin_meter_width);
 }
 

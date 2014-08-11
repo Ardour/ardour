@@ -20,7 +20,7 @@
     </VBox>
     <VBox>
       <EventBox height="1" bgnormal="#494949" bgactive="#494949"/>
-      <HBox width="100"
+      <HBox width="80"
             id="name_label_home">
         <HBox width="5"/>
         <Label id="name_label"
@@ -28,14 +28,14 @@
                fgnormal="#ffffff"
                fgactive="#ffffff"/>
         <FocusEntry id="name_entry"
-                    width="100"
+                    width="80"
                     height="20"
                     fgnormal="#ffffff"
                     font ="Helvetica 10"
                     cssname="EditorTrackNameDisplay"
                     textcolornormal="#ffffff"
                     textcoloractive="#ffffff"
-                    textcolorselected="#ffffff"                    
+                    textcolorselected="#ffffff"
                     noshowall="true"
                     visible="false"/>
       </HBox>
@@ -46,17 +46,18 @@
       <HBox>
         <iconbutton id="playlist_button"
             width="21"
-            height="21"
+            height="20"
             normalicon="time_axis_playlist"
             activeicon="time_axis_playlist"
             prelighticon="time_axis_playlist"/>
+        <HBox width="3"/>
         <HBox>
           <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
           <VBox>
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
             <iconbutton id="rec_enable_button"
-                        width="19"
-                        height="19"
+                        width="41"
+                        height="20"
                         normalicon="time_axis_record"
                         activeicon="time_axis_record_active"
                         prelighticon="time_axis_record_prelight"
@@ -67,8 +68,8 @@
           <VBox>
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
             <iconbutton id="solo_button"
-                        width="19"
-                        height="19"
+                        width="41"
+                        height="20"
                         normalicon="time_axis_solo"
                         activeicon="time_axis_solo_active"
                         implicitactiveicon="time_axis_solo_safe"
@@ -77,32 +78,31 @@
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
           </VBox>
           <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
-          <VBox>
-            <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
-            <iconbutton id="mute_button"
-                        width="19"
-                        height="19"
-                        normalicon="time_axis_mute"
-                        activeicon="time_axis_mute_active"
-                        implicitactiveicon="time_axis_mute_implicit"
-                        prelighticon="time_axis_mute_prelight"
-                        tooltip="Mute"/>
-            <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
-          </VBox>
-          <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
         </HBox>
       </HBox>
       <HBox>
-        <VBox width="21"/>
+        <VBox width="24"/>
         <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
         <VBox>
           <iconbutton id="monitor_input_button"
-                      width="19"
-                      height="19"
+                      width="41"
+                      height="20"
                       normalicon="time_axis_monitor_input"
                       activeicon="time_axis_monitor_input_active"
                       prelighticon="time_axis_monitor_input_prelight"
                       tooltip="Input Monitoring"/>
+          <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
+        </VBox>
+        <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
+        <VBox>
+          <iconbutton id="mute_button"
+                      width="41"
+                      height="20"
+                      normalicon="time_axis_mute"
+                      activeicon="time_axis_mute_active"
+                      implicitactiveicon="time_axis_mute_implicit"
+                      prelighticon="time_axis_mute_prelight"
+                      tooltip="Mute"/>
           <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
         </VBox>
         <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
@@ -119,11 +119,10 @@
       <Button id="automation_button"/>
     </HBox>
     <!--<HBox id="gain_meter_home" box.pack="end"/>-->
-    <HBox>
-      <VBox  id="gain_meter_home">
-        <EventBox height="1" bgnormal="#494949" bgactive="#494949"/>
-        <EventBox height="1" bgnormal="#000000" bgactive="#000000" box.pack="end"/>
-      </VBox>
-    </HBox>
+    <VBox  id="gain_meter_home" width="7">
+      <EventBox height="1" bgnormal="#494949" bgactive="#494949"/>
+      <EventBox height="1" bgnormal="#000000" bgactive="#000000" box.pack="end"/>
+    </VBox>
+    <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
   </HBox>
 </RouteUI>

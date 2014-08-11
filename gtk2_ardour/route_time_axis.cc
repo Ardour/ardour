@@ -125,13 +125,8 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	CANVAS_DEBUG_NAME (selection_group, string_compose ("selections for %1", rt->name()));
 	CANVAS_DEBUG_NAME (_ghost_group, string_compose ("ghosts for %1", rt->name()));
 
-	int meter_width = 3;
-	if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
-		meter_width = 6;
-	}
-
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
-	gm.get_level_meter().setup_meters(meter_width);
+	gm.setup_meters();
 	gm.update_gain_sensitive ();
 
 	string str = gui_property ("height");
@@ -513,11 +508,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 {
 	bool height_changed = (height == 0) || (h != height);
 
-	int meter_width = 3;
-	if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
-		meter_width = 6;
-	}
-	gm.get_level_meter().setup_meters (meter_width);
+	gm.setup_meters ();
 
 	TimeAxisView::set_height (h);
 
@@ -1904,7 +1895,7 @@ RouteTimeAxisView::reset_meter ()
 		if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
 			meter_width = 6;
 		}
-		gm.get_level_meter().setup_meters (meter_width);
+		gm.setup_meters ();
 	} else {
 		hide_meter ();
 	}

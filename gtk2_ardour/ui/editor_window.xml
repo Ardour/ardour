@@ -206,7 +206,6 @@
         </EventBox>
       </VBox>
     </EventBox>
-    <EventBox id="master_bus_ui_home" ui.orphan="true"/>
     <EventBox bgnormal="#000000" height="1"/>
     <HBox box.pack="end"
           box.fill="true"
@@ -226,24 +225,31 @@
             <Table id="edit_packer"
                    rows="4"
                    columns="4">
+              <EventBox id="master_bus_ui_home"
+                        table.leftattach="0"
+                        table.rightattach="1"
+                        table.topattach="0"
+                        table.bottomattach="2"
+                        bgnormal="#ff00ff"/>
               <EventBox id="ruler_label_event_box"
                         table.leftattach="1"
                         table.rightattach="2"
                         table.topattach="0"
                         table.bottomattach="1"
                         table.xfill="true"
-                        table.yshrink="true">
-                <VBox id="ruler_label_vbox" ui.orphan="true" />
-              </EventBox>
+                        table.yshrink="true"
+                        bgnormal="#ffff00"
+                        ui.orphan="true"/>
+              <VBox id="ruler_label_vbox"
+                    ui.orphan="true"/>
               <EventBox id="time_bars_event_box"
                         table.leftattach="1"
                         table.rightattach="2"
                         table.topattach="1"
                         table.bottomattach="2"
                         table.xfill="true"
-                        table.yshrink="true">
-                <VBox id="time_bars_vbox"/>
-              </EventBox>
+                        table.yshrink="true" ui.orphan="true"/>
+              <VBox id="time_bars_vbox" ui.orphan="true"/>
               <EventBox id="time_canvas_event_box"
                         table.leftattach="2"
                         table.rightattach="3"
