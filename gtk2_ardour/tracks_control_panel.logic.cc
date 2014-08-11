@@ -18,6 +18,7 @@
 */
 #include <stdlib.h>
 #include <string>
+#include <stdio.h>
 
 #include "tracks_control_panel.h"
 #include "waves_button.h"
@@ -47,6 +48,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace Glib;
+using namespace std;
 
 #define dbg_msg(a) MessageDialog (a, PROGRAM_NAME).run();
 
@@ -150,7 +152,7 @@ TracksControlPanel::init ()
     populate_file_type_combo();
     populate_bit_depth_combo();
     populate_frame_rate_combo();
-    populate_auto_lock_timer();
+    populate_auto_lock_timer_combo();
     
 	_audio_settings_tab_button.set_active(true);
 }
@@ -561,6 +563,29 @@ TracksControlPanel::populate_frame_rate_combo()
 }
 
 void
+TracksControlPanel::populate_auto_lock_timer_combo()
+{
+    using namespace std;
+    
+    vector<string> lock_time_strings;
+    lock_time_strings.push_back("0 Min");
+    lock_time_strings.push_back("1 Min");
+    lock_time_strings.push_back("3 Min");
+    lock_time_strings.push_back("5 Min");
+    lock_time_strings.push_back("10 Min");
+    lock_time_strings.push_back("15 Min");
+    
+    int time = ARDOUR_UI::config()->get_auto_lock_timer();
+    stringstream ss;
+    ss << time;
+    string str_time = ss.str() + " Min";
+    
+    set_popdown_strings (_auto_lock_timer_combo, lock_time_strings);
+    _auto_lock_timer_combo.set_sensitive (lock_time_strings.size() > 1);
+    _auto_lock_timer_combo.set_active_text( str_time );
+}
+
+void
 TracksControlPanel::refresh_session_settings_info()
 {
     ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
@@ -573,23 +598,6 @@ TracksControlPanel::refresh_session_settings_info()
     _bit_depth_combo.set_active_text( SampleFormat_to_string(session->config.get_native_file_data_format()) );
     _file_type_combo.set_active_text( HeaderFormat_to_string(session->config.get_native_file_header_format()) );
     _frame_rate_combo.set_active_text( TimecodeFormat_to_string(session->config.get_timecode_format()) );
-}
-
-void
-TracksControlPanel::populate_auto_lock_timer()
-{
-    using namespace std;
-    using namespace Gtk;
-    
-    _auto_lock_timer_spin_button.set_max_length(3);
-    _auto_lock_timer_spin_button.set_numeric(true);
-    
-    _auto_lock_timer_spin_button.set_update_policy(UPDATE_ALWAYS);
-    _auto_lock_timer_spin_button.set_range(0, 999);
-    _auto_lock_timer_spin_button.set_increments(1,1);
-    
-    int time = ARDOUR_UI::config()->get_auto_lock_timer();    
-    _auto_lock_timer_spin_button.set_value(time);
 }
 
 void
@@ -1264,8 +1272,10 @@ TracksControlPanel::save_auto_lock_time()
 {
     using namespace std;
     
-    string s = _auto_lock_timer_spin_button.get_text();
-    int time = atoi(s);
+    string s = _auto_lock_timer_combo.get_active_text();
+    
+    char * pEnd;
+    int time = strtol( s.c_str(), &pEnd, 10 );
     
     ARDOUR_UI::config()->set_auto_lock_timer(time);
     ARDOUR_UI::config()->save_state();

@@ -74,9 +74,9 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
     Gtk::ComboBoxText& _file_type_combo;
     Gtk::ComboBoxText& _bit_depth_combo;
     Gtk::ComboBoxText& _frame_rate_combo;
-	Gtk::Label& _latency_label;
+	Gtk::ComboBoxText& _auto_lock_timer_combo;
+    Gtk::Label& _latency_label;
     Gtk::Label& _default_open_path;
-    Gtk::SpinButton& _auto_lock_timer_spin_button;
     
 #include "tracks_control_panel.logic.h"
 };

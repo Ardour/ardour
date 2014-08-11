@@ -100,7 +100,7 @@
     void populate_file_type_combo();
     void populate_bit_depth_combo();
     void populate_frame_rate_combo();
-    void populate_auto_lock_timer();
+    void populate_auto_lock_timer_combo();
 
     // Engine State update callback handlers
     void on_port_registration_update();

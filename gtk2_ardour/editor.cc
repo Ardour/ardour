@@ -1183,7 +1183,7 @@ Editor::lock_timeout_callback ()
     if( !ARDOUR_UI::instance()->screen_lock_is_allowed() ) 
         return false; // Returning false will effectively disconnect us from the timer callback.
     
-    if (delta.tv_sec > ARDOUR_UI::config()->get_auto_lock_timer ())
+    if (delta.tv_sec >= 60 * ARDOUR_UI::config()->get_auto_lock_timer ())
     {
         lock ();
                 /* don't call again. Returning false will effectively
