@@ -125,7 +125,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	name_label.set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 	delete an_entry;
 
-	name_hbox.pack_start (name_label, true, true);
+	name_hbox.pack_end (name_label, true, true);
 	name_hbox.show ();
 	name_label.show ();
 
@@ -617,7 +617,7 @@ TimeAxisView::begin_name_edit ()
 			name_hbox.remove (name_label);
 		}
 		
-		name_hbox.pack_start (*name_entry, false, false);
+		name_hbox.pack_end (*name_entry, false, false);
 		name_entry->show ();
 
 		name_entry->select_region (0, -1);
@@ -662,7 +662,7 @@ TimeAxisView::end_name_edit (int response)
 
 	/* put the name label back */
 
-	name_hbox.pack_start (name_label);
+	name_hbox.pack_end (name_label);
 	name_label.show ();
 
 	if (edit_next) {

@@ -108,7 +108,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, gm (sess, true, 75, 20)
 	, _ignore_set_layer_display (false)
 {
-	number_label.set_name("tracknumber label");
+	number_label.set_name("route button");
 	number_label.set_alignment(.5, .5);
 
 	sess->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::parameter_changed, this, _1), gui_context());
@@ -366,15 +366,16 @@ RouteTimeAxisView::update_track_number_visibility ()
 	}
 
 	if (number_label.get_parent()) {
-		controls_table.remove (number_label);
+		name_hbox.remove (number_label);
 	}
 	if (show_label) {
-		controls_table.resize ( 2, 4 );
-		controls_table.attach (number_label, 3, 4, 0, 1,  Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+//		controls_table.resize ( 2, 4 );
+		name_hbox.pack_start(number_label, false, false, 2);
+//		controls_table.attach (number_label, 3, 4, 0, 1,  Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 		number_label.set_size_request(3 + _session->track_number_decimals() * 8, -1);
 		number_label.show ();
 	} else {
-		controls_table.resize ( 2, 3 );
+//		controls_table.resize ( 2, 3 );
 		number_label.hide ();
 	}
 }
