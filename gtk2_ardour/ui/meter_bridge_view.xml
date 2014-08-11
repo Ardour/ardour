@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<CompactMeterbridge bgnormal="#353535">
+  <ScrolledWindow hscroll="never"
+                  vscroll="always"
+                  box.expand="true"
+                  box.fill="true">
+    <EventBox bgnormal="#383838" box.pack="end" width="10">
+      <WavesGrid id="mixer_strips_home" box.fill="true" box.expand="true"/>
+    </EventBox>
+  </ScrolledWindow>
+</CompactMeterbridge>
