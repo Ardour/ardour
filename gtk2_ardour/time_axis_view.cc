@@ -146,20 +146,23 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	separator->set_size_request(-1, 1);
 	separator->show();
 
-	controls_vbox.pack_start (controls_table, false, false);
-	controls_vbox.show ();
-
 	name_vbox.pack_start (name_table, false, false);
 	name_vbox.show ();
 
-	controls_hbox.pack_start (controls_vbox, false, false);
+	controls_hbox.pack_start (controls_table, false, false);
 	controls_hbox.show ();
 
 	controls_hbox.pack_start (name_vbox, true, true);
 	controls_hbox.show ();
 
+	controls_vbox.pack_start (controls_hbox, false, false);
+	controls_vbox.show ();
+
+	top_hbox.pack_start (controls_vbox, true, true);
+	top_hbox.show ();
+
 	//controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
-	controls_ebox.add (controls_hbox);
+	controls_ebox.add (top_hbox);
 	controls_ebox.add_events (Gdk::BUTTON_PRESS_MASK|
 				  Gdk::BUTTON_RELEASE_MASK|
 				  Gdk::POINTER_MOTION_MASK|
