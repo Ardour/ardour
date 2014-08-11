@@ -357,14 +357,16 @@ Session::Session (AudioEngine &eng,
 	_engine.set_session (this);
 	_engine.reset_timebase ();
 
+    // Waves Tracks: always create master track
+    if ( ARDOUR::Profile->get_trx () ) {
+        create_master_track();
+    }
+    
     /* Waves Tracks: fill session with tracks basing on the amount of inputs.
      * each available input must have corresponding track when session starts.
      */
     if (_is_new ) {
         if ( ARDOUR::Profile->get_trx () ) {
-            
-            // Waves Tracks: always create master track
-            create_master_track();
             
             uint32_t how_many (0);
             
@@ -2420,6 +2422,10 @@ Session::create_master_track ()
 {
     if (!_master_out) {
         return false;
+    }
+    
+    if (_master_track) {
+        return true;
     }
     
     uint32_t input_channels = _master_out->n_inputs().get(DataType::AUDIO);
