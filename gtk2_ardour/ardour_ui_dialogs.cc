@@ -271,7 +271,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	if (hide_stuff) {
 		editor->hide ();
 		mixer->hide ();
-		meterbridge->hide ();
+//		meterbridge->hide ();
 		theme_manager->hide ();
 		audio_port_matrix->hide();
 		midi_port_matrix->hide();
@@ -378,12 +378,17 @@ ARDOUR_UI::toggle_mixer_window ()
 
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 
+	act = ActionManager::get_action (X_("Common"), X_("toggle-meterbridge"));
+	if (!act) {
+		return;
+	}
+
+	Glib::RefPtr<ToggleAction> meter_tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 	if (tact->get_active()) {
-		//goto_mixer_window ();
+		meter_tact->set_active (false);
 		editor->get_container ("mixer_bridge_view_home").show ();
 	} else {
 		editor->get_container ("mixer_bridge_view_home").hide ();
-		//mixer->hide ();
 	}
 }
 
@@ -397,10 +402,19 @@ ARDOUR_UI::toggle_meterbridge ()
 
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 
+	Glib::RefPtr<Action> mixer_act = ActionManager::get_action (X_("Common"), X_("toggle-mixer"));
+	if (!mixer_act) {
+		return;
+	}
+
+	Glib::RefPtr<ToggleAction> mixer_tact = Glib::RefPtr<ToggleAction>::cast_dynamic (mixer_act);
 	if (tact->get_active()) {
-		meterbridge->show_window ();
+		mixer_tact->set_active(false);
+		editor->get_container ("edit_pane").hide ();
+		editor->get_container ("meter_bridge_view_home").show ();
 	} else {
-		meterbridge->hide_window (NULL);
+		editor->get_container ("meter_bridge_view_home").hide ();
+		editor->get_container ("edit_pane").show ();
 	}
 }
 

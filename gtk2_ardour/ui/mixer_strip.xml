@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<RouteUI>
+<RouteUI gainmeterscript="mixer_gain_meter.xml">
   <HBox>
     <EventBox bgnormal="#383838" bgactive="#545454">
       <VBox>

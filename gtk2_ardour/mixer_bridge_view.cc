@@ -52,6 +52,7 @@
 #include "gui_thread.h"
 #include "global_signals.h"
 #include "meter_patterns.h"
+#include "waves_grid.h"
 
 #include "i18n.h"
 
@@ -80,16 +81,21 @@ struct SignalOrderRouteSorter {
 	}
 };
 
-MixerBridgeView::MixerBridgeView ()
+MixerBridgeView::MixerBridgeView (const std::string& mixer_bridge_script_name, const std::string& mixer_strip_script_name)
 	: Gtk::EventBox()
-	, WavesUI ("mixer_bridge_view.xml", *this)
-	, _mixer_strips_home (get_box ("mixer_strips_home"))
+	, WavesUI (mixer_bridge_script_name, *this)
+	, _mixer_strips_home (get_container ("mixer_strips_home"))
 	, _following_editor_selection (false)
+	, _mixer_strip_script_name (mixer_strip_script_name)
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&MixerBridgeView::sync_order_keys, this), gui_context());
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&MixerBridgeView::remove_strip, this, _1), gui_context());
+
+	if (dynamic_cast <WavesGrid*> (&_mixer_strips_home)) {
+		_mixer_strips_home.get_parent()->signal_size_allocate().connect (sigc::mem_fun(*this, &MixerBridgeView::parent_on_size_allocate));
+	}
 }
 
 MixerBridgeView::~MixerBridgeView ()
@@ -178,7 +184,7 @@ MixerBridgeView::add_strips (RouteList& routes)
 			continue;
 		}
 
-		MixerStrip* strip = strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(), _session, route, "mixer_strip.xml");
+		MixerStrip* strip = strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(), _session, route, _mixer_strip_script_name);
 		strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &MixerBridgeView::strip_button_release_event), strip));
 		_strips [route] = strip;
 		strip->show();
@@ -195,9 +201,18 @@ MixerBridgeView::add_strips (RouteList& routes)
 			!boost::dynamic_pointer_cast<Track> (route)) {
 			continue;
 		}
+		Gtk::Box* the_box = dynamic_cast <Gtk::Box*> (&_mixer_strips_home);
+		WavesGrid* the_grid = dynamic_cast <WavesGrid*> (&_mixer_strips_home);
+
 		std::map <boost::shared_ptr<ARDOUR::Route>, MixerStrip*>::iterator i = _strips.find (route);
 		if (i != _strips.end ()) {
-			_mixer_strips_home.pack_start (*(*i).second, false, false);
+			if (the_box) {
+				the_box->pack_start (*(*i).second, false, false);
+			} else {
+				if (the_grid) {
+					the_grid->pack (*(*i).second);
+				}
+			}
 		}
 	}
 }
@@ -236,6 +251,8 @@ MixerBridgeView::sync_order_keys ()
 	RouteList copy(*routes);
 	copy.sort(sorter);
 
+		Gtk::Box* the_box = dynamic_cast <Gtk::Box*> (&_mixer_strips_home);
+		WavesGrid* the_grid = dynamic_cast <WavesGrid*> (&_mixer_strips_home);
 	for (RouteList::iterator x = copy.begin(); x != copy.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 		if (route->is_auditioner() || route->is_monitor() || route->is_master() ||
@@ -244,7 +261,13 @@ MixerBridgeView::sync_order_keys ()
 		}
 		std::map <boost::shared_ptr<ARDOUR::Route>, MixerStrip*>::iterator i = _strips.find (route);
 		if (i != _strips.end ()) {
-			_mixer_strips_home.pack_start (*(*i).second, false, false);
+			if (the_box) {
+				the_box->pack_start (*(*i).second, false, false);
+			} else {
+				if (the_grid) {
+					the_grid->pack (*(*i).second);
+				}
+			}
 		}
 	}
 }
@@ -289,10 +312,7 @@ MixerBridgeView::set_route_targets_for_operation ()
 
 	/* nothing selected ... try to get mixer strip at mouse */
 
-	int x, y;
-	get_pointer (x, y);
-	
-	MixerStrip* ms = strip_by_x (x);
+	MixerStrip* ms = strip_under_pointer ();
 	
 	if (ms) {
 		_route_targets.insert (ms);
@@ -397,18 +417,27 @@ MixerBridgeView::strip_by_route (boost::shared_ptr<Route> route)
 }
 
 MixerStrip*
-MixerBridgeView::strip_by_x (int x)
+MixerBridgeView::strip_under_pointer ()
 {
+	int x, y;
+	get_pointer (x, y);
+
 	for (std::map<boost::shared_ptr<ARDOUR::Route>, MixerStrip*>::iterator i = _strips.begin(); i != _strips.end(); ++i) {
-		int x1, x2, y;
+		int x1, x2, y1, y2;
 
-		(*i).second->translate_coordinates (*this, 0, 0, x1, y);
+		(*i).second->translate_coordinates (*this, 0, 0, x1, y1);
 		x2 = x1 + (*i).second->get_width();
+		y2 = y1 + (*i).second->get_height();
 
-		if (x >= x1 && x <= x2) {
+		if (x >= x1 && x < x2 && y >= y1 && y < y2) {
 			return (*i).second;
 		}
 	}
 
 	return 0;
+}
+
+void MixerBridgeView::parent_on_size_allocate (Gtk::Allocation& alloc)
+{
+	_mixer_strips_home.set_size_request (alloc.get_width (), -1);
 }

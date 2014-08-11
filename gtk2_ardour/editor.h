@@ -1908,6 +1908,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	MixerStrip *current_mixer_strip;
 	CompactMeterbridge _compact_meter_bridge;
 	MixerBridgeView _mixer_bridge_view;
+	MixerBridgeView _meter_bridge_view;
 	bool show_editor_mixer_when_tracks_arrive;
 	void cms_new (boost::shared_ptr<ARDOUR::Route>);
 	void current_mixer_strip_hidden ();
@@ -2103,6 +2104,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void follow_mixer_bridge_view_selection ();
 	bool _following_mixer_bridge_view_selection;
+
+	void follow_meter_bridge_selection ();
+	bool _following_meter_bridge_selection;
 
 	int time_fx (ARDOUR::RegionList&, float val, bool pitching);
         void note_edit_done (int, EditNoteDialog*);

@@ -41,7 +41,7 @@
 #include "ardour_window.h"
 #include "utils.h"
 
-#include "meterbridge.h"
+//#include "meterbridge.h"
 #include "meter_strip.h"
 #include "meter_patterns.h"
 

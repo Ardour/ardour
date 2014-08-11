@@ -47,7 +47,7 @@ class MixerBridgeView :
 	public MixerActor
 {
   public:
-	MixerBridgeView ();
+	MixerBridgeView (const std::string& mixer_bridge_script_name, const std::string& mixer_strip_script_name);
 	~MixerBridgeView();
 	void set_session (ARDOUR::Session *);
 	void track_editor_selection ();
@@ -57,9 +57,10 @@ class MixerBridgeView :
     void toggle_midi_input_active (bool flip_others);
 
   private:
-	Gtk::Box& _mixer_strips_home;
+	Gtk::Container& _mixer_strips_home;
 	bool _following_editor_selection;
-
+	std::string _mixer_strip_script_name;
+	
 	gint start_updating ();
 	gint stop_updating ();
 
@@ -73,8 +74,10 @@ class MixerBridgeView :
 	void sync_order_keys ();
 	void follow_editor_selection ();
 	bool strip_button_release_event (GdkEventButton*, MixerStrip*);
+	void parent_on_size_allocate (Gtk::Allocation&);
+
 	MixerStrip* strip_by_route (boost::shared_ptr<ARDOUR::Route> route);
-	MixerStrip* strip_by_x (int x);
+	MixerStrip* strip_under_pointer ();
 
 	std::map <boost::shared_ptr<ARDOUR::Route>, MixerStrip*> _strips;
 	mutable Glib::Threads::Mutex _resync_mutex;

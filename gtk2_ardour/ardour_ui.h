@@ -74,7 +74,7 @@
 #include "editing.h"
 #include "session_lock_dialog.h"
 #include "tracks_control_panel.h"
-#include "meterbridge.h"
+//#include "meterbridge.h"
 #include "ui_config.h"
 #include "enums.h"
 #include "visibility_group.h"
@@ -622,7 +622,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	PublicEditor     *editor;
 	int         create_editor ();
 
-	Meterbridge  *meterbridge;
+	//Meterbridge  *meterbridge;
 	int         create_meterbridge ();
         /* Dialogs that can be created via new<T> */
 

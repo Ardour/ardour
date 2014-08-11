@@ -306,6 +306,8 @@ Editor::Editor ()
 	, _region_selection_change_updates_region_list (true)
 	, _following_mixer_selection (false)
 	, _following_mixer_bridge_view_selection (false)
+	, _mixer_bridge_view ("mixer_bridge_view.xml", "mixer_strip.xml")
+	, _meter_bridge_view ("meter_bridge_view.xml", "meter_strip.xml")
 	, _control_point_toggled_on_press (false)
 	, _stepping_axis_view (0)
 	, current_mixer_strip (0)
@@ -319,6 +321,7 @@ Editor::Editor ()
 	PublicEditor::_instance = this;
 	get_container ("compact_meter_bridge_home").add (_compact_meter_bridge);
 	get_container ("mixer_bridge_view_home").add (_mixer_bridge_view);
+	get_container ("meter_bridge_view_home").add (_meter_bridge_view);
 
 	_have_idled = false;
 
@@ -1290,6 +1293,7 @@ Editor::set_session (Session *t)
 	_locations->set_session (_session);
 	_compact_meter_bridge.set_session (_session);
 	_mixer_bridge_view.set_session (_session);
+	_meter_bridge_view.set_session (_session);
 
 	if (rhythm_ferret) {
 		rhythm_ferret->set_session (_session);

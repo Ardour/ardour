@@ -96,7 +96,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, const std::string& layout_s
 	, _mixer(mx)
 	, _mixer_owned (xml_property(*xml_tree()->root(), "selfdestruct", true))
 	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, xml_property(*xml_tree()->root(), "selfdestruct", true))
-	, gpm (sess, "inspector_gain_meter.xml")
+	, gpm (sess, xml_property(*xml_tree()->root(), "gainmeterscript", "default_gain_meter.xml"))
 	, panners (sess)
 	, _visibility (X_("mixer-strip-visibility"))
 
@@ -131,7 +131,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, _mixer(mx)
 	, _mixer_owned (xml_property(*xml_tree()->root(), "selfdestruct", true))
 	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, xml_property(*xml_tree()->root(), "selfdestruct", true))
-	, gpm (sess, "mixer_gain_meter.xml")
+	, gpm (sess, xml_property(*xml_tree()->root(), "gainmeterscript", "default_gain_meter.xml"))
 	, panners (sess)
 	, _visibility (X_("mixer-strip-visibility"))
 	, gain_meter_home (get_box ("gain_meter_home"))

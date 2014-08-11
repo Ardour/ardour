@@ -522,7 +522,7 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 void
 ARDOUR_UI::save_ardour_state ()
 {
-	if (!keyboard || !mixer || !editor || !meterbridge) {
+	if (!keyboard || !mixer || !editor /*|| !meterbridge*/) {
 		return;
 	}
 
@@ -575,12 +575,12 @@ ARDOUR_UI::save_ardour_state ()
 
 	XMLNode& enode (static_cast<Stateful*>(editor)->get_state());
 	XMLNode& mnode (mixer->get_state());
-	XMLNode& bnode (meterbridge->get_state());
+	//XMLNode& bnode (meterbridge->get_state());
 
 	if (_session) {
 		_session->add_instant_xml (enode);
 		_session->add_instant_xml (mnode);
-		_session->add_instant_xml (bnode);
+		//_session->add_instant_xml (bnode);
 		if (location_ui) {
 			_session->add_instant_xml (location_ui->ui().get_state ());
 		}

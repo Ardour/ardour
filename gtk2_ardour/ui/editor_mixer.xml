@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<RouteUI bgnormal="#383838" selfdestruct="false">
+<RouteUI bgnormal="#383838"
+         selfdestruct="false"
+         gainmeterscript="inspector_gain_meter.xml">
   <VBox>
     <VBox>
       <HBox>

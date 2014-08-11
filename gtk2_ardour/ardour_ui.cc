@@ -211,7 +211,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _dsp_load_adjustment (0)
 	, editor (0)
 	, mixer (0)
-	, meterbridge (0)
+	//, meterbridge (0)
 	, splash (0)
 {
 	Gtkmm2ext::init(localedir);

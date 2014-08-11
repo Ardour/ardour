@@ -309,7 +309,9 @@ Editor::track_mixer_selection ()
 {
 	Mixer_UI::instance()->selection().RoutesChanged.connect (sigc::mem_fun (*this, &Editor::follow_mixer_selection));
 	_mixer_bridge_view.selection().RoutesChanged.connect (sigc::mem_fun (*this, &Editor::follow_mixer_bridge_view_selection));
+	_meter_bridge_view.selection().RoutesChanged.connect (sigc::mem_fun (*this, &Editor::follow_meter_bridge_selection));
 	_mixer_bridge_view.track_editor_selection ();
+	_meter_bridge_view.track_editor_selection ();
 }
 
 void
@@ -338,6 +340,31 @@ Editor::follow_mixer_selection ()
 	selection->TracksChanged (); /* EMIT SIGNAL */
 }
 
+void
+Editor::follow_meter_bridge_selection ()
+{
+	if (/*!ARDOUR::Config->get_link_editor_and_mixer_selection() ||*/ _following_meter_bridge_selection) {
+		return;
+	}
+
+	_following_meter_bridge_selection = true;
+	selection->block_tracks_changed (true);
+
+	RouteUISelection& s (_meter_bridge_view.selection().routes);
+
+	selection->clear_tracks ();
+
+	for (RouteUISelection::iterator i = s.begin(); i != s.end(); ++i) {
+		TimeAxisView* tav = get_route_view_by_route_id ((*i)->route()->id());
+		if (tav) {
+			selection->add (tav);
+		}
+	}
+
+	_following_meter_bridge_selection = false;
+	selection->block_tracks_changed (false);
+	selection->TracksChanged (); /* EMIT SIGNAL */
+}
 
 void
 Editor::follow_mixer_bridge_view_selection ()
