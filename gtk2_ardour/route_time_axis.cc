@@ -105,7 +105,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, playlist_action_menu (0)
 	, mode_menu (0)
 	, color_mode_menu (0)
-	, gm (sess, true, 125, 18)
+	, gm (sess, true, 75, 20)
 	, _ignore_set_layer_display (false)
 {
 	number_label.set_name("tracknumber label");
@@ -178,7 +178,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 			break;
 		}
 
-		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+		controls_table.attach (*rec_enable_button, 0, 1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
                 if (is_midi_track()) {
                         ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
@@ -200,7 +200,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	Gtk::VBox *mtrbox = manage(new Gtk::VBox());
 	mtrbox->pack_start(gm.get_level_meter(), false, false, 2);
-	controls_hbox.pack_start(*mtrbox, false, false, 4);
+	controls_hbox.pack_end(*mtrbox, false, false, 4);
 	mtrbox->show();
 
 	_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
@@ -208,17 +208,17 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 	_route->track_number_changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::label_view, this), gui_context());
 
-	controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	controls_table.attach (*mute_button, 1, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
         if (!_route->is_master()) {
-                controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+                controls_table.attach (*solo_button, 2, 3, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
         }
 
 	if (!ARDOUR::Profile->get_trx()) {
-		controls_table.attach (route_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-		controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::AttachOptions (0), 3, 0);
+		controls_table.attach (route_group_button, 2, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+		name_table.attach (gm.get_gain_slider(), 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 2);
 	}
-
+	
 	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
 	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));
 	ARDOUR_UI::instance()->set_tip(route_group_button, _("Route Group"));
@@ -233,11 +233,11 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	label_view ();
 
 	if (!ARDOUR::Profile->get_trx()) {
-		controls_table.attach (automation_button, 6, 7, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (automation_button, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	}
 
 	if (!ARDOUR::Profile->get_trx() && is_track() && track()->mode() == ARDOUR::Normal) {
-		controls_table.attach (playlist_button, 5, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (playlist_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	}
 
 	_y_position = -1;
@@ -368,18 +368,13 @@ RouteTimeAxisView::update_track_number_visibility ()
 	if (number_label.get_parent()) {
 		controls_table.remove (number_label);
 	}
-	if (name_hbox.get_parent()) {
-		controls_table.remove (name_hbox);
-	}
 	if (show_label) {
-		controls_table.attach (number_label, 0, 1, 0, 1,  Gtk::SHRINK, Gtk::FILL|Gtk::EXPAND, 3, 0);
-		controls_table.attach (name_hbox, 1, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
+		controls_table.resize ( 2, 4 );
+		controls_table.attach (number_label, 3, 4, 0, 1,  Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 		number_label.set_size_request(3 + _session->track_number_decimals() * 8, -1);
-		name_hbox.show ();
 		number_label.show ();
 	} else {
-		controls_table.attach (name_hbox, 0, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
-		name_hbox.show ();
+		controls_table.resize ( 2, 3 );
 		number_label.hide ();
 	}
 }

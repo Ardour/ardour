@@ -72,7 +72,8 @@ PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
-	, controls_table (2, 8)
+	, controls_table (2, 3)
+	, name_table (2, 1)
 	, _name_editing (false)
 	, height (0)
 	, display_menu (0)
@@ -114,27 +115,31 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 
 	name_label.set_name ("TrackLabel");
 	name_label.set_alignment (0.0, 0.5);
+	name_label.set_width_chars (12);
 	ARDOUR_UI::instance()->set_tip (name_label, _("Track/Bus name (double click to edit)"));
 
 	Gtk::Entry* an_entry = new Gtk::Entry;
 	Gtk::Requisition req;
 	an_entry->size_request (req);
 	name_label.set_size_request (-1, req.height);
+	name_label.set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 	delete an_entry;
 
 	name_hbox.pack_start (name_label, true, true);
 	name_hbox.show ();
 	name_label.show ();
-	
-	controls_table.set_size_request (200);
+
 	controls_table.set_row_spacings (2);
 	controls_table.set_col_spacings (2);
 	controls_table.set_border_width (2);
 	controls_table.set_homogeneous (true);
 
-	controls_table.attach (name_hbox, 0, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
+
+	name_table.attach (name_hbox, 0, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
+	name_table.show_all ();
+	name_table.set_no_show_all ();
 
 	HSeparator* separator = manage (new HSeparator());
 	separator->set_name("TrackSeparator");
@@ -144,7 +149,13 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_vbox.pack_start (controls_table, false, false);
 	controls_vbox.show ();
 
-	controls_hbox.pack_start (controls_vbox, true, true);
+	name_vbox.pack_start (name_table, false, false);
+	name_vbox.show ();
+
+	controls_hbox.pack_start (controls_vbox, false, false);
+	controls_hbox.show ();
+
+	controls_hbox.pack_start (name_vbox, true, true);
 	controls_hbox.show ();
 
 	//controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
@@ -590,6 +601,8 @@ TimeAxisView::begin_name_edit ()
 
 		name_entry = manage (new Gtkmm2ext::FocusEntry);
 		
+		name_entry->set_width_chars(15);
+
 		name_entry->set_name ("EditorTrackNameDisplay");
 		name_entry->signal_key_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_press), false);
 		name_entry->signal_key_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_release), false);
@@ -601,7 +614,7 @@ TimeAxisView::begin_name_edit ()
 			name_hbox.remove (name_label);
 		}
 		
-		name_hbox.pack_start (*name_entry);
+		name_hbox.pack_start (*name_entry, false, false);
 		name_entry->show ();
 
 		name_entry->select_region (0, -1);

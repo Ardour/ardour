@@ -203,8 +203,10 @@ class TimeAxisView : public virtual AxisView
 	/* The Standard LHS Controls */
 	Gtk::HBox              controls_hbox;
 	Gtk::Table             controls_table;
+	Gtk::Table             name_table;
 	Gtk::EventBox          controls_ebox;
 	Gtk::VBox              controls_vbox;
+	Gtk::VBox              name_vbox;
 	Gtk::VBox              time_axis_vbox;
 	Gtk::HBox              name_hbox;
 	Gtk::Label             name_label;
