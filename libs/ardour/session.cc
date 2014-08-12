@@ -2947,7 +2947,7 @@ Session::remove_route (boost::shared_ptr<Route> route)
 			_monitor_out.reset ();
 		}
         
-        if (route = _master_track) {
+        if (route == _master_track) {
             _master_track.reset ();
         }
 
