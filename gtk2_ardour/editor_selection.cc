@@ -640,8 +640,14 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 				selection->set (all_equivalent_regions);
 				commit = true;
 			} else {
-				/* no commit necessary: clicked on an already selected region */
-				goto out;
+				/* clicked on an already selected region */
+				if (press)
+					goto out;
+				else {
+					get_equivalent_regions(clicked_regionview, all_equivalent_regions, ARDOUR::Properties::select.property_id);
+					selection->set(all_equivalent_regions);
+					commit = true;
+				}
 			}
 			break;
 
