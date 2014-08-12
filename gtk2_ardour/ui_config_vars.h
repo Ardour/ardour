@@ -25,4 +25,6 @@ UI_CONFIG_VARIABLE(bool, all_floating_windows_are_dialogs, "all-floating-windows
 UI_CONFIG_VARIABLE (bool, color_regions_using_track_color, "color-regions-using-track-color", false)
 UI_CONFIG_VARIABLE (bool, show_waveform_clipping, "show-waveform-clipping", true)
 UI_CONFIG_VARIABLE (int, auto_lock_timer, "auto-lock-timer", 0)
+UI_CONFIG_VARIABLE (int, auto_save_timer, "auto-save-timer", 0)
+UI_CONFIG_VARIABLE (int, pre_record_buffer, "pre-record-buffer", 0)
 

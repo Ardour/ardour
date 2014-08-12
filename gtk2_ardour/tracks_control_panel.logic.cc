@@ -153,6 +153,8 @@ TracksControlPanel::init ()
     populate_bit_depth_combo();
     populate_frame_rate_combo();
     populate_auto_lock_timer_combo();
+    populate_save_lock_timer_combo();
+    populate_pre_record_buffer_combo();
     
 	_audio_settings_tab_button.set_active(true);
 }
@@ -583,6 +585,49 @@ TracksControlPanel::populate_auto_lock_timer_combo()
     set_popdown_strings (_auto_lock_timer_combo, lock_time_strings);
     _auto_lock_timer_combo.set_sensitive (lock_time_strings.size() > 1);
     _auto_lock_timer_combo.set_active_text( str_time );
+}
+
+void
+TracksControlPanel::populate_save_lock_timer_combo()
+{
+    using namespace std;
+    
+    vector<string> save_time_strings;
+    save_time_strings.push_back("0 Min");
+    save_time_strings.push_back("1 Min");
+    save_time_strings.push_back("3 Min");
+    save_time_strings.push_back("5 Min");
+    save_time_strings.push_back("10 Min");
+    save_time_strings.push_back("15 Min");
+    
+    int time = ARDOUR_UI::config()->get_auto_save_timer();
+    stringstream ss;
+    ss << time;
+    string str_time = ss.str() + " Min";
+    
+    set_popdown_strings (_auto_save_timer_combo, save_time_strings);
+    _auto_save_timer_combo.set_sensitive (save_time_strings.size() > 1);
+    _auto_save_timer_combo.set_active_text( str_time );
+}
+
+void
+TracksControlPanel::populate_pre_record_buffer_combo()
+{
+    using namespace std;
+    
+    vector<string> pre_record_buffer_strings;
+    pre_record_buffer_strings.push_back("0 Min");
+    pre_record_buffer_strings.push_back("1 Min");
+    pre_record_buffer_strings.push_back("2 Min");
+    
+    int time = ARDOUR_UI::config()->get_pre_record_buffer();
+    stringstream ss;
+    ss << time;
+    string str_time = ss.str() + " Min";
+    
+    set_popdown_strings (_pre_record_buffer_combo, pre_record_buffer_strings);
+    _pre_record_buffer_combo.set_sensitive (pre_record_buffer_strings.size() > 1);
+    _pre_record_buffer_combo.set_active_text( str_time );
 }
 
 void
@@ -1270,15 +1315,28 @@ TracksControlPanel::save_default_session_path()
 void
 TracksControlPanel::save_auto_lock_time()
 {
-    using namespace std;
-    
     string s = _auto_lock_timer_combo.get_active_text();
-    
     char * pEnd;
     int time = strtol( s.c_str(), &pEnd, 10 );
-    
     ARDOUR_UI::config()->set_auto_lock_timer(time);
-    ARDOUR_UI::config()->save_state();
+}
+
+void
+TracksControlPanel::save_auto_save_time()
+{
+    string s = _auto_save_timer_combo.get_active_text();
+    char * pEnd;
+    int time = strtol( s.c_str(), &pEnd, 10 );
+    ARDOUR_UI::config()->set_auto_save_timer(time);
+}
+
+void
+TracksControlPanel::save_pre_record_buffer()
+{
+    string s = _pre_record_buffer_combo.get_active_text();
+    char * pEnd;
+    int time = strtol( s.c_str(), &pEnd, 10 );
+    ARDOUR_UI::config()->set_pre_record_buffer(time);
 }
 
 void TracksControlPanel::update_session_config ()
@@ -1307,6 +1365,10 @@ TracksControlPanel::update_configs()
     // update global config
     save_default_session_path();
     save_auto_lock_time();
+    save_auto_save_time();
+    save_pre_record_buffer();
+    // save ARDOUR_UI::config to disk persistently
+    ARDOUR_UI::config()->save_state();
 }
 
 void
@@ -1324,7 +1386,33 @@ void
 TracksControlPanel::on_cancel (WavesButton*)
 {
 	hide();
-	response(Gtk::RESPONSE_CANCEL);    
+	response(Gtk::RESPONSE_CANCEL);
+    
+    // restore previous value in combo-boxes
+    stringstream ss;
+    int temp;
+    string str;
+    temp = ARDOUR_UI::config()->get_auto_lock_timer();
+    ss.str(string(""));
+    ss.clear();
+    ss << temp;
+    str = ss.str() + " Min";
+    _auto_lock_timer_combo.set_active_text(str);
+    
+    temp = ARDOUR_UI::config()->get_auto_save_timer();
+    ss.str(string(""));
+    ss.clear();
+    ss << temp;
+    str = ss.str() + " Min";
+    _auto_save_timer_combo.set_active_text(str);
+    
+    temp = ARDOUR_UI::config()->get_pre_record_buffer();
+    ss.str(string(""));
+    ss.clear();
+    ss << temp;
+    str = ss.str() + " Min";
+    _pre_record_buffer_combo.set_active_text(str);
+    
     _default_open_path.set_text(Config->get_default_session_parent_dir());
 }
 

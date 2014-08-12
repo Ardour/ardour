@@ -94,6 +94,8 @@ TracksControlPanel::TracksControlPanel ()
     , _frame_rate_combo (get_combo_box_text ("frame_rate_combo"))
     , _browse_button(get_waves_button("browse_default_folder"))
     , _auto_lock_timer_combo(get_combo_box_text("auto_lock_timer_combo"))
+    , _auto_save_timer_combo(get_combo_box_text("auto_save_timer_combo"))
+    , _pre_record_buffer_combo(get_combo_box_text("pre_record_buffer_combo"))
     , _have_control (false)
 	, _ignore_changes (0)
 {

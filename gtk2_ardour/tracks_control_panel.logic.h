@@ -56,6 +56,8 @@
     void on_browse_button (WavesButton*);
     void save_default_session_path();
     void save_auto_lock_time();
+    void save_auto_save_time();
+    void save_pre_record_buffer();
 	void on_ok(WavesButton*);
 	void on_cancel(WavesButton*);
 	void on_apply(WavesButton*);
@@ -101,6 +103,8 @@
     void populate_bit_depth_combo();
     void populate_frame_rate_combo();
     void populate_auto_lock_timer_combo();
+    void populate_save_lock_timer_combo();
+    void populate_pre_record_buffer_combo();
 
     // Engine State update callback handlers
     void on_port_registration_update();
