@@ -562,7 +562,7 @@ ARDOUR_UI::post_engine ()
 }
 
 void
-ARDOUR_UI::update_ouput_operation_mode_buttons()
+ARDOUR_UI::update_output_operation_mode_buttons()
 {
     // muti out
     WavesButton& multi_out_button = editor->get_waves_button ("mode_multi_out_button");
