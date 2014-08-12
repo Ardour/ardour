@@ -352,7 +352,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	int  setup_windows ();
 	void setup_transport ();
-	void setup_transport_trx ();
 	void setup_clock ();
     
     bool delete_session_files(std::string session_path);
@@ -403,12 +402,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	/* Transport Control */
 
-	void detach_tearoff (Gtk::Box* parent, Gtk::Widget* contents);
-	void reattach_tearoff (Gtk::Box* parent, Gtk::Widget* contents, int32_t order);
-
-	Gtkmm2ext::TearOff*      transport_tearoff;
 	Gtk::Frame               transport_frame;
-	Gtk::HBox                transport_tearoff_hbox;
 	Gtk::HBox               _editor_transport_box;
 	Gtk::HBox                transport_hbox;
 	Gtk::Fixed               transport_base;

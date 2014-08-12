@@ -581,6 +581,12 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		widget.set_tooltip_text (property);
 	}
 
+	Gtk::EventBox* event_box = dynamic_cast<Gtk::EventBox*> (&widget);
+	if (event_box) {
+		bool visible_window = xml_property (definition, "visiblewindow", styles, true);
+		event_box->set_visible_window (visible_window);
+	}
+
 	Gtk::Label* label = dynamic_cast<Gtk::Label*> (&widget);
 	if (label) {
 		property = xml_property (definition, "justify", styles, "left");

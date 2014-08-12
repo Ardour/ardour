@@ -26,8 +26,8 @@
                         normalicon="tracks"
                         activeicon="tracks_active"
                         prelighticon="tracks_prelight"/>
-            <icon source="display_clock_mockup.png"
-                  tooltip="--------------------&#xA;This is a mockup&#xA;--------------------" />
+            <HBox id="time_info_box_home" width="300"/>
+            <HBox id="primary_clock_home"/>
             <Layout box.pack="end" width="114">
               <Adjustment id="dsp_load_adjustment"
                           minvalue="1"

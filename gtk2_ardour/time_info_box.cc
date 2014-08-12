@@ -30,8 +30,8 @@
 #include "ardour/profile.h"
 #include "ardour/session.h"
 
-#include "time_info_box.h"
 #include "audio_clock.h"
+#include "time_info_box.h"
 #include "editor.h"
 #include "control_point.h"
 #include "automation_line.h"
@@ -44,107 +44,82 @@ using std::min;
 using std::max;
 
 TimeInfoBox::TimeInfoBox ()
-	: left (2, 4)
-	, right (2, 4)
+	: Gtk::VBox ()
+	, WavesUI ("time_info_box.xml", *this)
 	, syncing_selection (false)
 	, syncing_punch (false)
+	, selection_start ("selection-start", false, "selection", false, false, false, false)
+	, selection_end ("selection-end", false, "selection", false, false, false, false)
+	, selection_length ("selection-length", false, "selection", false, false, true, false)
+	, punch_start ("punch-start", false, "punch", false, false, false, false)
+	, punch_end ("punch-end", false, "punch", false, false, false, false)
 {
-	set_name (X_("TimeInfoBox"));
+	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
+	get_box ("selection_start_home").pack_start (selection_start, false, false);
+	get_box ("selection_end_home").pack_start (selection_end, false, false);
+	get_box ("selection_length_home").pack_start (selection_length, false, false);
+	get_box ("punch_start_home").pack_start (punch_start, false, false);
+	get_box ("punch_end_home").pack_start (punch_end, false, false);
 
-	selection_start = new AudioClock ("selection-start", false, "selection", false, false, false, false);
-	selection_end = new AudioClock ("selection-end", false, "selection", false, false, false, false);
-	selection_length = new AudioClock ("selection-length", false, "selection", false, false, true, false);
+	selection_start.set_draw_background (false);
+	selection_start.set_visible_window (false);
+	selection_end.set_draw_background (false);
+	selection_end.set_visible_window (false);
+	selection_length.set_draw_background (false);
+	selection_length.set_visible_window (false);
+	punch_start.set_draw_background (false);
+	punch_end.set_draw_background (false);
 
-	punch_start = new AudioClock ("punch-start", false, "punch", false, false, false, false);
-	punch_end = new AudioClock ("punch-end", false, "punch", false, false, false, false);
+	//left.set_homogeneous (false);
+	//left.set_spacings (0);
+	//left.set_border_width (2);
+	//left.set_col_spacings (2);
 
-	selection_start->set_draw_background (false);
-	selection_end->set_draw_background (false);
-	selection_length->set_draw_background (false);
-	punch_start->set_draw_background (false);
-	punch_end->set_draw_background (false);
+	//right.set_homogeneous (false);
+	//right.set_spacings (0);
+	//right.set_border_width (2);
+	//right.set_col_spacings (2);
 
-	selection_title.set_text (_("Selection"));
-	punch_title.set_text (_("Punch"));
+    //left.attach (*selection_start, 1, 2, 1, 2);
 
-	set_homogeneous (false);
-	set_spacing (0);
-	set_border_width (2);
+    //left.attach (*l, 0, 1, 2, 3, FILL);
+    //left.attach (*selection_end, 1, 2, 2, 3);
 
-	pack_start (left, true, true);
-	if (!ARDOUR::Profile->get_trx()) {
-		pack_start (right, true, true);
-	}
+    //left.attach (*l, 0, 1, 3, 4, FILL);
+    //left.attach (*selection_length, 1, 2, 3, 4);
 
-	left.set_homogeneous (false);
-	left.set_spacings (0);
-	left.set_border_width (2);
-	left.set_col_spacings (2);
+	//punch_in_button.set_name ("punch button");
+	//punch_out_button.set_name ("punch button");
+	//punch_in_button.set_text (_("In"));
+	//punch_out_button.set_text (_("Out"));
 
-	right.set_homogeneous (false);
-	right.set_spacings (0);
-	right.set_border_width (2);
-	right.set_col_spacings (2);
+	//Glib::RefPtr<Action> act = ActionManager::get_action ("Transport", "TogglePunchIn");
+	//punch_in_button.set_related_action (act);
+	//act = ActionManager::get_action ("Transport", "TogglePunchOut");
+	//punch_out_button.set_related_action (act);
 
-	Gtk::Label* l;
+	//Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
+	//Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 
-	selection_title.set_name ("TimeInfoSelectionTitle");
-	left.attach (selection_title, 1, 2, 0, 1);
-	l = manage (new Label);
-	l->set_text (_("Start"));
-	l->set_alignment (1.0, 0.5);
-	l->set_name (X_("TimeInfoSelectionLabel"));
-        left.attach (*l, 0, 1, 1, 2, FILL);
-        left.attach (*selection_start, 1, 2, 1, 2);
-
-	l = manage (new Label);
-	l->set_text (_("End"));
-	l->set_alignment (1.0, 0.5);
-	l->set_name (X_("TimeInfoSelectionLabel"));
-        left.attach (*l, 0, 1, 2, 3, FILL);
-        left.attach (*selection_end, 1, 2, 2, 3);
-
-	l = manage (new Label);
-	l->set_text (_("Length"));
-	l->set_alignment (1.0, 0.5);
-	l->set_name (X_("TimeInfoSelectionLabel"));
-        left.attach (*l, 0, 1, 3, 4, FILL);
-        left.attach (*selection_length, 1, 2, 3, 4);
-
-	punch_in_button.set_name ("punch button");
-	punch_out_button.set_name ("punch button");
-	punch_in_button.set_text (_("In"));
-	punch_out_button.set_text (_("Out"));
-
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Transport", "TogglePunchIn");
-	punch_in_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport", "TogglePunchOut");
-	punch_out_button.set_related_action (act);
-
-	Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
-	Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
-
-	punch_title.set_name ("TimeInfoSelectionTitle");
-	right.attach (punch_title, 3, 4, 0, 1);
-        right.attach (punch_in_button, 2, 3, 1, 2, FILL, SHRINK);
-        right.attach (*punch_start, 3, 4, 1, 2);
-        right.attach (punch_out_button, 2, 3, 2, 3, FILL, SHRINK);
-        right.attach (*punch_end, 3, 4, 2, 3);
+        //right.attach (punch_in_button, 2, 3, 1, 2, FILL, SHRINK);
+        //right.attach (*punch_start, 3, 4, 1, 2);
+        //right.attach (punch_out_button, 2, 3, 2, 3, FILL, SHRINK);
+        //right.attach (*punch_end, 3, 4, 2, 3);
 
         show_all ();
 
-	selection_start->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), selection_start));
-	selection_end->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), selection_end));
-	selection_length->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), selection_length));
+	selection_start.mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), &selection_start));
+	selection_end.mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), &selection_end));
+	selection_length.mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), &selection_length));
 
-	punch_start->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_punch_mode), punch_start));
-	punch_end->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_punch_mode), punch_end));
+	punch_start.mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_punch_mode), &punch_start));
+	punch_end.mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_punch_mode), &punch_end));
 
-	selection_start->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), selection_start), true);
-	selection_end->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), selection_end), true);
+	selection_start.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), &selection_start), true);
+	selection_end.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), &selection_end), true);
 
-	punch_start->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), punch_start), true);
-	punch_end->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), punch_end), true);
+	punch_start.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), &punch_start), true);
+	punch_end.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), &punch_end), true);
 
 	Editor::instance().get_selection().TimeChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 	Editor::instance().get_selection().RegionsChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
@@ -154,12 +129,6 @@ TimeInfoBox::TimeInfoBox ()
 
 TimeInfoBox::~TimeInfoBox ()
 {
-        delete selection_length;
-        delete selection_end;
-        delete selection_start;
-        
-        delete punch_start;
-        delete punch_end;
 }
 
 void
@@ -190,9 +159,9 @@ TimeInfoBox::sync_selection_mode (AudioClock* src)
 {
 	if (!syncing_selection) {
 		syncing_selection = true;
-		selection_start->set_mode (src->mode());
-		selection_end->set_mode (src->mode());
-		selection_length->set_mode (src->mode());
+		selection_start.set_mode (src->mode());
+		selection_end.set_mode (src->mode());
+		selection_length.set_mode (src->mode());
 		syncing_selection = false;
 	}
 }
@@ -202,8 +171,8 @@ TimeInfoBox::sync_punch_mode (AudioClock* src)
 {
 	if (!syncing_punch) {
 		syncing_punch = true;
-		punch_start->set_mode (src->mode());
-		punch_end->set_mode (src->mode());
+		punch_start.set_mode (src->mode());
+		punch_end.set_mode (src->mode());
 		syncing_punch = false;
 	}
 }
@@ -214,12 +183,12 @@ TimeInfoBox::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
-	selection_start->set_session (s);
-	selection_end->set_session (s);
-	selection_length->set_session (s);
+	selection_start.set_session (s);
+	selection_end.set_session (s);
+	selection_length.set_session (s);
 
-	punch_start->set_session (s);
-	punch_end->set_session (s);
+	punch_start.set_session (s);
+	punch_end.set_session (s);
 
 	if (s) {
 		Location* punch = s->locations()->auto_punch_location ();
@@ -247,9 +216,9 @@ TimeInfoBox::selection_changed ()
 		if (Editor::instance().internal_editing()) {
 			/* displaying MIDI note selection is tricky */
 			
-			selection_start->set_off (true);
-			selection_end->set_off (true);
-			selection_length->set_off (true);
+			selection_start.set_off (true);
+			selection_end.set_off (true);
+			selection_length.set_off (true);
 
 		} else {
 			if (selection.regions.empty()) {
@@ -259,16 +228,16 @@ TimeInfoBox::selection_changed ()
 
 					if (tact && tact->get_active() && !selection.time.empty()) {
 						/* show selected range */
-						selection_start->set_off (false);
-						selection_end->set_off (false);
-						selection_length->set_off (false);
-						selection_start->set (selection.time.start());
-						selection_end->set (selection.time.end_frame());
-						selection_length->set (selection.time.length());
+						selection_start.set_off (false);
+						selection_end.set_off (false);
+						selection_length.set_off (false);
+						selection_start.set (selection.time.start());
+						selection_end.set (selection.time.end_frame());
+						selection_length.set (selection.time.length());
 					} else {
-						selection_start->set_off (true);
-						selection_end->set_off (true);
-						selection_length->set_off (true);
+						selection_start.set_off (true);
+						selection_end.set_off (true);
+						selection_length.set_off (true);
 					}
 				} else {
 					s = max_framepos;
@@ -278,22 +247,22 @@ TimeInfoBox::selection_changed ()
 						s = min (s, p);
 						e = max (e, p);
 					}
-					selection_start->set_off (false);
-					selection_end->set_off (false);
-					selection_length->set_off (false);
-					selection_start->set (s);
-					selection_end->set (e);
-					selection_length->set (e - s + 1);
+					selection_start.set_off (false);
+					selection_end.set_off (false);
+					selection_length.set_off (false);
+					selection_start.set (s);
+					selection_end.set (e);
+					selection_length.set (e - s + 1);
 				}
 			} else {
 				s = selection.regions.start();
 				e = selection.regions.end_frame();
-				selection_start->set_off (false);
-				selection_end->set_off (false);
-				selection_length->set_off (false);
-				selection_start->set (s);
-				selection_end->set (e);
-				selection_length->set (e - s + 1);
+				selection_start.set_off (false);
+				selection_end.set_off (false);
+				selection_length.set_off (false);
+				selection_start.set (s);
+				selection_end.set (e);
+				selection_length.set (e - s + 1);
 			}
 		}
 		break;
@@ -307,31 +276,31 @@ TimeInfoBox::selection_changed ()
 				/* show selected regions */
 				s = selection.regions.start();
 				e = selection.regions.end_frame();
-				selection_start->set_off (false);
-				selection_end->set_off (false);
-				selection_length->set_off (false);
-				selection_start->set (s);
-				selection_end->set (e);
-				selection_length->set (e - s + 1);
+				selection_start.set_off (false);
+				selection_end.set_off (false);
+				selection_length.set_off (false);
+				selection_start.set (s);
+				selection_end.set (e);
+				selection_length.set (e - s + 1);
 			} else {
-				selection_start->set_off (true);
-				selection_end->set_off (true);
-				selection_length->set_off (true);
+				selection_start.set_off (true);
+				selection_end.set_off (true);
+				selection_length.set_off (true);
 			}
 		} else {
-			selection_start->set_off (false);
-			selection_end->set_off (false);
-			selection_length->set_off (false);
-			selection_start->set (selection.time.start());
-			selection_end->set (selection.time.end_frame());
-			selection_length->set (selection.time.length());
+			selection_start.set_off (false);
+			selection_end.set_off (false);
+			selection_length.set_off (false);
+			selection_start.set (selection.time.start());
+			selection_end.set (selection.time.end_frame());
+			selection_length.set (selection.time.length());
 		}
 		break;
 
 	default:
-		selection_start->set_off (true);
-		selection_end->set_off (true);
-		selection_length->set_off (true);	
+		selection_start.set_off (true);
+		selection_end.set_off (true);
+		selection_length.set_off (true);	
 		break;
 	}
 }
@@ -359,15 +328,15 @@ void
 TimeInfoBox::punch_changed (Location* loc)
 {
 	if (!loc) {
-		punch_start->set_off (true);
-		punch_end->set_off (true);
+		punch_start.set_off (true);
+		punch_end.set_off (true);
 		return;
 	}
 
-	punch_start->set_off (false);
-	punch_end->set_off (false);
+	punch_start.set_off (false);
+	punch_end.set_off (false);
 
-	punch_start->set (loc->start());
-	punch_end->set (loc->end());
+	punch_start.set (loc->start());
+	punch_end.set (loc->end());
 }	
 

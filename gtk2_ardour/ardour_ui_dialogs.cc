@@ -192,21 +192,11 @@ ARDOUR_UI::set_session (Session *s)
     _session->config.set_native_file_data_format  (this->_sample_format);
     _session->config.set_timecode_format(this->_timecode_format);
 
-	if (meter_box.get_parent()) {
-		transport_tearoff_hbox.remove (meter_box);
-		transport_tearoff_hbox.remove (editor_meter_peak_display);
-	}
-
 	if (editor_meter) {
 		meter_box.remove(*editor_meter);
 		delete editor_meter;
 		editor_meter = 0;
 		editor_meter_peak_display.hide();
-	}
-
-	if (meter_box.get_parent()) {
-		transport_tearoff_hbox.remove (meter_box);
-		transport_tearoff_hbox.remove (editor_meter_peak_display);
 	}
 
 	if (_session && 
@@ -237,8 +227,6 @@ ARDOUR_UI::set_session (Session *s)
 		editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::editor_meter_peak_button_release), false);
 
 		if (Config->get_show_editor_meter() && !ARDOUR::Profile->get_trx()) {
-			transport_tearoff_hbox.pack_start (meter_box, false, false);
-			transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
 			meter_box.show();
 			editor_meter_peak_display.show();
 		}

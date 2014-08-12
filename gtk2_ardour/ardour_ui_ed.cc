@@ -545,12 +545,6 @@ ARDOUR_UI::save_ardour_state ()
 
 	XMLNode* tearoff_node = new XMLNode (X_("Tearoffs"));
 
-	if (transport_tearoff) {
-		XMLNode* t = new XMLNode (X_("transport"));
-		transport_tearoff->add_state (*t);
-		tearoff_node->add_child_nocopy (*t);
-	}
-
 	if (mixer && mixer->monitor_section()) {
 		XMLNode* t = new XMLNode (X_("monitor-section"));
 		mixer->monitor_section()->tearoff().add_state (*t);

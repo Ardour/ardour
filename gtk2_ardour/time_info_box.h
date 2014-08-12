@@ -26,11 +26,10 @@
 #include <gtkmm/label.h>
 #include <gtkmm/table.h>
 
-#include "gtkmm2ext/cairo_packer.h"
-
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
+#include "waves_ui.h"
 #include "ardour_button.h"
 
 namespace ARDOUR {
@@ -40,7 +39,7 @@ namespace ARDOUR {
 
 class AudioClock;
 
-class TimeInfoBox : public CairoHPacker, public ARDOUR::SessionHandlePtr
+class TimeInfoBox : public Gtk::VBox, public WavesUI, public ARDOUR::SessionHandlePtr
 {
   public:
     TimeInfoBox ();
@@ -49,18 +48,13 @@ class TimeInfoBox : public CairoHPacker, public ARDOUR::SessionHandlePtr
     void set_session (ARDOUR::Session*);
 
   private:
-    Gtk::Table left;
-    Gtk::Table right;
-
-    AudioClock* selection_start;
-    AudioClock* selection_end;
-    AudioClock* selection_length;
+    AudioClock selection_start;
+    AudioClock selection_end;
+    AudioClock selection_length;
     
-    AudioClock* punch_start;
-    AudioClock* punch_end;
+    AudioClock punch_start;
+    AudioClock punch_end;
 
-    Gtk::Label selection_title;
-    Gtk::Label punch_title;
     bool syncing_selection;
     bool syncing_punch;
 
@@ -70,8 +64,8 @@ class TimeInfoBox : public CairoHPacker, public ARDOUR::SessionHandlePtr
     PBD::ScopedConnectionList punch_connections;
     PBD::ScopedConnectionList editor_connections;
 
-    ArdourButton punch_in_button;
-    ArdourButton punch_out_button;
+    //ArdourButton punch_in_button;
+    //ArdourButton punch_out_button;
 
     void selection_changed ();
 

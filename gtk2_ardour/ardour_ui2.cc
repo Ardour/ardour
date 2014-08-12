@@ -214,7 +214,7 @@ ARDOUR_UI::tearoff_settings (const char* name) const
 }
 
 void
-ARDOUR_UI::setup_transport_trx ()
+ARDOUR_UI::setup_transport ()
 {
 	RefPtr<Action> act;
 
@@ -245,31 +245,12 @@ ARDOUR_UI::setup_transport_trx ()
     
     update_output_operation_mode_buttons();
     
-	transport_tearoff_hbox.set_border_width (3);
-	transport_tearoff_hbox.set_spacing (3);
-
-	transport_tearoff = manage (new TearOff (transport_tearoff_hbox));
-	transport_tearoff->set_name ("TransportBase");
-	transport_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &transport_tearoff->tearoff_window()), false);
-	transport_tearoff->set_can_be_torn_off (false);
-
-	transport_hbox.pack_start (*transport_tearoff, true, false);
-
 	transport_base.set_name ("TransportBase");
 	transport_base.add (transport_hbox);
 
 	transport_frame.set_shadow_type (SHADOW_OUT);
 	transport_frame.set_name ("BaseFrame");
 	transport_frame.add (transport_base);
-
-	transport_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
-						 static_cast<Widget*>(&transport_frame)));
-	transport_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
-						 static_cast<Widget*> (&transport_frame), 1));
-	transport_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
-						 static_cast<Widget*>(&transport_frame)));
-	transport_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
-						  static_cast<Widget*> (&transport_frame), 1));
 
 	auto_return_button.set_text(_("Auto Return"));
 
@@ -411,14 +392,7 @@ ARDOUR_UI::setup_transport_trx ()
 	tbox->pack_start (*a1, false, false);
 	tbox->pack_start (*a2, false, false);
 
-	HBox* clock_box = manage (new HBox);
-
-	clock_box->pack_start (*primary_clock, false, false);
-	if (!ARDOUR::Profile->get_small_screen() && !ARDOUR::Profile->get_trx()) {
-		clock_box->pack_start (*secondary_clock, false, false);
-	}
-
-	clock_box->set_spacing (3);
+	editor->get_box ("primary_clock_home").pack_start (*primary_clock, false, false);
 
 	shuttle_box = new ShuttleControl;
 	shuttle_box->show ();
@@ -430,13 +404,7 @@ ARDOUR_UI::setup_transport_trx ()
 	transport_vbox->pack_start (*tbox, true, true, 0);
 
 	time_info_box = manage (new TimeInfoBox);
-	VBox& tv_box = *manage (new VBox);
-	HBox& th_box = *manage (new HBox);
-	transport_tearoff_hbox.pack_start (tv_box, false, false);
-	tv_box.pack_start (th_box, false, false);
-	th_box.pack_start (*time_info_box, false, false);
-	th_box.pack_start (*clock_box, false, false);
-	tv_box.pack_start (*transport_vbox, false, false);
+	editor->get_box ("time_info_box_home").pack_start (*time_info_box, false, false);
 
 
 	/* transport related toggle controls */
@@ -444,286 +412,10 @@ ARDOUR_UI::setup_transport_trx ()
 	VBox* auto_box = manage (new VBox);
 	auto_box->set_homogeneous (true);
 	auto_box->set_spacing (2);
-	transport_tearoff_hbox.pack_start (*auto_box, false, false);
-	// NO NEED TO HAVE IT: auto_box->pack_start (sync_button, false, false);
-    if (ARDOUR::Profile->get_small_screen()) {
-            transport_tearoff_hbox.pack_start (_editor_transport_box, false, false);
-    }
 
 	/* desensitize */
 
 	set_transport_sensitivity (false);
-}
-
-void
-ARDOUR_UI::setup_transport ()
-{
-	if (Profile->get_trx()) {
-		setup_transport_trx();
-		return;
-	}
-
-	RefPtr<Action> act;
-
-	transport_tearoff_hbox.set_border_width (3);
-	transport_tearoff_hbox.set_spacing (3);
-
-	transport_tearoff = manage (new TearOff (transport_tearoff_hbox));
-	transport_tearoff->set_name ("TransportBase");
-	transport_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &transport_tearoff->tearoff_window()), false);
-
-	if (Profile->get_sae()) {
-		transport_tearoff->set_can_be_torn_off (false);
-	}
-
-	transport_hbox.pack_start (*transport_tearoff, true, false);
-
-	transport_base.set_name ("TransportBase");
-	transport_base.add (transport_hbox);
-
-	transport_frame.set_shadow_type (SHADOW_OUT);
-	transport_frame.set_name ("BaseFrame");
-	transport_frame.add (transport_base);
-
-	transport_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
-						 static_cast<Widget*>(&transport_frame)));
-	transport_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
-						 static_cast<Widget*> (&transport_frame), 1));
-	transport_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
-						 static_cast<Widget*>(&transport_frame)));
-	transport_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
-						  static_cast<Widget*> (&transport_frame), 1));
-
-	auto_return_button.set_text(_("Auto Return"));
-
-	follow_edits_button.set_text(_("Follow Edits"));
-
-//	auto_input_button.set_text (_("Auto Input"));
-
-	click_button.set_image (get_icon (X_("metronome")));
-	act = ActionManager::get_action ("Transport", "ToggleClick");
-	click_button.set_related_action (act);
-	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
-
-	auto_return_button.set_name ("transport option button");
-	follow_edits_button.set_name ("transport option button");
-	auto_input_button.set_name ("transport option button");
-
-	/* these have to provide a clear indication of active state */
-
-	click_button.set_name ("transport button");
-	// NO NEED TO HAVE IT: sync_button.set_name ("transport active option button");
-
-	stop_button.set_active (true);
-
-	goto_start_button.set_image (get_icon (X_("transport_start")));
-	goto_end_button.set_image (get_icon (X_("transport_end")));
-	roll_button.set_image (get_icon (X_("transport_play")));
-	stop_button.set_image (get_icon (X_("transport_stop")));
-	play_selection_button.set_image (get_icon (X_("transport_range")));
-	rec_button.set_image (get_icon (X_("transport_record")));
-	auto_loop_button.set_image (get_icon (X_("transport_loop")));
-
-	midi_panic_button.set_image (get_icon (X_("midi_panic")));
-	/* the icon for this has an odd aspect ratio, so fatten up the button */
-	midi_panic_button.set_size_request (25, -1);
-	
-	act = ActionManager::get_action (X_("Transport"), X_("Stop"));
-	stop_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("Roll"));
-	roll_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("Record"));
-	rec_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("GotoStart"));
-	goto_start_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("GotoEnd"));
-	goto_end_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("Loop"));
-	auto_loop_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("PlaySelection"));
-	play_selection_button.set_related_action (act);
-	act = ActionManager::get_action (X_("MIDI"), X_("panic"));
-	midi_panic_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
-	// NO NEED TO HAVE IT: sync_button.set_related_action (act);
-
-	/* clocks, etc. */
-
-	ARDOUR_UI::Clock.connect (sigc::mem_fun (primary_clock, &AudioClock::set));
-	ARDOUR_UI::Clock.connect (sigc::mem_fun (secondary_clock, &AudioClock::set));
-
-	primary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
-	secondary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
-	big_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::big_clock_value_changed));
-
-	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
-	auto_return_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
-	follow_edits_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport", "ToggleAutoInput");
-	auto_input_button.set_related_action (act);
-
-	/* alerts */
-
-	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
-
-	solo_alert_button.set_name ("rude solo");
-	solo_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::solo_alert_press), false);
-	auditioning_alert_button.set_name ("rude audition");
-	auditioning_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::audition_alert_press), false);
-	feedback_alert_button.set_name ("feedback alert");
-	feedback_alert_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::feedback_alert_press), false);
-
-	alert_box.pack_start (solo_alert_button, true, false);
-	alert_box.pack_start (auditioning_alert_button, true, false);
-	alert_box.pack_start (feedback_alert_button, true, false);
-
-	/* all transport buttons should be the same size vertically and
-	 * horizontally 
-	 */
-	int width = 33;
-	int height = 25;
-	goto_start_button.set_size_request (width, height);
-	goto_end_button.set_size_request (width, height);
-	auto_loop_button.set_size_request (width, height);
-	rec_button.set_size_request (width, height);
-	play_selection_button.set_size_request (width, height);
-	roll_button.set_size_request (width, height);
-	stop_button.set_size_request (width, height);
-
-	goto_start_button.set_size_request (width, height);
-
-	HBox* tbox1 = manage (new HBox);
-	HBox* tbox2 = manage (new HBox);
-	HBox* tbox = manage (new HBox);
-
-	VBox* vbox1 = manage (new VBox);
-	VBox* vbox2 = manage (new VBox);
-
-	Alignment* a1 = manage (new Alignment);
-	Alignment* a2 = manage (new Alignment);
-
-	tbox1->set_spacing (2);
-	tbox2->set_spacing (2);
-	tbox->set_spacing (2);
-
-	if (!Profile->get_trx()) {
-		tbox1->pack_start (midi_panic_button, false, false, 5);
-		tbox1->pack_start (click_button, false, false, 5);
-	}
-
-	tbox1->pack_start (goto_start_button, false, false);
-	tbox1->pack_start (goto_end_button, false, false);
-	tbox1->pack_start (auto_loop_button, false, false);
-
-	if (!Profile->get_trx()) {
-		tbox2->pack_start (play_selection_button, false, false);
-	}
-	tbox2->pack_start (roll_button, false, false);
-	tbox2->pack_start (stop_button, false, false);
-	tbox2->pack_start (rec_button, false, false, 5);
-
-	vbox1->pack_start (*tbox1, false, false);
-	vbox2->pack_start (*tbox2, false, false);
-
-	a1->add (*vbox1);
-	a1->set (0.5, 1.0, 0.0, 0.0);
-	a2->add (*vbox2);
-	a2->set (0.5, 1.0, 0.0, 0.0);
-
-	tbox->pack_start (*a1, false, false);
-	tbox->pack_start (*a2, false, false);
-
-	HBox* clock_box = manage (new HBox);
-
-	clock_box->pack_start (*primary_clock, false, false);
-	if (!ARDOUR::Profile->get_small_screen() && !ARDOUR::Profile->get_trx()) {
-		clock_box->pack_start (*secondary_clock, false, false);
-	}
-	clock_box->set_spacing (3);
-
-	shuttle_box = new ShuttleControl;
-	shuttle_box->show ();
-	
-	VBox* transport_vbox = manage (new VBox);
-	transport_vbox->set_name ("TransportBase");
-	transport_vbox->set_border_width (0);
-	transport_vbox->set_spacing (3);
-	transport_vbox->pack_start (*tbox, true, true, 0);
-
-	if (!Profile->get_trx()) {
-		transport_vbox->pack_start (*shuttle_box, false, false, 0);
-	}
-
-	time_info_box = manage (new TimeInfoBox);
-
-	if (ARDOUR::Profile->get_trx()) {
-		transport_tearoff_hbox.pack_start (*time_info_box, false, false);
-	}
-
-	transport_tearoff_hbox.pack_start (*transport_vbox, false, false);
-
-	/* transport related toggle controls */
-
-	VBox* auto_box = manage (new VBox);
-	auto_box->set_homogeneous (true);
-	auto_box->set_spacing (2);
-	// NO NEED TO HAVE IT: auto_box->pack_start (sync_button, false, false);
-	if (!ARDOUR::Profile->get_trx()) {
-		auto_box->pack_start (follow_edits_button, false, false);
-		auto_box->pack_start (auto_return_button, false, false);
-	}
-
-	if (!ARDOUR::Profile->get_trx()) {
-		transport_tearoff_hbox.pack_start (*auto_box, false, false);
-	}
-	transport_tearoff_hbox.pack_start (*clock_box, true, true);
-
-	if (ARDOUR::Profile->get_trx()) {
-		transport_tearoff_hbox.pack_start (*auto_box, false, false);
-	}
-
-	if (!ARDOUR::Profile->get_trx()) {
-		transport_tearoff_hbox.pack_start (*time_info_box, false, false);
-	}
-
-        if (ARDOUR::Profile->get_small_screen()) {
-                transport_tearoff_hbox.pack_start (_editor_transport_box, false, false);
-        }
-
-	if (!ARDOUR::Profile->get_trx()) {
-		transport_tearoff_hbox.pack_start (alert_box, false, false);
-		transport_tearoff_hbox.pack_start (meter_box, false, false);
-		transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
-	}
-
-	if (Profile->get_sae()) {
-		Image* img = manage (new Image ((::get_icon (X_("sae")))));
-		transport_tearoff_hbox.pack_end (*img, false, false);
-	}
-
-	/* desensitize */
-
-	set_transport_sensitivity (false);
-
-	XMLNode* tnode = tearoff_settings ("transport");
-	if (tnode) {
-		transport_tearoff->set_state (*tnode);
-	}
-}
-
-void
-ARDOUR_UI::detach_tearoff (Box* b, Widget* w)
-{
-//	editor->ensure_float (transport_tearoff->tearoff_window());
-	b->remove (*w);
-}
-
-void
-ARDOUR_UI::reattach_tearoff (Box* b, Widget* w, int32_t n)
-{
-	b->pack_start (*w);
-	b->reorder_child (*w, n);
 }
 
 void
