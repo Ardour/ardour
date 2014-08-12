@@ -418,7 +418,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 			} 
 		}
 	} else if (p == "output-auto-connect") {
-        update_ouput_operation_mode_buttons();
+        update_output_operation_mode_buttons();
     }
 }
 

@@ -243,7 +243,7 @@ ARDOUR_UI::setup_transport_trx ()
 	act = ActionManager::get_action (X_("Common"), X_("toggle-meterbridge"));	
 	editor->get_waves_button ("meter_bridge_on_button").set_related_action (act);
     
-    update_ouput_operation_mode_buttons();
+    update_output_operation_mode_buttons();
     
 	transport_tearoff_hbox.set_border_width (3);
 	transport_tearoff_hbox.set_spacing (3);
