@@ -114,17 +114,22 @@ ExportProfileManager::ExportProfileManager (Session & s, ExportType type)
 
 ExportProfileManager::~ExportProfileManager ()
 {
-	XMLNode * instant_xml (new XMLNode (xml_node_name));
-	serialize_profile (*instant_xml);
-	session.add_instant_xml (*instant_xml, false);
+	XMLNode * extra_xml (new XMLNode (xml_node_name));
+	serialize_profile (*extra_xml);
+	session.add_extra_xml (*extra_xml);
 }
 
 void
 ExportProfileManager::load_profile ()
 {
-	XMLNode * instant_node = session.instant_xml (xml_node_name);
-	if (instant_node) {
-		set_state (*instant_node);
+	XMLNode * extra_node = session.extra_xml (xml_node_name);
+	/* Legacy sessions used Session instant.xml for this */
+	if (!extra_node) {
+		extra_node = session.instant_xml (xml_node_name);
+	}
+
+	if (extra_node) {
+		set_state (*extra_node);
 	} else {
 		XMLNode empty_node (xml_node_name);
 		set_state (empty_node);
