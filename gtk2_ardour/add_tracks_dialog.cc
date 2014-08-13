@@ -92,7 +92,7 @@ AddTracksDialog::on_increment_button (WavesButton*)
 {
     int track_count = count();
     
-    if( 1<=track_count && track_count < 999 )
+    if( 1<=track_count && track_count <= 256 )
     {
         ++track_count;
         set_track_count(track_count);
