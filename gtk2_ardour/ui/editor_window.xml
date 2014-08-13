@@ -285,12 +285,10 @@
           </VPaned>
         </HPaned>
         <EventBox id="mixer_bridge_view_home"
-                  height="409"
+                  height="400"
                   box.pack="end"
                   visible="false"
-                  noshowall="true"
-                  box.fill="true"
-                  box.expand="true"/>
+                  noshowall="true"/>
         <EventBox id="meter_bridge_view_home"
                    box.pack="end"
                    visible="false"
