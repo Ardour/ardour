@@ -46,15 +46,14 @@
 class MasterBusUI : public Gtk::EventBox, public WavesUI
 {
 public:
- 	MasterBusUI (ARDOUR::Session*);
+ 	MasterBusUI (ARDOUR::Session*, PublicEditor&);
     void init(ARDOUR::Session* session);
  	virtual ~MasterBusUI ();
 
     void fast_update ();
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
+    void update_master_bus_selection();
 	static PBD::Signal1<void,MasterBusUI*> CatchDeletion;
-    
-    PBD::Signal0<void> MasterMeterClicked;
 
 private:
 	static int __meter_width;
@@ -72,6 +71,7 @@ private:
 	void on_global_rec_button (WavesButton*);
     void on_output_connection_mode_changed ();
     bool on_level_meter_button_press (GdkEventButton*);
+    bool on_master_event_box_button_release (GdkEventButton*);
     
     PBD::ScopedConnection _route_meter_connection;
     
@@ -105,6 +105,11 @@ private:
 	WavesButton& _global_rec_button;
     Gtk::EventBox& _no_peak_display_box;
     Gtk::Image& _master_bus_multi_out_mode_icon;
+    Gtk::Container& _master_event_box;
+    
+    PublicEditor& _editor;
+    
+    bool _selected;
 };
 
 #endif /* __tracks_master_bus_ui_h__ */

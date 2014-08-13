@@ -943,7 +943,10 @@ void
 Editor::track_selection_changed ()
 {
     if (!selection->tracks.empty() ) {
-
+        set_selected_mixer_strip (*(selection->tracks.front()));
+        // the commented out implementation shows master bus in the inspector
+        // when master track is selected. Requirements chenged for this case
+        /*
         bool master_bus_set = false;
         TimeAxisView* tv = selection->tracks.front();
         RouteTimeAxisView* rtv = dynamic_cast <RouteTimeAxisView*> (tv);
@@ -960,9 +963,10 @@ Editor::track_selection_changed ()
         
         if (!master_bus_set) {
             set_selected_mixer_strip(*tv);
-        }
+        }*/
         
     } else {
+
         // set master bus visible if it's available
         RouteTimeAxisView* rtv = 0;
         bool set_master_bus = false;

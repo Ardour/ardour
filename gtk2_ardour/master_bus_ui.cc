@@ -94,7 +94,7 @@ using namespace ArdourMeter;
 int MasterBusUI::__meter_width = 6;
 PBD::Signal1<void,MasterBusUI*> MasterBusUI::CatchDeletion;
 
-MasterBusUI::MasterBusUI (Session* sess)
+MasterBusUI::MasterBusUI (Session* sess, PublicEditor& ed)
 	: WavesUI ("master_ui.xml", *this)
 	, _max_peak (minus_infinity())
 	, _peak_treshold (xml_property(*xml_tree()->root(), "peaktreshold", -144.4)) // Think about having it in config
@@ -106,6 +106,9 @@ MasterBusUI::MasterBusUI (Session* sess)
 	, _global_rec_button (get_waves_button ("global_rec_button"))
     , _no_peak_display_box (get_event_box("no_peak_display_box") )
     , _master_bus_multi_out_mode_icon (get_image("master_bus_multi_out_mode_icon"))
+    , _master_event_box (WavesUI::root () )
+    , _selected(false)
+    , _editor(ed)
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 	_level_meter_home.pack_start (_level_meter, true, true);
@@ -113,7 +116,10 @@ MasterBusUI::MasterBusUI (Session* sess)
 	_master_mute_button.unset_flags (Gtk::CAN_FOCUS);
 	_clear_solo_button.unset_flags (Gtk::CAN_FOCUS);
 	_global_rec_button.unset_flags (Gtk::CAN_FOCUS);
-
+    _master_event_box.set_flags (CAN_FOCUS);
+    
+    _master_event_box.add_events (Gdk::BUTTON_RELEASE_MASK);
+	   
 	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &MasterBusUI::reset_peak_display));
 	ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &MasterBusUI::reset_route_peak_display));
 	ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &MasterBusUI::reset_group_peak_display));
@@ -122,10 +128,13 @@ MasterBusUI::MasterBusUI (Session* sess)
 	_master_mute_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_master_mute_button));
 	_clear_solo_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_clear_solo_button));
 	_global_rec_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_global_rec_button));
+    _master_event_box.signal_button_press_event().connect (sigc::mem_fun (*this, &MasterBusUI::on_master_event_box_button_release));
+    
+    _editor.get_selection().TracksChanged.connect (sigc::mem_fun(*this, &MasterBusUI::update_master_bus_selection));
     
     EngineStateController::instance()->OutputConnectionModeChanged.connect (_mode_connection,
                                                                             MISSING_INVALIDATOR,
-                                                                            boost::bind (&MasterBusUI::on_output_connection_mode_changed, this),
+                                                                            boost::bind (&MasterBusUI::update_master_bus_selection, this),
                                                                             gui_context ());
     init(sess);
 }
@@ -141,17 +150,21 @@ void MasterBusUI::init(ARDOUR::Session *session)
     // connect existing tracks to MASTER
     connect_route_state_signals( *(session->get_tracks().get()) );
     
+    if (!_level_meter.get_parent () ) {
+        _level_meter_home.pack_start (_level_meter);
+    }
+
     on_output_connection_mode_changed();
     update_master();
     
-    ARDOUR_UI::Blink.connect (sigc::mem_fun (*this, &MasterBusUI::solo_blink));
+    //ARDOUR_UI::Blink.connect (sigc::mem_fun (*this, &MasterBusUI::solo_blink));
     
     _level_meter.set_session(session);
-    _level_meter.ButtonPress.connect_same_thread (_session_connections, boost::bind (&MasterBusUI::on_level_meter_button_press, this, _1) );
 }
 
 void MasterBusUI::on_output_connection_mode_changed()
 {
+    /*
     if (Config->get_output_auto_connect() & AutoConnectPhysical) {
         if (_peak_display_button.get_parent ()) {
             get_box ("peak_display_button_home").remove (_peak_display_button);
@@ -184,18 +197,61 @@ void MasterBusUI::on_output_connection_mode_changed()
         if (!_level_meter.get_parent ()) {
             _level_meter_home.pack_start (_level_meter);
         }
-    }
+    } */
 
     // update MASTER MUTE
     route_mute_state_changed(NULL);
 }
 
-bool
-MasterBusUI::on_level_meter_button_press (GdkEventButton *ev)
+void
+MasterBusUI::update_master_bus_selection ()
 {
-    // EMIT SIGNAL
-    MasterMeterClicked ();
+    TimeAxisView* tv = _editor.axis_view_from_route (_route );
     
+    if (tv && _editor.get_selection().selected(tv) ) {
+        _selected = true;
+    } else {
+        _selected = false;
+    }
+    
+    
+    if (_selected) {
+        _master_event_box.set_state (Gtk::STATE_ACTIVE);
+    } else {
+        _master_event_box.set_state (Gtk::STATE_NORMAL);
+    }
+}
+
+bool
+MasterBusUI::on_master_event_box_button_release (GdkEventButton *ev)
+{
+    if (ev->button == 1) {
+        
+        switch (ArdourKeyboard::selection_type (ev->state)) {
+            case Selection::Toggle:
+                if (_selected) {
+                    TimeAxisView* tv = _editor.axis_view_from_route (_route );
+                    if (tv) {
+                        _editor.set_selected_track(*tv, Selection::Toggle);
+                    }
+                    _selected = false;
+                    break;
+                } /*else - just fall down*/
+                
+            case Selection::Set:
+                if (!_selected) {
+                    TimeAxisView* tv = _editor.axis_view_from_route (_route );
+                    if (tv) {
+                        _editor.set_selected_track(*tv);
+                    }
+                    _selected = true;
+                break;
+        
+            }
+        }
+    }
+    
+    update_master_bus_selection();
     return true;
 }
 
