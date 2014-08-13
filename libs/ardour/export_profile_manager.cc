@@ -123,6 +123,11 @@ void
 ExportProfileManager::load_profile ()
 {
 	XMLNode * extra_node = session.extra_xml (xml_node_name);
+	/* Legacy sessions used Session instant.xml for this */
+	if (!extra_node) {
+		extra_node = session.instant_xml (xml_node_name);
+	}
+
 	if (extra_node) {
 		set_state (*extra_node);
 	} else {

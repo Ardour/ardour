@@ -65,6 +65,11 @@ ExportFilename::ExportFilename (Session & session) :
 	folder = session.session_directory().export_path();
 
 	XMLNode * extra_node = session.extra_xml ("ExportFilename");
+	/* Legacy sessions used Session instant.xml for this */
+	if (!extra_node) {
+		session.instant_xml ("ExportFilename");
+	}
+
 	if (extra_node) {
 		set_state (*extra_node);
 	}
@@ -145,6 +150,11 @@ ExportFilename::set_state (const XMLNode & node)
 	date_format = (DateFormat) string_2_enum (pair.second, date_format);
 
 	XMLNode * extra_node = session.extra_xml ("ExportRevision");
+	/* Legacy sessions used Session instant.xml for this */
+	if (!extra_node) {
+		extra_node = session.instant_xml ("ExportRevision");
+	}
+
 	if (extra_node && (prop = extra_node->property ("revision"))) {
 		revision = atoi (prop->value());
 	}
