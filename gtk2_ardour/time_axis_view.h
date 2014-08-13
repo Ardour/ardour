@@ -127,7 +127,7 @@ class TimeAxisView : public virtual AxisView
 
 	void idle_resize (uint32_t);
 
-	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent);
+	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent, bool show_number = true);
 	virtual void hide ();
 
 	bool touched (double top, double bot);

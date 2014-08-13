@@ -145,8 +145,13 @@ AudioTimeAxisView::audio_view()
 guint32
 AudioTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
 {
+    bool show_number = true;
+    if (is_master_track() ) {
+        show_number = false;
+    }
+    
 	set_gui_property ("visible", true);
-	return TimeAxisView::show_at (y, nth, parent);
+	return TimeAxisView::show_at (y, nth, parent, show_number);
 }
 
 void

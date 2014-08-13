@@ -223,7 +223,7 @@ TimeAxisView::hide ()
 * @return height of this TimeAxisView.
 */
 guint32
-TimeAxisView::show_at (double y, int& nth, VBox *parent)
+TimeAxisView::show_at (double y, int& nth, VBox *parent, bool show_number)
 {
 	time_axis_box.show ();
 	if (control_parent) {
@@ -235,7 +235,11 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	}
 
 	_order = nth;
-	number_label.set_text (string_compose (_("%1"), _order+1));
+    if (show_number) {
+        number_label.set_text (string_compose (_("%1"), _order));
+    } else {
+        number_label.set_text("");
+    }
 
 	if (_y_position != y) {
 		_canvas_display->set_y_position (y);

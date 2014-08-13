@@ -525,10 +525,16 @@ EditorRoutes::redisplay ()
         }
 
 		bool visible = tv->marked_for_display ();
-
+        
+        bool show_number = true;
+        boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(route);
+        if (at && at->is_master_track() ) {
+            show_number = false;
+        }
+        
 		/* show or hide the TimeAxisView */
 		if (visible) {
-			position += tv->show_at (position, n, &_editor->edit_controls_vbox);
+			position += tv->show_at (position, n, &_editor->edit_controls_vbox, show_number);
 			// SHOWTRACKS
 		} else {
 			tv->hide ();
