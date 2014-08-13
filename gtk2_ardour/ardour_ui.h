@@ -316,6 +316,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     void on_lock_button_pressed ();
     PBD::Signal0<void> lock_button_was_pressed;
     
+    bool session_auto_save_is_allowed() const;
+    
   protected:
 	friend class PublicEditor;
 

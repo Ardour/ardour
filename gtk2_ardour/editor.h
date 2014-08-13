@@ -1367,6 +1367,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         sigc::connection timeout_connection;
         bool lock_timeout_callback ();
         void start_lock_event_timing ();
+    
+        // Session auto save staff
+        struct timeval _start_recording_time;
+        sigc::connection _session_auto_save_timeout_connection;
+        bool session_auto_save_timeout_callback();
+        void start_session_auto_save_event_timing ();
+    
         void on_ardour_ui_config_changed (const std::string&);
 
 	Gtk::Menu fade_context_menu;

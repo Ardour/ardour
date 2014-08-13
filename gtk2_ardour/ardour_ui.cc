@@ -2284,6 +2284,18 @@ ARDOUR_UI::screen_lock_is_allowed() const
         return false;
 }
 
+bool
+ARDOUR_UI::session_auto_save_is_allowed() const
+{
+    if(!_session)
+        return false;
+    
+    if( (_session->record_status() == Session::Recording) && (ARDOUR_UI::config()->get_auto_save_timer () != 0) )
+        return true;
+    else
+        return false;
+}
+
 /** Ask the user for the name of a new snapshot and then take it.
  */
 

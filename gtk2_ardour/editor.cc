@@ -1129,20 +1129,20 @@ Editor::on_realize ()
         signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
 }
 
-// Update lock time
+// Update lock time and auto_save time
 void
 Editor::on_ardour_ui_config_changed(const std::string& param)
 {
     if (param=="auto-lock-timer" && ARDOUR_UI::instance()->screen_lock_is_allowed())
-    {
         start_lock_event_timing();
-    }
+
+    if (param=="auto-save-timer" && ARDOUR_UI::instance()->session_auto_save_is_allowed())
+        start_session_auto_save_event_timing();
 }
 
 void
 Editor::start_lock_event_timing ()
-{
-    
+{    
     ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
     
     timeout_connection.disconnect();
@@ -1152,6 +1152,69 @@ Editor::start_lock_event_timing ()
     
     gettimeofday(&last_event_time, 0);
     timeout_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &Editor::lock_timeout_callback), 1 * 1000);
+}
+
+bool
+Editor::lock_timeout_callback ()
+{
+    struct timeval now, delta;
+    
+    gettimeofday (&now, 0);
+    
+    timersub (&now, &last_event_time, &delta);
+    
+    if( !ARDOUR_UI::instance()->screen_lock_is_allowed() )
+        return false; // Returning false will effectively disconnect us from the timer callback.
+    
+    if (delta.tv_sec >= 60 * ARDOUR_UI::config()->get_auto_lock_timer ())
+    {
+        lock ();
+        /* don't call again. Returning false will effectively
+         disconnect us from the timer callback.
+         
+         unlock() will call start_lock_event_timing() to get things
+         started again.
+         */
+        return false;
+    }
+    
+    return true;
+}
+
+void
+Editor::start_session_auto_save_event_timing ()
+{
+    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
+    
+    _session_auto_save_timeout_connection.disconnect();
+    
+    if( !ardour_ui->session_auto_save_is_allowed() )
+        return;
+
+    gettimeofday(&_start_recording_time, 0);
+    
+    _session_auto_save_timeout_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &Editor::session_auto_save_timeout_callback), 1 * 1000);
+}
+
+bool
+Editor::session_auto_save_timeout_callback ()
+{
+    struct timeval now, delta;
+    
+    gettimeofday (&now, 0);
+    
+    timersub (&now, &_start_recording_time, &delta);
+    
+    if( !ARDOUR_UI::instance()->session_auto_save_is_allowed() )
+        return false; // Returning false will effectively disconnect us from the timer callback.
+    
+    if (delta.tv_sec >= 60 * ARDOUR_UI::config()->get_auto_save_timer ())
+    {
+        ARDOUR_UI::instance()->save_state();
+        gettimeofday(&_start_recording_time, 0);
+    }
+    
+    return true;
 }
 
 bool
@@ -1169,33 +1232,6 @@ Editor::generic_event_handler (GdkEvent* ev)
                 break;
         }
         return false;
-}
-
-bool
-Editor::lock_timeout_callback ()
-{
-    struct timeval now, delta;
-
-    gettimeofday (&now, 0);
-
-    timersub (&now, &last_event_time, &delta);
-    
-    if( !ARDOUR_UI::instance()->screen_lock_is_allowed() ) 
-        return false; // Returning false will effectively disconnect us from the timer callback.
-    
-    if (delta.tv_sec >= 60 * ARDOUR_UI::config()->get_auto_lock_timer ())
-    {
-        lock ();
-                /* don't call again. Returning false will effectively
-                      disconnect us from the timer callback.
-
-                         unlock() will call start_lock_event_timing() to get things
-                            started again.
-                */
-        return false;
-    }
-
-    return true;
 }
 
 void
@@ -1358,6 +1394,7 @@ Editor::set_session (Session *t)
 	_session->locations()->StateChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
     _session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&Editor::start_lock_event_timing, this), gui_context());
+    _session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::start_session_auto_save_event_timing, this), gui_context());
     
 	playhead_cursor->show ();
 
