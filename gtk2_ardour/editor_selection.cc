@@ -939,6 +939,30 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* /*ev*/, StreamView*
 	return true;
 }
 
+/*
+ Return true if selection is empty even MasterTrack is selected
+ Otherwise return false
+*/
+bool
+Editor::non_master_track_selected ()
+{
+    if( selection->tracks.empty() )
+        return false;
+    
+    if( selection->tracks.size() >=2 )
+        return true;
+    
+    TimeAxisView* tv = selection->tracks.front();
+    RouteTimeAxisView* rtv = dynamic_cast <RouteTimeAxisView*> (tv);
+    if (rtv) {
+        AudioTrack* atr = dynamic_cast <AudioTrack*> (rtv->route().get() );
+        if (atr && _session && atr->is_master_track() )
+            return false;
+        else
+            return true;
+    }
+}
+
 void
 Editor::track_selection_changed ()
 {
@@ -1026,7 +1050,7 @@ Editor::track_selection_changed ()
 		}
 	}
 
-	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, !selection->tracks.empty());
+	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, non_master_track_selected());
 
 	/* notify control protocols */
 	

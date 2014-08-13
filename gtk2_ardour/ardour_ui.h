@@ -237,6 +237,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void synchronize_sync_source_and_video_pullup ();
 
 	void add_route (Gtk::Window* float_window);
+    void delete_selected_tracks();
         void add_routes_part_two ();
         void add_routes_thread ();
 

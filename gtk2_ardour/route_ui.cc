@@ -1331,52 +1331,31 @@ RouteUI::set_color_from_route ()
 void
 RouteUI::remove_this_route (bool apply_to_selection)
 {
-	if (apply_to_selection) {
-		ARDOUR_UI::instance()->the_editor().get_selection().tracks.foreach_route_ui (boost::bind (&RouteUI::remove_this_route, _1, false));
+    if (apply_to_selection) {      
+        TrackSelection& track_selection =  ARDOUR_UI::instance()->the_editor().get_selection().tracks;
+
+        for (list<TimeAxisView*>::iterator i = track_selection.begin(); i != track_selection.end(); ++i) {
+            RouteUI* t = dynamic_cast<RouteUI*> (*i);
+            if (t) {
+                if ( t->route()->is_master() || t->route()->is_monitor() )
+                    continue;
+                
+                AudioTrack* audio_track = dynamic_cast<AudioTrack*>( t->route().get() );
+                if( audio_track && audio_track->is_master_track() )
+                    continue;
+                
+                Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (&RouteUI::idle_remove_this_route), t));
+            }
+        }
 	} else {
-		if ((route()->is_master() || route()->is_monitor()) &&
-		    !Config->get_allow_special_bus_removal()) {
-			MessageDialog msg (_("That would be bad news ...."),
-					   false,
-					   Gtk::MESSAGE_INFO,
-                                   Gtk::BUTTONS_OK);
-			msg.set_secondary_text (string_compose (_(
-"Removing the master or monitor bus is such a bad idea\n\
-that %1 is not going to allow it.\n\
-\n\
-If you really want to do this sort of thing\n\
-edit your ardour.rc file to set the\n\
-\"allow-special-bus-removal\" option to be \"yes\""), PROGRAM_NAME));
-
-			msg.present ();
-			msg.run ();
+		if ( route()->is_master() || route()->is_monitor() )
 			return;
-		}
-
-		vector<string> choices;
-		string prompt;
-
-		if (is_track()) {
-			prompt  = string_compose (_("Do you really want to remove track \"%1\" ?\n\nYou may also lose the playlist used by this track.\n\n(This action cannot be undone, and the session file will be overwritten)"), _route->name());
-		} else {
-			prompt  = string_compose (_("Do you really want to remove bus \"%1\" ?\n\n(This action cannot be undone, and the session file will be overwritten)"), _route->name());
-		}
-
-		choices.push_back (_("No, do nothing."));
-		choices.push_back (_("Yes, remove it."));
-
-		string title;
-		if (is_track()) {
-			title = _("Remove track");
-		} else {
-			title = _("Remove bus");
-		}
-
-		Choice prompter (title, prompt, choices);
-
-		if (prompter.run () == 1) {
-			Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (&RouteUI::idle_remove_this_route), this));
-		}
+        
+        AudioTrack* audio_track = dynamic_cast<AudioTrack*>( route().get() );
+        if( audio_track && audio_track->is_master_track() )
+            return;
+		
+        Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (&RouteUI::idle_remove_this_route), this));
 	}
 }
 

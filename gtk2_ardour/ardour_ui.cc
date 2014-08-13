@@ -3566,6 +3566,13 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 }
 
 void
+ARDOUR_UI::delete_selected_tracks()
+{
+    TrackSelection& track_selection =  ARDOUR_UI::instance()->the_editor().get_selection().tracks;
+    track_selection.foreach_route_ui (boost::bind (&RouteUI::remove_this_route, _1, false));
+}
+
+void
 ARDOUR_UI::add_audio_track_instantly ()
 {    
 	if (!_session) {

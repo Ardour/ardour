@@ -96,6 +96,7 @@
 
     <menu action='TrackMenu'>
       <menuitem action='AddTrackBus'/>	
+      <menuitem action='DeleteSelectedTracks'/>
       <menuitem action="move-selected-tracks-up"/>
       <menuitem action="move-selected-tracks-down"/>
     </menu>
