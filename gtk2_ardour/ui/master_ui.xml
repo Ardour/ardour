@@ -68,4 +68,8 @@
               activeicon="master_global_rec_active"
               prelighticon="master_global_rec_prelight"
               ui.orphan="true"/>
+  <icon id="master_bus_multi_out_mode_icon"
+        source="master_bus_multi_out_mode.png"
+        ui.orphan="true"/>
+
 </RouteUI>
