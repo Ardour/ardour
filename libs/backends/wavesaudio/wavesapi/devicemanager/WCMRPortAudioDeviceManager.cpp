@@ -18,6 +18,9 @@ using namespace wvNS;
 #include "pa_asio.h"
 #include "asio.h"
 
+#define PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS 200
+#define PROPERTY_CHANGE_TIMEOUT_SECONDS 2
+
 ///< Supported Sample rates                                                                                                  
 static const double gAllSampleRates[] =
 	{
@@ -705,9 +708,21 @@ WTErr WCMRPortAudioDevice::SetCurrentBufferSize (int newSize)
 	intIter = find(m_BufferSizes.begin(), m_BufferSizes.end(), newSize);
 	if (intIter == m_BufferSizes.end())
 	{
-		//Can't change, perhaps use an "invalid param" type of error
-		retVal = eCommandLineParameter;
-		return (retVal);
+		//Sample rate proposed by client is not supported any more
+		if (m_BufferSizes.size() == 1)
+		{
+			// we have only one aloved buffer size which is preffered by PA
+			// this is the only value which could be set
+			m_CurrentBufferSize = m_BufferSizes[0];
+			int bufferSize = m_CurrentBufferSize;
+			// notify client to update sample rate after us
+			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::BufferSizeChanged, (void *)&bufferSize);
+		} else {
+			// more then one buffer size value is available
+			//Can't change, perhaps use an "invalid param" type of error
+			retVal = eCommandLineParameter;
+			return (retVal);
+		}
 	}
 	
 	if (Streaming())
@@ -799,14 +814,28 @@ void WCMRPortAudioDevice::activateDevice (bool callerIsWaiting/*=false*/)
 		
 		std::cout << "API::Device" << m_DeviceName << " Opening device stream " << std::endl;
 		std::cout << "Sample rate: " << m_CurrentSamplingRate << " buffer size: " << m_CurrentBufferSize << std::endl;
-		paErr = Pa_OpenStream(&m_PortAudioStream, 
-							  pInS,
-							  pOutS,
-							  m_CurrentSamplingRate,
-							  m_CurrentBufferSize,
-							  paDitherOff,
-							  WCMRPortAudioDevice::TheCallback,
-							  this);
+		
+		int tryAgain = ((PROPERTY_CHANGE_TIMEOUT_SECONDS * 1000) / PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS) ;
+		while (tryAgain) {
+			paErr = Pa_OpenStream(&m_PortAudioStream, 
+								  pInS,
+								  pOutS,
+								  m_CurrentSamplingRate,
+								  m_CurrentBufferSize,
+								  paDitherOff,
+								  WCMRPortAudioDevice::TheCallback,
+								  this);
+			if(paErr == paNoError)
+			{
+				break;
+			}
+
+			std::cout << "Cannot open streamm sleeping for "<< PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS << "msec and trying again" << std::endl;
+
+			// sleep and try again
+			wvThread::sleep_milliseconds (PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS);
+			--tryAgain;
+		}
 
 		if(paErr == paNoError)
 		{
