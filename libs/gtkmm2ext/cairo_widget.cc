@@ -29,6 +29,7 @@ CairoWidget::CairoWidget ()
 	, _visual_state (Gtkmm2ext::NoVisualState)
 	, _need_bg (true)
 	, _name_proxy (this, X_("name"))
+	, _current_event_expose (0)
 {
 	_name_proxy.connect (sigc::mem_fun (*this, &CairoWidget::on_name_changed));
 }
@@ -40,6 +41,7 @@ CairoWidget::~CairoWidget ()
 bool
 CairoWidget::on_expose_event (GdkEventExpose *ev)
 {
+    _current_event_expose = ev;
 	cairo_t* cr = gdk_cairo_create (get_window ()->gobj());
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
@@ -47,12 +49,14 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 	/* paint expose area the color of the parent window bg 
 	*/
 	
-	Gdk::Color bg (get_parent_bg());
+    if (get_visible_window ()) {
+        Gdk::Color bg (get_parent_bg());
 	
-	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cairo_set_source_rgb (cr, bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
-	cairo_fill (cr);
-
+        cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+        cairo_set_source_rgb (cr, bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
+        cairo_fill (cr);
+    }
+    
 	render (cr);
 
 	cairo_destroy (cr);

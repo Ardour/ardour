@@ -70,7 +70,7 @@ public:
 protected:
 	/** Render the widget to the given Cairo context */
 	virtual void render (cairo_t *) = 0;
-	virtual bool on_expose_event (GdkEventExpose *);
+	virtual bool on_expose_event (GdkEventExpose*);
 	void on_size_allocate (Gtk::Allocation &);
 	void on_state_changed (Gtk::StateType);
 	Gdk::Color get_parent_bg ();
@@ -84,6 +84,7 @@ protected:
 	Gtkmm2ext::ActiveState _active_state;
 	Gtkmm2ext::VisualState _visual_state;
 	bool                   _need_bg;
+    GdkEventExpose*        _current_event_expose; // Valid only when on_expose_event
 
   private:
 	Glib::SignalProxyProperty _name_proxy;
