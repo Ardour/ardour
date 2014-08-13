@@ -5,40 +5,53 @@
          bgnormal="#383838"
          bgactive="#6A6A6A"
          peaktreshold="-144.4">
-  <HBox>
-    <VBox width="35"/>
-    <EventBox width="1"
+  <VBox>
+    <EventBox height="1"
+              bgnormal="#494949"
+              bgactive="#494949"/>
+    <HBox height="64">
+      <VBox width="35"/>
+      <EventBox width="1"
+                bgnormal="#000000"
+                bgactive="#000000"/>
+      <VBox width="60">
+        <HBox height="3"/>
+        <HBox>
+          <VBox width="6"/>
+          <Label text="MASTER"
+                 font="Helvetica 10"
+                 fgnormal="#ffffff"
+                 fgactive="#ffffff"
+                 justify="left"/>
+        </HBox>
+      </VBox>
+      <VBox>
+        <EventBox bgnormal="#000000"
+                bgactive="#000000">
+          <EventBox bgnormal="#383838"
+                    bgactive="#6A6A6A"
+                    borderwidth="1">
+            <iconbutton id="master_mute_button"
+                  width="41"
+                  height="20"
+                  normalicon="master_mute"
+                  activeicon="master_mute_active"
+                  prelighticon="master_mute_prelight"/>
+          </EventBox>
+        </EventBox>
+      </VBox>
+      <EventBox width="1"
+                bgnormal="#000000"
+                bgactive="#000000"
+                box.pack="end"/>
+      <VBox id="level_meter_home"
+            box.pack="end"/>
+    </HBox>
+    <EventBox height="1"
               bgnormal="#000000"
               bgactive="#000000"/>
-    <VBox width="103">
-      <HBox height="3"/>
-      <HBox>
-      <VBox width="6"/>
-      <Label text="MASTER"
-             font="Helvetica 10"
-             fgnormal="#ffffff"
-             fgactive="#ffffff"
-             justify="left"/>
-      </HBox>
-    </VBox>
-    <VBox>
-      <EventBox bgnormal="#000000"
-              bgactive="#000000">
-        <EventBox bgnormal="#383838"
-                  bgactive="#6A6A6A"
-                  borderwidth="1">
-          <iconbutton id="master_mute_button"
-                width="41"
-                height="20"
-                normalicon="master_mute"
-                activeicon="master_mute_active"
-                prelighticon="master_mute_prelight"/>
-        </EventBox>
-      </EventBox>
-    </VBox>
-    <VBox id="level_meter_home"
-          box.pack="end"/>
-  </HBox>
+  </VBox>
+
   <EventBox id="no_peak_display_box"
             width="95"
             height="13"

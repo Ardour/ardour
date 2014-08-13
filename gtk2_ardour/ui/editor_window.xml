@@ -224,6 +224,8 @@
             box.expand="true">
         <EventBox id="compact_meter_bridge_home"
                   bgnormal="#383838"/>
+        <EventBox bgnormal="#000000"
+                  height="2"/>
         <HPaned id="edit_pane"
                 box.fill="true"
                 box.expand="true">

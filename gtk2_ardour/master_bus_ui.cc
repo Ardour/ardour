@@ -91,7 +91,7 @@ using namespace std;
 using std::list;
 using namespace ArdourMeter;
 
-int MasterBusUI::__meter_width = 6;
+int MasterBusUI::__meter_width = 3;
 PBD::Signal1<void,MasterBusUI*> MasterBusUI::CatchDeletion;
 
 MasterBusUI::MasterBusUI (Session* sess, PublicEditor& ed)
