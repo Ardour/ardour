@@ -1996,8 +1996,6 @@ RouteUI::setup_invert_buttons ()
 
 	for (uint32_t i = 0; i < to_add; ++i) {
 		ArdourButton* b = manage (new ArdourButton);
-		b->set_size_request(20,20);
-		Gtkmm2ext::set_height_request_to_display_any_text (*b, _button_vpad);
 		b->signal_button_press_event().connect (sigc::mem_fun (*this, &RouteUI::invert_press));
 		b->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::invert_release), i));
 
