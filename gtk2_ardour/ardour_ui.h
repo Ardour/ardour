@@ -413,10 +413,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::VBox                transport_button_vbox;
 	Gtk::HBox                transport_option_button_hbox;
 	Gtk::VBox                transport_option_button_vbox;
-	Gtk::HBox                transport_clock_hbox;
-	Gtk::VBox                transport_clock_vbox;
-	Gtk::HBox                primary_clock_hbox;
-	Gtk::HBox                secondary_clock_hbox;
 
 	struct TransportControllable : public PBD::Controllable {
 	    enum ToggleType {

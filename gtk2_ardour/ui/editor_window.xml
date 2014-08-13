@@ -26,8 +26,16 @@
                         normalicon="tracks"
                         activeicon="tracks_active"
                         prelighticon="tracks_prelight"/>
-            <HBox id="time_info_box_home" width="300"/>
-            <HBox id="primary_clock_home"/>
+            <Layout width="407" height="51">
+              <icon source="top_bar_background.png"
+                    tooltip="--------------------&#xA;This is a mockup&#xA;--------------------" />
+              <HBox id="time_info_box_home"
+                    x="60"
+                    y="4"/>
+              <HBox id="primary_clock_home"
+                    x="132"
+                    y="6"/>
+            </Layout>
             <Layout box.pack="end" width="114">
               <Adjustment id="dsp_load_adjustment"
                           minvalue="1"

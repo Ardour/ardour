@@ -392,6 +392,8 @@ ARDOUR_UI::setup_transport ()
 	tbox->pack_start (*a1, false, false);
 	tbox->pack_start (*a2, false, false);
 
+	primary_clock->set_draw_background (false);
+	primary_clock->set_visible_window (false);
 	editor->get_box ("primary_clock_home").pack_start (*primary_clock, false, false);
 
 	shuttle_box = new ShuttleControl;

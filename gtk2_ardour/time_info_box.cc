@@ -68,7 +68,9 @@ TimeInfoBox::TimeInfoBox ()
 	selection_length.set_draw_background (false);
 	selection_length.set_visible_window (false);
 	punch_start.set_draw_background (false);
+	punch_start.set_visible_window (false);
 	punch_end.set_draw_background (false);
+	punch_end.set_visible_window (false);
 
 	//left.set_homogeneous (false);
 	//left.set_spacings (0);

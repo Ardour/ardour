@@ -290,17 +290,19 @@ AudioClock::render (cairo_t* cr)
 		cairo_set_source_rgba (cr, bg_r, bg_g, bg_b, bg_a);
 		if (corner_radius) {
 			if (_left_layout) {
-				Gtkmm2ext::rounded_top_half_rectangle (cr, 0, 0, get_width(), upper_height, corner_radius);
+				Gtkmm2ext::rounded_top_half_rectangle (cr, _current_event_expose->area.x, _current_event_expose->area.y, get_width(), upper_height, corner_radius);
 			} else {
-				Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), upper_height, corner_radius);
+				Gtkmm2ext::rounded_rectangle (cr, _current_event_expose->area.x, _current_event_expose->area.y, get_width(), upper_height, corner_radius);
 			}
 		} else {
-			cairo_rectangle (cr, 0, 0, get_width(), upper_height);
+			cairo_rectangle (cr, _current_event_expose->area.x, _current_event_expose->area.y, get_width(), upper_height);
 		}
 		cairo_fill (cr);
 	}
 
-	cairo_move_to (cr, (get_width() - layout_width) / 2.0, (upper_height - layout_height) / 2.0);
+	cairo_move_to (cr, 
+				   (get_width() - layout_width) / 2.0 + _current_event_expose->area.x,
+				   (upper_height - layout_height) / 2.0 + _current_event_expose->area.y);
 
 	pango_cairo_show_layout (cr, _layout->gobj());
 

@@ -1,33 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <TimeInfoBox>
-  <Layout bgnormal="#7f6f5f" width="404" height="51">
-    <icon source="time_info_start_end_length.png"/>
-    <EventBox bgnormal="#7f0000"
-              x="52"
-              y="5">
-      <HBox id="selection_start_home"/>
-    </EventBox>
-    <EventBox bgnormal="#9f0000"
-              x="52"
-              y="21"
-              visiblewindow="false">
-      <HBox id="selection_end_home"/>
-    </EventBox>
-    <EventBox bgnormal="#bf0000"
-              x="52"
-              y="37">
-      <HBox id="selection_length_home"/>
-    </EventBox>
-    <HBox id="punch_start_home"
-          width="66"
-          height="10"
-          x="118"
-          y="0"/>
-    <HBox id="punch_end_home"
-          width="66"
-          height="10"
-          x="118"
-          y="10"/>
-  </Layout>
+  <HBox id="selection_start_home"
+          x="52"
+          y="5"/>
+  <HBox height="6"/>
+  <HBox id="selection_end_home"
+          x="52"
+          y="21"/>
+  <HBox height="5"/>
+  <HBox id="selection_length_home"
+          x="52"
+          y="37"/>
+  <HBox id="punch_start_home"
+        width="66"
+        height="10"
+        x="118"
+        y="0" ui.orphan="true"/>
+  <HBox id="punch_end_home"
+        width="66"
+        height="10"
+        x="118"
+        y="10" ui.orphan="true"/>
 </TimeInfoBox>
