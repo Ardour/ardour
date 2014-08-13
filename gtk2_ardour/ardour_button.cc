@@ -512,7 +512,17 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	CairoWidget::on_size_request (req);
 
 	if ((_elements & Text) && !_text.empty()) {
-		_layout->get_pixel_size (_text_width, _text_height);
+
+		//calc our real width for our string (but ignore the height, because that results in inconsistent button heights)
+		int ignored;
+		_layout->get_pixel_size (_text_width, ignored);
+
+		//calc the height using some text with both ascenders and descenders
+		std::string t = _layout->get_text();
+		_layout->set_text ("WjgO");  //what we put here probably doesn't matter, as long as its the same for everyone
+		_layout->get_pixel_size (ignored, _text_height);
+		_layout->set_text (t);
+
 		if (_text_width + _diameter < 75) {
 			xpad = 7;
 		} else {

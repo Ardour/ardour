@@ -165,12 +165,10 @@ MixerStrip::init ()
 	
 	input_button.set_text (_("Input"));
 	input_button.set_name ("mixer strip button");
-	input_button.set_size_request (-1, 20);
 	input_button_box.pack_start (input_button, true, true);
 
 	output_button.set_text (_("Output"));
 	output_button.set_name ("mixer strip button");
-	output_button.set_size_request (-1, 20);
 
 	ARDOUR_UI::instance()->set_tip (&meter_point_button, _("Click to select metering point"), "");
 	meter_point_button.set_name ("mixer strip button");
@@ -259,15 +257,12 @@ MixerStrip::init ()
 	name_button.set_text (""); /* back to empty */
 	name_button.layout()->set_ellipsize (Pango::ELLIPSIZE_END);
 	name_button.signal_size_allocate().connect (sigc::mem_fun (*this, &MixerStrip::name_button_resized));
-	name_button.set_size_request (-1, 20);
 
 	ARDOUR_UI::instance()->set_tip (&group_button, _("Mix group"), "");
 	group_button.set_name ("mixer strip button");
-	group_button.set_size_request (-1, 20);
 
 	_comment_button.set_name (X_("mixer strip button"));
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
-	_comment_button.set_size_request (-1, 20);
 
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (0);
