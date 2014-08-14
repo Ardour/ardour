@@ -77,6 +77,8 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 	, sends_menu(0)
 	, record_menu(0)
 	, comment_window(0)
+	, input_selector (0)
+	, output_selector (0)
 	, _invert_menu(0)
 {
 	if (sess) init ();
@@ -91,10 +93,10 @@ RouteUI::~RouteUI()
 	delete mute_menu;
 	delete sends_menu;
         delete record_menu;
-	delete _invert_menu;
 	delete comment_window;
 	delete input_selector;
 	delete output_selector;
+	delete _invert_menu;
 }
 
 void
