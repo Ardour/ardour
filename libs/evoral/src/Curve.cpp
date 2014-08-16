@@ -302,14 +302,11 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		if (veclen > 1) {
 			dx_num = hx - lx;
 			dx_den = veclen - 1;
-		}
-
-		if (veclen > 1) {
 			for (int i = 0; i < veclen; ++i) {
 				vec[i] = (lx * (m_num / m_den) + m_num * i * dx_num / (m_den * dx_den)) + c;
 			}
 		} else {
-			vec[0] = lx;
+			vec[0] = lx * (m_num / m_den) + c;
 		}
 
 		return;
