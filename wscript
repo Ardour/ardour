@@ -36,7 +36,7 @@ else:
 parts = rev.split ('.')
 MAJOR = parts[0]
 MINOR = parts[1]
-other = parts[2].split ('-')
+other = parts[1].split ('-')
 if len(other) > 1:
     MICRO = other[0]
 else:
