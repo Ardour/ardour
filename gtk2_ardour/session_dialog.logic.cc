@@ -149,7 +149,7 @@ void
 SessionDialog::on_new_session (WavesButton*)
 {
     set_keep_above(false);
-    _selected_session_full_file_name = ARDOUR::save_file_dialog(Config->get_default_session_parent_dir(),_("Create New Session"));
+    _selected_session_full_name = ARDOUR::save_file_dialog(Config->get_default_session_parent_dir(),_("Create New Session"));
     set_keep_above(true);
     
     if (!_selected_session_full_name.empty()) {
