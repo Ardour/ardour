@@ -38,9 +38,7 @@
 #include "ardour/export_filename.h"
 #include "ardour/session_metadata.h"
 #include "ardour/soundcloud_upload.h"
-#include "pbd/openuri.h"
-#include "pbd/basename.h"
-#include "pbd/system_exec.h"
+#include "ardour/system_exec.h"
 
 #include "i18n.h"
 
@@ -297,18 +295,18 @@ ExportHandler::finish_timespan ()
 	while (config_map.begin() != timespan_bounds.second) {
 
 		ExportFormatSpecPtr fmt = config_map.begin()->second.format;
-		std::string filepath = config_map.begin()->second.filename->get_path(fmt);
+		std::string filename = config_map.begin()->second.filename->get_path(fmt);
 
 		if (fmt->with_cue()) {
-			export_cd_marker_file (current_timespan, fmt, filepath, CDMarkerCUE);
+			export_cd_marker_file (current_timespan, fmt, filename, CDMarkerCUE);
 		} 
 
 		if (fmt->with_toc()) {
-			export_cd_marker_file (current_timespan, fmt, filepath, CDMarkerTOC);
+			export_cd_marker_file (current_timespan, fmt, filename, CDMarkerTOC);
                 }
 
 		if (fmt->tag()) {
-			AudiofileTagger::tag_file(filepath, *SessionMetadata::Metadata());
+			AudiofileTagger::tag_file(filename, *SessionMetadata::Metadata());
 		}
 
 		if (!fmt->command().empty()) {
@@ -325,15 +323,14 @@ ExportHandler::finish_timespan ()
 
 			PBD::ScopedConnection command_connection;
 			std::map<char, std::string> subs;
-			subs.insert (std::pair<char, std::string> ('f', filepath));
-			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname(filepath)));
-			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix(filepath)));
-			subs.insert (std::pair<char, std::string> ('u', upload_username));
-			subs.insert (std::pair<char, std::string> ('p', upload_password));
-
+			subs.insert (std::pair<char, std::string> ('f', filename));
+			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname(filename)));
+			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix(filename)));
+                        subs.insert (std::pair<char, std::string> ('s', session.path ()));
+                        subs.insert (std::pair<char, std::string> ('n', session.name ()));
 
 			std::cerr << "running command: " << fmt->command() << "..." << std::endl;
-			SystemExec *se = new SystemExec(fmt->command(), subs);
+                        ARDOUR::SystemExec *se = new SystemExec(fmt->command(), subs);
 
 			se->ReadStdout.connect_same_thread(command_connection, boost::bind(&ExportHandler::command_output, this, _1, _2));
 			if (se->start (2) == 0) {
@@ -357,8 +354,8 @@ ExportHandler::finish_timespan ()
 						"uploading %1 - username=%2, password=%3, token=%4",
 						filename, soundcloud_username, soundcloud_password, token) );
 			std::string path = soundcloud_uploader->Upload (
-					filepath,
-					PBD::basename_nosuffix(filepath), // title
+					filename,
+					PBD::basename_nosuffix(filename), // title
 					token,
 					soundcloud_make_public,
 					soundcloud_downloadable,

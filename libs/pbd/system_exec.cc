@@ -43,7 +43,12 @@
 #include <sys/resource.h>
 #endif
 
+#include <glibmm/miscutils.h>
 
+#define USE_VFORK
+
+#include "pbd/file_utils.h"
+#include "pbd/search_path.h"
 #include "pbd/system_exec.h"
 
 using namespace std;
@@ -149,9 +154,8 @@ static int close_allv(const int except_fds[]) {
 }
 #endif /* not on windows, nor vfork */
 
-
-SystemExec::SystemExec (std::string c, std::string a)
-	: cmd(c)
+void
+SystemExec::init ()
 {
 	pthread_mutex_init(&write_lock, NULL);
 	thread_active=false;
@@ -159,12 +163,19 @@ SystemExec::SystemExec (std::string c, std::string a)
 	pin[1] = -1;
 	nicelevel = 0;
 	envp = NULL;
-	argp = NULL;
 #ifdef PLATFORM_WINDOWS
 	stdinP[0] = stdinP[1] = INVALID_HANDLE_VALUE;
 	stdoutP[0] = stdoutP[1] = INVALID_HANDLE_VALUE;
 	stderrP[0] = stderrP[1] = INVALID_HANDLE_VALUE;
 #endif
+}
+
+SystemExec::SystemExec (std::string c, std::string a)
+	: cmd(c)
+{
+	init ();
+
+	argp = NULL;
 	make_envp();
 	make_argp(a);
 }
@@ -172,16 +183,9 @@ SystemExec::SystemExec (std::string c, std::string a)
 SystemExec::SystemExec (std::string c, char **a)
 	: cmd(c) , argp(a)
 {
-	pthread_mutex_init(&write_lock, NULL);
-	thread_active=false;
-	pid = 0;
-	pin[1] = -1;
-	nicelevel = 0;
-	envp = NULL;
+	init ();
+
 #ifdef PLATFORM_WINDOWS
-	stdinP[0] = stdinP[1] = INVALID_HANDLE_VALUE;
-	stdoutP[0] = stdoutP[1] = INVALID_HANDLE_VALUE;
-	stderrP[0] = stderrP[1] = INVALID_HANDLE_VALUE;
 	make_wargs(a);
 #endif
 	make_envp();
@@ -191,8 +195,17 @@ SystemExec::SystemExec (std::string command, const std::map<char, std::string> s
 {
 	init ();
 	make_argp_escaped(command, subs);
-	cmd = argp[0];
-	// cmd = strdup(argp[0]);
+
+	if (find_file_in_search_path (Searchpath (Glib::getenv ("PATH")), argp[0], cmd)) {
+		// argp[0] exists in $PATH` - set it to the actual path where it was found
+		free (argp[0]);
+		argp[0] = strdup(cmd.c_str ());
+	}
+	// else argp[0] not found in path - leave it as-is, it might be an absolute path
+
+	// Glib::find_program_in_path () is only available in Glib >= 2.28
+	// cmd = Glib::find_program_in_path (argp[0]);
+
 	make_envp();
 }
 
@@ -264,9 +277,6 @@ SystemExec::make_argp_escaped(std::string command, const std::map<char, std::str
 		}
 	}
 	argp[n] = NULL;
-
-	char *p = argp[0];
-	n = 0;
 }
 
 SystemExec::~SystemExec ()
@@ -274,13 +284,13 @@ SystemExec::~SystemExec ()
 	terminate ();
 	if (envp) {
 		for (int i=0;envp[i];++i) {
-		  free(envp[i]);
+			free(envp[i]);
 		}
 		free (envp);
 	}
 	if (argp) {
 		for (int i=0;argp[i];++i) {
-		  free(argp[i]);
+			free(argp[i]);
 		}
 		free (argp);
 	}
@@ -403,8 +413,7 @@ int
 SystemExec::wait (int options)
 {
 	while (is_running()) {
-		WaitForSingleObject(pid->hProcess, INFINITE);
-		Sleep(20);
+		WaitForSingleObject(pid->hProcess, 40);
 	}
 	return 0;
 }
@@ -412,7 +421,12 @@ SystemExec::wait (int options)
 bool
 SystemExec::is_running ()
 {
-	return pid?true:false;
+	if (!pid) return false;
+	DWORD exit_code;
+	if (GetExitCodeProcess(pid->hProcess, &exit_code)) {
+		if (exit_code == STILL_ACTIVE) return true;
+	}
+	return false;
 }
 
 int
@@ -602,7 +616,7 @@ SystemExec::make_argp(std::string args) {
 			*cp2 = '\0';
 			argp[argn++] = strdup(cp1);
 			cp1 = cp2 + 1;
-	    argp = (char **) realloc(argp, (argn + 1) * sizeof(char *));
+			argp = (char **) realloc(argp, (argn + 1) * sizeof(char *));
 		}
 	}
 	if (cp2 != cp1) {
@@ -626,7 +640,7 @@ SystemExec::terminate ()
 	close_stdin();
 
 	if (pid) {
-		::usleep(50000);
+		::usleep(200000);
 		sched_yield();
 		wait(WNOHANG);
 	}
@@ -637,7 +651,7 @@ SystemExec::terminate ()
 	
 	if (pid) {
 		::kill(pid, SIGTERM);
-		usleep(50000);
+		::usleep(250000);
 		sched_yield();
 		wait(WNOHANG);
 	}
@@ -795,6 +809,10 @@ SystemExec::start (int stderr_mode, const char *vfork_exec_wrapper)
 #else
 	signal(SIGPIPE, SIG_DFL);
 #endif
+	if (!vfork_exec_wrapper) {
+		error << _("Cannot start external process, no vfork wrapper") << endmsg;
+		return -1;
+	}
 
 	int good_fds[2] = { pok[1],  -1 };
 	close_allv(good_fds);
@@ -857,7 +875,16 @@ SystemExec::output_interposer()
 	for (;fcntl(rfd, F_GETFL)!=-1;) {
 		r = read(rfd, buf, sizeof(buf));
 		if (r < 0 && (errno == EINTR || errno == EAGAIN)) {
-			::usleep(1000);
+			fd_set rfds;
+			struct timeval tv;
+			FD_ZERO(&rfds);
+			FD_SET(rfd, &rfds);
+			tv.tv_sec = 0;
+			tv.tv_usec = 10000;
+			int rv = select(1, &rfds, NULL, NULL, &tv);
+			if (rv == -1) {
+				break;
+			}
 			continue;
 		}
 		if (r <= 0) {
