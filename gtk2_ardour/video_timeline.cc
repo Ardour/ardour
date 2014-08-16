@@ -39,6 +39,10 @@
 #include <pthread.h>
 #include <curl/curl.h>
 
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+#endif
+
 #include "i18n.h"
 
 using namespace std;
@@ -718,20 +722,45 @@ void
 VideoTimeLine::find_xjadeo () {
 	std::string xjadeo_file_path;
 	if (getenv("XJREMOTE")) {
-		_xjadeo_bin = strdup(getenv("XJREMOTE")); // XXX TODO: free it?!
-	} else if (find_file_in_search_path (SearchPath(Glib::getenv("PATH")), X_("xjremote"), xjadeo_file_path)) {
+		_xjadeo_bin = getenv("XJREMOTE");
+	}
+	else if (find_file_in_search_path (SearchPath(Glib::getenv("PATH")), X_("xjremote"), xjadeo_file_path)) {
 		_xjadeo_bin = xjadeo_file_path;
+	}
+	else if (find_file_in_search_path (SearchPath(Glib::getenv("PATH")), X_("xjadeo"), xjadeo_file_path)) {
+		_xjadeo_bin = xjadeo_file_path;
+	}
+#ifdef __APPLE__
+	else if (Glib::file_test(X_("/Applications/Xjadeo.app/Contents/MacOS/xjremote"), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
+		_xjadeo_bin = X_("/Applications/Xjadeo.app/Contents/MacOS/xjremote");
 	}
 	else if (Glib::file_test(X_("/Applications/Jadeo.app/Contents/MacOS/xjremote"), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
 		_xjadeo_bin = X_("/Applications/Jadeo.app/Contents/MacOS/xjremote");
 	}
-	/* TODO: win32: allow to configure PATH to xjremote */
+#endif
+#ifdef PLATFORM_WINDOWS
+	else {
+		HKEY key;
+		DWORD size = PATH_MAX;
+		char path[PATH_MAX+1];
+		xjadeo_file_path = X_("");
+		if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\xjadeo", 0, KEY_READ, &key))
+		    && (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, (LPBYTE)path, &size))
+		   )
+		{
+			xjadeo_file_path = g_build_filename(path, X_("xjadeo.exe"));
+		}
+	}
+	if (Glib::file_test(xjadeo_file_path, Glib::FILE_TEST_EXISTS)) {
+		_xjadeo_bin = xjadeo_file_path;
+	}
 	else if (Glib::file_test(X_("C:\\Program Files\\xjadeo\\xjremote.exe"), Glib::FILE_TEST_EXISTS)) {
 		_xjadeo_bin = X_("C:\\Program Files\\xjadeo\\xjremote.exe");
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\xjadeo\\xjremote.bat"), Glib::FILE_TEST_EXISTS)) {
 		_xjadeo_bin = X_("C:\\Program Files\\xjadeo\\xjremote.bat");
 	}
+#endif
 	else  {
 		_xjadeo_bin = X_("");
 		warning << _("Video-monitor 'xjadeo' was not found. Please install http://xjadeo.sf.net/ "
