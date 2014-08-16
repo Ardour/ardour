@@ -3678,7 +3678,7 @@ Editor::set_visible_track_count (int32_t n)
 		/* negative value means that the visible track count has 
 		   been overridden by explicit track height changes.
 		*/
-		visible_tracks_selector.set_active_text (X_("*"));
+		visible_tracks_selector.set_text (X_("*"));
 		return;
 	}
 
@@ -3687,8 +3687,8 @@ Editor::set_visible_track_count (int32_t n)
 //		(*i)->set_height (h);
 //	}
 	
-	if (str != visible_tracks_selector.get_active_text()) {
-		visible_tracks_selector.set_active_text (str);
+	if (str != visible_tracks_selector.get_text()) {
+		visible_tracks_selector.set_text (str);
 	}
 }
 
