@@ -330,12 +330,6 @@ WavesButton::color_handler ()
 }
 
 void
-WavesButton::on_size_allocate (Allocation& alloc)
-{
-	CairoWidget::on_size_allocate (alloc);
-}
-
-void
 WavesButton::set_controllable (boost::shared_ptr<Controllable> c)
 {
         watch_connection.disconnect ();
