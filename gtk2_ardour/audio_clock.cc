@@ -320,27 +320,41 @@ AudioClock::render (cairo_t* cr)
 
 			if (_need_bg) {
 				if (corner_radius) {
-					Gtkmm2ext::rounded_bottom_half_rectangle (cr, 0, upper_height + separator_height,
-							left_rect_width + (separator_height == 0 ? corner_radius : 0),
-							h, corner_radius);
+					Gtkmm2ext::rounded_bottom_half_rectangle (cr,
+															  _current_event_expose->area.x, 
+															  _current_event_expose->area.y + upper_height + separator_height,
+															  left_rect_width + (separator_height == 0 ? corner_radius : 0),
+															  h,
+															  corner_radius);
 				} else {
-					cairo_rectangle (cr, 0, upper_height + separator_height, left_rect_width, h);
+					cairo_rectangle (cr, 
+									 _current_event_expose->area.x,
+									 _current_event_expose->area.y + upper_height + separator_height,
+									 left_rect_width,
+									 h);
 				}
 				cairo_fill (cr);
 			}
 
-			cairo_move_to (cr, x_leading_padding, upper_height + separator_height + ((h - info_height)/2.0));
+			cairo_move_to (cr,
+						   _current_event_expose->area.x + x_leading_padding,
+						   _current_event_expose->area.y + upper_height + separator_height + ((h - info_height)/2.0));
 			pango_cairo_show_layout (cr, _left_layout->gobj());
 
 			if (_need_bg) {
 				if (corner_radius) {
-					Gtkmm2ext::rounded_bottom_half_rectangle (cr, left_rect_width + separator_height,
-							upper_height + separator_height,
-							get_width() - separator_height - left_rect_width,
-							h, corner_radius);
+					Gtkmm2ext::rounded_bottom_half_rectangle (cr,
+															  _current_event_expose->area.x + left_rect_width + separator_height,
+															  _current_event_expose->area.y + upper_height + separator_height,
+															  get_width() - separator_height - left_rect_width,
+															  h,
+															  corner_radius);
 				} else {
-					cairo_rectangle (cr, left_rect_width + separator_height, upper_height + separator_height,
-							 get_width() - separator_height - left_rect_width, h);
+					cairo_rectangle (cr,
+									 _current_event_expose->area.x + left_rect_width + separator_height,
+									 _current_event_expose->area.y + upper_height + separator_height,
+									 get_width() - separator_height - left_rect_width,
+									 h);
 				}
 				cairo_fill (cr);
 			}
@@ -361,9 +375,13 @@ AudioClock::render (cairo_t* cr)
 					/* rather cut off the right end than overlap with the text on the left */
 					x = x_leading_padding + left_rect_width + separator_height;
 				}
-				cairo_move_to (cr, x, upper_height + separator_height + ((h - info_height)/2.0));
+				cairo_move_to (cr,
+							   _current_event_expose->area.x + x,
+							   _current_event_expose->area.y + upper_height + separator_height + ((h - info_height)/2.0));
 			} else {
-				cairo_move_to (cr, x_leading_padding + left_rect_width + separator_height, upper_height + separator_height + ((h - info_height)/2.0));
+				cairo_move_to (cr,
+							   _current_event_expose->area.x + x_leading_padding + left_rect_width + separator_height,
+							   _current_event_expose->area.y + upper_height + separator_height + ((h - info_height)/2.0));
 			}
 			pango_cairo_show_layout (cr, _right_layout->gobj());
 
@@ -372,9 +390,18 @@ AudioClock::render (cairo_t* cr)
 
 			if (_need_bg) {
 				if (corner_radius) {
-					Gtkmm2ext::rounded_bottom_half_rectangle (cr, 0, upper_height + separator_height, get_width(), h, corner_radius);
+					Gtkmm2ext::rounded_bottom_half_rectangle (cr,
+															  _current_event_expose->area.x,
+															  _current_event_expose->area.y + upper_height + separator_height,
+															  get_width(),
+															  h,
+															  corner_radius);
 				} else {
-					cairo_rectangle (cr, 0, upper_height + separator_height, get_width(), h);
+					cairo_rectangle (cr,
+									 _current_event_expose->area.x,
+									 _current_event_expose->area.y + upper_height + separator_height,
+									 get_width(),
+									 h);
 				}
 				cairo_fill (cr);
 			}
@@ -400,22 +427,22 @@ AudioClock::render (cairo_t* cr)
 
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
 				cairo_rectangle (cr,
-						 min (get_width() - 2.0,
-						      (double) xcenter + cursor.get_x()/PANGO_SCALE + em_width),
-						 (upper_height - layout_height)/2.0,
-						 2.0, cursor.get_height()/PANGO_SCALE);
+								 _current_event_expose->area.x + min (get_width() - 2.0, (double) xcenter + cursor.get_x()/PANGO_SCALE + em_width),
+								 _current_event_expose->area.y + (upper_height - layout_height)/2.0,
+								 2.0,
+								 cursor.get_height()/PANGO_SCALE);
 				cairo_fill (cr);
 			} else {
 				/* we've entered all possible digits, no cursor */
 			}
-
 		} else {
 			if (input_string.empty()) {
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
 				cairo_rectangle (cr,
-						 (get_width()/2.0),
-						 (upper_height - layout_height)/2.0,
-						 2.0, upper_height);
+								 _current_event_expose->area.x + (get_width()/2.0),
+								 _current_event_expose->area.y + (upper_height - layout_height)/2.0,
+								 2.0,
+								 upper_height);
 				cairo_fill (cr);
 			}
 		}
@@ -991,6 +1018,9 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 void
 AudioClock::set_slave_info ()
 {
+	return;
+	/* TRACKS: Let's carefully define what we need here
+	*/
 	if (!_left_layout || !_right_layout) {
 		return;
 	}

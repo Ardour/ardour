@@ -6,7 +6,10 @@
                     box.expand="true"
                     box.fill="true">
       <EventBox bgnormal="#383838">
+        <VBox>
+          <EventBox bgnormal="#000000" height="1"/>
           <Hbox id="mixer_strips_home"/>
+        </VBox>
       </EventBox>        
     </ScrolledWindow>
 </CompactMeterbridge>
