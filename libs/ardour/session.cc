@@ -4568,34 +4568,27 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 	legal_playlist_name = legalize_for_path (playlist->name());
 
-	ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
+        for (uint32_t chan_n = 0; chan_n < diskstream_channels.n_audio(); ++chan_n) {
 
-	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n_audio(); ++chan_n) {
-
-		for (x = 0; x < 99999; ++x) {
-			possible_path = Glib::build_filename (sound_dir, string_compose ("%1-%2-bounce-%3%4", legal_playlist_name.c_str(), chan_n, x+1, ext.c_str()));
-			if (!Glib::file_test (possible_path, Glib::FILE_TEST_EXISTS)) {
-				break;
-			}
-		}
-
-		if (x == 99999) {
-			error << string_compose (_("too many bounced versions of playlist \"%1\""), playlist->name()) << endmsg;
-			goto out;
-		}
-
-		try {
-			fsource = boost::dynamic_pointer_cast<AudioFileSource> (
-				SourceFactory::createWritable (DataType::AUDIO, *this, possible_path, false, frame_rate()));
-		}
-
-		catch (failed_constructor& err) {
-			error << string_compose (_("cannot create new audio file \"%1\" for %2"), possible_path, track.name()) << endmsg;
-			goto out;
-		}
-
-		srcs.push_back (fsource);
-	}
+                string base_name = string_compose ("%1-%2-bounce", playlist->name(), chan_n);
+                string path = new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, false, true);
+                
+                if (path.empty()) {
+                        goto out;
+                }
+                
+                try {
+                        fsource = boost::dynamic_pointer_cast<AudioFileSource> (
+                                SourceFactory::createWritable (DataType::AUDIO, *this, path, false, frame_rate()));
+                }
+                
+                catch (failed_constructor& err) {
+                        error << string_compose (_("cannot create new audio file \"%1\" for %2"), path, track.name()) << endmsg;
+                        goto out;
+                }
+                
+                srcs.push_back (fsource);
+        }
 
 	/* tell redirects that care that we are about to use a much larger
 	 * blocksize. this will flush all plugins too, so that they are ready
