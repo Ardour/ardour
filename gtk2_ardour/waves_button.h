@@ -65,7 +65,6 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
   protected:
 	void render (cairo_t *);
 	void on_size_request (Gtk::Requisition* req);
-	void on_size_allocate (Gtk::Allocation&);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 	void on_name_changed ();
 	bool on_enter_notify_event (GdkEventCrossing*);
