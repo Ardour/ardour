@@ -136,7 +136,7 @@ StereoPanner::set_tooltip ()
 }
 
 void
-StereoPanner::render (cairo_t* cr)
+StereoPanner::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create(get_pango_context());
 	layout->set_attributes (panner_font_attributes);

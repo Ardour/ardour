@@ -106,7 +106,7 @@ MonoPanner::set_tooltip ()
 }
 
 void
-MonoPanner::render (cairo_t* cr)
+MonoPanner::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	unsigned pos = (unsigned)(rint (100.0 * position_control->get_value ())); /* 0..100 */
 

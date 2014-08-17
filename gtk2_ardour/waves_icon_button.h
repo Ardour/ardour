@@ -34,7 +34,7 @@ class WavesIconButton : public WavesButton
 	void set_prelight_image (const Glib::RefPtr<Gdk::Pixbuf>& img);	
 
   protected:
-	void render (cairo_t *);
+	void render (cairo_t *, cairo_rectangle_t*);
 
   private:
 	Glib::RefPtr<Gdk::Pixbuf>   _normal_pixbuf;

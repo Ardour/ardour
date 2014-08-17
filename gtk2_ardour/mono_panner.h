@@ -48,7 +48,7 @@ class MonoPanner : public PannerInterface
 	sigc::signal<void> StopGesture;
 
   protected:
-	void render (cairo_t* cr);
+	void render (cairo_t* cr, cairo_rectangle_t*);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 	bool on_motion_notify_event (GdkEventMotion*);

@@ -113,7 +113,7 @@ WavesButton::set_angle (const double angle)
 }
 
 void
-WavesButton::render (cairo_t* cr)
+WavesButton::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	Glib::RefPtr<Gtk::Style> style = get_style();
 	

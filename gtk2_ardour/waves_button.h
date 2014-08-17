@@ -63,7 +63,7 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	sigc::signal1<void, WavesButton*> signal_double_clicked;
 
   protected:
-	void render (cairo_t *);
+        void render (cairo_t *, cairo_rectangle_t*);
 	void on_size_request (Gtk::Requisition* req);
 	void on_size_allocate (Gtk::Allocation&);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);

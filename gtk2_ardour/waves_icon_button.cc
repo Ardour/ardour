@@ -50,7 +50,7 @@ WavesIconButton::~WavesIconButton()
 
 
 void
-WavesIconButton::render (cairo_t* cr)
+WavesIconButton::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	void (*rounded_function)(cairo_t*, double, double, double, double, double);
 

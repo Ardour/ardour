@@ -196,7 +196,7 @@ Fader::~Fader ()
 }
 
 void
-Fader::render (cairo_t* cr)
+Fader::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	get_handle_position (_last_drawn_x, _last_drawn_y);
 

@@ -67,6 +67,7 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 	cairo_destroy (cr);
 
 	return true;
+    }
 }
 
 /** Marks the widget as dirty, so that render () will be called on
