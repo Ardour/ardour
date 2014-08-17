@@ -31,6 +31,7 @@
 #include <gtkmm/scrolledwindow.h>
 #include "gtkmm2ext/fader.h"
 #include "gtkmm2ext/focus_entry.h"
+#include "pbd/xml++.h"
 #include "canvas/canvas.h"
 #include "canvas/xml_ui.h"
 #include "waves_grid.h"

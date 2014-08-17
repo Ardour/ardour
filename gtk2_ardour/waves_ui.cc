@@ -121,9 +121,11 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 			child = manage (new Gtk::Layout (get_adjustment(hadjustment_id.c_str()), 
 											 get_adjustment(vadjustment_id.c_str())));
 		}
+#ifdef ARDOUR_CANVAS_HAS_XMLUI                
 	} else if (widget_type == "CANVAS") {
 		std::map<std::string, ArdourCanvas::Item*> named_items;
 		child = manage (new ArdourCanvas::GtkCanvas (definition, styles, named_items));
+#endif
 	} else if (widget_type == "SCROLLEDWINDOW") {
 		child = manage (new Gtk::ScrolledWindow);
 	} else if (widget_type == "FIXED") {
