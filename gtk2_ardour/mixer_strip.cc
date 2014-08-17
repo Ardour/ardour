@@ -1200,8 +1200,7 @@ MixerStrip::show_passthru_color ()
 	reset_strip_style ();
 }
 
-<<<<<<< HEAD
-=======
+#if 0 /* not used in tracks */
 void
 MixerStrip::build_route_ops_menu ()
 {
@@ -1242,8 +1241,8 @@ MixerStrip::build_route_ops_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), false)));
 }
+#endif
 
->>>>>>> 14c6dfa... Do not allow to de/activate a track while the transport is rolling.
 gboolean
 MixerStrip::name_button_button_press (GdkEventButton* ev)
 {
