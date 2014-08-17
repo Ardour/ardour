@@ -1619,7 +1619,7 @@ RegionRippleDrag::add_all_after_to_views(TimeAxisView *tav, framepos_t where, co
 
 			if (drag_in_progress) {
 				(*i)->drag_start();
-				ArdourCanvas::Group* rvg = (*i)->get_canvas_group();
+				ArdourCanvas::Item* rvg = (*i)->get_canvas_group();
 				Duple rv_canvas_offset = rvg->item_to_canvas (Duple (0,0));
 				rvg->set_position (rv_canvas_offset);
 			}
