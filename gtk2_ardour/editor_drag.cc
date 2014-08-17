@@ -1621,10 +1621,9 @@ RegionRippleDrag::add_all_after_to_views(TimeAxisView *tav, framepos_t where, co
 				(*i)->drag_start();
 				ArdourCanvas::Group* rvg = (*i)->get_canvas_group();
 				Duple rv_canvas_offset = rvg->item_to_canvas (Duple (0,0));
-				(*i)->fake_set_opaque (true);
 				rvg->set_position (rv_canvas_offset);
 			}
-			_views.push_back (DraggingView (*i, this));
+			_views.push_back (DraggingView (*i, this, tav));
 		}
 	}
 }
@@ -1651,7 +1650,6 @@ RegionRippleDrag::remove_unselected_from_views(framecnt_t amount)
 			rv->get_canvas_group()->reparent(prev_tav->view()->canvas_item());
 			rv->get_canvas_group()->set_y_position (0);
 			rv->drag_end ();
-			rv->fake_set_opaque (false);
 			rv->move(-amount, 0);	// second parameter is y delta - seems 0 is OK
 			// rv->set_height (rtv->view()->child_height ());
 
