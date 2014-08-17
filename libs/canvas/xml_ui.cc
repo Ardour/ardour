@@ -17,7 +17,6 @@
 
 */
 #include "canvas/xml_ui.h"
-#include "canvas/group.h"
 #include "canvas/rectangle.h"
 #include "canvas/pixbuf.h"
 #include "canvas/text.h"
