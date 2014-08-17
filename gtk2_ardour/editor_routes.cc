@@ -535,12 +535,8 @@ EditorRoutes::redisplay ()
         
 		/* show or hide the TimeAxisView */
 		if (visible) {
-<<<<<<< HEAD
 			position += tv->show_at (position, n, &_editor->edit_controls_vbox, show_number);
 			// SHOWTRACKS
-=======
-			position += tv->show_at (position, n, &_editor->edit_controls_vbox);
->>>>>>> 5d6dc38... fix some confusion when redrawing editor/mixer track/strip displays after track/bus deletion
 		} else {
 			tv->hide ();
 		}
