@@ -732,8 +732,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	bool track_canvas_motion (GdkEvent*);
 
-	Gtk::EventBox             time_bars_event_box;
-	Gtk::VBox                 time_bars_vbox;
+	Gtk::EventBox&            time_bars_event_box;
+	Gtk::VBox&                time_bars_vbox;
 
 	ArdourCanvas::Pixbuf     *logo_item;
 #if 0    
@@ -999,7 +999,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Menu *edit_controls_right_menu;
 
 	Gtk::VBox           track_canvas_vbox;
-	Gtk::VBox           edit_controls_vbox;
+	Gtk::VBox&          edit_controls_vbox;
 	Gtk::HBox           edit_controls_hbox;
 
 	void control_vertical_zoom_in_all ();
