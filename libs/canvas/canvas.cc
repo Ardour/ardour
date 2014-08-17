@@ -46,18 +46,6 @@ Canvas::Canvas ()
 	set_epoch ();
 }
 
-Canvas::Canvas (const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Item*>& named_items)
-	: _root (this)
-	, _scroll_offset_x (0)
-	, _scroll_offset_y (0)
-{
-	set_epoch ();
-	const XMLNodeList& children = definition.children();
-	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-		XMLUI::create_item (root(), **i, styles, named_items);
-	}
-}
-
 void
 Canvas::scroll_to (Coord x, Coord y)
 {
@@ -292,19 +280,6 @@ GtkCanvas::GtkCanvas ()
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK |
 		    Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
 }
-
-GtkCanvas::GtkCanvas (const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Item*>& named_items)
-	: Canvas(definition, styles, named_items)
-	, _current_item (0)
-	, _new_current_item (0)
-	, _grabbed_item (0)
-	, _focused_item (0)
-{
-	/* these are the events we want to know about */
-	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK |
-		    Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
-}
-
 
 void
 GtkCanvas::pick_current_item (int state)
@@ -780,11 +755,8 @@ GtkCanvas::request_size (Duple size)
 	if (req.y > INT_MAX) {
 		req.y = INT_MAX;
 	}
-	int applied_width;
-	int applied_height;
-	get_size_request(applied_width, applied_height);
-	set_size_request (applied_width == -1 ? req.x : applied_width,
-					  applied_height == -1 ? req.y : applied_height );
+
+	set_size_request (req.x, req.y);
 }
 
 /** `Grab' an item, so that all events are sent to that item until it is `ungrabbed'.

@@ -24,20 +24,17 @@
 
 #include "canvas/visibility.h"
 #include "canvas/item.h"
-#include "canvas/xml_ui.h"
 
 namespace Gdk {
 	class Pixbuf;
 }
 
 namespace ArdourCanvas {
-using namespace XMLUI;
 
 class LIBCANVAS_API Pixbuf : public Item
 {
 public:
 	Pixbuf (Group *);
-	Pixbuf (Group *, const XMLNode&, const XMLNodeMap&, std::map<std::string, Item*>&);
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;

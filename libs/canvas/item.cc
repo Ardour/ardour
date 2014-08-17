@@ -42,29 +42,7 @@ Item::Item (Canvas* canvas)
 Item::Item (Group* parent)
 	: _canvas (parent->canvas ())
 	, _parent (parent)
-	, _visible (true)
-	, _bounding_box_dirty (true)
-	, _ignore_events (false)
 {
-	init ();
-}
-
-Item::Item (Group* parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Item*>& named_items)
-	: _canvas (parent->canvas ())
-	, _parent (parent)
-	, _position(xml_x (definition, styles),
-				xml_y (definition, styles))
-	, _visible (xml_property(definition, "visible", styles, true))
-	, _bounding_box_dirty (true)
-	, _ignore_events (false)
-{
-	std::string item_id = xml_id (definition);
-	if (!item_id.empty()) {
-		named_items[item_id] = this;
-	}
-
-	_position = Duple (xml_x (definition, styles),
-					   xml_y (definition, styles));
 	init ();
 }
 
@@ -72,9 +50,6 @@ Item::Item (Group* parent, Duple position)
 	: _canvas (parent->canvas())
 	, _parent (parent)
 	, _position (position)
-	, _visible (true)
-	, _bounding_box_dirty (true)
-	, _ignore_events (false)
 {
 	init ();
 }
@@ -82,6 +57,9 @@ Item::Item (Group* parent, Duple position)
 void
 Item::init ()
 {
+	_visible = true;
+	_bounding_box_dirty = true;
+	_ignore_events = false;
 	
 	if (_parent) {
 		_parent->add (this);

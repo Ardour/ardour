@@ -227,6 +227,7 @@ Pango::Alignment xml_text_alignment (const XMLNode& node, const XMLNodeMap& styl
 	return default_value;
 }
 
+#ifdef ARDOUR_CANVAS_HAS_XML_UI
 ArdourCanvas::Item*
 create_item (Group* parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, ArdourCanvas::Item*>& named_items)
 {
@@ -257,7 +258,7 @@ create_item (Group* parent, const XMLNode& definition, const XMLNodeMap& styles,
 
 	return child;
 }
-
+#endif
 }
 }
 

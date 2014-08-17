@@ -59,7 +59,9 @@ namespace XMLUI {
 	extern LIBCANVAS_API double xml_y (const XMLNode& node, const XMLNodeMap& styles, double default_value = 0);
 	extern LIBCANVAS_API Pango::Alignment xml_text_alignment (const XMLNode& node, const XMLNodeMap& styles, Pango::Alignment default_value = Pango::ALIGN_LEFT);
 
+#ifdef ARDOUR_CANVAS_HAS_XML_UI
 	extern LIBCANVAS_API ArdourCanvas::Item* create_item (Group* parent, const XMLNode& definition, const XMLNodeMap& styles, std::map<std::string, Item*> &named_items);
+#endif
 }
 }
 

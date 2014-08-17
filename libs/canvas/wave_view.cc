@@ -335,8 +335,8 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 
 	/* ensure single-pixel lines */
 		
-	context->set_line_width (1.1); //VK: 0.5);
-	context->translate (1.1, 0.0); //VK: (0.5, 0.0);
+	context->set_line_width (0.5);
+	context->translate (0.5, 0.0);
 
 	/* draw the lines */
 
