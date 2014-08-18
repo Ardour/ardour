@@ -4,18 +4,24 @@
   <VBox id="vpacker">
     <Adjustment id="vertical_adjustment"
                 initial_value="0"
-                min_value="0"
-                max_value="10"
+                minvalue="0"
+                maxvalue="10"
                 step="400"/>
     <Adjustment id="horizontal_adjustment"
                 initial_value="0"
-                min_value="0"
-                max_value="10000000000000000"/>
+                minvalue="0"
+                maxvalue="10000000000000000"/>
     <Adjustment id="unused_adjustment"
                 initial_value="0"
-                min_value="0"
-                max_value="10"
+                minvalue="0"
+                maxvalue="10"
                 step="400"/>
+    <Adjustment id="waves_zoom_adjustment"
+                initial_value="0"
+                minvalue="0"
+                maxvalue="10"
+                step="0.2"
+                pagesize="2.0"/>
     <HBox id="menu_bar_base"/>
     <EventBox bgnormal="#000000">
       <VBox borderwidth="2" spacing ="1">
@@ -197,12 +203,10 @@
                      minposy="13"
                      maxposx="20"
                      maxposy="13"/>
-              <iconbutton id="tool_waveform_zoom_button"
-                          tooltip="Waveform Zoom"
-                          width="34" height="26"
-                          normalicon="tool_waveform_zoom"
-                          activeicon="tool_waveform_zoom_active"
-                          prelighticon="tool_waveform_zoom_prelight"/>
+              <EventBox id="waves_zoom_control_home"
+                        tooltip="Waveform Zoom"
+                        width="48" height="26"
+                        bgnormal="#ffff00"/>
               <iconbutton id="media_button"
                           tooltip="Media Button"
                           width="48" height="26"
