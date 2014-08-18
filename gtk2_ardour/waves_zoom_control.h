@@ -32,7 +32,7 @@ class WavesZoomControl : public CairoWidget
 	bool on_button_release_event (GdkEventButton*);
 
   protected:
-	void render (cairo_t *);
+	void render (cairo_t *, cairo_rectangle_t*);
 	void on_size_request (Gtk::Requisition* req);
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);

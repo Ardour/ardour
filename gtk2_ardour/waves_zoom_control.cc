@@ -24,6 +24,8 @@
 #include "i18n.h"
 #include "dbg_msg.h"
 
+using namespace ARDOUR_UI_UTILS;
+
 WavesZoomControl::WavesZoomControl (Gtk::Adjustment& adjustment)
 	: _adjustment (adjustment)
 	, _state (StateIdle)
@@ -42,7 +44,7 @@ WavesZoomControl::~WavesZoomControl()
 }
 
 void
-WavesZoomControl::render (cairo_t* cr)
+WavesZoomControl::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 
