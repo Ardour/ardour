@@ -7,9 +7,12 @@
       <HBox box.expand="true" box.fill="true">
         <EventBox id="selected_track_color_box" width="29" bgactive="#5BA55C">
           <HBox>
-            <HBox width="12"/>
-            <VBox>
-              <Label id="number_label" text="32" fgnormal="#ffffff" fgactive="#ffffff" font ="Helvetica 10"/>
+            <!--<Igor! width="2" below is the shift from RIGHT side of the space>-->
+            <VBox width="2" box.pack="end"/>
+            <VBox box.pack="end">
+              <!--<Igor! height="4" below is the shift from TOP side of the space>-->
+              <HBox height="4"/>
+              <Label id="number_label" text="32" fgnormal="#ffffff" fgactive="#ffffff" font ="Helvetica Bold 13"/>
             </VBox>
           </HBox>
         </EventBox>
@@ -20,6 +23,8 @@
     </VBox>
     <VBox>
       <EventBox height="1" bgnormal="#494949" bgactive="#494949"/>
+      <!--<Igor! About the track name: height="5" below is the shift from TOP side of the space>-->
+      <HBox height="5"/>
       <HBox width="80"
             id="name_label_home">
         <HBox width="5"/>
