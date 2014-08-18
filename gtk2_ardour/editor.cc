@@ -1297,6 +1297,10 @@ Editor::update_title ()
 	}
 }
 
+namespace {
+    const size_t mixer_bridge_strip_max_name_size = 9;
+    const size_t meter_bridge_strip_max_name_size = 6;
+}
 void
 Editor::set_session (Session *t)
 {
@@ -1318,9 +1322,11 @@ Editor::set_session (Session *t)
 	_routes->set_session (_session);
 	_locations->set_session (_session);
 	_compact_meter_bridge.set_session (_session);
-	_mixer_bridge_view.set_session (_session);
+    _mixer_bridge_view.set_max_name_size(mixer_bridge_strip_max_name_size);
+    _mixer_bridge_view.set_session (_session);
+    _meter_bridge_view.set_max_name_size(meter_bridge_strip_max_name_size);
 	_meter_bridge_view.set_session (_session);
-
+    
 	if (rhythm_ferret) {
 		rhythm_ferret->set_session (_session);
 	}

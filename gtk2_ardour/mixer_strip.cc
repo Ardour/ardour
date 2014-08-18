@@ -126,9 +126,30 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, const std::string& layout_s
 	}
 }
 
-MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt, const std::string& layout_script_file)
+string cut_string(const string& route_name, size_t max_name_size)
+{
+    if ( max_name_size == 0 )
+        return route_name;
+    
+    string cutted_route_name;  
+    
+    if ( route_name.size()<=max_name_size )
+    {
+        cutted_route_name = route_name;
+    }
+    else
+    {
+        cutted_route_name.assign(route_name, 0, max_name_size-3);
+        cutted_route_name += "...";
+    }
+    
+    return cutted_route_name;
+}
+
+MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt, const std::string& layout_script_file, size_t max_name_size)
 	: AxisView(sess)
 	, RouteUI (sess, layout_script_file)
+    , _max_name_size(max_name_size)
 	, _mixer(mx)
 	, _mixer_owned (xml_property(*xml_tree()->root(), "selfdestruct", true))
 	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, xml_property(*xml_tree()->root(), "selfdestruct", true))
@@ -151,7 +172,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 {
 	init ();
 	set_route (rt);
-	name_button.set_text (_route->name());
+	name_button.set_text ( cut_string(_route->name(), _max_name_size) );
 }
 
 void
@@ -1272,7 +1293,7 @@ MixerStrip::property_changed (const PropertyChange& what_changed)
 void
 MixerStrip::name_changed ()
 {
-	name_button.set_text (_route->name());
+	name_button.set_text ( cut_string(_route->name(), _max_name_size) );
 	ARDOUR_UI::instance()->set_tip (name_button, _route->name());
 }
 
