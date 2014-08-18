@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title=" " resizeable="False">
-    <style name="generic_control" font ="Arial 10"/>
+    <style name="generic_control"
+           winfont ="Arial 10"
+           macfont ="Helvetica 10"/>
     <style name="generic_button"
     style="generic_control"
     fgnormal="#BFBFBF"
@@ -17,7 +19,6 @@
        
         <Label style ="generic_control"
                 justify="center"
-                font="10"
                 text="Add Track"
                 x="0"
                 y="0"

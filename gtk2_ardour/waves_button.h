@@ -43,7 +43,6 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_rounded_corner_mask (int);
 
 	void set_text (const std::string&);
-	void set_markup (const std::string&);
 	void set_angle (const double);
 	void set_border_width(float, float, float, float);
 	void set_border_width(const char*);
@@ -97,6 +96,9 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void action_tooltip_changed ();
 
 private:
+	static void __prop_style_watcher(WavesButton *);
+	void _prop_style_watcher();
+
 	Glib::RefPtr<Pango::Layout> _layout;
 	std::string                 _text;
 	BindingProxy                binding_proxy;

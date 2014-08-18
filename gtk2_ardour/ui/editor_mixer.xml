@@ -137,14 +137,16 @@
                 <HBox width="7"/>
                 <Label id="input_info_label"
                        text="IN Grisha, Kolya"
-                       font="Arial Bold 7"/>
+                       winfont="Arial Bold 7"
+                       macfont="Helvetica Bold 7"/>
                 <HBox box.fill="true" box.expand="true"/>
               </HBox>
               <HBox>
                 <HBox width="7"/>
                 <Label id="output_info_label"
                        text="OUT please code it"
-                       font="Arial Bold 7"/>
+                       winfont="Arial Bold 7"
+                       macfont="Helvetica Bold 7"/>
                 <HBox box.fill="true" box.expand="true"/>
               </HBox>
               <HBox height="5"/>
@@ -204,7 +206,9 @@
                     height="47"
                     fgnormal="#D7D7D7"
                     fghover="#D7D7D7"
-                    fgactive="#D7D7D7"/>
+                    fgactive="#D7D7D7"
+                    winfont ="Arial 10"
+                    macfont ="Helvetica 10"/>
           </VBox>
         </EventBox>
         <HBox visible="false" noshowall="true">

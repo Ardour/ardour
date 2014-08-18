@@ -192,13 +192,14 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 		double max_value = xml_property (definition, "maxvalue", styles, 100.0);
 		double initial_value = xml_property (definition, "initialvalue", styles, min_value);
 		double step = xml_property (definition, "step", styles, (max_value-min_value)/100.0);
-		double page_increment = xml_property (definition, "pageincrement", styles, (max_value-min_value)/10);
-
+		double page_increment = xml_property (definition, "pageincrement", styles, (max_value-min_value)/20);
+		double page_size = xml_property (definition, "pagesize", styles, (max_value-min_value)/10);
 		child = manage (new Gtk::Adjustment (initial_value,
 											 min_value,
 											 max_value,
 											 step,
-											 page_increment));
+											 page_increment,
+											 page_size));
 	} else if (widget_type != "STYLE") {
 		dbg_msg (std::string("Illegal object type (" + 
 							  definition.name() +
@@ -568,7 +569,11 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		widget.modify_fg(Gtk::STATE_PRELIGHT, Gdk::Color(property));
 	}
 
-	property = xml_property (definition, "font", styles, "");
+#if defined (PLATFORM_WINDOWS)
+	property = xml_property (definition, "winfont", styles, "");
+#elif defined (__MACOS__)
+	property = xml_property (definition, "macfont", styles, "");
+#endif
 	if (!property.empty ()) {
 		widget.modify_font(Pango::FontDescription(property));
 	}

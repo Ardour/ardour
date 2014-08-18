@@ -39,8 +39,20 @@ using std::max;
 using std::min;
 using namespace std;
 
+void
+WavesButton::__prop_style_watcher(WavesButton *that)
+{
+	that->_prop_style_watcher();
+}
+
+void
+WavesButton::_prop_style_watcher()
+{
+	_layout->set_font_description(get_style()->get_font());
+}
+
 WavesButton::WavesButton ()
-	:  _text_width (0)
+	: _text_width (0)
 	, _text_height (0)
 	, _corner_radius (0.0)
 	, _corner_mask (0xf)
@@ -52,7 +64,9 @@ WavesButton::WavesButton ()
 	, _top_border_width (0)
 	, _right_border_width (0)
 	, _bottom_border_width (0)
+	, _layout (Pango::Layout::create (get_pango_context()))
 {
+	property_style ().signal_changed ().connect (bind (sigc::ptr_fun (__prop_style_watcher), this));
 	ColorsChanged.connect (sigc::mem_fun (*this, &WavesButton::color_handler));
 }
 
@@ -69,7 +83,9 @@ WavesButton::WavesButton (const std::string& str)
 	, _top_border_width (0)
 	, _right_border_width (0)
 	, _bottom_border_width (0)
+	, _layout (Pango::Layout::create (get_pango_context()))
 {
+	property_style ().signal_changed ().connect (bind (sigc::ptr_fun (__prop_style_watcher), this));
 	set_text (str);
 }
 
@@ -81,28 +97,7 @@ void
 WavesButton::set_text (const std::string& str)
 {
 	_text = str;
-
-	if (!_layout && !_text.empty()) {
-		_layout = Pango::Layout::create (get_pango_context());
-	} 
-
-	if (_layout) {
-		_layout->set_text (str);
-	}
-
-	queue_resize ();
-}
-
-void
-WavesButton::set_markup (const std::string& str)
-{
-	_text = str;
-
-	if (!_layout) {
-		_layout = Pango::Layout::create (get_pango_context());
-	} 
-
-	_layout->set_markup (str);
+	_layout->set_text (str);
 	queue_resize ();
 }
 
