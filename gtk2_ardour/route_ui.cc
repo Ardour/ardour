@@ -281,8 +281,6 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 	multiple_mute_change = false;
 
-	if (!_i_am_the_modifier) {
-			
         if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
             /* toggle mute on everything (but
@@ -354,10 +352,10 @@ RouteUI::mute_press (GdkEventButton* ev)
             _session->set_mute (rl, !_route->muted());
 
         }
-
+        
 	return true;
 }
-
+        
 bool
 RouteUI::mute_release (GdkEventButton*)
 {
@@ -524,21 +522,13 @@ RouteUI::solo_release (GdkEventButton*)
 	if (!_i_am_the_modifier) {
 
 		if (_solo_release) {
-
 			if (_solo_release->exclusive) {
 			} else {
-<<<<<<< HEAD
-				if (Config->get_solo_control_is_listen_control()) {
-						_session->set_listen (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
-				} else {
-						_session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
-=======
 				DisplaySuspender ds;
 				if (Config->get_solo_control_is_listen_control()) {
 					_session->set_listen (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
 				} else {
 					_session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
->>>>>>> c52cb37... suspend route redisplay for (rec-en, solo, mute and monitor) batch changes
 				}
 			}
 
@@ -583,12 +573,8 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-<<<<<<< HEAD
-			_session->set_record_enabled (_session->get_routes(), !rec_enable_button.active_state());
-=======
 			DisplaySuspender ds;
-			_session->set_record_enabled (_session->get_routes(), !rec_enable_button->active_state());
->>>>>>> c52cb37... suspend route redisplay for (rec-en, solo, mute and monitor) batch changes
+			_session->set_record_enabled (_session->get_routes(), !rec_enable_button.active_state());
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -608,14 +594,9 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 					rl.reset (new RouteList);
 					rl->push_back (_route);
 				}
-<<<<<<< HEAD
-				
-				_session->set_record_enabled (rl, !rec_enable_button.active_state(), Session::rt_cleanup, true);
-=======
 
 				DisplaySuspender ds;
-				_session->set_record_enabled (rl, !rec_enable_button->active_state(), Session::rt_cleanup, true);
->>>>>>> c52cb37... suspend route redisplay for (rec-en, solo, mute and monitor) batch changes
+				_session->set_record_enabled (rl, !rec_enable_button.active_state(), Session::rt_cleanup, true);
 			}
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
@@ -626,12 +607,8 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 			boost::shared_ptr<RouteList> rl (new RouteList);
 			rl->push_back (route());
-<<<<<<< HEAD
-			_session->set_record_enabled (rl, !rec_enable_button.active_state());
-=======
 			DisplaySuspender ds;
-			_session->set_record_enabled (rl, !rec_enable_button->active_state());
->>>>>>> c52cb37... suspend route redisplay for (rec-en, solo, mute and monitor) batch changes
+			_session->set_record_enabled (rl, !rec_enable_button.active_state());
 		}
 	}
 
@@ -1228,8 +1205,7 @@ RouteUI::muting_change ()
 	}
 }
 
-
-/*
+#if 0 /* not used in Tracks */
 bool
 RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 {
@@ -1237,42 +1213,24 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 		return true;
 	}
 
-<<<<<<< HEAD
-        bool view = solo_isolated_led.active_state();
-        bool model = _route->solo_isolated();
-
-        *//* called BEFORE the view has changed *//*
-=======
 	bool view = solo_isolated_led->active_state();
 	bool model = _route->solo_isolated();
 
 	/* called BEFORE the view has changed */
->>>>>>> c52cb37... suspend route redisplay for (rec-en, solo, mute and monitor) batch changes
 
 	if (ev->button == 1) {
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-<<<<<<< HEAD
-                        if (model) {
-                                *//* disable isolate for all routes *//*
-                                _session->set_solo_isolated (_session->get_routes(), false, Session::rt_cleanup, true);
-                        }
-=======
 			if (model) {
 				/* disable isolate for all routes */
 				DisplaySuspender ds;
 				_session->set_solo_isolated (_session->get_routes(), false, Session::rt_cleanup, true);
 			}
->>>>>>> c52cb37... suspend route redisplay for (rec-en, solo, mute and monitor) batch changes
 
 		} else {
 			if (model == view) {
 
-<<<<<<< HEAD
-                                *//* flip just this route *//*
-=======
 				/* flip just this route */
->>>>>>> c52cb37... suspend route redisplay for (rec-en, solo, mute and monitor) batch changes
 
 				boost::shared_ptr<RouteList> rl (new RouteList);
 				rl->push_back (_route);
@@ -1284,9 +1242,9 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 
 	return true;
 }
-*/
+#endif
 
-/*
+#if 0 /* not used in Tracks */
 bool
 RouteUI::solo_safe_button_release (GdkEventButton* ev)
 {
@@ -1296,7 +1254,7 @@ RouteUI::solo_safe_button_release (GdkEventButton* ev)
 	}
 	return false;
 }
-*/
+#endif
 
 void
 RouteUI::toggle_solo_isolated (Gtk::CheckMenuItem* check)

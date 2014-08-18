@@ -44,6 +44,7 @@
 
 #include "canvas/wave_view.h"
 
+#include "ardour_ui.h"
 #include "ardour_window.h"
 #include "ardour_dialog.h"
 #include "gui_thread.h"
