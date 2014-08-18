@@ -84,6 +84,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess,
 	, selection_group (0)
 	, _ghost_group (0)
 	, _hidden (false)
+    , _number_is_hidden (false)
 	, in_destructor (false)
 	, _size_menu (0)
 	, _canvas_display (0)
@@ -215,6 +216,12 @@ TimeAxisView::hide ()
 	Hiding ();
 }
 
+void
+TimeAxisView::set_number_is_hidden (bool hidden)
+{
+    _number_is_hidden = hidden;
+}
+
 /** Display this TimeAxisView as the nth component of the parent box, at y.
 *
 * @param y y position.
@@ -223,7 +230,7 @@ TimeAxisView::hide ()
 * @return height of this TimeAxisView.
 */
 guint32
-TimeAxisView::show_at (double y, int& nth, VBox *parent, bool show_number)
+TimeAxisView::show_at (double y, int& nth, VBox *parent)
 {
 	time_axis_box.show ();
 	if (control_parent) {
@@ -235,7 +242,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent, bool show_number)
 	}
 
 	_order = nth;
-    if (show_number) {
+    if (!_number_is_hidden) {
         number_label.set_text (string_compose (_("%1"), _order));
     } else {
         number_label.set_text("");

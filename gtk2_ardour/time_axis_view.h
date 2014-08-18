@@ -127,9 +127,11 @@ class TimeAxisView : public virtual AxisView
 
 	void idle_resize (uint32_t);
 
-	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent, bool show_number = true);
+	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	virtual void hide ();
 
+    void set_number_is_hidden (bool);
+    
 	bool touched (double top, double bot);
 
 	/** @return true if hidden, otherwise false */
@@ -220,7 +222,8 @@ class TimeAxisView : public virtual AxisView
 	std::list<GhostRegion*> ghosts;
 	std::list<SelectionRect*> free_selection_rects;
 	std::list<SelectionRect*> used_selection_rects;
-	bool                  _hidden;
+	bool                  _number_is_hidden;
+    bool                  _hidden;
 	bool                   in_destructor;
 	Gtk::Menu*            _size_menu;
 	ArdourCanvas::Group*  _canvas_display;
