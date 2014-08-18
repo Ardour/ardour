@@ -264,16 +264,6 @@
                         table.xfill="true"
                         table.yshrink="true" ui.orphan="true"/>
               <VBox id="time_bars_vbox" ui.orphan="true"/>
-              <EventBox id="time_canvas_event_box"
-                        table.leftattach="2"
-                        table.rightattach="3"
-                        table.topattach="0"
-                        table.bottomattach="1"
-                        table.xfill="true"
-                        table.xexpand="true"
-                        table.yfill="true">
-                <VBox id="time_canvas_vbox"/>
-              </EventBox>
               <Layout id="controls_layout"
                       hadjustment="unused_adjustment"
                       vadjustment="vertical_adjustment"
