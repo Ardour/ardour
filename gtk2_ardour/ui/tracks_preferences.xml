@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title="Tracks Preferences" resizeable="false">
-  <style name="generic_control" font ="Arial 10"/>
+  <style name="generic_control"
+         winfont ="Arial 10"
+         macfont ="Helvetica 10"/>
   <style name="generic_button"
     style="generic_control"
     fgnormal="#BFBFBF"
@@ -24,7 +26,8 @@
         bgnormal="#1F1F1F"
         bgactive="#565656"
         bghover="#2f2f2f"
-        font ="Arial Bold 10"
+        winfont ="Arial Bold 10"
+        macfont ="Helvetica Bold 10"
         width="107" height="65"/>
       <Layout bgnormal="#A0A0A0" width="107" height="1"/>
       <Button
@@ -35,7 +38,8 @@
         bgnormal="#1F1F1F"
         bgactive="#565656"
         bghover="#2f2f2f"
-        font ="Arial Bold 10"
+        winfont ="Arial Bold 10"
+        macfont ="Helvetica Bold 10"
         width="107" height="65"/>
       <Layout bgnormal="#A0A0A0" width="107" height="1"/>
       <Button
@@ -46,7 +50,8 @@
         bgnormal="#1F1F1F"
         bgactive="#565656"
         bghover="#2f2f2f"
-        font ="Arial Bold 10"
+        winfont ="Arial Bold 10"
+        macfont ="Helvetica Bold 10"
         width="107" height="65"/>
       <Layout bgnormal="#A0A0A0" width="107" height="1"/>
     </VBox>
@@ -70,13 +75,38 @@
     </Layout>
     <Layout id="midi_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557" visible="true">
       <Layout bgnormal="#000000" x="21" y="20" width="291" height="19">
-        <Label style="generic_control" text="MIDI PORTS" fgnormal="#ffffff" font ="Arial Bold 10" x="7" y="3"/>
+        <Label style="generic_control"
+               text="MIDI PORTS"
+               fgnormal="#ffffff"
+               winfont ="Arial Bold 10"
+               macfont ="Helvetica Bold 10"
+               x="7" y="3"/>
       </Layout>
-      <Layout bgnormal="#797979" x="317" y="20" width="60" height="19">
-        <Label style="generic_control" text="INPUT" fgnormal="#ffffff" font="Arial Bold 10" x="7" y="3"/>
+      <Layout bgnormal="#797979"
+              x="317"
+              y="20"
+              width="60"
+              height="19">
+        <Label style="generic_control"
+               text="INPUT"
+               fgnormal="#ffffff"
+               winfont ="Arial Bold 10"
+               macfont ="Helvetica Bold 10"
+               x="7"
+               y="3"/>
       </Layout>
-      <Layout bgnormal="#797979" x="382" y="20" width="60" height="19">
-        <Label style="generic_control" text="OUTPUT" fgnormal="#ffffff" font="Arial Bold 10" x="7" y="3"/>
+      <Layout bgnormal="#797979"
+              x="382"
+              y="20"
+              width="60"
+              height="19">
+        <Label style="generic_control"
+               text="OUTPUT"
+               fgnormal="#ffffff"
+               winfont ="Arial Bold 10"
+               macfont ="Helvetica Bold 10"
+               x="7"
+               y="3"/>
       </Layout>
       <Layout bgnormal="#000000" x="447" y="20" width="14" height="19" />
       <ScrolledWindow x="21" y="62" bgnormal="#565656" width="440" height="218" hscroll="never" vscroll="auto">
@@ -108,30 +138,41 @@
         <Label id="latency_label" style="generic_control" text="INPUT LATENCY:" x="16" y="74  " width="476"/>
       </Layout>
       <Layout bgnormal="#565656" x="0" y="101" width="505" height="39">
-        <Label style="generic_control" text="CHANNEL CONFIGURATION MODE" fgnormal="#ffffff" font="Arial Bold 10" x="17" y="15"/>
+        <Label style="generic_control" text="CHANNEL CONFIGURATION MODE" fgnormal="#ffffff"
+               winfont ="Arial Bold 10"
+               macfont ="Helvetica Bold 10"
+               x="17" y="15"/>
         <Button id="multi_out_button"
-          style="generic_button"
-          text="MULTI OUT"
-          fgnormal="#C2C2C2"
-          fgactive="#FFFFFF"
-          bgactive="#1CA3B3"
-          fghover="#CECECE"
-          font="Arial Bold 10"
-          x="280" y="6" width="106" height="28"/>
+                style="generic_button"
+                text="MULTI OUT"
+                fgnormal="#C2C2C2"
+                fgactive="#FFFFFF"
+                bgactive="#1CA3B3"
+                fghover="#CECECE"
+                winfont ="Arial Bold 10"
+                macfont ="Helvetica Bold 10"
+                x="280" y="6" width="106" height="28"/>
         <Button id="stereo_out_button"
-          text="STEREO OUT"
-          style="generic_button"
-          fgnormal="#C2C2C2"
-          fgactive="#FFFFFF"
-          bgactive="#1CA3B3"
-          fghover="#CECECE"
-          font="Arial Bold 10"
+                text="STEREO OUT"
+                style="generic_button"
+                fgnormal="#C2C2C2"
+                fgactive="#FFFFFF"
+                bgactive="#1CA3B3"
+                fghover="#CECECE"
+                winfont ="Arial Bold 10"
+                macfont ="Helvetica Bold 10"
           x="387" y="6" width="106" height="28"/>
       </Layout>
       <Layout bgnormal="#565656" x="0" y="141" width="505" height="416">
         <Layout bgnormal="#862579" x="16" y="13" width="3" height="41"/>
         <Layout bgnormal="#862579" x="22" y="13" width="265" height="19">
-          <Label style="generic_control" text="INPUTS" fgnormal="#ffffff" font ="Arial Bold 10" x="7" y="3"/>
+          <Label style="generic_control"
+                 text="INPUTS"
+                 fgnormal="#ffffff"
+                 winfont ="Arial Bold 10"
+                 macfont ="Helvetica Bold 10"
+                 x="7"
+                 y="3"/>
         </Layout>
         <Layout bgnormal="#797979" x="22" y="35" width="85" height="19">
           <Label style="generic_control" text="Port" fgnormal="#000000" x="7" y="3"/>
@@ -166,7 +207,13 @@
         </Layout>
         <Layout bgnormal="#27ae36" x="290" y="13" width="3" height="41"/>
         <Layout bgnormal="#27ae36" x="296" y="13" width="178" height="19">
-          <Label style="generic_control" text="OUTPUTS" fgnormal="#ffffff" font ="Arial Bold 10" x="7" y="3"/>
+          <Label style="generic_control"
+                 text="OUTPUTS"
+                 fgnormal="#ffffff"
+                 winfont ="Arial Bold 10"
+                 macfont ="Helvetica Bold 10"
+                 x="7"
+                 y="3"/>
         </Layout>
         <Layout bgnormal="#797979" x="296" y="35" width="85" height="19">
           <Label style="generic_control" text="Port" fgnormal="#000000" x="7" y="3"/>

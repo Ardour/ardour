@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<RouteUI bgnormal="#383838" bgactive="#6A6A6A">
+<RouteUI bgnormal="#383838" bgactive="#545454">
   <HBox>
     <VBox>
       <EventBox height="1" bgnormal="#494949" bgactive="#494949"/>
@@ -12,7 +12,12 @@
             <VBox box.pack="end">
               <!--<Igor! height="4" below is the shift from TOP side of the space>-->
               <HBox height="4"/>
-              <Label id="number_label" text="32" fgnormal="#ffffff" fgactive="#ffffff" font ="Helvetica Bold 13"/>
+              <Label id="number_label"
+                     text="32"
+                     fgnormal="#ffffff"
+                     fgactive="#ffffff"
+                     winfont ="Arial Bold 13"
+                     macfont ="Helvetica Bold 13"/>
             </VBox>
           </HBox>
         </EventBox>
@@ -29,14 +34,16 @@
             id="name_label_home">
         <HBox width="5"/>
         <Label id="name_label"
-               font="Helvetica 10"
+               winfont ="Arial 10"
+               macfont ="Helvetica 10"
                fgnormal="#ffffff"
                fgactive="#ffffff"/>
         <FocusEntry id="name_entry"
                     width="80"
                     height="20"
                     fgnormal="#ffffff"
-                    font ="Helvetica 10"
+                    winfont ="Arial 10"
+                    macfont ="Helvetica 10"                    
                     cssname="EditorTrackNameDisplay"
                     textcolornormal="#ffffff"
                     textcoloractive="#ffffff"

@@ -19,7 +19,8 @@
         <HBox>
           <VBox width="6"/>
           <Label text="MASTER"
-                 font="Helvetica 10"
+                 winfont ="Arial 10"
+                 macfont ="Helvetica 10"
                  fgnormal="#ffffff"
                  fgactive="#ffffff"
                  justify="left"/>
