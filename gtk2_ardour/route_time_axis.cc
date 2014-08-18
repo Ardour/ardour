@@ -165,6 +165,11 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		track()->PlaylistChanged.connect (*this, invalidator (*this), ui_bind(&RouteTimeAxisView::update_playlist_tip, this), gui_context());
 	}
 
+    if (is_master_track() ) {
+        // do not display number for master track
+        TimeAxisView::set_number_is_hidden(true);
+    }
+    
 	playlist_button.set_visible(is_track() && track()->mode() == ARDOUR::Normal);
 
 	LevelMeterHBox& level_meter = gm.get_level_meter();
