@@ -969,10 +969,9 @@ ArdourButton::on_focus_out_event (GdkEventFocus* ev)
 }
 
 bool
-ArdourButton::on_key_release_event (GdkEventKey *ev) {
-	if (_focused &&
-			(ev->keyval == GDK_KEY_space || ev->keyval == GDK_Return))
-	{
+ArdourButton::on_key_release_event (GdkEventKey *ev) 
+{
+	if (_focused && (ev->keyval == GDK_KEY_space || ev->keyval == GDK_Return)) {
 		signal_clicked();
 		if (_action) {
 			_action->activate ();

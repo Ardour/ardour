@@ -446,3 +446,8 @@ void MixerBridgeView::delete_processors ()
 {
         /* does nothing in Tracks */
 }
+
+void MixerBridgeView::select_none ()
+{
+        /* does nothing in Tracks */
+}
