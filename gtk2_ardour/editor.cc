@@ -2934,10 +2934,6 @@ Editor::setup_toolbar ()
 
 	RefPtr<Action> act;
 
-	zoom_focus_selector.set_name ("ZoomFocusSelector");
-	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);
-	zoom_focus_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done));
-
 	_temporal_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::temporal_zoom_by_slider));
 	_vertical_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::vertical_zoom_by_slider));
 	ZoomChanged.connect (sigc::mem_fun (*this, &Editor::update_temporal_zoom_slider));
