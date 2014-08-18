@@ -14,21 +14,17 @@ def backend_list():
         # Ardour
         backends = [ 'jack' ]
 
-        # These will come over from Ardour at some point soon (PD)
-        #if Options.options.build_dummy: 
-        #    backends += [ 'dummy' ]
+        if Options.options.build_dummy: 
+            backends += [ 'dummy' ]
 
-        #if Options.options.build_alsabackend:
-        #        if re.search ("linux", sys.platform) != None:
-        #            backends += [ 'alsa' ]
+        if Options.options.build_alsabackend:
+            if re.search ("linux", sys.platform) != None:
+                backends += [ 'alsa' ]
 
     else:
         # Not Ardour
         if re.search ("linux", sys.platform) != None:
-            # Can't build this till the ALSA backend is merged because of a dependency (on Linux) on a shared utility library
-            # created for the ALSA backend and JACK.
-            # backends = [ 'jack' ]
-            backends = [ ]
+            backends = [ 'jack' ]
         else:
             backends = [ ]
 
