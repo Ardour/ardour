@@ -78,7 +78,7 @@ class ArdourWindow;
 class MixerStrip : public RouteUI
 {
   public:
-	MixerStrip (Mixer_UI&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, const std::string& layout_script_file);
+	MixerStrip (Mixer_UI&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, const std::string& layout_script_file, size_t max_name_size = 0);
 	MixerStrip (Mixer_UI&, ARDOUR::Session*, const std::string& layout_script_file);
 	~MixerStrip ();
 
@@ -144,6 +144,8 @@ class MixerStrip : public RouteUI
 	bool  _embedded;
 	bool  _packed;
 	bool  _mixer_owned;
+    
+    size_t _max_name_size;
 
 	Gtk::EventBox&       panners_home;
 	ProcessorBox processor_box;

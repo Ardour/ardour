@@ -47,9 +47,10 @@ class MixerBridgeView :
 	public MixerActor
 {
   public:
-	MixerBridgeView (const std::string& mixer_bridge_script_name, const std::string& mixer_strip_script_name);
+	MixerBridgeView (const std::string& mixer_bridge_script_name, const std::string& mixer_strip_script_name = 0);
 	~MixerBridgeView();
 	void set_session (ARDOUR::Session *);
+    void set_max_name_size(size_t size) {_max_name_size = size;}
 	void track_editor_selection ();
 
   protected:
@@ -81,6 +82,8 @@ class MixerBridgeView :
 
 	std::map <boost::shared_ptr<ARDOUR::Route>, MixerStrip*> _strips;
 	mutable Glib::Threads::Mutex _resync_mutex;
+    
+    size_t _max_name_size;
 };
 
 #endif //__ardour_mixer_bridge_view_h__
