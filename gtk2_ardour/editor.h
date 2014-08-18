@@ -59,6 +59,7 @@
 #include "region_selection.h"
 #include "compact_meter_bridge.h"
 #include "mixer_bridge_view.h"
+#include "waves_zoom_control.h"
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -1214,6 +1215,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void temporal_zoom_by_frame (framepos_t start, framepos_t end);
 	void temporal_zoom_to_frame (bool coarser, framepos_t frame);
 	void temporal_zoom_by_slider ();
+	void wave_form_zoom ();
 	void update_temporal_zoom_slider ();
 
 	void insert_region_list_drag (boost::shared_ptr<ARDOUR::Region>, int x, int y);
@@ -1590,10 +1592,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void editor_list_button_toggled ();
 
 	AudioClock*               zoom_range_clock;
-
-	ArdourButton              zoom_in_button;
-	ArdourButton              zoom_out_button;
-	ArdourButton              zoom_out_full_button;
+	WavesZoomControl          _waves_zoom_control;
 
 	ArdourButton              tav_expand_button;
 	ArdourButton              tav_shrink_button;

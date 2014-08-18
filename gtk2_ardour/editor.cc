@@ -260,6 +260,7 @@ Editor::Editor ()
 	, _vertical_zoom_adjustment (get_adjustment ("vertical_zoom_adjustment"))
     , _vertical_zoom_fader (get_fader ("vertical_zoom_fader"))
 	, vertical_adjustment (get_adjustment ("vertical_adjustment"))
+	, _waves_zoom_control (get_adjustment ("waves_zoom_adjustment"))
     , horizontal_adjustment (get_adjustment ("horizontal_adjustment"))
     , unused_adjustment (get_adjustment ("unused_adjustment"))
 	, edit_packer (get_table ("edit_packer"))
@@ -322,6 +323,8 @@ Editor::Editor ()
 	get_container ("compact_meter_bridge_home").add (_compact_meter_bridge);
 	get_container ("mixer_bridge_view_home").add (_mixer_bridge_view);
 	get_container ("meter_bridge_view_home").add (_meter_bridge_view);
+	get_container ("waves_zoom_control_home").add (_waves_zoom_control);
+	_waves_zoom_control.show();
 
 	_have_idled = false;
 
@@ -3070,43 +3073,15 @@ Editor::setup_toolbar ()
 
 	RefPtr<Action> act;
 
-	zoom_in_button.set_name ("zoom button");
-	zoom_in_button.add_elements ( ArdourButton::Inset );
-	zoom_in_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
-	zoom_in_button.set_image(::get_icon ("zoom_in"));
-	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-in"));
-	zoom_in_button.set_related_action (act);
-
-	zoom_out_button.set_name ("zoom button");
-	zoom_out_button.add_elements ( ArdourButton::Inset );
-	zoom_out_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
-	zoom_out_button.set_image(::get_icon ("zoom_out"));
-	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-out"));
-	zoom_out_button.set_related_action (act);
-
-	zoom_out_full_button.set_name ("zoom button");
-	zoom_out_full_button.add_elements ( ArdourButton::Inset );
-	zoom_out_full_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
-	zoom_out_full_button.set_image(::get_icon ("zoom_full"));
-	act = ActionManager::get_action (X_("Editor"), X_("zoom-to-session"));
-	zoom_out_full_button.set_related_action (act);
-
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
 	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);
 	zoom_focus_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done));
 
-	if (!ARDOUR::Profile->get_trx()) {
-		_zoom_box.pack_start (zoom_out_button, false, false);
-		_zoom_box.pack_start (zoom_in_button, false, false);
-		_zoom_box.pack_start (zoom_out_full_button, false, false);
-		_zoom_box.pack_start (zoom_focus_selector, false, false);
-	} else {
-		_temporal_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::temporal_zoom_by_slider));
-		_vertical_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::vertical_zoom_by_slider));
-		ZoomChanged.connect (sigc::mem_fun (*this, &Editor::update_temporal_zoom_slider));
+	_temporal_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::temporal_zoom_by_slider));
+	_vertical_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::vertical_zoom_by_slider));
+	ZoomChanged.connect (sigc::mem_fun (*this, &Editor::update_temporal_zoom_slider));
         
-        _vertical_zoom_fader.signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::vertical_fader_pressed), false);
-	}
+    _vertical_zoom_fader.signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::vertical_fader_pressed), false);
 
 	/* Track zoom buttons */
 	visible_tracks_selector.set_name ("zoom button");
@@ -3311,10 +3286,6 @@ Editor::setup_tooltips ()
 	ARDOUR_UI::instance()->set_tip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
 	ARDOUR_UI::instance()->set_tip (nudge_forward_button, _("Nudge Region/Selection Later"));
 	ARDOUR_UI::instance()->set_tip (nudge_backward_button, _("Nudge Region/Selection Earlier"));
-	ARDOUR_UI::instance()->set_tip (zoom_in_button, _("Zoom In"));
-	ARDOUR_UI::instance()->set_tip (zoom_out_button, _("Zoom Out"));
-	ARDOUR_UI::instance()->set_tip (zoom_out_full_button, _("Zoom to Session"));
-	ARDOUR_UI::instance()->set_tip (zoom_focus_selector, _("Zoom focus"));
 	ARDOUR_UI::instance()->set_tip (tav_expand_button, _("Expand Tracks"));
 	ARDOUR_UI::instance()->set_tip (tav_shrink_button, _("Shrink Tracks"));
 	ARDOUR_UI::instance()->set_tip (visible_tracks_selector, _("Number of visible tracks"));
