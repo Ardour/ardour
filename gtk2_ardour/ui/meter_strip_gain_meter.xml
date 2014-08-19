@@ -12,7 +12,7 @@
             fgnormal="#000000"
             fgactive="#000000"
             bghover="#C47474"
-            bordercolor="#BABABA"
+            bordercolor="#FFFFFF33"
             borderwidth="1 1 0 0"/>
     <HBox height="10"/>
     <HBox spacing="7" width="32">
@@ -36,7 +36,7 @@
           bgactive="#D83838"
           fgnormal="#000000"
           fgactive="#000000"
-          bghover="#C47474"
+          bghover="#B1B1B1"
           bordercolor="#C9C9C9"
           borderwidth="1 1 0 0"
           ui.orphan="true"/>
