@@ -158,6 +158,8 @@ Editor::initialize_rulers ()
 	CANVAS_DEBUG_NAME (bbt_ruler, "bbt ruler");
 	timecode_nmarks = 0;
 
+#if 0 /* no ruler labels in Tracks */
+
 	using namespace Box_Helpers;
 	BoxList & lab_children =  time_bars_vbox.children();
 
@@ -172,6 +174,7 @@ Editor::initialize_rulers ()
 	lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(videotl_label, PACK_SHRINK, PACK_START));
+#endif
 
 	/* 1 event handler to bind them all ... */
 
@@ -609,7 +612,9 @@ Editor::update_ruler_visibility ()
 		update_video_timeline(true);
 	}
 
+#if 0 /* no ruler labels in Tracks */
 	time_bars_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars));
+#endif
 
 	/* move hv_scroll_group (trackviews) to the end of the timebars
 	 */

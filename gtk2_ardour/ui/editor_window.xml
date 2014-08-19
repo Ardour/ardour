@@ -238,29 +238,21 @@
                   paned.resize="true"
                   paned.shrink="true">
             <Table id="edit_packer"
-                   rows="3"
-                   columns="3">
+                   rows="2"
+                   columns="2">
               <EventBox id="master_bus_ui_home"
                         table.leftattach="0"
                         table.rightattach="1"
                         table.topattach="0"
-                        table.bottomattach="2"
+                        table.bottomattach="1"
                         table.xfill="false"
                         table.yfill="false"
                         bgnormal="#ff00ff"/>
-             <EventBox id="time_bars_event_box"
-                       table.leftattach="1"
-                       table.rightattach="2"
-                       table.topattach="0"
-                       table.bottomattach="1"
-                       table.xfill="true"
-                       table.yfill="false" ui.orphan="true"/>
-              <VBox id="time_bars_vbox" ui.orphan="true"/>
               <Layout id="controls_layout"
                       hadjustment="unused_adjustment"
                       vadjustment="vertical_adjustment"
-                      table.leftattach="1"
-                      table.rightattach="2"
+                      table.leftattach="0"
+                      table.rightattach="1"
                       table.topattach="1"
                       table.bottomattach="2"
                       table.xfill="true"

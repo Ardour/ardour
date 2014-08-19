@@ -277,10 +277,8 @@ Editor::Editor ()
     , horizontal_adjustment (get_adjustment ("horizontal_adjustment"))
     , unused_adjustment (get_adjustment ("unused_adjustment"))
 	, edit_packer (get_table ("edit_packer"))
-	, time_bars_event_box (get_event_box ("time_bars_event_box"))
 	, edit_controls_vbox (get_v_box ("edit_controls_vbox"))
 	, controls_layout (get_layout ("controls_layout"))
-	, time_bars_vbox (get_v_box ("time_bars_vbox"))
 #ifdef TOP_MENUBAR
 	/*
 	 * This is needed for OS X primarily
@@ -557,16 +555,9 @@ Editor::Editor ()
 	edit_packer.set_border_width (0);
 	edit_packer.set_name ("EditorWindow");
 
-	time_bars_event_box.add (time_bars_vbox);
-	time_bars_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	time_bars_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
-        
-	/* labels for the time bars */
-	// edit_packer.attach (time_bars_event_box,     0, 1, 0, 1,    FILL,        SHRINK, 0, 0);
-	/* track controls */
-	// edit_packer.attach (controls_layout,         0, 1, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
-	/* canvas */
-	edit_packer.attach (*_track_canvas_viewport,  2, 3, 0, 2,    FILL|EXPAND, FILL|EXPAND, 0, 0);
+        /* rest of the packing is done in ui/editor_window.xml */
+
+	edit_packer.attach (*_track_canvas_viewport,  1, 2, 0, 2,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
 	_route_groups = new EditorRouteGroups (this);
 	_routes = new EditorRoutes (this);

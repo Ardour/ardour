@@ -742,9 +742,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void parameter_changed (std::string);
 	void ui_parameter_changed (std::string);
 
-	Gtk::EventBox&             time_bars_event_box;
-	Gtk::VBox&                 time_bars_vbox;
-
 	ArdourCanvas::Pixbuf     *logo_item;
 #if 0    
     /* these will be needed when we have canvas rulers */
