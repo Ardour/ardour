@@ -98,6 +98,8 @@
   <button id="color_button_13" ui.orphan="true"/>
   <button id="color_button_14" ui.orphan="true"/>
   <button id="color_button_15" ui.orphan="true"/>
+  <button id="master_mute_button" ui.orphan="true"/>
+  <VBox id="track_buttons_home" ui.orphan="true"/>
   <EventBox id="color_palette_home" ui.orphan="true"/>
   <VBox id="color_buttons_home" ui.orphan="true"/>
   <Button id="info_panel_button" ui.orphan="true"/>
