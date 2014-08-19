@@ -62,6 +62,14 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	sigc::signal1<void, WavesButton*> signal_double_clicked;
 
   protected:
+	struct RGBA {
+		float red;
+		double green;
+		double blue;
+		double alpha;
+		RGBA() : red (0), green (0), blue (0), alpha (0) {}
+	};
+
 	void render (cairo_t *);
 	void on_size_request (Gtk::Requisition* req);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
@@ -81,7 +89,7 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	float _right_border_width;
 	float _bottom_border_width;
 	double _angle;
-	Gdk::Color _border_color;
+	struct RGBA _border_color;
 
 	bool _act_on_release;
 	bool _hovering;

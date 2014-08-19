@@ -56,14 +56,14 @@ WavesButton::WavesButton ()
 	, _text_height (0)
 	, _corner_radius (0.0)
 	, _corner_mask (0xf)
-	, _angle (0)
-	, _act_on_release (true)
-	, _hovering (false)
-	, _pushed (false)
 	, _left_border_width (0)
 	, _top_border_width (0)
 	, _right_border_width (0)
 	, _bottom_border_width (0)
+	, _angle (0)
+	, _act_on_release (true)
+	, _hovering (false)
+	, _pushed (false)
 	, _layout (Pango::Layout::create (get_pango_context()))
 {
 	property_style ().signal_changed ().connect (bind (sigc::ptr_fun (__prop_style_watcher), this));
@@ -75,14 +75,14 @@ WavesButton::WavesButton (const std::string& str)
 	, _text_height (0)
 	, _corner_radius (0.0)
 	, _corner_mask (0xf)
-	, _angle(0)
-	, _act_on_release (true)
-	, _hovering (false)
-	, _pushed (false)
 	, _left_border_width (0)
 	, _top_border_width (0)
 	, _right_border_width (0)
 	, _bottom_border_width (0)
+	, _angle(0)
+	, _act_on_release (true)
+	, _hovering (false)
+	, _pushed (false)
 	, _layout (Pango::Layout::create (get_pango_context()))
 {
 	property_style ().signal_changed ().connect (bind (sigc::ptr_fun (__prop_style_watcher), this));
@@ -124,7 +124,16 @@ WavesButton::render (cairo_t* cr)
 	int width = get_width ();
 	int height = get_height();
 
-	cairo_set_source_rgb (cr, _border_color.get_red_p(), _border_color.get_green_p(), _border_color.get_blue_p());
+	cairo_rectangle (cr, 
+					 0,
+					 0,
+					 width,
+					 height);
+
+	cairo_set_source_rgb (cr, bgcolor.get_red_p(), bgcolor.get_green_p(), bgcolor.get_blue_p());
+	cairo_fill (cr);
+
+	cairo_set_source_rgba (cr, _border_color.red, _border_color.green, _border_color.blue, _border_color.alpha);
 	if (_left_border_width) {
 		cairo_set_line_width (cr, _left_border_width);
 		cairo_move_to (cr, _left_border_width/2.0, height);
@@ -152,15 +161,6 @@ WavesButton::render (cairo_t* cr)
 		cairo_line_to (cr, 0, height-_bottom_border_width/2.0);
 		cairo_stroke (cr);
 	}
-
-	cairo_rectangle (cr, 
-					 _left_border_width,
-					 _top_border_width,
-					 width-_left_border_width-_right_border_width,
-					 height-_top_border_width-_bottom_border_width);
-
-	cairo_set_source_rgb (cr, bgcolor.get_red_p(), bgcolor.get_green_p(), bgcolor.get_blue_p());
-	cairo_fill (cr);
 
 	// text, if any
 	if (!_text.empty()) {
@@ -258,9 +258,44 @@ WavesButton::set_border_width (const char* definition)
 
 void WavesButton::set_border_color(const char* color)
 {
-	if (color) {
-		_border_color = Gdk::Color(color);
+	unsigned ucolor = 0;
+
+	if ((!color) || (*color != '#')) {
+		return;
 	}
+
+    char* where_stopped;
+    ucolor = strtoul(color+1, &where_stopped, 16);
+    if (*where_stopped != 0) {
+        return;
+    }
+
+	switch (strlen (color))
+	{
+	case 7:
+		UINT_TO_RGB (ucolor, 
+					 &_border_color.red,
+					 &_border_color.green,
+					 &_border_color.blue);
+		_border_color.alpha = 255;
+		break;
+	case 9:
+		std::cout << "WavesButton::set_border_color(" << color << ") --> " << std::hex << ucolor << std::dec << std::endl;
+
+		UINT_TO_RGBA (ucolor, 
+					  &_border_color.red,
+					  &_border_color.green,
+					  &_border_color.blue,
+					  &_border_color.alpha);
+		break;
+	default:
+		return;
+	}
+
+	_border_color.red /= 255;
+	_border_color.green /= 255;
+	_border_color.blue /= 255;
+	_border_color.alpha /= 255;
 }
 
 void
