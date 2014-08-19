@@ -280,8 +280,6 @@ void WavesButton::set_border_color(const char* color)
 		_border_color.alpha = 255;
 		break;
 	case 9:
-		std::cout << "WavesButton::set_border_color(" << color << ") --> " << std::hex << ucolor << std::dec << std::endl;
-
 		UINT_TO_RGBA (ucolor, 
 					  &_border_color.red,
 					  &_border_color.green,
