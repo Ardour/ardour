@@ -77,6 +77,7 @@ RouteUI::RouteUI (ARDOUR::Session* sess, const std::string& layout_script_file)
 	, sends_menu (0)
 	, record_menu (0)
 	, _invert_menu (0)
+	, master_mute_button (get_waves_button ("master_mute_button"))
 	, mute_button (get_waves_button ("mute_button"))
 	, solo_button (get_waves_button ("solo_button"))
 	, rec_enable_button (get_waves_button ("rec_enable_button"))
@@ -140,7 +141,9 @@ RouteUI::init ()
 	solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::solo_press), false);
 	solo_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::solo_release), false);
 	mute_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::mute_press), false);
+	master_mute_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::mute_press), false);
 	mute_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::mute_release), false);
+	master_mute_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::mute_release), false);
 	
 //	monitor_input_button.set_distinct_led_click (false);
 
@@ -195,6 +198,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 											 this), gui_context());
 
 	mute_button.set_controllable (_route->mute_control());
+	master_mute_button.set_controllable (_route->mute_control());
 	solo_button.set_controllable (_route->solo_control());
 
 	_route->active_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_active_changed, this), gui_context());
@@ -240,6 +244,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	}
 
 	mute_button.unset_flags (Gtk::CAN_FOCUS);
+	master_mute_button.unset_flags (Gtk::CAN_FOCUS);
 	solo_button.unset_flags (Gtk::CAN_FOCUS);
 
 	mute_button.show();
@@ -1070,11 +1075,12 @@ RouteUI::mute_active_state (Session* s, boost::shared_ptr<Route> r)
 void
 RouteUI::update_mute_display ()
 {
-        if (!_route) {
-                return;
-        }
+	if (!_route) {
+		return;
+	}
 
-        mute_button.set_active_state (mute_active_state (_session, _route));
+	mute_button.set_active_state (mute_active_state (_session, _route));
+	master_mute_button.set_active_state (mute_active_state (_session, _route));
 }
 
 void

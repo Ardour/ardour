@@ -318,14 +318,18 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	
 	gpm.set_type (rt->meter_type());
 	
-    mute_button.show ();
-    
 	if (route()->is_master()) {
-		solo_button.hide ();
-        rec_enable_button.hide ();
+		master_mute_button.show ();
+		get_container ("track_buttons_home").hide ();
+		//mute_button.hide ();
+		//solo_button.hide ();
+		//rec_enable_button.hide ();
 	} else {
-        solo_button.show ();
-        rec_enable_button.show ();
+		master_mute_button.hide ();
+		get_container ("track_buttons_home").show ();
+		//mute_button.show ();
+		//solo_button.show ();
+		//rec_enable_button.show ();
 	}
 
 	if (_mixer_owned && (route()->is_master() || route()->is_monitor())) {

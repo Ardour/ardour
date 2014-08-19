@@ -94,6 +94,7 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	bool multiple_mute_change;
 	bool multiple_solo_change;
 
+	WavesButton& master_mute_button;
 	WavesButton& mute_button;
 	WavesButton& solo_button;
 	WavesButton& rec_enable_button; /* audio tracks */

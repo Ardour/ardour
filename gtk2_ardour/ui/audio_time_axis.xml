@@ -115,6 +115,7 @@
                       implicitactiveicon="time_axis_mute_implicit"
                       prelighticon="time_axis_mute_prelight"
                       tooltip="Mute"/>
+          <Button id="master_mute_button" ui.orphan="true"/>
           <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
         </VBox>
         <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
