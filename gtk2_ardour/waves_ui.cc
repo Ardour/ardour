@@ -574,7 +574,7 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 
 #if defined (PLATFORM_WINDOWS)
 	property = xml_property (definition, "winfont", styles, "");
-#elif defined (__MACOS__)
+#elif defined (__APPLE__)
 	property = xml_property (definition, "macfont", styles, "");
 #endif
 	if (!property.empty ()) {
