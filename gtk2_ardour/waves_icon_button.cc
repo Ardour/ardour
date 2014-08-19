@@ -77,19 +77,6 @@ WavesIconButton::render (cairo_t* cr, cairo_rectangle_t*)
 								_normal_pixbuf));
 	}
 
-	if ((_left_border_width != 0) ||
-		(_top_border_width != 0) ||
-		(_right_border_width != 0) ||
-		(_bottom_border_width != 0)) {
-		cairo_set_source_rgba (cr, _border_color.get_red_p(), _border_color.get_blue_p(), _border_color.get_green_p(), 1);
-		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
-		cairo_fill (cr);
-	}
-
-	//rounded_function (cr, _left_border_width, _top_border_width, get_width()-_left_border_width-_right_border_width, get_height()-_top_border_width-_bottom_border_width, _corner_radius);
-	//cairo_set_source_rgba (cr, bgcolor.get_red_p(), bgcolor.get_green_p(), bgcolor.get_blue_p(), 1);
-	//cairo_fill (cr);
-
 	// pixbuf, if any
 	if (pixbuf) {
 		double x = (get_width() - pixbuf->get_width())/2.0;
