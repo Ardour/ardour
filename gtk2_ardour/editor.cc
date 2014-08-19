@@ -560,13 +560,13 @@ Editor::Editor ()
 	time_bars_event_box.add (time_bars_vbox);
 	time_bars_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	time_bars_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
-
+        
 	/* labels for the time bars */
-	edit_packer.attach (time_bars_event_box,     0, 1, 0, 1,    FILL,        SHRINK, 0, 0);
+	// edit_packer.attach (time_bars_event_box,     0, 1, 0, 1,    FILL,        SHRINK, 0, 0);
 	/* track controls */
-	edit_packer.attach (controls_layout,         0, 1, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
+	// edit_packer.attach (controls_layout,         0, 1, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
 	/* canvas */
-	edit_packer.attach (*_track_canvas_viewport,  1, 2, 0, 2,    FILL|EXPAND, FILL|EXPAND, 0, 0);
+	edit_packer.attach (*_track_canvas_viewport,  2, 3, 0, 2,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
 	_route_groups = new EditorRouteGroups (this);
 	_routes = new EditorRoutes (this);
