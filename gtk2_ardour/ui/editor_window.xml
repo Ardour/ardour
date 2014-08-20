@@ -292,7 +292,7 @@
           </VPaned>
         </HPaned>
         <EventBox id="mixer_bridge_view_home"
-                  height="400"
+                  height="426"
                   box.pack="end"
                   visible="false"
                   noshowall="true"/>
