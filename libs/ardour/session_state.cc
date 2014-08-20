@@ -2110,6 +2110,21 @@ Session::refresh_disk_space ()
 #endif
 }
 
+float
+Session::get_disk_usage_percentage ()
+{
+#if __APPLE__ || (HAVE_SYS_VFS_H && HAVE_SYS_STATVFS_H)
+    vector<space_and_path>::iterator i = session_dirs.begin();
+    
+    struct statfs statfsbuf;
+	statfs (i->path.c_str(), &statfsbuf);
+    
+    return 100 - (statfsbuf.f_bfree * 100.0)/(statfsbuf.f_blocks);
+#elif
+    return -1;
+#endif
+}
+
 string
 Session::get_best_session_directory_for_new_source ()
 {

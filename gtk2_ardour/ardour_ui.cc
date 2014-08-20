@@ -208,7 +208,11 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, error_log_button (_("Errors"))
 	, _status_bar_visibility (X_("status-bar"))
 	, _feedback_exists (false)
-	, _dsp_load_adjustment (0)
+    , _dsp_load_adjustment (0)
+    , _hd_load_adjustment (0)
+    , _dsp_load_label(0)
+    , _hd_load_label(0)
+    , _hd_remained_time_label(0)
 	, editor (0)
 	, mixer (0)
 	//, meterbridge (0)
@@ -431,6 +435,7 @@ ARDOUR_UI::engine_running ()
 	} 
 	
 	update_disk_space ();
+    update_disk_usage ();
 	update_cpu_load ();
 	update_sample_rate (EngineStateController::instance()->get_current_sample_rate() );
 	update_timecode_format ();
@@ -1085,6 +1090,7 @@ ARDOUR_UI::every_second ()
 	update_cpu_load ();
 	update_buffer_load ();
 	update_disk_space ();
+    update_disk_usage ();
 	update_timecode_format ();
 
 	if (nsm && nsm->is_active ()) {
@@ -1229,6 +1235,10 @@ ARDOUR_UI::update_cpu_load ()
 	snprintf (buf, sizeof (buf), _("DSP: <span foreground=\"%s\">%5.1f%%</span>"), c >= 90 ? X_("red") : X_("green"), c);
 	cpu_load_label.set_markup (buf);
 	_dsp_load_adjustment->set_value (c);
+    
+    stringstream ss;
+    ss << (int)c;
+    _dsp_load_label->set_text ( ss.str() + "%" );
 }
 
 void
@@ -1272,6 +1282,8 @@ ARDOUR_UI::count_recenabled_streams (Route& route)
 void
 ARDOUR_UI::update_disk_space()
 {
+    string result;
+    
 	if (_session == 0) {
 		return;
 	}
@@ -1288,9 +1300,11 @@ ARDOUR_UI::update_disk_space()
 	if (!opt_frames) {
 		/* Available space is unknown */
 		snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">Unknown</span>"));
+        result = "Unknown";
 	} else if (opt_frames.get_value_or (0) == max_framecnt) {
 		snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">24hrs+</span>"));
-	} else {
+        result = "24hrs+";
+    } else {
 		rec_enabled_streams = 0;
 		_session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams);
 
@@ -1298,7 +1312,9 @@ ARDOUR_UI::update_disk_space()
 
 		if (rec_enabled_streams) {
 			frames /= rec_enabled_streams;
-		}
+		} else {
+            frames /= _session->nroutes ();
+        }
 
 		int hrs;
 		int mins;
@@ -1308,7 +1324,8 @@ ARDOUR_UI::update_disk_space()
 
 		if (hrs > 24) {
 			snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">&gt;24 hrs</span>"));
-		} else {
+            result =">24hrs";
+        } else {
 			frames -= hrs * fr * 3600;
 			mins = frames / (fr * 60);
 			frames -= mins * fr * 60;
@@ -1322,10 +1339,29 @@ ARDOUR_UI::update_disk_space()
 				low ? X_("red") : X_("green"),
 				hrs, mins, secs
 				);
+            
+            stringstream ss;
+            ss << hrs << "h " << mins << "m ";
+            result = ss.str();
 		}
 	}
 
 	disk_space_label.set_markup (buf);
+    _hd_remained_time_label->set_text(result);
+}
+
+void
+ARDOUR_UI::update_disk_usage ()
+{
+    if (_session == 0) {
+		return;
+	}
+    
+    int disk_usage_percentage = _session->get_disk_usage_percentage ();
+    _hd_load_adjustment->set_value (disk_usage_percentage);
+    stringstream ss;
+    ss << disk_usage_percentage;
+    _hd_load_label->set_text ( ss.str() + "%" );
 }
 
 void
@@ -2198,6 +2234,7 @@ ARDOUR_UI::map_transport_state ()
 			editor->get_waves_button ("transport_loop_button").set_active (false);
 		}
 		update_disk_space ();
+        update_disk_usage ();
 	}
 }
 
@@ -2938,7 +2975,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 					continue;
 				}
                     
-                int pos = full_session_name.rfind(suffix);
+                size_t pos = full_session_name.rfind(suffix);
                 
                 // if not *.ardour file was choosen
                 if( !(pos == full_session_name.size() - suffix.size()) )

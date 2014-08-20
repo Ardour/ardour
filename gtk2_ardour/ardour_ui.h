@@ -544,6 +544,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	Gtk::Label   disk_space_label;
 	void update_disk_space ();
+    void update_disk_usage ();
 
 	Gtk::Label   timecode_format_label;
 
@@ -760,6 +761,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	VisibilityGroup _status_bar_visibility;
 	Gtk::Adjustment* _dsp_load_adjustment;
+    Gtk::Adjustment* _hd_load_adjustment;
+    Gtk::Label* _dsp_load_label;
+    Gtk::Label* _hd_load_label;
+    Gtk::Label* _hd_remained_time_label;
 
 	/** A ProcessThread so that we have some thread-local buffers for use by
 	 *  PluginEqGui::impulse_analysis ().

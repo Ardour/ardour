@@ -81,6 +81,11 @@ ARDOUR_UI::create_editor ()
 	try {
 		editor = new Editor ();
 		_dsp_load_adjustment = &editor->get_adjustment ("dsp_load_adjustment");
+        _hd_load_adjustment = &editor->get_adjustment("hd_load_adjustment");
+        
+        _dsp_load_label = &editor->get_label("dsp_load_label");
+        _hd_load_label = &editor->get_label("hd_load_label");
+        _hd_remained_time_label = &editor->get_label("hd_remained_time");
 	}
 
 	catch (failed_constructor& err) {
