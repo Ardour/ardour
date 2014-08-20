@@ -1196,7 +1196,7 @@ TimeAxisView::preset_height (Height h)
 	case HeightLarge:
 		return 66;
 	case HeightNormal:
-		return 44;
+		return 45;
 	case HeightSmall:
 		return 22;
     case HeightMaximum:
