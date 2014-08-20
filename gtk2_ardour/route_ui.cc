@@ -172,6 +172,11 @@ RouteUI::self_delete ()
 	delete this;
 }
 
+namespace {
+    size_t default_palette_color = 9;
+    size_t master_color = 3;
+}
+
 void
 RouteUI::set_route (boost::shared_ptr<Route> rp)
 {
@@ -184,9 +189,14 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
         Editor* editor = dynamic_cast<Editor*>( &(ARDOUR_UI::instance()->the_editor()) );
         
         if( editor!=NULL && editor->set_session_in_progress() )
-            color = MixerStrip::palette_random_color();
+        {
+            if( _route->is_master() )
+                color = (Gdk::Color)(MixerStrip::XMLColor[master_color]);
+            else
+                color = MixerStrip::palette_random_color();
+        }
         else
-            color = (Gdk::Color)(MixerStrip::XMLColor[14]);
+            color = (Gdk::Color)(MixerStrip::XMLColor[default_palette_color]);
 		
         set_color (color);
 	}
