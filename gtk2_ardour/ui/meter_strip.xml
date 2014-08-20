@@ -58,6 +58,8 @@
               <Button id="name_button"
                       width="37"
                       height="24"
+                      fgnormal="#ffffff"
+                      fgactive="#ffffff"
                       winfont="Arial 10"
                       macfont="Helvetica 10"/>
               <EventBox bgnormal="#000000"
