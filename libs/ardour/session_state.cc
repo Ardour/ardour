@@ -2120,7 +2120,7 @@ Session::get_disk_usage_percentage ()
 	statfs (i->path.c_str(), &statfsbuf);
     
     return 100 - (statfsbuf.f_bfree * 100.0)/(statfsbuf.f_blocks);
-#elif
+#else
     return -1;
 #endif
 }
