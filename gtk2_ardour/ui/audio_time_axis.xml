@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <RouteUI bgnormal="#383838" bgactive="#545454">
+<Vbox>
+<EventBox id="upper_drop_indicator" visible="false" noshowall="true" height="2" bgnormal="#1CA3B3" bgactive="#1CA3B3"/>
   <HBox>
     <VBox>
       <EventBox height="1" bgnormal="#494949" bgactive="#494949"/>
@@ -138,4 +140,6 @@
     </VBox>
     <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
   </HBox>
+<EventBox id="lower_drop_indicator" visible="false" noshowall="true" height="2" bgnormal="#1CA3B3" bgactive="#1CA3B3" box.pack="end"/>
+</Vbox>
 </RouteUI>

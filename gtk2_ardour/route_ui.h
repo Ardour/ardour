@@ -56,6 +56,14 @@ class ArdourButton;
 class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 {
   public:
+    
+    enum {
+        ROUTE_HEADER
+        // add more targets here
+    } DnDTargets;
+    
+    static Gtk::TargetEntry header_target;
+    
 	RouteUI(ARDOUR::Session*, const std::string& layout_script_file);
 
 	virtual ~RouteUI();
@@ -65,6 +73,31 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	virtual void set_route (boost::shared_ptr<ARDOUR::Route>);
 	virtual void set_button_names () = 0;
 
+    // DnD
+    void enable_header_dnd ();
+    bool disable_header_dnd ();
+    
+    // DnD callback handlers:
+    // source callbacks
+    void on_route_drag_begin(const Glib::RefPtr<Gdk::DragContext>& context);
+    void on_route_drag_data_get(const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time);
+    
+    // destination callbacks
+    bool on_route_drag_motion(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
+    void on_route_drag_leave(const Glib::RefPtr<Gdk::DragContext>& context, guint time);
+    bool on_route_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
+    void on_route_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time);
+    
+    // HANDLERS WHICH MUST BE DEFINED in inheriting class for DnD support
+    // define in inheriting class if you want custom drag icon to be set
+    virtual void handle_route_drag_begin(const Glib::RefPtr<Gdk::DragContext>& context) {};
+    // define this in inheriting class to provide the responce on a draging above the widget
+    virtual bool handle_route_drag_motion(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time) { context->drag_refuse(time); return false; };
+    // define this in inheriting class to provide the responce on a leaving the widget with drag
+    virtual void handle_route_drag_leave(const Glib::RefPtr<Gdk::DragContext>& context, guint time) {};
+    // define this in inheriting class to provide the responce and actions on the destination side
+    virtual void handle_route_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time) {context->drop_finish(false, time); };
+    
 	bool is_track() const;
 	bool is_audio_track() const;
     bool is_master_track() const;
@@ -93,7 +126,7 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	bool wait_for_release;
 	bool multiple_mute_change;
 	bool multiple_solo_change;
-
+    
 	WavesButton& master_mute_button;
 	WavesButton& mute_button;
 	WavesButton& solo_button;
