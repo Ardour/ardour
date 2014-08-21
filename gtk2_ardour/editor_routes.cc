@@ -1619,8 +1619,8 @@ EditorRoutes::move_tracks_relatively (const PBD::ID& source_track_id, const PBD:
         }
 	}
     
-    RouteList::const_iterator insert_position;
-    for (RouteList::const_iterator iter = routes.begin(); iter != routes.end(); ++iter) {
+    RouteList::iterator insert_position;
+    for (RouteList::iterator iter = routes.begin(); iter != routes.end(); ++iter) {
         if ((*iter)->id() == target_track_id ) {
             insert_position = iter;
             break;
