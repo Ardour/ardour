@@ -939,7 +939,7 @@ TracksControlPanel::cleanup_output_channels_list()
         }
         
         playback_controls.pop_back();
-        _device_capture_list.remove(*item);
+        _device_playback_list.remove(*item);
         delete item;
     }
 }
