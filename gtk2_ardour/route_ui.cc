@@ -196,8 +196,13 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
                 color = MixerStrip::palette_random_color();
         }
         else
-            color = (Gdk::Color)(MixerStrip::XMLColor[default_palette_color]);
-		
+		{
+			if( _route->is_master() )
+                color = (Gdk::Color)(MixerStrip::XMLColor[master_color]);
+			else
+				color = (Gdk::Color)(MixerStrip::XMLColor[default_palette_color]);
+		}
+
         set_color (color);
 	}
 

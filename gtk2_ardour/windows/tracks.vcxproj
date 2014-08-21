@@ -777,13 +777,31 @@
     <None Include="..\icons\export_icons.sh" />
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="..\ui\add_tracks_dialog.xml" />
+    <Xml Include="..\ui\audio_time_axis.xml" />
+    <Xml Include="..\ui\automation_time_axis.xml" />
+    <Xml Include="..\ui\compact_meter_bridge.xml" />
+    <Xml Include="..\ui\compact_meter_strip.xml" />
     <Xml Include="..\ui\device_capture_control.xml" />
     <Xml Include="..\ui\device_playback_control.xml" />
+    <Xml Include="..\ui\editor_mixer.xml" />
     <Xml Include="..\ui\editor_window.xml" />
+    <Xml Include="..\ui\inspector_gain_meter.xml" />
+    <Xml Include="..\ui\master_ui.xml" />
+    <Xml Include="..\ui\master_ui_gain_meter.xml" />
+    <Xml Include="..\ui\meter_bridge_view.xml" />
+    <Xml Include="..\ui\meter_strip.xml" />
+    <Xml Include="..\ui\meter_strip_gain_meter.xml" />
     <Xml Include="..\ui\midi_device_control.xml" />
+    <Xml Include="..\ui\mixer_bridge_view.xml" />
+    <Xml Include="..\ui\mixer_gain_meter.xml" />
+    <Xml Include="..\ui\mixer_strip.xml" />
+    <Xml Include="..\ui\session_close_dialog.xml" />
     <Xml Include="..\ui\session_dialog.xml" />
     <Xml Include="..\ui\session_lock_dialog.xml" />
+    <Xml Include="..\ui\time_info_box.xml" />
     <Xml Include="..\ui\tracks_preferences.xml" />
+    <Xml Include="..\ui\track_header_gain_meter.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

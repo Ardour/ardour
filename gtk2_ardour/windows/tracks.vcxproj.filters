@@ -2168,5 +2168,59 @@
     <Xml Include="..\ui\session_lock_dialog.xml">
       <Filter>ui</Filter>
     </Xml>
+    <Xml Include="..\ui\add_tracks_dialog.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\audio_time_axis.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\automation_time_axis.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\compact_meter_bridge.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\compact_meter_strip.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\editor_mixer.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\inspector_gain_meter.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\master_ui.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\master_ui_gain_meter.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\meter_bridge_view.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\meter_strip.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\meter_strip_gain_meter.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\mixer_bridge_view.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\mixer_gain_meter.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\mixer_strip.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\session_close_dialog.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\time_info_box.xml">
+      <Filter>ui</Filter>
+    </Xml>
+    <Xml Include="..\ui\track_header_gain_meter.xml">
+      <Filter>ui</Filter>
+    </Xml>
   </ItemGroup>
 </Project>
