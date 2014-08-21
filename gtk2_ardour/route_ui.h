@@ -76,6 +76,7 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
     // DnD
     void enable_header_dnd ();
     bool disable_header_dnd ();
+    bool dnd_operation_enabled () { return _dnd_operation_enabled; }
     
     // DnD callback handlers:
     // source callbacks
@@ -321,6 +322,7 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	static uint32_t _max_invert_buttons;
 
 	bool _dnd_operation_in_progress;
+    bool _dnd_operation_enabled;
 };
 
 #endif /* __ardour_route_ui__ */

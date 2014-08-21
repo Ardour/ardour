@@ -148,6 +148,12 @@ public:
 
 	std::string state_id() const;
 
+    void set_ignore_dnd_requests(bool ignore) {_ignore_dnd_requests = ignore; }
+    bool check_ignore_dnd_requests() {return _ignore_dnd_requests; }
+    
+    virtual void control_ebox_resize_started();
+    virtual void control_ebox_resize_ended();
+
     PBD::Signal3<void, const PBD::ID&, const PBD::ID&, bool> relative_tracks_reorder_request;
     
 protected:
@@ -313,6 +319,7 @@ protected:
 	UnderlayMirrorList _underlay_mirrors;
 
 	bool _ignore_set_layer_display;
+    bool _ignore_dnd_requests;
 
 private:
 

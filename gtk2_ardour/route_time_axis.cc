@@ -111,6 +111,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed,
 	, color_mode_menu (0)
 	, gm (sess, "track_header_gain_meter.xml")
 	, _ignore_set_layer_display (false)
+    , _ignore_dnd_requests (false)
 	, gain_meter_home (get_box ("gain_meter_home"))
 	, selected_track_color_box (get_container ("selected_track_color_box"))
 	, track_color_box (get_container ("track_color_box"))
@@ -894,6 +895,10 @@ RouteTimeAxisView::update_diskstream_display ()
 void
 RouteTimeAxisView::selection_click (GdkEventButton* ev)
 {
+    if (dnd_in_progress() ) {
+        return;
+    }
+    
 	if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
 
 		/* special case: select/deselect all tracks */
@@ -2251,4 +2256,23 @@ RouteTimeAxisView::remove_child (boost::shared_ptr<TimeAxisView> c)
 			}
 		}
 	}
+}
+
+void
+RouteTimeAxisView::control_ebox_resize_started()
+{
+    if (dnd_operation_enabled () ) {
+        _ignore_dnd_requests = true;
+        disable_header_dnd ();
+    }
+    
+}
+
+void
+RouteTimeAxisView::control_ebox_resize_ended()
+{
+    if (_ignore_dnd_requests ) {
+        _ignore_dnd_requests = false;
+        enable_header_dnd ();
+    }
 }

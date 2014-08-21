@@ -84,6 +84,7 @@ RouteUI::RouteUI (ARDOUR::Session* sess, const std::string& layout_script_file)
 	, rec_enable_button (get_waves_button ("rec_enable_button"))
 	, show_sends_button (get_waves_button ("show_sends_button"))
 	, monitor_input_button (get_waves_button ("monitor_input_button"))
+    , _dnd_operation_enabled (false)
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 	if (sess) init ();
@@ -157,6 +158,7 @@ RouteUI::init ()
     // source side
     signal_drag_begin().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_begin));
     signal_drag_data_get().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_data_get));
+    signal_drag_begin().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_end));
     
     // destination callbacks
     signal_drag_motion().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_motion));
@@ -300,6 +302,7 @@ void RouteUI::enable_header_dnd ()
     targets.push_back(header_target);
     drag_source_set(targets, Gdk::BUTTON1_MASK);
     drag_dest_set(targets, DEST_DEFAULT_HIGHLIGHT);
+    _dnd_operation_enabled = true;
 }
 
 bool RouteUI::disable_header_dnd ()
@@ -307,11 +310,12 @@ bool RouteUI::disable_header_dnd ()
     // disable DnD operations
     drag_source_unset ();
     drag_dest_unset ();
+    _dnd_operation_enabled = false;
 }
 
 void
 RouteUI::on_route_drag_begin(const Glib::RefPtr<Gdk::DragContext>& context)
-{
+{    
 	_dnd_operation_in_progress = true;
     handle_route_drag_begin(context);
 }
