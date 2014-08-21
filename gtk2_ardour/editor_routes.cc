@@ -688,7 +688,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		(*x)->route()->active_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_active_display, this), gui_context ());
         
         // connect to DnD reordering signal
-        (*x)->relative_tracks_reorder_request.connect(*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::move_tracks_relatively, this, _1, _2, _3), gui_context());
+        (*x)->relative_tracks_reorder_request.connect(*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::move_selected_tracks_relatively, this, _1, _2, _3), gui_context());
 	}
 
 	update_rec_display ();
@@ -1566,51 +1566,38 @@ EditorRoutes::move_selected_tracks (bool up)
 }
 
 void
-EditorRoutes::move_tracks_relatively (const PBD::ID& source_track_id, const PBD::ID& target_track_id, bool after_target)
+EditorRoutes::move_selected_tracks_relatively (const PBD::ID& source_track_id, const PBD::ID& target_track_id, bool after_target)
 {
     if (source_track_id == target_track_id) {
         return;
     }
     
-    RouteList routes_to_move;
     RouteTimeAxisView* source_rtv = _editor->get_route_view_by_route_id(source_track_id);
-    
     Selection& selection = _editor->get_selection();
-    // source track is among selected - move allselected tracks
-	if (selection.selected(source_rtv) ) {
-		TrackViewList tracks = selection.tracks;
-        
-        for (TrackViewList::const_iterator iter = tracks.begin(); iter != tracks.end(); ++iter) {
-            
-            RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*iter);
-            
-            if (rtv->route()->id() != target_track_id && !rtv->is_master_track() ) {
-                routes_to_move.push_back(rtv->route() );
-            }
-        }
-	} else {
-        routes_to_move.push_back(source_rtv->route() );
-    }
     
-	RouteList routes;
+    RouteList routes;
+    RouteList routes_to_move;
 	TreeModel::Children rows = _model->children();
     
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri) {
 
-        // skip source track...
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
-        if (source_rtv->route()->id() == route->id() ) {
-            continue;
-        }
-        
-        // and selected track if source is selected
         TimeAxisView* tv = (*ri)[_columns.tv];
-        if (selection.selected(source_rtv) &&
-            selection.selected(tv) &&
-            route->id() != target_track_id) {
+        
+        // source track: add to the move list
+        if (source_rtv->route()->id() == route->id() ) {
+            routes_to_move.push_back(route );
             continue;
         }
         
+        // selected tracks: add to the move list but if it's not a target
+        if (selection.selected(tv) &&
+            route->id() != target_track_id) {
+            routes_to_move.push_back(route);
+            continue;
+        }
+        
+        // master track should always be the first
         RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tv);
         if (rtv->is_master_track() ) {
             routes.push_front(route);
@@ -1656,8 +1643,6 @@ EditorRoutes::move_tracks_relatively (const PBD::ID& source_track_id, const PBD:
 #endif	
     
 	_model->reorder (neworder);
-    
-    
 }
 
 void
