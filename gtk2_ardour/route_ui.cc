@@ -312,7 +312,15 @@ bool RouteUI::disable_header_dnd ()
 void
 RouteUI::on_route_drag_begin(const Glib::RefPtr<Gdk::DragContext>& context)
 {
+	_dnd_operation_in_progress = true;
     handle_route_drag_begin(context);
+}
+
+void
+RouteUI::on_route_drag_end(const Glib::RefPtr<Gdk::DragContext>& context)
+{
+	_dnd_operation_in_progress = false;
+	handle_route_drag_end(context);
 }
 
 void

@@ -81,7 +81,8 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
     // source callbacks
     void on_route_drag_begin(const Glib::RefPtr<Gdk::DragContext>& context);
     void on_route_drag_data_get(const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time);
-    
+    void on_route_drag_end(const Glib::RefPtr<Gdk::DragContext>& context);
+
     // destination callbacks
     bool on_route_drag_motion(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
     void on_route_drag_leave(const Glib::RefPtr<Gdk::DragContext>& context, guint time);
@@ -91,6 +92,8 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
     // HANDLERS WHICH MUST BE DEFINED in inheriting class for DnD support
     // define in inheriting class if you want custom drag icon to be set
     virtual void handle_route_drag_begin(const Glib::RefPtr<Gdk::DragContext>& context) {};
+	// define in inheriting class if you want actions on dnd end
+	virtual void handle_route_drag_end(const Glib::RefPtr<Gdk::DragContext>& context) {};
     // define this in inheriting class to provide the responce on a draging above the widget
     virtual bool handle_route_drag_motion(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time) { context->drag_refuse(time); return false; };
     // define this in inheriting class to provide the responce on a leaving the widget with drag
@@ -258,6 +261,8 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	 */
 	static PBD::Signal1<void, boost::shared_ptr<ARDOUR::Route> > BusSendDisplayChanged;
 
+	bool dnd_in_progress() {return _dnd_operation_in_progress; }
+
   protected:
 	PBD::ScopedConnectionList route_connections;
 	bool self_destruct;
@@ -314,6 +319,8 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	static boost::weak_ptr<ARDOUR::Route> _showing_sends_to;
 	
 	static uint32_t _max_invert_buttons;
+
+	bool _dnd_operation_in_progress;
 };
 
 #endif /* __ardour_route_ui__ */
