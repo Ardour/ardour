@@ -28,6 +28,7 @@ CairoWidget::CairoWidget ()
 	: _active_state (Gtkmm2ext::Off)
 	, _visual_state (Gtkmm2ext::NoVisualState)
 	, _need_bg (true)
+	, _grabbed (false)
 	, _name_proxy (this, X_("name"))
 {
 	_name_proxy.connect (sigc::mem_fun (*this, &CairoWidget::on_name_changed));

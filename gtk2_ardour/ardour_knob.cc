@@ -56,7 +56,6 @@ ArdourKnob::Element ArdourKnob::default_elements = ArdourKnob::Element (ArdourKn
 ArdourKnob::ArdourKnob (Element e)
 	: _elements (e)
 	, _hovering (false)
-	, _grabbed (false)
 {
 	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourKnob::color_handler));
 }

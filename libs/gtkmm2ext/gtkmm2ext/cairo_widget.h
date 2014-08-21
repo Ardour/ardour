@@ -85,6 +85,8 @@ protected:
 	Gtkmm2ext::ActiveState _active_state;
 	Gtkmm2ext::VisualState _visual_state;
 	bool                   _need_bg;
+	
+	bool		_grabbed;
 
   private:
 	Glib::SignalProxyProperty _name_proxy;

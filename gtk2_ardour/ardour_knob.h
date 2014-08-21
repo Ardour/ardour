@@ -84,7 +84,6 @@ public:
 	BindingProxy                binding_proxy;
 
 	bool _hovering;
-	bool _grabbed;
 	float _grabbed_y;
 
 	float _val;  //percent of knob travel
