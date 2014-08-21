@@ -84,6 +84,7 @@ RouteUI::RouteUI (ARDOUR::Session* sess, const std::string& layout_script_file)
 	, rec_enable_button (get_waves_button ("rec_enable_button"))
 	, show_sends_button (get_waves_button ("show_sends_button"))
 	, monitor_input_button (get_waves_button ("monitor_input_button"))
+	, _dnd_operation_in_progress (false)
     , _dnd_operation_enabled (false)
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
