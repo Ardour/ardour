@@ -861,6 +861,8 @@ RouteTimeAxisView::handle_route_drag_leave(const Glib::RefPtr<Gdk::DragContext>&
 void
 RouteTimeAxisView::handle_route_drag_begin (const Glib::RefPtr<Gdk::DragContext>& context)
 {
+	_ebox_release_can_act = false;
+
     // mark dragged track selected anyway
     if (!_editor.get_selection().selected(this) ) {
         _editor.get_selection().clear_tracks();
@@ -868,6 +870,11 @@ RouteTimeAxisView::handle_route_drag_begin (const Glib::RefPtr<Gdk::DragContext>
     }
     
     //GZ TO-DO: Draw DnD icon for track header
+}
+
+void
+RouteTimeAxisView::handle_route_drag_end(const Glib::RefPtr<Gdk::DragContext>& context)
+{
 }
 
 void
@@ -899,34 +906,59 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
         return;
     }
     
-	if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
+	if (ev->type == GDK_BUTTON_PRESS) {
 
-		/* special case: select/deselect all tracks */
-		if (_editor.get_selection().selected (this)) {
-			_editor.get_selection().clear_tracks ();
-		} else {
-			_editor.select_all_tracks ();
+		if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
+
+			/* special case: select/deselect all tracks */
+			if (_editor.get_selection().selected (this)) {
+				_editor.get_selection().clear_tracks ();
+			} else {
+				_editor.select_all_tracks ();
+			}
+
+			return;
 		}
 
-		return;
-	}
 
-	switch (ArdourKeyboard::selection_type (ev->state)) {
-	case Selection::Toggle:
-		_editor.get_selection().toggle (this);
-		break;
+		switch (ArdourKeyboard::selection_type (ev->state)) {
+		case Selection::Toggle:
+			_editor.get_selection().toggle (this);
+			break;
 
-	case Selection::Set:
-		_editor.get_selection().set (this);
-		break;
+		case Selection::Set:
+			if (!_editor.get_selection().selected (this)) {
+				_editor.get_selection().set (this);
+			}
+			break;
 
-	case Selection::Extend:
-		_editor.extend_selection_to_track (*this);
-		break;
+		case Selection::Extend:
+			_editor.extend_selection_to_track (*this);
+			break;
 
-	case Selection::Add:
-		_editor.get_selection().add (this);
-		break;
+		case Selection::Add:
+			_editor.get_selection().add (this);
+			break;
+		}
+
+	} else if (ev->type == GDK_BUTTON_RELEASE) {
+
+		switch (ArdourKeyboard::selection_type (ev->state)) {
+		case Selection::Toggle:
+			break;
+
+		case Selection::Set:
+			if (_editor.get_selection().selected (this)) {
+				_editor.get_selection().set (this);
+			}
+			break;
+
+		case Selection::Extend:
+			break;
+
+		case Selection::Add:
+			break;
+		}
 	}
 }
 

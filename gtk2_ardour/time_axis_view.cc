@@ -336,6 +336,10 @@ TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 
 	}
 
+	if (event->button == 1) {
+		selection_click (event);
+	}
+
 	_ebox_release_can_act = true;
 			
 	if (maybe_set_cursor (event->y) > 0) {

@@ -225,6 +225,7 @@ class TimeAxisView : public virtual AxisView
 	bool                  _number_is_hidden;
     bool                  _hidden;
 	bool                   in_destructor;
+	bool                  _ebox_release_can_act;
 	Gtk::Menu*            _size_menu;
 	ArdourCanvas::Group*  _canvas_display;
 	double                _y_position;
@@ -296,7 +297,6 @@ private:
 	double               _resize_drag_start;
 	GdkCursor*           _preresize_cursor;
 	bool                 _have_preresize_cursor;
-    bool                 _ebox_release_can_act;
 
 	static uint32_t button_height;
 	static uint32_t extra_height;

@@ -185,10 +185,10 @@ protected:
 
     // DnD heandlers for route header
     virtual void handle_route_drag_begin (const Glib::RefPtr<Gdk::DragContext>& context);
+	virtual void handle_route_drag_end(const Glib::RefPtr<Gdk::DragContext>& context);
     virtual void handle_route_drag_data_received (const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time);
     virtual bool handle_route_drag_motion (const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
     virtual void handle_route_drag_leave (const Glib::RefPtr<Gdk::DragContext>& context, guint time);
-
     
 	void update_diskstream_display ();
 
