@@ -1584,12 +1584,6 @@ EditorRoutes::move_selected_tracks_relatively (const PBD::ID& source_track_id, c
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
         TimeAxisView* tv = (*ri)[_columns.tv];
         
-        // source track: add to the move list
-        if (source_rtv->route()->id() == route->id() ) {
-            routes_to_move.push_back(route );
-            continue;
-        }
-        
         // selected tracks: add to the move list but if it's not a target
         if (selection.selected(tv) &&
             route->id() != target_track_id) {
