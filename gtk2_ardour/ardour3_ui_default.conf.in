@@ -81,12 +81,10 @@
     <Option name="midi meter fill: 7" value="8fc78eff"/>
     <Option name="midi meter fill: 8" value="8fc78eff"/>
     <Option name="midi meter fill: 9" value="00f45600"/>
-    <Option name="meterbridge peakindicator: fill start" value="444444ff"/>
-    <Option name="meterbridge peakindicator: fill end" value="333333ff"/>
-    <Option name="meterbridge peakindicator on: fill start" value="ff0000ff"/>
-    <Option name="meterbridge peakindicator on: fill end" value="880000ff"/>
-    <Option name="meterbridge label: fill start" value="444444ff"/>
-    <Option name="meterbridge label: fill end" value="333333ff"/>
+    <Option name="meterbridge peakindicator: fill" value="444444ff"/>
+    <Option name="meterbridge peakindicator: fill active" value="ff0000ff"/>
+    <Option name="meterbridge label: fill" value="444444ff"/>
+    <Option name="meterbridge label: fill active" value="333333ff"/>
     <Option name="meterbridge label: text" value="c7c7d8ff"/>
     <Option name="meter marker" value="f2425bff"/>
     <Option name="midi bus base" value="00000000"/>
@@ -161,8 +159,8 @@
     <Option name="selected time axis frame" value="000000ff"/>
     <Option name="time stretch fill" value="e2b5b596"/>
     <Option name="time stretch outline" value="63636396"/>
-    <Option name="tracknumber label: fill start" value="444444ff"/>
-    <Option name="tracknumber label: fill end" value="333333ff"/>
+    <Option name="tracknumber label: fill" value="444444ff"/>
+    <Option name="tracknumber label: fill active" value="333333ff"/>
     <Option name="tracknumber label: text" value="c7c7d8ff"/>
     <Option name="transport drag rect" value="969696c6"/>
     <Option name="transport loop rect" value="1e7728f9"/>
@@ -181,333 +179,252 @@
     <Option name="zero line" value="7f7f7fe0"/>
     <Option name="zoom rect" value="c6d1b26d"/>
     <Option name="monitor knob" value="555050ff"/>
+    <Option name="monitor knob: arc start" value="5d90b0ff"/>
+    <Option name="monitor knob: arc end" value="154c6eff"/>
     <Option name="button border" value="000000f0"/>
     <Option name="border color" value="00000000"/>
-    <Option name="processor prefader: fill start" value="873c3cff"/>
+    <Option name="processor prefader: fill" value="873c3cff"/>
     <Option name="processor prefader: fill end" value="542525ff"/>
-    <Option name="processor prefader: fill start active" value="774c4cff"/>
-    <Option name="processor prefader: fill end active" value="603535ff"/>
+    <Option name="processor prefader: fill active" value="603535ff"/>
     <Option name="processor prefader: led" value="26550eff"/>
     <Option name="processor prefader: led active" value="78cb4eff"/>
     <Option name="processor prefader: text" value="aaaaa3ff"/>
     <Option name="processor prefader: text active" value="eeeeecff"/>
     <Option name="processor fader: fill start" value="5d90b0ff"/>
     <Option name="processor fader: fill end" value="154c6eff"/>
-    <Option name="processor fader: fill start active" value="5d90b0ff"/>
-    <Option name="processor fader: fill end active" value="256d8fff"/>
+    <Option name="processor fader: fill active" value="256d8fff"/>
     <Option name="processor fader: led" value="26550eff"/>
     <Option name="processor fader: led active" value="78cb4eff"/>
     <Option name="processor fader: text" value="aaaaa3ff"/>
     <Option name="processor fader: text active" value="eeeeecff"/>
-    <Option name="processor postfader: fill start" value="354537ff"/>
+    <Option name="processor postfader: fill" value="354537ff"/>
     <Option name="processor postfader: fill end" value="202823ff"/>
-    <Option name="processor postfader: fill start active" value="466452ff"/>
-    <Option name="processor postfader: fill end active" value="254528ff"/>
+    <Option name="processor postfader: fill active" value="254528ff"/>
     <Option name="processor postfader: led" value="26550eff"/>
     <Option name="processor postfader: led active" value="78cb4eff"/>
     <Option name="processor postfader: text" value="aaaaa3ff"/>
     <Option name="processor postfader: text active" value="eeeeecff"/>
-    <Option name="processor control button: fill start" value="222222ff"/>
-    <Option name="processor control button: fill end" value="333333ff"/>
-    <Option name="processor control button: fill start active" value="444444ff"/>
-    <Option name="processor control button: fill end active" value="333333ff"/>
+    <Option name="processor control button: fill" value="222222ff"/>
+    <Option name="processor control button: fill active" value="333333ff"/>
     <Option name="processor control button: led" value="224400ff"/>
     <Option name="processor control button: led active" value="99cc00ff"/>
     <Option name="processor control button: text" value="ffffffff"/>
     <Option name="processor control button: text active" value="ffffffff"/>
-    <Option name="midi device: fill start" value="54555dff"/>
-    <Option name="midi device: fill end" value="54555dff"/>
-    <Option name="midi device: fill start active" value="3a3a40ff"/>
-    <Option name="midi device: fill end active" value="45464cff"/>
+    <Option name="midi device: fill" value="54555dff"/>
+    <Option name="midi device: fill active" value="45464cff"/>
     <Option name="midi device: led" value="006600ff"/>
     <Option name="midi device: led active" value="00ff00ff"/>
     <Option name="midi device: text" value="c7c7d8ff"/>
     <Option name="midi device: text active" value="eeeeecff"/>
-    <Option name="monitor button: fill start" value="5f5a58ff"/>
-    <Option name="monitor button: fill end" value="4f4a48ff"/>
-    <Option name="monitor button: fill start active" value="553500ff"/>
-    <Option name="monitor button: fill end active" value="e58505ff"/>
+    <Option name="monitor button: fill" value="616268ff"/>
+    <Option name="monitor button: fill active" value="c56505ff"/>
     <Option name="monitor button: led" value="660000ff"/>
     <Option name="monitor button: led active" value="ff0000ff"/>
-    <Option name="monitor button: text" value="aaaaa3ff"/>
+    <Option name="monitor button: text" value="c7c7d8ff"/>
     <Option name="monitor button: text active" value="1a1a1aff"/>
-    <Option name="meterbridge label: fill start" value="444444ff"/>
-    <Option name="meterbridge label: fill end" value="333333ff"/>
-    <Option name="meterbridge label: text" value="c7c7d8ff"/>
-    <Option name="solo isolate: fill start" value="5f5a58ff"/>
-    <Option name="solo isolate: fill end" value="504442ff"/>
-    <Option name="solo isolate: fill start active" value="5d5856ff"/>
-    <Option name="solo isolate: fill end active" value="564d48ff"/>
+    <Option name="solo isolate: fill" value="616268ff"/>
+    <Option name="solo isolate: fill active" value="564d48ff"/>
     <Option name="solo isolate: led" value="660000ff"/>
     <Option name="solo isolate: led active" value="ff0000ff"/>
     <Option name="solo isolate: text" value="c7c7d8ff"/>
     <Option name="solo isolate: text active" value="c8c8d9ff"/>
-    <Option name="solo safe: fill start" value="5f5a58ff"/>
-    <Option name="solo safe: fill end" value="504442ff"/>
-    <Option name="solo safe: fill start active" value="5d5856ff"/>
-    <Option name="solo safe: fill end active" value="564d48ff"/>
+    <Option name="solo safe: fill" value="616268ff"/>
+    <Option name="solo safe: fill active" value="564d48ff"/>
     <Option name="solo safe: led" value="660000ff"/>
     <Option name="solo safe: led active" value="ff0000ff"/>
     <Option name="solo safe: text" value="c7c7d8ff"/>
     <Option name="solo safe: text active" value="c8c8d9ff"/>
     <Option name="meterbridge peaklabel" value="ff1111ff"/>
     <Option name="meter color BBC" value="ffa500ff"/>
-    <Option name="meterbridge peakindicator: fill start" value="444444ff"/>
-    <Option name="meterbridge peakindicator: fill end" value="333333ff"/>
-    <Option name="meterbridge peakindicator on: fill start" value="ff0000ff"/>
-    <Option name="meterbridge peakindicator on: fill end" value="880000ff"/>
-    <Option name="monitor section cut: fill start" value="5f5a58ff"/>
-    <Option name="monitor section cut: fill end" value="4f4a48ff"/>
-    <Option name="monitor section cut: fill start active" value="5f4943ff"/>
-    <Option name="monitor section cut: fill end active" value="ffa500ff"/>
+    <Option name="monitor section cut: fill" value="5f5a58ff"/>
+    <Option name="monitor section cut: fill active" value="ffa500ff"/>
     <Option name="monitor section cut: led" value="473812ff"/>
     <Option name="monitor section cut: led active" value="78cb4eff"/>
     <Option name="monitor section cut: text" value="c7c7d8ff"/>
     <Option name="monitor section cut: text active" value="000000ff"/>
-    <Option name="monitor section dim: fill start" value="5f5a58ff"/>
-    <Option name="monitor section dim: fill end" value="4f4a48ff"/>
-    <Option name="monitor section dim: fill start active" value="553500ff"/>
-    <Option name="monitor section dim: fill end active" value="e58505ff"/>
+    <Option name="monitor section dim: fill" value="5f5a58ff"/>
+    <Option name="monitor section dim: fill active" value="e58505ff"/>
     <Option name="monitor section dim: led" value="00000000"/>
     <Option name="monitor section dim: led active" value="78cb4eff"/>
     <Option name="monitor section dim: text" value="c8c8d9ff"/>
     <Option name="monitor section dim: text active" value="c8c8d9ff"/>
-    <Option name="monitor section solo: fill start" value="5f5a58ff"/>
-    <Option name="monitor section solo: fill end" value="4f4a48ff"/>
-    <Option name="monitor section solo: fill start active" value="104506ff"/>
-    <Option name="monitor section solo: fill end active" value="4dbb00ff"/>
+    <Option name="monitor section solo: fill" value="5f5a58ff"/>
+    <Option name="monitor section solo: fill active" value="4dbb00ff"/>
     <Option name="monitor section solo: led" value="473812ff"/>
     <Option name="monitor section solo: led active" value="ffa500ff"/>
     <Option name="monitor section solo: text" value="00000000"/>
     <Option name="monitor section solo: text active" value="00000000"/>
-    <Option name="monitor section invert: fill start" value="5f5a58ff"/>
-    <Option name="monitor section invert: fill end" value="4f4a48ff"/>
-    <Option name="monitor section invert: fill start active" value="222260ff"/>
-    <Option name="monitor section invert: fill end active" value="4242d0ff"/>
+    <Option name="monitor section invert: fill" value="5f5a58ff"/>
+    <Option name="monitor section invert: fill active" value="4242d0ff"/>
     <Option name="monitor section invert: led" value="473812ff"/>
     <Option name="monitor section invert: led active" value="78cb4eff"/>
     <Option name="monitor section invert: text" value="00000000"/>
     <Option name="monitor section invert: text active" value="00000000"/>
-    <Option name="monitor section mono: fill start" value="5f5a58ff"/>
-    <Option name="monitor section mono: fill end" value="4f4a48ff"/>
-    <Option name="monitor section mono: fill start active" value="222260ff"/>
-    <Option name="monitor section mono: fill end active" value="3232c0ff"/>
+    <Option name="monitor section mono: fill" value="5f5a58ff"/>
+    <Option name="monitor section mono: fill active" value="3232c0ff"/>
     <Option name="monitor section mono: led" value="473812ff"/>
     <Option name="monitor section mono: led active" value="78cb4eff"/>
     <Option name="monitor section mono: text" value="c7c7d8ff"/>
     <Option name="monitor section mono: text active" value="c8c8d9ff"/>
-    <Option name="monitor section solo model: fill start" value="5d5856ff"/>
-    <Option name="monitor section solo model: fill end" value="564d48ff"/>
-    <Option name="monitor section solo model: fill start active" value="5d5856ff"/>
-    <Option name="monitor section solo model: fill end active" value="564d48ff"/>
+    <Option name="monitor section solo model: fill" value="5d5856ff"/>
+    <Option name="monitor section solo model: fill active" value="564d48ff"/>
     <Option name="monitor section solo model: led" value="4f3300ff"/>
     <Option name="monitor section solo model: led active" value="ffa500ff"/>
     <Option name="monitor section solo model: text" value="c7c7d8ff"/>
     <Option name="monitor section solo model: text active" value="c8c8d9ff"/>
-    <Option name="monitor solo override: fill start" value="5d5856ff"/>
-    <Option name="monitor solo override: fill end" value="564d48ff"/>
-    <Option name="monitor solo override: fill start active" value="5d5856ff"/>
-    <Option name="monitor solo override: fill end active" value="564d48ff"/>
+    <Option name="monitor solo override: fill" value="5d5856ff"/>
+    <Option name="monitor solo override: fill active" value="564d48ff"/>
     <Option name="monitor solo override: led" value="4f3300ff"/>
     <Option name="monitor solo override: led active" value="ffa500ff"/>
     <Option name="monitor solo override: text" value="c7c7d8ff"/>
     <Option name="monitor solo override: text active" value="c8c8d9ff"/>
-    <Option name="monitor solo exclusive: fill start" value="5d5856ff"/>
-    <Option name="monitor solo exclusive: fill end" value="564d48ff"/>
-    <Option name="monitor solo exclusive: fill start active" value="5d5856ff"/>
-    <Option name="monitor solo exclusive: fill end active" value="564c47ff"/>
+    <Option name="monitor solo exclusive: fill" value="5d5856ff"/>
+    <Option name="monitor solo exclusive: fill active" value="564c47ff"/>
     <Option name="monitor solo exclusive: led" value="4f3300ff"/>
     <Option name="monitor solo exclusive: led active" value="ffa500ff"/>
     <Option name="monitor solo exclusive: text" value="c7c7d8ff"/>
     <Option name="monitor solo exclusive: text active" value="c8c8d9ff"/>
-    <Option name="rude solo: fill start" value="684d4dff"/>
-    <Option name="rude solo: fill end" value="513c3cff"/>
-    <Option name="rude solo: fill start active" value="ff1f1fff"/>
-    <Option name="rude solo: fill end active" value="e21b1bff"/>
+    <Option name="rude solo: fill" value="684d4dff"/>
+    <Option name="rude solo: fill active" value="e21b1bff"/>
     <Option name="rude solo: led" value="00000000"/>
     <Option name="rude solo: led active" value="00000000"/>
     <Option name="rude solo: text" value="969696ff"/>
     <Option name="rude solo: text active" value="e5e5e5ff"/>
-    <Option name="rude isolate: fill start" value="21414fff"/>
-    <Option name="rude isolate: fill end" value="192930ff"/>
-    <Option name="rude isolate: fill start active" value="e5f7ffff"/>
-    <Option name="rude isolate: fill end active" value="b6e5fdff"/>
+    <Option name="rude isolate: fill" value="21414fff"/>
+    <Option name="rude isolate: fill active" value="b6e5fdff"/>
     <Option name="rude isolate: led" value="00000000"/>
     <Option name="rude isolate: led active" value="000000ff"/>
     <Option name="rude isolate: text" value="979797ff"/>
     <Option name="rude isolate: text active" value="000000ff"/>
-    <Option name="rude audition: fill start" value="684d4dff"/>
-    <Option name="rude audition: fill end" value="513c3cff"/>
-    <Option name="rude audition: fill start active" value="ff1f1fff"/>
-    <Option name="rude audition: fill end active" value="e21b1bff"/>
+    <Option name="rude audition: fill" value="684d4dff"/>
+    <Option name="rude audition: fill active" value="e21b1bff"/>
     <Option name="rude audition: led" value="00000000"/>
     <Option name="rude audition: led active" value="00000000"/>
     <Option name="rude audition: text" value="979797ff"/>
     <Option name="rude audition: text active" value="ffffffff"/>
-    <Option name="feedback alert: fill start" value="684d4dff"/>
-    <Option name="feedback alert: fill end" value="513c3cff"/>
-    <Option name="feedback alert: fill start active" value="ff1f1fff"/>
-    <Option name="feedback alert: fill end active" value="e21b1bff"/>
+    <Option name="feedback alert: fill" value="684d4dff"/>
+    <Option name="feedback alert: fill active" value="e21b1bff"/>
     <Option name="feedback alert: led" value="00000000"/>
     <Option name="feedback alert: led active" value="00000000"/>
     <Option name="feedback alert: text" value="969696ff"/>
     <Option name="feedback alert: text active" value="e5e5e5ff"/>
-    <Option name="mute button: fill start" value="565659ff"/>
-    <Option name="mute button: fill end" value="404149ff"/>
-    <Option name="mute button: fill start active" value="5f4943ff"/>
-    <Option name="mute button: fill end active" value="ffff00ff"/>
+    <Option name="mute button: fill" value="616268ff"/>
+    <Option name="mute button: fill active" value="bbbb00ff"/>
     <Option name="mute button: led" value="00000000"/>
     <Option name="mute button: led active" value="00000000"/>
-    <Option name="mute button: text" value="bfbfafff"/>
+    <Option name="mute button: text" value="c7c7d8ff"/>
     <Option name="mute button: text active" value="191919ff"/>
-    <Option name="solo button: fill start" value="565659ff"/>
-    <Option name="solo button: fill end" value="404149ff"/>
-    <Option name="solo button: fill start active" value="1d7a05ff"/>
-    <Option name="solo button: fill end active" value="4dbb00ff"/>
+    <Option name="solo button: fill" value="616268ff"/>
+    <Option name="solo button: fill active" value="4dbb00ff"/>
     <Option name="solo button: led" value="00000000"/>
     <Option name="solo button: led active" value="00000000"/>
-    <Option name="solo button: text" value="afbfafff"/>
+    <Option name="solo button: text" value="c7c7d8ff"/>
     <Option name="solo button: text active" value="191919ff"/>
-    <Option name="invert button: fill start" value="565659ff"/>
+    <Option name="invert button: fill" value="616268ff"/>
     <Option name="invert button: fill end" value="404149ff"/>
-    <Option name="invert button: fill start active" value="222260ff"/>
-    <Option name="invert button: fill end active" value="4242d0ff"/>
+    <Option name="invert button: fill active" value="4242d0ff"/>
     <Option name="invert button: led" value="473812ff"/>
     <Option name="invert button: led active" value="78cb4eff"/>
-    <Option name="invert button: text" value="bfbfbfff"/>
+    <Option name="invert button: text" value="d7d7e8ff"/>
     <Option name="invert button: text active" value="bfbfbfff"/>
-    <Option name="record enable button: fill start" value="3e312fff"/>
-    <Option name="record enable button: fill end" value="3f312fff"/>
-    <Option name="record enable button: fill start active" value="c10b0bff"/>
-    <Option name="record enable button: fill end active" value="fd0000ff"/>
+    <Option name="record enable button: fill" value="616268ff"/>
+    <Option name="record enable button: fill active" value="b50e0eff"/>
     <Option name="record enable button: led" value="7b3541ff"/>
     <Option name="record enable button: led active" value="ffa3b3ff"/>
     <Option name="record enable button: text" value="a5a5a5ff"/>
     <Option name="record enable button: text active" value="000000ff"/>
-    <Option name="generic button: fill start" value="3e312fff"/>
-    <Option name="generic button: fill end" value="3f312fff"/>
-    <Option name="generic button: fill start active" value="c10b0bff"/>
-    <Option name="generic button: fill end active" value="fd0000ff"/>
+    <Option name="generic button: fill" value="3e312fff"/>
+    <Option name="generic button: fill active" value="fd0000ff"/>
     <Option name="generic button: led" value="7b3541ff"/>
     <Option name="generic button: led active" value="ffa3b3ff"/>
     <Option name="generic button: text" value="ff0000ff"/>
     <Option name="generic button: text active" value="000000ff"/>
-    <Option name="send alert button: fill start" value="4e5647ff"/>
-    <Option name="send alert button: fill end" value="43493cff"/>
-    <Option name="send alert button: fill start active" value="91f928ff"/>
-    <Option name="send alert button: fill end active" value="85e524ff"/>
+    <Option name="send alert button: fill" value="4e5647ff"/>
+    <Option name="send alert button: fill active" value="85e524ff"/>
     <Option name="send alert button: led" value="00000000"/>
     <Option name="send alert button: led active" value="00000000"/>
     <Option name="send alert button: text" value="ccccccff"/>
     <Option name="send alert button: text active" value="000000ff"/>
-    <Option name="transport button: fill start" value="616268ff"/>
-    <Option name="transport button: fill end" value="4a4b51ff"/>
-    <Option name="transport button: fill start active" value="1d7a05ff"/>
-    <Option name="transport button: fill end active" value="00a300ff"/>
+    <Option name="transport button: fill" value="616268ff"/>
+    <Option name="transport button: fill active" value="00a300ff"/>
     <Option name="transport button: led" value="00000000"/>
     <Option name="transport button: led active" value="00000000"/>
     <Option name="transport button: text" value="00000000"/>
     <Option name="transport button: text active" value="00000000"/>
-    <Option name="transport recenable button: fill start" value="5f3f3fff"/>
-    <Option name="transport recenable button: fill end" value="3d2828ff"/>
-    <Option name="transport recenable button: fill start active" value="6a0404ff"/>
-    <Option name="transport recenable button: fill end active" value="b50e0eff"/>
+    <Option name="transport recenable button: fill" value="5f3f3fff"/>
+    <Option name="transport recenable button: fill active" value="b50e0eff"/>
     <Option name="transport recenable button: led" value="00000000"/>
     <Option name="transport recenable button: led active" value="00000000"/>
     <Option name="transport recenable button: text" value="00000000"/>
     <Option name="transport recenable button: text active" value="00000000"/>
-    <Option name="transport option button: fill start" value="636470ff"/>
-    <Option name="transport option button: fill end" value="4a4b51ff"/>
-    <Option name="transport option button: fill start active" value="636470ff"/>
-    <Option name="transport option button: fill end active" value="4a4b51ff"/>
+    <Option name="transport option button: fill" value="616268ff"/>
+    <Option name="transport option button: fill active" value="4a4b51ff"/>
     <Option name="transport option button: led" value="4f3300ff"/>
     <Option name="transport option button: led active" value="ffa500ff"/>
-    <Option name="transport option button: text" value="c7c7d8ff"/>
+    <Option name="transport option button: text" value="d7d7e8ff"/>
     <Option name="transport option button: text active" value="c8c8d9ff"/>
-    <Option name="transport active option button: fill start" value="636470ff"/>
-    <Option name="transport active option button: fill end" value="4a4b51ff"/>
-    <Option name="transport active option button: fill start active" value="1d7a05ff"/>
-    <Option name="transport active option button: fill end active" value="00a300ff"/>
+    <Option name="transport active option button: fill" value="616268ff"/>
+    <Option name="transport active option button: fill active" value="00a300ff"/>
     <Option name="transport active option button: led" value="4f3300ff"/>
     <Option name="transport active option button: led active" value="ffa500ff"/>
-    <Option name="transport active option button: text" value="c7c7d8ff"/>
+    <Option name="transport active option button: text" value="d7d7e8ff"/>
     <Option name="transport active option button: text active" value="000000ff"/>
-    <Option name="plugin bypass button: fill start" value="5d5856ff"/>
-    <Option name="plugin bypass button: fill end" value="564d48ff"/>
-    <Option name="plugin bypass button: fill start active" value="5d5856ff"/>
-    <Option name="plugin bypass button: fill end active" value="564d48ff"/>
+    <Option name="plugin bypass button: fill" value="5d5856ff"/>
+    <Option name="plugin bypass button: fill active" value="564d48ff"/>
     <Option name="plugin bypass button: led" value="660000ff"/>
     <Option name="plugin bypass button: led active" value="ff0000ff"/>
     <Option name="plugin bypass button: text" value="c7c7d8ff"/>
     <Option name="plugin bypass button: text active" value="c8c8d9ff"/>
-    <Option name="punch button: fill start" value="603f3fff"/>
-    <Option name="punch button: fill end" value="3d2828ff"/>
-    <Option name="punch button: fill start active" value="503010ff"/>
-    <Option name="punch button: fill end active" value="f03020ff"/>
+    <Option name="punch button: fill" value="603f3fff"/>
+    <Option name="punch button: fill active" value="f03020ff"/>
     <Option name="punch button: led" value="00000000"/>
     <Option name="punch button: led active" value="00000000"/>
     <Option name="punch button: text" value="a5a5a5ff"/>
     <Option name="punch button: text active" value="d8d8d8ff"/>
-    <Option name="mouse mode button: fill start" value="616268ff"/>
-    <Option name="mouse mode button: fill end" value="45464dff"/>
-    <Option name="mouse mode button: fill start active" value="1e7f05ff"/>
-    <Option name="mouse mode button: fill end active" value="00b200ff"/>
+    <Option name="mouse mode button: fill" value="616268ff"/>
+    <Option name="mouse mode button: fill active" value="00b200ff"/>
     <Option name="mouse mode button: led" value="4f3300ff"/>
     <Option name="mouse mode button: led active" value="ffa500ff"/>
-    <Option name="mouse mode button: text" value="c7c7d8ff"/>
+    <Option name="mouse mode button: text" value="d7d7e8ff"/>
     <Option name="mouse mode button: text active" value="000000ff"/>
-    <Option name="nudge button: fill start" value="785754dd"/>
-    <Option name="nudge button: fill end" value="564242dd"/>
-    <Option name="nudge button: fill start active" value="202025ff"/>
-    <Option name="nudge button: fill end active" value="404045ff"/>
+    <Option name="nudge button: fill" value="684744ff"/>
+    <Option name="nudge button: fill active" value="404045ff"/>
     <Option name="nudge button: led" value="4f3300ff"/>
     <Option name="nudge button: led active" value="ffa500ff"/>
     <Option name="nudge button: text" value="c7c7d8ff"/>
     <Option name="nudge button: text active" value="c8c8d9ff"/>
-    <Option name="zoom menu: fill start" value="99997950"/>
-    <Option name="zoom menu: fill end" value="99996999"/>
-    <Option name="zoom menu: fill start active" value="202025ff"/>
-    <Option name="zoom menu: fill end active" value="404045ff"/>
+    <Option name="zoom menu: fill" value="99997950"/>
+    <Option name="zoom menu: fill active" value="404045ff"/>
     <Option name="zoom menu: led" value="4f3300ff"/>
     <Option name="zoom menu: led active" value="ffa500ff"/>
-    <Option name="zoom menu: text" value="c7c7d8ff"/>
+    <Option name="zoom menu: text" value="d7d7e8ff"/>
     <Option name="zoom menu: text active" value="c8c8d9ff"/>
-    <Option name="zoom button: fill start" value="616268ff"/>
-    <Option name="zoom button: fill end" value="45464dff"/>
-    <Option name="zoom button: fill start active" value="1d7a05ff"/>
-    <Option name="zoom button: fill end active" value="00a300ff"/>
+    <Option name="zoom button: fill" value="616268ff"/>
+    <Option name="zoom button: fill active" value="00a300ff"/>
     <Option name="zoom button: led" value="4f3300ff"/>
     <Option name="zoom button: led active" value="ffa500ff"/>
-    <Option name="zoom button: text" value="c7c7d8ff"/>
+    <Option name="zoom button: text" value="d7d7e8ff"/>
     <Option name="zoom button: text active" value="000000ff"/>
-    <Option name="route button: fill start" value="565659ff"/>
-    <Option name="route button: fill end" value="404149ff"/>
-    <Option name="route button: fill start active" value="4d4d4dff"/>
-    <Option name="route button: fill end active" value="121212ff"/>
+    <Option name="route button: fill" value="616268ff"/>
+    <Option name="route button: fill active" value="121212ff"/>
     <Option name="route button: led" value="4f3300ff"/>
     <Option name="route button: led active" value="ffa500ff"/>
-    <Option name="route button: text" value="bfbfbfff"/>
+    <Option name="route button: text" value="d7d7e8ff"/>
     <Option name="route button: text active" value="191919ff"/>
-    <Option name="mixer strip button: fill start" value="565659ff"/>
-    <Option name="mixer strip button: fill end" value="454652ff"/>
-    <Option name="mixer strip button: fill start active" value="5f4943ff"/>
-    <Option name="mixer strip button: fill end active" value="ffa500ff"/>
+    <Option name="mixer strip button: fill" value="616268ff"/>
+    <Option name="mixer strip button: fill active" value="ffa500ff"/>
     <Option name="mixer strip button: led" value="4f3300ff"/>
     <Option name="mixer strip button: led active" value="ffa500ff"/>
-    <Option name="mixer strip button: text" value="c7c7d8ff"/>
+    <Option name="mixer strip button: text" value="d7d7e8ff"/>
     <Option name="mixer strip button: text active" value="000000ff"/>
-    <Option name="mixer strip name button: fill start" value="565659ff"/>
-    <Option name="mixer strip name button: fill end" value="404149ff"/>
-    <Option name="mixer strip name button: fill start active" value="4d4d4dff"/>
-    <Option name="mixer strip name button: fill end active" value="121212ff"/>
+    <Option name="mixer strip name button: fill" value="616268ff"/>
+    <Option name="mixer strip name button: fill active" value="121212ff"/>
     <Option name="mixer strip name button: led" value="4f3300ff"/>
     <Option name="mixer strip name button: led active" value="ffa500ff"/>
-    <Option name="mixer strip name button: text" value="c7c7d8ff"/>
+    <Option name="mixer strip name button: text" value="d7d7e8ff"/>
     <Option name="mixer strip name button: text active" value="c8c8d9ff"/>
-    <Option name="midi input button: fill start" value="656867ff"/>
-    <Option name="midi input button: fill end" value="333333ff"/>
-    <Option name="midi input button: fill start active" value="a1ff43ff"/>
-    <Option name="midi input button: fill end active" value="00a300ff"/>
+    <Option name="midi input button: fill" value="656867ff"/>
+    <Option name="midi input button: fill active" value="00a300ff"/>
     <Option name="midi input button: led" value="00000000"/>
     <Option name="midi input button: led active" value="00000000"/>
     <Option name="midi input button: text" value="00000000"/>
@@ -552,10 +469,8 @@
     <Option name="clock: text" value="6bb620ff"/>
     <Option name="clock: edited text" value="ffa500ff"/>
     <Option name="clock: cursor" value="ffa500ff"/>
-    <Option name="lock button: fill start" value="ff2714dd"/>
-    <Option name="lock button: fill end" value="8b0000ff"/>
-    <Option name="lock button: fill start active" value="202025ff"/>
-    <Option name="lock button: fill end active" value="404045ff"/>
+    <Option name="lock button: fill" value="616268ff"/>
+    <Option name="lock button: fill active" value="404045ff"/>
     <Option name="lock button: led" value="00000000"/>
     <Option name="lock button: led active" value="00000000"/>
     <Option name="lock button: text" value="000024ff"/>

@@ -118,10 +118,10 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 
 		//look up the arc colors from the config
 		double red_start, green_start, blue_start, unused;
-		ArdourCanvas::Color arc_start_color = ARDOUR_UI::config()->color_by_name ( "processor fader: fill start");
+		ArdourCanvas::Color arc_start_color = ARDOUR_UI::config()->color_by_name ( string_compose ("%1: arc start", get_name()));
 		ArdourCanvas::color_to_rgba( arc_start_color, red_start, green_start, blue_start, unused );
 		double red_end, green_end, blue_end;
-		ArdourCanvas::Color arc_end_color = ARDOUR_UI::config()->color_by_name ( "processor fader: fill end" );
+		ArdourCanvas::Color arc_end_color = ARDOUR_UI::config()->color_by_name ( string_compose ("%1: arc end", get_name()) );
 		ArdourCanvas::color_to_rgba( arc_end_color, red_end, green_end, blue_end, unused );
 
 		//vary the arc color over the travel of the knob

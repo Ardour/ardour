@@ -265,10 +265,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	rec_button.set_name ("transport recenable button");
 	midi_panic_button.set_name ("transport button");
 
-	goto_start_button.set_tweaks (ArdourButton::ShowClick);
-	goto_end_button.set_tweaks (ArdourButton::ShowClick);
-	midi_panic_button.set_tweaks (ArdourButton::ShowClick);
-	
 	last_configure_time= 0;
 	last_peak_grab = 0;
 
@@ -1133,8 +1129,7 @@ ARDOUR_UI::every_point_zero_something_seconds ()
 		float mpeak = editor_meter->update_meters();
 		if (mpeak > editor_meter_max_peak) {
 			if (mpeak >= Config->get_meter_peak()) {
-				editor_meter_peak_display.set_name ("meterbridge peakindicator on");
-				editor_meter_peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+				editor_meter_peak_display.set_active_state ( Gtkmm2ext::ExplicitActive );
 			}
 		}
 	}
@@ -2482,7 +2477,7 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 		if (onoff) {
 			rec_button.set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
-			rec_button.set_active_state (Gtkmm2ext::ImplicitActive);
+			rec_button.set_active_state (Gtkmm2ext::Off);
 		}
 	} else if (r == Session::Recording && h) {
 		rec_button.set_active_state (Gtkmm2ext::ExplicitActive);
@@ -4416,8 +4411,7 @@ ARDOUR_UI::reset_peak_display ()
 	if (!_session || !_session->master_out() || !editor_meter) return;
 	editor_meter->clear_meters();
 	editor_meter_max_peak = -INFINITY;
-	editor_meter_peak_display.set_name ("meterbridge peakindicator");
-	editor_meter_peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+	editor_meter_peak_display.set_active_state ( Gtkmm2ext::Off );
 }
 
 void

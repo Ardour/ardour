@@ -37,7 +37,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 		Body = 0x2,
 		Text = 0x4,
 		Indicator = 0x8,
-		Inset = 0x10,
+		unused = 0x10,
 		Menu = 0x20,
 	};
 
@@ -53,9 +53,9 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	virtual ~ArdourButton ();
 
 	enum Tweaks {
-		ShowClick = 0x1,
-		NoModel = 0x2,
-		ImplicitUsesSolidColor = 0x4,
+		unused1 = 0x1,
+		unused2 = 0x2,
+		unused3 = 0x4,
 	};
 
 	Tweaks tweaks() const { return _tweaks; }
@@ -64,12 +64,13 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_active_state (Gtkmm2ext::ActiveState);
 	void set_visual_state (Gtkmm2ext::VisualState);
 
+	void set_act_on_release (bool onRelease) { _act_on_release = onRelease; }
+
 	Element elements() const { return _elements; }
 	void set_elements (Element);
 	void add_elements (Element);
 	
 	void set_corner_radius (float);
-	void set_rounded_corner_mask (int);
 	void set_diameter (float);
 
 	void set_text (const std::string&);
@@ -132,39 +133,21 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	double _angle;
 	float _xalign, _yalign;
 
-	uint32_t bg_color;
-	uint32_t border_color;
-        uint32_t fill_start_inactive_color;
-        uint32_t fill_end_inactive_color;
-        uint32_t fill_start_active_color;
-        uint32_t fill_end_active_color;
-        uint32_t text_active_color;
-        uint32_t text_inactive_color;
-        uint32_t led_active_color;
-        uint32_t led_inactive_color;
+	uint32_t fill_inactive_color;
+	uint32_t fill_active_color;
+
+	uint32_t text_active_color;
+	uint32_t text_inactive_color;
+
+	uint32_t led_active_color;
+	uint32_t led_inactive_color;
     
-	cairo_pattern_t* fill_pattern;
-	cairo_pattern_t* fill_pattern_active;
-	cairo_pattern_t* shine_pattern;
+	cairo_pattern_t* convex_pattern;
+	cairo_pattern_t* concave_pattern;
+
 	cairo_pattern_t* led_inset_pattern;
-	cairo_pattern_t* reflection_pattern;
     
 	cairo_rectangle_t* _led_rect;
-
-	double text_r;
-	double text_g;
-	double text_b;
-	double text_a;
-
-	double led_r;
-	double led_g;
-	double led_b;
-	double led_a;
-
-	double active_r;
-	double active_g;
-	double active_b;
-	double active_a;
 
 	bool _act_on_release;
 	bool _led_left;

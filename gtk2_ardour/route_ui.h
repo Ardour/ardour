@@ -115,6 +115,8 @@ class RouteUI : public virtual AxisView
 	void send_blink (bool);
 	sigc::connection send_blink_connection;
 
+	sigc::connection rec_blink_connection;
+
 	Gtk::Menu* mute_menu;
 	Gtk::Menu* solo_menu;
 	Gtk::Menu* sends_menu;
@@ -213,7 +215,7 @@ class RouteUI : public virtual AxisView
 	void disconnect_input ();
 	void disconnect_output ();
 
-	virtual void update_rec_display ();
+	virtual void blink_rec_display (bool onoff);
 	void update_mute_display ();
 
 	void update_solo_display ();

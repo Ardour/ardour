@@ -324,12 +324,16 @@ MixerStrip::init ()
 	_session->engine().Running.connect (*this, invalidator (*this), boost::bind (&MixerStrip::engine_running, this), gui_context());
 
 	input_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::input_press), false);
-	output_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::output_press), false);
+	input_button.signal_button_release_event().connect (sigc::mem_fun(*this, &MixerStrip::input_release), false);
 
-	/* ditto for this button and busses */
+	output_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::output_press), false);
+	output_button.signal_button_release_event().connect (sigc::mem_fun(*this, &MixerStrip::output_release), false);
 
 	number_label.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::number_button_button_press), false);
+
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::name_button_button_press), false);
+	name_button.signal_button_release_event().connect (sigc::mem_fun(*this, &MixerStrip::name_button_button_release), false);
+
 	group_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::select_route_group), false);
 
 	_width = (Width) -1;
@@ -760,6 +764,18 @@ struct RouteCompareByName {
 };
 
 gint
+MixerStrip::output_release (GdkEventButton *ev)
+{
+	switch (ev->button) {
+	case 1:
+		edit_output_configuration ();
+		break;
+	}
+	
+	return false;
+}
+
+gint
 MixerStrip::output_press (GdkEventButton *ev)
 {
 	using namespace Menu_Helpers;
@@ -773,8 +789,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 	switch (ev->button) {
 
 	case 1:
-		edit_output_configuration ();
-		break;
+		return false;  //wait for the mouse-up to pop the dialog
 
 	case 3:
 	{
@@ -837,6 +852,23 @@ MixerStrip::output_press (GdkEventButton *ev)
 }
 
 gint
+MixerStrip::input_release (GdkEventButton *ev)
+{
+	switch (ev->button) {
+
+	case 1:
+		edit_input_configuration ();
+		break;
+	default:
+		break;
+
+	}
+
+	return false;
+}
+
+
+gint
 MixerStrip::input_press (GdkEventButton *ev)
 {
 	using namespace Menu_Helpers;
@@ -857,8 +889,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 	switch (ev->button) {
 
 	case 1:
-		edit_input_configuration ();
-		break;
+		return false;  //don't handle the mouse-down here.  wait for mouse-up to pop the menu
 
 	case 3:
 	{
@@ -1479,11 +1510,23 @@ MixerStrip::build_route_ops_menu ()
 gboolean
 MixerStrip::name_button_button_press (GdkEventButton* ev)
 {
-	/* show menu for either button 1 or 3, so as not to confuse people
-	   and also not hide stuff from them.
-	*/
+	if (ev->button == 3) {
+		list_route_operations ();
 
-	if (ev->button == 3 || ev->button == 1) {
+		/* do not allow rename if the track is record-enabled */
+		rename_menu_item->set_sensitive (!_route->record_enabled());
+		route_ops_menu->popup (1, ev->time);
+
+		return true;
+	}
+
+	return false;
+}
+
+gboolean
+MixerStrip::name_button_button_release (GdkEventButton* ev)
+{
+	if (ev->button == 1) {
 		list_route_operations ();
 
 		/* do not allow rename if the track is record-enabled */
@@ -1503,6 +1546,8 @@ MixerStrip::number_button_button_press (GdkEventButton* ev)
 		/* do not allow rename if the track is record-enabled */
 		rename_menu_item->set_sensitive (!_route->record_enabled());
 		route_ops_menu->popup (1, ev->time);
+		
+		return true;
 	}
 
 	return false;
@@ -1914,7 +1959,7 @@ MixerStrip::set_button_names ()
 {
 	switch (_width) {
 	case Wide:
-		rec_enable_button->set_text (_("Rec"));
+//		rec_enable_button->set_text (_("Rec"));
 		mute_button->set_text (_("Mute"));
 		monitor_input_button->set_text (_("In"));
 		monitor_disk_button->set_text (_("Disk"));
@@ -1941,7 +1986,7 @@ MixerStrip::set_button_names ()
 		break;
 
 	default:
-		rec_enable_button->set_text (_("R"));
+//		rec_enable_button->set_text (_("R"));
 		mute_button->set_text (_("M"));
 		monitor_input_button->set_text (_("I"));
 		monitor_disk_button->set_text (_("D"));

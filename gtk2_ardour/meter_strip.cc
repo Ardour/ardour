@@ -154,6 +154,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	// peak display
 	peak_display.set_name ("meterbridge peakindicator");
 	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+	ARDOUR_UI::instance()->set_tip (peak_display, _("Reset Peak"));
 	max_peak = minus_infinity();
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 	peak_display.set_size_request(12, 8);
@@ -205,7 +206,6 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 
 	rec_enable_button->set_corner_radius(2);
 	rec_enable_button->set_size_request(16, 16);
-	rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
 
 	mute_button->set_corner_radius(2);
 	mute_button->set_size_request(16, 16);
@@ -340,9 +340,9 @@ MeterStrip::set_session (Session* s)
 }
 
 void
-MeterStrip::update_rec_display ()
+MeterStrip::blink_rec_display (bool onoff)
 {
-	RouteUI::update_rec_display ();
+	RouteUI::blink_rec_display (onoff);
 }
 
 std::string
@@ -394,14 +394,20 @@ MeterStrip::strip_property_changed (const PropertyChange& what_changed)
 }
 
 void
+MeterStrip::route_color_changed ()
+{
+	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
+}
+
+
+void
 MeterStrip::fast_update ()
 {
 	float mpeak = level_meter->update_meters();
 	if (mpeak > max_peak) {
 		max_peak = mpeak;
 		if (mpeak >= Config->get_meter_peak()) {
-			peak_display.set_name ("meterbridge peakindicator on");
-			peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+			peak_display.set_active_state ( Gtkmm2ext::ExplicitActive );
 		}
 	}
 }
@@ -645,8 +651,7 @@ MeterStrip::reset_peak_display ()
 	_route->shared_peak_meter()->reset_max();
 	level_meter->clear_meters();
 	max_peak = -INFINITY;
-	peak_display.set_name ("meterbridge peakindicator");
-	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+	peak_display.set_active_state ( Gtkmm2ext::Off );
 }
 
 bool
@@ -661,7 +666,7 @@ MeterStrip::peak_button_release (GdkEventButton* ev)
 	} else {
 		ResetRoutePeakDisplays (_route.get());
 	}
-	return true;
+	return false;
 }
 
 void

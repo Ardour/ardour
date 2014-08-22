@@ -208,7 +208,7 @@ protected:
 	void route_property_changed (const PBD::PropertyChange&);
 	void name_entry_changed ();
 
-	void update_rec_display ();
+	void blink_rec_display (bool onoff);
 
 	virtual void label_view ();
 

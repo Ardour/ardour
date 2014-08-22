@@ -88,7 +88,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void on_size_request (Gtk::Requisition*);
 
 	/* route UI */
-	void update_rec_display ();
+	void blink_rec_display (bool onoff);
 	std::string state_id() const;
 	void set_button_names ();
 
@@ -142,6 +142,8 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void update_button_box ();
 	void update_name_box ();
 	void name_changed ();
+	
+	void route_color_changed ();
 
 	bool _suspend_menu_callbacks;
 	bool level_meter_button_release (GdkEventButton* ev);

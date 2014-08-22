@@ -90,13 +90,6 @@ CANVAS_VARIABLE(canvasvar_MidiMeterColor8, "midi meter fill: 8")
 CANVAS_VARIABLE(canvasvar_MidiMeterColor9, "midi meter fill: 9")
 CANVAS_VARIABLE(canvasvar_MeterBackgroundBot, "meter background: bottom")
 CANVAS_VARIABLE(canvasvar_MeterBackgroundTop, "meter background: top")
-CANVAS_VARIABLE(canvasvar_MeterBridgePeakindicatorOffFillStart, "meterbridge peakindicator: fill start")
-CANVAS_VARIABLE(canvasvar_MeterBridgePeakindicatorOffFillEnd, "meterbridge peakindicator: fill end")
-CANVAS_VARIABLE(canvasvar_MeterBridgePeakindicatorOnFillStart, "meterbridge peakindicator on: fill start")
-CANVAS_VARIABLE(canvasvar_MeterBridgePeakindicatorOnFillEnd, "meterbridge peakindicator on: fill end")
-CANVAS_VARIABLE(canvasvar_MeterBridgeLabelFillStart, "meterbridge label: fill start")
-CANVAS_VARIABLE(canvasvar_MeterBridgeLabelFillEnd, "meterbridge label: fill end")
-CANVAS_VARIABLE(canvasvar_MeterBridgeLabelText, "meterbridge label: text")
 CANVAS_VARIABLE(canvasvar_MeterMarker, "meter marker")
 CANVAS_VARIABLE(canvasvar_MidiBusBase, "midi bus base")
 CANVAS_VARIABLE(canvasvar_MidiFrameBase, "midi frame base")
@@ -170,9 +163,8 @@ CANVAS_VARIABLE(canvasvar_TimeAxisFrame, "time axis frame")
 CANVAS_VARIABLE(canvasvar_SelectedTimeAxisFrame, "selected time axis frame")
 CANVAS_VARIABLE(canvasvar_TimeStretchFill, "time stretch fill")
 CANVAS_VARIABLE(canvasvar_TimeStretchOutline, "time stretch outline")
-CANVAS_VARIABLE(canvasvar_TrackNumberLabelFillStart, "tracknumber label: fill start")
-CANVAS_VARIABLE(canvasvar_TrackNumberLabelFillEnd, "tracknumber label: fill end")
-CANVAS_VARIABLE(canvasvar_TrackNumberLabelText, "tracknumber label: text")
+CANVAS_VARIABLE(canvasvar_MonitorKnobArcStart, "monitor knob: arc start")
+CANVAS_VARIABLE(canvasvar_MonitorKnobArcEnd, "monitor knob: arc end")
 CANVAS_VARIABLE(canvasvar_TransportDragRect, "transport drag rect")
 CANVAS_VARIABLE(canvasvar_TransportLoopRect, "transport loop rect")
 CANVAS_VARIABLE(canvasvar_TransportMarkerBar, "transport marker bar")
@@ -193,10 +185,8 @@ CANVAS_VARIABLE(canvasvar_MonitorSectionKnob, "monitor knob")
 
 CANVAS_VARIABLE(canvasvar_ButtonBorder, "border color")
 #define BUTTON_VARS(root,name) \
-CANVAS_VARIABLE(canvasvar_ ## root ## FillStart, name ": fill start") \
-CANVAS_VARIABLE(canvasvar_ ## root ## FillEnd, name ": fill end") \
-CANVAS_VARIABLE(canvasvar_ ## root ## FillStartActive, name ": fill start active") \
-CANVAS_VARIABLE(canvasvar_ ## root ## FillEndActive, name ": fill end active") \
+CANVAS_VARIABLE(canvasvar_ ## root ## Fill, name ": fill") \
+CANVAS_VARIABLE(canvasvar_ ## root ## FillActive, name ": fill active") \
 CANVAS_VARIABLE(canvasvar_ ## root ## LED, name ": led") \
 CANVAS_VARIABLE(canvasvar_ ## root ## LEDActive, name ": led active") \
 CANVAS_VARIABLE(canvasvar_ ## root ## Text, name ": text") \
@@ -210,6 +200,8 @@ BUTTON_VARS(MonitorButton, "monitor button")
 BUTTON_VARS(SoloIsolateButton, "solo isolate")
 BUTTON_VARS(SoloSafeButton, "solo safe")
 BUTTON_VARS(MidiDeviceButton, "midi device")
+BUTTON_VARS(MeterBridgePeakIndicator, "meterbridge peakindicator")
+BUTTON_VARS(MeterBridgeLabel, "meterbridge label")
 BUTTON_VARS(MonitorSectionCutButton, "monitor section cut")
 BUTTON_VARS(MonitorSectionDimButton, "monitor section dim")
 BUTTON_VARS(MonitorSectionSoloButton, "monitor section solo")
@@ -231,6 +223,7 @@ BUTTON_VARS(TransportButton, "transport button")
 BUTTON_VARS(TransportRecenableButton, "transport recenable button")
 BUTTON_VARS(TransportOptionButton, "transport option button")
 BUTTON_VARS(TransportActiveOptionButton, "transport active option button")
+BUTTON_VARS(TrackNumberLabel, "tracknumber label")
 BUTTON_VARS(PluginBypassButton, "plugin bypass button")
 BUTTON_VARS(PunchButton, "punch button")
 BUTTON_VARS(MouseModeButton, "mouse mode button")

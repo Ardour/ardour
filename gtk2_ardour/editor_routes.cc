@@ -679,12 +679,12 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 			t->RecordEnableChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
 		}
 
-		if ((*x)->is_midi_track()) {
-			boost::shared_ptr<MidiTrack> t = boost::dynamic_pointer_cast<MidiTrack> ((*x)->route());
+ 		if ((*x)->is_midi_track()) {
+ 			boost::shared_ptr<MidiTrack> t = boost::dynamic_pointer_cast<MidiTrack> ((*x)->route());
 			t->StepEditStatusChange.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
-			t->InputActiveChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_input_active_display, this), gui_context());
-		}
-
+ 			t->InputActiveChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_input_active_display, this), gui_context());
+ 		}
+ 
 		(*x)->route()->mute_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_mute_display, this), gui_context());
 		(*x)->route()->solo_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_display, this, _1), gui_context());
 		(*x)->route()->listen_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_display, this, _1), gui_context());

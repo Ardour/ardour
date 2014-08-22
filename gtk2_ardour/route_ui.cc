@@ -79,6 +79,7 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 	, comment_window(0)
 	, input_selector (0)
 	, output_selector (0)
+	, comment_area(0)
 	, _invert_menu(0)
 {
 	if (sess) init ();
@@ -97,6 +98,9 @@ RouteUI::~RouteUI()
 	delete input_selector;
 	delete output_selector;
 	delete _invert_menu;
+	
+	send_blink_connection.disconnect ();
+	rec_blink_connection.disconnect ();
 }
 
 void
@@ -140,8 +144,10 @@ RouteUI::init ()
 
 	rec_enable_button = manage (new ArdourButton);
 	rec_enable_button->set_name ("record enable button");
-//	rec_enable_button->set_tweaks (ArdourButton::ImplicitUsesSolidColor);
+	rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
+
+	rec_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun (*this, &RouteUI::blink_rec_display));
 
 	show_sends_button = manage (new ArdourButton);
 	show_sends_button->set_name ("send alert button");
@@ -268,8 +274,6 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	   set up the name entry/name label display.
 	*/
 
-	update_rec_display ();
-
 	if (is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 		t->MonitoringChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::monitoring_changed, this), gui_context());
@@ -298,6 +302,8 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	update_mute_display ();
 	update_solo_display ();
+
+	route_color_changed();
 }
 
 void
@@ -326,6 +332,8 @@ RouteUI::mute_press (GdkEventButton* ev)
 		}
 
 		mute_menu->popup(0,ev->time);
+		
+		return true;
 
 	} else {
 
@@ -333,7 +341,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 			// Primary-button2 click is the midi binding click
 			// button2-click is "momentary"
 
-
+			//give the button a chance to handle a midi binding
 			if (mute_button->on_button_press_event (ev)) {
 				return true;
 			}
@@ -415,11 +423,11 @@ RouteUI::mute_press (GdkEventButton* ev)
 		}
 	}
 
-	return true;
+	return false;
 }
 
 bool
-RouteUI::mute_release (GdkEventButton*)
+RouteUI::mute_release (GdkEventButton *ev)
 {
 	if (_mute_release){
 		DisplaySuspender ds;
@@ -428,7 +436,7 @@ RouteUI::mute_release (GdkEventButton*)
 		_mute_release = 0;
 	}
 
-	return true;
+	return false;
 }
 
 void
@@ -504,13 +512,12 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 		if (Keyboard::is_button2_event (ev)) {
 
-			// Primary-button2 click is the midi binding click
-			// button2-click is "momentary"
-
+			// Give the button a chance to handle MIDI binding
 			if (solo_button->on_button_press_event (ev)) {
 				return true;
 			}
 
+			// button2-click is "momentary"
 			_solo_release = new SoloMuteRelease (_route->self_soloed());
 		}
 
@@ -619,11 +626,11 @@ RouteUI::solo_press(GdkEventButton* ev)
 		}
 	}
 
-	return true;
+	return false;
 }
 
 bool
-RouteUI::solo_release (GdkEventButton*)
+RouteUI::solo_release (GdkEventButton *ev)
 {
 	if (_solo_release) {
 
@@ -642,7 +649,7 @@ RouteUI::solo_release (GdkEventButton*)
 		_solo_release = 0;
 	}
 
-	return true;
+	return false;
 }
 
 bool
@@ -655,7 +662,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 	if (!_session->engine().connected()) {
 	        MessageDialog msg (_("Not connected to AudioEngine - cannot engage record"));
 		msg.run ();
-		return true;
+		return false;
 	}
 
         if (is_midi_track()) {
@@ -664,21 +671,21 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
                 if (midi_track()->step_editing()) {
 			midi_track()->set_step_editing (false);
-			return true;
+			return false;
                 }
         }
 
 	if (is_track() && rec_enable_button) {
 
 		if (Keyboard::is_button2_event (ev)) {
-
-			// do nothing on midi sigc::bind event
-			return rec_enable_button->on_button_press_event (ev);
+			
+			//rec arm does not have a momentary mode
+			return false;
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
 			DisplaySuspender ds;
-			_session->set_record_enabled (_session->get_routes(), !rec_enable_button->active_state());
+			_session->set_record_enabled (_session->get_routes(), !_route->record_enabled());
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -700,7 +707,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 				}
 
 				DisplaySuspender ds;
-				_session->set_record_enabled (rl, !rec_enable_button->active_state(), Session::rt_cleanup, true);
+				_session->set_record_enabled (rl, !_route->record_enabled(), Session::rt_cleanup, true);
 			}
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
@@ -712,11 +719,11 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			boost::shared_ptr<RouteList> rl (new RouteList);
 			rl->push_back (route());
 			DisplaySuspender ds;
-			_session->set_record_enabled (rl, !rec_enable_button->active_state());
+			_session->set_record_enabled (rl, !_route->record_enabled());
 		}
 	}
 
-	return true;
+	return false;
 }
 
 void
@@ -909,10 +916,10 @@ RouteUI::rec_enable_release (GdkEventButton* ev)
                 if (record_menu) {
                         record_menu->popup (1, ev->time);
                 }
-                return true;
+                return false;
         }
 
-	return true;
+	return false;
 }
 
 void
@@ -1220,19 +1227,18 @@ RouteUI::update_mute_display ()
 void
 RouteUI::route_rec_enable_changed ()
 {
-        update_rec_display ();
+	blink_rec_display(true);  //this lets the button change "immediately" rather than wait for the next blink
 	update_monitoring_display ();
 }
 
 void
 RouteUI::session_rec_enable_changed ()
 {
-        update_rec_display ();
 	update_monitoring_display ();
 }
 
 void
-RouteUI::update_rec_display ()
+RouteUI::blink_rec_display (bool blinkOn)
 {
 	if (!rec_enable_button || !_route) {
 		return;
@@ -1246,7 +1252,10 @@ RouteUI::update_rec_display ()
 
                 case Session::Disabled:
                 case Session::Enabled:
-                        rec_enable_button->set_active_state (Gtkmm2ext::ImplicitActive);
+                        if ( false )  //TODO:  Need a blink option
+							rec_enable_button->set_active_state ( blinkOn ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off );
+						else
+							rec_enable_button->set_active_state ( ImplicitActive );
                         break;
 
                 }
@@ -1710,6 +1719,8 @@ RouteUI::comment_changed (void *src)
 void
 RouteUI::comment_editor_done_editing ()
 {
+	ENSURE_GUI_THREAD (*this, &MixerStrip::comment_editor_done_editing, src)
+
 	string const str = comment_area->get_buffer()->get_text();
 	if (str == _route->comment ()) {
 		return;
@@ -2084,7 +2095,7 @@ RouteUI::invert_press (GdkEventButton* ev)
 		   up a menu on right-click; left click is handled
 		   on release.
 		*/
-		return true;
+		return false;
 	}
 	
 	delete _invert_menu;

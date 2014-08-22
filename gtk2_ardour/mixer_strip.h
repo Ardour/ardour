@@ -205,7 +205,10 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	RouteGroupMenu *group_menu;
 
 	gint input_press (GdkEventButton *);
+	gint input_release (GdkEventButton *);
+
 	gint output_press (GdkEventButton *);
+	gint output_release (GdkEventButton *);
 
 	Gtk::Menu input_menu;
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > input_menu_bundles;
@@ -242,6 +245,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Menu* route_ops_menu;
 	void build_route_ops_menu ();
 	gboolean name_button_button_press (GdkEventButton*);
+	gboolean name_button_button_release (GdkEventButton*);
 	gboolean number_button_button_press (GdkEventButton*);
 	void list_route_operations ();
 

@@ -149,7 +149,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	mute_changed (0);
 	update_solo_display ();
-	route_color_changed();
 
 	timestretch_rect = 0;
 	no_redraw = false;
@@ -2276,9 +2275,9 @@ RouteTimeAxisView::can_edit_name () const
 }
 
 void
-RouteTimeAxisView::update_rec_display ()
+RouteTimeAxisView::blink_rec_display (bool onoff)
 {
-	RouteUI::update_rec_display ();
+	RouteUI::blink_rec_display (onoff);
 }
 
 void

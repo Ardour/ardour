@@ -673,11 +673,9 @@ Editor::Editor ()
 	/* nudge stuff */
 
 	nudge_forward_button.set_name ("nudge button");
-//	nudge_forward_button.add_elements (ArdourButton::Inset);
 	nudge_forward_button.set_image(::get_icon("nudge_right"));
 
 	nudge_backward_button.set_name ("nudge button");
-//	nudge_backward_button.add_elements (ArdourButton::Inset);
 	nudge_backward_button.set_image(::get_icon("nudge_left"));
 
 	fade_context_menu.set_name ("ArdourContextMenu");
@@ -2881,28 +2879,21 @@ Editor::setup_toolbar ()
 	zoom_preset_selector.set_size_request (42, -1);
 
 	zoom_in_button.set_name ("zoom button");
-//	zoom_in_button.add_elements ( ArdourButton::Inset );
-	zoom_in_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	zoom_in_button.set_image(::get_icon ("zoom_in"));
 	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-in"));
 	zoom_in_button.set_related_action (act);
 
 	zoom_out_button.set_name ("zoom button");
-//	zoom_out_button.add_elements ( ArdourButton::Inset );
-	zoom_out_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	zoom_out_button.set_image(::get_icon ("zoom_out"));
 	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-out"));
 	zoom_out_button.set_related_action (act);
 
 	zoom_out_full_button.set_name ("zoom button");
-//	zoom_out_full_button.add_elements ( ArdourButton::Inset );
-	zoom_out_full_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	zoom_out_full_button.set_image(::get_icon ("zoom_full"));
 	act = ActionManager::get_action (X_("Editor"), X_("zoom-to-session"));
 	zoom_out_full_button.set_related_action (act);
 
 	zoom_focus_selector.set_name ("zoom button");
-//	zoom_focus_selector.add_elements (ArdourButton::Inset);
 
 	if (ARDOUR::Profile->get_mixbus()) {
 		_zoom_box.pack_start (zoom_preset_selector, false, false);
@@ -2918,7 +2909,6 @@ Editor::setup_toolbar ()
 
 	/* Track zoom buttons */
 	visible_tracks_selector.set_name ("zoom button");
-//	visible_tracks_selector.add_elements ( ArdourButton::Inset );
 	if (Profile->get_mixbus()) {
 		visible_tracks_selector.set_image(::get_icon ("tav_exp"));
 		visible_tracks_selector.set_size_request (42, -1);
@@ -2927,16 +2917,12 @@ Editor::setup_toolbar ()
 	}
 
 	tav_expand_button.set_name ("zoom button");
-//	tav_expand_button.add_elements ( ArdourButton::FlatFace );
-	tav_expand_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	tav_expand_button.set_size_request (-1, 20);
 	tav_expand_button.set_image(::get_icon ("tav_exp"));
 	act = ActionManager::get_action (X_("Editor"), X_("expand-tracks"));
 	tav_expand_button.set_related_action (act);
 
 	tav_shrink_button.set_name ("zoom button");
-//	tav_shrink_button.add_elements ( ArdourButton::FlatFace );
-	tav_shrink_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	tav_shrink_button.set_size_request (-1, 20);
 	tav_shrink_button.set_image(::get_icon ("tav_shrink"));
 	act = ActionManager::get_action (X_("Editor"), X_("shrink-tracks"));
@@ -2991,9 +2977,6 @@ Editor::setup_toolbar ()
 
 	nudge_forward_button.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::nudge_forward_release), false);
 	nudge_backward_button.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::nudge_backward_release), false);
-
-	nudge_forward_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
-	nudge_backward_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 
 	nudge_box->pack_start (nudge_backward_button, false, false);
 	nudge_box->pack_start (nudge_forward_button, false, false);
