@@ -55,8 +55,8 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	: PannerInterface (p->panner())
 	, _panner_shell (p)
 	, position_control (_panner->pannable()->pan_azimuth_control)
-	, drag_start_x (0)
-	, last_drag_x (0)
+	, drag_start_y (0)
+	, last_drag_y (0)
 	, accumulated_delta (0)
 	, detented (false)
 	, position_binder (position_control)
@@ -129,8 +129,8 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
 		return false;
 	}
 
-	drag_start_x = ev->x;
-	last_drag_x = ev->x;
+	drag_start_y = ev->y;
+	last_drag_y = ev->y;
 
 	_dragging = false;
 	_tooltip.target_stop_drag ();
@@ -259,7 +259,7 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 	}
 
 	int w = get_width();
-	double delta = (ev->x - last_drag_x) / (double) w;
+	double delta = (last_drag_y - ev->y) / (double) w;
 
 	/* create a detent close to the center */
 
@@ -284,7 +284,7 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 		position_control->set_value (pv + delta);
 	}
 
-	last_drag_x = ev->x;
+	last_drag_y = ev->y;
 	return true;
 }
 
