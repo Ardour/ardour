@@ -328,7 +328,7 @@
                       table.yfill="true"
                       table.yexpand="true"
                       bgnormal="#3E3E3E">
-                  <VBox id="edit_controls_vbox" height="800"/>
+                  <VBox id="edit_controls_vbox"/>
               </Layout>
             </Table>
           </VPaned>
