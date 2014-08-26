@@ -51,6 +51,8 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
+Gdk::Cursor* MonoPanner::__touch_cursor;
+
 MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	: PannerInterface (p->panner())
 	, _panner_shell (p)
@@ -66,6 +68,13 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 		for (size_t i=0; i < (sizeof(_knob_image)/sizeof(_knob_image[0])); i++) {
 			_knob_image[i] = load_pixbuf (_knob_image_files[i]);
 		}
+	}
+
+	if (__touch_cursor == 0) {
+		__touch_cursor = new Gdk::Cursor (Gdk::Display::get_default(), 
+										 ::get_icon ("panner_touch_cursor"),
+										 12,
+										 12);
 	}
 
 	position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
@@ -125,9 +134,12 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
 	if (PannerInterface::on_button_press_event (ev)) {
 		return true;
 	}
+
 	if (_panner_shell->bypassed()) {
 		return false;
 	}
+
+	get_window()->set_cursor (*__touch_cursor);
 
 	drag_start_y = ev->y;
 	last_drag_y = ev->y;
@@ -200,6 +212,8 @@ MonoPanner::on_button_release_event (GdkEventButton* ev)
 	if (_panner_shell->bypassed()) {
 		return false;
 	}
+
+	get_window()->set_cursor();
 
 	_dragging = false;
 	_tooltip.target_stop_drag ();

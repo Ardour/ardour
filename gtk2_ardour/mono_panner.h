@@ -73,6 +73,8 @@ class MonoPanner : public PannerInterface
 
 	bool _dragging;
 
+	static Gdk::Cursor* __touch_cursor;
+
 	void bypass_handler ();
 	void pannable_handler ();
 };
