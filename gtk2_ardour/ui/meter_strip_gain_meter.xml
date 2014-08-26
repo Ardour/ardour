@@ -47,6 +47,7 @@
          underlaysource="slider_controller_fader_underlay.png"
          handlesource="slider_controller_fader_handle.png"
          activehandlesource="slider_controller_fader_handle.png"
+         touchcursor="fader_touch_cursor.png"
          minposx="10"
          minposy="196"
          maxposx="10"

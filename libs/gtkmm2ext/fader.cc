@@ -140,6 +140,8 @@ Fader::Fader (Gtk::Adjustment& adj,
 	, _default_value (adjustment.get_value())
 	, _dragging (false)
 	, _read_only (read_only)
+	, _grab_window (0)
+	, _touch_cursor (0)
 {
 	PBD::Searchpath spath(ARDOUR::ardour_data_search_path());
 
@@ -262,6 +264,10 @@ Fader::on_button_press_event (GdkEventButton* ev)
 		return false;
 	}
 
+	if (_touch_cursor) {
+		get_window()->set_cursor (*_touch_cursor);
+	}
+
 	double hx;
 	double hy;
 	get_handle_position (hx, hy);
@@ -311,6 +317,10 @@ Fader::on_button_release_event (GdkEventButton* ev)
 {
 	if (_read_only) {
 		return false;
+	}
+
+	if (_touch_cursor) {
+		get_window()->set_cursor ();
 	}
 
 	if (_dragging) { //temp
@@ -457,6 +467,26 @@ Fader::set_default_value (float d)
 	_default_value = d;
 	update_unity_position ();
 }
+
+void
+Fader::set_touch_cursor (const std::string& icon_name)
+{
+	PBD::Searchpath spath(ARDOUR::ardour_data_search_path());
+
+	spath.add_subdirectory_to_paths ("icons");
+
+	std::string icon_file_path;
+
+	if (PBD::find_file_in_search_path (spath, icon_name, icon_file_path)) {
+		_touch_cursor = new Gdk::Cursor (Gdk::Display::get_default(), 
+										 Gdk::Pixbuf::create_from_file (icon_file_path),
+										 12,
+										 12);
+	} else {
+		throw failed_constructor(); 
+	}
+}
+
 
 void
 Fader::update_unity_position ()
