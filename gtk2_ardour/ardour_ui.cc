@@ -4611,10 +4611,10 @@ ARDOUR_UI::open_media_folder ()
 		return;
 	}
 	
-	//dbg_msg ("ARDOUR_UI::open_media_folder () : \n" + _session->session_directory ().sources_root ());
 #if defined (PLATFORM_WINDOWS)
 	ShellExecute (NULL, "open", _session->session_directory ().sources_root ().c_str (), NULL, NULL, SW_SHOW);
 #elif defined (__APPLE__)
+    std::string command = "open \"" + _session->session_directory ().sources_root () + "\"";
+    system (command.c_str ());
 #endif
-	//dbg_msg ("ARDOUR_UI::open_media_folder () : \n" + _session->session_directory ().sources_root ());
 }
