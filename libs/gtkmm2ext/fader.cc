@@ -195,6 +195,9 @@ Fader::Fader (Gtk::Adjustment& adj,
 
 Fader::~Fader ()
 {
+	if (_touch_cursor) {
+		delete _touch_cursor;
+	}
 }
 
 void
