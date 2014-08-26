@@ -1357,10 +1357,10 @@ ARDOUR_UI::update_disk_usage ()
 		return;
 	}
     
-    int disk_usage_percentage = _session->get_disk_usage_percentage ();
-    _hd_load_adjustment->set_value (disk_usage_percentage);
+    uint32_t const hd_buffer = 100 - (_session ? _session->capture_load () : 100);
+    _hd_load_adjustment->set_value (hd_buffer);
     stringstream ss;
-    ss << disk_usage_percentage;
+    ss << hd_buffer;
     _hd_load_label->set_text ( ss.str() + "%" );
 }
 
