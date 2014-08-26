@@ -215,7 +215,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
     , _hd_remained_time_label(0)
 	, editor (0)
 	, mixer (0)
-	//, meterbridge (0)
+    , _bit_depth_button(0)
+    , _sample_rate_button(0)
+    , _frame_rate_button(0)
 	, splash (0)
 {
 	Gtkmm2ext::init(localedir);
@@ -313,6 +315,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	ARDOUR::GUIIdle.connect (forever_connections, MISSING_INVALIDATOR, boost::bind(&ARDOUR_UI::gui_idle_handler, this), gui_context());
 
+    EngineStateController::instance()->SampleRateChanged.connect_same_thread (update_connections_to_toolbar_buttons, boost::bind (&ARDOUR_UI::update_sample_rate_button, this) );
+    EngineStateController::instance()->EngineRunning.connect_same_thread (update_connections_to_toolbar_buttons, boost::bind (&ARDOUR_UI::update_sample_rate_button, this) );
+    
 	/* lets get this party started */
 
 	setup_gtk_ardour_enums ();

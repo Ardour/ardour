@@ -418,10 +418,20 @@ ARDOUR_UI::parameter_changed (std::string p)
 void
 ARDOUR_UI::session_parameter_changed (const std::string& param)
 { 
-    if (param == "native-file-data-format" || param == "native-file-header-format")
+    if ( param == "native-file-data-format" )
+    {
         update_format();
-    if ( param == "timecode-format")
+        update_bit_depth_button ();
+    }
+    else if (param == "native-file-header-format")
+    {
+        update_format();
+    }
+    else if ( param == "timecode-format" )
+    {
         update_timecode_format();
+        update_frame_rate_button ();
+    }
 }
 
 void

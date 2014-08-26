@@ -227,6 +227,17 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void focus_on_clock ();
 	AudioClock*   big_clock;
 
+    WavesButton* _bit_depth_button;
+    WavesButton* _sample_rate_button;
+    WavesButton* _frame_rate_button;
+    void on_bit_depth_button (WavesButton*);
+    void on_sample_rate_button (WavesButton*);
+    void on_frame_rate_button (WavesButton*);
+    void update_bit_depth_button ();
+    void update_sample_rate_button ();
+    void update_frame_rate_button ();
+    PBD::ScopedConnectionList update_connections_to_toolbar_buttons;
+    
 	TimeInfoBox* time_info_box;
 
 	VideoTimeLine *video_timeline;

@@ -231,6 +231,10 @@ ARDOUR_UI::set_session (Session *s)
 			editor_meter_peak_display.show();
 		}
 	}
+    
+    update_bit_depth_button ();
+    update_sample_rate_button ();
+    update_frame_rate_button ();
 }
 
 int
