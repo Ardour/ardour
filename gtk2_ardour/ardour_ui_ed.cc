@@ -220,6 +220,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (common_actions, X_("Manual"), S_("Help|Manual"),  mem_fun(*this, &ARDOUR_UI::launch_manual));
 	ActionManager::register_action (common_actions, X_("Reference"), _("Reference"),  mem_fun(*this, &ARDOUR_UI::launch_reference));
 
+	ActionManager::register_action (common_actions, X_("OpenMediaFolder"), _("OpenMediaFolder"),  mem_fun(*this, &ARDOUR_UI::open_media_folder));
+
 	act = ActionManager::register_action (common_actions, X_("Save"), _("Save"),  sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::save_state), string(""), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);

@@ -4603,3 +4603,18 @@ ARDOUR_UI::do_engine_setup (framecnt_t desired_sample_rate)
     
 	return 0;
 }
+
+void
+ARDOUR_UI::open_media_folder ()
+{
+	if (!_session) {
+		return;
+	}
+	
+	//dbg_msg ("ARDOUR_UI::open_media_folder () : \n" + _session->session_directory ().sources_root ());
+#if defined (PLATFORM_WINDOWS)
+	ShellExecute (NULL, "open", _session->session_directory ().sources_root ().c_str (), NULL, NULL, SW_SHOW);
+#elif defined (__APPLE__)
+#endif
+	//dbg_msg ("ARDOUR_UI::open_media_folder () : \n" + _session->session_directory ().sources_root ());
+}

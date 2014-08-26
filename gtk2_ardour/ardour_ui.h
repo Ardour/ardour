@@ -148,6 +148,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void launch_reference ();
 	void show_about ();
 	void hide_about ();
+	void open_media_folder ();
 
 	void idle_load (const std::string& path);
 	void finish();

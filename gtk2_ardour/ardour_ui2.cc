@@ -243,7 +243,10 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action (X_("Common"), X_("toggle-meterbridge"));	
 	editor->get_waves_button ("meter_bridge_on_button").set_related_action (act);
     
-    update_output_operation_mode_buttons();
+	act = ActionManager::get_action (X_("Common"), X_("OpenMediaFolder"));	
+	editor->get_waves_button ("media_button").set_related_action (act);
+
+	update_output_operation_mode_buttons();
     
 	transport_base.set_name ("TransportBase");
 	transport_base.add (transport_hbox);
