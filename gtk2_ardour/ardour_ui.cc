@@ -4617,9 +4617,11 @@ ARDOUR_UI::open_media_folder ()
 	}
 	
 #if defined (PLATFORM_WINDOWS)
-	ShellExecute (NULL, "open", _session->session_directory ().sources_root ().c_str (), NULL, NULL, SW_SHOW);
+	//ShellExecute (NULL, "open", _session->session_directory ().sources_root ().c_str (), NULL, NULL, SW_SHOW);
+	ShellExecute (NULL, "open", _session->session_directory ().sound_path ().c_str (), NULL, NULL, SW_SHOW);
 #elif defined (__APPLE__)
-    std::string command = "open \"" + _session->session_directory ().sources_root () + "\"";
+    //std::string command = "open \"" + _session->session_directory ().sources_root () + "\"";
+    std::string command = "open \"" + _session->session_directory ().sound_path () + "\"";
     system (command.c_str ());
 #endif
 }
