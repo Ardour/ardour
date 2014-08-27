@@ -3,6 +3,9 @@
   <UI>
     <Option name="ui-rc-file" value="ardour3_ui_dark.rc"/>
     <Option name="flat-buttons" value="00000000"/>
+    <Option name="square-buttons" value="00000000"/>
+    <Option name="blink-rec-arm" value="00000000"/>
+    <Option name="led-meters" value="00000000"/>
     <Option name="waveform-gradient-depth" value="0"/>
     <Option name="timeline-item-gradient-depth" value="00000.5"/>
     <Option name="all-floating-windows-are-dialogs" value="00000000"/>

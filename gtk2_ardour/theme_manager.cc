@@ -64,6 +64,7 @@ ThemeManager::ThemeManager()
 	, light_button (_("Light Theme"))
 	, reset_button (_("Restore Defaults"))
 	, flat_buttons (_("Draw \"flat\" buttons"))
+	, blink_rec_button (_("Blink Rec-Arm buttons"))
 	, region_color_button (_("Color regions using their track's color"))
 	, show_clipping_button (_("Show waveform clipping"))
 	, waveform_gradient_depth (0, 1.0, 0.05)
@@ -110,6 +111,7 @@ ThemeManager::ThemeManager()
 	vbox->pack_start (all_dialogs, PACK_SHRINK);
 #endif
 	vbox->pack_start (flat_buttons, PACK_SHRINK);
+	vbox->pack_start (blink_rec_button, PACK_SHRINK);
 	vbox->pack_start (region_color_button, PACK_SHRINK);
 	vbox->pack_start (show_clipping_button, PACK_SHRINK);
 
@@ -156,6 +158,7 @@ ThemeManager::ThemeManager()
 	color_dialog.get_colorsel()->set_has_palette (true);
 
 	flat_buttons.set_active (ARDOUR_UI::config()->get_flat_buttons());
+	blink_rec_button.set_active (ARDOUR_UI::config()->get_blink_rec_arm());
 	region_color_button.set_active (ARDOUR_UI::config()->get_color_regions_using_track_color());
 	show_clipping_button.set_active (ARDOUR_UI::config()->get_show_waveform_clipping());
 
@@ -165,6 +168,7 @@ ThemeManager::ThemeManager()
 	light_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_light_theme_button_toggled));
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &ThemeManager::reset_canvas_colors));
 	flat_buttons.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_flat_buttons_toggled));
+	blink_rec_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_blink_rec_arm_toggled));
 	region_color_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_region_color_toggled));
 	show_clipping_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_show_clip_toggled));
 	waveform_gradient_depth.signal_value_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_waveform_gradient_depth_change));
@@ -310,6 +314,13 @@ ThemeManager::on_flat_buttons_toggled ()
 	ArdourButton::set_flat_buttons (flat_buttons.get_active());
 	/* force a redraw */
 	gtk_rc_reset_styles (gtk_settings_get_default());
+}
+
+void
+ThemeManager::on_blink_rec_arm_toggled ()
+{
+	ARDOUR_UI::config()->set_blink_rec_arm (blink_rec_button.get_active());
+	ARDOUR_UI::config()->set_dirty ();
 }
 
 void
@@ -468,6 +479,7 @@ ThemeManager::setup_theme ()
 	}
 	
 	flat_buttons.set_active (ARDOUR_UI::config()->get_flat_buttons());
+	blink_rec_button.set_active (ARDOUR_UI::config()->get_blink_rec_arm());
 	waveform_gradient_depth.set_value (ARDOUR_UI::config()->get_waveform_gradient_depth());
 	timeline_item_gradient_depth.set_value (ARDOUR_UI::config()->get_timeline_item_gradient_depth());
 	all_dialogs.set_active (ARDOUR_UI::config()->get_all_floating_windows_are_dialogs());

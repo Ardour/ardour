@@ -1257,7 +1257,7 @@ RouteUI::blink_rec_display (bool blinkOn)
 
                 case Session::Disabled:
                 case Session::Enabled:
-                        if ( false )  //TODO:  Need a blink option
+                        if ( ARDOUR_UI::config()->get_blink_rec_arm() )
 							rec_enable_button->set_active_state ( blinkOn ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off );
 						else
 							rec_enable_button->set_active_state ( ImplicitActive );

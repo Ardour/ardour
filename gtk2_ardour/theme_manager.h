@@ -44,6 +44,7 @@ class ThemeManager : public ArdourWindow
 	void on_dark_theme_button_toggled ();
 	void on_light_theme_button_toggled ();
 	void on_flat_buttons_toggled ();
+	void on_blink_rec_arm_toggled ();
         void on_region_color_toggled ();
         void on_show_clip_toggled ();
         void on_waveform_gradient_depth_change ();
@@ -76,6 +77,7 @@ class ThemeManager : public ArdourWindow
 	Gtk::RadioButton light_button;
 	Gtk::Button reset_button;
 	Gtk::CheckButton flat_buttons;
+	Gtk::CheckButton blink_rec_button;
 	Gtk::CheckButton region_color_button;
 	Gtk::CheckButton show_clipping_button;
         Gtk::HScale waveform_gradient_depth;
