@@ -74,6 +74,8 @@ AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream:
 	in_set_state = true;
 	use_new_playlist ();
 	in_set_state = false;
+
+        Config->ParameterChanged.connect_same_thread (*this, boost::bind (&AudioDiskstream::config_parameter_changed, this, _1));
 }
 
 AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
@@ -93,6 +95,8 @@ AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
 	if (destructive()) {
 		use_destructive_playlist ();
 	}
+
+        Config->ParameterChanged.connect_same_thread (*this, boost::bind (&AudioDiskstream::config_parameter_changed, this, _1));
 }
 
 void
@@ -123,6 +127,14 @@ AudioDiskstream::~AudioDiskstream ()
 	}
 
 	channels.flush ();
+}
+
+void
+AudioDiskstream::config_parameter_changed (const std::string& what)
+{
+        if (what == "replication-parent-folder") {
+                reset_replication_sources ();
+        }
 }
 
 void
@@ -1983,6 +1995,8 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 		}
 	}
 
+        reset_replication_sources ();
+
 	if (destructive() && !c->empty ()) {
 
 		/* we now have all our write sources set up, so create the
@@ -2506,18 +2520,27 @@ AudioDiskstream::reset_replication_sources ()
 {
         RCUWriter<ChannelList> writer (channels);
         boost::shared_ptr<ChannelList> c = writer.get_copy();
-        
+
+        string replication_path = Config->get_replication_parent_folder();
+
         try {
                 for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-                        if (!_replication_path.empty()) {
-                                // (*chan)->replication_source = session.create_replicated_audio_source ((*c)->write_source, _replication_path);
+
+                        if (!(*chan)->write_source) {
+                                continue;
+                        }
+
+                        if (!replication_path.empty()) {
+                                (*chan)->replication_source = _session.create_replicated_audio_source ((*chan)->write_source, replication_path);
+                                cerr << "replication source: " << (*chan)->replication_source->path() << endl;
                         } else {
                                 (*chan)->replication_source.reset ();
+                                cerr << "no replication path\n";
                         }
                 }
                 return 0;
         } catch (...) {
-                error << string_compose (_("%1: cannot create replication sources @ %2"), _name, _replication_path) << endmsg;
+                error << string_compose (_("%1: cannot create replication sources @ %2"), _name, replication_path) << endmsg;
                 return -1;
         }
 }

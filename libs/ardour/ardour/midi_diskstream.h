@@ -181,8 +181,6 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 	*/
 	MidiBuffer                   _gui_feed_buffer;
 	mutable Glib::Threads::Mutex _gui_feed_buffer_mutex;
-        
-        int reset_replication_sources () { return 0; /* no replication for MIDI */ }
 };
 
 }; /* namespace ARDOUR */

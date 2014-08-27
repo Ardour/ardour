@@ -79,6 +79,7 @@ CONFIG_VARIABLE (float, audio_playback_buffer_seconds, "playback-buffer-seconds"
 CONFIG_VARIABLE (float, midi_track_buffer_seconds, "midi-track-buffer-seconds", 1.0)
 CONFIG_VARIABLE (uint32_t, disk_choice_space_threshold,  "disk-choice-space-threshold", 57600000)
 CONFIG_VARIABLE (bool, auto_analyse_audio, "auto-analyse-audio", false)
+CONFIG_VARIABLE (std::string, replication_parent_folder, "replication-parent-folder", "")
 
 /* OSC */
 

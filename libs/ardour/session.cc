@@ -4147,8 +4147,10 @@ Session::create_replicated_audio_source (boost::shared_ptr<AudioFileSource> orig
         string path = Glib::build_filename (repdir, file);
 
         if (!path.empty()) {
+                /* do not announce this source, since it is essentially private to the requestor 
+                 */
 		return boost::dynamic_pointer_cast<AudioFileSource> (
-			SourceFactory::createWritable (DataType::AUDIO, *this, path, false, frame_rate()));
+			SourceFactory::createWritable (DataType::AUDIO, *this, path, false, frame_rate(), false));
 	} else {
 		throw failed_constructor ();
 	}
