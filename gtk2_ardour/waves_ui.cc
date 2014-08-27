@@ -595,6 +595,14 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		event_box->set_visible_window (visible_window);
 	}
 
+	Gtkmm2ext::Fader* fader = dynamic_cast<Gtkmm2ext::Fader*> (&widget);
+	if (fader) {
+		property = xml_property (definition, "touchcursor", styles, "");
+		if (!property.empty ()) {
+			fader->set_touch_cursor (property);
+		}
+	}
+
 	Gtk::Label* label = dynamic_cast<Gtk::Label*> (&widget);
 	if (label) {
 		property = xml_property (definition, "justify", styles, "left");

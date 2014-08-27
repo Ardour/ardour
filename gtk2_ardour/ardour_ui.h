@@ -148,6 +148,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void launch_reference ();
 	void show_about ();
 	void hide_about ();
+	void open_media_folder ();
 
 	void idle_load (const std::string& path);
 	void finish();
@@ -226,6 +227,17 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void focus_on_clock ();
 	AudioClock*   big_clock;
 
+    WavesButton* _bit_depth_button;
+    WavesButton* _sample_rate_button;
+    WavesButton* _frame_rate_button;
+    void on_bit_depth_button (WavesButton*);
+    void on_sample_rate_button (WavesButton*);
+    void on_frame_rate_button (WavesButton*);
+    void update_bit_depth_button ();
+    void update_sample_rate_button ();
+    void update_frame_rate_button ();
+    PBD::ScopedConnectionList update_connections_to_toolbar_buttons;
+    
 	TimeInfoBox* time_info_box;
 
 	VideoTimeLine *video_timeline;
@@ -546,6 +558,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	Gtk::Label   disk_space_label;
 	void update_disk_space ();
+    void update_disk_usage ();
 
 	Gtk::Label   timecode_format_label;
 
@@ -771,6 +784,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	VisibilityGroup _status_bar_visibility;
 	Gtk::Adjustment* _dsp_load_adjustment;
+    Gtk::Adjustment* _hd_load_adjustment;
+    Gtk::Label* _dsp_load_label;
+    Gtk::Label* _hd_load_label;
+    Gtk::Label* _hd_remained_time_label;
 
 	/** A ProcessThread so that we have some thread-local buffers for use by
 	 *  PluginEqGui::impulse_analysis ().

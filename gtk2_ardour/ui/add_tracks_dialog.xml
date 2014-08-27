@@ -62,15 +62,15 @@
                 text="CANCEL"
                 x="0"
                 y="155"
-                width="70"
+                width="69"
                 height="25"/>
         
         <Button style="generic_button"
                 id="ok_button"
                 text="OK"
-                x="71"
+                x="70"
                 y="155"
-                width="70"
+                width="69"
                 height="25"/>
     </Layout>
 </Dialog>

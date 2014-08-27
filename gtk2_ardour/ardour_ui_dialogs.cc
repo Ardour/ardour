@@ -227,6 +227,10 @@ ARDOUR_UI::set_session (Session *s)
 			editor_meter_peak_display.show();
 		}
 	}
+    
+    update_bit_depth_button ();
+    update_sample_rate_button ();
+    update_frame_rate_button ();
 }
 
 int
@@ -396,9 +400,11 @@ ARDOUR_UI::toggle_meterbridge ()
 		mixer_tact->set_active(false);
 		editor->get_container ("edit_pane").hide ();
 		editor->get_container ("meter_bridge_view_home").show ();
+		editor->get_container ("compact_meter_bridge_home").hide ();
 	} else {
 		editor->get_container ("meter_bridge_view_home").hide ();
 		editor->get_container ("edit_pane").show ();
+		editor->get_container ("compact_meter_bridge_home").show ();
 	}
 }
 

@@ -36,6 +36,8 @@ public:
 	}
 
 	void move_selected_tracks (bool);
+    void move_selected_tracks_relatively (const PBD::ID& source_track_id, const PBD::ID& target_track_id, bool after_target);
+    
 	void show_track_in_display (TimeAxisView &);
 
 	void suspend_redisplay () {

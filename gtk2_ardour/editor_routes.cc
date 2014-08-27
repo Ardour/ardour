@@ -702,7 +702,9 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		(*x)->route()->solo_isolated_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_isolate_display, this), gui_context());
 		(*x)->route()->solo_safe_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_safe_display, this), gui_context());
 		(*x)->route()->active_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_active_display, this), gui_context ());
-
+        
+        // connect to DnD reordering signal
+        (*x)->relative_tracks_reorder_request.connect(*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::move_selected_tracks_relatively, this, _1, _2, _3), gui_context());
 	}
 
 	update_rec_display ();
@@ -1567,6 +1569,80 @@ EditorRoutes::move_selected_tracks (bool up)
 	}
 #endif	
 
+	_model->reorder (neworder);
+}
+
+void
+EditorRoutes::move_selected_tracks_relatively (const PBD::ID& source_track_id, const PBD::ID& target_track_id, bool after_target)
+{
+    if (source_track_id == target_track_id) {
+        return;
+    }
+    
+    RouteTimeAxisView* source_rtv = _editor->get_route_view_by_route_id(source_track_id);
+    Selection& selection = _editor->get_selection();
+    
+    RouteList routes;
+    RouteList routes_to_move;
+	TreeModel::Children rows = _model->children();
+    
+	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri) {
+
+		boost::shared_ptr<Route> route = (*ri)[_columns.route];
+        TimeAxisView* tv = (*ri)[_columns.tv];
+        
+        // selected tracks: add to the move list but if it's not a target
+        if (selection.selected(tv) &&
+            route->id() != target_track_id) {
+            routes_to_move.push_back(route);
+            continue;
+        }
+        
+        // master track should always be the first
+        RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tv);
+        if (rtv->is_master_track() ) {
+            routes.push_front(route);
+        } else {
+            routes.push_back (route);
+        }
+	}
+    
+    RouteList::iterator insert_position;
+    for (RouteList::iterator iter = routes.begin(); iter != routes.end(); ++iter) {
+        if ((*iter)->id() == target_track_id ) {
+            insert_position = iter;
+            break;
+        }
+    }
+    
+    // insert the pack of tracks to be moved to the correct possition
+    if (after_target) {
+        ++insert_position;
+    }
+    routes.insert(insert_position, routes_to_move.begin(), routes_to_move.end() );
+    
+    std::vector<int> neworder;
+    
+	for (RouteList::const_iterator iter = routes.begin(); iter != routes.end(); ++iter) {
+		uint32_t order = (*iter)->order_key ();
+		neworder.push_back (order);
+	}
+    
+#ifndef NDEBUG
+	DEBUG_TRACE (DEBUG::OrderKeys, "New order after moving tracks:\n");
+	for (vector<int>::iterator i = neworder.begin(); i != neworder.end(); ++i) {
+		DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("\t%1\n", *i));
+	}
+	DEBUG_TRACE (DEBUG::OrderKeys, "-------\n");
+    
+	for (vector<int>::iterator i = neworder.begin(); i != neworder.end(); ++i) {
+		if (*i >= (int) neworder.size()) {
+			cerr << "Trying to move something to " << *i << " of " << neworder.size() << endl;
+		}
+		assert (*i < (int) neworder.size ());
+	}
+#endif	
+    
 	_model->reorder (neworder);
 }
 

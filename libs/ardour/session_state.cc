@@ -49,6 +49,10 @@
 #include <sys/statvfs.h>
 #endif
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <glib.h>
 #include <glib/gstdio.h>
 
@@ -2111,6 +2115,64 @@ Session::refresh_disk_space ()
 		}
 	}
 #endif
+
+#ifdef _WIN32
+    BOOL fResult;
+	const char *pszDrive  = NULL;
+	DWORD dwSectPerClust,
+          dwBytesPerSect,
+          dwFreeClusters,
+          dwTotalClusters;	 
+	if( session_dirs.empty() )
+		return;	 
+	pszDrive = session_dirs.begin()->path.c_str();
+	fResult = GetDiskFreeSpace (pszDrive, 
+                                &dwSectPerClust,
+                                &dwBytesPerSect, 
+                                &dwFreeClusters,
+                                &dwTotalClusters);
+	if( 0 != fResult )
+	{
+		float number_of_4K_blocks_in_cluster = dwSectPerClust*dwBytesPerSect/4096.0;
+		_total_free_4k_blocks = floor (dwFreeClusters * number_of_4K_blocks_in_cluster);
+	}
+
+	return;
+#endif
+}
+
+float
+Session::get_disk_usage_percentage ()
+{
+#if __APPLE__ || (HAVE_SYS_VFS_H && HAVE_SYS_STATVFS_H)
+    vector<space_and_path>::iterator i = session_dirs.begin();
+    
+    struct statfs statfsbuf;
+	statfs (i->path.c_str(), &statfsbuf);
+    
+    return 100 - (statfsbuf.f_bfree * 100.0)/(statfsbuf.f_blocks);
+#endif
+
+#ifdef _WIN32
+	BOOL fResult;
+	const char  *pszDrive  = NULL;
+	DWORD dwSectPerClust,
+          dwBytesPerSect,
+          dwFreeClusters,
+          dwTotalClusters;
+
+	pszDrive = session_dirs.begin()->path.c_str();
+
+	fResult = GetDiskFreeSpace (pszDrive, 
+                                &dwSectPerClust,
+                                &dwBytesPerSect, 
+                                &dwFreeClusters,
+                                &dwTotalClusters);
+	
+	return 100 - (dwFreeClusters*100.0)/dwTotalClusters;
+#endif
+
+    return -1;
 }
 
 string

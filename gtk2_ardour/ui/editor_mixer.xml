@@ -9,10 +9,10 @@
         <EventBox id="color_palette_home"
                   bgnormal="#383838">
           <iconbutton id="color_palette_button"
-                    width="97"
-                    height="17"
-                    normalicon="inspector_color_close"
-                    activeicon="inspector_color_open"/>
+                      width="97"
+                      height="17"
+                      normalicon="inspector_color_close"
+                      activeicon="inspector_color_open"/>
         </EventBox>
       </HBox>
       <VBox id="color_buttons_home"
@@ -134,7 +134,8 @@
         <VBox id="info_panel_home"
               noshowall="true"
               visible="false">
-          <EventBox bgnormal="#4F4F4F" width="97">
+          <EventBox bgnormal="#4F4F4F"
+                    width="97">
             <VBox>
               <HBox box.padding="4">
                 <HBox width="7"/>
@@ -142,7 +143,8 @@
                        text="IN Grisha, Kolya"
                        winfont="Arial Bold 7"
                        macfont="Helvetica Bold 7"/>
-                <HBox box.fill="true" box.expand="true"/>
+                <HBox box.fill="true"
+                      box.expand="true"/>
               </HBox>
               <HBox>
                 <HBox width="7"/>
@@ -150,7 +152,8 @@
                        text="OUT please code it"
                        winfont="Arial Bold 7"
                        macfont="Helvetica Bold 7"/>
-                <HBox box.fill="true" box.expand="true"/>
+                <HBox box.fill="true"
+                      box.expand="true"/>
               </HBox>
               <HBox height="5"/>
             </VBox>
@@ -171,14 +174,16 @@
         <HBox id="gain_meter_home"/>
         <HBox id="invert_button_box"
               visible="false"/>
-        <EventBox bgnormal="#000000"
-                  width="50">
-          <VBox borderwidth="1"
-                spacing="1">
+        <VBox>
+          <HBox>
+            <EventBox width="1"
+                      bgnormal="#383838"/>s
             <VBox id="track_buttons_home"
                   visible="false"
                   noshowall="true">
-              <HBox spacing="1">
+              <EventBox height="1"
+                        bgnormal="#000000"/>s
+              <HBox>
                 <iconbutton id="rec_enable_button"
                             width="47"
                             height="20"
@@ -187,6 +192,8 @@
                             prelighticon="inspector_record_prelight"
                             visible="false"
                             noshowall="true"/>
+                <EventBox width="1"
+                          bgnormal="#000000"/>s
                 <iconbutton id="monitor_input_button"
                             width="47"
                             height="20"
@@ -196,7 +203,9 @@
                             visible="false"
                             noshowall="true"/>
               </HBox>
-              <HBox spacing="1">
+              <EventBox height="1"
+                        bgnormal="#000000"/>s
+              <HBox>
                 <iconbutton id="mute_button"
                             width="47"
                             height="20"
@@ -206,6 +215,8 @@
                             prelighticon="inspector_mute_prelight"
                             visible="false"
                             noshowall="true"/>
+                <EventBox width="1"
+                          bgnormal="#000000"/>s
                 <iconbutton id="solo_button"
                             width="47"
                             height="20"
@@ -216,26 +227,33 @@
                             visible="false"
                             noshowall="true"/>
               </HBox>
+              <EventBox height="1"
+                        bgnormal="#000000"/>s
             </VBox>
-            <iconbutton id="master_mute_button"
-                        width="95"
-                        height="41"
-                        normalicon="inspector_master_mute"
-                        activeicon="inspector_master_mute_active"
-                        prelighticon="inspector_master_mute_prelight"
-                        visible="false"
-                        noshowall="true"/>
-            <Button id="name_button"
-                    width="95"
-                    height="47"
-                    fgnormal="#D7D7D7"
-                    fghover="#D7D7D7"
-                    fgactive="#D7D7D7"
-                    winfont ="Arial 10"
-                    macfont ="Helvetica 10"/>
-          </VBox>
-        </EventBox>
-        <HBox visible="false" noshowall="true">
+            <EventBox width="1"
+                      bgnormal="#383838"/>s
+
+          </HBox>
+          <iconbutton id="master_mute_button"
+                      width="95"
+                      height="41"
+                      normalicon="inspector_master_mute"
+                      activeicon="inspector_master_mute_active"
+                      prelighticon="inspector_master_mute_prelight"
+                      visible="false"
+                      noshowall="true"/>
+          <Button id="name_button"
+                  width="95"
+                  height="47"
+                  fgnormal="#D7D7D7"
+                  fghover="#D7D7D7"
+                  fgactive="#D7D7D7"
+                  winfont ="Arial 10"
+                  macfont ="Helvetica 10"/>
+        </VBox>
+        <HBox visible="false"
+              noshowall="true">
+>>>>>>> master
           <Button id="show_sends_button"/>
           <Button id="monitor_disk_button"/>
           <Button id="comment_button"/>

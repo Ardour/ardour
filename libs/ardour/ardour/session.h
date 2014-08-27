@@ -226,6 +226,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void butler_transport_work ();
 
 	void refresh_disk_space ();
+    float get_disk_usage_percentage();
 
 	int load_diskstreams_2X (XMLNode const &, int);
 

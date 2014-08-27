@@ -52,12 +52,14 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR_UI_UTILS;
 
+Gdk::Cursor* MonoPanner::__touch_cursor;
+
 MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	: PannerInterface (p->panner())
 	, _panner_shell (p)
 	, position_control (_panner->pannable()->pan_azimuth_control)
-	, drag_start_x (0)
-	, last_drag_x (0)
+	, drag_start_y (0)
+	, last_drag_y (0)
 	, accumulated_delta (0)
 	, detented (false)
 	, position_binder (position_control)
@@ -68,6 +70,13 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 		for (size_t i=0; i < (sizeof(_knob_image)/sizeof(_knob_image[0])); i++) {
 			_knob_image[i] = load_pixbuf (_knob_image_files[i]);
 		}
+	}
+
+	if (__touch_cursor == 0) {
+		__touch_cursor = new Gdk::Cursor (Gdk::Display::get_default(), 
+										 ::get_icon ("panner_touch_cursor"),
+										 12,
+										 12);
 	}
 
 	position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
@@ -127,12 +136,15 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
 	if (PannerInterface::on_button_press_event (ev)) {
 		return true;
 	}
+
 	if (_panner_shell->bypassed()) {
 		return false;
 	}
 
-	drag_start_x = ev->x;
-	last_drag_x = ev->x;
+	get_window()->set_cursor (*__touch_cursor);
+
+	drag_start_y = ev->y;
+	last_drag_y = ev->y;
 
 	_dragging = false;
 	_tooltip.target_stop_drag ();
@@ -203,6 +215,8 @@ MonoPanner::on_button_release_event (GdkEventButton* ev)
 		return false;
 	}
 
+	get_window()->set_cursor();
+
 	_dragging = false;
 	_tooltip.target_stop_drag ();
 	accumulated_delta = 0;
@@ -261,7 +275,7 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 	}
 
 	int w = get_width();
-	double delta = (ev->x - last_drag_x) / (double) w;
+	double delta = (last_drag_y - ev->y) / (double) w;
 
 	/* create a detent close to the center */
 
@@ -286,7 +300,7 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 		position_control->set_value (pv + delta);
 	}
 
-	last_drag_x = ev->x;
+	last_drag_y = ev->y;
 	return true;
 }
 

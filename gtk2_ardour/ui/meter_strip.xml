@@ -58,8 +58,10 @@
               <Button id="name_button"
                       width="37"
                       height="24"
-                      winfont="Arial 10"
-                      macfont="Helvetica 10"/>
+                      fgnormal="#ffffff"
+                      fgactive="#ffffff"
+                      winfont="Arial 8"
+                      macfont="Helvetica 8"/>
               <EventBox bgnormal="#000000"
                         bgactive="#000000"
                         height="1"/>

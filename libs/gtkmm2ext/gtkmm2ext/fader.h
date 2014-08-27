@@ -52,8 +52,8 @@ class LIBGTKMM2EXT_API Fader : public CairoWidget
 	virtual ~Fader ();
 
 	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { binding_proxy.set_controllable (c); }
-
 	void set_default_value (float);
+	void set_touch_cursor (const std::string& icon_name);
 
   protected:
 	void get_handle_position (double& x, double& y);
@@ -88,6 +88,8 @@ class LIBGTKMM2EXT_API Fader : public CairoWidget
 	bool _hovering;
 
 	GdkWindow* _grab_window;
+	Gdk::Cursor *_touch_cursor;
+
 	double _grab_loc_x;
 	double _grab_loc_y;
 	double _grab_start_x;

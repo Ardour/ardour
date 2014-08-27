@@ -64,6 +64,8 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 
+Gtk::TargetEntry RouteUI::header_target("HEADER", (Gtk::TargetFlags)0 ,ROUTE_HEADER);
+
 uint32_t RouteUI::_max_invert_buttons = 3;
 PBD::Signal1<void, boost::shared_ptr<Route> > RouteUI::BusSendDisplayChanged;
 boost::weak_ptr<Route> RouteUI::_showing_sends_to;
@@ -83,6 +85,8 @@ RouteUI::RouteUI (ARDOUR::Session* sess, const std::string& layout_script_file)
 	, rec_enable_button (get_waves_button ("rec_enable_button"))
 	, show_sends_button (get_waves_button ("show_sends_button"))
 	, monitor_input_button (get_waves_button ("monitor_input_button"))
+	, _dnd_operation_in_progress (false)
+    , _dnd_operation_enabled (false)
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 	if (sess) init ();
@@ -151,6 +155,18 @@ RouteUI::init ()
 	monitor_input_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_release));
 
 	BusSendDisplayChanged.connect_same_thread (*this, boost::bind(&RouteUI::bus_send_display_changed, this, _1));
+    
+    // DnD callbacks
+    // source side
+    signal_drag_begin().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_begin));
+    signal_drag_data_get().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_data_get));
+    signal_drag_begin().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_end));
+    
+    // destination callbacks
+    signal_drag_motion().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_motion));
+    signal_drag_leave().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_leave));
+    signal_drag_drop().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_drop));
+    signal_drag_data_received().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_data_received));
 }
 
 void
@@ -173,6 +189,11 @@ RouteUI::self_delete ()
 	delete this;
 }
 
+namespace {
+    size_t default_palette_color = 9;
+    size_t master_color = 3;
+}
+
 void
 RouteUI::set_route (boost::shared_ptr<Route> rp)
 {
@@ -185,10 +206,20 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
         Editor* editor = dynamic_cast<Editor*>( &(ARDOUR_UI::instance()->the_editor()) );
         
         if( editor!=NULL && editor->set_session_in_progress() )
-            color = MixerStrip::palette_random_color();
+        {
+            if( _route->is_master() )
+                color = (Gdk::Color)(MixerStrip::XMLColor[master_color]);
+            else
+                color = MixerStrip::palette_random_color();
+        }
         else
-            color = (Gdk::Color)(MixerStrip::XMLColor[14]);
-		
+		{
+			if( _route->is_master() )
+                color = (Gdk::Color)(MixerStrip::XMLColor[master_color]);
+			else
+				color = (Gdk::Color)(MixerStrip::XMLColor[default_palette_color]);
+		}
+
         set_color (color);
 	}
 
@@ -265,6 +296,88 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	update_mute_display ();
 	update_solo_display ();
+}
+
+void RouteUI::enable_header_dnd ()
+{
+    std::vector<Gtk::TargetEntry> targets;
+    targets.push_back(header_target);
+    drag_source_set(targets, Gdk::BUTTON1_MASK);
+    drag_dest_set(targets, DEST_DEFAULT_HIGHLIGHT);
+    _dnd_operation_enabled = true;
+}
+
+bool RouteUI::disable_header_dnd ()
+{
+    // disable DnD operations
+    drag_source_unset ();
+    drag_dest_unset ();
+    _dnd_operation_enabled = false;
+}
+
+void
+RouteUI::on_route_drag_begin(const Glib::RefPtr<Gdk::DragContext>& context)
+{    
+	_dnd_operation_in_progress = true;
+    handle_route_drag_begin(context);
+}
+
+void
+RouteUI::on_route_drag_end(const Glib::RefPtr<Gdk::DragContext>& context)
+{
+	_dnd_operation_in_progress = false;
+	handle_route_drag_end(context);
+}
+
+void
+RouteUI::on_route_drag_data_get(const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time)
+{
+    switch (info)
+    {
+        case RouteUI::ROUTE_HEADER:
+        {
+            // Put route id, if we have a route
+            if (_route) {
+                std::string route_id_string =_route->id().to_s();
+                selection_data.set(8, (const guint8*)route_id_string.c_str(), route_id_string.length() + 1  );
+                break;
+            }
+        }
+            
+        default:
+            break;
+    }
+}
+
+bool
+RouteUI::on_route_drag_motion(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time)
+{
+    return handle_route_drag_motion(context, x, y, time);
+}
+
+void
+RouteUI::on_route_drag_leave(const Glib::RefPtr<Gdk::DragContext>& context, guint time)
+{
+    handle_route_drag_leave(context, time);
+}
+
+bool
+RouteUI::on_route_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time)
+{
+    if (RouteUI::header_target.get_target () == drag_dest_find_target (context) )
+    {
+        // request the data from the source:
+        drag_get_data (context, RouteUI::header_target.get_target (), time );
+        return true;
+    }
+    
+    return false;
+}
+
+void
+RouteUI::on_route_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time)
+{
+    handle_route_drag_data_received(context, x, y, selection_data, info, time);
 }
 
 void

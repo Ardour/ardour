@@ -66,6 +66,7 @@
 #include "control_protocol/control_protocol.h"
 
 #include "i18n.h"
+#include "utils.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -80,16 +81,108 @@ ARDOUR_UI::create_editor ()
 	try {
 		editor = new Editor ();
 		_dsp_load_adjustment = &editor->get_adjustment ("dsp_load_adjustment");
-	}
+        _hd_load_adjustment = &editor->get_adjustment("hd_load_adjustment");
+        
+        _dsp_load_label = &editor->get_label("dsp_load_label");
+        _hd_load_label = &editor->get_label("hd_load_label");
+        _hd_remained_time_label = &editor->get_label("hd_remained_time");
+        
+        _bit_depth_button = &editor->get_waves_button("bit_depth_button");
+        _sample_rate_button = &editor->get_waves_button("sample_rate_button");
+        _frame_rate_button = &editor->get_waves_button("frame_rate_button");
+    }
 
 	catch (failed_constructor& err) {
 		return -1;
 	}
+    
+    _bit_depth_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_bit_depth_button));
+    _sample_rate_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_sample_rate_button));
+    _frame_rate_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_frame_rate_button));
 
 	editor->Realized.connect (sigc::mem_fun (*this, &ARDOUR_UI::editor_realized));
 	editor->signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), true));
 
 	return 0;
+}
+
+void
+ARDOUR_UI::on_bit_depth_button (WavesButton*)
+{
+    tracks_control_panel->show ();
+}
+
+void
+ARDOUR_UI::on_sample_rate_button (WavesButton*)
+{
+    tracks_control_panel->show ();
+}
+
+void
+ARDOUR_UI::on_frame_rate_button (WavesButton*)
+{
+    tracks_control_panel->show ();
+}
+
+void
+ARDOUR_UI::update_bit_depth_button ()
+{
+    if( _session && _bit_depth_button )
+    {
+        string file_data_format;
+        switch (_session->config.get_native_file_data_format ()) {
+        case FormatFloat:
+            file_data_format = "32 bit";
+            break;
+        case FormatInt24:
+            file_data_format = "24 bit";
+            break;
+        case FormatInt16:
+            file_data_format = "16 bit";
+            break;
+        }
+        _bit_depth_button->set_text (file_data_format);
+    }
+}
+
+void
+ARDOUR_UI::update_sample_rate_button ()
+{
+    if( !_sample_rate_button )
+        return;
+    
+    std::string active_sr = ARDOUR_UI_UTILS::rate_as_string(EngineStateController::instance()->get_current_sample_rate());
+    _sample_rate_button->set_text (active_sr);
+}
+
+void
+ARDOUR_UI::update_frame_rate_button ()
+{
+    if( !_frame_rate_button )
+        return;
+         
+    string timecode_format_string;
+    switch( _timecode_format ) {
+        case Timecode::timecode_24:
+            timecode_format_string = "24 fps";
+            break;
+        case Timecode::timecode_25:
+            timecode_format_string = "25 fps";
+            break;
+        case Timecode::timecode_30:
+            timecode_format_string = "30 fps";
+            break;
+        case Timecode::timecode_23976:
+            timecode_format_string = "23.976 fps";
+            break;
+        case Timecode::timecode_2997:
+            timecode_format_string = "29.97 fps";
+            break;
+        default:
+            break;
+    }
+    
+    _frame_rate_button->set_text (timecode_format_string);
 }
 
 void
@@ -215,6 +308,8 @@ ARDOUR_UI::install_actions ()
 	/** TRANSLATORS: This is `Manual' in the sense of an instruction book that tells a user how to use Ardour */
 	ActionManager::register_action (common_actions, X_("Manual"), S_("Help|Manual"),  mem_fun(*this, &ARDOUR_UI::launch_manual));
 	ActionManager::register_action (common_actions, X_("Reference"), _("Reference"),  mem_fun(*this, &ARDOUR_UI::launch_reference));
+
+	ActionManager::register_action (common_actions, X_("OpenMediaFolder"), _("OpenMediaFolder"),  mem_fun(*this, &ARDOUR_UI::open_media_folder));
 
 	act = ActionManager::register_action (common_actions, X_("Save"), _("Save"),  sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::save_state), string(""), false));
 	ActionManager::session_sensitive_actions.push_back (act);

@@ -1293,7 +1293,7 @@ Editor::update_title ()
 
 namespace {
     const size_t mixer_bridge_strip_max_name_size = 9;
-    const size_t meter_bridge_strip_max_name_size = 6;
+    const size_t meter_bridge_strip_max_name_size = 8;
 }
 void
 Editor::set_session (Session *t)

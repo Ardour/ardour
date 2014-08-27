@@ -32,17 +32,54 @@
                         normalicon="tracks"
                         activeicon="tracks_active"
                         prelighticon="tracks_prelight"/>
+            
             <Layout width="407" height="51">
-              <icon source="top_bar_background.png"
-                    tooltip="--------------------&#xA;This is a mockup&#xA;--------------------" />
+              <icon source="top_bar_background.png"/>
               <HBox id="time_info_box_home"
                     x="60"
                     y="4"/>
               <HBox id="primary_clock_home"
                     x="132"
                     y="6"/>
+            
+              <Button id="bit_depth_button"
+                      text="bit depth"
+                      fgnormal="#ffffff"
+                      winfont ="Arial 8"
+                      macfont ="Helvetica 8"
+                      x="270"
+                      y="5"
+                      width="63"
+                      height="18"
+                      normalicon="top_bar_button"
+                      activeicon="top_bar_button"
+                      prelighticon="top_bar_button"/>
+              <Button id="sample_rate_button"
+                              text="sample rate"
+                              fgnormal="#ffffff"
+                              winfont ="Arial 8"
+                              macfont ="Helvetica 8"
+                              x="270"
+                              y="28"
+                              width="63"
+                              height="18"
+                              normalicon="top_bar_button"
+                              activeicon="top_bar_button"
+                              prelighticon="top_bar_button"/>
+              <Button id="frame_rate_button"
+                              text="frame rate"
+                              winfont ="Arial 8"
+                              macfont ="Helvetica 8"
+                              x="335"
+                              y="28"
+                              width="63"
+                              height="18"
+                              normalicon="top_bar_button"
+                              activeicon="top_bar_button"
+                              prelighticon="top_bar_button"/>
             </Layout>
-            <Layout box.pack="end" width="114">
+            <Layout box.pack="end" width="114" height="51">
+              <icon source="metrics_display.png"/>
               <Adjustment id="dsp_load_adjustment"
                           minvalue="1"
                           maxvalue="100"
@@ -53,13 +90,54 @@
                      handlesource="dsp_load_fader_handle.png"
                      minposx="0"
                      minposy="3"
-                     maxposx="78"
+                     maxposx="56"
                      maxposy="3"
                      readonly="true"
                      x="28"
+                     y="8"
+                     width="56"
+                     height="5"/>
+              <Label id="dsp_load_label"
+                     style="generic_control"
+                     text="%"
+                     fgnormal="#ffffff"
+                     winfont ="Arial 8"
+                     macfont ="Helvetica 8"
+                     x="87"
                      y="8"/>
-              <icon source="metrics_display.png"
-                    tooltip="--------------------&#xA;This is a mockup&#xA;--------------------"/>
+              <Adjustment id="hd_load_adjustment"
+                          minvalue="1"
+                          maxvalue="100"
+                          initialvalue="50"
+                          readonly="fals"/>
+              <Fader adjustment="hd_load_adjustment"
+                     facesource="dsp_load_fader_face.png"
+                     handlesource="dsp_load_fader_handle.png"
+                     minposx="0"
+                     minposy="3"
+                     maxposx="56"
+                     maxposy="3"
+                     readonly="true"
+                     x="28"
+                     y="18"
+                     width="56"
+                     height="5"/>
+              <Label id="hd_load_label"
+                     style="generic_control"
+                     text="%"
+                     fgnormal="#ffffff"
+                     winfont ="Arial 8"
+                     macfont ="Helvetica 8"
+                     x="87"
+                     y="18"/>
+                
+              <Label id="hd_remained_time"
+                     style="generic_control"
+                     fgnormal="#ffffff"
+                     winfont ="Arial 9"
+                     macfont ="Helvetica 9"
+                     x="58"
+                     y="33"/>
             </Layout>
             <EventBox bgnormal="#383838" 
                       width="420"
@@ -259,13 +337,13 @@
                       table.yfill="true"
                       table.yexpand="true"
                       bgnormal="#3E3E3E">
-                  <VBox id="edit_controls_vbox" height="800"/>
+                  <VBox id="edit_controls_vbox"/>
               </Layout>
             </Table>
           </VPaned>
         </HPaned>
         <EventBox id="mixer_bridge_view_home"
-                  height="400"
+                  height="426"
                   box.pack="end"
                   visible="false"
                   noshowall="true"/>

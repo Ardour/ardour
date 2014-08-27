@@ -227,6 +227,7 @@ class TimeAxisView : public virtual AxisView
 	bool                  _number_is_hidden;
     bool                  _hidden;
 	bool                   in_destructor;
+	bool                  _ebox_release_can_act;
 	Gtk::Menu*            _size_menu;
 	ArdourCanvas::Container*  _canvas_display;
 	double                _y_position;
@@ -256,6 +257,10 @@ class TimeAxisView : public virtual AxisView
 	virtual bool controls_ebox_motion (GdkEventMotion*);
 	virtual bool controls_ebox_leave (GdkEventCrossing*);
 
+    // Define in inheriting class to rect on control ebox resizing
+    virtual void control_ebox_resize_started() {}
+    virtual void control_ebox_resize_ended() {}
+    
 	/** Display the standard LHS control menu at when.
 	 *
 	 * @param when the popup activation time
@@ -294,7 +299,6 @@ private:
 	double               _resize_drag_start;
 	GdkCursor*           _preresize_cursor;
 	bool                 _have_preresize_cursor;
-        bool                  _ebox_release_can_act;
 
 	static uint32_t button_height;
 	static uint32_t extra_height;

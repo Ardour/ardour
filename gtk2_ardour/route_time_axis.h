@@ -149,6 +149,14 @@ public:
 
 	std::string state_id() const;
 
+    void set_ignore_dnd_requests(bool ignore) {_ignore_dnd_requests = ignore; }
+    bool check_ignore_dnd_requests() {return _ignore_dnd_requests; }
+    
+    virtual void control_ebox_resize_started();
+    virtual void control_ebox_resize_ended();
+
+    PBD::Signal3<void, const PBD::ID&, const PBD::ID&, bool> relative_tracks_reorder_request;
+    
 protected:
 	friend class StreamView;
 
@@ -176,7 +184,13 @@ protected:
 	    ~ProcessorAutomationInfo ();
 	};
 
-
+    // DnD heandlers for route header
+    virtual void handle_route_drag_begin (const Glib::RefPtr<Gdk::DragContext>& context);
+	virtual void handle_route_drag_end(const Glib::RefPtr<Gdk::DragContext>& context);
+    virtual void handle_route_drag_data_received (const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time);
+    virtual bool handle_route_drag_motion (const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
+    virtual void handle_route_drag_leave (const Glib::RefPtr<Gdk::DragContext>& context, guint time);
+    
 	void update_diskstream_display ();
 
 	gint route_group_click  (GdkEventButton *);
@@ -252,7 +266,10 @@ protected:
 	StreamView*           _view;
 	ArdourCanvas::Canvas& parent_canvas;
 	bool                  no_redraw;
-
+    
+    Gtk::EventBox& upper_drop_indicator;
+    Gtk::EventBox& lower_drop_indicator;
+    
 	WavesButton& route_group_button;
 	WavesButton& playlist_button;
 	WavesButton& automation_button;
@@ -305,6 +322,7 @@ protected:
 	UnderlayMirrorList _underlay_mirrors;
 
 	bool _ignore_set_layer_display;
+    bool _ignore_dnd_requests;
 
 private:
 

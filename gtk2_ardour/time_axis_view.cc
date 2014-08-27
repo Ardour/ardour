@@ -338,10 +338,15 @@ TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 
 	}
 
+	if (event->button == 1) {
+		selection_click (event);
+	}
+
 	_ebox_release_can_act = true;
 			
 	if (maybe_set_cursor (event->y) > 0) {
 		_resize_drag_start = event->y_root;
+        control_ebox_resize_started();
 	}
 
 	return true;
@@ -358,7 +363,7 @@ bool
 TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
 {
 	if (_resize_drag_start >= 0) {
-
+        
 		/* (ab)use the DragManager to do autoscrolling - basically we
 		 * are pretending that the drag is taking place over the canvas
 		 * (which perhaps in the glorious future, when track headers
@@ -429,6 +434,7 @@ TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 		}
 		_editor.stop_canvas_autoscroll ();
 		_resize_drag_start = -1;
+        control_ebox_resize_ended();
 	}
 
 	if (!_ebox_release_can_act) {
@@ -1201,7 +1207,7 @@ TimeAxisView::preset_height (Height h)
 	case HeightLarge:
 		return 66;
 	case HeightNormal:
-		return 44;
+		return 45;
 	case HeightSmall:
 		return 22;
     case HeightMaximum:

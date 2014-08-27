@@ -90,6 +90,7 @@ using namespace Editing;
 using namespace std;
 using std::list;
 
+
 RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed,
 									  Session* sess,
 									  ArdourCanvas::Canvas& canvas,
@@ -111,15 +112,20 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed,
 	, color_mode_menu (0)
 	, gm (sess, "track_header_gain_meter.xml")
 	, _ignore_set_layer_display (false)
+    , _ignore_dnd_requests (false)
 	, gain_meter_home (get_box ("gain_meter_home"))
 	, selected_track_color_box (get_container ("selected_track_color_box"))
 	, track_color_box (get_container ("track_color_box"))
+    , upper_drop_indicator(get_event_box ("upper_drop_indicator"))
+    , lower_drop_indicator(get_event_box ("lower_drop_indicator"))
 {
 }
 
 void
 RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 {
+    disable_header_dnd ();
+    
 	RouteUI::set_route (rt);
 
 	CANVAS_DEBUG_NAME (_canvas_display, string_compose ("main for %1", rt->name()));
@@ -168,6 +174,8 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
     if (is_master_track() ) {
         // do not display number for master track
         TimeAxisView::set_number_is_hidden(true);
+    } else {
+        enable_header_dnd ();
     }
     
 	playlist_button.set_visible(is_track() && track()->mode() == ARDOUR::Normal);
@@ -1106,6 +1114,73 @@ RouteTimeAxisView::speed_changed ()
 	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteTimeAxisView::reset_samples_per_pixel, this));
 }
 
+bool
+RouteTimeAxisView::handle_route_drag_motion(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time)
+{
+    // check if the target of the drop is expected by our drop zone
+    if (RouteUI::header_target.get_target () == drag_dest_find_target (context) &&
+        drag_get_source_widget(context) != this) {
+        
+        context->drag_status(context->get_suggested_action(), time);
+        
+        if (context->get_suggested_action() ) {
+            
+            int height = get_height();
+            
+            if (y <= height/2) {
+                upper_drop_indicator.show();
+                lower_drop_indicator.hide();
+            } else {
+                lower_drop_indicator.show();
+                upper_drop_indicator.hide();
+            }
+            
+            return true;
+        }
+    }
+    
+    context->drag_refuse(time);
+    return false;
+}
+
+void
+RouteTimeAxisView::handle_route_drag_leave(const Glib::RefPtr<Gdk::DragContext>& context, guint time)
+{
+    upper_drop_indicator.hide();
+    lower_drop_indicator.hide();
+}
+
+void
+RouteTimeAxisView::handle_route_drag_begin (const Glib::RefPtr<Gdk::DragContext>& context)
+{
+	_ebox_release_can_act = false;
+
+    // mark dragged track selected anyway
+    if (!_editor.get_selection().selected(this) ) {
+        _editor.get_selection().clear_tracks();
+        _editor.get_selection().add(this);
+    }
+    
+    //GZ TO-DO: Draw DnD icon for track header
+}
+
+void
+RouteTimeAxisView::handle_route_drag_end(const Glib::RefPtr<Gdk::DragContext>& context)
+{
+}
+
+void
+RouteTimeAxisView::handle_route_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const SelectionData& selection_data, guint info, guint time)
+{
+    PBD::ID source_route_id = selection_data.get_data_as_string ();
+    
+    // emit signal
+    int height = get_height();
+    relative_tracks_reorder_request(source_route_id, _route->id(), y > height/2 );
+    
+    context->drop_finish(true, time);
+}
+
 void
 RouteTimeAxisView::update_diskstream_display ()
 {
@@ -1119,34 +1194,63 @@ RouteTimeAxisView::update_diskstream_display ()
 void
 RouteTimeAxisView::selection_click (GdkEventButton* ev)
 {
-	if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
+    if (dnd_in_progress() ) {
+        return;
+    }
+    
+	if (ev->type == GDK_BUTTON_PRESS) {
 
-		/* special case: select/deselect all tracks */
-		if (_editor.get_selection().selected (this)) {
-			_editor.get_selection().clear_tracks ();
-		} else {
-			_editor.select_all_tracks ();
+		if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
+
+			/* special case: select/deselect all tracks */
+			if (_editor.get_selection().selected (this)) {
+				_editor.get_selection().clear_tracks ();
+			} else {
+				_editor.select_all_tracks ();
+			}
+
+			return;
 		}
 
-		return;
-	}
 
-	switch (ArdourKeyboard::selection_type (ev->state)) {
-	case Selection::Toggle:
-		_editor.get_selection().toggle (this);
-		break;
+		switch (ArdourKeyboard::selection_type (ev->state)) {
+		case Selection::Toggle:
+			_editor.get_selection().toggle (this);
+			break;
 
-	case Selection::Set:
-		_editor.get_selection().set (this);
-		break;
+		case Selection::Set:
+			if (!_editor.get_selection().selected (this)) {
+				_editor.get_selection().set (this);
+			}
+			break;
 
-	case Selection::Extend:
-		_editor.extend_selection_to_track (*this);
-		break;
+		case Selection::Extend:
+			_editor.extend_selection_to_track (*this);
+			break;
 
-	case Selection::Add:
-		_editor.get_selection().add (this);
-		break;
+		case Selection::Add:
+			_editor.get_selection().add (this);
+			break;
+		}
+
+	} else if (ev->type == GDK_BUTTON_RELEASE) {
+
+		switch (ArdourKeyboard::selection_type (ev->state)) {
+		case Selection::Toggle:
+			break;
+
+		case Selection::Set:
+			if (_editor.get_selection().selected (this)) {
+				_editor.get_selection().set (this);
+			}
+			break;
+
+		case Selection::Extend:
+			break;
+
+		case Selection::Add:
+			break;
+		}
 	}
 }
 
@@ -2556,4 +2660,23 @@ RouteTimeAxisView::remove_child (boost::shared_ptr<TimeAxisView> c)
 			}
 		}
 	}
+}
+
+void
+RouteTimeAxisView::control_ebox_resize_started()
+{
+    if (dnd_operation_enabled () ) {
+        _ignore_dnd_requests = true;
+        disable_header_dnd ();
+    }
+    
+}
+
+void
+RouteTimeAxisView::control_ebox_resize_ended()
+{
+    if (_ignore_dnd_requests ) {
+        _ignore_dnd_requests = false;
+        enable_header_dnd ();
+    }
 }

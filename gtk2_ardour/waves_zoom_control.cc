@@ -25,7 +25,6 @@
 #include "dbg_msg.h"
 
 using namespace ARDOUR_UI_UTILS;
-
 WavesZoomControl::WavesZoomControl (Gtk::Adjustment& adjustment)
 	: _adjustment (adjustment)
 	, _state (StateIdle)
