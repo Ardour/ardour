@@ -69,6 +69,11 @@ public:
 
 	virtual void render (cairo_t *, cairo_rectangle_t*) = 0;
 
+	static void set_flat_buttons (bool yn);
+	static bool flat_buttons() { return _flat_buttons; }
+
+	static void set_source_rgb_a( cairo_t* cr, Gdk::Color, float a=1.0 );
+
 protected:
 	/** Render the widget to the given Cairo context */
 	virtual bool on_expose_event (GdkEventExpose *);
@@ -85,7 +90,8 @@ protected:
 	Gtkmm2ext::ActiveState _active_state;
 	Gtkmm2ext::VisualState _visual_state;
 	bool                   _need_bg;
-	
+
+	static bool	_flat_buttons;
 	bool		_grabbed;
 
   private:

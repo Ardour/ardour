@@ -54,7 +54,6 @@ using namespace std;
 ArdourButton::Element ArdourButton::default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text);
 ArdourButton::Element ArdourButton::led_default_elements = ArdourButton::Element (ArdourButton::default_elements|ArdourButton::Indicator);
 ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Indicator);
-bool ArdourButton::_flat_buttons = false;
 
 ArdourButton::ArdourButton (Element e)
 	: _elements (e)
@@ -398,15 +397,17 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		}
 		
 		//inset
-		cairo_arc (cr, 0, 0, _diameter/2, 0, 2 * M_PI);
-		cairo_set_source (cr, led_inset_pattern);
-		cairo_fill (cr);
-		
+		if (!_flat_buttons) {
+			cairo_arc (cr, 0, 0, _diameter/2, 0, 2 * M_PI);
+			cairo_set_source (cr, led_inset_pattern);
+			cairo_fill (cr);
+		}
+
 		//black ring
 		cairo_set_source_rgb (cr, 0, 0, 0);
-		cairo_arc (cr, 0, 0, _diameter/2-2, 0, 2 * M_PI);
+		cairo_arc (cr, 0, 0, _diameter/2-1, 0, 2 * M_PI);
 		cairo_fill(cr);
-		
+
 		//led color
 		ArdourCanvas::set_source_rgba (cr, led_color);
 		cairo_arc (cr, 0, 0, _diameter/2-3, 0, 2 * M_PI);
@@ -976,10 +977,4 @@ void
 ArdourButton::add_elements (Element e)
 {
 	_elements = (ArdourButton::Element) (_elements | e);
-}
-
-void
-ArdourButton::set_flat_buttons (bool yn)
-{
-	_flat_buttons = yn;
 }

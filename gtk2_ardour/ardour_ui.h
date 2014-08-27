@@ -466,6 +466,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void sync_blink (bool);
 	void audition_blink (bool);
 	void feedback_blink (bool);
+	
+	void set_flat_buttons();
 
 	void soloing_changed (bool);
 	void auditioning_changed (bool);

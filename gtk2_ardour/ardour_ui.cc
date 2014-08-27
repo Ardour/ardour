@@ -312,6 +312,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	ARDOUR::GUIIdle.connect (forever_connections, MISSING_INVALIDATOR, boost::bind(&ARDOUR_UI::gui_idle_handler, this), gui_context());
 
+	Config->ParameterChanged.connect ( forever_connections, MISSING_INVALIDATOR, boost::bind(&ARDOUR_UI::set_flat_buttons, this), gui_context() );
+	set_flat_buttons();
+
 	/* lets get this party started */
 
 	setup_gtk_ardour_enums ();
@@ -4492,4 +4495,10 @@ ARDOUR_UI::transport_numpad_event (int num)
 			case 9:  toggle_follow_edits();		break;
 		}
 	}
+}
+
+void
+ARDOUR_UI::set_flat_buttons ()
+{
+	CairoWidget::set_flat_buttons( config()->get_flat_buttons() );
 }

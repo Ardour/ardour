@@ -24,6 +24,17 @@
 
 static const char* has_cairo_widget_background_info = "has_cairo_widget_background_info";
 
+bool CairoWidget::_flat_buttons = false;
+
+void CairoWidget::set_source_rgb_a( cairo_t* cr, Gdk::Color col, float a)  //ToDo:  this one and the Canvas version should be in a shared file (?)
+{
+	float r = col.get_red_p ();
+	float g = col.get_green_p ();
+	float b = col.get_blue_p ();
+	
+	cairo_set_source_rgba(cr, r, g, b, a);
+}
+
 CairoWidget::CairoWidget ()
 	: _active_state (Gtkmm2ext::Off)
 	, _visual_state (Gtkmm2ext::NoVisualState)
@@ -185,4 +196,10 @@ CairoWidget::provide_background_for_cairo_widget (Gtk::Widget& w, const Gdk::Col
 	w.modify_bg (Gtk::STATE_SELECTED, bg);
 
 	g_object_set_data (G_OBJECT(w.gobj()), has_cairo_widget_background_info, (void*) 0xfeedface);
+}
+
+void
+CairoWidget::set_flat_buttons (bool yn)
+{
+	_flat_buttons = yn;
 }
