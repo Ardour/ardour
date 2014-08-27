@@ -127,10 +127,10 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		_base_rect->lower_to_bottom();
 	}
 
-	hide_button.add (*(manage (new Gtk::Image (::get_icon("hide")))));
+	hide_button.set_image ( ::get_icon(X_("hide")));
 
-	auto_button.set_name ("TrackVisualButton");
-	hide_button.set_name ("TrackRemoveButton");
+	auto_button.set_name ("mixer strip button");
+	hide_button.set_name ("mixer strip button");
 
 	auto_button.unset_flags (Gtk::CAN_FOCUS);
 	hide_button.unset_flags (Gtk::CAN_FOCUS);
@@ -146,6 +146,9 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	} else {
 		set_height (preset_height (HeightNormal));
 	}
+
+	//name label isn't editable on an automation track; remove the tooltip
+	ARDOUR_UI::instance()->set_tip (name_label, X_(""));
 
 	/* repack the name label */
 
@@ -182,8 +185,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	controls_table.show_all ();
 
-	hide_button.signal_clicked().connect (sigc::mem_fun(*this, &AutomationTimeAxisView::hide_clicked));
-	auto_button.signal_clicked().connect (sigc::mem_fun(*this, &AutomationTimeAxisView::auto_clicked));
+	hide_button.signal_clicked.connect (sigc::mem_fun(*this, &AutomationTimeAxisView::hide_clicked));
+	auto_button.signal_clicked.connect (sigc::mem_fun(*this, &AutomationTimeAxisView::auto_clicked));
 
 	controls_base_selected_name = X_("AutomationTrackControlsBaseSelected");
 	controls_base_unselected_name = X_("AutomationTrackControlsBase");
@@ -298,7 +301,7 @@ AutomationTimeAxisView::automation_state_changed ()
 
 	switch (state & (ARDOUR::Off|Play|Touch|Write)) {
 	case ARDOUR::Off:
-		auto_button.set_label (S_("Automation|Manual"));
+		auto_button.set_text (S_("Automation|Manual"));
 		if (auto_off_item) {
 			ignore_state_request = true;
 			auto_off_item->set_active (true);
@@ -309,7 +312,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	case Play:
-		auto_button.set_label (_("Play"));
+		auto_button.set_text (_("Play"));
 		if (auto_play_item) {
 			ignore_state_request = true;
 			auto_play_item->set_active (true);
@@ -320,7 +323,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	case Write:
-		auto_button.set_label (_("Write"));
+		auto_button.set_text (_("Write"));
 		if (auto_write_item) {
 			ignore_state_request = true;
 			auto_write_item->set_active (true);
@@ -331,7 +334,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	case Touch:
-		auto_button.set_label (_("Touch"));
+		auto_button.set_text (_("Touch"));
 		if (auto_touch_item) {
 			ignore_state_request = true;
 			auto_touch_item->set_active (true);
@@ -342,7 +345,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		break;
 	default:
-		auto_button.set_label (_("???"));
+		auto_button.set_text (_("???"));
 		break;
 	}
 }
