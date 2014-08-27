@@ -30,7 +30,6 @@
 #include <gdkmm/color.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/fastmeter.h>
-#include <gtkmm2ext/barcontroller.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include "pbd/fastlog.h"
 #include "pbd/stacktrace.h"
@@ -99,13 +98,14 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_display.signal_activate().connect (sigc::mem_fun (*this, &GainMeter::gain_activated));
 	gain_display.signal_focus_in_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
 	gain_display.signal_focus_out_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
-	gain_display.set_alignment(1.0);
+	gain_display.set_alignment(0.5);
 
 	peak_display.set_name ("MixerStripPeakDisplay");
 	set_size_request_to_display_given_text (peak_display, "-80.g", 2, 6); /* note the descender */
 	max_peak = minus_infinity();
 	peak_display.set_text (_("-inf"));
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
+	peak_display.set_alignment(0.5);
 
 	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
@@ -137,15 +137,6 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &GainMeterBase::on_theme_changed));
 	ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), false));
 	DPIReset.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), true));
-	
-//	PBD::ScopedConnection _config_connection;
-//	Config->ParameterChanged.connect ( _config_connection, MISSING_INVALIDATOR, boost::bind(&GainMeterBase::set_flat_buttons, this, _1), gui_context() );
-}
-
-void
-GainMeterBase::set_flat_buttons ()
-{
-//	gain_slider->set_flat_buttons( ARDOUR_UI::config()->flat_buttons.get() );
 }
 
 GainMeterBase::~GainMeterBase ()
