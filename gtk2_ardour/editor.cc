@@ -5135,8 +5135,13 @@ Editor::add_routes (RouteList& routes)
 			throw unknown_type();
 		}
 
-		new_views.push_back (rtv);
-		track_views.push_back (rtv);
+        if (rtv->is_master_track() ) {
+            new_views.push_front (rtv);
+            track_views.push_front (rtv);
+        } else {
+            new_views.push_back (rtv);
+            track_views.push_back (rtv);
+        }
 
 		rtv->effective_gain_display ();
 
