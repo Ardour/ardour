@@ -45,9 +45,6 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 	std::string                 _text;
 	int   _text_width;
 	int   _text_height;
-	double text_r;
-	double text_g;
-	double text_b;
 
 	Gtk::Adjustment& adjustment;
 
@@ -61,8 +58,9 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 	bool on_scroll_event (GdkEventScroll* ev);
 	bool on_enter_notify_event (GdkEventCrossing* ev);
 	bool on_leave_notify_event (GdkEventCrossing* ev);
-        void on_state_changed (Gtk::StateType);
-        void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
+
+	void on_state_changed (Gtk::StateType);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 
 	enum Orientation {
 		VERT,
@@ -72,52 +70,9 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
   private:
 	int span, girth;
 	int _orien;
-        cairo_pattern_t* pattern;
-
-        struct FaderImage {
-	    cairo_pattern_t* pattern;
-	    double fr;
-	    double fg;
-	    double fb;
-	    double br;
-	    double bg;
-	    double bb;
-	    int width;
-	    int height;
-
-	    FaderImage (cairo_pattern_t* p, 
-			double afr, double afg, double afb, 
-			double abr, double abg, double abb,
-			int w, int h) 
-		    : pattern (p)
-		    , fr (afr)
-		    , fg (afg)
-		    , fb (afb)
-		    , br (abr)
-		    , bg (abg)
-		    , bb (abb)
-		    , width (w)
-		    , height (h)
-	    {}
-
-	    bool matches (double afr, double afg, double afb, 
-			  double abr, double abg, double abb,
-			  int w, int h) {
-		    return width == w && 
-			    height == h &&
-			    afr == fr &&
-			    afg == fg && 
-			    afb == fb &&
-			    abr == br &&
-			    abg == bg && 
-			    abb == bb;
-	    }
-	};
-
-        static std::list<FaderImage*> _patterns;
-        static cairo_pattern_t* find_pattern (double afr, double afg, double afb, 
-					      double abr, double abg, double abb, 
-					      int w, int h);
+	
+	cairo_pattern_t* fg_gradient;
+	cairo_pattern_t* bg_gradient;
 
 	bool _hovering;
 
@@ -130,10 +85,9 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 	int unity_loc;
 
 	void adjustment_changed ();
-	int display_span ();
+	float display_span ();
 	void set_adjustment_from_event (GdkEventButton *);
 	void update_unity_position ();
-	void create_patterns();
 };
 
 

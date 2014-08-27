@@ -31,6 +31,7 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/barcontroller.h"
+#include "gtkmm2ext/cairo_widget.h"
 
 #include "i18n.h"
 
@@ -41,10 +42,10 @@ using namespace Gtkmm2ext;
 BarController::BarController (Gtk::Adjustment& adj,
 			      boost::shared_ptr<PBD::Controllable> mc)
 
-	: adjustment (adj),
-	  binding_proxy (mc),
-	  spinner (adjustment)
-
+	: adjustment (adj)
+	  , binding_proxy (mc)
+	  , _hovering (false)
+	  , spinner (adjustment)
 {			  
 	_style = LeftToRight;
 	grabbed = false;
@@ -74,6 +75,8 @@ BarController::BarController (Gtk::Adjustment& adj,
 	darea.signal_button_press_event().connect (mem_fun (*this, &BarController::button_press), false);
 	darea.signal_button_release_event().connect (mem_fun (*this, &BarController::button_release), false);
 	darea.signal_scroll_event().connect (mem_fun (*this, &BarController::scroll));
+	darea.signal_enter_notify_event().connect (mem_fun (*this, &BarController::on_enter_notify_event));
+	darea.signal_leave_notify_event().connect (mem_fun (*this, &BarController::on_leave_notify_event));
 
 	spinner.signal_activate().connect (mem_fun (*this, &BarController::entry_activated));
 	spinner.signal_focus_out_event().connect (mem_fun (*this, &BarController::entry_focus_out));
@@ -89,8 +92,24 @@ BarController::BarController (Gtk::Adjustment& adj,
 
 BarController::~BarController ()
 {
-//	delete pattern;
-//	delete shine_pattern;
+}
+
+bool
+BarController::on_enter_notify_event (GdkEventCrossing*)
+{
+	_hovering = true;
+	Keyboard::magic_widget_grab_focus ();
+	queue_draw ();
+	return false;
+}
+
+bool
+BarController::on_leave_notify_event (GdkEventCrossing*)
+{
+	_hovering = false;
+	Keyboard::magic_widget_drop_focus();
+	queue_draw ();
+	return false;
 }
 
 void
@@ -270,36 +289,34 @@ BarController::mouse_control (double x, GdkWindow* window, double scaling)
 	return TRUE;
 }
 
-void
-BarController::create_patterns ()
+Gdk::Color
+BarController::get_parent_bg ()
 {
-	Glib::RefPtr<Gdk::Window> win (darea.get_window());
-    Cairo::RefPtr<Cairo::Context> context = win->create_cairo_context();
+        Widget* parent;
 
-	Gdk::Color c = get_style()->get_fg (get_state());
-    float r, g, b;
-	r = c.get_red_p ();
-	g = c.get_green_p ();
-	b = c.get_blue_p ();
+	parent = get_parent ();
 
-	float rheight = darea.get_height()-2;
+        while (parent) {
+		static const char* has_cairo_widget_background_info = "has_cairo_widget_background_info";
+		void* p = g_object_get_data (G_OBJECT(parent->gobj()), has_cairo_widget_background_info);
 
- 	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, rheight);
-	cairo_pattern_add_color_stop_rgba (pat, 0, r*0.8,g*0.8,b*0.8, 1.0);
-	cairo_pattern_add_color_stop_rgba (pat, 1, r*0.6,g*0.6,b*0.6, 1.0);
-	Cairo::RefPtr<Cairo::Pattern> p (new Cairo::Pattern (pat, false));
-	pattern = p;
-	cairo_pattern_destroy(pat);
+		if (p) {
+			Glib::RefPtr<Gtk::Style> style = parent->get_style();
+			return style->get_bg (get_state());
+		}
+		
+		if (!parent->get_has_window()) {
+			parent = parent->get_parent();
+		} else {
+			break;
+		}
+        }
 
-	pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, rheight);
-	cairo_pattern_add_color_stop_rgba (pat, 0, 1,1,1,0.0);
-	cairo_pattern_add_color_stop_rgba (pat, 0.2, 1,1,1,0.3);
-	cairo_pattern_add_color_stop_rgba (pat, 0.5, 1,1,1,0.0);
-	cairo_pattern_add_color_stop_rgba (pat, 1, 1,1,1,0.0);
-	Cairo::RefPtr<Cairo::Pattern> p2 (new Cairo::Pattern (pat, false));
-	shine_pattern = p2;
-	cairo_pattern_destroy(pat);
+        if (parent && parent->get_has_window()) {
+		return parent->get_style ()->get_bg (parent->get_state());
+        } 
 
+	return get_style ()->get_bg (get_state());
 }
 
 bool
@@ -307,157 +324,37 @@ BarController::expose (GdkEventExpose* /*event*/)
 {
 	Glib::RefPtr<Gdk::Window> win (darea.get_window());
 	Cairo::RefPtr<Cairo::Context> context = win->create_cairo_context();
+	cairo_t* cr = context->cobj();
 
-	if( !pattern )
-		create_patterns();
+	Gdk::Color fg_col = get_style()->get_fg (get_state());
 
-	Gdk::Color c;
-	Widget* parent;
-	gint x1=0, x2=0, y2=0;
-	gint w, h;
-	double fract, radius;
-    float r, g, b;
-
-	fract = ((adjustment.get_value() - adjustment.get_lower()) /
+	double fract = ((adjustment.get_value() - adjustment.get_lower()) /
 		 (adjustment.get_upper() - adjustment.get_lower()));
 	
+	gint w = darea.get_width() ;
+	gint h = darea.get_height();
+	gint bar_start, bar_width;
+	double radius = 4;
+
 	switch (_style) {
 	case Line:
-		w = darea.get_width() - 1;
-		h = darea.get_height();
-		x1 = (gint) floor (w * fract);
-		x2 = x1;
-		y2 = h - 1;
-
-		if (use_parent) {
-			parent = get_parent();
-                        
-			if (parent) {
-                                c = parent->get_style()->get_fg (parent->get_state());
-                                r = c.get_red_p ();
-                                g = c.get_green_p ();
-                                b = c.get_blue_p ();
-                                context->set_source_rgb (r, g, b);
-                                context->rectangle (0, 0, darea.get_width(), darea.get_height());
-                                context->fill ();
-			}
-
-		} else {
-
-                        c = get_style()->get_bg (get_state());
-                        r = c.get_red_p ();
-                        g = c.get_green_p ();
-                        b = c.get_blue_p ();
-                        context->set_source_rgb (r, g, b);
-                        context->rectangle (0, 0, darea.get_width() - ((darea.get_width()+1) % 2), darea.get_height());
-                        context->fill ();
-		}
-                
-                c = get_style()->get_fg (get_state());
-                r = c.get_red_p ();
-                g = c.get_green_p ();
-                b = c.get_blue_p ();
-                context->set_source_rgb (r, g, b);
-                context->move_to (x1, 0);
-                context->line_to (x1, h);
-                context->stroke ();
+		bar_start = (gint) floor ((w-1) * fract);
+		bar_width = 1;
 		break;
 
-        case Blob:
-		w = darea.get_width() - 1;
-		h = darea.get_height();
-		x1 = (gint) floor (w * fract);
-		x2 = min (w-2,h-2);
-
-		if (use_parent) {
-			parent = get_parent();
-			
-			if (parent) {
-                                c = parent->get_style()->get_fg (parent->get_state());
-                                r = c.get_red_p ();
-                                g = c.get_green_p ();
-                                b = c.get_blue_p ();
-                                context->set_source_rgb (r, g, b);
-                                context->rectangle (0, 0, darea.get_width(), darea.get_height());
-                                context->fill ();
-			}
-
-		} else {
-
-                        c = get_style()->get_bg (get_state());
-                        r = c.get_red_p ();
-                        g = c.get_green_p ();
-                        b = c.get_blue_p ();
-                        context->set_source_rgb (r, g, b);
-                        context->rectangle (0, 0, darea.get_width() - ((darea.get_width()+1) % 2), darea.get_height());
-                        context->fill ();
-		}
-		
-                c = get_style()->get_fg (get_state());
-                r = c.get_red_p ();
-                g = c.get_green_p ();
-                b = c.get_blue_p ();
-                context->arc (x1, ((h-2)/2)-1, x2, 0, 2*M_PI);
+	case Blob:
+		// ????
 		break;
 
 	case CenterOut:
-		w = darea.get_width();
-		h = darea.get_height()-2;
-                if (use_parent) {
-                        parent = get_parent();
-                        if (parent) {
-                                c = parent->get_style()->get_fg (parent->get_state());
-                                r = c.get_red_p ();
-                                g = c.get_green_p ();
-                                b = c.get_blue_p ();
-                                context->set_source_rgb (r, g, b);
-                                context->rectangle (0, 0, darea.get_width(), darea.get_height());
-                                context->fill ();
-                        }
-                } else {
-                        c = get_style()->get_bg (get_state());
-                        r = c.get_red_p ();
-                        g = c.get_green_p ();
-                        b = c.get_blue_p ();
-                        context->set_source_rgb (r, g, b);
-                        context->rectangle (0, 0, darea.get_width(), darea.get_height());
-                        context->fill ();
-                }
-                c = get_style()->get_fg (get_state());
-                r = c.get_red_p ();
-                g = c.get_green_p ();
-                b = c.get_blue_p ();
-                x1 = (w/2) - ((w*fract)/2); // center, back up half the bar width
-                context->set_source_rgb (r, g, b);
-                context->rectangle (x1, 1, w*fract, h);
-                context->fill ();
-		break;
+        bar_width = (w*fract);
+        bar_start = (w/2) - bar_width/2; // center, back up half the bar width
+ 		break;
 
 	case LeftToRight:
+		bar_start = 1;
+		bar_width = floor((w-2)*fract);
 
-		w = darea.get_width() - 2;
-		h = darea.get_height() - 2;
-
-		x2 = (gint) floor (w * fract);
-		y2 = h;
-		radius = 4;
-		if (x2 < 8) x2 = 8;
-
-		/* border */
-
-		context->set_source_rgb (0,0,0);
-		cairo_rectangle (context->cobj(), 0, 0, darea.get_width(), darea.get_height());
-		context->fill ();
-
-		/* draw active box */
-
-		context->set_source (pattern);
-		rounded_rectangle (context, 1, 1, x2, y2, radius-1.5);
-		context->fill ();
-
-//		context->set_source (shine_pattern);
-//		rounded_rectangle (context, 2, 3, x2-2, y2-8, radius-2);
-//		context->fill ();
 		break;
 
 	case RightToLeft:
@@ -468,10 +365,85 @@ BarController::expose (GdkEventExpose* /*event*/)
 		break;
 	}
 
+	//fill in the bg rect ... 
+	Gdk::Color c = get_parent_bg(); //get_style()->get_bg (Gtk::STATE_PRELIGHT);  //why prelight?  Shouldn't we be using the parent's color?  maybe   get_parent_bg  ?
+	CairoWidget::set_source_rgb_a (cr, c);
+	cairo_rectangle (cr, 0, 0, w, h);
+	cairo_fill(cr);
+
+	//"slot"
+	cairo_set_source_rgba (cr, 0.17, 0.17, 0.17, 1.0);
+	Gtkmm2ext::rounded_rectangle (cr, 1, 1, w-2, h-2, radius-0.5);
+	cairo_fill(cr);
+
+	//mask off the corners
+	Gtkmm2ext::rounded_rectangle (cr, 1, 1, w-2, h-2, radius-0.5);
+	cairo_clip(cr);
+	
+		//background gradient
+		if ( !CairoWidget::flat_buttons() ) {
+			cairo_pattern_t *bg_gradient = cairo_pattern_create_linear (0.0, 0.0, 0, h);
+			cairo_pattern_add_color_stop_rgba (bg_gradient, 0, 0, 0, 0, 0.4);
+			cairo_pattern_add_color_stop_rgba (bg_gradient, 0.2, 0, 0, 0, 0.2);
+			cairo_pattern_add_color_stop_rgba (bg_gradient, 1, 0, 0, 0, 0.0);
+			cairo_set_source (cr, bg_gradient);
+			Gtkmm2ext::rounded_rectangle (cr, 1, 1, w-2, h-2, radius-1.5);
+			cairo_fill (cr);
+			cairo_pattern_destroy(bg_gradient);
+		}
+		
+		//fg color
+		CairoWidget::set_source_rgb_a (cr, fg_col, 1.0);
+		Gtkmm2ext::rounded_rectangle (cr, bar_start, 1, bar_width, h-2, radius - 1.5);
+		cairo_fill(cr);
+
+		//fg gradient
+		if (!CairoWidget::flat_buttons() ) {
+			cairo_pattern_t * fg_gradient = cairo_pattern_create_linear (0.0, 0.0, 0, h);
+			cairo_pattern_add_color_stop_rgba (fg_gradient, 0, 0, 0, 0, 0.0);
+			cairo_pattern_add_color_stop_rgba (fg_gradient, 0.1, 0, 0, 0, 0.0);
+			cairo_pattern_add_color_stop_rgba (fg_gradient, 1, 0, 0, 0, 0.3);
+			cairo_set_source (cr, fg_gradient);
+			Gtkmm2ext::rounded_rectangle (cr, bar_start, 1, bar_width, h-2, radius - 1.5);
+			cairo_fill (cr);
+			cairo_pattern_destroy(fg_gradient);
+		}
+		
+	cairo_reset_clip(cr);
+
+	//black border
+	cairo_set_line_width (cr, 1.0);
+	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
+	Gtkmm2ext::rounded_rectangle (cr, 0.5, 0.5, w-1, h-1, radius);
+	cairo_stroke(cr);
+
+	/* draw the unity-position line if it's not at either end*/
+/*	if (unity_loc > 0) {
+		context->set_line_width (1);
+		cairo_set_source_rgba (cr, 1,1,1, 1.0);
+		if ( _orien == VERT) {
+			if (unity_loc < h ) {
+				context->move_to (2.5, unity_loc + radius + .5);
+				context->line_to (girth-2.5, unity_loc + radius + .5);
+				context->stroke ();
+			}
+		} else {
+			if ( unity_loc < w ){
+				context->move_to (unity_loc - radius + .5, 3.5);
+				context->line_to (unity_loc - radius + .5, girth-3.5);
+				context->stroke ();
+			}
+		}
+	}*/
+	
 	if (!darea.get_sensitive()) {
 		rounded_rectangle (context, 0, 0, darea.get_width(), darea.get_height(), 3);
 		context->set_source_rgba (0.505, 0.517, 0.525, 0.6);
 		context->fill ();
+	} else if (_hovering) {
+		Gtkmm2ext::rounded_rectangle (cr, 1, 1, w-2, h-2, radius);
+		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.1);
+		cairo_fill (cr);
 	}
 
 	/* draw label */
@@ -479,7 +451,7 @@ BarController::expose (GdkEventExpose* /*event*/)
 	double xpos = -1;
 	std::string const label = get_label (xpos);
 
-	if (!label.empty()) {
+/*	if (!label.empty()) {
 		
 		layout->set_text (label);
 		
@@ -490,8 +462,8 @@ BarController::expose (GdkEventExpose* /*event*/)
 			x = max (3, 1 + (x2 - (width/2)));
 			x = min (darea.get_width() - width - 3, (int) lrint (xpos));
 		} else {
-                        x = lrint (darea.get_width() * xpos);
-                }
+			x = lrint (darea.get_width() * xpos);
+		}
 
                 c = get_style()->get_text (get_state());
                 r = c.get_red_p ();
@@ -500,7 +472,7 @@ BarController::expose (GdkEventExpose* /*event*/)
                 context->set_source_rgb (r, g, b);
                 context->move_to (x, (darea.get_height()/2) - (height/2));
                 layout->show_in_cairo_context (context);
-	}
+	}*/
 	
 	return true;
 }

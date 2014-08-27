@@ -19,7 +19,6 @@
 #include <limits.h>
 
 #include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/barcontroller.h>
 
 #include "pbd/fastlog.h"
 

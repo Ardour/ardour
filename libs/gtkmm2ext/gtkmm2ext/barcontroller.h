@@ -91,18 +91,18 @@ class LIBGTKMM2EXT_API BarController : public Gtk::Frame
 		return "";
 	}
 	
-	void create_patterns();
-	Cairo::RefPtr<Cairo::Pattern> pattern;
-	Cairo::RefPtr<Cairo::Pattern> shine_pattern;
-
 	virtual bool button_press (GdkEventButton *);
 	virtual bool button_release (GdkEventButton *);
 	virtual bool motion (GdkEventMotion *);
 	virtual bool expose (GdkEventExpose *);
 	virtual bool scroll (GdkEventScroll *);
 	virtual bool entry_focus_out (GdkEventFocus*);
+	bool on_enter_notify_event (GdkEventCrossing* ev);
+	bool on_leave_notify_event (GdkEventCrossing* ev);
 
 	gint mouse_control (double x, GdkWindow* w, double scaling);
+
+	Gdk::Color get_parent_bg ();
 
 	gint switch_to_bar ();
 	gint switch_to_spinner ();
@@ -112,6 +112,9 @@ class LIBGTKMM2EXT_API BarController : public Gtk::Frame
 	
 	int entry_input (double* new_value);
 	bool entry_output ();
+
+	bool _hovering;
+
 };
 
 
