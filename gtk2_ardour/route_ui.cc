@@ -77,9 +77,9 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 	, sends_menu(0)
 	, record_menu(0)
 	, comment_window(0)
+	, comment_area(0)
 	, input_selector (0)
 	, output_selector (0)
-	, comment_area(0)
 	, _invert_menu(0)
 {
 	if (sess) init ();
@@ -2077,7 +2077,7 @@ RouteUI::invert_release (GdkEventButton* ev, uint32_t i)
 		if (N <= _max_invert_buttons) {
 			/* left-click inverts phase so long as we have a button per channel */
 			_route->set_phase_invert (i, !_invert_buttons[i]->get_active());
-			return true;
+			return false;
 		}
 	}
 	return false;
@@ -2113,7 +2113,7 @@ RouteUI::invert_press (GdkEventButton* ev)
 
 	_invert_menu->popup (0, ev->time);
 
-	return false;
+	return true;
 }
 
 void
