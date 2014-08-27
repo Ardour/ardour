@@ -2220,7 +2220,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_narrow_ms)
 		     ));
 
-	add_option (S_("Preferences|GUI"), new OptionEditorHeading (_("Metering")));
+	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Metering")));
 
 	ComboOption<float>* mht = new ComboOption<float> (
 		"meter-hold",
@@ -2234,7 +2234,7 @@ RCOptionEditor::RCOptionEditor ()
 	mht->add (MeterHoldMedium, _("medium"));
 	mht->add (MeterHoldLong, _("long"));
 
-	add_option (S_("Preferences|GUI"), mht);
+	add_option (S_("Preferences|Metering"), mht);
 
 	ComboOption<float>* mfo = new ComboOption<float> (
 		"meter-falloff",
@@ -2253,7 +2253,7 @@ RCOptionEditor::RCOptionEditor ()
 	mfo->add (METER_FALLOFF_FASTER,   _("faster [46dB/sec]"));
 	mfo->add (METER_FALLOFF_FASTEST,  _("fastest [70dB/sec]"));
 
-	add_option (S_("Preferences|GUI"), mfo);
+	add_option (S_("Preferences|Metering"), mfo);
 
 	ComboOption<MeterLineUp>* mlu = new ComboOption<MeterLineUp> (
 		"meter-line-up-level",
@@ -2269,7 +2269,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-marks and color-knee point for dBFS scale DPM, set reference level for IEC1/Nordic, IEC2 PPM and VU meter."));
 
-	add_option (S_("Preferences|GUI"), mlu);
+	add_option (S_("Preferences|Metering"), mlu);
 
 	ComboOption<MeterLineUp>* mld = new ComboOption<MeterLineUp> (
 		"meter-line-up-din",
@@ -2285,7 +2285,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	Gtkmm2ext::UI::instance()->set_tip (mld->tip_widget(), _("Reference level for IEC1/DIN meter."));
 
-	add_option (S_("Preferences|GUI"), mld);
+	add_option (S_("Preferences|Metering"), mld);
 
 	ComboOption<VUMeterStandard>* mvu = new ComboOption<VUMeterStandard> (
 		"meter-vu-standard",
@@ -2299,7 +2299,7 @@ RCOptionEditor::RCOptionEditor ()
 	mvu->add (MeteringVUstandard, _("0VU = +4dBu (standard)"));
 	mvu->add (MeteringVUeight,    _("0VU = +8dBu"));
 
-	add_option (S_("Preferences|GUI"), mvu);
+	add_option (S_("Preferences|Metering"), mvu);
 
 	Gtk::Adjustment *mpk = manage (new Gtk::Adjustment(0, -10, 0, .1, .1));
 	HSliderOption *mpks = new HSliderOption("meter-peak",
@@ -2313,9 +2313,9 @@ RCOptionEditor::RCOptionEditor ()
 		(mpks->tip_widget(),
 		 _("Specify the audio signal level in dbFS at and above which the meter-peak indicator will flash red."));
 
-	add_option (S_("Preferences|GUI"), mpks);
+	add_option (S_("Preferences|Metering"), mpks);
 
-	add_option (S_("Preferences|GUI"),
+	add_option (S_("Preferences|Metering"),
 	     new BoolOption (
 		     "meter-style-led",
 		     _("LED meter style"),
