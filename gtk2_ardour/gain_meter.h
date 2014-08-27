@@ -58,7 +58,6 @@ namespace ARDOUR {
 }
 namespace Gtkmm2ext {
 	class FastMeter;
-	class BarController;
 }
 namespace Gtk {
 	class Menu;
@@ -81,8 +80,6 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	void set_width (Width, int len=0);
 	void set_meter_strip_name (const char * name);
 	void set_fader_name (const char * name);
-
-	void set_flat_buttons ();
 
 	virtual void setup_meters (int len=0);
 	virtual void set_type (ARDOUR::MeterType);
