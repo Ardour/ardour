@@ -613,6 +613,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (
 		size_t, std::string const &, uint32_t, bool destructive);
+	boost::shared_ptr<AudioFileSource> create_replicated_audio_source (boost::shared_ptr<AudioFileSource> original, const std::string& replication_parent_folder);
 
 	boost::shared_ptr<MidiSource> create_midi_source_for_session (std::string const &);
 	boost::shared_ptr<MidiSource> create_midi_source_by_stealing_name (boost::shared_ptr<Track>);

@@ -63,7 +63,7 @@ string Diskstream::_replication_path;
 
 PBD::Signal0<void>                Diskstream::DiskOverrun;
 PBD::Signal0<void>                Diskstream::DiskUnderrun;
-PBD::Signal0<void>                Diskstream::ReplicationPathChange;
+PBD::Signal0<int>                 Diskstream::ReplicationPathChange;
 
 Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
 	: SessionObject(sess, name)
@@ -753,6 +753,9 @@ void
 Diskstream::set_replication_path (const std::string& path)
 {
         _replication_path = path;
-        ReplicationPathChange (); /* EMIT SIGNAL */
+
+        if (ReplicationPathChange ()) { /* EMIT SIGNAL */
+                // error 
+        }
 }
 

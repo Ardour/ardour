@@ -175,6 +175,7 @@ class LIBARDOUR_API AudioDiskstream : public Diskstream
 		Sample     *speed_buffer;
 
 		boost::shared_ptr<AudioFileSource> write_source;
+		boost::shared_ptr<AudioFileSource> replication_source;
 
 		/** Information about the Port that our audio data comes from */
 		ChannelSource source;
@@ -262,7 +263,7 @@ class LIBARDOUR_API AudioDiskstream : public Diskstream
 
 	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
 	int remove_channel_from (boost::shared_ptr<ChannelList>, uint32_t how_many);
-        void reset_replication_sources ();
+        int reset_replication_sources ();
 };
 
 } // namespace ARDOUR

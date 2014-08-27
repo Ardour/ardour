@@ -183,7 +183,7 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 
 	static PBD::Signal0<void>     DiskOverrun;
 	static PBD::Signal0<void>     DiskUnderrun;
-	static PBD::Signal0<void>     ReplicationPathChange;
+	static PBD::Signal0<int>      ReplicationPathChange;
 
   protected:
 	friend class Session;
@@ -339,7 +339,7 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 
 	void route_going_away ();
 
-        virtual void reset_replication_sources () = 0;
+        virtual int reset_replication_sources () = 0;
 };
 
 }; /* namespace ARDOUR */

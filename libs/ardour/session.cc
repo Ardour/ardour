@@ -4120,6 +4120,40 @@ Session::create_audio_source_for_session (size_t n_chans, string const & base, u
 	}
 }
 
+/** Create a new within-session audio source */
+boost::shared_ptr<AudioFileSource>
+Session::create_replicated_audio_source (boost::shared_ptr<AudioFileSource> original, const std::string& replication_parent_folder)
+{
+        if (!Glib::file_test (replication_parent_folder.c_str(), Glib::FileTest (G_FILE_TEST_EXISTS|G_FILE_TEST_IS_DIR))) {
+                throw failed_constructor ();
+        }
+
+        string session_dirname = Glib::path_get_basename (_path);
+        
+        vector<string> v;
+        v.push_back (replication_parent_folder);
+        v.push_back (session_dirname);
+        v.push_back (X_("audio"));
+
+        string repdir = Glib::build_filename (v);
+        
+        if (!Glib::file_test (repdir.c_str(), Glib::FileTest (G_FILE_TEST_EXISTS|G_FILE_TEST_IS_DIR))) {
+                if (g_mkdir_with_parents (repdir.c_str(), 0755) < 0) {
+                        throw failed_constructor ();
+                }
+        }
+        
+        string file = Glib::path_get_basename (original->path());
+        string path = Glib::build_filename (repdir, file);
+
+        if (!path.empty()) {
+		return boost::dynamic_pointer_cast<AudioFileSource> (
+			SourceFactory::createWritable (DataType::AUDIO, *this, path, false, frame_rate()));
+	} else {
+		throw failed_constructor ();
+	}
+}
+
 /** Create a new within-session MIDI source */
 boost::shared_ptr<MidiSource>
 Session::create_midi_source_for_session (string const & basic_name)

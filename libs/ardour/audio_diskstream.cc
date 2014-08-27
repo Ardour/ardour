@@ -1932,6 +1932,8 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 
 	chan->write_source->set_allow_remove_if_empty (!destructive());
 
+        reset_replication_sources ();
+
 	return 0;
 }
 
@@ -2499,8 +2501,23 @@ AudioDiskstream::set_write_source_name (const std::string& str) {
 	return true;
 }
 
-void
+int
 AudioDiskstream::reset_replication_sources ()
 {
-
+        RCUWriter<ChannelList> writer (channels);
+        boost::shared_ptr<ChannelList> c = writer.get_copy();
+        
+        try {
+                for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+                        if (!_replication_path.empty()) {
+                                // (*chan)->replication_source = session.create_replicated_audio_source ((*c)->write_source, _replication_path);
+                        } else {
+                                (*chan)->replication_source.reset ();
+                        }
+                }
+                return 0;
+        } catch (...) {
+                error << string_compose (_("%1: cannot create replication sources @ %2"), _name, _replication_path) << endmsg;
+                return -1;
+        }
 }
