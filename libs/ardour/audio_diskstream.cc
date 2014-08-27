@@ -1363,6 +1363,9 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 					// by definition, the first data we got above represents the given capture pos
 
 					(*chan)->write_source->mark_capture_start (captrans.capture_val);
+                                        if ((*chan)->replication_source) {
+                                                (*chan)->replication_source->mark_capture_start (captrans.capture_val);
+                                        }
 					(*chan)->curr_capture_cnt = 0;
 
 				} else if (captrans.type == CaptureEnd) {
@@ -1379,7 +1382,10 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 						}
 						to_write = nto_write;
 
-						(*chan)->write_source->mark_capture_end ();
+                                                (*chan)->write_source->mark_capture_end ();
+                                                if ((*chan)->replication_source) {
+                                                        (*chan)->replication_source->mark_capture_end ();
+                                                }
 
 						// increment past this transition, but go no further
 						++ti;
@@ -1403,6 +1409,12 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 			return -1;
 		}
 
+		if ((*chan)->replication_source && (*chan)->replication_source->write (vector.buf[0], to_write) != to_write) {
+			error << string_compose(_("AudioDiskstream %1: cannot write replicated data to disk"), id()) << endmsg;
+                        /* leave the file on disk, but forget about for now */
+			(*chan)->replication_source.reset ();
+		}
+
 		(*chan)->capture_buf->increment_read_ptr (to_write);
 		(*chan)->curr_capture_cnt += to_write;
 
@@ -1417,6 +1429,11 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 
 			if ((*chan)->write_source->write (vector.buf[1], to_write) != to_write) {
 				error << string_compose(_("AudioDiskstream %1: cannot write to disk"), id()) << endmsg;
+				return -1;
+			}
+
+			if ((*chan)->replication_source && (*chan)->replication_source->write (vector.buf[1], to_write) != to_write) {
+				error << string_compose(_("AudioDiskstream %1: cannot replicated data write to disk"), id()) << endmsg;
 				return -1;
 			}
 
@@ -1486,6 +1503,13 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 				(*chan)->write_source.reset ();
 			}
 
+			if ((*chan)->replication_source) {
+
+				(*chan)->replication_source->mark_for_remove ();
+				(*chan)->replication_source->drop_references ();
+				(*chan)->replication_source.reset ();
+			}
+
 			/* new source set up in "out" below */
 		}
 
@@ -1512,6 +1536,14 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 				Analyser::queue_source_for_analysis (s, true);
 			}
 		}
+
+		s = (*chan)->replication_source;
+
+		if (s) {
+			s->update_header (capture_info.front()->start, when, twhen);
+			s->set_captured_for (_name.val());
+			s->mark_immutable ();
+                }
 	}
 
 	/* destructive tracks have a single, never changing region */
@@ -1776,12 +1808,18 @@ AudioDiskstream::prep_record_enable ()
 			(*chan)->source.request_input_monitoring (!(_session.config.get_auto_input() && rolling));
 			capturing_sources.push_back ((*chan)->write_source);
 			(*chan)->write_source->mark_streaming_write_started ();
+                        if ((*chan)->replication_source) {
+                                (*chan)->replication_source->mark_streaming_write_started();
+                        }
 		}
 
 	} else {
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 			capturing_sources.push_back ((*chan)->write_source);
 			(*chan)->write_source->mark_streaming_write_started ();
+                        if ((*chan)->replication_source) {
+                                (*chan)->replication_source->mark_streaming_write_started();
+                        }
 		}
 	}
 
@@ -1937,14 +1975,13 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 	catch (failed_constructor &err) {
 		error << string_compose (_("%1:%2 new capture file not initialized correctly"), _name, n) << endmsg;
 		chan->write_source.reset ();
+                chan->replication_source.reset ();
 		return -1;
 	}
 
 	/* do not remove destructive files even if they are empty */
 
 	chan->write_source->set_allow_remove_if_empty (!destructive());
-
-        reset_replication_sources ();
 
 	return 0;
 }
@@ -1971,7 +2008,11 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 				if (mark_write_complete) {
 					(*chan)->write_source->mark_streaming_write_completed ();
 					(*chan)->write_source->done_with_peakfile_writes ();
-				}
+
+                                        if ((*chan)->replication_source) {
+                                                (*chan)->replication_source->mark_streaming_write_completed ();
+                                        }
+                                }
 
 				if ((*chan)->write_source->removable()) {
 					(*chan)->write_source->mark_for_remove ();
@@ -1979,8 +2020,9 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 				}
 
 				(*chan)->write_source.reset ();
+				(*chan)->replication_source.reset ();
 			}
-
+                        
 			use_new_write_source (n);
 
 			if (record_enabled()) {
@@ -2491,6 +2533,8 @@ AudioDiskstream::set_name (string const & name)
 		use_new_write_source (n);
 	}
 
+        reset_replication_sources ();
+
 	return true;
 }
 
@@ -2512,6 +2556,9 @@ AudioDiskstream::set_write_source_name (const std::string& str) {
 	for (n = 0, i = c->begin(); i != c->end(); ++i, ++n) {
 		use_new_write_source (n);
 	}
+
+        reset_replication_sources ();
+
 	return true;
 }
 
@@ -2532,10 +2579,8 @@ AudioDiskstream::reset_replication_sources ()
 
                         if (!replication_path.empty()) {
                                 (*chan)->replication_source = _session.create_replicated_audio_source ((*chan)->write_source, replication_path);
-                                cerr << "replication source: " << (*chan)->replication_source->path() << endl;
                         } else {
                                 (*chan)->replication_source.reset ();
-                                cerr << "no replication path\n";
                         }
                 }
                 return 0;
