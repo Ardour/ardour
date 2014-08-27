@@ -2498,3 +2498,9 @@ AudioDiskstream::set_write_source_name (const std::string& str) {
 	}
 	return true;
 }
+
+void
+AudioDiskstream::reset_replication_sources ()
+{
+
+}

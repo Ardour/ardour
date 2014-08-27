@@ -59,9 +59,11 @@ using namespace PBD;
  * allocating buffer sizes..
  */
 ARDOUR::framecnt_t Diskstream::disk_io_chunk_frames = 1024 * 256 / sizeof (Sample);
+string Diskstream::_replication_path;
 
 PBD::Signal0<void>                Diskstream::DiskOverrun;
 PBD::Signal0<void>                Diskstream::DiskUnderrun;
+PBD::Signal0<void>                Diskstream::ReplicationPathChange;
 
 Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
 	: SessionObject(sess, name)
@@ -99,6 +101,7 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
         , _flags (flag)
         , deprecated_io_node (0)
 {
+        ReplicationPathChange.connect_same_thread (*this,  boost::bind (&Diskstream::reset_replication_sources, this));
 }
 
 Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
@@ -137,6 +140,7 @@ Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
         , _flags (Recordable)
         , deprecated_io_node (0)
 {
+        ReplicationPathChange.connect_same_thread (*this,  boost::bind (&Diskstream::reset_replication_sources, this));
 }
 
 Diskstream::~Diskstream ()
@@ -744,3 +748,11 @@ Diskstream::disengage_record_enable ()
 {
 	g_atomic_int_set (&_record_enabled, 0);
 }
+
+void
+Diskstream::set_replication_path (const std::string& path)
+{
+        _replication_path = path;
+        ReplicationPathChange (); /* EMIT SIGNAL */
+}
+

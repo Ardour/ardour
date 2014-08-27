@@ -72,6 +72,8 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	virtual bool set_name (const std::string& str);
 	virtual bool set_write_source_name (const std::string& str);
 
+        static void set_replication_path (const std::string& str);
+
 	std::string write_source_name () const {
 		if (_write_source_name.empty()) {
 			return name();
@@ -181,6 +183,7 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 
 	static PBD::Signal0<void>     DiskOverrun;
 	static PBD::Signal0<void>     DiskUnderrun;
+	static PBD::Signal0<void>     ReplicationPathChange;
 
   protected:
 	friend class Session;
@@ -314,7 +317,7 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 
 	double        _speed;
 	double        _target_speed;
-
+        
 	/** The next frame position that we should be reading from in our playlist */
 	framepos_t     file_frame;
 	framepos_t     playback_sample;
@@ -322,6 +325,8 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	bool          in_set_state;
 
 	std::string   _write_source_name;
+
+        static std::string   _replication_path;
 
 	Glib::Threads::Mutex state_lock;
 
@@ -333,6 +338,8 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	XMLNode* deprecated_io_node;
 
 	void route_going_away ();
+
+        virtual void reset_replication_sources () = 0;
 };
 
 }; /* namespace ARDOUR */

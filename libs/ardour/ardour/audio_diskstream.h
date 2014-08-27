@@ -262,7 +262,7 @@ class LIBARDOUR_API AudioDiskstream : public Diskstream
 
 	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
 	int remove_channel_from (boost::shared_ptr<ChannelList>, uint32_t how_many);
-
+        void reset_replication_sources ();
 };
 
 } // namespace ARDOUR
