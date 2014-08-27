@@ -253,7 +253,6 @@
         </VBox>
         <HBox visible="false"
               noshowall="true">
->>>>>>> master
           <Button id="show_sends_button"/>
           <Button id="monitor_disk_button"/>
           <Button id="comment_button"/>

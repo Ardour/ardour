@@ -3,7 +3,6 @@
 <RouteUI bgnormal="#383838" bgactive="#545454">
 <Vbox>
 <EventBox id="upper_drop_indicator" visible="false" noshowall="true" height="2" bgnormal="#1CA3B3" bgactive="#1CA3B3"/>
->>>>>>> master
   <HBox>
     <VBox>
       <EventBox height="1" bgnormal="#494949" bgactive="#494949"/>
