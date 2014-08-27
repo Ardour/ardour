@@ -745,3 +745,33 @@ Diskstream::disengage_record_enable ()
 	g_atomic_int_set (&_record_enabled, 0);
 }
 
+std::string
+Diskstream::own_replication_path () const
+{
+        return _own_replication_path;
+}
+
+std::string
+Diskstream::replication_path () const
+{
+        if (!Config->get_global_replication()) {
+                return string ();
+        }
+
+        if (!_own_replication_path.empty()) {
+                return _own_replication_path;
+        } 
+
+        return Config->get_global_replication_path ();
+}
+
+int
+Diskstream::set_own_replication_path (const std::string& path)
+{
+        if (_own_replication_path != path) {
+                _own_replication_path = path;
+                return reset_replication_sources ();
+        }
+
+        return 0;
+}

@@ -82,6 +82,10 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 
 	virtual std::string steal_write_source_name () { return std::string(); }
 
+        std::string replication_path () const;
+        std::string own_replication_path () const;
+        int set_own_replication_path (const std::string&);
+
 	boost::shared_ptr<ARDOUR::IO> io() const { return _io; }
 	void set_track (ARDOUR::Track *);
 
@@ -333,6 +337,9 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	XMLNode* deprecated_io_node;
 
 	void route_going_away ();
+        
+        std::string _own_replication_path;
+        virtual int reset_replication_sources () { return 0; }
 };
 
 }; /* namespace ARDOUR */

@@ -33,6 +33,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/enumwriter.h"
 #include "pbd/stateful_diff_command.h"
+#include "pbd/strsplit.h"
 
 #include "ardour/analyser.h"
 #include "ardour/audio_buffer.h"
@@ -132,7 +133,7 @@ AudioDiskstream::~AudioDiskstream ()
 void
 AudioDiskstream::config_parameter_changed (const std::string& what)
 {
-        if (what == "replication-parent-folder") {
+        if (what == "global-replication-path" || what == "global-replication") {
                 reset_replication_sources ();
         }
 }
@@ -170,7 +171,7 @@ AudioDiskstream::non_realtime_input_change ()
 		}
 
 		boost::shared_ptr<ChannelList> cr = channels.reader();
-		if (!cr->empty() && !cr->front()->write_source) {
+		if (!cr->empty() && cr->front()->write_sources.empty()) {
 			need_write_sources = true;
 		}
 
@@ -335,7 +336,7 @@ AudioDiskstream::setup_destructive_playlist ()
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-		srcs.push_back ((*chan)->write_source);
+		srcs.push_back ((*chan)->write_sources.front());
 	}
 
 	/* a single full-sized region */
@@ -381,14 +382,16 @@ AudioDiskstream::use_destructive_playlist ()
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
+        (*chan)->write_sources.clear ();
+
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
-		(*chan)->write_source = boost::dynamic_pointer_cast<AudioFileSource>(region->source (n));
-		assert((*chan)->write_source);
-		(*chan)->write_source->set_allow_remove_if_empty (false);
+		(*chan)->write_sources.push_back(boost::dynamic_pointer_cast<AudioFileSource>(region->source (n)));
+		assert (!(*chan)->write_sources.empty());
+		(*chan)->write_sources.front()->set_allow_remove_if_empty (false);
 
 		/* this might be false if we switched modes, so force it */
 
-		(*chan)->write_source->set_destructive (true);
+		(*chan)->write_sources.front()->set_destructive (true);
 	}
 
 	/* the source list will never be reset for a destructive track */
@@ -1362,9 +1365,9 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 				if (captrans.type == CaptureStart) {
 					// by definition, the first data we got above represents the given capture pos
 
-					(*chan)->write_source->mark_capture_start (captrans.capture_val);
-                                        if ((*chan)->replication_source) {
-                                                (*chan)->replication_source->mark_capture_start (captrans.capture_val);
+
+                                        for (ChannelInfo::Sources::iterator s = (*chan)->write_sources.begin(); s != (*chan)->write_sources.end(); ++s) {
+                                                (*s)->mark_capture_start (captrans.capture_val);
                                         }
 					(*chan)->curr_capture_cnt = 0;
 
@@ -1382,9 +1385,8 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 						}
 						to_write = nto_write;
 
-                                                (*chan)->write_source->mark_capture_end ();
-                                                if ((*chan)->replication_source) {
-                                                        (*chan)->replication_source->mark_capture_end ();
+                                                for (ChannelInfo::Sources::iterator s = (*chan)->write_sources.begin(); s != (*chan)->write_sources.end(); ++s) {
+                                                        (*s)->mark_capture_end ();
                                                 }
 
 						// increment past this transition, but go no further
@@ -1404,16 +1406,15 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 			}
 		}
 
-		if ((!(*chan)->write_source) || (*chan)->write_source->write (vector.buf[0], to_write) != to_write) {
-			error << string_compose(_("AudioDiskstream %1: cannot write to disk"), id()) << endmsg;
-			return -1;
-		}
-
-		if ((*chan)->replication_source && (*chan)->replication_source->write (vector.buf[0], to_write) != to_write) {
-			error << string_compose(_("AudioDiskstream %1: cannot write replicated data to disk"), id()) << endmsg;
-                        /* leave the file on disk, but forget about for now */
-			(*chan)->replication_source.reset ();
-		}
+                if (!(*chan)->write_sources.empty()) {
+                        for (ChannelInfo::Sources::iterator s = (*chan)->write_sources.begin(); s != (*chan)->write_sources.end(); ++s) {
+                                
+                                if ((*s)->write (vector.buf[0], to_write) != to_write) {
+                                        error << string_compose(_("AudioDiskstream %1: cannot write to disk @ %2"), id(), (*s)->path()) << endmsg;
+                                        return -1;
+                                }
+                        }
+                }
 
 		(*chan)->capture_buf->increment_read_ptr (to_write);
 		(*chan)->curr_capture_cnt += to_write;
@@ -1427,15 +1428,12 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 
 			to_write = min ((framecnt_t)(disk_io_chunk_frames - to_write), (framecnt_t) vector.len[1]);
 
-			if ((*chan)->write_source->write (vector.buf[1], to_write) != to_write) {
-				error << string_compose(_("AudioDiskstream %1: cannot write to disk"), id()) << endmsg;
-				return -1;
-			}
-
-			if ((*chan)->replication_source && (*chan)->replication_source->write (vector.buf[1], to_write) != to_write) {
-				error << string_compose(_("AudioDiskstream %1: cannot replicated data write to disk"), id()) << endmsg;
-				return -1;
-			}
+                        for (ChannelInfo::Sources::iterator s = (*chan)->write_sources.begin(); s != (*chan)->write_sources.end(); ++s) {
+                                if ((*s)->write (vector.buf[1], to_write) != to_write) {
+                                        error << string_compose(_("AudioDiskstream %1: cannot write to disk @ %2"), id(), (*s)->path()) << endmsg;
+                                        return -1;
+                                }
+                        }
 
 			(*chan)->capture_buf->increment_read_ptr (to_write);
 			(*chan)->curr_capture_cnt += to_write;
@@ -1496,18 +1494,10 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 
-			if ((*chan)->write_source) {
-
-				(*chan)->write_source->mark_for_remove ();
-				(*chan)->write_source->drop_references ();
-				(*chan)->write_source.reset ();
-			}
-
-			if ((*chan)->replication_source) {
-
-				(*chan)->replication_source->mark_for_remove ();
-				(*chan)->replication_source->drop_references ();
-				(*chan)->replication_source.reset ();
+                        for (ChannelInfo::Sources::iterator s = (*chan)->write_sources.begin(); s != (*chan)->write_sources.end(); ++s) {
+				(*s)->mark_for_remove ();
+				(*s)->drop_references ();
+				(*s).reset (); /* clear shared ptr */
 			}
 
 			/* new source set up in "out" below */
@@ -1524,26 +1514,19 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
-		boost::shared_ptr<AudioFileSource> s = (*chan)->write_source;
+                if (!(*chan)->write_sources.empty()) {
+                        ChannelInfo::Sources::iterator s = (*chan)->write_sources.begin();
 
-		if (s) {
-			srcs.push_back (s);
-			s->update_header (capture_info.front()->start, when, twhen);
-			s->set_captured_for (_name.val());
-			s->mark_immutable ();
+			srcs.push_back (*s);
+			(*s)->update_header (capture_info.front()->start, when, twhen);
+			(*s)->set_captured_for (_name.val());
+			(*s)->mark_immutable ();
 
-			if (Config->get_auto_analyse_audio()) {
-				Analyser::queue_source_for_analysis (s, true);
+			if (s == (*chan)->write_sources.begin() && Config->get_auto_analyse_audio()) {
+                                /* queue only 1 replicated source for analysis */
+				Analyser::queue_source_for_analysis (*s, true);
 			}
 		}
-
-		s = (*chan)->replication_source;
-
-		if (s) {
-			s->update_header (capture_info.front()->start, when, twhen);
-			s->set_captured_for (_name.val());
-			s->mark_immutable ();
-                }
 	}
 
 	/* destructive tracks have a single, never changing region */
@@ -1561,7 +1544,8 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 	} else {
 
 		string whole_file_region_name;
-		whole_file_region_name = region_name_from_path (c->front()->write_source->name(), true);
+                boost::shared_ptr<AudioFileSource> src = c->front()->write_sources.front();
+		whole_file_region_name = region_name_from_path (src->name(), true);
 
 		/* Register a new region with the Session that
 		   describes the entire source. Do this first
@@ -1572,7 +1556,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 		try {
 			PropertyList plist;
 
-			plist.add (Properties::start, c->front()->write_source->last_capture_start_frame());
+			plist.add (Properties::start, src->last_capture_start_frame());
 			plist.add (Properties::length, total_capture);
 			plist.add (Properties::name, whole_file_region_name);
 			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
@@ -1597,7 +1581,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 		_playlist->set_capture_insertion_in_progress (true);
 		_playlist->freeze ();
 
-		for (buffer_position = c->front()->write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+		for (buffer_position = src->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 
 			string region_name;
 
@@ -1806,19 +1790,17 @@ AudioDiskstream::prep_record_enable ()
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 			(*chan)->source.request_input_monitoring (!(_session.config.get_auto_input() && rolling));
-			capturing_sources.push_back ((*chan)->write_source);
-			(*chan)->write_source->mark_streaming_write_started ();
-                        if ((*chan)->replication_source) {
-                                (*chan)->replication_source->mark_streaming_write_started();
+			capturing_sources.push_back ((*chan)->write_sources.front());
+                        for (ChannelInfo::Sources::iterator s = (*chan)->write_sources.begin(); s != (*chan)->write_sources.end(); ++s) {
+                                (*s)->mark_streaming_write_started ();
                         }
 		}
 
 	} else {
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-			capturing_sources.push_back ((*chan)->write_source);
-			(*chan)->write_source->mark_streaming_write_started ();
-                        if ((*chan)->replication_source) {
-                                (*chan)->replication_source->mark_streaming_write_started();
+			capturing_sources.push_back ((*chan)->write_sources.front());
+                        for (ChannelInfo::Sources::iterator s = (*chan)->write_sources.begin(); s != (*chan)->write_sources.end(); ++s) {
+                                (*s)->mark_streaming_write_started ();
                         }
 		}
 	}
@@ -1964,24 +1946,29 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 	}
 
 	ChannelInfo* chan = (*c)[n];
+        boost::shared_ptr<AudioFileSource> src;
+
+        chan->write_sources.clear ();
 
 	try {
-		if ((chan->write_source = _session.create_audio_source_for_session (
-			     n_channels().n_audio(), write_source_name(), n, destructive())) == 0) {
-			throw failed_constructor();
-		}
+		if ((src = _session.create_audio_source_for_session (
+                             n_channels().n_audio(), write_source_name(), n, destructive())) == 0) {
+                        throw failed_constructor();
+                }
+                chan->write_sources.push_back (src);
 	}
 
 	catch (failed_constructor &err) {
 		error << string_compose (_("%1:%2 new capture file not initialized correctly"), _name, n) << endmsg;
-		chan->write_source.reset ();
-                chan->replication_source.reset ();
+		chan->write_sources.clear ();
 		return -1;
 	}
 
 	/* do not remove destructive files even if they are empty */
 
-	chan->write_source->set_allow_remove_if_empty (!destructive());
+        for (ChannelInfo::Sources::iterator s = chan->write_sources.begin(); s != chan->write_sources.end(); ++s) {
+                (*s)->set_allow_remove_if_empty (!destructive());
+        }
 
 	return 0;
 }
@@ -2003,35 +1990,30 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 
 		if (!destructive()) {
 
-			if ((*chan)->write_source) {
+                        for (ChannelInfo::Sources::iterator s = (*chan)->write_sources.begin(); s != (*chan)->write_sources.end(); ++s) {
 
 				if (mark_write_complete) {
-					(*chan)->write_source->mark_streaming_write_completed ();
-					(*chan)->write_source->done_with_peakfile_writes ();
-
-                                        if ((*chan)->replication_source) {
-                                                (*chan)->replication_source->mark_streaming_write_completed ();
-                                        }
+					(*s)->mark_streaming_write_completed ();
+					(*s)->done_with_peakfile_writes ();
                                 }
 
-				if ((*chan)->write_source->removable()) {
-					(*chan)->write_source->mark_for_remove ();
-					(*chan)->write_source->drop_references ();
+				if ((*s)->removable()) {
+					(*s)->mark_for_remove ();
+					(*s)->drop_references ();
 				}
-
-				(*chan)->write_source.reset ();
-				(*chan)->replication_source.reset ();
 			}
+
+                        (*chan)->write_sources.clear ();
                         
 			use_new_write_source (n);
 
 			if (record_enabled()) {
-				capturing_sources.push_back ((*chan)->write_source);
+				capturing_sources.push_back ((*chan)->write_sources.front());
 			}
 
 		} else {
 
-			if ((*chan)->write_source == 0) {
+			if ((*chan)->write_sources.empty()) {
 				use_new_write_source (n);
 			}
 		}
@@ -2493,7 +2475,7 @@ AudioDiskstream::ChannelInfo::resize_capture (framecnt_t capture_bufsize)
 
 AudioDiskstream::ChannelInfo::~ChannelInfo ()
 {
-	write_source.reset ();
+        write_sources.clear ();
 
 	delete [] speed_buffer;
 	speed_buffer = 0;
@@ -2539,7 +2521,8 @@ AudioDiskstream::set_name (string const & name)
 }
 
 bool
-AudioDiskstream::set_write_source_name (const std::string& str) {
+AudioDiskstream::set_write_source_name (const std::string& str) 
+{
 	if (_write_source_name == str) {
 		return true;
 	}
@@ -2568,24 +2551,42 @@ AudioDiskstream::reset_replication_sources ()
         RCUWriter<ChannelList> writer (channels);
         boost::shared_ptr<ChannelList> c = writer.get_copy();
 
-        string replication_path = Config->get_replication_parent_folder();
+        string rpath = replication_path ();
+
+        for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+                /* remove all but the first write source */ 
+
+                /* XXX note conceptual dependency on mono recording */
+                
+                while  ((*chan)->write_sources.size() > 1) {
+                        (*chan)->write_sources.pop_back ();
+                }
+        }
+
+        if (rpath.empty()) {
+                /* Not doing replication or no path set */
+                return 0;
+        }
+
+        vector<string> rdirs;
+        split (rpath, rdirs, ':');
 
         try {
                 for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 
-                        if (!(*chan)->write_source) {
+                        if ((*chan)->write_sources.empty()) {
                                 continue;
                         }
-
-                        if (!replication_path.empty()) {
-                                (*chan)->replication_source = _session.create_replicated_audio_source ((*chan)->write_source, replication_path);
-                        } else {
-                                (*chan)->replication_source.reset ();
+                        
+                        for (vector<string>::iterator rd = rdirs.begin(); rd != rdirs.end(); ++rd) {
+                                (*chan)->write_sources.push_back (_session.create_replicated_audio_source ((*chan)->write_sources.front(), *rd));
                         }
                 }
+
                 return 0;
+
         } catch (...) {
-                error << string_compose (_("%1: cannot create replication sources @ %2"), _name, replication_path) << endmsg;
+                error << string_compose (_("%1: cannot create replication sources along %2"), _name, rpath) << endmsg;
                 return -1;
         }
 }

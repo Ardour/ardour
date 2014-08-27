@@ -99,8 +99,9 @@ class LIBARDOUR_API AudioDiskstream : public Diskstream
 
 	boost::shared_ptr<AudioFileSource> write_source (uint32_t n=0) {
 		boost::shared_ptr<ChannelList> c = channels.reader();
-		if (n < c->size())
-			return (*c)[n]->write_source;
+		if (n < c->size()) {
+			return (*c)[n]->write_sources.front();
+                }
 		return boost::shared_ptr<AudioFileSource>();
 	}
 
@@ -174,8 +175,8 @@ class LIBARDOUR_API AudioDiskstream : public Diskstream
 		Sample     *capture_wrap_buffer;
 		Sample     *speed_buffer;
 
-		boost::shared_ptr<AudioFileSource> write_source;
-		boost::shared_ptr<AudioFileSource> replication_source;
+                typedef std::vector<boost::shared_ptr<AudioFileSource> > Sources;
+                Sources write_sources;
 
 		/** Information about the Port that our audio data comes from */
 		ChannelSource source;
