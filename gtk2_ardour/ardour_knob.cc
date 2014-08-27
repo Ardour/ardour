@@ -95,7 +95,7 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 	
 	bool arc = (_elements & Arc)==Arc;
 	bool bevel = (_elements & Bevel)==Bevel;
-	bool flat = ARDOUR_UI::config()->get_flat_buttons();
+	bool flat = _flat_buttons;
 	
 	if ( arc ) {
 		center_radius = scale*0.30;
