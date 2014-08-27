@@ -60,8 +60,8 @@
                       height="24"
                       fgnormal="#ffffff"
                       fgactive="#ffffff"
-                      winfont="Arial 10"
-                      macfont="Helvetica 10"/>
+                      winfont="Arial 8"
+                      macfont="Helvetica 8"/>
               <EventBox bgnormal="#000000"
                         bgactive="#000000"
                         height="1"/>

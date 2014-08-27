@@ -125,26 +125,49 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, const std::string& layout_s
 	}
 }
 
-string cut_string(const string& route_name, size_t max_name_size)
-{
-    if ( max_name_size == 0 )
-        return route_name;
-    
-    string cutted_route_name;  
-    
-    if ( route_name.size()<=max_name_size )
+namespace {
+    bool is_vowel_letter(char letter)
     {
-        cutted_route_name = route_name;
-    }
-    else
-    {
-        cutted_route_name.assign(route_name, 0, max_name_size-3);
-        cutted_route_name += "...";
+        if( letter=='a' || letter=='e' || letter=='i' || letter=='o' ||
+            letter=='q' || letter=='u' || letter=='y')
+            return true;
+        return false;
     }
     
-    return cutted_route_name;
+    string cut_string(string route_name, size_t max_name_size)
+    {
+        if ( max_name_size == 0 )
+            return route_name;
+        
+        string cutted_route_name;  
+        
+        if ( route_name.size()<=max_name_size )
+        {
+            cutted_route_name = route_name;
+        }
+        else
+        {
+            // first step: delete vowel letters
+            int i = route_name.size()-1; // iterator
+            while( i >= 0 && route_name.size() > max_name_size )
+            {
+                if( is_vowel_letter( route_name[i] ) )
+                    route_name.erase(i, 1);
+                else
+                    --i;
+            }
+            
+            if ( route_name.size()<=max_name_size )
+                cutted_route_name = route_name;
+            else  // second step: leave only first letters
+                cutted_route_name.assign(route_name, 0, max_name_size);
+        }
+        
+        return cutted_route_name;
+    }
 }
-
+    
+    
 MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt, const std::string& layout_script_file, size_t max_name_size)
 	: AxisView(sess)
 	, RouteUI (sess, layout_script_file)
