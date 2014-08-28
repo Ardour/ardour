@@ -443,6 +443,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Source, RemoveAtDestroy);
 	REGISTER_CLASS_ENUM (Source, NoPeakFile);
 	REGISTER_CLASS_ENUM (Source, Destructive);
+	REGISTER_CLASS_ENUM (Source, Empty);
 	REGISTER_BITS (_Source_Flag);
 
 	REGISTER_ENUM (FadeLinear);
