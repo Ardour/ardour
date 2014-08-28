@@ -672,7 +672,7 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 	if (_fallthrough_to_parent)
 		return false;
 
-	return false;
+	return true;
 }
 
 bool

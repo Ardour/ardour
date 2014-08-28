@@ -115,6 +115,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	
 	_button.set_diameter (3);
 	_button.set_distinct_led_click (true);
+	_button.set_fallthrough_to_parent(true);
 	_button.set_led_left (true);
 	_button.signal_led_clicked.connect (sigc::mem_fun (*this, &ProcessorEntry::led_clicked));
 	_button.set_text (name (_width));
@@ -501,7 +502,6 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 {
 	_slider.set_controllable (c);
 	box.set_padding(0, 0, 4, 4);
-	_button.set_fallthrough_to_parent(true);
 
 	if (c->toggled()) {
 		_button.set_text (_name);
