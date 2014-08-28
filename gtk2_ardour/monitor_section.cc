@@ -108,13 +108,13 @@ MonitorSection::MonitorSection (Session* s)
 
         ARDOUR_UI::Blink.connect (sigc::mem_fun (*this, &MonitorSection::do_blink));
 
-	rude_solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_solo));
+	rude_solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_solo), false);
         UI::instance()->set_tip (rude_solo_button, _("When active, something is soloed.\nClick to de-solo everything"));
 
-	rude_iso_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_isolate));
+	rude_iso_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_isolate), false);
         UI::instance()->set_tip (rude_iso_button, _("When active, something is solo-isolated.\nClick to de-isolate everything"));
 
-	rude_audition_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_audition));
+	rude_audition_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_audition), false);
         UI::instance()->set_tip (rude_audition_button, _("When active, auditioning is active.\nClick to stop the audition"));
 
 	solo_in_place_button.set_name ("monitor section solo model");

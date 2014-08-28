@@ -409,8 +409,8 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 			meters[n].width = width;
 			meters[n].length = len;
 			meters[n].meter->add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
-			meters[n].meter->signal_button_press_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_press));
-			meters[n].meter->signal_button_release_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_release));
+			meters[n].meter->signal_button_press_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_press), false);
+			meters[n].meter->signal_button_release_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_release), false);
 		}
 
 		//pack_end (*meters[n].meter, false, false);

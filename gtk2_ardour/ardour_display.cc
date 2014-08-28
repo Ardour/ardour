@@ -52,8 +52,6 @@ using namespace std;
 
 ArdourDisplay::ArdourDisplay (Element e)
 {
-	signal_button_press_event().connect (sigc::mem_fun(*this, &ArdourDisplay::on_mouse_pressed));
-
 	add_elements(e);
 	add_elements(ArdourButton::Menu);
 	add_elements(ArdourButton::Text);
@@ -64,7 +62,7 @@ ArdourDisplay::~ArdourDisplay ()
 }
 
 bool
-ArdourDisplay::on_mouse_pressed (GdkEventButton*)
+ArdourDisplay::on_button_press_event (GdkEventButton*)
 {
 	_menu.popup (1, gtk_get_current_event_time());	
 	return true;

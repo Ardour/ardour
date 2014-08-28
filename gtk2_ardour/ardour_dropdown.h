@@ -36,7 +36,7 @@ class ArdourDropdown : public ArdourButton
 	ArdourDropdown (Element e = default_elements);
 	virtual ~ArdourDropdown ();
 
-	bool on_mouse_pressed (GdkEventButton*);
+	bool on_button_press_event (GdkEventButton*);
 
 	void AddMenuElem (Gtk::Menu_Helpers::MenuElem e);
 

@@ -39,7 +39,7 @@ class ArdourDisplay : public ArdourButton
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
  	void set_controllable (boost::shared_ptr<PBD::Controllable> c);
 
-	bool on_mouse_pressed (GdkEventButton*);  //mousedown will pop up our preset menu
+	bool on_button_press_event (GdkEventButton*);  //mousedown will pop up our preset menu
 //	bool on_button_press_event (GdkEventButton*);
 //	bool on_button_release_event (GdkEventButton*);
 	bool on_scroll_event (GdkEventScroll* ev);

@@ -31,20 +31,17 @@ using namespace Gtkmm2ext;
 using namespace std;
 using namespace PBD;
 
+guint BindingProxy::bind_button = 2;
+guint BindingProxy::bind_statemask = Gdk::CONTROL_MASK;
+
 BindingProxy::BindingProxy (boost::shared_ptr<Controllable> c)
 	: prompter (0),
-	  controllable (c),
-	  bind_button (2),
-	  bind_statemask (Gdk::CONTROL_MASK)
-
+	  controllable (c)
 {			  
 }
 
 BindingProxy::BindingProxy ()
-	: prompter (0),
-	  bind_button (2),
-	  bind_statemask (Gdk::CONTROL_MASK)
-
+	: prompter (0)
 {			  
 }
 
@@ -69,17 +66,17 @@ BindingProxy::set_bind_button_state (guint button, guint statemask)
 	bind_statemask = statemask;
 }
 
-void
-BindingProxy::get_bind_button_state (guint &button, guint &statemask)
+bool
+BindingProxy::is_bind_action (GdkEventButton *ev)
 {
-	button = bind_button;
-	statemask = bind_statemask;
+	return ( (ev->state & bind_statemask) && ev->button == bind_button );
 }
+
 
 bool
 BindingProxy::button_press_handler (GdkEventButton *ev)
 {
-	if (controllable && (ev->state & bind_statemask) && ev->button == bind_button) { 
+	if ( controllable && is_bind_action(ev) ) { 
 		if (Controllable::StartLearning (controllable.get())) {
 			string prompt = _("operate controller now");
 			if (prompter == 0) {

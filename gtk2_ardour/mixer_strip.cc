@@ -189,7 +189,7 @@ MixerStrip::init ()
         solo_isolated_led->set_no_show_all (true);
         solo_isolated_led->set_name (X_("solo isolate"));
         solo_isolated_led->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-        solo_isolated_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_isolate_button_release));
+        solo_isolated_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_isolate_button_release), false);
 	UI::instance()->set_tip (solo_isolated_led, _("Isolate Solo"), "");
 
         solo_safe_led = manage (new ArdourButton (ArdourButton::led_default_elements));
@@ -198,7 +198,7 @@ MixerStrip::init ()
         solo_safe_led->set_no_show_all (true);
         solo_safe_led->set_name (X_("solo safe"));
         solo_safe_led->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-        solo_safe_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_safe_button_release));
+        solo_safe_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_safe_button_release), false);
 	UI::instance()->set_tip (solo_safe_led, _("Lock Solo Status"), "");
 
 	solo_safe_led->set_text (_("Lock"));

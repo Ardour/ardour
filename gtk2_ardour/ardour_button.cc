@@ -692,11 +692,11 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 
 
 	if (_hovering) {
-		signal_clicked ();
-		
+		signal_clicked ();	
 		if (_act_on_release) {
 			if (_action) {
 				_action->activate ();
+				return true;
 			}
 		}
 	}

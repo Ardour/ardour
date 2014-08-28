@@ -176,7 +176,7 @@ RouteUI::init ()
 	rec_enable_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_release), false);
 
 	show_sends_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_press), false);
-	show_sends_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_release));
+	show_sends_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_release), false);
 
 	solo_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::solo_press), false);
 	solo_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::solo_release), false);
@@ -186,11 +186,11 @@ RouteUI::init ()
 	monitor_input_button->set_distinct_led_click (false);
 	monitor_disk_button->set_distinct_led_click (false);
 
-	monitor_input_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_press));
-	monitor_input_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_release));
+	monitor_input_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_press), false);
+	monitor_input_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_release), false);
 
-	monitor_disk_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_press));
-	monitor_disk_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_release));
+	monitor_disk_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_press), false);
+	monitor_disk_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_release), false);
 
 	BusSendDisplayChanged.connect_same_thread (*this, boost::bind(&RouteUI::bus_send_display_changed, this, _1));
 }
@@ -323,6 +323,10 @@ RouteUI::mute_press (GdkEventButton* ev)
 		return true;
 	}
 
+	//if this is a binding action, let the ArdourButton handle it
+	if ( BindingProxy::is_bind_action(ev) )
+		return false;
+			
 	multiple_mute_change = false;
 
 	if (Keyboard::is_context_menu_event (ev)) {
@@ -338,13 +342,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 	} else {
 
 		if (Keyboard::is_button2_event (ev)) {
-			// Primary-button2 click is the midi binding click
 			// button2-click is "momentary"
-
-			//give the button a chance to handle a midi binding
-			if (mute_button->on_button_press_event (ev)) {
-				return true;
-			}
 
 			_mute_release = new SoloMuteRelease (_route->muted ());
 		}
@@ -494,6 +492,10 @@ RouteUI::solo_press(GdkEventButton* ev)
 		return true;
 	}
 
+	//if this is a binding action, let the ArdourButton handle it
+	if ( BindingProxy::is_bind_action(ev) )
+		return false;
+			
 	multiple_solo_change = false;
 
 	if (Keyboard::is_context_menu_event (ev)) {
@@ -511,11 +513,6 @@ RouteUI::solo_press(GdkEventButton* ev)
 	} else {
 
 		if (Keyboard::is_button2_event (ev)) {
-
-			// Give the button a chance to handle MIDI binding
-			if (solo_button->on_button_press_event (ev)) {
-				return true;
-			}
 
 			// button2-click is "momentary"
 			_solo_release = new SoloMuteRelease (_route->self_soloed());
@@ -659,6 +656,10 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		return true;
 	}
 
+	//if this is a binding action, let the ArdourButton handle it
+	if ( BindingProxy::is_bind_action(ev) )
+		return false;
+			
 	if (!_session->engine().connected()) {
 	        MessageDialog msg (_("Not connected to AudioEngine - cannot engage record"));
 		msg.run ();
@@ -771,25 +772,29 @@ RouteUI::update_monitoring_display ()
 bool
 RouteUI::monitor_input_press(GdkEventButton*)
 {
-	return true;
+printf("RouteUI  monitor_input_press\n");
+	return false;
 }
 
 bool
 RouteUI::monitor_input_release(GdkEventButton* ev)
 {
+printf("RouteUI  monitor_input_release\n");
 	return monitor_release (ev, MonitorInput);
 }
 
 bool
 RouteUI::monitor_disk_press (GdkEventButton*)
 {
-	return true;
+printf("RouteUI  monitor_disk_press\n");
+	return false;
 }
 
 bool
 RouteUI::monitor_disk_release (GdkEventButton* ev)
 {
-	return monitor_release (ev, MonitorDisk);
+	printf("RouteUI  monitor_disk_release\n");
+	monitor_release (ev, MonitorDisk);
 }
 
 bool
@@ -839,7 +844,7 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 	DisplaySuspender ds;
 	_session->set_monitoring (rl, mc, Session::rt_cleanup, true);		
 
-	return true;
+	return false;
 }
 
 void
@@ -1428,7 +1433,7 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 		}
 	}
 
-	return true;
+	return false;
 }
 
 bool
@@ -1436,7 +1441,6 @@ RouteUI::solo_safe_button_release (GdkEventButton* ev)
 {
 	if (ev->button == 1) {
 		_route->set_solo_safe (!solo_safe_led->active_state(), this);
-		return true;
 	}
 	return false;
 }
@@ -2009,8 +2013,8 @@ RouteUI::setup_invert_buttons ()
 
 	for (uint32_t i = 0; i < to_add; ++i) {
 		ArdourButton* b = manage (new ArdourButton);
-		b->signal_button_press_event().connect (sigc::mem_fun (*this, &RouteUI::invert_press));
-		b->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::invert_release), i));
+		b->signal_button_press_event().connect (sigc::mem_fun (*this, &RouteUI::invert_press), false);
+		b->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::invert_release), i), false);
 
 		b->set_name (X_("invert button"));
 		if (to_add == 1) {

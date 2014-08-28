@@ -52,7 +52,7 @@ using namespace std;
 
 ArdourDropdown::ArdourDropdown (Element e)
 {
-	signal_button_press_event().connect (sigc::mem_fun(*this, &ArdourDropdown::on_mouse_pressed));
+//	signal_button_press_event().connect (sigc::mem_fun(*this, &ArdourDropdown::on_mouse_pressed));
 
 	add_elements(e);
 	add_elements(ArdourButton::Menu);
@@ -63,7 +63,7 @@ ArdourDropdown::~ArdourDropdown ()
 }
 
 bool
-ArdourDropdown::on_mouse_pressed (GdkEventButton*)
+ArdourDropdown::on_button_press_event (GdkEventButton*)
 {
 	_menu.popup (1, gtk_get_current_event_time());	
 	return true;
