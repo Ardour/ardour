@@ -1870,14 +1870,13 @@ ARDOUR_UI::transport_record (bool roll)
 				msg.run ();
 				return;
 			}
-                        if (Profile->get_trx()) {
-                                roll = trx_record_enable_all_tracks ();
-                        }
+            
+            if ( Profile->get_trx() )
+                 roll = trx_record_enable_all_tracks ();
+            
+            transport_roll ();
 			_session->maybe_enable_record ();
-			if (roll) {
-				transport_roll ();
-			}
-			break;
+		    break;
 		case Session::Recording:
 			if (roll) {
 				_session->request_stop();
