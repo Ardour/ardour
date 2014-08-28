@@ -206,8 +206,8 @@
     <Option name="processor postfader: text active" value="eeeeecff"/>
     <Option name="processor control button: fill" value="222222ff"/>
     <Option name="processor control button: fill active" value="333333ff"/>
-    <Option name="processor control button: led" value="5d90b0ff"/>
-    <Option name="processor control button: led active" value="99cc00ff"/>
+    <Option name="processor control button: led" value="101010ff"/>
+    <Option name="processor control button: led active" value="5d90b0ff"/>
     <Option name="processor control button: text" value="ffffffff"/>
     <Option name="processor control button: text active" value="ffffffff"/>
     <Option name="midi device: fill" value="54555dff"/>
