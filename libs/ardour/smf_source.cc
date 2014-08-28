@@ -71,6 +71,8 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
         assert (!Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
 	existence_check ();
 
+	_flags = Source::Flag (_flags | Empty);
+
 	/* file is not opened until write */
 
 	if (flags & Writable) {
@@ -131,12 +133,23 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 		throw failed_constructor ();
 	}
 
-	if (init (_path, true)) {
+	/* we expect the file to exist, but if no MIDI data was ever added
+	   it will have been removed at last session close. so, we don't
+	   require it to exist if it was marked Empty.
+	*/
+
+	if (init (_path, !(_flags & Source::Empty))) {
 		throw failed_constructor ();
 	}
 
-        assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
-	existence_check ();
+	if (!(_flags & Source::Empty)) {
+		assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+		existence_check ();
+	} else {
+		assert (_flags & Source::Writable);
+		/* file will be opened on write */
+		return;
+	}
 
 	if (open(_path)) {
 		throw failed_constructor ();
@@ -379,6 +392,7 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_beats = ev.time();
+	_flags = Source::Flag (_flags & ~Empty);
 }
 
 /** Append an event with a timestamp in frames (framepos_t) */
@@ -425,6 +439,7 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_frames = ev.time();
+	_flags = Source::Flag (_flags & ~Empty);
 }
 
 XMLNode&
@@ -667,9 +682,11 @@ SMFSource::destroy_model ()
 void
 SMFSource::flush_midi ()
 {
-	if (!writable() || (writable() && !_open)) {
+	if (!writable() || _length_beats == 0.0) {
 		return;
 	}
+
+	ensure_disk_file ();
 
 	Evoral::SMF::end_write ();
 	/* data in the file means its no longer removable */
@@ -702,9 +719,6 @@ SMFSource::ensure_disk_file ()
 		if (!_open) {
 			open_for_write ();
 		}
-
-		/* Flush, which will definitely put something on disk */
-		flush_midi ();
 	}
 }
 

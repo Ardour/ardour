@@ -47,7 +47,8 @@ class Source : public SessionObject
 		RemovableIfEmpty = 0x10,
 		RemoveAtDestroy = 0x20,
 		NoPeakFile = 0x40,
-		Destructive = 0x80
+		Destructive = 0x80,
+		Empty = 0x100, /* used for MIDI only */
 	};
 
 	Source (Session&, DataType type, const std::string& name, Flag flags=Flag(0));

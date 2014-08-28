@@ -3603,7 +3603,11 @@ Session::create_midi_source_by_stealing_name (boost::shared_ptr<Track> track)
 		return boost::shared_ptr<MidiSource>();
 	}
 
-	const string path = new_midi_source_path (name);
+	/* MIDI files are small, just put them in the first location of the
+	   session source search path.
+	*/
+
+	const string path = Glib::build_filename (source_search_path (DataType::MIDI).front(), name);
 
 	return boost::dynamic_pointer_cast<SMFSource> (
 		SourceFactory::createWritable (
