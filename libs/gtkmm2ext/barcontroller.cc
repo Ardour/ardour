@@ -456,9 +456,14 @@ BarController::expose (GdkEventExpose* /*event*/)
 		layout->set_text (label);
 		layout->get_pixel_size (twidth, theight);
 
-		c = get_style()->get_text (get_state());
-		CairoWidget::set_source_rgb_a (cr, c, 1.0);
-		context->move_to ( (fract > 0.5) ? w - twidth/0.7 : twidth/0.7, (darea.get_height()/2) - (theight/2));
+		if (fract > 0.5) {
+			cairo_set_source_rgba (cr, 0.17, 0.17, 0.17, 1.0);
+			context->move_to ( 5, (darea.get_height()/2) - (theight/2));
+		} else {
+			c = get_style()->get_text (get_state());
+			CairoWidget::set_source_rgb_a (cr, c, 0.7);
+			context->move_to ( w-twidth-5, (darea.get_height()/2) - (theight/2));
+		}
 		layout->show_in_cairo_context (context);
 	}
 	
