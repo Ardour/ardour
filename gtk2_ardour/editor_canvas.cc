@@ -583,6 +583,7 @@ Editor::autoscroll_canvas ()
 
 	VisualChange vc;
 	bool vertical_motion = false;
+	bool y_motion = false;
 
 	if (autoscroll_horizontal_allowed) {
 
