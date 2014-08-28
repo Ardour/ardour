@@ -184,21 +184,18 @@
     <Option name="button border" value="000000f0"/>
     <Option name="border color" value="00000000"/>
     <Option name="processor prefader: fill" value="873c3cff"/>
-    <Option name="processor prefader: fill end" value="542525ff"/>
     <Option name="processor prefader: fill active" value="603535ff"/>
     <Option name="processor prefader: led" value="26550eff"/>
     <Option name="processor prefader: led active" value="78cb4eff"/>
     <Option name="processor prefader: text" value="aaaaa3ff"/>
     <Option name="processor prefader: text active" value="eeeeecff"/>
-    <Option name="processor fader: fill start" value="5d90b0ff"/>
-    <Option name="processor fader: fill end" value="154c6eff"/>
+    <Option name="processor fader: fill" value="5d90b0ff"/>
     <Option name="processor fader: fill active" value="256d8fff"/>
     <Option name="processor fader: led" value="26550eff"/>
     <Option name="processor fader: led active" value="78cb4eff"/>
     <Option name="processor fader: text" value="aaaaa3ff"/>
     <Option name="processor fader: text active" value="eeeeecff"/>
     <Option name="processor postfader: fill" value="354537ff"/>
-    <Option name="processor postfader: fill end" value="202823ff"/>
     <Option name="processor postfader: fill active" value="254528ff"/>
     <Option name="processor postfader: led" value="26550eff"/>
     <Option name="processor postfader: led active" value="78cb4eff"/>
@@ -321,7 +318,6 @@
     <Option name="solo button: text" value="c7c7d8ff"/>
     <Option name="solo button: text active" value="191919ff"/>
     <Option name="invert button: fill" value="616268ff"/>
-    <Option name="invert button: fill end" value="404149ff"/>
     <Option name="invert button: fill active" value="4242d0ff"/>
     <Option name="invert button: led" value="473812ff"/>
     <Option name="invert button: led active" value="78cb4eff"/>
