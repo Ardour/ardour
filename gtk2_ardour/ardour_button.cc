@@ -285,15 +285,9 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 			cairo_translate (cr, -8,0 );
 		}
 		
-		if (_grabbed) {
-			cairo_rectangle (cr, x+1, y+1, _pixbuf->get_width(), _pixbuf->get_height());
-			gdk_cairo_set_source_pixbuf (cr, _pixbuf->gobj(), x+1, y+1);
-			cairo_fill (cr);
-		} else {
-			cairo_rectangle (cr, x, y, _pixbuf->get_width(), _pixbuf->get_height());
-			gdk_cairo_set_source_pixbuf (cr, _pixbuf->gobj(), x, y);
-			cairo_fill (cr);
-		}
+		cairo_rectangle (cr, x, y, _pixbuf->get_width(), _pixbuf->get_height());
+		gdk_cairo_set_source_pixbuf (cr, _pixbuf->gobj(), x, y);
+		cairo_fill (cr);
 
 		//..and then return to our previous drawing position
 		if (((_elements & Menu)==Menu)) {
