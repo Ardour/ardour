@@ -1164,7 +1164,7 @@ Editor::lock_timeout_callback ()
 
 	timersub (&now, &last_event_time, &delta);
 
-	if (delta.tv_sec > ARDOUR_UI::config()->get_lock_gui_after_seconds()) {
+	if (delta.tv_sec > (time_t) ARDOUR_UI::config()->get_lock_gui_after_seconds()) {
 		lock ();
 		/* don't call again. Returning false will effectively
 		   disconnect us from the timer callback.
