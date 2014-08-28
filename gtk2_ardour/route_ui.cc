@@ -772,28 +772,24 @@ RouteUI::update_monitoring_display ()
 bool
 RouteUI::monitor_input_press(GdkEventButton*)
 {
-printf("RouteUI  monitor_input_press\n");
 	return false;
 }
 
 bool
 RouteUI::monitor_input_release(GdkEventButton* ev)
 {
-printf("RouteUI  monitor_input_release\n");
 	return monitor_release (ev, MonitorInput);
 }
 
 bool
 RouteUI::monitor_disk_press (GdkEventButton*)
 {
-printf("RouteUI  monitor_disk_press\n");
 	return false;
 }
 
 bool
 RouteUI::monitor_disk_release (GdkEventButton* ev)
 {
-	printf("RouteUI  monitor_disk_release\n");
 	monitor_release (ev, MonitorDisk);
 }
 

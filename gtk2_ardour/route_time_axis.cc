@@ -110,6 +110,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 {
 	number_label.set_name("route button");
 	number_label.set_alignment(.5, .5);
+	number_label.set_fallthrough_to_parent (true);
 
 	sess->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::parameter_changed, this, _1), gui_context());
 }

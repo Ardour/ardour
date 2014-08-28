@@ -501,6 +501,7 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 {
 	_slider.set_controllable (c);
 	box.set_padding(0, 0, 4, 4);
+	_button.set_fallthrough_to_parent(true);
 
 	if (c->toggled()) {
 		_button.set_text (_name);
@@ -1312,6 +1313,12 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 
 		ret = true;
 
+	} else if (Keyboard::is_context_menu_event (ev)) {
+
+		show_processor_menu (ev->time);
+		
+		ret = true;
+
 	} else if (processor && ev->button == 1 && selected) {
 
 		// this is purely informational but necessary for route params UI
@@ -1339,10 +1346,6 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev, ProcessorEntry
 		Glib::signal_idle().connect (sigc::bind (
 				sigc::mem_fun(*this, &ProcessorBox::idle_delete_processor),
 				boost::weak_ptr<Processor>(processor)));
-
-	} else if (Keyboard::is_context_menu_event (ev)) {
-
-		show_processor_menu (ev->time);
 
 	} else if (processor && Keyboard::is_button2_event (ev)
 #ifndef GTKOSX

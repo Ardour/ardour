@@ -83,6 +83,7 @@ ArdourButton::ArdourButton (Element e)
 	, _hovering (false)
 	, _focused (false)
 	, _fixed_colors_set (false)
+	, _fallthrough_to_parent (false)
 {
 	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 }
@@ -660,20 +661,24 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 		}
 	}
 
-	_grabbed = true;
-	queue_draw ();
-
 	if (binding_proxy.button_press_handler (ev)) {
 		return true;
 	}
 	
+	_grabbed = true;
+	queue_draw ();
+
 	if (!_act_on_release) {
 		if (_action) {
 			_action->activate ();
+			return true;
 		}
 	}
 
-	return true;
+	if (_fallthrough_to_parent)
+		return false;
+
+	return false;
 }
 
 bool
@@ -690,7 +695,6 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 	_grabbed = false;
 	queue_draw ();
 
-
 	if (_hovering) {
 		signal_clicked ();	
 		if (_act_on_release) {
@@ -700,6 +704,9 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 			}
 		}
 	}
+	
+	if (_fallthrough_to_parent)
+		return false;
 
 	return true;
 }
