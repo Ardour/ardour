@@ -102,16 +102,23 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	// Default sizes, font and spacing
 	static Pango::FontDescription NAME_FONT;
 	static void set_constant_heights ();
-	static const double NAME_X_OFFSET;
+    static const double NAME_HIGHLIGHT_Y_IDENT;
+    static const double NAME_HIGHLIGHT_X_OFFSET;
+    static const double NAME_HIGHLIGHT_Y_OFFSET;
 	static const double GRAB_HANDLE_TOP;
 	static const double GRAB_HANDLE_WIDTH;
 
+    static const double REGION_TOP_OFFSET;
+    static const double REGION_BOTTOM_OFFSET;
+    
 	/* these are not constant, but vary with the pixel size
 	   of the font used to display the item name.
 	*/
 	static int    NAME_HEIGHT;
+    static double NAME_HIGHLIGHT_X_IDENT;
+    static double NAME_X_OFFSET;
 	static double NAME_Y_OFFSET;
-	static double NAME_HIGHLIGHT_SIZE;
+	static double NAME_HIGHLIGHT_HEIGHT;
 	static double NAME_HIGHLIGHT_THRESH;
 
         /* if this is 1.0, we move the right boundary
@@ -231,6 +238,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 
 	uint32_t fill_opacity;
 	uint32_t fill_color;
+    uint32_t name_highlight_color;
 	uint32_t frame_color_r;
 	uint32_t frame_color_g;
 	uint32_t frame_color_b;

@@ -2878,7 +2878,7 @@ Editor::update_join_object_range_location (double /*x*/, double y)
 			double cy = y;
 			rtv->canvas_display()->canvas_to_item (cx, cy);
 
-			double const c = cy / (rtv->view()->child_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE);
+			double const c = cy / (rtv->view()->child_height() );
 
 			_join_object_range_state = c <= 0.5 ? JOIN_OBJECT_RANGE_RANGE : JOIN_OBJECT_RANGE_OBJECT;
 		}

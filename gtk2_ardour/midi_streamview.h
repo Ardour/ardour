@@ -82,7 +82,7 @@ class MidiStreamView : public StreamView
 	void leave_internal_edit_mode ();
 	
 	inline double contents_height() const
-	{ return (child_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
+	{ return (child_height() - 2); }
 
 	inline double note_to_y(uint8_t note) const
 		{ return contents_height()
