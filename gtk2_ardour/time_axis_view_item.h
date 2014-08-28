@@ -104,16 +104,23 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	// Default sizes, font and spacing
 	static Pango::FontDescription NAME_FONT;
 	static void set_constant_heights ();
-	static const double NAME_X_OFFSET;
+    static const double NAME_HIGHLIGHT_Y_IDENT;
+    static const double NAME_HIGHLIGHT_X_OFFSET;
+    static const double NAME_HIGHLIGHT_Y_OFFSET;
 	static const double GRAB_HANDLE_TOP;
 	static const double GRAB_HANDLE_WIDTH;
 
+    static const double REGION_TOP_OFFSET;
+    static const double REGION_BOTTOM_OFFSET;
+    
 	/* these are not constant, but vary with the pixel size
 	   of the font used to display the item name.
 	*/
 	static int    NAME_HEIGHT;
+    static double NAME_HIGHLIGHT_X_IDENT;
+    static double NAME_X_OFFSET;
 	static double NAME_Y_OFFSET;
-	static double NAME_HIGHLIGHT_SIZE;
+	static double NAME_HIGHLIGHT_HEIGHT;
 	static double NAME_HIGHLIGHT_THRESH;
 
         /* if this is 1.0, we move the right boundary
@@ -230,9 +237,23 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	/** true if a small vestigial rect should be shown when the item gets very narrow */
 	bool show_vestigial;
 
-	uint32_t fill_color;
-
 	virtual uint32_t fill_opacity() const;
+
+	uint32_t fill_color;
+        uint32_t name_highlight_color;
+	uint32_t frame_color_r;
+	uint32_t frame_color_g;
+	uint32_t frame_color_b;
+	uint32_t selected_frame_color_r;
+	uint32_t selected_frame_color_g;
+	uint32_t selected_frame_color_b;
+
+	uint32_t handle_color_r;
+	uint32_t handle_color_g;
+	uint32_t handle_color_b;
+	uint32_t lock_handle_color_r;
+	uint32_t lock_handle_color_g;
+	uint32_t lock_handle_color_b;
 
 	uint32_t last_item_width;
 	int name_text_width;

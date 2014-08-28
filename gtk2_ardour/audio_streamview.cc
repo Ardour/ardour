@@ -35,6 +35,7 @@
 #include "ardour/session.h"
 
 #include "canvas/rectangle.h"
+#include "canvas/utils.h"
 
 #include "audio_streamview.h"
 #include "audio_region_view.h"
@@ -269,25 +270,22 @@ AudioStreamView::setup_rec_box ()
 			switch (_trackview.audio_track()->mode()) {
 			case Normal:
 			case NonLayered:
-				xend = xstart;
-				fill_color = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
-				break;
-
 			case Destructive:
-				xend = xstart + 2;
-				fill_color = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
+				xend = xstart;
+                //fill_color = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
+                // GZ FIXME:change in config instead of following
+                fill_color = ArdourCanvas::rgba_to_color (251.0/255.0, 35.0/255.0, 52.0/255.0, 1.0);
 				/* make the recording rect translucent to allow
 				   the user to see the peak data coming in, etc.
 				*/
-				fill_color = UINT_RGBA_CHANGE_A (fill_color, 120);
-				break;
+                break;
 			}
 
 			ArdourCanvas::Rectangle * rec_rect = new ArdourCanvas::Rectangle (_canvas_group);
 			rec_rect->set_x0 (xstart);
-			rec_rect->set_y0 (1);
+			rec_rect->set_y0 (2);
 			rec_rect->set_x1 (xend);
-			rec_rect->set_y1 (child_height ());
+			rec_rect->set_y1 (child_height () - 3);
 			rec_rect->set_outline_what (ArdourCanvas::Rectangle::What (0));
 			rec_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame());
 			rec_rect->set_fill_color (fill_color);

@@ -50,7 +50,7 @@ class AutomationStreamView : public StreamView
 	void redisplay_track ();
 
 	inline double contents_height() const {
-		return (_trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2);
+		return (_trackview.current_height() - 2);
 	}
 
 	bool has_automation () const;

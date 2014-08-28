@@ -425,12 +425,12 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 		float x_pos = trackview.editor().sample_to_pixel (*i);
 
 		(*l).second->set (ArdourCanvas::Duple (x_pos, 2.0),
-				  ArdourCanvas::Duple (x_pos, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1));
+				  ArdourCanvas::Duple (x_pos, _height - 1));
 
 		(*l).first = *i;
 
 		(*l).second->set (ArdourCanvas::Duple (x_pos, 2.0),
-				  ArdourCanvas::Duple (x_pos, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1));
+				  ArdourCanvas::Duple (x_pos, _height - 1));
 	}
 
 	reset_fade_shapes ();
@@ -483,7 +483,7 @@ AudioRegionView::set_height (gdouble height)
 		if (height < NAME_HIGHLIGHT_THRESH) {
 			ht = ((height - 2 * wcnt) / (double) wcnt);
 		} else {
-			ht = (((height - 2 * wcnt) - NAME_HIGHLIGHT_SIZE) / (double) wcnt);
+			ht = (((height - 2 * wcnt) ) / (double) wcnt);
 		}
 
 		gdouble yoff = n * (ht + 1);
@@ -500,7 +500,7 @@ AudioRegionView::set_height (gdouble height)
 			update_envelope_visibility ();
 		}
 
-		gain_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE) - 2);
+		gain_line->set_height ((uint32_t) rint (height) - 2);
 	}
 
 	reset_fade_shapes ();
@@ -514,7 +514,7 @@ AudioRegionView::set_height (gdouble height)
 
 		if (height >= NAME_HIGHLIGHT_THRESH) {
 			(*l).second->set (ArdourCanvas::Duple (pos_x, 2.0),
-					  ArdourCanvas::Duple (pos_x, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1));
+					  ArdourCanvas::Duple (pos_x, _height - 1));
 		} else {
 			(*l).second->set (ArdourCanvas::Duple (pos_x, 2.0),
 					  ArdourCanvas::Duple (pos_x, _height - 1));
@@ -584,7 +584,7 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 	double effective_height;
 
 	if (_height >= NAME_HIGHLIGHT_THRESH) {
-		effective_height = _height - NAME_HIGHLIGHT_SIZE;
+		effective_height = _height;
 	} else {
 		effective_height = _height;
 	}
@@ -669,7 +669,7 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 	double effective_height;
 
 	if (_height >= NAME_HIGHLIGHT_THRESH) {
-		effective_height = _height - NAME_HIGHLIGHT_SIZE;
+		effective_height = _height;
 	} else {
 		effective_height = _height;
 	}
@@ -1126,11 +1126,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	uint32_t nwaves = std::min (nchans, audio_region()->n_channels());
 	gdouble ht;
 
-	if (trackview.current_height() < NAME_HIGHLIGHT_THRESH) {
-		ht = ((trackview.current_height()) / (double) nchans);
-	} else {
-		ht = ((trackview.current_height() - NAME_HIGHLIGHT_SIZE) / (double) nchans);
-	}
+    ht = ((trackview.current_height()) / (double) nchans);
 
 	gdouble yoff = which * ht;
 
@@ -1230,7 +1226,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 
 	/* compute vertical fractional position */
 
-	y = 1.0 - (y / (_height - NAME_HIGHLIGHT_SIZE));
+	y = 1.0 - (y / (_height));
 
 	/* map using gain line */
 
@@ -1518,7 +1514,7 @@ AudioRegionView::transients_changed ()
 		CANVAS_DEBUG_NAME (canvas_item, string_compose ("transient group for %1", region()->name()));
 
 		canvas_item->set (ArdourCanvas::Duple (-1.0, 2.0),
-				  ArdourCanvas::Duple (1.0, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1));
+				  ArdourCanvas::Duple (1.0, _height - 1));
 
 		canvas_item->raise_to_top ();
 		canvas_item->show ();
@@ -1545,7 +1541,7 @@ AudioRegionView::transients_changed ()
 
 		(*l).second->set (
 			ArdourCanvas::Duple (*pos, 2.0),
-			ArdourCanvas::Duple (*pos, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1)
+			ArdourCanvas::Duple (*pos, _height - 1)
 			);
 
 		(*l).second->set_data ("position", pos);

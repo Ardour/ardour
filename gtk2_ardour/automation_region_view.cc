@@ -88,7 +88,7 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 				_parameter,
 				&_source_relative_time_converter));
 	_line->set_colors();
-	_line->set_height ((uint32_t)rint(trackview.current_height() - NAME_HIGHLIGHT_SIZE));
+	_line->set_height ((uint32_t)rint(trackview.current_height()));
 	_line->set_visibility (AutomationLine::VisibleAspects (AutomationLine::Line|AutomationLine::ControlPoints));
 	_line->set_maximum_time (_region->length());
 	_line->set_offset (_region->start ());
@@ -118,7 +118,7 @@ AutomationRegionView::canvas_event (GdkEvent* ev)
 
 		/* clamp y */
 		y = std::max (y, 0.0);
-		y = std::min (y, _height - NAME_HIGHLIGHT_SIZE);
+		y = std::min (y, _height);
 
 		/* guard points only if primary modifier is used */
 		bool with_guard_points = Gtkmm2ext::Keyboard::modifier_state_equals (ev->button.state, Gtkmm2ext::Keyboard::PrimaryModifier);
@@ -147,7 +147,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 
 	/* compute vertical fractional position */
 
-	const double h = trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2;
+	const double h = trackview.current_height() - 2;
 	y = 1.0 - (y / h);
 
 	/* snap frame */
@@ -184,7 +184,7 @@ AutomationRegionView::set_height (double h)
 	RegionView::set_height(h);
 
 	if (_line) {
-		_line->set_height ((uint32_t)rint(h - NAME_HIGHLIGHT_SIZE));
+		_line->set_height ((uint32_t)rint(h));
 	}
 }
 

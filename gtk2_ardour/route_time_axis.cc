@@ -2273,7 +2273,7 @@ RouteTimeAxisView::can_edit_name () const
 {
 	/* we do not allow track name changes if it is record enabled
 	 */
-	return !_route->record_enabled();
+ 	return !( (ARDOUR_UI::instance()->the_session()->record_status()==Session::Recording) && (_route->record_enabled()) );
 }
 
 void

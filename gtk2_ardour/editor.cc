@@ -279,14 +279,6 @@ Editor::Editor ()
 	, edit_packer (get_table ("edit_packer"))
 	, edit_controls_vbox (get_v_box ("edit_controls_vbox"))
 	, controls_layout (get_layout ("controls_layout"))
-#ifdef TOP_MENUBAR
-	/*
-	 * This is needed for OS X primarily
-	 * but also any other OS that uses a single
-	 * top menubar instead of per window menus
-	 */
-	, _status_bar_hpacker (get_h_box ("menu_bar_base"))
-#endif
 
 	  /* the values here don't matter: layout widgets
 	     reset them as needed.
@@ -4960,8 +4952,13 @@ Editor::add_routes (RouteList& routes)
 			throw unknown_type();
 		}
 
-		new_views.push_back (rtv);
-		track_views.push_back (rtv);
+        if (rtv->is_master_track() ) {
+            new_views.push_front (rtv);
+            track_views.push_front (rtv);
+        } else {
+            new_views.push_back (rtv);
+            track_views.push_back (rtv);
+        }
 
 		rtv->effective_gain_display ();
 

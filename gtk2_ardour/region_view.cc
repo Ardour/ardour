@@ -675,7 +675,7 @@ RegionView::region_sync_changed ()
 			sync_mark->set (points);
 			sync_mark->show ();
 
-			sync_line->set (ArdourCanvas::Duple (offset, 0), ArdourCanvas::Duple (offset, trackview.current_height() - NAME_HIGHLIGHT_SIZE));
+			sync_line->set (ArdourCanvas::Duple (offset, 0), ArdourCanvas::Duple (offset, trackview.current_height() ));
 			sync_line->show ();
 		}
 	}
@@ -748,7 +748,7 @@ RegionView::set_height (double h)
 
 		sync_line->set (
 			ArdourCanvas::Duple (offset, 0),
-			ArdourCanvas::Duple (offset, h - NAME_HIGHLIGHT_SIZE)
+			ArdourCanvas::Duple (offset, h )
 			);
 	}
 

@@ -2626,12 +2626,7 @@ Editor::update_join_object_range_location (double y)
 
 			entered_route_view->canvas_display()->canvas_to_item (cx, cy);
 
-			double track_height = entered_route_view->view()->child_height();
-			if (Config->get_show_name_highlight()) {
-				track_height -= TimeAxisViewItem::NAME_HIGHLIGHT_SIZE;
-			}
-			double const c = cy / track_height;
-
+			double const c = cy / (entered_route_view->view()->child_height() );
 
 			if (c <= 0.5) {
 				_join_object_range_state = JOIN_OBJECT_RANGE_RANGE;

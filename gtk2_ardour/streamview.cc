@@ -418,17 +418,12 @@ StreamView::update_rec_box ()
 
 		case NonLayered:
 		case Normal:
-			rect.length = at - rect.start;
-			xstart = _trackview.editor().sample_to_pixel (rect.start);
-			xend = _trackview.editor().sample_to_pixel (at);
-			break;
-
 		case Destructive:
-			rect.length = 2;
-			xstart = _trackview.editor().sample_to_pixel (_trackview.track()->current_capture_start());
-			xend = _trackview.editor().sample_to_pixel (at);
-			break;
-
+                rect.length = at - rect.start;
+                xstart = _trackview.editor().sample_to_pixel (rect.start);
+                xend = _trackview.editor().sample_to_pixel (at);
+                break;
+			
 		default:
 			fatal << string_compose (_("programming error: %1"), "illegal track mode") << endmsg;
 			/*NOTREACHED*/

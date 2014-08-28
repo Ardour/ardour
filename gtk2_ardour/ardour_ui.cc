@@ -208,8 +208,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, big_clock_window (X_("big-clock"), _("Big Clock"), boost::bind (&ARDOUR_UI::create_big_clock_window, this))
 	, audio_port_matrix (X_("audio-connection-manager"), _("Audio Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::AUDIO))
 	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
-	, error_log_button (_("Errors"))
-	, _status_bar_visibility (X_("status-bar"))
 	, _feedback_exists (false)
     , _dsp_load_adjustment (0)
     , _hd_load_adjustment (0)
@@ -399,8 +397,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	_process_thread = new ProcessThread ();
 	_process_thread->init ();
 
-	DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
-
     // start the engine:
     // initialize engin state controller
     EngineStateController::instance();
@@ -447,8 +443,6 @@ ARDOUR_UI::engine_running ()
 	update_disk_space ();
     update_disk_usage ();
 	update_cpu_load ();
-	update_sample_rate (EngineStateController::instance()->get_current_sample_rate() );
-	update_timecode_format ();
 }
 
 void
@@ -466,8 +460,6 @@ ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
 
 	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, true);
-
-	update_sample_rate (0);
 
 	string msgstr;
 
@@ -506,19 +498,12 @@ ARDOUR_UI::post_engine ()
 	/* connect to important signals */
 
 	AudioEngine::instance()->Stopped.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_stopped, this), gui_context());
-	AudioEngine::instance()->SampleRateChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate, this, _1), gui_context());
 	AudioEngine::instance()->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 
 	_tooltips.enable();
 
 	if (setup_windows ()) {
 		throw failed_constructor ();
-	}
-
-	/* Do this after setup_windows (), as that's when the _status_bar_visibility is created */
-	XMLNode* n = Config->extra_xml (X_("UI"));
-	if (n) {
-		_status_bar_visibility.set_state (*n);
 	}
 	
 	check_memory_locking();
@@ -562,14 +547,6 @@ ARDOUR_UI::post_engine ()
 		primary_clock->set_mode (AudioClock::Timecode);
 		secondary_clock->set_mode (AudioClock::BBT);
 	}
-
-	/* start the time-of-day-clock */
-
-#ifndef GTKOSX
-	/* OS X provides a nearly-always visible wallclock, so don't be stupid */
-	update_wall_clock ();
-	Glib::signal_timeout().connect_seconds (sigc::mem_fun(*this, &ARDOUR_UI::update_wall_clock), 1);
-#endif
 
 	Config->ParameterChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
@@ -892,7 +869,6 @@ ARDOUR_UI::starting ()
 	/* We have to do this here since goto_editor_window() ends up calling show_all() on the
 	 * editor window, and we may want stuff to be hidden.
 	 */
-	_status_bar_visibility.update ();
 
 	BootMessage (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
 	return 0;
@@ -1100,10 +1076,8 @@ gint
 ARDOUR_UI::every_second ()
 {
 	update_cpu_load ();
-	update_buffer_load ();
 	update_disk_space ();
     update_disk_usage ();
-	update_timecode_format ();
 
 	if (nsm && nsm->is_active ()) {
 		nsm->check ();
@@ -1147,139 +1121,14 @@ ARDOUR_UI::every_point_zero_something_seconds ()
 }
 
 void
-ARDOUR_UI::update_sample_rate (framecnt_t)
-{
-	char buf[64];
-
-	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::update_sample_rate, ignored)
-
-	if (!AudioEngine::instance()->connected()) {
-
-		snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"red\">none</span>"));
-
-	} else {
-
-		framecnt_t rate = EngineStateController::instance()->get_current_sample_rate();
-
-		if (rate == 0) {
-			/* no sample rate available */
-			snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"red\">none</span>"));
-		} else {
-
-			if (fmod (rate, 1000.0) != 0.0) {
-				snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"),
-					  (float) rate / 1000.0f,
-					  (AudioEngine::instance()->usecs_per_cycle() / 1000.0f));
-			} else {
-				snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"green\">%" PRId64 " kHz / %4.1f ms</span>"),
-					  rate/1000,
-					  (AudioEngine::instance()->usecs_per_cycle() / 1000.0f));
-			}
-		}
-	}
-	sample_rate_label.set_markup (buf);
-}
-
-void
-ARDOUR_UI::update_format ()
-{
-	if (!_session) {
-		format_label.set_text ("");
-		return;
-	}
-
-	stringstream s;
-	s << _("File:") << X_(" <span foreground=\"green\">");
-
-	switch (_session->config.get_native_file_header_format ()) {
-	case BWF:
-		s << _("BWF");
-		break;
-	case WAVE:
-		s << _("WAV");
-		break;
-	case WAVE64:
-		s << _("WAV64");
-		break;
-	case CAF:
-		s << _("CAF");
-		break;
-	case AIFF:
-		s << _("AIFF");
-		break;
-	case iXML:
-		s << _("iXML");
-		break;
-	case RF64:
-		s << _("RF64");
-		break;
-	}
-
-	s << " ";
-	
-	switch (_session->config.get_native_file_data_format ()) {
-	case FormatFloat:
-		s << _("32-float");
-		break;
-	case FormatInt24:
-		s << _("24-int");
-		break;
-	case FormatInt16:
-		s << _("16-int");
-		break;
-	}
-
-	s << X_("</span>");
-
-	format_label.set_markup (s.str ());
-}
-
-void
 ARDOUR_UI::update_cpu_load ()
 {
-	char buf[64];
-
-	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::resize_text_widgets
-	   should also be changed.
-	*/
-
 	float const c = AudioEngine::instance()->get_dsp_load ();
-	snprintf (buf, sizeof (buf), _("DSP: <span foreground=\"%s\">%5.1f%%</span>"), c >= 90 ? X_("red") : X_("green"), c);
-	cpu_load_label.set_markup (buf);
-	_dsp_load_adjustment->set_value (c);
-    
+    _dsp_load_adjustment->set_value (c);
+	    
     stringstream ss;
     ss << (int)c;
     _dsp_load_label->set_text ( ss.str() + "%" );
-}
-
-void
-ARDOUR_UI::update_buffer_load ()
-{
-	char buf[256];
-
-	uint32_t const playback = _session ? _session->playback_load () : 100;
-	uint32_t const capture = _session ? _session->capture_load () : 100;
-
-	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::resize_text_widgets
-	   should also be changed.
-	*/
-	
-	if (_session) {
-		snprintf (
-			buf, sizeof (buf),
-			_("Buffers: <span foreground=\"green\">p:</span><span foreground=\"%s\">%" PRIu32 "%%</span> "
-			           "<span foreground=\"green\">c:</span><span foreground=\"%s\">%" PRIu32 "%%</span>"),
-			playback <= 5 ? X_("red") : X_("green"),
-			playback,
-			capture <= 5 ? X_("red") : X_("green"),
-			capture
-			);
-
-		buffer_load_label.set_markup (buf);
-	} else {
-		buffer_load_label.set_text ("");
-	}
 }
 
 void
@@ -1301,7 +1150,6 @@ ARDOUR_UI::update_disk_space()
 	}
 
 	boost::optional<framecnt_t> opt_frames = _session->available_capture_duration();
-	char buf[64];
 	framecnt_t fr = _session->frame_rate();
 
 	if (fr == 0) {
@@ -1311,10 +1159,8 @@ ARDOUR_UI::update_disk_space()
 
 	if (!opt_frames) {
 		/* Available space is unknown */
-		snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">Unknown</span>"));
         result = "Unknown";
 	} else if (opt_frames.get_value_or (0) == max_framecnt) {
-		snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">24hrs+</span>"));
         result = "24hrs+";
     } else {
 		rec_enabled_streams = 0;
@@ -1335,22 +1181,12 @@ ARDOUR_UI::update_disk_space()
 		hrs  = frames / (fr * 3600);
 
 		if (hrs > 24) {
-			snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">&gt;24 hrs</span>"));
             result =">24hrs";
         } else {
 			frames -= hrs * fr * 3600;
 			mins = frames / (fr * 60);
 			frames -= mins * fr * 60;
 			secs = frames / fr;
-			
-			bool const low = (hrs == 0 && mins <= 30);
-			
-			snprintf (
-				buf, sizeof(buf),
-				_("Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"),
-				low ? X_("red") : X_("green"),
-				hrs, mins, secs
-				);
             
             stringstream ss;
             ss << hrs << "h " << mins << "m ";
@@ -1358,7 +1194,6 @@ ARDOUR_UI::update_disk_space()
 		}
 	}
 
-	disk_space_label.set_markup (buf);
     _hd_remained_time_label->set_text(result);
 }
 
@@ -1374,51 +1209,6 @@ ARDOUR_UI::update_disk_usage ()
     stringstream ss;
     ss << hd_buffer;
     _hd_load_label->set_text ( ss.str() + "%" );
-}
-
-void
-ARDOUR_UI::update_timecode_format ()
-{
-	char buf[64];
-
-	if (_session) {
-		bool matching;
-		TimecodeSlave* tcslave;
-		SyncSource sync_src = Config->get_sync_source();
-
-		if ((sync_src == LTC || sync_src == MTC) && (tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
-			matching = (tcslave->apparent_timecode_format() == _session->config.get_timecode_format());
-		} else {
-			matching = true;
-		}
-			
-		snprintf (buf, sizeof (buf), S_("Timecode|TC: <span foreground=\"%s\">%s</span>"),
-			  matching ? X_("green") : X_("red"),
-			  Timecode::timecode_format_name (_session->config.get_timecode_format()).c_str());
-	} else {
-		snprintf (buf, sizeof (buf), "TC: n/a");
-	}
-
-	timecode_format_label.set_markup (buf);
-}	
-
-gint
-ARDOUR_UI::update_wall_clock ()
-{
-	time_t now;
-	struct tm *tm_now;
-	static int last_min = -1;
-
-	time (&now);
-	tm_now = localtime (&now);
-	if (last_min != tm_now->tm_min) {
-		char buf[16];
-		sprintf (buf, "%02d:%02d", tm_now->tm_hour, tm_now->tm_min);
-		wall_clock_label.set_text (buf);
-		last_min = tm_now->tm_min;
-	}
-
-	return TRUE;
 }
 
 void
@@ -1878,14 +1668,13 @@ ARDOUR_UI::transport_record (bool roll)
 				msg.run ();
 				return;
 			}
-                        if (Profile->get_trx()) {
-                                roll = trx_record_enable_all_tracks ();
-                        }
+            
+            if ( Profile->get_trx() )
+                 roll = trx_record_enable_all_tracks ();
+            
+            transport_roll ();
 			_session->maybe_enable_record ();
-			if (roll) {
-				transport_roll ();
-			}
-			break;
+		    break;
 		case Session::Recording:
 			if (roll) {
 				_session->request_stop();
@@ -4278,8 +4067,7 @@ ARDOUR_UI::disconnect_from_engine ()
 	} else {
 		AudioEngine::instance()->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 	}
-	
-	update_sample_rate (0);
+
 	return 0;
 }
 
@@ -4297,7 +4085,6 @@ ARDOUR_UI::reconnect_to_engine ()
 		return -1;
 	}
 	
-	update_sample_rate (0);
 	return 0;
 }
 

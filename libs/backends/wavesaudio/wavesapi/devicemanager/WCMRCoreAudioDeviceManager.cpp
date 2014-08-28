@@ -2562,7 +2562,7 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceMaxInputChannels(DeviceID deviceId, u
     OSStatus err = kAudioHardwareNoError;
     UInt32 propSize = 0;
     inputChannels = 0;
-    
+
     // 1. Get property cannels input size.
     err = AudioDeviceGetPropertyInfo (deviceId, 0, 1/* Input */, kAudioDevicePropertyStreamConfiguration, &propSize, NULL);
     if (err == kAudioHardwareNoError)
@@ -2618,7 +2618,7 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceMaxOutputChannels(DeviceID deviceId, 
     OSStatus err = kAudioHardwareNoError;
     UInt32 propSize = 0;
     outputChannels = 0;
-    
+
     //! 1. Get property cannels output size.
     err = AudioDeviceGetPropertyInfo (deviceId, 0, 0/* Output */, kAudioDevicePropertyStreamConfiguration, &propSize, NULL);
     if (err == kAudioHardwareNoError)
@@ -2900,6 +2900,11 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & d
 		return retVal;
 	}
 
+    if (m_CurrentDevice && m_CurrentDevice->DeviceName () == deviceName) {
+        sampleRates.assign(m_CurrentDevice->SamplingRates().begin(), m_CurrentDevice->SamplingRates().end() );
+        return retVal;
+    }
+    
     DeviceInfo devInfo;
     retVal = GetDeviceInfoByName(deviceName, devInfo);
     
@@ -2972,6 +2977,11 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceBufferSizesImpl(const std::string & d
 		bufferSizes = m_NoneDevice->BufferSizes();
 		return retVal;
 	}
+    
+    if (m_CurrentDevice && m_CurrentDevice->DeviceName () == deviceName) {
+        bufferSizes.assign(m_CurrentDevice->BufferSizes().begin(), m_CurrentDevice->BufferSizes().end() );
+        return retVal;
+    }
     
     DeviceInfo devInfo;
     retVal = GetDeviceInfoByName(deviceName, devInfo);
