@@ -450,29 +450,17 @@ BarController::expose (GdkEventExpose* /*event*/)
 
 	double xpos = -1;
 	std::string const label = get_label (xpos);
-
-/*	if (!label.empty()) {
+	if (!label.empty()) {
 		
+		int twidth, theight;
 		layout->set_text (label);
-		
-		int width, height, x;
-		layout->get_pixel_size (width, height);
+		layout->get_pixel_size (twidth, theight);
 
-		if (xpos == -1) {
-			x = max (3, 1 + (x2 - (width/2)));
-			x = min (darea.get_width() - width - 3, (int) lrint (xpos));
-		} else {
-			x = lrint (darea.get_width() * xpos);
-		}
-
-                c = get_style()->get_text (get_state());
-                r = c.get_red_p ();
-                g = c.get_green_p ();
-                b = c.get_blue_p ();
-                context->set_source_rgb (r, g, b);
-                context->move_to (x, (darea.get_height()/2) - (height/2));
-                layout->show_in_cairo_context (context);
-	}*/
+		c = get_style()->get_text (get_state());
+		CairoWidget::set_source_rgb_a (cr, c, 1.0);
+		context->move_to ( (fract > 0.5) ? w - twidth/0.7 : twidth/0.7, (darea.get_height()/2) - (theight/2));
+		layout->show_in_cairo_context (context);
+	}
 	
 	return true;
 }
