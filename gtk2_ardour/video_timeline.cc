@@ -736,15 +736,18 @@ VideoTimeLine::find_xjadeo () {
 		_xjadeo_bin = getenv("XJREMOTE");
 	} else if (find_file (Searchpath(Glib::getenv("PATH")), X_("xjremote"), xjadeo_file_path)) {
 		_xjadeo_bin = xjadeo_file_path;
+	} else if (find_file (Searchpath(Glib::getenv("PATH")), X_("xjadeo"), xjadeo_file_path)) {
+		_xjadeo_bin = xjadeo_file_path;
 	}
+#ifdef __APPLE__
+	else if (Glib::file_test(X_("/Applications/Xjadeo.app/Contents/MacOS/xjremote"), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
+		_xjadeo_bin = X_("/Applications/Xjadeo.app/Contents/MacOS/xjremote");
+	}
+	else if (Glib::file_test(X_("/Applications/Jadeo.app/Contents/MacOS/xjremote"), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
+		_xjadeo_bin = X_("/Applications/Jadeo.app/Contents/MacOS/xjremote");
+	}
+#endif
 #ifdef PLATFORM_WINDOWS
-	/* old xjadeo, typo in key <= 0.7.6 */
-	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSSxjadeo", 0, KEY_READ, &key))
-			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-			)
-	{
-		_xjadeo_bin = std::string(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "xjadeo.exe", 0));
-	}
 	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\xjadeo", 0, KEY_READ, &key))
 			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
 			)
@@ -753,18 +756,13 @@ VideoTimeLine::find_xjadeo () {
 	}
 	else if (program_files && Glib::file_test(g_build_filename(program_files, "xjadeo", "xjadeo.exe", 0), Glib::FILE_TEST_EXISTS))
 	{
-		_xjadeo_bin = std::string(g_build_filename(program_files, "harvid", "xjadeo.exe", 0));
+		_xjadeo_bin = std::string(g_build_filename(program_files, "xjadeo", "xjadeo.exe", 0));
 	}
-#endif
-	/* generic fallbacks to try */
-#ifdef __APPLE__
-	else if (Glib::file_test(X_("/Applications/Jadeo.app/Contents/MacOS/xjremote"), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
-		_xjadeo_bin = X_("/Applications/Jadeo.app/Contents/MacOS/xjremote");
-	}
-#endif
+	/* generic fallback to try */
 	else if (Glib::file_test(X_("C:\\Program Files\\xjadeo\\xjadeo.exe"), Glib::FILE_TEST_EXISTS)) {
 		_xjadeo_bin = X_("C:\\Program Files\\xjadeo\\xjadeo.exe");
 	}
+#endif
 	else  {
 		_xjadeo_bin = X_("");
 		warning << _("Video-monitor 'xjadeo' was not found. Please install http://xjadeo.sf.net/ "
