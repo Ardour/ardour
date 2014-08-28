@@ -328,7 +328,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	PeakData::PeakDatum xmax;
 	PeakData::PeakDatum xmin;
 	int32_t to_read;
-	uint32_t nread;
+	ssize_t nread;
 	framecnt_t zero_fill = 0;
 
 	boost::scoped_ptr<FdFileDescriptor> peakfile_descriptor(new FdFileDescriptor (peakpath, false, 0664));
