@@ -551,28 +551,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void use_menubar_as_top_menubar ();
 	void build_menu_bar ();
 
-	Gtk::Label   wall_clock_label;
-	gint update_wall_clock ();
-
-	Gtk::Label   disk_space_label;
 	void update_disk_space ();
     void update_disk_usage ();
 
-	Gtk::Label   timecode_format_label;
-
-	Gtk::Label   cpu_load_label;
 	void update_cpu_load ();
-
-	Gtk::Label   buffer_load_label;
-	void update_buffer_load ();
-
-	Gtk::Label   sample_rate_label;
-	void update_sample_rate (ARDOUR::framecnt_t);
-
-	Gtk::Label    format_label;
-    void update_format ();
-
-    void update_timecode_format ();
 	
 	gint every_second ();
 	gint every_point_one_seconds ();
@@ -743,13 +725,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool check_audioengine();
 	void audioengine_setup ();
 
-	void display_message (const char *prefix, gint prefix_len,
-			Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, Glib::RefPtr<Gtk::TextBuffer::Tag> mtag,
-			const char *msg);
-	Gtk::Label status_bar_label;
-    bool status_bar_button_press (GdkEventButton*);
-	Gtk::ToggleButton error_log_button;
-
 	void loading_message (const std::string& msg);
 
 	PBD::ScopedConnectionList forever_connections;
@@ -771,7 +746,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	bool click_button_clicked (GdkEventButton *);
 
-	VisibilityGroup _status_bar_visibility;
 	Gtk::Adjustment* _dsp_load_adjustment;
     Gtk::Adjustment* _hd_load_adjustment;
     Gtk::Label* _dsp_load_label;
@@ -790,8 +764,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void successful_graph_sort ();
 	bool _feedback_exists;
-
-	void resize_text_widgets ();
 
     std::string _announce_string;
     void check_announcements ();

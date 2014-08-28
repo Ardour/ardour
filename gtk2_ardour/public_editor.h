@@ -356,15 +356,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	static const int vertical_spacing;
 	static const int horizontal_spacing;
 
-#ifdef TOP_MENUBAR
-	/*
-	 * This is needed for OS X primarily
-	 * but also any other OS that uses a single
-	 * top menubar instead of per window menus
-	 */
-	virtual Gtk::HBox& get_status_bar_packer() = 0;
-#endif
-
 	virtual ArdourCanvas::Group* get_trackview_group () const = 0;
 	virtual ArdourCanvas::Group* get_time_bars_group () const = 0;
 	virtual ArdourCanvas::Group* get_track_canvas_group () const = 0;

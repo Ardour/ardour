@@ -281,14 +281,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void export_region ();
 
 	void add_toplevel_controls (Gtk::Container&);
-#ifdef TOP_MENUBAR
-	/*
-	 * This is needed for OS X primarily
-	 * but also any other OS that uses a single
-	 * top menubar instead of per window menus
-	 */
-	Gtk::HBox& get_status_bar_packer()  { return _status_bar_hpacker; }
-#endif
 
 	void               set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
@@ -1988,15 +1980,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Glib::RefPtr<Gtk::Action>              redo_action;
 
 	void history_changed ();
-
-#ifdef TOP_MENUBAR
-	/*
-	 * This is needed for OS X primarily
-	 * but also any other OS that uses a single
-	 * top menubar instead of per window menus
-	 */
-	Gtk::HBox&      _status_bar_hpacker;
-#endif
 
 	Editing::EditPoint _edit_point;
 

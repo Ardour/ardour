@@ -272,15 +272,6 @@ Editor::Editor ()
 	, edit_controls_vbox (get_v_box ("edit_controls_vbox"))
 	, controls_layout (get_layout ("controls_layout"))
 	, time_bars_vbox (get_v_box ("time_bars_vbox"))
-#ifdef TOP_MENUBAR
-	/*
-	 * This is needed for OS X primarily
-	 * but also any other OS that uses a single
-	 * top menubar instead of per window menus
-	 */
-	, _status_bar_hpacker (get_h_box ("menu_bar_base"))
-#endif
-
 	  /* the values here don't matter: layout widgets
 	     reset them as needed.
 	  */
