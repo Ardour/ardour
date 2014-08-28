@@ -532,7 +532,8 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 	}
 	int tnh = 0;
 	if (_session && _session->config.get_track_name_number()) {
-		tnh = 4 + _session->track_number_decimals() * 8;
+		// NB numbers are rotated 90deg. on the meterbridge
+		tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_with_of_digit_0_to_9()
 	}
 	namebx.set_size_request(18, nh + tnh);
 	namenumberbx.set_size_request(18, nh + tnh);
@@ -768,7 +769,9 @@ MeterStrip::name_changed () {
 			number_label.set_text (PBD::to_string (abs(_route->track_number ()), std::dec));
 			number_label.show();
 		}
-		number_label.set_size_request(18, 4 + _session->track_number_decimals() * 8);
+		const int tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_width_of_digit_0_to_9()
+		// NB numbers are rotated 90deg. on the meterbridge -> use height
+		number_label.set_size_request(18, tnh);
 	} else {
 		number_label.hide();
 	}
