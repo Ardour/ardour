@@ -92,15 +92,15 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
     
     // HANDLERS WHICH MUST BE DEFINED in inheriting class for DnD support
     // define in inheriting class if you want custom drag icon to be set
-    virtual void handle_route_drag_begin(const Glib::RefPtr<Gdk::DragContext>& context) {};
+    virtual void handle_route_drag_begin(const Glib::RefPtr<Gdk::DragContext>&) {};
 	// define in inheriting class if you want actions on dnd end
-	virtual void handle_route_drag_end(const Glib::RefPtr<Gdk::DragContext>& context) {};
+	virtual void handle_route_drag_end(const Glib::RefPtr<Gdk::DragContext>&) {};
     // define this in inheriting class to provide the responce on a draging above the widget
-    virtual bool handle_route_drag_motion(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time) { context->drag_refuse(time); return false; };
+    virtual bool handle_route_drag_motion(const Glib::RefPtr<Gdk::DragContext>& context, int, int, guint time) { context->drag_refuse(time); return false; };
     // define this in inheriting class to provide the responce on a leaving the widget with drag
-    virtual void handle_route_drag_leave(const Glib::RefPtr<Gdk::DragContext>& context, guint time) {};
+    virtual void handle_route_drag_leave(const Glib::RefPtr<Gdk::DragContext>&, guint) {};
     // define this in inheriting class to provide the responce and actions on the destination side
-    virtual void handle_route_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time) {context->drop_finish(false, time); };
+    virtual void handle_route_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int, int, const Gtk::SelectionData&, guint, guint time) {context->drop_finish(false, time); };
     
 	bool is_track() const;
 	bool is_audio_track() const;
