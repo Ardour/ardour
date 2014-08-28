@@ -180,10 +180,32 @@ ardour_config_search_path ()
 	static Searchpath search_path;
 
 	if (search_path.empty()) {
+		// Start by adding the user's personal config folder
 		search_path += user_config_directory();
 #ifdef PLATFORM_WINDOWS
+		// On Windows, add am intermediate configuration folder
+		// (one that's guaranteed to be writable by all users).
+		const gchar* const *all_users_folder = g_get_system_config_dirs();
+		// Despite its slightly odd name, the above returns a single entry which
+		// corresponds to 'All Users' on Windows (according to the documentation)
+
+		if (all_users_folder) {
+			std::string writable_all_users_path = all_users_folder[0];
+			writable_all_users_path += "\\";
+			writable_all_users_path += PROGRAM_NAME;
+			writable_all_users_path += "\\.config";
+#ifdef _WIN64
+			writable_all_users_path += "\\win64";
+#else
+			writable_all_users_path += "\\win32";
+#endif
+			search_path += writable_all_users_path;
+		}
+
+		// now add a suitable config path from the bundle
 		search_path += windows_search_path ();
 #endif
+		// finally, add any paths from ARDOUR_CONFIG_PATH if it exists
 		std::string s = Glib::getenv("ARDOUR_CONFIG_PATH");
 		if (s.empty()) {
 			std::cerr << _("ARDOUR_CONFIG_PATH not set in environment\n");
