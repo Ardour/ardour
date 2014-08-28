@@ -670,11 +670,10 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 	if (!_act_on_release) {
 		if (_action) {
 			_action->activate ();
-			return true;
 		}
 	}
 
-	return false;
+	return true;
 }
 
 bool
@@ -698,12 +697,11 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 		if (_act_on_release) {
 			if (_action) {
 				_action->activate ();
-				return true;
 			}
 		}
 	}
 
-	return false;
+	return true;
 }
 
 void

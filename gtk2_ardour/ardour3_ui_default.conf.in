@@ -195,7 +195,7 @@
     <Option name="processor fader: led active" value="78cb4eff"/>
     <Option name="processor fader: text" value="aaaaa3ff"/>
     <Option name="processor fader: text active" value="eeeeecff"/>
-    <Option name="processor postfader: fill" value="354537ff"/>
+    <Option name="processor postfader: fill" value="455a3cff"/>
     <Option name="processor postfader: fill active" value="254528ff"/>
     <Option name="processor postfader: led" value="26550eff"/>
     <Option name="processor postfader: led active" value="78cb4eff"/>
@@ -203,7 +203,7 @@
     <Option name="processor postfader: text active" value="eeeeecff"/>
     <Option name="processor control button: fill" value="222222ff"/>
     <Option name="processor control button: fill active" value="333333ff"/>
-    <Option name="processor control button: led" value="224400ff"/>
+    <Option name="processor control button: led" value="5d90b0ff"/>
     <Option name="processor control button: led active" value="99cc00ff"/>
     <Option name="processor control button: text" value="ffffffff"/>
     <Option name="processor control button: text active" value="ffffffff"/>
