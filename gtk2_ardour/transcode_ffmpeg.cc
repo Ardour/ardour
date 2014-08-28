@@ -30,6 +30,12 @@
 #include "transcode_ffmpeg.h"
 #include "utils_videotl.h"
 
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+#include <shlobj.h> // CSIDL_*
+#include "pbd/windows_special_dirs.h"
+#endif
+
 #include "i18n.h"
 
 using namespace PBD;
@@ -51,22 +57,68 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 	debug_enable = false;
 #endif
 
+#ifdef PLATFORM_WINDOWS
+	HKEY key;
+	DWORD size = PATH_MAX;
+	char tmp[PATH_MAX+1];
+	const char *program_files = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
+#endif
+
 	std::string ff_file_path;
-	if (find_file (Searchpath(Glib::getenv("PATH")), X_("ffmpeg_harvid"), ff_file_path)) { ffmpeg_exe = ff_file_path; }
+	if (find_file (Searchpath(Glib::getenv("PATH")), X_("ffmpeg_harvid"), ff_file_path)) {
+		ffmpeg_exe = ff_file_path;
+	}
+#ifdef PLATFORM_WINDOWS
+	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\harvid", 0, KEY_READ, &key))
+			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+			)
+	{
+		ffmpeg_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), X_("ffmpeg.exe"));
+		ffprobe_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), X_("ffprobe.exe"));
+	}
+	if (Glib::file_test(ffmpeg_exe, Glib::FILE_TEST_EXISTS)) {
+		;
+	}
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "ffmpeg.exe", 0), Glib::FILE_TEST_EXISTS)) {
+		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffmpeg.exe", 0);
+	}
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "ffmpeg", "ffmpeg.exe", 0), Glib::FILE_TEST_EXISTS)) {
+		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffmpeg.exe", 0);
+	}
+	/* generic fallbacks to try */
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffmpeg.exe"), Glib::FILE_TEST_EXISTS)) {
-		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
+		ffmpeg_exe = X_("C:\\Program Files\\harvid\\ffmpeg.exe");
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
+	} else {
+		ffmpeg_exe = X_("");
 	}
+#endif
 
-	if (find_file (Searchpath(Glib::getenv("PATH")), X_("ffprobe_harvid"), ff_file_path)) { ffprobe_exe = ff_file_path; }
+	if (find_file (Searchpath(Glib::getenv("PATH")), X_("ffprobe_harvid"), ff_file_path)) {
+		ffprobe_exe = ff_file_path;
+	}
+#ifdef PLATFORM_WINDOWS
+	if (Glib::file_test(ffprobe_exe, Glib::FILE_TEST_EXISTS)) {
+		;
+	}
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "ffprobe.exe", 0), Glib::FILE_TEST_EXISTS)) {
+		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffprobe.exe", 0);
+	}
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "ffmpeg", "ffprobe.exe", 0), Glib::FILE_TEST_EXISTS)) {
+		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffprobe.exe", 0);
+	}
+	/* generic fallbacks to try */
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffprobe.exe"), Glib::FILE_TEST_EXISTS)) {
-		ffprobe_exe = X_("C:\\Program Files\\ffmpeg\\ffprobe.exe");
+		ffprobe_exe = X_("C:\\Program Files\\harvid\\ffprobe.exe");
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\ffmpeg\\ffprobe.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffprobe_exe = X_("C:\\Program Files\\ffmpeg\\ffprobe.exe");
+	} else {
+		ffprobe_exe = X_("");
 	}
+#endif
 
 	if (ffmpeg_exe.empty() || ffprobe_exe.empty()) {
 		warning << string_compose(
