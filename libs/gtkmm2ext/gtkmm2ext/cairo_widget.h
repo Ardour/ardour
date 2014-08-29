@@ -39,7 +39,7 @@ public:
 	Gtkmm2ext::ActiveState active_state() const { return _active_state; }
 	Gtkmm2ext::VisualState visual_state() const { return _visual_state; }
 	
-	/* derived widgets can override these two to catch 
+	/* derived widgets can override these two to catch
 	   changes in active & visual state
 	*/
 	
@@ -79,6 +79,7 @@ protected:
 	virtual bool on_expose_event (GdkEventExpose *);
 	void on_size_allocate (Gtk::Allocation &);
 	void on_state_changed (Gtk::StateType);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 	Gdk::Color get_parent_bg ();
 	
 	/* this is an additional virtual "on_..." method. Glibmm does not
@@ -96,6 +97,8 @@ protected:
 
   private:
 	Glib::SignalProxyProperty _name_proxy;
+	sigc::connection _parent_style_change;
+	Widget * _current_parent;
 };
 
 #endif

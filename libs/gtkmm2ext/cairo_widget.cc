@@ -41,12 +41,14 @@ CairoWidget::CairoWidget ()
 	, _need_bg (true)
 	, _grabbed (false)
 	, _name_proxy (this, X_("name"))
+	, _current_parent (0)
 {
 	_name_proxy.connect (sigc::mem_fun (*this, &CairoWidget::on_name_changed));
 }
 
 CairoWidget::~CairoWidget ()
 {
+	if (_parent_style_change) _parent_style_change.disconnect();
 }
 
 bool
@@ -54,14 +56,13 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 {
 	cairo_t* cr = gdk_cairo_create (get_window ()->gobj());
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cairo_clip (cr);
+	cairo_clip_preserve (cr);
 
-	/* paint expose area the color of the parent window bg 
+	/* paint expose area the color of the parent window bg
 	*/
 	
 	Gdk::Color bg (get_parent_bg());
 	
-	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_set_source_rgb (cr, bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
 	cairo_fill (cr);
 
@@ -103,28 +104,38 @@ CairoWidget::on_size_allocate (Gtk::Allocation& alloc)
 Gdk::Color
 CairoWidget::get_parent_bg ()
 {
-        Widget* parent;
+	Widget* parent;
 
 	parent = get_parent ();
 
-        while (parent) {
+	while (parent) {
 		void* p = g_object_get_data (G_OBJECT(parent->gobj()), has_cairo_widget_background_info);
 
 		if (p) {
 			Glib::RefPtr<Gtk::Style> style = parent->get_style();
+			if (_current_parent != parent) {
+				if (_parent_style_change) _parent_style_change.disconnect();
+				_current_parent = parent;
+				_parent_style_change = parent->signal_style_changed().connect (mem_fun (*this, &CairoWidget::on_style_changed));
+			}
 			return style->get_bg (get_state());
 		}
-		
+
 		if (!parent->get_has_window()) {
 			parent = parent->get_parent();
 		} else {
 			break;
 		}
-        }
+	}
 
-        if (parent && parent->get_has_window()) {
+	if (parent && parent->get_has_window()) {
+		if (_current_parent != parent) {
+			if (_parent_style_change) _parent_style_change.disconnect();
+			_current_parent = parent;
+			_parent_style_change = parent->signal_style_changed().connect (mem_fun (*this, &CairoWidget::on_style_changed));
+		}
 		return parent->get_style ()->get_bg (parent->get_state());
-        } 
+	}
 
 	return get_style ()->get_bg (get_state());
 }
@@ -162,10 +173,16 @@ CairoWidget::set_active (bool yn)
 }
 
 void
+CairoWidget::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
+{
+	queue_draw();
+}
+
+void
 CairoWidget::on_state_changed (Gtk::StateType)
 {
 	/* this will catch GTK-level state changes from calls like
-	   ::set_sensitive() 
+	   ::set_sensitive()
 	*/
 
 	if (get_state() == Gtk::STATE_INSENSITIVE) {
@@ -186,7 +203,7 @@ CairoWidget::set_draw_background (bool yn)
 void
 CairoWidget::provide_background_for_cairo_widget (Gtk::Widget& w, const Gdk::Color& bg)
 {
-	/* set up @w to be able to provide bg information to 
+	/* set up @w to be able to provide bg information to
 	   any CairoWidgets that are packed inside it.
 	*/
 
