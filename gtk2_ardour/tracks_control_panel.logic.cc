@@ -1243,6 +1243,21 @@ TracksControlPanel::on_session_settings (WavesButton*)
 	_session_settings_tab_button.set_active(true);
 }
 
+void
+TracksControlPanel::on_device_error ()
+{
+    std::string message = _("Device cannot operate properly. Switched to None device.");
+    
+    MessageDialog msg (message,
+                       false,
+                       Gtk::MESSAGE_WARNING,
+                       Gtk::BUTTONS_OK,
+                       true);
+    
+    msg.set_position (Gtk::WIN_POS_MOUSE);
+    msg.set_keep_above (true);
+    msg.run ();
+}
 
 void
 TracksControlPanel::on_multi_out (WavesButton*)
