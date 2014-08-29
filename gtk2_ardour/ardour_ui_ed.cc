@@ -91,6 +91,8 @@ ARDOUR_UI::create_editor ()
         _bit_depth_button = &editor->get_waves_button("bit_depth_button");
         _sample_rate_button = &editor->get_waves_button("sample_rate_button");
         _frame_rate_button = &editor->get_waves_button("frame_rate_button");
+        
+        _tracks_button = &editor->get_waves_button("tracks_button");
     }
 
 	catch (failed_constructor& err) {
@@ -100,11 +102,18 @@ ARDOUR_UI::create_editor ()
     _bit_depth_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_bit_depth_button));
     _sample_rate_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_sample_rate_button));
     _frame_rate_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_frame_rate_button));
+    _tracks_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_tracks_button));
 
 	editor->Realized.connect (sigc::mem_fun (*this, &ARDOUR_UI::editor_realized));
 	editor->signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), true));
 
 	return 0;
+}
+
+void
+ARDOUR_UI::on_tracks_button (WavesButton*)
+{
+    about->show ();
 }
 
 void
