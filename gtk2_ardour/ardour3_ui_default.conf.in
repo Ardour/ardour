@@ -159,7 +159,7 @@
     <Option name="tempo bar" value="70727fcc"/>
     <Option name="tempo marker" value="f2425bff"/>
     <Option name="time axis frame" value="000000ff"/>
-    <Option name="selected time axis frame" value="000000ff"/>
+    <Option name="selected time axis frame" value="ee0000ff"/>
     <Option name="time stretch fill" value="e2b5b596"/>
     <Option name="time stretch outline" value="63636396"/>
     <Option name="tracknumber label: fill" value="444444ff"/>

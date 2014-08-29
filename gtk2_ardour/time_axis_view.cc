@@ -180,8 +180,11 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.show ();
 
 	time_axis_vbox.pack_start (controls_ebox, true, true, 0);
-	time_axis_vbox.pack_end (*separator, false, false);
+//	time_axis_vbox.pack_end (*separator, false, false);
 	time_axis_vbox.show();
+
+	time_axis_frame.add(time_axis_vbox);
+	time_axis_frame.show();
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
 
@@ -231,7 +234,7 @@ TimeAxisView::hide ()
 	_canvas_display->hide ();
 
 	if (control_parent) {
-		control_parent->remove (time_axis_vbox);
+		control_parent->remove (time_axis_frame);
 		control_parent = 0;
 	}
 
@@ -263,11 +266,11 @@ guint32
 TimeAxisView::show_at (double y, int& nth, VBox *parent)
 {
 	if (control_parent) {
-		control_parent->reorder_child (time_axis_vbox, nth);
+		control_parent->reorder_child (time_axis_frame, nth);
 	} else {
 		control_parent = parent;
-		parent->pack_start (time_axis_vbox, false, false);
-		parent->reorder_child (time_axis_vbox, nth);
+		parent->pack_start (time_axis_frame, false, false);
+		parent->reorder_child (time_axis_frame, nth);
 	}
 
 	_order = nth;
@@ -525,7 +528,7 @@ TimeAxisView::set_height (uint32_t h)
 		h = preset_height (HeightSmall);
 	}
 
-	time_axis_vbox.property_height_request () = h;
+	time_axis_frame.property_height_request () = h;
 	height = h;
 
 	char buf[32];
@@ -768,13 +771,21 @@ TimeAxisView::set_selected (bool yn)
 	Selectable::set_selected (yn);
 
 	if (_selected) {
-		controls_ebox.set_name (controls_base_selected_name);
-		time_axis_vbox.set_name (controls_base_selected_name);
-		controls_vbox.set_name (controls_base_selected_name);
+		time_axis_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
+		time_axis_frame.set_name ("MixerStripSelectedFrame");
+
+//		time_axis_frame.set_name (controls_base_selected_name);
+//		controls_ebox.set_name (controls_base_selected_name);
+//		time_axis_vbox.set_name (controls_base_selected_name);
+//		controls_vbox.set_name (controls_base_selected_name);
 	} else {
-		controls_ebox.set_name (controls_base_unselected_name);
-		time_axis_vbox.set_name (controls_base_unselected_name);
-		controls_vbox.set_name (controls_base_unselected_name);
+		time_axis_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
+		time_axis_frame.set_name (controls_base_unselected_name);
+
+//		time_axis_frame.set_name (controls_base_unselected_name);
+//		controls_ebox.set_name (controls_base_unselected_name);
+//		time_axis_vbox.set_name (controls_base_unselected_name);
+//		controls_vbox.set_name (controls_base_unselected_name);
 		hide_selection ();
 
 		/* children will be set for the yn=true case. but when deselecting
@@ -786,6 +797,9 @@ TimeAxisView::set_selected (bool yn)
 			(*i)->set_selected (false);
 		}
 	}
+
+	time_axis_frame.show();
+
 }
 
 void
@@ -831,7 +845,8 @@ TimeAxisView::show_selection (TimeSelection& ts)
 	double x1;
 	double x2;
 	double y2;
-	SelectionRect *rect;
+	SelectionRect *rect;	time_axis_frame.show();
+
 
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->show_selection (ts);

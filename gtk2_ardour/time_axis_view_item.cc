@@ -205,7 +205,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		if (Config->get_show_name_highlight()) {
 			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
 		} else {
-			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM));
+			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM|ArdourCanvas::Rectangle::TOP));
 		}
 
 		if (_recregion) {

@@ -190,7 +190,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	controls_base_selected_name = X_("AutomationTrackControlsBaseSelected");
 	controls_base_unselected_name = X_("AutomationTrackControlsBase");
-	controls_ebox.set_name (controls_base_unselected_name);
+	time_axis_frame.set_name (controls_base_unselected_name);
 
 	/* ask for notifications of any new RegionViews */
 	if (show_regions) {
