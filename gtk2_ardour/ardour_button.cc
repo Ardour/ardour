@@ -321,13 +321,13 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		ArdourCanvas::set_source_rgba (cr, text_color);
 
 		if ( (_elements & Menu) == Menu) {
-			cairo_move_to (cr, text_margin, get_height()/2.0 - _text_height/2.0);
+			cairo_move_to (cr, rint(text_margin), rint((get_height() - _text_height)/2.0));
 			pango_cairo_show_layout (cr, _layout->gobj());
 		} else if ( (_elements & Indicator)  == Indicator) {
 			if (_led_left) {
-				cairo_move_to (cr, text_margin + _diameter + 4, get_height()/2.0 - _text_height/2.0);
+				cairo_move_to (cr, rint(text_margin + _diameter + 4),rint((get_height() - _text_height)/2.0));
 			} else {
-				cairo_move_to (cr, text_margin, get_height()/2.0 - _text_height/2.0);
+				cairo_move_to (cr, rint(text_margin), rint((get_height() - _text_height)/2.0));
 			}
 			pango_cairo_show_layout (cr, _layout->gobj());
 		} else {
@@ -351,16 +351,13 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 			// TODO honor left/right text_margin with min/max()
 
-			cairo_move_to (cr, xa, ya);
+			cairo_move_to (cr, rint(xa), rint(ya));
 			pango_cairo_update_layout(cr, _layout->gobj());
 			pango_cairo_show_layout (cr, _layout->gobj());
 			cairo_restore (cr);
-
-			/* use old center'ed layout for follow up items - until rotation/aligment code is completed */
-			cairo_move_to (cr, (get_width() - _text_width)/2.0, get_height()/2.0 - _text_height/2.0);
 		}
 		cairo_restore (cr);
-	} 
+	}
 
 	//Menu "triangle"
 	if (((_elements & Menu)==Menu)) {
