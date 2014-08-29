@@ -12,6 +12,7 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/data_type.h"
 
+#include "pbd/pthread_utils.h"
 #include "pbd/error.h"
 #include "i18n.h"
 
@@ -1511,14 +1512,17 @@ EngineStateController::push_current_state_to_backend(bool start)
             }
         }
         
+		std::cout << "EngineStateController::Setting device: " << _current_state->device_name << std::endl;
         if ((_current_state->device_name != backend->device_name()) && backend->set_device_name (_current_state->device_name)) {
             error << string_compose (_("Cannot set device name to %1"), get_current_device_name()) << endmsg;
         }
         
+		std::cout << "EngineStateController::Setting device sample rate " << _current_state->sample_rate << std::endl;
         if (backend->set_sample_rate (_current_state->sample_rate )) {
             error << string_compose (_("Cannot set sample rate to %1"), get_current_sample_rate()) << endmsg;
         }
         
+		std::cout << "EngineStateController::Setting device buffer size " << _current_state->buffer_size << std::endl;
         if (backend->set_buffer_size (_current_state->buffer_size )) {
             error << string_compose (_("Cannot set buffer size to %1"), get_current_buffer_size()) << endmsg;
         }
