@@ -215,60 +215,68 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	if (!_fixed_diameter) {
 		_diameter = std::min (get_width(), get_height());
 	}
+
+#if 0 // clear background - "transparent" round corners
+	/* Alas, neither get_style()->get_bg nor get_parent()->get_style()->get_bg
+	 * does work for all places in ardour where a button is used.
+	 * gtk style are sadly inconsisent throughout ardour.
+	 * -> disabled for now.
+	 */
+	if (get_parent ()) {
+		Gdk::Color c = get_parent ()->get_style ()->get_bg (get_parent ()->get_state ());
+		CairoWidget::set_source_rgb_a (cr, c);
+		cairo_rectangle (cr, 0, 0, get_width(), get_height());
+		cairo_fill(cr);
+	}
+#endif
 	
-	//border and background fill
+	// background fill
 	if ((_elements & Body)==Body) {
-		if (_elements & Edge) {
-
-			cairo_set_source_rgba (cr, 0, 0, 0, 1);
-			rounded_function(cr, 0, 0, get_width(), get_height(), _corner_radius);
-			cairo_fill (cr);
-
-			rounded_function (cr, 1, 1, get_width()-2, get_height()-2, _corner_radius - 1.5);
-		} else {
-			rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
-		}
-
+		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
 		if (active_state() == Gtkmm2ext::ImplicitActive && !((_elements & Indicator)==Indicator)) {
-			
 			ArdourCanvas::set_source_rgba (cr, fill_inactive_color);
 			cairo_fill (cr);
-
-			//border
-			cairo_set_line_width (cr, 2.0);
-			rounded_function (cr, 2, 2, get_width()-4, get_height()-4, _corner_radius - 1.5);
-			ArdourCanvas::set_source_rgba (cr, fill_active_color);
-			cairo_stroke (cr);
-				
 		} else if ( (active_state() == Gtkmm2ext::ExplicitActive) && !((_elements & Indicator)==Indicator) ) {
-
 			//background color
 			ArdourCanvas::set_source_rgba (cr, fill_active_color);
 			cairo_fill (cr);
-
 		} else {  //inactive, or it has an indicator
-
 			//background color
 			ArdourCanvas::set_source_rgba (cr, fill_inactive_color);
-			cairo_fill (cr);
-
 		}
+		cairo_fill (cr);
 	}
 
 	//show the "convex" or "concave" gradient
 	if (!_flat_buttons) {
 		if ( active_state() == Gtkmm2ext::ExplicitActive && !((_elements & Indicator)==Indicator) ) {
 			//concave
-			float width = get_width();  float height = get_height();
 			cairo_set_source (cr, concave_pattern);
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, width-2, height-2, _corner_radius - 1.5);
+			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
 			cairo_fill (cr);
 		} else {
-			float width = get_width();  float height = get_height();
 			cairo_set_source (cr, convex_pattern);
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, width-2, height-2, _corner_radius - 1.5);
+			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
 			cairo_fill (cr);
 		}
+	}
+
+	// indicator border on top of gradient
+	if ((_elements & Body)==Body) {
+		if (active_state() == Gtkmm2ext::ImplicitActive && !((_elements & Indicator)==Indicator)) {
+			cairo_set_line_width (cr, 3.0);
+			rounded_function (cr, 1.5, 1.5, get_width() - 3, get_height() - 3, _corner_radius);
+			ArdourCanvas::set_source_rgba (cr, fill_active_color);
+			cairo_stroke (cr);
+		}
+	}
+
+	// draw edge
+	if ((_elements & (Body|Edge)) == (Body|Edge)) {
+		rounded_function (cr, .5, .5, get_width() - 1, get_height() - 1, _corner_radius);
+		cairo_set_source_rgba (cr, 0, 0, 0, 1);
+		cairo_set_line_width (cr, 1.0);
+		cairo_stroke(cr);
 	}
 
 	//Pixbuf, if any
@@ -414,7 +422,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 	// a transparent gray layer to indicate insensitivity
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
-		rounded_function (cr, 1, 1, get_width()-2, get_height()-2, _corner_radius);
+		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
 		cairo_set_source_rgba (cr, 0.505, 0.517, 0.525, 0.6);
 		cairo_fill (cr);
 	}
@@ -423,7 +431,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	if (ARDOUR::Config->get_widget_prelight()
 			&& !((visual_state() & Gtkmm2ext::Insensitive))) {
 		if (_hovering) {
-			rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
+			rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
 			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
 			cairo_fill (cr);
 		}
@@ -431,17 +439,22 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 	//user is currently pressing the button.  black outline helps to indicate this
 	if ( _grabbed && !(_elements & (Inactive|Menu))) {
-		cairo_set_line_width(cr,1);
-		rounded_function (cr, 1, 1, get_width()-2, get_height()-2, _corner_radius - 1);
-		cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
+		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
+		cairo_set_line_width(cr, 2);
+		cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, .5); // XXX no longer 'black'
 		cairo_stroke (cr);
 	}
 	
 	//some buttons (like processor boxes) can be selected  (so they can be deleted).  Draw a white box around them
 	if (visual_state() & Gtkmm2ext::Selected) {
-		cairo_set_line_width(cr,2);
-		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
+#if 0 // outline, edge + 1px outside
+		cairo_set_line_width(cr, 2);
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.75);
+#else // replace edge (if any)
+		cairo_set_line_width(cr, 1);
+		cairo_set_source_rgba (cr, 1, 1, 1, 1.0);
+#endif
+		rounded_function (cr, 0.5, 0.5, get_width() - 1, get_height() - 1, _corner_radius);
 		cairo_stroke (cr);
 	}
 	
