@@ -109,6 +109,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, _ignore_set_layer_display (false)
 {
 	number_label.set_name("route button");
+	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	number_label.set_alignment(.5, .5);
 	number_label.set_fallthrough_to_parent (true);
 

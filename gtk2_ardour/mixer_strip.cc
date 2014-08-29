@@ -280,6 +280,7 @@ MixerStrip::init ()
 	width_hide_box.pack_end (hide_button, false, true);
 
 	number_label.set_text ("-");
+	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	number_label.set_no_show_all ();
 	number_label.set_name ("tracknumber label");
 	number_label.set_fixed_colors (0x80808080, 0x80808080);

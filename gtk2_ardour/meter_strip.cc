@@ -172,6 +172,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_changed();
 
 	name_label.set_corner_radius(2);
+	name_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	name_label.set_name("meterbridge label");
 	name_label.set_angle(-90.0);
 	name_label.layout()->set_ellipsize (Pango::ELLIPSIZE_END);
@@ -182,6 +183,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	ARDOUR_UI::instance()->set_tip (*level_meter, _route->name());
 
 	number_label.set_corner_radius(2);
+	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	number_label.set_name("tracknumber label");
 	number_label.set_angle(-90.0);
 	number_label.layout()->set_width(18 * PANGO_SCALE);
