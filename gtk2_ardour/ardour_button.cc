@@ -216,20 +216,6 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		_diameter = std::min (get_width(), get_height());
 	}
 
-#if 0 // clear background - "transparent" round corners
-	/* Alas, neither get_style()->get_bg nor get_parent()->get_style()->get_bg
-	 * does work for all places in ardour where a button is used.
-	 * gtk style are sadly inconsisent throughout ardour.
-	 * -> disabled for now.
-	 */
-	if (get_parent ()) {
-		Gdk::Color c = get_parent ()->get_style ()->get_bg (get_parent ()->get_state ());
-		CairoWidget::set_source_rgb_a (cr, c);
-		cairo_rectangle (cr, 0, 0, get_width(), get_height());
-		cairo_fill(cr);
-	}
-#endif
-	
 	// background fill
 	if ((_elements & Body)==Body) {
 		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
