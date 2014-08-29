@@ -144,7 +144,7 @@ RouteUI::init ()
 
 	rec_enable_button = manage (new ArdourButton);
 	rec_enable_button->set_name ("record enable button");
-	rec_enable_button->set_markup ("<span weight=\"bold\" color=\"#cc0000\">\u2B24</span>");
+	rec_enable_button->set_markup ("<span weight=\"bold\" color=\"#f46f6f\">\u2B24</span>");
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 
 	rec_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun (*this, &RouteUI::blink_rec_display));
