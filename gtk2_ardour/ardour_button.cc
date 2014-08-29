@@ -430,7 +430,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	}
 
 	//user is currently pressing the button.  black outline helps to indicate this
-	if ( _grabbed && !((_elements & Menu)==Menu) && _action) {
+	if ( _grabbed && !(_elements & (Inactive|Menu))) {
 		cairo_set_line_width(cr,1);
 		rounded_function (cr, 1, 1, get_width()-2, get_height()-2, _corner_radius - 1);
 		cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
@@ -911,7 +911,7 @@ ArdourButton::on_key_release_event (GdkEventKey *ev) {
 bool
 ArdourButton::on_enter_notify_event (GdkEventCrossing* ev)
 {
-	_hovering = true;
+	_hovering = (_elements & Inactive) ? false : true;
 
 	if (ARDOUR::Config->get_widget_prelight()) {
 		queue_draw ();

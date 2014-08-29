@@ -39,6 +39,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 		Indicator = 0x8,
 		unused = 0x10,
 		Menu = 0x20,
+		Inactive = 0x40, // no _action is defined AND state is not used
 	};
 
 	static Element default_elements;
