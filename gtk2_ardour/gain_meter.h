@@ -217,6 +217,7 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	gint meter_metrics_expose (GdkEventExpose *);
 	gint meter_ticks1_expose (GdkEventExpose *);
 	gint meter_ticks2_expose (GdkEventExpose *);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 
   private:
 

@@ -1056,6 +1056,13 @@ GainMeter::meter_ticks2_expose (GdkEventExpose *ev)
 	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks2_area);
 }
 
+void
+GainMeter::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
+{
+	gain_display.queue_draw();
+	peak_display.queue_draw();
+}
+
 boost::shared_ptr<PBD::Controllable>
 GainMeterBase::get_controllable()
 {
@@ -1121,6 +1128,7 @@ GainMeter::meter_configuration_changed (ChanCount c)
 
 	setup_meters();
 	meter_clear_pattern_cache(4);
+	on_style_changed(Glib::RefPtr<Gtk::Style>());
 }
 
 void
