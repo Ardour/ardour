@@ -774,18 +774,19 @@ TimeAxisView::set_selected (bool yn)
 		time_axis_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 		time_axis_frame.set_name ("MixerStripSelectedFrame");
 
-//		time_axis_frame.set_name (controls_base_selected_name);
-//		controls_ebox.set_name (controls_base_selected_name);
-//		time_axis_vbox.set_name (controls_base_selected_name);
-//		controls_vbox.set_name (controls_base_selected_name);
+		//time_axis_frame.set_name (controls_base_selected_name);
+		controls_ebox.set_name (controls_base_selected_name);
+		time_axis_vbox.set_name (controls_base_selected_name);
+		controls_vbox.set_name (controls_base_selected_name);
 	} else {
 		time_axis_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 		time_axis_frame.set_name (controls_base_unselected_name);
 
-//		time_axis_frame.set_name (controls_base_unselected_name);
-//		controls_ebox.set_name (controls_base_unselected_name);
-//		time_axis_vbox.set_name (controls_base_unselected_name);
-//		controls_vbox.set_name (controls_base_unselected_name);
+		//time_axis_frame.set_name (controls_base_unselected_name);
+		controls_ebox.set_name (controls_base_unselected_name);
+		time_axis_vbox.set_name (controls_base_unselected_name);
+		controls_vbox.set_name (controls_base_unselected_name);
+
 		hide_selection ();
 
 		/* children will be set for the yn=true case. but when deselecting
