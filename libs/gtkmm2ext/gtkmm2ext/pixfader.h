@@ -61,6 +61,7 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 
 	void on_state_changed (Gtk::StateType);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
+	Gdk::Color get_parent_bg ();
 
 	enum Orientation {
 		VERT,
@@ -88,6 +89,9 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 	float display_span ();
 	void set_adjustment_from_event (GdkEventButton *);
 	void update_unity_position ();
+
+	sigc::connection _parent_style_change;
+	Widget * _current_parent;
 };
 
 

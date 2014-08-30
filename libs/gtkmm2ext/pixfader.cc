@@ -46,6 +46,7 @@ PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int
 	, _hovering (false)
 	, last_drawn (-1)
 	, dragging (false)
+	, _current_parent (0)
 {
 	bg_gradient = 0;
 	fg_gradient = 0;
@@ -75,15 +76,17 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
 	cairo_t* cr = context->cobj();
 
+	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	cairo_clip_preserve (cr);
+
 	Gdk::Color fg_col = get_style()->get_fg (get_state());
 
 	float ds = display_span ();
 	float w = get_width();
 	float h = get_height();
 
-	//fill in the bg rect ... 
-	Gdk::Color c = get_style()->get_bg (Gtk::STATE_PRELIGHT);  //why prelight?  Shouldn't we be using the parent's color?
-	CairoWidget::set_source_rgb_a (cr, c);
+	Gdk::Color bg (get_parent_bg());
+	CairoWidget::set_source_rgb_a (cr, bg);
 	cairo_rectangle (cr, 0, 0, w, h);
 	cairo_fill(cr);
 
@@ -538,4 +541,31 @@ PixFader::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
 	}
 
 	queue_draw ();
+}
+
+Gdk::Color
+PixFader::get_parent_bg ()
+{
+	Widget* parent;
+
+	parent = get_parent ();
+
+	while (parent) {
+		if (!parent->get_has_window()) {
+			parent = parent->get_parent();
+		} else {
+			break;
+		}
+	}
+
+	if (parent && parent->get_has_window()) {
+		if (_current_parent != parent) {
+			if (_parent_style_change) _parent_style_change.disconnect();
+			_current_parent = parent;
+			_parent_style_change = parent->signal_style_changed().connect (mem_fun (*this, &PixFader::on_style_changed));
+		}
+		return parent->get_style ()->get_bg (parent->get_state());
+	}
+
+	return get_style ()->get_bg (get_state());
 }
