@@ -68,6 +68,7 @@ PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int
 
 PixFader::~PixFader ()
 {
+	if (_parent_style_change) _parent_style_change.disconnect();
 }
 
 bool
