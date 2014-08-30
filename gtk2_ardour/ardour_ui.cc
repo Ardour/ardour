@@ -151,6 +151,7 @@ UIConfiguration *ARDOUR_UI::ui_config = 0;
 sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
+sigc::signal<void>      ARDOUR_UI::FPSUpdate;
 sigc::signal<void, framepos_t, bool, framepos_t> ARDOUR_UI::Clock;
 sigc::signal<void>      ARDOUR_UI::CloseAllDialogs;
 
@@ -992,6 +993,7 @@ If you still wish to quit, please use the\n\n\
 		second_connection.disconnect ();
 		point_one_second_connection.disconnect ();
 		point_zero_something_second_connection.disconnect();
+		fps_connection.disconnect();
 	}
 
 	delete ARDOUR_UI::instance()->video_timeline;
@@ -1137,6 +1139,35 @@ ARDOUR_UI::every_point_zero_something_seconds ()
 		}
 	}
 	return TRUE;
+}
+
+gint
+ARDOUR_UI::every_fps ()
+{
+	FPSUpdate(); /* EMIT_SIGNAL */
+	return TRUE;
+}
+
+void
+ARDOUR_UI::set_fps_timeout_connection ()
+{
+	unsigned int interval = 40;
+	if (!_session) return;
+	if (_session->timecode_frames_per_second() != 0) {
+		/* ideally we'll use a select() to sleep and not accumulate
+		 * idle time to provide a regular periodic signal.
+		 * See linux_vst_gui_support.cc 'elapsed_time_ms'.
+		 * However, that'll require a dedicated thread and cross-thread
+		 * signals to the GUI Thread..
+		 */
+		interval = floor(500. /* update twice per FPS, since Glib::signal_timeout is very irregular */
+				* _session->frame_rate() / _session->nominal_frame_rate()
+				/ _session->timecode_frames_per_second()
+				);
+		interval = std::max(8u, interval); // at most 120Hz.
+	}
+	fps_connection.disconnect();
+	fps_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_fps), interval);
 }
 
 void

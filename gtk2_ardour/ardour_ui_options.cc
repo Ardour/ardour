@@ -367,6 +367,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "sync-source") {
 
 		synchronize_sync_source_and_video_pullup ();
+		set_fps_timeout_connection ();
 
 	} else if (p == "show-track-meters") {
 		editor->toggle_meter_updating();
@@ -426,7 +427,11 @@ ARDOUR_UI::session_parameter_changed (std::string p)
 {
 	if (p == "native-file-data-format" || p == "native-file-header-format") {
 		update_format ();
+	} else if (p == "timecode-format") {
+		set_fps_timeout_connection ();
 	} else if (p == "video-pullup" || p == "timecode-format") {
+		set_fps_timeout_connection ();
+
 		synchronize_sync_source_and_video_pullup ();
 		reset_main_clocks ();
 		editor->queue_visual_videotimeline_update();

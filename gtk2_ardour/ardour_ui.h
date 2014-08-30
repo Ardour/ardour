@@ -190,6 +190,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	/** point_zero_something_seconds -- currently 25Hz ^= 40ms */
 	static sigc::signal<void>      SuperRapidScreenUpdate;
 
+	/** every_fps -- see set_fps_timeout_connection() 25Hz < x < 120Hz */
+	static sigc::signal<void>      FPSUpdate;
+
 	/** Emitted frequently with the audible frame, false, and the edit point as
 	 *  parameters respectively.
 	 *
@@ -548,10 +551,14 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	gint every_second ();
 	gint every_point_one_seconds ();
 	gint every_point_zero_something_seconds ();
+	gint every_fps ();
 
 	sigc::connection second_connection;
 	sigc::connection point_one_second_connection;
 	sigc::connection point_zero_something_second_connection;
+	sigc::connection fps_connection;
+
+	void set_fps_timeout_connection ();
 
 	void open_session ();
 	void open_recent_session ();
