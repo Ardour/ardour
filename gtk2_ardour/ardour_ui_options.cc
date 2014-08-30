@@ -364,12 +364,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ActionManager::map_some_state ("Transport", "ToggleClick", &RCConfiguration::get_clicking);
 	} else if (p == "use-video-sync") {
 		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_use_video_sync));
-	} else if (p == "video-pullup" || p == "timecode-format") {
-
-		synchronize_sync_source_and_video_pullup ();
-		reset_main_clocks ();
-		editor->queue_visual_videotimeline_update();
-
 	} else if (p == "sync-source") {
 
 		synchronize_sync_source_and_video_pullup ();
@@ -432,6 +426,10 @@ ARDOUR_UI::session_parameter_changed (std::string p)
 {
 	if (p == "native-file-data-format" || p == "native-file-header-format") {
 		update_format ();
+	} else if (p == "video-pullup" || p == "timecode-format") {
+		synchronize_sync_source_and_video_pullup ();
+		reset_main_clocks ();
+		editor->queue_visual_videotimeline_update();
 	}
 }
 
