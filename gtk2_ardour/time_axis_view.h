@@ -82,14 +82,13 @@ class ArdourDialog;
  */
 class TimeAxisView : public virtual AxisView
 {
-  private:
+	private:
 	enum NamePackingBits {
 		NameLabelPacked = 0x1,
 		NameEntryPacked = 0x2
 	};
 
-  public:
-
+	public:
 	TimeAxisView(ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
 
@@ -101,14 +100,14 @@ class TimeAxisView : public virtual AxisView
 	/** @return maximum allowable value of order */
 	static int max_order () { return _max_order; }
 
-        virtual void enter_internal_edit_mode () {}
-        virtual void leave_internal_edit_mode () {}
+	virtual void enter_internal_edit_mode () {}
+	virtual void leave_internal_edit_mode () {}
 
 	ArdourCanvas::Container* canvas_display () { return _canvas_display; }
 	ArdourCanvas::Container* ghost_group () { return _ghost_group; }
 
 	/** @return effective height (taking children into account) in canvas units, or
-	    0 if this TimeAxisView has not yet been shown */
+		0 if this TimeAxisView has not yet been shown */
 	uint32_t effective_height () const { return _effective_height; }
 
 	/** @return y position, or -1 if hidden */
@@ -145,7 +144,7 @@ class TimeAxisView : public virtual AxisView
 	virtual void reset_visual_state ();
 
 	std::pair<TimeAxisView*, double> covers_y_position (double) const;
-        bool covered_by_y_range (double y0, double y1) const;
+	bool covered_by_y_range (double y0, double y1) const;
 
 	virtual void step_height (bool);
 
@@ -173,7 +172,7 @@ class TimeAxisView : public virtual AxisView
 		return boost::shared_ptr<ARDOUR::Region> ();
 	}
 
-  	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
+	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
 
 	virtual void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable*>&);
 	virtual void get_inverted_selectables (Selection&, std::list<Selectable *>& results);
@@ -196,10 +195,10 @@ class TimeAxisView : public virtual AxisView
 	Children get_child_list ();
 
 	SelectionRect* get_selection_rect(uint32_t id);
-	
+
 	static uint32_t preset_height (Height);
 
-  protected:
+	protected:
 	/* The Standard LHS Controls */
 	Gtk::HBox              controls_hbox;
 	Gtk::Table             controls_table;
@@ -208,12 +207,12 @@ class TimeAxisView : public virtual AxisView
 	Gtk::VBox              controls_vbox;
 	Gtk::VBox              name_vbox;
 	Gtk::VBox              time_axis_vbox;
-	Gtk::Frame              time_axis_frame;
+	Gtk::Frame             time_axis_frame;
 	Gtk::HBox              name_hbox;
 	Gtk::HBox              top_hbox;
 	Gtk::Label             name_label;
-        bool                  _name_editing;
-        uint32_t               height;  /* in canvas units */
+	bool                  _name_editing;
+	uint32_t               height;  /* in canvas units */
 	std::string            controls_base_unselected_name;
 	std::string            controls_base_selected_name;
 	Gtk::Menu*             display_menu; /* The standard LHS Track control popup-menus */
@@ -230,15 +229,15 @@ class TimeAxisView : public virtual AxisView
 	double                _y_position;
 	PublicEditor&         _editor;
 
-        virtual bool can_edit_name() const;
+	virtual bool can_edit_name() const;
 
 	bool name_entry_key_release (GdkEventKey *ev);
 	bool name_entry_key_press (GdkEventKey *ev);
 	bool name_entry_focus_out (GdkEventFocus *ev);
 
-        Gtk::Entry* name_entry;
-        void begin_name_edit ();
-        void end_name_edit (int);
+	Gtk::Entry* name_entry;
+	void begin_name_edit ();
+	void end_name_edit (int);
 
 	/* derived classes can override these */
 
@@ -286,22 +285,21 @@ class TimeAxisView : public virtual AxisView
 	void build_size_menu ();
 
 private:
- 	Gtk::VBox*            control_parent;
+	Gtk::VBox*            control_parent;
 	int                  _order;
 	uint32_t             _effective_height;
 	double               _resize_drag_start;
 	GdkCursor*           _preresize_cursor;
 	bool                 _have_preresize_cursor;
-        bool                  _ebox_release_can_act;
+	bool                  _ebox_release_can_act;
 
 	static uint32_t button_height;
 	static uint32_t extra_height;
 	static int const _max_order;
-	
+
 	void compute_heights ();
 	bool maybe_set_cursor (int y);
 
 }; /* class TimeAxisView */
 
 #endif /* __ardour_gtk_time_axis_h__ */
-
