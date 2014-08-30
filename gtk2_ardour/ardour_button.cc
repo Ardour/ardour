@@ -290,7 +290,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	}
 
 	int text_margin;
-	if (get_width() < 75) {
+	if (get_width() < 75 || (_elements & Menu) ) {
 		text_margin = 5;
 	} else {
 		text_margin = 10;
@@ -311,7 +311,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 			pango_cairo_show_layout (cr, _layout->gobj());
 		} else if ( (_elements & Indicator)  == Indicator) {
 			if (_led_left) {
-				cairo_move_to (cr, rint(text_margin + _diameter + 4),rint((get_height() - _text_height)/2.0));
+				cairo_move_to (cr, rint(text_margin + _diameter + 4), rint((get_height() - _text_height)/2.0));
 			} else {
 				cairo_move_to (cr, rint(text_margin), rint((get_height() - _text_height)/2.0));
 			}
@@ -337,7 +337,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 			// TODO honor left/right text_margin with min/max()
 
-			cairo_move_to (cr, rint(xa), rint(ya));
+			cairo_move_to (cr, rint(.5 + xa), rint(ya));
 			pango_cairo_update_layout(cr, _layout->gobj());
 			pango_cairo_show_layout (cr, _layout->gobj());
 			cairo_restore (cr);
@@ -347,22 +347,25 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 	//Menu "triangle"
 	if (((_elements & Menu)==Menu)) {
-	
-		cairo_save (cr);
-
+		const float trih = ceil(_diameter/2.0);
+		const float triw2 = ceil(.577 * _diameter/2.0); // 1/sqrt(3) Equilateral triangle
 		//menu arrow
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.4);
-		cairo_move_to(cr, get_width() - ((_diameter/2.0) + 6.0), get_height()/2.0 +_diameter/4);
-		cairo_rel_line_to(cr, -_diameter/2, -_diameter/2);
-		cairo_rel_line_to(cr, _diameter, 0);
+		cairo_move_to(cr, get_width() - triw2 - 3. , rint((get_height() + trih) / 2.0));
+		cairo_rel_line_to(cr, -triw2, -trih);
+		cairo_rel_line_to(cr, 2. * triw2, 0);
 		cairo_close_path(cr);
+
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.4);
-		cairo_fill_preserve(cr);
+		cairo_fill(cr);
+
+		cairo_move_to(cr, get_width() - triw2 - 3 , rint((get_height() + trih) / 2.0));
+		cairo_rel_line_to(cr, .5 - triw2, .5 - trih);
+		cairo_rel_line_to(cr, 2. * triw2 - 1, 0);
+		cairo_close_path(cr);
 		cairo_set_source_rgba (cr, 0, 0, 0, 0.8);
-		cairo_set_line_width(cr, 0.5);
+		cairo_set_line_width(cr, 1);
 		cairo_stroke(cr);
-	
-		cairo_restore (cr);
 	}
 	
 	//Indicator LED
@@ -512,7 +515,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		xpad = 6;
 	}
 
-        if ((_elements & Indicator) && _fixed_diameter) {
+	if ((_elements & Indicator) && _fixed_diameter) {
 		if (_pixbuf) {
 			req->width = _pixbuf->get_width() + lrint (_diameter) + xpad;
 			req->height = max (_pixbuf->get_height(), (int) lrint (_diameter)) + ypad;
@@ -520,7 +523,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 			req->width = _text_width + lrint (_diameter) + xpad * 2; // margin left+right * 2
 			req->height = max (_text_height, (int) lrint (_diameter)) + ypad;
 		}
-        } else {
+	} else {
 		if (_pixbuf) {
 			req->width = _pixbuf->get_width() + xpad;
 			req->height = _pixbuf->get_height() + ypad;
@@ -528,6 +531,10 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 			req->width = _text_width + xpad;
 			req->height = _text_height + ypad;
 		}
+	}
+
+	if ((_elements & Menu)) {
+		req->width += _diameter + 4;
 	}
 	req->width += _corner_radius;
 }
