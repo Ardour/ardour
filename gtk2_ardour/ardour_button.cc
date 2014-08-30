@@ -618,15 +618,13 @@ ArdourButton::build_patterns ()
 		cairo_pattern_destroy (led_inset_pattern);
 	}
 	
-	float width = get_width();  float height = get_height();
-
 	//convex gradient
-	convex_pattern = cairo_pattern_create_linear (0.0, 0, 0.0,  height);
+	convex_pattern = cairo_pattern_create_linear (0.0, 0, 0.0,  get_height());
 	cairo_pattern_add_color_stop_rgba (convex_pattern, 0.0, 0,0,0, 0.0);
 	cairo_pattern_add_color_stop_rgba (convex_pattern, 1.0, 0,0,0, 0.35);
 
 	//concave gradient
-	concave_pattern = cairo_pattern_create_linear (0.0, 0, 0.0,  height);
+	concave_pattern = cairo_pattern_create_linear (0.0, 0, 0.0,  get_height());
 	cairo_pattern_add_color_stop_rgba (concave_pattern, 0.0, 0,0,0, 0.5);
 	cairo_pattern_add_color_stop_rgba (concave_pattern, 0.7, 0,0,0, 0.0);
 

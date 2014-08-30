@@ -43,9 +43,9 @@ BarController::BarController (Gtk::Adjustment& adj,
 			      boost::shared_ptr<PBD::Controllable> mc)
 
 	: adjustment (adj)
-	  , binding_proxy (mc)
-	  , _hovering (false)
-	  , spinner (adjustment)
+	, binding_proxy (mc)
+	, spinner (adjustment)
+	, _hovering (false)
 {			  
 	_style = LeftToRight;
 	grabbed = false;

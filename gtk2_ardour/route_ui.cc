@@ -790,7 +790,7 @@ RouteUI::monitor_disk_press (GdkEventButton*)
 bool
 RouteUI::monitor_disk_release (GdkEventButton* ev)
 {
-	monitor_release (ev, MonitorDisk);
+	return monitor_release (ev, MonitorDisk);
 }
 
 bool
