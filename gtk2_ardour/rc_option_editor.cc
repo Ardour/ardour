@@ -2172,7 +2172,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (S_("GUI"),
 		    new BoolOption (
 			    "super-rapid-clock-update",
-			    _("update transport clock display every 40ms instead of every 100ms"),
+			    _("update transport clock display at FPS instead of every 100ms"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_super_rapid_clock_update),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_super_rapid_clock_update)
 			    ));

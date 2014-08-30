@@ -162,7 +162,7 @@ VideoMonitor::open (std::string filename)
 		state_connection = ARDOUR_UI::RapidScreenUpdate.connect (sigc::mem_fun (*this, &VideoMonitor::querystate));
 	}
 	sync_by_manual_seek = true;
-	clock_connection = ARDOUR_UI::SuperRapidScreenUpdate.connect (sigc::mem_fun (*this, &VideoMonitor::srsupdate));
+	clock_connection = ARDOUR_UI::FPSUpdate.connect (sigc::mem_fun (*this, &VideoMonitor::srsupdate));
 	xjadeo_sync_setup();
 }
 
@@ -570,7 +570,7 @@ VideoMonitor::xjadeo_sync_setup ()
 			process->write_to_stdin("jack connect\n");
 		} else {
 			process->write_to_stdin("jack disconnect\n");
-			clock_connection = ARDOUR_UI::SuperRapidScreenUpdate.connect (sigc::mem_fun (*this, &VideoMonitor::srsupdate));
+			clock_connection = ARDOUR_UI::FPSUpdate.connect (sigc::mem_fun (*this, &VideoMonitor::srsupdate));
 		}
 		sync_by_manual_seek = my_manual_seek;
 	}
