@@ -945,12 +945,24 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 	}
 
 	if (when == last_when && !force) {
+#if 0 // XXX return if no change and no change forced. verify Aug/2014
 		if (_mode != Timecode && _mode != MinSec) {
 			/* may need to force display of TC source
 			 * time, so don't return early.
 			 */
+			/* ^^ Why was that?,  delta times?
+			 * Timecode FPS, pull-up/down, etc changes
+			 * trigger a 'session_property_changed' which
+			 * eventually calls set(last_when, true)
+			 *
+			 * re-rendering the clock every 40ms or so just
+			 * because we can is not ideal.
+			 */
 			return;
 		}
+#else
+		return;
+#endif
 	}
 
 	if (!editing) {
