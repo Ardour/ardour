@@ -593,7 +593,7 @@ TimeAxisViewItem::set_height (double height)
 	}
 
 	if (frame) {
-		frame->set_y1 (height);
+		frame->set_y1 (height -1);
 		if (frame_handle_start) {
 			frame_handle_start->set_y1 (height);
 			frame_handle_end->set_y1 (height);
