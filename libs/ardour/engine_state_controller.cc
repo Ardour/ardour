@@ -1547,7 +1547,7 @@ EngineStateController::push_current_state_to_backend(bool start)
         
 		if (result) // error during device setup
 		{
-			//switch to None device and notify about hte issue
+			//switch to None device and notify about the issue
 			set_new_device_as_current ("None");
 			DeviceListChanged(false);
 			DeviceError();
@@ -1575,7 +1575,12 @@ EngineStateController::push_current_state_to_backend(bool start)
     }
     
 	if(start || (was_running && state_changed) ) {
-        if (AudioEngine::instance()->start () ) {
+        if (AudioEngine::instance()->start () && !AudioEngine::instance()->is_reset_requested() ) {
+			//switch to None device and notify about the issue
+			set_new_device_as_current ("None");
+			AudioEngine::instance()->start ();
+			DeviceListChanged(false);
+			DeviceError();
             return false;
         }
 	}

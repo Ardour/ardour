@@ -113,6 +113,9 @@ public:
     bool           is_realtime() const;
     bool           connected() const;
 
+	// for the user which hold state_lock to check if reset operation is pending
+	bool		   is_reset_requested() const { return g_atomic_int_get(&_hw_reset_request_count); }
+
     int set_device_name (const std::string&);
     int set_sample_rate (float);
     int set_buffer_size (uint32_t);
