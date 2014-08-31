@@ -178,6 +178,15 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	time_axis_frame.add(controls_ebox);
 	time_axis_frame.show();
 
+	HSeparator* separator = manage (new HSeparator());
+	separator->set_name("TrackSeparator");
+	separator->set_size_request(-1, 1);
+	separator->show();
+
+	time_axis_vbox.pack_start (time_axis_frame, true, true);
+	time_axis_vbox.pack_end (*separator, false, false);
+	time_axis_vbox.show();
+
 	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
 
 	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&TimeAxisView::erase_ghost, this, _1), gui_context());
@@ -258,11 +267,11 @@ guint32
 TimeAxisView::show_at (double y, int& nth, VBox *parent)
 {
 	if (control_parent) {
-		control_parent->reorder_child (time_axis_frame, nth);
+		control_parent->reorder_child (time_axis_vbox, nth);
 	} else {
 		control_parent = parent;
-		parent->pack_start (time_axis_frame, false, false);
-		parent->reorder_child (time_axis_frame, nth);
+		parent->pack_start (time_axis_vbox, false, false);
+		parent->reorder_child (time_axis_vbox, nth);
 	}
 
 	_order = nth;
@@ -520,7 +529,7 @@ TimeAxisView::set_height (uint32_t h)
 		h = preset_height (HeightSmall);
 	}
 
-	time_axis_frame.property_height_request () = h;
+	time_axis_vbox.property_height_request () = h;
 	height = h;
 
 	char buf[32];
@@ -767,11 +776,13 @@ TimeAxisView::set_selected (bool yn)
 		time_axis_frame.set_name ("MixerStripSelectedFrame");
 		controls_ebox.set_name (controls_base_selected_name);
 		controls_vbox.set_name (controls_base_selected_name);
+		time_axis_vbox.set_name (controls_base_selected_name);
 	} else {
 		time_axis_frame.set_shadow_type (Gtk::SHADOW_OUT);
 		time_axis_frame.set_name (controls_base_unselected_name);
 		controls_ebox.set_name (controls_base_unselected_name);
 		controls_vbox.set_name (controls_base_unselected_name);
+		time_axis_vbox.set_name (controls_base_unselected_name);
 
 		hide_selection ();
 

@@ -206,6 +206,7 @@ class TimeAxisView : public virtual AxisView
 	Glib::RefPtr<Gtk::SizeGroup> controls_button_size_group;
 	Gtk::EventBox          controls_ebox;
 	Gtk::VBox              controls_vbox;
+	Gtk::VBox              time_axis_vbox;
 	Gtk::Frame             time_axis_frame;
 	Gtk::HBox              name_hbox;
 	Gtk::HBox              top_hbox;
