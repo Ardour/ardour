@@ -45,9 +45,12 @@ ControlSet::add_control(boost::shared_ptr<Control> ac)
 
 	ac->ListMarkedDirty.connect_same_thread (_control_connections, boost::bind (&ControlSet::control_list_marked_dirty, this));
 
-	ac->list()->InterpolationChanged.connect_same_thread (
-		_list_connections, boost::bind (&ControlSet::control_list_interpolation_changed, this, ac->parameter(), _1)
-	                                                      );
+	if (ac->list()) {
+		ac->list()->InterpolationChanged.connect_same_thread (
+			_list_connections,
+			boost::bind (&ControlSet::control_list_interpolation_changed,
+			             this, ac->parameter(), _1));
+	}
 }
 
 void
@@ -95,6 +98,9 @@ ControlSet::find_next_event (double now, double end, ControlEvent& next_event) c
 		ControlList::const_iterator i;
 		boost::shared_ptr<const ControlList> alist (li->second->list());
 		ControlEvent cp (now, 0.0f);
+		if (!alist) {
+			continue;
+		}
 
 		for (i = lower_bound (alist->begin(), alist->end(), &cp, ControlList::time_comparator);
 		     i != alist->end() && (*i)->when < end; ++i) {
@@ -121,8 +127,11 @@ ControlSet::clear_controls ()
 	_control_connections.drop_connections ();
 	_list_connections.drop_connections ();
 
-	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li)
-		li->second->list()->clear();
+	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li) {
+		if (li->second->list()) {
+			li->second->list()->clear();
+		}
+	}
 }
 
 } // namespace Evoral

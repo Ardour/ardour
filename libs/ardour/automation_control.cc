@@ -85,7 +85,7 @@ AutomationControl::set_list (boost::shared_ptr<Evoral::ControlList> list)
 void
 AutomationControl::set_automation_state (AutoState as)
 {
-	if (as != alist()->automation_state()) {
+	if (_list && as != alist()->automation_state()) {
 
 		alist()->set_automation_state (as);
 
