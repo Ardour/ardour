@@ -1577,6 +1577,7 @@ edit your ardour.rc file to set the\n\
 gint
 RouteUI::idle_remove_this_route (RouteUI *rui)
 {
+	DisplaySuspender ds;
 	rui->_session->remove_route (rui->route());
 	return false;
 }
