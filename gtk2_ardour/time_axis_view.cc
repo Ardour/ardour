@@ -36,6 +36,8 @@
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"
 
+#include "ardour/profile.h"
+
 #include "ardour_ui.h"
 #include "ardour_dialog.h"
 #include "global_signals.h"
@@ -69,6 +71,7 @@ uint32_t TimeAxisView::button_height = 0;
 uint32_t TimeAxisView::extra_height = 0;
 int const TimeAxisView::_max_order = 512;
 PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
+Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::controls_meters_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
@@ -126,7 +129,13 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	delete an_entry;
 
 	name_hbox.pack_end (name_label, true, true);
-	name_hbox.set_size_request(100, 0); // XXX min header width (if fader is not visible)
+
+	// set min. track-header width if fader is not visible
+	if (ARDOUR::Profile->get_mixbus() ) {
+		name_hbox.set_size_request(100, 0);
+	} else {
+		name_hbox.set_size_request(90, 0);
+	}
 	name_hbox.show ();
 	name_label.show ();
 
@@ -134,7 +143,11 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_col_spacings (2);
 	controls_table.set_border_width (2);
 
-	controls_table.attach (name_hbox, 4, 5, 0, 2,  Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	if (ARDOUR::Profile->get_mixbus() ) {
+		controls_table.attach (name_hbox, 4, 5, 0, 2,  Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	} else {
+		controls_table.attach (name_hbox, 1, 2, 0, 2,  Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	}
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
 

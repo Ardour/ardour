@@ -200,6 +200,7 @@ class TimeAxisView : public virtual AxisView
 	static uint32_t preset_height (Height);
 
 	protected:
+	static Glib::RefPtr<Gtk::SizeGroup> controls_meters_size_group;
 	/* The Standard LHS Controls */
 	Gtk::Table             controls_table;
 	Glib::RefPtr<Gtk::SizeGroup> controls_button_size_group;
