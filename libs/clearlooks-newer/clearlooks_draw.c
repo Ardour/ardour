@@ -406,9 +406,9 @@ clearlooks_draw_entry (cairo_t *cr,
 	/* Draw the inner shadow */
 	if (params->focus)
 	{
-		/* ge_cairo_rounded_rectangle (cr, 2, 2, width-5, height-5, RADIUS-1, params->corners); */
+		ge_cairo_rounded_rectangle (cr, 2, 2, width-5, height-5, radius, params->corners);
 		ge_cairo_set_color (cr, &colors->spot[0]);
-		ge_cairo_stroke_rectangle (cr, 2, 2, width-5, height-5);
+		cairo_fill(cr);
 	}
 	else
 	{

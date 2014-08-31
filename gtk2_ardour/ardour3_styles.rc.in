@@ -644,7 +644,7 @@ style "small_entry" = "small_text"
 
 	base[NORMAL] = @@COLPREFIX@_base
 	base[ACTIVE] = @@COLPREFIX@_base
-	base[SELECTED] = @@COLPREFIX@_bg_selected
+	base[SELECTED] = @@COLPREFIX@_base
 }
 
 style "red_active_small_entry" = "small_entry"
