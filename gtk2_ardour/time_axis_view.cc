@@ -138,11 +138,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
 
-	HSeparator* separator = manage (new HSeparator());
-	separator->set_name("TrackSeparator");
-	separator->set_size_request(-1, 1);
-	separator->show();
-
 	controls_vbox.pack_start (controls_table, false, false);
 	controls_vbox.show ();
 
@@ -1099,38 +1094,26 @@ TimeAxisView::reset_height ()
 void
 TimeAxisView::compute_heights ()
 {
+	// TODO this function should be re-evaluated when font-scaling changes (!)
 	Gtk::Window window (Gtk::WINDOW_TOPLEVEL);
-	Gtk::Table two_row_table (2, 8);
 	Gtk::Table one_row_table (1, 8);
-	Button* buttons[5];
+	ArdourButton* test_button = manage (new ArdourButton);
 	const int border_width = 2;
-
-	const int separator_height = 2;
-	extra_height = (2 * border_width) + separator_height;
+	const int frame_height = 2;
+	extra_height = (2 * border_width) + frame_height;
 
 	window.add (one_row_table);
+	test_button->set_name ("mute button");
+	test_button->set_text (_("M"));
 
 	one_row_table.set_border_width (border_width);
-	one_row_table.set_row_spacings (0);
-	one_row_table.set_col_spacings (0);
-	one_row_table.set_homogeneous (true);
+	one_row_table.set_row_spacings (2);
+	one_row_table.set_col_spacings (2);
 
-	two_row_table.set_border_width (border_width);
-	two_row_table.set_row_spacings (0);
-	two_row_table.set_col_spacings (0);
-	two_row_table.set_homogeneous (true);
-
-	for (int i = 0; i < 5; ++i) {
-		buttons[i] = manage (new Button (X_("f")));
-		buttons[i]->set_name ("TrackMuteButton");
-	}
-
-	one_row_table.attach (*buttons[0], 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-
+	one_row_table.attach (*test_button, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	one_row_table.show_all ();
-	Gtk::Requisition req(one_row_table.size_request ());
 
-	// height required to show 1 row of buttons
+	Gtk::Requisition req(one_row_table.size_request ());
 	button_height = req.height;
 }
 
