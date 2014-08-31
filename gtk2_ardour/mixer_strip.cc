@@ -478,7 +478,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	gpm.set_type (rt->meter_type());
 	
 	mute_solo_table.attach (gpm.gain_display,0,1,1,2, EXPAND|FILL, EXPAND);
-	mute_solo_table.attach (gpm.peak_display,1,2,1,2);
+	mute_solo_table.attach (gpm.peak_display,1,2,1,2, EXPAND|FILL, EXPAND);
 
 	if (solo_button->get_parent()) {
 		mute_solo_table.remove (*solo_button);

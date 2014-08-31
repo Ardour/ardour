@@ -628,6 +628,8 @@ style "medium_bold_entry"  = "medium_bold_text"
 
 style "small_entry" = "small_text"
 {
+	xthickness = 3
+	ythickness = 3
 	fg[NORMAL] = @@COLPREFIX@_text
 	fg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
 	fg[SELECTED] = @@COLPREFIX@_fg_selected
@@ -637,8 +639,8 @@ style "small_entry" = "small_text"
 	text[SELECTED] = @@COLPREFIX@_fg_selected
 
 	bg[NORMAL] = @@COLPREFIX@_base
+	bg[ACTIVE] = @@COLPREFIX@_base
 	bg[SELECTED] = @@COLPREFIX@_base
-	bg[SELECTED] = @@COLPREFIX@_bg_selected
 
 	base[NORMAL] = @@COLPREFIX@_base
 	base[ACTIVE] = @@COLPREFIX@_base
@@ -647,8 +649,9 @@ style "small_entry" = "small_text"
 
 style "red_active_small_entry" = "small_entry"
 {
-	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
-	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+	fg[ACTIVE] = @@COLPREFIX@_text
+	fg[SELECTED] = @@COLPREFIX@_text
+	text[SELECTED] = @@COLPREFIX@_text
 }
 
 style "small_bold_entry" = "small_bold_text"
@@ -905,25 +908,17 @@ style "paler_bright_when_active" = "medium_text"
 	bg[ACTIVE] = lighter(@@COLPREFIX@_bright_indicator)
 }
 
-style "peak_display_peaked_entry" = "small_text"
+style "peak_display_peaked_entry" = "small_entry"
 {
-	fg[NORMAL] = @@COLPREFIX@_text
 	fg[ACTIVE] = @@COLPREFIX@_text
 	fg[SELECTED] = @@COLPREFIX@_text
-	text[NORMAL] = @@COLPREFIX@_text
-	text[ACTIVE] = @@COLPREFIX@_text
 	text[SELECTED] = @@COLPREFIX@_text
 
-        bg[NORMAL] = @@COLPREFIX@_bright_indicator
-        bg[ACTIVE] = @@COLPREFIX@_bright_indicator
-        bg[PRELIGHT] = @@COLPREFIX@_bright_indicator
-        bg[INSENSITIVE] = @@COLPREFIX@_bright_indicator
-        bg[SELECTED] = @@COLPREFIX@_bright_indicator
-        base[NORMAL] = @@COLPREFIX@_bright_indicator
-        base[ACTIVE] = @@COLPREFIX@_bright_indicator
-        base[PRELIGHT] = @@COLPREFIX@_bright_indicator
-        base[INSENSITIVE] = @@COLPREFIX@_bright_indicator
-        base[SELECTED] = @@COLPREFIX@_bright_indicator
+	base[NORMAL] = @@COLPREFIX@_bright_indicator
+	base[ACTIVE] = @@COLPREFIX@_bright_indicator
+	base[PRELIGHT] = @@COLPREFIX@_bright_indicator
+	base[INSENSITIVE] = @@COLPREFIX@_bright_indicator
+	base[SELECTED] = @@COLPREFIX@_bright_indicator
 }
 
 style "selected_strip_frame"
