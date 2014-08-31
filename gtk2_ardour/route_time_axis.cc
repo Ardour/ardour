@@ -105,7 +105,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, playlist_action_menu (0)
 	, mode_menu (0)
 	, color_mode_menu (0)
-	, gm (sess, true, 75, 20)
+	, gm (sess, true, 75, 14)
 	, _ignore_set_layer_display (false)
 {
 	number_label.set_name("route button");
@@ -252,13 +252,13 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	if (ARDOUR::Profile->get_mixbus()) {
 		controls_button_size_group->add_widget(route_group_button);
-		controls_table.attach (route_group_button, 2, 3, 3, 4, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		controls_table.attach (gm.get_gain_slider(), 3, 5, 2, 4, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+		controls_table.attach (route_group_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (gm.get_gain_slider(), 3, 5, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
 	}
 	else if (!ARDOUR::Profile->get_trx()) {
 		controls_button_size_group->add_widget(route_group_button);
-		controls_table.attach (route_group_button, 4, 5, 3, 4, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		controls_table.attach (gm.get_gain_slider(), 0, 2, 2, 4, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+		controls_table.attach (route_group_button, 4, 5, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (gm.get_gain_slider(), 0, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
 	}
 	
 	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
@@ -275,21 +275,21 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	label_view ();
 
 	if (ARDOUR::Profile->get_mixbus()) {
-		controls_table.attach (automation_button, 1, 2, 3, 4, Gtk::SHRINK, Gtk::SHRINK);
+		controls_table.attach (automation_button, 1, 2, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
 		controls_button_size_group->add_widget(automation_button);
 	}
 	else if (!ARDOUR::Profile->get_trx()) {
-		controls_table.attach (automation_button, 3, 4, 3, 4, Gtk::SHRINK, Gtk::SHRINK);
+		controls_table.attach (automation_button, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
 		controls_button_size_group->add_widget(automation_button);
 	}
 
 	if (is_track() && track()->mode() == ARDOUR::Normal) {
 		if (ARDOUR::Profile->get_mixbus()) {
-			controls_table.attach (playlist_button, 0, 1, 3, 4, Gtk::SHRINK, Gtk::SHRINK);
+			controls_table.attach (playlist_button, 0, 1, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
 			controls_button_size_group->add_widget(playlist_button);
 		}
 		else if (!ARDOUR::Profile->get_trx()) {
-			controls_table.attach (playlist_button, 2, 3, 3, 4, Gtk::SHRINK, Gtk::SHRINK);
+			controls_table.attach (playlist_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
 			controls_button_size_group->add_widget(playlist_button);
 		}
 	}
@@ -425,9 +425,9 @@ RouteTimeAxisView::update_track_number_visibility ()
 	}
 	if (show_label) {
 		if (ARDOUR::Profile->get_mixbus()) {
-			controls_table.attach (number_label, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+			controls_table.attach (number_label, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 1, 0);
 		} else {
-			controls_table.attach (number_label, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+			controls_table.attach (number_label, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 1, 0);
 		}
 		const int tnw = std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_width_of_digit_0_to_9()
 		number_label.set_size_request(3 + tnw, -1);

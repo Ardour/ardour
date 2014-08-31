@@ -28,6 +28,7 @@
 
 #include "ardour/automation_control.h"
 #include "ardour/event_type_map.h"
+#include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 
@@ -170,18 +171,20 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	/* add the buttons */
 	controls_table.remove (name_hbox);
-	controls_table.attach (hide_button, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK);
-	controls_table.attach (name_label,  1, 3, 1, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 2, 0);
-	controls_table.attach (auto_button, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
-	controls_table.set_border_width (0);
+	if (ARDOUR::Profile->get_mixbus()) {
+		controls_table.attach (hide_button, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	} else {
+		controls_table.attach (hide_button, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 1, 0);
+	}
+	controls_table.attach (name_label,  1, 2, 1, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 2, 0);
+	controls_table.attach (auto_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
 
 	name_label.show ();
 	hide_button.show ();
 
 	if (_controller) {
-		_controller.get()->set_size_request(-1, 24);
 		/* add bar controller */
-		controls_table.attach (*_controller.get(), 1, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (*_controller.get(), 1, 3, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
 		/* note that this handler connects *before* the default handler */
 		_controller->event_widget().signal_scroll_event().connect (mem_fun (*this, &AutomationTimeAxisView::controls_ebox_scroll), false);
 	}

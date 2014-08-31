@@ -57,7 +57,7 @@ BarController::BarController (Gtk::Adjustment& adj,
 	layout = darea.create_pango_layout("");
 
 	set (.5, .5, 1.0, 1.0);
-	set_border_width(2);
+	set_border_width(0);
 
 	initial_value = adjustment.get_value ();
 

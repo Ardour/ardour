@@ -75,7 +75,7 @@ Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::controls_meters_size_group = SizeGrou
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
-	, controls_table (4, 4)
+	, controls_table (3, 3)
 	, controls_button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_BOTH))
 	, _name_editing (false)
 	, height (0)
@@ -131,11 +131,8 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	name_hbox.pack_end (name_label, true, true);
 
 	// set min. track-header width if fader is not visible
-	if (ARDOUR::Profile->get_mixbus() ) {
-		name_hbox.set_size_request(100, 0);
-	} else {
-		name_hbox.set_size_request(90, 0);
-	}
+	name_hbox.set_size_request(100, 0);
+
 	name_hbox.show ();
 	name_label.show ();
 
@@ -1116,7 +1113,7 @@ TimeAxisView::compute_heights ()
 {
 	// TODO this function should be re-evaluated when font-scaling changes (!)
 	Gtk::Window window (Gtk::WINDOW_TOPLEVEL);
-	Gtk::Table one_row_table (1, 8);
+	Gtk::Table one_row_table (1, 1);
 	ArdourButton* test_button = manage (new ArdourButton);
 	const int border_width = 2;
 	const int frame_height = 2;
