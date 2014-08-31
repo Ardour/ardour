@@ -69,6 +69,7 @@ Editor::stop_updating_meters ()
 void
 Editor::toggle_meter_updating()
 {
+	DisplaySuspender ds;
 	if (Config->get_show_track_meters()) {
 		start_updating_meters ();
 	} else {
