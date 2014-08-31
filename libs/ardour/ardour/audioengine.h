@@ -128,6 +128,7 @@ public:
     bool running() const { return _running; }
 
     Glib::Threads::Mutex& process_lock() { return _process_lock; }
+	Glib::Threads::RecMutex& state_lock() { return _state_lock; }
 
     int request_buffer_size (pframes_t samples) {
 	    return set_buffer_size (samples);
@@ -168,6 +169,10 @@ public:
     
     PBD::Signal1<void, pframes_t> BufferSizeChanged;
     
+	/* this signal is emitted if the device cannot operate properly */
+	
+	PBD::Signal0<void> DeviceError;
+
     /* this signal is emitted if the device list changed */
     
     PBD::Signal0<void> DeviceListChanged;
@@ -217,7 +222,8 @@ public:
 
     static AudioEngine*       _instance;
 
-    Glib::Threads::Mutex      _process_lock;
+    Glib::Threads::Mutex	   _process_lock;
+	Glib::Threads::RecMutex    _state_lock;
     Glib::Threads::Cond        session_removed;
     bool                       session_remove_pending;
     frameoffset_t              session_removal_countdown;

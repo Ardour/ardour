@@ -425,7 +425,7 @@ WavesAudioBackend::physically_connected (PortHandle port_handle, bool process_ca
 int
 WavesAudioBackend::get_connections (PortHandle port_handle, std::vector<std::string>& names, bool process_callback_safe)
 {
-    // COMMENTED DBG LOGS */ std::cout  << "WavesAudioBackend::get_connections ()" << std::endl;
+   // COMMENTED DBG LOGS */ std::cout  << "WavesAudioBackend::get_connections ()" << std::endl;
     
     if (!_registered (port_handle)) {
         std::cerr << "WavesAudioBackend::get_connections (): Failed to find port [" << std::hex << port_handle << std::dec << "]!" << std::endl;

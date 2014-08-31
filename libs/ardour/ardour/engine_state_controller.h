@@ -128,7 +128,9 @@ public:
     PBD::Signal0<void> BufferSizeChanged;
     /* this signal is emitted if the device list changes */
     PBD::Signal1<void, bool> DeviceListChanged;
-    
+	/* this signal is emitted if the device cannot operate properly */
+    PBD::Signal0<void> DeviceError;
+
     //ENGINE STATE SIGNALS
     /* this signal is emitted when the engine is started */
     PBD::Signal0<void> EngineRunning;
@@ -260,11 +262,13 @@ private:
     void _on_engine_running();
     void _on_engine_halted();
     void _on_engine_stopped();
+	void _on_device_error();
     void _on_sample_rate_change(ARDOUR::framecnt_t);
     void _on_buffer_size_change(ARDOUR::pframes_t);
     void _on_device_list_change();
     void _on_parameter_changed (const std::string&);
     void _on_ports_registration_update ();
+	void _on_session_loaded();
     ////////////////////////////////////////
         
     ////////////////////////////////////////
@@ -284,10 +288,10 @@ private:
     
     // Engine connections stuff
 	PBD::ScopedConnectionList update_connections;
+	PBD::ScopedConnectionList session_connections;
     PBD::ScopedConnection running_connection;
     PBD::ScopedConnection halt_connection;
     PBD::ScopedConnection stopped_connection;
-
 };
 
 } // namespace ARDOUR

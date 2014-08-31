@@ -62,6 +62,7 @@ EngineStateController::EngineStateController()
     AudioEngine::instance()->SampleRateChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_sample_rate_change, this, _1) );
 	AudioEngine::instance()->BufferSizeChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_buffer_size_change, this, _1) );
     AudioEngine::instance()->DeviceListChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_device_list_change, this) );
+	AudioEngine::instance()->DeviceError.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_device_error, this) );
     
     /* Global configuration parameters update */
     Config->ParameterChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_parameter_changed, this, _1) );
@@ -81,7 +82,8 @@ EngineStateController::~EngineStateController()
 
 
 XMLNode&
-EngineStateController::serialize_audio_midi_settings() {
+EngineStateController::serialize_audio_midi_settings()
+{
     
     XMLNode* root = new XMLNode ("AudioMidiSettings");
     
@@ -93,7 +95,8 @@ EngineStateController::serialize_audio_midi_settings() {
 
 
 void
-EngineStateController::save_audio_midi_settings() {
+EngineStateController::save_audio_midi_settings()
+{
     Config->add_extra_xml (serialize_audio_midi_settings() );
     Config->save_state ();
 }
@@ -1182,7 +1185,7 @@ EngineStateController::_on_sample_rate_change(framecnt_t new_sample_rate)
         framecnt_t sample_rate_to_set = new_sample_rate;
         if (AudioEngine::instance()->session() ) {
             // and we have current session we should restore it back to the one tracks uses
-            framecnt_t sample_rate_to_set = _current_state->sample_rate;
+            sample_rate_to_set = _current_state->sample_rate;
         }
         
         if ( set_new_sample_rate_in_controller (sample_rate_to_set) ) {
@@ -1192,7 +1195,8 @@ EngineStateController::_on_sample_rate_change(framecnt_t new_sample_rate)
             // if sample rate can't be set
             // switch to NONE device
             set_new_device_as_current ("None");
-            DeviceListChanged(true);
+            DeviceListChanged(false);
+			DeviceError();
         }
     }
 }
@@ -1468,6 +1472,16 @@ EngineStateController::_on_engine_halted ()
 
 
 void
+EngineStateController::_on_device_error()
+{
+	set_new_device_as_current ("None");
+	push_current_state_to_backend(true);
+	DeviceListChanged(false);
+	DeviceError();
+}
+
+
+void
 EngineStateController::_on_parameter_changed (const std::string& parameter_name)
 {
     if (parameter_name == "output-auto-connect") {
@@ -1504,29 +1518,41 @@ EngineStateController::push_current_state_to_backend(bool start)
     
     bool was_running = AudioEngine::instance()->running();
     
+	Glib::Threads::RecMutex::Lock sl (AudioEngine::instance()->state_lock() );
     if (state_changed) {
-        
+
         if (was_running) {
             if (AudioEngine::instance()->stop () ) {
                 return false;
             }
         }
+
+		int result = 0;
+		{
+			std::cout << "EngineStateController::Setting device: " << _current_state->device_name << std::endl;
+			if ((_current_state->device_name != backend->device_name()) && (result = backend->set_device_name (_current_state->device_name)) ) {
+				error << string_compose (_("Cannot set device name to %1"), get_current_device_name()) << endmsg;
+			}
         
-		std::cout << "EngineStateController::Setting device: " << _current_state->device_name << std::endl;
-        if ((_current_state->device_name != backend->device_name()) && backend->set_device_name (_current_state->device_name)) {
-            error << string_compose (_("Cannot set device name to %1"), get_current_device_name()) << endmsg;
-        }
+			std::cout << "EngineStateController::Setting device sample rate " << _current_state->sample_rate << std::endl;
+			if (!result && (result = backend->set_sample_rate (_current_state->sample_rate)) ) {
+				error << string_compose (_("Cannot set sample rate to %1"), get_current_sample_rate()) << endmsg;
+			}
         
-		std::cout << "EngineStateController::Setting device sample rate " << _current_state->sample_rate << std::endl;
-        if (backend->set_sample_rate (_current_state->sample_rate )) {
-            error << string_compose (_("Cannot set sample rate to %1"), get_current_sample_rate()) << endmsg;
-        }
+			std::cout << "EngineStateController::Setting device buffer size " << _current_state->buffer_size << std::endl;
+			if (!result && (result = backend->set_buffer_size (_current_state->buffer_size)) ) {
+				error << string_compose (_("Cannot set buffer size to %1"), get_current_buffer_size()) << endmsg;
+			}
+		}
         
-		std::cout << "EngineStateController::Setting device buffer size " << _current_state->buffer_size << std::endl;
-        if (backend->set_buffer_size (_current_state->buffer_size )) {
-            error << string_compose (_("Cannot set buffer size to %1"), get_current_buffer_size()) << endmsg;
-        }
-        
+		if (result) // error during device setup
+		{
+			//switch to None device and notify about hte issue
+			set_new_device_as_current ("None");
+			DeviceListChanged(false);
+			DeviceError();
+		}
+
         //if (backend->set_input_channels (get_input_channels())) {
         //	error << string_compose (_("Cannot set input channels to %1"), get_input_channels()) << endmsg;
         //	return -1;
@@ -1566,12 +1592,7 @@ EngineStateController::set_desired_sample_rate(framecnt_t session_desired_sr)
     if (session_desired_sr == 0 || session_desired_sr == _desired_sample_rate) {
         return;
     }
-    
-    _desired_sample_rate = session_desired_sr;  
-    
-    // if we swithced to new desired sample rate successfuly - push the new state to the backend
-    if (set_new_sample_rate_in_controller (session_desired_sr) ) {
-        push_current_state_to_backend(false);
-    }
+
+    _desired_sample_rate = session_desired_sr;
 }
 

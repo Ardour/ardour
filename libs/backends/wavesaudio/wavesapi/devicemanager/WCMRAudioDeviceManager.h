@@ -151,6 +151,8 @@ public:
 	virtual bool Streaming();///<Streaming Status?
 	virtual WTErr SetStreaming (bool newState);///<Start/Stop Streaming - should reconnect connections when streaming starts!
 
+	virtual WTErr ResetDevice ();
+
     virtual bool IsProcessActive();
 	
 	virtual WTErr DoIdle();///<Do Idle Processing

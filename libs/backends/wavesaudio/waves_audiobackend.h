@@ -121,6 +121,8 @@ class WavesMidiPort;
 
     virtual int set_systemic_output_latency (uint32_t);
 
+	virtual int reset_device ();
+
     virtual std::string device_name () const;
     
     virtual float sample_rate () const;
@@ -324,7 +326,6 @@ class WavesMidiPort;
                                  pframes_t sample_time,
                                  uint64_t cycle_start_time_nanos);
 
-	int _reset_device (uint32_t buffer_size, float sample_rate);
     void _changed_midi_devices ();
 
 	// DO change sample rate and buffer size
