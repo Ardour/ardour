@@ -232,7 +232,7 @@ TimeAxisView::hide ()
 	_canvas_display->hide ();
 
 	if (control_parent) {
-		control_parent->remove (time_axis_frame);
+		control_parent->remove (time_axis_vbox);
 		control_parent = 0;
 	}
 
