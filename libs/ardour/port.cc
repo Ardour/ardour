@@ -135,7 +135,12 @@ Port::get_connections (std::vector<std::string> & c) const
 		return c.size();
 	}
 
-	return port_engine.get_connections (_port_handle, c);
+    if (_port_handle) {
+        port_engine.get_connections (_port_handle, c);
+        return c.size();
+    }
+    
+    return 0;
 }
 
 int
