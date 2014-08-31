@@ -755,49 +755,7 @@ void WCMRPortAudioDevice::activateDevice (bool callerIsWaiting/*=false*/)
 		if (paErr == paNoError)
 		{
 			buffersSizes.push_front(preferredSize);
-
-			/*
-			size_t amountOfBuffers = sizeof(gAllBufferSizes)/sizeof(*gAllBufferSizes);
-			for (int i = 0; i < amountOfBuffers; ++i)
-			{
-				if (minSize <= gAllBufferSizes[i] <= maxSize)
-				{
-					buffersSizes.push_back(gAllBufferSizes[i]);
-				}
-			}*/
 		}
-
-		/*
-		// test validness with current sample rate and device prefered buffer size
-		if (paNoError != (paErr = testStateValidness(m_CurrentSamplingRate, m_CurrentBufferSize) ) )
-		{
-			std::cout << "State has changed, cannot start with error: " <<  Pa_GetErrorText (paErr) << std::endl;
-			if (paErr ==  paUnanticipatedHostError)
-				std::cout << "Details: "<< Pa_GetLastHostErrorInfo ()->errorText << "; code: " << Pa_GetLastHostErrorInfo ()->errorCode << std::endl;
-			
-			std::cout << "Updating state... " << std::endl;
-			// update device info
-			updateDeviceInfo();
-
-			// pick up buffers we'll need to try
-			long minSize, maxSize, preferredSize, granularity;
-			PaError paErr = PaAsio_GetAvailableBufferSizes(m_DeviceID, &minSize, &maxSize, &preferredSize, &granularity);
-
-			if (paErr == paNoError)
-			{
-				buffersSizes.push_front(preferredSize);
-
-				size_t amountOfBuffers = sizeof(gAllBufferSizes)/sizeof(*gAllBufferSizes);
-				for (int i = 0; i < amountOfBuffers; ++i)
-				{
-					if (minSize <= gAllBufferSizes[i] <= maxSize)
-					{
-						buffersSizes.push_back(gAllBufferSizes[i]);
-					}
-				}
-			}
-		}
-		std::cout << "**********Tested VALIDNESS*********** " <<  Pa_GetErrorText (paErr) << std::endl;*/
 
 		PaStreamParameters inputParameters, outputParameters;
 		PaStreamParameters *pInS = NULL, *pOutS = NULL;
@@ -851,21 +809,15 @@ void WCMRPortAudioDevice::activateDevice (bool callerIsWaiting/*=false*/)
 
 		if(paErr == paNoError)
 		{
-			std::cout << "***************Stream has been opened ****************************"<< std::endl;
-
 			long minSize, maxSize, preferredSize, granularity;
 			PaError paErr = PaAsio_GetAvailableBufferSizes(m_DeviceID, &minSize, &maxSize, &preferredSize, &granularity);
 
 			if (paErr == paNoError && m_CurrentBufferSize != preferredSize)
 			{
-				std::cout << "***************Buffer changed ****************************"<< std::endl;
 				m_CurrentBufferSize = preferredSize;
 				m_BufferSizes.clear();
 				m_BufferSizes.push_back(preferredSize);
 				m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::BufferSizeChanged, (void *)&preferredSize);
-			} else
-			{
-				std::cout << "***************Buffer DIDn't changed ****************************"<< std::endl;
 			}
 
 			m_DropsDetected = 0;
