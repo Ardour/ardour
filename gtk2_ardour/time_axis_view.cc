@@ -174,7 +174,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.signal_leave_notify_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_leave));
 	controls_ebox.show ();
 
-	time_axis_frame.set_shadow_type (Gtk::SHADOW_OUT);
+	time_axis_frame.set_shadow_type (Gtk::SHADOW_NONE);
 	time_axis_frame.add(controls_ebox);
 	time_axis_frame.show();
 
@@ -778,7 +778,7 @@ TimeAxisView::set_selected (bool yn)
 		controls_vbox.set_name (controls_base_selected_name);
 		time_axis_vbox.set_name (controls_base_selected_name);
 	} else {
-		time_axis_frame.set_shadow_type (Gtk::SHADOW_OUT);
+		time_axis_frame.set_shadow_type (Gtk::SHADOW_NONE);
 		time_axis_frame.set_name (controls_base_unselected_name);
 		controls_ebox.set_name (controls_base_unselected_name);
 		controls_vbox.set_name (controls_base_unselected_name);
