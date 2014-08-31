@@ -56,7 +56,8 @@ BarController::BarController (Gtk::Adjustment& adj,
 
 	layout = darea.create_pango_layout("");
 
-	set_shadow_type (SHADOW_NONE);
+	set (.5, .5, 1.0, 1.0);
+	set_border_width(2);
 
 	initial_value = adjustment.get_value ();
 
@@ -550,7 +551,7 @@ BarController::set_use_parent (bool yn)
 void
 BarController::set_sensitive (bool yn)
 {
-	Frame::set_sensitive (yn);
+	Alignment::set_sensitive (yn);
 	darea.set_sensitive (yn);
 }
 

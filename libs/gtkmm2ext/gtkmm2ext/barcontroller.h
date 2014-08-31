@@ -19,6 +19,7 @@
 #ifndef __gtkmm2ext_bar_controller_h__
 #define __gtkmm2ext_bar_controller_h__
 
+#include <gtkmm/alignment.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/drawingarea.h>
 #include <cairo.h>
@@ -28,7 +29,7 @@
 
 namespace Gtkmm2ext {
 
-class LIBGTKMM2EXT_API BarController : public Gtk::Frame
+class LIBGTKMM2EXT_API BarController : public Gtk::Alignment
 {
   public:
 	BarController (Gtk::Adjustment& adj, boost::shared_ptr<PBD::Controllable>);
