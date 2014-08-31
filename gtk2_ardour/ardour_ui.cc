@@ -4016,15 +4016,17 @@ ARDOUR_UI::sr_mismatch_dialog (framecnt_t desired, framecnt_t actual)
 	ArdourDialog dialog (_("Sample Rate Mismatch"), true);
 	Label  message (string_compose (_("\
 This session was created with a sample rate of %1 Hz, but\n\
-%2 is currently running at %3 Hz.  If you load this session,\n\
+%2 is currently running at %3 Hz. If you load this session,\n\
+device will be switched to the session sample rate value. \n\
+If an attemp to switch the device is unsuccessful\n\
 audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual));
 
 	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
 	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
 	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
 	dialog.get_vbox()->pack_start(*hbox, PACK_EXPAND_PADDING, 6);
-	dialog.add_button (_("Do not load session"), RESPONSE_REJECT);
-	dialog.add_button (_("Load session anyway"), RESPONSE_ACCEPT);
+	dialog.add_button (_("Cancel"), RESPONSE_REJECT);
+	dialog.add_button (_("Accept"), RESPONSE_ACCEPT);
 	dialog.set_default_response (RESPONSE_ACCEPT);
 	dialog.set_position (WIN_POS_CENTER);
 	message.show();

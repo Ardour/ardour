@@ -48,6 +48,9 @@ public:
     
     static EngineStateController* instance();
     
+	void set_session(Session* session);
+	void remove_session ();
+
     //Interfaces
     void available_backends(std::vector<const AudioBackendInfo*>&);
     
@@ -286,6 +289,8 @@ private:
     ARDOUR::framecnt_t  _desired_sample_rate;
     bool                _have_control;
     
+	Session* _session;
+
     // Engine connections stuff
 	PBD::ScopedConnectionList update_connections;
 	PBD::ScopedConnectionList session_connections;

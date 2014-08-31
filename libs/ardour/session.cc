@@ -357,6 +357,8 @@ Session::Session (AudioEngine &eng,
 	_engine.set_session (this);
 	_engine.reset_timebase ();
 
+	EngineStateController::instance()->set_session(this);
+
     // Waves Tracks: always create master track
     if ( ARDOUR::Profile->get_trx () ) {
         create_master_track();
@@ -407,6 +409,7 @@ Session::Session (AudioEngine &eng,
     
     _is_new = false;
     
+	SessionLoaded();
 	BootMessage (_("Session loading complete"));
 
 }
@@ -512,6 +515,7 @@ Session::destroy ()
 	drop_connections ();
 
 	_engine.remove_session ();
+	EngineStateController::instance()->remove_session();
 
 	/* deregister all ports - there will be no process or any other
 	 * callbacks from the engine any more.

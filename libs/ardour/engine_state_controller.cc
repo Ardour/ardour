@@ -9,6 +9,7 @@
 #include "ardour/engine_state_controller.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/session.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/data_type.h"
 
@@ -78,6 +79,22 @@ EngineStateController::EngineStateController()
 
 EngineStateController::~EngineStateController()
 {
+}
+
+
+void
+EngineStateController::set_session(Session* session)
+{
+	_session = session;
+	_session->SessionLoaded.connect_same_thread (session_connections, boost::bind (&EngineStateController::_on_session_loaded, this) );
+}
+
+
+void
+EngineStateController::remove_session ()
+{
+	session_connections.drop_connections ();
+	_session = 0;
 }
 
 
@@ -1173,6 +1190,17 @@ EngineStateController::get_physical_midi_output_states (std::vector<PortState>& 
             channel_states.push_back(state);
         }
     }
+}
+
+
+void
+EngineStateController::_on_session_loaded ()
+{
+	if (_session && _desired_sample_rate && set_new_sample_rate_in_controller(_desired_sample_rate) )
+	{
+		push_current_state_to_backend(false);
+        SampleRateChanged(); // emit a signal
+	}
 }
 
 
