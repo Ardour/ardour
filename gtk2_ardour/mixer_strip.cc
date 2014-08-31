@@ -136,8 +136,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 void
 MixerStrip::init ()
 {
-	int button_table_row = 0;
-
 	_entered_mixer_strip= 0;
 	group_menu = 0;
 	route_ops_menu = 0;

@@ -517,14 +517,11 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 
 	ArdourCanvas::Rect scrolling_boundary;
 	Gtk::Allocation alloc;
-	int cx, cy;
 
 	if (from_headers) {
 		alloc = controls_layout.get_allocation ();
 	} else {	
 		alloc = _track_canvas_viewport->get_allocation ();
-		cx = alloc.get_x();
-		cy = alloc.get_y();
 
 		/* reduce height by the height of the timebars, which happens
 		   to correspond to the position of the hv_scroll_group.
@@ -581,7 +578,6 @@ Editor::autoscroll_canvas ()
 	Gdk::ModifierType mask;
 	frameoffset_t dx = 0;
 	bool no_stop = false;
-	bool y_motion = false;
 
 	get_window()->get_pointer (x, y, mask);
 
@@ -644,14 +640,14 @@ Editor::autoscroll_canvas ()
 			/* scroll to make higher tracks visible */
 
 			if (autoscroll_cnt && (autoscroll_cnt % speed_factor == 0)) {
-				y_motion = scroll_up_one_track ();
+				scroll_up_one_track ();
 				vertical_motion = true;
 			}
 
 		} else if (y > autoscroll_boundary.y1) {
 
 			if (autoscroll_cnt && (autoscroll_cnt % speed_factor == 0)) {
-				y_motion = scroll_down_one_track ();
+				scroll_down_one_track ();
 				vertical_motion = true;
 			}
 		}

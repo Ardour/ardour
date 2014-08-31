@@ -137,7 +137,6 @@ VerboseCursor::set_duration (framepos_t start, framepos_t end)
 	Timecode::Time timecode;
 	Timecode::BBT_Time sbbt;
 	Timecode::BBT_Time ebbt;
-	framepos_t frame_rate;
 	Meter meter_at_start (_editor->_session->tempo_map().meter_at(start));
 
 	if (_editor->_session == 0) {

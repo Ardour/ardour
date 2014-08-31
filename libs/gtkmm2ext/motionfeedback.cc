@@ -553,44 +553,32 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double size, double progress_
 	double progress_radius;
 	double progress_radius_inner;
 	double progress_radius_outer;
-	double knob_disc_radius;
-	cairo_pattern_t* pattern;
-	double progress_rim_width;
-	cairo_pattern_t* progress_shine;
-	double degrees;
-	cairo_pattern_t* knob_ripples;
-        double pxs;
-        double pys;
 
 	g_return_if_fail (cr != NULL);
         
 	progress_radius = 40.0;
 	progress_radius_inner = progress_radius - (progress_width / 2.0);
 	progress_radius_outer = progress_radius + (progress_width / 2.0);
-	knob_disc_radius = progress_radius_inner - 5.0;
 
-        const double pad = 2.0; /* line width for boundary of progress ring */
-        const double actual_width = ((2.0 * pad) + (2.0 * progress_radius_outer));
-        const double scale_factor = size / actual_width;
+	const double pad = 2.0; /* line width for boundary of progress ring */
+	const double actual_width = ((2.0 * pad) + (2.0 * progress_radius_outer));
+	const double scale_factor = size / actual_width;
 
-        /* knob center is at middle of the area bounded by (xorigin,yorigin) and (xorigin+size, yorigin+size)
-           but the coordinates will be scaled by the scale factor when cairo uses them so first
-           adjust them by the reciprocal of the scale factor.
-        */
+	/* knob center is at middle of the area bounded by (xorigin,yorigin) and (xorigin+size, yorigin+size)
+	   but the coordinates will be scaled by the scale factor when cairo uses them so first
+	   adjust them by the reciprocal of the scale factor.
+	*/
 
 	xc = (xorigin + (size / 2.0)) * (1.0/scale_factor);
-        yc = (yorigin + (size / 2.0)) * (1.0/scale_factor);
-
-        pxs = xorigin * (1.0/scale_factor);
-        pys = yorigin * (1.0/scale_factor);
+	yc = (yorigin + (size / 2.0)) * (1.0/scale_factor);
 
 	start_angle = 0.0;
 	end_angle = 0.0;
 	value_angle = 0.0;
 	value = (phase * 1.0) / (65 - 1);
 
-        start_angle = ((180 - 65) * G_PI) / 180;
-        end_angle = ((360 + 65) * G_PI) / 180;
+	start_angle = ((180 - 65) * G_PI) / 180;
+	end_angle = ((360 + 65) * G_PI) / 180;
 
 	value_angle = start_angle + (value * (end_angle - start_angle));
 	value_x = cos (value_angle);

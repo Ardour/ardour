@@ -359,7 +359,7 @@ def set_compiler_flags (conf,opt):
     #
 
     compiler_flags.extend(
-            ('-Wall', '-Wpointer-arith', '-Wcast-qual', '-Wcast-align'))
+            ('-Wall', '-Wpointer-arith', '-Wcast-qual', '-Wcast-align', '-Wno-unused-parameter'))
 
     c_flags.extend(('-Wstrict-prototypes', '-Wmissing-prototypes'))
     cxx_flags.append('-Woverloaded-virtual')

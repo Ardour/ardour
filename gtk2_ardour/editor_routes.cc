@@ -735,13 +735,11 @@ EditorRoutes::route_removed (TimeAxisView *tv)
 
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator ri;
-	bool found = false;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[_columns.tv] == tv) {
                         PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
 			_model->erase (ri);
-			found = true;
 			break;
 		}
 	}
