@@ -170,6 +170,9 @@ AudioEngine::buffer_size_change (pframes_t bufsiz)
 /** Method called by our ::process_thread when there is work to be done.
  *  @param nframes Number of frames to process.
  */
+#ifdef __clang__
+__attribute__((annotate("realtime")))
+#endif
 int
 AudioEngine::process_callback (pframes_t nframes)
 {
