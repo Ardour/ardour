@@ -181,7 +181,8 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 			break;
 		}
 
-		controls_table.attach (*rec_enable_button, 0, 1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+		controls_table.attach (*rec_enable_button, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_button_size_group->add_widget(*rec_enable_button);
 
                 if (is_midi_track()) {
                         ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
@@ -199,6 +200,10 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	} else {
 		gm.set_fader_name ("AudioBusFader");
+		Gtk::Fixed *blank = manage(new Gtk::Fixed());
+		controls_button_size_group->add_widget(*blank);
+		controls_table.attach (*blank, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		blank->show();
 	}
 
 	top_hbox.pack_end(gm.get_level_meter(), false, false, 4);
@@ -208,15 +213,23 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 	_route->track_number_changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::label_view, this), gui_context());
 
-	controls_table.attach (*mute_button, 1, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	controls_table.attach (*mute_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	controls_button_size_group->add_widget(*mute_button);
 
-        if (!_route->is_master()) {
-                controls_table.attach (*solo_button, 2, 3, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-        }
+	if (!_route->is_master()) {
+		controls_table.attach (*solo_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_button_size_group->add_widget(*solo_button);
+	} else {
+		Gtk::Fixed *blank = manage(new Gtk::Fixed());
+		controls_button_size_group->add_widget(*blank);
+		controls_table.attach (*blank, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		blank->show();
+	}
 
 	if (!ARDOUR::Profile->get_trx()) {
-		controls_table.attach (route_group_button, 2, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-		name_table.attach (gm.get_gain_slider(), 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 2);
+		controls_table.attach (route_group_button, 2, 3, 3, 4, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_button_size_group->add_widget(route_group_button);
+		controls_table.attach (gm.get_gain_slider(), 3, 6, 2, 4, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	}
 	
 	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
@@ -233,11 +246,13 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	label_view ();
 
 	if (!ARDOUR::Profile->get_trx()) {
-		controls_table.attach (automation_button, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (automation_button, 1, 2, 3, 4, Gtk::SHRINK, Gtk::SHRINK);
+		controls_button_size_group->add_widget(automation_button);
 	}
 
 	if (!ARDOUR::Profile->get_trx() && is_track() && track()->mode() == ARDOUR::Normal) {
-		controls_table.attach (playlist_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (playlist_button, 0, 1, 3, 4, Gtk::SHRINK, Gtk::SHRINK);
+		controls_button_size_group->add_widget(playlist_button);
 	}
 
 	_y_position = -1;
@@ -366,17 +381,14 @@ RouteTimeAxisView::update_track_number_visibility ()
 	}
 
 	if (number_label.get_parent()) {
-		name_hbox.remove (number_label);
+		controls_table.remove (number_label); // XXX
 	}
 	if (show_label) {
-//		controls_table.resize ( 2, 4 );
-		name_hbox.pack_start(number_label, false, false, 2);
-//		controls_table.attach (number_label, 3, 4, 0, 1,  Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (number_label, 3, 4, 0, 1,  Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 		const int tnw = std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_width_of_digit_0_to_9()
 		number_label.set_size_request(3 + tnw, -1);
 		number_label.show ();
 	} else {
-//		controls_table.resize ( 2, 3 );
 		number_label.hide ();
 	}
 }

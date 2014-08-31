@@ -72,8 +72,8 @@ PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
-	, controls_table (2, 3)
-	, name_table (2, 1)
+	, controls_table (4, 4)
+	, controls_button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_BOTH))
 	, _name_editing (false)
 	, height (0)
 	, display_menu (0)
@@ -126,36 +126,24 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	delete an_entry;
 
 	name_hbox.pack_end (name_label, true, true);
+	name_hbox.set_size_request(100, 0); // XXX min header width (if fader is not visible)
 	name_hbox.show ();
 	name_label.show ();
 
 	controls_table.set_row_spacings (2);
 	controls_table.set_col_spacings (2);
 	controls_table.set_border_width (2);
-	controls_table.set_homogeneous (true);
 
+	controls_table.attach (name_hbox, 4, 5, 0, 2,  Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
-
-	name_table.attach (name_hbox, 0, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
-	name_table.show_all ();
-	name_table.set_no_show_all ();
 
 	HSeparator* separator = manage (new HSeparator());
 	separator->set_name("TrackSeparator");
 	separator->set_size_request(-1, 1);
 	separator->show();
 
-	name_vbox.pack_start (name_table, false, false);
-	name_vbox.show ();
-
-	controls_hbox.pack_start (controls_table, false, false);
-	controls_hbox.show ();
-
-	controls_hbox.pack_start (name_vbox, true, true);
-	controls_hbox.show ();
-
-	controls_vbox.pack_start (controls_hbox, false, false);
+	controls_vbox.pack_start (controls_table, false, false);
 	controls_vbox.show ();
 
 	top_hbox.pack_start (controls_vbox, true, true);
@@ -179,11 +167,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.signal_leave_notify_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_leave));
 	controls_ebox.show ();
 
-	time_axis_vbox.pack_start (controls_ebox, true, true, 0);
-//	time_axis_vbox.pack_end (*separator, false, false);
-	time_axis_vbox.show();
-
-	time_axis_frame.add(time_axis_vbox);
+	time_axis_frame.add(controls_ebox);
 	time_axis_frame.show();
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
@@ -607,7 +591,7 @@ TimeAxisView::begin_name_edit ()
 
 		name_entry = manage (new Gtkmm2ext::FocusEntry);
 		
-		name_entry->set_width_chars(15);
+		name_entry->set_width_chars(8); // min width, entry expands
 
 		name_entry->set_name ("EditorTrackNameDisplay");
 		name_entry->signal_key_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_press), false);
@@ -620,7 +604,7 @@ TimeAxisView::begin_name_edit ()
 			name_hbox.remove (name_label);
 		}
 		
-		name_hbox.pack_end (*name_entry, false, false);
+		name_hbox.pack_end (*name_entry, true, true);
 		name_entry->show ();
 
 		name_entry->select_region (0, -1);
@@ -776,7 +760,6 @@ TimeAxisView::set_selected (bool yn)
 
 		//time_axis_frame.set_name (controls_base_selected_name);
 		controls_ebox.set_name (controls_base_selected_name);
-		time_axis_vbox.set_name (controls_base_selected_name);
 		controls_vbox.set_name (controls_base_selected_name);
 	} else {
 		time_axis_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
@@ -784,7 +767,6 @@ TimeAxisView::set_selected (bool yn)
 
 		//time_axis_frame.set_name (controls_base_unselected_name);
 		controls_ebox.set_name (controls_base_unselected_name);
-		time_axis_vbox.set_name (controls_base_unselected_name);
 		controls_vbox.set_name (controls_base_unselected_name);
 
 		hide_selection ();

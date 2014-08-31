@@ -30,6 +30,7 @@
 #include <gtkmm/table.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
+#include <gtkmm/sizegroup.h>
 
 #include <gtkmm2ext/focus_entry.h>
 
@@ -200,13 +201,10 @@ class TimeAxisView : public virtual AxisView
 
 	protected:
 	/* The Standard LHS Controls */
-	Gtk::HBox              controls_hbox;
 	Gtk::Table             controls_table;
-	Gtk::Table             name_table;
+	Glib::RefPtr<Gtk::SizeGroup> controls_button_size_group;
 	Gtk::EventBox          controls_ebox;
 	Gtk::VBox              controls_vbox;
-	Gtk::VBox              name_vbox;
-	Gtk::VBox              time_axis_vbox;
 	Gtk::Frame             time_axis_frame;
 	Gtk::HBox              name_hbox;
 	Gtk::HBox              top_hbox;
