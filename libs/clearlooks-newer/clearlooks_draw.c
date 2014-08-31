@@ -1096,8 +1096,14 @@ clearlooks_draw_frame            (cairo_t *cr,
 
 	ge_shade_color (&colors->bg[GTK_STATE_NORMAL], 1.05, &hilight);
 	
-	if (frame->shadow == CL_SHADOW_NONE)
+	if (frame->shadow == CL_SHADOW_NONE) {
+		const CairoColor *bg = &colors->bg[params->state_type];
+		ge_cairo_set_color (cr, bg);
+		cairo_rectangle (cr, x + 1.5, y + 1.5, width - 3, height - 3);
+		cairo_set_line_width (cr, 3.0);
+		cairo_stroke (cr);
 		return;
+	}
 	
 	if (frame->gap_x != -1)
 		clearlooks_get_frame_gap_clip (x, y, width, height,
