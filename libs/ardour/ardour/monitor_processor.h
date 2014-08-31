@@ -46,10 +46,10 @@ public:
 	MPControl (T initial, const std::string& name, PBD::Controllable::Flag flag,
 	           float lower = 0.0f, float upper = 1.0f)
 		: PBD::Controllable (name, flag)
-		, _normal (initial)
 		, _value (initial)
 		, _lower (lower)
 		, _upper (upper)
+		, _normal (initial)
 	{}
 
 	/* Controllable API */
