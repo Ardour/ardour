@@ -95,8 +95,10 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	if (is_audio_track()) {
 		controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
+		time_axis_frame.set_name ("AudioTrackControlsBaseUnselected");
 	} else { // bus
 		controls_ebox.set_name ("AudioBusControlsBaseUnselected");
+		time_axis_frame.set_name ("AudioBusControlsBaseUnselected");
 	}
 
 	/* if set_state above didn't create a gain automation child, we need to make one */
@@ -408,8 +410,10 @@ AudioTimeAxisView::update_control_names ()
 	}
 
 	if (get_selected()) {
+		controls_ebox.set_name (controls_base_selected_name);
 		time_axis_frame.set_name (controls_base_selected_name);
 	} else {
+		controls_ebox.set_name (controls_base_unselected_name);
 		time_axis_frame.set_name (controls_base_unselected_name);
 	}
 }

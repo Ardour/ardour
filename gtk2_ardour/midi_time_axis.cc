@@ -162,9 +162,11 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	if (is_midi_track()) {
 		controls_ebox.set_name ("MidiTimeAxisViewControlsBaseUnselected");
+		time_axis_frame.set_name ("MidiTimeAxisViewControlsBaseUnselected");
 		_note_mode = midi_track()->note_mode();
 	} else { // MIDI bus (which doesn't exist yet..)
 		controls_ebox.set_name ("MidiBusControlsBaseUnselected");
+		time_axis_frame.set_name ("MidiBusControlsBaseUnselected");
 	}
 
 	/* if set_state above didn't create a gain automation child, we need to make one */
@@ -232,6 +234,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		top_hbox.pack_end(*blank, false, false, 0);
 
 		controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
+		time_axis_frame.set_name ("MidiTrackControlsBaseUnselected");
 		controls_base_selected_name = "MidiTrackControlsBaseSelected";
 		controls_base_unselected_name = "MidiTrackControlsBaseUnselected";
 
@@ -1381,20 +1384,24 @@ MidiTimeAxisView::route_active_changed ()
 	if (is_track()) {
 		if (_route->active()) {
 			controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
+			time_axis_frame.set_name ("MidiTrackControlsBaseUnselected");
 			controls_base_selected_name = "MidiTrackControlsBaseSelected";
 			controls_base_unselected_name = "MidiTrackControlsBaseUnselected";
 		} else {
 			controls_ebox.set_name ("MidiTrackControlsBaseInactiveUnselected");
+			time_axis_frame.set_name ("MidiTrackControlsBaseInactiveUnselected");
 			controls_base_selected_name = "MidiTrackControlsBaseInactiveSelected";
 			controls_base_unselected_name = "MidiTrackControlsBaseInactiveUnselected";
 		}
 	} else {
 		if (_route->active()) {
 			controls_ebox.set_name ("BusControlsBaseUnselected");
+			time_axis_frame.set_name ("BusControlsBaseUnselected");
 			controls_base_selected_name = "BusControlsBaseSelected";
 			controls_base_unselected_name = "BusControlsBaseUnselected";
 		} else {
 			controls_ebox.set_name ("BusControlsBaseInactiveUnselected");
+			time_axis_frame.set_name ("BusControlsBaseInactiveUnselected");
 			controls_base_selected_name = "BusControlsBaseInactiveSelected";
 			controls_base_unselected_name = "BusControlsBaseInactiveUnselected";
 		}

@@ -157,7 +157,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	top_hbox.pack_start (controls_vbox, true, true);
 	top_hbox.show ();
 
-	//controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
 	controls_ebox.add (top_hbox);
 	controls_ebox.add_events (Gdk::BUTTON_PRESS_MASK|
 				  Gdk::BUTTON_RELEASE_MASK|
