@@ -50,6 +50,7 @@
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 #include "ardour/playlist.h"
+#include "ardour/profile.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
 #include "ardour/route.h"
@@ -209,15 +210,26 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		   label so that they can be reduced in height for stacked-view
 		   tracks.
 		*/
+
+		top_hbox.remove(gm.get_level_meter());
 		VBox* v = manage (new VBox);
 		HBox* h = manage (new HBox);
-		h->pack_start (*_range_scroomer);
-		h->pack_start (*_piano_roll_header);
+		h->pack_end (*_piano_roll_header);
+		h->pack_end (*_range_scroomer);
+		h->pack_end (gm.get_level_meter(), false, false, 4);
 		v->pack_start (*h, false, false);
-		v->pack_start (*manage (new Label ("")), true, true);
 		v->show ();
 		h->show ();
-		top_hbox.pack_start(*v, false, false);
+		top_hbox.pack_end(*v, false, false, 0);
+		if (!ARDOUR::Profile->get_mixbus()) {
+			controls_meters_size_group->remove_widget (gm.get_level_meter());
+			controls_meters_size_group->add_widget (*h);
+		}
+		// make up for level_meter 4 spc padding in RTA
+		Gtk::Fixed *blank = manage(new Gtk::Fixed());
+		blank->set_size_request(8, -1);
+		blank->show();
+		top_hbox.pack_end(*blank, false, false, 0);
 
 		controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
 		controls_base_selected_name = "MidiTrackControlsBaseSelected";
