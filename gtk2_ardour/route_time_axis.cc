@@ -432,8 +432,10 @@ RouteTimeAxisView::update_track_number_visibility ()
 		const int tnw = std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_width_of_digit_0_to_9()
 		number_label.set_size_request(3 + tnw, -1);
 		number_label.show ();
+		name_hbox.set_size_request(95 - tnw, 0);
 	} else {
 		number_label.hide ();
+		name_hbox.set_size_request(100, 0);
 	}
 }
 
