@@ -1318,6 +1318,8 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 	}
 
 	boost::shared_ptr<AutomationTimeAxisView> track;
+	boost::shared_ptr<AutomationControl> control;
+
 
 	switch (param.type()) {
 
@@ -1340,15 +1342,19 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 	case MidiSystemExclusiveAutomation:
 		/* These controllers are region "automation" - they are owned
 		 * by regions (and their MidiModels), not by the track. As a
-		 * result we do not create an AutomationList/Line for the track
-		 * ... except here we are doing something!! XXX 
+		 * result there is no AutomationList/Line for the track, but we create
+		 * a controller for the user to write immediate events, so the editor
+		 * can act as a control surface for the present MIDI controllers.
+		 *
+		 * TODO: Record manipulation of the controller to regions?
 		 */
 
+		control = _route->automation_control(param, true);
 		track.reset (new AutomationTimeAxisView (
 			             _session,
 			             _route,
-			             boost::shared_ptr<Automatable> (),
-			             boost::shared_ptr<AutomationControl> (),
+			             control ? _route : boost::shared_ptr<Automatable> (),
+			             control,
 			             param,
 			             _editor,
 			             *this,
