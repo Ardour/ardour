@@ -93,6 +93,8 @@ public:
 		MidiTrack* _route;
 	};
 
+	virtual void set_parameter_automation_state (Evoral::Parameter param, AutoState);
+
 	NoteMode note_mode() const { return _note_mode; }
 	void set_note_mode (NoteMode m);
 

@@ -137,16 +137,20 @@ Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
 	Evoral::Parameter param = ac->parameter();
 
 	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (ac->list ());
-	assert (al);
 
-	al->automation_state_changed.connect_same_thread (
-		_list_connections, boost::bind (&Automatable::automation_list_automation_state_changed, this, ac->parameter(), _1)
-		);
+	if (al) {
+		al->automation_state_changed.connect_same_thread (
+			_list_connections,
+			boost::bind (&Automatable::automation_list_automation_state_changed,
+			             this, ac->parameter(), _1));
+	}
 
 	ControlSet::add_control (ac);
 	_can_automate_list.insert (param);
 
-	automation_list_automation_state_changed (param, al->automation_state ()); // sync everything up
+	if (al) {
+		automation_list_automation_state_changed (param, al->automation_state ()); // sync everything up
+	}
 }
 
 string
@@ -394,6 +398,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 		MidiTrack* mt = dynamic_cast<MidiTrack*>(this);
 		if (mt) {
 			control = new MidiTrack::MidiControl(mt, param);
+			list.reset();  // No list, this is region "automation"
 		} else {
 			warning << "MidiCCAutomation for non-MidiTrack" << endl;
 		}

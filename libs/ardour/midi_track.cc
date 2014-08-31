@@ -623,6 +623,24 @@ MidiTrack::write_immediate_event(size_t size, const uint8_t* buf)
 }
 
 void
+MidiTrack::set_parameter_automation_state (Evoral::Parameter param, AutoState state)
+{
+	switch (param.type()) {
+	case MidiCCAutomation:
+	case MidiPgmChangeAutomation:
+	case MidiPitchBenderAutomation:
+	case MidiChannelPressureAutomation:
+	case MidiSystemExclusiveAutomation:
+		/* The track control for MIDI parameters is for immediate events to act
+		   as a control surface, write/touch for them is not currently
+		   supported. */
+		return;
+	default:
+		Automatable::set_parameter_automation_state(param, state);
+	}
+}
+
+void
 MidiTrack::MidiControl::set_value(double val)
 {
 	bool valid = false;
