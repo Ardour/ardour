@@ -388,23 +388,25 @@ AudioEngine::do_reset_backend()
 
             g_atomic_int_dec_and_test (&_hw_reset_request_count);
 
+			std::cout << "AudioEngine::RESET::Reset request processing" << std::endl;
+
             // backup the device name
             std::string name = _backend->device_name ();
 			
-            std::cout << "RESET::HALT" << std::endl;
+            std::cout << "AudioEngine::RESET::Halting session processing..." << std::endl;
 			if (_session && _running) {
 				// it's not a halt, but should be handled the same way:
 				// disable record, stop transport and I/O processign but save the data.
 				_session->engine_halted ();
 			}
             
-			std::cout << "RESET::Stoping" << std::endl;
+			std::cout << "AudioEngine::RESET::Stoping engine..." << std::endl;
 			stop();
 
-			std::cout << "RESET::Reseting" << std::endl;
+			std::cout << "AudioEngine::RESET::Reseting device..." << std::endl;
 			if ( 0 == _backend->reset_device () ) {
 				
-				std::cout << "RESET::Starting" << std::endl;
+				std::cout << "AudioEngine::RESET::Starting engine..." << std::endl;
 				start ();
 
 				// inform about possible changes
@@ -413,6 +415,8 @@ AudioEngine::do_reset_backend()
 				DeviceError();
 			}
             
+			std::cout << "AudioEngine::RESET::Done." << std::endl;
+
             _reset_request_lock.lock();
             
         } else {
