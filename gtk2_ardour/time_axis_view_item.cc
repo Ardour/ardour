@@ -201,11 +201,11 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 									 trackview.current_height() - 1.0));
 
 		CANVAS_DEBUG_NAME (frame, string_compose ("frame for %1", get_item_name()));
-		
+
 		if (Config->get_show_name_highlight()) {
 			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
 		} else {
-			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM|ArdourCanvas::Rectangle::TOP));
+			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM));
 		}
 
 		if (_recregion) {
@@ -543,6 +543,20 @@ TimeAxisViewItem::set_selected(bool yn)
 		Selectable::set_selected (yn);
 		set_frame_color ();
 		set_name_text_color ();
+
+		if (frame) {
+			if (!Config->get_show_name_highlight() && yn) {
+				frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM|ArdourCanvas::Rectangle::TOP));
+				frame->set_y1 (_height - 1.0);
+			} else {
+				if (Config->get_show_name_highlight()) {
+					frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
+				} else {
+					frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM));
+				}
+				frame->set_y1 (_height);
+			}
+		}
 	}
 }
 
@@ -593,7 +607,18 @@ TimeAxisViewItem::set_height (double height)
 	}
 
 	if (frame) {
-		frame->set_y1 (height -1);
+		if (!Config->get_show_name_highlight() && _selected) {
+			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM|ArdourCanvas::Rectangle::TOP));
+			frame->set_y1 (_height - 1.0);
+		} else {
+			if (Config->get_show_name_highlight()) {
+				frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
+			} else {
+				frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM));
+			}
+			frame->set_y1 (_height);
+		}
+
 		if (frame_handle_start) {
 			frame_handle_start->set_y1 (height);
 			frame_handle_end->set_y1 (height);
