@@ -391,15 +391,15 @@ AudioEngine::do_reset_backend()
             // backup the device name
             std::string name = _backend->device_name ();
 			
-			std::cout << "RESET::Stoping" << std::endl;
-			stop();				
-
-			std::cout << "RESET::HALT" << std::endl;
+            std::cout << "RESET::HALT" << std::endl;
 			if (_session) {
 				// it's not a halt, but should be handled the same way:
 				// disable record, stop transport and I/O processign but save the data.
-				//_session->engine_halted ();
+				_session->engine_halted ();
 			}
+            
+			std::cout << "RESET::Stoping" << std::endl;
+			stop();
 
 			std::cout << "RESET::Reseting" << std::endl;
 			if ( 0 == _backend->reset_device () ) {
