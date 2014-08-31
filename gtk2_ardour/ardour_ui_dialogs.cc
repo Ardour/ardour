@@ -224,8 +224,8 @@ ARDOUR_UI::set_session (Session *s)
 
 		editor_meter_peak_display.set_name ("meterbridge peakindicator");
 		editor_meter_peak_display.unset_flags (Gtk::CAN_FOCUS);
-		editor_meter_peak_display.set_size_request(10, -1);
-		editor_meter_peak_display.set_corner_radius(1);
+		editor_meter_peak_display.set_size_request(8, -1);
+		editor_meter_peak_display.set_corner_radius(3);
 
 		editor_meter_max_peak = -INFINITY;
 		editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::editor_meter_peak_button_release), false);
