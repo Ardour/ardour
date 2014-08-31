@@ -435,6 +435,13 @@ ARDOUR_UI::session_parameter_changed (std::string p)
 		synchronize_sync_source_and_video_pullup ();
 		reset_main_clocks ();
 		editor->queue_visual_videotimeline_update();
+	} else if (p == "track-name-number") {
+		/* DisplaySuspender triggers _route->redisplay() when going out of scope
+		 * which eventually calls reset_controls_layout_width() and re-sets the
+		 * track-header width.
+		 * see also RouteTimeAxisView::update_track_number_visibility()
+		 */
+		DisplaySuspender ds;
 	}
 }
 

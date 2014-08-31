@@ -374,6 +374,7 @@ RouteTimeAxisView::label_view ()
 void
 RouteTimeAxisView::update_track_number_visibility ()
 {
+	DisplaySuspender ds;
 	bool show_label = _session->config.get_track_name_number();
 
 	if (_route && _route->is_master()) {
