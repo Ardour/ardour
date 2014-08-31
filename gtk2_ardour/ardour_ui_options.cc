@@ -392,8 +392,10 @@ ARDOUR_UI::parameter_changed (std::string p)
 			secondary_clock->set_widget_name ("secondary");
 		}
 	} else if (p == "super-rapid-clock-update") {
-		stop_clocking ();
-		start_clocking ();
+		if (_session) {
+			stop_clocking ();
+			start_clocking ();
+		}
 	} else if (p == "waveform-gradient-depth") {
 		ArdourCanvas::WaveView::set_global_gradient_depth (config()->get_waveform_gradient_depth());
 	} else if (p == "show-editor-meter") {
