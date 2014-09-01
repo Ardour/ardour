@@ -301,6 +301,13 @@ EngineControl::EngineControl ()
 }
 
 void
+EngineControl::on_show ()
+{
+	ArdourDialog::on_show ();
+	ok_button->grab_focus();
+}
+
+void
 EngineControl::on_response (int response_id)
 {
 	ArdourDialog::on_response (response_id);

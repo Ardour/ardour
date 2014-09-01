@@ -221,6 +221,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void build_full_control_notebook ();
     void build_no_control_notebook ();
 
+    void on_show ();
     void on_response (int);
     void control_app_button_clicked ();
     void use_latency_button_clicked ();
