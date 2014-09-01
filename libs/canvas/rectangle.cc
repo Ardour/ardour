@@ -118,8 +118,8 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 			
 			if (_outline_what & RIGHT) {
 				/* vertical line: move x-coordinate by 0.5 pixels */
-				context->move_to (self.x1 + 0.5, self.y0);
-				context->line_to (self.x1 + 0.5, self.y1);
+				context->move_to (self.x1 - 0.5, self.y0);
+				context->line_to (self.x1 - 0.5, self.y1);
 			}
 			
 		}
