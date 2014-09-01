@@ -83,11 +83,11 @@
                       box.fill="true"
                       box.expand="true">
               <HBox>
-                <icon source="log_area_mockup_left.png"/>
-                <icon source="log_area_mockup_middle.png"
+                <icon source="infobar_left.png"/>
+                <icon source="infobar_center.png"
                       box.fill="true"
                       box.expand="true"/>
-                <icon source="log_area_mockup_right.png"
+                <icon source="infobar_right.png"
                       box.pack="end"/>
               </HBox>
             </EventBox>
