@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,14 +20,14 @@
 
 
 #include <iostream>
+#include <assert.h>
 
 #include "pbd/stacktrace.h"
 
-#include "gtkmm2ext/pixfader.h"
-#include "gtkmm2ext/keyboard.h"
-#include "gtkmm2ext/rgb_macros.h"
-#include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/cairo_widget.h"
+#include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/pixfader.h"
+#include "gtkmm2ext/utils.h"
 
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -38,23 +38,30 @@ using namespace std;
 #define CORNER_OFFSET 1
 #define FADER_RESERVE 5
 
+std::list<PixFader::FaderImage*> PixFader::_patterns;
+
 PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int fader_girth)
 	: adjustment (adj)
 	, span (fader_length)
 	, girth (fader_girth)
 	, _orien (orientation)
+	, pattern (0)
 	, _hovering (false)
 	, last_drawn (-1)
 	, dragging (false)
 	, _current_parent (0)
 {
-	bg_gradient = 0;
-	fg_gradient = 0;
-
 	default_value = adjustment.get_value();
 	update_unity_position ();
 
-	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
+	add_events (
+			  Gdk::BUTTON_PRESS_MASK
+			| Gdk::BUTTON_RELEASE_MASK
+			| Gdk::POINTER_MOTION_MASK
+			| Gdk::SCROLL_MASK
+			| Gdk::ENTER_NOTIFY_MASK
+			| Gdk::LEAVE_NOTIFY_MASK
+			);
 
 	adjustment.signal_value_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
 	adjustment.signal_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
@@ -71,154 +78,245 @@ PixFader::~PixFader ()
 	if (_parent_style_change) _parent_style_change.disconnect();
 }
 
+cairo_pattern_t*
+PixFader::find_pattern (double afr, double afg, double afb,
+			double abr, double abg, double abb,
+			int w, int h)
+{
+	for (list<FaderImage*>::iterator f = _patterns.begin(); f != _patterns.end(); ++f) {
+		if ((*f)->matches (afr, afg, afb, abr, abg, abb, w, h)) {
+			return (*f)->pattern;
+		}
+	}
+	return 0;
+}
+
+void
+PixFader::create_patterns ()
+{
+	Gdk::Color c = get_style()->get_fg (get_state());
+	float fr, fg, fb;
+	float br, bg, bb;
+
+	fr = c.get_red_p ();
+	fg = c.get_green_p ();
+	fb = c.get_blue_p ();
+
+	c = get_style()->get_bg (get_state());
+
+	br = c.get_red_p ();
+	bg = c.get_green_p ();
+	bb = c.get_blue_p ();
+
+	if ( _layout && !_text.empty()) {
+		_layout->get_pixel_size (_text_width, _text_height);
+	} else {
+		_text_width = 0;
+		_text_height = 0;
+	}
+
+	cairo_surface_t* surface;
+	cairo_t* tc = 0;
+
+	if (get_width() <= 1 || get_height() <= 1) {
+		return;
+	}
+
+	if ((pattern = find_pattern (fr, fg, fb, br, bg, bb, get_width(), get_height())) != 0) {
+		/* found it - use it */
+		return;
+	}
+
+	if (_orien == VERT) {
+
+		surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, get_width(), get_height() * 2.0);
+		tc = cairo_create (surface);
+
+		/* paint background + border */
+
+		cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, get_width(), 0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, br*0.8,bg*0.8,bb*0.8, 1.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, br*0.6,bg*0.6,bb*0.6, 1.0);
+		cairo_set_source (tc, shade_pattern);
+		cairo_rectangle (tc, 0, 0, get_width(), get_height() * 2.0);
+		cairo_fill (tc);
+
+		cairo_pattern_destroy (shade_pattern);
+
+		/* paint lower shade */
+
+		shade_pattern = cairo_pattern_create_linear (0.0, 0.0, get_width() - 2 - CORNER_OFFSET , 0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, fr*0.8,fg*0.8,fb*0.8, 1.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, fr*0.6,fg*0.6,fb*0.6, 1.0);
+		cairo_set_source (tc, shade_pattern);
+		Gtkmm2ext::rounded_top_half_rectangle (tc, CORNER_OFFSET, get_height() + CORNER_OFFSET,
+				get_width() - CORNER_SIZE, get_height(), CORNER_RADIUS);
+		cairo_fill (tc);
+
+		cairo_pattern_destroy (shade_pattern);
+
+		pattern = cairo_pattern_create_for_surface (surface);
+
+	} else {
+
+		surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, get_width() * 2.0, get_height());
+		tc = cairo_create (surface);
+
+		/* paint right shade (background section)*/
+
+		cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, br*0.8,bg*0.8,bb*0.8, 1.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, br*0.6,bg*0.6,bb*0.6, 1.0);
+		cairo_set_source (tc, shade_pattern);
+		cairo_rectangle (tc, 0, 0, get_width() * 2.0, get_height());
+		cairo_fill (tc);
+
+		/* paint left shade (active section/foreground) */
+
+		shade_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, fr*0.8,fg*0.8,fb*0.8, 1.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, fr*0.6,fg*0.6,fb*0.6, 1.0);
+		cairo_set_source (tc, shade_pattern);
+		Gtkmm2ext::rounded_right_half_rectangle (tc, CORNER_OFFSET, CORNER_OFFSET,
+				get_width() - CORNER_OFFSET, get_height() - CORNER_SIZE, CORNER_RADIUS);
+		cairo_fill (tc);
+		cairo_pattern_destroy (shade_pattern);
+
+		pattern = cairo_pattern_create_for_surface (surface);
+	}
+
+	/* cache it for others to use */
+
+	_patterns.push_back (new FaderImage (pattern, fr, fg, fb, br, bg, bb, get_width(), get_height()));
+
+	cairo_destroy (tc);
+	cairo_surface_destroy (surface);
+}
+
 bool
 PixFader::on_expose_event (GdkEventExpose* ev)
 {
 	Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
 	cairo_t* cr = context->cobj();
 
+	// clip to expose area
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cairo_clip_preserve (cr);
+	cairo_clip (cr);
 
-	Gdk::Color fg_col = get_style()->get_fg (get_state());
+	if (!pattern) {
+		create_patterns();
+	}
 
-	float ds = display_span ();
-	float w = get_width();
-	float h = get_height();
+	if (!pattern) {
+		/* this isn't supposed to be happen, but some wackiness whereby
+		 * the pixfader ends up with a 1xN or Nx1 size allocation
+		 * leads to it. the basic wackiness needs fixing but we
+		 * shouldn't crash. just fill in the expose area with
+		 * our bg color.
+		 */
 
-	Gdk::Color bg (get_parent_bg());
-	CairoWidget::set_source_rgb_a (cr, bg);
+		CairoWidget::set_source_rgb_a (cr, get_style()->get_bg (get_state()), 1);
+		cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		cairo_fill (cr);
+		return true;
+	}
+
+	int ds = display_span ();
+	const float w = get_width();
+	const float h = get_height();
+
+	CairoWidget::set_source_rgb_a (cr, get_parent_bg(), 1);
 	cairo_rectangle (cr, 0, 0, w, h);
 	cairo_fill(cr);
 
-	//"slot"
-	cairo_set_source_rgba (cr, 0.17, 0.17, 0.17, 1.0);
-	Gtkmm2ext::rounded_rectangle (cr, 1, 1, w-2, h-2, CORNER_RADIUS-0.5);
-	cairo_fill(cr);
+	cairo_set_line_width (cr, 1);
+	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
 
-	//mask off the corners
-	Gtkmm2ext::rounded_rectangle (cr, 1, 1, w-2, h-2, CORNER_RADIUS-0.5);
-	cairo_clip(cr);
-	
+	cairo_matrix_t matrix;
+	Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
+	// we use a 'trick' here: The stoke is off by .5px but filling the interiour area
+	// results in an outline of 0.5 px the actual outline is exatly 1px at 50% alpha.
+	cairo_stroke_preserve(cr);
+
 	if (_orien == VERT) {
 
-		int travel = h - 1;
-		int progress = travel * (1.0-ds);
-		int top = 1 + progress;
-		int bottom = h;
-		
-		//background gradient
-		if ( !CairoWidget::flat_buttons() ) {
-			cairo_pattern_t *bg_gradient = cairo_pattern_create_linear (0.0, 0.0, w, 0);
-			cairo_pattern_add_color_stop_rgba (bg_gradient, 0, 0, 0, 0, 0.4);
-			cairo_pattern_add_color_stop_rgba (bg_gradient, 0.2, 0, 0, 0, 0.2);
-			cairo_pattern_add_color_stop_rgba (bg_gradient, 1, 0, 0, 0, 0.0);
-			cairo_set_source (cr, bg_gradient);
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, w-2, h-2, CORNER_RADIUS-1.5);
-			cairo_fill (cr);
-			cairo_pattern_destroy(bg_gradient);
+		if (ds > h - FADER_RESERVE - CORNER_OFFSET) {
+			ds = h - FADER_RESERVE - CORNER_OFFSET;
 		}
-		
-		//fg color
-		CairoWidget::set_source_rgb_a (cr, fg_col, 1.0);
-		Gtkmm2ext::rounded_top_rectangle (cr, 1, top, w-2, bottom, CORNER_RADIUS - 1.5);
-		cairo_fill(cr);
 
-		//fg gradient
 		if (!CairoWidget::flat_buttons() ) {
-			cairo_pattern_t *fg_gradient = cairo_pattern_create_linear (0.0, 0.0, w, 0);
-			cairo_pattern_add_color_stop_rgba (fg_gradient, 0, 0, 0, 0, 0.0);
-			cairo_pattern_add_color_stop_rgba (fg_gradient, 0.1, 0, 0, 0, 0.0);
-			cairo_pattern_add_color_stop_rgba (fg_gradient, 1, 0, 0, 0, 0.3);
-			cairo_set_source (cr, fg_gradient);
-			Gtkmm2ext::rounded_rectangle (cr, 1, top, w-2, bottom, CORNER_RADIUS - 1.5);
+			cairo_set_source (cr, pattern);
+			cairo_matrix_init_translate (&matrix, 0, (h - ds));
+			cairo_pattern_set_matrix (pattern, &matrix);
+		} else {
+			CairoWidget::set_source_rgb_a (cr, get_style()->get_bg (get_state()), 1);
 			cairo_fill (cr);
-			cairo_pattern_destroy(fg_gradient);
+			CairoWidget::set_source_rgb_a (cr, get_style()->get_fg (get_state()), 1);
+			Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, ds + CORNER_OFFSET,
+					w - CORNER_SIZE, h - ds - CORNER_SIZE, CORNER_RADIUS);
 		}
+		cairo_fill (cr);
+
 	} else {
 
-		int travel = w - 1;
-		int progress = travel * ds;
-		int left = 1;
-		int length = progress;
-		
-		//background gradient
-		if ( !CairoWidget::flat_buttons() ) {
-			cairo_pattern_t *bg_gradient = cairo_pattern_create_linear (0.0, 0.0, 0, h);
-			cairo_pattern_add_color_stop_rgba (bg_gradient, 0, 0, 0, 0, 0.4);
-			cairo_pattern_add_color_stop_rgba (bg_gradient, 0.2, 0, 0, 0, 0.2);
-			cairo_pattern_add_color_stop_rgba (bg_gradient, 1, 0, 0, 0, 0.0);
-			cairo_set_source (cr, bg_gradient);
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, w-2, h-2, CORNER_RADIUS-1.5);
-			cairo_fill (cr);
-			cairo_pattern_destroy(bg_gradient);
+		if (ds < FADER_RESERVE) {
+			ds = FADER_RESERVE;
 		}
-		
-		//fg color
-		CairoWidget::set_source_rgb_a (cr, fg_col, 1.0);
-		Gtkmm2ext::rounded_rectangle (cr, left, 1, length, h-2, CORNER_RADIUS - 1.5);
-		cairo_fill(cr);
+		assert(ds <= w);
 
-		//fg gradient
+		/*
+		 * if ds == w, the pattern does not need to be translated
+		 * if ds == 0 (or FADER_RESERVE), the pattern needs to be moved
+		 * w to the left, which is -w in pattern space, and w in user space
+		 * if ds == 10, then the pattern needs to be moved w - 10
+		 * to the left, which is -(w-10) in pattern space, which
+		 * is (w - 10) in user space
+		 * thus: translation = (w - ds)
+		 */
+
 		if (!CairoWidget::flat_buttons() ) {
-			cairo_pattern_t * fg_gradient = cairo_pattern_create_linear (0.0, 0.0, 0, h);
-			cairo_pattern_add_color_stop_rgba (fg_gradient, 0, 0, 0, 0, 0.0);
-			cairo_pattern_add_color_stop_rgba (fg_gradient, 0.1, 0, 0, 0, 0.0);
-			cairo_pattern_add_color_stop_rgba (fg_gradient, 1, 0, 0, 0, 0.3);
-			cairo_set_source (cr, fg_gradient);
-		Gtkmm2ext::rounded_rectangle (cr, left, 1, length, h-2, CORNER_RADIUS - 1.5);
+			cairo_set_source (cr, pattern);
+			cairo_matrix_init_translate (&matrix, w - ds, 0);
+			cairo_pattern_set_matrix (pattern, &matrix);
+		} else {
+			CairoWidget::set_source_rgb_a (cr, get_style()->get_bg (get_state()), 1);
 			cairo_fill (cr);
-			cairo_pattern_destroy(fg_gradient);
+			CairoWidget::set_source_rgb_a (cr, get_style()->get_fg (get_state()), 1);
+			Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET,
+					ds - CORNER_OFFSET, h - CORNER_SIZE, CORNER_RADIUS);
 		}
+		cairo_fill (cr);
 	}
-		
-	cairo_reset_clip(cr);
-
-	//black border
-	cairo_set_line_width (cr, 1.0);
-	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
-	Gtkmm2ext::rounded_rectangle (cr, 0.5, 0.5, w-1, h-1, CORNER_RADIUS);
-	cairo_stroke(cr);
 
 	/* draw the unity-position line if it's not at either end*/
 	if (unity_loc > 0) {
 		context->set_line_width (1);
+		context->set_line_cap (Cairo::LINE_CAP_ROUND);
 		Gdk::Color c = get_style()->get_fg (Gtk::STATE_ACTIVE);
-		CairoWidget::set_source_rgb_a (cr, c, 1.0);
+		context->set_source_rgba (c.get_red_p()*1.5, c.get_green_p()*1.5, c.get_blue_p()*1.5, 0.85);
 		if ( _orien == VERT) {
 			if (unity_loc < h ) {
-				context->move_to (2.5, unity_loc + CORNER_OFFSET + .5);
-				context->line_to (girth-2.5, unity_loc + CORNER_OFFSET + .5);
+				context->move_to (1.5, unity_loc + CORNER_OFFSET + .5);
+				context->line_to (girth - 1.5, unity_loc + CORNER_OFFSET + .5);
 				context->stroke ();
 			}
 		} else {
 			if ( unity_loc < w ){
-				context->move_to (unity_loc - CORNER_OFFSET + .5, 3.5);
-				context->line_to (unity_loc - CORNER_OFFSET + .5, girth-3.5);
+				context->move_to (unity_loc - CORNER_OFFSET + .5, 1.5);
+				context->line_to (unity_loc - CORNER_OFFSET + .5, girth - 1.5);
 				context->stroke ();
 			}
 		}
 	}
-	
-	//draw text
+
 	if ( !_text.empty() ) {
-
-		//calc text size
-		if ( !_text.empty()) {
-			_layout->get_pixel_size (_text_width, _text_height);
-		} else {
-			_text_width = 0;
-			_text_height = 0;
-		}
-
 		/* center text */
 		cairo_new_path (cr);
 		cairo_move_to (cr, (get_width() - _text_width)/2.0, get_height()/2.0 - _text_height/2.0);
-		Gdk::Color c = get_style()->get_text (get_state());
-		CairoWidget::set_source_rgb_a (cr, c, 0.9);
+		CairoWidget::set_source_rgb_a (cr, get_style()->get_text (get_state()), 1);
 		pango_cairo_show_layout (cr, _layout->gobj());
-	} 
-	
+	}
+
 	if (!get_sensitive()) {
 		Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
 		cairo_set_source_rgba (cr, 0.505, 0.517, 0.525, 0.4);
@@ -259,6 +357,11 @@ PixFader::on_size_allocate (Gtk::Allocation& alloc)
 		span = alloc.get_width ();
 	}
 
+	if (is_realized()) {
+		/* recreate patterns in case we've changed size */
+		create_patterns ();
+	}
+
 	update_unity_position ();
 }
 
@@ -285,7 +388,7 @@ PixFader::on_button_press_event (GdkEventButton* ev)
 	if (ev->button == 2) {
 		set_adjustment_from_event (ev);
 	}
-	
+
 	return true;
 }
 
@@ -293,7 +396,7 @@ bool
 PixFader::on_button_release_event (GdkEventButton* ev)
 {
 	double const ev_pos = (_orien == VERT) ? ev->y : ev->x;
-	
+
 	switch (ev->button) {
 	case 1:
 		if (dragging) {
@@ -322,9 +425,9 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 				}
 			}
 			return true;
-		} 
+		}
 		break;
-		
+
 	case 2:
 		if (dragging) {
 			remove_modal_grab();
@@ -406,13 +509,13 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 	if (dragging) {
 		double scale = 1.0;
 		double const ev_pos = (_orien == VERT) ? ev->y : ev->x;
-		
+
 		if (ev->window != grab_window) {
 			grab_loc = ev_pos;
 			grab_window = ev->window;
 			return true;
 		}
-		
+
 		if (ev->state & Keyboard::GainFineScaleModifier) {
 			if (ev->state & Keyboard::GainExtraFineScaleModifier) {
 				scale = 0.05;
@@ -430,7 +533,7 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 		fract = max (-1.0, fract);
 
 		// X Window is top->bottom for 0..Y
-		
+
 		if (_orien == VERT) {
 			fract = -fract;
 		}
@@ -450,12 +553,18 @@ PixFader::adjustment_changed ()
 }
 
 /** @return pixel offset of the current value from the right or bottom of the fader */
-float
+int
 PixFader::display_span ()
 {
 	float fract = (adjustment.get_value () - adjustment.get_lower()) / ((adjustment.get_upper() - adjustment.get_lower()));
-	
-	return fract;
+	int ds;
+	if (_orien == VERT) {
+		ds = (int)floor (span * (1.0 - fract));
+	} else {
+		ds = (int)floor (span * fract);
+	}
+
+	return ds;
 }
 
 void
@@ -513,9 +622,10 @@ PixFader::set_text (const std::string& str)
 {
 	_text = str;
 
- 	if (!_layout && !_text.empty()) {
+	if (!_layout && !_text.empty()) {
 		_layout = Pango::Layout::create (get_pango_context());
-	} 
+		// XXX explicityly unref in dtor?
+	}
 
 	if (_layout) {
 		_layout->set_text (str);
@@ -529,6 +639,7 @@ void
 PixFader::on_state_changed (Gtk::StateType old_state)
 {
 	Widget::on_state_changed (old_state);
+	create_patterns ();
 	queue_draw ();
 }
 
@@ -540,23 +651,22 @@ PixFader::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
 		_layout.clear (); // drop reference to existing layout
 		set_text (txt);
 	}
-
+	/* patterns are cached and re-created as needed 
+	 * during 'expose' in the GUI thread */
+	pattern = 0;
 	queue_draw ();
 }
 
 Gdk::Color
 PixFader::get_parent_bg ()
 {
-	Widget* parent;
-
-	parent = get_parent ();
+	Widget* parent = get_parent ();
 
 	while (parent) {
-		if (!parent->get_has_window()) {
-			parent = parent->get_parent();
-		} else {
+		if (parent->get_has_window()) {
 			break;
 		}
+		parent = parent->get_parent();
 	}
 
 	if (parent && parent->get_has_window()) {

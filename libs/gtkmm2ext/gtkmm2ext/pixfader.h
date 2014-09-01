@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -71,9 +71,52 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
   private:
 	int span, girth;
 	int _orien;
-	
-	cairo_pattern_t* fg_gradient;
-	cairo_pattern_t* bg_gradient;
+	cairo_pattern_t* pattern;
+
+	struct FaderImage {
+		cairo_pattern_t* pattern;
+		double fr;
+		double fg;
+		double fb;
+		double br;
+		double bg;
+		double bb;
+		int width;
+		int height;
+
+		FaderImage (cairo_pattern_t* p,
+				double afr, double afg, double afb,
+				double abr, double abg, double abb,
+				int w, int h)
+			: pattern (p)
+				, fr (afr)
+				 , fg (afg)
+				 , fb (afb)
+				 , br (abr)
+				 , bg (abg)
+				 , bb (abb)
+				 , width (w)
+				 , height (h)
+		{}
+
+		bool matches (double afr, double afg, double afb,
+				double abr, double abg, double abb,
+				int w, int h) {
+			return width == w &&
+				height == h &&
+				afr == fr &&
+				afg == fg &&
+				afb == fb &&
+				abr == br &&
+				abg == bg &&
+				abb == bb;
+		}
+	};
+
+	static std::list<FaderImage*> _patterns;
+	static cairo_pattern_t* find_pattern (double afr, double afg, double afb,
+			double abr, double abg, double abb,
+			int w, int h);
 
 	bool _hovering;
 
@@ -86,12 +129,13 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 	int unity_loc;
 
 	void adjustment_changed ();
-	float display_span ();
+	int display_span ();
 	void set_adjustment_from_event (GdkEventButton *);
 	void update_unity_position ();
 
 	sigc::connection _parent_style_change;
 	Widget * _current_parent;
+	void create_patterns();
 };
 
 
