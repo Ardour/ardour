@@ -1,145 +1,138 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <RouteUI bgnormal="#383838" bgactive="#545454">
-<Vbox>
-<EventBox id="upper_drop_indicator" visible="false" noshowall="true" height="2" bgnormal="#1CA3B3" bgactive="#1CA3B3"/>
-  <HBox>
-    <VBox>
-      <EventBox height="1" bgnormal="#494949" bgactive="#494949"/>
-      <HBox box.expand="true" box.fill="true">
-        <EventBox id="selected_track_color_box" width="29" bgactive="#5BA55C">
-          <HBox>
-            <!--<Igor! width="2" below is the shift from RIGHT side of the space>-->
-            <VBox width="2" box.pack="end"/>
-            <VBox box.pack="end">
-              <!--<Igor! height="4" below is the shift from TOP side of the space>-->
-              <HBox height="4"/>
-              <Label id="number_label"
-                     text="32"
-                     fgnormal="#ffffff"
-                     fgactive="#ffffff"
-                     winfont ="Arial Bold 13"
-                     macfont ="Helvetica Bold 13"/>
-            </VBox>
-          </HBox>
-        </EventBox>
-        <EventBox id="track_color_box" width="6" bgnormal="#5BA55C" bgactive="#5BA55C"/>
-        <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
-      </HBox>
-      <EventBox height="1" bgnormal="#000000" bgactive="#000000" box.pack="end"/>
-    </VBox>
-    <VBox>
-      <EventBox height="1" bgnormal="#494949" bgactive="#494949"/>
-      <!--<Igor! About the track name: height="5" below is the shift from TOP side of the space>-->
-      <HBox height="5"/>
-      <HBox width="80"
-            id="name_label_home">
-        <HBox width="5"/>
-        <Label id="name_label"
-               winfont ="Arial 10"
-               macfont ="Helvetica 10"
-               fgnormal="#ffffff"
-               fgactive="#ffffff"/>
-        <FocusEntry id="name_entry"
-                    width="80"
-                    height="20"
-                    fgnormal="#ffffff"
-                    winfont ="Arial 10"
-                    macfont ="Helvetica 10"                    
-                    cssname="EditorTrackNameDisplay"
-                    textcolornormal="#ffffff"
-                    textcoloractive="#ffffff"
-                    textcolorselected="#ffffff"
-                    noshowall="true"
-                    visible="false"/>
-      </HBox>
-      <EventBox height="1" bgnormal="#000000" bgactive="#000000" box.pack="end"/>
-    </VBox>
-    <VBox>
-      <EventBox height="1" bgnormal="#494949" bgactive="#494949"/>
-      <HBox>
-        <iconbutton id="playlist_button"
-            width="21"
-            height="20"
-            normalicon="time_axis_playlist"
-            activeicon="time_axis_playlist"
-            prelighticon="time_axis_playlist"/>
-        <HBox width="3"/>
+  <Vbox>
+    <EventBox height="1" bgnormal="#494949" bgactive="#494949"/>
+    <EventBox id="upper_drop_indicator" visible="false" noshowall="true" height="2" bgnormal="#1CA3B3" bgactive="#1CA3B3"/>
+    <HBox box.fill="true" box.expand="true">
+      <VBox>
+        <HBox box.expand="true" box.fill="true">
+          <EventBox id="selected_track_color_box" width="29" bgactive="#5BA55C">
+            <HBox>
+              <!--<Igor! width="2" below is the shift from RIGHT side of the space>-->
+              <VBox width="2" box.pack="end"/>
+              <VBox box.pack="end">
+                <!--<Igor! height="4" below is the shift from TOP side of the space>-->
+                <HBox height="4"/>
+                <Label id="number_label"
+                       text="32"
+                       fgnormal="#ffffff"
+                       fgactive="#ffffff"
+                       winfont ="Arial Bold 13"
+                       macfont ="Helvetica Bold 13"/>
+              </VBox>
+            </HBox>
+          </EventBox>
+          <EventBox id="track_color_box" width="6" bgnormal="#5BA55C" bgactive="#5BA55C"/>
+          <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
+        </HBox>
+      </VBox>
+      <VBox>
+        <!--<Igor! About the track name: height="5" below is the shift from TOP side of the space>-->
+        <HBox height="5"/>
+        <HBox width="80"
+              id="name_label_home">
+          <HBox width="5"/>
+          <Label id="name_label"
+                 winfont ="Arial 10"
+                 macfont ="Helvetica 10"
+                 fgnormal="#ffffff"
+                 fgactive="#ffffff"/>
+          <FocusEntry id="name_entry"
+                      width="80"
+                      height="20"
+                      fgnormal="#ffffff"
+                      winfont ="Arial 10"
+                      macfont ="Helvetica 10"
+                      cssname="EditorTrackNameDisplay"
+                      textcolornormal="#ffffff"
+                      textcoloractive="#ffffff"
+                      textcolorselected="#ffffff"
+                      noshowall="true"
+                      visible="false"/>
+        </HBox>
+      </VBox>
+      <VBox>
         <HBox>
+          <iconbutton id="playlist_button"
+              width="21"
+              height="20"
+              normalicon="time_axis_playlist"
+              activeicon="time_axis_playlist"
+              prelighticon="time_axis_playlist"/>
+          <HBox width="3"/>
+          <HBox>
+            <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
+            <VBox>
+              <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
+              <iconbutton id="rec_enable_button"
+                          width="41"
+                          height="20"
+                          normalicon="time_axis_record"
+                          activeicon="time_axis_record_active"
+                          prelighticon="time_axis_record_prelight"
+                          tooltip="Record Enable"/>
+              <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
+            </VBox>
+            <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
+            <VBox>
+              <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
+              <iconbutton id="solo_button"
+                          width="41"
+                          height="20"
+                          normalicon="time_axis_solo"
+                          activeicon="time_axis_solo_active"
+                          implicitactiveicon="time_axis_solo_safe"
+                          prelighticon="time_axis_solo_prelight"
+                          tooltip="Solo"/>
+              <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
+            </VBox>
+            <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
+          </HBox>
+        </HBox>
+        <HBox>
+          <VBox width="24"/>
           <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
           <VBox>
-            <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
-            <iconbutton id="rec_enable_button"
+            <iconbutton id="monitor_input_button"
                         width="41"
                         height="20"
-                        normalicon="time_axis_record"
-                        activeicon="time_axis_record_active"
-                        prelighticon="time_axis_record_prelight"
-                        tooltip="Record Enable"/>
+                        normalicon="time_axis_monitor_input"
+                        activeicon="time_axis_monitor_input_active"
+                        prelighticon="time_axis_monitor_input_prelight"
+                        tooltip="Input Monitoring"/>
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
           </VBox>
           <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
           <VBox>
-            <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
-            <iconbutton id="solo_button"
+            <iconbutton id="mute_button"
                         width="41"
                         height="20"
-                        normalicon="time_axis_solo"
-                        activeicon="time_axis_solo_active"
-                        implicitactiveicon="time_axis_solo_safe"
-                        prelighticon="time_axis_solo_prelight"
-                        tooltip="Solo"/>
+                        normalicon="time_axis_mute"
+                        activeicon="time_axis_mute_active"
+                        implicitactiveicon="time_axis_mute_implicit"
+                        prelighticon="time_axis_mute_prelight"
+                        tooltip="Mute"/>
+            <Button id="master_mute_button" ui.orphan="true"/>
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
           </VBox>
           <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
         </HBox>
+      </VBox>
+      <HBox visible="false" noshowall="true">
+        <Button id="show_sends_button"/>
+        <Button id="monitor_disk_button"/>
+        <Button id="comment_button"/>
+        <Button id="midi_input_enable_button"/>
+        <Button id="group_button" text="Grp"/>
+        <Button id="route_group_button"/>
+        <Button id="automation_button"/>
       </HBox>
-      <HBox>
-        <VBox width="24"/>
-        <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
-        <VBox>
-          <iconbutton id="monitor_input_button"
-                      width="41"
-                      height="20"
-                      normalicon="time_axis_monitor_input"
-                      activeicon="time_axis_monitor_input_active"
-                      prelighticon="time_axis_monitor_input_prelight"
-                      tooltip="Input Monitoring"/>
-          <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
-        </VBox>
-        <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
-        <VBox>
-          <iconbutton id="mute_button"
-                      width="41"
-                      height="20"
-                      normalicon="time_axis_mute"
-                      activeicon="time_axis_mute_active"
-                      implicitactiveicon="time_axis_mute_implicit"
-                      prelighticon="time_axis_mute_prelight"
-                      tooltip="Mute"/>
-          <Button id="master_mute_button" ui.orphan="true"/>
-          <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
-        </VBox>
-        <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
-      </HBox>
-      <EventBox height="1" bgnormal="#000000" bgactive="#000000" box.pack="end"/>
-    </VBox>
-    <HBox visible="false" noshowall="true">
-      <Button id="show_sends_button"/>
-      <Button id="monitor_disk_button"/>
-      <Button id="comment_button"/>
-      <Button id="midi_input_enable_button"/>
-      <Button id="group_button" text="Grp"/>
-      <Button id="route_group_button"/>
-      <Button id="automation_button"/>
+      <VBox width="1"/>
+      <VBox  id="gain_meter_home" width="7" />
+      <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
     </HBox>
-    <!--<HBox id="gain_meter_home" box.pack="end"/>-->
-    <VBox  id="gain_meter_home" width="7">
-      <EventBox height="1" bgnormal="#494949" bgactive="#494949"/>
-      <EventBox height="1" bgnormal="#000000" bgactive="#000000" box.pack="end"/>
-    </VBox>
-    <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
-  </HBox>
-<EventBox id="lower_drop_indicator" visible="false" noshowall="true" height="2" bgnormal="#1CA3B3" bgactive="#1CA3B3" box.pack="end"/>
-</Vbox>
+    <EventBox id="lower_drop_indicator" visible="false" noshowall="true" height="2" bgnormal="#1CA3B3" bgactive="#1CA3B3"/>
+    <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
+  </Vbox>
 </RouteUI>
