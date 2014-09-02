@@ -78,9 +78,9 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	_width = Wide;
 
 	if (horizontal) {
-		gain_slider = manage (new HSliderController (&gain_adjustment, fader_length, fader_girth, false));
+		gain_slider = manage (new HSliderController (&gain_adjustment, fader_length, fader_girth));
 	} else {
-		gain_slider = manage (new VSliderController (&gain_adjustment, fader_length, fader_girth, false));
+		gain_slider = manage (new VSliderController (&gain_adjustment, fader_length, fader_girth));
 	}
 
 	level_meter = new LevelMeterHBox(_session);

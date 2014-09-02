@@ -46,8 +46,6 @@ AutomationController::AutomationController(boost::shared_ptr<Automatable> printe
         assert (_printer);
 
 	set_name (X_("PluginSlider")); // FIXME: get yer own name!
-	set_style (BarController::LeftToRight);
-	set_use_parent (true);
 
 	StartGesture.connect (sigc::mem_fun(*this, &AutomationController::start_touch));
 	StopGesture.connect (sigc::mem_fun(*this, &AutomationController::end_touch));

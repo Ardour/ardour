@@ -103,8 +103,6 @@ LatencyGUI::LatencyGUI (Latent& l, framepos_t sr, framepos_t psz)
 	adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &LatencyGUI::finish));
 
 	bc.set_size_request (-1, 25);
-	bc.set_style (BarController::LeftToRight);
-	bc.set_use_parent (true);
 	bc.set_name (X_("PluginSlider"));
 
 	set_spacing (12);

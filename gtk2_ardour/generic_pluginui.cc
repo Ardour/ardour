@@ -644,8 +644,6 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 			control_ui->controller->set_size_request (200, req.height);
 			control_ui->controller->set_name (X_("PluginSlider"));
-			control_ui->controller->set_style (BarController::LeftToRight);
-			control_ui->controller->set_use_parent (true);
 			control_ui->controller->set_logarithmic (desc.logarithmic);
 
 			control_ui->controller->StartGesture.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::start_touch), control_ui));
