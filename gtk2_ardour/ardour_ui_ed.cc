@@ -231,7 +231,7 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("Close"), _("Close"),  sigc::mem_fun(*this, &ARDOUR_UI::close_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track or Bus..."),
+	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track"),
 					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_route), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
@@ -543,17 +543,6 @@ ARDOUR_UI::build_menu_bar ()
 #else
 	use_menubar_as_top_menubar ();
 #endif
-
-	bool wall_clock = false;
-	bool disk_space = false;
-
- 	if (!Profile->get_small_screen()) {
-#ifndef GTKOSX
-		// OSX provides its own wallclock, thank you very much
-		wall_clock = true;
-#endif
-		disk_space = true;
-	}
 	
 	menu_hbox.pack_end (*ev, false, false, 6);
 
