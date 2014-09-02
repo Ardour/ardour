@@ -632,7 +632,7 @@ PixFader::set_default_value (float d)
 }
 
 void
-PixFader::set_text (const std::string& str, bool centered = true)
+PixFader::set_text (const std::string& str, bool centered)
 {
 	if (_layout && _text == str) {
 		return;

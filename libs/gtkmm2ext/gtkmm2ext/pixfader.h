@@ -42,7 +42,7 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 	sigc::signal<void> OnExpose;
 
 	void set_default_value (float);
-	void set_text (const std::string&, bool);
+	void set_text (const std::string&, bool centered = true);
 
 	protected:
 	Glib::RefPtr<Pango::Layout> _layout;
