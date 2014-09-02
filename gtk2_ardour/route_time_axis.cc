@@ -429,11 +429,10 @@ RouteTimeAxisView::update_track_number_visibility ()
 		} else {
 			controls_table.attach (number_label, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 1, 0);
 		}
-		const int tnw = std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_width_of_digit_0_to_9()
-		number_label.set_size_request(3 + tnw, -1);
+		const int tnw = 9 + std::max(2u, _session->track_number_decimals()) * number_label.char_pixel_width();
+		number_label.set_size_request(tnw, -1);
 		number_label.show ();
-		// -5 = -2 for table border - 3 for padding ^^
-		name_hbox.set_size_request(TimeAxisView::name_width_px - 5 - tnw, 0);
+		name_hbox.set_size_request(TimeAxisView::name_width_px - 2 - tnw, 0); // -2 = cellspacing
 	} else {
 		number_label.hide ();
 		name_hbox.set_size_request(TimeAxisView::name_width_px, 0);
