@@ -133,8 +133,9 @@ PixFader::create_patterns ()
 		/* paint background + border */
 
 		cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, get_width(), 0);
-		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, br*0.8,bg*0.8,bb*0.8, 1.0);
-		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, br*0.6,bg*0.6,bb*0.6, 1.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, br*0.4,bg*0.4,bb*0.4, 1.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0.25, br*0.6,bg*0.6,bb*0.6, 1.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, br*0.8,bg*0.8,bb*0.8, 1.0);
 		cairo_set_source (tc, shade_pattern);
 		cairo_rectangle (tc, 0, 0, get_width(), get_height() * 2.0);
 		cairo_fill (tc);
@@ -163,8 +164,9 @@ PixFader::create_patterns ()
 		/* paint right shade (background section)*/
 
 		cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
-		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, br*0.8,bg*0.8,bb*0.8, 1.0);
-		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, br*0.6,bg*0.6,bb*0.6, 1.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, br*0.4,bg*0.4,bb*0.4, 1.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0.25, br*0.6,bg*0.6,bb*0.6, 1.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, br*0.8,bg*0.8,bb*0.8, 1.0);
 		cairo_set_source (tc, shade_pattern);
 		cairo_rectangle (tc, 0, 0, get_width() * 2.0, get_height());
 		cairo_fill (tc);
@@ -232,7 +234,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
 
 	cairo_matrix_t matrix;
-	Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
+	Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS+1.5);
 	// we use a 'trick' here: The stoke is off by .5px but filling the interior area
 	// after a stroke of 2px width results in an outline of 1px
 	cairo_stroke_preserve(cr);
