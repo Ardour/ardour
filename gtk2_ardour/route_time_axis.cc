@@ -172,10 +172,10 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		switch (track()->mode()) {
 		case ARDOUR::Normal:
 		case ARDOUR::NonLayered:
-			rec_enable_button->set_image (Glib::RefPtr<Gdk::Pixbuf>());
+			rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton));
 			break;
 		case ARDOUR::Destructive:
-			rec_enable_button->set_image (::get_icon (X_("record_tape_red")));
+			rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton|ArdourButton::RecTapeMode));
 			break;
 		}
 
@@ -859,10 +859,10 @@ RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
 		switch (mode) {
 		case ARDOUR::NonLayered:
 		case ARDOUR::Normal:
-			rec_enable_button->set_image (Glib::RefPtr<Gdk::Pixbuf>());
+			rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton));
 			break;
 		case ARDOUR::Destructive:
-			rec_enable_button->set_image (::get_icon (X_("record_tape_red")));
+			rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton|ArdourButton::RecTapeMode));
 			break;
 		}
 
