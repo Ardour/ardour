@@ -153,7 +153,7 @@ void
 BarController::before_expose ()
 {
 	double xpos = -1;
-	_slider.set_text (get_label (xpos), false);
+	_slider.set_text (get_label (xpos), false, false);
 }
 
 void
