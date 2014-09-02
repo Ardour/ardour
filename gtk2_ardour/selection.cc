@@ -399,6 +399,8 @@ Selection::add (const list<boost::shared_ptr<Playlist> >& pllist)
 void
 Selection::add (const TrackViewList& track_list)
 {
+	clear_objects();  //enforce object/range exclusivity
+
 	TrackViewList added = tracks.add (track_list);
 
 	if (!added.empty()) {
@@ -414,6 +416,8 @@ Selection::add (const TrackViewList& track_list)
 void
 Selection::add (TimeAxisView* track)
 {
+	clear_objects();  //enforce object/range exclusivity
+
 	TrackViewList tr;
 	track->set_selected (true);
 	tr.push_back (track);
