@@ -28,6 +28,7 @@
 #include "ardour/dB.h"
 #include "ardour/session.h"
 
+#include "public_editor.h"
 #include "option_editor.h"
 #include "gui_thread.h"
 #include "i18n.h"
@@ -137,6 +138,18 @@ void
 BoolOption::toggled ()
 {
 	_set (_button->get_active ());
+}
+
+RouteDisplayBoolOption::RouteDisplayBoolOption (string const & i, string const & n, sigc::slot<bool> g, sigc::slot<bool, bool> s)
+	: BoolOption (i, n, g, s)
+{
+}
+
+void
+RouteDisplayBoolOption::toggled ()
+{
+	DisplaySuspender ds;
+	BoolOption::toggled ();
 }
 
 EntryOption::EntryOption (string const & i, string const & n, sigc::slot<string> g, sigc::slot<bool, string> s)

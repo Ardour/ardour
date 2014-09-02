@@ -169,16 +169,24 @@ public:
 		_button->set_sensitive (yn);
 	}
 
-        Gtk::Widget& tip_widget() { return *_button; }
+	Gtk::Widget& tip_widget() { return *_button; }
 
-private:
+protected:
 
-	void toggled ();
+	virtual void toggled ();
 
 	sigc::slot<bool>       _get; ///< slot to get the configuration variable's value
 	sigc::slot<bool, bool> _set;  ///< slot to set the configuration variable's value
 	Gtk::CheckButton*      _button; ///< UI button
 	Gtk::Label*            _label; ///< label for button, so we can use markup
+};
+
+class RouteDisplayBoolOption : public BoolOption
+{
+public:
+	RouteDisplayBoolOption (std::string const &, std::string const &, sigc::slot<bool>, sigc::slot<bool, bool>);
+protected:
+	virtual void toggled ();
 };
 
 /** Component which allows to add any GTK Widget - intended for single buttons and custom stateless objects */
