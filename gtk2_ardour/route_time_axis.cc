@@ -173,10 +173,8 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		case ARDOUR::Normal:
 		case ARDOUR::NonLayered:
 			rec_enable_button->set_image (Glib::RefPtr<Gdk::Pixbuf>());
-			rec_enable_button->set_markup ("<span color=\"#f46f6f\">\u25CF</span>");
 			break;
 		case ARDOUR::Destructive:
-			rec_enable_button->set_text (string());
 			rec_enable_button->set_image (::get_icon (X_("record_tape_red")));
 			break;
 		}
@@ -862,10 +860,8 @@ RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
 		case ARDOUR::NonLayered:
 		case ARDOUR::Normal:
 			rec_enable_button->set_image (Glib::RefPtr<Gdk::Pixbuf>());
-			rec_enable_button->set_markup ("<span color=\"#f46f6f\">\u25CF</span>");
 			break;
 		case ARDOUR::Destructive:
-			rec_enable_button->set_text (string());
 			rec_enable_button->set_image (::get_icon (X_("record_tape_red")));
 			break;
 		}

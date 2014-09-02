@@ -357,7 +357,6 @@ void
 MeterStrip::set_button_names()
 {
 	mute_button->set_text (_("M"));
-	rec_enable_button->set_markup ("<span color=\"#f46f6f\">\u25CF</span>");
 
 	if (_route && _route->solo_safe()) {
 		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
