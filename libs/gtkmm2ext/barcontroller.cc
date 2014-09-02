@@ -49,6 +49,7 @@ BarController::BarController (Gtk::Adjustment& adj,
 	set (.5, .5, 1.0, 1.0);
 	set_border_width (0);
 	_slider.set_controllable (mc);
+	_slider.show_unity_line (false);
 
 	_slider.StartGesture.connect (sigc::mem_fun(*this, &BarController::passtrhu_gesture_start));
 	_slider.StopGesture.connect (sigc::mem_fun(*this, &BarController::passtrhu_gesture_stop));
