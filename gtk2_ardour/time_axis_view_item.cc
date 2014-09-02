@@ -61,9 +61,9 @@ using namespace Gtkmm2ext;
 
 // GZ: Should be moved to config
 #ifdef _WIN32
-    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Helvetica 8");
-#else
     Pango::FontDescription TimeAxisViewItem::NAME_FONT("Arial 8");
+#else
+    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Helvetica 8");
 #endif
 
 const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 1.0;
