@@ -645,7 +645,7 @@ int rd_dbus_get_name_owner(
 		goto fail;
 	}
 
-	reply = dbus_connection_send_with_reply_and_block(connection, msg, DBUS_TIMEOUT_USE_DEFAULT, error);
+	reply = dbus_connection_send_with_reply_and_block(connection, msg, 5000, error);
 	dbus_message_unref(msg);
 	msg = NULL;
 
