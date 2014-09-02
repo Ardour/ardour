@@ -446,6 +446,10 @@ WavesAudioBackend::set_buffer_size (uint32_t buffer_size)
         return -1;
     }
     
+	// if call to set buffer is successful but device buffer size differs from the value we tried to set
+	// this means we are driven by device for buffer size
+	buffer_size = _device->CurrentBufferSize ();
+
 	_buffer_size_change(buffer_size);
     
     if (device_needs_restart) {
@@ -472,9 +476,9 @@ WavesAudioBackend::set_sample_format (SampleFormat sample_format)
 }
 
 int 
-WavesAudioBackend::_reset_device (uint32_t buffer_size, float sample_rate)
+WavesAudioBackend::reset_device ()
 {
-    // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::_reset_device (" << buffer_size <<", " << sample_rate << "):" << std::endl;
+    // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::_reset_device ():" << std::endl;
 
     WTErr retVal = eNoErr;
 
@@ -483,95 +487,7 @@ WavesAudioBackend::_reset_device (uint32_t buffer_size, float sample_rate)
         return -1;
     }
 
-    bool device_needs_restart = _device->Streaming ();
-    
-    if (device_needs_restart) {
-        retVal  = _device->SetStreaming (false);
-        // COMMENTED DBG LOGS */ std::cout << "\t\t[" << _device->DeviceName() << "]->SetStreaming (false);"<< std::endl;
-        if (retVal != eNoErr) {
-            std::cerr << "WavesAudioBackend::_reset_device (): [" << _device->DeviceName () << "]->SetStreaming (false) failed (" << retVal << ") !" << std::endl;
-            return -1;
-        }
-        retVal  = _device->SetActive (false);
-        // COMMENTED DBG LOGS */ std::cout << "\t\t[" << _device->DeviceName() << "]->SetActive (false);"<< std::endl;
-        if (retVal != eNoErr) {
-            std::cerr << "WavesAudioBackend::_reset_device (): [" << _device->DeviceName () << "]->SetActive (false) failed (" << retVal << ") !" << std::endl;
-            return -1;
-        }
-    }
-    
-	retVal = _device->UpdateDeviceInfo ();
-	if (retVal != eNoErr) {
-		std::cerr << "WavesAudioBackend::_reset_device (): [" << _device->DeviceName() << "]->UpdateDeviceInfo () failed (" << retVal << ") !" << std::endl;
-		return -1;
-	}
-
-	if (buffer_size != 0)
-	{
-		retVal = _device->SetCurrentBufferSize (buffer_size);
-    
-		if (retVal != eNoErr) {
-			std::cerr << "WavesAudioBackend::_reset_device (): [" << _device->DeviceName() << "]->SetCurrentBufferSize (" << buffer_size << ") failed (" << retVal << ") !" << std::endl;
-			return -1;
-		}
-    
-	    _buffer_size = buffer_size;
-	}
-	else
-	{
-		uint32_t current_buffer_size = _device->CurrentBufferSize();
-		// COMMENTED DBG LOGS */ std::cout << "\t\tcurrent_buffer_size: " << current_buffer_size << std::endl;
-		// COMMENTED DBG LOGS */ std::cout << "\t\t       _buffer_size: " << _buffer_size << std::endl;
-		if(_buffer_size != current_buffer_size)
-		{
-			_buffer_size = current_buffer_size;
-			engine.buffer_size_change (_buffer_size);
-			// COMMENTED DBG LOGS */ std::cout << "\t\tengine.buffer_size_change (" << buffer_size <<")" << std::endl;
-		}
-	}
-
-	if(sample_rate > 0.0)
-	{
-		retVal = _device->SetCurrentSamplingRate ((int)sample_rate);
-    
-		if (retVal != eNoErr) {
-			std::cerr << "WavesAudioBackend::set_sample_rate (): [" << _device->DeviceName() << "]->SetCurrentSamplingRate ((int)" << sample_rate << ") failed (" << retVal << ") !" << std::endl;
-			return -1;
-		}
-	    _sample_rate = sample_rate;
-	}
-	else
-	{
-		float current_sample_rate = _device->CurrentSamplingRate();
-		// COMMENTED DBG LOGS */ std::cout << "\t\tcurrent_sample_rate: " << current_sample_rate << std::endl;
-		// COMMENTED DBG LOGS */ std::cout << "\t\t       _sample_rate: " << _sample_rate << std::endl;
-		if(_sample_rate != current_sample_rate)
-		{
-			_sample_rate = current_sample_rate;
-			engine.sample_rate_change (_sample_rate);
-			// COMMENTED DBG LOGS */ std::cout << "\t\tengine.sample_rate_change (" << _sample_rate <<")" << std::endl;
-		}
-	}
-
-    _init_dsp_load_history();
-    
-    if (device_needs_restart) {
-        // COMMENTED DBG LOGS */ std::cout << "\t\t[" << _device->DeviceName() << "]->SetActive (true);"<< std::endl;
-        retVal  = _device->SetActive (true);
-        if (retVal != eNoErr) {
-            std::cerr << "WavesAudioBackend::_reset_device (): [" << _device->DeviceName () << "]->SetActive (true) failed (" << retVal << ") !" << std::endl;
-            return -1;
-        }
-        // COMMENTED DBG LOGS */ std::cout << "\t\t[" << _device->DeviceName() << "]->SetStreaming (true);"<< std::endl;
-        _call_thread_init_callback = true;
-        retVal  = _device->SetStreaming (true);
-        if (retVal != eNoErr) {
-            std::cerr << "WavesAudioBackend::_reset_device (): [" << _device->DeviceName () << "]->SetStreaming (true) failed (" << retVal << ") !" << std::endl;
-            return -1;
-        }
-    }
-    
-    return 0;
+	return _device->ResetDevice();
 }
 
 

@@ -405,31 +405,42 @@ AudioEngine::do_reset_backend()
     while (!_stop_hw_reset_processing) {
         
         if (_hw_reset_request_count && _backend) {
+
+			_reset_request_lock.unlock();
             
-            _reset_request_lock.unlock();
-            
+			Glib::Threads::RecMutex::Lock pl (_state_lock);
+
             g_atomic_int_dec_and_test (&_hw_reset_request_count);
+
+			std::cout << "AudioEngine::RESET::Reset request processing" << std::endl;
 
             // backup the device name
             std::string name = _backend->device_name ();
+			
+            std::cout << "AudioEngine::RESET::Halting session processing..." << std::endl;
+			if (_session && _running) {
+				// it's not a halt, but should be handled the same way:
+				// disable record, stop transport and I/O processign but save the data.
+				_session->engine_halted ();
+			}
             
-            stop();
-            if (_session) {
-                // it's not a halt, but should be handled the same way:
-                // disable record, stop transport and I/O processign but save the data.
-                _session->engine_halted ();
-            }
+			std::cout << "AudioEngine::RESET::Stoping engine..." << std::endl;
+			stop();
+
+			std::cout << "AudioEngine::RESET::Reseting device..." << std::endl;
+			if ( 0 == _backend->reset_device () ) {
+				
+				std::cout << "AudioEngine::RESET::Starting engine..." << std::endl;
+				start ();
+
+				// inform about possible changes
+				BufferSizeChanged (_backend->buffer_size() );
+			} else {
+				DeviceError();
+			}
             
-            // "hard reset" the device
-            _backend->drop_device ();
-            _backend->set_device_name (name);
-            
-            start ();
-            
-            // inform about possible changes
-            SampleRateChanged (_backend->sample_rate() );
-            BufferSizeChanged (_backend->buffer_size() );
-            
+			std::cout << "AudioEngine::RESET::Done." << std::endl;
+
             _reset_request_lock.lock();
             
         } else {
@@ -460,7 +471,7 @@ AudioEngine::do_devicelist_update()
     while (!_stop_hw_devicelist_processing) {
         
         if (_hw_devicelist_update_count) {
-            
+
             _devicelist_update_lock.unlock();
             
             g_atomic_int_dec_and_test (&_hw_devicelist_update_count);
@@ -611,7 +622,7 @@ AudioEngine::died ()
 
 	stop_metering_thread ();
 
-        _running = false;
+    _running = false;
 }
 
 int
@@ -1177,7 +1188,7 @@ AudioEngine::halted_callback (const char* why)
 		return;
 	}
 
-        stop_metering_thread ();
+    stop_metering_thread ();
 	_running = false;
 
 	Port::PortDrop (); /* EMIT SIGNAL */

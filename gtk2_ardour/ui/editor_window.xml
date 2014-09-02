@@ -40,8 +40,7 @@
                     y="4"/>
               <HBox id="primary_clock_home"
                     x="132"
-                    y="6"/>
-            
+                    y="6"/>            
               <Button id="bit_depth_button"
                       text="bit depth"
                       fgnormal="#ffffff"
@@ -78,8 +77,26 @@
                               activeicon="top_bar_button"
                               prelighticon="top_bar_button"/>
             </Layout>
-            <Layout box.pack="end" width="114" height="51">
-              <icon source="metrics_display.png"/>
+            <EventBox bgnormal="#383838"
+                      width="17"
+                      box.padding="1"
+                      box.fill="true"
+                      box.expand="true">
+              <HBox>
+                <icon source="infobar_left.png"/>
+                <icon source="infobar_center.png"
+                      box.fill="true"
+                      box.expand="true"/>
+                <icon source="infobar_right.png"
+                      box.pack="end"/>
+              </HBox>
+            </EventBox>
+            <Layout bgnormal="#282828"
+                    width="115"
+                    height="51"
+                    box.pack="end">
+              <icon source="metrics_display.png"
+                    x="1"/>
               <Adjustment id="dsp_load_adjustment"
                           minvalue="1"
                           maxvalue="100"
@@ -93,7 +110,7 @@
                      maxposx="56"
                      maxposy="3"
                      readonly="true"
-                     x="28"
+                     x="29"
                      y="8"
                      width="56"
                      height="5"/>
@@ -103,7 +120,7 @@
                      fgnormal="#ffffff"
                      winfont ="Arial 8"
                      macfont ="Helvetica 8"
-                     x="87"
+                     x="88"
                      y="8"/>
               <Adjustment id="hd_load_adjustment"
                           minvalue="1"
@@ -118,7 +135,7 @@
                      maxposx="56"
                      maxposy="3"
                      readonly="true"
-                     x="28"
+                     x="29"
                      y="18"
                      width="56"
                      height="5"/>
@@ -128,7 +145,7 @@
                      fgnormal="#ffffff"
                      winfont ="Arial 8"
                      macfont ="Helvetica 8"
-                     x="87"
+                     x="88"
                      y="18"/>
                 
               <Label id="hd_remained_time"
@@ -136,16 +153,11 @@
                      fgnormal="#ffffff"
                      winfont ="Arial 9"
                      macfont ="Helvetica 9"
-                     x="58"
+                     x="59"
                      y="33"/>
             </Layout>
-            <EventBox bgnormal="#383838" 
-                      width="420"
-                      box.padding="4">
-              <EventBox bgnormal="#474747"
-                        borderwidth="1"/>
-            </EventBox>
-            <VBox spacing ="1" box.pack="end">
+            <VBox spacing ="1"
+                  box.pack="end">
               <iconbutton id="mode_stereo_out_button"
                           tooltip="Stereo Out Mode"
                           width="79" height="25"
@@ -183,7 +195,9 @@
                         normalicon="meter_bridge_on"
                         activeicon="meter_bridge_on_active"
                         prelighticon="meter_bridge_on_prelight"/>
-            <layout     width="54" height="26" bgnormal="#3E3E3E"/>
+            <Layout width="54"
+                    height="26"
+                    bgnormal="#3E3E3E"/>
             <iconbutton id="transport_start_button"
                         tooltip="Rewind"
                         width="34" height="26"
@@ -226,7 +240,9 @@
                         normalicon="lock_session"
                         activeicon="lock_session_active"
                         prelighticon="lock_session_prelight"/>
-            <layout width="60" height="26" bgnormal="#3E3E3E"/>
+            <Layout width="60"
+                    height="26"
+                    bgnormal="#3E3E3E"/>
             <iconbutton id="tool_marker_button"
                         tooltip="Range Select Tool"
                         width="34" height="26"

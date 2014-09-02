@@ -115,6 +115,7 @@
     void on_audio_output_configuration_changed ();
     void on_midi_input_configuration_changed ();
     void on_midi_output_configuration_changed ();
+    void on_device_error ();
 
     void cleanup_input_channels_list();
     void cleanup_output_channels_list();

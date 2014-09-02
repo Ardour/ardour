@@ -114,6 +114,9 @@ public:
     bool           is_realtime() const;
     bool           connected() const;
 
+	// for the user which hold state_lock to check if reset operation is pending
+	bool		   is_reset_requested() const { return g_atomic_int_get(&_hw_reset_request_count); }
+
     int set_device_name (const std::string&);
     int set_sample_rate (float);
     int set_buffer_size (uint32_t);
@@ -129,6 +132,7 @@ public:
     bool running() const { return _running; }
 
     Glib::Threads::Mutex& process_lock() { return _process_lock; }
+	Glib::Threads::RecMutex& state_lock() { return _state_lock; }
 
     int request_buffer_size (pframes_t samples) {
 	    return set_buffer_size (samples);
@@ -169,6 +173,10 @@ public:
     
     PBD::Signal1<void, pframes_t> BufferSizeChanged;
     
+	/* this signal is emitted if the device cannot operate properly */
+	
+	PBD::Signal0<void> DeviceError;
+
     /* this signal is emitted if the device list changed */
     
     PBD::Signal0<void> DeviceListChanged;
@@ -228,7 +236,8 @@ public:
 
     static AudioEngine*       _instance;
 
-    Glib::Threads::Mutex      _process_lock;
+    Glib::Threads::Mutex	   _process_lock;
+	Glib::Threads::RecMutex    _state_lock;
     Glib::Threads::Cond        session_removed;
     bool                       session_remove_pending;
     frameoffset_t              session_removal_countdown;

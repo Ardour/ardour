@@ -116,7 +116,8 @@ TracksControlPanel::init ()
     EngineStateController::instance()->OutputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_audio_output_configuration_changed, this), gui_context());
     EngineStateController::instance()->MIDIInputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_midi_input_configuration_changed, this), gui_context());
     EngineStateController::instance()->MIDIOutputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_midi_output_configuration_changed, this), gui_context());
-    
+    EngineStateController::instance()->DeviceError.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_device_error, this), gui_context());
+
     /* Global configuration parameters update */
     Config->ParameterChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_parameter_changed, this, _1), gui_context());
     
@@ -1243,6 +1244,21 @@ TracksControlPanel::on_session_settings (WavesButton*)
 	_session_settings_tab_button.set_active(true);
 }
 
+void
+TracksControlPanel::on_device_error ()
+{
+    std::string message = _("Device cannot operate properly. Switched to None device.");
+    
+    MessageDialog msg (message,
+                       false,
+                       Gtk::MESSAGE_WARNING,
+                       Gtk::BUTTONS_OK,
+                       true);
+    
+    msg.set_position (Gtk::WIN_POS_MOUSE);
+    msg.set_keep_above (true);
+    msg.run ();
+}
 
 void
 TracksControlPanel::on_multi_out (WavesButton*)

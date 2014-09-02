@@ -386,6 +386,12 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      */
     virtual int stop () = 0;
 
+	 /** Reset device. 
+     *
+     * Return zero if successful, negative values on error
+     */
+	virtual int reset_device() = 0;
+
     /** While remaining connected to the device, and without changing its
      * configuration, start (or stop) calling the process_callback() of @param engine
      * without waiting for the device. Once process_callback() has returned, it

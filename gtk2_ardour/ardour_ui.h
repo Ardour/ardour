@@ -227,6 +227,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void focus_on_clock ();
 	AudioClock*   big_clock;
 
+    WavesButton* _tracks_button;
+    void on_tracks_button (WavesButton*);
     WavesButton* _bit_depth_button;
     WavesButton* _sample_rate_button;
     WavesButton* _frame_rate_button;

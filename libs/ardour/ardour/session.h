@@ -301,6 +301,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	PBD::Signal0<void> RecordStateChanged;
 
+	/* Emited when session is loaded */
+	PBD::Signal0<void> SessionLoaded;
+
 	/* Transport mechanism signals */
 
 	/** Emitted on the following changes in transport state:
