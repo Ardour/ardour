@@ -647,6 +647,23 @@ style "small_entry" = "small_text"
 	base[SELECTED] = @@COLPREFIX@_base
 }
 
+style "small_spinner" = "small_text"
+{
+	xthickness = 0
+	ythickness = 0
+	fg[NORMAL] = @@COLPREFIX@_text
+	fg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
+	fg[SELECTED] = @@COLPREFIX@_fg_selected
+
+	text[NORMAL] = @@COLPREFIX@_text
+	text[ACTIVE] = @@COLPREFIX@_text
+	text[SELECTED] = @@COLPREFIX@_fg_selected
+
+	base[NORMAL] = @@COLPREFIX@_base
+	base[ACTIVE] = @@COLPREFIX@_base
+	base[SELECTED] = @@COLPREFIX@_base
+}
+
 style "red_active_small_entry" = "small_entry"
 {
 	fg[ACTIVE] = @@COLPREFIX@_text
