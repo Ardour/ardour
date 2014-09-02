@@ -305,7 +305,15 @@ GainMeter::setup_meters (int len)
 {
 	switch (_width) {
 		case Wide:
-			hbox.set_homogeneous(true);
+			{
+				uint32_t meter_channels = 0;
+				if (_meter) {
+					meter_channels = _meter->input_streams().n_total();
+				} else if (_route) {
+					meter_channels = _route->shared_peak_meter()->input_streams().n_total();
+				}
+				hbox.set_homogeneous(meter_channels < 7 ? true : false);
+			}
 			break;
 		case Narrow:
 			hbox.set_homogeneous(false);
