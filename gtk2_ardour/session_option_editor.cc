@@ -207,7 +207,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	BoolOption *bo;
 
-	bo = new BoolOption (
+	bo = new RouteDisplayBoolOption (
 			"track-name-number",
 			_("Prefix Track number"),
 			sigc::mem_fun (*_session_config, &SessionConfiguration::get_track_name_number),
