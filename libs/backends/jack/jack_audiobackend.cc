@@ -1158,3 +1158,11 @@ JACKAudioBackend::speed_and_position (double& speed, framepos_t& position)
 	position = pos.frame;
 	return starting;
 }
+
+int
+JACKAudioBackend::reset_device ()
+{
+        /* XXX need to figure out what this means for JACK
+         */
+        return 0;
+}
