@@ -33,15 +33,8 @@ SliderController::SliderController (Gtk::Adjustment *adj, int orientation, int f
 	, spin (*adj, 0, 2)
 {			  
 	spin.set_name ("SliderControllerValue");
-	spin.set_size_request (70,-1); // should be based on font size somehow
 	spin.set_numeric (true);
 	spin.set_snap_to_ticks (false);
-}
-
-void
-SliderController::set_value (float v)
-{
-	adjustment.set_value (v);
 }
 
 bool 
@@ -54,29 +47,12 @@ SliderController::on_button_press_event (GdkEventButton *ev)
 	return PixFader::on_button_press_event (ev);
 }
 
-VSliderController::VSliderController (Gtk::Adjustment *adj, int fader_length, int fader_girth, bool with_numeric)
-
+VSliderController::VSliderController (Gtk::Adjustment *adj, int fader_length, int fader_girth)
 	: SliderController (adj, VERT, fader_length, fader_girth)
 {
-	if (with_numeric) {
-		spin_frame.add (spin);
-		spin_frame.set_shadow_type (Gtk::SHADOW_IN);
-		spin_frame.set_name ("BaseFrame");
-		spin_hbox.pack_start (spin_frame, false, true);
-		// pack_start (spin_hbox, false, false);
-	}
 }
 
-HSliderController::HSliderController (Gtk::Adjustment *adj, int fader_length, int fader_girth,
-				      bool with_numeric)
-	
+HSliderController::HSliderController (Gtk::Adjustment *adj, int fader_length, int fader_girth)
 	: SliderController (adj, HORIZ, fader_length, fader_girth)
 {
-	if (with_numeric) {
-		spin_frame.add (spin);
-		//spin_frame.set_shadow_type (Gtk::SHADOW_IN);
-		spin_frame.set_name ("BaseFrame");
-		spin_hbox.pack_start (spin_frame, false, true);
-		// pack_start (spin_hbox, false, false);
-	}
 }
