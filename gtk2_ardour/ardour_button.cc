@@ -58,6 +58,8 @@ ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::El
 ArdourButton::ArdourButton (Element e)
 	: _elements (e)
 	, _tweaks (Tweaks (0))
+	, _char_pixel_width (0)
+	, _char_pixel_height (0)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (11.0)
@@ -494,12 +496,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		//calc our real width for our string (but ignore the height, because that results in inconsistent button heights)
 		int ignored;
 		_layout->get_pixel_size (_text_width, ignored);
-
-		//calc the height using some text with both ascenders and descenders
-		std::string t = _layout->get_text();
-		_layout->set_text ("WjgO");  //what we put here probably doesn't matter, as long as its the same for everyone
-		_layout->get_pixel_size (ignored, _text_height);
-		_layout->set_text (t);
+		_text_height = char_pixel_height ();
 
 		if (_text_width + _diameter < 75) {
 			xpad = 7;
@@ -803,13 +800,14 @@ ArdourButton::action_toggled ()
 void
 ArdourButton::on_style_changed (const RefPtr<Gtk::Style>&)
 {
-	set_colors ();
-	build_patterns ();
+	on_name_changed();
 }
 
 void
 ArdourButton::on_name_changed ()
 {
+	_char_pixel_width = 0;
+	_char_pixel_height = 0;
 	set_colors ();
 	build_patterns ();
 }
@@ -953,6 +951,29 @@ ArdourButton::action_sensitivity_changed ()
 	
 }
 
+void
+ArdourButton::recalc_char_pixel_geometry ()
+{
+	if (_char_pixel_height > 0 && _char_pixel_width > 0) {
+		return;
+	}
+	if (!_layout) {
+		_layout = Pango::Layout::create (get_pango_context());
+	}
+	// NB. this is not static, since the geometry is different
+	// depending on the font used.
+	int w, h;
+	std::string t = _layout->get_text();
+	std::string x = _("ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+	_layout->set_text (x);
+	_layout->get_pixel_size (w, h);
+	_layout->set_text (t);
+	_char_pixel_height = std::max(4, h);
+	// number of actual chars in the string (not bytes)
+	// Glib to the rescue.
+	Glib::ustring gx(x);
+	_char_pixel_width = std::max(4, w / (int)gx.size());
+}
 
 void
 ArdourButton::action_visibility_changed ()

@@ -101,6 +101,9 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	void set_fallthrough_to_parent(bool fall) { _fallthrough_to_parent = fall; }
 
+	unsigned int char_pixel_width() { if (_char_pixel_width < 1) recalc_char_pixel_geometry() ; return _char_pixel_width; }
+	unsigned int char_pixel_height() { if (_char_pixel_height < 1) recalc_char_pixel_geometry() ; return _char_pixel_height; }
+
   protected:
 	void render (cairo_t *, cairo_rectangle_t *);
 	void on_size_request (Gtk::Requisition* req);
@@ -123,6 +126,10 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	Element                     _elements;
 	Tweaks                      _tweaks;
 	BindingProxy                binding_proxy;
+
+	void recalc_char_pixel_geometry ();
+	unsigned int _char_pixel_width;
+	unsigned int _char_pixel_height;
 
 	int   _text_width;
 	int   _text_height;
