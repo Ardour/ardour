@@ -205,20 +205,10 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
         Gdk::Color color;
         Editor* editor = dynamic_cast<Editor*>( &(ARDOUR_UI::instance()->the_editor()) );
         
-        if( editor!=NULL && editor->set_session_in_progress() )
-        {
-            if( _route->is_master() )
-                color = (Gdk::Color)(MixerStrip::XMLColor[master_color]);
-            else
-                color = MixerStrip::palette_random_color();
-        }
-        else
-		{
-			if( _route->is_master() )
-                color = (Gdk::Color)(MixerStrip::XMLColor[master_color]);
-			else
-				color = (Gdk::Color)(MixerStrip::XMLColor[default_palette_color]);
-		}
+		if ( _route->is_master() )
+            color = (Gdk::Color)(MixerStrip::XMLColor[master_color]);
+		else
+		    color = (Gdk::Color)(MixerStrip::XMLColor[default_palette_color]);
 
         set_color (color);
 	}

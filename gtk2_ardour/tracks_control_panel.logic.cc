@@ -1636,8 +1636,31 @@ TracksControlPanel::bufsize_as_string (uint32_t sz)
 framecnt_t
 TracksControlPanel::get_sample_rate () const
 {
-	float r = atof (_sample_rate_combo.get_active_text ());
-	/* the string may have been translated with an abbreviation for
+    const string sample_rate = _sample_rate_combo.get_active_text ();
+    
+    if ( "44.1 kHz" == sample_rate )
+    {
+        return 44100;
+    } else if ( "48 kHz" == sample_rate )
+    {
+        return 48000;
+    } else if ( "88.2 kHz" == sample_rate )
+    {
+        return 88200;
+    } else if ( "96 kHz" == sample_rate )
+    {
+        return 96000;
+    } else if ( "172.4 kHz" == sample_rate )
+    {
+        return 172400;
+    } else if ( "192 kHz" == sample_rate )
+    {
+        return 192000;
+    }
+    
+    float r = atof (sample_rate);
+	    
+    /* the string may have been translated with an abbreviation for
 	* thousands, so use a crude heuristic to fix this.
 	*/
 	if (r < 1000.0) {
