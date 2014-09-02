@@ -36,6 +36,7 @@
 #include "waves_grid.h"
 #include "waves_button.h"
 #include "waves_icon_button.h"
+#include "waves_dropdown.h"
 
 using namespace ArdourCanvas::XMLUI;
 
@@ -53,6 +54,7 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	Gtk::HBox& get_h_box (const char* id);
 	Gtk::Fixed& get_fixed (const char* id);
 	WavesGrid& get_waves_grid (const char* id);
+	WavesDropdown& get_waves_dropdown (const char* id);
 	Gtk::Paned& get_paned (const char* id);
 	Gtk::HPaned& get_h_paned (const char* id);
 	Gtk::VPaned& get_v_paned (const char* id);

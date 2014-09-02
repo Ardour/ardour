@@ -80,6 +80,8 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 		child = manage (new WavesButton(text));
 	} else if (widget_type == "ICONBUTTON") {
 		child = manage (new WavesIconButton);
+	} else if (widget_type == "DROPDOWN") {
+		child = manage (new WavesDropdown);
 	} else if (widget_type == "ICON") {
 		std::string image_path;
 		Searchpath spath(ARDOUR::ardour_data_search_path());
@@ -676,6 +678,11 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		}
 	}
 
+	WavesDropdown* dropdown = dynamic_cast<WavesDropdown*> (&widget);
+	if (dropdown) {
+		set_attributes (dropdown->get_menu (), definition, styles);
+	}
+
 	Gtk::Table* table = dynamic_cast<Gtk::Table*> (&widget);
 	if (table) {
 		table->set_col_spacings (xml_property (definition, "columnspacing", styles, 0));
@@ -810,6 +817,16 @@ WavesUI::get_waves_grid (const char* id)
 	return *child;
 }
 
+WavesDropdown&
+WavesUI::get_waves_dropdown (const char* id)
+{
+	WavesDropdown* child = dynamic_cast<WavesDropdown*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("WavesDropdown ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
 Gtk::Paned&
 WavesUI::get_paned (const char* id)
 {
