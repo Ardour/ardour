@@ -70,6 +70,7 @@ const double trim_handle_size = 6.0; /* pixels */
 uint32_t TimeAxisView::button_height = 0;
 uint32_t TimeAxisView::extra_height = 0;
 int const TimeAxisView::_max_order = 512;
+unsigned int TimeAxisView::name_width_px = 100; // TODO adjust with font-scaling on style-change
 PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::controls_meters_size_group = Glib::RefPtr<Gtk::SizeGroup>();
 
@@ -134,7 +135,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	name_hbox.pack_end (name_label, true, true);
 
 	// set min. track-header width if fader is not visible
-	name_hbox.set_size_request(100, 0);
+	name_hbox.set_size_request(name_width_px, 0);
 
 	name_hbox.show ();
 	name_label.show ();
