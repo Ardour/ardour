@@ -71,7 +71,7 @@ uint32_t TimeAxisView::button_height = 0;
 uint32_t TimeAxisView::extra_height = 0;
 int const TimeAxisView::_max_order = 512;
 PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
-Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::controls_meters_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
+Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::controls_meters_size_group = Glib::RefPtr<Gtk::SizeGroup>();
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
@@ -98,6 +98,9 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	, _have_preresize_cursor (false)
 	, _ebox_release_can_act (true)
 {
+	if (!controls_meters_size_group) {
+		controls_meters_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
+	}
 	if (extra_height == 0) {
 		compute_heights ();
 	}
