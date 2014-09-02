@@ -33,18 +33,22 @@ namespace Gtkmm2ext {
 
 class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 {
-  public:
-        PixFader (Gtk::Adjustment& adjustment, int orientation, int span, int girth);
+	public:
+	PixFader (Gtk::Adjustment& adjustment, int orientation, int span, int girth);
 	virtual ~PixFader ();
 
-	void set_default_value (float);
-	void set_text (const std::string&);
+	sigc::signal<void> StartGesture;
+	sigc::signal<void> StopGesture;
+	sigc::signal<void> OnExpose;
 
-  protected:
+	void set_default_value (float);
+	void set_text (const std::string&, bool);
+
+	protected:
 	Glib::RefPtr<Pango::Layout> _layout;
 	std::string                 _text;
-	int   _text_width;
-	int   _text_height;
+	int _text_width;
+	int _text_height;
 
 	Gtk::Adjustment& adjustment;
 
@@ -61,17 +65,36 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 
 	void on_state_changed (Gtk::StateType);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
-	Gdk::Color get_parent_bg ();
 
 	enum Orientation {
 		VERT,
 		HORIZ,
 	};
 
-  private:
-	int span, girth;
+	private:
+	int _span;
+	int _girth;
 	int _orien;
-	cairo_pattern_t* pattern;
+	cairo_pattern_t* _pattern;
+	bool _hovering;
+	GdkWindow* _grab_window;
+	double _grab_loc;
+	double _grab_start;
+	int _last_drawn;
+	bool _dragging;
+	float _default_value;
+	int _unity_loc;
+	bool _centered_text;
+
+	sigc::connection _parent_style_change;
+	Widget * _current_parent;
+	Gdk::Color get_parent_bg ();
+
+	void create_patterns();
+	void adjustment_changed ();
+	void set_adjustment_from_event (GdkEventButton *);
+	void update_unity_position ();
+	int  display_span ();
 
 	struct FaderImage {
 		cairo_pattern_t* pattern;
@@ -118,27 +141,9 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 			double abr, double abg, double abb,
 			int w, int h);
 
-	bool _hovering;
-
-	GdkWindow* grab_window;
-	double grab_loc;
-	double grab_start;
-	int last_drawn;
-	bool dragging;
-	float default_value;
-	int unity_loc;
-
-	void adjustment_changed ();
-	int display_span ();
-	void set_adjustment_from_event (GdkEventButton *);
-	void update_unity_position ();
-
-	sigc::connection _parent_style_change;
-	Widget * _current_parent;
-	void create_patterns();
 };
 
 
 } /* namespace */
 
- #endif /* __gtkmm2ext_pixfader_h__ */
+#endif /* __gtkmm2ext_pixfader_h__ */
