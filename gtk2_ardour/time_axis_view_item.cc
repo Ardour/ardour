@@ -248,7 +248,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		name_text = new ArdourCanvas::Text (group);
 		CANVAS_DEBUG_NAME (name_text, string_compose ("name text for %1", get_item_name()));
                 
-                name_text->set_position (ArdourCanvas::Duple (NAME_HIGHLIGHT_X_OFFSET + NAME_HIGHLIGHT_X_IDENT, NAME_HIGHLIGHT_Y_OFFSET + NAME_HIGHLIGHT_Y_IDENT) );
+                name_text->set_position (ArdourCanvas::Duple (NAME_HIGHLIGHT_X_OFFSET + NAME_HIGHLIGHT_X_INDENT, NAME_HIGHLIGHT_Y_OFFSET + NAME_HIGHLIGHT_Y_INDENT) );
                 name_text->set("");
                 name_text->set_font_description (NAME_FONT);
                 
