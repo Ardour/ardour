@@ -396,7 +396,7 @@ MixerStrip::~MixerStrip ()
 }
 
 bool
-MixerStrip::mixer_strip_enter_event (GdkEventCrossing *ev)
+MixerStrip::mixer_strip_enter_event (GdkEventCrossing* /*ev*/)
 {
 	_entered_mixer_strip = this;
 	
