@@ -59,8 +59,14 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace Gtkmm2ext;
 
-Pango::FontDescription TimeAxisViewItem::NAME_FONT;
-const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_IDENT = 3.0;
+// GZ: Should be moved to config
+#ifdef _WIN32
+    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Helvetica 8");
+#else
+    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Arial 8");
+#endif
+
+const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 1.0;
 const double TimeAxisViewItem::NAME_HIGHLIGHT_X_OFFSET = 10.0;
 const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_OFFSET = 5.0;
 const double TimeAxisViewItem::GRAB_HANDLE_TOP = 2.0;
@@ -71,38 +77,37 @@ const double TimeAxisViewItem::REGION_TOP_OFFSET = 2.0;
 const double TimeAxisViewItem::REGION_BOTTOM_OFFSET = 3.0;
 
 int    TimeAxisViewItem::NAME_HEIGHT;
-double TimeAxisViewItem::NAME_HIGHLIGHT_X_IDENT;
-double TimeAxisViewItem::NAME_Y_OFFSET;
+double TimeAxisViewItem::NAME_HIGHLIGHT_X_INDENT;
 double TimeAxisViewItem::NAME_HIGHLIGHT_HEIGHT;
 double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
 
 void
 TimeAxisViewItem::set_constant_heights ()
 {
-    NAME_FONT = get_font_for_style (X_("TimeAxisViewItemName"));
-
+    // GZ: FONT IS DEFINED AT THE BEGINNING OF THE FILE
+    //NAME_FONT = get_font_for_style (X_("TimeAxisViewItemName"));
     Gtk::Window win;
     Gtk::Label foo;
     win.add (foo);
 
     int width = 0;
     int height = 0;
-
+    
     Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("H")); /* just the ascender */
     layout->set_font_description (NAME_FONT);
     get_pixel_size (layout, width, height);
+    
+    NAME_HEIGHT = height;
+    NAME_HIGHLIGHT_X_INDENT = width;
 
-    NAME_HEIGHT = height + 2;
-    NAME_HIGHLIGHT_X_IDENT = width + 2;
-
-	/* Config->get_show_name_highlight) == true: 
+	/* Config->get_show_name_highlight) == true:
 	        Y_OFFSET is measured from bottom of the time axis view item.
 	   Config->get_show_name_highlight) == false: 
 	        Y_OFFSET is measured from the top of the time axis view item.
 	*/
 
-    NAME_HIGHLIGHT_HEIGHT = NAME_HEIGHT + NAME_HIGHLIGHT_Y_IDENT*2;
-    NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_HEIGHT * 1.5;
+    NAME_HIGHLIGHT_HEIGHT = NAME_HEIGHT + NAME_HIGHLIGHT_Y_INDENT*2;
+    NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_HEIGHT + 2;
 }
 
 /**
@@ -237,8 +242,8 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 		name_highlight = new ArdourCanvas::Rectangle (group, 
 							      ArdourCanvas::Rect (NAME_HIGHLIGHT_X_OFFSET,
                                                       NAME_HIGHLIGHT_Y_OFFSET,
-                                                      NAME_HIGHLIGHT_X_OFFSET + 2*NAME_HIGHLIGHT_X_IDENT,
-                                                      NAME_HIGHLIGHT_HEIGHT) );
+                                                      NAME_HIGHLIGHT_X_OFFSET + 2*NAME_HIGHLIGHT_X_INDENT,
+                                                      NAME_HIGHLIGHT_HEIGHT + NAME_HIGHLIGHT_Y_OFFSET) );
 		CANVAS_DEBUG_NAME (name_highlight, string_compose ("name highlight for %1", get_item_name()));
 		name_highlight->set_data ("timeaxisviewitem", this);
         name_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0) );
@@ -248,7 +253,7 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
     {
 		name_text = new ArdourCanvas::Text (group);
 		CANVAS_DEBUG_NAME (name_text, string_compose ("name text for %1", get_item_name()));
-        name_text->set_position (ArdourCanvas::Duple (NAME_HIGHLIGHT_X_OFFSET + NAME_HIGHLIGHT_X_IDENT, NAME_HIGHLIGHT_Y_OFFSET + NAME_HIGHLIGHT_Y_IDENT) );
+        name_text->set_position (ArdourCanvas::Duple (NAME_HIGHLIGHT_X_OFFSET + NAME_HIGHLIGHT_X_INDENT, NAME_HIGHLIGHT_Y_OFFSET + NAME_HIGHLIGHT_Y_INDENT) );
 		name_text->set("");
         name_text->set_font_description (NAME_FONT);
 
@@ -562,8 +567,9 @@ TimeAxisViewItem::set_name_text(const string& new_name)
 	if (!name_text) {
 		return;
 	}
-
-	name_text_width = pixel_width (new_name, NAME_FONT);
+    // This is a workaround.
+    // Pango returns incorrect width values 1.5*NAME_HIGHLIGHT_X_INDENT
+	name_text_width = pixel_width (new_name, NAME_FONT) + 1.5*NAME_HIGHLIGHT_X_INDENT;
 	name_text->set (new_name);
 }
 
@@ -605,12 +611,12 @@ TimeAxisViewItem::manage_name_highlight ()
 		high_enough_for_name = true;
 	}
 
-    double highlite_y1 = name_text_width + 2*NAME_HIGHLIGHT_X_IDENT + NAME_HIGHLIGHT_X_OFFSET;
-	if (_width < highlite_y1) {
-        highlite_y1 = _width;
+    double highlite_x1 = name_text_width + 2*NAME_HIGHLIGHT_X_INDENT + NAME_HIGHLIGHT_X_OFFSET;
+	if (_width < highlite_x1) {
+        highlite_x1 = _width;
 	}
 
-    if (highlite_y1 < NAME_HIGHLIGHT_X_OFFSET) {
+    if (highlite_x1 < NAME_HIGHLIGHT_X_OFFSET) {
     	wide_enough_for_name = false;
 	} else {
 		wide_enough_for_name = true;
@@ -619,10 +625,10 @@ TimeAxisViewItem::manage_name_highlight ()
 	if (wide_enough_for_name && high_enough_for_name && !name_text->text().empty() ) {
 		name_highlight->set (ArdourCanvas::Rect (NAME_HIGHLIGHT_X_OFFSET,
                                                  NAME_HIGHLIGHT_Y_OFFSET,
-                                                 highlite_y1,
-                                                 NAME_HIGHLIGHT_HEIGHT) );
+                                                 highlite_x1,
+                                                 NAME_HIGHLIGHT_HEIGHT + NAME_HIGHLIGHT_Y_OFFSET) );
         name_highlight->show();
-			
+        name_highlight->raise_to_top();
 	} else {
 		name_highlight->hide();
 	}
@@ -969,8 +975,8 @@ TimeAxisViewItem::manage_name_text ()
 
 	visible_name_width = name_text_width;
 
-	if (visible_name_width > _width - NAME_HIGHLIGHT_X_OFFSET - NAME_HIGHLIGHT_X_IDENT) {
-		visible_name_width = _width - NAME_HIGHLIGHT_X_OFFSET - NAME_HIGHLIGHT_X_IDENT;
+	if (visible_name_width > _width - NAME_HIGHLIGHT_X_OFFSET - NAME_HIGHLIGHT_X_INDENT) {
+		visible_name_width = _width - NAME_HIGHLIGHT_X_OFFSET - NAME_HIGHLIGHT_X_INDENT;
 	}
 
 	if (visible_name_width < 1) {
@@ -978,6 +984,7 @@ TimeAxisViewItem::manage_name_text ()
 	} else {
 		name_text->clamp_width (visible_name_width);
 		name_text->show ();
+        name_text->raise_to_top ();
 	}
 }
 
