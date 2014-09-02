@@ -295,10 +295,10 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		const double y = get_height() * .5;
 		cairo_arc (cr, x, y, get_height () *.2 , 0, 2 * M_PI);
 		cairo_set_source_rgba (cr, .95, .44, .44, 1.); // #f46f6f
-		cairo_fill(cr);
+		cairo_fill_preserve(cr);
 		cairo_set_source_rgba (cr, .0, .0, .0, 1.);
 		cairo_set_line_width(cr, 1);
-		cairo_stroke_preserve (cr);
+		cairo_stroke (cr);
 	}
 
 	int text_margin;
