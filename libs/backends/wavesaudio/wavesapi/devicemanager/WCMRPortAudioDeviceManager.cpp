@@ -1736,7 +1736,6 @@ WTErr WCMRPortAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & d
 WTErr WCMRPortAudioDeviceManager::getDeviceBufferSizesImpl(const std::string & deviceName, std::vector<int>& buffers) const
 {
 	WTErr retVal = eNoErr;
-	std::cout << "API::PortAudioDeviceManager::GetBufferSizes: getting buffer size for device: "<< deviceName << std::endl;
 	
 	buffers.clear();
 
