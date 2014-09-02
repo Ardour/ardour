@@ -36,7 +36,7 @@ using namespace std;
 #define CORNER_RADIUS 4
 #define CORNER_SIZE   2
 #define CORNER_OFFSET 1
-#define FADER_RESERVE 5
+#define FADER_RESERVE 6 // >= 1.5 * CORNER_RADIUS
 
 std::list<PixFader::FaderImage*> PixFader::_patterns;
 
@@ -44,12 +44,15 @@ PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int
 	: adjustment (adj)
 	, _span (fader_length)
 	, _girth (fader_girth)
+	, _min_span (fader_length)
+	, _min_girth (fader_girth)
 	, _orien (orientation)
 	, _pattern (0)
 	, _hovering (false)
 	, _last_drawn (-1)
 	, _dragging (false)
 	, _centered_text (true)
+	, _display_unity_line (true)
 	, _current_parent (0)
 {
 	_default_value = adjustment.get_value();
@@ -225,13 +228,13 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	cairo_rectangle (cr, 0, 0, w, h);
 	cairo_fill(cr);
 
-	cairo_set_line_width (cr, 1);
+	cairo_set_line_width (cr, 2);
 	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
 
 	cairo_matrix_t matrix;
 	Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
-	// we use a 'trick' here: The stoke is off by .5px but filling the interiour area
-	// results in an outline of 0.5 px the actual outline is exatly 1px at 50% alpha.
+	// we use a 'trick' here: The stoke is off by .5px but filling the interior area
+	// after a stroke of 2px width results in an outline of 1px
 	cairo_stroke_preserve(cr);
 
 	if (_orien == VERT) {
@@ -279,25 +282,25 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 			cairo_fill (cr);
 			CairoWidget::set_source_rgb_a (cr, get_style()->get_fg (get_state()), 1);
 			Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET,
-					ds - CORNER_OFFSET, h - CORNER_SIZE, CORNER_RADIUS);
+					ds - CORNER_SIZE, h - CORNER_SIZE, CORNER_RADIUS);
 		}
 		cairo_fill (cr);
 	}
 
 	/* draw the unity-position line if it's not at either end*/
-	if (_unity_loc > 0) {
+	if (_display_unity_line && _unity_loc > CORNER_RADIUS) {
 		context->set_line_width (1);
 		context->set_line_cap (Cairo::LINE_CAP_ROUND);
 		Gdk::Color c = get_style()->get_fg (Gtk::STATE_ACTIVE);
-		context->set_source_rgba (c.get_red_p()*1.5, c.get_green_p()*1.5, c.get_blue_p()*1.5, 0.85);
-		if ( _orien == VERT) {
-			if (_unity_loc < h ) {
+		context->set_source_rgba (c.get_red_p() * 1.5, c.get_green_p() * 1.5, c.get_blue_p() * 1.5, 0.85);
+		if (_orien == VERT) {
+			if (_unity_loc < h - CORNER_RADIUS) {
 				context->move_to (1.5, _unity_loc + CORNER_OFFSET + .5);
 				context->line_to (_girth - 1.5, _unity_loc + CORNER_OFFSET + .5);
 				context->stroke ();
 			}
 		} else {
-			if ( _unity_loc < w ){
+			if (_unity_loc < w - CORNER_RADIUS) {
 				context->move_to (_unity_loc - CORNER_OFFSET + .5, 1.5);
 				context->line_to (_unity_loc - CORNER_OFFSET + .5, _girth - 1.5);
 				context->stroke ();
@@ -340,11 +343,11 @@ void
 PixFader::on_size_request (GtkRequisition* req)
 {
 	if (_orien == VERT) {
-		req->width = (_girth ? _girth : -1);
-		req->height = (_span ? _span : -1);
+		req->width = (_min_girth ? _min_girth : -1);
+		req->height = (_min_span ? _min_span : -1);
 	} else {
-		req->height = (_girth ? _girth : -1);
-		req->width = (_span ? _span : -1);
+		req->height = (_min_girth ? _min_girth : -1);
+		req->width = (_min_span ? _min_span : -1);
 	}
 }
 
@@ -406,7 +409,7 @@ PixFader::on_button_press_event (GdkEventButton* ev)
 bool
 PixFader::on_button_release_event (GdkEventButton* ev)
 {
-	double const ev_pos = (_orien == VERT) ? ev->y : ev->x;
+	double ev_pos = (_orien == VERT) ? ev->y : ev->x;
 
 	switch (ev->button) {
 	case 1:
@@ -422,16 +425,17 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 			}
 
 			if (ev_pos == _grab_start) {
-
 				/* no motion - just a click */
+				const double slider_pos =  display_span();
+				ev_pos = rint(ev_pos);
 
 				if (ev->state & Keyboard::TertiaryModifier) {
 					adjustment.set_value (_default_value);
 				} else if (ev->state & Keyboard::GainFineScaleModifier) {
 					adjustment.set_value (adjustment.get_lower());
-				} else if (ev_pos == display_span()) {
+				} else if (ev_pos == slider_pos) {
 					; // click on current position, no move.
-				} else if ((_orien == VERT && ev_pos < display_span()) || (_orien == HORIZ && ev_pos > display_span())) {
+				} else if ((_orien == VERT && ev_pos < slider_pos) || (_orien == HORIZ && ev_pos > slider_pos)) {
 					/* above the current display height, remember X Window coords */
 					adjustment.set_value (adjustment.get_value() + adjustment.get_step_increment());
 				} else {
@@ -573,9 +577,9 @@ PixFader::display_span ()
 	float fract = (adjustment.get_value () - adjustment.get_lower()) / ((adjustment.get_upper() - adjustment.get_lower()));
 	int ds;
 	if (_orien == VERT) {
-		ds = (int)floor (_span * (1.0 - fract));
+		ds = (int)rint (_span * (1.0 - fract));
 	} else {
-		ds = (int)floor (_span * fract);
+		ds = (int)rint (_span * fract);
 	}
 
 	return ds;
@@ -632,7 +636,15 @@ PixFader::set_default_value (float d)
 }
 
 void
-PixFader::set_text (const std::string& str, bool centered)
+PixFader::show_unity_line (bool yn )
+{
+	if (yn == _display_unity_line) return;
+	_display_unity_line = yn;
+	queue_draw();
+}
+
+void
+PixFader::set_text (const std::string& str, bool centered, bool expose)
 {
 	if (_layout && _text == str) {
 		return;
@@ -646,7 +658,8 @@ PixFader::set_text (const std::string& str, bool centered)
 	if (_layout) {
 		_layout->set_text (str);
 		_layout->get_pixel_size (_text_width, _text_height);
-		queue_resize ();
+		// queue_resize ();
+		if (expose) queue_draw ();
 	}
 }
 
@@ -665,7 +678,7 @@ PixFader::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
 		std::string txt = _layout->get_text();
 		_layout.clear (); // drop reference to existing layout
 		_text = "";
-		set_text (txt, _centered_text);
+		set_text (txt, _centered_text, false);
 	}
 	/* patterns are cached and re-created as needed 
 	 * during 'expose' in the GUI thread */

@@ -42,7 +42,8 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 	sigc::signal<void> OnExpose;
 
 	void set_default_value (float);
-	void set_text (const std::string&, bool centered = true);
+	void set_text (const std::string&, bool centered = true, bool expose = true);
+	void show_unity_line (bool yn);
 
 	protected:
 	Glib::RefPtr<Pango::Layout> _layout;
@@ -72,8 +73,8 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 	};
 
 	private:
-	int _span;
-	int _girth;
+	int _span, _girth;
+	int _min_span, _min_girth;
 	int _orien;
 	cairo_pattern_t* _pattern;
 	bool _hovering;
@@ -85,6 +86,7 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 	float _default_value;
 	int _unity_loc;
 	bool _centered_text;
+	bool _display_unity_line;
 
 	sigc::connection _parent_style_change;
 	Widget * _current_parent;
