@@ -52,16 +52,15 @@ WavesDropdown::_on_menu_item (void* cookie)
 void
 WavesDropdown::_on_popup_menu_position (int& x, int& y, bool& push_in)
 {
-	Gtk::Container *toplevel = get_toplevel ();
-	if (toplevel) {
-		translate_coordinates (*toplevel, 0, 0, x, y);
-		Gtk::Allocation a = get_allocation ();
-		x += a.get_x ();
-		y += a.get_y ();
-		int xo;
-		int yo;
-		get_window ()->get_origin (xo, yo);
-		x += xo;
-		y += yo;
-	}
+    if (get_window ()) {
+        Gtk::Allocation a = get_allocation ();
+
+        int xo;
+        int yo;
+        
+        get_window ()->get_origin (xo, yo);
+        
+        x = xo;
+        y = yo + a.get_height ();
+    }
 }
