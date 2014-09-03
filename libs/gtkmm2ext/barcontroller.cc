@@ -54,6 +54,7 @@ BarController::BarController (Gtk::Adjustment& adj,
 	_slider.StartGesture.connect (sigc::mem_fun(*this, &BarController::passtrhu_gesture_start));
 	_slider.StopGesture.connect (sigc::mem_fun(*this, &BarController::passtrhu_gesture_stop));
 	_slider.OnExpose.connect (sigc::mem_fun(*this, &BarController::before_expose));
+	_slider.set_name (get_name());
 
 	Gtk::SpinButton& spinner = _slider.get_spin_button();
 	spinner.signal_activate().connect (mem_fun (*this, &BarController::entry_activated));
@@ -97,6 +98,12 @@ BarController::on_button_release_event (GdkEventButton* ev)
 		return true;
 	}
 	return false;
+}
+
+void
+BarController::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
+{
+	_slider.set_name (get_name());
 }
 
 gint

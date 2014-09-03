@@ -52,6 +52,7 @@ class LIBGTKMM2EXT_API BarController : public Gtk::Alignment
   protected:
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 
 	virtual std::string get_label (double& /*x*/) {
 		return "";
