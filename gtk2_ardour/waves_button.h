@@ -71,6 +71,8 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	};
 
         void render (cairo_t *, cairo_rectangle_t*);
+        void render_text (cairo_t *);
+
 	void on_size_request (Gtk::Requisition* req);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 	void on_name_changed ();
@@ -94,6 +96,8 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	bool _act_on_release;
 	bool _hovering;
 	bool _pushed;
+	Glib::RefPtr<Pango::Layout> _layout;
+	std::string                 _text;
     
 	void color_handler ();
 
@@ -107,8 +111,6 @@ private:
 	static void __prop_style_watcher(WavesButton *);
 	void _prop_style_watcher();
 
-	Glib::RefPtr<Pango::Layout> _layout;
-	std::string                 _text;
 	BindingProxy                binding_proxy;
 
 };

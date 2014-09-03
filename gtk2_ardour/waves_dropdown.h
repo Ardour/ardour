@@ -20,25 +20,28 @@
 #define __gtk2_ardour_waves_dropdown_h__
 
 #include "waves_icon_button.h"
+#include "canvas/xml_ui.h"
+
+using namespace ArdourCanvas::XMLUI;
 
 class WavesDropdown : public WavesIconButton
 {
   public:
 
-	WavesDropdown ();
-	virtual ~WavesDropdown ();
-	Gtk::Menu& get_menu () { return _menu; }
+    WavesDropdown (const std::string& title = "");
+    virtual ~WavesDropdown ();
+    Gtk::Menu& get_menu () { return _menu; }
 
-	bool on_mouse_pressed (GdkEventButton*);
+    bool on_mouse_pressed (GdkEventButton*);
 
-	void AddMenuElem (const std::string& item, void* coockie);
+    Gtk::MenuItem& add_menu_item (const std::string& item, void* coockie);
 
-	sigc::signal2<void, WavesDropdown*, void*> signal_menu_item_clicked;
+    sigc::signal2<void, WavesDropdown*, void*> signal_menu_item_clicked;
 
   private:
-	Gtk::Menu _menu;
-	void _on_menu_item (void* cookie);
-	void _on_popup_menu_position (int& x, int& y, bool& push_in);
+    Gtk::Menu _menu;
+    void _on_menu_item (void* cookie);
+    void _on_popup_menu_position (int& x, int& y, bool& push_in);
 };
 
 #endif /* __gtk2_ardour_waves_dropdown_h__ */

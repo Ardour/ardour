@@ -39,12 +39,12 @@ using std::max;
 using std::min;
 using namespace std;
 
-WavesIconButton::WavesIconButton ()
-	:  WavesButton()
+WavesIconButton::WavesIconButton (const std::string& title)
+	: WavesButton (title)
 {
 }
 
-WavesIconButton::~WavesIconButton()
+WavesIconButton::~WavesIconButton ()
 {
 }
 
@@ -52,8 +52,6 @@ WavesIconButton::~WavesIconButton()
 void
 WavesIconButton::render (cairo_t* cr, cairo_rectangle_t*)
 {
-	void (*rounded_function)(cairo_t*, double, double, double, double, double);
-
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf = ((CairoWidget::active_state() == Gtkmm2ext::ImplicitActive) ? _implicit_active_pixbuf : Glib::RefPtr<Gdk::Pixbuf>(0));
 
 	if (pixbuf == 0) {
@@ -86,6 +84,8 @@ WavesIconButton::render (cairo_t* cr, cairo_rectangle_t*)
 		gdk_cairo_set_source_pixbuf (cr, pixbuf->gobj(), x, y);
 		cairo_fill (cr);
 	}
+
+    render_text (cr);
 }
 
 void

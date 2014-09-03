@@ -24,7 +24,7 @@
 class WavesIconButton : public WavesButton
 {
   public:
-	WavesIconButton ();
+	WavesIconButton (const std::string& title = "");
 	virtual ~WavesIconButton ();
 
 	void set_normal_image (const Glib::RefPtr<Gdk::Pixbuf>& img);

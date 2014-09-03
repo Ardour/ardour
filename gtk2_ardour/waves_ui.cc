@@ -69,25 +69,27 @@ Gtk::Widget*
 WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 {
 	Gtk::Object* child = NULL;
-	std::string widget_type = definition.name();
+	std::string widget_type = definition.name ();
 	std::string widget_id = xml_property (definition, "id", styles, "");
 
 	std::string text = xml_property (definition, "text", styles, "");
-	boost::replace_all(text, "\\n", "\n");
+	boost::replace_all (text, "\\n", "\n");
 
-	std::transform(widget_type.begin(), widget_type.end(), widget_type.begin(), ::toupper);
+	std::transform (widget_type.begin(), widget_type.end(), widget_type.begin(), ::toupper);
 
 	if (widget_type == "BUTTON") {
-		child = manage (new WavesButton(text));
+		child = manage (new WavesButton (text));
 	} else if (widget_type == "ICONBUTTON") {
 		child = manage (new WavesIconButton);
 	} else if (widget_type == "DROPDOWN") {
-		child = manage (new WavesDropdown);
+		child = manage (new WavesDropdown (text));
+	} else if (widget_type == "DROPDOWNITEM") {
+		child = manage (new WavesDropdown (text));
 	} else if (widget_type == "ICON") {
 		std::string image_path;
-		Searchpath spath(ARDOUR::ardour_data_search_path());
+		Searchpath spath(ARDOUR::ardour_data_search_path ());
 
-		spath.add_subdirectory_to_paths("icons");
+		spath.add_subdirectory_to_paths ("icons");
     
 		if (find_file (spath, 
 									  xml_property (definition, "source", styles, ""),
@@ -434,13 +436,45 @@ WavesUI::add_widget (Gtk::Container& parent, const XMLNode& definition, const XM
 }
 
 void
+WavesUI::add_dropdown_items (WavesDropdown &dropdown, const XMLNodeList& definition, const XMLNodeMap& styles)
+{
+    for (XMLNodeList::const_iterator i = definition.begin (); i != definition.end (); ++i) {
+        if ((**i).is_content()) {
+            continue;
+        }
+        std::string node_name = (**i).name ();
+        std::transform (node_name.begin (), node_name.end (), node_name.begin (), ::toupper);
+        if (node_name != "DROPDOWNITEM") {
+            continue;
+        }
+        std::string title = xml_property (**i, "title", styles, "");
+        if (title.empty ()) {
+            continue;
+        }
+        int itemdata = xml_property (**i, "data", styles, 0);
+        Gtk::MenuItem& menuitem = dropdown.add_menu_item (title, (void*)itemdata);
+        if (menuitem.get_child ()) {
+            set_attributes (*menuitem.get_child (), **i, styles);
+        }
+    }
+}
+
+
+void
 WavesUI::create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk::Container& root)
 {
-	for (XMLNodeList::const_iterator i = definition.begin (); i != definition.end (); ++i) {
-        if (!(**i).is_content()) {
-			WavesUI::add_widget (root, **i, styles);
-		}
-	}
+    WavesDropdown* dropdown = dynamic_cast<WavesDropdown*> (&root);
+    
+    if (dropdown) {
+        dbg_msg ("launching dropdown->create_menu ()");
+        add_dropdown_items (*dropdown, definition, styles);
+    } else {
+        for (XMLNodeList::const_iterator i = definition.begin (); i != definition.end (); ++i) {
+            if (!(**i).is_content()) {
+                WavesUI::add_widget (root, **i, styles);
+            }
+        }
+    }
 }
 
 void
@@ -492,8 +526,9 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 
 	int height = xml_property (definition, "height", styles, -1);
 	int width = xml_property (definition, "width", styles, -1);
-	widget.set_size_request (width, height);
-		
+    if (dynamic_cast<Gtk::Menu*> (&widget) == 0) {
+        widget.set_size_request (width, height);
+    }
 	property = xml_property (definition, "textcolornormal", styles, "");
 	if (!property.empty ()) {
 		widget.unset_text(Gtk::STATE_NORMAL);

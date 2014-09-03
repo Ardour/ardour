@@ -162,8 +162,16 @@ WavesButton::render (cairo_t* cr, cairo_rectangle_t*)
 		cairo_stroke (cr);
 	}
 
+    render_text (cr);
+}
+
+void
+WavesButton::render_text (cairo_t* cr)
+{
 	// text, if any
 	if (!_text.empty()) {
+        Glib::RefPtr<Gtk::Style> style = get_style();
+
 		cairo_save (cr);
 		cairo_rectangle (cr, 2, 1, get_width()-4, get_height()-2);
 		cairo_clip (cr);

@@ -97,6 +97,8 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	Gtk::Widget* add_widget (Gtk::Layout& parent, const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::Container& parent, const XMLNode& definition, const XMLNodeMap& styles);
 	Gtk::Widget* add_widget (Gtk::EventBox& parent, const XMLNode& definition, const XMLNodeMap& styles);
+    void add_dropdown_items (WavesDropdown &dropdown, const XMLNodeList& definition, const XMLNodeMap& styles);
+
 };
 
 #endif //__WAVES_UI_H__
