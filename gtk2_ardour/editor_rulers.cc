@@ -182,8 +182,6 @@ Editor::initialize_rulers ()
 	minsec_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), minsec_ruler, MinsecRulerItem));
 	bbt_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), bbt_ruler, BBTRulerItem));
 	samples_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), samples_ruler, SamplesRulerItem));
-	
-	visible_timebars = 0; /*this will be changed below */
 }
 
 bool
@@ -412,8 +410,6 @@ Editor::restore_ruler_visibility ()
 void
 Editor::update_ruler_visibility ()
 {
-	int visible_timebars = 0;
-
 	if (no_ruler_shown_update) {
 		return;
 	}
@@ -426,7 +422,6 @@ Editor::update_ruler_visibility ()
 	 */
 
 	double tbpos = 0.0;
-	double tbgpos = 0.0;
 	double old_unit_pos;
 
 #ifdef GTKOSX
@@ -448,9 +443,7 @@ Editor::update_ruler_visibility ()
                         }
                         marker_group->show();
                         mark_label.show();
-                        tbpos += timebar_height;
-                        tbgpos += timebar_height;
-                        visible_timebars++;
+                        tbpos += Marker::marker_height();
                 } else {
                         marker_group->hide();
                         mark_label.hide();
@@ -465,8 +458,6 @@ Editor::update_ruler_visibility ()
 		minsec_ruler->show();
 		minsec_label.show();
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
 	} else {
 		minsec_ruler->hide();
 		minsec_label.hide();
@@ -480,8 +471,6 @@ Editor::update_ruler_visibility ()
 		timecode_ruler->show();
 		timecode_label.show();
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
 	} else {
 		timecode_ruler->hide();
 		timecode_label.hide();
@@ -495,8 +484,6 @@ Editor::update_ruler_visibility ()
 		samples_ruler->show();
 		samples_label.show();
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
 	} else {
 		samples_ruler->hide();
 		samples_label.hide();
@@ -510,8 +497,6 @@ Editor::update_ruler_visibility ()
 		bbt_ruler->show();
 		bbt_label.show();
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
 	} else {
 		bbt_ruler->hide();
 		bbt_label.hide();
@@ -525,8 +510,6 @@ Editor::update_ruler_visibility ()
 		meter_group->show();
 		meter_label.show();
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
 	} else {
 		meter_group->hide();
 		meter_label.hide();
@@ -540,8 +523,6 @@ Editor::update_ruler_visibility ()
 		tempo_group->show();
 		tempo_label.show();
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
 	} else {
 		tempo_group->hide();
 		tempo_label.hide();
@@ -556,8 +537,6 @@ Editor::update_ruler_visibility ()
 		range_mark_label.show();
 
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
 	} else {
 		range_marker_group->hide();
 		range_mark_label.hide();
@@ -571,8 +550,6 @@ Editor::update_ruler_visibility ()
 		transport_marker_group->show();
 		transport_mark_label.show();
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
 	} else {
 		transport_marker_group->hide();
 		transport_mark_label.hide();
@@ -586,8 +563,6 @@ Editor::update_ruler_visibility ()
 		cd_marker_group->show();
 		cd_mark_label.show();
 		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
 		// make sure all cd markers show up in their respective places
 		update_cd_marker_display();
 	} else {
@@ -606,8 +581,6 @@ Editor::update_ruler_visibility ()
                         marker_group->show();
                         mark_label.show();
                         tbpos += timebar_height;
-                        tbgpos += timebar_height;
-                        visible_timebars++;
                 } else {
                         marker_group->hide();
                         mark_label.hide();
@@ -622,8 +595,6 @@ Editor::update_ruler_visibility ()
 		videotl_group->show();
 		videotl_label.show();
 		tbpos += timebar_height * videotl_bar_height;
-		tbgpos += timebar_height * videotl_bar_height;
-		visible_timebars+=videotl_bar_height;
 		queue_visual_videotimeline_update();
 	} else {
 		videotl_group->hide();
@@ -632,13 +603,13 @@ Editor::update_ruler_visibility ()
 	}
 
 #if 0 /* no ruler labels in Tracks */
-	time_bars_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars));
+	time_bars_vbox.set_size_request (-1, (int)(tbpos));
 #endif
 
 	/* move hv_scroll_group (trackviews) to the end of the timebars
 	 */
 
-	hv_scroll_group->set_y_position (timebar_height * visible_timebars);
+	hv_scroll_group->set_y_position (tbpos);
 
 	compute_fixed_ruler_scale ();
 	update_fixed_rulers();

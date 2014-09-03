@@ -179,7 +179,7 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (transport_marker_bar, "transport Marker Bar");
 	transport_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
-	marker_bar = new ArdourCanvas::Rectangle (marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	marker_bar = new ArdourCanvas::Rectangle (marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, Marker::marker_height()));
 	CANVAS_DEBUG_NAME (marker_bar, "Marker Bar");
 	marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 

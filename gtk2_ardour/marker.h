@@ -68,6 +68,8 @@ class Marker : public sigc::trackable
 	void set_selected (bool);
 	void set_show_line (bool);
 	void canvas_height_set (double);
+        
+        void set_has_scene_change (bool);
 
 	void set_position (framepos_t);
 	void set_name (const std::string&);
@@ -93,8 +95,11 @@ class Marker : public sigc::trackable
 
 	bool label_on_left () const;
 
+        static double marker_height() { return _marker_height; }
+
   protected:
 	PublicEditor& editor;
+        ARDOUR::Location* _location;
 
 	Pango::FontDescription name_font;
 
@@ -104,6 +109,8 @@ class Marker : public sigc::trackable
         ArdourCanvas::Text *_name_item;
 	ArdourCanvas::Line* _track_canvas_line;
 	ArdourCanvas::Rectangle* _name_background;
+	ArdourCanvas::Rectangle* _scene_change_rect;
+	ArdourCanvas::Text* _scene_change_text;
 
 	std::string  _name;
 	double        unit_position;
@@ -119,6 +126,7 @@ class Marker : public sigc::trackable
 	double       _left_label_limit; ///< the number of pixels available to the left of this marker for a label
 	double       _right_label_limit; ///< the number of pixels available to the right of this marker for a label
 	double       _label_offset;
+        bool         _have_scene_change;
 
 	void reposition ();
 	void setup_line_x ();
@@ -130,6 +138,8 @@ private:
 	Marker & operator= (Marker const &);
 
         void add_polygon (Type);
+
+        static const double _marker_height;
 };
 
 class TempoMarker : public Marker

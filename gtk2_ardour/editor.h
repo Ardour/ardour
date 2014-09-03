@@ -888,7 +888,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Ruler* minsec_ruler;
 
 	static const double timebar_height;
-	guint32 visible_timebars;
 	Gtk::Menu          *editor_ruler_menu;
 
 	ArdourCanvas::Rectangle* tempo_bar;
