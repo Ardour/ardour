@@ -172,19 +172,42 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	/* add the buttons */
 	controls_table.remove (name_hbox);
 	if (ARDOUR::Profile->get_mixbus()) {
-		controls_table.attach (hide_button, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (hide_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	} else {
-		controls_table.attach (hide_button, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 1, 0);
+		controls_table.attach (hide_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 1, 0);
 	}
-	controls_table.attach (name_label,  1, 2, 1, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 2, 0);
-	controls_table.attach (auto_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
+	controls_table.attach (name_label,  2, 3, 1, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 2, 0);
+	controls_table.attach (auto_button, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 1, 0);
+
+	Gtk::DrawingArea *blank = manage(new Gtk::DrawingArea());
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&parent);
+	if (rtv && rtv->is_audio_track()) {
+		blank->set_name("AudioTrackControlsBaseUnselected");
+	}
+	else if (rtv && rtv->is_midi_track()) {
+		blank->set_name("MidiTrackControlsBaseUnselected");
+	}
+	else {
+		blank->set_name("AudioBusControlsBaseUnselected");
+	}
+	blank->set_size_request(20, -1);
+	blank->show();
+	time_axis_hbox.pack_start (*blank, false, false);
+	time_axis_hbox.reorder_child (*blank, 0);
+
+	VSeparator* separator = manage (new VSeparator());
+	separator->set_name("TrackSeparator");
+	separator->set_size_request(1, -1);
+	separator->show();
+	time_axis_hbox.pack_start (*separator, false, false);
+	time_axis_hbox.reorder_child (*separator, 1);
 
 	name_label.show ();
 	hide_button.show ();
 
 	if (_controller) {
 		/* add bar controller */
-		controls_table.attach (*_controller.get(), 1, 3, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
+		controls_table.attach (*_controller.get(), 2, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
 		/* note that this handler connects *before* the default handler */
 		_controller->event_widget().signal_scroll_event().connect (mem_fun (*this, &AutomationTimeAxisView::controls_ebox_scroll), false);
 	}

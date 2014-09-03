@@ -184,9 +184,11 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	separator->set_size_request(-1, 1);
 	separator->show();
 
+	time_axis_vbox.pack_start (*separator, false, false);
 	time_axis_vbox.pack_start (time_axis_frame, true, true);
-	time_axis_vbox.pack_end (*separator, false, false);
 	time_axis_vbox.show();
+	time_axis_hbox.pack_start (time_axis_vbox, true, true);
+	time_axis_hbox.show();
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
 
@@ -236,7 +238,7 @@ TimeAxisView::hide ()
 	_canvas_display->hide ();
 
 	if (control_parent) {
-		control_parent->remove (time_axis_vbox);
+		control_parent->remove (time_axis_hbox);
 		control_parent = 0;
 	}
 
@@ -268,17 +270,19 @@ guint32
 TimeAxisView::show_at (double y, int& nth, VBox *parent)
 {
 	if (control_parent) {
-		control_parent->reorder_child (time_axis_vbox, nth);
+		control_parent->reorder_child (time_axis_hbox, nth);
 	} else {
 		control_parent = parent;
-		parent->pack_start (time_axis_vbox, false, false);
-		parent->reorder_child (time_axis_vbox, nth);
+		parent->pack_start (time_axis_hbox, false, false);
+		parent->reorder_child (time_axis_hbox, nth);
 	}
 
 	_order = nth;
 
 	if (_y_position != y) {
-		_canvas_display->set_y_position (y);
+		// XXX +1 is a quick hack to align the track-header with the canvas
+		// with the separator line at the top.
+		_canvas_display->set_y_position (y + 1);
 		_y_position = y;
 
 	}
@@ -530,7 +534,7 @@ TimeAxisView::set_height (uint32_t h)
 		h = preset_height (HeightSmall);
 	}
 
-	time_axis_vbox.property_height_request () = h;
+	time_axis_hbox.property_height_request () = h;
 	height = h;
 
 	char buf[32];

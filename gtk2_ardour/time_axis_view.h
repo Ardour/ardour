@@ -208,6 +208,7 @@ class TimeAxisView : public virtual AxisView
 	Gtk::EventBox          controls_ebox;
 	Gtk::VBox              controls_vbox;
 	Gtk::VBox              time_axis_vbox;
+	Gtk::HBox              time_axis_hbox;
 	Gtk::Frame             time_axis_frame;
 	Gtk::HBox              name_hbox;
 	Gtk::HBox              top_hbox;
