@@ -39,12 +39,12 @@ using std::max;
 using std::min;
 using namespace std;
 
-WavesIconButton::WavesIconButton ()
-	:  WavesButton()
+WavesIconButton::WavesIconButton (const std::string& title)
+	: WavesButton (title)
 {
 }
 
-WavesIconButton::~WavesIconButton()
+WavesIconButton::~WavesIconButton ()
 {
 }
 
@@ -86,6 +86,8 @@ WavesIconButton::render (cairo_t* cr)
 		gdk_cairo_set_source_pixbuf (cr, pixbuf->gobj(), x, y);
 		cairo_fill (cr);
 	}
+
+    render_text (cr);
 }
 
 void

@@ -77,16 +77,16 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 	std::transform(widget_type.begin(), widget_type.end(), widget_type.begin(), ::toupper);
 
 	if (widget_type == "BUTTON") {
-		child = manage (new WavesButton(text));
+		child = manage (new WavesButton (text));
 	} else if (widget_type == "ICONBUTTON") {
 		child = manage (new WavesIconButton);
 	} else if (widget_type == "DROPDOWN") {
-		child = manage (new WavesDropdown);
+		child = manage (new WavesDropdown (text));
 	} else if (widget_type == "ICON") {
 		std::string image_path;
-		Searchpath spath(ARDOUR::ardour_data_search_path());
+		Searchpath spath(ARDOUR::ardour_data_search_path ());
 
-		spath.add_subdirectory_to_paths("icons");
+		spath.add_subdirectory_to_paths ("icons");
     
 		if (find_file_in_search_path (spath, 
 									  xml_property (definition, "source", styles, ""),
@@ -489,8 +489,9 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 
 	int height = xml_property (definition, "height", styles, -1);
 	int width = xml_property (definition, "width", styles, -1);
-	widget.set_size_request (width, height);
-		
+    if (dynamic_cast<Gtk::Menu*> (&widget) == 0) {
+        widget.set_size_request (width, height);
+    }
 	property = xml_property (definition, "textcolornormal", styles, "");
 	if (!property.empty ()) {
 		widget.unset_text(Gtk::STATE_NORMAL);

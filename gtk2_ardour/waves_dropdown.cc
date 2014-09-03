@@ -19,7 +19,8 @@
 
 #include "waves_dropdown.h"
 
-WavesDropdown::WavesDropdown ()
+WavesDropdown::WavesDropdown (const std::string& title)
+  : WavesIconButton (title)
 {
 	signal_button_press_event().connect (sigc::mem_fun(*this, &WavesDropdown::on_mouse_pressed));
 }
@@ -52,6 +53,24 @@ WavesDropdown::_on_menu_item (void* cookie)
 void
 WavesDropdown::_on_popup_menu_position (int& x, int& y, bool& push_in)
 {
+    Gtk::Container *toplevel = get_toplevel ();
+    if (toplevel) {
+    	translate_coordinates (*toplevel, 0, 0, x, y);
+    	Gtk::Allocation a = toplevel->get_allocation ();
+    	x = a.get_x ();
+    	y = a.get_y ();
+        
+        a = get_allocation ();
+        y += a.get_height ();
+        
+        int xo;
+    	int yo;
+    	get_window ()->get_origin (xo, yo);
+    	x += xo;
+    	y += yo;
+    }
+
+    /*
     if (get_window ()) {
         Gtk::Allocation a = get_allocation ();
 
@@ -63,4 +82,5 @@ WavesDropdown::_on_popup_menu_position (int& x, int& y, bool& push_in)
         x = xo;
         y = yo + a.get_height ();
     }
+     */
 }

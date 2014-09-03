@@ -25,7 +25,7 @@ class WavesDropdown : public WavesIconButton
 {
   public:
 
-	WavesDropdown ();
+	WavesDropdown (const std::string& title = "");
 	virtual ~WavesDropdown ();
 	Gtk::Menu& get_menu () { return _menu; }
 
