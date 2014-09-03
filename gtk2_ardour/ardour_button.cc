@@ -351,6 +351,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
 		const double r = std::min(10., std::min(x, y) * .55); // TODO we need a better way to limit max. radius.
+		cairo_arc (cr, x, y, r, 0, 2 * M_PI);
 		if (active_state() == Gtkmm2ext::ExplicitActive)
 			cairo_set_source_rgba (cr, .95, .1, .1, 1.);
 		else
