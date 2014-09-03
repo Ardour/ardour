@@ -52,8 +52,6 @@ WavesIconButton::~WavesIconButton ()
 void
 WavesIconButton::render (cairo_t* cr)
 {
-	void (*rounded_function)(cairo_t*, double, double, double, double, double);
-
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf = ((CairoWidget::active_state() == Gtkmm2ext::ImplicitActive) ? _implicit_active_pixbuf : Glib::RefPtr<Gdk::Pixbuf>(0));
 
 	if (pixbuf == 0) {
