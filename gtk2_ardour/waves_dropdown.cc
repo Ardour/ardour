@@ -41,14 +41,18 @@ WavesDropdown::add_menu_item (const std::string& item, void* cookie)
 {
 	Gtk::Menu_Helpers::MenuList& items = _menu.items ();
 	
-	items.push_back (Gtk::Menu_Helpers::MenuElem (item, sigc::bind (sigc::mem_fun(*this, &WavesDropdown::_on_menu_item), cookie)));
+	items.push_back (Gtk::Menu_Helpers::MenuElem (item, sigc::bind (sigc::mem_fun(*this, &WavesDropdown::_on_menu_item), items.size (), cookie)));
     
     return _menu.items ().back ();
 }
 
 void
-WavesDropdown::_on_menu_item (void* cookie)
+WavesDropdown::_on_menu_item (size_t item_number, void* cookie)
 {
+    Gtk::Menu_Helpers::MenuList& items = _menu.items ();
+    Gtk::Menu_Helpers::MenuList::iterator i = items.begin();
+    std::advance (i, item_number);
+    set_text ((*i).get_label());
 	signal_menu_item_clicked (this, cookie);
 }
 
@@ -71,18 +75,4 @@ WavesDropdown::_on_popup_menu_position (int& x, int& y, bool& push_in)
     	x += xo;
     	y += yo;
     }
-
-    /*
-    if (get_window ()) {
-        Gtk::Allocation a = get_allocation ();
-
-        int xo;
-        int yo;
-        
-        get_window ()->get_origin (xo, yo);
-        
-        x = xo;
-        y = yo + a.get_height ();
-    }
-     */
 }

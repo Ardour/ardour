@@ -463,7 +463,6 @@ WavesUI::create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk
     WavesDropdown* dropdown = dynamic_cast<WavesDropdown*> (&root);
     
     if (dropdown) {
-        dbg_msg ("launching dropdown->create_menu ()");
         add_dropdown_items (*dropdown, definition, styles);
     } else {
         for (XMLNodeList::const_iterator i = definition.begin (); i != definition.end (); ++i) {

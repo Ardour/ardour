@@ -40,7 +40,7 @@ class WavesDropdown : public WavesIconButton
 
   private:
     Gtk::Menu _menu;
-    void _on_menu_item (void* cookie);
+    void _on_menu_item (size_t item_number, void* cookie);
     void _on_popup_menu_position (int& x, int& y, bool& push_in);
 };
 
