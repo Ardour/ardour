@@ -55,13 +55,32 @@
               <EventBox bgnormal="#000000"
                         bgactive="#000000"
                         height="1"/>
-              <Button id="name_button"
-                      width="57"
-                      height="28"
-                      fgnormal="#ffffff"
-                      fgactive="#ffffff"
-                      winfont ="Arial 10"
-                      macfont ="Helvetica 10"/>
+              
+              <EventBox id="name_label_home">
+              <HBox>
+                  <Button id="name_button"
+                          width="57"
+                          height="28"
+                          fgnormal="#ffffff"
+                          fgactive="#ffffff"
+                          fghover="#ffffff"
+                          winfont ="Arial 10"
+                          macfont ="Helvetica 10"/>
+                  <FocusEntry id="name_entry"
+                              width="57"
+                              height="28"
+                              fgnormal="#ffffff"
+                              winfont ="Arial 10"
+                              macfont ="Helvetica 10"
+                              cssname="EditorTrackNameDisplay"
+                              textcolornormal="#ffffff"
+                              textcoloractive="#ffffff"
+                              textcolorselected="#ffffff"
+                              noshowall="true"
+                              visible="false"/> 
+              </HBox>
+              </EventBox>
+                
               <EventBox bgnormal="#000000"
                         bgactive="#000000"
                         height="1"/>

@@ -1590,16 +1590,17 @@ EditorRoutes::move_selected_tracks_relatively (const PBD::ID& source_track_id, c
 
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
         TimeAxisView* tv = (*ri)[_columns.tv];
+        RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tv);
         
         // selected tracks: add to the move list but if it's not a target
         if (selection.selected(tv) &&
-            route->id() != target_track_id) {
+            route->id() != target_track_id &&
+            !rtv->is_master_track() ) {
             routes_to_move.push_back(route);
             continue;
         }
         
         // master track should always be the first
-        RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tv);
         if (rtv->is_master_track() ) {
             routes.push_front(route);
         } else {

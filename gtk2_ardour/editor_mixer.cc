@@ -146,14 +146,7 @@ Editor::show_editor_mixer (bool yn)
 				RouteTimeAxisView* atv;
 
 				if ((atv = dynamic_cast<RouteTimeAxisView*> (*i) ) != 0) {
-					
-                    AudioTrack* atr = dynamic_cast<AudioTrack*> (atv->route().get() );
-                    if (atr && atr->is_master_track() ) {
-                        r = master_bus;
-                    } else {
-                        r = atv->route();
-                    }
-                    
+                    r = atv->route();
 					break;
 				}
 			}

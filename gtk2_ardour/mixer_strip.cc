@@ -26,6 +26,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/replace_all.h"
 #include "pbd/stacktrace.h"
+#include "pbd/whitespace.h"
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
@@ -101,10 +102,14 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, const std::string& layout_s
 	, panners (sess)
 	, _visibility (X_("mixer-strip-visibility"))
 
+    ,_editor (ARDOUR_UI::instance()->the_editor())
+
 	, gain_meter_home (get_box ("gain_meter_home"))
 	, _comment_button (get_waves_button ("comment_button"))
 	, midi_input_enable_button (get_waves_button ("midi_input_enable_button"))
-	, name_button (get_waves_button ("name_button"))
+    , _name_button_home (get_event_box("name_label_home"))
+    , name_button (get_waves_button ("name_button"))
+    , _name_entry (get_entry("name_entry"))
 	, color_palette_button (get_waves_button ("color_palette_button"))
 	, color_palette_home (get_container ("color_palette_home"))
 	, color_buttons_home (get_container ("color_buttons_home"))
@@ -178,10 +183,15 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, gpm (sess, xml_property(*xml_tree()->root(), "gainmeterscript", "default_gain_meter.xml"))
 	, panners (sess)
 	, _visibility (X_("mixer-strip-visibility"))
+
+    , _editor (ARDOUR_UI::instance()->the_editor())
+
 	, gain_meter_home (get_box ("gain_meter_home"))
 	, _comment_button (get_waves_button ("comment_button"))
 	, midi_input_enable_button (get_waves_button ("midi_input_enable_button"))
-	, name_button (get_waves_button ("name_button"))
+    , _name_button_home (get_event_box("name_label_home"))
+    , name_button (get_waves_button ("name_button"))
+    , _name_entry (get_entry ("name_entry"))
 	, color_palette_button (get_waves_button ("color_palette_button"))
 	, color_palette_home (get_container ("color_palette_home"))
 	, color_buttons_home (get_container ("color_buttons_home"))
@@ -290,6 +300,24 @@ MixerStrip::init ()
 
 	gpm.LevelMeterButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&MixerStrip::level_meter_button_press, this, _1));
     
+    _name_entry.signal_key_press_event().connect (sigc::mem_fun (*this, &MixerStrip::name_entry_key_press), false);
+	_name_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &MixerStrip::name_entry_key_release), false);
+	_name_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &MixerStrip::name_entry_focus_out));
+	
+    if( _route )
+        _name_entry.set_text ( _route->name() );
+	
+    _name_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &MixerStrip::end_name_edit), RESPONSE_OK));
+    
+    _name_button_home.add_events (Gdk::BUTTON_PRESS_MASK|
+								   Gdk::BUTTON_RELEASE_MASK|
+								   Gdk::POINTER_MOTION_MASK);
+	_name_button_home.set_flags (CAN_FOCUS);
+    
+	/* note that this handler connects *before* the default handler */
+	_name_button_home.signal_button_press_event().connect (sigc::mem_fun (*this, &MixerStrip::controls_ebox_button_press));
+    _name_button_home.signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::controls_ebox_button_release));
+    
     Session* session = ARDOUR_UI::instance()->the_session();
     if( session )
         session->session_routes_reconnected.connect(_input_output_channels_update, invalidator (*this), boost::bind (&MixerStrip::update_inspector_info_panel, this), gui_context());
@@ -304,11 +332,149 @@ MixerStrip::~MixerStrip ()
 	delete comment_window;
 }
 
-Gdk::Color
-MixerStrip::palette_random_color()
+bool
+MixerStrip::controls_ebox_button_press (GdkEventButton* event)
 {
-    int number_of_colors_in_palette = sizeof(MixerStrip::XMLColor)/sizeof(*MixerStrip::XMLColor);
-    return (Gdk::Color)(MixerStrip::XMLColor[random() % number_of_colors_in_palette]);
+	if ((event->button == 1 && event->type == GDK_2BUTTON_PRESS) || Keyboard::is_edit_event (event)) {
+		/* see if it is inside the name label */
+		if (name_button.is_ancestor (_name_button_home)) {
+			int nlx;
+			int nly;
+			_name_button_home.translate_coordinates (name_button, event->x, event->y, nlx, nly);
+			Gtk::Allocation a = name_button.get_allocation ();
+			if (nlx > 0 && nlx < a.get_width() && nly > 0 && nly < a.get_height()) {
+				begin_name_edit ();
+				return true;
+			}
+		}
+        
+	}
+           
+	return true;
+}
+
+bool
+MixerStrip::controls_ebox_button_release (GdkEventButton* ev)
+{       
+	return false;
+}
+
+void
+MixerStrip::selection_click (GdkEventButton* ev)
+{
+	Selection::Operation op = ArdourKeyboard::selection_type (ev->state);
+}
+
+bool
+MixerStrip::name_entry_key_press (GdkEventKey* ev)
+{
+	/* steal escape, tabs from GTK */
+    
+	switch (ev->keyval) {
+        case GDK_Escape:
+        case GDK_ISO_Left_Tab:
+        case GDK_Tab:
+            return true;
+	}
+	return false;
+}
+
+bool
+MixerStrip::name_entry_key_release (GdkEventKey* ev)
+{
+	TrackViewList::iterator i;
+    
+	switch (ev->keyval) {
+        case GDK_Escape:
+            end_name_edit (RESPONSE_CANCEL);
+            return true;
+            
+            /* Shift+Tab Keys Pressed. Note that for Shift+Tab, GDK actually
+             * generates a different ev->keyval, rather than setting
+             * ev->state.
+             */
+        case GDK_ISO_Left_Tab:
+            end_name_edit (RESPONSE_APPLY);
+            return true;
+            
+        case GDK_Tab:
+            end_name_edit (RESPONSE_ACCEPT);
+            return true;
+        default:
+            break;
+	}
+    
+	return false;
+}
+
+
+bool
+MixerStrip::name_entry_focus_out (GdkEventFocus*)
+{
+	end_name_edit (RESPONSE_OK);
+	return false;
+}
+
+void
+MixerStrip::begin_name_edit ()
+{
+    if( _route->is_master () )
+        return;
+    
+    _name_entry.set_text ( _route->name() );
+    name_button.hide();
+    _name_entry.show ();
+    
+    _name_entry.select_region (0, -1);
+    _name_entry.set_state (STATE_SELECTED);
+    _name_entry.grab_focus ();
+    _name_entry.start_editing (0);
+}
+
+void
+MixerStrip::end_name_edit (int response)
+{
+	switch (response) {
+        case RESPONSE_CANCEL:
+            break;
+        case RESPONSE_OK:
+            name_entry_changed ();
+            break;
+        case RESPONSE_ACCEPT:
+            name_entry_changed ();
+        case RESPONSE_APPLY:
+            name_entry_changed ();
+	}
+    
+	name_button.show ();
+	_name_entry.hide ();
+}
+
+void
+MixerStrip::name_entry_changed ()
+{
+    string x = _name_entry.get_text ();
+    
+	if (x == _route->name()) {
+		return;
+	}
+    
+	strip_whitespace_edges (x);
+    
+	if (x.length() == 0) {
+		_name_entry.set_text ( cut_string(_route->name(), _max_name_size) );
+		return;
+	}
+    
+	if (_session->route_name_internal (x)) {
+		ARDOUR_UI::instance()->popup_error (string_compose (_("You cannot create a track with that name as it is reserved for %1"),
+                                                            PROGRAM_NAME));
+		_name_entry.grab_focus ();
+	} else if (RouteUI::verify_new_route_name (x)) {
+		_route->set_name (x);
+	} else {
+		_name_entry.grab_focus ();
+	}
 }
 
 void
@@ -342,13 +508,17 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	
 	if (route()->is_master()) {
 		master_mute_button.show ();
-		get_container ("track_buttons_home").hide ();
+		//get_container ("track_buttons_home").hide ();
+        color_buttons_home.set_visible (false);
+        color_palette_button.set_visible (false);
+        color_palette_button.set_active (false);
 		//mute_button.hide ();
 		//solo_button.hide ();
 		//rec_enable_button.hide ();
 	} else {
 		master_mute_button.hide ();
-		get_container ("track_buttons_home").show ();
+        color_palette_button.set_visible (true);
+        color_palette_home.set_visible (true);
 		//mute_button.show ();
 		//solo_button.show ();
 		//rec_enable_button.show ();
