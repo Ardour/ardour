@@ -59,6 +59,7 @@
 #include "ardour/ladspa_plugin.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_manager.h"
+#include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
 
 #include "ardour/search_paths.h"
@@ -189,6 +190,19 @@ PluginManager::~PluginManager()
 void
 PluginManager::refresh (bool cache_only)
 {
+        if (Profile->get_trx()) {
+
+                /* No plugins in Tracks, so just initialize empty plugin lists */
+
+                _ladspa_plugin_info = new PluginInfoList;
+                _lv2_plugin_info = new PluginInfoList;
+                _au_plugin_info = new PluginInfoList;
+                _lxvst_plugin_info = new PluginInfoList;
+                _windows_vst_plugin_info = new PluginInfoList;
+
+                return;
+        }
+
 	DEBUG_TRACE (DEBUG::PluginManager, "PluginManager::refresh\n");
 	_cancel_scan = false;
 
