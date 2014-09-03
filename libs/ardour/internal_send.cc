@@ -58,6 +58,7 @@ InternalSend::InternalSend (Session& s,
 
 	init_gain ();
 
+	_send_from->DropReferences.connect_same_thread (source_connection, boost::bind (&InternalSend::send_from_going_away, this));
 	CycleStart.connect_same_thread (*this, boost::bind (&InternalSend::cycle_start, this, _1));
 }
 
@@ -115,6 +116,12 @@ InternalSend::target_io_changed ()
 	mixbufs.ensure_buffers (_send_to->internal_return()->input_streams(), _session.get_block_size());
 	mixbufs.set_count (_send_to->internal_return()->input_streams());
 	reset_panner();
+}
+
+void
+InternalSend::send_from_going_away ()
+{
+	_send_from.reset();
 }
 
 void

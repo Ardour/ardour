@@ -65,8 +65,10 @@ class LIBARDOUR_API InternalSend : public Send
 	boost::shared_ptr<Route> _send_to;
 	PBD::ID _send_to_id;
 	PBD::ScopedConnection connect_c;
+	PBD::ScopedConnection source_connection;
 	PBD::ScopedConnectionList target_connections;
 
+	void send_from_going_away ();
 	void send_to_going_away ();
 	void send_to_property_changed (const PBD::PropertyChange&);
 	int  connect_when_legal ();
