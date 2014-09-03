@@ -683,7 +683,7 @@ TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
 	fill_color = RGBA_TO_UINT(r,g,b,160);
     
     // place to config
-    uint32_t opacity = 255*0.5; //50%
+    uint32_t opacity = 255*0.8; //80%
     name_highlight_color = RGBA_TO_UINT(0, 0, 0, opacity);
 }
 
