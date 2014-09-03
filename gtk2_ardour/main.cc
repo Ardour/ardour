@@ -66,7 +66,7 @@ using namespace ARDOUR_COMMAND_LINE;
 using namespace ARDOUR;
 using namespace PBD;
 
-TextReceiver text_receiver ("ardour");
+TextReceiver text_receiver ("tracks");
 
 extern int curvetest (string);
 
