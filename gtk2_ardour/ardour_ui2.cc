@@ -272,8 +272,9 @@ ARDOUR_UI::setup_transport ()
 	roll_button.set_image (get_icon (X_("transport_play")));
 	stop_button.set_image (get_icon (X_("transport_stop")));
 	play_selection_button.set_image (get_icon (X_("transport_range")));
-	rec_button.set_image (get_icon (X_("transport_record")));
 	auto_loop_button.set_image (get_icon (X_("transport_loop")));
+
+	rec_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton));
 
 	midi_panic_button.set_image (get_icon (X_("midi_panic")));
 	/* the icon for this has an odd aspect ratio, so fatten up the button */
