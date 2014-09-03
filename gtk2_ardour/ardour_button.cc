@@ -246,7 +246,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	if ((_elements & Body)==Body) {
 		if (active_state() == Gtkmm2ext::ImplicitActive && !((_elements & Indicator)==Indicator)) {
 			cairo_set_line_width (cr, 2.0);
-			rounded_function (cr, 2, 2, get_width() - 4, get_height() - 4, _corner_radius);
+			rounded_function (cr, 2, 2, get_width() - 4, get_height() - 4, _corner_radius-0.5);
 			ArdourCanvas::set_source_rgba (cr, fill_active_color);
 			cairo_stroke (cr);
 		}
@@ -299,7 +299,10 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_translate(cr, x, y);
 
 		cairo_arc (cr, 0, 0, r, 0, 2 * M_PI);
-		cairo_set_source_rgba (cr, .95, .44, .44, 1.); // #f46f6f
+		if (active_state() == Gtkmm2ext::ExplicitActive)
+			cairo_set_source_rgba (cr, .95, .1, .1, 1.);
+		else
+			cairo_set_source_rgba (cr, .95, .44, .44, 1.); // #f46f6f
 		cairo_fill_preserve(cr);
 		cairo_set_source_rgba (cr, .0, .0, .0, .5);
 		cairo_set_line_width(cr, 1);
@@ -333,7 +336,10 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_restore(cr);
 
 		cairo_arc (cr, 0, 0, r * .3, 0, 2 * M_PI);
-		cairo_set_source_rgba (cr, .95, .44, .44, 1.); // #f46f6f
+		if (active_state() == Gtkmm2ext::ExplicitActive)
+			cairo_set_source_rgba (cr, .95, .1, .1, 1.);
+		else
+			cairo_set_source_rgba (cr, .95, .44, .44, 1.); // #f46f6f
 		cairo_fill(cr);
 		cairo_set_source_rgba (cr, .0, .0, .0, 1.0);
 		cairo_arc (cr, 0, 0, r *.15, 0, 2 * M_PI); // hole in the middle
@@ -345,10 +351,12 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
 		const double r = std::min(10., std::min(x, y) * .55); // TODO we need a better way to limit max. radius.
-		cairo_arc (cr, x, y, r, 0, 2 * M_PI);
-		cairo_set_source_rgba (cr, .95, .44, .44, 1.); // #f46f6f
+		if (active_state() == Gtkmm2ext::ExplicitActive)
+			cairo_set_source_rgba (cr, .95, .1, .1, 1.);
+		else
+			cairo_set_source_rgba (cr, .95, .44, .44, 1.); // #f46f6f
 		cairo_fill_preserve(cr);
-		cairo_set_source_rgba (cr, .0, .0, .0, .5);
+		cairo_set_source_rgba (cr, .0, .0, .0, .8);
 		cairo_set_line_width(cr, 1);
 		cairo_stroke(cr);
 	}
