@@ -769,7 +769,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			if (_brushing) {
 				_editor->mouse_brush_insert_region (rv, pending_region_position);
 			} else {
-				Duple track_origin;
+				Duple track_origin (0, 1);
 
 				/* Get the y coordinate of the top of the track that this region is now over */
 				track_origin = current_tv->canvas_display()->item_to_canvas (track_origin);

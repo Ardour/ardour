@@ -486,7 +486,7 @@ AudioRegionView::set_height (gdouble height)
 			ht = (((height - 2 * wcnt) - NAME_HIGHLIGHT_SIZE) / (double) wcnt);
 		}
 
-		gdouble yoff = n * (ht + 1);
+		gdouble yoff = 1 + n * (ht + 1);
 
 		waves[n]->set_height (ht);
 		waves[n]->set_y_position (yoff + 2);
@@ -1132,7 +1132,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		ht = ((trackview.current_height() - NAME_HIGHLIGHT_SIZE) / (double) nchans);
 	}
 
-	gdouble yoff = which * ht;
+	gdouble yoff = 1 + which * ht;
 
 	WaveView *wave = new WaveView (group, audio_region ());
 	CANVAS_DEBUG_NAME (wave, string_compose ("wave view for chn %1 of %2", which, get_item_name()));

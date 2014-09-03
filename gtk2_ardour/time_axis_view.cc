@@ -280,9 +280,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	_order = nth;
 
 	if (_y_position != y) {
-		// XXX +1 is a quick hack to align the track-header with the canvas
-		// with the separator line at the top.
-		_canvas_display->set_y_position (y + 1);
+		_canvas_display->set_y_position (y);
 		_y_position = y;
 
 	}
@@ -845,9 +843,9 @@ TimeAxisView::hide_timestretch ()
 void
 TimeAxisView::show_selection (TimeSelection& ts)
 {
+	double x0;
 	double x1;
-	double x2;
-	double y2;
+	double y1;
 	SelectionRect *rect;	time_axis_frame.show();
 
 
@@ -879,17 +877,17 @@ TimeAxisView::show_selection (TimeSelection& ts)
 
 		rect = get_selection_rect ((*i).id);
 
-		x1 = _editor.sample_to_pixel (start);
-		x2 = _editor.sample_to_pixel (start + cnt - 1);
-		y2 = current_height() - 1;
+		x0 = _editor.sample_to_pixel (start);
+		x1 = _editor.sample_to_pixel (start + cnt - 1);
+		y1 = current_height();
 
-		rect->rect->set (ArdourCanvas::Rect (x1, 0, x2, y2));
+		rect->rect->set (ArdourCanvas::Rect (x0, 1, x1, y1));
 
 		// trim boxes are at the top for selections
 
-		if (x2 > x1) {
-			rect->start_trim->set (ArdourCanvas::Rect (x1, 1, x1 + trim_handle_size, y2));
-			rect->end_trim->set (ArdourCanvas::Rect (x2 - trim_handle_size, 1, x2, y2));
+		if (x1 > x0) {
+			rect->start_trim->set (ArdourCanvas::Rect (x0, 1, x0 + trim_handle_size, y1));
+			rect->end_trim->set (ArdourCanvas::Rect (x1 - trim_handle_size, 1, x1, y1));
 
 			rect->start_trim->show();
 			rect->end_trim->show();
