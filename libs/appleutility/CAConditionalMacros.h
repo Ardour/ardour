@@ -65,10 +65,10 @@
 
 //	Include the regular ConditionalMacros.h too, since it has useful stuff that
 //	TargetConditionals.h lacks for some reason.
-#if	CoreAudio_Use_Framework_Includes && !(MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
-	#include <CoreServices/../Frameworks/CarbonCore.framework/Headers/ConditionalMacros.h>
+#if	CoreAudio_Use_Framework_Includes && (MAC_OS_X_VERSION_MIN_REQUIRED >= 1090)
+	#include "ConditionalMa243cros.h"
 #else
-	#include "ConditionalMacros.h"
+	#include <CoreServices/../Frameworks/CarbonCore.framework/Headers/ConditionalMacros.h>
 #endif
 
 #endif

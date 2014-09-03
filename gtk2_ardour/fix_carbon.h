@@ -25,7 +25,7 @@
 /* an awful hack to stop Carbon #defines from messing with other code
  */
 
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1090
     #include "MacTypes.h"
 #else
     #include "/System/Library/Frameworks/CoreServices.framework/Headers/../Frameworks/CarbonCore.framework/Headers/MacTypes.h"
@@ -36,6 +36,7 @@
 #undef Yes
 #undef No
 #undef nil
+
 #endif
 
 #endif
