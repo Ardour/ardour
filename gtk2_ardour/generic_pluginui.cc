@@ -643,7 +643,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 			//sigc::slot<void,char*,uint32_t> pslot = sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::print_parameter), (uint32_t) port_index);
 
 			control_ui->controller->set_size_request (200, req.height);
-			control_ui->controller->set_name (X_("PluginSlider"));
+			control_ui->controller->set_name (X_("ProcessorControlSlider"));
 			control_ui->controller->set_logarithmic (desc.logarithmic);
 
 			control_ui->controller->StartGesture.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::start_touch), control_ui));

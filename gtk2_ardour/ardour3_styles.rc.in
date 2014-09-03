@@ -868,8 +868,8 @@ style "processor_control_button"  = "very_small_text"
 
 style "processor_control_slider"  = "plugin_slider"
 {
-	bg[PRELIGHT] = @@COLPREFIX@_darkest
-	bg[NORMAL] = @@COLPREFIX@_bg
+	bg[PRELIGHT] = @@COLPREFIX@_bg
+	bg[NORMAL] = @@COLPREFIX@_darkest
 }
 
 style "track_list_display" = "small_bold_text"
