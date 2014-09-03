@@ -582,7 +582,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		_text_height = 0;
 	}
 
-	if ((_elements & RecButton) || _pixbuf) {
+	if ((_elements & (RecButton | CloseCross)) || _pixbuf) {
 		xpad = 6;
 	}
 
