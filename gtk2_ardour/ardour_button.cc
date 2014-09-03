@@ -96,7 +96,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (11.0)
-	, _corner_radius (4.0)
+	, _corner_radius (2.5)
 	, _corner_mask (0xf)
 	, _angle(0)
 	, _xalign(.5)
@@ -220,7 +220,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 	// draw edge (filling a rect underneath, rather than stroking a border on top, allows the corners to be lighter-weight.
 	if ((_elements & (Body|Edge)) == (Body|Edge)) {
-		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
+		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius + 1.5);
 		cairo_set_source_rgba (cr, 0, 0, 0, 1);
 		cairo_fill(cr);
 	}
