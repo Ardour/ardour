@@ -440,6 +440,23 @@ Editor::update_ruler_visibility ()
 	videotl_label.hide();
 #endif
 
+        if (Profile->get_trx()) {
+                if (ruler_marker_action->get_active()) {
+                        old_unit_pos = marker_group->position().y;
+                        if (tbpos != old_unit_pos) {
+                                marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+                        }
+                        marker_group->show();
+                        mark_label.show();
+                        tbpos += timebar_height;
+                        tbgpos += timebar_height;
+                        visible_timebars++;
+                } else {
+                        marker_group->hide();
+                        mark_label.hide();
+                }
+        }
+
 	if (ruler_minsec_action->get_active()) {
 		old_unit_pos = minsec_ruler->position().y;
 		if (tbpos != old_unit_pos) {
@@ -579,21 +596,23 @@ Editor::update_ruler_visibility ()
 		// make sure all cd markers show up in their respective places
 		update_cd_marker_display();
 	}
-
-	if (ruler_marker_action->get_active()) {
-		old_unit_pos = marker_group->position().y;
-		if (tbpos != old_unit_pos) {
-			marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		marker_group->show();
-		mark_label.show();
-		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
-	} else {
-		marker_group->hide();
-		mark_label.hide();
-	}
+        
+        if (!Profile->get_trx()) {
+                if (ruler_marker_action->get_active()) {
+                        old_unit_pos = marker_group->position().y;
+                        if (tbpos != old_unit_pos) {
+                                marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+                        }
+                        marker_group->show();
+                        mark_label.show();
+                        tbpos += timebar_height;
+                        tbgpos += timebar_height;
+                        visible_timebars++;
+                } else {
+                        marker_group->hide();
+                        mark_label.hide();
+                }
+        }
 
 	if (ruler_video_action->get_active()) {
 		old_unit_pos = videotl_group->position().y;
