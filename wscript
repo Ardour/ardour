@@ -388,6 +388,7 @@ def set_compiler_flags (conf,opt):
         compiler_flags.append('-DENABLE_NLS')
 
     compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
+    compiler_flags.append ('-DPROGRAM_NAME_LOWER_CASE="' + Options.options.program_name.lower() + '"')
     compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
 
     if opt.debug:
