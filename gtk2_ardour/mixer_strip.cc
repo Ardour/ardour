@@ -1959,7 +1959,6 @@ MixerStrip::set_button_names ()
 {
 	switch (_width) {
 	case Wide:
-//		rec_enable_button->set_text (_("Rec"));
 		mute_button->set_text (_("Mute"));
 		monitor_input_button->set_text (_("In"));
 		monitor_disk_button->set_text (_("Disk"));
@@ -1986,7 +1985,6 @@ MixerStrip::set_button_names ()
 		break;
 
 	default:
-//		rec_enable_button->set_text (_("R"));
 		mute_button->set_text (_("M"));
 		monitor_input_button->set_text (_("I"));
 		monitor_disk_button->set_text (_("D"));

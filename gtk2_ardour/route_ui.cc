@@ -248,6 +248,10 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->solo_safe_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->listen_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->solo_isolated_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
+	if (is_track()) {
+		track()->TrackModeChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::track_mode_changed, this), gui_context());
+		track_mode_changed();
+	}
 
         _route->phase_invert_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::property_changed, this, _1), gui_context());
@@ -2152,6 +2156,22 @@ RouteUI::route_gui_changed (string what_changed)
 			route_color_changed ();
 		}
 	}
+}
+
+void
+RouteUI::track_mode_changed (void)
+{
+	assert(is_track());
+	switch (track()->mode()) {
+		case ARDOUR::NonLayered:
+		case ARDOUR::Normal:
+			rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton));
+			break;
+		case ARDOUR::Destructive:
+			rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton|ArdourButton::RecTapeMode));
+			break;
+	}
+	rec_enable_button->queue_draw();
 }
 
 /** @return the color that this route should use; it maybe its own,

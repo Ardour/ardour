@@ -167,18 +167,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	if (is_track()) {
 
-		/* use icon */
-		
-		switch (track()->mode()) {
-		case ARDOUR::Normal:
-		case ARDOUR::NonLayered:
-			rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton));
-			break;
-		case ARDOUR::Destructive:
-			rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton|ArdourButton::RecTapeMode));
-			break;
-		}
-
 		if (ARDOUR::Profile->get_mixbus()) {
 			controls_table.attach (*rec_enable_button, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 		} else {
@@ -853,20 +841,6 @@ RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
 		}
 
 		track()->set_mode (mode);
-
-		rec_enable_button->remove ();
-
-		switch (mode) {
-		case ARDOUR::NonLayered:
-		case ARDOUR::Normal:
-			rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton));
-			break;
-		case ARDOUR::Destructive:
-			rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton|ArdourButton::RecTapeMode));
-			break;
-		}
-
-		rec_enable_button->show_all ();
 	}
 }
 

@@ -276,6 +276,7 @@ class RouteUI : public virtual AxisView
 	void check_rec_enable_sensitivity ();
 	void parameter_changed (std::string const &);
 	void relabel_solo_button ();
+	void track_mode_changed ();
 
 	std::string route_state_id () const;
 
