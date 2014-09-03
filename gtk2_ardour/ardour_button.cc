@@ -63,7 +63,7 @@ ArdourButton::ArdourButton (Element e)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (11.0)
-	, _corner_radius (4.0)
+	, _corner_radius (2.5)
 	, _corner_mask (0xf)
 	, _angle(0)
 	, _xalign(.5)
@@ -227,7 +227,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 	// background fill
 	if ((_elements & Body)==Body) {
-		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius-1.5);
+		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
 		if (active_state() == Gtkmm2ext::ImplicitActive && !((_elements & Indicator)==Indicator)) {
 			ArdourCanvas::set_source_rgba (cr, fill_inactive_color);
 			cairo_fill (cr);
@@ -246,7 +246,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	if ((_elements & Body)==Body) {
 		if (active_state() == Gtkmm2ext::ImplicitActive && !((_elements & Indicator)==Indicator)) {
 			cairo_set_line_width (cr, 2.0);
-			rounded_function (cr, 2, 2, get_width() - 4, get_height() - 4, _corner_radius-2);
+			rounded_function (cr, 2, 2, get_width() - 4, get_height() - 4, _corner_radius);
 			ArdourCanvas::set_source_rgba (cr, fill_active_color);
 			cairo_stroke (cr);
 		}
@@ -257,11 +257,11 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		if ( active_state() == Gtkmm2ext::ExplicitActive && !((_elements & Indicator)==Indicator) ) {
 			//concave
 			cairo_set_source (cr, concave_pattern);
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius-1.5);
+			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
 			cairo_fill (cr);
 		} else {
 			cairo_set_source (cr, convex_pattern);
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius-1.5);
+			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
 			cairo_fill (cr);
 		}
 	}
@@ -471,7 +471,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 	// a transparent gray layer to indicate insensitivity
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
-		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius-1.5);
+		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
 		cairo_set_source_rgba (cr, 0.505, 0.517, 0.525, 0.6);
 		cairo_fill (cr);
 	}
@@ -480,7 +480,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	if (ARDOUR::Config->get_widget_prelight()
 			&& !((visual_state() & Gtkmm2ext::Insensitive))) {
 		if (_hovering) {
-			rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius-1.5);
+			rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
 			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
 			cairo_fill (cr);
 		}
