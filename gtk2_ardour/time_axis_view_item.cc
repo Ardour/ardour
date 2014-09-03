@@ -62,8 +62,10 @@ using namespace Gtkmm2ext;
 // GZ: Should be moved to config
 #ifdef _WIN32
     Pango::FontDescription TimeAxisViewItem::NAME_FONT("Arial 8");
+	const double  TimeAxisViewItem::NAME_WIDTH_CORRECTION = 0;
 #else
     Pango::FontDescription TimeAxisViewItem::NAME_FONT("Helvetica 8");
+	const double  TimeAxisViewItem::NAME_WIDTH_CORRECTION = 7;
 #endif
 
 const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 1.0;
@@ -569,7 +571,7 @@ TimeAxisViewItem::set_name_text(const string& new_name)
 	}
     // This is a workaround.
     // Pango returns incorrect width values 1.5*NAME_HIGHLIGHT_X_INDENT
-	name_text_width = pixel_width (new_name, NAME_FONT) + 1.5*NAME_HIGHLIGHT_X_INDENT;
+	name_text_width = pixel_width (new_name, NAME_FONT) + NAME_WIDTH_CORRECTION;
 	name_text->set (new_name);
 }
 

@@ -100,6 +100,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	bool name_active() const { return name_connected; }
 
 	// Default sizes, font and spacing
+	static const double NAME_WIDTH_CORRECTION;
 	static Pango::FontDescription NAME_FONT;
 	static void set_constant_heights ();
     static const double NAME_HIGHLIGHT_Y_INDENT;
