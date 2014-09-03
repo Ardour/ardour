@@ -18,7 +18,9 @@
 */
 
 #include <sigc++/bind.h>
+
 #include "ardour/tempo.h"
+#include "ardour/profile.h"
 
 #include "canvas/rectangle.h"
 #include "canvas/container.h"
@@ -35,7 +37,6 @@
  * due to a conflicting definition of 'Rect' between
  * Apple's MacTypes.h and GTK.
  */
-
 #include "marker.h"
 #include "public_editor.h"
 #include "utils.h"
@@ -326,7 +327,7 @@ Marker::set_show_line (bool s)
 void
 Marker::setup_line ()
 {
-	if (_shown && (_selected || _line_shown)) {
+	if (_shown && (_selected || _line_shown || ARDOUR::Profile->get_trx())) {
 
 		if (_track_canvas_line == 0) {
 
@@ -341,7 +342,7 @@ Marker::setup_line ()
 		_track_canvas_line->set_x0 (d.x);
 		_track_canvas_line->set_x1 (d.x);
 		_track_canvas_line->set_y0 (d.y);
-		_track_canvas_line->set_y1 (ArdourCanvas::COORD_MAX);
+                _track_canvas_line->set_y1 (ArdourCanvas::COORD_MAX);
 		_track_canvas_line->set_outline_color (_selected ? ARDOUR_UI::config()->get_canvasvar_EditPoint() : _color);
 		_track_canvas_line->raise_to_top ();
 		_track_canvas_line->show ();
