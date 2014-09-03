@@ -36,12 +36,14 @@ WavesDropdown::on_mouse_pressed (GdkEventButton*)
 	return true;
 }
 
-void
-WavesDropdown::AddMenuElem (const std::string& item, void* cookie)
+Gtk::MenuItem&
+WavesDropdown::add_menu_item (const std::string& item, void* cookie)
 {
 	Gtk::Menu_Helpers::MenuList& items = _menu.items ();
 	
 	items.push_back (Gtk::Menu_Helpers::MenuElem (item, sigc::bind (sigc::mem_fun(*this, &WavesDropdown::_on_menu_item), cookie)));
+    
+    return _menu.items ().back ();
 }
 
 void
