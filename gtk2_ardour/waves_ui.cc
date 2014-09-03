@@ -450,7 +450,9 @@ WavesUI::add_dropdown_items (WavesDropdown &dropdown, const XMLNodeList& definit
         }
         int itemdata = xml_property (**i, "data", styles, 0);
         Gtk::MenuItem& menuitem = dropdown.add_menu_item (title, (void*)itemdata);
-        set_attributes (*(Gtk::Widget*)&menuitem, **i, styles);
+        if (menuitem.get_child ()) {
+            set_attributes (*menuitem.get_child (), **i, styles);
+        }
     }
 }
 
