@@ -343,13 +343,17 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	
 	if (route()->is_master()) {
 		master_mute_button.show ();
-		get_container ("track_buttons_home").hide ();
+		//get_container ("track_buttons_home").hide ();
+        color_buttons_home.set_visible (false);
+        color_palette_button.set_visible (false);
+        color_palette_button.set_active (false);
 		//mute_button.hide ();
 		//solo_button.hide ();
 		//rec_enable_button.hide ();
 	} else {
 		master_mute_button.hide ();
-		get_container ("track_buttons_home").show ();
+        color_palette_button.set_visible (true);
+        color_palette_home.set_visible (true);
 		//mute_button.show ();
 		//solo_button.show ();
 		//rec_enable_button.show ();
