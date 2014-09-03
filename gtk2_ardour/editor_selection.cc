@@ -961,6 +961,8 @@ Editor::non_master_track_selected ()
         else
             return true;
     }
+
+    return false;
 }
 
 void
