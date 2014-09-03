@@ -253,7 +253,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		track_mode_changed();
 	}
 
-        _route->phase_invert_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
+	_route->phase_invert_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::property_changed, this, _1), gui_context());
 
 	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::setup_invert_buttons, this), gui_context ());
@@ -429,7 +429,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 }
 
 bool
-RouteUI::mute_release (GdkEventButton *ev)
+RouteUI::mute_release (GdkEventButton* /*ev*/)
 {
 	if (_mute_release){
 		DisplaySuspender ds;
@@ -631,7 +631,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 }
 
 bool
-RouteUI::solo_release (GdkEventButton *ev)
+RouteUI::solo_release (GdkEventButton* /*ev*/)
 {
 	if (_solo_release) {
 
