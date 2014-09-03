@@ -53,7 +53,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	virtual ~ArdourButton ();
 
 	enum Tweaks {
-		unused1 = 0x1,
+		Square = 0x1,
 		unused2 = 0x2,
 		unused3 = 0x4,
 	};

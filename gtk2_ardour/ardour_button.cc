@@ -602,6 +602,13 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	}
 
 	req->width += _corner_radius;
+
+	if ((_tweaks & Square)==Square) {
+		if (req->width < req->height)
+			req->width = req->height;
+		if (req->height < req->width)
+			req->height = req->width;
+	}
 }
 
 /**
