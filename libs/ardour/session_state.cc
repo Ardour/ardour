@@ -3255,7 +3255,7 @@ Session::restore_history (string snapshot_name)
 	const std::string xml_filename = legalize_for_path (snapshot_name) + history_suffix;
 	const std::string xml_path(Glib::build_filename (_session_dir->root_path(), xml_filename));
 
-	info << "Loading history from " << xml_path << endmsg;
+	// info << "Loading history from " << xml_path << endmsg;
 
 	if (!Glib::file_test (xml_path, Glib::FILE_TEST_EXISTS)) {
 		info << string_compose (_("%1: no history file \"%2\" for this session."),

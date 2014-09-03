@@ -72,8 +72,6 @@ MidiPatchManager::add_session_patches ()
 
 	find_files_matching_pattern (result, path_to_patches, "*.midnam");
 
-	info << "Loading " << result.size() << " MIDI patches from " << path_to_patches << endmsg;
-
 	for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
 		boost::shared_ptr<MIDINameDocument> document(new MIDINameDocument(*i));
 		for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
@@ -106,8 +104,6 @@ MidiPatchManager::refresh()
 	vector<std::string> result;
 
 	find_files_matching_pattern (result, search_path, "*.midnam");
-
-	info << "Loading " << result.size() << " MIDI patches from " << search_path.to_string() << endmsg;
 
 	for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
 		boost::shared_ptr<MIDINameDocument> document;

@@ -285,7 +285,7 @@ load_rc_file (const string& filename, bool themechange)
 		return;
 	}
 
-	info << "Loading ui configuration file " << rc_file_path << endmsg;
+	// info << "Loading ui configuration file " << rc_file_path << endmsg;
 
 	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path, themechange);
 }

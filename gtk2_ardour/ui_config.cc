@@ -92,7 +92,7 @@ UIConfiguration::load_defaults ()
 
 		string rcfile = default_ui_rc_file;
 
-		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
+		// info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
 
 		if (!tree.read (rcfile.c_str())) {
 			error << string_compose(_("cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
@@ -123,7 +123,7 @@ UIConfiguration::load_state ()
 
 		string rcfile = default_ui_rc_file;
 
-		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
+		// info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
 
 		if (!tree.read (rcfile.c_str())) {
 			error << string_compose(_("cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
@@ -144,7 +144,7 @@ UIConfiguration::load_state ()
 
 		string rcfile = user_ui_rc_file;
 
-		info << string_compose (_("Loading user ui configuration file %1"), rcfile) << endmsg;
+		// info << string_compose (_("Loading user ui configuration file %1"), rcfile) << endmsg;
 
 		if (!tree.read (rcfile)) {
 			error << string_compose(_("cannot read ui configuration file \"%1\""), rcfile) << endmsg;

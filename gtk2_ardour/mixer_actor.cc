@@ -87,7 +87,7 @@ MixerActor::load_bindings ()
 
 	if (find_file (ardour_config_search_path(), "mixer.bindings", binding_file)) {
                 bindings.load (binding_file);
-		info << string_compose (_("Loaded mixer bindings from %1"), binding_file) << endmsg;
+		// info << string_compose (_("Loaded mixer bindings from %1"), binding_file) << endmsg;
         } else {
 		error << string_compose (_("Could not find mixer.bindings in search path %1"), ardour_config_search_path().to_string()) << endmsg;
 	}
