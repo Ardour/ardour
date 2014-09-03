@@ -179,29 +179,43 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	controls_table.attach (name_label,  2, 3, 1, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 2, 0);
 	controls_table.attach (auto_button, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 1, 0);
 
-	Gtk::DrawingArea *blank = manage(new Gtk::DrawingArea());
+	Gtk::DrawingArea *blank0 = manage (new Gtk::DrawingArea());
+	Gtk::DrawingArea *blankB = manage (new Gtk::DrawingArea());
+
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&parent);
 	if (rtv && rtv->is_audio_track()) {
-		blank->set_name("AudioTrackControlsBaseUnselected");
+		blank0->set_name ("AudioTrackControlsBaseUnselected");
+		blankB->set_name ("AudioTrackControlsBaseUnselected");
 	}
 	else if (rtv && rtv->is_midi_track()) {
-		blank->set_name("MidiTrackControlsBaseUnselected");
+		blank0->set_name ("MidiTrackControlsBaseUnselected");
+		blankB->set_name ("MidiTrackControlsBaseUnselected");
 	}
 	else {
-		blank->set_name("AudioBusControlsBaseUnselected");
+		blank0->set_name ("AudioBusControlsBaseUnselected");
+		blankB->set_name ("AudioBusControlsBaseUnselected");
 	}
-	blank->set_size_request(20, -1);
-	blank->show();
-	time_axis_hbox.pack_start (*blank, false, false);
-	time_axis_hbox.reorder_child (*blank, 0);
+	blank0->set_size_request (-1, -1);
+	blankB->set_size_request (4, -1);
 
 	VSeparator* separator = manage (new VSeparator());
 	separator->set_name("TrackSeparator");
-	separator->set_size_request(1, -1);
-	separator->show();
-	time_axis_hbox.pack_start (*separator, false, false);
-	time_axis_hbox.reorder_child (*separator, 1);
+	separator->set_size_request (1, -1);
 
+	controls_button_size_group->add_widget(*blank0);
+	controls_button_size_group->add_widget(hide_button);
+
+	time_axis_hbox.pack_start (*blank0, false, false);
+	time_axis_hbox.pack_start (*blankB, false, false);
+	time_axis_hbox.pack_start (*separator, false, false);
+	time_axis_hbox.reorder_child (*blank0, 0);
+	time_axis_hbox.reorder_child (*blankB, 1);
+	time_axis_hbox.reorder_child (*separator, 2);
+	time_axis_hbox.reorder_child (time_axis_vbox, 3);
+
+	blank0->show();
+	blank0->show();
+	separator->show();
 	name_label.show ();
 	hide_button.show ();
 
