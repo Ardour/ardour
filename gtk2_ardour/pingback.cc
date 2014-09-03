@@ -144,7 +144,7 @@ _pingback (void *arg)
 		if ( return_str.length() > 140 ) { // like a tweet :)
 			std::cerr << "Announcement string is too long (probably behind a proxy)." << std::endl;
 		} else {
-			std::cerr << "Announcement is: " << return_str << std::endl;
+			// std::cerr << "Announcement is: " << return_str << std::endl;
 			
 			//write announcements to local file, even if the
 			//announcement is empty

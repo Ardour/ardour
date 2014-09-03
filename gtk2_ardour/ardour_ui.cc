@@ -2673,8 +2673,6 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		if (should_be_new || session_name.empty()) {
 			/* need the dialog to get info from user */
 
-			cerr << "run dialog\n";
-
 			switch (session_dialog.run()) {
 			case RESPONSE_ACCEPT:
 				break;

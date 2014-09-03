@@ -529,7 +529,6 @@ Editor::Editor ()
 
 	_cursors = new MouseCursors;
 	_cursors->set_cursor_set (ARDOUR_UI::config()->get_icon_set());
-	cerr << "Set cursor set to " << ARDOUR_UI::config()->get_icon_set() << endl;
 
 	ArdourCanvas::GtkCanvas* time_pad = manage (new ArdourCanvas::GtkCanvas ());
 
