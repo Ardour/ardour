@@ -244,14 +244,35 @@
                       prelighticon="inspector_master_mute_prelight"
                       visible="false"
                       noshowall="true"/>
-          <Button id="name_button"
-                  width="95"
-                  height="47"
-                  fgnormal="#D7D7D7"
-                  fghover="#D7D7D7"
-                  fgactive="#D7D7D7"
-                  winfont ="Arial 10"
-                  macfont ="Helvetica 10"/>
+          
+          <EventBox id="name_label_home">
+          <HBox>
+              <Button id="name_button"
+                      width="95"
+                      height="47"
+                      fgnormal="#D7D7D7"
+                      fghover="#D7D7D7"
+                      fgactive="#D7D7D7"
+                      winfont ="Arial 10"
+                      macfont ="Helvetica 10"
+              textcolornormal="#ffffff"
+              textcoloractive="#ffffff"
+              textcolorselected="#ffffff"/>
+              <FocusEntry id="name_entry"
+                          width="57"
+                          height="28"
+                          fgnormal="#ffffff"
+                          winfont ="Arial 10"
+                          macfont ="Helvetica 10"
+                          cssname="EditorTrackNameDisplay"
+                          textcolornormal="#ffffff"
+                          textcoloractive="#ffffff"
+                          textcolorselected="#ffffff"
+                          noshowall="true"
+                          visible="false"/>
+          </HBox>
+          </EventBox>
+            
         </VBox>
         <HBox visible="false"
               noshowall="true">

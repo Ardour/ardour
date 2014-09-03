@@ -125,7 +125,6 @@ class MixerStrip : public RouteUI
 	void toggle_processors ();
 	void ab_plugins ();
 
-    static Gdk::Color palette_random_color();
     static const char* XMLColor[15];
     
   protected:
@@ -135,7 +134,9 @@ class MixerStrip : public RouteUI
 
 	void set_selected(bool yn);
 	void set_stuff_from_route ();
-
+    
+    PublicEditor& _editor;
+    
   private:
 	Mixer_UI& _mixer;
 
@@ -164,8 +165,22 @@ class MixerStrip : public RouteUI
 	gint    mark_update_safe ();
 	guint32 mode_switch_in_progress;
 
-	WavesButton&   name_button;
-
+    Gtk::Container& _name_button_home;
+	bool controls_ebox_button_press (GdkEventButton*);
+    bool controls_ebox_button_release (GdkEventButton* ev);
+    void selection_click (GdkEventButton* ev);
+	
+    WavesButton&   name_button;
+    
+    Gtk::Entry& _name_entry;
+    void begin_name_edit ();
+    void end_name_edit (int);
+    
+    bool name_entry_key_release (GdkEventKey *ev);
+	bool name_entry_key_press (GdkEventKey *ev);
+ 	bool name_entry_focus_out (GdkEventFocus *ev);
+    void name_entry_changed ();
+    
 	WavesButton&   color_palette_button;
 	Gtk::Container& color_palette_home;
 	Gtk::Container& color_buttons_home;
