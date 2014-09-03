@@ -33,10 +33,10 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace std;
 
-#define CORNER_RADIUS 4
+#define CORNER_RADIUS 2.5
 #define CORNER_SIZE   2
 #define CORNER_OFFSET 1
-#define FADER_RESERVE 6 // >= 1.5 * CORNER_RADIUS
+#define FADER_RESERVE 6
 
 std::list<PixFader::FaderImage*> PixFader::_patterns;
 
@@ -234,10 +234,11 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
 
 	cairo_matrix_t matrix;
-	Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
+	Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS + 1.5);
 	// we use a 'trick' here: The stoke is off by .5px but filling the interior area
 	// after a stroke of 2px width results in an outline of 1px
-	cairo_stroke_preserve(cr);
+	cairo_stroke (cr);
+	Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
 
 	if (_orien == VERT) {
 
