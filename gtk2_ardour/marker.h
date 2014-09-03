@@ -102,7 +102,6 @@ class Marker : public sigc::trackable
 	ArdourCanvas::Container *group;
 	ArdourCanvas::Polygon *mark;
         ArdourCanvas::Text *_name_item;
-	ArdourCanvas::Points *points;
 	ArdourCanvas::Line* _track_canvas_line;
 	ArdourCanvas::Rectangle* _name_background;
 
@@ -129,6 +128,8 @@ private:
 	/* disallow copy construction */
 	Marker (Marker const &);
 	Marker & operator= (Marker const &);
+
+        void add_polygon (Type);
 };
 
 class TempoMarker : public Marker

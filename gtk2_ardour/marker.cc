@@ -18,6 +18,7 @@
 */
 
 #include <sigc++/bind.h>
+#include <boost/scoped_ptr.hpp>
 
 #include "ardour/tempo.h"
 #include "ardour/profile.h"
@@ -54,12 +55,16 @@ using namespace Gtkmm2ext;
 PBD::Signal1<void,Marker*> Marker::CatchDeletion;
 
 static const double marker_height = 13.0;
+static const double name_padding = 10.0;
 
 Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba, const string& annotation,
 		Type type, framepos_t frame, bool handle_events)
 
 	: editor (ed)
 	, _parent (&parent)
+        , group (0)
+        , mark (0)
+        , _name_item (0)
 	, _track_canvas_line (0)
 	, _type (type)
 	, _selected (false)
@@ -71,6 +76,74 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 	, _label_offset (0)
 
 {
+	frame_position = frame;
+	unit_position = editor.sample_to_pixel (frame);
+	unit_position -= _shift;
+
+	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple (unit_position, 0));
+	CANVAS_DEBUG_NAME (group, string_compose ("Marker::group for %1", annotation));
+
+	_name_background = new ArdourCanvas::Rectangle (group);
+	CANVAS_DEBUG_NAME (_name_background, string_compose ("Marker::_name_background for %1", annotation));
+
+        if (!ARDOUR::Profile->get_trx()) {
+                add_polygon (type);
+                CANVAS_DEBUG_NAME (mark, string_compose ("Marker::mark for %1", annotation));
+        } else {
+                _label_offset = name_padding;
+        }
+
+	set_color_rgba (rgba);
+
+	/* setup name pixbuf sizes */
+	name_font = get_font_for_style (N_("MarkerText"));
+
+	Gtk::Label foo;
+
+	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("Hg")); /* ascender + descender */
+	int width;
+
+	layout->set_font_description (name_font);
+	Gtkmm2ext::get_ink_pixel_size (layout, width, name_height);
+	
+	_name_item = new ArdourCanvas::Text (group);
+	CANVAS_DEBUG_NAME (_name_item, string_compose ("Marker::_name_item for %1", annotation));
+	_name_item->set_font_description (name_font);
+	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
+	_name_item->set_position (ArdourCanvas::Duple (_label_offset, (marker_height / 2.0) - (name_height / 2.0) - 2.0));
+
+	set_name (annotation.c_str());
+
+	editor.ZoomChanged.connect (sigc::mem_fun (*this, &Marker::reposition));
+
+	/* events will be handled by both the group and the mark itself, so
+	 * make sure they can both be used to lookup this object.
+	 */
+
+	group->set_data ("marker", this);
+        if (mark) {
+                mark->set_data ("marker", this);
+        }
+	
+	if (handle_events) {
+		group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
+	}
+}
+
+Marker::~Marker ()
+{
+	CatchDeletion (this); /* EMIT SIGNAL */
+
+	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
+	delete group;
+	delete _track_canvas_line;
+}
+
+void
+Marker::add_polygon (Type type)
+{
+        boost::scoped_ptr<ArdourCanvas::Points> points (new ArdourCanvas::Points());
+
 	/* Shapes we use:
 
 	  Mark:
@@ -139,17 +212,15 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 
 	*/
 
-	switch (type) {
-	case Mark:
-		points = new ArdourCanvas::Points ();
-
+        switch (type) {
+        case Mark:
+                points->push_back (ArdourCanvas::Duple (0.0, 0.0));
+                points->push_back (ArdourCanvas::Duple (6.0, 0.0));
+                points->push_back (ArdourCanvas::Duple (6.0, 5.0));
+                points->push_back (ArdourCanvas::Duple (3.0, marker_height));
+                points->push_back (ArdourCanvas::Duple (0.0, 5.0));
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (6.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (6.0, 5.0));
-		points->push_back (ArdourCanvas::Duple (3.0, marker_height));
-		points->push_back (ArdourCanvas::Duple (0.0, 5.0));
-		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
-
+                
 		_shift = 3;
 		_label_offset = 8.0;
 		break;
@@ -157,7 +228,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 	case Tempo:
 	case Meter:
 
-		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple (3.0, 0.0));
 		points->push_back (ArdourCanvas::Duple (6.0, 5.0));
 		points->push_back (ArdourCanvas::Duple (6.0, 10.0));
@@ -172,7 +242,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 	case SessionStart:
 	case RangeStart:
 
-	        points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 		points->push_back (ArdourCanvas::Duple (6.5, 6.5));
 		points->push_back (ArdourCanvas::Duple (0.0, marker_height));
@@ -184,7 +253,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 
 	case SessionEnd:
 	case RangeEnd:
-		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple (6.5, 6.5));
 		points->push_back (ArdourCanvas::Duple (marker_height, 0.0));
 		points->push_back (ArdourCanvas::Duple (marker_height, marker_height));
@@ -195,7 +263,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 		break;
 
 	case LoopStart:
-		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 		points->push_back (ArdourCanvas::Duple (marker_height, marker_height));
 		points->push_back (ArdourCanvas::Duple (0.0, marker_height));
@@ -206,7 +273,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 		break;
 
 	case LoopEnd:
-		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple (marker_height,  0.0));
 		points->push_back (ArdourCanvas::Duple (marker_height, marker_height));
 		points->push_back (ArdourCanvas::Duple (0.0, marker_height));
@@ -217,7 +283,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 		break;
 
 	case  PunchIn:
-		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 		points->push_back (ArdourCanvas::Duple (marker_height, 0.0));
 		points->push_back (ArdourCanvas::Duple (0.0, marker_height));
@@ -228,7 +293,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 		break;
 
 	case  PunchOut:
-		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 		points->push_back (ArdourCanvas::Duple (12.0, 0.0));
 		points->push_back (ArdourCanvas::Duple (12.0, 12.0));
@@ -240,68 +304,8 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 
 	}
 
-	frame_position = frame;
-	unit_position = editor.sample_to_pixel (frame);
-	unit_position -= _shift;
-
-	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple (unit_position, 0));
-#ifdef CANVAS_DEBUG
-	group->name = string_compose ("Marker::group for %1", annotation);
-#endif	
-
-	_name_background = new ArdourCanvas::Rectangle (group);
-#ifdef CANVAS_DEBUG
-	_name_background->name = string_compose ("Marker::_name_background for %1", annotation);
-#endif	
-
-	/* adjust to properly locate the tip */
-
 	mark = new ArdourCanvas::Polygon (group);
-	CANVAS_DEBUG_NAME (mark, string_compose ("Marker::mark for %1", annotation));
-
 	mark->set (*points);
-	set_color_rgba (rgba);
-
-	/* setup name pixbuf sizes */
-	name_font = get_font_for_style (N_("MarkerText"));
-
-	Gtk::Label foo;
-
-	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("Hg")); /* ascender + descender */
-	int width;
-
-	layout->set_font_description (name_font);
-	Gtkmm2ext::get_ink_pixel_size (layout, width, name_height);
-	
-	_name_item = new ArdourCanvas::Text (group);
-	CANVAS_DEBUG_NAME (_name_item, string_compose ("Marker::_name_item for %1", annotation));
-	_name_item->set_font_description (name_font);
-	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
-	_name_item->set_position (ArdourCanvas::Duple (_label_offset, (marker_height / 2.0) - (name_height / 2.0) - 2.0));
-
-	set_name (annotation.c_str());
-
-	editor.ZoomChanged.connect (sigc::mem_fun (*this, &Marker::reposition));
-
-	/* events will be handled by both the group and the mark itself, so
-	 * make sure they can both be used to lookup this object.
-	 */
-
-	group->set_data ("marker", this);
-	mark->set_data ("marker", this);
-	
-	if (handle_events) {
-		group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
-	}
-}
-
-Marker::~Marker ()
-{
-	CatchDeletion (this); /* EMIT SIGNAL */
-
-	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
-	delete group;
-	delete _track_canvas_line;
 }
 
 void Marker::reparent(ArdourCanvas::Container & parent)
@@ -332,7 +336,6 @@ Marker::setup_line ()
 		if (_track_canvas_line == 0) {
 
 			_track_canvas_line = new ArdourCanvas::Line (editor.get_hscroll_group());
-			_track_canvas_line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_EditPoint());
 			_track_canvas_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 		}
 
@@ -343,7 +346,11 @@ Marker::setup_line ()
 		_track_canvas_line->set_x1 (d.x);
 		_track_canvas_line->set_y0 (d.y);
                 _track_canvas_line->set_y1 (ArdourCanvas::COORD_MAX);
-		_track_canvas_line->set_outline_color (_selected ? ARDOUR_UI::config()->get_canvasvar_EditPoint() : _color);
+                if (ARDOUR::Profile->get_trx()) {
+                        _track_canvas_line->set_outline_color (_color);
+                } else {
+                        _track_canvas_line->set_outline_color (_selected ? ARDOUR_UI::config()->get_canvasvar_EditPoint() : _color);
+                }
 		_track_canvas_line->raise_to_top ();
 		_track_canvas_line->show ();
 
@@ -394,27 +401,41 @@ Marker::setup_name_display ()
 	}
 
 	/* Work out how wide the name can be */
-	int name_width = min ((double) pixel_width (_name, name_font) + 2, limit);
+	int name_width;
 
+        if (ARDOUR::Profile->get_trx()) {
+                name_width = min ((double) pixel_width (_name, name_font) + (2 * name_padding), limit);
+        } else {
+                name_width = min ((double) pixel_width (_name, name_font) + 2, limit);
+        }
 	if (name_width == 0) {
 		_name_item->hide ();
 	} else {
 		_name_item->show ();
 
-		if (label_on_left ()) {
-			_name_item->set_x_position (-name_width);
-		}
+                if (ARDOUR::Profile->get_trx()) {
+                        _name_item->set_x_position (_label_offset);
+                } else {
+                        if (label_on_left ()) {
+                                _name_item->set_x_position (-name_width);
+                        }
+                }
 			
 		_name_item->clamp_width (name_width);
 		_name_item->set (_name);
 		
-		if (label_on_left ()) {
-			_name_background->set_x0 (_name_item->position().x - 2);
-			_name_background->set_x1 (_name_item->position().x + name_width + _shift);
-		} else {
-			_name_background->set_x0 (_name_item->position().x - _label_offset + 2);
-			_name_background->set_x1 (_name_item->position().x + name_width);
-		}
+                if (ARDOUR::Profile->get_trx()) {
+                        _name_background->set_x0 (_name_item->position().x - _label_offset);
+                        _name_background->set_x1 (_name_item->position().x - _label_offset + name_width);
+                } else {
+                        if (label_on_left ()) {
+                                _name_background->set_x0 (_name_item->position().x - 2);
+                                _name_background->set_x1 (_name_item->position().x + name_width + _shift);
+                        } else {
+                                _name_background->set_x0 (_name_item->position().x - _label_offset + 2);
+                                _name_background->set_x1 (_name_item->position().x + name_width);
+                        }
+                }
 	}
 
 	_name_background->set_y0 (0);
@@ -459,8 +480,11 @@ void
 Marker::set_color_rgba (uint32_t c)
 {
 	_color = c;
-	mark->set_fill_color (_color);
-	mark->set_outline_color (_color);
+
+        if (mark) {
+                mark->set_fill_color (_color);
+                mark->set_outline_color (_color);
+        }
 
 	if (_track_canvas_line && !_selected) {
 		_track_canvas_line->set_outline_color (_color);
