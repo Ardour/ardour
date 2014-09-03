@@ -42,6 +42,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 		Inactive = 0x40, // no _action is defined AND state is not used
 		RecButton = 0x80, // tentative, see commit message
 		RecTapeMode = 0x100, // tentative
+		CloseCross = 0x200, // tentative
 	};
 
 	static Element default_elements;

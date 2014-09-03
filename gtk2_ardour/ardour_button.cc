@@ -352,6 +352,18 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_set_line_width(cr, 1);
 		cairo_stroke(cr);
 	}
+	else if (_elements & CloseCross) {
+		const double x = get_width() * .5;
+		const double y = get_height() * .5;
+		const double o = std::min(x, y) * .4;
+		ArdourCanvas::set_source_rgba (cr, text_color);
+		cairo_set_line_width(cr, 1);
+		cairo_move_to(cr, x-o, y-o);
+		cairo_line_to(cr, x+o, y+o);
+		cairo_move_to(cr, x+o, y-o);
+		cairo_line_to(cr, x-o, y+o);
+		cairo_stroke(cr);
+	}
 
 	int text_margin;
 	if (get_width() < 75 || (_elements & Menu) ) {
@@ -596,7 +608,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		req->width += _diameter + 4;
 	}
 
-	if ((_elements & RecButton) && !_pixbuf) {
+	if ((_elements & (RecButton | CloseCross)) && !_pixbuf) {
 		assert(!(_elements & Text));
 		req->width += std::max(char_pixel_width(), char_pixel_height());
 		req->height += std::max(char_pixel_width(), char_pixel_height());
