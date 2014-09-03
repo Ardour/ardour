@@ -1195,7 +1195,7 @@ WavesAudioBackend::__waves_backend_factory (AudioEngine& e)
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::__waves_backend_factory ():" << std::endl;
     if (!__instance) {
-        __instance.reset (new WavesAudioBackend (e, descriptor()));
+            __instance.reset (new WavesAudioBackend (e, *(descriptor())));
     }
     return __instance;
 }
@@ -1286,12 +1286,4 @@ AudioBackendInfo WavesAudioBackend::__backend_info = {
     WavesAudioBackend::__already_configured,
 };
 
-#ifdef __MINGW64__
-	extern "C" __declspec(dllexport) ARDOUR::AudioBackendInfo* descriptor ()
-#else
-	extern "C" ARDOURBACKEND_API ARDOUR::AudioBackendInfo* descriptor ()
-#endif
-{
-    // COMMENTED DBG LOGS */ std::cout  << "waves_backend.dll : ARDOUR::AudioBackendInfo* descriptor (): " << std::endl;
-    return &WavesAudioBackend::backend_info ();
-}
+
