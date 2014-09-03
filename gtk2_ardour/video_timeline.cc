@@ -23,6 +23,8 @@
 
 #include "pbd/file_utils.h"
 #include "pbd/convert.h"
+
+#include "ardour/profile.h"
 #include "ardour/session_directory.h"
 
 #ifdef PLATFORM_WINDOWS
@@ -62,15 +64,24 @@ VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Container *vbg, in
 	auto_set_session_fps = false;
 	video_offset_lock = false;
 	video_aspect_ratio = 4.0/3.0;
-	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&VideoTimeLine::parameter_changed, this, _1), gui_context());
-	video_server_url = video_get_server_url(Config);
-	server_docroot   = video_get_docroot(Config);
 	video_filename = "";
 	local_file = true;
 	video_file_fps = 25.0;
 	flush_frames = false;
 	vmonitor=0;
 	reopen_vmonitor=false;
+
+        if (ARDOUR::Profile->get_trx()) {
+                /* leave it incomplete because we don't do any of this stuff in Tracks. We still need the VTL to exist,
+                   however, since it is accessed unconditionally in many places.
+                 */
+                return;
+        }
+
+	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&VideoTimeLine::parameter_changed, this, _1), gui_context());
+	video_server_url = video_get_server_url(Config);
+	server_docroot   = video_get_docroot(Config);
+
 	find_xjadeo();
 
 	VtlUpdate.connect (*this, invalidator (*this), boost::bind (&PublicEditor::queue_visual_videotimeline_update, editor), gui_context());

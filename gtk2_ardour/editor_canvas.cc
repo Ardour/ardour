@@ -187,7 +187,7 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (cd_marker_bar, "CD Marker Bar");
  	cd_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
-	// ARDOUR_UI::instance()->video_timeline = new VideoTimeLine(this, videotl_group, (timebar_height * videotl_bar_height));
+	ARDOUR_UI::instance()->video_timeline = new VideoTimeLine(this, videotl_group, (timebar_height * videotl_bar_height));
 	
 	cd_marker_bar_drag_rect = new ArdourCanvas::Rectangle (cd_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
 	CANVAS_DEBUG_NAME (cd_marker_bar_drag_rect, "cd marker drag");
