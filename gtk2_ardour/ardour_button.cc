@@ -570,7 +570,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		_text_height = 0;
 	}
 
-	if (_pixbuf) {
+	if ((_elements & RecButton) || _pixbuf) {
 		xpad = 6;
 	}
 
@@ -598,11 +598,12 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 
 	if ((_elements & RecButton) && !_pixbuf) {
 		assert(!(_elements & Text));
-		req->width += char_pixel_height();
-		req->height += char_pixel_height();
+		req->width += std::max(char_pixel_width(), char_pixel_height());
+		req->height += std::max(char_pixel_width(), char_pixel_height());
 	}
 
 	req->width += _corner_radius;
+	req->height += _corner_radius;
 
 	if ((_tweaks & Square)==Square) {
 		if (req->width < req->height)
