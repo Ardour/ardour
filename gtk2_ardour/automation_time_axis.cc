@@ -128,7 +128,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		_base_rect->lower_to_bottom();
 	}
 
-	hide_button.set_image ( ::get_icon(X_("hide")));
+	hide_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::CloseCross));
 
 	auto_button.set_name ("mixer strip button");
 	hide_button.set_name ("mixer strip button");
