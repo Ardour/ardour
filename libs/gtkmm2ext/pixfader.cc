@@ -234,7 +234,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
 
 	cairo_matrix_t matrix;
-	Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS+1.5);
+	Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
 	// we use a 'trick' here: The stoke is off by .5px but filling the interior area
 	// after a stroke of 2px width results in an outline of 1px
 	cairo_stroke_preserve(cr);
