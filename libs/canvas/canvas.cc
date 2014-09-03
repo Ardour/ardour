@@ -24,6 +24,8 @@
 
 #include <list>
 #include <cassert>
+#include <glib.h>
+
 #include <gtkmm/adjustment.h>
 #include <gtkmm/label.h>
 
@@ -113,9 +115,9 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 #ifdef CANVAS_DEBUG
 		if (getenv ("CANVAS_HARLEQUIN_DEBUGGING")) {
 			// This transparently colors the rect being rendered, after it has been drawn.
-			double r = (random() % 65536) /65536.0;
-			double g = (random() % 65536) /65536.0;
-			double b = (random() % 65536) /65536.0;
+			double r = (g_random_int() % 65536) /65536.0;
+			double g = (g_random_int() % 65536) /65536.0;
+			double b = (g_random_int() % 65536) /65536.0;
 			context->rectangle (draw->x0, draw->y0, draw->x1 - draw->x0, draw->y1 - draw->y0);
 			context->set_source_rgba (r, g, b, 0.25);
 			context->fill ();
