@@ -291,14 +291,14 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	}
 	else // rec-en is exclusive to pixbuf (tape machine mode, rec-en)
 	if ((_elements & (RecButton|RecTapeMode)) == (RecButton|RecTapeMode)) {
-		const double h = get_height();
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
+		const double r = std::min(10., std::min(x, y) * .6); // TODO we need a better way to limit max. radius.
 		const double slit = .11 * M_PI;
 		cairo_save(cr);
 		cairo_translate(cr, x, y);
 
-		cairo_arc (cr, 0, 0, y *.6, 0, 2 * M_PI);
+		cairo_arc (cr, 0, 0, r, 0, 2 * M_PI);
 		cairo_set_source_rgba (cr, .95, .44, .44, 1.); // #f46f6f
 		cairo_fill_preserve(cr);
 		cairo_set_source_rgba (cr, .0, .0, .0, .5);
@@ -310,7 +310,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 		cairo_rotate (cr, -.5 * M_PI);
 		cairo_move_to(cr, 0, 0);
-		cairo_arc (cr, 0, 0, h *.25, -slit, slit);
+		cairo_arc (cr, 0, 0, r *.85, -slit, slit);
 		cairo_line_to(cr, 0, 0);
 		cairo_close_path(cr);
 
@@ -318,25 +318,25 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_rotate (cr, 2. * M_PI / 3.);
 
 		cairo_move_to(cr, 0, 0);
-		cairo_arc (cr, 0, 0, h *.25, -slit, slit);
+		cairo_arc (cr, 0, 0, r *.85, -slit, slit);
 		cairo_line_to(cr, 0, 0);
 		cairo_close_path(cr);
 		cairo_fill(cr);
 
 		cairo_rotate (cr, 2. * M_PI / 3.);
 		cairo_move_to(cr, 0, 0);
-		cairo_arc (cr, 0, 0, h *.25, -slit, slit);
+		cairo_arc (cr, 0, 0, r *.85, -slit, slit);
 		cairo_line_to(cr, 0, 0);
 		cairo_close_path(cr);
 		cairo_fill(cr);
 
 		cairo_restore(cr);
 
-		cairo_arc (cr, 0, 0, h * .09, 0, 2 * M_PI);
+		cairo_arc (cr, 0, 0, r * .3, 0, 2 * M_PI);
 		cairo_set_source_rgba (cr, .95, .44, .44, 1.); // #f46f6f
 		cairo_fill(cr);
 		cairo_set_source_rgba (cr, .0, .0, .0, 1.0);
-		cairo_arc (cr, 0, 0, h *.05, 0, 2 * M_PI); // hole in the middle
+		cairo_arc (cr, 0, 0, r *.15, 0, 2 * M_PI); // hole in the middle
 		cairo_fill(cr);
 
 		cairo_restore(cr);
@@ -344,7 +344,8 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	else if (_elements & RecButton) {
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
-		cairo_arc (cr, x, y, y *.55, 0, 2 * M_PI);
+		const double r = std::min(10., std::min(x, y) * .55); // TODO we need a better way to limit max. radius.
+		cairo_arc (cr, x, y, r, 0, 2 * M_PI);
 		cairo_set_source_rgba (cr, .95, .44, .44, 1.); // #f46f6f
 		cairo_fill_preserve(cr);
 		cairo_set_source_rgba (cr, .0, .0, .0, .5);
