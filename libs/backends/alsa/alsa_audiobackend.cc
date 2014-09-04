@@ -664,6 +664,13 @@ AlsaAudioBackend::freewheel (bool onoff)
 	return 0;
 }
 
+int
+AlsaAudioBackend::reset_device ()
+{
+        /* XXX what are the semantics of this ? */
+        return 0;
+}
+
 float
 AlsaAudioBackend::dsp_load () const
 {
@@ -1824,3 +1831,4 @@ AlsaMidiEvent::AlsaMidiEvent (const AlsaMidiEvent& other)
 AlsaMidiEvent::~AlsaMidiEvent () {
 	free (_data);
 };
+
