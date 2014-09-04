@@ -2271,6 +2271,14 @@ RouteTimeAxisView::reset_processor_automation_curves ()
 bool
 RouteTimeAxisView::can_edit_name () const
 {
+    if( _route->is_master () )
+        return false;
+    
+    boost::shared_ptr<AudioTrack> audio_track = boost::dynamic_pointer_cast<AudioTrack>( _route );
+    
+    if( audio_track && audio_track->is_master_track() )
+        return false;
+    
 	/* we do not allow track name changes if it is record enabled
 	 */
 	return !_route->record_enabled();
