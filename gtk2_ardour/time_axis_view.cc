@@ -291,7 +291,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 
 	if (_y_position != y) {
 		_canvas_separator->set (ArdourCanvas::Duple(0, y), ArdourCanvas::Duple(ArdourCanvas::COORD_MAX, y));
-		_canvas_display->set_y_position (y + 1); // XXX
+		_canvas_display->set_y_position (y + 1);
 		_y_position = y;
 	}
 
@@ -892,7 +892,7 @@ TimeAxisView::show_selection (TimeSelection& ts)
 
 		x1 = _editor.sample_to_pixel (start);
 		x2 = _editor.sample_to_pixel (start + cnt - 1);
-		y2 = current_height();
+		y2 = current_height() - 1;
 
 		rect->rect->set (ArdourCanvas::Rect (x1, 0, x2, y2));
 
