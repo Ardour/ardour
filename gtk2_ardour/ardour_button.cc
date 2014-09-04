@@ -543,7 +543,7 @@ ArdourButton::set_corner_radius (float r)
 void
 ArdourButton::on_size_request (Gtk::Requisition* req)
 {
-	req->height = req->height = 0;
+	req->width = req->height = 0;
 	CairoWidget::on_size_request (req);
 
 	if (_diameter == 0) {
