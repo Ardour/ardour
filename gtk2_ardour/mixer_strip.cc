@@ -317,6 +317,7 @@ MixerStrip::init ()
 	/* note that this handler connects *before* the default handler */
 	_name_button_home.signal_button_press_event().connect (sigc::mem_fun (*this, &MixerStrip::controls_ebox_button_press));
     _name_button_home.signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::controls_ebox_button_release));
+    _name_entry.set_max_length(13);
     
     Session* session = ARDOUR_UI::instance()->the_session();
     if( session )
