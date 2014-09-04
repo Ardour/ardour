@@ -106,9 +106,15 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 		compute_heights ();
 	}
 
-	_canvas_display = new ArdourCanvas::Container (ed.get_trackview_group (), ArdourCanvas::Duple (0.0, 0.0));
+	_canvas_display = new ArdourCanvas::Container (ed.get_trackview_group (), ArdourCanvas::Duple (1.0, 0.0));
 	CANVAS_DEBUG_NAME (_canvas_display, "main for TAV");
 	_canvas_display->hide(); // reveal as needed
+
+	_canvas_separator = new ArdourCanvas::Line(ed.get_trackview_group ());
+	CANVAS_DEBUG_NAME (_canvas_separator, "separator for TAV");
+	_canvas_separator->set_outline_color(RGBA_TO_UINT (0, 0, 0, 255));
+	_canvas_separator->set_outline_width(1.0);
+	_canvas_separator->hide();
 
 	selection_group = new ArdourCanvas::Container (_canvas_display);
 	CANVAS_DEBUG_NAME (selection_group, "selection for TAV");
@@ -222,6 +228,9 @@ TimeAxisView::~TimeAxisView()
 	delete _canvas_display;
 	_canvas_display = 0;
 
+	delete _canvas_separator;
+	_canvas_separator = 0;
+
 	delete display_menu;
 	display_menu = 0;
 
@@ -236,6 +245,7 @@ TimeAxisView::hide ()
 	}
 
 	_canvas_display->hide ();
+	_canvas_separator->hide ();
 
 	if (control_parent) {
 		control_parent->remove (time_axis_hbox);
@@ -280,15 +290,16 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	_order = nth;
 
 	if (_y_position != y) {
-		// XXX +1 is a quick hack to align the track-header with the canvas
-		// with the separator line at the top.
-		_canvas_display->set_y_position (y + 1);
+		_canvas_separator->set (ArdourCanvas::Duple(0, y), ArdourCanvas::Duple(ArdourCanvas::COORD_MAX, y));
+		_canvas_display->set_y_position (y + 1); // XXX
 		_y_position = y;
-
 	}
 
 	_canvas_display->raise_to_top ();
 	_canvas_display->show ();
+
+	_canvas_separator->raise_to_top ();
+	_canvas_separator->show ();
 
 	_hidden = false;
 
@@ -881,14 +892,14 @@ TimeAxisView::show_selection (TimeSelection& ts)
 
 		x1 = _editor.sample_to_pixel (start);
 		x2 = _editor.sample_to_pixel (start + cnt - 1);
-		y2 = current_height() - 1;
+		y2 = current_height();
 
 		rect->rect->set (ArdourCanvas::Rect (x1, 0, x2, y2));
 
 		// trim boxes are at the top for selections
 
 		if (x2 > x1) {
-			rect->start_trim->set (ArdourCanvas::Rect (x1, 1, x1 + trim_handle_size, y2));
+			rect->start_trim->set (ArdourCanvas::Rect (x1, 0, x1 + trim_handle_size, y2));
 			rect->end_trim->set (ArdourCanvas::Rect (x2 - trim_handle_size, 1, x2, y2));
 
 			rect->start_trim->show();

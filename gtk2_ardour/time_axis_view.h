@@ -41,6 +41,8 @@
 #include "ardour/region.h"
 #include "evoral/Parameter.hpp"
 
+#include "canvas/line.h"
+
 #include "prompter.h"
 #include "axis_view.h"
 #include "enums.h"
@@ -227,6 +229,7 @@ class TimeAxisView : public virtual AxisView
 	bool                  _hidden;
 	bool                   in_destructor;
 	Gtk::Menu*            _size_menu;
+	ArdourCanvas::Line*       _canvas_separator;
 	ArdourCanvas::Container*  _canvas_display;
 	double                _y_position;
 	PublicEditor&         _editor;
