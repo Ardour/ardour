@@ -43,6 +43,7 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_rounded_corner_mask (int);
 
 	void set_text (const std::string&);
+    const std::string& get_text() { return _text; }
 	void set_angle (const double);
 	void set_border_width(float, float, float, float);
 	void set_border_width(const char*);
