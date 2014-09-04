@@ -166,7 +166,6 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	group = new ArdourCanvas::Container (parent);
 	CANVAS_DEBUG_NAME (group, string_compose ("TAVI group for %1", get_item_name()));
 	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
-	group->set_y_position (1);
 
 	fill_color = base_color;
 	samples_per_pixel = fpp;
@@ -1019,7 +1018,7 @@ TimeAxisViewItem::idle_remove_this_item(TimeAxisViewItem* item, void* src)
 void
 TimeAxisViewItem::set_y (double y)
 {
-	group->set_y_position (y + 1);
+	group->set_y_position (y);
 }
 
 void

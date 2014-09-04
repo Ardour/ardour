@@ -675,7 +675,7 @@ RegionView::region_sync_changed ()
 			sync_mark->set (points);
 			sync_mark->show ();
 
-			sync_line->set (ArdourCanvas::Duple (offset, 0), ArdourCanvas::Duple (offset, trackview.current_height() - NAME_HIGHLIGHT_SIZE - 1));
+			sync_line->set (ArdourCanvas::Duple (offset, 0), ArdourCanvas::Duple (offset, trackview.current_height() - NAME_HIGHLIGHT_SIZE));
 			sync_line->show ();
 		}
 	}
@@ -748,18 +748,16 @@ RegionView::set_height (double h)
 
 		sync_line->set (
 			ArdourCanvas::Duple (offset, 0),
-			ArdourCanvas::Duple (offset, h - NAME_HIGHLIGHT_SIZE - 1)
+			ArdourCanvas::Duple (offset, h - NAME_HIGHLIGHT_SIZE)
 			);
 	}
 
 	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_frames.begin(); i != _coverage_frames.end(); ++i) {
-		(*i)->set_y0 (1);
-		(*i)->set_y1 (h);
+		(*i)->set_y1 (h + 1);
 	}
 
 	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_frames.begin(); i != _silent_frames.end(); ++i) {
-		(*i)->set_y0 (1);
-		(*i)->set_y1 (h);
+		(*i)->set_y1 (h + 1);
 	}
 
 }
@@ -814,7 +812,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 			_coverage_frames.push_back (cr);
 			cr->set_x0 (trackview.editor().sample_to_pixel (t - position));
 			cr->set_y0 (1);
-			cr->set_y1 (_height);
+			cr->set_y1 (_height + 1);
 			cr->set_outline (false);
 			cr->set_ignore_events (true);
 			if (new_me) {

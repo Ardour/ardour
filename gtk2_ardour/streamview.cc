@@ -72,7 +72,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Container* canvas_g
 	canvas_rect = new ArdourCanvas::Rectangle (_canvas_group);
 	CANVAS_DEBUG_NAME (canvas_rect, string_compose ("SV canvas rectangle %1", _trackview.name()));
 	canvas_rect->set (ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, tv.current_height ()));
-	canvas_rect->set_outline_what (ArdourCanvas::Rectangle::TOP);
+	canvas_rect->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 	canvas_rect->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
 	canvas_rect->set_fill (true);
 	canvas_rect->Event.connect (sigc::bind (sigc::mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event), canvas_rect, &_trackview));
@@ -608,7 +608,7 @@ StreamView::update_contents_height ()
 		case Stacked:
 		case Expanded:
 			/* In stacked displays, the recregion is always at the top */
-			i->rectangle->set_y0 (1);
+			i->rectangle->set_y0 (0);
 			i->rectangle->set_y1 (h);
 			break;
 		}
