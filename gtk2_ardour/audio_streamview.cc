@@ -246,7 +246,7 @@ AudioStreamView::setup_rec_box ()
 
 				plist.add (Properties::start, start);
 				plist.add (Properties::length, 1);
-				plist.add (Properties::name, string());
+				plist.add (Properties::name, region_name_from_path (sources.front()->name(), true) );
 				plist.add (Properties::layer, 0);
 
 				boost::shared_ptr<AudioRegion> region (
@@ -274,7 +274,7 @@ AudioStreamView::setup_rec_box ()
 				xend = xstart;
                 //fill_color = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
                 // GZ FIXME:change in config instead of following
-                fill_color = ArdourCanvas::rgba_to_color (251.0/255.0, 35.0/255.0, 52.0/255.0, 1.0);
+                fill_color = ArdourCanvas::rgba_to_color (251.0/255.0, 35.0/255.0, 52.0/255.0, 0.6);
 				/* make the recording rect translucent to allow
 				   the user to see the peak data coming in, etc.
 				*/
@@ -283,19 +283,21 @@ AudioStreamView::setup_rec_box ()
 
 			ArdourCanvas::Rectangle * rec_rect = new ArdourCanvas::Rectangle (_canvas_group);
 			rec_rect->set_x0 (xstart);
-			rec_rect->set_y0 (2);
+			rec_rect->set_y0 (TimeAxisViewItem::REGION_TOP_OFFSET);
 			rec_rect->set_x1 (xend);
-			rec_rect->set_y1 (child_height () - 3);
+			rec_rect->set_y1 (child_height () - TimeAxisViewItem::REGION_BOTTOM_OFFSET);
 			rec_rect->set_outline_what (ArdourCanvas::Rectangle::What (0));
 			rec_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame());
 			rec_rect->set_fill_color (fill_color);
-			rec_rect->lower_to_bottom();
 
 			RecBoxInfo recbox;
 			recbox.rectangle = rec_rect;
-			recbox.start = _trackview.session()->transport_frame();
+            if (rec_rects.empty() ) {
+                recbox.start = _trackview.session()->record_location ();
+            } else {
+                recbox.start = _trackview.session()->transport_frame();
+            }
 			recbox.length = 0;
-
 			rec_rects.push_back (recbox);
 
 			screen_update_connection.disconnect();

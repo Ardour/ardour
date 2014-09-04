@@ -567,6 +567,7 @@ TimeAxisViewItem::set_name_text(const string& new_name)
     // Pango returns incorrect width values 1.5*NAME_HIGHLIGHT_X_INDENT
 	name_text_width = pixel_width (new_name, NAME_FONT) + NAME_WIDTH_CORRECTION;
 	name_text->set (new_name);
+    manage_name_highlight();
 }
 
 /**
@@ -743,7 +744,7 @@ TimeAxisViewItem::get_fill_color () const
 		if (_recregion) {
 			//f = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
             // GZ FIXME:change in config instead of following
-            f = ArdourCanvas::rgba_to_color (251.0/255.0, 35.0/255.0, 52.0/255.0, 1.0);
+            f = ArdourCanvas::rgba_to_color (251.0/255.0, 35.0/255.0, 52.0/255.0, 0.6);
 		} else {
             f = fill_color;
             f = UINT_RGBA_CHANGE_A (f, (ARDOUR_UI::config()->get_canvasvar_FrameBase() & 0x000000ff));
