@@ -73,6 +73,7 @@ int const TimeAxisView::_max_order = 512;
 unsigned int TimeAxisView::name_width_px = 100; // TODO adjust with font-scaling on style-change
 PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::controls_meters_size_group = Glib::RefPtr<Gtk::SizeGroup>();
+Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::track_number_v_size_group = Glib::RefPtr<Gtk::SizeGroup>();
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
@@ -101,6 +102,9 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 {
 	if (!controls_meters_size_group) {
 		controls_meters_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
+	}
+	if (!track_number_v_size_group) {
+		track_number_v_size_group = SizeGroup::create (SIZE_GROUP_VERTICAL);
 	}
 	if (extra_height == 0) {
 		compute_heights ();
@@ -151,9 +155,9 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_border_width (2);
 
 	if (ARDOUR::Profile->get_mixbus() ) {
-		controls_table.attach (name_hbox, 4, 5, 0, 2,  Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+		controls_table.attach (name_hbox, 4, 5, 0, 2,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
 	} else {
-		controls_table.attach (name_hbox, 1, 2, 0, 2,  Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+		controls_table.attach (name_hbox, 1, 2, 0, 2,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
 	}
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();

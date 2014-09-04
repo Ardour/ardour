@@ -112,6 +112,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	number_label.set_alignment(.5, .5);
 	number_label.set_fallthrough_to_parent (true);
+	track_number_v_size_group->add_widget(number_label);
 
 	sess->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::parameter_changed, this, _1), gui_context());
 }
@@ -217,6 +218,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		controls_table.attach (*mute_button, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	}
 	controls_button_size_group->add_widget(*mute_button);
+	track_number_v_size_group->add_widget(*mute_button);
 
 	if (!_route->is_master()) {
 		if (ARDOUR::Profile->get_mixbus()) {
@@ -418,9 +420,9 @@ RouteTimeAxisView::update_track_number_visibility ()
 	}
 	if (show_label) {
 		if (ARDOUR::Profile->get_mixbus()) {
-			controls_table.attach (number_label, 3, 4, 0, 1, Gtk::SHRINK, Gtk::FILL|Gtk::EXPAND, 1, 0);
+			controls_table.attach (number_label, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 1, 0);
 		} else {
-			controls_table.attach (number_label, 0, 1, 0, 1, Gtk::SHRINK, Gtk::FILL|Gtk::EXPAND, 1, 0);
+			controls_table.attach (number_label, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 1, 0);
 		}
 		// see ArdourButton::on_size_request(), we should probably use a global size-group here instead.
 		// except the width of the number label is subtracted from the name-hbox, so we
