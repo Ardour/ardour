@@ -420,10 +420,10 @@ ARDOUR_UI::setup_transport ()
 	VBox* auto_box = manage (new VBox);
 	auto_box->set_homogeneous (true);
 	auto_box->set_spacing (2);
-	auto_box->pack_start (sync_button, false, false);
+	auto_box->pack_start (sync_button, true, true);
 	if (!ARDOUR::Profile->get_trx()) {
-		auto_box->pack_start (follow_edits_button, false, false);
-		auto_box->pack_start (auto_return_button, false, false);
+		auto_box->pack_start (follow_edits_button, true, true);
+		auto_box->pack_start (auto_return_button, true, true);
 	}
 
 	if (!ARDOUR::Profile->get_trx()) {
