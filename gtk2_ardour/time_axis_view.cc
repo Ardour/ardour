@@ -66,6 +66,8 @@ using namespace Editing;
 using namespace ArdourCanvas;
 using Gtkmm2ext::Keyboard;
 
+#define TOP_LEVEL_WIDGET controls_ebox
+
 const double trim_handle_size = 6.0; /* pixels */
 uint32_t TimeAxisView::button_height = 0;
 uint32_t TimeAxisView::extra_height = 0;
@@ -171,7 +173,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	top_hbox.pack_start (controls_vbox, true, true);
 	top_hbox.show ();
 
-	controls_ebox.add (top_hbox);
+	controls_ebox.add (time_axis_hbox);
 	controls_ebox.add_events (Gdk::BUTTON_PRESS_MASK|
 				  Gdk::BUTTON_RELEASE_MASK|
 				  Gdk::POINTER_MOTION_MASK|
@@ -189,7 +191,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.show ();
 
 	time_axis_frame.set_shadow_type (Gtk::SHADOW_NONE);
-	time_axis_frame.add(controls_ebox);
+	time_axis_frame.add(top_hbox);
 	time_axis_frame.show();
 
 	HSeparator* separator = manage (new HSeparator());
@@ -255,7 +257,7 @@ TimeAxisView::hide ()
 	_canvas_separator->hide ();
 
 	if (control_parent) {
-		control_parent->remove (time_axis_hbox);
+		control_parent->remove (TOP_LEVEL_WIDGET);
 		control_parent = 0;
 	}
 
@@ -287,11 +289,11 @@ guint32
 TimeAxisView::show_at (double y, int& nth, VBox *parent)
 {
 	if (control_parent) {
-		control_parent->reorder_child (time_axis_hbox, nth);
+		control_parent->reorder_child (TOP_LEVEL_WIDGET, nth);
 	} else {
 		control_parent = parent;
-		parent->pack_start (time_axis_hbox, false, false);
-		parent->reorder_child (time_axis_hbox, nth);
+		parent->pack_start (TOP_LEVEL_WIDGET, false, false);
+		parent->reorder_child (TOP_LEVEL_WIDGET, nth);
 	}
 
 	_order = nth;
@@ -552,7 +554,7 @@ TimeAxisView::set_height (uint32_t h)
 		h = preset_height (HeightSmall);
 	}
 
-	time_axis_hbox.property_height_request () = h;
+	TOP_LEVEL_WIDGET.property_height_request () = h;
 	height = h;
 
 	char buf[32];
