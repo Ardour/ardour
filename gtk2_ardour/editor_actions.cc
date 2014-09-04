@@ -482,10 +482,7 @@ Editor::register_actions ()
 	mouse_timefx_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseCut));
-	mouse_cut_button.set_related_action (act);
-	mouse_cut_button.set_image (::get_icon("tool_cut"));
-	mouse_cut_button.add_elements (ArdourButton::Inset );
-	mouse_cut_button.set_name ("mouse mode button");
+	_tool_cut_button.set_related_action (act);
 
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), sigc::bind (sigc::mem_fun(*this, &Editor::step_mouse_mode), true));
 

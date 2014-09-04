@@ -1621,13 +1621,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	WavesButton& _tool_arrow_button;
 	ArdourButton mouse_gain_button;
 	WavesButton& _tool_zoom_button;
+	WavesButton& _tool_cut_button;
 	Gtk::Adjustment& _temporal_zoom_adjustment;
 	Gtk::Adjustment& _vertical_zoom_adjustment;
     Gtkmm2ext::Fader& _vertical_zoom_fader;
 
 	ArdourButton mouse_timefx_button;
 	ArdourButton mouse_audition_button;
-	ArdourButton mouse_cut_button;
 
 	ArdourButton smart_mode_button;
 	Glib::RefPtr<Gtk::ToggleAction> smart_mode_action;

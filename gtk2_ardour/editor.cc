@@ -267,8 +267,9 @@ Editor::Editor ()
 	, _master_bus_ui_home (get_container ("master_bus_ui_home"))
 	, vpacker (get_v_box ("vpacker"))
 	, _tool_marker_button (get_waves_button ("tool_marker_button"))
-	, _tool_zoom_button (get_waves_button ("tool_zoom_button"))
 	, _tool_arrow_button (get_waves_button ("tool_arrow_button"))
+	, _tool_zoom_button (get_waves_button ("tool_zoom_button"))
+	, _tool_cut_button (get_waves_button ("tool_cut_button"))
 	, _temporal_zoom_adjustment (get_adjustment ("temporal_zoom_adjustment"))
 	, _vertical_zoom_adjustment (get_adjustment ("vertical_zoom_adjustment"))
     , _vertical_zoom_fader (get_fader ("vertical_zoom_fader"))
@@ -2876,16 +2877,6 @@ Editor::setup_toolbar ()
 
 	mouse_mode_hbox->set_spacing (2);
 
-	if (!ARDOUR::Profile->get_trx()) {
-		mouse_mode_hbox->pack_start (smart_mode_button, false, false);
-                mouse_mode_hbox->pack_start (mouse_cut_button, false, false);
-		mouse_mode_hbox->pack_start (mouse_gain_button, false, false);
-		mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
-		mouse_mode_hbox->pack_start (mouse_audition_button, false, false);
-		mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
-		mouse_mode_hbox->pack_start (internal_edit_button, false, false, 8);
-	}
-
 	mouse_mode_vbox->pack_start (*mouse_mode_hbox);
 
 	mouse_mode_align->add (*mouse_mode_vbox);
@@ -3132,7 +3123,6 @@ void
 Editor::setup_tooltips ()
 {
 	ARDOUR_UI::instance()->set_tip (smart_mode_button, _("Smart Mode (add Range functions to Object mode)"));
-	ARDOUR_UI::instance()->set_tip (mouse_cut_button, _("Cut Mode (split Regions)"));
 	ARDOUR_UI::instance()->set_tip (mouse_draw_button, _("Draw/Edit MIDI Notes"));
 	ARDOUR_UI::instance()->set_tip (mouse_gain_button, _("Draw Region Gain"));
 	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch/Shrink Regions and MIDI Notes"));
