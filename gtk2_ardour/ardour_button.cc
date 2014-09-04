@@ -41,7 +41,7 @@
 
 #include "i18n.h"
 
-#define BASELINESTRETCH (1.3)
+#define BASELINESTRETCH (1.25)
 
 using namespace Gdk;
 using namespace Gtk;
@@ -569,7 +569,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 
 	if (_elements & Indicator) {
 		req->width += lrint (_diameter) + 2 * char_pixel_width();
-		req->height = std::max (req->height, (int) lrint (_diameter) + 2);
+		req->height = std::max (req->height, (int) lrint (_diameter) + 4);
 	}
 
 	if ((_elements & Menu)) {
@@ -584,7 +584,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	}
 
 	req->width += ceil(_corner_radius);
-	req->height += ceil(_corner_radius);
+	//req->height += ceil(_corner_radius);
 
 	if (_tweaks & Square) {
 		// squared buttons are also grouped, we cannot align all texts
