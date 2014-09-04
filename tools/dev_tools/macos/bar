@@ -4,6 +4,6 @@ cd $AD/tracks
 		./waf build -v
 	else
 		./waf clean 
-		if ./waf configure --internal-static-libs --program-name=Tracks; then ./waf build -v; fi
+		if ./waf configure --program-name=Tracks; then ./waf build -v; fi
 	fi
 ) 2>&1 | tee $AD/buildlog.txt #"$AD/tracks-build-log.`date +%Y-%m-%d--%H.%M`.txt"
