@@ -488,8 +488,8 @@ AudioRegionView::set_height (gdouble height)
 
 		gdouble yoff = n * (ht + 1);
 
-		waves[n]->set_height (ht);
-		waves[n]->set_y_position (yoff + 2);
+		waves[n]->set_height (ht - (TimeAxisViewItem::REGION_BOTTOM_OFFSET + TimeAxisViewItem::REGION_TOP_OFFSET) );
+		waves[n]->set_y_position (yoff + TimeAxisViewItem::REGION_BOTTOM_OFFSET);
 	}
 
 	if (gain_line) {
