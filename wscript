@@ -387,9 +387,23 @@ def set_compiler_flags (conf,opt):
     if opt.nls:
         compiler_flags.append('-DENABLE_NLS')
 
+    if Options.options.program_name == 'Ardour':
+        lwrcase_dirname = 'ardour'
+        statefile_suffix = '.ardour'
+        executable_name = 'ardour3'
+    else:
+        lwrcase_dirname = 'tracks'
+        statefile_suffix = '.tracks'
+        executable_name = 'tracks'
+
+    conf.env['INSTALL_DIRNAME'] = lwrcase_dirname
+    conf.env['EXECUTABLE_NAME'] = executable_name
     compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
-    compiler_flags.append ('-DPROGRAM_NAME_LOWER_CASE="' + Options.options.program_name.lower() + '"')
     compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
+    compiler_flags.append ('-DSTATEFILE_SUFFIX="' + statefile_suffix + '"')
+
+    statefile_suffix = '.ardour'
+    
 
     if opt.debug:
         conf.env.append_value('CFLAGS', debug_flags)
@@ -810,6 +824,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Debug RT allocations',  conf.is_defined('DEBUG_RT_ALLOC'))
     write_config_text('Debug Symbols',         conf.is_defined('debug_symbols') or conf.env['DEBUG'])
     write_config_text('Dummy backend',         opts.build_dummy)
+    write_config_text('Executable name',       conf.env['EXECUTABLE_NAME'])
     write_config_text('Process thread timing', conf.is_defined('PT_TIMING'))
     write_config_text('Denormal exceptions',   conf.is_defined('DEBUG_DENORMAL_EXCEPTION'))
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
@@ -854,17 +869,12 @@ def build(bld):
     bld.path.find_dir ('libs/pbd/pbd')
 
     # set up target directories
-    lwrcase_dirname = 'ardour3'
-
-    if bld.is_defined ('TRX_BUILD'):
-        lwrcase_dirname = 'trx'
-
     # configuration files go here
-    bld.env['CONFDIR'] = os.path.join(bld.env['SYSCONFDIR'], lwrcase_dirname)
+    bld.env['CONFDIR'] = os.path.join(bld.env['SYSCONFDIR'], bld.env['INSTALL_DIRNAME'])
     # data files loaded at run time go here
-    bld.env['DATADIR'] = os.path.join(bld.env['DATADIR'], lwrcase_dirname)
-    # shared objects loaded at runtime go here (two aliases)
-    bld.env['DLLDIR'] = os.path.join(bld.env['LIBDIR'], lwrcase_dirname)
+    bld.env['DATADIR'] = os.path.join(bld.env['DATADIR'], bld.env['INSTALL_DIRNAME'])
+    # shared objects loaded at runtime go here (two aliases for the same location, because Win & *nix developers ...)
+    bld.env['DLLDIR'] = os.path.join(bld.env['LIBDIR'], bld.env['INSTALL_DIRNAME'])
     bld.env['LIBDIR'] = bld.env['DLLDIR']
 
     autowaf.set_recursive()
