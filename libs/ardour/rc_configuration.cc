@@ -49,6 +49,9 @@ namespace ARDOUR {
     float speed_quietning = 0.251189; // -12dB reduction for ffwd or rewind
 }
 
+static const char* user_config_file_name = "config";
+static const char* system_config_file_name = "system_config";
+
 RCConfiguration::RCConfiguration ()
 	:
 /* construct variables */
@@ -76,7 +79,7 @@ RCConfiguration::load_state ()
 
 	/* load system configuration first */
 
-	if (find_file (ardour_config_search_path(), "ardour_system.rc", rcfile)) {
+	if (find_file (ardour_config_search_path(), system_config_file_name, rcfile)) {
 
 		/* stupid XML Parser hates empty files */
 
@@ -104,7 +107,7 @@ RCConfiguration::load_state ()
 
 	/* now load configuration file for user */
 
-	if (find_file (ardour_config_search_path(), "ardour.rc", rcfile)) {
+	if (find_file (ardour_config_search_path(), user_config_file_name, rcfile)) {
 
 		/* stupid XML parser hates empty files */
 
@@ -136,7 +139,7 @@ RCConfiguration::load_state ()
 int
 RCConfiguration::save_state()
 {
-	const std::string rcfile = Glib::build_filename (user_config_directory(), "ardour.rc");
+	const std::string rcfile = Glib::build_filename (user_config_directory(), user_config_file_name);
 
 	// this test seems bogus?
 	if (!rcfile.empty()) {
