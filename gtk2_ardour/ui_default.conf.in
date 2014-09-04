@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Ardour>
   <UI>
-   <Option name="ui-rc-file" value="ardour3_ui_dark.rc"/>
+   <Option name="ui-rc-file" value="ui_dark.rc"/>
     <Option name="flat-buttons" value="00000000"/>
     <Option name="waveform-gradient-depth" value="0"/>
     <Option name="timeline-item-gradient-depth" value="00000.5"/>
