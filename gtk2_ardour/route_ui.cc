@@ -667,8 +667,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
                 }
         }
 
-//	if (!_i_am_the_modifier && is_track() && rec_enable_button) {
-	if (!is_track()) {
+	if (is_track()) {
 
 		if (Keyboard::is_button2_event (ev)) {
 
