@@ -393,7 +393,9 @@ def set_compiler_flags (conf,opt):
         executable_name = 'ardour3'
     else:
         lwrcase_dirname = 'tracks'
-        statefile_suffix = '.tracks'
+        # plan to change this sooner rather than later
+        # statefile_suffix = '.tracks'
+        statefile_suffix = '.ardour'
         executable_name = 'tracks'
 
     conf.env['INSTALL_DIRNAME'] = lwrcase_dirname
