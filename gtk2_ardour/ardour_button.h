@@ -161,7 +161,6 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	bool _act_on_release;
 	bool _led_left;
-	bool _fixed_diameter;
 	bool _distinct_led_click;
 	bool _hovering;
 	bool _focused;
