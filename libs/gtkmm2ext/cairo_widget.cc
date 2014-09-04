@@ -55,7 +55,7 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_set_source_rgb (cr, bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
 	cairo_fill (cr);
-
+    }
 	cairo_rectangle_t expose_area;
 	expose_area.x = ev->area.x;
 	expose_area.y = ev->area.y;
