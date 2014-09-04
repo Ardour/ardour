@@ -516,8 +516,9 @@ def build(bld):
             'CONFDIR'        : os.path.normpath(bld.env['CONFDIR']),
             'LIBS'           : 'build/libs',
             'VERSION'        : bld.env['VERSION'],
-            # this is for ardev and friends
-            'EXECUTABLE'     : 'build/gtk2_ardour/' + bld.env['EXECUTABLE_NAME'],
+            # this is for ardev and friends and refers to the executable
+            # that can be found in the build tree.
+            'EXECUTABLE'     : 'build/gtk2_ardour/' + bld.env['EXECUTABLE_NAME'] + '-' + str (bld.env['VERSION']),
             # this is for the script installed by ./waf install
             'EXECUTABLE_NAME' : bld.env['EXECUTABLE_NAME'],
     }
