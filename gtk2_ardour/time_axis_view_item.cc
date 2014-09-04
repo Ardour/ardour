@@ -61,14 +61,14 @@ using namespace Gtkmm2ext;
 
 // GZ: Should be moved to config
 #ifdef _WIN32
-    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Arial 8");
+    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Arial 12");
 	const double  TimeAxisViewItem::NAME_WIDTH_CORRECTION = 0;
 #else
-    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Helvetica 8");
-	const double  TimeAxisViewItem::NAME_WIDTH_CORRECTION = 7;
+    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Helvetica 12");
+	const double  TimeAxisViewItem::NAME_WIDTH_CORRECTION = 17;
 #endif
 
-const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 1.0;
+const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 2.0;
 const double TimeAxisViewItem::NAME_HIGHLIGHT_X_OFFSET = 10.0;
 const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_OFFSET = 5.0;
 const double TimeAxisViewItem::GRAB_HANDLE_TOP = 2.0;
@@ -231,19 +231,16 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	}
 
 	{ // always show name highlight
-		double width;
-
-                width = trackview.editor().sample_to_pixel(item_duration) - 2.0 + RIGHT_EDGE_SHIFT;
-                
-                name_highlight = new ArdourCanvas::Rectangle (group, 
-                                                              ArdourCanvas::Rect (NAME_HIGHLIGHT_X_OFFSET,
-                                                                                  NAME_HIGHLIGHT_Y_OFFSET,
-                                                                                  NAME_HIGHLIGHT_X_OFFSET + 2*NAME_HIGHLIGHT_X_INDENT,
-                                                                                  NAME_HIGHLIGHT_HEIGHT + NAME_HIGHLIGHT_Y_OFFSET) );
-                CANVAS_DEBUG_NAME (name_highlight, string_compose ("name highlight for %1", get_item_name()));
-                name_highlight->set_data ("timeaxisviewitem", this);
-                name_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0) );
-                name_highlight->set_outline_color (RGBA_TO_UINT (0,0,0,255));
+        name_highlight_color = ArdourCanvas::rgba_to_color (0, 0, 0, 0.5);
+        name_highlight = new ArdourCanvas::Rectangle (group, 
+                                        ArdourCanvas::Rect (NAME_HIGHLIGHT_X_OFFSET,
+                                                            NAME_HIGHLIGHT_Y_OFFSET,
+                                                            NAME_HIGHLIGHT_X_OFFSET + 2*NAME_HIGHLIGHT_X_INDENT,
+                                                            NAME_HIGHLIGHT_HEIGHT + NAME_HIGHLIGHT_Y_OFFSET) );
+        CANVAS_DEBUG_NAME (name_highlight, string_compose ("name highlight for %1", get_item_name()));
+        name_highlight->set_data ("timeaxisviewitem", this);
+        name_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0) );
+        name_highlight->set_outline_color (RGBA_TO_UINT (0,0,0,255));
 	}
         
         {
@@ -580,7 +577,7 @@ TimeAxisViewItem::set_name_text(const string& new_name)
 void
 TimeAxisViewItem::set_height (double height)
 {
-        _height = height;
+    _height = height;
 
 	manage_name_highlight ();
 
@@ -745,11 +742,11 @@ TimeAxisViewItem::get_fill_color () const
 
 		if (_recregion) {
 			//f = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
-                        // GZ FIXME:change in config instead of following
-                        f = ArdourCanvas::rgba_to_color (251.0/255.0, 35.0/255.0, 52.0/255.0, 1.0);
+            // GZ FIXME:change in config instead of following
+            f = ArdourCanvas::rgba_to_color (251.0/255.0, 35.0/255.0, 52.0/255.0, 1.0);
 		} else {
-                        f = fill_color;
-                        f = UINT_RGBA_CHANGE_A (f, (ARDOUR_UI::config()->get_canvasvar_FrameBase() & 0x000000ff));
+            f = fill_color;
+            f = UINT_RGBA_CHANGE_A (f, (ARDOUR_UI::config()->get_canvasvar_FrameBase() & 0x000000ff));
                 }
 	}
 
@@ -772,19 +769,19 @@ TimeAxisViewItem::set_frame_color()
 		f = UINT_RGBA_CHANGE_A (f, 0);
 	}
         
-        frame->set_fill_color (f);
+    frame->set_fill_color (f);
 	set_frame_gradient ();
         
-        //f = ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame();
-        
-        // GZ FIXME:change in config instead of following
-        f = ArdourCanvas::rgba_to_color (104.0/255.0, 104.0/255.0, 104.0/255.0, 1.0);
-                        
-        if (!rect_visible) {
-                f = UINT_RGBA_CHANGE_A (f, 64);
-        }
-        
-        frame->set_outline_color (f);
+    //f = ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame();
+    
+    // GZ FIXME:change in config instead of following
+    f = ArdourCanvas::rgba_to_color (104.0/255.0, 104.0/255.0, 104.0/255.0, 0.5);
+                    
+    if (!rect_visible) {
+            f = UINT_RGBA_CHANGE_A (f, 64);
+    }
+    
+    frame->set_outline_color (f);
 }
 
 void
