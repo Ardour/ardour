@@ -41,7 +41,7 @@
 
 #include "i18n.h"
 
-#define REFLECTION_HEIGHT 2
+#define BASELINESTRETCH (1.3)
 
 using namespace Gdk;
 using namespace Gtk;
@@ -556,7 +556,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		_text_height = char_pixel_height ();
 		req->width += char_pixel_width();
 		req->width += _text_width;
-		req->height = std::max(req->height, (int) ceil(_text_height * 1.25));
+		req->height = std::max(req->height, (int) ceil(_text_height * BASELINESTRETCH));
 	} else {
 		_text_width = 0;
 		_text_height = 0;
@@ -578,7 +578,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 
 	if (_elements & (RecButton | CloseCross)) {
 		assert(!(_elements & Text));
-		const int wh = std::max(char_pixel_width(), char_pixel_height()) * 1.25;
+		const int wh = std::max(char_pixel_width(), char_pixel_height()) * BASELINESTRETCH;
 		req->width += wh;
 		req->height = std::max(req->height, (int) wh);
 	}
