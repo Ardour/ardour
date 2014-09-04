@@ -135,7 +135,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	name_hbox.pack_end (name_label, true, true);
 
 	// set min. track-header width if fader is not visible
-	name_hbox.set_size_request(name_width_px, 0);
+	name_hbox.set_size_request(name_width_px, -1);
 
 	name_hbox.show ();
 	name_label.show ();

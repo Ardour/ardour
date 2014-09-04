@@ -257,7 +257,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	playlist_button.set_tweaks(ArdourButton::Square);
 	automation_button.set_tweaks(ArdourButton::Square);
 	route_group_button.set_tweaks(ArdourButton::Square);
-	number_label.set_tweaks(ArdourButton::Square);
 
 	if (is_midi_track()) {
 		ARDOUR_UI::instance()->set_tip(automation_button, _("MIDI Controllers and Automation"));
@@ -419,17 +418,21 @@ RouteTimeAxisView::update_track_number_visibility ()
 	}
 	if (show_label) {
 		if (ARDOUR::Profile->get_mixbus()) {
-			controls_table.attach (number_label, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 1, 0);
+			controls_table.attach (number_label, 3, 4, 0, 1, Gtk::SHRINK, Gtk::FILL|Gtk::EXPAND, 1, 0);
 		} else {
-			controls_table.attach (number_label, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 1, 0);
+			controls_table.attach (number_label, 0, 1, 0, 1, Gtk::SHRINK, Gtk::FILL|Gtk::EXPAND, 1, 0);
 		}
-		const int tnw = 9 + std::max(2u, _session->track_number_decimals()) * number_label.char_pixel_width();
+		// see ArdourButton::on_size_request(), we should probably use a global size-group here instead.
+		// except the width of the number label is subtracted from the name-hbox, so we
+		// need to explictly calculate it anyway until the name-label & entry become ArdourWidgets.
+		int tnw = (2 + std::max(2u, _session->track_number_decimals())) * number_label.char_pixel_width();
+		if (tnw & 1) --tnw;
 		number_label.set_size_request(tnw, -1);
 		number_label.show ();
-		name_hbox.set_size_request(TimeAxisView::name_width_px - 2 - tnw, 0); // -2 = cellspacing
+		name_hbox.set_size_request(TimeAxisView::name_width_px - 2 - tnw, -1); // -2 = cellspacing
 	} else {
 		number_label.hide ();
-		name_hbox.set_size_request(TimeAxisView::name_width_px, 0);
+		name_hbox.set_size_request(TimeAxisView::name_width_px, -1);
 	}
 }
 
