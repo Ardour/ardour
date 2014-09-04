@@ -24,7 +24,7 @@ def backend_list():
     else:
         # Not Ardour
         if re.search ("linux", sys.platform) != None:
-            backends = [ 'jack' ]
+            backends = [ 'jack', 'alsa' ]
         else:
             backends = [ ]
 
