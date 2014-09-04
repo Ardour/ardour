@@ -890,15 +890,14 @@ ArdourButton::setup_led_rect ()
 	_led_rect = new cairo_rectangle_t;
 
 	if (_elements & Text) {
-		int led_xoff = ceil(char_pixel_width() + _diameter * .5);
 		if (_led_left) {
-			_led_rect->x = led_xoff;
+			_led_rect->x = char_pixel_width();
 		} else {
-			_led_rect->x = get_width() - led_xoff;
+			_led_rect->x = get_width() - char_pixel_width() + _diameter;
 		}
 	} else {
 		/* centered */
-		_led_rect->x = .5 * (get_width() - _diameter);
+		_led_rect->x = .5 * get_width() - _diameter;
 	}
 
 	_led_rect->y = .5 * (get_height() - _diameter);
