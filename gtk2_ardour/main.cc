@@ -229,6 +229,7 @@ int main (int argc, char *argv[])
 	}
 
 	cout << PROGRAM_NAME
+             << ' '
 	     << VERSIONSTRING
 	     << _(" (built using ")
 	     << revision
