@@ -101,15 +101,16 @@ Editor::show_editor_mixer (bool yn)
 		return;
 	}
 
-    // check if master is available: try to find it's view
-    TimeAxisView* tv;
-    boost::shared_ptr<ARDOUR::Route> master_bus;
-    if ( tv = axis_view_from_route (_session->master_out() ) ) {
-        RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*> (tv);
-        if ( atv != 0 ) {
-            master_bus = atv->route();
+        // check if master is available: try to find it's view
+        TimeAxisView* tv;
+        boost::shared_ptr<ARDOUR::Route> master_bus;
+
+        if ((tv = axis_view_from_route (_session->master_out())) != 0) {
+                RouteTimeAxisView* atv = dynamic_cast<RouteTimeAxisView*> (tv);
+                if ( atv != 0 ) {
+                        master_bus = atv->route();
+                }
         }
-    }
     
 	if (yn) {
 
