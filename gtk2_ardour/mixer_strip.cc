@@ -691,8 +691,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	case Wide:
 
 		if (show_sends_button)  {
-			show_sends_button->set_text (_("Aux\nSends"));
-			show_sends_button->layout()->set_alignment (Pango::ALIGN_CENTER);
+			show_sends_button->set_text (_("Aux"));
 		}
 
 		gpm.gain_automation_style_button.set_text (
