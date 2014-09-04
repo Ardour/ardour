@@ -64,11 +64,10 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 	expose_area.height = ev->area.height;
 
 	render (cr, &expose_area);
-
+        
 	cairo_destroy (cr);
 
 	return true;
-    }
 }
 
 /** Marks the widget as dirty, so that render () will be called on
