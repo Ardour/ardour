@@ -781,6 +781,10 @@ TimeAxisView::popup_display_menu (guint32 when)
 void
 TimeAxisView::set_selected (bool yn)
 {
+        if (can_edit_name() && name_entry.get_visible()) {
+                end_name_edit (RESPONSE_CANCEL);
+        }
+
 	if (yn == _selected) {
 		return;
 	}
