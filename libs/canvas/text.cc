@@ -20,6 +20,7 @@
 #include <gdk/gdk.h>
 
 #include <cairomm/cairomm.h>
+#include <gtkmm/window.h>
 #include <gtkmm/label.h>
 
 #include "pbd/stacktrace.h"
@@ -31,8 +32,10 @@
 using namespace std;
 using namespace ArdourCanvas;
 
+
 Text::Text (Canvas* c)
 	: Item (c)
+    , _width_correction (0)
 	, _color (0x000000ff)
 	, _font_description (0)
 	, _alignment (Pango::ALIGN_LEFT)
@@ -46,6 +49,7 @@ Text::Text (Canvas* c)
 
 Text::Text (Item* parent)
 	: Item (parent)
+    , _width_correction (0)
 	, _color (0x000000ff)
 	, _font_description (0)
 	, _alignment (Pango::ALIGN_LEFT)
@@ -109,12 +113,32 @@ Text::_redraw (Glib::RefPtr<Pango::Layout> layout) const
 
 	layout->set_alignment (_alignment);
 
+    // Pango returns incorrect text width on some platforms
+    // So we have to make a correction
+    // To determine the correct indent take the largest symbol for which the width is correct
+    // and make the calculation
+    Gtk::Window win;
+    Gtk::Label foo;
+    win.add (foo);
+    
+    int width = 0;
+    int height = 0;
+    Glib::RefPtr<Pango::Layout> test_layout = foo.create_pango_layout ("H");
+    test_layout->set_font_description (*_font_description);
+    test_layout->get_pixel_size (width, height);
+    
+#ifdef __APPLE__
+    double _width_correction = width*1.5;
+#else if
+    double _width_correction = 0;
+#endif
+    
 	int w;
 	int h;
 
 	layout->get_pixel_size (w, h);
 
-	_width = w;
+	_width = w + _width_correction;
 	_height = h;
 
 	_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _width, _height);

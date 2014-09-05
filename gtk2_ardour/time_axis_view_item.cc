@@ -59,13 +59,10 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace Gtkmm2ext;
 
-// GZ: Should be moved to config
 #ifdef _WIN32
     Pango::FontDescription TimeAxisViewItem::NAME_FONT("Arial 12");
-	const double  TimeAxisViewItem::NAME_WIDTH_CORRECTION = 0;
 #else
     Pango::FontDescription TimeAxisViewItem::NAME_FONT("Helvetica 12");
-	const double  TimeAxisViewItem::NAME_WIDTH_CORRECTION = 17;
 #endif
 
 const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 2.0;
@@ -563,10 +560,9 @@ TimeAxisViewItem::set_name_text(const string& new_name)
 	if (!name_text) {
 		return;
 	}
-    // This is a workaround.
-    // Pango returns incorrect width values 1.5*NAME_HIGHLIGHT_X_INDENT
-	name_text_width = pixel_width (new_name, NAME_FONT) + NAME_WIDTH_CORRECTION;
+
 	name_text->set (new_name);
+    name_text_width = name_text->text_width();
     manage_name_highlight();
 }
 
@@ -681,22 +677,9 @@ TimeAxisViewItem::set_name_text_color ()
 		return;
 	}
 	
-
-	uint32_t f;
-	
-	if (Config->get_show_name_highlight()) {
-		/* name text will always be on top of name highlight, which
-		   will always use our fill color.
-		*/
-		f = fill_color;
-	} else {
-		/* name text will be on top of the item, whose color
-		   may vary depending on various conditions.
-		*/
-		f = get_fill_color ();
-	}
-
-	name_text->set_color (ArdourCanvas::contrasting_text_color (f));
+    // GZ FIXME:change in config instead of following
+    uint32_t text_color = ArdourCanvas::rgba_to_color (255.0, 255.0, 255.0, 1.0);
+	name_text->set_color (text_color);
 }
 
 uint32_t
@@ -722,14 +705,14 @@ TimeAxisViewItem::fill_opacity () const
 uint32_t
 TimeAxisViewItem::get_fill_color () const
 {
-        uint32_t f;
+    uint32_t f;
 	uint32_t o;
 
 	o = fill_opacity ();
 
 	if (_selected) {
 
-                f = ARDOUR_UI::config()->get_canvasvar_SelectedFrameBase();
+        f = ARDOUR_UI::config()->get_canvasvar_SelectedFrameBase();
 
 		if (o == 0) {
 			/* some condition of this item has set fill opacity to

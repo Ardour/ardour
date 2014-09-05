@@ -49,8 +49,11 @@ public:
         void dump (std::ostream&) const;
 
 	std::string text() const { return _text; }
+    double text_width() const { return _width; }
 
 private:
+    double _width_correction;
+    
 	std::string      _text;
 	uint32_t         _color;
 	Pango::FontDescription* _font_description;
