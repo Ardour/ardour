@@ -1923,6 +1923,7 @@ RouteUI::parameter_changed (string const & p)
 			rec_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun (*this, &RouteUI::blink_rec_display));
 		} else {
 			rec_blink_connection.disconnect ();
+			RouteUI::blink_rec_display(false);
 		}
 	}
 }
