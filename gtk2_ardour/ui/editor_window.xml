@@ -334,14 +334,63 @@
             <Table id="edit_packer"
                    rows="2"
                    columns="2">
-              <EventBox id="master_bus_ui_home"
-                        table.leftattach="0"
-                        table.rightattach="1"
-                        table.topattach="0"
-                        table.bottomattach="1"
-                        table.xfill="false"
-                        table.yfill="false"
-                        bgnormal="#ff00ff"/>
+              <Layout width="125" height="108"
+                      table.leftattach="0"
+                      table.rightattach="1"
+                      table.topattach="0"
+                      table.bottomattach="1"
+                      table.xfill="false"
+                      table.yfill="false">
+                <Button id="markers_dropdown"
+                          text="Marker"
+                          x="0"
+                          y="0"
+                          width="100"
+                          height="18"
+                          winfont ="Arial 8"
+                          macfont ="Helvetica 8"
+                          normalicon="top_bar_button"
+                          activeicon="top_bar_button"
+                          prelighticon="top_bar_button"/>
+                  <Button id="marker_add_button"
+                          text="+"
+                          x="0"
+                          y="18"
+                          width="25"
+                          height="18"
+                          winfont ="Arial 8"
+                          macfont ="Helvetica 8"
+                          normalicon="top_bar_button"
+                          activeicon="top_bar_button"
+                          prelighticon="top_bar_button"/>
+                  <Label id="skip_label"
+                         text="SKIP"
+                         x="0"
+                         y="36"
+                         width="100"
+                         height="12"
+                         style="generic_control"
+                         fgnormal="#ffffff"
+                         winfont ="Arial 9"
+                         macfont ="Helvetica 9"/>
+                  <Button id="global_tracks_dropdown"
+                          text="GLOBAL TRACKS"
+                          winfont ="Arial 8"
+                          macfont ="Helvetica 8"
+                          x="0"
+                          y="48"
+                          width="100"
+                          height="18"
+                          normalicon="top_bar_button"
+                          activeicon="top_bar_button"
+                          prelighticon="top_bar_button"/>
+                  <EventBox id="master_bus_ui_home"
+                            x="0"
+                            y="66"
+                            width="100"
+                            height="30"
+                            bgnormal="#ff00ff"/>
+                </Layout>
               <Layout id="controls_layout"
                       hadjustment="unused_adjustment"
                       vadjustment="vertical_adjustment"
@@ -353,11 +402,12 @@
                       table.yfill="true"
                       table.yexpand="true"
                       bgnormal="#3E3E3E">
-                  <VBox id="edit_controls_vbox"/>
+                <VBox id="edit_controls_vbox"/>
               </Layout>
             </Table>
           </VPaned>
         </HPaned>
+
         <EventBox id="mixer_bridge_view_home"
                   height="426"
                   box.pack="end"
