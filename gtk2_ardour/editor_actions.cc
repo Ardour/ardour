@@ -594,8 +594,7 @@ Editor::register_actions ()
 		ruler_meter_action->set_active (false);
 		ruler_tempo_action->set_active (false);
 		ruler_range_action->set_active (false);
-		ruler_loop_punch_action->set_active (false);
-		ruler_loop_punch_action->set_active (false);
+		ruler_loop_punch_action->set_active (true);
 		ruler_bbt_action->set_active (true);
 		ruler_cd_marker_action->set_active (false);
 		ruler_timecode_action->set_active (false);
@@ -605,7 +604,6 @@ Editor::register_actions ()
 		ruler_meter_action->set_active (true);
 		ruler_tempo_action->set_active (true);
 		ruler_range_action->set_active (true);
-		ruler_loop_punch_action->set_active (true);
 		ruler_loop_punch_action->set_active (true);
 		ruler_bbt_action->set_active (false);
 		ruler_cd_marker_action->set_active (true);
