@@ -103,6 +103,7 @@ vamp-sdk-2.dll
 cd $BASE || exit 1
 
 PRODUCT_NAME_DIR="tracks"
+PRODUCT_EXECUTABLE_NAME="tracks.exe"
 
 if ! test -f $BUILD_CACHE_FILE; then
 	echo "ERROR: $APPNAME is not configured and built yet..."
@@ -135,7 +136,7 @@ echo "Deleting import libs ..."
 
 rm $PACKAGE_DIR/lib/*dll.a || exit 1
 
-# delete sh script
+# delete sh script that was copied over
 rm $PACKAGE_DIR/${PRODUCT_NAME_DIR} || exit 1
 
 if test x$WITH_TESTS != x ; then
@@ -214,7 +215,7 @@ if test x$DEBUG != x ; then
 	cp $GTK/bin/gtk-demo.exe $PACKAGE_DIR || exit 1
 else
 	echo "Optimized build Stripping executable ..."
-	$STRIP $PACKAGE_DIR/ardour-3.0.exe || exit 1
+	$STRIP $PACKAGE_DIR/${PRODUCT_EXECUTABLE_NAME} || exit 1
 	echo "Stripping libraries ..." || exit 1
 	find $PACKAGE_DIR -type f -name "*.dll*" | xargs $STRIP
 fi
