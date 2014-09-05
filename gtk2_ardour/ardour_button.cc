@@ -359,7 +359,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_stroke(cr);
 	}
 
-	const int text_margin = rint(.5 * (char_pixel_width() + _corner_radius));
+	const int text_margin = char_pixel_width();
 
 	// Text, if any
 	if (!_pixbuf && ((_elements & Text)==Text) && !_text.empty()) {
@@ -554,9 +554,9 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		int ignored;
 		_layout->get_pixel_size (_text_width, ignored);
 		_text_height = char_pixel_height ();
-		req->width += char_pixel_width();
+		req->width += rint(1.6 * char_pixel_width()); // padding
 		req->width += _text_width;
-		req->height = std::max(req->height, (int) ceil(_text_height * BASELINESTRETCH));
+		req->height = std::max(req->height, (int) ceil(_text_height * BASELINESTRETCH + 1.0));
 	} else {
 		_text_width = 0;
 		_text_height = 0;
@@ -568,7 +568,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	}
 
 	if (_elements & Indicator) {
-		req->width += lrint (_diameter) + 2 * char_pixel_width();
+		req->width += lrint (_diameter) + char_pixel_width();
 		req->height = std::max (req->height, (int) lrint (_diameter) + 4);
 	}
 
@@ -583,9 +583,6 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		req->height = std::max(req->height, (int) wh);
 	}
 
-	req->width += ceil(_corner_radius);
-	//req->height += ceil(_corner_radius);
-
 	if (_tweaks & Square) {
 		// squared buttons are also grouped, we cannot align all texts
 		// -> skip proper center adjustment
@@ -593,7 +590,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 			req->width = req->height;
 		if (req->height < req->width)
 			req->height = req->width;
-	} else if (! (_elements & (Menu | Indicator))) {
+	} else if (_text_width > 0 && !(_elements & (Menu | Indicator))) {
 		// properly centered text for those elements that are centered
 		if ((req->width - _text_width) & 1) { ++req->width; }
 		if ((req->height - _text_height) & 1) { ++req->height; }
