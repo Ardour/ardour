@@ -321,6 +321,7 @@ ThemeManager::on_blink_rec_arm_toggled ()
 {
 	ARDOUR_UI::config()->set_blink_rec_arm (blink_rec_button.get_active());
 	ARDOUR_UI::config()->set_dirty ();
+	ARDOUR::Config->ParameterChanged("blink-rec-arm");
 }
 
 void

@@ -147,7 +147,9 @@ RouteUI::init ()
 	rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton));
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 
-	rec_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun (*this, &RouteUI::blink_rec_display));
+	if (ARDOUR_UI::config()->get_blink_rec_arm()) {
+		rec_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun (*this, &RouteUI::blink_rec_display));
+	}
 
 	show_sends_button = manage (new ArdourButton);
 	show_sends_button->set_name ("send alert button");
@@ -1248,6 +1250,9 @@ RouteUI::blink_rec_display (bool blinkOn)
 	if (!rec_enable_button || !_route) {
 		return;
 	}
+	if (boost::dynamic_pointer_cast<Send>(_current_delivery)) {
+		return;
+	}
 
 	if (_route->record_enabled()) {
                 switch (_session->record_status ()) {
@@ -1912,6 +1917,13 @@ RouteUI::parameter_changed (string const & p)
 		set_button_names ();
 	} else if (p == "auto-input") {
 		update_monitoring_display ();
+	} else if (p == "blink-rec-arm") {
+		if (ARDOUR_UI::config()->get_blink_rec_arm()) {
+			rec_blink_connection.disconnect ();
+			rec_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun (*this, &RouteUI::blink_rec_display));
+		} else {
+			rec_blink_connection.disconnect ();
+		}
 	}
 }
 
