@@ -62,11 +62,11 @@ public:
 	
 	void set_range (double lower, double upper);
 	void set_font_description (Pango::FontDescription);
-	
+
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	
 private:
-	const Metric& _metric;
+	const Metric* _metric;
 
 	/* lower and upper and sample positions, which are also canvas coordinates
 	 */

@@ -33,7 +33,7 @@ using namespace ArdourCanvas;
 
 Ruler::Ruler (Canvas* c, const Metric& m)
 	: Rectangle (c)
-	, _metric (m)
+	, _metric (&m)
 	, _lower (0)
 	, _upper (0)
 	, _need_marks (true)
@@ -42,7 +42,7 @@ Ruler::Ruler (Canvas* c, const Metric& m)
 
 Ruler::Ruler (Canvas* c, const Metric& m, Rect const& r)
 	: Rectangle (c, r)
-	, _metric (m)
+	, _metric (&m)
 	, _lower (0)
 	, _upper (0)
 	, _need_marks (true)
@@ -51,7 +51,7 @@ Ruler::Ruler (Canvas* c, const Metric& m, Rect const& r)
 
 Ruler::Ruler (Item* parent, const Metric& m)
 	: Rectangle (parent)
-	, _metric (m)
+	, _metric (&m)
 	, _lower (0)
 	, _upper (0)
 	, _need_marks (true)
@@ -60,7 +60,7 @@ Ruler::Ruler (Item* parent, const Metric& m)
 
 Ruler::Ruler (Item* parent, const Metric& m, Rect const& r)
 	: Rectangle (parent, r)
-	, _metric (m)
+	, _metric (&m)
 	, _lower (0)
 	, _upper (0)
 	, _need_marks (true)
@@ -106,7 +106,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 
 	if (_need_marks) {
 		marks.clear ();
-		_metric.get_marks (marks, _lower, _upper, 50);
+		_metric->get_marks (marks, _lower, _upper, 50);
 		_need_marks = false;
 	}
 
@@ -142,7 +142,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 	for (vector<Mark>::const_iterator m = marks.begin(); m != marks.end(); ++m) {
 		Duple pos;
 
-		pos.x = floor ((m->position - _lower) / _metric.units_per_pixel);
+		pos.x = floor ((m->position - _lower) / _metric->units_per_pixel);
 		pos.y = self.y1; /* bottom edge */
 
 		if (_outline_width == 1.0) {
