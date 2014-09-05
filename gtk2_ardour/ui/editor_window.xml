@@ -334,7 +334,7 @@
             <Table id="edit_packer"
                    rows="2"
                    columns="2">
-              <Layout width="230" height="70"
+              <Layout width="234" height="70"
                       table.leftattach="0"
                       table.rightattach="1"
                       table.topattach="0"
@@ -356,7 +356,7 @@
                           text="+"
                           x="200"
                           y="0"
-                          width="30"
+                          width="34"
                           height="18"
                           winfont ="Arial 8"
                           macfont ="Helvetica 8"
@@ -367,7 +367,7 @@
                          text="SKIP"
                          x="0"
                          y="18"
-                         width="230"
+                         width="234"
                          height="12"
                          winfont ="Arial 8"
                          macfont ="Helvetica 8"/>
@@ -386,7 +386,7 @@
                             x="0"
                             y="40"
                             height="32"
-                            width="230"
+                            width="234"
                             bgnormal="#ff00ff"/>
                 </Layout>
               <Layout id="controls_layout"
