@@ -491,6 +491,9 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		solo_button->hide ();
 		mute_button->show ();
 		rec_mon_table.hide ();
+		if (solo_iso_table.get_parent()) {
+			solo_iso_table.get_parent()->remove(solo_iso_table);
+		}
 	} else {
 		bottom_button_table.attach (group_button, 1, 2, 0, 1);
 		mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
