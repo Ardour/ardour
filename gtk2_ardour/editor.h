@@ -709,7 +709,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void add_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView *);
 
-    Gtk::Container& inspector_home;
+        Gtk::Container& inspector_home;
 	Gtk::Container& _master_bus_ui_home;
 	MasterBusUI*    _master_bus_ui;
 	Gtk::VBox&      vpacker;
