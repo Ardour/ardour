@@ -748,6 +748,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Container      *marker_group;
 	ArdourCanvas::Container      *range_marker_group;
 	ArdourCanvas::Container      *transport_marker_group;
+	ArdourCanvas::Container      *skip_group;
 	ArdourCanvas::Container*      cd_marker_group;
 
 	/* parent for groups which themselves contain time markers */
@@ -892,6 +893,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Rectangle* marker_bar;
 	ArdourCanvas::Rectangle* range_marker_bar;
 	ArdourCanvas::Rectangle* punch_loop_bar;
+	ArdourCanvas::Rectangle* skip_bar;
 	ArdourCanvas::Rectangle* cd_marker_bar;
 
 	Gtk::Label  minsec_label;
@@ -1454,6 +1456,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool canvas_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_range_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_punch_loop_bar_event (GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_skip_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_cd_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 
 	bool canvas_videotl_bar_event (GdkEvent* event, ArdourCanvas::Item*);

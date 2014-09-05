@@ -156,6 +156,8 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (marker_group, "marker group");
 	transport_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 2.0) + 1.0));
 	CANVAS_DEBUG_NAME (transport_marker_group, "transport marker group");
+	skip_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 2.0) + 1.0));
+	CANVAS_DEBUG_NAME (skip_group, "skip group");
 	range_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 3.0) + 1.0));
 	CANVAS_DEBUG_NAME (range_marker_group, "range marker group");
 	tempo_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 4.0) + 1.0));
@@ -178,6 +180,10 @@ Editor::initialize_canvas ()
 	punch_loop_bar = new ArdourCanvas::Rectangle (transport_marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
 	CANVAS_DEBUG_NAME (punch_loop_bar, "punch/loop Bar");
 	punch_loop_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
+
+	skip_bar = new ArdourCanvas::Rectangle (skip_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	CANVAS_DEBUG_NAME (skip_bar, "skip Bar");
+	skip_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
 	marker_bar = new ArdourCanvas::Rectangle (marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, Marker::marker_height()));
 	CANVAS_DEBUG_NAME (marker_bar, "Marker Bar");
@@ -225,6 +231,7 @@ Editor::initialize_canvas ()
 	videotl_group->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_videotl_bar_event), videotl_group));
 	range_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
 	punch_loop_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_punch_loop_bar_event), punch_loop_bar));
+	skip_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_skip_bar_event), skip_bar));
 
 	playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event);
 
@@ -904,6 +911,9 @@ Editor::color_handler()
         punch_loop_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_PunchLoopBar());
 	punch_loop_bar->set_outline_color (ARDOUR_UI::config()->get_canvasvar_MarkerBarSeparator());
 
+        skip_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SkipBar());
+	skip_bar->set_outline_color (ARDOUR_UI::config()->get_canvasvar_MarkerBarSeparator());
+
 	cd_marker_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RangeDragBarRect());
 	cd_marker_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RangeDragBarRect());
 
@@ -1335,6 +1345,7 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 	case CdMarkerBarItem:
 	case VideoBarItem:
 	case PunchLoopBarItem:
+	case SkipBarItem:
 	case DropZoneItem:
 		cursor = which_grabber_cursor();
 		break;

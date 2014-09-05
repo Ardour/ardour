@@ -169,6 +169,7 @@
     <Option name="transport drag rect" value="969696c6"/>
     <Option name="transport loop rect" value="1e7728f9"/>
     <Option name="punch loop bar" value="575757ff"/>
+    <Option name="skip bar" value="575757ff"/>
     <Option name="transport punch rect" value="6d2828e5"/>
     <Option name="trim handle locked" value="ea0f0f28"/>
     <Option name="trim handle" value="1900ff44"/>

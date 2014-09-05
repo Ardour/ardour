@@ -991,6 +991,12 @@ Editor::canvas_punch_loop_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 }
 
 bool
+Editor::canvas_skip_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
+{
+	return typed_event (item, event, SkipBarItem);
+}
+
+bool
 Editor::canvas_cd_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, CdMarkerBarItem);

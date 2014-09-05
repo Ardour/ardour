@@ -197,6 +197,9 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 	case PunchLoopBarItem:
 		break;
 
+	case SkipBarItem:
+		break;
+
 	case CdMarkerBarItem:
 		// TODO
 		ruler_items.push_back (MenuElem (_("New CD track marker"), sigc::bind ( sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, true, false)));
