@@ -168,8 +168,8 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	Gtk::Menu* meter_menu;
 	void popup_meter_menu (GdkEventButton*);
 
-	bool gain_slider_button_press (GdkEventButton *);
-	bool gain_slider_button_release (GdkEventButton *);
+	void amp_stop_touch ();
+	void amp_start_touch ();
 
 	void set_route_group_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
 	void set_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
