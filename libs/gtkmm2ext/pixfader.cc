@@ -41,7 +41,11 @@ using namespace std;
 std::list<PixFader::FaderImage*> PixFader::_patterns;
 
 PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int fader_girth)
-	: adjustment (adj)
+	: _layout (0)
+	, _tweaks (Tweaks(0))
+	, _adjustment (adj)
+	, _text_width (0)
+	, _text_height (0)
 	, _span (fader_length)
 	, _girth (fader_girth)
 	, _min_span (fader_length)
@@ -52,10 +56,9 @@ PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int
 	, _last_drawn (-1)
 	, _dragging (false)
 	, _centered_text (true)
-	, _display_unity_line (true)
 	, _current_parent (0)
 {
-	_default_value = adjustment.get_value();
+	_default_value = _adjustment.get_value();
 	update_unity_position ();
 
 	add_events (
@@ -67,8 +70,8 @@ PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int
 			| Gdk::LEAVE_NOTIFY_MASK
 			);
 
-	adjustment.signal_value_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
-	adjustment.signal_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
+	_adjustment.signal_value_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
+	_adjustment.signal_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
 
 	if (_orien == VERT) {
 		DrawingArea::set_size_request(_girth, _span);
@@ -290,7 +293,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	}
 
 	/* draw the unity-position line if it's not at either end*/
-	if (_display_unity_line && _unity_loc > CORNER_RADIUS) {
+	if (!(_tweaks & NoShowUnityLine) && _unity_loc > CORNER_RADIUS) {
 		context->set_line_width (1);
 		context->set_line_cap (Cairo::LINE_CAP_ROUND);
 		Gdk::Color c = get_style()->get_fg (Gtk::STATE_ACTIVE);
@@ -384,7 +387,7 @@ PixFader::on_button_press_event (GdkEventButton* ev)
 			gdk_pointer_ungrab (GDK_CURRENT_TIME);
 			StopGesture ();
 		}
-		return false;
+		return (_tweaks & NoButtonForward) ? true : false;
 	}
 
 	if (ev->button != 1 && ev->button != 2) {
@@ -405,7 +408,7 @@ PixFader::on_button_press_event (GdkEventButton* ev)
 		set_adjustment_from_event (ev);
 	}
 
-	return true;
+	return (_tweaks & NoButtonForward) ? true : false;
 }
 
 bool
@@ -432,16 +435,16 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 				ev_pos = rint(ev_pos);
 
 				if (ev->state & Keyboard::TertiaryModifier) {
-					adjustment.set_value (_default_value);
+					_adjustment.set_value (_default_value);
 				} else if (ev->state & Keyboard::GainFineScaleModifier) {
-					adjustment.set_value (adjustment.get_lower());
+					_adjustment.set_value (_adjustment.get_lower());
 				} else if (ev_pos == slider_pos) {
 					; // click on current position, no move.
 				} else if ((_orien == VERT && ev_pos < slider_pos) || (_orien == HORIZ && ev_pos > slider_pos)) {
 					/* above the current display height, remember X Window coords */
-					adjustment.set_value (adjustment.get_value() + adjustment.get_step_increment());
+					_adjustment.set_value (_adjustment.get_value() + _adjustment.get_step_increment());
 				} else {
-					adjustment.set_value (adjustment.get_value() - adjustment.get_step_increment());
+					_adjustment.set_value (_adjustment.get_value() - _adjustment.get_step_increment());
 				}
 			}
 			return true;
@@ -482,42 +485,37 @@ PixFader::on_scroll_event (GdkEventScroll* ev)
 	}
 
 	if (_orien == VERT) {
-
-		/* should left/right scroll affect vertical faders ? */
-
 		switch (ev->direction) {
-
-		case GDK_SCROLL_UP:
-			adjustment.set_value (adjustment.get_value() + (adjustment.get_page_increment() * scale));
-			ret = true;
-			break;
-		case GDK_SCROLL_DOWN:
-			adjustment.set_value (adjustment.get_value() - (adjustment.get_page_increment() * scale));
-			ret = true;
-			break;
-		default:
-			break;
+			case GDK_SCROLL_UP:
+				_adjustment.set_value (_adjustment.get_value() + (_adjustment.get_page_increment() * scale));
+				ret = true;
+				break;
+			case GDK_SCROLL_DOWN:
+				_adjustment.set_value (_adjustment.get_value() - (_adjustment.get_page_increment() * scale));
+				ret = true;
+				break;
+			default:
+				break;
 		}
 	} else {
+		int dir = ev->direction;
 
-		/* up/down scrolls should definitely affect horizontal faders
-		   because they are so much easier to use
-		*/
+		if (ev->state & Keyboard::ScrollHorizontalModifier || !(_tweaks & NoVerticalScroll)) {
+			if (ev->direction == GDK_SCROLL_UP) dir = GDK_SCROLL_RIGHT;
+			if (ev->direction == GDK_SCROLL_DOWN) dir = GDK_SCROLL_LEFT;
+		}
 
-		switch (ev->direction) {
-
-		case GDK_SCROLL_RIGHT:
-		case GDK_SCROLL_UP:
-			adjustment.set_value (adjustment.get_value() + (adjustment.get_page_increment() * scale));
-			ret = true;
-			break;
-		case GDK_SCROLL_LEFT:
-		case GDK_SCROLL_DOWN:
-			adjustment.set_value (adjustment.get_value() - (adjustment.get_page_increment() * scale));
-			ret = true;
-			break;
-		default:
-			break;
+		switch (dir) {
+			case GDK_SCROLL_RIGHT:
+				_adjustment.set_value (_adjustment.get_value() + (_adjustment.get_page_increment() * scale));
+				ret = true;
+				break;
+			case GDK_SCROLL_LEFT:
+				_adjustment.set_value (_adjustment.get_value() - (_adjustment.get_page_increment() * scale));
+				ret = true;
+				break;
+			default:
+				break;
 		}
 	}
 	return ret;
@@ -558,7 +556,7 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 			fract = -fract;
 		}
 
-		adjustment.set_value (adjustment.get_value() + scale * fract * (adjustment.get_upper() - adjustment.get_lower()));
+		_adjustment.set_value (_adjustment.get_value() + scale * fract * (_adjustment.get_upper() - _adjustment.get_lower()));
 	}
 
 	return true;
@@ -576,7 +574,7 @@ PixFader::adjustment_changed ()
 int
 PixFader::display_span ()
 {
-	float fract = (adjustment.get_value () - adjustment.get_lower()) / ((adjustment.get_upper() - adjustment.get_lower()));
+	float fract = (_adjustment.get_value () - _adjustment.get_lower()) / ((_adjustment.get_upper() - _adjustment.get_lower()));
 	int ds;
 	if (_orien == VERT) {
 		ds = (int)rint (_span * (1.0 - fract));
@@ -591,9 +589,9 @@ void
 PixFader::update_unity_position ()
 {
 	if (_orien == VERT) {
-		_unity_loc = (int) rint (_span * (1 - ((_default_value - adjustment.get_lower()) / (adjustment.get_upper() - adjustment.get_lower())))) - 1;
+		_unity_loc = (int) rint (_span * (1 - ((_default_value - _adjustment.get_lower()) / (_adjustment.get_upper() - _adjustment.get_lower())))) - 1;
 	} else {
-		_unity_loc = (int) rint ((_default_value - adjustment.get_lower()) * _span / (adjustment.get_upper() - adjustment.get_lower()));
+		_unity_loc = (int) rint ((_default_value - _adjustment.get_lower()) * _span / (_adjustment.get_upper() - _adjustment.get_lower()));
 	}
 
 	queue_draw ();
@@ -627,7 +625,7 @@ PixFader::set_adjustment_from_event (GdkEventButton* ev)
 	fract = min (1.0, fract);
 	fract = max (0.0, fract);
 
-	adjustment.set_value (fract * (adjustment.get_upper () - adjustment.get_lower ()));
+	_adjustment.set_value (fract * (_adjustment.get_upper () - _adjustment.get_lower ()));
 }
 
 void
@@ -638,11 +636,16 @@ PixFader::set_default_value (float d)
 }
 
 void
-PixFader::show_unity_line (bool yn )
+PixFader::set_tweaks (Tweaks t)
 {
-	if (yn == _display_unity_line) return;
-	_display_unity_line = yn;
-	queue_draw();
+	bool need_redraw = false;
+	if ((_tweaks & NoShowUnityLine) ^ (t & NoShowUnityLine)) {
+		need_redraw = true;
+	}
+	_tweaks = t;
+	if (need_redraw) {
+		queue_draw();
+	}
 }
 
 void

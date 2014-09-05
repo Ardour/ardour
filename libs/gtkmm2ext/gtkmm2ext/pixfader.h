@@ -43,16 +43,17 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 
 	void set_default_value (float);
 	void set_text (const std::string&, bool centered = true, bool expose = true);
-	void show_unity_line (bool yn);
+
+	enum Tweaks {
+		NoShowUnityLine = 0x1,
+		NoButtonForward = 0x2,
+		NoVerticalScroll = 0x4,
+	};
+
+	Tweaks tweaks() const { return _tweaks; }
+	void set_tweaks (Tweaks);
 
 	protected:
-	Glib::RefPtr<Pango::Layout> _layout;
-	std::string                 _text;
-	int _text_width;
-	int _text_height;
-
-	Gtk::Adjustment& adjustment;
-
 	void on_size_request (GtkRequisition*);
 	void on_size_allocate (Gtk::Allocation& alloc);
 
@@ -73,6 +74,14 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 	};
 
 	private:
+
+	Glib::RefPtr<Pango::Layout> _layout;
+	std::string                 _text;
+	Tweaks                      _tweaks;
+	Gtk::Adjustment&            _adjustment;
+	int _text_width;
+	int _text_height;
+
 	int _span, _girth;
 	int _min_span, _min_girth;
 	int _orien;
@@ -86,7 +95,6 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 	float _default_value;
 	int _unity_loc;
 	bool _centered_text;
-	bool _display_unity_line;
 
 	sigc::connection _parent_style_change;
 	Widget * _current_parent;
