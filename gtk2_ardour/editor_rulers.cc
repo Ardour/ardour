@@ -462,7 +462,6 @@ Editor::update_ruler_visibility ()
 
         old_unit_pos = clock_ruler->position().y;
         if (pos != old_unit_pos) {
-                std::cerr << "move clock by " << ArdourCanvas::Duple (0.0, pos - old_unit_pos) << std::endl;
                 clock_ruler->move (ArdourCanvas::Duple (0.0, pos - old_unit_pos));
         }
         clock_ruler->show();
