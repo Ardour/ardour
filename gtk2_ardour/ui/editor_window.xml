@@ -334,7 +334,7 @@
             <Table id="edit_packer"
                    rows="2"
                    columns="2">
-              <Layout width="234" height="70"
+              <Layout width="234" height="86"
                       table.leftattach="0"
                       table.rightattach="1"
                       table.topattach="0"
@@ -376,15 +376,15 @@
                           winfont ="Arial 8"
                           macfont ="Helvetica 8"
                           x="0"
-                          y="30"
+                          y="36"
                           width="230"
-                          height="10"
+                          height="18"
                           normalicon="top_bar_button"
                           activeicon="top_bar_button"
                           prelighticon="top_bar_button"/>
                   <EventBox id="master_bus_ui_home"
                             x="0"
-                            y="40"
+                            y="54"
                             height="32"
                             width="234"
                             bgnormal="#ff00ff"/>
