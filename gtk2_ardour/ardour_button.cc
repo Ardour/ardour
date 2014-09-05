@@ -663,8 +663,8 @@ void ArdourButton::set_fixed_colors (const uint32_t color_active, const uint32_t
 
 	/* XXX what about led colors ? */
 
-	build_patterns ();
-	set_name (""); /* this will trigger a "style-changed" message and then set_colors() */
+	/* trigger a "style-changed" message */
+	on_name_changed();
 }
 
 void
