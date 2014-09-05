@@ -370,17 +370,18 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 		cairo_new_path (cr);
 		ArdourCanvas::set_source_rgba (cr, text_color);
+		const double text_ypos = (get_height() - _text_height) * .5;
 
 		if (_elements & Menu) {
 			// always left align (dropdown)
-			cairo_move_to (cr, text_margin, rint((get_height() - _text_height) * .5));
+			cairo_move_to (cr, text_margin, text_ypos);
 			pango_cairo_show_layout (cr, _layout->gobj());
 		} else if ( (_elements & Indicator)  == Indicator) {
 			// left/right align depending on LED position
 			if (_led_left) {
-				cairo_move_to (cr, rint(text_margin + _diameter + char_pixel_width()), rint((get_height() - _text_height) * .5));
+				cairo_move_to (cr, text_margin + _diameter + .5 * char_pixel_width(), text_ypos);
 			} else {
-				cairo_move_to (cr, text_margin, rint((get_height() - _text_height) * .5));
+				cairo_move_to (cr, text_margin, text_ypos);
 			}
 			pango_cairo_show_layout (cr, _layout->gobj());
 		} else {
