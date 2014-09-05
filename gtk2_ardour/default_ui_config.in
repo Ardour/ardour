@@ -126,7 +126,7 @@
     <Option name="recorded waveform fill" value="ffffffff"/>
     <Option name="recorded waveform outline" value="ffffffff"/>
     <Option name="rubber band rect" value="c6c6c659"/>
-    <Option name="ruler base" value="2c2121ff"/>
+    <Option name="ruler base" value="424242ff"/>
     <Option name="ruler text" value="e5e5e5ff"/>
     <Option name="selected crossfade editor line" value="00dbdbff"/>
     <Option name="selected crossfade editor wave" value="f9ea14a0"/>
@@ -168,7 +168,7 @@
     <Option name="tracknumber label: text" value="c7c7d8ff"/>
     <Option name="transport drag rect" value="969696c6"/>
     <Option name="transport loop rect" value="1e7728f9"/>
-    <Option name="punch loop bar" value="575757ff"/>
+    <Option name="punch loop bar" value="2c2121ff"/>
     <Option name="skip bar" value="575757ff"/>
     <Option name="transport punch rect" value="6d2828e5"/>
     <Option name="trim handle locked" value="ea0f0f28"/>
