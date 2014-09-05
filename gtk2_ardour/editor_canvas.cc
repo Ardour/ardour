@@ -177,11 +177,11 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
 	range_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
-	punch_loop_bar = new ArdourCanvas::Rectangle (transport_marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	punch_loop_bar = new ArdourCanvas::Rectangle (transport_marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, Marker::marker_height()));
 	CANVAS_DEBUG_NAME (punch_loop_bar, "punch/loop Bar");
-	punch_loop_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
+        /* not outlined */
 
-	skip_bar = new ArdourCanvas::Rectangle (skip_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	skip_bar = new ArdourCanvas::Rectangle (skip_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, Marker::marker_height()));
 	CANVAS_DEBUG_NAME (skip_bar, "skip Bar");
 	skip_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
@@ -908,8 +908,10 @@ Editor::color_handler()
 	range_marker_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RangeMarkerBar());
 	range_marker_bar->set_outline_color (ARDOUR_UI::config()->get_canvasvar_MarkerBarSeparator());
 
-        punch_loop_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_PunchLoopBar());
-	punch_loop_bar->set_outline_color (ARDOUR_UI::config()->get_canvasvar_MarkerBarSeparator());
+        /* same color as rulers */
+        punch_loop_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RulerBase());
+        /* no outline */
+	punch_loop_bar->set_outline (false);
 
         skip_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SkipBar());
 	skip_bar->set_outline_color (ARDOUR_UI::config()->get_canvasvar_MarkerBarSeparator());

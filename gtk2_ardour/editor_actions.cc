@@ -566,7 +566,8 @@ Editor::register_actions ()
 	ruler_range_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-range-ruler"), _("Ranges"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_range_marker)));
 	ruler_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-marker-ruler"), _("Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_marker)));
 	ruler_cd_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-cd-marker-ruler"), _("CD Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_cd_marker)));
-	ruler_loop_punch_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-loop-punch-ruler"), _("Loop/Punch"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_transport_marker)));
+	ruler_loop_punch_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-loop-punch-ruler"), _("Loop/Punch"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_punch_loop)));
+	ruler_skip_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-skip-ruler"), _("Skip"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_skip)));
 	ruler_bbt_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-bbt-ruler"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_bbt)));
 	ruler_samples_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-samples-ruler"), _("Samples"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_samples)));
 	ruler_timecode_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-timecode-ruler"), _("Timecode"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_timecode)));
@@ -595,6 +596,7 @@ Editor::register_actions ()
 		ruler_tempo_action->set_active (false);
 		ruler_range_action->set_active (false);
 		ruler_loop_punch_action->set_active (true);
+		ruler_skip_action->set_active (true);
 		ruler_bbt_action->set_active (true);
 		ruler_cd_marker_action->set_active (false);
 		ruler_timecode_action->set_active (false);
@@ -604,6 +606,7 @@ Editor::register_actions ()
 		ruler_meter_action->set_active (true);
 		ruler_tempo_action->set_active (true);
 		ruler_range_action->set_active (true);
+		ruler_skip_action->set_active (false);
 		ruler_loop_punch_action->set_active (true);
 		ruler_bbt_action->set_active (false);
 		ruler_cd_marker_action->set_active (true);
@@ -770,7 +773,7 @@ Editor::toggle_ruler_visibility (RulerType rt)
 	case ruler_time_range_marker:
 		action = "toggle-range-ruler";
 		break;
-	case ruler_time_transport_marker:
+	case ruler_time_punch_loop:
 		action = "toggle-loop-punch-ruler";
 		break;
 	case ruler_time_cd_marker:
@@ -778,6 +781,9 @@ Editor::toggle_ruler_visibility (RulerType rt)
 		break;
 	case ruler_video_timeline:
 		action = "toggle-video-ruler";
+		break;
+	case ruler_time_skip:
+		action = "toggle-skip-ruler";
 		break;
 	}
 

@@ -393,11 +393,20 @@ Editor::update_ruler_visibility ()
                         marker_group->move (ArdourCanvas::Duple (0.0, pos - old_unit_pos));
                 }
                 marker_group->show();
-                mark_label.show();
-                pos += Marker::marker_height();
+                pos += Marker::marker_height(); // marker_bar->y0() - marker_bar->y1();
         } else {
                 marker_group->hide();
-                mark_label.hide();
+        }
+
+        if (ruler_skip_action->get_active()) {
+                old_unit_pos = skip_group->position().y;
+                if (pos != old_unit_pos) {
+                        skip_group->move (ArdourCanvas::Duple (0.0, pos - old_unit_pos));
+                }
+                skip_group->show();
+                pos += Marker::marker_height(); // skip_bar->y1() - skip_bar->y0();
+        } else {
+                skip_group->hide();
         }
 
 	if (ruler_loop_punch_action->get_active()) {
@@ -406,11 +415,9 @@ Editor::update_ruler_visibility ()
 			transport_marker_group->move (ArdourCanvas::Duple (0.0, pos - old_unit_pos));
 		}
 		transport_marker_group->show();
-		transport_mark_label.show();
-		pos += timebar_height;
+		pos += Marker::marker_height(); // punch_loop_bar->y1() - punch_loop_bar->y0();
 	} else {
 		transport_marker_group->hide();
-		transport_mark_label.hide();
 	}
 
         /* these are always hidden in Tracks */

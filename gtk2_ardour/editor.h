@@ -794,9 +794,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		ruler_time_meter = 5,
 		ruler_time_marker = 6,
 		ruler_time_range_marker = 7,
-		ruler_time_transport_marker = 8,
+		ruler_time_punch_loop = 8,
 		ruler_time_cd_marker = 9,
 		ruler_video_timeline = 10,
+		ruler_time_skip = 11,
 	};
 
 	Glib::RefPtr<Gtk::ToggleAction> ruler_timecode_action;
@@ -806,6 +807,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Glib::RefPtr<Gtk::ToggleAction> ruler_tempo_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_meter_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_marker_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_skip_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_range_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_loop_punch_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_cd_marker_action;
