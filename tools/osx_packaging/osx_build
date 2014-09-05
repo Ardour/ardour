@@ -49,6 +49,14 @@ while [ $# -gt 0 ] ; do
 		  PRODUCT_PKG_DIR=Tracks;
 		  APPNAME=Tracks ;
 		  shift ;;
+	--tracks) WITH_NLS= ; 
+	          SAE= ; 
+                  WITH_LADSPA=; 
+                  STRIP= ; 
+		  PRODUCT_PKG_DIR=Tracks;
+		  APPNAME=Tracks ;
+		  WITH_HARVID=
+		  shift ;;
 	--allinone) SAE= ; 
 	            WITH_NLS= ; 
 		    WITH_LADSPA=1; 
