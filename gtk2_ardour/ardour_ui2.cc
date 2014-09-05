@@ -326,9 +326,11 @@ ARDOUR_UI::setup_transport ()
 	feedback_alert_button.set_name ("feedback alert");
 	feedback_alert_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::feedback_alert_press), false);
 
-	alert_box.pack_start (solo_alert_button, true, false);
-	alert_box.pack_start (auditioning_alert_button, true, false);
-	alert_box.pack_start (feedback_alert_button, true, false);
+	alert_box.set_homogeneous (true);
+	alert_box.set_spacing (2);
+	alert_box.pack_start (solo_alert_button, true, true);
+	alert_box.pack_start (auditioning_alert_button, true, true);
+	alert_box.pack_start (feedback_alert_button, true, true);
 
 	/* all transport buttons should be the same size vertically and
 	 * horizontally 
