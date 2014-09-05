@@ -421,19 +421,30 @@ def build(bld):
         obj.name      = 'libgtk2_ardour'
         obj.target    = 'gtk2_ardour'
     else:
-	# just the normal executable version of the GTK GUI
-	# this gets installed in LIBDIR/DLLDIR and is invoked
-        # by a startup script from BINDIR.
-        obj = bld (features = 'cxx c cxxprogram')
-        obj.source    = gtk2_ardour_sources
-        obj.target = bld.env['EXECUTABLE_NAME']
-        obj.includes = ['.']
-        obj.ldflags = ['-no-undefined']
-
-        if bld.is_defined('WINDOWS_VST_SUPPORT'):
-        # Windows VST support mingw
-            obj.source += [ '../vst/winmain.c' ]
-            obj.includes += [ '../libs/fst' ]
+            # just the normal executable version of the GTK GUI
+            # this gets installed in LIBDIR/DLLDIR and is invoked
+            # by a startup script from BINDIR. 
+            #
+            # SEE COMMENTS REGARDING EXECUTABLE/EXECUTABLE_NAME IN
+            # THE SETUP OF wrapper_subst_dict BELOW. 
+            # 
+            # bld.env['EXECUTABLE_NAME'] IS THE TARGET NAME OF 
+            # A subst-PROCESSED SCRIPT, NOT A BINARY PROGRAM.
+            #
+            # NEITHER DEVELOPERS NOR USERS INVOKE THE BINARY
+            # TARGET BUILT HERE DIRECTLY, NOR DOES THIS NAME
+            # CONTROL THE BINARY NAME IN A RELEASE PACKAGE
+            #
+            obj = bld (features = 'cxx c cxxprogram')
+            obj.source    = gtk2_ardour_sources
+            obj.target = bld.env['EXECUTABLE_NAME'] + '-' + str(bld.env['VERSION'])
+            obj.includes = ['.']
+            obj.ldflags = ['-no-undefined']
+            
+            if bld.is_defined('WINDOWS_VST_SUPPORT'):
+                    # Windows VST support mingw
+                    obj.source += [ '../vst/winmain.c' ]
+                    obj.includes += [ '../libs/fst' ]
 
     # at this point, "obj" refers to either the normal native executable
     # OR the shared library built for use with wine on linux.
@@ -516,11 +527,44 @@ def build(bld):
             'CONFDIR'        : os.path.normpath(bld.env['CONFDIR']),
             'LIBS'           : 'build/libs',
             'VERSION'        : bld.env['VERSION'],
+            #
+            # THIS IS **** NOT *** THE NAME OF THE EXECUTABLE
+            # THAT GETS PACKAGED FOR RELEASE. IT IS THE NAME OF THE EXECUTABLE
+            # THAT EXISTS IMMEDIATELY AFTER WAF HAS FINISHED BUILDING.
+            #
             # this is for ardev and friends and refers to the executable
             # that can be found in the build tree.
-            'EXECUTABLE'     : 'build/gtk2_ardour/' + bld.env['EXECUTABLE_NAME'],
+            'EXECUTABLE'     : 'build/gtk2_ardour/' + bld.env['EXECUTABLE_NAME'] + '-' + str (bld.env['VERSION']),
+            #
+            # THIS IS ALSO **** NOT *** THE NAME OF THE EXECUTABLE THAT GETS
+            # PACKAGED FOR RELEASE. IT IS THE NAME THE EXECUTABLE WOULD BE
+            # INSTALLED AS IF YOU USED "./waf install" 
+            #
             # this is for the script installed by ./waf install
             'EXECUTABLE_NAME' : bld.env['EXECUTABLE_NAME'],
+            #
+            # THE NAME OF THE EXECUTABLE SEEN BY USERS IS DETERMINED *** ONLY ****
+            # IN THE PACKAGING SCRIPTS FOR A GIVEN PLATFORM (tools/*_packaging/....)
+            #
+            # THERE ARE TWO "EXECUTABLES" BUILT BY WAF
+            # 
+            #    * a binary executable
+            #    * a script required to run the executable 
+            #
+            # LIKEWISE, WHEN PACKAGED, THERE ARE TWO "EXECUTABLES" INCLUDED:
+            #
+            #   * a binary executable
+            #   * a script or some other startup mechanism that sets various required
+            #       environment variables and related stuff before running the executable
+            #
+            # IF YOU NEED TO RENAME THE EXECUTABLE CONTAINED IN THE PACKAGE, MODIFY THE PACKAGING
+            # SCRIPT. DO NOT RENAME THE EXECUTABLE HERE WITHOUT MODIFYING ardev_common_sh.in
+            # AND ENSURING THAT THE STARTUP SCRIPT AND BINARY EXECUTABLE HAVE DIFFERENT NAMES
+            #
+            # THE "EXECUTABLE" INVOKED BY USERS IS THE *** STARTUP SCRIPT *** AND NOT THE
+            # BINARY. 
+            #
+            # c.f Firefox, Thunderbird, GIMP, Inkscape and others that use the same approach.
     }
 
     def set_subst_dict(obj, dict):
