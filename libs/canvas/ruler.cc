@@ -184,7 +184,9 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 void
 Ruler::set_metric (const Metric& m)
 {
-        _metric = &m;
-        _need_marks = true;
-        redraw ();
+        if (_metric != &m) {
+                _metric = &m;
+                _need_marks = true;
+                redraw ();
+        }
 }
