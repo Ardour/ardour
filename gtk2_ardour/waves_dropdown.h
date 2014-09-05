@@ -34,7 +34,7 @@ class WavesDropdown : public WavesIconButton
 
     bool on_mouse_pressed (GdkEventButton*);
 
-    Gtk::MenuItem& add_menu_item (const std::string& item, void* coockie);
+    Gtk::MenuItem& add_menu_item (const std::string& item, void* cookie);
 
     sigc::signal2<void, WavesDropdown*, void*> signal_menu_item_clicked;
 
