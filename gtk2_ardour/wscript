@@ -426,7 +426,7 @@ def build(bld):
         # by a startup script from BINDIR.
         obj = bld (features = 'cxx c cxxprogram')
         obj.source    = gtk2_ardour_sources
-        obj.target = bld.env['EXECUTABLE_NAME'] + '-' + str (bld.env['VERSION'])
+        obj.target = bld.env['EXECUTABLE_NAME']
         obj.includes = ['.']
         obj.ldflags = ['-no-undefined']
 
@@ -518,7 +518,7 @@ def build(bld):
             'VERSION'        : bld.env['VERSION'],
             # this is for ardev and friends and refers to the executable
             # that can be found in the build tree.
-            'EXECUTABLE'     : 'build/gtk2_ardour/' + bld.env['EXECUTABLE_NAME'] + '-' + str (bld.env['VERSION']),
+            'EXECUTABLE'     : 'build/gtk2_ardour/' + bld.env['EXECUTABLE_NAME'],
             # this is for the script installed by ./waf install
             'EXECUTABLE_NAME' : bld.env['EXECUTABLE_NAME'],
     }
