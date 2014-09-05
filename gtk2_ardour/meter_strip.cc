@@ -207,25 +207,25 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	btnbox.pack_start(solobox, false, false, 1);
 
 	rec_enable_button->set_corner_radius(2);
-	rec_enable_button->set_size_request(16, 16);
+	rec_enable_button->set_size_request(18, 18);
 
 	mute_button->set_corner_radius(2);
-	mute_button->set_size_request(16, 16);
+	mute_button->set_size_request(18, 18);
 
 	solo_button->set_corner_radius(2);
-	solo_button->set_size_request(16, 16);
+	solo_button->set_size_request(18, 18);
 
 	monitor_input_button->set_corner_radius(2);
-	monitor_input_button->set_size_request(16, 16);
+	monitor_input_button->set_size_request(18, 18);
 
 	monitor_disk_button->set_corner_radius(2);
-	monitor_disk_button->set_size_request(16, 16);
+	monitor_disk_button->set_size_request(18, 18);
 
-	mutebox.set_size_request(16, 16);
-	solobox.set_size_request(16, 16);
-	recbox.set_size_request(16, 16);
-	mon_in_box.set_size_request(16, 16);
-	mon_disk_box.set_size_request(16, 16);
+	mutebox.set_size_request(18, 18);
+	solobox.set_size_request(18, 18);
+	recbox.set_size_request(18, 18);
+	mon_in_box.set_size_request(18, 18);
+	mon_disk_box.set_size_request(18, 18);
 	spacer.set_size_request(-1,0);
 
 	update_button_box();
@@ -685,32 +685,32 @@ MeterStrip::update_button_box ()
 	if (!_session) return;
 	int height = 0;
 	if (_session->config.get_show_mute_on_meterbridge()) {
-		height += 18;
+		height += 20;
 		mutebox.show();
 	} else {
 		mutebox.hide();
 	}
 	if (_session->config.get_show_solo_on_meterbridge()) {
-		height += 18;
+		height += 20;
 		solobox.show();
 	} else {
 		solobox.hide();
 	}
 	if (_session->config.get_show_rec_on_meterbridge()) {
-		height += 18;
+		height += 20;
 		recbox.show();
 	} else {
 		recbox.hide();
 	}
 	if (_session->config.get_show_monitor_on_meterbridge()) {
-		height += 18 + 18;
+		height += 20 + 20;
 		mon_in_box.show();
 		mon_disk_box.show();
 	} else {
 		mon_in_box.hide();
 		mon_disk_box.hide();
 	}
-	btnbox.set_size_request(16, height);
+	btnbox.set_size_request(18, height);
 	check_resize();
 }
 
