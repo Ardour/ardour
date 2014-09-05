@@ -47,6 +47,7 @@
 #include "editing.h"
 #include "actions.h"
 #include "gui_thread.h"
+#include "main_clock.h"
 #include "ruler_dialog.h"
 #include "time_axis_view.h"
 #include "editor_drag.h"
@@ -157,24 +158,6 @@ Editor::initialize_rulers ()
 	bbt_ruler->set_font_description (font);
 	CANVAS_DEBUG_NAME (bbt_ruler, "bbt ruler");
 	timecode_nmarks = 0;
-
-#if 0 /* no ruler labels in Tracks */
-
-	using namespace Box_Helpers;
-	BoxList & lab_children =  time_bars_vbox.children();
-
-	lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(timecode_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(samples_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(bbt_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(meter_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(tempo_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(transport_mark_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(videotl_label, PACK_SHRINK, PACK_START));
-#endif
 
 	/* 1 event handler to bind them all ... */
 
@@ -414,202 +397,81 @@ Editor::update_ruler_visibility ()
 		return;
 	}
 
-	/* the order of the timebars is fixed, so we have to go through each one
-	 * and adjust its position depending on what is shown.
-	 *
-	 * Order: minsec, timecode, samples, bbt, meter, tempo, ranges,
-	 * loop/punch, cd markers, location markers
-	 */
-
-	double tbpos = 0.0;
+	double pos = 0.0;
 	double old_unit_pos;
 
-#ifdef GTKOSX
-	/* gtk update probs require this (damn) */
-	meter_label.hide();
-	tempo_label.hide();
-	range_mark_label.hide();
-	transport_mark_label.hide();
-	cd_mark_label.hide();
-	mark_label.hide();
-	videotl_label.hide();
-#endif
-
-        if (Profile->get_trx()) {
-                if (ruler_marker_action->get_active()) {
-                        old_unit_pos = marker_group->position().y;
-                        if (tbpos != old_unit_pos) {
-                                marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-                        }
-                        marker_group->show();
-                        mark_label.show();
-                        tbpos += Marker::marker_height();
-                } else {
-                        marker_group->hide();
-                        mark_label.hide();
+        if (ruler_marker_action->get_active()) {
+                old_unit_pos = marker_group->position().y;
+                if (pos != old_unit_pos) {
+                        marker_group->move (ArdourCanvas::Duple (0.0, pos - old_unit_pos));
                 }
+                marker_group->show();
+                mark_label.show();
+                pos += Marker::marker_height();
+        } else {
+                marker_group->hide();
+                mark_label.hide();
         }
-
-	if (ruler_minsec_action->get_active()) {
-		old_unit_pos = minsec_ruler->position().y;
-		if (tbpos != old_unit_pos) {
-			minsec_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		minsec_ruler->show();
-		minsec_label.show();
-		tbpos += timebar_height;
-	} else {
-		minsec_ruler->hide();
-		minsec_label.hide();
-	}
-
-	if (ruler_timecode_action->get_active()) {
-		old_unit_pos = timecode_ruler->position().y;
-		if (tbpos != old_unit_pos) {
-			timecode_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		timecode_ruler->show();
-		timecode_label.show();
-		tbpos += timebar_height;
-	} else {
-		timecode_ruler->hide();
-		timecode_label.hide();
-	}
-
-	if (ruler_samples_action->get_active()) {
-		old_unit_pos = samples_ruler->position().y;
-		if (tbpos != old_unit_pos) {
-			samples_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		samples_ruler->show();
-		samples_label.show();
-		tbpos += timebar_height;
-	} else {
-		samples_ruler->hide();
-		samples_label.hide();
-	}
-
-	if (ruler_bbt_action->get_active()) {
-		old_unit_pos = bbt_ruler->position().y;
-		if (tbpos != old_unit_pos) {
-			bbt_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		bbt_ruler->show();
-		bbt_label.show();
-		tbpos += timebar_height;
-	} else {
-		bbt_ruler->hide();
-		bbt_label.hide();
-	}
-
-	if (ruler_meter_action->get_active()) {
-		old_unit_pos = meter_group->position().y;
-		if (tbpos != old_unit_pos) {
-			meter_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		meter_group->show();
-		meter_label.show();
-		tbpos += timebar_height;
-	} else {
-		meter_group->hide();
-		meter_label.hide();
-	}
-
-	if (ruler_tempo_action->get_active()) {
-		old_unit_pos = tempo_group->position().y;
-		if (tbpos != old_unit_pos) {
-			tempo_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		tempo_group->show();
-		tempo_label.show();
-		tbpos += timebar_height;
-	} else {
-		tempo_group->hide();
-		tempo_label.hide();
-	}
-
-	if (!Profile->get_sae() && ruler_range_action->get_active()) {
-		old_unit_pos = range_marker_group->position().y;
-		if (tbpos != old_unit_pos) {
-			range_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		range_marker_group->show();
-		range_mark_label.show();
-
-		tbpos += timebar_height;
-	} else {
-		range_marker_group->hide();
-		range_mark_label.hide();
-	}
 
 	if (ruler_loop_punch_action->get_active()) {
 		old_unit_pos = transport_marker_group->position().y;
-		if (tbpos != old_unit_pos) {
-			transport_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+		if (pos != old_unit_pos) {
+			transport_marker_group->move (ArdourCanvas::Duple (0.0, pos - old_unit_pos));
 		}
 		transport_marker_group->show();
 		transport_mark_label.show();
-		tbpos += timebar_height;
+		pos += timebar_height;
 	} else {
 		transport_marker_group->hide();
 		transport_mark_label.hide();
 	}
 
-	if (ruler_cd_marker_action->get_active()) {
-		old_unit_pos = cd_marker_group->position().y;
-		if (tbpos != old_unit_pos) {
-			cd_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		cd_marker_group->show();
-		cd_mark_label.show();
-		tbpos += timebar_height;
-		// make sure all cd markers show up in their respective places
-		update_cd_marker_display();
-	} else {
-		cd_marker_group->hide();
-		cd_mark_label.hide();
-		// make sure all cd markers show up in their respective places
-		update_cd_marker_display();
-	}
+        /* these are always hidden in Tracks */
+
+        videotl_group->hide ();
+        range_marker_group->hide ();
+        tempo_group->hide ();
+        meter_group->hide ();
+
+        /* which ruler we show depends on the clock mode */
+
+        /* first hide them all */
+
+        timecode_ruler->hide ();
+        samples_ruler->hide ();
+        minsec_ruler->hide ();
+        bbt_ruler->hide ();
+
+        ArdourCanvas::Ruler *clock_ruler = 0;
         
-        if (!Profile->get_trx()) {
-                if (ruler_marker_action->get_active()) {
-                        old_unit_pos = marker_group->position().y;
-                        if (tbpos != old_unit_pos) {
-                                marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-                        }
-                        marker_group->show();
-                        mark_label.show();
-                        tbpos += timebar_height;
-                } else {
-                        marker_group->hide();
-                        mark_label.hide();
-                }
+        switch (ARDOUR_UI::instance()->primary_clock->mode()) {
+        case AudioClock::Timecode:
+                clock_ruler = timecode_ruler;
+                break;
+        case AudioClock::Frames:
+                clock_ruler = samples_ruler;
+                break;
+        default:
+                clock_ruler = minsec_ruler;
+                break;
         }
+        
+        /* move time marker group (which contains all rulers) into the right
+           position.
+        */
 
-	if (ruler_video_action->get_active()) {
-		old_unit_pos = videotl_group->position().y;
-		if (tbpos != old_unit_pos) {
-			videotl_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		videotl_group->show();
-		videotl_label.show();
-		tbpos += timebar_height * videotl_bar_height;
-		queue_visual_videotimeline_update();
-	} else {
-		videotl_group->hide();
-		videotl_label.hide();
-		update_video_timeline(true);
-	}
-
-#if 0 /* no ruler labels in Tracks */
-	time_bars_vbox.set_size_request (-1, (int)(tbpos));
-#endif
+        old_unit_pos = clock_ruler->position().y;
+        if (pos != old_unit_pos) {
+                std::cerr << "move clock by " << ArdourCanvas::Duple (0.0, pos - old_unit_pos) << std::endl;
+                clock_ruler->move (ArdourCanvas::Duple (0.0, pos - old_unit_pos));
+        }
+        clock_ruler->show();
+        pos += timebar_height;
 
 	/* move hv_scroll_group (trackviews) to the end of the timebars
 	 */
 
-	hv_scroll_group->set_y_position (tbpos);
+	hv_scroll_group->set_y_position (pos);
 
 	compute_fixed_ruler_scale ();
 	update_fixed_rulers();
@@ -644,17 +506,23 @@ Editor::compute_fixed_ruler_scale ()
 		return;
 	}
 
-	if (ruler_timecode_action->get_active()) {
-		set_timecode_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
-	}
+        ArdourCanvas::Ruler *clock_ruler = 0;
+        
+        switch (ARDOUR_UI::instance()->primary_clock->mode()) {
+        case AudioClock::Timecode:
+                clock_ruler = timecode_ruler;
+                break;
+        case AudioClock::Frames:
+                clock_ruler = samples_ruler;
+                break;
+        default:
+                clock_ruler = minsec_ruler;
+                break;
+        }
 
-	if (ruler_minsec_action->get_active()) {
-		set_minsec_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
-	}
-
-	if (ruler_samples_action->get_active()) {
-		set_samples_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
-	}
+        set_timecode_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
+        set_minsec_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
+        set_samples_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
 }
 
 void
@@ -678,17 +546,9 @@ Editor::update_fixed_rulers ()
 	   to compute the relevant ticks to display.
 	*/
 
-	if (ruler_timecode_action->get_active()) {
-		timecode_ruler->set_range (leftmost_frame, rightmost_frame);
-	}
-
-	if (ruler_samples_action->get_active()) {
-		samples_ruler->set_range (leftmost_frame, rightmost_frame);
-	}
-
-	if (ruler_minsec_action->get_active()) {
-		minsec_ruler->set_range (leftmost_frame, rightmost_frame);
-	}
+        timecode_ruler->set_range (leftmost_frame, rightmost_frame);
+        samples_ruler->set_range (leftmost_frame, rightmost_frame);
+        minsec_ruler->set_range (leftmost_frame, rightmost_frame);
 }
 
 void
