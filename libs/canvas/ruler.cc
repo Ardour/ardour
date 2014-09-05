@@ -180,3 +180,11 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 
 	/* done! */
 }
+
+void
+Ruler::set_metric (const Metric& m)
+{
+        _metric = &m;
+        _need_marks = true;
+        redraw ();
+}
