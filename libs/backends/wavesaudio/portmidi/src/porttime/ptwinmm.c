@@ -2,14 +2,14 @@
 
 
 #include "porttime.h"
-<<<<<<< HEAD
+//<<<<<<< HEAD
 #include "windows.h"
 #include "time.h"
-=======
+//=======
 #include <windows.h>
 #include <mmsystem.h>
 #include <time.h>
->>>>>>> 41fe637... Add the 'porttime' source file for Windows
+//>>>>>>> 41fe637... Add the 'porttime' source file for Windows
 
 
 TIMECAPS caps;
