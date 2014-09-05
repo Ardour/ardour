@@ -102,6 +102,8 @@ vamp-sdk-2.dll
 
 cd $BASE || exit 1
 
+PRODUCT_NAME_DIR="tracks"
+
 if ! test -f $BUILD_CACHE_FILE; then
 	echo "ERROR: $APPNAME is not configured and built yet..."
 	exit 1
@@ -123,18 +125,18 @@ echo "Moving Ardour dll's and executable to $PACKAGE_DIR ..."
 echo "mv $PACKAGE_DIR/lib/*.dll $PACKAGE_DIR"
 mv $PACKAGE_DIR/lib/*.dll $PACKAGE_DIR || exit 1
 
-echo "mv $PACKAGE_DIR/lib/ardour3/*.dll $PACKAGE_DIR"
-mv $PACKAGE_DIR/lib/ardour3/*.dll $PACKAGE_DIR || exit 1
+echo "mv $PACKAGE_DIR/lib/${PRODUCT_NAME_DIR}/*.dll $PACKAGE_DIR"
+mv $PACKAGE_DIR/lib/${PRODUCT_NAME_DIR}/*.dll $PACKAGE_DIR || exit 1
 
-echo "mv $PACKAGE_DIR/lib/ardour3/*.exe $PACKAGE_DIR"
-mv $PACKAGE_DIR/lib/ardour3/*.exe $PACKAGE_DIR || exit 1
+echo "mv $PACKAGE_DIR/lib/${PRODUCT_NAME_DIR}/*.exe $PACKAGE_DIR"
+mv $PACKAGE_DIR/lib/${PRODUCT_NAME_DIR}/*.exe $PACKAGE_DIR || exit 1
 
 echo "Deleting import libs ..."
 
 rm $PACKAGE_DIR/lib/*dll.a || exit 1
 
 # delete sh script
-rm $PACKAGE_DIR/ardour3 || exit 1
+rm $PACKAGE_DIR/${PRODUCT_NAME_DIR} || exit 1
 
 if test x$WITH_TESTS != x ; then
 	echo "Copying tests and test data to $PACKAGE_DIR ..."
