@@ -62,6 +62,7 @@ public:
 	
 	void set_range (double lower, double upper);
 	void set_font_description (Pango::FontDescription);
+	void set_metric (const Metric&);
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	
