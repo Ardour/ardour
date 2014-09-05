@@ -85,6 +85,9 @@ ArdourButton::ArdourButton (Element e)
 	, _focused (false)
 	, _fixed_colors_set (false)
 	, _fallthrough_to_parent (false)
+	, _layout_ellipsize_width (-1)
+	, _ellipsis (Pango::ELLIPSIZE_NONE)
+	, _update_colors_and_patterns (true)
 {
 	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 }
@@ -135,35 +138,19 @@ ArdourButton::~ArdourButton()
 	if (led_inset_pattern) {
 		cairo_pattern_destroy (led_inset_pattern);
 	}
-
 }
 
 void
 ArdourButton::set_text (const std::string& str)
 {
 	_text = str;
-
-	if (!_layout && !_text.empty()) {
-		_layout = Pango::Layout::create (get_pango_context());
+	if (!is_realized()) {
+		return;
 	}
-
-	if (_layout) {
-		_layout->set_text (str);
+	ensure_layout ();
+	if (_layout && _layout->get_text() != _text) {
+		_layout->set_text (_text);
 	}
-
-	queue_resize ();
-}
-
-void
-ArdourButton::set_markup (const std::string& str)
-{
-	_text = str;
-
-	if (!_layout) {
-		_layout = Pango::Layout::create (get_pango_context());
-	}
-
-	_layout->set_markup (str);
 	queue_resize ();
 }
 
@@ -185,6 +172,13 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 {
 	uint32_t text_color;
 	uint32_t led_color;
+
+	if (_update_colors_and_patterns) {
+		set_colors ();
+		build_patterns ();
+		_update_colors_and_patterns = false;
+	}
+
 	if ( active_state() == Gtkmm2ext::ExplicitActive ) {
 		text_color = text_active_color;
 		led_color = led_active_color;
@@ -363,6 +357,25 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 	// Text, if any
 	if (!_pixbuf && ((_elements & Text)==Text) && !_text.empty()) {
+		assert(_layout);
+#if 0 // DEBUG style (print on hover)
+		if (_hovering) {
+			bool layout_font = true;
+			Pango::FontDescription fd = _layout->get_font_description();
+			if (fd.gobj() == NULL) {
+				layout_font = false;
+				fd = get_pango_context()->get_font_description();
+			}
+			printf("%s: f:%dx%d bh:%.0f tw:%d (%dx%d) %s\"%s\"\n",
+					get_name().c_str(),
+					char_pixel_width(), char_pixel_height(),
+					ceil(_text_height * BASELINESTRETCH),
+					_text_width,
+					get_width(), get_height(),
+					layout_font ? "L:" : "W:",
+					fd.to_string().c_str());
+		}
+#endif
 
 		cairo_save (cr);
 		cairo_rectangle (cr, 2, 1, get_width() - 4, get_height() - 2);
@@ -487,11 +500,11 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		}
 	}
 
-	//user is currently pressing the button.  black outline helps to indicate this
+	//user is currently pressing the button. dark outline helps to indicate this
 	if (_grabbed && !(_elements & (Inactive|Menu))) {
 		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
 		cairo_set_line_width(cr, 2);
-		cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, .5); // XXX no longer 'black'
+		cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, .5);
 		cairo_stroke (cr);
 	}
 
@@ -530,15 +543,26 @@ ArdourButton::set_diameter (float d)
 {
 	_diameter = (d*2) + 5.0;
 
-	build_patterns ();
-	queue_resize ();
+	if (is_realized()) {
+		queue_resize ();
+	}
 }
 
 void
 ArdourButton::set_corner_radius (float r)
 {
 	_corner_radius = r;
-	set_dirty ();
+	CairoWidget::set_dirty ();
+}
+
+void
+ArdourButton::on_realize()
+{
+	CairoWidget::on_realize ();
+	ensure_layout ();
+	if (_layout && _layout->get_text() != _text) {
+		_layout->set_text (_text);
+	}
 }
 
 void
@@ -553,8 +577,9 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 
 	if ((_elements & Text) && !_text.empty()) {
 		int ignored;
-		_layout->get_pixel_size (_text_width, ignored);
 		_text_height = char_pixel_height ();
+		// if _layout does not exist, char_pixel_height() creates it,
+		_layout->get_pixel_size (_text_width, ignored);
 		req->width += rint(1.6 * char_pixel_width()); // padding
 		req->width += _text_width;
 		req->height = std::max(req->height, (int) ceil(_text_height * BASELINESTRETCH + 1.0));
@@ -619,6 +644,7 @@ ArdourButton::set_colors ()
 	led_active_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led active", name));
 	led_inactive_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led", name));
 }
+
 /**
  * This sets the colors used for rendering based on two fixed values, rather
  * than basing them on the button name, and thus information in the GUI config
@@ -700,7 +726,7 @@ ArdourButton::build_patterns ()
 		cairo_pattern_add_color_stop_rgba (led_inset_pattern, 1, 1,1,1, 0.7);
 	}
 
-	set_dirty ();
+	CairoWidget::set_dirty ();
 }
 
 void
@@ -724,7 +750,7 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 	}
 
 	_grabbed = true;
-	queue_draw ();
+	CairoWidget::set_dirty ();
 
 	if (!_act_on_release) {
 		if (_action) {
@@ -751,7 +777,7 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 	}
 
 	_grabbed = false;
-	queue_draw ();
+	CairoWidget::set_dirty ();
 
 	if (_hovering) {
 		signal_clicked ();
@@ -779,9 +805,8 @@ ArdourButton::set_distinct_led_click (bool yn)
 void
 ArdourButton::color_handler ()
 {
-	set_colors ();
-	build_patterns ();
-	set_dirty ();
+	_update_colors_and_patterns = true;
+	CairoWidget::set_dirty ();
 }
 
 void
@@ -789,39 +814,39 @@ ArdourButton::on_size_allocate (Allocation& alloc)
 {
 	CairoWidget::on_size_allocate (alloc);
 	setup_led_rect ();
-	build_patterns ();
+	_update_colors_and_patterns = true;
 }
 
 void
 ArdourButton::set_controllable (boost::shared_ptr<Controllable> c)
 {
-        watch_connection.disconnect ();
-        binding_proxy.set_controllable (c);
+	watch_connection.disconnect ();
+	binding_proxy.set_controllable (c);
 }
 
 void
 ArdourButton::watch ()
 {
-        boost::shared_ptr<Controllable> c (binding_proxy.get_controllable ());
+	boost::shared_ptr<Controllable> c (binding_proxy.get_controllable ());
 
-        if (!c) {
-                warning << _("button cannot watch state of non-existing Controllable\n") << endmsg;
-                return;
-        }
-
-        c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&ArdourButton::controllable_changed, this), gui_context());
+	if (!c) {
+		warning << _("button cannot watch state of non-existing Controllable\n") << endmsg;
+		return;
+	}
+	c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&ArdourButton::controllable_changed, this), gui_context());
 }
 
 void
 ArdourButton::controllable_changed ()
 {
-        float val = binding_proxy.get_controllable()->get_value();
+	float val = binding_proxy.get_controllable()->get_value();
 
 	if (fabs (val) >= 0.5f) {
 		set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		unset_active_state ();
 	}
+	CairoWidget::set_dirty ();
 }
 
 void
@@ -871,9 +896,10 @@ ArdourButton::on_name_changed ()
 	_char_pixel_width = 0;
 	_char_pixel_height = 0;
 	_diameter = 0;
-	set_colors ();
-	build_patterns ();
-	queue_resize ();
+	_update_colors_and_patterns = true;
+	if (is_realized()) {
+		queue_resize ();
+	}
 }
 
 void
@@ -907,7 +933,10 @@ void
 ArdourButton::set_image (const RefPtr<Gdk::Pixbuf>& img)
 {
 	_pixbuf = img;
-	queue_draw ();
+	if (is_realized()) {
+		queue_resize ();
+	}
+	CairoWidget::set_dirty ();
 }
 
 void
@@ -916,8 +945,8 @@ ArdourButton::set_active_state (Gtkmm2ext::ActiveState s)
 	bool changed = (_active_state != s);
 	CairoWidget::set_active_state (s);
 	if (changed) {
-		set_colors ();
-		build_patterns ();
+		_update_colors_and_patterns = true;
+		CairoWidget::set_dirty ();
 	}
 }
 
@@ -927,17 +956,16 @@ ArdourButton::set_visual_state (Gtkmm2ext::VisualState s)
 	bool changed = (_visual_state != s);
 	CairoWidget::set_visual_state (s);
 	if (changed) {
-		set_colors ();
-		build_patterns ();
+		_update_colors_and_patterns = true;
+		CairoWidget::set_dirty ();
 	}
 }
-
 
 bool
 ArdourButton::on_focus_in_event (GdkEventFocus* ev)
 {
 	_focused = true;
-	queue_draw ();
+	CairoWidget::set_dirty ();
 	return CairoWidget::on_focus_in_event (ev);
 }
 
@@ -945,7 +973,7 @@ bool
 ArdourButton::on_focus_out_event (GdkEventFocus* ev)
 {
 	_focused = false;
-	queue_draw ();
+	CairoWidget::set_dirty ();
 	return CairoWidget::on_focus_out_event (ev);
 }
 
@@ -969,7 +997,7 @@ ArdourButton::on_enter_notify_event (GdkEventCrossing* ev)
 	_hovering = (_elements & Inactive) ? false : true;
 
 	if (ARDOUR::Config->get_widget_prelight()) {
-		queue_draw ();
+		CairoWidget::set_dirty ();
 	}
 
 	return CairoWidget::on_enter_notify_event (ev);
@@ -981,7 +1009,7 @@ ArdourButton::on_leave_notify_event (GdkEventCrossing* ev)
 	_hovering = false;
 
 	if (ARDOUR::Config->get_widget_prelight()) {
-		queue_draw ();
+		CairoWidget::set_dirty ();
 	}
 
 	return CairoWidget::on_leave_notify_event (ev);
@@ -992,7 +1020,7 @@ ArdourButton::set_tweaks (Tweaks t)
 {
 	if (_tweaks != t) {
 		_tweaks = t;
-		queue_draw ();
+		CairoWidget::set_dirty ();
 	}
 }
 
@@ -1007,27 +1035,70 @@ ArdourButton::action_sensitivity_changed ()
 }
 
 void
+ArdourButton::set_layout_ellisize_width (int w)
+{
+	if (_layout_ellipsize_width == w) {
+		return;
+	}
+	_layout_ellipsize_width = w;
+	if (!_layout) {
+		return;
+	}
+	if (_layout_ellipsize_width > 0) {
+	_layout->set_width (_layout_ellipsize_width);
+	}
+}
+
+void
+ArdourButton::set_text_ellipsize (Pango::EllipsizeMode e)
+{
+	if (_ellipsis == e) {
+		return;
+	}
+	_ellipsis = e;
+	if (!_layout) {
+		return;
+	}
+	_layout->set_ellipsize(_ellipsis);
+	if (is_realized () && _layout_ellipsize_width > 0) {
+		_layout->set_width (_layout_ellipsize_width);
+		queue_resize ();
+		CairoWidget::set_dirty ();
+	}
+}
+
+void
+ArdourButton::ensure_layout ()
+{
+	if (!_layout) {
+		ensure_style ();
+		_layout = Pango::Layout::create (get_pango_context());
+		_layout->set_ellipsize(_ellipsis);
+		if (_layout_ellipsize_width > 0) {
+			_layout->set_width (_layout_ellipsize_width);
+		}
+	}
+}
+
+void
 ArdourButton::recalc_char_pixel_geometry ()
 {
 	if (_char_pixel_height > 0 && _char_pixel_width > 0) {
 		return;
 	}
-	if (!_layout) {
-		_layout = Pango::Layout::create (get_pango_context());
-	}
+	ensure_layout();
 	// NB. this is not static, since the geometry is different
 	// depending on the font used.
 	int w, h;
-	std::string t = _layout->get_text();
 	std::string x = _("ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
 	_layout->set_text (x);
 	_layout->get_pixel_size (w, h);
-	_layout->set_text (t);
 	_char_pixel_height = std::max(4, h);
 	// number of actual chars in the string (not bytes)
 	// Glib to the rescue.
 	Glib::ustring gx(x);
 	_char_pixel_width = std::max(4, w / (int)gx.size());
+	_layout->set_text (_text);
 }
 
 void
@@ -1051,10 +1122,12 @@ void
 ArdourButton::set_elements (Element e)
 {
 	_elements = e;
+	CairoWidget::set_dirty ();
 }
 
 void
 ArdourButton::add_elements (Element e)
 {
 	_elements = (ArdourButton::Element) (_elements | e);
+	CairoWidget::set_dirty ();
 }

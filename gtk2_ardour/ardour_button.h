@@ -31,7 +31,7 @@
 
 class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 {
-  public:
+	public:
 	enum Element {
 		Edge = 0x1,
 		Body = 0x2,
@@ -70,13 +70,12 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	Element elements() const { return _elements; }
 	void set_elements (Element);
 	void add_elements (Element);
-	
+
 	void set_corner_radius (float);
 	void set_diameter (float);
 
 	void set_text (const std::string&);
 	const std::string& get_text () {return _text;}
-	void set_markup (const std::string&);
 	void set_angle (const double);
 	void set_alignment (const float, const float);
 	void get_alignment (float& xa, float& ya) {xa = _xalign; ya = _yalign;};
@@ -84,13 +83,14 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_led_left (bool yn);
 	void set_distinct_led_click (bool yn);
 
-	Glib::RefPtr<Pango::Layout> layout() const { return _layout; }
+	void set_layout_ellisize_width (int w);
+	void set_text_ellipsize (Pango::EllipsizeMode);
 
 	sigc::signal<void> signal_led_clicked;
 	sigc::signal<void> signal_clicked;
 
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
- 	void set_controllable (boost::shared_ptr<PBD::Controllable> c);
+	void set_controllable (boost::shared_ptr<PBD::Controllable> c);
 	void watch ();
 
 	void set_related_action (Glib::RefPtr<Gtk::Action>);
@@ -107,12 +107,13 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	unsigned int char_pixel_width() { if (_char_pixel_width < 1) recalc_char_pixel_geometry() ; return _char_pixel_width; }
 	unsigned int char_pixel_height() { if (_char_pixel_height < 1) recalc_char_pixel_geometry() ; return _char_pixel_height; }
 
-  protected:
+	protected:
 	void render (cairo_t *, cairo_rectangle_t *);
 	void on_size_request (Gtk::Requisition* req);
 	void on_size_allocate (Gtk::Allocation&);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 	void on_name_changed ();
+	void on_realize ();
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
 	bool on_focus_in_event (GdkEventFocus*);
@@ -122,7 +123,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void controllable_changed ();
 	PBD::ScopedConnection watch_connection;
 
-  protected:
+	protected:
 	Glib::RefPtr<Pango::Layout> _layout;
 	Glib::RefPtr<Gdk::Pixbuf>   _pixbuf;
 	std::string                 _text;
@@ -151,12 +152,10 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	uint32_t led_active_color;
 	uint32_t led_inactive_color;
-    
+
 	cairo_pattern_t* convex_pattern;
 	cairo_pattern_t* concave_pattern;
-
 	cairo_pattern_t* led_inset_pattern;
-    
 	cairo_rectangle_t* _led_rect;
 
 	bool _act_on_release;
@@ -165,16 +164,18 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	bool _hovering;
 	bool _focused;
 	bool _fixed_colors_set;
-    
 	bool _fallthrough_to_parent;
-    
+	int _layout_ellipsize_width;
+	Pango::EllipsizeMode _ellipsis;
+	bool _update_colors_and_patterns;
+
 	void setup_led_rect ();
 	void set_colors ();
 	void color_handler ();
-        void build_patterns ();
+	void build_patterns ();
+	void ensure_layout ();
 
 	void action_toggled ();
-
 	void action_sensitivity_changed ();
 	void action_visibility_changed ();
 	void action_tooltip_changed ();

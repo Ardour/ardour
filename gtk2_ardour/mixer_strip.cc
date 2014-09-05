@@ -251,9 +251,7 @@ MixerStrip::init ()
 	bottom_button_table.attach (gpm.gain_automation_state_button, 0, 1, 0, 1);
 
 	name_button.set_name ("mixer strip button");
-	name_button.set_text (" "); /* non empty text, forces creation of the layout */
-	name_button.set_text (""); /* back to empty */
-	name_button.layout()->set_ellipsize (Pango::ELLIPSIZE_END);
+	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	name_button.signal_size_allocate().connect (sigc::mem_fun (*this, &MixerStrip::name_button_resized));
 
 	ARDOUR_UI::instance()->set_tip (&group_button, _("Mix group"), "");
@@ -1607,12 +1605,7 @@ MixerStrip::name_changed ()
 		name_button.set_text (_route->name());
 		break;
 	case Narrow:
-		if (_session->config.get_track_name_number()) {
-			name_button.set_markup(track_number_to_string (_route->track_number (), " ",
-						PBD::short_version (_route->name (), 5)));
-		} else {
-			name_button.set_text (PBD::short_version (_route->name(), 5));
-		}
+		name_button.set_text (PBD::short_version (_route->name(), 5));
 		break;
 	}
 
@@ -1622,7 +1615,7 @@ MixerStrip::name_changed ()
 void
 MixerStrip::name_button_resized (Gtk::Allocation& alloc)
 {
-	name_button.layout()->set_width (alloc.get_width() * PANGO_SCALE);
+	name_button.set_layout_ellisize_width (alloc.get_width() * PANGO_SCALE);
 }
 
 bool
