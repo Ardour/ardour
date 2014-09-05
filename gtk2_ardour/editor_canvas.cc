@@ -175,9 +175,9 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
 	range_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
-	transport_marker_bar = new ArdourCanvas::Rectangle (transport_marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
-	CANVAS_DEBUG_NAME (transport_marker_bar, "transport Marker Bar");
-	transport_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
+	punch_loop_bar = new ArdourCanvas::Rectangle (transport_marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	CANVAS_DEBUG_NAME (punch_loop_bar, "punch/loop Bar");
+	punch_loop_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
 	marker_bar = new ArdourCanvas::Rectangle (marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, Marker::marker_height()));
 	CANVAS_DEBUG_NAME (marker_bar, "Marker Bar");
@@ -224,7 +224,7 @@ Editor::initialize_canvas ()
 	cd_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_cd_marker_bar_event), cd_marker_bar));
 	videotl_group->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_videotl_bar_event), videotl_group));
 	range_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
-	transport_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
+	punch_loop_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_punch_loop_bar_event), punch_loop_bar));
 
 	playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event);
 
@@ -901,8 +901,8 @@ Editor::color_handler()
 	range_marker_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RangeMarkerBar());
 	range_marker_bar->set_outline_color (ARDOUR_UI::config()->get_canvasvar_MarkerBarSeparator());
 
-	transport_marker_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TransportMarkerBar());
-	transport_marker_bar->set_outline_color (ARDOUR_UI::config()->get_canvasvar_MarkerBarSeparator());
+        punch_loop_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_PunchLoopBar());
+	punch_loop_bar->set_outline_color (ARDOUR_UI::config()->get_canvasvar_MarkerBarSeparator());
 
 	cd_marker_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RangeDragBarRect());
 	cd_marker_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RangeDragBarRect());
@@ -1334,7 +1334,7 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 	case RangeMarkerBarItem:
 	case CdMarkerBarItem:
 	case VideoBarItem:
-	case TransportMarkerBarItem:
+	case PunchLoopBarItem:
 	case DropZoneItem:
 		cursor = which_grabber_cursor();
 		break;

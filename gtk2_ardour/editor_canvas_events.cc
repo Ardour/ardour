@@ -985,9 +985,9 @@ Editor::canvas_range_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item
 }
 
 bool
-Editor::canvas_transport_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
+Editor::canvas_punch_loop_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 {
-	return typed_event (item, event, TransportMarkerBarItem);
+	return typed_event (item, event, PunchLoopBarItem);
 }
 
 bool

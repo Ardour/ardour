@@ -30,7 +30,7 @@ enum ItemType {
 	RangeMarkerBarItem,
 	CdMarkerBarItem,
 	VideoBarItem,
-	TransportMarkerBarItem,
+	PunchLoopBarItem,
 	SelectionItem,
 	ControlPointItem,
 	GainLineItem,

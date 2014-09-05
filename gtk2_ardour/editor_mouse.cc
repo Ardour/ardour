@@ -699,7 +699,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
-	case TransportMarkerBarItem:
+	case PunchLoopBarItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
 		} else {
@@ -1287,7 +1287,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		case MeterBarItem:
 		case RangeMarkerBarItem:
 		case CdMarkerBarItem:
-		case TransportMarkerBarItem:
+		case PunchLoopBarItem:
 		case StreamItem:
 		case TimecodeRulerItem:
 		case SamplesRulerItem:
@@ -1505,7 +1505,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case MarkerBarItem:
 			case RangeMarkerBarItem:
-			case TransportMarkerBarItem:
+			case PunchLoopBarItem:
 			case CdMarkerBarItem:
 			case TempoBarItem:
 			case MeterBarItem:

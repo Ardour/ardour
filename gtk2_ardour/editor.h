@@ -891,7 +891,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Rectangle* meter_bar;
 	ArdourCanvas::Rectangle* marker_bar;
 	ArdourCanvas::Rectangle* range_marker_bar;
-	ArdourCanvas::Rectangle* transport_marker_bar;
+	ArdourCanvas::Rectangle* punch_loop_bar;
 	ArdourCanvas::Rectangle* cd_marker_bar;
 
 	Gtk::Label  minsec_label;
@@ -1453,7 +1453,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool canvas_meter_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_range_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
-	bool canvas_transport_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_punch_loop_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_cd_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 
 	bool canvas_videotl_bar_event (GdkEvent* event, ArdourCanvas::Item*);

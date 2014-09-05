@@ -193,8 +193,8 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 		ruler_items.push_back (SeparatorElem ());
 
 		break;
-	case TransportMarkerBarItem:
 
+	case PunchLoopBarItem:
 		break;
 
 	case CdMarkerBarItem:

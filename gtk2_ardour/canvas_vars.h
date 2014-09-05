@@ -177,7 +177,7 @@ CANVAS_VARIABLE(canvasvar_TrackNumberLabelFillEnd, "tracknumber label: fill end"
 CANVAS_VARIABLE(canvasvar_TrackNumberLabelText, "tracknumber label: text")
 CANVAS_VARIABLE(canvasvar_TransportDragRect, "transport drag rect")
 CANVAS_VARIABLE(canvasvar_TransportLoopRect, "transport loop rect")
-CANVAS_VARIABLE(canvasvar_TransportMarkerBar, "transport marker bar")
+CANVAS_VARIABLE(canvasvar_PunchLoopBar, "punch loop bar")
 CANVAS_VARIABLE(canvasvar_TransportPunchRect, "transport punch rect")
 CANVAS_VARIABLE(canvasvar_TrimHandleLocked, "trim handle locked")
 CANVAS_VARIABLE(canvasvar_TrimHandle, "trim handle")
