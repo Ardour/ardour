@@ -98,7 +98,5 @@ Gdk::Color unique_random_color (std::list<Gdk::Color> &);
 
 std::string rate_as_string (float r);
 
-std::string track_number_to_string (int64_t tracknumber, std::string sep = "", std::string postfix = "");
-
 } // namespace
 #endif /* __ardour_gtk_utils_h__ */

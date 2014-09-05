@@ -510,13 +510,8 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 	//some buttons (like processor boxes) can be selected  (so they can be deleted).  Draw a selection indicator
 	if (visual_state() & Gtkmm2ext::Selected) {
-#if 0 // outline, edge + 1px outside
-		cairo_set_line_width(cr, 2);
-		cairo_set_source_rgba (cr, 1, 0, 0, 0.8);
-#else // replace edge (if any)
 		cairo_set_line_width(cr, 1);
 		cairo_set_source_rgba (cr, 1, 0, 0, 0.8);
-#endif
 		rounded_function (cr, 0.5, 0.5, get_width() - 1, get_height() - 1, _corner_radius);
 		cairo_stroke (cr);
 	}
