@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-02-10 12:05+0100\n"
+"POT-Creation-Date: 2014-09-04 19:07-0400\n"
 "PO-Revision-Date: 2011-06-13 00:30+0200\n"
 "Language-Team: American English <kde-i18n-doc@kde.org>\n"
 "Language: en_US\n"
@@ -15,11 +15,15 @@ msgstr ""
 "X-Generator: Lokalize 1.2\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: actions.cc:387
+#: actions.cc:336
+msgid "programming error: %1"
+msgstr ""
+
+#: actions.cc:511
 msgid "Unknown action name: %1"
 msgstr "Nom de l'action inconnue: %1"
 
-#: binding_proxy.cc:84
+#: binding_proxy.cc:81
 msgid "operate controller now"
 msgstr ""
 
@@ -27,55 +31,91 @@ msgstr ""
 msgid "button cannot watch state of non-existing Controllable\n"
 msgstr "Le bouton ne peut pas surveiller l'état d'un Controllable inexistant\n"
 
-#: gtk_ui.cc:108
+#: gtk_ui.cc:111
 msgid "Log"
 msgstr "Log"
 
-#: gtk_ui.cc:364
+#: gtk_ui.cc:368
 msgid ""
 "\n"
 "\n"
 "Shortcut: "
 msgstr ""
 
-#: gtk_ui.cc:636
+#: gtk_ui.cc:640
 msgid "Press To Exit"
 msgstr "Appuyer pour quitter"
 
-#: gtk_ui.cc:672
+#: gtk_ui.cc:676
 msgid "I'm sorry %1, I can't do that"
 msgstr ""
 
-#: keyboard.cc:68
+#: keyboard.cc:73
 msgid "Command"
 msgstr "Commande"
 
-#: keyboard.cc:69 keyboard.cc:72 keyboard.cc:85 keyboard.cc:89
+#: keyboard.cc:74 keyboard.cc:77 keyboard.cc:90 keyboard.cc:94
 msgid "Control"
 msgstr "Ctrl"
 
-#: keyboard.cc:70 keyboard.cc:73 keyboard.cc:87 keyboard.cc:90
+#: keyboard.cc:75 keyboard.cc:78 keyboard.cc:92 keyboard.cc:95
 msgid "Key|Shift"
 msgstr ""
 
-#: keyboard.cc:71
+#: keyboard.cc:76
 msgid "Option"
 msgstr "Option"
 
-#: keyboard.cc:86
+#: keyboard.cc:91
 msgid "Alt"
 msgstr "Alt"
 
-#: keyboard.cc:88
+#: keyboard.cc:93
 msgid "Meta"
 msgstr "Meta"
 
-#: keyboard.cc:139 keyboard.cc:535
+#: keyboard.cc:144 keyboard.cc:540
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: keyboard.cc:546
+#: keyboard.cc:551
 msgid "key bindings file not found at \"%2\" or contains errors."
+msgstr ""
+
+#: keyboard.cc:602
+msgid "Cannot rename your own keybinding file (%1)"
+msgstr ""
+
+#: motionfeedback.cc:486
+msgid "motionfeedback: failed to open a temporary file for writing: %1"
+msgstr ""
+
+#: motionfeedback.cc:516
+msgid "motionfeedback: could not save image set to %1"
+msgstr ""
+
+#: motionfeedback.cc:526
+msgid "motionfeedback: caught PixbufError: %1"
+msgstr ""
+
+#: motionfeedback.cc:528
+msgid "motionfeedback: unknown exception"
+msgstr ""
+
+#: paths_dialog.cc:32
+msgid "Add"
+msgstr ""
+
+#: paths_dialog.cc:33
+msgid "Delete"
+msgstr ""
+
+#: paths_dialog.cc:34
+msgid "Reset to Default"
+msgstr ""
+
+#: paths_dialog.cc:109
+msgid "Add folder to search path"
 msgstr ""
 
 #: tearoff.cc:57
