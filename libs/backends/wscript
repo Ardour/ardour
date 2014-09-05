@@ -10,7 +10,28 @@ top = '.'
 out = 'build'
 
 def backend_list():
-    return [ 'wavesaudio' ]
+    if Options.options.program_name == 'Ardour':
+        # Ardour
+        backends = [ 'jack' ]
+
+        if Options.options.build_dummy: 
+            backends += [ 'dummy' ]
+
+        if Options.options.build_alsabackend:
+            if re.search ("linux", sys.platform) != None:
+                backends += [ 'alsa' ]
+
+    else:
+        # Not Ardour
+        if re.search ("linux", sys.platform) != None:
+            backends = [ 'jack', 'alsa' ]
+        else:
+            backends = [ ]
+
+    if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc':
+        backends += [ 'wavesaudio' ]
+
+    return backends
 
 def options(opt):
     autowaf.set_options(opt)
