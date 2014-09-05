@@ -439,7 +439,7 @@ fi
 cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Resources
 cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Resources/ui_config
 cp $BUILD_ROOT/gtk2_ardour/ui_light.rc $Resources
-cp $BUILD_ROOT/gtk2_ardour/ui_light.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/ui_dark.rc $Resources
 cp $BUILD_ROOT/gtk2_ardour/light_fonts.rc $Resources
 cp $BUILD_ROOT/gtk2_ardour/light_styles.rc $Resources
 cp $BUILD_ROOT/gtk2_ardour/dark_fonts.rc $Resources
