@@ -140,7 +140,7 @@ using PBD::internationalize;
 using PBD::atoi;
 using Gtkmm2ext::Keyboard;
 
-const double Editor::timebar_height = 15.0;
+const double Editor::timebar_height = 32.0;
 
 static const gchar *_snap_type_strings[] = {
 	N_("CD Frames"),
