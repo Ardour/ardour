@@ -136,35 +136,19 @@ Editor::initialize_rulers ()
 	_minsec_metric = new MinsecMetric (this);
 	_samples_metric = new SamplesMetric (this);
 	
-	timecode_ruler = new ArdourCanvas::Ruler (_time_markers_group, *_timecode_metric,
-						  ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	timecode_ruler->set_font_description (font);
-	CANVAS_DEBUG_NAME (timecode_ruler, "timecode ruler");
-	timecode_nmarks = 0;
-
-	samples_ruler = new ArdourCanvas::Ruler (_time_markers_group, *_samples_metric,
-						 ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	samples_ruler->set_font_description (font);
-	CANVAS_DEBUG_NAME (samples_ruler, "samples ruler");
-
-	minsec_ruler = new ArdourCanvas::Ruler (_time_markers_group, *_minsec_metric,
+        /* initial metric isn't important */
+	clock_ruler = new ArdourCanvas::Ruler (_time_markers_group, *_minsec_metric,
 						ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	minsec_ruler->set_font_description (font);
-	CANVAS_DEBUG_NAME (minsec_ruler, "minsec ruler");
+	clock_ruler->set_font_description (font);
+	CANVAS_DEBUG_NAME (clock_ruler, "clock ruler");
+
+        ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun (*this, &Editor::update_ruler_visibility));
+
 	minsec_nmarks = 0;
-
-	bbt_ruler = new ArdourCanvas::Ruler (_time_markers_group, *_bbt_metric,
-					     ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
-	bbt_ruler->set_font_description (font);
-	CANVAS_DEBUG_NAME (bbt_ruler, "bbt ruler");
 	timecode_nmarks = 0;
+        bbt_nmarks = 0;
 
-	/* 1 event handler to bind them all ... */
-
-	timecode_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), timecode_ruler, TimecodeRulerItem));
-	minsec_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), minsec_ruler, MinsecRulerItem));
-	bbt_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), bbt_ruler, BBTRulerItem));
-	samples_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), samples_ruler, SamplesRulerItem));
+	clock_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), clock_ruler, TimecodeRulerItem));
 }
 
 bool
@@ -433,26 +417,15 @@ Editor::update_ruler_visibility ()
         tempo_group->hide ();
         meter_group->hide ();
 
-        /* which ruler we show depends on the clock mode */
-
-        /* first hide them all */
-
-        timecode_ruler->hide ();
-        samples_ruler->hide ();
-        minsec_ruler->hide ();
-        bbt_ruler->hide ();
-
-        ArdourCanvas::Ruler *clock_ruler = 0;
-        
         switch (ARDOUR_UI::instance()->primary_clock->mode()) {
         case AudioClock::Timecode:
-                clock_ruler = timecode_ruler;
+                clock_ruler->set_metric (*_timecode_metric);
                 break;
         case AudioClock::Frames:
-                clock_ruler = samples_ruler;
+                clock_ruler->set_metric (*_samples_metric);
                 break;
         default:
-                clock_ruler = minsec_ruler;
+                clock_ruler->set_metric (*_minsec_metric);
                 break;
         }
         
@@ -493,8 +466,8 @@ Editor::update_just_timecode ()
 
 	framepos_t rightmost_frame = leftmost_frame + current_page_samples();
 
-	if (ruler_timecode_action->get_active()) {
-		timecode_ruler->set_range (leftmost_frame, rightmost_frame);
+        if (ARDOUR_UI::instance()->primary_clock->mode() == AudioClock::Timecode) {
+		clock_ruler->set_range (leftmost_frame, rightmost_frame);
 	}
 }
 
@@ -505,23 +478,18 @@ Editor::compute_fixed_ruler_scale ()
 		return;
 	}
 
-        ArdourCanvas::Ruler *clock_ruler = 0;
-        
         switch (ARDOUR_UI::instance()->primary_clock->mode()) {
         case AudioClock::Timecode:
-                clock_ruler = timecode_ruler;
+                set_timecode_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
                 break;
         case AudioClock::Frames:
-                clock_ruler = samples_ruler;
+                set_samples_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
                 break;
         default:
-                clock_ruler = minsec_ruler;
+                set_minsec_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
                 break;
         }
 
-        set_timecode_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
-        set_minsec_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
-        set_samples_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
 }
 
 void
@@ -541,13 +509,11 @@ Editor::update_fixed_rulers ()
 
 	rightmost_frame = leftmost_frame + current_page_samples();
 
-	/* these force a redraw, which in turn will force execution of the metric callbacks
+	/* force a redraw, which in turn will force execution of the metric callbacks
 	   to compute the relevant ticks to display.
 	*/
 
-        timecode_ruler->set_range (leftmost_frame, rightmost_frame);
-        samples_ruler->set_range (leftmost_frame, rightmost_frame);
-        minsec_ruler->set_range (leftmost_frame, rightmost_frame);
+        clock_ruler->set_range (leftmost_frame, rightmost_frame);
 }
 
 void
@@ -563,8 +529,8 @@ Editor::update_tempo_based_rulers (ARDOUR::TempoMap::BBTPointList::const_iterato
 
 	_bbt_metric->units_per_pixel = samples_per_pixel;
 
-	if (ruler_bbt_action->get_active()) {
-		bbt_ruler->set_range (leftmost_frame, leftmost_frame+current_page_samples());
+	if (ARDOUR_UI::instance()->primary_clock->mode() == AudioClock::BBT) {
+		clock_ruler->set_range (leftmost_frame, leftmost_frame+current_page_samples());
 	}
 }
 

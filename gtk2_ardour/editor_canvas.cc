@@ -880,14 +880,9 @@ Editor::color_handler()
 {
 	ArdourCanvas::Color base = ARDOUR_UI::config()->get_canvasvar_RulerBase();
 	ArdourCanvas::Color text = ARDOUR_UI::config()->get_canvasvar_RulerText();
-	timecode_ruler->set_fill_color (base);
-	timecode_ruler->set_outline_color (text);
-	minsec_ruler->set_fill_color (base);
-	minsec_ruler->set_outline_color (text);
-	samples_ruler->set_fill_color (base);
-	samples_ruler->set_outline_color (text);
-	bbt_ruler->set_fill_color (base);
-	bbt_ruler->set_outline_color (text);
+
+	clock_ruler->set_fill_color (base);
+	clock_ruler->set_outline_color (text);
 	
 	playhead_cursor->set_color (ARDOUR_UI::config()->get_canvasvar_PlayHead());
 

@@ -882,10 +882,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 				      ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin,
 				      ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end);
 
-	ArdourCanvas::Ruler* timecode_ruler;
-	ArdourCanvas::Ruler* bbt_ruler;
-	ArdourCanvas::Ruler* samples_ruler;
-	ArdourCanvas::Ruler* minsec_ruler;
+	ArdourCanvas::Ruler* clock_ruler;
 
 	static const double timebar_height;
 	Gtk::Menu          *editor_ruler_menu;
