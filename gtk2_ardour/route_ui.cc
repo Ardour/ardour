@@ -309,6 +309,10 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	update_mute_display ();
 	update_solo_display ();
 
+	if (!ARDOUR_UI::config()->get_blink_rec_arm()) {
+		blink_rec_display(true); // set initial rec-en button state
+	}
+
 	route_color_changed();
 }
 
