@@ -76,6 +76,7 @@ private:
 	bool button_press (GdkEventButton *);
 	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route>);
 	void handle_gui_changes (std::string const &, void *);
+	bool idle_update_mute_rec_solo_etc ();
 	void update_rec_display ();
 	void update_mute_display ();
 	void update_solo_display (bool);
@@ -154,6 +155,7 @@ private:
 	bool _redisplaying;
 	bool _adding_routes;
 	bool _route_deletion_in_progress;
+	int  _queue_mute_rec_solo_etc;
 
 	Gtk::Menu* _menu;
 	Gtk::Widget* old_focus;

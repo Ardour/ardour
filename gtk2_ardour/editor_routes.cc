@@ -382,6 +382,7 @@ EditorRoutes::on_input_active_changed (std::string const & path_string)
 void
 EditorRoutes::on_tv_rec_enable_changed (std::string const & path_string)
 {
+	DisplaySuspender ds;
 	// Get the model row that has been toggled.
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
@@ -740,7 +741,7 @@ EditorRoutes::route_removed (TimeAxisView *tv)
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[_columns.tv] == tv) {
-                        PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
+			PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
 			_model->erase (ri);
 			break;
 		}
@@ -781,13 +782,10 @@ EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost:
 void
 EditorRoutes::update_active_display ()
 {
-	TreeModel::Children rows = _model->children();
-	TreeModel::Children::iterator i;
-
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		boost::shared_ptr<Route> route = (*i)[_columns.route];
-		(*i)[_columns.active] = route->active ();
+	if (_queue_mute_rec_solo_etc == 0) {
+		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
+	_queue_mute_rec_solo_etc |= 16;
 }
 
 void
@@ -1562,78 +1560,96 @@ EditorRoutes::update_input_active_display ()
 void
 EditorRoutes::update_rec_display ()
 {
+	if (_queue_mute_rec_solo_etc == 0) {
+		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
+	}
+	_queue_mute_rec_solo_etc |= 32;
+}
+
+bool
+EditorRoutes::idle_update_mute_rec_solo_etc()
+{
+	const int what = _queue_mute_rec_solo_etc;
+	_queue_mute_rec_solo_etc = 0;
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		boost::shared_ptr<Route> route = (*i)[_columns.route];
+		if (what & 1) {
+			(*i)[_columns.mute_state] = RouteUI::mute_active_state (_session, route);
+		}
+		if (what & 2) {
+			(*i)[_columns.solo_state] = RouteUI::solo_active_state (route);
+		}
+		if (what & 4) {
+			(*i)[_columns.solo_isolate_state] = RouteUI::solo_isolate_active_state (route) ? 1 : 0;
+		}
+		if (what & 8) {
+			(*i)[_columns.solo_safe_state] = RouteUI::solo_safe_active_state (route) ? 1 : 0;
+		}
+		if (what & 16) {
+			(*i)[_columns.active] = route->active ();
+		}
+		if (what & 32) { // rec
 
-		if (boost::dynamic_pointer_cast<Track> (route)) {
-			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (route);
+			if (boost::dynamic_pointer_cast<Track> (route)) {
+				boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (route);
 
-			if (route->record_enabled()) {
-				if (_session->record_status() == Session::Recording) {
-					(*i)[_columns.rec_state] = 1;
+				if (route->record_enabled()) {
+					if (_session->record_status() == Session::Recording) {
+						(*i)[_columns.rec_state] = 1;
+					} else {
+						(*i)[_columns.rec_state] = 2;
+					}
+				} else if (mt && mt->step_editing()) {
+					(*i)[_columns.rec_state] = 3;
 				} else {
-					(*i)[_columns.rec_state] = 2;
+					(*i)[_columns.rec_state] = 0;
 				}
-			} else if (mt && mt->step_editing()) {
-				(*i)[_columns.rec_state] = 3;
-			} else {
-				(*i)[_columns.rec_state] = 0;
-			}
 
-			(*i)[_columns.name_editable] = !route->record_enabled ();
+				(*i)[_columns.name_editable] = !route->record_enabled ();
+			}
 		}
 	}
+	return false; // do not call again (until needed)
 }
+
 
 void
 EditorRoutes::update_mute_display ()
 {
-	TreeModel::Children rows = _model->children();
-	TreeModel::Children::iterator i;
-
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		boost::shared_ptr<Route> route = (*i)[_columns.route];
-		(*i)[_columns.mute_state] = RouteUI::mute_active_state (_session, route);
+	if (_queue_mute_rec_solo_etc == 0) {
+		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
+	_queue_mute_rec_solo_etc |= 1;
 }
 
 void
 EditorRoutes::update_solo_display (bool /* selfsoloed */)
 {
-	TreeModel::Children rows = _model->children();
-	TreeModel::Children::iterator i;
-
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		boost::shared_ptr<Route> route = (*i)[_columns.route];
-		(*i)[_columns.solo_state] = RouteUI::solo_active_state (route);
+	if (_queue_mute_rec_solo_etc == 0) {
+		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
+	_queue_mute_rec_solo_etc |= 2;
 }
 
 void
 EditorRoutes::update_solo_isolate_display ()
 {
-	TreeModel::Children rows = _model->children();
-	TreeModel::Children::iterator i;
-
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		boost::shared_ptr<Route> route = (*i)[_columns.route];
-		(*i)[_columns.solo_isolate_state] = RouteUI::solo_isolate_active_state (route) ? 1 : 0;
+	if (_queue_mute_rec_solo_etc == 0) {
+		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
+	_queue_mute_rec_solo_etc |= 4;
 }
 
 void
 EditorRoutes::update_solo_safe_display ()
 {
-	TreeModel::Children rows = _model->children();
-	TreeModel::Children::iterator i;
-
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		boost::shared_ptr<Route> route = (*i)[_columns.route];
-		(*i)[_columns.solo_safe_state] = RouteUI::solo_safe_active_state (route) ? 1 : 0;
+	if (_queue_mute_rec_solo_etc == 0) {
+		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
+	_queue_mute_rec_solo_etc |= 4;
 }
 
 list<TimeAxisView*>
