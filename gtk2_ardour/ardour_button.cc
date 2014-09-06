@@ -151,8 +151,8 @@ ArdourButton::set_text (const std::string& str)
 	ensure_layout ();
 	if (_layout && _layout->get_text() != _text) {
 		_layout->set_text (_text);
+		queue_resize ();
 	}
-	queue_resize ();
 }
 
 void
@@ -927,7 +927,6 @@ ArdourButton::set_image (const RefPtr<Gdk::Pixbuf>& img)
 	if (is_realized()) {
 		queue_resize ();
 	}
-	CairoWidget::set_dirty ();
 }
 
 void
@@ -1054,7 +1053,6 @@ ArdourButton::set_text_ellipsize (Pango::EllipsizeMode e)
 	if (is_realized () && _layout_ellipsize_width > 0) {
 		_layout->set_width (_layout_ellipsize_width);
 		queue_resize ();
-		CairoWidget::set_dirty ();
 	}
 }
 
