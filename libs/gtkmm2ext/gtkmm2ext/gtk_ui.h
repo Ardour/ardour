@@ -42,7 +42,9 @@
 #include <gtkmm/main.h>
 #include <gdkmm/color.h>
 
+#ifndef ABSTRACT_UI_EXPORTS
 #define ABSTRACT_UI_EXPORTS
+#endif
 #include "pbd/abstract_ui.h"
 #include "pbd/ringbufferNPT.h"
 #include "pbd/pool.h"
