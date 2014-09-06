@@ -97,19 +97,25 @@ Port::drop ()
 bool
 Port::connected () const
 {
-	return (port_engine.connected (_port_handle) != 0);
+	if (_port_handle) {
+		return (port_engine.connected (_port_handle) != 0);
+	} 
+	return false;
 }
 
 int
 Port::disconnect_all ()
 {
-	port_engine.disconnect_all (_port_handle);
-	_connections.clear ();
-
-	/* a cheaper, less hacky way to do boost::shared_from_this() ... 
-	 */
-	boost::shared_ptr<Port> pself = port_manager->get_port_by_name (name());
-	PostDisconnect (pself, boost::shared_ptr<Port>()); // emit signal
+	if (_port_handle) {
+		
+		port_engine.disconnect_all (_port_handle);
+		_connections.clear ();
+		
+		/* a cheaper, less hacky way to do boost::shared_from_this() ... 
+		 */
+		boost::shared_ptr<Port> pself = port_manager->get_port_by_name (name());
+		PostDisconnect (pself, boost::shared_ptr<Port>()); // emit signal
+	}
 
 	return 0;
 }
@@ -120,6 +126,10 @@ Port::disconnect_all ()
 bool
 Port::connected_to (std::string const & o) const
 {
+	if (!_port_handle) {
+		return false; 
+	}
+
 	if (!port_engine.available()) {
 		return false;
 	}
@@ -221,20 +231,26 @@ Port::disconnect (Port* o)
 void
 Port::request_input_monitoring (bool yn)
 {
-	port_engine.request_input_monitoring (_port_handle, yn);
+	if (_port_handle) {
+		port_engine.request_input_monitoring (_port_handle, yn);
+	}
 }
 
 void
 Port::ensure_input_monitoring (bool yn)
 {
-	port_engine.ensure_input_monitoring (_port_handle, yn);
+	if (_port_handle) {
+		port_engine.ensure_input_monitoring (_port_handle, yn);
+	}
 }
 
 bool
 Port::monitoring_input () const
 {
-	
-	return port_engine.monitoring_input (_port_handle);
+	if (_port_handle) {
+		return port_engine.monitoring_input (_port_handle);
+	}
+	return false;
 }
 
 void
@@ -268,7 +284,9 @@ Port::set_public_latency_range (LatencyRange& range, bool playback) const
 	                             name(), range.min, range.max,
 	                             (playback ? "PLAYBACK" : "CAPTURE")));;
 
-	port_engine.set_latency_range (_port_handle, playback, range);
+	if (_port_handle) {
+		port_engine.set_latency_range (_port_handle, playback, range);
+	}
 }
 
 void
@@ -320,12 +338,16 @@ Port::public_latency_range (bool /*playback*/) const
 {
 	LatencyRange r;
 
-	r = port_engine.get_latency_range (_port_handle, sends_output() ? true : false);
 
-	DEBUG_TRACE (DEBUG::Latency, string_compose (
-		             "GET PORT %1: %4 PUBLIC latency range %2 .. %3\n",
-		             name(), r.min, r.max,
-		             sends_output() ? "PLAYBACK" : "CAPTURE"));
+	if (_port_handle) {
+		r = port_engine.get_latency_range (_port_handle, sends_output() ? true : false);
+		
+		DEBUG_TRACE (DEBUG::Latency, string_compose (
+				     "GET PORT %1: %4 PUBLIC latency range %2 .. %3\n",
+				     name(), r.min, r.max,
+				     sends_output() ? "PLAYBACK" : "CAPTURE"));
+	}
+
 	return r;
 }
 
@@ -435,7 +457,7 @@ Port::reconnect ()
 int
 Port::set_name (std::string const & n)
 {
-	if (n == _name) {
+	if (n == _name || !_port_handle) {
 		return 0;
 	}
 
@@ -453,6 +475,10 @@ Port::set_name (std::string const & n)
 bool
 Port::physically_connected () const
 {
+	if (!_port_handle) {
+		return false;
+	}
+
 	return port_engine.physically_connected (_port_handle);
 }
 
