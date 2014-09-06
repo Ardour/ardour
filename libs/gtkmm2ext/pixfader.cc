@@ -425,7 +425,9 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 			StopGesture ();
 
 			if (!_hovering) {
-				Keyboard::magic_widget_drop_focus();
+				if (!(_tweaks & NoVerticalScroll)) {
+					Keyboard::magic_widget_drop_focus();
+				}
 				queue_draw ();
 			}
 
@@ -601,7 +603,9 @@ bool
 PixFader::on_enter_notify_event (GdkEventCrossing*)
 {
 	_hovering = true;
-	Keyboard::magic_widget_grab_focus ();
+	if (!(_tweaks & NoVerticalScroll)) {
+		Keyboard::magic_widget_grab_focus ();
+	}
 	queue_draw ();
 	return false;
 }
@@ -611,7 +615,9 @@ PixFader::on_leave_notify_event (GdkEventCrossing*)
 {
 	if (!_dragging) {
 		_hovering = false;
-		Keyboard::magic_widget_drop_focus();
+		if (!(_tweaks & NoVerticalScroll)) {
+			Keyboard::magic_widget_drop_focus();
+		}
 		queue_draw ();
 	}
 	return false;

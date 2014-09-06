@@ -38,6 +38,9 @@ class LIBGTKMM2EXT_API BarController : public Gtk::Alignment
 	void set_sensitive (bool yn);
 	void set_logarithmic (bool yn) { _logarithmic = yn; }
 
+	PixFader::Tweaks tweaks() const { return _slider.tweaks (); }
+	void set_tweaks (PixFader::Tweaks t) { _slider.set_tweaks (t);}
+
 	sigc::signal<void> StartGesture;
 	sigc::signal<void> StopGesture;
 
