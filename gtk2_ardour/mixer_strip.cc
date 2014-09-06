@@ -1586,25 +1586,26 @@ void
 MixerStrip::name_changed ()
 {
 	switch (_width) {
-	case Wide:
-		if (_session->config.get_track_name_number()) {
-			const int64_t track_number = _route->track_number ();
-			if (track_number == 0) {
-				number_label.set_text ("-");
-			} else {
-				number_label.set_text (PBD::to_string (abs(_route->track_number ()), std::dec));
-			}
-		} else {
-			number_label.set_text ("");
-		}
-		name_button.set_text (_route->name());
-		break;
-	case Narrow:
-		name_button.set_text (PBD::short_version (_route->name(), 5));
-		break;
+		case Wide:
+			name_button.set_text (_route->name());
+			break;
+		case Narrow:
+			name_button.set_text (PBD::short_version (_route->name(), 5));
+			break;
 	}
 
 	ARDOUR_UI::instance()->set_tip (name_button, _route->name());
+
+	if (_session->config.get_track_name_number()) {
+		const int64_t track_number = _route->track_number ();
+		if (track_number == 0) {
+			number_label.set_text ("-");
+		} else {
+			number_label.set_text (PBD::to_string (abs(_route->track_number ()), std::dec));
+		}
+	} else {
+		number_label.set_text ("");
+	}
 }
 
 void
