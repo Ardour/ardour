@@ -39,6 +39,10 @@
 
 #include "i18n.h"
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-version.h"
+#endif
+
 using namespace Gtk;
 using namespace Gdk;
 using namespace std;

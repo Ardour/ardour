@@ -19,6 +19,7 @@
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
+#include "gtk2ardour-version.h"
 #endif
 
 #include <fstream>

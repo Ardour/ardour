@@ -60,6 +60,10 @@
 #include <fcntl.h> // Needed for '_fmode'
 #endif
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-version.h"
+#endif
+
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR_COMMAND_LINE;

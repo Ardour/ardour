@@ -29,6 +29,13 @@
 #include "video_image_frame.h"
 #include "utils_videotl.h"
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-version.h"
+#endif
+
+#ifndef ARDOUR_CURL_TIMEOUT
+#define ARDOUR_CURL_TIMEOUT (60)
+#endif
 #include "i18n.h"
 
 using namespace Gtk;
@@ -337,7 +344,7 @@ extern "C" {
 
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
-		curl_easy_setopt(curl, CURLOPT_USERAGENT, ARDOUR_USER_AGENT);
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, PROGRAM_NAME VERSIONSTRING);
 		curl_easy_setopt(curl, CURLOPT_TIMEOUT, ARDOUR_CURL_TIMEOUT);
 		curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 #ifdef CURLERRORDEBUG

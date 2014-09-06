@@ -281,6 +281,12 @@ def configure(conf):
 
     conf.write_config_header('gtk2ardour-config.h', remove=False)
 
+    bak = conf.env['define_key']
+    conf.define('VERSIONSTRING', str (conf.env['VERSION']))
+    conf.env['define_key'] = {'VERSIONSTRING'}
+    conf.write_config_header('gtk2ardour-version.h')
+    conf.env['define_key'] = bak;
+
     # Boost headers
     autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
     autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
@@ -417,7 +423,6 @@ def build(bld):
 
     obj.defines = [
         'PACKAGE="' + I18N_PACKAGE + '"',
-        'VERSIONSTRING="' + str (bld.env['VERSION']) + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',

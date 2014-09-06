@@ -20,9 +20,6 @@
 #ifndef __ardour_video_image_frame_h__
 #define __ardour_video_image_frame_h__
 
-#define ARDOUR_USER_AGENT (PROGRAM_NAME VERSIONSTRING)
-#define ARDOUR_CURL_TIMEOUT (60)
-
 #include <string>
 #include <glib.h>
 
