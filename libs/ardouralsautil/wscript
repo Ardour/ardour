@@ -35,7 +35,7 @@ def build(bld):
             obj.use      = 'libpbd'
             obj.uselib   = [ 'ALSA' ]
             obj.vnum     = '0.0.1'
-            obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardouralsautil')
+            obj.install_path = os.path.join(bld.env['LIBDIR'])
 
         if bld.env['BUILD_ALSABACKEND'] and bld.is_defined('HAVE_ALSA') and bld.is_defined('HAVE_DBUS'):
             obj = bld(features = 'c cprogram')
