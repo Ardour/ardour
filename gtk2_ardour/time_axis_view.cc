@@ -75,7 +75,6 @@ int const TimeAxisView::_max_order = 512;
 unsigned int TimeAxisView::name_width_px = 100; // TODO adjust with font-scaling on style-change
 PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::controls_meters_size_group = Glib::RefPtr<Gtk::SizeGroup>();
-Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::track_number_v_size_group = Glib::RefPtr<Gtk::SizeGroup>();
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
@@ -104,9 +103,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 {
 	if (!controls_meters_size_group) {
 		controls_meters_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
-	}
-	if (!track_number_v_size_group) {
-		track_number_v_size_group = SizeGroup::create (SIZE_GROUP_VERTICAL);
 	}
 	if (extra_height == 0) {
 		compute_heights ();
@@ -1151,6 +1147,7 @@ TimeAxisView::compute_heights ()
 	window.add (one_row_table);
 	test_button->set_name ("mute button");
 	test_button->set_text (_("M"));
+	test_button->set_tweaks (ArdourButton::Square);
 
 	one_row_table.set_border_width (border_width);
 	one_row_table.set_row_spacings (2);

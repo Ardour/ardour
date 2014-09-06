@@ -793,8 +793,10 @@ GenericPluginUI::toggle_parameter_changed (ControlUI* cui)
 	if (!cui->ignore_change) {
 		if (val > 0.5) {
 			cui->button->set_active (true);
+			cui->button->set_name ("PluginEditorButton-active");
 		} else {
 			cui->button->set_active (false);
+			cui->button->set_name ("PluginEditorButton");
 		}
 	}
 }
@@ -855,7 +857,13 @@ void
 GenericPluginUI::control_port_toggled (ControlUI* cui)
 {
 	cui->ignore_change++;
-	insert->automation_control (cui->parameter())->set_value (cui->button->get_active());
+	const bool active = cui->button->get_active();
+	if (active) {
+		cui->button->set_name ("PluginEditorButton-active");
+	} else {
+		cui->button->set_name ("PluginEditorButton");
+	}
+	insert->automation_control (cui->parameter())->set_value (active);
 	cui->ignore_change--;
 }
 

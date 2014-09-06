@@ -362,7 +362,6 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	}
 
 	const int text_margin = char_pixel_width();
-
 	// Text, if any
 	if (!_pixbuf && ((_elements & Text)==Text) && !_text.empty()) {
 		assert(_layout);
@@ -377,7 +376,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 			printf("%s: f:%dx%d bh:%.0f tw:%d (%dx%d) %s\"%s\"\n",
 					get_name().c_str(),
 					char_pixel_width(), char_pixel_height(),
-					ceil(_text_height * BASELINESTRETCH),
+					ceil(char_pixel_height() * BASELINESTRETCH),
 					_text_width,
 					get_width(), get_height(),
 					layout_font ? "L:" : "W:",
@@ -577,7 +576,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		_text_height = char_pixel_height ();
 		// if _layout does not exist, char_pixel_height() creates it,
 		_layout->get_pixel_size (_text_width, ignored);
-		req->width += rint(1.6 * char_pixel_width()); // padding
+		req->width += rint(1.75 * char_pixel_width()); // padding
 		req->width += _text_width;
 		req->height = std::max(req->height, (int) ceil(_text_height * BASELINESTRETCH + 1.0));
 	} else {
@@ -601,9 +600,9 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 
 	if (_elements & (RecButton | CloseCross)) {
 		assert(!(_elements & Text));
-		const int wh = std::max(char_pixel_width(), char_pixel_height()) * BASELINESTRETCH;
+		const int wh = std::max(3.5 * char_pixel_width(), ceil(char_pixel_height() * BASELINESTRETCH + 1));
 		req->width += wh;
-		req->height = std::max(req->height, (int) wh);
+		req->height = std::max(req->height, wh);
 	}
 
 	if (_tweaks & Square) {
@@ -1016,7 +1015,9 @@ ArdourButton::set_tweaks (Tweaks t)
 {
 	if (_tweaks != t) {
 		_tweaks = t;
-		CairoWidget::set_dirty ();
+		if (is_realized()) {
+			queue_resize ();
+		}
 	}
 }
 

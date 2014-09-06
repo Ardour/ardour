@@ -203,7 +203,6 @@ class TimeAxisView : public virtual AxisView
 
 	protected:
 	static Glib::RefPtr<Gtk::SizeGroup> controls_meters_size_group;
-	static Glib::RefPtr<Gtk::SizeGroup> track_number_v_size_group;
 	static unsigned int name_width_px;
 	/* The Standard LHS Controls */
 	Gtk::Table             controls_table;

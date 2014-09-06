@@ -143,10 +143,6 @@ style "mixer_track_rec_enable_button_active" = "track_rec_enable_button_active"
 	ythickness = 0
 }
 
-style "monitor" = "small_button"
-{
-}
-
 style "meterbridge_label" = "small_text"
 {
 }
@@ -1024,10 +1020,18 @@ style "tooltip" = "medium_text"
 
 style "default_toggle_button"
 {
+	bg[NORMAL] = @@COLPREFIX@_bg
+	bg[PRELIGHT] = shade(1.1, @@COLPREFIX@_bg)
 	bg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
-	fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
+style "default_toggle_button_active" = "default_toggle_button"
+{
+	bg[NORMAL] = @@COLPREFIX@_contrasting_indicator
+	bg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
+	bg[SELECTED] = @@COLPREFIX@_contrasting_indicator
+	bg[PRELIGHT] = shade(1.2, @@COLPREFIX@_contrasting_indicator)
+}
 
 style "meter_strip_dpm" = "default"
 {

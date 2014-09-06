@@ -130,8 +130,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	hide_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::CloseCross));
 
-	auto_button.set_name ("mixer strip button");
-	hide_button.set_name ("mixer strip button");
+	auto_button.set_name ("route button");
+	hide_button.set_name ("route button");
 
 	auto_button.unset_flags (Gtk::CAN_FOCUS);
 	hide_button.unset_flags (Gtk::CAN_FOCUS);
@@ -183,6 +183,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	Gtk::DrawingArea *blankB = manage (new Gtk::DrawingArea());
 
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&parent);
+	// TODO use rtv->controls_base_unselected_name
+	// subscribe to route_active_changed, ...
 	if (rtv && rtv->is_audio_track()) {
 		blank0->set_name ("AudioTrackControlsBaseUnselected");
 		blankB->set_name ("AudioTrackControlsBaseUnselected");
