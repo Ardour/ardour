@@ -283,7 +283,7 @@ def configure(conf):
 
     bak = conf.env['define_key']
     conf.define('VERSIONSTRING', str (conf.env['VERSION']))
-    conf.env['define_key'] = {'VERSIONSTRING'}
+    conf.env['define_key'] = ['VERSIONSTRING']
     conf.write_config_header('gtk2ardour-version.h')
     conf.env['define_key'] = bak;
 
