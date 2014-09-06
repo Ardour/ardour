@@ -120,8 +120,14 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _hovering (false)
 	, _focused (false)
 	, _fixed_colors_set (false)
+	, _fallthrough_to_parent (false)
+	, _layout_ellipsize_width (-1)
+	, _ellipsis (Pango::ELLIPSIZE_NONE)
+	, _update_colors (true)
+	, _pattern_height (0)
 {
 	set_text (str);
+	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 }
 
 ArdourButton::~ArdourButton()
