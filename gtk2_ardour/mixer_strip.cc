@@ -178,25 +178,20 @@ MixerStrip::init ()
 	
 	hide_button.set_events (hide_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
-	monitor_input_button->set_diameter (3);
-	monitor_disk_button->set_diameter (3);
-
-        solo_isolated_led = manage (new ArdourButton (ArdourButton::led_default_elements));
-        solo_isolated_led->show ();
-        solo_isolated_led->set_diameter (3);
-        solo_isolated_led->set_no_show_all (true);
-        solo_isolated_led->set_name (X_("solo isolate"));
-        solo_isolated_led->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-        solo_isolated_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_isolate_button_release), false);
+	solo_isolated_led = manage (new ArdourButton (ArdourButton::led_default_elements));
+	solo_isolated_led->show ();
+	solo_isolated_led->set_no_show_all (true);
+	solo_isolated_led->set_name (X_("solo isolate"));
+	solo_isolated_led->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	solo_isolated_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_isolate_button_release), false);
 	UI::instance()->set_tip (solo_isolated_led, _("Isolate Solo"), "");
 
-        solo_safe_led = manage (new ArdourButton (ArdourButton::led_default_elements));
-        solo_safe_led->show ();
-        solo_safe_led->set_diameter (3);
-        solo_safe_led->set_no_show_all (true);
-        solo_safe_led->set_name (X_("solo safe"));
-        solo_safe_led->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-        solo_safe_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_safe_button_release), false);
+	solo_safe_led = manage (new ArdourButton (ArdourButton::led_default_elements));
+	solo_safe_led->show ();
+	solo_safe_led->set_no_show_all (true);
+	solo_safe_led->set_name (X_("solo safe"));
+	solo_safe_led->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	solo_safe_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_safe_button_release), false);
 	UI::instance()->set_tip (solo_safe_led, _("Lock Solo Status"), "");
 
 	solo_safe_led->set_text (_("Lock"));

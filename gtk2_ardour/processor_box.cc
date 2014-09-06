@@ -113,7 +113,6 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 {
 	_vbox.show ();
 	
-	_button.set_diameter (3);
 	_button.set_distinct_led_click (true);
 	_button.set_fallthrough_to_parent(true);
 	_button.set_led_left (true);

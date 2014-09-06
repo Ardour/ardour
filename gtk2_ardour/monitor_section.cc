@@ -497,23 +497,18 @@ MonitorSection::set_session (Session* s)
 
 MonitorSection::ChannelButtonSet::ChannelButtonSet ()
 {
-	cut.set_diameter (3);
-	dim.set_diameter (3);
-	solo.set_diameter (3);
-	invert.set_diameter (3);
+	cut.set_name (X_("monitor section cut"));
+	dim.set_name (X_("monitor section dim"));
+	solo.set_name (X_("monitor section solo"));
+	invert.set_name (X_("monitor section invert"));
 
-        cut.set_name (X_("monitor section cut"));
-        dim.set_name (X_("monitor section dim"));
-        solo.set_name (X_("monitor section solo"));
-        invert.set_name (X_("monitor section invert"));
-
-        cut.unset_flags (Gtk::CAN_FOCUS);
-        dim.unset_flags (Gtk::CAN_FOCUS);
-        solo.unset_flags (Gtk::CAN_FOCUS);
-        invert.unset_flags (Gtk::CAN_FOCUS);
+	cut.unset_flags (Gtk::CAN_FOCUS);
+	dim.unset_flags (Gtk::CAN_FOCUS);
+	solo.unset_flags (Gtk::CAN_FOCUS);
+	invert.unset_flags (Gtk::CAN_FOCUS);
 }
 
-void
+	void
 MonitorSection::populate_buttons ()
 {
         if (!_monitor) {

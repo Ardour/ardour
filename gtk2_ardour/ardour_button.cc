@@ -536,16 +536,6 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 }
 
 void
-ArdourButton::set_diameter (float d)
-{
-	_diameter = (d*2) + 5.0;
-
-	if (is_realized()) {
-		queue_resize ();
-	}
-}
-
-void
 ArdourButton::set_corner_radius (float r)
 {
 	_corner_radius = r;
