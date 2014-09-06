@@ -167,7 +167,8 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	bool _fallthrough_to_parent;
 	int _layout_ellipsize_width;
 	Pango::EllipsizeMode _ellipsis;
-	bool _update_colors_and_patterns;
+	bool _update_colors;
+	int _pattern_height;
 
 	void setup_led_rect ();
 	void set_colors ();

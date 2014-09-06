@@ -87,7 +87,8 @@ ArdourButton::ArdourButton (Element e)
 	, _fallthrough_to_parent (false)
 	, _layout_ellipsize_width (-1)
 	, _ellipsis (Pango::ELLIPSIZE_NONE)
-	, _update_colors_and_patterns (true)
+	, _update_colors (true)
+	, _pattern_height (0)
 {
 	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 }
@@ -173,10 +174,11 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	uint32_t text_color;
 	uint32_t led_color;
 
-	if (_update_colors_and_patterns) {
+	if (_update_colors) {
 		set_colors ();
+	}
+	if (get_height() != _pattern_height) {
 		build_patterns ();
-		_update_colors_and_patterns = false;
 	}
 
 	if ( active_state() == Gtkmm2ext::ExplicitActive ) {
@@ -567,7 +569,11 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	CairoWidget::on_size_request (req);
 
 	if (_diameter == 0) {
-		_diameter = rint (ARDOUR::Config->get_font_scale () / 1024. / 7.5); // 11px with 80% font-scaling
+		const float newdia = rint (ARDOUR::Config->get_font_scale () / 1024. / 7.5); // 11px with 80% font-scaling
+		if (_diameter != newdia) {
+			_pattern_height = 0;
+			_diameter = newdia;
+		}
 	}
 
 	if ((_elements & Text) && !_text.empty()) {
@@ -625,6 +631,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 void
 ArdourButton::set_colors ()
 {
+	_update_colors = false;
 	if (_fixed_colors_set) {
 		return;
 	}
@@ -703,6 +710,7 @@ ArdourButton::build_patterns ()
 
 	if (led_inset_pattern) {
 		cairo_pattern_destroy (led_inset_pattern);
+		led_inset_pattern = 0;
 	}
 
 	//convex gradient
@@ -715,13 +723,11 @@ ArdourButton::build_patterns ()
 	cairo_pattern_add_color_stop_rgba (concave_pattern, 0.0, 0,0,0, 0.5);
 	cairo_pattern_add_color_stop_rgba (concave_pattern, 0.7, 0,0,0, 0.0);
 
-	if (_elements & Indicator) {
-		led_inset_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, _diameter);
-		cairo_pattern_add_color_stop_rgba (led_inset_pattern, 0, 0,0,0, 0.4);
-		cairo_pattern_add_color_stop_rgba (led_inset_pattern, 1, 1,1,1, 0.7);
-	}
+	led_inset_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, _diameter);
+	cairo_pattern_add_color_stop_rgba (led_inset_pattern, 0, 0,0,0, 0.4);
+	cairo_pattern_add_color_stop_rgba (led_inset_pattern, 1, 1,1,1, 0.7);
 
-	CairoWidget::set_dirty ();
+	_pattern_height = get_height() ;
 }
 
 void
@@ -800,7 +806,7 @@ ArdourButton::set_distinct_led_click (bool yn)
 void
 ArdourButton::color_handler ()
 {
-	_update_colors_and_patterns = true;
+	_update_colors = true;
 	CairoWidget::set_dirty ();
 }
 
@@ -809,7 +815,7 @@ ArdourButton::on_size_allocate (Allocation& alloc)
 {
 	CairoWidget::on_size_allocate (alloc);
 	setup_led_rect ();
-	_update_colors_and_patterns = true;
+	_update_colors = true;
 }
 
 void
@@ -891,7 +897,7 @@ ArdourButton::on_name_changed ()
 	_char_pixel_width = 0;
 	_char_pixel_height = 0;
 	_diameter = 0;
-	_update_colors_and_patterns = true;
+	_update_colors = true;
 	if (is_realized()) {
 		queue_resize ();
 	}
@@ -940,7 +946,7 @@ ArdourButton::set_active_state (Gtkmm2ext::ActiveState s)
 	bool changed = (_active_state != s);
 	CairoWidget::set_active_state (s);
 	if (changed) {
-		_update_colors_and_patterns = true;
+		_update_colors = true;
 		CairoWidget::set_dirty ();
 	}
 }
@@ -951,7 +957,7 @@ ArdourButton::set_visual_state (Gtkmm2ext::VisualState s)
 	bool changed = (_visual_state != s);
 	CairoWidget::set_visual_state (s);
 	if (changed) {
-		_update_colors_and_patterns = true;
+		_update_colors = true;
 		CairoWidget::set_dirty ();
 	}
 }
