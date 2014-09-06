@@ -153,6 +153,7 @@ private:
 	bool _ignore_reorder;
 	bool _no_redisplay;
 	bool _redisplaying;
+	bool _redisplay_2;
 	bool _adding_routes;
 	bool _route_deletion_in_progress;
 	int  _queue_mute_rec_solo_etc;

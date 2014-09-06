@@ -70,6 +70,8 @@ EditorRoutes::EditorRoutes (Editor* e)
 	: EditorComponent (e)
         , _ignore_reorder (false)
         , _no_redisplay (false)
+        , _redisplaying (false)
+        , _redisplay_2 (false)
         , _adding_routes (false)
         , _route_deletion_in_progress (false)
         , _menu (0)
@@ -495,9 +497,14 @@ EditorRoutes::show_menu ()
 void
 EditorRoutes::redisplay ()
 {
-	if (_no_redisplay || !_session || _session->deletion_in_progress() || _redisplaying) {
+	if (_redisplaying) {
+		_redisplay_2 = true;
 		return;
 	}
+	if (_no_redisplay || !_session || _session->deletion_in_progress()) {
+		return;
+	}
+	_redisplay_2 = false;
 	_redisplaying = true; // tv->show_at() below causes recursive redisplay via handle_gui_changes()
 
 	TreeModel::Children rows = _model->children();
@@ -548,6 +555,9 @@ EditorRoutes::redisplay ()
 		_editor->vertical_adjustment.set_value (_editor->_full_canvas_height - _editor->_visible_canvas_height);
 	}
 	_redisplaying = false;
+	if (_redisplay_2) {
+		redisplay();
+	}
 }
 
 void
