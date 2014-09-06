@@ -554,6 +554,7 @@ ArdourButton::on_realize()
 	ensure_layout ();
 	if (_layout && _layout->get_text() != _text) {
 		_layout->set_text (_text);
+		queue_resize ();
 	}
 }
 
@@ -685,9 +686,7 @@ void ArdourButton::set_fixed_colors (const uint32_t color_active, const uint32_t
 		RGBA_TO_UINT(  0,   0,   0,   255);  /* use black */
 
 	/* XXX what about led colors ? */
-
-	/* trigger a "style-changed" message */
-	on_name_changed();
+	CairoWidget::set_dirty ();
 }
 
 void
@@ -810,7 +809,6 @@ ArdourButton::on_size_allocate (Allocation& alloc)
 {
 	CairoWidget::on_size_allocate (alloc);
 	setup_led_rect ();
-	_update_colors = true;
 }
 
 void
@@ -883,7 +881,8 @@ ArdourButton::action_toggled ()
 void
 ArdourButton::on_style_changed (const RefPtr<Gtk::Style>&)
 {
-	on_name_changed();
+	_update_colors = true;
+	CairoWidget::set_dirty ();
 }
 
 void
@@ -1057,8 +1056,10 @@ ArdourButton::set_text_ellipsize (Pango::EllipsizeMode e)
 		return;
 	}
 	_layout->set_ellipsize(_ellipsis);
-	if (is_realized () && _layout_ellipsize_width > 0) {
+	if (_layout_ellipsize_width > 0) {
 		_layout->set_width (_layout_ellipsize_width);
+	}
+	if (is_realized ()) {
 		queue_resize ();
 	}
 }
