@@ -151,6 +151,7 @@ private:
 
 	bool _ignore_reorder;
 	bool _no_redisplay;
+	bool _redisplaying;
         bool _adding_routes;
         bool _route_deletion_in_progress;
 

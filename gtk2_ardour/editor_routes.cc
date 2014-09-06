@@ -494,9 +494,10 @@ EditorRoutes::show_menu ()
 void
 EditorRoutes::redisplay ()
 {
-	if (_no_redisplay || !_session || _session->deletion_in_progress()) {
+	if (_no_redisplay || !_session || _session->deletion_in_progress() || _redisplaying) {
 		return;
 	}
+	_redisplaying = true; // tv->show_at() below causes recursive redisplay via handle_gui_changes()
 
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
@@ -545,6 +546,7 @@ EditorRoutes::redisplay ()
 		*/
 		_editor->vertical_adjustment.set_value (_editor->_full_canvas_height - _editor->_visible_canvas_height);
 	}
+	_redisplaying = false;
 }
 
 void

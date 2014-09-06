@@ -72,6 +72,7 @@ ARDOUR_UI::we_have_dependents ()
 void
 ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 {
+	DisplaySuspender ds;
 	BootMessage (_("Setup Editor"));
 	editor->set_session (s);
 	BootMessage (_("Setup Mixer"));

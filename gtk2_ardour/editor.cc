@@ -893,6 +893,7 @@ void
 Editor::show_window ()
 {
 	if (!is_visible ()) {
+		DisplaySuspender ds;
 		show_all ();
 
 		/* XXX: this is a bit unfortunate; it would probably

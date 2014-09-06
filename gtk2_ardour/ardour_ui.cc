@@ -553,9 +553,12 @@ ARDOUR_UI::post_engine ()
 	Glib::signal_timeout().connect_seconds (sigc::mem_fun(*this, &ARDOUR_UI::update_wall_clock), 1);
 #endif
 
-	Config->ParameterChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
-	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
-	Config->map_parameters (pc);
+	{
+		DisplaySuspender ds;
+		Config->ParameterChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
+		boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
+		Config->map_parameters (pc);
+	}
 }
 
 ARDOUR_UI::~ARDOUR_UI ()
