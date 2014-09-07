@@ -87,7 +87,7 @@ UIConfiguration::load_defaults ()
 
 		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
 
-		if (!tree.read (default_ui_config_file_name)) {
+		if (!tree.read (rcfile.c_str())) {
 			error << string_compose(_("cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
 			return -1;
 		}
