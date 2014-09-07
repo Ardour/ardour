@@ -172,7 +172,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		} else {
 			controls_table.attach (*rec_enable_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 		}
-		controls_button_size_group->add_widget(*rec_enable_button);
 
                 if (is_midi_track()) {
                         ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
@@ -216,6 +215,8 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	} else {
 		controls_table.attach (*mute_button, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	}
+	// mute button is always present, it is used to
+	// force the 'blank' placeholders to the proper size
 	controls_button_size_group->add_widget(*mute_button);
 
 	if (!_route->is_master()) {
@@ -224,7 +225,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		} else {
 			controls_table.attach (*solo_button, 4, 5, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 		}
-		controls_button_size_group->add_widget(*solo_button);
 	} else {
 		Gtk::Fixed *blank = manage(new Gtk::Fixed());
 		controls_button_size_group->add_widget(*blank);
@@ -237,12 +237,10 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	if (ARDOUR::Profile->get_mixbus()) {
-		controls_button_size_group->add_widget(route_group_button);
 		controls_table.attach (route_group_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 		controls_table.attach (gm.get_gain_slider(), 3, 5, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
 	}
 	else if (!ARDOUR::Profile->get_trx()) {
-		controls_button_size_group->add_widget(route_group_button);
 		controls_table.attach (route_group_button, 4, 5, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 		controls_table.attach (gm.get_gain_slider(), 0, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
 	}
@@ -251,12 +249,12 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));
 	ARDOUR_UI::instance()->set_tip(route_group_button, _("Route Group"));
 
-	mute_button->set_tweaks(ArdourButton::Square);
-	solo_button->set_tweaks(ArdourButton::Square);
-	rec_enable_button->set_tweaks(ArdourButton::Square);
-	playlist_button.set_tweaks(ArdourButton::Square);
-	automation_button.set_tweaks(ArdourButton::Square);
-	route_group_button.set_tweaks(ArdourButton::Square);
+	mute_button->set_tweaks(ArdourButton::TrackHeader);
+	solo_button->set_tweaks(ArdourButton::TrackHeader);
+	rec_enable_button->set_tweaks(ArdourButton::TrackHeader);
+	playlist_button.set_tweaks(ArdourButton::TrackHeader);
+	automation_button.set_tweaks(ArdourButton::TrackHeader);
+	route_group_button.set_tweaks(ArdourButton::TrackHeader);
 
 	if (is_midi_track()) {
 		ARDOUR_UI::instance()->set_tip(automation_button, _("MIDI Controllers and Automation"));
@@ -269,21 +267,17 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	if (ARDOUR::Profile->get_mixbus()) {
 		controls_table.attach (automation_button, 1, 2, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
-		controls_button_size_group->add_widget(automation_button);
 	}
 	else if (!ARDOUR::Profile->get_trx()) {
 		controls_table.attach (automation_button, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
-		controls_button_size_group->add_widget(automation_button);
 	}
 
 	if (is_track() && track()->mode() == ARDOUR::Normal) {
 		if (ARDOUR::Profile->get_mixbus()) {
 			controls_table.attach (playlist_button, 0, 1, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
-			controls_button_size_group->add_widget(playlist_button);
 		}
 		else if (!ARDOUR::Profile->get_trx()) {
 			controls_table.attach (playlist_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
-			controls_button_size_group->add_widget(playlist_button);
 		}
 	}
 

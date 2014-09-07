@@ -129,6 +129,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	}
 
 	hide_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::CloseCross));
+	hide_button.set_tweaks(ArdourButton::TrackHeader);
 
 	auto_button.set_name ("route button");
 	hide_button.set_name ("route button");
@@ -198,7 +199,9 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		blankB->set_name ("AudioBusControlsBaseUnselected");
 	}
 	blank0->set_size_request (-1, -1);
-	blankB->set_size_request (4, -1);
+	// one button width (blank0) + 2 * table colspacing - 1 * sep line
+	// -> align with 2nd button in Mixbus profile
+	blankB->set_size_request (3, -1);
 
 	VSeparator* separator = manage (new VSeparator());
 	separator->set_name("TrackSeparator");

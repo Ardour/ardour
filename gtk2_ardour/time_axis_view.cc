@@ -1147,7 +1147,7 @@ TimeAxisView::compute_heights ()
 	window.add (one_row_table);
 	test_button->set_name ("mute button");
 	test_button->set_text (_("M"));
-	test_button->set_tweaks (ArdourButton::Square);
+	test_button->set_tweaks (ArdourButton::TrackHeader);
 
 	one_row_table.set_border_width (border_width);
 	one_row_table.set_row_spacings (2);
