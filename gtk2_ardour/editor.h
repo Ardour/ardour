@@ -1617,6 +1617,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Table               toolbar_selection_clock_table;
 	Gtk::Label               toolbar_selection_cursor_label;
 
+        WavesButton& add_marker_button;
+
 	Gtkmm2ext::TearOff*      _mouse_mode_tearoff;
 	WavesButton& _tool_marker_button;
 	ArdourButton mouse_draw_button;
