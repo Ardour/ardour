@@ -428,12 +428,10 @@ if test x$SAE != x ; then
     cp $BUILD_ROOT/gtk2_ardour/SAE-de-nokeypad.bindings  $Resources
     cp $BUILD_ROOT/gtk2_ardour/SAE-us-keypad.bindings  $Resources
     cp $BUILD_ROOT/gtk2_ardour/SAE-us-nokeypad.bindings  $Resources
-    cp $BUILD_ROOT/ardour_system_sae.rc $Resources/ardour_system.rc
-    echo cp $BUILD_ROOT/ardour_system_sae.rc $Resources/ardour_system.rc
     cp $BUILD_ROOT/instant.xml.sae $Resources/instant.xml
     echo cp $BUILD_ROOT/instant.xml.sae $Resources/instant.xml
 else
-    cp ../../ardour_system.rc $Resources/ardour_system.rc
+    cp ../../system_config $Resources/system_config
     cp ../../instant.xml $Resources/instant.xml
     echo cp ../../instant.xml $Resources/instant.xml
 fi
