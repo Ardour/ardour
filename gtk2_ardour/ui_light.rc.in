@@ -6,18 +6,18 @@
 # Released under the terms of the GNU GPL v2:  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 #
 
-#@color fg #EEEEEC
-#@color bg #54555d
-#@color text #EEEEEC
+#@color fg #171717
+#@color bg #cccccc
+#@color text #171717
 #@color light_text_on_dark #CFCFC1
-#@color base #171717
+#@color base #cccccc
 #@color fg_selected #EEF
 #@color bg_selected #58B
 #@color fg_tooltip #1F1F1F
 #@color bg_tooltip #FCF5B8
 
-#@color lightest #FFFFFF
-#@color darkest #222
+#@color lightest #ffffff
+#@color darkest #000000
 #@color bright_indicator #F11
 #@color contrasting_indicator #9f3
 #@color somewhat_bright_indicator #CEF
@@ -29,21 +29,21 @@
 #@color midi_channel_selector #005900
 #@color mute #FFFA87
 #@color mono #DEC
-#@color monitor #FFAB34
+#@color monitor #7596DE
 #@color control_text2 #8D2B1B
-#@color control_base #26292D
+#@color control_base #ffffff
 #@color control_text #D0D2D5
-#@color audio_track #33445e
-#@color midi_track #445033
-#@color audio_bus #262c35
+#@color audio_track #aaaaaa
+#@color midi_track #aabbbb
+#@color audio_bus #888899
 
-#@color send_fg #9FD5C1
-#@color send_bg #33445e
+#@color send_fg #30F7B0
+#@color send_bg #C4C4B8
 
-#@color processor_frame_selected #E2CC33
-#@color processor_fader #666666
+#@color processor_frame_selected #999999
+#@color processor_fader_bg #666666
 #@color processor_fader_frame #7F7F7F
-#@color processor_prefader #4D0000
+#@color processor_prefader #ffffff
 #@color processor_prefader_frame #7F0000
 #@color processor_postfader #1A4D1A
 #@color processor_postfader_frame #1B7F1B
@@ -57,11 +57,14 @@ gtk_color_scheme = "@COLOR_SCHEME@"
 style "default" = "medium_text"
 {
   #Original values for reference
-
+  GtkWidget::cursor_color =  @@COLPREFIX@_lightest
+  GtkButton::default_border = { 0, 0, 0, 0 }
+  GtkButton::default_outside_border = { 0, 0, 0, 0 }
+  GtkButton::button_relief = GTK_RELIEF_NONE
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
-  GtkTreeView::even-row-color = shade(0.25,@@COLPREFIX@_base)
-  GtkTreeView::odd-row-color = lighter(lighter(@@COLPREFIX@_base))
+  GtkTreeView::even-row-color = shade(0.75,@@COLPREFIX@_base)
+  GtkTreeView::odd-row-color = darker(@@COLPREFIX@_base)
   
   GtkWidget           :: focus-line-pattern               = "\001\001"        #                              Dash pattern used to draw the focus indicator.
   GtkWidget           :: focus-line-width                 = 1                 # [               1 ] ( >= 0 ) Width, in pixels, of the focus indicator line.
@@ -69,18 +72,17 @@ style "default" = "medium_text"
   GtkWidget           :: interior-focus                   = 1                 # [               1 ] ( bool ) Draw the focus indicator inside widgets.
   GtkWidget           :: scroll-arrow-hlength             = 16                # [              16 ] ( >= 1 ) Length of horizontal scroll arrows.
   GtkWidget           :: scroll-arrow-vlength             = 16                # [              16 ] ( >= 1 ) Length of vertical scroll arrows.
+
   GtkWidget           :: link-color                       = shade(1.25, @@COLPREFIX@_bright_color)
   GtkWidget           :: visited-link-color               = @@COLPREFIX@_bright_color
   
+#Window Properties
   GtkDialog           :: action-area-border               = 4                 # [               5 ] ( >= 0 ) Width of border around the button area at the bottom of the dialog.
   GtkDialog           :: button-spacing                   = 4                 # [               6 ] ( >= 0 ) Spacing between buttons.
   GtkDialog           :: content-area-border              = 2                 # [               2 ] ( >= 0 ) Width of border around the main dialog area.
   GtkDialog           :: content-area-spacing             = 0                 # [               0 ] ( >= 0 ) The default spacing used between elements of the content area of the dialog.
   
-
-  GtkButton           :: default-border = { 0, 0, 0, 0 }
-  GtkButton           :: default-outside_border = { 0, 0, 0, 0 }
-  GtkButton           :: button-relief = GTK_RELIEF_NONE
+#Control Properties
   GtkButton           :: child-displacement-x             = 1                 # [               0 ]          How far in x direction to move the button when its depressed.
   GtkButton           :: child-displacement-y             = 1                 # [               0 ]          ... y
   GtkButton           :: default-border                   = { 0, 0, 0, 0 }    #                              Extra space to add for CAN_DEFAULT buttons.
@@ -155,7 +157,7 @@ style "default" = "medium_text"
   GtkTreeView         :: vertical-separator               = 2                 # [               2 ] ( >= 0 ) Vertical space between cells. Must be an even number.
 
   GtkEntry            :: honors-transparent-bg-hint       = 1                 # [               0 ] ( bool ) (Clearlooks) Without this, gecko will fill in the background of the entry.
-  GtkEntry            :: cursor-color = @@COLPREFIX@_fg_selected
+
 
   #GtkToolbar::shadow_type = GTK_SHADOW_ETCHED_IN
 
@@ -184,7 +186,7 @@ style "default" = "medium_text"
   text[NORMAL]        = @@COLPREFIX@_text
   text[PRELIGHT]      = @@COLPREFIX@_text
   text[ACTIVE]        = @@COLPREFIX@_fg_selected
-  text[INSENSITIVE]   = shade(0.7, @@COLPREFIX@_lightest)
+  text[INSENSITIVE]   = darker(darker (@@COLPREFIX@_bg))
   text[SELECTED]      = @@COLPREFIX@_fg_selected
 
 #engine specific tweaks
@@ -199,9 +201,18 @@ style "default" = "medium_text"
 }
 
 
+style "mixer_red_active_button" = "very_small_button"
+{
+	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
+
+ 	base[INSENSITIVE] = { 0.16, 0.16, 0.21 }
+ 	bg[INSENSITIVE] = { 0.16, 0.16, 0.21 }
+}
+
+
 style "track_controls_inactive" 
 {
-	bg[NORMAL] =      { 0.60, 0.20, 0.26 }
+	bg[NORMAL] =      { 0.60, 0.60, 0.66 }
 	bg[ACTIVE] =      { 0.60, 0.60, 0.66 }
 	bg[INSENSITIVE] = { 0.60, 0.60, 0.66 }
 	bg[SELECTED] =    { 0.60, 0.60, 0.66 }
@@ -287,7 +298,7 @@ style "treeview_display" = "small_bold_text"
 	base[SELECTED] = { 0, 0.75, 0.75 }
 
 	# row text when in normal state and not a parent
-	text[NORMAL] = { 0.80, 0.80, 0.80 }
+	text[NORMAL] = { 0.20, 0.20, 0.20 }
 
 	# selected row text with window focus
 	text[SELECTED] = { 1.0, 1.0, 1.0 }  
@@ -318,7 +329,7 @@ style "track_controls_inactive" = "larger_text"
 
 style "edit_controls_base_selected"
 {
-	bg[NORMAL] = { 0.32, 0.32, 0.54 }
+ 	bg[NORMAL] = { 0.32, 0.32, 0.54 }
 	bg[ACTIVE] = { 0.32, 0.32, 0.54 }
 	bg[INSENSITIVE] = { 0.32, 0.32, 0.54 }
 	bg[SELECTED] = { 0.32, 0.32, 0.54 }
@@ -350,6 +361,6 @@ style "status_bar_box"
         bg[NORMAL] = { 0.149, 0.149, 0.149 }
 }
 
-##include ardour3_dark_fonts.rc
-##include ardour3_dark_styles.rc
-##include ardour3_widgets.rc
+##include light_fonts.rc
+##include light_styles.rc
+##include widgets.rc

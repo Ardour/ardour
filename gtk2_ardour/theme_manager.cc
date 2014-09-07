@@ -376,11 +376,7 @@ ThemeManager::on_dark_theme_button_toggled()
 {
 	if (!dark_button.get_active()) return;
 
-	if (HACK_PROFILE_IS_SAE()){
-		ARDOUR_UI::config()->set_ui_rc_file("ardour3_ui_dark_sae.rc");
-	} else {
-		ARDOUR_UI::config()->set_ui_rc_file("ardour3_ui_dark.rc");
-	}
+        ARDOUR_UI::config()->set_ui_rc_file("ui_dark.rc");
 	ARDOUR_UI::config()->set_dirty ();
 
 	load_rc_file (ARDOUR_UI::config()->get_ui_rc_file(), true);
@@ -391,12 +387,7 @@ ThemeManager::on_light_theme_button_toggled()
 {
 	if (!light_button.get_active()) return;
 
-	if (HACK_PROFILE_IS_SAE()){
-		ARDOUR_UI::config()->set_ui_rc_file("ardour3_ui_light_sae.rc");
-	} else {
-		ARDOUR_UI::config()->set_ui_rc_file("ardour3_ui_light.rc");
-	}
-
+        ARDOUR_UI::config()->set_ui_rc_file("ui_light.rc");
 	load_rc_file (ARDOUR_UI::config()->get_ui_rc_file(), true);
 }
 
@@ -473,9 +464,9 @@ ThemeManager::setup_theme ()
 		rcfile = ARDOUR_UI::config()->get_ui_rc_file();
 	}
 
-	if (rcfile == "ardour3_ui_dark.rc" || rcfile == "ardour3_ui_dark_sae.rc") {
+	if (rcfile == "ui_dark.rc") {
 		dark_button.set_active();
-	} else if (rcfile == "ardour3_ui_light.rc" || rcfile == "ardour3_ui_light_sae.rc") {
+	} else if (rcfile == "ui_light.rc") {
 		light_button.set_active();
 	}
 	

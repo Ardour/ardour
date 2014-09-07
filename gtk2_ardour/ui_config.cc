@@ -40,6 +40,9 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
+static const char* ui_config_file_name = "ui_config";
+static const char* default_ui_config_file_name = "default_ui_config";
+
 UIConfiguration::UIConfiguration ()
 	:
 #undef  UI_CONFIG_VARIABLE
@@ -76,25 +79,15 @@ int
 UIConfiguration::load_defaults ()
 {
 	int found = 0;
+        std::string rcfile;
 
-	std::string default_ui_rc_file;
-	std::string rcfile;
-
-	if (getenv ("ARDOUR_SAE")) {
-		rcfile = "ardour3_ui_sae.conf";
-	} else {
-		rcfile = "ardour3_ui_default.conf";
-	}
-
-	if (find_file (ardour_config_search_path(), rcfile, default_ui_rc_file) ) {
+	if (find_file (ardour_config_search_path(), default_ui_config_file_name, rcfile) ) {
 		XMLTree tree;
 		found = 1;
 
-		string rcfile = default_ui_rc_file;
-
 		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
 
-		if (!tree.read (rcfile.c_str())) {
+		if (!tree.read (default_ui_config_file_name)) {
 			error << string_compose(_("cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
 			return -1;
 		}
@@ -115,13 +108,11 @@ UIConfiguration::load_state ()
 {
 	bool found = false;
 
-	std::string default_ui_rc_file;
+	std::string rcfile;
 
-	if ( find_file (ardour_config_search_path(), "ardour3_ui_default.conf", default_ui_rc_file)) {
+	if ( find_file (ardour_config_search_path(), default_ui_config_file_name, rcfile)) {
 		XMLTree tree;
 		found = true;
-
-		string rcfile = default_ui_rc_file;
 
 		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
 
@@ -136,13 +127,9 @@ UIConfiguration::load_state ()
 		}
 	}
 
-	std::string user_ui_rc_file;
-
-	if (find_file (ardour_config_search_path(), "ardour3_ui.conf", user_ui_rc_file)) {
+	if (find_file (ardour_config_search_path(), ui_config_file_name, rcfile)) {
 		XMLTree tree;
 		found = true;
-
-		string rcfile = user_ui_rc_file;
 
 		info << string_compose (_("Loading user ui configuration file %1"), rcfile) << endmsg;
 
@@ -173,7 +160,7 @@ UIConfiguration::save_state()
 	XMLTree tree;
 
 	std::string rcfile(user_config_directory());
-	rcfile = Glib::build_filename (rcfile, "ardour3_ui.conf");
+	rcfile = Glib::build_filename (rcfile, ui_config_file_name);
 
 	// this test seems bogus?
 	if (rcfile.length()) {

@@ -18,7 +18,7 @@
 */
 
 UI_CONFIG_VARIABLE(std::string, icon_set, "icon-set", "default")
-UI_CONFIG_VARIABLE(std::string, ui_rc_file, "ui-rc-file", "ardour3_ui_dark.rc")
+UI_CONFIG_VARIABLE(std::string, ui_rc_file, "ui-rc-file", "ui_dark.rc")
 UI_CONFIG_VARIABLE(bool, flat_buttons, "flat-buttons", false)
 UI_CONFIG_VARIABLE(bool, blink_rec_arm, "blink-rec-arm", false)
 UI_CONFIG_VARIABLE(float, waveform_gradient_depth, "waveform-gradient-depth", 0)

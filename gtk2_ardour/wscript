@@ -602,70 +602,70 @@ def build(bld):
 
     # RC files
     dark_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme(
-        'gtk2_ardour/ardour3_ui_dark.rc.in', 'ARDOUR_DARK')
+        'gtk2_ardour/ui_dark.rc.in', 'ARDOUR_DARK')
     dark_rc_subst_dict['COLPREFIX'] = 'ARDOUR_DARK'
     light_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme(
-        'gtk2_ardour/ardour3_ui_light.rc.in', 'ARDOUR_LIGHT')
+        'gtk2_ardour/ui_light.rc.in', 'ARDOUR_LIGHT')
     light_rc_subst_dict['COLPREFIX'] = 'ARDOUR_LIGHT'
 
     obj              = bld(features = 'subst')
-    obj.source       = [ 'ardour3_ui_dark.rc.in' ]
-    obj.target       = 'ardour3_ui_dark.rc.pre'
+    obj.source       = [ 'ui_dark.rc.in' ]
+    obj.target       = 'ui_dark.rc.pre'
     obj.install_path = None
     set_subst_dict(obj, dark_rc_subst_dict)
 
     obj              = bld(features = 'subst')
-    obj.source       = [ 'ardour3_ui_light.rc.in' ]
-    obj.target       = 'ardour3_ui_light.rc.pre'
+    obj.source       = [ 'ui_light.rc.in' ]
+    obj.target       = 'ui_light.rc.pre'
     obj.install_path = None
     set_subst_dict(obj, light_rc_subst_dict)
 
     obj              = bld(features = 'subst')
-    obj.source       = [ 'ardour3_styles.rc.in' ]
-    obj.target       = 'ardour3_dark_styles.rc'
+    obj.source       = [ 'styles.rc.in' ]
+    obj.target       = 'dark_styles.rc'
     obj.install_path = None
     set_subst_dict(obj, dark_rc_subst_dict)
 
     obj              = bld(features = 'subst')
-    obj.source       = [ 'ardour3_styles.rc.in' ]
-    obj.target       = 'ardour3_light_styles.rc'
+    obj.source       = [ 'styles.rc.in' ]
+    obj.target       = 'light_styles.rc'
     obj.install_path = None
     set_subst_dict(obj, light_rc_subst_dict)
 
     obj              = bld(features = 'subst')
-    obj.source       = [ 'ardour3_fonts.rc.in' ]
-    obj.target       = 'ardour3_dark_fonts.rc'
+    obj.source       = [ 'fonts.rc.in' ]
+    obj.target       = 'dark_fonts.rc'
     obj.install_path = None
     set_subst_dict(obj, dark_rc_subst_dict)
 
     obj              = bld(features = 'subst')
-    obj.source       = [ 'ardour3_fonts.rc.in' ]
-    obj.target       = 'ardour3_light_fonts.rc'
+    obj.source       = [ 'fonts.rc.in' ]
+    obj.target       = 'light_fonts.rc'
     obj.install_path = None
     set_subst_dict(obj, light_rc_subst_dict)
 
-    obj              = bld(rule = autowaf.copyfile) 
-    obj.source       = [ 'ardour3_widget_list.rc' ]
-    obj.target       = 'ardour3_widgets.rc'
+    obj              = bld(rule = copyfile) 
+    obj.source       = [ 'widget_list.rc' ]
+    obj.target       = 'widgets.rc'
     obj.install_path = None
 
     obj = bld (rule = include_processor)
-    obj.source = [ 'ardour3_ui_dark.rc.pre' ]
+    obj.source = [ 'ui_dark.rc.pre' ]
     # find and add all ##include dependencies as sources
-    obj.source += _doPyp (bld.path.find_resource ('ardour3_ui_dark.rc.in').srcpath(), True)
-    obj.target = 'ardour3_ui_dark.rc'
+    obj.source += _doPyp (bld.path.find_resource ('ui_dark.rc.in').srcpath(), True)
+    obj.target = 'ui_dark.rc'
     obj.install_path = bld.env['CONFDIR']
 
     obj = bld (rule = include_processor)
-    obj.source = [ 'ardour3_ui_light.rc.pre' ]
+    obj.source = [ 'ui_light.rc.pre' ]
     # find and add all ##include dependencies as sources
-    obj.source += _doPyp (bld.path.find_resource ('ardour3_ui_light.rc.in').srcpath(), True)
-    obj.target = 'ardour3_ui_light.rc'
+    obj.source += _doPyp (bld.path.find_resource ('ui_light.rc.in').srcpath(), True)
+    obj.target = 'ui_light.rc'
     obj.install_path = bld.env['CONFDIR']
 
     obj              = bld(features = 'subst')
-    obj.source       = [ 'ardour3_ui_default.conf.in' ]
-    obj.target       = 'ardour3_ui_default.conf'
+    obj.source       = [ 'ui_default.conf.in' ]
+    obj.target       = 'ui_default.conf'
     obj.install_path = None
     set_subst_dict(obj, ui_conf_dict)
 
@@ -718,7 +718,7 @@ def build(bld):
     bld.install_files(bld.env['DATADIR'], 'ArdourMono.ttf')
 
     # Default UI configuration
-    bld.install_files(bld.env['CONFDIR'], 'ardour3_ui_default.conf')
+    bld.install_files(bld.env['CONFDIR'], 'ui_default.conf')
 
     # Default export stuff
     bld.install_files(os.path.join(bld.env['CONFDIR'],' export'), bld.path.ant_glob('export/*.format'))
