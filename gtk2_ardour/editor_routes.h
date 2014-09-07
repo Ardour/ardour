@@ -62,6 +62,7 @@ public:
 
 private:
 	void initial_display ();
+	void redisplay_real ();
 	void on_input_active_changed (std::string const &);
 	void on_tv_rec_enable_changed (std::string const &);
 	void on_tv_mute_enable_toggled (std::string const &);
@@ -78,6 +79,7 @@ private:
 	bool button_press (GdkEventButton *);
 	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route>);
 	void handle_gui_changes (std::string const &, void *);
+	bool idle_update_mute_rec_solo_etc ();
 	void update_rec_display ();
 	void update_mute_display ();
 	void update_solo_display (bool);
@@ -159,9 +161,11 @@ private:
 
 	bool _ignore_reorder;
 	bool _no_redisplay;
-    bool _adding_routes;
-    bool _route_deletion_in_progress;
-    boost::shared_ptr<ARDOUR::Route> _route_is_being_deleted;
+        bool _adding_routes;
+        bool _route_deletion_in_progress;
+        boost::shared_ptr<ARDOUR::Route> _route_is_being_deleted;
+	volatile gint _redisplay_active;
+	volatile gint _queue_tv_update;
 
 	Gtk::Menu* _menu;
     Gtk::Widget* old_focus;
