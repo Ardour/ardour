@@ -285,13 +285,12 @@ AudioStreamView::setup_rec_box ()
 
 			ArdourCanvas::Rectangle * rec_rect = new ArdourCanvas::Rectangle (_canvas_group);
 			rec_rect->set_x0 (xstart);
-			rec_rect->set_y0 (1);
+			rec_rect->set_y0 (0);
 			rec_rect->set_x1 (xend);
 			rec_rect->set_y1 (child_height ());
 			rec_rect->set_outline_what (ArdourCanvas::Rectangle::What (0));
 			rec_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame());
 			rec_rect->set_fill_color (fill_color);
-			rec_rect->lower_to_bottom();
 
 			RecBoxInfo recbox;
 			recbox.rectangle = rec_rect;
