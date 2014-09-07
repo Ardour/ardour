@@ -370,7 +370,7 @@ class DummyAudioBackend : public AudioBackend {
 		/* port engine */
 		PortHandle add_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
 		int register_system_ports ();
-		void unregister_system_ports ();
+		void unregister_ports (bool system_only = false);
 
 		std::vector<DummyAudioPort *> _system_inputs;
 		std::vector<DummyPort *> _ports;

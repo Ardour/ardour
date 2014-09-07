@@ -317,6 +317,9 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 
 	if (_ports.size()) {
 		PBD::warning << _("DummyAudioBackend: recovering from unclean shutdown, port registry is not empty.") << endmsg;
+		for (std::vector<DummyPort*>::const_iterator it = _ports.begin (); it != _ports.end (); ++it) {
+			PBD::info << _("DummyAudioBackend: port '") << (*it)->name () << "' exists." << endmsg;
+		}
 		_system_inputs.clear();
 		_ports.clear();
 	}
@@ -366,7 +369,7 @@ DummyAudioBackend::stop ()
 		PBD::error << _("DummyAudioBackend: failed to terminate.") << endmsg;
 		return -1;
 	}
-	unregister_system_ports();
+	unregister_ports();
 	return 0;
 }
 
@@ -709,14 +712,15 @@ DummyAudioBackend::register_system_ports()
 }
 
 void
-DummyAudioBackend::unregister_system_ports()
+DummyAudioBackend::unregister_ports (bool system_only)
 {
 	size_t i = 0;
 	_system_inputs.clear();
 	while (i <  _ports.size ()) {
 		DummyPort* port = _ports[i];
-		if (port->is_physical () && port->is_terminal ()) {
+		if (! system_only || (port->is_physical () && port->is_terminal ())) {
 			port->disconnect_all ();
+			delete port;
 			_ports.erase (_ports.begin() + i);
 		} else {
 			++i;
