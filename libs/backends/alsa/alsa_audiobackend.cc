@@ -914,8 +914,8 @@ AlsaAudioBackend::add_port (
 void
 AlsaAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 {
-	if (!valid_port (port_handle)) {
-		PBD::error << _("AlsaBackend::unregister_port: Invalid Port.") << endmsg;
+	if (!_run) {
+		return;
 	}
 	AlsaPort* port = static_cast<AlsaPort*>(port_handle);
 	std::vector<AlsaPort*>::iterator i = std::find (_ports.begin (), _ports.end (), static_cast<AlsaPort*>(port_handle));
