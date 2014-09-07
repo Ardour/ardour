@@ -563,7 +563,7 @@ EditorRoutes::redisplay ()
 	redisplay_real ();
 
 	while (!g_atomic_int_compare_and_exchange (&_redisplay_active, 1, 0)) {
-		g_atomic_pointer_set(&_redisplay_active, 1);
+		g_atomic_int_set(&_redisplay_active, 1);
 		redisplay_real ();
 	}
 }
