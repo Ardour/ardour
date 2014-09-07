@@ -68,7 +68,7 @@ Auditioner::init ()
 		return -1;
 	}
 
-	_output->add_port ("Midiaudition", this, DataType::MIDI);
+	_output->add_port ("", this, DataType::MIDI);
 
 	lookup_synth();
 
