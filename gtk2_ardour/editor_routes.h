@@ -60,6 +60,7 @@ public:
 
 private:
 	void initial_display ();
+	void redisplay_real ();
 	void on_input_active_changed (std::string const &);
 	void on_tv_rec_enable_changed (std::string const &);
 	void on_tv_mute_enable_toggled (std::string const &);
@@ -152,11 +153,10 @@ private:
 
 	bool _ignore_reorder;
 	bool _no_redisplay;
-	bool _redisplaying;
-	bool _redisplay_2;
 	bool _adding_routes;
 	bool _route_deletion_in_progress;
-	int  _queue_mute_rec_solo_etc;
+	volatile gint _redisplay_active;
+	volatile gint _queue_tv_update;
 
 	Gtk::Menu* _menu;
 	Gtk::Widget* old_focus;

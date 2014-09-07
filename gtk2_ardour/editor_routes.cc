@@ -70,10 +70,10 @@ EditorRoutes::EditorRoutes (Editor* e)
 	: EditorComponent (e)
         , _ignore_reorder (false)
         , _no_redisplay (false)
-        , _redisplaying (false)
-        , _redisplay_2 (false)
         , _adding_routes (false)
         , _route_deletion_in_progress (false)
+        , _redisplay_active (0)
+        , _queue_tv_update (0)
         , _menu (0)
         , old_focus (0)
         , selection_countdown (0)
@@ -495,25 +495,15 @@ EditorRoutes::show_menu ()
 }
 
 void
-EditorRoutes::redisplay ()
+EditorRoutes::redisplay_real ()
 {
-	if (_redisplaying) {
-		_redisplay_2 = true;
-		return;
-	}
-	if (_no_redisplay || !_session || _session->deletion_in_progress()) {
-		return;
-	}
-	_redisplay_2 = false;
-	_redisplaying = true; // tv->show_at() below causes recursive redisplay via handle_gui_changes()
-
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 	uint32_t position;
 
 	/* n will be the count of tracks plus children (updated by TimeAxisView::show_at),
-	   so we will use that to know where to put things.
-	*/
+	 * so we will use that to know where to put things.
+	 */
 	int n;
 
 	for (n = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
@@ -538,25 +528,43 @@ EditorRoutes::redisplay ()
 	}
 
 	/* whenever we go idle, update the track view list to reflect the new order.
-	   we can't do this here, because we could mess up something that is traversing
-	   the track order and has caused a redisplay of the list.
-	*/
+	 * we can't do this here, because we could mess up something that is traversing
+	 * the track order and has caused a redisplay of the list.
+	 */
 	Glib::signal_idle().connect (sigc::mem_fun (*_editor, &Editor::sync_track_view_list_and_routes));
 
-        _editor->reset_controls_layout_height (position);
-        _editor->reset_controls_layout_width ();
+	_editor->reset_controls_layout_height (position);
+	_editor->reset_controls_layout_width ();
 	_editor->_full_canvas_height = position;
 
 	if ((_editor->vertical_adjustment.get_value() + _editor->_visible_canvas_height) > _editor->vertical_adjustment.get_upper()) {
 		/*
-		   We're increasing the size of the canvas while the bottom is visible.
-		   We scroll down to keep in step with the controls layout.
-		*/
+		 * We're increasing the size of the canvas while the bottom is visible.
+		 * We scroll down to keep in step with the controls layout.
+		 */
 		_editor->vertical_adjustment.set_value (_editor->_full_canvas_height - _editor->_visible_canvas_height);
 	}
-	_redisplaying = false;
-	if (_redisplay_2) {
-		redisplay();
+}
+
+void
+EditorRoutes::redisplay ()
+{
+	if (_no_redisplay || !_session || _session->deletion_in_progress()) {
+		return;
+	}
+
+	// model deprecated g_atomic_int_exchange_and_add(, 1)
+	g_atomic_int_inc(&_redisplay_active);
+	if (!g_atomic_int_compare_and_exchange (&_redisplay_active, 1, 1)) {
+		printf ("SKIP redisplay\n");
+		return;
+	}
+
+	redisplay_real ();
+
+	while (!g_atomic_int_compare_and_exchange (&_redisplay_active, 1, 0)) {
+		g_atomic_pointer_set(&_redisplay_active, 1);
+		redisplay_real ();
 	}
 }
 
@@ -792,10 +800,9 @@ EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost:
 void
 EditorRoutes::update_active_display ()
 {
-	if (_queue_mute_rec_solo_etc == 0) {
+	if (g_atomic_int_compare_and_exchange (&_queue_tv_update, 0, 1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
-	_queue_mute_rec_solo_etc |= 16;
 }
 
 void
@@ -1570,39 +1577,26 @@ EditorRoutes::update_input_active_display ()
 void
 EditorRoutes::update_rec_display ()
 {
-	if (_queue_mute_rec_solo_etc == 0) {
+	if (g_atomic_int_compare_and_exchange (&_queue_tv_update, 0, 1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
-	_queue_mute_rec_solo_etc |= 32;
 }
 
 bool
 EditorRoutes::idle_update_mute_rec_solo_etc()
 {
-	const int what = _queue_mute_rec_solo_etc;
-	_queue_mute_rec_solo_etc = 0;
+	g_atomic_int_set (&_queue_tv_update, 0);
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		boost::shared_ptr<Route> route = (*i)[_columns.route];
-		if (what & 1) {
-			(*i)[_columns.mute_state] = RouteUI::mute_active_state (_session, route);
-		}
-		if (what & 2) {
-			(*i)[_columns.solo_state] = RouteUI::solo_active_state (route);
-		}
-		if (what & 4) {
-			(*i)[_columns.solo_isolate_state] = RouteUI::solo_isolate_active_state (route) ? 1 : 0;
-		}
-		if (what & 8) {
-			(*i)[_columns.solo_safe_state] = RouteUI::solo_safe_active_state (route) ? 1 : 0;
-		}
-		if (what & 16) {
-			(*i)[_columns.active] = route->active ();
-		}
-		if (what & 32) { // rec
-
+		(*i)[_columns.mute_state] = RouteUI::mute_active_state (_session, route);
+		(*i)[_columns.solo_state] = RouteUI::solo_active_state (route);
+		(*i)[_columns.solo_isolate_state] = RouteUI::solo_isolate_active_state (route) ? 1 : 0;
+		(*i)[_columns.solo_safe_state] = RouteUI::solo_safe_active_state (route) ? 1 : 0;
+		(*i)[_columns.active] = route->active ();
+		{
 			if (boost::dynamic_pointer_cast<Track> (route)) {
 				boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (route);
 
@@ -1629,37 +1623,33 @@ EditorRoutes::idle_update_mute_rec_solo_etc()
 void
 EditorRoutes::update_mute_display ()
 {
-	if (_queue_mute_rec_solo_etc == 0) {
+	if (g_atomic_int_compare_and_exchange (&_queue_tv_update, 0, 1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
-	_queue_mute_rec_solo_etc |= 1;
 }
 
 void
 EditorRoutes::update_solo_display (bool /* selfsoloed */)
 {
-	if (_queue_mute_rec_solo_etc == 0) {
+	if (g_atomic_int_compare_and_exchange (&_queue_tv_update, 0, 1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
-	_queue_mute_rec_solo_etc |= 2;
 }
 
 void
 EditorRoutes::update_solo_isolate_display ()
 {
-	if (_queue_mute_rec_solo_etc == 0) {
+	if (g_atomic_int_compare_and_exchange (&_queue_tv_update, 0, 1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
-	_queue_mute_rec_solo_etc |= 4;
 }
 
 void
 EditorRoutes::update_solo_safe_display ()
 {
-	if (_queue_mute_rec_solo_etc == 0) {
+	if (g_atomic_int_compare_and_exchange (&_queue_tv_update, 0, 1)) {
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorRoutes::idle_update_mute_rec_solo_etc));
 	}
-	_queue_mute_rec_solo_etc |= 4;
 }
 
 list<TimeAxisView*>
