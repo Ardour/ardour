@@ -295,7 +295,12 @@ AudioStreamView::setup_rec_box ()
 
 			RecBoxInfo recbox;
 			recbox.rectangle = rec_rect;
-			recbox.start = _trackview.session()->transport_frame();
+			
+			if (rec_rects.empty()) {
+				recbox.start = _trackview.session()->record_location ();
+			} else {
+				recbox.start = _trackview.session()->transport_frame ();
+			}
 			recbox.length = 0;
 
 			rec_rects.push_back (recbox);
