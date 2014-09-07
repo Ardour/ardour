@@ -644,7 +644,7 @@ def build(bld):
     obj.install_path = None
     set_subst_dict(obj, light_rc_subst_dict)
 
-    obj              = bld(rule = copyfile) 
+    obj              = bld(rule = autowaf.copyfile) 
     obj.source       = [ 'widget_list.rc' ]
     obj.target       = 'widgets.rc'
     obj.install_path = None
@@ -664,8 +664,8 @@ def build(bld):
     obj.install_path = bld.env['CONFDIR']
 
     obj              = bld(features = 'subst')
-    obj.source       = [ 'ui_default.conf.in' ]
-    obj.target       = 'ui_default.conf'
+    obj.source       = [ 'default_ui_config.in' ]
+    obj.target       = 'default_ui_config'
     obj.install_path = None
     set_subst_dict(obj, ui_conf_dict)
 
