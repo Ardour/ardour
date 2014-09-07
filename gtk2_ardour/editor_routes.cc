@@ -556,7 +556,6 @@ EditorRoutes::redisplay ()
 	// model deprecated g_atomic_int_exchange_and_add(, 1)
 	g_atomic_int_inc(&_redisplay_active);
 	if (!g_atomic_int_compare_and_exchange (&_redisplay_active, 1, 1)) {
-		printf ("SKIP redisplay\n");
 		return;
 	}
 
