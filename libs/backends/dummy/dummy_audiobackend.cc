@@ -595,6 +595,9 @@ DummyAudioBackend::register_port (
 {
 	if (name.size () == 0) { return 0; }
 	if (flags & IsPhysical) { return 0; }
+	if (!_running) {
+		PBD::info << _("DummyBackend::register_port: Engine is not running.") << endmsg;
+	}
 	return add_port (_instance_name + ":" + name, type, flags);
 }
 
@@ -631,8 +634,10 @@ DummyAudioBackend::add_port (
 void
 DummyAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 {
-	if (!valid_port (port_handle)) {
-		PBD::error << _("DummyBackend::unregister_port: Invalid Port.") << endmsg;
+	if (!_running) {
+		PBD::info << _("DummyBackend::unregister_port: Engine is not running.") << endmsg;
+		assert (!valid_port (port_handle));
+		return;
 	}
 	DummyPort* port = static_cast<DummyPort*>(port_handle);
 	std::vector<DummyPort*>::iterator i = std::find (_ports.begin (), _ports.end (), static_cast<DummyPort*>(port_handle));
