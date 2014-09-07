@@ -294,6 +294,35 @@ UIConfiguration::color_by_name (const std::string& name)
 	if (i != canvas_colors.end()) {
 		return i->second->get();
 	}
+#if 0 // yet unsed experimental style postfix
+	/* Idea: use identical colors but different font/sizes
+	 * for variants of the same 'widget'.
+	 *
+	 * example:
+	 *  set_name("mute button");  // in route_ui.cc
+	 *  set_name("mute button small"); // in mixer_strip.cc
+	 *
+	 * ardour3_widget_list.rc:
+	 *  widget "*mute button" style:highest "small_button"
+	 *  widget "*mute button small" style:highest "very_small_text"
+	 *
+	 * both use color-schema of defined in
+	 *   BUTTON_VARS(MuteButton, "mute button")
+	 *
+	 * (in this particular example the widgets should be packed
+	 * vertically shinking the mixer strip ones are currently not)
+	 */
+	const size_t name_len = name.size();
+	const size_t name_sep = name.find(':');
+	for (i = canvas_colors.begin(); i != canvas_colors.end(), name_sep != string::npos; ++i) {
+		const size_t cmp_len = i->first.size();
+		const size_t cmp_sep = i->first.find(':');
+		if (cmp_len >= name_len || cmp_sep == string::npos) continue;
+		if (name.substr(name_sep) != i->first.substr(cmp_sep)) continue;
+		if (name.substr(0, cmp_sep) != i->first.substr(0, cmp_sep)) continue;
+		return i->second->get();
+	}
+#endif
 
 	// cerr << string_compose (_("Color %1 not found"), name) << endl;
 	return RGBA_TO_UINT (g_random_int()%256,g_random_int()%256,g_random_int()%256,0xff);
