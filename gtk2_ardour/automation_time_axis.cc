@@ -222,11 +222,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	hide_button.show ();
 
 	if (_controller) {
-		/* add bar controller */
 		_controller.get()->set_tweaks (PixFader::Tweaks(_controller.get()->tweaks() | PixFader::NoVerticalScroll));
 		controls_table.attach (*_controller.get(), 2, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
-		/* note that this handler connects *before* the default handler */
-		_controller->event_widget().signal_scroll_event().connect (mem_fun (*this, &AutomationTimeAxisView::controls_ebox_scroll), false);
 	}
 
 	controls_table.show_all ();
