@@ -361,6 +361,6 @@ style "status_bar_box"
         bg[NORMAL] = { 0.149, 0.149, 0.149 }
 }
 
-##include ardour3_light_fonts.rc
-##include ardour3_light_styles.rc
-##include ardour3_widgets.rc
+##include light_fonts.rc
+##include light_styles.rc
+##include widgets.rc
