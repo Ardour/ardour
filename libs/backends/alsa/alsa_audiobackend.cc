@@ -646,7 +646,7 @@ AlsaAudioBackend::stop ()
 		delete m;
 	}
 
-	unregister_system_ports();
+	unregister_ports();
 	delete _pcmi; _pcmi = 0;
 	release_device();
 
@@ -1057,7 +1057,7 @@ AlsaAudioBackend::register_system_midi_ports()
 }
 
 void
-AlsaAudioBackend::unregister_system_ports()
+AlsaAudioBackend::unregister_ports (bool system_only)
 {
 	size_t i = 0;
 	_system_inputs.clear();
@@ -1066,8 +1066,9 @@ AlsaAudioBackend::unregister_system_ports()
 	_system_midi_out.clear();
 	while (i <  _ports.size ()) {
 		AlsaPort* port = _ports[i];
-		if (port->is_physical () && port->is_terminal ()) {
+		if (! system_only || (port->is_physical () && port->is_terminal ())) {
 			port->disconnect_all ();
+			delete port;
 			_ports.erase (_ports.begin() + i);
 		} else {
 			++i;

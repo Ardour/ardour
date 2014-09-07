@@ -366,7 +366,7 @@ class AlsaAudioBackend : public AudioBackend {
 		PortHandle add_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
 		int register_system_audio_ports ();
 		int register_system_midi_ports ();
-		void unregister_system_ports ();
+		void unregister_ports (bool system_only = false);
 
 		std::vector<AlsaPort *> _ports;
 		std::vector<AlsaPort *> _system_inputs;
