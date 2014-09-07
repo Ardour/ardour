@@ -55,7 +55,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	enum Tweaks {
 		Square = 0x1,
-		unused2 = 0x2,
+		TrackHeader = 0x2,
 		unused3 = 0x4,
 	};
 
@@ -105,6 +105,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	unsigned int char_pixel_width() { if (_char_pixel_width < 1) recalc_char_pixel_geometry() ; return _char_pixel_width; }
 	unsigned int char_pixel_height() { if (_char_pixel_height < 1) recalc_char_pixel_geometry() ; return _char_pixel_height; }
+	float char_avg_pixel_width() { if (_char_pixel_width < 1) recalc_char_pixel_geometry() ; return _char_avg_pixel_width; }
 
 	protected:
 	void render (cairo_t *, cairo_rectangle_t *);
@@ -133,6 +134,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void recalc_char_pixel_geometry ();
 	unsigned int _char_pixel_width;
 	unsigned int _char_pixel_height;
+	float _char_avg_pixel_width;
 
 	int   _text_width;
 	int   _text_height;

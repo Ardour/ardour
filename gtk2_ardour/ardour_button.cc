@@ -42,6 +42,7 @@
 #include "i18n.h"
 
 #define BASELINESTRETCH (1.25)
+#define TRACKHEADERBTNW (3.10)
 
 using namespace Gdk;
 using namespace Gtk;
@@ -60,6 +61,7 @@ ArdourButton::ArdourButton (Element e)
 	, _tweaks (Tweaks (0))
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
+	, _char_avg_pixel_width (0)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (0)
@@ -128,6 +130,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 {
 	set_text (str);
 	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
+	ARDOUR_UI_UTILS::DPIReset.connect (sigc::mem_fun (*this, &ArdourButton::on_name_changed));
 }
 
 ArdourButton::~ArdourButton()
@@ -373,11 +376,11 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 				layout_font = false;
 				fd = get_pango_context()->get_font_description();
 			}
-			printf("%s: f:%dx%d bh:%.0f tw:%d (%dx%d) %s\"%s\"\n",
+			printf("%s: f:%dx%d aw:%.3f bh:%.0f t:%dx%d (%dx%d) %s\"%s\"\n",
 					get_name().c_str(),
-					char_pixel_width(), char_pixel_height(),
+					char_pixel_width(), char_pixel_height(), char_avg_pixel_width(),
 					ceil(char_pixel_height() * BASELINESTRETCH),
-					_text_width,
+					_text_width, _text_height,
 					get_width(), get_height(),
 					layout_font ? "L:" : "W:",
 					fd.to_string().c_str());
@@ -601,23 +604,35 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 
 	if (_elements & (RecButton | CloseCross)) {
 		assert(!(_elements & Text));
-		const int wh = std::max(3.5 * char_pixel_width(), ceil(char_pixel_height() * BASELINESTRETCH + 1));
+		const int wh = std::max (rint (TRACKHEADERBTNW * char_avg_pixel_width()), ceil (char_pixel_height() * BASELINESTRETCH + 1.));
 		req->width += wh;
 		req->height = std::max(req->height, wh);
 	}
 
-	if (_tweaks & Square) {
-		// squared buttons are also grouped, we cannot align all texts
-		// -> skip proper center adjustment
+	/* Tweaks to mess the nice stuff above up again. */
+	if (_tweaks & TrackHeader) {
+		// forget everything above and just use a fixed square [em] size
+		// "TrackHeader Buttons" are single letter (usually uppercase)
+		// a SizeGroup is much less efficient (lots of gtk work under the hood for each track)
+		const int wh = std::max (rint (TRACKHEADERBTNW * char_avg_pixel_width()), ceil (char_pixel_height() * BASELINESTRETCH + 1.));
+		req->width  = wh;
+		req->height = wh;
+	}
+	else if (_tweaks & Square) {
+		// currerntly unused (again)
 		if (req->width < req->height)
 			req->width = req->height;
 		if (req->height < req->width)
 			req->height = req->width;
 	} else if (_text_width > 0 && !(_elements & (Menu | Indicator))) {
 		// properly centered text for those elements that are centered
+		// (no sub-pixel offset)
 		if ((req->width - _text_width) & 1) { ++req->width; }
 		if ((req->height - _text_height) & 1) { ++req->height; }
 	}
+#if 0
+		printf("REQ: %s: %dx%d\n", get_name().c_str(), req->width, req->height);
+#endif
 }
 
 /**
@@ -1094,7 +1109,8 @@ ArdourButton::recalc_char_pixel_geometry ()
 	// number of actual chars in the string (not bytes)
 	// Glib to the rescue.
 	Glib::ustring gx(x);
-	_char_pixel_width = std::max(4, w / (int)gx.size());
+	_char_avg_pixel_width = w / (float)gx.size();
+	_char_pixel_width = std::max(4, (int) ceil (_char_avg_pixel_width));
 	_layout->set_text (_text);
 }
 
