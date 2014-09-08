@@ -426,7 +426,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 			 */
 			if (_xalign < 0) xa = ceil(.5 + (ww * fabs(_xalign) + text_margin));
 
-			cairo_move_to (cr, xa, ya);
+			cairo_move_to (cr, xa, floor(ya));
 			pango_cairo_update_layout(cr, _layout->gobj());
 			pango_cairo_show_layout (cr, _layout->gobj());
 			cairo_restore (cr);
