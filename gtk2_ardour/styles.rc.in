@@ -803,6 +803,8 @@ style "audio_bus_metrics_inactive" = "track_controls_inactive"
 
 style "track_name_display" = "medium_text"
 {
+	xthickness = 0
+	ythickness = 0
 	fg[NORMAL] = @@COLPREFIX@_fg
 	fg[ACTIVE] = @@COLPREFIX@_fg
 	fg[SELECTED] = @@COLPREFIX@_fg
@@ -813,7 +815,7 @@ style "track_name_display" = "medium_text"
 
 	base[NORMAL] = @@COLPREFIX@_base
 	base[ACTIVE] = lighter(@@COLPREFIX@_base)
-        base[SELECTED] = @@COLPREFIX@_bg_selected
+	base[SELECTED] = @@COLPREFIX@_bg_selected
 
 	bg[NORMAL] = lighter(@@COLPREFIX@_base)
 	bg[ACTIVE] = lighter(@@COLPREFIX@_base)

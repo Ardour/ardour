@@ -137,7 +137,8 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	name_label.set_width_chars (12);
 	ARDOUR_UI::instance()->set_tip (name_label, _("Track/Bus name (double click to edit)"));
 
-	Gtk::Entry* an_entry = new Gtk::Entry;
+	Gtk::Entry* an_entry = new Gtkmm2ext::FocusEntry;
+	an_entry->set_name ("EditorTrackNameDisplay");
 	Gtk::Requisition req;
 	an_entry->size_request (req);
 	name_label.set_size_request (-1, req.height);
@@ -205,7 +206,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	time_axis_vbox.show();
 	time_axis_hbox.pack_start (time_axis_vbox, true, true);
 	time_axis_hbox.show();
-	top_hbox.pack_start (scroomer_placeholder, false, false);
+	top_hbox.pack_start (scroomer_placeholder, false, false); // OR pack_end to move after meters ?
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
 
