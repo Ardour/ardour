@@ -1413,8 +1413,8 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 
 		if (Note* cnote = dynamic_cast<Note*>(event)) {
 
-			const double y0 = midi_stream_view()->note_to_y(note->note());
-			const double y1 = y0 + floor(midi_stream_view()->note_height());
+			const double y0 = 1. + floor (midi_stream_view()->note_to_y(note->note()));
+			const double y1 = y0 + std::max(1., floor(midi_stream_view()->note_height()) - 1.);
 
 			cnote->set_y0 (y0);
 			cnote->set_y1 (y1);
@@ -1612,7 +1612,7 @@ MidiRegionView::update_note (Note* ev, bool update_ghost_regions)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
 	const double x = trackview.editor().sample_to_pixel (source_beats_to_region_frames (note->time()));
-	const double y0 = midi_stream_view()->note_to_y(note->note());
+	const double y0 = 1 + floor(midi_stream_view()->note_to_y(note->note()));
 
 	ev->set_x0 (x);
 	ev->set_y0 (y0);
@@ -1626,7 +1626,7 @@ MidiRegionView::update_note (Note* ev, bool update_ghost_regions)
 		ev->set_x1 (trackview.editor().sample_to_pixel (_region->length()));
 	}
 
-	ev->set_y1 (y0 + floor(midi_stream_view()->note_height()));
+	ev->set_y1 (y0 + std::max(1., floor(midi_stream_view()->note_height()) - 1));
 
 	if (note->length() == 0) {
 		if (_active_notes && note->note() < 128) {
@@ -1667,8 +1667,8 @@ MidiRegionView::update_hit (Hit* ev)
 
 	const framepos_t note_start_frames = source_beats_to_region_frames(note->time());
 	const double x = trackview.editor().sample_to_pixel(note_start_frames);
-	const double diamond_size = midi_stream_view()->note_height();
-	const double y = midi_stream_view()->note_to_y(note->note()) + (diamond_size/2.0);
+	const double diamond_size = std::max(1., floor(midi_stream_view()->note_height()) - 2.);
+	const double y = 1.5 + floor(midi_stream_view()->note_to_y(note->note())) + diamond_size * .5;
 
 	ev->set_position (ArdourCanvas::Duple (x, y));
 	ev->set_height (diamond_size);
@@ -1703,7 +1703,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 
 	} else if (midi_view()->note_mode() == Percussive) {
 
-		const double diamond_size = midi_stream_view()->note_height() / 2.0;
+		const double diamond_size = std::max(1., floor(midi_stream_view()->note_height()) - 2.);
 
 		Hit* ev_diamond = new Hit (*this, _note_group, diamond_size, note);
 
