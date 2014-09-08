@@ -199,7 +199,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		blank->show();
 	}
 
-	top_hbox.pack_end(gm.get_level_meter(), false, false, 4);
+	top_hbox.pack_end(gm.get_level_meter(), false, false, 2);
 
 	if (!ARDOUR::Profile->get_mixbus()) {
 		controls_meters_size_group->add_widget (gm.get_level_meter());

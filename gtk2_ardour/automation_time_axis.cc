@@ -171,54 +171,46 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	ARDOUR_UI::instance()->set_tip(controls_ebox, tipname);
 
 	/* add the buttons */
+	controls_table.set_border_width (1);
 	controls_table.remove (name_hbox);
-	if (ARDOUR::Profile->get_mixbus()) {
-		controls_table.attach (hide_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-	} else {
-		controls_table.attach (hide_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 1, 0);
-	}
+	controls_table.attach (hide_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	controls_table.attach (name_label,  2, 3, 1, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 2, 0);
-	controls_table.attach (auto_button, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 1, 0);
+	controls_table.attach (auto_button, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 
 	Gtk::DrawingArea *blank0 = manage (new Gtk::DrawingArea());
-	Gtk::DrawingArea *blankB = manage (new Gtk::DrawingArea());
+	Gtk::DrawingArea *blank1 = manage (new Gtk::DrawingArea());
 
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&parent);
 	// TODO use rtv->controls_base_unselected_name
 	// subscribe to route_active_changed, ...
 	if (rtv && rtv->is_audio_track()) {
 		blank0->set_name ("AudioTrackControlsBaseUnselected");
-		blankB->set_name ("AudioTrackControlsBaseUnselected");
 	}
 	else if (rtv && rtv->is_midi_track()) {
 		blank0->set_name ("MidiTrackControlsBaseUnselected");
-		blankB->set_name ("MidiTrackControlsBaseUnselected");
 	}
 	else {
 		blank0->set_name ("AudioBusControlsBaseUnselected");
-		blankB->set_name ("AudioBusControlsBaseUnselected");
 	}
 	blank0->set_size_request (-1, -1);
-	// one button width (blank0) + 2 * table colspacing - 1 * sep line
-	// -> align with 2nd button in Mixbus profile
-	blankB->set_size_request (3, -1);
-
+	blank1->set_size_request (1, 0);
 	VSeparator* separator = manage (new VSeparator());
 	separator->set_name("TrackSeparator");
 	separator->set_size_request (1, -1);
 
-	controls_button_size_group->add_widget(*blank0);
 	controls_button_size_group->add_widget(hide_button);
+	controls_button_size_group->add_widget(*blank0);
 
 	time_axis_hbox.pack_start (*blank0, false, false);
-	time_axis_hbox.pack_start (*blankB, false, false);
 	time_axis_hbox.pack_start (*separator, false, false);
 	time_axis_hbox.reorder_child (*blank0, 0);
-	time_axis_hbox.reorder_child (*blankB, 1);
-	time_axis_hbox.reorder_child (*separator, 2);
-	time_axis_hbox.reorder_child (time_axis_vbox, 3);
+	time_axis_hbox.reorder_child (*separator, 1);
+	time_axis_hbox.reorder_child (time_axis_vbox, 2);
 
-	blank0->show();
+	if (!ARDOUR::Profile->get_mixbus() ) {
+		time_axis_hbox.pack_start (*blank1, false, false);
+	}
+
 	blank0->show();
 	separator->show();
 	name_label.show ();
@@ -226,7 +218,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	if (_controller) {
 		_controller.get()->set_tweaks (PixFader::Tweaks(_controller.get()->tweaks() | PixFader::NoVerticalScroll));
-		controls_table.attach (*_controller.get(), 2, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
+		controls_table.attach (*_controller.get(), 2, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	}
 
 	controls_table.show_all ();
