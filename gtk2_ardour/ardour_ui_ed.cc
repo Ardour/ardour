@@ -40,6 +40,7 @@
 #include "pbd/file_utils.h"
 #include "pbd/fpu.h"
 #include "pbd/convert.h"
+#include "pbd/unwind.h"
 
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -88,8 +89,8 @@ ARDOUR_UI::create_editor ()
         _hd_remained_time_label = &editor->get_label("hd_remained_time");
         
         _bit_depth_button = &editor->get_waves_button("bit_depth_button");
-        _sample_rate_button = &editor->get_waves_button("sample_rate_button");
-        _frame_rate_button = &editor->get_waves_button("frame_rate_button");
+        _frame_rate_button = &editor->get_waves_button("frame_rate_button");        
+        _sample_rate_dropdown = &editor->get_waves_dropdown("sample_rate_dropdown");
         
         _tracks_button = &editor->get_waves_button("tracks_button");
     }
@@ -99,7 +100,7 @@ ARDOUR_UI::create_editor ()
 	}
     
     _bit_depth_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_bit_depth_button));
-    _sample_rate_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_sample_rate_button));
+    _sample_rate_dropdown->signal_menu_item_clicked.connect (mem_fun(*this, &ARDOUR_UI::on_sample_rate_dropdown_item_clicked ));
     _frame_rate_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_frame_rate_button));
     _tracks_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_tracks_button));
 
@@ -122,15 +123,103 @@ ARDOUR_UI::on_bit_depth_button (WavesButton*)
 }
 
 void
-ARDOUR_UI::on_sample_rate_button (WavesButton*)
+ARDOUR_UI::on_frame_rate_button (WavesButton*)
 {
     tracks_control_panel->show ();
 }
 
 void
-ARDOUR_UI::on_frame_rate_button (WavesButton*)
+ARDOUR_UI::populate_sample_rate_combo ()
 {
-    tracks_control_panel->show ();
+    static std::vector<float> sample_rates;
+    
+    _sample_rate_dropdown->clear_items();
+    
+    sample_rates.clear ();
+    EngineStateController::instance()->available_sample_rates_for_current_device( sample_rates );
+	
+	std::vector<std::string> s;
+	for (std::vector<float>::const_iterator x = sample_rates.begin(); x != sample_rates.end(); ++x) {
+		s.push_back (ARDOUR_UI_UTILS::rate_as_string (*x));
+	}
+    
+	{
+		// set _ignore_changes flag to ignore changes in combo-box callbacks
+		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
+        
+        for(int i = 0; i < sample_rates.size(); ++i)
+        {
+            _sample_rate_dropdown->add_menu_item (s[i], &sample_rates[i]);
+        }
+        
+        update_sample_rate_dropdown ();
+	}
+}
+
+framecnt_t
+ARDOUR_UI::get_sample_rate () const
+{
+    const string& sample_rate = _sample_rate_dropdown->get_text ();
+    
+    if ( "44.1 kHz" == sample_rate )
+    {
+        return 44100;
+    } else if ( "48 kHz" == sample_rate )
+    {
+        return 48000;
+    } else if ( "88.2 kHz" == sample_rate )
+    {
+        return 88200;
+    } else if ( "96 kHz" == sample_rate )
+    {
+        return 96000;
+    } else if ( "172.4 kHz" == sample_rate )
+    {
+        return 172400;
+    } else if ( "192 kHz" == sample_rate )
+    {
+        return 192000;
+    }
+    
+    float r = atof (sample_rate);
+    
+    /* the string may have been translated with an abbreviation for
+     * thousands, so use a crude heuristic to fix this.
+     */
+	if (r < 1000.0) {
+		r *= 1000.0;
+	}
+	return r;
+}
+
+void
+ARDOUR_UI::sample_rate_changed()
+{
+	if (_ignore_changes) {
+		return;
+	}
+    
+    framecnt_t new_sample_rate = get_sample_rate ();
+    if ( EngineStateController::instance()->set_new_sample_rate_in_controller(new_sample_rate) )
+    {
+        return;
+    } 
+    // ELSE restore previous buffer size value in combo box
+    update_sample_rate_dropdown ();
+}
+
+void
+ARDOUR_UI::on_sample_rate_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie)
+{
+    float sample_rate = *((float*)my_cookie);
+    
+    if (EngineStateController::instance()->set_new_sample_rate_in_controller( sample_rate ) )
+    {
+        EngineStateController::instance()->push_current_state_to_backend (false);
+        return;
+    }
+    // ELSE restore previous buffer size value in combo box
+    update_sample_rate_dropdown ();
 }
 
 void
@@ -155,13 +244,17 @@ ARDOUR_UI::update_bit_depth_button ()
 }
 
 void
-ARDOUR_UI::update_sample_rate_button ()
+ARDOUR_UI::update_sample_rate_dropdown ()
 {
-    if( !_sample_rate_button )
+    if( !_sample_rate_dropdown )
         return;
     
-    std::string active_sr = ARDOUR_UI_UTILS::rate_as_string(EngineStateController::instance()->get_current_sample_rate());
-    _sample_rate_button->set_text (active_sr);
+    {
+		// set _ignore_changes flag to ignore changes in combo-box callbacks
+		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
+        std::string active_sr = ARDOUR_UI_UTILS::rate_as_string(EngineStateController::instance()->get_current_sample_rate());
+        _sample_rate_dropdown->set_text (active_sr);
+    }
 }
 
 void

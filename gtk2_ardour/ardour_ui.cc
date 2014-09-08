@@ -218,9 +218,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, mixer (0)
     , _tracks_button (0)
     , _bit_depth_button (0)
-    , _sample_rate_button (0)
     , _frame_rate_button (0)
-	, splash (0)
+    , _sample_rate_dropdown (0)
+    , splash (0)
 {
 	Gtkmm2ext::init(localedir);
 
@@ -319,8 +319,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	ARDOUR::GUIIdle.connect (forever_connections, MISSING_INVALIDATOR, boost::bind(&ARDOUR_UI::gui_idle_handler, this), gui_context());
 
-    EngineStateController::instance()->SampleRateChanged.connect_same_thread (update_connections_to_toolbar_buttons, boost::bind (&ARDOUR_UI::update_sample_rate_button, this) );
-    EngineStateController::instance()->EngineRunning.connect_same_thread (update_connections_to_toolbar_buttons, boost::bind (&ARDOUR_UI::update_sample_rate_button, this) );
+    EngineStateController::instance()->SampleRateChanged.connect_same_thread (update_connections_to_toolbar_buttons, boost::bind (&ARDOUR_UI::update_sample_rate_dropdown, this) );
+    EngineStateController::instance()->EngineRunning.connect_same_thread (update_connections_to_toolbar_buttons, boost::bind (&ARDOUR_UI::update_sample_rate_dropdown, this) );
     
 	/* lets get this party started */
 
@@ -444,6 +444,7 @@ ARDOUR_UI::engine_running ()
 	update_disk_space ();
     update_disk_usage ();
 	update_cpu_load ();
+    populate_sample_rate_combo ();
 }
 
 void

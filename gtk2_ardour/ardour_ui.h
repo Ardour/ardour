@@ -230,13 +230,19 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     WavesButton* _tracks_button;
     void on_tracks_button (WavesButton*);
     WavesButton* _bit_depth_button;
-    WavesButton* _sample_rate_button;
     WavesButton* _frame_rate_button;
     void on_bit_depth_button (WavesButton*);
-    void on_sample_rate_button (WavesButton*);
     void on_frame_rate_button (WavesButton*);
+    
+    WavesDropdown* _sample_rate_dropdown;
+    void on_sample_rate_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie);
+    void sample_rate_changed();
+    ARDOUR::framecnt_t get_sample_rate () const;
+    void populate_sample_rate_combo ();
+    uint32_t _ignore_changes;
+    
     void update_bit_depth_button ();
-    void update_sample_rate_button ();
+    void update_sample_rate_dropdown ();
     void update_frame_rate_button ();
     PBD::ScopedConnectionList update_connections_to_toolbar_buttons;
     
