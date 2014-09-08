@@ -255,7 +255,7 @@ Scroomer::on_button_press_event (GdkEventButton* ev)
 		DoubleClicked();
 	}
 
-	return false;
+	return true;
 }
 
 bool
