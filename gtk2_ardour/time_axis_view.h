@@ -24,6 +24,7 @@
 #include <list>
 
 #include <gtkmm/box.h>
+#include <gtkmm/fixed.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/eventbox.h>
@@ -203,6 +204,7 @@ class TimeAxisView : public virtual AxisView
 
 	protected:
 	static Glib::RefPtr<Gtk::SizeGroup> controls_meters_size_group;
+	static Glib::RefPtr<Gtk::SizeGroup> midi_scroomer_size_group;
 	static unsigned int name_width_px;
 	/* The Standard LHS Controls */
 	Gtk::Table             controls_table;
@@ -215,6 +217,7 @@ class TimeAxisView : public virtual AxisView
 	Gtk::HBox              name_hbox;
 	Gtk::HBox              top_hbox;
 	Gtk::Label             name_label;
+	Gtk::Fixed             scroomer_placeholder;
 	bool                  _name_editing;
 	uint32_t               height;  /* in canvas units */
 	std::string            controls_base_unselected_name;

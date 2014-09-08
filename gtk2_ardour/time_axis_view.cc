@@ -75,6 +75,7 @@ int const TimeAxisView::_max_order = 512;
 unsigned int TimeAxisView::name_width_px = 100; // TODO adjust with font-scaling on style-change
 PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::controls_meters_size_group = Glib::RefPtr<Gtk::SizeGroup>();
+Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::midi_scroomer_size_group = Glib::RefPtr<Gtk::SizeGroup>();
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
@@ -103,6 +104,9 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 {
 	if (!controls_meters_size_group) {
 		controls_meters_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
+	}
+	if (!midi_scroomer_size_group) {
+		midi_scroomer_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 	}
 	if (extra_height == 0) {
 		compute_heights ();
@@ -192,11 +196,16 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	separator->set_size_request(-1, 1);
 	separator->show();
 
+	scroomer_placeholder.set_size_request (-1, -1);
+	scroomer_placeholder.show();
+	midi_scroomer_size_group->add_widget (scroomer_placeholder);
+
 	time_axis_vbox.pack_start (*separator, false, false);
 	time_axis_vbox.pack_start (time_axis_frame, true, true);
 	time_axis_vbox.show();
 	time_axis_hbox.pack_start (time_axis_vbox, true, true);
 	time_axis_hbox.show();
+	top_hbox.pack_start (scroomer_placeholder, false, false);
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
 

@@ -213,14 +213,23 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		   tracks.
 		*/
 
+		HSeparator* separator = manage (new HSeparator());
+		separator->set_name("TrackSeparator");
+		separator->set_size_request(-1, 1);
+		separator->show();
+
 		VBox* v = manage (new VBox);
 		HBox* h = manage (new HBox);
 		h->pack_end (*_piano_roll_header);
+		h->pack_end (*_piano_roll_header);
 		h->pack_end (*_range_scroomer);
+		v->pack_start (*separator, false, false);
 		v->pack_start (*h, true, true);
 		v->show ();
 		h->show ();
+		top_hbox.remove(scroomer_placeholder);
 		time_axis_hbox.pack_end(*v, false, false, 0);
+		midi_scroomer_size_group->add_widget (*v);
 
 		controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
 		time_axis_frame.set_name ("MidiTrackControlsBaseUnselected");
