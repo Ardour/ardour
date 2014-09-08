@@ -1200,6 +1200,7 @@ TracksControlPanel::engine_running ()
 {
 	populate_buffer_size_combo();
 	populate_sample_rate_combo();
+    show_buffer_duration ();
 }
 
 
