@@ -124,7 +124,7 @@ rmdir $PACKAGE_DIR/msys || exit 1
 echo "Moving Ardour dll's and executable to $PACKAGE_DIR ..."
 
 echo "mv $PACKAGE_DIR/lib/*.dll $PACKAGE_DIR"
-mv $PACKAGE_DIR/lib/*.dll $PACKAGE_DIR || exit 1
+#mv $PACKAGE_DIR/lib/*.dll $PACKAGE_DIR || exit 1
 
 echo "mv $PACKAGE_DIR/lib/${PRODUCT_NAME_DIR}/*.dll $PACKAGE_DIR"
 mv $PACKAGE_DIR/lib/${PRODUCT_NAME_DIR}/*.dll $PACKAGE_DIR || exit 1
@@ -190,14 +190,15 @@ libs/audiographer
 
 if test x$DEBUG != x ; then
 
-	PACKAGE_SRC_DIR=$PACKAGE_DIR/src
-	echo "Copying source files to $PACKAGE_SRC_DIR ..."
-	mkdir -p $PACKAGE_SRC_DIR/libs || exit 1
-	cp -r $BASE/gtk2_ardour $PACKAGE_SRC_DIR || exit 1
-	for i in $SRC_DIRS;
-	do
-	cp -r -p $BASE/$i $PACKAGE_SRC_DIR/libs || exit 1
-	done
+	## COMMENTED OUT, because mingw cannot copy some pbd test files (like Chinese, etc.)
+	#PACKAGE_SRC_DIR=$PACKAGE_DIR/src
+	#echo "Copying source files to $PACKAGE_SRC_DIR ..."
+	#mkdir -p $PACKAGE_SRC_DIR/libs || exit 1
+	#cp -r $BASE/gtk2_ardour $PACKAGE_SRC_DIR || exit 1
+	#for i in $SRC_DIRS;
+	#do
+	#cp -r -p -f $BASE/$i $PACKAGE_SRC_DIR/libs || exit 1
+	#done
 	
 	echo "Copying JACK utility programs to $PACKAGE_DIR ..."
 	# VK: -- FIXIT cp $MINGW_ROOT/bin/jack_*.exe $PACKAGE_DIR || exit 1
