@@ -61,11 +61,13 @@ using namespace Gtkmm2ext;
 
 #ifdef _WIN32
     Pango::FontDescription TimeAxisViewItem::NAME_FONT("Arial 12");
+	const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 0.0;
 #else
+	const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 2.0;
     Pango::FontDescription TimeAxisViewItem::NAME_FONT("Helvetica 12");
 #endif
 
-const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 2.0;
+
 const double TimeAxisViewItem::NAME_HIGHLIGHT_X_OFFSET = 10.0;
 const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_OFFSET = 5.0;
 const double TimeAxisViewItem::GRAB_HANDLE_TOP = 2.0;
