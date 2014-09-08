@@ -46,7 +46,7 @@
                           fgnormal="#ffffff"
                           winfont ="Arial 8"
                           macfont ="Helvetica 8"
-                          x="270"
+                          x="269"
                           y="5"
                           width="63"
                           height="18"
@@ -69,20 +69,18 @@
                 
                 <dropdown id="sample_rate_dropdown"
                           text="sample rate"
-                          bgnormal="#007f7f"
+                          bgnormal="#43919A"
                           fgnormal="#ffffff"
                           fgactive="#7f7f7f"
                           winfont ="Arial 8"
                           macfont ="Helvetica 8"
-                          x="270"
+                          x="269"
                           y="28"
                           width="63"
                           height="18"
                           normalicon="topbar_button"
                           activeicon="topbar_button_active"
                           prelighticon="topbar_button_prelight"/>
-                
-                
             </Layout>
             <EventBox bgnormal="#383838"
                       width="17"
