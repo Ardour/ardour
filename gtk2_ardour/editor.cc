@@ -2808,6 +2808,26 @@ Editor::setup_toolbar ()
 	mouse_mode_size_group->add_widget (mouse_draw_button);
 	mouse_mode_size_group->add_widget (internal_edit_button);
 
+	mouse_mode_size_group->add_widget (zoom_in_button);
+	mouse_mode_size_group->add_widget (zoom_out_button);
+	mouse_mode_size_group->add_widget (zoom_preset_selector);
+	mouse_mode_size_group->add_widget (zoom_out_full_button);
+	mouse_mode_size_group->add_widget (zoom_focus_selector);
+
+	mouse_mode_size_group->add_widget (tav_shrink_button);
+	mouse_mode_size_group->add_widget (tav_expand_button);
+	mouse_mode_size_group->add_widget (visible_tracks_selector);
+
+	mouse_mode_size_group->add_widget (snap_type_selector);
+	mouse_mode_size_group->add_widget (snap_mode_selector);
+
+	mouse_mode_size_group->add_widget (edit_point_selector);
+	mouse_mode_size_group->add_widget (edit_mode_selector);
+
+	mouse_mode_size_group->add_widget (*nudge_clock);
+	mouse_mode_size_group->add_widget (nudge_forward_button);
+	mouse_mode_size_group->add_widget (nudge_backward_button);
+
 	mouse_mode_hbox->set_spacing (2);
 
 	if (!ARDOUR::Profile->get_trx()) {
@@ -2827,7 +2847,7 @@ Editor::setup_toolbar ()
 		mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_audition_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
-		mouse_mode_hbox->pack_start (internal_edit_button, false, false, 4);
+		mouse_mode_hbox->pack_start (internal_edit_button, false, false, 0);
 	}
 
 	mouse_mode_vbox->pack_start (*mouse_mode_hbox);
@@ -2911,13 +2931,11 @@ Editor::setup_toolbar ()
 	}
 
 	tav_expand_button.set_name ("zoom button");
-	tav_expand_button.set_size_request (-1, 20);
 	tav_expand_button.set_image(::get_icon ("tav_exp"));
 	act = ActionManager::get_action (X_("Editor"), X_("expand-tracks"));
 	tav_expand_button.set_related_action (act);
 
 	tav_shrink_button.set_name ("zoom button");
-	tav_shrink_button.set_size_request (-1, 20);
 	tav_shrink_button.set_image(::get_icon ("tav_shrink"));
 	act = ActionManager::get_action (X_("Editor"), X_("shrink-tracks"));
 	tav_shrink_button.set_related_action (act);
