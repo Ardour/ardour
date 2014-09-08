@@ -2796,8 +2796,8 @@ Editor::setup_toolbar ()
 	VBox* mouse_mode_vbox = manage (new VBox);
 	Alignment* mouse_mode_align = manage (new Alignment);
 
-	Glib::RefPtr<SizeGroup> mouse_mode_size_group = SizeGroup::create (SIZE_GROUP_BOTH);
-	//mouse_mode_size_group->add_widget (smart_mode_button);
+	Glib::RefPtr<SizeGroup> mouse_mode_size_group = SizeGroup::create (SIZE_GROUP_VERTICAL);
+	mouse_mode_size_group->add_widget (smart_mode_button);
 	mouse_mode_size_group->add_widget (mouse_move_button);
 	mouse_mode_size_group->add_widget (mouse_cut_button);
 	mouse_mode_size_group->add_widget (mouse_select_button);
@@ -2808,13 +2808,6 @@ Editor::setup_toolbar ()
 	mouse_mode_size_group->add_widget (mouse_draw_button);
 	mouse_mode_size_group->add_widget (internal_edit_button);
 
-	if (!ARDOUR::Profile->get_small_screen()) {
-		/* make them just a bit bigger */
-		mouse_move_button.set_size_request (24, 30);
-	} else {
-		/* make them just a bit taller */
-		mouse_move_button.set_size_request (-1, 30);
-	}
 	mouse_mode_hbox->set_spacing (2);
 
 	if (!ARDOUR::Profile->get_trx()) {
