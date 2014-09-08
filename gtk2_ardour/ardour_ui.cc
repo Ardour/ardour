@@ -777,7 +777,7 @@ ARDOUR_UI::starting ()
 	if ((nsm_url = g_getenv ("NSM_URL")) != 0) {
 		nsm = new NSM_Client;
 		if (!nsm->init (nsm_url)) {
-			nsm->announce (PROGRAM_NAME, ":dirty:", "ardour3");
+			nsm->announce (PROGRAM_NAME, ":dirty:", "tracks");
 
 			unsigned int i = 0;
 			// wait for announce reply from nsm server

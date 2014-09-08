@@ -62,7 +62,7 @@ namespace ARDOUR {
 
 #ifdef PLATFORM_WINDOWS
 	/**
-	 * @return our 'Windows' search path ( corresponds to <install_dir>/share/ardour3 )
+	 * @return our 'Windows' search path ( corresponds to <install_dir>/share/tracks )
 	 */
 	LIBARDOUR_API PBD::Searchpath windows_search_path ();
 #endif

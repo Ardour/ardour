@@ -360,11 +360,11 @@ fixup_bundle_environment (int argc, char* argv[], const char** localedir)
 
 	// First, set up 'ARDOUR_DLL_PATH'
 	path  = dir_path;
-	path += "\\lib\\ardour3\\surfaces;";
+	path += "\\lib\\tracks\\surfaces;";
 	path += dir_path;
-	path += "\\lib\\ardour3\\panners;";
+	path += "\\lib\\tracks\\panners;";
 	path += dir_path;
-	path += "\\lib\\ardour3\\backends;";
+	path += "\\lib\\tracks\\backends;";
 	path += dir_path;
 	path += "\\bin";
 	Glib::setenv ("ARDOUR_DLL_PATH", path, true);
