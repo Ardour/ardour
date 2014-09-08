@@ -272,10 +272,10 @@ gtk2_ardour_sources = [
         'export_video_dialog.cc',
         'export_video_infobox.cc'
 ]
-
 if sys.platform == 'darwin':
     gtk2_ardour_sources.append('open_file_dialog.mm')
-elif sys.platform == 'mingw' or sys.platform == 'msvc':
+elif sys.platform == 'win32' or sys.platform == 'msvc':
+    
     gtk2_ardour_sources.append('open_file_dialog_windows.cc')
 else:
     gtk2_ardour_sources.append('open_file_dialog_nix.cc')
@@ -437,7 +437,10 @@ def build(bld):
             #
             obj = bld (features = 'cxx c cxxprogram')
             obj.source    = gtk2_ardour_sources
-            obj.target = bld.env['EXECUTABLE_NAME'] + '-' + str(bld.env['VERSION'])
+            if sys.platform == 'win32' :
+                obj.target = bld.env['EXECUTABLE_NAME']
+            else :
+                obj.target = bld.env['EXECUTABLE_NAME'] + '-' + str(bld.env['VERSION'])
             obj.includes = ['.']
             obj.ldflags = ['-no-undefined']
             
