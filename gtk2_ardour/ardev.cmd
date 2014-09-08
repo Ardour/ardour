@@ -31,5 +31,5 @@ set GTK_PATH=%LIBS%\clearlooks-newer
 set VAMP_PATH=%LIBS%\vamp-plugins
 
 set PATH=%A3%\inst\bin;%GTK%\inst\bin;c:\mingw64win32\x86_64-w64-mingw32\bin;c:\mingw64win32\bin;%LIBS%\qm-dsp;%LIBS%\vamp-sdk;%LIBS%\surfaces;%LIBS%\surfaces\control_protocol;%LIBS%\ardour;%LIBS%\midi++2;%LIBS%\pbd;%LIBS%\rubberband;%LIBS%\soundtouch;%LIBS%\gtkmm2ext;%LIBS%\gnomecanvas;%LIBS%\libsndfile;%LIBS%\appleutility;%LIBS%\taglib;%LIBS%\evoral;%LIBS%\evoral\src\libsmf;%LIBS%\audiographer;%LIBS%\timecode;%LIBS%\libltc;%LIBS%\canvas;%PATH%
-%AD%\tracks\build\gtk2_ardour\tracks-1.0.0.exe %1
+%AD%\tracks\build\gtk2_ardour\tracks.exe %1
 set path=%truelala%
