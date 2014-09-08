@@ -269,7 +269,14 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	if (_pixbuf) {
 		double x = rint((get_width() - _pixbuf->get_width()) * .5);
 		const double y = rint((get_height() - _pixbuf->get_height()) * .5);
-
+#if 0 // DEBUG style (print on hover)
+		if (_hovering || (_elements & Inactive)) {
+			printf("%s: p:%dx%d (%dx%d)\n",
+					get_name().c_str(),
+					_pixbuf->get_width(), _pixbuf->get_height(),
+					get_width(), get_height());
+		}
+#endif
 		if (_elements & Menu) {
 			//if this is a DropDown with an icon, then we need to
 			//move the icon left slightly to accomomodate the arrow
@@ -369,7 +376,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	if (!_pixbuf && ((_elements & Text)==Text) && !_text.empty()) {
 		assert(_layout);
 #if 0 // DEBUG style (print on hover)
-		if (_hovering) {
+		if (_hovering || (_elements & Inactive)) {
 			bool layout_font = true;
 			Pango::FontDescription fd = _layout->get_font_description();
 			if (fd.gobj() == NULL) {
