@@ -26,10 +26,10 @@ def backend_list():
         if re.search ("linux", sys.platform) != None:
             backends = [ 'jack', 'alsa' ]
         else:
-            backends = [ ]
+            backends = [ 'wavesaudio' ]
 
-    if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc':
-        backends += [ 'wavesaudio' ]
+    #if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc':
+    #    backends += [ 'wavesaudio' ]
 
     return backends
 
