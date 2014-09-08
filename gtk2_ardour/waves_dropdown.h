@@ -36,6 +36,8 @@ class WavesDropdown : public WavesIconButton
 
     Gtk::MenuItem& add_menu_item (const std::string& item, void* cookie);
 
+    void clear_items ();
+    
     sigc::signal2<void, WavesDropdown*, void*> signal_menu_item_clicked;
 
   private:

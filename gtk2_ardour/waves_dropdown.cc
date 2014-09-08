@@ -47,6 +47,12 @@ WavesDropdown::add_menu_item (const std::string& item, void* cookie)
 }
 
 void
+WavesDropdown::clear_items ()
+{
+    _menu.items().clear ();
+}
+
+void
 WavesDropdown::_on_menu_item (size_t item_number, void* cookie)
 {
     Gtk::Menu_Helpers::MenuList& items = _menu.items ();
