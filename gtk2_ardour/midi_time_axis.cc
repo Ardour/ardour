@@ -221,7 +221,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		VBox* v = manage (new VBox);
 		HBox* h = manage (new HBox);
 		h->pack_end (*_piano_roll_header);
-		h->pack_end (*_piano_roll_header);
 		h->pack_end (*_range_scroomer);
 		v->pack_start (*separator, false, false);
 		v->pack_start (*h, true, true);
