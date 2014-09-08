@@ -35,13 +35,18 @@ else:
 
 parts = rev.split ('.')
 MAJOR = parts[0]
-other = parts[1].split ('-')
-MINOR = other[0]
-if len(other) > 1:
-    MICRO = other[1]
-else:
-    MICRO = '0'
 
+try:
+    MINOR = parts[1]
+    other = parts[2].split ('-')
+    if len(other) > 1:
+        MICRO = other[0]
+    else:
+        MICRO = '0'
+except:
+    MINOR = 0
+    MICRO = 0
+    
 V = MAJOR + '.' + MINOR + '.' + MICRO
 #
 # it is important that VERSION *not* be unicode string
