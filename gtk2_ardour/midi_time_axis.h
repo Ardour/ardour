@@ -136,7 +136,6 @@ class MidiTimeAxisView : public RouteTimeAxisView
         Gtk::Label                   _playback_channel_status;
         Gtk::Label                   _capture_channel_status;
  	Gtk::HBox                    _channel_status_box;
-        Gtk::Button                  _channel_selector_button;
 	Gtk::VBox                    _midi_controls_box;
 	MidiChannelSelectorWindow*   _channel_selector;
 	Gtk::ComboBoxText            _midnam_model_selector;

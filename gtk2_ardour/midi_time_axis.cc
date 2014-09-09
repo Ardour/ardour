@@ -291,42 +291,38 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	ARDOUR_UI::instance()->set_tip (_midnam_custom_device_mode_selector, _("External Device Mode"));
 
 	_midi_controls_box.set_homogeneous(false);
-	_midi_controls_box.set_border_width (10);
+	_midi_controls_box.set_border_width (2);
 
 	_channel_status_box.set_homogeneous (false);
-	_channel_status_box.set_spacing (6);
+	_channel_status_box.set_spacing (4);
 	
-	_channel_selector_button.set_label (_("Chns"));
-	ARDOUR_UI::instance()->set_tip (_channel_selector_button, _("Click to edit channel settings"));
+	ArdourButton *channel_selector_button = manage (new ArdourButton(_("Chns")));
+	channel_selector_button->set_name ("route button");
+	ARDOUR_UI::instance()->set_tip (channel_selector_button, _("Click to edit channel settings"));
 	
 	/* fixed sized labels to prevent silly nonsense (though obviously,
 	 * they cause their own too)
 	 */
-
-	_playback_channel_status.set_size_request (65, -1);
-	_capture_channel_status.set_size_request (60, -1);
+	set_size_request_to_display_given_text(_playback_channel_status, "Play: somemo", 2, 2); // TODO use _("Play: all/some")
+	set_size_request_to_display_given_text(_capture_channel_status, "Rec: somemo", 2, 2); // TODO use _("Rec: all/some")
 
 	_channel_status_box.pack_start (_playback_channel_status, false, false);
 	_channel_status_box.pack_start (_capture_channel_status, false, false);
-	_channel_status_box.pack_start (_channel_selector_button, false, false);
+	_channel_status_box.pack_end (*channel_selector_button, false, false);
 	_channel_status_box.show_all ();
 
-	_channel_selector_button.signal_clicked().connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_channel_selector));
+	channel_selector_button->signal_clicked.connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_channel_selector));
 	
 	_midi_controls_box.pack_start (_channel_status_box, false, false, 10);
 
 	if (!patch_manager.all_models().empty()) {
 
-		_midnam_model_selector.set_size_request(22, 30);
-		_midnam_model_selector.set_border_width(2);
 		_midnam_model_selector.show ();
-		_midi_controls_box.pack_start (_midnam_model_selector);
+		_midi_controls_box.pack_start (_midnam_model_selector, false, false, 2);
 
-		_midnam_custom_device_mode_selector.set_size_request(10, 30);
-		_midnam_custom_device_mode_selector.set_border_width(2);
 		_midnam_custom_device_mode_selector.show ();
 
-		_midi_controls_box.pack_start (_midnam_custom_device_mode_selector);
+		_midi_controls_box.pack_start (_midnam_custom_device_mode_selector, false, false, 2);
 	} 
 
 	model_changed();
