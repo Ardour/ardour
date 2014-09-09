@@ -64,7 +64,7 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 
-Gtk::TargetEntry RouteUI::header_target("HEADER", (Gtk::TargetFlags)0 ,ROUTE_HEADER);
+Gtk::TargetEntry RouteUI::header_target("HEADER", Gtk::TARGET_SAME_APP | Gtk::TARGET_OTHER_WIDGET,ROUTE_HEADER);
 
 uint32_t RouteUI::_max_invert_buttons = 3;
 PBD::Signal1<void, boost::shared_ptr<Route> > RouteUI::BusSendDisplayChanged;
@@ -100,7 +100,7 @@ RouteUI::~RouteUI()
 	delete solo_menu;
 	delete mute_menu;
 	delete sends_menu;
-        delete record_menu;
+    delete record_menu;
 	delete _invert_menu;
 }
 
