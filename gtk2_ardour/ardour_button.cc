@@ -433,7 +433,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 			 */
 			if (_xalign < 0) xa = ceil(.5 + (ww * fabs(_xalign) + text_margin));
 
-			cairo_move_to (cr, xa, floor(ya));
+			cairo_move_to (cr, xa, ya);
 			pango_cairo_update_layout(cr, _layout->gobj());
 			pango_cairo_show_layout (cr, _layout->gobj());
 			cairo_restore (cr);
@@ -583,13 +583,11 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	}
 
 	if ((_elements & Text) && !_text.empty()) {
-		int ignored;
-		_text_height = char_pixel_height ();
 		// if _layout does not exist, char_pixel_height() creates it,
-		_layout->get_pixel_size (_text_width, ignored);
+		req->height = std::max(req->height, (int) ceil(char_pixel_height() * BASELINESTRETCH + 1.0));
+		_layout->get_pixel_size (_text_width, _text_height);
 		req->width += rint(1.75 * char_pixel_width()); // padding
 		req->width += _text_width;
-		req->height = std::max(req->height, (int) ceil(_text_height * BASELINESTRETCH + 1.0));
 	} else {
 		_text_width = 0;
 		_text_height = 0;
