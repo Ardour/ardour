@@ -79,19 +79,21 @@
     ARDOUR::TracksAutoNamingRule _tracks_naming_rule;
 
 	void engine_changed ();
-	void device_changed (bool show_confirm_dial);
+	void on_device_dropdown_item_clicked (WavesDropdown*, void*);
+	void device_changed ();
 	void buffer_size_changed ();
-	void sample_rate_changed ();
+	void on_buffer_size_dropdown_item_clicked (WavesDropdown*, void*);
+	void on_sample_rate_dropdown_item_clicked (WavesDropdown*, void*);
     void engine_running ();
     void engine_stopped ();
-    void file_type_changed ();
+	void on_file_type_dropdown_item_clicked (WavesDropdown*, void*);
     void bit_depth_changed ();
     void frame_rate_changed ();
 
 	void populate_engine_combo ();
-	void populate_device_combo ();
-	void populate_sample_rate_combo ();
-	void populate_buffer_size_combo ();
+	void populate_device_dropdown ();
+	void populate_sample_rate_dropdown ();
+	void populate_buffer_size_dropdown ();
 	void populate_output_mode ();
     void populate_input_channels();
     void populate_output_channels();
@@ -99,7 +101,7 @@
     void populate_default_session_path();
 
     // Session Settings
-    void populate_file_type_combo();
+    void populate_file_type_dropdown();
     void populate_bit_depth_combo();
     void populate_frame_rate_combo();
     void populate_auto_lock_timer_combo();
@@ -123,7 +125,7 @@
 
 	std::string bufsize_as_string (uint32_t sz);
 
-    std::string         get_device_name() const { return _device_combo.get_active_text (); };
+    std::string         get_device_name() const { return _device_dropdown.get_text (); };
     ARDOUR::framecnt_t  get_sample_rate() const;
     ARDOUR::pframes_t   get_buffer_size () const;
 	uint32_t            get_input_channels () const { return 0; };

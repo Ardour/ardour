@@ -32,6 +32,7 @@
 #include "pbd/xml++.h"
 
 #include "waves_dialog.h"
+#include "waves_dropdown.h"
 #include "device_connection_control.h"
 #include "midi_device_connection_control.h"
 
@@ -68,10 +69,10 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
     WavesButton& _name_tracks_after_driver;
     WavesButton& _reset_tracks_name_to_default;
 	Gtk::ComboBoxText& _engine_combo;
-	Gtk::ComboBoxText& _device_combo;
-	Gtk::ComboBoxText& _sample_rate_combo;
-	Gtk::ComboBoxText& _buffer_size_combo;
-    Gtk::ComboBoxText& _file_type_combo;
+	WavesDropdown& _device_dropdown;
+	WavesDropdown& _sample_rate_dropdown;
+	WavesDropdown& _buffer_size_dropdown;
+	WavesDropdown& _file_type_dropdown;
     Gtk::ComboBoxText& _bit_depth_combo;
     Gtk::ComboBoxText& _frame_rate_combo;
 	Gtk::ComboBoxText& _auto_lock_timer_combo;

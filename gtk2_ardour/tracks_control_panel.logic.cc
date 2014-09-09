@@ -122,12 +122,12 @@ TracksControlPanel::init ()
     Config->ParameterChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_parameter_changed, this, _1), gui_context());
     
 	_engine_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::engine_changed));
-	_device_combo.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &TracksControlPanel::device_changed), true) );
-	_sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::sample_rate_changed));
-	_buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::buffer_size_changed));
+    _device_dropdown.signal_menu_item_clicked.connect (mem_fun(*this, &TracksControlPanel::on_device_dropdown_item_clicked));
+	_sample_rate_dropdown.signal_menu_item_clicked.connect (mem_fun(*this, &TracksControlPanel::on_sample_rate_dropdown_item_clicked));
+	_buffer_size_dropdown.signal_menu_item_clicked.connect (mem_fun(*this, &TracksControlPanel::on_buffer_size_dropdown_item_clicked));
     
     /* Session configuration parameters update */
-    _file_type_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::file_type_changed));
+	_file_type_dropdown.signal_menu_item_clicked.connect (mem_fun(*this, &TracksControlPanel::on_file_type_dropdown_item_clicked));
     _bit_depth_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::bit_depth_changed));
     _frame_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::frame_rate_changed));
 
@@ -144,13 +144,13 @@ TracksControlPanel::init ()
 	populate_engine_combo ();
 	populate_output_mode();
 
+    populate_file_type_dropdown();
     populate_input_channels();
     populate_output_channels();
     populate_midi_ports();
     populate_default_session_path();
     
     // Init session Settings
-    populate_file_type_combo();
     populate_bit_depth_combo();
     populate_frame_rate_combo();
     populate_auto_lock_timer_combo();
@@ -335,36 +335,6 @@ namespace  {
         
         return string("");
     }
-}
-
-
-void
-TracksControlPanel::populate_file_type_combo()
-{
-    using namespace std;
-    
-    vector<string> file_type_strings;
-    file_type_strings.push_back( HeaderFormat_to_string(CAF) );
-    file_type_strings.push_back( HeaderFormat_to_string(BWF) );
-    file_type_strings.push_back( HeaderFormat_to_string(AIFF) );
-    file_type_strings.push_back( HeaderFormat_to_string(WAVE64) );
-    
-    // Get FILE_TYPE from last used session
-    string header_format_string = read_property_from_last_session(Native_File_Header_Format);
-    
-    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
-    HeaderFormat header_format = string_to_HeaderFormat(header_format_string);
-    ardour_ui->set_header_format( header_format );
-    
-    {
-		// set _ignore_changes flag to ignore changes in combo-box callbacks
-		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-		set_popdown_strings (_file_type_combo, file_type_strings);
-		_file_type_combo.set_sensitive (file_type_strings.size() > 1);
-        _file_type_combo.set_active_text( HeaderFormat_to_string(header_format) );
-	}
-
-    return;
 }
 
 namespace {
@@ -642,7 +612,7 @@ TracksControlPanel::refresh_session_settings_info()
     if( !session )
         return;
     _bit_depth_combo.set_active_text( SampleFormat_to_string(session->config.get_native_file_data_format()) );
-    _file_type_combo.set_active_text( HeaderFormat_to_string(session->config.get_native_file_header_format()) );
+    _file_type_dropdown.set_text( HeaderFormat_to_string(session->config.get_native_file_header_format()) );
     _frame_rate_combo.set_active_text( TimecodeFormat_to_string(session->config.get_timecode_format()) );
 }
 
@@ -692,77 +662,86 @@ TracksControlPanel::populate_engine_combo()
 }
 
 void
-TracksControlPanel::populate_device_combo()
+TracksControlPanel::populate_device_dropdown()
 {
     std::vector<AudioBackend::DeviceStatus> all_devices;
 	EngineStateController::instance()->enumerate_devices (all_devices);
 
-    std::vector<std::string> available_devices;
-
+	_device_dropdown.clear_items ();
 	for (std::vector<AudioBackend::DeviceStatus>::const_iterator i = all_devices.begin(); i != all_devices.end(); ++i) {
-		available_devices.push_back (i->name);
+		_device_dropdown.add_menu_item (i->name, 0);
 	}
 
 	{
 		// set _ignore_changes flag to ignore changes in combo-box callbacks
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-		set_popdown_strings (_device_combo, available_devices);
-		_device_combo.set_sensitive (available_devices.size() > 1);
-	
-        if(!available_devices.empty() ) {
-            _device_combo.set_active_text (EngineStateController::instance()->get_current_device_name() );
-        }
-    }
-    
-    if(!available_devices.empty() ) {
-        device_changed(false);
+		_device_dropdown.set_sensitive (all_devices.size() > 1);
+	}
+
+    if(!all_devices.empty() ) {
+		_device_dropdown.set_text (EngineStateController::instance ()->get_current_device_name());
+        device_changed();
     }
 }
 
 void
-TracksControlPanel::populate_sample_rate_combo()
+TracksControlPanel::populate_file_type_dropdown()
+{
+    // Get FILE_TYPE from last used session
+    string header_format_string = read_property_from_last_session(Native_File_Header_Format);
+    
+    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
+    HeaderFormat header_format = string_to_HeaderFormat(header_format_string);
+    ardour_ui->set_header_format( header_format );
+	{
+		// set _ignore_changes flag to ignore changes in combo-box callbacks
+		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
+		_file_type_dropdown.set_text( HeaderFormat_to_string(header_format) );
+	}
+    return;
+}
+
+void
+TracksControlPanel::populate_sample_rate_dropdown()
 {
     std::vector<float> sample_rates;
     EngineStateController::instance()->available_sample_rates_for_current_device(sample_rates);
-	
-	std::vector<std::string> s;
+
+	_sample_rate_dropdown.clear_items ();
+
 	for (std::vector<float>::const_iterator x = sample_rates.begin(); x != sample_rates.end(); ++x) {
-		s.push_back (ARDOUR_UI_UTILS::rate_as_string (*x));
+		_sample_rate_dropdown.add_menu_item (ARDOUR_UI_UTILS::rate_as_string (*x), 0);
 	}
 
-	{
-		// set _ignore_changes flag to ignore changes in combo-box callbacks
-		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-		set_popdown_strings (_sample_rate_combo, s);
-		_sample_rate_combo.set_sensitive (s.size() > 1);
+	// set _ignore_changes flag to ignore changes in combo-box callbacks
+	PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
+	_sample_rate_dropdown.set_sensitive (sample_rates.size() > 1);
 
-		if (!s.empty() ) {
-			std::string active_sr = ARDOUR_UI_UTILS::rate_as_string(EngineStateController::instance()->get_current_sample_rate() );
-			_sample_rate_combo.set_active_text(active_sr);
-		}
+	if (!sample_rates.empty() ) {
+		std::string active_sr = ARDOUR_UI_UTILS::rate_as_string(EngineStateController::instance()->get_current_sample_rate() );
+		_sample_rate_dropdown.set_text(active_sr);
 	}
 }
 
 void
-TracksControlPanel::populate_buffer_size_combo()
+TracksControlPanel::populate_buffer_size_dropdown()
 {
-    std::vector<std::string> s;
 	std::vector<pframes_t> buffer_sizes;
-
 	EngineStateController::instance()->available_buffer_sizes_for_current_device(buffer_sizes);
+
+	_buffer_size_dropdown.clear_items ();
 	for (std::vector<pframes_t>::const_iterator x = buffer_sizes.begin(); x != buffer_sizes.end(); ++x) {
-		s.push_back (bufsize_as_string (*x));
+		_buffer_size_dropdown.add_menu_item (bufsize_as_string (*x), 0);
 	}
 
 	{
 		// set _ignore_changes flag to ignore changes in combo-box callbacks
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-		set_popdown_strings (_buffer_size_combo, s);
-		_buffer_size_combo.set_sensitive (s.size() > 1);
+		_buffer_size_dropdown.set_sensitive (buffer_sizes.size() > 1);
 
-		if (!s.empty() ) {
+		if (!buffer_sizes.empty() ) {
 			std::string active_bs = bufsize_as_string(EngineStateController::instance()->get_current_buffer_size());
-			_buffer_size_combo.set_active_text(active_bs);
+			_buffer_size_dropdown.set_text(active_bs);
 		}
 	}
 }
@@ -978,50 +957,57 @@ void TracksControlPanel::engine_changed ()
 	if ( EngineStateController::instance()->set_new_backend_as_current (backend_name) )
 	{
 		_have_control = EngineStateController::instance()->is_setup_required ();
-        populate_device_combo();
+        populate_device_dropdown();
         return;
 	}
     
     std::cerr << "\tfailed to set backend [" << backend_name << "]\n";
 }
 
-void TracksControlPanel::device_changed (bool show_confirm_dial/*=true*/)
+void
+TracksControlPanel::on_device_dropdown_item_clicked (WavesDropdown*, void*)
+{
+	if (_ignore_changes) {
+		return;
+	}
+
+    std::string device_name = _device_dropdown.get_text ();
+    
+    std::string message = _("Would you like to switch to ") + device_name;
+
+    MessageDialog msg (message,
+                        false,
+                        Gtk::MESSAGE_WARNING,
+                        Gtk::BUTTONS_YES_NO,
+                        true);
+        
+    msg.set_position (Gtk::WIN_POS_MOUSE);
+    msg.set_keep_above(true);
+
+    switch (msg.run()) {
+        case RESPONSE_NO:
+            // set _ignore_changes flag to ignore changes in combo-box callbacks
+            PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
+                
+            _device_dropdown.set_text (EngineStateController::instance()->get_current_device_name());
+            return;
+    } 
+
+	device_changed ();
+}
+
+void
+TracksControlPanel::device_changed ()
 {
 	if (_ignore_changes) {
 		return;
 	}
     
-    std::string device_name = _device_combo.get_active_text ();
-    
-    if( show_confirm_dial )
-    {    
-        std::string message = _("Would you like to switch to ") + device_name;
-
-        MessageDialog msg (message,
-                           false,
-                           Gtk::MESSAGE_WARNING,
-                           Gtk::BUTTONS_YES_NO,
-                           true);
-        
-        msg.set_position (Gtk::WIN_POS_MOUSE);
-        msg.set_keep_above(true);
-
-        switch (msg.run()) {
-            case RESPONSE_NO:
-                // set _ignore_changes flag to ignore changes in combo-box callbacks
-                PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-                
-                _device_combo.set_active_text (EngineStateController::instance()->get_current_device_name());
-
-                return;
-        } 
-
-    }
-    
+    std::string device_name = _device_dropdown.get_text ();
     if (EngineStateController::instance()->set_new_device_as_current(device_name) )
     {
-        populate_buffer_size_combo();
-        populate_sample_rate_combo();
+        populate_buffer_size_dropdown();
+        populate_sample_rate_dropdown();
         return;
     }
     
@@ -1029,7 +1015,7 @@ void TracksControlPanel::device_changed (bool show_confirm_dial/*=true*/)
 		// set _ignore_changes flag to ignore changes in combo-box callbacks
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
 		// restore previous device name in combo box
-        _device_combo.set_active_text (EngineStateController::instance()->get_current_device_name() );
+        _device_dropdown.set_text (EngineStateController::instance()->get_current_device_name() );
 	}
     
     MessageDialog( _("Error activating selected device"), PROGRAM_NAME).run();
@@ -1103,13 +1089,13 @@ TracksControlPanel::on_all_outputs_off_button(WavesButton*)
 }
 
 void
-TracksControlPanel::file_type_changed()
+TracksControlPanel::on_file_type_dropdown_item_clicked (WavesDropdown*, void*)
 { 
     if (_ignore_changes) {
 		return;
 	}
     
-    std::string s = _file_type_combo.get_active_text();
+    std::string s = _file_type_dropdown.get_text();
     ARDOUR::HeaderFormat header_format = string_to_HeaderFormat(s);
     
     ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
@@ -1145,7 +1131,7 @@ TracksControlPanel::frame_rate_changed()
 }
 
 void 
-TracksControlPanel::buffer_size_changed()
+TracksControlPanel::on_buffer_size_dropdown_item_clicked (WavesDropdown*, void*)
 {
 	if (_ignore_changes) {
 		return;
@@ -1163,14 +1149,14 @@ TracksControlPanel::buffer_size_changed()
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
         // restore previous buffer size value in combo box
         std::string buffer_size_str = bufsize_as_string (EngineStateController::instance()->get_current_buffer_size() );
-        _buffer_size_combo.set_active_text(buffer_size_str);
+        _buffer_size_dropdown.set_text(buffer_size_str);
     }
     
 	MessageDialog( _("Buffer size set to the value which is not supported"), PROGRAM_NAME).run();
 }
 
 void
-TracksControlPanel::sample_rate_changed()
+TracksControlPanel::on_sample_rate_dropdown_item_clicked (WavesDropdown*, void*)
 {
 	if (_ignore_changes) {
 		return;
@@ -1183,13 +1169,13 @@ TracksControlPanel::sample_rate_changed()
         return;
     }
     
-    {
+	{
 		// set _ignore_changes flag to ignore changes in combo-box callbacks
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-        // restore previous buffer size value in combo box
-                std::string sample_rate_str = ARDOUR_UI_UTILS::rate_as_string (EngineStateController::instance()->get_current_sample_rate() );
-        _sample_rate_combo.set_active_text(sample_rate_str);
-    }
+		// restore previous buffer size value in combo box
+		std::string sample_rate_str = ARDOUR_UI_UTILS::rate_as_string (EngineStateController::instance()->get_current_sample_rate() );
+		_sample_rate_dropdown.set_text(sample_rate_str);
+	}
 	
     MessageDialog( _("Sample rate set to the value which is not supported"), PROGRAM_NAME).run();
 }
@@ -1198,8 +1184,8 @@ TracksControlPanel::sample_rate_changed()
 void
 TracksControlPanel::engine_running ()
 {
-	populate_buffer_size_combo();
-	populate_sample_rate_combo();
+	populate_buffer_size_dropdown();
+	populate_sample_rate_dropdown();
     show_buffer_duration ();
 }
 
@@ -1344,9 +1330,9 @@ void TracksControlPanel::update_session_config ()
         
         if( session )
         {
-            session->config.set_native_file_header_format( string_to_HeaderFormat(_file_type_combo.get_active_text() ) );
-            session->config.set_native_file_data_format  ( string_to_SampleFormat(_bit_depth_combo.get_active_text() ) );
-            session->config.set_timecode_format(           string_to_TimecodeFormat(_frame_rate_combo.get_active_text() ) );
+            session->config.set_native_file_header_format( string_to_HeaderFormat(_file_type_dropdown.get_text()));
+            session->config.set_native_file_data_format ( string_to_SampleFormat(_bit_depth_combo.get_active_text()));
+            session->config.set_timecode_format ( string_to_TimecodeFormat(_frame_rate_combo.get_active_text()));
         }
     }
 }
@@ -1461,14 +1447,14 @@ void TracksControlPanel::on_port_registration_update()
 void
 TracksControlPanel::on_buffer_size_update ()
 {
-    populate_buffer_size_combo();
+    populate_buffer_size_dropdown();
 }
 
 
 void
 TracksControlPanel::on_device_list_update (bool current_device_disconnected)
 {
-    populate_device_combo();
+    populate_device_dropdown();
     
     if (current_device_disconnected) {
         std::string message = _("Audio device has been removed");
@@ -1637,7 +1623,7 @@ TracksControlPanel::bufsize_as_string (uint32_t sz)
 framecnt_t
 TracksControlPanel::get_sample_rate () const
 {
-    const string sample_rate = _sample_rate_combo.get_active_text ();
+    const string sample_rate = _sample_rate_dropdown.get_text ();
     
     if ( "44.1 kHz" == sample_rate )
     {
@@ -1672,7 +1658,7 @@ TracksControlPanel::get_sample_rate () const
 
 pframes_t TracksControlPanel::get_buffer_size() const
 {
-    std::string bs_text = _buffer_size_combo.get_active_text ();
+    std::string bs_text = _buffer_size_dropdown.get_text ();
     pframes_t samples = atoi (bs_text); /* will ignore trailing text */
 	return samples;
 }

@@ -18,39 +18,6 @@
 */
 #include "tracks_control_panel.h"
 #include "waves_button.h"
-//#include <exception>
-//#include <vector>
-//#include <cmath>
-//#include <fstream>
-//#include <map>
-
-//#include <boost/scoped_ptr.hpp>
-
-//#include <gtkmm/messagedialog.h>
-
-//#include "pbd/error.h"
-//#include "pbd/xml++.h"
-//#include "pbd/unwind.h"
-//#include "pbd/failed_constructor.h"
-
-//#include <gtkmm/alignment.h>
-//#include <gtkmm/stock.h>
-//#include <gtkmm/notebook.h>
-//#include <gtkmm2ext/utils.h>
-
-//#include "ardour/audio_backend.h"
-//#include "ardour/audioengine.h"
-//#include "ardour/mtdm.h"
-//#include "ardour/rc_configuration.h"
-//#include "ardour/types.h"
-
-//#include "pbd/convert.h"
-//#include "pbd/error.h"
-
-//#include "ardour_ui.h"
-//#include "tracks_control_panel.h"
-//#include "gui_thread.h"
-//#include "utils.h"
 #include "i18n.h"
 
 using namespace Gtk;
@@ -80,16 +47,16 @@ TracksControlPanel::TracksControlPanel ()
 	, _no_button (get_waves_button ("no_button"))
 	, _yes_button (get_waves_button ("yes_button"))
 	, _engine_combo (get_combo_box_text ("engine_combo"))
-	, _device_combo (get_combo_box_text ("device_combo"))
-	, _sample_rate_combo (get_combo_box_text ("sample_rate_combo"))
-	, _buffer_size_combo (get_combo_box_text ("buffer_size_combo"))
+	, _device_dropdown (get_waves_dropdown ("device_dropdown"))
+	, _sample_rate_dropdown (get_waves_dropdown ("sample_rate_dropdown"))
+	, _buffer_size_dropdown (get_waves_dropdown ("buffer_size_dropdown"))
 	, _latency_label (get_label("latency_label"))
     , _default_open_path (get_label("default_open_path"))
 	, _multi_out_button(get_waves_button ("multi_out_button"))
 	, _stereo_out_button(get_waves_button ("stereo_out_button"))
     , _name_tracks_after_driver(get_waves_button ("name_tracks_after_driver_button"))
     , _reset_tracks_name_to_default(get_waves_button ("reset_tracks_name_to_default_button"))
-    , _file_type_combo (get_combo_box_text ("file_type_combo"))
+    , _file_type_dropdown (get_waves_dropdown ("file_type_dropdown"))
     , _bit_depth_combo (get_combo_box_text ("bit_depth_combo"))
     , _frame_rate_combo (get_combo_box_text ("frame_rate_combo"))
     , _browse_button(get_waves_button("browse_default_folder"))
