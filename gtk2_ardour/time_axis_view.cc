@@ -345,7 +345,7 @@ TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 
 	_ebox_release_can_act = true;
 			
-	if (maybe_set_cursor (event->y) > 0) {
+	if ( event->button == 1 && maybe_set_cursor (event->y) > 0 ) {
 		_resize_drag_start = event->y_root;
         control_ebox_resize_started();
 	}
@@ -436,6 +436,7 @@ TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 		_editor.stop_canvas_autoscroll ();
 		_resize_drag_start = -1;
         control_ebox_resize_ended();
+        return true;
 	}
 
 	if (!_ebox_release_can_act) {

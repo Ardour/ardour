@@ -5611,9 +5611,21 @@ Editor::output_connection_mode_changed ()
     if (Config->get_output_auto_connect() & AutoConnectMaster) {
         
         if (_session->master_out() && !axis_view_from_route(_session->master_out() ) ) {
+
+            selection->block_tracks_changed(true);
+            
+            // backup selected tracks
+            TrackViewList selected_tracks (selection->tracks);
+            
+            // add master bus view
             RouteList list;
             list.push_back(_session->master_out() );
             add_routes(list);
+            
+            // restore selection
+            selection->set(selected_tracks);
+            
+            selection->block_tracks_changed(false);
         }
     } else {
         TimeAxisView* tv = 0;
@@ -5621,8 +5633,6 @@ Editor::output_connection_mode_changed ()
             delete tv;
         }
     }
-    
-    track_selection_changed ();
 }
 
 
