@@ -317,11 +317,10 @@
     
     -->
       <Label style="generic_control" text="FILE TYPE" x="24" y="40"/>
-      <ComboBoxText style="generic_control" id="file_type_combo"  x="215" y="40" width="150" height="20" />
       <Dropdown style="generic_control"
                 id="file_type_dropdown"
                 x="215"
-                y="60"
+                y="40"
                 width="150"
                 height="20"
                 normalicon="preference_session_settings_dropdown"
@@ -337,21 +336,6 @@
         <dropdownitem title="Aiff"/>
         <dropdownitem title="Wave64"/>
       </Dropdown>
-      <Label style="generic_control" text="SAMPLE RATE" x="231" y="17"/>
-      <Dropdown style="generic_control"
-                id="sample_rate_dropdown"
-                x="311"
-                y="12"
-                width="90"
-                height="20"
-                normalicon="preference_rate_buffer_dropdown"
-                activeicon="preference_rate_buffer_dropdown_active"
-                prelighticon="preference_rate_buffer_dropdown_prelight"
-                bgnormal="#6C6C6C"
-                fgnormal="#ffffff"
-                fgactive="#ffffff"
-                fghover="#ffffff"
-                winfont="Arial 10"/>
       <Label style="generic_control" text="BIT DEPTH" x="24" y="70"/>
       <ComboBoxText style="generic_control" id="bit_depth_combo"  x="215" y="70" width="150" height="20" />
       <Label style="generic_control" text="SESSION FRAME RATE" x="24" y="100"/>
