@@ -160,7 +160,7 @@ RouteUI::init ()
     // source side
     signal_drag_begin().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_begin));
     signal_drag_data_get().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_data_get));
-    signal_drag_begin().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_end));
+    signal_drag_end().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_end));
     
     // destination callbacks
     signal_drag_motion().connect (sigc::mem_fun(*this, &RouteUI::on_route_drag_motion));
