@@ -720,10 +720,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\pbd\pthread_utils.h"
-				>
-			</File>
-			<File
 				RelativePath="..\pbd\rcu.h"
 				>
 			</File>

@@ -20,21 +20,6 @@
 #ifndef __pbd_pthread_utils__
 #define __pbd_pthread_utils__
 
-/* Accommodate thread setting (and testing) for both
- * 'libpthread' and 'libpthread_win32' (whose implementations
- * of 'pthread_t' are subtlely different)
- */
-#ifndef PTHREAD_MACROS_DEFINED
-#define PTHREAD_MACROS_DEFINED
-#ifdef  PTW32_VERSION  /* pthread_win32 */
-#define mark_pthread_inactive(threadID)  threadID.p=0
-#define is_pthread_active(threadID)      threadID.p==0
-#else                 /* normal pthread */
-#define mark_pthread_inactive(threadID)  threadID=0
-#define is_pthread_active(threadID)      threadID==0
-#endif  /* PTW32_VERSION */
-#endif  /* PTHREAD_MACROS_DEFINED */
-
 #ifdef COMPILER_MSVC
 #include <ardourext/pthread.h>
 #else
