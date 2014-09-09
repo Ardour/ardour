@@ -877,12 +877,13 @@ MasterDeviceNames::get_state(void)
 
 MIDINameDocument::MIDINameDocument (const string& filename)
 {
-	if (!_document.read (filename)) {
+	XMLTree document;
+	if (!document.read (filename)) {
 		throw failed_constructor ();
 	}
 
-	_document.set_filename (filename);
-	set_state (_document, *_document.root());
+	document.set_filename (filename);
+	set_state (document, *document.root());
 }
 
 int

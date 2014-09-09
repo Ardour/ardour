@@ -485,7 +485,6 @@ public:
 private:
 	std::string                   _author;
 	MasterDeviceNamesList         _master_device_names_list;
-	XMLTree                       _document;
 	MasterDeviceNames::Models     _all_models;
 };
 
