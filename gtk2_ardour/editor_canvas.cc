@@ -575,6 +575,19 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 	}
 }
 
+void
+Editor::start_autoscroll_for_headers ()
+{
+    if (autoscroll_active () ) {
+		return;
+	}
+    
+	Gtk::Allocation alloc = controls_layout.get_allocation ();
+    ArdourCanvas::Rect scrolling_boundary = ArdourCanvas::Rect (alloc.get_x(), alloc.get_y(), alloc.get_x() + alloc.get_width(), alloc.get_y() + alloc.get_height());
+    
+    start_canvas_autoscroll (false/*horizontal disabled*/, true/*vertical enabled*/, scrolling_boundary);
+}
+
 bool
 Editor::autoscroll_active () const
 {

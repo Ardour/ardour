@@ -423,8 +423,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		return _drags;
 	}
 
-        void maybe_autoscroll (bool, bool, bool);
-        bool autoscroll_active() const;
+    void maybe_autoscroll (bool, bool, bool);
+    void start_autoscroll_for_headers ();
+    bool autoscroll_active() const;
 
 	Gdk::Cursor* get_canvas_cursor () const { return current_canvas_cursor; }
 	void set_canvas_cursor (Gdk::Cursor*, bool save=false);
@@ -1800,7 +1801,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         ArdourCanvas::Rect autoscroll_boundary;
 
 	bool autoscroll_canvas ();
-        void start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary);
+    void start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary);
 	void stop_canvas_autoscroll ();
 
 	/* trimming */

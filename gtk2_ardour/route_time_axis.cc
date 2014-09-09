@@ -1134,7 +1134,7 @@ RouteTimeAxisView::handle_route_drag_motion(const Glib::RefPtr<Gdk::DragContext>
                 lower_drop_indicator.show();
                 upper_drop_indicator.hide();
             }
-            
+
             return true;
         }
     }
@@ -1161,12 +1161,17 @@ RouteTimeAxisView::handle_route_drag_begin (const Glib::RefPtr<Gdk::DragContext>
         _editor.get_selection().add(this);
     }
     
+    // enable autoscroll
+    _editor.start_autoscroll_for_headers ();
+    
     //GZ TO-DO: Draw DnD icon for track header
 }
 
 void
 RouteTimeAxisView::handle_route_drag_end(const Glib::RefPtr<Gdk::DragContext>& context)
 {
+    // disable autoscroll
+    _editor.stop_canvas_autoscroll ();
 }
 
 void

@@ -373,12 +373,12 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual ArdourCanvas::ScrollGroup* get_vscroll_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_hvscroll_group () const = 0;
 
-        virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
+    virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
 
 	virtual TimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const = 0;
 
-        virtual void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>) = 0;
-        virtual void set_current_movable (boost::shared_ptr<ARDOUR::Movable>) = 0;
+    virtual void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>) = 0;
+    virtual void set_current_movable (boost::shared_ptr<ARDOUR::Movable>) = 0;
 
 	virtual void center_screen (framepos_t) = 0;
 
@@ -389,9 +389,10 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual Gtkmm2ext::TearOff* tools_tearoff () const = 0;
 
 	virtual DragManager* drags () const = 0;
-        virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
+    virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
+    virtual void start_autoscroll_for_headers () = 0;
 	virtual void stop_canvas_autoscroll () = 0;
-        virtual bool autoscroll_active() const = 0;
+    virtual bool autoscroll_active() const = 0;
 
 	virtual MouseCursors const * cursors () const = 0;
 	virtual VerboseCursor * verbose_cursor () const = 0;
