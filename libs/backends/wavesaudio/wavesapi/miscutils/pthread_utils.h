@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2014 John Emmas 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __pbd_pthread_utils__
-#define __pbd_pthread_utils__
+#ifndef __waves_pthread_utils__
+#define __waves_pthread_utils__
 
 /* Accommodate thread setting (and testing) for both
  * 'libpthread' and 'libpthread_win32' (whose implementations
@@ -33,30 +33,6 @@
 #define mark_pthread_inactive(threadID)  threadID=0
 #define is_pthread_active(threadID)      threadID!=0
 #endif  /* PTW32_VERSION */
+
 #endif  /* PTHREAD_MACROS_DEFINED */
-
-#ifdef COMPILER_MSVC
-#include <ardourext/pthread.h>
-#else
-#include <pthread.h>
-#endif
-#include <signal.h>
-#include <string>
-#include <stdint.h>
-
-#include "pbd/libpbd_visibility.h"
-#include "pbd/signals.h"
-
-LIBPBD_API int  pthread_create_and_store (std::string name, pthread_t  *thread, void * (*start_routine)(void *), void * arg);
-LIBPBD_API void pthread_cancel_one (pthread_t thread);
-LIBPBD_API void pthread_cancel_all ();
-LIBPBD_API void pthread_kill_all (int signum);
-LIBPBD_API const char* pthread_name ();
-LIBPBD_API void pthread_set_name (const char* name);
-
-namespace PBD {
-	LIBPBD_API extern void notify_gui_about_thread_creation (std::string, pthread_t, std::string, int requests = 256);
-	LIBPBD_API extern PBD::Signal4<void,std::string,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
-}
-
-#endif /* __pbd_pthread_utils__ */
+#endif  /* __waves_pthread_utils__ */
