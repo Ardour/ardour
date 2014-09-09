@@ -3584,7 +3584,7 @@ bool
 Editor::edit_controls_button_press (GdkEventButton* ev)
 {
 	if ( (ev->button == 1) && (ev->type == GDK_2BUTTON_PRESS) ) {
-                ARDOUR_UI::instance()->add_audio_track_instantly ();
+        ARDOUR_UI::instance()->add_audio_track_instantly ();
 	}
     
 	return true;
@@ -3594,11 +3594,7 @@ Editor::edit_controls_button_press (GdkEventButton* ev)
 bool
 Editor::edit_controls_button_release (GdkEventButton* ev)
 {
-	if (ev->button == 1) {
-		selection->clear_tracks ();
-	}
-
-	return true;
+	return false;
 }
 
 bool
