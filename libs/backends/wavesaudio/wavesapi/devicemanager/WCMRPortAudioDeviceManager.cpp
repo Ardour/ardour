@@ -1774,7 +1774,7 @@ WTErr WCMRPortAudioDeviceManager::getDeviceBufferSizesImpl(const std::string & d
 		else
 		{
 			retVal = eAsioFailed;
-			std::cout << "API::PortAudioDeviceManager::GetBufferSizes: error: " <<  Pa_GetErrorText (paErr) << " getting buffer size fo device: "<< deviceName << std::endl;
+			std::cout << "API::PortAudioDeviceManager::GetBufferSizes: error: " <<  Pa_GetErrorText (paErr) << " getting buffer sizes for device: "<< deviceName << std::endl;
 		}
 	}
 	else
