@@ -64,9 +64,9 @@ class MidiChannelSelectorWindow;
 
 class MidiTimeAxisView : public RouteTimeAxisView
 {
-  public:
- 	MidiTimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
- 	virtual ~MidiTimeAxisView ();
+	public:
+	MidiTimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
+	virtual ~MidiTimeAxisView ();
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 
@@ -100,11 +100,11 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	uint8_t get_channel_for_add () const;
 
-  protected:
+	protected:
 	void start_step_editing ();
 	void stop_step_editing ();
 
-  private:
+	private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 
 	void model_changed();
@@ -114,7 +114,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void build_automation_action_menu (bool);
 	Gtk::Menu* build_note_mode_menu();
 	Gtk::Menu* build_color_mode_menu();
-	
+
 	void set_note_mode (ARDOUR::NoteMode mode, bool apply_to_selection = false);
 	void set_color_mode (ARDOUR::ColorMode, bool force = false, bool redisplay = true, bool apply_to_selection = false);
 	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
@@ -133,9 +133,9 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Gtk::RadioMenuItem*          _meter_color_mode_item;
 	Gtk::RadioMenuItem*          _channel_color_mode_item;
 	Gtk::RadioMenuItem*          _track_color_mode_item;
-        Gtk::Label                   _playback_channel_status;
-        Gtk::Label                   _capture_channel_status;
- 	Gtk::HBox                    _channel_status_box;
+	Gtk::Label                   _playback_channel_status;
+	Gtk::Label                   _capture_channel_status;
+	Gtk::HBox                    _channel_status_box;
 	Gtk::VBox                    _midi_controls_box;
 	MidiChannelSelectorWindow*   _channel_selector;
 	Gtk::ComboBoxText            _midnam_model_selector;
@@ -153,8 +153,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void add_single_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 	void add_multi_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 	void build_controller_menu ();
-        void toggle_channel_selector ();
-        void channel_selector_hidden ();
+	void toggle_channel_selector ();
+	void channel_selector_hidden ();
 	void set_channel_mode (ARDOUR::ChannelMode, uint16_t);
 
 	void set_note_selection (uint8_t note);
@@ -175,8 +175,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	StepEditor* _step_editor;
 
-        void capture_channel_mode_changed();
-        void playback_channel_mode_changed();
+	void capture_channel_mode_changed();
+	void playback_channel_mode_changed();
 
 	void ensure_pan_views (bool show = true);
 
@@ -189,4 +189,3 @@ class MidiTimeAxisView : public RouteTimeAxisView
 };
 
 #endif /* __ardour_midi_time_axis_h__ */
-
