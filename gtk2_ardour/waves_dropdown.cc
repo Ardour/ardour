@@ -43,7 +43,14 @@ WavesDropdown::add_menu_item (const std::string& item, void* cookie)
 	
 	items.push_back (Gtk::Menu_Helpers::MenuElem (item, sigc::bind (sigc::mem_fun(*this, &WavesDropdown::_on_menu_item), items.size (), cookie)));
     
-    return _menu.items ().back ();
+	Gtk::MenuItem& menuitem = _menu.items ().back ();
+	ensure_style();
+	Widget* child = menuitem.get_child ();
+	if (child) {
+		child->set_style (get_style());
+	}
+
+    return menuitem;
 }
 
 void
