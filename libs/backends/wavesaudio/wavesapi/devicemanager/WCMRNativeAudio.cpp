@@ -12,6 +12,7 @@
 #endif
 
 #include "WCMRNativeAudio.h"
+#include "MiscUtils/pthread_utils.h"
 #include "MiscUtils/safe_delete.h"
 #include <iostream>
 #include <sstream>
@@ -34,11 +35,12 @@
 //**********************************************************************************************
 WCMRNativeAudioNoneDevice::WCMRNativeAudioNoneDevice (WCMRAudioDeviceManager *pManager)
 	: WCMRNativeAudioDevice (pManager, false /*useMultiThreading*/)
-	, m_SilenceThread(0)
 #if defined (PLATFORM_WINDOWS)
     , _waitableTimerForUsleep (CreateWaitableTimer(NULL, TRUE, NULL))
 #endif
 {
+	mark_pthread_inactive (m_SilenceThread);
+
 	m_DeviceName = NONE_DEVICE_NAME;
 
 	m_SamplingRates = boost::assign::list_of (m_CurrentSamplingRate=44100)(48000)(88200)(96000);
@@ -137,7 +139,7 @@ WTErr WCMRNativeAudioNoneDevice::SetStreaming (bool newState)
 
 	if (Streaming())
 	{
-		if (m_SilenceThread)
+		if (is_pthread_active (m_SilenceThread))
 			std::cerr << "\t\t\t\t\t !!!!!!!!!!!!!!! Warning: the inactive NONE-DEVICE was streaming!" << std::endl;
 
 		pthread_attr_t attributes;
@@ -156,19 +158,19 @@ WTErr WCMRNativeAudioNoneDevice::SetStreaming (bool newState)
 		}
 
 		if (pthread_create (&m_SilenceThread, &attributes, __SilenceThread, this)) {
-			m_SilenceThread = 0;
+			mark_pthread_inactive (m_SilenceThread);
 			std::cerr << "WCMRNativeAudioNoneDevice::SetStreaming (): pthread_create () failed!" << std::endl;
 			return eGenericErr;
 		}
 	}
 	else
 	{
-		if (!m_SilenceThread)
+		if (!is_pthread_active (m_SilenceThread))
 		{
 			std::cerr << "\t\t\t\t\t !!!!!!!!!!!!!!! Warning: the active NONE-DEVICE was NOT streaming!" << std::endl;
 		}
 
-		while (m_SilenceThread)
+		while (is_pthread_active (m_SilenceThread))
 		{
 			_usleep(1); //now wait for ended  thread;
 		}
@@ -220,7 +222,7 @@ void WCMRNativeAudioNoneDevice::_SilenceThread()
         }
 		audioCallbackData.acdCycleStartTimeNanos = cycleEndTimeNanos+1;
     }
-	m_SilenceThread = 0;
+	mark_pthread_inactive (m_SilenceThread);
 }
 
 void* WCMRNativeAudioNoneDevice::__SilenceThread(void *This)
