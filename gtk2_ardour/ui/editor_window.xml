@@ -40,7 +40,22 @@
                     y="4"/>
               <HBox id="primary_clock_home"
                     x="132"
-                    y="6"/>            
+                    y="6"/>
+                <dropdown id="display_format_dropdown"
+                          text="Frames"
+                          fgnormal="#ffffff"
+                          fgactive="#ffffff"
+                          fghover="#ffffff"
+                          winfont ="Arial 8"
+                          macfont ="Helvetica 8"
+                          x="200"
+                          y="28"
+                          width="63"
+                          height="18"
+                          normalicon="topbar_button"
+                          activeicon="topbar_button_active"
+                          prelighticon="topbar_button_prelight"/>
+                
               <Iconbutton id="bit_depth_button"
                           text="bit depth"
                           fgnormal="#ffffff"
@@ -65,8 +80,6 @@
                           normalicon="topbar_button"
                           activeicon="topbar_button_active"
                           prelighticon="topbar_button_prelight"/>
-                
-                
                 <dropdown id="sample_rate_dropdown"
                           text="sample rate"
                           bgnormal="#43919A"
@@ -82,6 +95,21 @@
                           normalicon="topbar_button"
                           activeicon="topbar_button_active"
                           prelighticon="topbar_button_prelight"/>
+                
+                <dropdown id="timecode_selector_dropdown"
+                          text="internal"
+                          fgnormal="#ffffff"
+                          fgactive="#ffffff"
+                          fghover="#ffffff"
+                          winfont ="Arial 8"
+                          macfont ="Helvetica 8"
+                          x="338"
+                          y="5"
+                          width="63"
+                          height="18"
+                          normalicon="topbar_button"
+                          activeicon="topbar_button_active"
+                          prelighticon="topbar_button_prelight"/>                
             </Layout>
             <EventBox bgnormal="#383838"
                       width="17"
