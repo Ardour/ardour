@@ -713,9 +713,20 @@ EngineControl::backend_changed ()
 
 		if (!drivers.empty()) {
 			{
+				string current_driver;
+				current_driver = backend->driver_name ();
+
+				// driver might not have been set yet
+				if (current_driver == "") {
+					current_driver = driver_combo.get_active_text ();
+					if (current_driver == "")
+						// driver has never been set, make sure it's not blank
+						current_driver = drivers.front ();
+				}
+
 				PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 				set_popdown_strings (driver_combo, drivers);
-				driver_combo.set_active_text (drivers.front());
+				driver_combo.set_active_text (current_driver);
 			}
 
 			driver_changed ();
@@ -797,9 +808,20 @@ EngineControl::list_devices ()
 		update_sensitivity ();
 
 		{
+			string current_device;
+			current_device = backend->device_name ();
+			if (current_device == "") {
+				// device might not have been set yet
+				current_device = device_combo.get_active_text ();
+				if (current_device == "")
+					// device has never been set, make sure it's not blank
+					current_device = available_devices.front ();
+			}
+
 			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 			set_popdown_strings (device_combo, available_devices);
-			device_combo.set_active_text (available_devices.front());
+
+			device_combo.set_active_text (current_device);
 		}
 
 		device_changed ();
