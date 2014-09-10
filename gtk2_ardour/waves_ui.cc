@@ -657,6 +657,33 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		}
 		label->set_justify (justification);
 		
+		property = xml_property (definition, "horzalignment", styles, "center");
+		std::transform(property.begin(), property.end(), property.begin(), ::tolower);
+		Gtk::AlignmentEnum xalign = Gtk::ALIGN_CENTER;
+		if (property == "start") {
+			xalign = Gtk::ALIGN_START;
+		} else if (property == "end") {
+			xalign = Gtk::ALIGN_END;
+		} else if (property == "center") {
+			xalign = Gtk::ALIGN_CENTER;
+		} else {
+			dbg_msg ("Invalid horizontal alignment for Gtk::Label !");
+		}
+
+		property = xml_property (definition, "vertalignment", styles, "center");
+		std::transform(property.begin(), property.end(), property.begin(), ::tolower);
+		Gtk::AlignmentEnum yalign = Gtk::ALIGN_CENTER;
+		if (property == "top") {
+			yalign = Gtk::ALIGN_START;
+		} else if (property == "bottom") {
+			yalign = Gtk::ALIGN_END;
+		} else if (property == "center") {
+			yalign = Gtk::ALIGN_CENTER;
+		} else {
+			dbg_msg ("Invalid vertical alignment for Gtk::Label !");
+		}
+		label->set_alignment (xalign, yalign);
+
 		property = xml_property (definition, "ellipsize", styles, "none");
 		std::transform(property.begin(), property.end(), property.begin(), ::tolower);
 		Pango::EllipsizeMode ellipsize_mode = Pango::ELLIPSIZE_NONE;
