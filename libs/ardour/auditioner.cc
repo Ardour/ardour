@@ -96,6 +96,7 @@ Auditioner::lookup_synth ()
 				warning << _("Falling back to Reasonable Synth for Midi Audition") << endmsg;
 			} else {
 				warning << _("No synth for midi-audition found.") << endmsg;
+				Config->set_midi_audition_synth_uri(""); // Don't check again for Reasonable Synth (ie --no-lv2)
 			}
 		}
 		if (p) {
