@@ -36,6 +36,7 @@ gtkmm2ext_sources = [
         'cell_renderer_pixbuf_toggle.cc',
         'choice.cc',
         'click_box.cc',
+        'cursors.cc',
         'debug.cc',
         'dndtreeview.cc',
         'fastmeter.cc',
