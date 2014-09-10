@@ -119,10 +119,19 @@
     <Layout id="audio_settings_layout" bgnormal="#000000" x="113" y="1" width="505" height="558" visible="true">
       <Layout bgnormal="#565656" x="0" y="0" width="505" height="100">
         <Label style="generic_control" text="AUDIO ENGINE" x="12" y="17"/>
-        <ComboBoxText style="generic_control" id="engine_combo" x="97" y="12" width="126" height="20"/>
+        <Dropdown style="generic_button"
+                  id="engine_dropdown"
+                  x="97"
+                  y="12"
+                  width="126"
+                  height="20"
+                  normalicon="preference_device_dropdown"
+                  activeicon="preference_device_dropdown_active"
+                  prelighticon="preference_device_dropdown_prelight"
+                  inactiveicon="preference_device_dropdown_inactive"/>
 
         <Label style="generic_control" text="INTERFACE" x="12" y="47"/>
-        <Dropdown style="generic_control"
+        <Dropdown style="generic_button"
                   id="device_dropdown"
                   x="97"
                   y="40"
@@ -130,14 +139,10 @@
                   height="20"
                   normalicon="preference_device_dropdown"
                   activeicon="preference_device_dropdown_active"
-                  prelighticon="preference_device_dropdown_prelight"
-                  bgnormal="#6C6C6C"
-                  fgnormal="#ffffff"
-                  fgactive="#ffffff"
-                  fghover="#ffffff"
-                  winfont="Arial 10"/>
+                  prelighticon="preference_device_dropdown_prelight"                  
+                  inactiveicon="preference_device_dropdown_inactive"/>
         <Label style="generic_control" text="SAMPLE RATE" x="231" y="17"/>
-        <Dropdown style="generic_control"
+        <Dropdown style="generic_button"
                   id="sample_rate_dropdown"
                   x="311"
                   y="12"
@@ -146,13 +151,9 @@
                   normalicon="preference_rate_buffer_dropdown"
                   activeicon="preference_rate_buffer_dropdown_active"
                   prelighticon="preference_rate_buffer_dropdown_prelight"
-                  bgnormal="#6C6C6C"
-                  fgnormal="#ffffff"
-                  fgactive="#ffffff"
-                  fghover="#ffffff"
-                  winfont="Arial 10"/>
+                  inactiveicon="preference_rate_buffer_dropdown_inactive"/>
           <Label style="generic_control" text="BUFFER SIZE" x="231" y="47"/>
-        <Dropdown style="generic_control"
+        <Dropdown style="generic_button"
                   id="buffer_size_dropdown"
                   x="311"
                   y="42"
@@ -161,11 +162,7 @@
                   normalicon="preference_rate_buffer_dropdown"
                   activeicon="preference_rate_buffer_dropdown_active"
                   prelighticon="preference_rate_buffer_dropdown_prelight"
-                  bgnormal="#6C6C6C"
-                  fgnormal="#ffffff"
-                  fgactive="#ffffff"
-                  fghover="#ffffff"
-                  winfont="Arial 10"/>
+                  inactiveicon="preference_rate_buffer_dropdown_inactive"/>
 
         <Button id="control_panel_button"
           style="generic_button"
@@ -317,7 +314,7 @@
     
     -->
       <Label style="generic_control" text="FILE TYPE" x="24" y="40"/>
-      <Dropdown style="generic_control"
+      <Dropdown style="generic_button"
                 id="file_type_dropdown"
                 x="215"
                 y="40"
@@ -325,28 +322,91 @@
                 height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
-                prelighticon="preference_session_settings_dropdown_prelight"
-                bgnormal="#6C6C6C"
-                fgnormal="#ffffff"
-                fgactive="#ffffff"
-                fghover="#ffffff"
-                winfont="Arial 10">
+                prelighticon="preference_session_settings_dropdown_prelight">
         <dropdownitem title="Caf"/>
         <dropdownitem title="BWav"/>
         <dropdownitem title="Aiff"/>
         <dropdownitem title="Wave64"/>
       </Dropdown>
       <Label style="generic_control" text="BIT DEPTH" x="24" y="70"/>
-      <ComboBoxText style="generic_control" id="bit_depth_combo"  x="215" y="70" width="150" height="20" />
+      <Dropdown style="generic_button"
+                id="bit_depth_dropdown"
+                x="215"
+                y="70"
+                width="150"
+                height="20"
+                normalicon="preference_session_settings_dropdown"
+                activeicon="preference_session_settings_dropdown_active"
+                prelighticon="preference_session_settings_dropdown_prelight">
+        <dropdownitem title="16 bit"/>
+        <dropdownitem title="24 bit"/>
+        <dropdownitem title="32 bit floating point"/>
+      </Dropdown>
       <Label style="generic_control" text="SESSION FRAME RATE" x="24" y="100"/>
-      <ComboBoxText style="generic_control" id="frame_rate_combo"  x="215" y="100" width="150" height="20" />
+      <Dropdown style="generic_button"
+                id="frame_rate_dropdown"
+                x="215"
+                y="100"
+                width="150"
+                height="20"
+                normalicon="preference_session_settings_dropdown"
+                activeicon="preference_session_settings_dropdown_active"
+                prelighticon="preference_session_settings_dropdown_prelight">
+        <dropdownitem title="24 fps"/>
+        <dropdownitem title="25 fps"/>
+        <dropdownitem title="30 fps"/>
+        <dropdownitem title="23.976 fps"/>
+        <dropdownitem title="29.97 fps"/>
+      </Dropdown>
       <Label style="generic_control" text="AUTO LOCK TIMER" x="24" y="175"/>
-      <ComboBoxText style="generic_control" id="auto_lock_timer_combo"  x="215" y="175" width="150" height="20" />
+      <Dropdown style="generic_button"
+                id="auto_lock_timer_dropdown"
+                x="215"
+                y="175"
+                width="150"
+                height="20"
+                normalicon="preference_session_settings_dropdown"
+                activeicon="preference_session_settings_dropdown_active"
+                prelighticon="preference_session_settings_dropdown_prelight">
+        <dropdownitem title="0 Min"/>
+        <dropdownitem title="1 Min"/>
+        <dropdownitem title="3 Min"/>
+        <dropdownitem title="5 Min"/>
+        <dropdownitem title="10 Min"/>
+        <dropdownitem title="15 Min"/>
+      </Dropdown>
       <Label style="generic_control" text="AUTO SAVE TIMER" x="24" y="205"/>
-      <ComboBoxText style="generic_control" id="auto_save_timer_combo"  x="215" y="205" width="150" height="20" />
+      <Dropdown style="generic_button"
+                id="auto_save_timer_dropdown"
+                x="215"
+                y="205"
+                width="150"
+                height="20"
+                normalicon="preference_session_settings_dropdown"
+                activeicon="preference_session_settings_dropdown_active"
+                prelighticon="preference_session_settings_dropdown_prelight">
+        <dropdownitem title="0 Min"/>
+        <dropdownitem title="1 Min"/>
+        <dropdownitem title="3 Min"/>
+        <dropdownitem title="5 Min"/>
+        <dropdownitem title="10 Min"/>
+        <dropdownitem title="15 Min"/>
+      </Dropdown>
       <Label style="generic_control" text="PRE RECORD BUFFER" x="24" y="235"/>
-      <ComboBoxText style="generic_control" id="pre_record_buffer_combo"  x="215" y="235" width="150" height="20" />
-        
+      <Dropdown style="generic_button"
+                id="pre_record_buffer_dropdown"
+                x="215"
+                y="235"
+                width="150"
+                height="20"
+                normalicon="preference_session_settings_dropdown"
+                activeicon="preference_session_settings_dropdown_active"
+                prelighticon="preference_session_settings_dropdown_prelight">
+        <dropdownitem title="0 Min"/>
+        <dropdownitem title="1 Min"/>
+        <dropdownitem title="2 Min"/>
+      </Dropdown>
+
       <Label style="generic_control" text="DEFAULT FOLDER FOR NEW SESSION" x = "24" y = "290" />
       <Button
         id = "browse_default_folder"

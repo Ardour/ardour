@@ -48,7 +48,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace Glib;
-using namespace std;
+using namespace Timecode;
 
 #define dbg_msg(a) MessageDialog (a, PROGRAM_NAME).run();
 
@@ -121,15 +121,15 @@ TracksControlPanel::init ()
     /* Global configuration parameters update */
     Config->ParameterChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_parameter_changed, this, _1), gui_context());
     
-	_engine_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::engine_changed));
-    _device_dropdown.signal_menu_item_clicked.connect (mem_fun(*this, &TracksControlPanel::on_device_dropdown_item_clicked));
-	_sample_rate_dropdown.signal_menu_item_clicked.connect (mem_fun(*this, &TracksControlPanel::on_sample_rate_dropdown_item_clicked));
-	_buffer_size_dropdown.signal_menu_item_clicked.connect (mem_fun(*this, &TracksControlPanel::on_buffer_size_dropdown_item_clicked));
+    _engine_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun(*this, &TracksControlPanel::on_engine_dropdown_item_clicked));
+    _device_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun(*this, &TracksControlPanel::on_device_dropdown_item_clicked));
+	_sample_rate_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun(*this, &TracksControlPanel::on_sample_rate_dropdown_item_clicked));
+	_buffer_size_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun(*this, &TracksControlPanel::on_buffer_size_dropdown_item_clicked));
     
     /* Session configuration parameters update */
-	_file_type_dropdown.signal_menu_item_clicked.connect (mem_fun(*this, &TracksControlPanel::on_file_type_dropdown_item_clicked));
-    _bit_depth_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::bit_depth_changed));
-    _frame_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &TracksControlPanel::frame_rate_changed));
+	_file_type_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun(*this, &TracksControlPanel::on_file_type_dropdown_item_clicked));
+    _bit_depth_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun(*this, &TracksControlPanel::on_bit_depth_dropdown_item_clicked));
+    _frame_rate_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_frame_rate__item_clicked));
 
     _name_tracks_after_driver.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_name_tracks_after_driver));
     _reset_tracks_name_to_default.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_reset_tracks_name_to_default));
@@ -141,21 +141,23 @@ TracksControlPanel::init ()
     _yes_button.set_visible(false);
     _no_button.set_visible(false);
     
-	populate_engine_combo ();
-	populate_output_mode();
+	populate_engine_dropdown ();
+	populate_device_dropdown ();
 
-    populate_file_type_dropdown();
-    populate_input_channels();
-    populate_output_channels();
-    populate_midi_ports();
-    populate_default_session_path();
+	populate_output_mode ();
+
+    populate_file_type_dropdown ();
+    populate_input_channels ();
+    populate_output_channels ();
+    populate_midi_ports ();
+    populate_default_session_path ();
     
     // Init session Settings
-    populate_bit_depth_combo();
-    populate_frame_rate_combo();
-    populate_auto_lock_timer_combo();
-    populate_save_lock_timer_combo();
-    populate_pre_record_buffer_combo();
+    populate_bit_depth_dropdown();
+    populate_frame_rate_dropdown();
+    populate_auto_lock_timer_dropdown();
+    populate_auto_save_timer_dropdown();
+    populate_pre_record_buffer_dropdown();
     
 	_audio_settings_tab_button.set_active(true);
 }
@@ -228,8 +230,6 @@ namespace  {
     std::string
     HeaderFormat_to_string(HeaderFormat header_format)
     {
-        using namespace std;
-        
         switch (header_format) {
             case CAF:
                 return string_CAF;
@@ -240,10 +240,10 @@ namespace  {
             case WAVE64:
                 return string_Wav64;
             default:
-                return string("");
+                return std::string("");
         }
         
-        return string("");
+        return std::string("");
     }
     
     HeaderFormat
@@ -277,35 +277,33 @@ namespace  {
     std::string
     read_property_from_last_session(SessionProperty session_property)
     {        
-        using namespace std;
-        
         ARDOUR::RecentSessions rs;
         ARDOUR::read_recent_sessions (rs);
         
         if( rs.size() > 0 )
         {
-            string full_session_name = Glib::build_filename( rs[0].second, rs[0].first );
+            std::string full_session_name = Glib::build_filename( rs[0].second, rs[0].first );
             full_session_name += statefile_suffix;
             
             // read property from session projectfile
             boost::shared_ptr<XMLTree> state_tree(new XMLTree());
             
             if (!state_tree->read (full_session_name))
-                return string("");
+                return std::string("");
             
             XMLNode& root (*state_tree->root());
 
             if (root.name() != X_("Session"))
-                return string("");
+                return std::string("");
             
             XMLNode* config_main_node = root.child ("Config");
             if( !config_main_node )
-                return string("");
+                return std::string("");
 
             XMLNodeList config_nodes_list = config_main_node->children();
             XMLNodeConstIterator config_node_iter = config_nodes_list.begin();
             
-            string required_property_name;
+            std::string required_property_name;
             
             switch (session_property) {
                 case Native_File_Header_Format:
@@ -318,7 +316,7 @@ namespace  {
                     required_property_name = "timecode-format";
                     break;
                 default:
-                    return string("");
+                    return std::string("");
             }
             
             for (; config_node_iter != config_nodes_list.end(); ++config_node_iter)
@@ -333,7 +331,7 @@ namespace  {
             }
         } 
         
-        return string("");
+        return std::string("");
     }
 }
 
@@ -346,8 +344,6 @@ namespace {
     std::string
     SampleFormat_to_string(SampleFormat sample_format)
     {
-        using namespace std;
-        
         switch (sample_format) {
             case FormatFloat:
                 return string_bit32;
@@ -357,7 +353,7 @@ namespace {
                 return string_bit16;
         }
         
-        return string("");
+        return std::string("");
     }
 
     SampleFormat
@@ -378,17 +374,10 @@ namespace {
 }
 
 void
-TracksControlPanel::populate_bit_depth_combo()
+TracksControlPanel::populate_bit_depth_dropdown()
 {
-    using namespace std;
-    
-    vector<string> bit_depth_strings;
-    bit_depth_strings.push_back(SampleFormat_to_string(FormatInt16));
-    bit_depth_strings.push_back(SampleFormat_to_string(FormatInt24));
-    bit_depth_strings.push_back(SampleFormat_to_string(FormatFloat));
-    
     // Get BIT_DEPTH from last used session
-    string sample_format_string = read_property_from_last_session(Native_File_Data_Format);
+    std::string sample_format_string = read_property_from_last_session(Native_File_Data_Format);
     
     ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
     SampleFormat sample_format = string_to_SampleFormat(sample_format_string);
@@ -397,9 +386,7 @@ TracksControlPanel::populate_bit_depth_combo()
     {
 		// set _ignore_changes flag to ignore changes in combo-box callbacks
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-		set_popdown_strings (_bit_depth_combo, bit_depth_strings);
-		_bit_depth_combo.set_sensitive (bit_depth_strings.size() > 1);
-        _bit_depth_combo.set_active_text ( SampleFormat_to_string(sample_format) );
+        _bit_depth_dropdown.set_text ( SampleFormat_to_string(sample_format) );
 	}
    
     return;
@@ -415,8 +402,6 @@ namespace  {
     std::string
     TimecodeFormat_to_string(Timecode::TimecodeFormat timecode_format)
     {
-        using namespace std;
-        using namespace Timecode;
         
         switch (timecode_format) {
             case timecode_24:
@@ -431,17 +416,15 @@ namespace  {
                 return string_2997fps;
                 
             default:
-                return string("");
+                return std::string("");
         }
         
-        return string("");
+        return std::string("");
     }
     
     Timecode::TimecodeFormat
     string_to_TimecodeFormat(std::string s)
     {
-        using namespace Timecode;
-        
         if(s == string_24fps)
             return timecode_24;
         if(s == string_25fps)
@@ -506,19 +489,10 @@ namespace  {
 }
 
 void
-TracksControlPanel::populate_frame_rate_combo()
+TracksControlPanel::populate_frame_rate_dropdown()
 {
-    using namespace std;
-    
-    vector<string> frame_rate_strings;
-    frame_rate_strings.push_back(string_24fps);
-    frame_rate_strings.push_back(string_25fps);
-    frame_rate_strings.push_back(string_30fps);
-    frame_rate_strings.push_back(string_23976fps);
-    frame_rate_strings.push_back(string_2997fps);
-    
     // Get FRAME_RATE from last used session
-    string last_used_frame_rate = read_property_from_last_session(Timecode_Format);
+    std::string last_used_frame_rate = read_property_from_last_session(Timecode_Format);
     
     ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
     Timecode::TimecodeFormat timecode_format = string_to_TimecodeFormat(last_used_frame_rate);
@@ -527,78 +501,43 @@ TracksControlPanel::populate_frame_rate_combo()
     {
 		// set _ignore_changes flag to ignore changes in combo-box callbacks
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-		set_popdown_strings (_frame_rate_combo, frame_rate_strings);
-		_frame_rate_combo.set_sensitive (frame_rate_strings.size() > 1);
-        _frame_rate_combo.set_active_text ( TimecodeFormat_to_string(timecode_format) );
+        _frame_rate_dropdown.set_text ( TimecodeFormat_to_string(timecode_format) );
 	}
     
     return;
 }
 
 void
-TracksControlPanel::populate_auto_lock_timer_combo()
+TracksControlPanel::populate_auto_lock_timer_dropdown()
 {
-    using namespace std;
-    
-    vector<string> lock_time_strings;
-    lock_time_strings.push_back("0 Min");
-    lock_time_strings.push_back("1 Min");
-    lock_time_strings.push_back("3 Min");
-    lock_time_strings.push_back("5 Min");
-    lock_time_strings.push_back("10 Min");
-    lock_time_strings.push_back("15 Min");
-    
     int time = ARDOUR_UI::config()->get_auto_lock_timer();
-    stringstream ss;
+    std::stringstream ss;
     ss << time;
-    string str_time = ss.str() + " Min";
+    std::string str_time = ss.str() + " Min";
     
-    set_popdown_strings (_auto_lock_timer_combo, lock_time_strings);
-    _auto_lock_timer_combo.set_sensitive (lock_time_strings.size() > 1);
-    _auto_lock_timer_combo.set_active_text( str_time );
+    _auto_lock_timer_dropdown.set_text( str_time );
 }
 
 void
-TracksControlPanel::populate_save_lock_timer_combo()
+TracksControlPanel::populate_auto_save_timer_dropdown()
 {
-    using namespace std;
-    
-    vector<string> save_time_strings;
-    save_time_strings.push_back("0 Min");
-    save_time_strings.push_back("1 Min");
-    save_time_strings.push_back("3 Min");
-    save_time_strings.push_back("5 Min");
-    save_time_strings.push_back("10 Min");
-    save_time_strings.push_back("15 Min");
-    
     int time = ARDOUR_UI::config()->get_auto_save_timer();
-    stringstream ss;
+    std::stringstream ss;
     ss << time;
-    string str_time = ss.str() + " Min";
+    std::string str_time = ss.str() + " Min";
     
-    set_popdown_strings (_auto_save_timer_combo, save_time_strings);
-    _auto_save_timer_combo.set_sensitive (save_time_strings.size() > 1);
-    _auto_save_timer_combo.set_active_text( str_time );
+    _auto_save_timer_dropdown.set_text( str_time );
 }
 
 void
-TracksControlPanel::populate_pre_record_buffer_combo()
+TracksControlPanel::populate_pre_record_buffer_dropdown()
 {
-    using namespace std;
-    
-    vector<string> pre_record_buffer_strings;
-    pre_record_buffer_strings.push_back("0 Min");
-    pre_record_buffer_strings.push_back("1 Min");
-    pre_record_buffer_strings.push_back("2 Min");
-    
     int time = ARDOUR_UI::config()->get_pre_record_buffer();
-    stringstream ss;
+    std::stringstream ss;
     ss << time;
-    string str_time = ss.str() + " Min";
+    std::string str_time = ss.str() + " Min";
     
-    set_popdown_strings (_pre_record_buffer_combo, pre_record_buffer_strings);
-    _pre_record_buffer_combo.set_sensitive (pre_record_buffer_strings.size() > 1);
-    _pre_record_buffer_combo.set_active_text( str_time );
+    _pre_record_buffer_dropdown.set_text( str_time );
 }
 
 void
@@ -611,9 +550,9 @@ TracksControlPanel::refresh_session_settings_info()
     Session* session = ardour_ui->the_session();
     if( !session )
         return;
-    _bit_depth_combo.set_active_text( SampleFormat_to_string(session->config.get_native_file_data_format()) );
+    _bit_depth_dropdown.set_text( SampleFormat_to_string(session->config.get_native_file_data_format()) );
     _file_type_dropdown.set_text( HeaderFormat_to_string(session->config.get_native_file_header_format()) );
-    _frame_rate_combo.set_active_text( TimecodeFormat_to_string(session->config.get_timecode_format()) );
+    _frame_rate_dropdown.set_text( TimecodeFormat_to_string(session->config.get_timecode_format()) );
 }
 
 void
@@ -629,13 +568,12 @@ TracksControlPanel::populate_default_session_path()
 }
 
 void
-TracksControlPanel::populate_engine_combo()
+TracksControlPanel::populate_engine_dropdown()
 {
 	if (_ignore_changes) {
 		return;
 	}
 
-	std::vector<std::string> strings;
     std::vector<const AudioBackendInfo*> backends;
     EngineStateController::instance()->available_backends(backends);
 
@@ -645,19 +583,18 @@ TracksControlPanel::populate_engine_combo()
 		throw failed_constructor ();
 	}
 	for (std::vector<const AudioBackendInfo*>::const_iterator b = backends.begin(); b != backends.end(); ++b) {
-		strings.push_back ((*b)->name);
+		_engine_dropdown.add_menu_item ((*b)->name, 0);
 	}
 
 	{
 		// set _ignore_changes flag to ignore changes in combo-box callbacks
 		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-		set_popdown_strings (_engine_combo, strings);
-		_engine_combo.set_sensitive (strings.size() > 1);
+		_engine_dropdown.set_sensitive (backends.size() > 1);
 	}
 
-	if (!strings.empty() )
+	if (!backends.empty() )
 	{
-		_engine_combo.set_active_text (EngineStateController::instance()->get_current_backend_name() );
+		_engine_dropdown.set_text (EngineStateController::instance()->get_current_backend_name() );
 	}
 }
 
@@ -688,7 +625,7 @@ void
 TracksControlPanel::populate_file_type_dropdown()
 {
     // Get FILE_TYPE from last used session
-    string header_format_string = read_property_from_last_session(Native_File_Header_Format);
+    std::string header_format_string = read_property_from_last_session(Native_File_Header_Format);
     
     ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
     HeaderFormat header_format = string_to_HeaderFormat(header_format_string);
@@ -835,7 +772,7 @@ TracksControlPanel::populate_midi_ports()
     EngineStateController::instance()->get_physical_midi_input_states(midi_input_states);
     EngineStateController::instance()->get_physical_midi_output_states(midi_output_states);
     
-    // now group corresponding inputs and outputs into a vector of midi device descriptors
+    // now group corresponding inputs and outputs into a std::vector of midi device descriptors
     MidiDeviceDescriptorVec midi_device_descriptors;
     std::vector<EngineStateController::PortState>::const_iterator state_iter;
     // process inputs
@@ -946,13 +883,13 @@ TracksControlPanel::cleanup_midi_device_list()
     }
 }
 
-void TracksControlPanel::engine_changed ()
+void TracksControlPanel::on_engine_dropdown_item_clicked (WavesDropdown*, void*)
 {
 	if (_ignore_changes) {
 		return;
 	}
 
-	std::string backend_name = _engine_combo.get_active_text();
+	std::string backend_name = _engine_dropdown.get_text();
     
 	if ( EngineStateController::instance()->set_new_backend_as_current (backend_name) )
 	{
@@ -1103,13 +1040,13 @@ TracksControlPanel::on_file_type_dropdown_item_clicked (WavesDropdown*, void*)
 }
 
 void
-TracksControlPanel::bit_depth_changed()
+TracksControlPanel::on_bit_depth_dropdown_item_clicked (WavesDropdown*, void*)
 {
     if (_ignore_changes) {
 		return;
 	}
     
-    std::string s = _bit_depth_combo.get_active_text();
+    std::string s = _bit_depth_dropdown.get_text();
     ARDOUR::SampleFormat sample_format = string_to_SampleFormat(s);
     
     ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
@@ -1117,13 +1054,13 @@ TracksControlPanel::bit_depth_changed()
 }
 
 void
-TracksControlPanel::frame_rate_changed()
+TracksControlPanel::on_frame_rate__item_clicked (WavesDropdown*, void*)
 {
     if (_ignore_changes) {
 		return;
 	}
 
-    std::string s = _frame_rate_combo.get_active_text();
+    std::string s = _frame_rate_dropdown.get_text();
     Timecode::TimecodeFormat timecode_format = string_to_TimecodeFormat(s);
     
     ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
@@ -1270,8 +1207,6 @@ TracksControlPanel::on_stereo_out (WavesButton*)
 void
 TracksControlPanel::on_browse_button (WavesButton*)
 {
-    using namespace std;
-    
     set_keep_above (false);
     _default_path_name = ARDOUR::choose_folder_dialog(Config->get_default_session_parent_dir(), _("Choose Default Path"));
     set_keep_above (true);    
@@ -1296,7 +1231,7 @@ TracksControlPanel::save_default_session_path()
 void
 TracksControlPanel::save_auto_lock_time()
 {
-    string s = _auto_lock_timer_combo.get_active_text();
+    std::string s = _auto_lock_timer_dropdown.get_text();
     char * pEnd;
     int time = strtol( s.c_str(), &pEnd, 10 );
     ARDOUR_UI::config()->set_auto_lock_timer(time);
@@ -1305,7 +1240,7 @@ TracksControlPanel::save_auto_lock_time()
 void
 TracksControlPanel::save_auto_save_time()
 {
-    string s = _auto_save_timer_combo.get_active_text();
+    std::string s = _auto_save_timer_dropdown.get_text();
     char * pEnd;
     int time = strtol( s.c_str(), &pEnd, 10 );
     ARDOUR_UI::config()->set_auto_save_timer(time);
@@ -1314,7 +1249,7 @@ TracksControlPanel::save_auto_save_time()
 void
 TracksControlPanel::save_pre_record_buffer()
 {
-    string s = _pre_record_buffer_combo.get_active_text();
+    std::string s = _pre_record_buffer_dropdown.get_text();
     char * pEnd;
     int time = strtol( s.c_str(), &pEnd, 10 );
     ARDOUR_UI::config()->set_pre_record_buffer(time);
@@ -1331,8 +1266,8 @@ void TracksControlPanel::update_session_config ()
         if( session )
         {
             session->config.set_native_file_header_format( string_to_HeaderFormat(_file_type_dropdown.get_text()));
-            session->config.set_native_file_data_format ( string_to_SampleFormat(_bit_depth_combo.get_active_text()));
-            session->config.set_timecode_format ( string_to_TimecodeFormat(_frame_rate_combo.get_active_text()));
+            session->config.set_native_file_data_format ( string_to_SampleFormat(_bit_depth_dropdown.get_text()));
+            session->config.set_timecode_format ( string_to_TimecodeFormat(_frame_rate_dropdown.get_text()));
         }
     }
 }
@@ -1370,29 +1305,29 @@ TracksControlPanel::on_cancel (WavesButton*)
 	response(Gtk::RESPONSE_CANCEL);
     
     // restore previous value in combo-boxes
-    stringstream ss;
+    std::stringstream ss;
     int temp;
-    string str;
+    std::string str;
     temp = ARDOUR_UI::config()->get_auto_lock_timer();
-    ss.str(string(""));
+    ss.str(std::string(""));
     ss.clear();
     ss << temp;
     str = ss.str() + " Min";
-    _auto_lock_timer_combo.set_active_text(str);
+    _auto_lock_timer_dropdown.set_text(str);
     
     temp = ARDOUR_UI::config()->get_auto_save_timer();
-    ss.str(string(""));
+    ss.str(std::string(""));
     ss.clear();
     ss << temp;
     str = ss.str() + " Min";
-    _auto_save_timer_combo.set_active_text(str);
+    _auto_save_timer_dropdown.set_text(str);
     
     temp = ARDOUR_UI::config()->get_pre_record_buffer();
-    ss.str(string(""));
+    ss.str(std::string(""));
     ss.clear();
     ss << temp;
     str = ss.str() + " Min";
-    _pre_record_buffer_combo.set_active_text(str);
+    _pre_record_buffer_dropdown.set_text(str);
     
     _default_open_path.set_text(Config->get_default_session_parent_dir());
 }
@@ -1623,7 +1558,7 @@ TracksControlPanel::bufsize_as_string (uint32_t sz)
 framecnt_t
 TracksControlPanel::get_sample_rate () const
 {
-    const string sample_rate = _sample_rate_dropdown.get_text ();
+    const std::string sample_rate = _sample_rate_dropdown.get_text ();
     
     if ( "44.1 kHz" == sample_rate )
     {
@@ -1647,7 +1582,7 @@ TracksControlPanel::get_sample_rate () const
     
     float r = atof (sample_rate);
 	    
-    /* the string may have been translated with an abbreviation for
+    /* the std::string may have been translated with an abbreviation for
 	* thousands, so use a crude heuristic to fix this.
 	*/
 	if (r < 1000.0) {

@@ -68,16 +68,16 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
     WavesButton& _browse_button;
     WavesButton& _name_tracks_after_driver;
     WavesButton& _reset_tracks_name_to_default;
-	Gtk::ComboBoxText& _engine_combo;
+	WavesDropdown& _engine_dropdown;
 	WavesDropdown& _device_dropdown;
 	WavesDropdown& _sample_rate_dropdown;
 	WavesDropdown& _buffer_size_dropdown;
 	WavesDropdown& _file_type_dropdown;
-    Gtk::ComboBoxText& _bit_depth_combo;
-    Gtk::ComboBoxText& _frame_rate_combo;
-	Gtk::ComboBoxText& _auto_lock_timer_combo;
-    Gtk::ComboBoxText& _auto_save_timer_combo;
-    Gtk::ComboBoxText& _pre_record_buffer_combo;
+	WavesDropdown& _bit_depth_dropdown;
+	WavesDropdown& _frame_rate_dropdown;
+	WavesDropdown& _auto_lock_timer_dropdown;
+	WavesDropdown& _auto_save_timer_dropdown;
+	WavesDropdown& _pre_record_buffer_dropdown;
     Gtk::Label& _latency_label;
     Gtk::Label& _default_open_path;
     

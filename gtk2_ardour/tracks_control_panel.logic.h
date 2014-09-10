@@ -30,8 +30,8 @@
     uint32_t _desired_sample_rate;
     bool  _have_control;
 
-	// this flag is set for emidiate return during combo-box change callbacks
-	// when we don need to process current combo-box change
+	// this flag is set for immediate return during combo-box change callbacks
+	// when we do not need to process current combo-box change
 	uint32_t _ignore_changes;
     std::string _current_device;
 
@@ -78,7 +78,7 @@
     void on_control_panel_button(WavesButton*);
     ARDOUR::TracksAutoNamingRule _tracks_naming_rule;
 
-	void engine_changed ();
+	void on_engine_dropdown_item_clicked (WavesDropdown*, void*);
 	void on_device_dropdown_item_clicked (WavesDropdown*, void*);
 	void device_changed ();
 	void buffer_size_changed ();
@@ -87,10 +87,10 @@
     void engine_running ();
     void engine_stopped ();
 	void on_file_type_dropdown_item_clicked (WavesDropdown*, void*);
-    void bit_depth_changed ();
-    void frame_rate_changed ();
+    void on_bit_depth_dropdown_item_clicked (WavesDropdown*, void*);
+    void on_frame_rate__item_clicked (WavesDropdown*, void*);
 
-	void populate_engine_combo ();
+	void populate_engine_dropdown ();
 	void populate_device_dropdown ();
 	void populate_sample_rate_dropdown ();
 	void populate_buffer_size_dropdown ();
@@ -102,11 +102,11 @@
 
     // Session Settings
     void populate_file_type_dropdown();
-    void populate_bit_depth_combo();
-    void populate_frame_rate_combo();
-    void populate_auto_lock_timer_combo();
-    void populate_save_lock_timer_combo();
-    void populate_pre_record_buffer_combo();
+    void populate_bit_depth_dropdown();
+    void populate_frame_rate_dropdown();
+    void populate_auto_lock_timer_dropdown();
+    void populate_auto_save_timer_dropdown();
+    void populate_pre_record_buffer_dropdown();
 
     // Engine State update callback handlers
     void on_port_registration_update();
