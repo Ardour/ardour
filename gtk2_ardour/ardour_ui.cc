@@ -444,7 +444,7 @@ ARDOUR_UI::engine_running ()
 	update_disk_space ();
     update_disk_usage ();
 	update_cpu_load ();
-    populate_sample_rate_combo ();
+    populate_sample_rate_dropdown ();
 }
 
 void

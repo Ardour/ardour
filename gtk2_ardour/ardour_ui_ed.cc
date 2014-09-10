@@ -56,6 +56,7 @@
 #include "global_port_matrix.h"
 #include "location_ui.h"
 #include "main_clock.h"
+#include "time_info_box.h"
 
 #include <gtkmm2ext/application.h>
 
@@ -91,6 +92,8 @@ ARDOUR_UI::create_editor ()
         _bit_depth_button = &editor->get_waves_button("bit_depth_button");
         _frame_rate_button = &editor->get_waves_button("frame_rate_button");        
         _sample_rate_dropdown = &editor->get_waves_dropdown("sample_rate_dropdown");
+        _display_format_dropdown = &editor->get_waves_dropdown("display_format_dropdown");
+        _timecode_selector_dropdown = &editor->get_waves_dropdown("timecode_selector_dropdown");
         
         _tracks_button = &editor->get_waves_button("tracks_button");
     }
@@ -100,14 +103,73 @@ ARDOUR_UI::create_editor ()
 	}
     
     _bit_depth_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_bit_depth_button));
-    _sample_rate_dropdown->signal_menu_item_clicked.connect (mem_fun(*this, &ARDOUR_UI::on_sample_rate_dropdown_item_clicked ));
     _frame_rate_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_frame_rate_button));
     _tracks_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_tracks_button));
-
+    
+    _sample_rate_dropdown->signal_menu_item_clicked.connect (mem_fun(*this, &ARDOUR_UI::on_sample_rate_dropdown_item_clicked ));
+    _display_format_dropdown->signal_menu_item_clicked.connect (mem_fun(*this, &ARDOUR_UI::on_display_format_dropdown_item_clicked ));
+    _timecode_selector_dropdown->signal_menu_item_clicked.connect (mem_fun(*this, &ARDOUR_UI::on_timecode_selector_dropdown_item_clicked ));
+    
 	editor->Realized.connect (sigc::mem_fun (*this, &ARDOUR_UI::editor_realized));
 	editor->signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), true));
 
+    populate_display_format_dropdown ();
+    populate_timecode_selector_dropdown ();
+    
 	return 0;
+}
+
+void
+ARDOUR_UI::populate_display_format_dropdown ()
+{
+    static std::vector<string> display_formats;
+    display_formats.push_back("Timecode");
+    display_formats.push_back("Time");
+    display_formats.push_back("Samples");
+    
+    for(int i = 0; i < display_formats.size(); ++i)
+    {
+        _display_format_dropdown->add_menu_item (display_formats[i], &display_formats[i]);
+    }
+}
+
+void
+ARDOUR_UI::populate_timecode_selector_dropdown ()
+{
+    static std::vector<string> timecode_selector;
+    timecode_selector.push_back("Internal");
+    timecode_selector.push_back("MTC");
+    timecode_selector.push_back("LTC");
+    
+    for(int i = 0; i < timecode_selector.size(); ++i)
+    {
+        _timecode_selector_dropdown->add_menu_item (timecode_selector[i], &timecode_selector[i]);
+    }
+}
+
+void
+ARDOUR_UI::on_display_format_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie)
+{
+    string format = *((string*)my_cookie);
+    AudioClock::Mode mode;
+    
+    if( format == "Timecode" )
+        mode = AudioClock::Timecode;
+    else if ( format == "Time" )
+        mode = AudioClock::MinSec;
+    else if ( format == "Samples" )
+        mode = AudioClock::Frames;
+   
+    if( time_info_box )
+        time_info_box->set_mode (mode);
+    if ( big_clock )
+        primary_clock->set_mode (mode);
+}
+
+void
+ARDOUR_UI::on_timecode_selector_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie)
+{
+    
 }
 
 void
@@ -129,7 +191,7 @@ ARDOUR_UI::on_frame_rate_button (WavesButton*)
 }
 
 void
-ARDOUR_UI::populate_sample_rate_combo ()
+ARDOUR_UI::populate_sample_rate_dropdown ()
 {
     static std::vector<float> sample_rates;
     

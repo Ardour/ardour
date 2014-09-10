@@ -207,6 +207,14 @@ TimeInfoBox::set_session (Session* s)
 }
 
 void
+TimeInfoBox::set_mode (AudioClock::Mode mode)
+{
+    selection_start.set_mode(mode);
+    selection_end.set_mode(mode);
+    selection_length.set_mode(mode);
+}
+
+void
 TimeInfoBox::selection_changed ()
 {
 	framepos_t s, e;

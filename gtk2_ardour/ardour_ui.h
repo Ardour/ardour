@@ -234,12 +234,21 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     void on_bit_depth_button (WavesButton*);
     void on_frame_rate_button (WavesButton*);
     
+    uint32_t _ignore_changes;
+    
     WavesDropdown* _sample_rate_dropdown;
     void on_sample_rate_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie);
     void sample_rate_changed();
     ARDOUR::framecnt_t get_sample_rate () const;
-    void populate_sample_rate_combo ();
-    uint32_t _ignore_changes;
+    void populate_sample_rate_dropdown ();
+    
+    WavesDropdown* _display_format_dropdown;
+    void on_display_format_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie);
+    void populate_display_format_dropdown ();
+    
+    WavesDropdown* _timecode_selector_dropdown;
+    void on_timecode_selector_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie);
+    void populate_timecode_selector_dropdown ();    
     
     void update_bit_depth_button ();
     void update_sample_rate_dropdown ();
