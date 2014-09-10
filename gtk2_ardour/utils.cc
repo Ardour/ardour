@@ -676,11 +676,14 @@ ARDOUR_UI_UTILS::get_icon_sets ()
 }
 
 std::string
-ARDOUR_UI_UTILS::get_icon_path (const char* cname, string icon_set)
+ARDOUR_UI_UTILS::get_icon_path (const char* cname, string icon_set, bool is_image)
 {
 	std::string data_file_path;
 	string name = cname;
-	name += X_(".png");
+
+	if (is_image) {
+		name += X_(".png");
+	}
 
 	Searchpath spath(ARDOUR::ardour_data_search_path());
 
@@ -693,7 +696,7 @@ ARDOUR_UI_UTILS::get_icon_path (const char* cname, string icon_set)
 		find_file (spath, name, data_file_path);
 	}
 	
-	if (data_file_path.empty()) {
+	if (is_image && data_file_path.empty()) {
 		
 		if (!icon_set.empty() && icon_set != _("default")) {
 			warning << string_compose (_("icon \"%1\" not found for icon set \"%2\", fallback to default"), cname, icon_set) << endmsg;

@@ -80,7 +80,7 @@ bool emulate_key_event (Gtk::Widget*, unsigned int);
 
 Glib::RefPtr<Gdk::Pixbuf> get_xpm (std::string);
 std::vector<std::string> get_icon_sets ();
-std::string get_icon_path (const char*, std::string icon_set = std::string());
+std::string get_icon_path (const char*, std::string icon_set = std::string(), bool is_image = true);
 Glib::RefPtr<Gdk::Pixbuf> get_icon (const char*, std::string icon_set = std::string());
 static std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> > xpm_map;
 const char* const *get_xpm_data (std::string path);
