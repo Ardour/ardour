@@ -492,6 +492,11 @@ Session::destroy ()
 	delete midi_control_ui;
 	delete _all_route_group;
 
+	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
+	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
+		delete *i;
+	}
+
 	if (click_data != default_click) {
 		delete [] click_data;
 	}
@@ -555,12 +560,6 @@ Session::destroy ()
 		}
 
 		sources.clear ();
-	}
-
-	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
-	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
-
-		delete *i;
 	}
 
 	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
