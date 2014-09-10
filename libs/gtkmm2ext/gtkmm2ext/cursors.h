@@ -13,15 +13,15 @@ class CursorInfo
         static int load_cursor_info (const std::string& path);
         static void drop_cursor_info ();
 
+        std::string name;
+        int x;
+        int y;
+
     private:
         CursorInfo (const std::string& image_name, int hotspot_x, int hotspot_y);
         
         typedef std::map<std::string,CursorInfo*> Infos;
         static Infos infos;
-
-        std::string name;
-        int x;
-        int y;
 };
 
 } /* namespace */
