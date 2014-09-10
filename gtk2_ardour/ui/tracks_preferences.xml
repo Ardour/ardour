@@ -13,7 +13,7 @@
     bghover="#898989"
     fgdisabled ="#959595"
     bordercolor="#7E7E7E"
-    borderwidth="1 1 0 0" />
+    borderwidth="1 1 0 0"/>
 
   <Layout bgnormal="#1F1F1F" x="0" y="0" width="619" height="623">
     <VBox x="2" y="1">
@@ -57,21 +57,33 @@
     </VBox>
 
     <Layout bgnormal="#565656" x="113" y="559" width="505" height="63">
-      <Button
-        id="ok_button"
-        text="OK"
-        style="generic_button"
-        x="275" y="18" width="71" height="28"/>
-      <Button
-        id="cancel_button"
-        text="CANCEL"
-        style="generic_button"
-        x="347" y="18" width="71" height="28"/>
-      <Button
-        id="apply_button"
-        text="APPLY"
-        style="generic_button"
-        x="419" y="18" width="71" height="28"/>
+      <Iconbutton id="ok_button"
+                  style="generic_button"
+                  x="275"
+                  y="18"
+                  width="71"
+                  height="28"
+                  normalicon="preferences_ok_button"
+                  activeicon="preferences_ok_button_active"
+                  prelighticon="preferences_ok_button_prelight"/>
+      <Iconbutton id="cancel_button"
+                  style="generic_button"
+                  x="347"
+                  y="18"
+                  width="71"
+                  height="28"
+                  normalicon="preferences_cancel_button"
+                  activeicon="preferences_cancel_button_active"
+                  prelighticon="preferences_cancel_button_prelight"/>
+      <Iconbutton id="apply_button"
+                  style="generic_button"
+                  x="419"
+                  y="18"
+                  width="71"
+                  height="28"
+                  normalicon="preferences_apply_button"
+                  activeicon="preferences_apply_button_active"
+                  prelighticon="preferences_apply_button_prelight"/>
     </Layout>
     <Layout id="midi_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557" visible="true">
       <Layout bgnormal="#000000" x="21" y="20" width="291" height="19">
@@ -108,8 +120,18 @@
                x="7"
                y="3"/>
       </Layout>
-      <Layout bgnormal="#000000" x="447" y="20" width="14" height="19" />
-      <ScrolledWindow x="21" y="62" bgnormal="#565656" width="440" height="218" hscroll="never" vscroll="auto">
+      <Layout bgnormal="#000000"
+              x="447"
+              y="20"
+              width="14"
+              height="19"/>
+      <ScrolledWindow bgnormal="#565656"
+                      x="21"
+                      y="62"
+                      width="440"
+                      height="218"
+                      hscroll="never"
+                      vscroll="auto">
         <HBox>
           <VBox id="midi_device_list">
           </VBox>
@@ -117,11 +139,20 @@
       </ScrolledWindow>
     </Layout>
     <Layout id="audio_settings_layout" bgnormal="#000000" x="113" y="1" width="505" height="558" visible="true">
-      <Layout bgnormal="#565656" x="0" y="0" width="505" height="100">
-        <Label style="generic_control" text="AUDIO ENGINE" x="12" y="17"/>
+      <Layout bgnormal="#565656"
+              x="0"
+              y="0"
+              width="505"
+              height="100">
+        <Label style="generic_control"
+               text="AUDIO ENGINE"
+               x="0"
+               y="15"
+               width="88"
+               horzalignment="end"/>
         <Dropdown style="generic_button"
                   id="engine_dropdown"
-                  x="97"
+                  x="96"
                   y="12"
                   width="126"
                   height="20"
@@ -130,18 +161,28 @@
                   prelighticon="preference_device_dropdown_prelight"
                   inactiveicon="preference_device_dropdown_inactive"/>
 
-        <Label style="generic_control" text="INTERFACE" x="12" y="47"/>
+        <Label style="generic_control"
+               text="INTERFACE"
+               x="0"
+               y="43"
+               width="88"
+               horzalignment="end"/>
         <Dropdown style="generic_button"
                   id="device_dropdown"
-                  x="97"
+                  x="96"
                   y="40"
                   width="126"
                   height="20"
                   normalicon="preference_device_dropdown"
                   activeicon="preference_device_dropdown_active"
-                  prelighticon="preference_device_dropdown_prelight"                  
+                  prelighticon="preference_device_dropdown_prelight"
                   inactiveicon="preference_device_dropdown_inactive"/>
-        <Label style="generic_control" text="SAMPLE RATE" x="231" y="17"/>
+        <Label style="generic_control"
+               text="SAMPLE RATE"
+               x="223"
+               y="15"
+               width="80"
+               horzalignment="end"/>
         <Dropdown style="generic_button"
                   id="sample_rate_dropdown"
                   x="311"
@@ -152,11 +193,16 @@
                   activeicon="preference_rate_buffer_dropdown_active"
                   prelighticon="preference_rate_buffer_dropdown_prelight"
                   inactiveicon="preference_rate_buffer_dropdown_inactive"/>
-          <Label style="generic_control" text="BUFFER SIZE" x="231" y="47"/>
+        <Label style="generic_control"
+               text="BUFFER SIZE"
+               x="223"
+               y="43"
+               width="80"
+               horzalignment="end"/>
         <Dropdown style="generic_button"
                   id="buffer_size_dropdown"
                   x="311"
-                  y="42"
+                  y="40"
                   width="90"
                   height="20"
                   normalicon="preference_rate_buffer_dropdown"
@@ -164,10 +210,15 @@
                   prelighticon="preference_rate_buffer_dropdown_prelight"
                   inactiveicon="preference_rate_buffer_dropdown_inactive"/>
 
-        <Button id="control_panel_button"
-          style="generic_button"
-          text="DEVICE\nCONTROL\nPANEL"
-          x="407" y="12" width="84" height="48"/>
+        <Iconbutton id="control_panel_button"
+                    style="generic_button"
+                    x="407"
+                    y="12"
+                    width="85"
+                    height="49"
+                    normalicon="preferences_device_control_panel_button"
+                    activeicon="preferences_device_control_panel_button_active"
+                    prelighticon="preferences_device_control_panel_button_prelight"/>
 
         <Label id="latency_label" style="generic_control" text="INPUT LATENCY:" x="16" y="74  " width="476"/>
       </Layout>
@@ -176,26 +227,23 @@
                winfont ="Arial Bold 10"
                macfont ="Helvetica Bold 10"
                x="17" y="15"/>
-        <Button id="multi_out_button"
-                style="generic_button"
-                text="MULTI OUT"
-                fgnormal="#C2C2C2"
-                fgactive="#FFFFFF"
-                bgactive="#1CA3B3"
-                fghover="#CECECE"
-                winfont ="Arial Bold 10"
-                macfont ="Helvetica Bold 10"
-                x="280" y="6" width="106" height="28"/>
-        <Button id="stereo_out_button"
-                text="STEREO OUT"
-                style="generic_button"
-                fgnormal="#C2C2C2"
-                fgactive="#FFFFFF"
-                bgactive="#1CA3B3"
-                fghover="#CECECE"
-                winfont ="Arial Bold 10"
-                macfont ="Helvetica Bold 10"
-          x="387" y="6" width="106" height="28"/>
+        <iconbutton id="multi_out_button"
+                    text="MULTI OUT"
+                    x="280"
+                    y="6"
+                    width="106"
+                    height="28"
+                    normalicon="preferences_multi_out_button"
+                    activeicon="preferences_multi_out_button_active"
+                    prelighticon="preferences_multi_out_button_prelight"/>
+        <Iconbutton id="stereo_out_button"
+                    x="387"
+                    y="6"
+                    width="106"
+                    height="28"
+                    normalicon="preferences_stereo_out_button"
+                    activeicon="preferences_stereo_out_button_active"
+                    prelighticon="preferences_stereo_out_button_prelight"/>
       </Layout>
       <Layout bgnormal="#565656" x="0" y="141" width="505" height="416">
         <Layout bgnormal="#862579" x="16" y="13" width="3" height="41"/>
@@ -285,26 +333,41 @@
             </VBox>
           </HBox>
         </ScrolledWindow>
-        <Button
-          id="name_tracks_after_driver_button"
-          text="NAME TRACK\nAFTER DRIVER"
-          style="generic_button"
-          x="16" y="369" width="136" height="39"/>
-        <Button
-          id="reset_tracks_name_to_default_button"
-          text="RESET TRACK\nNAMES TO DEFAULT"
-          style="generic_button"
-          x="153" y="369" width="136" height="39"/>
-        <Button
-          id="yes_button"
-          text="YES"
-          style="generic_button"
-          x="292" y="369" width="52" height="39"/>
-        <Button
-          id="no_button"
-          text="NO"
-          style="generic_button"
-          x="345" y="369" width="52" height="39"/>
+        <Iconbutton id="name_tracks_after_driver_button"
+                    style="generic_button"
+                    x="16"
+                    y="369"
+                    width="136"
+                    height="39"
+                    normalicon="preference_name_track_after_driver_button"
+                    activeicon="preference_name_track_after_driver_active"
+                    prelighticon="preference_name_track_after_driver_prelight"/>
+        <Iconbutton id="reset_tracks_name_to_default_button"
+                    x="153"
+                    y="369"
+                    width="136"
+                    height="39"
+                    normalicon="preference_reset_track_names_button"
+                    activeicon="preference_reset_track_names_button_active"
+                    prelighticon="preference_reset_track_names_button_prelight"/>
+        <Iconbutton id="yes_button"
+                    text="YES"
+                    x="292"
+                    y="369"
+                    width="52"
+                    height="39"
+                    normalicon="preference_yes_button"
+                    activeicon="preference_yes_button_active"
+                    prelighticon="preference_yes_button_prelight"/>
+        <Iconbutton id="no_button"
+                    text="NO"
+                    x="345"
+                    y="369"
+                    width="52"
+                    height="39"
+                    normalicon="preference_no_button"
+                    activeicon="preference_no_button_active"
+                    prelighticon="preference_no_button_prelight"/>
       </Layout>
     </Layout>
     <Layout id="session_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557" visible="false">
@@ -407,13 +470,13 @@
         <dropdownitem title="2 Min"/>
       </Dropdown>
 
-      <Label style="generic_control" text="DEFAULT FOLDER FOR NEW SESSION" x = "24" y = "290" />
+      <Label style="generic_control" text="DEFAULT FOLDER FOR NEW SESSION" x = "24" y = "290"/>
       <Button
         id = "browse_default_folder"
         text = "Browse"
         style = "generic_button"
         x = "24" y = "310" width = "100" height = "28"/>
-      <Label id="default_open_path" style="generic_control" text="" x = "135" y = "315" />
+      <Label id="default_open_path" style="generic_control" text="" x = "135" y = "315"/>
     </Layout>
   </Layout>
 </Dialog>
