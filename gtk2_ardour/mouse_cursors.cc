@@ -18,6 +18,9 @@
 */
 
 #include <gdkmm/cursor.h>
+
+#include "gtkmm2ext/cursors.h"
+
 #include "utils.h"
 #include "mouse_cursors.h"
 #include "editor_xpms"
@@ -111,27 +114,66 @@ MouseCursors::drop_all ()
 	delete expand_up_down; expand_up_down = 0;
 }
 
+Gdk::Cursor*
+MouseCursors::make_cursor (const char* name, int hotspot_x, int hotspot_y)
+{
+	Gtkmm2ext::CursorInfo* info = Gtkmm2ext::CursorInfo::lookup_cursor_info (name);
+
+	if (info) {
+		hotspot_x = info->x;
+		hotspot_y = info->y;
+	}
+
+	Glib::RefPtr<Gdk::Pixbuf> p (::get_icon (name, _cursor_set));
+	return new Gdk::Cursor (Gdk::Display::get_default(), p, hotspot_x, hotspot_y);
+}
+
 void
 MouseCursors::set_cursor_set (const std::string& name)
 {
 	using namespace Glib;
 	using namespace Gdk;
-	
+
 	drop_all ();
 	_cursor_set = name;
 
-	{
-		RefPtr<Pixbuf> p (::get_icon ("zoom_in_cursor", _cursor_set));
-		zoom_in = new Cursor (Display::get_default(), p, 10, 5);
-	}
+	/* these will throw exceptions if their images cannot be found.
+	   
+	   the default hotspot coordinates will be overridden by any 
+	   data found by Gtkmm2ext::Cursors::load_cursor_info(). the values
+	   here from the set of cursors used by Ardour; new cursor/icon
+	   sets should come with a hotspot info file.
+	*/
 
-	{
-		RefPtr<Pixbuf> p (::get_icon ("zoom_out_cursor", _cursor_set));
-		zoom_out = new Cursor (Display::get_default(), p, 5, 5);
-	}
+	zoom_in = make_cursor ("zoom_in_cursor", 10, 5);
+	zoom_out = make_cursor ("zoom_out_cursor", 5, 5);
+	scissors = make_cursor ("scissors", 5, 0);
+	grabber = make_cursor ("grabber", 5, 0);
+	grabber_note = make_cursor ("grabber_note", 5, 10);
+	grabber_edit_point = make_cursor ("grabber_edit_point", 5, 17);
+	left_side_trim = make_cursor ("trim_left_cursor", 5, 11);
+	anchored_left_side_trim = make_cursor ("anchored_trim_left_cursor", 5, 11);
+	right_side_trim = make_cursor ("trim_right_cursor", 23, 11);
+	anchored_right_side_trim = make_cursor ("anchored_trim_right_cursor", 23, 11);
+	left_side_trim_right_only = make_cursor ("trim_left_cursor_right_only", 5, 11);
+	right_side_trim_left_only = make_cursor ("trim_right_cursor_left_only", 23, 11);
+	fade_in = make_cursor ("fade_in_cursor", 0, 0);
+	fade_out = make_cursor ("fade_out_cursor", 29, 0);
+	resize_left = make_cursor ("resize_left_cursor", 3, 10);
+	resize_top_left = make_cursor ("resize_top_left_cursor", 3, 3);
+	resize_top = make_cursor ("resize_top_cursor", 10, 3);
+	resize_top_right = make_cursor ("resize_top_right_cursor", 18, 3);
+	resize_right = make_cursor ("resize_right_cursor", 24, 10);
+	resize_bottom_right = make_cursor ("resize_bottom_right_cursor", 18, 18);
+	resize_bottom = make_cursor ("resize_bottom_cursor", 10, 24);
+	resize_bottom_left = make_cursor ("resize_bottom_left_cursor", 3, 18);
+	move = make_cursor ("move_cursor", 11, 11);
+	expand_left_right = make_cursor ("expand_left_right_cursor", 11, 4);
+	expand_up_down = make_cursor ("expand_up_down_cursor", 4, 11);
+	selector = make_cursor ("i_beam_cursor", 4, 11);
 
-	Color fbg ("#ffffff");
-	Color ffg ("#000000");
+	Gdk::Color fbg ("#ffffff");
+	Gdk::Color ffg ("#000000");
 
 	{
 		RefPtr<Bitmap> source = Bitmap::create ((char const *) fader_cursor_bits, fader_cursor_width, fader_cursor_height);
@@ -152,136 +194,8 @@ MouseCursors::set_cursor_set (const std::string& name)
 		transparent = new Cursor (bits, bits, c, c, 0, 0);
 	}
 
-	{
-		char pix[4] = { 0, 0, 0, 0 };
-		RefPtr<Bitmap> bits = Bitmap::create (pix, 2, 2);
-		Color c;
-		transparent = new Cursor (bits, bits, c, c, 0, 0);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("scissors", _cursor_set));
-		scissors = new Cursor (Display::get_default(), p, 5, 0);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("grabber", _cursor_set));
-		grabber = new Cursor (Display::get_default(), p, 5, 0);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("grabber_note", _cursor_set));
-		grabber_note = new Cursor (Display::get_default(), p, 5, 10);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("grabber_edit_point", _cursor_set));
-		grabber_edit_point = new Cursor (Display::get_default(), p, 5, 17);
-	}
-
 	cross_hair = new Cursor (CROSSHAIR);
 	trimmer =  new Cursor (SB_H_DOUBLE_ARROW);
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("trim_left_cursor", _cursor_set));
-		left_side_trim = new Cursor (Display::get_default(), p, 5, 11);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("anchored_trim_left_cursor", _cursor_set));
-		anchored_left_side_trim = new Cursor (Display::get_default(), p, 5, 11);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("trim_right_cursor", _cursor_set));
-		right_side_trim = new Cursor (Display::get_default(), p, 23, 11);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("anchored_trim_right_cursor", _cursor_set));
-		anchored_right_side_trim = new Cursor (Display::get_default(), p, 23, 11);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("trim_left_cursor_right_only", _cursor_set));
-		left_side_trim_right_only = new Cursor (Display::get_default(), p, 5, 11);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("trim_right_cursor_left_only", _cursor_set));
-		right_side_trim_left_only = new Cursor (Display::get_default(), p, 23, 11);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("fade_in_cursor", _cursor_set));
-		fade_in = new Cursor (Display::get_default(), p, 0, 0);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("fade_out_cursor", _cursor_set));
-		fade_out = new Cursor (Display::get_default(), p, 29, 0);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("resize_left_cursor", _cursor_set));
-		resize_left = new Cursor (Display::get_default(), p, 3, 10);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("resize_top_left_cursor", _cursor_set));
-		resize_top_left = new Cursor (Display::get_default(), p, 3, 3);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("resize_top_cursor", _cursor_set));
-		resize_top = new Cursor (Display::get_default(), p, 10, 3);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("resize_top_right_cursor", _cursor_set));
-		resize_top_right = new Cursor (Display::get_default(), p, 18, 3);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("resize_right_cursor", _cursor_set));
-		resize_right = new Cursor (Display::get_default(), p, 24, 10);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("resize_bottom_right_cursor", _cursor_set));
-		resize_bottom_right = new Cursor (Display::get_default(), p, 18, 18);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("resize_bottom_cursor", _cursor_set));
-		resize_bottom = new Cursor (Display::get_default(), p, 10, 24);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("resize_bottom_left_cursor", _cursor_set));
-		resize_bottom_left = new Cursor (Display::get_default(), p, 3, 18);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("move_cursor", _cursor_set));
-		move = new Cursor (Display::get_default(), p, 11, 11);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("expand_left_right_cursor", _cursor_set));
-		expand_left_right = new Cursor (Display::get_default(), p, 11, 4);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("expand_up_down_cursor", _cursor_set));
-		expand_up_down = new Cursor (Display::get_default(), p, 4, 11);
-	}
-
-	{
-		RefPtr<Pixbuf> p (::get_icon ("i_beam_cursor", _cursor_set));
-		selector = new Cursor (Display::get_default(), p, 4, 11);
-	}
-
 	time_fx = new Cursor (SIZING);
 	wait = new Cursor (WATCH);
 	timebar = new Cursor(LEFT_PTR);
