@@ -2014,6 +2014,7 @@ LV2World::~LV2World()
 	lilv_node_free(atom_Sequence);
 	lilv_node_free(atom_Chunk);
 	lilv_node_free(atom_AtomPort);
+	lilv_world_free(world);
 }
 
 void
@@ -2039,26 +2040,30 @@ LV2World::load_bundled_plugins()
 	}
 }
 
-LV2PluginInfo::LV2PluginInfo (const void* c_plugin)
-	: _c_plugin(c_plugin)
+LV2PluginInfo::LV2PluginInfo (const char* plugin_uri)
 {
 	type = ARDOUR::LV2;
+	_plugin_uri = strdup(plugin_uri);
 }
 
 LV2PluginInfo::~LV2PluginInfo()
-{}
+{
+	free(_plugin_uri);
+}
 
 PluginPtr
 LV2PluginInfo::load(Session& session)
 {
 	try {
 		PluginPtr plugin;
-
-		plugin.reset(new LV2Plugin(session.engine(), session,
-		                           (const LilvPlugin*)_c_plugin,
-		                           session.frame_rate()));
-
-		plugin->set_info(PluginInfoPtr(new LV2PluginInfo(*this)));
+		const LilvPlugins* plugins = lilv_world_get_all_plugins(_world.world);
+		LilvNode* uri = lilv_new_uri(_world.world, _plugin_uri);
+		if (!uri) { throw failed_constructor(); }
+		const LilvPlugin* lp = lilv_plugins_get_by_uri(plugins, uri);
+		if (!lp) { throw failed_constructor(); }
+		plugin.reset(new LV2Plugin(session.engine(), session, lp, session.frame_rate()));
+		lilv_node_free(uri);
+		plugin->set_info(PluginInfoPtr(new LV2PluginInfo(_plugin_uri)));
 		return plugin;
 	} catch (failed_constructor& err) {
 		return PluginPtr((Plugin*)0);
@@ -2070,10 +2075,12 @@ LV2PluginInfo::load(Session& session)
 PluginInfoList*
 LV2PluginInfo::discover()
 {
+	LV2World world;
+	world.load_bundled_plugins();
 	_world.load_bundled_plugins();
 
 	PluginInfoList*    plugs   = new PluginInfoList;
-	const LilvPlugins* plugins = lilv_world_get_all_plugins(_world.world);
+	const LilvPlugins* plugins = lilv_world_get_all_plugins(world.world);
 
 	if (!Config->get_show_plugin_scan_window()) {
 		info << "LV2: Discovering " << lilv_plugins_size(plugins) << " plugins" << endmsg;
@@ -2081,7 +2088,9 @@ LV2PluginInfo::discover()
 
 	LILV_FOREACH(plugins, i, plugins) {
 		const LilvPlugin* p = lilv_plugins_get(plugins, i);
-		LV2PluginInfoPtr  info(new LV2PluginInfo((const void*)p));
+		const LilvNode* pun = lilv_plugin_get_uri(p);
+		if (!pun) continue;
+		LV2PluginInfoPtr info(new LV2PluginInfo(lilv_node_as_string(pun)));
 
 		LilvNode* name = lilv_plugin_get_name(p);
 		if (!name || !lilv_plugin_get_port_by_index(p, 0)) {
@@ -2116,18 +2125,18 @@ LV2PluginInfo::discover()
 		int count_midi_in = 0;
 		for (uint32_t i = 0; i < lilv_plugin_get_num_ports(p); ++i) {
 			const LilvPort* port  = lilv_plugin_get_port_by_index(p, i);
-			if (lilv_port_is_a(p, port, _world.atom_AtomPort)) {
+			if (lilv_port_is_a(p, port, world.atom_AtomPort)) {
 				LilvNodes* buffer_types = lilv_port_get_value(
-					p, port, _world.atom_bufferType);
+					p, port, world.atom_bufferType);
 				LilvNodes* atom_supports = lilv_port_get_value(
-					p, port, _world.atom_supports);
+					p, port, world.atom_supports);
 
-				if (lilv_nodes_contains(buffer_types, _world.atom_Sequence)
-						&& lilv_nodes_contains(atom_supports, _world.midi_MidiEvent)) {
-					if (lilv_port_is_a(p, port, _world.lv2_InputPort)) {
+				if (lilv_nodes_contains(buffer_types, world.atom_Sequence)
+						&& lilv_nodes_contains(atom_supports, world.midi_MidiEvent)) {
+					if (lilv_port_is_a(p, port, world.lv2_InputPort)) {
 						count_midi_in++;
 					}
-					if (lilv_port_is_a(p, port, _world.lv2_OutputPort)) {
+					if (lilv_port_is_a(p, port, world.lv2_OutputPort)) {
 						count_midi_out++;
 					}
 				}
@@ -2138,18 +2147,18 @@ LV2PluginInfo::discover()
 
 		info->n_inputs.set_audio(
 			lilv_plugin_get_num_ports_of_class(
-				p, _world.lv2_InputPort, _world.lv2_AudioPort, NULL));
+				p, world.lv2_InputPort, world.lv2_AudioPort, NULL));
 		info->n_inputs.set_midi(
 			lilv_plugin_get_num_ports_of_class(
-				p, _world.lv2_InputPort, _world.ev_EventPort, NULL)
+				p, world.lv2_InputPort, world.ev_EventPort, NULL)
 			+ count_midi_in);
 
 		info->n_outputs.set_audio(
 			lilv_plugin_get_num_ports_of_class(
-				p, _world.lv2_OutputPort, _world.lv2_AudioPort, NULL));
+				p, world.lv2_OutputPort, world.lv2_AudioPort, NULL));
 		info->n_outputs.set_midi(
 			lilv_plugin_get_num_ports_of_class(
-				p, _world.lv2_OutputPort, _world.ev_EventPort, NULL)
+				p, world.lv2_OutputPort, world.ev_EventPort, NULL)
 			+ count_midi_out);
 
 		info->unique_id = lilv_node_as_uri(lilv_plugin_get_uri(p));
