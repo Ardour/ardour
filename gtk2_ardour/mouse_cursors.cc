@@ -137,6 +137,12 @@ MouseCursors::set_cursor_set (const std::string& name)
 	drop_all ();
 	_cursor_set = name;
 
+	std::string hotspot_info_path = get_icon_path ("hotspots", _cursor_set, false);
+
+	if (!hotspot_info_path.empty()) {
+		Gtkmm2ext::CursorInfo::load_cursor_info (hotspot_info_path);
+	}
+
 	/* these will throw exceptions if their images cannot be found.
 	   
 	   the default hotspot coordinates will be overridden by any 
