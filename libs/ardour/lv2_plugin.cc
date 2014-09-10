@@ -2049,6 +2049,7 @@ LV2PluginInfo::LV2PluginInfo (const char* plugin_uri)
 LV2PluginInfo::~LV2PluginInfo()
 {
 	free(_plugin_uri);
+	_plugin_uri = NULL;
 }
 
 PluginPtr
