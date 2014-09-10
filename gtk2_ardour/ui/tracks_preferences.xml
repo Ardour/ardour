@@ -134,7 +134,7 @@
         <Dropdown style="generic_button"
                   id="device_dropdown"
                   x="97"
-                  y="40"
+                  y="42"
                   width="126"
                   height="20"
                   normalicon="preference_device_dropdown"
