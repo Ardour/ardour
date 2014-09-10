@@ -1128,7 +1128,7 @@ WavesAudioBackend::_read_audio_data_from_device (const float* input_buffer, pfra
 {
 #if defined(PLATFORM_WINDOWS)
     const float **buffer = (const float**)input_buffer;
-    size_t copied_bytes = nframes*sizeof(float*);
+    size_t copied_bytes = nframes*sizeof(float);
 
     for(std::vector<WavesAudioPort*>::iterator it = _physical_audio_inputs.begin ();
         it != _physical_audio_inputs.end();
