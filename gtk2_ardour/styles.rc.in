@@ -657,7 +657,7 @@ style "small_spinner" = "small_text"
 
 	base[NORMAL] = @@COLPREFIX@_base
 	base[ACTIVE] = @@COLPREFIX@_base
-	base[SELECTED] = @@COLPREFIX@_base
+	base[SELECTED] = @@COLPREFIX@_bg
 }
 
 style "red_active_small_entry" = "small_entry"
