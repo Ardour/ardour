@@ -274,14 +274,14 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 class LIBARDOUR_API LV2PluginInfo : public PluginInfo {
 public:
-	LV2PluginInfo (const void* c_plugin);
+	LV2PluginInfo (const char* plugin_uri);
 	~LV2PluginInfo ();
 
 	static PluginInfoList* discover ();
 
 	PluginPtr load (Session& session);
 
-	const void* _c_plugin;
+	char * _plugin_uri;
 };
 
 typedef boost::shared_ptr<LV2PluginInfo> LV2PluginInfoPtr;
