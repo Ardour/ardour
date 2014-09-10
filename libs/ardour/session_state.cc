@@ -1143,7 +1143,7 @@ Session::set_state (const XMLNode& node, int version)
 
 	if (node.name() != X_("Session")) {
 		fatal << _("programming error: Session: incorrect XML node sent to set_state()") << endmsg;
-		return -1;
+		goto out;
 	}
 
 	if ((prop = node.property ("name")) != 0) {
@@ -1157,7 +1157,7 @@ Session::set_state (const XMLNode& node, int version)
 		if (_nominal_frame_rate != _current_frame_rate) {
                         boost::optional<int> r = AskAboutSampleRateMismatch (_nominal_frame_rate, _current_frame_rate);
 			if (r.get_value_or (0)) {
-				return -1;
+				goto out;
 			}
 		}
 	}
@@ -1350,9 +1350,13 @@ Session::set_state (const XMLNode& node, int version)
 
 	StateReady (); /* EMIT SIGNAL */
 
+	delete state_tree;
+	state_tree = 0;
 	return 0;
 
   out:
+	delete state_tree;
+	state_tree = 0;
 	return ret;
 }
 
