@@ -113,7 +113,7 @@ public:
 	LV2World ();
 	~LV2World ();
 
-	void load_bundled_plugins();
+	void load_bundled_plugins(bool verbose=false);
 
 	LilvWorld* world;
 
@@ -2018,10 +2018,12 @@ LV2World::~LV2World()
 }
 
 void
-LV2World::load_bundled_plugins()
+LV2World::load_bundled_plugins(bool verbose)
 {
 	if (!_bundle_checked) {
-		cout << "Scanning folders for bundled LV2s: " << ARDOUR::lv2_bundled_search_path().to_string() << endl;
+		if (verbose) {
+			cout << "Scanning folders for bundled LV2s: " << ARDOUR::lv2_bundled_search_path().to_string() << endl;
+		}
 
 		vector<string> plugin_objects;
 		find_paths_matching_filter (plugin_objects, ARDOUR::lv2_bundled_search_path(), lv2_filter, 0, true, true, true);
@@ -2078,7 +2080,7 @@ LV2PluginInfo::discover()
 {
 	LV2World world;
 	world.load_bundled_plugins();
-	_world.load_bundled_plugins();
+	_world.load_bundled_plugins(true);
 
 	PluginInfoList*    plugs   = new PluginInfoList;
 	const LilvPlugins* plugins = lilv_world_get_all_plugins(world.world);
