@@ -55,6 +55,7 @@ EditorSummary::EditorSummary (Editor* e)
 	  _view_rectangle_y (0, 0),
 	  _zoom_dragging (false),
 	  _old_follow_playhead (false),
+	  _image (0),
 	  _background_dirty (true)
 {
 	add_events (Gdk::POINTER_MOTION_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
