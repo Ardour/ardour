@@ -20,7 +20,12 @@
 #include <sstream>
 #include <fstream>
 
+#include "pbd/error.h"
+#include "pbd/compose.h"
+
 #include "gtkmm2ext/cursors.h"
+
+#include "i18n.h"
 
 using namespace Gtkmm2ext;
 
@@ -46,23 +51,38 @@ CursorInfo::load_cursor_info (const std::string& path)
         std::string name;
         int x;
         int y;
+	bool parse_ok;
+	int line_number = 1;
 
         do {
-                s << infofile;
+		parse_ok = false;
+		infofile >> name;
+                if (!infofile) {
+			/* failing here is OK ... EOF */
+			parse_ok = true;
+                        break;
+                }
+		infofile >> x;
                 if (!infofile) {
                         break;
                 }
-                s >> name;
-                s >> x;
-                s >> y;
-                if (!s) {
+		infofile >> y;
+                if (!infofile) {
                         break;
                 }
-                
-                CursorInfo* ci = new CursorInfo (name, x, y);
-                infos[name] = ci;
+
+                parse_ok = true;
+		line_number++;
+
+                infos[name] = new CursorInfo (name, x, y);
 
         } while (true);
+
+	if (!parse_ok) {
+		PBD::error << string_compose (_("cursor hotspots info file %1 has an error on line %2"), path, line_number) << endmsg;
+		infos.clear ();
+		return -1;
+	}
 
         return 0;
 }
