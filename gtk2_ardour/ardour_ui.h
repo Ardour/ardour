@@ -246,9 +246,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     void on_display_format_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie);
     void populate_display_format_dropdown ();
     
-    WavesDropdown* _timecode_selector_dropdown;
-    void on_timecode_selector_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie);
-    void populate_timecode_selector_dropdown ();    
+    WavesDropdown* _timecode_source_dropdown;
+    void on_timecode_source_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie);
+    void populate_timecode_source_dropdown ();
     
     void update_bit_depth_button ();
     void update_sample_rate_dropdown ();

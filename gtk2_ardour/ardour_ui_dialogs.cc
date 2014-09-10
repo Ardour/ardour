@@ -231,6 +231,9 @@ ARDOUR_UI::set_session (Session *s)
     update_bit_depth_button ();
     update_sample_rate_dropdown ();
     update_frame_rate_button ();
+    
+    populate_display_format_dropdown ();
+    populate_timecode_source_dropdown ();
 }
 
 int

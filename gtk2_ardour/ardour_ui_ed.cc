@@ -93,7 +93,7 @@ ARDOUR_UI::create_editor ()
         _frame_rate_button = &editor->get_waves_button("frame_rate_button");        
         _sample_rate_dropdown = &editor->get_waves_dropdown("sample_rate_dropdown");
         _display_format_dropdown = &editor->get_waves_dropdown("display_format_dropdown");
-        _timecode_selector_dropdown = &editor->get_waves_dropdown("timecode_selector_dropdown");
+        _timecode_source_dropdown = &editor->get_waves_dropdown("timecode_selector_dropdown");
         
         _tracks_button = &editor->get_waves_button("tracks_button");
     }
@@ -108,13 +108,10 @@ ARDOUR_UI::create_editor ()
     
     _sample_rate_dropdown->signal_menu_item_clicked.connect (mem_fun(*this, &ARDOUR_UI::on_sample_rate_dropdown_item_clicked ));
     _display_format_dropdown->signal_menu_item_clicked.connect (mem_fun(*this, &ARDOUR_UI::on_display_format_dropdown_item_clicked ));
-    _timecode_selector_dropdown->signal_menu_item_clicked.connect (mem_fun(*this, &ARDOUR_UI::on_timecode_selector_dropdown_item_clicked ));
+    _timecode_source_dropdown->signal_menu_item_clicked.connect (mem_fun(*this, &ARDOUR_UI::on_timecode_source_dropdown_item_clicked ));
     
 	editor->Realized.connect (sigc::mem_fun (*this, &ARDOUR_UI::editor_realized));
 	editor->signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), true));
-
-    populate_display_format_dropdown ();
-    populate_timecode_selector_dropdown ();
     
 	return 0;
 }
@@ -123,6 +120,8 @@ void
 ARDOUR_UI::populate_display_format_dropdown ()
 {
     static std::vector<string> display_formats;
+    _display_format_dropdown->clear_items ();
+    
     display_formats.push_back("Timecode");
     display_formats.push_back("Time");
     display_formats.push_back("Samples");
@@ -131,20 +130,49 @@ ARDOUR_UI::populate_display_format_dropdown ()
     {
         _display_format_dropdown->add_menu_item (display_formats[i], &display_formats[i]);
     }
+    
+    if( !_session )
+        return;
+    
+    string format = _session->config.get_display_format();
+    AudioClock::Mode mode;
+    
+    if ( format == "Time" )
+        mode = AudioClock::MinSec;
+    else if ( format == "Samples" )
+        mode = AudioClock::Frames;
+    if( format == "Timecode" )
+        mode = AudioClock::Timecode;
+    
+    if( time_info_box )
+        time_info_box->set_mode (mode);
+    if ( big_clock )
+        primary_clock->set_mode (mode);
+    
+    _display_format_dropdown->set_text( format );
 }
 
 void
-ARDOUR_UI::populate_timecode_selector_dropdown ()
+ARDOUR_UI::populate_timecode_source_dropdown ()
 {
     static std::vector<string> timecode_selector;
+    _timecode_source_dropdown->clear_items ();
+    
     timecode_selector.push_back("Internal");
     timecode_selector.push_back("MTC");
     timecode_selector.push_back("LTC");
     
     for(int i = 0; i < timecode_selector.size(); ++i)
     {
-        _timecode_selector_dropdown->add_menu_item (timecode_selector[i], &timecode_selector[i]);
+        _timecode_source_dropdown->add_menu_item (timecode_selector[i], &timecode_selector[i]);
     }
+    
+    if( !_session )
+        return;
+    
+    string timecode_source = _session->config.get_timecode_source();
+    
+    _timecode_source_dropdown->set_text( timecode_source );
 }
 
 void
@@ -159,7 +187,9 @@ ARDOUR_UI::on_display_format_dropdown_item_clicked (WavesDropdown* from_which, v
         mode = AudioClock::MinSec;
     else if ( format == "Samples" )
         mode = AudioClock::Frames;
-   
+
+    _session->config.set_display_format(format);
+    
     if( time_info_box )
         time_info_box->set_mode (mode);
     if ( big_clock )
@@ -167,9 +197,10 @@ ARDOUR_UI::on_display_format_dropdown_item_clicked (WavesDropdown* from_which, v
 }
 
 void
-ARDOUR_UI::on_timecode_selector_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie)
+ARDOUR_UI::on_timecode_source_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie)
 {
-    
+    string timecode_source = *((string*)my_cookie);
+    _session->config.set_timecode_source(timecode_source);
 }
 
 void
