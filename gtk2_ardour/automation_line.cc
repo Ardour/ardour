@@ -81,10 +81,8 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	, _maximum_time (max_framepos)
 {
 	if (converter) {
-		_time_converter = converter;
 		_our_time_converter = false;
 	} else {
-		_time_converter = new Evoral::IdentityConverter<double, framepos_t>;
 		_our_time_converter = true;
 	}
 	
