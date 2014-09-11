@@ -714,6 +714,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Container& _master_bus_ui_home;
 	MasterBusUI*    _master_bus_ui;
 	Gtk::VBox&      vpacker;
+        Gtk::VBox&      timebars_vbox;
+        Gtk::HBox&      marker_lane_hbox;
+        WavesButton&    skip_button;
+        WavesButton&    global_tracks_button;
 
 	std::stack<Gdk::Cursor*> _cursor_stack;
 	Gdk::Cursor*          current_canvas_cursor;
