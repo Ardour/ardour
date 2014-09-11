@@ -1623,6 +1623,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Label               toolbar_selection_cursor_label;
 
         WavesButton& add_marker_button;
+        WavesButton& global_solo_button;
+        void solo_blink (bool);
+        WavesButton& global_rec_button;
 
 	Gtkmm2ext::TearOff*      _mouse_mode_tearoff;
 	WavesButton& _tool_marker_button;

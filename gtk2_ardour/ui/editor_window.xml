@@ -383,7 +383,7 @@
                               height="24"
                               width="42"
                               normalicon="global_solo_button"
-                              activeicon="global_solo_button"/>
+                              activeicon="global_solo_button_active"/>
                 </HBox>
 		<EventBox id="master_bus_ui_home"
                           x="0"

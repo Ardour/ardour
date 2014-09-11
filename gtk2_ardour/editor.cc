@@ -271,6 +271,8 @@ Editor::Editor ()
 	, skip_button (get_waves_button ("skip_button"))
         , global_tracks_button (get_waves_button ("global_tracks_button"))
         , add_marker_button (get_waves_button ("add_marker_button"))
+        , global_solo_button (get_waves_button ("global_solo_button"))
+        , global_rec_button (get_waves_button ("global_rec_button"))
 	, _tool_marker_button (get_waves_button ("tool_marker_button"))
 	, _tool_arrow_button (get_waves_button ("tool_arrow_button"))
 	, _tool_zoom_button (get_waves_button ("tool_zoom_button"))
@@ -644,6 +646,8 @@ Editor::Editor ()
 	// load_bindings ();
 
 	setup_toolbar ();
+
+        ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::solo_blink));
 
 	set_zoom_focus (zoom_focus);
 	set_visible_track_count (_visible_track_count);
@@ -5652,5 +5656,23 @@ Editor::ui_parameter_changed (string parameter)
 		if (_verbose_cursor) {
 			playhead_cursor->set_sensitive (ARDOUR_UI::config()->get_draggable_playhead());
 		}
+	}
+}
+
+void
+Editor::solo_blink (bool onoff)
+{
+	if (_session == 0) {
+		return;
+	}
+
+	if (_session->soloing() || _session->listening()) {
+		if (onoff) {
+			global_solo_button.set_active (true);
+		} else {
+			global_solo_button.set_active (false);
+		}
+	} else {
+		global_solo_button.set_active (false);
 	}
 }
