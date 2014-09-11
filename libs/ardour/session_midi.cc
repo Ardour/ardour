@@ -597,6 +597,7 @@ Session::send_song_position_pointer (framepos_t)
 int
 Session::start_midi_thread ()
 {
+	if (midi_control_ui) { return 0; }
 	midi_control_ui = new MidiControlUI (*this);
 	midi_control_ui->run ();
 	return 0;

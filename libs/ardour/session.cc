@@ -554,7 +554,6 @@ Session::destroy ()
 	delete _butler;
 	_butler = 0;
 	
-	delete midi_control_ui;
 	delete _all_route_group;
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
@@ -632,6 +631,7 @@ Session::destroy ()
 	playlists.reset ();
 
 	delete _scene_changer; _scene_changer = 0;
+	delete midi_control_ui; midi_control_ui = 0;
 
 	delete _mmc; _mmc = 0;
 	delete _midi_ports; _midi_ports = 0;
