@@ -50,6 +50,7 @@ void
 MidiPatchManager::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
+	refresh ();
 	add_session_patches ();
 }
 
@@ -144,5 +145,7 @@ void
 MidiPatchManager::session_going_away ()
 {
 	SessionHandlePtr::session_going_away ();
-	refresh ();
+	_documents.clear();
+	_master_devices_by_model.clear();
+	_all_models.clear();
 }
