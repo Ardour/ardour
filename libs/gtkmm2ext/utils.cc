@@ -705,6 +705,18 @@ Gtkmm2ext::pixel_width (const string& str, Pango::FontDescription& font)
 	return width;
 }
 
+void
+Gtkmm2ext::pixel_size (const string& str, Pango::FontDescription& font, int& width, int& height)
+{
+	Gtk::Label foo;
+	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
+
+	layout->set_font_description (font);
+	layout->set_text (str);
+
+	Gtkmm2ext::get_ink_pixel_size (layout, width, height);
+}
+
 #if 0
 string
 Gtkmm2ext::fit_to_pixels (const string& str, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses)
