@@ -1626,6 +1626,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         WavesButton& global_solo_button;
         void solo_blink (bool);
         WavesButton& global_rec_button;
+        void global_solo_clicked (WavesButton*);
 
 	Gtkmm2ext::TearOff*      _mouse_mode_tearoff;
 	WavesButton& _tool_marker_button;

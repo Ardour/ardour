@@ -648,6 +648,7 @@ Editor::Editor ()
 	setup_toolbar ();
 
         ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::solo_blink));
+	global_solo_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::global_solo_clicked));
 
 	set_zoom_focus (zoom_focus);
 	set_visible_track_count (_visible_track_count);
@@ -5675,4 +5676,18 @@ Editor::solo_blink (bool onoff)
 	} else {
 		global_solo_button.set_active (false);
 	}
+}
+
+void
+Editor::global_solo_clicked (WavesButton*)
+{
+	if (!_session) {
+                return;
+        }
+
+        if (_session->soloing()) {
+                _session->set_solo (_session->get_routes(), false);
+        } else if (_session->listening()) {
+                _session->set_listen (_session->get_routes(), false);
+        }
 }
