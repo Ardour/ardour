@@ -569,6 +569,15 @@ ARDOUR_UI::~ARDOUR_UI ()
 	}
 
 	stop_video_server();
+
+	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
+		// don't bother at 'real' exit. the OS cleans up for us.
+		delete big_clock;
+		delete primary_clock;
+		delete secondary_clock;
+		delete _process_thread;
+		delete gui_object_state;
+	}
 }
 
 void

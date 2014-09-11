@@ -184,6 +184,14 @@ PluginManager::PluginManager ()
 
 PluginManager::~PluginManager()
 {
+	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
+		// don't bother, just exit quickly.
+		delete _windows_vst_plugin_info;
+		delete _lxvst_plugin_info;
+		delete _ladspa_plugin_info;
+		delete _lv2_plugin_info;
+		delete _au_plugin_info;
+	}
 }
 
 void
