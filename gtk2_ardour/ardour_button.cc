@@ -926,7 +926,9 @@ ArdourButton::setup_led_rect ()
 		return;
 	}
 
-	_led_rect = new cairo_rectangle_t;
+	if (!_led_rect) {
+		_led_rect = new cairo_rectangle_t;
+	}
 
 	if (_elements & Text) {
 		if (_led_left) {

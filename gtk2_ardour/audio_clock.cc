@@ -260,12 +260,14 @@ AudioClock::set_colors ()
 	r = lrint ((r/255.0) * 65535.0);
 	g = lrint ((g/255.0) * 65535.0);
 	b = lrint ((b/255.0) * 65535.0);
+	delete foreground_attr;
 	foreground_attr = new Pango::AttrColor (Pango::Attribute::create_attr_foreground (r, g, b));
 
 	UINT_TO_RGBA (editing_color, &r, &g, &b, &a);
 	r = lrint ((r/255.0) * 65535.0);
 	g = lrint ((g/255.0) * 65535.0);
 	b = lrint ((b/255.0) * 65535.0);
+	delete editing_attr;
 	editing_attr = new Pango::AttrColor (Pango::Attribute::create_attr_foreground (r, g, b));
 
 	normal_attributes.change (*foreground_attr);

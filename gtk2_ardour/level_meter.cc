@@ -66,6 +66,9 @@ LevelMeterBase::on_theme_changed()
 
 LevelMeterBase::~LevelMeterBase ()
 {
+	_configuration_connection.disconnect();
+	_meter_type_connection.disconnect();
+	_parameter_connection.disconnect();
 	for (vector<MeterInfo>::iterator i = meters.begin(); i != meters.end(); i++) {
 		delete (*i).meter;
 	}

@@ -396,7 +396,7 @@ ARDOUR_UI::setup_transport ()
 	}
 	clock_box->set_spacing (3);
 
-	shuttle_box = new ShuttleControl;
+	shuttle_box = manage (new ShuttleControl);
 	shuttle_box->show ();
 	
 	VBox* transport_vbox = manage (new VBox);

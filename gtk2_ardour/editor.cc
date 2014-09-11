@@ -786,6 +786,7 @@ Editor::~Editor()
 	delete _route_groups;
 	delete _track_canvas_viewport;
 	delete _drags;
+	delete nudge_clock;
 }
 
 XMLNode*

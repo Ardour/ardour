@@ -632,6 +632,7 @@ ARDOUR_UI::save_ardour_state ()
 			Config->add_instant_xml (location_ui->ui().get_state ());
 		}
 	}
+	delete &enode;
 
 	Keyboard::save_keybindings ();
 }

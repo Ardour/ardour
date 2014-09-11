@@ -480,6 +480,7 @@ Session::destroy ()
 	/* clear state tree so that no references to objects are held any more */
 
 	delete state_tree;
+	state_tree = 0;
 
 	/* reset dynamic state version back to default */
 
