@@ -32,10 +32,10 @@ private:
     WavesButton& _cancel_button;
     WavesButton& _ok_button;
     
-    Gtk::ComboBoxText& _tracks_format_combo;
+	WavesDropdown& _tracks_format_dropdown;
     Gtk::Entry& _tracks_counter_entry;
     
-    void populate_tracks_format_combo();
+    void populate_tracks_format_dropdown();
     
     void on_cancel_button (WavesButton*);
     void on_ok_button (WavesButton*);
