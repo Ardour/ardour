@@ -45,7 +45,8 @@ tags
 /doc/html/
 /doc/latex/
 /tools/osx_packaging/Resources/
-
+/tools/osx_packaging/Tracks
+/tools/osx_packaging/Info.plist
 
 # translations
 /gtk2_ardour/po/*.mo
