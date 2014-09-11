@@ -2294,9 +2294,15 @@ RouteTimeAxisView::can_edit_name () const
     if( audio_track && audio_track->is_master_track() )
         return false;
     
+    Session *session = ARDOUR_UI::instance()->the_session();
+    
+    if (session == 0) {
+        return false;
+    }
+    
 	/* we do not allow track name changes if it is record enabled
 	 */
- 	return !( (ARDOUR_UI::instance()->the_session()->record_status()==Session::Recording) && (_route->record_enabled()) );
+ 	return !( (session->record_status() == Session::Recording) && (_route->record_enabled()) );
 }
 
 void
