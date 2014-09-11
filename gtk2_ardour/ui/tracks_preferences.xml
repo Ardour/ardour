@@ -226,7 +226,7 @@
         <Label style="generic_control" text="CHANNEL CONFIGURATION MODE" fgnormal="#ffffff"
                winfont ="Arial Bold 10"
                macfont ="Helvetica Bold 10"
-               x="17" y="15"/>
+               x="18" y="12"/>
         <iconbutton id="multi_out_button"
                     text="MULTI OUT"
                     x="280"
@@ -471,12 +471,20 @@
       </Dropdown>
 
       <Label style="generic_control" text="DEFAULT FOLDER FOR NEW SESSION" x = "24" y = "290"/>
-      <Button
-        id = "browse_default_folder"
-        text = "Browse"
-        style = "generic_button"
-        x = "24" y = "310" width = "100" height = "28"/>
-      <Label id="default_open_path" style="generic_control" text="" x = "135" y = "315"/>
+      <Iconbutton style = "generic_button"
+                  id = "browse_default_folder"
+                  x = "24"
+                  y = "310"
+                  width = "71"
+                  height = "28"
+                  normalicon="preferences_browse_button"
+                  activeicon="preferences_browse_button_active"
+                  prelighticon="preferences_browse_button_prelight"/>
+      <Label id="default_open_path"
+             style="generic_control"
+             text=""
+             x = "105"
+             y = "315"/>
     </Layout>
   </Layout>
 </Dialog>
