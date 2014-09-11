@@ -17,43 +17,28 @@
 
   <Layout bgnormal="#1F1F1F" x="0" y="0" width="619" height="623">
     <VBox x="2" y="1">
-      <Layout bgnormal="#A0A0A0" width="107" height="1"/>
-      <Button
-        id="audio_settings_tab_button"
-        text="AUDIO\nSYSTEM\nSETTINGS"
-        fgnormal="#C1C1C1"
-        fgactive="#CDCDCD"
-        bgnormal="#1F1F1F"
-        bgactive="#565656"
-        bghover="#2f2f2f"
-        winfont ="Arial Bold 10"
-        macfont ="Helvetica Bold 10"
-        width="107" height="65"/>
-      <Layout bgnormal="#A0A0A0" width="107" height="1"/>
-      <Button
-        id="midi_settings_tab_button"
-        text="MIDI\nSYSTEM\nSETTINGS"
-        fgnormal="#C1C1C1"
-        fgactive="#CDCDCD"
-        bgnormal="#1F1F1F"
-        bgactive="#565656"
-        bghover="#2f2f2f"
-        winfont ="Arial Bold 10"
-        macfont ="Helvetica Bold 10"
-        width="107" height="65"/>
-      <Layout bgnormal="#A0A0A0" width="107" height="1"/>
-      <Button
-        id="session_settings_tab_button"
-        text="SESSION\nSETTINGS"
-        fgnormal="#C1C1C1"
-        fgactive="#CDCDCD"
-        bgnormal="#1F1F1F"
-        bgactive="#565656"
-        bghover="#2f2f2f"
-        winfont ="Arial Bold 10"
-        macfont ="Helvetica Bold 10"
-        width="107" height="65"/>
-      <Layout bgnormal="#A0A0A0" width="107" height="1"/>
+      <EventBox bgnormal="#A0A0A0" width="107" height="1"/>
+      <Iconbutton id="audio_settings_tab_button"
+                  width="107"
+                  height="65"
+                  normalicon="preferences_audio_settings_tab_button"
+                  activeicon="preferences_audio_settings_tab_button_active"
+                  prelighticon="preferences_audio_settings_tab_button_prelight"/>
+      <EventBox bgnormal="#A0A0A0" width="107" height="1"/>
+      <Iconbutton id="midi_settings_tab_button"
+                  width="107"
+                  height="65"
+                  normalicon="preferences_midi_settings_tab_button"
+                  activeicon="preferences_midi_settings_tab_button_active"
+                  prelighticon="preferences_midi_settings_tab_button_prelight"/>
+      <EventBox bgnormal="#A0A0A0" width="107" height="1"/>
+      <Iconbutton id="session_settings_tab_button"
+                  width="107"
+                  height="65"
+                  normalicon="preferences_session_settings_tab_button"
+                  activeicon="preferences_session_settings_tab_button_active"
+                  prelighticon="preferences_session_settings_tab_button_prelight"/>
+      <EventBox bgnormal="#A0A0A0" width="107" height="1"/>
     </VBox>
 
     <Layout bgnormal="#565656" x="113" y="559" width="505" height="63">
