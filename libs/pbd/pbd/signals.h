@@ -39,6 +39,13 @@
 #include "pbd/libpbd_visibility.h"
 #include "pbd/event_loop.h"
 
+#define DEBUG_PBD_SIGNAL_CONNECTIONS
+
+#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+#include "pbd/stacktrace.h"
+#include <iostream>
+#endif
+
 namespace PBD {
 
 class LIBPBD_API Connection;
@@ -46,11 +53,18 @@ class LIBPBD_API Connection;
 class LIBPBD_API SignalBase
 {
 public:
+	SignalBase () : _debug_connection (false) {}
 	virtual ~SignalBase () {}
 	virtual void disconnect (boost::shared_ptr<Connection>) = 0;
+#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+	void set_debug_connection (bool yn) { _debug_connection = yn; }
+#endif
 
 protected:
         Glib::Threads::Mutex _mutex;
+#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+	bool _debug_connection;
+#endif
 };
 
 class LIBPBD_API Connection : public boost::enable_shared_from_this<Connection>
