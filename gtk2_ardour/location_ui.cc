@@ -1011,7 +1011,7 @@ LocationUI::add_new_location()
 
 	if (_session) {
 		framepos_t where = _session->audible_frame();
-		_session->locations()->next_available_name(markername,"mark");
+		_session->locations()->next_available_name(markername,_(Marker::default_new_marker_prefix));
 		Location *location = new Location (*_session, where, where, markername, Location::IsMark);
 		if (Config->get_name_new_markers()) {
 			newest_location = location;

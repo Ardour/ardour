@@ -1950,7 +1950,7 @@ Editor::add_location_mark (framepos_t where)
 
 	select_new_marker = true;
 
-	_session->locations()->next_available_name(markername,"mark");
+	_session->locations()->next_available_name(markername,_(Marker::default_new_marker_prefix));
 	if (!choose_new_marker_name(markername)) {
 		return;
 	}
@@ -2101,7 +2101,7 @@ Editor::set_mark ()
 	framepos_t const pos = _session->audible_frame ();
 
 	string markername;
-	_session->locations()->next_available_name (markername, "mark");
+	_session->locations()->next_available_name (markername, _(Marker::default_new_marker_prefix));
 
 	if (!choose_new_marker_name (markername)) {
 		return;
