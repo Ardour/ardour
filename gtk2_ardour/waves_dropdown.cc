@@ -23,6 +23,8 @@ WavesDropdown::WavesDropdown (const std::string& title)
   : WavesIconButton (title)
 {
 	signal_button_press_event().connect (sigc::mem_fun(*this, &WavesDropdown::on_mouse_pressed));
+	_menu.signal_hide ().connect (sigc::bind (sigc::mem_fun (*this, &CairoWidget::set_active), false));
+	_menu.signal_show ().connect (sigc::bind (sigc::mem_fun (*this, &CairoWidget::set_active), true));
 }
 
 WavesDropdown::~WavesDropdown ()
