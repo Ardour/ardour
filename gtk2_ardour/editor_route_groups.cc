@@ -197,7 +197,7 @@ EditorRouteGroups::remove_selected ()
 	Glib::RefPtr<TreeSelection> selection = _display.get_selection();
 	TreeView::Selection::ListHandle_Path rows = selection->get_selected_rows ();
 
-	if (rows.empty()) {
+	if (rows.empty() || _session->deletion_in_progress()) {
 		return;
 	}
 
@@ -582,7 +582,7 @@ EditorRouteGroups::run_new_group_dialog ()
 void
 EditorRouteGroups::row_deleted (Gtk::TreeModel::Path const &)
 {
-	if (_in_rebuild) {
+	if (_in_rebuild || !_session || _session->deletion_in_progress()) {
 		/* We need to ignore this in cases where we're not doing a drag-and-drop
 		   re-order.
 		*/
