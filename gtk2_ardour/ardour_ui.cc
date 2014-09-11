@@ -577,6 +577,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete secondary_clock;
 		delete _process_thread;
 		delete gui_object_state;
+		FastMeter::flush_pattern_cache ();
 	}
 }
 

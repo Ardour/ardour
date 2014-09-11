@@ -52,6 +52,7 @@ class LIBGTKMM2EXT_API FastMeter : public CairoWidget {
 			int styleflags = 3
 			);
 	virtual ~FastMeter ();
+	static void flush_pattern_cache();
 
 	void set (float level, float peak = -1);
 	void clear ();
