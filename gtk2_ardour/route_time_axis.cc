@@ -119,6 +119,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed,
     , upper_drop_indicator(get_event_box ("upper_drop_indicator"))
     , lower_drop_indicator(get_event_box ("lower_drop_indicator"))
 {
+    sess->RecordStateChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::on_record_state_changed, this), gui_context());
 }
 
 void
@@ -127,6 +128,15 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
     disable_header_dnd ();
     
 	RouteUI::set_route (rt);
+    
+    boost::shared_ptr<Track> t;
+    if ((t = boost::dynamic_pointer_cast<Track>(rt)) != 0) {
+        t->RecordEnableChanged.connect (_route_state_connections,
+                                        invalidator (*this),
+                                        boost::bind (&RouteTimeAxisView::on_record_state_changed, this),
+                                        gui_context() );
+    }
+    
 
 	CANVAS_DEBUG_NAME (_canvas_display, string_compose ("main for %1", rt->name()));
 	CANVAS_DEBUG_NAME (selection_group, string_compose ("selections for %1", rt->name()));
@@ -2692,4 +2702,11 @@ RouteTimeAxisView::control_ebox_resize_ended()
         _ignore_dnd_requests = false;
         enable_header_dnd ();
     }
+}
+
+void
+RouteTimeAxisView::on_record_state_changed ()
+{
+    if ( (ARDOUR_UI::instance()->the_session()->record_status()==Session::Recording) && (_route->record_enabled()) )
+        end_name_edit (RESPONSE_CANCEL);
 }

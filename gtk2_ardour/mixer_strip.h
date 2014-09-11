@@ -173,6 +173,10 @@ class MixerStrip : public RouteUI
 	
     WavesButton&   name_button;
     
+    PBD::ScopedConnectionList _route_state_connections;
+    void on_record_state_changed ();
+    
+    
     Gtk::Entry& _name_entry;
     void begin_name_edit ();
     void end_name_edit (int);

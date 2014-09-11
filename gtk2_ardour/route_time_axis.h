@@ -329,6 +329,9 @@ private:
 	void remove_child (boost::shared_ptr<TimeAxisView>);
 	void update_playlist_tip ();
 	void display_route_color ();
+    
+    void on_record_state_changed ();
+    PBD::ScopedConnectionList _route_state_connections;
 };
 
 #endif /* __ardour_route_time_axis_h__ */

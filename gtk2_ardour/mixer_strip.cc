@@ -259,6 +259,7 @@ MixerStrip::init ()
 
 	_session->engine().Stopped.connect (*this, invalidator (*this), boost::bind (&MixerStrip::engine_stopped, this), gui_context());
 	_session->engine().Running.connect (*this, invalidator (*this), boost::bind (&MixerStrip::engine_running, this), gui_context());
+    _session->RecordStateChanged.connect (*this, invalidator (*this), boost::bind (&MixerStrip::on_record_state_changed, this), gui_context());
 
 	/* ditto for this button and busses */
 
@@ -422,6 +423,9 @@ MixerStrip::begin_name_edit ()
     if( _route->is_master () )
         return;
     
+    if ( (ARDOUR_UI::instance()->the_session()->record_status()==Session::Recording) && (_route->record_enabled()) )
+        return;
+    
     boost::shared_ptr<AudioTrack> audio_track = boost::dynamic_pointer_cast<AudioTrack>(_route);
     if( audio_track && audio_track->is_master_track() )
         return;
@@ -434,6 +438,13 @@ MixerStrip::begin_name_edit ()
     _name_entry.set_state (STATE_SELECTED);
     _name_entry.grab_focus ();
     _name_entry.start_editing (0);
+}
+
+void
+MixerStrip::on_record_state_changed ()
+{
+    if ( (ARDOUR_UI::instance()->the_session()->record_status()==Session::Recording) && (_route->record_enabled()) )
+        end_name_edit (RESPONSE_CANCEL);
 }
 
 void
@@ -486,7 +497,15 @@ void
 MixerStrip::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
-
+    
+    boost::shared_ptr<Track> t;
+    if ((t = boost::dynamic_pointer_cast<Track>(rt)) != 0) {
+        t->RecordEnableChanged.connect (_route_state_connections,
+                                        invalidator (*this),
+                                        boost::bind (&MixerStrip::on_record_state_changed, this),
+                                        gui_context() );
+    }
+    
 	/* ProcessorBox needs access to _route so that it can read
 	   GUI object state.
 	*/
