@@ -23,6 +23,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <boost/enable_shared_from_this.hpp>
 
 #include "ardour/plugin.h"
 #include "ardour/uri_map.h"
@@ -272,7 +273,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 };
 
 
-class LIBARDOUR_API LV2PluginInfo : public PluginInfo {
+class LIBARDOUR_API LV2PluginInfo : public PluginInfo , public boost::enable_shared_from_this<ARDOUR::LV2PluginInfo> {
 public:
 	LV2PluginInfo (const char* plugin_uri);
 	~LV2PluginInfo ();

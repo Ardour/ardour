@@ -2066,7 +2066,7 @@ LV2PluginInfo::load(Session& session)
 		if (!lp) { throw failed_constructor(); }
 		plugin.reset(new LV2Plugin(session.engine(), session, lp, session.frame_rate()));
 		lilv_node_free(uri);
-		plugin->set_info(PluginInfoPtr(new LV2PluginInfo(*this)));
+		plugin->set_info(PluginInfoPtr(shared_from_this ()));
 		return plugin;
 	} catch (failed_constructor& err) {
 		return PluginPtr((Plugin*)0);
