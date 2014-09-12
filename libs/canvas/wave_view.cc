@@ -123,7 +123,7 @@ WaveView::handle_visual_property_change ()
 		_gradient_depth = global_gradient_depth();
 		changed = true;
 	}
-	
+
 	if (changed) {
 		begin_visual_change ();
 		invalidate_image_cache ();
@@ -170,7 +170,7 @@ WaveView::set_samples_per_pixel (double samples_per_pixel)
 		invalidate_image_cache ();
 		_samples_per_pixel = samples_per_pixel;
 		_bounding_box_dirty = true;
-		
+
 		end_change ();
 	}
 }
@@ -223,16 +223,16 @@ WaveView::invalidate_image_cache ()
 
 	for (uint32_t i = 0; i < caches.size (); ++i) {
 
-		if (_channel != caches[i].channel 
+		if (_channel != caches[i].channel
 		    || _height != caches[i].height
-		    || _region_amplitude != caches[i].amplitude 
+		    || _region_amplitude != caches[i].amplitude
 		    || _fill_color != caches[i].fill_color) {
 
 			continue;
 		}
 
 		deletion_list.push_back (i);
-		
+
 	}
 
 	while (deletion_list.size() > 0) {
@@ -262,7 +262,7 @@ WaveView::consolidate_image_cache () const
 
 	for (uint32_t i = 0; i < caches.size (); ++i) {
 
-		if (_channel != caches[i].channel 
+		if (_channel != caches[i].channel
 		    || _height != caches[i].height
 		    || _region_amplitude != caches[i].amplitude
 		    || _fill_color != caches[i].fill_color) {
@@ -276,8 +276,8 @@ WaveView::consolidate_image_cache () const
 
 		for (uint32_t j = i; j < caches.size (); ++j) {
 
-			if (i == j || _channel != caches[j].channel 
-			    || _height != caches[i].height 
+			if (i == j || _channel != caches[j].channel
+			    || _height != caches[i].height
 			    || _region_amplitude != caches[i].amplitude
 			    || _fill_color != caches[i].fill_color) {
 
@@ -300,7 +300,7 @@ WaveView::consolidate_image_cache () const
 		deletion_list.pop_back();
 	}
 
-	/* We don't care if this channel/height/amplitude has anything in the cache - just drop the Last Added entries 
+	/* We don't care if this channel/height/amplitude has anything in the cache - just drop the Last Added entries
 	   until we reach a size where there is a maximum of CACHE_HIGH_WATER + other entries.
 	*/
 
@@ -319,7 +319,7 @@ WaveView::consolidate_image_cache () const
 Coord
 WaveView::y_extent (double s, bool /*round_to_lower_edge*/) const
 {
-	/* it is important that this returns an integral value, so that we 
+	/* it is important that this returns an integral value, so that we
 	 * can ensure correct single pixel behaviour.
 	 *
 	 * we need (_height - max(wave_line_width))
@@ -359,7 +359,7 @@ struct LineTips {
 	double spread;
 	bool clip_max;
 	bool clip_min;
-	
+
 	LineTips() : top (0.0), bot (0.0), clip_max (false), clip_min (false) {}
 };
 
@@ -369,8 +369,8 @@ struct ImageSet {
 	Cairo::RefPtr<Cairo::ImageSurface> clip;
 	Cairo::RefPtr<Cairo::ImageSurface> zero;
 
-	ImageSet() : 
-		wave (0), outline (0), clip (0), zero (0) {} 
+	ImageSet() :
+		wave (0), outline (0), clip (0), zero (0) {}
 };
 
 void
@@ -423,7 +423,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				}
 
 				if (fabs (_peaks[i].min) >= clip_level) {
-					tips[i].clip_min = true;
+					tips[i].clip_max = true;
 				}
 			}
 
@@ -484,7 +484,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				tips[i].top = y_extent (top, false);
 				tips[i].bot = y_extent (bot, true);
 				tips[i].spread = fabs (tips[i].top - tips[i].bot);
-			} 
+			}
 
 		} else {
 			for (int i = 0; i < n_peaks; ++i) {
@@ -510,7 +510,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				tips[i].bot = y_extent (_peaks[i].min, true);
 				tips[i].spread = fabs (tips[i].top - tips[i].bot);
 			}
-			
+
 		}
 	}
 	Color alpha_one = rgba_to_color (0, 0, 0, 1.0);
@@ -521,7 +521,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	set_source_rgba (zero_context, alpha_one);
 
 	/* ensure single-pixel lines */
-		
+
 	wave_context->set_line_width (1.0);
 	wave_context->translate (0.5, +0.5);
 
@@ -540,7 +540,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	 */
 
 	const double clip_height = min (7.0, ceil (_height * 0.05));
-	
+
 	/* There are 3 possible components to draw at each x-axis position: the
 	   waveform "line", the zero line and an outline/clip indicator.  We
 	   have to decide which of the 3 to draw at each position, pixel by
@@ -554,11 +554,11 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	   we just draw the upper outline/clip indicator.
 
 	   With 2 pixels of spread, we draw the upper and lower outline clip
-	   indicators. 
-	   
-	   With 3 pixels of spread we draw the upper and lower outline/clip 
+	   indicators.
+
+	   With 3 pixels of spread we draw the upper and lower outline/clip
 	   indicators and at least 1 pixel of the waveform line.
-	   
+
 	   With 5 pixels of spread, we draw all components.
 
 	   We can do rectified as two separate passes because we have a much
@@ -664,11 +664,11 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	/* Here we set a source colour and use the various components as a mask. */
 
 	if (gradient_depth() != 0.0) {
-			
+
 		Cairo::RefPtr<Cairo::LinearGradient> gradient (Cairo::LinearGradient::create (0, 0, 0, _height));
-			
+
 		double stops[3];
-			
+
 		double r, g, b, a;
 
 		if (_shape == Rectified) {
@@ -690,7 +690,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 		v *= 1.0 - gradient_depth();
 		Color center = hsv_to_color (h, s, v, a);
 		color_to_rgba (center, r, g, b, a);
-			
+
 		gradient->add_color_stop_rgba (stops[0], r, g, b, a);
 		gradient->add_color_stop_rgba (stops[2], r, g, b, a);
 
@@ -700,7 +700,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	}
 
 	context->mask (images.wave, 0, 0);
-	context->fill ();	
+	context->fill ();
 
 	set_source_rgba (context, _outline_color);
 	context->mask (images.outline, 0, 0);
@@ -722,7 +722,7 @@ WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start
 	vector <CacheEntry> caches;
 
 	if (_image_cache.find (_region->audio_source ()) != _image_cache.end ()) {
-		
+
 		caches = _image_cache.find (_region->audio_source ())->second;
 	}
 
@@ -730,7 +730,7 @@ WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start
 	*/
 	for (uint32_t i = 0; i < caches.size (); ++i) {
 
-		if (_channel != caches[i].channel 
+		if (_channel != caches[i].channel
 		    || _height != caches[i].height
 		    || _region_amplitude != caches[i].amplitude
 		    || _fill_color != caches[i].fill_color) {
@@ -752,9 +752,9 @@ WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start
 	consolidate_image_cache ();
 
 	/* sample position is canonical here, and we want to generate
-	 * an image that spans about twice the canvas width 
+	 * an image that spans about twice the canvas width
 	 */
-	
+
 	const framepos_t center = start + ((end - start) / 2);
 	const framecnt_t canvas_samples = _canvas->visible_area().width() * _samples_per_pixel; /* one canvas width */
 
@@ -768,9 +768,9 @@ WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start
 
 	boost::scoped_array<ARDOUR::PeakData> peaks (new PeakData[n_peaks]);
 
-	_region->read_peaks (peaks.get(), n_peaks, 
+	_region->read_peaks (peaks.get(), n_peaks,
 			     sample_start, sample_end - sample_start,
-			     _channel, 
+			     _channel,
 			     _samples_per_pixel);
 
 	image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, _height);
@@ -801,7 +801,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	if (!d) {
 		return;
 	}
-	
+
 	Rect draw = d.get();
 
 	/* window coordinates - pixels where x=0 is the left edge of the canvas
@@ -813,11 +813,11 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	const double draw_end = floor (draw.x1);
 
 	// cerr << "Need to draw " << draw_start << " .. " << draw_end << endl;
-	
+
 	/* image coordnates: pixels where x=0 is the start of this waveview,
 	 * wherever it may be positioned. thus image_start=N means "an image
 	 * that beings N pixels after the start of region that this waveview is
-	 * representing. 
+	 * representing.
 	 */
 
 	const framepos_t image_start = window_to_image (self.x0, draw_start);
@@ -864,10 +864,10 @@ WaveView::compute_bounding_box () const
 	} else {
 		_bounding_box = boost::optional<Rect> ();
 	}
-	
+
 	_bounding_box_dirty = false;
 }
-	
+
 void
 WaveView::set_height (Distance height)
 {
@@ -1039,4 +1039,3 @@ WaveView::set_global_show_waveform_clipping (bool yn)
 		VisualPropertiesChanged (); /* EMIT SIGNAL */
 	}
 }
-
