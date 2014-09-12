@@ -23,6 +23,7 @@ WavesDropdown::WavesDropdown (const std::string& title)
   : WavesIconButton (title)
 {
 	signal_button_press_event().connect (sigc::mem_fun(*this, &WavesDropdown::on_mouse_pressed));
+	_menu.signal_hide ().connect (sigc::bind (sigc::mem_fun (*this, &CairoWidget::set_active), false));
 }
 
 WavesDropdown::~WavesDropdown ()
@@ -33,6 +34,7 @@ bool
 WavesDropdown::on_mouse_pressed (GdkEventButton*)
 {
 	_menu.popup (sigc::mem_fun(this, &WavesDropdown::_on_popup_menu_position), 1, gtk_get_current_event_time());
+	set_active (true);
 	return true;
 }
 

@@ -157,6 +157,8 @@ public:
 
     PBD::Signal3<void, const PBD::ID&, const PBD::ID&, bool> relative_tracks_reorder_request;
     
+    void route_rec_enable_changed();
+    
 protected:
 	friend class StreamView;
 
@@ -329,6 +331,8 @@ private:
 	void remove_child (boost::shared_ptr<TimeAxisView>);
 	void update_playlist_tip ();
 	void display_route_color ();
+    
+    void on_record_state_changed ();
 };
 
 #endif /* __ardour_route_time_axis_h__ */

@@ -77,6 +77,7 @@ public:
 	std::string _cursor_set;
 	void drop_all ();
 
+	Gdk::Cursor* make_cursor (const char* name, int hotspot_x = 0, int hotspot_y = 0);
 };
 
 #endif /* __gtk2_ardour_mouse_cursors__ */

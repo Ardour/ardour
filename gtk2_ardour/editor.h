@@ -714,6 +714,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Container& _master_bus_ui_home;
 	MasterBusUI*    _master_bus_ui;
 	Gtk::VBox&      vpacker;
+        Gtk::VBox&      timebars_vbox;
+        Gtk::HBox&      marker_lane_hbox;
+        WavesButton&    skip_button;
+        WavesButton&    global_tracks_button;
 
 	std::stack<Gdk::Cursor*> _cursor_stack;
 	Gdk::Cursor*          current_canvas_cursor;
@@ -1619,6 +1623,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Label               toolbar_selection_cursor_label;
 
         WavesButton& add_marker_button;
+        WavesButton& global_solo_button;
+        void solo_blink (bool);
+        WavesButton& global_rec_button;
+        void global_solo_clicked (WavesButton*);
 
 	Gtkmm2ext::TearOff*      _mouse_mode_tearoff;
 	WavesButton& _tool_marker_button;

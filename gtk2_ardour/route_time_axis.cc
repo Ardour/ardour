@@ -119,6 +119,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed,
     , upper_drop_indicator(get_event_box ("upper_drop_indicator"))
     , lower_drop_indicator(get_event_box ("lower_drop_indicator"))
 {
+    sess->RecordStateChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::on_record_state_changed, this), gui_context());
 }
 
 void
@@ -2284,9 +2285,15 @@ RouteTimeAxisView::can_edit_name () const
     if( audio_track && audio_track->is_master_track() )
         return false;
     
+    Session *session = ARDOUR_UI::instance()->the_session();
+    
+    if (session == 0) {
+        return false;
+    }
+    
 	/* we do not allow track name changes if it is record enabled
 	 */
-	return !_route->record_enabled();
+ 	return !( (session->record_status() == Session::Recording) && (_route->record_enabled()) );
 }
 
 void
@@ -2692,4 +2699,21 @@ RouteTimeAxisView::control_ebox_resize_ended()
         _ignore_dnd_requests = false;
         enable_header_dnd ();
     }
+}
+
+void
+RouteTimeAxisView::route_rec_enable_changed()
+{
+    RouteUI::route_rec_enable_changed ();
+    on_record_state_changed ();
+}
+
+void
+RouteTimeAxisView::on_record_state_changed ()
+{
+    if ( !ARDOUR_UI::instance()->the_session() )
+        return;
+    
+    if ( (ARDOUR_UI::instance()->the_session()->record_status()==Session::Recording) && (_route->record_enabled()) )
+        end_name_edit (RESPONSE_CANCEL);
 }

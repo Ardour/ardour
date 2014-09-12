@@ -1116,10 +1116,22 @@ long WCMRPortAudioDevice::ASIOMessageHook (long selector, long WCUNUSEDPARAM(val
 {
 	switch(selector)
 	{
+		case kAsioResyncRequest:
+			m_ResyncRequested++;
+			std::cout << "\t\t\tWCMRPortAudioDevice::ASIOMessageHook -- kAsioResyncRequest" << std::endl;
+			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
+			break;
+
+		case kAsioLatenciesChanged:
+			m_BufferSizeChangeRequested++;
+			std::cout << "\t\t\tWCMRPortAudioDevice::ASIOMessageHook -- kAsioLatenciesChanged" << std::endl;
+			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
+			break;
+
 		case kAsioBufferSizeChange:
 			m_BufferSizeChangeRequested++;
 			std::cout << "\t\t\tWCMRPortAudioDevice::ASIOMessageHook -- m_BufferSizeChangeRequested" << std::endl;
-			SetEvent(m_hBufferSizeChangedEvent);
+			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
 			break;
 
 		case kAsioResetRequest:
@@ -1128,20 +1140,10 @@ long WCMRPortAudioDevice::ASIOMessageHook (long selector, long WCUNUSEDPARAM(val
 			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
 			break;
 
-		case kAsioResyncRequest:
-			std::cout << "\t\t\tWCMRPortAudioDevice::ASIOMessageHook -- kAsioResyncRequest" << std::endl;
-			m_ResyncRequested++;
-			break;
-
-		case kAsioLatenciesChanged:
-			std::cout << "\t\t\tWCMRPortAudioDevice::ASIOMessageHook -- kAsioLatenciesChanged" << std::endl;
-			SetEvent(m_hBufferSizeChangedEvent);
-			m_BufferSizeChangeRequested++;
-			break;
-
         case kAsioOverload:
+			m_DropsDetected++;
 			std::cout << "\t\t\tWCMRPortAudioDevice::ASIOMessageHook -- kAsioOverload" << std::endl;
-            m_DropsDetected++;
+			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::Dropout);
             break;
 	}
 	return 0;
@@ -1399,6 +1401,8 @@ int WCMRPortAudioDevice::AudioCallback( const float *pInputBuffer, float *pOutpu
 			m_IgnoreThisDrop = false; //We'll ignore once, just once!
 		else
 			m_DropsDetected++;
+
+		m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::Dropout);
 	}
 
 	m_pInputData = pInputBuffer;

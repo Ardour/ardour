@@ -97,6 +97,8 @@ class Marker : public sigc::trackable
 
         static double marker_height() { return _marker_height; }
 
+        static const char * default_new_marker_prefix;
+
   protected:
 	PublicEditor& editor;
         ARDOUR::Location* _location;

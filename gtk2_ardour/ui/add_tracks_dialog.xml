@@ -1,76 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title=" " resizeable="False">
-    <style name="generic_control"
-           winfont ="Arial 10"
-           macfont ="Helvetica 10"/>
-    <style name="generic_button"
-    style="generic_control"
-    fgnormal="#BFBFBF"
-    bgnormal="#6C6C6C"
-    fgactive="#BFBFBF"
-    bgactive="#454545"
-    fghover="#CCCCCC"
-    bghover="#898989"
-    fgdisabled ="#959595"
-    bordercolor="#7E7E7E"
-    borderwidth="0 0 0 0" />
-    
-    <Layout width="140" height="180">
-       
-        <Label style ="generic_control"
-                justify="center"
-                text="Add Track"
-                x="0"
-                y="0"
-                width="140"
-                height="25"/>
-        
-        <ComboBoxText style="generic_control"
-                      id="tracks_format_combo"
-                      x="5"
-                      y="40"
-                      width="130"
-                      height="25" />
-        
-        <Button style="generic_button"
-                id="decrement_button"
-                text="-"
-                x="5"
-                y="105"
-                width="25"
-                height="25"/>
+  <style name="generic_control"
+         winfont ="Arial 10"
+         macfont ="Helvetica 10"
+         fgnormal="#BFBFBF"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"
+         fghover="#CCCCCC"
+         bghover="#898989"/>
+  <style name="generic_button"
+  style="generic_control"
+  fgnormal="#BFBFBF"
+  bgnormal="#6C6C6C"
+  fgactive="#BFBFBF"
+  bgactive="#454545"
+  fghover="#CCCCCC"
+  bghover="#898989"
+  fgdisabled ="#959595"
+  bordercolor="#7E7E7E"
+  borderwidth="0 0 0 0"/>
+  <Layout width="140"
+          height="180">
+    <Label style ="generic_control"
+           justify="center"
+           text="Add Track"
+           x="0"
+           y="0"
+           width="140"
+           height="25"/>
+    <Dropdown id="tracks_format_dropdown"
+              style="generic_control"
+              x="5"
+              y="40"
+              width="130"
+              height="25"
+              normalicon="added_track_format_dropdown"
+              activeicon="added_track_format_dropdown_active"
+              prelighticon="added_track_format_dropdown_prelight"
+              inactiveicon="added_track_format_dropdown_inactive">
+      <dropdownitem title="MONO"/>
+      <dropdownitem title="STEREO"/>
+    </Dropdown>
 
-        <Entry  style="generic_control"
-                id="tracks_counter_entry"
-                text="1"
-                justify="center"
-                x="35"
-                y="105"
-                width="70"
-                height="25"/>
-                
-        <Button style="generic_button"
-                id="increment_button"
-                text="+"
-                x="110"
-                y="105"
-                width="25"
-                height="25"/>
-        
-        <Button style="generic_button"
-                id="cancel_button"
-                text="CANCEL"
-                x="0"
-                y="155"
-                width="69"
-                height="25"/>
-        
-        <Button style="generic_button"
-                id="ok_button"
-                text="OK"
-                x="70"
-                y="155"
-                width="69"
-                height="25"/>
-    </Layout>
+    <Button style="generic_button"
+              id="decrement_button"
+              text="-"
+              x="5"
+              y="105"
+              width="25"
+              height="25"/>
+
+    <Entry  style="generic_control"
+            id="tracks_counter_entry"
+            text="1"
+            justify="center"
+            x="35"
+            y="105"
+            width="70"
+            height="25"/>
+
+    <Button style="generic_button"
+            id="increment_button"
+            text="+"
+            x="110"
+            y="105"
+            width="25"
+            height="25"/>
+
+    <Button style="generic_button"
+            id="cancel_button"
+            text="CANCEL"
+            x="0"
+            y="155"
+            width="69"
+            height="25"/>
+
+    <Button style="generic_button"
+            id="ok_button"
+            text="OK"
+            x="70"
+            y="155"
+            width="69"
+            height="25"/>
+  </Layout>
 </Dialog>

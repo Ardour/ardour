@@ -55,7 +55,8 @@ using namespace Gtkmm2ext;
 
 PBD::Signal1<void,Marker*> Marker::CatchDeletion;
 
-const double Marker::_marker_height = 18.0;
+const double Marker::_marker_height = 17.0;
+const char * Marker::default_new_marker_prefix = N_("MARKER");
 
 static const double name_padding = 10.0;
 
@@ -99,8 +100,12 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 
 	set_color_rgba (rgba);
 
+        if (type == Mark) {
+                _line_shown = true;
+        }
+        
 	/* setup name pixbuf sizes */
-	name_font = get_font_for_style (N_("MarkerText"));
+	name_font = Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_SmallFont());
 
 	Gtk::Label foo;
 
@@ -115,9 +120,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 	_name_item->set_font_description (name_font);
         /* white with 95% opacity */
 	_name_item->set_color (ArdourCanvas::rgba_to_color (1.0,1.0,1.0,0.95));
-	_name_item->set_position (ArdourCanvas::Duple (_label_offset, (_marker_height / 2.0) - (name_height / 2.0) - 2.0));
-
-        set_has_scene_change (true);
+	_name_item->set_position (ArdourCanvas::Duple (_label_offset, (_marker_height / 2.0) - (name_height / 2.0)));
 
 	set_name (annotation.c_str());
 
@@ -338,7 +341,7 @@ Marker::set_show_line (bool s)
 void
 Marker::setup_line ()
 {
-	if (_shown && (_selected || _line_shown || ARDOUR::Profile->get_trx())) {
+	if ((Profile->get_trx() && _type == Mark) || (_shown && ((!Profile->get_trx() && _selected) || _line_shown))) {
 
 		if (_track_canvas_line == 0) {
 
@@ -414,16 +417,16 @@ Marker::setup_name_display ()
 
         if (_have_scene_change) {
 
-                name_width = (double) pixel_width (_("MIDI"), name_font);
-
-                /* coordinates of rect that will surround "MIDI */
+                /* coordinates of rect that will surround "MIDI" */
 
                 ArdourCanvas::Rect r;
+                int midi_height;
+
+                pixel_size (X_("MIDI"), name_font, name_width, midi_height);
+
                 r.x0 = 2.0;
                 r.x1 = r.x1 + name_width + 7.0;
-                r.y0 = 2.0;
-                r.y1 = r.y0 + _marker_height - 4.0;
-                
+
                 if (_scene_change_text == 0) {
                         _scene_change_rect = new ArdourCanvas::Rectangle (group);
                         _scene_change_text = new ArdourCanvas::Text (group);
@@ -437,14 +440,18 @@ Marker::setup_name_display ()
                 
                 _scene_change_text->set_font_description (name_font);
                 _scene_change_text->set_color (ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 0.95));
-                _scene_change_text->set (_("MIDI"));
+                _scene_change_text->set (X_("MIDI"));
                         
-                _scene_change_text->set_position (ArdourCanvas::Duple (4.0, (_marker_height / 2.0) - (name_height / 2.0) - 2.0));
-                
+                /* 4 pixels left margin, place it in the vertical middle.
+                 */
+                _scene_change_text->set_position (ArdourCanvas::Duple (4.0, (_marker_height / 2.0) - (name_height / 2.0)));
+
+                r.y0 = _scene_change_text->position().y - 2.0;
+                r.y1 = r.y0 + name_height + 4.0;
+
                 _scene_change_rect->set (r);
-
                 scene_change_width = r.x1;
-
+                
         } else {
                 if (_scene_change_text) {
                         delete _scene_change_text;

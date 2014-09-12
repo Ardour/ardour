@@ -34,10 +34,10 @@ AddTracksDialog::AddTracksDialog ()
 , _increment_button (get_waves_button ("increment_button"))
 , _cancel_button (get_waves_button ("cancel_button"))
 , _ok_button (get_waves_button ("ok_button"))
-, _tracks_format_combo (get_combo_box_text ("tracks_format_combo"))
+, _tracks_format_dropdown (get_waves_dropdown ("tracks_format_dropdown"))
 , _tracks_counter_entry (get_entry("tracks_counter_entry"))
 {
-    populate_tracks_format_combo();
+    populate_tracks_format_dropdown();
     _tracks_counter_entry.set_text("1");
     
     _cancel_button.signal_clicked.connect (sigc::mem_fun (*this, &AddTracksDialog::on_cancel_button));
@@ -47,15 +47,9 @@ AddTracksDialog::AddTracksDialog ()
 }
 
 void
-AddTracksDialog::populate_tracks_format_combo ()
+AddTracksDialog::populate_tracks_format_dropdown ()
 {
-    std::vector<std::string> track_format_strings;
-    track_format_strings.push_back(TrackFormat::FormatMono);
-    track_format_strings.push_back(TrackFormat::FormatStereo);
-
-    set_popdown_strings (_tracks_format_combo, track_format_strings);
-    _tracks_format_combo.set_sensitive (track_format_strings.size() > 1);
-    _tracks_format_combo.set_active_text(TrackFormat::FormatMono);
+    _tracks_format_dropdown.set_text(TrackFormat::FormatMono);
 }
 
 void
@@ -127,7 +121,7 @@ AddTracksDialog::input_channels ()
 {
     ChanCount channel_count;
     
-    string track_format = _tracks_format_combo.get_active_text();
+    string track_format = _tracks_format_dropdown.get_text();
     
     if( track_format == TrackFormat::FormatMono )
         channel_count.set(DataType::AUDIO, 1);
@@ -143,6 +137,6 @@ void
 AddTracksDialog::setup ()
 {
     set_track_count(1);
-    _tracks_format_combo.set_active_text(TrackFormat::FormatMono);
+    _tracks_format_dropdown.set_text(TrackFormat::FormatMono);
 }
 

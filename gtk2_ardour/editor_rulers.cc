@@ -392,9 +392,11 @@ Editor::update_ruler_visibility ()
                 if (pos != old_unit_pos) {
                         marker_group->move (ArdourCanvas::Duple (0.0, pos - old_unit_pos));
                 }
+                marker_lane_hbox.show ();
                 marker_group->show();
                 pos += Marker::marker_height(); // marker_bar->y0() - marker_bar->y1();
         } else {
+                marker_lane_hbox.hide ();
                 marker_group->hide();
         }
 
@@ -403,9 +405,11 @@ Editor::update_ruler_visibility ()
                 if (pos != old_unit_pos) {
                         skip_group->move (ArdourCanvas::Duple (0.0, pos - old_unit_pos));
                 }
+                skip_button.show ();
                 skip_group->show();
                 pos += Marker::marker_height(); // skip_bar->y1() - skip_bar->y0();
         } else {
+                skip_button.hide ();
                 skip_group->hide();
         }
 

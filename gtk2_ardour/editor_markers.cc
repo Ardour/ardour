@@ -648,7 +648,7 @@ Editor::mouse_add_new_marker (framepos_t where, bool is_cd, bool is_xrun)
 		markerprefix = "xrun";
 		flags = Location::IsMark;
 	} else {
-		markerprefix = "mark";
+		markerprefix = _(Marker::default_new_marker_prefix);
 	}
 
 	if (_session) {
