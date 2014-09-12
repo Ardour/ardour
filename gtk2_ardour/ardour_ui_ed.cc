@@ -121,6 +121,7 @@ ARDOUR_UI::populate_display_format_dropdown ()
 {
     static std::vector<string> display_formats;
     _display_format_dropdown->clear_items ();
+    display_formats.clear ();
     
     display_formats.push_back("Timecode");
     display_formats.push_back("Time");
@@ -134,45 +135,38 @@ ARDOUR_UI::populate_display_format_dropdown ()
     if( !_session )
         return;
     
-    string format = _session->config.get_display_format();
-    AudioClock::Mode mode;
-    
-    if ( format == "Time" )
-        mode = AudioClock::MinSec;
-    else if ( format == "Samples" )
-        mode = AudioClock::Frames;
-    if( format == "Timecode" )
-        mode = AudioClock::Timecode;
-    
-    if( time_info_box )
-        time_info_box->set_mode (mode);
-    if ( big_clock )
-        primary_clock->set_mode (mode);
-    
+    AudioClock::Mode mode = primary_clock->mode();
+ 
+    string format;
+    if (AudioClock::Timecode == mode)
+        format = display_formats[0];
+    else if (AudioClock::MinSec == mode)
+        format = display_formats[1];
+    else format = display_formats[2];
+        
     _display_format_dropdown->set_text( format );
 }
 
 void
 ARDOUR_UI::populate_timecode_source_dropdown ()
 {
-    static std::vector<string> timecode_selector;
+    static std::vector<string> timecode_source;
     _timecode_source_dropdown->clear_items ();
     
-    timecode_selector.push_back("Internal");
-    timecode_selector.push_back("MTC");
-    timecode_selector.push_back("LTC");
-    
-    for(int i = 0; i < timecode_selector.size(); ++i)
+    timecode_source.clear();
+    timecode_source.push_back("Internal");
+    timecode_source.push_back("MTC");
+    timecode_source.push_back("LTC");
+        
+    for(int i = 0; i < timecode_source.size(); ++i)
     {
-        _timecode_source_dropdown->add_menu_item (timecode_selector[i], &timecode_selector[i]);
+        _timecode_source_dropdown->add_menu_item (timecode_source[i], &timecode_source[i]);
     }
     
     if( !_session )
         return;
     
-    string timecode_source = _session->config.get_timecode_source();
-    
-    _timecode_source_dropdown->set_text( timecode_source );
+    _timecode_source_dropdown->set_text (timecode_source[0]);
 }
 
 void
@@ -187,8 +181,6 @@ ARDOUR_UI::on_display_format_dropdown_item_clicked (WavesDropdown* from_which, v
         mode = AudioClock::MinSec;
     else if ( format == "Samples" )
         mode = AudioClock::Frames;
-
-    _session->config.set_display_format(format);
     
     if( time_info_box )
         time_info_box->set_mode (mode);
@@ -200,7 +192,6 @@ void
 ARDOUR_UI::on_timecode_source_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie)
 {
     string timecode_source = *((string*)my_cookie);
-    _session->config.set_timecode_source(timecode_source);
 }
 
 void
