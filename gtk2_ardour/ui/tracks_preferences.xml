@@ -154,13 +154,8 @@
                horzalignment="end"/>
         <Dropdown style="generic_button"
                   id="device_dropdown"
-<<<<<<< HEAD
-                  x="97"
-                  y="42"
-=======
                   x="96"
                   y="40"
->>>>>>> e5c87df6cc4ebef877f5d0e002ce543f2a3f563f
                   width="126"
                   height="20"
                   normalicon="preference_device_dropdown"
