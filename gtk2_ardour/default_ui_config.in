@@ -122,7 +122,7 @@
     <Option name="range drag rect" value="82c696c6"/>
     <Option name="range marker bar" value="7d7f8ccc"/>
     <Option name="recording rect" value="cc2828ff"/>
-    <Option name="recorded waveform fill" value="ffffffff"/>
+    <Option name="recorded waveform fill" value="ffffffd9"/>
     <Option name="recorded waveform outline" value="0f0f1fff"/>
     <Option name="rubber band rect" value="c6c6c659"/>
     <Option name="ruler base" value="2c2121ff"/>
@@ -130,7 +130,7 @@
     <Option name="selected crossfade editor line" value="00dbdbff"/>
     <Option name="selected crossfade editor wave" value="f9ea14a0"/>
     <Option name="selected region base" value="596559ff"/>
-    <Option name="selected waveform fill" value="ffa500ff"/>
+    <Option name="selected waveform fill" value="ffa500d9"/>
     <Option name="selected waveform outline" value="0f0f0fcc"/>
     <Option name="selection rect" value="e8f4d377"/>
     <Option name="selection" value="636363b2"/>
@@ -178,7 +178,7 @@
     <Option name="region area covered by another region" value="505050b0"/>
     <Option name="waveform outline" value="000000ff"/>
     <Option name="clipped waveform" value="ff0000e5"/>
-    <Option name="waveform fill" value="ffffffff"/>
+    <Option name="waveform fill" value="ffffffd9"/>
     <Option name="zero line" value="7f7f7fe0"/>
     <Option name="zoom rect" value="c6d1b26d"/>
     <Option name="monitor knob" value="555050ff"/>

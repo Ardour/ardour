@@ -1413,13 +1413,6 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourCanvas::WaveView*>& wave
 		} else {
 			outline = ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm();
 			fill = ARDOUR_UI::config()->get_canvasvar_SelectedWaveFormFill();
-
-			if (ARDOUR_UI::config()->get_color_regions_using_track_color()) {
-				/* just use a slightly transparent version of the selected
-				 * color so that some of the track color bleeds through
-				 */
-				fill = UINT_RGBA_CHANGE_A (fill, 217);
-			}
 		}
 	} else {
 		if (_recregion) {
@@ -1433,13 +1426,6 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourCanvas::WaveView*>& wave
 			} else {
 				outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
 				fill = ARDOUR_UI::config()->get_canvasvar_WaveFormFill();
-
-				if (ARDOUR_UI::config()->get_color_regions_using_track_color()) {
-					/* just use a slightly transparent version of the selected
-					 * color so that some of the track color bleeds through
-					 */
-					fill = UINT_RGBA_CHANGE_A (fill, 217);
-				}
 			}
 		}
 	}
