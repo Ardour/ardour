@@ -166,7 +166,18 @@ ARDOUR_UI::populate_timecode_source_dropdown ()
     if( !_session )
         return;
     
-    _timecode_source_dropdown->set_text (timecode_source[0]);
+    bool use_external_timecode_source = _session->config.get_external_sync ();
+    
+    if (use_external_timecode_source)
+    {
+        if ( Config->get_sync_source() == MTC )
+            _timecode_source_dropdown->set_text (timecode_source[1]);//"MTC"
+        else
+            _timecode_source_dropdown->set_text (timecode_source[2]);//"LTC"
+    } else
+    {
+        _timecode_source_dropdown->set_text (timecode_source[0]);//Internal
+    }
 }
 
 void
@@ -192,6 +203,19 @@ void
 ARDOUR_UI::on_timecode_source_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie)
 {
     string timecode_source = *((string*)my_cookie);
+    
+    if ( timecode_source == "Intermal" )
+    {
+        _session->config.set_external_sync (false);
+    } else if ( timecode_source == "MTC" )
+    {
+        Config->set_sync_source (MTC);
+        _session->config.set_external_sync (true);
+    } else if ( timecode_source == "LTC" )
+    {
+        Config->set_sync_source (LTC);
+        _session->config.set_external_sync (true);        
+    }
 }
 
 void
