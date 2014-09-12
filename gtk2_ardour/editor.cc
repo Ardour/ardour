@@ -648,7 +648,9 @@ Editor::Editor ()
 	setup_toolbar ();
 
         ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::solo_blink));
+        ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::record_status_blink));
 	global_solo_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::global_solo_clicked));
+	global_rec_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::global_rec_clicked));
 
 	set_zoom_focus (zoom_focus);
 	set_visible_track_count (_visible_track_count);
@@ -5691,3 +5693,34 @@ Editor::global_solo_clicked (WavesButton*)
                 _session->set_listen (_session->get_routes(), false);
         }
 }
+
+void
+Editor::record_status_blink (bool onoff)
+{
+	if (!_session) {
+                return;
+	}
+        
+        if (_session->have_rec_enabled_track()) {
+                switch (_session->record_status()) {
+                case Session::Disabled:
+                case Session::Enabled:
+                        global_rec_button.set_active (onoff);
+                        break;
+
+                case Session::Recording:
+                        global_rec_button.set_active (true);
+                        break;
+                }
+	} else {
+		global_rec_button.set_active (false);
+	}
+}
+
+void
+Editor::global_rec_clicked (WavesButton*)
+{
+        DisplaySuspender ds;
+        _session->set_record_enabled (_session->get_routes(), !_session->have_rec_enabled_track());
+}
+        

@@ -378,7 +378,7 @@
                               height="24"
                               width="42"
                               normalicon="global_rec_button"
-                              activeicon="global_rec_button"/>
+                              activeicon="global_rec_button_active"/>
                   <iconbutton id="global_solo_button"
                               height="24"
                               width="42"
