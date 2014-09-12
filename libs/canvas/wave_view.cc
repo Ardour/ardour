@@ -498,16 +498,16 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 
 	/* ensure single-pixel lines */
 		
-	wave_context->set_line_width (0.5);
+	wave_context->set_line_width (1.0);
 	wave_context->translate (0.5, 0.0);
 
-	outline_context->set_line_width (0.5);
+	outline_context->set_line_width (1.0);
 	outline_context->translate (0.5, 0.0);
 
-	clip_context->set_line_width (0.5);
+	clip_context->set_line_width (1.0);
 	clip_context->translate (0.5, 0.0);
 
-	zero_context->set_line_width (0.5);
+	zero_context->set_line_width (1.0);
 	zero_context->translate (0.5, 0.0);
 
 	/* the height of the clip-indicator should be at most 7 pixels,
