@@ -441,8 +441,18 @@ MixerStrip::begin_name_edit ()
 }
 
 void
+MixerStrip::route_rec_enable_changed ()
+{
+    RouteUI::route_rec_enable_changed ();
+    on_record_state_changed ();
+}
+
+void
 MixerStrip::on_record_state_changed ()
 {
+    if ( !ARDOUR_UI::instance()->the_session() )
+        return;
+    
     if ( (ARDOUR_UI::instance()->the_session()->record_status()==Session::Recording) && (_route->record_enabled()) )
         end_name_edit (RESPONSE_CANCEL);
 }
@@ -497,15 +507,7 @@ void
 MixerStrip::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
-    
-    boost::shared_ptr<Track> t;
-    if ((t = boost::dynamic_pointer_cast<Track>(rt)) != 0) {
-        t->RecordEnableChanged.connect (_route_state_connections,
-                                        invalidator (*this),
-                                        boost::bind (&MixerStrip::on_record_state_changed, this),
-                                        gui_context() );
-    }
-    
+
 	/* ProcessorBox needs access to _route so that it can read
 	   GUI object state.
 	*/

@@ -185,7 +185,7 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	void mute_changed(void*);
 	void listen_changed(void*);
 	virtual void processors_changed (ARDOUR::RouteProcessorChange) {}
-	void route_rec_enable_changed();
+	virtual void route_rec_enable_changed();
 	void session_rec_enable_changed();
 
 	void build_solo_menu ();

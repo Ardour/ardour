@@ -128,6 +128,8 @@ class MixerStrip : public RouteUI
 
     static const char* XMLColor[15];
     
+    void route_rec_enable_changed();
+    
   protected:
 	friend class Mixer_UI;
 	void set_packed (bool yn);
@@ -172,10 +174,7 @@ class MixerStrip : public RouteUI
     void selection_click (GdkEventButton* ev);
 	
     WavesButton&   name_button;
-    
-    PBD::ScopedConnectionList _route_state_connections;
     void on_record_state_changed ();
-    
     
     Gtk::Entry& _name_entry;
     void begin_name_edit ();

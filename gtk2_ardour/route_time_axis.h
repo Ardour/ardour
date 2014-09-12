@@ -157,6 +157,8 @@ public:
 
     PBD::Signal3<void, const PBD::ID&, const PBD::ID&, bool> relative_tracks_reorder_request;
     
+    void route_rec_enable_changed();
+    
 protected:
 	friend class StreamView;
 
@@ -331,7 +333,6 @@ private:
 	void display_route_color ();
     
     void on_record_state_changed ();
-    PBD::ScopedConnectionList _route_state_connections;
 };
 
 #endif /* __ardour_route_time_axis_h__ */
