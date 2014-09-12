@@ -23,9 +23,11 @@
 #include <string>
 #include <map>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-class CursorInfo 
+class LIBGTKMM2EXT_API CursorInfo 
 {
     public:
         static CursorInfo* lookup_cursor_info (const std::string& image_name);
