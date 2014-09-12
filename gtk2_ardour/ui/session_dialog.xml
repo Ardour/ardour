@@ -20,7 +20,7 @@
          fgnormal="#DDDDDD"
          fgactive="#DDDDDD"
          borderwidth="0 0 0 0"/>
-  <Layout bgnormal="000000" width="451" height="252">
+  <Layout bgnormal="#000000" width="451" height="252">
     <Layout bgnormal="#404040" x="1" y="1" width="449" height="250">
       <Button style="generic_button"
               id="new_session_button"
@@ -151,16 +151,5 @@
         </Layout>
       </Layout>
     </Layout>
-  </Layout>
-  <Layout height="50">
-    <Iconbutton id="engine_dropdown" bgnormal="#778797"
-              width="126"
-              height="50"
-              normalicon="preference_device_dropdown"
-              activeicon="preference_device_dropdown_active"
-              prelighticon="preference_device_dropdown_prelight"
-              inactiveicon="preference_device_dropdown_inactive">
-      <Label text="123456" vertalignment="bottom" horzalignment="end" height="50"/>
-    </Iconbutton>
   </Layout>
 </Dialog>
