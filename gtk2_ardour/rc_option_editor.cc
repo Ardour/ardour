@@ -583,7 +583,7 @@ class ClipLevelOptions : public OptionEditorBox
 public:
 	ClipLevelOptions (RCConfiguration* c) 
 		: _rc_config (c)
-		, _clip_level_adjustment (0, -128.0, 2.0, 0.1, 1.0) /* units of dB */
+		, _clip_level_adjustment (-.5, -50.0, 0.0, 0.1, 1.0) /* units of dB */
 		, _clip_level_slider (_clip_level_adjustment)
 	{
 		_clip_level_adjustment.set_value (_rc_config->get_waveform_clip_level ());
