@@ -35,6 +35,12 @@ namespace WM {
 class WavesButton;
 class XMLNode;
 
+/*
+ * This virtual parent class is so that each dialog box uses the
+ * same mechanism to declare its closing. It shares a common
+ * method of connecting and disconnecting from a Session with
+ * all other objects that have a handle on a Session.
+ */
 class WavesDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr, public WavesUI
 {
   public:
