@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title="IrrelevantBecauseHidden" resizeable="false">
+  <VBox borderwidth="2" spacing="2">
+    <HBox borderwidth="2" spacing="6">
+      <Label id="input_label"
+             text="MIDI IN"
+             horzalignment="start"
+             winfont ="Arial 8"
+             macfont ="Helvetica 8"/>
+      <dropdown id="input_dropdown"
+                winfont ="Arial 8"
+                macfont ="Helvetica 8"
+                width="200"
+                height="18"/>
+    </HBox>
+    <HBox borderwidth="2" spacing="6">
+      <Label id="output_label"
+             text="MIDI OUT"
+             horzalignment="start"
+             winfont ="Arial 8"
+             macfont ="Helvetica 8"/>
+      <dropdown id="output_dropdown"
+                winfont ="Arial 8"
+                macfont ="Helvetica 8"
+                width="200"
+                height="18"/>
+    </HBox>
+  </VBox>
+</Dialog>
