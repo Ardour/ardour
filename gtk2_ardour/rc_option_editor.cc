@@ -795,17 +795,7 @@ private:
 			if (!was_enabled) {
 				ControlProtocolManager::instance().activate (*cpi);
 			} else {
-				Gtk::Window* win = r[_model.editor];
-				if (win) {
-					win->hide ();
-				}
-
 				ControlProtocolManager::instance().deactivate (*cpi);
-					
-				if (win) {
-					delete win;
-					r[_model.editor] = 0;
-				}
 			}
 		}
 
@@ -817,8 +807,8 @@ private:
 		}
 	}
 
-        void edit_clicked (GdkEventButton* ev)
-        {
+	void edit_clicked (GdkEventButton* ev)
+	{
 		if (ev->type != GDK_2BUTTON_PRESS) {
 			return;
 		}
@@ -828,26 +818,32 @@ private:
 		TreeModel::Row row;
 
 		row = *(_view.get_selection()->get_selected());
-
-		Window* win = row[_model.editor];
-		if (win && !win->is_visible()) {
-			win->present ();
-		} else {
-			cpi = row[_model.protocol_info];
-
-			if (cpi && cpi->protocol && cpi->protocol->has_editor ()) {
-				Box* box = (Box*) cpi->protocol->get_gui ();
-				if (box) {
-					string title = row[_model.name];
-					ArdourWindow* win = new ArdourWindow (_parent, title);
-					win->set_title ("Control Protocol Options");
-					win->add (*box);
-					box->show ();
-					win->present ();
-					row[_model.editor] = win;
-				}
-			}
+		if (!row[_model.enabled]) {
+			return;
 		}
+		cpi = row[_model.protocol_info];
+		if (!cpi || !cpi->protocol || !cpi->protocol->has_editor ()) {
+			return;
+		}
+		Box* box = (Box*) cpi->protocol->get_gui ();
+		if (!box) {
+			return;
+		}
+		if (box->get_parent()) {
+			static_cast<ArdourWindow*>(box->get_parent())->present();
+			return;
+		}
+		string title = row[_model.name];
+		/* once created, the window is managed by the surface itself (as ->get_parent())
+		 * Surface's tear_down_gui() is called on session close, when de-activating
+		 * or re-initializing a surface.
+		 * tear_down_gui() hides an deletes the Window if it exists.
+		 */
+		ArdourWindow* win = new ArdourWindow (_parent, title);
+		win->set_title ("Control Protocol Options");
+		win->add (*box);
+		box->show ();
+		win->present ();
 	}
 
         class ControlSurfacesModelColumns : public TreeModelColumnRecord
@@ -860,14 +856,12 @@ private:
 			add (enabled);
 			add (feedback);
 			add (protocol_info);
-			add (editor);
 		}
 
 		TreeModelColumn<string> name;
 		TreeModelColumn<bool> enabled;
 		TreeModelColumn<bool> feedback;
 		TreeModelColumn<ControlProtocolInfo*> protocol_info;
-	        TreeModelColumn<Gtk::Window*> editor;
 	};
 
 	Glib::RefPtr<ListStore> _store;

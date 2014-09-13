@@ -68,13 +68,22 @@ GenericMidiControlProtocol::get_gui () const
 	if (!gui) {
 		const_cast<GenericMidiControlProtocol*>(this)->build_gui ();
 	}
+	static_cast<Gtk::VBox*>(gui)->show_all();
 	return gui;
 }
 
 void
 GenericMidiControlProtocol::tear_down_gui ()
 {
+	if (gui) {
+		Gtk::Widget *w = static_cast<Gtk::VBox*>(gui)->get_parent();
+		if (w) {
+			w->hide();
+			delete w;
+		}
+	}
 	delete (GMCPGUI*) gui;
+	gui = 0;
 }
 
 void

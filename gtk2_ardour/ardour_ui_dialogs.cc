@@ -25,8 +25,10 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/automation_watch.h"
+#include "ardour/control_protocol_manager.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
+#include "control_protocol/control_protocol.h"
 
 #include "actions.h"
 #include "add_route_dialog.h"
@@ -259,6 +261,16 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 		case 1:
 			_session->save_state ("");
 			break;
+		}
+	}
+
+	{
+		// tear down session specific CPI (owned by rc_config_editor which can remain)
+		ControlProtocolManager& m = ControlProtocolManager::instance ();
+		for (std::list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
+			if (*i && (*i)->protocol && (*i)->protocol->has_editor ()) {
+				(*i)->protocol->tear_down_gui ();
+			}
 		}
 	}
 

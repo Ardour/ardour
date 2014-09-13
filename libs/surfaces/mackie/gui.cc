@@ -51,14 +51,22 @@ MackieControlProtocol::get_gui () const
 	if (!_gui) {
 		const_cast<MackieControlProtocol*>(this)->build_gui ();
 	}
-
+	static_cast<Gtk::Notebook*>(_gui)->show_all();
 	return _gui;
 }
 
 void
 MackieControlProtocol::tear_down_gui ()
 {
+	if (_gui) {
+		Gtk::Widget *w = static_cast<Gtk::Widget*>(_gui)->get_parent();
+		if (w) {
+			w->hide();
+			delete w;
+		}
+	}
 	delete (MackieControlProtocolGUI*) _gui;
+	_gui = 0;
 }
 
 void
