@@ -435,14 +435,14 @@ else
     cp ../../instant.xml $Resources/instant.xml
     echo cp ../../instant.xml $Resources/instant.xml
 fi
-cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_default.conf $Resources
-cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_default.conf $Resources/ardour3_ui.conf
-cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_light.rc $Resources
-cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_light.rc $Resources
-cp $BUILD_ROOT/gtk2_ardour/ardour3_light_fonts.rc $Resources
-cp $BUILD_ROOT/gtk2_ardour/ardour3_light_styles.rc $Resources
-cp $BUILD_ROOT/gtk2_ardour/ardour3_dark_styles.rc $Resources
-cp $BUILD_ROOT/gtk2_ardour/ardour3_widgets.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Resources
+cp $BUILD_ROOT/gtk2_ardour/dark_fonts.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/dark_styles.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/light_fonts.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/light_styles.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/ui_dark.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/ui_light.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/widgets.rc $Resources
 
 cp -r ../../gtk2_ardour/icons $Resources
 cp -r ../../gtk2_ardour/pixmaps $Resources
