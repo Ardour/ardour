@@ -113,6 +113,7 @@ class EditorSummary;
 class GroupedButtons;
 class GUIObjectState;
 class Marker;
+class MarkerIODialog;
 class MidiRegionView;
 class MixerStrip;
 class MouseCursors;
@@ -1622,6 +1623,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Table               toolbar_selection_clock_table;
 	Gtk::Label               toolbar_selection_cursor_label;
 
+        WavesButton& marker_button;
+        MarkerIODialog* marker_io_dialog;
+        void marker_button_clicked (WavesButton*);
         WavesButton& add_marker_button;
         WavesButton& global_solo_button;
         void solo_blink (bool);
