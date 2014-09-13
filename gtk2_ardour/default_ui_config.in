@@ -40,11 +40,11 @@
     <Option name="frame handle" value="7c00ff96"/>
     <Option name="gain line" value="00bc20ff"/>
     <Option name="gain line inactive" value="9fbca4c5"/>
-    <Option name="ghost track base" value="44007c7f"/>
+    <Option name="ghost track base" value="603e7cc6"/>
     <Option name="ghost track midi outline" value="00000000"/>
-    <Option name="ghost track wave" value="02fd004c"/>
-    <Option name="ghost track wave fill" value="00000000"/>
-    <Option name="ghost track wave clip" value="ff000000"/>
+    <Option name="ghost track wave" value="202020d9"/>
+    <Option name="ghost track wave fill" value="20202060"/>
+    <Option name="ghost track wave clip" value="202020d9"/>
     <Option name="ghost track zero line" value="e500e566"/>
     <Option name="image track" value="ddddd8ff"/>
     <Option name="inactive crossfade" value="e8ed3d77"/>
