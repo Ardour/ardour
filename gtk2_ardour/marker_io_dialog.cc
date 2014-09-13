@@ -21,7 +21,6 @@
 
 #include "ardour_ui.h"
 #include "marker_io_dialog.h"
-#include "midi_port_dropdown.h"
 
 #include "i18n.h"
 
@@ -33,7 +32,7 @@ MarkerIODialog::MarkerIODialog ()
         populate_dropdown (input_dropdown, false);
         populate_dropdown (output_dropdown, true);
 
-        input_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun (*this, &MarkerIODialog::output_chosen));
+        input_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun (*this, &MarkerIODialog::input_chosen));
         output_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun (*this, &MarkerIODialog::output_chosen));
 }
 
@@ -109,7 +108,6 @@ MarkerIODialog::populate_dropdown (WavesDropdown& dropdown, bool for_playback)
                 if (state_iter->active) {
                         dropdown.add_menu_item (device_name, strdup (state_iter->name.c_str()));
                         if (!have_first) {
-                                std::cerr << "set text using full name: " << state_iter->name << " device " << device_name << " active " << state_iter->active << "\n";
                                 dropdown.set_text (device_name);
                                 have_first = true;
                         }
