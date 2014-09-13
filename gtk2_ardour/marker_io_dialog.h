@@ -42,4 +42,5 @@ class MarkerIODialog : public WavesDialog
         void input_chosen (WavesDropdown*,void*);
         void output_chosen (WavesDropdown*,void*);
         void on_realize ();
+        bool on_button_press_event (GdkEventButton*);
 };

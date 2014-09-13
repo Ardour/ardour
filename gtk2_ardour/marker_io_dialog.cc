@@ -29,6 +29,7 @@ MarkerIODialog::MarkerIODialog ()
         , input_dropdown (get_waves_dropdown ("input_dropdown"))
         , output_dropdown (get_waves_dropdown ("output_dropdown"))
 {
+        add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
         populate_dropdown (input_dropdown, false);
         populate_dropdown (output_dropdown, true);
 
@@ -42,6 +43,15 @@ MarkerIODialog::on_realize ()
         WavesDialog::on_realize ();
         /* remove all borders, buttons, titles, etc */
         get_window()->set_decorations (Gdk::WMDecoration (0));
+}
+
+bool
+MarkerIODialog::on_button_press_event (GdkEventButton*)
+{
+        /* button press anywhere except the dropdowns means "close dialog" */
+        hide ();
+
+        return true;
 }
 
 void
@@ -93,6 +103,10 @@ MarkerIODialog::populate_dropdown (WavesDropdown& dropdown, bool for_playback)
         }
 
         dropdown.clear_items ();
+
+        /* add a "none" entry */
+
+        dropdown.add_menu_item (_("Off"), 0);
         
         std::vector<EngineStateController::PortState>::const_iterator state_iter;
 
