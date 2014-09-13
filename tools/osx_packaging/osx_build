@@ -339,7 +339,7 @@ cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp*.dylib $Frameworks
 cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
 
 # Backends
-for backend in jack wavesaudio ; do
+for backend in jack wavesaudio dummy; do
     cp $BUILD_ROOT/libs/backends/$backend/lib*.dylib $Backends
 done
 
@@ -383,7 +383,7 @@ cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Frameworks
 cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $Frameworks/ || true
 
 # vfork wrapper
-mkdir $Frameworks/vfork
+mkdir -p $Frameworks/vfork
 cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $VFork
 
 
