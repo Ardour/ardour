@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Ardour>
   <UI>
+    <Option name="icon-set" value="default"/>
     <Option name="ui-rc-file" value="ui_dark.rc"/>
-    <Option name="flat-buttons" value="00000000"/>
-    <Option name="square-buttons" value="00000000"/>
-    <Option name="blink-rec-arm" value="00000000"/>
-    <Option name="led-meters" value="00000000"/>
+    <Option name="flat-buttons" value="0"/>
+    <Option name="blink-rec-arm" value="0"/>
     <Option name="waveform-gradient-depth" value="0"/>
-    <Option name="timeline-item-gradient-depth" value="00000.5"/>
-    <Option name="all-floating-windows-are-dialogs" value="00000000"/>
-    <Option name="color-regions-using-track-color" value="00000000"/>
-    <Option name="show-waveform-clipping" value="00000001"/>
+    <Option name="timeline-item-gradient-depth" value="0.5"/>
+    <Option name="all-floating-windows-are-dialogs" value="0"/>
+    <Option name="color-regions-using-track-color" value="0"/>
+    <Option name="show-waveform-clipping" value="1"/>
+    <Option name="lock-gui-after-seconds" value="0"/>
+    <Option name="draggable-playhead" value="1"/>
   </UI>
   <Canvas>
     <Option name="active crossfade" value="20b2af2e"/>
