@@ -322,6 +322,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\cursors.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\debug.cc"
 				>
 			</File>
@@ -505,6 +509,10 @@
 			</File>
 			<File
 				RelativePath="..\gtkmm2ext\click_box.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtkmm2ext\cursors.h"
 				>
 			</File>
 			<File
