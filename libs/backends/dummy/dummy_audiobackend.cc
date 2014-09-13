@@ -54,6 +54,7 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _port_change_flag (false)
 {
 	_instance_name = s_instance_name;
+	_device = _("Silence");
 	pthread_mutex_init (&_port_callback_mutex, 0);
 }
 
