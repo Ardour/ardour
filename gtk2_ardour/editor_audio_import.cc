@@ -746,7 +746,12 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 					region_name = (*x)->name();
 				}
 
-				track_names.push_back (PBD::basename_nosuffix (paths[n]));
+				if (SMFSource::safe_midi_file_extension (paths.front())) {
+					string track_name = string_compose ("%1-c%2", PBD::basename_nosuffix (fs->path()), (n + 1));
+					track_names.push_back (track_name);
+				} else {
+					track_names.push_back (PBD::basename_nosuffix (paths[n]));
+				}
 			}
 
 			PropertyList plist;
