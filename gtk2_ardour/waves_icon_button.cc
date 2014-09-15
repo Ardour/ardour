@@ -84,8 +84,6 @@ WavesIconButton::render (cairo_t* cr, cairo_rectangle_t*)
 		gdk_cairo_set_source_pixbuf (cr, pixbuf->gobj(), x, y);
 		cairo_fill (cr);
 	}
-
-    render_text (cr);
 }
 
 void

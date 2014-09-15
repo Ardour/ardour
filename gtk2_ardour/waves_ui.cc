@@ -84,7 +84,7 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 	} else if (widget_type == "DROPDOWN") {
 		child = manage (new WavesDropdown (text));
 	} else if (widget_type == "DROPDOWNITEM") {
-		child = manage (new WavesDropdown (text));
+	} else if (widget_type == "DROPDOWNMENU") {
 	} else if (widget_type == "ICON") {
 		std::string image_path;
 		Searchpath spath(ARDOUR::ardour_data_search_path ());
@@ -444,18 +444,26 @@ WavesUI::add_dropdown_items (WavesDropdown &dropdown, const XMLNodeList& definit
         }
         std::string node_name = (**i).name ();
         std::transform (node_name.begin (), node_name.end (), node_name.begin (), ::toupper);
-        if (node_name != "DROPDOWNITEM") {
-            continue;
-        }
-        std::string title = xml_property (**i, "title", styles, "");
-        if (title.empty ()) {
-            continue;
-        }
-        int itemdata = xml_property (**i, "data", styles, 0);
-        Gtk::MenuItem& menuitem = dropdown.add_menu_item (title, (void*)itemdata);
-        if (menuitem.get_child ()) {
-            set_attributes (*menuitem.get_child (), **i, styles);
-        }
+		
+        if (node_name == "DROPDOWNMENU") {
+			set_attributes (dropdown.get_menu (), **i, styles);
+			const XMLNodeList& menuitems = (**i).children ();
+		    for (XMLNodeList::const_iterator ii = menuitems.begin (); ii != menuitems.end (); ++ii) {
+				std::string node_name = (**ii).name ();
+				std::transform (node_name.begin (), node_name.end (), node_name.begin (), ::toupper);
+				if (node_name == "DROPDOWNITEM") {
+					std::string title = xml_property (**ii, "title", styles, "");
+					if (title.empty ()) {
+						continue;
+					}
+					int itemdata = xml_property (**ii, "data", styles, 0);
+					Gtk::MenuItem& menuitem = dropdown.add_menu_item (title, (void*)itemdata);
+					if (menuitem.get_child ()) {
+						set_attributes (*menuitem.get_child (), **ii, styles);
+					}
+				}
+			}
+		}
     }
 }
 
@@ -467,11 +475,10 @@ WavesUI::create_ui (const XMLNodeList& definition, const XMLNodeMap& styles, Gtk
     
     if (dropdown) {
         add_dropdown_items (*dropdown, definition, styles);
-    } else {
-        for (XMLNodeList::const_iterator i = definition.begin (); i != definition.end (); ++i) {
-            if (!(**i).is_content()) {
-                WavesUI::add_widget (root, **i, styles);
-            }
+    }
+    for (XMLNodeList::const_iterator i = definition.begin (); i != definition.end (); ++i) {
+        if (!(**i).is_content()) {
+            WavesUI::add_widget (root, **i, styles);
         }
     }
 }
@@ -608,6 +615,27 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		widget.modify_fg(Gtk::STATE_PRELIGHT, Gdk::Color(property));
 	}
 
+	property = xml_property (definition, "state", styles, "");
+	if (!property.empty ()) {
+		Gtk::StateType state = Gtk::STATE_NORMAL; 
+		if (property == "normal") {
+			state = Gtk::STATE_NORMAL;
+		} else if (property == "active") {
+			state = Gtk::STATE_ACTIVE;
+		} else if (property == "prelight") {
+			state = Gtk::STATE_PRELIGHT;
+		} else if (property == "selected") {
+			state = Gtk::STATE_SELECTED;
+		} else if (property == "insensitive") {
+			state = Gtk::STATE_INSENSITIVE;
+		} else if (property == "disabled") {
+			state = Gtk::STATE_INSENSITIVE;
+		} else {
+			dbg_msg ("Invalid state for Gtk::Widget !");
+		}
+		widget.set_state (state);
+	}
+
 #if defined (PLATFORM_WINDOWS)
 	property = xml_property (definition, "winfont", styles, "");
 #elif defined (__APPLE__)
@@ -740,11 +768,6 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		if (!property.empty ()) {
 			iconbutton->set_implicit_active_image (get_icon (property.c_str ()));
 		}
-	}
-
-	WavesDropdown* dropdown = dynamic_cast<WavesDropdown*> (&widget);
-	if (dropdown) {
-		set_attributes (dropdown->get_menu (), definition, styles);
 	}
 
 	Gtk::Table* table = dynamic_cast<Gtk::Table*> (&widget);

@@ -97,6 +97,10 @@ void
 WavesButton::set_text (const std::string& str)
 {
 	_text = str;
+    Gtk::Label* child = _find_label (this);
+	if (child) {
+		child->set_text (str);
+	}
 	_layout->set_text (str);
 	queue_resize ();
 }
@@ -169,7 +173,10 @@ void
 WavesButton::render_text (cairo_t* cr)
 {
 	// text, if any
-	if (!_text.empty()) {
+	
+	if ((!_find_label (this)) &&
+		(!_text.empty ())) {
+        
         Glib::RefPtr<Gtk::Style> style = get_style();
 
 		cairo_save (cr);
@@ -475,6 +482,16 @@ WavesButton::on_leave_notify_event (GdkEventCrossing* ev)
 }
 
 void
+WavesButton::on_realize ()
+{
+    Gtk::EventBox::on_realize ();
+    Gtk::Label* child = _find_label (this);
+    if (child) {
+		child->set_text (get_text());
+	}
+}
+
+void
 WavesButton::action_sensitivity_changed ()
 {
 	if (_action->property_sensitive ()) {
@@ -515,4 +532,23 @@ WavesButton::set_rounded_corner_mask (int mask)
 {
 	_corner_mask = mask;
 	queue_draw ();
+}
+
+Gtk::Label*
+WavesButton::_find_label (Gtk::Container *container)
+{
+	Gtk::Label* label = NULL;
+	if (container) {
+		std::list<Gtk::Widget*> children = container->get_children ();
+		for (std::list<Gtk::Widget*>::iterator i = children.begin(); i != children.end(); ++i) {
+			label = dynamic_cast<Gtk::Label*>(*i);
+			if (!label) {
+				label = _find_label (dynamic_cast<Gtk::Container*>(*i));
+			}
+			if (label) {
+				break;
+			}
+		}
+	}
+	return label;
 }

@@ -2,46 +2,68 @@
 <Dialog title="Tracks Preferences" resizeable="false">
   <style name="generic_control"
          winfont ="Arial 10"
-         macfont ="Helvetica 10"/>
+         macfont ="Helvetica 10"
+         fgnormal="#BFBFBF"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"
+         fghover="#CCCCCC"
+         bghover="#898989"
+         fgdisabled ="#959595"/>
   <style name="generic_button"
-    style="generic_control"
-    fgnormal="#BFBFBF"
-    bgnormal="#6C6C6C"
-    fgactive="#BFBFBF"
-    bgactive="#454545"
-    fghover="#CCCCCC"
-    bghover="#898989"
-    fgdisabled ="#959595"
-    bordercolor="#7E7E7E"
-    borderwidth="1 1 0 0"/>
+         style="generic_control"
+         bordercolor="#7E7E7E"
+         borderwidth="1 1 0 0"/>
+  <style name="generic_dropdown"
+         style="generic_control"
+         bgdisabled="#373737"/>
+  <style name="generic_dropdown_menu"
+         bgnormal="#454545"/>
 
-  <Layout bgnormal="#1F1F1F" x="0" y="0" width="619" height="623">
-    <VBox x="2" y="1">
-      <EventBox bgnormal="#A0A0A0" width="107" height="1"/>
+  <Layout bgnormal="#1F1F1F"
+          x="0"
+          y="0"
+          width="619"
+          height="623">
+    <VBox x="2"
+          y="1">
+      <EventBox bgnormal="#A0A0A0"
+                width="107"
+                height="1"/>
       <Iconbutton id="audio_settings_tab_button"
                   width="107"
                   height="65"
                   normalicon="preferences_audio_settings_tab_button"
                   activeicon="preferences_audio_settings_tab_button_active"
                   prelighticon="preferences_audio_settings_tab_button_prelight"/>
-      <EventBox bgnormal="#A0A0A0" width="107" height="1"/>
+      <EventBox bgnormal="#A0A0A0"
+                width="107"
+                height="1"/>
       <Iconbutton id="midi_settings_tab_button"
                   width="107"
                   height="65"
                   normalicon="preferences_midi_settings_tab_button"
                   activeicon="preferences_midi_settings_tab_button_active"
                   prelighticon="preferences_midi_settings_tab_button_prelight"/>
-      <EventBox bgnormal="#A0A0A0" width="107" height="1"/>
+      <EventBox bgnormal="#A0A0A0"
+                width="107"
+                height="1"/>
       <Iconbutton id="session_settings_tab_button"
                   width="107"
                   height="65"
                   normalicon="preferences_session_settings_tab_button"
                   activeicon="preferences_session_settings_tab_button_active"
                   prelighticon="preferences_session_settings_tab_button_prelight"/>
-      <EventBox bgnormal="#A0A0A0" width="107" height="1"/>
+      <EventBox bgnormal="#A0A0A0"
+                width="107"
+                height="1"/>
     </VBox>
 
-    <Layout bgnormal="#565656" x="113" y="559" width="505" height="63">
+    <Layout bgnormal="#565656"
+            x="113"
+            y="559"
+            width="505"
+            height="63">
       <Iconbutton id="ok_button"
                   style="generic_button"
                   x="275"
@@ -70,8 +92,18 @@
                   activeicon="preferences_apply_button_active"
                   prelighticon="preferences_apply_button_prelight"/>
     </Layout>
-    <Layout id="midi_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557" visible="true">
-      <Layout bgnormal="#000000" x="21" y="20" width="291" height="19">
+    <Layout id="midi_settings_layout"
+            bgnormal="#565656"
+            x="113"
+            y="1"
+            width="505"
+            height="557"
+            visible="true">
+      <Layout bgnormal="#000000"
+              x="21"
+              y="20"
+              width="291"
+              height="19">
         <Label style="generic_control"
                text="MIDI PORTS"
                fgnormal="#ffffff"
@@ -123,7 +155,12 @@
         </HBox>
       </ScrolledWindow>
     </Layout>
-    <Layout id="audio_settings_layout" bgnormal="#000000" x="113" y="1" width="505" height="558" visible="true">
+    <Layout id="audio_settings_layout"
+            bgnormal="#000000"
+            x="113" y="1"
+            width="505"
+            height="558"
+            visible="true">
       <Layout bgnormal="#565656"
               x="0"
               y="0"
@@ -135,7 +172,7 @@
                y="15"
                width="88"
                horzalignment="end"/>
-        <Dropdown style="generic_button"
+        <Dropdown style="generic_dropdown"
                   id="engine_dropdown"
                   x="96"
                   y="12"
@@ -144,7 +181,15 @@
                   normalicon="preference_device_dropdown"
                   activeicon="preference_device_dropdown_active"
                   prelighticon="preference_device_dropdown_prelight"
-                  inactiveicon="preference_device_dropdown_inactive"/>
+                  inactiveicon="preference_device_dropdown_inactive">
+          <HBox>
+            <VBox width="10"/>
+            <Label style="generic_control"
+                   horzalignment="start"
+                   width="93"/>
+          </HBox>
+          <DROPDOWNMENU style="generic_dropdown_menu"/>
+        </Dropdown>
 
         <Label style="generic_control"
                text="INTERFACE"
@@ -152,7 +197,7 @@
                y="43"
                width="88"
                horzalignment="end"/>
-        <Dropdown style="generic_button"
+        <Dropdown style="generic_dropdown"
                   id="device_dropdown"
                   x="96"
                   y="40"
@@ -161,14 +206,22 @@
                   normalicon="preference_device_dropdown"
                   activeicon="preference_device_dropdown_active"
                   prelighticon="preference_device_dropdown_prelight"
-                  inactiveicon="preference_device_dropdown_inactive"/>
+                  inactiveicon="preference_device_dropdown_inactive">
+          <HBox>
+            <VBox width="10"/>
+            <Label style="generic_control"
+                   horzalignment="start"
+                   width="93"/>
+          </HBox>
+          <DROPDOWNMENU style="generic_dropdown_menu"/>
+        </Dropdown>
         <Label style="generic_control"
                text="SAMPLE RATE"
                x="223"
                y="15"
                width="80"
                horzalignment="end"/>
-        <Dropdown style="generic_button"
+        <Dropdown style="generic_dropdown"
                   id="sample_rate_dropdown"
                   x="311"
                   y="12"
@@ -177,14 +230,22 @@
                   normalicon="preference_rate_buffer_dropdown"
                   activeicon="preference_rate_buffer_dropdown_active"
                   prelighticon="preference_rate_buffer_dropdown_prelight"
-                  inactiveicon="preference_rate_buffer_dropdown_inactive"/>
+                  inactiveicon="preference_rate_buffer_dropdown_inactive">
+          <HBox>
+            <VBox width="10"/>
+            <Label style="generic_control"
+                   horzalignment="start"
+                   width="57"/>
+          </HBox>
+          <DROPDOWNMENU style="generic_dropdown_menu"/>
+        </Dropdown>
         <Label style="generic_control"
                text="BUFFER SIZE"
                x="223"
                y="43"
                width="80"
                horzalignment="end"/>
-        <Dropdown style="generic_button"
+        <Dropdown style="generic_dropdown"
                   id="buffer_size_dropdown"
                   x="311"
                   y="40"
@@ -193,7 +254,15 @@
                   normalicon="preference_rate_buffer_dropdown"
                   activeicon="preference_rate_buffer_dropdown_active"
                   prelighticon="preference_rate_buffer_dropdown_prelight"
-                  inactiveicon="preference_rate_buffer_dropdown_inactive"/>
+                  inactiveicon="preference_rate_buffer_dropdown_inactive">
+          <HBox>
+            <VBox width="10"/>
+            <Label style="generic_control"
+                   horzalignment="start"
+                   width="57"/>
+          </HBox>
+          <DROPDOWNMENU style="generic_dropdown_menu"/>
+        </Dropdown>
 
         <Iconbutton id="control_panel_button"
                     style="generic_button"
@@ -362,7 +431,7 @@
     
     -->
       <Label style="generic_control" text="FILE TYPE" x="24" y="40"/>
-      <Dropdown style="generic_button"
+      <Dropdown style="generic_dropdown"
                 id="file_type_dropdown"
                 x="215"
                 y="40"
@@ -371,13 +440,25 @@
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 prelighticon="preference_session_settings_dropdown_prelight">
-        <dropdownitem title="Caf"/>
-        <dropdownitem title="BWav"/>
-        <dropdownitem title="Aiff"/>
-        <dropdownitem title="Wave64"/>
+        <HBox>
+          <VBox width="10"/>
+          <Label style="generic_control"
+                 horzalignment="start"
+                 width="117"/>
+        </HBox>
+        <DROPDOWNMENU style="generic_dropdown_menu">
+          <Dropdownitem title="Caf"
+                        horzalignment="start"/>
+          <Dropdownitem title="BWav"
+                        horzalignment="start"/>
+          <Dropdownitem title="Aiff"
+                        horzalignment="start"/>
+          <Dropdownitem title="Wave64"
+                        horzalignment="start"/>
+        </DROPDOWNMENU>          
       </Dropdown>
       <Label style="generic_control" text="BIT DEPTH" x="24" y="70"/>
-      <Dropdown style="generic_button"
+      <Dropdown style="generic_dropdown"
                 id="bit_depth_dropdown"
                 x="215"
                 y="70"
@@ -386,12 +467,23 @@
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 prelighticon="preference_session_settings_dropdown_prelight">
-        <dropdownitem title="16 bit"/>
-        <dropdownitem title="24 bit"/>
-        <dropdownitem title="32 bit floating point"/>
+        <HBox>
+          <VBox width="10"/>
+          <Label style="generic_control"
+                 horzalignment="start"
+                 width="117"/>
+        </HBox>
+        <DROPDOWNMENU style="generic_dropdown_menu">
+          <Dropdownitem title="16 bit"
+                        horzalignment="start"/>
+          <Dropdownitem title="24 bit"
+                        horzalignment="start"/>
+          <Dropdownitem title="32 bit floating point"
+                        horzalignment="start"/>
+        </DROPDOWNMENU>
       </Dropdown>
       <Label style="generic_control" text="SESSION FRAME RATE" x="24" y="100"/>
-      <Dropdown style="generic_button"
+      <Dropdown style="generic_dropdown"
                 id="frame_rate_dropdown"
                 x="215"
                 y="100"
@@ -400,13 +492,29 @@
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 prelighticon="preference_session_settings_dropdown_prelight">
-        <dropdownitem title="24 fps"/>
-        <dropdownitem title="25 fps"/>
-        <dropdownitem title="30 fps"/>
-        <dropdownitem title="23.976 fps"/>
-        <dropdownitem title="29.97 fps"/>
+        <HBox>
+          <VBox width="10"/>
+          <Label style="generic_control"
+                 horzalignment="start"
+                 width="117"/>
+        </HBox>
+        <DROPDOWNMENU style="generic_dropdown_menu">
+          <Dropdownitem title="24 fps"
+                        horzalignment="start"/>
+          <Dropdownitem title="25 fps"
+                        horzalignment="start"/>
+          <Dropdownitem title="30 fps"
+                        horzalignment="start"/>
+          <Dropdownitem title="23.976 fps"
+                        horzalignment="start"/>
+          <Dropdownitem title="29.97 fps"
+                        horzalignment="start"/>
+        </DROPDOWNMENU>
       </Dropdown>
-      <Label style="generic_control" text="AUTO LOCK TIMER" x="24" y="175"/>
+      <Label style="generic_control"
+             text="AUTO LOCK TIMER"
+             x="24"
+             y="175"/>
       <Dropdown style="generic_button"
                 id="auto_lock_timer_dropdown"
                 x="215"
@@ -416,12 +524,26 @@
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 prelighticon="preference_session_settings_dropdown_prelight">
-        <dropdownitem title="0 Min"/>
-        <dropdownitem title="1 Min"/>
-        <dropdownitem title="3 Min"/>
-        <dropdownitem title="5 Min"/>
-        <dropdownitem title="10 Min"/>
-        <dropdownitem title="15 Min"/>
+        <HBox>
+          <VBox width="10"/>
+          <Label style="generic_control"
+                 horzalignment="start"
+                 width="117"/>
+        </HBox>
+        <DROPDOWNMENU style="generic_dropdown_menu">
+          <Dropdownitem title="0 Min"
+                        horzalignment="start"/>
+          <Dropdownitem title="1 Min"
+                        horzalignment="start"/>
+          <Dropdownitem title="3 Min"
+                        horzalignment="start"/>
+          <Dropdownitem title="5 Min"
+                        horzalignment="start"/>
+          <Dropdownitem title="10 Min"
+                        horzalignment="start"/>
+          <Dropdownitem title="15 Min"
+                        horzalignment="start"/>
+          </DROPDOWNMENU>
       </Dropdown>
       <Label style="generic_control" text="AUTO SAVE TIMER" x="24" y="205"/>
       <Dropdown style="generic_button"
@@ -433,14 +555,31 @@
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 prelighticon="preference_session_settings_dropdown_prelight">
-        <dropdownitem title="0 Min"/>
-        <dropdownitem title="1 Min"/>
-        <dropdownitem title="3 Min"/>
-        <dropdownitem title="5 Min"/>
-        <dropdownitem title="10 Min"/>
-        <dropdownitem title="15 Min"/>
+        <HBox>
+          <VBox width="10"/>
+          <Label style="generic_control"
+                 horzalignment="start"
+                 width="117"/>
+        </HBox>
+        <DROPDOWNMENU style="generic_dropdown_menu">
+          <Dropdownitem title="0 Min"
+                        horzalignment="start"/>
+          <Dropdownitem title="1 Min"
+                        horzalignment="start"/>
+          <Dropdownitem title="3 Min"
+                        horzalignment="start"/>
+          <Dropdownitem title="5 Min"
+                        horzalignment="start"/>
+          <Dropdownitem title="10 Min"
+                        horzalignment="start"/>
+          <Dropdownitem title="15 Min"
+                        horzalignment="start"/>
+          </DROPDOWNMENU>
       </Dropdown>
-      <Label style="generic_control" text="PRE RECORD BUFFER" x="24" y="235"/>
+      <Label style="generic_control"
+             text="PRE RECORD BUFFER"
+             x="24"
+             y="235"/>
       <Dropdown style="generic_button"
                 id="pre_record_buffer_dropdown"
                 x="215"
@@ -450,12 +589,25 @@
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 prelighticon="preference_session_settings_dropdown_prelight">
-        <dropdownitem title="0 Min"/>
-        <dropdownitem title="1 Min"/>
-        <dropdownitem title="2 Min"/>
+        <HBox>
+          <VBox width="10"/>
+          <Label style="generic_control"
+                 horzalignment="start"
+                 width="117"/>
+        </HBox>
+        <DROPDOWNMENU style="generic_dropdown_menu">
+          <Dropdownitem title="0 Min"
+                        horzalignment="start"/>
+          <Dropdownitem title="1 Min"
+                        horzalignment="start"/>
+          <Dropdownitem title="2 Min"
+                        horzalignment="start"/>
+        </DROPDOWNMENU>
       </Dropdown>
-
-      <Label style="generic_control" text="DEFAULT FOLDER FOR NEW SESSION" x = "24" y = "290"/>
+      <Label style="generic_control"
+             text="DEFAULT FOLDER FOR NEW SESSION"
+             x = "24"
+             y = "290"/>
       <Iconbutton style = "generic_button"
                   id = "browse_default_folder"
                   x = "24"
@@ -470,6 +622,8 @@
              text=""
              x = "105"
              y = "315"/>
+      <dropdownitem title="MONO"/>
+      <dropdownitem title="STEREO"/>
     </Layout>
   </Layout>
 </Dialog>

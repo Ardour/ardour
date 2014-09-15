@@ -71,14 +71,15 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 		RGBA() : red (0), green (0), blue (0), alpha (0) {}
 	};
 
-        void render (cairo_t *, cairo_rectangle_t*);
-        void render_text (cairo_t *);
+    void render (cairo_t *, cairo_rectangle_t*);
+    void render_text (cairo_t *);
 
 	void on_size_request (Gtk::Requisition* req);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 	void on_name_changed ();
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
+    void on_realize ();
 
 	void controllable_changed ();
 	PBD::ScopedConnection watch_connection;
@@ -111,6 +112,7 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 private:
 	static void __prop_style_watcher(WavesButton *);
 	void _prop_style_watcher();
+	Gtk::Label* _find_label (Gtk::Container *child);
 
 	BindingProxy                binding_proxy;
 

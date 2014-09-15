@@ -22,7 +22,10 @@
                 maxvalue="10"
                 step="0.2"
                 pagesize="2.0"/>
+    <HBox>
     <HBox id="menu_bar_base"/>
+      <Eventbox bgnormal="#ff0000" width="10"/>
+    </HBox>
     <EventBox bgnormal="#000000">
       <VBox borderwidth="2" spacing ="1">
         <EventBox bgnormal="#282828">
