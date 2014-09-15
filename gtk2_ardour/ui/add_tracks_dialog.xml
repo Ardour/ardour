@@ -34,13 +34,21 @@
               x="5"
               y="40"
               width="130"
-              height="25"
+              height="20"
               normalicon="added_track_format_dropdown"
               activeicon="added_track_format_dropdown_active"
               prelighticon="added_track_format_dropdown_prelight"
               inactiveicon="added_track_format_dropdown_inactive">
-      <dropdownitem title="MONO"/>
-      <dropdownitem title="STEREO"/>
+      <HBox>
+        <VBox width="10"/>
+        <Label style="generic_control"
+               horzalignment="start"
+               width="93"/>
+      </HBox>
+      <DropdownMenu bgnormal="#454545">
+        <DropdownItem title="MONO"/>
+        <DropdownItem title="STEREO"/>
+      </DropdownMenu>        
     </Dropdown>
 
     <Button style="generic_button"
