@@ -1907,8 +1907,19 @@ Session::load_sources (const XMLNode& node)
 
                         case -1:
                         default:
-                                warning << _("A sound file is missing. It will be replaced by silence.") << endmsg;
-                                source = SourceFactory::createSilent (*this, **niter, max_framecnt, _current_frame_rate);
+				switch (err.type) {
+
+				case DataType::AUDIO:
+					warning << _("A sound file is missing. It will be replaced by silence.") << endmsg;
+					source = SourceFactory::createSilent (*this, **niter, max_framecnt, _current_frame_rate);
+					break;
+
+				case DataType::MIDI:
+					warning << string_compose (_("A MIDI file is missing. %1 cannot currently recover from missing MIDI files"),
+								     PROGRAM_NAME) << endmsg;
+					return -1;
+					break;
+				}
                                 break;
                         }
 		}
