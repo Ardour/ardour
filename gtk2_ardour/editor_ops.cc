@@ -2370,8 +2370,8 @@ Editor::loop_location (Location& location)
 		tll->set (location.start(), location.end());
 
 		// enable looping, reposition and start rolling
-		_session->request_play_loop (true);
 		_session->request_locate (tll->start(), true);
+		_session->request_play_loop (true);
 	}
 }
 
@@ -5747,8 +5747,8 @@ Editor::set_loop_from_edit_range (bool play)
 	set_loop_range (start, end,  _("set loop range from edit range"));
 
 	if (play) {
-		_session->request_play_loop (true);
 		_session->request_locate (start, true);
+		_session->request_play_loop (true);
 	}
 }
 
@@ -5776,8 +5776,8 @@ Editor::set_loop_from_region (bool play)
 	set_loop_range (start, end, _("set loop range from region"));
 
 	if (play) {
-		_session->request_play_loop (true);
 		_session->request_locate (start, true);
+		_session->request_play_loop (true);
 	}
 }
 

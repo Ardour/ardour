@@ -4532,9 +4532,9 @@ ARDOUR_UI::transport_numpad_event (int num)
 			case 1:  transport_rewind(1); 				break;
 			case 2:  transport_forward(1); 				break;
 			case 3:  transport_record(true); 			break;
-			case 4:  if (_session) _session->request_play_loop(true);					break;
-			case 5:  if (_session) _session->request_play_loop(true); transport_record(false); 	break;
-			case 6:  toggle_punch(); 						break;
+			case 4:  toggle_session_auto_loop();		break;
+			case 5:  transport_record(false); toggle_session_auto_loop(); 	break;
+			case 6:  toggle_punch(); 					break;
 			case 7:  toggle_click(); 				break;
 			case 8:  toggle_auto_return();			break;
 			case 9:  toggle_follow_edits();		break;

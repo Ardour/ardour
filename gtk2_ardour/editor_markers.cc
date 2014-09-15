@@ -1240,8 +1240,8 @@ Editor::marker_menu_loop_range ()
 			l2->set (l->start(), l->end());
 
 			// enable looping, reposition and start rolling
-			_session->request_play_loop(true);
 			_session->request_locate (l2->start(), true);
+			_session->request_play_loop(true);
 		}
 	}
 }
