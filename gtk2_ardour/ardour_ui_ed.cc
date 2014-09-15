@@ -791,7 +791,7 @@ ARDOUR_UI::build_menu_bar ()
 	use_menubar_as_top_menubar ();
 #endif
 	
-	menu_hbox.pack_end (*ev, false, false, 6);
+//	menu_hbox.pack_end (*ev, false, false, 6);
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
