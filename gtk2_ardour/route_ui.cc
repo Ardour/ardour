@@ -197,6 +197,9 @@ namespace {
 void
 RouteUI::set_route (boost::shared_ptr<Route> rp)
 {
+    if ( !_session )
+        return;
+    
 	reset ();
 
 	_route = rp;
@@ -236,7 +239,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::setup_invert_buttons, this), gui_context ());
 	_route->gui_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_gui_changed, this, _1), gui_context ());
 
-	if (_session->writable() && is_track()) {
+	if (_session && _session->writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
 		t->RecordEnableChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
@@ -937,7 +940,8 @@ RouteUI::build_sends_menu ()
 void
 RouteUI::create_sends (Placement p, bool include_buses)
 {
-	_session->globally_add_internal_sends (_route, p, include_buses);
+    if ( _session )
+        _session->globally_add_internal_sends (_route, p, include_buses);
 }
 
 void
@@ -957,26 +961,30 @@ RouteUI::create_selected_sends (Placement p, bool include_buses)
 			}
 		}
 	}
-
-	_session->add_internal_sends (_route, p, rlist);
+    
+    if ( _session )
+        _session->add_internal_sends (_route, p, rlist);
 }
 
 void
 RouteUI::set_sends_gain_from_track ()
 {
-	_session->globally_set_send_gains_from_track (_route);
+    if ( _session )
+        _session->globally_set_send_gains_from_track (_route);
 }
 
 void
 RouteUI::set_sends_gain_to_zero ()
 {
-	_session->globally_set_send_gains_to_zero (_route);
+    if ( _session )
+        _session->globally_set_send_gains_to_zero (_route);
 }
 
 void
 RouteUI::set_sends_gain_to_unity ()
 {
-	_session->globally_set_send_gains_to_unity (_route);
+	if ( _session )
+        _session->globally_set_send_gains_to_unity (_route);
 }
 
 bool
@@ -1681,6 +1689,9 @@ RouteUI::map_frozen ()
 void
 RouteUI::adjust_latency ()
 {
+    if ( !_session )
+        return;
+    
 	LatencyDialog dialog (_route->name() + _(" latency"), *(_route->output()), _session->frame_rate(), AudioEngine::instance()->samples_per_cycle());
 }
 
@@ -1724,7 +1735,7 @@ RouteUI::save_as_template ()
 void
 RouteUI::check_rec_enable_sensitivity ()
 {
-	if (_session->transport_rolling() && rec_enable_button.active_state() && Config->get_disable_disarm_during_roll()) {
+	if (_session && _session->transport_rolling() && rec_enable_button.active_state() && Config->get_disable_disarm_during_roll()) {
 		rec_enable_button.set_sensitive (false);
 	} else {
 		rec_enable_button.set_sensitive (true);
@@ -1774,6 +1785,9 @@ RouteUI::page_gain_down ()
 void
 RouteUI::open_remote_control_id_dialog ()
 {
+    if ( !_session )
+        return;
+    
 	ArdourDialog dialog (_("Remote Control ID"));
 	SpinButton* spin = 0;
 

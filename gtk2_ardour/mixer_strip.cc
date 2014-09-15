@@ -320,11 +320,15 @@ MixerStrip::init ()
 	/* note that this handler connects *before* the default handler */
 	_name_button_home.signal_button_press_event().connect (sigc::mem_fun (*this, &MixerStrip::controls_ebox_button_press));
     _name_button_home.signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::controls_ebox_button_release));
-    _name_entry.set_max_length(13);       
+    _name_entry.set_max_length(13);
+    
+    deletion_in_progress = false;
 }
 
 MixerStrip::~MixerStrip ()
 {
+    deletion_in_progress = true;
+    
 	CatchDeletion (this);
 
 	delete input_selector;
@@ -504,6 +508,12 @@ MixerStrip::name_entry_changed ()
 void
 MixerStrip::set_route (boost::shared_ptr<Route> rt)
 {
+    if ( deletion_in_progress )
+        return;
+    
+    if ( !_session )
+        return;
+    
 	RouteUI::set_route (rt);
 
 	/* ProcessorBox needs access to _route so that it can read

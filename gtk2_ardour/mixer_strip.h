@@ -323,6 +323,8 @@ class MixerStrip : public RouteUI
 	void color_button_clicked (WavesButton *button);
 	void color_palette_button_clicked (WavesButton *button);
 	void info_panel_button_clicked (WavesButton *button);
+    
+    bool deletion_in_progress;
 };
 
 #endif /* __ardour_mixer_strip__ */
