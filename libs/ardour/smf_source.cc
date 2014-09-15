@@ -99,16 +99,15 @@ SMFSource::SMFSource (Session& s, const string& path)
 {
 	/* note that origin remains empty */
 
-	if (init (_path, false)) {
+	if (init (_path, true)) {
 		throw failed_constructor ();
 	}
  
         assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
 	existence_check ();
 
-	/* file is not opened until write */
-
 	if (_flags & Writable) {
+		/* file is not opened until write */
 		return;
 	}
 
@@ -138,8 +137,30 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 	   require it to exist if it was marked Empty.
 	*/
 
-	if (init (_path, !(_flags & Source::Empty))) {
-		throw failed_constructor ();
+	try {
+
+		if (init (_path, true)) {
+			throw failed_constructor ();
+		}
+
+	} catch (MissingSource& err) {
+
+		if (_flags & Source::Empty) {
+			/* we don't care that the file was not found, because
+			   it was empty. But FileSource::init() will have
+			   failed to set our _path correctly, so we have to do
+			   this ourselves. Use the first entry in the search
+			   path for MIDI files, which is assumed to be the
+			   correct "main" location.
+			*/
+			std::vector<string> sdirs = s.source_search_path (DataType::MIDI);
+			_path = Glib::build_filename (sdirs.front(), _path);
+			/* This might be important, too */
+			_file_is_new = true;
+		} else {
+			/* pass it on */
+			throw;
+		}
 	}
 
 	if (!(_flags & Source::Empty)) {
@@ -704,6 +725,10 @@ SMFSource::set_path (const string& p)
 void
 SMFSource::ensure_disk_file ()
 {
+	if (!writable()) {
+		return;
+	}
+
 	if (_model) {
 		/* We have a model, so write it to disk; see MidiSource::session_saved
 		   for an explanation of what we are doing here.
