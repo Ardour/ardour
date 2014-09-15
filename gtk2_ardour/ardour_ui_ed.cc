@@ -760,7 +760,6 @@ void
 ARDOUR_UI::build_menu_bar ()
 {
 	menu_bar = dynamic_cast<MenuBar*> (ActionManager::get_widget (X_("/Main")));
-	menu_bar->set_name ("MainMenuBar");
 
 	/*
 	 * This is needed because this property does not get installed
@@ -772,7 +771,12 @@ ARDOUR_UI::build_menu_bar ()
 	// so use this instead ...
 	gtk_settings_set_long_property (gtk_settings_get_default(), "gtk-can-change-accels", 1, "Ardour:designers");
 
+#ifndef TOP_MENUBAR
+	menu_bar->set_name ("MainMenuBar");
 	editor->get_h_box ("menu_bar_home").pack_start (*menu_bar, false, false);
+#else
+	use_menubar_as_top_menubar ();
+#endif
 	return;
 }
 
