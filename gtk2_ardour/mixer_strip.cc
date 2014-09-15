@@ -261,6 +261,8 @@ MixerStrip::init ()
 	_session->engine().Running.connect (*this, invalidator (*this), boost::bind (&MixerStrip::engine_running, this), gui_context());
     _session->RecordStateChanged.connect (*this, invalidator (*this), boost::bind (&MixerStrip::on_record_state_changed, this), gui_context());
 
+    _session->session_routes_reconnected.connect(_input_output_channels_update, invalidator (*this), boost::bind (&MixerStrip::update_inspector_info_panel, this), gui_context());
+    
 	/* ditto for this button and busses */
 
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::name_button_button_press), false);
@@ -318,11 +320,7 @@ MixerStrip::init ()
 	/* note that this handler connects *before* the default handler */
 	_name_button_home.signal_button_press_event().connect (sigc::mem_fun (*this, &MixerStrip::controls_ebox_button_press));
     _name_button_home.signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::controls_ebox_button_release));
-    _name_entry.set_max_length(13);
-    
-    Session* session = ARDOUR_UI::instance()->the_session();
-    if( session )
-        session->session_routes_reconnected.connect(_input_output_channels_update, invalidator (*this), boost::bind (&MixerStrip::update_inspector_info_panel, this), gui_context());
+    _name_entry.set_max_length(13);       
 }
 
 MixerStrip::~MixerStrip ()
@@ -423,7 +421,7 @@ MixerStrip::begin_name_edit ()
     if( _route->is_master () )
         return;
     
-    if ( (ARDOUR_UI::instance()->the_session()->record_status()==Session::Recording) && (_route->record_enabled()) )
+    if ( (_session->record_status()==Session::Recording) && (_route->record_enabled()) )
         return;
     
     boost::shared_ptr<AudioTrack> audio_track = boost::dynamic_pointer_cast<AudioTrack>(_route);
@@ -450,10 +448,10 @@ MixerStrip::route_rec_enable_changed ()
 void
 MixerStrip::on_record_state_changed ()
 {
-    if ( !ARDOUR_UI::instance()->the_session() )
+    if ( !_session )
         return;
     
-    if ( (ARDOUR_UI::instance()->the_session()->record_status()==Session::Recording) && (_route->record_enabled()) )
+    if ( (_session->record_status()==Session::Recording) && (_route->record_enabled()) )
         end_name_edit (RESPONSE_CANCEL);
 }
 
@@ -1948,7 +1946,7 @@ MixerStrip::deselect_all_processors ()
 bool
 MixerStrip::delete_processors ()
 {
-	processor_box.processor_operation (ProcessorBox::ProcessorsDelete);
+	return processor_box.processor_operation (ProcessorBox::ProcessorsDelete);
 }
 
 void
