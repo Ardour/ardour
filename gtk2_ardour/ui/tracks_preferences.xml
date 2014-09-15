@@ -188,7 +188,7 @@
                    horzalignment="start"
                    width="93"/>
           </HBox>
-          <DROPDOWNMENU style="generic_dropdown_menu"/>
+          <DropdownMenu style="generic_dropdown_menu"/>
         </Dropdown>
 
         <Label style="generic_control"
@@ -213,7 +213,7 @@
                    horzalignment="start"
                    width="93"/>
           </HBox>
-          <DROPDOWNMENU style="generic_dropdown_menu"/>
+          <DropdownMenu style="generic_dropdown_menu"/>
         </Dropdown>
         <Label style="generic_control"
                text="SAMPLE RATE"
@@ -237,7 +237,7 @@
                    horzalignment="start"
                    width="57"/>
           </HBox>
-          <DROPDOWNMENU style="generic_dropdown_menu"/>
+          <DropdownMenu style="generic_dropdown_menu"/>
         </Dropdown>
         <Label style="generic_control"
                text="BUFFER SIZE"
@@ -261,7 +261,7 @@
                    horzalignment="start"
                    width="57"/>
           </HBox>
-          <DROPDOWNMENU style="generic_dropdown_menu"/>
+          <DropdownMenu style="generic_dropdown_menu"/>
         </Dropdown>
 
         <Iconbutton id="control_panel_button"
@@ -446,7 +446,7 @@
                  horzalignment="start"
                  width="117"/>
         </HBox>
-        <DROPDOWNMENU style="generic_dropdown_menu">
+        <DropdownMenu style="generic_dropdown_menu">
           <Dropdownitem title="Caf"
                         horzalignment="start"/>
           <Dropdownitem title="BWav"
@@ -455,7 +455,7 @@
                         horzalignment="start"/>
           <Dropdownitem title="Wave64"
                         horzalignment="start"/>
-        </DROPDOWNMENU>          
+        </DropdownMenu>          
       </Dropdown>
       <Label style="generic_control" text="BIT DEPTH" x="24" y="70"/>
       <Dropdown style="generic_dropdown"
@@ -473,14 +473,14 @@
                  horzalignment="start"
                  width="117"/>
         </HBox>
-        <DROPDOWNMENU style="generic_dropdown_menu">
+        <DropdownMenu style="generic_dropdown_menu">
           <Dropdownitem title="16 bit"
                         horzalignment="start"/>
           <Dropdownitem title="24 bit"
                         horzalignment="start"/>
           <Dropdownitem title="32 bit floating point"
                         horzalignment="start"/>
-        </DROPDOWNMENU>
+        </DropdownMenu>
       </Dropdown>
       <Label style="generic_control" text="SESSION FRAME RATE" x="24" y="100"/>
       <Dropdown style="generic_dropdown"
@@ -498,7 +498,7 @@
                  horzalignment="start"
                  width="117"/>
         </HBox>
-        <DROPDOWNMENU style="generic_dropdown_menu">
+        <DropdownMenu style="generic_dropdown_menu">
           <Dropdownitem title="24 fps"
                         horzalignment="start"/>
           <Dropdownitem title="25 fps"
@@ -509,7 +509,7 @@
                         horzalignment="start"/>
           <Dropdownitem title="29.97 fps"
                         horzalignment="start"/>
-        </DROPDOWNMENU>
+        </DropdownMenu>
       </Dropdown>
       <Label style="generic_control"
              text="AUTO LOCK TIMER"
@@ -530,7 +530,7 @@
                  horzalignment="start"
                  width="117"/>
         </HBox>
-        <DROPDOWNMENU style="generic_dropdown_menu">
+        <DropdownMenu style="generic_dropdown_menu">
           <Dropdownitem title="0 Min"
                         horzalignment="start"/>
           <Dropdownitem title="1 Min"
@@ -543,7 +543,7 @@
                         horzalignment="start"/>
           <Dropdownitem title="15 Min"
                         horzalignment="start"/>
-          </DROPDOWNMENU>
+          </DropdownMenu>
       </Dropdown>
       <Label style="generic_control" text="AUTO SAVE TIMER" x="24" y="205"/>
       <Dropdown style="generic_button"
@@ -561,7 +561,7 @@
                  horzalignment="start"
                  width="117"/>
         </HBox>
-        <DROPDOWNMENU style="generic_dropdown_menu">
+        <DropdownMenu style="generic_dropdown_menu">
           <Dropdownitem title="0 Min"
                         horzalignment="start"/>
           <Dropdownitem title="1 Min"
@@ -574,7 +574,7 @@
                         horzalignment="start"/>
           <Dropdownitem title="15 Min"
                         horzalignment="start"/>
-          </DROPDOWNMENU>
+          </DropdownMenu>
       </Dropdown>
       <Label style="generic_control"
              text="PRE RECORD BUFFER"
@@ -595,14 +595,14 @@
                  horzalignment="start"
                  width="117"/>
         </HBox>
-        <DROPDOWNMENU style="generic_dropdown_menu">
+        <DropdownMenu style="generic_dropdown_menu">
           <Dropdownitem title="0 Min"
                         horzalignment="start"/>
           <Dropdownitem title="1 Min"
                         horzalignment="start"/>
           <Dropdownitem title="2 Min"
                         horzalignment="start"/>
-        </DROPDOWNMENU>
+        </DropdownMenu>
       </Dropdown>
       <Label style="generic_control"
              text="DEFAULT FOLDER FOR NEW SESSION"

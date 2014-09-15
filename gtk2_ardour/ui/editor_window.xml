@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+                             
 <Window>
+  <style name="topbar_dropdown"
+         bgnormal="#43919A"
+         fgnormal="#ffffff"
+         fgactive="#ffffff"
+         fghover="#ffffff"
+         winfont ="Arial 8"
+         macfont ="Helvetica 8"
+         width="63"
+         height="18"/>
+  <style name="topbar_dropdown_menu"
+         bgnormal="#43919A"
+         fgnormal="#ffffff"
+         fgactive="#ffffff"
+         fghover="#ffffff"
+         winfont ="Arial 8"
+         macfont ="Helvetica 8"/>
   <VBox id="vpacker">
     <Adjustment id="vertical_adjustment"
                 initial_value="0"
@@ -42,69 +58,65 @@
               <HBox id="primary_clock_home"
                     x="132"
                     y="6"/>
-              <dropdown id="display_format_dropdown"
-                        bgnormal="#43919A"
-                        fgnormal="#ffffff"
-                        fgactive="#ffffff"
-                        fghover="#ffffff"
-                        winfont ="Arial 8"
-                        macfont ="Helvetica 8"
+              <Dropdown id="display_format_dropdown"
+                        style="topbar_dropdown"
                         x="200"
                         y="28"
-                        width="63"
-                        height="18"
                         normalicon="topbar_button"
-                        activeicon="topbar_button_active"/>
+                        activeicon="topbar_button_active">
+                <Label style="topbar_dropdown_menu"/>
+                <DropdownMenu style="topbar_dropdown_menu"/>
+              </Dropdown>
               <Iconbutton id="bit_depth_button"
-                          fgnormal="#ffffff"
-                          fgactive="#ffffff"
-                          fghover="#ffffff"
-                          winfont ="Arial 8"
-                          macfont ="Helvetica 8"
+                          style="topbar_dropdown"
                           x="269"
                           y="5"
-                          width="63"
-                          height="18"
                           normalicon="topbar_button_upper"
-                          activeicon="topbar_button_upper_active"/>
+                          activeicon="topbar_button_upper_active">
+                <HBox>
+                  <VBox width="10"/>
+                  <Label style="topbar_dropdown_menu"
+                         horzalignment="start"/>
+                </HBox>
+              </Iconbutton>
               <Iconbutton id="frame_rate_button"
-                          winfont ="Arial 8"
-                          fgnormal="#ffffff"
-                          fgactive="#ffffff"
-                          fghover="#ffffff"
-                          macfont ="Helvetica 8"
+                          style="topbar_dropdown"
                           x="338"
                           y="28"
-                          width="63"
-                          height="18"
                           normalicon="topbar_button"
-                          activeicon="topbar_button_active"/>
-              <dropdown id="sample_rate_dropdown"
-                        bgnormal="#43919A"
-                        fgnormal="#ffffff"
-                        fgactive="#ffffff"
-                        fghover="#ffffff"
-                        winfont ="Arial 8"
-                        macfont ="Helvetica 8"
+                          activeicon="topbar_button_active">
+                <HBox>
+                  <VBox width="10"/>
+                  <Label style="topbar_dropdown_menu"
+                         horzalignment="start"/>
+                </HBox>
+              </Iconbutton>
+              <Dropdown id="sample_rate_dropdown"
+                        style="topbar_dropdown"
                         x="269"
                         y="28"
-                        width="63"
-                        height="18"
                         normalicon="topbar_button"
-                        activeicon="topbar_button_active"/>
-              <dropdown id="timecode_selector_dropdown"
-                        bgnormal="#43919A"
-                        fgnormal="#ffffff"
-                        fgactive="#ffffff"
-                        fghover="#ffffff"
-                        winfont ="Arial 8"
-                        macfont ="Helvetica 8"
+                        activeicon="topbar_button_active">
+                <HBox>
+                  <VBox width="10"/>
+                  <Label style="topbar_dropdown_menu"
+                         horzalignment="start"/>
+                </HBox>
+                <DropdownMenu style="topbar_dropdown_menu"/>
+              </Dropdown>
+              <Dropdown id="timecode_selector_dropdown"
+                        style="topbar_dropdown"
                         x="338"
                         y="5"
-                        width="63"
-                        height="18"
                         normalicon="topbar_button_upper"
-                        activeicon="topbar_button_upper_active"/>
+                        activeicon="topbar_button_upper_active">
+                <HBox>
+                  <VBox width="10"/>
+                  <Label style="topbar_dropdown_menu"
+                         horzalignment="start"/>
+                </HBox>
+                <DropdownMenu style="topbar_dropdown_menu"/>
+              </Dropdown>
             </Layout>
             <EventBox bgnormal="#383838"
                       width="17"
