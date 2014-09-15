@@ -124,7 +124,13 @@
   <EventBox id="color_palette_home" ui.orphan="true"/>
   <VBox id="color_buttons_home" ui.orphan="true"/>
   <Button id="info_panel_button" ui.orphan="true"/>
-  <Label id="input_info_label" ui.orphan="true"/>
-  <Label id="output_info_label" ui.orphan="true"/>
+  <Label id="input_info_label"
+         winfont="Arial 8"
+         macfont="Helvetica 8"
+         ui.orphan="true"/>
+  <Label id="output_info_label" 
+         winfont="Arial 8"
+         macfont="Helvetica 8"
+         ui.orphan="true"/>
   <VBox id="info_panel_home" ui.orphan="true"/>
 </RouteUI>
