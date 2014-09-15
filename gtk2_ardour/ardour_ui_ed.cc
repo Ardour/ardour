@@ -772,29 +772,8 @@ ARDOUR_UI::build_menu_bar ()
 	// so use this instead ...
 	gtk_settings_set_long_property (gtk_settings_get_default(), "gtk-can-change-accels", 1, "Ardour:designers");
 
-	EventBox* ev = manage (new EventBox);
-	ev->show ();
-	CairoHPacker* hbox = manage (new CairoHPacker);
-	hbox->set_name (X_("StatusBarBox"));
-	hbox->show ();
-	hbox->set_border_width (3);
-
-	VBox* vbox = manage (new VBox);
-	vbox->pack_start (*hbox, true, false);
-	vbox->show();
-
-	ev->add (*vbox);
-
-#ifndef TOP_MENUBAR
- 	menu_hbox.pack_start (*menu_bar, false, false);
-#else
-	use_menubar_as_top_menubar ();
-#endif
-	
-//	menu_hbox.pack_end (*ev, false, false, 6);
-
-	menu_bar_base.set_name ("MainMenuBar");
-	menu_bar_base.add (menu_hbox);
+	editor->get_h_box ("menu_bar_home").pack_start (*menu_bar, false, false);
+	return;
 }
 
 void

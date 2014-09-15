@@ -88,9 +88,6 @@ ARDOUR_UI::setup_windows ()
 
 	we_have_dependents ();
 
-#ifndef TOP_MENUBAR
-	editor->get_h_box ("menu_bar_base").pack_start (menu_bar_base, false, false);
-#endif
 	if (ARDOUR::Profile->get_trx()) {
 		top_packer.pack_start (tracks_tools_packer, false, false);
 	} else {

@@ -564,8 +564,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	/* menu bar and associated stuff */
 
 	Gtk::MenuBar* menu_bar;
-	Gtk::EventBox menu_bar_base;
-	Gtk::HBox     menu_hbox;
 
 	void use_menubar_as_top_menubar ();
 	void build_menu_bar ();
