@@ -153,7 +153,12 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 			   path for MIDI files, which is assumed to be the
 			   correct "main" location.
 			*/
-			std::vector<string> sdirs = s.source_search_path (DataType::MIDI);
+			std::vector<Glib::ustring> sdirs;
+			split (s.source_search_path (DataType::MIDI), sdirs, ':');
+			if (sdirs.empty()) {
+				fatal << _("Empty MIDI source search path!") << endmsg;
+				/*NOTREACHED*/
+			}
 			_path = Glib::build_filename (sdirs.front(), _path);
 			/* This might be important, too */
 			_file_is_new = true;
