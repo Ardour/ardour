@@ -252,8 +252,6 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
                         goto out;
                 }
 
-                hits.clear ();
-
                 for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
 
                         fullpath = Glib::build_filename (*i, path);
@@ -308,8 +306,9 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 			/* no match: error */
 
                         if (must_exist) {
-                                error << string_compose(
-                                        _("Filesource: cannot find required file (%1)"), path) << endmsg;
+				/* do not generate an error here, leave that to
+				   whoever deals with the false return value.
+				*/
                                 goto out;
                         } else {
                                 isnew = true;
@@ -320,16 +319,17 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 			
 			keeppath = de_duped_hits[0];
 		}
-						  
-        } else {
+						   
+       } else {
                 keeppath = path;
         }
 
         /* Current find() is unable to parse relative path names to yet non-existant
            sources. QuickFix(tm)
         */
-        if (keeppath == "") {
-                if (must_exist) {
+
+	if (keeppath.empty()) {
+		if (must_exist) {
                         error << "FileSource::find(), keeppath = \"\", but the file must exist" << endl;
                 } else {
                         keeppath = path;
