@@ -4834,7 +4834,7 @@ Editor::idle_resize ()
     // could be negative at first
     int32_t new_height = _pending_resize_view->current_height() + _pending_resize_amount;
     
-    // if the result height would be negative - set trakc header height to minimal
+    // if the result height would be less then minimal - set track header height to minimal
     if ( new_height < minimal_height ) {
         new_height = minimal_height;
     }
@@ -4850,7 +4850,7 @@ Editor::idle_resize ()
                 minimal_height = (*i)->preset_height (HeightSmall);
                 
                 new_height = (*i)->current_height() + _pending_resize_amount;
-                // if the result height would be negative - set trakc header height to minimal
+                // if the result height would be less then minimal - set track header height to minimal
                 if ( new_height < minimal_height ) {
                     new_height = minimal_height;
                 }
