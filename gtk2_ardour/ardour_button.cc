@@ -753,6 +753,8 @@ ArdourButton::set_led_left (bool yn)
 bool
 ArdourButton::on_button_press_event (GdkEventButton *ev)
 {
+	focus_handler ();
+
 	if ((_elements & Indicator) && _led_rect && _distinct_led_click) {
 		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width &&
 		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
