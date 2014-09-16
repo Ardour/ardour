@@ -24,6 +24,10 @@
 
 static const char* has_cairo_widget_background_info = "has_cairo_widget_background_info";
 
+
+static void noop() { }
+sigc::slot<void> CairoWidget::focus_handler (sigc::ptr_fun (noop));
+
 CairoWidget::CairoWidget ()
 	: _active_state (Gtkmm2ext::Off)
 	, _visual_state (Gtkmm2ext::NoVisualState)
@@ -36,6 +40,13 @@ CairoWidget::CairoWidget ()
 
 CairoWidget::~CairoWidget ()
 {
+}
+
+bool
+CairoWidget::on_button_press_event (GdkEventButton*)
+{
+	focus_handler();
+	return false;
 }
 
 bool
@@ -193,4 +204,10 @@ CairoWidget::provide_background_for_cairo_widget (Gtk::Widget& w, const Gdk::Col
 	w.modify_bg (Gtk::STATE_SELECTED, bg);
 
 	g_object_set_data (G_OBJECT(w.gobj()), has_cairo_widget_background_info, (void*) 0xfeedface);
+}
+
+void
+CairoWidget::set_focus_handler (sigc::slot<void> s)
+{
+	focus_handler = s;
 }
