@@ -93,6 +93,7 @@ AlsaAudioBackend::enumerate_devices () const
 	std::map<std::string, std::string> devices;
 	get_alsa_audio_device_names(devices);
 	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		if (_audio_device == "") _audio_device = i->first;
 		_audio_device_status.push_back (DeviceStatus (i->first, true));
 	}
 	return _audio_device_status;
