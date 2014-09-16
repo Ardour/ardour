@@ -4829,14 +4829,33 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 bool
 Editor::idle_resize ()
 {
-	_pending_resize_view->idle_resize (_pending_resize_view->current_height() + _pending_resize_amount);
+    int32_t minimal_height = _pending_resize_view->preset_height (HeightSmall);
+    
+    // could be negative at first
+    int32_t new_height = _pending_resize_view->current_height() + _pending_resize_amount;
+    
+    // if the result height would be negative - set trakc header height to minimal
+    if ( new_height < minimal_height ) {
+        new_height = minimal_height;
+    }
+    
+	_pending_resize_view->idle_resize (new_height);
 
 	if (dynamic_cast<AutomationTimeAxisView*> (_pending_resize_view) == 0 &&
 	    selection->tracks.contains (_pending_resize_view)) {
 
 		for (TrackViewList::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 			if (*i != _pending_resize_view) {
-				(*i)->idle_resize ((*i)->current_height() + _pending_resize_amount);
+                
+                minimal_height = (*i)->preset_height (HeightSmall);
+                
+                new_height = (*i)->current_height() + _pending_resize_amount;
+                // if the result height would be negative - set trakc header height to minimal
+                if ( new_height < minimal_height ) {
+                    new_height = minimal_height;
+                }
+                
+                (*i)->idle_resize (new_height);
 			}
 		}
 	}
