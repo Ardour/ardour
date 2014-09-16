@@ -2511,6 +2511,8 @@ Editor::escape ()
 	} else {
 		selection->clear ();
 	}
+
+	reset_focus ();
 }
 
 void
