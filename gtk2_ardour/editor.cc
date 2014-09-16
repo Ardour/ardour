@@ -484,6 +484,8 @@ Editor::Editor ()
 
 	initialize_canvas ();
 
+	CairoWidget::set_focus_handler (sigc::mem_fun (*this, &Editor::reset_focus));
+
 	_summary = new EditorSummary (this);
 
 	selection->TimeChanged.connect (sigc::mem_fun(*this, &Editor::time_selection_changed));
@@ -1149,9 +1151,28 @@ Editor::generic_event_handler (GdkEvent* ev)
 	case GDK_KEY_RELEASE:
 		gettimeofday (&last_event_time, 0);
 		break;
+
+	case GDK_LEAVE_NOTIFY:
+		switch (ev->crossing.detail) {
+		case GDK_NOTIFY_UNKNOWN:
+		case GDK_NOTIFY_INFERIOR:
+		case GDK_NOTIFY_ANCESTOR:
+			break; 
+		case GDK_NOTIFY_VIRTUAL:
+		case GDK_NOTIFY_NONLINEAR:
+		case GDK_NOTIFY_NONLINEAR_VIRTUAL:
+			/* leaving window, so reset focus, thus ending any and
+			   all text entry operations.
+			*/
+			reset_focus();
+			break;
+		}
+		break;
+
 	default:
 		break;
 	}
+
 	return false;
 }
 
