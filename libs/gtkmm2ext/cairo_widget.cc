@@ -26,6 +26,9 @@ static const char* has_cairo_widget_background_info = "has_cairo_widget_backgrou
 
 bool CairoWidget::_flat_buttons = false;
 
+static void noop() { }
+sigc::slot<void> CairoWidget::focus_handler (sigc::ptr_fun (noop));
+
 void CairoWidget::set_source_rgb_a( cairo_t* cr, Gdk::Color col, float a)  //ToDo:  this one and the Canvas version should be in a shared file (?)
 {
 	float r = col.get_red_p ();
@@ -49,6 +52,13 @@ CairoWidget::CairoWidget ()
 CairoWidget::~CairoWidget ()
 {
 	if (_parent_style_change) _parent_style_change.disconnect();
+}
+
+bool
+CairoWidget::on_button_press_event (GdkEventButton*)
+{
+	focus_handler();
+	return false;
 }
 
 bool
@@ -219,4 +229,10 @@ void
 CairoWidget::set_flat_buttons (bool yn)
 {
 	_flat_buttons = yn;
+}
+
+void
+CairoWidget::set_focus_handler (sigc::slot<void> s)
+{
+	focus_handler = s;
 }

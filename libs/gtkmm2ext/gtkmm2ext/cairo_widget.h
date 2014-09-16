@@ -74,12 +74,30 @@ public:
 
 	static void set_source_rgb_a( cairo_t* cr, Gdk::Color, float a=1.0 );
 
+	/* set_focus_handler() will cause all button-press events on any
+	   CairoWidget to invoke this slot/functor/function/method/callback.
+	   
+	   We do this because in general, CairoWidgets do not grab
+	   keyboard focus, but a button press on them should
+	   clear focus from any active text entry.
+
+	   This is global to all CairoWidgets and derived types.
+
+	   However, derived types can override the behaviour by defining their
+	   own on_button_press_event() handler which returns true under all
+	   conditions (which will block this handler from being called). If 
+	   they wish to invoke any existing focus handler from their own
+	   button press handler, they can just use: focus_handler();
+	*/
+	static void set_focus_handler (sigc::slot<void>);
+
 protected:
 	/** Render the widget to the given Cairo context */
 	virtual bool on_expose_event (GdkEventExpose *);
 	void on_size_allocate (Gtk::Allocation &);
 	void on_state_changed (Gtk::StateType);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
+	bool on_button_press_event (GdkEventButton*);
 	Gdk::Color get_parent_bg ();
 	
 	/* this is an additional virtual "on_..." method. Glibmm does not
@@ -95,10 +113,13 @@ protected:
 	static bool	_flat_buttons;
 	bool		_grabbed;
 
+	static sigc::slot<void> focus_handler;
+
   private:
 	Glib::SignalProxyProperty _name_proxy;
 	sigc::connection _parent_style_change;
 	Widget * _current_parent;
+	
 };
 
 #endif
