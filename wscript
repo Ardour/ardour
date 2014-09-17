@@ -452,7 +452,7 @@ def options(opt):
     opt.add_option('--lv2dir', type='string', help="install destination for builtin LV2 bundles [Default: LIBDIR/lv2]")
     opt.add_option('--lxvst', action='store_true', default=True, dest='lxvst',
                     help='Compile with support for linuxVST plugins')
-    opt.add_option('--no-lxvst', action='store_false', default=False, dest='lxvst',
+    opt.add_option('--no-lxvst', action='store_false', dest='lxvst',
                     help='Compile without support for linuxVST plugins')
     opt.add_option('--nls', action='store_true', default=True, dest='nls',
                     help='Enable i18n (native language support) (default)')
