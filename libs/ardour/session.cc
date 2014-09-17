@@ -1349,14 +1349,14 @@ Session::sync_locations_to_skips (Locations::LocationList& locations)
 	Locations::LocationList::iterator i;
 	Location* location;
 
-	clear_events (SessionEvent::LocateRoll);
+	clear_events (SessionEvent::Skip);
 
 	for (i = locations.begin(); i != locations.end(); ++i) {
 
 		location = *i;
 
 		if (location->is_skip()) {
-			SessionEvent* ev = new SessionEvent (SessionEvent::LocateRoll, SessionEvent::Add, location->start(), location->end(), 1.0);
+			SessionEvent* ev = new SessionEvent (SessionEvent::Skip, SessionEvent::Add, location->start(), location->end(), 1.0);
 			queue_event (ev);
 		}
 	}

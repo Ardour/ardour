@@ -372,6 +372,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (SessionEvent, CancelPlayAudioRange);
 	REGISTER_CLASS_ENUM (SessionEvent, StopOnce);
 	REGISTER_CLASS_ENUM (SessionEvent, AutoLoop);
+	REGISTER_CLASS_ENUM (SessionEvent, Skip);
 	REGISTER (_SessionEvent_Type);
 
 	REGISTER_CLASS_ENUM (Session, Stopped);
