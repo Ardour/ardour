@@ -991,6 +991,7 @@ class RangeMarkerBarDrag : public Drag
 {
 public:
 	enum Operation {
+		CreateSkipMarker,
 		CreateRangeMarker,
 		CreateTransportMarker,
 		CreateCDMarker

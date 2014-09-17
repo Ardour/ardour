@@ -4445,6 +4445,7 @@ RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	}
 
 	switch (_operation) {
+	case CreateSkipMarker:
 	case CreateRangeMarker:
 	case CreateTransportMarker:
 	case CreateCDMarker:
@@ -4471,6 +4472,9 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 	ArdourCanvas::Rectangle *crect;
 
 	switch (_operation) {
+	case CreateSkipMarker:
+		crect = _editor->range_bar_drag_rect;
+		break;
 	case CreateRangeMarker:
 		crect = _editor->range_bar_drag_rect;
 		break;
@@ -4488,7 +4492,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 
 	framepos_t const pf = adjusted_current_frame (event);
 
-	if (_operation == CreateRangeMarker || _operation == CreateTransportMarker || _operation == CreateCDMarker) {
+	if (_operation == CreateSkipMarker || _operation == CreateRangeMarker || _operation == CreateTransportMarker || _operation == CreateCDMarker) {
 		framepos_t grab = grab_frame ();
 		_editor->snap_to (grab);
 
@@ -4544,17 +4548,24 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 		_drag_rect->hide();
 
 		switch (_operation) {
+		case CreateSkipMarker:
 		case CreateRangeMarker:
 		case CreateCDMarker:
 		    {
-			_editor->begin_reversible_command (_("new range marker"));
 			XMLNode &before = _editor->session()->locations()->get_state();
-			_editor->session()->locations()->next_available_name(rangename,"unnamed");
-			if (_operation == CreateCDMarker) {
+			if (_operation == CreateSkipMarker) {
+				_editor->begin_reversible_command (_("new skip marker"));
+				_editor->session()->locations()->next_available_name(rangename,_("skip"));
+				flags = Location::IsRangeMarker | Location::IsSkip;
+				_editor->range_bar_drag_rect->hide();
+			} else if (_operation == CreateCDMarker) {
+				_editor->session()->locations()->next_available_name(rangename, _("CD"));
+				_editor->begin_reversible_command (_("new CD marker"));
 				flags = Location::IsRangeMarker | Location::IsCDMarker;
 				_editor->cd_marker_bar_drag_rect->hide();
-			}
-			else {
+			} else {
+				_editor->begin_reversible_command (_("new skip marker"));
+				_editor->session()->locations()->next_available_name(rangename, _("unnamed"));
 				flags = Location::IsRangeMarker;
 				_editor->range_bar_drag_rect->hide();
 			}
@@ -4590,7 +4601,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			/* didn't drag, but mark is already created so do
 			 * nothing */
 
-		} else { /* operation == CreateRangeMarker */
+		} else { /* operation == CreateRangeMarker || CreateSkipMarker */
 			
 
 			framepos_t start;
