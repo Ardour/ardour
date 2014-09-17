@@ -1174,6 +1174,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void              locations_changed ();
 	void              locations_added (Location*);
 	void              handle_locations_changed (Locations::LocationList&);
+	void              sync_locations_to_skips (Locations::LocationList&);
 
 	PBD::ScopedConnectionList punch_connections;
 	void             auto_punch_start_changed (Location *);
