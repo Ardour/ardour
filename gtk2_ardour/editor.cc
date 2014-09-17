@@ -553,6 +553,12 @@ Editor::Editor ()
 	_snapshots = new EditorSnapshots (this);
 	_locations = new EditorLocations (this);
 
+	/* these are static location signals */
+
+	Location::start_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
+	Location::end_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
+	Location::changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
+
 	add_notebook_page (_("Regions"), _regions->widget ());
 	add_notebook_page (_("Tracks & Busses"), _routes->widget ());
 	add_notebook_page (_("Snapshots"), _snapshots->widget ());
