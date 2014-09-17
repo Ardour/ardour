@@ -692,10 +692,12 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 
 	case RangeMarkerBarItem:
-		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
-		} else {
+		if (Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
+			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateSkipMarker), event);
+		} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateRangeMarker), event);
+		} else {
+			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
 		}
 		return true;
 		break;
