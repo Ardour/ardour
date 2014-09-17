@@ -505,6 +505,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		RouteGroup* route_group = 0, uint32_t how_many = 1, std::string name_template = ""
 		);
 
+    void   remove_routes (boost::shared_ptr<RouteList>);
 	void   remove_route (boost::shared_ptr<Route>);
 	void   resort_routes ();
 	void   resort_routes_using (boost::shared_ptr<RouteList>);

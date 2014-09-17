@@ -2368,8 +2368,8 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			error << "cannot find name for new audio track" << endmsg;
 			goto failed;
 		}
-
-		boost::shared_ptr<AudioTrack> track;
+		
+        boost::shared_ptr<AudioTrack> track;
 
 		try {
 			track.reset (new AudioTrack (*this, track_name, Route::Flag (0), mode));
@@ -2948,6 +2948,126 @@ Session::add_internal_send (boost::shared_ptr<Route> dest, boost::shared_ptr<Pro
 	sender->add_aux_send (dest, before);
 
 	graph_reordered ();
+}
+
+void
+Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
+{
+    for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
+        
+        if (*iter == _master_out || *iter == _master_track) {
+            return;
+        }
+        
+        (*iter)->set_solo (false, this);
+        
+        {
+            RCUWriter<RouteList> writer (routes);
+            boost::shared_ptr<RouteList> rs = writer.get_copy ();
+            
+            rs->remove (*iter);
+            
+            /* deleting the master out seems like a dumb
+             idea, but its more of a UI policy issue
+             than our concern.
+             */
+            
+            if (*iter == _master_out) {
+                _master_out = boost::shared_ptr<Route> ();
+            }
+            
+            if (*iter == _monitor_out) {
+                _monitor_out.reset ();
+            }
+            
+            if (*iter == _master_track) {
+                _master_track.reset ();
+            }
+            
+            /* writer goes out of scope, forces route list update */
+        }
+        update_route_solo_state ();
+        
+        // We need to disconnect the route's inputs and outputs
+        
+        (*iter)->input()->disconnect (0);
+        (*iter)->output()->disconnect (0);
+        
+        /* if the route had internal sends sending to it, remove them */
+        if ((*iter)->internal_return()) {
+            
+            boost::shared_ptr<RouteList> r = routes.reader ();
+            for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                boost::shared_ptr<Send> s = (*i)->internal_send_for (*iter);
+                if (s) {
+                    (*i)->remove_processor (s);
+                }
+            }
+        }
+        
+        /* if the monitoring section had a pointer to this route, remove it */
+        if (_monitor_out && !(*iter)->is_master() && !(*iter)->is_monitor()) {
+            Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+            PBD::Unwinder<bool> uw (ignore_route_processor_changes, true);
+            (*iter)->remove_aux_or_listen (_monitor_out);
+        }
+        
+        boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*iter);
+        if (mt && mt->step_editing()) {
+            if (_step_editors > 0) {
+                _step_editors--;
+            }
+        }
+        
+        /* try to cause everyone to drop their references
+         * and unregister ports from the backend
+         */
+        for (size_t i = 0; i < (*iter)->input()->ports().num_ports(); ++i) {
+            _engine.unregister_port((*iter)->input()->ports().port(i));
+            PortEngine::PortHandle handle = (*iter)->input()->ports().port(i)->port_handle();
+            _engine.current_backend()->unregister_port(handle);
+        }
+        
+        for (size_t i = 0; i < (*iter)->output()->ports().num_ports(); ++i) {
+            _engine.unregister_port((*iter)->output()->ports().port(i));
+            PortEngine::PortHandle handle = (*iter)->output()->ports().port(i)->port_handle();
+            _engine.current_backend()->unregister_port(handle);
+        }
+        (*iter)->drop_references ();
+
+    }
+    
+	update_latency_compensation ();
+	set_dirty();
+    
+	/* Re-sort routes to remove the graph's current references to the one that is
+	 * going away, then flush old references out of the graph.
+     * Wave Tracks: reconnect routes
+	 */
+    if (ARDOUR::Profile->get_trx () ) {
+        reconnect_existing_routes(true, false);
+    } else {
+        resort_routes ();
+    }
+    
+	if (_process_graph) {
+		_process_graph->clear_other_chain ();
+	}
+    
+	/* get rid of it from the dead wood collection in the route list manager */
+    
+	/* XXX i think this is unsafe as it currently stands, but i am not sure. (pd, october 2nd, 2006) */
+    
+	routes.flush ();
+    
+	Route::RemoteControlIDChange(); /* EMIT SIGNAL */
+    
+	/* save the new state of the world */
+    
+	if (save_state (_current_snapshot_name)) {
+		save_history (_current_snapshot_name);
+	}
+	reassign_track_numbers();
 }
 
 void
