@@ -1061,6 +1061,13 @@ Session::process_event (SessionEvent* ev)
 		_send_timecode_update = true;
 		break;
 
+	case SessionEvent::Skip:
+		start_locate (ev->target_frame, true, true, false);
+		remove = false;
+		del = false;
+		_send_timecode_update = true;
+		break;
+
 	case SessionEvent::LocateRollLocate:
 		// locate is handled by ::request_roll_at_and_return()
 		_requested_return_frame = ev->target_frame;
