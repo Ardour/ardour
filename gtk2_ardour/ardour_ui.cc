@@ -165,7 +165,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
 	, gui_object_state (new GUIObjectState)
-	, primary_clock (new MainClock (X_("primary"), false, X_("transport"), true, true, true, false, true))
+	, primary_clock (new MainClock (X_("primary"), false, X_("transport"), true, true, true, false, false))
 	, secondary_clock (new MainClock (X_("secondary"), false, X_("secondary"), true, true, false, false, true))
 	  /* big clock */
 	, big_clock (new AudioClock (X_("bigclock"), false, "big", true, true, false, false))
