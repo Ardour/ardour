@@ -1355,7 +1355,7 @@ Session::sync_locations_to_skips (Locations::LocationList& locations)
 
 		location = *i;
 
-		if (location->is_range_marker()) {
+		if (location->is_skip()) {
 			SessionEvent* ev = new SessionEvent (SessionEvent::LocateRoll, SessionEvent::Add, location->start(), location->end(), 1.0);
 			queue_event (ev);
 		}
