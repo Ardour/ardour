@@ -329,6 +329,8 @@ WavesButton::on_size_request (Gtk::Requisition* req)
 bool
 WavesButton::on_button_press_event (GdkEventButton *ev)
 {
+        focus_handler ();
+
 	if (ev->type == GDK_2BUTTON_PRESS) {
 		signal_double_clicked (this);
 	} else {
