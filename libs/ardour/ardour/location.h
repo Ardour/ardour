@@ -99,16 +99,16 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	boost::shared_ptr<SceneChange> scene_change() const { return _scene_change; }
 	void set_scene_change (boost::shared_ptr<SceneChange>);
 
-	PBD::Signal1<void,Location*> name_changed;
-	PBD::Signal1<void,Location*> end_changed;
-	PBD::Signal1<void,Location*> start_changed;
+	static PBD::Signal1<void,Location*> name_changed;
+	static PBD::Signal1<void,Location*> end_changed;
+	static PBD::Signal1<void,Location*> start_changed;
 
 	PBD::Signal1<void,Location*> LockChanged;
 	PBD::Signal2<void,Location*,void*> FlagsChanged;
 	PBD::Signal1<void,Location*> PositionLockStyleChanged;
 
 	/* this is sent only when both start and end change at the same time */
-	PBD::Signal1<void,Location*> changed;
+	static PBD::Signal1<void,Location*> changed;
 
 	/* CD Track / CD-Text info */
 
@@ -211,6 +211,7 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 
 	int set_current_unlocked (Location *);
 	void location_changed (Location*);
+	void listen_to (Location*);
 };
 
 } // namespace ARDOUR
