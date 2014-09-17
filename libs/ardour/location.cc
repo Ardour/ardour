@@ -44,6 +44,10 @@ using namespace ARDOUR;
 using namespace PBD;
 
 PBD::Signal0<void> Location::scene_changed;
+PBD::Signal1<void,Location*> Location::name_changed;
+PBD::Signal1<void,Location*> Location::end_changed;
+PBD::Signal1<void,Location*> Location::start_changed;
+PBD::Signal1<void,Location*> Location::changed;
 
 Location::Location (Session& s)
 	: SessionHandleRef (s)
@@ -621,6 +625,10 @@ Locations::Locations (Session& s)
 	: SessionHandleRef (s)
 {
 	current_location = 0;
+
+	Location::changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
+	Location::start_changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
+	Location::end_changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
 }
 
 Locations::~Locations ()
