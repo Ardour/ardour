@@ -132,7 +132,6 @@ typedef uint64_t microseconds_t;
 #include "shuttle_control.h"
 #include "speaker_dialog.h"
 #include "splash.h"
-#include "startup.h"
 #include "theme_manager.h"
 #include "time_axis_view_item.h"
 #include "utils.h"
@@ -759,11 +758,10 @@ ARDOUR_UI::check_announcements ()
 
 int
 ARDOUR_UI::starting ()
-{
+{  
 	Application* app = Application::instance ();
 	const char *nsm_url;
-	bool brand_new_user = ArdourStartup::required ();
-
+    
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
 	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
 
@@ -850,23 +848,11 @@ ARDOUR_UI::starting ()
 
         goto_editor_window ();
 	} else  {
-		
-		if (brand_new_user) {
-			ArdourStartup s;
-			s.present ();
-			main().run();
-			s.hide ();
-			switch (s.response ()) {
-			case Gtk::RESPONSE_OK:
-				break;
-			default:
-				return -1;
-			}
-		}
-
+        
+        bool brand_new_user = !Glib::file_test ( Glib::build_filename (user_config_directory (), ".a3"), Glib::FILE_TEST_EXISTS);
+        const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || brand_new_user);
+        
 		/* go get a session */
-
-		const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || brand_new_user);
 
 		if (get_session_parameters (false, new_session_required, ARDOUR_COMMAND_LINE::load_template)) {
 			std::cerr << "Cannot get session parameters."<< std::endl;

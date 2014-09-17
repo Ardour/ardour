@@ -51,7 +51,6 @@
 #include "editor.h"
 #include "actions.h"
 #include "mixer_ui.h"
-#include "startup.h"
 #include "window_manager.h"
 #include "global_port_matrix.h"
 #include "location_ui.h"
