@@ -1310,6 +1310,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void jump_forward_to_mark ();
 	void jump_backward_to_mark ();
 	void cursor_align (bool playhead_to_edit);
+	void toggle_skip_playback ();
 
 	void remove_last_capture ();
 	void select_all_selectables_using_time_selection ();

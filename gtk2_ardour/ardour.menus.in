@@ -62,6 +62,7 @@
       <menuitem action='Record'/>
       <menuitem action='ToggleRollMaybe'/>
       <menuitem action='ToggleRollForgetCapture'/>
+      <menuitem action='toggle-skip-playback'/>
       <menu action="SetLoopMenu">
         <menuitem action='set-loop-from-edit-range'/>
         <menuitem action='set-loop-from-region'/>
