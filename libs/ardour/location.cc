@@ -766,6 +766,17 @@ Locations::clear_ranges ()
 			tmp = i;
 			++tmp;
 
+			/* We do not remove these ranges as part of this
+			 * operation
+			 */
+
+			if ((*i)->is_auto_punch() ||
+			    (*i)->is_auto_loop() ||
+			    (*i)->is_session_range()) {
+				i = tmp;
+				continue;
+			}
+
 			if (!(*i)->is_mark()) {
 				delete *i;
 				locations.erase (i);
