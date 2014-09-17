@@ -318,6 +318,8 @@ Session::post_engine_init ()
 		_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
 		_locations->added.connect_same_thread (*this, boost::bind (&Session::locations_added, this, _1));
 		
+		
+		
 	} catch (AudioEngine::PortRegistrationFailure& err) {
 		/* handle this one in a different way than all others, so that its clear what happened */
 		error << err.what() << endmsg;
@@ -1232,20 +1234,7 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	}
 
-	Location* location;
-
-	if ((location = _locations->auto_loop_location()) != 0) {
-		set_auto_loop_location (location);
-	}
-
-	if ((location = _locations->auto_punch_location()) != 0) {
-		set_auto_punch_location (location);
-	}
-
-	if ((location = _locations->session_range_location()) != 0) {
-		delete _session_range_location;
-		_session_range_location = location;
-	}
+	locations_changed ();
 
 	if (_session_range_location) {
 		AudioFileSource::set_header_position_offset (_session_range_location->start());
@@ -2893,6 +2882,12 @@ Session::cleanup_trash_sources (CleanupReport& rep)
 void
 Session::set_dirty ()
 {
+	/* never mark session dirty during loading */
+
+	if (_state_of_the_state & Loading) {
+		return;
+	}
+
 	bool was_dirty = dirty();
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state | Dirty);
