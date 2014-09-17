@@ -51,7 +51,8 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 		IsHidden = 0x8,
 		IsCDMarker = 0x10,
 		IsRangeMarker = 0x20,
-		IsSessionRange = 0x40
+		IsSessionRange = 0x40,
+		IsSkip = 0x80,
 	};
 
 	Location (Session &);
@@ -92,6 +93,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	bool is_cd_marker () const { return _flags & IsCDMarker; }
 	bool is_session_range () const { return _flags & IsSessionRange; }
 	bool is_range_marker() const { return _flags & IsRangeMarker; }
+	bool is_skip() const { return _flags & IsSkip; }
 	bool matches (Flags f) const { return _flags & f; }
 
 	Flags flags () const { return _flags; }
