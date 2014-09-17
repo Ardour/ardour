@@ -1,54 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <RouteUI width="233"
-         height="66"
-         bgnormal="#383838"
-         bgactive="#6A6A6A"
+         bgnormal="#424242"
+         bgactive="#6C6C6C"
          peaktreshold="-144.4">
   <VBox>
     <EventBox height="1"
               bgnormal="#494949"
               bgactive="#494949"/>
-    <HBox height="64">
-      <VBox width="35"/>
+    <HBox height="17">
+      <EventBox width="29"
+                bgnormal="#424242"
+                bgactive="#242424"/>
+      <EventBox width="6"
+                bgnormal="#242424"
+                bgactive="#242424"/>
       <EventBox width="1"
                 bgnormal="#000000"
                 bgactive="#000000"/>
-      <VBox width="60">
-        <HBox height="3"/>
-        <HBox>
-          <VBox width="6"/>
-          <Label text="MASTER"
-                 winfont ="Arial 10"
-                 macfont ="Helvetica 10"
-                 fgnormal="#ffffff"
-                 fgactive="#ffffff"
-                 justify="left"/>
-        </HBox>
-      </VBox>
-      <VBox>
-        <EventBox bgnormal="#000000"
-                bgactive="#000000">
-          <EventBox bgnormal="#383838"
-                    bgactive="#6A6A6A"
-                    borderwidth="1">
-            <iconbutton id="master_mute_button"
-                  width="41"
-                  height="20"
-                  normalicon="master_mute"
-                  activeicon="master_mute_active"
-                  prelighticon="master_mute_prelight"/>
-          </EventBox>
-        </EventBox>
-      </VBox>
+      <VBox width="6"/>
+      <Label text="MASTER BUS"
+              winfont ="Arial 10"
+              macfont ="Helvetica 10"
+              fgnormal="#ffffff"
+              fgactive="#ffffff"
+              width="99"
+              height="17"
+              horzalignment="start"
+              vertalignment="center"/>
+      <iconbutton id="master_mute_button"
+            width="83"
+            height="17"
+            normalicon="master_mute"
+            activeicon="master_mute_active"
+            prelighticon="master_mute_prelight"/>
       <EventBox width="1"
-                bgnormal="#000000"
-                bgactive="#000000"
-                box.pack="end"/>
-      <VBox id="level_meter_home"
-            box.pack="end"/>
+                bgnormal="#424242"
+                bgactive="#424242"/>
+      <EventBox bgnormal="#6C6C6C"
+                bgactive="#6C6C6C">
+        <HBox id="level_meter_home"
+              width="8"/>
+      </EventBox>
     </HBox>
-    <EventBox height="1"
+    <EventBox height="2"
               bgnormal="#000000"
               bgactive="#000000"/>
   </VBox>
@@ -85,5 +80,4 @@
   <icon id="master_bus_multi_out_mode_icon"
         source="master_bus_multi_out_mode.png"
         ui.orphan="true"/>
-
 </RouteUI>

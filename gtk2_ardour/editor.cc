@@ -141,8 +141,6 @@ using PBD::internationalize;
 using PBD::atoi;
 using Gtkmm2ext::Keyboard;
 
-const double Editor::timebar_height = 32.0;
-
 static const gchar *_snap_type_strings[] = {
 	N_("CD Frames"),
 	N_("TC Frames"),
@@ -249,6 +247,7 @@ pane_size_watcher (Paned* pane)
 Editor::Editor ()
 	: PublicEditor ("editor_window.xml")
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
+	, timebar_height (xml_property (*xml_tree ()->root (), "timebarheight", 32.0))
 
 	  /* time display buttons */
 	, minsec_label (_("Mins:Secs"))
@@ -267,15 +266,15 @@ Editor::Editor ()
 	, inspector_home (get_container ("inspector_home"))
 	, _master_bus_ui_home (get_container ("master_bus_ui_home"))
 	, vpacker (get_v_box ("vpacker"))
-        , timebars_vbox (get_v_box ("timebars_vbox"))
+    , timebars_vbox (get_v_box ("timebars_vbox"))
 	, marker_lane_hbox (get_h_box ("marker_lane_hbox"))
 	, skip_button (get_waves_button ("skip_button"))
-        , global_tracks_button (get_waves_button ("global_tracks_button"))
-        , marker_button (get_waves_button ("marker_button"))
-        , marker_io_dialog (0)
-        , add_marker_button (get_waves_button ("add_marker_button"))
-        , global_solo_button (get_waves_button ("global_solo_button"))
-        , global_rec_button (get_waves_button ("global_rec_button"))
+    , global_tracks_button (get_waves_button ("global_tracks_button"))
+    , marker_button (get_waves_button ("marker_button"))
+    , marker_io_dialog (0)
+    , add_marker_button (get_waves_button ("add_marker_button"))
+    , global_solo_button (get_waves_button ("global_solo_button"))
+    , global_rec_button (get_waves_button ("global_rec_button"))
 	, _tool_marker_button (get_waves_button ("tool_marker_button"))
 	, _tool_arrow_button (get_waves_button ("tool_arrow_button"))
 	, _tool_zoom_button (get_waves_button ("tool_zoom_button"))

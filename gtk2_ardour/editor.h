@@ -566,10 +566,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::HPaned&   edit_pane;
 	Gtk::VPaned&   editor_summary_pane;
 
-	Gtk::EventBox marker_base;
-	Gtk::HBox     marker_box;
-	Gtk::VBox     scrollers_rulers_markers_box;
-
 	void location_changed (ARDOUR::Location *);
 	void location_flags_changed (ARDOUR::Location *, void *);
 	void refresh_location_display ();
@@ -887,13 +883,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	gint bbt_nmarks;
 	uint32_t bbt_bar_helper_on;
 	uint32_t bbt_accent_modulo;
-        void compute_bbt_ruler_scale (framepos_t lower, framepos_t upper,
-				      ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin,
-				      ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end);
+    void compute_bbt_ruler_scale (framepos_t lower, framepos_t upper,
+				    ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin,
+				    ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end);
 
 	ArdourCanvas::Ruler* clock_ruler;
 
-	static const double timebar_height;
+	const double timebar_height;
 	Gtk::Menu          *editor_ruler_menu;
 
 	ArdourCanvas::Rectangle* tempo_bar;
