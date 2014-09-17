@@ -11,10 +11,10 @@
     <HBox height="17">
       <EventBox width="29"
                 bgnormal="#424242"
-                bgactive="#242424"/>
+                bgactive="#F48E16"/>
       <EventBox width="6"
-                bgnormal="#242424"
-                bgactive="#242424"/>
+                bgnormal="#F48E16"
+                bgactive="#F48E16"/>
       <EventBox width="1"
                 bgnormal="#000000"
                 bgactive="#000000"/>
@@ -37,7 +37,7 @@
       <EventBox width="1"
                 bgnormal="#424242"
                 bgactive="#424242"/>
-      <EventBox bgnormal="#6C6C6C"
+      <EventBox bgnormal="#424242"
                 bgactive="#6C6C6C">
         <HBox id="level_meter_home"
               width="8"/>
