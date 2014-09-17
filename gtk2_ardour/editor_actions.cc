@@ -295,6 +295,8 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "playhead-to-edit", _("Playhead to Active Mark"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_align), true));
 	reg_sens (editor_actions, "edit-to-playhead", _("Active Mark to Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_align), false));
 
+	toggle_reg_sens (editor_actions, "toggle-skip-playback", _("Use Skip Ranges"), sigc::mem_fun(*this, &Editor::toggle_skip_playback));
+
 	reg_sens (editor_actions, "set-loop-from-edit-range", _("Set Loop from Edit Range"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_edit_range), false));
 	reg_sens (editor_actions, "set-punch-from-edit-range", _("Set Punch from Edit Range"), sigc::mem_fun(*this, &Editor::set_punch_from_edit_range));
 
@@ -742,6 +744,20 @@ Editor::load_bindings ()
 		info << string_compose (_("Loaded editor bindings from %1"), binding_file) << endmsg;
         } else {
 		error << string_compose (_("Could not find editor.bindings in search path %1"), ardour_config_search_path().to_string()) << endmsg;
+	}
+}
+
+void
+Editor::toggle_skip_playback ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), "toggle-skip-playback");
+
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		bool s = Config->get_skip_playback ();
+		if (tact->get_active() != s) {
+			Config->set_skip_playback (tact->get_active());
+		}
 	}
 }
 
@@ -1720,6 +1736,16 @@ Editor::parameter_changed (std::string p)
 			Gtkmm2ext::enable_tooltips ();
 		} else {
 			Gtkmm2ext::disable_tooltips ();
+		}
+	} else if (p == "skip-playback") {
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-skip-playback"));
+
+		if (act) {
+			bool s = Config->get_skip_playback ();
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+			if (tact->get_active () != s) {
+				tact->set_active (s);
+			}
 		}
 	}
 }
