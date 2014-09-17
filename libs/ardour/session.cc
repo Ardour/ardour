@@ -1295,6 +1295,7 @@ Session::set_auto_loop_location (Location* location)
 void
 Session::locations_added (Location *)
 {
+	_locations->apply (*this, &Session::sync_locations_to_skips);
 	set_dirty ();
 }
 
@@ -1330,6 +1331,8 @@ Session::handle_locations_changed (Locations::LocationList& locations)
 		}
 	}
 
+	sync_locations_to_skips (locations);
+
 	if (!set_loop) {
 		set_auto_loop_location (0);
 	}
@@ -1338,6 +1341,25 @@ Session::handle_locations_changed (Locations::LocationList& locations)
 	}
 
 	set_dirty();
+}
+
+void
+Session::sync_locations_to_skips (Locations::LocationList& locations)
+{
+	Locations::LocationList::iterator i;
+	Location* location;
+
+	clear_events (SessionEvent::LocateRoll);
+
+	for (i = locations.begin(); i != locations.end(); ++i) {
+
+		location = *i;
+
+		if (location->is_range_marker()) {
+			SessionEvent* ev = new SessionEvent (SessionEvent::LocateRoll, SessionEvent::Add, location->start(), location->end(), 1.0);
+			queue_event (ev);
+		}
+	}
 }
 
 void
