@@ -466,6 +466,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Location, IsCDMarker);
 	REGISTER_CLASS_ENUM (Location, IsSessionRange);
 	REGISTER_CLASS_ENUM (Location, IsRangeMarker);
+	REGISTER_CLASS_ENUM (Location, IsSkip);
 	REGISTER_BITS (_Location_Flags);
 
 	REGISTER_CLASS_ENUM (Track, NoFreeze);
