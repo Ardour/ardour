@@ -1062,10 +1062,12 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::Skip:
-		start_locate (ev->target_frame, true, true, false);
+		if (Config->get_skip_playback()) {
+			start_locate (ev->target_frame, true, true, false);
+			_send_timecode_update = true;
+		}
 		remove = false;
 		del = false;
-		_send_timecode_update = true;
 		break;
 
 	case SessionEvent::LocateRollLocate:
