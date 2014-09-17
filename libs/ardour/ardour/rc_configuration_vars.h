@@ -130,6 +130,7 @@ CONFIG_VARIABLE (gain_t, click_gain, "click-gain", 1.0)
 /** if true, we call Processor::flush() on all processors when the transport is stopped.
  *  Note that processors are still run when the transport is not moving.
  */
+CONFIG_VARIABLE (bool, skip_playback, "skip-playback", true)
 CONFIG_VARIABLE (bool, plugins_stop_with_transport, "plugins-stop-with-transport", false)
 CONFIG_VARIABLE (bool, stop_recording_on_xrun, "stop-recording-on-xrun", false)
 CONFIG_VARIABLE (bool, create_xrun_marker, "create-xrun-marker", true)
