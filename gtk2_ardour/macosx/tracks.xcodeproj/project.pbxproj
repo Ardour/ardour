@@ -840,6 +840,7 @@
 		4327942F194F0062003C9FEA /* session_lock_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = session_lock_dialog.xml; path = ../ui/session_lock_dialog.xml; sourceTree = SOURCE_ROOT; };
 		43279430194F0062003C9FEA /* tracks_preferences.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = tracks_preferences.xml; path = ../ui/tracks_preferences.xml; sourceTree = SOURCE_ROOT; };
 		43279475194F009E003C9FEA /* tracks.menus.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = tracks.menus.in; path = ../tracks.menus.in; sourceTree = SOURCE_ROOT; };
+		4397595019CADAFC00740098 /* canvas.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = canvas.xcodeproj; path = ../../libs/canvas/macosx/canvas/canvas.xcodeproj; sourceTree = "<group>"; };
 		43B350F0194F04E00038C140 /* about.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = about.h; path = ../about.h; sourceTree = SOURCE_ROOT; };
 		43B350F1194F04E00038C140 /* actions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = actions.h; path = ../actions.h; sourceTree = SOURCE_ROOT; };
 		43B350F2194F04E00038C140 /* add_route_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = add_route_dialog.h; path = ../add_route_dialog.h; sourceTree = SOURCE_ROOT; };
@@ -1138,6 +1139,7 @@
 		43279039194EFF24003C9FEA = {
 			isa = PBXGroup;
 			children = (
+				4397595019CADAFC00740098 /* canvas.xcodeproj */,
 				CEDB41311951C668006E6F77 /* buildlog.txt */,
 				43B351FA194F131D0038C140 /* pbd.xcodeproj */,
 				43B351F4194F130C0038C140 /* libardour.xcodeproj */,
@@ -2046,6 +2048,13 @@
 			name = headers;
 			sourceTree = "<group>";
 		};
+		4397595119CADAFC00740098 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		43B351EF194F12FB0038C140 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -2110,6 +2119,10 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = 4397595119CADAFC00740098 /* Products */;
+					ProjectRef = 4397595019CADAFC00740098 /* canvas.xcodeproj */;
+				},
+				{
 					ProductGroup = 43B351F5194F130C0038C140 /* Products */;
 					ProjectRef = 43B351F4194F130C0038C140 /* libardour.xcodeproj */;
 				},
@@ -2140,7 +2153,6 @@
 		43B351F9194F130D0038C140 /* libardour.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			name = libardour.dylib;
 			path = liblibardour.dylib;
 			remoteRef = 43B351F8194F130D0038C140 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;

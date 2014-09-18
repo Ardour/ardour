@@ -983,7 +983,7 @@
 		432653E3194EF73C00BEFB46 /* vumeterdsp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vumeterdsp.h; sourceTree = "<group>"; };
 		432653E4194EF73C00BEFB46 /* windows_vst_plugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = windows_vst_plugin.h; sourceTree = "<group>"; };
 		432653E5194EF73C00BEFB46 /* worker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = worker.h; sourceTree = "<group>"; };
-		43AA82A9194EEAAF00A67B56 /* libardour.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = libardour.dylib; path = liblibardour.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		43AA82A9194EEAAF00A67B56 /* liblibardour.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblibardour.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		43AA82AE194EEB2600A67B56 /* amp.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = amp.cc; path = ../amp.cc; sourceTree = SOURCE_ROOT; };
 		43AA82AF194EEB2600A67B56 /* analyser.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = analyser.cc; path = ../analyser.cc; sourceTree = SOURCE_ROOT; };
 		43AA82B0194EEB2600A67B56 /* async_midi_port.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = async_midi_port.cc; path = ../async_midi_port.cc; sourceTree = SOURCE_ROOT; };
@@ -1211,7 +1211,7 @@
 		43AA8464194EEB5F00A67B56 /* combine_regions_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = combine_regions_test.h; path = ../test/combine_regions_test.h; sourceTree = SOURCE_ROOT; };
 		43AA8465194EEB5F00A67B56 /* control_surfaces_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = control_surfaces_test.cc; path = ../test/control_surfaces_test.cc; sourceTree = SOURCE_ROOT; };
 		43AA8466194EEB5F00A67B56 /* control_surfaces_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = control_surfaces_test.h; path = ../test/control_surfaces_test.h; sourceTree = SOURCE_ROOT; };
-		43AA8469194EEB5F00A67B56 /*  */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = folder; name = ""; sourceTree = "<group>"; };
+		43AA8469194EEB5F00A67B56 = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = folder; sourceTree = "<group>"; };
 		43AA846A194EEB5F00A67B56 /* automation_list_property_test1.ref */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = automation_list_property_test1.ref; path = ../test/data/automation_list_property_test1.ref; sourceTree = SOURCE_ROOT; };
 		43AA846B194EEB5F00A67B56 /* automation_list_property_test2.ref */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = automation_list_property_test2.ref; path = ../test/data/automation_list_property_test2.ref; sourceTree = SOURCE_ROOT; };
 		43AA846C194EEB5F00A67B56 /* automation_list_property_test3.ref */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = automation_list_property_test3.ref; path = ../test/data/automation_list_property_test3.ref; sourceTree = SOURCE_ROOT; };
@@ -1794,7 +1794,7 @@
 		43AA829F194EEA6F00A67B56 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				43AA82A9194EEAAF00A67B56 /* libardour.dylib */,
+				43AA82A9194EEAAF00A67B56 /* liblibardour.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2103,7 +2103,7 @@
 		43AA8468194EEB5F00A67B56 /* 2 Track-template */ = {
 			isa = PBXGroup;
 			children = (
-				43AA8469194EEB5F00A67B56 /*  */,
+				43AA8469194EEB5F00A67B56,
 			);
 			path = "2 Track-template";
 			sourceTree = "<group>";
@@ -3022,7 +3022,7 @@
 			);
 			name = libardour;
 			productName = ardour;
-			productReference = 43AA82A9194EEAAF00A67B56 /* libardour.dylib */;
+			productReference = 43AA82A9194EEAAF00A67B56 /* liblibardour.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
