@@ -912,12 +912,6 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 		
 		/* just a click */
 
-		if (was_double_click() && !_views.empty()) {
-			DraggingView dv = _views.front();
-			dv.view->show_region_editor ();
-			
-		}
-
 		return;
 	}
 
