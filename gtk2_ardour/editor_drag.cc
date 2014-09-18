@@ -4473,7 +4473,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 
 	switch (_operation) {
 	case CreateSkipMarker:
-		crect = _editor->range_bar_drag_rect;
+		crect = _editor->skip_drag_rect;
 		break;
 	case CreateRangeMarker:
 		crect = _editor->range_bar_drag_rect;
@@ -4557,7 +4557,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 				_editor->begin_reversible_command (_("new skip marker"));
 				_editor->session()->locations()->next_available_name(rangename,_("skip"));
 				flags = Location::IsRangeMarker | Location::IsSkip;
-				_editor->range_bar_drag_rect->hide();
+				_editor->skip_drag_rect->hide();
 			} else if (_operation == CreateCDMarker) {
 				_editor->session()->locations()->next_available_name(rangename, _("CD"));
 				_editor->begin_reversible_command (_("new CD marker"));

@@ -200,6 +200,11 @@ Editor::initialize_canvas ()
 	cd_marker_bar_drag_rect->set_outline (false);
 	cd_marker_bar_drag_rect->hide ();
 
+	skip_drag_rect = new ArdourCanvas::Rectangle (skip_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
+	CANVAS_DEBUG_NAME (skip_drag_rect, "skip drag");
+	skip_drag_rect->set_outline (false);
+	skip_drag_rect->hide ();
+
 	range_bar_drag_rect = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
 	CANVAS_DEBUG_NAME (range_bar_drag_rect, "range drag");
 	range_bar_drag_rect->set_outline (false);
@@ -935,6 +940,9 @@ Editor::color_handler()
 	range_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RangeDragBarRect());
 	range_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RangeDragBarRect());
 
+	skip_drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RangeDragBarRect());
+	skip_drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RangeDragBarRect());
+
 	transport_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TransportDragRect());
 	transport_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TransportDragRect());
 
@@ -958,6 +966,7 @@ Editor::color_handler()
 	location_cd_marker_color = ARDOUR_UI::config()->get_canvasvar_LocationCDMarker();
 	location_loop_color = ARDOUR_UI::config()->get_canvasvar_LocationLoop();
 	location_punch_color = ARDOUR_UI::config()->get_canvasvar_LocationPunch();
+	location_skip_color = ARDOUR_UI::config()->get_canvasvar_LocationSkip();
 
 	refresh_location_display ();
 /*
@@ -1346,6 +1355,7 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 	case MinsecRulerItem:
 	case BBTRulerItem:
 	case SamplesRulerItem:
+	case SkipBarItem:
 		cursor = _cursors->timebar;
 		break;
 
@@ -1360,7 +1370,6 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 	case CdMarkerBarItem:
 	case VideoBarItem:
 	case PunchLoopBarItem:
-	case SkipBarItem:
 	case DropZoneItem:
 		cursor = which_grabber_cursor();
 		break;

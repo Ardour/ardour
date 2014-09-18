@@ -61,7 +61,7 @@ const char * Marker::default_new_marker_prefix = N_("MARKER");
 static const double name_padding = 10.0;
 
 Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba, const string& annotation,
-		Type type, framepos_t frame, bool handle_events)
+		Type type, framepos_t start_pos, bool handle_events, framepos_t end_pos)
 
 	: editor (ed)
 	, _parent (&parent)
@@ -71,6 +71,8 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 	, _track_canvas_line (0)
         , _scene_change_rect (0)
         , _scene_change_text (0)
+        , frame_position (start_pos)
+        , end_frame (end_pos)
 	, _type (type)
 	, _selected (false)
 	, _shown (false)
@@ -81,8 +83,11 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 	, _label_offset (0)
         , _have_scene_change (false)
 {
-	frame_position = frame;
-	unit_position = editor.sample_to_pixel (frame);
+        if (end_frame >= 0 && (end_frame < frame_position)) {
+                swap (end_frame, frame_position);
+        }
+
+	unit_position = editor.sample_to_pixel (frame_position);
 	unit_position -= _shift;
 
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple (unit_position, 0));
@@ -100,7 +105,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 
 	set_color_rgba (rgba);
 
-        if (type == Mark) {
+        if (type == Mark || type == Skip) {
                 _line_shown = true;
         }
         
@@ -223,6 +228,10 @@ Marker::add_polygon (Type type)
 	*/
 
         switch (type) {
+        case Skip:
+                /*NOTREACHED*/
+                break;
+
         case Mark:
                 points->push_back (ArdourCanvas::Duple (0.0, 0.0));
                 points->push_back (ArdourCanvas::Duple (6.0, 0.0));
@@ -341,7 +350,8 @@ Marker::set_show_line (bool s)
 void
 Marker::setup_line ()
 {
-	if ((Profile->get_trx() && _type == Mark) || (_shown && ((!Profile->get_trx() && _selected) || _line_shown))) {
+	if ((Profile->get_trx() && (_type == Skip || _type == Mark)) || 
+(_shown && ((!Profile->get_trx() && _selected) || _line_shown))) {
 
 		if (_track_canvas_line == 0) {
 
@@ -482,19 +492,28 @@ Marker::setup_name_display ()
 		_name_item->clamp_width (name_width);
 		_name_item->set (_name);
 		
-                if (ARDOUR::Profile->get_trx()) {
+                
+                if (_type == Skip) {
+
+                        /* fully span the extent between frame_position + end_frame */
                         _name_background->set_x0 (_name_item->position().x - _label_offset);
-                        _name_background->set_x1 (_name_item->position().x - _label_offset + name_width + scene_change_width);
+                        _name_background->set_x1 (_name_background->x0() + editor.sample_to_pixel (end_frame - frame_position));
+
                 } else {
-                        if (label_on_left ()) {
-                                _name_background->set_x0 (_name_item->position().x - 2);
-                                _name_background->set_x1 (_name_item->position().x + name_width + _shift + scene_change_width);
+                        if (ARDOUR::Profile->get_trx()) {
+                                _name_background->set_x0 (_name_item->position().x - _label_offset);
+                                _name_background->set_x1 (_name_item->position().x - _label_offset + name_width + scene_change_width);
                         } else {
-                                _name_background->set_x0 (_name_item->position().x - _label_offset + 2);
-                                _name_background->set_x1 (_name_item->position().x + name_width + scene_change_width);
+                                if (label_on_left ()) {
+                                        _name_background->set_x0 (_name_item->position().x - 2);
+                                        _name_background->set_x1 (_name_item->position().x + name_width + _shift + scene_change_width);
+                                } else {
+                                        _name_background->set_x0 (_name_item->position().x - _label_offset + 2);
+                                        _name_background->set_x1 (_name_item->position().x + name_width + scene_change_width);
+                                }
                         }
                 }
-	}
+        }
 
 	_name_background->set_y0 (0);
 	_name_background->set_y1 (_marker_height + 1.0); 

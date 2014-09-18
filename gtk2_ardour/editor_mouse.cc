@@ -681,10 +681,13 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		break;
 
 
+        case SkipBarItem:
+                _drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateSkipMarker), event);
+                return true;
+                break;
+
 	case RangeMarkerBarItem:
-		if (Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
-			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateSkipMarker), event);
-		} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+                if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateRangeMarker), event);
 		} else {
 			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
@@ -706,15 +709,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
 		} else {
 			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateTransportMarker), event);
-		}
-		return true;
-		break;
-
-	case SkipBarItem:
-		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
-		} else {
-			// _drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateTransportMarker), event);
 		}
 		return true;
 		break;
@@ -1297,9 +1291,9 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		case TempoBarItem:
 		case MeterBarItem:
 		case RangeMarkerBarItem:
+                case SkipBarItem:
 		case CdMarkerBarItem:
 		case PunchLoopBarItem:
-		case SkipBarItem:
 		case StreamItem:
 		case TimecodeRulerItem:
 		case SamplesRulerItem:

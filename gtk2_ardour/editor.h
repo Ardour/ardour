@@ -584,6 +584,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	uint32_t location_loop_color;
 	uint32_t location_punch_color;
 	uint32_t location_cd_marker_color;
+	uint32_t location_skip_color;
 
 	struct LocationMarkers {
 		Marker* start;
@@ -1755,6 +1756,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	ArdourCanvas::Rectangle*  cd_marker_bar_drag_rect;
 	ArdourCanvas::Rectangle*  range_bar_drag_rect;
+	ArdourCanvas::Rectangle*  skip_drag_rect;
 	ArdourCanvas::Rectangle*  transport_bar_drag_rect;
 
 #ifdef GTKOSX
@@ -1765,8 +1767,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Rectangle     *transport_bar_postroll_rect;
 	ArdourCanvas::Rectangle     *transport_loop_range_rect;
 	ArdourCanvas::Rectangle     *transport_punch_range_rect;
-	ArdourCanvas::Line     *transport_punchin_line;
-	ArdourCanvas::Line     *transport_punchout_line;
+	ArdourCanvas::Line          *transport_punchin_line;
+	ArdourCanvas::Line          *transport_punchout_line;
 	ArdourCanvas::Rectangle     *transport_preroll_rect;
 	ArdourCanvas::Rectangle     *transport_postroll_rect;
 

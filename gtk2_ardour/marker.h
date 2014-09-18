@@ -52,12 +52,13 @@ class Marker : public sigc::trackable
 		LoopStart,
 		LoopEnd,
 		PunchIn,
-		PunchOut
+		PunchOut,
+                Skip,
 	};
 
 
 	Marker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Type,
-		framepos_t frame = 0, bool handle_events = true);
+		framepos_t frame = 0, bool handle_events = true, framepos_t end_frame = -1);
 
 	virtual ~Marker ();
 
@@ -117,6 +118,7 @@ class Marker : public sigc::trackable
 	std::string  _name;
 	double        unit_position;
 	framepos_t    frame_position;
+	framepos_t    end_frame;
 	double       _shift;
 	Type         _type;
 	int           name_height;

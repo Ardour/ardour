@@ -99,6 +99,8 @@ Editor::add_new_location_internal (Location* location)
 		color = location_loop_color;
 	} else if (location->is_auto_punch()) {
 		color = location_punch_color;
+        } else if (location->is_skip()) {
+                color = location_skip_color;
 	} else {
 		color = location_range_color;
 	}
@@ -139,6 +141,11 @@ Editor::add_new_location_internal (Location* location)
 		lam->start = new Marker (*this, *marker_group, color, _("start"), Marker::SessionStart, location->start());
 		lam->end = new Marker (*this, *marker_group, color, _("end"), Marker::SessionEnd, location->end());
 		group = marker_group;
+                
+        } else if (location->is_skip ()) {
+                /* skip: single marker that spans entire skip area */
+                lam->start = new Marker (*this, *skip_group, color, location->name(), Marker::Skip, location->start(), true, location->end());
+                lam->end = 0;
 
 	} else {
 		// range marker
