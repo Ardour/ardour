@@ -273,6 +273,24 @@
 		CE1C6DCE19879F04006BDB03 /* compact_meter_bridge.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE1C6DCC19879F04006BDB03 /* compact_meter_bridge.cc */; };
 		CE1C6DCF19879F04006BDB03 /* compact_meter_strip.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE1C6DCD19879F04006BDB03 /* compact_meter_strip.cc */; };
 		CE1C6DE01987A924006BDB03 /* master_bus_ui.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE1C6DDF1987A924006BDB03 /* master_bus_ui.cc */; };
+		CE294C5F19CAD4E300D12768 /* add_tracks_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = CE294C5719CAD4E300D12768 /* add_tracks_dialog.xml */; };
+		CE294C6019CAD4E300D12768 /* compact_meter_bridge.xml in Resources */ = {isa = PBXBuildFile; fileRef = CE294C5819CAD4E300D12768 /* compact_meter_bridge.xml */; };
+		CE294C6119CAD4E300D12768 /* compact_meter_strip.xml in Resources */ = {isa = PBXBuildFile; fileRef = CE294C5919CAD4E300D12768 /* compact_meter_strip.xml */; };
+		CE294C6219CAD4E300D12768 /* marker_io_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = CE294C5A19CAD4E300D12768 /* marker_io_dialog.xml */; };
+		CE294C6319CAD4E300D12768 /* meter_bridge_view.xml in Resources */ = {isa = PBXBuildFile; fileRef = CE294C5B19CAD4E300D12768 /* meter_bridge_view.xml */; };
+		CE294C6419CAD4E300D12768 /* meter_strip_gain_meter.xml in Resources */ = {isa = PBXBuildFile; fileRef = CE294C5C19CAD4E300D12768 /* meter_strip_gain_meter.xml */; };
+		CE294C6519CAD4E300D12768 /* mixer_bridge_view.xml in Resources */ = {isa = PBXBuildFile; fileRef = CE294C5D19CAD4E300D12768 /* mixer_bridge_view.xml */; };
+		CE294C6619CAD4E300D12768 /* time_info_box.xml in Resources */ = {isa = PBXBuildFile; fileRef = CE294C5E19CAD4E300D12768 /* time_info_box.xml */; };
+		CE294C7419CAD54500D12768 /* about.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE294C6A19CAD54500D12768 /* about.cc */; };
+		CE294C7519CAD54500D12768 /* marker_io_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE294C6B19CAD54500D12768 /* marker_io_dialog.cc */; };
+		CE294C7619CAD54500D12768 /* mixer_bridge_view.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE294C6C19CAD54500D12768 /* mixer_bridge_view.cc */; };
+		CE294C7719CAD54500D12768 /* open_file_dialog_nix.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE294C6D19CAD54500D12768 /* open_file_dialog_nix.cc */; };
+		CE294C7819CAD54500D12768 /* open_file_dialog_windows.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE294C6E19CAD54500D12768 /* open_file_dialog_windows.cc */; };
+		CE294C7919CAD54500D12768 /* ruler_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE294C6F19CAD54500D12768 /* ruler_dialog.cc */; };
+		CE294C7A19CAD54500D12768 /* soundcloud_export_selector.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE294C7019CAD54500D12768 /* soundcloud_export_selector.cc */; };
+		CE294C7B19CAD54500D12768 /* waves_dropdown.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE294C7119CAD54500D12768 /* waves_dropdown.cc */; };
+		CE294C7C19CAD54500D12768 /* waves_grid.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE294C7219CAD54500D12768 /* waves_grid.cc */; };
+		CE294C7D19CAD54500D12768 /* waves_zoom_control.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE294C7319CAD54500D12768 /* waves_zoom_control.cc */; };
 		CEAFC770195445560016ACF0 /* bbt_time.cc in Sources */ = {isa = PBXBuildFile; fileRef = CEAFC76E195445560016ACF0 /* bbt_time.cc */; };
 		CEAFC771195445560016ACF0 /* time.cc in Sources */ = {isa = PBXBuildFile; fileRef = CEAFC76F195445560016ACF0 /* time.cc */; };
 		CEB0A9F219583F96006D269A /* session_close_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = CEB0A9F119583F96006D269A /* session_close_dialog.cc */; };
@@ -1103,6 +1121,30 @@
 		CE1C6DD419879F1B006BDB03 /* compact_meter_strip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = compact_meter_strip.h; path = ../compact_meter_strip.h; sourceTree = "<group>"; };
 		CE1C6DDB1987A910006BDB03 /* master_bus_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = master_bus_ui.h; path = ../master_bus_ui.h; sourceTree = "<group>"; };
 		CE1C6DDF1987A924006BDB03 /* master_bus_ui.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = master_bus_ui.cc; path = ../master_bus_ui.cc; sourceTree = "<group>"; };
+		CE294C5719CAD4E300D12768 /* add_tracks_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = add_tracks_dialog.xml; sourceTree = "<group>"; };
+		CE294C5819CAD4E300D12768 /* compact_meter_bridge.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = compact_meter_bridge.xml; sourceTree = "<group>"; };
+		CE294C5919CAD4E300D12768 /* compact_meter_strip.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = compact_meter_strip.xml; sourceTree = "<group>"; };
+		CE294C5A19CAD4E300D12768 /* marker_io_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = marker_io_dialog.xml; sourceTree = "<group>"; };
+		CE294C5B19CAD4E300D12768 /* meter_bridge_view.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = meter_bridge_view.xml; sourceTree = "<group>"; };
+		CE294C5C19CAD4E300D12768 /* meter_strip_gain_meter.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = meter_strip_gain_meter.xml; sourceTree = "<group>"; };
+		CE294C5D19CAD4E300D12768 /* mixer_bridge_view.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = mixer_bridge_view.xml; sourceTree = "<group>"; };
+		CE294C5E19CAD4E300D12768 /* time_info_box.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = time_info_box.xml; sourceTree = "<group>"; };
+		CE294C6A19CAD54500D12768 /* about.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = about.cc; path = ../about.cc; sourceTree = "<group>"; };
+		CE294C6B19CAD54500D12768 /* marker_io_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = marker_io_dialog.cc; path = ../marker_io_dialog.cc; sourceTree = "<group>"; };
+		CE294C6C19CAD54500D12768 /* mixer_bridge_view.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mixer_bridge_view.cc; path = ../mixer_bridge_view.cc; sourceTree = "<group>"; };
+		CE294C6D19CAD54500D12768 /* open_file_dialog_nix.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = open_file_dialog_nix.cc; path = ../open_file_dialog_nix.cc; sourceTree = "<group>"; };
+		CE294C6E19CAD54500D12768 /* open_file_dialog_windows.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = open_file_dialog_windows.cc; path = ../open_file_dialog_windows.cc; sourceTree = "<group>"; };
+		CE294C6F19CAD54500D12768 /* ruler_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ruler_dialog.cc; path = ../ruler_dialog.cc; sourceTree = "<group>"; };
+		CE294C7019CAD54500D12768 /* soundcloud_export_selector.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = soundcloud_export_selector.cc; path = ../soundcloud_export_selector.cc; sourceTree = "<group>"; };
+		CE294C7119CAD54500D12768 /* waves_dropdown.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_dropdown.cc; path = ../waves_dropdown.cc; sourceTree = "<group>"; };
+		CE294C7219CAD54500D12768 /* waves_grid.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_grid.cc; path = ../waves_grid.cc; sourceTree = "<group>"; };
+		CE294C7319CAD54500D12768 /* waves_zoom_control.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_zoom_control.cc; path = ../waves_zoom_control.cc; sourceTree = "<group>"; };
+		CE294C7E19CAD58500D12768 /* ardour_dropdown.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ardour_dropdown.h; path = ../ardour_dropdown.h; sourceTree = "<group>"; };
+		CE294C7F19CAD58500D12768 /* marker_io_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = marker_io_dialog.h; path = ../marker_io_dialog.h; sourceTree = "<group>"; };
+		CE294C8019CAD58500D12768 /* mixer_bridge_view.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mixer_bridge_view.h; path = ../mixer_bridge_view.h; sourceTree = "<group>"; };
+		CE294C8119CAD58500D12768 /* soundcloud_export_selector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = soundcloud_export_selector.h; path = ../soundcloud_export_selector.h; sourceTree = "<group>"; };
+		CE294C8219CAD58500D12768 /* waves_dropdown.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_dropdown.h; path = ../waves_dropdown.h; sourceTree = "<group>"; };
+		CE294C8319CAD58500D12768 /* waves_zoom_control.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_zoom_control.h; path = ../waves_zoom_control.h; sourceTree = "<group>"; };
 		CEAFC76E195445560016ACF0 /* bbt_time.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bbt_time.cc; path = ../../libs/timecode/src/bbt_time.cc; sourceTree = "<group>"; };
 		CEAFC76F195445560016ACF0 /* time.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = time.cc; path = ../../libs/timecode/src/time.cc; sourceTree = "<group>"; };
 		CEAFC775195445D90016ACF0 /* bbt_time.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bbt_time.h; path = ../../libs/timecode/timecode/bbt_time.h; sourceTree = "<group>"; };
@@ -1159,6 +1201,16 @@
 		43279040194EFF38003C9FEA /* source */ = {
 			isa = PBXGroup;
 			children = (
+				CE294C6A19CAD54500D12768 /* about.cc */,
+				CE294C6B19CAD54500D12768 /* marker_io_dialog.cc */,
+				CE294C6C19CAD54500D12768 /* mixer_bridge_view.cc */,
+				CE294C6D19CAD54500D12768 /* open_file_dialog_nix.cc */,
+				CE294C6E19CAD54500D12768 /* open_file_dialog_windows.cc */,
+				CE294C6F19CAD54500D12768 /* ruler_dialog.cc */,
+				CE294C7019CAD54500D12768 /* soundcloud_export_selector.cc */,
+				CE294C7119CAD54500D12768 /* waves_dropdown.cc */,
+				CE294C7219CAD54500D12768 /* waves_grid.cc */,
+				CE294C7319CAD54500D12768 /* waves_zoom_control.cc */,
 				CE1A9079199A37AE00ECA62B /* add_tracks_dialog.cc */,
 				CE1C6DDF1987A924006BDB03 /* master_bus_ui.cc */,
 				CE1C6DCC19879F04006BDB03 /* compact_meter_bridge.cc */,
@@ -1751,6 +1803,14 @@
 		43279429194F0062003C9FEA /* ui */ = {
 			isa = PBXGroup;
 			children = (
+				CE294C5719CAD4E300D12768 /* add_tracks_dialog.xml */,
+				CE294C5819CAD4E300D12768 /* compact_meter_bridge.xml */,
+				CE294C5919CAD4E300D12768 /* compact_meter_strip.xml */,
+				CE294C5A19CAD4E300D12768 /* marker_io_dialog.xml */,
+				CE294C5B19CAD4E300D12768 /* meter_bridge_view.xml */,
+				CE294C5C19CAD4E300D12768 /* meter_strip_gain_meter.xml */,
+				CE294C5D19CAD4E300D12768 /* mixer_bridge_view.xml */,
+				CE294C5E19CAD4E300D12768 /* time_info_box.xml */,
 				CEB9D787197516BE00B21780 /* audio_time_axis.xml */,
 				CEB9D788197516BE00B21780 /* automation_time_axis.xml */,
 				CEB9D789197516BE00B21780 /* editor_mixer.xml */,
@@ -1785,6 +1845,12 @@
 		43279480194F00CB003C9FEA /* headers */ = {
 			isa = PBXGroup;
 			children = (
+				CE294C7E19CAD58500D12768 /* ardour_dropdown.h */,
+				CE294C7F19CAD58500D12768 /* marker_io_dialog.h */,
+				CE294C8019CAD58500D12768 /* mixer_bridge_view.h */,
+				CE294C8119CAD58500D12768 /* soundcloud_export_selector.h */,
+				CE294C8219CAD58500D12768 /* waves_dropdown.h */,
+				CE294C8319CAD58500D12768 /* waves_zoom_control.h */,
 				CE1A907E199A37BF00ECA62B /* add_tracks_dialog.h */,
 				CE1C6DDB1987A910006BDB03 /* master_bus_ui.h */,
 				CE1C6DD319879F1B006BDB03 /* compact_meter_bridge.h */,
@@ -2442,6 +2508,14 @@
 				CEB9D798197516BE00B21780 /* mixer_gain_meter.xml in Resources */,
 				CEB9D799197516BE00B21780 /* mixer_strip.xml in Resources */,
 				CEB9D79A197516BE00B21780 /* track_header_gain_meter.xml in Resources */,
+				CE294C5F19CAD4E300D12768 /* add_tracks_dialog.xml in Resources */,
+				CE294C6019CAD4E300D12768 /* compact_meter_bridge.xml in Resources */,
+				CE294C6119CAD4E300D12768 /* compact_meter_strip.xml in Resources */,
+				CE294C6219CAD4E300D12768 /* marker_io_dialog.xml in Resources */,
+				CE294C6319CAD4E300D12768 /* meter_bridge_view.xml in Resources */,
+				CE294C6419CAD4E300D12768 /* meter_strip_gain_meter.xml in Resources */,
+				CE294C6519CAD4E300D12768 /* mixer_bridge_view.xml in Resources */,
+				CE294C6619CAD4E300D12768 /* time_info_box.xml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2461,6 +2535,16 @@
 				CE1C6DCF19879F04006BDB03 /* compact_meter_strip.cc in Sources */,
 				CE1C6DE01987A924006BDB03 /* master_bus_ui.cc in Sources */,
 				CE1A907A199A37AE00ECA62B /* add_tracks_dialog.cc in Sources */,
+				CE294C7419CAD54500D12768 /* about.cc in Sources */,
+				CE294C7519CAD54500D12768 /* marker_io_dialog.cc in Sources */,
+				CE294C7619CAD54500D12768 /* mixer_bridge_view.cc in Sources */,
+				CE294C7719CAD54500D12768 /* open_file_dialog_nix.cc in Sources */,
+				CE294C7819CAD54500D12768 /* open_file_dialog_windows.cc in Sources */,
+				CE294C7919CAD54500D12768 /* ruler_dialog.cc in Sources */,
+				CE294C7A19CAD54500D12768 /* soundcloud_export_selector.cc in Sources */,
+				CE294C7B19CAD54500D12768 /* waves_dropdown.cc in Sources */,
+				CE294C7C19CAD54500D12768 /* waves_grid.cc in Sources */,
+				CE294C7D19CAD54500D12768 /* waves_zoom_control.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
