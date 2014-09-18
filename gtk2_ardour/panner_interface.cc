@@ -100,7 +100,6 @@ PannerInterface::~PannerInterface ()
 bool
 PannerInterface::on_enter_notify_event (GdkEventCrossing *)
 {
-	grab_focus ();
 	Keyboard::magic_widget_grab_focus ();
 	return false;
 }

@@ -1239,10 +1239,6 @@ Editor::generic_event_handler (GdkEvent* ev)
 		case GDK_NOTIFY_VIRTUAL:
 		case GDK_NOTIFY_NONLINEAR:
 		case GDK_NOTIFY_NONLINEAR_VIRTUAL:
-			/* leaving window, so reset focus, thus ending any and
-			   all text entry operations.
-			*/
-			reset_focus();
 			break;
 		}
 		break;
