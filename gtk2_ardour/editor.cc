@@ -658,7 +658,7 @@ Editor::Editor ()
 	setup_toolbar ();
 
         ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::solo_blink));
-        ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::record_status_blink));
+        ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::record_status_update));
 	global_solo_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::global_solo_clicked));
 	global_rec_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::global_rec_clicked));
 	marker_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::marker_button_clicked));
@@ -5738,33 +5738,26 @@ Editor::global_solo_clicked (WavesButton*)
 }
 
 void
-Editor::record_status_blink (bool onoff)
+Editor::record_status_update (bool onoff)
 {
 	if (!_session) {
-                return;
+        return;
 	}
         
-        if (_session->have_rec_enabled_track()) {
-                switch (_session->record_status()) {
-                case Session::Disabled:
-                case Session::Enabled:
-                        global_rec_button.set_active (onoff);
-                        break;
-
-                case Session::Recording:
-                        global_rec_button.set_active (true);
-                        break;
-                }
-	} else {
+    if ( !_session->have_rec_disabled_track() )
+        global_rec_button.set_active (true);
+	else
 		global_rec_button.set_active (false);
-	}
 }
 
 void
 Editor::global_rec_clicked (WavesButton*)
 {
         DisplaySuspender ds;
-        _session->set_record_enabled (_session->get_routes(), !_session->have_rec_enabled_track());
+        /* If exists record disabled track make all tracks record enabled.
+           If does not exist record disabled track make all tracks record disabled.
+         */
+        _session->set_record_enabled (_session->get_routes(), _session->have_rec_disabled_track());
 }
         
 void

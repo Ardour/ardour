@@ -218,6 +218,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	BufferSet& get_mix_buffers (ChanCount count = ChanCount::ZERO);
 
 	bool have_rec_enabled_track () const;
+    bool have_rec_disabled_track () const;
 
 	bool have_captured() const { return _have_captured; }
 
@@ -1616,6 +1617,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void update_have_rec_enabled_track ();
 	gint _have_rec_enabled_track;
+    gint _have_rec_disabled_track;
 
 	static int ask_about_playlist_deletion (boost::shared_ptr<Playlist>);
 

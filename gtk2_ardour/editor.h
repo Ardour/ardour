@@ -1630,7 +1630,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         void global_solo_clicked (WavesButton*);
         WavesButton& global_rec_button;
         void global_rec_clicked (WavesButton*);
-        void record_status_blink (bool);
+        void record_status_update (bool);
 
 	Gtkmm2ext::TearOff*      _mouse_mode_tearoff;
 	WavesButton& _tool_marker_button;
