@@ -53,8 +53,8 @@
                     x="60"
                     y="4"/>
               <HBox id="primary_clock_home"
-                    x="132"
-                    y="6"/>
+                    x="122"
+                    y="3"/>
               <Dropdown id="display_format_dropdown"
                         style="topbar_dropdown"
                         x="200"
@@ -374,7 +374,8 @@
                                 width="49"
                                 height="16"
                                 normalicon="add_marker_button"
-                                activeicon="add_marker_button"/>
+                                activeicon="add_marker_button"
+                                tooltip="Add Marker"/>
                   </HBox>
                   <EventBox height="1"
                             bgnormal="#424242"/>
@@ -395,17 +396,20 @@
                                 width="140"
                                 height="30"
                                 normalicon="global_tracks_button"
-                                activeicon="global_tracks_button"/>
+                                activeicon="global_tracks_button"
+                                tooltip="Show/Hide Global Tracks"/>
                     <iconbutton id="global_rec_button"
                                 width="41"
                                 height="30"
                                 normalicon="global_rec_button"
-                                activeicon="global_rec_button_active"/>
+                                activeicon="global_rec_button_active"
+                                tooltip="Global Record"/>
                     <iconbutton id="global_solo_button"
                                 width="41"
                                 height="30"
                                 normalicon="global_solo_button"
-                                activeicon="global_solo_button_active"/>
+                                activeicon="global_solo_button_active"
+                                tooltip="Global Solo"/>
                     <EventBox width="8"
                               bgnormal="#6C6C6C"/>
                   </HBox>
