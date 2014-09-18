@@ -33,7 +33,7 @@
                   height="17"
                   normalicon="master_mute"
                   activeicon="master_mute_active"
-                  prelighticon="master_mute_prelight"
+                  _prelighticon="master_mute_prelight"
                   tooltip="Mute"/>
       <EventBox width="1"
                 bgnormal="#424242"
@@ -69,14 +69,14 @@
               height="27"
               normalicon="master_clear_solo"
               activeicon="master_clear_solo_active"
-              prelighticon="master_clear_solo_prelight"
+              _prelighticon="master_clear_solo_prelight"
               ui.orphan="true"/>
   <iconbutton id="global_rec_button"
               width="47"
               height="27"
               normalicon="master_global_rec"
               activeicon="master_global_rec_active"
-              prelighticon="master_global_rec_prelight"
+              _prelighticon="master_global_rec_prelight"
               ui.orphan="true"/>
   <icon id="master_bus_multi_out_mode_icon"
         source="master_bus_multi_out_mode.png"

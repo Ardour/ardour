@@ -59,7 +59,7 @@
               height="20"
               normalicon="time_axis_playlist"
               activeicon="time_axis_playlist"
-              prelighticon="time_axis_playlist"/>
+              _prelighticon="time_axis_playlist"/>
           <HBox width="3"/>
           <HBox>
             <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
@@ -70,7 +70,7 @@
                           height="20"
                           normalicon="time_axis_record"
                           activeicon="time_axis_record_active"
-                          prelighticon="time_axis_record_prelight"
+                          _prelighticon="time_axis_record_prelight"
                           tooltip="Record Enable"/>
               <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
             </VBox>
@@ -83,7 +83,7 @@
                           normalicon="time_axis_solo"
                           activeicon="time_axis_solo_active"
                           implicitactiveicon="time_axis_solo_safe"
-                          prelighticon="time_axis_solo_prelight"
+                          _prelighticon="time_axis_solo_prelight"
                           tooltip="Solo"/>
               <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
             </VBox>
@@ -99,7 +99,7 @@
                         height="20"
                         normalicon="time_axis_monitor_input"
                         activeicon="time_axis_monitor_input_active"
-                        prelighticon="time_axis_monitor_input_prelight"
+                        _prelighticon="time_axis_monitor_input_prelight"
                         tooltip="Input Monitoring"/>
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
           </VBox>
@@ -111,7 +111,7 @@
                         normalicon="time_axis_mute"
                         activeicon="time_axis_mute_active"
                         implicitactiveicon="time_axis_mute_implicit"
-                        prelighticon="time_axis_mute_prelight"
+                        _prelighticon="time_axis_mute_prelight"
                         tooltip="Mute"/>
             <Button id="master_mute_button" ui.orphan="true"/>
             <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>

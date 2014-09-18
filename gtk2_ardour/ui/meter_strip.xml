@@ -19,7 +19,7 @@
                             height="12"
                             normalicon="meter_strip_record"
                             activeicon="meter_strip_record_active"
-                            prelighticon="meter_strip_record_prelight"/>
+                            _prelighticon="meter_strip_record_prelight"/>
                 <EventBox bgnormal="#000000"
                           bgactive="#000000"
                           width="1"/>
@@ -28,7 +28,7 @@
                             height="12"
                             normalicon="meter_strip_monitor_input"
                             activeicon="meter_strip_monitor_input_active"
-                            prelighticon="meter_strip_monitor_input_prelight"/>
+                            _prelighticon="meter_strip_monitor_input_prelight"/>
               </HBox>
               <EventBox bgnormal="#000000"
                         bgactive="#000000"
@@ -40,7 +40,7 @@
                             normalicon="meter_strip_mute"
                             activeicon="meter_strip_mute_active"
                             implicitactiveicon="meter_strip_mute_implicit"
-                            prelighticon="mixer_mute_prelight"/>
+                            _prelighticon="mixer_mute_prelight"/>
                 <EventBox bgnormal="#000000"
                           bgactive="#000000"
                           width="1"/>
@@ -50,7 +50,7 @@
                             normalicon="meter_strip_solo"
                             activeicon="meter_strip_solo_active"
                             implicitactiveicon="meter_strip_solo_safe"
-                            prelighticon="meter_strip_solo_prelight"/>
+                            _prelighticon="meter_strip_solo_prelight"/>
               </HBox>
               <EventBox bgnormal="#000000"
                         bgactive="#000000"

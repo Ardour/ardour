@@ -35,7 +35,7 @@
                   height="65"
                   normalicon="preferences_audio_settings_tab_button"
                   activeicon="preferences_audio_settings_tab_button_active"
-                  prelighticon="preferences_audio_settings_tab_button_prelight"/>
+                  _prelighticon="preferences_audio_settings_tab_button_prelight"/>
       <EventBox bgnormal="#A0A0A0"
                 width="107"
                 height="1"/>
@@ -44,7 +44,7 @@
                   height="65"
                   normalicon="preferences_midi_settings_tab_button"
                   activeicon="preferences_midi_settings_tab_button_active"
-                  prelighticon="preferences_midi_settings_tab_button_prelight"/>
+                  _prelighticon="preferences_midi_settings_tab_button_prelight"/>
       <EventBox bgnormal="#A0A0A0"
                 width="107"
                 height="1"/>
@@ -53,7 +53,7 @@
                   height="65"
                   normalicon="preferences_session_settings_tab_button"
                   activeicon="preferences_session_settings_tab_button_active"
-                  prelighticon="preferences_session_settings_tab_button_prelight"/>
+                  _prelighticon="preferences_session_settings_tab_button_prelight"/>
       <EventBox bgnormal="#A0A0A0"
                 width="107"
                 height="1"/>
@@ -72,7 +72,7 @@
                   height="28"
                   normalicon="preferences_ok_button"
                   activeicon="preferences_ok_button_active"
-                  prelighticon="preferences_ok_button_prelight"/>
+                  _prelighticon="preferences_ok_button_prelight"/>
       <Iconbutton id="cancel_button"
                   style="generic_button"
                   x="347"
@@ -81,7 +81,7 @@
                   height="28"
                   normalicon="preferences_cancel_button"
                   activeicon="preferences_cancel_button_active"
-                  prelighticon="preferences_cancel_button_prelight"/>
+                  _prelighticon="preferences_cancel_button_prelight"/>
       <Iconbutton id="apply_button"
                   style="generic_button"
                   x="419"
@@ -90,7 +90,7 @@
                   height="28"
                   normalicon="preferences_apply_button"
                   activeicon="preferences_apply_button_active"
-                  prelighticon="preferences_apply_button_prelight"/>
+                  _prelighticon="preferences_apply_button_prelight"/>
     </Layout>
     <Layout id="midi_settings_layout"
             bgnormal="#565656"
@@ -180,7 +180,7 @@
                   height="20"
                   normalicon="preference_device_dropdown"
                   activeicon="preference_device_dropdown_active"
-                  prelighticon="preference_device_dropdown_prelight"
+                  _prelighticon="preference_device_dropdown_prelight"
                   inactiveicon="preference_device_dropdown_inactive">
           <HBox>
             <VBox width="10"/>
@@ -205,7 +205,7 @@
                   height="20"
                   normalicon="preference_device_dropdown"
                   activeicon="preference_device_dropdown_active"
-                  prelighticon="preference_device_dropdown_prelight"
+                  _prelighticon="preference_device_dropdown_prelight"
                   inactiveicon="preference_device_dropdown_inactive">
           <HBox>
             <VBox width="10"/>
@@ -229,7 +229,7 @@
                   height="20"
                   normalicon="preference_rate_buffer_dropdown"
                   activeicon="preference_rate_buffer_dropdown_active"
-                  prelighticon="preference_rate_buffer_dropdown_prelight"
+                  _prelighticon="preference_rate_buffer_dropdown_prelight"
                   inactiveicon="preference_rate_buffer_dropdown_inactive">
           <HBox>
             <VBox width="10"/>
@@ -253,7 +253,7 @@
                   height="20"
                   normalicon="preference_rate_buffer_dropdown"
                   activeicon="preference_rate_buffer_dropdown_active"
-                  prelighticon="preference_rate_buffer_dropdown_prelight"
+                  _prelighticon="preference_rate_buffer_dropdown_prelight"
                   inactiveicon="preference_rate_buffer_dropdown_inactive">
           <HBox>
             <VBox width="10"/>
@@ -272,7 +272,7 @@
                     height="49"
                     normalicon="preferences_device_control_panel_button"
                     activeicon="preferences_device_control_panel_button_active"
-                    prelighticon="preferences_device_control_panel_button_prelight"/>
+                    _prelighticon="preferences_device_control_panel_button_prelight"/>
 
         <Label id="latency_label" style="generic_control" text="INPUT LATENCY:" x="16" y="74  " width="476"/>
       </Layout>
@@ -289,7 +289,7 @@
                     height="28"
                     normalicon="preferences_multi_out_button"
                     activeicon="preferences_multi_out_button_active"
-                    prelighticon="preferences_multi_out_button_prelight"/>
+                    _prelighticon="preferences_multi_out_button_prelight"/>
         <Iconbutton id="stereo_out_button"
                     x="387"
                     y="6"
@@ -297,7 +297,7 @@
                     height="28"
                     normalicon="preferences_stereo_out_button"
                     activeicon="preferences_stereo_out_button_active"
-                    prelighticon="preferences_stereo_out_button_prelight"/>
+                    _prelighticon="preferences_stereo_out_button_prelight"/>
       </Layout>
       <Layout bgnormal="#565656" x="0" y="141" width="505" height="416">
         <Layout bgnormal="#862579" x="16" y="13" width="3" height="41"/>
@@ -395,7 +395,7 @@
                     height="39"
                     normalicon="preference_name_track_after_driver_button"
                     activeicon="preference_name_track_after_driver_active"
-                    prelighticon="preference_name_track_after_driver_prelight"/>
+                    _prelighticon="preference_name_track_after_driver_prelight"/>
         <Iconbutton id="reset_tracks_name_to_default_button"
                     x="153"
                     y="369"
@@ -403,7 +403,7 @@
                     height="39"
                     normalicon="preference_reset_track_names_button"
                     activeicon="preference_reset_track_names_button_active"
-                    prelighticon="preference_reset_track_names_button_prelight"/>
+                    _prelighticon="preference_reset_track_names_button_prelight"/>
         <Iconbutton id="yes_button"
                     text="YES"
                     x="292"
@@ -412,7 +412,7 @@
                     height="39"
                     normalicon="preference_yes_button"
                     activeicon="preference_yes_button_active"
-                    prelighticon="preference_yes_button_prelight"/>
+                    _prelighticon="preference_yes_button_prelight"/>
         <Iconbutton id="no_button"
                     text="NO"
                     x="345"
@@ -421,7 +421,7 @@
                     height="39"
                     normalicon="preference_no_button"
                     activeicon="preference_no_button_active"
-                    prelighticon="preference_no_button_prelight"/>
+                    _prelighticon="preference_no_button_prelight"/>
       </Layout>
     </Layout>
     <Layout id="session_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557" visible="false">
@@ -439,7 +439,7 @@
                 height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
-                prelighticon="preference_session_settings_dropdown_prelight">
+                _prelighticon="preference_session_settings_dropdown_prelight">
         <HBox>
           <VBox width="10"/>
           <Label style="generic_control"
@@ -466,7 +466,7 @@
                 height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
-                prelighticon="preference_session_settings_dropdown_prelight">
+                _prelighticon="preference_session_settings_dropdown_prelight">
         <HBox>
           <VBox width="10"/>
           <Label style="generic_control"
@@ -491,7 +491,7 @@
                 height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
-                prelighticon="preference_session_settings_dropdown_prelight">
+                _prelighticon="preference_session_settings_dropdown_prelight">
         <HBox>
           <VBox width="10"/>
           <Label style="generic_control"
@@ -523,7 +523,7 @@
                 height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
-                prelighticon="preference_session_settings_dropdown_prelight">
+                _prelighticon="preference_session_settings_dropdown_prelight">
         <HBox>
           <VBox width="10"/>
           <Label style="generic_control"
@@ -554,7 +554,7 @@
                 height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
-                prelighticon="preference_session_settings_dropdown_prelight">
+                _prelighticon="preference_session_settings_dropdown_prelight">
         <HBox>
           <VBox width="10"/>
           <Label style="generic_control"
@@ -588,7 +588,7 @@
                 height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
-                prelighticon="preference_session_settings_dropdown_prelight">
+                _prelighticon="preference_session_settings_dropdown_prelight">
         <HBox>
           <VBox width="10"/>
           <Label style="generic_control"
@@ -616,7 +616,7 @@
                   height = "28"
                   normalicon="preferences_browse_button"
                   activeicon="preferences_browse_button_active"
-                  prelighticon="preferences_browse_button_prelight"/>
+                  _prelighticon="preferences_browse_button_prelight"/>
       <Label id="default_open_path"
              style="generic_control"
              text=""

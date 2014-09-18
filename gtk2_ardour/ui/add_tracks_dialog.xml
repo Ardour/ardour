@@ -37,7 +37,7 @@
               height="20"
               normalicon="added_track_format_dropdown"
               activeicon="added_track_format_dropdown_active"
-              prelighticon="added_track_format_dropdown_prelight"
+              _prelighticon="added_track_format_dropdown_prelight"
               inactiveicon="added_track_format_dropdown_inactive">
       <HBox>
         <VBox width="10"/>

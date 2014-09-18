@@ -120,7 +120,7 @@ WavesButton::render (cairo_t* cr, cairo_rectangle_t*)
 											(_hovering ? 
 												(_pushed ? 
 													Gtk::STATE_ACTIVE :
-													Gtk::STATE_PRELIGHT ) :
+													Gtk::STATE_NORMAL ) : // or Gtk::STATE_PRELIGHT if you want hovering
 												(get_active() ? 
 													Gtk::STATE_ACTIVE :
 													Gtk::STATE_NORMAL)));
