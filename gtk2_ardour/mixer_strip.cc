@@ -1538,6 +1538,7 @@ void
 MixerStrip::name_changed ()
 {
 	name_button.set_text ( cut_string(_route->name(), _max_name_size) );
+    _name_entry.set_text ( cut_string(_route->name(), _max_name_size) );
 	ARDOUR_UI::instance()->set_tip (name_button, _route->name());
 }
 
