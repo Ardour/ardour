@@ -177,6 +177,7 @@ class MixerStrip : public RouteUI
     void on_record_state_changed ();
     
     Gtk::Entry& _name_entry;
+    Gtk::EventBox& _name_entry_eventbox;
     void begin_name_edit ();
     void end_name_edit (int);
     

@@ -110,6 +110,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, const std::string& layout_s
     , _name_button_home (get_event_box("name_label_home"))
     , name_button (get_waves_button ("name_button"))
     , _name_entry (get_entry("name_entry"))
+    , _name_entry_eventbox (get_event_box("name_entry_eventbox"))
 	, color_palette_button (get_waves_button ("color_palette_button"))
 	, color_palette_home (get_container ("color_palette_home"))
 	, color_buttons_home (get_container ("color_buttons_home"))
@@ -192,6 +193,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
     , _name_button_home (get_event_box("name_label_home"))
     , name_button (get_waves_button ("name_button"))
     , _name_entry (get_entry ("name_entry"))
+    , _name_entry_eventbox (get_event_box("name_entry_eventbox"))
 	, color_palette_button (get_waves_button ("color_palette_button"))
 	, color_palette_home (get_container ("color_palette_home"))
 	, color_buttons_home (get_container ("color_buttons_home"))
@@ -434,10 +436,11 @@ MixerStrip::begin_name_edit ()
     
     _name_entry.set_text ( _route->name() );
     name_button.hide();
+    _name_entry_eventbox.show ();
     _name_entry.show ();
-    
+        
     _name_entry.select_region (0, -1);
-    _name_entry.set_state (STATE_SELECTED);
+    _name_entry.set_state (STATE_NORMAL);
     _name_entry.grab_focus ();
     _name_entry.start_editing (0);
 }
@@ -476,6 +479,7 @@ MixerStrip::end_name_edit (int response)
     
 	name_button.show ();
 	_name_entry.hide ();
+    _name_entry_eventbox.hide ();
 }
 
 void

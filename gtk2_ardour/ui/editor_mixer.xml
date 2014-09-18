@@ -255,12 +255,18 @@
                       fgactive="#D7D7D7"
                       winfont ="Arial 10"
                       macfont ="Helvetica 10"
-              textcolornormal="#ffffff"
-              textcoloractive="#ffffff"
-              textcolorselected="#ffffff"/>
+                      textcolornormal="#ffffff"
+                      textcoloractive="#ffffff"
+                      textcolorselected="#ffffff"/>
+              <EventBox id="name_entry_eventbox"
+                        width="95"
+                        height="47"
+                        noshowall="true"
+                        visible="false">
               <FocusEntry id="name_entry"
-                          width="57"
-                          height="28"
+                          horzalignment="center"
+                          width="80"
+                          height="20"
                           fgnormal="#ffffff"
                           winfont ="Arial 10"
                           macfont ="Helvetica 10"
@@ -270,6 +276,7 @@
                           textcolorselected="#ffffff"
                           noshowall="true"
                           visible="false"/>
+              </EventBox>
           </HBox>
           </EventBox>
             

@@ -66,6 +66,10 @@
                           fghover="#ffffff"
                           winfont ="Arial 10"
                           macfont ="Helvetica 10"/>
+                  <EventBox id="name_entry_eventbox"
+                            width="57"
+                            height="28"
+                            visible="false">
                   <FocusEntry id="name_entry"
                               width="57"
                               height="28"
@@ -77,7 +81,8 @@
                               textcoloractive="#ffffff"
                               textcolorselected="#ffffff"
                               noshowall="true"
-                              visible="false"/> 
+                              visible="false"/>
+                  </EventBox>
               </HBox>
               </EventBox>
                 
