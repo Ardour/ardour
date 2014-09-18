@@ -516,7 +516,7 @@ Editor::Editor ()
 
 	initialize_canvas ();
 
-        CairoWidget::set_focus_handler (sigc::mem_fun (*this, &Editor::reset_focus));
+    CairoWidget::set_focus_handler (sigc::mem_fun (*this, &Editor::reset_focus));
 
 	_summary = new EditorSummary (this);
 
@@ -1128,7 +1128,7 @@ Editor::on_realize ()
 	Window::on_realize ();
 	Realized ();
 
-        signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
+    signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
 }
 
 // Update lock time and auto_save time
@@ -1224,6 +1224,7 @@ Editor::generic_event_handler (GdkEvent* ev)
 {
         switch (ev->type) {
         case GDK_BUTTON_PRESS:
+                reset_focus();
         case GDK_BUTTON_RELEASE:
         case GDK_MOTION_NOTIFY:
         case GDK_KEY_PRESS:
@@ -1240,6 +1241,9 @@ Editor::generic_event_handler (GdkEvent* ev)
 		case GDK_NOTIFY_NONLINEAR:
 		case GDK_NOTIFY_NONLINEAR_VIRTUAL:
 			break;
+        case GDK_FOCUS_CHANGE:
+            reset_focus();
+            break;
 		}
 		break;
         default:
@@ -5008,7 +5012,7 @@ Editor::add_routes (RouteList& routes)
                 } else {
                         rtv->leave_internal_edit_mode ();
                 }
-
+        
 		rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
 		rtv->view()->RegionViewRemoved.connect (sigc::mem_fun (*this, &Editor::region_view_removed));
 	}
