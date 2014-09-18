@@ -625,8 +625,8 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		Adjustment* adj = control_ui->controller->adjustment();
 		boost::shared_ptr<PluginInsert::PluginControl> pc = boost::dynamic_pointer_cast<PluginInsert::PluginControl> (control_ui->control);
 
-		adj->set_lower (pc->internal_to_interface (desc.lower));
-		adj->set_upper (pc->internal_to_interface (desc.upper));
+		adj->set_lower (desc.lower);
+		adj->set_upper (desc.upper);
 
 		adj->set_step_increment (desc.step);
 		adj->set_page_increment (desc.largestep);
@@ -644,14 +644,13 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 			control_ui->controller->set_size_request (200, req.height);
 			control_ui->controller->set_name (X_("ProcessorControlSlider"));
-			control_ui->controller->set_logarithmic (desc.logarithmic);
 
 			control_ui->controller->StartGesture.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::start_touch), control_ui));
 			control_ui->controller->StopGesture.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::stop_touch), control_ui));
 
 		}
 
-		adj->set_value (pc->internal_to_interface (plugin->get_parameter (port_index)));
+		adj->set_value (plugin->get_parameter (port_index));
 
 		/* XXX memory leak: SliderController not destroyed by ControlUI
 		   destructor, and manage() reports object hierarchy

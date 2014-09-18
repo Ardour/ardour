@@ -71,9 +71,9 @@ AutomationController::create(
 {
 	Gtk::Adjustment* adjustment = manage (
 		new Gtk::Adjustment (
-			ac->internal_to_interface (param.normal()),
-			ac->internal_to_interface (param.min()),
-			ac->internal_to_interface (param.max()),
+			param.normal(),
+			param.min(),
+			param.max(),
 			(param.max() - param.min()) / 100.0,
 			(param.max() - param.min()) / 10.0
 			)
@@ -94,7 +94,7 @@ AutomationController::get_label (double& xpos)
 void
 AutomationController::display_effective_value()
 {
-	double const interface_value = _controllable->internal_to_interface (_controllable->get_value());
+	double const interface_value = _controllable->get_value();
 
 	if (_adjustment->get_value () != interface_value) {
 		_ignore_change = true;
@@ -107,7 +107,7 @@ void
 AutomationController::value_adjusted ()
 {
 	if (!_ignore_change) {
-		_controllable->set_value (_controllable->interface_to_internal (_adjustment->get_value()));
+		_controllable->set_value (_adjustment->get_value());
 	}
 }
 

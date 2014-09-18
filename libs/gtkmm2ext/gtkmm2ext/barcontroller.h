@@ -36,7 +36,6 @@ class LIBGTKMM2EXT_API BarController : public Gtk::Alignment
 	virtual ~BarController ();
 
 	void set_sensitive (bool yn);
-	void set_logarithmic (bool yn) { _logarithmic = yn; }
 
 	PixFader::Tweaks tweaks() const { return _slider.tweaks (); }
 	void set_tweaks (PixFader::Tweaks t) { _slider.set_tweaks (t);}
@@ -65,15 +64,12 @@ class LIBGTKMM2EXT_API BarController : public Gtk::Alignment
 	HSliderController _slider;
 	bool entry_focus_out (GdkEventFocus*);
 	void entry_activated ();
-	int  entry_input (double* new_value);
-	bool entry_output ();
 	void before_expose ();
 
 	gint switch_to_bar ();
 	gint switch_to_spinner ();
 
 	bool _grabbed;
-	bool _logarithmic;
 	bool _switching;
 	bool _switch_on_release;
 
