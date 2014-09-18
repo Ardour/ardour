@@ -424,6 +424,9 @@ MixerStrip::name_entry_focus_out (GdkEventFocus*)
 void
 MixerStrip::begin_name_edit ()
 {
+    if (!_route)
+        return;
+    
     if( _route->is_master () )
         return;
     
@@ -485,9 +488,13 @@ MixerStrip::end_name_edit (int response)
 void
 MixerStrip::name_entry_changed ()
 {
+    if (!_route) {
+        return;
+    }
+    
     string x = _name_entry.get_text ();
     
-	if (x == _route->name()) {
+	if (x == _route->name() ) {
 		return;
 	}
     
@@ -518,8 +525,11 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
     if ( !_session )
         return;
     
+    end_name_edit (RESPONSE_OK);
+    
 	RouteUI::set_route (rt);
 
+    _name_entry.set_text ( _route->name() );
 	/* ProcessorBox needs access to _route so that it can read
 	   GUI object state.
 	*/
