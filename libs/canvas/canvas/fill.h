@@ -53,6 +53,8 @@ public:
 	
         void set_gradient (StopList const & stops, bool is_vertical);
 
+        void set_pattern (Cairo::RefPtr<Cairo::Pattern>);
+
 protected:
 	void setup_fill_context (Cairo::RefPtr<Cairo::Context>) const;
         void setup_gradient_context (Cairo::RefPtr<Cairo::Context>, Rect const &, Duple const &) const;
@@ -63,6 +65,8 @@ protected:
 	bool _transparent;
         StopList _stops;
         bool _vertical_gradient;
+        Cairo::RefPtr<Cairo::Pattern> _pattern;
+
 };
 
 }

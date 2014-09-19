@@ -72,7 +72,11 @@ Fill::set_fill (bool fill)
 void
 Fill::setup_fill_context (Cairo::RefPtr<Cairo::Context> context) const
 {
-	set_source_rgba (context, _fill_color);
+        if (_pattern) {
+                context->set_source (_pattern);
+        } else {
+                set_source_rgba (context, _fill_color);
+        }
 }
 
 void
@@ -93,6 +97,12 @@ Fill::setup_gradient_context (Cairo::RefPtr<Cairo::Context> context, Rect const 
 	}
 	
 	context->set_source (_gradient);
+}
+
+void
+Fill::set_pattern (Cairo::RefPtr<Cairo::Pattern> p)
+{
+        _pattern = p;
 }
 
 void
