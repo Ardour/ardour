@@ -1615,7 +1615,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	mutable bool have_looped; ///< Used in ::audible_frame(*)
 
-	void update_route_active_state ();
+	void update_route_record_state ();
 	gint _have_rec_enabled_track;
     gint _have_rec_disabled_track;
 
