@@ -1677,9 +1677,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	mutable bool have_looped; ///< Used in ::audible_frame(*)
 
-	void update_have_rec_enabled_track ();
+	void update_route_record_state ();
 	gint _have_rec_enabled_track;
-    gint _have_rec_disabled_track;
+	gint _have_rec_disabled_track;
 
 	static int ask_about_playlist_deletion (boost::shared_ptr<Playlist>);
 

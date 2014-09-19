@@ -2709,6 +2709,8 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 	
 	reassign_track_numbers();
 
+	update_route_record_state ();
+    
 	RouteAdded (new_routes); /* EMIT SIGNAL */
 }
 
@@ -2766,7 +2768,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		if (tr) {
 			tr->PlaylistChanged.connect_same_thread (*this, boost::bind (&Session::track_playlist_changed, this, boost::weak_ptr<Track> (tr)));
 			track_playlist_changed (boost::weak_ptr<Track> (tr));
-			tr->RecordEnableChanged.connect_same_thread (*this, boost::bind (&Session::update_have_rec_enabled_track, this));
+			tr->RecordEnableChanged.connect_same_thread (*this, boost::bind (&Session::update_route_record_state, this));
 
 			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (tr);
 			if (mt) {
@@ -2994,6 +2996,8 @@ Session::remove_route (boost::shared_ptr<Route> route)
 		save_history (_current_snapshot_name);
 	}
 	reassign_track_numbers();
+    
+	update_route_record_state ();
 }
 
 void
@@ -4986,7 +4990,7 @@ Session::have_rec_disabled_track () const
 
 /** Update the state of our rec-enabled tracks flag */
 void
-Session::update_have_rec_enabled_track ()
+Session::update_route_record_state ()
 {
 	boost::shared_ptr<RouteList> rl = routes.reader ();
 	RouteList::iterator i = rl->begin();
@@ -5063,7 +5067,8 @@ Session::route_added_to_route_group (RouteGroup* rg, boost::weak_ptr<Route> r)
 void
 Session::route_removed_from_route_group (RouteGroup* rg, boost::weak_ptr<Route> r)
 {
-	RouteRemovedFromRouteGroup (rg, r);
+	update_route_record_state ();
+	RouteRemovedFromRouteGroup (rg, r); /* EMIT SIGNAL */
 }
 
 boost::shared_ptr<RouteList>
