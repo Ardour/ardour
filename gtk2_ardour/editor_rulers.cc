@@ -137,8 +137,8 @@ Editor::initialize_rulers ()
 	_samples_metric = new SamplesMetric (this);
 	
         /* initial metric isn't important */
-	clock_ruler = new ArdourCanvas::Ruler (_time_markers_group, *_minsec_metric,
-						ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
+	clock_ruler = new ArdourCanvas::Ruler (ruler_group, *_minsec_metric,
+                                               ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
 	clock_ruler->set_font_description (font);
 	CANVAS_DEBUG_NAME (clock_ruler, "clock ruler");
 
@@ -413,17 +413,6 @@ Editor::update_ruler_visibility ()
                 skip_group->hide();
         }
 
-	if (ruler_loop_punch_action->get_active()) {
-		old_unit_pos = transport_marker_group->position().y;
-		if (pos != old_unit_pos) {
-			transport_marker_group->move (ArdourCanvas::Duple (0.0, pos - old_unit_pos));
-		}
-		transport_marker_group->show();
-		pos += Marker::marker_height(); // punch_loop_bar->y1() - punch_loop_bar->y0();
-	} else {
-		transport_marker_group->hide();
-	}
-
         /* these are always hidden in Tracks */
 
         videotl_group->hide ();
@@ -443,13 +432,12 @@ Editor::update_ruler_visibility ()
                 break;
         }
         
-        /* move time marker group (which contains all rulers) into the right
-           position.
+        /* now position the ruler group correctly
         */
 
-        old_unit_pos = clock_ruler->position().y;
+        old_unit_pos = ruler_group->position().y;
         if (pos != old_unit_pos) {
-                clock_ruler->move (ArdourCanvas::Duple (0.0, pos - old_unit_pos));
+                ruler_group->move (ArdourCanvas::Duple (0.0, pos - old_unit_pos));
         }
         clock_ruler->show();
         pos += timebar_height;

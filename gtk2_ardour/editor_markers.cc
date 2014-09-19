@@ -30,6 +30,7 @@
 #include "canvas/canvas.h"
 #include "canvas/item.h"
 #include "canvas/rectangle.h"
+#include "canvas/utils.h"
 
 #include "editor.h"
 #include "marker.h"
@@ -108,10 +109,10 @@ Editor::add_new_location_internal (Location* location)
 	if (location->is_mark()) {
 
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
-			lam->start = new Marker (*this, *cd_marker_group, color, location->name(), Marker::Mark, location->start());
+			lam->start = new Marker (*this, *cd_marker_group, Marker::marker_height(), color, location->name(), Marker::Mark, location->start());
 			group = cd_marker_group;
 		} else {
-			lam->start = new Marker (*this, *marker_group, color, location->name(), Marker::Mark, location->start());
+			lam->start = new Marker (*this, *marker_group, Marker::marker_height(), color, location->name(), Marker::Mark, location->start());
 			group = marker_group;
 		}
 
@@ -119,82 +120,89 @@ Editor::add_new_location_internal (Location* location)
 
 	} else if (location->is_auto_loop()) {
 
-		// transport marker
-		lam->start = new Marker (*this, *transport_marker_group, color,
-					 location->name(), Marker::LoopStart, location->start());
-		lam->end   = new Marker (*this, *transport_marker_group, color,
-					 location->name(), Marker::LoopEnd, location->end());
-		group = transport_marker_group;
+		// no name shown
+		lam->start = new RulerMarker (*this, *ruler_group, timebar_height, ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 0.4),
+                                              "", location->start(), location->end());
+                lam->end = 0;
+		group = ruler_group;
 
 	} else if (location->is_auto_punch()) {
 
 		// transport marker
-		lam->start = new Marker (*this, *transport_marker_group, color,
+		lam->start = new Marker (*this, *transport_marker_group, Marker::marker_height(), color,
 					 location->name(), Marker::PunchIn, location->start());
-		lam->end   = new Marker (*this, *transport_marker_group, color,
+		lam->end   = new Marker (*this, *transport_marker_group, Marker::marker_height(), color,
 					 location->name(), Marker::PunchOut, location->end());
 		group = transport_marker_group;
 
 	} else if (location->is_session_range()) {
 
-		// session range
-		lam->start = new Marker (*this, *marker_group, color, _("start"), Marker::SessionStart, location->start());
-		lam->end = new Marker (*this, *marker_group, color, _("end"), Marker::SessionEnd, location->end());
-		group = marker_group;
-                
+                /* Tracks does not display this range */
+                lam->start = 0;
+                lam->end = 0;
+                group = 0;
+
         } else if (location->is_skip ()) {
                 /* skip: single marker that spans entire skip area */
-                lam->start = new Marker (*this, *skip_group, color, location->name(), Marker::Skip, location->start(), true, location->end());
+                lam->start = new RangeMarker (*this, *skip_group, Marker::marker_height(), color, location->name(), location->start(), location->end());
                 lam->end = 0;
+                group = skip_group;
 
 	} else {
 		// range marker
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
-			lam->start = new Marker (*this, *cd_marker_group, color,
+			lam->start = new Marker (*this, *cd_marker_group, Marker::marker_height(), color,
 						 location->name(), Marker::RangeStart, location->start());
-			lam->end   = new Marker (*this, *cd_marker_group, color,
+			lam->end   = new Marker (*this, *cd_marker_group, Marker::marker_height(), color,
 						 location->name(), Marker::RangeEnd, location->end());
 			group = cd_marker_group;
 		} else {
-			lam->start = new Marker (*this, *range_marker_group, color,
+			lam->start = new Marker (*this, *range_marker_group, Marker::marker_height(), color,
 						 location->name(), Marker::RangeStart, location->start());
-			lam->end   = new Marker (*this, *range_marker_group, color,
+			lam->end   = new Marker (*this, *range_marker_group, Marker::marker_height(), color,
 						 location->name(), Marker::RangeEnd, location->end());
 			group = range_marker_group;
 		}
 	}
 
-	if (location->is_hidden ()) {
-		lam->hide();
-	} else {
-		lam->show ();
-	}
+        if (lam->start || lam->end) {
 
-	location->name_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
-	location->FlagsChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_flags_changed, this, _1, _2), gui_context());
+                if (location->is_hidden ()) {
+                        lam->hide();
+                } else {
+                        lam->show ();
+                }
+                
+                location->name_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
+                location->FlagsChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_flags_changed, this, _1, _2), gui_context());
+                
+                
+                pair<Location*,LocationMarkers*> newpair;
+                
+                newpair.first = location;
+                newpair.second = lam;
+                
+                location_markers.insert (newpair);
+                
+                if (select_new_marker && location->is_mark()) {
+                        selection->set (lam->start);
+                        select_new_marker = false;
+                }
+                
+                lam->canvas_height_set (_visible_canvas_height);
+                lam->set_show_lines (_show_marker_lines);
+                
+                /* Add these markers to the appropriate sorted marker lists, which will render
+                   them unsorted until a call to update_marker_labels() sorts them out.
+                */
+                _sorted_marker_lists[group].push_back (lam->start);
 
-	pair<Location*,LocationMarkers*> newpair;
-
-	newpair.first = location;
-	newpair.second = lam;
-
-	location_markers.insert (newpair);
-
-	if (select_new_marker && location->is_mark()) {
-		selection->set (lam->start);
-		select_new_marker = false;
-	}
-
-	lam->canvas_height_set (_visible_canvas_height);
-	lam->set_show_lines (_show_marker_lines);
-
-	/* Add these markers to the appropriate sorted marker lists, which will render
-	   them unsorted until a call to update_marker_labels() sorts them out.
-	*/
-	_sorted_marker_lists[group].push_back (lam->start);
-	if (lam->end) {
-		_sorted_marker_lists[group].push_back (lam->end);
-	}
+                if (lam->end) {
+                        _sorted_marker_lists[group].push_back (lam->end);
+                }
+        } else {
+                delete lam;
+        }
 
 	return group;
 }
@@ -266,6 +274,7 @@ Editor::check_marker_label (Marker* m)
 		return;
 	}
 
+#if 0
 	if (prev != sorted.end()) {
 
 		/* Update just the available space between the previous marker and this one */
@@ -273,7 +282,7 @@ Editor::check_marker_label (Marker* m)
 		double const p = sample_to_pixel (m->position() - (*prev)->position());
 
 		if (m->label_on_left()) {
-			(*prev)->set_right_label_limit (p / 2);
+			(*prev)->set_right_label_limit (p - 4.0);
 		} else {
 			(*prev)->set_right_label_limit (p);
 		}
@@ -281,7 +290,7 @@ Editor::check_marker_label (Marker* m)
 		if ((*prev)->label_on_left ()) {
 			m->set_left_label_limit (p);
 		} else {
-			m->set_left_label_limit (p / 2);
+			m->set_left_label_limit (p - 4.0);
 		}
 	}
 
@@ -292,7 +301,7 @@ Editor::check_marker_label (Marker* m)
 		double const p = sample_to_pixel ((*next)->position() - m->position());
 
 		if ((*next)->label_on_left()) {
-			m->set_right_label_limit (p / 2);
+			m->set_right_label_limit (p - 4.0);
 		} else {
 			m->set_right_label_limit (p);
 		}
@@ -300,9 +309,12 @@ Editor::check_marker_label (Marker* m)
 		if (m->label_on_left()) {
 			(*next)->set_left_label_limit (p);
 		} else {
-			(*next)->set_left_label_limit (p / 2);
+			(*next)->set_left_label_limit (p - 4.0);
 		}
 	}
+
+#endif
+
 }
 
 struct MarkerComparator {
@@ -343,6 +355,8 @@ Editor::update_marker_labels (ArdourCanvas::Container* group)
 		++next;
 	}
 
+#if 0
+
 	while (i != sorted.end()) {
 
 		if (prev != sorted.end()) {
@@ -371,6 +385,7 @@ Editor::update_marker_labels (ArdourCanvas::Container* group)
 		prev = i;
 		++i;
 	}
+#endif
 }
 
 void
@@ -576,10 +591,12 @@ Editor::LocationMarkers::show()
 void
 Editor::LocationMarkers::canvas_height_set (double h)
 {
+#if 0
 	start->canvas_height_set (h);
 	if (end) {
 		end->canvas_height_set (h);
 	}
+#endif
 }
 
 void
@@ -618,28 +635,34 @@ Editor::LocationMarkers::set_color_rgba (uint32_t rgba)
 void
 Editor::LocationMarkers::set_show_lines (bool s)
 {
+#if 0
 	start->set_show_line (s);
 	if (end) {
 		end->set_show_line (s);
 	}
+#endif
 }
 
 void
 Editor::LocationMarkers::set_selected (bool s)
 {
+#if 0
 	start->set_selected (s);
 	if (end) {
 		end->set_selected (s);
 	}
+#endif
 }
 
 void
 Editor::LocationMarkers::setup_lines ()
 {
+#if 0
 	start->setup_line ();
 	if (end) {
 		end->setup_line ();
 	}
+#endif
 }
 
 void
@@ -1505,9 +1528,12 @@ Editor::marker_selection_changed ()
 		i->second->set_selected (false);
 	}
 
+#if 0
 	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
 		(*x)->set_selected (true);
 	}
+#endif
+
 }
 
 struct SortLocationsByPosition {

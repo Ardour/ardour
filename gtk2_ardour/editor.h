@@ -748,6 +748,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	ArdourCanvas::Container      *tempo_group;
 	ArdourCanvas::Container      *meter_group;
+	ArdourCanvas::Container      *ruler_group;
 	ArdourCanvas::Container      *marker_group;
 	ArdourCanvas::Container      *range_marker_group;
 	ArdourCanvas::Container      *transport_marker_group;

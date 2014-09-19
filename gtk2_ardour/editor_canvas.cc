@@ -147,6 +147,7 @@ Editor::initialize_canvas ()
 
 	cd_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
 	CANVAS_DEBUG_NAME (cd_marker_group, "cd marker group");
+
 	/* the vide is temporarily placed a the same location as the
 	   cd_marker_group, but is moved later.
 	*/
@@ -177,7 +178,10 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
 	range_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
-	punch_loop_bar = new ArdourCanvas::Rectangle (transport_marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, Marker::marker_height()));
+	ruler_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
+        CANVAS_DEBUG_NAME (ruler_group, "ruler group");
+
+	punch_loop_bar = new ArdourCanvas::Rectangle (ruler_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, Marker::marker_height()));
 	CANVAS_DEBUG_NAME (punch_loop_bar, "punch/loop Bar");
         /* not outlined */
 

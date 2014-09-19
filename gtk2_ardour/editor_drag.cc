@@ -4549,7 +4549,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			XMLNode &before = _editor->session()->locations()->get_state();
 			if (_operation == CreateSkipMarker) {
 				_editor->begin_reversible_command (_("new skip marker"));
-				_editor->session()->locations()->next_available_name(rangename,_("skip"));
+				_editor->session()->locations()->next_available_name(rangename,_("skip "));
 				flags = Location::IsRangeMarker | Location::IsSkip;
 				_editor->skip_drag_rect->hide();
 			} else if (_operation == CreateCDMarker) {
@@ -4558,8 +4558,8 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 				flags = Location::IsRangeMarker | Location::IsCDMarker;
 				_editor->cd_marker_bar_drag_rect->hide();
 			} else {
-				_editor->begin_reversible_command (_("new skip marker"));
-				_editor->session()->locations()->next_available_name(rangename, _("unnamed"));
+				_editor->begin_reversible_command (_("new range marker"));
+				_editor->session()->locations()->next_available_name(rangename, _("Marker "));
 				flags = Location::IsRangeMarker;
 				_editor->range_bar_drag_rect->hide();
 			}
