@@ -1361,7 +1361,7 @@ Session::set_state (const XMLNode& node, int version)
 		ControlProtocolManager::instance().set_state (*child, version);
 	}
 
-	update_have_rec_enabled_track ();
+	update_route_active_state ();
 
 	/* here beginneth the second phase ... */
 
