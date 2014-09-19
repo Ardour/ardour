@@ -255,10 +255,12 @@ Fader::on_size_allocate (Gtk::Allocation& alloc)
 bool
 Fader::on_button_press_event (GdkEventButton* ev)
 {
+    grab_focus();
+    
 	if (_read_only) {
 		return false;
 	}
-
+    
 	if (ev->type != GDK_BUTTON_PRESS) {
 		return true;
 	}

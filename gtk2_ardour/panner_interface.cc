@@ -127,6 +127,8 @@ PannerInterface::value_change ()
 bool
 PannerInterface::on_button_press_event (GdkEventButton* ev)
 {
+    grab_focus();
+    
 	if (Gtkmm2ext::Keyboard::is_edit_event (ev)) {
 		edit ();
 		return true;
