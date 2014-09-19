@@ -36,13 +36,13 @@ using namespace ArdourCanvas;
 
 Text::Text (Canvas* c)
 	: Item (c)
-    , _width_correction (0)
 	, _color (0x000000ff)
 	, _font_description (0)
 	, _alignment (Pango::ALIGN_LEFT)
 	, _width (0)
 	, _height (0)
 	, _need_redraw (false)
+        , _width_correction (-1)
 	, _clamped_width (COORD_MAX)
 {
 	_outline = false;
@@ -50,13 +50,13 @@ Text::Text (Canvas* c)
 
 Text::Text (Item* parent)
 	: Item (parent)
-    , _width_correction (0)
 	, _color (0x000000ff)
 	, _font_description (0)
 	, _alignment (Pango::ALIGN_LEFT)
 	, _width (0)
 	, _height (0)
 	, _need_redraw (false)
+        , _width_correction (-1)
 	, _clamped_width (COORD_MAX)
 {
 	_outline = false;
@@ -106,6 +106,29 @@ Text::_redraw (Glib::RefPtr<Pango::Context> context) const
 void
 Text::__redraw (Glib::RefPtr<Pango::Layout> layout) const
 {
+#ifdef __APPLE__
+        if (_width_correction < 0.0) {
+                // Pango returns incorrect text width on some OS X
+                // So we have to make a correction
+                // To determine the correct indent take the largest symbol for which the width is correct
+                // and make the calculation
+                Gtk::Window win;
+                Gtk::Label foo;
+                win.add (foo);
+                
+                int width = 0;
+                int height = 0;
+                Glib::RefPtr<Pango::Layout> test_layout = foo.create_pango_layout ("H");
+                test_layout->set_font_description (*_font_description);
+                test_layout->get_pixel_size (width, height);
+                
+                _width_correction = width*1.5;
+        }
+#else
+        /* don't bother with a conditional here */
+        _width_correction = 0.0;
+#endif
+
 	layout->set_text (_text);
 
 	if (_font_description) {
@@ -113,26 +136,6 @@ Text::__redraw (Glib::RefPtr<Pango::Layout> layout) const
 	}
 
 	layout->set_alignment (_alignment);
-
-    // Pango returns incorrect text width on some platforms
-    // So we have to make a correction
-    // To determine the correct indent take the largest symbol for which the width is correct
-    // and make the calculation
-    Gtk::Window win;
-    Gtk::Label foo;
-    win.add (foo);
-    
-    int width = 0;
-    int height = 0;
-    Glib::RefPtr<Pango::Layout> test_layout = foo.create_pango_layout ("H");
-    test_layout->set_font_description (*_font_description);
-    test_layout->get_pixel_size (width, height);
-    
-#ifdef __APPLE__
-    double _width_correction = width*1.5;
-#else if
-    double _width_correction = 0;
-#endif
     
 	int w;
 	int h;
@@ -238,6 +241,7 @@ Text::set_font_description (Pango::FontDescription font_description)
 	
 	_font_description = new Pango::FontDescription (font_description);
 	_need_redraw = true;
+        _width_correction = -1.0;
 
 	_bounding_box_dirty = true;
 	end_change ();
