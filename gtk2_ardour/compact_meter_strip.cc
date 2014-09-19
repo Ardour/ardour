@@ -18,10 +18,13 @@
 
 #include "ardour/meter.h"
 #include "ardour/track.h"
+#include "ardour/audio_track.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "meter_patterns.h"
 #include "compact_meter_strip.h"
+#include "time_axis_view.h"
+#include "editor.h"
 
 #include "dbg_msg.h"
 
@@ -80,6 +83,27 @@ CompactMeterStrip::CompactMeterStrip (Session* sess, boost::shared_ptr<ARDOUR::R
         
         update_rec_display ();
 	}
+    
+    signal_button_press_event().connect(sigc::mem_fun(*this, &CompactMeterStrip::on_eventbox_button_press) );
+}
+
+bool
+CompactMeterStrip::on_eventbox_button_press (GdkEventButton* ev)
+{
+    // Set clicked compact_meter_strip in Track Headers selection, MeterBridge selection, MixerBridge selection and Inspector
+    Selection& selection = ARDOUR_UI::instance()->the_editor().get_selection();
+ 
+    TimeAxisView* tav = ARDOUR_UI::instance()->the_editor().get_route_view_by_route_id (_route->id());
+    if( !tav )
+        return true;
+    
+    /* 
+     Clear selection in Track Header and set choosen track to selection.
+     Track Header selection emits signal TracksChanged () which set choosen track to MeterBridge selection, MixerBridge selection and Inspector.
+     */
+    selection.set (tav);
+    
+    return true;
 }
 
 CompactMeterStrip::~CompactMeterStrip ()

@@ -58,6 +58,7 @@ class CompactMeterStrip : public Gtk::EventBox, public WavesUI
 	void meter_configuration_changed (ARDOUR::ChanCount);
 	void update_rec_display ();
     void route_property_changed(const PBD::PropertyChange& what_changed);
+    bool on_eventbox_button_press (GdkEventButton* ev);
 };
 
 #endif /* __tracks_compact_meter_strip__ */
