@@ -52,8 +52,6 @@ public:
     double text_width() const { return _width; }
 
 private:
-    double _width_correction;
-    
 	std::string      _text;
 	uint32_t         _color;
 	Pango::FontDescription* _font_description;
@@ -63,6 +61,7 @@ private:
         mutable double _width;
         mutable double _height;
         mutable bool _need_redraw;
+        mutable double _width_correction;
         double _clamped_width;
 
         void redraw (Cairo::RefPtr<Cairo::Context>) const;
