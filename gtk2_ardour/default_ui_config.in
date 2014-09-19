@@ -50,7 +50,7 @@
     <Option name="location loop" value="5DA557ff"/>
     <Option name="location marker" value="B700FFff"/>
     <Option name="location punch" value="B700FFff"/>
-    <Option name="location skip" value="ff0000ff"/>
+    <Option name="location skip" value="eb7801ff"/>
     <Option name="location range" value="E0922Fff"/>
     <Option name="marker bar" value="575757ff"/>
     <Option name="marker bar separator" value="ffffff15"/>
