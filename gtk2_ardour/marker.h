@@ -53,12 +53,12 @@ class Marker : public sigc::trackable
 		LoopEnd,
 		PunchIn,
 		PunchOut,
-                Skip,
+                Range,
 	};
 
 
-	Marker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Type,
-		framepos_t frame = 0, bool handle_events = true, framepos_t end_frame = -1);
+	Marker (PublicEditor& editor, ArdourCanvas::Container &, double height, guint32 rgba, const std::string& text, Type,
+		framepos_t frame = 0, bool handle_events = true);
 
 	virtual ~Marker ();
 
@@ -66,16 +66,12 @@ class Marker : public sigc::trackable
 
 	ArdourCanvas::Item& the_item() const;
 
-	void set_selected (bool);
-	void set_show_line (bool);
-	void canvas_height_set (double);
-        
         void set_has_scene_change (bool);
 
-	void set_position (framepos_t);
 	void set_name (const std::string&);
-	void set_color_rgba (uint32_t rgba);
-	void setup_line ();
+
+	virtual void set_position (framepos_t);
+	virtual void set_color_rgba (uint32_t rgba);
 
 	framepos_t position() const { return frame_position; }
 
@@ -110,7 +106,7 @@ class Marker : public sigc::trackable
 	ArdourCanvas::Container *group;
 	ArdourCanvas::Polygon *mark;
         ArdourCanvas::Text *_name_item;
-	ArdourCanvas::Line* _track_canvas_line;
+	ArdourCanvas::Line* _start_line;
 	ArdourCanvas::Rectangle* _name_background;
 	ArdourCanvas::Rectangle* _scene_change_rect;
 	ArdourCanvas::Text* _scene_change_text;
@@ -118,14 +114,11 @@ class Marker : public sigc::trackable
 	std::string  _name;
 	double        unit_position;
 	framepos_t    frame_position;
-	framepos_t    end_frame;
 	double       _shift;
 	Type         _type;
 	int           name_height;
-	bool         _selected;
 	bool         _shown;
-	bool         _line_shown;
-	double       _canvas_height;
+	double       _height;
 	uint32_t     _color;
 	double       _left_label_limit; ///< the number of pixels available to the left of this marker for a label
 	double       _right_label_limit; ///< the number of pixels available to the right of this marker for a label
@@ -133,17 +126,47 @@ class Marker : public sigc::trackable
         bool         _have_scene_change;
 
 	void reposition ();
-	void setup_line_x ();
-	void setup_name_display ();
+	virtual void setup_name_display ();
+	virtual void setup_line ();
+        
+        static const double _marker_height;
 
 private:
 	/* disallow copy construction */
 	Marker (Marker const &);
 	Marker & operator= (Marker const &);
+};
 
-        void add_polygon (Type);
+/** A Marker that displays a range (start+end) rather than a single location
+ */
+class RangeMarker : public Marker
+{
+    public:
+        RangeMarker (PublicEditor& editor, ArdourCanvas::Container &, double height, guint32 rgba, const std::string& text,
+                     framepos_t start, framepos_t end);
+        ~RangeMarker ();
+        
+	void setup_name_display ();
+	void set_color_rgba (uint32_t rgba);
+        void set_position (framepos_t);
+        void setup_line ();
 
-        static const double _marker_height;
+    protected:
+        framepos_t _end_frame;
+	ArdourCanvas::Line* _end_line;
+        Cairo::RefPtr<Cairo::Surface> _pattern;
+};
+
+/** A variant on RangeMarker that is used to draw markers/locations on top of the ruler using
+    a washout gradient. It differs from RangeMarker only in the coloration.
+ */
+class RulerMarker: public RangeMarker 
+{
+    public:
+        RulerMarker (PublicEditor& editor, ArdourCanvas::Container &, double height, guint32 rgba, const std::string& text,
+                     framepos_t start, framepos_t end);
+        
+	void set_color_rgba (uint32_t rgba);
 };
 
 class TempoMarker : public Marker
