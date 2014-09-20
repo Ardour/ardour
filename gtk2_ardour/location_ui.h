@@ -131,13 +131,13 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void scms_toggled ();
 	void preemph_toggled ();
 
-	void end_changed (ARDOUR::Location *);
-	void start_changed (ARDOUR::Location *);
-	void name_changed (ARDOUR::Location *);
-	void location_changed (ARDOUR::Location *);
-	void flags_changed (ARDOUR::Location *, void *src);
-	void lock_changed (ARDOUR::Location *);
-	void position_lock_style_changed (ARDOUR::Location *);
+	void end_changed ();
+	void start_changed ();
+	void name_changed ();
+	void location_changed ();
+	void flags_changed ();
+	void lock_changed ();
+	void position_lock_style_changed ();
 
 	void set_clock_editable_status ();
 	void show_cd_track_details ();

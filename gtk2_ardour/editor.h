@@ -567,7 +567,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::VPaned&   editor_summary_pane;
 
 	void location_changed (ARDOUR::Location *);
-	void location_flags_changed (ARDOUR::Location *, void *);
+	void location_flags_changed (ARDOUR::Location *);
 	void refresh_location_display ();
 	void refresh_location_display_internal (ARDOUR::Locations::LocationList&);
 	void add_new_location (ARDOUR::Location *);
