@@ -85,6 +85,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	void set_hidden (bool yn, void *src);
 	void set_cd (bool yn, void *src);
 	void set_is_range_marker (bool yn, void* src);
+        void set_skip (bool yn);
 
 	bool is_auto_punch () const { return _flags & IsAutoPunch; }
 	bool is_auto_loop () const { return _flags & IsAutoLoop; }

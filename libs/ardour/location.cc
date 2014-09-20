@@ -376,6 +376,17 @@ Location::set_is_range_marker (bool yn, void*)
 }
 
 void
+Location::set_skip (bool yn)
+{
+        if (is_range_marker() && length() > 0) {
+                if (set_flag_internal (yn, IsSkip)) {
+                        flags_changed (this);
+                        FlagsChanged ();
+                }
+        }
+}
+
+void
 Location::set_auto_punch (bool yn, void*)
 {
 	if (is_mark() || _start == _end) {
@@ -648,6 +659,7 @@ Locations::Locations (Session& s)
 	Location::changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
 	Location::start_changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
 	Location::end_changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
+	Location::flags_changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
 }
 
 Locations::~Locations ()
