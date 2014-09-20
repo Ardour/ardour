@@ -164,7 +164,7 @@ Editor::add_new_location_internal (Location* location)
 	}
 
 	location->name_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
-	location->FlagsChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_flags_changed, this, _1, _2), gui_context());
+	location->FlagsChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_flags_changed, this, location), gui_context());
 
 	pair<Location*,LocationMarkers*> newpair;
 
@@ -367,7 +367,7 @@ Editor::update_marker_labels (ArdourCanvas::Container* group)
 }
 
 void
-Editor::location_flags_changed (Location *location, void*)
+Editor::location_flags_changed (Location *location)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::location_flags_changed, location, src)
 

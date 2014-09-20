@@ -1885,7 +1885,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 		}
 		entered_marker = 0;
 		if ((loc = find_location_from_marker (marker, is_start)) != 0) {
-			location_flags_changed (loc, this);
+			location_flags_changed (loc);
 		}
 		// fall through
 	case MeterMarkerItem:
