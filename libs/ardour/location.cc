@@ -47,6 +47,9 @@ PBD::Signal0<void> Location::scene_changed;
 PBD::Signal1<void,Location*> Location::name_changed;
 PBD::Signal1<void,Location*> Location::end_changed;
 PBD::Signal1<void,Location*> Location::start_changed;
+PBD::Signal1<void,Location*> Location::flags_changed;
+PBD::Signal1<void,Location*> Location::lock_changed;
+PBD::Signal1<void,Location*> Location::position_lock_style_changed;
 PBD::Signal1<void,Location*> Location::changed;
 
 Location::Location (Session& s)
@@ -189,7 +192,9 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 			}
 
 			start_changed (this); /* EMIT SIGNAL */
+			StartChanged (); /* EMIT SIGNAL */
 			end_changed (this); /* EMIT SIGNAL */
+			EndChanged (); /* EMIT SIGNAL */
 		}
 
 		/* moving the start (position) of a marker with a scene change
@@ -215,6 +220,7 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 			recompute_bbt_from_frames ();
 		}
 		start_changed (this); /* EMIT SIGNAL */
+		StartChanged (); /* EMIT SIGNAL */
 				
 		if (is_session_range ()) {
 			Session::StartTimeChanged (old); /* EMIT SIGNAL */
@@ -257,7 +263,9 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 				recompute_bbt_from_frames ();
 			}
 			start_changed (this); /* EMIT SIGNAL */
+			StartChanged (); /* EMIT SIGNAL */
 			end_changed (this); /* EMIT SIGNAL */
+			EndChanged (); /* EMIT SIGNAL */
 		}
 
 		assert (_start >= 0);
@@ -275,6 +283,7 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 			recompute_bbt_from_frames ();
 		}
 		end_changed(this); /* EMIT SIGNAL */
+		EndChanged(); /* EMIT SIGNAL */
 
 		if (is_session_range()) {
 			Session::EndTimeChanged (old); /* EMIT SIGNAL */
@@ -322,6 +331,7 @@ Location::move_to (framepos_t pos)
 		recompute_bbt_from_frames ();
 
 		changed (this); /* EMIT SIGNAL */
+		Changed (); /* EMIT SIGNAL */
 	}
 
 	assert (_start >= 0);
@@ -331,15 +341,16 @@ Location::move_to (framepos_t pos)
 }
 
 void
-Location::set_hidden (bool yn, void *src)
+Location::set_hidden (bool yn, void*)
 {
 	if (set_flag_internal (yn, IsHidden)) {
-		 FlagsChanged (this, src); /* EMIT SIGNAL */
+		 flags_changed (this); /* EMIT SIGNAL */
+                 FlagsChanged ();
 	}
 }
 
 void
-Location::set_cd (bool yn, void *src)
+Location::set_cd (bool yn, void*)
 {
 	// XXX this really needs to be session start
 	// but its not available here - leave to GUI
@@ -350,39 +361,43 @@ Location::set_cd (bool yn, void *src)
 	}
 
 	if (set_flag_internal (yn, IsCDMarker)) {
-		 FlagsChanged (this, src); /* EMIT SIGNAL */
+		 flags_changed (this); /* EMIT SIGNAL */
+                 FlagsChanged ();
 	}
 }
 
 void
-Location::set_is_range_marker (bool yn, void *src)
+Location::set_is_range_marker (bool yn, void*)
 {
        if (set_flag_internal (yn, IsRangeMarker)) {
-                FlagsChanged (this, src); /* EMIT SIGNAL */
+               flags_changed (this);
+                FlagsChanged (); /* EMIT SIGNAL */
        }
 }
 
 void
-Location::set_auto_punch (bool yn, void *src)
+Location::set_auto_punch (bool yn, void*)
 {
 	if (is_mark() || _start == _end) {
 		return;
 	}
 
 	if (set_flag_internal (yn, IsAutoPunch)) {
-		 FlagsChanged (this, src); /* EMIT SIGNAL */
+		 flags_changed (this); /* EMIT SIGNAL */
+		 FlagsChanged (); /* EMIT SIGNAL */
 	}
 }
 
 void
-Location::set_auto_loop (bool yn, void *src)
+Location::set_auto_loop (bool yn, void*)
 {
 	if (is_mark() || _start == _end) {
 		return;
 	}
 
 	if (set_flag_internal (yn, IsAutoLoop)) {
-		 FlagsChanged (this, src); /* EMIT SIGNAL */
+		 flags_changed (this); /* EMIT SIGNAL */
+		 FlagsChanged (); /* EMIT SIGNAL */
 	}
 }
 
@@ -554,6 +569,7 @@ Location::set_state (const XMLNode& node, int version)
 	recompute_bbt_from_frames ();
 
 	changed (this); /* EMIT SIGNAL */
+	Changed (); /* EMIT SIGNAL */
 
 	assert (_start >= 0);
 	assert (_end >= 0);
@@ -572,7 +588,8 @@ Location::set_position_lock_style (PositionLockStyle ps)
 
 	recompute_bbt_from_frames ();
 
-	PositionLockStyleChanged (this); /* EMIT SIGNAL */
+	position_lock_style_changed (this); /* EMIT SIGNAL */
+	PositionLockStyleChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -601,14 +618,16 @@ void
 Location::lock ()
 {
 	_locked = true;
-	LockChanged (this);
+	lock_changed (this);
+	LockChanged ();
 }
 
 void
 Location::unlock ()
 {
 	_locked = false;
-	LockChanged (this);
+	lock_changed (this);
+	LockChanged ();
 }
 
 void

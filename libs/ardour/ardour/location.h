@@ -101,17 +101,32 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	boost::shared_ptr<SceneChange> scene_change() const { return _scene_change; }
 	void set_scene_change (boost::shared_ptr<SceneChange>);
 
+        /* these are static signals for objects that want to listen to all
+           locations at once.
+        */
+
 	static PBD::Signal1<void,Location*> name_changed;
 	static PBD::Signal1<void,Location*> end_changed;
 	static PBD::Signal1<void,Location*> start_changed;
-
-	PBD::Signal1<void,Location*> LockChanged;
-	PBD::Signal2<void,Location*,void*> FlagsChanged;
-	PBD::Signal1<void,Location*> PositionLockStyleChanged;
+	static PBD::Signal1<void,Location*> flags_changed;
+        static PBD::Signal1<void,Location*> lock_changed;
+	static PBD::Signal1<void,Location*> position_lock_style_changed;
 
 	/* this is sent only when both start and end change at the same time */
 	static PBD::Signal1<void,Location*> changed;
 
+        /* these are member signals for objects that care only about
+           changes to this object 
+        */
+
+	PBD::Signal0<void> NameChanged;
+	PBD::Signal0<void> EndChanged;
+	PBD::Signal0<void> StartChanged;
+	PBD::Signal0<void> Changed;
+	PBD::Signal0<void> FlagsChanged;
+	PBD::Signal0<void> LockChanged;
+	PBD::Signal0<void> PositionLockStyleChanged;
+        
 	/* CD Track / CD-Text info */
 
 	std::map<std::string, std::string> cd_info;
