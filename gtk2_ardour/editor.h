@@ -579,13 +579,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_marker_lines ();
 	void set_marker_line_visibility (bool);
 
-	uint32_t location_marker_color;
-	uint32_t location_range_color;
-	uint32_t location_loop_color;
-	uint32_t location_punch_color;
-	uint32_t location_cd_marker_color;
-	uint32_t location_skip_color;
-
 	struct LocationMarkers {
 		Marker* start;
 		Marker* end;

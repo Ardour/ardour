@@ -965,13 +965,6 @@ Editor::color_handler()
 	rubberband_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RubberBandRect());
 	rubberband_rect->set_fill_color ((guint32) ARDOUR_UI::config()->get_canvasvar_RubberBandRect());
 
-	location_marker_color = ARDOUR_UI::config()->get_canvasvar_LocationMarker();
-	location_range_color = ARDOUR_UI::config()->get_canvasvar_LocationRange();
-	location_cd_marker_color = ARDOUR_UI::config()->get_canvasvar_LocationCDMarker();
-	location_loop_color = ARDOUR_UI::config()->get_canvasvar_LocationLoop();
-	location_punch_color = ARDOUR_UI::config()->get_canvasvar_LocationPunch();
-	location_skip_color = ARDOUR_UI::config()->get_canvasvar_LocationSkip();
-
 	refresh_location_display ();
 /*
 	redisplay_tempo (true);

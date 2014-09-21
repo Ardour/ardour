@@ -87,32 +87,17 @@ ArdourCanvas::Container*
 Editor::add_new_location_internal (Location* location)
 {
 	LocationMarkers *lam = new LocationMarkers;
-	uint32_t color;
 
 	/* make a note here of which group this marker ends up in */
 	ArdourCanvas::Container* group = 0;
 
-	if (location->is_cd_marker()) {
-		color = location_cd_marker_color;
-	} else if (location->is_mark()) {
-		color = location_marker_color;
-	} else if (location->is_auto_loop()) {
-		color = location_loop_color;
-	} else if (location->is_auto_punch()) {
-		color = location_punch_color;
-        } else if (location->is_skip()) {
-                color = location_skip_color;
-	} else {
-		color = location_range_color;
-	}
-
 	if (location->is_mark()) {
 
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
-			lam->start = new Marker (location, *this, *cd_marker_group, Marker::marker_height(), color, location->name(), Marker::Mark, location->start());
+			lam->start = new Marker (location, *this, *cd_marker_group, Marker::marker_height(), 0, location->name(), Marker::Mark, location->start());
 			group = cd_marker_group;
 		} else {
-			lam->start = new Marker (location, *this, *marker_group, Marker::marker_height(), color, location->name(), Marker::Mark, location->start());
+			lam->start = new Marker (location, *this, *marker_group, Marker::marker_height(), 0, location->name(), Marker::Mark, location->start());
 			group = marker_group;
 		}
 
@@ -129,9 +114,9 @@ Editor::add_new_location_internal (Location* location)
 	} else if (location->is_auto_punch()) {
 
 		// transport marker
-		lam->start = new Marker (location, *this, *transport_marker_group, Marker::marker_height(), color,
+		lam->start = new Marker (location, *this, *transport_marker_group, Marker::marker_height(), 0,
 					 location->name(), Marker::PunchIn, location->start());
-		lam->end   = new Marker (location, *this, *transport_marker_group, Marker::marker_height(), color,
+		lam->end   = new Marker (location, *this, *transport_marker_group, Marker::marker_height(), 0,
 					 location->name(), Marker::PunchOut, location->end());
 		group = transport_marker_group;
 
@@ -144,22 +129,22 @@ Editor::add_new_location_internal (Location* location)
 
         } else if (location->is_skip ()) {
                 /* skip: single marker that spans entire skip area */
-                lam->start = new RangeMarker (location, *this, *skip_group, Marker::marker_height(), color, location->name(), location->start(), location->end());
+                lam->start = new RangeMarker (location, *this, *skip_group, Marker::marker_height(), 0, location->name(), location->start(), location->end());
                 lam->end = 0;
                 group = skip_group;
 
 	} else {
 		// range marker
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
-			lam->start = new Marker (location, *this, *cd_marker_group, Marker::marker_height(), color,
+			lam->start = new Marker (location, *this, *cd_marker_group, Marker::marker_height(), 0,
 						 location->name(), Marker::RangeStart, location->start());
-			lam->end   = new Marker (location, *this, *cd_marker_group, Marker::marker_height(), color,
+			lam->end   = new Marker (location, *this, *cd_marker_group, Marker::marker_height(), 0,
 						 location->name(), Marker::RangeEnd, location->end());
 			group = cd_marker_group;
 		} else {
-			lam->start = new Marker (location, *this, *range_marker_group, Marker::marker_height(), color,
+			lam->start = new Marker (location, *this, *range_marker_group, Marker::marker_height(), 0,
 						 location->name(), Marker::RangeStart, location->start());
-			lam->end   = new Marker (location, *this, *range_marker_group, Marker::marker_height(), color,
+			lam->end   = new Marker (location, *this, *range_marker_group, Marker::marker_height(), 0,
 						 location->name(), Marker::RangeEnd, location->end());
 			group = range_marker_group;
 		}
@@ -402,10 +387,11 @@ Editor::location_flags_changed (Location *location)
 	// move cd markers to/from cd marker bar as appropriate
 	ensure_cd_marker_updated (lam, location);
 
+#if 0
 	if (location->is_cd_marker()) {
-		lam->set_color_rgba (location_cd_marker_color);
+		lam->pick_basic_color ();
 	} else if (location->is_mark()) {
-		lam->set_color_rgba (location_marker_color);
+		lam->pick_basic_color ();
 	} else if (location->is_auto_punch()) {
 		lam->set_color_rgba (location_punch_color);
 	} else if (location->is_auto_loop()) {
@@ -413,6 +399,7 @@ Editor::location_flags_changed (Location *location)
 	} else {
 		lam->set_color_rgba (location_range_color);
 	}
+#endif
 
 	if (location->is_hidden()) {
 		lam->hide();
@@ -625,10 +612,12 @@ Editor::LocationMarkers::set_position (framepos_t startf,
 void
 Editor::LocationMarkers::set_color_rgba (uint32_t rgba)
 {
+#if 0
 	start->set_color_rgba (rgba);
 	if (end) {
 		end->set_color_rgba (rgba);
 	}
+#endif
 }
 
 void

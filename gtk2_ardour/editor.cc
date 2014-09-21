@@ -420,12 +420,6 @@ Editor::Editor ()
 
 	sfbrowser = 0;
 
-	location_marker_color = ARDOUR_UI::config()->get_canvasvar_LocationMarker();
-	location_range_color = ARDOUR_UI::config()->get_canvasvar_LocationRange();
-	location_cd_marker_color = ARDOUR_UI::config()->get_canvasvar_LocationCDMarker();
-	location_loop_color = ARDOUR_UI::config()->get_canvasvar_LocationLoop();
-	location_punch_color = ARDOUR_UI::config()->get_canvasvar_LocationPunch();
-
 	zoom_focus = ZoomFocusLeft;
 	_edit_point = EditAtMouse;
 	_internal_editing = false;

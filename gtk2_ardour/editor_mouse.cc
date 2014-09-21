@@ -1824,7 +1824,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			break;
 		}
 		entered_marker = marker;
-		marker->set_color_rgba (ARDOUR_UI::config()->get_canvasvar_EnteredMarker());
+		marker->set_color (ARDOUR_UI::config()->get_canvasvar_EnteredMarker());
 		// fall through
 	case MeterMarkerItem:
 	case TempoMarkerItem:
@@ -1919,9 +1919,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 			break;
 		}
 		entered_marker = 0;
-		if ((loc = find_location_from_marker (marker, is_start)) != 0) {
-			location_flags_changed (loc);
-		}
+                marker->reset_color ();
 		// fall through
 	case MeterMarkerItem:
 	case TempoMarkerItem:

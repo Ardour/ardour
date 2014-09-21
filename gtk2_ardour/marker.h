@@ -70,8 +70,10 @@ class Marker : public sigc::trackable
 
 	void set_name (const std::string&);
 
+        void set_color (ArdourCanvas::Color);
+        void reset_color ();
+        
 	virtual void set_position (framepos_t);
-	virtual void set_color_rgba (uint32_t rgba);
 
 	framepos_t position() const { return frame_position; }
 
@@ -124,7 +126,9 @@ class Marker : public sigc::trackable
 	double       _right_label_limit; ///< the number of pixels available to the right of this marker for a label
 	double       _label_offset;
         bool         _have_scene_change;
-
+        
+        void pick_basic_color (ArdourCanvas::Color);
+	virtual void use_color ();
 	void reposition ();
 	virtual void setup_name_display ();
 	virtual void setup_line ();
@@ -147,7 +151,7 @@ class RangeMarker : public Marker
         ~RangeMarker ();
         
 	void setup_name_display ();
-	void set_color_rgba (uint32_t rgba);
+	void use_color ();
         void set_position (framepos_t);
         void setup_line ();
 
@@ -166,7 +170,7 @@ class RulerMarker: public RangeMarker
         RulerMarker (ARDOUR::Location*, PublicEditor& editor, ArdourCanvas::Container &, double height, guint32 rgba, const std::string& text,
                      framepos_t start, framepos_t end);
         
-	void set_color_rgba (uint32_t rgba);
+	void use_color ();
 };
 
 class TempoMarker : public Marker

@@ -67,15 +67,15 @@ RulerMarker::RulerMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanva
 {
         /* make sure we call our own color stuff, since we look different */
 
-        set_color_rgba (rgba);
+        use_color ();
 }
 
 void
-RulerMarker::set_color_rgba (uint32_t rgba)
+RulerMarker::use_color ()
 {
-        Marker::set_color_rgba (rgba);
+        Marker::use_color ();
 
-        /* unset the effects of RangeMarker::set_color_rgba () */
+        /* unset the effects of RangeMarker::use_color () */
 
         _name_background->set_pattern (Cairo::RefPtr<Cairo::SurfacePattern> ());
 
@@ -85,7 +85,7 @@ RulerMarker::set_color_rgba (uint32_t rgba)
         
         ArdourCanvas::Color normal (_color);
         int r, g, b;
-        UINT_TO_RGB(rgba, &r, &g, &b);
+        UINT_TO_RGB(_color, &r, &g, &b);
         ArdourCanvas::Color transparent = ArdourCanvas::rgba_to_color (r, g, b, 0.0);
 
         ArdourCanvas::Fill::StopList stops;
@@ -113,7 +113,7 @@ RangeMarker::RangeMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanva
 
         set_position (frame_position);
         setup_line ();
-        set_color_rgba (rgba);
+        use_color ();
         setup_name_display ();
 }
 
@@ -123,9 +123,9 @@ RangeMarker::~RangeMarker ()
 }
 
 void
-RangeMarker::set_color_rgba (uint32_t rgba)
+RangeMarker::use_color ()
 {
-        Marker::set_color_rgba (rgba);
+        Marker::use_color ();
 
         double dimen = _height * 2.0;
 
@@ -298,7 +298,8 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
 	}
 
 	set_name (annotation);
-	set_color_rgba (rgba);
+        pick_basic_color (rgba);
+        use_color ();
 }
 
 Marker::~Marker ()
@@ -314,6 +315,45 @@ void Marker::reparent(ArdourCanvas::Container & parent)
 {
 	group->reparent (&parent);
 	_parent = &parent;
+}
+
+void
+Marker::set_color (ArdourCanvas::Color c)
+{
+        _color = c;
+        use_color ();
+}
+
+void
+Marker::reset_color ()
+{
+        pick_basic_color (0);
+}
+
+void
+Marker::pick_basic_color (ArdourCanvas::Color c)
+{
+        ArdourCanvas::Color col;
+
+        if (_location) {
+                if (_location->is_cd_marker()) {
+                        col = ARDOUR_UI::config()->get_canvasvar_LocationCDMarker();
+                } else if (_location->is_mark()) {
+                        col = ARDOUR_UI::config()->get_canvasvar_LocationMarker();
+                } else if (_location->is_auto_loop()) {
+                        col = ARDOUR_UI::config()->get_canvasvar_LocationLoop();
+                } else if (_location->is_auto_punch()) {
+                        col = ARDOUR_UI::config()->get_canvasvar_LocationPunch();
+                } else if (_location->is_skip()) {
+                        col = ARDOUR_UI::config()->get_canvasvar_LocationSkip();
+                } else {
+                        col = ARDOUR_UI::config()->get_canvasvar_LocationRange();
+                }
+        } else {
+                col = c;
+        }
+
+        set_color (col);
 }
 
 void
@@ -485,11 +525,9 @@ Marker::hide ()
 }
 
 void
-Marker::set_color_rgba (uint32_t c)
+Marker::use_color ()
 {
-	_color = c;
-
-        if (mark) {
+       if (mark) {
                 mark->set_fill_color (_color);
                 mark->set_outline_color (_color);
         }
