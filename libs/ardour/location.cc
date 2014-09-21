@@ -387,6 +387,17 @@ Location::set_skip (bool yn)
 }
 
 void
+Location::set_skipping (bool yn)
+{
+        if (is_range_marker() && is_skip() && length() > 0) {
+                if (set_flag_internal (yn, IsSkipping)) {
+                        flags_changed (this);
+                        FlagsChanged ();
+                }
+        }
+}
+
+void
 Location::set_auto_punch (bool yn, void*)
 {
 	if (is_mark() || _start == _end) {

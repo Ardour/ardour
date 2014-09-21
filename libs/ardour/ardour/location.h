@@ -53,6 +53,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 		IsRangeMarker = 0x20,
 		IsSessionRange = 0x40,
 		IsSkip = 0x80,
+		IsSkipping = 0x100, /* skipping is active (or not) */
 	};
 
 	Location (Session &);
@@ -86,6 +87,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	void set_cd (bool yn, void *src);
 	void set_is_range_marker (bool yn, void* src);
         void set_skip (bool yn);
+        void set_skipping (bool yn);
 
 	bool is_auto_punch () const { return _flags & IsAutoPunch; }
 	bool is_auto_loop () const { return _flags & IsAutoLoop; }
@@ -95,6 +97,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	bool is_session_range () const { return _flags & IsSessionRange; }
 	bool is_range_marker() const { return _flags & IsRangeMarker; }
 	bool is_skip() const { return _flags & IsSkip; }
+	bool is_skipping() const { return (_flags & IsSkip) && (_flags & IsSkipping); }
 	bool matches (Flags f) const { return _flags & f; }
 
 	Flags flags () const { return _flags; }

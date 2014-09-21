@@ -1440,7 +1440,7 @@ Session::sync_locations_to_skips (Locations::LocationList& locations)
 
 		location = *i;
 
-		if (location->is_skip()) {
+		if (location->is_skipping()) {
 			SessionEvent* ev = new SessionEvent (SessionEvent::Skip, SessionEvent::Add, location->start(), location->end(), 1.0);
 			queue_event (ev);
 		}
