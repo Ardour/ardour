@@ -61,9 +61,9 @@ const char * Marker::default_new_marker_prefix = N_("Marker");
 
 static const double name_padding = 10.0;
 
-RulerMarker::RulerMarker (PublicEditor& editor, ArdourCanvas::Container& parent, double height, guint32 rgba, const std::string& text,
+RulerMarker::RulerMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanvas::Container& parent, double height, guint32 rgba, const std::string& text,
                           framepos_t start, framepos_t end)
-        : RangeMarker (editor, parent, height, rgba, text, start, end)
+        : RangeMarker (l, editor, parent, height, rgba, text, start, end)
 {
         /* make sure we call our own color stuff, since we look different */
 
@@ -100,9 +100,9 @@ RulerMarker::set_color_rgba (uint32_t rgba)
         }
 }
 
-RangeMarker::RangeMarker (PublicEditor& editor, ArdourCanvas::Container& parent, double height, guint32 rgba, const std::string& text,
+RangeMarker::RangeMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanvas::Container& parent, double height, guint32 rgba, const std::string& text,
                           framepos_t start, framepos_t end)
-        : Marker (editor, parent, height, rgba, text, Range, start, true)
+        : Marker (l, editor, parent, height, rgba, text, Range, start, true)
         , _end_frame (end)
         , _end_line (0)
 {
@@ -244,10 +244,11 @@ RangeMarker::setup_name_display ()
         }
 }
 
-Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, double height, guint32 rgba, const string& annotation,
+Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& parent, double height, guint32 rgba, const string& annotation,
 		Type type, framepos_t start_pos, bool handle_events)
 
 	: editor (ed)
+        , _location (l)
 	, _parent (&parent)
         , group (0)
         , mark (0)
@@ -550,7 +551,7 @@ Marker::set_has_scene_change (bool yn)
 
 TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
 			  ARDOUR::TempoSection& temp)
-	: Marker (editor, parent, Marker::marker_height(), rgba, text, Tempo, 0, false),
+	: Marker (0, editor, parent, Marker::marker_height(), rgba, text, Tempo, 0, false),
 	  _tempo (temp)
 {
 	set_position (_tempo.frame());
@@ -565,7 +566,7 @@ TempoMarker::~TempoMarker ()
 
 MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
 			  ARDOUR::MeterSection& m)
-	: Marker (editor, parent, Marker::marker_height(), rgba, text, Meter, 0, false),
+	: Marker (0, editor, parent, Marker::marker_height(), rgba, text, Meter, 0, false),
 	  _meter (m)
 {
 	set_position (_meter.frame());

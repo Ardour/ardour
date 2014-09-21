@@ -57,7 +57,7 @@ class Marker : public sigc::trackable
 	};
 
 
-	Marker (PublicEditor& editor, ArdourCanvas::Container &, double height, guint32 rgba, const std::string& text, Type,
+	Marker (ARDOUR::Location*, PublicEditor& editor, ArdourCanvas::Container &, double height, guint32 rgba, const std::string& text, Type,
 		framepos_t frame = 0, bool handle_events = true);
 
 	virtual ~Marker ();
@@ -142,7 +142,7 @@ private:
 class RangeMarker : public Marker
 {
     public:
-        RangeMarker (PublicEditor& editor, ArdourCanvas::Container &, double height, guint32 rgba, const std::string& text,
+        RangeMarker (ARDOUR::Location*, PublicEditor& editor, ArdourCanvas::Container &, double height, guint32 rgba, const std::string& text,
                      framepos_t start, framepos_t end);
         ~RangeMarker ();
         
@@ -163,7 +163,7 @@ class RangeMarker : public Marker
 class RulerMarker: public RangeMarker 
 {
     public:
-        RulerMarker (PublicEditor& editor, ArdourCanvas::Container &, double height, guint32 rgba, const std::string& text,
+        RulerMarker (ARDOUR::Location*, PublicEditor& editor, ArdourCanvas::Container &, double height, guint32 rgba, const std::string& text,
                      framepos_t start, framepos_t end);
         
 	void set_color_rgba (uint32_t rgba);
