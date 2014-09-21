@@ -65,6 +65,7 @@ class Marker : public sigc::trackable
 	static PBD::Signal1<void,Marker*> CatchDeletion;
 
 	ArdourCanvas::Item& the_item() const;
+        ARDOUR::Location* location() const { return _location; }
 
         void set_has_scene_change (bool);
 
@@ -127,6 +128,7 @@ class Marker : public sigc::trackable
 	double       _label_offset;
         bool         _have_scene_change;
         
+        void flags_changed ();
         void pick_basic_color (ArdourCanvas::Color);
 	virtual void use_color ();
 	void reposition ();
@@ -139,6 +141,8 @@ private:
 	/* disallow copy construction */
 	Marker (Marker const &);
 	Marker & operator= (Marker const &);
+
+        PBD::ScopedConnection flags_changed_connection;
 };
 
 /** A Marker that displays a range (start+end) rather than a single location

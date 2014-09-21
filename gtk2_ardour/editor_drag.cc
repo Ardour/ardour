@@ -3419,13 +3419,24 @@ void
 MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
-		
+                
 		if (was_double_click()) {
 			_editor->rename_marker (_marker);
 			return;
 		}
 
-		/* just a click, do nothing but finish
+		/* just a single click */
+
+                Location* loc = _marker->location ();
+                if (loc) {
+                        if (loc->is_skip()) {
+                                /* skip range - click toggles active skip status */
+                                loc->set_skipping (!loc->is_skipping());
+                                return;
+                        }
+                }
+
+                /* other markers: do nothing but finish
 		   off the selection process
 		*/
 
@@ -4550,7 +4561,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			if (_operation == CreateSkipMarker) {
 				_editor->begin_reversible_command (_("new skip marker"));
 				_editor->session()->locations()->next_available_name(rangename,_("skip "));
-				flags = Location::IsRangeMarker | Location::IsSkip;
+				flags = Location::IsRangeMarker | Location::IsSkip | Location::IsSkipping;
 				_editor->skip_drag_rect->hide();
 			} else if (_operation == CreateCDMarker) {
 				_editor->session()->locations()->next_available_name(rangename, _("CD"));
@@ -4559,7 +4570,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 				_editor->cd_marker_bar_drag_rect->hide();
 			} else {
 				_editor->begin_reversible_command (_("new range marker"));
-				_editor->session()->locations()->next_available_name(rangename, _("Marker "));
+				_editor->session()->locations()->next_available_name (rangename, _(Marker::default_new_marker_prefix));
 				flags = Location::IsRangeMarker;
 				_editor->range_bar_drag_rect->hide();
 			}

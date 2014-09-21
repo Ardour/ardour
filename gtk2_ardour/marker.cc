@@ -40,6 +40,7 @@
  * due to a conflicting definition of 'Rect' between
  * Apple's MacTypes.h and GTK.
  */
+#include "gui_thread.h"
 #include "marker.h"
 #include "public_editor.h"
 #include "utils.h"
@@ -300,6 +301,10 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
 	set_name (annotation);
         pick_basic_color (rgba);
         use_color ();
+
+        if (_location) {
+               _location->FlagsChanged.connect (flags_changed_connection, MISSING_INVALIDATOR, boost::bind (&Marker::flags_changed, this), gui_context());
+        }
 }
 
 Marker::~Marker ()
@@ -315,6 +320,12 @@ void Marker::reparent(ArdourCanvas::Container & parent)
 {
 	group->reparent (&parent);
 	_parent = &parent;
+}
+
+void
+Marker::flags_changed ()
+{
+        pick_basic_color (0);
 }
 
 void
@@ -345,7 +356,11 @@ Marker::pick_basic_color (ArdourCanvas::Color c)
                 } else if (_location->is_auto_punch()) {
                         col = ARDOUR_UI::config()->get_canvasvar_LocationPunch();
                 } else if (_location->is_skip()) {
-                        col = ARDOUR_UI::config()->get_canvasvar_LocationSkip();
+                        if (_location->is_skipping()) {
+                                col = ARDOUR_UI::config()->get_canvasvar_LocationSkipping();
+                        } else {
+                                col = ARDOUR_UI::config()->get_canvasvar_LocationSkip();
+                        }
                 } else {
                         col = ARDOUR_UI::config()->get_canvasvar_LocationRange();
                 }
