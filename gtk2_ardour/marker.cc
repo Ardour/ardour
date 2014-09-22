@@ -79,26 +79,6 @@ RulerMarker::use_color ()
         /* unset the effects of RangeMarker::use_color () */
 
         _name_background->set_pattern (Cairo::RefPtr<Cairo::SurfacePattern> ());
-
-        /* Create a linear gradient that goes from full opacity to totally transparent
-           across the height of the marker
-        */
-        
-        ArdourCanvas::Color normal (_color);
-        int r, g, b;
-        UINT_TO_RGB(_color, &r, &g, &b);
-        ArdourCanvas::Color transparent = ArdourCanvas::rgba_to_color (r, g, b, 0.0);
-
-        ArdourCanvas::Fill::StopList stops;
-        stops.push_back (make_pair (0.0, normal));
-        stops.push_back (make_pair (1.0, transparent));
-        _name_background->set_gradient (stops, true);
-
-        /* set end line correctly, also */
-
-        if (_end_line) {
-                _end_line->set_outline_color (_color);
-        }
 }
 
 RangeMarker::RangeMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanvas::Container& parent, double height, guint32 rgba, const std::string& text,
@@ -197,11 +177,6 @@ RangeMarker::setup_line ()
 
         if (!_end_line) {
                 _end_line = new ArdourCanvas::Line (editor.get_hscroll_group());
-                /* these never change - they cause the line to span from the bottom
-                   edge of the marker rectangle to the absolute lowest possible
-                   canvas coordinate.
-                */
-                _end_line->set_y0 (_height);
                 _end_line->set_y1 (ArdourCanvas::COORD_MAX);
         }
 
@@ -211,9 +186,16 @@ RangeMarker::setup_line ()
            into a different coordinate system.
         */
         
-       ArdourCanvas::Duple g = group->canvas_origin();
-       ArdourCanvas::Duple d = _end_line->canvas_to_item (ArdourCanvas::Duple (g.x + _shift + _name_background->x1(), 0));
+        ArdourCanvas::Duple h = _name_background->item_to_canvas (ArdourCanvas::Duple (0.0, _height));
+        ArdourCanvas::Duple g = group->canvas_origin();
+
+       /* merge and adjust them */
+       g.x += _shift + _name_background->x1();
+       g.y = h.y;
+
+       ArdourCanvas::Duple d = _end_line->canvas_to_item (g);
        
+       _end_line->set_y0 (d.y); /* bottom of marker, in the right coordinate system */
        _end_line->set_x0 (d.x);
        _end_line->set_x1 (d.x);
        _end_line->set_outline_color (_color);
@@ -224,6 +206,7 @@ void
 RangeMarker::canvas_height_set (double h) 
 {
         if (_end_line) {
+                /* h is already in the right coordinate system since it is an absolute height */
                 _end_line->set_y1 (h);
         }
 }
@@ -393,7 +376,6 @@ Marker::setup_line ()
         if (_start_line == 0) {
                 _start_line = new ArdourCanvas::Line (editor.get_hscroll_group());
                 _start_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
-                _start_line->set_y0 (_height);
                 _start_line->set_y1 (ArdourCanvas::COORD_MAX);
         }
 
@@ -401,12 +383,16 @@ Marker::setup_line ()
            into a different coordinate system.
         */
         
+        ArdourCanvas::Duple h = _name_background->item_to_canvas (ArdourCanvas::Duple (0.0, _height));
         ArdourCanvas::Duple g = group->canvas_origin();
-        ArdourCanvas::Duple d = _start_line->canvas_to_item (ArdourCanvas::Duple (g.x + _shift, _height));
         
-        _start_line->set_y0 (d.y);
-        _start_line->set_y1 (ArdourCanvas::COORD_MAX);
+        /* merge and adjust them */
+        g.x += _shift;
+        g.y = h.y;
         
+        ArdourCanvas::Duple d = _start_line->canvas_to_item (g);
+        
+        _start_line->set_y0 (d.y); /* bottom of marker, in the right coordinate system */
         _start_line->set_x0 (d.x);
         _start_line->set_x1 (d.x);
         _start_line->set_outline_color (_color);
