@@ -265,8 +265,12 @@
                         height="47"
                         noshowall="true"
                         visible="false">
+              <Layout width="95"
+                      height="47"
+                      color="#383838">
               <FocusEntry id="name_entry"
-                          horzalignment="center"
+                          x="7"
+                          y="13"
                           width="80"
                           height="20"
                           fgnormal="#ffffff"
@@ -278,6 +282,7 @@
                           textcolorselected="#ffffff"
                           noshowall="true"
                           visible="false"/>
+              </Layout>
               </EventBox>
           </HBox>
           </EventBox>
