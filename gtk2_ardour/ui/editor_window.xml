@@ -371,18 +371,16 @@
                                   height="16"
                                   normalicon="marker_button"
                                   ui.orphan="true"/>
-                      <Label text="MARKER"
-                             width="50"
-                             height="15"
-                             winfont ="Arial 8"
-                             macfont ="Helvetica 8"/>
+                      <Icon source="marker_label.png"/>
                       <EventBox width="1"
                                 bgnormal="#424242"/>
                       <Dropdown id="midi_input_dropdown"
                                 width="65"
                                 height="16"
                                 normalicon="marker_midi_dropdown"
-                                activeicon="marker_midi_dropdown_active">
+                                activeicon="marker_midi_dropdown_active"
+                                winfont ="Arial 8"
+                                macfont ="Helvetica 8">
                         <HBox>
                           <!--
                           The following three icons should be shown/hidden according to the
