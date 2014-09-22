@@ -221,8 +221,9 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
         //ArdourCanvas::Color ouline_color = ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame();
         
         // GZ FIXME:change in config instead of following
-        ArdourCanvas::Color outline_color = ArdourCanvas::rgba_to_color (104, 104, 104, 0.6);
-        frame->set_outline_color (outline_color );
+        uint32_t opacity = 255*0.7; //70% opacity
+        uint32_t outline_color_rgba = RGBA_TO_UINT (0, 0, 0, opacity);
+        frame->set_outline_color (outline_color_rgba );
 
 	} else {
 
@@ -767,7 +768,10 @@ TimeAxisViewItem::set_frame_color()
             f = UINT_RGBA_CHANGE_A (f, 64);
     }
     
-    frame->set_outline_color (f);
+    uint32_t opacity = 255*0.7; //70% opacity
+    uint32_t outline_color_rgba = RGBA_TO_UINT (0, 0, 0, opacity);
+
+    frame->set_outline_color (outline_color_rgba );
 }
 
 void
