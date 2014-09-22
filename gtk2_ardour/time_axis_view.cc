@@ -617,6 +617,7 @@ TimeAxisView::end_name_edit (int response)
 		edit_prev = true;
 	}
 
+    name_entry.set_text (name_label.get_text() );
 	name_label.show ();
 	name_entry.hide ();
 

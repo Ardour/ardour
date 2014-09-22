@@ -480,6 +480,7 @@ MixerStrip::end_name_edit (int response)
             name_entry_changed ();
 	}
     
+    _name_entry.set_text (name_button.get_text() );
 	name_button.show ();
 	_name_entry.hide ();
     _name_entry_eventbox.hide ();
