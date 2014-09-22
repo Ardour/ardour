@@ -114,7 +114,7 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	
 	get_vbox()->show_all ();
 
-	/* fill data models and how/hide accordingly */
+	/* fill data models and show/hide accordingly */
 
 	populate_session_templates ();
 

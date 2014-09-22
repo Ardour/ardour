@@ -83,7 +83,7 @@ find_session_templates (vector<TemplateInfo>& template_names)
 {
 	vector<string> templates;
 
-	find_files_matching_filter (templates, template_search_path(), template_filter, 0, true, true);
+	find_paths_matching_filter (templates, template_search_path(), template_filter, 0, true, true);
 
 	if (templates.empty()) {
 		cerr << "Found nothing along " << template_search_path().to_string() << endl;
