@@ -305,7 +305,6 @@
 		CEB9D798197516BE00B21780 /* mixer_gain_meter.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB9D78E197516BE00B21780 /* mixer_gain_meter.xml */; };
 		CEB9D799197516BE00B21780 /* mixer_strip.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB9D78F197516BE00B21780 /* mixer_strip.xml */; };
 		CEB9D79A197516BE00B21780 /* track_header_gain_meter.xml in Resources */ = {isa = PBXBuildFile; fileRef = CEB9D790197516BE00B21780 /* track_header_gain_meter.xml */; };
-		CEDB41321951C668006E6F77 /* buildlog.txt in Resources */ = {isa = PBXBuildFile; fileRef = CEDB41311951C668006E6F77 /* buildlog.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1164,7 +1163,6 @@
 		CEB9D78E197516BE00B21780 /* mixer_gain_meter.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = mixer_gain_meter.xml; sourceTree = "<group>"; };
 		CEB9D78F197516BE00B21780 /* mixer_strip.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = mixer_strip.xml; sourceTree = "<group>"; };
 		CEB9D790197516BE00B21780 /* track_header_gain_meter.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = track_header_gain_meter.xml; sourceTree = "<group>"; };
-		CEDB41311951C668006E6F77 /* buildlog.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = buildlog.txt; path = ../../../buildlog.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1184,7 +1182,6 @@
 			children = (
 				4397599619CB06AC00740098 /* gtkmm2ext.xcodeproj */,
 				4397595019CADAFC00740098 /* canvas.xcodeproj */,
-				CEDB41311951C668006E6F77 /* buildlog.txt */,
 				43B351FA194F131D0038C140 /* pbd.xcodeproj */,
 				43B351F4194F130C0038C140 /* libardour.xcodeproj */,
 				43B351EE194F12FB0038C140 /* waves_audiobackend.xcodeproj */,
@@ -2509,7 +2506,6 @@
 				43279460194F0062003C9FEA /* tracks_preferences.xml in Resources */,
 				4327947F194F009E003C9FEA /* tracks.menus.in in Resources */,
 				43B351ED194F04E00038C140 /* step_editing.bindings in Resources */,
-				CEDB41321951C668006E6F77 /* buildlog.txt in Resources */,
 				CEB0A9F41958447C006D269A /* session_close_dialog.xml in Resources */,
 				CEB9D791197516BE00B21780 /* audio_time_axis.xml in Resources */,
 				CEB9D792197516BE00B21780 /* automation_time_axis.xml in Resources */,
