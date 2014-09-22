@@ -302,9 +302,7 @@ MixerStrip::init ()
 	parameter_changed (X_("mixer-strip-visibility"));
 
 	Config->ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
-
-	gpm.LevelMeterButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&MixerStrip::level_meter_button_press, this, _1));
-    
+   
     _name_entry.signal_key_press_event().connect (sigc::mem_fun (*this, &MixerStrip::name_entry_key_press), false);
 	_name_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &MixerStrip::name_entry_key_release), false);
 	_name_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &MixerStrip::name_entry_focus_out));
@@ -1985,82 +1983,6 @@ void
 MixerStrip::ab_plugins ()
 {
 	processor_box.processor_operation (ProcessorBox::ProcessorsAB);
-}
-
-bool
-MixerStrip::level_meter_button_press (GdkEventButton* ev)
-{
-	if (_current_delivery && boost::dynamic_pointer_cast<Send>(_current_delivery)) {
-		return false;
-	}
-	if (ev->button == 3) {
-		popup_level_meter_menu (ev);
-		return true;
-	}
-
-	return false;
-}
-
-void
-MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
-{
-	using namespace Gtk::Menu_Helpers;
-
-	Gtk::Menu* m = manage (new Menu);
-	MenuList& items = m->items ();
-
-	RadioMenuItem::Group group;
-
-	_suspend_menu_callbacks = true;
-	add_level_meter_item_point (items, group, _("Input"), MeterInput);
-	add_level_meter_item_point (items, group, _("Pre fader"), MeterPreFader);
-	add_level_meter_item_point (items, group, _("Post fader"), MeterPostFader);
-	add_level_meter_item_point (items, group, _("Output"), MeterOutput);
-	add_level_meter_item_point (items, group, _("Custom"), MeterCustom);
-
-	RadioMenuItem::Group tgroup;
-	items.push_back (SeparatorElem());
-
-	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterPeak), MeterPeak);
-	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterKrms),  MeterKrms);
-	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterIEC1DIN), MeterIEC1DIN);
-	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterIEC1NOR), MeterIEC1NOR);
-	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterIEC2BBC), MeterIEC2BBC);
-	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterIEC2EBU), MeterIEC2EBU);
-	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterK20), MeterK20);
-	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterK14), MeterK14);
-	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterK12), MeterK12);
-	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterVU),  MeterVU);
-
-	int _strip_type;
-	if (_route->is_master()) {
-		_strip_type = 4;
-	}
-	else if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
-			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0) {
-		/* non-master bus */
-		_strip_type = 3;
-	}
-	else if (boost::dynamic_pointer_cast<MidiTrack>(_route)) {
-		_strip_type = 2;
-	}
-	else {
-		_strip_type = 1;
-	}
-
-	MeterType cmt = _route->meter_type();
-	const std::string cmn = ArdourMeter::meter_type_string(cmt);
-
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (string_compose(_("Change all in Group to %1"), cmn),
-				sigc::bind (SetMeterTypeMulti, -1, _route->route_group(), cmt)));
-	items.push_back (MenuElem (string_compose(_("Change all to %1"), cmn),
-				sigc::bind (SetMeterTypeMulti, 0, _route->route_group(), cmt)));
-	items.push_back (MenuElem (string_compose(_("Change same track-type to %1"), cmn),
-				sigc::bind (SetMeterTypeMulti, _strip_type, _route->route_group(), cmt)));
-
-	m->popup (ev->button, ev->time);
-	_suspend_menu_callbacks = false;
 }
 
 void
