@@ -27,17 +27,10 @@
           <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
         </HBox>
       </VBox>
-      <VBox>
+      <HBox width="80">
         <!--<Igor! About the track name: height="5" below is the shift from TOP side of the space>-->
-        <HBox height="5"/>
-        <HBox width="80"
-              id="name_label_home">
-          <HBox width="5"/>
-          <Label id="name_label"
-                 winfont ="Arial 10"
-                 macfont ="Helvetica 10"
-                 fgnormal="#ffffff"
-                 fgactive="#ffffff"/>
+        <HBox width="5"/>
+        <VBox id="name_label_home">
           <FocusEntry id="name_entry"
                       width="80"
                       height="20"
@@ -50,8 +43,15 @@
                       textcolorselected="#ffffff"
                       noshowall="true"
                       visible="false"/>
-        </HBox>
-      </VBox>
+          <HBox height="5"/>
+          <Label id="name_label"
+                 winfont ="Arial 10"
+                 macfont ="Helvetica 10"
+                 fgnormal="#ffffff"
+                 fgactive="#ffffff"
+                 horzalignment="start"/>
+        </VBox>
+      </HBox>
       <VBox>
         <HBox>
           <iconbutton id="playlist_button"
