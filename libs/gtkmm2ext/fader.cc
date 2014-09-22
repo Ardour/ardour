@@ -255,7 +255,7 @@ Fader::on_size_allocate (Gtk::Allocation& alloc)
 bool
 Fader::on_button_press_event (GdkEventButton* ev)
 {
-    grab_focus();
+    focus_handler();
     
 	if (_read_only) {
 		return false;
@@ -283,7 +283,7 @@ Fader::on_button_press_event (GdkEventButton* ev)
 	if ((ev->x < (hx - hw/2)) || (ev->x > (hx + hw/2)) || (ev->y < (hy - hh/2)) || (ev->y > (hy + hh/2))) {
 		return false;
 	}
-
+    
 	double ev_pos_x;
 	double ev_pos_y;
 		
