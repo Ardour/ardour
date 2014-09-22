@@ -67,6 +67,7 @@ class Marker : public sigc::trackable
 	ArdourCanvas::Item& the_item() const;
         ARDOUR::Location* location() const { return _location; }
 
+        virtual void canvas_height_set (double);
         void set_has_scene_change (bool);
 
 	void set_name (const std::string&);
@@ -158,6 +159,7 @@ class RangeMarker : public Marker
 	void use_color ();
         void set_position (framepos_t);
         void setup_line ();
+        void canvas_height_set (double);
 
     protected:
         framepos_t _end_frame;

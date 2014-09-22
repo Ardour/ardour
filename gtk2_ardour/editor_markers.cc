@@ -387,20 +387,6 @@ Editor::location_flags_changed (Location *location)
 	// move cd markers to/from cd marker bar as appropriate
 	ensure_cd_marker_updated (lam, location);
 
-#if 0
-	if (location->is_cd_marker()) {
-		lam->pick_basic_color ();
-	} else if (location->is_mark()) {
-		lam->pick_basic_color ();
-	} else if (location->is_auto_punch()) {
-		lam->set_color_rgba (location_punch_color);
-	} else if (location->is_auto_loop()) {
-		lam->set_color_rgba (location_loop_color);
-	} else {
-		lam->set_color_rgba (location_range_color);
-	}
-#endif
-
 	if (location->is_hidden()) {
 		lam->hide();
 	} else {
@@ -577,12 +563,10 @@ Editor::LocationMarkers::show()
 void
 Editor::LocationMarkers::canvas_height_set (double h)
 {
-#if 0
 	start->canvas_height_set (h);
 	if (end) {
 		end->canvas_height_set (h);
 	}
-#endif
 }
 
 void

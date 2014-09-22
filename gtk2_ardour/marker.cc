@@ -221,6 +221,14 @@ RangeMarker::setup_line ()
 }
 
 void
+RangeMarker::canvas_height_set (double h) 
+{
+        if (_end_line) {
+                _end_line->set_y1 (h);
+        }
+}
+
+void
 RangeMarker::setup_name_display ()
 {
         /* No need to adjust name background size here, since it is always the same */
@@ -326,6 +334,14 @@ void
 Marker::flags_changed ()
 {
         pick_basic_color (0);
+}
+
+void
+Marker::canvas_height_set (double h) 
+{
+        if (_start_line) {
+                _start_line->set_y1 (h);
+        }
 }
 
 void
