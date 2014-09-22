@@ -88,36 +88,48 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 
 		setup_outline_context (context);
 		
-		/* see the cairo FAQ on single pixel lines to see why we do
-		 * the 0.5 pixel additions.
-		 */
-
 		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
 			
 			context->rectangle (self.x0 + 0.5, self.y0 + 0.5, self.width() - 1.0, self.height() - 1.0);
 
 		} else {
 
+			/* the goal here is that if the border is 1 pixel
+			 * thick, it will precisely align with the corner
+			 * coordinates of the rectangle. So if the rectangle
+			 * has a left edge at 0 and a right edge at 10, then
+			 * the right edge must span -0.5..+0.5, the left edge
+			 * must span 9.5..10.5 (i.e. the single full color
+			 * pixel is precisely aligned with 0 and 10
+			 * respectively).
+			 *
+			 * we have to shift left/up in all cases, which means
+			 * subtraction along both axes.
+			 *
+			 * see the cairo FAQ on single pixel lines to see why we do
+			 * the 0.5 pixel additions.
+			 */
+
 			if (_outline_what & LEFT) {
-				/* vertical line: move x-coordinate by 0.5 pixels */
-				context->move_to (self.x0 + 0.5, self.y0);
-				context->line_to (self.x0 + 0.5, self.y1);
+				/* vertical line: move x-coordinate left by 0.5 pixels */
+				context->move_to (self.x0 - 0.5, self.y0);
+				context->line_to (self.x0 - 0.5, self.y1);
 			}
 			
 			if (_outline_what & TOP) {
-				/* horizontal line: move y-coordinate by 0.5 pixels */
-				context->move_to (self.x0, self.y0 + 0.5);
-				context->line_to (self.x1, self.y0 + 0.5);
+				/* horizontal line: move y-coordinate up by 0.5 pixels */
+				context->move_to (self.x0, self.y0 - 0.5);
+				context->line_to (self.x1, self.y0 - 0.5);
 			}
 
 			if (_outline_what & BOTTOM) {
-				/* horizontal line: move y-coordinate by 0.5 pixels */
+				/* horizontal line: move y-coordinate up by 0.5 pixels */
 				context->move_to (self.x0, self.y1 - 0.5);
 				context->line_to (self.x1, self.y1 - 0.5);
 			}
 			
 			if (_outline_what & RIGHT) {
-				/* vertical line: move x-coordinate by 0.5 pixels */
+				/* vertical line: move x-coordinate left by 0.5 pixels */
 				context->move_to (self.x1 - 0.5, self.y0);
 				context->line_to (self.x1 - 0.5, self.y1);
 			}
