@@ -60,11 +60,11 @@ using namespace ARDOUR_UI_UTILS;
 using namespace Gtkmm2ext;
 
 #ifdef _WIN32
-    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Arial 12");
+    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Arial 11");
 	const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 0.0;
 #else
-	const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 2.0;
-    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Helvetica 12");
+	const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 1.0;
+    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Helvetica 11");
 #endif
 
 
