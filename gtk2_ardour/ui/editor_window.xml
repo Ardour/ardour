@@ -159,7 +159,7 @@
                      winfont ="Arial 8"
                      macfont ="Helvetica 8"
                      x="88"
-                     y="8"/>
+                     y="6"/>
               <Adjustment id="hd_load_adjustment"
                           minvalue="1"
                           maxvalue="100"
@@ -174,7 +174,7 @@
                      maxposy="3"
                      readonly="true"
                      x="29"
-                     y="18"
+                     y="16"
                      width="56"
                      height="5"/>
               <Label id="hd_load_label"
@@ -184,7 +184,7 @@
                      winfont ="Arial 8"
                      macfont ="Helvetica 8"
                      x="88"
-                     y="18"/>
+                     y="14"/>
                 
               <Label id="hd_remained_time"
                      style="generic_control"
@@ -192,7 +192,7 @@
                      winfont ="Arial 9"
                      macfont ="Helvetica 9"
                      x="59"
-                     y="33"/>
+                     y="34"/>
             </Layout>
             <VBox spacing ="1"
                   box.pack="end">
