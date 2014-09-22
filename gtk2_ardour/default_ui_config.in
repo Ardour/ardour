@@ -121,6 +121,7 @@
     <Option name="play head" value="ffffffff"/>
     <Option name="processor automation line" value="7aa3f9ff"/>
     <Option name="punch line" value="a80000ff"/>
+    <Option name="skip drag bar rect" value="eb7801ff"/>
     <Option name="range drag bar rect" value="ffffffff"/>
     <Option name="range drag rect" value="ffffffff"/>
     <Option name="range marker bar" value="575757ff"/>

@@ -95,8 +95,6 @@ DragManager::abort ()
 {
 	_ending = true;
 
-	cerr << "Aborting drag\n";
-
 	for (list<Drag*>::const_iterator i = _drags.begin(); i != _drags.end(); ++i) {
 		(*i)->abort ();
 		delete *i;
@@ -3304,6 +3302,11 @@ MarkerDrag::motion (GdkEvent* event, bool)
 				return;
 			}
 
+                        if (real_location->is_skip() || 
+                            real_location->is_auto_loop()) {
+                                move_both = true;
+                        }
+
 			if (real_location->is_mark()) {
 				f_delta = newframe - copy_location->start();
 			} else {
@@ -3314,6 +3317,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 				case Marker::RangeStart:
 				case Marker::LoopStart:
 				case Marker::PunchIn:
+                                case Marker::Range:
 					f_delta = newframe - copy_location->start();
 					break;
 
@@ -3339,7 +3343,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	}
 
 	/* now move them all */
-
+        
 	for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
 
 		copy_location = x->location;
@@ -3366,7 +3370,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 			framepos_t new_end = copy_location->end() + f_delta;
 			
 			if (is_start) { // start-of-range marker
-				
+
 				if (move_both || (*x).move_both) {
 					copy_location->set_start (new_start);
 					copy_location->set_end (new_end);
@@ -4432,8 +4436,16 @@ RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operat
 								      physical_screen_height (_editor->get_window())));
 	_drag_rect->hide ();
 
-	_drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RangeDragRect());
-	_drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RangeDragRect());
+        switch (o) {
+        case CreateSkipMarker:
+                _drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SkipDragBarRect());
+                _drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_SkipDragBarRect());
+                break;
+        default:
+                _drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RangeDragRect());
+                _drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RangeDragRect());
+                break;
+        }
 }
 
 void

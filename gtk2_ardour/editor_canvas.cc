@@ -944,8 +944,8 @@ Editor::color_handler()
 	range_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RangeDragBarRect());
 	range_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RangeDragBarRect());
 
-	skip_drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RangeDragBarRect());
-	skip_drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RangeDragBarRect());
+	skip_drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SkipDragBarRect());
+	skip_drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_SkipDragBarRect());
 
 	transport_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TransportDragRect());
 	transport_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TransportDragRect());
