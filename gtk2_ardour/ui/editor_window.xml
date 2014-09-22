@@ -397,18 +397,7 @@
                                 visible="false"
                                 noshowall="true"/>
                         </HBox>
-                        <DropdownMenu style="generic_dropdown_menu">
-                          <Dropdownitem title="OFF"
-                                        horzalignment="start"/>
-                          <Dropdownitem title="Barabanus"
-                                        horzalignment="start"/>
-                          <Dropdownitem title="Arabanus"
-                                        horzalignment="start"/>
-                          <Dropdownitem title="Abanus"
-                                        horzalignment="start"/>
-                          <Dropdownitem title="OOPS!!"
-                                        horzalignment="start"/>
-                        </DropdownMenu>
+                        <DropdownMenu style="generic_dropdown_menu"/>
                       </Dropdown>
                       <EventBox width="1"
                                 bgnormal="#424242"/>
@@ -436,18 +425,7 @@
                                 visible="false"
                                 noshowall="true"/>
                         </HBox>
-                        <DropdownMenu style="generic_dropdown_menu">
-                          <Dropdownitem title="OFF"
-                                        horzalignment="start"/>
-                          <Dropdownitem title="Barabanus"
-                                        horzalignment="start"/>
-                          <Dropdownitem title="Arabanus"
-                                        horzalignment="start"/>
-                          <Dropdownitem title="Abanus"
-                                        horzalignment="start"/>
-                          <Dropdownitem title="OOPS!!"
-                                        horzalignment="start"/>
-                        </DropdownMenu>
+                        <DropdownMenu style="generic_dropdown_menu"/>
                       </Dropdown>
                       <EventBox width="1"
                                 bgnormal="#424242"/>
