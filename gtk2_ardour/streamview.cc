@@ -73,8 +73,12 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Container* canvas_g
 	CANVAS_DEBUG_NAME (canvas_rect, string_compose ("SV canvas rectangle %1", _trackview.name()));
 	canvas_rect->set (ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, tv.current_height ()));
 	canvas_rect->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
-	canvas_rect->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
-	canvas_rect->set_fill (true);
+    
+    uint32_t opacity = 255*0.2; //20% opacity
+    uint32_t outline_color_rgba = RGBA_TO_UINT (0, 0, 0, opacity);
+	canvas_rect->set_outline_color (outline_color_rgba);
+	
+    canvas_rect->set_fill (true);
 	canvas_rect->Event.connect (sigc::bind (sigc::mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event), canvas_rect, &_trackview));
 
 	if (_trackview.is_track()) {
