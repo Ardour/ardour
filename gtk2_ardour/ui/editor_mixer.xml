@@ -244,7 +244,9 @@
                       _prelighticon="inspector_master_mute_prelight"
                       visible="false"
                       noshowall="true"/>
-          
+          <HBox>
+          <EventBox width="1"
+                    bgnormal="#383838"/>s
           <EventBox id="name_label_home">
           <HBox>
               <Button id="name_button"
@@ -279,6 +281,7 @@
               </EventBox>
           </HBox>
           </EventBox>
+          </HBox>
             
         </VBox>
         <HBox visible="false"
