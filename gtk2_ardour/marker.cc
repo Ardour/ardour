@@ -408,11 +408,14 @@ Marker::setup_name_display ()
 		_name_item->set (_name);
 		
 		if (label_on_left ()) {
+			/* adjust right edge of background to fit text */
 			_name_background->set_x0 (_name_item->position().x - 2);
 			_name_background->set_x1 (_name_item->position().x + name_width + _shift);
 		} else {
-			_name_background->set_x0 (_name_item->position().x - _label_offset + 2);
-			_name_background->set_x1 (_name_item->position().x + name_width);
+			/* right edge remains at zero (group-relative). Add
+			 * arbitrary 4 pixels of extra padding at the end
+			 */
+			_name_background->set_x1 (_name_item->position().x + name_width + 4.0);
 		}
 	}
 
