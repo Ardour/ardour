@@ -364,19 +364,105 @@
                 <VBox id="timebars_vbox">
                   <EventBox height="1"
                             bgnormal="#424242"/>
-                  <HBox id="marker_lane_hbox" spacing="1">
-                    <iconbutton id="marker_button"
-                                width="182"
+                  <EventBox bgnormal="#6C6C6C">
+                    <HBox id="marker_lane_hbox">
+                      <iconbutton id="marker_button"
+                                  width="182"
+                                  height="16"
+                                  normalicon="marker_button"
+                                  ui.orphan="true"/>
+                      <Label text="MARKER"
+                             width="50"
+                             height="15"
+                             winfont ="Arial 8"
+                             macfont ="Helvetica 8"/>
+                      <EventBox width="1"
+                                bgnormal="#424242"/>
+                      <Dropdown id="midi_input_dropdown"
+                                width="65"
                                 height="16"
-                                normalicon="marker_button"
-                                activeicon="marker_button"/>
-                    <iconbutton id="add_marker_button"
-                                width="49"
+                                normalicon="marker_midi_dropdown"
+                                activeicon="marker_midi_dropdown_active">
+                        <HBox>
+                          <!--
+                          The following three icons should be shown/hidden according to the
+                          availability/activity of the MIDI inputs
+                          -->
+                          <Icon id="midi_input_enabled_indicator"
+                                source="midi_input_enabled_indicator.png"
+                                noshowall="true"/>
+                          <Icon id="midi_input_disabled_indicator"
+                                source="midi_input_disabled_indicator.png"
+                                visible="false"
+                                noshowall="true"/>
+                          <Icon source="midi_input_activity_indicator.png"
+                                visible="false"
+                                noshowall="true"/>
+                        </HBox>
+                        <DropdownMenu style="generic_dropdown_menu">
+                          <Dropdownitem title="OFF"
+                                        horzalignment="start"/>
+                          <Dropdownitem title="Barabanus"
+                                        horzalignment="start"/>
+                          <Dropdownitem title="Arabanus"
+                                        horzalignment="start"/>
+                          <Dropdownitem title="Abanus"
+                                        horzalignment="start"/>
+                          <Dropdownitem title="OOPS!!"
+                                        horzalignment="start"/>
+                        </DropdownMenu>
+                      </Dropdown>
+                      <EventBox width="1"
+                                bgnormal="#424242"/>
+                      <Dropdown id="midi_output_dropdown"
+                                width="65"
                                 height="16"
-                                normalicon="add_marker_button"
-                                activeicon="add_marker_button"
-                                tooltip="Add Marker"/>
-                  </HBox>
+                                normalicon="marker_midi_dropdown"
+                                activeicon="marker_midi_dropdown_active"
+                                winfont ="Arial 8"
+                                macfont ="Helvetica 8">
+                        <HBox>
+                          <!--
+                          The following three icons should be shown/hidden according to the
+                          availability/activity of the MIDI outputs
+                          -->
+                          <Icon id="midi_output_enabled_indicator"
+                                source="midi_output_enabled_indicator.png"
+                                noshowall="true"/>
+                          <Icon id="midi_output_disabled_indicator"
+                                source="midi_output_disabled_indicator.png"
+                                visible="false"
+                                noshowall="true"/>
+                          <Icon id="midi_output_activity_indicator"
+                                source="midi_output_activity_indicator.png"
+                                visible="false"
+                                noshowall="true"/>
+                        </HBox>
+                        <DropdownMenu style="generic_dropdown_menu">
+                          <Dropdownitem title="OFF"
+                                        horzalignment="start"/>
+                          <Dropdownitem title="Barabanus"
+                                        horzalignment="start"/>
+                          <Dropdownitem title="Arabanus"
+                                        horzalignment="start"/>
+                          <Dropdownitem title="Abanus"
+                                        horzalignment="start"/>
+                          <Dropdownitem title="OOPS!!"
+                                        horzalignment="start"/>
+                        </DropdownMenu>
+                      </Dropdown>
+                      <EventBox width="1"
+                                bgnormal="#424242"/>
+                      <iconbutton id="add_marker_button"
+                                  width="41"
+                                  height="16"
+                                  normalicon="add_marker_button"
+                                  activeicon="add_marker_button_active"
+                                  tooltip="Add Marker"/>
+                      <EventBox width="1"
+                                bgnormal="#424242"/>
+                    </HBox>
+                  </EventBox>
                   <EventBox height="1"
                             bgnormal="#424242"/>
                   <EventBox height="1"
