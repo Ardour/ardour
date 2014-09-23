@@ -2059,26 +2059,29 @@ MixerStrip::update_inspector_info_panel ()
     
     string track_name = _route->name();
     
-    if( track_name != "master")
-    {
-        for (PortSet::iterator i = in_ports.begin(); i != in_ports.end(); ++i)
-        {
-            vector<string> connections_string;
-            i->get_connections(connections_string);
+    for (PortSet::iterator i = in_ports.begin(); i != in_ports.end(); ++i)
+    {        
+        vector<string> connections_string;
+        i->get_connections(connections_string);
 
-            for(unsigned int j = 0; j < connections_string.size(); ++j)
-            {
-                if( connections_string[j].find("system:capture:") != string::npos )
-                    connections_string[j].erase(0, 15);
-                
-                input_text += connections_string[j] + " ";
-            }
+        for(unsigned int j = 0; j < connections_string.size(); ++j)
+        {
+            // delete "/audio_out 1"
+            remove_pattern_from_string(connections_string[j], "/audio_out 1", connections_string[j]);
+           
+            // Do not show the same inputs. For example Input for Master Bus can be "Track 1/audio_out 1", "Track 1/audio_out 2". We leave only one "Track 1".
+            int pos = connections_string[j].find("/audio_out 2");
+            if( pos != string::npos )
+                continue;
+            
+            remove_pattern_from_string(connections_string[j], "system:capture:", connections_string[j]);
+            remove_pattern_from_string(connections_string[j], "ardour:", connections_string[j]);
+                        
+            input_text += "\n" + connections_string[j];
         }
-    } else {
-        input_text = track_name; // track_name = "master"
     }
     
-    input_text = "In " + input_text;
+    input_text = "In" + input_text;
     input_info_label.set_text (input_text);
     input_info_label.set_tooltip_text (input_text);
     
@@ -2125,13 +2128,13 @@ MixerStrip::update_inspector_info_panel ()
                 if( connections_string[j].find("system:playback:") != string::npos )
                     connections_string[j].erase(0, 16);
                 
-                output_text += connections_string[j] + " ";
+                output_text += connections_string[j] + "\n";
             }
         }
 
     }
     
-    output_text = "Out " + output_text;
+    output_text = "Out\n" + output_text;
     output_info_label.set_text(output_text);
     output_info_label.set_tooltip_text(output_text);
 }
