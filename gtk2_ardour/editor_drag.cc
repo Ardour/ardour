@@ -1129,11 +1129,12 @@ RegionMoveDrag::finished_no_copy (
 
 		if (changed_tracks) {
 
+                        /* new region that is identical to the original one, including its name */
+                        
+                        boost::shared_ptr<Region> r = RegionFactory::create (rv->region (), 0, PropertyList(), false);
+                        
 			/* insert into new playlist */
-
-			RegionView* new_view = insert_region_into_playlist (
-				RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, where, modified_playlists
-				);
+			RegionView* new_view = insert_region_into_playlist (r, dest_rtv, dest_layer, where, modified_playlists);
 
 			if (new_view == 0) {
 				++i;
