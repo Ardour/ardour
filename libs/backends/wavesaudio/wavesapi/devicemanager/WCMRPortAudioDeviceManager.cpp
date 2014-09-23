@@ -27,7 +27,7 @@ using namespace wvNS;
 ///< Supported Sample rates                                                                                                  
 static const double gAllSampleRates[] =
 	{
-		44100.0, 48000.0, 88200.0, 96000.0, -1 /* negative terminated  list */
+		44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0 -1 /* negative terminated  list */
 	};
 
 
@@ -1401,8 +1401,6 @@ int WCMRPortAudioDevice::AudioCallback( const float *pInputBuffer, float *pOutpu
 			m_IgnoreThisDrop = false; //We'll ignore once, just once!
 		else
 			m_DropsDetected++;
-
-		m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::Dropout);
 	}
 
 	m_pInputData = pInputBuffer;
