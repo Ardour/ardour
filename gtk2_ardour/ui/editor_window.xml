@@ -397,7 +397,7 @@
                                 visible="false"
                                 noshowall="true"/>
                         </HBox>
-                        <DropdownMenu style="generic_dropdown_menu"/>
+                        <DropdownMenu/>
                       </Dropdown>
                       <EventBox width="1"
                                 bgnormal="#424242"/>
@@ -406,8 +406,11 @@
                                 height="16"
                                 normalicon="marker_midi_dropdown"
                                 activeicon="marker_midi_dropdown_active"
-                                winfont ="Arial 8"
-                                macfont ="Helvetica 8">
+                                winfont ="Arial 10"
+                                macfont ="Helvetica 10"
+                                fgnormal="#BEBEBE"
+                                fgactive="#ffffff"
+                                fghover="#ffffff">
                         <HBox>
                           <!--
                           The following three icons should be shown/hidden according to the
@@ -425,7 +428,7 @@
                                 visible="false"
                                 noshowall="true"/>
                         </HBox>
-                        <DropdownMenu style="generic_dropdown_menu"/>
+                        <DropdownMenu bgnormal="#6C6C6C"/>
                       </Dropdown>
                       <EventBox width="1"
                                 bgnormal="#424242"/>
@@ -441,15 +444,21 @@
                   </EventBox>
                   <EventBox height="1"
                             bgnormal="#424242"/>
-                  <EventBox height="1"
-                            bgnormal="#7B7B7B"/>
-                  <iconbutton id="skip_button"
-                              width="232"
-                              height="16"
-                              normalicon="skip_button"
-                              activeicon="skip_button"/>
-                  <EventBox height="1"
-                            bgnormal="#7B7B7B"/>
+                  <EventBox id="skip_button_home"
+                            bgnormal="#6C6C6C">
+                    <HBox>
+                      <icon source="skip_lane_label.png"/>
+                      <EventBox width="1"
+                                bgnormal="#424242"/>
+                      <iconbutton id="skip_button"
+                                  width="41"
+                                  height="16"
+                                  normalicon="skip_off"
+                                  activeicon="skip_on"/>
+                      <EventBox width="1"
+                                bgnormal="#424242"/>
+                    </HBox>
+                  </EventBox>
                   <EventBox height="1"
                             bgnormal="#424242"/>
                   <HBox id="global_tracks_hbox"
