@@ -151,6 +151,8 @@ class DummyAudioPort : public DummyPort {
 			PinkNoise,
 			PonyNoise,
 			SineWave,
+			SquareWave,
+			KronekerDelta,
 		};
 		void setup_generator (GeneratorType const, float const);
 

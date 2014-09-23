@@ -85,6 +85,8 @@ DummyAudioBackend::enumerate_devices () const
 	if (_device_status.empty()) {
 		_device_status.push_back (DeviceStatus (_("Silence"), true));
 		_device_status.push_back (DeviceStatus (_("Sine Wave"), true));
+		_device_status.push_back (DeviceStatus (_("Square Wave"), true));
+		_device_status.push_back (DeviceStatus (_("Kroneker Delta"), true));
 		_device_status.push_back (DeviceStatus (_("Uniform White Noise"), true));
 		_device_status.push_back (DeviceStatus (_("Gaussian White Noise"), true));
 		_device_status.push_back (DeviceStatus (_("Pink Noise"), true));
@@ -676,6 +678,10 @@ DummyAudioBackend::register_system_ports()
 		gt = DummyAudioPort::PonyNoise;
 	} else if (_device == _("Sine Wave")) {
 		gt = DummyAudioPort::SineWave;
+	} else if (_device == _("Square Wave")) {
+		gt = DummyAudioPort::SquareWave;
+	} else if (_device == _("Kroneker Delta")) {
+		gt = DummyAudioPort::KronekerDelta;
 	} else {
 		gt = DummyAudioPort::Silence;
 	}
@@ -1383,12 +1389,18 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 		case GaussianWhiteNoise:
 		case Silence:
 			break;
+		case KronekerDelta:
+			_tbl_length = (5 + randi() % (int)(samplerate / 20.f));
+			break;
+		case SquareWave:
+			_tbl_length = (5 + randi() % (int)(samplerate / 20.f)) & ~1;
+			break;
 		case SineWave:
 			{
 				_tbl_length = 5 + randi() % (int)(samplerate / 20.f);
 				_wavetable = (Sample*) malloc( _tbl_length * sizeof(Sample));
 				for (uint32_t i = 0 ; i < _tbl_length; ++i) {
-					_wavetable[i] = .12589f * sinf(2.0 * M_PI * (float)i / (float)_tbl_length);
+					_wavetable[i] = .12589f * sinf(2.0 * M_PI * (float)i / (float)_tbl_length); // -18dBFS
 				}
 			}
 			break;
@@ -1429,6 +1441,27 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 	switch (_gen_type) {
 		case Silence:
 			memset (_buffer, 0, n_samples * sizeof (Sample));
+			break;
+		case SquareWave:
+			assert(_tbl_length > 0);
+			for (pframes_t i = 0 ; i < n_samples; ++i) {
+				if (_tbl_offset < _tbl_length * .5) {
+					_buffer[i] =  .40709f; // -6dBFS
+				} else {
+					_buffer[i] = -.40709f;
+				}
+				_tbl_offset = (_tbl_offset + 1) % _tbl_length;
+			}
+			break;
+		case KronekerDelta:
+			assert(_tbl_length > 0);
+			memset (_buffer, 0, n_samples * sizeof (Sample));
+			for (pframes_t i = 0; i < n_samples; ++i) {
+				if (_tbl_offset == 0) {
+					_buffer[i] = 1.0;
+				}
+				_tbl_offset = (_tbl_offset + 1) % _tbl_length;
+			}
 			break;
 		case SineWave:
 			assert(_wavetable && _tbl_length > 0);
