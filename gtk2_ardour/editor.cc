@@ -4332,8 +4332,6 @@ Editor::set_samples_per_pixel (framecnt_t spp)
 	refresh_location_display();
 	_summary->set_overlays_dirty ();
 
-	update_marker_labels ();
-
 	instant_save ();
 }
 
@@ -4518,6 +4516,7 @@ Editor::set_loop_range (framepos_t start, framepos_t end, string cmd)
 	Location* tll;
 
 	if ((tll = transport_loop_location()) == 0) {
+                cerr << "Set loop with new loc\n";
 		Location* loc = new Location (*_session, start, end, _("Loop"),  Location::IsAutoLoop);
 		XMLNode &before = _session->locations()->get_state();
 		_session->locations()->add (loc, true);
@@ -4525,6 +4524,7 @@ Editor::set_loop_range (framepos_t start, framepos_t end, string cmd)
 		XMLNode &after = _session->locations()->get_state();
 		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
 	} else {
+                cerr << "Set loop with existing loc " << tll << endl;
 		XMLNode &before = tll->get_state();
 		tll->set_hidden (false, this);
 		tll->set (start, end);

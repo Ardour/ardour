@@ -75,7 +75,9 @@ class Marker : public sigc::trackable
         void set_color (ArdourCanvas::Color);
         void reset_color ();
         
-	virtual void set_position (framepos_t);
+	void set_position (framepos_t start, framepos_t end = -1) {
+                return _set_position (start, end);
+        }
 
 	framepos_t position() const { return frame_position; }
 
@@ -129,7 +131,12 @@ class Marker : public sigc::trackable
 	double       _label_offset;
         bool         _have_scene_change;
         
-        void flags_changed ();
+        virtual void flags_changed ();
+        virtual void bounds_changed ();
+        virtual void name_changed ();
+
+        virtual void _set_position (framepos_t, framepos_t);
+
         void pick_basic_color (ArdourCanvas::Color);
 	virtual void use_color ();
 	void reposition ();
@@ -143,7 +150,7 @@ private:
 	Marker (Marker const &);
 	Marker & operator= (Marker const &);
 
-        PBD::ScopedConnection flags_changed_connection;
+        PBD::ScopedConnectionList location_connections;
 };
 
 /** A Marker that displays a range (start+end) rather than a single location
@@ -157,11 +164,13 @@ class RangeMarker : public Marker
         
 	void setup_name_display ();
 	void use_color ();
-        void set_position (framepos_t);
         void setup_line ();
         void canvas_height_set (double);
 
     protected:
+        void bounds_changed ();
+        void _set_position (framepos_t, framepos_t);
+
         framepos_t _end_frame;
 	ArdourCanvas::Line* _end_line;
         Cairo::RefPtr<Cairo::Surface> _pattern;

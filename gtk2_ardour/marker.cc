@@ -159,15 +159,30 @@ RangeMarker::use_color ()
 }
 
 void
-RangeMarker::set_position (framepos_t frame)
+RangeMarker::_set_position (framepos_t start, framepos_t end)
 {
-        Marker::set_position (frame);
-        double pixel_width = editor.sample_to_pixel (_end_frame - frame_position);
-        _name_background->set_x1 (_name_background->x0() + pixel_width);
-        if (_name_item) {
-                _name_item->clamp_width (pixel_width - _label_offset);
+        if (end >= 0) {
+                _end_frame = end;
         }
-        setup_line ();
+
+        Marker::_set_position (start, end);
+
+        if (end >= 0) {
+                
+                /* clamp displayed length of text to visible marker width
+                   since the marker's visible width is variable depending
+                   on zoom (not true for single-position, non-range markers.
+                */
+                
+                double pixel_width = editor.sample_to_pixel (_end_frame - frame_position);
+                _name_background->set_x1 (_name_background->x0() + pixel_width);
+                
+                cerr << "reset x1 to " << _name_background->x1() << " based on " << frame_position << " .. " << _end_frame << endl;
+                
+                if (_name_item) {
+                        _name_item->clamp_width (pixel_width - _label_offset);
+                }
+        }
 }        
 
 void
@@ -200,6 +215,12 @@ RangeMarker::setup_line ()
        _end_line->set_x1 (d.x);
        _end_line->set_outline_color (_color);
        _end_line->show ();
+}
+
+void
+RangeMarker::bounds_changed ()
+{
+        _set_position (_location->start(), _location->end());
 }
 
 void
@@ -250,8 +271,8 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
         , _scene_change_text (0)
         , frame_position (start_pos)
 	, _type (type)
-        , _height (height)
 	, _shown (false)
+        , _height (height)
 	, _color (rgba)
 	, _left_label_limit (DBL_MAX)
 	, _right_label_limit (DBL_MAX)
@@ -294,7 +315,13 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
         use_color ();
 
         if (_location) {
-               _location->FlagsChanged.connect (flags_changed_connection, MISSING_INVALIDATOR, boost::bind (&Marker::flags_changed, this), gui_context());
+                /* Listen to region properties that we care about */
+
+                _location->FlagsChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::flags_changed, this), gui_context());
+                _location->NameChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::name_changed, this), gui_context());
+                _location->StartChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::bounds_changed, this), gui_context());
+                _location->EndChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::bounds_changed, this), gui_context());
+                _location->Changed.connect (location_connections, invalidator(*this), boost::bind (&Marker::bounds_changed, this), gui_context());
         }
 }
 
@@ -304,6 +331,8 @@ Marker::~Marker ()
 
 	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
 	delete group;
+
+        /* this isn't a child of the group, but belongs to the global canvas hscroll group */
 	delete _start_line;
 }
 
@@ -314,9 +343,35 @@ void Marker::reparent(ArdourCanvas::Container & parent)
 }
 
 void
+Marker::name_changed ()
+{
+        _name = _location->name();
+        setup_name_display ();
+}
+
+void
 Marker::flags_changed ()
 {
+        /* flags are basically indicate by different coloring, so choose
+           the right one again.
+        */
         pick_basic_color (0);
+
+        /* location could also have been hidden */
+
+        if (_location && _location->is_hidden()) {
+                group->hide ();
+        } else {
+                group->show ();
+        }
+}
+
+void
+Marker::bounds_changed ()
+{
+        /* handler can only be invoked if _location was non-null */
+
+        set_position (_location->start ());
 }
 
 void
@@ -432,6 +487,7 @@ Marker::setup_name_display ()
                 }
 
                 _name_background->set_x0 (0);
+                /* hard-coded fixed width used if there is no text to display */
                 _name_background->set_x1 (10);
                 
                 return;
@@ -509,7 +565,7 @@ Marker::setup_name_display ()
 }
 
 void
-Marker::set_position (framepos_t frame)
+Marker::_set_position (framepos_t frame, framepos_t)
 {
 	frame_position = frame;
 	unit_position = editor.sample_to_pixel (frame_position) - _shift;

@@ -63,6 +63,7 @@ enum ItemType {
 	BBTRulerItem,
 	SamplesRulerItem,
 	DropZoneItem,
+        ClockRulerItem,
 
 	/* don't remove this */
 

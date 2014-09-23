@@ -588,17 +588,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 		~LocationMarkers ();
 
-		void hide ();
-		void show ();
-
-		void set_show_lines (bool);
-		void set_selected (bool);
 		void canvas_height_set (double);
-		void setup_lines ();
-
-		void set_name (const std::string&);
-		void set_position (framepos_t start, framepos_t end = 0);
-		void set_color_rgba (uint32_t);
 	};
 
 	LocationMarkers  *find_location_markers (ARDOUR::Location *) const;

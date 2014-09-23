@@ -3132,6 +3132,367 @@ FadeOutDrag::aborted (bool)
 	}
 }
 
+
+MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
+	: Drag (e, i)
+        , type (Move)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New MarkerDrag\n");
+
+	_marker = reinterpret_cast<Marker*> (_item->get_data ("marker"));
+	assert (_marker);
+
+	_points.push_back (ArdourCanvas::Duple (0, 0));
+	_points.push_back (ArdourCanvas::Duple (0, physical_screen_height (_editor->get_window())));
+}
+
+MarkerDrag::~MarkerDrag ()
+{
+	for (CopiedLocationInfo::iterator i = _copied_locations.begin(); i != _copied_locations.end(); ++i) {
+		delete i->location;
+	}
+}
+
+MarkerDrag::CopiedLocationMarkerInfo::CopiedLocationMarkerInfo (Location* l, Marker* m)
+{
+	location = new Location (*l);
+	markers.push_back (m);
+	move_both = false;
+}
+
+void
+MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+{
+	Drag::start_grab (event, cursor);
+
+        /* event coordinates are in canvas space */
+
+        boost::optional<ArdourCanvas::Rect> ro = _marker->the_item().bounding_box();
+        assert (ro);
+        ArdourCanvas::Rect r (*ro);
+        
+        r = _marker->the_item().item_to_canvas (r);
+        
+        cerr << "From right " << abs (grab_x() - r.x0) << " from left " << abs (grab_x() - r.x1) << endl;
+
+        if (r.width() > 50.0) {
+                if (abs (grab_x() - r.x0) < 20.0) {
+                        type = TrimLeft;
+                } else if (abs (grab_x() - r.x1) < 20.0) {
+                        type = TrimRight;
+                } else {
+                        type = Move;
+                }
+        } else {
+                type = Move;
+        }
+
+	Location *location = _marker->location();
+	_editor->_dragging_edit_point = true;
+
+        if (location) {
+
+                if (location->is_mark()) {
+                        type = Move;
+                }
+
+                switch (type) {
+                case TrimLeft:
+                case Move:
+                        show_verbose_cursor_time (location->start());
+                case TrimRight:
+                default:
+                        show_verbose_cursor_time (location->end());
+                }
+        }
+
+        cerr << "marker drag, type = " << type << endl;
+
+	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
+
+	switch (op) {
+	case Selection::Toggle:
+		/* we toggle on the button release */
+		break;
+	case Selection::Set:
+		if (!_editor->selection->selected (_marker)) {
+			_editor->selection->set (_marker);
+		}
+		break;
+	case Selection::Extend:
+	{
+		Locations::LocationList ll;
+		list<Marker*> to_add;
+		framepos_t s, e;
+		_editor->selection->markers.range (s, e);
+		s = min (_marker->position(), s);
+		e = max (_marker->position(), e);
+		s = min (s, e);
+		e = max (s, e);
+		if (e < max_framepos) {
+			++e;
+		}
+		_editor->session()->locations()->find_all_between (s, e, ll, Location::Flags (0));
+		for (Locations::LocationList::iterator i = ll.begin(); i != ll.end(); ++i) {
+			Editor::LocationMarkers* lm = _editor->find_location_markers (*i);
+			if (lm) {
+				if (lm->start) {
+					to_add.push_back (lm->start);
+				}
+				if (lm->end) {
+					to_add.push_back (lm->end);
+				}
+			}
+		}
+		if (!to_add.empty()) {
+			_editor->selection->add (to_add);
+		}
+		break;
+	}
+	case Selection::Add:
+		_editor->selection->add (_marker);
+		break;
+	}
+
+	/* Set up copies for us to manipulate during the drag 
+	 */
+
+	for (MarkerSelection::iterator i = _editor->selection->markers.begin(); i != _editor->selection->markers.end(); ++i) {
+
+		Location* l = (*i)->location();
+
+		if (!l) {
+			continue;
+		}
+
+		if (l->is_mark()) {
+			_copied_locations.push_back (CopiedLocationMarkerInfo (l, *i));
+		} else {
+			/* range: check that the other end of the range isn't
+			   already there.
+			*/
+			CopiedLocationInfo::iterator x;
+			for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
+				if (*(*x).location == *l) {
+					break;
+				}
+			}
+			if (x == _copied_locations.end()) {
+				_copied_locations.push_back (CopiedLocationMarkerInfo (l, *i));
+			} else {
+				(*x).markers.push_back (*i);
+				(*x).move_both = true;
+			}
+		}
+			
+	}
+}
+
+void
+MarkerDrag::setup_pointer_frame_offset ()
+{
+	bool is_start;
+	Location *location = _editor->find_location_from_marker (_marker, is_start);
+	_pointer_frame_offset = raw_grab_frame() - (is_start ? location->start() : location->end());
+}
+
+void
+MarkerDrag::motion (GdkEvent* event, bool)
+{
+	framecnt_t f_delta = 0;
+	Location *real_location;
+	Location *copy_location = 0;
+
+	framepos_t const newframe = adjusted_current_frame (event);
+
+	CopiedLocationInfo::iterator x;
+
+	/* find the marker we're dragging, and compute the delta */
+
+	for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
+
+		copy_location = (*x).location;
+
+		if (find (x->markers.begin(), x->markers.end(), _marker) != x->markers.end()) {
+
+			/* this marker is represented by this
+			 * CopiedLocationMarkerInfo 
+			 */
+
+                        if ((real_location = _marker->location()) == 0) {
+                                /* que pasa ? */
+                                return;
+                        }
+
+                        switch (type) {
+                        case TrimLeft:
+                        case Move:
+				f_delta = newframe - copy_location->start();
+                                cerr << " TL/M fdelta from " << copy_location->end() << " to " << newframe << " = " << f_delta << endl;
+                                break;
+                        case TrimRight:
+                        default:
+                                f_delta = newframe - copy_location->end();
+                                cerr << "\n\n\nTR fdelta from " << copy_location->end() << " to " << newframe << " = " << f_delta << endl;
+                                break;
+                        }
+
+			break;
+		}
+	}
+
+
+	if (x == _copied_locations.end()) {
+		/* hmm, impossible - we didn't find the dragged marker */
+		return;
+	}
+
+	/* now move them all */
+        
+	for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
+
+		copy_location = x->location;
+
+		/* call this to find out if its the start or end */
+
+		if ((real_location = x->markers.front()->location()) == 0) {
+			continue;
+		}
+
+		if (real_location->locked()) {
+			continue;
+		}
+
+		if (copy_location->is_mark()) {
+
+			/* now move it */
+
+			copy_location->set_start (copy_location->start() + f_delta);
+
+		} else {
+			
+                        framepos_t new_start = copy_location->start() + f_delta;
+                        framepos_t new_end = copy_location->end() + f_delta;
+
+                        if (type == Move) {
+                                // _editor->snap_to (new_start, -1, true);
+                                // _editor->snap_to (new_end, -1, true);
+                                cerr << "New : " << new_start << ", " << new_end << endl;
+                                copy_location->set (new_start, new_end);
+                        } else 	if (type == TrimLeft) {
+                                // _editor->snap_to (new_start, -1, true);
+                                cerr << "New start : " << new_start << endl;
+                                copy_location->set_start (new_start);
+                        } else if (newframe > 0) {
+                                // _editor->snap_to (new_end, -1, true);
+                                cerr << "New end : " << new_end << endl;
+                                copy_location->set_end (new_end);
+                        }
+		}
+
+                /* doing things this way means that we still obey any logic
+                   in ARDOUR::Location that controls changing position,
+                   but without actually moving the real Location (yet)
+                */
+
+                cerr << "MOTION: RESET MARKER TO " << copy_location->start() << " .. " << copy_location->end() << endl;
+                _marker->set_position (copy_location->start(), copy_location->end());
+	}
+
+	assert (!_copied_locations.empty());
+
+	show_verbose_cursor_time (newframe);
+}
+
+void
+MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+	if (!movement_occurred) {
+                
+		if (was_double_click()) {
+			_editor->rename_marker (_marker);
+			return;
+		}
+
+		/* just a single click */
+
+                Location* loc = _marker->location ();
+                if (loc) {
+                        if (loc->is_skip()) {
+                                /* skip range - click toggles active skip status */
+                                loc->set_skipping (!loc->is_skipping());
+                                return;
+                        }
+                }
+
+                /* other markers: do nothing but finish
+		   off the selection process
+		*/
+
+		Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
+
+		switch (op) {
+		case Selection::Set:
+			if (_editor->selection->selected (_marker) && _editor->selection->markers.size() > 1) {
+				_editor->selection->set (_marker);
+			}
+			break;
+
+		case Selection::Toggle:
+			/* we toggle on the button release, click only */
+			_editor->selection->toggle (_marker);
+			break;
+
+		case Selection::Extend:
+		case Selection::Add:
+			break;
+		}
+
+		return;
+	}
+
+	_editor->_dragging_edit_point = false;
+
+	_editor->begin_reversible_command ( _("move marker") );
+	XMLNode &before = _editor->session()->locations()->get_state();
+
+	MarkerSelection::iterator i;
+	CopiedLocationInfo::iterator x;
+	bool is_start;
+
+	for (i = _editor->selection->markers.begin(), x = _copied_locations.begin();
+	     x != _copied_locations.end() && i != _editor->selection->markers.end();
+	     ++i, ++x) {
+
+		Location * location = _editor->find_location_from_marker (*i, is_start);
+
+		if (location) {
+
+			if (location->locked()) {
+				return;
+			}
+
+			if (location->is_mark()) {
+				location->set_start (((*x).location)->start());
+			} else {
+				location->set (((*x).location)->start(), ((*x).location)->end());
+			}
+		}
+	}
+
+	XMLNode &after = _editor->session()->locations()->get_state();
+	_editor->session()->add_command(new MementoCommand<Locations>(*(_editor->session()->locations()), &before, &after));
+	_editor->commit_reversible_command ();
+}
+
+void
+MarkerDrag::aborted (bool)
+{
+	/* XXX: TODO */
+}
+
+#if 0
+
 MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
 {
@@ -3511,6 +3872,8 @@ MarkerDrag::update_item (Location*)
 {
         /* noop */
 }
+
+#endif
 
 ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i),
@@ -4425,27 +4788,13 @@ SelectionDrag::aborted (bool)
 }
 
 RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
-	: Drag (e, i, false),
-	  _operation (o),
-	  _copy (false)
+	: Drag (e, i, false)
+        , _drag_rect (0)
+        , _crect (0)
+        , _operation (o)
+        , _copy (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RangeMarkerBarDrag\n");
-
-	_drag_rect = new ArdourCanvas::Rectangle (_editor->time_line_group, 
-						  ArdourCanvas::Rect (0.0, 0.0, 0.0,
-								      physical_screen_height (_editor->get_window())));
-	_drag_rect->hide ();
-
-        switch (o) {
-        case CreateSkipMarker:
-                _drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SkipDragBarRect());
-                _drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_SkipDragBarRect());
-                break;
-        default:
-                _drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RangeDragRect());
-                _drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RangeDragRect());
-                break;
-        }
 }
 
 void
@@ -4486,71 +4835,83 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 {
 	framepos_t start = 0;
 	framepos_t end = 0;
-	ArdourCanvas::Rectangle *crect;
-
-	switch (_operation) {
-	case CreateSkipMarker:
-		crect = _editor->skip_drag_rect;
-		break;
-	case CreateRangeMarker:
-		crect = _editor->range_bar_drag_rect;
-		break;
-	case CreateTransportMarker:
-		crect = _editor->transport_bar_drag_rect;
-		break;
-	case CreateCDMarker:
-		crect = _editor->cd_marker_bar_drag_rect;
-		break;
-	default:
-		error << string_compose (_("programming_error: %1"), "Error: unknown range marker op passed to Editor::drag_range_markerbar_op ()") << endmsg;
-		return;
-		break;
-	}
-
 	framepos_t const pf = adjusted_current_frame (event);
 
-	if (_operation == CreateSkipMarker || _operation == CreateRangeMarker || _operation == CreateTransportMarker || _operation == CreateCDMarker) {
-		framepos_t grab = grab_frame ();
-		_editor->snap_to (grab);
+        framepos_t grab = grab_frame ();
+        _editor->snap_to (grab);
+        
+        if (pf < grab_frame()) {
+                start = pf;
+                end = grab;
+        } else {
+                end = pf;
+                start = grab;
+        }
+        
+        if (first_move) {
+                
+                /* Pick the canvas rect that we're going to be dragging */
+                
+                switch (_operation) {
+                case CreateSkipMarker:
+                        _crect = _editor->skip_drag_rect;
+                        break;
+                case CreateRangeMarker:
+                        _crect = _editor->range_bar_drag_rect;
+                        break;
+                case CreateTransportMarker:
+                        cerr << "using transport bar\n";
+                        _crect = _editor->transport_bar_drag_rect;
+                        break;
+                case CreateCDMarker:
+                        _crect = _editor->cd_marker_bar_drag_rect;
+                        break;
+                default:
+                        error << string_compose (_("programming_error: %1"), "Error: unknown range marker op passed to Editor::drag_range_markerbar_op ()") << endmsg;
+                        return;
+                        break;
+                }
 
-		if (pf < grab_frame()) {
-			start = pf;
-			end = grab;
-		} else {
-			end = pf;
-			start = grab;
-		}
+                /* now a rect to cover the main canvas */
 
-		/* first drag: Either add to the selection
-		   or create a new selection.
-		*/
-
-		if (first_move) {
-
-			_editor->temp_location->set (start, end);
-
-			crect->show ();
-
-			update_item (_editor->temp_location);
-			_drag_rect->show();
-			//_drag_rect->raise_to_top();
-
-		}
-	}
-
+                _drag_rect = new ArdourCanvas::Rectangle (_editor->time_line_group, 
+                                                          ArdourCanvas::Rect (0.0, 0.0, 0.0,
+                                                                              physical_screen_height (_editor->get_window())));
+                switch (_operation) {
+                case CreateSkipMarker:
+                        _drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SkipDragBarRect());
+                        _drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_SkipDragBarRect());
+                        break;
+                default:
+                        _drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RangeDragRect());
+                        _drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RangeDragRect());
+                        break;
+                }
+                
+                _editor->temp_location->set (start, end);
+                
+                _crect->show ();
+                _crect->raise_to_top ();
+                
+                _drag_rect->show();
+                _drag_rect->raise_to_top();
+        }
+        
 	if (start != end) {
 		_editor->temp_location->set (start, end);
-
+                
 		double x1 = _editor->sample_to_pixel (start);
 		double x2 = _editor->sample_to_pixel (end);
-		crect->set_x0 (x1);
-		crect->set_x1 (x2);
-
-		update_item (_editor->temp_location);
+                
+		_crect->set_x0 (x1);
+		_crect->set_x1 (x2);
+                
+                _drag_rect->set_x0 (x1);
+                _drag_rect->set_x1 (x2);
 	}
-
+        
+        
 	show_verbose_cursor_time (pf);
-
 }
 
 void
@@ -4563,6 +4924,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (movement_occurred) {
 		motion (event, false);
 		_drag_rect->hide();
+                _crect->hide ();
 
 		switch (_operation) {
 		case CreateSkipMarker:
@@ -4598,8 +4960,9 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 		    }
 
 		case CreateTransportMarker:
-			// popup menu to pick loop or punch
-			_editor->new_transport_marker_context_menu (&event->button, _item);
+                        /* Ardour used to offer a menu to choose between setting loop + autopunch range here */
+                        cerr << "Setting loop to " << _editor->temp_location->start() << " .. " << _editor->temp_location->end() << endl;
+                        _editor->set_loop_range (_editor->temp_location->start(), _editor->temp_location->end(), _("set loop range"));
 			break;
 		}
 
@@ -4658,16 +5021,6 @@ void
 RangeMarkerBarDrag::aborted (bool)
 {
 	/* XXX: TODO */
-}
-
-void
-RangeMarkerBarDrag::update_item (Location* location)
-{
-	double const x1 = _editor->sample_to_pixel (location->start());
-	double const x2 = _editor->sample_to_pixel (location->end());
-
-	_drag_rect->set_x0 (x1);
-	_drag_rect->set_x1 (x2);
 }
 
 MouseZoomDrag::MouseZoomDrag (Editor* e, ArdourCanvas::Item* i)

@@ -173,5 +173,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (MinsecRulerItem);
 	REGISTER_ENUM (BBTRulerItem);
 	REGISTER_ENUM (SamplesRulerItem);
+	REGISTER_ENUM (ClockRulerItem);
+	REGISTER_ENUM (DropZoneItem);
 	REGISTER (item_type);
 }

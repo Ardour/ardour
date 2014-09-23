@@ -65,11 +65,8 @@ Editor::add_new_location (Location *location)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::add_new_location, location);
 
-	ArdourCanvas::Container* group = add_new_location_internal (location);
+	(void) add_new_location_internal (location);
 
-	/* Do a full update of the markers in this group */
-	update_marker_labels (group);
-	
 	if (location->is_auto_punch()) {
 		update_punch_range_view ();
 	}
@@ -152,12 +149,6 @@ Editor::add_new_location_internal (Location* location)
 
         if (lam->start || lam->end) {
 
-                if (location->is_hidden ()) {
-                        lam->hide();
-                } else {
-                        lam->show ();
-                }
-                
                 location->name_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
                 location->FlagsChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_flags_changed, this, location), gui_context());
                 
@@ -174,7 +165,6 @@ Editor::add_new_location_internal (Location* location)
                 }
                 
                 lam->canvas_height_set (_visible_canvas_height);
-                lam->set_show_lines (_show_marker_lines);
                 
                 /* Add these markers to the appropriate sorted marker lists, which will render
                    them unsorted until a call to update_marker_labels() sorts them out.
@@ -194,182 +184,11 @@ Editor::add_new_location_internal (Location* location)
 void
 Editor::location_changed (Location *location)
 {
-	ENSURE_GUI_THREAD (*this, &Editor::location_changed, location)
-
-	LocationMarkers *lam = find_location_markers (location);
-
-	if (lam == 0) {
-		/* a location that isn't "marked" with markers */
-		return;
-	}
-
-	lam->set_name (location->name ());
-	lam->set_position (location->start(), location->end());
-
 	if (location->is_auto_loop()) {
 		update_loop_range_view ();
 	} else if (location->is_auto_punch()) {
 		update_punch_range_view ();
 	}
-
-	check_marker_label (lam->start);
-	if (lam->end) {
-		check_marker_label (lam->end);
-	}
-}
-
-/** Look at a marker and check whether its label, and those of the previous and next markers,
- *  need to have their labels updated (in case those labels need to be shortened or can be
- *  lengthened)
- */
-void
-Editor::check_marker_label (Marker* m)
-{
-	/* Get a time-ordered list of markers from the last time anything changed */
-	std::list<Marker*>& sorted = _sorted_marker_lists[m->get_parent()];
-
-	list<Marker*>::iterator i = std::find (sorted.begin(), sorted.end(), m);
-
-	list<Marker*>::iterator prev = sorted.end ();
-	list<Marker*>::iterator next = i;
-	++next;
-
-	/* Look to see if the previous marker is still behind `m' in time */
-	if (i != sorted.begin()) {
-
-		prev = i;
-		--prev;
-
-		if ((*prev)->position() > m->position()) {
-			/* This marker is no longer in the correct order with the previous one, so
-			 * update all the markers in this group.
-			 */
-			update_marker_labels (m->get_parent ());
-			return;
-		}
-	}
-
-	/* Look to see if the next marker is still ahead of `m' in time */
-	if (next != sorted.end() && (*next)->position() < m->position()) {
-		/* This marker is no longer in the correct order with the next one, so
-		 * update all the markers in this group.
-		 */
-		update_marker_labels (m->get_parent ());
-		return;
-	}
-
-#if 0
-	if (prev != sorted.end()) {
-
-		/* Update just the available space between the previous marker and this one */
-
-		double const p = sample_to_pixel (m->position() - (*prev)->position());
-
-		if (m->label_on_left()) {
-			(*prev)->set_right_label_limit (p - 4.0);
-		} else {
-			(*prev)->set_right_label_limit (p);
-		}
-
-		if ((*prev)->label_on_left ()) {
-			m->set_left_label_limit (p);
-		} else {
-			m->set_left_label_limit (p - 4.0);
-		}
-	}
-
-	if (next != sorted.end()) {
-
-		/* Update just the available space between this marker and the next */
-
-		double const p = sample_to_pixel ((*next)->position() - m->position());
-
-		if ((*next)->label_on_left()) {
-			m->set_right_label_limit (p - 4.0);
-		} else {
-			m->set_right_label_limit (p);
-		}
-
-		if (m->label_on_left()) {
-			(*next)->set_left_label_limit (p);
-		} else {
-			(*next)->set_left_label_limit (p - 4.0);
-		}
-	}
-
-#endif
-
-}
-
-struct MarkerComparator {
-	bool operator() (Marker const * a, Marker const * b) {
-		return a->position() < b->position();
-	}
-};
-
-/** Update all marker labels in all groups */
-void
-Editor::update_marker_labels ()
-{
-	for (std::map<ArdourCanvas::Container *, std::list<Marker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
-		update_marker_labels (i->first);
-	}
-}
-
-/** Look at all markers in a group and update label widths */
-void
-Editor::update_marker_labels (ArdourCanvas::Container* group)
-{
-	list<Marker*>& sorted = _sorted_marker_lists[group];
-
-	if (sorted.empty()) {
-		return;
-	}
-
-	/* We sort the list of markers and then set up the space available between each one */
-
-	sorted.sort (MarkerComparator ());
-
-	list<Marker*>::iterator i = sorted.begin ();
-
-	list<Marker*>::iterator prev = sorted.end ();
-	list<Marker*>::iterator next = i;
-
-	if (next != sorted.end()) {
-		++next;
-	}
-
-#if 0
-
-	while (i != sorted.end()) {
-
-		if (prev != sorted.end()) {
-			double const p = sample_to_pixel ((*i)->position() - (*prev)->position());
-
-			if ((*prev)->label_on_left()) {
-				(*i)->set_left_label_limit (p);
-			} else {
-				(*i)->set_left_label_limit (p / 2);
-			}
-
-		}
-
-		if (next != sorted.end()) {
-			double const p = sample_to_pixel ((*next)->position() - (*i)->position());
-
-			if ((*next)->label_on_left()) {
-				(*i)->set_right_label_limit (p / 2);
-			} else {
-				(*i)->set_right_label_limit (p);
-			}
-
-			++next;
-		}
-
-		prev = i;
-		++i;
-	}
-#endif
 }
 
 void
@@ -386,12 +205,6 @@ Editor::location_flags_changed (Location *location)
 
 	// move cd markers to/from cd marker bar as appropriate
 	ensure_cd_marker_updated (lam, location);
-
-	if (location->is_hidden()) {
-		lam->hide();
-	} else {
-		lam->show ();
-	}
 }
 
 void Editor::update_cd_marker_display ()
@@ -538,26 +351,6 @@ Editor::refresh_location_display ()
 	if (_session) {
 		_session->locations()->apply (*this, &Editor::refresh_location_display_internal);
 	}
-
-	update_marker_labels ();
-}
-
-void
-Editor::LocationMarkers::hide()
-{
-	start->hide ();
-	if (end) {
-		end->hide ();
-	}
-}
-
-void
-Editor::LocationMarkers::show()
-{
-	start->show ();
-	if (end) {
-		end->show ();
-	}
 }
 
 void
@@ -567,74 +360,6 @@ Editor::LocationMarkers::canvas_height_set (double h)
 	if (end) {
 		end->canvas_height_set (h);
 	}
-}
-
-void
-Editor::LocationMarkers::set_name (const string& str)
-{
-	/* XXX: hack: don't change names of session start/end markers */
-
-	if (start->type() != Marker::SessionStart) {
-		start->set_name (str);
-	}
-
-	if (end && end->type() != Marker::SessionEnd) {
-		end->set_name (str);
-	}
-}
-
-void
-Editor::LocationMarkers::set_position (framepos_t startf,
-				       framepos_t endf)
-{
-	start->set_position (startf);
-	if (end) {
-		end->set_position (endf);
-	}
-}
-
-void
-Editor::LocationMarkers::set_color_rgba (uint32_t rgba)
-{
-#if 0
-	start->set_color_rgba (rgba);
-	if (end) {
-		end->set_color_rgba (rgba);
-	}
-#endif
-}
-
-void
-Editor::LocationMarkers::set_show_lines (bool s)
-{
-#if 0
-	start->set_show_line (s);
-	if (end) {
-		end->set_show_line (s);
-	}
-#endif
-}
-
-void
-Editor::LocationMarkers::set_selected (bool s)
-{
-#if 0
-	start->set_selected (s);
-	if (end) {
-		end->set_selected (s);
-	}
-#endif
-}
-
-void
-Editor::LocationMarkers::setup_lines ()
-{
-#if 0
-	start->setup_line ();
-	if (end) {
-		end->setup_line ();
-	}
-#endif
 }
 
 void
@@ -1437,18 +1162,17 @@ Editor::update_loop_range_view ()
 		return;
 	}
 
-	Location* tll;
+	Location* tll = transport_loop_location();
 
-	if (_session->get_play_loop() && ((tll = transport_loop_location()) != 0)) {
+	if (_session->get_play_loop() && tll) {
 
 		double x1 = sample_to_pixel (tll->start());
 		double x2 = sample_to_pixel (tll->end());
 
 		transport_loop_range_rect->set_x0 (x1);
 		transport_loop_range_rect->set_x1 (x2);
-
+                
 		transport_loop_range_rect->show();
-		
 	} else {
 		transport_loop_range_rect->hide();
 	}
@@ -1496,11 +1220,11 @@ Editor::marker_selection_changed ()
 		return;
 	}
 
+#if 0
 	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
 		i->second->set_selected (false);
 	}
 
-#if 0
 	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
 		(*x)->set_selected (true);
 	}
@@ -1570,9 +1294,12 @@ Editor::toggle_marker_lines ()
 {
 	_show_marker_lines = !_show_marker_lines;
 
+#if 0
 	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
 		i->second->set_show_lines (_show_marker_lines);
 	}
+#endif
+
 }
 
 void

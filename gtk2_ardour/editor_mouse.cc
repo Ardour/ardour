@@ -674,8 +674,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case SamplesRulerItem:
 	case MinsecRulerItem:
 	case BBTRulerItem:
+        case ClockRulerItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
+			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateTransportMarker), event);
 		}
 		return true;
 		break;

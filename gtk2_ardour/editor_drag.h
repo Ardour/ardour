@@ -767,9 +767,14 @@ public:
 	void setup_pointer_frame_offset ();
 
 private:
-	void update_item (ARDOUR::Location *);
+        enum Type {
+                TrimLeft,
+                TrimRight,
+                Move
+        };
 
 	Marker* _marker; ///< marker being dragged
+        Type  type;
 
         struct CopiedLocationMarkerInfo {
 	    ARDOUR::Location* location;
@@ -1017,6 +1022,7 @@ private:
 
 	Operation _operation;
 	ArdourCanvas::Rectangle* _drag_rect;
+	ArdourCanvas::Rectangle* _crect;
 	bool _copy;
 };
 

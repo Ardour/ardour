@@ -148,7 +148,7 @@ Editor::initialize_rulers ()
 	timecode_nmarks = 0;
         bbt_nmarks = 0;
 
-	clock_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), clock_ruler, TimecodeRulerItem));
+	clock_ruler->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_event), clock_ruler, ClockRulerItem));
 }
 
 bool
@@ -453,9 +453,11 @@ Editor::update_ruler_visibility ()
 	redisplay_tempo (false);
 
 	/* Changing ruler visibility means that any lines on markers might need updating */
+#if 0
 	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
 		i->second->setup_lines ();
 	}
+#endif
 }
 
 void
