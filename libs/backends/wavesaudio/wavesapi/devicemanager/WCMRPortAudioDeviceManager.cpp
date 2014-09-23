@@ -20,7 +20,8 @@ using namespace wvNS;
 #include "pa_asio.h"
 #include "asio.h"
 
-#define PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS 500
+#define PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS 200
+#define DEVICE_INFO_UPDATE_SLEEP_TIME_MILLISECONDS 500
 #define PROPERTY_CHANGE_TIMEOUT_SECONDS 2
 #define PROPERTY_CHANGE_RETRIES 3
 
@@ -603,10 +604,11 @@ WTErr WCMRPortAudioDevice::SetCurrentSamplingRate (int newRate)
 	//make the change...
 	m_CurrentSamplingRate = newRate;
 	PaError paErr = PaAsio_SetStreamSampleRate (m_PortAudioStream, m_CurrentSamplingRate);	
+	Pa_Sleep(PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS); // sleep some time to make sure the change has place
 
 	if (paErr != paNoError)
 	{
-		std::cout << "Sample rate change failed, cannot start with error: " <<  Pa_GetErrorText (paErr) << std::endl;
+		std::cout << "Sample rate change failed: " <<  Pa_GetErrorText (paErr) << std::endl;
 		if (paErr ==  paUnanticipatedHostError)
 			std::cout << "Details: "<< Pa_GetLastHostErrorInfo ()->errorText << "; code: " << Pa_GetLastHostErrorInfo ()->errorCode << std::endl;
 
@@ -1064,9 +1066,9 @@ void WCMRPortAudioDevice::resetDevice (bool callerIsWaiting /*=false*/ )
 		if (paErr ==  paUnanticipatedHostError)
 			std::cout << "Details: "<< Pa_GetLastHostErrorInfo ()->errorText << "; code: " << Pa_GetLastHostErrorInfo ()->errorCode << std::endl;
 
-		std::cout << "Will try again in " << PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS << "msec" << std::endl;
+		std::cout << "Will try again in " << DEVICE_INFO_UPDATE_SLEEP_TIME_MILLISECONDS << "msec" << std::endl;
 
-		Pa_Sleep(PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS);
+		Pa_Sleep(DEVICE_INFO_UPDATE_SLEEP_TIME_MILLISECONDS);
 	}
 
 	if (paErr == paNoError)
@@ -1573,7 +1575,7 @@ WTErr WCMRPortAudioDeviceManager::getDeviceAvailableSampleRates(DeviceID deviceI
 		}
 	}
 
-	return eNoErr;
+	return retVal;
 }
 
 
