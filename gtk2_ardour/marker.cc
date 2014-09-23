@@ -92,7 +92,7 @@ RangeMarker::RangeMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanva
         /* Marker::Marker calls these but will not have used our versions since it is a constructor.
         */
 
-        set_position (frame_position);
+        set_position (start, end);
         setup_line ();
         use_color ();
         setup_name_display ();
