@@ -41,7 +41,7 @@ WCMRNativeAudioNoneDevice::WCMRNativeAudioNoneDevice (WCMRAudioDeviceManager *pM
 {
 	m_DeviceName = NONE_DEVICE_NAME;
 
-	m_SamplingRates = boost::assign::list_of (m_CurrentSamplingRate=44100)(48000)(88200)(96000);
+	m_SamplingRates = boost::assign::list_of (m_CurrentSamplingRate=44100)(48000)(88200)(96000)(176400)(192000);
 
 	m_BufferSizes = boost::assign::list_of (32)(64)(128)(m_CurrentBufferSize=256)(512)(1024);
 

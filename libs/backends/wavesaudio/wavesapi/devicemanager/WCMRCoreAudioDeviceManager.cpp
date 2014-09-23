@@ -25,7 +25,7 @@ using namespace wvNS;
 ///< Supported Sample rates
 static const double gAllSampleRates[] =
 {
-    44100.0, 48000.0, 88200.0, 96000.0, -1 /* negative terminated  list */
+    44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0, -1 /* negative terminated  list */
 };
 
 
@@ -2512,7 +2512,7 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceAvailableSampleRates(DeviceID deviceI
     {
         //! 2. Get property: cannels output.
         
-        // Allocate size accrding to the number of audio values
+        // Allocate size according to the number of audio values
         int numRates = propSize / sizeof(AudioValueRange);
         AudioValueRange* supportedRates = new AudioValueRange[numRates];
         
