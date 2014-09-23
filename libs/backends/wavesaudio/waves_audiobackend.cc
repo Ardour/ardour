@@ -661,22 +661,26 @@ WavesAudioBackend::_start (bool for_latency_measurement)
 
     if (!_device) {
         std::cerr << "WavesAudioBackend::_start (): No device is set!" << std::endl;
-        return -1;
+        stop();
+		return -1;
     }
 
     if (_register_system_audio_ports () != 0) {
         std::cerr << "WavesAudioBackend::_start (): _register_system_audio_ports () failed!" << std::endl;
-        return -1;
+        stop();
+		return -1;
     }
 
     if (_use_midi) {
         if (_midi_device_manager.start () != 0) {
             std::cerr << "WavesAudioBackend::_start (): _midi_device_manager.start () failed!" << std::endl;
-            return -1;
+            stop();
+			return -1;
         }
         if (_register_system_midi_ports () != 0) {
             std::cerr << "WavesAudioBackend::_start (): _register_system_midi_ports () failed!" << std::endl;
-            return -1;
+            stop();
+			return -1;
         }
     }
 
@@ -690,13 +694,15 @@ WavesAudioBackend::_start (bool for_latency_measurement)
     WTErr retVal  = _device->SetStreaming (true);
     if (retVal != eNoErr) {
         std::cerr << "WavesAudioBackend::_start (): [" << _device->DeviceName () << "]->SetStreaming () failed!" << std::endl;
+		stop();
         return -1;
     }
 
     if (_use_midi) {
         if (_midi_device_manager.stream (true)) {
             std::cerr << "WavesAudioBackend::_start (): _midi_device_manager.stream (true) failed!" << std::endl;
-            return -1;
+            stop();
+			return -1;
         }
     }
 
