@@ -54,12 +54,13 @@
       </HBox>
       <VBox>
         <HBox>
+          <VBox width="21"/>
           <iconbutton id="playlist_button"
               width="21"
               height="20"
               normalicon="time_axis_playlist"
               activeicon="time_axis_playlist"
-              _prelighticon="time_axis_playlist"/>
+              _prelighticon="time_axis_playlist" ui.orphan="true"/>
           <HBox width="3"/>
           <HBox>
             <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
