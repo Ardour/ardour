@@ -163,26 +163,21 @@ RangeMarker::_set_position (framepos_t start, framepos_t end)
 {
         if (end >= 0) {
                 _end_frame = end;
-        }
 
-        Marker::_set_position (start, end);
-
-        if (end >= 0) {
-                
                 /* clamp displayed length of text to visible marker width
                    since the marker's visible width is variable depending
                    on zoom (not true for single-position, non-range markers.
                 */
                 
-                double pixel_width = editor.sample_to_pixel (_end_frame - frame_position);
+                double pixel_width = editor.sample_to_pixel (end - start);
                 _name_background->set_x1 (_name_background->x0() + pixel_width);
-                
-                cerr << "reset x1 to " << _name_background->x1() << " based on " << frame_position << " .. " << _end_frame << endl;
                 
                 if (_name_item) {
                         _name_item->clamp_width (pixel_width - _label_offset);
                 }
         }
+
+        Marker::_set_position (start, end);
 }        
 
 void
@@ -205,7 +200,8 @@ RangeMarker::setup_line ()
         ArdourCanvas::Duple g = group->canvas_origin();
 
        /* merge and adjust them */
-       g.x += _shift + _name_background->x1();
+
+       g.x += _name_background->x1();
        g.y = h.y;
 
        ArdourCanvas::Duple d = _end_line->canvas_to_item (g);
@@ -280,7 +276,6 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
         , _have_scene_change (false)
 {
 	unit_position = editor.sample_to_pixel (frame_position);
-	unit_position -= _shift;
 
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple (unit_position, 0));
 	CANVAS_DEBUG_NAME (group, string_compose ("Marker::group for %1", annotation));
@@ -441,8 +436,7 @@ Marker::setup_line ()
         ArdourCanvas::Duple h = _name_background->item_to_canvas (ArdourCanvas::Duple (0.0, _height));
         ArdourCanvas::Duple g = group->canvas_origin();
         
-        /* merge and adjust them */
-        g.x += _shift;
+        /* merge y */
         g.y = h.y;
         
         ArdourCanvas::Duple d = _start_line->canvas_to_item (g);
@@ -568,7 +562,7 @@ void
 Marker::_set_position (framepos_t frame, framepos_t)
 {
 	frame_position = frame;
-	unit_position = editor.sample_to_pixel (frame_position) - _shift;
+	unit_position = editor.sample_to_pixel (frame_position);
 	group->set_x_position (unit_position);
 	setup_line ();
 }
