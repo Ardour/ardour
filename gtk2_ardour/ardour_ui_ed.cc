@@ -956,7 +956,7 @@ ARDOUR_UI::populate_midi_inout_dropdown  (bool playback)
 
 	/* add a "none" entry */
 
-	dropdown.add_menu_item (_("None"), 0);
+	dropdown.add_radio_menu_item (_("None"), 0);
 
 	std::vector<EngineStateController::PortState>::const_iterator state_iter;
 
@@ -970,7 +970,7 @@ ARDOUR_UI::populate_midi_inout_dropdown  (bool playback)
 		ARDOUR::remove_pattern_from_string(device_name, midi_type_suffix, device_name);
 
 		if (state_iter->active) {
-			dropdown.add_menu_item (device_name, strdup (state_iter->name.c_str()));
+			dropdown.add_radio_menu_item (device_name, strdup (state_iter->name.c_str()));
 			if (!have_first) {
 				dropdown.set_text (device_name);
 				have_first = true;

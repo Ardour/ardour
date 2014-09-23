@@ -55,6 +55,23 @@ WavesDropdown::add_menu_item (const std::string& item, void* cookie)
     return menuitem;
 }
 
+Gtk::RadioMenuItem&
+WavesDropdown::add_radio_menu_item (const std::string& item, void* cookie)
+{
+	Gtk::Menu_Helpers::MenuList& items = _menu.items ();
+	
+	items.push_back (Gtk::Menu_Helpers::RadioMenuElem (_radio_menu_items_group, item, sigc::bind (sigc::mem_fun(*this, &WavesDropdown::_on_menu_item), items.size (), cookie)));
+    
+	Gtk::RadioMenuItem& menuitem = *dynamic_cast <Gtk::RadioMenuItem*> (&_menu.items ().back ());
+	ensure_style();
+	Widget* child = menuitem.get_child ();
+	if (child) {
+		child->set_style (get_style());
+	}
+
+    return menuitem;
+}
+
 void
 WavesDropdown::clear_items ()
 {
