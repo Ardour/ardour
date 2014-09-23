@@ -419,13 +419,6 @@ AudioEngine::do_reset_backend()
 
             // backup the device name
             std::string name = _backend->device_name ();
-			
-            std::cout << "AudioEngine::RESET::Halting session processing..." << std::endl;
-			if (_session && _running) {
-				// it's not a halt, but should be handled the same way:
-				// disable record, stop transport and I/O processign but save the data.
-				_session->engine_halted ();
-			}
             
 			std::cout << "AudioEngine::RESET::Stoping engine..." << std::endl;
 			stop();
@@ -837,6 +830,12 @@ AudioEngine::stop (bool for_latency)
 {
 	if (!_backend) {
 		return 0;
+	}
+
+	if (_session && _running) {
+		// it's not a halt, but should be handled the same way:
+		// disable record, stop transport and I/O processign but save the data.
+		_session->engine_halted ();
 	}
 
 	Glib::Threads::Mutex::Lock lm (_process_lock);
