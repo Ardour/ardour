@@ -253,9 +253,17 @@ Selection::toggle (TimeAxisView* track)
 	if ((i = find (tracks.begin(), tracks.end(), track)) == tracks.end()) {
 		track->set_selected (true);
 		tracks.push_back (track);
+        
+        StreamView* view = track->view();
+        if (view) {
+            view->foreach_regionview (sigc::mem_fun(*this, &Selection::add_region));
+        }
+        
 	} else {
 		track->set_selected (false);
 		tracks.erase (i);
+        
+        remove_regions (track);
 	}
 
 	if (!_no_tracks_changed) {
@@ -404,6 +412,11 @@ Selection::add (const TrackViewList& track_list)
 	if (!added.empty()) {
 		for (TrackViewList::iterator x = added.begin(); x != added.end(); ++x) {
 			(*x)->set_selected (true);
+            
+            StreamView* view = (*x)->view();
+            if (view) {
+                view->foreach_regionview (sigc::mem_fun(*this, &Selection::add_region));
+            }
 		}
 		if (!_no_tracks_changed) {
 			TracksChanged ();
@@ -416,6 +429,12 @@ Selection::add (TimeAxisView* track)
 {
 	TrackViewList tr;
 	track->set_selected (true);
+    
+    StreamView* view = track->view();
+    if (view) {
+        view->foreach_regionview (sigc::mem_fun(*this, &Selection::add_region));
+    }
+    
 	tr.push_back (track);
 	add (tr);
 }
@@ -596,7 +615,10 @@ Selection::remove (TimeAxisView* track)
 	list<TimeAxisView*>::iterator i;
 	if ((i = find (tracks.begin(), tracks.end(), track)) != tracks.end()) {
 		track->set_selected (false);
-		tracks.erase (i);
+		
+        remove_regions(track);
+        
+        tracks.erase (i);
 		if (!_no_tracks_changed) {
 			TracksChanged();
 		}
@@ -613,7 +635,10 @@ Selection::remove (const TrackViewList& track_list)
 		TrackViewList::iterator x = find (tracks.begin(), tracks.end(), *i);
 		if (x != tracks.end()) {
 			(*i)->set_selected (false);
-			tracks.erase (x);
+
+			remove_regions ((*i) );
+            
+            tracks.erase (x);
 			changed = true;
 		}
 	}
@@ -763,7 +788,9 @@ void
 Selection::set (const TrackViewList& track_list)
 {
 	clear_objects();  //enforce object/range exclusivity
-	clear_tracks ();
+	_no_tracks_changed = true;
+    clear_tracks ();
+    _no_tracks_changed = false;
 	add (track_list);
 }
 
@@ -957,6 +984,7 @@ Selection::toggle (ControlPoint* cp)
 {
 	clear_time();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
+    clear_regions ();
 
 	cp->set_selected (!cp->get_selected ());
 	PointSelection::iterator i = find (points.begin(), points.end(), cp);
@@ -974,6 +1002,7 @@ Selection::toggle (vector<ControlPoint*> const & cps)
 {
 	clear_time();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
+    clear_regions ();
 
 	for (vector<ControlPoint*>::const_iterator i = cps.begin(); i != cps.end(); ++i) {
 		toggle (*i);
@@ -985,6 +1014,7 @@ Selection::toggle (list<Selectable*> const & selectables)
 {
 	clear_time();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
+    clear_regions ();
 	
 	RegionView* rv;
 	ControlPoint* cp;
@@ -1028,6 +1058,7 @@ Selection::add (PointSelection const & s)
 {
 	clear_time ();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
+    clear_regions ();
 
 	for (PointSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
 		points.push_back (*i);
@@ -1039,6 +1070,7 @@ Selection::add (list<Selectable*> const & selectables)
 {
 	clear_time ();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
+    clear_regions ();
 
 	RegionView* rv;
 	ControlPoint* cp;
@@ -1081,6 +1113,7 @@ Selection::add (ControlPoint* cp)
 {
 	clear_time ();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
+    clear_regions ();
 
 	cp->set_selected (true);
 	points.push_back (cp);
@@ -1092,6 +1125,7 @@ Selection::add (vector<ControlPoint*> const & cps)
 {
 	clear_time ();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
+    clear_regions ();
 
 	for (vector<ControlPoint*>::const_iterator i = cps.begin(); i != cps.end(); ++i) {
 		(*i)->set_selected (true);
@@ -1105,6 +1139,7 @@ Selection::set (ControlPoint* cp)
 {
 	clear_time ();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
+    clear_regions ();
 
 	if (cp->get_selected()) {
 		return;
@@ -1123,6 +1158,7 @@ Selection::set (Marker* m)
 {
 	clear_time ();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
+    clear_regions ();
 	markers.clear ();
 
 	add (m);
@@ -1156,6 +1192,7 @@ Selection::add (Marker* m)
 {
 	clear_time ();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
+    clear_regions ();
 
 	if (find (markers.begin(), markers.end(), m) == markers.end()) {
 		markers.push_back (m);
@@ -1168,6 +1205,7 @@ Selection::add (const list<Marker*>& m)
 {
 	clear_time ();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
+    clear_regions ();
 
 	markers.insert (markers.end(), m.begin(), m.end());
 	markers.sort ();
@@ -1293,6 +1331,17 @@ Selection::set_state (XMLNode const & node, int)
 	}
 
 	return 0;
+}
+
+void
+Selection::add_region (RegionView* region)
+{
+    if (find (regions.begin(), regions.end(), region) == regions.end()) {
+		bool changed = regions.add (region);
+        if (changed) {
+            RegionsChanged ();
+        }
+	}
 }
 
 void
