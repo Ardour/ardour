@@ -34,6 +34,7 @@ bool
 WavesDropdown::on_mouse_pressed (GdkEventButton*)
 {
 	_menu.popup (sigc::mem_fun(this, &WavesDropdown::_on_popup_menu_position), 1, gtk_get_current_event_time());
+	_hovering = _pushed = false;
 	set_active (true);
 	return true;
 }
