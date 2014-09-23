@@ -37,6 +37,13 @@ namespace ARDOUR {
 
 class DummyAudioBackend;
 
+namespace DummyMidiData {
+	typedef struct _MIDISequence {
+		float   beat_time;
+		uint8_t event[3];
+	} MIDISequence;
+};
+
 class DummyMidiEvent {
 	public:
 		DummyMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size);
@@ -83,6 +90,7 @@ class DummyPort {
 		void disconnect_all ();
 
 		virtual void* get_buffer (pframes_t nframes) = 0;
+		void next_period () { _gen_cycle = false; }
 
 		const LatencyRange& latency_range (bool for_playback) const
 		{
@@ -112,6 +120,17 @@ class DummyPort {
 		void _connect (DummyPort* , bool);
 		void _disconnect (DummyPort* , bool);
 
+	protected:
+		// random number generator
+		void setup_random_number_generator ();
+		inline float    randf ();
+		inline uint32_t randi ();
+		uint32_t _rseed;
+
+		// signal generator
+		volatile bool _gen_cycle;
+		Glib::Threads::Mutex generator_lock;
+
 }; // class DummyPort
 
 class DummyAudioPort : public DummyPort {
@@ -133,7 +152,6 @@ class DummyAudioPort : public DummyPort {
 			PonyNoise,
 			SineWave,
 		};
-		void next_period () { _gen_cycle = false; }
 		void setup_generator (GeneratorType const, float const);
 
 	private:
@@ -142,8 +160,6 @@ class DummyAudioPort : public DummyPort {
 		// signal generator ('fake' physical inputs)
 		void generate (const pframes_t n_samples);
 		GeneratorType _gen_type;
-		Glib::Threads::Mutex generator_lock;
-		volatile bool _gen_cycle;
 
 		// generator buffers
 		// pink-noise filters
@@ -152,11 +168,6 @@ class DummyAudioPort : public DummyPort {
 		Sample * _wavetable;
 		uint32_t _tbl_length;
 		uint32_t _tbl_offset;
-
-		// random number generator
-		inline float    randf ();
-		inline uint32_t randi ();
-		uint32_t _rseed;
 
 		// gaussian noise generator
 		float grandf ();
@@ -175,8 +186,17 @@ class DummyMidiPort : public DummyPort {
 		void* get_buffer (pframes_t nframes);
 		const DummyMidiBuffer const_buffer () const { return _buffer; }
 
+		void setup_generator (int, float const);
+
 	private:
 		DummyMidiBuffer _buffer;
+
+		// midi event generator ('fake' physical inputs)
+		void midi_generate (const pframes_t n_samples);
+		float   _midi_seq_spb; // samples per beat
+		int32_t _midi_seq_time;
+		uint32_t _midi_seq_pos;
+		DummyMidiData::MIDISequence const * _midi_seq_dat;
 }; // class DummyMidiPort
 
 class DummyAudioBackend : public AudioBackend {
@@ -346,6 +366,7 @@ class DummyAudioBackend : public AudioBackend {
 
 		uint32_t _n_midi_inputs;
 		uint32_t _n_midi_outputs;
+		bool     _enable_midi_generators;
 
 		uint32_t _systemic_input_latency;
 		uint32_t _systemic_output_latency;
@@ -373,8 +394,8 @@ class DummyAudioBackend : public AudioBackend {
 		void unregister_ports (bool system_only = false);
 
 		std::vector<DummyAudioPort *> _system_inputs;
+		std::vector<DummyMidiPort *> _system_midi_in;
 		std::vector<DummyPort *> _ports;
-
 
 		struct PortConnectData {
 			std::string a;

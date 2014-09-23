@@ -24,6 +24,7 @@
 #include <glibmm.h>
 
 #include "dummy_audiobackend.h"
+#include "dummy_midi_seq.h"
 
 #include "pbd/error.h"
 #include "ardour/port_manager.h"
@@ -48,6 +49,7 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _n_outputs (0)
 	, _n_midi_inputs (0)
 	, _n_midi_outputs (0)
+	, _enable_midi_generators (false)
 	, _systemic_input_latency (0)
 	, _systemic_output_latency (0)
 	, _processed_samples (0)
@@ -267,9 +269,11 @@ std::vector<std::string>
 DummyAudioBackend::enumerate_midi_options () const
 {
 	if (_midi_options.empty()) {
-		_midi_options.push_back (_("1 in, 1 out"));
-		_midi_options.push_back (_("2 in, 2 out"));
-		_midi_options.push_back (_("8 in, 8 out"));
+		_midi_options.push_back (_("No MIDI I/O"));
+		_midi_options.push_back (_("1 in, 1 out, Silence"));
+		_midi_options.push_back (_("2 in, 2 out, Silence"));
+		_midi_options.push_back (_("8 in, 8 out, Silence"));
+		_midi_options.push_back (_("Midi Event Generators"));
 	}
 	return _midi_options;
 }
@@ -277,14 +281,19 @@ DummyAudioBackend::enumerate_midi_options () const
 int
 DummyAudioBackend::set_midi_option (const std::string& opt)
 {
-	if (opt == _("1 in, 1 out")) {
+	_enable_midi_generators = false;
+	if (opt == _("1 in, 1 out, Silence")) {
 		_n_midi_inputs = _n_midi_outputs = 1;
 	}
-	else if (opt == _("2 in, 2 out")) {
+	else if (opt == _("2 in, 2 out, Silence")) {
 		_n_midi_inputs = _n_midi_outputs = 2;
 	}
-	else if (opt == _("8 in, 8 out")) {
+	else if (opt == _("8 in, 8 out, Silence")) {
 		_n_midi_inputs = _n_midi_outputs = 8;
+	}
+	else if (opt == _("Midi Event Generators")) {
+		_n_midi_inputs = _n_midi_outputs = NUM_MIDI_EVENT_GENERATORS;
+		_enable_midi_generators = true;
 	}
 	else {
 		_n_midi_inputs = _n_midi_outputs = 0;
@@ -322,6 +331,7 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 			PBD::info << _("DummyAudioBackend: port '") << (*it)->name () << "' exists." << endmsg;
 		}
 		_system_inputs.clear();
+		_system_midi_in.clear();
 		_ports.clear();
 	}
 
@@ -672,8 +682,8 @@ DummyAudioBackend::register_system_ports()
 
 	const int a_ins = _n_inputs > 0 ? _n_inputs : 8;
 	const int a_out = _n_outputs > 0 ? _n_outputs : 8;
-	const int m_ins = _n_midi_inputs > 0 ? _n_midi_inputs : 2;
-	const int m_out = _n_midi_outputs > 0 ? _n_midi_outputs : 2;
+	const int m_ins = _n_midi_inputs;
+	const int m_out = _n_midi_outputs;
 
 	/* audio ports */
 	lr.min = lr.max = _samples_per_period + _systemic_input_latency;
@@ -704,6 +714,10 @@ DummyAudioBackend::register_system_ports()
 		PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
+		_system_midi_in.push_back (static_cast<DummyMidiPort*>(p));
+		if (_enable_midi_generators) {
+			static_cast<DummyMidiPort*>(p)->setup_generator (i % NUM_MIDI_EVENT_GENERATORS, _samplerate);
+		}
 	}
 
 	lr.min = lr.max = _samples_per_period + _systemic_output_latency;
@@ -722,6 +736,7 @@ DummyAudioBackend::unregister_ports (bool system_only)
 {
 	size_t i = 0;
 	_system_inputs.clear();
+	_system_midi_in.clear();
 	while (i <  _ports.size ()) {
 		DummyPort* port = _ports[i];
 		if (! system_only || (port->is_physical () && port->is_terminal ())) {
@@ -1061,6 +1076,9 @@ DummyAudioBackend::main_process_thread ()
 		for (std::vector<DummyAudioPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 			(*it)->next_period();
 		}
+		for (std::vector<DummyMidiPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+			(*it)->next_period();
+		}
 
 		if (engine.process_callback (_samples_per_period)) {
 			return 0;
@@ -1174,6 +1192,8 @@ DummyPort::DummyPort (DummyAudioBackend &b, const std::string& name, PortFlags f
 	: _dummy_backend (b)
 	, _name  (name)
 	, _flags (flags)
+	, _rseed (0)
+	, _gen_cycle (false)
 {
 	_capture_latency_range.min = 0;
 	_capture_latency_range.max = 0;
@@ -1295,12 +1315,41 @@ bool DummyPort::is_physically_connected () const
 	return false;
 }
 
+void DummyPort::setup_random_number_generator ()
+{
+	_rseed = g_get_monotonic_time() % UINT_MAX;
+}
+
+inline uint32_t
+DummyPort::randi ()
+{
+	// 31bit Park-Miller-Carta Pseudo-Random Number Generator
+	// http://www.firstpr.com.au/dsp/rand31/
+	uint32_t hi, lo;
+	lo = 16807 * (_rseed & 0xffff);
+	hi = 16807 * (_rseed >> 16);
+
+	lo += (hi & 0x7fff) << 16;
+	lo += hi >> 15;
+#if 1
+	lo = (lo & 0x7fffffff) + (lo >> 31);
+#else
+	if (lo > 0x7fffffff) { lo -= 0x7fffffff; }
+#endif
+	return (_rseed = lo);
+}
+
+inline float
+DummyPort::randf ()
+{
+	return (randi() / 1073741824.f) - 1.f;
+}
+
 /******************************************************************************/
 
 DummyAudioPort::DummyAudioPort (DummyAudioBackend &b, const std::string& name, PortFlags flags)
 	: DummyPort (b, name, flags)
 	, _gen_type (Silence)
-	, _gen_cycle (false)
 	, _b0 (0)
 	, _b1 (0)
 	, _b2 (0)
@@ -1324,8 +1373,8 @@ DummyAudioPort::~DummyAudioPort () {
 
 void DummyAudioPort::setup_generator (GeneratorType const g, float const samplerate)
 {
+	DummyPort::setup_random_number_generator();
 	_gen_type = g;
-	_rseed = g_get_monotonic_time() % UINT_MAX;
 
 	switch (_gen_type) {
 		case PinkNoise:
@@ -1344,31 +1393,6 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 			}
 			break;
 	}
-}
-
-inline uint32_t
-DummyAudioPort::randi ()
-{
-	// 31bit Park-Miller-Carta Pseudo-Random Number Generator
-	// http://www.firstpr.com.au/dsp/rand31/
-	uint32_t hi, lo;
-	lo = 16807 * (_rseed & 0xffff);
-	hi = 16807 * (_rseed >> 16);
-
-	lo += (hi & 0x7fff) << 16;
-	lo += hi >> 15;
-#if 1
-	lo = (lo & 0x7fffffff) + (lo >> 31);
-#else
-	if (lo > 0x7fffffff) { lo -= 0x7fffffff; }
-#endif
-	return (_rseed = lo);
-}
-
-inline float
-DummyAudioPort::randf ()
-{
-	return (randi() / 1073741824.f) - 1.f;
 }
 
 float DummyAudioPort::grandf ()
@@ -1500,6 +1524,9 @@ void* DummyAudioPort::get_buffer (pframes_t n_samples)
 
 DummyMidiPort::DummyMidiPort (DummyAudioBackend &b, const std::string& name, PortFlags flags)
 	: DummyPort (b, name, flags)
+	, _midi_seq_spb (0)
+	, _midi_seq_time (0)
+	, _midi_seq_pos (0)
 {
 	_buffer.clear ();
 }
@@ -1512,13 +1539,75 @@ struct MidiEventSorter {
 	}
 };
 
-void* DummyMidiPort::get_buffer (pframes_t /* nframes */)
+void DummyMidiPort::setup_generator (int seq_id, const float sr)
+{
+	DummyPort::setup_random_number_generator();
+	switch (seq_id) {
+		case 1:
+			_midi_seq_dat = DummyMidiData::s1;
+			break;
+		case 2:
+			_midi_seq_dat = DummyMidiData::s2;
+			break;
+		case 3:
+			_midi_seq_dat = DummyMidiData::s3;
+			break;
+		default:
+			_midi_seq_dat = DummyMidiData::s0;
+			break;
+	}
+	_midi_seq_spb = sr * .5; // 120 BPM, beat_time 1.0 per beat.
+	_midi_seq_pos = 0;
+	_midi_seq_time = 0;
+}
+
+void DummyMidiPort::midi_generate (const pframes_t n_samples)
+{
+	Glib::Threads::Mutex::Lock lm (generator_lock);
+	if (_gen_cycle) {
+		return;
+	}
+
+	_buffer.clear ();
+	_gen_cycle = true;
+
+	if (_midi_seq_spb == 0 || !_midi_seq_dat) {
+		return;
+	}
+
+	while (1) {
+		const int32_t ev_beat_time = _midi_seq_dat[_midi_seq_pos].beat_time * _midi_seq_spb - _midi_seq_time;
+		if (ev_beat_time < 0) {
+			break;
+		}
+		if ((pframes_t) ev_beat_time >= n_samples) {
+			break;
+		}
+		_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (
+						ev_beat_time, _midi_seq_dat[_midi_seq_pos].event, 3
+						)));
+		++_midi_seq_pos;
+
+		if (_midi_seq_dat[_midi_seq_pos].event[0] == 0xff && _midi_seq_dat[_midi_seq_pos].event[1] == 0xff) {
+			_midi_seq_time -= _midi_seq_dat[_midi_seq_pos].beat_time * _midi_seq_spb;
+			_midi_seq_pos = 0;
+		}
+	}
+	_midi_seq_time += n_samples;
+}
+
+
+void* DummyMidiPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
 		_buffer.clear ();
 		for (std::vector<DummyPort*>::const_iterator i = get_connections ().begin ();
 				i != get_connections ().end ();
 				++i) {
+			DummyMidiPort * source = static_cast<DummyMidiPort*>(*i);
+			if (source->is_physical() && source->is_terminal()) {
+				source->get_buffer(n_samples); // generate signal.
+			}
 			const DummyMidiBuffer src = static_cast<const DummyMidiPort*>(*i)->const_buffer ();
 			for (DummyMidiBuffer::const_iterator it = src.begin (); it != src.end (); ++it) {
 				_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (**it)));
@@ -1526,7 +1615,9 @@ void* DummyMidiPort::get_buffer (pframes_t /* nframes */)
 		}
 		std::sort (_buffer.begin (), _buffer.end (), MidiEventSorter());
 	} else if (is_output () && is_physical () && is_terminal()) {
-		_buffer.clear ();
+		if (!_gen_cycle) {
+			midi_generate(n_samples);
+		}
 	}
 	return &_buffer;
 }
