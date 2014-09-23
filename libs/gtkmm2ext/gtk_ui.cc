@@ -607,6 +607,7 @@ UI::toggle_errors ()
 {
 	// Per PRD Request hide forever.
 	errors->hide ();
+    return;
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
 	if (!act) {
