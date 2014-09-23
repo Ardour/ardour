@@ -3142,9 +3142,6 @@ MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
 
 	_marker = reinterpret_cast<Marker*> (_item->get_data ("marker"));
 	assert (_marker);
-
-	_points.push_back (ArdourCanvas::Duple (0, 0));
-	_points.push_back (ArdourCanvas::Duple (0, physical_screen_height (_editor->get_window())));
 }
 
 MarkerDrag::~MarkerDrag ()
@@ -3158,7 +3155,6 @@ MarkerDrag::CopiedLocationMarkerInfo::CopiedLocationMarkerInfo (Location* l, Mar
 {
 	location = new Location (*l);
 	markers.push_back (m);
-	move_both = false;
 }
 
 void
@@ -3166,7 +3162,9 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-        /* event coordinates are in canvas space */
+        /* set the type/target for the drag based on whether it starts 
+         * in the left, right or center section of the marker.
+         */
 
         boost::optional<ArdourCanvas::Rect> ro = _marker->the_item().bounding_box();
         assert (ro);
@@ -3174,8 +3172,6 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
         
         r = _marker->the_item().item_to_canvas (r);
         
-        cerr << "From right " << abs (grab_x() - r.x0) << " from left " << abs (grab_x() - r.x1) << endl;
-
         if (r.width() > 50.0) {
                 if (abs (grab_x() - r.x0) < 20.0) {
                         type = TrimLeft;
@@ -3206,8 +3202,6 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
                         show_verbose_cursor_time (location->end());
                 }
         }
-
-        cerr << "marker drag, type = " << type << endl;
 
 	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
 
@@ -3282,19 +3276,10 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				_copied_locations.push_back (CopiedLocationMarkerInfo (l, *i));
 			} else {
 				(*x).markers.push_back (*i);
-				(*x).move_both = true;
 			}
 		}
 			
 	}
-}
-
-void
-MarkerDrag::setup_pointer_frame_offset ()
-{
-	bool is_start;
-	Location *location = _editor->find_location_from_marker (_marker, is_start);
-	_pointer_frame_offset = raw_grab_frame() - (is_start ? location->start() : location->end());
 }
 
 void
@@ -3304,7 +3289,6 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	Location *real_location;
 	Location *copy_location = 0;
 
-	framepos_t const newframe = adjusted_current_frame (event);
 
 	CopiedLocationInfo::iterator x;
 
@@ -3316,32 +3300,24 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 		if (find (x->markers.begin(), x->markers.end(), _marker) != x->markers.end()) {
 
-			/* this marker is represented by this
-			 * CopiedLocationMarkerInfo 
-			 */
-
-                        if ((real_location = _marker->location()) == 0) {
-                                /* que pasa ? */
-                                return;
-                        }
-
                         switch (type) {
                         case TrimLeft:
+				f_delta = _drags->current_pointer_frame() - copy_location->start();
+                                break;
                         case Move:
-				f_delta = newframe - copy_location->start();
-                                cerr << " TL/M fdelta from " << copy_location->end() << " to " << newframe << " = " << f_delta << endl;
+				f_delta = _drags->current_pointer_frame() - last_pointer_frame();
                                 break;
                         case TrimRight:
                         default:
-                                f_delta = newframe - copy_location->end();
-                                cerr << "\n\n\nTR fdelta from " << copy_location->end() << " to " << newframe << " = " << f_delta << endl;
+                                f_delta = _drags->current_pointer_frame() - copy_location->end();
                                 break;
                         }
+
+                        /* found the CopiedLocationInfo, break */
 
 			break;
 		}
 	}
-
 
 	if (x == _copied_locations.end()) {
 		/* hmm, impossible - we didn't find the dragged marker */
@@ -3376,17 +3352,14 @@ MarkerDrag::motion (GdkEvent* event, bool)
                         framepos_t new_end = copy_location->end() + f_delta;
 
                         if (type == Move) {
-                                // _editor->snap_to (new_start, -1, true);
-                                // _editor->snap_to (new_end, -1, true);
-                                cerr << "New : " << new_start << ", " << new_end << endl;
+                                _editor->snap_to (new_start, -1, true);
+                                _editor->snap_to (new_end, -1, true);
                                 copy_location->set (new_start, new_end);
                         } else 	if (type == TrimLeft) {
-                                // _editor->snap_to (new_start, -1, true);
-                                cerr << "New start : " << new_start << endl;
+                                 _editor->snap_to (new_start, -1, true);
                                 copy_location->set_start (new_start);
-                        } else if (newframe > 0) {
-                                // _editor->snap_to (new_end, -1, true);
-                                cerr << "New end : " << new_end << endl;
+                        } else  {
+                                _editor->snap_to (new_end, -1, true);
                                 copy_location->set_end (new_end);
                         }
 		}
@@ -3396,13 +3369,20 @@ MarkerDrag::motion (GdkEvent* event, bool)
                    but without actually moving the real Location (yet)
                 */
 
-                cerr << "MOTION: RESET MARKER TO " << copy_location->start() << " .. " << copy_location->end() << endl;
                 _marker->set_position (copy_location->start(), copy_location->end());
 	}
 
 	assert (!_copied_locations.empty());
 
-	show_verbose_cursor_time (newframe);
+        switch (type) {
+        case Move:
+        case TrimLeft:
+                show_verbose_cursor_time (copy_location->start());
+                break;
+        case TrimRight:
+                show_verbose_cursor_time (copy_location->end());
+        }
+
 }
 
 void
@@ -4861,7 +4841,6 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
                         _crect = _editor->range_bar_drag_rect;
                         break;
                 case CreateTransportMarker:
-                        cerr << "using transport bar\n";
                         _crect = _editor->transport_bar_drag_rect;
                         break;
                 case CreateCDMarker:
@@ -4949,6 +4928,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 				flags = Location::IsRangeMarker;
 				_editor->range_bar_drag_rect->hide();
 			}
+
 			newloc = new Location (
 				*_editor->session(), _editor->temp_location->start(), _editor->temp_location->end(), rangename, (Location::Flags) flags
 				);
@@ -4962,7 +4942,6 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		case CreateTransportMarker:
                         /* Ardour used to offer a menu to choose between setting loop + autopunch range here */
-                        cerr << "Setting loop to " << _editor->temp_location->start() << " .. " << _editor->temp_location->end() << endl;
                         _editor->set_loop_range (_editor->temp_location->start(), _editor->temp_location->end(), _("set loop range"));
 			break;
 		}
@@ -4973,9 +4952,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		if (_operation == CreateTransportMarker) {
 
-			/* didn't drag, so just locate */
-
-			_editor->session()->request_locate (grab_frame(), _editor->session()->transport_rolling());
+                        /* tracks does not locate for a click in the range marker bar */
 
 		} else if (_operation == CreateCDMarker) {
 

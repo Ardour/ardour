@@ -764,8 +764,6 @@ public:
 		return false;
 	}
 
-	void setup_pointer_frame_offset ();
-
 private:
         enum Type {
                 TrimLeft,
@@ -779,13 +777,11 @@ private:
         struct CopiedLocationMarkerInfo {
 	    ARDOUR::Location* location;
 	    std::vector<Marker*> markers;
-	    bool    move_both;
 	    CopiedLocationMarkerInfo (ARDOUR::Location* l, Marker* m);
 	};
 
         typedef std::list<CopiedLocationMarkerInfo> CopiedLocationInfo;
         CopiedLocationInfo _copied_locations;
- 	ArdourCanvas::Points _points;
 };
 
 /** Control point drag */
