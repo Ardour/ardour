@@ -987,15 +987,17 @@ private:
         framepos_t end_at_start;
 };
 
-/** Range marker drag */
+/** Drag in a bar that displays Range markers */
 class RangeMarkerBarDrag : public Drag
 {
 public:
 	enum Operation {
+                CreateMarker,
 		CreateSkipMarker,
 		CreateRangeMarker,
 		CreateTransportMarker,
-		CreateCDMarker
+		CreateCDMarker,
+                CreateLoopMarker
 	};
 
 	RangeMarkerBarDrag (Editor *, ArdourCanvas::Item *, Operation);
@@ -1020,6 +1022,28 @@ private:
 	ArdourCanvas::Rectangle* _drag_rect;
 	ArdourCanvas::Rectangle* _crect;
 	bool _copy;
+};
+
+/** marker bar drag */
+class MarkerBarDrag : public Drag
+{
+public:
+	MarkerBarDrag (Editor *, ArdourCanvas::Item *);
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool y_movement_matters () const {
+		return false;
+	}
+
+private:
 };
 
 /** Drag of rectangle to set zoom */

@@ -668,52 +668,31 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		break;
 
 	case MarkerBarItem:
-	case TempoBarItem:
-	case MeterBarItem:
-	case TimecodeRulerItem:
-	case SamplesRulerItem:
-	case MinsecRulerItem:
-	case BBTRulerItem:
-        case ClockRulerItem:
-		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateTransportMarker), event);
-		}
-		return true;
-		break;
-
+                _drags->set (new MarkerBarDrag (this, item), event);
+                break;
 
         case SkipBarItem:
                 _drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateSkipMarker), event);
                 return true;
                 break;
 
-	case RangeMarkerBarItem:
-                if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateRangeMarker), event);
-		} else {
-			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
-		}
-		return true;
-		break;
-
-	case CdMarkerBarItem:
-		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
-		} else {
-			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateCDMarker), event);
-		}
-		return true;
-		break;
-
 	case PunchLoopBarItem:
-		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
-		} else {
-			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateTransportMarker), event);
-		}
+        case ClockRulerItem:
+                _drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateLoopMarker), event);
 		return true;
 		break;
 
+	case RangeMarkerBarItem:
+	case CdMarkerBarItem:
+	case TempoBarItem:
+	case MeterBarItem:
+	case TimecodeRulerItem:
+	case SamplesRulerItem:
+	case MinsecRulerItem:
+	case BBTRulerItem:
+                /* these are not visible/do not exist in Tracks */
+		return true;
+		break;
 	default:
 		break;
 	}
@@ -1603,41 +1582,20 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case AutomationLineItem:
 		case StartSelectionTrimItem:
 		case EndSelectionTrimItem:
-			return true;
-
 		case MarkerBarItem:
-			if (!_dragging_playhead) {
-				snap_to_with_modifier (where, event, 0, true);
-				mouse_add_new_marker (where);
-			}
-			return true;
-
 		case CdMarkerBarItem:
-			if (!_dragging_playhead) {
-				// if we get here then a dragged range wasn't done
-				snap_to_with_modifier (where, event, 0, true);
-				mouse_add_new_marker (where, true);
-			}
-			return true;
-
 		case TempoBarItem:
-			if (!_dragging_playhead) {
-				snap_to_with_modifier (where, event);
-				mouse_add_new_tempo_event (where);
-			}
-			return true;
+		case TimecodeRulerItem:
+		case SamplesRulerItem:
+		case MinsecRulerItem:
+		case BBTRulerItem:
+                        /* interactions handled by a Drag object, nothing to do */
+                        return true;
 
 		case MeterBarItem:
 			if (!_dragging_playhead) {
 				mouse_add_new_meter_event (pixel_to_sample (event->button.x));
 			}
-			return true;
-			break;
-
-		case TimecodeRulerItem:
-		case SamplesRulerItem:
-		case MinsecRulerItem:
-		case BBTRulerItem:
 			return true;
 			break;
 
@@ -1895,8 +1853,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 {
 	AutomationLine* al;
 	Marker *marker;
-	Location *loc;
-	bool is_start;
 	bool ret = true;
 
 	switch (item_type) {

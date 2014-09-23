@@ -3283,7 +3283,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 }
 
 void
-MarkerDrag::motion (GdkEvent* event, bool)
+MarkerDrag::motion (GdkEvent*, bool)
 {
 	framecnt_t f_delta = 0;
 	Location *real_location;
@@ -4768,11 +4768,51 @@ SelectionDrag::aborted (bool)
 	/* XXX: TODO */
 }
 
+MarkerBarDrag::MarkerBarDrag (Editor* e, ArdourCanvas::Item* i)
+	: Drag (e, i, false)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New MarkerBarDrag\n");
+}
+
+void
+MarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
+{
+        Gdk::Cursor * const cursor = _editor->cursors()->selector;
+
+	Drag::start_grab (event, cursor);
+
+	show_verbose_cursor_time (adjusted_current_frame (event));
+}
+
+void
+MarkerBarDrag::motion (GdkEvent*, bool first_move)
+{
+	show_verbose_cursor_time (_drags->current_pointer_frame());
+}
+
+void
+MarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+        if (!movement_occurred) {
+                framepos_t where = _drags->current_pointer_frame();
+                _editor->snap_to_with_modifier (where, event);
+                _editor->mouse_add_new_marker (where);
+        }
+
+	_editor->stop_canvas_autoscroll ();
+}
+
+void
+MarkerBarDrag::aborted (bool)
+{
+	/* XXX: TODO */
+}
+
 RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i, false)
         , _drag_rect (0)
-        , _crect (0)
         , _operation (o)
+        , _crect (0)
         , _copy (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RangeMarkerBarDrag\n");
@@ -4791,20 +4831,7 @@ RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 		_editor->temp_location = new Location (*_editor->session());
 	}
 
-	switch (_operation) {
-	case CreateSkipMarker:
-	case CreateRangeMarker:
-	case CreateTransportMarker:
-	case CreateCDMarker:
-
-		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
-			_copy = true;
-		} else {
-			_copy = false;
-		}
-		cursor = _editor->cursors()->selector;
-		break;
-	}
+        cursor = _editor->cursors()->selector;
 
 	Drag::start_grab (event, cursor);
 
@@ -4841,6 +4868,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
                         _crect = _editor->range_bar_drag_rect;
                         break;
                 case CreateTransportMarker:
+                case CreateLoopMarker:
                         _crect = _editor->transport_bar_drag_rect;
                         break;
                 case CreateCDMarker:
@@ -4939,8 +4967,12 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			_editor->commit_reversible_command ();
 			break;
 		    }
+                    
 
 		case CreateTransportMarker:
+                        break;
+
+                case CreateLoopMarker:
                         /* Ardour used to offer a menu to choose between setting loop + autopunch range here */
                         _editor->set_loop_range (_editor->temp_location->start(), _editor->temp_location->end(), _("set loop range"));
 			break;
@@ -4948,48 +4980,8 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	} else {
 
-		/* just a click, no pointer movement. remember that context menu stuff was handled elsewhere */
+		/* just a click, no pointer movement... currently do nothing at all */
 
-		if (_operation == CreateTransportMarker) {
-
-                        /* tracks does not locate for a click in the range marker bar */
-
-		} else if (_operation == CreateCDMarker) {
-
-			/* didn't drag, but mark is already created so do
-			 * nothing */
-
-		} else { /* operation == CreateRangeMarker || CreateSkipMarker */
-			
-
-			framepos_t start;
-			framepos_t end;
-
-			_editor->session()->locations()->marks_either_side (grab_frame(), start, end);
-
-			if (end == max_framepos) {
-				end = _editor->session()->current_end_frame ();
-			}
-
-			if (start == max_framepos) {
-				start = _editor->session()->current_start_frame ();
-			}
-
-			switch (_editor->mouse_mode) {
-			case MouseObject:
-				/* find the two markers on either side and then make the selection from it */
-				_editor->select_all_within (start, end, 0.0f, FLT_MAX, _editor->track_views, Selection::Set, false);
-				break;
-
-			case MouseRange:
-				/* find the two markers on either side of the click and make the range out of it */
-				_editor->selection->set (start, end);
-				break;
-
-			default:
-				break;
-			}
-		}
 	}
 
 	_editor->stop_canvas_autoscroll ();

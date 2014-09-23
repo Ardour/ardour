@@ -2158,6 +2158,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	friend class ScrubDrag;
 	friend class SelectionDrag;
 	friend class RangeMarkerBarDrag;
+	friend class MarkerBarDrag;
 	friend class MouseZoomDrag;
 	friend class RegionCreateDrag;
 	friend class RegionMotionDrag;
