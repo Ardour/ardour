@@ -7,16 +7,28 @@
          fgactive="#ffffff"
          fghover="#ffffff"
          winfont ="Arial 8"
-         macfont ="Helvetica 8"
+         macfont ="Helvetica 10"
          width="63"
          height="18"/>
+  <style name="generic_dropdown"
+         bgnormal="#6C6C6C"
+         bgactive="#454545"
+         bghover="#898989"
+         fgnormal="#ffffff"
+         fgactive="#BFBFBF"
+         fghover="#CCCCCC"
+         winfont ="Arial 8"
+         macfont ="Helvetica 10"/>
+  <style name="generic_dropdown_menu"
+         bgnormal="#454545"/>
+
   <style name="topbar_dropdown_menu"
          bgnormal="#43919A"
          fgnormal="#ffffff"
          fgactive="#ffffff"
          fghover="#ffffff"
          winfont ="Arial 8"
-         macfont ="Helvetica 8"/>
+         macfont ="Helvetica 10"/>
   <VBox id="vpacker">
     <Adjustment id="vertical_adjustment"
                 initial_value="0"
@@ -375,12 +387,11 @@
                       <EventBox width="1"
                                 bgnormal="#424242"/>
                       <Dropdown id="midi_input_dropdown"
+                                style="generic_dropdown"
                                 width="65"
                                 height="16"
                                 normalicon="marker_midi_dropdown"
-                                activeicon="marker_midi_dropdown_active"
-                                winfont ="Arial 8"
-                                macfont ="Helvetica 8">
+                                activeicon="marker_midi_dropdown_active">
                         <HBox>
                           <!--
                           The following three icons should be shown/hidden according to the
@@ -397,20 +408,16 @@
                                 visible="false"
                                 noshowall="true"/>
                         </HBox>
-                        <DropdownMenu/>
+                        <DropdownMenu style="generic_dropdown_menu"/>
                       </Dropdown>
                       <EventBox width="1"
                                 bgnormal="#424242"/>
                       <Dropdown id="midi_output_dropdown"
+                                style="generic_dropdown"
                                 width="65"
                                 height="16"
                                 normalicon="marker_midi_dropdown"
-                                activeicon="marker_midi_dropdown_active"
-                                winfont ="Arial 10"
-                                macfont ="Helvetica 10"
-                                fgnormal="#BEBEBE"
-                                fgactive="#ffffff"
-                                fghover="#ffffff">
+                                activeicon="marker_midi_dropdown_active">
                         <HBox>
                           <!--
                           The following three icons should be shown/hidden according to the
@@ -428,7 +435,7 @@
                                 visible="false"
                                 noshowall="true"/>
                         </HBox>
-                        <DropdownMenu bgnormal="#6C6C6C"/>
+                        <DropdownMenu style="generic_dropdown_menu"/>
                       </Dropdown>
                       <EventBox width="1"
                                 bgnormal="#424242"/>
