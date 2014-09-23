@@ -178,7 +178,7 @@
                           initialvalue="50"
                           readonly="fals"/>
               <Fader adjustment="hd_load_adjustment"
-                     facesource="dsp_load_fader_face.png"
+                     facesource="hd_load_fader_face.png"
                      handlesource="dsp_load_fader_handle.png"
                      minposx="0"
                      minposy="3"
