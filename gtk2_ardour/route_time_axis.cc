@@ -76,8 +76,6 @@
 #include "utils.h"
 #include "route_group_menu.h"
 
-#include "mouse_cursors.h"
-
 #include "ardour/track.h"
 
 #include "i18n.h"
@@ -1167,18 +1165,7 @@ RouteTimeAxisView::handle_route_drag_begin (const Glib::RefPtr<Gdk::DragContext>
     // enable autoscroll
     _editor.start_autoscroll_for_headers ();
     
-    //GZ TO-DO: Draw DnD icon for track header. This is a temporary decision.
-    Glib::RefPtr< Gdk::Window > win = get_window();
-    int width = win->get_width();
-    int height = win->get_height();
-    
-    Glib::RefPtr<Gdk::Pixbuf> pixbuf = Gdk::Pixbuf::create((Glib::RefPtr<Gdk::Drawable>)win,
-                                                      40, 2,
-                                                           195, 40);//235, 45);
-    
-    Glib::RefPtr<Gdk::Pixbuf> icon = pixbuf->scale_simple(235, 45, Gdk::INTERP_BILINEAR );
-    
-    RouteUI::drag_source_set_icon(pixbuf);
+    //GZ TO-DO: Draw DnD icon for track header
 }
 
 void
