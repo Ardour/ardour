@@ -85,6 +85,26 @@ bool RegionSelection::contains (RegionView* rv) const
 	return find (begin(), end(), rv) != end();
 }
 
+/** Add a region list to the selection.
+ *  @param rv Region list to add.
+ *  @return false if we already had the region or if it cannot be added,
+ *          otherwise true.
+ */
+std::list<RegionView*> RegionSelection::add (std::list<RegionView*> const & r)
+{
+    std::list<RegionView*> added;
+    
+    for (std::list<RegionView*>::const_iterator i = r.begin(); i != r.end(); ++i) {
+        if (!contains (*i)) {
+            added.push_back (*i);
+            push_back (*i);
+        }
+    }
+    
+    return added;
+}
+
+
 /** Add a region to the selection.
  *  @param rv Region to add.
  *  @return false if we already had the region or if it cannot be added,

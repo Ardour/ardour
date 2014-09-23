@@ -42,6 +42,7 @@ class RegionSelection : public std::list<RegionView*>
 
 	RegionSelection& operator= (const RegionSelection&);
 
+    std::list<RegionView*> add (std::list<RegionView*> const & r);
 	bool add (RegionView*);
 	bool remove (RegionView*);
 	void sort_by_position_and_track ();

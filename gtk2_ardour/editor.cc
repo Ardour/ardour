@@ -5667,6 +5667,7 @@ Editor::output_connection_mode_changed ()
             
             // backup selected tracks
             TrackViewList selected_tracks (selection->tracks);
+            std::list<RegionView*> selected_regions (selection->regions);
             
             // add master bus view
             RouteList list;
@@ -5674,7 +5675,10 @@ Editor::output_connection_mode_changed ()
             add_routes(list);
             
             // restore selection
-            selection->set(selected_tracks);
+            selection->tracks.clear();
+            selection->tracks.add(selected_tracks);
+            selection->regions.clear();
+            selection->regions.add(selected_regions);
             
             selection->block_tracks_changed(false);
         }
