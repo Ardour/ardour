@@ -120,6 +120,7 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &GainMeter::gain_adjusted));
 	peak_display_button.signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::peak_button_release), false);
 	gain_display_entry.signal_key_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_key_press), false);
+    gain_display_entry.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_button_press), false);
 
 	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &GainMeter::reset_peak_display));
 	ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &GainMeter::reset_route_peak_display));
@@ -295,6 +296,17 @@ GainMeter::gain_key_press (GdkEventKey* ev)
 	}
 	/* illegal key for gain entry */
 	return true;
+}
+
+bool
+GainMeter::gain_button_press (GdkEventButton* ev)
+{
+    gain_display_entry.grab_focus ();
+    
+    if (ev->button == 3)
+        return true;
+    
+    return false;
 }
 
 bool

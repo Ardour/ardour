@@ -162,6 +162,7 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
 
 	bool peak_button_release (GdkEventButton*);
 	bool gain_key_press (GdkEventKey*);
+    bool gain_button_press (GdkEventButton*);
 
 	Gtk::Menu* meter_menu;
 	void popup_meter_menu (GdkEventButton*);
