@@ -1414,22 +1414,33 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 		case SineSweepSwell:
 			{
 				_gen_period = 5 * samplerate + randi() % (int)(samplerate * 10.f);
-				_wavetable = (Sample*) malloc (_gen_period * sizeof(Sample));
+				_gen_period &= ~1;
 				_gen_perio2 = 1 | (int)ceilf (_gen_period * .89f); // Volume Swell period
 				const double f_min = 20.;
 				const double f_max = samplerate * .5;
+				const double g_p2 = _gen_period * .5;
 #ifdef LINEAR_SWEEP
-				const double b = (f_max - f_min) / (2. * samplerate * _gen_period);
+				const double b = (f_max - f_min) / (2. * samplerate * g_p2);
 				const double a = f_min / samplerate;
 #else
-				const double b = log (f_max / f_min) / _gen_period;
+				const double b = log (f_max / f_min) / g_p2;
 				const double a = f_min / (b * samplerate);
 #endif
-				for (uint32_t i = 0 ; i < _gen_period; ++i) {
+				_wavetable = (Sample*) malloc (_gen_period * sizeof(Sample));
+				for (uint32_t i = 0 ; i < g_p2; ++i) {
 #ifdef LINEAR_SWEEP
 					const double phase = i * (a + b * i);
 #else
 					const double phase = a * exp (b * i) - a;
+#endif
+					_wavetable[i] = (float)sin (2. * M_PI * (phase - floor (phase)));
+				}
+				for (uint32_t i = g_p2; i < _gen_period; ++i) {
+					const uint32_t j = _gen_period - i;
+#ifdef LINEAR_SWEEP
+					const double phase = j * (a + b * j);
+#else
+					const double phase = a * exp (b * j) - a;
 #endif
 					_wavetable[i] = (float)sin (2. * M_PI * (phase - floor (phase)));
 				}
