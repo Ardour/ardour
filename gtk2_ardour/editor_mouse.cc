@@ -677,7 +677,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                 break;
 
 	case PunchLoopBarItem:
-        case ClockRulerItem:
                 _drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateLoopMarker), event);
 		return true;
 		break;
@@ -1726,7 +1725,6 @@ bool
 Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	ControlPoint* cp;
-	Marker * marker;
 	double fraction;
         bool ret = true;
 
@@ -1846,7 +1844,6 @@ bool
 Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 {
 	AutomationLine* al;
-	Marker *marker;
 	bool ret = true;
 
 	switch (item_type) {
