@@ -132,7 +132,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess,
 	name_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_focus_out));
 	name_entry.set_text (name_label.get_text());
 	name_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisView::end_name_edit), RESPONSE_OK));
-    name_entry.set_max_length(13);
+    name_entry.set_max_length(250);
     
 	controls_event_box.add_events (Gdk::BUTTON_PRESS_MASK|
 								   Gdk::BUTTON_RELEASE_MASK|

@@ -45,6 +45,7 @@
                       visible="false"/>
           <HBox height="5"/>
           <Label id="name_label"
+                 width="83"
                  winfont ="Arial 10"
                  macfont ="Helvetica 10"
                  fgnormal="#ffffff"
