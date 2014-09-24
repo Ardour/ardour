@@ -681,6 +681,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
+	case ClockRulerItem:
+                _drags->set (new CursorDrag (this, *playhead_cursor, true), event);
+		return true;
+		break;
+
 	case RangeMarkerBarItem:
 	case CdMarkerBarItem:
 	case TempoBarItem:
