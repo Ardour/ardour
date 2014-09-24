@@ -136,11 +136,11 @@ Editor::initialize_rulers ()
 	_minsec_metric = new MinsecMetric (this);
 	_samples_metric = new SamplesMetric (this);
 	
-        /* initial metric isn't important */
-	clock_ruler = new ArdourCanvas::Ruler (ruler_group, *_minsec_metric,
-                                               ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
+        /* initial choice metric isn't important, but we have to supply one */
+	clock_ruler = new ArdourCanvas::Ruler (ruler_group, *_minsec_metric, ArdourCanvas::Rect (0, timebar_height, ArdourCanvas::COORD_MAX, 2.0 * timebar_height));
 	clock_ruler->set_font_description (font);
 	CANVAS_DEBUG_NAME (clock_ruler, "clock ruler");
+        clock_ruler->raise_to_top ();
 
         ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun (*this, &Editor::update_ruler_visibility));
 
@@ -441,7 +441,11 @@ Editor::update_ruler_visibility ()
                 ruler_group->move (ArdourCanvas::Duple (0.0, pos - old_unit_pos));
         }
         clock_ruler->show();
-        pos += timebar_height;
+        boost::optional<ArdourCanvas::Rect> r = ruler_group->bounding_box();
+        if (r) {
+                ArdourCanvas::Rect rr (r.get());
+                pos += rr.y1 - rr.y0;
+        }
 
 	/* move hv_scroll_group (trackviews) to the end of the timebars
 	 */

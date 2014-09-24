@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
                              
-<Window timebarheight="56">
+<Window timebarheight="28">
   <style name="topbar_dropdown"
          bgnormal="#43919A"
          fgnormal="#ffffff"

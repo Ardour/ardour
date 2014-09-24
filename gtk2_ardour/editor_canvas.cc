@@ -32,6 +32,7 @@
 #include "canvas/pixbuf.h"
 #include "canvas/scroll_group.h"
 #include "canvas/text.h"
+#include "canvas/utils.h"
 #include "canvas/debug.h"
 
 #include "ardour_ui.h"
@@ -142,29 +143,40 @@ Editor::initialize_canvas ()
 
 	/* TIME BAR CANVAS */
 	
+        /* this group is part of the canvas "top-level" hscroll group. This group
+           responds only to horizontal scroll, so vertical scrolling does not move
+           it.
+        */
+
 	_time_markers_group = new ArdourCanvas::Container (h_scroll_group);
 	CANVAS_DEBUG_NAME (_time_markers_group, "time bars");
 
-	cd_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
-	CANVAS_DEBUG_NAME (cd_marker_group, "cd marker group");
+        /* items (containers) in the time_markers_group. Each group holds a background rectangle ("bar"),
+           and may then also hold zero or more markers of various kinds, depending on the state of the
+           session (does it have any locations defined?) and visibility options. In some cases, eg. the ruler
+           group, it may hold other kinds of items also (e.g. a ruler).
+         */
 
-	/* the vide is temporarily placed a the same location as the
-	   cd_marker_group, but is moved later.
-	*/
-	videotl_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple(0.0, 0.0));
+	cd_marker_group = new ArdourCanvas::Container (_time_markers_group);
+	CANVAS_DEBUG_NAME (cd_marker_group, "cd marker group");
+	videotl_group = new ArdourCanvas::Container (_time_markers_group);
 	CANVAS_DEBUG_NAME (videotl_group, "videotl group");
-	marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height + 1.0));
+	marker_group = new ArdourCanvas::Container (_time_markers_group);
 	CANVAS_DEBUG_NAME (marker_group, "marker group");
-	transport_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 2.0) + 1.0));
+	transport_marker_group = new ArdourCanvas::Container (_time_markers_group);
 	CANVAS_DEBUG_NAME (transport_marker_group, "transport marker group");
-	skip_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 2.0) + 1.0));
+	skip_group = new ArdourCanvas::Container (_time_markers_group);
 	CANVAS_DEBUG_NAME (skip_group, "skip group");
-	range_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 3.0) + 1.0));
+	range_marker_group = new ArdourCanvas::Container (_time_markers_group);
 	CANVAS_DEBUG_NAME (range_marker_group, "range marker group");
-	tempo_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 4.0) + 1.0));
+	tempo_group = new ArdourCanvas::Container (_time_markers_group);
 	CANVAS_DEBUG_NAME (tempo_group, "tempo group");
-	meter_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
+	meter_group = new ArdourCanvas::Container (_time_markers_group);
 	CANVAS_DEBUG_NAME (meter_group, "meter group");
+	ruler_group = new ArdourCanvas::Container (_time_markers_group);
+        CANVAS_DEBUG_NAME (ruler_group, "ruler group");
+
+        /* bars (background rectangles for each kind of marker/ruler */
 
 	meter_bar = new ArdourCanvas::Rectangle (meter_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
 	CANVAS_DEBUG_NAME (meter_bar, "meter Bar");
@@ -178,12 +190,10 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
 	range_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
-	ruler_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
-        CANVAS_DEBUG_NAME (ruler_group, "ruler group");
-
-	punch_loop_bar = new ArdourCanvas::Rectangle (ruler_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, Marker::marker_height()));
+	punch_loop_bar = new ArdourCanvas::Rectangle (ruler_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
 	CANVAS_DEBUG_NAME (punch_loop_bar, "punch/loop Bar");
-        /* not outlined */
+        /* not outlined, so that there is no gap between it and the ruler in the same group */
+	punch_loop_bar->set_outline (false);
 
 	skip_bar = new ArdourCanvas::Rectangle (skip_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, Marker::marker_height()));
 	CANVAS_DEBUG_NAME (skip_bar, "skip Bar");
@@ -932,8 +942,6 @@ Editor::color_handler()
 
         /* same color as rulers */
         punch_loop_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RulerBase());
-        /* no outline */
-	punch_loop_bar->set_outline (false);
 
         skip_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SkipBar());
 	skip_bar->set_outline_color (ARDOUR_UI::config()->get_canvasvar_MarkerBarSeparator());
