@@ -159,6 +159,12 @@ RangeMarker::use_color ()
 }
 
 void
+RangeMarker::reposition ()
+{
+	_set_position (frame_position, _end_frame);
+}
+
+void
 RangeMarker::_set_position (framepos_t start, framepos_t end)
 {
         if (end >= 0) {

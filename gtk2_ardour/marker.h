@@ -139,7 +139,7 @@ class Marker : public sigc::trackable
 
         void pick_basic_color (ArdourCanvas::Color);
 	virtual void use_color ();
-	void reposition ();
+	virtual void reposition ();
 	virtual void setup_name_display ();
 	virtual void setup_line ();
         
@@ -164,6 +164,7 @@ class RangeMarker : public Marker
         
 	void setup_name_display ();
 	void use_color ();
+	void reposition ();
         void setup_line ();
         void canvas_height_set (double);
 
