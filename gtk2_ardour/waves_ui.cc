@@ -444,22 +444,36 @@ WavesUI::add_dropdown_items (WavesDropdown &dropdown, const XMLNodeList& definit
         }
         std::string node_name = (**i).name ();
         std::transform (node_name.begin (), node_name.end (), node_name.begin (), ::toupper);
-		
+
         if (node_name == "DROPDOWNMENU") {
 			set_attributes (dropdown.get_menu (), **i, styles);
 			const XMLNodeList& menuitems = (**i).children ();
+
 		    for (XMLNodeList::const_iterator ii = menuitems.begin (); ii != menuitems.end (); ++ii) {
+				std::string title = xml_property (**ii, "title", styles, "");
+				if (title.empty ()) {
+					continue;
+				}
+				std::string widget_id = xml_property ((**ii), "id", styles, "");
+				int itemdata = xml_property (**ii, "data", styles, 0);
 				std::string node_name = (**ii).name ();
 				std::transform (node_name.begin (), node_name.end (), node_name.begin (), ::toupper);
+
 				if (node_name == "DROPDOWNITEM") {
-					std::string title = xml_property (**ii, "title", styles, "");
-					if (title.empty ()) {
-						continue;
-					}
-					int itemdata = xml_property (**ii, "data", styles, 0);
 					Gtk::MenuItem& menuitem = dropdown.add_menu_item (title, (void*)itemdata);
 					if (menuitem.get_child ()) {
 						set_attributes (*menuitem.get_child (), **ii, styles);
+					}
+					if (!widget_id.empty ()) {
+						(*this)[widget_id] = &menuitem;
+					}
+			} else if (node_name == "DROPDOWNCHECKITEM") {
+					Gtk::CheckMenuItem& menuitem = dropdown.add_check_menu_item (title, (void*)itemdata);
+					if (menuitem.get_child ()) {
+						set_attributes (*menuitem.get_child (), **ii, styles);
+					}
+					if (!widget_id.empty ()) {
+						(*this)[widget_id] = &menuitem;
 					}
 				}
 			}
@@ -987,6 +1001,40 @@ WavesUI::get_image (const char* id)
 	Gtk::Image* child = dynamic_cast<Gtk::Image*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtk::Image ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+
+Gtk::MenuItem& 
+WavesUI::get_menu_item (const char* id)
+{
+	Gtk::MenuItem* child = dynamic_cast<Gtk::MenuItem*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::MenuItem ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+
+Gtk::RadioMenuItem& 
+WavesUI::get_radio_menu_item (const char* id)
+{
+	Gtk::RadioMenuItem* child = dynamic_cast<Gtk::RadioMenuItem*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::RadioMenuItem ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+
+
+Gtk::CheckMenuItem& 
+WavesUI::get_check_menu_item (const char* id)
+{
+	Gtk::CheckMenuItem* child = dynamic_cast<Gtk::CheckMenuItem*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::CheckMenuItem ") + id + " not found in " + _scrip_file_name + "!");
 		abort ();
 	}
 	return *child;

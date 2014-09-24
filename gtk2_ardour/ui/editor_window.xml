@@ -6,7 +6,7 @@
          fgnormal="#ffffff"
          fgactive="#ffffff"
          fghover="#ffffff"
-         winfont ="Arial 8"
+         winfont ="Arial 10"
          macfont ="Helvetica 10"
          width="63"
          height="18"/>
@@ -17,7 +17,7 @@
          fgnormal="#ffffff"
          fgactive="#BFBFBF"
          fghover="#CCCCCC"
-         winfont ="Arial 8"
+         winfont ="Arial 10"
          macfont ="Helvetica 10"/>
   <style name="generic_dropdown_menu"
          bgnormal="#454545"/>
@@ -470,12 +470,22 @@
                             bgnormal="#424242"/>
                   <HBox id="global_tracks_hbox"
                         spacing="1">
-                    <iconbutton id="global_tracks_button"
-                                width="140"
-                                height="30"
-                                normalicon="global_tracks_button"
-                                activeicon="global_tracks_button"
-                                tooltip="Show/Hide Global Tracks"/>
+                    <Dropdown id="global_tracks_dropdown"
+                              style="generic_dropdown"
+                              width="140"
+                              height="30"
+                              normalicon="global_tracks_button"
+                              activeicon="global_tracks_button"
+                              tooltip="Show/Hide Global Tracks">
+                      <DropdownMenu style="generic_dropdown_menu">
+                        <DropdownCheckItem id="global_tracks_marker_ruler_menu_item"
+                                           title="Skip Ruler"
+                                           horzalignment="start"/>
+                        <DropdownCheckItem id="global_tracks_skip_ruler_menu_item"
+                                           title="Marker Ruler" 
+                                           horzalignment="start"/>
+                      </DropdownMenu>
+                    </Dropdown>
                     <iconbutton id="global_rec_button"
                                 width="41"
                                 height="30"

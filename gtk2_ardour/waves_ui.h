@@ -63,6 +63,9 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	Gtk::Layout& get_layout (const char* id);
 	Gtk::Label& get_label (const char* id);
 	Gtk::Image& get_image (const char* id);
+	Gtk::MenuItem& get_menu_item (const char* id);
+	Gtk::RadioMenuItem& get_radio_menu_item (const char* id);
+	Gtk::CheckMenuItem& get_check_menu_item (const char* id);
 	Gtk::ComboBoxText& get_combo_box_text (const char* id);
 	Gtk::Entry& get_entry (const char* id);
 	Gtkmm2ext::FocusEntry& get_focus_entry (const char* id);

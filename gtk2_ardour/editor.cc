@@ -82,7 +82,6 @@
 #include "control_protocol/control_protocol.h"
 
 #include "actions.h"
-#include "actions.h"
 #include "analysis_window.h"
 #include "audio_clock.h"
 #include "audio_region_view.h"
@@ -269,7 +268,6 @@ Editor::Editor ()
     , timebars_vbox (get_v_box ("timebars_vbox"))
 	, marker_lane_hbox (get_h_box ("marker_lane_hbox"))
 	, skip_button (get_waves_button ("skip_button"))
-    , global_tracks_button (get_waves_button ("global_tracks_button"))
     , marker_button (get_waves_button ("marker_button"))
     , marker_io_dialog (0)
     , add_marker_button (get_waves_button ("add_marker_button"))
