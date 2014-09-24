@@ -1291,9 +1291,6 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 				break;
 			}
 			break;
-		case SelectionItem:
-			cursor = _cursors->selector;
-			break;
 		case ControlPointItem:
 			cursor = _cursors->fader;
 			break;
@@ -1377,6 +1374,7 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 	case VideoBarItem:
 	case PunchLoopBarItem:
 	case DropZoneItem:
+    case SelectionItem:
 		cursor = which_grabber_cursor();
 		break;
 
