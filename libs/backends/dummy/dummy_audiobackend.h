@@ -153,6 +153,8 @@ class DummyAudioPort : public DummyPort {
 			SineWave,
 			SquareWave,
 			KronekerDelta,
+			SineSweep,
+			SineSweepSwell,
 		};
 		void setup_generator (GeneratorType const, float const);
 
@@ -168,8 +170,10 @@ class DummyAudioPort : public DummyPort {
 		float _b0, _b1, _b2, _b3, _b4, _b5, _b6;
 		// generated sinf() samples
 		Sample * _wavetable;
-		uint32_t _tbl_length;
-		uint32_t _tbl_offset;
+		uint32_t _gen_period;
+		uint32_t _gen_offset;
+		uint32_t _gen_perio2;
+		uint32_t _gen_count2;
 
 		// gaussian noise generator
 		float grandf ();

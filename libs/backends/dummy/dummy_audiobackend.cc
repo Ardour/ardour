@@ -86,11 +86,13 @@ DummyAudioBackend::enumerate_devices () const
 		_device_status.push_back (DeviceStatus (_("Silence"), true));
 		_device_status.push_back (DeviceStatus (_("Sine Wave"), true));
 		_device_status.push_back (DeviceStatus (_("Square Wave"), true));
-		_device_status.push_back (DeviceStatus (_("Kroneker Delta"), true));
+		_device_status.push_back (DeviceStatus (_("Impulses"), true));
 		_device_status.push_back (DeviceStatus (_("Uniform White Noise"), true));
 		_device_status.push_back (DeviceStatus (_("Gaussian White Noise"), true));
 		_device_status.push_back (DeviceStatus (_("Pink Noise"), true));
 		_device_status.push_back (DeviceStatus (_("Pink Noise (low CPU)"), true));
+		_device_status.push_back (DeviceStatus (_("Sine Sweep"), true));
+		_device_status.push_back (DeviceStatus (_("Sine Sweep Swell"), true));
 	}
 	return _device_status;
 }
@@ -680,8 +682,12 @@ DummyAudioBackend::register_system_ports()
 		gt = DummyAudioPort::SineWave;
 	} else if (_device == _("Square Wave")) {
 		gt = DummyAudioPort::SquareWave;
-	} else if (_device == _("Kroneker Delta")) {
+	} else if (_device == _("Impulses")) {
 		gt = DummyAudioPort::KronekerDelta;
+	} else if (_device == _("Sine Sweep")) {
+		gt = DummyAudioPort::SineSweep;
+	} else if (_device == _("Sine Sweep Swell")) {
+		gt = DummyAudioPort::SineSweepSwell;
 	} else {
 		gt = DummyAudioPort::Silence;
 	}
@@ -1364,8 +1370,10 @@ DummyAudioPort::DummyAudioPort (DummyAudioBackend &b, const std::string& name, P
 	, _b5 (0)
 	, _b6 (0)
 	, _wavetable (0)
-	, _tbl_length (0)
-	, _tbl_offset (0)
+	, _gen_period (0)
+	, _gen_offset (0)
+	, _gen_perio2 (0)
+	, _gen_count2 (0)
 	, _pass (false)
 	, _rn1 (0)
 {
@@ -1390,17 +1398,40 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 		case Silence:
 			break;
 		case KronekerDelta:
-			_tbl_length = (5 + randi() % (int)(samplerate / 20.f));
+			_gen_period = (5 + randi() % (int)(samplerate / 20.f));
 			break;
 		case SquareWave:
-			_tbl_length = (5 + randi() % (int)(samplerate / 20.f)) & ~1;
+			_gen_period = (5 + randi() % (int)(samplerate / 20.f)) & ~1;
 			break;
 		case SineWave:
+			_gen_period = 5 + randi() % (int)(samplerate / 20.f);
+			_wavetable = (Sample*) malloc (_gen_period * sizeof(Sample));
+			for (uint32_t i = 0 ; i < _gen_period; ++i) {
+				_wavetable[i] = .12589f * sinf(2.0f * M_PI * (float)i / (float)_gen_period); // -18dBFS
+			}
+			break;
+		case SineSweep:
+		case SineSweepSwell:
 			{
-				_tbl_length = 5 + randi() % (int)(samplerate / 20.f);
-				_wavetable = (Sample*) malloc( _tbl_length * sizeof(Sample));
-				for (uint32_t i = 0 ; i < _tbl_length; ++i) {
-					_wavetable[i] = .12589f * sinf(2.0f * M_PI * (float)i / (float)_tbl_length); // -18dBFS
+				_gen_period = 5 * samplerate + randi() % (int)(samplerate * 10.f);
+				_wavetable = (Sample*) malloc (_gen_period * sizeof(Sample));
+				_gen_perio2 = 1 | (int)ceilf (_gen_period * .89f); // Volume Swell period
+				const double f_min = 20.;
+				const double f_max = samplerate * .5;
+#ifdef LINEAR_SWEEP
+				const double b = (f_max - f_min) / (2. * samplerate * _gen_period);
+				const double a = f_min / samplerate;
+#else
+				const double b = log (f_max / f_min) / _gen_period;
+				const double a = f_min / (b * samplerate);
+#endif
+				for (uint32_t i = 0 ; i < _gen_period; ++i) {
+#ifdef LINEAR_SWEEP
+					const double phase = i * (a + b * i);
+#else
+					const double phase = a * exp (b * i) - a;
+#endif
+					_wavetable[i] = (float)sin (2. * M_PI * (phase - floor (phase)));
 				}
 			}
 			break;
@@ -1443,38 +1474,51 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 			break;
 		case SquareWave:
-			assert(_tbl_length > 0);
+			assert(_gen_period > 0);
 			for (pframes_t i = 0 ; i < n_samples; ++i) {
-				if (_tbl_offset < _tbl_length * .5f) {
+				if (_gen_offset < _gen_period * .5f) {
 					_buffer[i] =  .40709f; // -6dBFS
 				} else {
 					_buffer[i] = -.40709f;
 				}
-				_tbl_offset = (_tbl_offset + 1) % _tbl_length;
+				_gen_offset = (_gen_offset + 1) % _gen_period;
 			}
 			break;
 		case KronekerDelta:
-			assert(_tbl_length > 0);
+			assert(_gen_period > 0);
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 			for (pframes_t i = 0; i < n_samples; ++i) {
-				if (_tbl_offset == 0) {
+				if (_gen_offset == 0) {
 					_buffer[i] = 1.0f;
 				}
-				_tbl_offset = (_tbl_offset + 1) % _tbl_length;
+				_gen_offset = (_gen_offset + 1) % _gen_period;
+			}
+			break;
+		case SineSweepSwell:
+			assert(_wavetable && _gen_period > 0);
+			{
+				const float vols = 2.f / (float)_gen_perio2;
+				for (pframes_t i = 0; i < n_samples; ++i) {
+					const float g = fabsf (_gen_count2 * vols - 1.0);
+					_buffer[i] = g * _wavetable[_gen_offset];
+					_gen_offset = (_gen_offset + 1) % _gen_period;
+					_gen_count2 = (_gen_count2 + 1) % _gen_perio2;
+				}
 			}
 			break;
 		case SineWave:
-			assert(_wavetable && _tbl_length > 0);
+		case SineSweep:
+			assert(_wavetable && _gen_period > 0);
 			{
 				pframes_t written = 0;
 				while (written < n_samples) {
 					const uint32_t remain = n_samples - written;
-					const uint32_t to_copy = std::min(remain, _tbl_length - _tbl_offset);
+					const uint32_t to_copy = std::min(remain, _gen_period - _gen_offset);
 					memcpy((void*)&_buffer[written],
-							(void*)&_wavetable[_tbl_offset],
+							(void*)&_wavetable[_gen_offset],
 							to_copy * sizeof(Sample));
 					written += to_copy;
-					_tbl_offset = (_tbl_offset + to_copy) % _tbl_length;
+					_gen_offset = (_gen_offset + to_copy) % _gen_period;
 				}
 			}
 			break;
