@@ -1156,9 +1156,6 @@ Selection::set (ControlPoint* cp)
 void
 Selection::set (Marker* m)
 {
-	clear_time ();  //enforce region/object exclusivity
-	clear_tracks();  //enforce object/track exclusivity
-    clear_regions ();
 	markers.clear ();
 
 	add (m);
@@ -1190,10 +1187,6 @@ Selection::remove (Marker* m)
 void
 Selection::add (Marker* m)
 {
-	clear_time ();  //enforce region/object exclusivity
-	clear_tracks();  //enforce object/track exclusivity
-    clear_regions ();
-
 	if (find (markers.begin(), markers.end(), m) == markers.end()) {
 		markers.push_back (m);
 		MarkersChanged();
@@ -1203,10 +1196,6 @@ Selection::add (Marker* m)
 void
 Selection::add (const list<Marker*>& m)
 {
-	clear_time ();  //enforce region/object exclusivity
-	clear_tracks();  //enforce object/track exclusivity
-    clear_regions ();
-
 	markers.insert (markers.end(), m.begin(), m.end());
 	markers.sort ();
 	markers.unique ();
