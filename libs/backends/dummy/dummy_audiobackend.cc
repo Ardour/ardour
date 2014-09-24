@@ -1101,7 +1101,7 @@ DummyAudioBackend::main_process_thread ()
 				Glib::usleep (100); // don't hog cpu
 			}
 		} else {
-			_dsp_load = 1.0;
+			_dsp_load = 1.0f;
 			Glib::usleep (100); // don't hog cpu
 		}
 		clock1 = g_get_monotonic_time();
@@ -1400,7 +1400,7 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 				_tbl_length = 5 + randi() % (int)(samplerate / 20.f);
 				_wavetable = (Sample*) malloc( _tbl_length * sizeof(Sample));
 				for (uint32_t i = 0 ; i < _tbl_length; ++i) {
-					_wavetable[i] = .12589f * sinf(2.0 * M_PI * (float)i / (float)_tbl_length); // -18dBFS
+					_wavetable[i] = .12589f * sinf(2.0f * M_PI * (float)i / (float)_tbl_length); // -18dBFS
 				}
 			}
 			break;
@@ -1445,7 +1445,7 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 		case SquareWave:
 			assert(_tbl_length > 0);
 			for (pframes_t i = 0 ; i < n_samples; ++i) {
-				if (_tbl_offset < _tbl_length * .5) {
+				if (_tbl_offset < _tbl_length * .5f) {
 					_buffer[i] =  .40709f; // -6dBFS
 				} else {
 					_buffer[i] = -.40709f;
@@ -1458,7 +1458,7 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 			for (pframes_t i = 0; i < n_samples; ++i) {
 				if (_tbl_offset == 0) {
-					_buffer[i] = 1.0;
+					_buffer[i] = 1.0f;
 				}
 				_tbl_offset = (_tbl_offset + 1) % _tbl_length;
 			}
@@ -1501,8 +1501,8 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 				_b3 = .86650f * _b3 + white * .3104856f;
 				_b4 = .55000f * _b4 + white * .5329522f;
 				_b5 = -.7616f * _b5 - white * .0168980f;
-				_buffer[i] = _b0 + _b1 + _b2 + _b3 + _b4 + _b5 + _b6 + white * 0.5362;
-				_b6 = white * 0.115926;
+				_buffer[i] = _b0 + _b1 + _b2 + _b3 + _b4 + _b5 + _b6 + white * 0.5362f;
+				_b6 = white * 0.115926f;
 			}
 			break;
 		case PonyNoise:
@@ -1510,10 +1510,10 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 				const float white = 0.0498f * randf ();
 				// Paul Kellet's economy method
 				// http://www.musicdsp.org/files/pink.txt
-				_b0 = 0.99765 * _b0 + white * 0.0990460;
-				_b1 = 0.96300 * _b1 + white * 0.2965164;
-				_b2 = 0.57000 * _b2 + white * 1.0526913;
-				_buffer[i] = _b0 + _b1 + _b2 + white * 0.1848;
+				_b0 = 0.99765f * _b0 + white * 0.0990460f;
+				_b1 = 0.96300f * _b1 + white * 0.2965164f;
+				_b2 = 0.57000f * _b2 + white * 1.0526913f;
+				_buffer[i] = _b0 + _b1 + _b2 + white * 0.1848f;
 			}
 			break;
 	}
@@ -1589,7 +1589,7 @@ void DummyMidiPort::setup_generator (int seq_id, const float sr)
 			_midi_seq_dat = DummyMidiData::s0;
 			break;
 	}
-	_midi_seq_spb = sr * .5; // 120 BPM, beat_time 1.0 per beat.
+	_midi_seq_spb = sr * .5f; // 120 BPM, beat_time 1.0 per beat.
 	_midi_seq_pos = 0;
 	_midi_seq_time = 0;
 }
