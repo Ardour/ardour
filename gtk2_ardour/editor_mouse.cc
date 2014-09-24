@@ -748,27 +748,27 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case SelectionItem:
-			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
-				start_selection_grab (item, event);
-				return true;
-			} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::SecondaryModifier)) {
+                        if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 				/* grab selection for moving */
 				_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionMove), event);
 			} else {
 				double const y = event->button.y;
-				pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
-				if (tvp.first) {
+                                pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
+                                if (tvp.first) {
 					AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
-					if ( get_smart_mode() && atv) {
+					if (get_smart_mode() && atv) {
 						/* smart "join" mode: drag automation */
 						_drags->set (new AutomationRangeDrag (this, atv, selection->time), event, _cursors->up_down);
 					} else {
 						/* this was debated, but decided the more common action was to
-						   make a new selection */
-						_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
-					}
-				}
-			}
+                                                   separate-drag the selection. Well actually, Igor@Waves
+                                                   decided this, so here it is.
+                                                */
+                                                start_selection_grab (item, event);
+                                                return true;
+                                        }
+                                }
+                        }
 			break;
 
 		case StreamItem:
@@ -2442,7 +2442,6 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 	}
 
 	/* XXX fix me one day to use all new regions */
-
 	boost::shared_ptr<Region> region (new_regions.front());
 
 	/* add it to the current stream/playlist.
