@@ -1779,12 +1779,6 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case MarkerItem:
-		if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
-			break;
-		}
-		entered_marker = marker;
-		marker->set_color (ARDOUR_UI::config()->get_canvasvar_EnteredMarker());
-		// fall through
 	case MeterMarkerItem:
 	case TempoMarkerItem:
 		break;
@@ -1872,12 +1866,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 		break;
 
 	case MarkerItem:
-		if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
-			break;
-		}
-		entered_marker = 0;
-                marker->reset_color ();
-		// fall through
 	case MeterMarkerItem:
 	case TempoMarkerItem:
 		break;
