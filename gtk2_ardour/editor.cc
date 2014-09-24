@@ -246,8 +246,10 @@ pane_size_watcher (Paned* pane)
 Editor::Editor ()
 	: PublicEditor ("editor_window.xml")
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
-	, timebar_height (xml_property (*xml_tree ()->root (), "timebarheight", 32.0))
-
+	, timebar_height (xml_property (*xml_tree ()->root (), "timebar_height", 17.0))
+	, ruler_height (xml_property (*xml_tree ()->root (), "ruler_height", 27.0))
+	, loopbar_height (xml_property (*xml_tree ()->root (), "loopbar_height", 26.0))
+	, marker_height (xml_property (*xml_tree ()->root (), "marker_height", 17.0))
 	  /* time display buttons */
 	, minsec_label (_("Mins:Secs"))
 	, bbt_label (_("Bars:Beats"))

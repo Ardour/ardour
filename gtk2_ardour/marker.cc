@@ -57,8 +57,7 @@ using namespace Gtkmm2ext;
 
 PBD::Signal1<void,Marker*> Marker::CatchDeletion;
 
-const double Marker::_marker_height = 17.0;
-const char * Marker::default_new_marker_prefix = N_("Marker");
+const char * Marker::default_new_marker_prefix = N_("Marker ");
 
 static const double name_padding = 10.0;
 
@@ -660,9 +659,9 @@ Marker::set_has_scene_change (bool yn)
                 
 /***********************************************************************/
 
-TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
+TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Container& parent, double height, guint32 rgba, const string& text,
 			  ARDOUR::TempoSection& temp)
-	: Marker (0, editor, parent, Marker::marker_height(), rgba, text, Tempo, 0, false),
+	: Marker (0, editor, parent, height, rgba, text, Tempo, 0, false),
 	  _tempo (temp)
 {
 	set_position (_tempo.frame());
@@ -675,9 +674,9 @@ TempoMarker::~TempoMarker ()
 
 /***********************************************************************/
 
-MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
+MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent, double height, guint32 rgba, const string& text,
 			  ARDOUR::MeterSection& m)
-	: Marker (0, editor, parent, Marker::marker_height(), rgba, text, Meter, 0, false),
+	: Marker (0, editor, parent, height, rgba, text, Meter, 0, false),
 	  _meter (m)
 {
 	set_position (_meter.frame());

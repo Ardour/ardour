@@ -192,7 +192,7 @@ class RulerMarker: public RangeMarker
 class TempoMarker : public Marker
 {
   public:
-        TempoMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, ARDOUR::TempoSection&);
+        TempoMarker (PublicEditor& editor, ArdourCanvas::Container &, double height, guint32 rgba, const std::string& text, ARDOUR::TempoSection&);
 	~TempoMarker ();
 
 	ARDOUR::TempoSection& tempo() const { return _tempo; }
@@ -204,7 +204,7 @@ class TempoMarker : public Marker
 class MeterMarker : public Marker
 {
   public:
-        MeterMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, ARDOUR::MeterSection&);
+        MeterMarker (PublicEditor& editor, ArdourCanvas::Container &, double height, guint32 rgba, const std::string& text, ARDOUR::MeterSection&);
 	~MeterMarker ();
 
 	ARDOUR::MeterSection& meter() const { return _meter; }

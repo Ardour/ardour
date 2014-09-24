@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
                              
-<Window timebarheight="26">
+<Window timebar_height="17"
+        ruler_height="27"
+        loopbar_height="26"
+        marker_height="17" >
   <style name="topbar_dropdown"
          bgnormal="#43919A"
          fgnormal="#ffffff"

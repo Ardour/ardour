@@ -91,10 +91,10 @@ Editor::add_new_location_internal (Location* location)
 	if (location->is_mark()) {
 
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
-			lam->start = new Marker (location, *this, *cd_marker_group, Marker::marker_height(), 0, location->name(), Marker::Mark, location->start());
+			lam->start = new Marker (location, *this, *cd_marker_group, marker_height, 0, location->name(), Marker::Mark, location->start());
 			group = cd_marker_group;
 		} else {
-			lam->start = new Marker (location, *this, *marker_group, Marker::marker_height(), 0, location->name(), Marker::Mark, location->start());
+			lam->start = new Marker (location, *this, *marker_group, marker_height, 0, location->name(), Marker::Mark, location->start());
 			group = marker_group;
 		}
 
@@ -104,7 +104,7 @@ Editor::add_new_location_internal (Location* location)
 
 		// no name shown ; actual marker is twice the height of the bar on which we drag, so that 
                 // it covers the ruler as well.
-		lam->start = new RulerMarker (location, *this, *ruler_group, (2.0*timebar_height), ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 0.4),
+		lam->start = new RulerMarker (location, *this, *ruler_group, loopbar_height + ruler_height, ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 0.4),
                                               "", location->start(), location->end());
                 lam->end = 0;
 		group = ruler_group;
@@ -112,9 +112,9 @@ Editor::add_new_location_internal (Location* location)
 	} else if (location->is_auto_punch()) {
 
 		// transport marker
-		lam->start = new Marker (location, *this, *transport_marker_group, Marker::marker_height(), 0,
+		lam->start = new Marker (location, *this, *transport_marker_group, marker_height, 0,
 					 location->name(), Marker::PunchIn, location->start());
-		lam->end   = new Marker (location, *this, *transport_marker_group, Marker::marker_height(), 0,
+		lam->end   = new Marker (location, *this, *transport_marker_group, marker_height, 0,
 					 location->name(), Marker::PunchOut, location->end());
 		group = transport_marker_group;
 
@@ -127,22 +127,22 @@ Editor::add_new_location_internal (Location* location)
 
         } else if (location->is_skip ()) {
                 /* skip: single marker that spans entire skip area */
-                lam->start = new RangeMarker (location, *this, *skip_group, Marker::marker_height(), 0, location->name(), location->start(), location->end());
+                lam->start = new RangeMarker (location, *this, *skip_group, marker_height, 0, location->name(), location->start(), location->end());
                 lam->end = 0;
                 group = skip_group;
 
 	} else {
 		// range marker
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
-			lam->start = new Marker (location, *this, *cd_marker_group, Marker::marker_height(), 0,
+			lam->start = new Marker (location, *this, *cd_marker_group, marker_height, 0,
 						 location->name(), Marker::RangeStart, location->start());
-			lam->end   = new Marker (location, *this, *cd_marker_group, Marker::marker_height(), 0,
+			lam->end   = new Marker (location, *this, *cd_marker_group, marker_height, 0,
 						 location->name(), Marker::RangeEnd, location->end());
 			group = cd_marker_group;
 		} else {
-			lam->start = new Marker (location, *this, *range_marker_group, Marker::marker_height(), 0,
+			lam->start = new Marker (location, *this, *range_marker_group, marker_height, 0,
 						 location->name(), Marker::RangeStart, location->start());
-			lam->end   = new Marker (location, *this, *range_marker_group, Marker::marker_height(), 0,
+			lam->end   = new Marker (location, *this, *range_marker_group, marker_height, 0,
 						 location->name(), Marker::RangeEnd, location->end());
 			group = range_marker_group;
 		}

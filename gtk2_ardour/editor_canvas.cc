@@ -178,6 +178,39 @@ Editor::initialize_canvas ()
 
         /* bars (background rectangles for each kind of marker/ruler */
 
+	punch_loop_bar = new ArdourCanvas::Rectangle (ruler_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, ruler_height));
+	CANVAS_DEBUG_NAME (punch_loop_bar, "punch/loop Bar");
+        /* not outlined, so that there is no gap between it and the ruler in the same group */
+	punch_loop_bar->set_outline (false);
+
+	skip_bar = new ArdourCanvas::Rectangle (skip_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, marker_height));
+	CANVAS_DEBUG_NAME (skip_bar, "skip Bar");
+	skip_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
+
+	marker_bar = new ArdourCanvas::Rectangle (marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, marker_height));
+	CANVAS_DEBUG_NAME (marker_bar, "Marker Bar");
+	marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
+
+        /* Rectangles displayed on the bars during drag operations */
+
+	skip_drag_rect = new ArdourCanvas::Rectangle (skip_group, ArdourCanvas::Rect (0.0, 0.0, 100, marker_height));
+	CANVAS_DEBUG_NAME (skip_drag_rect, "skip drag");
+	skip_drag_rect->set_outline (false);
+	skip_drag_rect->hide ();
+
+	range_bar_drag_rect = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, marker_height));
+	CANVAS_DEBUG_NAME (range_bar_drag_rect, "range drag");
+	range_bar_drag_rect->set_outline (false);
+	range_bar_drag_rect->hide ();
+
+        /* drag bar for ruler is double height because it spans loop bar and the ruler */
+	transport_bar_drag_rect = new ArdourCanvas::Rectangle (ruler_group, ArdourCanvas::Rect (0.0, 0.0, 100, ruler_height + loopbar_height));
+	CANVAS_DEBUG_NAME (transport_bar_drag_rect, "transport drag");
+	transport_bar_drag_rect->set_outline (false);
+	transport_bar_drag_rect->hide ();
+
+        /* the following bars and rects are not used in Tracks Live */
+
 	meter_bar = new ArdourCanvas::Rectangle (meter_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
 	CANVAS_DEBUG_NAME (meter_bar, "meter Bar");
 	meter_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
@@ -190,19 +223,6 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
 	range_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
-	punch_loop_bar = new ArdourCanvas::Rectangle (ruler_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
-	CANVAS_DEBUG_NAME (punch_loop_bar, "punch/loop Bar");
-        /* not outlined, so that there is no gap between it and the ruler in the same group */
-	punch_loop_bar->set_outline (false);
-
-	skip_bar = new ArdourCanvas::Rectangle (skip_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, Marker::marker_height()));
-	CANVAS_DEBUG_NAME (skip_bar, "skip Bar");
-	skip_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
-
-	marker_bar = new ArdourCanvas::Rectangle (marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, Marker::marker_height()));
-	CANVAS_DEBUG_NAME (marker_bar, "Marker Bar");
-	marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
-
 	cd_marker_bar = new ArdourCanvas::Rectangle (cd_marker_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
 	CANVAS_DEBUG_NAME (cd_marker_bar, "CD Marker Bar");
  	cd_marker_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
@@ -214,22 +234,8 @@ Editor::initialize_canvas ()
 	cd_marker_bar_drag_rect->set_outline (false);
 	cd_marker_bar_drag_rect->hide ();
 
-	skip_drag_rect = new ArdourCanvas::Rectangle (skip_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
-	CANVAS_DEBUG_NAME (skip_drag_rect, "skip drag");
-	skip_drag_rect->set_outline (false);
-	skip_drag_rect->hide ();
-
-	range_bar_drag_rect = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
-	CANVAS_DEBUG_NAME (range_bar_drag_rect, "range drag");
-	range_bar_drag_rect->set_outline (false);
-	range_bar_drag_rect->hide ();
-
-        /* drag bar for ruler is double height because it spans loop bar and the ruler */
-	transport_bar_drag_rect = new ArdourCanvas::Rectangle (ruler_group, ArdourCanvas::Rect (0.0, 0.0, 100, 2.0 * timebar_height));
-	CANVAS_DEBUG_NAME (transport_bar_drag_rect, "transport drag");
-	transport_bar_drag_rect->set_outline (false);
-	transport_bar_drag_rect->hide ();
-
+        /* end of bars + rects */
+        
 	transport_punchin_line = new ArdourCanvas::Line (hv_scroll_group);
 	transport_punchin_line->set_x0 (0);
 	transport_punchin_line->set_y0 (0);

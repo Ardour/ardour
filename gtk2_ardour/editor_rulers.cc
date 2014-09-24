@@ -137,7 +137,7 @@ Editor::initialize_rulers ()
 	_samples_metric = new SamplesMetric (this);
 	
         /* initial choice metric isn't important, but we have to supply one */
-	clock_ruler = new ArdourCanvas::Ruler (ruler_group, *_minsec_metric, ArdourCanvas::Rect (0, timebar_height, ArdourCanvas::COORD_MAX, 2.0 * timebar_height));
+	clock_ruler = new ArdourCanvas::Ruler (ruler_group, *_minsec_metric, ArdourCanvas::Rect (0, loopbar_height, ArdourCanvas::COORD_MAX, loopbar_height + ruler_height));
 	clock_ruler->set_font_description (font);
 	CANVAS_DEBUG_NAME (clock_ruler, "clock ruler");
         clock_ruler->raise_to_top ();
@@ -395,7 +395,7 @@ Editor::update_ruler_visibility ()
                 }
                 marker_lane_hbox.show ();
                 marker_group->show();
-                pos += Marker::marker_height(); // marker_bar->y0() - marker_bar->y1();
+                pos += marker_height; // marker_bar->y0() - marker_bar->y1();
         } else {
                 marker_lane_hbox.hide ();
                 marker_group->hide();
@@ -408,7 +408,7 @@ Editor::update_ruler_visibility ()
                 }
                 skip_playback_lane.show ();
                 skip_group->show();
-                pos += Marker::marker_height(); // skip_bar->y1() - skip_bar->y0();
+                pos += marker_height; // skip_bar->y1() - skip_bar->y0();
         } else {
                 skip_playback_lane.hide ();
                 skip_group->hide();

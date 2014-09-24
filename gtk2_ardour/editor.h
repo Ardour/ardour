@@ -874,7 +874,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Ruler* clock_ruler;
 
 	const double timebar_height;
-	Gtk::Menu          *editor_ruler_menu;
+	const double ruler_height;
+	const double loopbar_height;
+	const double marker_height;
+
+	Gtk::Menu *editor_ruler_menu;
 
 	ArdourCanvas::Rectangle* tempo_bar;
 	ArdourCanvas::Rectangle* meter_bar;

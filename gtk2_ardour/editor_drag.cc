@@ -2566,6 +2566,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_marker = new MeterMarker (
 			*_editor,
 			*_editor->meter_group,
+                        _editor->marker_height,
 			ARDOUR_UI::config()->get_canvasvar_MeterMarker(),
 			name,
 			*new MeterSection (_marker->meter())
@@ -2696,6 +2697,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_marker = new TempoMarker (
 			*_editor,
 			*_editor->tempo_group,
+                        _editor->marker_height,
 			ARDOUR_UI::config()->get_canvasvar_TempoMarker(),
 			name,
 			*new TempoSection (_marker->tempo())
