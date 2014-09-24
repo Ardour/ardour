@@ -311,6 +311,7 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
 	}
 
 	set_name (annotation);
+        setup_line ();
         pick_basic_color (rgba);
         use_color ();
 
@@ -445,7 +446,7 @@ Marker::setup_line ()
         g.y = h.y;
         
         ArdourCanvas::Duple d = _start_line->canvas_to_item (g);
-        
+
         _start_line->set_y0 (d.y); /* bottom of marker, in the right coordinate system */
         _start_line->set_x0 (d.x);
         _start_line->set_x1 (d.x);
