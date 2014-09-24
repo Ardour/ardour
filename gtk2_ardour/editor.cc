@@ -651,6 +651,10 @@ Editor::Editor ()
 
 	setup_toolbar ();
 
+	RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-skip-playback"));
+        assert (act);
+	skip_button.set_related_action (act);
+
         ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::solo_blink));
         ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::record_status_update));
 	global_solo_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::global_solo_clicked));
