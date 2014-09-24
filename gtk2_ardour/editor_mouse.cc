@@ -363,7 +363,7 @@ Editor::mouse_mode_toggled (MouseMode m)
 
 	set_gain_envelope_visibility ();
 	
-	update_time_selection_display ();
+	//update_time_selection_display ();
 
 	MouseModeChanged (); /* EMIT SIGNAL */
 }
