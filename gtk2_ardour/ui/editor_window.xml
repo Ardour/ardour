@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
                              
-<Window timebar_height="17"
-        ruler_height="26"
-        loopbar_height="26"
-        skipbar_height="17"
-        marker_height="18" >
+<Window timebarheight="17"
+        rulerheight="60"
+        loopbarheight="26"
+        skipbarheight="17"
+        markerheight="18" >
   <style name="topbar_dropdown"
          bgnormal="#43919A"
          fgnormal="#ffffff"
