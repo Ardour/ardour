@@ -127,7 +127,7 @@ Editor::add_new_location_internal (Location* location)
 
         } else if (location->is_skip ()) {
                 /* skip: single marker that spans entire skip area */
-                lam->start = new RangeMarker (location, *this, *skip_group, marker_height, 0, location->name(), location->start(), location->end());
+                lam->start = new RangeMarker (location, *this, *skip_group, skipbar_height, 0, location->name(), location->start(), location->end());
                 lam->end = 0;
                 group = skip_group;
 

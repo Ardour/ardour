@@ -183,7 +183,7 @@ Editor::initialize_canvas ()
         /* not outlined, so that there is no gap between it and the ruler in the same group */
 	punch_loop_bar->set_outline (false);
 
-	skip_bar = new ArdourCanvas::Rectangle (skip_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, marker_height));
+	skip_bar = new ArdourCanvas::Rectangle (skip_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, skipbar_height));
 	CANVAS_DEBUG_NAME (skip_bar, "skip Bar");
 	skip_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
@@ -193,7 +193,7 @@ Editor::initialize_canvas ()
 
         /* Rectangles displayed on the bars during drag operations */
 
-	skip_drag_rect = new ArdourCanvas::Rectangle (skip_group, ArdourCanvas::Rect (0.0, 0.0, 100, marker_height));
+	skip_drag_rect = new ArdourCanvas::Rectangle (skip_group, ArdourCanvas::Rect (0.0, 0.0, 100, skipbar_height));
 	CANVAS_DEBUG_NAME (skip_drag_rect, "skip drag");
 	skip_drag_rect->set_outline (false);
 	skip_drag_rect->hide ();

@@ -140,6 +140,7 @@ Editor::initialize_rulers ()
 	clock_ruler = new ArdourCanvas::Ruler (ruler_group, *_minsec_metric, ArdourCanvas::Rect (0, loopbar_height, ArdourCanvas::COORD_MAX, loopbar_height + ruler_height));
 	clock_ruler->set_font_description (font);
 	CANVAS_DEBUG_NAME (clock_ruler, "clock ruler");
+        clock_ruler->set_outline (false);
         clock_ruler->raise_to_top ();
 
         ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun (*this, &Editor::update_ruler_visibility));
@@ -408,7 +409,7 @@ Editor::update_ruler_visibility ()
                 }
                 skip_playback_lane.show ();
                 skip_group->show();
-                pos += marker_height; // skip_bar->y1() - skip_bar->y0();
+                pos += skipbar_height; // skip_bar->y1() - skip_bar->y0();
         } else {
                 skip_playback_lane.hide ();
                 skip_group->hide();

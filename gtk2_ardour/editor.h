@@ -877,6 +877,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	const double ruler_height;
 	const double loopbar_height;
 	const double marker_height;
+	const double skipbar_height;
 
 	Gtk::Menu *editor_ruler_menu;
 
