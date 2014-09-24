@@ -306,6 +306,7 @@ RouteTimeAxisView::label_view ()
 
 	if (x != name_label.get_text()) {
 		name_label.set_text (x);
+        name_label.set_tooltip_text (x);
 	}
 
 }
