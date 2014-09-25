@@ -1196,7 +1196,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void region_from_selection ();
 	void create_region_from_selection (std::vector<boost::shared_ptr<ARDOUR::Region> >&);
-
+    void cut_region_from_selection (std::vector<boost::shared_ptr<ARDOUR::Region> >&);
+    
 	void play_from_start ();
 	void play_from_edit_point ();
 	void play_from_edit_point_and_return ();
@@ -1407,7 +1408,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void start_create_region_grab (ArdourCanvas::Item*, GdkEvent*);
 	void add_region_copy_drag (ArdourCanvas::Item*, GdkEvent*, RegionView*);
 	void add_region_brush_drag (ArdourCanvas::Item*, GdkEvent*, RegionView*);
-	void start_selection_grab (ArdourCanvas::Item*, GdkEvent*);
+	void start_selection_grab (ArdourCanvas::Item*, GdkEvent*, bool copy = false);
 
 	void region_view_item_click (AudioRegionView&, GdkEventButton*);
 

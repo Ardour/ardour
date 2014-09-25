@@ -768,11 +768,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                             _drags->set (new AutomationRangeDrag (this, atv, selection->time), event, _cursors->up_down);
                         }
                     } else {
+                        
+                        bool copy = Keyboard::modifier_state_equals (event->button.state, GDK_MOD1_MASK);
+                        
                         /* this was debated, but decided the more common action was to
                             separate-drag the selection. Well actually, Igor@Waves
                             decided this, so here it is.
                          */
-                        start_selection_grab (item, event);
+                        start_selection_grab (item, event, copy);
                         return true;
                     }
                 }
@@ -2433,7 +2436,7 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
  *  the section of the clicked region that lies within the time range.
  */
 void
-Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
+Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool copy/*=false*/)
 {
 	if (clicked_regionview == 0) {
 		return;
@@ -2442,8 +2445,15 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 	/* lets try to create new Region for the selection */
 
 	vector<boost::shared_ptr<Region> > new_regions;
-	create_region_from_selection (new_regions);
-
+    
+	begin_reversible_command (_("new region for selection drag"));
+    if (copy) {
+        create_region_from_selection (new_regions);
+    } else {
+        cut_region_from_selection (new_regions);
+    }
+    commit_reversible_command ();
+    
 	if (new_regions.empty()) {
 		return;
 	}

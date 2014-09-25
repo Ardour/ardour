@@ -2699,6 +2699,34 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_re
 }
 
 void
+Editor::cut_region_from_selection (vector<boost::shared_ptr<Region> >& new_regions)
+{
+	if (selection->time.empty() || selection->tracks.empty()) {
+		return;
+	}
+
+    AudioRange range = selection->time[clicked_selection];
+    clicked_routeview->cut_range(range);
+    clicked_routeview->paste(range.start, 1, *cut_buffer, 0);
+    
+    boost::shared_ptr<Region> current;
+    boost::shared_ptr<ARDOUR::Playlist> playlist;
+    if ((playlist = clicked_routeview->playlist()) == 0) {
+        return;
+    }
+    
+    if ((current = playlist->top_region_at(range.start)) == 0) {
+        return;
+    }
+    
+    playlist->clear_changes ();
+    playlist->remove_region (current);
+    
+    new_regions.push_back( current );
+}
+
+
+void
 Editor::split_multichannel_region ()
 {
 	RegionSelection rs = get_regions_from_selection_and_entered ();

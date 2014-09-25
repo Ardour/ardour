@@ -1434,6 +1434,45 @@ RouteTimeAxisView::fade_range (TimeSelection& selection)
 }
 
 void
+RouteTimeAxisView::cut_range (ARDOUR::AudioRange& range)
+{
+	boost::shared_ptr<Playlist> what_we_got;
+	boost::shared_ptr<Track> tr = track ();
+	boost::shared_ptr<Playlist> playlist;
+    
+	if (tr == 0) {
+		/* route is a bus, not a track */
+		return;
+	}
+    
+	playlist = tr->playlist();
+    
+	float const speed = tr->speed();
+	if (speed != 1.0f) {
+        range.start = session_frame_to_track_frame(range.start, speed);
+        range.end   = session_frame_to_track_frame(range.end,   speed);
+	}
+    
+    playlist->clear_changes ();
+    playlist->clear_owned_changes ();
+    
+    std::list<AudioRange> audio_ranges;
+    audio_ranges.push_back(range);
+    if ((what_we_got = playlist->cut (audio_ranges)) != 0) {
+        _editor.get_cut_buffer().set (what_we_got);
+        if (Config->get_edit_mode() == Ripple)
+            playlist->ripple(range.start, -range.length(), NULL);
+        // no need to exclude any regions from rippling here
+        
+        vector<Command*> cmds;
+        playlist->rdiff (cmds);
+        _session->add_commands (cmds);
+        
+        _session->add_command (new StatefulDiffCommand (playlist));
+    }
+}
+
+void
 RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
 	boost::shared_ptr<Playlist> what_we_got;
