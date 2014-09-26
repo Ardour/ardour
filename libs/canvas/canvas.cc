@@ -890,6 +890,17 @@ GtkCanvas::on_enter_notify_event (GdkEventCrossing* ev)
 bool
 GtkCanvas::on_leave_notify_event (GdkEventCrossing* ev)
 {
+	switch (ev->detail) {
+	case GDK_NOTIFY_ANCESTOR:
+	case GDK_NOTIFY_UNKNOWN:
+	case GDK_NOTIFY_VIRTUAL:
+	case GDK_NOTIFY_NONLINEAR:
+	case GDK_NOTIFY_NONLINEAR_VIRTUAL:
+		/* leaving window, cancel any tooltips */
+		stop_tooltip_timeout ();
+		hide_tooltip ();
+		break;
+	}
 	_new_current_item = 0;
 	deliver_enter_leave (Duple (ev->x, ev->y), ev->state);
 	return true;
