@@ -74,6 +74,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/convert.h"
 #include "pbd/clear_dir.h"
+#include "pbd/strsplit.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_diskstream.h"
@@ -1902,7 +1903,13 @@ Session::load_sources (const XMLNode& node)
 					string fullpath;
 
 					if (!Glib::path_is_absolute (err.path)) {
-						fullpath = Glib::build_filename (source_search_path (DataType::MIDI).front(), err.path);
+						vector<Glib::ustring> sdirs;
+						split (source_search_path (DataType::MIDI), sdirs, ':');
+						if (sdirs.empty()) {
+							fatal << _("Empty MIDI source search path!") << endmsg;
+							/*NOTREACHED*/
+						}
+						fullpath = Glib::build_filename (sdirs.front(), err.path);
 					} else {
 						/* this should be an unrecoverable error: we would be creating a MIDI file outside
 						   the session tree.
