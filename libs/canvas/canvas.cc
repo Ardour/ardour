@@ -26,6 +26,7 @@
 #include <cassert>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/label.h>
+#include <gtkmm/window.h>
 
 #include "pbd/compose.h"
 #include "pbd/stacktrace.h"
@@ -345,6 +346,8 @@ GtkCanvas::GtkCanvas ()
 	, _new_current_item (0)
 	, _grabbed_item (0)
 	, _focused_item (0)
+	, current_tooltip_item (0)
+	, tooltip_window (0)
 {
 	/* these are the events we want to know about */
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK |
@@ -607,7 +610,9 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 		_new_current_item->Event ((GdkEvent*)&enter_event);
 	}
 
+	start_tooltip_timeout (_new_current_item);
 	_current_item = _new_current_item;
+	
 }
 
 
@@ -687,6 +692,11 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 
 	if (_focused_item == item) {
 		_focused_item = 0;
+	}
+
+	if (current_tooltip_item) {
+		current_tooltip_item = 0;
+		stop_tooltip_timeout ();
 	}
 
 	ScrollGroup* sg = dynamic_cast<ScrollGroup*>(item);
@@ -834,6 +844,8 @@ GtkCanvas::get_mouse_position (Duple& winpos) const
 bool
 GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 {
+	hide_tooltip ();
+
 	/* translate event coordinates from window to canvas */
 
 	GdkEvent copy = *((GdkEvent*)ev);
@@ -972,6 +984,75 @@ Coord
 GtkCanvas::height() const
 {
 	return get_allocation().get_height();
+}
+
+void
+GtkCanvas::start_tooltip_timeout (Item* item)
+{
+	stop_tooltip_timeout ();
+
+	if (item) {
+		current_tooltip_item = item;
+
+		/* wait for the first idle that happens after this is
+		   called. this means that we've stopped processing events, which
+		   in turn implies that the user has stopped doing stuff for a
+		   little while.
+		*/
+
+		std::cerr << "wait for idle now that we're in " << item->name << std::endl;
+
+		Glib::signal_idle().connect (sigc::mem_fun (*this, &GtkCanvas::really_start_tooltip_timeout));
+	}
+}
+
+bool
+GtkCanvas::really_start_tooltip_timeout ()
+{
+	/* an idle has occured since we entered a tooltip-bearing widget. Now
+	 * wait 1 second and if the timeout isn't cancelled, show the tooltip.
+	 */
+
+	std::cerr << "gone idle\n";
+
+
+	if (current_tooltip_item) {
+		std::cerr << "have an item " << current_tooltip_item->name << " now wait 1second\n";
+		_current_timeout_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &GtkCanvas::show_tooltip), 1000);
+	}
+
+	return false; /* this is called from an idle callback, don't call it again */
+}
+
+void
+GtkCanvas::stop_tooltip_timeout ()
+{
+	if (current_tooltip_item) {
+		std::cerr << "Stop timeout for " << current_tooltip_item->name << "\n";
+	}
+	current_tooltip_item = 0;
+	_current_timeout_connection.disconnect ();
+}
+
+bool
+GtkCanvas::show_tooltip ()
+{
+	if (current_tooltip_item) {
+		std::cerr << "Would show a tooltip for " << current_tooltip_item->name << '\n';
+	} else {
+		std::cerr << "tooltip timeout expired, but no item\n";
+	}
+
+	/* called from a timeout handler, don't call it again */
+	return false;
+}
+
+void
+GtkCanvas::hide_tooltip ()
+{
+	if (tooltip_window) {
+		tooltip_window->hide ();
+	}
 }
 
 /** Create a GtkCanvaSViewport.

@@ -45,6 +45,8 @@ Item::Item (Canvas* canvas)
 	, _lut (0)
 	, _ignore_events (false)
 {
+	_tooltip = "This is a tooltip";
+
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 }	
 
@@ -59,6 +61,8 @@ Item::Item (Item* parent)
 	, _lut (0)
 	, _ignore_events (false)
 {
+	_tooltip = "This is a tooltip";
+
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 
 	if (parent) {
@@ -80,6 +84,8 @@ Item::Item (Item* parent, Duple const& p)
 	, _lut (0)
 	, _ignore_events (false)
 {
+	_tooltip = "This is a tooltip";
+
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 
 	if (parent) {
@@ -979,6 +985,26 @@ Item::add_items_at_point (Duple const point, vector<Item const *>& items) const
 	for (vector<Item*>::iterator i = our_items.begin(); i != our_items.end(); ++i) {
 		(*i)->add_items_at_point (point, items);
 	}
+}
+
+void
+Item::set_tooltip (const std::string& s)
+{
+	_tooltip = s;
+}
+
+void
+Item::start_tooltip_timeout ()
+{
+	if (!_tooltip.empty()) {
+		_canvas->start_tooltip_timeout (this);
+	}
+}
+
+void
+Item::stop_tooltip_timeout ()
+{
+	_canvas->stop_tooltip_timeout ();
 }
 
 void

@@ -228,6 +228,12 @@ public:
 	void grab_focus ();
 #endif	
 
+	const std::string& tooltip () const { return _tooltip; }
+	void set_tooltip (const std::string&);
+
+	void start_tooltip_timeout ();
+	void stop_tooltip_timeout ();
+	
         virtual void dump (std::ostream&) const;
         std::string whatami() const;
 
@@ -288,6 +294,7 @@ protected:
 private:
 	void init ();
 
+	std::string _tooltip;
 	bool _ignore_events;
 
 	Duple scroll_offset() const;

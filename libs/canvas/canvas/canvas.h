@@ -140,13 +140,16 @@ public:
 	    an enter event for it.
 	*/
 	virtual void re_enter () = 0;
-    
+
+	virtual void start_tooltip_timeout (Item*) {}
+	virtual void stop_tooltip_timeout () {}
+	
 protected:
 	void queue_draw_item_area (Item *, Rect);
 	
 	/** our root item */
 	Root _root;
-
+	
         virtual void pick_current_item (int state) = 0;
         virtual void pick_current_item (Duple const &, int state) = 0;
 
@@ -175,6 +178,9 @@ public:
 	bool get_mouse_position (Duple& winpos) const;
 
 	void re_enter ();
+
+	void start_tooltip_timeout (Item*);
+	void stop_tooltip_timeout ();
 
 protected:
 	bool on_scroll_event (GdkEventScroll *);
@@ -205,6 +211,13 @@ private:
 	Item * _grabbed_item;
         /** the item that currently has key focus or 0 */
 	Item * _focused_item;
+
+	sigc::connection _current_timeout_connection;
+	Item* current_tooltip_item;
+	Gtk::Window* tooltip_window;
+	bool show_tooltip ();
+	void hide_tooltip ();
+	bool really_start_tooltip_timeout ();
 };
 
 /** A GTK::Alignment with a GtkCanvas inside it plus some Gtk::Adjustments for
