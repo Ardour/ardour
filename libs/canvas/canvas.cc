@@ -1000,8 +1000,6 @@ GtkCanvas::start_tooltip_timeout (Item* item)
 		   little while.
 		*/
 
-		std::cerr << "wait for idle now that we're in " << item->name << std::endl;
-
 		Glib::signal_idle().connect (sigc::mem_fun (*this, &GtkCanvas::really_start_tooltip_timeout));
 	}
 }
@@ -1013,11 +1011,7 @@ GtkCanvas::really_start_tooltip_timeout ()
 	 * wait 1 second and if the timeout isn't cancelled, show the tooltip.
 	 */
 
-	std::cerr << "gone idle\n";
-
-
 	if (current_tooltip_item) {
-		std::cerr << "have an item " << current_tooltip_item->name << " now wait 1second\n";
 		_current_timeout_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &GtkCanvas::show_tooltip), 1000);
 	}
 
@@ -1027,9 +1021,6 @@ GtkCanvas::really_start_tooltip_timeout ()
 void
 GtkCanvas::stop_tooltip_timeout ()
 {
-	if (current_tooltip_item) {
-		std::cerr << "Stop timeout for " << current_tooltip_item->name << "\n";
-	}
 	current_tooltip_item = 0;
 	_current_timeout_connection.disconnect ();
 }
@@ -1037,13 +1028,51 @@ GtkCanvas::stop_tooltip_timeout ()
 bool
 GtkCanvas::show_tooltip ()
 {
-	if (current_tooltip_item) {
-		std::cerr << "Would show a tooltip for " << current_tooltip_item->name << '\n';
-	} else {
-		std::cerr << "tooltip timeout expired, but no item\n";
+	Rect tooltip_item_bbox;
+
+	if (!current_tooltip_item || current_tooltip_item->tooltip().empty() || !current_tooltip_item->bounding_box()) {
+		return false;
 	}
 
+	if (!tooltip_window) {
+		tooltip_window = new Gtk::Window (Gtk::WINDOW_POPUP);
+		tooltip_label = manage (new Gtk::Label);
+		tooltip_label->show ();
+		tooltip_window->add (*tooltip_label);
+		tooltip_window->set_border_width (6);
+		tooltip_window->set_name ("tooltip");
+	}
+
+	tooltip_label->set_text (current_tooltip_item->tooltip());
+
+	/* figure out where to position the tooltip */
+
+	Gtk::Widget* toplevel = get_toplevel();
+	assert (toplevel);
+	int pointer_x, pointer_y;
+	Gdk::ModifierType mask;
+
+	(void) toplevel->get_window()->get_pointer (pointer_x, pointer_y, mask);
+
+	Duple tooltip_item_center (pointer_x, pointer_y);
+	
+	/* convert to root window coordinates */
+
+	int win_x, win_y;
+	dynamic_cast<Gtk::Window*>(toplevel)->get_position (win_x, win_y);
+	
+	tooltip_item_center = tooltip_item_center.translate (Duple (win_x, win_y));
+
+	/* move the tooltip window into position */
+
+	tooltip_window->move (tooltip_item_center.x, tooltip_item_center.y);
+
+	/* ready to show */
+
+	tooltip_window->present ();
+	
 	/* called from a timeout handler, don't call it again */
+
 	return false;
 }
 

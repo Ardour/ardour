@@ -38,6 +38,11 @@
 
 #include "canvas/root_group.h"
 
+namespace Gtk {
+	class Window;
+	class Label;
+}
+
 namespace ArdourCanvas
 {
 struct Rect;
@@ -215,6 +220,7 @@ private:
 	sigc::connection _current_timeout_connection;
 	Item* current_tooltip_item;
 	Gtk::Window* tooltip_window;
+	Gtk::Label* tooltip_label;
 	bool show_tooltip ();
 	void hide_tooltip ();
 	bool really_start_tooltip_timeout ();
