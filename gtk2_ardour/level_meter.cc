@@ -355,7 +355,6 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					stp[1] = 115.0 * meter_deflect_nordic(-18);
 					stp[2] = 115.0 * meter_deflect_nordic(-12);
 					stp[3] = 115.0 * meter_deflect_nordic( -9); // ignored
-					//c[2] = c[3] = c[1]; // dark-green
 					c[0] = c[1] = c[2]; // bright-green
 					c[6] = c[7] = c[8] = c[9];
 					break;
@@ -364,7 +363,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					stp[1] = 115.0 * meter_deflect_din(-18);
 					stp[2] = 115.0 * meter_deflect_din(-15); // ignored
 					stp[3] = 115.0 * meter_deflect_din( -9);
-					c[0] = c[1] = c[2] = c[3] = 0x00aa00ff;
+					c[0] = c[2] = c[3] = c[1];
 					c[4] = c[6];
 					c[5] = c[7];
 					break;
@@ -373,8 +372,8 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					stp[1] = 115.0 * meter_deflect_vu(-23); // -3
 					stp[2] = 115.0 * meter_deflect_vu(-20); // 0
 					stp[3] = 115.0 * meter_deflect_vu(-18); // +2
-					c[0] = c[1] = c[2] = c[3] = c[4] = c[5] = 0x00aa00ff;
-					c[6] = c[7] = c[8] = c[9] = 0xff8800ff;
+					c[0] = c[2] = c[3] = c[4] = c[5] = c[1];
+					c[7] = c[8] = c[9] = c[6];
 					break;
 				default: // PEAK, RMS
 					stp[1] = 77.5;  // 115 * log_meter(-10)
