@@ -36,6 +36,7 @@ XFadeCurve::XFadeCurve (Canvas* c)
 	, _xfadeposition (Start)
 	, _outline_color (0x000000ff)
 	, _fill_color (0x22448880)
+    , show_background_fade (false)
 {
 }
 
@@ -45,6 +46,7 @@ XFadeCurve::XFadeCurve (Canvas* c, XFadePosition pos)
 	, _xfadeposition (pos)
 	, _outline_color (0x000000ff)
 	, _fill_color (0x22448880)
+    , show_background_fade (false)
 {
 }
 
@@ -54,6 +56,7 @@ XFadeCurve::XFadeCurve (Item* parent)
 	, _xfadeposition (Start)
 	, _outline_color (0x000000ff)
 	, _fill_color (0x22448880)
+    , show_background_fade (false)
 {
 }
 
@@ -63,6 +66,7 @@ XFadeCurve::XFadeCurve (Item* parent, XFadePosition pos)
 	, _xfadeposition (pos)
 	, _outline_color (0x000000ff)
 	, _fill_color (0x22448880)
+    , show_background_fade (false)
 {
 }
 
@@ -239,44 +243,52 @@ XFadeCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 	Color fill_shaded = _fill_color;
 	fill_shaded = 0.5 * (fill_shaded & 0xff) + (fill_shaded & ~0xff);
 
-#define IS (_xfadeposition == Start)
+#define IS_START (_xfadeposition == Start)
 
 	/* fill primary fade */
 	context->begin_new_path ();
-	context->append_path (IS ? *path_in : *path_out);
-	close_path(draw, context, IS ?_in : _out, false);
+	context->append_path (IS_START ? *path_in : *path_out);
+	close_path(draw, context, IS_START ?_in : _out, false);
 	set_source_rgba (context, _fill_color);
 	context->fill ();
 
-	/* fill background fade */
-	context->save ();
-	context->begin_new_path ();
-	context->append_path (IS ? *path_in : *path_out);
-	close_path(draw, context, IS ? _in : _out, true);
-	context->set_fill_rule (Cairo::FILL_RULE_EVEN_ODD);
-	context->clip ();
-	context->begin_new_path ();
-	context->append_path (IS ? *path_out: *path_in);
-	close_path(draw, context, IS ? _out : _in, true);
-	set_source_rgba (context, fill_shaded);
-	context->set_fill_rule (Cairo::FILL_RULE_WINDING);
-	context->fill ();
-	context->restore ();
+    if (show_background_fade) {
+        /* fill background fade */
+        context->save ();
+        context->begin_new_path ();
+        context->append_path (IS_START ? *path_in : *path_out);
+        close_path(draw, context, IS_START ? _in : _out, true);
+        context->set_fill_rule (Cairo::FILL_RULE_EVEN_ODD);
+        context->clip ();
+        context->begin_new_path ();
+        context->append_path (IS_START ? *path_out: *path_in);
+        close_path(draw, context, IS_START ? _out : _in, true);
+        set_source_rgba (context, fill_shaded);
+        context->set_fill_rule (Cairo::FILL_RULE_WINDING);
+        context->fill ();
+        context->restore ();
+    }
 
 	/* draw lines over fills */
-	set_source_rgba (context, IS ? _outline_color : outline_shaded);
-	context->set_line_width (IS ? 1.0 : .5);
+    /* fade in line */
+    if (IS_START || show_background_fade) {
+        set_source_rgba (context, IS_START ? _outline_color : outline_shaded);
+        context->set_line_width (IS_START ? 1.0 : .5);
+        
+        context->begin_new_path ();
+        context->append_path (*path_in);
+        context->stroke();
+    }
 
-	context->begin_new_path ();
-	context->append_path (*path_in);
-	context->stroke();
+    /* fade out line */
+    if (!IS_START || show_background_fade) {
+        set_source_rgba (context, IS_START ? outline_shaded :_outline_color);
+        context->set_line_width (IS_START ? .5 : 1.0);
 
-	set_source_rgba (context, IS ? outline_shaded :_outline_color);
-	context->set_line_width (IS ? .5 : 1.0);
-
-	context->begin_new_path ();
-	context->append_path (*path_out);
-	context->stroke();
+        context->begin_new_path ();
+        context->append_path (*path_out);
+        context->stroke();
+    }
 
 	context->restore ();
 

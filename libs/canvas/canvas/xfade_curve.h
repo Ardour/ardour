@@ -40,7 +40,8 @@ public:
 	XFadeCurve (Item*, XFadePosition);
 
 	void set_fade_position (XFadePosition xfp) { _xfadeposition = xfp; }
-	
+	void set_show_background_fade (bool show) { show_background_fade = show; }
+    
 	void compute_bounding_box () const;
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 
@@ -79,6 +80,8 @@ private:
 	Color _outline_color;
 	Color _fill_color;
 
+    bool show_background_fade;
+    
 	void interpolate ();
 };
 
