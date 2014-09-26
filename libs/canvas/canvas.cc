@@ -39,6 +39,8 @@
 using namespace std;
 using namespace ArdourCanvas;
 
+uint32_t Canvas::tooltip_timeout_msecs = 750;
+
 /** Construct a new Canvas */
 Canvas::Canvas ()
 	: _root (this)
@@ -333,6 +335,12 @@ Canvas::queue_draw_item_area (Item* item, Rect area)
 }
 
 void
+Canvas::set_tooltip_timeout (uint32_t msecs)
+{
+	tooltip_timeout_msecs = msecs;
+}
+
+void
 GtkCanvas::re_enter ()
 {
 	DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, "re-enter canvas by request\n");
@@ -607,12 +615,11 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 	if (_new_current_item && !_new_current_item->ignore_events()) {
 		enter_event.detail = enter_detail;
 		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("ENTER %1/%2\n", _new_current_item->whatami(), _new_current_item->name));
+		start_tooltip_timeout (_new_current_item);
 		_new_current_item->Event ((GdkEvent*)&enter_event);
 	}
 
-	start_tooltip_timeout (_new_current_item);
 	_current_item = _new_current_item;
-	
 }
 
 
@@ -1012,7 +1019,7 @@ GtkCanvas::really_start_tooltip_timeout ()
 	 */
 
 	if (current_tooltip_item) {
-		_current_timeout_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &GtkCanvas::show_tooltip), 1000);
+		tooltip_timeout_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &GtkCanvas::show_tooltip), tooltip_timeout_msecs);
 	}
 
 	return false; /* this is called from an idle callback, don't call it again */
@@ -1022,7 +1029,7 @@ void
 GtkCanvas::stop_tooltip_timeout ()
 {
 	current_tooltip_item = 0;
-	_current_timeout_connection.disconnect ();
+	tooltip_timeout_connection.disconnect ();
 }
 
 bool
@@ -1054,18 +1061,29 @@ GtkCanvas::show_tooltip ()
 
 	(void) toplevel->get_window()->get_pointer (pointer_x, pointer_y, mask);
 
-	Duple tooltip_item_center (pointer_x, pointer_y);
+	Duple tooltip_window_origin (pointer_x, pointer_y);
 	
 	/* convert to root window coordinates */
 
 	int win_x, win_y;
 	dynamic_cast<Gtk::Window*>(toplevel)->get_position (win_x, win_y);
 	
-	tooltip_item_center = tooltip_item_center.translate (Duple (win_x, win_y));
+	tooltip_window_origin = tooltip_window_origin.translate (Duple (win_x, win_y));
+
+	/* we don't want the pointer to be inside the window when it is
+	 * displayed, because then we generate a leave/enter event pair when
+	 * the window is displayed then hidden - the enter event will
+	 * trigger a new tooltip timeout.
+	 *
+	 * So move the window right of the pointer position by just a enough
+	 * to get it away from the pointer.
+	 */
+
+	tooltip_window_origin.x += 20;
 
 	/* move the tooltip window into position */
 
-	tooltip_window->move (tooltip_item_center.x, tooltip_item_center.y);
+	tooltip_window->move (tooltip_window_origin.x, tooltip_window_origin.y);
 
 	/* ready to show */
 
@@ -1079,6 +1097,8 @@ GtkCanvas::show_tooltip ()
 void
 GtkCanvas::hide_tooltip ()
 {
+	/* hide it if its there */
+
 	if (tooltip_window) {
 		tooltip_window->hide ();
 	}

@@ -148,13 +148,19 @@ public:
 
 	virtual void start_tooltip_timeout (Item*) {}
 	virtual void stop_tooltip_timeout () {}
+
+	/** Set the timeout used to display tooltips, in milliseconds
+	 */
+	static void set_tooltip_timeout (uint32_t msecs);
 	
 protected:
 	void queue_draw_item_area (Item *, Rect);
 	
 	/** our root item */
 	Root _root;
-	
+
+	static uint32_t tooltip_timeout_msecs;
+
         virtual void pick_current_item (int state) = 0;
         virtual void pick_current_item (Duple const &, int state) = 0;
 
@@ -217,7 +223,7 @@ private:
         /** the item that currently has key focus or 0 */
 	Item * _focused_item;
 
-	sigc::connection _current_timeout_connection;
+	sigc::connection tooltip_timeout_connection;
 	Item* current_tooltip_item;
 	Gtk::Window* tooltip_window;
 	Gtk::Label* tooltip_label;
