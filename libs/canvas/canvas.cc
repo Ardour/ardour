@@ -900,6 +900,11 @@ GtkCanvas::on_leave_notify_event (GdkEventCrossing* ev)
 		stop_tooltip_timeout ();
 		hide_tooltip ();
 		break;
+	default:
+		/* we don't care about any other kind
+		   of leave event (notably GDK_NOTIFY_INFERIOR)
+		*/
+		break;
 	}
 	_new_current_item = 0;
 	deliver_enter_leave (Duple (ev->x, ev->y), ev->state);
