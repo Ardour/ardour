@@ -72,6 +72,7 @@ LevelMeterBase::~LevelMeterBase ()
 	for (vector<MeterInfo>::iterator i = meters.begin(); i != meters.end(); i++) {
 		delete (*i).meter;
 	}
+	meters.clear();
 }
 
 void
