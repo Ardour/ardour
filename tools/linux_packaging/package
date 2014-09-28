@@ -161,8 +161,8 @@ cp stage2.run ${PACKAGE}/.stage2.run
 cp README ${PACKAGE}
 
 if test -n "$MAKESELF"; then
-	echo "Creating self-extracing installer"
-	makeself --nocomp ${PACKAGE}/ ${PACKAGE}.sh ${APPNAME} ./install.sh
+	echo "Creating self-extracting installer"
+	$MAKESELF --nocomp ${PACKAGE}/ ${PACKAGE}.sh ${APPNAME} ./install.sh
 else
 	echo "Creating tarball..."
 	tar -cf ${PACKAGE}.tar ${PACKAGE}
