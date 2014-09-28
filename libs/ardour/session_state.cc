@@ -512,7 +512,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
 				/* Copy plugin state files from template to new session */
 				std::string template_plugins = Glib::build_filename (session_template, X_("plugins"));
-				copy_files (template_plugins, plugins_dir ());
+				copy_recurse (template_plugins, plugins_dir ());
 				
 				return 0;
 
