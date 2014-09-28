@@ -130,7 +130,12 @@ Session::get_paths_for_new_sources (bool /*allow_replacing*/, const string& impo
 
 		switch (type) {
 		  case DataType::MIDI:
-			filepath = new_midi_source_path (basename);
+				if (channels > 1) {
+					string mchn_name = string_compose ("%1-t%2", basename, n);
+					filepath = new_midi_source_path (mchn_name);
+				} else {
+					filepath = new_midi_source_path (basename);
+				}
 			break;
 		case DataType::AUDIO:
 			filepath = new_audio_source_path (basename, channels, n, false, false);
