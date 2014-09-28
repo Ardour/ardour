@@ -176,6 +176,11 @@ LIBPBD_API bool copy_file(const std::string & from_path, const std::string & to_
 LIBPBD_API void copy_files(const std::string & from_path, const std::string & to_dir);
 
 /**
+ * Attempt to copy all regular files from from_path to a new directory.
+ */
+LIBPBD_API void copy_recurse(const std::string & from_path, const std::string & to_dir);
+
+/**
  * Take a (possibly) relative path and make it absolute
  * @return An absolute path
  */
