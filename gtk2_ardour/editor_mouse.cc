@@ -682,7 +682,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		break;
 
 	case ClockRulerItem:
-                _drags->set (new CursorDrag (this, *playhead_cursor, true), event);
+                /* XXX this is not really a CursorDrag .. a new Drag object is needed */
+                _drags->set (new CursorDrag (this, *playhead_cursor, false), event);
 		return true;
 		break;
 
