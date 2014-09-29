@@ -35,6 +35,7 @@
 #include "waves_dropdown.h"
 #include "device_connection_control.h"
 #include "midi_device_connection_control.h"
+#include "option_editor.h"
 
 class WavesButton;
 
@@ -51,12 +52,14 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
     WavesButton& _all_inputs_off_button;
     WavesButton& _all_outputs_on_button;
     WavesButton& _all_outputs_off_button;
-	Gtk::Layout& _audio_settings_layout;
-	Gtk::Layout& _midi_settings_layout;
-	Gtk::Layout& _session_settings_layout;
+	Gtk::Container& _audio_settings_tab;
+	Gtk::Container& _midi_settings_tab;
+	Gtk::Container& _session_settings_tab;
+	Gtk::Container& _general_settings_tab;
 	WavesButton& _audio_settings_tab_button;
-	WavesButton& _session_settings_tab_button;
 	WavesButton& _midi_settings_tab_button;
+	WavesButton& _session_settings_tab_button;
+	WavesButton& _general_settings_tab_button;
 	WavesButton& _multi_out_button;
 	WavesButton& _stereo_out_button;
 	WavesButton& _ok_button;
@@ -78,8 +81,10 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
 	WavesDropdown& _auto_lock_timer_dropdown;
 	WavesDropdown& _auto_save_timer_dropdown;
 	WavesDropdown& _pre_record_buffer_dropdown;
+	WavesDropdown& _waveform_dropdown;
     Gtk::Label& _latency_label;
     Gtk::Label& _default_open_path;
+
     
 #include "tracks_control_panel.logic.h"
 };

@@ -90,9 +90,10 @@ TracksControlPanel::init ()
 	_cancel_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_cancel));
 	_apply_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_apply));
 
-	_audio_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_audio_settings));
-	_midi_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_midi_settings));
-	_session_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_session_settings));
+	_audio_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_a_settings_tab_button_clicked));
+	_midi_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_a_settings_tab_button_clicked));
+	_session_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_a_settings_tab_button_clicked));
+	_general_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_a_settings_tab_button_clicked));
     
     _all_inputs_on_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_all_inputs_on_button));
     _all_inputs_off_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_all_inputs_off_button));
@@ -121,15 +122,15 @@ TracksControlPanel::init ()
     /* Global configuration parameters update */
     Config->ParameterChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_parameter_changed, this, _1), gui_context());
     
-    _engine_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun(*this, &TracksControlPanel::on_engine_dropdown_item_clicked));
-    _device_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun(*this, &TracksControlPanel::on_device_dropdown_item_clicked));
-	_sample_rate_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun(*this, &TracksControlPanel::on_sample_rate_dropdown_item_clicked));
-	_buffer_size_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun(*this, &TracksControlPanel::on_buffer_size_dropdown_item_clicked));
+    _engine_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_engine_dropdown_item_clicked));
+    _device_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_device_dropdown_item_clicked));
+	_sample_rate_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_sample_rate_dropdown_item_clicked));
+	_buffer_size_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_buffer_size_dropdown_item_clicked));
     
     /* Session configuration parameters update */
-	_file_type_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun(*this, &TracksControlPanel::on_file_type_dropdown_item_clicked));
-    _bit_depth_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun(*this, &TracksControlPanel::on_bit_depth_dropdown_item_clicked));
-    _frame_rate_dropdown.signal_menu_item_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_frame_rate__item_clicked));
+	_file_type_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_file_type_dropdown_item_clicked));
+    _bit_depth_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_bit_depth_dropdown_item_clicked));
+    _frame_rate_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &TracksControlPanel::on_frame_rate__item_clicked));
 
     _name_tracks_after_driver.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_name_tracks_after_driver));
     _reset_tracks_name_to_default.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_reset_tracks_name_to_default));
@@ -1134,39 +1135,25 @@ TracksControlPanel::engine_stopped ()
 
 
 void
-TracksControlPanel::on_audio_settings (WavesButton*)
+TracksControlPanel::on_a_settings_tab_button_clicked (WavesButton* clicked_button)
 {
-	_midi_settings_layout.hide ();
-	_midi_settings_tab_button.set_active(false);
-	_session_settings_layout.hide ();
-	_session_settings_tab_button.set_active(false);
-	_audio_settings_layout.show ();
-	_audio_settings_tab_button.set_active(true);
+	bool visible = (&_midi_settings_tab_button == clicked_button);
+	_midi_settings_tab.set_visible (visible);
+	_midi_settings_tab_button.set_active(visible);
+
+	visible = (&_session_settings_tab_button == clicked_button);
+	_session_settings_tab.set_visible (visible);;
+	_session_settings_tab_button.set_active(visible);
+
+	visible = (&_audio_settings_tab_button == clicked_button);
+	_audio_settings_tab.set_visible (visible);
+	_audio_settings_tab_button.set_active(visible);
+
+	visible = (&_general_settings_tab_button == clicked_button);
+	_general_settings_tab.set_visible (visible);
+	_general_settings_tab_button.set_active(visible);
 }
 
-
-void
-TracksControlPanel::on_midi_settings (WavesButton*)
-{
-	_audio_settings_layout.hide ();
-	_audio_settings_tab_button.set_active(false);
-	_session_settings_layout.hide ();
-	_session_settings_tab_button.set_active(false);
-	_midi_settings_layout.show ();
-	_midi_settings_tab_button.set_active(true);
-}
-
-
-void
-TracksControlPanel::on_session_settings (WavesButton*)
-{
-	_audio_settings_layout.hide ();
-	_audio_settings_tab_button.set_active(false);
-	_midi_settings_layout.hide ();
-	_midi_settings_tab_button.set_active(false);
-	_session_settings_layout.show ();
-	_session_settings_tab_button.set_active(true);
-}
 
 void
 TracksControlPanel::on_device_error ()

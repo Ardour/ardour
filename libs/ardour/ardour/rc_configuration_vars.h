@@ -91,7 +91,7 @@ CONFIG_VARIABLE (bool, use_osc, "use-osc", false)
 
 CONFIG_VARIABLE (EditMode, edit_mode, "edit-mode", Slide)
 CONFIG_VARIABLE (bool, link_region_and_track_selection, "link-region-and-track-selection", false)  // DEPRECATED
-CONFIG_VARIABLE (bool, link_editor_and_mixer_selection, "link-editor-and-mixer-selection", false)
+CONFIG_VARIABLE (bool, link_editor_and_mixer_selection, "link-editor-and-mixer-selection", true)
 CONFIG_VARIABLE (std::string, keyboard_layout_name, "keyboard-layout-name", "ansi")
 CONFIG_VARIABLE (bool, automation_follows_regions, "automation-follows-regions", true)
 CONFIG_VARIABLE (bool, region_boundaries_from_selected_tracks, "region-boundaries-from-selected-tracks", true)
@@ -169,7 +169,7 @@ CONFIG_VARIABLE (MeterLineUp, meter_line_up_din, "meter-line-up-din", MeteringLi
 CONFIG_VARIABLE (float, meter_peak, "meter-peak", 0.0f)
 CONFIG_VARIABLE (bool, meter_style_led, "meter-style-led", true)
 CONFIG_VARIABLE (bool, show_editor_meter, "show-editor-meter", true)
-CONFIG_VARIABLE (double, waveform_clip_level, "waveform-clip-level", -0.0933967) /* units of dB */
+CONFIG_VARIABLE (double, waveform_clip_level, "waveform-clip-level", -0.0) /* units of dB */
 
 /* miscellany */
 
@@ -192,7 +192,7 @@ CONFIG_VARIABLE (std::string, keyboard_layout, "keyboard-layout", "ansi")
 CONFIG_VARIABLE (std::string, default_bindings, "default-bindings", "ardour")
 CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)
 CONFIG_VARIABLE (bool, name_new_markers, "name-new-markers", false)
-CONFIG_VARIABLE (bool, rubberbanding_snaps_to_grid, "rubberbanding-snaps-to-grid", false)
+CONFIG_VARIABLE (bool, rubberbanding_snaps_to_grid, "rubberbanding-snaps-to-grid", true)
 CONFIG_VARIABLE (long, font_scale, "font-scale", 81920)
 CONFIG_VARIABLE (std::string, default_session_parent_dir, "default-session-parent-dir", Glib::get_home_dir())
 CONFIG_VARIABLE (bool, show_waveforms, "show-waveforms", true)

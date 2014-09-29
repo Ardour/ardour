@@ -17,9 +17,6 @@
 
 */
 
-#include <string.h>
-#include <ardour/ardour/types.h>
-
 // class TracksControlPanel : public WavesDialog {
   public:
     void refresh_session_settings_info ();
@@ -30,17 +27,17 @@
     uint32_t _desired_sample_rate;
     bool  _have_control;
 
-	// this flag is set for immediate return during combo-box change callbacks
-	// when we do not need to process current combo-box change
+// this flag is set for immediate return during combo-box change callbacks
+// when we do not need to process current combo-box change
 	uint32_t _ignore_changes;
     std::string _current_device;
 
-//	Sync stuff
+// Sync stuff
 	PBD::ScopedConnectionList update_connections;
     PBD::ScopedConnection running_connection;
     PBD::ScopedConnection stopped_connection;
 
-// methods
+// Methods
 	virtual void init();
 	DeviceConnectionControl& add_device_capture_control(std::string port_name, bool active, uint16_t capture_number, std::string track_name);
 	DeviceConnectionControl& add_device_playback_control(std::string port_name, bool active, uint16_t playback_number);
@@ -48,9 +45,7 @@
                                                          const std::string& capture_name, bool capture_active,
                                                          const std::string& playback_name, bool playback_active);
 
-	void on_audio_settings (WavesButton*);
-	void on_midi_settings (WavesButton*);
-	void on_session_settings (WavesButton*);
+	void on_a_settings_tab_button_clicked (WavesButton* clicked_button);
     void on_multi_out (WavesButton*);
     void on_stereo_out (WavesButton*);
     void on_browse_button (WavesButton*);
