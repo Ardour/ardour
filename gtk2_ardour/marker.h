@@ -169,12 +169,14 @@ class RangeMarker : public Marker
         void canvas_height_set (double);
 
     protected:
-        void bounds_changed ();
-        void _set_position (framepos_t, framepos_t);
-
         framepos_t _end_frame;
 	ArdourCanvas::Line* _end_line;
         Cairo::RefPtr<Cairo::Surface> _pattern;
+        PBD::ScopedConnection parameter_connection;
+
+        void bounds_changed ();
+        void _set_position (framepos_t, framepos_t);
+        void parameter_changed (const std::string&);
 };
 
 /** A variant on RangeMarker that is used to draw markers/locations on top of the ruler using

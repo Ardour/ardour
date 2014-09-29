@@ -95,11 +95,24 @@ RangeMarker::RangeMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanva
         setup_line ();
         use_color ();
         setup_name_display ();
+
+        /* our appearance depends on some backend parameters, so pick up changes as necessary */
+
+        Config->ParameterChanged.connect (parameter_connection, invalidator (*this), boost::bind (&RangeMarker::parameter_changed, this, _1), gui_context());
 }
 
 RangeMarker::~RangeMarker ()
 {
         delete _end_line;
+}
+
+void
+RangeMarker::parameter_changed (const std::string& s)
+{
+        if (s == "skip-playback") {
+                /* reset our color to reflect global skip-playback setting */
+                pick_basic_color (0);
+        }
 }
 
 void
@@ -411,7 +424,7 @@ Marker::pick_basic_color (ArdourCanvas::Color c)
                 } else if (_location->is_auto_punch()) {
                         col = ARDOUR_UI::config()->get_canvasvar_LocationPunch();
                 } else if (_location->is_skip()) {
-                        if (_location->is_skipping()) {
+                        if (_location->is_skipping() && Config->get_skip_playback()) {
                                 col = ARDOUR_UI::config()->get_canvasvar_LocationSkipping();
                         } else {
                                 col = ARDOUR_UI::config()->get_canvasvar_LocationSkip();
