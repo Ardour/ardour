@@ -4691,22 +4691,24 @@ Editor::get_regions_from_selection_and_mouse (framepos_t pos)
 {
 	RegionSelection regions;
 
-	if (entered_regionview && selection->tracks.empty() && selection->regions.empty() ) {
+    regions = selection->regions;
+    
+    if (entered_regionview ) {
 		regions.add (entered_regionview);
-	} else {
-		regions = selection->regions;
-	}
+    }
 
-	if ( regions.empty() ) {
-		TrackViewList tracks = selection->tracks;
-
-		if (!tracks.empty()) {
-			/* no region selected or entered, but some selected tracks:
-			 * act on all regions on the selected tracks at the edit point
-			 */ 
-			get_regions_at(regions, pos, tracks);
-		}
-	}
+    // Greg Zharun: Waves Tracks PRD does not say this.
+    // So let's skip this.
+	//if ( regions.empty() ) {
+	//	TrackViewList tracks = selection->tracks;
+    //
+	//	if (!tracks.empty()) {
+	//		/* no region selected or entered, but some selected tracks:
+	//		 * act on all regions on the selected tracks at the edit point
+	//		 */
+	//		get_regions_at(regions, pos, tracks);
+	//	}
+	//}
 
 	return regions;
 }
