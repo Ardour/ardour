@@ -2659,9 +2659,11 @@ Editor::region_from_selection ()
 }
 
 void
-Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_regions)
+Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_regions, RouteTimeAxisView* rtv)
 {
-	if (selection->time.empty() || selection->tracks.empty()) {
+    new_regions.clear ();
+    
+	if (selection->time.empty() || selection->tracks.empty() ) {
 		return;
 	}
 
@@ -2671,51 +2673,82 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_re
 	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
 	sort_track_selection (ts);
 
-	for (TrackSelection::iterator i = ts.begin(); i != ts.end(); ++i) {
-		boost::shared_ptr<Region> current;
+    if (rtv) {
+        boost::shared_ptr<Region> current;
 		boost::shared_ptr<Playlist> playlist;
 		framepos_t internal_start;
 		string new_name;
-
-		if ((playlist = (*i)->playlist()) == 0) {
-			continue;
+        
+		if ((playlist = rtv->playlist()) == 0) {
+			return;
 		}
-
+        
 		if ((current = playlist->top_region_at(start)) == 0) {
-			continue;
+			return;
 		}
-
+        
 		internal_start = start - current->position();
 		RegionFactory::region_name (new_name, current->name(), true);
-
+        
 		PropertyList plist;
-
+        
 		plist.add (ARDOUR::Properties::start, current->start() + internal_start);
 		plist.add (ARDOUR::Properties::length, end - start + 1);
 		plist.add (ARDOUR::Properties::name, new_name);
-
+        
 		new_regions.push_back (RegionFactory::create (current, plist));
-	}
+    
+    } else {
+    
+        for (TrackSelection::iterator i = ts.begin(); i != ts.end(); ++i) {
+            boost::shared_ptr<Region> current;
+            boost::shared_ptr<Playlist> playlist;
+            framepos_t internal_start;
+            string new_name;
+
+            if ((playlist = (*i)->playlist()) == 0) {
+                continue;
+            }
+
+            if ((current = playlist->top_region_at(start)) == 0) {
+                continue;
+            }
+
+            internal_start = start - current->position();
+            RegionFactory::region_name (new_name, current->name(), true);
+
+            PropertyList plist;
+
+            plist.add (ARDOUR::Properties::start, current->start() + internal_start);
+            plist.add (ARDOUR::Properties::length, end - start + 1);
+            plist.add (ARDOUR::Properties::name, new_name);
+
+            new_regions.push_back (RegionFactory::create (current, plist));
+        }
+    }
 }
 
 void
-Editor::cut_region_from_selection (vector<boost::shared_ptr<Region> >& new_regions)
+Editor::cut_region_from_selection (vector<boost::shared_ptr<Region> >& new_regions, RouteTimeAxisView* rtv)
 {
-	if (selection->time.empty() || selection->tracks.empty()) {
+    new_regions.clear();
+    
+	if (selection->time.empty() || selection->tracks.empty() || !rtv) {
 		return;
 	}
-
+    
     AudioRange range = selection->time[clicked_selection];
-    clicked_routeview->cut_range(range);
-    clicked_routeview->paste(range.start, 1, *cut_buffer, 0);
+    
+    rtv->cut_range(range);
+    rtv->paste(range.start, 1, *cut_buffer, 0);
     
     boost::shared_ptr<Region> current;
     boost::shared_ptr<ARDOUR::Playlist> playlist;
-    if ((playlist = clicked_routeview->playlist()) == 0) {
+    if ((playlist = rtv->playlist() ) == 0) {
         return;
     }
     
-    if ((current = playlist->top_region_at(range.start)) == 0) {
+    if ((current = playlist->top_region_at(range.start) ) == 0) {
         return;
     }
     
@@ -4514,7 +4547,7 @@ Editor::duplicate_selection (float times)
 	vector<boost::shared_ptr<Region> > new_regions;
 	vector<boost::shared_ptr<Region> >::iterator ri;
 
-	create_region_from_selection (new_regions);
+	create_region_from_selection (new_regions, NULL);
 
 	if (new_regions.empty()) {
 		return;

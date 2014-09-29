@@ -761,7 +761,12 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                     // of the ruler, timebar, loopbar, skipbar and markerbar
                     double axis_view_offset = timebar_height + ruler_height +loopbar_height + marker_height + skipbar_height;
                     pair<TimeAxisView*, int> tvp = trackview_by_y_position (y - axis_view_offset );
-                    if (get_smart_mode() && tvp.first) {
+                    
+                    if (!tvp.first) {
+                        break;
+                    }
+                    
+                    if (get_smart_mode() ) {
                         AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
                         if (atv) {
                             /* smart "join" mode: drag automation */
@@ -775,7 +780,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                             separate-drag the selection. Well actually, Igor@Waves
                             decided this, so here it is.
                          */
-                        start_selection_grab (item, event, copy);
+                        RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
+                        start_selection_grab (item, rtv, event, copy);
                         return true;
                     }
                 }
@@ -2436,9 +2442,9 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
  *  the section of the clicked region that lies within the time range.
  */
 void
-Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool copy/*=false*/)
+Editor::start_selection_grab (ArdourCanvas::Item* item, RouteTimeAxisView* rtv, GdkEvent* event, bool copy/*=false*/)
 {
-	if (clicked_regionview == 0) {
+	if (rtv == 0) {
 		return;
 	}
 
@@ -2448,9 +2454,9 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event, boo
     
 	begin_reversible_command (_("new region for selection drag"));
     if (copy) {
-        create_region_from_selection (new_regions);
+        create_region_from_selection (new_regions, rtv);
     } else {
-        cut_region_from_selection (new_regions);
+        cut_region_from_selection (new_regions, rtv);
     }
     commit_reversible_command ();
     
@@ -2469,7 +2475,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event, boo
 	*/
 
 	latest_regionviews.clear();
-	sigc::connection c = clicked_routeview->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
+	sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
 	/* A selection grab currently creates two undo/redo operations, one for
 	   creating the new region and another for moving it.
@@ -2477,10 +2483,10 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event, boo
 
 	begin_reversible_command (Operations::selection_grab);
 
-	boost::shared_ptr<Playlist> playlist = clicked_axisview->playlist();
+	boost::shared_ptr<Playlist> playlist = rtv->playlist();
 
 	playlist->clear_changes ();
-	clicked_routeview->playlist()->add_region (region, selection->time[clicked_selection].start);
+	rtv->playlist()->add_region (region, selection->time[clicked_selection].start);
 	_session->add_command(new StatefulDiffCommand (playlist));
 
 	commit_reversible_command ();
