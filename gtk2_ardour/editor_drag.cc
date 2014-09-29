@@ -3405,6 +3405,10 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
                                 /* skip range - click toggles active skip status */
                                 loc->set_skipping (!loc->is_skipping());
                                 return;
+                        } else if (loc->is_auto_loop()) {
+                                /* click on loop marker: locate */
+                                _editor->session()->request_locate (grab_frame(), _editor->session()->transport_rolling());
+                                return;
                         }
                 }
 
