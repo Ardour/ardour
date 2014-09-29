@@ -136,7 +136,6 @@ gtk2_ardour_sources = [
         'main.cc',
         'main_clock.cc',
         'marker.cc',
-        'marker_io_dialog.cc',
         'midi_automation_line.cc',
         'midi_channel_dialog.cc',
         'midi_channel_selector.cc',
