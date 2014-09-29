@@ -2870,22 +2870,19 @@ CursorDrag::motion (GdkEvent* event, bool)
 }
 
 void
-CursorDrag::finished (GdkEvent* event, bool movement_occurred)
+CursorDrag::finished (GdkEvent* event, bool /*movement_occurred*/)
 {
 	_editor->_dragging_playhead = false;
 
 	_cursor.track_canvas_item().ungrab();
 
-	if (!movement_occurred && _stop) {
-		return;
-	}
-
 	motion (event, false);
 
 	Session* s = _editor->session ();
+
 	if (s) {
-		s->request_locate (_editor->playhead_cursor->current_frame (), _was_rolling);
 		_editor->_pending_locate_request = true;
+		s->request_locate (_editor->playhead_cursor->current_frame (), (_stop ? false : _was_rolling));
 		s->request_resume_timecode_transmission ();
 	}
 }
@@ -4791,7 +4788,7 @@ MarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 }
 
 void
-MarkerBarDrag::motion (GdkEvent*, bool first_move)
+MarkerBarDrag::motion (GdkEvent*, bool /*first_move*/)
 {
 	show_verbose_cursor_time (_drags->current_pointer_frame());
 }
