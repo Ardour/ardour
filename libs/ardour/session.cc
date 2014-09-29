@@ -397,7 +397,7 @@ Session::Session (AudioEngine &eng,
             if( Config->get_tracks_auto_naming() == NameAfterDriver )
             {
                 string track_name = "";
-                for( int i = 0; i < inputs.size(); ++i)
+                for (std::vector<string>::size_type i = 0; i < inputs.size(); ++i)
                 {
                     string track_name;
                     remove_pattern_from_string(inputs[i], "system:capture:", track_name);
@@ -2483,7 +2483,6 @@ Session::create_master_track ()
     uint32_t output_channels = input_channels;
     
     std::string track_name = "Master Track";
-	uint32_t track_id = 0;
 	string port;
 	RouteList new_routes;
     boost::shared_ptr<AudioTrack> track;
@@ -4868,7 +4867,6 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	boost::shared_ptr<Region> result;
 	boost::shared_ptr<Playlist> playlist;
 	boost::shared_ptr<AudioFileSource> fsource;
-	uint32_t x;
 	ChanCount diskstream_channels (track.n_channels());
 	framepos_t position;
 	framecnt_t this_chunk;
