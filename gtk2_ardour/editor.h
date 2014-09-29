@@ -1610,16 +1610,14 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Table               toolbar_selection_clock_table;
 	Gtk::Label               toolbar_selection_cursor_label;
 
-        WavesButton& marker_button;
-        MarkerIODialog* marker_io_dialog;
-        void marker_button_clicked (WavesButton*);
-        WavesButton& add_marker_button;
-        WavesButton& global_solo_button;
-        void solo_blink (bool);
-        void global_solo_clicked (WavesButton*);
-        WavesButton& global_rec_button;
-        void global_rec_clicked (WavesButton*);
-        void record_status_update (bool);
+    MarkerIODialog* marker_io_dialog;
+    WavesButton& add_marker_button;
+    WavesButton& global_solo_button;
+    void solo_blink (bool);
+    void global_solo_clicked (WavesButton*);
+    WavesButton& global_rec_button;
+    void global_rec_clicked (WavesButton*);
+    void record_status_update (bool);
 
 	Gtkmm2ext::TearOff*      _mouse_mode_tearoff;
 	WavesButton& _tool_marker_button;
