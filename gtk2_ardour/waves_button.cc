@@ -350,7 +350,7 @@ WavesButton::on_button_press_event (GdkEventButton *ev)
 }
 
 bool
-WavesButton::on_button_release_event (GdkEventButton *ev)
+WavesButton::on_button_release_event (GdkEventButton *)
 {
 	_pushed = false;
 	queue_draw ();
