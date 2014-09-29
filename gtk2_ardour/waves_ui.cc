@@ -194,6 +194,20 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 											 maxposx,
 											 maxposy,
 											 read_only));
+	} else if (widget_type == "HSCROLLBAR") {
+		std::string adjustment_id = xml_property (definition, "adjustment", styles, "");
+		if (adjustment_id.empty()) {
+			dbg_msg("Horizontal Scrollbar's adjustment NOT SPECIFIED!");
+			abort ();
+		}
+		child = manage (new Gtk::HScrollbar(get_adjustment(adjustment_id.c_str())));
+	} else if (widget_type == "VSCROLLBAR") {
+		std::string adjustment_id = xml_property (definition, "adjustment", styles, "");
+		if (adjustment_id.empty()) {
+			dbg_msg("Vertical Scrollbar's adjustment NOT SPECIFIED!");
+			abort ();
+		}
+		child = manage (new Gtk::VScrollbar(get_adjustment(adjustment_id.c_str())));
 	} else if (widget_type == "ADJUSTMENT") {
 		double min_value = xml_property (definition, "minvalue", styles, 0.0);
 		double max_value = xml_property (definition, "maxvalue", styles, 100.0);
@@ -1059,6 +1073,38 @@ WavesUI::get_entry(const char* id)
 	Gtk::Entry* child = dynamic_cast<Gtk::Entry*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtk::Entry ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+
+Gtk::Scrollbar&
+WavesUI::get_scrollbar (const char* id)
+{
+	Gtk::Scrollbar* child = dynamic_cast<Gtk::Scrollbar*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::Scrollbar ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+
+Gtk::HScrollbar&
+WavesUI::get_h_scrollbar (const char* id)
+{
+	Gtk::HScrollbar* child = dynamic_cast<Gtk::HScrollbar*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::HScrollbar ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+Gtk::VScrollbar&
+WavesUI::get_v_scrollbar (const char* id)
+{
+	Gtk::VScrollbar* child = dynamic_cast<Gtk::VScrollbar*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::VScrollbar ") + id + " not found in " + _scrip_file_name + "!");
 		abort ();
 	}
 	return *child;
