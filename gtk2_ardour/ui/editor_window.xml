@@ -381,7 +381,7 @@
                   <EventBox height="1"
                             bgnormal="#424242"/>
                   <EventBox bgnormal="#6C6C6C">
-                    <HBox id="marker_lane_hbox">
+                    <HBox id="marker_lane_hbox" noshowall="true">
                       <Icon source="marker_label.png"/>
                       <EventBox width="1"
                                 bgnormal="#424242"/>
