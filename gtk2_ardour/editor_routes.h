@@ -159,8 +159,9 @@ private:
 
 	bool _ignore_reorder;
 	bool _no_redisplay;
-        bool _adding_routes;
-        bool _route_deletion_in_progress;
+    bool _adding_routes;
+    bool _route_deletion_in_progress;
+    boost::shared_ptr<ARDOUR::Route> _route_is_being_deleted;
 
 	Gtk::Menu* _menu;
     Gtk::Widget* old_focus;

@@ -94,8 +94,8 @@ Mixer_UI::Mixer_UI ()
 	, _monitor_section (0)
 	, _strip_width (Config->get_default_narrow_ms() ? Narrow : Wide)
 	, ignore_reorder (false)
-        , _in_group_rebuild_or_clear (false)
-        , _route_deletion_in_progress (false)
+    , _in_group_rebuild_or_clear (false)
+    , _route_deletion_in_progress (false)
 	, _following_editor_selection (false)
 	, _maximised (false)
 {
@@ -530,7 +530,7 @@ Mixer_UI::sync_order_keys_from_treeview ()
 		bool visible = (*ri)[track_columns.visible];
 
 		uint32_t old_key = route->order_key ();
-
+        
 		if (order != old_key) {
 			route->set_order_key (order);
 			changed = true;
@@ -1050,11 +1050,13 @@ Mixer_UI::track_list_delete (const Gtk::TreeModel::Path&)
 	*/
 
 	DEBUG_TRACE (DEBUG::OrderKeys, "mixer UI treeview row deleted\n");
-	sync_order_keys_from_treeview ();
-
-        if (_route_deletion_in_progress) {
-                redisplay_track_list ();
-        }
+	
+    // editor performs the same actions, let it do the job
+    //sync_order_keys_from_treeview ();
+    
+    if (_route_deletion_in_progress) {
+        redisplay_track_list ();
+    }
 }
 
 void

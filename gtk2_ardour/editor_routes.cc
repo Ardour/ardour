@@ -752,7 +752,9 @@ EditorRoutes::route_removed (TimeAxisView *tv)
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[_columns.tv] == tv) {
-                        PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
+            boost::shared_ptr<Route> route = (*ri)[_columns.route];
+            PBD::Unwinder<bool> uw_flag (_route_deletion_in_progress, true);
+            PBD::Unwinder<boost::shared_ptr<Route> > uw_route (_route_is_being_deleted, route );
 			_model->erase (ri);
 			found = true;
 			break;
@@ -934,6 +936,13 @@ EditorRoutes::sync_order_keys_from_treeview ()
 		bool visible = (*ri)[_columns.visible];
 
 		uint32_t old_key = route->order_key ();
+        
+        // Greg Zharun: During track deletion process
+        // we should make shore we skip the track which is being deleted
+        if (_route_deletion_in_progress &&
+            _route_is_being_deleted == route ) {
+            continue;
+        }
         
 		if (order != old_key) {
 			route->set_order_key (order);
