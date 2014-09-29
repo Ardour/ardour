@@ -449,7 +449,7 @@ wiimote_control_protocol_mesg_callback (cwiid_wiimote_t *wiimote, int mesg_count
 {
 	DEBUG_TRACE (DEBUG::WiimoteControl, "WiimoteControlProtocol::mesg_callback init\n");
 
-	WiimoteControlProtocol *protocol = (WiimoteControlProtocol *)cwiid_get_data (wiimote);
+	WiimoteControlProtocol *protocol = const_cast<WiimoteControlProtocol *> (cwiid_get_data (wiimote));
 
 	if (protocol) {
 		protocol->wiimote_callback (mesg_count, mesg);
