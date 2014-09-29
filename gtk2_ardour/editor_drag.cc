@@ -4986,8 +4986,8 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	} else {
 
-		/* just a click, no pointer movement... currently do nothing at all */
-
+                /* locate playhead */
+                _editor->session()->request_locate (grab_frame(), _editor->session()->transport_rolling());
 	}
 
 	_editor->stop_canvas_autoscroll ();
