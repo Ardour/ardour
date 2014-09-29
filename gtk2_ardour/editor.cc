@@ -107,7 +107,6 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "marker.h"
-#include "marker_io_dialog.h"
 #include "midi_time_axis.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"
@@ -271,8 +270,6 @@ Editor::Editor ()
     , timebars_vbox (get_v_box ("timebars_vbox"))
 	, marker_lane_hbox (get_h_box ("marker_lane_hbox"))
 	, skip_button (get_waves_button ("skip_button"))
-    , marker_button (get_waves_button ("marker_button"))
-    , marker_io_dialog (0)
     , add_marker_button (get_waves_button ("add_marker_button"))
     , global_solo_button (get_waves_button ("global_solo_button"))
     , global_rec_button (get_waves_button ("global_rec_button"))
@@ -660,7 +657,6 @@ Editor::Editor ()
         ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::record_status_update));
 	global_solo_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::global_solo_clicked));
 	global_rec_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::global_rec_clicked));
-	marker_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::marker_button_clicked));
 
 	set_zoom_focus (zoom_focus);
 	set_visible_track_count (_visible_track_count);
@@ -5766,42 +5762,3 @@ Editor::global_rec_clicked (WavesButton*)
         _session->set_record_enabled (_session->get_routes(), _session->have_rec_disabled_track());
 }
         
-void
-Editor::marker_button_clicked (WavesButton*)
-{
-        if (!_session) {
-                return;
-        }
-                      
-        if (!marker_io_dialog) {
-                marker_io_dialog = new MarkerIODialog ();
-        } else {
-                if (marker_io_dialog->is_visible()) {
-                        marker_io_dialog->hide ();
-                        return;
-                }
-        }
-
-        marker_io_dialog->set_session (_session);
-        marker_io_dialog->show ();
-
-        Gtk::Container* toplevel = get_toplevel ();
-
-        if (toplevel) {
-                
-                /* position this dialog directly below the marker button */
-                
-                Gtk::Allocation r = marker_button.get_allocation ();
-
-                int x, y; /* coordinates of bottom left corner of marker_button in toplevel window */
-                
-                marker_button.translate_coordinates (*toplevel, 0, r.get_height(), x, y);
-                
-                /* convert to root coordinates */
-                int rx, ry;
-                toplevel->get_window()->get_root_coords (x, y, rx, ry);
-                
-                /* and move it there */
-                marker_io_dialog->move (rx, ry);
-        }
-}
