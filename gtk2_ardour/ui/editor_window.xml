@@ -542,7 +542,7 @@
                         table.bottomattach="3"
                         table.xfill="true"
                         table.yfill="true"
-                        bgnormal="#380000"/>
+                        bgnormal="#383838"/>
             </Table>
           </VPaned>
         </HPaned>
