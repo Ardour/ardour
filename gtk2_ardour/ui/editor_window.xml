@@ -369,8 +369,8 @@
                   paned.resize="true"
                   paned.shrink="true">
             <Table id="edit_packer"
-                   rows="2"
-                   columns="2">
+                   rows="3"
+                   columns="3">
               <HBox table.leftattach="0"
                     table.rightattach="1"
                     table.topattach="0"
@@ -382,11 +382,6 @@
                             bgnormal="#424242"/>
                   <EventBox bgnormal="#6C6C6C">
                     <HBox id="marker_lane_hbox">
-                      <iconbutton id="marker_button"
-                                  width="182"
-                                  height="16"
-                                  normalicon="marker_button"
-                                  ui.orphan="true"/>
                       <Icon source="marker_label.png"/>
                       <EventBox width="1"
                                 bgnormal="#424242"/>
@@ -527,10 +522,30 @@
                       bgnormal="#3E3E3E">
                 <VBox id="edit_controls_vbox"/>
               </Layout>
+              <VScrollbar adjustment="vertical_adjustment"
+                          table.leftattach="2"
+                          table.rightattach="3"
+                          table.topattach="1"
+                          table.bottomattach="2"
+                          table.yfill="true"
+                          bgnormal="#353535"/>
+              <HScrollbar adjustment="horizontal_adjustment"
+                          table.leftattach="1"
+                          table.rightattach="2"
+                          table.topattach="2"
+                          table.bottomattach="3"
+                          table.xfill="true"
+                          bgnormal="#353535"/>
+              <EventBox table.leftattach="0"
+                        table.rightattach="1"
+                        table.topattach="2"
+                        table.bottomattach="3"
+                        table.xfill="true"
+                        table.yfill="true"
+                        bgnormal="#380000"/>
             </Table>
           </VPaned>
         </HPaned>
-
         <EventBox id="mixer_bridge_view_home"
                   height="426"
                   box.pack="end"
