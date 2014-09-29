@@ -168,7 +168,6 @@ void
 MIDISceneChanger::locate (framepos_t pos)
 {
 	boost::shared_ptr<MIDISceneChange> msc;
-	framepos_t when;
 
 	{
 		Glib::Threads::RWLock::ReaderLock lm (scene_lock);
@@ -196,7 +195,6 @@ MIDISceneChanger::locate (framepos_t pos)
 			--i;
 		}
 
-		when = i->first;
 		msc = i->second;
 	}
 
