@@ -143,7 +143,7 @@ SoundcloudUploader::Get_Auth_Token( std::string username, std::string password )
 }
 
 int
-SoundcloudUploader::progress_callback(void *caller, double dltotal, double dlnow, double ultotal, double ulnow)
+SoundcloudUploader::progress_callback(void *caller, double /*dltotal*/, double /*dlnow*/, double ultotal, double ulnow)
 {
 	SoundcloudUploader *scu = (SoundcloudUploader *) caller;
 	DEBUG_TRACE (DEBUG::Soundcloud, string_compose ("%1: uploaded %2 of %3", scu->title, ulnow, ultotal) );
