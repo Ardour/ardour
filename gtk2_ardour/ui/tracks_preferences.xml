@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title="Tracks Preferences" resizeable="false">
   <style name="generic_control"
-         winfont ="Arial 10"
-         macfont ="Helvetica 10"
+         winfont="Arial 10"
+         macfont="Helvetica 10"
          fgnormal="#BFBFBF"
          bgnormal="#6C6C6C"
          fgactive="#BFBFBF"
@@ -57,6 +57,15 @@
       <EventBox bgnormal="#A0A0A0"
                 width="107"
                 height="1"/>
+      <Iconbutton id="general_settings_tab_button"
+                  width="107"
+                  height="65"
+                  normalicon="preferences_general_settings_tab_button"
+                  activeicon="preferences_general_settings_tab_button_active"
+                  _prelighticon="preferences_general_settings_tab_button_prelight"/>
+      <EventBox bgnormal="#A0A0A0"
+                width="107"
+                height="1"/>
     </VBox>
 
     <Layout bgnormal="#565656"
@@ -92,7 +101,7 @@
                   activeicon="preferences_apply_button_active"
                   _prelighticon="preferences_apply_button_prelight"/>
     </Layout>
-    <Layout id="midi_settings_layout"
+    <Layout id="midi_settings_tab"
             bgnormal="#565656"
             x="113"
             y="1"
@@ -155,7 +164,7 @@
         </HBox>
       </ScrolledWindow>
     </Layout>
-    <Layout id="audio_settings_layout"
+    <Layout id="audio_settings_tab"
             bgnormal="#000000"
             x="113" y="1"
             width="505"
@@ -424,13 +433,17 @@
                     _prelighticon="preference_no_button_prelight"/>
       </Layout>
     </Layout>
-    <Layout id="session_settings_layout" bgnormal="#565656" x="113" y="1" width="505" height="557" visible="false">
-      <!--
-    
-    Igor! Add feel free to add what you need here!
-    
-    -->
-      <Label style="generic_control" text="FILE TYPE" x="24" y="40"/>
+    <Layout id="session_settings_tab"
+            bgnormal="#565656"
+            x="113"
+            y="1"
+            width="505"
+            height="557"
+            visible="false">
+      <Label style="generic_control"
+             text="FILE TYPE"
+             x="24"
+             y="40"/>
       <Dropdown style="generic_dropdown"
                 id="file_type_dropdown"
                 x="215"
@@ -515,7 +528,7 @@
              text="AUTO LOCK TIMER"
              x="24"
              y="175"/>
-      <Dropdown style="generic_button"
+      <Dropdown style="generic_dropdown"
                 id="auto_lock_timer_dropdown"
                 x="215"
                 y="175"
@@ -546,7 +559,7 @@
           </DropdownMenu>
       </Dropdown>
       <Label style="generic_control" text="AUTO SAVE TIMER" x="24" y="205"/>
-      <Dropdown style="generic_button"
+      <Dropdown style="generic_dropdown"
                 id="auto_save_timer_dropdown"
                 x="215"
                 y="205"
@@ -580,7 +593,7 @@
              text="PRE RECORD BUFFER"
              x="24"
              y="235"/>
-      <Dropdown style="generic_button"
+      <Dropdown style="generic_dropdown"
                 id="pre_record_buffer_dropdown"
                 x="215"
                 y="235"
@@ -625,5 +638,61 @@
       <dropdownitem title="MONO"/>
       <dropdownitem title="STEREO"/>
     </Layout>
+    <EventBox id="general_settings_tab"
+              bgnormal="#565656"
+              x="113"
+              y="1"
+              width="505"
+              height="557"
+              visible="false">
+      <HBox>
+        <VBox width="21"/>
+        <VBox>
+          <HBox height="21"/>
+          <HBox >
+            <Label style="generic_control"
+                   text="WAVEFORM SHAPE"
+                   horzalignment="end"/>
+            <Dropdown style="generic_dropdown"
+                      id="waveform_dropdown"
+                      width="150"
+                      height="20"
+                      normalicon="preference_session_settings_dropdown"
+                      activeicon="preference_session_settings_dropdown_active"
+                      _prelighticon="preference_session_settings_dropdown_prelight">
+              <!--ComboOption<WaveformShape>
+                * wfsh = new ComboOption<WaveformShape>
+                  (
+                  "waveform-shape",
+                  _("Waveform shape"),
+                  sigc::mem_fun (*_rc_config, &RCConfiguration::get_waveform_shape),
+                  sigc::mem_fun (*_rc_config, &RCConfiguration::set_waveform_shape)
+                  );-->
+
+                  <HBox>
+                <VBox width="10"/>
+                <Label style="generic_control"
+                       horzalignment="start"
+                       width="117"/>
+              </HBox>
+              <DropdownMenu style="generic_dropdown_menu">
+                <Dropdownitem title="traditional"
+                              horzalignment="start"/>
+                <Dropdownitem title="rectified"
+                              horzalignment="start"/>
+              </DropdownMenu>
+            </Dropdown>
+
+          </HBox>
+        </VBox>
+      </HBox>
+      <!--<ScrolledWindow
+                      hscroll="never"
+                      vscroll="always"
+                      bgnormal="#565656"
+                      width="505"
+                      height="557">-->
+      <!--</ScrolledWindow>-->
+    </EventBox>
   </Layout>
 </Dialog>

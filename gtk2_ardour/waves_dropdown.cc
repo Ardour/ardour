@@ -21,8 +21,9 @@
 
 WavesDropdown::WavesDropdown (const std::string& title)
   : WavesIconButton (title)
+  , _selected_item_number (-1)
 {
-	signal_button_press_event().connect (sigc::mem_fun(*this, &WavesDropdown::on_mouse_pressed));
+	signal_button_press_event().connect (sigc::mem_fun(*this, &WavesDropdown::_on_mouse_pressed));
 	_menu.signal_hide ().connect (sigc::bind (sigc::mem_fun (*this, &CairoWidget::set_active), false));
 }
 
@@ -30,13 +31,25 @@ WavesDropdown::~WavesDropdown ()
 {
 }
 
-bool
-WavesDropdown::on_mouse_pressed (GdkEventButton*)
+void
+WavesDropdown::clear_items ()
 {
-	_menu.popup (sigc::mem_fun(this, &WavesDropdown::_on_popup_menu_position), 1, gtk_get_current_event_time());
-	_hovering = _pushed = false;
-	set_active (true);
-	return true;
+    _menu.items().clear ();
+}
+
+void
+WavesDropdown::set_selected_item (int selected_item_number)
+{
+	Gtk::Menu_Helpers::MenuList& items = _menu.items ();
+
+	if ((selected_item_number < 0) || (selected_item_number >= items.size ())) {
+		return;
+	}
+
+    Gtk::Menu_Helpers::MenuList::iterator i = items.begin();
+    std::advance (i, _selected_item_number);
+
+	_on_menu_item (_selected_item_number, 	(*i).get_data ("waves_dropdown_item_cookie"));
 }
 
 Gtk::MenuItem&
@@ -52,6 +65,8 @@ WavesDropdown::add_menu_item (const std::string& item, void* cookie)
 	if (child) {
 		child->set_style (get_style());
 	}
+
+	menuitem.set_data ("waves_dropdown_item_cookie", cookie);
 
     return menuitem;
 }
@@ -70,6 +85,8 @@ WavesDropdown::add_radio_menu_item (const std::string& item, void* cookie)
 		child->set_style (get_style());
 	}
 
+	menuitem.set_data ("waves_dropdown_item_cookie", cookie);
+
     return menuitem;
 }
 
@@ -87,23 +104,21 @@ WavesDropdown::add_check_menu_item (const std::string& item, void* cookie)
 		child->set_style (get_style());
 	}
 
+	menuitem.set_data ("waves_dropdown_item_cookie", cookie);
+
     return menuitem;
 }
 
 void
-WavesDropdown::clear_items ()
+WavesDropdown::_on_menu_item (int item_number, void* cookie)
 {
-    _menu.items().clear ();
-}
+	_selected_item_number = item_number;
 
-void
-WavesDropdown::_on_menu_item (size_t item_number, void* cookie)
-{
     Gtk::Menu_Helpers::MenuList& items = _menu.items ();
     Gtk::Menu_Helpers::MenuList::iterator i = items.begin();
-    std::advance (i, item_number);
+    std::advance (i, _selected_item_number);
     set_text ((*i).get_label());
-	signal_menu_item_clicked (this, cookie);
+	selected_item_changed (this, cookie);
 }
 
 void
@@ -125,4 +140,13 @@ WavesDropdown::_on_popup_menu_position (int& x, int& y, bool& push_in)
     	x += xo;
     	y += yo;
     }
+}
+
+bool
+WavesDropdown::_on_mouse_pressed (GdkEventButton*)
+{
+	_menu.popup (sigc::mem_fun(this, &WavesDropdown::_on_popup_menu_position), 1, gtk_get_current_event_time());
+	_hovering = _pushed = false;
+	set_active (true);
+	return true;
 }

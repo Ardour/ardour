@@ -31,22 +31,25 @@ class WavesDropdown : public WavesIconButton
     WavesDropdown (const std::string& title = "");
     virtual ~WavesDropdown ();
     Gtk::Menu& get_menu () { return _menu; }
-
-    bool on_mouse_pressed (GdkEventButton*);
-
-    Gtk::MenuItem& add_menu_item (const std::string& item, void* cookie);
-    Gtk::RadioMenuItem& add_radio_menu_item (const std::string& item, void* cookie);
-    Gtk::CheckMenuItem& add_check_menu_item (const std::string& item, void* cookie);
-
     void clear_items ();
+	int get_selected_item () { return _selected_item_number; }
+
+	void set_selected_item (int selected_item_number);
+
+    Gtk::MenuItem& add_menu_item (const std::string& item, void* cookie = 0);
+    Gtk::RadioMenuItem& add_radio_menu_item (const std::string& item, void* cookie = 0);
+    Gtk::CheckMenuItem& add_check_menu_item (const std::string& item, void* cookie = 0);
+
     
-    sigc::signal2<void, WavesDropdown*, void*> signal_menu_item_clicked;
+    sigc::signal2<void, WavesDropdown*, void*> selected_item_changed;
 
   private:
     Gtk::Menu _menu;
+	int _selected_item_number;
 	Gtk::RadioMenuItem::Group _radio_menu_items_group;
-    void _on_menu_item (size_t item_number, void* cookie);
+    void _on_menu_item (int item_number, void* cookie);
     void _on_popup_menu_position (int& x, int& y, bool& push_in);
+    bool _on_mouse_pressed (GdkEventButton*);
 };
 
 #endif /* __gtk2_ardour_waves_dropdown_h__ */

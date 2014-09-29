@@ -107,15 +107,15 @@ ARDOUR_UI::create_editor ()
     _frame_rate_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_frame_rate_button));
     _tracks_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_tracks_button));
     
-    _sample_rate_dropdown->signal_menu_item_clicked.connect (mem_fun(*this, &ARDOUR_UI::on_sample_rate_dropdown_item_clicked ));
-    _display_format_dropdown->signal_menu_item_clicked.connect (mem_fun(*this, &ARDOUR_UI::on_display_format_dropdown_item_clicked ));
-    _timecode_source_dropdown->signal_menu_item_clicked.connect (mem_fun(*this, &ARDOUR_UI::on_timecode_source_dropdown_item_clicked ));
+    _sample_rate_dropdown->selected_item_changed.connect (mem_fun(*this, &ARDOUR_UI::on_sample_rate_dropdown_item_clicked ));
+    _display_format_dropdown->selected_item_changed.connect (mem_fun(*this, &ARDOUR_UI::on_display_format_dropdown_item_clicked ));
+    _timecode_source_dropdown->selected_item_changed.connect (mem_fun(*this, &ARDOUR_UI::on_timecode_source_dropdown_item_clicked ));
     
 	editor->Realized.connect (sigc::mem_fun (*this, &ARDOUR_UI::editor_realized));
 	editor->signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), true));
     
-	_midi_input_dropdown->signal_menu_item_clicked.connect (sigc::mem_fun (*this, &ARDOUR_UI::midi_input_chosen));
-	_midi_output_dropdown->signal_menu_item_clicked.connect (sigc::mem_fun (*this, &ARDOUR_UI::midi_output_chosen));
+	_midi_input_dropdown->selected_item_changed.connect (sigc::mem_fun (*this, &ARDOUR_UI::midi_input_chosen));
+	_midi_output_dropdown->selected_item_changed.connect (sigc::mem_fun (*this, &ARDOUR_UI::midi_output_chosen));
 
 	populate_midi_inout_dropdowns ();
 
