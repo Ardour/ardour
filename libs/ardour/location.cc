@@ -161,6 +161,18 @@ Location::operator= (const Location& other)
 	return this;
 }
 
+/** Set location name
+ */
+
+void
+Location::set_name (const std::string& str)
+{ 
+        _name = str; 
+
+        name_changed (this); /* EMIT SIGNAL */
+        NameChanged  (); /* EMIT SIGNAL */
+}
+
 /** Set start position.
  *  @param s New start.
  *  @param force true to force setting, even if the given new start is after the current end.

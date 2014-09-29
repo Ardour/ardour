@@ -79,7 +79,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	int move_to (framepos_t pos);
 
 	const std::string& name() const { return _name; }
-	void set_name (const std::string &str) { _name = str; name_changed(this); }
+	void set_name (const std::string &str);
 
 	void set_auto_punch (bool yn, void *src);
 	void set_auto_loop (bool yn, void *src);
