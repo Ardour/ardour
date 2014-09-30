@@ -79,7 +79,7 @@ class MixerStrip : public RouteUI
 {
   public:
 	MixerStrip (Mixer_UI&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, const std::string& layout_script_file, size_t max_name_size = 0);
-	MixerStrip (Mixer_UI&, ARDOUR::Session*, const std::string& layout_script_file);
+	MixerStrip (Mixer_UI&, ARDOUR::Session*, const std::string& layout_script_file, size_t max_name_size = 0);
 	~MixerStrip ();
 
 	GainMeter&      gain_meter()      { return gpm; }

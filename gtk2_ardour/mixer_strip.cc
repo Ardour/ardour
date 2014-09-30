@@ -92,9 +92,10 @@ const char* MixerStrip::XMLColor[15] = { "#9a2f16", "#9a4618", "#9a5f1a", "#f48e
 										 "#4b7c0d", "#1c9a4a", "#1c9b7f", "#1d9b9b", "#197f9a",
 										 "#4937a3", "#6f2ba1", "#7e1a99", "#9a177e", "#242424"};
 
-MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, const std::string& layout_script_file)
+MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, const std::string& layout_script_file, size_t max_name_size)
 	: AxisView(sess)
 	, RouteUI (sess, layout_script_file)
+    , _max_name_size (max_name_size)
 	, _mixer(mx)
 	, _mixer_owned (xml_property(*xml_tree()->root(), "selfdestruct", true))
 	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, xml_property(*xml_tree()->root(), "selfdestruct", true))

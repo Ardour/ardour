@@ -191,13 +191,18 @@ Editor::ensure_all_elements_drawn ()
 }
 #endif
 
+namespace  {
+    const size_t inspector_strip_max_name_size = 15;
+}
+
 void
 Editor::create_editor_mixer ()
 {
     if (!current_mixer_strip) {
         current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
                                               _session,
-                                              "editor_mixer.xml");
+                                              "editor_mixer.xml",
+                                              inspector_strip_max_name_size);
         current_mixer_strip->Hiding.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_hidden));
         current_mixer_strip->set_embedded (true);
     }
