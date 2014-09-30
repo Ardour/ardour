@@ -42,8 +42,13 @@ MIDISceneChanger::MIDISceneChanger (Session& s)
 	, last_delivered_bank (-1)
 	  
 {
-	_session.locations()->changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this, _1));
-	Location::scene_changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::gather, this));
+        /* catch any add/remove/clear etc. for all Locations */
+	_session.locations()->changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
+	_session.locations()->added.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
+	_session.locations()->removed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
+
+        /* catch class-based signal that notifies of us changes in the scene change state of any Location */
+	Location::scene_changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
 }
 
 MIDISceneChanger::~MIDISceneChanger ()
@@ -51,9 +56,9 @@ MIDISceneChanger::~MIDISceneChanger ()
 }
 
 void
-MIDISceneChanger::locations_changed (Locations::Change)
+MIDISceneChanger::locations_changed ()
 {
-	gather ();
+	_session.locations()->apply (*this, &MIDISceneChanger::gather);
 }
 
 /** Use the session's list of locations to collect all patch changes.
@@ -61,9 +66,8 @@ MIDISceneChanger::locations_changed (Locations::Change)
  * This is called whenever the locations change in anyway.
  */
 void
-MIDISceneChanger::gather ()
+MIDISceneChanger::gather (const Locations::LocationList& locations)
 {
-	const Locations::LocationList& locations (_session.locations()->list());
 	boost::shared_ptr<SceneChange> sc;
 
 	Glib::Threads::RWLock::WriterLock lm (scene_lock);

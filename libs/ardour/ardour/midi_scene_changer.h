@@ -57,7 +57,7 @@ class MIDISceneChanger : public SceneChanger
 	int last_delivered_program;
 	int last_delivered_bank;
 
-	void gather ();
+	void gather (const Locations::LocationList&);
 	bool recording () const;
 	void jump_to (int bank, int program);
 	void rt_deliver (MidiBuffer&, framepos_t, boost::shared_ptr<MIDISceneChange>);
@@ -65,7 +65,7 @@ class MIDISceneChanger : public SceneChanger
 
 	void bank_change_input (MIDI::Parser&, unsigned short, int channel);
 	void program_change_input (MIDI::Parser&, MIDI::byte, int channel);
-	void locations_changed (Locations::Change);
+	void locations_changed ();
 
 	PBD::ScopedConnectionList incoming_connections;
 };

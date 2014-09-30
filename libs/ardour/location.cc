@@ -749,11 +749,6 @@ Locations::Locations (Session& s)
 	: SessionHandleRef (s)
 {
 	current_location = 0;
-
-	Location::changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
-	Location::start_changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
-	Location::end_changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
-	Location::flags_changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
 }
 
 Locations::~Locations ()
@@ -852,7 +847,7 @@ Locations::clear ()
 		current_location = 0;
 	}
 
-	changed (OTHER); /* EMIT SIGNAL */
+	changed (); /* EMIT SIGNAL */
 	current_changed (0); /* EMIT SIGNAL */
 }
 
@@ -875,8 +870,8 @@ Locations::clear_markers ()
 			i = tmp;
 		}
 	}
-
-	changed (OTHER); /* EMIT SIGNAL */
+        
+	changed (); /* EMIT SIGNAL */
 }
 
 void
@@ -914,7 +909,7 @@ Locations::clear_ranges ()
 		current_location = 0;
 	}
 
-	changed (OTHER); /* EMIT SIGNAL */
+        changed ();
 	current_changed (0); /* EMIT SIGNAL */
 }
 
@@ -975,19 +970,11 @@ Locations::remove (Location *loc)
 	if (was_removed) {
 
 		removed (loc); /* EMIT SIGNAL */
-
+                
 		if (was_current) {
 			 current_changed (0); /* EMIT SIGNAL */
 		}
-
-		changed (REMOVAL); /* EMIT_SIGNAL */
 	}
-}
-
-void
-Locations::location_changed (Location* /*loc*/)
-{
-	changed (OTHER); /* EMIT SIGNAL */
 }
 
 XMLNode&
@@ -1099,7 +1086,7 @@ Locations::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	changed (OTHER); /* EMIT SIGNAL */
+	changed (); /* EMIT SIGNAL */
 
 	return 0;
 }

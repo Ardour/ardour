@@ -1409,10 +1409,9 @@ Editor::set_session (Session *t)
 	_session->locations()->added.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_new_location, this, _1), gui_context());
 	_session->locations()->removed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::location_gone, this, _1), gui_context());
 	_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
-	_session->locations()->StateChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
-    _session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&Editor::start_lock_event_timing, this), gui_context());
-    _session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::start_session_auto_save_event_timing, this), gui_context());
+        _session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&Editor::start_lock_event_timing, this), gui_context());
+        _session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::start_session_auto_save_event_timing, this), gui_context());
     
 	playhead_cursor->show ();
 

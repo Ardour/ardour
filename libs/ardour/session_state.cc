@@ -323,10 +323,9 @@ Session::post_engine_init ()
 		
 		initialize_latencies ();
 		
+		_locations->added.connect_same_thread (*this, boost::bind (&Session::location_added, this, _1));
+		_locations->removed.connect_same_thread (*this, boost::bind (&Session::location_removed, this, _1));
 		_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
-		_locations->added.connect_same_thread (*this, boost::bind (&Session::locations_added, this, _1));
-		
-		
 		
 	} catch (AudioEngine::PortRegistrationFailure& err) {
 		/* handle this one in a different way than all others, so that its clear what happened */
@@ -1262,7 +1261,7 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	}
 
-	locations_changed ();
+        locations_changed ();
 
 	if (_session_range_location) {
 		AudioFileSource::set_header_position_offset (_session_range_location->start());

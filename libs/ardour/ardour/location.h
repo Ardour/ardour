@@ -200,28 +200,26 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 
 	void find_all_between (framepos_t start, framepos_t, LocationList&, Location::Flags);
 
-	enum Change {
-		ADDITION, ///< a location was added, but nothing else changed
-		REMOVAL, ///< a location was removed, but nothing else changed
-		OTHER ///< something more complicated happened
-	};
-
 	PBD::Signal1<void,Location*> current_changed;
-	/** something changed about the location list; the parameter gives some idea as to what */
-	PBD::Signal1<void,Change>    changed;
-	/** a location has been added to the end of the list */
+
+        /* Objects that care about individual addition and removal of Locations should connect to added/removed.
+           If an object additionally cares about potential mass clearance of Locations, they should connect to changed.
+        */
+
 	PBD::Signal1<void,Location*> added;
 	PBD::Signal1<void,Location*> removed;
-	PBD::Signal1<void,const PBD::PropertyChange&>    StateChanged;
+	PBD::Signal0<void> changed; /* emitted when any action that could have added/removed more than 1 location actually removed 1 or more */
 
-	template<class T> void apply (T& obj, void (T::*method)(LocationList&)) {
-		Glib::Threads::Mutex::Lock lm (lock);
-		(obj.*method)(locations);
-	}
-
-	template<class T1, class T2> void apply (T1& obj, void (T1::*method)(LocationList&, T2& arg), T2& arg) {
-		Glib::Threads::Mutex::Lock lm (lock);
-		(obj.*method)(locations, arg);
+	template<class T> void apply (T& obj, void (T::*method)(const LocationList&)) const {
+                /* We don't want to hold the lock while the given method runs, so take a copy
+                   of the list and pass that instead.
+                */
+                Locations::LocationList copy;
+                {
+                        Glib::Threads::Mutex::Lock lm (lock);
+                        copy = locations;
+                }
+		(obj.*method)(copy);
 	}
 
   private:
