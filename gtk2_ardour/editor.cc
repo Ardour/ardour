@@ -319,7 +319,13 @@ Editor::Editor ()
 	, _stepping_axis_view (0)
 	, current_mixer_strip (0)
 	, _master_bus_ui (0)
-    , _set_session_in_progress(false)
+        , _set_session_in_progress(false)
+        , midi_marker_input_activity_image (get_image ("midi_input_activity_indicator"))
+        , midi_marker_output_activity_image (get_image ("midi_output_activity_indicator"))
+        , midi_marker_input_enabled_image (get_image ("midi_input_enabled_indicator"))
+        , midi_marker_input_disabled_image (get_image ("midi_input_disabled_indicator"))
+        , midi_marker_output_enabled_image (get_image ("midi_output_enabled_indicator"))
+        , midi_marker_output_disabled_image (get_image ("midi_output_disabled_indicator"))
 {
 	constructed = false;
 

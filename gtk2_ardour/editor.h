@@ -2146,6 +2146,19 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void update_bring_in_message (Gtk::Label* label, uint32_t n, uint32_t total, std::string name);
 	void bring_all_sources_into_session ();
 
+        /* members and methods associated with MIDI + markers */
+        Gtk::Image& midi_marker_input_activity_image;
+        Gtk::Image& midi_marker_output_activity_image;
+        Gtk::Image& midi_marker_input_enabled_image;
+        Gtk::Image& midi_marker_input_disabled_image;
+        Gtk::Image& midi_marker_output_enabled_image;
+        Gtk::Image& midi_marker_output_disabled_image;
+
+        void marker_midi_input_activity ();
+        void marker_midi_output_activity ();
+        bool hide_marker_midi_image (Gtk::Widget*);
+        void display_marker_midi_port_status ();
+
 	friend class Drag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;

@@ -1322,3 +1322,31 @@ Editor::find_marker_from_location_id (PBD::ID const & id, bool is_start) const
 
 	return 0;
 }
+
+void
+Editor::marker_midi_input_activity ()
+{
+        if (!midi_marker_input_activity_image.is_visible ()) {
+                midi_marker_input_activity_image.show ();
+                /* hide the image again in 1/2 second */
+                Glib::signal_timeout().connect (sigc::bind (sigc::mem_fun (*this, &Editor::hide_marker_midi_image), &midi_marker_input_activity_image), 500);
+        }
+}
+
+void
+Editor::marker_midi_output_activity ()
+{
+        if (!midi_marker_output_activity_image.is_visible ()) {
+                midi_marker_output_activity_image.show ();
+                /* hide the image again in 1/2 second */
+                Glib::signal_timeout().connect (sigc::bind (sigc::mem_fun (*this, &Editor::hide_marker_midi_image), &midi_marker_output_activity_image), 500);
+        }
+}
+
+bool
+Editor::hide_marker_midi_image (Gtk::Widget* img)
+{
+        img->hide ();
+        return false; /* do not call again */
+}
+
