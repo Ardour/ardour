@@ -2086,7 +2086,7 @@ MixerStrip::update_inspector_info_panel ()
     input_info_label.set_tooltip_text (input_text);
     
     // Output label
-    string output_text;
+    string output_text = "";
     PortSet& out_ports (_route->output()->ports() );
     
     if( track_name != "master")
@@ -2104,16 +2104,11 @@ MixerStrip::update_inspector_info_panel ()
                     if( connections_string[j].find("system:playback:") != string::npos )
                         connections_string[j].erase(0, 16);
                     
-                    output_text += connections_string[j] + " ";
-                    
-                    if( j == 1 )
-                        output_text = "\n" + output_text;
-                    if( j > 1 )
-                        output_text += "\n";
+                    output_text += "\n" + connections_string[j];
                 }
             }
         } else { // stereo out mode
-            output_text = "Master Bus";
+            output_text = "\nMaster Bus";
         }
         
     } else {
@@ -2128,13 +2123,13 @@ MixerStrip::update_inspector_info_panel ()
                 if( connections_string[j].find("system:playback:") != string::npos )
                     connections_string[j].erase(0, 16);
                 
-                output_text += connections_string[j] + "\n";
+                output_text += "\n" + connections_string[j];
             }
         }
 
     }
     
-    output_text = "Out\n" + output_text;
+    output_text = "Out" + output_text;
     output_info_label.set_text(output_text);
     output_info_label.set_tooltip_text(output_text);
 }
