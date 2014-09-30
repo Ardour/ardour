@@ -762,8 +762,7 @@ def configure(conf):
     elif Options.options.dist_target != 'mingw':
         sub_config_and_use(conf, 'tools/sanity_check')
 
-    if Options.options.dist_target != 'mingw':
-        sub_config_and_use(conf, 'libs/clearlooks-newer')
+    sub_config_and_use(conf, 'libs/clearlooks-newer')
 
     for i in children:
         sub_config_and_use(conf, i)
@@ -867,8 +866,7 @@ def build(bld):
     elif bld.env['build_target'] != 'mingw':
         bld.recurse('tools/sanity_check')
 
-    if bld.env['build_target'] != 'mingw':
-        bld.recurse('libs/clearlooks-newer')
+    bld.recurse('libs/clearlooks-newer')
 
     for i in children:
         bld.recurse(i)
