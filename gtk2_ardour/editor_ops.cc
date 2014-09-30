@@ -235,12 +235,24 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 	if (frozen){
 		EditorThaw(); /* Emit Signal */
 	}
-
+    
+    RegionSelection regions_to_select;
+    
+    {
+        // latest_regionviews - regions created after the split
+        // select only those regions which are on the right side of the cut
+        RegionSelection::iterator iter = latest_regionviews.begin();
+        for (; iter != latest_regionviews.end(); ++iter) {
+            if (where <= (*iter)->region()->start() ) {
+                regions_to_select.push_back(*iter);
+            }
+        }
+    }
+    
 	//IFF we were working on selected regions, try to reinstate the other region selections that existed before the freeze/thaw.
 	_ignore_follow_edits = true;  //a split will change the region selection in mysterious ways;  its not practical or wanted to follow this edit
 	if( working_on_selection ) {
-		selection->add ( pre_selected_regions );
-		selection->add (latest_regionviews);  //these are the new regions created after the split
+		selection->add (regions_to_select );
 	}
 	_ignore_follow_edits = false;
 
