@@ -46,10 +46,14 @@ WavesDropdown::set_selected_item (int selected_item_number)
 		return;
 	}
 
-    Gtk::Menu_Helpers::MenuList::iterator i = items.begin();
-    std::advance (i, _selected_item_number);
+	if (selected_item_number == _selected_item_number) {
+		return;
+	}
 
-	_on_menu_item (_selected_item_number, 	(*i).get_data ("waves_dropdown_item_cookie"));
+    Gtk::Menu_Helpers::MenuList::iterator i = items.begin();
+    std::advance (i, selected_item_number);
+
+	_on_menu_item (selected_item_number, (*i).get_data ("waves_dropdown_item_cookie"));
 }
 
 Gtk::MenuItem&
