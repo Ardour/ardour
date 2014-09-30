@@ -17,10 +17,10 @@
 
 */
 
-#include <fst.h>
 #include <gtkmm.h>
 #include <gtk/gtk.h>
 #include <gtk/gtksocket.h>
+#include <fst.h>
 #include "ardour/plugin_insert.h"
 #include "ardour/windows_vst_plugin.h"
 
