@@ -134,6 +134,8 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 {
 	bool frozen = false;
 
+    // this code is needed if active selection
+    // should influent newly selected tracks
 	RegionSelection pre_selected_regions = selection->regions;
 	bool working_on_selection = !pre_selected_regions.empty();
 	
@@ -251,10 +253,10 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
     
 	//IFF we were working on selected regions, try to reinstate the other region selections that existed before the freeze/thaw.
 	_ignore_follow_edits = true;  //a split will change the region selection in mysterious ways;  its not practical or wanted to follow this edit
-	if( working_on_selection ) {
-		selection->add (regions_to_select );
-	}
-	_ignore_follow_edits = false;
+	
+	selection->add (regions_to_select );
+	
+    _ignore_follow_edits = false;
 
 }
 
