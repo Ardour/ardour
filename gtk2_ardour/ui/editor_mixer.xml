@@ -181,7 +181,7 @@
             <EventBox width="1"
                       bgnormal="#383838"/>s
             <VBox id="track_buttons_home"
-                  visible="false"
+                  visible="true"
                   noshowall="true">
               <EventBox height="1"
                         bgnormal="#000000"/>s

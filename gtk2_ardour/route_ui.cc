@@ -271,13 +271,10 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	master_mute_button.unset_flags (Gtk::CAN_FOCUS);
 	solo_button.unset_flags (Gtk::CAN_FOCUS);
 
-	mute_button.show();
-
-	if (_route->is_monitor() || _route->is_master()) {
-		solo_button.hide ();
-	} else {
-		solo_button.show();
-	}
+    mute_button.set_visible ( !_route->is_master() );
+    solo_button.set_visible ( !_route->is_master() );
+    rec_enable_button.set_visible ( !_route->is_master() );
+    monitor_input_button.set_visible ( !_route->is_master() );
 
 	map_frozen ();
 
