@@ -717,7 +717,7 @@ def build(bld):
     bld.install_files(bld.env['DATADIR'], 'ArdourMono.ttf')
 
     # Default UI configuration
-    bld.install_files(bld.env['CONFDIR'], 'ui_default.conf')
+    bld.install_files(bld.env['CONFDIR'], 'default_ui_config')
 
     # Default export stuff
     bld.install_files(os.path.join(bld.env['CONFDIR'],' export'), bld.path.ant_glob('export/*.format'))
