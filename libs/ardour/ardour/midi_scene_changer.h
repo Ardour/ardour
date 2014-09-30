@@ -43,6 +43,10 @@ class MIDISceneChanger : public SceneChanger
 	void set_recording (bool);
 	void locate (framepos_t);
 
+        /** Signal emitted whenever any relevant MIDI activity is detected.
+         */
+        PBD::Signal0<void> MIDIActivity;
+
     private:
 	typedef std::multimap<framepos_t,boost::shared_ptr<MIDISceneChange> > Scenes;
 

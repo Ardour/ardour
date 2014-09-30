@@ -254,6 +254,7 @@ MIDISceneChanger::bank_change_input (MIDI::Parser& parser, unsigned short, int)
 	}
 
 	last_bank_message_time = parser.get_timestamp ();
+        MIDIActivity (); /* EMIT SIGNAL */
 }
 
 void
@@ -304,6 +305,8 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 	if (new_mark) {
 		locations->add (loc);
 	}
+
+        MIDIActivity (); /* EMIT SIGNAL */
 }
 
 void
