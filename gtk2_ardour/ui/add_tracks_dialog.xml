@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title=" " resizeable="False">
   <style name="generic_control"
-         winfont ="Arial 10"
-         macfont ="Helvetica 10"
+         winfont ="Arial Bold 11"
+         macfont ="Helvetica Bold 11"
          fgnormal="#BFBFBF"
          bgnormal="#6C6C6C"
          fgactive="#BFBFBF"
@@ -19,7 +19,7 @@
   bghover="#898989"
   fgdisabled ="#959595"
   bordercolor="#7E7E7E"
-  borderwidth="0 0 0 0"/>
+  borderwidth="1 1 0 0"/>
   <Layout width="140"
           height="180">
     <Label style ="generic_control"
@@ -46,8 +46,8 @@
                width="93"/>
       </HBox>
       <DropdownMenu bgnormal="#454545">
-        <DropdownItem title="MONO"/>
-        <DropdownItem title="STEREO"/>
+        <DropdownItem title="Mono"/>
+        <DropdownItem title="Stereo"/>
       </DropdownMenu>        
     </Dropdown>
 
@@ -78,7 +78,7 @@
 
     <Button style="generic_button"
             id="cancel_button"
-            text="CANCEL"
+            text="Cancel"
             x="0"
             y="155"
             width="69"
@@ -86,7 +86,7 @@
 
     <Button style="generic_button"
             id="ok_button"
-            text="OK"
+            text="Ok"
             x="70"
             y="155"
             width="69"

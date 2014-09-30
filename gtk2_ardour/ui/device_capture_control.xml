@@ -12,7 +12,7 @@
            x="7" y="3"/>
   </Layout>
   <Button id="capture_on_button"
-    text="ON"
+    text="On"
     style="generic_control"
     fgnormal="#FFFFFF"
     bgnormal="#606060"
@@ -23,7 +23,7 @@
     borderwidth="0 0 0 0"
     x="95" y="0" width="29" height="19"/>
   <Button id="capture_off_button"
-    text="OFF"
+    text="Off"
     style="generic_control"
     fgnormal="#FFFFFF"
     bgnormal="#606060"

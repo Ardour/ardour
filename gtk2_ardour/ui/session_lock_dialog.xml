@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title=" " resizeable="False">
   <style name="generic_control"
-         winfont ="Arial Bold 16"
-         macfont ="Helvetica Bold 16"/>
+         winfont ="Arial Bold 11"
+         macfont ="Helvetica Bold 11"/>
   <style name="generic_button"
          style="generic_control"
-         fgnormal="#FFffff"
-         bgnormal="#00871B"
+fgnormal="#E6E6E6"
+         bgnormal="#6C6C6C"
          fgactive="#BFBFBF"
          bgactive="#454545"
          fghover="#CCCCCC"
          bghover="#898989"
          fgdisabled ="#959595"
-         bordercolor="#FF0000"
-         borderwidth="0 0 0 0" />
+         bordercolor="#7E7E7E"
+         borderwidth="1 1 0 0" />
     <Layout width="240" height="215">
       <icon source="systemlock.png"/>
     <Button style="generic_button"
         id="ok_button"
-        text="UNLOCK"        
-        x="15" y="170" width="80" height="32"/>
+        text="Unlock System"        
+        x="15" y="170" width="180" height="26"/>
     </Layout>
 </Dialog>
