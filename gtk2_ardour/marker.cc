@@ -80,6 +80,12 @@ RulerMarker::use_color ()
         _name_background->set_pattern (Cairo::RefPtr<Cairo::SurfacePattern> ());
 }
 
+void
+RulerMarker::setup_name_display ()
+{
+        /* we never show our name, so do nothing */
+}
+
 RangeMarker::RangeMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanvas::Container& parent, double height, guint32 rgba, const std::string& text,
                           framepos_t start, framepos_t end)
         : Marker (l, editor, parent, height, rgba, text, Range, start, true)

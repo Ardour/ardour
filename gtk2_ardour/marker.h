@@ -189,6 +189,7 @@ class RulerMarker: public RangeMarker
                      framepos_t start, framepos_t end);
         
 	void use_color ();
+        void setup_name_display ();
 };
 
 class TempoMarker : public Marker
