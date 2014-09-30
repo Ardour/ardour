@@ -113,7 +113,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 
 		_root.render (*draw, context);
 
-#ifdef CANVAS_DEBUG
+#if defined CANVAS_DEBUG && !PLATFORM_WINDOWS
 		if (getenv ("CANVAS_HARLEQUIN_DEBUGGING")) {
 			// This transparently colors the rect being rendered, after it has been drawn.
 			double r = (random() % 65536) /65536.0;
