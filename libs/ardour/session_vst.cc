@@ -79,7 +79,7 @@ intptr_t Session::vst_callback (
 	if (effect && effect->user) {
 		plug = (VSTPlugin *) (effect->user);
 		session = &plug->session();
-#ifdef COMPILER_MSVC
+#ifdef PLATFORM_WINDOWS
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (int) pthread_self().p, opcode, plug->name());
 #else
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (int) pthread_self(), opcode, plug->name());
@@ -87,7 +87,7 @@ intptr_t Session::vst_callback (
 	} else {
 		plug = 0;
 		session = 0;
-#ifdef COMPILER_MSVC
+#ifdef PLATFORM_WINDOWS
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %d", (int) pthread_self().p, opcode);
 #else
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %d", (int) pthread_self(), opcode);
