@@ -771,14 +771,14 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 	if (spin_button) {
 		double minval, maxval, step, page;
 
-		spin_button.get_range (minval, maxval);
-		spin_button.set_range (xml_property (definition, "min", styles, minval),
-			                   xml_property (definition, "max", styles, maxval));
+		spin_button->get_range (minval, maxval);
+		spin_button->set_range (xml_property (definition, "min", styles, minval),
+								xml_property (definition, "max", styles, maxval));
 
-		spin_button.get_increments(step, page);
-		spin_button.set_range (xml_property (definition, "step", styles, step),
-			                   xml_property (definition, "page", styles, page));
-		spin_button.set_value (xml_property (definition, "min", styles, minval));
+		spin_button->get_increments(step, page);
+		spin_button->set_range (xml_property (definition, "step", styles, step),
+								xml_property (definition, "page", styles, page));
+		spin_button->set_value (xml_property (definition, "min", styles, minval));
 	}
 
 	Gtk::Box* box = dynamic_cast<Gtk::Box*> (&widget);
