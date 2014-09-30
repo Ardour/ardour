@@ -2495,6 +2495,7 @@ Session::create_master_track ()
         }
         
         track->use_new_diskstream();
+        track->set_mute (true, this);
         
         {
             Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
