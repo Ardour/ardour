@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title="Tracks Preferences" resizeable="false">
   <style name="generic_control"
-         winfont="Arial 10"
-         macfont="Helvetica 10"
+         winfont="Arial Bold 11"
+         macfont="Helvetica Bold 11"
          fgnormal="#BFBFBF"
          bgnormal="#6C6C6C"
          fgactive="#BFBFBF"
@@ -12,7 +12,7 @@
          fgdisabled ="#959595"/>
   <style name="parameter_label"
          style="generic_control"
-         width="180"
+         width="300"
          horzalignment="end"/>
   <style name="parameter_spacing"
          width="20"/>
@@ -33,45 +33,45 @@
           height="623">
     <VBox x="2"
           y="1">
-      <EventBox bgnormal="#A0A0A0"
+      <EventBox bgnormal="#373737"
                 width="107"
-                height="1"/>
+                height="0"/>
       <Iconbutton id="audio_settings_tab_button"
                   width="107"
                   height="65"
                   normalicon="preferences_audio_settings_tab_button"
                   activeicon="preferences_audio_settings_tab_button_active"
                   _prelighticon="preferences_audio_settings_tab_button_prelight"/>
-      <EventBox bgnormal="#A0A0A0"
+      <EventBox bgnormal="#373737"
                 width="107"
-                height="1"/>
+                height="0"/>
       <Iconbutton id="midi_settings_tab_button"
                   width="107"
                   height="65"
                   normalicon="preferences_midi_settings_tab_button"
                   activeicon="preferences_midi_settings_tab_button_active"
                   _prelighticon="preferences_midi_settings_tab_button_prelight"/>
-      <EventBox bgnormal="#A0A0A0"
+      <EventBox bgnormal="#373737"
                 width="107"
-                height="1"/>
+                height="0"/>
       <Iconbutton id="session_settings_tab_button"
                   width="107"
                   height="65"
                   normalicon="preferences_session_settings_tab_button"
                   activeicon="preferences_session_settings_tab_button_active"
                   _prelighticon="preferences_session_settings_tab_button_prelight"/>
-      <EventBox bgnormal="#A0A0A0"
+      <EventBox bgnormal="#373737"
                 width="107"
-                height="1"/>
+                height="0"/>
       <Iconbutton id="general_settings_tab_button"
                   width="107"
                   height="65"
                   normalicon="preferences_general_settings_tab_button"
                   activeicon="preferences_general_settings_tab_button_active"
                   _prelighticon="preferences_general_settings_tab_button_prelight"/>
-      <EventBox bgnormal="#A0A0A0"
+      <EventBox bgnormal="#373737"
                 width="107"
-                height="1"/>
+                height="0"/>
     </VBox>
 
     <Layout bgnormal="#565656"
@@ -114,16 +114,16 @@
             width="505"
             height="557"
             visible="true">
-      <Layout bgnormal="#000000"
+      <Layout bgnormal="#373737"
               x="21"
               y="20"
               width="291"
               height="19">
         <Label style="generic_control"
-               text="MIDI PORTS"
+               text="MIDI Ports"
                fgnormal="#ffffff"
-               winfont ="Arial Bold 10"
-               macfont ="Helvetica Bold 10"
+               winfont ="Arial Bold 12"
+               macfont ="Helvetica Bold 12"
                x="7" y="3"/>
       </Layout>
       <Layout bgnormal="#797979"
@@ -132,10 +132,10 @@
               width="60"
               height="19">
         <Label style="generic_control"
-               text="INPUT"
+               text="Input"
                fgnormal="#ffffff"
-               winfont ="Arial Bold 10"
-               macfont ="Helvetica Bold 10"
+               winfont ="Arial Bold 12"
+               macfont ="Helvetica Bold 12"
                x="7"
                y="3"/>
       </Layout>
@@ -145,10 +145,10 @@
               width="60"
               height="19">
         <Label style="generic_control"
-               text="OUTPUT"
+               text="Output"
                fgnormal="#ffffff"
-               winfont ="Arial Bold 10"
-               macfont ="Helvetica Bold 10"
+               winfont ="Arial Bold 12"
+               macfont ="Helvetica Bold 12"
                x="7"
                y="3"/>
       </Layout>
@@ -176,13 +176,13 @@
             width="505"
             height="558"
             visible="true">
-      <Layout bgnormal="#565656"
+      <Layout bgnormal="#373737"
               x="0"
               y="0"
               width="505"
               height="100">
         <Label style="generic_control"
-               text="AUDIO ENGINE"
+               text="Audio Engine"
                x="0"
                y="15"
                width="88"
@@ -207,7 +207,7 @@
         </Dropdown>
 
         <Label style="generic_control"
-               text="INTERFACE"
+               text="Interface"
                x="0"
                y="43"
                width="88"
@@ -231,7 +231,7 @@
           <DropdownMenu style="generic_dropdown_menu"/>
         </Dropdown>
         <Label style="generic_control"
-               text="SAMPLE RATE"
+               text="Sample Rate"
                x="223"
                y="15"
                width="80"
@@ -255,7 +255,7 @@
           <DropdownMenu style="generic_dropdown_menu"/>
         </Dropdown>
         <Label style="generic_control"
-               text="BUFFER SIZE"
+               text="Buffer Size"
                x="223"
                y="43"
                width="80"
@@ -282,22 +282,22 @@
         <Iconbutton id="control_panel_button"
                     style="generic_button"
                     x="407"
-                    y="12"
+                    y="10"
                     width="85"
                     height="49"
                     normalicon="preferences_device_control_panel_button"
                     activeicon="preferences_device_control_panel_button_active"
                     _prelighticon="preferences_device_control_panel_button_prelight"/>
 
-        <Label id="latency_label" style="generic_control" text="INPUT LATENCY:" x="16" y="74  " width="476"/>
+        <Label id="latency_label" style="generic_control" text="Input Latency:" x="16" y="74  " width="476"/>
       </Layout>
       <Layout bgnormal="#565656" x="0" y="101" width="505" height="39">
-        <Label style="generic_control" text="CHANNEL CONFIGURATION MODE" fgnormal="#ffffff"
-               winfont ="Arial Bold 10"
-               macfont ="Helvetica Bold 10"
+        <Label style="generic_control" text="Channel Configuration Mode" fgnormal="#ffffff"
+               winfont ="Arial Bold 12"
+               macfont ="Helvetica Bold 12"
                x="18" y="12"/>
         <iconbutton id="multi_out_button"
-                    text="MULTI OUT"
+                    text="Multi Out"
                     x="280"
                     y="6"
                     width="106"
@@ -318,10 +318,10 @@
         <Layout bgnormal="#862579" x="16" y="13" width="3" height="41"/>
         <Layout bgnormal="#862579" x="22" y="13" width="265" height="19">
           <Label style="generic_control"
-                 text="INPUTS"
+                 text="Inputs"
                  fgnormal="#ffffff"
-                 winfont ="Arial Bold 10"
-                 macfont ="Helvetica Bold 10"
+                 winfont ="Arial Bold 12"
+                 macfont ="Helvetica Bold 12"
                  x="7"
                  y="3"/>
         </Layout>
@@ -329,7 +329,7 @@
           <Label style="generic_control" text="Port" fgnormal="#000000" x="7" y="3"/>
         </Layout>
         <Button id="all_inputs_on_button"
-          text="ALL"
+          text="All"
           style="generic_button"
           fgnormal="#D1D1D1"
           bgnormal="#606060"
@@ -340,7 +340,7 @@
           borderwidth="0 0 0 0"
           x="111" y="35" width="29" height="19"/>
         <Button id="all_inputs_off_button"
-          text="ALL"
+          text="All"
           style="generic_button"
           fgnormal="#D1D1D1"
           bgnormal="#606060"
@@ -359,10 +359,10 @@
         <Layout bgnormal="#27ae36" x="290" y="13" width="3" height="41"/>
         <Layout bgnormal="#27ae36" x="296" y="13" width="178" height="19">
           <Label style="generic_control"
-                 text="OUTPUTS"
+                 text="Outputs"
                  fgnormal="#ffffff"
-                 winfont ="Arial Bold 10"
-                 macfont ="Helvetica Bold 10"
+                 winfont ="Arial Bold 12"
+                 macfont ="Helvetica Bold 12"
                  x="7"
                  y="3"/>
         </Layout>
@@ -370,7 +370,7 @@
           <Label style="generic_control" text="Port" fgnormal="#000000" x="7" y="3"/>
         </Layout>
         <Button id="all_outputs_on_button"
-          text="ALL"
+          text="All"
           style="generic_button"
           fgnormal="#D1D1D1"
           bgnormal="#606060"
@@ -381,7 +381,7 @@
           borderwidth="0 0 0 0"
           x="385" y="35" width="29" height="19"/>
         <Button id="all_outputs_off_button"
-          text="ALL"
+          text="All"
           style="generic_button"
           fgnormal="#D1D1D1"
           bgnormal="#606060"
@@ -420,7 +420,7 @@
                     activeicon="preference_reset_track_names_button_active"
                     _prelighticon="preference_reset_track_names_button_prelight"/>
         <Iconbutton id="yes_button"
-                    text="YES"
+                    text="Yes"
                     x="292"
                     y="369"
                     width="52"
@@ -429,7 +429,7 @@
                     activeicon="preference_yes_button_active"
                     _prelighticon="preference_yes_button_prelight"/>
         <Iconbutton id="no_button"
-                    text="NO"
+                    text="No"
                     x="345"
                     y="369"
                     width="52"
@@ -447,7 +447,7 @@
             height="557"
             visible="false">
       <Label style="generic_control"
-             text="FILE TYPE"
+             text="File Type"
              x="24"
              y="40"/>
       <Dropdown style="generic_dropdown"
@@ -468,15 +468,15 @@
         <DropdownMenu style="generic_dropdown_menu">
           <Dropdownitem title="Caf"
                         horzalignment="start"/>
-          <Dropdownitem title="BWav"
+          <Dropdownitem title="Wave"
                         horzalignment="start"/>
           <Dropdownitem title="Aiff"
                         horzalignment="start"/>
           <Dropdownitem title="Wave64"
                         horzalignment="start"/>
-        </DropdownMenu>          
+        </DropdownMenu>
       </Dropdown>
-      <Label style="generic_control" text="BIT DEPTH" x="24" y="70"/>
+      <Label style="generic_control" text="Bit Depth" x="24" y="70"/>
       <Dropdown style="generic_dropdown"
                 id="bit_depth_dropdown"
                 x="215"
@@ -501,7 +501,7 @@
                         horzalignment="start"/>
         </DropdownMenu>
       </Dropdown>
-      <Label style="generic_control" text="SESSION FRAME RATE" x="24" y="100"/>
+      <Label style="generic_control" text="Session Frame Rate" x="24" y="100"/>
       <Dropdown style="generic_dropdown"
                 id="frame_rate_dropdown"
                 x="215"
@@ -531,7 +531,7 @@
         </DropdownMenu>
       </Dropdown>
       <Label style="generic_control"
-             text="AUTO LOCK TIMER"
+             text="Auto Lock Timer"
              x="24"
              y="175"/>
       <Dropdown style="generic_dropdown"
@@ -562,9 +562,9 @@
                         horzalignment="start"/>
           <Dropdownitem title="15 Min"
                         horzalignment="start"/>
-          </DropdownMenu>
+        </DropdownMenu>
       </Dropdown>
-      <Label style="generic_control" text="AUTO SAVE TIMER" x="24" y="205"/>
+      <Label style="generic_control" text="Auto Save Timer" x="24" y="205"/>
       <Dropdown style="generic_dropdown"
                 id="auto_save_timer_dropdown"
                 x="215"
@@ -593,10 +593,10 @@
                         horzalignment="start"/>
           <Dropdownitem title="15 Min"
                         horzalignment="start"/>
-          </DropdownMenu>
+        </DropdownMenu>
       </Dropdown>
       <Label style="generic_control"
-             text="PRE RECORD BUFFER"
+             text="Pre Record Buffer"
              x="24"
              y="235"/>
       <Dropdown style="generic_dropdown"
@@ -619,12 +619,10 @@
                         horzalignment="start"/>
           <Dropdownitem title="1 Min"
                         horzalignment="start"/>
-          <Dropdownitem title="2 Min"
-                        horzalignment="start"/>
         </DropdownMenu>
       </Dropdown>
       <Label style="generic_control"
-             text="DEFAULT FOLDER FOR NEW SESSION"
+             text="New Session Default Location"
              x = "24"
              y = "290"/>
       <Iconbutton style = "generic_button"
@@ -641,8 +639,8 @@
              text=""
              x = "105"
              y = "315"/>
-      <dropdownitem title="MONO"/>
-      <dropdownitem title="STEREO"/>
+      <dropdownitem title="Mono"/>
+      <dropdownitem title="Stereo"/>
     </Layout>
     <EventBox id="general_settings_tab"
               bgnormal="#565656"
@@ -653,7 +651,7 @@
               visible="false">
       <HBox>
         <VBox width="21"/>
-        <VBox>
+        <VBox spacing="6">
           <HBox height="21"/>
           <HBox >
             <Label style="parameter_label"
@@ -661,13 +659,13 @@
                    horzalignment="end"/>
             <VBox style="parameter_spacing"/>
             <Dropdown id="waveform_shape_dropdown"
-                      style="generic_dropdown"                      
+                      style="generic_dropdown"
                       width="150"
                       height="20"
                       normalicon="preference_session_settings_dropdown"
                       activeicon="preference_session_settings_dropdown_active"
                       _prelighticon="preference_session_settings_dropdown_prelight">
-                  <HBox>
+              <HBox>
                 <VBox width="10"/>
                 <Label style="generic_control"
                        horzalignment="start"
@@ -682,7 +680,61 @@
                               data="1"/>
               </DropdownMenu>
             </Dropdown>
-
+          </HBox>
+          <HBox>
+            <Label style="parameter_label"
+                   text="Obey MIDI Machine Control commands"/>
+            <VBox style="parameter_spacing"/>
+            <Iconbutton id="obey_mmc_commands_button"
+                        width="20"
+                        height="20"
+                        normalicon="waves_check_box"
+                        activeicon="waves_check_box_active"
+                        toggleable="true"/>
+          </HBox>
+          <HBox>
+            <Label style="parameter_label"
+                   text="Send MIDI Machine Control commands"/>
+            <VBox style="parameter_spacing"/>
+            <Iconbutton id="send_mmc_commands_button"
+                        width="20"
+                        height="20"
+                        normalicon="waves_check_box"
+                        activeicon="waves_check_box_active"
+                        toggleable="true"/>
+          </HBox>
+          <HBox>
+            <Label style="parameter_label"
+                   text="Send MIDI control feedback"/>
+            <VBox style="parameter_spacing"/>
+            <Iconbutton id="send_mmc_feedback_button"
+                        width="20"
+                        height="20"
+                        normalicon="waves_check_box"
+                        activeicon="waves_check_box_active"
+                        toggleable="true"/>
+          </HBox>
+          <HBox>
+            <Label style="parameter_label"
+                   text="Inbound MMC device ID"/>
+            <VBox style="parameter_spacing"/>
+            <SpinButton id="inbound_mmc_device_spinbutton"
+                        width="50"
+                        min="0"
+                        max="128"
+                        step="1"
+                        page="10"/>
+          </HBox>
+          <HBox>
+            <Label style="parameter_label"
+                   text="Outbound MMC device ID"/>
+            <VBox style="parameter_spacing"/>
+            <SpinButton id="outbound_mmc_device_spinbutton"
+                        width="50"
+                        min="0"
+                        max="128"
+                        step="1"
+                        page="10"/>
           </HBox>
         </VBox>
       </HBox>

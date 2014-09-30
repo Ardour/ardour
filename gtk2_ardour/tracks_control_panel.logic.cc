@@ -163,7 +163,7 @@ TracksControlPanel::init ()
     
 	_audio_settings_tab_button.set_active(true);
 
-	display_waveform_shape ();
+	display_general_preferences ();
 }
 
 DeviceConnectionControl& TracksControlPanel::add_device_capture_control(std::string port_name, bool active, uint16_t capture_number, std::string track_name)
@@ -888,7 +888,7 @@ TracksControlPanel::cleanup_midi_device_list()
 }
 
 
-void TracksControlPanel::display_waveform_shape ()
+void TracksControlPanel::display_general_preferences ()
 {
 	ARDOUR::WaveformShape shape = Config->get_waveform_shape ();
 	switch (shape) {
@@ -899,13 +899,18 @@ void TracksControlPanel::display_waveform_shape ()
 		_waveform_shape_dropdown.set_selected_item (1);
 		break;
 	default:
-		dbg_msg ("TracksControlPanel::display_waveform_shape ():\nUnexpected WaveformShape !");
+		dbg_msg ("TracksControlPanel::display_general_preferences ():\nUnexpected WaveFormShape !");
 		break;
 	}
+	_obey_mmc_commands_button.set_active_state (Config->get_mmc_control () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	_send_mmc_commands_button.set_active_state (Config->get_send_mmc () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	_send_mmc_feedback_button.set_active_state (Config->get_midi_feedback () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	_inbound_mmc_device_spinbutton.set_value (Config->get_mmc_receive_device_id ());
+	_outbound_mmc_device_spinbutton.set_value (Config->get_mmc_send_device_id ());
 }
 
 
-void TracksControlPanel::save_waveform_shape ()
+void TracksControlPanel::save_general_preferences ()
 {
 	int item = _waveform_shape_dropdown.get_selected_item ();
 	switch (item) {
@@ -913,12 +918,18 @@ void TracksControlPanel::save_waveform_shape ()
 		Config->set_waveform_shape (Traditional);
 		break;
 	case 1:
-		Config->RCConfiguration::set_waveform_shape (Rectified);
+		Config->set_waveform_shape (Rectified);
 		break;
 	default:
-		dbg_msg ("TracksControlPanel::apply_waveform_shape ():\nUnexpected WaveformShape !");
+		dbg_msg ("TracksControlPanel::general_preferences ():\nUnexpected WaveFormShape !");
 		break;
 	}
+
+	Config->set_mmc_control (_obey_mmc_commands_button.active_state () == Gtkmm2ext::ExplicitActive);
+	Config->set_send_mmc (_send_mmc_commands_button.active_state () == Gtkmm2ext::ExplicitActive);
+	Config->set_midi_feedback (_send_mmc_feedback_button.active_state () == Gtkmm2ext::ExplicitActive);
+	Config->set_mmc_receive_device_id (_inbound_mmc_device_spinbutton.get_value ());
+	Config->set_mmc_send_device_id (_outbound_mmc_device_spinbutton.get_value ());
 }
 
 
@@ -1308,7 +1319,7 @@ TracksControlPanel::update_configs()
     save_auto_lock_time ();
     save_auto_save_time ();
     save_pre_record_buffer ();
-	save_waveform_shape ();
+	save_general_preferences ();
 
     // save ARDOUR_UI::config to disk persistently
     ARDOUR_UI::config()->save_state();
@@ -1357,6 +1368,7 @@ TracksControlPanel::on_cancel (WavesButton*)
     _pre_record_buffer_dropdown.set_text(str);
     
     _default_open_path.set_text(Config->get_default_session_parent_dir());
+	display_general_preferences ();
 }
 
 
@@ -1445,10 +1457,19 @@ TracksControlPanel::on_parameter_changed (const std::string& parameter_name)
         on_audio_input_configuration_changed ();
     } else if (parameter_name == "default-session-parent-dir") {
         _default_open_path.set_text(Config->get_default_session_parent_dir());
-    } else if (parameter_name == "meter-hold") {
-		dbg_msg ("meter-hold");
-    } else if (parameter_name == "waveform-shape") {
-		display_waveform_shape ();
+    } else if ((parameter_name == "meter-hold") ||
+			   (parameter_name == "waveform-shape") ||
+			   (parameter_name == "mmc-control") ||
+			   (parameter_name == "send-mmc") ||
+			   (parameter_name == "midi-feedback") ||
+			   (parameter_name == "mmc-receive-device-id") ||
+			   (parameter_name == "mmc-send-device-id")){
+		// This is not that correct.
+		// We should update UI when the panel is being shown.
+		// We should not react immediately.
+		// The use case is: load the values, edit them and then
+		// save or cancel.
+		display_general_preferences ();
     }
 }
 

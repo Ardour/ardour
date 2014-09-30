@@ -71,6 +71,11 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
     WavesButton& _browse_button;
     WavesButton& _name_tracks_after_driver;
     WavesButton& _reset_tracks_name_to_default;
+	WavesButton& _obey_mmc_commands_button;
+	WavesButton& _send_mmc_commands_button;
+	WavesButton& _send_mmc_feedback_button;
+	Gtk::SpinButton& _inbound_mmc_device_spinbutton;
+	Gtk::SpinButton& _outbound_mmc_device_spinbutton;
 	WavesDropdown& _engine_dropdown;
 	WavesDropdown& _device_dropdown;
 	WavesDropdown& _sample_rate_dropdown;

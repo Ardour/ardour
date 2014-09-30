@@ -115,8 +115,8 @@
     void on_device_error ();
 
 	// Merged ARDOUR's preferences
-	void display_waveform_shape ();
-	void save_waveform_shape ();
+	void display_general_preferences ();
+	void save_general_preferences ();
 
     void cleanup_input_channels_list();
     void cleanup_output_channels_list();
