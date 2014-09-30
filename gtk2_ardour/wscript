@@ -406,7 +406,6 @@ def build(bld):
 
         if bld.is_defined('WINDOWS_VST_SUPPORT'):
         # Windows VST support mingw
-            obj.source += [ '../vst/winmain.c' ]
             obj.includes += [ '../libs/fst' ]
 
     # at this point, "obj" refers to either the normal native executable
