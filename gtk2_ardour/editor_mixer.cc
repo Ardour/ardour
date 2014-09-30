@@ -333,6 +333,7 @@ Editor::follow_meter_bridge_selection ()
 	RouteUISelection& s (_meter_bridge_view.selection().routes);
 
 	selection->clear_tracks ();
+    selection->clear_objects ();
 
 	for (RouteUISelection::iterator i = s.begin(); i != s.end(); ++i) {
 		TimeAxisView* tav = get_route_view_by_route_id ((*i)->route()->id());
@@ -359,7 +360,8 @@ Editor::follow_mixer_bridge_view_selection ()
 	RouteUISelection& s (_mixer_bridge_view.selection().routes);
 
 	selection->clear_tracks ();
-
+    selection->clear_objects ();
+    
 	for (RouteUISelection::iterator i = s.begin(); i != s.end(); ++i) {
 		TimeAxisView* tav = get_route_view_by_route_id ((*i)->route()->id());
 		if (tav) {
