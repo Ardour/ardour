@@ -21,7 +21,9 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#ifndef PLATFORM_WINDOWS
 #include <pango/pangoft2.h> // for fontmap resolution control for GnomeCanvas
+#endif
 #include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
 
 #include <cstdlib>
