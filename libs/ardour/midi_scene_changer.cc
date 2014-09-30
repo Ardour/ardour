@@ -93,6 +93,8 @@ MIDISceneChanger::rt_deliver (MidiBuffer& mbuf, framepos_t when, boost::shared_p
 	uint8_t buf[4];
 	size_t cnt;
 
+        MIDIOutputActivity (); /* EMIT SIGNAL */
+
 	if ((cnt = msc->get_bank_msb_message (buf, sizeof (buf))) > 0) {
 		mbuf.push_back (when, cnt, buf);
 
@@ -121,6 +123,8 @@ MIDISceneChanger::non_rt_deliver (boost::shared_ptr<MIDISceneChange> msc)
 	   non-RT/process context. Using zero means "deliver them as early as
 	   possible" (practically speaking, in the next process callback).
 	*/
+        
+        MIDIOutputActivity (); /* EMIT SIGNAL */
 
 	if ((cnt = msc->get_bank_msb_message (buf, sizeof (buf))) > 0) {
 		aport->write (buf, cnt, 0);
@@ -254,7 +258,7 @@ MIDISceneChanger::bank_change_input (MIDI::Parser& parser, unsigned short, int)
 	}
 
 	last_bank_message_time = parser.get_timestamp ();
-        MIDIActivity (); /* EMIT SIGNAL */
+        MIDIInputActivity (); /* EMIT SIGNAL */
 }
 
 void
@@ -306,7 +310,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 		locations->add (loc);
 	}
 
-        MIDIActivity (); /* EMIT SIGNAL */
+        MIDIInputActivity (); /* EMIT SIGNAL */
 }
 
 void
