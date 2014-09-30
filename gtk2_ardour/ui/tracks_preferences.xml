@@ -10,6 +10,12 @@
          fghover="#CCCCCC"
          bghover="#898989"
          fgdisabled ="#959595"/>
+  <style name="parameter_label"
+         style="generic_control"
+         width="180"
+         horzalignment="end"/>
+  <style name="parameter_spacing"
+         width="20"/>
   <style name="generic_button"
          style="generic_control"
          bordercolor="#7E7E7E"
@@ -650,25 +656,17 @@
         <VBox>
           <HBox height="21"/>
           <HBox >
-            <Label style="generic_control"
+            <Label style="parameter_label"
                    text="WAVEFORM SHAPE"
                    horzalignment="end"/>
-            <Dropdown style="generic_dropdown"
-                      id="waveform_dropdown"
+            <VBox style="parameter_spacing"/>
+            <Dropdown id="waveform_shape_dropdown"
+                      style="generic_dropdown"                      
                       width="150"
                       height="20"
                       normalicon="preference_session_settings_dropdown"
                       activeicon="preference_session_settings_dropdown_active"
                       _prelighticon="preference_session_settings_dropdown_prelight">
-              <!--ComboOption<WaveformShape>
-                * wfsh = new ComboOption<WaveformShape>
-                  (
-                  "waveform-shape",
-                  _("Waveform shape"),
-                  sigc::mem_fun (*_rc_config, &RCConfiguration::get_waveform_shape),
-                  sigc::mem_fun (*_rc_config, &RCConfiguration::set_waveform_shape)
-                  );-->
-
                   <HBox>
                 <VBox width="10"/>
                 <Label style="generic_control"
@@ -676,10 +674,12 @@
                        width="117"/>
               </HBox>
               <DropdownMenu style="generic_dropdown_menu">
-                <Dropdownitem title="traditional"
-                              horzalignment="start"/>
-                <Dropdownitem title="rectified"
-                              horzalignment="start"/>
+                <DropdownRadioItem title="Traditional"
+                              horzalignment="start"
+                              data="0"/>
+                <DropdownRadioItem title="Rectified"
+                              horzalignment="start"
+                              data="1"/>
               </DropdownMenu>
             </Dropdown>
 
