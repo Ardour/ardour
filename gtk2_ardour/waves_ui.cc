@@ -481,8 +481,16 @@ WavesUI::add_dropdown_items (WavesDropdown &dropdown, const XMLNodeList& definit
 					if (!widget_id.empty ()) {
 						(*this)[widget_id] = &menuitem;
 					}
-			} else if (node_name == "DROPDOWNCHECKITEM") {
+				} else if (node_name == "DROPDOWNCHECKITEM") {
 					Gtk::CheckMenuItem& menuitem = dropdown.add_check_menu_item (title, (void*)itemdata);
+					if (menuitem.get_child ()) {
+						set_attributes (*menuitem.get_child (), **ii, styles);
+					}
+					if (!widget_id.empty ()) {
+						(*this)[widget_id] = &menuitem;
+					}
+				} else if (node_name == "DROPDOWNRADIOITEM") {
+					Gtk::RadioMenuItem& menuitem = dropdown.add_radio_menu_item (title, (void*)itemdata);
 					if (menuitem.get_child ()) {
 						set_attributes (*menuitem.get_child (), **ii, styles);
 					}
