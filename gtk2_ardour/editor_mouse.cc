@@ -888,7 +888,34 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				return true;
 			}
 			break;
-
+        case SelectionItem:
+            if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+                /* grab selection for moving */
+                _drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionMove), event);
+            } else {
+                double const y = event->button.y;
+                // FIX-ME Greg Zharun:
+                // Looks like this coordinate is wrong for AxisView location.
+                // Waves Tracks does not use smart mode so far,
+                // but tracks views y possition seems to be shifted
+                // to the value which equals the height
+                // of the ruler, timebar, loopbar, skipbar and markerbar
+                double axis_view_offset = timebar_height + ruler_height +loopbar_height + marker_height + skipbar_height;
+                pair<TimeAxisView*, int> tvp = trackview_by_y_position (y - axis_view_offset );
+                
+                if (tvp.first) {
+                    bool copy = Keyboard::modifier_state_equals (event->button.state, GDK_MOD1_MASK);
+                    
+                    /* this was debated, but decided the more common action was to
+                     separate-drag the selection. Well actually, Igor@Waves
+                     decided this, so here it is.
+                     */
+                    RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
+                    start_selection_grab (item, rtv, event, copy);
+                    return true;
+                }
+            }
+            break;
 		default:
 			break;
 		}
