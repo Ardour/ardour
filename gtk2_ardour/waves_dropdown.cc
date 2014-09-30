@@ -52,6 +52,10 @@ WavesDropdown::set_selected_item (int selected_item_number)
 
     Gtk::Menu_Helpers::MenuList::iterator i = items.begin();
     std::advance (i, selected_item_number);
+	Gtk::RadioMenuItem* radio_menu_item = dynamic_cast <Gtk::RadioMenuItem*> (&(*i));
+	if (radio_menu_item) {
+		radio_menu_item->set_active (true);
+	}
 
 	_on_menu_item (selected_item_number, (*i).get_data ("waves_dropdown_item_cookie"));
 }
