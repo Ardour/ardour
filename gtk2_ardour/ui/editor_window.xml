@@ -403,7 +403,8 @@
                                 source="midi_input_disabled_indicator.png"
                                 visible="false"
                                 noshowall="true"/>
-                          <Icon source="midi_input_activity_indicator.png"
+                          <Icon id="midi_input_activity_indicator"
+                                source="midi_input_activity_indicator.png"
                                 visible="false"
                                 noshowall="true"/>
                         </HBox>
