@@ -26,6 +26,7 @@
 
 #include <gtkmm2ext/utils.h>
 
+#include "ardour/types.h"
 #include "ardour/engine_state_controller.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/recent_sessions.h"
@@ -130,7 +131,7 @@ TracksControlPanel::init ()
     /* Session configuration parameters update */
 	_file_type_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_file_type_dropdown_item_clicked));
     _bit_depth_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_bit_depth_dropdown_item_clicked));
-    _frame_rate_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &TracksControlPanel::on_frame_rate__item_clicked));
+    _frame_rate_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &TracksControlPanel::on_frame_rate_item_clicked));
 
     _name_tracks_after_driver.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_name_tracks_after_driver));
     _reset_tracks_name_to_default.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_reset_tracks_name_to_default));
@@ -161,6 +162,8 @@ TracksControlPanel::init ()
     populate_pre_record_buffer_dropdown();
     
 	_audio_settings_tab_button.set_active(true);
+
+	display_waveform_shape ();
 }
 
 DeviceConnectionControl& TracksControlPanel::add_device_capture_control(std::string port_name, bool active, uint16_t capture_number, std::string track_name)
@@ -884,6 +887,41 @@ TracksControlPanel::cleanup_midi_device_list()
     }
 }
 
+
+void TracksControlPanel::display_waveform_shape ()
+{
+	ARDOUR::WaveformShape shape = Config->get_waveform_shape ();
+	switch (shape) {
+	case Traditional:
+		_waveform_shape_dropdown.set_selected_item (0);
+		break;
+	case Rectified:
+		_waveform_shape_dropdown.set_selected_item (1);
+		break;
+	default:
+		dbg_msg ("TracksControlPanel::display_waveform_shape ():\nUnexpected WaveformShape !");
+		break;
+	}
+}
+
+
+void TracksControlPanel::save_waveform_shape ()
+{
+	int item = _waveform_shape_dropdown.get_selected_item ();
+	switch (item) {
+	case 0:
+		Config->set_waveform_shape (Traditional);
+		break;
+	case 1:
+		Config->RCConfiguration::set_waveform_shape (Rectified);
+		break;
+	default:
+		dbg_msg ("TracksControlPanel::apply_waveform_shape ():\nUnexpected WaveformShape !");
+		break;
+	}
+}
+
+
 void TracksControlPanel::on_engine_dropdown_item_clicked (WavesDropdown*, void*)
 {
 	if (_ignore_changes) {
@@ -1055,7 +1093,7 @@ TracksControlPanel::on_bit_depth_dropdown_item_clicked (WavesDropdown*, void*)
 }
 
 void
-TracksControlPanel::on_frame_rate__item_clicked (WavesDropdown*, void*)
+TracksControlPanel::on_frame_rate_item_clicked (WavesDropdown*, void*)
 {
     if (_ignore_changes) {
 		return;
@@ -1263,13 +1301,15 @@ void
 TracksControlPanel::update_configs()
 {
     // update session config
-    update_session_config();
+    update_session_config ();
     
     // update global config
-    save_default_session_path();
-    save_auto_lock_time();
-    save_auto_save_time();
-    save_pre_record_buffer();
+    save_default_session_path ();
+    save_auto_lock_time ();
+    save_auto_save_time ();
+    save_pre_record_buffer ();
+	save_waveform_shape ();
+
     // save ARDOUR_UI::config to disk persistently
     ARDOUR_UI::config()->save_state();
 }
@@ -1403,9 +1443,12 @@ TracksControlPanel::on_parameter_changed (const std::string& parameter_name)
         populate_output_mode();
     } else if (parameter_name == "tracks-auto-naming") {
         on_audio_input_configuration_changed ();
-    } else if (parameter_name == "default-session-parent-dir")
-    {
+    } else if (parameter_name == "default-session-parent-dir") {
         _default_open_path.set_text(Config->get_default_session_parent_dir());
+    } else if (parameter_name == "meter-hold") {
+		dbg_msg ("meter-hold");
+    } else if (parameter_name == "waveform-shape") {
+		display_waveform_shape ();
     }
 }
 

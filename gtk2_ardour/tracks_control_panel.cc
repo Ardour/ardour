@@ -65,7 +65,7 @@ TracksControlPanel::TracksControlPanel ()
     , _auto_lock_timer_dropdown(get_waves_dropdown("auto_lock_timer_dropdown"))
     , _auto_save_timer_dropdown(get_waves_dropdown("auto_save_timer_dropdown"))
     , _pre_record_buffer_dropdown(get_waves_dropdown("pre_record_buffer_dropdown"))
-	, _waveform_dropdown(get_waves_dropdown ("waveform_dropdown"))
+	, _waveform_shape_dropdown(get_waves_dropdown ("waveform_shape_dropdown"))
     , _have_control (false)
 	, _ignore_changes (0)
 {

@@ -81,7 +81,7 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
 	WavesDropdown& _auto_lock_timer_dropdown;
 	WavesDropdown& _auto_save_timer_dropdown;
 	WavesDropdown& _pre_record_buffer_dropdown;
-	WavesDropdown& _waveform_dropdown;
+	WavesDropdown& _waveform_shape_dropdown;
     Gtk::Label& _latency_label;
     Gtk::Label& _default_open_path;
 

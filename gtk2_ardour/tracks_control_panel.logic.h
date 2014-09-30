@@ -83,7 +83,7 @@
     void engine_stopped ();
 	void on_file_type_dropdown_item_clicked (WavesDropdown*, void*);
     void on_bit_depth_dropdown_item_clicked (WavesDropdown*, void*);
-    void on_frame_rate__item_clicked (WavesDropdown*, void*);
+    void on_frame_rate_item_clicked (WavesDropdown*, void*);
 
 	void populate_engine_dropdown ();
 	void populate_device_dropdown ();
@@ -113,6 +113,10 @@
     void on_midi_input_configuration_changed ();
     void on_midi_output_configuration_changed ();
     void on_device_error ();
+
+	// Merged ARDOUR's preferences
+	void display_waveform_shape ();
+	void save_waveform_shape ();
 
     void cleanup_input_channels_list();
     void cleanup_output_channels_list();
