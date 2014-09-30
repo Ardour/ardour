@@ -101,6 +101,8 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 		}
 	} else if (widget_type == "COMBOBOXTEXT") {
 		child = manage (new Gtk::ComboBoxText);
+	} else if (widget_type == "CHECKBUTTON") {
+		child = manage (new Gtk::CheckButton (text));
 	} else if (widget_type == "LABEL") {
 		child = manage (new Gtk::Label (text));
 	} else if (widget_type == "ENTRY") {
@@ -765,6 +767,20 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		label->set_ellipsize (ellipsize_mode);
 	}
 
+	Gtk::SpinButton* spin_button = dynamic_cast<Gtk::SpinButton*> (&widget);
+	if (spin_button) {
+		double minval, maxval, step, page;
+
+		spin_button.get_range (minval, maxval);
+		spin_button.set_range (xml_property (definition, "min", styles, minval),
+			                   xml_property (definition, "max", styles, maxval));
+
+		spin_button.get_increments(step, page);
+		spin_button.set_range (xml_property (definition, "step", styles, step),
+			                   xml_property (definition, "page", styles, page));
+		spin_button.set_value (xml_property (definition, "min", styles, minval));
+	}
+
 	Gtk::Box* box = dynamic_cast<Gtk::Box*> (&widget);
 	if (box) {
 		box->set_spacing(xml_property (definition, "spacing", styles, 0));
@@ -780,6 +796,7 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		button->set_border_width (xml_property (definition, "borderwidth", styles, "0").c_str());
 		button->set_border_color (xml_property (definition, "bordercolor", styles, "#000000").c_str());
 		button->set_active (xml_property (definition, "active", styles, false));
+		button->set_toggleable (xml_property (definition, "toggleable", styles, false));
 	}
 
 	WavesIconButton* iconbutton = dynamic_cast<WavesIconButton*> (&widget);
@@ -1069,6 +1086,17 @@ WavesUI::get_combo_box_text (const char* id)
 	Gtk::ComboBoxText* child = dynamic_cast<Gtk::ComboBoxText*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtk::ComboBoxText ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+
+Gtk::CheckButton&
+WavesUI::get_check_button (const char* id)
+{
+	Gtk::CheckButton* child = dynamic_cast<Gtk::CheckButton*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Gtk::CheckButton ") + id + " not found in " + _scrip_file_name + "!");
 		abort ();
 	}
 	return *child;
