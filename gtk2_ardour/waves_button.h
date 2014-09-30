@@ -36,6 +36,10 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	WavesButton (const std::string&);
 	virtual ~WavesButton ();
 
+	void set_toggleable (bool toggleable) { _toggleable = toggleable; }
+	bool get_toggleable () { return _toggleable; }
+
+
 	void set_active_state (Gtkmm2ext::ActiveState);
 	void set_visual_state (Gtkmm2ext::VisualState);
 
@@ -94,7 +98,7 @@ class WavesButton : public CairoWidget , public Gtkmm2ext::Activatable
 	float _bottom_border_width;
 	double _angle;
 	struct RGBA _border_color;
-
+	bool _toggleable;
 	bool _act_on_release;
 	bool _hovering;
 	bool _pushed;

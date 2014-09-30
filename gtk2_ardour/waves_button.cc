@@ -79,7 +79,8 @@ WavesButton::WavesButton (const std::string& str)
 	, _top_border_width (0)
 	, _right_border_width (0)
 	, _bottom_border_width (0)
-	, _angle(0)
+	, _angle (0)
+	, _toggleable (false)
 	, _act_on_release (true)
 	, _hovering (false)
 	, _pushed (false)
@@ -356,6 +357,9 @@ WavesButton::on_button_release_event (GdkEventButton *)
 	queue_draw ();
 	if (_hovering) {
 		signal_clicked (this);
+		if (_toggleable) {
+			set_active_state (active_state () == Gtkmm2ext::ExplicitActive ? Gtkmm2ext::Off : Gtkmm2ext::ExplicitActive);
+		}
 		
 		if (_act_on_release) {
 			if (_action) {
