@@ -43,12 +43,8 @@ else:
     MICRO = '0'
 
 V = MAJOR + '.' + MINOR + '.' + MICRO
-#
-# it is important that VERSION *not* be unicode string
-# because if it is, it breaks waf somehow.
-#
-VERSION = V.encode ('ascii', 'ignore')
-PROGRAM_VERSION = MAJOR.encode ('ascii', 'ignore')
+VERSION = V
+PROGRAM_VERSION = MAJOR
 
 # Mandatory variables
 top = '.'
