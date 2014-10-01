@@ -519,7 +519,7 @@
                       table.xfill="true"
                       table.yfill="true"
                       table.yexpand="true"
-                      bgnormal="#383838">
+                      bgnormal="#3E3E3E">
                 <VBox id="edit_controls_vbox"/>
               </Layout>
               <VScrollbar adjustment="vertical_adjustment"
