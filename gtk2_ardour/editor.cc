@@ -272,7 +272,7 @@ Editor::Editor ()
 	, skip_button (get_waves_button ("skip_button"))
     , add_marker_button (get_waves_button ("add_marker_button"))
     , global_solo_button (get_waves_button ("global_solo_button"))
-    , global_rec_button (get_waves_button ("global_rec_button"))
+    , _global_rec_button (get_waves_button ("global_rec_button"))
 	, _tool_marker_button (get_waves_button ("tool_marker_button"))
 	, _tool_arrow_button (get_waves_button ("tool_arrow_button"))
 	, _tool_zoom_button (get_waves_button ("tool_zoom_button"))
@@ -654,9 +654,9 @@ Editor::Editor ()
 	skip_button.set_related_action (act);
 
         ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::solo_blink));
-        ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::record_status_update));
+
 	global_solo_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::global_solo_clicked));
-	global_rec_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::global_rec_clicked));
+	_global_rec_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::global_rec_clicked));   
 
 	set_zoom_focus (zoom_focus);
 	set_visible_track_count (_visible_track_count);
@@ -1412,6 +1412,13 @@ Editor::set_session (Session *t)
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
         _session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&Editor::start_lock_event_timing, this), gui_context());
         _session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::start_session_auto_save_event_timing, this), gui_context());
+    
+    // Global record button staff
+    // if new tracks is added, they must effect on Global Record button and Master Mute button
+    _session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::connect_routes_and_update_global_rec_button, this, _1), gui_context());
+    
+    // connect existing tracks to Global Record button
+    connect_routes_and_update_global_rec_button( *(_session->get_tracks().get()) );
     
 	playhead_cursor->show ();
 
@@ -5740,26 +5747,70 @@ Editor::global_solo_clicked (WavesButton*)
         }
 }
 
-void
-Editor::record_status_update (bool onoff)
+// Global Record button staff
+bool
+Editor::check_all_tracks_are_record_armed ()
 {
-	if (!_session) {
-        return;
-	}
+    if( !_session )
+        return false;
+    
+    boost::shared_ptr<RouteList> tracks = _session->get_tracks ();
+    
+    if(tracks->size() == 0)
+        return false;
+    
+    bool all_tracks_are_record_armed = true;
+    for (RouteList::iterator i = tracks->begin(); i != tracks->end(); ++i)
+    {
+        if ( !(*i)->record_enabled() )
+        {
+            all_tracks_are_record_armed = false;
+            break;
+        }
+    }
+    
+    return all_tracks_are_record_armed;
+}
+
+void
+Editor::connect_routes_and_update_global_rec_button(RouteList& tracks)
+{
+    for (RouteList::iterator i = tracks.begin(); i != tracks.end(); ++i)
+    {
+        boost::shared_ptr<Track> t;
         
-    if ( !_session->have_rec_disabled_track() )
-        global_rec_button.set_active (true);
-	else
-		global_rec_button.set_active (false);
+        if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
+            t->RecordEnableChanged.connect (_route_state_connections,
+                                            invalidator (*this),
+                                            boost::bind (&Editor::record_state_changed, this),
+                                            gui_context() );
+		}
+        
+        (*i)->DropReferences.connect(_route_state_connections,
+                                     invalidator (*this),
+                                     boost::bind (&Editor::record_state_changed, this),
+                                     gui_context() );
+    }
+    
+    record_state_changed();
+}
+
+void
+Editor::record_state_changed ()
+{
+    _global_rec_button.set_active (check_all_tracks_are_record_armed());
 }
 
 void
 Editor::global_rec_clicked (WavesButton*)
 {
-        DisplaySuspender ds;
-        /* If exists record disabled track make all tracks record enabled.
-           If does not exist record disabled track make all tracks record disabled.
-         */
-        _session->set_record_enabled (_session->get_routes(), _session->have_rec_disabled_track());
+    if( !_session )
+        return;
+    
+    boost::shared_ptr<RouteList> rl = _session->get_tracks ();
+    
+    bool all_tracks_are_record_armed = check_all_tracks_are_record_armed();
+    _session->set_record_enabled (rl, !all_tracks_are_record_armed);
+    _global_rec_button.set_active(!all_tracks_are_record_armed);
 }
         

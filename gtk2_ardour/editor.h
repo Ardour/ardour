@@ -1615,9 +1615,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
     WavesButton& global_solo_button;
     void solo_blink (bool);
     void global_solo_clicked (WavesButton*);
-    WavesButton& global_rec_button;
+    
+    // Global record staff
+    WavesButton& _global_rec_button;
+    bool check_all_tracks_are_record_armed ();
+    void connect_routes_and_update_global_rec_button(ARDOUR::RouteList& tracks);
+    PBD::ScopedConnectionList _route_state_connections;
+    
+    void record_state_changed ();
     void global_rec_clicked (WavesButton*);
-    void record_status_update (bool);
 
 	Gtkmm2ext::TearOff*      _mouse_mode_tearoff;
 	WavesButton& _tool_marker_button;
