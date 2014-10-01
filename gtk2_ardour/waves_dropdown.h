@@ -46,7 +46,6 @@ class WavesDropdown : public WavesIconButton
   private:
     Gtk::Menu _menu;
 	int _selected_item_number;
-	Gtk::RadioMenuItem::Group _radio_menu_items_group;
     void _on_menu_item (int item_number, void* cookie);
     void _on_popup_menu_position (int& x, int& y, bool& push_in);
     bool _on_mouse_pressed (GdkEventButton*);
