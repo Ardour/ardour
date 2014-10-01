@@ -236,6 +236,8 @@ class DummyAudioBackend : public AudioBackend {
 		int set_systemic_midi_input_latency (std::string const, uint32_t) { return 0; }
 		int set_systemic_midi_output_latency (std::string const, uint32_t) { return 0; }
 
+		int reset_device () { return 0; };
+
 		/* Retrieving parameters */
 		std::string  device_name () const;
 		float        sample_rate () const;
