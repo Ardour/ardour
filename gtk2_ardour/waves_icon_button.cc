@@ -57,22 +57,8 @@ WavesIconButton::render (cairo_t* cr, cairo_rectangle_t*)
 	if (pixbuf == 0) {
 		pixbuf = (get_state() == Gtk::STATE_INSENSITIVE) ? 
 						(_inactive_pixbuf ? _inactive_pixbuf : _normal_pixbuf) : 
-						(_hovering ? 
-							(_pushed ? (_active_pixbuf ?
-											_active_pixbuf : 
-											_normal_pixbuf) :
-									   (_prelight_pixbuf ? 
-											_prelight_pixbuf :
-											(get_active() ? 
-								(_active_pixbuf ? 
-									_active_pixbuf :
-									_normal_pixbuf) :
-								_normal_pixbuf))) :
-							(get_active() ? 
-								(_active_pixbuf ? 
-									_active_pixbuf :
-									_normal_pixbuf) :
-								_normal_pixbuf));
+						(get_active() ? (_active_pixbuf ? _active_pixbuf : _normal_pixbuf) :
+										_normal_pixbuf);
 	}
 
 	// pixbuf, if any

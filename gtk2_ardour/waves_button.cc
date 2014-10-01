@@ -118,13 +118,7 @@ WavesButton::render (cairo_t* cr, cairo_rectangle_t*)
 	Glib::RefPtr<Gtk::Style> style = get_style();
 	
 	Gdk::Color bgcolor = style->get_bg ((get_state() == Gtk::STATE_INSENSITIVE) ? Gtk::STATE_INSENSITIVE : 
-											(_hovering ? 
-												(_pushed ? 
-													Gtk::STATE_ACTIVE :
-													Gtk::STATE_NORMAL ) : // or Gtk::STATE_PRELIGHT if you want hovering
-												(get_active() ? 
-													Gtk::STATE_ACTIVE :
-													Gtk::STATE_NORMAL)));
+											(get_active() ? Gtk::STATE_ACTIVE : Gtk::STATE_NORMAL));
 
 	int width = get_width ();
 	int height = get_height();
@@ -186,14 +180,12 @@ WavesButton::render_text (cairo_t* cr)
 
 		cairo_new_path (cr);	
 
-		Gdk::Color fgcolor = style->get_fg ((get_state() == Gtk::STATE_INSENSITIVE) ? Gtk::STATE_INSENSITIVE : 
-											(_hovering ? 
-												(_pushed ? 
-													Gtk::STATE_ACTIVE :
-													Gtk::STATE_PRELIGHT ) :
-												(get_active() ? 
-													Gtk::STATE_ACTIVE :
-													Gtk::STATE_NORMAL)));
+		Gdk::Color fgcolor = style->get_fg ((get_state() == Gtk::STATE_INSENSITIVE) ? 
+											   Gtk::STATE_INSENSITIVE : 
+											   (get_active() ?
+												   Gtk::STATE_ACTIVE :
+												   Gtk::STATE_NORMAL));
+
 		cairo_set_source_rgba (cr, fgcolor.get_red_p(), fgcolor.get_green_p(), fgcolor.get_blue_p(), 1);
 
 		/* align text */
