@@ -74,8 +74,12 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
 	WavesButton& _obey_mmc_commands_button;
 	WavesButton& _send_mmc_commands_button;
 	WavesButton& _send_mmc_feedback_button;
+	WavesButton& _dc_bias_against_denormals_button;
+	WavesButton& _copy_imported_files_button;
 	Gtk::SpinButton& _inbound_mmc_device_spinbutton;
 	Gtk::SpinButton& _outbound_mmc_device_spinbutton;
+	Gtk::SpinButton& _limit_undo_history_spinbutton;
+	Gtk::SpinButton& _save_undo_history_spinbutton;
 	WavesDropdown& _engine_dropdown;
 	WavesDropdown& _device_dropdown;
 	WavesDropdown& _sample_rate_dropdown;
@@ -87,6 +91,11 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
 	WavesDropdown& _auto_save_timer_dropdown;
 	WavesDropdown& _pre_record_buffer_dropdown;
 	WavesDropdown& _waveform_shape_dropdown;
+	WavesDropdown& _peak_hold_time_dropdown;
+	WavesDropdown& _dpm_fall_off_dropdown;
+	WavesDropdown& _recording_seconds_dropdown;
+	WavesDropdown& _playback_seconds_dropdown;
+
     Gtk::Label& _latency_label;
     Gtk::Label& _default_open_path;
 

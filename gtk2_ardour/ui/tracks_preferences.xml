@@ -12,17 +12,24 @@
          fgdisabled ="#959595"/>
   <style name="parameter_label"
          style="generic_control"
-         width="300"
+         width="246"
          horzalignment="end"/>
   <style name="parameter_spacing"
-         width="20"/>
+         width="15"/>
   <style name="generic_button"
          style="generic_control"
          bordercolor="#7E7E7E"
          borderwidth="1 1 0 0"/>
   <style name="generic_dropdown"
          style="generic_control"
-         bgdisabled="#373737"/>
+         bgdisabled="#373737"
+         height="20"/>
+  <style name="preferences_tab_dropdown"
+         style="generic_dropdown"
+         bgdisabled="#373737"
+         width="216"
+         normalicon="preference_general_preferences_dropdown"
+         activeicon="preference_general_preferences_dropdown_active"/>
   <style name="generic_dropdown_menu"
          bgnormal="#454545"/>
 
@@ -192,7 +199,6 @@
                   x="96"
                   y="12"
                   width="126"
-                  height="20"
                   normalicon="preference_device_dropdown"
                   activeicon="preference_device_dropdown_active"
                   _prelighticon="preference_device_dropdown_prelight"
@@ -217,7 +223,6 @@
                   x="96"
                   y="40"
                   width="126"
-                  height="20"
                   normalicon="preference_device_dropdown"
                   activeicon="preference_device_dropdown_active"
                   _prelighticon="preference_device_dropdown_prelight"
@@ -241,7 +246,6 @@
                   x="311"
                   y="12"
                   width="90"
-                  height="20"
                   normalicon="preference_rate_buffer_dropdown"
                   activeicon="preference_rate_buffer_dropdown_active"
                   _prelighticon="preference_rate_buffer_dropdown_prelight"
@@ -265,7 +269,6 @@
                   x="311"
                   y="40"
                   width="90"
-                  height="20"
                   normalicon="preference_rate_buffer_dropdown"
                   activeicon="preference_rate_buffer_dropdown_active"
                   _prelighticon="preference_rate_buffer_dropdown_prelight"
@@ -296,23 +299,31 @@
                winfont ="Arial Bold 12"
                macfont ="Helvetica Bold 12"
                x="18" y="12"/>
-        <iconbutton id="multi_out_button"
-                    text="Multi Out"
-                    x="280"
-                    y="6"
-                    width="106"
-                    height="28"
-                    normalicon="preferences_multi_out_button"
-                    activeicon="preferences_multi_out_button_active"
-                    _prelighticon="preferences_multi_out_button_prelight"/>
-        <Iconbutton id="stereo_out_button"
-                    x="387"
-                    y="6"
-                    width="106"
-                    height="28"
-                    normalicon="preferences_stereo_out_button"
-                    activeicon="preferences_stereo_out_button_active"
-                    _prelighticon="preferences_stereo_out_button_prelight"/>
+        <Button id="multi_out_button"
+                            text="Multi Out"
+                            style="generic_control"
+                            fgnormal="#909090"
+                bgnormal="#606060"
+                fgactive="#ffffff"
+                bgactive="#0A8893"
+                borderwidth="0 0 0 0"
+                            x="280"
+                            y="6"
+                            width="106"
+                            height="28"/>
+
+        <Button id="stereo_out_button"
+        text="Stereo Out"
+        style="generic_control"
+        fgnormal="#909090"
+        bgnormal="#606060"
+        fgactive="#ffffff"
+        bgactive="#0A8893"
+        borderwidth="0 0 0 0"
+        x="387"
+        y="6"
+        width="106"
+        height="28"/>
       </Layout>
       <Layout bgnormal="#565656" x="0" y="141" width="505" height="416">
         <Layout bgnormal="#862579" x="16" y="13" width="3" height="41"/>
@@ -455,7 +466,6 @@
                 x="215"
                 y="40"
                 width="150"
-                height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 _prelighticon="preference_session_settings_dropdown_prelight">
@@ -482,7 +492,6 @@
                 x="215"
                 y="70"
                 width="150"
-                height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 _prelighticon="preference_session_settings_dropdown_prelight">
@@ -507,7 +516,6 @@
                 x="215"
                 y="100"
                 width="150"
-                height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 _prelighticon="preference_session_settings_dropdown_prelight">
@@ -539,7 +547,6 @@
                 x="215"
                 y="175"
                 width="150"
-                height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 _prelighticon="preference_session_settings_dropdown_prelight">
@@ -570,7 +577,6 @@
                 x="215"
                 y="205"
                 width="150"
-                height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 _prelighticon="preference_session_settings_dropdown_prelight">
@@ -604,7 +610,6 @@
                 x="215"
                 y="235"
                 width="150"
-                height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 _prelighticon="preference_session_settings_dropdown_prelight">
@@ -650,21 +655,15 @@
               height="557"
               visible="false">
       <HBox>
-        <VBox width="21"/>
+        <VBox width="15"/>
         <VBox spacing="6">
           <HBox height="21"/>
-          <HBox >
+          <HBox>
             <Label style="parameter_label"
-                   text="WAVEFORM SHAPE"
-                   horzalignment="end"/>
+                   text="Peak Hold Time"/>
             <VBox style="parameter_spacing"/>
-            <Dropdown id="waveform_shape_dropdown"
-                      style="generic_dropdown"
-                      width="150"
-                      height="20"
-                      normalicon="preference_session_settings_dropdown"
-                      activeicon="preference_session_settings_dropdown_active"
-                      _prelighticon="preference_session_settings_dropdown_prelight">
+            <Dropdown id="peak_hold_time_dropdown"
+                      style="preferences_tab_dropdown">
               <HBox>
                 <VBox width="10"/>
                 <Label style="generic_control"
@@ -672,10 +671,82 @@
                        width="117"/>
               </HBox>
               <DropdownMenu style="generic_dropdown_menu">
-                <DropdownRadioItem title="Traditional"
+                <DropdownItem title="Off"
                               horzalignment="start"
                               data="0"/>
-                <DropdownRadioItem title="Rectified"
+                <DropdownItem title="Short"
+                              horzalignment="start"
+                              data="1"/>
+                <DropdownItem title="Medium"
+                              horzalignment="start"
+                              data="2"/>
+                <DropdownItem title="Long"
+                              horzalignment="start"
+                              data="3"/>
+              </DropdownMenu>
+            </Dropdown>
+          </HBox>
+          <HBox >
+            <Label style="parameter_label"
+                   text="DPM Fall-off"/>
+            <VBox style="parameter_spacing"/>
+            <Dropdown id="dpm_fall_off_dropdown"
+                      style="preferences_tab_dropdown">
+              <HBox>
+                <VBox width="10"/>
+                <Label style="generic_control"
+                       horzalignment="start"
+                       width="117"/>
+              </HBox>
+              <DropdownMenu style="generic_dropdown_menu">
+                <DropdownItem title="Off"
+                              horzalignment="start"
+                              data="0"/>
+                <DropdownItem title="Slowest [6.6dB/sec]"
+                              horzalignment="start"
+                              data="1"/>
+                <DropdownItem title="Slow [8.6dB/sec] (BBC PPM, EBU PPM)"
+                              horzalignment="start"
+                              data="2"/>
+                <DropdownItem title="Slowish [12.0dB/sec] (DIN)"
+                              horzalignment="start"
+                              data="3"/>
+                <DropdownItem title="Moderate [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"
+                              horzalignment="start"
+                              data="4"/>
+                <DropdownItem title="Medium [20dB/sec]"
+                              horzalignment="start"
+                              data="5"/>
+                <DropdownItem title="Fast [32dB/sec]"
+                              horzalignment="start"
+                              data="6"/>
+                <DropdownItem title="Faster [46dB/sec]"
+                              horzalignment="start"
+                              data="7"/>
+                <DropdownItem title="Fastest [70dB/sec]"
+                              horzalignment="start"
+                              data="8"/>
+              </DropdownMenu>
+            </Dropdown>
+          </HBox>
+          <HBox >
+            <Label style="parameter_label"
+                   text="Waveform Shape"
+                   horzalignment="end"/>
+            <VBox style="parameter_spacing"/>
+            <Dropdown id="waveform_shape_dropdown"
+                      style="preferences_tab_dropdown">
+              <HBox>
+                <VBox width="10"/>
+                <Label style="generic_control"
+                       horzalignment="start"
+                       width="117"/>
+              </HBox>
+              <DropdownMenu style="generic_dropdown_menu">
+                <DropdownItem title="Traditional"
+                              horzalignment="start"
+                              data="0"/>
+                <DropdownItem title="Rectified"
                               horzalignment="start"
                               data="1"/>
               </DropdownMenu>
@@ -735,6 +806,128 @@
                         max="128"
                         step="1"
                         page="10"/>
+          </HBox>
+          <HBox>
+            <Label style="parameter_label"
+                   text="Playback (Seconds of Buffering)"/>
+            <VBox style="parameter_spacing"/>
+            <Dropdown id="playback_seconds_dropdown"
+                      style="preferences_tab_dropdown">
+              <HBox>
+                <VBox width="10"/>
+                <Label style="generic_control"
+                       horzalignment="start"
+                       width="117"/>
+              </HBox>
+              <DropdownMenu style="generic_dropdown_menu">
+                <DropdownItem title="0"
+                              horzalignment="start"
+                              data="0"/>
+                <DropdownItem title="5"
+                              horzalignment="start"
+                              data="1"/>
+                <DropdownItem title="10"
+                              horzalignment="start"
+                              data="2"/>
+                <DropdownItem title="15"
+                              horzalignment="start"
+                              data="3"/>
+                <DropdownItem title="30"
+                              horzalignment="start"
+                              data="4"/>
+                <DropdownItem title="45"
+                              horzalignment="start"
+                              data="5"/>
+                <DropdownItem title="60"
+                              horzalignment="start"
+                              data="6"/>
+              </DropdownMenu>
+            </Dropdown>
+          </HBox>
+          <HBox>
+            <Label style="parameter_label"
+                   text="Recording (Seconds of Buffering)"/>
+            <VBox style="parameter_spacing"/>
+            <Dropdown id="recording_seconds_dropdown"
+                      style="preferences_tab_dropdown">
+              <HBox>
+                <VBox width="10"/>
+                <Label style="generic_control"
+                       horzalignment="start"
+                       width="117"/>
+              </HBox>
+              <DropdownMenu style="generic_dropdown_menu">
+                <DropdownItem title="0"
+                              horzalignment="start"
+                              data="0"/>
+                <DropdownItem title="5"
+                              horzalignment="start"
+                              data="1"/>
+                <DropdownItem title="10"
+                              horzalignment="start"
+                              data="2"/>
+                <DropdownItem title="15"
+                              horzalignment="start"
+                              data="3"/>
+                <DropdownItem title="30"
+                              horzalignment="start"
+                              data="4"/>
+                <DropdownItem title="45"
+                              horzalignment="start"
+                              data="5"/>
+                <DropdownItem title="60"
+                              horzalignment="start"
+                              data="6"/>
+              </DropdownMenu>
+            </Dropdown>
+          </HBox>
+          <HBox>
+            <Label style="parameter_label"
+                   text="Use DC Bias To Protect Against Denormals"/>
+            <VBox style="parameter_spacing"/>
+            <Iconbutton id="dc_bias_against_denormals_button"
+                        width="20"
+                        height="20"
+                        normalicon="waves_check_box"
+                        activeicon="waves_check_box_active"
+                        toggleable="true"/>
+          </HBox>
+          <HBox>
+            <Label style="parameter_label"
+                   text="Limit undo history to"/>
+            <VBox style="parameter_spacing"/>
+            <SpinButton id="limit_undo_history_spinbutton"
+                        width="50"
+                        min="0"
+                        max="512"
+                        step="1"
+                        page="10"/>
+            <Label style="generic_control"
+                   text="  commands"/>
+          </HBox>
+          <HBox>
+            <Label style="parameter_label"
+                   text="Save undo history of"/>
+            <VBox style="parameter_spacing"/>
+            <SpinButton id="save_undo_history_spinbutton"
+                        width="50"
+                        min="0"
+                        max="512"
+                        step="1"
+                        page="10"/>
+            <Label style="generic_control"
+                   text="  commands"/>
+          </HBox>
+          <HBox>
+            <Label style="parameter_label"
+                   text="Always Copy Imported Files"/>
+            <VBox style="parameter_spacing"/>
+            <Iconbutton id="copy_imported_files_button"
+                        width="20"
+                        height="20"
+                        normalicon="waves_check_box"
+                        activeicon="waves_check_box_active"
+                        toggleable="true"/>
           </HBox>
         </VBox>
       </HBox>

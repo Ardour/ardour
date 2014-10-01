@@ -902,18 +902,101 @@ void TracksControlPanel::display_general_preferences ()
 		dbg_msg ("TracksControlPanel::display_general_preferences ():\nUnexpected WaveFormShape !");
 		break;
 	}
+
+	float peak_hold_time = Config->get_meter_hold ();
+	int selected_item = 0;
+	if (peak_hold_time <= (MeterHoldOff + 0.1)) {
+		selected_item = 0;
+	} else if (peak_hold_time <= (MeterHoldShort + 0.1)) {
+		selected_item = 1;
+	} else if (peak_hold_time <= (MeterHoldMedium + 0.1)) {
+		selected_item = 2;
+	} else if (peak_hold_time <= (MeterHoldLong + 0.1)) {
+		selected_item = 3;
+	} 
+	_peak_hold_time_dropdown.set_selected_item (selected_item);
+
+	float meter_falloff = Config->get_meter_falloff ();
+	selected_item = 0;
+
+	if (meter_falloff <= (METER_FALLOFF_OFF + 0.1)) {
+		selected_item = 0;
+	} else if (meter_falloff <= (METER_FALLOFF_SLOWEST + 0.1)) {
+		selected_item = 1;
+	} else if (meter_falloff <= (METER_FALLOFF_SLOW + 0.1)) {
+		selected_item = 2;
+	} else if (meter_falloff <= (METER_FALLOFF_SLOWISH + 0.1)) {
+		selected_item = 3;
+	} else if (meter_falloff <= (METER_FALLOFF_MODERATE + 0.1)) {
+		selected_item = 4;
+	} else if (meter_falloff <= (METER_FALLOFF_MEDIUM + 0.1)) {
+		selected_item = 5;
+	} else if (meter_falloff <= (METER_FALLOFF_FAST + 0.1)) {
+		selected_item = 6;
+	} else if (meter_falloff <= (METER_FALLOFF_FASTER + 0.1)) {
+		selected_item = 7;
+	} else if (meter_falloff <= (METER_FALLOFF_FASTEST + 0.1)) {
+		selected_item = 8;
+	} 
+	_dpm_fall_off_dropdown.set_selected_item (selected_item);
+
+
+	long period = Config->get_audio_capture_buffer_seconds ();
+	selected_item = 0;
+
+	if (period <= 0.1) {
+		selected_item = 0;
+	} else if ((period <= 5.1)) {
+		selected_item = 1;
+	} else if ((period <= 10.1)) {
+		selected_item = 2;
+	} else if ((period <= 15.1)) {
+		selected_item = 3;
+	} else if ((period <= 30.1)) {
+		selected_item = 4;
+	} else if ((period <= 45.1)) {
+		selected_item = 5;
+	} else if ((period <= 60.1)) {
+		selected_item = 6;
+	}
+	_recording_seconds_dropdown.set_selected_item (selected_item);
+	
+	period = Config->get_audio_playback_buffer_seconds ();
+	selected_item = 0;
+
+	if (period <= 0.1) {
+		selected_item = 0;
+	} else if ((period <= 5.1)) {
+		selected_item = 1;
+	} else if ((period <= 10.1)) {
+		selected_item = 2;
+	} else if ((period <= 15.1)) {
+		selected_item = 3;
+	} else if ((period <= 30.1)) {
+		selected_item = 4;
+	} else if ((period <= 45.1)) {
+		selected_item = 5;
+	} else if ((period <= 60.1)) {
+		selected_item = 6;
+	}
+	_playback_seconds_dropdown.set_selected_item (selected_item);
+
 	_obey_mmc_commands_button.set_active_state (Config->get_mmc_control () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	_send_mmc_commands_button.set_active_state (Config->get_send_mmc () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	_send_mmc_feedback_button.set_active_state (Config->get_midi_feedback () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	_inbound_mmc_device_spinbutton.set_value (Config->get_mmc_receive_device_id ());
 	_outbound_mmc_device_spinbutton.set_value (Config->get_mmc_send_device_id ());
+	_limit_undo_history_spinbutton.set_value (Config->get_history_depth ());
+	_save_undo_history_spinbutton.set_value (Config->get_saved_history_depth ());
+	_copy_imported_files_button.set_active_state (Config->get_only_copy_imported_files () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	_dc_bias_against_denormals_button.set_active_state (Config->get_denormal_protection () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
 
 
 void TracksControlPanel::save_general_preferences ()
 {
-	int item = _waveform_shape_dropdown.get_selected_item ();
-	switch (item) {
+	int selected_item = _waveform_shape_dropdown.get_selected_item ();
+	switch (selected_item) {
 	case 0:
 		Config->set_waveform_shape (Traditional);
 		break;
@@ -925,11 +1008,70 @@ void TracksControlPanel::save_general_preferences ()
 		break;
 	}
 
+	selected_item = _peak_hold_time_dropdown.get_selected_item ();
+	switch (selected_item) {
+	case 0:
+		Config->set_meter_hold (MeterHoldOff);
+		break;
+	case 1:
+		Config->set_meter_hold (MeterHoldShort);
+		break;
+	case 2:
+		Config->set_meter_hold (MeterHoldMedium);
+		break;
+	case 3:
+		Config->set_meter_hold (MeterHoldLong);
+		break;
+	default:
+		dbg_msg ("TracksControlPanel::general_preferences ():\nUnexpected peak hold time!");
+		break;
+	}
+
+	selected_item = _dpm_fall_off_dropdown.get_selected_item ();
+	switch (selected_item) {
+	case 0:
+		Config->set_meter_falloff (METER_FALLOFF_OFF);
+		break;
+	case 1:
+		Config->set_meter_falloff (METER_FALLOFF_SLOWEST);
+		break;
+	case 2:
+		Config->set_meter_falloff (METER_FALLOFF_SLOW);
+		break;
+	case 3:
+		Config->set_meter_falloff (METER_FALLOFF_SLOWISH);
+		break;
+	case 4:
+		Config->set_meter_falloff (METER_FALLOFF_MODERATE);
+		break;
+	case 5:
+		Config->set_meter_falloff (METER_FALLOFF_MEDIUM);
+		break;
+	case 6:
+		Config->set_meter_falloff (METER_FALLOFF_FAST);
+		break;
+	case 7:
+		Config->set_meter_falloff (METER_FALLOFF_FASTER);
+		break;
+	case 8:
+		Config->set_meter_falloff (METER_FALLOFF_FASTEST);
+		break;
+	default:
+		dbg_msg ("TracksControlPanel::general_preferences ():\nUnexpected meter fall off time!");
+		break;
+	}
+
 	Config->set_mmc_control (_obey_mmc_commands_button.active_state () == Gtkmm2ext::ExplicitActive);
 	Config->set_send_mmc (_send_mmc_commands_button.active_state () == Gtkmm2ext::ExplicitActive);
 	Config->set_midi_feedback (_send_mmc_feedback_button.active_state () == Gtkmm2ext::ExplicitActive);
+	Config->set_only_copy_imported_files (_copy_imported_files_button.active_state () ==  Gtkmm2ext::ExplicitActive);
+	Config->set_denormal_protection (_dc_bias_against_denormals_button.active_state () == Gtkmm2ext::ExplicitActive);
+
 	Config->set_mmc_receive_device_id (_inbound_mmc_device_spinbutton.get_value ());
 	Config->set_mmc_send_device_id (_outbound_mmc_device_spinbutton.get_value ());
+	Config->set_history_depth (_limit_undo_history_spinbutton.get_value ());
+	Config->set_saved_history_depth (_save_undo_history_spinbutton.get_value ());
+	Config->set_save_history (_save_undo_history_spinbutton.get_value () > 0);
 }
 
 
@@ -1458,12 +1600,20 @@ TracksControlPanel::on_parameter_changed (const std::string& parameter_name)
     } else if (parameter_name == "default-session-parent-dir") {
         _default_open_path.set_text(Config->get_default_session_parent_dir());
     } else if ((parameter_name == "meter-hold") ||
+			   (parameter_name == "meter-falloff") ||
 			   (parameter_name == "waveform-shape") ||
 			   (parameter_name == "mmc-control") ||
 			   (parameter_name == "send-mmc") ||
 			   (parameter_name == "midi-feedback") ||
 			   (parameter_name == "mmc-receive-device-id") ||
-			   (parameter_name == "mmc-send-device-id")){
+			   (parameter_name == "mmc-send-device-id") ||
+			   (parameter_name == "playback-buffer-seconds") ||
+			   (parameter_name == "capture-buffer-seconds") ||
+			   (parameter_name == "only-copy-imported-files") ||
+			   (parameter_name == "denormal-protection") ||
+			   (parameter_name == "history-depth") ||
+			   (parameter_name == "save-history") ||
+			   (parameter_name == "save-history-depth")){
 		// This is not that correct.
 		// We should update UI when the panel is being shown.
 		// We should not react immediately.
