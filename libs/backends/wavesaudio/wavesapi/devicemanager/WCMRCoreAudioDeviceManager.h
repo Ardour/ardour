@@ -81,7 +81,7 @@ protected:
 
 	AudioDeviceID m_DeviceID; ///< The CoreAudio device id
 	bool m_StopRequested; ///< should be set to true when want to stop, set to false otherwise.
-	float *m_pInputData; ///< This is what came in with the most recent callback.
+    float *m_pInputData; ///< This is what came in with the most recent callback.
 	int m_SampleCounter; ///< The current running sample counter, updated by the audio callback.
 	int m_SampleCountAtLastIdle; ///< What was the sample count last time we checked...
 	int m_StalledSampleCounter; ///< The number of idle calls with same sample count detected
@@ -93,9 +93,7 @@ protected:
 //	int m_CyclesToAccumulate; ///< The number of cycles to accumulate the values for - maximum for last one second.
 //	unsigned int m_CyclePeriod; ///< The number of host time units for a cycle period - determined by buffer size and sampling rate
 	
-	
-	
-	AudioBufferList m_InputAudioBufferList; ///< The buffer list used to get AHHAL to render input to.
+
 	AudioUnit m_AUHALAudioUnit;///< The AUHAL AudioUnit
 
 	int m_BufferSizeChangeRequested;
@@ -152,6 +150,7 @@ protected:
 	AudioDevicePropertyID inPropertyID, void *inClientData);
 	void PropertyChangeProc (AudioDevicePropertyID inPropertyID);
     
+    void resetAudioDevice();
 private:
 
 };
@@ -168,12 +167,13 @@ public:
 	virtual ~WCMRCoreAudioDeviceManager(void); ///< Destructor
 
 protected:
-    static OSStatus DevicePropertyChangeCallback (AudioHardwarePropertyID inPropertyID, void* inClientData);
+    static OSStatus HardwarePropertyChangeCallback (AudioHardwarePropertyID inPropertyID, void* inClientData);
     
     virtual WCMRAudioDevice*	initNewCurrentDeviceImpl(const std::string & deviceName);
 	virtual void				destroyCurrentDeviceImpl();
 	virtual WTErr				generateDeviceListImpl();
     virtual WTErr				updateDeviceListImpl();
+    virtual WTErr               getDeviceSampleRatesImpl(const std::string & deviceName, std::vector<int>& sampleRates) const;
 	virtual WTErr				getDeviceBufferSizesImpl(const std::string & deviceName, std::vector<int>& bufferSizes) const;
     
 	bool m_UseMultithreading; ///< Flag indicates whether to use multi-threading for audio processing.

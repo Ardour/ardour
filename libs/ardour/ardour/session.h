@@ -933,6 +933,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
 	void set_frame_rate (framecnt_t nframes);
+        void reconnect_existing_routes (bool withLock, bool reconnect_master = true, bool reconnect_inputs = true, bool reconnect_outputs = true);
 
   protected:
 	friend class Route;

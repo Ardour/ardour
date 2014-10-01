@@ -225,7 +225,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     virtual int set_device_name (const std::string&) = 0;
     /** Deinitialize and destroy current device
      */
-    virtual int drop_device() { return 0; };
+	virtual int drop_device() {return 0;};
     /** Set the sample rate to be used
      */
     virtual int set_sample_rate (float) = 0;
@@ -385,6 +385,12 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      * Return zero if successful, 1 if the device is not in use, negative values on error
      */
     virtual int stop () = 0;
+
+	 /** Reset device. 
+     *
+     * Return zero if successful, negative values on error
+     */
+	virtual int reset_device() = 0;
 
     /** While remaining connected to the device, and without changing its
      * configuration, start (or stop) calling the process_callback() of @param engine

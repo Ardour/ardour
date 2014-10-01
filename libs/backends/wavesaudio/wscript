@@ -29,8 +29,8 @@ def build(bld):
     if bld.env['build_target'] == 'mingw':
         obj = bld(features = 'cxx cxxshlib')
     else:
-        obj = bld(features = 'c cxx cxxshlib')
-
+	obj = bld(features = 'c cxx cxxshlib')
+    
     if sys.platform == 'darwin':
         if bld.env['build_target'] not in [ 'lion' ]:
             obj.framework = 'CoreMidi'
@@ -89,7 +89,7 @@ def build(bld):
             ]
 
     obj.cxxflags = [ '-fPIC' ]
-    obj.cflags = [ '-fPIC', '-fms-extensions' ]
+    obj.cflags   = [ '-fPIC', '-fms-extensions' ]
     obj.name     = 'waves_audiobackend'
     obj.target   = 'waves_audiobackend'
     obj.use      = 'libardour libpbd'

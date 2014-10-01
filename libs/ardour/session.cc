@@ -2072,6 +2072,14 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
 	}
 }
 
+void
+Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool reconnect_inputs, bool reconnect_outputs)
+{
+        /* TRX does stuff here, ardour does not (but probably should). This is called after an engine reset (in particular).
+         */
+}
+
+
 /** Caller must not hold process lock
  *  @param name_template string to use for the start of the name, or "" to use "Audio".
  */

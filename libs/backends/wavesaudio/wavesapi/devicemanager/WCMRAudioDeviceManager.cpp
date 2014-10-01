@@ -345,6 +345,28 @@ WTErr WCMRAudioDevice::SetStreaming (bool newState)
 	return (eNoErr);
 }
 
+
+WTErr WCMRAudioDevice::ResetDevice ()
+{
+	// Keep device sates
+	bool wasStreaming = Streaming();
+	bool wasActive = Active();
+
+	WTErr err = SetStreaming(false);
+	
+	if (err == eNoErr)
+		SetActive(false);
+
+	if (err == eNoErr && wasActive)
+		SetActive(true);
+
+	if (err == eNoErr && wasStreaming)
+		SetStreaming(true);
+
+	return err;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // IsProcessActive - returns true if process code is running.
 // A normal audio device should return the Streaming() value
@@ -630,6 +652,13 @@ WTErr WCMRAudioDeviceManager::GetDeviceInfoByName(const std::string & nameToMatc
 
 	return eRMResNotFound;
 }
+
+
+WTErr WCMRAudioDeviceManager::GetDeviceSampleRates(const std::string & nameToMatch, std::vector<int>& sampleRates) const
+{
+	return getDeviceSampleRatesImpl(nameToMatch, sampleRates);
+}
+
 
 
 WTErr WCMRAudioDeviceManager::GetDeviceBufferSizes(const std::string & nameToMatch, std::vector<int>& bufferSizes) const

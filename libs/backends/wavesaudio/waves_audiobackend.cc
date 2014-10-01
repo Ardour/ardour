@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2013 Valeriy Kamyshniy
+    Copyright (C) 2014 Waves Audio Ltd.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,13 +38,14 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
     switch (reason) {
         case WCMRAudioDeviceManagerClient::DeviceDebugInfo:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::DeviceDebugInfo -- " << (char*)parameter << std::endl;
-        break;
+            break;
         case WCMRAudioDeviceManagerClient::BufferSizeChanged:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::BufferSizeChanged: " << *(uint32_t*)parameter << std::endl;
 			_buffer_size_change(*(uint32_t*)parameter);
-        break;
+            break;
         case WCMRAudioDeviceManagerClient::RequestReset:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::RequestReset" << std::endl;
+            engine.request_backend_reset();
             break;
         case WCMRAudioDeviceManagerClient::RequestResync:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::RequestResync" << std::endl;
@@ -52,6 +53,9 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
         case WCMRAudioDeviceManagerClient::SamplingRateChanged:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::SamplingRateChanged: " << *(float*)parameter << std::endl;
 			set_sample_rate(*(float*)parameter);
+            break;
+        case WCMRAudioDeviceManagerClient::Dropout:
+            std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::Dropout: " << std::endl;
             break;
         case WCMRAudioDeviceManagerClient::DeviceDroppedSamples:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::DeviceDroppedSamples" << std::endl;
@@ -68,11 +72,11 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
             break;
         case WCMRAudioDeviceManagerClient::DeviceListChanged:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::DeviceListChanged" << std::endl;
-            _device_list_change();
+            engine.request_device_list_update();
             break;
         case WCMRAudioDeviceManagerClient::IODeviceDisconnected:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::DeviceListChanged" << std::endl;
-            _device_list_change();
+            engine.request_device_list_update();
             break;
         case WCMRAudioDeviceManagerClient::AudioCallback:
             if (parameter) {
@@ -192,17 +196,18 @@ WavesAudioBackend::available_sample_rates (const std::string& device_name) const
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::available_sample_rates (): [" << device_name << "]" << std::endl;
 
-	DeviceInfo devInfo;
-    WTErr err = _audio_device_manager.GetDeviceInfoByName(device_name, devInfo);
+    std::vector<int> sr;
     
-	if (eNoErr != err) {
+    WTErr retVal = _audio_device_manager.GetDeviceSampleRates(device_name, sr);
+    
+	if (eNoErr != retVal) {
         std::cerr << "WavesAudioBackend::available_sample_rates (): Failed to find device [" << device_name << "]" << std::endl;
         return std::vector<float> ();
     }
 
     // COMMENTED DBG LOGS */ std::cout << "\tFound " << devInfo.m_AvailableSampleRates.size () << " sample rates for " << device_name << ":";
 
-    std::vector<float> sample_rates (devInfo.m_AvailableSampleRates.begin (), devInfo.m_AvailableSampleRates.end ());
+    std::vector<float> sample_rates (sr.begin (), sr.end ());
     
     // COMMENTED DBG LOGS */ for (std::vector<float>::iterator i = sample_rates.begin ();  i != sample_rates.end (); ++i) std::cout << " " << *i; std::cout << std::endl;
 
@@ -224,8 +229,7 @@ WavesAudioBackend::available_buffer_sizes (const std::string& device_name) const
 
 	std::vector<int> bs;
 
-	WTErr retVal;
-	retVal = _audio_device_manager.GetDeviceBufferSizes(device_name, bs);
+	WTErr retVal = _audio_device_manager.GetDeviceBufferSizes(device_name, bs);
 
     if (retVal != eNoErr) {
         std::cerr << "WavesAudioBackend::available_buffer_sizes (): Failed to get buffer size for device [" << device_name << "]" << std::endl;
@@ -442,6 +446,10 @@ WavesAudioBackend::set_buffer_size (uint32_t buffer_size)
         return -1;
     }
     
+	// if call to set buffer is successful but device buffer size differs from the value we tried to set
+	// this means we are driven by device for buffer size
+	buffer_size = _device->CurrentBufferSize ();
+
 	_buffer_size_change(buffer_size);
     
     if (device_needs_restart) {
@@ -468,9 +476,9 @@ WavesAudioBackend::set_sample_format (SampleFormat sample_format)
 }
 
 int 
-WavesAudioBackend::_reset_device (uint32_t buffer_size, float sample_rate)
+WavesAudioBackend::reset_device ()
 {
-    // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::_reset_device (" << buffer_size <<", " << sample_rate << "):" << std::endl;
+    // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::_reset_device ():" << std::endl;
 
     WTErr retVal = eNoErr;
 
@@ -479,95 +487,7 @@ WavesAudioBackend::_reset_device (uint32_t buffer_size, float sample_rate)
         return -1;
     }
 
-    bool device_needs_restart = _device->Streaming ();
-    
-    if (device_needs_restart) {
-        retVal  = _device->SetStreaming (false);
-        // COMMENTED DBG LOGS */ std::cout << "\t\t[" << _device->DeviceName() << "]->SetStreaming (false);"<< std::endl;
-        if (retVal != eNoErr) {
-            std::cerr << "WavesAudioBackend::_reset_device (): [" << _device->DeviceName () << "]->SetStreaming (false) failed (" << retVal << ") !" << std::endl;
-            return -1;
-        }
-        retVal  = _device->SetActive (false);
-        // COMMENTED DBG LOGS */ std::cout << "\t\t[" << _device->DeviceName() << "]->SetActive (false);"<< std::endl;
-        if (retVal != eNoErr) {
-            std::cerr << "WavesAudioBackend::_reset_device (): [" << _device->DeviceName () << "]->SetActive (false) failed (" << retVal << ") !" << std::endl;
-            return -1;
-        }
-    }
-    
-	retVal = _device->UpdateDeviceInfo ();
-	if (retVal != eNoErr) {
-		std::cerr << "WavesAudioBackend::_reset_device (): [" << _device->DeviceName() << "]->UpdateDeviceInfo () failed (" << retVal << ") !" << std::endl;
-		return -1;
-	}
-
-	if (buffer_size != 0)
-	{
-		retVal = _device->SetCurrentBufferSize (buffer_size);
-    
-		if (retVal != eNoErr) {
-			std::cerr << "WavesAudioBackend::_reset_device (): [" << _device->DeviceName() << "]->SetCurrentBufferSize (" << buffer_size << ") failed (" << retVal << ") !" << std::endl;
-			return -1;
-		}
-    
-	    _buffer_size = buffer_size;
-	}
-	else
-	{
-		uint32_t current_buffer_size = _device->CurrentBufferSize();
-		// COMMENTED DBG LOGS */ std::cout << "\t\tcurrent_buffer_size: " << current_buffer_size << std::endl;
-		// COMMENTED DBG LOGS */ std::cout << "\t\t       _buffer_size: " << _buffer_size << std::endl;
-		if(_buffer_size != current_buffer_size)
-		{
-			_buffer_size = current_buffer_size;
-			engine.buffer_size_change (_buffer_size);
-			// COMMENTED DBG LOGS */ std::cout << "\t\tengine.buffer_size_change (" << buffer_size <<")" << std::endl;
-		}
-	}
-
-	if(sample_rate > 0.0)
-	{
-		retVal = _device->SetCurrentSamplingRate ((int)sample_rate);
-    
-		if (retVal != eNoErr) {
-			std::cerr << "WavesAudioBackend::set_sample_rate (): [" << _device->DeviceName() << "]->SetCurrentSamplingRate ((int)" << sample_rate << ") failed (" << retVal << ") !" << std::endl;
-			return -1;
-		}
-	    _sample_rate = sample_rate;
-	}
-	else
-	{
-		float current_sample_rate = _device->CurrentSamplingRate();
-		// COMMENTED DBG LOGS */ std::cout << "\t\tcurrent_sample_rate: " << current_sample_rate << std::endl;
-		// COMMENTED DBG LOGS */ std::cout << "\t\t       _sample_rate: " << _sample_rate << std::endl;
-		if(_sample_rate != current_sample_rate)
-		{
-			_sample_rate = current_sample_rate;
-			engine.sample_rate_change (_sample_rate);
-			// COMMENTED DBG LOGS */ std::cout << "\t\tengine.sample_rate_change (" << _sample_rate <<")" << std::endl;
-		}
-	}
-
-    _init_dsp_load_history();
-    
-    if (device_needs_restart) {
-        // COMMENTED DBG LOGS */ std::cout << "\t\t[" << _device->DeviceName() << "]->SetActive (true);"<< std::endl;
-        retVal  = _device->SetActive (true);
-        if (retVal != eNoErr) {
-            std::cerr << "WavesAudioBackend::_reset_device (): [" << _device->DeviceName () << "]->SetActive (true) failed (" << retVal << ") !" << std::endl;
-            return -1;
-        }
-        // COMMENTED DBG LOGS */ std::cout << "\t\t[" << _device->DeviceName() << "]->SetStreaming (true);"<< std::endl;
-        _call_thread_init_callback = true;
-        retVal  = _device->SetStreaming (true);
-        if (retVal != eNoErr) {
-            std::cerr << "WavesAudioBackend::_reset_device (): [" << _device->DeviceName () << "]->SetStreaming (true) failed (" << retVal << ") !" << std::endl;
-            return -1;
-        }
-    }
-    
-    return 0;
+	return _device->ResetDevice();
 }
 
 
@@ -586,15 +506,6 @@ WavesAudioBackend::_sample_rate_change (float new_sample_rate)
 	_sample_rate = new_sample_rate;
     _init_dsp_load_history();
     return engine.sample_rate_change (new_sample_rate);
-}
-
-
-int
-WavesAudioBackend::_device_list_change ()
-{
-	// requires GZ changes for device list update
-	// return engine.device_list_change ();
-	return 0;
 }
 
 
@@ -750,22 +661,26 @@ WavesAudioBackend::_start (bool for_latency_measurement)
 
     if (!_device) {
         std::cerr << "WavesAudioBackend::_start (): No device is set!" << std::endl;
-        return -1;
+        stop();
+		return -1;
     }
 
     if (_register_system_audio_ports () != 0) {
         std::cerr << "WavesAudioBackend::_start (): _register_system_audio_ports () failed!" << std::endl;
-        return -1;
+        stop();
+		return -1;
     }
 
     if (_use_midi) {
         if (_midi_device_manager.start () != 0) {
             std::cerr << "WavesAudioBackend::_start (): _midi_device_manager.start () failed!" << std::endl;
-            return -1;
+            stop();
+			return -1;
         }
         if (_register_system_midi_ports () != 0) {
             std::cerr << "WavesAudioBackend::_start (): _register_system_midi_ports () failed!" << std::endl;
-            return -1;
+            stop();
+			return -1;
         }
     }
 
@@ -779,13 +694,15 @@ WavesAudioBackend::_start (bool for_latency_measurement)
     WTErr retVal  = _device->SetStreaming (true);
     if (retVal != eNoErr) {
         std::cerr << "WavesAudioBackend::_start (): [" << _device->DeviceName () << "]->SetStreaming () failed!" << std::endl;
+		stop();
         return -1;
     }
 
     if (_use_midi) {
         if (_midi_device_manager.stream (true)) {
             std::cerr << "WavesAudioBackend::_start (): _midi_device_manager.stream (true) failed!" << std::endl;
-            return -1;
+            stop();
+			return -1;
         }
     }
 
@@ -827,7 +744,7 @@ WavesAudioBackend::_audio_device_callback (const float* input_buffer,
     uint64_t dsp_end_time_nanos = __get_time_nanos();
     
     _dsp_load_accumulator -= *_dsp_load_history.begin();
-    _dsp_load_history.pop_front();
+        _dsp_load_history.pop_front();
     uint64_t dsp_load_nanos = dsp_end_time_nanos - dsp_start_time_nanos;
     _dsp_load_accumulator += dsp_load_nanos;
     _dsp_load_history.push_back(dsp_load_nanos);
@@ -1217,7 +1134,7 @@ WavesAudioBackend::_read_audio_data_from_device (const float* input_buffer, pfra
 {
 #if defined(PLATFORM_WINDOWS)
     const float **buffer = (const float**)input_buffer;
-    size_t copied_bytes = nframes*sizeof(float*);
+    size_t copied_bytes = nframes*sizeof(float);
 
     for(std::vector<WavesAudioPort*>::iterator it = _physical_audio_inputs.begin ();
         it != _physical_audio_inputs.end();
@@ -1284,7 +1201,7 @@ WavesAudioBackend::__waves_backend_factory (AudioEngine& e)
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::__waves_backend_factory ():" << std::endl;
     if (!__instance) {
-        __instance.reset (new WavesAudioBackend (e, __backend_info));
+            __instance.reset (new WavesAudioBackend (e, *(descriptor())));
     }
     return __instance;
 }
@@ -1374,4 +1291,5 @@ AudioBackendInfo WavesAudioBackend::__backend_info = {
     WavesAudioBackend::__waves_backend_factory,
     WavesAudioBackend::__already_configured,
 };
+
 

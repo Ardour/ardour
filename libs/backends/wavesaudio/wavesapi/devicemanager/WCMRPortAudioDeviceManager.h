@@ -146,6 +146,7 @@ protected:
 	virtual WTErr				generateDeviceListImpl(); // use this in derived class to fill device list
 	virtual WTErr				updateDeviceListImpl() {return eNoErr; } // not supported
 	virtual WTErr				getDeviceBufferSizesImpl(const std::string & deviceName, std::vector<int>& buffers) const;
+    virtual WTErr				getDeviceSampleRatesImpl(const std::string & deviceName, std::vector<int>& sampleRates) const;
 
 	bool m_UseMultithreading; ///< Flag indicates whether to use multi-threading for audio processing.
     bool m_bNoCopyAudioBuffer;
