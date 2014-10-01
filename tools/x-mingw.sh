@@ -186,22 +186,19 @@ src libxml2-2.7.8 tar.gz ftp://xmlsoft.org/libxslt/libxml2-2.7.8.tar.gz
 CFLAGS=" -O0" CXXFLAGS=" -O0" \
 autoconfbuild --with-threads=no --with-zlib=$PREFIX
 
-src freetype-2.5.3 tar.gz http://download.savannah.gnu.org/releases/freetype/freetype-2.5.3.tar.gz
-autoconfbuild -with-harfbuzz=no --with-png=no
+#src libpng-1.6.12 tar.gz ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.12.tar.gz
+src libpng-1.6.12 tar.gz https://downloads.sourceforge.net/project/libpng/libpng16/1.6.12/libpng-1.6.12.tar.gz
+autoconfbuild
 
-#src harfbuzz-0.9.22 tar.bz2 http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.22.tar.bz2
-#autoconfbuild
+src freetype-2.5.3 tar.gz http://download.savannah.gnu.org/releases/freetype/freetype-2.5.3.tar.gz
+autoconfbuild -with-harfbuzz=no
 
 src fontconfig-2.11.0 tar.bz2 http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.11.0.tar.bz2
 ed Makefile.in << EOF
 %s/conf.d test /conf.d /
 wq
 EOF
-autoconfbuild
-
-#src libpng-1.6.12 tar.gz ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.12.tar.gz
-src libpng-1.6.12 tar.gz https://downloads.sourceforge.net/project/libpng/libpng16/1.6.12/libpng-1.6.12.tar.gz
-autoconfbuild
+autoconfbuild --enable-libxml2
 
 src pixman-0.30.2 tar.gz http://cgit.freedesktop.org/pixman/snapshot/pixman-0.30.2.tar.gz
 ./autogen.sh
@@ -227,6 +224,9 @@ autoconfbuild --with-pcre=internal --disable-silent-rules --with-libiconv=no
 ################################################################################
 dpkg -P gettext python || true
 ################################################################################
+
+src harfbuzz-0.9.22 tar.bz2 http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.22.tar.bz2
+autoconfbuild
 
 src pango-1.36.8 tar.xz http://ftp.gnome.org/pub/GNOME/sources/pango/1.36/pango-1.36.8.tar.xz
 autoconfbuild --without-x --with-included-modules=yes
