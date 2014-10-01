@@ -96,6 +96,7 @@ private:
         
 	boost::shared_ptr<ARDOUR::Route> _route;
     PBD::ScopedConnection _mode_connection;
+    PBD::ScopedConnection _output_mode_connection;
 
 	Gtk::Box& _level_meter_home;
 	LevelMeterHBox _level_meter;

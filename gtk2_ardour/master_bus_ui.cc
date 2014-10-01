@@ -136,6 +136,12 @@ MasterBusUI::MasterBusUI (Session* sess, PublicEditor& ed)
                                                                             MISSING_INVALIDATOR,
                                                                             boost::bind (&MasterBusUI::update_master_bus_selection, this),
                                                                             gui_context ());
+    EngineStateController::instance()->OutputConfigChanged.connect (_output_mode_connection,
+                                                                    MISSING_INVALIDATOR,
+                                                                    boost::bind (&MasterBusUI::
+                                                                        on_output_connection_mode_changed, this),
+                                                                    gui_context());
+    
     init(sess);
 }
 
