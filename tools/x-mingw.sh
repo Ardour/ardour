@@ -70,8 +70,8 @@ set -e
 
 apt-get -y install build-essential \
 	gcc-mingw-w64-i686 g++-mingw-w64-i686 mingw-w64-tools mingw32 \
-	wget git autoconf automake libtool pkg-config \
-	curl unzip ed yasm cmake zip
+	git autoconf automake libtool pkg-config \
+	curl unzip ed yasm cmake ca-certificates
 
 ###############################################################################
 
@@ -239,7 +239,7 @@ autoconfbuild
 src libffi-3.0.10 tar.gz ftp://sourceware.org/pub/libffi/libffi-3.0.10.tar.gz
 autoconfbuild
 
-src gettext-0.18.2 tar.gz http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.2.tar.gz
+src gettext-0.19.2 tar.gz http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.2.tar.gz
 autoconfbuild
 
 ################################################################################
@@ -506,17 +506,17 @@ LDFLAGS="-L${PREFIX}/lib" ./waf configure \
 ./waf
 ./waf install
 
+ARDOURVERSION=$(git describe | sed 's/-g.*$//')
+ARDOURDATE=$(date -R)
+
 ################################################################################
 ################################################################################
 ################################################################################
 
-# somewhat whacky solution to zip it all up..
-# TODO: NSIS to the rescue
-
-DESTDIR=/tmp/a3win
+DESTDIR=/tmp/a3bundle
 ALIBDIR=$DESTDIR/lib/ardour3
 
-echo " === DEPLOY to $DESTDIR"
+echo " === bundle to $DESTDIR"
 
 rm -rf $DESTDIR
 mkdir -p $DESTDIR/bin
@@ -560,8 +560,88 @@ cp /usr/lib/gcc/i686-w64-mingw32/4.6/libstdc++-6.dll /$DESTDIR/bin/
 cp -r $PREFIX/share/ardour3 $DESTDIR/share/
 cp -r $PREFIX/etc/ardour3/* $DESTDIR/share/ardour3/
 
+cp COPYING $DESTDIR/share/
+cp gtk2_ardour/icons/ardour.ico $DESTDIR/share/
+
+echo " === bundle complete. size:"
 du -sch $DESTDIR
 
 ################################################################################
-cd /tmp/ ; rm -rf a3win.zip ; zip -r a3win.zip a3win/
-ls -l a3win.zip
+echo " === Building Windows Installer"
+NSISFILE=$DESTDIR/a3.nsis
+OUTFILE="/tmp/ardour-${ARDOURVERSION}-Setup.exe"
+
+cat > $NSISFILE << EOF
+SetCompressor /SOLID lzma
+SetCompressorDictSize 32
+
+!include MUI2.nsh
+Name "Ardour3"
+OutFile "${OUTFILE}"
+RequestExecutionLevel admin
+InstallDir "\$PROGRAMFILES\\ardour3"
+InstallDirRegKey HKLM "Software\\Ardour\\ardour3" "Install_Dir"
+
+!define MUI_ICON "share\\ardour.ico"
+!define MUI_FINISHPAGE_TITLE "Welcome to Ardour"
+!define MUI_FINISHPAGE_TEXT "This windows versions or Ardour is provided as-is.\$\\r\$\\nThe ardour community currently has no expertise in supporting windows users, and there are no developers focusing on windows specific issues either.\$\\r\$\\nIf you like Ardour, please consider helping out."
+!define MUI_FINISHPAGE_LINK "Ardour Manual"
+!define MUI_FINISHPAGE_LINK_LOCATION "http://manual.ardour.org"
+!define MUI_FINISHPAGE_RUN "\$INSTDIR\\bin\\ardour.exe"
+!define MUI_FINISHPAGE_NOREBOOTSUPPORT
+
+!define MUI_ABORTWARNING
+!insertmacro MUI_PAGE_LICENSE "share\\COPYING"
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_LANGUAGE "English"
+
+Section "Ardour3 (required)" SecArdour
+  SectionIn RO
+  SetOutPath \$INSTDIR
+  File /r bin
+  File /r lib
+  File /r share
+  WriteRegStr HKLM SOFTWARE\\Ardour\\ardour3 "Install_Dir" "\$INSTDIR"
+  WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "DisplayName" "Ardour3"
+  WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "UninstallString" '"\$INSTDIR\\uninstall.exe"'
+  WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "NoModify" 1
+  WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "NoRepair" 1
+  WriteUninstaller "\$INSTDIR\uninstall.exe"
+SectionEnd
+Section "Start Menu Shortcuts" SecMenu
+  SetShellVarContext all
+  CreateDirectory "\$SMPROGRAMS\\ardour3"
+  CreateShortCut "\$SMPROGRAMS\\ardour3\\Ardour3.lnk" "\$INSTDIR\\bin\\ardour.exe" "" "\$INSTDIR\\bin\\ardour.exe" 0
+  CreateShortCut "\$SMPROGRAMS\\ardour3\\Uninstall.lnk" "\$INSTDIR\\uninstall.exe" "" "\$INSTDIR\\uninstall.exe" 0
+SectionEnd
+LangString DESC_SecArdour \${LANG_ENGLISH} "Ardour ${ARDOURVERSION}\$\\r\$\\nDebug Version.\$\\r\$\\n${ARDOURDATE}"
+LangString DESC_SecMenu \${LANG_ENGLISH} "Create Start-Menu Shortcuts (recommended)."
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+!insertmacro MUI_DESCRIPTION_TEXT \${SecArdour} \$(DESC_SecArdour)
+!insertmacro MUI_DESCRIPTION_TEXT \${SecMenu} \$(DESC_SecMenu)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+Section "Uninstall"
+  SetShellVarContext all
+  DeleteRegKey HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour"
+  DeleteRegKey HKLM SOFTWARE\\Ardour\\ardour3
+  RMDir /r "\$INSTDIR\\bin"
+  RMDir /r "\$INSTDIR\\lib"
+  RMDir /r "\$INSTDIR\\share"
+  Delete "\$INSTDIR\\uninstall.exe"
+  RMDir "\$INSTDIR"
+  Delete "\$SMPROGRAMS\\ardour3\\*.*"
+  RMDir "\$SMPROGRAMS\\ardour3"
+SectionEnd
+EOF
+
+apt-get -y install nsis
+
+rm -f ${OUTFILE}
+makensis -V2 $NSISFILE
+rm -rf $DESTDIR
+ls -lh "$OUTFILE"
