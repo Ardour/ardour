@@ -3,7 +3,7 @@
   <style name="generic_control"
          winfont="Arial Bold 11"
          macfont="Helvetica Bold 11"
-         fgnormal="#BFBFBF"
+         fgnormal="#c1c1c1"
          bgnormal="#6C6C6C"
          fgactive="#BFBFBF"
          bgactive="#454545"
@@ -31,9 +31,9 @@
          normalicon="preference_general_preferences_dropdown"
          activeicon="preference_general_preferences_dropdown_active"/>
   <style name="generic_dropdown_menu"
-         bgnormal="#454545"/>
+         bgnormal="#424242"/>
 
-  <Layout bgnormal="#1F1F1F"
+  <Layout bgnormal="#424242"
           x="0"
           y="0"
           width="619"
@@ -43,45 +43,69 @@
       <EventBox bgnormal="#373737"
                 width="107"
                 height="0"/>
-      <Iconbutton id="audio_settings_tab_button"
+      <Button id="audio_settings_tab_button"
+                  text="Audio\nSystem \nSettings \n"
+                  style="generic_control"
+                  fgnormal="#909090"
+    			  bgnormal="#606060"
+    			  fgactive="#000000"
+    			  bgactive="#dcdcdc"
+    			  borderwidth="0 0 0 0"
+                  x="0"
+                  y="0"
                   width="107"
-                  height="65"
-                  normalicon="preferences_audio_settings_tab_button"
-                  activeicon="preferences_audio_settings_tab_button_active"
-                  _prelighticon="preferences_audio_settings_tab_button_prelight"/>
+                  height="65"/>
       <EventBox bgnormal="#373737"
                 width="107"
                 height="0"/>
-      <Iconbutton id="midi_settings_tab_button"
+      <Button id="midi_settings_tab_button"
                   width="107"
                   height="65"
-                  normalicon="preferences_midi_settings_tab_button"
-                  activeicon="preferences_midi_settings_tab_button_active"
-                  _prelighticon="preferences_midi_settings_tab_button_prelight"/>
+                  text="MIDI\nSystem \nSettings \n"
+                  style="generic_control"
+                  fgnormal="#909090"
+    			  bgnormal="#606060"
+    			  fgactive="#000000"
+    			  bgactive="#dcdcdc"
+    			  borderwidth="0 0 0 0"
+                  x="0"
+                  y="0"/>
       <EventBox bgnormal="#373737"
                 width="107"
                 height="0"/>
-      <Iconbutton id="session_settings_tab_button"
+      <Button id="session_settings_tab_button"
                   width="107"
                   height="65"
-                  normalicon="preferences_session_settings_tab_button"
-                  activeicon="preferences_session_settings_tab_button_active"
-                  _prelighticon="preferences_session_settings_tab_button_prelight"/>
+                  text="Session\nSettings"
+                  style="generic_control"
+                  fgnormal="#909090"
+    			  bgnormal="#606060"
+    			  fgactive="#000000"
+    			  bgactive="#dcdcdc"
+    			  borderwidth="0 0 0 0"
+                  x="0"
+                  y="0"/>
       <EventBox bgnormal="#373737"
                 width="107"
                 height="0"/>
-      <Iconbutton id="general_settings_tab_button"
+      <Button id="general_settings_tab_button"
                   width="107"
                   height="65"
-                  normalicon="preferences_general_settings_tab_button"
-                  activeicon="preferences_general_settings_tab_button_active"
-                  _prelighticon="preferences_general_settings_tab_button_prelight"/>
+                  text="Preferences"
+                  style="generic_control"
+                  fgnormal="#909090"
+    			  bgnormal="#606060"
+    			  fgactive="#000000"
+    			  bgactive="#dcdcdc"
+    			  borderwidth="0 0 0 0"
+                  x="0"
+                  y="0"/>
       <EventBox bgnormal="#373737"
                 width="107"
                 height="0"/>
     </VBox>
 
-    <Layout bgnormal="#565656"
+    <Layout bgnormal="#303030"
             x="113"
             y="559"
             width="505"
@@ -115,7 +139,7 @@
                   _prelighticon="preferences_apply_button_prelight"/>
     </Layout>
     <Layout id="midi_settings_tab"
-            bgnormal="#565656"
+            bgnormal="#303030"
             x="113"
             y="1"
             width="505"
@@ -128,7 +152,7 @@
               height="19">
         <Label style="generic_control"
                text="MIDI Ports"
-               fgnormal="#ffffff"
+               fgnormal="#c1c1c1"
                winfont ="Arial Bold 12"
                macfont ="Helvetica Bold 12"
                x="7" y="3"/>
@@ -140,7 +164,7 @@
               height="19">
         <Label style="generic_control"
                text="Input"
-               fgnormal="#ffffff"
+               fgnormal="#c1c1c1"
                winfont ="Arial Bold 12"
                macfont ="Helvetica Bold 12"
                x="7"
@@ -153,18 +177,18 @@
               height="19">
         <Label style="generic_control"
                text="Output"
-               fgnormal="#ffffff"
+               fgnormal="#c1c1c1"
                winfont ="Arial Bold 12"
                macfont ="Helvetica Bold 12"
                x="7"
                y="3"/>
       </Layout>
-      <Layout bgnormal="#000000"
+      <Layout bgnormal="#797979"
               x="447"
               y="20"
               width="14"
               height="19"/>
-      <ScrolledWindow bgnormal="#565656"
+      <ScrolledWindow bgnormal="#303030"
                       x="21"
                       y="62"
                       width="440"
@@ -178,12 +202,12 @@
       </ScrolledWindow>
     </Layout>
     <Layout id="audio_settings_tab"
-            bgnormal="#000000"
+            bgnormal="#303030"
             x="113" y="1"
             width="505"
             height="558"
             visible="true">
-      <Layout bgnormal="#373737"
+      <Layout bgnormal="#303030"
               x="0"
               y="0"
               width="505"
@@ -199,6 +223,7 @@
                   x="96"
                   y="12"
                   width="126"
+                  height="20"
                   normalicon="preference_device_dropdown"
                   activeicon="preference_device_dropdown_active"
                   _prelighticon="preference_device_dropdown_prelight"
@@ -223,6 +248,7 @@
                   x="96"
                   y="40"
                   width="126"
+                  height="20"
                   normalicon="preference_device_dropdown"
                   activeicon="preference_device_dropdown_active"
                   _prelighticon="preference_device_dropdown_prelight"
@@ -246,6 +272,7 @@
                   x="311"
                   y="12"
                   width="90"
+                  height="20"
                   normalicon="preference_rate_buffer_dropdown"
                   activeicon="preference_rate_buffer_dropdown_active"
                   _prelighticon="preference_rate_buffer_dropdown_prelight"
@@ -269,6 +296,7 @@
                   x="311"
                   y="40"
                   width="90"
+                  height="20"
                   normalicon="preference_rate_buffer_dropdown"
                   activeicon="preference_rate_buffer_dropdown_active"
                   _prelighticon="preference_rate_buffer_dropdown_prelight"
@@ -294,50 +322,50 @@
 
         <Label id="latency_label" style="generic_control" text="Input Latency:" x="16" y="74  " width="476"/>
       </Layout>
-      <Layout bgnormal="#565656" x="0" y="101" width="505" height="39">
-        <Label style="generic_control" text="Channel Configuration Mode" fgnormal="#ffffff"
+      <Layout bgnormal="#303030" x="0" y="101" width="505" height="39">
+        <Label style="generic_control" text="Channel Configuration Mode" fgnormal="#c1c1c1"
                winfont ="Arial Bold 12"
                macfont ="Helvetica Bold 12"
                x="18" y="12"/>
         <Button id="multi_out_button"
-                            text="Multi Out"
-                            style="generic_control"
-                            fgnormal="#909090"
-                bgnormal="#606060"
-                fgactive="#ffffff"
-                bgactive="#0A8893"
-                borderwidth="0 0 0 0"
-                            x="280"
-                            y="6"
-                            width="106"
-                            height="28"/>
+                    text="Multi Out"
+                    style="generic_control"
+                    fgnormal="#909090"
+    				bgnormal="#606060"
+    				fgactive="#ffffff"
+    				bgactive="#0A8893"
+    				borderwidth="0 0 0 0"
+                    x="280"
+                    y="6"
+                    width="106"
+                    height="28"/>
 
         <Button id="stereo_out_button"
-        text="Stereo Out"
-        style="generic_control"
-        fgnormal="#909090"
-        bgnormal="#606060"
-        fgactive="#ffffff"
-        bgactive="#0A8893"
-        borderwidth="0 0 0 0"
-        x="387"
-        y="6"
-        width="106"
-        height="28"/>
+    				text="Stereo Out"
+    				style="generic_control"
+    				fgnormal="#909090"
+    				bgnormal="#606060"
+    				fgactive="#ffffff"
+    				bgactive="#0A8893"
+    				borderwidth="0 0 0 0"
+    				x="387"
+    				y="6"
+    				width="106"
+    				height="28"/>
       </Layout>
-      <Layout bgnormal="#565656" x="0" y="141" width="505" height="416">
-        <Layout bgnormal="#862579" x="16" y="13" width="3" height="41"/>
-        <Layout bgnormal="#862579" x="22" y="13" width="265" height="19">
+      <Layout bgnormal="#303030" x="0" y="141" width="505" height="416">
+        <Layout bgnormal="#303030" x="16" y="13" width="3" height="41"/>
+        <Layout bgnormal="#303030" x="22" y="13" width="265" height="19">
           <Label style="generic_control"
                  text="Inputs"
-                 fgnormal="#ffffff"
+                 fgnormal="#c1c1c1"
                  winfont ="Arial Bold 12"
                  macfont ="Helvetica Bold 12"
                  x="7"
                  y="3"/>
         </Layout>
         <Layout bgnormal="#797979" x="22" y="35" width="85" height="19">
-          <Label style="generic_control" text="Port" fgnormal="#000000" x="7" y="3"/>
+          <Label style="generic_control" text="Port" fgnormal="#303030" x="7" y="3"/>
         </Layout>
         <Button id="all_inputs_on_button"
           text="All"
@@ -362,23 +390,23 @@
           borderwidth="0 0 0 0"
           x="141" y="35" width="29" height="19"/>
         <Layout bgnormal="#797979" x="174" y="35" width="26" height="19">
-          <Label style="generic_control" text="#" fgnormal="#000000" x="7" y="3"/>
+          <Label style="generic_control" text="#" fgnormal="#303030" x="7" y="3"/>
         </Layout>
         <Layout bgnormal="#797979" x="202" y="35" width="85" height="19">
-          <Label style="generic_control" text="Track Name" fgnormal="#000000" x="7" y="3"/>
+          <Label style="generic_control" text="Track Name" fgnormal="#303030" x="7" y="3"/>
         </Layout>
-        <Layout bgnormal="#27ae36" x="290" y="13" width="3" height="41"/>
-        <Layout bgnormal="#27ae36" x="296" y="13" width="178" height="19">
+        <Layout bgnormal="#303030" x="290" y="13" width="3" height="41"/>
+        <Layout bgnormal="#303030" x="296" y="13" width="178" height="19">
           <Label style="generic_control"
                  text="Outputs"
-                 fgnormal="#ffffff"
+                 fgnormal="#c1c1c1"
                  winfont ="Arial Bold 12"
                  macfont ="Helvetica Bold 12"
                  x="7"
                  y="3"/>
         </Layout>
         <Layout bgnormal="#797979" x="296" y="35" width="85" height="19">
-          <Label style="generic_control" text="Port" fgnormal="#000000" x="7" y="3"/>
+          <Label style="generic_control" text="Port" fgnormal="#303030" x="7" y="3"/>
         </Layout>
         <Button id="all_outputs_on_button"
           text="All"
@@ -402,10 +430,10 @@
           bghover="#808080"
           borderwidth="0 0 0 0"
           x="415" y="35" width="29" height="19"/>
-        <Layout bgnormal="#797979" x="448" y="35" width="26" height="19">
-          <Label style="generic_control" text="#" fgnormal="#000000" x="7" y="3"/>
+        <Layout bgnormal="#303030" x="448" y="35" width="26" height="19">
+          <Label style="generic_control" text="#" fgnormal="#303030" x="7" y="3"/>
         </Layout>
-        <ScrolledWindow x="16" y="62" bgnormal="#565656" width="478" height="299" hscroll="never" vscroll="auto">
+        <ScrolledWindow x="16" y="62" bgnormal="#303030" width="478" height="299" hscroll="never" vscroll="auto">
           <HBox>
             <VBox id="device_capture_list" width="274">
             </VBox>
@@ -451,7 +479,7 @@
       </Layout>
     </Layout>
     <Layout id="session_settings_tab"
-            bgnormal="#565656"
+            bgnormal="#303030"
             x="113"
             y="1"
             width="505"
@@ -466,6 +494,7 @@
                 x="215"
                 y="40"
                 width="150"
+                height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 _prelighticon="preference_session_settings_dropdown_prelight">
@@ -492,6 +521,7 @@
                 x="215"
                 y="70"
                 width="150"
+                height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 _prelighticon="preference_session_settings_dropdown_prelight">
@@ -516,6 +546,7 @@
                 x="215"
                 y="100"
                 width="150"
+                height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 _prelighticon="preference_session_settings_dropdown_prelight">
@@ -547,6 +578,7 @@
                 x="215"
                 y="175"
                 width="150"
+                height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 _prelighticon="preference_session_settings_dropdown_prelight">
@@ -577,6 +609,7 @@
                 x="215"
                 y="205"
                 width="150"
+                height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 _prelighticon="preference_session_settings_dropdown_prelight">
@@ -610,6 +643,7 @@
                 x="215"
                 y="235"
                 width="150"
+                height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
                 _prelighticon="preference_session_settings_dropdown_prelight">
@@ -648,7 +682,7 @@
       <dropdownitem title="Stereo"/>
     </Layout>
     <EventBox id="general_settings_tab"
-              bgnormal="#565656"
+              bgnormal="#303030"
               x="113"
               y="1"
               width="505"
@@ -934,7 +968,7 @@
       <!--<ScrolledWindow
                       hscroll="never"
                       vscroll="always"
-                      bgnormal="#565656"
+                      bgnormal="#303030"
                       width="505"
                       height="557">-->
       <!--</ScrolledWindow>-->

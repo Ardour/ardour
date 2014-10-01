@@ -35,7 +35,6 @@
       </menu>
 #ifdef GTKOSX
       <menuitem action='toggle-about'/>
-      <menuitem action='toggle-rc-options-editor'/>
 #endif
 #ifndef GTKOSX
       <separator/>
@@ -89,7 +88,6 @@
       <separator/>
 #ifndef GTKOSX
       <separator/>
-      <menuitem action='toggle-rc-options-editor'/>
 #endif
     </menu>         
 
