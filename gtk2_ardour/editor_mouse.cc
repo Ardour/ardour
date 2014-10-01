@@ -2458,66 +2458,24 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
 void
 Editor::start_selection_grab (ArdourCanvas::Item* item, RouteTimeAxisView* rtv, GdkEvent* event, bool copy/*=false*/)
 {
-	if (rtv == 0) {
-		return;
-	}
-
 	/* lets try to create new Region for the selection */
-
-	vector<boost::shared_ptr<Region> > new_regions;
-    
 	begin_reversible_command (_("new region for selection drag"));
-    if (copy) {
-        create_region_from_selection (new_regions, rtv);
-    } else {
-        cut_region_from_selection (new_regions, rtv);
-    }
+    
+    RegionSelection new_regions;
+    cut_copy_region_from_selection (new_regions, rtv, true, copy);
+    
     commit_reversible_command ();
     
 	if (new_regions.empty()) {
 		return;
 	}
 
-	/* XXX fix me one day to use all new regions */
-	boost::shared_ptr<Region> region (new_regions.front());
-
-	/* add it to the current stream/playlist.
-
-	   tricky: the streamview for the track will add a new regionview. we will
-	   catch the signal it sends when it creates the regionview to
-	   set the regionview we want to then drag.
-	*/
-
-	latest_regionviews.clear();
-	sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
-
-	/* A selection grab currently creates two undo/redo operations, one for
-	   creating the new region and another for moving it.
-	*/
-
-	begin_reversible_command (Operations::selection_grab);
-
-	boost::shared_ptr<Playlist> playlist = rtv->playlist();
-
-	playlist->clear_changes ();
-	rtv->playlist()->add_region (region, selection->time[clicked_selection].start);
-	_session->add_command(new StatefulDiffCommand (playlist));
-
-	commit_reversible_command ();
-
-	c.disconnect ();
-
-	if (latest_regionviews.empty()) {
-		/* something went wrong */
-		return;
-	}
-
 	/* we need to deselect all other regionviews, and select this one
 	   i'm ignoring undo stuff, because the region creation will take care of it
 	*/
-	selection->set (latest_regionviews);
+	selection->set (new_regions);
 
-	_drags->set (new RegionMoveDrag (this, latest_regionviews.front()->get_canvas_group(), latest_regionviews.front(), latest_regionviews, false, false), event);
+	_drags->set (new RegionMoveDrag (this, new_regions.front()->get_canvas_group(), new_regions.front(), latest_regionviews, false, false), event);
 }
 
 void

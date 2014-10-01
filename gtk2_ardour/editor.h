@@ -1195,8 +1195,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void keyboard_paste ();
 
 	void region_from_selection ();
-	void create_region_from_selection (std::vector<boost::shared_ptr<ARDOUR::Region> >&, RouteTimeAxisView*);
-    void cut_region_from_selection (std::vector<boost::shared_ptr<ARDOUR::Region> >&, RouteTimeAxisView*);
+	void create_region_from_selection (std::vector<boost::shared_ptr<ARDOUR::Region> >&);
+    void cut_copy_region_from_selection (RegionSelection& new_regions, RouteTimeAxisView* rtv, bool follow_track_selection = false, bool copy = false);
     
 	void play_from_start ();
 	void play_from_edit_point ();

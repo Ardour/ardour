@@ -108,7 +108,7 @@ public:
 	void uncombine_region (RegionView*);
 	void toggle_automation_track (const Evoral::Parameter& param);
 	void fade_range (TimeSelection&);
-    void cut_range (ARDOUR::AudioRange& range);
+    void cut_copy_range (Selection& selection, bool copy, Selection& new_items);
 
 	/* The editor calls these when mapping an operation across multiple tracks */
 	void use_new_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
