@@ -295,7 +295,7 @@ JACKAudioBackend::get_ports (const string& port_name_pattern, DataType type, Por
 	for (uint32_t i = 0; ports[i]; ++i) {
 		s.push_back (ports[i]);
 	}
-
+        
 	jack_free (ports);
 	
 	return s.size();
@@ -325,9 +325,9 @@ JACKAudioBackend::get_physical (DataType type, unsigned long flags, vector<strin
 
 	if (ports) {
 		for (uint32_t i = 0; ports[i]; ++i) {
-                        if (strstr (ports[i], "Midi-Through")) {
-                                continue;
-                        }
+//                        if (strstr (ports[i], "Midi-Through")) {
+//                                continue;
+//                        }
 			phy.push_back (ports[i]);
 		}
 		jack_free (ports);
