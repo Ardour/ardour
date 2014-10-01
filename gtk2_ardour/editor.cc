@@ -70,6 +70,7 @@
 #include "ardour/engine_state_controller.h"
 #include "ardour/audioregion.h"
 #include "ardour/location.h"
+#include "ardour/midi_scene_changer.h"
 #include "ardour/profile.h"
 #include "ardour/route_group.h"
 #include "ardour/session_playlists.h"
@@ -320,6 +321,8 @@ Editor::Editor ()
 	, current_mixer_strip (0)
 	, _master_bus_ui (0)
         , _set_session_in_progress(false)
+        , _midi_input_dropdown (get_waves_dropdown ("midi_input_dropdown"))
+        , _midi_output_dropdown (get_waves_dropdown ("midi_output_dropdown"))
         , midi_marker_input_activity_image (get_image ("midi_input_activity_indicator"))
         , midi_marker_output_activity_image (get_image ("midi_output_activity_indicator"))
         , midi_marker_input_enabled_image (get_image ("midi_input_enabled_indicator"))
@@ -327,7 +330,7 @@ Editor::Editor ()
         , midi_marker_output_enabled_image (get_image ("midi_output_enabled_indicator"))
         , midi_marker_output_disabled_image (get_image ("midi_output_disabled_indicator"))
 {
-	constructed = false;
+        constructed = false;
 
 	/* we are a singleton */
 
@@ -522,6 +525,12 @@ Editor::Editor ()
 	selection->TracksChanged.connect (sigc::mem_fun(*this, &Editor::track_selection_changed));
     
     EngineStateController::instance()->OutputConnectionModeChanged.connect (*this, invalidator (*this),  boost::bind (&Editor::output_connection_mode_changed, this), gui_context() );
+
+        /* Connect to relevant signal so that we will be notified of port registration changes */
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_registration_connection, invalidator (*this), boost::bind (&Editor::port_registration_handler, this), gui_context());
+
+        /* Connect to relevant signal so that we will be notified of port connection changes */
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection_connection, invalidator (*this), boost::bind (&Editor::port_connection_handler, this, _1, _2, _3, _4, _5), gui_context());
     
 	editor_regions_selection_changed_connection = selection->RegionsChanged.connect (sigc::mem_fun(*this, &Editor::region_selection_changed));
 
@@ -1389,6 +1398,23 @@ Editor::set_session (Session *t)
 	*/
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	set_state (*node, Stateful::loading_state_version);
+
+        /* signal connections related to MIDI/scene change */
+
+	_midi_input_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &Editor::midi_input_chosen));
+	_midi_output_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &Editor::midi_output_chosen));
+
+        /* listen for incoming scene change messages so we can indicate relevant MIDI activity in the GUI */
+        
+        MIDISceneChanger* msc = dynamic_cast<MIDISceneChanger*> (_session->scene_changer());
+
+        if (msc) {
+                msc->MIDIInputActivity.connect (_session_connections, invalidator (*this), boost::bind (&Editor::marker_midi_input_activity, this), gui_context());
+                msc->MIDIOutputActivity.connect (_session_connections, invalidator (*this), boost::bind (&Editor::marker_midi_output_activity, this), gui_context());
+        }
+
+        reset_marker_midi_images (false);
+        reset_marker_midi_images (true);
 
 	/* catch up with the playhead */
 
@@ -5820,3 +5846,30 @@ Editor::global_rec_clicked (WavesButton*)
     _global_rec_button.set_active(!all_tracks_are_record_armed);
 }
         
+void
+Editor::port_registration_handler ()
+{
+        if (!_session) {
+                cerr << "PRH, early\n";
+                return;
+        }
+
+        populate_midi_inout_dropdowns ();
+}
+
+void
+Editor::port_connection_handler (boost::weak_ptr<Port> wa, std::string, boost::weak_ptr<Port> wb, std::string, bool connected)
+{
+        if (!_session) {
+                cerr << "PCH, early\n";
+                return;
+        }
+
+        /* we could investigate the types of ports involved in this connection/disconnection,
+           but since this really doesn't cost a lot (hide/show of various images, no redraw)
+           the benefit of doing so doesn't seem that great.
+        */
+
+        reset_marker_midi_images (true);
+        reset_marker_midi_images (false);
+}

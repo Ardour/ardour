@@ -55,18 +55,18 @@
 #include "location_ui.h"
 #include "main_clock.h"
 #include "time_info_box.h"
+#include "utils.h"
+#include "gui_thread.h"
 
 #include <gtkmm2ext/application.h>
 
 #include "ardour/session.h"
 #include "ardour/profile.h"
-#include "ardour/audioengine.h"
 #include "ardour/engine_state_controller.h"
 
 #include "control_protocol/control_protocol.h"
 
 #include "i18n.h"
-#include "utils.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -81,45 +81,37 @@ ARDOUR_UI::create_editor ()
 	try {
 		editor = new Editor ();
 		_dsp_load_adjustment = &editor->get_adjustment ("dsp_load_adjustment");
-        _hd_load_adjustment = &editor->get_adjustment("hd_load_adjustment");
-        
-        _dsp_load_label = &editor->get_label("dsp_load_label");
-        _hd_load_label = &editor->get_label("hd_load_label");
-        _hd_remained_time_label = &editor->get_label("hd_remained_time");
-        
-        _bit_depth_button = &editor->get_waves_button("bit_depth_button");
-        _frame_rate_button = &editor->get_waves_button("frame_rate_button");        
-        _sample_rate_dropdown = &editor->get_waves_dropdown("sample_rate_dropdown");
-        _display_format_dropdown = &editor->get_waves_dropdown("display_format_dropdown");
-        _timecode_source_dropdown = &editor->get_waves_dropdown("timecode_selector_dropdown");
-        
-        _tracks_button = &editor->get_waves_button("tracks_button");
-
-		_midi_input_dropdown = &editor->get_waves_dropdown ("midi_input_dropdown");
-		_midi_output_dropdown = &editor->get_waves_dropdown ("midi_output_dropdown");
+                _hd_load_adjustment = &editor->get_adjustment("hd_load_adjustment");
+                
+                _dsp_load_label = &editor->get_label("dsp_load_label");
+                _hd_load_label = &editor->get_label("hd_load_label");
+                _hd_remained_time_label = &editor->get_label("hd_remained_time");
+                
+                _bit_depth_button = &editor->get_waves_button("bit_depth_button");
+                _frame_rate_button = &editor->get_waves_button("frame_rate_button");        
+                _sample_rate_dropdown = &editor->get_waves_dropdown("sample_rate_dropdown");
+                _display_format_dropdown = &editor->get_waves_dropdown("display_format_dropdown");
+                _timecode_source_dropdown = &editor->get_waves_dropdown("timecode_selector_dropdown");
+                
+                _tracks_button = &editor->get_waves_button("tracks_button");
 	}
 
 	catch (failed_constructor& err) {
 		return -1;
 	}
     
-    _bit_depth_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_bit_depth_button));
-    _frame_rate_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_frame_rate_button));
-    _tracks_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_tracks_button));
-    
-    _sample_rate_dropdown->selected_item_changed.connect (mem_fun(*this, &ARDOUR_UI::on_sample_rate_dropdown_item_clicked ));
-    _display_format_dropdown->selected_item_changed.connect (mem_fun(*this, &ARDOUR_UI::on_display_format_dropdown_item_clicked ));
-    _timecode_source_dropdown->selected_item_changed.connect (mem_fun(*this, &ARDOUR_UI::on_timecode_source_dropdown_item_clicked ));
-    
+        _bit_depth_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_bit_depth_button));
+        _frame_rate_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_frame_rate_button));
+        _tracks_button->signal_clicked.connect(sigc::mem_fun (*this, &ARDOUR_UI::on_tracks_button));
+        
+        _sample_rate_dropdown->selected_item_changed.connect (mem_fun(*this, &ARDOUR_UI::on_sample_rate_dropdown_item_clicked ));
+        _display_format_dropdown->selected_item_changed.connect (mem_fun(*this, &ARDOUR_UI::on_display_format_dropdown_item_clicked ));
+        _timecode_source_dropdown->selected_item_changed.connect (mem_fun(*this, &ARDOUR_UI::on_timecode_source_dropdown_item_clicked ));
+        
 	editor->Realized.connect (sigc::mem_fun (*this, &ARDOUR_UI::editor_realized));
 	editor->signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), true));
     
-	_midi_input_dropdown->selected_item_changed.connect (sigc::mem_fun (*this, &ARDOUR_UI::midi_input_chosen));
-	_midi_output_dropdown->selected_item_changed.connect (sigc::mem_fun (*this, &ARDOUR_UI::midi_output_chosen));
-
-	populate_midi_inout_dropdowns ();
-
-	return 0;
+        return 0;
 }
 
 void
@@ -897,84 +889,3 @@ ARDOUR_UI::focus_on_clock ()
 	}
 }
 
-void
-ARDOUR_UI::midi_input_chosen (WavesDropdown*, void* full_name_of_chosen_port)
-{
-    if( !_session )
-        return;
-
-    _session->scene_in()->disconnect_all ();
-
-    if (full_name_of_chosen_port != 0) {
-            _session->scene_in()->connect ((char*) full_name_of_chosen_port);
-    }
-}
-
-void
-ARDOUR_UI::midi_output_chosen (WavesDropdown*, void* full_name_of_chosen_port)
-{
-    if( !_session )
-        return;
-
-    _session->scene_out()->disconnect_all ();
-
-    if (full_name_of_chosen_port != 0) {
-            _session->scene_out()->connect ((char *) full_name_of_chosen_port);
-    }
-}
-
-void
-ARDOUR_UI::populate_midi_inout_dropdowns  ()
-{
-	// these two calls should occure every time
-	// the list of available midi inputs/outputs
-	// is changed.
-	populate_midi_inout_dropdown (false);
-	populate_midi_inout_dropdown (true);
-}
-
-void
-ARDOUR_UI::populate_midi_inout_dropdown  (bool playback)
-{
-	WavesDropdown& dropdown = *(playback ? _midi_output_dropdown : _midi_input_dropdown);
-		using namespace ARDOUR;
-
-	std::vector<EngineStateController::PortState> midi_states;
-	static const char* midi_port_name_prefix = "system_midi:";
-	const char* midi_type_suffix;
-	bool have_first = false;
-
-	if (playback) {
-		EngineStateController::instance()->get_physical_midi_output_states(midi_states);
-		midi_type_suffix = X_(" playback");
-	} else {
-		EngineStateController::instance()->get_physical_midi_input_states(midi_states);
-		midi_type_suffix = X_(" capture");
-	}
-
-	dropdown.clear_items ();
-
-	/* add a "none" entry */
-
-	dropdown.add_radio_menu_item (_("None"), 0);
-
-	std::vector<EngineStateController::PortState>::const_iterator state_iter;
-
-	for (state_iter = midi_states.begin(); state_iter != midi_states.end(); ++state_iter) {
-
-		// strip the device name from input port name
-
-		std::string device_name;
-
-		ARDOUR::remove_pattern_from_string(state_iter->name, midi_port_name_prefix, device_name);
-		ARDOUR::remove_pattern_from_string(device_name, midi_type_suffix, device_name);
-
-		if (state_iter->active) {
-			dropdown.add_radio_menu_item (device_name, strdup (state_iter->name.c_str()));
-			if (!have_first) {
-				dropdown.set_text (device_name);
-				have_first = true;
-			}
-		}
-	}
-}        

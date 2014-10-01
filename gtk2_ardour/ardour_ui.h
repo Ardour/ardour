@@ -257,13 +257,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     void update_sample_rate_dropdown ();
     void update_frame_rate_button ();
 
-    WavesDropdown* _midi_input_dropdown;
-    WavesDropdown* _midi_output_dropdown;
-	void populate_midi_inout_dropdowns ();
-	void populate_midi_inout_dropdown (bool playback);
-
-
-
     PBD::ScopedConnectionList update_connections_to_toolbar_buttons;
     
 	TimeInfoBox* time_info_box;
@@ -758,9 +751,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void parameter_changed (std::string);
 	void session_parameter_changed (const std::string& param);
-
-	void midi_input_chosen (WavesDropdown*, void*);
-	void midi_output_chosen (WavesDropdown*, void*);
 
 	bool first_idle ();
 

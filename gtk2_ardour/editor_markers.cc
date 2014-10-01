@@ -22,10 +22,14 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 
+#include "pbd/memento_command.h"
+
 #include "ardour/session.h"
 #include "ardour/location.h"
+#include "ardour/midi_port.h"
 #include "ardour/profile.h"
-#include "pbd/memento_command.h"
+#include "ardour/engine_state_controller.h"
+#include "ardour/audioengine.h"
 
 #include "canvas/canvas.h"
 #include "canvas/item.h"
@@ -1327,9 +1331,11 @@ void
 Editor::marker_midi_input_activity ()
 {
         if (!midi_marker_input_activity_image.is_visible ()) {
+                midi_marker_input_disabled_image.hide ();
+                midi_marker_input_enabled_image.hide ();
                 midi_marker_input_activity_image.show ();
                 /* hide the image again in 1/2 second */
-                Glib::signal_timeout().connect (sigc::bind (sigc::mem_fun (*this, &Editor::hide_marker_midi_image), &midi_marker_input_activity_image), 500);
+                Glib::signal_timeout().connect (sigc::bind (sigc::mem_fun (*this, &Editor::reset_marker_midi_images), true), 500);
         }
 }
 
@@ -1337,16 +1343,124 @@ void
 Editor::marker_midi_output_activity ()
 {
         if (!midi_marker_output_activity_image.is_visible ()) {
+                midi_marker_output_disabled_image.hide ();
+                midi_marker_output_enabled_image.hide ();
                 midi_marker_output_activity_image.show ();
                 /* hide the image again in 1/2 second */
-                Glib::signal_timeout().connect (sigc::bind (sigc::mem_fun (*this, &Editor::hide_marker_midi_image), &midi_marker_output_activity_image), 500);
+                Glib::signal_timeout().connect (sigc::bind (sigc::mem_fun (*this, &Editor::reset_marker_midi_images), false), 500);
         }
 }
 
 bool
-Editor::hide_marker_midi_image (Gtk::Widget* img)
+Editor::reset_marker_midi_images (bool input)
 {
-        img->hide ();
+        if (!_session) {
+                return false;
+        }
+
+        if (input) {
+                if (_session->scene_in()->connected()) {
+                        midi_marker_input_enabled_image.show ();
+                        midi_marker_input_disabled_image.hide ();
+                } else {
+                        midi_marker_input_enabled_image.hide ();
+                        midi_marker_input_disabled_image.show ();
+                }
+                midi_marker_input_activity_image.hide ();
+        } else {
+                if (_session->scene_out()->connected()) {
+                        midi_marker_output_enabled_image.show ();
+                        midi_marker_output_disabled_image.hide ();
+                } else {
+                        midi_marker_output_enabled_image.hide ();
+                        midi_marker_output_disabled_image.show ();
+                }
+                midi_marker_output_activity_image.hide ();
+        }
+
         return false; /* do not call again */
 }
 
+/* MIDI/scene change Markers */
+
+void
+Editor::midi_input_chosen (WavesDropdown*, void* full_name_of_chosen_port)
+{
+        if (!_session) {
+                return;
+        }
+        
+        _session->scene_in()->disconnect_all ();
+        
+        if (full_name_of_chosen_port != 0) {
+                _session->scene_in()->connect ((char*) full_name_of_chosen_port);
+        }
+}
+
+void
+Editor::midi_output_chosen (WavesDropdown*, void* full_name_of_chosen_port)
+{
+        if (!_session) {
+                return;
+        }
+        
+        _session->scene_out()->disconnect_all ();
+        
+        if (full_name_of_chosen_port != 0) {
+                _session->scene_out()->connect ((char *) full_name_of_chosen_port);
+        }
+}
+
+void
+Editor::populate_midi_inout_dropdowns  ()
+{
+	populate_midi_inout_dropdown (false);
+	populate_midi_inout_dropdown (true);
+}
+
+void
+Editor::populate_midi_inout_dropdown  (bool playback)
+{
+        using namespace ARDOUR;
+        
+	WavesDropdown* dropdown = playback ? &_midi_output_dropdown : &_midi_input_dropdown;
+        
+	std::vector<EngineStateController::PortState> midi_states;
+	static const char* midi_port_name_prefix = "system_midi:";
+	const char* midi_type_suffix;
+	bool have_first = false;
+
+	if (playback) {
+		EngineStateController::instance()->get_physical_midi_output_states(midi_states);
+		midi_type_suffix = X_(" playback");
+	} else {
+		EngineStateController::instance()->get_physical_midi_input_states(midi_states);
+		midi_type_suffix = X_(" capture");
+	}
+
+	dropdown->clear_items ();
+
+	/* add a "none" entry */
+
+	dropdown->add_radio_menu_item (_("None"), 0);
+
+	std::vector<EngineStateController::PortState>::const_iterator state_iter;
+
+	for (state_iter = midi_states.begin(); state_iter != midi_states.end(); ++state_iter) {
+
+		// strip the device name from input port name
+
+		std::string device_name;
+
+		ARDOUR::remove_pattern_from_string(state_iter->name, midi_port_name_prefix, device_name);
+		ARDOUR::remove_pattern_from_string(device_name, midi_type_suffix, device_name);
+
+		if (state_iter->active) {
+			dropdown->add_radio_menu_item (device_name, strdup (state_iter->name.c_str()));
+			if (!have_first) {
+				dropdown->set_text (device_name);
+				have_first = true;
+			}
+		}
+	}
+}        
