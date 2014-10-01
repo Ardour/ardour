@@ -413,6 +413,8 @@ def options(opt):
                    help='Build the dummy backend (no audio/MIDI I/O, useful for profiling)')
     opt.add_option('--with-alsabackend', action='store_true', default=False, dest='build_alsabackend',
                    help='Build the ALSA backend')
+    opt.add_option('--with-wavesbackend', action='store_true', default=False, dest='build_wavesbackend',
+                   help='Build the Waves/Portaudio backend')
     opt.add_option('--backtrace', action='store_true', default=True, dest='backtrace',
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
@@ -754,6 +756,8 @@ def configure(conf):
         conf.env['BUILD_ALSABACKEND'] = True
     if opts.build_dummy:
         conf.env['BUILD_DUMMYBACKEND'] = True
+    if opts.build_wavesbackend:
+        conf.env['BUILD_WAVESBACKEND'] = True
 
     set_compiler_flags (conf, Options.options)
 
@@ -819,6 +823,7 @@ const char* const ardour_config_info = "\\n\\
 #    write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Generic x86 CPU',       opts.generic)
+    write_config_text('Waves Backend',         opts.build_wavesbackend)
     write_config_text('Windows VST support',   opts.windows_vst)
     write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))
     write_config_text('Windows key',           opts.windows_key)
