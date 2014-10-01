@@ -253,11 +253,9 @@ MIDISceneChanger::recording() const
 void
 MIDISceneChanger::bank_change_input (MIDI::Parser& parser, unsigned short, int)
 {
-	if (!recording()) {
-		return;
-	}
-
-	last_bank_message_time = parser.get_timestamp ();
+	if (recording()) {
+                last_bank_message_time = parser.get_timestamp ();
+        }
         MIDIInputActivity (); /* EMIT SIGNAL */
 }
 
@@ -269,6 +267,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 	last_program_message_time = time;
 
 	if (!recording()) {
+                MIDIInputActivity (); /* EMIT SIGNAL */
 		jump_to (input_port->channel (channel)->bank(), program);
 		return;
 	}
