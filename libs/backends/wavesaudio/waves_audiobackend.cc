@@ -97,8 +97,8 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
 }
 
 
-WavesAudioBackend::WavesAudioBackend (AudioEngine& e, AudioBackendInfo& info)
-    : AudioBackend (e, info)
+WavesAudioBackend::WavesAudioBackend (AudioEngine& e)
+    : AudioBackend (e, __backend_info)
     , _audio_device_manager (this)
     , _midi_device_manager (*this)
     , _device (NULL)
@@ -1201,7 +1201,7 @@ WavesAudioBackend::__waves_backend_factory (AudioEngine& e)
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::__waves_backend_factory ():" << std::endl;
     if (!__instance) {
-            __instance.reset (new WavesAudioBackend (e, *(descriptor())));
+            __instance.reset (new WavesAudioBackend (e));
     }
     return __instance;
 }

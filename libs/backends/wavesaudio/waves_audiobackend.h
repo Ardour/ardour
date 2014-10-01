@@ -70,7 +70,7 @@ class WavesMidiPort;
     class WavesAudioBackend : public AudioBackend, WCMRAudioDeviceManagerClient
 {
   public:
-    WavesAudioBackend (AudioEngine& e, AudioBackendInfo&);
+    WavesAudioBackend (AudioEngine& e);
     virtual ~WavesAudioBackend ();
 
     /* AUDIOBACKEND API */
