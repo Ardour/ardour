@@ -18,7 +18,7 @@
 # sudo i386 cowbuilder --login --bindmounts /tmp \
 #     --basepath /var/cache/pbuilder/jessie-i386/base.cow
 #
-### inside cowbuilder (/tmp/ is shared wit host)
+### inside cowbuilder (/tmp/ is shared with host)
 # /tmp/this_script.sh
 #
 ###############################################################################
@@ -71,9 +71,10 @@ function autoconfbuild {
 set -e
 echo "======= $(pwd) ======="
 PATH=${PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin \
+#CPPFLAGS="-I${PREFIX}/include -DDEBUG$CPPFLAGS" \
 	CPPFLAGS="-I${PREFIX}/include$CPPFLAGS" \
-	CFLAGS="-I${PREFIX}/include -O2$CFLAGS" \
-	CXXFLAGS="-I${PREFIX}/include -O2$CXXFLAGS" \
+	CFLAGS="-I${PREFIX}/include -O2 -g -mstackrealign$CFLAGS" \
+	CXXFLAGS="-I${PREFIX}/include -O2 -g -mstackrealign$CXXFLAGS" \
 	LDFLAGS="-L${PREFIX}/lib$LDFLAGS" \
 	./configure --host=i686-w64-mingw32 --build=i386-linux \
 	--prefix=$PREFIX $@
@@ -94,6 +95,10 @@ PATH=${PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin \
 	STRIP=i686-w64-mingw32-strip \
 	RANLIB=i686-w64-mingw32-ranlib \
 	DLLTOOL=i686-w64-mingw32-dlltool \
+	CPPFLAGS="-I${PREFIX}/include$CPPFLAGS" \
+	CFLAGS="-I${PREFIX}/include -O2 -g -mstackrealign$CFLAGS" \
+	CXXFLAGS="-I${PREFIX}/include -O2 -g -mstackrealign$CXXFLAGS" \
+	LDFLAGS="-L${PREFIX}/lib$LDFLAGS" \
 	./waf configure --prefix=$PREFIX $@ \
 	&& ./waf && ./waf install
 }
@@ -102,10 +107,14 @@ PATH=${PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin \
 if test -z "$NOSTACK"; then
 ################################################################################
 
+# jack headers, .dll and pkg-config file from jackd 1.9.10
+# the .dll is not shipped and only used for linking.
+# This is currently the only part not built from source.
 download jack_win32.tar.xz http://robin.linuxaudio.org/jack_win32.tar.xz
 cd "$PREFIX"
 tar xf ${SRCDIR}/jack_win32.tar.xz
 "$PREFIX"/update_pc_prefix.sh
+
 
 download pthreads-w32-2-9-1-release.tar.gz ftp://sourceware.org/pub/pthreads-win32/pthreads-w32-2-9-1-release.tar.gz
 cd ${BUILDD}
@@ -147,7 +156,6 @@ ed Makefile.in << EOF
 wq
 EOF
 autoconfbuild
-# add -lwsock32 to /usr/src/win-stack/lib/pkgconfig/flac.pc ??
 
 src libsndfile-1.0.25 tar.gz http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.25.tar.gz
 ed Makefile.in << EOF
@@ -175,7 +183,8 @@ src libiconv-1.14 tar.gz ftp://ftp.gnu.org/gnu/libiconv/libiconv-1.14.tar.gz
 autoconfbuild --with-included-gettext --with-libiconv-prefix=$PREFIX
 
 src libxml2-2.7.8 tar.gz ftp://xmlsoft.org/libxslt/libxml2-2.7.8.tar.gz
-autoconfbuild --with-threads=no
+CFLAGS=" -O0" CXXFLAGS=" -O0" \
+autoconfbuild --with-threads=no --with-zlib=$PREFIX
 
 src freetype-2.5.3 tar.gz http://download.savannah.gnu.org/releases/freetype/freetype-2.5.3.tar.gz
 autoconfbuild -with-harfbuzz=no --with-png=no
@@ -217,8 +226,6 @@ autoconfbuild --with-pcre=internal --disable-silent-rules --with-libiconv=no
 
 ################################################################################
 dpkg -P gettext python || true
-export PATH=$PREFIX/bin:$PATH
-rm -f ${PREFIX}/lib/pkgconfig/harfbuzz.pc  || true
 ################################################################################
 
 src pango-1.36.8 tar.xz http://ftp.gnome.org/pub/GNOME/sources/pango/1.36/pango-1.36.8.tar.xz
@@ -235,8 +242,9 @@ ed Makefile.in << EOF
 %s/demos / /
 wq
 EOF
-autoconfbuild --disable-modules --disable-rebuilds
-
+autoconfbuild --disable-rebuilds # --disable-modules \
+#	--with-included-immodules=ime \
+# --with-gdktarget=win32 \
 
 #http://ardour.org/files/gtk-engines-2.21.0.tar.gz
 #http://ftp.gnome.org/pub/GNOME/sources/gtk-engines/2.20/gtk-engines-2.20.2.tar.bz2
@@ -421,7 +429,7 @@ wq
 EOF
 
 src portaudio tgz http://portaudio.com/archives/pa_stable_v19_20140130.tgz
-autoconfbuild
+autoconfbuild # does not include asio, yet
 
 ################################################################################
 fi  # $NOSTACK
@@ -445,6 +453,8 @@ export STRIP=i686-w64-mingw32-strip
 export RANLIB=i686-w64-mingw32-ranlib
 export DLLTOOL=i686-w64-mingw32-dlltool
 
+CFLAGS="-mstackrealign" \
+CXXFLAGS="-mstackrealign" \
 LDFLAGS="-L${PREFIX}/lib" ./waf configure \
 	--dist-target=mingw --windows-vst \
 	--also-include=${PREFIX}/include \
@@ -470,7 +480,6 @@ mkdir -p $DESTDIR/bin
 mkdir -p $DESTDIR/share/
 mkdir -p $ALIBDIR/surfaces
 mkdir -p $ALIBDIR/backends
-mkdir -p $ALIBDIR/lv2
 mkdir -p $ALIBDIR/panners
 mkdir -p $ALIBDIR/fst
 
@@ -484,7 +493,7 @@ cp build/libs/canvas/canvas-0.dll $DESTDIR/bin/
 cp build/libs/pbd/pbd-4.dll $DESTDIR/bin/
 cp build/libs/audiographer/audiographer-0.dll $DESTDIR/bin/
 cp build/libs/fst/ardour-vst-scanner.exe $ALIBDIR/fst/
-cp build/gtk2_ardour/ardour-*.exe $DESTDIR/bin/ardour.exe
+cp `ls -t build/gtk2_ardour/ardour-*.exe | head -n1` $DESTDIR/bin/ardour.exe
 cp build/libs/clearlooks-newer/clearlooks.dll $DESTDIR/bin/
 
 cp $PREFIX/bin/*dll $DESTDIR/bin/
@@ -494,7 +503,8 @@ rm -rf $DESTDIR/bin/libjack.dll
 cp `find build/libs/surfaces/ -iname "*.dll"` $ALIBDIR/surfaces/
 cp `find build/libs/backends/ -iname "*.dll"` $ALIBDIR/backends/
 cp `find build/libs/panners/ -iname "*.dll"` $ALIBDIR/panners/
-cp -r build/libs/LV2/* $DESTDIR/lib/lv2/
+
+cp -r build/libs/LV2 $ALIBDIR/
 
 mv $ALIBDIR/surfaces/ardourcp-4.dll $DESTDIR/bin/
 
@@ -504,10 +514,6 @@ cp /usr/lib/gcc/i686-w64-mingw32/4.6/libstdc++-6.dll /$DESTDIR/bin/
 
 cp -r $PREFIX/share/ardour3 $DESTDIR/share/
 cp -r $PREFIX/etc/ardour3/* $DESTDIR/share/ardour3/
-
-# parser errors: "DOCTYPE improperly terminated" - probably '\r\n' ??
-rm -rf $DESTDIR/share/ardour3/patchfiles
-rm -rf $DESTDIR/share/ardour3/midi_maps
 
 du -sch $DESTDIR
 
