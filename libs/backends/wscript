@@ -31,7 +31,7 @@ def backend_list():
         else:
             backends = [ ]
 
-    if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc':
+    if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc' or Options.options.dist_target == 'mingw':
         backends += [ 'wavesaudio' ]
 
     return backends
