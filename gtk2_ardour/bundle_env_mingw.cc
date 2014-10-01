@@ -18,6 +18,21 @@
 */
 
 #include "bundle_env.h"
+#include "i18n.h"
+
+#include <fontconfig/fontconfig.h>
+
+#include "ardour/ardour.h"
+#include "ardour/search_paths.h"
+#include "ardour/filesystem_paths.h"
+
+#include "pbd/file_utils.h"
+#include "pbd/epa.h"
+
+using namespace std;
+using namespace PBD;
+using namespace ARDOUR;
+
 
 void
 fixup_bundle_environment (int, char* [], const char** localedir)
@@ -27,4 +42,22 @@ fixup_bundle_environment (int, char* [], const char** localedir)
 
 void load_custom_fonts() 
 {
+	std::string ardour_mono_file;
+
+	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
+		cerr << _("Cannot find ArdourMono TrueType font") << endl;
+	}
+
+	FcConfig *config = FcInitLoadConfigAndFonts();
+	FcBool ret = FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()));
+
+	if (ret == FcFalse) {
+		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
+	}
+
+	ret = FcConfigSetCurrent(config);
+
+	if (ret == FcFalse) {
+		cerr << _("Failed to set fontconfig configuration.") << endl;
+	}
 }
