@@ -5,44 +5,73 @@
 # It is intended to run in a pristine chroot or VM of a minimal
 # debian system. see http://wiki.debian.org/cowbuilder
 #
-### Quick start: (host, setup cowbuilder)
+###############################################################################
+### Quick start
+### one-time cowbuilder/pbuilder setup on the build-host
 #
 # sudo apt-get install cowbuilder util-linux
-# sudo mkdir -p /var/cache/pbuilder/jessie-i386/
+# sudo mkdir -p /var/cache/pbuilder/jessie-i386/aptcache
 #
 # sudo i386 cowbuilder --create \
 #     --basepath /var/cache/pbuilder/jessie-i386/base.cow \
 #     --distribution jessie \
 #     --debootstrapopts --arch --debootstrapopts i386
 #
+### 'interactive build'
+#
 # sudo i386 cowbuilder --login --bindmounts /tmp \
 #     --basepath /var/cache/pbuilder/jessie-i386/base.cow
 #
-### inside cowbuilder (/tmp/ is shared with host)
+### now, inside cowbuilder (/tmp/ is shared with host, -> bindmounts)
+#
 # /tmp/this_script.sh
 #
+### go for a coffee and ~30min later find /tmp/a3win.zip
+###
+### instead of cowbuilder --login, cowbuilder --execute /tmp/x-mingw.sh
+### does it all by itself, a ~/.pbuilderrc or /etc//etc/pbuilderrc
+### can be used to set bindmounts and basepath... last but not least
+### ccache helps a lot to speed up recompiles. see also
+### https://wiki.ubuntu.com/PbuilderHowto#Integration_with_ccache
+###
 ###############################################################################
 
+: ${MAKEFLAGS=-j4}
+: ${SRCDIR=/tmp/winsrc}  # source-code tgz are cached here
+
+: ${ASIO=}     # set to build with ASIO/waves backend
+: ${NOSTACK=}  # set to skip building the build-stack
+: ${RMSTACK=}  # rm -rf $PREFIX $BUILDD - exclusive with NOSTACK
+
+# directories inside the build-chroot:
 : ${SRC=/usr/src}
-: ${SRCDIR=/tmp/winsrc}
 : ${PREFIX=$SRC/win-stack}
 : ${BUILDD=$SRC/win-build}
-: ${MAKEFLAGS=-j4}
+
+###############################################################################
 
 if [ "$(id -u)" != "0" -a -z "$SUDO" ]; then
 	echo "This script must be run as root in pbuilder" 1>&2
-  echo "e.g sudo DIST=jessie ARCH=i386 linux32 cowbuilder --bindmounts /tmp --execute $0"
+	echo "e.g sudo DIST=jessie ARCH=i386 linux32 cowbuilder --bindmounts /tmp --execute $0"
 	exit 1
 fi
 
+if test -n "$NOSTACK" -a -n "$RMSTACK"; then
+	echo "NOSTACK and RMSTACK are exclusive"
+	exit 1
+fi
+
+if test -n "$RMSTACK"; then
+	rm -rf ${PREFIX} ${BUILDD}
+fi
+
+###############################################################################
 set -e
 
 apt-get -y install build-essential \
 	gcc-mingw-w64-i686 g++-mingw-w64-i686 mingw-w64-tools mingw32 \
 	wget git autoconf automake libtool pkg-config \
 	curl unzip ed yasm cmake zip
-
-cd "$SRC"
 
 ###############################################################################
 
@@ -78,7 +107,7 @@ PATH=${PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin \
 	LDFLAGS="-L${PREFIX}/lib$LDFLAGS" \
 	./configure --host=i686-w64-mingw32 --build=i386-linux \
 	--prefix=$PREFIX $@
-  make $MAKEFLAGS && make install
+make $MAKEFLAGS && make install
 }
 
 function wafbuild {
@@ -321,6 +350,7 @@ set(CMAKE_RC_COMPILER i686-w64-mingw32-windres)
 .
 wq
 EOF
+rm -rf build/
 mkdir build && cd build
 	cmake \
 		-DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_RELEASE_TYPE=Release \
@@ -384,7 +414,7 @@ echo "using gcc : 4.7 : i686-w64-mingw32-g++ :
 	--with-regex \
 	--layout=tagged \
 	--user-config=user-config.jam \
-  -j 4 install
+	$MAKEFLAGS install
 
 ################################################################################
 download ladspa.h http://www.ladspa.org/ladspa_sdk/ladspa.h.txt
@@ -428,14 +458,27 @@ ed $PREFIX/lib/pkgconfig/aubio.pc << EOF
 wq
 EOF
 
+if test -n "$ASIO"; then
+cd ${BUILDD}
+git clone --depth 1 git://github.com/aardvarkk/soundfind.git || true
 src portaudio tgz http://portaudio.com/archives/pa_stable_v19_20140130.tgz
-autoconfbuild # does not include asio, yet
+autoconfbuild --with-asiodir=${BUILDD}/soundfind/ASIOSDK2/ --with-winapi=asio,wmme
+cp include/pa_asio.h ${PREFIX}/include/
+cp ${BUILDD}/soundfind/ASIOSDK2/common/asio.h ${PREFIX}/include/
+else
+src portaudio tgz http://portaudio.com/archives/pa_stable_v19_20140130.tgz
+autoconfbuild
+fi
 
 ################################################################################
 fi  # $NOSTACK
 ################################################################################
+if test -n "$ASIO"; then
+	ARDOURWAVES="--with-wavesbackend"
+else
+	ARDOURWAVES=""
+fi
 ################################################################################
-
 
 cd ${SRC}
 ARDOURSRC=ardour-w32
@@ -458,7 +501,7 @@ CXXFLAGS="-mstackrealign" \
 LDFLAGS="-L${PREFIX}/lib" ./waf configure \
 	--dist-target=mingw --windows-vst \
 	--also-include=${PREFIX}/include \
-	--with-dummy \
+	--with-dummy $ARDOURWAVES \
 	--prefix=${PREFIX}
 ./waf
 ./waf install
@@ -494,7 +537,9 @@ cp build/libs/pbd/pbd-4.dll $DESTDIR/bin/
 cp build/libs/audiographer/audiographer-0.dll $DESTDIR/bin/
 cp build/libs/fst/ardour-vst-scanner.exe $ALIBDIR/fst/
 cp `ls -t build/gtk2_ardour/ardour-*.exe | head -n1` $DESTDIR/bin/ardour.exe
-cp build/libs/clearlooks-newer/clearlooks.dll $DESTDIR/bin/
+
+mkdir -p $DESTDIR/lib/gtk-2.0/engines
+cp build/libs/clearlooks-newer/clearlooks.dll $DESTDIR/lib/gtk-2.0/engines/libclearlooks.la
 
 cp $PREFIX/bin/*dll $DESTDIR/bin/
 cp $PREFIX/lib/*dll $DESTDIR/bin/
