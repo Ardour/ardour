@@ -20,7 +20,7 @@
 #endif
 
 #if (defined (PLATFORM_WINDOWS) || defined(WIN32) || defined(WIN64))
-#if (_MSC_VER > 1600) || defined(__MINGW64__)
+#if (_MSC_VER > 1600) || defined(__MINGW64__) || defined(__MINGW32__)
     // Taken from MSDN official page:
     // In Visual Studio 2010 _MSC_VER  is defined as 1600, In Visual Studio 2012 _MSC_VER  is defined as 1700.
     #include <stdint.h>

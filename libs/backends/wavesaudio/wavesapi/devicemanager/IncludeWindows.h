@@ -23,8 +23,8 @@
 #define NOMINMAX // DO NOT REMOVE NOMINMAX - DOING SO CAUSES CONFLICTS WITH STD INCLUDES (<limits> ...)
 #endif
 
-#include <WinSock2.h>
-#include <Windows.h>
+#include <winsock2.h>
+#include <windows.h>
 #include <objbase.h>
 #endif // #if PLATFORM_WINDOWS 
 #endif // #ifndef __IncludeWindows_h__

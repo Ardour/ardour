@@ -16,7 +16,7 @@
 #include <list>
 using namespace wvNS;
 #include "IncludeWindows.h"
-#include <MMSystem.h>
+#include <mmsystem.h>
 #include "pa_asio.h"
 #include "asio.h"
 

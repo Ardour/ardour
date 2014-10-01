@@ -52,14 +52,14 @@ def build(bld):
             'wavesapi/refmanager/WCRefManager.cpp',
             'wavesapi/devicemanager/WCMRAudioDeviceManager.cpp',
             'wavesapi/devicemanager/WCMRNativeAudio.cpp',
-            'wavesapi/threads/WCThreadSafe.cpp',
+            'wavesapi/Threads/WCThreadSafe.cpp',
             'portmidi/src/pm_common/pmutil.c',
             'portmidi/src/pm_common/portmidi.c'
             ]
 
     if bld.env['build_target'] == 'mingw':
         platform_dependent = [
-                        'wavesapi/miscutils/UMicroseconds.cpp',
+                        'wavesapi/MiscUtils/UMicroseconds.cpp',
                         'wavesapi/devicemanager/WCMRPortAudioDeviceManager.cpp',
                         'portmidi/src/pm_win/pmwin.c',
                         'portmidi/src/pm_win/pmwinmm.c',
@@ -80,10 +80,10 @@ def build(bld):
     obj.includes = ['.',
            'wavesapi',
            'wavesapi/refmanager',
-           'wavesapi/wavespublicapi',
+           'wavesapi/WavesPublicAPI',
            'wavesapi/devicemanager',
-           'wavesapi/miscutils',
-           'wavesapi/threads',
+           'wavesapi/MiscUtils',
+           'wavesapi/Threads',
            'portmidi',
            'portmidi/src/pm_common'
             ]

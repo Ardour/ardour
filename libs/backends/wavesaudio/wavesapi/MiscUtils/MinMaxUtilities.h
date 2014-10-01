@@ -9,6 +9,10 @@
 #include "BasicTypes/WUMathConsts.h"
 #include "WavesPublicAPI/wstdint.h"
 
+#ifdef __GNUC__
+#undef round
+#endif
+
 // New accelerated templates
 #if defined ( __cplusplus ) && !defined (__WUMinMax)
 #define __WUMinMax   // Also defined in Nativepr.h
@@ -30,12 +34,18 @@ template<class T> inline T WUMinMax(const T &Smallest, const T &Biggest, const T
 	}
  */	
 // Absolute value
+
 #ifdef PLATFORM_WINDOWS
 	#include <math.h>
+
+#ifndef __GNUC__
 #define __abs(x)	abs(x) 
 #define __labs(x)	labs(x)
 #define __fabs(x)	fabs(x)
 #endif
+
+#endif
+
 #ifdef __GNUC__
 	#include <iostream> // why don't know makes it work need to check
 	#include <cstdlib>
