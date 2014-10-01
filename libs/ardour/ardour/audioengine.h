@@ -108,14 +108,14 @@ public:
     bool           in_process_thread ();
     uint32_t       process_thread_count ();
 
-	void		   request_backend_reset();
-    void           request_device_list_update();
+		void           request_backend_reset();
+		void           request_device_list_update();
 
     bool           is_realtime() const;
     bool           connected() const;
 
-	// for the user which hold state_lock to check if reset operation is pending
-    bool		   is_reset_requested() const { return g_atomic_int_get(const_cast<gint*>(&_hw_reset_request_count)); }
+		// for the user which hold state_lock to check if reset operation is pending
+		bool           is_reset_requested() const { return g_atomic_int_get(const_cast<gint*>(&_hw_reset_request_count)); }
 
     int set_device_name (const std::string&);
     int set_sample_rate (float);
@@ -131,8 +131,8 @@ public:
     bool freewheeling() const { return _freewheeling; }
     bool running() const { return _running; }
 
-    Glib::Threads::Mutex& process_lock() { return _process_lock; }
-	Glib::Threads::RecMutex& state_lock() { return _state_lock; }
+		Glib::Threads::Mutex& process_lock() { return _process_lock; }
+		Glib::Threads::RecMutex& state_lock() { return _state_lock; }
 
     int request_buffer_size (pframes_t samples) {
 	    return set_buffer_size (samples);
@@ -144,8 +144,8 @@ public:
     void remove_session (); // not a replacement for SessionHandle::session_going_away()
     Session* session() const { return _session; }
 
-    void reconnect_session_routes (bool reconnect_inputs = true, bool reconnect_outputs = true);
-    
+		void reconnect_session_routes (bool reconnect_inputs = true, bool reconnect_outputs = true);
+
     class NoBackendAvailable : public std::exception {
       public:
 	virtual const char *what() const throw() { return "could not connect to engine backend"; }
@@ -165,17 +165,14 @@ public:
     
     PBD::Signal0<void> Xrun;
 
-    /* this signal is emitted if the sample rate changes */
-    
-    PBD::Signal1<void, framecnt_t> SampleRateChanged;
+		/** this signal is emitted if the sample rate changes */
+		PBD::Signal1<void, framecnt_t> SampleRateChanged;
 
-	 /* this signal is emitted if the buffer size changes */
-    
-    PBD::Signal1<void, pframes_t> BufferSizeChanged;
-    
-	/* this signal is emitted if the device cannot operate properly */
-	
-	PBD::Signal0<void> DeviceError;
+		/** this signal is emitted if the buffer size changes */
+		PBD::Signal1<void, pframes_t> BufferSizeChanged;
+
+		/** this signal is emitted if the device cannot operate properly */
+		PBD::Signal0<void> DeviceError;
 
     /* this signal is emitted if the device list changed */
     
@@ -234,11 +231,11 @@ public:
   private:
     AudioEngine ();
 
-    static AudioEngine*       _instance;
+		static AudioEngine*       _instance;
 
-    Glib::Threads::Mutex	   _process_lock;
-	Glib::Threads::RecMutex    _state_lock;
-    Glib::Threads::Cond        session_removed;
+		Glib::Threads::Mutex	   _process_lock;
+		Glib::Threads::RecMutex    _state_lock;
+		Glib::Threads::Cond        session_removed;
     bool                       session_remove_pending;
     frameoffset_t              session_removal_countdown;
     gain_t                     session_removal_gain;
@@ -264,34 +261,34 @@ public:
     framecnt_t                _latency_signal_latency;
     bool                      _stopped_for_latency;
     bool                      _started_for_latency;
-    bool                      _in_destructor;
+		bool                      _in_destructor;
 
-    Glib::Threads::Thread*     _hw_reset_event_thread;
-    gint                       _hw_reset_request_count;
-    Glib::Threads::Cond        _hw_reset_condition;
-    Glib::Threads::Mutex       _reset_request_lock;
-    gint                       _stop_hw_reset_processing;
-    Glib::Threads::Thread*     _hw_devicelist_update_thread;
-    gint                       _hw_devicelist_update_count;
-    Glib::Threads::Cond        _hw_devicelist_update_condition;
-    Glib::Threads::Mutex       _devicelist_update_lock;
-    gint                       _stop_hw_devicelist_processing;
-    
-    void start_hw_event_processing();
-	void stop_hw_event_processing();
-	void do_reset_backend();
-    void do_devicelist_update();
+		Glib::Threads::Thread*     _hw_reset_event_thread;
+		gint                       _hw_reset_request_count;
+		Glib::Threads::Cond        _hw_reset_condition;
+		Glib::Threads::Mutex       _reset_request_lock;
+		gint                       _stop_hw_reset_processing;
+		Glib::Threads::Thread*     _hw_devicelist_update_thread;
+		gint                       _hw_devicelist_update_count;
+		Glib::Threads::Cond        _hw_devicelist_update_condition;
+		Glib::Threads::Mutex       _devicelist_update_lock;
+		gint                       _stop_hw_devicelist_processing;
 
-    void meter_thread ();
-    void start_metering_thread ();
-    void stop_metering_thread ();
-    
-    static gint      m_meter_exit;
-    
-    typedef std::map<std::string,AudioBackendInfo*> BackendMap;
-    BackendMap _backends;
-    AudioBackendInfo* backend_discover (const std::string&);
-    void drop_backend ();
+		void start_hw_event_processing();
+		void stop_hw_event_processing();
+		void do_reset_backend();
+		void do_devicelist_update();
+
+		void meter_thread ();
+		void start_metering_thread ();
+		void stop_metering_thread ();
+
+		static gint      m_meter_exit;
+
+		typedef std::map<std::string,AudioBackendInfo*> BackendMap;
+		BackendMap _backends;
+		AudioBackendInfo* backend_discover (const std::string&);
+		void drop_backend ();
 };
 	
 } // namespace ARDOUR
