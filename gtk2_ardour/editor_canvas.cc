@@ -355,8 +355,11 @@ Editor::track_canvas_viewport_size_allocated ()
 		for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
 			i->second->canvas_height_set (_visible_canvas_height);
 		}
-
+        
 		vertical_adjustment.set_page_size (_visible_canvas_height);
+        vertical_adjustment.set_page_increment (_visible_canvas_height/2);
+        vertical_adjustment.set_step_increment (_visible_canvas_height/10);
+        
 		if ((vertical_adjustment.get_value() + _visible_canvas_height) >= vertical_adjustment.get_upper()) {
 			/*
 			   We're increasing the size of the canvas while the bottom is visible.
@@ -369,8 +372,9 @@ Editor::track_canvas_viewport_size_allocated ()
 	}
     
     if (width_changed) {
-        // set page size for horizontal adjustment
         horizontal_adjustment.set_page_size (_visible_canvas_width);
+        horizontal_adjustment.set_page_increment (_visible_canvas_width/2);
+        horizontal_adjustment.set_step_increment (_visible_canvas_width/10);
         
         // set adjustment horizontal value
         update_horizontal_adjustment_limits ();
