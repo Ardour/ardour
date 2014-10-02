@@ -44,60 +44,60 @@
                 width="107"
                 height="0"/>
       <Button id="audio_settings_tab_button"
-                  text="Audio\nSystem \nSettings \n"
+                  text="\nAudio\nSystem \nSettings \n"
                   style="generic_control"
                   fgnormal="#909090"
-    			  bgnormal="#606060"
+    			  bgnormal="#303030"
     			  fgactive="#000000"
     			  bgactive="#dcdcdc"
-    			  borderwidth="0 0 0 0"
+    			  borderwidth="0 1 1 1"
                   x="0"
                   y="0"
-                  width="107"
+                  width="110"
                   height="65"/>
       <EventBox bgnormal="#373737"
                 width="107"
                 height="0"/>
       <Button id="midi_settings_tab_button"
-                  width="107"
+                  width="110"
                   height="65"
-                  text="MIDI\nSystem \nSettings \n"
+                  text="\nMIDI\nSystem \nSettings \n"
                   style="generic_control"
                   fgnormal="#909090"
-    			  bgnormal="#606060"
+    			  bgnormal="#303030"
     			  fgactive="#000000"
     			  bgactive="#dcdcdc"
-    			  borderwidth="0 0 0 0"
+    			  borderwidth="0 0 1 1"
                   x="0"
                   y="0"/>
       <EventBox bgnormal="#373737"
                 width="107"
                 height="0"/>
       <Button id="session_settings_tab_button"
-                  width="107"
+                  width="110"
                   height="65"
                   text="Session\nSettings"
                   style="generic_control"
                   fgnormal="#909090"
-    			  bgnormal="#606060"
+    			  bgnormal="#303030"
     			  fgactive="#000000"
     			  bgactive="#dcdcdc"
-    			  borderwidth="0 0 0 0"
+    			  borderwidth="0 0 1 1"
                   x="0"
                   y="0"/>
       <EventBox bgnormal="#373737"
                 width="107"
                 height="0"/>
       <Button id="general_settings_tab_button"
-                  width="107"
+                  width="110"
                   height="65"
                   text="Preferences"
                   style="generic_control"
                   fgnormal="#909090"
-    			  bgnormal="#606060"
+    			  bgnormal="#303030"
     			  fgactive="#000000"
     			  bgactive="#dcdcdc"
-    			  borderwidth="0 0 0 0"
+    			  borderwidth="0 0 1 1"
                   x="0"
                   y="0"/>
       <EventBox bgnormal="#373737"
@@ -110,33 +110,45 @@
             y="559"
             width="505"
             height="63">
-      <Iconbutton id="ok_button"
+      <Button id="ok_button"
                   style="generic_button"
+                  text="Ok"
+                  fgnormal="#212121"
+    			  bgnormal="#EbEbEb"
+    			  fgactive="#909090"
+    			  bgactive="#424242"
+    			  borderwidth="1 1 1 1"
+                  bordercolor="#454545"
                   x="275"
                   y="18"
                   width="71"
-                  height="28"
-                  normalicon="preferences_ok_button"
-                  activeicon="preferences_ok_button_active"
-                  _prelighticon="preferences_ok_button_prelight"/>
-      <Iconbutton id="cancel_button"
+                  height="24"/>
+      <Button id="cancel_button"
                   style="generic_button"
+                  text="Cancel"
+                  fgnormal="#212121"
+    			  bgnormal="#EbEbEb"
+    			  fgactive="#909090"
+    			  bgactive="#424242"
+    			  borderwidth="1 1 1 1"
+                  bordercolor="#454545"
                   x="347"
                   y="18"
                   width="71"
-                  height="28"
-                  normalicon="preferences_cancel_button"
-                  activeicon="preferences_cancel_button_active"
-                  _prelighticon="preferences_cancel_button_prelight"/>
-      <Iconbutton id="apply_button"
+                  height="24"/>
+      <Button id="apply_button"
                   style="generic_button"
+                  text="Apply"
+                  fgnormal="#212121"
+    			  bgnormal="#EbEbEb"
+    			  fgactive="#909090"
+    			  bgactive="#424242"
+    			  borderwidth="1 1 1 1"
+                  bordercolor="#454545"
                   x="419"
                   y="18"
                   width="71"
-                  height="28"
-                  normalicon="preferences_apply_button"
-                  activeicon="preferences_apply_button_active"
-                  _prelighticon="preferences_apply_button_prelight"/>
+                  height="24"/>
     </Layout>
     <Layout id="midi_settings_tab"
             bgnormal="#303030"
@@ -309,24 +321,27 @@
           </HBox>
           <DropdownMenu style="generic_dropdown_menu"/>
         </Dropdown>
-
-        <Iconbutton id="control_panel_button"
-                    style="generic_button"
+          <Button id="control_panel_button"
+                    style="generic_control"
+                    text="Device\nControl\nPanel"
+                    fgnormal="#909090"
+    			  	bgnormal="#404040"
+    			  	fgactive="#000000"
+    			  	bgactive="#dcdcdc"
+                    borderwidth="1 1 1 1"
+                    bordercolor="#454545"
                     x="407"
                     y="10"
                     width="85"
-                    height="49"
-                    normalicon="preferences_device_control_panel_button"
-                    activeicon="preferences_device_control_panel_button_active"
-                    _prelighticon="preferences_device_control_panel_button_prelight"/>
+                    height="49"/>
 
-        <Label id="latency_label" style="generic_control" text="Input Latency:" x="16" y="74  " width="476"/>
+        <Label id="latency_label" style="generic_control" text="" x="16" y="74  " width="476"/>
       </Layout>
-      <Layout bgnormal="#303030" x="0" y="101" width="505" height="39">
-        <Label style="generic_control" text="Channel Configuration Mode" fgnormal="#c1c1c1"
-               winfont ="Arial Bold 12"
-               macfont ="Helvetica Bold 12"
-               x="18" y="12"/>
+      <Layout bgnormal="#303030" x="0" y="101" width="505" height="38">
+        <Label style="generic_control" text="Operation Mode" fgnormal="#c1c1c1"
+               winfont ="Arial 12"
+               macfont ="Helvetica 12"
+               x="55" y="10"/>
         <Button id="multi_out_button"
                     text="Multi Out"
                     style="generic_control"
@@ -334,11 +349,12 @@
     				bgnormal="#606060"
     				fgactive="#ffffff"
     				bgactive="#0A8893"
-    				borderwidth="0 0 0 0"
-                    x="280"
-                    y="6"
-                    width="106"
-                    height="28"/>
+    				borderwidth="1 1 1 1"
+                    bordercolor="#454545"
+                    x="180"
+                    y="0"
+                    width="80"
+                    height="24"/>
 
         <Button id="stereo_out_button"
     				text="Stereo Out"
@@ -347,15 +363,16 @@
     				bgnormal="#606060"
     				fgactive="#ffffff"
     				bgactive="#0A8893"
-    				borderwidth="0 0 0 0"
-    				x="387"
-    				y="6"
-    				width="106"
-    				height="28"/>
+    				borderwidth="1 1 1 1"
+                    bordercolor="#454545"
+    				x="261"
+    				y="0"
+    				width="80"
+    				height="24"/>
       </Layout>
       <Layout bgnormal="#303030" x="0" y="141" width="505" height="416">
-        <Layout bgnormal="#303030" x="16" y="13" width="3" height="41"/>
-        <Layout bgnormal="#303030" x="22" y="13" width="265" height="19">
+        <Layout bgnormal="#909090" x="16" y="13" width="3" height="41"/>
+        <Layout bgnormal="#404040" x="22" y="13" width="265" height="19">
           <Label style="generic_control"
                  text="Inputs"
                  fgnormal="#c1c1c1"
@@ -364,8 +381,8 @@
                  x="7"
                  y="3"/>
         </Layout>
-        <Layout bgnormal="#797979" x="22" y="35" width="85" height="19">
-          <Label style="generic_control" text="Port" fgnormal="#303030" x="7" y="3"/>
+        <Layout bgnormal="#404040" x="22" y="35" width="85" height="19">
+          <Label style="generic_control" text="Port" fgnormal="#909090" x="7" y="3"/>
         </Layout>
         <Button id="all_inputs_on_button"
           text="All"
@@ -389,14 +406,14 @@
           bghover="#808080"
           borderwidth="0 0 0 0"
           x="141" y="35" width="29" height="19"/>
-        <Layout bgnormal="#797979" x="174" y="35" width="26" height="19">
-          <Label style="generic_control" text="#" fgnormal="#303030" x="7" y="3"/>
+        <Layout bgnormal="#404040" x="174" y="35" width="26" height="19">
+          <Label style="generic_control" text="#" fgnormal="#909090" x="7" y="3"/>
         </Layout>
-        <Layout bgnormal="#797979" x="202" y="35" width="85" height="19">
-          <Label style="generic_control" text="Track Name" fgnormal="#303030" x="7" y="3"/>
+        <Layout bgnormal="#404040" x="202" y="35" width="85" height="19">
+          <Label style="generic_control" text="Track Name" fgnormal="#909090" x="7" y="3"/>
         </Layout>
         <Layout bgnormal="#303030" x="290" y="13" width="3" height="41"/>
-        <Layout bgnormal="#303030" x="296" y="13" width="178" height="19">
+        <Layout bgnormal="#404040" x="296" y="13" width="178" height="19">
           <Label style="generic_control"
                  text="Outputs"
                  fgnormal="#c1c1c1"
@@ -405,8 +422,8 @@
                  x="7"
                  y="3"/>
         </Layout>
-        <Layout bgnormal="#797979" x="296" y="35" width="85" height="19">
-          <Label style="generic_control" text="Port" fgnormal="#303030" x="7" y="3"/>
+        <Layout bgnormal="#404040" x="296" y="35" width="85" height="19">
+          <Label style="generic_control" text="Port" fgnormal="#909090" x="7" y="3"/>
         </Layout>
         <Button id="all_outputs_on_button"
           text="All"
@@ -430,8 +447,8 @@
           bghover="#808080"
           borderwidth="0 0 0 0"
           x="415" y="35" width="29" height="19"/>
-        <Layout bgnormal="#303030" x="448" y="35" width="26" height="19">
-          <Label style="generic_control" text="#" fgnormal="#303030" x="7" y="3"/>
+        <Layout bgnormal="#404040" x="448" y="35" width="26" height="19">
+          <Label style="generic_control" text="#" fgnormal="#909090" x="7" y="3"/>
         </Layout>
         <ScrolledWindow x="16" y="62" bgnormal="#303030" width="478" height="299" hscroll="never" vscroll="auto">
           <HBox>
@@ -441,41 +458,58 @@
             </VBox>
           </HBox>
         </ScrolledWindow>
-        <Iconbutton id="name_tracks_after_driver_button"
+        <Button id="name_tracks_after_driver_button"
                     style="generic_button"
+                    text="Name Tracks\nAfter Driver"
+                    fgnormal="#909090"
+    			  	bgnormal="#505050"
+    			  	fgactive="#000000"
+    			  	bgactive="#dcdcdc"
+    			  	borderwidth="1 1 1 1"
+                    bordercolor="#454545"
                     x="16"
                     y="369"
                     width="136"
-                    height="39"
-                    normalicon="preference_name_track_after_driver_button"
-                    activeicon="preference_name_track_after_driver_active"
-                    _prelighticon="preference_name_track_after_driver_prelight"/>
-        <Iconbutton id="reset_tracks_name_to_default_button"
+                    height="39"/>
+        <Button id="reset_tracks_name_to_default_button"
+        			style="generic_button"
+                    text="Reset Track\nNames To Default"
+                    fgnormal="#909090"
+    			  	bgnormal="#505050"
+    			  	fgactive="#000000"
+    			  	bgactive="#dcdcdc"
+    			  	borderwidth="1 1 1 1"
+                    bordercolor="#454545"
                     x="153"
                     y="369"
                     width="136"
-                    height="39"
-                    normalicon="preference_reset_track_names_button"
-                    activeicon="preference_reset_track_names_button_active"
-                    _prelighticon="preference_reset_track_names_button_prelight"/>
-        <Iconbutton id="yes_button"
+                    height="39"/>
+        <Button id="yes_button"
                     text="Yes"
+                    style="generic_button"
+                    fgnormal="#909090"
+    			  	bgnormal="#505050"
+    			  	fgactive="#000000"
+    			  	bgactive="#dcdcdc"
+    			  	borderwidth="1 1 1 1"
+                    bordercolor="#454545"
                     x="292"
                     y="369"
                     width="52"
-                    height="39"
-                    normalicon="preference_yes_button"
-                    activeicon="preference_yes_button_active"
-                    _prelighticon="preference_yes_button_prelight"/>
-        <Iconbutton id="no_button"
+                    height="39"/>
+        <Button id="no_button"
                     text="No"
+                    style="generic_button"
+                    fgnormal="#909090"
+    			  	bgnormal="#505050"
+    			  	fgactive="#000000"
+    			  	bgactive="#dcdcdc"
+    			  	borderwidth="1 1 1 1"
+                    bordercolor="#454545"
                     x="345"
                     y="369"
                     width="52"
-                    height="39"
-                    normalicon="preference_no_button"
-                    activeicon="preference_no_button_active"
-                    _prelighticon="preference_no_button_prelight"/>
+                    height="39"/>
       </Layout>
     </Layout>
     <Layout id="session_settings_tab"

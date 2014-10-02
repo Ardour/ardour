@@ -4,7 +4,7 @@
                    meterwidth="5"
                    thinmeterwidth="2">
   <VBox spacing="6">
-    <EventBox bgnormal="#212121">
+    <EventBox bgnormal="#303030">
     <Hbox id="level_meter_home"
           height="51"/>
     </EventBox>
