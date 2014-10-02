@@ -118,7 +118,7 @@ FileManager::allocate (FileDescriptor* d)
 
 #ifdef __APPLE__
 	d->_last_used = mach_absolute_time();
-#elif defined(_POSIX_TIMERS) && defined(_POSIX_MONOTONIC_CLOCK)
+#elif defined(_POSIX_TIMERS) && defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_C_SOURCE >= 199309L)
 	struct timespec t;
 	clock_gettime (CLOCK_MONOTONIC, &t);
 	d->_last_used = t.tv_sec + (double) t.tv_nsec / 10e9;
