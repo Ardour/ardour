@@ -324,7 +324,7 @@ GainMeter::peak_button_release (GdkEventButton* ev)
 		ResetRoutePeakDisplays (_route.get());
 	}
 
-	return true;
+	return false;
 }
 
 void
