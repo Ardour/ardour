@@ -460,7 +460,7 @@ RouteUI::mute_press (GdkEventButton* ev)
             _session->set_mute (rl, !_route->muted());
         }
         
-	return false;
+	return true;
 }
         
 bool
@@ -618,7 +618,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 		}
 	}
 
-	return false;
+	return true;
 }
 
 bool
@@ -641,7 +641,7 @@ RouteUI::solo_release (GdkEventButton*)
 		_solo_release = 0;
 	}
 
-	return false;
+	return true;
 }
 
 bool
@@ -654,7 +654,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 	if (!_session->engine().connected()) {
 	        MessageDialog msg (_("Not connected to AudioEngine - cannot engage record"));
 		msg.run ();
-		return false;
+		return true;
 	}
 
         if (is_midi_track()) {
@@ -663,7 +663,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
                 if (midi_track()->step_editing()) {
 			midi_track()->set_step_editing (false);
-			return false;
+			return true;
                 }
         }
 
@@ -715,7 +715,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		}
 	}
 
-	return false;
+	return true;
 }
 
 void
@@ -747,7 +747,7 @@ RouteUI::update_monitoring_display ()
 bool
 RouteUI::monitor_input_press(GdkEventButton*)
 {
-	return false;
+	return true;
 }
 
 bool
@@ -759,7 +759,7 @@ RouteUI::monitor_input_release(GdkEventButton* ev)
 bool
 RouteUI::monitor_disk_press (GdkEventButton*)
 {
-	return false;
+	return true;
 }
 
 bool
@@ -882,10 +882,10 @@ RouteUI::rec_enable_release (GdkEventButton* ev)
                 if (record_menu) {
                         record_menu->popup (1, ev->time);
                 }
-                return false;
+                return true;
         }
 
-	return false;
+	return true;
 }
 
 void
