@@ -42,7 +42,8 @@
     <Adjustment id="horizontal_adjustment"
                 initial_value="0"
                 minvalue="0"
-                maxvalue="10000000000000000"/>
+                maxvalue="10"
+                step="400"/>
     <Adjustment id="unused_adjustment"
                 initial_value="0"
                 minvalue="0"

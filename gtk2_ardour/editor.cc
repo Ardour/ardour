@@ -538,6 +538,8 @@ Editor::Editor ()
 	selection->MarkersChanged.connect (sigc::mem_fun(*this, &Editor::marker_selection_changed));
 
 	vertical_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &Editor::tie_vertical_scrolling), true);
+    horizontal_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &Editor::tie_horizontal_scrolling), true);
+    
 	_track_canvas->signal_map_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_map_handler));
 
 	_group_tabs = new EditorGroupTabs (this);
@@ -1274,7 +1276,7 @@ Editor::map_position_change (framepos_t frame)
 	if (_follow_playhead) {
 		center_screen (frame);
 	}
-
+    
 	playhead_cursor->set_position (frame);
 }
 
@@ -1442,8 +1444,12 @@ Editor::set_session (Session *t)
 	_session->locations()->removed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::location_gone, this, _1), gui_context());
 	_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
-        _session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&Editor::start_lock_event_timing, this), gui_context());
-        _session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::start_session_auto_save_event_timing, this), gui_context());
+    _session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&Editor::start_lock_event_timing, this), gui_context());
+    _session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::start_session_auto_save_event_timing, this), gui_context());
+    _session->locations()->session_range_location()->StartChanged.connect(_session_connections, invalidator (*this), boost::bind (&Editor::update_horizontal_adjustment_limits, this), gui_context() );
+    _session->locations()->session_range_location()->EndChanged.connect(_session_connections, invalidator (*this), boost::bind (&Editor::update_horizontal_adjustment_limits, this), gui_context() );
+    
+    update_horizontal_adjustment_limits();
     
     // Global record button staff
     // if new tracks is added, they must effect on Global Record button and Master Mute button
@@ -4342,7 +4348,8 @@ Editor::set_samples_per_pixel (framecnt_t spp)
 	}
 
 	samples_per_pixel = spp;
-
+    update_horizontal_adjustment_limits();
+    
 	if (tempo_lines) {
 		tempo_lines->tempo_map_changed();
 	}
@@ -4452,7 +4459,7 @@ Editor::visual_changer (const VisualChange& vc)
 	}
 
 	if (vc.pending & VisualChange::TimeOrigin) {
-		set_horizontal_position (vc.time_origin / samples_per_pixel);
+		horizontal_adjustment.set_value (vc.time_origin / samples_per_pixel);
 	}
 
 	if (vc.pending & VisualChange::YOrigin) {
@@ -4468,7 +4475,7 @@ Editor::visual_changer (const VisualChange& vc)
 	if (!(vc.pending & VisualChange::ZoomLevel)) {
 		update_video_timeline();
 	}
-
+    
 	_summary->set_overlays_dirty ();
 }
 
@@ -5374,7 +5381,7 @@ Editor::reset_x_origin_to_follow_playhead ()
 			if (l < 0) {
 				l = 0;
 			}
-			
+            
 			center_screen_internal (l + (current_page_samples() / 2), current_page_samples ());
 		}
 	}
@@ -5429,9 +5436,14 @@ Editor::super_rapid_screen_update ()
 		if (!_dragging_playhead) {
 			playhead_cursor->set_position (frame);
 		}
-
+        
 		if (!_stationary_playhead) {
 
+            if (_session->actively_recording () &&
+                sample_to_pixel(frame) > horizontal_adjustment.get_upper() ) {
+                horizontal_adjustment.set_upper(sample_to_pixel(frame) + _visible_canvas_width );
+            }
+            
 			if (!_dragging_playhead && _follow_playhead && _session->requested_return_frame() < 0 && !pending_visual_change.being_handled) {
 				/* We only do this if we aren't already
 				   handling a visual change (ie if
@@ -5461,7 +5473,7 @@ Editor::super_rapid_screen_update ()
 			}
 
 			current = target;
-			set_horizontal_position (current);
+			horizontal_adjustment.set_value (current);
 #endif
 		}
 

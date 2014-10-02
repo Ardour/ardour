@@ -321,9 +321,27 @@ Editor::track_canvas_viewport_allocate (Gtk::Allocation alloc)
 }
 
 void
+Editor::update_horizontal_adjustment_limits ()
+{
+    if (!_session) {
+        return;
+    }
+    
+    double lower_limit = sample_to_pixel(_session->locations()->session_range_location()->start() );
+    horizontal_adjustment.set_lower(lower_limit);
+    
+    double session_end_marker_position = sample_to_pixel(_session->locations()->session_range_location()->end() );
+    double upper_limit = max (lower_limit + _visible_canvas_width, session_end_marker_position);
+    
+    horizontal_adjustment.set_upper(upper_limit + 10); // 3 pixels offset
+}
+
+void
 Editor::track_canvas_viewport_size_allocated ()
 {
 	bool height_changed = _visible_canvas_height != _canvas_viewport_allocation.get_height();
+    
+    bool width_changed = _visible_canvas_width != _canvas_viewport_allocation.get_width();
 
 	_visible_canvas_width  = _canvas_viewport_allocation.get_width ();
 	_visible_canvas_height = _canvas_viewport_allocation.get_height ();
@@ -349,6 +367,19 @@ Editor::track_canvas_viewport_size_allocated ()
 
 		set_visible_track_count (_visible_track_count);
 	}
+    
+    if (width_changed) {
+        // set page size for horizontal adjustment
+        horizontal_adjustment.set_page_size (_visible_canvas_width);
+        
+        // set adjustment horizontal value
+        update_horizontal_adjustment_limits ();
+        
+        if ((horizontal_adjustment.get_value() + _visible_canvas_width) >= horizontal_adjustment.get_upper()) {
+            
+            horizontal_adjustment.set_value (horizontal_adjustment.get_upper() - _visible_canvas_width);
+        }
+    }
 
 	update_fixed_rulers();
 	redisplay_tempo (false);
@@ -396,7 +427,7 @@ Editor::reset_controls_layout_height (int32_t h)
 	 * for the controls layout. The size request is set elsewhere.
          */
 
-        controls_layout.property_height() = h;
+    controls_layout.property_height() = h;
 
 }
 
@@ -905,20 +936,20 @@ Editor::tie_vertical_scrolling ()
 }
 
 void
-Editor::set_horizontal_position (double p)
+Editor::tie_horizontal_scrolling ()
 {
-	horizontal_adjustment.set_value (p);
-
-	leftmost_frame = (framepos_t) floor (p * samples_per_pixel);
-
-	update_fixed_rulers ();
-	redisplay_tempo (true);
-
-	if (pending_visual_change.idle_handler_id < 0) {
-		_summary->set_overlays_dirty ();
-	}
-
-	update_video_timeline();
+    double p = horizontal_adjustment.get_value ();
+      
+    leftmost_frame = (framepos_t) floor (p * samples_per_pixel);
+    
+    update_fixed_rulers ();
+    redisplay_tempo (true);
+    
+    if (pending_visual_change.idle_handler_id < 0) {
+        _summary->set_overlays_dirty ();
+    }
+    
+    update_video_timeline();
 }
 
 void

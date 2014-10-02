@@ -1012,7 +1012,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	sigc::connection control_scroll_connection;
 
 	void tie_vertical_scrolling ();
-	void set_horizontal_position (double);
+    void tie_horizontal_scrolling ();
 	double horizontal_position () const;
 
 	struct VisualChange {
@@ -1481,6 +1481,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool track_canvas_motion_notify_event (GdkEventMotion* event);
 
 	Gtk::Allocation _canvas_viewport_allocation;
+    void update_horizontal_adjustment_limits ();
 	void track_canvas_viewport_allocate (Gtk::Allocation alloc);
 	void track_canvas_viewport_size_allocated ();
 	bool track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const &, int, int, guint);
