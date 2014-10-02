@@ -23,6 +23,8 @@
 
 #include <glibmm.h>
 #include <fontconfig/fontconfig.h>
+#include <pango/pangoft2.h>
+#include <pango/pangocairo.h>
 #include <windows.h>
 #include <wingdi.h>
 
@@ -67,24 +69,25 @@ void load_custom_fonts()
 		return;
 	}
 
-	// pango with fontconfig backend
-	FcConfig *config = FcInitLoadConfigAndFonts();
-	FcBool ret = FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()));
+	if (pango_font_map_get_type() == PANGO_TYPE_FT2_FONT_MAP) {
+		FcConfig *config = FcInitLoadConfigAndFonts();
+		FcBool ret = FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()));
 
-	if (ret == FcFalse) {
-		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
-	}
+		if (ret == FcFalse) {
+			cerr << _("Cannot load ArdourMono TrueType font.") << endl;
+		}
 
-	ret = FcConfigSetCurrent(config);
+		ret = FcConfigSetCurrent(config);
 
-	if (ret == FcFalse) {
-		cerr << _("Failed to set fontconfig configuration.") << endl;
-	}
-
-	// pango with win32 backend
-	if (0 == AddFontResource(ardour_mono_file.c_str())) {
-		cerr << _("Cannot register ArdourMono TrueType font with windows gdi.") << endl;
+		if (ret == FcFalse) {
+			cerr << _("Failed to set fontconfig configuration.") << endl;
+		}
 	} else {
-		atexit (&unload_custom_fonts);
+		// pango with win32 backend
+		if (0 == AddFontResource(ardour_mono_file.c_str())) {
+			cerr << _("Cannot register ArdourMono TrueType font with windows gdi.") << endl;
+		} else {
+			atexit (&unload_custom_fonts);
+		}
 	}
 }
