@@ -23,7 +23,7 @@
 
 using namespace ARDOUR;
 
-#ifdef __MINGW64__
+#if defined __MINGW64__ || defined __MINGW32__
 	extern "C" __declspec(dllexport) ARDOUR::AudioBackendInfo* descriptor ()
 #else
 	extern "C" ARDOURBACKEND_API ARDOUR::AudioBackendInfo* descriptor ()
