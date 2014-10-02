@@ -5850,7 +5850,6 @@ void
 Editor::port_registration_handler ()
 {
         if (!_session) {
-                cerr << "PRH, early\n";
                 return;
         }
 
@@ -5861,7 +5860,6 @@ void
 Editor::port_connection_handler (boost::weak_ptr<Port> wa, std::string, boost::weak_ptr<Port> wb, std::string, bool connected)
 {
         if (!_session) {
-                cerr << "PCH, early\n";
                 return;
         }
 
