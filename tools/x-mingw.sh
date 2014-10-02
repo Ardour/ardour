@@ -4,6 +4,7 @@
 #
 # It is intended to run in a pristine chroot or VM of a minimal
 # debian system. see http://wiki.debian.org/cowbuilder
+# but it can also be run as root on any system...
 #
 ###############################################################################
 ### Quick start
@@ -26,7 +27,7 @@
 #
 # /tmp/this_script.sh
 #
-### go for a coffee and ~30min later find /tmp/a3win.zip
+### go for a coffee and ~40min later find /tmp/ardour-{VERSION}-Setup.exe
 ###
 ### instead of cowbuilder --login, cowbuilder --execute /tmp/x-mingw.sh
 ### does it all by itself, a ~/.pbuilderrc or /etc//etc/pbuilderrc
@@ -526,15 +527,15 @@ mkdir -p $ALIBDIR/backends
 mkdir -p $ALIBDIR/panners
 mkdir -p $ALIBDIR/fst
 
-cp build/libs/gtkmm2ext/gtkmm2ext-0.dll $DESTDIR/bin/
-cp build/libs/midi++2/midipp-4.dll $DESTDIR/bin/
-cp build/libs/evoral/evoral-0.dll $DESTDIR/bin/
-cp build/libs/ardour/ardour-3.dll $DESTDIR/bin/
+cp build/libs/gtkmm2ext/gtkmm2ext-*.dll $DESTDIR/bin/
+cp build/libs/midi++2/midipp-*.dll $DESTDIR/bin/
+cp build/libs/evoral/evoral-*.dll $DESTDIR/bin/
+cp build/libs/ardour/ardour-*.dll $DESTDIR/bin/
 cp build/libs/timecode/timecode.dll $DESTDIR/bin/
-cp build/libs/qm-dsp/qmdsp-0.dll $DESTDIR/bin/
-cp build/libs/canvas/canvas-0.dll $DESTDIR/bin/
-cp build/libs/pbd/pbd-4.dll $DESTDIR/bin/
-cp build/libs/audiographer/audiographer-0.dll $DESTDIR/bin/
+cp build/libs/qm-dsp/qmdsp-*.dll $DESTDIR/bin/
+cp build/libs/canvas/canvas-*.dll $DESTDIR/bin/
+cp build/libs/pbd/pbd-*.dll $DESTDIR/bin/
+cp build/libs/audiographer/audiographer-*.dll $DESTDIR/bin/
 cp build/libs/fst/ardour-vst-scanner.exe $ALIBDIR/fst/
 cp `ls -t build/gtk2_ardour/ardour-*.exe | head -n1` $DESTDIR/bin/ardour.exe
 
@@ -551,11 +552,19 @@ cp `find build/libs/panners/ -iname "*.dll"` $ALIBDIR/panners/
 
 cp -r build/libs/LV2 $ALIBDIR/
 
-mv $ALIBDIR/surfaces/ardourcp-4.dll $DESTDIR/bin/
+mv $ALIBDIR/surfaces/ardourcp-*.dll $DESTDIR/bin/
 
-# TODO use -static-libgcc -static-libstdc++
-cp /usr/lib/gcc/i686-w64-mingw32/4.6/libgcc_s_sjlj-1.dll /$DESTDIR/bin/
-cp /usr/lib/gcc/i686-w64-mingw32/4.6/libstdc++-6.dll /$DESTDIR/bin/
+# TODO use -static-libgcc -static-libstdc++ -- but for .exe files only
+if update-alternatives --query i686-w64-mingw32-gcc | grep Value: | grep -q win32; then
+	cp /usr/lib/gcc/i686-w64-mingw32/*-win32/libgcc_s_sjlj-1.dll /$DESTDIR/bin/
+	cp /usr/lib/gcc/i686-w64-mingw32/*-win32/libstdc++-6.dll /$DESTDIR/bin/
+elif update-alternatives --query i686-w64-mingw32-gcc | grep Value: | grep -q posix; then
+	cp /usr/lib/gcc/i686-w64-mingw32/*-posix/libgcc_s_sjlj-1.dll /$DESTDIR/bin/
+	cp /usr/lib/gcc/i686-w64-mingw32/*-posix/libstdc++-6.dll /$DESTDIR/bin/
+else
+	cp /usr/lib/gcc/i686-w64-mingw32/*/libgcc_s_sjlj-1.dll /$DESTDIR/bin/
+	cp /usr/lib/gcc/i686-w64-mingw32/*/libstdc++-6.dll /$DESTDIR/bin/
+fi
 
 cp -r $PREFIX/share/ardour3 $DESTDIR/share/
 cp -r $PREFIX/etc/ardour3/* $DESTDIR/share/ardour3/
