@@ -47,6 +47,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/operations.h"
 #include "ardour/playlist_factory.h"
+#include "ardour/profile.h"
 #include "ardour/quantize.h"
 #include "ardour/region_factory.h"
 #include "ardour/reverse.h"
@@ -136,7 +137,7 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 
 	RegionSelection pre_selected_regions = selection->regions;
 	bool working_on_selection = !pre_selected_regions.empty();
-	
+
 	list<boost::shared_ptr<Playlist> > used_playlists;
 	list<RouteTimeAxisView*> used_trackviews;
 
@@ -236,14 +237,15 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 		EditorThaw(); /* Emit Signal */
 	}
 
-	//IFF we were working on selected regions, try to reinstate the other region selections that existed before the freeze/thaw.
-	_ignore_follow_edits = true;  //a split will change the region selection in mysterious ways;  its not practical or wanted to follow this edit
-	if( working_on_selection ) {
-		selection->add ( pre_selected_regions );
-		selection->add (latest_regionviews);  //these are the new regions created after the split
+	if (ARDOUR::Profile->get_mixbus()) {
+		//IFF we were working on selected regions, try to reinstate the other region selections that existed before the freeze/thaw.
+		_ignore_follow_edits = true;  //a split will change the region selection in mysterious ways;  its not practical or wanted to follow this edit
+		if( working_on_selection ) {
+			selection->add ( pre_selected_regions );
+			selection->add (latest_regionviews);  //these are the new regions created after the split
+		}
+		_ignore_follow_edits = false;
 	}
-	_ignore_follow_edits = false;
-
 }
 
 /** Move one extreme of the current range selection.  If more than one range is selected,
