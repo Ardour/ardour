@@ -160,8 +160,12 @@ WavesDropdown::_on_popup_menu_position (int& x, int& y, bool& push_in)
 bool
 WavesDropdown::_on_mouse_pressed (GdkEventButton*)
 {
-	_menu.popup (sigc::mem_fun(this, &WavesDropdown::_on_popup_menu_position), 1, gtk_get_current_event_time());
 	_hovering = _pushed = false;
-	set_active (true);
+	if (!_menu.items ().empty ()) {
+		_menu.popup (sigc::mem_fun(this, &WavesDropdown::_on_popup_menu_position), 1, gtk_get_current_event_time());
+		set_active (true);
+	} else {
+		set_active (false);
+	}
 	return true;
 }
