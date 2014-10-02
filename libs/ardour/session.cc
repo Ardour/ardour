@@ -113,6 +113,9 @@ using namespace PBD;
 const char * Session::default_trx_track_name_pattern = "Track "; // add track number to the pattern
 const char * Session::default_ardour_track_name_pattern = "Audio "; // add track number to the pattern
 
+// seconds should be added afte the region exceeds end marker
+const uint32_t session_end_shift = 15;
+
 namespace {
     bool compare_roots_by_remote_id (const boost::shared_ptr<Route>& route1, const boost::shared_ptr<Route>& route2)
     {
@@ -3808,10 +3811,13 @@ Session::maybe_update_session_range (framepos_t a, framepos_t b)
 	if (_state_of_the_state & Loading) {
 		return;
 	}
+    
+    //calculate session endarker offset in samples
+    framepos_t session_end_marker_shift_samples = session_end_shift*_nominal_frame_rate;
 
 	if (_session_range_location == 0) {
 
-		set_session_range_location (a, b);
+		set_session_range_location (a, b + session_end_marker_shift_samples);
 
 	} else {
 
@@ -3820,7 +3826,7 @@ Session::maybe_update_session_range (framepos_t a, framepos_t b)
 		}
 
 		if (b > _session_range_location->end()) {
-			_session_range_location->set_end (b);
+			_session_range_location->set_end (b + session_end_marker_shift_samples);
 		}
 	}
 }
