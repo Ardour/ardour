@@ -1495,6 +1495,14 @@ Editor::set_session (Session *t)
 
 	start_updating_meters ();
     
+    // create or init master bus UI
+    if (!_master_bus_ui) {
+        _master_bus_ui = new MasterBusUI (_session, *this);
+        _master_bus_ui_home.add (*_master_bus_ui);
+    } else {
+        _master_bus_ui->init(_session);
+    }
+    
     _set_session_in_progress = false;
 }
 
