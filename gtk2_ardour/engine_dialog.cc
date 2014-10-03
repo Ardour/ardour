@@ -826,6 +826,11 @@ EngineControl::list_devices ()
 
 		device_changed ();
 
+		input_latency.set_sensitive (true);
+		output_latency.set_sensitive (true);
+		input_channels.set_sensitive (true);
+		output_channels.set_sensitive (true);
+
 		ok_button->set_sensitive (true);
 		apply_button->set_sensitive (true);
 
