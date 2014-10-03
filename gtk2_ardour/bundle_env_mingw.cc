@@ -105,7 +105,7 @@ fixup_bundle_environment (int, char* [], const char** localedir)
 	} else {
 		path = "";
 	}
-	path += Glib::build_filename(get_install_path(), "lib", "ardour3", "vamp", NULL);
+	path += Glib::build_filename(get_install_path(), "lib", "ardour3", "vamp");
 	path += G_SEARCHPATH_SEPARATOR;
 	path += "%ProgramFiles%\\Vamp Plugins"; // default vamp path
 	path += G_SEARCHPATH_SEPARATOR;
