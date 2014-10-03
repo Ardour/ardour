@@ -373,7 +373,10 @@ EngineControl::build_notebook ()
 		basic_vbox.pack_start (*hpacker);
 	}
 
-	basic_vbox.show_all ();
+	{
+		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
+		basic_vbox.show_all ();
+	}
 }
 
 void
