@@ -11,17 +11,17 @@
 ### one-time cowbuilder/pbuilder setup on the build-host
 #
 # sudo apt-get install cowbuilder util-linux
-# sudo mkdir -p /var/cache/pbuilder/jessie-i386/aptcache
+# sudo mkdir -p /var/cache/pbuilder/jessie-amd64/aptcache
 #
-# sudo i386 cowbuilder --create \
-#     --basepath /var/cache/pbuilder/jessie-i386/base.cow \
+# sudo cowbuilder --create \
+#     --basepath /var/cache/pbuilder/jessie-amd64/base.cow \
 #     --distribution jessie \
-#     --debootstrapopts --arch --debootstrapopts i386
+#     --debootstrapopts --arch --debootstrapopts amd64
 #
 ### 'interactive build'
 #
-# sudo i386 cowbuilder --login --bindmounts /tmp \
-#     --basepath /var/cache/pbuilder/jessie-i386/base.cow
+# sudo cowbuilder --login --bindmounts /tmp \
+#     --basepath /var/cache/pbuilder/jessie-amd64/base.cow
 #
 ### now, inside cowbuilder (/tmp/ is shared with host, -> bindmounts)
 #
@@ -49,11 +49,14 @@
 : ${PREFIX=$SRC/win-stack}
 : ${BUILDD=$SRC/win-build}
 
+: ${XARCH=i686} # or x86-64 // experimental
+: ${ARDOURCFG=--with-dummy}
+
 ###############################################################################
 
 if [ "$(id -u)" != "0" -a -z "$SUDO" ]; then
 	echo "This script must be run as root in pbuilder" 1>&2
-	echo "e.g sudo DIST=jessie ARCH=i386 linux32 cowbuilder --bindmounts /tmp --execute $0"
+	echo "e.g sudo DIST=jessie cowbuilder --bindmounts /tmp --execute $0"
 	exit 1
 fi
 
@@ -69,10 +72,32 @@ fi
 ###############################################################################
 set -e
 
+if test "$XARCH" = "x86_64" -o "$XARCH" = "amd64"; then
+	echo "Target: 64bit Windows (x86_64)"
+	XPREFIX=x86_64-w64-mingw32
+	HPREFIX=x86_64
+	WARCH=w64
+	DEBIANPKGS="mingw-w64"
+else
+	echo "Target: 32 Windows (i686)"
+	XPREFIX=i686-w64-mingw32
+	HPREFIX=i386
+	WARCH=w32
+	DEBIANPKGS="gcc-mingw-w64-i686 g++-mingw-w64-i686 mingw-w64-tools mingw32"
+fi
+
 apt-get -y install build-essential \
-	gcc-mingw-w64-i686 g++-mingw-w64-i686 mingw-w64-tools mingw32 \
+	${DEBIANPKGS} \
 	git autoconf automake libtool pkg-config \
 	curl unzip ed yasm cmake ca-certificates
+
+#fixup mingw64 ccache for now
+if test -d /usr/lib/ccache -a -f /usr/bin/ccache; then
+	export PATH="/usr/lib/ccache:${PATH}"
+	cd /usr/lib/ccache
+	test -L ${XPREFIX}-gcc || ln -s ../../bin/ccache ${XPREFIX}-gcc
+	test -L ${XPREFIX}-g++ || ln -s ../../bin/ccache ${XPREFIX}-g++
+fi
 
 ###############################################################################
 
@@ -81,9 +106,14 @@ mkdir -p ${PREFIX}
 mkdir -p ${BUILDD}
 
 unset PKG_CONFIG_PATH
+export XPREFIX
 export PKG_CONFIG_PATH=${PREFIX}/lib/pkgconfig
 export PREFIX
 export SRCDIR
+
+if test -n "$(which ${XPREFIX}-pkg-config)"; then
+	export PKG_CONFIG=`which ${XPREFIX}-pkg-config`
+fi
 
 function download {
 echo "--- Downloading.. $2"
@@ -97,34 +127,37 @@ tar xf ${SRCDIR}/${1}.${2}
 cd $1
 }
 
-function autoconfbuild {
+function autoconfconf {
 set -e
 echo "======= $(pwd) ======="
-PATH=${PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin \
 #CPPFLAGS="-I${PREFIX}/include -DDEBUG$CPPFLAGS" \
 	CPPFLAGS="-I${PREFIX}/include$CPPFLAGS" \
 	CFLAGS="-I${PREFIX}/include -O2 -g -mstackrealign$CFLAGS" \
 	CXXFLAGS="-I${PREFIX}/include -O2 -g -mstackrealign$CXXFLAGS" \
 	LDFLAGS="-L${PREFIX}/lib$LDFLAGS" \
-	./configure --host=i686-w64-mingw32 --build=i386-linux \
+	./configure --host=${XPREFIX} --build=${HPREFIX}-linux \
 	--prefix=$PREFIX $@
+}
+
+function autoconfbuild {
+set -e
+autoconfconf $@
 make $MAKEFLAGS && make install
 }
 
 function wafbuild {
 set -e
 echo "======= $(pwd) ======="
-PATH=${PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin \
-	CC=i686-w64-mingw32-gcc \
-	CXX=i686-w64-mingw32-c++ \
-	CPP=i686-w64-mingw32-cpp \
-	AR=i686-w64-mingw32-ar \
-	LD=i686-w64-mingw32-ld \
-	NM=i686-w64-mingw32-nm \
-	AS=i686-w64-mingw32-as \
-	STRIP=i686-w64-mingw32-strip \
-	RANLIB=i686-w64-mingw32-ranlib \
-	DLLTOOL=i686-w64-mingw32-dlltool \
+	CC=${XPREFIX}-gcc \
+	CXX=${XPREFIX}-g++ \
+	CPP=${XPREFIX}-cpp \
+	AR=${XPREFIX}-ar \
+	LD=${XPREFIX}-ld \
+	NM=${XPREFIX}-nm \
+	AS=${XPREFIX}-as \
+	STRIP=${XPREFIX}-strip \
+	RANLIB=${XPREFIX}-ranlib \
+	DLLTOOL=${XPREFIX}-dlltool \
 	CPPFLAGS="-I${PREFIX}/include$CPPFLAGS" \
 	CFLAGS="-I${PREFIX}/include -O2 -g -mstackrealign$CFLAGS" \
 	CXXFLAGS="-I${PREFIX}/include -O2 -g -mstackrealign$CXXFLAGS" \
@@ -137,20 +170,18 @@ PATH=${PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin \
 if test -z "$NOSTACK"; then
 ################################################################################
 
-# jack headers, .dll and pkg-config file from jackd 1.9.10
-# the .dll is not shipped and only used for linking.
-# This is currently the only part not built from source.
-download jack_win32.tar.xz http://robin.linuxaudio.org/jack_win32.tar.xz
+# jack headers, .def, .lib and pkg-config file from jackd 1.9.10
+download jack_win3264.tar.xz http://robin.linuxaudio.org/jack_win3264.tar.xz
 cd "$PREFIX"
-tar xf ${SRCDIR}/jack_win32.tar.xz
-"$PREFIX"/update_pc_prefix.sh
+tar xf ${SRCDIR}/jack_win3264.tar.xz
+"$PREFIX"/update_pc_prefix.sh ${WARCH}
 
 
 download pthreads-w32-2-9-1-release.tar.gz ftp://sourceware.org/pub/pthreads-win32/pthreads-w32-2-9-1-release.tar.gz
 cd ${BUILDD}
 tar xzf ${SRCDIR}/pthreads-w32-2-9-1-release.tar.gz
 cd pthreads-w32-2-9-1-release
-make clean GC CROSS=i686-w64-mingw32-
+make clean GC CROSS=${XPREFIX}-
 mkdir -p ${PREFIX}/bin
 mkdir -p ${PREFIX}/lib
 mkdir -p ${PREFIX}/include
@@ -159,13 +190,13 @@ cp -vf libpthreadGC2.a ${PREFIX}/lib/libpthread.a
 cp -vf pthread.h sched.h ${PREFIX}/include
 
 src zlib-1.2.7 tar.gz ftp://ftp.simplesystems.org/pub/libpng/png/src/history/zlib/zlib-1.2.7.tar.gz
-make -fwin32/Makefile.gcc PREFIX=i686-w64-mingw32-
+make -fwin32/Makefile.gcc PREFIX=${XPREFIX}-
 make install -fwin32/Makefile.gcc SHARED_MODE=1 \
 	INCLUDE_PATH=${PREFIX}/include \
 	LIBRARY_PATH=${PREFIX}/lib \
 	BINARY_PATH=${PREFIX}/bin
 
-src tiff-4.0.1 tar.gz ftp://ftp.remotesensing.org/pub/libtiff/tiff-4.0.1.tar.gz
+src tiff-4.0.3 tar.gz ftp://ftp.remotesensing.org/pub/libtiff/tiff-4.0.3.tar.gz
 autoconfbuild
 
 download jpegsrc.v9a.tar.gz http://www.ijg.org/files/jpegsrc.v9a.tar.gz
@@ -180,7 +211,7 @@ autoconfbuild
 src libvorbis-1.3.4 tar.gz http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.4.tar.gz
 autoconfbuild --disable-examples --with-ogg=${PREFIX}
 
-src flac-1.2.1 tar.gz http://downloads.xiph.org/releases/flac/flac-1.2.1.tar.gz
+src flac-1.3.0 tar.xz http://downloads.xiph.org/releases/flac/flac-1.3.0.tar.xz
 ed Makefile.in << EOF
 %s/examples / /
 wq
@@ -212,12 +243,11 @@ autoconfbuild
 src libiconv-1.14 tar.gz ftp://ftp.gnu.org/gnu/libiconv/libiconv-1.14.tar.gz
 autoconfbuild --with-included-gettext --with-libiconv-prefix=$PREFIX
 
-src libxml2-2.7.8 tar.gz ftp://xmlsoft.org/libxslt/libxml2-2.7.8.tar.gz
+src libxml2-2.9.1 tar.gz ftp://xmlsoft.org/libxslt/libxml2-2.9.1.tar.gz
 CFLAGS=" -O0" CXXFLAGS=" -O0" \
-autoconfbuild --with-threads=no --with-zlib=$PREFIX
+autoconfbuild --with-threads=no --with-zlib=$PREFIX --without-python
 
-#src libpng-1.6.12 tar.gz ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.12.tar.gz
-src libpng-1.6.12 tar.gz https://downloads.sourceforge.net/project/libpng/libpng16/1.6.12/libpng-1.6.12.tar.gz
+src libpng-1.6.13 tar.xz https://downloads.sourceforge.net/project/libpng/libpng16/1.6.13/libpng-1.6.13.tar.xz
 autoconfbuild
 
 src freetype-2.5.3 tar.gz http://download.savannah.gnu.org/releases/freetype/freetype-2.5.3.tar.gz
@@ -230,14 +260,14 @@ wq
 EOF
 autoconfbuild --enable-libxml2
 
-src pixman-0.30.2 tar.gz http://cgit.freedesktop.org/pixman/snapshot/pixman-0.30.2.tar.gz
+src pixman-0.32.2 tar.gz http://cgit.freedesktop.org/pixman/snapshot/pixman-0.32.2.tar.gz
 ./autogen.sh
 autoconfbuild
 
 src cairo-1.12.16 tar.xz http://cairographics.org/releases/cairo-1.12.16.tar.xz
 autoconfbuild
 
-src libffi-3.0.10 tar.gz ftp://sourceware.org/pub/libffi/libffi-3.0.10.tar.gz
+src libffi-3.1 tar.gz ftp://sourceware.org/pub/libffi/libffi-3.1.tar.gz
 autoconfbuild
 
 src gettext-0.19.2 tar.gz http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.2.tar.gz
@@ -245,6 +275,7 @@ autoconfbuild
 
 ################################################################################
 apt-get -y install python gettext libglib2.0-dev # /usr/bin/msgfmt , genmarshall
+#NB. we could apt-get install wine instead and run the exe files in $PREFIX/bin
 ################################################################################
 
 src glib-2.42.0 tar.xz  http://ftp.gnome.org/pub/gnome/sources/glib/2.42/glib-2.42.0.tar.xz
@@ -255,16 +286,16 @@ autoconfbuild --with-pcre=internal --disable-silent-rules --with-libiconv=no
 dpkg -P gettext python || true
 ################################################################################
 
-src harfbuzz-0.9.22 tar.bz2 http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.22.tar.bz2
+src harfbuzz-0.9.35 tar.bz2 http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.35.tar.bz2
 autoconfbuild
 
 src pango-1.36.8 tar.xz http://ftp.gnome.org/pub/GNOME/sources/pango/1.36/pango-1.36.8.tar.xz
 autoconfbuild --without-x --with-included-modules=yes
 
-src atk-2.2.0 tar.bz2 http://ftp.gnome.org/pub/GNOME/sources/atk/2.2/atk-2.2.0.tar.bz2
+src atk-2.14.0 tar.bz2 http://ftp.gnome.org/pub/GNOME/sources/atk/2.14/atk-2.14.0.tar.xz
 autoconfbuild --disable-rebuilds
 
-src gdk-pixbuf-2.25.2 tar.xz http://ftp.gnome.org/pub/GNOME/sources/gdk-pixbuf/2.25/gdk-pixbuf-2.25.2.tar.xz
+src gdk-pixbuf-2.31.1 tar.xz http://ftp.acc.umu.se/pub/GNOME/sources/gdk-pixbuf/2.31/gdk-pixbuf-2.31.1.tar.xz
 autoconfbuild --disable-modules --without-gdiplus --with-included-loaders=yes
 
 src gtk+-2.24.24 tar.xz http://ftp.gnome.org/pub/gnome/sources/gtk+/2.24/gtk+-2.24.24.tar.xz
@@ -272,12 +303,12 @@ ed Makefile.in << EOF
 %s/demos / /
 wq
 EOF
-autoconfbuild --disable-rebuilds # --disable-modules \
-#	--with-included-immodules=ime \
-# --with-gdktarget=win32 \
-
-#http://ardour.org/files/gtk-engines-2.21.0.tar.gz
-#http://ftp.gnome.org/pub/GNOME/sources/gtk-engines/2.20/gtk-engines-2.20.2.tar.bz2
+autoconfconf --disable-rebuilds # --disable-modules
+if test "$WARCH" = "w64"; then
+make -n || true
+rm gtk/gtk.def # workaround disable-rebuilds
+fi
+make && make install
 
 ################################################################################
 dpkg -P libglib2.0-dev libpcre3-dev || true
@@ -301,7 +332,10 @@ wafbuild
 
 src lilv-0.20.0 tar.bz2 http://download.drobilla.net/lilv-0.20.0.tar.bz2
 ed wscript << EOF
-%s/'dl'//
+/sys.platform.*win32
+.s/win32/linux2/
+/sys.platform.*win32
+.s/win32/linux2/
 %s/win32/linux/
 wq
 EOF
@@ -320,16 +354,16 @@ autoconfbuild
 src libsigc++-2.4.0 tar.xz http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.4/libsigc++-2.4.0.tar.xz
 autoconfbuild
 
-src glibmm-2.32.0 tar.xz http://ftp.gnome.org/pub/GNOME/sources/glibmm/2.32/glibmm-2.32.0.tar.xz
+src glibmm-2.42.0 tar.xz http://ftp.gnome.org/pub/GNOME/sources/glibmm/2.42/glibmm-2.42.0.tar.xz
 autoconfbuild
 
-src cairomm-1.10.0 tar.gz http://cairographics.org/releases/cairomm-1.10.0.tar.gz
+src cairomm-1.11.2 tar.gz http://cairographics.org/releases/cairomm-1.11.2.tar.gz
 autoconfbuild
 
-src pangomm-2.28.4 tar.xz http://ftp.acc.umu.se/pub/gnome/sources/pangomm/2.28/pangomm-2.28.4.tar.xz
+src pangomm-2.34.0 tar.xz http://ftp.acc.umu.se/pub/gnome/sources/pangomm/2.34/pangomm-2.34.0.tar.xz
 autoconfbuild
 
-src atkmm-2.22.6 tar.xz http://ftp.gnome.org/pub/GNOME/sources/atkmm/2.22/atkmm-2.22.6.tar.xz
+src atkmm-2.22.7 tar.xz http://ftp.gnome.org/pub/GNOME/sources/atkmm/2.22/atkmm-2.22.7.tar.xz
 autoconfbuild
 
 src gtkmm-2.24.4 tar.xz http://ftp.acc.umu.se/pub/GNOME/sources/gtkmm/2.24/gtkmm-2.24.4.tar.xz
@@ -345,9 +379,9 @@ src taglib-1.9.1 tar.gz http://taglib.github.io/releases/taglib-1.9.1.tar.gz
 ed CMakeLists.txt << EOF
 0i
 set(CMAKE_SYSTEM_NAME Windows)
-set(CMAKE_C_COMPILER i686-w64-mingw32-gcc)
-set(CMAKE_CXX_COMPILER i686-w64-mingw32-c++)
-set(CMAKE_RC_COMPILER i686-w64-mingw32-windres)
+set(CMAKE_C_COMPILER ${XPREFIX}-gcc)
+set(CMAKE_CXX_COMPILER ${XPREFIX}-c++)
+set(CMAKE_RC_COMPILER ${XPREFIX}-windres)
 .
 wq
 EOF
@@ -377,12 +411,7 @@ EOF
 ################################################################################
 #git://liblo.git.sourceforge.net/gitroot/liblo/liblo
 src liblo-0.28 tar.gz http://downloads.sourceforge.net/liblo/liblo-0.28.tar.gz
-PATH=${PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin \
-	CPPFLAGS="-I${PREFIX}/include" \
-	CFLAGS="-I${PREFIX}/include" \
-	CXXFLAGS="-I${PREFIX}/include" \
-	LDFLAGS="-L${PREFIX}/lib" \
-	./configure --host=i686-w64-mingw32 --build=i386-linux --prefix=$PREFIX --enable-shared $@
+autoconfconf --enable-shared
 ed src/Makefile << EOF
 /noinst_PROGRAMS
 .,+3d
@@ -397,9 +426,9 @@ make $MAKEFLAGS && make install
 ################################################################################
 src boost_1_49_0 tar.bz2 http://sourceforge.net/projects/boost/files/boost/1.49.0/boost_1_49_0.tar.bz2
 ./bootstrap.sh --prefix=$PREFIX
-echo "using gcc : 4.7 : i686-w64-mingw32-g++ :
-<rc>i686-w64-mingw32-windres
-<archiver>i686-w64-mingw32-ar
+echo "using gcc : 4.7 : ${XPREFIX}-g++ :
+<rc>${XPREFIX}-windres
+<archiver>${XPREFIX}-ar
 ;" > user-config.jam
 #	PTW32_INCLUDE=${PREFIX}/include \
 #	PTW32_LIB=${PREFIX}/lib  \
@@ -424,8 +453,8 @@ cp ${SRCDIR}/ladspa.h $PREFIX/include/ladspa.h
 
 src vamp-plugin-sdk-2.5 tar.gz http://code.soundsoftware.ac.uk/attachments/download/690/vamp-plugin-sdk-2.5.tar.gz
 ed Makefile.in << EOF
-%s/= ar/= i686-w64-mingw32-ar/
-%s/= ranlib/= i686-w64-mingw32-ranlib/
+%s/= ar/= ${XPREFIX}-ar/
+%s/= ranlib/= ${XPREFIX}-ranlib/
 wq
 EOF
 MAKEFLAGS="sdk -j4" autoconfbuild
@@ -436,7 +465,7 @@ EOF
 
 src rubberband-1.8.1 tar.bz2 http://code.breakfastquay.com/attachments/download/34/rubberband-1.8.1.tar.bz2
 ed Makefile.in << EOF
-%s/= ar/= i686-w64-mingw32-ar/
+%s/= ar/= ${XPREFIX}-ar/
 wq
 EOF
 autoconfbuild
@@ -459,65 +488,92 @@ ed $PREFIX/lib/pkgconfig/aubio.pc << EOF
 wq
 EOF
 
+rm -f ${PREFIX}/include/pa_asio.h ${PREFIX}/include/portaudio.h ${PREFIX}/include/asio.h
 if test -n "$ASIO"; then
-cd ${BUILDD}
-git clone --depth 1 git://github.com/aardvarkk/soundfind.git || true
-src portaudio tgz http://portaudio.com/archives/pa_stable_v19_20140130.tgz
-autoconfbuild --with-asiodir=${BUILDD}/soundfind/ASIOSDK2/ --with-winapi=asio,wmme
-cp include/pa_asio.h ${PREFIX}/include/
-cp ${BUILDD}/soundfind/ASIOSDK2/common/asio.h ${PREFIX}/include/
+	if test ! -d ${SRCDIR}/soundfind.git.reference; then
+		git clone --mirror git://github.com/aardvarkk/soundfind.git ${SRCDIR}/soundfind.git.reference
+	fi
+	cd ${BUILDD}
+	git clone --reference ${SRCDIR}/soundfind.git.reference --depth 1 git://github.com/aardvarkk/soundfind.git || true
+
+	download pa_waves2.diff http://robin.linuxaudio.org/tmp/pa_waves2.diff
+	src portaudio tgz http://portaudio.com/archives/pa_stable_v19_20140130.tgz
+	patch -p1 < ${SRCDIR}/pa_waves2.diff
+	autoconfconf --with-asiodir=${BUILDD}/soundfind/ASIOSDK2/ --with-winapi=asio,wmme --without-jack
+	ed Makefile << EOF
+%s/-luuid//g
+wq
+EOF
+	make $MAKEFLAGS && make install
+	cp include/pa_asio.h ${PREFIX}/include/
+	cp ${BUILDD}/soundfind/ASIOSDK2/common/asio.h ${PREFIX}/include/
 else
-src portaudio tgz http://portaudio.com/archives/pa_stable_v19_20140130.tgz
-autoconfbuild
+	src portaudio tgz http://portaudio.com/archives/pa_stable_v19_20140130.tgz
+	autoconfbuild
 fi
 
 ################################################################################
 fi  # $NOSTACK
 ################################################################################
 if test -n "$ASIO"; then
-	ARDOURWAVES="--with-wavesbackend"
-else
-	ARDOURWAVES=""
+	ARDOURCFG="$ARDOURCFG --with-wavesbackend"
+fi
+if test "$WARCH" = "w32"; then
+	ARDOURCFG="$ARDOURCFG --windows-vst"
 fi
 ################################################################################
 
 cd ${SRC}
-ARDOURSRC=ardour-w32
-git clone -b cairocanvas git://git.ardour.org/ardour/ardour.git $ARDOURSRC || true
+ARDOURSRC=ardour-${WARCH}
+# create a git cache to speed up future clones
+if test ! -d ${SRCDIR}/ardour.git.reference; then
+	git clone --mirror git://git.ardour.org/ardour/ardour.git ${SRCDIR}/ardour.git.reference
+fi
+git clone --reference ${SRCDIR}/ardour.git.reference -b cairocanvas git://git.ardour.org/ardour/ardour.git $ARDOURSRC || true
 cd ${ARDOURSRC}
 
-export CC=i686-w64-mingw32-gcc
-export CXX=i686-w64-mingw32-c++
-export CPP=i686-w64-mingw32-cpp
-export AR=i686-w64-mingw32-ar
-export LD=i686-w64-mingw32-ld
-export NM=i686-w64-mingw32-nm
-export AS=i686-w64-mingw32-as
-export STRIP=i686-w64-mingw32-strip
-export RANLIB=i686-w64-mingw32-ranlib
-export DLLTOOL=i686-w64-mingw32-dlltool
+export CC=${XPREFIX}-gcc
+export CXX=${XPREFIX}-g++
+export CPP=${XPREFIX}-cpp
+export AR=${XPREFIX}-ar
+export LD=${XPREFIX}-ld
+export NM=${XPREFIX}-nm
+export AS=${XPREFIX}-as
+export STRIP=${XPREFIX}-strip
+export RANLIB=${XPREFIX}-ranlib
+export DLLTOOL=${XPREFIX}-dlltool
 
 CFLAGS="-mstackrealign" \
 CXXFLAGS="-mstackrealign" \
 LDFLAGS="-L${PREFIX}/lib" ./waf configure \
-	--dist-target=mingw --windows-vst \
+	--dist-target=mingw \
 	--also-include=${PREFIX}/include \
-	--with-dummy $ARDOURWAVES \
+	$ARDOURCFG \
 	--prefix=${PREFIX}
 ./waf
-./waf install
+
+################################################################################
+if test -n "$NOBUNDLE"; then
+	echo "Done. (NOBUNDLE)"
+	exit
+fi
 
 ARDOURVERSION=$(git describe | sed 's/-g.*$//')
 ARDOURDATE=$(date -R)
+./waf install
 
 ################################################################################
 ################################################################################
 ################################################################################
 
-DESTDIR=/tmp/a3bundle
-ALIBDIR=$DESTDIR/lib/ardour3
+if test -z "$DESTDIR"; then
+	DESTDIR=`mktemp -d`
+	trap 'rm -rf $DESTDIR' exit SIGINT SIGTERM
+fi
 
 echo " === bundle to $DESTDIR"
+
+ALIBDIR=$DESTDIR/lib/ardour3
 
 rm -rf $DESTDIR
 mkdir -p $DESTDIR/bin
@@ -536,7 +592,7 @@ cp build/libs/qm-dsp/qmdsp-*.dll $DESTDIR/bin/
 cp build/libs/canvas/canvas-*.dll $DESTDIR/bin/
 cp build/libs/pbd/pbd-*.dll $DESTDIR/bin/
 cp build/libs/audiographer/audiographer-*.dll $DESTDIR/bin/
-cp build/libs/fst/ardour-vst-scanner.exe $ALIBDIR/fst/
+cp build/libs/fst/ardour-vst-scanner.exe $ALIBDIR/fst/ || true
 cp `ls -t build/gtk2_ardour/ardour-*.exe | head -n1` $DESTDIR/bin/ardour.exe
 
 mkdir -p $DESTDIR/lib/gtk-2.0/engines
@@ -555,15 +611,15 @@ cp -r build/libs/LV2 $ALIBDIR/
 mv $ALIBDIR/surfaces/ardourcp-*.dll $DESTDIR/bin/
 
 # TODO use -static-libgcc -static-libstdc++ -- but for .exe files only
-if update-alternatives --query i686-w64-mingw32-gcc | grep Value: | grep -q win32; then
-	cp /usr/lib/gcc/i686-w64-mingw32/*-win32/libgcc_s_sjlj-1.dll /$DESTDIR/bin/
-	cp /usr/lib/gcc/i686-w64-mingw32/*-win32/libstdc++-6.dll /$DESTDIR/bin/
-elif update-alternatives --query i686-w64-mingw32-gcc | grep Value: | grep -q posix; then
-	cp /usr/lib/gcc/i686-w64-mingw32/*-posix/libgcc_s_sjlj-1.dll /$DESTDIR/bin/
-	cp /usr/lib/gcc/i686-w64-mingw32/*-posix/libstdc++-6.dll /$DESTDIR/bin/
+if update-alternatives --query ${XPREFIX}-gcc | grep Value: | grep -q win32; then
+	cp /usr/lib/gcc/${XPREFIX}/*-win32/libgcc_s_*.dll $DESTDIR/bin/
+	cp /usr/lib/gcc/${XPREFIX}/*-win32/libstdc++-6.dll $DESTDIR/bin/
+elif update-alternatives --query ${XPREFIX}-gcc | grep Value: | grep -q posix; then
+	cp /usr/lib/gcc/${XPREFIX}/*-posix/libgcc_s_*.dll $DESTDIR/bin/
+	cp /usr/lib/gcc/${XPREFIX}/*-posix/libstdc++-6.dll $DESTDIR/bin/
 else
-	cp /usr/lib/gcc/i686-w64-mingw32/*/libgcc_s_sjlj-1.dll /$DESTDIR/bin/
-	cp /usr/lib/gcc/i686-w64-mingw32/*/libstdc++-6.dll /$DESTDIR/bin/
+	cp /usr/lib/gcc/${XPREFIX}/*/libgcc_s_sjlj-1.dll $DESTDIR/bin/
+	cp /usr/lib/gcc/${XPREFIX}/*/libstdc++-6.dll $DESTDIR/bin/
 fi
 
 cp -r $PREFIX/share/ardour3 $DESTDIR/share/
@@ -572,13 +628,30 @@ cp -r $PREFIX/etc/ardour3/* $DESTDIR/share/ardour3/
 cp COPYING $DESTDIR/share/
 cp gtk2_ardour/icons/ardour.ico $DESTDIR/share/
 
-echo " === bundle complete. size:"
-du -sch $DESTDIR
+# clean stack-dir after install
+./waf uninstall
+echo " === complete"
+du -sh $DESTDIR
 
 ################################################################################
-echo " === Building Windows Installer"
+if test -f ${SRCDIR}/gdb.exe; then
+	cp ${SRCDIR}/gdb.exe $DESTDIR/bin/
+	cat > $DESTDIR/ardbg.bat << EOF
+cd bin
+START gdb.exe ardour.exe
+EOF
+fi
+
+################################################################################
+echo " === Preparing Windows Installer"
 NSISFILE=$DESTDIR/a3.nsis
-OUTFILE="/tmp/ardour-${ARDOURVERSION}-Setup.exe"
+OUTFILE="/tmp/ardour-${ARDOURVERSION}-${WARCH}-Setup.exe"
+
+if test "$WARCH" = "w64"; then
+	PGF=PROGRAMFILES64
+else
+	PGF=PROGRAMFILES
+fi
 
 cat > $NSISFILE << EOF
 SetCompressor /SOLID lzma
@@ -588,8 +661,8 @@ SetCompressorDictSize 32
 Name "Ardour3"
 OutFile "${OUTFILE}"
 RequestExecutionLevel admin
-InstallDir "\$PROGRAMFILES\\ardour3"
-InstallDirRegKey HKLM "Software\\Ardour\\ardour3" "Install_Dir"
+InstallDir "\$${PGF}\\ardour3"
+InstallDirRegKey HKLM "Software\\Ardour\\ardour3\\$WARCH" "Install_Dir"
 
 !define MUI_ICON "share\\ardour.ico"
 !define MUI_FINISHPAGE_TITLE "Welcome to Ardour"
@@ -615,7 +688,8 @@ Section "Ardour3 (required)" SecArdour
   File /r bin
   File /r lib
   File /r share
-  WriteRegStr HKLM SOFTWARE\\Ardour\\ardour3 "Install_Dir" "\$INSTDIR"
+  File /nonfatal ardbg.bat
+  WriteRegStr HKLM SOFTWARE\\Ardour\\ardour3\\$WARCH "Install_Dir" "\$INSTDIR"
   WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "DisplayName" "Ardour3"
   WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "UninstallString" '"\$INSTDIR\\uninstall.exe"'
   WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "NoModify" 1
@@ -641,6 +715,7 @@ Section "Uninstall"
   RMDir /r "\$INSTDIR\\bin"
   RMDir /r "\$INSTDIR\\lib"
   RMDir /r "\$INSTDIR\\share"
+  Delete "\$INSTDIR\\ardbg.bat"
   Delete "\$INSTDIR\\uninstall.exe"
   RMDir "\$INSTDIR"
   Delete "\$SMPROGRAMS\\ardour3\\*.*"
@@ -651,6 +726,8 @@ EOF
 apt-get -y install nsis
 
 rm -f ${OUTFILE}
+echo " === OutFile: $OUTFILE"
+echo " === Building Windows Installer (lzma compression takes ages)"
 makensis -V2 $NSISFILE
 rm -rf $DESTDIR
 ls -lh "$OUTFILE"
