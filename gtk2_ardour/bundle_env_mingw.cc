@@ -25,8 +25,10 @@
 #include <fontconfig/fontconfig.h>
 #include <pango/pangoft2.h>
 #include <pango/pangocairo.h>
+
 #include <windows.h>
 #include <wingdi.h>
+#include <shlobj.h> // CSIDL_*
 
 #include "ardour/ardour.h"
 #include "ardour/search_paths.h"
@@ -34,10 +36,52 @@
 
 #include "pbd/file_utils.h"
 #include "pbd/epa.h"
+#include "pbd/windows_special_dirs.h"
 
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+
+
+/* query top-level Ardour installation path.
+ * Typically, this will be somehwere like
+ * "C:\Program Files (x86)\Ardour"
+ */
+const std::string
+get_install_path ()
+{
+	const gchar* pExeRoot = g_win32_get_package_installation_directory_of_module (0);
+
+	if (0 == pExeRoot) {
+		HKEY key;
+		DWORD size = PATH_MAX;
+		char tmp[PATH_MAX+1];
+		if (
+#ifdef __MINGW64__
+				(ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\Ardour\\ardour3\\w64", 0, KEY_READ, &key))
+#else
+				(ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\Ardour\\ardour3\\w32", 0, KEY_READ, &key))
+#endif
+				&&(ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+			 )
+		{
+			pExeRoot = Glib::locale_to_utf8(tmp).c_str();
+		}
+	}
+
+	if (0 == pExeRoot) {
+		const char *program_files = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
+		if (program_files) {
+			pExeRoot = g_build_filename(program_files, PROGRAM_NAME, NULL);
+		}
+	}
+
+	if (pExeRoot && Glib::file_test(pExeRoot, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
+		return std::string (pExeRoot);
+	}
+	return "";
+}
+
 
 void
 fixup_bundle_environment (int, char* [], const char** localedir)
@@ -50,9 +94,28 @@ fixup_bundle_environment (int, char* [], const char** localedir)
 
 	// Unset GTK_RC_FILES so that only ardour specific files are loaded
 	Glib::unsetenv ("GTK_RC_FILES");
+
+
+	std::string path;
+	const char *cstr;
+	cstr = getenv ("VAMP_PATH");
+	if (cstr) {
+		path = cstr;
+		path += G_SEARCHPATH_SEPARATOR;
+	} else {
+		path = "";
+	}
+	path += Glib::build_filename(get_install_path(), "lib", "ardour3", "vamp", NULL);
+	path += G_SEARCHPATH_SEPARATOR;
+	path += "%ProgramFiles%\\Vamp Plugins"; // default vamp path
+	path += G_SEARCHPATH_SEPARATOR;
+	path += "%COMMONPROGRAMFILES%\\Vamp Plugins";
+	Glib::setenv ("VAMP_PATH", path, true);
 }
 
-static __cdecl void unload_custom_fonts() {
+static __cdecl void
+unload_custom_fonts()
+{
 	std::string ardour_mono_file;
 	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
 		return;
@@ -60,7 +123,8 @@ static __cdecl void unload_custom_fonts() {
 	RemoveFontResource(ardour_mono_file.c_str());
 }
 
-void load_custom_fonts() 
+void
+load_custom_fonts()
 {
 	std::string ardour_mono_file;
 
