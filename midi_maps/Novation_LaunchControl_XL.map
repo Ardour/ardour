@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Novation Launch Control XL">
+<!-- 2014-10-04 Alois Cochard (alois.cochard@gmail.com)            -->
+
+<DeviceInfo bank-size="8" motorised="yes"/>
+
+<Binding channel="9" ctl="13"   uri="/route/send/gain B1 1"/>
+<Binding channel="9" ctl="14"   uri="/route/send/gain B2 1"/>
+<Binding channel="9" ctl="15"   uri="/route/send/gain B3 1"/>
+<Binding channel="9" ctl="16"   uri="/route/send/gain B4 1"/>
+<Binding channel="9" ctl="17"   uri="/route/send/gain B5 1"/>
+<Binding channel="9" ctl="18"   uri="/route/send/gain B6 1"/>
+<Binding channel="9" ctl="19"   uri="/route/send/gain B7 1"/>
+<Binding channel="9" ctl="20"   uri="/route/send/gain B8 1"/>
+
+<Binding channel="9" ctl="29"   uri="/route/send/gain B1 2"/>
+<Binding channel="9" ctl="30"   uri="/route/send/gain B2 2"/>
+<Binding channel="9" ctl="31"   uri="/route/send/gain B3 2"/>
+<Binding channel="9" ctl="32"   uri="/route/send/gain B4 2"/>
+<Binding channel="9" ctl="33"   uri="/route/send/gain B5 2"/>
+<Binding channel="9" ctl="34"   uri="/route/send/gain B6 2"/>
+<Binding channel="9" ctl="35"   uri="/route/send/gain B7 2"/>
+<Binding channel="9" ctl="36"   uri="/route/send/gain B8 2"/>
+
+<Binding channel="9" ctl="49"   uri="/route/pandirection B1"/>
+<Binding channel="9" ctl="50"   uri="/route/pandirection B2"/>
+<Binding channel="9" ctl="51"   uri="/route/pandirection B3"/>
+<Binding channel="9" ctl="52"   uri="/route/pandirection B4"/>
+<Binding channel="9" ctl="53"   uri="/route/pandirection B5"/>
+<Binding channel="9" ctl="54"   uri="/route/pandirection B6"/>
+<Binding channel="9" ctl="55"   uri="/route/pandirection B7"/>
+<Binding channel="9" ctl="56"   uri="/route/pandirection B8"/>
+
+<Binding channel="9" ctl="77"  uri="/route/gain B1"/>
+<Binding channel="9" ctl="78"  uri="/route/gain B2"/>
+<Binding channel="9" ctl="79"  uri="/route/gain B3"/>
+<Binding channel="9" ctl="80"  uri="/route/gain B4"/>
+<Binding channel="9" ctl="81"  uri="/route/gain B5"/>
+<Binding channel="9" ctl="82"  uri="/route/gain B6"/>
+<Binding channel="9" ctl="83"  uri="/route/gain B7"/>
+<Binding channel="9" ctl="84"  uri="/route/gain B8"/>
+
+<Binding channel="9" note="41"  uri="/route/mute B1"/>
+<Binding channel="9" note="42"  uri="/route/mute B2"/>
+<Binding channel="9" note="43"  uri="/route/mute B3"/>
+<Binding channel="9" note="44"  uri="/route/mute B4"/>
+<Binding channel="9" note="57"  uri="/route/mute B5"/>
+<Binding channel="9" note="58"  uri="/route/mute B6"/>
+<Binding channel="9" note="59"  uri="/route/mute B7"/>
+<Binding channel="9" note="60"  uri="/route/mute B8"/>
+
+<Binding channel="9" note="73"  uri="/route/solo B1"/>
+<Binding channel="9" note="74"  uri="/route/solo B2"/>
+<Binding channel="9" note="75"  uri="/route/solo B3"/>
+<Binding channel="9" note="76"  uri="/route/solo B4"/>
+<Binding channel="9" note="89"  uri="/route/solo B5"/>
+<Binding channel="9" note="90"  uri="/route/solo B6"/>
+<Binding channel="9" note="91"  uri="/route/solo B7"/>
+<Binding channel="9" note="92"  uri="/route/solo B8"/>
+
+<Binding channel="9" ctl="106" function="prev-bank"/>
+<Binding channel="9" ctl="107" function="next-bank"/>
+</ArdourMIDIBindings>
