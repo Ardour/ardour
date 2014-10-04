@@ -374,10 +374,10 @@ static FILE *
 vstfx_blacklist_file (const char *dllpath)
 {
 	FILE *f;
-	if ((f = fopen (vstfx_blacklist_path (dllpath, 0).c_str(), "w"))) {
+	if ((f = fopen (vstfx_blacklist_path (dllpath, 0).c_str(), "wb"))) {
 		return f;
 	}
-	return fopen (vstfx_blacklist_path (dllpath, 1).c_str(), "w");
+	return fopen (vstfx_blacklist_path (dllpath, 1).c_str(), "wb");
 }
 
 /** mark plugin as blacklisted */
@@ -477,7 +477,7 @@ vstfx_infofile_create (const char* dllpath, int personal)
 	}
 
 	string const path = vstfx_infofile_path (dllpath, personal);
-	return fopen (path.c_str(), "w");
+	return fopen (path.c_str(), "wb");
 }
 
 /** newly created cache file for given plugin
