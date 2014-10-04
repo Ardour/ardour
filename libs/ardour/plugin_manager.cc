@@ -115,16 +115,23 @@ PluginManager::PluginManager ()
 	char* s;
 	string lrdf_path;
 
-	string  scan_p = Glib::build_filename(ARDOUR::ardour_dll_directory(), "fst");
-	if (!PBD::find_file (PBD::Searchpath(scan_p),
+#if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
+	PBD::Searchpath vstsp(Glib::build_filename(ARDOUR::ardour_dll_directory(), "fst"));
+#ifdef PLATFORM_WINDOWS
+	vstsp += Glib::build_filename(g_win32_get_package_installation_directory_of_module (0), "bin");
+#else
+	vstsp += Glib::getenv("PATH");
+#endif
+	if (!PBD::find_file (vstsp,
 #ifdef PLATFORM_WINDOWS
 				"ardour-vst-scanner.exe"
 #else
 				"ardour-vst-scanner"
 #endif
 				, scanner_bin_path)) {
-		PBD::warning << "VST scanner app (ardour-vst-scanner) not found in path " << scan_p <<  endmsg;
+		PBD::warning << "VST scanner app (ardour-vst-scanner) not found in path " << vstsp.to_string() <<  endmsg;
 	}
+#endif
 
 	load_statuses ();
 
