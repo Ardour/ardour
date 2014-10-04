@@ -37,20 +37,23 @@
 ###
 ###############################################################################
 
-: ${MAKEFLAGS=-j4}
+### influential environment variables
+: ${XARCH=i686} # or x86_64
+: ${ASIO=}      # set to build with ASIO/waves backend
 : ${SRCDIR=/tmp/winsrc}  # source-code tgz are cached here
 
-: ${ASIO=}     # set to build with ASIO/waves backend
-: ${NOSTACK=}  # set to skip building the build-stack
-: ${RMSTACK=}  # rm -rf $PREFIX $BUILDD - exclusive with NOSTACK
+: ${MAKEFLAGS=-j4}
+: ${ARDOURCFG=--with-dummy}
+: ${STACKCFLAGS="-O2 -g"}
+
+: ${NOSTACK=}    # set to skip building the build-stack
+: ${RMSTACK=}    # rm -rf $PREFIX $BUILDD - exclusive with NOSTACK
+: ${TMPDIR=/tmp}
 
 # directories inside the build-chroot:
 : ${SRC=/usr/src}
 : ${PREFIX=$SRC/win-stack}
 : ${BUILDD=$SRC/win-build}
-
-: ${XARCH=i686} # or x86-64 // experimental
-: ${ARDOURCFG=--with-dummy}
 
 ###############################################################################
 
@@ -132,8 +135,8 @@ set -e
 echo "======= $(pwd) ======="
 #CPPFLAGS="-I${PREFIX}/include -DDEBUG$CPPFLAGS" \
 	CPPFLAGS="-I${PREFIX}/include$CPPFLAGS" \
-	CFLAGS="-I${PREFIX}/include -O2 -g -mstackrealign$CFLAGS" \
-	CXXFLAGS="-I${PREFIX}/include -O2 -g -mstackrealign$CXXFLAGS" \
+	CFLAGS="-I${PREFIX}/include ${STACKCFLAGS} -mstackrealign$CFLAGS" \
+	CXXFLAGS="-I${PREFIX}/include ${STACKCFLAGS} -mstackrealign$CXXFLAGS" \
 	LDFLAGS="-L${PREFIX}/lib$LDFLAGS" \
 	./configure --host=${XPREFIX} --build=${HPREFIX}-linux \
 	--prefix=$PREFIX $@
@@ -159,8 +162,8 @@ echo "======= $(pwd) ======="
 	RANLIB=${XPREFIX}-ranlib \
 	DLLTOOL=${XPREFIX}-dlltool \
 	CPPFLAGS="-I${PREFIX}/include$CPPFLAGS" \
-	CFLAGS="-I${PREFIX}/include -O2 -g -mstackrealign$CFLAGS" \
-	CXXFLAGS="-I${PREFIX}/include -O2 -g -mstackrealign$CXXFLAGS" \
+	CFLAGS="-I${PREFIX}/include ${STACKCFLAGS} -mstackrealign$CFLAGS" \
+	CXXFLAGS="-I${PREFIX}/include ${STACKCFLAGS} -mstackrealign$CXXFLAGS" \
 	LDFLAGS="-L${PREFIX}/lib$LDFLAGS" \
 	./waf configure --prefix=$PREFIX $@ \
 	&& ./waf && ./waf install
@@ -170,7 +173,11 @@ echo "======= $(pwd) ======="
 if test -z "$NOSTACK"; then
 ################################################################################
 
-# jack headers, .def, .lib and pkg-config file from jackd 1.9.10
+### jack headers, .def, .lib, .dll and pkg-config file from jackd 1.9.10
+### this is a re-zip of file extracted from official jack releases:
+### https://dl.dropboxusercontent.com/u/28869550/Jack_v1.9.10_32_setup.exe
+### https://dl.dropboxusercontent.com/u/28869550/Jack_v1.9.10_64_setup.exe
+
 download jack_win3264.tar.xz http://robin.linuxaudio.org/jack_win3264.tar.xz
 cd "$PREFIX"
 tar xf ${SRCDIR}/jack_win3264.tar.xz
@@ -321,15 +328,12 @@ src serd-0.20.0 tar.bz2 http://download.drobilla.net/serd-0.20.0.tar.bz2
 wafbuild
 
 src sord-0.12.2 tar.bz2 http://download.drobilla.net/sord-0.12.2.tar.bz2
-ed wscript << EOF
-%s/pthread/lpthread/
-wq
-EOF
-wafbuild
+wafbuild --no-utils
 
 src sratom-0.4.6 tar.bz2 http://download.drobilla.net/sratom-0.4.6.tar.bz2
 wafbuild
 
+# http://dev.drobilla.net/ticket/986
 src lilv-0.20.0 tar.bz2 http://download.drobilla.net/lilv-0.20.0.tar.bz2
 ed wscript << EOF
 /sys.platform.*win32
@@ -424,7 +428,7 @@ EOF
 make $MAKEFLAGS && make install
 
 ################################################################################
-src boost_1_49_0 tar.bz2 http://sourceforge.net/projects/boost/files/boost/1.49.0/boost_1_49_0.tar.bz2
+src boost_1_56_0 tar.bz2 http://sourceforge.net/projects/boost/files/boost/1.56.0/boost_1_56_0.tar.bz2
 ./bootstrap.sh --prefix=$PREFIX
 echo "using gcc : 4.7 : ${XPREFIX}-g++ :
 <rc>${XPREFIX}-windres
@@ -474,7 +478,7 @@ ed $PREFIX/lib/pkgconfig/rubberband.pc << EOF
 wq
 EOF
 
-src mingw-libgnurx-2.5.1 tar.gz http://sourceforge.net/projects/mingw/files/Other/UserContributed/regex/mingw-regex-2.5.1/mingw-libgnurx-2.5.1-src.tar.gz/download
+src mingw-libgnurx-2.5.1 tar.gz http://sourceforge.net/projects/mingw/files/Other/UserContributed/regex/mingw-regex-2.5.1/mingw-libgnurx-2.5.1-src.tar.gz
 autoconfbuild
 
 src aubio-0.3.2 tar.gz http://aubio.org/pub/aubio-0.3.2 tar.gz
@@ -515,12 +519,14 @@ fi
 ################################################################################
 fi  # $NOSTACK
 ################################################################################
+
 if test -n "$ASIO"; then
 	ARDOURCFG="$ARDOURCFG --with-wavesbackend"
 fi
 if test "$WARCH" = "w32"; then
 	ARDOURCFG="$ARDOURCFG --windows-vst"
 fi
+
 ################################################################################
 
 cd ${SRC}
@@ -581,7 +587,7 @@ mkdir -p $DESTDIR/share/
 mkdir -p $ALIBDIR/surfaces
 mkdir -p $ALIBDIR/backends
 mkdir -p $ALIBDIR/panners
-mkdir -p $ALIBDIR/fst
+mkdir -p $ALIBDIR/vamp
 
 cp build/libs/gtkmm2ext/gtkmm2ext-*.dll $DESTDIR/bin/
 cp build/libs/midi++2/midipp-*.dll $DESTDIR/bin/
@@ -592,7 +598,7 @@ cp build/libs/qm-dsp/qmdsp-*.dll $DESTDIR/bin/
 cp build/libs/canvas/canvas-*.dll $DESTDIR/bin/
 cp build/libs/pbd/pbd-*.dll $DESTDIR/bin/
 cp build/libs/audiographer/audiographer-*.dll $DESTDIR/bin/
-cp build/libs/fst/ardour-vst-scanner.exe $ALIBDIR/fst/ || true
+cp build/libs/fst/ardour-vst-scanner.exe $DESTDIR/bin/ || true
 cp `ls -t build/gtk2_ardour/ardour-*.exe | head -n1` $DESTDIR/bin/ardour.exe
 
 mkdir -p $DESTDIR/lib/gtk-2.0/engines
@@ -600,13 +606,14 @@ cp build/libs/clearlooks-newer/clearlooks.dll $DESTDIR/lib/gtk-2.0/engines/libcl
 
 cp $PREFIX/bin/*dll $DESTDIR/bin/
 cp $PREFIX/lib/*dll $DESTDIR/bin/
-rm -rf $DESTDIR/bin/libjack.dll
+rm -rf $DESTDIR/bin/libjack*.dll
 
 cp `find build/libs/surfaces/ -iname "*.dll"` $ALIBDIR/surfaces/
 cp `find build/libs/backends/ -iname "*.dll"` $ALIBDIR/backends/
 cp `find build/libs/panners/ -iname "*.dll"` $ALIBDIR/panners/
 
 cp -r build/libs/LV2 $ALIBDIR/
+cp -r build/libs/vamp-plugins/*ardourvampplugins*.dll $ALIBDIR/vamp/libardourvampplugins.dll
 
 mv $ALIBDIR/surfaces/ardourcp-*.dll $DESTDIR/bin/
 
@@ -634,18 +641,25 @@ echo " === complete"
 du -sh $DESTDIR
 
 ################################################################################
-if test -f ${SRCDIR}/gdb.exe; then
-	cp ${SRCDIR}/gdb.exe $DESTDIR/bin/
+### include static gdb - re-zipped binaries from
+### http://sourceforge.net/projects/mingw/files/MinGW/Extension/gdb/gdb-7.6.1-1/gdb-7.6.1-1-mingw32-bin.tar.lzma
+### http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.9.1/threads-win32/sjlj/x86_64-4.9.1-release-win32-sjlj-rt_v3-rev1.7z
+#download gdb-static-win3264.tar.xz http://robin.linuxaudio.org/gdb-static-win3264.tar.xz
+#cd ${SRCDIR} && tar xz gdb-static-win3264.tar.xz
+#cd ${SRC}${ARDOURSRC}
+
+if test -d ${SRCDIR}/gdb_$WARCH; then # TODO, grep for --optimize in $ARDOURCFG
+	cp -r ${SRCDIR}/gdb_$WARCH $DESTDIR/gdb
 	cat > $DESTDIR/ardbg.bat << EOF
 cd bin
-START gdb.exe ardour.exe
+START ..\\gdb\\bin\\gdb.exe ardour.exe
 EOF
 fi
 
 ################################################################################
 echo " === Preparing Windows Installer"
 NSISFILE=$DESTDIR/a3.nsis
-OUTFILE="/tmp/ardour-${ARDOURVERSION}-${WARCH}-Setup.exe"
+OUTFILE="${TMPDIR}/ardour-${ARDOURVERSION}-${WARCH}-Setup.exe"
 
 if test "$WARCH" = "w64"; then
 	PGF=PROGRAMFILES64
@@ -689,6 +703,7 @@ Section "Ardour3 (required)" SecArdour
   File /r lib
   File /r share
   File /nonfatal ardbg.bat
+  File /nonfatal /r gdb
   WriteRegStr HKLM SOFTWARE\\Ardour\\ardour3\\$WARCH "Install_Dir" "\$INSTDIR"
   WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "DisplayName" "Ardour3"
   WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "UninstallString" '"\$INSTDIR\\uninstall.exe"'
@@ -715,6 +730,7 @@ Section "Uninstall"
   RMDir /r "\$INSTDIR\\bin"
   RMDir /r "\$INSTDIR\\lib"
   RMDir /r "\$INSTDIR\\share"
+  RMDir /r "\$INSTDIR\\gdb"
   Delete "\$INSTDIR\\ardbg.bat"
   Delete "\$INSTDIR\\uninstall.exe"
   RMDir "\$INSTDIR"
