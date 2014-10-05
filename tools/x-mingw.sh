@@ -43,7 +43,7 @@
 : ${SRCDIR=/tmp/winsrc}  # source-code tgz are cached here
 
 : ${MAKEFLAGS=-j4}
-: ${ARDOURCFG=--with-dummy}
+: ${ARDOURCFG=--with-dummy --windows-vst}
 : ${STACKCFLAGS="-O2 -g"}
 
 : ${NOSTACK=}    # set to skip building the build-stack
@@ -523,9 +523,6 @@ fi  # $NOSTACK
 if test -n "$ASIO"; then
 	ARDOURCFG="$ARDOURCFG --with-wavesbackend"
 fi
-if test "$WARCH" = "w32"; then
-	ARDOURCFG="$ARDOURCFG --windows-vst"
-fi
 
 ################################################################################
 
@@ -537,6 +534,9 @@ if test ! -d ${SRCDIR}/ardour.git.reference; then
 fi
 git clone --reference ${SRCDIR}/ardour.git.reference -b cairocanvas git://git.ardour.org/ardour/ardour.git $ARDOURSRC || true
 cd ${ARDOURSRC}
+#if git diff-files --quiet --ignore-submodules -- && git diff-index --cached --quiet HEAD --ignore-submodules --; then
+#	git pull
+#fi
 
 export CC=${XPREFIX}-gcc
 export CXX=${XPREFIX}-g++
@@ -684,7 +684,8 @@ InstallDirRegKey HKLM "Software\\Ardour\\ardour3\\$WARCH" "Install_Dir"
 !define MUI_FINISHPAGE_TEXT "This windows versions or Ardour is provided as-is.\$\\r\$\\nThe ardour community currently has no expertise in supporting windows users, and there are no developers focusing on windows specific issues either.\$\\r\$\\nIf you like Ardour, please consider helping out."
 !define MUI_FINISHPAGE_LINK "Ardour Manual"
 !define MUI_FINISHPAGE_LINK_LOCATION "http://manual.ardour.org"
-!define MUI_FINISHPAGE_RUN "\$INSTDIR\\bin\\ardour.exe"
+#this would run as admin - see http://forums.winamp.com/showthread.php?t=353366
+#!define MUI_FINISHPAGE_RUN "\$INSTDIR\\bin\\ardour.exe"
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT
 
 !define MUI_ABORTWARNING
@@ -711,6 +712,7 @@ Section "Ardour3 (required)" SecArdour
   WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "NoModify" 1
   WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "NoRepair" 1
   WriteUninstaller "\$INSTDIR\uninstall.exe"
+  CreateShortCut "\$INSTDIR\\Ardour3.lnk" "\$INSTDIR\\bin\\ardour.exe" "" "\$INSTDIR\\bin\\ardour.exe" 0
 SectionEnd
 Section "Start Menu Shortcuts" SecMenu
   SetShellVarContext all
@@ -734,6 +736,7 @@ Section "Uninstall"
   RMDir /r "\$INSTDIR\\gdb"
   Delete "\$INSTDIR\\ardbg.bat"
   Delete "\$INSTDIR\\uninstall.exe"
+  Delete "\$INSTDIR\\Ardour3.lnk"
   RMDir "\$INSTDIR"
   Delete "\$SMPROGRAMS\\ardour3\\*.*"
   RMDir "\$SMPROGRAMS\\ardour3"

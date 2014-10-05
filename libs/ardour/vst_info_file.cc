@@ -384,8 +384,14 @@ vstfx_blacklist_file (const char *dllpath)
 {
 	FILE *f;
 	if ((f = fopen (vstfx_blacklist_path (dllpath, 0).c_str(), "wb"))) {
+#ifndef NDEBUG
+	PBD::info << "Blacklisted VST: '" << vstfx_blacklist_path (dllpath, 0) << "'" << endmsg;
+#endif
 		return f;
 	}
+#ifndef NDEBUG
+	PBD::info << "Blacklisted VST: '" << vstfx_blacklist_path (dllpath, 1) << "'" << endmsg;
+#endif
 	return fopen (vstfx_blacklist_path (dllpath, 1).c_str(), "wb");
 }
 
@@ -486,6 +492,9 @@ vstfx_infofile_create (const char* dllpath, int personal)
 	}
 
 	string const path = vstfx_infofile_path (dllpath, personal);
+#ifndef NDEBUG
+	PBD::info << "Creating VST cache file " << path << endmsg;
+#endif
 	return fopen (path.c_str(), "wb");
 }
 

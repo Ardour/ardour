@@ -80,7 +80,7 @@ intptr_t Session::vst_callback (
 		plug = (VSTPlugin *) (effect->user);
 		session = &plug->session();
 #ifdef PLATFORM_WINDOWS
-		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (int) pthread_self().p, opcode, plug->name());
+		SHOW_CALLBACK ("am callback 0x%p, opcode = %d, plugin = \"%s\" ", pthread_self().p, opcode, plug->name());
 #else
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (int) pthread_self(), opcode, plug->name());
 #endif
@@ -88,7 +88,7 @@ intptr_t Session::vst_callback (
 		plug = 0;
 		session = 0;
 #ifdef PLATFORM_WINDOWS
-		SHOW_CALLBACK ("am callback 0x%x, opcode = %d", (int) pthread_self().p, opcode);
+		SHOW_CALLBACK ("am callback 0x%p, opcode = %d", pthread_self().p, opcode);
 #else
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %d", (int) pthread_self(), opcode);
 #endif

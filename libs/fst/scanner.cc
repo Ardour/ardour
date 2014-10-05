@@ -7,6 +7,10 @@
 #include "pbd/transmitter.h"
 #include "pbd/receiver.h"
 
+#ifdef __MINGW64__
+#define NO_OLDNAMES // no backwards compat _pid_t, conflict with w64 pthread/sched
+#endif
+
 #include "ardour/filesystem_paths.h"
 #ifdef LXVST_SUPPORT
 #include "ardour/linux_vst_support.h"
