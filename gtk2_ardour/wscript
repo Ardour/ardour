@@ -8,6 +8,7 @@ import sys
 import re
 import time
 from waflib.Task import Task
+from waflib.Tools import winres
 
 I18N_PACKAGE = 'gtk2_ardour3'
 
@@ -398,7 +399,10 @@ def build(bld):
         obj.target    = 'gtk2_ardour'
     else:
         # just the normal executable version of the GTK GUI
-        obj = bld (features = 'cxx c cxxprogram')
+        if bld.env['build_target'] == 'mingw':
+            obj = bld (features = 'cxx c cxxprogram winres')
+        else:
+            obj = bld (features = 'cxx c cxxprogram')
         obj.source    = gtk2_ardour_sources
         obj.target = 'ardour-' + str (bld.env['VERSION'])
         obj.includes = ['.']
@@ -438,6 +442,7 @@ def build(bld):
         obj.source += [ 'cocoacarbon.mm', 'bundle_env_cocoa.cc' ]
     elif bld.env['build_target'] == 'mingw':
         obj.source += [ 'bundle_env_mingw.cc' ]
+        obj.source += [ 'windows_icon.rc' ]
     else:
         obj.source += [ 'bundle_env_linux.cc' ]
 

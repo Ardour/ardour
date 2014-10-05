@@ -7,6 +7,7 @@ import string
 import subprocess
 import sys
 import platform as PLATFORM
+from waflib.Tools import winres
 
 def fetch_git_revision ():
     cmd = "git describe HEAD"
@@ -508,6 +509,9 @@ def sub_config_and_use(conf, name, has_objects = True):
 def configure(conf):
     conf.load('compiler_c')
     conf.load('compiler_cxx')
+    if Options.options.dist_target == 'mingw':
+        conf.load('winres')
+
     conf.env['VERSION'] = VERSION
     conf.env['MAJOR'] = MAJOR
     conf.env['MINOR'] = MINOR

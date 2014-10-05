@@ -546,6 +546,7 @@ export LD=${XPREFIX}-ld
 export NM=${XPREFIX}-nm
 export AS=${XPREFIX}-as
 export STRIP=${XPREFIX}-strip
+export WINRC=${XPREFIX}-windres
 export RANLIB=${XPREFIX}-ranlib
 export DLLTOOL=${XPREFIX}-dlltool
 
