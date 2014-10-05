@@ -96,7 +96,7 @@ vstfx_cache_file (const char* dllpath, int personal, const char *ext)
 {
 	string dir;
 	if (personal) {
-		dir = get_personal_vst_blacklist_dir();
+		dir = get_personal_vst_info_cache_dir();
 	} else {
 		dir = Glib::path_get_dirname (std::string(dllpath));
 	}
@@ -109,7 +109,16 @@ vstfx_cache_file (const char* dllpath, int personal, const char *ext)
 static string
 vstfx_blacklist_path (const char* dllpath, int personal)
 {
-	return vstfx_cache_file(dllpath, personal, EXT_BLACKLIST);
+	string dir;
+	if (personal) {
+		dir = get_personal_vst_blacklist_dir();
+	} else {
+		dir = Glib::path_get_dirname (std::string(dllpath));
+	}
+
+	stringstream s;
+	s << PFX_DOTFILE << Glib::path_get_basename (dllpath) << EXT_BLACKLIST;
+	return Glib::build_filename (dir, s.str ());
 }
 
 static string
