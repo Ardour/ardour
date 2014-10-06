@@ -111,6 +111,7 @@ private:
     PublicEditor& _editor;
     
     bool _selected;
+    bool _ignore_mute_upadte;
 };
 
 #endif /* __tracks_master_bus_ui_h__ */

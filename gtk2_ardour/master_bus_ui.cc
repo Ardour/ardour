@@ -33,6 +33,7 @@
 #include "pbd/whitespace.h"
 #include "pbd/memento_command.h"
 #include "pbd/enumwriter.h"
+#include "pbd/unwind.h"
 #include "pbd/stateful_diff_command.h"
 
 #include <gtkmm/menu.h>
@@ -108,6 +109,7 @@ MasterBusUI::MasterBusUI (Session* sess, PublicEditor& ed)
     , _master_bus_multi_out_mode_icon (get_image("master_bus_multi_out_mode_icon"))
     , _master_event_box (WavesUI::root () )
     , _selected(false)
+    , _ignore_mute_upadte(false)
     , _editor(ed)
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
@@ -433,6 +435,8 @@ void MasterBusUI::on_master_mute_button (WavesButton*)
     if( !session )
         return;
     
+    PBD::Unwinder<bool> uw (_ignore_mute_upadte, true);
+    
     if (Config->get_output_auto_connect() & AutoConnectPhysical) // Multi out
     {
         boost::shared_ptr<RouteList> tracks = session->get_tracks();
@@ -452,6 +456,9 @@ void MasterBusUI::route_mute_state_changed (void* )
     Session* session = ARDOUR_UI::instance()->the_session();
     
     if( !session )
+        return;
+    
+    if( _ignore_mute_upadte )
         return;
     
     if (Config->get_output_auto_connect() & AutoConnectPhysical) // Multi out
