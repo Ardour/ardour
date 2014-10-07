@@ -1895,8 +1895,9 @@ LV2Plugin::latency_compute_run()
 	uint32_t in_index   = 0;
 	uint32_t out_index  = 0;
 
-	const framecnt_t bufsize = 1024;
-	float            buffer[bufsize];
+	// this is done in the main thread. non realtime.
+	const framecnt_t bufsize = _engine.samples_per_cycle();
+	float            *buffer = (float*) malloc(_engine.samples_per_cycle() * sizeof(float));
 
 	memset(buffer, 0, sizeof(float) * bufsize);
 
@@ -1922,6 +1923,7 @@ LV2Plugin::latency_compute_run()
 	if (was_activated) {
 		activate();
 	}
+	free(buffer);
 }
 
 const LilvPort*
