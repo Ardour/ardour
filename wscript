@@ -210,7 +210,9 @@ def set_compiler_flags (conf,opt):
         conf.env['build_target'] = opt.dist_target
 
     if conf.env['build_target'] == 'mavericks':
-        cxx_flags.append('-stdlib=libc++')
+            # Mavericks and later changed the syntax to be used when including Carbon headers,
+            # from requiring a full path to requiring just the header name.
+            cxx_flags.append('-DCARBON_FLAT_HEADERS')
 
     if conf.env['build_target'] == 'snowleopard':
         #

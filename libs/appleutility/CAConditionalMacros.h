@@ -55,7 +55,7 @@
 #include "TargetConditionals.h"
 
 //	Determine whether or not to use framework style includes for system headers
-#if !defined(CoreAudio_Use_Framework_Includes) && !defined(__COREAUDIO_USE_FLAT_INCLUDES__)
+#if !defined(CoreAudio_Use_Framework_Includes) && !defined(__COREAUDIO_USE_FLAT_INCLUDES__) && !defined (CARBON_FLAT_HEADERS)
 	#if	TARGET_RT_MAC_MACHO
 		#define	CoreAudio_Use_Framework_Includes	1
 	#else
@@ -65,7 +65,7 @@
 
 //	Include the regular ConditionalMacros.h too, since it has useful stuff that
 //	TargetConditionals.h lacks for some reason.
-#if	CoreAudio_Use_Framework_Includes && (MAC_OS_X_VERSION_MIN_REQUIRED >= 1090)
+#if	CoreAudio_Use_Framework_Includes
 	#include "ConditionalMacros.h"
 #else
 	#include <CoreServices/../Frameworks/CarbonCore.framework/Headers/ConditionalMacros.h>
