@@ -20,16 +20,16 @@
 #
 ### 'interactive build'
 #
-# sudo cowbuilder --login --bindmounts /tmp \
+# sudo cowbuilder --login --bindmounts /var/tmp \
 #     --basepath /var/cache/pbuilder/jessie-amd64/base.cow
 #
-### now, inside cowbuilder (/tmp/ is shared with host, -> bindmounts)
+### now, inside cowbuilder (/var/tmp/ is shared with host, -> bindmounts)
 #
-# /tmp/this_script.sh
+# /var/tmp/this_script.sh
 #
-### go for a coffee and ~40min later find /tmp/ardour-{VERSION}-Setup.exe
+### go for a coffee and ~40min later find /var/tmp/ardour-{VERSION}-Setup.exe
 ###
-### instead of cowbuilder --login, cowbuilder --execute /tmp/x-mingw.sh
+### instead of cowbuilder --login, cowbuilder --execute /var/tmp/x-mingw.sh
 ### does it all by itself, a ~/.pbuilderrc or /etc//etc/pbuilderrc
 ### can be used to set bindmounts and basepath... last but not least
 ### ccache helps a lot to speed up recompiles. see also
@@ -38,38 +38,28 @@
 ###############################################################################
 
 ### influential environment variables
+
 : ${XARCH=i686} # or x86_64
-: ${ASIO=}      # set to build with ASIO/waves backend
-: ${SRCDIR=/tmp/winsrc}  # source-code tgz are cached here
+: ${ASIO=yes}   # [yes|no] build with ASIO/waves backend
 
 : ${MAKEFLAGS=-j4}
-: ${ARDOURCFG=--with-dummy --windows-vst}
 : ${STACKCFLAGS="-O2 -g"}
+: ${ARDOURCFG=--with-dummy --windows-vst}
 
-: ${NOSTACK=}    # set to skip building the build-stack
-: ${RMSTACK=}    # rm -rf $PREFIX $BUILDD - exclusive with NOSTACK
-: ${TMPDIR=/tmp}
+: ${NOSTACK=}   # set to skip building the build-stack
 
-# directories inside the build-chroot:
-: ${SRC=/usr/src}
-: ${PREFIX=$SRC/win-stack}
-: ${BUILDD=$SRC/win-build}
+: ${SRCDIR=/var/tmp/winsrc}  # source-code tgz cache
+: ${TMPDIR=/var/tmp}         # package is built (and zipped) here.
+
+: ${ROOT=/home/ardour} # everything happens below here :)
+                       # src, build and stack-install
 
 ###############################################################################
 
 if [ "$(id -u)" != "0" -a -z "$SUDO" ]; then
 	echo "This script must be run as root in pbuilder" 1>&2
-	echo "e.g sudo DIST=jessie cowbuilder --bindmounts /tmp --execute $0"
+	echo "e.g sudo DIST=jessie cowbuilder --bindmounts /var/tmp --execute $0"
 	exit 1
-fi
-
-if test -n "$NOSTACK" -a -n "$RMSTACK"; then
-	echo "NOSTACK and RMSTACK are exclusive"
-	exit 1
-fi
-
-if test -n "$RMSTACK"; then
-	rm -rf ${PREFIX} ${BUILDD}
 fi
 
 ###############################################################################
@@ -88,6 +78,9 @@ else
 	WARCH=w32
 	DEBIANPKGS="gcc-mingw-w64-i686 g++-mingw-w64-i686 mingw-w64-tools mingw32"
 fi
+
+: ${PREFIX=${ROOT}/win-stack-$WARCH}
+: ${BUILDD=${ROOT}/win-build-$WARCH}
 
 apt-get -y install build-essential \
 	${DEBIANPKGS} \
@@ -126,6 +119,7 @@ test -f ${SRCDIR}/$1 || curl -k -L -o ${SRCDIR}/$1 $2
 function src {
 download ${1}.${2} $3
 cd ${BUILDD}
+rm -rf $1
 tar xf ${SRCDIR}/${1}.${2}
 cd $1
 }
@@ -186,6 +180,7 @@ tar xf ${SRCDIR}/jack_win3264.tar.xz
 
 download pthreads-w32-2-9-1-release.tar.gz ftp://sourceware.org/pub/pthreads-win32/pthreads-w32-2-9-1-release.tar.gz
 cd ${BUILDD}
+rm -rf pthreads-w32-2-9-1-release
 tar xzf ${SRCDIR}/pthreads-w32-2-9-1-release.tar.gz
 cd pthreads-w32-2-9-1-release
 make clean GC CROSS=${XPREFIX}-
@@ -208,6 +203,7 @@ autoconfbuild
 
 download jpegsrc.v9a.tar.gz http://www.ijg.org/files/jpegsrc.v9a.tar.gz
 cd ${BUILDD}
+rm -rf jpeg-9a
 tar xzf ${SRCDIR}/jpegsrc.v9a.tar.gz
 cd jpeg-9a
 autoconfbuild
@@ -493,7 +489,7 @@ wq
 EOF
 
 rm -f ${PREFIX}/include/pa_asio.h ${PREFIX}/include/portaudio.h ${PREFIX}/include/asio.h
-if test -n "$ASIO"; then
+if test "$ASIO" != "no"; then
 	if test ! -d ${SRCDIR}/soundfind.git.reference; then
 		git clone --mirror git://github.com/aardvarkk/soundfind.git ${SRCDIR}/soundfind.git.reference
 	fi
@@ -520,13 +516,13 @@ fi
 fi  # $NOSTACK
 ################################################################################
 
-if test -n "$ASIO"; then
+if test "$ASIO" != "no"; then
 	ARDOURCFG="$ARDOURCFG --with-wavesbackend"
 fi
 
 ################################################################################
 
-cd ${SRC}
+cd ${ROOT}
 ARDOURSRC=ardour-${WARCH}
 # create a git cache to speed up future clones
 if test ! -d ${SRCDIR}/ardour.git.reference; then
@@ -645,11 +641,13 @@ du -sh $DESTDIR
 ### include static gdb - re-zipped binaries from
 ### http://sourceforge.net/projects/mingw/files/MinGW/Extension/gdb/gdb-7.6.1-1/gdb-7.6.1-1-mingw32-bin.tar.lzma
 ### http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.9.1/threads-win32/sjlj/x86_64-4.9.1-release-win32-sjlj-rt_v3-rev1.7z
-#download gdb-static-win3264.tar.xz http://robin.linuxaudio.org/gdb-static-win3264.tar.xz
-#cd ${SRCDIR} && tar xz gdb-static-win3264.tar.xz
-#cd ${SRC}${ARDOURSRC}
+if ! echo "$ARDOURCFG" | grep -q -- "--optimize"; then
+	download gdb-static-win3264.tar.xz http://robin.linuxaudio.org/gdb-static-win3264.tar.xz
+	cd ${SRCDIR}
+	tar xf gdb-static-win3264.tar.xz
+	cd ${ROOT}/${ARDOURSRC}
 
-if test -d ${SRCDIR}/gdb_$WARCH; then # TODO, grep for --optimize in $ARDOURCFG
+	echo " === Creating ardbg.bat"
 	cp -r ${SRCDIR}/gdb_$WARCH $DESTDIR/gdb
 	cat > $DESTDIR/ardbg.bat << EOF
 cd bin
