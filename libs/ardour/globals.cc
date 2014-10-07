@@ -92,6 +92,7 @@
 #include "ardour/midi_region.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/mix.h"
+#include "ardour/operations.h"
 #include "ardour/panner_manager.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/process_thread.h"
@@ -249,6 +250,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	SessionEvent::init_event_pool ();
 
+	Operations::make_operations_quarks ();
 	SessionObject::make_property_quarks ();
 	Region::make_property_quarks ();
 	MidiRegion::make_property_quarks ();

@@ -43,5 +43,6 @@ namespace Operations {
 	LIBARDOUR_API extern GQuark region_copy;
 	LIBARDOUR_API extern GQuark fixed_time_region_copy;
 
+        LIBARDOUR_API void make_operations_quarks ();
 };
 
