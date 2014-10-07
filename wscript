@@ -208,6 +208,8 @@ def set_compiler_flags (conf,opt):
         cxx_flags.append('-std=c++11')
         if platform == "darwin":
             cxx_flags.append('--stdlib=libstdc++')
+            # Mavericks and later changed the syntax to be used when including Carbon headers,
+            # from requiring a full path to requiring just the header name.
             cxx_flags.append('-DCARBON_FLAT_HEADERS')
             linker_flags.append('--stdlib=libstdc++')
             # Prevents visibility issues in standard headers
