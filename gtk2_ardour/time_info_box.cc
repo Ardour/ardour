@@ -328,8 +328,8 @@ TimeInfoBox::watch_punch (Location* punch)
 {
 	punch_connections.drop_connections ();
 
-	punch->start_changed.connect (punch_connections, MISSING_INVALIDATOR, boost::bind (&TimeInfoBox::punch_changed, this, _1), gui_context());
-	punch->end_changed.connect (punch_connections, MISSING_INVALIDATOR, boost::bind (&TimeInfoBox::punch_changed, this, _1), gui_context());
+	punch->StartChanged.connect (punch_connections, MISSING_INVALIDATOR, boost::bind (&TimeInfoBox::punch_changed, this, punch), gui_context());
+	punch->EndChanged.connect (punch_connections, MISSING_INVALIDATOR, boost::bind (&TimeInfoBox::punch_changed, this, punch), gui_context());
 
 	punch_changed (punch);
 }
