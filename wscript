@@ -207,8 +207,9 @@ def set_compiler_flags (conf,opt):
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
         if platform == "darwin":
-            cxx_flags.append('-stdlib=libc++')
-            linker_flags.append('-lc++')
+            cxx_flags.append('--stdlib=libstdc++')
+            cxx_flags.append('-DOSX_MAVERICKS')
+            linker_flags.append('--stdlib=libstdc++')
             # Prevents visibility issues in standard headers
             conf.define("_DARWIN_C_SOURCE", 1)
 

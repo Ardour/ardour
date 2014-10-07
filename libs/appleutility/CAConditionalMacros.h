@@ -55,7 +55,7 @@
 #include "TargetConditionals.h"
 
 //	Determine whether or not to use framework style includes for system headers
-#if !defined(CoreAudio_Use_Framework_Includes) && !defined(__COREAUDIO_USE_FLAT_INCLUDES__)
+#if !defined(CoreAudio_Use_Framework_Includes) && !defined(__COREAUDIO_USE_FLAT_INCLUDES__) && !defined (OSX_MAVERICKS)
 	#if	TARGET_RT_MAC_MACHO
 		#define	CoreAudio_Use_Framework_Includes	1
 	#else
