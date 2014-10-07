@@ -1,6 +1,9 @@
 #undef  Marker
 #define Marker FuckYouAppleAndYourLackOfNameSpaces
 
+#include <gtkmm/button.h>
+#include <gdk/gdkquartz.h>
+
 #include "pbd/convert.h"
 #include "pbd/error.h"
 
@@ -9,9 +12,6 @@
 #include "ardour/plugin_insert.h"
 
 #undef check // stupid gtk, stupid apple
-
-#include <gtkmm/button.h>
-#include <gdk/gdkquartz.h>
 
 #include <gtkmm2ext/utils.h>
 
@@ -34,7 +34,6 @@
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace Gtkmm2ext;
-using namespace sigc;
 using namespace std;
 using namespace PBD;
 
@@ -84,12 +83,12 @@ dump_view_tree (NSView* view, int depth)
                         [[NSNotificationCenter defaultCenter] addObserver:self
                          selector:@selector(cocoaParentActivationHandler:)
                          name:NSWindowDidBecomeMainNotification
-                         object:nil];
+                         object:NULL];
                         
                         [[NSNotificationCenter defaultCenter] addObserver:self
                          selector:@selector(cocoaParentBecameKeyHandler:)
                          name:NSWindowDidBecomeKeyNotification
-                         object:nil];
+                         object:NULL];
                 }
         }
 
@@ -366,7 +365,7 @@ AUPluginUI::create_cocoa_view ()
 
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("tried to create bundle, result = %1\n", viewBundle));
 
-		if (viewBundle == nil) {
+		if (viewBundle == NULL) {
 			error << _("AUPluginUI: error loading AU view's bundle") << endmsg;
 			return -1;
 		} else {
@@ -384,7 +383,7 @@ AUPluginUI::create_cocoa_view ()
 			}
 			// make a factory
 			id factory = [[[factoryClass alloc] init] autorelease];
-			if (factory == nil) {
+			if (factory == NULL) {
 				error << _("AUPluginUI: Could not create an instance of the AU view factory") << endmsg;
 				return -1;
 			}
@@ -661,13 +660,13 @@ AUPluginUI::parent_cocoa_window ()
 	NSPoint origin = { 0, static_cast<CGFloat> (a.height) };
 
 	[au_view setFrameOrigin:origin];
-        [view addSubview:au_view positioned:NSWindowBelow relativeTo:nil]; 
+        [view addSubview:au_view positioned:NSWindowBelow relativeTo:NULL];
 
         last_au_frame = [au_view frame];
 
 	// watch for size changes of the view
 
-	_notify = [ [NotificationObject alloc] initWithPluginUI:this andCocoaParent:nil andTopLevelParent:win ]; 
+	_notify = [ [NotificationObject alloc] initWithPluginUI:this andCocoaParent:NULL andTopLevelParent:win ];
 
         [[NSNotificationCenter defaultCenter] addObserver:_notify
          selector:@selector(auViewResized:) name:NSViewFrameDidChangeNotification
