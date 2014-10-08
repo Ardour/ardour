@@ -596,7 +596,7 @@ VOLNAME=$APPNAME-$release_version
 
 # TODO use mktemp
 export TMPDIR=`pwd`
-MNTPATH=`mktemp -d -t /ardourimg`
+MNTPATH=`mktemp -d -t ardourimg`
 TMPDMG=`mktemp -t ardour`
 ICNSTMP=`mktemp -t ardouricon`
 EXTRA_SPACE_MB=30
@@ -621,32 +621,41 @@ cp -vi ${DMGBACKGROUND} "${MNTPATH}/.background/dmgbg.png"
 
 echo "setting DMG background ..."
 
-echo '
-   tell application "Finder"
-     tell disk "'${VOLNAME}'"
-           open
-           set current view of container window to icon view
-           set toolbar visible of container window to false
-           set statusbar visible of container window to false
-           set the bounds of container window to {400, 200, 800, '${DMGWINBOTTOM}'}
-           set theViewOptions to the icon view options of container window
-           set arrangement of theViewOptions to not arranged
-           set icon size of theViewOptions to 64
-           set background picture of theViewOptions to file ".background:dmgbg.png"
-           make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
-           set position of item "'${APPDIR}'" of container window to {90, 100}
-           set position of item "Applications" of container window to {310, 100}
-           '${MIXBUSPOS}'
-           '${HARVIDPOS}'
-           '${XJADEOPOS}'
-           close
-           open
-           update without registering applications
-           delay 5
-           eject
-     end tell
-   end tell
-' | osascript
+if test $(sw_vers -productVersion | cut -d '.' -f 2) -lt 9; then
+	# OSX ..10.8.X
+	DISKNAME=${VOLNAME}
+else
+	# OSX 10.9.X and later
+	DISKNAME=`basename "${MNTPATH}"`
+fi
+
+osascript << EOF
+  tell application "Finder"
+    activate
+    tell disk "${DISKNAME}"
+      open
+      set current view of container window to icon view
+      set toolbar visible of container window to false
+      set statusbar visible of container window to false
+      set the bounds of container window to {400, 200, 800, ${DMGWINBOTTOM}}
+      set theViewOptions to the icon view options of container window
+      set arrangement of theViewOptions to not arranged
+      set icon size of theViewOptions to 64
+      set background picture of theViewOptions to file ".background:dmgbg.png"
+      make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
+      set position of item "${APPDIR}" of container window to {90, 100}
+      set position of item "Applications" of container window to {310, 100}
+      ${MIXBUSPOS}
+      ${HARVIDPOS}
+      ${XJADEOPOS}
+      close
+      open
+      update without registering applications
+      delay 5
+      eject
+    end tell
+  end tell
+EOF
 
 chmod -Rf go-w "${MNTPATH}"
 sync
