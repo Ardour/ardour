@@ -103,6 +103,7 @@ static const uint32_t midi_port_color = 0x960909FF; //Red
 ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processor> p, Width w)
 	: _button (ArdourButton::led_default_elements)
 	, _position (PreFader)
+	, _position_num(0)
 	, _selectable(true)
 	, _parent (parent)
 	, _processor (p)

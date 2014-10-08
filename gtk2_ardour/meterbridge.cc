@@ -392,7 +392,7 @@ Meterbridge::on_scroll()
 	ARDOUR::MeterType mt_right = _mt_right;
 
 	for (unsigned int i = 0; i < _metrics.size(); ++i) {
-		int sx, dx, dy;
+		int sx, dx = 0, dy = 0;
 		int mm = _metrics[i]->get_metric_mode();
 		sx = (mm & 2) ? _metrics[i]->get_width() : 0;
 
