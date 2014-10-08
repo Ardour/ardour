@@ -282,6 +282,10 @@
 				RelativePath="..\dummy\dummy_audiobackend.h"
 				>
 			</File>
+			<File
+				RelativePath="..\dummy\dummy_midi_seq.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
