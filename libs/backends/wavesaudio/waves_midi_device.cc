@@ -130,7 +130,7 @@ WavesMidiDevice::close ()
     if (_input_pm_stream) {
         Pm_Close (_input_pm_stream);
         while (1 == Pm_Dequeue (_input_queue, &waves_midi_event)) {
-            delete waves_midi_event;
+            delete waves_midi_event; // XXX possible dup free in ~WavesMidiBuffer() (?)
         }
 
         Pm_QueueDestroy (_input_queue);
@@ -143,7 +143,7 @@ WavesMidiDevice::close ()
     if ( _output_pm_stream ) {
         Pm_Close (_output_pm_stream);
         while (1 == Pm_Dequeue (_output_queue, &waves_midi_event)) {
-            delete waves_midi_event;
+            delete waves_midi_event; // XXX possible dup free in ~WavesMidiBuffer() (?)
         }
         Pm_QueueDestroy (_output_queue);
         _output_queue = NULL;
@@ -232,7 +232,6 @@ WavesMidiDevice::write_midi ()
             }
             // COMMENTED DBG LOGS */ std::cout << "WavesMidiDevice::_write_midi (): SHORTMSG used, ev->tm:" << waves_midi_event->timestamp () - LATENCY <<  std::endl;
         }
-        delete waves_midi_event;
     }
     return;
 }
