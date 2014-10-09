@@ -29,6 +29,12 @@ WavesMidiPort::WavesMidiPort (const std::string& port_name, PortFlags flags)
 {       
 }
 
+struct MidiEventSorter {
+	bool operator() (const WavesMidiEvent* a, const WavesMidiEvent* b) {
+		return *a < *b;
+	}
+};
+
 void* 
 WavesMidiPort::get_buffer (pframes_t nframes)
 {
@@ -47,7 +53,7 @@ WavesMidiPort::get_buffer (pframes_t nframes)
 				target += ((const WavesMidiPort*)*cit)->const_buffer ();
 			}while((++cit) != get_connections ().end ());
 
-			std::sort (target.begin (), target.end ());
+			std::sort (target.begin (), target.end (), MidiEventSorter());
 		}
 	}
 
