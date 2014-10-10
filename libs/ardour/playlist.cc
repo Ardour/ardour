@@ -2596,6 +2596,29 @@ Playlist::region_use_count (boost::shared_ptr<Region> r) const
 		}
 	}
 
+	RegionFactory::CompoundAssociations& cassocs (RegionFactory::compound_associations());
+	for (RegionFactory::CompoundAssociations::iterator it = cassocs.begin(); it != cassocs.end(); ++it) {
+		/* check if region is used in a compound */
+		if (it->second == r) {
+			/* region is referenced as 'original' of a compound */
+			++cnt;
+			break;
+		}
+		if (r->whole_file() && r->max_source_level() > 0) {
+			/* region itself ia a compound.
+			 * the compound regions are not referenced -> check regions inside compound
+			 */
+			const SourceList& sl = r->sources();
+			for (SourceList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
+				boost::shared_ptr<PlaylistSource> ps = boost::dynamic_pointer_cast<PlaylistSource>(*s);
+				if (!ps) continue;
+				if (ps->playlist()->region_use_count(it->first)) {
+					// break out of both loops
+					return ++cnt;
+				}
+			}
+		}
+	}
 	return cnt;
 }
 
