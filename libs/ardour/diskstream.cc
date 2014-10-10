@@ -252,8 +252,18 @@ Diskstream::set_capture_offset ()
 		return;
 	}
 
-	_capture_offset = _io->latency();
-        DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: using IO latency, capture offset set to %2\n", name(), _capture_offset));
+	switch (_alignment_style) {
+	case ExistingMaterial:
+		_capture_offset = _io->latency();
+		break;
+
+	case CaptureTime:
+	default:
+		_capture_offset = 0;
+		break;
+	}
+
+        DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: using IO latency, capture offset set to %2 with style = %3\n", name(), _capture_offset, enum_2_string (_alignment_style)));
 }
 
 
@@ -266,6 +276,7 @@ Diskstream::set_align_style (AlignStyle a, bool force)
 
 	if ((a != _alignment_style) || force) {
 		_alignment_style = a;
+		set_capture_offset ();
 		AlignmentStyleChanged ();
 	}
 }
@@ -613,7 +624,7 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
 		return;
 	}
 
-	framecnt_t existing_material_offset = _session.worst_playback_latency();
+	const framecnt_t existing_material_offset = _session.worst_playback_latency();
 
 	if (possibly_recording == fully_rec_enabled) {
 
@@ -728,9 +739,26 @@ Diskstream::calculate_record_range (Evoral::OverlapType ot, framepos_t transport
 }
 
 void
-Diskstream::prepare_to_stop (framepos_t pos)
+Diskstream::prepare_to_stop (framepos_t transport_frame, framepos_t audible_frame)
 {
-        last_recordable_frame = pos + _capture_offset;
+	switch (_alignment_style) {
+	case ExistingMaterial:
+		last_recordable_frame = transport_frame + _capture_offset;
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose("%1: prepare to stop sets last recordable frame to %2 + %3 = %4\n", _name, transport_frame, _capture_offset, last_recordable_frame));
+		break;
+
+	case CaptureTime:
+		last_recordable_frame = audible_frame; // note that capture_offset is zero
+		/* we may already have captured audio before the last_recordable_frame (audible frame),
+		   so deal with this.
+		*/
+		if (last_recordable_frame > capture_start_frame) {
+			capture_captured = min (capture_captured, last_recordable_frame - capture_start_frame);
+		}
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose("%1: prepare to stop sets last recordable frame to audible frame @ %2\n", _name, audible_frame));
+		break;
+	}
+
 }
 
 void

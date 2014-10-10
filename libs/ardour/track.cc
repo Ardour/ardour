@@ -766,9 +766,9 @@ Track::speed () const
 }
 
 void
-Track::prepare_to_stop (framepos_t p)
+Track::prepare_to_stop (framepos_t t, framepos_t a)
 {
-	_diskstream->prepare_to_stop (p);
+	_diskstream->prepare_to_stop (t, a);
 }
 
 void

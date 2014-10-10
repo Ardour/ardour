@@ -462,6 +462,8 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 		Evoral::OverlapType ot = Evoral::coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
 		calculate_record_range (ot, transport_frame, nframes, rec_nframes, rec_offset);
 
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: this time record %2 of %3 frames, offset %4\n", _name, rec_nframes, nframes, rec_offset));
+
 		if (rec_nframes && !was_recording) {
 			capture_captured = 0;
 			was_recording = true;
@@ -1546,9 +1548,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 		}
 
 		_last_capture_sources.insert (_last_capture_sources.end(), srcs.begin(), srcs.end());
-
-		// cerr << _name << ": there are " << capture_info.size() << " capture_info records\n";
-
+		
 		_playlist->clear_changes ();
 		_playlist->set_capture_insertion_in_progress (true);
 		_playlist->freeze ();
@@ -1703,8 +1703,8 @@ AudioDiskstream::finish_capture (boost::shared_ptr<ChannelList> c)
 	   accessors, so that invalidation will not occur (both non-realtime).
 	*/
 
-	// cerr << "Finish capture, add new CI, " << ci->start << '+' << ci->frames << endl;
-
+	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("Finish capture, add new CI, %1 + %2\n", ci->start, ci->frames));
+	
 	capture_info.push_back (ci);
 	capture_captured = 0;
 

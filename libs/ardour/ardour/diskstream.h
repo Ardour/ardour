@@ -255,7 +255,7 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	virtual void set_align_style_from_io() {}
 	virtual void setup_destructive_playlist () {}
 	virtual void use_destructive_playlist () {}
-	virtual void prepare_to_stop (framepos_t pos);
+	virtual void prepare_to_stop (framepos_t transport_pos, framepos_t audible_frame);
 
 	void engage_record_enable ();
 	void disengage_record_enable ();
