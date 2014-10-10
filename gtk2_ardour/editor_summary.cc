@@ -104,6 +104,9 @@ EditorSummary::render_background_image ()
 {
 	int stride;
 	unsigned char *data;
+	if (_image) {
+		free (cairo_image_surface_get_data (_image));
+	}
 	stride = cairo_format_stride_for_width (CAIRO_FORMAT_RGB24, get_width ());
 	data = (unsigned char*) malloc (stride * get_height ());
 	_image = cairo_image_surface_create_for_data (data, CAIRO_FORMAT_RGB24, get_width (), get_height (), stride);
