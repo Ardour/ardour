@@ -60,7 +60,7 @@ public:
 	virtual void transport_stopped_wallclock (struct tm &, time_t, bool) = 0;
 	virtual bool pending_overwrite () const = 0;
 	virtual double speed () const = 0;
-	virtual void prepare_to_stop (framepos_t) = 0;
+	virtual void prepare_to_stop (framepos_t,framepos_t) = 0;
 	virtual void set_slaved (bool) = 0;
 	virtual ChanCount n_channels () = 0;
 	virtual framepos_t get_capture_start_frame (uint32_t n = 0) const = 0;

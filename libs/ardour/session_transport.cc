@@ -139,8 +139,8 @@ Session::request_track_speed (Track* tr, double speed)
 void
 Session::request_stop (bool abort, bool clear_state)
 {
-	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0, abort, clear_state);
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport stop, abort = %1, clear state = %2\n", abort, clear_state));
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, audible_frame(), 0.0, abort, clear_state);
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport stop, audible %3 transport %4 abort = %1, clear state = %2\n", abort, clear_state, audible_frame(), _transport_frame));
 	queue_event (ev);
 }
 
@@ -257,27 +257,12 @@ Session::realtime_stop (bool abort, bool clear_state)
 	for (RouteList::iterator i = r->begin (); i != r->end(); ++i) {
 		(*i)->realtime_handle_transport_stopped ();
 	}
+	
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("stop complete, auto-return scheduled for return to %1\n", _requested_return_frame));
 
-	if (actively_recording()) {
-
-		/* move the transport position back to where the
-		   request for a stop was noticed. we rolled
-		   past that point to pick up delayed input (and/or to delick)
-		*/
-
-		if (worst_playback_latency() > current_block_size) {
-			/* we rolled past the stop point to pick up data that had
-			   not yet arrived. move back to where the stop occured.
-			*/
-			decrement_transport_position (current_block_size + (worst_input_latency() - current_block_size));
-		} else {
-			decrement_transport_position (current_block_size);
-		}
-
-		/* the duration change is not guaranteed to have happened, but is likely */
-
-		todo = PostTransportWork (todo | PostTransportDuration);
-	}
+	/* the duration change is not guaranteed to have happened, but is likely */
+	
+	todo = PostTransportWork (todo | PostTransportDuration);
 
 	if (abort) {
 		todo = PostTransportWork (todo | PostTransportAbort);
@@ -750,8 +735,10 @@ Session::check_declick_out ()
 			start_locate (pending_locate_frame, pending_locate_roll, pending_locate_flush);
 			transport_sub_state &= ~(PendingDeclickOut|PendingLocate);
 		} else {
-			stop_transport (pending_abort);
-			transport_sub_state &= ~(PendingDeclickOut|PendingLocate);
+			if (!(transport_sub_state & StopPendingCapture)) {
+				stop_transport (pending_abort);
+				transport_sub_state &= ~(PendingDeclickOut|PendingLocate);
+			}
 		}
 
 	} else if (transport_sub_state & PendingLoopDeclickOut) {
@@ -952,7 +939,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 	if (!force && _transport_frame == target_frame && !loop_changing && !for_seamless_loop) {
 		if (with_roll) {
-			set_transport_speed (1.0, false);
+			set_transport_speed (1.0, 0, false);
 		}
 		loop_changing = false;
 		Located (); /* EMIT SIGNAL */
@@ -1097,7 +1084,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
  *  @param speed New speed
  */
 void
-Session::set_transport_speed (double speed, bool abort, bool clear_state, bool as_default)
+Session::set_transport_speed (double speed, framepos_t destination_frame, bool abort, bool clear_state, bool as_default)
 {
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1, abort = %2 clear_state = %3, current = %4 as_default %6\n", 
 						       speed, abort, clear_state, _transport_speed, _transport_frame, as_default));
@@ -1135,7 +1122,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 		if (Config->get_monitoring_model() == HardwareMonitoring) {
 			set_track_monitor_input_status (true);
 		}
-
+		
 		if (synced_to_engine ()) {
 			if (clear_state) {
 				/* do this here because our response to the slave won't
@@ -1146,6 +1133,12 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 			}
 			_engine.transport_stop ();
 		} else {
+			bool const auto_return_enabled = (!config.get_external_sync() && (config.get_auto_return() || abort));
+
+			if (!auto_return_enabled) {
+				_requested_return_frame = destination_frame;
+			}
+
 			stop_transport (abort);
 		}
 
@@ -1251,59 +1244,77 @@ Session::stop_transport (bool abort, bool clear_state)
 		return;
 	}
 
-	if (actively_recording() && !(transport_sub_state & StopPendingCapture) && worst_input_latency() > current_block_size) {
+	if (!get_transport_declick_required()) {
+
+		/* stop has not yet been scheduled */
 
 		boost::shared_ptr<RouteList> rl = routes.reader();
+		framepos_t stop_target = audible_frame();
+
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
-				tr->prepare_to_stop (_transport_frame);
+				tr->prepare_to_stop (_transport_frame, stop_target);
 			}
 		}
 
-		/* we need to capture the audio that has still not yet been received by the system
-		   at the time the stop is requested, so we have to roll past that time.
+		SubState new_bits;
+		
+		if (actively_recording() &&                           /* we are recording */
+		    worst_input_latency() > current_block_size) {     /* input latency exceeds block size, so simple 1 cycle delay before stop is not enough */
+			
+			/* we need to capture the audio that is still somewhere in the pipeline between
+			   wherever it was generated and the process callback. This means that even though
+			   the user (or something else)  has asked us to stop, we have to roll
+			   past this point and then reset the playhead/transport location to
+			   the position at which the stop was requested.
 
-		   we want to declick before stopping, so schedule the autostop for one
-		   block before the actual end. we'll declick in the subsequent block,
-		   and then we'll really be stopped.
+			   we still need playback to "stop" now, however, which is why we schedule
+			   a declick below.
+			*/
+			
+			DEBUG_TRACE (DEBUG::Transport, string_compose ("stop transport requested @ %1, scheduled for + %2 = %3, abort = %4\n",
+								       _transport_frame, _worst_input_latency,
+								       _transport_frame + _worst_input_latency,
+								       abort));
+			
+			SessionEvent *ev = new SessionEvent (SessionEvent::StopOnce, SessionEvent::Replace,
+							     _transport_frame + _worst_input_latency,
+							     0, 0, abort);
+			
+			merge_event (ev);
+
+			/* request a declick at the start of the next process cycle() so that playback ceases.
+			   It will remain silent until we actually stop (at the StopOnce event somewhere in 
+			   the future). The extra flag (StopPendingCapture) is set to ensure that check_declick_out()
+			   does not stop the transport too early.
+			 */
+			new_bits = SubState (PendingDeclickOut|StopPendingCapture);
+			
+		} else {
+			
+			/* Not recording, schedule a declick in the next process() cycle and then stop at its end */
+			
+			new_bits = PendingDeclickOut;
+		}
+
+		
+		/* we'll be called again after the declick */
+		transport_sub_state = SubState (transport_sub_state|new_bits);
+		pending_abort = abort;
+
+		return;
+
+	} else {
+		
+		/* declick was scheduled, but we've been called again, which means it is really time to stop
+		   
+		   XXX: we should probably split this off into its own method and call it explicitly.
 		*/
 
-		DEBUG_TRACE (DEBUG::Transport, string_compose ("stop transport requested @ %1, scheduled for + %2 - %3 = %4, abort = %5\n",
-							       _transport_frame, _worst_input_latency, current_block_size,
-							       _transport_frame - _worst_input_latency - current_block_size,
-							       abort));
-
-		SessionEvent *ev = new SessionEvent (SessionEvent::StopOnce, SessionEvent::Replace,
-		                                     _transport_frame + _worst_input_latency - current_block_size,
-		                                     0, 0, abort);
-
-		merge_event (ev);
-		transport_sub_state |= StopPendingCapture;
-		pending_abort = abort;
-		return;
+		realtime_stop (abort, clear_state);
+		_butler->schedule_transport_work ();
 	}
-
-	if ((transport_sub_state & PendingDeclickOut) == 0) {
-
-		if (!(transport_sub_state & StopPendingCapture)) {
-			boost::shared_ptr<RouteList> rl = routes.reader();
-			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-				if (tr) {
-					tr->prepare_to_stop (_transport_frame);
-				}
-			}
-		}
-
-		transport_sub_state |= PendingDeclickOut;
-		/* we'll be called again after the declick */
-		pending_abort = abort;
-		return;
-	}
-
-	realtime_stop (abort, clear_state);
-	_butler->schedule_transport_work ();
 }
 
 /** Called from the process thread */

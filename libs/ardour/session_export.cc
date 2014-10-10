@@ -192,7 +192,7 @@ Session::process_export_fw (pframes_t nframes)
 {
 	if (!_export_started) {
 		_export_started = true;
-		set_transport_speed (1.0, false);
+		set_transport_speed (1.0, 0, false);
 		butler_transport_work ();
 		g_atomic_int_set (&_butler->should_do_transport_work, 0);
 		post_transport ();

@@ -143,7 +143,7 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
 	bool pending_overwrite () const;
 	double speed () const;
-	void prepare_to_stop (framepos_t);
+	void prepare_to_stop (framepos_t, framepos_t);
 	void set_slaved (bool);
 	ChanCount n_channels ();
 	framepos_t get_capture_start_frame (uint32_t n = 0) const;

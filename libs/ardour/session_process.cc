@@ -154,11 +154,6 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 	int  declick = get_transport_declick_required();
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
-	if (transport_sub_state & StopPendingCapture) {
-		/* force a declick out */
-		declick = -1;
-	}
-
 	const framepos_t start_frame = _transport_frame;
 	const framepos_t end_frame = _transport_frame + floor (nframes * _transport_speed);
 	
@@ -581,7 +576,7 @@ Session::follow_slave (pframes_t nframes)
 #endif
 
 			if (_slave->give_slave_full_control_over_transport_speed()) {
-				set_transport_speed (slave_speed, false, false);
+				set_transport_speed (slave_speed, 0, false, false);
 				//std::cout << "set speed = " << slave_speed << "\n";
 			} else {
 				float adjusted_speed = slave_speed + (1.5 * (delta /  float(_current_frame_rate)));
@@ -1078,7 +1073,7 @@ Session::process_event (SessionEvent* ev)
 
 
 	case SessionEvent::SetTransportSpeed:
-		set_transport_speed (ev->speed, ev->yes_or_no, ev->second_yes_or_no, ev->third_yes_or_no);
+		set_transport_speed (ev->speed, ev->target_frame, ev->yes_or_no, ev->second_yes_or_no, ev->third_yes_or_no);
 		break;
 
 	case SessionEvent::PunchIn:
@@ -1101,8 +1096,8 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::StopOnce:
 		if (!non_realtime_work_pending()) {
-			stop_transport (ev->yes_or_no);
 			_clear_event_type (SessionEvent::StopOnce);
+			stop_transport (ev->yes_or_no);
 		}
 		remove = false;
 		del = false;
