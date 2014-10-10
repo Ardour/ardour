@@ -96,6 +96,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/pannable.h"
 #include "ardour/playlist_factory.h"
+#include "ardour/playlist_source.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
 #include "ardour/proxy_controllable.h"
@@ -2611,6 +2612,7 @@ Session::ask_about_playlist_deletion (boost::shared_ptr<Playlist> p)
 void
 Session::cleanup_regions ()
 {
+	bool removed = false;
 	const RegionFactory::RegionMap& regions (RegionFactory::regions());
 
 	for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end(); ++i) {
@@ -2618,7 +2620,21 @@ Session::cleanup_regions ()
 		uint32_t used = playlists->region_use_count (i->second);
 
 		if (used == 0 && !i->second->automatic ()) {
+			removed = true;
 			RegionFactory::map_remove (i->second);
+		}
+	}
+
+	if (removed) {
+		// re-check to remove parent references of compound regions
+		for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+			if (!(i->second->whole_file() && i->second->max_source_level() > 0)) {
+				continue;
+			}
+			assert(boost::dynamic_pointer_cast<PlaylistSource>(i->second->source (0)) != 0);
+			if (0 == playlists->region_use_count (i->second)) {
+				RegionFactory::map_remove (i->second);
+			}
 		}
 	}
 
