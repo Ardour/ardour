@@ -3038,6 +3038,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 		}
 
 		boost::shared_ptr<Region> original (ca->second);
+		cassocs.erase(ca);
 		bool modified_region;
 
 		if (i == rl.begin()) {
@@ -3135,6 +3136,9 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	for (vector<boost::shared_ptr<Region> >::iterator i = originals.begin(); i != originals.end(); ++i) {
 		add_region ((*i), (*i)->position());
 		set_layer((*i), (*i)->layer());
+		if (!RegionFactory::region_by_id((*i)->id())) {
+			RegionFactory::map_add(*i);
+		}
 	}
 
 	in_partition = false;
