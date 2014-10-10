@@ -5,3 +5,7 @@ export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
 exec valgrind \
 	--tool=massif \
 	$TOP/$EXECUTABLE --novst "$@"
+
+# analyse output with
+#   ms_print massif.out.<PID>
+# or check out https://projects.kde.org/projects/extragear/sdk/massif-visualizer
