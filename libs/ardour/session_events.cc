@@ -125,7 +125,8 @@ SessionEventManager::dump_events () const
 {
 	cerr << "EVENT DUMP" << endl;
 	for (Events::const_iterator i = events.begin(); i != events.end(); ++i) {
-		cerr << "\tat " << (*i)->action_frame << ' ' << (*i)->type << " target = " << (*i)->target_frame << endl;
+
+		cerr << "\tat " << (*i)->action_frame << ' ' << enum_2_string ((*i)->type) << " target = " << (*i)->target_frame << endl;
 	}
 	cerr << "Next event: ";
 
@@ -133,12 +134,12 @@ SessionEventManager::dump_events () const
 		cerr << "none" << endl;
 	} else {
 		cerr << "at " << (*next_event)->action_frame << ' '
-		     << (*next_event)->type << " target = "
+		     << enum_2_string ((*next_event)->type) << " target = "
 		     << (*next_event)->target_frame << endl;
 	}
 	cerr << "Immediate events pending:\n";
 	for (Events::const_iterator i = immediate_events.begin(); i != immediate_events.end(); ++i) {
-		cerr << "\tat " << (*i)->action_frame << ' ' << (*i)->type << " target = " << (*i)->target_frame << endl;
+		cerr << "\tat " << (*i)->action_frame << ' ' << enum_2_string((*i)->type) << " target = " << (*i)->target_frame << endl;
 	}
 	cerr << "END EVENT_DUMP" << endl;
 }
