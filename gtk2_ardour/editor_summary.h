@@ -36,6 +36,7 @@ class EditorSummary : public CairoWidget, public EditorComponent, public ARDOUR:
 {
 public:
 	EditorSummary (Editor *);
+	~EditorSummary ();
 
 	void set_session (ARDOUR::Session *);
 	void set_overlays_dirty ();
