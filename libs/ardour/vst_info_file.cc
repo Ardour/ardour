@@ -730,7 +730,6 @@ vstfx_info_from_plugin (const char *dllpath, VSTState* vstfx, vector<VSTInfo *> 
 		int id;
 		vector< pair<int, string> > ids;
 		AEffect *plugin = vstfx->plugin;
-		string path = vstfx->handle->path;
 
 		do {
 			char name[65] = "Unknown";
