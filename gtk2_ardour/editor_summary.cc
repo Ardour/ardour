@@ -62,6 +62,11 @@ EditorSummary::EditorSummary (Editor* e)
 	set_flags (get_flags() | Gtk::CAN_FOCUS);
 }
 
+EditorSummary::~EditorSummary ()
+{
+	cairo_surface_destroy (_image);
+}
+
 /** Handle a size allocation.
  *  @param alloc GTK allocation.
  */
@@ -102,14 +107,8 @@ EditorSummary::set_session (Session* s)
 void
 EditorSummary::render_background_image ()
 {
-	int stride;
-	unsigned char *data;
-	if (_image) {
-		free (cairo_image_surface_get_data (_image));
-	}
-	stride = cairo_format_stride_for_width (CAIRO_FORMAT_RGB24, get_width ());
-	data = (unsigned char*) malloc (stride * get_height ());
-	_image = cairo_image_surface_create_for_data (data, CAIRO_FORMAT_RGB24, get_width (), get_height (), stride);
+	cairo_surface_destroy (_image); // passing NULL is safe
+	_image = cairo_image_surface_create (CAIRO_FORMAT_RGB24, get_width (), get_height ());
 
 	cairo_t* cr = cairo_create (_image);
 
