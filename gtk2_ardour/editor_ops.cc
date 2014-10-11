@@ -43,6 +43,8 @@
 #include "ardour/audioregion.h"
 #include "ardour/dB.h"
 #include "ardour/location.h"
+#include "ardour/freezable.h"
+#include "ardour/freeze_operation.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_track.h"
 #include "ardour/operations.h"
@@ -3446,7 +3448,10 @@ Editor::unfreeze_route ()
 		return;
 	}
 
-	clicked_routeview->track()->unfreeze ();
+	FreezeOperation* freeze = FreezeOperation::get_instance();
+	boost::shared_ptr<Track> track = clicked_routeview->track();
+
+	track->disapply(freeze);
 }
 
 void*

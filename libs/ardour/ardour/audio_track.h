@@ -22,6 +22,8 @@
 
 #include "ardour/interthread_info.h"
 #include "ardour/track.h"
+#include "ardour/operation.h"
+#include "ardour/freezable.h"
 
 namespace ARDOUR {
 
@@ -31,10 +33,13 @@ class AudioPlaylist;
 class RouteGroup;
 class AudioFileSource;
 
-class AudioTrack : public Track
+ class AudioTrack : public Track, public Freezable
 {
   public:
-	AudioTrack (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
+	AudioTrack (Session&, 
+		    std::string name, 
+		    Route::Flag f = Route::Flag (0), 
+		    TrackMode m = Normal);
 	~AudioTrack ();
 
 	int set_mode (TrackMode m);
@@ -50,6 +55,16 @@ class AudioTrack : public Track
 		return DataType::AUDIO;
 	}
 
+	//Operation
+	void apply(Operation *op);
+	void disapply(Operation *op);
+
+	//Recording
+	void set_record_enabled (bool yn, void *src);
+	void prep_record_enabled (bool yn, void *src);
+
+	//FreezeState
+	FreezeState freeze_state() const;
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
 
@@ -67,6 +82,7 @@ class AudioTrack : public Track
   protected:
 	boost::shared_ptr<AudioDiskstream> audio_diskstream () const;
 	XMLNode& state (bool full);
+	FreezeRecord          _freeze_record;
 
   private:
 
