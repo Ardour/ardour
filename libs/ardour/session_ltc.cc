@@ -248,9 +248,9 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	framepos_t cycle_start_frame;
 
 	if (current_speed < 0) {
-		cycle_start_frame = (start_frame - ltc_out_latency.max);
-	} else if (current_speed > 0) {
 		cycle_start_frame = (start_frame + ltc_out_latency.max);
+	} else if (current_speed > 0) {
+		cycle_start_frame = (start_frame - ltc_out_latency.max);
 	} else {
 		/* There is no need to compensate for latency when not rolling
 		 * rather send the accurate NOW timecode
