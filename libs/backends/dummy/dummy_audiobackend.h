@@ -132,9 +132,15 @@ class DummyAudioPort : public DummyPort {
 			PinkNoise,
 			PonyNoise,
 			SineWave,
+			SquareWave,
+			KronekerDelta,
+			SineSweep,
+			SineSweepSwell,
+			Loopback,
 		};
 		void next_period () { _gen_cycle = false; }
 		void setup_generator (GeneratorType const, float const);
+		void fill_wavetable (const float* d, size_t n_samples) { assert(_wavetable != 0);  memcpy(_wavetable, d, n_samples * sizeof(float)); }
 
 	private:
 		Sample _buffer[8192];
@@ -326,6 +332,8 @@ class DummyAudioBackend : public AudioBackend {
 
 		void* main_process_thread ();
 
+		static size_t max_buffer_size() {return _max_buffer_size;}
+
 	private:
 		std::string _instance_name;
 		static std::vector<std::string> _midi_options;
@@ -373,6 +381,9 @@ class DummyAudioBackend : public AudioBackend {
 		void unregister_ports (bool system_only = false);
 
 		std::vector<DummyAudioPort *> _system_inputs;
+		std::vector<DummyAudioPort *> _system_outputs;
+		std::vector<DummyMidiPort *> _system_midi_in;
+		std::vector<DummyMidiPort *> _system_midi_out;
 		std::vector<DummyPort *> _ports;
 
 
