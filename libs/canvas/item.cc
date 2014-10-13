@@ -45,8 +45,6 @@ Item::Item (Canvas* canvas)
 	, _lut (0)
 	, _ignore_events (false)
 {
-	_tooltip = "This is a tooltip";
-
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 }	
 
@@ -61,8 +59,6 @@ Item::Item (Item* parent)
 	, _lut (0)
 	, _ignore_events (false)
 {
-	_tooltip = "This is a tooltip";
-
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 
 	if (parent) {
@@ -84,8 +80,6 @@ Item::Item (Item* parent, Duple const& p)
 	, _lut (0)
 	, _ignore_events (false)
 {
-	_tooltip = "This is a tooltip";
-
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 
 	if (parent) {
