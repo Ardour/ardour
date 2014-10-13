@@ -92,14 +92,13 @@
             <EventBox width="" bgnormal="#000000" bgactive="#000000"/>
             <VBox>
               <EventBox height="" bgnormal="#000000" bgactive="#000000"/>
-              <iconbutton id="solo_button"
+              <iconbutton id="monitor_input_button"
                           width="40"
-                          height="20"
-                          normalicon="time_axis_solo"
-                          activeicon="time_axis_solo_active"
-                          implicitactiveicon="time_axis_solo_safe"
-                          _prelighticon="time_axis_solo_prelight"
-                          tooltip="Solo"/>
+                          height="16"
+                          normalicon="time_axis_monitor_input"
+                          activeicon="time_axis_monitor_input_active"
+                          _prelighticon="time_axis_monitor_input_prelight"
+                          tooltip="Input Monitoring"/>
               <EventBox height="" bgnormal="#383838" bgactive="#424242"/>
             </VBox>
             <EventBox width="" bgnormal="#383838" bgactive="#424242"/>
@@ -109,25 +108,26 @@
           <VBox width="26"/>
           <EventBox width="" bgnormal="#000000" bgactive="#000000"/>
           <VBox>
-            <iconbutton id="monitor_input_button"
-                        width="40"
-                        height="16"
-                        normalicon="time_axis_monitor_input"
-                        activeicon="time_axis_monitor_input_active"
-                        _prelighticon="time_axis_monitor_input_prelight"
-                        tooltip="Input Monitoring"/>
+              <iconbutton id="mute_button"
+                          width="40"
+                          height="16"
+                          normalicon="time_axis_mute"
+                          activeicon="time_axis_mute_active"
+                          implicitactiveicon="time_axis_mute_implicit"
+                          _prelighticon="time_axis_mute_prelight"
+                          tooltip="Mute"/>
             <EventBox height="" bgnormal="#383838" bgactive="#424242"/>
           </VBox>
           <EventBox width="" bgnormal="#383838" bgactive="#424242"/>
           <VBox>
-            <iconbutton id="mute_button"
-                        width="40"
-                        height="16"
-                        normalicon="time_axis_mute"
-                        activeicon="time_axis_mute_active"
-                        implicitactiveicon="time_axis_mute_implicit"
-                        _prelighticon="time_axis_mute_prelight"
-                        tooltip="Mute"/>
+              <iconbutton id="solo_button"
+                          width="40"
+                          height="20"
+                          normalicon="time_axis_solo"
+                          activeicon="time_axis_solo_active"
+                          implicitactiveicon="time_axis_solo_safe"
+                          _prelighticon="time_axis_solo_prelight"
+                          tooltip="Solo"/>
             <Button id="master_mute_button" ui.orphan="true"/>
             <EventBox height="" bgnormal="#383838" bgactive="#424242"/>
           </VBox>
