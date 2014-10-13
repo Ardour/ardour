@@ -63,7 +63,7 @@
       <Button style="generic_control"
               id="system_configuration_button"
               text="System Settings"
-              fgnormal="#909090"
+              fgnormal="#ffffff"
     		  bgnormal="#303030"
     		  fgactive="#000000"
     		  bgactive="#dcdcdc"
