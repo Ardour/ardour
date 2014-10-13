@@ -1469,30 +1469,12 @@ Session::audible_frame () const
 	framepos_t tf;
 	framecnt_t offset;
 
-	/* the first of these two possible settings for "offset"
-	   mean that the audible frame is stationary until
-	   audio emerges from the latency compensation
-	   "pseudo-pipeline".
-
-	   the second means that the audible frame is stationary
-	   until audio would emerge from a physical port
-	   in the absence of any plugin latency compensation
-	*/
-
 	offset = worst_playback_latency ();
 
-	if (offset > current_block_size) {
-		offset -= current_block_size;
-	} else {
-		/* XXX is this correct? if we have no external
-		   physical connections and everything is internal
-		   then surely this is zero? still, how
-		   likely is that anyway?
-		*/
-		offset = current_block_size;
-	}
+	assert (offset == 0 || offset >= current_block_size);
 
 	if (synced_to_engine()) {
+		/* Note: this is basically just sync-to-JACK */
 		tf = _engine.transport_frame();
 	} else {
 		tf = _transport_frame;
