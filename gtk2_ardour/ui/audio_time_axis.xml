@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <RouteUI bgnormal="#383838"
-         bgactive="#545454">
+         bgactive="#424242">
   <Vbox>
     <EventBox height="1"
               bgnormal="#494949"
@@ -29,10 +29,10 @@
                 <HBox height="4"/>
                 <Label id="number_label"
                        text="32"
-                       fgnormal="#ffffff"
+                       fgnormal="#BAB9B9"
                        fgactive="#ffffff"
-                       winfont ="Arial Bold 13"
-                       macfont ="Helvetica Bold 13"/>
+                       winfont ="Arial Bold 14"
+                       macfont ="Helvetica Bold 14"/>
               </VBox>
             </HBox>
           </EventBox>
@@ -51,8 +51,8 @@
                       winfont ="Arial 10"
                       macfont ="Helvetica 10"
                       cssname="EditorTrackNameDisplay"
-                      textcolornormal="#ffffff"
-                      textcoloractive="#ffffff"
+                      textcolornormal="#acacac"
+                      textcoloractive="#acacac"
                       textcolorselected="#ffffff"
                       noshowall="true"
                       visible="false"/>
@@ -61,77 +61,77 @@
                  width="83"
                  winfont ="Arial 10"
                  macfont ="Helvetica 10"
-                 fgnormal="#ffffff"
+                 fgnormal="#acacac"
                  fgactive="#ffffff"
                  horzalignment="start"/>
         </VBox>
       </HBox>
       <VBox>
         <HBox>
-          <VBox width="21"/>
+          <VBox width="26"/>
           <iconbutton id="playlist_button"
               width="21"
               height="20"
               normalicon="time_axis_playlist"
               activeicon="time_axis_playlist"
               _prelighticon="time_axis_playlist" ui.orphan="true"/>
-          <HBox width="3"/>
+          <HBox width=""/>
           <HBox>
-            <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
+            <EventBox width="" bgnormal="#000000" bgactive="#000000"/>
             <VBox>
-              <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
+              <EventBox height="" bgnormal="#000000" bgactive="#000000"/>
               <iconbutton id="rec_enable_button"
-                          width="41"
+                          width="40"
                           height="20"
                           normalicon="time_axis_record"
                           activeicon="time_axis_record_active"
                           _prelighticon="time_axis_record_prelight"
                           tooltip="Record Enable"/>
-              <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
+              <EventBox height="" bgnormal="#000000" bgactive="#000000"/>
             </VBox>
-            <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
+            <EventBox width="" bgnormal="#000000" bgactive="#000000"/>
             <VBox>
-              <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
+              <EventBox height="" bgnormal="#000000" bgactive="#000000"/>
               <iconbutton id="solo_button"
-                          width="41"
+                          width="40"
                           height="20"
                           normalicon="time_axis_solo"
                           activeicon="time_axis_solo_active"
                           implicitactiveicon="time_axis_solo_safe"
                           _prelighticon="time_axis_solo_prelight"
                           tooltip="Solo"/>
-              <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
+              <EventBox height="" bgnormal="#383838" bgactive="#424242"/>
             </VBox>
-            <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
+            <EventBox width="" bgnormal="#383838" bgactive="#424242"/>
           </HBox>
         </HBox>
         <HBox>
-          <VBox width="24"/>
-          <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
+          <VBox width="26"/>
+          <EventBox width="" bgnormal="#000000" bgactive="#000000"/>
           <VBox>
             <iconbutton id="monitor_input_button"
-                        width="41"
-                        height="20"
+                        width="40"
+                        height="16"
                         normalicon="time_axis_monitor_input"
                         activeicon="time_axis_monitor_input_active"
                         _prelighticon="time_axis_monitor_input_prelight"
                         tooltip="Input Monitoring"/>
-            <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
+            <EventBox height="" bgnormal="#383838" bgactive="#424242"/>
           </VBox>
-          <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
+          <EventBox width="" bgnormal="#383838" bgactive="#424242"/>
           <VBox>
             <iconbutton id="mute_button"
-                        width="41"
-                        height="20"
+                        width="40"
+                        height="16"
                         normalicon="time_axis_mute"
                         activeicon="time_axis_mute_active"
                         implicitactiveicon="time_axis_mute_implicit"
                         _prelighticon="time_axis_mute_prelight"
                         tooltip="Mute"/>
             <Button id="master_mute_button" ui.orphan="true"/>
-            <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
+            <EventBox height="" bgnormal="#383838" bgactive="#424242"/>
           </VBox>
-          <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
+          <EventBox width="" bgnormal="#383838" bgactive="#424242"/>
         </HBox>
       </VBox>
       <HBox visible="false" noshowall="true">
@@ -145,7 +145,7 @@
       </HBox>
       <VBox width="1"/>
       <VBox  id="gain_meter_home" width="7" />
-      <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
+      <EventBox width="" bgnormal="#000000" bgactive="#000000"/>
     </HBox>
     <EventBox id="lower_drop_indicator" visible="false" noshowall="true" height="2" bgnormal="#1CA3B3" bgactive="#1CA3B3"/>
     <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>

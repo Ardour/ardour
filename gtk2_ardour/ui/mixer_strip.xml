@@ -2,51 +2,51 @@
 
 <RouteUI gainmeterscript="mixer_gain_meter.xml">
   <HBox>
-    <EventBox bgnormal="#383838" bgactive="#545454">
+    <EventBox bgnormal="#383838" bgactive="#424242">
       <VBox>
-        <EventBox id="panners_home" bgnormal="#383838" bgactive="#545454" height="59"/>
+        <EventBox id="panners_home" bgnormal="#383838" bgactive="#424242" height="59"/>
         <HBox id="level_meter_home"/>
         <Vbox>
           <HBox id="gain_meter_home"/>
-            <EventBox bgnormal="#383838" bgactive="#545454">
+            <EventBox bgnormal="#383838" bgactive="#424242">
             <VBox>
               <EventBox bgnormal="#000000"
                         bgactive="#000000"
-                        height="1"/>
+                        height=""/>
               <HBox>
                 <iconbutton id="rec_enable_button"
                             width="28"
-                            height="20"
+                            height="21"
                             normalicon="mixer_record"
                             activeicon="mixer_record_active"
                             _prelighticon="mixer_record_prelight"/>
                 <EventBox bgnormal="#000000"
                           bgactive="#000000"
-                          width="1"/>
+                          width=""/>
                 <iconbutton id="monitor_input_button"
-                            width="28"
-                            height="20"
+                            width="30"
+                            height="21"
                             normalicon="mixer_monitor_input"
                             activeicon="mixer_monitor_input_active"
                             _prelighticon="mixer_monitor_input_prelight"/>
               </HBox>
               <EventBox bgnormal="#000000"
                         bgactive="#000000"
-                        height="1"/>
+                        height=""/>
               <HBox>
                 <iconbutton id="mute_button"
                             width="28"
-                            height="20"
+                            height="21"
                             normalicon="mixer_mute"
                             activeicon="mixer_mute_active"
                             implicitactiveicon="mixer_mute_implicit"
                             _prelighticon="mixer_mute_prelight"/>
                 <EventBox bgnormal="#000000"
                           bgactive="#000000"
-                          width="1"/>
+                          width=""/>
                 <iconbutton id="solo_button"
-                            width="28"
-                            height="20"
+                            width="30"
+                            height="21"
                             normalicon="mixer_solo"
                             activeicon="mixer_solo_active"
                             implicitactiveicon="mixer_solo_safe"
@@ -54,7 +54,7 @@
               </HBox>
               <EventBox bgnormal="#000000"
                         bgactive="#000000"
-                        height="1"/>
+                        height=""/>
               
               <EventBox id="name_label_home">
               <HBox>
@@ -88,13 +88,13 @@
                 
               <EventBox bgnormal="#000000"
                         bgactive="#000000"
-                        height="1"/>
+                        height=""/>
             </VBox>
           </EventBox>
         </Vbox>
         <EventBox bgnormal="#000000"
                   bgactive="#000000"
-                  height="1"
+                  height=""
                   box.pack="end"/>
       </VBox>
     </EventBox>
