@@ -1290,6 +1290,10 @@ Editor::reset_canvas_cursor ()
 
 	Gdk::Cursor* cursor = which_mode_cursor ();
 
+	if (!cursor) {
+		cursor = which_grabber_cursor ();
+	}
+		
 	if (cursor) {
 		set_canvas_cursor (cursor);
 		return true;
