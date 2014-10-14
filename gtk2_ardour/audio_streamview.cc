@@ -141,27 +141,6 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 		return 0;
 	}
 
-//	if(!recording){
-//		for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-//			if ((*i)->region() == r) {
-//				cerr << "audio_streamview in add_region_view_internal region found" << endl;
-				/* great. we already have a AudioRegionView for this Region. use it again. */
-
-//				(*i)->set_valid (true);
-
-				// this might not be necessary
-//				AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-
-//				if (arv) {
-//					arv->set_waveform_scale (_waveform_scale);
-//					arv->set_waveform_shape (_waveform_shape);
-//				}
-
-//				return NULL;
-//			}
-//		}
-//	}
-
 	region_views.push_front (region_view);
 
         if (_trackview.editor().internal_editing()) {
