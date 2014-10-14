@@ -11,25 +11,26 @@ out = 'build'
 
 def backend_list():
     if Options.options.program_name == 'Ardour':
-        # Ardour
         backends = [ 'jack' ]
 
         if Options.options.build_dummy: 
             backends += [ 'dummy' ]
 
-        if Options.options.build_alsabackend:
-                if re.search ("linux", sys.platform) != None:
-                    backends += [ 'alsa' ]
+    elif Options.options.program_name == 'Mixbus':
+        backends = [ 'jack' ]
 
-    else:
-        # Not Ardour
+    elif Options.options.program_name == 'Tracks':
         if re.search ("linux", sys.platform) != None:
-            # Can't build this till the ALSA backend is merged because of a dependency (on Linux) on a shared utility library
-            # created for the ALSA backend and JACK.
-            # backends = [ 'jack' ]
-            backends = [ ]
+            backends = [ 'jack' ]
         else:
             backends = [ ]
+
+    else:
+        print ('Unknown product name; backends will not include JACK ', Options.options.program_name)
+
+    if re.search ("linux", sys.platform) != None:
+        if Options.options.build_alsabackend:
+            backends += [ 'alsa' ]
 
     if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc' or Options.options.dist_target == 'mingw':
         if Options.options.build_wavesbackend:
