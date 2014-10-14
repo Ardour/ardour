@@ -103,7 +103,7 @@ LatencyGUI::LatencyGUI (Latent& l, framepos_t sr, framepos_t psz)
 	adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &LatencyGUI::finish));
 
 	bc.set_size_request (-1, 25);
-	bc.set_name (X_("PluginSlider"));
+	bc.set_name (X_("ProcessorControlSlider"));
 
 	set_spacing (12);
 	pack_start (hbox1, true, true);
