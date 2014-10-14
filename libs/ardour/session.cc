@@ -3137,22 +3137,6 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
                     _step_editors--;
                 }
             }
-            
-            /* try to cause everyone to drop their references
-             * and unregister ports from the backend
-             */
-            for (size_t i = 0; i < (*iter)->input()->ports().num_ports(); ++i) {
-                _engine.unregister_port((*iter)->input()->ports().port(i));
-                PortEngine::PortHandle handle = (*iter)->input()->ports().port(i)->port_handle();
-                _engine.current_backend()->unregister_port(handle);
-            }
-            
-            for (size_t i = 0; i < (*iter)->output()->ports().num_ports(); ++i) {
-                _engine.unregister_port((*iter)->output()->ports().port(i));
-                PortEngine::PortHandle handle = (*iter)->output()->ports().port(i)->port_handle();
-                _engine.current_backend()->unregister_port(handle);
-            }
-            (*iter)->drop_references ();
 
         }
     
@@ -3181,6 +3165,25 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 	/* XXX i think this is unsafe as it currently stands, but i am not sure. (pd, october 2nd, 2006) */
     
 	routes.flush ();
+    
+    /* try to cause everyone to drop their references
+     * and unregister ports from the backend
+     */
+    for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
+        
+        for (size_t i = 0; i < (*iter)->input()->ports().num_ports(); ++i) {
+            _engine.unregister_port((*iter)->input()->ports().port(i));
+            PortEngine::PortHandle handle = (*iter)->input()->ports().port(i)->port_handle();
+            _engine.current_backend()->unregister_port(handle);
+        }
+        
+        for (size_t i = 0; i < (*iter)->output()->ports().num_ports(); ++i) {
+            _engine.unregister_port((*iter)->output()->ports().port(i));
+            PortEngine::PortHandle handle = (*iter)->output()->ports().port(i)->port_handle();
+            _engine.current_backend()->unregister_port(handle);
+        }
+        (*iter)->drop_references ();
+    }
     
 	Route::RemoteControlIDChange(); /* EMIT SIGNAL */
     

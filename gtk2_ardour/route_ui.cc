@@ -1452,9 +1452,14 @@ RouteUI::set_color_from_route ()
 void
 RouteUI::remove_this_route (bool apply_to_selection)
 {
+    if (!_session) {
+        return;
+    }
+    
+    boost::shared_ptr<RouteList> routes_to_remove(new RouteList);
     if (apply_to_selection) {      
         TrackSelection& track_selection =  ARDOUR_UI::instance()->the_editor().get_selection().tracks;
-
+        
         for (list<TimeAxisView*>::iterator i = track_selection.begin(); i != track_selection.end(); ++i) {
             RouteUI* t = dynamic_cast<RouteUI*> (*i);
             if (t) {
@@ -1465,7 +1470,7 @@ RouteUI::remove_this_route (bool apply_to_selection)
                 if( audio_track && audio_track->is_master_track() )
                     continue;
                 
-                Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (&RouteUI::idle_remove_this_route), t));
+                routes_to_remove->push_back(t->route() );
             }
         }
 	} else {
@@ -1476,8 +1481,10 @@ RouteUI::remove_this_route (bool apply_to_selection)
         if( audio_track && audio_track->is_master_track() )
             return;
 		
-        Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (&RouteUI::idle_remove_this_route), this));
+        routes_to_remove->push_back(this->route() );
 	}
+    
+    Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (&RouteUI::idle_remove_routes), ARDOUR_UI::instance()->the_session(), routes_to_remove) );
 }
 
 gint
@@ -1485,6 +1492,13 @@ RouteUI::idle_remove_this_route (RouteUI *rui)
 {
 	rui->_session->remove_route (rui->route());
 	return false;
+}
+
+gint
+RouteUI::idle_remove_routes (Session* sess, boost::shared_ptr<RouteList>& rlist)
+{
+    sess->remove_routes (rlist);
+    return false;
 }
 
 /** @return true if this name should be used for the route, otherwise false */
