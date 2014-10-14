@@ -112,7 +112,7 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 						       _samples_per_pixel, region_color);
 		break;
 	default:
-		fatal << string_compose (_("programming error: %1"), "illegal track mode in ::add_region_view_internal") << endmsg;
+		fatal << string_compose (_("programming error: %1"), "illegal track mode in ::create_region_view()") << endmsg;
 		/*NOTREACHED*/
 
 	}
