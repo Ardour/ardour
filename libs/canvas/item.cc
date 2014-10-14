@@ -777,6 +777,10 @@ Item::add_child_bounding_boxes() const
 
 	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
 
+		if (!(*i)->visible()) {
+			continue;
+		}
+
 		boost::optional<Rect> item_bbox = (*i)->bounding_box ();
 
 		if (!item_bbox) {
