@@ -419,38 +419,30 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 
 	bool be_silent;
 
-	if (_have_internal_generator) {
-		/* since the instrument has no input streams,
-		   there is no reason to send any signal
-		   into the route.
-		*/
+	MonitorState const s = monitoring_state ();
+	/* we are not rolling, so be silent even if we are monitoring disk, as there
+	   will be no disk data coming in.
+	*/
+	switch (s) {
+	case MonitoringSilence:
 		be_silent = true;
-
-	} else {
-
-		MonitorState const s = monitoring_state ();
-		/* we are not rolling, so be silent even if we are monitoring disk, as there
-		   will be no disk data coming in.
-		*/
-		switch (s) {
-		case MonitoringSilence:
-			/* if there is an instrument, be_silent should always
-			   be false
-			*/
-			be_silent = (the_instrument_unlocked() == 0);
-			break;
-		case MonitoringDisk:
-			be_silent = true;
-			break;
-		case MonitoringInput:
-			be_silent = false;
-			break;
-		default:
-			be_silent = false;
-			break;
-		}
+		break;
+	case MonitoringDisk:
+		be_silent = true;
+		break;
+	case MonitoringInput:
+		be_silent = false;
+		break;
+	default:
+		be_silent = false;
+		break;
 	}
-
+	
+	//if we have an internal generator, let it play regardless of monitoring state
+	if (_have_internal_generator) {
+		be_silent = false;
+	}
+	
 	_amp->apply_gain_automation (false);
 
 	/* if have_internal_generator, or .. */

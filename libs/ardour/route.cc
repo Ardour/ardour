@@ -450,8 +450,13 @@ Route::process_output_buffers (BufferSet& bufs,
 	   on a transition between monitoring states we get a de-clicking gain
 	   change in the _main_outs delivery.
 	*/
+	bool silence = monitoring_state () == MonitoringSilence;
 
-	_main_outs->no_outs_cuz_we_no_monitor (monitoring_state () == MonitoringSilence);
+	//but we override this in the case where we have an internal generator
+	if ( _have_internal_generator )
+		silence = false;
+
+	_main_outs->no_outs_cuz_we_no_monitor (silence);
 
 	/* -------------------------------------------------------------------------------------------
 	   GLOBAL DECLICK (for transport changes etc.)
