@@ -116,8 +116,6 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 		return -1;
 	}
 
-	cerr << "OPen " << _file_path << " for I/O\n";
-
 	if ((_smf = smf_load (f)) == 0) {
 		return -1;
 	}
