@@ -37,22 +37,20 @@ namespace Evoral {
 
 SMF::~SMF()
 {
-	if (_smf) {
-		smf_delete(_smf);
-		_smf = 0;
-		_smf_track = 0;
-	}
+	close ();
 }
 
 uint16_t
 SMF::num_tracks() const
 {
+	Glib::Threads::Mutex::Lock lm (_smf_lock);
 	return _smf->number_of_tracks;
 }
 
 uint16_t
 SMF::ppqn() const
 {
+	Glib::Threads::Mutex::Lock lm (_smf_lock);
 	return _smf->ppqn;
 }
 
@@ -62,6 +60,7 @@ SMF::ppqn() const
 int
 SMF::seek_to_track(int track)
 {
+	Glib::Threads::Mutex::Lock lm (_smf_lock);
 	_smf_track = smf_get_track_by_number(_smf, track);
 	if (_smf_track != NULL) {
 		_smf_track->next_event_number = (_smf_track->number_of_events == 0) ? 0 : 1;
@@ -102,6 +101,8 @@ SMF::test(const std::string& path)
 int
 SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 {
+	Glib::Threads::Mutex::Lock lm (_smf_lock);
+
 	assert(track >= 1);
 	if (_smf) {
 		smf_delete(_smf);
@@ -114,6 +115,8 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 	if (f == 0) {
 		return -1;
 	}
+
+	cerr << "OPen " << _file_path << " for I/O\n";
 
 	if ((_smf = smf_load (f)) == 0) {
 		return -1;
@@ -145,6 +148,8 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 int
 SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 {
+	Glib::Threads::Mutex::Lock lm (_smf_lock);
+
 	assert(track >= 1);
 	if (_smf) {
 		smf_delete(_smf);
@@ -196,6 +201,8 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 void
 SMF::close() THROW_FILE_ERROR
 {
+	Glib::Threads::Mutex::Lock lm (_smf_lock);
+
 	if (_smf) {
 		smf_delete(_smf);
 		_smf = 0;
@@ -206,6 +213,7 @@ SMF::close() THROW_FILE_ERROR
 void
 SMF::seek_to_start() const
 {
+	Glib::Threads::Mutex::Lock lm (_smf_lock);
 	_smf_track->next_event_number = 1;
 }
 
@@ -229,6 +237,8 @@ SMF::seek_to_start() const
 int
 SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* note_id) const
 {
+	Glib::Threads::Mutex::Lock lm (_smf_lock);
+
 	smf_event_t* event;
 
 	assert(delta_t);
@@ -291,6 +301,8 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* no
 void
 SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, event_id_t note_id)
 {
+	Glib::Threads::Mutex::Lock lm (_smf_lock);
+
 	if (size == 0) {
 		return;
 	}
@@ -364,6 +376,8 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, eve
 void
 SMF::begin_write()
 {
+	Glib::Threads::Mutex::Lock lm (_smf_lock);
+
 	assert(_smf_track);
 	smf_track_delete(_smf_track);
 
@@ -377,6 +391,7 @@ SMF::begin_write()
 void
 SMF::end_write() THROW_FILE_ERROR
 {
+	Glib::Threads::Mutex::Lock lm (_smf_lock);
 	PBD::StdioFileDescriptor d (_file_path, "w+");
 	FILE* f = d.allocate ();
 	if (f == 0) {

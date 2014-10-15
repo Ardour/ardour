@@ -22,6 +22,8 @@
 
 #include <cassert>
 
+#include <glibmm/threads.h>
+
 #include "evoral/visibility.h"
 #include "evoral/types.hpp"
 
@@ -85,6 +87,7 @@ private:
 	smf_t*       _smf;
 	smf_track_t* _smf_track;
 	bool         _empty; ///< true iff file contains(non-empty) events
+	mutable Glib::Threads::Mutex _smf_lock;
 };
 
 }; /* namespace Evoral */
