@@ -1471,8 +1471,6 @@ Session::audible_frame () const
 
 	offset = worst_playback_latency ();
 
-	assert (offset == 0 || offset >= current_block_size);
-
 	if (synced_to_engine()) {
 		/* Note: this is basically just sync-to-JACK */
 		tf = _engine.transport_frame();
