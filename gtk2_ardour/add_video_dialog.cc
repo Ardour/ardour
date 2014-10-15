@@ -269,6 +269,8 @@ static bool check_video_file_extension(std::string file)
 		".ogg"     , ".OGG"     ,
 		".ogv"     , ".OGV"     ,
 		".mpg"     , ".MPG"     ,
+		".mpeg"    , ".MPEG"    ,
+		".mts"     , ".MTS"     ,
 		".mov"     , ".MOV"     ,
 		".mp4"     , ".MP4"     ,
 		".mkv"     , ".MKV"     ,
@@ -283,6 +285,8 @@ static bool check_video_file_extension(std::string file)
 		".dv"      , ".DV"      ,
 		".dirac"   , ".DIRAC"   ,
 		".webm"    , ".WEBM"    ,
+		".wmv"     , ".WMV"     ,
+		".ts"      , ".TS"      ,
 	};
 
 	for (size_t n = 0; n < sizeof(suffixes)/sizeof(suffixes[0]); ++n) {
