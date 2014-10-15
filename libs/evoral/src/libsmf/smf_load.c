@@ -565,11 +565,17 @@ parse_next_event(smf_track_t *track)
 	assert(track->next_event_offset > 0);
 
 	buffer_length = track->file_buffer_length - track->next_event_offset;
-	assert(buffer_length > 0);
-
-	/* First, extract time offset from previous event. */
-	if (smf_extract_vlq(c, buffer_length, &etime, &len))
+	/* if there was no meta-EOT event, buffer_length can be zero. This is
+	   an error in the SMF file, but it shouldn't be treated as fatal.
+	*/
+	if (buffer_length == 0) {
+		g_warning ("SMF warning: expected EOT at end of track, but none found");
 		goto error;
+	}
+	/* First, extract time offset from previous event. */
+	if (smf_extract_vlq(c, buffer_length, &etime, &len)) {
+		goto error;
+	}
 
 	c += len;
 	buffer_length -= len;
@@ -578,8 +584,9 @@ parse_next_event(smf_track_t *track)
 		goto error;
 
 	/* Now, extract the actual event. */
-	if (extract_midi_event(c, buffer_length, event, &len, track->last_status))
+	if (extract_midi_event(c, buffer_length, event, &len, track->last_status)) {
 		goto error;
+	}
 
 	c += len;
 	buffer_length -= len;

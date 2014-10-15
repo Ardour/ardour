@@ -441,6 +441,9 @@ pointers_are_clear(smf_t *smf)
 	int i;
 
 	smf_track_t *track;
+	if (smf->file_buffer != NULL) {
+		fprintf (stderr, "SFB != null but == %p\n", smf->file_buffer);
+	}
 	assert(smf->file_buffer == NULL);
 	assert(smf->file_buffer_length == 0);
 
