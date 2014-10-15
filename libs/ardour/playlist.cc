@@ -557,6 +557,7 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 		pending_contents_change = false;
 		RegionAdded (boost::weak_ptr<Region> (r)); /* EMIT SIGNAL */
 		ContentsChanged (); /* EMIT SIGNAL */
+		
 	}
 }
 
@@ -611,37 +612,41 @@ Playlist::flush_notifications (bool from_undo)
 		*/
 	}
 
-	if (((regions_changed || pending_contents_change) && !in_set_state) || pending_layering) {
+	/* notify about contents/region changes first so that layering changes
+	 * in a UI will take place on the new contents.
+	 */
+
+	if (regions_changed || pending_contents_change) {
+		pending_layering = true;
+		ContentsChanged (); /* EMIT SIGNAL */
+	}
+	
+	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
+		(*s)->clear_changes ();
+		RegionAdded (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
+	}
+	
+	if ((regions_changed && !in_set_state) || pending_layering) {
 		relayer ();
 	}
+	
+	coalesce_and_check_crossfades (crossfade_ranges);
+	
+	if (!pending_range_moves.empty ()) {
+		/* We don't need to check crossfades for these as pending_bounds has
+		   already covered it.
+		*/
+		RangesMoved (pending_range_moves, from_undo);
+	}
+	
+	if (!pending_region_extensions.empty ()) {
+		RegionsExtended (pending_region_extensions);
+	}
 
-	 if (regions_changed || pending_contents_change) {
-		 pending_contents_change = false;
-		 ContentsChanged (); /* EMIT SIGNAL */
-	 }
+	clear_pending ();
 
-	 for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
-		 (*s)->clear_changes ();
-		 RegionAdded (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
-	 }
-
-	 coalesce_and_check_crossfades (crossfade_ranges);
-
-	 if (!pending_range_moves.empty ()) {
-		 /* We don't need to check crossfades for these as pending_bounds has
-		    already covered it.
-		 */
-		 RangesMoved (pending_range_moves, from_undo);
-	 }
-
-	 if (!pending_region_extensions.empty ()) {
-		 RegionsExtended (pending_region_extensions);
-	 }
-
-	 clear_pending ();
-
-	 in_flush = false;
- }
+	in_flush = false;
+}
 
  void
  Playlist::clear_pending ()
