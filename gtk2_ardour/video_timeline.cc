@@ -42,10 +42,6 @@
 #include <pthread.h>
 #include <curl/curl.h>
 
-#ifdef PLATFORM_WINDOWS
-#include <windows.h>
-#endif
-
 #include "i18n.h"
 
 using namespace std;
