@@ -536,8 +536,7 @@ cp $BUILD_ROOT/gtk2_ardour/dark_fonts.rc $Etc
 cp $BUILD_ROOT/gtk2_ardour/light_styles.rc $Etc
 cp $BUILD_ROOT/gtk2_ardour/dark_styles.rc $Etc
 cp $BUILD_ROOT/gtk2_ardour/widgets.rc $Etc
-cp $BUILD_ROOT/gtk2_ardour/ui_default.conf $Etc
-cp $BUILD_ROOT/gtk2_ardour/ui_default.conf $Etc/ardour3_ui.conf
+cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Etc
 
 # these are copied straight from the source tree
 
