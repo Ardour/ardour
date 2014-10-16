@@ -430,6 +430,8 @@ remove_file_source (boost::shared_ptr<Source> source)
 {
 	boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (source);
 
+	fs->DropReferences ();
+
 	if (fs) {
 		::g_unlink (fs->path().c_str());
 	}
