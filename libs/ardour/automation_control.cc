@@ -117,6 +117,7 @@ AutomationControl::set_automation_style (AutoStyle as)
 void
 AutomationControl::start_touch(double when)
 {
+	if (!_list) return;
 	if (!touching()) {
 		if (alist()->automation_state() == Touch) {
 			alist()->start_touch (when);
@@ -129,6 +130,7 @@ AutomationControl::start_touch(double when)
 void
 AutomationControl::stop_touch(bool mark, double when)
 {
+	if (!_list) return;
 	if (touching()) {
 		set_touching (false);
 		if (alist()->automation_state() == Touch) {
