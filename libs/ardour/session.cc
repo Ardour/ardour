@@ -121,7 +121,16 @@ namespace {
     {
         return route1->remote_control_id() < route2->remote_control_id();
     }
+    
+    long get_time_measurement()
+    {
+        timeval time;
+        gettimeofday(&time, NULL);
+        long millis = (time.tv_sec * 1000) + (time.tv_usec / 1000);
+        return millis;
+    }
 }
+
 
 bool Session::_disable_all_loaded_plugins = false;
 
@@ -2853,6 +2862,8 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 void
 Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, bool save)
 {
+    std::cout << "*-*-*-*-* Adding routes: " << std::endl;
+    long start_time = get_time_measurement();
 	try {
 		PBD::Unwinder<bool> aip (_adding_routes_in_progress, true);
 		add_routes_inner (new_routes, input_auto_connect, output_auto_connect);
@@ -2877,6 +2888,8 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
     update_route_record_state ();
     
 	RouteAdded (new_routes); /* EMIT SIGNAL */
+    long end_time = get_time_measurement();
+    std::cout << "*-*-*-*-* time: " << end_time - start_time << std::endl;
 }
 
 void
@@ -3079,6 +3092,11 @@ Session::add_internal_send (boost::shared_ptr<Route> dest, boost::shared_ptr<Pro
 void
 Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 {
+    std::cout << "*!*!*!*!*----Removing " << routes_to_remove->size() << " tracks" << std::endl;
+    
+    long start_time = get_time_measurement();
+    long disconnect_start_time;
+    long disconnect_stop_time;
     { //RCU Writer scope
         RCUWriter<RouteList> writer (routes);
         boost::shared_ptr<RouteList> rs = writer.get_copy ();
@@ -3115,8 +3133,10 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
             
             // We need to disconnect the route's inputs and outputs
             
+            disconnect_start_time = get_time_measurement();
             (*iter)->input()->disconnect (0);
             (*iter)->output()->disconnect (0);
+            disconnect_stop_time = get_time_measurement();
             
             /* if the route had internal sends sending to it, remove them */
             if ((*iter)->internal_return()) {
@@ -3156,6 +3176,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 	 * going away, then flush old references out of the graph.
      * Wave Tracks: reconnect routes
 	 */
+    long reconnect_start_time = get_time_measurement();
     if (ARDOUR::Profile->get_trx () ) {
         reconnect_existing_routes(true, false);
     } else {
@@ -3165,6 +3186,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 	if (_process_graph) {
 		_process_graph->clear_other_chain ();
 	}
+    long reconnect_stop_time = get_time_measurement();
     
 	/* get rid of it from the dead wood collection in the route list manager */
     
@@ -3176,12 +3198,14 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
      * and unregister ports from the backend
      */
     PBD::Unwinder<bool> uw_flag (_route_deletion_in_progress, true);
+    long ref_drop_start_time = get_time_measurement();
     for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
         
         (*iter)->drop_references ();
     }
     
 	Route::RemoteControlIDChange(); /* EMIT SIGNAL */
+    long ref_drop_stop_time = get_time_measurement();
     
 	/* save the new state of the world */
     
@@ -3189,6 +3213,15 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 		save_history (_current_snapshot_name);
 	}
 	reassign_track_numbers();
+    
+    long end_time = get_time_measurement();
+    
+    
+    std::cout << "*!*!*!*!*----Times " << std::endl;
+    std::cout << "Total " << start_time - end_time << std::endl;
+    std::cout << "Disconnect " << disconnect_start_time - disconnect_stop_time << std::endl;
+    std::cout << "Reconnect " << reconnect_start_time - reconnect_stop_time << std::endl;
+    std::cout << "Ref drop " << ref_drop_start_time - ref_drop_stop_time << std::endl;
 }
 
 void

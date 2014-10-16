@@ -1,52 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <RouteUI gainmeterscript="meter_strip_gain_meter.xml">
-  <EventBox id="panners_home" bgnormal="#383838" bgactive="#545454" height="59" ui.orphan="true"/>
+  <EventBox id="panners_home" bgnormal="#383838" bgactive="#424242" height="59" ui.orphan="true"/>
   <HBox>
-    <EventBox bgnormal="#383838" bgactive="#545454">
+    <EventBox bgnormal="#383838" bgactive="#424242">
       <VBox>
         <HBox id="level_meter_home"/>
         <Vbox>
           <HBox id="gain_meter_home"/>
-          <EventBox bgnormal="#383838" bgactive="#545454">
+          <EventBox bgnormal="#383838" bgactive="#424242">
             <VBox>
               <EventBox bgnormal="#000000"
                         bgactive="#000000"
-                        height="1"/>
+                        height=""/>
               <HBox>
                 <iconbutton id="rec_enable_button"
-                            width="18"
-                            height="12"
+                            width="19"
+                            height="13"
                             normalicon="meter_strip_record"
                             activeicon="meter_strip_record_active"
                             _prelighticon="meter_strip_record_prelight"/>
                 <EventBox bgnormal="#000000"
                           bgactive="#000000"
-                          width="1"/>
+                          width=""/>
                 <iconbutton id="monitor_input_button"
-                            width="18"
-                            height="12"
+                            width="19"
+                            height="13"
                             normalicon="meter_strip_monitor_input"
                             activeicon="meter_strip_monitor_input_active"
                             _prelighticon="meter_strip_monitor_input_prelight"/>
               </HBox>
               <EventBox bgnormal="#000000"
                         bgactive="#000000"
-                        height="1"/>
+                        height=""/>
               <HBox>
                 <iconbutton id="mute_button"
-                            width="18"
-                            height="12"
+                            width="19"
+                            height="13"
                             normalicon="meter_strip_mute"
                             activeicon="meter_strip_mute_active"
                             implicitactiveicon="meter_strip_mute_implicit"
                             _prelighticon="mixer_mute_prelight"/>
                 <EventBox bgnormal="#000000"
                           bgactive="#000000"
-                          width="1"/>
+                          width=""/>
                 <iconbutton id="solo_button"
-                            width="18"
-                            height="12"
+                            width="19"
+                            height="13"
                             normalicon="meter_strip_solo"
                             activeicon="meter_strip_solo_active"
                             implicitactiveicon="meter_strip_solo_safe"
@@ -54,12 +54,12 @@
               </HBox>
               <EventBox bgnormal="#000000"
                         bgactive="#000000"
-                        height="1"/>
+                        height=""/>
               
               <EventBox id="name_label_home">
               <HBox>
                   <Button id="name_button"
-                          width="37"
+                          width="38"
                           height="24"
                           fgnormal="#ffffff"
                           fgactive="#ffffff"
@@ -71,7 +71,7 @@
                               height="24"
                               visible="false">
                     <FocusEntry id="name_entry"
-                                width="37"
+                                width="38"
                                 height="24"
                                 fgnormal="#ffffff"
                                 winfont ="Arial 8"
