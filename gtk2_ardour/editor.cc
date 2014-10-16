@@ -4070,6 +4070,14 @@ Editor::update_tearoff_visibility()
 }
 
 void
+Editor::reattach_all_tearoffs ()
+{
+	if (_mouse_mode_tearoff) _mouse_mode_tearoff->put_it_back ();
+	if (_tools_tearoff) _tools_tearoff->put_it_back ();
+	if (_zoom_tearoff) _zoom_tearoff->put_it_back ();
+}
+
+void
 Editor::maximise_editing_space ()
 {
 	if (_maximised) {

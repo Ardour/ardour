@@ -369,6 +369,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void restore_editing_space();
 
 	void update_tearoff_visibility();
+	void reattach_all_tearoffs ();
 
 	void reset_x_origin (framepos_t);
 	void reset_x_origin_to_follow_playhead ();

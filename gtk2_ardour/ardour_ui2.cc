@@ -484,6 +484,7 @@ void
 ARDOUR_UI::reattach_all_tearoffs ()
 {
 	if (transport_tearoff) transport_tearoff->put_it_back();
+	if (editor) editor->reattach_all_tearoffs ();
 }
 
 void
