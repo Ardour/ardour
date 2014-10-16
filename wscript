@@ -301,6 +301,11 @@ def set_compiler_flags (conf,opt):
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1070",
                  '-mmacosx-version-min=10.7'))
+
+    elif conf.env['build_target'] in [ 'mavericks' ]:
+        compiler_flags.extend(
+                ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
+                 "-mmacosx-version-min=10.8"))
     else:
         conf.define ('IS_OSX', 0)
 
