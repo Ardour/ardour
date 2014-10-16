@@ -43,7 +43,8 @@ CONFIG_VARIABLE (bool, midi_feedback, "midi-feedback", false)
 CONFIG_VARIABLE (int32_t, mmc_receive_device_id, "mmc-receive-device-id", 0x7f)
 CONFIG_VARIABLE (int32_t, mmc_send_device_id, "mmc-send-device-id", 0)
 CONFIG_VARIABLE (int32_t, initial_program_change, "initial-program-change", -1)
-CONFIG_VARIABLE (bool, first_midi_bank_is_zero, "diplay-first-midi-bank-as-zero", false)
+CONFIG_VARIABLE (bool, first_midi_bank_is_zero, "display-first-midi-bank-as-zero", false)
+CONFIG_VARIABLE (int32_t, inter_scene_gap_msecs, "inter-scene-gap-msecs", 1)
 
 /* Timecode and related */
 
@@ -82,13 +83,14 @@ CONFIG_VARIABLE (bool, use_osc, "use-osc", false)
 /* editing related */
 
 CONFIG_VARIABLE (EditMode, edit_mode, "edit-mode", Slide)
-CONFIG_VARIABLE (bool, link_region_and_track_selection, "link-region-and-track-selection", false)
+CONFIG_VARIABLE (bool, link_region_and_track_selection, "link-region-and-track-selection", false)  // DEPRECATED
 CONFIG_VARIABLE (bool, link_editor_and_mixer_selection, "link-editor-and-mixer-selection", false)
 CONFIG_VARIABLE (std::string, keyboard_layout_name, "keyboard-layout-name", "ansi")
 CONFIG_VARIABLE (bool, automation_follows_regions, "automation-follows-regions", true)
 CONFIG_VARIABLE (bool, region_boundaries_from_selected_tracks, "region-boundaries-from-selected-tracks", true)
 CONFIG_VARIABLE (bool, region_boundaries_from_onscreen_tracks, "region-boundaries-from-onscreen_tracks", true)
 CONFIG_VARIABLE (bool, autoscroll_editor, "autoscroll-editor", true)
+CONFIG_VARIABLE (FadeShape, default_fade_shape, "default-fade-shape", FadeLinear)
 
 /* monitoring, mute, solo etc */
 
@@ -128,11 +130,13 @@ CONFIG_VARIABLE (gain_t, click_gain, "click-gain", 1.0)
 /** if true, we call Processor::flush() on all processors when the transport is stopped.
  *  Note that processors are still run when the transport is not moving.
  */
+CONFIG_VARIABLE (bool, skip_playback, "skip-playback", true)
 CONFIG_VARIABLE (bool, plugins_stop_with_transport, "plugins-stop-with-transport", false)
 CONFIG_VARIABLE (bool, stop_recording_on_xrun, "stop-recording-on-xrun", false)
 CONFIG_VARIABLE (bool, create_xrun_marker, "create-xrun-marker", true)
 CONFIG_VARIABLE (bool, stop_at_session_end, "stop-at-session-end", false)
 CONFIG_VARIABLE (bool, seamless_loop, "seamless-loop", false)
+CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", false)
 CONFIG_VARIABLE (framecnt_t, preroll, "preroll", 0)
 CONFIG_VARIABLE (framecnt_t, postroll, "postroll", 0)
 CONFIG_VARIABLE (float, rf_speed, "rf-speed", 2.0f)
@@ -145,7 +149,7 @@ CONFIG_VARIABLE (bool, secondary_clock_delta_edit_cursor, "secondary-clock-delta
 CONFIG_VARIABLE (bool, show_track_meters, "show-track-meters", true)
 CONFIG_VARIABLE (bool, locate_while_waiting_for_sync, "locate-while-waiting-for-sync", false)
 CONFIG_VARIABLE (bool, disable_disarm_during_roll, "disable-disarm-during-roll", false)
-CONFIG_VARIABLE (bool, always_play_range, "always-play-range", false)
+CONFIG_VARIABLE (bool, follow_edits, "follow-edits", false)
 CONFIG_VARIABLE (bool, super_rapid_clock_update, "super-rapid-clock-update", false)
 
 /* metering */
@@ -158,6 +162,7 @@ CONFIG_VARIABLE (MeterLineUp, meter_line_up_din, "meter-line-up-din", MeteringLi
 CONFIG_VARIABLE (float, meter_peak, "meter-peak", 0.0f)
 CONFIG_VARIABLE (bool, meter_style_led, "meter-style-led", true)
 CONFIG_VARIABLE (bool, show_editor_meter, "show-editor-meter", true)
+CONFIG_VARIABLE (double, waveform_clip_level, "waveform-clip-level", -0.0933967) /* units of dB */
 
 /* miscellany */
 
@@ -167,8 +172,6 @@ CONFIG_VARIABLE (bool, replicate_missing_region_channels, "replicate-missing-reg
 CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "hiding-groups-deactivates-groups", true)
 CONFIG_VARIABLE (bool, verify_remove_last_capture, "verify-remove-last-capture", true)
 CONFIG_VARIABLE (bool, no_new_session_dialog, "no-new-session-dialog", false)
-CONFIG_VARIABLE (bool, use_windows_vst, "use-windows-vst", true)
-CONFIG_VARIABLE (bool, use_lxvst, "use-lxvst", true)
 CONFIG_VARIABLE (bool, save_history, "save-history", true)
 CONFIG_VARIABLE (int32_t, saved_history_depth, "save-history-depth", 20)
 CONFIG_VARIABLE (int32_t, history_depth, "history-depth", 20)
@@ -178,7 +181,6 @@ CONFIG_VARIABLE (uint32_t, periodic_safety_backup_interval, "periodic-safety-bac
 CONFIG_VARIABLE (float, automation_interval_msecs, "automation-interval-msecs", 30)
 CONFIG_VARIABLE (bool, only_copy_imported_files, "only-copy-imported-files", false)
 CONFIG_VARIABLE (bool, keep_tearoffs, "keep-tearoffs", false)
-CONFIG_VARIABLE (bool, new_plugins_active, "new-plugins-active", true)
 CONFIG_VARIABLE (std::string, keyboard_layout, "keyboard-layout", "ansi")
 CONFIG_VARIABLE (std::string, default_bindings, "default-bindings", "ardour")
 CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)
@@ -192,15 +194,27 @@ CONFIG_VARIABLE (WaveformScale, waveform_scale, "waveform-scale", Linear)
 CONFIG_VARIABLE (WaveformShape, waveform_shape, "waveform-shape", Traditional)
 CONFIG_VARIABLE (bool, allow_special_bus_removal, "allow-special-bus-removal", false)
 CONFIG_VARIABLE (int32_t, processor_usage, "processor-usage", -1)
-CONFIG_VARIABLE (bool, color_regions_using_track_color, "color-regions-using-track-color", false)
 CONFIG_VARIABLE (gain_t, max_gain, "max-gain", 2.0) /* +6.0dB */
 CONFIG_VARIABLE (bool, update_editor_during_summary_drag, "update-editor-during-summary-drag", true)
 CONFIG_VARIABLE (bool, never_display_periodic_midi, "never-display-periodic-midi", true)
 CONFIG_VARIABLE (bool, sound_midi_notes, "sound-midi-notes", false)
-CONFIG_VARIABLE (bool, use_plugin_own_gui, "use-plugin-own-gui", true)
 CONFIG_VARIABLE (uint32_t, max_recent_sessions, "max-recent-sessions", 10)
 CONFIG_VARIABLE (double, automation_thinning_factor, "automation-thinning-factor", 20.0)
 CONFIG_VARIABLE (std::string, freesound_download_dir, "freesound-download-dir", Glib::get_home_dir() + "/Freesound/snd")
+
+/* plugin related */
+
+CONFIG_VARIABLE (bool, new_plugins_active, "new-plugins-active", true)
+CONFIG_VARIABLE (bool, use_plugin_own_gui, "use-plugin-own-gui", true)
+CONFIG_VARIABLE (bool, use_windows_vst, "use-windows-vst", true)
+CONFIG_VARIABLE (bool, use_lxvst, "use-lxvst", true)
+CONFIG_VARIABLE (bool, show_plugin_scan_window, "show-plugin-scan-window", false)
+CONFIG_VARIABLE (bool, discover_vst_on_start, "discover-vst-on-start", false)
+CONFIG_VARIABLE (int, vst_scan_timeout, "vst-scan-timeout", 600) /* deciseconds, per plugin, <= 0 no timeout */
+
+/* custom user plugin paths */
+CONFIG_VARIABLE (std::string, plugin_path_vst, "plugin-path-vst", "@default@")
+CONFIG_VARIABLE (std::string, plugin_path_lxvst, "plugin-path-lxvst", "@default@")
 
 /* denormal management */
 
@@ -212,9 +226,10 @@ CONFIG_VARIABLE (DenormalModel, denormal_model, "denormal-model", DenormalFTZDAZ
 CONFIG_VARIABLE (bool, show_zoom_tools, "show-zoom-tools", true)
 CONFIG_VARIABLE (bool, widget_prelight, "widget-prelight", true)
 CONFIG_VARIABLE (bool, use_tooltips, "use-tooltips", true)
-CONFIG_VARIABLE (std::string, mixer_strip_visibility, "mixer-strip-visibility", "PhaseInvert,SoloSafe,SoloIsolated,Group,MeterPoint")
+CONFIG_VARIABLE (std::string, mixer_strip_visibility, "mixer-element-visibility", "Input,PhaseInvert,RecMon,SoloIsoLock,Output,Comments")
 CONFIG_VARIABLE (bool, allow_non_quarter_pulse, "allow-non-quarter-pulse", false)
 CONFIG_VARIABLE (bool, show_region_gain, "show-region-gain", false)
+CONFIG_VARIABLE (bool, show_name_highlight, "show-name-highlight", false)
 
 /* web addresses used in the program */
 

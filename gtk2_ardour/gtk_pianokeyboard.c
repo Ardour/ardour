@@ -244,7 +244,7 @@ bind_key(PianoKeyboard *pk, const char *key, int note)
 {
 	assert(pk->key_bindings != NULL);
 
-	g_hash_table_insert(pk->key_bindings, (gpointer)key, (gpointer)((intptr_t)note));
+	g_hash_table_insert(pk->key_bindings, (const gpointer)key, (gpointer)((intptr_t)note));
 }
 
 static void
@@ -360,6 +360,8 @@ keyboard_event_handler(GtkWidget *mk, GdkEventKey *event, gpointer ignored)
 	GdkKeymapKey	kk;
 	PianoKeyboard	*pk = PIANO_KEYBOARD(mk);
 
+        (void) ignored;
+
 	/* We're not using event->keyval, because we need keyval with level set to 0.
 	   E.g. if user holds Shift and presses '7', we want to get a '7', not '&'. */
 	kk.keycode = event->hardware_keycode;
@@ -440,6 +442,8 @@ mouse_button_event_handler(PianoKeyboard *pk, GdkEventButton *event, gpointer ig
 
 	int		note = get_note_for_xy(pk, x, y);
 
+        (void) ignored;
+
 	if (event->button != 1)
 		return TRUE;
 
@@ -476,6 +480,8 @@ static gboolean
 mouse_motion_event_handler(PianoKeyboard *pk, GdkEventMotion *event, gpointer ignored)
 {
 	int		note;
+
+        (void) ignored;
 
 	if ((event->state & GDK_BUTTON1_MASK) == 0)
 		return TRUE;
@@ -529,6 +535,8 @@ piano_keyboard_expose(GtkWidget *widget, GdkEventExpose *event)
 static void
 piano_keyboard_size_request(GtkWidget* w, GtkRequisition *requisition)
 {
+        (void) w;
+
 	requisition->width = PIANO_KEYBOARD_DEFAULT_WIDTH;
 	requisition->height = PIANO_KEYBOARD_DEFAULT_HEIGHT;
 }
@@ -602,15 +610,15 @@ piano_keyboard_class_init(PianoKeyboardClass *klass)
 
 	/* Set up signals. */
 	piano_keyboard_signals[NOTE_ON_SIGNAL] = g_signal_new ("note-on",
-		G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+		G_TYPE_FROM_CLASS (klass), (GSignalFlags)(G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION),
 		0, NULL, NULL, g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1, G_TYPE_INT);
 
 	piano_keyboard_signals[NOTE_OFF_SIGNAL] = g_signal_new ("note-off",
-		G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+		G_TYPE_FROM_CLASS (klass), (GSignalFlags)(G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION),
 		0, NULL, NULL, g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1, G_TYPE_INT);
 
 	piano_keyboard_signals[REST_SIGNAL] = g_signal_new ("rest",
-                G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                G_TYPE_FROM_CLASS (klass), (GSignalFlags)(G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION),
                 0, NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
 	widget_klass = (GtkWidgetClass*) klass;
@@ -651,7 +659,7 @@ piano_keyboard_get_type(void)
                         0,    /* value_table */
 		};
 
-		mk_type = g_type_register_static(GTK_TYPE_DRAWING_AREA, "PianoKeyboard", &mk_info, 0);
+		mk_type = g_type_register_static(GTK_TYPE_DRAWING_AREA, "PianoKeyboard", &mk_info, (GTypeFlags)0);
 	}
 
 	return mk_type;
@@ -660,7 +668,7 @@ piano_keyboard_get_type(void)
 GtkWidget *
 piano_keyboard_new(void)
 {
-	GtkWidget *widget = gtk_type_new(piano_keyboard_get_type());
+	GtkWidget *widget = (GtkWidget*)gtk_type_new(piano_keyboard_get_type());
 
 	PianoKeyboard *pk = PIANO_KEYBOARD(widget);
 

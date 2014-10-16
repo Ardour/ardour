@@ -30,6 +30,7 @@
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
 
+#include "control_protocol/visibility.h"
 #include "control_protocol/basic_ui.h"
 #include "control_protocol/types.h"
 
@@ -39,7 +40,7 @@ class Route;
 class Session;
 class Bundle;
 
-class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI
+class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI
 {
   public:
 	ControlProtocol (Session&, std::string name);
@@ -144,7 +145,7 @@ class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, 
 	void prev_track (uint32_t initial_id);
 
   private:
-	ControlProtocol (const ControlProtocol&); /* noncopyable */
+	LIBCONTROLCP_LOCAL ControlProtocol (const ControlProtocol&); /* noncopyable */
         bool _active;
 };
 

@@ -28,7 +28,7 @@
 
 namespace ARDOUR {
 
-class SndFileSource : public AudioFileSource {
+class LIBARDOUR_API SndFileSource : public AudioFileSource {
   public:
 	/** Constructor to be called for existing external-to-session files */
 	SndFileSource (Session&, const std::string& path, int chn, Flag flags);
@@ -55,6 +55,7 @@ class SndFileSource : public AudioFileSource {
 	float sample_rate () const;
 	int update_header (framepos_t when, struct tm&, time_t);
 	int flush_header ();
+	void flush ();
 
 	framepos_t natural_position () const;
 
@@ -73,6 +74,8 @@ class SndFileSource : public AudioFileSource {
 	static const Source::Flag default_writable_flags;
 
 	static int get_soundfile_info (const std::string& path, SoundFileInfo& _info, std::string& error_msg);
+
+	void release_descriptor ();
 
   protected:
 	void set_path (const std::string& p);

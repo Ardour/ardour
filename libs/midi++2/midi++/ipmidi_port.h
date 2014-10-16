@@ -21,7 +21,7 @@
 
 #include <string>
 #include <iostream>
-#if defined(WIN32)
+#if defined(PLATFORM_WINDOWS)
 #include <winsock.h>
 #elif defined(__FREE_BSD__)
 #include <netinet/in.h>
@@ -46,13 +46,14 @@
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
 
+#include "midi++/libmidi_visibility.h"
 #include "midi++/types.h"
 #include "midi++/parser.h"
 #include "midi++/port.h"
 
 namespace MIDI {
 
-class IPMIDIPort : public Port {
+class LIBMIDIPP_API IPMIDIPort : public Port {
   public:
     IPMIDIPort (int base_port = lowest_ipmidi_port_default, const std::string& ifname = std::string());
     IPMIDIPort (const XMLNode&);

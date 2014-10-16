@@ -31,6 +31,7 @@
 #include "pbd/replace_all.h"
 #include "pbd/whitespace.h"
 #include "pbd/stacktrace.h"
+#include "pbd/stl_delete.h"
 #include "pbd/openuri.h"
 
 #include "ardour/audioengine.h"
@@ -54,6 +55,7 @@ using namespace Gdk;
 using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 static string poor_mans_glob (string path)
 {
@@ -112,7 +114,7 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	
 	get_vbox()->show_all ();
 
-	/* fill data models and how/hide accordingly */
+	/* fill data models and show/hide accordingly */
 
 	populate_session_templates ();
 
@@ -248,7 +250,9 @@ SessionDialog::session_folder ()
 		/* existing session chosen from file chooser */
 		return Glib::path_get_dirname (existing_session_chooser.get_current_folder ());
 	} else {
-		std::string legal_session_folder_name = legalize_for_path (new_name_entry.get_text());
+		std::string val = new_name_entry.get_text();
+		strip_whitespace_edges (val);
+		std::string legal_session_folder_name = legalize_for_path (val);
 		return Glib::build_filename (new_folder_chooser.get_current_folder(), legal_session_folder_name);
 	}
 }
@@ -277,7 +281,7 @@ SessionDialog::setup_initial_choice_box ()
 
 	string image_path;
 
-	if (find_file_in_search_path (ardour_data_search_path(), "small-splash.png", image_path)) {
+	if (find_file (ardour_data_search_path(), "small-splash.png", image_path)) {
 		Gtk::Image* image;
 		if ((image = manage (new Gtk::Image (image_path))) != 0) {
 			hbox->pack_start (*image, false, false);
@@ -340,7 +344,7 @@ SessionDialog::setup_initial_choice_box ()
 	recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &SessionDialog::recent_row_activated));
 	
 	centering_vbox->pack_start (recent_label, false, false, 12);
-	centering_vbox->pack_start (recent_scroller, false, true);
+	centering_vbox->pack_start (recent_scroller, true, true);
 
 	/* Browse button */
 	
@@ -618,7 +622,7 @@ SessionDialog::redisplay_recent_sessions ()
 
 		get_state_files_in_directory (*i, state_file_paths);
 
-		vector<string*>* states;
+		vector<string> states;
 		vector<const gchar*> item;
 		string dirname = *i;
 
@@ -636,7 +640,9 @@ SessionDialog::redisplay_recent_sessions ()
 
 		/* now get available states for this session */
 
-		if ((states = Session::possible_states (dirname)) == 0) {
+		states = Session::possible_states (dirname);
+
+		if (states.empty()) {
 			/* no state file? */
 			continue;
 		}
@@ -651,9 +657,10 @@ SessionDialog::redisplay_recent_sessions ()
 
 		float sr;
 		SampleFormat sf;
-		std::string s = Glib::build_filename (dirname, state_file_names.front() + statefile_suffix);
+		std::string state_file_basename = state_file_names.front();
 
-		row[recent_session_columns.visible_name] = Glib::path_get_basename (dirname);
+		std::string s = Glib::build_filename (dirname, state_file_basename + statefile_suffix);
+
 		row[recent_session_columns.fullpath] = dirname; /* just the dir, but this works too */
 		row[recent_session_columns.tip] = Glib::Markup::escape_text (dirname);
 
@@ -678,9 +685,13 @@ SessionDialog::redisplay_recent_sessions ()
 		++session_snapshot_count;
 
 		if (state_file_names.size() > 1) {
+			// multiple session files in the session directory - show the directory name.
+			// if there's not a session file with the same name as the session directory,
+			// opening the parent item will fail, but expanding it will show the session
+			// files that actually exist, and the right one can then be opened.
+			row[recent_session_columns.visible_name] = Glib::path_get_basename (dirname);
 
 			// add the children
-
 			for (std::vector<std::string>::iterator i2 = state_file_names.begin(); i2 != state_file_names.end(); ++i2) {
 
 				Gtk::TreeModel::Row child_row = *(recent_session_model->append (row.children()));
@@ -710,6 +721,9 @@ SessionDialog::redisplay_recent_sessions ()
 
 				++session_snapshot_count;
 			}
+		} else {
+			// only a single session file in the directory - show its actual name.
+			row[recent_session_columns.visible_name] = state_file_basename;
 		}
 	}
 
@@ -1034,6 +1048,7 @@ void
 SessionDialog::existing_session_selected ()
 {
 	_existing_session_chooser_used = true;
+	recent_session_display.get_selection()->unselect_all();
 	/* mark this sensitive in case we come back here after a failed open
 	 * attempt and the user has hacked up the fix. sigh.
 	 */

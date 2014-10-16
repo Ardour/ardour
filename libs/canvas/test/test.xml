@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Canvas>
+  <Group x-position="0" y-position="0" visible="yes">
+    <Rectangle x0="0" y0="0" x1="16" y1="16" outline-what="15" x-position="0" y-position="0" visible="yes" outline-color="305419896" outline="yes" outline-width="0.5" fill-color="255" fill="yes"/>
+    <Group x-position="64" y-position="72" visible="yes">
+      <Line x0="41" y0="43" x1="44" y1="46" x-position="0" y-position="0" visible="yes" outline-color="255" outline="yes" outline-width="0.5"/>
+    </Group>
+  </Group>
+</Canvas>

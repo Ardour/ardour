@@ -50,7 +50,10 @@
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
+
 #include "evoral/Parameter.hpp"
+
+#include "canvas/debug.h"
 
 #include "ardour_ui.h"
 #include "ardour_button.h"
@@ -58,7 +61,6 @@
 #include "global_signals.h"
 #include "route_time_axis.h"
 #include "automation_time_axis.h"
-#include "canvas_impl.h"
 #include "enums.h"
 #include "gui_thread.h"
 #include "keyboard.h"
@@ -69,7 +71,6 @@
 #include "region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
-#include "simplerect.h"
 #include "streamview.h"
 #include "utils.h"
 #include "route_group_menu.h"
@@ -79,6 +80,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -86,7 +88,7 @@ using namespace Editing;
 using namespace std;
 using std::list;
 
-RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& canvas)
+RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
 	: AxisView(sess)
 	, RouteUI(sess)
 	, TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas)
@@ -94,24 +96,34 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& c
 	, parent_canvas (canvas)
 	, no_redraw (false)
 	, button_table (3, 3)
-	, route_group_button (_("g"))
-	, playlist_button (_("p"))
-	, automation_button (_("a"))
+	, route_group_button (_("G"))
+	, playlist_button (_("P"))
+	, automation_button (_("A"))
 	, automation_action_menu (0)
 	, plugins_submenu_item (0)
 	, route_group_menu (0)
 	, playlist_action_menu (0)
 	, mode_menu (0)
 	, color_mode_menu (0)
-	, gm (sess, true, 125, 18)
+	, gm (sess, true, 75, 14)
 	, _ignore_set_layer_display (false)
 {
+	number_label.set_name("tracknumber label");
+	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
+	number_label.set_alignment(.5, .5);
+	number_label.set_fallthrough_to_parent (true);
+
+	sess->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::parameter_changed, this, _1), gui_context());
 }
 
 void
 RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
+
+	CANVAS_DEBUG_NAME (_canvas_display, string_compose ("main for %1", rt->name()));
+	CANVAS_DEBUG_NAME (selection_group, string_compose ("selections for %1", rt->name()));
+	CANVAS_DEBUG_NAME (_ghost_group, string_compose ("ghosts for %1", rt->name()));
 
 	int meter_width = 3;
 	if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
@@ -138,7 +150,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	mute_changed (0);
-        update_solo_display ();
+	update_solo_display ();
 
 	timestretch_rect = 0;
 	no_redraw = false;
@@ -155,19 +167,11 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	if (is_track()) {
 
-		/* use icon */
-		
-		switch (track()->mode()) {
-		case ARDOUR::Normal:
-		case ARDOUR::NonLayered:
-			rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
-			break;
-		case ARDOUR::Destructive:
-			rec_enable_button->set_image (::get_icon (X_("record_tape_red")));
-			break;
+		if (ARDOUR::Profile->get_mixbus()) {
+			controls_table.attach (*rec_enable_button, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		} else {
+			controls_table.attach (*rec_enable_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 		}
-
-		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 
                 if (is_midi_track()) {
                         ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
@@ -185,29 +189,72 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	} else {
 		gm.set_fader_name ("AudioBusFader");
+		Gtk::Fixed *blank = manage(new Gtk::Fixed());
+		controls_button_size_group->add_widget(*blank);
+		if (ARDOUR::Profile->get_mixbus() ) {
+			controls_table.attach (*blank, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		} else {
+			controls_table.attach (*blank, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		}
+		blank->show();
 	}
 
-	Gtk::VBox *mtrbox = manage(new Gtk::VBox());
-	mtrbox->pack_start(gm.get_level_meter(), false, false, 2);
-	controls_hbox.pack_start(*mtrbox, false, false, 4);
-	mtrbox->show();
+	top_hbox.pack_end(gm.get_level_meter(), false, false, 2);
+
+	if (!ARDOUR::Profile->get_mixbus()) {
+		controls_meters_size_group->add_widget (gm.get_level_meter());
+	}
 
 	_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
 	_route->input()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
+	_route->track_number_changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::label_view, this), gui_context());
 
-	controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+	if (ARDOUR::Profile->get_mixbus()) {
+		controls_table.attach (*mute_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	} else {
+		controls_table.attach (*mute_button, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	}
+	// mute button is always present, it is used to
+	// force the 'blank' placeholders to the proper size
+	controls_button_size_group->add_widget(*mute_button);
 
-        if (!_route->is_master()) {
-                controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-        }
+	if (!_route->is_master()) {
+		if (ARDOUR::Profile->get_mixbus()) {
+			controls_table.attach (*solo_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		} else {
+			controls_table.attach (*solo_button, 4, 5, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		}
+	} else {
+		Gtk::Fixed *blank = manage(new Gtk::Fixed());
+		controls_button_size_group->add_widget(*blank);
+		if (ARDOUR::Profile->get_mixbus()) {
+			controls_table.attach (*blank, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		} else {
+			controls_table.attach (*blank, 4, 5, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		}
+		blank->show();
+	}
 
-	controls_table.attach (route_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::AttachOptions (0), 3, 0);
-
+	if (ARDOUR::Profile->get_mixbus()) {
+		controls_table.attach (route_group_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (gm.get_gain_slider(), 3, 5, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
+	}
+	else if (!ARDOUR::Profile->get_trx()) {
+		controls_table.attach (route_group_button, 4, 5, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (gm.get_gain_slider(), 0, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
+	}
+	
 	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
 	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));
 	ARDOUR_UI::instance()->set_tip(route_group_button, _("Route Group"));
+
+	mute_button->set_tweaks(ArdourButton::TrackHeader);
+	solo_button->set_tweaks(ArdourButton::TrackHeader);
+	rec_enable_button->set_tweaks(ArdourButton::TrackHeader);
+	playlist_button.set_tweaks(ArdourButton::TrackHeader);
+	automation_button.set_tweaks(ArdourButton::TrackHeader);
+	route_group_button.set_tweaks(ArdourButton::TrackHeader);
 
 	if (is_midi_track()) {
 		ARDOUR_UI::instance()->set_tip(automation_button, _("MIDI Controllers and Automation"));
@@ -215,12 +262,23 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		ARDOUR_UI::instance()->set_tip(automation_button, _("Automation"));
 	}
 
+	update_track_number_visibility();
 	label_view ();
 
-	controls_table.attach (automation_button, 6, 7, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	if (ARDOUR::Profile->get_mixbus()) {
+		controls_table.attach (automation_button, 1, 2, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
+	}
+	else if (!ARDOUR::Profile->get_trx()) {
+		controls_table.attach (automation_button, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
+	}
 
 	if (is_track() && track()->mode() == ARDOUR::Normal) {
-		controls_table.attach (playlist_button, 5, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		if (ARDOUR::Profile->get_mixbus()) {
+			controls_table.attach (playlist_button, 0, 1, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
+		}
+		else if (!ARDOUR::Profile->get_trx()) {
+			controls_table.attach (playlist_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
+		}
 	}
 
 	_y_position = -1;
@@ -243,8 +301,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	} 
 
-	_editor.ZoomChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
-	_editor.HorizontalPositionChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::horizontal_position_changed));
+	_editor.ZoomChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_pixel));
 	ColorsChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::color_handler));
 
 	PropertyList* plist = new PropertyList();
@@ -253,8 +310,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	plist->add (ARDOUR::Properties::solo, true);
 
 	route_group_menu = new RouteGroupMenu (_session, plist);
-
-	gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 
 	gm.get_level_meter().signal_scroll_event().connect (sigc::mem_fun (*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 }
@@ -328,12 +383,57 @@ RouteTimeAxisView::playlist_changed ()
 void
 RouteTimeAxisView::label_view ()
 {
-	string x = _route->name();
-
-	if (x != name_label.get_text()) {
+	string x = _route->name ();
+	if (x != name_label.get_text ()) {
 		name_label.set_text (x);
 	}
+	const int64_t track_number = _route->track_number ();
+	if (track_number == 0) {
+		number_label.set_text ("");
+	} else {
+		number_label.set_text (PBD::to_string (abs(_route->track_number ()), std::dec));
+	}
+}
 
+void
+RouteTimeAxisView::update_track_number_visibility ()
+{
+	DisplaySuspender ds;
+	bool show_label = _session->config.get_track_name_number();
+
+	if (_route && _route->is_master()) {
+		show_label = false;
+	}
+
+	if (number_label.get_parent()) {
+		controls_table.remove (number_label);
+	}
+	if (show_label) {
+		if (ARDOUR::Profile->get_mixbus()) {
+			controls_table.attach (number_label, 3, 4, 0, 1, Gtk::SHRINK, Gtk::EXPAND|Gtk::FILL, 1, 0);
+		} else {
+			controls_table.attach (number_label, 0, 1, 0, 1, Gtk::SHRINK, Gtk::EXPAND|Gtk::FILL, 1, 0);
+		}
+		// see ArdourButton::on_size_request(), we should probably use a global size-group here instead.
+		// except the width of the number label is subtracted from the name-hbox, so we
+		// need to explictly calculate it anyway until the name-label & entry become ArdourWidgets.
+		int tnw = (2 + std::max(2u, _session->track_number_decimals())) * number_label.char_pixel_width();
+		if (tnw & 1) --tnw;
+		number_label.set_size_request(tnw, -1);
+		number_label.show ();
+		name_hbox.set_size_request(TimeAxisView::name_width_px - 2 - tnw, -1); // -2 = cellspacing
+	} else {
+		number_label.hide ();
+		name_hbox.set_size_request(TimeAxisView::name_width_px, -1);
+	}
+}
+
+void
+RouteTimeAxisView::parameter_changed (string const & p)
+{
+	if (p == "track-name-number") {
+		update_track_number_visibility();
+	}
 }
 
 void
@@ -422,6 +522,14 @@ RouteTimeAxisView::build_display_menu ()
 	display_menu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
+
+	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
+
+	items.push_back (MenuElem (_("Inputs..."), sigc::mem_fun (*this, &RouteUI::edit_input_configuration)));
+
+	items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
+
+	items.push_back (SeparatorElem());
 
 	if (_size_menu) {
 		detach_menu (*_size_menu);
@@ -694,7 +802,7 @@ RouteTimeAxisView::build_display_menu ()
 	}
 
 	items.push_back (CheckMenuElem (_("Active")));
-	CheckMenuItem* i = dynamic_cast<CheckMenuItem *> (&items.back());
+	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 	bool click_sets_active = true;
 	if (active > 0 && inactive == 0) {
 		i->set_active (true);
@@ -702,6 +810,7 @@ RouteTimeAxisView::build_display_menu ()
 	} else if (active > 0 && inactive > 0) {
 		i->set_inconsistent (true);
 	}
+	i->set_sensitive(! _session->transport_rolling());
 	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), click_sets_active, true));
 
 	items.push_back (SeparatorElem());
@@ -721,7 +830,7 @@ RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
 		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_track_mode, _1, mode, false));
 	} else {
 
-		bool needs_bounce;
+		bool needs_bounce = false;
 
 		if (!track()->can_use_mode (mode, needs_bounce)) {
 
@@ -735,22 +844,6 @@ RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
 		}
 
 		track()->set_mode (mode);
-
-		rec_enable_button->remove ();
-
-		switch (mode) {
-		case ARDOUR::NonLayered:
-		case ARDOUR::Normal:
-			rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
-			rec_enable_button->set_text (string());
-			break;
-		case ARDOUR::Destructive:
-			rec_enable_button->set_image (::get_icon (X_("record_tape_red")));
-			rec_enable_button->set_text (string());
-			break;
-		}
-
-		rec_enable_button->show_all ();
 	}
 }
 
@@ -784,13 +877,9 @@ RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layer
 #endif
 
 	if (timestretch_rect == 0) {
-		timestretch_rect = new SimpleRect (*canvas_display ());
-		timestretch_rect->property_x1() =  0.0;
-		timestretch_rect->property_y1() =  0.0;
-		timestretch_rect->property_x2() =  0.0;
-		timestretch_rect->property_y2() =  0.0;
-		timestretch_rect->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_TimeStretchFill.get();
-		timestretch_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeStretchOutline.get();
+		timestretch_rect = new ArdourCanvas::Rectangle (canvas_display ());
+		timestretch_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TimeStretchFill());
+		timestretch_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TimeStretchOutline());
 	}
 
 	timestretch_rect->show ();
@@ -799,10 +888,8 @@ RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layer
 	double const x1 = start / _editor.get_current_zoom();
 	double const x2 = (end - 1) / _editor.get_current_zoom();
 
-	timestretch_rect->property_x1() = x1;
-	timestretch_rect->property_y1() = current_height() * (layers - layer - 1) / layers;
-	timestretch_rect->property_x2() = x2;
-	timestretch_rect->property_y2() = current_height() * (layers - layer) / layers;
+	timestretch_rect->set (ArdourCanvas::Rect (x1, current_height() * (layers - layer - 1) / layers,
+						   x2, current_height() * (layers - layer) / layers));
 }
 
 void
@@ -909,24 +996,18 @@ RouteTimeAxisView::route_color_changed ()
 	if (_view) {
 		_view->apply_color (color(), StreamView::RegionColor);
 	}
+
+	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
 }
 
 void
-RouteTimeAxisView::reset_samples_per_unit ()
+RouteTimeAxisView::reset_samples_per_pixel ()
 {
-	set_samples_per_unit (_editor.get_current_zoom());
+	set_samples_per_pixel (_editor.get_current_zoom());
 }
 
 void
-RouteTimeAxisView::horizontal_position_changed ()
-{
-	if (_view) {
-		_view->horizontal_position_changed ();
-	}
-}
-
-void
-RouteTimeAxisView::set_samples_per_unit (double spu)
+RouteTimeAxisView::set_samples_per_pixel (double fpp)
 {
 	double speed = 1.0;
 
@@ -935,10 +1016,10 @@ RouteTimeAxisView::set_samples_per_unit (double spu)
 	}
 
 	if (_view) {
-		_view->set_samples_per_unit (spu * speed);
+		_view->set_samples_per_pixel (fpp * speed);
 	}
 
-	TimeAxisView::set_samples_per_unit (spu * speed);
+	TimeAxisView::set_samples_per_pixel (fpp * speed);
 }
 
 void
@@ -1156,7 +1237,7 @@ RouteTimeAxisView::clear_playlist ()
 void
 RouteTimeAxisView::speed_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteTimeAxisView::reset_samples_per_unit, this));
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteTimeAxisView::reset_samples_per_pixel, this));
 }
 
 void
@@ -1341,6 +1422,41 @@ RouteTimeAxisView::find_next_region_boundary (framepos_t pos, int32_t dir)
 }
 
 void
+RouteTimeAxisView::fade_range (TimeSelection& selection)
+{
+	boost::shared_ptr<Playlist> what_we_got;
+	boost::shared_ptr<Track> tr = track ();
+	boost::shared_ptr<Playlist> playlist;
+
+	if (tr == 0) {
+		/* route is a bus, not a track */
+		return;
+	}
+
+	playlist = tr->playlist();
+
+	TimeSelection time (selection);
+	float const speed = tr->speed();
+	if (speed != 1.0f) {
+		for (TimeSelection::iterator i = time.begin(); i != time.end(); ++i) {
+			(*i).start = session_frame_to_track_frame((*i).start, speed);
+			(*i).end   = session_frame_to_track_frame((*i).end,   speed);
+		}
+	}
+
+        playlist->clear_changes ();
+        playlist->clear_owned_changes ();
+
+	playlist->fade_range (time);
+
+	vector<Command*> cmds;
+	playlist->rdiff (cmds);
+	_session->add_commands (cmds);
+	_session->add_command (new StatefulDiffCommand (playlist));
+
+}
+
+void
 RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
 	boost::shared_ptr<Playlist> what_we_got;
@@ -1369,6 +1485,10 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	switch (op) {
 	case Delete:
 		if (playlist->cut (time) != 0) {
+			if (Config->get_edit_mode() == Ripple)
+				playlist->ripple(time.start(), -time.length(), NULL);
+				// no need to exclude any regions from rippling here
+
                         vector<Command*> cmds;
                         playlist->rdiff (cmds);
                         _session->add_commands (cmds);
@@ -1380,6 +1500,10 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	case Cut:
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
+			if (Config->get_edit_mode() == Ripple)
+				playlist->ripple(time.start(), -time.length(), NULL);
+				// no need to exclude any regions from rippling here
+
                         vector<Command*> cmds;
                         playlist->rdiff (cmds);
                         _session->add_commands (cmds);
@@ -1395,6 +1519,9 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 
 	case Clear:
 		if ((what_we_got = playlist->cut (time)) != 0) {
+			if (Config->get_edit_mode() == Ripple)
+				playlist->ripple(time.start(), -time.length(), NULL);
+				// no need to exclude any regions from rippling here
 
                         vector<Command*> cmds;
                         playlist->rdiff (cmds);
@@ -1429,8 +1556,18 @@ RouteTimeAxisView::paste (framepos_t pos, float times, Selection& selection, siz
                 DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("modified paste to %1\n", pos));
 	}
 
-        pl->clear_changes ();
+	pl->clear_changes ();
+	if (Config->get_edit_mode() == Ripple) {
+		std::pair<framepos_t, framepos_t> extent = (*p)->get_extent_with_endspace();
+		framecnt_t amount = extent.second - extent.first;
+		pl->ripple(pos, amount * times, boost::shared_ptr<Region>());
+	}
 	pl->paste (*p, pos, times);
+
+	vector<Command*> cmds;
+	pl->rdiff (cmds);
+	_session->add_commands (cmds);
+
 	_session->add_command (new StatefulDiffCommand (pl));
 
 	return true;
@@ -1634,11 +1771,11 @@ RouteTimeAxisView::color_handler ()
 {
 	//case cTimeStretchOutline:
 	if (timestretch_rect) {
-		timestretch_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeStretchOutline.get();
+		timestretch_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TimeStretchOutline());
 	}
 	//case cTimeStretchFill:
 	if (timestretch_rect) {
-		timestretch_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeStretchFill.get();
+		timestretch_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TimeStretchFill());
 	}
 
 	reset_meter();
@@ -2038,12 +2175,12 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 	for (std::set<Evoral::Parameter>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
 
 		ProcessorAutomationNode* pan;
-		CheckMenuItem* mitem;
+		Gtk::CheckMenuItem* mitem;
 
 		string name = processor->describe_parameter (*i);
 
 		items.push_back (CheckMenuElem (name));
-		mitem = dynamic_cast<CheckMenuItem*> (&items.back());
+		mitem = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 		
 		_subplugin_menu_map[*i] = mitem;
 
@@ -2171,9 +2308,9 @@ RouteTimeAxisView::can_edit_name () const
 }
 
 void
-RouteTimeAxisView::update_rec_display ()
+RouteTimeAxisView::blink_rec_display (bool onoff)
 {
-	RouteUI::update_rec_display ();
+	RouteUI::blink_rec_display (onoff);
 }
 
 void
@@ -2415,10 +2552,10 @@ RouteTimeAxisView::set_button_names ()
 			break;
 		}
 	} else {
-		solo_button->set_text (_("s"));
+		solo_button->set_text (_("S"));
 		ARDOUR_UI::instance()->set_tip (*solo_button, _("Solo"));
 	}
-	mute_button->set_text (_("m"));
+	mute_button->set_text (_("M"));
 }
 
 Gtk::CheckMenuItem*
@@ -2459,6 +2596,30 @@ RouteTimeAxisView::create_gain_automation_child (const Evoral::Parameter& param,
 	}
 
 	add_automation_child (Evoral::Parameter(GainAutomation), gain_track, show);
+}
+
+void
+RouteTimeAxisView::create_mute_automation_child (const Evoral::Parameter& param, bool show)
+{
+	boost::shared_ptr<AutomationControl> c = _route->mute_control();
+	if (!c) {
+		error << "Route has no mute automation, unable to add automation track view." << endmsg;
+		return;
+	}
+
+	mute_track.reset (new AutomationTimeAxisView (_session,
+						      _route, _route, c, param,
+						      _editor,
+						      *this,
+						      false,
+						      parent_canvas,
+						      _route->describe_parameter(param)));
+
+	if (_view) {
+		_view->foreach_regionview (sigc::mem_fun (*mute_track.get(), &TimeAxisView::add_ghost));
+	}
+
+	add_automation_child (Evoral::Parameter(MuteAutomation), mute_track, show);
 }
 
 static

@@ -75,7 +75,7 @@ ControlList::ControlList (const Parameter& id)
 
 ControlList::ControlList (const ControlList& other)
 	: _parameter(other._parameter)
-	, _interpolation(Linear)
+	, _interpolation(other._interpolation)
 	, _curve(0)
 {
 	_frozen = 0;
@@ -99,7 +99,7 @@ ControlList::ControlList (const ControlList& other)
 
 ControlList::ControlList (const ControlList& other, double start, double end)
 	: _parameter(other._parameter)
-	, _interpolation(Linear)
+	, _interpolation(other._interpolation)
 	, _curve(0)
 {
 	_frozen = 0;
@@ -156,6 +156,9 @@ ControlList::operator= (const ControlList& other)
 
 		_min_yval = other._min_yval;
 		_max_yval = other._max_yval;
+
+
+		_interpolation = other._interpolation;
 		_default_value = other._default_value;
 		
 		copy_events (other);
@@ -438,6 +441,39 @@ bool
 ControlList::in_write_pass () const
 {
 	return _in_write_pass;
+}
+
+void
+ControlList::editor_add (double when, double value)
+{
+	/* this is for making changes from a graphical line editor
+	*/
+
+	if (!clamp_value (when, value)) {
+		return;
+	}
+
+	if (_events.empty()) {
+		
+		/* as long as the point we're adding is not at zero,
+		 * add an "anchor" point there.
+		 */
+
+		if (when >= 1) {
+			_events.insert (_events.end(), new ControlEvent (0, _default_value));
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added default value %2 at zero\n", this, _default_value));
+		}
+	}
+
+	ControlEvent cp (when, 0.0f);
+	iterator i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+	DEBUG_TRACE (DEBUG::ControlList, string_compose ("editor_add: actually add when= %1 value= %2\n", when, value));
+	_events.insert (i, new ControlEvent (when, value));
+
+	mark_dirty ();
+
+	maybe_signal_changed ();
+
 }
 
 void
@@ -818,7 +854,7 @@ ControlList::modify (iterator iter, double when, double val)
 		(*iter)->when = when;
 		(*iter)->value = val;
 
-		if (std::isnan (val)) {
+		if (isnan (val)) {
 			abort ();
 		}
 
@@ -1446,7 +1482,13 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 			assert(inclusive ? x >= start : x > start);
 			return true;
 		} else {
-			return false;
+			if (inclusive) {
+				x = next->when;
+			} else {
+				x = start;
+			}
+			_search_cache.left = x;
+			return true;
 		}
 
 		/* No points in the future, so no steps (towards them) in the future */

@@ -1,0 +1,49 @@
+Profiling Ardour with Callgrind
+===============================
+
+Prerequisites
+-------------
+
+*  valgrind version 3.7.0 or later (current 3.9.0)
+*  kcachegrind 0.6 or later (current: 0.7.4)
+
+
+Basic Profiling
+---------------
+
+1.  Compile ardour with debug symbols [1].
+2.  `cd gtk2_ardour`
+3.  start ardour using `./arcall`
+
+Load a session, ideally use the 'Dummy' (non realtime) backend.
+
+The `arcall` script does not start profiling immediately,
+to start profiling, in a second terminal run
+
+4. `callgrind_control -i on`
+
+[do operations in Ardour that should be profiled]
+
+5. `callgrind_control -i off`
+
+6. quit ardour
+
+7. run  `kcachegrind calgringd.out.<PID>`
+
+NB. There will be multiple files calgringd.out.<PID>-<Thread-ID> for every run,
+only load the main file without the dash into
+
+8. clean-up: `rm calgringd.out.*`
+
+
+Advanced Usage
+--------------
+
+Edit gtk2_ardour/arcall, add/remove options as needed.
+see http://valgrind.org/docs/manual/cl-manual.html for further information.
+
+---
+
+[1] ideally an optimized built with debug-symbols (-g) is used for profiling,
+however the ardour wscript does not yet offer that configuration option.
+However, a default (non optimized build) does contain debug-symbols.

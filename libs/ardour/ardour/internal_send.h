@@ -25,10 +25,10 @@
 
 namespace ARDOUR {
 
-class InternalSend : public Send
+class LIBARDOUR_API InternalSend : public Send
 {
   public:
-	InternalSend (Session&, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster>, boost::shared_ptr<Route> send_to, Delivery::Role role = Delivery::Aux, bool ignore_bitslot = false);
+	InternalSend (Session&, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster>, boost::shared_ptr<Route> send_from, boost::shared_ptr<Route> send_to, Delivery::Role role = Delivery::Aux, bool ignore_bitslot = false);
 	virtual ~InternalSend ();
 
 	std::string display_name() const;
@@ -46,6 +46,7 @@ class InternalSend : public Send
 	bool configure_io (ChanCount in, ChanCount out);
 	int  set_block_size (pframes_t);
 
+	boost::shared_ptr<Route> source_route() const { return _send_from; }
 	boost::shared_ptr<Route> target_route() const { return _send_to; }
 	const PBD::ID& target_id() const { return _send_to_id; }
 
@@ -60,11 +61,14 @@ class InternalSend : public Send
 
   private:
 	BufferSet mixbufs;
+	boost::shared_ptr<Route> _send_from;
 	boost::shared_ptr<Route> _send_to;
 	PBD::ID _send_to_id;
 	PBD::ScopedConnection connect_c;
+	PBD::ScopedConnection source_connection;
 	PBD::ScopedConnectionList target_connections;
 
+	void send_from_going_away ();
 	void send_to_going_away ();
 	void send_to_property_changed (const PBD::PropertyChange&);
 	int  connect_when_legal ();

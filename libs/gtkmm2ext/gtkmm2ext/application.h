@@ -22,8 +22,10 @@
 #ifndef __GTK_APPLICATION_MM_H__
 #define __GTK_APPLICATION_MM_H__
 
-#include <gtkmm2ext/gtkapplication.h> // for GtkApplicationGroup typedef
 #include <sigc++/signal.h>
+
+#include "gtkmm2ext/visibility.h"
+#include "gtkmm2ext/gtkapplication.h" // for GtkApplicationGroup typedef
 
 namespace Gtk {
 	class MenuItem;
@@ -36,7 +38,7 @@ namespace Glib {
 
 namespace Gtkmm2ext {
 
-class Application 
+class LIBGTKMM2EXT_API Application 
 {
 public:
     static Application* instance();

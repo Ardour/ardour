@@ -77,6 +77,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_session (ARDOUR::Session *s);
         void set_negative_allowed (bool yn); 
 
+	static void print_minsec (framepos_t, char* buf, size_t bufsize, float frame_rate);
+
 	sigc::signal<void> ValueChanged;
 	sigc::signal<void> mode_changed;
 	sigc::signal<void> ChangeAborted;
@@ -85,7 +87,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	static std::vector<AudioClock*> clocks;
 
   protected:
-	void render (cairo_t*);
+	void render (cairo_t*, cairo_rectangle_t*);
 
 	virtual void build_ops_menu ();
 	Gtk::Menu  *ops_menu;

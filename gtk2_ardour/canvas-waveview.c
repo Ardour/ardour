@@ -35,7 +35,7 @@
 /* POSIX guarantees casting between void* and function pointers, ISO C doesn't
  * We can work around warnings by going one step deeper in our casts
  */
-#ifdef _POSIX_VERSION
+#if defined(_POSIX_VERSION) || defined(COMPILER_MINGW)
 #define POSIX_FUNC_PTR_CAST(type, object) *((type*) &(object))
 #endif // _POSIX_VERSION
 

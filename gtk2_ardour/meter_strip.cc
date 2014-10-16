@@ -48,6 +48,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -114,14 +115,15 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 
 MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	: AxisView(sess)
-	, RouteUI(sess)
+	, RouteUI(0)
 	, _route(rt)
 	, peak_display()
 {
 	mtr_vbox.set_spacing(2);
 	nfo_vbox.set_spacing(2);
-	RouteUI::set_route (rt);
 	SessionHandlePtr::set_session (sess);
+	RouteUI::init ();
+	RouteUI::set_route (rt);
 
 	_has_midi = false;
 	_tick_bar = 0;
@@ -152,6 +154,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	// peak display
 	peak_display.set_name ("meterbridge peakindicator");
 	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+	ARDOUR_UI::instance()->set_tip (peak_display, _("Reset Peak"));
 	max_peak = minus_infinity();
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 	peak_display.set_size_request(12, 8);
@@ -162,20 +165,34 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	peakbx.pack_start(peak_align, true, true, 3);
 	peakbx.set_size_request(-1, 14);
 
-	// add track-name label
-	name_label.set_text(_route->name());
+	// add track-name & -number label
+	number_label.set_text("-");
+	number_label.set_size_request(18, 18);
+
+	name_changed();
+
 	name_label.set_corner_radius(2);
+	name_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	name_label.set_name("meterbridge label");
 	name_label.set_angle(-90.0);
-	name_label.layout()->set_ellipsize (Pango::ELLIPSIZE_END);
-	name_label.layout()->set_width(48 * PANGO_SCALE);
+	name_label.set_text_ellipsize (Pango::ELLIPSIZE_END);
+	name_label.set_layout_ellisize_width(48 * PANGO_SCALE);
 	name_label.set_size_request(18, 50);
 	name_label.set_alignment(-1.0, .5);
 	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
 	ARDOUR_UI::instance()->set_tip (*level_meter, _route->name());
 
+	number_label.set_corner_radius(2);
+	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
+	number_label.set_name("tracknumber label");
+	number_label.set_angle(-90.0);
+	number_label.set_layout_ellisize_width(18 * PANGO_SCALE);
+	number_label.set_alignment(.5, .5);
+
 	namebx.set_size_request(18, 52);
-	namebx.pack_start(name_label, true, false, 3);
+	namebx.pack_start(namenumberbx, true, false, 0);
+	namenumberbx.pack_start(name_label, true, false, 0);
+	namenumberbx.pack_start(number_label, false, false, 0);
 
 	mon_in_box.pack_start(*monitor_input_button, true, false);
 	btnbox.pack_start(mon_in_box, false, false, 1);
@@ -190,25 +207,25 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	btnbox.pack_start(solobox, false, false, 1);
 
 	rec_enable_button->set_corner_radius(2);
-	rec_enable_button->set_size_request(16, 16);
+	rec_enable_button->set_size_request(18, 18);
 
 	mute_button->set_corner_radius(2);
-	mute_button->set_size_request(16, 16);
+	mute_button->set_size_request(18, 18);
 
 	solo_button->set_corner_radius(2);
-	solo_button->set_size_request(16, 16);
+	solo_button->set_size_request(18, 18);
 
 	monitor_input_button->set_corner_radius(2);
-	monitor_input_button->set_size_request(16, 16);
+	monitor_input_button->set_size_request(18, 18);
 
 	monitor_disk_button->set_corner_radius(2);
-	monitor_disk_button->set_size_request(16, 16);
+	monitor_disk_button->set_size_request(18, 18);
 
-	mutebox.set_size_request(16, 16);
-	solobox.set_size_request(16, 16);
-	recbox.set_size_request(16, 16);
-	mon_in_box.set_size_request(16, 16);
-	mon_disk_box.set_size_request(16, 16);
+	mutebox.set_size_request(18, 18);
+	solobox.set_size_request(18, 18);
+	recbox.set_size_request(18, 18);
+	mon_in_box.set_size_request(18, 18);
+	mon_disk_box.set_size_request(18, 18);
 	spacer.set_size_request(-1,0);
 
 	update_button_box();
@@ -245,11 +262,18 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	mtr_container.show();
 	mtr_hsep.show();
 	nfo_vbox.show();
-	monitor_input_button->show();
-	monitor_disk_button->show();
+	namenumberbx.show();
+
+	if (boost::dynamic_pointer_cast<Track>(_route)) {
+		monitor_input_button->show();
+		monitor_disk_button->show();
+	} else {
+		monitor_input_button->hide();
+		monitor_disk_button->hide();
+	}
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
-			route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_configuration_changed, this, _1), gui_context()
+			meter_route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_configuration_changed, this, _1), gui_context()
 			);
 
 	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &MeterStrip::reset_peak_display));
@@ -265,8 +289,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	meter_ticks1_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks1_expose));
 	meter_ticks2_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks2_expose));
 
-	_route->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::self_delete, this), gui_context());
-	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::strip_property_changed, this, _1), gui_context());
+	_route->DropReferences.connect (meter_route_connections, invalidator (*this), boost::bind (&MeterStrip::self_delete, this), gui_context());
+	_route->PropertyChanged.connect (meter_route_connections, invalidator (*this), boost::bind (&MeterStrip::strip_property_changed, this, _1), gui_context());
 
 	peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &MeterStrip::peak_button_release), false);
 	name_label.signal_button_release_event().connect (sigc::mem_fun(*this, &MeterStrip::name_label_button_release), false);
@@ -318,9 +342,9 @@ MeterStrip::set_session (Session* s)
 }
 
 void
-MeterStrip::update_rec_display ()
+MeterStrip::blink_rec_display (bool onoff)
 {
-	RouteUI::update_rec_display ();
+	RouteUI::blink_rec_display (onoff);
 }
 
 std::string
@@ -333,8 +357,6 @@ void
 MeterStrip::set_button_names()
 {
 	mute_button->set_text (_("M"));
-	rec_enable_button->set_text ("");
-	rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
 
 	if (_route && _route->solo_safe()) {
 		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
@@ -364,13 +386,20 @@ MeterStrip::strip_property_changed (const PropertyChange& what_changed)
 	if (!what_changed.contains (ARDOUR::Properties::name)) {
 		return;
 	}
-	ENSURE_GUI_THREAD (*this, &MeterStrip::strip_name_changed, what_changed)
-	name_label.set_text(_route->name());
+	ENSURE_GUI_THREAD (*this, &MeterStrip::strip_name_changed, what_changed);
+	name_changed();
 	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
 	if (level_meter) {
 		ARDOUR_UI::instance()->set_tip (*level_meter, _route->name());
 	}
 }
+
+void
+MeterStrip::route_color_changed ()
+{
+	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
+}
+
 
 void
 MeterStrip::fast_update ()
@@ -379,8 +408,7 @@ MeterStrip::fast_update ()
 	if (mpeak > max_peak) {
 		max_peak = mpeak;
 		if (mpeak >= Config->get_meter_peak()) {
-			peak_display.set_name ("meterbridge peakindicator on");
-			peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+			peak_display.set_active_state ( Gtkmm2ext::ExplicitActive );
 		}
 	}
 }
@@ -503,10 +531,16 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 			nh = 148;
 			break;
 	}
-	namebx.set_size_request(18, nh);
+	int tnh = 0;
+	if (_session && _session->config.get_track_name_number()) {
+		// NB numbers are rotated 90deg. on the meterbridge
+		tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_with_of_digit_0_to_9()
+	}
+	namebx.set_size_request(18, nh + tnh);
+	namenumberbx.set_size_request(18, nh + tnh);
 	if (_route) {
-		name_label.set_size_request(18, nh-2);
-		name_label.layout()->set_width((nh-4) * PANGO_SCALE);
+		name_label.set_size_request(18, nh + (_route->is_master() ? tnh : -1));
+		name_label.set_layout_ellisize_width ((nh - 4 + (_route->is_master() ? tnh : 0)) * PANGO_SCALE);
 	}
 	VBox::on_size_allocate(a);
 }
@@ -619,8 +653,7 @@ MeterStrip::reset_peak_display ()
 	_route->shared_peak_meter()->reset_max();
 	level_meter->clear_meters();
 	max_peak = -INFINITY;
-	peak_display.set_name ("meterbridge peakindicator");
-	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+	peak_display.set_active_state ( Gtkmm2ext::Off );
 }
 
 bool
@@ -635,7 +668,7 @@ MeterStrip::peak_button_release (GdkEventButton* ev)
 	} else {
 		ResetRoutePeakDisplays (_route.get());
 	}
-	return true;
+	return false;
 }
 
 void
@@ -652,32 +685,32 @@ MeterStrip::update_button_box ()
 	if (!_session) return;
 	int height = 0;
 	if (_session->config.get_show_mute_on_meterbridge()) {
-		height += 18;
+		height += 20;
 		mutebox.show();
 	} else {
 		mutebox.hide();
 	}
 	if (_session->config.get_show_solo_on_meterbridge()) {
-		height += 18;
+		height += 20;
 		solobox.show();
 	} else {
 		solobox.hide();
 	}
 	if (_session->config.get_show_rec_on_meterbridge()) {
-		height += 18;
+		height += 20;
 		recbox.show();
 	} else {
 		recbox.hide();
 	}
 	if (_session->config.get_show_monitor_on_meterbridge()) {
-		height += 18 + 18;
+		height += 20 + 20;
 		mon_in_box.show();
 		mon_disk_box.show();
 	} else {
 		mon_in_box.hide();
 		mon_disk_box.hide();
 	}
-	btnbox.set_size_request(16, height);
+	btnbox.set_size_request(18, height);
 	check_resize();
 }
 
@@ -715,6 +748,33 @@ MeterStrip::parameter_changed (std::string const & p)
 	}
 	else if (p == "meterbridge-label-height") {
 		queue_resize();
+	}
+	else if (p == "track-name-number") {
+		name_changed();
+		queue_resize();
+	}
+}
+
+void
+MeterStrip::name_changed () {
+	if (!_route) {
+		return;
+	}
+	name_label.set_text(_route->name ());
+	if (_session && _session->config.get_track_name_number()) {
+		const int64_t track_number = _route->track_number ();
+		if (track_number == 0) {
+			number_label.set_text("-");
+			number_label.hide();
+		} else {
+			number_label.set_text (PBD::to_string (abs(_route->track_number ()), std::dec));
+			number_label.show();
+		}
+		const int tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_width_of_digit_0_to_9()
+		// NB numbers are rotated 90deg. on the meterbridge -> use height
+		number_label.set_size_request(18, tnh);
+	} else {
+		number_label.hide();
 	}
 }
 

@@ -32,6 +32,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace ARDOUR_UI_UTILS;
 
 ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
 	: Dialog (title, modal, use_seperator)
@@ -65,7 +66,10 @@ ArdourDialog::~ArdourDialog ()
 bool
 ArdourDialog::on_key_press_event (GdkEventKey* ev)
 {
-	return relay_key_press (ev, this);
+	if (!relay_key_press (ev, this)) {
+		return Gtk::Window::on_key_press_event(ev);
+	}
+	return true;
 }
 
 bool

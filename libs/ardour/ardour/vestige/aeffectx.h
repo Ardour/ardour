@@ -101,16 +101,35 @@
 #define effEditIdle 19
 #define effEditTop 20
 #define effProcessEvents 25
+// the next one from http://asseca.com/vst-24-specs/index.html
+#define effGetPlugCategory 35
 #define effGetEffectName 45
 #define effGetVendorString 47
 #define effGetProductString 48
 #define effGetVendorVersion 49
 #define effCanDo 51 // currently unused
+/* from http://asseca.com/vst-24-specs/efIdle.html */
+#define effIdle 53
 /* from http://asseca.com/vst-24-specs/efGetParameterProperties.html */
 #define effGetParameterProperties 56
 #define effGetVstVersion 58 // currently unused
+/* http://asseca.com/vst-24-specs/efShellGetNextPlugin.html */
+#define effShellGetNextPlugin  70
+/* The next two were gleaned from http://www.kvraudio.com/forum/printview.php?t=143587&start=0 */
+#define effStartProcess 71
+#define effStopProcess 72
 
-#define kEffectMagic (CCONST( 'V', 's', 't', 'P' ))
+#define effBeginSetProgram 67
+#define effEndSetProgram 68
+
+#ifdef WORDS_BIGENDIAN
+// "VstP"
+#define kEffectMagic 0x50747356
+#else
+// "PtsV"
+#define kEffectMagic 0x56737450
+#endif
+
 #define kVstLangEnglish 1
 #define kVstMidiType 1
 
@@ -174,21 +193,58 @@ struct _VstEvents
 	VstEvent * events[];
 };
 
+/* constants from http://www.rawmaterialsoftware.com/juceforum/viewtopic.php?t=3740&sid=183f74631fee71a493316735e2b9f28b */
+
+enum Vestige2StringConstants
+{
+	VestigeMaxNameLen       = 64,
+	VestigeMaxLabelLen      = 64,
+	VestigeMaxShortLabelLen = 8,
+	VestigeMaxCategLabelLen = 24,
+	VestigeMaxFileNameLen   = 100
+};
+
+
+/* constants from http://asseca.com/vst-24-specs/efGetPlugCategory.html */
+
+enum VstPlugCategory
+{
+	kPlugCategUnknown = 0,
+	kPlugCategEffect,
+	kPlugCategSynth,
+	kPlugCategAnalysis,
+	kPlugCategMastering,
+	kPlugCategSpacializer,
+	kPlugCategRoomFx,
+	kPlugSurroundFx,
+	kPlugCategRestoration,
+	kPlugCategOfflineProcess,
+	kPlugCategShell,
+	kPlugCategGenerator,
+	kPlugCategMaxCount
+};
+
 typedef struct _VstEvents VstEvents;
 
 /* this struct taken from http://asseca.com/vst-24-specs/efGetParameterProperties.html */
 struct _VstParameterProperties
 {
-	float stepFloat;
-	float smallStepFloat;
-	float largeStepFloat;
-	char label[64];
-	int32_t flags;
-	int32_t minInteger;
-	int32_t maxInteger;
-	int32_t stepInteger;
-	int32_t largeStepInteger;
-	char shortLabel[8];
+	float stepFloat;              /* float step */
+	float smallStepFloat;         /* small float step */
+	float largeStepFloat;         /* large float step */
+	char label[VestigeMaxLabelLen];  /* parameter label */
+	int32_t flags;               /* @see VstParameterFlags */
+	int32_t minInteger;          /* integer minimum */
+	int32_t maxInteger;          /* integer maximum */
+	int32_t stepInteger;         /* integer step */
+	int32_t largeStepInteger;    /* large integer step */
+	char shortLabel[VestigeMaxShortLabelLen]; /* short label, recommended: 6 + delimiter */
+	int16_t displayIndex;        /* index where this parameter should be displayed (starting with 0) */
+	int16_t category;            /* 0: no category, else group index + 1 */
+	int16_t numParametersInCategory; /* number of parameters in category */
+	int16_t reserved;            /* zero */
+	char categoryLabel[VestigeMaxCategLabelLen]; /* category label, e.g. "Osc 1"  */
+	char future[16];              /* reserved for future use */
 };
 
 typedef struct _VstParameterProperties VstParameterProperties;

@@ -159,10 +159,11 @@ add_animation (const GtkWidget *widget, gdouble stop_time)
 static gboolean
 update_animation_info (gpointer key, gpointer value, gpointer user_data)
 {
-	(void) user_data;
-	
-	AnimationInfo *animation_info = value;
+	AnimationInfo *animation_info;
 	GtkWidget *widget = key;
+	
+	animation_info = value;
+	(void) user_data;
 	
 	g_assert ((widget != NULL) && (animation_info != NULL));
 	
@@ -217,9 +218,10 @@ animation_timeout_handler (gpointer data)
 static void
 on_checkbox_toggle (GtkWidget *widget, gpointer data)
 {
+	AnimationInfo *animation_info;
 	(void) data;
 	
-	AnimationInfo *animation_info = lookup_animation_info (widget);
+	animation_info = lookup_animation_info (widget);
 	
 	if (animation_info != NULL)
 	{

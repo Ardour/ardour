@@ -33,12 +33,12 @@
 
 #include "pbd/strsplit.h"
 
+#include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
 
 #include "actions.h"
 #include "keyboard.h"
 #include "keyeditor.h"
-#include "utils.h"
 
 #include "i18n.h"
 
@@ -76,9 +76,8 @@ KeyEditor::KeyEditor ()
 	scroller.add (view);
 	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	add (vpacker);
-
 	vpacker.set_spacing (6);
+	vpacker.set_border_width (12);
 	vpacker.pack_start (scroller);
 
 	if (!ARDOUR::Profile->get_sae()) {
@@ -95,8 +94,18 @@ KeyEditor::KeyEditor ()
 		unbind_button.show ();
 
 	}
+	
+	reset_button.add (reset_label);
+	reset_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Reset Bindings to Defaults")));
+				
+	reset_box.pack_start (reset_button, true, false);
+	reset_box.show ();
+	reset_button.show ();
+	reset_label.show ();
+	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::reset));
+	vpacker.pack_start (reset_box, false, false);
 
-	vpacker.set_border_width (12);
+	add (vpacker);
 
 	view.show ();
 	scroller.show ();
@@ -295,4 +304,10 @@ KeyEditor::populate ()
 			row[columns.binding] = (*k);
 		}
 	}
+}
+
+void
+KeyEditor::reset ()
+{
+	Keyboard::the_keyboard().reset_bindings ();
 }

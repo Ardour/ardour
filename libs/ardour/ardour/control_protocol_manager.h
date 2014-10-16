@@ -35,7 +35,7 @@ class ControlProtocol;
 class ControlProtocolDescriptor;
 class Session;
 
-class ControlProtocolInfo {
+class LIBARDOUR_API ControlProtocolInfo {
 public:
     ControlProtocolDescriptor* descriptor;
     ControlProtocol* protocol;
@@ -52,7 +52,7 @@ public:
     ~ControlProtocolInfo() { delete state; }
 };
 
-class ControlProtocolManager : public PBD::Stateful, public ARDOUR::SessionHandlePtr
+class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR::SessionHandlePtr
 {
   public:
 	~ControlProtocolManager ();

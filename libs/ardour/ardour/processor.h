@@ -30,6 +30,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/latent.h"
 #include "ardour/session_object.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/automatable.h"
 
@@ -41,7 +42,7 @@ class Session;
 class Route;
 
 /** A mixer strip element - plugin, send, meter, etc */
-class Processor : public SessionObject, public Automatable, public Latent
+class LIBARDOUR_API Processor : public SessionObject, public Automatable, public Latent
 {
   public:
 	static const std::string state_node_name;

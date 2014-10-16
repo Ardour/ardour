@@ -33,7 +33,7 @@
 
 namespace ARDOUR {
 
-class RBStretch : public RBEffect {
+class LIBARDOUR_API RBStretch : public RBEffect {
   public:
 	RBStretch (ARDOUR::Session&, TimeFXRequest&);
 	~RBStretch() {}
@@ -47,7 +47,7 @@ class RBStretch : public RBEffect {
 
 namespace ARDOUR {
 
-class STStretch : public Filter {
+class LIBARDOUR_API STStretch : public Filter {
   public:
 	STStretch (ARDOUR::Session&, TimeFXRequest&);
 	~STStretch ();

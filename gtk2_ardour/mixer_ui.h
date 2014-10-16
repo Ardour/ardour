@@ -87,6 +87,11 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
         MonitorSection* monitor_section() const { return _monitor_section; }
 
+	void deselect_all_strip_processors();
+	void delete_processors();
+
+	void select_none ();
+
   protected:
 	void set_route_targets_for_operation ();
 
@@ -272,6 +277,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	    it during a session teardown.
 	*/
 	bool _in_group_rebuild_or_clear;
+        bool _route_deletion_in_progress;
 
 	void update_title ();
 	MixerStrip* strip_by_x (int x);

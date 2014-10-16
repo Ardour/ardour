@@ -28,6 +28,7 @@
 #include "pbd/ringbuffer.h"
 #include "pbd/event_loop.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
@@ -35,7 +36,7 @@ namespace ARDOUR {
 class Slave;
 class Region;
 
-class SessionEvent {
+class LIBARDOUR_API SessionEvent {
 public:
 	enum Type {
 		SetTransportSpeed,
@@ -53,10 +54,12 @@ public:
 		Audition,
 		InputConfigurationChange,
 		SetPlayAudioRange,
+		CancelPlayAudioRange,
 		RealTimeOperation,
 		AdjustPlaybackBuffering,
 		AdjustCaptureBuffering,
 		SetTimecodeTransmission,
+		Skip,
 
 		/* only one of each of these events can be queued at any one time */
 
@@ -108,7 +111,7 @@ public:
 
 	boost::shared_ptr<Region> region;
 
-    SessionEvent (Type t, Action a, framepos_t when, framepos_t where, double spd, bool yn = false, bool yn2 = false, bool yn3 = false)
+	SessionEvent (Type t, Action a, framepos_t when, framepos_t where, double spd, bool yn = false, bool yn2 = false, bool yn3 = false)
 		: type (t)
 		, action (a)
 		, action_frame (when)

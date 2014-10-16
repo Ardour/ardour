@@ -45,6 +45,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace std;
@@ -259,12 +260,14 @@ AudioClock::set_colors ()
 	r = lrint ((r/255.0) * 65535.0);
 	g = lrint ((g/255.0) * 65535.0);
 	b = lrint ((b/255.0) * 65535.0);
+	delete foreground_attr;
 	foreground_attr = new Pango::AttrColor (Pango::Attribute::create_attr_foreground (r, g, b));
 
 	UINT_TO_RGBA (editing_color, &r, &g, &b, &a);
 	r = lrint ((r/255.0) * 65535.0);
 	g = lrint ((g/255.0) * 65535.0);
 	b = lrint ((b/255.0) * 65535.0);
+	delete editing_attr;
 	editing_attr = new Pango::AttrColor (Pango::Attribute::create_attr_foreground (r, g, b));
 
 	normal_attributes.change (*foreground_attr);
@@ -282,7 +285,7 @@ AudioClock::set_colors ()
 }
 
 void
-AudioClock::render (cairo_t* cr)
+AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	/* main layout: rounded rect, plus the text */
 
@@ -775,31 +778,31 @@ AudioClock::parse_as_timecode_distance (const std::string& str)
 	case 1:
 	case 2:
 		sscanf (str.c_str(), "%" PRId32, &frames);
-		return lrint ((frames/(float)fps) * sr);
+		return llrint ((frames/(float)fps) * sr);
 
 	case 3:
 		sscanf (str.c_str(), "%1" PRId32 "%" PRId32, &secs, &frames);
-		return (secs * sr) + lrint ((frames/(float)fps) * sr);
+		return (secs * sr) + llrint ((frames/(float)fps) * sr);
 
 	case 4:
 		sscanf (str.c_str(), "%2" PRId32 "%" PRId32, &secs, &frames);
-		return (secs * sr) + lrint ((frames/(float)fps) * sr);
+		return (secs * sr) + llrint ((frames/(float)fps) * sr);
 
 	case 5:
 		sscanf (str.c_str(), "%1" PRId32 "%2" PRId32 "%" PRId32, &mins, &secs, &frames);
-		return (mins * 60 * sr) + (secs * sr) + lrint ((frames/(float)fps) * sr);
+		return (mins * 60 * sr) + (secs * sr) + llrint ((frames/(float)fps) * sr);
 
 	case 6:
 		sscanf (str.c_str(), "%2" PRId32 "%2" PRId32 "%" PRId32, &mins, &secs, &frames);
-		return (mins * 60 * sr) + (secs * sr) + lrint ((frames/(float)fps) * sr);
+		return (mins * 60 * sr) + (secs * sr) + llrint ((frames/(float)fps) * sr);
 
 	case 7:
 		sscanf (str.c_str(), "%1" PRId32 "%2" PRId32 "%2" PRId32 "%" PRId32, &hrs, &mins, &secs, &frames);
-		return (hrs * 3600 * sr) + (mins * 60 * sr) + (secs * sr) + lrint ((frames/(float)fps) * sr);
+		return (hrs * 3600 * sr) + (mins * 60 * sr) + (secs * sr) + llrint ((frames/(float)fps) * sr);
 
 	case 8:
 		sscanf (str.c_str(), "%2" PRId32 "%2" PRId32 "%2" PRId32 "%" PRId32, &hrs, &mins, &secs, &frames);
-		return (hrs * 3600 * sr) + (mins * 60 * sr) + (secs * sr) + lrint ((frames/(float)fps) * sr);
+		return (hrs * 3600 * sr) + (mins * 60 * sr) + (secs * sr) + llrint ((frames/(float)fps) * sr);
 
 	default:
 		break;
@@ -944,12 +947,24 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 	}
 
 	if (when == last_when && !force) {
+#if 0 // XXX return if no change and no change forced. verify Aug/2014
 		if (_mode != Timecode && _mode != MinSec) {
 			/* may need to force display of TC source
 			 * time, so don't return early.
 			 */
+			/* ^^ Why was that?,  delta times?
+			 * Timecode FPS, pull-up/down, etc changes
+			 * trigger a 'session_property_changed' which
+			 * eventually calls set(last_when, true)
+			 *
+			 * re-rendering the clock every 40ms or so just
+			 * because we can is not ideal.
+			 */
 			return;
 		}
+#else
+		return;
+#endif
 	}
 
 	if (!editing) {
@@ -1099,15 +1114,43 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 }
 
 void
-AudioClock::set_minsec (framepos_t when, bool /*force*/)
+AudioClock::print_minsec (framepos_t when, char* buf, size_t bufsize, float frame_rate)
 {
-	char buf[32];
 	framecnt_t left;
 	int hrs;
 	int mins;
 	int secs;
 	int millisecs;
-	bool negative = false;
+	bool negative;
+
+	if (when < 0) {
+		when = -when;
+		negative = true;
+	} else {
+		negative = false;
+	}
+
+	left = when;
+	hrs = (int) floor (left / (frame_rate * 60.0f * 60.0f));
+	left -= (framecnt_t) floor (hrs * frame_rate * 60.0f * 60.0f);
+	mins = (int) floor (left / (frame_rate * 60.0f));
+	left -= (framecnt_t) floor (mins * frame_rate * 60.0f);
+	secs = (int) floor (left / (float) frame_rate);
+	left -= (framecnt_t) floor ((double)(secs * frame_rate));
+	millisecs = floor (left * 1000.0 / (float) frame_rate);
+
+	if (negative) {
+		snprintf (buf, bufsize, "-%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
+	} else {
+		snprintf (buf, bufsize, " %02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
+	}
+
+}
+
+void
+AudioClock::set_minsec (framepos_t when, bool /*force*/)
+{
+	char buf[32];
 
 	if (_off) {
 		_layout->set_text (" --:--:--.---");
@@ -1120,25 +1163,7 @@ AudioClock::set_minsec (framepos_t when, bool /*force*/)
 		return;
 	}
 
-	if (when < 0) {
-		when = -when;
-		negative = true;
-	}
-
-	left = when;
-	hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
-	left -= (framecnt_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
-	mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-	left -= (framecnt_t) floor (mins * _session->frame_rate() * 60.0f);
-	secs = (int) floor (left / (float) _session->frame_rate());
-	left -= (framecnt_t) floor (secs * _session->frame_rate());
-	millisecs = floor (left * 1000.0 / (float) _session->frame_rate());
-
-	if (negative) {
-		snprintf (buf, sizeof (buf), "-%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
-	} else {
-		snprintf (buf, sizeof (buf), " %02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
-	}
+	print_minsec (when, buf, sizeof (buf), _session->frame_rate());
 
 	_layout->set_text (buf);
 	set_slave_info();
@@ -1742,7 +1767,7 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 
 	drag_y = ev->y;
 
-	if (trunc (drag_accum) != 0) {
+	if (floor (drag_accum) != 0) {
 
 		framepos_t frames;
 		framepos_t pos;

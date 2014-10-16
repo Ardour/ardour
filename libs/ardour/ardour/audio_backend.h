@@ -28,25 +28,60 @@
 
 #include <boost/function.hpp>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/audioengine.h"
 #include "ardour/port_engine.h"
-#include "ardour/visibility.h"
 
 #ifdef ARDOURBACKEND_DLL_EXPORTS // defined if we are building the ARDOUR Panners DLLs (instead of using them)
-    #define ARDOURBACKEND_API LIBARDOUR_HELPER_DLL_EXPORT
+    #define ARDOURBACKEND_API LIBARDOUR_DLL_EXPORT
 #else
-    #define ARDOURBACKEND_API LIBARDOUR_HELPER_DLL_IMPORT
+    #define ARDOURBACKEND_API LIBARDOUR_DLL_IMPORT
 #endif 
-#define ARDOURBACKEND_LOCAL LIBARDOUR_HELPER_DLL_LOCAL
+#define ARDOURBACKEND_LOCAL LIBARDOUR_DLL_LOCAL
 
 namespace ARDOUR {
 
-class AudioBackend : public PortEngine {
+struct LIBARDOUR_API AudioBackendInfo {
+    const char* name;
+
+    /** Using arg1 and arg2, initialize this audiobackend.
+     * 
+     * Returns zero on success, non-zero otherwise.
+     */
+    int (*instantiate) (const std::string& arg1, const std::string& arg2);
+
+    /** Release all resources associated with this audiobackend
+     */
+    int (*deinstantiate) (void);
+
+    /** Factory method to create an AudioBackend-derived class.
+     * 
+     * Returns a valid shared_ptr to the object if successfull,
+     * or a "null" shared_ptr otherwise.
+     */
+    boost::shared_ptr<AudioBackend> (*factory) (AudioEngine&);
+
+    /** Return true if the underlying mechanism/API has been
+     * configured and does not need (re)configuration in order
+     * to be usable. Return false otherwise.
+     *
+     * Note that this may return true if (re)configuration, even though
+     * not currently required, is still possible.
+     */
+    bool (*already_configured)();
+};
+
+class LIBARDOUR_API AudioBackend : public PortEngine {
   public:
 
-    AudioBackend (AudioEngine& e) : PortEngine (e), engine (e) {}
+    AudioBackend (AudioEngine& e, AudioBackendInfo& i) : PortEngine (e), _info (i), engine (e) {}
     virtual ~AudioBackend () {}
+    
+    /** Return the AudioBackendInfo object from which this backend
+	was constructed.
+    */
+    AudioBackendInfo& info() const { return _info; }
 
     /** Return the name of this backend.
      *
@@ -188,6 +223,9 @@ class AudioBackend : public PortEngine {
     /** Set the name of the device to be used
      */
     virtual int set_device_name (const std::string&) = 0;
+    /** Deinitialize and destroy current device
+     */
+	virtual int drop_device() {return 0;};
     /** Set the sample rate to be used
      */
     virtual int set_sample_rate (float) = 0;
@@ -200,12 +238,6 @@ class AudioBackend : public PortEngine {
      * doesn't directly expose the concept).
      */
     virtual int set_buffer_size (uint32_t) = 0;
-    /** Set the preferred underlying hardware sample format
-     *
-     * This does not change the sample format (32 bit float) read and
-     * written to the device via the Port API.
-     */
-    virtual int set_sample_format (SampleFormat) = 0;
     /** Set the preferred underlying hardware data layout.
      * If @param yn is true, then the hardware will interleave
      * samples for successive channels; otherwise, the hardware will store
@@ -231,18 +263,27 @@ class AudioBackend : public PortEngine {
      * external D-A/D-A converters. Units are samples.
      */
     virtual int set_systemic_output_latency (uint32_t) = 0;
+    /** Set the (additional) input latency for a specific midi device,
+     * or if the identifier is empty, apply to all midi devices.
+     */
+    virtual int set_systemic_midi_input_latency (std::string const, uint32_t) = 0;
+    /** Set the (additional) output latency for a specific midi device,
+     * or if the identifier is empty, apply to all midi devices.
+     */
+    virtual int set_systemic_midi_output_latency (std::string const, uint32_t) = 0;
 
     /* Retrieving parameters */
 
     virtual std::string  device_name () const = 0;
     virtual float        sample_rate () const = 0;
     virtual uint32_t     buffer_size () const = 0;
-    virtual SampleFormat sample_format () const = 0;
     virtual bool         interleaved () const = 0;
     virtual uint32_t     input_channels () const = 0;
     virtual uint32_t     output_channels () const = 0;
     virtual uint32_t     systemic_input_latency () const = 0;
     virtual uint32_t     systemic_output_latency () const = 0;
+    virtual uint32_t     systemic_midi_input_latency (std::string const) const = 0;
+    virtual uint32_t     systemic_midi_output_latency (std::string const) const = 0;
 
     /** override this if this implementation returns true from
      * requires_driver_selection()
@@ -280,7 +321,19 @@ class AudioBackend : public PortEngine {
     virtual int set_midi_option (const std::string& option) = 0;
 
     virtual std::string midi_option () const = 0;
-    
+
+    /** Detailed MIDI device list - if available */
+    virtual std::vector<DeviceStatus> enumerate_midi_devices () const = 0;
+
+    /** mark a midi-devices as enabled */
+    virtual int set_midi_device_enabled (std::string const, bool) = 0;
+
+    /** query if a midi-device is enabled */
+    virtual bool midi_device_enabled (std::string const) const = 0;
+
+    /** if backend supports systemic_midi_[in|ou]tput_latency() */
+    virtual bool can_set_systemic_midi_latencies () const = 0;
+
     /* State Control */
  
     /** Start using the device named in the most recent call
@@ -332,6 +385,12 @@ class AudioBackend : public PortEngine {
      * Return zero if successful, 1 if the device is not in use, negative values on error
      */
     virtual int stop () = 0;
+
+	 /** Reset device. 
+     *
+     * Return zero if successful, negative values on error
+     */
+	virtual int reset_device() = 0;
 
     /** While remaining connected to the device, and without changing its
      * configuration, start (or stop) calling the process_callback() of @param engine
@@ -486,39 +545,10 @@ class AudioBackend : public PortEngine {
      }
 
   protected:
-    AudioEngine&          engine;
+     AudioBackendInfo&  _info; 
+     AudioEngine&        engine;
 
-    virtual int _start (bool for_latency_measurement) = 0;
-};
-
-struct AudioBackendInfo {
-    const char* name;
-
-    /** Using arg1 and arg2, initialize this audiobackend.
-     * 
-     * Returns zero on success, non-zero otherwise.
-     */
-    int (*instantiate) (const std::string& arg1, const std::string& arg2);
-
-    /** Release all resources associated with this audiobackend
-     */
-    int (*deinstantiate) (void);
-
-    /** Factory method to create an AudioBackend-derived class.
-     * 
-     * Returns a valid shared_ptr to the object if successfull,
-     * or a "null" shared_ptr otherwise.
-     */
-    boost::shared_ptr<AudioBackend> (*factory) (AudioEngine&);
-
-    /** Return true if the underlying mechanism/API has been
-     * configured and does not need (re)configuration in order
-     * to be usable. Return false otherwise.
-     *
-     * Note that this may return true if (re)configuration, even though
-     * not currently required, is still possible.
-     */
-    bool (*already_configured)();
+     virtual int _start (bool for_latency_measurement) = 0;
 };
 
 } // namespace

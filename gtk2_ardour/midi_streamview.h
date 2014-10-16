@@ -27,7 +27,6 @@
 #include "streamview.h"
 #include "time_axis_view_item.h"
 #include "route_time_axis.h"
-#include "canvas.h"
 
 namespace Gdk {
 	class Color;
@@ -40,6 +39,10 @@ namespace ARDOUR {
 	class Route;
 	class Source;
 	struct PeakData;
+}
+
+namespace ArdourCanvas {
+	class LineSet;
 }
 
 class PublicEditor;
@@ -65,7 +68,7 @@ class MidiStreamView : public StreamView
 	};
 
 	Gtk::Adjustment note_range_adjustment;
-	ArdourCanvas::Group* midi_underlay_group;
+	ArdourCanvas::Container* midi_underlay_group;
 
 	void set_note_range(VisibleNoteRange r);
 

@@ -29,6 +29,8 @@
 
 #include <sigc++/bind.h>
 
+#include <glib/gstdio.h>
+
 #include "pbd/error.h"
 #include "pbd/convert.h"
 #include "gtkmm2ext/utils.h"
@@ -39,7 +41,6 @@
 #include "ardour_ui.h"
 #include "gui_thread.h"
 
-#include "utils.h"
 #include "opts.h"
 #include "transcode_video_dialog.h"
 #include "utils_videotl.h"
@@ -306,9 +307,9 @@ void
 TranscodeVideoDialog::finished ()
 {
 	if (aborted) {
-		unlink(path_entry.get_text().c_str());
+		::g_unlink(path_entry.get_text().c_str());
 		if (!audiofile.empty()) {
-			unlink(audiofile.c_str());
+			::g_unlink(audiofile.c_str());
 		}
 		Gtk::Dialog::response(RESPONSE_CANCEL);
 	} else {

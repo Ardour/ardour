@@ -52,7 +52,6 @@
 #include "audio_time_axis.h"
 #include "midi_time_axis.h"
 #include "session_import_dialog.h"
-#include "utils.h"
 #include "gui_thread.h"
 #include "interthread_progress_window.h"
 #include "mouse_cursors.h"
@@ -528,8 +527,8 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 	SoundFileInfo finfo;
 	int ret = 0;
 
-	set_canvas_cursor (_cursors->wait);
-	gdk_flush ();
+        push_canvas_cursor (_cursors->wait);
+        gdk_flush ();
 
 	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
 
@@ -601,8 +600,6 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 			}
 		}
 
-		set_canvas_cursor (_cursors->wait);
-
 		for (int n = 0; n < finfo.channels; ++n) {
 
 			try {
@@ -632,7 +629,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 				goto out;
 			}
 
-			ARDOUR_UI::instance()->flush_pending ();
+			gtk_main_iteration();
 		}
 	}
 
@@ -644,7 +641,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 	ret = add_sources (paths, sources, pos, disposition, mode, target_regions, target_tracks, track, true);
 
   out:
-	set_canvas_cursor (current_canvas_cursor);
+	pop_canvas_cursor ();
 	return ret;
 }
 
@@ -749,7 +746,12 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 					region_name = (*x)->name();
 				}
 
-				track_names.push_back (PBD::basename_nosuffix (paths[n]));
+				if (SMFSource::safe_midi_file_extension (paths.front())) {
+					string track_name = string_compose ("%1-t%2", PBD::basename_nosuffix (fs->path()), (n + 1));
+					track_names.push_back (track_name);
+				} else {
+					track_names.push_back (PBD::basename_nosuffix (paths[n]));
+				}
 			}
 
 			PropertyList plist;
@@ -896,6 +898,9 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 		boost::shared_ptr<Region> copy (RegionFactory::create (region, region->properties()));
 		playlist->clear_changes ();
 		playlist->add_region (copy, pos);
+		if (Config->get_edit_mode() == Ripple)
+			playlist->ripple (pos, copy->length(), copy);
+
 		_session->add_command (new StatefulDiffCommand (playlist));
 		break;
 	}

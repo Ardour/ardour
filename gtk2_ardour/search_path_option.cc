@@ -103,7 +103,7 @@ SearchPathOption::set_state_from_config ()
         clear ();
         path_box.pack_start (session_label);
 
-        split (str, dirs, ':');
+        split (str, dirs, G_SEARCHPATH_SEPARATOR);
 
         for (vector<string>::iterator d = dirs.begin(); d != dirs.end(); ++d) {
                 add_path (*d);
@@ -118,7 +118,7 @@ SearchPathOption::changed ()
         for (list<PathEntry*>::iterator p = paths.begin(); p != paths.end(); ++p) {
 
                 if (!str.empty()) {
-                        str += ':';
+                        str += G_SEARCHPATH_SEPARATOR;
                 }
                 str += (*p)->entry.get_text ();
         }

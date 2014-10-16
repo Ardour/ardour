@@ -21,10 +21,11 @@
 #define __pbd_destructible_h__
 
 #include "pbd/signals.h"
+#include "pbd/libpbd_visibility.h"
 
 namespace PBD {
 
-class Destructible {
+class LIBPBD_API Destructible {
   public:
         Destructible() {}
 	virtual ~Destructible () { Destroyed(); }

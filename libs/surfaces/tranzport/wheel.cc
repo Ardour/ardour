@@ -62,7 +62,7 @@ TranzportControlProtocol::datawheel ()
 			prev_track ();
 		}
 
-		timerclear (&last_wheel_motion);
+		last_wheel_motion = 0;
 		
 	} else if ((buttonmask & ButtonPrev) || (buttonmask & ButtonNext)) {
 
@@ -72,7 +72,7 @@ TranzportControlProtocol::datawheel ()
 			prev_marker ();
 		}
 		
-		timerclear (&last_wheel_motion);
+		last_wheel_motion = 0;
 		
 	} else if (buttonmask & ButtonShift) {
 		
@@ -104,7 +104,7 @@ TranzportControlProtocol::datawheel ()
 			}
 		}
 		
-		timerclear (&last_wheel_motion);
+		last_wheel_motion = 0;
 		
 	} else {
 		
@@ -149,11 +149,10 @@ void
 TranzportControlProtocol::scrub ()
 {
 	float speed;
-	struct timeval now;
-	struct timeval delta;
+	uint64_t now;
 	int dir;
 	
-	gettimeofday (&now, 0);
+	now = g_get_monotonic_time();
 	
 	if (_datawheel < WheelDirectionThreshold) {
 		dir = 1;
@@ -165,13 +164,10 @@ TranzportControlProtocol::scrub ()
 		/* changed direction, start over */
 		speed = 0.1f;
 	} else {
-		if (timerisset (&last_wheel_motion)) {
-
-			timersub (&now, &last_wheel_motion, &delta);
-			
+		if (last_wheel_motion != 0) {
 			/* 10 clicks per second => speed == 1.0 */
 			
-			speed = 100000.0f / (delta.tv_sec * 1000000 + delta.tv_usec);
+			speed = 100000.0f / (float) (now - last_wheel_motion)
 			
 		} else {
 			

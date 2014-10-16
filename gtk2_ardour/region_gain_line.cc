@@ -27,7 +27,6 @@
 #include "control_point.h"
 #include "region_gain_line.h"
 #include "audio_region_view.h"
-#include "utils.h"
 
 #include "time_axis_view.h"
 #include "editor.h"
@@ -38,7 +37,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& r, ArdourCanvas::Group& parent, boost::shared_ptr<AutomationList> l)
+AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& r, ArdourCanvas::Container& parent, boost::shared_ptr<AutomationList> l)
 	: AutomationLine (name, r.get_time_axis_view(), parent, l)
 	, rv (r)
 {
@@ -48,7 +47,7 @@ AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& 
 	_time_converter->set_origin_b (r.region()->position() - r.region()->start());
 
 	group->raise_to_top ();
-	group->property_y() = 2;
+	group->set_y_position (2);
 	set_uses_gain_mapping (true);
 	terminal_points_can_slide = false;
 }

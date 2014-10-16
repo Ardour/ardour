@@ -25,14 +25,14 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <giomm/file.h>
+#include <glib/gstdio.h>
 #include <glib/gprintf.h>
 #include <glibmm.h>
 
 #include <boost/utility.hpp>
 
-#include "pbd/clear_dir.h"
-#include "pbd/pathscanner.h"
+#include "pbd/file_utils.h"
+#include "pbd/stl_delete.h"
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/xml++.h"
@@ -48,7 +48,7 @@
 #include "ardour/types.h"
 #include "ardour/utils.h"
 #include "ardour/worker.h"
-#include "ardour/lv2_bundled_search_path.h"
+#include "ardour/search_paths.h"
 
 #include "i18n.h"
 #include <locale.h>
@@ -113,7 +113,7 @@ public:
 	LV2World ();
 	~LV2World ();
 
-	void load_bundled_plugins();
+	void load_bundled_plugins(bool verbose=false);
 
 	LilvWorld* world;
 
@@ -407,7 +407,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		throw failed_constructor();
 	}
 
-#ifdef HAVE_NEW_LILV
+#ifdef HAVE_LILV_0_16_0
 	// Load default state
 	LilvState* state = lilv_state_new_from_world(
 		_world.world, _uri_map.urid_map(), lilv_plugin_get_uri(_impl->plugin));
@@ -1077,6 +1077,10 @@ LV2Plugin::do_save_preset(string name)
 	std::string uri = Glib::filename_to_uri(Glib::build_filename(bundle, file_name));
 	LilvNode *node_bundle = lilv_new_uri(_world.world, Glib::filename_to_uri(Glib::build_filename(bundle, "/")).c_str());
 	LilvNode *node_preset = lilv_new_uri(_world.world, uri.c_str());
+#ifdef HAVE_LILV_0_19_2
+	lilv_world_unload_resource(_world.world, node_preset);
+	lilv_world_unload_bundle(_world.world, node_bundle);
+#endif
 	lilv_world_load_bundle(_world.world, node_bundle);
 	lilv_world_load_resource(_world.world, node_preset);
 	lilv_node_free(node_bundle);
@@ -1094,7 +1098,7 @@ LV2Plugin::do_remove_preset(string name)
 			name + ".ttl"
 		)
 	);
-	unlink(preset_file.c_str());
+	::g_unlink(preset_file.c_str());
 }
 
 bool
@@ -1122,16 +1126,16 @@ LV2Plugin::write_to(RingBuffer<uint8_t>* dest,
                     uint32_t             size,
                     const uint8_t*       body)
 {
-	const uint32_t buf_size = sizeof(UIMessage) + size;
-	uint8_t        buf[buf_size];
+	const uint32_t  buf_size = sizeof(UIMessage) + size;
+	vector<uint8_t> buf(buf_size);
 
-	UIMessage* msg = (UIMessage*)buf;
+	UIMessage* msg = (UIMessage*)&buf[0];
 	msg->index    = index;
 	msg->protocol = protocol;
 	msg->size     = size;
 	memcpy(msg + 1, body, size);
 
-	return (dest->write(buf, buf_size) == buf_size);
+	return (dest->write(&buf[0], buf_size) == buf_size);
 }
 
 bool
@@ -1210,13 +1214,13 @@ LV2Plugin::emit_to_ui(void* controller, UIMessageSink sink)
 			error << "Error reading from Plugin=>UI RingBuffer" << endmsg;
 			break;
 		}
-		uint8_t body[msg.size];
-		if (_to_ui->read(body, msg.size) != msg.size) {
+		vector<uint8_t> body(msg.size);
+		if (_to_ui->read(&body[0], msg.size) != msg.size) {
 			error << "Error reading from Plugin=>UI RingBuffer" << endmsg;
 			break;
 		}
 
-		sink(controller, msg.index, msg.size, msg.protocol, body);
+		sink(controller, msg.index, msg.size, msg.protocol, &body[0]);
 
 		read_space -= sizeof(msg) + msg.size;
 	}
@@ -1699,15 +1703,15 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				error << "Error reading from UI=>Plugin RingBuffer" << endmsg;
 				break;
 			}
-			uint8_t body[msg.size];
-			if (_from_ui->read(body, msg.size) != msg.size) {
+			vector<uint8_t> body(msg.size);
+			if (_from_ui->read(&body[0], msg.size) != msg.size) {
 				error << "Error reading from UI=>Plugin RingBuffer" << endmsg;
 				break;
 			}
 			if (msg.protocol == urids.atom_eventTransfer) {
 				LV2_Evbuf*            buf  = _ev_buffers[msg.index];
 				LV2_Evbuf_Iterator    i    = lv2_evbuf_end(buf);
-				const LV2_Atom* const atom = (const LV2_Atom*)body;
+				const LV2_Atom* const atom = (const LV2_Atom*)&body[0];
 				if (!lv2_evbuf_write(&i, nframes, 0, atom->type, atom->size,
 				                (const uint8_t*)(atom + 1))) {
 					error << "Failed to write data to LV2 event buffer\n";
@@ -1884,14 +1888,16 @@ LV2Plugin::latency_compute_run()
 
 	// Run the plugin so that it can set its latency parameter
 
+	bool was_activated = _was_activated;
 	activate();
 
 	uint32_t port_index = 0;
 	uint32_t in_index   = 0;
 	uint32_t out_index  = 0;
 
-	const framecnt_t bufsize = 1024;
-	float            buffer[bufsize];
+	// this is done in the main thread. non realtime.
+	const framecnt_t bufsize = _engine.samples_per_cycle();
+	float            *buffer = (float*) malloc(_engine.samples_per_cycle() * sizeof(float));
 
 	memset(buffer, 0, sizeof(float) * bufsize);
 
@@ -1914,6 +1920,10 @@ LV2Plugin::latency_compute_run()
 
 	run(bufsize);
 	deactivate();
+	if (was_activated) {
+		activate();
+	}
+	free(buffer);
 }
 
 const LilvPort*
@@ -2006,53 +2016,59 @@ LV2World::~LV2World()
 	lilv_node_free(atom_Sequence);
 	lilv_node_free(atom_Chunk);
 	lilv_node_free(atom_AtomPort);
+	lilv_world_free(world);
 }
 
 void
-LV2World::load_bundled_plugins()
+LV2World::load_bundled_plugins(bool verbose)
 {
 	if (!_bundle_checked) {
-		cout << "Scanning folders for bundled LV2s: " << ARDOUR::lv2_bundled_search_path().to_string() << endl;
-		PathScanner scanner;
-		vector<string *> *plugin_objects = scanner (ARDOUR::lv2_bundled_search_path().to_string(), lv2_filter, 0, true, true);
-		if (plugin_objects) {
-			for ( vector<string *>::iterator x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
-#ifdef WINDOWS
-				string uri = "file:///" + **x + "/";
-#else
-				string uri = "file://" + **x + "/";
-#endif
-				LilvNode *node = lilv_new_uri(world, uri.c_str());
-				lilv_world_load_bundle(world, node);
-				lilv_node_free(node);
-			}
+		if (verbose) {
+			cout << "Scanning folders for bundled LV2s: " << ARDOUR::lv2_bundled_search_path().to_string() << endl;
 		}
-		delete (plugin_objects);
+
+		vector<string> plugin_objects;
+		find_paths_matching_filter (plugin_objects, ARDOUR::lv2_bundled_search_path(), lv2_filter, 0, true, true, true);
+		for ( vector<string>::iterator x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
+#ifdef PLATFORM_WINDOWS
+			string uri = "file:///" + *x + "/";
+#else
+			string uri = "file://" + *x + "/";
+#endif
+			LilvNode *node = lilv_new_uri(world, uri.c_str());
+			lilv_world_load_bundle(world, node);
+			lilv_node_free(node);
+		}
 
 		_bundle_checked = true;
 	}
 }
 
-LV2PluginInfo::LV2PluginInfo (const void* c_plugin)
-	: _c_plugin(c_plugin)
+LV2PluginInfo::LV2PluginInfo (const char* plugin_uri)
 {
 	type = ARDOUR::LV2;
+	_plugin_uri = strdup(plugin_uri);
 }
 
 LV2PluginInfo::~LV2PluginInfo()
-{}
+{
+	free(_plugin_uri);
+	_plugin_uri = NULL;
+}
 
 PluginPtr
 LV2PluginInfo::load(Session& session)
 {
 	try {
 		PluginPtr plugin;
-
-		plugin.reset(new LV2Plugin(session.engine(), session,
-		                           (const LilvPlugin*)_c_plugin,
-		                           session.frame_rate()));
-
-		plugin->set_info(PluginInfoPtr(new LV2PluginInfo(*this)));
+		const LilvPlugins* plugins = lilv_world_get_all_plugins(_world.world);
+		LilvNode* uri = lilv_new_uri(_world.world, _plugin_uri);
+		if (!uri) { throw failed_constructor(); }
+		const LilvPlugin* lp = lilv_plugins_get_by_uri(plugins, uri);
+		if (!lp) { throw failed_constructor(); }
+		plugin.reset(new LV2Plugin(session.engine(), session, lp, session.frame_rate()));
+		lilv_node_free(uri);
+		plugin->set_info(PluginInfoPtr(shared_from_this ()));
 		return plugin;
 	} catch (failed_constructor& err) {
 		return PluginPtr((Plugin*)0);
@@ -2064,16 +2080,22 @@ LV2PluginInfo::load(Session& session)
 PluginInfoList*
 LV2PluginInfo::discover()
 {
-	_world.load_bundled_plugins();
+	LV2World world;
+	world.load_bundled_plugins();
+	_world.load_bundled_plugins(true);
 
 	PluginInfoList*    plugs   = new PluginInfoList;
-	const LilvPlugins* plugins = lilv_world_get_all_plugins(_world.world);
+	const LilvPlugins* plugins = lilv_world_get_all_plugins(world.world);
 
-	info << "LV2: Discovering " << lilv_plugins_size(plugins) << " plugins" << endmsg;
+	if (!Config->get_show_plugin_scan_window()) {
+		info << "LV2: Discovering " << lilv_plugins_size(plugins) << " plugins" << endmsg;
+	}
 
 	LILV_FOREACH(plugins, i, plugins) {
 		const LilvPlugin* p = lilv_plugins_get(plugins, i);
-		LV2PluginInfoPtr  info(new LV2PluginInfo((const void*)p));
+		const LilvNode* pun = lilv_plugin_get_uri(p);
+		if (!pun) continue;
+		LV2PluginInfoPtr info(new LV2PluginInfo(lilv_node_as_string(pun)));
 
 		LilvNode* name = lilv_plugin_get_name(p);
 		if (!name || !lilv_plugin_get_port_by_index(p, 0)) {
@@ -2087,6 +2109,7 @@ LV2PluginInfo::discover()
 
 		info->name = string(lilv_node_as_string(name));
 		lilv_node_free(name);
+		ARDOUR::PluginScanMessage(_("LV2"), info->name, false);
 
 		const LilvPluginClass* pclass = lilv_plugin_get_class(p);
 		const LilvNode*        label  = lilv_plugin_class_get_label(pclass);
@@ -2107,18 +2130,18 @@ LV2PluginInfo::discover()
 		int count_midi_in = 0;
 		for (uint32_t i = 0; i < lilv_plugin_get_num_ports(p); ++i) {
 			const LilvPort* port  = lilv_plugin_get_port_by_index(p, i);
-			if (lilv_port_is_a(p, port, _world.atom_AtomPort)) {
+			if (lilv_port_is_a(p, port, world.atom_AtomPort)) {
 				LilvNodes* buffer_types = lilv_port_get_value(
-					p, port, _world.atom_bufferType);
+					p, port, world.atom_bufferType);
 				LilvNodes* atom_supports = lilv_port_get_value(
-					p, port, _world.atom_supports);
+					p, port, world.atom_supports);
 
-				if (lilv_nodes_contains(buffer_types, _world.atom_Sequence)
-						&& lilv_nodes_contains(atom_supports, _world.midi_MidiEvent)) {
-					if (lilv_port_is_a(p, port, _world.lv2_InputPort)) {
+				if (lilv_nodes_contains(buffer_types, world.atom_Sequence)
+						&& lilv_nodes_contains(atom_supports, world.midi_MidiEvent)) {
+					if (lilv_port_is_a(p, port, world.lv2_InputPort)) {
 						count_midi_in++;
 					}
-					if (lilv_port_is_a(p, port, _world.lv2_OutputPort)) {
+					if (lilv_port_is_a(p, port, world.lv2_OutputPort)) {
 						count_midi_out++;
 					}
 				}
@@ -2129,18 +2152,18 @@ LV2PluginInfo::discover()
 
 		info->n_inputs.set_audio(
 			lilv_plugin_get_num_ports_of_class(
-				p, _world.lv2_InputPort, _world.lv2_AudioPort, NULL));
+				p, world.lv2_InputPort, world.lv2_AudioPort, NULL));
 		info->n_inputs.set_midi(
 			lilv_plugin_get_num_ports_of_class(
-				p, _world.lv2_InputPort, _world.ev_EventPort, NULL)
+				p, world.lv2_InputPort, world.ev_EventPort, NULL)
 			+ count_midi_in);
 
 		info->n_outputs.set_audio(
 			lilv_plugin_get_num_ports_of_class(
-				p, _world.lv2_OutputPort, _world.lv2_AudioPort, NULL));
+				p, world.lv2_OutputPort, world.lv2_AudioPort, NULL));
 		info->n_outputs.set_midi(
 			lilv_plugin_get_num_ports_of_class(
-				p, _world.lv2_OutputPort, _world.ev_EventPort, NULL)
+				p, world.lv2_OutputPort, world.ev_EventPort, NULL)
 			+ count_midi_out);
 
 		info->unique_id = lilv_node_as_uri(lilv_plugin_get_uri(p));

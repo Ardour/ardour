@@ -28,6 +28,9 @@
 #include "ardour/windows_vst_plugin.h"
 #include "ardour/vestige/aeffectx.h"
 #include "ardour/vst_types.h"
+#ifdef WINDOWS_VST_SUPPORT
+#include <fst.h>
+#endif
 
 #include "i18n.h"
 
@@ -41,6 +44,20 @@ static int debug_callbacks = -1;
 #endif
 
 using namespace ARDOUR;
+
+int Session::vst_current_loading_id = 0;
+const char* Session::vst_can_do_strings[] = {
+	X_("supplyIdle"),
+	X_("sendVstTimeInfo"),
+	X_("sendVstEvents"),
+	X_("sendVstMidiEvent"),
+	X_("receiveVstEvents"),
+	X_("receiveVstMidiEvent"),
+	X_("supportShell"),
+	X_("shellCategory"),
+	X_("shellCategorycurID")
+};
+const int Session::vst_can_do_string_count = sizeof (vst_can_do_strings) / sizeof (char*);
 
 intptr_t Session::vst_callback (
 	AEffect* effect,
@@ -60,18 +77,18 @@ intptr_t Session::vst_callback (
 	}
 
 	if (effect && effect->user) {
-	        plug = (VSTPlugin *) (effect->user);
+		plug = (VSTPlugin *) (effect->user);
 		session = &plug->session();
-#ifdef COMPILER_MSVC
-		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (int) pthread_self().p, opcode, plug->name());
+#ifdef PLATFORM_WINDOWS
+		SHOW_CALLBACK ("am callback 0x%p, opcode = %d, plugin = \"%s\" ", pthread_self().p, opcode, plug->name());
 #else
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (int) pthread_self(), opcode, plug->name());
 #endif
 	} else {
 		plug = 0;
 		session = 0;
-#ifdef COMPILER_MSVC
-		SHOW_CALLBACK ("am callback 0x%x, opcode = %d", (int) pthread_self().p, opcode);
+#ifdef PLATFORM_WINDOWS
+		SHOW_CALLBACK ("am callback 0x%p, opcode = %d", pthread_self().p, opcode);
 #else
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %d", (int) pthread_self(), opcode);
 #endif
@@ -90,18 +107,18 @@ intptr_t Session::vst_callback (
 	case audioMasterVersion:
 		SHOW_CALLBACK ("amc: audioMasterVersion\n");
 		// vst version, currently 2 (0 for older)
-		return 2;
+		return 2400;
 
 	case audioMasterCurrentId:
 		SHOW_CALLBACK ("amc: audioMasterCurrentId\n");
-		// returns the unique id of a plug that's currently
-		// loading
-		return 0;
+		// returns the unique id of a plug that's currently loading
+		return vst_current_loading_id;
 
 	case audioMasterIdle:
 		SHOW_CALLBACK ("amc: audioMasterIdle\n");
-		// call application idle routine (this will
-		// call effEditIdle for all open editors too)
+#ifdef WINDOWS_VST_SUPPORT
+		fst_audio_master_idle();
+#endif
 		if (effect) {
 			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
 		}
@@ -137,7 +154,7 @@ intptr_t Session::vst_callback (
 
 			_timeInfo.samplePos = now;
 			_timeInfo.sampleRate = session->frame_rate();
-			
+
 			const TempoMetric& tm (session->tempo_map().metric_at (now));
 
 			if (value & (kVstTempoValid)) {
@@ -156,22 +173,21 @@ intptr_t Session::vst_callback (
 
 				try {
 					session->tempo_map().bbt_time_rt (now, bbt);
-					
-					/* PPQ = pulse per quarter
-					   VST's "pulse" is our "division".
 
-					   8 divisions per bar, 1 division = quarter, so 8 quarters per bar, ppq = 1
-					   8 divisions per bar, 1 division = eighth, so  4 quarters per bar, ppq = 2
-					   4 divisions per bar, 1 division = quarter, so  4 quarters per bar, ppq = 1
-					   4 divisions per bar, 1 division = half, so 8 quarters per bar, ppq = 0.5
-					   4 divisions per bar, 1 division = fifth, so (4 * 5/4) quarters per bar, ppq = 5/4
-					   
-					   general: divs_per_bar / (note_type / 4.0)
-					*/
+					/* PPQ = pulse per quarter
+					 * VST's "pulse" is our "division".
+					 *
+					 * 8 divisions per bar, 1 division = quarter, so 8 quarters per bar, ppq = 1
+					 * 8 divisions per bar, 1 division = eighth, so  4 quarters per bar, ppq = 2
+					 * 4 divisions per bar, 1 division = quarter, so  4 quarters per bar, ppq = 1
+					 * 4 divisions per bar, 1 division = half, so 8 quarters per bar, ppq = 0.5
+					 * 4 divisions per bar, 1 division = fifth, so (4 * 5/4) quarters per bar, ppq = 5/4
+					 *
+					 * general: divs_per_bar / (note_type / 4.0)
+					 */
 					double ppq_scaling =  tm.meter().note_divisor() / 4.0;
 
-					/* Note that this assumes constant meter/tempo throughout the session. Stupid VST
-					*/
+					/* Note that this assumes constant meter/tempo throughout the session. Stupid VST */
 					double ppqBar = double(bbt.bars - 1) * tm.meter().divisions_per_bar();
 					double ppqBeat = double(bbt.beats - 1);
 					double ppqTick = double(bbt.ticks) / Timecode::BBT_Time::ticks_per_beat;
@@ -179,17 +195,17 @@ intptr_t Session::vst_callback (
 					ppqBar *= ppq_scaling;
 					ppqBeat *= ppq_scaling;
 					ppqTick *= ppq_scaling;
-					
+
 					if (value & (kVstPpqPosValid)) {
 						_timeInfo.ppqPos = ppqBar + ppqBeat + ppqTick;
 						_timeInfo.flags |= (kVstPpqPosValid);
 					}
-					
+
 					if (value & (kVstBarsValid)) {
 						_timeInfo.barStartPos = ppqBar;
 						_timeInfo.flags |= (kVstBarsValid);
 					}
-					
+
 				} catch (...) {
 					/* relax */
 				}
@@ -197,13 +213,13 @@ intptr_t Session::vst_callback (
 
 			if (value & (kVstSmpteValid)) {
 				Timecode::Time t;
-				
+
 				session->timecode_time (now, t);
-				
-				_timeInfo.smpteOffset = (t.hours * t.rate * 60.0 * 60.0) + 
-					(t.minutes * t.rate * 60.0) + 
-					(t.seconds * t.rate) + 
-					(t.frames) + 
+
+				_timeInfo.smpteOffset = (t.hours * t.rate * 60.0 * 60.0) +
+					(t.minutes * t.rate * 60.0) +
+					(t.seconds * t.rate) +
+					(t.frames) +
 					(t.subframes);
 
 				_timeInfo.smpteOffset *= 80.0; /* VST spec is 1/80th frames */
@@ -239,12 +255,21 @@ intptr_t Session::vst_callback (
 			_timeInfo.samplePos = 0;
 			_timeInfo.sampleRate = AudioEngine::instance()->sample_rate();
 		}
-		
+
 		return (intptr_t) &_timeInfo;
 
 	case audioMasterProcessEvents:
 		SHOW_CALLBACK ("amc: audioMasterProcessEvents\n");
 		// VstEvents* in <ptr>
+		if (plug && plug->midi_buffer()) {
+			VstEvents* v = (VstEvents*)ptr;
+			for (int n = 0 ; n < v->numEvents; ++n) {
+				VstMidiEvent *vme = (VstMidiEvent*) (v->events[n]->dump);
+				if (vme->type == kVstMidiType) {
+					plug->midi_buffer()->push_back(vme->deltaFrames, 3, (uint8_t*)vme->midiData);
+				}
+			}
+		}
 		return 0;
 
 	case audioMasterSetTime:
@@ -268,14 +293,14 @@ intptr_t Session::vst_callback (
 
 	case audioMasterGetParameterQuantization:
 		SHOW_CALLBACK ("amc: audioMasterGetParameterQuantization\n");
-               // returns the integer value for +1.0 representation,
-	       // or 1 if full single float precision is maintained
-               // in automation. parameter index in <value> (-1: all, any)
+		// returns the integer value for +1.0 representation,
+		// or 1 if full single float precision is maintained
+		// in automation. parameter index in <value> (-1: all, any)
 		return 0;
 
 	case audioMasterIOChanged:
 		SHOW_CALLBACK ("amc: audioMasterIOChanged\n");
-	       // numInputs and/or numOutputs has changed
+		// numInputs and/or numOutputs has changed
 		return 0;
 
 	case audioMasterNeedIdle:
@@ -315,16 +340,16 @@ intptr_t Session::vst_callback (
 
 	case audioMasterGetPreviousPlug:
 		SHOW_CALLBACK ("amc: audioMasterGetPreviousPlug\n");
-	       // input pin in <value> (-1: first to come), returns cEffect*
+		// input pin in <value> (-1: first to come), returns cEffect*
 		return 0;
 
 	case audioMasterGetNextPlug:
 		SHOW_CALLBACK ("amc: audioMasterGetNextPlug\n");
-	       // output pin in <value> (-1: first to come), returns cEffect*
+		// output pin in <value> (-1: first to come), returns cEffect*
 
 	case audioMasterWillReplaceOrAccumulate:
 		SHOW_CALLBACK ("amc: audioMasterWillReplaceOrAccumulate\n");
-	       // returns: 0: not supported, 1: replace, 2: accumulate
+		// returns: 0: not supported, 1: replace, 2: accumulate
 		return 0;
 
 	case audioMasterGetCurrentProcessLevel:
@@ -346,10 +371,10 @@ intptr_t Session::vst_callback (
 	case audioMasterOfflineStart:
 		SHOW_CALLBACK ("amc: audioMasterOfflineStart\n");
 		return 0;
-		
+
 	case audioMasterOfflineRead:
 		SHOW_CALLBACK ("amc: audioMasterOfflineRead\n");
-	       // ptr points to offline structure, see below. return 0: error, 1 ok
+		// ptr points to offline structure, see below. return 0: error, 1 ok
 		return 0;
 
 	case audioMasterOfflineWrite:
@@ -360,7 +385,7 @@ intptr_t Session::vst_callback (
 	case audioMasterOfflineGetCurrentPass:
 		SHOW_CALLBACK ("amc: audioMasterOfflineGetCurrentPass\n");
 		return 0;
-		
+
 	case audioMasterOfflineGetCurrentMetaPass:
 		SHOW_CALLBACK ("amc: audioMasterOfflineGetCurrentMetaPass\n");
 		return 0;
@@ -404,7 +429,12 @@ intptr_t Session::vst_callback (
 
 	case audioMasterCanDo:
 		SHOW_CALLBACK ("amc: audioMasterCanDo\n");
-		// string in ptr, see below
+		// string in ptr,  (const char*)ptr
+		for (int i = 0; i < vst_can_do_string_count; i++) {
+			if (! strcmp(vst_can_do_strings[i], (const char*)ptr)) {
+				return 1;
+			}
+		}
 		return 0;
 
 	case audioMasterGetLanguage:

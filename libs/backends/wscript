@@ -1,12 +1,42 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
+from waflib import Options
 import os
+import sys
+import re
 
 # Mandatory variables
 top = '.'
 out = 'build'
 
-backends = [ 'jack' ]
+def backend_list():
+    if Options.options.program_name == 'Ardour':
+        backends = [ 'jack' ]
+
+        if Options.options.build_dummy: 
+            backends += [ 'dummy' ]
+
+    elif Options.options.program_name == 'Mixbus':
+        backends = [ 'jack' ]
+
+    elif Options.options.program_name == 'Tracks':
+        if re.search ("linux", sys.platform) != None:
+            backends = [ 'jack' ]
+        else:
+            backends = [ ]
+
+    else:
+        print ('Unknown product name; backends will not include JACK ', Options.options.program_name)
+
+    if re.search ("linux", sys.platform) != None:
+        if Options.options.build_alsabackend:
+            backends += [ 'alsa' ]
+
+    if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc' or Options.options.dist_target == 'mingw':
+        if Options.options.build_wavesbackend:
+            backends += [ 'wavesaudio' ]
+
+    return backends
 
 def options(opt):
     autowaf.set_options(opt)
@@ -19,9 +49,14 @@ def configure(conf):
     autowaf.set_recursive()
     autowaf.configure(conf)
 
+    backends = backend_list()
+    conf.env['BACKENDS'] = backends
+    
     for i in backends:
         sub_config_and_use(conf, i)
 
 def build(bld):
+    backends = bld.env['BACKENDS']
+
     for i in backends:
         bld.recurse(i)

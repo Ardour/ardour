@@ -27,7 +27,7 @@ namespace ARDOUR {
 class AudioSource;
 class Session;
 
-class OnsetDetector : public AudioAnalyser
+class LIBARDOUR_API OnsetDetector : public AudioAnalyser
 {
 public:
 	OnsetDetector (float sample_rate);

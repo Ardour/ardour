@@ -20,11 +20,17 @@
 #ifndef __gtkmm2ext_auto_spin_h__
 #define __gtkmm2ext_auto_spin_h__
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <gtkmm.h>
+
+#include "gtkmm2ext/visibility.h"
 
 namespace Gtkmm2ext {
 
-class AutoSpin 
+class LIBGTKMM2EXT_API AutoSpin 
 
 {
   public:

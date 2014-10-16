@@ -36,11 +36,14 @@ void gtk_application_cleanup (void)
 void                      
 gtk_application_set_menu_bar (GtkMenuShell* menushell)
 {
+	(void) menushell;
 }
 
 void                      
 gtk_application_add_app_menu_item (GtkApplicationMenuGroup* group, GtkMenuItem* item)
 {
+	(void) group;
+	(void) item;
 }
 
 void

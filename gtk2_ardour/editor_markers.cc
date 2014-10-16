@@ -20,7 +20,6 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "ardour/session.h"
@@ -28,12 +27,15 @@
 #include "ardour/profile.h"
 #include "pbd/memento_command.h"
 
+#include "canvas/canvas.h"
+#include "canvas/item.h"
+#include "canvas/rectangle.h"
+
 #include "editor.h"
 #include "marker.h"
 #include "selection.h"
 #include "editing.h"
 #include "gui_thread.h"
-#include "simplerect.h"
 #include "actions.h"
 #include "prompter.h"
 #include "editor_drag.h"
@@ -62,24 +64,32 @@ Editor::add_new_location (Location *location)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::add_new_location, location);
 
-	ArdourCanvas::Group* group = add_new_location_internal (location);
+	ArdourCanvas::Container* group = add_new_location_internal (location);
 
 	/* Do a full update of the markers in this group */
 	update_marker_labels (group);
+	
+	if (location->is_auto_punch()) {
+		update_punch_range_view ();
+	}
+
+	if (location->is_auto_loop()) {
+		update_loop_range_view ();
+	}
 }
 
 /** Add a new location, without a time-consuming update of all marker labels;
  *  the caller must call update_marker_labels () after calling this.
  *  @return canvas group that the location's marker was added to.
  */
-ArdourCanvas::Group*
+ArdourCanvas::Container*
 Editor::add_new_location_internal (Location* location)
 {
 	LocationMarkers *lam = new LocationMarkers;
 	uint32_t color;
 
 	/* make a note here of which group this marker ends up in */
-	ArdourCanvas::Group* group = 0;
+	ArdourCanvas::Container* group = 0;
 
 	if (location->is_cd_marker()) {
 		color = location_cd_marker_color;
@@ -153,11 +163,8 @@ Editor::add_new_location_internal (Location* location)
 		lam->show ();
 	}
 
-	location->start_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
-	location->end_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
-	location->changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
 	location->name_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
-	location->FlagsChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_flags_changed, this, _1, _2), gui_context());
+	location->FlagsChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_flags_changed, this, location), gui_context());
 
 	pair<Location*,LocationMarkers*> newpair;
 
@@ -171,7 +178,7 @@ Editor::add_new_location_internal (Location* location)
 		select_new_marker = false;
 	}
 
-	lam->canvas_height_set (_canvas_height);
+	lam->canvas_height_set (_visible_canvas_height);
 	lam->set_show_lines (_show_marker_lines);
 
 	/* Add these markers to the appropriate sorted marker lists, which will render
@@ -256,7 +263,7 @@ Editor::check_marker_label (Marker* m)
 
 		/* Update just the available space between the previous marker and this one */
 
-		double const p = frame_to_pixel (m->position() - (*prev)->position());
+		double const p = sample_to_pixel (m->position() - (*prev)->position());
 
 		if (m->label_on_left()) {
 			(*prev)->set_right_label_limit (p / 2);
@@ -275,7 +282,7 @@ Editor::check_marker_label (Marker* m)
 
 		/* Update just the available space between this marker and the next */
 
-		double const p = frame_to_pixel ((*next)->position() - m->position());
+		double const p = sample_to_pixel ((*next)->position() - m->position());
 
 		if ((*next)->label_on_left()) {
 			m->set_right_label_limit (p / 2);
@@ -301,14 +308,14 @@ struct MarkerComparator {
 void
 Editor::update_marker_labels ()
 {
-	for (std::map<ArdourCanvas::Group *, std::list<Marker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
+	for (std::map<ArdourCanvas::Container *, std::list<Marker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
 		update_marker_labels (i->first);
 	}
 }
 
 /** Look at all markers in a group and update label widths */
 void
-Editor::update_marker_labels (ArdourCanvas::Group* group)
+Editor::update_marker_labels (ArdourCanvas::Container* group)
 {
 	list<Marker*>& sorted = _sorted_marker_lists[group];
 
@@ -324,12 +331,15 @@ Editor::update_marker_labels (ArdourCanvas::Group* group)
 
 	list<Marker*>::iterator prev = sorted.end ();
 	list<Marker*>::iterator next = i;
-	++next;
+
+	if (next != sorted.end()) {
+		++next;
+	}
 
 	while (i != sorted.end()) {
 
 		if (prev != sorted.end()) {
-			double const p = frame_to_pixel ((*i)->position() - (*prev)->position());
+			double const p = sample_to_pixel ((*i)->position() - (*prev)->position());
 
 			if ((*prev)->label_on_left()) {
 				(*i)->set_left_label_limit (p);
@@ -340,23 +350,24 @@ Editor::update_marker_labels (ArdourCanvas::Group* group)
 		}
 
 		if (next != sorted.end()) {
-			double const p = frame_to_pixel ((*next)->position() - (*i)->position());
+			double const p = sample_to_pixel ((*next)->position() - (*i)->position());
 
 			if ((*next)->label_on_left()) {
 				(*i)->set_right_label_limit (p / 2);
 			} else {
 				(*i)->set_right_label_limit (p);
 			}
+
+			++next;
 		}
 
 		prev = i;
 		++i;
-		++next;
 	}
 }
 
 void
-Editor::location_flags_changed (Location *location, void*)
+Editor::location_flags_changed (Location *location)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::location_flags_changed, location, src)
 
@@ -521,8 +532,8 @@ Editor::refresh_location_display_internal (Locations::LocationList& locations)
 		i = tmp;
 	}
 
-	update_punch_range_view (false);
-	update_loop_range_view (false);
+	update_punch_range_view ();
+	update_loop_range_view ();
 }
 
 void
@@ -671,7 +682,7 @@ Editor::mouse_add_new_range (framepos_t where)
 	   it's reasonably easy to manipulate after creation.
 	*/
 
-	framepos_t const end = where + current_page_frames() / 8;
+	framepos_t const end = where + current_page_samples() / 8;
 
 	string name;
 	_session->locations()->next_available_name (name, _("range"));
@@ -727,11 +738,11 @@ Editor::location_gone (Location *location)
 	LocationMarkerMap::iterator i;
 
 	if (location == transport_loop_location()) {
-		update_loop_range_view (true);
+		update_loop_range_view ();
 	}
 
 	if (location == transport_punch_location()) {
-		update_punch_range_view (true);
+		update_punch_range_view ();
 	}
 
 	for (i = location_markers.begin(); i != location_markers.end(); ++i) {
@@ -858,14 +869,14 @@ Editor::build_marker_menu (Location* loc)
 	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
 
 	items.push_back (CheckMenuElem (_("Lock")));
-	CheckMenuItem* lock_item = static_cast<CheckMenuItem*> (&items.back());
+	Gtk::CheckMenuItem* lock_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
 	if (loc->locked ()) {
 		lock_item->set_active ();
 	}
 	lock_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_lock));
 
 	items.push_back (CheckMenuElem (_("Glue to Bars and Beats")));
-	CheckMenuItem* glue_item = static_cast<CheckMenuItem*> (&items.back());
+	Gtk::CheckMenuItem* glue_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
 	if (loc->position_lock_style() == MusicTime) {
 		glue_item->set_active ();
 	}
@@ -1226,8 +1237,8 @@ Editor::marker_menu_loop_range ()
 			l2->set (l->start(), l->end());
 
 			// enable looping, reposition and start rolling
-			_session->request_play_loop(true);
 			_session->request_locate (l2->start(), true);
+			_session->request_play_loop(true);
 		}
 	}
 }
@@ -1418,7 +1429,7 @@ Editor::new_transport_marker_menu_set_punch ()
 }
 
 void
-Editor::update_loop_range_view (bool visibility)
+Editor::update_loop_range_view ()
 {
 	if (_session == 0) {
 		return;
@@ -1428,23 +1439,21 @@ Editor::update_loop_range_view (bool visibility)
 
 	if (_session->get_play_loop() && ((tll = transport_loop_location()) != 0)) {
 
-		double x1 = frame_to_pixel (tll->start());
-		double x2 = frame_to_pixel (tll->end());
+		double x1 = sample_to_pixel (tll->start());
+		double x2 = sample_to_pixel (tll->end());
 
-		transport_loop_range_rect->property_x1() = x1;
-		transport_loop_range_rect->property_x2() = x2;
+		transport_loop_range_rect->set_x0 (x1);
+		transport_loop_range_rect->set_x1 (x2);
 
-		if (visibility) {
-			transport_loop_range_rect->show();
-		}
-
-	} else if (visibility) {
+		transport_loop_range_rect->show();
+		
+	} else {
 		transport_loop_range_rect->hide();
 	}
 }
 
 void
-Editor::update_punch_range_view (bool visibility)
+Editor::update_punch_range_view ()
 {
 	if (_session == 0) {
 		return;
@@ -1453,20 +1462,27 @@ Editor::update_punch_range_view (bool visibility)
 	Location* tpl;
 
 	if ((_session->config.get_punch_in() || _session->config.get_punch_out()) && ((tpl = transport_punch_location()) != 0)) {
-		guint track_canvas_width,track_canvas_height;
-		track_canvas->get_size(track_canvas_width,track_canvas_height);
-		if (_session->config.get_punch_in()) {
-			transport_punch_range_rect->property_x1() = frame_to_pixel (tpl->start());
-			transport_punch_range_rect->property_x2() = (_session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : frame_to_pixel (JACK_MAX_FRAMES));
-		} else {
-			transport_punch_range_rect->property_x1() = 0;
-			transport_punch_range_rect->property_x2() = (_session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : track_canvas_width);
-		}
 
-		if (visibility) {
-		        transport_punch_range_rect->show();
+		double pixel_start;
+		double pixel_end;
+		
+		if (_session->config.get_punch_in()) {
+			pixel_start = sample_to_pixel (tpl->start());
+		} else {
+			pixel_start = 0;
 		}
-	} else if (visibility) {
+		if (_session->config.get_punch_out()) {
+			pixel_end = sample_to_pixel (tpl->end());
+		} else {
+			pixel_end = sample_to_pixel (max_framepos);
+		}
+		
+		transport_punch_range_rect->set_x0 (pixel_start);
+		transport_punch_range_rect->set_x1 (pixel_end);			
+		transport_punch_range_rect->show();
+
+	} else {
+
 	        transport_punch_range_rect->hide();
 	}
 }
@@ -1557,7 +1573,7 @@ Editor::toggle_marker_lines ()
 void
 Editor::remove_sorted_marker (Marker* m)
 {
-	for (std::map<ArdourCanvas::Group *, std::list<Marker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
+	for (std::map<ArdourCanvas::Container *, std::list<Marker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
 		i->second.remove (m);
 	}
 }

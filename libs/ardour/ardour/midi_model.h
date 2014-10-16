@@ -27,10 +27,12 @@
 #include <boost/utility.hpp>
 #include <glibmm/threads.h>
 #include "pbd/command.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/automatable_sequence.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "evoral/Note.hpp"
 #include "evoral/Sequence.hpp"
@@ -47,7 +49,7 @@ class MidiSource;
  * Because of this MIDI controllers and automatable controllers/widgets/etc
  * are easily interchangeable.
  */
-class MidiModel : public AutomatableSequence<Evoral::MusicalTime> {
+class LIBARDOUR_API MidiModel : public AutomatableSequence<Evoral::MusicalTime> {
 public:
 	typedef Evoral::MusicalTime TimeType;
 
@@ -56,7 +58,7 @@ public:
 	NoteMode note_mode() const { return (percussive() ? Percussive : Sustained); }
 	void set_note_mode(NoteMode mode) { set_percussive(mode == Percussive); };
 
-	class DiffCommand : public Command {
+	class LIBARDOUR_API DiffCommand : public Command {
 	public:
 
 		DiffCommand (boost::shared_ptr<MidiModel> m, const std::string& name);
@@ -77,7 +79,7 @@ public:
 
 	};
 
-	class NoteDiffCommand : public DiffCommand {
+	class LIBARDOUR_API NoteDiffCommand : public DiffCommand {
 	public:
 
 		NoteDiffCommand (boost::shared_ptr<MidiModel> m, const std::string& name) : DiffCommand (m, name) {}
@@ -143,7 +145,7 @@ public:
 	};
 
 	/* Currently this class only supports changes of sys-ex time, but could be expanded */
-	class SysExDiffCommand : public DiffCommand {
+	class LIBARDOUR_API SysExDiffCommand : public DiffCommand {
 	public:
 		SysExDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
 
@@ -178,7 +180,7 @@ public:
 		Change unmarshal_change (XMLNode *);
 	};
 
-	class PatchChangeDiffCommand : public DiffCommand {
+	class LIBARDOUR_API PatchChangeDiffCommand : public DiffCommand {
 	public:
 		PatchChangeDiffCommand (boost::shared_ptr<MidiModel>, const std::string &);
 		PatchChangeDiffCommand (boost::shared_ptr<MidiModel>, const XMLNode &);
@@ -220,6 +222,8 @@ public:
 				uint8_t    new_program;
 				int        new_bank;
 			};
+
+		    Change() : patch_id (-1) {}
 		};
 
 		typedef std::list<Change> ChangeList;

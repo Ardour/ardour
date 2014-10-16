@@ -42,14 +42,14 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
   public:
     EngineControl ();
     ~EngineControl ();
-    
+
     static bool need_setup ();
-    
+
     XMLNode& get_state ();
     void set_state (const XMLNode&);
-    
+
     void set_desired_sample_rate (uint32_t);
-    
+
   private:
     Gtk::Notebook notebook;
 
@@ -79,6 +79,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     Gtk::Label      have_control_text;
     Gtk::Button     control_app_button;
+    ArdourButton    midi_devices_button;
 
     Gtk::Button     connect_disconnect_button;
 
@@ -90,8 +91,9 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     Gtk::Button       lm_measure_button;
     Gtk::Button       lm_use_button;
     Gtk::Button       lm_back_button;
-    ArdourButton      lm_button;
+    ArdourButton      lm_button_audio;
     Gtk::Label        lm_title;
+    Gtk::Label        lm_preamble;
     Gtk::Label        lm_results;
     Gtk::Table        lm_table;
     Gtk::VBox         lm_vbox;
@@ -105,13 +107,13 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     /* MIDI Tab */
 
     Gtk::VBox midi_vbox;
-    Gtk::Button midi_refresh_button;
+    Gtk::Button midi_back_button;
     Gtk::Table midi_device_table;
 
     /* MIDI ... JACK */
-    
+
     Gtk::CheckButton aj_button;
-    
+
     uint32_t ignore_changes;
     uint32_t _desired_sample_rate;
     bool     started_at_least_once;
@@ -125,8 +127,8 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     void setup_midi_tab_for_backend ();
     void setup_midi_tab_for_jack ();
-    void refresh_midi_display ();
-    
+    void refresh_midi_display (std::string focus = "");
+
     std::string bufsize_as_string (uint32_t);
 
     float get_rate() const;
@@ -144,7 +146,36 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void list_devices ();
     void show_buffer_duration ();
 
-    struct State {
+    void configure_midi_devices ();
+
+    struct MidiDeviceSetting {
+	std::string name;
+	bool enabled;
+	uint32_t input_latency;
+	uint32_t output_latency;
+
+	MidiDeviceSetting (std::string n, bool en = true, uint32_t inl = 0, uint32_t oul = 0)
+	    : name (n)
+	    , enabled (en)
+	    , input_latency (inl)
+	    , output_latency (oul)
+	{}
+    };
+
+    typedef boost::shared_ptr<MidiDeviceSetting> MidiDeviceSettings;
+    bool _can_set_midi_latencies;
+    std::vector<MidiDeviceSettings> _midi_devices;
+
+    MidiDeviceSettings find_midi_device(std::string devicename) const {
+	for (std::vector<MidiDeviceSettings>::const_iterator p = _midi_devices.begin(); p != _midi_devices.end(); ++p) {
+	    if ((*p)->name == devicename) {
+		return *p;
+	    }
+	}
+	return MidiDeviceSettings();
+    }
+
+    struct StateStruct {
 	std::string backend;
 	std::string driver;
 	std::string device;
@@ -156,27 +187,31 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	uint32_t output_channels;
 	bool active;
 	std::string midi_option;
+	std::vector<MidiDeviceSettings> midi_devices;
 
-	State() 
-		: input_latency (0)
+	StateStruct()
+		: sample_rate (48000)
+		, buffer_size (1024)
+		, input_latency (0)
 		, output_latency (0)
 		, input_channels (0)
 		, output_channels (0)
 		, active (false) {}
 
     };
-    
+
+    typedef boost::shared_ptr<StateStruct> State;
     typedef std::list<State> StateList;
 
     StateList states;
 
-    State* get_matching_state (const std::string& backend,
+    State get_matching_state (const std::string& backend,
 			       const std::string& driver,
 			       const std::string& device);
-    State* get_saved_state_for_currently_displayed_backend_and_device ();
+    State get_saved_state_for_currently_displayed_backend_and_device ();
     void maybe_display_saved_state ();
-    State* save_state ();
-    void store_state (State&);
+    State save_state ();
+    void store_state (State);
 
     bool  _have_control;
 
@@ -186,6 +221,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void build_full_control_notebook ();
     void build_no_control_notebook ();
 
+    void on_show ();
     void on_response (int);
     void control_app_button_clicked ();
     void use_latency_button_clicked ();
@@ -196,13 +232,14 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     /* latency measurement */
     void latency_button_clicked ();
-    bool check_latency_measurement ();
+    bool check_audio_latency_measurement ();
+    bool check_midi_latency_measurement ();
     sigc::connection latency_timeout;
     void enable_latency_tab ();
     void disable_latency_tab ();
     void start_latency_detection ();
     void end_latency_detection ();
-    
+
     void on_switch_page (GtkNotebookPage*, guint page_num);
     bool on_delete_event (GdkEventAny*);
 
@@ -212,7 +249,13 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     PBD::ScopedConnection stopped_connection;
 
     void connect_disconnect_click ();
-    void calibrate_latency ();
+    void calibrate_audio_latency ();
+    void calibrate_midi_latency (MidiDeviceSettings);
+
+    MidiDeviceSettings _measure_midi;
+    void midi_latency_adjustment_changed(Gtk::Adjustment *, MidiDeviceSettings, bool);
+    void midi_device_enabled_toggled(ArdourButton *, MidiDeviceSettings);
+    sigc::connection lm_back_button_signal;
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

@@ -68,8 +68,10 @@ Track::init ()
 	/* don't add rec_enable_control to controls because we don't want it to
 	 * appear as an automatable parameter
 	 */
+	track_number_changed.connect_same_thread (*this, boost::bind (&Track::resync_track_name, this));
+	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&Track::parameter_changed, this, _1));
 
-        return 0;
+	return 0;
 }
 
 void
@@ -284,6 +286,28 @@ Track::set_record_enabled (bool yn, void *src)
 	_rec_enable_control->Changed ();
 }
 
+void
+Track::parameter_changed (string const & p)
+{
+	if (p == "track-name-number") {
+		resync_track_name ();
+	}
+	else if (p == "track-name-take") {
+		resync_track_name ();
+	}
+	else if (p == "take-name") {
+		if (_session.config.get_track_name_take()) {
+			resync_track_name ();
+		}
+	}
+}
+
+void
+Track::resync_track_name ()
+{
+	set_name(name());
+}
+
 bool
 Track::set_name (const string& str)
 {
@@ -293,6 +317,29 @@ Track::set_name (const string& str)
 		/* this messes things up if done while recording */
 		return false;
 	}
+
+	string diskstream_name = "";
+	if (_session.config.get_track_name_take () && !_session.config.get_take_name ().empty()) {
+		// Note: any text is fine, legalize_for_path() fixes this later
+		diskstream_name += _session.config.get_take_name ();
+		diskstream_name += "_";
+	}
+	const int64_t tracknumber = track_number();
+	if (tracknumber > 0 && _session.config.get_track_name_number()) {
+		char num[64], fmt[10];
+		snprintf(fmt, sizeof(fmt), "%%0%d" PRId64, _session.track_number_decimals());
+		snprintf(num, sizeof(num), fmt, tracknumber);
+		diskstream_name += num;
+		diskstream_name += "_";
+	}
+	diskstream_name += str;
+
+	if (diskstream_name == _diskstream_name) {
+		return true;
+	}
+	_diskstream_name = diskstream_name;
+
+	_diskstream->set_write_source_name (diskstream_name);
 
 	boost::shared_ptr<Track> me = boost::dynamic_pointer_cast<Track> (shared_from_this ());
 	if (_diskstream->playlist()->all_regions_empty () && _session.playlists->playlists_for_track (me).size() == 1) {
@@ -372,38 +419,30 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 
 	bool be_silent;
 
-	if (_have_internal_generator) {
-		/* since the instrument has no input streams,
-		   there is no reason to send any signal
-		   into the route.
-		*/
+	MonitorState const s = monitoring_state ();
+	/* we are not rolling, so be silent even if we are monitoring disk, as there
+	   will be no disk data coming in.
+	*/
+	switch (s) {
+	case MonitoringSilence:
 		be_silent = true;
-
-	} else {
-
-		MonitorState const s = monitoring_state ();
-		/* we are not rolling, so be silent even if we are monitoring disk, as there
-		   will be no disk data coming in.
-		*/
-		switch (s) {
-		case MonitoringSilence:
-			/* if there is an instrument, be_silent should always
-			   be false
-			*/
-			be_silent = (the_instrument_unlocked() == 0);
-			break;
-		case MonitoringDisk:
-			be_silent = true;
-			break;
-		case MonitoringInput:
-			be_silent = false;
-			break;
-		default:
-			be_silent = false;
-			break;
-		}
+		break;
+	case MonitoringDisk:
+		be_silent = true;
+		break;
+	case MonitoringInput:
+		be_silent = false;
+		break;
+	default:
+		be_silent = false;
+		break;
 	}
-
+	
+	//if we have an internal generator, let it play regardless of monitoring state
+	if (_have_internal_generator) {
+		be_silent = false;
+	}
+	
 	_amp->apply_gain_automation (false);
 
 	/* if have_internal_generator, or .. */
@@ -719,9 +758,9 @@ Track::speed () const
 }
 
 void
-Track::prepare_to_stop (framepos_t p)
+Track::prepare_to_stop (framepos_t t, framepos_t a)
 {
-	_diskstream->prepare_to_stop (p);
+	_diskstream->prepare_to_stop (t, a);
 }
 
 void

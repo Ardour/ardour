@@ -187,11 +187,12 @@ RegionExportChannelFactory::update_buffers (framecnt_t frames)
 		assert (mixdown_buffer && gain_buffer);
 		for (size_t channel = 0; channel < n_channels; ++channel) {
 			memset (mixdown_buffer.get(), 0, sizeof (Sample) * frames);
+			buffers.get_audio (channel).silence(frames);
 			region.read_at (buffers.get_audio (channel).data(), mixdown_buffer.get(), gain_buffer.get(), position, frames, channel);
 		}
 		break;
 	case Processed:
-		track.export_stuff (buffers, position, frames, track.main_outs(), true, true);
+		track.export_stuff (buffers, position, frames, track.main_outs(), true, true, false);
 		break;
 	default:
 		throw ExportFailed ("Unhandled type in ExportChannelFactory::update_buffers");
@@ -239,7 +240,11 @@ RouteExportChannel::read (Sample const *& data, framecnt_t frames) const
 {
 	assert(processor);
 	AudioBuffer const & buffer = processor->get_capture_buffers().get_audio (channel);
+#ifndef NDEBUG
+	(void) frames;
+#else
 	assert (frames <= (framecnt_t) buffer.capacity());
+#endif
 	data = buffer.data();
 }
 

@@ -24,6 +24,8 @@
 #include "ardour/runtime_functions.h"
 #include <stdint.h>
 
+using std::min;
+using std::max;
 using namespace ARDOUR;
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
@@ -93,22 +95,22 @@ default_compute_peak (const ARDOUR::Sample * buf, pframes_t nsamples, float curr
 }
 
 void
-default_find_peaks (const ARDOUR::Sample * buf, pframes_t nframes, float *min, float *max)
+default_find_peaks (const ARDOUR::Sample * buf, pframes_t nframes, float *minf, float *maxf)
 {
 	pframes_t i;
 	float a, b;
 
-	a = *max;
-	b = *min;
+	a = *maxf;
+	b = *minf;
 
 	for (i = 0; i < nframes; i++)
 	{
-		a = fmax (buf[i], a);
-		b = fmin (buf[i], b);
+		a = max (buf[i], a);
+		b = min (buf[i], b);
 	}
 
-	*max = a;
-	*min = b;
+	*maxf = a;
+	*minf = b;
 }
 
 void

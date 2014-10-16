@@ -21,17 +21,19 @@
 #ifndef __ardour_filename_extensions_h__
 #define __ardour_filename_extensions_h__
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
-extern const char* const template_suffix;
-extern const char* const statefile_suffix;
-extern const char* const pending_suffix;
-extern const char* const peakfile_suffix;
-extern const char* const backup_suffix;
-extern const char* const temp_suffix;
-extern const char* const history_suffix;
-extern const char* const export_preset_suffix;
-extern const char* const export_format_suffix;
+	LIBARDOUR_API extern const char* const template_suffix;
+	LIBARDOUR_API extern const char* const statefile_suffix;
+	LIBARDOUR_API extern const char* const pending_suffix;
+	LIBARDOUR_API extern const char* const peakfile_suffix;
+	LIBARDOUR_API extern const char* const backup_suffix;
+	LIBARDOUR_API extern const char* const temp_suffix;
+	LIBARDOUR_API extern const char* const history_suffix;
+	LIBARDOUR_API extern const char* const export_preset_suffix;
+	LIBARDOUR_API extern const char* const export_format_suffix;
 
 }
 

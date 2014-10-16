@@ -29,18 +29,21 @@
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/cell_renderer_color_selector.h"
+#include "gtkmm2ext/utils.h"
 
 #include "pbd/file_utils.h"
 #include "pbd/compose.h"
 
 #include "ardour/filesystem_paths.h"
 
+#include "canvas/wave_view.h"
+
 #include "ardour_button.h"
-#include "canvas-waveview.h"
 #include "theme_manager.h"
 #include "rgb_macros.h"
 #include "ardour_ui.h"
 #include "global_signals.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -48,9 +51,12 @@ using namespace std;
 using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
-sigc::signal<void> ColorsChanged;
-sigc::signal<void,uint32_t> ColorChanged;
+namespace ARDOUR_UI_UTILS {
+	sigc::signal<void> ColorsChanged;
+	sigc::signal<void,uint32_t> ColorChanged;
+}
 
 ThemeManager::ThemeManager()
 	: ArdourWindow (_("Theme Manager"))
@@ -58,8 +64,15 @@ ThemeManager::ThemeManager()
 	, light_button (_("Light Theme"))
 	, reset_button (_("Restore Defaults"))
 	, flat_buttons (_("Draw \"flat\" buttons"))
+	, blink_rec_button (_("Blink Rec-Arm buttons"))
+	, region_color_button (_("Color regions using their track's color"))
+	, show_clipping_button (_("Show waveform clipping"))
+	, waveform_gradient_depth (0, 1.0, 0.05)
+	, waveform_gradient_depth_label (_("Waveforms color gradient depth"))
+	, timeline_item_gradient_depth (0, 1.0, 0.05)
+	, timeline_item_gradient_depth_label (_("Timeline item gradient depth"))
 	, all_dialogs (_("All floating windows are dialogs"))
-	, gradient_waveforms (_("Draw waveforms with color gradient"))
+	, icon_set_label (_("Icon Set"))
 {
 	set_title (_("Theme Manager"));
 
@@ -98,17 +111,56 @@ ThemeManager::ThemeManager()
 	vbox->pack_start (all_dialogs, PACK_SHRINK);
 #endif
 	vbox->pack_start (flat_buttons, PACK_SHRINK);
-	vbox->pack_start (gradient_waveforms, PACK_SHRINK);
+	vbox->pack_start (blink_rec_button, PACK_SHRINK);
+	vbox->pack_start (region_color_button, PACK_SHRINK);
+	vbox->pack_start (show_clipping_button, PACK_SHRINK);
+
+	Gtk::HBox* hbox;
+
+	vector<string> icon_sets = ::get_icon_sets ();
+
+	if (icon_sets.size() > 1) {
+		Gtkmm2ext::set_popdown_strings (icon_set_dropdown, icon_sets);
+		icon_set_dropdown.set_active_text (ARDOUR_UI::config()->get_icon_set());
+
+		hbox = Gtk::manage (new Gtk::HBox());
+		hbox->set_spacing (6);
+		hbox->pack_start (icon_set_label, false, false);
+		hbox->pack_start (icon_set_dropdown, true, true);
+		vbox->pack_start (*hbox, PACK_SHRINK);
+	}
+
+	
+	hbox = Gtk::manage (new Gtk::HBox());
+	hbox->set_spacing (6);
+	hbox->pack_start (waveform_gradient_depth, true, true);
+	hbox->pack_start (waveform_gradient_depth_label, false, false);
+	vbox->pack_start (*hbox, PACK_SHRINK);
+
+	hbox = Gtk::manage (new Gtk::HBox());
+	hbox->set_spacing (6);
+	hbox->pack_start (timeline_item_gradient_depth, true, true);
+	hbox->pack_start (timeline_item_gradient_depth_label, false, false);
+	vbox->pack_start (*hbox, PACK_SHRINK);
+
 	vbox->pack_start (scroller);
 
 	vbox->show_all ();
 
 	add (*vbox);
 
+	waveform_gradient_depth.set_update_policy (Gtk::UPDATE_DELAYED);
+	timeline_item_gradient_depth.set_update_policy (Gtk::UPDATE_DELAYED);
+	
 	color_display.signal_button_press_event().connect (sigc::mem_fun (*this, &ThemeManager::button_press_event), false);
 
 	color_dialog.get_colorsel()->set_has_opacity_control (true);
 	color_dialog.get_colorsel()->set_has_palette (true);
+
+	flat_buttons.set_active (ARDOUR_UI::config()->get_flat_buttons());
+	blink_rec_button.set_active (ARDOUR_UI::config()->get_blink_rec_arm());
+	region_color_button.set_active (ARDOUR_UI::config()->get_color_regions_using_track_color());
+	show_clipping_button.set_active (ARDOUR_UI::config()->get_show_waveform_clipping());
 
 	color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
 	color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
@@ -116,8 +168,13 @@ ThemeManager::ThemeManager()
 	light_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_light_theme_button_toggled));
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &ThemeManager::reset_canvas_colors));
 	flat_buttons.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_flat_buttons_toggled));
+	blink_rec_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_blink_rec_arm_toggled));
+	region_color_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_region_color_toggled));
+	show_clipping_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_show_clip_toggled));
+	waveform_gradient_depth.signal_value_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_waveform_gradient_depth_change));
+	timeline_item_gradient_depth.signal_value_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_timeline_item_gradient_depth_change));
 	all_dialogs.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_all_dialogs_toggled));
-	gradient_waveforms.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_gradient_waveforms_toggled));
+	icon_set_dropdown.signal_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_icon_set_changed));
 
 	Gtkmm2ext::UI::instance()->set_tip (all_dialogs, 
 					    string_compose (_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\n"
@@ -147,7 +204,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 	int cellx;
 	int celly;
 
-	UIConfigVariable<uint32_t> *ccvar;
+	ColorVariable<uint32_t> *ccvar;
 
 	if (!color_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		return false;
@@ -161,7 +218,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 	case 1: /* color */
 		if ((iter = color_list->get_iter (path))) {
 
-			UIConfigVariable<uint32_t>* var = (*iter)[columns.pVar];
+			ColorVariable<uint32_t>* var = (*iter)[columns.pVar];
 			if (!var) {
 				/* parent row, do nothing */
 				return false;
@@ -225,7 +282,7 @@ load_rc_file (const string& filename, bool themechange)
 {
 	std::string rc_file_path;
 
-	if (!find_file_in_search_path (ardour_config_search_path(), filename, rc_file_path)) {
+	if (!find_file (ardour_config_search_path(), filename, rc_file_path)) {
 		warning << string_compose (_("Unable to find UI style file %1 in search path %2. %3 will look strange"),
                                            filename, ardour_config_search_path().to_string(), PROGRAM_NAME)
 				<< endmsg;
@@ -252,7 +309,7 @@ load_rc_file (const string& filename, bool themechange)
 void
 ThemeManager::on_flat_buttons_toggled ()
 {
-	ARDOUR_UI::config()->flat_buttons.set (flat_buttons.get_active());
+	ARDOUR_UI::config()->set_flat_buttons (flat_buttons.get_active());
 	ARDOUR_UI::config()->set_dirty ();
 	ArdourButton::set_flat_buttons (flat_buttons.get_active());
 	/* force a redraw */
@@ -260,22 +317,58 @@ ThemeManager::on_flat_buttons_toggled ()
 }
 
 void
-ThemeManager::on_all_dialogs_toggled ()
+ThemeManager::on_blink_rec_arm_toggled ()
 {
-	ARDOUR_UI::config()->all_floating_windows_are_dialogs.set (all_dialogs.get_active());
+	ARDOUR_UI::config()->set_blink_rec_arm (blink_rec_button.get_active());
+	ARDOUR_UI::config()->set_dirty ();
+	ARDOUR::Config->ParameterChanged("blink-rec-arm");
+}
+
+void
+ThemeManager::on_region_color_toggled ()
+{
+	ARDOUR_UI::config()->set_color_regions_using_track_color (region_color_button.get_active());
 	ARDOUR_UI::config()->set_dirty ();
 }
 
 void
-ThemeManager::on_gradient_waveforms_toggled ()
+ThemeManager::on_show_clip_toggled ()
 {
-	ARDOUR_UI::config()->gradient_waveforms.set (gradient_waveforms.get_active());
+	ARDOUR_UI::config()->set_show_waveform_clipping (show_clipping_button.get_active());
 	ARDOUR_UI::config()->set_dirty ();
-	
-	gnome_canvas_waveview_set_gradient_waveforms (gradient_waveforms.get_active());
+}
 
-	/* force a redraw */
-	gtk_rc_reset_styles (gtk_settings_get_default());
+void
+ThemeManager::on_all_dialogs_toggled ()
+{
+	ARDOUR_UI::config()->set_all_floating_windows_are_dialogs (all_dialogs.get_active());
+	ARDOUR_UI::config()->set_dirty ();
+}
+
+void
+ThemeManager::on_waveform_gradient_depth_change ()
+{
+	double v = waveform_gradient_depth.get_value();
+
+	ARDOUR_UI::config()->set_waveform_gradient_depth (v);
+	ARDOUR_UI::config()->set_dirty ();
+	ArdourCanvas::WaveView::set_global_gradient_depth (v);
+}
+
+void
+ThemeManager::on_timeline_item_gradient_depth_change ()
+{
+	double v = timeline_item_gradient_depth.get_value();
+
+	ARDOUR_UI::config()->set_timeline_item_gradient_depth (v);
+	ARDOUR_UI::config()->set_dirty ();
+}
+
+void
+ThemeManager::on_icon_set_changed ()
+{
+	string new_set = icon_set_dropdown.get_active_text();
+	ARDOUR_UI::config()->set_icon_set (new_set);
 }
 
 void
@@ -283,14 +376,10 @@ ThemeManager::on_dark_theme_button_toggled()
 {
 	if (!dark_button.get_active()) return;
 
-	if (HACK_PROFILE_IS_SAE()){
-		ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_dark_sae.rc");
-	} else {
-		ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_dark.rc");
-	}
+        ARDOUR_UI::config()->set_ui_rc_file("ui_dark.rc");
 	ARDOUR_UI::config()->set_dirty ();
 
-	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get(), true);
+	load_rc_file (ARDOUR_UI::config()->get_ui_rc_file(), true);
 }
 
 void
@@ -298,13 +387,8 @@ ThemeManager::on_light_theme_button_toggled()
 {
 	if (!light_button.get_active()) return;
 
-	if (HACK_PROFILE_IS_SAE()){
-		ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_light_sae.rc");
-	} else {
-		ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_light.rc");
-	}
-
-	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get(), true);
+        ARDOUR_UI::config()->set_ui_rc_file("ui_light.rc");
+	load_rc_file (ARDOUR_UI::config()->get_ui_rc_file(), true);
 }
 
 void
@@ -314,10 +398,10 @@ ThemeManager::setup_theme ()
 
 	color_list->clear();
 
-	for (std::map<std::string,UIConfigVariable<uint32_t> *>::iterator i = ARDOUR_UI::config()->canvas_colors.begin(); i != ARDOUR_UI::config()->canvas_colors.end(); i++) {
+	for (std::map<std::string,ColorVariable<uint32_t> *>::iterator i = ARDOUR_UI::config()->canvas_colors.begin(); i != ARDOUR_UI::config()->canvas_colors.end(); i++) {
 
 
-		UIConfigVariable<uint32_t>* var = i->second;
+		ColorVariable<uint32_t>* var = i->second;
 
 		TreeModel::Children rows = color_list->children();
 		TreeModel::Row row;
@@ -377,18 +461,20 @@ ThemeManager::setup_theme ()
 	string rcfile = Glib::getenv("ARDOUR3_UI_RC", env_defined);
 
 	if(!env_defined) {
-		rcfile = ARDOUR_UI::config()->ui_rc_file.get();
+		rcfile = ARDOUR_UI::config()->get_ui_rc_file();
 	}
 
-	if (rcfile == "ardour3_ui_dark.rc" || rcfile == "ardour3_ui_dark_sae.rc") {
+	if (rcfile == "ui_dark.rc") {
 		dark_button.set_active();
-	} else if (rcfile == "ardour3_ui_light.rc" || rcfile == "ardour3_ui_light_sae.rc") {
+	} else if (rcfile == "ui_light.rc") {
 		light_button.set_active();
 	}
 	
-	flat_buttons.set_active (ARDOUR_UI::config()->flat_buttons.get());
-	all_dialogs.set_active (ARDOUR_UI::config()->all_floating_windows_are_dialogs.get());
-	gradient_waveforms.set_active (ARDOUR_UI::config()->gradient_waveforms.get());
+	flat_buttons.set_active (ARDOUR_UI::config()->get_flat_buttons());
+	blink_rec_button.set_active (ARDOUR_UI::config()->get_blink_rec_arm());
+	waveform_gradient_depth.set_value (ARDOUR_UI::config()->get_waveform_gradient_depth());
+	timeline_item_gradient_depth.set_value (ARDOUR_UI::config()->get_timeline_item_gradient_depth());
+	all_dialogs.set_active (ARDOUR_UI::config()->get_all_floating_windows_are_dialogs());
 	
 	load_rc_file(rcfile, false);
 }

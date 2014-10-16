@@ -40,7 +40,7 @@ ThreadBuffers::ThreadBuffers ()
 }
 
 void
-ThreadBuffers::ensure_buffers (ChanCount howmany)
+ThreadBuffers::ensure_buffers (ChanCount howmany, size_t custom)
 {
 	// std::cerr << "ThreadBuffers " << this << " resize buffers with count = " << howmany << std::endl;
 
@@ -60,7 +60,14 @@ ThreadBuffers::ensure_buffers (ChanCount howmany)
 
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		size_t count = std::max (scratch_buffers->available().get(*t), howmany.get(*t));
-		size_t size = _engine->raw_buffer_size (*t) / sizeof (Sample);
+		size_t size;
+		if (custom > 0) {
+			size = custom;
+		} else {
+			size = (*t == DataType::MIDI)
+				? _engine->raw_buffer_size (*t)
+				: _engine->raw_buffer_size (*t) / sizeof (Sample);
+		}
 
 		scratch_buffers->ensure_buffers (*t, count, size);
 		mix_buffers->ensure_buffers (*t, count, size);
@@ -68,7 +75,7 @@ ThreadBuffers::ensure_buffers (ChanCount howmany)
 		route_buffers->ensure_buffers (*t, count, size);
 	}
 
-	size_t audio_buffer_size = _engine->raw_buffer_size (DataType::AUDIO) / sizeof (Sample);
+	size_t audio_buffer_size = custom > 0 ? custom : _engine->raw_buffer_size (DataType::AUDIO) / sizeof (Sample);
 
 	delete [] gain_automation_buffer;
 	gain_automation_buffer = new gain_t[audio_buffer_size];

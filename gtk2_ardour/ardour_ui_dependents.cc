@@ -31,6 +31,7 @@
 
 #include "ardour/session.h"
 
+#include "actions.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "mixer_ui.h"
@@ -59,6 +60,11 @@ ARDOUR_UI::we_have_dependents ()
 	editor->setup_tooltips ();
 	editor->UpdateAllTransportClocks.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
 
+	/* all actions are defined */
+
+	ActionManager::enable_accelerators ();
+	ActionManager::load_menus (ARDOUR_COMMAND_LINE::menus_file);
+
 	editor->track_mixer_selection ();
 	mixer->track_editor_selection ();
 }
@@ -66,6 +72,7 @@ ARDOUR_UI::we_have_dependents ()
 void
 ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 {
+	DisplaySuspender ds;
 	BootMessage (_("Setup Editor"));
 	editor->set_session (s);
 	BootMessage (_("Setup Mixer"));

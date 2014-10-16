@@ -56,7 +56,7 @@ static bool sort_ports_by_name (boost::shared_ptr<Port> a, boost::shared_ptr<Por
 
 	// if some of the names don't have a number as posfix, compare as strings
 
-	if (last_digit_position_a == aname.size() or last_digit_position_b == bname.size()) {
+	if (last_digit_position_a == aname.size() || last_digit_position_b == bname.size()) {
 		return aname < bname;
 	}
 
@@ -145,9 +145,11 @@ PortSet::port(DataType type, size_t n) const
 		return port(n);
 	} else {
 		const PortVec& v = _ports[type];
-		assert(n < v.size());
-		return v[n];
+		if (n < v.size()) {
+			return v[n];
+		}
 	}
+	return boost::shared_ptr<Port>();
 }
 
 boost::shared_ptr<AudioPort>

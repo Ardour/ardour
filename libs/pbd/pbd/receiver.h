@@ -24,11 +24,12 @@
 
 #include <sigc++/sigc++.h>
 
+#include "pbd/libpbd_visibility.h"
 #include "transmitter.h"
 
 class strstream;
 
-class Receiver : public sigc::trackable
+class LIBPBD_API Receiver : public sigc::trackable
 {
   public:
 	Receiver ();

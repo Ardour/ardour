@@ -32,7 +32,6 @@ public:
 	}
 
 	void clear ();
-	Gtkmm2ext::StatefulToggleButton& all_group_active_button() { return _all_group_active_button; }
 
 private:
 
@@ -80,8 +79,6 @@ private:
 	void property_changed (ARDOUR::RouteGroup*, const PBD::PropertyChange &);
 	void remove_selected ();
 	void run_new_group_dialog ();
-        void all_group_toggled();
-        void all_group_changed (const PBD::PropertyChange&);
 	void row_deleted (Gtk::TreeModel::Path const &);
 
 	Glib::RefPtr<Gtk::ListStore> _model;
@@ -89,7 +86,6 @@ private:
 	Gtk::TreeView _display;
 	Gtk::ScrolledWindow _scroller;
 	Gtk::VBox _display_packer;
-        Gtkmm2ext::StatefulToggleButton _all_group_active_button;
 	bool _in_row_change;
 	bool _in_rebuild;
 	PBD::ScopedConnectionList _property_changed_connections;

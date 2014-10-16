@@ -28,7 +28,7 @@
 
 namespace ARDOUR {
 
-class MissingSource : public std::exception
+class LIBARDOUR_API MissingSource : public std::exception
 {
   public:
 	MissingSource (const std::string& p, DataType t) throw ()
@@ -42,7 +42,7 @@ class MissingSource : public std::exception
 };
 
 /** A source associated with a file on disk somewhere */
-class FileSource : virtual public Source {
+class LIBARDOUR_API FileSource : virtual public Source {
 public:
 	virtual ~FileSource ();
 
@@ -80,7 +80,7 @@ public:
 
 	virtual void set_path (const std::string&);
 	
-	static PBD::Signal3<int,std::string,std::string,std::vector<std::string> > AmbiguousFileName;
+	static PBD::Signal2<int,std::string,std::vector<std::string> > AmbiguousFileName;
 
 	void existence_check ();
 	virtual void prevent_deletion ();
@@ -88,6 +88,8 @@ public:
 	/** Rename the file on disk referenced by this source to \param newname
 	 */
 	int rename (const std::string& name);
+
+	virtual void release_descriptor () {}
 
 protected:
 	FileSource (Session& session, DataType type,

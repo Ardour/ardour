@@ -25,12 +25,15 @@
 #include "pbd/convert.h"
 #include "ardour/session_directory.h"
 
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+#include <shlobj.h> // CSIDL_*
+#include "pbd/windows_special_dirs.h"
+#endif
+
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "gui_thread.h"
-#include "utils.h"
-#include "canvas_impl.h"
-#include "simpleline.h"
 #include "utils_videotl.h"
 #include "rgb_macros.h"
 #include "video_timeline.h"
@@ -51,9 +54,9 @@ using namespace PBD;
 using namespace Timecode;
 using namespace VideoUtils;
 
-VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Group *vbg, int initial_height)
+VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Container *vbg, int initial_height)
 	: editor (ed)
-		, videotl_bar_group(vbg)
+		, videotl_group(vbg)
 		, bar_height(initial_height)
 {
 	video_start_offset = 0L;
@@ -275,7 +278,7 @@ float
 VideoTimeLine::get_apv()
 {
 	// XXX: dup code - TODO use this fn in update_video_timeline()
-	float apv = -1; /* audio frames per video frame; */
+	float apv = -1; /* audio samples per video frame; */
 	if (!_session) return apv;
 
 	if (_session->config.get_use_video_file_fps()) {
@@ -308,8 +311,8 @@ VideoTimeLine::update_video_timeline()
 		if (_session->timecode_frames_per_second() == 0 ) return;
 	}
 
-	double frames_per_unit = editor->unit_to_frame(1.0);
-	framepos_t leftmost_frame =  editor->leftmost_position();
+	const double samples_per_pixel = editor->get_current_zoom();
+	const framepos_t leftmost_sample =  editor->leftmost_sample();
 
 	/* Outline:
 	 * 1) calculate how many frames there should be in current zoom (plus 1 page on each side)
@@ -321,12 +324,12 @@ VideoTimeLine::update_video_timeline()
 
 	/* video-file and session properties */
 	double display_vframe_width; /* unit: pixels ; width of one thumbnail in the timeline */
-	float apv; /* audio frames per video frame; */
+	float apv; /* audio samples per video frame; */
 	framepos_t leftmost_video_frame; /* unit: video-frame number ; temporary var -> vtl_start */
 
 	/* variables needed to render videotimeline -- what needs to computed first */
-	framepos_t vtl_start; /* unit: audio-frames ; first displayed video-frame */
-	framepos_t vtl_dist;  /* unit: audio-frames ; distance between displayed video-frames */
+	framepos_t vtl_start; /* unit: audio-samples ; first displayed video-frame */
+	framepos_t vtl_dist;  /* unit: audio-samples ; distance between displayed video-frames */
 	unsigned int visible_video_frames; /* number of frames that fit on current canvas */
 
 	if (_session->config.get_videotimeline_pullup()) {
@@ -342,28 +345,28 @@ VideoTimeLine::update_video_timeline()
 
 	display_vframe_width = bar_height * video_aspect_ratio;
 
-	if (apv > frames_per_unit * display_vframe_width) {
+	if (apv > samples_per_pixel * display_vframe_width) {
 		/* high-zoom: need space between successive video-frames */
 		vtl_dist = rint(apv);
 	} else {
 		/* continous timeline: skip video-frames */
-		vtl_dist = ceil(display_vframe_width * frames_per_unit / apv) * apv;
+		vtl_dist = ceil(display_vframe_width * samples_per_pixel / apv) * apv;
 	}
 
 	assert (vtl_dist > 0);
 	assert (apv > 0);
 
-	leftmost_video_frame = floor (floor((leftmost_frame - video_start_offset - video_offset ) / vtl_dist) * vtl_dist / apv);
+	leftmost_video_frame = floor (floor((long double)(leftmost_sample - video_start_offset - video_offset ) / vtl_dist) * vtl_dist / apv);
 
 	vtl_start = rint (video_offset + video_start_offset + leftmost_video_frame * apv);
-	visible_video_frames = 2 + ceil(editor->current_page_frames() / vtl_dist); /* +2 left+right partial frames */
+	visible_video_frames = 2 + ceil((double)editor->current_page_samples() / vtl_dist); /* +2 left+right partial frames */
 
 	/* expand timeline (cache next/prev page images) */
 	vtl_start -= visible_video_frames * vtl_dist;
 	visible_video_frames *=3;
 
 	if (vtl_start < video_offset ) {
-		visible_video_frames += ceil(vtl_start/vtl_dist);
+		visible_video_frames += ceil((double)vtl_start/vtl_dist);
 		vtl_start = video_offset;
 	}
 
@@ -383,7 +386,7 @@ VideoTimeLine::update_video_timeline()
 
 	while (video_frames.size() < visible_video_frames) {
 		VideoImageFrame *frame;
-		frame = new VideoImageFrame(*editor, *videotl_bar_group, display_vframe_width, bar_height, video_server_url, translated_filename());
+		frame = new VideoImageFrame(*editor, *videotl_group, display_vframe_width, bar_height, video_server_url, translated_filename());
 		frame->ImgChanged.connect (*this, invalidator (*this), boost::bind (&PublicEditor::queue_visual_videotimeline_update, editor), gui_context());
 		video_frames.push_back(frame);
 	}
@@ -416,7 +419,7 @@ VideoTimeLine::update_video_timeline()
 		}
 		VideoImageFrame * frame = get_video_frame(vframeno, cut, rightend);
 		if (frame) {
-		  frame->set_position(vfpos-leftmost_frame);
+		  frame->set_position(vfpos);
 			outdated_video_frames.remove(frame);
 		} else {
 			remaining.push_back(vfcount);
@@ -426,7 +429,7 @@ VideoTimeLine::update_video_timeline()
 	for (VideoFrames::iterator i = outdated_video_frames.begin(); i != outdated_video_frames.end(); ++i ) {
 		VideoImageFrame *frame = (*i);
 		if (remaining.empty()) {
-		  frame->set_position(-2 * vtl_dist); /* move off screen */
+		  frame->set_position(-2 * vtl_dist + leftmost_sample); /* move off screen */
 		} else {
 			int vfcount=remaining.front();
 			remaining.pop_front();
@@ -437,7 +440,7 @@ VideoTimeLine::update_video_timeline()
 				rightend = display_vframe_width * (video_start_offset + video_duration + video_offset - vfpos) / vtl_dist;
 				//printf("lf(n): %lu\n", vframeno); // XXX
 			}
-			frame->set_position(vfpos-leftmost_frame);
+			frame->set_position(vfpos);
 			frame->set_videoframe(vframeno, rightend);
 		}
 	}
@@ -458,7 +461,8 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 {
 
 	local_file = local;
-	if (filename.at(0) == G_DIR_SEPARATOR || !local_file) {
+	if (Glib::path_is_absolute(filename) || !local_file)
+	{
 		video_filename = filename;
 	}  else {
 		video_filename = Glib::build_filename (_session->session_directory().video_path(), filename);
@@ -589,7 +593,7 @@ VideoTimeLine::check_server_docroot ()
 			|| lines.at(0).empty()
 			|| lines.at(0).at(0) != video_get_docroot(Config)) {
 		warning << string_compose(
-				_("Video-server docroot mismatch. %1: '%2', video-server: '%3'. This usually means that the video server was not started by ardour and uses a different document-root."),
+				_("Video-server docroot mismatch. %1: '%2', video-server: '%3'. This usually means that the video server was not started by %1 and uses a different document-root."),
 				PROGRAM_NAME, video_get_docroot(Config), lines.at(0).at(0))
 		<< endmsg;
 		ok = false; // TODO allow to override
@@ -719,15 +723,24 @@ VideoTimeLine::set_video_server_docroot(std::string vsr) {
 
 /* video-monitor for this timeline */
 void
+VideoTimeLine::xjadeo_readversion (std::string d, size_t /* s */) {
+	xjadeo_version += d;
+}
+
+void
 VideoTimeLine::find_xjadeo () {
 	std::string xjadeo_file_path;
+#ifdef PLATFORM_WINDOWS
+	HKEY key;
+	DWORD size = PATH_MAX;
+	char tmp[PATH_MAX+1];
+	const char *program_files = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
+#endif
 	if (getenv("XJREMOTE")) {
 		_xjadeo_bin = getenv("XJREMOTE");
-	}
-	else if (find_file_in_search_path (SearchPath(Glib::getenv("PATH")), X_("xjremote"), xjadeo_file_path)) {
+	} else if (find_file (Searchpath(Glib::getenv("PATH")), X_("xjremote"), xjadeo_file_path)) {
 		_xjadeo_bin = xjadeo_file_path;
-	}
-	else if (find_file_in_search_path (SearchPath(Glib::getenv("PATH")), X_("xjadeo"), xjadeo_file_path)) {
+	} else if (find_file (Searchpath(Glib::getenv("PATH")), X_("xjadeo"), xjadeo_file_path)) {
 		_xjadeo_bin = xjadeo_file_path;
 	}
 #ifdef __APPLE__
@@ -739,26 +752,19 @@ VideoTimeLine::find_xjadeo () {
 	}
 #endif
 #ifdef PLATFORM_WINDOWS
-	else {
-		HKEY key;
-		DWORD size = PATH_MAX;
-		char path[PATH_MAX+1];
-		xjadeo_file_path = X_("");
-		if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\xjadeo", 0, KEY_READ, &key))
-		    && (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, (LPBYTE)path, &size))
-		   )
-		{
-			xjadeo_file_path = g_build_filename(path, X_("xjadeo.exe"));
-		}
+	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\xjadeo", 0, KEY_READ, &key))
+			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+			)
+	{
+		_xjadeo_bin = std::string(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "xjadeo.exe", 0));
 	}
-	if (Glib::file_test(xjadeo_file_path, Glib::FILE_TEST_EXISTS)) {
-		_xjadeo_bin = xjadeo_file_path;
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "xjadeo", "xjadeo.exe", 0), Glib::FILE_TEST_EXISTS))
+	{
+		_xjadeo_bin = std::string(g_build_filename(program_files, "xjadeo", "xjadeo.exe", 0));
 	}
-	else if (Glib::file_test(X_("C:\\Program Files\\xjadeo\\xjremote.exe"), Glib::FILE_TEST_EXISTS)) {
-		_xjadeo_bin = X_("C:\\Program Files\\xjadeo\\xjremote.exe");
-	}
-	else if (Glib::file_test(X_("C:\\Program Files\\xjadeo\\xjremote.bat"), Glib::FILE_TEST_EXISTS)) {
-		_xjadeo_bin = X_("C:\\Program Files\\xjadeo\\xjremote.bat");
+	/* generic fallback to try */
+	else if (Glib::file_test(X_("C:\\Program Files\\xjadeo\\xjadeo.exe"), Glib::FILE_TEST_EXISTS)) {
+		_xjadeo_bin = X_("C:\\Program Files\\xjadeo\\xjadeo.exe");
 	}
 #endif
 	else  {
@@ -769,6 +775,45 @@ VideoTimeLine::find_xjadeo () {
 				"\n"
 				"see also http://manual.ardour.org/video-timeline/setup/")
 			<< endmsg;
+	}
+	if (found_xjadeo ()) {
+		ARDOUR::SystemExec version_check(_xjadeo_bin, X_("--version"));
+		xjadeo_version = "";
+		version_check.ReadStdout.connect_same_thread (*this, boost::bind (&VideoTimeLine::xjadeo_readversion, this, _1 ,_2));
+		version_check.Terminated.connect_same_thread (*this, boost::bind (&VideoTimeLine::xjadeo_readversion, this, "\n" ,1));
+		if (version_check.start(2)) {
+			warning << _(
+					"Video-monitor 'xjadeo' cannot be launched."
+					) << endmsg;
+			_xjadeo_bin = X_("");
+			return;
+		}
+
+		version_check.wait ();
+		int timeout = 300;
+		while (xjadeo_version.empty() && --timeout) {
+			Glib::usleep(10000);
+		}
+
+		bool v_ok = false;
+		size_t vo = xjadeo_version.find(" version ");
+		if (vo != string::npos) {
+			int v_major, v_minor, v_micro;
+			if(sscanf(xjadeo_version.substr(vo + 9, string::npos).c_str(),"%d.%d.%d",
+						&v_major, &v_minor, &v_micro) == 3)
+			{
+				if (v_major >= 1) v_ok = true;
+				else if (v_major == 0 && v_minor >= 8) v_ok = true;
+				else if (v_major == 0 && v_minor >= 7 && v_micro >= 7) v_ok = true;
+			}
+		}
+		if (!v_ok) {
+			_xjadeo_bin = X_("");
+			warning << _(
+					"Video-monitor 'xjadeo' is too old. "
+					"Please install xjadeo version 0.7.7 or later. http://xjadeo.sf.net/"
+					) << endmsg;
+		}
 	}
 }
 

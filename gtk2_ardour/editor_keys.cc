@@ -37,30 +37,35 @@
 
 using namespace ARDOUR;
 using namespace PBD;
+using namespace Editing;
 
 void
-Editor::keyboard_selection_finish (bool add)
+Editor::keyboard_selection_finish (bool /*add*/)
 {
-	if (_session && have_pending_keyboard_selection) {
+	if (_session) {
 
+		framepos_t start = selection->time.start();
 		framepos_t end;
-		bool ignored;
-
-		if (_session->transport_rolling()) {
+		
+		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
 			end = _session->audible_frame();
 		} else {
-			if (!mouse_frame (end, ignored)) {
-				return;
-			}
+			end = get_preferred_edit_position();
 		}
 
-		if (add) {
-			selection->add (pending_keyboard_selection_start, end);
-		} else {
-			selection->set (pending_keyboard_selection_start, end);
-		}
+		//snap the selection start/end
+		snap_to(start);
+		
+		//if no tracks are selected and we're working from the keyboard, enable all tracks (_something_ has to be selected for any range selection)
+		if ( (_edit_point == EditAtPlayhead) && selection->tracks.empty() )
+			select_all_tracks();
 
-		have_pending_keyboard_selection = false;
+		selection->set (start, end);
+
+		//if session is playing a range, cancel that
+		if (_session->get_play_range())
+			_session->request_cancel_play_range();
+
 	}
 }
 
@@ -68,19 +73,33 @@ void
 Editor::keyboard_selection_begin ()
 {
 	if (_session) {
-		if (_session->transport_rolling()) {
-			pending_keyboard_selection_start = _session->audible_frame();
-			have_pending_keyboard_selection = true;
+
+		framepos_t start;
+		framepos_t end = selection->time.end_frame();  //0 if no current selection
+
+		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
+			start = _session->audible_frame();
 		} else {
-			bool ignored;
-			framepos_t where; // XXX fix me
-
-			if (mouse_frame (where, ignored)) {
-				pending_keyboard_selection_start = where;
-				have_pending_keyboard_selection = true;
-			}
-
+			start = get_preferred_edit_position();
 		}
+		
+		//snap the selection start/end
+		snap_to(start);
+		
+		//if there's not already a sensible selection endpoint, go "forever"
+		if ( start > end ) {
+			end = max_framepos;
+		}
+		
+		//if no tracks are selected and we're working from the keyboard, enable all tracks (_something_ has to be selected for any range selection)
+		if ( selection->tracks.empty() )
+			select_all_tracks();
+					
+		selection->set (start, end);
+
+		//if session is playing a range, cancel that
+		if (_session->get_play_range())
+			_session->request_cancel_play_range();
 	}
 }
 

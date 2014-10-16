@@ -163,13 +163,16 @@ EventTypeMap::new_parameter(uint32_t type, uint8_t channel, uint32_t id) const
 		/* default 0.0 - 1.0 is fine */
 		break;
 	case PluginAutomation:
-	case SoloAutomation:
-	case MuteAutomation:
 	case FadeInAutomation:
 	case FadeOutAutomation:
 	case EnvelopeAutomation:
 		max = 2.0f;
 		normal = 1.0f;
+		break;
+	case SoloAutomation:
+	case MuteAutomation:
+		max = 1.0f;
+		normal = 0.0f;
 		break;
 	case MidiCCAutomation:
 	case MidiPgmChangeAutomation:

@@ -32,6 +32,7 @@
 #include "export_file_notebook.h"
 #include "export_preset_selector.h"
 #include "ardour_dialog.h"
+#include "soundcloud_export_selector.h"
 
 #include <gtkmm.h>
 
@@ -43,7 +44,8 @@ namespace ARDOUR {
 class ExportTimespanSelector;
 class ExportChannelSelector;
 
-class ExportDialog : public ArdourDialog {
+class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList 
+{
 
   public:
 
@@ -75,25 +77,22 @@ class ExportDialog : public ArdourDialog {
 	// Must initialize all the shared_ptrs below
 	virtual void init_components ();
 
-	// Override if the channel selector should not be grown
-	virtual bool channel_selector_is_expandable() { return true; }
-
 	boost::scoped_ptr<ExportPresetSelector>   preset_selector;
 	boost::scoped_ptr<ExportTimespanSelector> timespan_selector;
 	boost::scoped_ptr<ExportChannelSelector>  channel_selector;
 	boost::scoped_ptr<ExportFileNotebook>     file_notebook;
 
+	boost::shared_ptr<SoundcloudExportSelector> soundcloud_selector;
+
 	Gtk::VBox                                 warning_widget;
 	Gtk::VBox                                 progress_widget;
 
-	Gtk::Label *                              timespan_label;
-	Gtk::Label *                              channels_label;
+	/*** GUI components ***/
+	Gtk::Notebook export_notebook;
 
   private:
 
 	void init ();
-
-	void expanded_changed();
 
 	void notify_errors (bool force = false);
 	void close_dialog ();
@@ -112,10 +111,7 @@ class ExportDialog : public ArdourDialog {
 	PublicEditor &  editor;
 	StatusPtr       status;
 
-	/*** GUI components ***/
 
-	Glib::RefPtr<Gtk::SizeGroup> advanced_sizegroup;
-	Gtk::Expander * advanced;
 
 	/* Warning area */
 
@@ -137,6 +133,8 @@ class ExportDialog : public ArdourDialog {
 	sigc::connection        progress_connection;
 
 	float previous_progress; // Needed for gtk bug workaround
+
+	void soundcloud_upload_progress(double total, double now, std::string title);
 
 	/* Buttons */
 
@@ -169,9 +167,6 @@ class ExportRegionDialog : public ExportDialog
 {
   public:
 	ExportRegionDialog (PublicEditor & editor, ARDOUR::AudioRegion const & region, ARDOUR::AudioTrack & track);
-
-  protected:
-	virtual bool channel_selector_is_expandable() { return false; }
 
   private:
 	void init_gui ();

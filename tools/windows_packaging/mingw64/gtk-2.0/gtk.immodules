@@ -1,0 +1,39 @@
+# GTK+ Input Method Modules file
+# Automatically generated file, do not edit
+# Created by c:/Users/VKamyshniy/gtk/source/gtk+-2.24.18/gtk/.libs/gtk-query-immodules-2.0.exe from gtk+-2.24.18
+#
+# ModulesPath = c:\Users\VKamyshniy\.gtk-2.0\2.10.0\i686-pc-mingw32\immodules;c:\Users\VKamyshniy\.gtk-2.0\2.10.0\immodules;c:\Users\VKamyshniy\.gtk-2.0\i686-pc-mingw32\immodules;c:\Users\VKamyshniy\.gtk-2.0\immodules;c:/Users/VKamyshniy/gtk/inst/lib\gtk-2.0\2.10.0\i686-pc-mingw32\immodules;c:/Users/VKamyshniy/gtk/inst/lib\gtk-2.0\2.10.0\immodules;c:/Users/VKamyshniy/gtk/inst/lib\gtk-2.0\i686-pc-mingw32\immodules;c:/Users/VKamyshniy/gtk/inst/lib\gtk-2.0\immodules
+#
+"c:/Users/VKamyshniy/gtk/inst/lib/gtk-2.0/2.10.0/immodules/im-am-et.dll" 
+"am_et" "Amharic (EZ+)" "gtk20" "/Users/VKamyshniy/gtk/inst/share/locale" "am" 
+
+"c:/Users/VKamyshniy/gtk/inst/lib/gtk-2.0/2.10.0/immodules/im-cedilla.dll" 
+"cedilla" "Cedilla" "gtk20" "/Users/VKamyshniy/gtk/inst/share/locale" "az:ca:co:fr:gv:oc:pt:sq:tr:wa" 
+
+"c:/Users/VKamyshniy/gtk/inst/lib/gtk-2.0/2.10.0/immodules/im-cyrillic-translit.dll" 
+"cyrillic_translit" "Cyrillic (Transliterated)" "gtk20" "/Users/VKamyshniy/gtk/inst/share/locale" "" 
+
+"c:/Users/VKamyshniy/gtk/inst/lib/gtk-2.0/2.10.0/immodules/im-ime.dll" 
+"ime" "Windows IME" "gtk+" "" "ja:ko:zh" 
+
+"c:/Users/VKamyshniy/gtk/inst/lib/gtk-2.0/2.10.0/immodules/im-inuktitut.dll" 
+"inuktitut" "Inuktitut (Transliterated)" "gtk20" "/Users/VKamyshniy/gtk/inst/share/locale" "iu" 
+
+"c:/Users/VKamyshniy/gtk/inst/lib/gtk-2.0/2.10.0/immodules/im-ipa.dll" 
+"ipa" "IPA" "gtk20" "/Users/VKamyshniy/gtk/inst/share/locale" "" 
+
+"c:/Users/VKamyshniy/gtk/inst/lib/gtk-2.0/2.10.0/immodules/im-multipress.dll" 
+"multipress" "Multipress" "gtk20" "" "" 
+
+"c:/Users/VKamyshniy/gtk/inst/lib/gtk-2.0/2.10.0/immodules/im-thai.dll" 
+"thai" "Thai-Lao" "gtk20" "/Users/VKamyshniy/gtk/inst/share/locale" "lo:th" 
+
+"c:/Users/VKamyshniy/gtk/inst/lib/gtk-2.0/2.10.0/immodules/im-ti-er.dll" 
+"ti_er" "Tigrigna-Eritrean (EZ+)" "gtk20" "/Users/VKamyshniy/gtk/inst/share/locale" "ti" 
+
+"c:/Users/VKamyshniy/gtk/inst/lib/gtk-2.0/2.10.0/immodules/im-ti-et.dll" 
+"ti_et" "Tigrigna-Ethiopian (EZ+)" "gtk20" "/Users/VKamyshniy/gtk/inst/share/locale" "ti" 
+
+"c:/Users/VKamyshniy/gtk/inst/lib/gtk-2.0/2.10.0/immodules/im-viqr.dll" 
+"viqr" "Vietnamese (VIQR)" "gtk20" "/Users/VKamyshniy/gtk/inst/share/locale" "vi" 
+

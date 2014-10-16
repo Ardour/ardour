@@ -42,6 +42,7 @@ Gtkmm2ext::init (const char* localedir)
 {
 #ifdef ENABLE_NLS
 	(void) bindtextdomain(PACKAGE, localedir);
+	(void) bind_textdomain_codeset (PACKAGE, "UTF-8");
 #endif
 }
 
@@ -57,15 +58,60 @@ Gtkmm2ext::get_ink_pixel_size (Glib::RefPtr<Pango::Layout> layout,
 }
 
 void
-get_pixel_size (Glib::RefPtr<Pango::Layout> layout,
-			       int& width,
-			       int& height)
+Gtkmm2ext::get_pixel_size (Glib::RefPtr<Pango::Layout> layout,
+			   int& width,
+			   int& height)
 {
 	layout->get_pixel_size (width, height);
 }
 
 void
 Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *text,
+						   gint hpadding, gint vpadding)
+{
+	int width, height;
+	w.ensure_style ();
+	
+	get_pixel_size (w.create_pango_layout (text), width, height);
+	w.set_size_request(width + hpadding, height + vpadding);
+}
+
+/** Set width request to display given text, and height to display anything.
+    This is useful for setting many widgets to the same height for consistency. */
+void
+Gtkmm2ext::set_size_request_to_display_given_text_width (Gtk::Widget& w,
+                                                         const gchar* htext,
+                                                         gint         hpadding,
+                                                         gint         vpadding)
+{
+	static const gchar* vtext = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	w.ensure_style ();
+
+	int hwidth, hheight;
+	get_pixel_size (w.create_pango_layout (htext), hwidth, hheight);
+
+	int vwidth, vheight;
+	get_pixel_size (w.create_pango_layout (vtext), vwidth, vheight);
+
+	w.set_size_request(hwidth + hpadding, vheight + vpadding);
+}
+
+void
+Gtkmm2ext::set_height_request_to_display_any_text (Gtk::Widget& w, gint vpadding)
+{
+	static const gchar* vtext = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	w.ensure_style ();
+
+	int width, height;
+	get_pixel_size (w.create_pango_layout (vtext), width, height);
+
+	w.set_size_request(-1, height + vpadding);
+}
+
+void
+Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, std::string const & text,
 						   gint hpadding, gint vpadding)
 {
 	int width, height;
@@ -113,6 +159,33 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w,
 	w.set_size_request(width_max + hpadding, height_max + vpadding);
 }
 
+/** This version specifies horizontal padding in text to avoid assumptions
+    about font size.  Should be used anywhere padding is used to avoid text,
+    like combo boxes. */
+void
+Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget&                    w,
+                                                   const std::vector<std::string>& strings,
+                                                   const std::string&              hpadding,
+                                                   gint                            vpadding)
+{
+	int width_max = 0;
+	int height_max = 0;
+	w.ensure_style ();
+
+	for (vector<string>::const_iterator i = strings.begin(); i != strings.end(); ++i) {
+		int width, height;
+		get_pixel_size (w.create_pango_layout (*i), width, height);
+		width_max = max(width_max,width);
+		height_max = max(height_max, height);
+	}
+
+	int pad_width;
+	int pad_height;
+	get_pixel_size (w.create_pango_layout (hpadding), pad_width, pad_height);
+
+	w.set_size_request(width_max + pad_width, height_max + vpadding);
+}
+
 static inline guint8
 demultiply_alpha (guint8 src,
                   guint8 alpha)
@@ -129,11 +202,11 @@ demultiply_alpha (guint8 src,
 	return alpha ? ((guint (src) << 8) - src) / alpha : 0;
 }
 
-static void
-convert_bgra_to_rgba (guint8 const* src,
-		      guint8*       dst,
-		      int           width,
-		      int           height)
+void
+Gtkmm2ext::convert_bgra_to_rgba (guint8 const* src,
+				 guint8*       dst,
+				 int           width,
+				 int           height)
 {
 	guint8 const* src_pixel = src;
 	guint8*       dst_pixel = dst;
@@ -681,3 +754,87 @@ Gtkmm2ext::disable_tooltips ()
 	gtk_rc_parse_string ("gtk-enable-tooltips = 0");
 }
 
+const char*
+Gtkmm2ext::event_type_string (int event_type)
+{
+	switch (event_type) {
+	case GDK_NOTHING:
+		return "nothing";
+	case GDK_DELETE:
+		return "delete";
+	case GDK_DESTROY:
+		return "destroy";
+	case GDK_EXPOSE:
+		return "expose";
+	case GDK_MOTION_NOTIFY:
+		return "motion_notify";
+	case GDK_BUTTON_PRESS:
+		return "button_press";
+	case GDK_2BUTTON_PRESS:
+		return "2button_press";
+	case GDK_3BUTTON_PRESS:
+		return "3button_press";
+	case GDK_BUTTON_RELEASE:
+		return "button_release";
+	case GDK_KEY_PRESS:
+		return "key_press";
+	case GDK_KEY_RELEASE:
+		return "key_release";
+	case GDK_ENTER_NOTIFY:
+		return "enter_notify";
+	case GDK_LEAVE_NOTIFY:
+		return "leave_notify";
+	case GDK_FOCUS_CHANGE:
+		return "focus_change";
+	case GDK_CONFIGURE:
+		return "configure";
+	case GDK_MAP:
+		return "map";
+	case GDK_UNMAP:
+		return "unmap";
+	case GDK_PROPERTY_NOTIFY:
+		return "property_notify";
+	case GDK_SELECTION_CLEAR:
+		return "selection_clear";
+	case GDK_SELECTION_REQUEST:
+		return "selection_request";
+	case GDK_SELECTION_NOTIFY:
+		return "selection_notify";
+	case GDK_PROXIMITY_IN:
+		return "proximity_in";
+	case GDK_PROXIMITY_OUT:
+		return "proximity_out";
+	case GDK_DRAG_ENTER:
+		return "drag_enter";
+	case GDK_DRAG_LEAVE:
+		return "drag_leave";
+	case GDK_DRAG_MOTION:
+		return "drag_motion";
+	case GDK_DRAG_STATUS:
+		return "drag_status";
+	case GDK_DROP_START:
+		return "drop_start";
+	case GDK_DROP_FINISHED:
+		return "drop_finished";
+	case GDK_CLIENT_EVENT:
+		return "client_event";
+	case GDK_VISIBILITY_NOTIFY:
+		return "visibility_notify";
+	case GDK_NO_EXPOSE:
+		return "no_expose";
+	case GDK_SCROLL:
+		return "scroll";
+	case GDK_WINDOW_STATE:
+		return "window_state";
+	case GDK_SETTING:
+		return "setting";
+	case GDK_OWNER_CHANGE:
+		return "owner_change";
+	case GDK_GRAB_BROKEN:
+		return "grab_broken";
+	case GDK_DAMAGE:
+		return "damage";
+	}
+
+	return "unknown";
+}

@@ -23,9 +23,11 @@
 
 #include <string>
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
-int find_session (std::string str, std::string& path, std::string& snapshot, bool& isnew);
+	LIBARDOUR_API extern int find_session (std::string str, std::string& path, std::string& snapshot, bool& isnew);
 
 };
 

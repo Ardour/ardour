@@ -25,12 +25,14 @@
 #include <cstring>
 #include <glib.h>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
 /* ringbuffer class where the element size is not required to be a power of two */
 
 template<class T>
-class RingBufferNPT
+class /*LIBPBD_API*/ RingBufferNPT
 {
   public:
 	RingBufferNPT (size_t sz) {
@@ -118,7 +120,7 @@ class RingBufferNPT
 	mutable gint read_ptr;
 };
 
-template<class T> size_t
+template<class T> /*LIBPBD_API*/ size_t
 RingBufferNPT<T>::read (T *dest, size_t cnt)
 {
         size_t free_cnt;
@@ -157,7 +159,7 @@ RingBufferNPT<T>::read (T *dest, size_t cnt)
         return to_read;
 }
 
-template<class T> size_t
+template<class T> /*LIBPBD_API*/ size_t
 RingBufferNPT<T>::write (const T *src, size_t cnt)
 {
         size_t free_cnt;
@@ -196,8 +198,8 @@ RingBufferNPT<T>::write (const T *src, size_t cnt)
         return to_write;
 }
 
-template<class T> void
-RingBufferNPT<T>::get_read_vector (RingBufferNPT<T>::rw_vector *vec)
+template<class T> /*LIBPBD_API*/ void
+RingBufferNPT<T>::get_read_vector (typename RingBufferNPT<T>::rw_vector *vec)
 {
 	size_t free_cnt;
 	size_t cnt2;
@@ -236,8 +238,8 @@ RingBufferNPT<T>::get_read_vector (RingBufferNPT<T>::rw_vector *vec)
 	}
 }
 
-template<class T> void
-RingBufferNPT<T>::get_write_vector (RingBufferNPT<T>::rw_vector *vec)
+template<class T> /*LIBPBD_API*/ void
+RingBufferNPT<T>::get_write_vector (typename RingBufferNPT<T>::rw_vector *vec)
 {
 	size_t free_cnt;
 	size_t cnt2;

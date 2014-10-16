@@ -24,12 +24,13 @@
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
-#include "pbd/pathscanner.h"
+#include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
 
 #include "ardour/debug.h"
 #include "ardour/panner_manager.h"
-#include "ardour/panner_search_path.h"
+
+#include "ardour/search_paths.h"
 
 #include "i18n.h"
 
@@ -62,28 +63,42 @@ PannerManager::instance ()
 
 static bool panner_filter (const string& str, void */*arg*/)
 {
-#ifdef __APPLE__
+#ifdef COMPILER_MSVC
+   /**
+    * Different build targets (Debug / Release etc) use different versions
+    * of the 'C' runtime (which can't be 'mixed & matched'). Therefore, in
+    * case the supplied search path contains multiple version(s) of a given
+    * panner module, only select the one(s) which match the current build
+    * target (otherwise, all hell will break loose !!)
+    */
+	#if defined (_DEBUG)
+		return str.length() > 12 && (str.find ("panner_") == 0) && (str.find ("D.dll") == (str.length() - 5));
+	#elif defined (RDC_BUILD)
+		return str.length() > 14 && (str.find ("panner_") == 0) && (str.find ("RDC.dll") == (str.length() - 7));
+	#elif defined (_WIN64)
+		return str.length() > 13 && (str.find ("panner_") == 0) && (str.find ("64.dll") == (str.length() - 6));
+	#else
+		return str.length() > 13 && (str.find ("panner_") == 0) && (str.find ("32.dll") == (str.length() - 6));
+	#endif
+#elif defined (__APPLE__)
 	return str[0] != '.' && (str.length() > 6 && str.find (".dylib") == (str.length() - 6));
 #else
-	return str[0] != '.' && (str.length() > 3 && str.find (".so") == (str.length() - 3));
+	return str[0] != '.' && (str.length() > 3 && (str.find (".so") == (str.length() - 3) || str.find (".dll") == (str.length() - 4)));
 #endif
 }
 
 void
 PannerManager::discover_panners ()
 {
-	PathScanner scanner;
-	std::vector<std::string *> *panner_modules;
-	std::string search_path = panner_search_path().to_string();
+	std::vector<std::string> panner_modules;
 
-	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for panners in %1\n"), search_path));
+	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for panners in %1\n"), panner_search_path().to_string()));
 
-	panner_modules = scanner (search_path, panner_filter, 0, false, true, 1, true);
+	find_files_matching_filter (panner_modules, panner_search_path(), panner_filter, 0, false, true, true);
 
-	for (vector<std::string *>::iterator i = panner_modules->begin(); i != panner_modules->end(); ++i) {
-		panner_discover (**i);
+	for (vector<std::string>::iterator i = panner_modules.begin(); i != panner_modules.end(); ++i) {
+		panner_discover (*i);
 	}
-	vector_delete (panner_modules);
 }
 
 int
@@ -104,6 +119,8 @@ PannerManager::panner_discover (string path)
 		if (i == panner_info.end()) {
 			panner_info.push_back (pinfo);
 			DEBUG_TRACE (DEBUG::Panning, string_compose(_("Panner discovered: \"%1\" in %2\n"), pinfo->descriptor.name, path));
+		} else {
+			delete pinfo;
 		}
 	}
 
@@ -113,31 +130,33 @@ PannerManager::panner_discover (string path)
 PannerInfo*
 PannerManager::get_descriptor (string path)
 {
-	void *module;
+	Glib::Module* module = new Glib::Module(path);
 	PannerInfo* info = 0;
 	PanPluginDescriptor *descriptor = 0;
 	PanPluginDescriptor* (*dfunc)(void);
-	const char *errstr;
+	void* func = 0;
 
-	if ((module = dlopen (path.c_str(), RTLD_NOW)) == 0) {
-		error << string_compose(_("PannerManager: cannot load module \"%1\" (%2)"), path, dlerror()) << endmsg;
+	if (!module) {
+		error << string_compose(_("PannerManager: cannot load module \"%1\" (%2)"), path,
+				Glib::Module::get_last_error()) << endmsg;
+		delete module;
 		return 0;
 	}
 
-	dfunc = (PanPluginDescriptor* (*)(void)) dlsym (module, "panner_descriptor");
-
-	if ((errstr = dlerror()) != 0) {
+	if (!module->get_symbol("panner_descriptor", func)) {
 		error << string_compose(_("PannerManager: module \"%1\" has no descriptor function."), path) << endmsg;
-		error << errstr << endmsg;
-		dlclose (module);
+		error << Glib::Module::get_last_error() << endmsg;
+		delete module;
 		return 0;
 	}
 
+	dfunc = (PanPluginDescriptor* (*)(void))func;
 	descriptor = dfunc();
+
 	if (descriptor) {
 		info = new PannerInfo (*descriptor, module);
 	} else {
-		dlclose (module);
+		delete module;
 	}
 
 	return info;

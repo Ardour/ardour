@@ -20,7 +20,10 @@
 #ifndef __ardour_panner_manager_h__
 #define __ardour_panner_manager_h__
 
-#include <dlfcn.h>
+#include <map>
+#include <string>
+#include <glibmm/module.h>
+
 #include "ardour/panner.h"
 #include "ardour/session_handle.h"
 
@@ -28,21 +31,22 @@ namespace ARDOUR {
 
 typedef std::map<std::string,std::string> PannerUriMap;
 
-struct PannerInfo {
-	PanPluginDescriptor descriptor;
-	void* module;
+struct LIBARDOUR_API PannerInfo {
 
-	PannerInfo (PanPluginDescriptor& d, void* handle)
+	PanPluginDescriptor descriptor;
+	Glib::Module* module;
+
+	PannerInfo (PanPluginDescriptor& d, Glib::Module* m)
 	: descriptor (d)
-	, module (handle)
+	, module (m)
 	{}
 
 	~PannerInfo () {
-		dlclose (module);
+		delete module;
 	}
 };
 
-class PannerManager : public ARDOUR::SessionHandlePtr
+class LIBARDOUR_API PannerManager : public ARDOUR::SessionHandlePtr
 {
 public:
 	~PannerManager ();

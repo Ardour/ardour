@@ -24,7 +24,8 @@
 
 #include "pbd/xml++.h"
 #include "pbd/error.h"
-#include "pbd/pathscanner.h"
+#include "pbd/file_utils.h"
+#include "pbd/stl_delete.h"
 #include "pbd/replace_all.h"
 
 #include "ardour/filesystem_paths.h"
@@ -55,7 +56,7 @@ static const char * const devprofile_env_variable_name = "ARDOUR_MCP_PATH";
 static const char* const devprofile_dir_name = "mcp";
 static const char* const devprofile_suffix = ".profile";
 
-static SearchPath
+static Searchpath
 devprofile_search_path ()
 {
 	bool devprofile_path_defined = false;
@@ -65,7 +66,7 @@ devprofile_search_path ()
 		return spath_env;
 	}
 
-	SearchPath spath (ardour_data_search_path());
+	Searchpath spath (ardour_data_search_path());
 	spath.add_subdirectory_to_paths(devprofile_dir_name);
 
 	return spath;
@@ -78,7 +79,7 @@ user_devprofile_directory ()
 }
 
 static bool
-devprofile_filter (const string &str, void */*arg*/)
+devprofile_filter (const string &str, void* /*arg*/)
 {
 	return (str.length() > strlen(devprofile_suffix) &&
 		str.find (devprofile_suffix) == (str.length() - strlen (devprofile_suffix)));
@@ -89,25 +90,19 @@ DeviceProfile::reload_device_profiles ()
 {
 	DeviceProfile dp;
 	vector<string> s;
-	vector<string *> *devprofiles;
-	PathScanner scanner;
-	SearchPath spath (devprofile_search_path());
+	vector<string> devprofiles;
+	Searchpath spath (devprofile_search_path());
 
-	devprofiles = scanner (spath.to_string(), devprofile_filter, 0, false, true);
+	find_files_matching_filter (devprofiles, spath, devprofile_filter, 0, false, true);
 	device_profiles.clear ();
 
-	if (!devprofiles) {
+	if (devprofiles.empty()) {
 		error << "No MCP device info files found using " << spath.to_string() << endmsg;
 		return;
 	}
 
-	if (devprofiles->empty()) {
-		error << "No MCP device info files found using " << spath.to_string() << endmsg;
-		return;
-	}
-
-	for (vector<string*>::iterator i = devprofiles->begin(); i != devprofiles->end(); ++i) {
-		string fullpath = *(*i);
+	for (vector<string>::iterator i = devprofiles.begin(); i != devprofiles.end(); ++i) {
+		string fullpath = *i;
 
 		XMLTree tree;
 
@@ -125,8 +120,6 @@ DeviceProfile::reload_device_profiles ()
 			device_profiles[dp.name()] = dp;
 		}
 	}
-
-	delete devprofiles;
 }
 
 int

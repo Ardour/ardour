@@ -22,7 +22,7 @@
 class WindowsVSTPluginUI : public VSTPluginUI
 {
 public:
-	WindowsVSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VSTPlugin>);
+	WindowsVSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VSTPlugin>, GtkWidget *parent);
 	~WindowsVSTPluginUI ();
 
 	bool start_updating (GdkEventAny*) { return false; }

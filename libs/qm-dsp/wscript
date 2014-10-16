@@ -47,12 +47,13 @@ def build(bld):
             maths/MathUtilities.cpp
             base/Pitch.cpp
     '''
+    autowaf.ensure_visible_symbols (obj, True)
     obj.export_includes = ['.']
     obj.includes     = ['.']
     obj.name         = 'libqmdsp'
     obj.target       = 'qmdsp'
     obj.vnum         = QM_DSP_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    obj.install_path = bld.env['LIBDIR']
 
 def shutdown():
     autowaf.shutdown()

@@ -43,7 +43,6 @@
 #include "route_ui.h"
 #include "enums.h"
 #include "time_axis_view.h"
-#include "canvas.h"
 #include "gain_meter.h"
 
 namespace ARDOUR {
@@ -54,6 +53,10 @@ namespace ARDOUR {
 	class Processor;
 	class Location;
 	class Playlist;
+}
+
+namespace ArdourCanvas {
+	class Rectangle;
 }
 
 class PublicEditor;
@@ -79,7 +82,7 @@ public:
 	void show_selection (TimeSelection&);
 	void set_button_names ();
 
-	void set_samples_per_unit (double);
+	void set_samples_per_pixel (double);
  	void set_height (uint32_t h);
 	void show_timestretch (framepos_t start, framepos_t end, int layers, int layer);
 	void hide_timestretch ();
@@ -101,6 +104,7 @@ public:
 	void uncombine_regions ();
 	void uncombine_region (RegionView*);
 	void toggle_automation_track (const Evoral::Parameter& param);
+	void fade_range (TimeSelection&);
 
 	/* The editor calls these when mapping an operation across multiple tracks */
 	void use_new_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
@@ -204,12 +208,11 @@ protected:
 	void route_property_changed (const PBD::PropertyChange&);
 	void name_entry_changed ();
 
-	void update_rec_display ();
+	void blink_rec_display (bool onoff);
 
 	virtual void label_view ();
 
-	void reset_samples_per_unit ();
-	void horizontal_position_changed ();
+	void reset_samples_per_pixel ();
 
 	virtual void build_automation_action_menu (bool);
 	virtual void append_extra_display_menu_items () {}
@@ -235,11 +238,13 @@ protected:
 	void color_handler ();
 	void region_view_added (RegionView*);
 	void create_gain_automation_child (const Evoral::Parameter &, bool);
+	void create_mute_automation_child (const Evoral::Parameter &, bool);
 	void setup_processor_menu_and_curves ();
 	void route_color_changed ();
         bool can_edit_name() const;
 
 	boost::shared_ptr<AutomationTimeAxisView> gain_track;
+	boost::shared_ptr<AutomationTimeAxisView> mute_track;
 
 	StreamView*           _view;
 	ArdourCanvas::Canvas& parent_canvas;
@@ -250,6 +255,7 @@ protected:
 	ArdourButton route_group_button;
 	ArdourButton playlist_button;
 	ArdourButton automation_button;
+	ArdourButton number_label;
 
 	Gtk::Menu           subplugin_menu;
 	Gtk::Menu*          automation_action_menu;
@@ -264,7 +270,7 @@ protected:
 
 	void use_playlist (Gtk::RadioMenuItem *item, boost::weak_ptr<ARDOUR::Playlist> wpl);
 
-	ArdourCanvas::SimpleRect* timestretch_rect;
+	ArdourCanvas::Rectangle* timestretch_rect;
 
 	void set_track_mode (ARDOUR::TrackMode, bool apply_to_selection = false);
 
@@ -301,6 +307,8 @@ private:
 
 	void remove_child (boost::shared_ptr<TimeAxisView>);
 	void update_playlist_tip ();
+	void parameter_changed (std::string const & p);
+	void update_track_number_visibility();
 };
 
 #endif /* __ardour_route_time_axis_h__ */

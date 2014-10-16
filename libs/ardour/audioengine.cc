@@ -34,8 +34,6 @@
 #include "pbd/stacktrace.h"
 #include "pbd/unknown_type.h"
 
-#include <jack/weakjack.h>
-
 #include "midi++/port.h"
 #include "midi++/mmc.h"
 
@@ -43,13 +41,14 @@
 #include "ardour/audio_port.h"
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
-#include "ardour/backend_search_path.h"
+#include "ardour/search_paths.h"
 #include "ardour/buffer.h"
 #include "ardour/cycle_timer.h"
 #include "ardour/internal_send.h"
 #include "ardour/meter.h"
 #include "ardour/midi_port.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/mididm.h"
 #include "ardour/mtdm.h"
 #include "ardour/port.h"
 #include "ardour/process_thread.h"
@@ -75,15 +74,24 @@ AudioEngine::AudioEngine ()
 	, m_meter_thread (0)
 	, _main_thread (0)
 	, _mtdm (0)
-	, _measuring_latency (false)
+	, _mididm (0)
+	, _measuring_latency (MeasureNone)
 	, _latency_input_port (0)
 	, _latency_output_port (0)
 	, _latency_flush_frames (0)
 	, _latency_signal_latency (0)
 	, _stopped_for_latency (false)
+	, _started_for_latency (false)
 	, _in_destructor (false)
+    , _hw_reset_event_thread(0)
+    , _hw_reset_request_count(0)
+    , _stop_hw_reset_processing(0)
+    , _hw_devicelist_update_thread(0)
+    , _hw_devicelist_update_count(0)
+    , _stop_hw_devicelist_processing(0)
 {
 	g_atomic_int_set (&m_meter_exit, 0);
+    start_hw_event_processing();
 	discover_backends ();
 }
 
@@ -91,6 +99,7 @@ AudioEngine::~AudioEngine ()
 {
 	_in_destructor = true;
 	stop_metering_thread ();
+	stop_hw_event_processing();
 	drop_backend ();
 }
 
@@ -164,12 +173,17 @@ AudioEngine::buffer_size_change (pframes_t bufsiz)
 		last_monitor_check = 0;
 	}
 
+	BufferSizeChanged (bufsiz); /* EMIT SIGNAL */
+
 	return 0;
 }
 
 /** Method called by our ::process_thread when there is work to be done.
  *  @param nframes Number of frames to process.
  */
+#ifdef __clang__
+__attribute__((annotate("realtime")))
+#endif
 int
 AudioEngine::process_callback (pframes_t nframes)
 {
@@ -197,7 +211,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	bool return_after_remove_check = false;
 
-	if (_measuring_latency && _mtdm) {
+	if (_measuring_latency == MeasureAudio && _mtdm) {
 		/* run a normal cycle from the perspective of the PortManager
 		   so that we get silence on all registered ports.
 		   
@@ -215,6 +229,28 @@ AudioEngine::process_callback (pframes_t nframes)
 			Sample* out = (Sample*) pe.get_buffer (_latency_output_port, nframes);
 
 			_mtdm->process (nframes, in, out);
+		}
+
+		PortManager::cycle_end (nframes);
+		return_after_remove_check = true;
+
+	} else if (_measuring_latency == MeasureMIDI && _mididm) {
+		/* run a normal cycle from the perspective of the PortManager
+		   so that we get silence on all registered ports.
+
+		   we overwrite the silence on the two ports used for latency
+		   measurement.
+		*/
+
+		PortManager::cycle_start (nframes);
+		PortManager::silence (nframes);
+
+		if (_latency_input_port && _latency_output_port) {
+			PortEngine& pe (port_engine());
+
+			_mididm->process (nframes, pe,
+					pe.get_buffer (_latency_input_port, nframes),
+					pe.get_buffer (_latency_output_port, nframes));
 		}
 
 		PortManager::cycle_end (nframes);
@@ -355,6 +391,139 @@ AudioEngine::process_callback (pframes_t nframes)
 
 
 void
+AudioEngine::request_backend_reset()
+{
+    Glib::Threads::Mutex::Lock guard (_reset_request_lock);
+    g_atomic_int_inc (&_hw_reset_request_count);
+    _hw_reset_condition.signal ();
+}
+
+
+void
+AudioEngine::do_reset_backend()
+{
+    SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 512);
+    
+    Glib::Threads::Mutex::Lock guard (_reset_request_lock);
+    
+    while (!_stop_hw_reset_processing) {
+        
+        if (_hw_reset_request_count && _backend) {
+
+			_reset_request_lock.unlock();
+            
+			Glib::Threads::RecMutex::Lock pl (_state_lock);
+
+            g_atomic_int_dec_and_test (&_hw_reset_request_count);
+
+			std::cout << "AudioEngine::RESET::Reset request processing" << std::endl;
+
+            // backup the device name
+            std::string name = _backend->device_name ();
+            
+			std::cout << "AudioEngine::RESET::Stoping engine..." << std::endl;
+			stop();
+
+			std::cout << "AudioEngine::RESET::Reseting device..." << std::endl;
+			if ( 0 == _backend->reset_device () ) {
+				
+				std::cout << "AudioEngine::RESET::Starting engine..." << std::endl;
+				start ();
+
+				// inform about possible changes
+				BufferSizeChanged (_backend->buffer_size() );
+			} else {
+				DeviceError();
+			}
+            
+			std::cout << "AudioEngine::RESET::Done." << std::endl;
+
+            _reset_request_lock.lock();
+            
+        } else {
+            
+            _hw_reset_condition.wait (_reset_request_lock);
+            
+        }
+    }
+}
+
+
+void
+AudioEngine::request_device_list_update()
+{
+    Glib::Threads::Mutex::Lock guard (_devicelist_update_lock);
+    g_atomic_int_inc (&_hw_devicelist_update_count);
+    _hw_devicelist_update_condition.signal ();
+}
+
+
+void
+AudioEngine::do_devicelist_update()
+{
+    SessionEvent::create_per_thread_pool (X_("Device list update processing thread"), 512);
+    
+    Glib::Threads::Mutex::Lock guard (_devicelist_update_lock);
+    
+    while (!_stop_hw_devicelist_processing) {
+        
+        if (_hw_devicelist_update_count) {
+
+            _devicelist_update_lock.unlock();
+            
+            g_atomic_int_dec_and_test (&_hw_devicelist_update_count);
+            DeviceListChanged (); /* EMIT SIGNAL */
+        
+            _devicelist_update_lock.lock();
+            
+        } else {
+            _hw_devicelist_update_condition.wait (_devicelist_update_lock);
+        }
+    }
+}
+
+
+void
+AudioEngine::start_hw_event_processing()
+{   
+    if (_hw_reset_event_thread == 0) {
+        g_atomic_int_set(&_hw_reset_request_count, 0);
+        g_atomic_int_set(&_stop_hw_reset_processing, 0);
+        _hw_reset_event_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_reset_backend, this));
+    }
+    
+    if (_hw_devicelist_update_thread == 0) {
+        g_atomic_int_set(&_hw_devicelist_update_count, 0);
+        g_atomic_int_set(&_stop_hw_devicelist_processing, 0);
+        _hw_devicelist_update_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_devicelist_update, this));
+    }
+}
+
+
+void
+AudioEngine::stop_hw_event_processing()
+{
+    if (_hw_reset_event_thread) {
+        g_atomic_int_set(&_stop_hw_reset_processing, 1);
+        g_atomic_int_set(&_hw_reset_request_count, 0);
+        _hw_reset_condition.signal ();
+        _hw_reset_event_thread->join ();
+        _hw_reset_event_thread = 0;
+    }
+    
+    if (_hw_devicelist_update_thread) {
+        g_atomic_int_set(&_stop_hw_devicelist_processing, 1);
+        g_atomic_int_set(&_hw_devicelist_update_count, 0);
+        _hw_devicelist_update_condition.signal ();
+        _hw_devicelist_update_thread->join ();
+        _hw_devicelist_update_thread = 0;
+    }
+	
+}
+
+
+
+void
 AudioEngine::stop_metering_thread ()
 {
 	if (m_meter_thread) {
@@ -435,13 +604,22 @@ AudioEngine::remove_session ()
 
 
 void
+AudioEngine::reconnect_session_routes (bool reconnect_inputs, bool reconnect_outputs)
+{
+    if (_session) {
+        _session->reconnect_existing_routes(true, true, reconnect_inputs, reconnect_outputs);
+    }
+}
+
+
+void
 AudioEngine::died ()
 {
         /* called from a signal handler for SIGPIPE */
 
 	stop_metering_thread ();
 
-        _running = false;
+    _running = false;
 }
 
 int
@@ -474,27 +652,40 @@ AudioEngine::discover_backends ()
 
 	Glib::PatternSpec so_extension_pattern("*backend.so");
 	Glib::PatternSpec dylib_extension_pattern("*backend.dylib");
+
+#if defined(PLATFORM_WINDOWS) && defined(DEBUGGABLE_BACKENDS)
+	#if defined(DEBUG) || defined(_DEBUG)
+		Glib::PatternSpec dll_extension_pattern("*backendD.dll");
+	#else
+		Glib::PatternSpec dll_extension_pattern("*backendRDC.dll");
+	#endif
+#else
 	Glib::PatternSpec dll_extension_pattern("*backend.dll");
+#endif
 
-	find_matching_files_in_search_path (backend_search_path (),
-	                                    so_extension_pattern, backend_modules);
+	find_files_matching_pattern (backend_modules, backend_search_path (),
+	                             so_extension_pattern);
 
-	find_matching_files_in_search_path (backend_search_path (),
-	                                    dylib_extension_pattern, backend_modules);
+	find_files_matching_pattern (backend_modules, backend_search_path (),
+	                             dylib_extension_pattern);
 
-	find_matching_files_in_search_path (backend_search_path (),
-	                                    dll_extension_pattern, backend_modules);
+	find_files_matching_pattern (backend_modules, backend_search_path (),
+	                             dll_extension_pattern);
 
-	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for backends in %1\n"), backend_search_path().to_string()));
+	DEBUG_TRACE (DEBUG::AudioEngine, string_compose ("looking for backends in %1\n", backend_search_path().to_string()));
 
 	for (vector<std::string>::iterator i = backend_modules.begin(); i != backend_modules.end(); ++i) {
 
 		AudioBackendInfo* info;
 
+		DEBUG_TRACE (DEBUG::AudioEngine, string_compose ("Checking possible backend in %1\n", *i));
+
 		if ((info = backend_discover (*i)) != 0) {
 			_backends.insert (make_pair (info->name, info));
 		}
 	}
+
+	DEBUG_TRACE (DEBUG::AudioEngine, string_compose ("Found %1 backends\n", _backends.size()));
 
 	return _backends.size();
 }
@@ -553,7 +744,9 @@ AudioEngine::drop_backend ()
 {
 	if (_backend) {
 		_backend->stop ();
+		_backend->drop_device ();
 		_backend.reset ();
+		_running = false;
 	}
 }
 
@@ -582,7 +775,7 @@ AudioEngine::set_backend (const std::string& name, const std::string& arg1, cons
 		if (b->second->instantiate (arg1, arg2)) {
 			throw failed_constructor ();
 		}
-
+		
 		_backend = b->second->factory (*this);
 
 	} catch (exception& e) {
@@ -621,6 +814,7 @@ AudioEngine::start (bool for_latency)
 		if (_session->config.get_jack_time_master()) {
 			_backend->set_time_master (true);
 		}
+
 	}
 	
 	start_metering_thread ();
@@ -639,6 +833,12 @@ AudioEngine::stop (bool for_latency)
 		return 0;
 	}
 
+	if (_session && _running) {
+		// it's not a halt, but should be handled the same way:
+		// disable record, stop transport and I/O processign but save the data.
+		_session->engine_halted ();
+	}
+
 	Glib::Threads::Mutex::Lock lm (_process_lock);
 
 	if (_backend->stop ()) {
@@ -647,7 +847,7 @@ AudioEngine::stop (bool for_latency)
 	
 	_running = false;
 	_processed_frames = 0;
-	_measuring_latency = false;
+	_measuring_latency = MeasureNone;
 	_latency_output_port = 0;
 	_latency_input_port = 0;
 	_started_for_latency = false;
@@ -884,15 +1084,6 @@ AudioEngine::set_buffer_size (uint32_t bufsiz)
 }
 
 int
-AudioEngine::set_sample_format (SampleFormat sf)
-{
-	if (!_backend) {
-		return -1;
-	}
-	return _backend->set_sample_format  (sf);
-}
-
-int
 AudioEngine::set_interleaved (bool yn)
 {
 	if (!_backend) {
@@ -1000,7 +1191,7 @@ AudioEngine::halted_callback (const char* why)
 		return;
 	}
 
-        stop_metering_thread ();
+    stop_metering_thread ();
 	_running = false;
 
 	Port::PortDrop (); /* EMIT SIGNAL */
@@ -1013,24 +1204,16 @@ AudioEngine::halted_callback (const char* why)
 bool
 AudioEngine::setup_required () const
 {
-	/* If there is only a single backend and it claims to be configured
-	 * already there is no setup to be done.
-	 *
-	 * Primarily for a case where there is only a JACK backend and
-	 * JACK is already running.
-	 */
-	 
-	if (_backends.size() == 1 && _backends.begin()->second->already_configured()) {
-		return false;
+	if (_backend) {
+		if (_backend->info().already_configured())
+			return false;
+	} else {
+		if (_backends.size() == 1 && _backends.begin()->second->already_configured()) {
+			return false;
+		}
 	}
-
+	
 	return true;
-}
-
-MTDM*
-AudioEngine::mtdm() 
-{
-	return _mtdm;
 }
 
 int
@@ -1050,7 +1233,7 @@ AudioEngine::prepare_for_latency_measurement ()
 }
 
 int
-AudioEngine::start_latency_detection ()
+AudioEngine::start_latency_detection (bool for_midi)
 {
 	if (!running()) {
 		if (prepare_for_latency_measurement ()) {
@@ -1063,6 +1246,9 @@ AudioEngine::start_latency_detection ()
 	delete _mtdm;
 	_mtdm = 0;
 
+	delete _mididm;
+	_mididm = 0;
+
 	/* find the ports we will connect to */
 
 	PortEngine::PortHandle out = pe.get_port_by_name (_latency_output_name);
@@ -1074,27 +1260,61 @@ AudioEngine::start_latency_detection ()
 	}
 
 	/* create the ports we will use to read/write data */
-	
-	if ((_latency_output_port = pe.register_port ("latency_out", DataType::AUDIO, IsOutput)) == 0) {
-		stop (true);
-		return -1;
-	}
-	if (pe.connect (_latency_output_port, _latency_output_name)) {
-		pe.unregister_port (_latency_output_port);
-		stop (true);
-		return -1;
-	}
+	if (for_midi) {
+		if ((_latency_output_port = pe.register_port ("latency_out", DataType::MIDI, IsOutput)) == 0) {
+			stop (true);
+			return -1;
+		}
+		if (pe.connect (_latency_output_port, _latency_output_name)) {
+			pe.unregister_port (_latency_output_port);
+			stop (true);
+			return -1;
+		}
 
-	const string portname ("latency_in");
-	if ((_latency_input_port = pe.register_port (portname, DataType::AUDIO, IsInput)) == 0) {
-		pe.unregister_port (_latency_output_port);
-		stop (true);
-		return -1;
-	}
-	if (pe.connect (_latency_input_name, make_port_name_non_relative (portname))) {
-		pe.unregister_port (_latency_output_port);
-		stop (true);
-		return -1;
+		const string portname ("latency_in");
+		if ((_latency_input_port = pe.register_port (portname, DataType::MIDI, IsInput)) == 0) {
+			pe.unregister_port (_latency_input_port);
+			pe.unregister_port (_latency_output_port);
+			stop (true);
+			return -1;
+		}
+		if (pe.connect (_latency_input_name, make_port_name_non_relative (portname))) {
+			pe.unregister_port (_latency_input_port);
+			pe.unregister_port (_latency_output_port);
+			stop (true);
+			return -1;
+		}
+
+		_mididm = new MIDIDM (sample_rate());
+
+	} else {
+
+		if ((_latency_output_port = pe.register_port ("latency_out", DataType::AUDIO, IsOutput)) == 0) {
+			stop (true);
+			return -1;
+		}
+		if (pe.connect (_latency_output_port, _latency_output_name)) {
+			pe.unregister_port (_latency_output_port);
+			stop (true);
+			return -1;
+		}
+
+		const string portname ("latency_in");
+		if ((_latency_input_port = pe.register_port (portname, DataType::AUDIO, IsInput)) == 0) {
+			pe.unregister_port (_latency_input_port);
+			pe.unregister_port (_latency_output_port);
+			stop (true);
+			return -1;
+		}
+		if (pe.connect (_latency_input_name, make_port_name_non_relative (portname))) {
+			pe.unregister_port (_latency_input_port);
+			pe.unregister_port (_latency_output_port);
+			stop (true);
+			return -1;
+		}
+
+		_mtdm = new MTDM (sample_rate());
+
 	}
 
 	LatencyRange lr;
@@ -1105,10 +1325,8 @@ AudioEngine::start_latency_detection ()
 	_latency_signal_latency += lr.max;
 
 	/* all created and connected, lets go */
-
-	_mtdm = new MTDM (sample_rate());
-	_measuring_latency = true;
-        _latency_flush_frames = samples_per_cycle();
+	_latency_flush_frames = samples_per_cycle();
+	_measuring_latency = for_midi ? MeasureMIDI : MeasureAudio;
 
 	return 0;
 }
@@ -1116,7 +1334,7 @@ AudioEngine::start_latency_detection ()
 void
 AudioEngine::stop_latency_detection ()
 {
-	_measuring_latency = false;
+	_measuring_latency = MeasureNone;
 
 	if (_latency_output_port) {
 		port_engine().unregister_port (_latency_output_port);

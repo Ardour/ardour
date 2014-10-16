@@ -30,7 +30,7 @@ namespace ARDOUR {
 
 class AutomationControl;
 
-class AutomationWatch : public sigc::trackable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList {
+class LIBARDOUR_API AutomationWatch : public sigc::trackable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList {
   public:
     static AutomationWatch& instance();
 

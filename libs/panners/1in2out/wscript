@@ -22,13 +22,14 @@ def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = [ 'panner_1in2out.cc' ]
     obj.export_includes = ['.']
-    obj.cxxflags     = '-DPACKAGE="libardour_pan1in2out"'
+    obj.defines      = [ 'PACKAGE="libardour_pan1in2out"' ]
+    obj.defines     += [ 'ARDOURPANNER_DLL_EXPORTS' ]
     obj.includes     = ['.']
     obj.name         = 'libardour_pan1in2out'
     obj.target       = 'pan1in2out'
     obj.use          = 'libardour libardour_cp libpbd'
     obj.vnum         = LIBARDOUR_PAN1IN2OUT_LIB_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'panners')
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'panners')
 
 def shutdown():
     autowaf.shutdown()

@@ -22,6 +22,8 @@
 
 #include <stdlib.h>
 
-int cache_aligned_malloc (void** memptr, size_t size);
+#include "pbd/libpbd_visibility.h"
+
+LIBPBD_API int cache_aligned_malloc (void** memptr, size_t size);
 
 #endif /* __pbd_malign_h__ */

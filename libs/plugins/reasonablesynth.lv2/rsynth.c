@@ -402,8 +402,9 @@ static uint32_t synth_sound (void *synth, uint32_t written, const uint32_t nfram
     uint32_t nremain = nframes - written;
 
     if (rs->boffset >= BUFFER_SIZE_SAMPLES)  {
-      rs->boffset = 0;
-      synth_fragment(rs, BUFFER_SIZE_SAMPLES, rs->buf[0], rs->buf[1]);
+      const uint32_t tosynth = MIN(BUFFER_SIZE_SAMPLES, nremain);
+      rs->boffset = BUFFER_SIZE_SAMPLES - tosynth;
+      synth_fragment(rs, tosynth, &(rs->buf[0][rs->boffset]), &(rs->buf[1][rs->boffset]));
     }
 
     uint32_t nread = MIN(nremain, (BUFFER_SIZE_SAMPLES - rs->boffset));

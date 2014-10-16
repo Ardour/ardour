@@ -30,6 +30,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/memento_command.h"
+#include "pbd/stacktrace.h"
 
 #include "midi++/mmc.h"
 #include "midi++/port.h"
@@ -40,6 +41,8 @@
 #include "ardour/click.h"
 #include "ardour/debug.h"
 #include "ardour/location.h"
+#include "ardour/profile.h"
+#include "ardour/scene_changer.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
 #include "ardour/operations.h"
@@ -136,8 +139,8 @@ Session::request_track_speed (Track* tr, double speed)
 void
 Session::request_stop (bool abort, bool clear_state)
 {
-	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0, abort, clear_state);
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport stop, abort = %1, clear state = %2\n", abort, clear_state));
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, audible_frame(), 0.0, abort, clear_state);
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport stop, audible %3 transport %4 abort = %1, clear state = %2\n", abort, clear_state, audible_frame(), _transport_frame));
 	queue_event (ev);
 }
 
@@ -158,10 +161,11 @@ Session::force_locate (framepos_t target_frame, bool with_roll)
 }
 
 void
-Session::request_play_loop (bool yn, bool leave_rolling)
+Session::request_play_loop (bool yn, bool change_transport_roll)
 {
 	SessionEvent* ev;
 	Location *location = _locations->auto_loop_location();
+	double target_speed;
 
 	if (location == 0 && yn) {
 		error << _("Cannot loop - no loop range defined")
@@ -169,14 +173,44 @@ Session::request_play_loop (bool yn, bool leave_rolling)
 		return;
 	}
 
-	ev = new SessionEvent (SessionEvent::SetLoop, SessionEvent::Add, SessionEvent::Immediate, 0, (leave_rolling ? 1.0 : 0.0), yn);
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request set loop = %1, leave rolling ? %2\n", yn, leave_rolling));
+	if (change_transport_roll) {
+		if (transport_rolling()) {
+			/* start looping at current speed */
+			target_speed = transport_speed ();
+		} else {
+			/* currently stopped */
+			if (yn) {
+				/* start looping at normal speed */
+				target_speed = 1.0;
+			} else {
+				target_speed = 0.0;
+			}
+		}
+	} else {
+		/* leave the speed alone */
+		target_speed = transport_speed ();
+	}
+
+	ev = new SessionEvent (SessionEvent::SetLoop, SessionEvent::Add, SessionEvent::Immediate, 0, target_speed, yn);
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request set loop = %1, change roll state ? %2\n", yn, change_transport_roll));
 	queue_event (ev);
 
-	if (!leave_rolling && !yn && Config->get_seamless_loop() && transport_rolling()) {
-		// request an immediate locate to refresh the tracks
-		// after disabling looping
-		request_locate (_transport_frame-1, false);
+	if (yn) {
+		if (!change_transport_roll) {
+			if (!transport_rolling()) {
+				/* we're not changing transport state, but we do want
+				   to set up position for the new loop. Don't
+				   do this if we're rolling already.
+				*/
+				request_locate (location->start(), false);
+			}
+		}
+	} else {
+		if (!change_transport_roll && Config->get_seamless_loop() && transport_rolling()) {
+			// request an immediate locate to refresh the tracks
+			// after disabling looping
+			request_locate (_transport_frame-1, false);
+		}
 	}
 }
 
@@ -192,6 +226,14 @@ Session::request_play_range (list<AudioRange>* range, bool leave_rolling)
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request play range, leave rolling ? %1\n", leave_rolling));
 	queue_event (ev);
 }
+
+void
+Session::request_cancel_play_range ()
+{
+	SessionEvent* ev = new SessionEvent (SessionEvent::CancelPlayAudioRange, SessionEvent::Add, SessionEvent::Immediate, 0, 0);
+	queue_event (ev);
+}
+
 
 void
 Session::realtime_stop (bool abort, bool clear_state)
@@ -215,27 +257,12 @@ Session::realtime_stop (bool abort, bool clear_state)
 	for (RouteList::iterator i = r->begin (); i != r->end(); ++i) {
 		(*i)->realtime_handle_transport_stopped ();
 	}
+	
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("stop complete, auto-return scheduled for return to %1\n", _requested_return_frame));
 
-	if (actively_recording()) {
-
-		/* move the transport position back to where the
-		   request for a stop was noticed. we rolled
-		   past that point to pick up delayed input (and/or to delick)
-		*/
-
-		if (worst_playback_latency() > current_block_size) {
-			/* we rolled past the stop point to pick up data that had
-			   not yet arrived. move back to where the stop occured.
-			*/
-			decrement_transport_position (current_block_size + (worst_input_latency() - current_block_size));
-		} else {
-			decrement_transport_position (current_block_size);
-		}
-
-		/* the duration change is not guaranteed to have happened, but is likely */
-
-		todo = PostTransportWork (todo | PostTransportDuration);
-	}
+	/* the duration change is not guaranteed to have happened, but is likely */
+	
+	todo = PostTransportWork (todo | PostTransportDuration);
 
 	if (abort) {
 		todo = PostTransportWork (todo | PostTransportAbort);
@@ -423,6 +450,8 @@ Session::non_realtime_locate ()
 		(*i)->non_realtime_locate (_transport_frame);
 	}
 
+	_scene_changer->locate (_transport_frame);
+
 	/* XXX: it would be nice to generate the new clicks here (in the non-RT thread)
 	   rather than clearing them so that the RT thread has to spend time constructing
 	   them (in Session::click).
@@ -498,6 +527,11 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	if (did_record) {
 		commit_reversible_command ();
+		/* increase take name */
+		if (config.get_track_name_take () && !config.get_take_name ().empty()) {
+			string newname = config.get_take_name();
+			config.set_take_name(bump_name_number (newname));
+		}
 	}
 
 	if (_engine.running()) {
@@ -509,7 +543,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	bool const auto_return_enabled =
-		(!config.get_external_sync() && config.get_auto_return());
+		(!config.get_external_sync() && (config.get_auto_return() || abort));
 
 	if (auto_return_enabled ||
 	    (ptw & PostTransportLocate) ||
@@ -530,8 +564,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 			if (_requested_return_frame >= 0) {
 
 				/* explicit return request pre-queued in event list. overrides everything else */
-
-				cerr << "explicit auto-return to " << _requested_return_frame << endl;
 
 				_transport_frame = _requested_return_frame;
 				do_locate = true;
@@ -571,6 +603,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 						_transport_frame = _last_roll_location;
 						do_locate = true;
 					}
+				} else if (abort) {
+
+					_transport_frame = _last_roll_location;
+					do_locate = true;
 				}
 			}
 
@@ -589,8 +625,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	*/
 
 	if (ptw & PostTransportClearSubstate) {
-		_play_range = false;
-		unset_play_loop ();
+		unset_play_range ();
+		if (!Config->get_loop_is_mode()) {
+			unset_play_loop ();
+		}
 	}
 
 	/* this for() block can be put inside the previous if() and has the effect of ... ??? what */
@@ -657,8 +695,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	if (ptw & PostTransportStop) {
-		_play_range = false;
-		play_loop = false;
+		unset_play_range ();
+		if (!Config->get_loop_is_mode()) {
+			unset_play_loop ();
+		}
 	}
 
 	PositionChanged (_transport_frame); /* EMIT SIGNAL */
@@ -695,8 +735,10 @@ Session::check_declick_out ()
 			start_locate (pending_locate_frame, pending_locate_roll, pending_locate_flush);
 			transport_sub_state &= ~(PendingDeclickOut|PendingLocate);
 		} else {
-			stop_transport (pending_abort);
-			transport_sub_state &= ~(PendingDeclickOut|PendingLocate);
+			if (!(transport_sub_state & StopPendingCapture)) {
+				stop_transport (pending_abort);
+				transport_sub_state &= ~(PendingDeclickOut|PendingLocate);
+			}
 		}
 
 	} else if (transport_sub_state & PendingLoopDeclickOut) {
@@ -723,7 +765,7 @@ Session::unset_play_loop ()
 }
 
 void
-Session::set_play_loop (bool yn)
+Session::set_play_loop (bool yn, double speed)
 {
 	/* Called from event-handling context */
 
@@ -782,12 +824,24 @@ Session::set_play_loop (bool yn)
 			merge_event (new SessionEvent (SessionEvent::AutoLoopDeclick, SessionEvent::Replace, dcp, dcl, 0.0f));
 			merge_event (new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f));
 
-			/* locate to start of loop and roll. 
+			/* if requested to roll, locate to start of loop and
+			 * roll but ONLY if we're not already rolling.
 
 			   args: positition, roll=true, flush=true, with_loop=false, force buffer refill if seamless looping
 			*/
 
-			start_locate (loc->start(), true, true, false, Config->get_seamless_loop());
+			if (Config->get_loop_is_mode()) {
+				/* loop IS a transport mode: if already
+				   rolling, do not locate to loop start.
+				*/
+				if (!transport_rolling() && (speed != 0.0)) {
+					start_locate (loc->start(), true, true, false, Config->get_seamless_loop());
+				}
+			} else {
+				if (speed != 0.0) {
+					start_locate (loc->start(), true, true, false, Config->get_seamless_loop());
+				}
+			}
 		}
 
 	} else {
@@ -885,7 +939,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 	if (!force && _transport_frame == target_frame && !loop_changing && !for_seamless_loop) {
 		if (with_roll) {
-			set_transport_speed (1.0, false);
+			set_transport_speed (1.0, 0, false);
 		}
 		loop_changing = false;
 		Located (); /* EMIT SIGNAL */
@@ -983,7 +1037,9 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 				// located outside the loop: cancel looping directly, this is called from event handling context
 
-				set_play_loop (false);
+				if (!Config->get_loop_is_mode()) {
+					set_play_loop (false, _transport_speed);
+				}
 				
 			} else if (_transport_frame == al->start()) {
 
@@ -1028,7 +1084,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
  *  @param speed New speed
  */
 void
-Session::set_transport_speed (double speed, bool abort, bool clear_state, bool as_default)
+Session::set_transport_speed (double speed, framepos_t destination_frame, bool abort, bool clear_state, bool as_default)
 {
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1, abort = %2 clear_state = %3, current = %4 as_default %6\n", 
 						       speed, abort, clear_state, _transport_speed, _transport_frame, as_default));
@@ -1066,7 +1122,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 		if (Config->get_monitoring_model() == HardwareMonitoring) {
 			set_track_monitor_input_status (true);
 		}
-
+		
 		if (synced_to_engine ()) {
 			if (clear_state) {
 				/* do this here because our response to the slave won't
@@ -1077,14 +1133,35 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 			}
 			_engine.transport_stop ();
 		} else {
+			bool const auto_return_enabled = (!config.get_external_sync() && (config.get_auto_return() || abort));
+
+			if (!auto_return_enabled) {
+				_requested_return_frame = destination_frame;
+			}
+
 			stop_transport (abort);
 		}
 
-		unset_play_loop ();
+		if (!Config->get_loop_is_mode()) {
+			unset_play_loop ();
+		}
 
 	} else if (transport_stopped() && speed == 1.0) {
 
 		/* we are stopped and we want to start rolling at speed 1 */
+
+		if (Config->get_loop_is_mode() && play_loop) {
+
+			Location *location = _locations->auto_loop_location();
+			
+			if (location != 0) {
+				if (_transport_frame != location->start()) {
+					/* jump to start and then roll from there */
+					request_locate (location->start(), true);
+					return;
+				}
+			}
+		}
 
 		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 			set_track_monitor_input_status (false);
@@ -1167,59 +1244,77 @@ Session::stop_transport (bool abort, bool clear_state)
 		return;
 	}
 
-	if (actively_recording() && !(transport_sub_state & StopPendingCapture) && worst_input_latency() > current_block_size) {
+	if (!get_transport_declick_required()) {
+
+		/* stop has not yet been scheduled */
 
 		boost::shared_ptr<RouteList> rl = routes.reader();
+		framepos_t stop_target = audible_frame();
+
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
-				tr->prepare_to_stop (_transport_frame);
+				tr->prepare_to_stop (_transport_frame, stop_target);
 			}
 		}
 
-		/* we need to capture the audio that has still not yet been received by the system
-		   at the time the stop is requested, so we have to roll past that time.
+		SubState new_bits;
+		
+		if (actively_recording() &&                           /* we are recording */
+		    worst_input_latency() > current_block_size) {     /* input latency exceeds block size, so simple 1 cycle delay before stop is not enough */
+			
+			/* we need to capture the audio that is still somewhere in the pipeline between
+			   wherever it was generated and the process callback. This means that even though
+			   the user (or something else)  has asked us to stop, we have to roll
+			   past this point and then reset the playhead/transport location to
+			   the position at which the stop was requested.
 
-		   we want to declick before stopping, so schedule the autostop for one
-		   block before the actual end. we'll declick in the subsequent block,
-		   and then we'll really be stopped.
+			   we still need playback to "stop" now, however, which is why we schedule
+			   a declick below.
+			*/
+			
+			DEBUG_TRACE (DEBUG::Transport, string_compose ("stop transport requested @ %1, scheduled for + %2 = %3, abort = %4\n",
+								       _transport_frame, _worst_input_latency,
+								       _transport_frame + _worst_input_latency,
+								       abort));
+			
+			SessionEvent *ev = new SessionEvent (SessionEvent::StopOnce, SessionEvent::Replace,
+							     _transport_frame + _worst_input_latency,
+							     0, 0, abort);
+			
+			merge_event (ev);
+
+			/* request a declick at the start of the next process cycle() so that playback ceases.
+			   It will remain silent until we actually stop (at the StopOnce event somewhere in 
+			   the future). The extra flag (StopPendingCapture) is set to ensure that check_declick_out()
+			   does not stop the transport too early.
+			 */
+			new_bits = SubState (PendingDeclickOut|StopPendingCapture);
+			
+		} else {
+			
+			/* Not recording, schedule a declick in the next process() cycle and then stop at its end */
+			
+			new_bits = PendingDeclickOut;
+		}
+
+		
+		/* we'll be called again after the declick */
+		transport_sub_state = SubState (transport_sub_state|new_bits);
+		pending_abort = abort;
+
+		return;
+
+	} else {
+		
+		/* declick was scheduled, but we've been called again, which means it is really time to stop
+		   
+		   XXX: we should probably split this off into its own method and call it explicitly.
 		*/
 
-		DEBUG_TRACE (DEBUG::Transport, string_compose ("stop transport requested @ %1, scheduled for + %2 - %3 = %4, abort = %5\n",
-							       _transport_frame, _worst_input_latency, current_block_size,
-							       _transport_frame - _worst_input_latency - current_block_size,
-							       abort));
-
-		SessionEvent *ev = new SessionEvent (SessionEvent::StopOnce, SessionEvent::Replace,
-		                                     _transport_frame + _worst_input_latency - current_block_size,
-		                                     0, 0, abort);
-
-		merge_event (ev);
-		transport_sub_state |= StopPendingCapture;
-		pending_abort = abort;
-		return;
+		realtime_stop (abort, clear_state);
+		_butler->schedule_transport_work ();
 	}
-
-	if ((transport_sub_state & PendingDeclickOut) == 0) {
-
-		if (!(transport_sub_state & StopPendingCapture)) {
-			boost::shared_ptr<RouteList> rl = routes.reader();
-			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-				if (tr) {
-					tr->prepare_to_stop (_transport_frame);
-				}
-			}
-		}
-
-		transport_sub_state |= PendingDeclickOut;
-		/* we'll be called again after the declick */
-		pending_abort = abort;
-		return;
-	}
-
-	realtime_stop (abort, clear_state);
-	_butler->schedule_transport_work ();
 }
 
 /** Called from the process thread */
@@ -1555,6 +1650,13 @@ Session::request_bounded_roll (framepos_t start, framepos_t end)
 	lar.push_back (ar);
 	request_play_range (&lar, true);
 }
+
+void
+Session::set_requested_return_frame (framepos_t return_to)
+{
+	_requested_return_frame = return_to;
+}
+
 void
 Session::request_roll_at_and_return (framepos_t start, framepos_t return_to)
 {

@@ -30,6 +30,7 @@
 #include <set>
 #include <boost/utility.hpp>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/plugin.h"
 
@@ -37,9 +38,10 @@ namespace ARDOUR {
 
 class Plugin;
 
-class PluginManager : public boost::noncopyable {
+class LIBARDOUR_API PluginManager : public boost::noncopyable {
   public:
 	static PluginManager& instance();
+	static std::string scanner_bin_path;
 
 	~PluginManager ();
 
@@ -49,11 +51,17 @@ class PluginManager : public boost::noncopyable {
 	ARDOUR::PluginInfoList &lv2_plugin_info ();
 	ARDOUR::PluginInfoList &au_plugin_info ();
 
-	void refresh ();
+	void refresh (bool cache_only = false);
+	void cancel_plugin_scan();
+	void cancel_plugin_timeout();
+	void clear_vst_cache ();
+	void clear_vst_blacklist ();
 
-	int add_ladspa_directory (std::string dirpath);
-	int add_windows_vst_directory (std::string dirpath);
-	int add_lxvst_directory (std::string dirpath);
+	const std::string get_default_windows_vst_path() const { return windows_vst_path; }
+	const std::string get_default_lxvst_path() const { return lxvst_path; }
+
+	bool cancelled () { return _cancel_scan; }
+	bool no_timeout () { return _cancel_timeout; }
 
 	enum PluginStatusType {
 		Normal = 0,
@@ -103,13 +111,15 @@ class PluginManager : public boost::noncopyable {
 
 	std::map<uint32_t, std::string> rdf_type;
 
-	std::string ladspa_path;
 	std::string windows_vst_path;
 	std::string lxvst_path;
 
+	bool _cancel_scan;
+	bool _cancel_timeout;
+
 	void ladspa_refresh ();
-	void windows_vst_refresh ();
-	void lxvst_refresh ();
+	void windows_vst_refresh (bool cache_only = false);
+	void lxvst_refresh (bool cache_only = false);
 
 	void add_lrdf_data (const std::string &path);
 	void add_ladspa_presets ();
@@ -121,13 +131,12 @@ class PluginManager : public boost::noncopyable {
 
 	void lv2_refresh ();
 
-	int windows_vst_discover_from_path (std::string path);
-	int windows_vst_discover (std::string path);
+	int windows_vst_discover_from_path (std::string path, bool cache_only = false);
+	int windows_vst_discover (std::string path, bool cache_only = false);
 	
-	int lxvst_discover_from_path (std::string path);
-	int lxvst_discover (std::string path);
+	int lxvst_discover_from_path (std::string path, bool cache_only = false);
+	int lxvst_discover (std::string path, bool cache_only = false);
 
-	int ladspa_discover_from_path (std::string path);
 	int ladspa_discover (std::string path);
 
 	std::string get_ladspa_category (uint32_t id);

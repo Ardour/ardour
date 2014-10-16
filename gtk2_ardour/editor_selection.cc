@@ -185,12 +185,12 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 		return;
 	}
 
-	if (!clicked_routeview) {
-		return;
+	RouteGroup* group = NULL;
+	if (clicked_routeview) {
+		group = clicked_routeview->route()->route_group();
 	}
 
 	bool had_tracks = !selection->tracks.empty();
-	RouteGroup* group = clicked_routeview->route()->route_group();
 	RouteGroup& arg (_session->all_route_group());
 
 	switch (op) {
@@ -364,7 +364,7 @@ void
 Editor::get_onscreen_tracks (TrackViewList& tvl)
 {
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		if ((*i)->y_position() < _canvas_height) {
+		if ((*i)->y_position() < _visible_canvas_height) {
 			tvl.push_back (*i);
 		}
 	}
@@ -640,8 +640,14 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 				selection->set (all_equivalent_regions);
 				commit = true;
 			} else {
-				/* no commit necessary: clicked on an already selected region */
-				goto out;
+				/* clicked on an already selected region */
+				if (press)
+					goto out;
+				else {
+					get_equivalent_regions(clicked_regionview, all_equivalent_regions, ARDOUR::Properties::select.property_id);
+					selection->set(all_equivalent_regions);
+					commit = true;
+				}
 			}
 			break;
 
@@ -991,6 +997,15 @@ Editor::time_selection_changed ()
 		return;
 	}
 
+	/* XXX this is superficially inefficient. Hide the selection in all
+	 * tracks, then show it in all selected tracks.
+	 *
+	 * However, if you investigate what this actually does, it isn't
+	 * anywhere nearly as bad as it may appear. Remember: nothing is
+	 * redrawn or even recomputed during these two loops - that only
+	 * happens when we next render ...
+	 */
+
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(*i)->hide_selection ();
 	}
@@ -1003,10 +1018,6 @@ Editor::time_selection_changed ()
 		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, false);
 	} else {
 		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, true);
-	}
-
-	if (_session && Config->get_always_play_range() && !_session->transport_rolling() && !selection->time.empty()) {
-		_session->request_locate (selection->time.start());
 	}
 }
 
@@ -1365,21 +1376,11 @@ Editor::select_all_internal_edit (Selection::Operation)
 }
 
 void
-Editor::select_all (Selection::Operation op)
+Editor::select_all_objects (Selection::Operation op)
 {
 	list<Selectable *> touched;
 
-	TrackViewList ts;
-
-	if (selection->tracks.empty()) {
-		if (entered_track) {
-			ts.push_back (entered_track);
-		} else {
-			ts = track_views;
-		}
-	} else {
-		ts = selection->tracks;
-	}
+	TrackViewList ts  = track_views;
 
 	if (_internal_editing) {
 
@@ -1409,7 +1410,9 @@ Editor::select_all (Selection::Operation op)
 			continue;
 		}
 		(*iter)->get_selectables (0, max_framepos, 0, DBL_MAX, touched);
+		selection->add (*iter);
 	}
+
 
 	begin_reversible_command (_("select all"));
 	switch (op) {
@@ -1489,6 +1492,8 @@ Editor::select_all_within (framepos_t start, framepos_t end, double top, double 
 	}
 
 	if (found.empty()) {
+		selection->clear_objects();
+		selection->clear_time ();
 		return;
 	}
 
@@ -1677,12 +1682,12 @@ Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 	list<Selectable *> touched;
 
 	if (after) {
-		start = cursor->current_frame;
+		start = cursor->current_frame();
 		end = _session->current_end_frame();
 	} else {
-		if (cursor->current_frame > 0) {
+		if (cursor->current_frame() > 0) {
 			start = 0;
-			end = cursor->current_frame - 1;
+			end = cursor->current_frame() - 1;
 		} else {
 			return;
 		}
@@ -1831,98 +1836,102 @@ Editor::select_range_between ()
 bool
 Editor::get_edit_op_range (framepos_t& start, framepos_t& end) const
 {
-	framepos_t m;
-	bool ignored;
+//	framepos_t m;
+//	bool ignored;
 
 	/* if an explicit range exists, use it */
 
-	if (!selection->time.empty()) {
+	if ( (mouse_mode == MouseRange || get_smart_mode() ) &&  !selection->time.empty()) {
 		/* we know that these are ordered */
 		start = selection->time.start();
 		end = selection->time.end_frame();
 		return true;
-	}
-
-	if (!mouse_frame (m, ignored)) {
-		/* mouse is not in a canvas, try playhead+selected marker.
-		   this is probably most true when using menus.
-		*/
-
-		if (selection->markers.empty()) {
-			return false;
-		}
-
-		start = selection->markers.front()->position();
-		end = _session->audible_frame();
-
 	} else {
-
-		switch (_edit_point) {
-		case EditAtPlayhead:
-			if (selection->markers.empty()) {
-				/* use mouse + playhead */
-				start = m;
-				end = _session->audible_frame();
-			} else {
-				/* use playhead + selected marker */
-				start = _session->audible_frame();
-				end = selection->markers.front()->position();
-			}
-			break;
-
-		case EditAtMouse:
-			/* use mouse + selected marker */
-			if (selection->markers.empty()) {
-				start = m;
-				end = _session->audible_frame();
-			} else {
-				start = selection->markers.front()->position();
-				end = m;
-			}
-			break;
-
-		case EditAtSelectedMarker:
-			/* use mouse + selected marker */
-			if (selection->markers.empty()) {
-
-				MessageDialog win (_("No edit range defined"),
-				                   false,
-				                   MESSAGE_INFO,
-				                   BUTTONS_OK);
-
-				win.set_secondary_text (
-					_("the edit point is Selected Marker\nbut there is no selected marker."));
-
-
-				win.set_default_response (RESPONSE_CLOSE);
-				win.set_position (Gtk::WIN_POS_MOUSE);
-				win.show_all();
-
-				win.run ();
-
-				return false; // NO RANGE
-			}
-			start = selection->markers.front()->position();
-			end = m;
-			break;
-		}
-	}
-
-	if (start == end) {
+		start = 0;
+		end = 0;
 		return false;
 	}
+	
+//	if (!mouse_frame (m, ignored)) {
+//		/* mouse is not in a canvas, try playhead+selected marker.
+//		   this is probably most true when using menus.
+//		*/
+//
+//		if (selection->markers.empty()) {
+//			return false;
+//		}
 
-	if (start > end) {
-		swap (start, end);
-	}
+//		start = selection->markers.front()->position();
+//		end = _session->audible_frame();
+
+//	} else {
+
+//		switch (_edit_point) {
+//		case EditAtPlayhead:
+//			if (selection->markers.empty()) {
+//				/* use mouse + playhead */
+//				start = m;
+//				end = _session->audible_frame();
+//			} else {
+//				/* use playhead + selected marker */
+//				start = _session->audible_frame();
+//				end = selection->markers.front()->position();
+//			}
+//			break;
+
+//		case EditAtMouse:
+//			/* use mouse + selected marker */
+//			if (selection->markers.empty()) {
+//				start = m;
+//				end = _session->audible_frame();
+//			} else {
+//				start = selection->markers.front()->position();
+//				end = m;
+//			}
+//			break;
+
+//		case EditAtSelectedMarker:
+//			/* use mouse + selected marker */
+//			if (selection->markers.empty()) {
+
+//				MessageDialog win (_("No edit range defined"),
+//				                   false,
+//				                   MESSAGE_INFO,
+//				                   BUTTONS_OK);
+
+//				win.set_secondary_text (
+//					_("the edit point is Selected Marker\nbut there is no selected marker."));
+
+
+//				win.set_default_response (RESPONSE_CLOSE);
+//				win.set_position (Gtk::WIN_POS_MOUSE);
+//				win.show_all();
+
+//				win.run ();
+
+//				return false; // NO RANGE
+//			}
+//			start = selection->markers.front()->position();
+//			end = m;
+//			break;
+//		}
+//	}
+
+//	if (start == end) {
+//		return false;
+//	}
+
+//	if (start > end) {
+//		swap (start, end);
+//	}
 
 	/* turn range into one delimited by start...end,
 	   not start...end-1
 	*/
 
-	end++;
+//	end++;
 
-	return true;
+//	return true;
 }
 
 void

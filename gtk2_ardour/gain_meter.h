@@ -58,7 +58,6 @@ namespace ARDOUR {
 }
 namespace Gtkmm2ext {
 	class FastMeter;
-	class BarController;
 }
 namespace Gtk {
 	class Menu;
@@ -81,8 +80,6 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	void set_width (Width, int len=0);
 	void set_meter_strip_name (const char * name);
 	void set_fader_name (const char * name);
-
-	void set_flat_buttons ();
 
 	virtual void setup_meters (int len=0);
 	virtual void set_type (ARDOUR::MeterType);
@@ -114,7 +111,8 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	Gtkmm2ext::SliderController *gain_slider;
 	Gtk::Adjustment              gain_adjustment;
 	Gtkmm2ext::FocusEntry        gain_display;
-	Gtk::Button                  peak_display;
+	Gtkmm2ext::FocusEntry        peak_display;
+//	Gtk::Button                  peak_display;
 	Gtk::DrawingArea             meter_metric_area;
 	Gtk::DrawingArea             meter_ticks1_area;
 	Gtk::DrawingArea             meter_ticks2_area;
@@ -170,8 +168,8 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	Gtk::Menu* meter_menu;
 	void popup_meter_menu (GdkEventButton*);
 
-	bool gain_slider_button_press (GdkEventButton *);
-	bool gain_slider_button_release (GdkEventButton *);
+	void amp_stop_touch ();
+	void amp_start_touch ();
 
 	void set_route_group_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
 	void set_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
@@ -219,6 +217,7 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	gint meter_metrics_expose (GdkEventExpose *);
 	gint meter_ticks1_expose (GdkEventExpose *);
 	gint meter_ticks2_expose (GdkEventExpose *);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 
   private:
 

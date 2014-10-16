@@ -17,8 +17,15 @@
 
 */
 
-UI_CONFIG_VARIABLE(std::string, ui_rc_file, "ui-rc-file", "ardour3_ui_dark.rc")
+UI_CONFIG_VARIABLE(std::string, icon_set, "icon-set", "default")
+UI_CONFIG_VARIABLE(std::string, ui_rc_file, "ui-rc-file", "ui_dark.rc")
 UI_CONFIG_VARIABLE(bool, flat_buttons, "flat-buttons", false)
-UI_CONFIG_VARIABLE(bool, gradient_waveforms, "gradient-waveforms", false)
+UI_CONFIG_VARIABLE(bool, blink_rec_arm, "blink-rec-arm", false)
+UI_CONFIG_VARIABLE(float, waveform_gradient_depth, "waveform-gradient-depth", 0)
+UI_CONFIG_VARIABLE(float, timeline_item_gradient_depth, "timeline-item-gradient-depth", 0.5)
 UI_CONFIG_VARIABLE(bool, all_floating_windows_are_dialogs, "all-floating-windows-are-dialogs", false)
+UI_CONFIG_VARIABLE (bool, color_regions_using_track_color, "color-regions-using-track-color", false)
+UI_CONFIG_VARIABLE (bool, show_waveform_clipping, "show-waveform-clipping", true)
+UI_CONFIG_VARIABLE (uint32_t, lock_gui_after_seconds, "lock-gui-after-seconds", 0)
+UI_CONFIG_VARIABLE (bool, draggable_playhead, "draggable-playhead", true)
 

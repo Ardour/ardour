@@ -20,14 +20,19 @@
 #ifndef __gtkmm2ext_click_box_h__
 #define __gtkmm2ext_click_box_h__
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <string>
 #include <gtkmm.h>
 
-#include <gtkmm2ext/auto_spin.h>
+#include "gtkmm2ext/visibility.h"
+#include "gtkmm2ext/auto_spin.h"
 
 namespace Gtkmm2ext {
 
-class ClickBox : public Gtk::DrawingArea, public AutoSpin
+class LIBGTKMM2EXT_API ClickBox : public Gtk::DrawingArea, public AutoSpin
 {
   public:
 	ClickBox (Gtk::Adjustment *adj, const std::string &name, bool round_to_steps = false);

@@ -26,6 +26,8 @@
 
 #include "pbd/debug.h"
 
+#include "evoral/visibility.h"
+
 namespace Evoral {
 
 /** ID of an event (note or other). This must be operable on by glib
@@ -35,11 +37,13 @@ typedef int32_t event_id_t;
 
 /** Musical time: beats relative to some defined origin */
 typedef double MusicalTime;
+
 const MusicalTime MaxMusicalTime = DBL_MAX;
 const MusicalTime MinMusicalTime = DBL_MIN;
 
 static inline bool musical_time_equal (MusicalTime a, MusicalTime b) {
-	/* acceptable tolerance is 1 tick. Nice if there was no magic number here */
+	/* acceptable tolerance is 1 tick. Nice if there was no magic number here
+	 * -> Timecode::BBT_Time::ticks_per_beat */
 	return fabs (a - b) <= (1.0/1920.0);
 }
 
@@ -77,9 +81,9 @@ typedef uint32_t EventType;
 
 namespace PBD {
 	namespace DEBUG {
-		extern uint64_t Sequence;
-		extern uint64_t Note;
-		extern uint64_t ControlList;
+		LIBEVORAL_API extern uint64_t Sequence;
+		LIBEVORAL_API extern uint64_t Note;
+		LIBEVORAL_API extern uint64_t ControlList;
 	}
 }
 

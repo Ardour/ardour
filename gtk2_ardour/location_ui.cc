@@ -38,6 +38,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -163,6 +164,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 
          set_location (loc);
          set_number (num);
+         cd_toggled(); // show/hide cd-track details
  }
 
  LocationEditRow::~LocationEditRow()
@@ -334,13 +336,15 @@ LocationEditRow::set_location (Location *loc)
 
 	--i_am_the_modifier;
 
-	location->start_changed.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::start_changed, this, _1), gui_context());
-	location->end_changed.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::end_changed, this, _1), gui_context());
-	location->name_changed.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::name_changed, this, _1), gui_context());
-	location->changed.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::location_changed, this, _1), gui_context());
-	location->FlagsChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::flags_changed, this, _1, _2), gui_context());
-	location->LockChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::lock_changed, this, _1), gui_context());
-	location->PositionLockStyleChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::position_lock_style_changed, this, _1), gui_context());
+        /* connect to per-location signals, since this row only cares about this location */
+
+	location->NameChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::name_changed, this), gui_context());
+        location->StartChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::start_changed, this), gui_context());
+        location->EndChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::end_changed, this), gui_context());
+        location->Changed.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::location_changed, this), gui_context());
+        location->FlagsChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::flags_changed, this), gui_context()); 
+        location->LockChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::lock_changed, this), gui_context());
+        location->PositionLockStyleChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::position_lock_style_changed, this), gui_context());
 }
 
 void
@@ -499,7 +503,7 @@ LocationEditRow::cd_toggled ()
 
 	location->set_cd (cd_check_button.get_active(), this);
 
-	if (location->is_cd_marker() && !(location->is_mark())) {
+	if (location->is_cd_marker()) {
 
 		show_cd_track_details ();
 
@@ -587,7 +591,7 @@ LocationEditRow::preemph_toggled ()
 }
 
 void
-LocationEditRow::end_changed (ARDOUR::Location *)
+LocationEditRow::end_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &LocationEditRow::end_changed, loc)
 
@@ -603,7 +607,7 @@ LocationEditRow::end_changed (ARDOUR::Location *)
 }
 
 void
-LocationEditRow::start_changed (ARDOUR::Location*)
+LocationEditRow::start_changed ()
 {
 	if (!location) return;
 
@@ -622,7 +626,7 @@ LocationEditRow::start_changed (ARDOUR::Location*)
 }
 
 void
-LocationEditRow::name_changed (ARDOUR::Location *)
+LocationEditRow::name_changed ()
 {
 	if (!location) return;
 
@@ -637,7 +641,7 @@ LocationEditRow::name_changed (ARDOUR::Location *)
 }
 
 void
-LocationEditRow::location_changed (ARDOUR::Location*)
+LocationEditRow::location_changed ()
 {
 
 	if (!location) return;
@@ -655,7 +659,7 @@ LocationEditRow::location_changed (ARDOUR::Location*)
 }
 
 void
-LocationEditRow::flags_changed (ARDOUR::Location*, void *)
+LocationEditRow::flags_changed ()
 {
 	if (!location) {
 		return;
@@ -671,7 +675,7 @@ LocationEditRow::flags_changed (ARDOUR::Location*, void *)
 }
 
 void
-LocationEditRow::lock_changed (ARDOUR::Location*)
+LocationEditRow::lock_changed ()
 {
 	if (!location) {
 		return;
@@ -687,7 +691,7 @@ LocationEditRow::lock_changed (ARDOUR::Location*)
 }
 
 void
-LocationEditRow::position_lock_style_changed (ARDOUR::Location*)
+LocationEditRow::position_lock_style_changed ()
 {
 	if (!location) {
 		return;

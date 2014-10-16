@@ -28,20 +28,21 @@
 #include "ardour/region_factory.h"
 #include "ardour/profile.h"
 
+#include "canvas/canvas.h"
+#include "canvas/text.h"
+#include "canvas/scroll_group.h"
+
 #include "editor.h"
 #include "keyboard.h"
 #include "public_editor.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
-#include "canvas-noevent-text.h"
 #include "audio_time_axis.h"
 #include "region_gain_line.h"
 #include "automation_line.h"
 #include "automation_time_axis.h"
 #include "automation_line.h"
 #include "control_point.h"
-#include "canvas_impl.h"
-#include "simplerect.h"
 #include "editor_drag.h"
 #include "midi_time_axis.h"
 #include "editor_regions.h"
@@ -60,8 +61,18 @@ using Gtkmm2ext::Keyboard;
 bool
 Editor::track_canvas_scroll (GdkEventScroll* ev)
 {
+	if (Keyboard::some_magic_widget_has_focus()) {
+		return false;
+	}
+	
 	framepos_t xdelta;
 	int direction = ev->direction;
+
+	/* this event arrives without transformation by the canvas, so we have
+	 * to transform the coordinates to be able to look things up.
+	 */
+
+	Duple event_coords = _track_canvas->window_to_canvas (Duple (ev->x, ev->y));
 
   retry:
 	switch (direction) {
@@ -79,7 +90,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
-				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (ev->y + vertical_adjustment.get_value() - canvas_timebars_vsize);
+				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (event_coords.y, false);
 				current_stepping_trackview = p.first;
 				if (!current_stepping_trackview) {
 					return false;
@@ -89,7 +100,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			current_stepping_trackview->step_height (false);
 			return true;
 		} else {
-			scroll_tracks_up_line ();
+			scroll_up_one_track ();
 			return true;
 		}
 		break;
@@ -108,7 +119,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
-				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (ev->y + vertical_adjustment.get_value() - canvas_timebars_vsize);
+				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (event_coords.y, false);
 				current_stepping_trackview = p.first;
 				if (!current_stepping_trackview) {
 					return false;
@@ -118,13 +129,13 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			current_stepping_trackview->step_height (true);
 			return true;
 		} else {
-			scroll_tracks_down_line ();
+			scroll_down_one_track ();
 			return true;
 		}
 		break;
 
 	case GDK_SCROLL_LEFT:
-		xdelta = (current_page_frames() / 8);
+		xdelta = (current_page_samples() / 8);
 		if (leftmost_frame > xdelta) {
 			reset_x_origin (leftmost_frame - xdelta);
 		} else {
@@ -133,11 +144,11 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		break;
 
 	case GDK_SCROLL_RIGHT:
-		xdelta = (current_page_frames() / 8);
+		xdelta = (current_page_samples() / 8);
 		if (max_framepos - xdelta > leftmost_frame) {
 			reset_x_origin (leftmost_frame + xdelta);
 		} else {
-			reset_x_origin (max_framepos - current_page_frames());
+			reset_x_origin (max_framepos - current_page_samples());
 		}
 		break;
 
@@ -150,9 +161,16 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 }
 
 bool
-Editor::track_canvas_scroll_event (GdkEventScroll *event)
+Editor::canvas_scroll_event (GdkEventScroll *event, bool from_canvas)
 {
-	track_canvas->grab_focus();
+	if (from_canvas) {
+		boost::optional<ArdourCanvas::Rect> rulers = _time_markers_group->bounding_box();
+		if (rulers && rulers->contains (Duple (event->x, event->y))) {
+			return canvas_ruler_event ((GdkEvent*) event, timecode_ruler, TimecodeRulerItem);
+		}
+	}
+
+	_track_canvas->grab_focus();
 	return track_canvas_scroll (event);
 }
 
@@ -160,7 +178,7 @@ bool
 Editor::track_canvas_button_press_event (GdkEventButton */*event*/)
 {
 	selection->clear ();
-	track_canvas->grab_focus();
+	_track_canvas->grab_focus();
 	return false;
 }
 
@@ -178,17 +196,7 @@ Editor::track_canvas_motion_notify_event (GdkEventMotion */*event*/)
 {
 	int x, y;
 	/* keep those motion events coming */
-	track_canvas->get_pointer (x, y);
-	return false;
-}
-
-bool
-Editor::track_canvas_motion (GdkEvent *ev)
-{
-	if (_verbose_cursor->visible ()) {
-		_verbose_cursor->set_position (ev->motion.x + 10, ev->motion.y + 10);
-	}
-
+	_track_canvas->get_pointer (x, y);
 	return false;
 }
 
@@ -261,13 +269,15 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 		break;
 
 	case GDK_ENTER_NOTIFY:
-		set_entered_track (&rv->get_time_axis_view ());
 		set_entered_regionview (rv);
+		ret = enter_handler (item, event, RegionItem);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		set_entered_track (0);
-		set_entered_regionview (0);
+		if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			set_entered_regionview (0);
+			ret = leave_handler (item, event, RegionItem);
+		}
 		break;
 
 	default:
@@ -276,6 +286,42 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 
 	return ret;
 }
+
+bool
+Editor::canvas_wave_view_event (GdkEvent *event, ArdourCanvas::Item* item, RegionView* rv)
+{
+	/* we only care about enter events here, required for mouse/cursor
+	 * tracking. there is a non-linear (non-child/non-parent) relationship
+	 * between various components of a regionview and so when we leave one
+	 * of them (e.g. a trim handle) and enter another (e.g. the waveview)
+	 * no other items get notified. enter/leave handling does not propagate
+	 * in the same way as other events, so we need to catch this because
+	 * entering (and leaving) the waveview is equivalent to
+	 * entering/leaving the regionview (which is why it is passed in as a
+	 * third argument).
+	 *
+	 * And in fact, we really only care about enter events.
+	 */
+
+	bool ret = false;
+
+	if (!rv->sensitive ()) {
+		return false;
+	}
+
+	switch (event->type) {
+	case GDK_ENTER_NOTIFY:
+		set_entered_regionview (rv);
+		ret = enter_handler (item, event, WaveItem);
+		break;
+
+	default:
+		break;
+	}
+
+	return ret;
+}	 
+
 
 bool
 Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, RouteTimeAxisView *tv)
@@ -303,10 +349,14 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, Rou
 
 	case GDK_ENTER_NOTIFY:
 		set_entered_track (tv);
+		ret = enter_handler (item, event, StreamItem);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		set_entered_track (0);
+		if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			set_entered_track (0);
+		}
+		ret = leave_handler (item, event, StreamItem);
 		break;
 
 	default:
@@ -456,13 +506,17 @@ Editor::canvas_fade_in_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRe
 
 	}
 
-	/* proxy for the regionview */
+	/* proxy for the regionview, except enter/leave events */
 
-	return canvas_region_view_event (event, rv->get_canvas_group(), rv);
+	if (event->type == GDK_ENTER_NOTIFY || event->type == GDK_LEAVE_NOTIFY) {
+		return true;
+	} else {
+		return canvas_region_view_event (event, rv->get_canvas_group(), rv);
+	}
 }
 
 bool
-Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv)
+Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv, bool trim)
 {
 	bool ret = false;
 
@@ -478,11 +532,11 @@ Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, 
 		clicked_control_point = 0;
 		clicked_axisview = &rv->get_time_axis_view();
 		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
-		ret = button_press_handler (item, event, FadeInHandleItem);
+		ret = button_press_handler (item, event, trim ? FadeInTrimHandleItem : FadeInHandleItem);
 		break;
 
 	case GDK_BUTTON_RELEASE:
-		ret = button_release_handler (item, event, FadeInHandleItem);
+		ret = button_release_handler (item, event, trim ? FadeInTrimHandleItem : FadeInHandleItem);
 		maybe_locate_with_edit_preroll ( rv->region()->position() );
 		break;
 
@@ -491,13 +545,11 @@ Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, 
 		break;
 
 	case GDK_ENTER_NOTIFY:
-		set_entered_regionview (rv);
-		ret = enter_handler (item, event, FadeInHandleItem);
+		ret = enter_handler (item, event, trim ? FadeInTrimHandleItem : FadeInHandleItem);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		set_entered_regionview (0);
-		ret = leave_handler (item, event, FadeInHandleItem);
+		ret = leave_handler (item, event, trim ? FadeInTrimHandleItem : FadeInHandleItem);
 		break;
 
 	default:
@@ -538,13 +590,17 @@ Editor::canvas_fade_out_event (GdkEvent *event, ArdourCanvas::Item* item, AudioR
 
 	}
 
-	/* proxy for the regionview */
+	/* proxy for the regionview, except enter/leave events */
 
-	return canvas_region_view_event (event, rv->get_canvas_group(), rv);
+	if (event->type == GDK_ENTER_NOTIFY || event->type == GDK_LEAVE_NOTIFY) {
+		return true;
+	} else {
+		return canvas_region_view_event (event, rv->get_canvas_group(), rv);
+	}
 }
 
 bool
-Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv)
+Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv, bool trim)
 {
 	bool ret = false;
 
@@ -560,11 +616,11 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 		clicked_control_point = 0;
 		clicked_axisview = &rv->get_time_axis_view();
 		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
-		ret = button_press_handler (item, event, FadeOutHandleItem);
+		ret = button_press_handler (item, event, trim ? FadeOutTrimHandleItem : FadeOutHandleItem);
 		break;
 
 	case GDK_BUTTON_RELEASE:
-		ret = button_release_handler (item, event, FadeOutHandleItem);
+		ret = button_release_handler (item, event, trim ? FadeOutTrimHandleItem : FadeOutHandleItem);
 		maybe_locate_with_edit_preroll ( rv->region()->last_frame() - rv->get_fade_out_shape_width() );
 		break;
 
@@ -573,13 +629,11 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 		break;
 
 	case GDK_ENTER_NOTIFY:
-		set_entered_regionview (rv);
-		ret = enter_handler (item, event, FadeOutHandleItem);
+		ret = enter_handler (item, event, trim ? FadeOutTrimHandleItem : FadeOutHandleItem);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		set_entered_regionview (0);
-		ret = leave_handler (item, event, FadeOutHandleItem);
+		ret = leave_handler (item, event, trim ? FadeOutTrimHandleItem : FadeOutHandleItem);
 		break;
 
 	default:
@@ -777,12 +831,10 @@ Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, Re
 		ret = motion_handler (item, event);
 		break;
 	case GDK_ENTER_NOTIFY:
-		set_entered_regionview (rv);
 		ret = enter_handler (item, event, type);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		set_entered_regionview (0);
 		ret = leave_handler (item, event, type);
 		break;
 
@@ -821,12 +873,10 @@ Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::
 		ret = true; // force this to avoid progagating the event into the regionview
 		break;
 	case GDK_ENTER_NOTIFY:
-		set_entered_regionview (rv);
 		ret = enter_handler (item, event, RegionViewNameHighlight);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		set_entered_regionview (0);
 		ret = leave_handler (item, event, RegionViewNameHighlight);
 		break;
 
@@ -863,12 +913,10 @@ Editor::canvas_region_view_name_event (GdkEvent *event, ArdourCanvas::Item* item
 		ret = motion_handler (item, event);
 		break;
 	case GDK_ENTER_NOTIFY:
-		set_entered_regionview (rv);
 		ret = enter_handler (item, event, RegionViewName);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		set_entered_regionview (0);
 		ret = leave_handler (item, event, RegionViewName);
 		break;
 
@@ -967,6 +1015,59 @@ Editor::canvas_meter_marker_event (GdkEvent *event, ArdourCanvas::Item* item, Me
 }
 
 bool
+Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType type)
+{
+	framepos_t xdelta;
+	bool handled = false;
+
+	if (event->type == GDK_SCROLL) {
+		
+		/* scroll events in the rulers are handled a little differently from
+		   scrolling elsewhere in the canvas.
+		*/
+
+		switch (event->scroll.direction) {
+		case GDK_SCROLL_UP:
+			temporal_zoom_step (false);
+			handled = true;
+			break;
+			
+		case GDK_SCROLL_DOWN:
+			temporal_zoom_step (true);
+			handled = true;
+			break;
+			
+		case GDK_SCROLL_LEFT:
+			xdelta = (current_page_samples() / 2);
+			if (leftmost_frame > xdelta) {
+				reset_x_origin (leftmost_frame - xdelta);
+			} else {
+				reset_x_origin (0);
+			}
+			handled = true;
+			break;
+			
+		case GDK_SCROLL_RIGHT:
+			xdelta = (current_page_samples() / 2);
+			if (max_framepos - xdelta > leftmost_frame) {
+				reset_x_origin (leftmost_frame + xdelta);
+			} else {
+				reset_x_origin (max_framepos - current_page_samples());
+			}
+			handled = true;
+			break;
+			
+		default:
+			/* what? */
+			break;
+		}
+		return handled;
+	}
+
+	return typed_event (item, event, type);
+}
+
+bool
 Editor::canvas_tempo_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, TempoBarItem);
@@ -1001,10 +1102,46 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 }
 
 bool
+Editor::canvas_drop_zone_event (GdkEvent* event)
+{
+	GdkEventScroll scroll;	
+	ArdourCanvas::Duple winpos;
+	
+	switch (event->type) {
+	case GDK_BUTTON_RELEASE:
+		if (event->button.button == 1) {
+			selection->clear_objects ();
+			selection->clear_tracks ();
+		}
+		break;
+
+	case GDK_SCROLL:
+		/* convert coordinates back into window space so that
+		   we can just call canvas_scroll_event().
+		*/
+		winpos = _track_canvas->canvas_to_window (Duple (event->scroll.x, event->scroll.y));
+		scroll = event->scroll;
+		scroll.x = winpos.x;
+		scroll.y = winpos.y;
+		return canvas_scroll_event (&scroll, true);
+		break;
+
+	case GDK_ENTER_NOTIFY:
+		return typed_event (_canvas_drop_zone, event, DropZoneItem);
+
+	case GDK_LEAVE_NOTIFY:
+		return typed_event (_canvas_drop_zone, event, DropZoneItem);
+
+	default:
+		break;
+	}
+
+	return true;
+}
+
+bool
 Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int x, int y, guint time)
 {
-	double wx;
-	double wy;
 	boost::shared_ptr<Region> region;
 	boost::shared_ptr<Region> region_copy;
 	RouteTimeAxisView* rtav;
@@ -1012,21 +1149,19 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 	double px;
 	double py;
 
-	string target = track_canvas->drag_dest_find_target (context, track_canvas->drag_dest_get_target_list());
+	string target = _track_canvas->drag_dest_find_target (context, _track_canvas->drag_dest_get_target_list());
 
 	if (target.empty()) {
 		return false;
 	}
 
-	track_canvas->window_to_world (x, y, wx, wy);
-
 	event.type = GDK_MOTION_NOTIFY;
-	event.button.x = wx;
-	event.button.y = wy;
+	event.button.x = x;
+	event.button.y = y;
 	/* assume we're dragging with button 1 */
 	event.motion.state = Gdk::BUTTON1_MASK;
 
-	(void) event_frame (&event, &px, &py);
+	(void) window_event_sample (&event, &px, &py);
 
 	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
 	bool can_drop = false;
@@ -1096,8 +1231,6 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 		      const SelectionData& /*data*/,
 		      guint /*info*/, guint /*time*/)
 {
-	double wx;
-	double wy;
 	boost::shared_ptr<Region> region;
 	boost::shared_ptr<Region> region_copy;
 	RouteTimeAxisView* rtav;
@@ -1105,17 +1238,15 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	double px;
 	double py;
 
-	track_canvas->window_to_world (x, y, wx, wy);
-
 	event.type = GDK_MOTION_NOTIFY;
-	event.button.x = wx;
-	event.button.y = wy;
+	event.button.x = x;
+	event.button.y = y;
 	/* assume we're dragging with button 1 */
 	event.motion.state = Gdk::BUTTON1_MASK;
 
-	framepos_t const pos = event_frame (&event, &px, &py);
+	framepos_t const pos = window_event_sample (&event, &px, &py);
 
-	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
+	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py, false);
 
 	if (tv.first != 0) {
 
@@ -1190,3 +1321,4 @@ Editor::key_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType
 
 	return handled;
 }
+

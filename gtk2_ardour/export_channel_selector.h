@@ -25,6 +25,10 @@
 
 #include "ardour/export_profile_manager.h"
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <gtkmm.h>
 #include <sigc++/signal.h>
 #include <boost/shared_ptr.hpp>
@@ -122,7 +126,7 @@ class PortExportChannelSelector : public ExportChannelSelector
 		typedef Gtk::TreeModelColumn<Glib::RefPtr<Gtk::ListStore> > ComboCol;
 		ComboCol                             port_list_col;
 
-		/* Channel struct, that represents the selected port and it's name */
+		/* Channel struct, that represents the selected port and its name */
 
 		struct Channel {
 		  public:

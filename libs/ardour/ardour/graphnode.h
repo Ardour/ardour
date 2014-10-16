@@ -38,7 +38,7 @@ typedef std::set< node_ptr_t > node_set_t;
 typedef std::list< node_ptr_t > node_list_t;
 
 /** A node on our processing graph, ie a Route */	
-class GraphNode
+class LIBARDOUR_API GraphNode
 {
     public:
 	GraphNode( boost::shared_ptr<Graph> Graph );

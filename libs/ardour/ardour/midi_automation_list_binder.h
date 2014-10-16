@@ -27,7 +27,7 @@ class MidiSource;
 class AutomationList;
 
 /** A class for late-binding a MidiSource and a Parameter to an AutomationList */
-class MidiAutomationListBinder : public MementoCommandBinder<ARDOUR::AutomationList>
+class LIBARDOUR_API MidiAutomationListBinder : public MementoCommandBinder<ARDOUR::AutomationList>
 {
 public:
 	MidiAutomationListBinder (boost::shared_ptr<ARDOUR::MidiSource>, Evoral::Parameter);

@@ -46,8 +46,8 @@ public:
 private:
 	/* see PortMatrix: signal flow from 0 to 1 (out to in) */
 	enum {
-		OUT = 0,
-		IN = 1,
+		FLOW_OUT = 0,
+		FLOW_IN = 1,
 	};
 };
 

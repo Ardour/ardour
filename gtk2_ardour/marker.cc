@@ -20,6 +20,15 @@
 #include <sigc++/bind.h>
 #include "ardour/tempo.h"
 
+#include "canvas/rectangle.h"
+#include "canvas/container.h"
+#include "canvas/line.h"
+#include "canvas/polygon.h"
+#include "canvas/text.h"
+#include "canvas/canvas.h"
+#include "canvas/scroll_group.h"
+#include "canvas/debug.h"
+
 #include "ardour_ui.h"
 /*
  * ardour_ui.h include was moved to the top of the list
@@ -30,9 +39,6 @@
 #include "marker.h"
 #include "public_editor.h"
 #include "utils.h"
-#include "canvas_impl.h"
-#include "simpleline.h"
-#include "simplerect.h"
 #include "rgb_macros.h"
 
 #include <gtkmm2ext/utils.h>
@@ -41,21 +47,23 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace Gtkmm2ext;
 
 PBD::Signal1<void,Marker*> Marker::CatchDeletion;
 
-Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, const string& annotation,
+static const double marker_height = 13.0;
+
+Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba, const string& annotation,
 		Type type, framepos_t frame, bool handle_events)
 
 	: editor (ed)
 	, _parent (&parent)
-	, _line (0)
+	, _track_canvas_line (0)
 	, _type (type)
 	, _selected (false)
 	, _shown (false)
 	, _line_shown (false)
-	, _canvas_height (0)
 	, _color (rgba)
 	, _left_label_limit (DBL_MAX)
 	, _right_label_limit (DBL_MAX)
@@ -71,7 +79,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	     |	      V
            (0,5)    (6,5)
 	       \    /
-               (3,13)
+               (3,marker_height)
 
 
 	   TempoMark:
@@ -107,25 +115,25 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
              PunchIn:
 
-	     0,0 ------> 13,0
+	     0,0 ------> marker_height,0
 	      |       /
 	      |      /
 	      |     /
 	      |    /
 	      |   /
 	      |  /
-	     0,13
+	     0,marker_height
 
 	     PunchOut
 
-	   0,0 -->-13,0
+	   0,0 -->-marker_height,0
 	    \       |
 	     \      |
 	      \     |
 	       \    |
 	        \   |
 	         \  |
-	         13,13
+	         marker_height,marker_height
 
 
 	*/
@@ -134,12 +142,12 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	case Mark:
 		points = new ArdourCanvas::Points ();
 
-		points->push_back (Gnome::Art::Point (0.0, 0.0));
-		points->push_back (Gnome::Art::Point (6.0, 0.0));
-		points->push_back (Gnome::Art::Point (6.0, 5.0));
-		points->push_back (Gnome::Art::Point (3.0, 13.0));
-		points->push_back (Gnome::Art::Point (0.0, 5.0));
-		points->push_back (Gnome::Art::Point (0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (6.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (6.0, 5.0));
+		points->push_back (ArdourCanvas::Duple (3.0, marker_height));
+		points->push_back (ArdourCanvas::Duple (0.0, 5.0));
+		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 
 		_shift = 3;
 		_label_offset = 8.0;
@@ -149,12 +157,12 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	case Meter:
 
 		points = new ArdourCanvas::Points ();
-		points->push_back (Gnome::Art::Point (3.0, 0.0));
-		points->push_back (Gnome::Art::Point (6.0, 5.0));
-		points->push_back (Gnome::Art::Point (6.0, 10.0));
-		points->push_back (Gnome::Art::Point (0.0, 10.0));
-		points->push_back (Gnome::Art::Point (0.0, 5.0));
-		points->push_back (Gnome::Art::Point (3.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (3.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (6.0, 5.0));
+		points->push_back (ArdourCanvas::Duple (6.0, 10.0));
+		points->push_back (ArdourCanvas::Duple (0.0, 10.0));
+		points->push_back (ArdourCanvas::Duple (0.0, 5.0));
+		points->push_back (ArdourCanvas::Duple (3.0, 0.0));
 
 		_shift = 3;
 		_label_offset = 8.0;
@@ -164,33 +172,33 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	case RangeStart:
 
 	        points = new ArdourCanvas::Points ();
-		points->push_back (Gnome::Art::Point (0.0, 0.0));
-		points->push_back (Gnome::Art::Point (6.5, 6.5));
-		points->push_back (Gnome::Art::Point (0.0, 13.0));
-		points->push_back (Gnome::Art::Point (0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (6.5, 6.5));
+		points->push_back (ArdourCanvas::Duple (0.0, marker_height));
+		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 
 		_shift = 0;
-		_label_offset = 13.0;
+		_label_offset = marker_height;
 		break;
 
 	case SessionEnd:
 	case RangeEnd:
 		points = new ArdourCanvas::Points ();
-		points->push_back (Gnome::Art::Point (6.5, 6.5));
-		points->push_back (Gnome::Art::Point (13.0, 0.0));
-		points->push_back (Gnome::Art::Point (13.0, 13.0));
-		points->push_back (Gnome::Art::Point (6.5, 6.5));
+		points->push_back (ArdourCanvas::Duple (6.5, 6.5));
+		points->push_back (ArdourCanvas::Duple (marker_height, 0.0));
+		points->push_back (ArdourCanvas::Duple (marker_height, marker_height));
+		points->push_back (ArdourCanvas::Duple (6.5, 6.5));
 
-		_shift = 13;
+		_shift = marker_height;
 		_label_offset = 6.0;
 		break;
 
 	case LoopStart:
 		points = new ArdourCanvas::Points ();
-		points->push_back (Gnome::Art::Point (0.0, 0.0));
-		points->push_back (Gnome::Art::Point (13.0, 13.0));
-		points->push_back (Gnome::Art::Point (0.0, 13.0));
-		points->push_back (Gnome::Art::Point (0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (marker_height, marker_height));
+		points->push_back (ArdourCanvas::Duple (0.0, marker_height));
+		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 
 		_shift = 0;
 		_label_offset = 12.0;
@@ -198,54 +206,60 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 	case LoopEnd:
 		points = new ArdourCanvas::Points ();
-		points->push_back (Gnome::Art::Point (13.0,  0.0));
-		points->push_back (Gnome::Art::Point (13.0, 13.0));
-		points->push_back (Gnome::Art::Point (0.0, 13.0));
-		points->push_back (Gnome::Art::Point (13.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (marker_height,  0.0));
+		points->push_back (ArdourCanvas::Duple (marker_height, marker_height));
+		points->push_back (ArdourCanvas::Duple (0.0, marker_height));
+		points->push_back (ArdourCanvas::Duple (marker_height, 0.0));
 
-		_shift = 13;
+		_shift = marker_height;
 		_label_offset = 0.0;
 		break;
 
 	case  PunchIn:
 		points = new ArdourCanvas::Points ();
-		points->push_back (Gnome::Art::Point (0.0, 0.0));
-		points->push_back (Gnome::Art::Point (13.0, 0.0));
-		points->push_back (Gnome::Art::Point (0.0, 13.0));
-		points->push_back (Gnome::Art::Point (0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (marker_height, 0.0));
+		points->push_back (ArdourCanvas::Duple (0.0, marker_height));
+		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 
 		_shift = 0;
-		_label_offset = 13.0;
+		_label_offset = marker_height;
 		break;
 
 	case  PunchOut:
 		points = new ArdourCanvas::Points ();
-		points->push_back (Gnome::Art::Point (0.0, 0.0));
-		points->push_back (Gnome::Art::Point (12.0, 0.0));
-		points->push_back (Gnome::Art::Point (12.0, 12.0));
-		points->push_back (Gnome::Art::Point (0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (12.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (12.0, 12.0));
+		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 
-		_shift = 13;
+		_shift = marker_height;
 		_label_offset = 0.0;
 		break;
 
 	}
 
 	frame_position = frame;
-	unit_position = editor.frame_to_unit (frame);
+	unit_position = editor.sample_to_pixel (frame);
 	unit_position -= _shift;
 
-	group = new Group (parent, unit_position, 0);
+	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple (unit_position, 0));
+#ifdef CANVAS_DEBUG
+	group->name = string_compose ("Marker::group for %1", annotation);
+#endif	
 
-	_name_background = new ArdourCanvas::SimpleRect (*group);
-	_name_background->property_outline_pixels() = 1;
+	_name_background = new ArdourCanvas::Rectangle (group);
+#ifdef CANVAS_DEBUG
+	_name_background->name = string_compose ("Marker::_name_background for %1", annotation);
+#endif	
 
 	/* adjust to properly locate the tip */
 
-	mark = new Polygon (*group);
-	mark->property_points() = *points;
+	mark = new ArdourCanvas::Polygon (group);
+	CANVAS_DEBUG_NAME (mark, string_compose ("Marker::mark for %1", annotation));
+
+	mark->set (*points);
 	set_color_rgba (rgba);
-	mark->property_width_pixels() = 1;
 
 	/* setup name pixbuf sizes */
 	name_font = get_font_for_style (N_("MarkerText"));
@@ -257,24 +271,28 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 	layout->set_font_description (name_font);
 	Gtkmm2ext::get_ink_pixel_size (layout, width, name_height);
-
-	name_pixbuf = new ArdourCanvas::Pixbuf(*group);
-	name_pixbuf->property_x() = _label_offset;
-	name_pixbuf->property_y() = (13/2) - (name_height/2);
+	
+	_name_item = new ArdourCanvas::Text (group);
+	CANVAS_DEBUG_NAME (_name_item, string_compose ("Marker::_name_item for %1", annotation));
+	_name_item->set_font_description (name_font);
+	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
+	_name_item->set_position (ArdourCanvas::Duple (_label_offset, (marker_height / 2.0) - (name_height / 2.0) - 2.0));
 
 	set_name (annotation.c_str());
 
 	editor.ZoomChanged.connect (sigc::mem_fun (*this, &Marker::reposition));
 
+	/* events will be handled by both the group and the mark itself, so
+	 * make sure they can both be used to lookup this object.
+	 */
+
+	group->set_data ("marker", this);
 	mark->set_data ("marker", this);
-	_name_background->set_data ("marker", this);
-
+	
 	if (handle_events) {
-		group->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
+		group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 	}
-
 }
-
 
 Marker::~Marker ()
 {
@@ -282,12 +300,12 @@ Marker::~Marker ()
 
 	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
 	delete group;
-	delete _line;
+	delete _track_canvas_line;
 }
 
-void Marker::reparent(ArdourCanvas::Group & parent)
+void Marker::reparent(ArdourCanvas::Container & parent)
 {
-	group->reparent (parent);
+	group->reparent (&parent);
 	_parent = &parent;
 }
 
@@ -310,32 +328,27 @@ Marker::setup_line ()
 {
 	if (_shown && (_selected || _line_shown)) {
 
-		if (_line == 0) {
+		if (_track_canvas_line == 0) {
 
-			_line = new ArdourCanvas::SimpleLine (*group);
-			_line->property_color_rgba() = ARDOUR_UI::config()->canvasvar_EditPoint.get();
-
-			_line->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
+			_track_canvas_line = new ArdourCanvas::Line (editor.get_hscroll_group());
+			_track_canvas_line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_EditPoint());
+			_track_canvas_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 		}
 
-                /* work out where to start the line from so that it extends from the top of the canvas */
-		double yo = 0;
-                double xo = 0;
+		ArdourCanvas::Duple g = group->canvas_origin();
+		ArdourCanvas::Duple d = _track_canvas_line->canvas_to_item (ArdourCanvas::Duple (g.x + _shift, 0));
 
-                _line->i2w (xo, yo);
-
-                _line->property_x1() = _shift;
-                _line->property_x2() = _shift;
-		_line->property_y1() = -yo; // zero in world coordinates, negative in item/parent coordinate space
-		_line->property_y2() = -yo + _canvas_height;
-
-		_line->property_color_rgba() = _selected ? ARDOUR_UI::config()->canvasvar_EditPoint.get() : _color;
-		_line->raise_to_top ();
-		_line->show ();
+		_track_canvas_line->set_x0 (d.x);
+		_track_canvas_line->set_x1 (d.x);
+		_track_canvas_line->set_y0 (d.y);
+		_track_canvas_line->set_y1 (ArdourCanvas::COORD_MAX);
+		_track_canvas_line->set_outline_color (_selected ? ARDOUR_UI::config()->get_canvasvar_EditPoint() : _color);
+		_track_canvas_line->raise_to_top ();
+		_track_canvas_line->show ();
 
 	} else {
-		if (_line) {
-			_line->hide ();
+		if (_track_canvas_line) {
+			_track_canvas_line->hide ();
 		}
 	}
 }
@@ -350,7 +363,7 @@ Marker::canvas_height_set (double h)
 ArdourCanvas::Item&
 Marker::the_item() const
 {
-	return *mark;
+	return *group;
 }
 
 void
@@ -381,36 +394,43 @@ Marker::setup_name_display ()
 
 	/* Work out how wide the name can be */
 	int name_width = min ((double) pixel_width (_name, name_font) + 2, limit);
+
 	if (name_width == 0) {
-		name_width = 1;
-	}
-
-	if (label_on_left ()) {
-		name_pixbuf->property_x() = -name_width;
-	}
-
-	name_pixbuf->property_pixbuf() = pixbuf_from_string (_name, name_font, name_width, name_height, Gdk::Color ("#000000"));
-
-	if (label_on_left ()) {
-		_name_background->property_x1() = name_pixbuf->property_x() - 2;
-		_name_background->property_x2() = name_pixbuf->property_x() + name_width + _shift;
+		_name_item->hide ();
 	} else {
-		_name_background->property_x1() = name_pixbuf->property_x() - _label_offset + 2;
-		_name_background->property_x2() = name_pixbuf->property_x() + name_width;
+		_name_item->show ();
+
+		if (label_on_left ()) {
+			_name_item->set_x_position (-name_width);
+		}
+			
+		_name_item->clamp_width (name_width);
+		_name_item->set (_name);
+		
+		if (label_on_left ()) {
+			/* adjust right edge of background to fit text */
+			_name_background->set_x0 (_name_item->position().x - 2);
+			_name_background->set_x1 (_name_item->position().x + name_width + _shift);
+		} else {
+			/* right edge remains at zero (group-relative). Add
+			 * arbitrary 4 pixels of extra padding at the end
+			 */
+			_name_background->set_x1 (_name_item->position().x + name_width + 4.0);
+		}
 	}
 
-	_name_background->property_y1() = 0;
-	_name_background->property_y2() = 13;
+	_name_background->set_y0 (0);
+	/* unfortunate hard coding - this has to * match the marker bars height */
+	_name_background->set_y1 (marker_height + 1.0); 
 }
 
 void
 Marker::set_position (framepos_t frame)
 {
-	double new_unit_position = editor.frame_to_unit (frame);
-	new_unit_position -= _shift;
-	group->move (new_unit_position - unit_position, 0.0);
+	unit_position = editor.sample_to_pixel (frame) - _shift;
+	group->set_x_position (unit_position);
+	setup_line ();
 	frame_position = frame;
-	unit_position = new_unit_position;
 }
 
 void
@@ -441,16 +461,16 @@ void
 Marker::set_color_rgba (uint32_t c)
 {
 	_color = c;
-	mark->property_fill_color_rgba() = _color;
-	mark->property_outline_color_rgba() = _color;
+	mark->set_fill_color (_color);
+	mark->set_outline_color (_color);
 
-	if (_line && !_selected) {
-		_line->property_color_rgba() = _color;
+	if (_track_canvas_line && !_selected) {
+		_track_canvas_line->set_outline_color (_color);
 	}
 
-	_name_background->property_fill() = true;
-	_name_background->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (_color, 0x70);
-	_name_background->property_outline_color_rgba() = _color;
+	_name_background->set_fill (true);
+	_name_background->set_fill_color (UINT_RGBA_CHANGE_A (_color, 0x70));
+	_name_background->set_outline_color (_color);
 }
 
 /** Set the number of pixels that are available for a label to the left of the centre of this marker */
@@ -458,7 +478,7 @@ void
 Marker::set_left_label_limit (double p)
 {
 	/* Account for the size of the marker */
-	_left_label_limit = p - 13;
+	_left_label_limit = p - marker_height;
 	if (_left_label_limit < 0) {
 		_left_label_limit = 0;
 	}
@@ -473,7 +493,7 @@ void
 Marker::set_right_label_limit (double p)
 {
 	/* Account for the size of the marker */
-	_right_label_limit = p - 13;
+	_right_label_limit = p - marker_height;
 	if (_right_label_limit < 0) {
 		_right_label_limit = 0;
 	}
@@ -485,13 +505,13 @@ Marker::set_right_label_limit (double p)
 
 /***********************************************************************/
 
-TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text,
+TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
 			  ARDOUR::TempoSection& temp)
 	: Marker (editor, parent, rgba, text, Tempo, 0, false),
 	  _tempo (temp)
 {
 	set_position (_tempo.frame());
-	group->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_marker_event), mark, this));
+	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_marker_event), group, this));
 }
 
 TempoMarker::~TempoMarker ()
@@ -500,13 +520,13 @@ TempoMarker::~TempoMarker ()
 
 /***********************************************************************/
 
-MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text,
+MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
 			  ARDOUR::MeterSection& m)
 	: Marker (editor, parent, rgba, text, Meter, 0, false),
 	  _meter (m)
 {
 	set_position (_meter.frame());
-	group->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_meter_marker_event), mark, this));
+	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_meter_marker_event), group, this));
 }
 
 MeterMarker::~MeterMarker ()

@@ -18,7 +18,7 @@ XPathTest::testMisc ()
 //	cout << "Test 1: RosegardenPatchFile.xml: Find all banks in the file" << endl;
 
 	std::string testdata_path;
-	CPPUNIT_ASSERT (find_file_in_search_path (test_search_path (), "RosegardenPatchFile.xml", testdata_path));
+	CPPUNIT_ASSERT (find_file (test_search_path (), "RosegardenPatchFile.xml", testdata_path));
 
 	XMLTree  doc(testdata_path);
 	// "//bank" gives as last element an empty element libxml bug????
@@ -51,7 +51,7 @@ XPathTest::testMisc ()
 	
 	// We have to allocate a new document here, or we get segfaults
 	std::string testsession_path;
-	CPPUNIT_ASSERT (find_file_in_search_path (test_search_path (), "TestSession.ardour", testsession_path));
+	CPPUNIT_ASSERT (find_file (test_search_path (), "TestSession.ardour", testsession_path));
 
 	XMLTree doc2(testsession_path);
 	result = doc2.find("/Session/Sources/Source[contains(@captured-for, 'Guitar')]");
@@ -77,7 +77,7 @@ XPathTest::testMisc ()
 //	cout << endl << endl << "Test 5: ProtoolsPatchFile.midnam: Get Banks and Patches for 'Name Set 1'" << endl;
 	
 	std::string testmidnam_path;
-	CPPUNIT_ASSERT (find_file_in_search_path (test_search_path (), "ProtoolsPatchFile.midnam", testmidnam_path));
+	CPPUNIT_ASSERT (find_file (test_search_path (), "ProtoolsPatchFile.midnam", testmidnam_path));
 
 	// We have to allocate a new document here, or we get segfaults
 	XMLTree doc3(testmidnam_path);

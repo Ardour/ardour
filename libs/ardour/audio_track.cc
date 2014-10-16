@@ -309,7 +309,7 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 	if (!lm.locked()) {
 		boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 		framecnt_t playback_distance = diskstream->calculate_playback_distance(nframes);
-		if (can_internal_playback_seek(std::llabs(playback_distance))) {
+		if (can_internal_playback_seek(llabs(playback_distance))) {
 			/* TODO should declick */
 			internal_playback_seek(playback_distance);
 		}
@@ -369,6 +369,13 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 
 	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, (!diskstream->record_enabled() && _session.transport_rolling()));
 
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
+		if (d) {
+			d->flush_buffers (nframes);
+		}
+	}
+
 	need_butler = diskstream->commit (playback_distance);
 
 	return 0;
@@ -376,7 +383,7 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 
 int
 AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nframes,
-			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export)
+			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze)
 {
 	boost::scoped_array<gain_t> gain_buffer (new gain_t[nframes]);
 	boost::scoped_array<Sample> mix_buffer (new Sample[nframes]);
@@ -410,38 +417,7 @@ AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nfram
 		}
 	}
 
-	// If no processing is required, there's no need to go any further.
-
-	if (!endpoint && !include_endpoint) {
-		return 0;
-	}
-
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-
-		if (!include_endpoint && (*i) == endpoint) {
-			break;
-		}
-		
-		/* if we're not exporting, stop processing if we come across a routing processor.
-		 */
-		
-		if (!for_export && (*i)->does_routing()) {
-			break;
-		}
-
-		/* even for export, don't run any processor that does routing. 
-
-		   oh, and don't bother with the peak meter either.
-		 */
-
-		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
-			(*i)->run (buffers, start, start+nframes, nframes, true);
-		}
-		
-		if ((*i) == endpoint) {
-			break;
-		}
-	}
+	bounce_process (buffers, start, nframes, endpoint, include_endpoint, for_export, for_freeze);
 
 	return 0;
 }
@@ -514,7 +490,7 @@ AudioTrack::bounce_range (framepos_t start, framepos_t end, InterThreadInfo& itt
 			  boost::shared_ptr<Processor> endpoint, bool include_endpoint)
 {
 	vector<boost::shared_ptr<Source> > srcs;
-	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false);
+	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false, false);
 }
 
 void
@@ -557,8 +533,8 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 	boost::shared_ptr<Region> res;
 
-	if ((res = _session.write_one_track (*this, _session.current_start_frame(), _session.current_end_frame(), true, srcs, itt, 
-					     main_outs(), false, false)) == 0) {
+	if ((res = _session.write_one_track (*this, _session.current_start_frame(), _session.current_end_frame(),
+					true, srcs, itt, main_outs(), false, false, true)) == 0) {
 		return;
 	}
 
@@ -569,7 +545,10 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 		for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
-			if (!(*r)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*r)) {
+			if ((*r)->does_routing() && (*r)->active()) {
+				break;
+			}
+			if (!boost::dynamic_pointer_cast<PeakMeter>(*r)) {
 
 				FreezeRecordProcessorInfo* frii  = new FreezeRecordProcessorInfo ((*r)->get_state(), (*r));
 
@@ -577,9 +556,10 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 				_freeze_record.processor_info.push_back (frii);
 
-				/* now deactivate the processor */
-
-				(*r)->deactivate ();
+				/* now deactivate the processor, */
+				if (!boost::dynamic_pointer_cast<Amp>(*r)) {
+					(*r)->deactivate ();
+				}
 			}
 			
 			_session.set_dirty ();

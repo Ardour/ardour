@@ -23,6 +23,7 @@
 enum ItemType {
 	RegionItem,
 	StreamItem,
+	WaveItem,
 	PlayheadCursorItem,
 	MarkerItem,
 	MarkerBarItem,
@@ -45,15 +46,22 @@ enum ItemType {
 	AutomationTrackItem,
 	FadeInItem,
 	FadeInHandleItem,
+	FadeInTrimHandleItem,
 	FadeOutItem,
 	FadeOutHandleItem,
+	FadeOutTrimHandleItem,
 	NoteItem,
 	FeatureLineItem,
-        LeftFrameHandle,
-        RightFrameHandle,
+	LeftFrameHandle,
+	RightFrameHandle,
 	StartCrossFadeItem,
 	EndCrossFadeItem,
 	CrossfadeViewItem,
+	TimecodeRulerItem,
+	MinsecRulerItem,
+	BBTRulerItem,
+	SamplesRulerItem,
+	DropZoneItem,
 
 	/* don't remove this */
 

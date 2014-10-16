@@ -27,6 +27,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 
 ExportFileNotebook::ExportFileNotebook () :
@@ -86,27 +87,41 @@ ExportFileNotebook::sync_with_manager ()
 	}
 
 	set_current_page (0);
+	update_soundcloud_upload ();
 	CriticalSelectionChanged ();
 }
 
 void
-ExportFileNotebook::update_example_filenames()
+ExportFileNotebook::update_soundcloud_upload ()
+{
+	int i;
+	bool show_credentials_entry = false;
+	ExportProfileManager::FormatStateList const & formats = profile_manager->get_formats ();
+	ExportProfileManager::FormatStateList::const_iterator format_it;
+
+	for (i = 0, format_it = formats.begin(); format_it != formats.end(); ++i, ++format_it) {
+		FilePage * page;
+		if ((page = dynamic_cast<FilePage *> (get_nth_page (i)))) {
+			bool this_soundcloud_upload = page->get_soundcloud_upload ();
+			(*format_it)->format->set_soundcloud_upload (this_soundcloud_upload);
+			if (this_soundcloud_upload) {
+				show_credentials_entry  = true;
+			}
+		}
+	}
+
+	soundcloud_export_selector->set_visible (show_credentials_entry);
+
+}
+
+void
+ExportFileNotebook::update_example_filenames ()
 {
 	int i = 0;
 	FilePage * page;
 	while ((page = dynamic_cast<FilePage *> (get_nth_page (i++)))) {
 		page->update_example_filename();
 	}
-}
-
-std::string
-ExportFileNotebook::get_nth_format_name (uint32_t n)
-{
-	FilePage * page;
-	if ((page = dynamic_cast<FilePage *> (get_nth_page (n - 1)))) {
-		return page->get_format_name();
-	}
-	return "";
 }
 
 void
@@ -177,6 +192,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 
   format_label (_("Format"), Gtk::ALIGN_LEFT),
   filename_label (_("Location"), Gtk::ALIGN_LEFT),
+  soundcloud_upload_button (_("Upload to Soundcloud")),
   tab_number (number)
 {
 	set_border_width (12);
@@ -185,6 +201,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	pack_start (format_align, false, false, 0);
 	pack_start (filename_label, false, false, 0);
 	pack_start (filename_align, false, false, 0);
+	pack_start (soundcloud_upload_button, false, false, 0);
 
 	format_align.add (format_selector);
 	format_align.set_padding (6, 12, 18, 0);
@@ -219,6 +236,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	filename_selector.CriticalSelectionChanged.connect (
 		sigc::mem_fun (*this, &ExportFileNotebook::FilePage::critical_selection_changed));
 
+	soundcloud_upload_button.signal_toggled().connect (sigc::mem_fun (*parent, &ExportFileNotebook::update_soundcloud_upload));
 	/* Tab widget */
 
 	tab_close_button.add (*Gtk::manage (new Gtk::Image (::get_icon("close"))));
@@ -253,6 +271,12 @@ ExportFileNotebook::FilePage::get_format_name () const
 		return format_state->format->name();
 	}
 	return _("No format!");
+}
+
+bool
+ExportFileNotebook::FilePage::get_soundcloud_upload () const
+{
+	return soundcloud_upload_button.get_active ();
 }
 
 void

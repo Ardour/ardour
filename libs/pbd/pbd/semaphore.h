@@ -22,13 +22,17 @@
 
 #ifdef __APPLE__
 #    include <mach/mach.h>
-#elif defined(_WIN32)
+#elif defined(PLATFORM_WINDOWS)
 #    include <windows.h>
+#ifndef INFINITE
+#define INFINITE 0xffffffffL
+#endif
 #else
 #    include <semaphore.h>
 #    include <errno.h>
 #endif
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/failed_constructor.h"
 
 namespace PBD {
@@ -45,7 +49,7 @@ namespace PBD {
    only safe way to reliably signal from a real-time audio thread.  The
    counting semantics also complement ringbuffers of events nicely.
 */
-class Semaphore
+class /*LIBPBD_API*/ Semaphore
 {
 public:
 	/**
@@ -69,7 +73,7 @@ public:
 private:
 #if defined(__APPLE__)
 	semaphore_t _sem;  // sem_t is a worthless broken mess on OSX
-#elif defined(_WIN32)
+#elif defined(PLATFORM_WINDOWS)
 	HANDLE _sem;  // types are overrated anyway
 #else
 	sem_t _sem;
@@ -114,7 +118,7 @@ Semaphore::try_wait()
 	return semaphore_timedwait(_sem, zero) == KERN_SUCCESS;
 }
 
-#elif defined(_WIN32)
+#elif defined(PLATFORM_WINDOWS)
 
 inline
 Semaphore::Semaphore(unsigned initial)
@@ -151,7 +155,7 @@ Semaphore::try_wait()
 	return WaitForSingleObject(_sem, 0) == WAIT_OBJECT_0;
 }
 
-#else  /* !defined(__APPLE__) && !defined(_WIN32) */
+#else  /* !defined(__APPLE__) && !defined(PLATFORM_WINDOWS) */
 
 Semaphore::Semaphore(unsigned initial)
 {

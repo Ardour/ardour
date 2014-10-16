@@ -25,6 +25,7 @@
 
 #include "pbd/signals.h"
 
+#include "midi++/libmidi_visibility.h"
 #include "midi++/types.h"
 
 namespace MIDI {
@@ -33,13 +34,14 @@ class Port;
 class Parser;
 
 typedef PBD::Signal1<void,Parser&>                   ZeroByteSignal;
+typedef PBD::Signal2<void,Parser&,unsigned short>    BankSignal;
 typedef PBD::Signal2<void,Parser&,framecnt_t>        TimestampedSignal;
 typedef PBD::Signal2<void,Parser&, byte>             OneByteSignal;
 typedef PBD::Signal2<void,Parser &, EventTwoBytes *> TwoByteSignal;
 typedef PBD::Signal2<void,Parser &, pitchbend_t>     PitchBendSignal;
 typedef PBD::Signal3<void,Parser &, byte *, size_t>  Signal;
 
-class Parser {
+class LIBMIDIPP_API Parser {
  public:
 	Parser ();
 	~Parser ();
@@ -54,7 +56,7 @@ class Parser {
 
 	/* signals that anyone can connect to */
 	
-	OneByteSignal         bank_change;
+	BankSignal            bank_change;
 	TwoByteSignal         note_on;
 	TwoByteSignal         note_off;
 	TwoByteSignal         poly_pressure;
@@ -63,7 +65,7 @@ class Parser {
 	PitchBendSignal       pitchbend;
 	TwoByteSignal         controller;
 
-	OneByteSignal         channel_bank_change[16];
+	BankSignal            channel_bank_change[16];
 	TwoByteSignal         channel_note_on[16];
 	TwoByteSignal         channel_note_off[16];
 	TwoByteSignal         channel_poly_pressure[16];

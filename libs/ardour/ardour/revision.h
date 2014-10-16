@@ -20,8 +20,15 @@
 #ifndef __ardour_revision_h__
 #define __ardour_revision_h__
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
-	extern const char* revision;
+
+	extern LIBARDOUR_API const char* revision;
+	
+	extern "C" {
+		LIBARDOUR_API const char* get_ardour_revision();
+	}
 }
 
 #endif

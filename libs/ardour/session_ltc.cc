@@ -31,7 +31,6 @@
 
 using namespace std;
 using namespace ARDOUR;
-using namespace MIDI;
 using namespace PBD;
 using namespace Timecode;
 
@@ -245,6 +244,19 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	/* port latency compensation:
 	 * The _generated timecode_ is offset by the port-latency,
 	 * therefore the offset depends on the direction of transport.
+	 *
+	 * latency is compensated by adding it to the timecode to
+	 * be generated. e.g. if the signal will reach the output in
+	 * N samples time from now, generate the timecode for (now + N).
+	 *
+	 * sample-sync is achieved by further calculating the difference
+	 * between the timecode and the session-transport and offsetting the
+	 * buffer.
+	 *
+	 * The timecode is generated directly in the Session process callback
+	 * using _transport_frame. It requires that the session has set the
+	 * port's playback latency to worst_playback_latency() prior to
+	 * calling ltc_tx_send_time_code_for_cycle().
 	 */
 	framepos_t cycle_start_frame;
 

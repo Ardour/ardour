@@ -19,12 +19,18 @@
 #ifndef __gtkmm2ext_slider_controller_h__
 #define __gtkmm2ext_slider_controller_h__
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <gtkmm.h>
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/pixfader.h>
 #include <gtkmm2ext/binding_proxy.h>
 
 #include <boost/shared_ptr.hpp>
+
+#include "gtkmm2ext/visibility.h"
 
 namespace Gtkmm2ext {
 	class Pix;
@@ -36,40 +42,32 @@ namespace PBD {
 
 namespace Gtkmm2ext {
 
-class SliderController : public Gtkmm2ext::PixFader
+class LIBGTKMM2EXT_API SliderController : public Gtkmm2ext::PixFader
 {
-  public:
-        SliderController (Gtk::Adjustment* adj, int orientation, int, int);
-	
-        virtual ~SliderController () {}
+	public:
+	SliderController (Gtk::Adjustment* adj, int orientation, int, int);
 
-	void set_value (float);
+	virtual ~SliderController () {}
 
 	Gtk::SpinButton& get_spin_button () { return spin; }
-	
-	bool on_button_press_event (GdkEventButton *ev);
-
 	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { binding_proxy.set_controllable (c); }
 
-  protected:
+	protected:
+	bool on_button_press_event (GdkEventButton *ev);
 	BindingProxy binding_proxy;
-	Gtk::SpinButton     spin;
-	Gtk::Frame          spin_frame;
-	Gtk::HBox           spin_hbox;
-
-	void init ();
+	Gtk::SpinButton spin;
 };
 
-class VSliderController : public SliderController
+class LIBGTKMM2EXT_API VSliderController : public SliderController
 {
-  public:
-        VSliderController (Gtk::Adjustment *adj, int, int, bool with_numeric = true);
+	public:
+	VSliderController (Gtk::Adjustment *adj, int, int);
 };
 
-class HSliderController : public SliderController
+class LIBGTKMM2EXT_API HSliderController : public SliderController
 {
-  public:
-	HSliderController (Gtk::Adjustment *adj, int, int, bool with_numeric = true);
+	public:
+	HSliderController (Gtk::Adjustment *adj, int, int);
 };
 
 

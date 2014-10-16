@@ -29,7 +29,7 @@ class XMLNode;
 
 namespace ARDOUR {
 
-class Configuration : public PBD::Stateful
+class LIBARDOUR_API Configuration : public PBD::Stateful
 {
   public:
 	Configuration();

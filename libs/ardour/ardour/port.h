@@ -25,12 +25,12 @@
 #include <set>
 #include <string>
 #include <vector>
-#include <jack/jack.h>
 #include <boost/utility.hpp>
 #include "pbd/signals.h"
 
 #include "ardour/data_type.h"
 #include "ardour/port_engine.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
@@ -38,7 +38,7 @@ namespace ARDOUR {
 class AudioEngine;
 class Buffer;
 
-class Port : public boost::noncopyable
+class LIBARDOUR_API Port : public boost::noncopyable
 {
 public:
 	virtual ~Port ();

@@ -21,6 +21,7 @@
 #define __ardour_gtk_axis_view_h__
 
 #include <list>
+#include <boost/unordered_map.hpp>
 
 #include <gtkmm/label.h>
 #include <gdkmm/color.h>
@@ -63,6 +64,10 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 	std::string gui_property (const std::string& property_name) const;
 	
 	template<typename T> void set_gui_property (const std::string& property_name, const T& value) {
+		std::stringstream s;
+		s << value;
+		property_hashtable.erase(property_name);
+		property_hashtable.emplace(property_name, s.str());
 		gui_object_state().set_property<T> (state_id(), property_name, value);
 	}
 
@@ -83,14 +88,13 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 	 */
 	static Gdk::Color unique_random_color();
 
-
 	Gdk::Color _color;
 
 	static std::list<Gdk::Color> used_colors;
 
 	Gtk::Label name_label;
 
-	bool _marked_for_display;
+	mutable boost::unordered_map<std::string, std::string> property_hashtable;
 	uint32_t _old_order_key;
 }; /* class AxisView */
 

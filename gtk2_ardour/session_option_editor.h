@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk_ardour_session_option_editor_h__
+#define __gtk_ardour_session_option_editor_h__
+
 #include "option_editor.h"
 
 namespace ARDOUR {
@@ -38,4 +41,9 @@ private:
 	bool get_use_monitor_section ();
 
 	ComboOption<float>* _vpu;
+	EntryOption* _take_name;
+
+	void save_defaults ();
 };
+
+#endif /* __gtk_ardour_session_option_editor_h__ */

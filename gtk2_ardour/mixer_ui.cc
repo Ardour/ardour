@@ -41,6 +41,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/route_group.h"
+#include "ardour/route_sorters.h"
 #include "ardour/session.h"
 
 #include "keyboard.h"
@@ -60,6 +61,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
@@ -91,7 +93,10 @@ Mixer_UI::Mixer_UI ()
 	, _monitor_section (0)
 	, _strip_width (Config->get_default_narrow_ms() ? Narrow : Wide)
 	, ignore_reorder (false)
+        , _in_group_rebuild_or_clear (false)
+        , _route_deletion_in_progress (false)
 	, _following_editor_selection (false)
+	, _maximised (false)
 {
 	/* allow this window to become the key focus window */
 	set_flags (CAN_FOCUS);
@@ -115,7 +120,7 @@ Mixer_UI::Mixer_UI ()
 	b->show_all ();
 
 	scroller.add (*b);
-	scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
 
 	setup_track_display ();
 
@@ -239,9 +244,6 @@ Mixer_UI::Mixer_UI ()
 	list_hpane.show();
 	group_display.show();
 
-	_in_group_rebuild_or_clear = false;
-	_maximised = false;
-
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 
         MonitorSection::setup_knob_images ();
@@ -291,7 +293,7 @@ Mixer_UI::show_window ()
 			ms = (*ri)[track_columns.strip];
 			ms->set_width_enum (ms->get_width_enum (), ms->width_owner());
 			/* Fix visibility of mixer strip stuff */
-			ms->parameter_changed (X_("mixer-strip-visibility"));
+			ms->parameter_changed (X_("mixer-element-visibility"));
 		}
 	}
 	
@@ -403,6 +405,30 @@ Mixer_UI::add_strips (RouteList& routes)
 }
 
 void
+Mixer_UI::deselect_all_strip_processors ()
+{
+	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		(*i)->deselect_all_processors();
+	}
+}
+
+void
+Mixer_UI::select_none ()
+{
+	_selection.clear_routes();
+	deselect_all_strip_processors();
+}
+
+void
+Mixer_UI::delete_processors ()
+{
+	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		(*i)->delete_processors();
+	}
+}
+
+
+void
 Mixer_UI::remove_strip (MixerStrip* strip)
 {
 	if (_session && _session->deletion_in_progress()) {
@@ -420,6 +446,7 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 	
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[track_columns.strip] == strip) {
+                        PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
 			track_model->erase (ri);
 			break;
 		}
@@ -997,9 +1024,17 @@ Mixer_UI::track_list_delete (const Gtk::TreeModel::Path&)
 {
 	/* this happens as the second step of a DnD within the treeview as well
 	   as when a row/route is actually deleted.
+           
+           if it was a deletion then we have to force a redisplay because
+           order keys may not have changed.
 	*/
+
 	DEBUG_TRACE (DEBUG::OrderKeys, "mixer UI treeview row deleted\n");
 	sync_order_keys_from_treeview ();
+
+        if (_route_deletion_in_progress) {
+                redisplay_track_list ();
+        }
 }
 
 void
@@ -1090,28 +1125,12 @@ Mixer_UI::strip_width_changed ()
 
 }
 
-struct SignalOrderRouteSorter {
-    bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-	    if (a->is_master() || a->is_monitor()) {
-		    /* "a" is a special route (master, monitor, etc), and comes
-		     * last in the mixer ordering
-		     */
-		    return false;
-	    } else if (b->is_master() || b->is_monitor()) {
-		    /* everything comes before b */
-		    return true;
-	    }
-	    return a->order_key () < b->order_key ();
-
-    }
-};
-
 void
 Mixer_UI::initial_track_display ()
 {
 	boost::shared_ptr<RouteList> routes = _session->get_routes();
 	RouteList copy (*routes);
-	SignalOrderRouteSorter sorter;
+	ARDOUR::SignalOrderRouteSorter sorter;
 
 	copy.sort (sorter);
 
@@ -1917,16 +1936,8 @@ Mixer_UI::set_route_targets_for_operation ()
 		return;
 	}
 
-	/* nothing selected ... try to get mixer strip at mouse */
+//  removed "implicit" selections of strips, after discussion on IRC
 
-	int x, y;
-	get_pointer (x, y);
-	
-	MixerStrip* ms = strip_by_x (x);
-	
-	if (ms) {
-		_route_targets.insert (ms);
-	}
 }
 
 void

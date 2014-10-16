@@ -17,7 +17,7 @@
 
 */
 
-#include <dlfcn.h>
+#include <glibmm/module.h>
 
 #include <glibmm/fileutils.h>
 
@@ -29,7 +29,9 @@
 
 #include "ardour/debug.h"
 #include "ardour/control_protocol_manager.h"
-#include "ardour/control_protocol_search_path.h"
+
+#include "ardour/search_paths.h"
+
 
 using namespace ARDOUR;
 using namespace std;
@@ -211,7 +213,9 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 	}
 
 	cpi.protocol = 0;
-	dlclose (cpi.descriptor->module);
+	delete cpi.state;
+	cpi.state = 0;
+	delete (Glib::Module*)cpi.descriptor->module;
 
 	ProtocolStatusChange (&cpi);
 
@@ -241,14 +245,37 @@ ControlProtocolManager::discover_control_protocols ()
 {
 	vector<std::string> cp_modules;
 
+#ifdef COMPILER_MSVC
+   /**
+    * Different build targets (Debug / Release etc) use different versions
+    * of the 'C' runtime (which can't be 'mixed & matched'). Therefore, in
+    * case the supplied search path contains multiple version(s) of a given
+    * module, only select the one(s) which match the current build target
+    */
+	#if defined (_DEBUG)
+		Glib::PatternSpec dll_extension_pattern("*D.dll");
+	#elif defined (RDC_BUILD)
+		Glib::PatternSpec dll_extension_pattern("*RDC.dll");
+	#elif defined (_WIN64)
+		Glib::PatternSpec dll_extension_pattern("*64.dll");
+	#else
+		Glib::PatternSpec dll_extension_pattern("*32.dll");
+	#endif
+#else
+	Glib::PatternSpec dll_extension_pattern("*.dll");
+#endif
+
 	Glib::PatternSpec so_extension_pattern("*.so");
 	Glib::PatternSpec dylib_extension_pattern("*.dylib");
 
-	find_matching_files_in_search_path (control_protocol_search_path (),
-					    so_extension_pattern, cp_modules);
+	find_files_matching_pattern (cp_modules, control_protocol_search_path (),
+	                             dll_extension_pattern);
 
-	find_matching_files_in_search_path (control_protocol_search_path (),
-					    dylib_extension_pattern, cp_modules);
+	find_files_matching_pattern (cp_modules, control_protocol_search_path (),
+	                             so_extension_pattern);
+
+	find_files_matching_pattern (cp_modules, control_protocol_search_path (),
+	                             dylib_extension_pattern);
 
 	DEBUG_TRACE (DEBUG::ControlProtocols, 
 		     string_compose (_("looking for control protocols in %1\n"), control_protocol_search_path().to_string()));
@@ -296,7 +323,7 @@ ControlProtocolManager::control_protocol_discover (string path)
 				     string_compose(_("Control surface protocol discovered: \"%1\"\n"), cpi->name));
 		}
 
-		dlclose (descriptor->module);
+		delete (Glib::Module*)descriptor->module;
 	}
 
 	return 0;
@@ -305,31 +332,31 @@ ControlProtocolManager::control_protocol_discover (string path)
 ControlProtocolDescriptor*
 ControlProtocolManager::get_descriptor (string path)
 {
-	void *module;
+	Glib::Module* module = new Glib::Module(path);
 	ControlProtocolDescriptor *descriptor = 0;
 	ControlProtocolDescriptor* (*dfunc)(void);
-	const char *errstr;
+	void* func = 0;
 
-	if ((module = dlopen (path.c_str(), RTLD_NOW)) == 0) {
-		error << string_compose(_("ControlProtocolManager: cannot load module \"%1\" (%2)"), path, dlerror()) << endmsg;
+	if (!(*module)) {
+		error << string_compose(_("ControlProtocolManager: cannot load module \"%1\" (%2)"), path, Glib::Module::get_last_error()) << endmsg;
+		delete module;
 		return 0;
 	}
 
-
-	dfunc = (ControlProtocolDescriptor* (*)(void)) dlsym (module, "protocol_descriptor");
-
-	if ((errstr = dlerror()) != 0) {
+	if (!module->get_symbol("protocol_descriptor", func)) {
 		error << string_compose(_("ControlProtocolManager: module \"%1\" has no descriptor function."), path) << endmsg;
-		error << errstr << endmsg;
-		dlclose (module);
+		error << Glib::Module::get_last_error() << endmsg;
+		delete module;
 		return 0;
 	}
 
+	dfunc = (ControlProtocolDescriptor* (*)(void))func;
 	descriptor = dfunc();
+
 	if (descriptor) {
-		descriptor->module = module;
+		descriptor->module = (void*)module;
 	} else {
-		dlclose (module);
+		delete module;
 	}
 
 	return descriptor;

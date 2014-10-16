@@ -22,12 +22,16 @@
 #include "pbd/stacktrace.h"
 #include "ardour/profile.h"
 
+#include "canvas/debug.h"
+#include "canvas/scroll_group.h"
+#include "canvas/tracking_text.h"
+
 #include "ardour_ui.h"
 #include "audio_clock.h"
 #include "editor.h"
 #include "editor_drag.h"
+#include "global_signals.h"
 #include "main_clock.h"
-#include "utils.h"
 #include "verbose_cursor.h"
 
 #include "i18n.h"
@@ -37,13 +41,19 @@ using namespace ARDOUR;
 
 VerboseCursor::VerboseCursor (Editor* editor)
 	: _editor (editor)
-	, _visible (false)
-	, _xoffset (0)
-	, _yoffset (0)
 {
-	_canvas_item = new ArdourCanvas::NoEventText (*_editor->track_canvas->root());
-	_canvas_item->property_font_desc() = get_font_for_style (N_("VerboseCanvasCursor"));
-	_canvas_item->property_anchor() = Gtk::ANCHOR_NW;
+	_canvas_item = new ArdourCanvas::TrackingText (_editor->get_noscroll_group());
+	CANVAS_DEBUG_NAME (_canvas_item, "verbose canvas cursor");
+	_canvas_item->set_font_description (Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_LargerBoldFont()));
+	color_handler ();
+
+	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &VerboseCursor::color_handler));
+}
+
+void
+VerboseCursor::color_handler ()
+{
+	_canvas_item->set_color (ARDOUR_UI::config()->get_canvasvar_VerboseCanvasCursor());
 }
 
 ArdourCanvas::Item *
@@ -52,88 +62,50 @@ VerboseCursor::canvas_item () const
 	return _canvas_item;
 }
 
-void
-VerboseCursor::set (string const & text, double x, double y)
-{
-	set_text (text);
-	set_position (x, y);
-}
-
-void
-VerboseCursor::set_text (string const & text)
-{
-	_canvas_item->property_text() = text.c_str();
-}
-
-/** @param xoffset x offset to be applied on top of any set_position() call
- *  before the next show ().
- *  @param yoffset y offset as above.
+/** Set the contents of the cursor.
  */
 void
-VerboseCursor::show (double xoffset, double yoffset)
+VerboseCursor::set (string const & text)
 {
-	_xoffset = xoffset;
-	_yoffset = yoffset;
+	_canvas_item->set (text);
+}
 
-	if (_visible) {
-		return;
-	}
-
-	_canvas_item->raise_to_top ();
-	_canvas_item->show ();
-	_visible = true;
+void
+VerboseCursor::show ()
+{
+	_canvas_item->show_and_track (true, true);
+	_canvas_item->parent()->raise_to_top ();
 }
 
 void
 VerboseCursor::hide ()
 {
 	_canvas_item->hide ();
-	_visible = false;
-}
-
-double
-VerboseCursor::clamp_x (double x)
-{
-	if (x < 0) {
-		x = 0;
-	} else {
-		x = min (_editor->_canvas_width - 200.0, x);
-	}
-	return x;
-}
-
-double
-VerboseCursor::clamp_y (double y)
-{
-	if (y < _editor->canvas_timebars_vsize) {
-		y = _editor->canvas_timebars_vsize;
-	} else {
-		y = min (_editor->_canvas_height - 50, y);
-	}
-	return y;
+	_canvas_item->parent()->lower_to_bottom ();
+	/* reset back to a sensible default for the next time we display the VC */
+	_canvas_item->set_offset (ArdourCanvas::Duple (10, 10));
 }
 
 void
-VerboseCursor::set_time (framepos_t frame, double x, double y)
+VerboseCursor::set_offset (ArdourCanvas::Duple const & d)
+{
+	_canvas_item->set_offset (d);
+}
+
+void
+VerboseCursor::set_time (framepos_t frame)
 {
 	char buf[128];
 	Timecode::Time timecode;
 	Timecode::BBT_Time bbt;
-	int hours, mins;
-	framepos_t frame_rate;
-	float secs;
 
 	if (_editor->_session == 0) {
 		return;
 	}
 
-	AudioClock::Mode m;
+	/* Take clock mode from the primary clock */
 
-	if (Profile->get_sae() || Profile->get_small_screen()) {
-		m = ARDOUR_UI::instance()->primary_clock->mode();
-	} else {
-		m = ARDOUR_UI::instance()->secondary_clock->mode();
-	}
+	AudioClock::Mode m = ARDOUR_UI::instance()->primary_clock->mode();
 
 	switch (m) {
 	case AudioClock::BBT:
@@ -143,18 +115,11 @@ VerboseCursor::set_time (framepos_t frame, double x, double y)
 
 	case AudioClock::Timecode:
 		_editor->_session->timecode_time (frame, timecode);
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+		snprintf (buf, sizeof (buf), "%s", Timecode::timecode_format_time (timecode).c_str());
 		break;
 
 	case AudioClock::MinSec:
-		/* XXX this is copied from show_verbose_duration_cursor() */
-		frame_rate = _editor->_session->frame_rate();
-		hours = frame / (frame_rate * 3600);
-		frame = frame % (frame_rate * 3600);
-		mins = frame / (frame_rate * 60);
-		frame = frame % (frame_rate * 60);
-		secs = (float) frame / (float) frame_rate;
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%07.4f", hours, mins, secs);
+		AudioClock::print_minsec (frame, buf, sizeof (buf), _editor->_session->frame_rate());
 		break;
 
 	default:
@@ -162,32 +127,23 @@ VerboseCursor::set_time (framepos_t frame, double x, double y)
 		break;
 	}
 
-	set (buf, x, y);
+	_canvas_item->set (buf);
 }
 
 void
-VerboseCursor::set_duration (framepos_t start, framepos_t end, double x, double y)
+VerboseCursor::set_duration (framepos_t start, framepos_t end)
 {
 	char buf[128];
 	Timecode::Time timecode;
 	Timecode::BBT_Time sbbt;
 	Timecode::BBT_Time ebbt;
-	int hours, mins;
-	framepos_t distance, frame_rate;
-	float secs;
 	Meter meter_at_start (_editor->_session->tempo_map().meter_at(start));
 
 	if (_editor->_session == 0) {
 		return;
 	}
 
-	AudioClock::Mode m;
-
-	if (Profile->get_sae() || Profile->get_small_screen()) {
-		m = ARDOUR_UI::instance()->primary_clock->mode ();
-	} else {
-		m = ARDOUR_UI::instance()->secondary_clock->mode ();
-	}
+	AudioClock::Mode m = ARDOUR_UI::instance()->primary_clock->mode ();
 
 	switch (m) {
 	case AudioClock::BBT:
@@ -228,19 +184,11 @@ VerboseCursor::set_duration (framepos_t start, framepos_t end, double x, double 
 
 	case AudioClock::Timecode:
 		_editor->_session->timecode_duration (end - start, timecode);
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+		snprintf (buf, sizeof (buf), "%s", Timecode::timecode_format_time (timecode).c_str());
 		break;
 
 	case AudioClock::MinSec:
-		/* XXX this stuff should be elsewhere.. */
-		distance = end - start;
-		frame_rate = _editor->_session->frame_rate();
-		hours = distance / (frame_rate * 3600);
-		distance = distance % (frame_rate * 3600);
-		mins = distance / (frame_rate * 60);
-		distance = distance % (frame_rate * 60);
-		secs = (float) distance / (float) frame_rate;
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%07.4f", hours, mins, secs);
+		AudioClock::print_minsec (end - start, buf, sizeof (buf), _editor->_session->frame_rate());
 		break;
 
 	default:
@@ -248,28 +196,11 @@ VerboseCursor::set_duration (framepos_t start, framepos_t end, double x, double 
 		break;
 	}
 
-	set (buf, x, y);
-}
-
-void
-VerboseCursor::set_color (uint32_t color)
-{
-	_canvas_item->property_fill_color_rgba() = color;
-}
-
-/** Set the position of the verbose cursor.  Any x/y offsets
- *  passed to the last call to show() will be applied to the
- *  coordinates passed in here.
- */
-void
-VerboseCursor::set_position (double x, double y)
-{
-	_canvas_item->property_x() = clamp_x (x + _xoffset);
-	_canvas_item->property_y() = clamp_y (y + _yoffset);
+	_canvas_item->set (buf);
 }
 
 bool
 VerboseCursor::visible () const
 {
-	return _visible;
+	return _canvas_item->visible();
 }

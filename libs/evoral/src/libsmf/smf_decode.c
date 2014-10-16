@@ -37,7 +37,11 @@
 #include <assert.h>
 #include <math.h>
 #include <errno.h>
+#ifdef PLATFORM_WINDOWS
+#include <winsock2.h>
+#else
 #include <arpa/inet.h>
+#endif
 #include <stdint.h>
 #include "smf.h"
 #include "smf_private.h"
@@ -114,7 +118,7 @@ smf_event_decode_textual(const smf_event_t *event, const char *name)
 	int off = 0;
 	char *buf, *extracted;
 
-	buf = malloc(BUFFER_SIZE);
+	buf = (char*)malloc(BUFFER_SIZE);
 	if (buf == NULL) {
 		g_critical("smf_event_decode_textual: malloc failed.");
 		return (NULL);
@@ -177,7 +181,7 @@ smf_event_decode_metadata(const smf_event_t *event)
 			break;
 	}
 
-	buf = malloc(BUFFER_SIZE);
+	buf = (char*)malloc(BUFFER_SIZE);
 	if (buf == NULL) {
 		g_critical("smf_event_decode_metadata: malloc failed.");
 		return (NULL);
@@ -235,7 +239,7 @@ smf_event_decode_metadata(const smf_event_t *event)
 
 			off += snprintf(buf + off, BUFFER_SIZE - off,
 				"Time Signature: %d/%d, %d clocks per click, %d notated 32nd notes per quarter note",
-				event->midi_buffer[3], (int)pow(2, event->midi_buffer[4]), event->midi_buffer[5],
+				event->midi_buffer[3], (int)pow((double)2, event->midi_buffer[4]), event->midi_buffer[5],
 				event->midi_buffer[6]);
 			break;
 
@@ -302,7 +306,7 @@ smf_event_decode_system_realtime(const smf_event_t *event)
 		return (NULL);
 	}
 
-	buf = malloc(BUFFER_SIZE);
+	buf = (char*)malloc(BUFFER_SIZE);
 	if (buf == NULL) {
 		g_critical("smf_event_decode_system_realtime: malloc failed.");
 		return (NULL);
@@ -354,7 +358,7 @@ smf_event_decode_sysex(const smf_event_t *event)
 		return (NULL);
 	}
 
-	buf = malloc(BUFFER_SIZE);
+	buf = (char*)malloc(BUFFER_SIZE);
 	if (buf == NULL) {
 		g_critical("smf_event_decode_sysex: malloc failed.");
 		return (NULL);
@@ -455,7 +459,7 @@ smf_event_decode_system_common(const smf_event_t *event)
 	if (smf_event_is_sysex(event))
 		return (smf_event_decode_sysex(event));
 
-	buf = malloc(BUFFER_SIZE);
+	buf = (char*)malloc(BUFFER_SIZE);
 	if (buf == NULL) {
 		g_critical("smf_event_decode_system_realtime: malloc failed.");
 		return (NULL);
@@ -526,7 +530,7 @@ smf_event_decode(const smf_event_t *event)
 		return (NULL);
 	}
 
-	buf = malloc(BUFFER_SIZE);
+	buf = (char*)malloc(BUFFER_SIZE);
 	if (buf == NULL) {
 		g_critical("smf_event_decode: malloc failed.");
 		return (NULL);
@@ -596,7 +600,7 @@ smf_decode(const smf_t *smf)
 	int off = 0;
 	char *buf;
 
-	buf = malloc(BUFFER_SIZE);
+	buf = (char*)malloc(BUFFER_SIZE);
 	if (buf == NULL) {
 		g_critical("smf_event_decode: malloc failed.");
 		return (NULL);

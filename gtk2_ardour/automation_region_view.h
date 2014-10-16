@@ -26,7 +26,6 @@
 #include "automation_time_axis.h"
 #include "automation_line.h"
 #include "enums.h"
-#include "canvas.h"
 
 namespace ARDOUR {
 	class AutomationList;
@@ -38,17 +37,17 @@ class TimeAxisView;
 class AutomationRegionView : public RegionView
 {
 public:
-	AutomationRegionView(ArdourCanvas::Group*,
+	AutomationRegionView(ArdourCanvas::Container*,
 	                     AutomationTimeAxisView&,
 	                     boost::shared_ptr<ARDOUR::Region>,
 	                     const Evoral::Parameter& parameter,
 	                     boost::shared_ptr<ARDOUR::AutomationList>,
-	                     double initial_samples_per_unit,
-	                     Gdk::Color const & basic_color);
+	                     double initial_samples_per_pixel,
+	                     uint32_t basic_color);
 
 	~AutomationRegionView();
 
-	void init (Gdk::Color const & basic_color, bool wfd);
+	void init (bool wfd);
 
 	inline AutomationTimeAxisView* automation_view() const
 		{ return dynamic_cast<AutomationTimeAxisView*>(&trackview); }
@@ -56,7 +55,7 @@ public:
 	boost::shared_ptr<AutomationLine> line() { return _line; }
 
 	// We are a ghost.  Meta ghosts?  Crazy talk.
-	virtual GhostRegion* add_ghost(TimeAxisView&) { return NULL; }
+	virtual GhostRegion* add_ghost(TimeAxisView&) { return 0; }
 
 	void set_height (double);
 	void reset_width_dependent_items(double pixel_width);

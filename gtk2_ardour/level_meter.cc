@@ -22,7 +22,6 @@
 #include "ardour/meter.h"
 
 #include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/barcontroller.h>
 #include "pbd/fastlog.h"
 
 #include "ardour_ui.h"
@@ -37,6 +36,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -66,9 +66,13 @@ LevelMeterBase::on_theme_changed()
 
 LevelMeterBase::~LevelMeterBase ()
 {
+	_configuration_connection.disconnect();
+	_meter_type_connection.disconnect();
+	_parameter_connection.disconnect();
 	for (vector<MeterInfo>::iterator i = meters.begin(); i != meters.end(); i++) {
 		delete (*i).meter;
 	}
+	meters.clear();
 }
 
 void
@@ -269,36 +273,36 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		uint32_t b[4];
 		float stp[4];
 		int styleflags = Config->get_meter_style_led() ? 3 : 1;
-		b[0] = ARDOUR_UI::config()->canvasvar_MeterBackgroundBot.get();
-		b[1] = ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get();
+		b[0] = ARDOUR_UI::config()->get_canvasvar_MeterBackgroundBot();
+		b[1] = ARDOUR_UI::config()->get_canvasvar_MeterBackgroundTop();
 		b[2] = 0x991122ff; // red highlight gradient Bot
 		b[3] = 0x551111ff; // red highlight gradient Top
 		if (n < nmidi) {
-			c[0] = ARDOUR_UI::config()->canvasvar_MidiMeterColor0.get();
-			c[1] = ARDOUR_UI::config()->canvasvar_MidiMeterColor1.get();
-			c[2] = ARDOUR_UI::config()->canvasvar_MidiMeterColor2.get();
-			c[3] = ARDOUR_UI::config()->canvasvar_MidiMeterColor3.get();
-			c[4] = ARDOUR_UI::config()->canvasvar_MidiMeterColor4.get();
-			c[5] = ARDOUR_UI::config()->canvasvar_MidiMeterColor5.get();
-			c[6] = ARDOUR_UI::config()->canvasvar_MidiMeterColor6.get();
-			c[7] = ARDOUR_UI::config()->canvasvar_MidiMeterColor7.get();
-			c[8] = ARDOUR_UI::config()->canvasvar_MidiMeterColor8.get();
-			c[9] = ARDOUR_UI::config()->canvasvar_MidiMeterColor9.get();
+			c[0] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor0();
+			c[1] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor1();
+			c[2] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor2();
+			c[3] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor3();
+			c[4] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor4();
+			c[5] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor5();
+			c[6] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor6();
+			c[7] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor7();
+			c[8] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor8();
+			c[9] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor9();
 			stp[0] = 115.0 *  32.0 / 128.0;
 			stp[1] = 115.0 *  64.0 / 128.0;
 			stp[2] = 115.0 * 100.0 / 128.0;
 			stp[3] = 115.0 * 112.0 / 128.0;
 		} else {
-			c[0] = ARDOUR_UI::config()->canvasvar_MeterColor0.get();
-			c[1] = ARDOUR_UI::config()->canvasvar_MeterColor1.get();
-			c[2] = ARDOUR_UI::config()->canvasvar_MeterColor2.get();
-			c[3] = ARDOUR_UI::config()->canvasvar_MeterColor3.get();
-			c[4] = ARDOUR_UI::config()->canvasvar_MeterColor4.get();
-			c[5] = ARDOUR_UI::config()->canvasvar_MeterColor5.get();
-			c[6] = ARDOUR_UI::config()->canvasvar_MeterColor6.get();
-			c[7] = ARDOUR_UI::config()->canvasvar_MeterColor7.get();
-			c[8] = ARDOUR_UI::config()->canvasvar_MeterColor8.get();
-			c[9] = ARDOUR_UI::config()->canvasvar_MeterColor9.get();
+			c[0] = ARDOUR_UI::config()->get_canvasvar_MeterColor0();
+			c[1] = ARDOUR_UI::config()->get_canvasvar_MeterColor1();
+			c[2] = ARDOUR_UI::config()->get_canvasvar_MeterColor2();
+			c[3] = ARDOUR_UI::config()->get_canvasvar_MeterColor3();
+			c[4] = ARDOUR_UI::config()->get_canvasvar_MeterColor4();
+			c[5] = ARDOUR_UI::config()->get_canvasvar_MeterColor5();
+			c[6] = ARDOUR_UI::config()->get_canvasvar_MeterColor6();
+			c[7] = ARDOUR_UI::config()->get_canvasvar_MeterColor7();
+			c[8] = ARDOUR_UI::config()->get_canvasvar_MeterColor8();
+			c[9] = ARDOUR_UI::config()->get_canvasvar_MeterColor9();
 
 			switch (meter_type) {
 				case MeterK20:
@@ -352,7 +356,6 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					stp[1] = 115.0 * meter_deflect_nordic(-18);
 					stp[2] = 115.0 * meter_deflect_nordic(-12);
 					stp[3] = 115.0 * meter_deflect_nordic( -9); // ignored
-					//c[2] = c[3] = c[1]; // dark-green
 					c[0] = c[1] = c[2]; // bright-green
 					c[6] = c[7] = c[8] = c[9];
 					break;
@@ -361,7 +364,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					stp[1] = 115.0 * meter_deflect_din(-18);
 					stp[2] = 115.0 * meter_deflect_din(-15); // ignored
 					stp[3] = 115.0 * meter_deflect_din( -9);
-					c[0] = c[1] = c[2] = c[3] = 0x00aa00ff;
+					c[0] = c[2] = c[3] = c[1];
 					c[4] = c[6];
 					c[5] = c[7];
 					break;
@@ -370,8 +373,8 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					stp[1] = 115.0 * meter_deflect_vu(-23); // -3
 					stp[2] = 115.0 * meter_deflect_vu(-20); // 0
 					stp[3] = 115.0 * meter_deflect_vu(-18); // +2
-					c[0] = c[1] = c[2] = c[3] = c[4] = c[5] = 0x00aa00ff;
-					c[6] = c[7] = c[8] = c[9] = 0xff8800ff;
+					c[0] = c[2] = c[3] = c[4] = c[5] = c[1];
+					c[7] = c[8] = c[9] = c[6];
 					break;
 				default: // PEAK, RMS
 					stp[1] = 77.5;  // 115 * log_meter(-10)
@@ -409,8 +412,8 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 			meters[n].width = width;
 			meters[n].length = len;
 			meters[n].meter->add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
-			meters[n].meter->signal_button_press_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_press));
-			meters[n].meter->signal_button_release_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_release));
+			meters[n].meter->signal_button_press_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_press), false);
+			meters[n].meter->signal_button_release_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_release), false);
 		}
 
 		//pack_end (*meters[n].meter, false, false);

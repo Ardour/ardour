@@ -19,6 +19,7 @@
 #include "pbd/compose.h"
 #include "pbd/replace_all.h"
 #include "pbd/strsplit.h"
+#include "pbd/search_path.h"
 
 #include "ardour/session.h"
 
@@ -31,7 +32,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataType type)
-        : ArdourDialog (_("Missing File!"), true, false)
+        : ArdourDialog (_("Missing File"), true, false)
         , filetype (type)
         , chooser (_("Select a folder to search"), FILE_CHOOSER_ACTION_SELECT_FOLDER)
         , use_chosen (_("Add chosen folder to search path, and try again"))
@@ -56,14 +57,18 @@ MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataT
                 break;
         }
 
-        string dirstr;
+	vector<string> source_dirs = s->source_search_path (type);
+	vector<string>::iterator i = source_dirs.begin();
+	ostringstream oss;
+	oss << *i << endl;
 
-        dirstr = s->source_search_path (type);
-        replace_all (dirstr, ":", "\n");
+	while (++i != source_dirs.end()) {
+		oss << *i << endl;
+	}
 
-        msg.set_justify (JUSTIFY_CENTER);
+        msg.set_justify (JUSTIFY_LEFT);
         msg.set_markup (string_compose (_("%1 cannot find the %2 file\n\n<i>%3</i>\n\nin any of these folders:\n\n\
-<tt>%4</tt>\n\n"), PROGRAM_NAME, typestr, Glib::Markup::escape_text(path), Glib::Markup::escape_text (dirstr)));
+<tt>%4</tt>\n\n"), PROGRAM_NAME, typestr, Glib::Markup::escape_text(path), Glib::Markup::escape_text (oss.str())));
 
         HBox* hbox = manage (new HBox);
         hbox->pack_start (msg, false, true);
@@ -128,7 +133,7 @@ MissingFileDialog::add_chosen ()
                 break;
         }
 
-        split (str, dirs, ':');
+        split (str, dirs, G_SEARCHPATH_SEPARATOR);
 
         newdir = chooser.get_filename ();
 
@@ -139,7 +144,7 @@ MissingFileDialog::add_chosen ()
         }
 
         if (!str.empty()) {
-                str += ':';
+                str += G_SEARCHPATH_SEPARATOR;
         }
 
         str += newdir;

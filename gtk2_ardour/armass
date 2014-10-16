@@ -1,0 +1,11 @@
+#!/bin/sh
+. `dirname "$0"`/../build/gtk2_ardour/ardev_common_waf.sh
+LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
+exec valgrind \
+	--tool=massif \
+	$TOP/$EXECUTABLE --novst "$@"
+
+# analyse output with
+#   ms_print massif.out.<PID>
+# or check out https://projects.kde.org/projects/extragear/sdk/massif-visualizer

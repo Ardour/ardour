@@ -1,18 +1,4 @@
 <ui>
-  <accelerator action='set-mouse-mode-object'/>
-  <accelerator action='set-mouse-mode-range'/>
-  <accelerator action='set-mouse-mode-gain'/>
-  <accelerator action='set-mouse-mode-draw'/>
-  <accelerator action='set-mouse-mode-zoom'/>
-  <accelerator action='set-mouse-mode-timefx'/>
-  <accelerator action='set-mouse-mode-object-range'/>
-  <accelerator action='toggle-internal-edit'/>
-  <accelerator action='focus-on-clock'/>
-  <accelerator action='track-solo-toggle'/>
-  <accelerator action='track-mute-toggle'/>
-  <accelerator action='toggle-edit-mode'/>
-  <accelerator action='toggle-midi-input-active'/>
-  
   <menubar name='Main' action='MainMenu'>
     <menu name='Session' action='Session'>
       <menuitem action='New'/>
@@ -39,10 +25,11 @@
       <menuitem action='CloseVideo'/>
 
       <menu name='Export' action='Export'>
-        <menuitem action='ExportAudio'/>
+       <menuitem action='ExportAudio'/>
         <menuitem action='StemExport'/>
         <menuitem action='ExportVideo'/>
       </menu>
+      <menuitem action='bring-into-session'/>
       <menu name='Cleanup' action='Cleanup'>
         <menuitem action='CleanupUnused'/>
         <menuitem action='FlushWastebasket'/>
@@ -53,6 +40,8 @@
       <menuitem action='toggle-about'/>
       <menuitem action='toggle-rc-options-editor'/>
 #endif
+      <separator/>
+      <menuitem action='lock'/>
 #ifndef GTKOSX
       <separator/>
       <menuitem action='Quit'/>
@@ -73,6 +62,7 @@
       <menuitem action='Record'/>
       <menuitem action='ToggleRollMaybe'/>
       <menuitem action='ToggleRollForgetCapture'/>
+      <menuitem action='toggle-skip-playback'/>
       <menu action="SetLoopMenu">
         <menuitem action='set-loop-from-edit-range'/>
         <menuitem action='set-loop-from-region'/>
@@ -125,13 +115,11 @@
         <menuitem action='selected-marker-to-previous-region-boundary'/>
         <menuitem action='edit-cursor-to-next-region-sync'/>
         <menuitem action='edit-cursor-to-previous-region-sync'/>
-        <separator/>
-        <menuitem action='edit-to-playhead'/>
-        <menuitem action='set-edit-point'/>
       </menu>
 
       <menu action="MarkerMenu">
         <menuitem action='add-location-from-playhead'/>
+		<menuitem action='remove-location-from-playhead'/>
         <separator/>
         <menuitem action='goto-mark-1'/>
         <menuitem action='goto-mark-2'/>
@@ -168,7 +156,8 @@
       <menuitem action='editor-paste'/>
       <separator/>       
       <menu action="SelectMenu">	   
-        <menuitem action='select-all'/>
+        <menuitem action='select-all-objects'/>
+        <menuitem action='select-all-tracks'/>
         <menuitem action='deselect-all'/>
         <menuitem action='invert-selection'/>
         <menuitem action='select-all-after-edit-cursor'/>
@@ -178,14 +167,13 @@
         <menuitem action='select-all-in-punch-range'/>
         <menuitem action='select-all-in-loop-range'/>
         <separator/>
-        <menuitem action='select-range-between-cursors'/>
         <menuitem action='move-range-start-to-previous-region-boundary'/>
         <menuitem action='move-range-start-to-next-region-boundary'/>
         <menuitem action='move-range-end-to-previous-region-boundary'/>
         <menuitem action='move-range-end-to-next-region-boundary'/>
+        <separator/>
         <menuitem action='start-range'/>
         <menuitem action='finish-range'/>
-        <menuitem action='finish-add-range'/>
         <separator/>
         <menuitem action='select-next-route'/>
         <menuitem action='select-prev-route'/>
@@ -245,8 +233,6 @@
          <menuitem action='combine-regions'/>
          <menuitem action='uncombine-regions'/>
          <menuitem action='analyze-region'/>
-         <menuitem action='toggle-opaque-region'/>
-         <menuitem action='toggle-region-mute'/>
          <menuitem action='pitch-shift-region'/>
          <menuitem action='split-region'/>
          <menuitem action='split-multichannel-region'/>
@@ -270,6 +256,8 @@
         <menuitem action='show-region-list-editor'/>
       </menu>
       <menu action='RegionMenuGain'>
+        <menuitem action='toggle-opaque-region'/>
+        <menuitem action='toggle-region-mute'/>
         <menuitem action='normalize-region'/>
         <menuitem action='boost-region-gain'/>
         <menuitem action='cut-region-gain'/>      		   
@@ -288,6 +276,7 @@
         <menuitem action='nudge-backward'/>
         <menuitem action='nudge-forward-by-capture-offset'/>
         <menuitem action='nudge-backward-by-capture-offset'/>
+	<menuitem action='sequence-regions'/>
       </menu>
       <menu action='RegionMenuTrim'>
         <menuitem action='trim-front'/>
@@ -323,6 +312,11 @@
 
     <menu action='TrackMenu'>
       <menuitem action='AddTrackBus'/>	
+      <separator/>
+      <menuitem action='track-record-enable-toggle'/>
+      <menuitem action='track-solo-toggle'/>
+      <menuitem action='track-mute-toggle'/>
+      <separator/>
       <menuitem action='insert-time'/>
       <menuitem action="move-selected-tracks-up"/>
       <menuitem action="move-selected-tracks-down"/>
@@ -334,8 +328,8 @@
         <menuitem action='track-height-normal'/>
         <menuitem action='track-height-small'/>
       </menu>
-      <menuitem action='track-record-enable-toggle'/>
-      <menuitem action='toggle-track-active'/>	
+      <separator/>
+     <menuitem action='toggle-track-active'/>	
       <menuitem action='remove-track'/>	
     </menu>
 
@@ -347,6 +341,7 @@
       <separator/>
 
       <menu action="PrimaryClockMenu">
+		<menuitem action='focus-on-clock'/>
         <menuitem action="primary-clock-timecode"/>
         <menuitem action="primary-clock-bbt"/>
         <menuitem action="primary-clock-minsec"/>
@@ -367,6 +362,8 @@
         <menuitem action='zoom-to-session'/>
         <menuitem action='zoom-to-region'/>
         <menuitem action='zoom-to-region-both-axes'/>
+        <menuitem action='zoom-to-range'/>
+        <menuitem action='zoom-to-range-both-axes'/>
         <menuitem action='toggle-zoom'/>
         <menuitem action='expand-tracks'/>
         <menuitem action='shrink-tracks'/>
@@ -489,6 +486,10 @@
       <menuitem action='ToggleSummary'/>
       <menuitem action='ToggleGroupTabs'/>
       <menuitem action='show-marker-lines'/>
+
+      <separator/>
+      <menuitem action='show-ui-prefs'/>
+
     </menu>
     <menu action = 'WindowMenu'>
       <menuitem action='toggle-audio-midi-setup'/>
@@ -619,8 +620,6 @@
        <menuitem action='uncombine-regions'/>
        <menuitem action='split-region'/>
        <menuitem action='split-multichannel-region'/>
-       <menuitem action='toggle-opaque-region'/>
-       <menuitem action='toggle-region-mute'/>
        <menuitem action='pitch-shift-region'/>
        <menuitem action='reverse-region'/>    
        <menuitem action='close-region-gaps'/>
@@ -647,6 +646,7 @@
       <menuitem action='nudge-backward'/>
       <menuitem action='nudge-forward-by-capture-offset'/>
       <menuitem action='nudge-backward-by-capture-offset'/>
+      <menuitem action='sequence-regions'/>
     </menu>
     <menu action='RegionMenuTrim'>
       <menuitem action='trim-front'/>
@@ -670,6 +670,8 @@
       <menuitem action='set-selection-from-region'/>
     </menu>
     <menu action='RegionMenuGain'>
+      <menuitem action='toggle-opaque-region'/>
+      <menuitem action='toggle-region-mute'/>
       <menuitem action='normalize-region'/>
       <menuitem action='boost-region-gain'/>
       <menuitem action='cut-region-gain'/>      		   

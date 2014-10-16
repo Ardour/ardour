@@ -25,6 +25,8 @@
 #include <gtkmm/cellrenderer.h>
 #include <gdkmm.h>
 
+#include "gtkmm2ext/visibility.h"
+
 using namespace Gtk;
 
 namespace Gtk {
@@ -33,7 +35,7 @@ namespace Gtk {
 
 namespace Gtkmm2ext {
 
-class CellRendererColorSelector : public Gtk::CellRenderer
+class LIBGTKMM2EXT_API CellRendererColorSelector : public Gtk::CellRenderer
 {
   public:
 	CellRendererColorSelector();  

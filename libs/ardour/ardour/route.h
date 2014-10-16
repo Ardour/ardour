@@ -43,6 +43,7 @@
 #include "ardour/ardour.h"
 #include "ardour/instrument_info.h"
 #include "ardour/io.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/mute_master.h"
 #include "ardour/route_group_member.h"
@@ -53,6 +54,7 @@
 namespace ARDOUR {
 
 class Amp;
+class DelayLine;
 class Delivery;
 class IOProcessor;
 class Panner;
@@ -67,7 +69,7 @@ class Pannable;
 class CapturingProcessor;
 class InternalSend;
 
-class Route : public SessionObject, public Automatable, public RouteGroupMember, public GraphNode, public boost::enable_shared_from_this<Route>
+class LIBARDOUR_API Route : public SessionObject, public Automatable, public RouteGroupMember, public GraphNode, public boost::enable_shared_from_this<Route>
 {
   public:
 
@@ -189,6 +191,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	PeakMeter&       peak_meter()       { return *_meter.get(); }
 	const PeakMeter& peak_meter() const { return *_meter.get(); }
 	boost::shared_ptr<PeakMeter> shared_peak_meter() const { return _meter; }
+	boost::shared_ptr<DelayLine> delay_line() const  { return _delayline; }
 
 	void flush_processors ();
 
@@ -283,6 +286,21 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	PBD::Signal1<void,void*> comment_changed;
 	PBD::Signal1<void,void*> mute_changed;
 	PBD::Signal0<void>       mute_points_changed;
+
+	/** track numbers - assigned by session
+	 * nubers > 0 indicate tracks (audio+midi)
+	 * nubers < 0 indicate busses
+	 * zero is reserved for unnumbered special busses.
+	 * */
+	PBD::Signal0<void> track_number_changed;
+	int64_t track_number() const { return _track_number; }
+
+	void set_track_number(int64_t tn) {
+		if (tn == _track_number) { return; }
+		_track_number = tn;
+		track_number_changed();
+		PropertyChanged (ARDOUR::Properties::name);
+	}
 
 	/** the processors have changed; the parameter indicates what changed */
 	PBD::Signal1<void,RouteProcessorChange> processors_changed;
@@ -469,11 +487,20 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	                                     pframes_t nframes, int declick,
 	                                     bool gain_automation_ok);
 
+	virtual void bounce_process (BufferSet& bufs,
+	                             framepos_t start_frame, framecnt_t nframes,
+															 boost::shared_ptr<Processor> endpoint, bool include_endpoint,
+	                             bool for_export, bool for_freeze);
+
+	framecnt_t   bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
+	ChanCount    bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
+
 	boost::shared_ptr<IO> _input;
 	boost::shared_ptr<IO> _output;
 
 	bool           _active;
 	framecnt_t     _signal_latency;
+	framecnt_t     _signal_latency_at_amp_position;
 	framecnt_t     _initial_delay;
 	framecnt_t     _roll_delay;
 
@@ -538,6 +565,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	boost::shared_ptr<Amp>       _amp;
 	boost::shared_ptr<PeakMeter> _meter;
+	boost::shared_ptr<DelayLine> _delayline;
 
 	boost::shared_ptr<Processor> the_instrument_unlocked() const;
 
@@ -548,6 +576,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
  	uint32_t _order_key;
 	bool _has_order_key;
         uint32_t _remote_control_id;
+
+	int64_t _track_number;
 
 	void input_change_handler (IOChange, void *src);
 	void output_change_handler (IOChange, void *src);

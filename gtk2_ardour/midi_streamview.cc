@@ -23,6 +23,9 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 
+#include "canvas/line_set.h"
+#include "canvas/rectangle.h"
+
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
@@ -32,10 +35,8 @@
 #include "ardour/smf_source.h"
 
 #include "ardour_ui.h"
-#include "canvas-simplerect.h"
 #include "global_signals.h"
 #include "gui_thread.h"
-#include "lineset.h"
 #include "midi_region_view.h"
 #include "midi_streamview.h"
 #include "midi_time_axis.h"
@@ -45,13 +46,13 @@
 #include "region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
-#include "simplerect.h"
 #include "utils.h"
 
 #include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Editing;
 
@@ -68,20 +69,15 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	, _updates_suspended (false)
 {
 	/* use a group dedicated to MIDI underlays. Audio underlays are not in this group. */
-	midi_underlay_group = new ArdourCanvas::Group (*_canvas_group);
+	midi_underlay_group = new ArdourCanvas::Container (_canvas_group);
 	midi_underlay_group->lower_to_bottom();
 
 	/* put the note lines in the timeaxisview's group, so it
-	   can be put below ghost regions from MIDI underlays*/
-	_note_lines = new ArdourCanvas::LineSet(*_canvas_group,
-	                                        ArdourCanvas::LineSet::Horizontal);
-
-	_note_lines->property_x1() = 0;
-	_note_lines->property_y1() = 0;
-	_note_lines->property_x2() = DBL_MAX;
-	_note_lines->property_y2() = 0;
-
-	_note_lines->signal_event().connect(
+	   can be put below ghost regions from MIDI underlays
+	*/
+	_note_lines = new ArdourCanvas::LineSet (_canvas_group, ArdourCanvas::LineSet::Horizontal);
+	
+	_note_lines->Event.connect(
 		sigc::bind(sigc::mem_fun(_trackview.editor(),
 		                         &PublicEditor::canvas_stream_view_event),
 		           _note_lines, &_trackview));
@@ -113,19 +109,19 @@ MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool /*wfd*/, b
 	}
 
 	RegionView* region_view = new MidiRegionView (_canvas_group, _trackview, region,
-	                                              _samples_per_unit, region_color);
+	                                              _samples_per_pixel, region_color);
 
-	region_view->init (region_color, false);
+	region_view->init (false);
 
 	return region_view;
 }
 
 RegionView*
-MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd, bool recording)
+MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_data, bool recording)
 {
 	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (r);
 
-	if (region == 0) {
+	if (!region) {
 		return 0;
 	}
 
@@ -136,13 +132,13 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd,
 
 			(*i)->set_valid (true);
 
-			display_region(dynamic_cast<MidiRegionView*>(*i), wfd);
+			display_region(dynamic_cast<MidiRegionView*>(*i), wait_for_data);
 
 			return 0;
 		}
 	}
 
-	MidiRegionView* region_view = dynamic_cast<MidiRegionView*> (create_region_view (r, wfd, recording));
+	MidiRegionView* region_view = dynamic_cast<MidiRegionView*> (create_region_view (r, wait_for_data, recording));
 	if (region_view == 0) {
 		return 0;
 	}
@@ -156,7 +152,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd,
 	}
 
 	/* display events and find note range */
-	display_region (region_view, wfd);
+	display_region (region_view, wait_for_data);
 
 	/* fit note range if we are importing */
 	if (_trackview.session()->operation_in_progress (Operations::insert_file)) {
@@ -179,7 +175,7 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 		return;
 	}
 
-	region_view->enable_display(true);
+	region_view->enable_display (true);
 
 	boost::shared_ptr<MidiSource> source(region_view->midi_region()->midi_source(0));
 
@@ -195,6 +191,7 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 	region_view->set_height (child_height());
 	region_view->display_model(source->model());
 }
+
 
 void
 MidiStreamView::display_track (boost::shared_ptr<Track> tr)
@@ -277,7 +274,8 @@ void
 MidiStreamView::update_contents_height ()
 {
 	StreamView::update_contents_height();
-	_note_lines->property_y2() = child_height ();
+
+	_note_lines->set_extent (ArdourCanvas::COORD_MAX);
 
 	apply_note_range (lowest_note(), highest_note(), true);
 }
@@ -290,7 +288,7 @@ MidiStreamView::draw_note_lines()
 	}
 
 	double y;
-	double prev_y = contents_height();
+	double prev_y = .5;
 	uint32_t color;
 
 	_note_lines->clear();
@@ -300,10 +298,25 @@ MidiStreamView::draw_note_lines()
 		return;
 	}
 
-	for (int i = lowest_note(); i <= highest_note(); ++i) {
-		y = floor(note_to_y(i));
+	/* do this is order of highest ... lowest since that matches the
+	 * coordinate system in which y=0 is at the top
+	 */
 
-		_note_lines->add_line(prev_y, 1.0, ARDOUR_UI::config()->canvasvar_PianoRollBlackOutline.get());
+	for (int i = highest_note() + 1; i >= lowest_note(); --i) {
+
+		y = floor(note_to_y (i)) + .5;
+
+		/* this is the line actually corresponding to the division
+		 * between notes
+		 */
+
+		if (i <= highest_note()) {
+			_note_lines->add (y, 1.0, ARDOUR_UI::config()->get_canvasvar_PianoRollBlackOutline());
+		}
+
+		/* now add a thicker line/bar which covers the entire vertical
+		 * height of this note.
+		 */
 
 		switch (i % 12) {
 		case 1:
@@ -311,17 +324,18 @@ MidiStreamView::draw_note_lines()
 		case 6:
 		case 8:
 		case 10:
-			color = ARDOUR_UI::config()->canvasvar_PianoRollBlack.get();
+			color = ARDOUR_UI::config()->get_canvasvar_PianoRollBlack();
 			break;
 		default:
-			color = ARDOUR_UI::config()->canvasvar_PianoRollWhite.get();
+			color = ARDOUR_UI::config()->get_canvasvar_PianoRollWhite();
 			break;
 		}
 
-		if (i == highest_note()) {
-			_note_lines->add_line(y, prev_y - y, color);
-		} else {
-			_note_lines->add_line(y + 1.0, prev_y - y - 1.0, color);
+		double h = y - prev_y;
+		double mid = y + (h/2.0);
+				
+		if (height > 1.0) { // XXX ? should that not be h >= 1 ?
+			_note_lines->add (mid, h, color);
 		}
 
 		prev_y = y;
@@ -484,19 +498,16 @@ MidiStreamView::setup_rec_box ()
 
 			boost::shared_ptr<MidiTrack> mt = _trackview.midi_track(); /* we know what it is already */
 			framepos_t const frame_pos = mt->current_capture_start ();
-			gdouble const xstart = _trackview.editor().frame_to_pixel (frame_pos);
+			gdouble const xstart = _trackview.editor().sample_to_pixel (frame_pos);
 			gdouble const xend = xstart;
 			uint32_t fill_color;
 
-			fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
+			fill_color = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
 
-			ArdourCanvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*_canvas_group);
-			rec_rect->property_x1() = xstart;
-			rec_rect->property_y1() = 1.0;
-			rec_rect->property_x2() = xend;
-			rec_rect->property_y2() = (double) _trackview.current_height() - 1;
-			rec_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
-			rec_rect->property_fill_color_rgba() = fill_color;
+			ArdourCanvas::Rectangle * rec_rect = new ArdourCanvas::Rectangle (_canvas_group);
+			rec_rect->set (ArdourCanvas::Rect (xstart, 1, xend, _trackview.current_height() - 1));
+			rec_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RecordingRect());
+			rec_rect->set_fill_color (fill_color);
 			rec_rect->lower_to_bottom();
 
 			RecBoxInfo recbox;
@@ -568,9 +579,9 @@ MidiStreamView::color_handler ()
 	draw_note_lines ();
 
 	if (_trackview.is_midi_track()) {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
+		canvas_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_MidiTrackBase());
 	} else {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();;
+		canvas_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_MidiBusBase());
 	}
 }
 
@@ -650,9 +661,11 @@ void
 MidiStreamView::resume_updates ()
 {
 	_updates_suspended = false;
-
+	
 	draw_note_lines ();
 	apply_note_range_to_regions ();
+
+	_canvas_group->redraw ();
 }
 
 void

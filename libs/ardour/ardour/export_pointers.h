@@ -25,6 +25,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/comparable_shared_ptr.h"
 
 namespace AudioGrapher {

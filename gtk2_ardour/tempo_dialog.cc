@@ -26,7 +26,6 @@
 #include "ardour/rc_configuration.h"
 
 #include "tempo_dialog.h"
-#include "utils.h"
 
 #include "i18n.h"
 
@@ -43,6 +42,7 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	, when_bar_label (_("bar:"), ALIGN_LEFT, ALIGN_CENTER)
 	, when_beat_label (_("beat:"), ALIGN_LEFT, ALIGN_CENTER)
 	, pulse_selector_label (_("Pulse note"), ALIGN_LEFT, ALIGN_CENTER)
+	, tap_tempo_button (_("Tap tempo"))
 {
 	Timecode::BBT_Time when;
 	Tempo tempo (map.tempo_at (frame));
@@ -58,6 +58,7 @@ TempoDialog::TempoDialog (TempoSection& section, const string&)
 	, when_bar_label (_("bar:"), ALIGN_LEFT, ALIGN_CENTER)
 	, when_beat_label (_("beat:"), ALIGN_LEFT, ALIGN_CENTER)
 	, pulse_selector_label (_("Pulse note"), ALIGN_LEFT, ALIGN_CENTER)
+	, tap_tempo_button (_("Tap tempo"))
 {
 	init (section.start(), section.beats_per_minute(), section.note_type(), section.movable());
 }
@@ -163,6 +164,8 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	set_default_response (RESPONSE_ACCEPT);
 
 	bpm_spinner.show ();
+	tap_tempo_button.show ();
+	get_vbox()->pack_end (tap_tempo_button);
 
 	set_name ("MetricDialog");
 
@@ -175,6 +178,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	when_beat_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
 	when_beat_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TempoDialog::entry_key_release), false);
 	pulse_selector.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::pulse_change));
+	tap_tempo_button.signal_clicked().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo));
 }
 
 void
@@ -250,6 +254,36 @@ TempoDialog::pulse_change ()
         set_response_sensitive (RESPONSE_ACCEPT, true);
 }
 
+void
+TempoDialog::tap_tempo ()
+{
+	gint64 now;
+	now = g_get_monotonic_time (); // microseconds
+
+	if (last_tap > 0) {
+		double interval, bpm;
+		static const double decay = 0.5;
+
+		interval = (now - last_tap) * 1.0e-6;
+		if (interval <= 6.0) {
+			// >= 10 bpm, say
+			if (average_interval > 0) {
+				average_interval = interval * decay
+					+ average_interval * (1.0-decay);
+			} else {
+				average_interval = interval;
+			}
+
+			bpm = 60.0 / average_interval;
+			bpm_spinner.set_value (bpm);
+		} else {
+			average_interval = 0;
+		}
+	} else {
+		average_interval = 0;
+	}
+	last_tap = now;
+}
 
 MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
 	: ArdourDialog (_("New Meter"))

@@ -23,7 +23,7 @@
 
 using namespace ARDOUR;
 
-ControlProtocol*
+static ControlProtocol*
 new_osc_protocol (ControlProtocolDescriptor* /*descriptor*/, Session* s)
 {
 	OSC* osc = new OSC (*s, Config->get_osc_port());
@@ -33,34 +33,29 @@ new_osc_protocol (ControlProtocolDescriptor* /*descriptor*/, Session* s)
 	return osc;
 }
 
-void
+static void
 delete_osc_protocol (ControlProtocolDescriptor* /*descriptor*/, ControlProtocol* cp)
 {
 	delete cp;
 }
 
-bool
+static bool
 probe_osc_protocol (ControlProtocolDescriptor* /*descriptor*/)
 {
 	return true; // we can always do OSC
 }
 
 static ControlProtocolDescriptor osc_descriptor = {
-	name : "Open Sound Control (OSC)",
-	id : "uri://ardour.org/surfaces/osc:0",
-	ptr : 0,
-	module : 0,
-	mandatory : 0,
-	supports_feedback : true,
-	probe : probe_osc_protocol,
-	initialize : new_osc_protocol,
-	destroy : delete_osc_protocol
+	/*name :              */   "Open Sound Control (OSC)",
+	/*id :                */   "uri://ardour.org/surfaces/osc:0",
+	/*ptr :               */   0,
+	/*module :            */   0,
+	/*mandatory :         */   0,
+	/*supports_feedback : */   true,
+	/*probe :             */   probe_osc_protocol,
+	/*initialize :        */   new_osc_protocol,
+	/*destroy :           */   delete_osc_protocol
 };
 
-extern "C" {
-ControlProtocolDescriptor* 
-protocol_descriptor () {
-	return &osc_descriptor;
-}
-}
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &osc_descriptor; }
 

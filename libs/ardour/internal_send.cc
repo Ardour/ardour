@@ -40,17 +40,25 @@ using namespace std;
 
 PBD::Signal1<void, pframes_t> InternalSend::CycleStart;
 
-InternalSend::InternalSend (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, boost::shared_ptr<Route> sendto, Delivery::Role role, bool ignore_bitslot)
+InternalSend::InternalSend (Session& s,
+		boost::shared_ptr<Pannable> p,
+		boost::shared_ptr<MuteMaster> mm,
+		boost::shared_ptr<Route> sendfrom,
+		boost::shared_ptr<Route> sendto,
+		Delivery::Role role,
+		bool ignore_bitslot)
 	: Send (s, p, mm, role, ignore_bitslot)
+	, _send_from (sendfrom)
 {
-        if (sendto) {
-                if (use_target (sendto)) {
-                        throw failed_constructor();
-                }
-        }
+	if (sendto) {
+		if (use_target (sendto)) {
+			throw failed_constructor();
+		}
+	}
 
 	init_gain ();
 
+	_send_from->DropReferences.connect_same_thread (source_connection, boost::bind (&InternalSend::send_from_going_away, this));
 	CycleStart.connect_same_thread (*this, boost::bind (&InternalSend::cycle_start, this, _1));
 }
 
@@ -108,6 +116,12 @@ InternalSend::target_io_changed ()
 	mixbufs.ensure_buffers (_send_to->internal_return()->input_streams(), _session.get_block_size());
 	mixbufs.set_count (_send_to->internal_return()->input_streams());
 	reset_panner();
+}
+
+void
+InternalSend::send_from_going_away ()
+{
+	_send_from.reset();
 }
 
 void
@@ -201,6 +215,8 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
 	_amp->setup_gain_automation (start_frame, end_frame, nframes);
 	_amp->run (mixbufs, start_frame, end_frame, nframes, true);
+
+	_delayline->run (mixbufs, start_frame, end_frame, nframes, true);
 
 	/* consider metering */
 

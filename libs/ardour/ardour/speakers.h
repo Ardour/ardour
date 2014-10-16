@@ -31,7 +31,7 @@ class XMLNode;
 
 namespace ARDOUR  {
 
-class Speakers : public PBD::Stateful {
+class LIBARDOUR_API Speakers : public PBD::Stateful {
 public:
 	Speakers ();
 	Speakers (const Speakers&);

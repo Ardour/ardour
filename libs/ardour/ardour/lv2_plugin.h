@@ -23,11 +23,14 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <boost/enable_shared_from_this.hpp>
 
 #include "ardour/plugin.h"
 #include "ardour/uri_map.h"
 #include "ardour/worker.h"
 #include "pbd/ringbuffer.h"
+
+typedef struct LV2_Evbuf_Impl LV2_Evbuf;
 
 namespace ARDOUR {
 
@@ -41,7 +44,7 @@ const void* lv2plugin_get_port_value(const char* port_symbol,
 class AudioEngine;
 class Session;
 
-class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
+class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 {
   public:
 	LV2Plugin (ARDOUR::AudioEngine& engine,
@@ -270,16 +273,16 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 };
 
 
-class LV2PluginInfo : public PluginInfo {
+class LIBARDOUR_API LV2PluginInfo : public PluginInfo , public boost::enable_shared_from_this<ARDOUR::LV2PluginInfo> {
 public:
-	LV2PluginInfo (const void* c_plugin);
+	LV2PluginInfo (const char* plugin_uri);
 	~LV2PluginInfo ();
 
 	static PluginInfoList* discover ();
 
 	PluginPtr load (Session& session);
 
-	const void* _c_plugin;
+	char * _plugin_uri;
 };
 
 typedef boost::shared_ptr<LV2PluginInfo> LV2PluginInfoPtr;

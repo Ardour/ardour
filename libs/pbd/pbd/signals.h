@@ -22,6 +22,11 @@
 
 #include <list>
 #include <map>
+
+#ifdef nil
+#undef nil
+#endif
+
 #include <glibmm/threads.h>
 
 #include <boost/noncopyable.hpp>
@@ -31,23 +36,38 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/optional.hpp>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/event_loop.h"
+
+#define DEBUG_PBD_SIGNAL_CONNECTIONS
+
+#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+#include "pbd/stacktrace.h"
+#include <iostream>
+#endif
 
 namespace PBD {
 
-class Connection;
+class LIBPBD_API Connection;
 
-class SignalBase
+class LIBPBD_API SignalBase
 {
 public:
+	SignalBase () : _debug_connection (false) {}
 	virtual ~SignalBase () {}
 	virtual void disconnect (boost::shared_ptr<Connection>) = 0;
+#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+	void set_debug_connection (bool yn) { _debug_connection = yn; }
+#endif
 
 protected:
         Glib::Threads::Mutex _mutex;
+#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+	bool _debug_connection;
+#endif
 };
 
-class Connection : public boost::enable_shared_from_this<Connection>
+class LIBPBD_API Connection : public boost::enable_shared_from_this<Connection>
 {
 public:
 	Connection (SignalBase* b) : _signal (b) {}
@@ -73,7 +93,7 @@ private:
 };
 
 template<typename R>
-class OptionalLastValue
+class /*LIBPBD_API*/ OptionalLastValue
 {
 public:
 	typedef boost::optional<R> result_type;
@@ -92,7 +112,7 @@ public:
 	
 typedef boost::shared_ptr<Connection> UnscopedConnection;
 	
-class ScopedConnection
+class LIBPBD_API ScopedConnection
 {
 public:
 	ScopedConnection () {}
@@ -123,7 +143,7 @@ private:
 	UnscopedConnection _c;
 };
 	
-class ScopedConnectionList  : public boost::noncopyable
+class LIBPBD_API ScopedConnectionList  : public boost::noncopyable
 {
   public:
 	ScopedConnectionList();

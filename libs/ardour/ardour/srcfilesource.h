@@ -23,18 +23,21 @@
 
 #include <cstring>
 #include <samplerate.h>
+
+#include "ardour/libardour_visibility.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/session.h"
 
 namespace ARDOUR {
 
-class SrcFileSource : public AudioFileSource {
+class LIBARDOUR_API SrcFileSource : public AudioFileSource {
 public:
 	SrcFileSource (Session&, boost::shared_ptr<AudioFileSource>, SrcQuality srcq = SrcQuality(SrcQuick));
 	~SrcFileSource ();
 
-	int update_header (framepos_t /*when*/, struct tm&, time_t) { return 0; }
-	int flush_header () { return 0; }
+	int  update_header (framepos_t /*when*/, struct tm&, time_t) { return 0; }
+	int  flush_header () { return 0; }
+	void flush () { }
 	void set_header_timeline_position () {};
 	void set_length (framecnt_t /*len*/) {};
 

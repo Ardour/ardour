@@ -26,6 +26,7 @@
 #include <sstream>
 #include <assert.h>
 
+#include "midi++/libmidi_visibility.h"
 #include "midi++/types.h"
 #include "midi++/events.h"
 #include "pbd/xml++.h"

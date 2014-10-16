@@ -26,7 +26,7 @@ namespace ARDOUR  {
 
 class RouteGroup;
 
-class RouteGroupMember
+class LIBARDOUR_API RouteGroupMember
 {
   public:
 	RouteGroupMember () : _route_group (0) {}

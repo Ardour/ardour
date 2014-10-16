@@ -29,6 +29,8 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
+#include "canvas/wave_view.h"
+
 #include "audio_clock.h"
 #include "ardour_ui.h"
 #include "actions.h"
@@ -307,8 +309,6 @@ ARDOUR_UI::setup_session_options ()
 void
 ARDOUR_UI::parameter_changed (std::string p)
 {
-	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::parameter_changed, p)
-
 	if (p == "external-sync") {
 
 		ActionManager::map_some_state ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
@@ -326,9 +326,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
 		}
 
-	} else if (p == "always-play-range") {
+	} else if (p == "follow-edits") {
 
-		ActionManager::map_some_state ("Transport", "ToggleFollowEdits", &RCConfiguration::get_always_play_range);
+		ActionManager::map_some_state ("Transport", "ToggleFollowEdits", &RCConfiguration::get_follow_edits);
 
 	} else if (p == "send-mtc") {
 
@@ -364,15 +364,10 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ActionManager::map_some_state ("Transport", "ToggleClick", &RCConfiguration::get_clicking);
 	} else if (p == "use-video-sync") {
 		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_use_video_sync));
-	} else if (p == "video-pullup" || p == "timecode-format") {
-
-		synchronize_sync_source_and_video_pullup ();
-		reset_main_clocks ();
-		editor->queue_visual_videotimeline_update();
-
 	} else if (p == "sync-source") {
 
 		synchronize_sync_source_and_video_pullup ();
+		set_fps_timeout_connection ();
 
 	} else if (p == "show-track-meters") {
 		editor->toggle_meter_updating();
@@ -397,8 +392,12 @@ ARDOUR_UI::parameter_changed (std::string p)
 			secondary_clock->set_widget_name ("secondary");
 		}
 	} else if (p == "super-rapid-clock-update") {
-		stop_clocking ();
-		start_clocking ();
+		if (_session) {
+			stop_clocking ();
+			start_clocking ();
+		}
+	} else if (p == "waveform-gradient-depth") {
+		ArdourCanvas::WaveView::set_global_gradient_depth (config()->get_waveform_gradient_depth());
 	} else if (p == "show-editor-meter") {
 		bool show = Config->get_show_editor_meter();
 
@@ -415,6 +414,13 @@ ARDOUR_UI::parameter_changed (std::string p)
 				editor_meter_peak_display.show();
 			} 
 		}
+	} else if (p == "waveform-scale") {
+		ArdourCanvas::WaveView::set_global_logscaled (Config->get_waveform_scale() == Logarithmic);
+	} else if (p == "waveform-shape") {
+		ArdourCanvas::WaveView::set_global_shape (Config->get_waveform_shape() == Rectified
+				? ArdourCanvas::WaveView::Rectified : ArdourCanvas::WaveView::Normal);
+	} else if (p == "show-waveform-clipping") {
+		ArdourCanvas::WaveView::set_global_show_waveform_clipping (ARDOUR_UI::config()->get_show_waveform_clipping());
 	}
 }
 
@@ -423,6 +429,21 @@ ARDOUR_UI::session_parameter_changed (std::string p)
 {
 	if (p == "native-file-data-format" || p == "native-file-header-format") {
 		update_format ();
+	} else if (p == "timecode-format") {
+		set_fps_timeout_connection ();
+	} else if (p == "video-pullup" || p == "timecode-format") {
+		set_fps_timeout_connection ();
+
+		synchronize_sync_source_and_video_pullup ();
+		reset_main_clocks ();
+		editor->queue_visual_videotimeline_update();
+	} else if (p == "track-name-number") {
+		/* DisplaySuspender triggers _route->redisplay() when going out of scope
+		 * which eventually calls reset_controls_layout_width() and re-sets the
+		 * track-header width.
+		 * see also RouteTimeAxisView::update_track_number_visibility()
+		 */
+		DisplaySuspender ds;
 	}
 }
 

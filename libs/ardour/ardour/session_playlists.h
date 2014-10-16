@@ -44,7 +44,7 @@ class Session;
 class Crossfade;
 class Track;
 
-class SessionPlaylists : public PBD::ScopedConnectionList
+class LIBARDOUR_API SessionPlaylists : public PBD::ScopedConnectionList
 {
 public:
 	~SessionPlaylists ();

@@ -297,9 +297,6 @@
 	       <menu action="LatchMenu">
                      <menuitem action='LatchedSolo'/>
 	       </menu>
-	       <menu action="Link">
-	       	     <menuitem action='link-region-and-track-selection'/> 
-	       </menu>
                <menu action='ZoomFocusMenu'>
                    <menuitem action='zoom-focus-playhead'/>
                    <menuitem action='zoom-focus-edit'/>

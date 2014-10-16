@@ -27,9 +27,11 @@
 #include <exception>
 #include <sstream>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-class unknown_enumeration : public std::exception {
+class LIBPBD_API unknown_enumeration : public std::exception {
   public:
 	unknown_enumeration (std::string const & e) throw() {
 		std::stringstream s;
@@ -47,7 +49,7 @@ private:
 	std::string _message;
 };
 
-class EnumWriter {
+class LIBPBD_API EnumWriter {
   public:
 	static EnumWriter& instance();
 	static void destroy();

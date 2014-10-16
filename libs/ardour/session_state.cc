@@ -33,15 +33,14 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <climits>
-#include <fcntl.h>
-#include <poll.h>
 #include <signal.h>
-#include <sys/mman.h>
 #include <sys/time.h>
 
 #ifdef HAVE_SYS_VFS_H
 #include <sys/vfs.h>
-#else
+#endif
+
+#ifdef __APPLE__
 #include <sys/param.h>
 #include <sys/mount.h>
 #endif
@@ -69,14 +68,14 @@
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
-#include "pbd/pathscanner.h"
+#include "pbd/pathexpand.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
 #include "pbd/convert.h"
-#include "pbd/clear_dir.h"
-#include "pbd/strsplit.h"
+#include "pbd/localtime_r.h"
 
 #include "ardour/amp.h"
+#include "ardour/async_midi_port.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
@@ -92,10 +91,12 @@
 #include "ardour/midi_model.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/midi_region.h"
+#include "ardour/midi_scene_changer.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
 #include "ardour/pannable.h"
 #include "ardour/playlist_factory.h"
+#include "ardour/playlist_source.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
 #include "ardour/proxy_controllable.h"
@@ -136,23 +137,8 @@ Session::pre_engine_init (string fullpath)
 
 	/* discover canonical fullpath */
 
-	char buf[PATH_MAX+1];
+	_path = canonical_path(fullpath);
 
-	if (!realpath (fullpath.c_str(), buf)) {
-		if (errno == ENOENT) {
-			/* fullpath does not exist yet, so realpath() returned
-			 * ENOENT. Just use it as-is
-			 */
-			_path = fullpath;
-		} else {
-			error << string_compose(_("Could not use path %1 (%2)"), buf, strerror(errno)) << endmsg;
-			destroy ();
-			throw failed_constructor();
-		}
-	} else {
-		_path = string(buf);
-	}
-	
 	/* we require _path to end with a dir separator */
 
 	if (_path[_path.length()-1] != G_DIR_SEPARATOR) {
@@ -222,6 +208,16 @@ Session::post_engine_init ()
 	BootMessage (_("Using configuration"));
 
 	_midi_ports = new MidiPortManager;
+	
+	MIDISceneChanger* msc;
+
+	_scene_changer = msc = new MIDISceneChanger (*this);
+	msc->set_input_port (scene_input_port());
+	msc->set_output_port (scene_out());
+
+	boost::function<framecnt_t(void)> timer_func (boost::bind (&Session::audible_frame, this));
+	boost::dynamic_pointer_cast<AsyncMIDIPort>(scene_in())->set_timer (timer_func);
+
 	setup_midi_machine_control ();
 	
 	if (_butler->start_thread()) {
@@ -323,6 +319,8 @@ Session::post_engine_init ()
 		_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
 		_locations->added.connect_same_thread (*this, boost::bind (&Session::locations_added, this, _1));
 		
+		
+		
 	} catch (AudioEngine::PortRegistrationFailure& err) {
 		/* handle this one in a different way than all others, so that its clear what happened */
 		error << err.what() << endmsg;
@@ -364,7 +362,7 @@ Session::post_engine_init ()
 string
 Session::raid_path () const
 {
-	SearchPath raid_search_path;
+	Searchpath raid_search_path;
 
 	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 		raid_search_path += (*i).path;
@@ -385,11 +383,11 @@ Session::setup_raid_path (string path)
 
 	session_dirs.clear ();
 
-	SearchPath search_path(path);
-	SearchPath sound_search_path;
-	SearchPath midi_search_path;
+	Searchpath search_path(path);
+	Searchpath sound_search_path;
+	Searchpath midi_search_path;
 
-	for (SearchPath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
+	for (Searchpath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
 		sp.path = *i;
 		sp.blocks = 0; // not needed
 		session_dirs.push_back (sp);
@@ -515,7 +513,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
 				/* Copy plugin state files from template to new session */
 				std::string template_plugins = Glib::build_filename (session_template, X_("plugins"));
-				copy_files (template_plugins, plugins_dir ());
+				copy_recurse (template_plugins, plugins_dir ());
 				
 				return 0;
 
@@ -545,7 +543,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
                 ChanCount count(DataType::AUDIO, bus_profile->master_out_channels);
 
 		if (bus_profile->master_out_channels) {
-			boost::shared_ptr<Route> r (new Route (*this, _("master"), Route::MasterOut, DataType::AUDIO));
+			boost::shared_ptr<Route> r (new Route (*this, _("Master"), Route::MasterOut, DataType::AUDIO));
                         if (r->init ()) {
                                 return -1;
                         }
@@ -670,9 +668,19 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	XMLTree tree;
 	std::string xml_path(_session_dir->root_path());
 
+	/* prevent concurrent saves from different threads */
+
+	Glib::Threads::Mutex::Lock lm (save_state_lock);
+
 	if (!_writable || (_state_of_the_state & CannotSave)) {
 		return 1;
 	}
+
+	if (g_atomic_int_get(&_suspend_save)) {
+		_save_queued = true;
+		return 1;
+	}
+	_save_queued = false;
 
 	if (!_engine.connected ()) {
 		error << string_compose (_("the %1 audio engine is not connected and state saving would lose all I/O connections. Session not saved"),
@@ -735,9 +743,9 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	} else {
 
-		if (::rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
-			error << string_compose (_("could not rename temporary session file %1 to %2"),
-					tmp_path, xml_path) << endmsg;
+		if (::g_rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
+			error << string_compose (_("could not rename temporary session file %1 to %2 (%3)"),
+					tmp_path, xml_path, g_strerror(errno)) << endmsg;
 			if (g_remove (tmp_path.c_str()) != 0) {
 				error << string_compose(_("Could not remove temporary session file at path \"%1\" (%2)"),
 						tmp_path, g_strerror (errno)) << endmsg;
@@ -813,7 +821,7 @@ Session::load_state (string snapshot_name)
 
 	set_dirty();
 
-	_writable = exists_and_writable (xmlpath);
+	_writable = exists_and_writable (xmlpath) && exists_and_writable(Glib::path_get_dirname(xmlpath));
 
 	if (!state_tree->read (xmlpath)) {
 		error << string_compose(_("Could not understand session file %1"), xmlpath) << endmsg;
@@ -878,6 +886,12 @@ Session::load_options (const XMLNode& node)
 	return 0;
 }
 
+bool
+Session::save_default_options ()
+{
+	return config.save_state();
+}
+
 XMLNode&
 Session::get_state()
 {
@@ -931,7 +945,7 @@ Session::state (bool full_state)
 				p += (*i).path;
 
 				if (next != session_dirs.end()) {
-					p += ':';
+					p += G_SEARCHPATH_SEPARATOR;
 				} else {
 					break;
 				}
@@ -1132,7 +1146,7 @@ Session::set_state (const XMLNode& node, int version)
 
 	if (node.name() != X_("Session")) {
 		fatal << _("programming error: Session: incorrect XML node sent to set_state()") << endmsg;
-		return -1;
+		goto out;
 	}
 
 	if ((prop = node.property ("name")) != 0) {
@@ -1146,7 +1160,7 @@ Session::set_state (const XMLNode& node, int version)
 		if (_nominal_frame_rate != _current_frame_rate) {
                         boost::optional<int> r = AskAboutSampleRateMismatch (_nominal_frame_rate, _current_frame_rate);
 			if (r.get_value_or (0)) {
-				return -1;
+				goto out;
 			}
 		}
 	}
@@ -1221,20 +1235,7 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	}
 
-	Location* location;
-
-	if ((location = _locations->auto_loop_location()) != 0) {
-		set_auto_loop_location (location);
-	}
-
-	if ((location = _locations->auto_punch_location()) != 0) {
-		set_auto_punch_location (location);
-	}
-
-	if ((location = _locations->session_range_location()) != 0) {
-		delete _session_range_location;
-		_session_range_location = location;
-	}
+	locations_changed ();
 
 	if (_session_range_location) {
 		AudioFileSource::set_header_position_offset (_session_range_location->start());
@@ -1339,9 +1340,13 @@ Session::set_state (const XMLNode& node, int version)
 
 	StateReady (); /* EMIT SIGNAL */
 
+	delete state_tree;
+	state_tree = 0;
 	return 0;
 
   out:
+	delete state_tree;
+	state_tree = 0;
 	return ret;
 }
 
@@ -1424,7 +1429,13 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
                 ret = track;
 
 	} else {
-		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML")));
+		enum Route::Flag flags = Route::Flag(0);
+		const XMLProperty* prop = node.property("flags");
+		if (prop) {
+			flags = Route::Flag (string_2_enum (prop->value(), flags));
+		}
+
+		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
                 if (r->init () == 0 && r->set_state (node, version) == 0) {
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
@@ -1496,7 +1507,13 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
                 ret = track;
 
 	} else {
-		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML")));
+		enum Route::Flag flags = Route::Flag(0);
+		const XMLProperty* prop = node.property("flags");
+		if (prop) {
+			flags = Route::Flag (string_2_enum (prop->value(), flags));
+		}
+
+		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
                 if (r->init () == 0 && r->set_state (node, version) == 0) {
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
@@ -1903,13 +1920,7 @@ Session::load_sources (const XMLNode& node)
 					string fullpath;
 
 					if (!Glib::path_is_absolute (err.path)) {
-						vector<Glib::ustring> sdirs;
-						split (source_search_path (DataType::MIDI), sdirs, ':');
-						if (sdirs.empty()) {
-							fatal << _("Empty MIDI source search path!") << endmsg;
-							/*NOTREACHED*/
-						}
-						fullpath = Glib::build_filename (sdirs.front(), err.path);
+						fullpath = Glib::build_filename (source_search_path (DataType::MIDI).front(), err.path);
 					} else {
 						/* this should be an unrecoverable error: we would be creating a MIDI file outside
 						   the session tree.
@@ -1945,7 +1956,7 @@ Session::XMLSourceFactory (const XMLNode& node)
 	}
 
 	catch (failed_constructor& err) {
-		error << string_compose (_("Found a sound file that cannot be used by %1. Talk to the progammers."), PROGRAM_NAME) << endmsg;
+		error << string_compose (_("Found a sound file that cannot be used by %1. Talk to the programmers."), PROGRAM_NAME) << endmsg;
 		return boost::shared_ptr<Source>();
 	}
 }
@@ -2006,7 +2017,7 @@ Session::save_template (string template_name)
 		return -1;
 	}
 
-	copy_files (plugins_dir(), template_plugin_state_path);
+	copy_recurse (plugins_dir(), template_plugin_state_path);
 
 	return 0;
 }
@@ -2055,6 +2066,54 @@ Session::refresh_disk_space ()
 		_total_free_4k_blocks += i->blocks;
 		if (i->blocks_unknown) {
 			_total_free_4k_blocks_uncertain = true;
+		}
+	}
+#elif defined (COMPILER_MSVC)
+	vector<string> scanned_volumes;
+	vector<string>::iterator j;
+	vector<space_and_path>::iterator i;
+    DWORD nSectorsPerCluster, nBytesPerSector,
+          nFreeClusters, nTotalClusters;
+    char disk_drive[4];
+	bool volume_found;
+
+	_total_free_4k_blocks = 0;
+
+	for (i = session_dirs.begin(); i != session_dirs.end(); i++) {
+		strncpy (disk_drive, (*i).path.c_str(), 3);
+		disk_drive[3] = 0;
+		strupr(disk_drive);
+
+		volume_found = false;
+		if (0 != (GetDiskFreeSpace(disk_drive, &nSectorsPerCluster, &nBytesPerSector, &nFreeClusters, &nTotalClusters)))
+		{
+			int64_t nBytesPerCluster = nBytesPerSector * nSectorsPerCluster;
+			int64_t nFreeBytes = nBytesPerCluster * (int64_t)nFreeClusters;
+			i->blocks = (uint32_t)(nFreeBytes / 4096);
+
+			for (j = scanned_volumes.begin(); j != scanned_volumes.end(); j++) {
+				if (0 == j->compare(disk_drive)) {
+					volume_found = true;
+					break;
+				}
+			}
+
+			if (!volume_found) {
+				scanned_volumes.push_back(disk_drive);
+				_total_free_4k_blocks += i->blocks;
+			}
+		}
+	}
+
+	if (0 == _total_free_4k_blocks) {
+		strncpy (disk_drive, path().c_str(), 3);
+		disk_drive[3] = 0;
+
+		if (0 != (GetDiskFreeSpace(disk_drive, &nSectorsPerCluster, &nBytesPerSector, &nFreeClusters, &nTotalClusters)))
+		{
+			int64_t nBytesPerCluster = nBytesPerSector * nSectorsPerCluster;
+			int64_t nFreeBytes = nBytesPerCluster * (int64_t)nFreeClusters;
+			_total_free_4k_blocks = (uint32_t)(nFreeBytes / 4096);
 		}
 	}
 #endif
@@ -2236,29 +2295,17 @@ Session::load_route_groups (const XMLNode& node, int version)
 	return 0;
 }
 
-void
-Session::auto_save()
-{
-	save_state (_current_snapshot_name);
-}
-
 static bool
-state_file_filter (const string &str, void */*arg*/)
+state_file_filter (const string &str, void* /*arg*/)
 {
 	return (str.length() > strlen(statefile_suffix) &&
 		str.find (statefile_suffix) == (str.length() - strlen (statefile_suffix)));
 }
 
-struct string_cmp {
-	bool operator()(const string* a, const string* b) {
-		return *a < *b;
-	}
-};
-
-static string*
-remove_end(string* state)
+static string
+remove_end(string state)
 {
-	string statename(*state);
+	string statename(state);
 
 	string::size_type start,end;
 	if ((start = statename.find_last_of (G_DIR_SEPARATOR)) != string::npos) {
@@ -2269,24 +2316,23 @@ remove_end(string* state)
 		end = statename.length();
 	}
 
-	return new string(statename.substr (0, end));
+	return string(statename.substr (0, end));
 }
 
-vector<string *> *
+vector<string>
 Session::possible_states (string path)
 {
-	PathScanner scanner;
-	vector<string*>* states = scanner (path, state_file_filter, 0, false, false);
+	vector<string> states;
+	find_files_matching_filter (states, path, state_file_filter, 0, false, false);
 
-	transform(states->begin(), states->end(), states->begin(), remove_end);
+	transform(states.begin(), states.end(), states.begin(), remove_end);
 
-	string_cmp cmp;
-	sort (states->begin(), states->end(), cmp);
+	sort (states.begin(), states.end());
 
 	return states;
 }
 
-vector<string *> *
+vector<string>
 Session::possible_states () const
 {
 	return possible_states(_path);
@@ -2420,7 +2466,7 @@ Session::commit_reversible_command (Command *cmd)
 }
 
 static bool
-accept_all_audio_files (const string& path, void */*arg*/)
+accept_all_audio_files (const string& path, void* /*arg*/)
 {
         if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
                 return false;
@@ -2434,7 +2480,7 @@ accept_all_audio_files (const string& path, void */*arg*/)
 }
 
 static bool
-accept_all_midi_files (const string& path, void */*arg*/)
+accept_all_midi_files (const string& path, void* /*arg*/)
 {
         if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
                 return false;
@@ -2446,7 +2492,7 @@ accept_all_midi_files (const string& path, void */*arg*/)
 }
 
 static bool
-accept_all_state_files (const string& path, void */*arg*/)
+accept_all_state_files (const string& path, void* /*arg*/)
 {
         if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
                 return false;
@@ -2510,8 +2556,7 @@ Session::find_all_sources (string path, set<string>& result)
 int
 Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_this_snapshot)
 {
-	PathScanner scanner;
-	vector<string*>* state_files;
+	vector<string> state_files;
 	string ripped;
 	string this_snapshot_path;
 
@@ -2523,9 +2568,9 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 		ripped = ripped.substr (0, ripped.length() - 1);
 	}
 
-	state_files = scanner (ripped, accept_all_state_files, (void *) 0, true, true);
+	find_files_matching_filter (state_files, ripped, accept_all_state_files, (void *) 0, true, true);
 
-	if (state_files == 0) {
+	if (state_files.empty()) {
 		/* impossible! */
 		return 0;
 	}
@@ -2534,13 +2579,13 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 	this_snapshot_path += legalize_for_path (_current_snapshot_name);
 	this_snapshot_path += statefile_suffix;
 
-	for (vector<string*>::iterator i = state_files->begin(); i != state_files->end(); ++i) {
+	for (vector<string>::iterator i = state_files.begin(); i != state_files.end(); ++i) {
 
-		if (exclude_this_snapshot && **i == this_snapshot_path) {
+		if (exclude_this_snapshot && *i == this_snapshot_path) {
 			continue;
 		}
 
-		if (find_all_sources (**i, result) < 0) {
+		if (find_all_sources (*i, result) < 0) {
 			return -1;
 		}
 	}
@@ -2567,6 +2612,7 @@ Session::ask_about_playlist_deletion (boost::shared_ptr<Playlist> p)
 void
 Session::cleanup_regions ()
 {
+	bool removed = false;
 	const RegionFactory::RegionMap& regions (RegionFactory::regions());
 
 	for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end(); ++i) {
@@ -2574,7 +2620,21 @@ Session::cleanup_regions ()
 		uint32_t used = playlists->region_use_count (i->second);
 
 		if (used == 0 && !i->second->automatic ()) {
+			removed = true;
 			RegionFactory::map_remove (i->second);
+		}
+	}
+
+	if (removed) {
+		// re-check to remove parent references of compound regions
+		for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+			if (!(i->second->whole_file() && i->second->max_source_level() > 0)) {
+				continue;
+			}
+			assert(boost::dynamic_pointer_cast<PlaylistSource>(i->second->source (0)) != 0);
+			if (0 == playlists->region_use_count (i->second)) {
+				RegionFactory::map_remove (i->second);
+			}
 		}
 	}
 
@@ -2590,18 +2650,18 @@ Session::cleanup_sources (CleanupReport& rep)
 	// FIXME: needs adaptation to midi
 
 	vector<boost::shared_ptr<Source> > dead_sources;
-	PathScanner scanner;
 	string audio_path;
 	string midi_path;
-	vector<space_and_path>::iterator i;
-	vector<space_and_path>::iterator nexti;
-	vector<string*>* candidates;
-	vector<string*>* candidates2;
+	vector<string> candidates;
 	vector<string> unused;
 	set<string> all_sources;
 	bool used;
 	string spath;
 	int ret = -1;
+	string tmppath1;
+	string tmppath2;
+	Searchpath asp;
+	Searchpath msp;
 
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state | InCleanup);
 
@@ -2643,54 +2703,23 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	/* build a list of all the possible audio directories for the session */
 
-	for (i = session_dirs.begin(); i != session_dirs.end(); ) {
-
-		nexti = i;
-		++nexti;
-
+	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 		SessionDirectory sdir ((*i).path);
-		audio_path += sdir.sound_path();
-
-		if (nexti != session_dirs.end()) {
-			audio_path += ':';
-		}
-
-		i = nexti;
+		asp += sdir.sound_path();
 	}
+	audio_path += asp.to_string();
 
 
 	/* build a list of all the possible midi directories for the session */
 
-	for (i = session_dirs.begin(); i != session_dirs.end(); ) {
-
-		nexti = i;
-		++nexti;
-
+	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 		SessionDirectory sdir ((*i).path);
-		midi_path += sdir.midi_path();
-
-		if (nexti != session_dirs.end()) {
-			midi_path += ':';
-		}
-
-		i = nexti;
+		msp += sdir.midi_path();
 	}
+	midi_path += msp.to_string();
 
-	candidates = scanner (audio_path, accept_all_audio_files, (void *) 0, true, true);
-	candidates2 = scanner (midi_path, accept_all_midi_files, (void *) 0, true, true);
-
-        /* merge them */
-
-        if (candidates) {
-                if (candidates2) {
-                        for (vector<string*>::iterator i = candidates2->begin(); i != candidates2->end(); ++i) {
-                                candidates->push_back (*i);
-                        }
-                        delete candidates2;
-                }
-        } else {
-                candidates = candidates2; // might still be null
-        }
+	find_files_matching_filter (candidates, audio_path, accept_all_audio_files, (void *) 0, true, true);
+	find_files_matching_filter (candidates, midi_path, accept_all_midi_files, (void *) 0, true, true);
 
 	/* find all sources, but don't use this snapshot because the
 	   state file on disk still references sources we may have already
@@ -2730,44 +2759,26 @@ Session::cleanup_sources (CleanupReport& rep)
                 i = tmp;
 	}
 
-	char tmppath1[PATH_MAX+1];
-	char tmppath2[PATH_MAX+1];
+	for (vector<string>::iterator x = candidates.begin(); x != candidates.end(); ++x) {
 
-        if (candidates) {
-                for (vector<string*>::iterator x = candidates->begin(); x != candidates->end(); ++x) {
+		used = false;
+		spath = *x;
 
-                        used = false;
-                        spath = **x;
+		for (set<string>::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
 
-                        for (set<string>::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
+			tmppath1 = canonical_path (spath);
+			tmppath2 = canonical_path ((*i));
 
-                                if (realpath(spath.c_str(), tmppath1) == 0) {
-                                        error << string_compose (_("Cannot expand path %1 (%2)"),
-                                                                 spath, strerror (errno)) << endmsg;
-                                        continue;
-                                }
+			if (tmppath1 == tmppath2) {
+				used = true;
+				break;
+			}
+		}
 
-                                if (realpath((*i).c_str(),  tmppath2) == 0) {
-                                        error << string_compose (_("Cannot expand path %1 (%2)"),
-                                                                 (*i), strerror (errno)) << endmsg;
-                                        continue;
-                                }
-
-                                if (strcmp(tmppath1, tmppath2) == 0) {
-                                        used = true;
-                                        break;
-                                }
-                        }
-
-                        if (!used) {
-                                unused.push_back (spath);
-                        }
-
-                        delete *x;
-                }
-
-                delete candidates;
-        }
+		if (!used) {
+			unused.push_back (spath);
+		}
+	}
 
 	/* now try to move all unused files into the "dead" directory(ies) */
 
@@ -2857,7 +2868,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		string peakpath = peak_path (base);
 
 		if (Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
-			if (::unlink (peakpath.c_str()) != 0) {
+			if (::g_unlink (peakpath.c_str()) != 0) {
 				error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"),
                                                          peakpath, _path, strerror (errno))
 				      << endmsg;
@@ -2912,6 +2923,12 @@ Session::cleanup_trash_sources (CleanupReport& rep)
 void
 Session::set_dirty ()
 {
+	/* never mark session dirty during loading */
+
+	if (_state_of_the_state & Loading) {
+		return;
+	}
+
 	bool was_dirty = dirty();
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state | Dirty);
@@ -3003,7 +3020,7 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 	case ControllableDescriptor::NamedRoute:
 	{
 		std::string str = desc.top_level_name();
-		if (str == "master") {
+		if (str == "Master" || str == "master") {
 			r = _master_out;
 		} else if (str == "control" || str == "listen") {
 			r = _monitor_out;
@@ -3149,6 +3166,11 @@ Session::save_history (string snapshot_name)
 	        return 0;
 	}
 
+	if (!Config->get_save_history() || Config->get_saved_history_depth() < 0 || 
+	    (_history.undo_depth() == 0 && _history.redo_depth() == 0)) {
+		return 0;
+	}
+
 	if (snapshot_name.empty()) {
 		snapshot_name = _current_snapshot_name;
 	}
@@ -3163,10 +3185,6 @@ Session::save_history (string snapshot_name)
 			error << _("could not backup old history file, current history not saved") << endmsg;
 			return -1;
 		}
-	}
-
-	if (!Config->get_save_history() || Config->get_saved_history_depth() < 0) {
-		return 0;
 	}
 
 	tree.set_root (&_history.get_state (Config->get_saved_history_depth()));
@@ -3586,8 +3604,6 @@ Session::rename (const std::string& new_name)
 
 	string const old_sources_root = _session_dir->sources_root();
 
-#define RENAME ::rename
-
 	/* Rename:
 
 	 * session directory
@@ -3649,7 +3665,8 @@ Session::rename (const std::string& new_name)
 
 		cerr << "Rename " << oldstr << " => " << newstr << endl;		
 
-		if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
+		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
+			error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 			return 1;
 		}
 
@@ -3676,7 +3693,8 @@ Session::rename (const std::string& new_name)
 		
 		cerr << "Rename " << oldstr << " => " << newstr << endl;
 		
-		if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
+		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
+			error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 			return 1;
 		}
 	}
@@ -3688,7 +3706,8 @@ Session::rename (const std::string& new_name)
 	
 	cerr << "Rename " << oldstr << " => " << newstr << endl;		
 
-	if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
+	if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
+		error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 		return 1;
 	}
 
@@ -3702,7 +3721,8 @@ Session::rename (const std::string& new_name)
 		
 		cerr << "Rename " << oldstr << " => " << newstr << endl;		
 		
-		if (RENAME (oldstr.c_str(), newstr.c_str()) != 0) {
+		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
+			error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 			return 1;
 		}
 	}
@@ -3726,6 +3746,11 @@ Session::rename (const std::string& new_name)
 	_current_snapshot_name = new_name;
 	_name = new_name;
 
+	/* re-add directory separator - reverse hack to oldstr above */
+	if (_path[_path.length()-1] != G_DIR_SEPARATOR) {
+		_path += G_DIR_SEPARATOR;
+	}
+
 	set_dirty ();
 
 	/* save state again to get everything just right */
@@ -3738,8 +3763,6 @@ Session::rename (const std::string& new_name)
 	store_recent_sessions (new_name, _path);
 
 	return 0;
-
-#undef RENAME
 }
 
 int
@@ -3805,4 +3828,93 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 	}
 
 	return !(found_sr && found_data_format); // zero if they are both found
+}
+
+typedef std::vector<boost::shared_ptr<FileSource> > SeveralFileSources;
+typedef std::map<std::string,SeveralFileSources> SourcePathMap;
+
+int
+Session::bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,string)> callback)
+{
+	uint32_t total = 0;
+	uint32_t n = 0;
+	SourcePathMap source_path_map;
+	string new_path;
+	boost::shared_ptr<AudioFileSource> afs;
+	int ret = 0;
+
+	{
+
+		Glib::Threads::Mutex::Lock lm (source_lock);
+		
+		cerr << " total sources = " << sources.size();
+		
+		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
+			
+			if (!fs) {
+				continue;
+			}
+			
+			if (fs->within_session()) {
+				cerr << "skip " << fs->name() << endl;
+				continue;
+			}
+			
+			if (source_path_map.find (fs->path()) != source_path_map.end()) {
+				source_path_map[fs->path()].push_back (fs);
+			} else {
+				SeveralFileSources v;
+				v.push_back (fs);
+				source_path_map.insert (make_pair (fs->path(), v));
+			}
+			
+			total++;
+		}
+		
+		cerr << " fsources = " << total << endl;
+		
+		for (SourcePathMap::iterator i = source_path_map.begin(); i != source_path_map.end(); ++i) {
+			
+			/* tell caller where we are */
+			
+			string old_path = i->first;
+			
+			callback (n, total, old_path);
+			
+			cerr << old_path << endl;
+			
+			new_path.clear ();
+			
+			switch (i->second.front()->type()) {
+			case DataType::AUDIO:
+				new_path = new_audio_source_path_for_embedded (old_path);
+				break;
+				
+			case DataType::MIDI:
+				break;
+			}
+			
+			cerr << "Move " << old_path << " => " << new_path << endl;
+			
+			if (!copy_file (old_path, new_path)) {
+				cerr << "failed !\n";
+				ret = -1;
+			}
+			
+			/* make sure we stop looking in the external
+			   dir/folder. Remember, this is an all-or-nothing
+			   operations, it doesn't merge just some files.
+			*/
+			remove_dir_from_search_path (Glib::path_get_dirname (old_path), i->second.front()->type());
+
+			for (SeveralFileSources::iterator f = i->second.begin(); f != i->second.end(); ++f) {
+				(*f)->set_path (new_path);
+			}
+		}
+	}
+
+	save_state ("", false, false);
+
+	return ret;
 }

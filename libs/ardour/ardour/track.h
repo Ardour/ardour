@@ -35,7 +35,7 @@ class Region;
 class Diskstream;
 class IO;
 
-class Track : public Route, public PublicDiskstream
+class LIBARDOUR_API Track : public Route, public PublicDiskstream
 {
   public:
 	Track (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
@@ -44,6 +44,7 @@ class Track : public Route, public PublicDiskstream
 	int init ();
 
 	bool set_name (const std::string& str);
+	void resync_track_name ();
 
 	TrackMode mode () const { return _mode; }
 	virtual int set_mode (TrackMode /*m*/) { return false; }
@@ -96,7 +97,7 @@ class Track : public Route, public PublicDiskstream
 	virtual boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, 
 							boost::shared_ptr<Processor> endpoint, bool include_endpoint) = 0;
 	virtual int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t nframes,
-				  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export) = 0;
+				  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) = 0;
 
 	XMLNode&    get_state();
 	XMLNode&    get_template();
@@ -142,7 +143,7 @@ class Track : public Route, public PublicDiskstream
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
 	bool pending_overwrite () const;
 	double speed () const;
-	void prepare_to_stop (framepos_t);
+	void prepare_to_stop (framepos_t, framepos_t);
 	void set_slaved (bool);
 	ChanCount n_channels ();
 	framepos_t get_capture_start_frame (uint32_t n = 0) const;
@@ -228,6 +229,9 @@ private:
 	void diskstream_record_enable_changed ();
 	void diskstream_speed_changed ();
 	void diskstream_alignment_style_changed ();
+	void parameter_changed (std::string const & p);
+
+	std::string _diskstream_name;
 };
 
 }; /* namespace ARDOUR*/

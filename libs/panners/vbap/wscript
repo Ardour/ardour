@@ -22,13 +22,14 @@ def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = [ 'vbap_speakers.cc', 'vbap.cc'  ]
     obj.export_includes = ['.']
-    obj.cxxflags     = '-DPACKAGE="libardour_panvbap"'
+    obj.defines      = ['PACKAGE="libardour_panvbap"']
+    obj.defines     += ['ARDOURPANNER_DLL_EXPORTS']
     obj.includes     = ['.']
     obj.name         = 'libardour_panvbap'
     obj.target       = 'panvbap'
     obj.use          = 'libardour libardour_cp libpbd'
     obj.vnum         = LIBARDOUR_PANVBAP_LIB_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'panners')
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'panners')
 
 def shutdown():
     autowaf.shutdown()

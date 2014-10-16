@@ -23,18 +23,19 @@
 #include <glibmm/threads.h>
 
 #include "ardour/chan_count.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
 
 class BufferSet;
 
-class ThreadBuffers {
+class LIBARDOUR_API ThreadBuffers {
 public:
 	ThreadBuffers ();
 	~ThreadBuffers ();
 
-	void ensure_buffers (ChanCount howmany = ChanCount::ZERO);
+	void ensure_buffers (ChanCount howmany = ChanCount::ZERO, size_t custom = 0);
 
 	BufferSet* silent_buffers;
 	BufferSet* scratch_buffers;

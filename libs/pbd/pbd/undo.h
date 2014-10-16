@@ -25,13 +25,18 @@
 #include <map>
 #include <sigc++/slot.h>
 #include <sigc++/bind.h>
+#ifndef  COMPILER_MSVC
 #include <sys/time.h>
+#else
+#include <ardourext/misc.h>
+#endif
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/command.h"
 
 typedef sigc::slot<void> UndoAction;
 
-class UndoTransaction : public Command
+class LIBPBD_API UndoTransaction : public Command
 {
   public:
 	UndoTransaction ();
@@ -70,7 +75,7 @@ class UndoTransaction : public Command
 	void about_to_explicitly_delete ();
 };
 
-class UndoHistory : public PBD::ScopedConnectionList
+class LIBPBD_API UndoHistory : public PBD::ScopedConnectionList
 {
   public:
 	UndoHistory();

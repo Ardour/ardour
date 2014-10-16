@@ -49,7 +49,7 @@ namespace Gtk {
 	class Menu;
 }
 
-class LevelMeterBase : public ARDOUR::SessionHandlePtr
+class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::trackable
 {
   public:
 	LevelMeterBase (ARDOUR::Session*, PBD::EventLoop::InvalidationRecord* ir,

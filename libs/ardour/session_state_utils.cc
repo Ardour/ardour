@@ -47,10 +47,8 @@ void
 get_state_files_in_directory (const std::string & directory_path,
 			      vector<std::string> & result)
 {
-	Glib::PatternSpec state_file_pattern('*' + string(statefile_suffix));
-
-	find_matching_files_in_directory (directory_path, state_file_pattern,
-			result);
+	find_files_matching_pattern (result, directory_path,
+	                             '*' + string(statefile_suffix));
 }
 
 vector<string>

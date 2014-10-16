@@ -19,13 +19,22 @@
 #ifndef __pbd_semutils_h__
 #define __pbd_semutils_h__
 
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+#else
 #include <semaphore.h>
+#endif
+
+#include "pbd/libpbd_visibility.h"
 
 namespace PBD {
 
-class ProcessSemaphore {
+class LIBPBD_API ProcessSemaphore {
   private:
-#ifdef __APPLE__
+#ifdef PLATFORM_WINDOWS
+	HANDLE _sem;
+
+#elif __APPLE__
 	sem_t* _sem;
 	sem_t* ptr_to_sem() const { return _sem; }
 #else
@@ -37,8 +46,15 @@ class ProcessSemaphore {
 	ProcessSemaphore (const char* name, int val);
 	~ProcessSemaphore ();
 
+#ifdef PLATFORM_WINDOWS
+
+	int signal ();
+	int wait ();
+
+#else
 	int signal () { return sem_post (ptr_to_sem()); }
 	int wait () { return sem_wait (ptr_to_sem()); }
+#endif
 };
 
 }

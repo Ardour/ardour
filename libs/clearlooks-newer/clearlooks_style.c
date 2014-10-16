@@ -956,14 +956,14 @@ clearlooks_style_draw_slider (DRAW_ARGS, GtkOrientation orientation)
 static void
 clearlooks_style_draw_option (DRAW_ARGS)
 {
-	(void) detail;
-		
-	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
 	const ClearlooksColors *colors;
 	WidgetParameters params;
 	CheckboxParameters checkbox;
 	cairo_t *cr;
+	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
 	
+	(void) detail;
+
 	CHECK_ARGS
 	SANITIZE_SIZE
 
@@ -1019,14 +1019,17 @@ clearlooks_style_draw_vline (GtkStyle               *style,
                              gint                    y2,
                              gint                    x)
 {
+	const ClearlooksColors *colors;
+	SeparatorParameters separator;
+	cairo_t *cr;
+
+	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
+
 	(void) state_type;
 	(void) widget;
 	(void) detail;
-	
-	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
-	const ClearlooksColors *colors;
-	SeparatorParameters separator = { FALSE };
-	cairo_t *cr;
+
+	separator.horizontal = FALSE;
 
 	CHECK_ARGS
 
@@ -1053,13 +1056,13 @@ clearlooks_style_draw_hline (GtkStyle               *style,
                              gint                    x2,
                              gint                    y)
 {
-	(void) state_type;
-	(void) widget;
-	
-	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
 	const ClearlooksColors *colors;
 	cairo_t *cr;
 	SeparatorParameters separator;
+	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
+
+	(void) state_type;
+	(void) widget;
 
 	CHECK_ARGS
 
@@ -1136,13 +1139,14 @@ clearlooks_style_draw_resize_grip (GtkStyle       *style,
                   gint            width,
                   gint            height)
 {
-	(void) detail;
-	
-	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
-	ClearlooksColors *colors = &clearlooks_style->colors;
+	ClearlooksColors *colors;
 	cairo_t *cr;
 	WidgetParameters params;
 	ResizeGripParameters grip;
+	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
+
+	(void) detail;
+	colors = &clearlooks_style->colors;
 
 	CHECK_ARGS
 	SANITIZE_SIZE
@@ -1164,14 +1168,15 @@ clearlooks_style_draw_resize_grip (GtkStyle       *style,
 static void
 clearlooks_style_draw_tab (DRAW_ARGS)
 {
-	(void) shadow_type;
-	(void) detail;
-	
-	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
-	ClearlooksColors *colors = &clearlooks_style->colors;
+	ClearlooksColors *colors;
 	WidgetParameters params;
 	ArrowParameters  arrow; 	 
 	cairo_t *cr;
+	ClearlooksStyle *clearlooks_style = CLEARLOOKS_STYLE (style);
+
+	(void) shadow_type;
+	(void) detail;
+	colors = &clearlooks_style->colors;
 
 	CHECK_ARGS
 	SANITIZE_SIZE
@@ -1202,15 +1207,18 @@ clearlooks_style_draw_arrow (GtkStyle  *style,
                        gint           width,
                        gint           height)
 {
+	ClearlooksColors *colors;
+	WidgetParameters params;
+	ArrowParameters  arrow;
+	cairo_t *cr;
+	ClearlooksStyle  *clearlooks_style = CLEARLOOKS_STYLE (style);
+
 	(void) shadow;
 	(void) detail;
 	(void) fill;
-	
-	ClearlooksStyle  *clearlooks_style = CLEARLOOKS_STYLE (style);
-	ClearlooksColors *colors = &clearlooks_style->colors;
-	WidgetParameters params;
-	ArrowParameters  arrow;
-	cairo_t *cr = ge_gdk_drawable_to_cairo (window, area);
+
+	cr = ge_gdk_drawable_to_cairo (window, area);
+	colors = &clearlooks_style->colors;
 
 	CHECK_ARGS
 	SANITIZE_SIZE
@@ -1475,10 +1483,9 @@ clearlooks_style_draw_layout (GtkStyle * style,
 	     GtkWidget * widget,
 	     const gchar * detail, gint x, gint y, PangoLayout * layout)
 {
-	(void) detail;
-
 	GdkGC *gc;
 
+	(void) detail;
 	g_return_if_fail (GTK_IS_STYLE (style));
 	g_return_if_fail (window != NULL);
 
@@ -1525,17 +1532,20 @@ clearlooks_style_draw_render_icon (GtkStyle            *style,
              GtkWidget           *widget,
              const char          *detail)
 {
-	(void) direction;
-	(void) detail;
-	
-	int width = 1;
-	int height = 1;
+	int width;
+	int height;
 	GdkPixbuf *scaled;
 	GdkPixbuf *stated;
 	GdkPixbuf *base_pixbuf;
 	GdkScreen *screen;
 	GtkSettings *settings;
-	
+
+	width = 1;
+	height = 1;
+
+	(void) direction;
+	(void) detail;
+
 	/* Oddly, style can be NULL in this function, because
 	 * GtkIconSet can be used without a style and if so
 	 * it uses this function.

@@ -27,17 +27,16 @@
 class TapeAudioRegionView : public AudioRegionView
 {
   public:
-	TapeAudioRegionView (ArdourCanvas::Group *,
+	TapeAudioRegionView (ArdourCanvas::Container *,
 			     RouteTimeAxisView&,
 			     boost::shared_ptr<ARDOUR::AudioRegion>,
-			     double initial_samples_per_unit,
-			     Gdk::Color const & base_color);
+			     double initial_samples_per_pixel,
+			     uint32_t base_color);
 	~TapeAudioRegionView ();
 
   protected:
-	void init (Gdk::Color const & base_color, bool wait_for_waves);
+	void init (bool wait_for_waves);
 
-	void set_frame_color ();
 	void update (uint32_t n);
 
 	static const TimeAxisViewItem::Visibility default_tape_visibility;

@@ -352,6 +352,9 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		}
 	}
 
+	bufs.set_count(ChanCount::max(bufs.count(), in_streams));
+	bufs.set_count(ChanCount::max(bufs.count(), out_streams));
+
 	/* Note that we've already required that plugins
 	   be able to handle in-place processing.
 	*/
@@ -452,13 +455,13 @@ PluginInsert::silence (framecnt_t nframes)
 }
 
 void
-PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t nframes, bool)
+PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t /*end_frame*/, pframes_t nframes, bool)
 {
 	if (_pending_active) {
 		/* run as normal if we are active or moving from inactive to active */
 
-		if (_session.transport_rolling()) {
-			automation_run (bufs, nframes);
+		if (_session.transport_rolling() || _session.bounce_processing()) {
+			automation_run (bufs, start_frame, nframes);
 		} else {
 			connect_and_run (bufs, nframes, 0, false);
 		}
@@ -535,10 +538,10 @@ PluginInsert::get_parameter (Evoral::Parameter param)
 }
 
 void
-PluginInsert::automation_run (BufferSet& bufs, pframes_t nframes)
+PluginInsert::automation_run (BufferSet& bufs, framepos_t start, pframes_t nframes)
 {
 	Evoral::ControlEvent next_event (0, 0.0f);
-	framepos_t now = _session.transport_frame ();
+	framepos_t now = start;
 	framepos_t end = now + nframes;
 	framecnt_t offset = 0;
 
@@ -973,6 +976,22 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 	boost::shared_ptr<Plugin> plugin = find_plugin (_session, prop->value(), type);
 
+	/* treat linux and windows VST plugins equivalent if they have the same uniqueID
+	 * allow to move sessions windows <> linux */
+#ifdef LXVST_SUPPORT
+	if (plugin == 0 && type == ARDOUR::Windows_VST) {
+		type = ARDOUR::LXVST;
+		plugin = find_plugin (_session, prop->value(), type);
+	}
+#endif
+
+#ifdef WINDOWS_VST_SUPPORT
+	if (plugin == 0 && type == ARDOUR::LXVST) {
+		type = ARDOUR::Windows_VST;
+		plugin = find_plugin (_session, prop->value(), type);
+	}
+#endif
+
 	if (plugin == 0) {
 		error << string_compose(
 			_("Found a reference to a plugin (\"%1\") that is unknown.\n"
@@ -1211,24 +1230,13 @@ PluginInsert::PluginControl::set_value (double user_val)
 double
 PluginInsert::PluginControl::internal_to_interface (double val) const
 {
+	val = Controllable::internal_to_interface(val);
+	
 	if (_logarithmic) {
-		/* some plugins have a log-scale range "0.."
-		 * ideally we'd map the range down to infinity somehow :)
-		 *
-		 * one solution could be to use
-		 *   val = exp(lower + log(range) * value);
-		 *   (log(val) - lower) / range)
-		 * This approach would require access to the actual range (ie
-		 * Plugin::ParameterDescriptor) and also require handling
-		 * of unbound ranges..
-		 *
-		 * currently an arbitrarly low number is assumed to represnt
-		 * log(0) as hot-fix solution.
-		 */
 		if (val > 0) {
-			val = log (val);
+			val = pow (val, 1/1.5);
 		} else {
-			val = -8; // ~ -70dB = 20 * log10(exp(-8))
+			val = 0;
 		}
 	}
 
@@ -1239,14 +1247,15 @@ double
 PluginInsert::PluginControl::interface_to_internal (double val) const
 {
 	if (_logarithmic) {
-		if (val <= -8) {
-			/* see note in PluginInsert::PluginControl::internal_to_interface() */
+		if (val <= 0) {
 			val= 0;
 		} else {
-			val = exp (val);
+			val = pow (val, 1.5);
 		}
 	}
 
+	val = Controllable::interface_to_internal(val);
+	
 	return val;
 }
 

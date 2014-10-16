@@ -249,6 +249,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 	   processing pathway that wants to use this->output_buffers() for some reason.
 	*/
 
+	// TODO delayline -- latency-compensation
 	output_buffers().get_backend_port_addresses (ports, nframes);
 
 	// this Delivery processor is not a derived type, and thus we assume
@@ -556,7 +557,7 @@ Delivery::set_name (const std::string& name)
 {
 	bool ret = IOProcessor::set_name (name);
 
-	if (ret) {
+	if (ret && _panshell) {
 		ret = _panshell->set_name (name);
 	}
 

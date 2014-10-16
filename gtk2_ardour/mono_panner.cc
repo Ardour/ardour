@@ -50,6 +50,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace ARDOUR_UI_UTILS;
 
 static const int pos_box_size = 9;
 static const int lr_box_size = 15;
@@ -80,9 +81,7 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	if (!have_font) {
 		Pango::FontDescription font;
 		Pango::AttrFontDesc* font_attr;
-		font = Pango::FontDescription ("ArdourMono");
-		font.set_weight (Pango::WEIGHT_BOLD);
-		font.set_size(9 * PANGO_SCALE);
+		font = Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_SmallBoldMonospaceFont());
 		font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 		panner_font_attributes.change(*font_attr);
 		delete font_attr;
@@ -158,6 +157,10 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 		t  = 0x606060ff;
 	}
 
+	if (_send_mode) {
+		b = rgba_from_style("SendStripBase",
+				UINT_RGBA_R(b), UINT_RGBA_G(b), UINT_RGBA_B(b), 255, "fg");
+	}
 	/* background */
 	context->set_source_rgba (UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
 	context->rectangle (0, 0, width, height);
@@ -485,12 +488,12 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
 void
 MonoPanner::set_colors ()
 {
-	colors.fill = ARDOUR_UI::config()->canvasvar_MonoPannerFill.get();
-	colors.outline = ARDOUR_UI::config()->canvasvar_MonoPannerOutline.get();
-	colors.text = ARDOUR_UI::config()->canvasvar_MonoPannerText.get();
-	colors.background = ARDOUR_UI::config()->canvasvar_MonoPannerBackground.get();
-	colors.pos_outline = ARDOUR_UI::config()->canvasvar_MonoPannerPositionOutline.get();
-	colors.pos_fill = ARDOUR_UI::config()->canvasvar_MonoPannerPositionFill.get();
+        colors.fill = ARDOUR_UI::config()->get_canvasvar_MonoPannerFill();
+        colors.outline = ARDOUR_UI::config()->get_canvasvar_MonoPannerOutline();
+        colors.text = ARDOUR_UI::config()->get_canvasvar_MonoPannerText();
+        colors.background = ARDOUR_UI::config()->get_canvasvar_MonoPannerBackground();
+        colors.pos_outline = ARDOUR_UI::config()->get_canvasvar_MonoPannerPositionOutline();
+        colors.pos_fill = ARDOUR_UI::config()->get_canvasvar_MonoPannerPositionFill();
 }
 
 void

@@ -226,7 +226,7 @@ inline static void gdither_innner_loop(const GDitherType dt,
 
 	switch (bit_depth) {
 	case GDither8bit:
-	    o8[i] = (u_int8_t) (clamped * post_scale);
+	    o8[i] = (uint8_t) (clamped * post_scale);
 	    break;
 	case GDither16bit:
 	    o16[i] = (int16_t) (clamped * post_scale);
@@ -292,7 +292,7 @@ inline static void gdither_innner_loop_fp(const GDitherType dt,
 	    break;
 	}
 
-	clamped = rintf(tmp);
+	clamped = (double)lrintf(tmp);
 	if (clamped > clamp_u) {
 		clamped = clamp_u;
 	} else if (clamped < clamp_l) {

@@ -53,7 +53,7 @@ class AudioPlaylist;
 class AudioFileSource;
 class IO;
 
-class AudioDiskstream : public Diskstream
+class LIBARDOUR_API AudioDiskstream : public Diskstream
 {
   public:
 	AudioDiskstream (Session &, const std::string& name, Diskstream::Flag f = Recordable);
@@ -108,6 +108,7 @@ class AudioDiskstream : public Diskstream
 	int remove_channel (uint32_t how_many);
 
 	bool set_name (std::string const &);
+	bool set_write_source_name (const std::string& str);
 
 	/* stateful */
 

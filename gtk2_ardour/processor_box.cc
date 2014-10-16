@@ -21,6 +21,10 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#ifdef COMPILER_MSVC
+#define rintf(x) round((x) + 0.5)
+#endif
+
 #include <cmath>
 #include <iostream>
 #include <set>
@@ -47,6 +51,7 @@
 #include "ardour/internal_send.h"
 #include "ardour/panner_shell.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/pannable.h"
 #include "ardour/port_insert.h"
 #include "ardour/profile.h"
 #include "ardour/return.h"
@@ -71,7 +76,6 @@
 #include "return_ui.h"
 #include "route_processor_selection.h"
 #include "send_ui.h"
-#include "utils.h"
 
 #include "i18n.h"
 
@@ -99,6 +103,8 @@ static const uint32_t midi_port_color = 0x960909FF; //Red
 ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processor> p, Width w)
 	: _button (ArdourButton::led_default_elements)
 	, _position (PreFader)
+	, _position_num(0)
+	, _selectable(true)
 	, _parent (parent)
 	, _processor (p)
 	, _width (w)
@@ -108,8 +114,8 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 {
 	_vbox.show ();
 	
-	_button.set_diameter (3);
 	_button.set_distinct_led_click (true);
+	_button.set_fallthrough_to_parent(true);
 	_button.set_led_left (true);
 	_button.signal_led_clicked.connect (sigc::mem_fun (*this, &ProcessorEntry::led_clicked));
 	_button.set_text (name (_width));
@@ -441,7 +447,7 @@ ProcessorEntry::build_controls_menu ()
 	
 	for (list<Control*>::iterator i = _controls.begin(); i != _controls.end(); ++i) {
 		items.push_back (CheckMenuElem ((*i)->name ()));
-		CheckMenuItem* c = dynamic_cast<CheckMenuItem*> (&items.back ());
+		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		c->set_active ((*i)->visible ());
 		c->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ProcessorEntry::toggle_control_visibility), *i));
 	}
@@ -467,7 +473,7 @@ ProcessorEntry::build_send_options_menu ()
 	if (send) {
 
 		items.push_back (CheckMenuElem (_("Link panner controls")));
-		CheckMenuItem* c = dynamic_cast<CheckMenuItem*> (&items.back ());
+		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		c->set_active (send->panner_shell()->is_linked_to_route());
 		c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_panner_link));
 
@@ -487,7 +493,7 @@ ProcessorEntry::toggle_panner_link ()
 ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string const & n)
 	: _control (c)
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
-	, _slider (&_adjustment, 0, 13, false)
+	, _slider (&_adjustment, 0, 13)
 	, _slider_persistant_tooltip (&_slider)
 	, _button (ArdourButton::led_default_elements)
 	, _ignore_ui_adjustment (false)
@@ -516,14 +522,14 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 		box.add (_slider);
 		_slider.show ();
 
-		double const lo = c->internal_to_interface (c->lower ());
-		double const up = c->internal_to_interface (c->upper ());
+		double const lo = c->lower ();
+		double const up = c->upper ();
 		
 		_adjustment.set_lower (lo);
 		_adjustment.set_upper (up);
 		_adjustment.set_step_increment ((up - lo) / 100);
 		_adjustment.set_page_increment ((up - lo) / 10);
-		_slider.set_default_value (c->internal_to_interface (c->normal ()));
+		_slider.set_default_value (c->normal ());
 		
 		_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
 		c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
@@ -575,7 +581,7 @@ ProcessorEntry::Control::slider_adjusted ()
 		return;
 	}
 
-	c->set_value (c->interface_to_internal (_adjustment.get_value ()));
+	c->set_value ( _adjustment.get_value () );
 	set_tooltip ();
 }
 
@@ -611,7 +617,7 @@ ProcessorEntry::Control::control_changed ()
 		
 	} else {
 
-		_adjustment.set_value (c->internal_to_interface (c->get_value ()));
+		_adjustment.set_value (c->get_value ());
 		
 		stringstream s;
 		s.precision (1);
@@ -1191,14 +1197,14 @@ ProcessorBox::leave_notify (GdkEventCrossing*)
 	return false;
 }
 
-void
+bool
 ProcessorBox::processor_operation (ProcessorOperation op) 
 {
 	ProcSelection targets;
 
 	get_selected_processors (targets);
 
-	if (targets.empty()) {
+/*	if (targets.empty()) {
 
 		int x, y;
 		processor_display.get_pointer (x, y);
@@ -1209,10 +1215,18 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 			targets.push_back (pointer.first->processor ());
 		}
 	}
+*/
 
+	if ( (op == ProcessorsDelete) && targets.empty() )
+		return false;  //nothing to delete.  return false so the editor-mixer, because the user was probably intending to delete something in the editor
+	
 	switch (op) {
 	case ProcessorsSelectAll:
 		processor_display.select_all ();
+		break;
+
+	case ProcessorsSelectNone:
+		processor_display.select_none ();
 		break;
 
 	case ProcessorsCopy:
@@ -1252,6 +1266,8 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 	default:
 		break;
 	}
+	
+	return true;
 }
 
 ProcessorWindowProxy* 
@@ -1297,6 +1313,12 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 
 		ret = true;
 
+	} else if (Keyboard::is_context_menu_event (ev)) {
+
+		show_processor_menu (ev->time);
+		
+		ret = true;
+
 	} else if (processor && ev->button == 1 && selected) {
 
 		// this is purely informational but necessary for route params UI
@@ -1324,10 +1346,6 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev, ProcessorEntry
 		Glib::signal_idle().connect (sigc::bind (
 				sigc::mem_fun(*this, &ProcessorBox::idle_delete_processor),
 				boost::weak_ptr<Processor>(processor)));
-
-	} else if (Keyboard::is_context_menu_event (ev)) {
-
-		show_processor_menu (ev->time);
 
 	} else if (processor && Keyboard::is_button2_event (ev)
 #ifndef GTKOSX
@@ -1454,7 +1472,8 @@ ProcessorBox::choose_insert ()
 void
 ProcessorBox::choose_send ()
 {
-	boost::shared_ptr<Send> send (new Send (*_session, _route->pannable(), _route->mute_master()));
+	boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
+	boost::shared_ptr<Send> send (new Send (*_session, sendpan, _route->mute_master()));
 
 	/* make an educated guess at the initial number of outputs for the send */
 	ChanCount outs = (_session->master_out())
@@ -1738,12 +1757,20 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	}
 
 	boost::shared_ptr<PluginInsert> plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (processor);
+	
 	ProcessorEntry* e = 0;
 	if (plugin_insert) {
 		e = new PluginInsertProcessorEntry (this, plugin_insert, _width);
 	} else {
 		e = new ProcessorEntry (this, processor, _width);
 	}
+
+	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
+	boost::shared_ptr<PortInsert> ext = boost::dynamic_pointer_cast<PortInsert> (processor);
+	
+	//faders and meters are not deletable, copy/paste-able, so they shouldn't be selectable
+	if (!send && !plugin_insert && !ext)
+		e->set_selectable(false);
 
 	/* Set up this entry's state from the GUIObjectState */
 	XMLNode* proc = entry_gui_object_state (e);
@@ -2103,9 +2130,10 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 					continue;
 				}
 
+				boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
 				XMLNode n (**niter);
-                                InternalSend* s = new InternalSend (*_session, _route->pannable(), _route->mute_master(),
-								    boost::shared_ptr<Route>(), Delivery::Aux); 
+				InternalSend* s = new InternalSend (*_session, sendpan, _route->mute_master(),
+						_route, boost::shared_ptr<Route>(), Delivery::Aux);
 
 				IOProcessor::prepare_for_reset (n, s->name());
 
@@ -2118,7 +2146,9 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 			} else if (type->value() == "send") {
 
+				boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
 				XMLNode n (**niter);
+
 				Send* s = new Send (*_session, _route->pannable(), _route->mute_master());
 
 				IOProcessor::prepare_for_reset (n, s->name());

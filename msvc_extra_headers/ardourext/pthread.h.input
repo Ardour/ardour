@@ -1,0 +1,7 @@
+#if !defined( PTHREAD_H )
+#ifdef  _PTHREAD_H  // Test added by JE - 12-12-2009
+#error  "ardourext/pthread.h conflicts with an existing pthread library"
+#else
+#include <ardourext/ptw32/pthread.h>
+#endif /* _PTHREAD_H */
+#endif /* PTHREAD_H */

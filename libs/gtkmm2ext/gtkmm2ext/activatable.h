@@ -23,6 +23,8 @@
 
 #include <gtkmm/action.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
 /**
@@ -30,7 +32,7 @@ namespace Gtkmm2ext {
 
    Gtkmm itself has a class for this.  I don't know why we don't use it.
 */
-class Activatable {
+class LIBGTKMM2EXT_API Activatable {
 public:
 	virtual ~Activatable() {}
 

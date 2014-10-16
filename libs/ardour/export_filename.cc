@@ -19,7 +19,6 @@
 */
 
 #include <string>
-#include "ardour/export_filename.h"
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
@@ -28,11 +27,13 @@
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
-#include "ardour/export_timespan.h"
+#include "ardour/export_filename.h"
 #include "ardour/export_format_specification.h"
 #include "ardour/export_channel_configuration.h"
+#include "ardour/export_timespan.h"
 #include "ardour/utils.h"
 
 #include "i18n.h"
@@ -63,9 +64,14 @@ ExportFilename::ExportFilename (Session & session) :
 
 	folder = session.session_directory().export_path();
 
-	XMLNode * instant_node = session.instant_xml ("ExportFilename");
-	if (instant_node) {
-		set_state (*instant_node);
+	XMLNode * extra_node = session.extra_xml ("ExportFilename");
+	/* Legacy sessions used Session instant.xml for this */
+	if (!extra_node) {
+		session.instant_xml ("ExportFilename");
+	}
+
+	if (extra_node) {
+		set_state (*extra_node);
 	}
 }
 
@@ -86,9 +92,9 @@ ExportFilename::get_state ()
 	add_field (node, "time", include_time, enum_2_string (time_format));
 	add_field (node, "date", include_date, enum_2_string (date_format));
 
-	XMLNode * instant_node = new XMLNode ("ExportRevision");
-	instant_node->add_property ("revision", to_string (revision, std::dec));
-	session.add_instant_xml (*instant_node);
+	XMLNode * extra_node = new XMLNode ("ExportRevision");
+	extra_node->add_property ("revision", to_string (revision, std::dec));
+	session.add_extra_xml (*extra_node);
 
 	return *node;
 }
@@ -143,8 +149,13 @@ ExportFilename::set_state (const XMLNode & node)
 	include_date = pair.first;
 	date_format = (DateFormat) string_2_enum (pair.second, date_format);
 
-	XMLNode * instant_node = session.instant_xml ("ExportRevision");
-	if (instant_node && (prop = instant_node->property ("revision"))) {
+	XMLNode * extra_node = session.extra_xml ("ExportRevision");
+	/* Legacy sessions used Session instant.xml for this */
+	if (!extra_node) {
+		extra_node = session.instant_xml ("ExportRevision");
+	}
+
+	if (extra_node && (prop = extra_node->property ("revision"))) {
 		revision = atoi (prop->value());
 	}
 

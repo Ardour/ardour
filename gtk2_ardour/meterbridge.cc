@@ -40,6 +40,7 @@
 
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
+#include "ardour/route_sorters.h"
 
 #include "meterbridge.h"
 
@@ -57,6 +58,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
@@ -77,24 +79,6 @@ Meterbridge::instance ()
 
 	return _instance;
 }
-
-/* copy from gtk2_ardour/mixer_ui.cc -- TODO consolidate
- * used by Meterbridge::set_session() below
- */
-struct SignalOrderRouteSorter {
-	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		if (a->is_master() || a->is_monitor()) {
-			/* "a" is a special route (master, monitor, etc), and comes
-			 * last in the mixer ordering
-			 */
-			return false;
-		} else if (b->is_master() || b->is_monitor()) {
-			/* everything comes before b */
-			return true;
-		}
-		return a->order_key () < b->order_key ();
-	}
-};
 
 Meterbridge::Meterbridge ()
 	: Window (Gtk::WINDOW_TOPLEVEL)
@@ -408,7 +392,7 @@ Meterbridge::on_scroll()
 	ARDOUR::MeterType mt_right = _mt_right;
 
 	for (unsigned int i = 0; i < _metrics.size(); ++i) {
-		int sx, dx, dy;
+		int sx, dx = 0, dy = 0;
 		int mm = _metrics[i]->get_metric_mode();
 		sx = (mm & 2) ? _metrics[i]->get_width() : 0;
 
@@ -450,7 +434,7 @@ Meterbridge::set_session (Session* s)
 	_show_master = _session->config.get_show_master_on_meterbridge();
 	_show_midi = _session->config.get_show_midi_on_meterbridge();
 
-	SignalOrderRouteSorter sorter;
+	ARDOUR::SignalOrderRouteSorter sorter;
 	boost::shared_ptr<RouteList> routes = _session->get_routes();
 
 	RouteList copy(*routes);
@@ -810,6 +794,12 @@ Meterbridge::parameter_changed (std::string const & p)
 		scroller.queue_resize();
 	}
 	else if (p == "meterbridge-label-height") {
+		scroller.queue_resize();
+	}
+	else if (p == "show-monitor-on-meterbridge") {
+		scroller.queue_resize();
+	}
+	else if (p == "track-name-number") {
 		scroller.queue_resize();
 	}
 }

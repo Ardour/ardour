@@ -46,7 +46,7 @@ namespace Gtk {
 }
 
 namespace Pango {
-	class Layout;
+	class Container;
 }
 
 class Panner2dWindow;
@@ -63,6 +63,7 @@ class Panner2d : public Gtk::DrawingArea
 	int  add_signal (const char* text, const PBD::AngularVector&);
 	void move_signal (int which, const PBD::AngularVector&);
 	void reset (uint32_t n_inputs);
+	void set_send_drawing_mode (bool);
 
 	boost::shared_ptr<ARDOUR::PannerShell> get_panner_shell() const { return panner_shell; }
 
@@ -117,6 +118,7 @@ class Panner2d : public Gtk::DrawingArea
 	double  last_width;
 	bool    did_move;
 	bool    have_elevation;
+	bool    _send_mode;
 
 	Target *find_closest_object (gdouble x, gdouble y, bool& is_signal);
 

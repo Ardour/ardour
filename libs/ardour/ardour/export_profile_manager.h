@@ -35,6 +35,7 @@
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/location.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/export_handler.h"
 
@@ -46,7 +47,7 @@ class Location;
 class Session;
 
 /// Manages (de)serialization of export profiles and related classes
-class ExportProfileManager
+class LIBARDOUR_API ExportProfileManager
 {
   public:
 
@@ -102,7 +103,7 @@ class ExportProfileManager
 	std::vector<std::string> find_file (std::string const & pattern);
 
 	std::string  export_config_dir;
-	PBD::SearchPath search_path;
+	PBD::Searchpath search_path;
 
 /* Timespans */
   public:

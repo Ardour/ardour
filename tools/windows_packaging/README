@@ -1,0 +1,150 @@
+Building Ardour for Windows
+
+The windows build is compiled and tested with the MinGW compiler that is
+packaged in Fedora, Currently using Fedora 19. There are many cross compiled
+"mingw" libraries that Ardour requires that are available on Fedora but
+not all are yet.
+
+
+Prerequisites
+
+For setting up the required packages to build Ardour refer to the README
+file located at https://github.com/mojofunk/fedora-mingw-ardour
+
+
+Configuring
+
+After all the necessary packages are installed the next step is to call
+one of the configure scripts configure-debug.sh or configure-release.sh.
+
+The configure-debug.sh script will enable debugging support and install
+the tests to the package directory. It will also mean the GDB debugger
+is packaged.
+
+The configure-release.sh is intended for releases only, none of the tests
+will be built and all the binaries will be optimized and stripped.
+
+These scripts both source the mingw-env.sh script to setup the appropriate 
+environment variables and then call waf with a specific set of parameters
+that are appropriate to configure for the windows build.
+
+There is also configure-distcc-debug.sh and configure-distcc-release.sh that
+configure to use distcc for building.
+
+Building
+
+After the build is configured the waf.sh script is used to build the Ardour
+application and all necessary libraries. The waf.sh script is not strictly
+needed, it just saves having to change working directories.
+
+
+Packaging
+
+When the build is successful the package.sh script will call waf install
+and then move some of the installed files to appropriate locations for a
+windows executable. This could probably be done in the waf scripts specifically
+for the windows build but I felt it simpler to do it in the packaging script
+for now.
+
+--------- NOTE --------------------
+
+package_win32.sh is an updated/extended version of package.sh from Valeriy. It
+should probably be merged with package.sh at some point. It uses a number of
+additional resources located under mingw64/
+
+-----------------------------------
+
+The packaging script then copies the JACK deamon and all the required mingw
+shared libraries from the host system into the packaging directory. The 
+shared libraries or dll's are placed in the same directory as the Ardour
+executable so they are found at runtime.
+
+Once the package.sh script has been run then the package directory located 
+in the Ardour source root directory will contain everything necessary to run
+the Ardour executable.
+
+The make-installer.sh script is only really relevant when configure-release.sh
+has been used to configure the build. The script creates a basic and little
+tested windows installer for Ardour using the Nullsoft Scriptable Installer
+System(NSIS). 
+
+
+Running
+
+The Ardour windows binary is intended to be run and tested on windows. Testing
+is mainly performed using Windows XP, but should work on Vista/7. It is only
+a 32bit binary at the moment but that may change with mingw64.
+
+The binary does not run successfully under WINE but that may change with updates
+and or bug fixes.
+
+When running Ardour for debugging purposes it is best to start the jack server
+in a separate terminal(Command Prompt) before starting Ardour so that they are
+not both writing to the same terminal. This will probably be fixed at some point
+so when jackd is started by Ardour the output is redirected etc.
+
+The cptovmshare.sh script will copy the package to a directory specified in the
+ARDOUR_VM_SHARE_DIR for testing in a virtual machine.
+
+
+Testing
+
+When configured for debugging there are a number of test programs(prefixed with
+test_) included in the package.
+
+The tests for libpbd, libevoral and libardour can be run under wine from the
+windows packaging directory using the wine-*-tests.sh scripts
+
+Debugging
+
+Ardour has some verbose logging/debugging output that can be useful that is used
+with the -D option. 
+
+When configured for debugging the package contains gdb along with a .gdbinit 
+file to automatically set the source directory so that the "list" gdb command
+will show the source code corresponding to the current stack frame.
+
+New versions of gdb will not load a .gdbinit file unless it is located in the directory
+set in the HOME environment variable and auto-load safe-path is set appropriately.
+
+So the gdbinit_home file needs to be moved to directory set in %USERPROFILE% and
+gdb started via gdb.bat for source file listing to work.
+
+The gdb batch scripts cannot be used if the package directory is on a network share
+so the package will need to be copied to a local drive first.
+
+When starting gdb using gdb.bat the Ardour executable needs to be set as the program
+to be debugged with the "file" command
+
+e.g (gdb) file ardour-3.5.exe
+
+You can then set a break point at main() with the "break" command as usual
+
+e.g (gdb) break main
+
+To set a breakpoint in a dll/shared library like libardour you need to wait for
+the symbols to be loaded which only occurs once the program has been executed using
+the "run" command
+
+You can set a breakpoint at a function
+
+e.g break `Somenamespace::somepartialsymbolname + tab to list symbols
+
+then remove ` to set the breakpoint.
+
+If you press tab with when there are thousands of possible matching symbols be
+prepared to wait a long time(this can also cause gdb to use a lot of memory).
+For this reason I prefer to set breakpoints by specifying the source file and line
+number.
+
+e.g (gdb) break audiosource.cc:976
+
+using "catch throw" or "catch catch" can be useful to break at points where exceptions
+are thrown or caught.
+
+They are a number of glib debugging options see
+
+http://developer.gnome.org/glib/2.30/glib-running.html
+
+use $ set G_DEBUG=fatal_warnings to get backtrace
+

@@ -24,6 +24,8 @@
 #include <string>
 #include <inttypes.h>
 
+#include "evoral/visibility.h"
+
 namespace Evoral {
 
 
@@ -31,7 +33,7 @@ namespace Evoral {
  *
  * Currently this only reads SMF files with tempo-based timing.
  */
-class SMFReader {
+class LIBEVORAL_API SMFReader {
 public:
 	class PrematureEOF : public std::exception {
 		const char* what() const throw() { return "Unexpected end of file"; }

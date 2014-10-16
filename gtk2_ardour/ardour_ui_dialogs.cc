@@ -23,9 +23,12 @@
    This is to cut down on the compile times.  It also helps with my sanity.
 */
 
-#include "ardour/session.h"
 #include "ardour/audioengine.h"
 #include "ardour/automation_watch.h"
+#include "ardour/control_protocol_manager.h"
+#include "ardour/profile.h"
+#include "ardour/session.h"
+#include "control_protocol/control_protocol.h"
 
 #include "actions.h"
 #include "add_route_dialog.h"
@@ -67,7 +70,6 @@ void
 ARDOUR_UI::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
-
 
 	if (!_session) {
 		WM::Manager::instance().set_session (s);
@@ -183,6 +185,7 @@ ARDOUR_UI::set_session (Session *s)
 	second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_second), 1000);
 	point_one_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_one_seconds), 100);
 	point_zero_something_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_zero_something_seconds), 40);
+	set_fps_timeout_connection();
 
 	update_format ();
 
@@ -198,37 +201,44 @@ ARDOUR_UI::set_session (Session *s)
 		editor_meter_peak_display.hide();
 	}
 
-	if (_session
-			&& _session->master_out()
-			&& _session->master_out()->n_outputs().n(DataType::AUDIO) > 0) {
-		editor_meter = new LevelMeterHBox(_session);
-		editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
-		editor_meter->clear_meters();
-		editor_meter->set_type (_session->master_out()->meter_type());
-		editor_meter->setup_meters (30, 12, 6);
-		editor_meter->show();
-		meter_box.pack_start(*editor_meter);
+	if (meter_box.get_parent()) {
+		transport_tearoff_hbox.remove (meter_box);
+		transport_tearoff_hbox.remove (editor_meter_peak_display);
+	}
+
+	if (_session && 
+	    _session->master_out() && 
+	    _session->master_out()->n_outputs().n(DataType::AUDIO) > 0) {
+
+		if (!ARDOUR::Profile->get_trx()) {
+			editor_meter = new LevelMeterHBox(_session);
+			editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
+			editor_meter->clear_meters();
+			editor_meter->set_type (_session->master_out()->meter_type());
+			editor_meter->setup_meters (30, 12, 6);
+			editor_meter->show();
+			meter_box.pack_start(*editor_meter);
+		}
 
 		ArdourMeter::ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_peak_display));
 		ArdourMeter::ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_route_peak_display));
 		ArdourMeter::ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_group_peak_display));
 
 		editor_meter_peak_display.set_name ("meterbridge peakindicator");
-		editor_meter_peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 		editor_meter_peak_display.unset_flags (Gtk::CAN_FOCUS);
-		editor_meter_peak_display.set_size_request(6, -1);
-		editor_meter_peak_display.set_corner_radius(2);
+		editor_meter_peak_display.set_size_request(8, -1);
+		editor_meter_peak_display.set_corner_radius(3);
 
 		editor_meter_max_peak = -INFINITY;
 		editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::editor_meter_peak_button_release), false);
 
-		if (Config->get_show_editor_meter()) {
+		if (Config->get_show_editor_meter() && !ARDOUR::Profile->get_trx()) {
 			transport_tearoff_hbox.pack_start (meter_box, false, false);
 			transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
 			meter_box.show();
 			editor_meter_peak_display.show();
 		}
-	} 
+	}
 }
 
 int
@@ -254,6 +264,16 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 		}
 	}
 
+	{
+		// tear down session specific CPI (owned by rc_config_editor which can remain)
+		ControlProtocolManager& m = ControlProtocolManager::instance ();
+		for (std::list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
+			if (*i && (*i)->protocol && (*i)->protocol->has_editor ()) {
+				(*i)->protocol->tear_down_gui ();
+			}
+		}
+	}
+
 	if (hide_stuff) {
 		editor->hide ();
 		mixer->hide ();
@@ -267,6 +287,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
 	point_zero_something_second_connection.disconnect();
+	fps_connection.disconnect();
 
 	if (editor_meter) {
 		meter_box.remove(*editor_meter);
@@ -563,7 +584,7 @@ ARDOUR_UI::editor_meter_peak_button_release (GdkEventButton* ev)
 	} else if (_session->master_out()) {
 		ArdourMeter::ResetRoutePeakDisplays (_session->master_out().get());
 	}
-	return true;
+	return false;
 }
 
 void

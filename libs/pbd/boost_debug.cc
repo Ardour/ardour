@@ -33,6 +33,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/stacktrace.h"
+#include "pbd/boost_debug.h"
 
 class Backtrace {
 public:

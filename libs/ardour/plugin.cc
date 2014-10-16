@@ -27,12 +27,16 @@
 #include <cstdlib>
 #include <cstdio> // so libraptor doesn't complain
 #include <cmath>
+#ifndef COMPILER_MSVC
 #include <dirent.h>
+#endif
 #include <sys/stat.h>
 #include <cerrno>
 #include <utility>
 
+#ifdef HAVE_LRDF
 #include <lrdf.h>
+#endif
 
 #include "pbd/compose.h"
 #include "pbd/error.h"

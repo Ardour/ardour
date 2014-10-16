@@ -43,6 +43,7 @@
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/activatable.h"
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/gui_thread.h"
 
 #include "i18n.h"
 
@@ -64,9 +65,12 @@ BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 
 #include "pbd/abstract_ui.cc"  /* instantiate the template */
 
+template class AbstractUI<Gtkmm2ext::UIRequest>;
+
 UI::UI (string namestr, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (namestr)
 	, _receiver (*this)
+	, errors (0)
 	  
 {
 	theMain = new Main (argc, argv);
@@ -94,7 +98,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 
 	/* attach our request source to the default main context */
 
-	request_channel.ios()->attach (MainContext::get_default());
+	attach_request_source ();
 
 	errors = new TextViewer (800,600);
 	errors->text().set_editable (false);
@@ -121,6 +125,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 UI::~UI ()
 {
 	_receiver.hangup ();
+	delete (errors);
 }
 
 bool
@@ -691,7 +696,7 @@ UI::flush_pending ()
 }
 
 bool
-UI::just_hide_it (GdkEventAny */*ev*/, Window *win)
+UI::just_hide_it (GdkEventAny* /*ev*/, Window *win)
 {
 	win->hide ();
 	return true;
@@ -741,7 +746,7 @@ UI::color_selection_done (bool status)
 }
 
 bool
-UI::color_selection_deleted (GdkEventAny */*ev*/)
+UI::color_selection_deleted (GdkEventAny* /*ev*/)
 {
 	Main::quit ();
 	return true;

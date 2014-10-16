@@ -24,7 +24,7 @@
 
 namespace ARDOUR {
 
-class Reverse : public Filter {
+class LIBARDOUR_API Reverse : public Filter {
   public:
 	Reverse (ARDOUR::Session&);
 	~Reverse ();

@@ -34,6 +34,7 @@
 #include "ardour/ardour.h"
 #include "ardour/chan_count.h"
 #include "ardour/session_object.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
 #include "ardour/public_diskstream.h"
@@ -54,7 +55,7 @@ class BufferSet;
 /** Parent class for classes which can stream data to and from disk.
  *  These are used by Tracks to get playback and put recorded data.
  */
-class Diskstream : public SessionObject, public PublicDiskstream
+class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 {
   public:
 	enum Flag {
@@ -69,6 +70,15 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	virtual ~Diskstream();
 
 	virtual bool set_name (const std::string& str);
+	virtual bool set_write_source_name (const std::string& str);
+
+	std::string write_source_name () const {
+		if (_write_source_name.empty()) {
+			return name();
+		} else {
+			return _write_source_name;
+		}
+	}
 
 	virtual std::string steal_write_source_name () { return std::string(); }
 
@@ -245,7 +255,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	virtual void set_align_style_from_io() {}
 	virtual void setup_destructive_playlist () {}
 	virtual void use_destructive_playlist () {}
-	virtual void prepare_to_stop (framepos_t pos);
+	virtual void prepare_to_stop (framepos_t transport_pos, framepos_t audible_frame);
 
 	void engage_record_enable ();
 	void disengage_record_enable ();
@@ -310,6 +320,8 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	framepos_t     playback_sample;
 
 	bool          in_set_state;
+
+	std::string   _write_source_name;
 
 	Glib::Threads::Mutex state_lock;
 

@@ -19,6 +19,7 @@
 #ifndef __ardour_amp_h__
 #define __ardour_amp_h__
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/chan_count.h"
 #include "ardour/processor.h"
@@ -32,7 +33,7 @@ class IO;
 /** Applies a declick operation to all audio inputs, passing the same number of
  * audio outputs, and passing through any other types unchanged.
  */
-class Amp : public Processor {
+class LIBARDOUR_API Amp : public Processor {
 public:
 	Amp(Session& s);
 
@@ -89,6 +90,8 @@ public:
 		double internal_to_interface (double) const;
 		double interface_to_internal (double) const;
 		double internal_to_user (double) const;
+		double user_to_internal (double) const;
+		std::string get_user_string () const;
 
 		Amp* _amp;
 	};

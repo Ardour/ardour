@@ -23,6 +23,9 @@
 #include <sys/time.h>
 #include <time.h>
 
+#include "pbd/localtime_r.h"
+#include "pbd/timersub.h"
+
 #include "midi++/parser.h"
 
 #include "ardour/async_midi_port.h"
@@ -212,7 +215,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 		s = snprintf (buf, bufsize, "+%02" PRId64 ":%06" PRId64, (int64_t) delta.tv_sec, (int64_t) delta.tv_usec);
 		bufsize -= s;
 	} else {
-		localtime_r (&tv.tv_sec, &now);
+		localtime_r ((const time_t*)&tv.tv_sec, &now);
 		s = strftime (buf, bufsize, "%H:%M:%S", &now);
 		bufsize -= s;
 		s += snprintf (&buf[s], bufsize, ".%06" PRId64, (int64_t) tv.tv_usec);

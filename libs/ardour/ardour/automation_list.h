@@ -21,6 +21,7 @@
 #define __ardour_automation_event_h__
 
 #include <stdint.h>
+#include <cstdlib>
 #include <list>
 #include <cmath>
 
@@ -40,7 +41,7 @@ namespace ARDOUR {
 class AutomationList;
 
 /** A SharedStatefulProperty for AutomationLists */
-class AutomationListProperty : public PBD::SharedStatefulProperty<AutomationList>
+class LIBARDOUR_API AutomationListProperty : public PBD::SharedStatefulProperty<AutomationList>
 {
 public:
 	AutomationListProperty (PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > d, Ptr p)
@@ -59,7 +60,7 @@ private:
 	AutomationListProperty& operator= (AutomationListProperty const &);
 };
 
-class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlList
+class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Evoral::ControlList
 {
   public:
 	AutomationList (Evoral::Parameter id);
@@ -71,7 +72,6 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 	virtual boost::shared_ptr<Evoral::ControlList> create(Evoral::Parameter id);
 
 	AutomationList& operator= (const AutomationList&);
-	bool operator== (const AutomationList&);
 
 	void thaw ();
 
@@ -116,6 +116,8 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 	AutoState    _state;
 	AutoStyle    _style;
 	gint         _touching;
+
+	bool operator== (const AutomationList&) const { /* not called */ abort(); return false; }
 };
 
 } // namespace

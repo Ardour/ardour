@@ -32,7 +32,7 @@ namespace ARDOUR {
 
 class MidiModel;
 
-class MidiOperator {
+class LIBARDOUR_API MidiOperator {
   public:
 	MidiOperator () {}
 	virtual ~MidiOperator() {}

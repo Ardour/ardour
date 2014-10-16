@@ -216,7 +216,10 @@ static inline cycles_t get_cycles (void)
 
 /* debian: sparc, arm, m68k */
 
+#ifndef COMPILER_MSVC
+/* GRRR... Annoyingly, #warning aborts the compilation for MSVC !!  */
 #warning You are compiling libardour on a platform for which ardour/cycles.h needs work
+#endif
 
 #include <sys/time.h>
 

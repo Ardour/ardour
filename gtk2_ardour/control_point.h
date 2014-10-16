@@ -21,11 +21,10 @@
 #define __ardour_control_point_h__
 
 #include <sys/types.h>
+#include <gdk/gdkevents.h>
 
 #include "ardour/automation_list.h"
 
-#include "canvas.h"
-#include "simplerect.h"
 #include "selectable.h"
 
 class AutomationLine;
@@ -36,11 +35,10 @@ class AutomationTimeAxisView;
 class Selectable;
 class Selection;
 
-namespace Gnome {
-	namespace Canvas {
-		class SimpleRect;
-		class Diamond;
-	}
+namespace ArdourCanvas {
+	class Rectangle;
+	class Diamond;
+	class Item;
 }
 
 class ControlPoint : public Selectable
@@ -63,22 +61,21 @@ class ControlPoint : public Selectable
 
 	void hide ();
 	void show ();
-	void set_color ();
+	bool visible () const;
 
 	double size () const {
 		return _size;
 	}
 
 	void set_size (double);
-	void set_visible (bool);
-	bool visible () const;
+	void set_color ();
 
 	bool     can_slide() const          { return _can_slide; }
 	void     set_can_slide(bool yn)     { _can_slide = yn; }
 	uint32_t view_index() const         { return _view_index; }
 	void     set_view_index(uint32_t i) { _view_index = i; }
 
-	void i2w (double &, double &) const;
+	ArdourCanvas::Item& item() const;
 
 	ARDOUR::AutomationList::iterator model() const { return _model; }
 	AutomationLine&                  line()  const { return _line; }
@@ -86,7 +83,7 @@ class ControlPoint : public Selectable
 	static PBD::Signal1<void, ControlPoint *> CatchDeletion;
 	
   private:
-	ArdourCanvas::SimpleRect*        _item;
+	ArdourCanvas::Rectangle*        _item;
 	AutomationLine&                  _line;
 	ARDOUR::AutomationList::iterator _model;
 	uint32_t                         _view_index;

@@ -445,7 +445,7 @@ static void usb_tranzport_interrupt_out_callback(struct urb *urb)
 {
 	struct usb_tranzport *dev = urb->context;
 
-	/* sync/async unlink faults aren't errors */
+	/* sync/async ::g_unlink faults aren't errors */
 	if (urb->status && !(urb->status == -ENOENT ||
 			     urb->status == -ECONNRESET ||
 			     urb->status == -ESHUTDOWN))

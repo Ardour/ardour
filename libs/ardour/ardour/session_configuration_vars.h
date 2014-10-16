@@ -25,7 +25,6 @@
     the value of the variable.
 *****************************************************/
 
-CONFIG_VARIABLE (CrossfadeChoice, xfade_choice, "xfade-choice", ConstantPowerMinus3dB)
 CONFIG_VARIABLE (uint32_t, destructive_xfade_msecs,  "destructive-xfade-msecs", 2)
 CONFIG_VARIABLE (bool, use_region_fades, "use-region-fades", true)
 CONFIG_VARIABLE (bool, show_region_fades, "show-region-fades", true)
@@ -41,6 +40,9 @@ CONFIG_VARIABLE (Timecode::TimecodeFormat, timecode_format, "timecode-format", T
 CONFIG_VARIABLE_SPECIAL(std::string, raid_path, "raid-path", "", PBD::path_expand)
 CONFIG_VARIABLE_SPECIAL(std::string, audio_search_path, "audio-search-path", "", PBD::search_path_expand)
 CONFIG_VARIABLE_SPECIAL(std::string, midi_search_path, "midi-search-path", "", PBD::search_path_expand)
+CONFIG_VARIABLE (bool, track_name_number, "track-name-number", false)
+CONFIG_VARIABLE (bool, track_name_take, "track-name-take", false)
+CONFIG_VARIABLE (std::string, take_name, "take-name", "Take1")
 CONFIG_VARIABLE (bool, jack_time_master, "jack-time-master", true)
 CONFIG_VARIABLE (bool, use_video_sync, "use-video-sync", false)
 CONFIG_VARIABLE (float, video_pullup, "video-pullup", 0.0f)

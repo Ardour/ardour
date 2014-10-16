@@ -25,7 +25,7 @@
 
 namespace ARDOUR {
 
-class MidiStretch : public Filter {
+class LIBARDOUR_API MidiStretch : public Filter {
   public:
 	MidiStretch (ARDOUR::Session&, const TimeFXRequest&);
 	~MidiStretch ();

@@ -22,6 +22,7 @@
 
 #include "pbd/compose.h"
 #include "pbd/debug_rt_alloc.h"
+#include "pbd/pthread_utils.h"
 
 #include "ardour/debug.h"
 #include "ardour/graph.h"
@@ -30,8 +31,6 @@
 #include "ardour/route.h"
 #include "ardour/process_thread.h"
 #include "ardour/audioengine.h"
-
-#include <jack/thread.h>
 
 #include "i18n.h"
 
@@ -223,7 +222,7 @@ Graph::trigger (GraphNode* n)
 void
 Graph::dec_ref()
 {
-        if (g_atomic_int_dec_and_test (&_finished_refcount)) {
+        if (g_atomic_int_dec_and_test (const_cast<gint*> (&_finished_refcount))) {
 
 		/* We have run all the nodes that are at the `output' end of
 		   the graph, so there is nothing more to do this time around.
@@ -358,7 +357,7 @@ Graph::run_one()
 	/* update the number of threads that will still be sleeping */
         _execution_tokens -= wakeup;
 
-        DEBUG_TRACE(DEBUG::ProcessThreads, string_compose ("%1 signals %2\n", pthread_self(), wakeup));
+        DEBUG_TRACE(DEBUG::ProcessThreads, string_compose ("%1 signals %2\n", pthread_name(), wakeup));
 
         for (int i = 0; i < wakeup; i++) {
                 _execution_sem.signal ();
@@ -367,12 +366,12 @@ Graph::run_one()
         while (to_run == 0) {
                 _execution_tokens += 1;
                 pthread_mutex_unlock (&_trigger_mutex);
-                DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 goes to sleep\n", pthread_self()));
+                DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 goes to sleep\n", pthread_name()));
                 _execution_sem.wait ();
                 if (_quit_threads) {
                         return true;
                 }
-                DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 is awake\n", pthread_self()));
+                DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 is awake\n", pthread_name()));
                 pthread_mutex_lock (&_trigger_mutex);
                 if (_trigger_queue.size()) {
                         to_run = _trigger_queue.back();
@@ -384,7 +383,7 @@ Graph::run_one()
         to_run->process();
         to_run->finish (_current_chain);
 
-        DEBUG_TRACE(DEBUG::ProcessThreads, string_compose ("%1 has finished run_one()\n", pthread_self()));
+        DEBUG_TRACE(DEBUG::ProcessThreads, string_compose ("%1 has finished run_one()\n", pthread_name()));
 
         return false;
 }
@@ -552,7 +551,7 @@ Graph::process_one_route (Route* route)
 
         assert (route);
 
-        DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 runs route %2\n", pthread_self(), route->name()));
+        DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 runs route %2\n", pthread_name(), route->name()));
 
         if (_process_silent) {
                 retval = route->silent_roll (_process_nframes, _process_start_frame, _process_end_frame, need_butler);

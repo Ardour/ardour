@@ -8,13 +8,16 @@
 
 #ifdef __GNUC__
 #include <cxxabi.h>
+#include <cstdlib>
 #endif
+
+#include "audiographer/visibility.h"
 
 namespace AudioGrapher
 {
 
 /// Utilities for debugging
-struct DebugUtils
+struct LIBAUDIOGRAPHER_API DebugUtils
 {
 	/// Returns the demangled name of the object passed as the parameter
 	template<typename T>

@@ -6,6 +6,8 @@ import re
 import string
 import subprocess
 import sys
+import platform as PLATFORM
+from waflib.Tools import winres
 
 def fetch_git_revision ():
     cmd = "git describe HEAD"
@@ -15,7 +17,7 @@ def fetch_git_revision ():
 
 def fetch_tarball_revision ():
     if not os.path.exists ('libs/ardour/revision.cc'):
-        print 'This tarball was not created correctly - it is missing libs/ardour/revision.cc'
+        print ('This tarball was not created correctly - it is missing libs/ardour/revision.cc')
         sys.exit (1)
     with open('libs/ardour/revision.cc') as f:
         content = f.readlines()
@@ -29,50 +31,54 @@ else:
 
 #
 # rev is now of the form MAJOR.MINOR-rev-commit
+# or, if right at the same rev as a release, MAJOR.MINOR
 #
 
 parts = rev.split ('.')
 MAJOR = parts[0]
 other = parts[1].split ('-')
 MINOR = other[0]
-MICRO = other[1]
+if len(other) > 1:
+    MICRO = other[1]
+else:
+    MICRO = '0'
 
 V = MAJOR + '.' + MINOR + '.' + MICRO
-#
-# it is important that VERSION *not* be unicode string
-# because if it is, it breaks waf somehow.
-#
-VERSION = V.encode ('ascii', 'ignore')
-APPNAME = 'Ardour' + MAJOR
+VERSION = V
+PROGRAM_VERSION = MAJOR
 
 # Mandatory variables
 top = '.'
 out = 'build'
 
 children = [
+        # optionally external libraries
+        'libs/qm-dsp',
+        'libs/vamp-plugins',
+        'libs/libltc',
+        # core ardour libraries
         'libs/pbd',
         'libs/midi++2',
         'libs/evoral',
-        'libs/vamp-sdk',
-        'libs/qm-dsp',
-        'libs/vamp-plugins',
-        'libs/taglib',
-        'libs/libltc',
-        'libs/rubberband',
         'libs/surfaces',
         'libs/panners',
         'libs/backends',
         'libs/timecode',
         'libs/ardour',
         'libs/gtkmm2ext',
-        'libs/clearlooks-newer',
         'libs/audiographer',
+        'libs/canvas',
         'libs/plugins/reasonablesynth.lv2',
         'gtk2_ardour',
         'export',
         'midi_maps',
         'mcp',
-        'patchfiles'
+        'patchfiles',
+        'headless',
+        # shared helper binaries (plugin-scanner, exec-wrapper)
+        'libs/fst',
+        'libs/vfork',
+        'libs/ardouralsautil',
 ]
 
 i18n_children = [
@@ -81,19 +87,10 @@ i18n_children = [
         'libs/gtkmm2ext',
 ]
 
-if sys.platform == 'linux2':
-    children += [ 'tools/sanity_check' ]
-    lxvst_default = True
-elif sys.platform == 'darwin':
-    children += [ 'libs/appleutility' ]
-    lxvst_default = False
-else:
-    lxvst_default = False
-
 # Version stuff
 
 def fetch_gcc_version (CC):
-    cmd = "LANG= %s --version" % CC
+    cmd = "%s --version" % CC
     output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
     o = output[0].decode('utf-8')
     version = o.split(' ')[2].split('.')
@@ -145,7 +142,7 @@ def set_compiler_flags (conf,opt):
     # Debugging flags
     debug_flags = []
 
-    u = os.uname ()
+    u = PLATFORM.uname ()
     cpu = u[4]
     platform = u[0].lower()
     version = u[2]
@@ -153,15 +150,6 @@ def set_compiler_flags (conf,opt):
     # waf adds -O0 -g itself. thanks waf!
     is_clang = conf.env['CXX'][0].endswith('clang++')
     
-    if conf.options.cxx11:
-        conf.check_cxx(cxxflags=["-std=c++11"])
-        cxx_flags.append('-std=c++11')
-        if platform == "darwin":
-            cxx_flags.append('-stdlib=libc++')
-            link_flags.append('-lc++')
-            # Prevents visibility issues in standard headers
-            conf.define("_DARWIN_C_SOURCE", 1)
-
     if conf.options.asan:
         conf.check_cxx(cxxflags=["-fsanitize=address", "-fno-omit-frame-pointer"], linkflags=["-fsanitize=address"])
         cxx_flags.append('-fsanitize=address')
@@ -191,8 +179,10 @@ def set_compiler_flags (conf,opt):
                 conf.env['build_target'] = 'snowleopard'
             elif re.search ("^11[.]", version) != None:
                 conf.env['build_target'] = 'lion'
-            else:
+            elif re.search ("^12[.]", version) != None:
                 conf.env['build_target'] = 'mountainlion'
+            else:
+                conf.env['build_target'] = 'mavericks' # 13.0.0
         else:
             match = re.search(
                     "(?P<cpu>i[0-6]86|x86_64|powerpc|ppc|ppc64|arm|s390x?)",
@@ -213,25 +203,19 @@ def set_compiler_flags (conf,opt):
         # 
         compiler_flags.append ('-U__STRICT_ANSI__')
 
-    if cpu == 'powerpc' and conf.env['build_target'] != 'none':
-        #
-        # Apple/PowerPC optimization options
-        #
-        # -mcpu=7450 does not reliably work with gcc 3.*
-        #
-        if opt.dist_target == 'panther' or opt.dist_target == 'tiger':
-            if platform == 'darwin':
-                # optimization_flags.extend ([ "-mcpu=7450", "-faltivec"])
-                # to support g3s but still have some optimization for above
-                compiler_flags.extend ([ "-mcpu=G3", "-mtune=7450"])
-            else:
-                compiler_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"])
-        else:
-            compiler_flags.extend([ "-mcpu=750", "-mmultiple" ])
-        compiler_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
-        optimization_flags.extend (["-Os"])
+    if conf.options.cxx11 or conf.env['build_target'] == 'mavericks':
+        conf.check_cxx(cxxflags=["-std=c++11"])
+        cxx_flags.append('-std=c++11')
+        if platform == "darwin":
+            cxx_flags.append('--stdlib=libstdc++')
+            # Mavericks and later changed the syntax to be used when including Carbon headers,
+            # from requiring a full path to requiring just the header name.
+            cxx_flags.append('-DCARBON_FLAT_HEADERS')
+            linker_flags.append('--stdlib=libstdc++')
+            # Prevents visibility issues in standard headers
+            conf.define("_DARWIN_C_SOURCE", 1)
 
-    elif ((re.search ("i[0-9]86", cpu) != None) or (re.search ("x86_64", cpu) != None)) and conf.env['build_target'] != 'none':
+    if ((re.search ("i[0-9]86", cpu) != None) or (re.search ("x86_64", cpu) != None)) and conf.env['build_target'] != 'none':
 
 
         #
@@ -275,7 +259,7 @@ def set_compiler_flags (conf,opt):
     if conf.env['FPU_OPTIMIZATION']:
         if sys.platform == 'darwin':
             compiler_flags.append("-DBUILD_VECLIB_OPTIMIZATIONS");
-            linker_flags.append("-framework Accelerate")
+            conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'Accelerate'])
         elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
             compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
@@ -294,7 +278,7 @@ def set_compiler_flags (conf,opt):
         print("However, this is tricky and not recommended for beginners.")
         sys.exit (-1)
 
-    if opt.lxvst:
+    if conf.env['LXVST_SUPPORT'] == True:
         if conf.env['build_target'] == 'x86_64':
             compiler_flags.append("-DLXVST_64BIT")
         else:
@@ -353,6 +337,9 @@ def set_compiler_flags (conf,opt):
                 "-fstrength-reduce"
                 ]
 
+    if opt.debug_symbols:
+        optimization_flags += [ '-g' ]
+
     if opt.stl_debug:
         cxx_flags.append("-D_GLIBCXX_DEBUG")
 
@@ -363,30 +350,16 @@ def set_compiler_flags (conf,opt):
     if conf.env['DEBUG_DENORMAL_EXCEPTION']:
         compiler_flags.append('-DDEBUG_DENORMAL_EXCEPTION')
 
-    if opt.universal:
-        if opt.generic:
-            print ('Specifying Universal and Generic builds at the same time is not supported')
-            sys.exit (1)
-        else:
-            if not Options.options.nocarbon:
-                compiler_flags.extend(("-arch", "i386", "-arch", "ppc"))
-                linker_flags.extend(("-arch", "i386", "-arch", "ppc"))
-            else:
-                compiler_flags.extend(
-                        ("-arch", "x86_64", "-arch", "i386", "-arch", "ppc"))
-                linker_flags.extend(
-                        ("-arch", "x86_64", "-arch", "i386", "-arch", "ppc"))
-    else:
-        if opt.generic:
-            compiler_flags.extend(('-arch', 'i386'))
-            linker_flags.extend(('-arch', 'i386'))
+    if opt.generic:
+        compiler_flags.extend(('-arch', 'i386'))
+        linker_flags.extend(('-arch', 'i386'))
 
     #
     # warnings flags
     #
 
     compiler_flags.extend(
-            ('-Wall', '-Wpointer-arith', '-Wcast-qual', '-Wcast-align'))
+            ('-Wall', '-Wpointer-arith', '-Wcast-qual', '-Wcast-align', '-Wno-unused-parameter'))
 
     c_flags.extend(('-Wstrict-prototypes', '-Wmissing-prototypes'))
     cxx_flags.append('-Woverloaded-virtual')
@@ -397,12 +370,17 @@ def set_compiler_flags (conf,opt):
 
     # need ISOC9X for llabs()
     compiler_flags.extend(
-            ('-DBOOST_SYSTEM_NO_DEPRECATED', '-D_ISOC9X_SOURCE',
-             '-D_LARGEFILE64_SOURCE', '-D_FILE_OFFSET_BITS=64'))
-    cxx_flags.extend(('-D__STDC_LIMIT_MACROS', '-D__STDC_FORMAT_MACROS'))
-
+        ('-DBOOST_SYSTEM_NO_DEPRECATED', '-D_ISOC9X_SOURCE',
+         '-D_LARGEFILE64_SOURCE', '-D_FILE_OFFSET_BITS=64'))
+    cxx_flags.extend(
+        ('-D__STDC_LIMIT_MACROS', '-D__STDC_FORMAT_MACROS', 
+         '-DCANVAS_COMPATIBILITY', '-DCANVAS_DEBUG'))
+    
     if opt.nls:
         compiler_flags.append('-DENABLE_NLS')
+
+    compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
+    compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
 
     if opt.debug:
         conf.env.append_value('CFLAGS', debug_flags)
@@ -412,7 +390,7 @@ def set_compiler_flags (conf,opt):
         conf.env.append_value('CXXFLAGS', optimization_flags)
 
     if opt.backtrace:
-        if platform != 'darwin' and not is_clang:
+        if platform != 'darwin' and not is_clang and not Options.options.dist_target == 'mingw':
             linker_flags += [ '-rdynamic' ]
 
     conf.env.append_value('CFLAGS', compiler_flags)
@@ -431,21 +409,32 @@ def options(opt):
     autowaf.set_options(opt, debug_by_default=True)
     opt.add_option('--program-name', type='string', action='store', default='Ardour', dest='program_name',
                     help='The user-visible name of the program being built')
+    opt.add_option ('--trx', action='store_true', default=False, dest='trx_build',
+                    help='Whether to build for TRX')
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler flags')
+    opt.add_option('--with-dummy', action='store_true', default=False, dest='build_dummy',
+                   help='Build the dummy backend (no audio/MIDI I/O, useful for profiling)')
+    opt.add_option('--with-alsabackend', action='store_true', default=False, dest='build_alsabackend',
+                   help='Build the ALSA backend')
+    opt.add_option('--with-wavesbackend', action='store_true', default=False, dest='build_wavesbackend',
+                   help='Build the Waves/Portaudio backend')
     opt.add_option('--backtrace', action='store_true', default=True, dest='backtrace',
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
                     help='Compile without support for AU Plugins with only CARBON UI (needed for 64bit)')
     opt.add_option('--boost-sp-debug', action='store_true', default=False, dest='boost_sp_debug',
                     help='Compile with Boost shared pointer debugging')
+    opt.add_option('--debug-symbols', action='store_true', default=False, dest='debug_symbols',
+                    help='Add debug-symbols to optimized builds')
     opt.add_option('--depstack-root', type='string', default='~', dest='depstack_root',
                     help='Directory/folder where dependency stack trees (gtk, a3) can be found (defaults to ~)')
     opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
-                    help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,powerpc,tiger,leopard]')
+                    help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,tiger,leopard,mingw]')
     opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
                     help='Build runtime checked assembler code (default)')
     opt.add_option('--no-fpu-optimization', action='store_false', dest='fpu_optimization')
+    opt.add_option('--exports-hidden', action='store_true', default=False, dest='exports_hidden')
     opt.add_option('--freedesktop', action='store_true', default=False, dest='freedesktop',
                     help='Install MIME type, icons and .desktop file as per freedesktop.org standards')
     opt.add_option('--freebie', action='store_true', default=False, dest='freebie',
@@ -462,8 +451,11 @@ def options(opt):
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
     opt.add_option('--no-lv2', action='store_false', dest='lv2',
                     help='Do not compile with support for LV2')
-    opt.add_option('--lxvst', action='store_true', default=lxvst_default, dest='lxvst',
+    opt.add_option('--lv2dir', type='string', help="install destination for builtin LV2 bundles [Default: LIBDIR/lv2]")
+    opt.add_option('--lxvst', action='store_true', default=True, dest='lxvst',
                     help='Compile with support for linuxVST plugins')
+    opt.add_option('--no-lxvst', action='store_false', dest='lxvst',
+                    help='Compile without support for linuxVST plugins')
     opt.add_option('--nls', action='store_true', default=True, dest='nls',
                     help='Enable i18n (native language support) (default)')
     opt.add_option('--no-nls', action='store_false', dest='nls')
@@ -487,8 +479,6 @@ def options(opt):
                     help="Build a single executable for each unit test")
     #opt.add_option('--tranzport', action='store_true', default=False, dest='tranzport',
     # help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
-    opt.add_option('--universal', action='store_true', default=False, dest='universal',
-                    help='Compile as universal binary (OS X ONLY, requires that external libraries are universal)')
     opt.add_option('--generic', action='store_true', default=False, dest='generic',
                     help='Compile with -arch i386 (OS X ONLY)')
     opt.add_option('--versioned', action='store_true', default=False, dest='versioned',
@@ -522,6 +512,9 @@ def sub_config_and_use(conf, name, has_objects = True):
 def configure(conf):
     conf.load('compiler_c')
     conf.load('compiler_cxx')
+    if Options.options.dist_target == 'mingw':
+        conf.load('winres')
+
     conf.env['VERSION'] = VERSION
     conf.env['MAJOR'] = MAJOR
     conf.env['MINOR'] = MINOR
@@ -577,6 +570,16 @@ def configure(conf):
         conf.env.append_value ('CFLAGS', '-DNO_PLUGIN_STATE')
         conf.env.append_value ('CXXFLAGS', '-DNO_PLUGIN_STATE')
         conf.define ('NO_PLUGIN_STATE', 1)
+
+    if Options.options.trx_build:
+        conf.define ('TRX_BUILD', 1)
+
+    if Options.options.lv2dir:
+        conf.env['LV2DIR'] = Options.options.lv2dir
+    else:
+        conf.env['LV2DIR'] = os.path.join(conf.env['LIBDIR'], 'lv2')
+
+    conf.env['LV2DIR'] = os.path.normpath(conf.env['LV2DIR'])
 
     if sys.platform == 'darwin':
 
@@ -650,30 +653,70 @@ def configure(conf):
     if Options.options.boost_sp_debug:
         conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
 
-    conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
+    # executing a test program is n/a when cross-compiling
+    if Options.options.dist_target != 'mingw':
+        conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
+        conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
                   execute = "1",
                   mandatory = True,
                   msg = 'Checking for boost library >= 1.39',
                   okmsg = 'ok',
                   errmsg = 'too old\nPlease install boost version 1.39 or higher.')
 
-    autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
-    autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.2')
-    autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0')
-    autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
-    autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2')
-    autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
-    autowaf.check_pkg(conf, 'liblo', uselib_store='LO', atleast_version='0.26')
+    if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw':
+        autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
 
-    conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
+    autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2', mandatory=True)
+    autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.2', mandatory=True)
+    autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0', mandatory=True)
+    autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18, mandatory=True')
+    autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2', mandatory=True)
+    autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0', mandatory=True)
+    autowaf.check_pkg(conf, 'liblo', uselib_store='LO', atleast_version='0.26', mandatory=True)
+    autowaf.check_pkg(conf, 'taglib', uselib_store='TAGLIB', atleast_version='1.6', mandatory=True)
+    autowaf.check_pkg(conf, 'vamp-sdk', uselib_store='VAMPSDK', atleast_version='2.4', mandatory=True)
+    autowaf.check_pkg(conf, 'vamp-hostsdk', uselib_store='VAMPHOSTSDK', atleast_version='2.4', mandatory=True)
+    autowaf.check_pkg(conf, 'rubberband', uselib_store='RUBBERBAND', mandatory=True)
+
+    if Options.options.dist_target == 'mingw':
+        Options.options.fpu_optimization = False
+        conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')
+        conf.env.append_value('CFLAGS', '-DCOMPILER_MINGW')
+        conf.env.append_value('CXXFLAGS', '-DPLATFORM_WINDOWS')
+        conf.env.append_value('CXXFLAGS', '-DCOMPILER_MINGW')
+        conf.env.append_value('LIB', 'pthread')
+        # needed for at least libsmf
+        conf.check_cc(function_name='htonl', header_name='winsock2.h', lib='ws2_32')
+        conf.env.append_value('LIB', 'ws2_32')
+        # needed for mingw64 packages, not harmful on normal mingw build
+        conf.env.append_value('LIB', 'intl')
+        conf.check_cc(function_name='regcomp', header_name='regex.h',
+                      lib='regex', uselib_store="REGEX", define_name='HAVE_REGEX_H')
+        # TODO put this only where it is needed
+        conf.env.append_value('LIB', 'regex')
 
     # Tell everyone that this is a waf build
 
     conf.env.append_value('CFLAGS', '-DWAF_BUILD')
     conf.env.append_value('CXXFLAGS', '-DWAF_BUILD')
 
-    # Set up waf environment and C defines
     opts = Options.options
+
+    # (optionally) Adopt Microsoft-like convention that makes all non-explicitly exported
+    # symbols invisible (rather than doing this all over the wscripts in the src tree)
+    #
+    # This won't apply to MSVC but that hasn't been added as a target yet
+    #
+    # We can't do this till all tests are complete, since some fail if this is et.
+    if opts.exports_hidden:
+        conf.define ('EXPORT_VISIBILITY_HIDDEN', True)
+        if opts.internal_shared_libs:
+            conf.env.append_value ('CXXFLAGS', '-fvisibility=hidden')
+            conf.env.append_value ('CFLAGS', '-fvisibility=hidden')
+    else:
+        conf.define ('EXPORT_VISIBILITY_HIDDEN', False)
+
+    # Set up waf environment and C defines
     if opts.phone_home:
         conf.define('PHONE_HOME', 1)
         conf.env['PHONE_HOME'] = True
@@ -692,14 +735,19 @@ def configure(conf):
     if opts.windows_vst:
         conf.define('WINDOWS_VST_SUPPORT', 1)
         conf.env['WINDOWS_VST_SUPPORT'] = True
-        conf.env.append_value('CFLAGS', '-I' + Options.options.wine_include)
-        conf.env.append_value('CXXFLAGS', '-I' + Options.options.wine_include)
-        autowaf.check_header(conf, 'cxx', 'windows.h', mandatory = True)
+        if not Options.options.dist_target == 'mingw':
+            conf.env.append_value('CFLAGS', '-I' + Options.options.wine_include)
+            conf.env.append_value('CXXFLAGS', '-I' + Options.options.wine_include)
+            autowaf.check_header(conf, 'cxx', 'windows.h', mandatory = True)
     if opts.lxvst:
-        conf.define('LXVST_SUPPORT', 1)
-        conf.env['LXVST_SUPPORT'] = True
-    conf.define('WINDOWS_KEY', opts.windows_key)
-    conf.env['PROGRAM_NAME'] = opts.program_name
+        if sys.platform == 'darwin':
+            conf.env['LXVST_SUPPORT'] = False
+        elif Options.options.dist_target == 'mingw':
+            conf.env['LXVST_SUPPORT'] = False
+        else:
+            conf.define('LXVST_SUPPORT', 1)
+            conf.env['LXVST_SUPPORT'] = True
+    conf.env['WINDOWS_KEY'] = opts.windows_key
     if opts.rt_alloc_debug:
         conf.define('DEBUG_RT_ALLOC', 1)
         conf.env['DEBUG_RT_ALLOC'] = True
@@ -711,8 +759,21 @@ def configure(conf):
         conf.env['DEBUG_DENORMAL_EXCEPTION'] = True
     if opts.build_tests:
         autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=True)
+    if opts.build_alsabackend:
+        conf.env['BUILD_ALSABACKEND'] = True
+    if opts.build_dummy:
+        conf.env['BUILD_DUMMYBACKEND'] = True
+    if opts.build_wavesbackend:
+        conf.env['BUILD_WAVESBACKEND'] = True
 
     set_compiler_flags (conf, Options.options)
+
+    if sys.platform == 'darwin':
+        sub_config_and_use(conf, 'libs/appleutility')
+    elif Options.options.dist_target != 'mingw':
+        sub_config_and_use(conf, 'tools/sanity_check')
+
+    sub_config_and_use(conf, 'libs/clearlooks-newer')
 
     for i in children:
         sub_config_and_use(conf, i)
@@ -729,7 +790,7 @@ const char* const ardour_config_info = "\\n\\
     def write_config_text(title, val):
         autowaf.display_msg(conf, title, val)
         config_text.write(title + ': ')
-        config_text.write(str(val))
+        config_text.write(str(val).replace ('"', '\\"'))
         config_text.write("\\n\\\n")
 
     write_config_text('Build documentation',   conf.env['DOCS'])
@@ -739,7 +800,10 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Strict compiler flags', conf.env['STRICT'])
     write_config_text('Internal Shared Libraries', conf.is_defined('INTERNAL_SHARED_LIBS'))
     write_config_text('Use External Libraries', conf.is_defined('USE_EXTERNAL_LIBS'))
+    write_config_text('Library exports hidden', conf.is_defined('EXPORT_VISIBILITY_HIDDEN'))
 
+    write_config_text('ALSA Backend',          opts.build_alsabackend)
+    write_config_text('ALSA DBus Reservation', conf.is_defined('HAVE_DBUS'))
     write_config_text('Architecture flags',    opts.arch)
     write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))
     write_config_text('AudioUnits',            conf.is_defined('AUDIOUNIT_SUPPORT'))
@@ -747,6 +811,8 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Build target',          conf.env['build_target'])
     write_config_text('CoreAudio',             conf.is_defined('HAVE_COREAUDIO'))
     write_config_text('Debug RT allocations',  conf.is_defined('DEBUG_RT_ALLOC'))
+    write_config_text('Debug Symbols',         conf.is_defined('debug_symbols') or conf.env['DEBUG'])
+    write_config_text('Dummy backend',         opts.build_dummy)
     write_config_text('Process thread timing', conf.is_defined('PT_TIMING'))
     write_config_text('Denormal exceptions',   conf.is_defined('DEBUG_DENORMAL_EXCEPTION'))
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
@@ -758,21 +824,20 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('OGG',                   conf.is_defined('HAVE_OGG'))
     write_config_text('Phone home',            conf.is_defined('PHONE_HOME'))
     write_config_text('Program name',          opts.program_name)
-    write_config_text('Rubberband',            conf.is_defined('HAVE_RUBBERBAND'))
     write_config_text('Samplerate',            conf.is_defined('HAVE_SAMPLERATE'))
 #    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Translation',           opts.nls)
 #    write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
-    write_config_text('Universal binary',      opts.universal)
     write_config_text('Generic x86 CPU',       opts.generic)
+    write_config_text('Waves Backend',         opts.build_wavesbackend)
     write_config_text('Windows VST support',   opts.windows_vst)
     write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))
     write_config_text('Windows key',           opts.windows_key)
 
     write_config_text('C compiler flags',      conf.env['CFLAGS'])
     write_config_text('C++ compiler flags',    conf.env['CXXFLAGS'])
-    write_config_text('Linker flags',           conf.env['LINKFLAGS'])
+    write_config_text('Linker flags',          conf.env['LINKFLAGS'])
 
     config_text.write ('";\n}\n')
     config_text.close ()
@@ -783,26 +848,42 @@ def build(bld):
 
     # add directories that contain only headers, to workaround an issue with waf
 
-    bld.path.find_dir ('libs/evoral/evoral')
-    if not bld.is_defined('USE_EXTERNAL_LIBS'):
-        bld.path.find_dir ('libs/vamp-sdk/vamp-sdk')
-    bld.path.find_dir ('libs/surfaces/control_protocol/control_protocol')
-    bld.path.find_dir ('libs/timecode/timecode')
     if not bld.is_defined('USE_EXTERNAL_LIBS'):
         bld.path.find_dir ('libs/libltc/ltc')
-        bld.path.find_dir ('libs/rubberband/rubberband')
+    bld.path.find_dir ('libs/evoral/evoral')
+    bld.path.find_dir ('libs/surfaces/control_protocol/control_protocol')
+    bld.path.find_dir ('libs/timecode/timecode')
     bld.path.find_dir ('libs/gtkmm2ext/gtkmm2ext')
     bld.path.find_dir ('libs/ardour/ardour')
-    if not bld.is_defined('USE_EXTERNAL_LIBS'):
-        bld.path.find_dir ('libs/taglib/taglib')
     bld.path.find_dir ('libs/pbd/pbd')
 
+    # set up target directories
+    lwrcase_dirname = 'ardour3'
+
+    if bld.is_defined ('TRX_BUILD'):
+        lwrcase_dirname = 'trx'
+
+    # configuration files go here
+    bld.env['CONFDIR'] = os.path.join(bld.env['SYSCONFDIR'], lwrcase_dirname)
+    # data files loaded at run time go here
+    bld.env['DATADIR'] = os.path.join(bld.env['DATADIR'], lwrcase_dirname)
+    # shared objects loaded at runtime go here (two aliases)
+    bld.env['DLLDIR'] = os.path.join(bld.env['LIBDIR'], lwrcase_dirname)
+    bld.env['LIBDIR'] = bld.env['DLLDIR']
+
     autowaf.set_recursive()
+
+    if sys.platform == 'darwin':
+        bld.recurse('libs/appleutility')
+    elif bld.env['build_target'] != 'mingw':
+        bld.recurse('tools/sanity_check')
+
+    bld.recurse('libs/clearlooks-newer')
 
     for i in children:
         bld.recurse(i)
 
-    bld.install_files (os.path.join(bld.env['SYSCONFDIR'], 'ardour3', ), 'ardour_system.rc')
+    bld.install_files (bld.env['CONFDIR'], 'system_config')
 
     if bld.env['RUN_TESTS']:
         bld.add_post_fun(test)

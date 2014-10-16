@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+import sys
+import re
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+ALSABACKEND_VERSION = '0.0.1'
+I18N_PACKAGE = 'alsa-backend'
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    autowaf.configure(conf)
+
+def build(bld):
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source = [
+            'alsa_audiobackend.cc',
+            'alsa_midi.cc',
+            'alsa_rawmidi.cc',
+            'alsa_sequencer.cc',
+            'zita-alsa-pcmi.cc',
+            ]
+    obj.includes = ['.']
+    obj.name     = 'alsa_audiobackend'
+    obj.target   = 'alsa_audiobackend'
+    obj.use      = 'libardour libpbd ardouralsautil'
+    obj.uselib   = 'ALSA'
+    obj.vnum     = ALSABACKEND_VERSION
+    obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
+    obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
+                   'ARDOURBACKEND_DLL_EXPORTS'
+                  ]

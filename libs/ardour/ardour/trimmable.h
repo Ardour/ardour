@@ -22,7 +22,7 @@
 
 namespace ARDOUR {
 
-class Trimmable {
+class LIBARDOUR_API Trimmable {
   public:
 	Trimmable() {}
 	virtual ~Trimmable() {}

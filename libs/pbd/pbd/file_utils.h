@@ -25,71 +25,141 @@
 
 #include <glibmm/pattern.h>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/search_path.h"
 
 namespace PBD {
 
 /**
- * Get a list of files in a directory.
- * @note You must join path with result to get the absolute path
- * to the file.
+ * Get a list of path entries in a directory or within a directory tree
+ * if recursing.
+ * @note paths in result will be absolute
  *
- * @param path An Absolute path to a directory
- * @param result A vector of filenames.
+ * @param result A vector of absolute paths to the directory entries in filename
+ * encoding.
+ * @param paths A Searchpath
+ * @param files_only Only include file entries in result
+ * @param recurse Recurse into child directories
  */
-void
-get_files_in_directory (const std::string& path,
-                        std::vector<std::string>& result);
+LIBPBD_API void
+get_paths (std::vector<std::string>& result,
+           const Searchpath& paths,
+           bool files_only = true,
+           bool recurse = false);
 
 /**
- * Takes a directory path and returns all the files in the directory
- * matching a particular pattern.
+ * Get a list of files in a Searchpath.
+ * @note paths in result will be absolute.
  *
- * @param directory A directory path
+ * @param path A Searchpath
+ * @param result A vector of paths to files.
+ */
+LIBPBD_API void
+get_files (std::vector<std::string>& result,
+           const Searchpath& paths);
+
+/**
+ * Takes a Searchpath and returns all the files contained in the
+ * directory paths that match a particular pattern.
+ *
+ * @param result A vector in which to place the resulting matches.
+ * @param paths A Searchpath
  * @param pattern A Glib::PatternSpec used to match the files.
- * @param result A vector in which to place the resulting matches.
  */
-void
-find_matching_files_in_directory (const std::string& directory,
-                                  const Glib::PatternSpec& pattern,
-                                  std::vector<std::string>& result);
+LIBPBD_API void
+find_files_matching_pattern (std::vector<std::string>& result,
+                             const Searchpath& paths,
+                             const Glib::PatternSpec& pattern);
 
 /**
- * Takes a number of directory paths and returns all the files matching
- * a particular pattern.
+ * Takes a Searchpath and returns all the files contained in the
+ * directory paths that match a particular pattern.
  *
- * @param paths A vector containing the Absolute paths
- * @param pattern A Glib::PatternSpec used to match the files
- * @param result A vector in which to place the resulting matches.
- */
-void
-find_matching_files_in_directories (const std::vector<std::string>& directory_paths,
-                                    const Glib::PatternSpec& pattern,
-                                    std::vector<std::string>& result);
-
-/**
- * Takes a SearchPath and puts a list of all the files in the search path
- * that match pattern into the result vector.
+ * This is a convenience method to avoid explicitly declaring
+ * temporary variables such as:
+ * find_files_matching_pattern (result, paths, string("*.ext"))
  *
- * @param search_path A SearchPath
- * @param pattern A Glib::PatternSpec used to match the files
  * @param result A vector in which to place the resulting matches.
+ * @param paths A Searchpath
+ * @param pattern A string representing the Glib::PatternSpec used
+ * to match the files.
  */
-void
-find_matching_files_in_search_path (const SearchPath& search_path,
-                                    const Glib::PatternSpec& pattern,
-                                    std::vector<std::string>& result);
+LIBPBD_API void
+find_files_matching_pattern (std::vector<std::string>& result,
+                             const Searchpath& paths,
+                             const std::string& pattern);
 
 /**
- * Takes a search path and a file name and place the full path
+ * Takes a search path and a file name and places the full path
  * to that file in result if it is found within the search path.
+ *
+ * @note the parameter order of this function doesn't match the
+ * others. At the time of writing it is the most widely used file
+ * utility function so I didn't change it but it may be worth
+ * doing at some point if it causes any confusion.
  *
  * @return true If file is found within the search path.
  */
-bool
-find_file_in_search_path (const SearchPath& search_path,
-                          const std::string& filename,
-                          std::string& result);
+LIBPBD_API bool
+find_file (const Searchpath& search_path,
+           const std::string& filename,
+           std::string& result);
+
+
+/**
+ * Find files in paths that match a regular expression
+ * @note This function does not recurse.
+ *
+ * @param result A vector in which to place the resulting matches.
+ * @param paths A Searchpath
+ * @param regexp A regular expression
+ */
+LIBPBD_API void
+find_files_matching_regex (std::vector<std::string>& results,
+                           const Searchpath& paths,
+                           const std::string& regexp);
+
+/**
+ * Find paths in a Searchpath that match a supplied filter(functor)
+ * @note results include files and directories.
+ *
+ * @param result A vector in which to place the resulting matches.
+ * @param paths A Searchpath
+ * @param filter A functor to use to filter paths
+ * @param arg additonal argument to filter if required
+ * @param pass_fullpath pass the full path to the filter or just the basename
+ * @param return_fullpath put the full path in results or just the basename
+ * @param recurse Recurse into child directories to find paths.
+ */
+LIBPBD_API void
+find_paths_matching_filter (std::vector<std::string>& results,
+                            const Searchpath& paths,
+                            bool (*filter)(const std::string &, void *),
+                            void *arg,
+                            bool pass_fullpath,
+                            bool return_fullpath,
+                            bool recurse = false);
+
+/**
+ * Find paths in a Searchpath that match a supplied filter(functor)
+ * @note results include only files.
+ *
+ * @param result A vector in which to place the resulting matches.
+ * @param paths A Searchpath
+ * @param filter A functor to use to filter paths
+ * @param arg additonal argument to filter if required
+ * @param pass_fullpath pass the full path to the filter or just the basename
+ * @param return_fullpath put the full path in results or just the basename
+ * @param recurse Recurse into child directories to find files.
+ */
+LIBPBD_API void
+find_files_matching_filter (std::vector<std::string>& results,
+                            const Searchpath& paths,
+                            bool (*filter)(const std::string &, void *),
+                            void *arg,
+                            bool pass_fullpath,
+                            bool return_fullpath,
+                            bool recurse = false);
 
 /**
  * Attempt to copy the contents of the file from_path to a new file
@@ -97,26 +167,38 @@ find_file_in_search_path (const SearchPath& search_path,
  *
  * @return true if file was successfully copied
  */
-bool copy_file(const std::string & from_path, const std::string & to_path);
+LIBPBD_API bool copy_file(const std::string & from_path, const std::string & to_path);
 
 /**
  * Attempt to copy all regular files from from_path to a new directory.
  * This method does not recurse.
  */
-void copy_files(const std::string & from_path, const std::string & to_dir);
+LIBPBD_API void copy_files(const std::string & from_path, const std::string & to_dir);
+
+/**
+ * Attempt to copy all regular files from from_path to a new directory.
+ */
+LIBPBD_API void copy_recurse(const std::string & from_path, const std::string & to_dir);
 
 /**
  * Take a (possibly) relative path and make it absolute
  * @return An absolute path
  */
-std::string get_absolute_path (const std::string &);
+LIBPBD_API std::string get_absolute_path (const std::string &);
+
+/**
+ * Take a path/filename and return the suffix (characters beyond the last '.'
+ * @return A string containing the suffix, which will be empty
+ * if there are no '.' characters in the path/filename.
+ */
+LIBPBD_API std::string get_suffix (const std::string &);
 
 /**
  * Find out if `needle' is a file or directory within the
  * directory `haystack'.
  * @return true if it is.
  */
-bool path_is_within (const std::string &, std::string);
+LIBPBD_API bool path_is_within (const std::string &, std::string);
 
 /**
  * @return true if p1 and p2 both resolve to the same file
@@ -125,10 +207,30 @@ bool path_is_within (const std::string &, std::string);
  *
  * Uses g_stat to check for identical st_dev and st_ino values.
  */
-bool equivalent_paths (const std::string &p1, const std::string &p2);
+LIBPBD_API bool equivalent_paths (const std::string &p1, const std::string &p2);
 
 /// @return true if path at p exists and is writable, false otherwise
-bool exists_and_writable(const std::string & p);
+LIBPBD_API bool exists_and_writable(const std::string & p);
+
+/**
+ * Remove all the files in a directory recursively leaving the directory
+ * structure in place.
+ * @note dir will not be removed
+ *
+ * @param dir The directory to clear of files.
+ * @param size of removed files in bytes.
+ * @param list of files that were removed.
+ */
+LIBPBD_API int clear_directory (const std::string& dir, size_t* size = 0,
+                                std::vector<std::string>* removed_files = 0);
+
+/**
+ * Remove all the contents of a directory recursively.
+ * @note dir will not be removed
+ *
+ * @param dir The directory to remove files from.
+ */
+LIBPBD_API void remove_directory (const std::string& dir);
 
 } // namespace PBD
 

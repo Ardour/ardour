@@ -1,0 +1,86 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+from waflib import Options, TaskGen
+import waflib.Logs as Logs, waflib.Utils as Utils
+import os
+import shutil
+import sys
+import re
+import time
+from waflib.Task import Task
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+scanner_app_src = [
+    'scanner.cc',
+    ]
+
+# needed for code used from libardour
+I18N_PACKAGE = 'ardour3'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    conf.load('misc')
+    conf.load('compiler_cxx')
+    autowaf.configure(conf)
+    if conf.env['WINDOWS_VST_SUPPORT'] == True and Options.options.dist_target == 'mingw':
+        conf.check(compiler='cxx',
+                   lib='gdi32',
+                   mandatory=True,
+                   uselib_store='GDI32')
+
+# Add a waf `feature' to allow compilation of things using winegcc
+from waflib.TaskGen import feature
+@feature("wine")
+def set_winegcc(self):
+    self.env.LINK_CXX = self.env.LINK_CC = 'wineg++'
+    self.env.CC = 'winegcc'
+
+def build(bld):
+    VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
+    if not (bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT')):
+        return
+
+    if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
+        # wine exec wrapper script
+        obj = bld(features = 'subst', rule= 'chmod 0755 ${TGT}')
+        obj.source = 'scanner.wine'
+        obj.target = 'ardour-vst-scanner'
+        obj.chmod  = Utils.O755
+        obj.install_path = os.path.join(bld.env['LIBDIR'], 'fst')
+        obj.dict   = {
+            'VERSION' : bld.env['VERSION'],
+                }
+
+        obj = bld (features = 'c cxx cxxprogram wine')
+        obj.source = (
+            'scanner.cc',
+            'vstwin.c',
+            )
+        obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
+        obj.target = 'ardour-vst-scanner.exe.so'
+        obj.uselib = ['GIOMM', 'DL']
+        obj.use = [ 'libpbd' ]
+    else:
+        obj = bld (features = 'cxx c cxxprogram')
+        if bld.is_defined('WINDOWS_VST_SUPPORT'):
+            obj.source = ( 'scanner.cc', 'vstwin.c' )
+            obj.uselib = ['GIOMM', 'DL', 'GDI32']
+        else:
+            obj.source = ( 'scanner.cc' )
+            obj.uselib = ['GIOMM', 'DL']
+        obj.target = 'ardour-vst-scanner'
+        obj.use = [ 'libpbd' ]
+
+    obj.includes  = [ '../pbd/', '../ardour/', '.' ]
+    obj.defines = [
+        '_POSIX_SOURCE',
+        'USE_WS_PREFIX',
+        'VST_SCANNER_APP',
+        'PACKAGE="' + I18N_PACKAGE + '"',
+        ]
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'fst')

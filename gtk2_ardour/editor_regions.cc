@@ -53,6 +53,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
@@ -346,7 +347,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 			c.set_rgb(0,65535,0);     // FIXME: error color from style
 
 		} else {
-			set_color(c, rgba_from_style ("RegionListWholeFile", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
+			set_color_from_rgba (c, rgba_from_style ("RegionListWholeFile", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
 
 		}
 

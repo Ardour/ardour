@@ -25,11 +25,13 @@
 #include <gtkmm/box.h>
 #include <gtkmm/eventbox.h>
 
+#include "gtkmm2ext/visibility.h"
+
 class XMLNode;
 
 namespace Gtkmm2ext {
 
-class TearOff : public Gtk::HBox
+class LIBGTKMM2EXT_API TearOff : public Gtk::HBox
 {
   public:
 	TearOff (Gtk::Widget& contents, bool allow_resize = false);

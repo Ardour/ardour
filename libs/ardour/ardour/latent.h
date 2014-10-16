@@ -20,11 +20,12 @@
 #ifndef __ardour_latent_h__
 #define __ardour_latent_h__
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
 
-class Latent {
+class LIBARDOUR_API Latent {
   public:
 	Latent() : _user_latency (0) {}
 	virtual ~Latent() {}

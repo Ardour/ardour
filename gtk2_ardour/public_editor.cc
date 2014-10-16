@@ -31,6 +31,7 @@ sigc::signal<void> PublicEditor::DropDownKeys;
 PublicEditor::PublicEditor ()
   	: Window (Gtk::WINDOW_TOPLEVEL)
 	, VisibilityTracker (*((Gtk::Window*)this))
+	, _suspend_route_redisplay_counter (0)
 {
 }
 

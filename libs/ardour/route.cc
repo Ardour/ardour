@@ -47,6 +47,7 @@
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
 #include "ardour/meter.h"
+#include "ardour/delayline.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_port.h"
 #include "ardour/monitor_processor.h"
@@ -79,6 +80,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, GraphNode (sess._process_graph)
 	, _active (true)
 	, _signal_latency (0)
+	, _signal_latency_at_amp_position (0)
 	, _initial_delay (0)
 	, _roll_delay (0)
 	, _flags (flg)
@@ -100,6 +102,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _order_key (0)
 	, _has_order_key (false)
 	, _remote_control_id (0)
+	, _track_number (0)
 	, _in_configure_processors (false)
 	, _initial_io_setup (false)
 	, _custom_meter_position_noted (false)
@@ -141,6 +144,13 @@ Route::init ()
 
 	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
 	_output->PortCountChanging.connect_same_thread (*this, boost::bind (&Route::output_port_count_changing, this, _1));
+
+#if 0 // not used - just yet
+	if (!is_master() && !is_monitor() && !is_auditioner()) {
+		_delayline.reset (new DelayLine (_session, _name));
+		add_processor (_delayline, PreFader);
+	}
+#endif
 
 	/* add amp processor  */
 
@@ -428,7 +438,10 @@ Route::process_output_buffers (BufferSet& bufs,
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {
 		_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
-		_amp->setup_gain_automation (start_frame, end_frame, nframes);
+		_amp->setup_gain_automation (
+				start_frame + _signal_latency_at_amp_position,
+				end_frame + _signal_latency_at_amp_position,
+				nframes);
 	} else {
 		_amp->apply_gain_automation (false);
 	}
@@ -437,8 +450,13 @@ Route::process_output_buffers (BufferSet& bufs,
 	   on a transition between monitoring states we get a de-clicking gain
 	   change in the _main_outs delivery.
 	*/
+	bool silence = monitoring_state () == MonitoringSilence;
 
-	_main_outs->no_outs_cuz_we_no_monitor (monitoring_state () == MonitoringSilence);
+	//but we override this in the case where we have an internal generator
+	if ( _have_internal_generator )
+		silence = false;
+
+	_main_outs->no_outs_cuz_we_no_monitor (silence);
 
 	/* -------------------------------------------------------------------------------------------
 	   GLOBAL DECLICK (for transport changes etc.)
@@ -506,6 +524,8 @@ Route::process_output_buffers (BufferSet& bufs,
 	/* set this to be true if the meter will already have been ::run() earlier */
 	bool const meter_already_run = metering_state() == MeteringInput;
 
+	framecnt_t latency = 0;
+
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 		if (meter_already_run && boost::dynamic_pointer_cast<PeakMeter> (*i)) {
@@ -531,9 +551,118 @@ Route::process_output_buffers (BufferSet& bufs,
 		   do we catch route != active somewhere higher?
 		*/
 
-		(*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
+		if (boost::dynamic_pointer_cast<Send>(*i) != 0) {
+			boost::dynamic_pointer_cast<Send>(*i)->set_delay_in(_signal_latency - latency);
+		}
+
+		(*i)->run (bufs, start_frame - latency, end_frame - latency, nframes, *i != _processors.back());
 		bufs.set_count ((*i)->output_streams());
+
+		if ((*i)->active ()) {
+			latency += (*i)->signal_latency ();
+		}
 	}
+}
+
+void
+Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
+		boost::shared_ptr<Processor> endpoint,
+		bool include_endpoint, bool for_export, bool for_freeze)
+{
+	/* If no processing is required, there's no need to go any further. */
+	if (!endpoint && !include_endpoint) {
+		return;
+	}
+
+	framecnt_t latency = bounce_get_latency(_amp, false, for_export, for_freeze);
+	_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
+	_amp->setup_gain_automation (start - latency, start - latency + nframes, nframes);
+
+	latency = 0;
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+
+		if (!include_endpoint && (*i) == endpoint) {
+			break;
+		}
+
+		/* if we're not exporting, stop processing if we come across a routing processor. */
+		if (!for_export && boost::dynamic_pointer_cast<PortInsert>(*i)) {
+			break;
+		}
+		if (!for_export && for_freeze && (*i)->does_routing() && (*i)->active()) {
+			break;
+		}
+
+		/* don't run any processors that does routing.
+		 * oh, and don't bother with the peak meter either.
+		 */
+		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
+			(*i)->run (buffers, start - latency, start - latency + nframes, nframes, true);
+			buffers.set_count ((*i)->output_streams());
+			latency += (*i)->signal_latency ();
+		}
+
+		if ((*i) == endpoint) {
+			break;
+		}
+	}
+}
+
+framecnt_t
+Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint,
+		bool include_endpoint, bool for_export, bool for_freeze) const
+{
+	framecnt_t latency = 0;
+	if (!endpoint && !include_endpoint) {
+		return latency;
+	}
+
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if (!include_endpoint && (*i) == endpoint) {
+			break;
+		}
+		if (!for_export && boost::dynamic_pointer_cast<PortInsert>(*i)) {
+			break;
+		}
+		if (!for_export && for_freeze && (*i)->does_routing() && (*i)->active()) {
+			break;
+		}
+		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
+			latency += (*i)->signal_latency ();
+		}
+		if ((*i) == endpoint) {
+			break;
+		}
+	}
+	return latency;
+}
+
+ChanCount
+Route::bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint,
+		bool include_endpoint, bool for_export, bool for_freeze) const
+{
+	if (!endpoint && !include_endpoint) {
+		return cc;
+	}
+
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if (!include_endpoint && (*i) == endpoint) {
+			break;
+		}
+		if (!for_export && boost::dynamic_pointer_cast<PortInsert>(*i)) {
+			break;
+		}
+		if (!for_export && for_freeze && (*i)->does_routing() && (*i)->active()) {
+			break;
+		}
+		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
+			cc = (*i)->output_streams();
+		}
+		if ((*i) == endpoint) {
+			break;
+		}
+	}
+	return cc;
 }
 
 ChanCount
@@ -1073,7 +1202,8 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 
 		} else if (node.name() == "Send") {
 
-			processor.reset (new Send (_session, _pannable, _mute_master));
+			boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
+			processor.reset (new Send (_session, sendpan, _mute_master));
 
 		} else {
 
@@ -1332,7 +1462,7 @@ Route::clear_processors (Placement p)
 				seen_amp = true;
 			}
 
-			if ((*i) == _amp || (*i) == _meter || (*i) == _main_outs) {
+			if ((*i) == _amp || (*i) == _meter || (*i) == _main_outs || (*i) == _delayline) {
 
 				/* you can't remove these */
 
@@ -1399,7 +1529,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 
 	/* these can never be removed */
 
-	if (processor == _amp || processor == _meter || processor == _main_outs) {
+	if (processor == _amp || processor == _meter || processor == _main_outs || processor == _delayline) {
 		return 0;
 	}
 
@@ -1516,7 +1646,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 
 			/* these can never be removed */
 
-			if (processor == _amp || processor == _meter || processor == _main_outs) {
+			if (processor == _amp || processor == _meter || processor == _main_outs || processor == _delayline) {
 				++i;
 				continue;
 			}
@@ -1598,7 +1728,10 @@ Route::reset_instrument_info ()
 int
 Route::configure_processors (ProcessorStreams* err)
 {
+#ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
+#endif
+
 	if (!_in_configure_processors) {
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		return configure_processors_unlocked (err);
@@ -1668,7 +1801,9 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 int
 Route::configure_processors_unlocked (ProcessorStreams* err)
 {
+#ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
+#endif
 
 	if (_in_configure_processors) {
 		return 0;
@@ -2476,6 +2611,11 @@ Route::set_processor_state (const XMLNode& node)
 		} else if (prop->value() == "meter") {
 			_meter->set_state (**niter, Stateful::current_state_version);
 			new_order.push_back (_meter);
+		} else if (prop->value() == "delay") {
+			if (_delayline) {
+				_delayline->set_state (**niter, Stateful::current_state_version);
+				new_order.push_back (_delayline);
+			}
 		} else if (prop->value() == "main-outs") {
 			_main_outs->set_state (**niter, Stateful::current_state_version);
 		} else if (prop->value() == "intreturn") {
@@ -2513,7 +2653,7 @@ Route::set_processor_state (const XMLNode& node)
 
 				if (prop->value() == "intsend") {
 
-					processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<Route>(), Delivery::Aux, true));
+					processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), boost::shared_ptr<Route>(), Delivery::Aux, true));
 
 				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 				           prop->value() == "lv2" ||
@@ -2682,7 +2822,7 @@ Route::enable_monitor_send ()
 
 	/* make sure we have one */
 	if (!_monitor_send) {
-		_monitor_send.reset (new InternalSend (_session, _pannable, _mute_master, _session.monitor_out(), Delivery::Listen));
+		_monitor_send.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), _session.monitor_out(), Delivery::Listen));
 		_monitor_send->set_display_to_user (false);
 	}
 
@@ -2719,7 +2859,8 @@ Route::add_aux_send (boost::shared_ptr<Route> route, boost::shared_ptr<Processor
 
 		{
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			listener.reset (new InternalSend (_session, _pannable, _mute_master, route, Delivery::Aux));
+			boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
+			listener.reset (new InternalSend (_session, sendpan, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Aux));
 		}
 
 		add_processor (listener, before);
@@ -2806,7 +2947,7 @@ Route::feeds (boost::shared_ptr<Route> other, bool* via_sends_only)
 {
 	const FedBy& fed_by (other->fed_by());
 
-	for (FedBy::iterator f = fed_by.begin(); f != fed_by.end(); ++f) {
+	for (FedBy::const_iterator f = fed_by.begin(); f != fed_by.end(); ++f) {
 		boost::shared_ptr<Route> sr = f->r.lock();
 
 		if (sr && (sr.get() == this)) {
@@ -3185,15 +3326,24 @@ framecnt_t
 Route::update_signal_latency ()
 {
 	framecnt_t l = _output->user_latency();
+	framecnt_t lamp = 0;
+	bool before_amp = true;
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->active ()) {
 			l += (*i)->signal_latency ();
 		}
+		if ((*i) == _amp) {
+			before_amp = false;
+		}
+		if (before_amp) {
+			lamp = l;
+		}
 	}
 
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: internal signal latency = %2\n", _name, l));
 
+	_signal_latency_at_amp_position = lamp;
 	if (_signal_latency != l) {
 		_signal_latency = l;
 		signal_latency_changed (); /* EMIT SIGNAL */
@@ -3422,14 +3572,14 @@ Route::save_as_template (const string& path, const string& name)
 bool
 Route::set_name (const string& str)
 {
-	bool ret;
-	string ioproc_name;
-	string name;
+	if (str == name()) {
+		return true;
+	}
 
-	name = Route::ensure_track_or_route_name (str, _session);
+	string name = Route::ensure_track_or_route_name (str, _session);
 	SessionObject::set_name (name);
 
-	ret = (_input->set_name(name) && _output->set_name(name));
+	bool ret = (_input->set_name(name) && _output->set_name(name));
 
 	if (ret) {
 		/* rename the main outs. Leave other IO processors
@@ -3554,6 +3704,10 @@ Route::denormal_protection () const
 void
 Route::set_active (bool yn, void* src)
 {
+	if (_session.transport_rolling()) {
+		return;
+	}
+
 	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_route_active()) {
 		_route_group->foreach_route (boost::bind (&Route::set_active, _1, yn, _route_group));
 		return;
@@ -3904,7 +4058,7 @@ Route::setup_invisible_processors ()
 		++amp;
 	}
 
-	assert (amp != _processors.end ());
+	assert (amp != new_processors.end ());
 
 	/* and the processor after the amp */
 
@@ -3995,6 +4149,12 @@ Route::setup_invisible_processors ()
 			_monitor_send->set_can_pan (false);
 		}
 	}
+
+#if 0 // not used - just yet
+	if (!is_master() && !is_monitor() && !is_auditioner()) {
+		new_processors.push_front (_delayline);
+	}
+#endif
 
 	/* MONITOR CONTROL */
 
@@ -4150,6 +4310,10 @@ Route::non_realtime_locate (framepos_t pos)
 {
 	if (_pannable) {
 		_pannable->transport_located (pos);
+	}
+
+	if (_delayline.get()) {
+		_delayline.get()->flush();
 	}
 
 	{

@@ -17,9 +17,15 @@
 
 */
 
+#include <glib.h>
+#include <glib/gstdio.h> /* for g_stat() */
+#include <glibmm/miscutils.h> /* for build_filename() */
+
+#include "pbd/file_utils.h"
 #include "pbd/pathexpand.h"
 
 #include "ardour/types.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/session_configuration.h"
 #include "i18n.h"
 
@@ -121,4 +127,68 @@ SessionConfiguration::map_parameters (boost::function<void (std::string)>& funct
 #include "ardour/session_configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
+}
+
+
+bool
+SessionConfiguration::load_state ()
+{
+	std::string rcfile;
+	GStatBuf statbuf;
+	if (find_file (ardour_config_search_path(), "session.rc", rcfile)) {
+		if (g_stat (rcfile.c_str(), &statbuf)) {
+			return false;
+		}
+		if (statbuf.st_size == 0) {
+			return false;
+		}
+		XMLTree tree;
+		if (!tree.read (rcfile.c_str())) {
+			error << string_compose(_("%1: cannot part default session options \"%2\""), PROGRAM_NAME, rcfile) << endmsg;
+			return false;
+		}
+
+		XMLNode& root (*tree.root());
+		if (root.name() != X_("SessionDefaults")) {
+			warning << _("Invalid session default XML Root.") << endmsg;
+			return false;
+		}
+
+		XMLNode* node;
+		if (((node = find_named_node (root, X_("Config"))) != 0)) {
+			LocaleGuard lg (X_("POSIX"));
+			set_variables(*node);
+			info << _("Loaded custom session defaults.") << endmsg;
+		} else {
+			warning << _("Found no session defaults in XML file.") << endmsg;
+			return false;
+		}
+
+		/* CUSTOM OVERRIDES */
+		set_audio_search_path("");
+		set_midi_search_path("");
+		set_raid_path("");
+	}
+	return true;
+}
+
+bool
+SessionConfiguration::save_state ()
+{
+	const std::string rcfile = Glib::build_filename (user_config_directory(), "session.rc");
+	if (rcfile.empty()) {
+		return false;
+	}
+
+	XMLTree tree;
+	XMLNode* root = new XMLNode(X_("SessionDefaults"));
+	root->add_child_nocopy (get_variables ());
+	tree.set_root (root);
+
+	if (!tree.write (rcfile.c_str())) {
+		error << _("Could not save session options") << endmsg;
+		return false;
+	}
+
+	return true;
 }

@@ -22,6 +22,7 @@
 
 #include <pthread.h>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/process_thread.h"
 
@@ -29,7 +30,7 @@ namespace ARDOUR {
 
 	class InterThreadInfo {
 	public:
-		InterThreadInfo () : done (false), cancel (false), progress (0), thread (0) {}
+		InterThreadInfo () : done (false), cancel (false), progress (0), thread () {}
 
 		volatile bool  done;
 		volatile bool  cancel;

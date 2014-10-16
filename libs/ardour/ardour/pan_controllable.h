@@ -34,7 +34,7 @@ namespace ARDOUR {
 class Session;
 class Pannable;
 
-class PanControllable : public AutomationControl
+class LIBARDOUR_API PanControllable : public AutomationControl
 {
 public:
 	PanControllable (Session& s, std::string name, Pannable* o, Evoral::Parameter param)

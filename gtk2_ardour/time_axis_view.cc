@@ -23,16 +23,20 @@
 #include <string>
 #include <list>
 
-#include <libgnomecanvasmm.h>
-#include <libgnomecanvasmm/canvas.h>
-#include <libgnomecanvasmm/item.h>
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
+#include "pbd/stacktrace.h"
 
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/selector.h>
+
+#include "canvas/canvas.h"
+#include "canvas/rectangle.h"
+#include "canvas/debug.h"
+
+#include "ardour/profile.h"
 
 #include "ardour_ui.h"
 #include "ardour_dialog.h"
@@ -42,8 +46,6 @@
 #include "time_axis_view.h"
 #include "region_view.h"
 #include "ghostregion.h"
-#include "simplerect.h"
-#include "simpleline.h"
 #include "selection.h"
 #include "keyboard.h"
 #include "rgb_macros.h"
@@ -58,25 +60,33 @@ using namespace std;
 using namespace Gtk;
 using namespace Gdk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
 using Gtkmm2ext::Keyboard;
 
+#define TOP_LEVEL_WIDGET controls_ebox
+
 const double trim_handle_size = 6.0; /* pixels */
 uint32_t TimeAxisView::button_height = 0;
 uint32_t TimeAxisView::extra_height = 0;
 int const TimeAxisView::_max_order = 512;
+unsigned int TimeAxisView::name_width_px = 100; // TODO adjust with font-scaling on style-change
 PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
+Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::controls_meters_size_group = Glib::RefPtr<Gtk::SizeGroup>();
+Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::midi_scroomer_size_group = Glib::RefPtr<Gtk::SizeGroup>();
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
-	, controls_table (2, 8)
+	, controls_table (3, 3)
+	, controls_button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_BOTH))
 	, _name_editing (false)
 	, height (0)
 	, display_menu (0)
 	, parent (rent)
 	, selection_group (0)
+	, _ghost_group (0)
 	, _hidden (false)
 	, in_destructor (false)
 	, _size_menu (0)
@@ -90,62 +100,78 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	, _resize_drag_start (-1)
 	, _preresize_cursor (0)
 	, _have_preresize_cursor (false)
-	, _ghost_group (0)
 	, _ebox_release_can_act (true)
 {
+	if (!controls_meters_size_group) {
+		controls_meters_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
+	}
+	if (!midi_scroomer_size_group) {
+		midi_scroomer_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
+	}
 	if (extra_height == 0) {
 		compute_heights ();
 	}
 
-	_canvas_background = new Group (*ed.get_background_group (), 0.0, 0.0);
-	_canvas_display = new Group (*ed.get_trackview_group (), 0.0, 0.0);
+	_canvas_display = new ArdourCanvas::Container (ed.get_trackview_group (), ArdourCanvas::Duple (1.0, 0.0));
+	CANVAS_DEBUG_NAME (_canvas_display, "main for TAV");
 	_canvas_display->hide(); // reveal as needed
 
-	selection_group = new Group (*_canvas_display);
+	_canvas_separator = new ArdourCanvas::Line(ed.get_trackview_group ());
+	CANVAS_DEBUG_NAME (_canvas_separator, "separator for TAV");
+	_canvas_separator->set_outline_color(RGBA_TO_UINT (0, 0, 0, 255));
+	_canvas_separator->set_outline_width(1.0);
+	_canvas_separator->hide();
+
+	selection_group = new ArdourCanvas::Container (_canvas_display);
+	CANVAS_DEBUG_NAME (selection_group, "selection for TAV");
 	selection_group->set_data (X_("timeselection"), (void *) 1);
 	selection_group->hide();
-
-	_ghost_group = new Group (*_canvas_display);
+	
+	_ghost_group = new ArdourCanvas::Container (_canvas_display);
+	CANVAS_DEBUG_NAME (_ghost_group, "ghost for TAV");
 	_ghost_group->lower_to_bottom();
 	_ghost_group->show();
 
 	name_label.set_name ("TrackLabel");
 	name_label.set_alignment (0.0, 0.5);
+	name_label.set_width_chars (12);
 	ARDOUR_UI::instance()->set_tip (name_label, _("Track/Bus name (double click to edit)"));
 
-	Gtk::Entry* an_entry = new Gtk::Entry;
+	Gtk::Entry* an_entry = new Gtkmm2ext::FocusEntry;
+	an_entry->set_name ("EditorTrackNameDisplay");
 	Gtk::Requisition req;
 	an_entry->size_request (req);
 	name_label.set_size_request (-1, req.height);
+	name_label.set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 	delete an_entry;
 
-	name_hbox.pack_start (name_label, true, true);
+	name_hbox.pack_end (name_label, true, true);
+
+	// set min. track-header width if fader is not visible
+	name_hbox.set_size_request(name_width_px, -1);
+
 	name_hbox.show ();
 	name_label.show ();
-	
-	controls_table.set_size_request (200);
+
 	controls_table.set_row_spacings (2);
 	controls_table.set_col_spacings (2);
 	controls_table.set_border_width (2);
-	controls_table.set_homogeneous (true);
 
-	controls_table.attach (name_hbox, 0, 5, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
+	if (ARDOUR::Profile->get_mixbus() ) {
+		controls_table.attach (name_hbox, 4, 5, 0, 2,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
+	} else {
+		controls_table.attach (name_hbox, 1, 2, 0, 2,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
+	}
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
-
-	HSeparator* separator = manage (new HSeparator());
-	separator->set_name("TrackSeparator");
-	separator->set_size_request(-1, 1);
-	separator->show();
 
 	controls_vbox.pack_start (controls_table, false, false);
 	controls_vbox.show ();
 
-	controls_hbox.pack_start (controls_vbox, true, true);
-	controls_hbox.show ();
+	top_hbox.pack_start (controls_vbox, true, true);
+	top_hbox.show ();
 
-	//controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
-	controls_ebox.add (controls_hbox);
+	controls_ebox.add (time_axis_hbox);
 	controls_ebox.add_events (Gdk::BUTTON_PRESS_MASK|
 				  Gdk::BUTTON_RELEASE_MASK|
 				  Gdk::POINTER_MOTION_MASK|
@@ -162,9 +188,25 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.signal_leave_notify_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_leave));
 	controls_ebox.show ();
 
-	time_axis_vbox.pack_start (controls_ebox, true, true, 0);
-	time_axis_vbox.pack_end (*separator, false, false);
+	time_axis_frame.set_shadow_type (Gtk::SHADOW_NONE);
+	time_axis_frame.add(top_hbox);
+	time_axis_frame.show();
+
+	HSeparator* separator = manage (new HSeparator());
+	separator->set_name("TrackSeparator");
+	separator->set_size_request(-1, 1);
+	separator->show();
+
+	scroomer_placeholder.set_size_request (-1, -1);
+	scroomer_placeholder.show();
+	midi_scroomer_size_group->add_widget (scroomer_placeholder);
+
+	time_axis_vbox.pack_start (*separator, false, false);
+	time_axis_vbox.pack_start (time_axis_frame, true, true);
 	time_axis_vbox.show();
+	time_axis_hbox.pack_start (time_axis_vbox, true, true);
+	time_axis_hbox.show();
+	top_hbox.pack_start (scroomer_placeholder, false, false); // OR pack_end to move after meters ?
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
 
@@ -195,11 +237,11 @@ TimeAxisView::~TimeAxisView()
 	delete selection_group;
 	selection_group = 0;
 
-	delete _canvas_background;
-	_canvas_background = 0;
-
 	delete _canvas_display;
 	_canvas_display = 0;
+
+	delete _canvas_separator;
+	_canvas_separator = 0;
 
 	delete display_menu;
 	display_menu = 0;
@@ -215,10 +257,10 @@ TimeAxisView::hide ()
 	}
 
 	_canvas_display->hide ();
-	_canvas_background->hide ();
+	_canvas_separator->hide ();
 
 	if (control_parent) {
-		control_parent->remove (time_axis_vbox);
+		control_parent->remove (TOP_LEVEL_WIDGET);
 		control_parent = 0;
 	}
 
@@ -250,30 +292,26 @@ guint32
 TimeAxisView::show_at (double y, int& nth, VBox *parent)
 {
 	if (control_parent) {
-		control_parent->reorder_child (time_axis_vbox, nth);
+		control_parent->reorder_child (TOP_LEVEL_WIDGET, nth);
 	} else {
 		control_parent = parent;
-		parent->pack_start (time_axis_vbox, false, false);
-		parent->reorder_child (time_axis_vbox, nth);
+		parent->pack_start (TOP_LEVEL_WIDGET, false, false);
+		parent->reorder_child (TOP_LEVEL_WIDGET, nth);
 	}
 
 	_order = nth;
 
 	if (_y_position != y) {
-		_canvas_display->property_y () = y;
-		_canvas_background->property_y () = y;
-		/* silly canvas */
-		_canvas_display->move (0.0, 0.0);
-		_canvas_background->move (0.0, 0.0);
+		_canvas_separator->set (ArdourCanvas::Duple(0, y), ArdourCanvas::Duple(ArdourCanvas::COORD_MAX, y));
+		_canvas_display->set_y_position (y + 1);
 		_y_position = y;
-
 	}
 
-	_canvas_background->raise_to_top ();
 	_canvas_display->raise_to_top ();
-
-	_canvas_background->show ();
 	_canvas_display->show ();
+
+	_canvas_separator->raise_to_top ();
+	_canvas_separator->show ();
 
 	_hidden = false;
 
@@ -293,21 +331,6 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	return _effective_height;
 }
 
-void
-TimeAxisView::clip_to_viewport ()
-{
-	if (marked_for_display()) {
-		if (_y_position + _effective_height < _editor.get_trackview_group_vertical_offset () || _y_position > _editor.get_trackview_group_vertical_offset () + _canvas_display->get_canvas()->get_height()) {
-			_canvas_background->hide ();
-			_canvas_display->hide ();
-			return;
-		}
-		_canvas_background->show ();
-		_canvas_display->show ();
-	}
-	return;
-}
-
 bool
 TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 {
@@ -321,10 +344,7 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 			}
 			e.stepping_axis_view()->step_height (false);
 			return true;
-		} else if (Keyboard::no_modifiers_active (ev->state)) {
-			_editor.scroll_tracks_up_line();
-			return true;
-		}
+		} 
 		break;
 
 	case GDK_SCROLL_DOWN:
@@ -336,10 +356,7 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 			}
 			e.stepping_axis_view()->step_height (true);
 			return true;
-		} else if (Keyboard::no_modifiers_active (ev->state)) {
-			_editor.scroll_tracks_down_line();
-			return true;
-		}
+		} 
 		break;
 
 	default:
@@ -347,7 +364,14 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 		break;
 	}
 
-	return false;
+	/* Just forward to the normal canvas scroll method. The coordinate
+	   systems are different but since the canvas is always larger than the
+	   track headers, and aligned with the trackview area, this will work.
+
+	   In the not too distant future this layout is going away anyway and
+	   headers will be on the canvas.
+	*/
+	return _editor.canvas_scroll_event (ev, false);
 }
 
 bool
@@ -389,19 +413,16 @@ bool
 TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
 {
 	if (_resize_drag_start >= 0) {
-		/* (ab)use the DragManager to do autoscrolling; adjust the event coordinates
-		   into the world coordinate space that DragManager::motion_handler is expecting,
-		   and then fake a DragManager motion event so that when maybe_autoscroll
-		   asks DragManager for the current pointer position it will get the correct
-		   answers.
-		*/
-		int tx, ty;
-		controls_ebox.translate_coordinates (*control_parent, ev->x, ev->y, tx, ty);
-		ev->y = ty - _editor.get_trackview_group_vertical_offset();
-		_editor.drags()->motion_handler ((GdkEvent *) ev, false);
-		_editor.maybe_autoscroll (false, true, false, ev->y_root < _resize_drag_start);
 
-		/* now do the actual TAV resize */
+		/* (ab)use the DragManager to do autoscrolling - basically we
+		 * are pretending that the drag is taking place over the canvas
+		 * (which perhaps in the glorious future, when track headers
+		 * and the canvas are unified, will actually be true.)
+		*/
+
+		_editor.maybe_autoscroll (false, true, true);
+
+		/* now schedule the actual TAV resize */
                 int32_t const delta = (int32_t) floor (ev->y_root - _resize_drag_start);
                 _editor.add_to_idle_resize (this, delta);
                 _resize_drag_start = ev->y_root;
@@ -536,7 +557,7 @@ TimeAxisView::set_height (uint32_t h)
 		h = preset_height (HeightSmall);
 	}
 
-	time_axis_vbox.property_height_request () = h;
+	TOP_LEVEL_WIDGET.property_height_request () = h;
 	height = h;
 
 	char buf[32];
@@ -547,10 +568,12 @@ TimeAxisView::set_height (uint32_t h)
 		(*i)->set_height ();
 	}
 
-	if (canvas_item_visible (selection_group)) {
+	if (selection_group->visible ()) {
 		/* resize the selection rect */
 		show_selection (_editor.get_selection().time);
 	}
+
+	_editor.override_visible_track_count ();
 }
 
 bool
@@ -613,6 +636,8 @@ TimeAxisView::begin_name_edit ()
 
 		name_entry = manage (new Gtkmm2ext::FocusEntry);
 		
+		name_entry->set_width_chars(8); // min width, entry expands
+
 		name_entry->set_name ("EditorTrackNameDisplay");
 		name_entry->signal_key_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_press), false);
 		name_entry->signal_key_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_release), false);
@@ -624,7 +649,7 @@ TimeAxisView::begin_name_edit ()
 			name_hbox.remove (name_label);
 		}
 		
-		name_hbox.pack_start (*name_entry);
+		name_hbox.pack_end (*name_entry, true, true);
 		name_entry->show ();
 
 		name_entry->select_region (0, -1);
@@ -669,7 +694,7 @@ TimeAxisView::end_name_edit (int response)
 
 	/* put the name label back */
 
-	name_hbox.pack_start (name_label);
+	name_hbox.pack_end (name_label);
 	name_label.show ();
 
 	if (edit_next) {
@@ -698,7 +723,7 @@ TimeAxisView::end_name_edit (int response)
 		}
 
 		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
-			_editor.ensure_time_axis_view_is_visible (**i);
+			_editor.ensure_time_axis_view_is_visible (**i, false);
 			(*i)->begin_name_edit ();
 		} 
 
@@ -729,7 +754,7 @@ TimeAxisView::end_name_edit (int response)
 		}
 		
 		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
-			_editor.ensure_time_axis_view_is_visible (**i);
+			_editor.ensure_time_axis_view_is_visible (**i, false);
 			(*i)->begin_name_edit ();
 		} 
 	}
@@ -768,6 +793,10 @@ TimeAxisView::popup_display_menu (guint32 when)
 void
 TimeAxisView::set_selected (bool yn)
 {
+	if (can_edit_name() && name_entry && name_entry->get_visible()) {
+		end_name_edit (RESPONSE_CANCEL);
+	}
+
 	if (yn == _selected) {
 		return;
 	}
@@ -775,13 +804,18 @@ TimeAxisView::set_selected (bool yn)
 	Selectable::set_selected (yn);
 
 	if (_selected) {
+		time_axis_frame.set_shadow_type (Gtk::SHADOW_IN);
+		time_axis_frame.set_name ("MixerStripSelectedFrame");
 		controls_ebox.set_name (controls_base_selected_name);
-		time_axis_vbox.set_name (controls_base_selected_name);
 		controls_vbox.set_name (controls_base_selected_name);
+		time_axis_vbox.set_name (controls_base_selected_name);
 	} else {
+		time_axis_frame.set_shadow_type (Gtk::SHADOW_NONE);
+		time_axis_frame.set_name (controls_base_unselected_name);
 		controls_ebox.set_name (controls_base_unselected_name);
-		time_axis_vbox.set_name (controls_base_unselected_name);
 		controls_vbox.set_name (controls_base_unselected_name);
+		time_axis_vbox.set_name (controls_base_unselected_name);
+
 		hide_selection ();
 
 		/* children will be set for the yn=true case. but when deselecting
@@ -793,6 +827,9 @@ TimeAxisView::set_selected (bool yn)
 			(*i)->set_selected (false);
 		}
 	}
+
+	time_axis_frame.show();
+
 }
 
 void
@@ -809,14 +846,11 @@ TimeAxisView::build_display_menu ()
 }
 
 void
-TimeAxisView::set_samples_per_unit (double spu)
+TimeAxisView::set_samples_per_pixel (double fpp)
 {
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-		(*i)->set_samples_per_unit (spu);
+		(*i)->set_samples_per_pixel (fpp);
 	}
-
-	AnalysisFeatureList::const_iterator i;
-	list<ArdourCanvas::SimpleLine*>::iterator l;
 }
 
 void
@@ -841,13 +875,14 @@ TimeAxisView::show_selection (TimeSelection& ts)
 	double x1;
 	double x2;
 	double y2;
-	SelectionRect *rect;
+	SelectionRect *rect;	time_axis_frame.show();
+
 
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->show_selection (ts);
 	}
 
-	if (canvas_item_visible (selection_group)) {
+	if (selection_group->visible ()) {
 		while (!used_selection_rects.empty()) {
 			free_selection_rects.push_front (used_selection_rects.front());
 			used_selection_rects.pop_front();
@@ -871,27 +906,17 @@ TimeAxisView::show_selection (TimeSelection& ts)
 
 		rect = get_selection_rect ((*i).id);
 
-		x1 = _editor.frame_to_unit (start);
-		x2 = _editor.frame_to_unit (start + cnt - 1);
-		y2 = current_height();
+		x1 = _editor.sample_to_pixel (start);
+		x2 = _editor.sample_to_pixel (start + cnt - 1);
+		y2 = current_height() - 1;
 
-		rect->rect->property_x1() = x1;
-		rect->rect->property_y1() = 1.0;
-		rect->rect->property_x2() = x2;
-		rect->rect->property_y2() = y2;
+		rect->rect->set (ArdourCanvas::Rect (x1, 0, x2, y2));
 
 		// trim boxes are at the top for selections
 
 		if (x2 > x1) {
-			rect->start_trim->property_x1() = x1;
-			rect->start_trim->property_y1() = 1.0;
-			rect->start_trim->property_x2() = x1 + trim_handle_size;
-			rect->start_trim->property_y2() = y2;
-
-			rect->end_trim->property_x1() = x2 - trim_handle_size;
-			rect->end_trim->property_y1() = 1.0;
-			rect->end_trim->property_x2() = x2;
-			rect->end_trim->property_y2() = y2;
+			rect->start_trim->set (ArdourCanvas::Rect (x1, 0, x1 + trim_handle_size, y2));
+			rect->end_trim->set (ArdourCanvas::Rect (x2 - trim_handle_size, 1, x2, y2));
 
 			rect->start_trim->show();
 			rect->end_trim->show();
@@ -918,7 +943,7 @@ TimeAxisView::reshow_selection (TimeSelection& ts)
 void
 TimeAxisView::hide_selection ()
 {
-	if (canvas_item_visible (selection_group)) {
+	if (selection_group->visible ()) {
 		while (!used_selection_rects.empty()) {
 			free_selection_rects.push_front (used_selection_rects.front());
 			used_selection_rects.pop_front();
@@ -986,29 +1011,26 @@ TimeAxisView::get_selection_rect (uint32_t id)
 
 		rect = new SelectionRect;
 
-		rect->rect = new SimpleRect (*selection_group);
-		rect->rect->property_outline_what() = 0x0;
-		rect->rect->property_x1() = 0.0;
-		rect->rect->property_y1() = 0.0;
-		rect->rect->property_x2() = 0.0;
-		rect->rect->property_y2() = 0.0;
-		rect->rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectionRect.get();
+		rect->rect = new ArdourCanvas::Rectangle (selection_group);
+		CANVAS_DEBUG_NAME (rect->rect, "selection rect");
+		rect->rect->set_outline (false);
+		rect->rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SelectionRect());
 
-		rect->start_trim = new SimpleRect (*selection_group);
-		rect->start_trim->property_outline_what() = 0x0;
-		rect->start_trim->property_x1() = 0.0;
-		rect->start_trim->property_x2() = 0.0;
+		rect->start_trim = new ArdourCanvas::Rectangle (selection_group);
+		CANVAS_DEBUG_NAME (rect->start_trim, "selection rect start trim");
+		rect->start_trim->set_outline (false);
+		rect->start_trim->set_fill (false);
 
-		rect->end_trim = new SimpleRect (*selection_group);
-		rect->end_trim->property_outline_what() = 0x0;
-		rect->end_trim->property_x1() = 0.0;
-		rect->end_trim->property_x2() = 0.0;
+		rect->end_trim = new ArdourCanvas::Rectangle (selection_group);
+		CANVAS_DEBUG_NAME (rect->end_trim, "selection rect end trim");
+		rect->end_trim->set_outline (false);
+		rect->end_trim->set_fill (false);
 
 		free_selection_rects.push_front (rect);
 
-		rect->rect->signal_event().connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_rect_event), rect->rect, rect));
-		rect->start_trim->signal_event().connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_start_trim_event), rect->rect, rect));
-		rect->end_trim->signal_event().connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_end_trim_event), rect->rect, rect));
+		rect->rect->Event.connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_rect_event), rect->rect, rect));
+		rect->start_trim->Event.connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_start_trim_event), rect->rect, rect));
+		rect->end_trim->Event.connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_end_trim_event), rect->rect, rect));
 	}
 
 	rect = free_selection_rects.front();
@@ -1124,38 +1146,27 @@ TimeAxisView::reset_height ()
 void
 TimeAxisView::compute_heights ()
 {
+	// TODO this function should be re-evaluated when font-scaling changes (!)
 	Gtk::Window window (Gtk::WINDOW_TOPLEVEL);
-	Gtk::Table two_row_table (2, 8);
-	Gtk::Table one_row_table (1, 8);
-	Button* buttons[5];
+	Gtk::Table one_row_table (1, 1);
+	ArdourButton* test_button = manage (new ArdourButton);
 	const int border_width = 2;
-
-	const int separator_height = 2;
-	extra_height = (2 * border_width) + separator_height;
+	const int frame_height = 2;
+	extra_height = (2 * border_width) + frame_height;
 
 	window.add (one_row_table);
+	test_button->set_name ("mute button");
+	test_button->set_text (_("M"));
+	test_button->set_tweaks (ArdourButton::TrackHeader);
 
 	one_row_table.set_border_width (border_width);
-	one_row_table.set_row_spacings (0);
-	one_row_table.set_col_spacings (0);
-	one_row_table.set_homogeneous (true);
+	one_row_table.set_row_spacings (2);
+	one_row_table.set_col_spacings (2);
 
-	two_row_table.set_border_width (border_width);
-	two_row_table.set_row_spacings (0);
-	two_row_table.set_col_spacings (0);
-	two_row_table.set_homogeneous (true);
-
-	for (int i = 0; i < 5; ++i) {
-		buttons[i] = manage (new Button (X_("f")));
-		buttons[i]->set_name ("TrackMuteButton");
-	}
-
-	one_row_table.attach (*buttons[0], 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-
+	one_row_table.attach (*test_button, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	one_row_table.show_all ();
-	Gtk::Requisition req(one_row_table.size_request ());
 
-	// height required to show 1 row of buttons
+	Gtk::Requisition req(one_row_table.size_request ());
 	button_height = req.height;
 }
 
@@ -1168,38 +1179,41 @@ TimeAxisView::color_handler ()
 
 	for (list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i) {
 
-		(*i)->rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectionRect.get();
-		(*i)->rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		(*i)->rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SelectionRect());
+		(*i)->rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_Selection());
 
-		(*i)->start_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
-		(*i)->start_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
-
-		(*i)->end_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
-		(*i)->end_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		(*i)->start_trim->set_fill_color (ARDOUR_UI::config()->get_canvasvar_Selection());
+		(*i)->start_trim->set_outline_color (ARDOUR_UI::config()->get_canvasvar_Selection());
+		
+		(*i)->end_trim->set_fill_color (ARDOUR_UI::config()->get_canvasvar_Selection());
+		(*i)->end_trim->set_outline_color (ARDOUR_UI::config()->get_canvasvar_Selection());
 	}
-
+	
 	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i) {
-
-		(*i)->rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectionRect.get();
-		(*i)->rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
-
-		(*i)->start_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
-		(*i)->start_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
-
-		(*i)->end_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
-		(*i)->end_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
+		
+		(*i)->rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SelectionRect());
+		(*i)->rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_Selection());
+		
+		(*i)->start_trim->set_fill_color (ARDOUR_UI::config()->get_canvasvar_Selection());
+		(*i)->start_trim->set_outline_color (ARDOUR_UI::config()->get_canvasvar_Selection());
+		
+		(*i)->end_trim->set_fill_color (ARDOUR_UI::config()->get_canvasvar_Selection());
+		(*i)->end_trim->set_outline_color (ARDOUR_UI::config()->get_canvasvar_Selection());
 	}
 }
 
 /** @return Pair: TimeAxisView, layer index.
- * TimeAxisView is non-0 if this object covers y, or one of its children does.
+ * TimeAxisView is non-0 if this object covers @param y, or one of its children
+ * does. @param y is an offset from the top of the trackview area.
+ *
  * If the covering object is a child axis, then the child is returned.
  * TimeAxisView is 0 otherwise.
+ *
  * Layer index is the layer number (possibly fractional) if the TimeAxisView is valid
  * and is in stacked or expanded * region display mode, otherwise 0.
  */
 std::pair<TimeAxisView*, double>
-TimeAxisView::covers_y_position (double y)
+TimeAxisView::covers_y_position (double y) const
 {
 	if (hidden()) {
 		return std::make_pair ((TimeAxisView *) 0, 0);
@@ -1234,7 +1248,7 @@ TimeAxisView::covers_y_position (double y)
 			break;
 		}
 
-		return std::make_pair (this, l);
+		return std::make_pair (const_cast<TimeAxisView*>(this), l);
 	}
 
 	for (Children::const_iterator i = children.begin(); i != children.end(); ++i) {
@@ -1248,6 +1262,30 @@ TimeAxisView::covers_y_position (double y)
 	return std::make_pair ((TimeAxisView *) 0, 0);
 }
 
+bool
+TimeAxisView::covered_by_y_range (double y0, double y1) const
+{
+	if (hidden()) {
+		return false;
+	}
+
+	/* if either the top or bottom of the axisview is in the vertical
+	 * range, we cover it.
+	 */
+	
+	if ((y0 < _y_position && y1 < _y_position) ||
+	    (y0 >= _y_position + height && y1 >= _y_position + height)) {
+		return false;
+	}
+
+	for (Children::const_iterator i = children.begin(); i != children.end(); ++i) {
+		if ((*i)->covered_by_y_range (y0, y1)) {
+			return true;
+		}
+	}
+
+	return true;
+}
 
 uint32_t
 TimeAxisView::preset_height (Height h)

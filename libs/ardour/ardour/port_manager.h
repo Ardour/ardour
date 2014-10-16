@@ -40,7 +40,7 @@ namespace ARDOUR {
 class PortEngine;
 class AudioBackend;
 
-class PortManager 
+class LIBARDOUR_API PortManager 
 {
   public:
     typedef std::map<std::string,boost::shared_ptr<Port> > Ports;

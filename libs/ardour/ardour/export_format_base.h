@@ -30,6 +30,7 @@
 #include <samplerate.h>
 
 #include "pbd/signals.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 #include "audiographer/general/sample_format_converter.h"
@@ -37,7 +38,7 @@
 namespace ARDOUR
 {
 
-class ExportFormatBase {
+class LIBARDOUR_API ExportFormatBase {
   public:
 
 	enum Type {
@@ -96,7 +97,7 @@ class ExportFormatBase {
 		SR_None = 0,
 		SR_Session = 1,
 		SR_8 = 8000,
-		SR_22_05 = 220500,
+		SR_22_05 = 22050,
 		SR_44_1 = 44100,
 		SR_48 = 48000,
 		SR_88_2 = 88200,
@@ -113,7 +114,7 @@ class ExportFormatBase {
 	};
 
 	/// Class for managing selection and compatibility states
-	class SelectableCompatible {
+	class LIBARDOUR_API SelectableCompatible {
 	  public:
 		SelectableCompatible ()
 			: _selected (false), _compatible (true) { }

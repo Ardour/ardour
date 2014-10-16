@@ -22,9 +22,10 @@
 
 #include <string>
 
+#include "pbd/libpbd_visibility.h"
 #include "receiver.h"
 
-class TextReceiver : public Receiver 
+class LIBPBD_API TextReceiver : public Receiver 
 {
   public:
 	TextReceiver (const std::string &n);

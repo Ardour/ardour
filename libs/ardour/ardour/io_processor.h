@@ -40,7 +40,7 @@ class Route;
 
 /** A mixer strip element (Processor) with 1 or 2 IO elements.
  */
-class IOProcessor : public Processor
+class LIBARDOUR_API IOProcessor : public Processor
 {
   public:
 	IOProcessor (Session&, bool with_input, bool with_output,

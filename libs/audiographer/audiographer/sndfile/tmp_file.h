@@ -4,6 +4,9 @@
 #include <cstdio>
 #include <string>
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #include "sndfile_writer.h"
 #include "sndfile_reader.h"
 
@@ -18,7 +21,7 @@ class TmpFile : public SndfileWriter<T>, public SndfileReader<T>
 
 	/// \a filename_template must match the requirements for mkstemp, i.e. end in "XXXXXX"
 	TmpFile (char * filename_template, int format, ChannelCount channels, framecnt_t samplerate)
-		: SndfileHandle (mkstemp(filename_template), true, SndfileBase::ReadWrite, format, channels, samplerate)
+		: SndfileHandle (g_mkstemp(filename_template), true, SndfileBase::ReadWrite, format, channels, samplerate)
 		, filename (filename_template)
 	{}
 

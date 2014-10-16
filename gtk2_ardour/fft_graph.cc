@@ -17,6 +17,11 @@
 
 */
 
+#ifdef COMPILER_MSVC
+#include <algorithm>
+using std::min; using std::max;
+#endif
+
 #include <iostream>
 
 #include <glibmm.h>
@@ -287,8 +292,8 @@ FFTGraph::redraw()
 
 
 	// Find "session wide" min & max
-	float min =  1000000000000.0;
-	float max = -1000000000000.0;
+	float minf =  1000000000000.0;
+	float maxf = -1000000000000.0;
 
 	TreeNodeChildren track_rows = _a_window->track_list.get_model()->children();
 
@@ -302,18 +307,18 @@ FFTGraph::redraw()
 			continue;
 		}
 
-		if ( res->minimum() < min) {
-			min = res->minimum();
+		if ( res->minimum() < minf) {
+			minf = res->minimum();
 		}
 
-		if ( res->maximum() > max) {
-			max = res->maximum();
+		if ( res->maximum() > maxf) {
+			maxf = res->maximum();
 		}
 	}
 
 	if (!_show_normalized) {
-		min = -150.0f;
-		max = 0.0f;
+		minf = -150.0f;
+		maxf = 0.0f;
 	}
 
 	//int graph_height = height - 2 * h_margin;
@@ -323,7 +328,7 @@ FFTGraph::redraw()
 	float fft_pane_size_w = (float)(width  - 2*v_margin) - 1.0;
 	float fft_pane_size_h = (float)(height - 2*h_margin);
 
-	double pixels_per_db = (double)fft_pane_size_h / (double)(max - min);
+	double pixels_per_db = (double)fft_pane_size_h / (double)(maxf - minf);
 
 	cairo_rectangle(cr, 0.0, 0.0, fft_pane_size_w, fft_pane_size_h);
 	cairo_clip(cr);
@@ -350,14 +355,14 @@ FFTGraph::redraw()
 			mpp = -1000000.0;
 
 			cairo_set_source_rgba(cr, res->get_color().get_red_p(), res->get_color().get_green_p(), res->get_color().get_blue_p(), 0.30);
-			cairo_move_to(cr, 0.5f + (float)_logScale[0], 0.5f + (float)( fft_pane_size_h - (int)floor( (res->maxAt(0) - min) * pixels_per_db) ));
+			cairo_move_to(cr, 0.5f + (float)_logScale[0], 0.5f + (float)( fft_pane_size_h - (int)floor( (res->maxAt(0) - minf) * pixels_per_db) ));
 
 			// Draw the line of maximum values
 			for (int x = 1; x < res->length(); x++) {
 				if (res->maxAt(x) > mpp)
 					mpp = res->maxAt(x);
-				mpp = fmax(mpp, min);
-				mpp = fmin(mpp, max);
+				mpp = fmax(mpp, minf);
+				mpp = fmin(mpp, maxf);
 
 				// If the next point on the log scale is at the same location,
 				// don't draw yet
@@ -366,7 +371,7 @@ FFTGraph::redraw()
 				}
 
 				float X = 0.5f + (float)_logScale[x];
-				float Y = 0.5f + (float)( fft_pane_size_h - (int)floor( (mpp - min) * pixels_per_db) );
+				float Y = 0.5f + (float)( fft_pane_size_h - (int)floor( (mpp - minf) * pixels_per_db) );
 
 				cairo_line_to(cr, X, Y);
 
@@ -378,8 +383,8 @@ FFTGraph::redraw()
 			for (int x = res->length()-1; x >= 0; x--) {
 				if (res->minAt(x) < mpp)
 					mpp = res->minAt(x);
-				mpp = fmax(mpp, min);
-				mpp = fmin(mpp, max);
+				mpp = fmax(mpp, minf);
+				mpp = fmin(mpp, maxf);
 
 				// If the next point on the log scale is at the same location,
 				// don't draw yet
@@ -388,7 +393,7 @@ FFTGraph::redraw()
 				}
 
 				float X = 0.5f + (float)_logScale[x];
-				float Y = 0.5f + (float)( fft_pane_size_h - (int)floor( (mpp - min) * pixels_per_db) );
+				float Y = 0.5f + (float)( fft_pane_size_h - (int)floor( (mpp - minf) * pixels_per_db) );
 
 				cairo_line_to(cr, X, Y );
 
@@ -414,8 +419,8 @@ FFTGraph::redraw()
 
 			if (res->avgAt(x) > mpp)
 				mpp = res->avgAt(x);
-			mpp = fmax(mpp, min);
-			mpp = fmin(mpp, max);
+			mpp = fmax(mpp, minf);
+			mpp = fmin(mpp, maxf);
 
 			// If the next point on the log scale is at the same location,
 			// don't draw yet
@@ -423,7 +428,7 @@ FFTGraph::redraw()
 				continue;
 			}
 
-			cairo_line_to(cr, 0.5f + (float)_logScale[x], 0.5f + (float)( fft_pane_size_h - (int)floor( (mpp - min) * pixels_per_db) ));
+			cairo_line_to(cr, 0.5f + (float)_logScale[x], 0.5f + (float)( fft_pane_size_h - (int)floor( (mpp - minf) * pixels_per_db) ));
 
 			mpp = -1000000.0;
 		}

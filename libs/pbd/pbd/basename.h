@@ -22,8 +22,10 @@
 
 #include <glibmm/ustring.h>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
-	Glib::ustring basename_nosuffix (Glib::ustring);
+	LIBPBD_API Glib::ustring basename_nosuffix (Glib::ustring);
 } 
 
 #endif  /* __libpbd_basename_h__ */

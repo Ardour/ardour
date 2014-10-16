@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include "audiographer/visibility.h"
+
 namespace AudioGrapher {
 
 /* XXX: copied from libardour */	

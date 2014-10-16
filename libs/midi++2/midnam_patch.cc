@@ -472,7 +472,7 @@ operator<< (std::ostream& os, const ChannelNameSet& cns)
 	   << "List size " << cns._patch_list.size() << endl
 	   << "Patch list name = [" << cns._patch_list_name << ']' << endl
 	   << "Available channels : ";
-	for (set<uint8_t>::iterator x = cns._available_for_channels.begin(); x != cns._available_for_channels.end(); ++x) {
+	for (set<uint8_t>::const_iterator x = cns._available_for_channels.begin(); x != cns._available_for_channels.end(); ++x) {
 		os << (int) (*x) << ' ';
 	}
 	os << endl;
@@ -877,12 +877,13 @@ MasterDeviceNames::get_state(void)
 
 MIDINameDocument::MIDINameDocument (const string& filename)
 {
-	if (!_document.read (filename)) {
+	XMLTree document;
+	if (!document.read (filename)) {
 		throw failed_constructor ();
 	}
 
-	_document.set_filename (filename);
-	set_state (_document, *_document.root());
+	document.set_filename (filename);
+	set_state (document, *document.root());
 }
 
 int

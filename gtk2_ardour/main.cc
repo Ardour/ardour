@@ -27,10 +27,10 @@
 #include <gtkmm/settings.h>
 
 #include "pbd/error.h"
-#include "pbd/epa.h"
 #include "pbd/file_utils.h"
 #include "pbd/textreceiver.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/pathexpand.h"
 #include "pbd/pthread_utils.h"
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 #include "pbd/boost_debug.h"
@@ -48,18 +48,20 @@
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
 
-#include <fontconfig/fontconfig.h>
-
 #include "version.h"
-#include "utils.h"
 #include "ardour_ui.h"
 #include "opts.h"
 #include "enums.h"
+#include "bundle_env.h"
 
 #include "i18n.h"
 
-#ifdef __APPLE__
-#include <Carbon/Carbon.h>
+#ifdef COMPILER_MSVC
+#include <fcntl.h> // Needed for '_fmode'
+#endif
+
+#ifdef WAF_BUILD
+#include "gtk2ardour-version.h"
 #endif
 
 using namespace std;
@@ -97,270 +99,6 @@ gui_jack_error ()
 
 	win.run ();
 }
-
-static void export_search_path (const string& base_dir, const char* varname, const char* dir)
-{
-	string path;
-	const char * cstr = getenv (varname);
-
-	if (cstr) {
-		path = cstr;
-		path += ':';
-	} else {
-		path = "";
-	}
-	path += base_dir;
-	path += dir;
-
-	setenv (varname, path.c_str(), 1);
-}
-
-#ifdef __APPLE__
-
-#include <mach-o/dyld.h>
-#include <sys/param.h>
-
-extern void set_language_preference (); // cocoacarbon.mm
-
-void
-fixup_bundle_environment (int, char* [])
-{
-	if (!getenv ("ARDOUR_BUNDLED")) {
-		return;
-	}
-
-	EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true, "PREBUNDLE_ENV"));
-
-	set_language_preference ();
-
-	char execpath[MAXPATHLEN+1];
-	uint32_t pathsz = sizeof (execpath);
-
-	_NSGetExecutablePath (execpath, &pathsz);
-
-	std::string path;
-	std::string exec_dir = Glib::path_get_dirname (execpath);
-	std::string bundle_dir;
-	std::string userconfigdir = user_config_directory();
-
-	bundle_dir = Glib::path_get_dirname (exec_dir);
-
-#ifdef ENABLE_NLS
-	if (!ARDOUR::translations_are_enabled ()) {
-		localedir = "/this/cannot/exist";
-	} else {
-		/* force localedir into the bundle */
-		
-		vector<string> lpath;
-		lpath.push_back (bundle_dir);
-		lpath.push_back ("Resources");
-		lpath.push_back ("locale");
-		localedir = strdup (Glib::build_filename (lpath).c_str());
-	}
-#endif
-		
-	export_search_path (bundle_dir, "ARDOUR_DLL_PATH", "/lib");
-
-	/* inside an OS X .app bundle, there is no difference
-	   between DATA and CONFIG locations, since OS X doesn't
-	   attempt to do anything to expose the notion of
-	   machine-independent shared data.
-	*/
-
-	export_search_path (bundle_dir, "ARDOUR_DATA_PATH", "/Resources");
-	export_search_path (bundle_dir, "ARDOUR_CONFIG_PATH", "/Resources");
-	export_search_path (bundle_dir, "ARDOUR_INSTANT_XML_PATH", "/Resources");
-	export_search_path (bundle_dir, "LADSPA_PATH", "/Plugins");
-	export_search_path (bundle_dir, "VAMP_PATH", "/lib");
-	export_search_path (bundle_dir, "GTK_PATH", "/lib/gtkengines");
-
-	setenv ("SUIL_MODULE_DIR", (bundle_dir + "/lib").c_str(), 1);
-	setenv ("PATH", (bundle_dir + "/MacOS:" + std::string(getenv ("PATH"))).c_str(), 1);
-
-	/* unset GTK_RC_FILES so that we only load the RC files that we define
-	 */
-
-	unsetenv ("GTK_RC_FILES");
-
-	/* write a pango.rc file and tell pango to use it. we'd love
-	   to put this into the PROGRAM_NAME.app bundle and leave it there,
-	   but the user may not have write permission. so ...
-
-	   we also have to make sure that the user ardour directory
-	   actually exists ...
-	*/
-
-	if (g_mkdir_with_parents (userconfigdir.c_str(), 0755) < 0) {
-		error << string_compose (_("cannot create user %3 folder %1 (%2)"), userconfigdir, strerror (errno), PROGRAM_NAME)
-		      << endmsg;
-	} else {
-		
-		path = Glib::build_filename (userconfigdir, "pango.rc");
-		std::ofstream pangorc (path.c_str());
-		if (!pangorc) {
-			error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
-		} else {
-			pangorc << "[Pango]\nModuleFiles="
-				<< Glib::build_filename (bundle_dir, "Resources/pango.modules") 
-				<< endl;
-			pangorc.close ();
-			
-			setenv ("PANGO_RC_FILE", path.c_str(), 1);
-		}
-	}
-	
-	setenv ("CHARSETALIASDIR", bundle_dir.c_str(), 1);
-	setenv ("FONTCONFIG_FILE", Glib::build_filename (bundle_dir, "Resources/fonts.conf").c_str(), 1);
-	setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (bundle_dir, "Resources/gdk-pixbuf.loaders").c_str(), 1);
-}
-
-static void load_custom_fonts() {
-/* this code will only compile on OS X 10.6 and above, and we currently do not
- * need it for earlier versions since we fall back on a non-monospace,
- * non-custom font.
- */
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
-	std::string ardour_mono_file;
-
-	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
-		cerr << _("Cannot find ArdourMono TrueType font") << endl;
-	}
-
-	CFStringRef ttf;
-	CFURLRef fontURL;
-	CFErrorRef error;
-	ttf = CFStringCreateWithBytes(
-			kCFAllocatorDefault, (UInt8*) ardour_mono_file.c_str(),
-			ardour_mono_file.length(),
-			kCFStringEncodingUTF8, FALSE);
-	fontURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, ttf, kCFURLPOSIXPathStyle, TRUE);
-	if (CTFontManagerRegisterFontsForURL(fontURL, kCTFontManagerScopeProcess, &error) != true) {
-		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
-	}
-#endif
-}
-
-#else
-
-void
-fixup_bundle_environment (int /*argc*/, char* argv[])
-{
-	/* THIS IS FOR LINUX - its just about the only place where its
-	 * acceptable to build paths directly using '/'.
-	 */
-
-	if (!getenv ("ARDOUR_BUNDLED")) {
-		return;
-	}
-
-	EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true, "PREBUNDLE_ENV"));
-
-	std::string path;
-	std::string dir_path = Glib::path_get_dirname (Glib::path_get_dirname (argv[0]));
-	std::string userconfigdir = user_config_directory();
-
-#ifdef ENABLE_NLS
-	if (!ARDOUR::translations_are_enabled ()) {
-		localedir = "/this/cannot/exist";
-	} else {
-		/* force localedir into the bundle */
-		vector<string> lpath;
-		lpath.push_back (dir_path);
-		lpath.push_back ("share");
-		lpath.push_back ("locale");
-		localedir = realpath (Glib::build_filename (lpath).c_str(), NULL);
-	}
-#endif
-
-	/* note that this function is POSIX/Linux specific, so using / as
-	   a dir separator in this context is just fine.
-	*/
-
-	export_search_path (dir_path, "ARDOUR_DLL_PATH", "/lib");
-	export_search_path (dir_path, "ARDOUR_CONFIG_PATH", "/etc");
-	export_search_path (dir_path, "ARDOUR_INSTANT_XML_PATH", "/share");
-	export_search_path (dir_path, "ARDOUR_DATA_PATH", "/share");
-	export_search_path (dir_path, "LADSPA_PATH", "/plugins");
-	export_search_path (dir_path, "VAMP_PATH", "/lib");
-	export_search_path (dir_path, "GTK_PATH", "/lib/gtkengines");
-
-	setenv ("SUIL_MODULE_DIR", (dir_path + "/lib").c_str(), 1);
-	setenv ("PATH", (dir_path + "/bin:" + std::string(getenv ("PATH"))).c_str(), 1);
-
-	/* unset GTK_RC_FILES so that we only load the RC files that we define
-	 */
-
-	unsetenv ("GTK_RC_FILES");
-
-	/* Tell fontconfig where to find fonts.conf. Use the system version
-	   if it exists, otherwise use the stuff we included in the bundle
-	*/
-
-	if (Glib::file_test ("/etc/fonts/fonts.conf", Glib::FILE_TEST_EXISTS)) {
-		setenv ("FONTCONFIG_FILE", "/etc/fonts/fonts.conf", 1);
-		setenv ("FONTCONFIG_PATH", "/etc/fonts", 1);
-	} else {
-		error << _("No fontconfig file found on your system. Things may looked very odd or ugly") << endmsg;
-	}
-
-	/* write a pango.rc file and tell pango to use it. we'd love
-	   to put this into the Ardour.app bundle and leave it there,
-	   but the user may not have write permission. so ...
-
-	   we also have to make sure that the user ardour directory
-	   actually exists ...
-	*/
-
-	if (g_mkdir_with_parents (userconfigdir.c_str(), 0755) < 0) {
-		error << string_compose (_("cannot create user %3 folder %1 (%2)"), userconfigdir, strerror (errno), PROGRAM_NAME)
-		      << endmsg;
-	} else {
-		
-		path = Glib::build_filename (userconfigdir, "pango.rc");
-		std::ofstream pangorc (path.c_str());
-		if (!pangorc) {
-			error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
-		} else {
-			pangorc << "[Pango]\nModuleFiles="
-				<< Glib::build_filename (userconfigdir, "pango.modules")
-				<< endl;
-			pangorc.close ();
-		}
-		
-		setenv ("PANGO_RC_FILE", path.c_str(), 1);
-		
-		/* similar for GDK pixbuf loaders, but there's no RC file required
-		   to specify where it lives.
-		*/
-		
-		setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders").c_str(), 1);
-	}
-
-        /* this doesn't do much but setting it should prevent various parts of the GTK/GNU stack
-           from looking outside the bundle to find the charset.alias file.
-        */
-        setenv ("CHARSETALIASDIR", dir_path.c_str(), 1);
-
-}
-
-static void load_custom_fonts() {
-	std::string ardour_mono_file;
-	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
-		cerr << _("Cannot find ArdourMono TrueType font") << endl;
-	}
-
-	FcConfig *config = FcInitLoadConfigAndFonts();
-	FcBool ret = FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()));
-	if (ret == FcFalse) {
-		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
-	}
-	ret = FcConfigSetCurrent(config);
-	if (ret == FcFalse) {
-		cerr << _("Failed to set fontconfig configuration.") << endl;
-	}
-}
-
-#endif
 
 static gboolean
 tell_about_backend_death (void* /* ignored */)
@@ -406,8 +144,15 @@ sigpipe_handler (int /*signal*/)
 	}
 }
 
-#ifdef WINDOWS_VST_SUPPORT
+#if (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
+/*
+ *  Release build with MSVC uses ardour_main()
+ */
+int ardour_main (int argc, char *argv[])
 
+#elif (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
+
+// prototype for function in windows_vst_plugin_ui.cc
 extern int windows_vst_gui_init (int* argc, char** argv[]);
 
 /* this is called from the entry point of a wine-compiled
@@ -415,14 +160,22 @@ extern int windows_vst_gui_init (int* argc, char** argv[]);
    as a shared library.
 */
 extern "C" {
+
 int ardour_main (int argc, char *argv[])
+
 #else
 int main (int argc, char *argv[])
 #endif
 {
-	fixup_bundle_environment (argc, argv);
+#ifdef COMPILER_MSVC
+	// Essential!!  Make sure that any files used by Ardour
+	//              will be created or opened in BINARY mode!
+	_fmode = O_BINARY;
+#endif
 
-	load_custom_fonts(); /* needs to happend before any gtk and pango init calls */
+	fixup_bundle_environment (argc, argv, &localedir);
+
+	load_custom_fonts(); /* needs to happen before any gtk and pango init calls */
 
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
@@ -432,15 +185,15 @@ int main (int argc, char *argv[])
 	gtk_set_locale ();
 #endif
 
-#ifdef WINDOWS_VST_SUPPORT
-	/* this does some magic that is needed to make GTK and Wine's own
-	   X11 client interact properly.
-	*/
+#if (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
+	/* this does some magic that is needed to make GTK and X11 client interact properly.
+	 * the platform dependent code is in windows_vst_plugin_ui.cc
+	 */
 	windows_vst_gui_init (&argc, &argv);
 #endif
 
 #ifdef ENABLE_NLS
-	cerr << "bnd txt domain [" << PACKAGE << "] to " << localedir << endl;
+	cerr << "bind txt domain [" << PACKAGE << "] to " << localedir << endl;
 
 	(void) bindtextdomain (PACKAGE, localedir);
 	/* our i18n translations are all in UTF-8, so make sure
@@ -460,12 +213,22 @@ int main (int argc, char *argv[])
 	text_receiver.listen_to (warning);
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-	if (getenv ("BOOST_DEBUG")) {
+	if (g_getenv ("BOOST_DEBUG")) {
 		boost_debug_shared_ptr_show_live_debugging (true);
 	}
 #endif
 
 	if (parse_opts (argc, argv)) {
+#if (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
+        // Since we don't ordinarily have access to stdout and stderr with
+        // an MSVC app, let the user know we encountered a parsing error.
+        Gtk::Main app(&argc, &argv); // Calls 'gtk_init()'
+
+        Gtk::MessageDialog dlgReportParseError (_("\n   Ardour could not understand your command line      "),
+                                                      false, MESSAGE_ERROR, BUTTONS_CLOSE, true);
+        dlgReportParseError.set_title (_("An error was encountered while launching Ardour"));
+		dlgReportParseError.run ();
+#endif
 		exit (1);
 	}
 
@@ -505,9 +268,11 @@ int main (int argc, char *argv[])
 		return curvetest (curvetest_file);
 	}
 
+#ifndef PLATFORM_WINDOWS
 	if (::signal (SIGPIPE, sigpipe_handler)) {
 		cerr << _("Cannot xinstall SIGPIPE error handler") << endl;
 	}
+#endif
 
 	try {
 		ui = new ARDOUR_UI (&argc, &argv, localedir);
@@ -526,7 +291,6 @@ int main (int argc, char *argv[])
 
 	return 0;
 }
-#ifdef WINDOWS_VST_SUPPORT
-} // end of extern C block
+#if (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
+} // end of extern "C" block
 #endif
-

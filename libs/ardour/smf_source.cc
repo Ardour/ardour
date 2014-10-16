@@ -26,15 +26,16 @@
 #include <errno.h>
 #include <regex.h>
 
-#include "pbd/pathscanner.h"
+#include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
 #include "pbd/strsplit.h"
 
+#include <glib/gstdio.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 
 #include "evoral/Control.hpp"
-#include "evoral/evoral/SMF.hpp"
+#include "evoral/SMF.hpp"
 
 #include "ardour/event_type_map.h"
 #include "ardour/midi_model.h"
@@ -153,12 +154,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 			   path for MIDI files, which is assumed to be the
 			   correct "main" location.
 			*/
-			std::vector<Glib::ustring> sdirs;
-			split (s.source_search_path (DataType::MIDI), sdirs, ':');
-			if (sdirs.empty()) {
-				fatal << _("Empty MIDI source search path!") << endmsg;
-				/*NOTREACHED*/
-			}
+			std::vector<string> sdirs = s.source_search_path (DataType::MIDI);
 			_path = Glib::build_filename (sdirs.front(), _path);
 			/* This might be important, too */
 			_file_is_new = true;
@@ -187,7 +183,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 SMFSource::~SMFSource ()
 {
 	if (removable()) {
-		unlink (_path.c_str());
+		::g_unlink (_path.c_str());
 	}
 }
 
@@ -761,4 +757,5 @@ SMFSource::prevent_deletion ()
   
 	_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
 }
-
+		
+	

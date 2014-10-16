@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,28 +27,33 @@
 #include <gtkmm/adjustment.h>
 #include <gdkmm.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-class PixFader : public Gtk::DrawingArea
+class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 {
-  public:
-        PixFader (Gtk::Adjustment& adjustment, int orientation, int span, int girth);
+	public:
+	PixFader (Gtk::Adjustment& adjustment, int orientation, int span, int girth);
 	virtual ~PixFader ();
 
+	sigc::signal<void> StartGesture;
+	sigc::signal<void> StopGesture;
+	sigc::signal<void> OnExpose;
+
 	void set_default_value (float);
-	void set_text (const std::string&);
+	void set_text (const std::string&, bool centered = true, bool expose = true);
 
-  protected:
-	Glib::RefPtr<Pango::Layout> _layout;
-	std::string                 _text;
-	int   _text_width;
-	int   _text_height;
-	double text_r;
-	double text_g;
-	double text_b;
+	enum Tweaks {
+		NoShowUnityLine = 0x1,
+		NoButtonForward = 0x2,
+		NoVerticalScroll = 0x4,
+	};
 
-	Gtk::Adjustment& adjustment;
+	Tweaks tweaks() const { return _tweaks; }
+	void set_tweaks (Tweaks);
 
+	protected:
 	void on_size_request (GtkRequisition*);
 	void on_size_allocate (Gtk::Allocation& alloc);
 
@@ -59,82 +64,96 @@ class PixFader : public Gtk::DrawingArea
 	bool on_scroll_event (GdkEventScroll* ev);
 	bool on_enter_notify_event (GdkEventCrossing* ev);
 	bool on_leave_notify_event (GdkEventCrossing* ev);
-        void on_state_changed (Gtk::StateType);
-        void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
+
+	void on_state_changed (Gtk::StateType);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 
 	enum Orientation {
 		VERT,
 		HORIZ,
 	};
 
-  private:
-	int span, girth;
+	private:
+
+	Glib::RefPtr<Pango::Layout> _layout;
+	std::string                 _text;
+	Tweaks                      _tweaks;
+	Gtk::Adjustment&            _adjustment;
+	int _text_width;
+	int _text_height;
+
+	int _span, _girth;
+	int _min_span, _min_girth;
 	int _orien;
-        cairo_pattern_t* pattern;
-
-        struct FaderImage {
-	    cairo_pattern_t* pattern;
-	    double fr;
-	    double fg;
-	    double fb;
-	    double br;
-	    double bg;
-	    double bb;
-	    int width;
-	    int height;
-
-	    FaderImage (cairo_pattern_t* p, 
-			double afr, double afg, double afb, 
-			double abr, double abg, double abb,
-			int w, int h) 
-		    : pattern (p)
-		    , fr (afr)
-		    , fg (afg)
-		    , fb (afb)
-		    , br (abr)
-		    , bg (abg)
-		    , bb (abb)
-		    , width (w)
-		    , height (h)
-	    {}
-
-	    bool matches (double afr, double afg, double afb, 
-			  double abr, double abg, double abb,
-			  int w, int h) {
-		    return width == w && 
-			    height == h &&
-			    afr == fr &&
-			    afg == fg && 
-			    afb == fb &&
-			    abr == br &&
-			    abg == bg && 
-			    abb == bb;
-	    }
-	};
-
-        static std::list<FaderImage*> _patterns;
-        static cairo_pattern_t* find_pattern (double afr, double afg, double afb, 
-					      double abr, double abg, double abb, 
-					      int w, int h);
-
+	cairo_pattern_t* _pattern;
 	bool _hovering;
+	GdkWindow* _grab_window;
+	double _grab_loc;
+	double _grab_start;
+	int _last_drawn;
+	bool _dragging;
+	float _default_value;
+	int _unity_loc;
+	bool _centered_text;
 
-	GdkWindow* grab_window;
-	double grab_loc;
-	double grab_start;
-	int last_drawn;
-	bool dragging;
-	float default_value;
-	int unity_loc;
+	sigc::connection _parent_style_change;
+	Widget * _current_parent;
+	Gdk::Color get_parent_bg ();
 
+	void create_patterns();
 	void adjustment_changed ();
-	int display_span ();
 	void set_adjustment_from_event (GdkEventButton *);
 	void update_unity_position ();
-	void create_patterns();
+	int  display_span ();
+
+	struct FaderImage {
+		cairo_pattern_t* pattern;
+		double fr;
+		double fg;
+		double fb;
+		double br;
+		double bg;
+		double bb;
+		int width;
+		int height;
+
+		FaderImage (cairo_pattern_t* p,
+				double afr, double afg, double afb,
+				double abr, double abg, double abb,
+				int w, int h)
+			: pattern (p)
+				, fr (afr)
+				 , fg (afg)
+				 , fb (afb)
+				 , br (abr)
+				 , bg (abg)
+				 , bb (abb)
+				 , width (w)
+				 , height (h)
+		{}
+
+		bool matches (double afr, double afg, double afb,
+				double abr, double abg, double abb,
+				int w, int h) {
+			return width == w &&
+				height == h &&
+				afr == fr &&
+				afg == fg &&
+				afb == fb &&
+				abr == br &&
+				abg == bg &&
+				abb == bb;
+		}
+	};
+
+	static std::list<FaderImage*> _patterns;
+	static cairo_pattern_t* find_pattern (double afr, double afg, double afb,
+			double abr, double abg, double abb,
+			int w, int h);
+
 };
 
 
 } /* namespace */
 
- #endif /* __gtkmm2ext_pixfader_h__ */
+#endif /* __gtkmm2ext_pixfader_h__ */

@@ -22,8 +22,10 @@
 
 #include <string>
 
+#include "pbd/libpbd_visibility.h"
+
 #ifndef LESS_STRING_P
-struct less<std::string *> {
+struct LIBPBD_API less<std::string *> {
     bool operator()(std::string *s1, std::string *s2) const {
       return *s1 < *s2;
     }
@@ -32,7 +34,7 @@ struct less<std::string *> {
 #endif // LESS_STRING_P
 
 #ifndef LESS_CONST_STRING_P
-struct less<const std::string *> {
+struct LIBPBD_API less<const std::string *> {
     bool operator()(const std::string *s1, const std::string *s2) const {
 	return *s1 < *s2;
     }
@@ -41,7 +43,7 @@ struct less<const std::string *> {
 #endif // LESS_CONST_STRING_P
 
 #ifndef LESS_CONST_CHAR_P
-struct less<const char *>
+struct LIBPBD_API less<const char *>
 {
 	bool operator()(const char* s1, const char* s2) const {
 		return strcmp(s1, s2) < 0;
@@ -51,7 +53,7 @@ struct less<const char *>
 #endif // LESS_CONST_CHAR_P
 
 #ifndef LESS_CONST_FLOAT_P
-struct less<const float *>
+struct LIBPBD_API less<const float *>
 {
 	bool operator()(const float *n1, const float *n2) const {
 		return *n1 < *n2;
@@ -61,7 +63,7 @@ struct less<const float *>
 #endif // LESS_CONST_FLOAT_P
 
 #ifndef EQUAL_TO_CONST_CHAR_P
-struct equal_to<const char *>
+struct LIBPBD_API equal_to<const char *>
 {
         bool operator()(const char *s1, const char *s2) const {
 		return strcmp (s1, s2) == 0;
@@ -71,7 +73,7 @@ struct equal_to<const char *>
 #endif // EQUAL_TO_CONST_CHAR_P
 
 #ifndef EQUAL_TO_STRING_P
-struct equal_to<std::string *>
+struct LIBPBD_API equal_to<std::string *>
 {
         bool operator()(const std::string *s1, const std::string *s2) const {
 		return *s1 == *s2;
@@ -81,7 +83,7 @@ struct equal_to<std::string *>
 #endif // EQUAL_TO_STRING_P
 
 #ifndef LESS_CONST_STRING_R
-struct less<const std::string &> {
+struct LIBPBD_API less<const std::string &> {
     bool operator() (const std::string &s1, const std::string &s2) {
 	    return s1 < s2; 
     }

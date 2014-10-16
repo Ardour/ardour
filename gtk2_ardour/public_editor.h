@@ -32,17 +32,16 @@
 #include <gtkmm/box.h>
 #include <gtkmm/window.h>
 #include <gtkmm/actiongroup.h>
-#include <jack/types.h>
 #include <sigc++/signal.h>
 
 #include "evoral/types.hpp"
 
 #include "pbd/statefuldestructible.h"
 
+#include "canvas/fwd.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
 #include "editing.h"
-#include "canvas.h"
 #include "selection.h"
 
 namespace ARDOUR {
@@ -84,6 +83,13 @@ class TimeAxisViewItem;
 class VerboseCursor;
 class XMLNode;
 struct SelectionRect;
+
+class DisplaySuspender;
+
+namespace ARDOUR_UI_UTILS {
+bool relay_key_press (GdkEventKey* ev, Gtk::Window* win);
+bool forward_key_press (GdkEventKey* ev);
+}
 
 using ARDOUR::framepos_t;
 using ARDOUR::framecnt_t;
@@ -197,12 +203,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void separate_region_from_selection () = 0;
 
 	virtual void transition_to_rolling (bool fwd) = 0;
-	virtual framepos_t unit_to_frame (double unit) const = 0;
-	virtual double frame_to_unit (framepos_t frame) const = 0;
-	virtual double frame_to_unit (double frame) const = 0;
-	virtual double frame_to_unit_unrounded (framepos_t frame) const = 0;
-	virtual framepos_t pixel_to_frame (double pixel) const = 0;
-	virtual gulong frame_to_pixel (framepos_t frame) const = 0;
+	virtual framepos_t pixel_to_sample (double pixel) const = 0;
+	virtual double sample_to_pixel (framepos_t frame) const = 0;
+	virtual double sample_to_pixel_unrounded (framepos_t frame) const = 0;
 	virtual Selection& get_selection () const = 0;
 	virtual Selection& get_cut_buffer () const = 0;
 	virtual void track_mixer_selection () = 0;
@@ -210,9 +213,11 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void play_selection () = 0;
 	virtual void play_with_preroll () = 0;
 	virtual void maybe_locate_with_edit_preroll (framepos_t location) = 0;
+	virtual void goto_nth_marker (int nth) = 0;
+	virtual void add_location_from_playhead_cursor () = 0;
+	virtual void remove_location_at_playhead_cursor () = 0;
 	virtual void set_show_measures (bool yn) = 0;
 	virtual bool show_measures () const = 0;
-	virtual bool redraw_measures () = 0;
 
 	virtual Editing::MouseMode effective_mouse_mode () const = 0;
 
@@ -233,10 +238,11 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void export_range () = 0;
 
 	virtual void register_actions () = 0;
-	virtual void add_toplevel_controls (Gtk::Container&) = 0;
+	virtual void add_transport_frame (Gtk::Container&) = 0;
+	virtual void add_toplevel_menu (Gtk::Container&) = 0;
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
 	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
-	virtual gdouble   get_current_zoom () const = 0;
+	virtual framecnt_t get_current_zoom () const = 0;
 	virtual PlaylistSelector& playlist_selector() const = 0;
 	virtual void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>) = 0;
 	virtual void new_playlists (TimeAxisView*) = 0;
@@ -267,13 +273,16 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual bool dragging_playhead () const = 0;
 	virtual void ensure_float (Gtk::Window&) = 0;
 	virtual void show_window () = 0;
-	virtual framepos_t leftmost_position() const = 0;
-	virtual framecnt_t current_page_frames() const = 0;
-	virtual double canvas_height () const = 0;
+	virtual framepos_t leftmost_sample() const = 0;
+	virtual framecnt_t current_page_samples() const = 0;
+	virtual double visible_canvas_height () const = 0;
 	virtual void temporal_zoom_step (bool coarser) = 0;
-	virtual void ensure_time_axis_view_is_visible (const TimeAxisView& tav) = 0;
+        virtual void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top = false) = 0;
+        virtual void override_visible_track_count () = 0;
 	virtual void scroll_tracks_down_line () = 0;
 	virtual void scroll_tracks_up_line () = 0;
+        virtual bool scroll_down_one_track () = 0;
+        virtual bool scroll_up_one_track () = 0;
 	virtual void prepare_for_cleanup () = 0;
 	virtual void finish_cleanup () = 0;
 	virtual void reset_x_origin (framepos_t frame) = 0;
@@ -283,6 +292,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void update_tearoff_visibility () = 0;
 	virtual framepos_t get_preferred_edit_position (bool ignore_playhead = false, bool from_context_menu = false) = 0;
 	virtual void toggle_meter_updating() = 0;
+	virtual void split_regions_at (framepos_t, RegionSelection&) = 0;
 	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
 	virtual void mouse_add_new_marker (framepos_t where, bool is_cd=false, bool is_xrun=false) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
@@ -307,8 +317,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, PBD::PropertyID) const = 0;
 
 	sigc::signal<void> ZoomChanged;
-	/** Emitted when the horizontal position of the editor view changes */
-	sigc::signal<void> HorizontalPositionChanged;
 	sigc::signal<void> Realized;
 	sigc::signal<void,framepos_t> UpdateAllTransportClocks;
 
@@ -320,6 +328,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 
 	virtual void reset_focus () = 0;
 
+	virtual bool canvas_scroll_event (GdkEventScroll* event, bool from_canvas) = 0;
 	virtual bool canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item*, ControlPoint*) = 0;
 	virtual bool canvas_line_event (GdkEvent* event, ArdourCanvas::Item*, AutomationLine*) = 0;
 	virtual bool canvas_selection_rect_event (GdkEvent* event, ArdourCanvas::Item*, SelectionRect*) = 0;
@@ -328,10 +337,11 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual bool canvas_start_xfade_event (GdkEvent* event, ArdourCanvas::Item*, AudioRegionView*) = 0;
 	virtual bool canvas_end_xfade_event (GdkEvent* event, ArdourCanvas::Item*, AudioRegionView*) = 0;
 	virtual bool canvas_fade_in_event (GdkEvent* event, ArdourCanvas::Item*, AudioRegionView*) = 0;
-	virtual bool canvas_fade_in_handle_event (GdkEvent* event, ArdourCanvas::Item*, AudioRegionView*) = 0;
+	virtual bool canvas_fade_in_handle_event (GdkEvent* event, ArdourCanvas::Item*, AudioRegionView*, bool) = 0;
 	virtual bool canvas_fade_out_event (GdkEvent* event, ArdourCanvas::Item*, AudioRegionView*) = 0;
-	virtual bool canvas_fade_out_handle_event (GdkEvent* event, ArdourCanvas::Item*, AudioRegionView*) = 0;
+	virtual bool canvas_fade_out_handle_event (GdkEvent* event, ArdourCanvas::Item*, AudioRegionView*, bool) = 0;
 	virtual bool canvas_region_view_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
+	virtual bool canvas_wave_view_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_region_view_name_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
@@ -365,10 +375,12 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual Gtk::HBox& get_status_bar_packer() = 0;
 #endif
 
-	virtual gdouble get_trackview_group_vertical_offset () const = 0;
-	virtual double get_canvas_timebars_vsize () const = 0;
-	virtual ArdourCanvas::Group* get_trackview_group () const = 0;
-	virtual ArdourCanvas::Group* get_background_group () const = 0;
+	virtual ArdourCanvas::Container* get_trackview_group () const = 0;
+	virtual ArdourCanvas::ScrollGroup* get_hscroll_group () const = 0;
+	virtual ArdourCanvas::ScrollGroup* get_vscroll_group () const = 0;
+	virtual ArdourCanvas::ScrollGroup* get_hvscroll_group () const = 0;
+
+        virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
 
 	virtual TimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const = 0;
 
@@ -384,8 +396,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual Gtkmm2ext::TearOff* tools_tearoff () const = 0;
 
 	virtual DragManager* drags () const = 0;
-	virtual void maybe_autoscroll (bool, bool, bool, bool) = 0;
+        virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
 	virtual void stop_canvas_autoscroll () = 0;
+        virtual bool autoscroll_active() const = 0;
 
 	virtual MouseCursors const * cursors () const = 0;
 	virtual VerboseCursor * verbose_cursor () const = 0;
@@ -400,16 +413,37 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void snap_to_with_modifier (framepos_t &, GdkEvent const *, int32_t direction = 0, bool for_mark = false) = 0;
 
 	virtual void get_regions_at (RegionSelection &, framepos_t where, TrackViewList const &) const = 0;
+	virtual RegionSelection get_regions_from_selection_and_mouse (framepos_t) = 0;
 
 	/// Singleton instance, set up by Editor::Editor()
 
 	static PublicEditor* _instance;
 
-	friend bool relay_key_press (GdkEventKey*, Gtk::Window*);
-	friend bool forward_key_press (GdkEventKey*);
+	friend bool ARDOUR_UI_UTILS::relay_key_press (GdkEventKey*, Gtk::Window*);
+	friend bool ARDOUR_UI_UTILS::forward_key_press (GdkEventKey*);
 
 	PBD::Signal0<void> SnapChanged;
 	PBD::Signal0<void> MouseModeChanged;
+
+  protected:
+	friend class DisplaySuspender;
+	virtual void suspend_route_redisplay () = 0;
+	virtual void resume_route_redisplay () = 0;
+	gint _suspend_route_redisplay_counter;
+};
+
+class DisplaySuspender {
+	public:
+		DisplaySuspender() {
+			if (g_atomic_int_add(&PublicEditor::instance()._suspend_route_redisplay_counter, 1) == 0) {
+				PublicEditor::instance().suspend_route_redisplay ();
+			}
+		}
+		~DisplaySuspender () {
+			if (g_atomic_int_dec_and_test (&PublicEditor::instance()._suspend_route_redisplay_counter)) {
+				PublicEditor::instance().resume_route_redisplay ();
+			}
+		}
 };
 
 #endif // __gtk_ardour_public_editor_h__

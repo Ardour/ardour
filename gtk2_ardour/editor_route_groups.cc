@@ -30,27 +30,28 @@
 #include "gtkmm2ext/cell_renderer_color_selector.h"
 
 #include "ardour/route_group.h"
-
-#include "editor.h"
-#include "keyboard.h"
-#include "marker.h"
-#include "time_axis_view.h"
-#include "prompter.h"
-#include "gui_thread.h"
-#include "editor_group_tabs.h"
-#include "route_group_dialog.h"
-#include "route_time_axis.h"
-#include "editor_routes.h"
-#include "editor_route_groups.h"
-#include "ardour_ui.h"
-
 #include "ardour/route.h"
 #include "ardour/session.h"
+
+#include "ardour_ui.h"
+#include "editor.h"
+#include "editor_group_tabs.h"
+#include "editor_route_groups.h"
+#include "editor_routes.h"
+#include "gui_thread.h"
+#include "keyboard.h"
+#include "marker.h"
+#include "prompter.h"
+#include "route_group_dialog.h"
+#include "route_time_axis.h"
+#include "time_axis_view.h"
+#include "utils.h"
 
 #include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using Gtkmm2ext::Keyboard;
@@ -63,7 +64,6 @@ struct ColumnInfo {
 
 EditorRouteGroups::EditorRouteGroups (Editor* e)
 	: EditorComponent (e)
-	, _all_group_active_button (_("No Selection = All Tracks?"))
 	, _in_row_change (false)
 	, _in_rebuild (false)
 {
@@ -72,6 +72,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 
 	Gtkmm2ext::CellRendererColorSelector* color_renderer = manage (new Gtkmm2ext::CellRendererColorSelector);
 	TreeViewColumn* color_column = manage (new TreeViewColumn ("", *color_renderer));
+
 	color_column->add_attribute (color_renderer->property_color(), _columns.gdkcolor);
 	
 	_display.append_column (*color_column);
@@ -186,15 +187,8 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	button_box->pack_start (*add_button);
 	button_box->pack_start (*remove_button);
 
-	_all_group_active_button.show ();
-
 	_display_packer.pack_start (_scroller, true, true);
-	_display_packer.pack_start (_all_group_active_button, false, false);
 	_display_packer.pack_start (*button_box, false, false);
-
-	_all_group_active_button.signal_toggled().connect (sigc::mem_fun (*this, &EditorRouteGroups::all_group_toggled));
-	_all_group_active_button.set_name (X_("EditorRouteGroupsAllGroupButton"));
-	ARDOUR_UI::instance()->set_tip (_all_group_active_button, _("Activate this button to operate on all tracks when none are selected."));
 }
 
 void
@@ -203,7 +197,7 @@ EditorRouteGroups::remove_selected ()
 	Glib::RefPtr<TreeSelection> selection = _display.get_selection();
 	TreeView::Selection::ListHandle_Path rows = selection->get_selected_rows ();
 
-	if (rows.empty()) {
+	if (rows.empty() || _session->deletion_in_progress()) {
 		return;
 	}
 
@@ -268,8 +262,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
 	case 0: 
-		c = (*iter)[_columns.gdkcolor];
-
+		c =  (*iter)[_columns.gdkcolor];
 		color_dialog.get_colorsel()->set_previous_color (c);
 		color_dialog.get_colorsel()->set_current_color (c);
 
@@ -278,7 +271,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 			break;
 		case RESPONSE_ACCEPT:
 			c = color_dialog.get_colorsel()->get_current_color();
-			GroupTabs::set_group_color (group, c);
+			GroupTabs::set_group_color (group, gdk_color_to_rgba (c));
 			ARDOUR_UI::config()->set_dirty ();
 			break;
 			
@@ -409,7 +402,7 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 
 	group->apply_changes (plist);
 
-	GroupTabs::set_group_color ((*iter)[_columns.routegroup], (*iter)[_columns.gdkcolor]);
+	GroupTabs::set_group_color ((*iter)[_columns.routegroup], gdk_color_to_rgba ((*iter)[_columns.gdkcolor]));
 }
 
 void
@@ -430,7 +423,10 @@ EditorRouteGroups::add (RouteGroup* group)
 	row[_columns.active_shared] = group->is_route_active ();
 	row[_columns.active_state] = group->is_active ();
 	row[_columns.is_visible] = !group->is_hidden();
-	row[_columns.gdkcolor] = GroupTabs::group_color (group);
+	
+	Gdk::Color c;
+	set_color_from_rgba (c, GroupTabs::group_color (group));
+	row[_columns.gdkcolor] = c;
 	
 	_in_row_change = true;
 
@@ -500,7 +496,10 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange&)
 			(*iter)[_columns.active_shared] = group->is_route_active ();
 			(*iter)[_columns.active_state] = group->is_active ();
 			(*iter)[_columns.is_visible] = !group->is_hidden();
-			(*iter)[_columns.gdkcolor] = GroupTabs::group_color (group);
+
+			Gdk::Color c;
+			set_color_from_rgba (c, GroupTabs::group_color (group));
+			(*iter)[_columns.gdkcolor] = c;
 
 			break;
 		}
@@ -552,10 +551,6 @@ EditorRouteGroups::set_session (Session* s)
 
 	if (_session) {
 
-		RouteGroup& arg (_session->all_route_group());
-
-		arg.PropertyChanged.connect (all_route_groups_changed_connection, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::all_group_changed, this, _1), gui_context());
-
 		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::add, this, _1), gui_context());
 		_session->route_group_removed.connect (
 			_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::groups_changed, this), gui_context()
@@ -568,7 +563,6 @@ EditorRouteGroups::set_session (Session* s)
 	PBD::PropertyChange pc;
 	pc.add (Properties::select);
 	pc.add (Properties::active);
-	all_group_changed (pc);
 
 	groups_changed ();
 }
@@ -581,25 +575,6 @@ EditorRouteGroups::run_new_group_dialog ()
 	return _editor->_group_tabs->run_new_group_dialog (rl);
 }
 
-void
-EditorRouteGroups::all_group_toggled ()
-{
-	if (_session) {
-		_session->all_route_group().set_select (_all_group_active_button.get_active());
-	}
-}
-
-void
-EditorRouteGroups::all_group_changed (const PropertyChange&)
-{
-	if (_session) {
-		RouteGroup& arg (_session->all_route_group());
-		_all_group_active_button.set_active (arg.is_active() && arg.is_select());
-	} else {
-		_all_group_active_button.set_active (false);
-	}
-}
-
 /** Called when a model row is deleted, but also when the model is
  *  reordered by a user drag-and-drop; the latter is what we are
  *  interested in here.
@@ -607,7 +582,7 @@ EditorRouteGroups::all_group_changed (const PropertyChange&)
 void
 EditorRouteGroups::row_deleted (Gtk::TreeModel::Path const &)
 {
-	if (_in_rebuild) {
+	if (_in_rebuild || !_session || _session->deletion_in_progress()) {
 		/* We need to ignore this in cases where we're not doing a drag-and-drop
 		   re-order.
 		*/

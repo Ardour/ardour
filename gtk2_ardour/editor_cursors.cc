@@ -20,9 +20,10 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <libgnomecanvas/libgnomecanvas.h>
+#include "canvas/canvas.h"
+#include "canvas/debug.h"
+#include "canvas/scroll_group.h"
 
-#include "utils.h"
 #include "editor_cursors.h"
 #include "editor.h"
 
@@ -31,29 +32,44 @@ using namespace PBD;
 using namespace Gtk;
 
 EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*))
-	: editor (ed),
-	  canvas_item (*editor.cursor_group),
-	  length(1.0)
+	: _editor (ed)
+	, _track_canvas_item (new ArdourCanvas::Arrow (_editor.get_hscroll_group()))
+	, _length (1.0)
 {
-	points.push_back(Gnome::Art::Point(-1.0, 0.0)); // first x-coord needs to be a non-normal value
-	points.push_back(Gnome::Art::Point(1.0, 1.0));
+	CANVAS_DEBUG_NAME (_track_canvas_item, "track canvas editor cursor");
 
-	canvas_item.property_points() = points;
-	canvas_item.property_width_pixels() = 1;
-	canvas_item.property_first_arrowhead() = TRUE;
-	canvas_item.property_last_arrowhead() = TRUE;
-	canvas_item.property_arrow_shape_a() = 11.0;
-	canvas_item.property_arrow_shape_b() = 0.0;
-	canvas_item.property_arrow_shape_c() = 9.0;
+	_track_canvas_item->set_show_head (0, true);
+	_track_canvas_item->set_head_height (0, 9);
+	_track_canvas_item->set_head_width (0, 16);
+	_track_canvas_item->set_head_outward (0, false);
+	_track_canvas_item->set_show_head (1, false); // head only
+	_track_canvas_item->set_data ("cursor", this);
 
-	canvas_item.set_data ("cursor", this);
-	canvas_item.signal_event().connect (sigc::bind (sigc::mem_fun (ed, callbck), &canvas_item));
-	current_frame = 1; /* force redraw at 0 */
+	_track_canvas_item->Event.connect (sigc::bind (sigc::mem_fun (ed, callbck), _track_canvas_item));
+
+	_track_canvas_item->set_y1 (ArdourCanvas::COORD_MAX);
+	
+	_current_frame = 1; /* force redraw at 0 */
+}
+
+EditorCursor::EditorCursor (Editor& ed)
+	: _editor (ed)
+	, _track_canvas_item (new ArdourCanvas::Arrow (_editor.get_hscroll_group()))
+	, _length (1.0)
+{
+	CANVAS_DEBUG_NAME (_track_canvas_item, "track canvas cursor");
+
+	_track_canvas_item->set_show_head (0, false);
+	_track_canvas_item->set_show_head (1, false);
+	_track_canvas_item->set_y1 (ArdourCanvas::COORD_MAX);
+	_track_canvas_item->set_ignore_events (true);
+	
+	_current_frame = 1; /* force redraw at 0 */
 }
 
 EditorCursor::~EditorCursor ()
-
 {
+	delete _track_canvas_item;
 }
 
 void
@@ -61,30 +77,35 @@ EditorCursor::set_position (framepos_t frame)
 {
 	PositionChanged (frame);
 
-	double new_pos =  editor.frame_to_unit (frame);
+	double const new_pos = _editor.sample_to_pixel_unrounded (frame);
 
-	if (new_pos != points.front().get_x()) {
-
-		points.front().set_x (new_pos);
-		points.back().set_x (new_pos);
-
-		canvas_item.property_points() = points;
+	if (new_pos != _track_canvas_item->x ()) {
+		_track_canvas_item->set_x (new_pos);
 	}
-	current_frame = frame;
+
+	_current_frame = frame;
 }
 
 void
-EditorCursor::set_length (double units)
+EditorCursor::show ()
 {
-	length = units;
-	points.back().set_y (points.front().get_y() + length);
-	canvas_item.property_points() = points;
+	_track_canvas_item->show ();
 }
 
 void
-EditorCursor::set_y_axis (double position)
+EditorCursor::hide ()
 {
-	points.front().set_y (position);
-	points.back().set_y (position + length);
-	canvas_item.property_points() = points;
+	_track_canvas_item->hide ();
+}
+
+void
+EditorCursor::set_color (ArdourCanvas::Color color)
+{
+	_track_canvas_item->set_color (color);
+}
+
+void
+EditorCursor::set_sensitive (bool yn)
+{
+	_track_canvas_item->set_ignore_events (!yn);
 }

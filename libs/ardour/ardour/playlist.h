@@ -41,13 +41,13 @@
 #include "evoral/types.hpp"
 
 #include "ardour/ardour.h"
+#include "ardour/region.h"
 #include "ardour/session_object.h"
 #include "ardour/data_type.h"
 
 namespace ARDOUR  {
 
 class Session;
-class Region;
 class Playlist;
 class Crossfade;
 
@@ -55,10 +55,10 @@ namespace Properties {
 	/* fake the type, since regions are handled by SequenceProperty which doesn't
 	   care about such things.
 	*/
-	extern PBD::PropertyDescriptor<bool> regions;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> regions;
 }
 
-class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_ptr<Region> > >
+class LIBARDOUR_API RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_ptr<Region> > >
 {
   public:
 	RegionListProperty (Playlist&);
@@ -78,7 +78,7 @@ class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_
 	Playlist& _playlist;
 };
 
-class Playlist : public SessionObject , public boost::enable_shared_from_this<Playlist>
+class LIBARDOUR_API Playlist : public SessionObject , public boost::enable_shared_from_this<Playlist>
 {
 public:
 	static void make_property_quarks ();
@@ -120,6 +120,7 @@ public:
 	uint32_t n_regions() const;
 	bool all_regions_empty() const;
 	std::pair<framepos_t, framepos_t> get_extent () const;
+	std::pair<framepos_t, framepos_t> get_extent_with_endspace() const;
 	layer_t top_layer() const;
 
 	EditMode get_edit_mode() const { return _edit_mode; }
@@ -142,8 +143,17 @@ public:
 	void nudge_after (framepos_t start, framecnt_t distance, bool forwards);
 	boost::shared_ptr<Region> combine (const RegionList&);
 	void uncombine (boost::shared_ptr<Region>);
+	void fade_range (std::list<AudioRange>&);
 
 	void shuffle (boost::shared_ptr<Region>, int dir);
+	void ripple (framepos_t at, framecnt_t distance, RegionList *exclude);
+	void ripple (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude) {
+		 RegionList el;
+		 if (exclude)
+			 el.push_back (exclude);
+		 ripple (at, distance, &el);
+	}
+
 	void update_after_tempo_map_change ();
 
 	boost::shared_ptr<Playlist> cut  (std::list<AudioRange>&, bool result_is_hidden = true);
@@ -283,6 +293,7 @@ public:
 	bool             first_set_state;
 	bool            _hidden;
 	bool            _splicing;
+	bool            _rippling;
 	bool            _shuffling;
 	bool            _nudging;
 	uint32_t        _refcnt;
@@ -337,6 +348,11 @@ public:
 	void splice_locked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude);
 	void splice_unlocked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude);
 
+	void core_ripple (framepos_t at, framecnt_t distance, RegionList *exclude);
+	void ripple_locked (framepos_t at, framecnt_t distance, RegionList *exclude);
+	void ripple_unlocked (framepos_t at, framecnt_t distance, RegionList *exclude);
+
+
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
 
 	virtual XMLNode& state (bool);
@@ -381,6 +397,8 @@ public:
 	void setup_layering_indices (RegionList const &);
 	void coalesce_and_check_crossfades (std::list<Evoral::Range<framepos_t> >);
 	boost::shared_ptr<RegionList> find_regions_at (framepos_t);
+
+	framepos_t _end_space;  //this is used when we are pasting a range with extra space at the end
 };
 
 } /* namespace ARDOUR */

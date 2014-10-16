@@ -47,13 +47,15 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libardourvampplugins'
     obj.target       = 'ardourvampplugins'
-    obj.uselib       = 'FFTW3F'
+    obj.uselib       = 'FFTW3F VAMPSDK'
     obj.use          = 'libvampplugin libqmdsp'
+    obj.defines      = [ 'ARDOUR_VAMP_PLUGINS_DLL_EPORTS' ]
+    autowaf.ensure_visible_symbols (obj, True)
     if bld.is_defined('HAVE_AUBIO'):
         obj.source += ' Onset.cpp '
         obj.uselib += ' AUBIO '
     obj.vnum         = LIBARDOURVAMPPLUGINS_LIB_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'vamp')
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'vamp')
 
 def shutdown():
     autowaf.shutdown()

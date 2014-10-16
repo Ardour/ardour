@@ -28,12 +28,14 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-WindowsVSTPlugin::WindowsVSTPlugin (AudioEngine& e, Session& session, VSTHandle* h)
+WindowsVSTPlugin::WindowsVSTPlugin (AudioEngine& e, Session& session, VSTHandle* h, int unique_id)
 	: VSTPlugin (e, session, h)
 {
+	Session::vst_current_loading_id = unique_id;
 	if ((_state = fst_instantiate (_handle, Session::vst_callback, this)) == 0) {
 		throw failed_constructor();
 	}
+	Session::vst_current_loading_id = 0;
 
 	set_plugin (_state->plugin);
 }
@@ -43,9 +45,11 @@ WindowsVSTPlugin::WindowsVSTPlugin (const WindowsVSTPlugin &other)
 {
 	_handle = other._handle;
 
+	Session::vst_current_loading_id = PBD::atoi(other.unique_id());
 	if ((_state = fst_instantiate (_handle, Session::vst_callback, this)) == 0) {
 		throw failed_constructor();
 	}
+	Session::vst_current_loading_id = 0;
 	
 	_plugin = _state->plugin;
 }
@@ -67,10 +71,10 @@ WindowsVSTPluginInfo::load (Session& session)
 
 			handle = fst_load(path.c_str());
 
-			if ((int) handle == -1) {
+			if (!handle) {
 				error << string_compose(_("VST: cannot load module from \"%1\""), path) << endmsg;
 			} else {
-				plugin.reset (new WindowsVSTPlugin (session.engine(), session, handle));
+				plugin.reset (new WindowsVSTPlugin (session.engine(), session, handle, PBD::atoi(unique_id)));
 			}
 		} else {
 			error << _("You asked ardour to not use any VST plugins") << endmsg;

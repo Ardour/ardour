@@ -50,7 +50,7 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 	option_hbox.pack_start (time_format_label, false, false, 0);
 	option_hbox.pack_start (time_format_combo, false, false, 6);
 
-	Gtk::Button* b = manage (new Gtk::Button (_("Select All")));
+	Gtk::Button* b = Gtk::manage (new Gtk::Button (_("Select All")));
 	b->signal_clicked().connect (
 		sigc::bind (
 			sigc::mem_fun (*this, &ExportTimespanSelector::set_selection_state_of_all_timespans), true
@@ -58,7 +58,7 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 		);
 	option_hbox.pack_start (*b, false, false, 6);
 	
-	b = manage (new Gtk::Button (_("Deselect All")));
+	b = Gtk::manage (new Gtk::Button (_("Deselect All")));
 	b->signal_clicked().connect (
 		sigc::bind (
 			sigc::mem_fun (*this, &ExportTimespanSelector::set_selection_state_of_all_timespans), false
@@ -105,6 +105,9 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 	/* Range view */
 
 	range_list = Gtk::ListStore::create (range_cols);
+	// order by location start times
+	range_list->set_sort_column(range_cols.location, Gtk::SORT_ASCENDING);
+	range_list->set_sort_func(range_cols.location, sigc::mem_fun(*this, &ExportTimespanSelector::location_sorter));
 	range_view.set_model (range_list);
 	range_view.set_headers_visible (true);
 }
@@ -112,6 +115,22 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 ExportTimespanSelector::~ExportTimespanSelector ()
 {
 
+}
+
+int
+ExportTimespanSelector::location_sorter(Gtk::TreeModel::iterator a, Gtk::TreeModel::iterator b)
+{
+	Location *l1 = (*a)[range_cols.location];
+	Location *l2 = (*b)[range_cols.location];
+	const Location *ls = _session->locations()->session_range_location();
+
+	// always sort session range first
+	if (l1 == ls)
+		return -1;
+	if (l2 == ls)
+		return +1;
+
+	return l1->start() - l2->start();
 }
 
 void
@@ -305,7 +324,7 @@ ExportTimespanSelector::ms_str (framecnt_t frames) const
 	mins = (int) floor (left / (_session->frame_rate() * 60.0f));
 	left -= (framecnt_t) floor (mins * _session->frame_rate() * 60.0f);
 	secs = (int) floor (left / (float) _session->frame_rate());
-	left -= (framecnt_t) floor (secs * _session->frame_rate());
+	left -= (framecnt_t) floor ((double)(secs * _session->frame_rate()));
 	sec_promilles = (int) (left * 1000 / (float) _session->frame_rate() + 0.5);
 
 	oss << std::setfill('0') << std::right <<

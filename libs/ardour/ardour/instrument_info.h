@@ -28,19 +28,22 @@
 
 #include "evoral/Parameter.hpp"
 
+#include "midi++/libmidi_visibility.h"
+#include "ardour/libardour_visibility.h"
+
 namespace MIDI {
-namespace Name {
-class ChannelNameSet;
-class Patch;
-typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
-}
+	namespace Name {
+		class ChannelNameSet;
+		class Patch;
+		typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
+	}
 }
 
 namespace ARDOUR {
 
 class Processor;
 
-class InstrumentInfo {
+class LIBARDOUR_API InstrumentInfo {
   public:
     InstrumentInfo();
     ~InstrumentInfo ();

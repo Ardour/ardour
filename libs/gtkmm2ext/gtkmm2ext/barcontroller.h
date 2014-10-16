@@ -19,49 +19,32 @@
 #ifndef __gtkmm2ext_bar_controller_h__
 #define __gtkmm2ext_bar_controller_h__
 
-#include <gtkmm/frame.h>
-#include <gtkmm/drawingarea.h>
-#include <gtkmm2ext/binding_proxy.h>
+#include <gtkmm/alignment.h>
 #include <cairo.h>
 
+#include "gtkmm2ext/visibility.h"
+#include "gtkmm2ext/binding_proxy.h"
+#include "gtkmm2ext/slider_controller.h"
 
 namespace Gtkmm2ext {
 
-class BarController : public Gtk::Frame
+class LIBGTKMM2EXT_API BarController : public Gtk::Alignment
 {
   public:
 	BarController (Gtk::Adjustment& adj, boost::shared_ptr<PBD::Controllable>);
 
 	virtual ~BarController ();
 
-	enum barStyle {
-		LeftToRight,
-		RightToLeft,
-		Line,
-                Blob,
-		CenterOut,
-		
-		TopToBottom,
-		BottomToTop
-	};
-
-	barStyle style() const { return _style; }
-	void set_style (barStyle);
-	void set_use_parent (bool yn);
-
 	void set_sensitive (bool yn);
-	
-	void set_logarithmic (bool yn) { logarithmic = yn; }
+
+	PixFader::Tweaks tweaks() const { return _slider.tweaks (); }
+	void set_tweaks (PixFader::Tweaks t) { _slider.set_tweaks (t);}
 
 	sigc::signal<void> StartGesture;
 	sigc::signal<void> StopGesture;
 
 	/* export this to allow direct connection to button events */
-
-	Gtk::Widget& event_widget() { return darea; }
-
-	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
-	void set_controllable(boost::shared_ptr<PBD::Controllable> c) { binding_proxy.set_controllable(c); }
+	Gtk::Widget& event_widget() { return _slider; }
 
 	/** Emitted when the adjustment spinner is activated or deactivated;
 	 *  the parameter is true on activation, false on deactivation.
@@ -69,48 +52,30 @@ class BarController : public Gtk::Frame
 	sigc::signal<void, bool> SpinnerActive;
 
   protected:
-	Gtk::Adjustment&    adjustment;
-	BindingProxy        binding_proxy;
-	Gtk::DrawingArea    darea;
-	Glib::RefPtr<Pango::Layout> layout;
-	barStyle              _style;
-	bool                grabbed;
-	bool                switching;
-	bool                switch_on_release;
-	double              initial_value;
-	double              grab_x;
-	GdkWindow*          grab_window;
-	Gtk::SpinButton     spinner;
-	bool                use_parent;
-	bool                logarithmic;
-        sigc::slot<std::string> _label_slot;
-        bool                    _use_slot;
+	bool on_button_press_event (GdkEventButton*);
+	bool on_button_release_event (GdkEventButton*);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 
 	virtual std::string get_label (double& /*x*/) {
 		return "";
 	}
-	
-	void create_patterns();
-	Cairo::RefPtr<Cairo::Pattern> pattern;
-	Cairo::RefPtr<Cairo::Pattern> shine_pattern;
 
-	virtual bool button_press (GdkEventButton *);
-	virtual bool button_release (GdkEventButton *);
-	virtual bool motion (GdkEventMotion *);
-	virtual bool expose (GdkEventExpose *);
-	virtual bool scroll (GdkEventScroll *);
-	virtual bool entry_focus_out (GdkEventFocus*);
-
-	gint mouse_control (double x, GdkWindow* w, double scaling);
+	private:
+	HSliderController _slider;
+	bool entry_focus_out (GdkEventFocus*);
+	void entry_activated ();
+	void before_expose ();
 
 	gint switch_to_bar ();
 	gint switch_to_spinner ();
 
-	void entry_activated ();
-	void drop_grab ();
-	
-	int entry_input (double* new_value);
-	bool entry_output ();
+	bool _grabbed;
+	bool _switching;
+	bool _switch_on_release;
+
+
+	void passtrhu_gesture_start() { StartGesture (); }
+	void passtrhu_gesture_stop()  { StopGesture (); }
 };
 
 

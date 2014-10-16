@@ -23,6 +23,7 @@
 
 #include "pbd/signals.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/session_handle.h"
 
@@ -35,7 +36,7 @@ namespace ARDOUR {
 class Session;
 class MidiPort;
 
-class MidiClockTicker : public SessionHandlePtr, boost::noncopyable
+class LIBARDOUR_API MidiClockTicker : public SessionHandlePtr, boost::noncopyable
 {
 public:
 	MidiClockTicker ();

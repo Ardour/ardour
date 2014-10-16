@@ -55,7 +55,7 @@ private:
 
 	void gain_toggled ();
 	void update ();
-	bool unique_name () const;
+	bool unique_name (std::string const name) const;
 };
 
 

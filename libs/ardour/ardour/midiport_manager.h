@@ -29,6 +29,8 @@
 #include "midi++/types.h"
 #include "midi++/port.h"
 
+#include "ardour/libardour_visibility.h"
+#include "ardour/midi_port.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
@@ -36,7 +38,7 @@ namespace ARDOUR {
 class MidiPort;
 class Port;
 
-class MidiPortManager {
+class LIBARDOUR_API MidiPortManager {
   public:
     MidiPortManager();
     virtual ~MidiPortManager ();
@@ -55,7 +57,12 @@ class MidiPortManager {
     MIDI::Port* midi_output_port () const { return _midi_output_port; }
     MIDI::Port* mmc_input_port () const { return _mmc_input_port; }
     MIDI::Port* mmc_output_port () const { return _mmc_output_port; }
+    MIDI::Port* scene_input_port () const { return _scene_input_port; }
+    MIDI::Port* scene_output_port () const { return _scene_output_port; }
     
+    boost::shared_ptr<MidiPort> scene_in() const { return boost::dynamic_pointer_cast<MidiPort>(_scene_in); }
+    boost::shared_ptr<MidiPort> scene_out() const { return boost::dynamic_pointer_cast<MidiPort>(_scene_out); }
+
     /* Ports used for synchronization. These have their I/O handled inside the
      * process callback.
      */
@@ -76,13 +83,17 @@ class MidiPortManager {
     MIDI::Port* _midi_output_port;
     MIDI::Port* _mmc_input_port;
     MIDI::Port* _mmc_output_port;
-    /* these point to the same objects as the 4 members above,
+    MIDI::Port* _scene_input_port;
+    MIDI::Port* _scene_output_port;
+    /* these point to the same objects as the members above,
        but cast to their ARDOUR::Port base class
     */
     boost::shared_ptr<Port> _midi_in;
     boost::shared_ptr<Port> _midi_out;
     boost::shared_ptr<Port> _mmc_in;
     boost::shared_ptr<Port> _mmc_out;
+    boost::shared_ptr<Port> _scene_in;
+    boost::shared_ptr<Port> _scene_out;
 
     /* synchronously handled ports: ARDOUR::MidiPort */
     boost::shared_ptr<MidiPort> _mtc_input_port;

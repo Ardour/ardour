@@ -28,7 +28,7 @@ namespace ARDOUR {
 
 class Session;
 
-class PlaylistFactory {
+class LIBARDOUR_API PlaylistFactory {
 
   public:
 	static PBD::Signal2<void,boost::shared_ptr<Playlist>, bool> PlaylistCreated;

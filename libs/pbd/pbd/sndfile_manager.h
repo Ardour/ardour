@@ -25,13 +25,15 @@
 #include <map>
 #include <sndfile.h>
 #include <glibmm/threads.h>
+
+#include "pbd/libpbd_visibility.h"
 #include "pbd/signals.h"
 #include "pbd/file_manager.h"
 
 namespace PBD {
 
 /** FileDescriptor for a file to be opened using libsndfile */	
-class SndFileDescriptor : public FileDescriptor
+class LIBPBD_API SndFileDescriptor : public FileDescriptor
 {
 public:
 	SndFileDescriptor (std::string const & file_name, bool writeable, SF_INFO* info);

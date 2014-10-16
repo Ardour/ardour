@@ -31,7 +31,7 @@ namespace ARDOUR {
 
 class Playlist;
 
-class PlaylistSource : virtual public Source {
+class LIBARDOUR_API PlaylistSource : virtual public Source {
 public:
 	virtual ~PlaylistSource ();
 

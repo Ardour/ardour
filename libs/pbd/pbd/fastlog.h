@@ -10,6 +10,8 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include <math.h> /* for HUGE_VAL */
 
+#include "pbd/libpbd_visibility.h"
+
 static inline float fast_log2 (float val)
 {
 	/* don't use reinterpret_cast<> because that prevents this

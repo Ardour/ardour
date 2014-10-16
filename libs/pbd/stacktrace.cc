@@ -22,6 +22,7 @@
 #include "pbd/stacktrace.h"
 #include <cstdio>
 #include <iostream>
+#include <string>
 
 void
 PBD::trace_twb ()
@@ -35,37 +36,45 @@ PBD::trace_twb ()
 #include <execinfo.h>
 #include <cxxabi.h>
 
-std::string demangle (std::string const & l)
+static std::string 
+symbol_demangle (const std::string& l)
+{
+	int status;
+
+	try {
+		
+		char* realname = abi::__cxa_demangle (l.c_str(), 0, 0, &status);
+		std::string d (realname);
+		free (realname);
+		return d;
+	} catch (std::exception) {
+		
+	}
+
+	return l;
+}
+
+std::string 
+PBD::demangle (std::string const & l)
 {
 	std::string::size_type const b = l.find_first_of ("(");
+
 	if (b == std::string::npos) {
-		return l;
+		return symbol_demangle (l);
 	}
 
 	std::string::size_type const p = l.find_last_of ("+");
 	if (p == std::string::npos) {
-		return l;
+		return symbol_demangle (l);
 	}
 
 	if ((p - b) <= 1) {
-		return l;
+		return symbol_demangle (l);
 	}
 	
 	std::string const fn = l.substr (b + 1, p - b - 1);
 
-	int status;
-	try {
-		
-		char* realname = abi::__cxa_demangle (fn.c_str(), 0, 0, &status);
-		std::string d (realname);
-		free (realname);
-		return d;
-		
-	} catch (std::exception) {
-		
-	}
-	
-	return l;
+	return symbol_demangle (fn);
 }
 
 void
@@ -97,7 +106,7 @@ PBD::stacktrace (std::ostream& out, int levels)
 #else
 
 std::string 
-demangle (std::string const & l)
+PBD::demangle (std::string const & l) /* JE - !!!! 'PBD' namespace might possibly get removed (except it's still used in 'libs/canvas/item.cc') */
 {
 	return std::string();
 }

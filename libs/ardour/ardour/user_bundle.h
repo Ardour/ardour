@@ -29,7 +29,7 @@ namespace ARDOUR {
 
 class Session;
 
-class UserBundle : public Bundle, public PBD::Stateful {
+class LIBARDOUR_API UserBundle : public Bundle, public PBD::Stateful {
 
   public:
 	UserBundle (std::string const &);

@@ -24,6 +24,7 @@
 #include <cassert>
 
 #include "pbd/pool.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/error.h"
 #include "pbd/debug.h"
 #include "pbd/compose.h"
@@ -182,7 +183,7 @@ PerThreadPool::per_thread_pool ()
 {
 	CrossThreadPool* p = _key.get();
 	if (!p) {
-		fatal << "programming error: no per-thread pool \"" << _name << "\" for thread " << pthread_self() << endmsg;
+		fatal << "programming error: no per-thread pool \"" << _name << "\" for thread " << pthread_name() << endmsg;
 		/*NOTREACHED*/
 	}
 	return p;
@@ -226,9 +227,9 @@ CrossThreadPool::alloc ()
 {
 	void* ptr;
 
-	DEBUG_TRACE (DEBUG::Pool, string_compose ("%1 %2 has %3 pending free entries waiting\n", pthread_self(), name(), pending.read_space()));
+	DEBUG_TRACE (DEBUG::Pool, string_compose ("%1 %2 has %3 pending free entries waiting\n", pthread_name(), name(), pending.read_space()));
 	while (pending.read (&ptr, 1) == 1) {
-		DEBUG_TRACE (DEBUG::Pool, string_compose ("%1 %2 pushes back a pending free list entry before allocating\n", pthread_self(), name()));
+		DEBUG_TRACE (DEBUG::Pool, string_compose ("%1 %2 pushes back a pending free list entry before allocating\n", pthread_name(), name()));
 		free_list.write (&ptr, 1);
 	}
 	return Pool::alloc ();

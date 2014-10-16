@@ -20,18 +20,45 @@
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/gui_thread.h"
 
+#include "i18n.h"
+
 static const char* has_cairo_widget_background_info = "has_cairo_widget_background_info";
+
+bool CairoWidget::_flat_buttons = false;
+
+static void noop() { }
+sigc::slot<void> CairoWidget::focus_handler (sigc::ptr_fun (noop));
+
+void CairoWidget::set_source_rgb_a( cairo_t* cr, Gdk::Color col, float a)  //ToDo:  this one and the Canvas version should be in a shared file (?)
+{
+	float r = col.get_red_p ();
+	float g = col.get_green_p ();
+	float b = col.get_blue_p ();
+	
+	cairo_set_source_rgba(cr, r, g, b, a);
+}
 
 CairoWidget::CairoWidget ()
 	: _active_state (Gtkmm2ext::Off)
 	, _visual_state (Gtkmm2ext::NoVisualState)
 	, _need_bg (true)
+	, _grabbed (false)
+	, _name_proxy (this, X_("name"))
+	, _current_parent (0)
 {
-
+	_name_proxy.connect (sigc::mem_fun (*this, &CairoWidget::on_name_changed));
 }
 
 CairoWidget::~CairoWidget ()
 {
+	if (_parent_style_change) _parent_style_change.disconnect();
+}
+
+bool
+CairoWidget::on_button_press_event (GdkEventButton*)
+{
+	focus_handler();
+	return false;
 }
 
 bool
@@ -39,18 +66,23 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 {
 	cairo_t* cr = gdk_cairo_create (get_window ()->gobj());
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cairo_clip (cr);
+	cairo_clip_preserve (cr);
 
-	/* paint expose area the color of the parent window bg 
+	/* paint expose area the color of the parent window bg
 	*/
 	
 	Gdk::Color bg (get_parent_bg());
 	
-	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_set_source_rgb (cr, bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
 	cairo_fill (cr);
 
-	render (cr);
+	cairo_rectangle_t expose_area;
+	expose_area.x = ev->area.x;
+	expose_area.y = ev->area.y;
+	expose_area.width = ev->area.width;
+	expose_area.height = ev->area.height;
+
+	render (cr, &expose_area);
 
 	cairo_destroy (cr);
 
@@ -82,28 +114,38 @@ CairoWidget::on_size_allocate (Gtk::Allocation& alloc)
 Gdk::Color
 CairoWidget::get_parent_bg ()
 {
-        Widget* parent;
+	Widget* parent;
 
 	parent = get_parent ();
 
-        while (parent) {
+	while (parent) {
 		void* p = g_object_get_data (G_OBJECT(parent->gobj()), has_cairo_widget_background_info);
 
 		if (p) {
 			Glib::RefPtr<Gtk::Style> style = parent->get_style();
+			if (_current_parent != parent) {
+				if (_parent_style_change) _parent_style_change.disconnect();
+				_current_parent = parent;
+				_parent_style_change = parent->signal_style_changed().connect (mem_fun (*this, &CairoWidget::on_style_changed));
+			}
 			return style->get_bg (get_state());
 		}
-		
+
 		if (!parent->get_has_window()) {
 			parent = parent->get_parent();
 		} else {
 			break;
 		}
-        }
+	}
 
-        if (parent && parent->get_has_window()) {
+	if (parent && parent->get_has_window()) {
+		if (_current_parent != parent) {
+			if (_parent_style_change) _parent_style_change.disconnect();
+			_current_parent = parent;
+			_parent_style_change = parent->signal_style_changed().connect (mem_fun (*this, &CairoWidget::on_style_changed));
+		}
 		return parent->get_style ()->get_bg (parent->get_state());
-        } 
+	}
 
 	return get_style ()->get_bg (get_state());
 }
@@ -141,10 +183,16 @@ CairoWidget::set_active (bool yn)
 }
 
 void
+CairoWidget::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
+{
+	queue_draw();
+}
+
+void
 CairoWidget::on_state_changed (Gtk::StateType)
 {
 	/* this will catch GTK-level state changes from calls like
-	   ::set_sensitive() 
+	   ::set_sensitive()
 	*/
 
 	if (get_state() == Gtk::STATE_INSENSITIVE) {
@@ -165,7 +213,7 @@ CairoWidget::set_draw_background (bool yn)
 void
 CairoWidget::provide_background_for_cairo_widget (Gtk::Widget& w, const Gdk::Color& bg)
 {
-	/* set up @w to be able to provide bg information to 
+	/* set up @w to be able to provide bg information to
 	   any CairoWidgets that are packed inside it.
 	*/
 
@@ -175,4 +223,16 @@ CairoWidget::provide_background_for_cairo_widget (Gtk::Widget& w, const Gdk::Col
 	w.modify_bg (Gtk::STATE_SELECTED, bg);
 
 	g_object_set_data (G_OBJECT(w.gobj()), has_cairo_widget_background_info, (void*) 0xfeedface);
+}
+
+void
+CairoWidget::set_flat_buttons (bool yn)
+{
+	_flat_buttons = yn;
+}
+
+void
+CairoWidget::set_focus_handler (sigc::slot<void> s)
+{
+	focus_handler = s;
 }

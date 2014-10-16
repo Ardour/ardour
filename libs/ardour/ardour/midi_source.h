@@ -36,10 +36,11 @@ namespace ARDOUR {
 
 class MidiStateTracker;
 class MidiModel;
+
 template<typename T> class MidiRingBuffer;
 
 /** Source for MIDI data */
-class MidiSource : virtual public Source, public boost::enable_shared_from_this<MidiSource>
+class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_shared_from_this<MidiSource>
 {
   public:
 	typedef double TimeType;

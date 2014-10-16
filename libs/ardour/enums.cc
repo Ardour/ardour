@@ -74,8 +74,6 @@ setup_enum_writer ()
 	AFLPosition _AFLPosition;
 	RemoteModel _RemoteModel;
 	DenormalModel _DenormalModel;
-	CrossfadeModel _CrossfadeModel;
-	CrossfadeChoice _CrossfadeChoice;
 	InsertMergePolicy _InsertMergePolicy;
 	ListenPosition _ListenPosition;
 	SampleFormat _SampleFormat;
@@ -237,8 +235,14 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (Slide);
 	REGISTER_ENUM (Splice);
+	REGISTER_ENUM (Ripple); // XXX do the old enum values have to stay in order?
 	REGISTER_ENUM (Lock);
 	REGISTER (_EditMode);
+	/*
+	 * Splice mode is undefined, undocumented, and basically fubar'ed
+	 * perhaps someday we will make it work.  but for now, avoid it
+	*/
+	enum_writer.add_to_hack_table ("Splice", "Slide");
 
 	REGISTER_ENUM (Start);
 	REGISTER_ENUM (End);
@@ -288,15 +292,6 @@ setup_enum_writer ()
 	 * editor / mixer ordering.
 	*/
 	enum_writer.add_to_hack_table ("EditorOrdered", "MixerOrdered");
-
-	REGISTER_ENUM (FullCrossfade);
-	REGISTER_ENUM (ShortCrossfade);
-	REGISTER (_CrossfadeModel);
-
-	REGISTER_ENUM (RegionFades);
-	REGISTER_ENUM (ConstantPowerMinus3dB);
-	REGISTER_ENUM (ConstantPowerMinus6dB);
-	REGISTER (_CrossfadeChoice);
 
         REGISTER_ENUM (InsertMergeReject);
         REGISTER_ENUM (InsertMergeRelax);
@@ -374,8 +369,15 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (SessionEvent, Audition);
 	REGISTER_CLASS_ENUM (SessionEvent, InputConfigurationChange);
 	REGISTER_CLASS_ENUM (SessionEvent, SetPlayAudioRange);
+	REGISTER_CLASS_ENUM (SessionEvent, CancelPlayAudioRange);
+	REGISTER_CLASS_ENUM (SessionEvent, RealTimeOperation);
+	REGISTER_CLASS_ENUM (SessionEvent, AdjustPlaybackBuffering);
+	REGISTER_CLASS_ENUM (SessionEvent, AdjustCaptureBuffering);
+	REGISTER_CLASS_ENUM (SessionEvent, SetTimecodeTransmission);
+	REGISTER_CLASS_ENUM (SessionEvent, Skip);
 	REGISTER_CLASS_ENUM (SessionEvent, StopOnce);
 	REGISTER_CLASS_ENUM (SessionEvent, AutoLoop);
+	REGISTER_CLASS_ENUM (SessionEvent, AutoLoopDeclick);
 	REGISTER (_SessionEvent_Type);
 
 	REGISTER_CLASS_ENUM (Session, Stopped);
@@ -469,6 +471,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Location, IsCDMarker);
 	REGISTER_CLASS_ENUM (Location, IsSessionRange);
 	REGISTER_CLASS_ENUM (Location, IsRangeMarker);
+	REGISTER_CLASS_ENUM (Location, IsSkip);
 	REGISTER_BITS (_Location_Flags);
 
 	REGISTER_CLASS_ENUM (Track, NoFreeze);
@@ -795,34 +798,6 @@ std::ostream& operator<<(std::ostream& o, const InsertMergePolicy& var)
 	return o << s;
 }
 
-std::istream& operator>>(std::istream& o, CrossfadeModel& var)
-{
-	std::string s;
-	o >> s;
-	var = (CrossfadeModel) string_2_enum (s, var);
-	return o;
-}
-
-std::ostream& operator<<(std::ostream& o, const CrossfadeModel& var)
-{
-	std::string s = enum_2_string (var);
-	return o << s;
-}
-
-std::istream& operator>>(std::istream& o, CrossfadeChoice& var)
-{
-	std::string s;
-	o >> s;
-	var = (CrossfadeChoice) string_2_enum (s, var);
-	return o;
-}
-
-std::ostream& operator<<(std::ostream& o, const CrossfadeChoice& var)
-{
-	std::string s = enum_2_string (var);
-	return o << s;
-}
-
 std::istream& operator>>(std::istream& o, SyncSource& var)
 {
 	std::string s;
@@ -938,6 +913,19 @@ std::istream& operator>>(std::istream& o, Evoral::OverlapType& var)
 }
 
 std::ostream& operator<<(std::ostream& o, const Evoral::OverlapType& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, FadeShape& var)
+{
+	std::string s;
+	o >> s;
+	var = (FadeShape) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const FadeShape& var)
 {
 	std::string s = enum_2_string (var);
 	return o << s;

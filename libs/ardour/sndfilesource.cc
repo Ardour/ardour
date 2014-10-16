@@ -26,8 +26,6 @@
 #include <climits>
 #include <cstdarg>
 
-#include <pwd.h>
-#include <sys/utsname.h>
 #include <sys/stat.h>
 
 #ifdef PLATFORM_WINDOWS
@@ -77,7 +75,9 @@ SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	}
 }
 
-/** Files created this way are never writable or removable */
+/** Constructor for existing external-to-session files.
+    Files created this way are never writable or removable 
+*/
 SndFileSource::SndFileSource (Session& s, const string& path, int chn, Flag flags)
 	: Source(s, DataType::AUDIO, path, flags)
           /* note that the origin of an external file is itself */
@@ -101,7 +101,9 @@ SndFileSource::SndFileSource (Session& s, const string& path, int chn, Flag flag
 	}
 }
 
-/** This constructor is used to construct new files, not open existing ones. */
+/** This constructor is used to construct new internal-to-session files, 
+    not open existing ones. 
+*/
 SndFileSource::SndFileSource (Session& s, const string& path, const string& origin,
                               SampleFormat sfmt, HeaderFormat hf, framecnt_t rate, Flag flags)
 	: Source(s, DataType::AUDIO, path, flags)
@@ -231,22 +233,30 @@ SndFileSource::init_sndfile ()
 int
 SndFileSource::open ()
 {
-	_descriptor = new SndFileDescriptor (_path, writable(), &_info);
+	string path_to_open;
+
+#ifdef PLATFORM_WINDOWS
+	path_to_open = Glib::locale_from_utf8(_path);
+#else
+	path_to_open = _path;
+#endif
+
+	_descriptor = new SndFileDescriptor (path_to_open.c_str(), writable(), &_info);
 	_descriptor->Closed.connect_same_thread (file_manager_connection, boost::bind (&SndFileSource::file_closed, this));
 	SNDFILE* sf = _descriptor->allocate ();
 
 	if (sf == 0) {
-		char errbuf[256];
+		char errbuf[1024];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 #ifndef HAVE_COREAUDIO
 		/* if we have CoreAudio, we will be falling back to that if libsndfile fails,
 		   so we don't want to see this message.
 		*/
 
-                cerr << "failed to open " << _path << " with name " << _name << endl;
+                cerr << "failed to open " << path_to_open << " with name " << _name << endl;
 
 		error << string_compose(_("SndFileSource: cannot open file \"%1\" for %2 (%3)"),
-					_path, (writable() ? "read+write" : "reading"), errbuf) << endmsg;
+					path_to_open, (writable() ? "read+write" : "reading"), errbuf) << endmsg;
 #endif
 		return -1;
 	}
@@ -308,7 +318,7 @@ SndFileSource::open ()
 
                         if (!_broadcast_info->write_to_file (sf)) {
                                 error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
-                                                         _path, _broadcast_info->get_error())
+                                                         path_to_open, _broadcast_info->get_error())
                                       << endmsg;
                                 _flags = Flag (_flags & ~Broadcast);
                                 delete _broadcast_info;
@@ -596,6 +606,30 @@ SndFileSource::flush_header ()
 	return r;
 }
 
+void
+SndFileSource::flush ()
+{
+	if (!_open) {
+		warning << string_compose (_("attempt to flush an un-opened audio file source (%1)"), _path) << endmsg;
+		return;
+	}
+
+	if (!writable()) {
+		warning << string_compose (_("attempt to flush a non-writable audio file source (%1)"), _path) << endmsg;
+		return;
+	}
+
+	SNDFILE* sf = _descriptor->allocate ();
+	if (sf == 0) {
+		error << string_compose (_("could not allocate file %1 to flush contents"), _path) << endmsg;
+		return;
+	}
+
+	// Hopefully everything OK
+	sf_write_sync (sf);
+	_descriptor->release ();
+}
+
 int
 SndFileSource::setup_broadcast_info (framepos_t /*when*/, struct tm& now, time_t /*tnow*/)
 {
@@ -823,12 +857,12 @@ SndFileSource::crossfade (Sample* data, framecnt_t cnt, int fade_in)
 
 	} else if (xfade < xfade_frames) {
 
-		gain_t in[xfade];
-		gain_t out[xfade];
+		std::vector<gain_t> in(xfade);
+		std::vector<gain_t> out(xfade);
 
 		/* short xfade, compute custom curve */
 
-		compute_equal_power_fades (xfade, in, out);
+		compute_equal_power_fades (xfade, &in[0], &out[0]);
 
 		for (framecnt_t n = 0; n < xfade; ++n) {
 			xfade_buf[n] = (xfade_buf[n] * out[n]) + (fade_data[n] * in[n]);
@@ -981,4 +1015,13 @@ SndFileSource::set_path (const string& p)
         if (_descriptor) {
                 _descriptor->set_path (_path);
         }
+}
+
+void
+SndFileSource::release_descriptor ()
+{
+	if (_descriptor) {
+		_descriptor->release ();
+		_descriptor = 0;
+	}
 }

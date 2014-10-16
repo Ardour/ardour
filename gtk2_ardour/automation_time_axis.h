@@ -30,10 +30,11 @@
 #include "ardour/automatable.h"
 #include "ardour/automation_list.h"
 
-#include "canvas.h"
+#include "canvas/rectangle.h"
+
 #include "time_axis_view.h"
-#include "simplerect.h"
 #include "automation_controller.h"
+#include "ardour_button.h"
 
 namespace ARDOUR {
 	class Session;
@@ -69,7 +70,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	~AutomationTimeAxisView();
 
 	virtual void set_height (uint32_t);
-	void set_samples_per_unit (double);
+	void set_samples_per_pixel (double);
 	std::string name() const { return _name; }
 
         void add_automation_event (GdkEvent *, framepos_t, double, bool with_guard_points);
@@ -132,19 +133,19 @@ class AutomationTimeAxisView : public TimeAxisView {
 	boost::shared_ptr<AutomationController> _controller;
 	Evoral::Parameter _parameter;
 
-	ArdourCanvas::SimpleRect* _base_rect;
+	ArdourCanvas::Rectangle* _base_rect;
 	boost::shared_ptr<AutomationLine> _line;
+
+	std::string _name;
 
 	/** AutomationStreamView if we are editing region-based automation (for MIDI), otherwise 0 */
 	AutomationStreamView* _view;
 
-	std::string _name;
 	bool    ignore_toggle;
-
 	bool    first_call_to_set_height;
 
-	Gtk::Button        hide_button;
-	Gtk::Button        auto_button;
+	ArdourButton       hide_button;
+	ArdourButton       auto_button;
 	Gtk::Menu*         automation_menu;
 	Gtk::Label*        plugname;
 	bool               plugname_packed;
@@ -164,6 +165,8 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void clear_clicked ();
 	void hide_clicked ();
 	void auto_clicked ();
+
+	virtual bool can_edit_name() const {return false;}
 
 	void build_display_menu ();
 

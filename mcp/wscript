@@ -11,8 +11,8 @@ def configure(conf):
 def build(bld):
     devinfo = bld.path.ant_glob ('*.device')
     profiles = bld.path.ant_glob ('*.profile')
-    bld.install_files (os.path.join(bld.env['DATADIR'], 'ardour3', 'mcp'), devinfo)
-    bld.install_files (os.path.join(bld.env['DATADIR'], 'ardour3', 'mcp'), profiles)
+    bld.install_files (os.path.join(bld.env['DATADIR'], 'mcp'), devinfo)
+    bld.install_files (os.path.join(bld.env['DATADIR'], 'mcp'), profiles)
 
 def options(opt):
     pass

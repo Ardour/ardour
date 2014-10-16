@@ -116,7 +116,8 @@ VBAPSpeakers::choose_speaker_triplets(struct ls_triplet_chain **ls_triplets)
 	int i,j,k,l,table_size;
 	int n_speakers = _speakers.size ();
 
-	if (n_speakers == 0) {
+	if (n_speakers < 3) {
+		fprintf(stderr, "VBAP: at least 3 speakers need to be defined.");
 		return;
 	}
 
@@ -536,7 +537,8 @@ VBAPSpeakers::choose_speaker_pairs (){
 	*/
 	const int n_speakers = _speakers.size();
 
-	if (n_speakers == 0) {
+	if (n_speakers < 2) {
+		fprintf(stderr, "VBAP: at least 2 speakers need to be defined.");
 		return;
 	}
 

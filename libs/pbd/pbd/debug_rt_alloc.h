@@ -22,18 +22,20 @@
 #ifndef __pbd_debug_rt_alloc_h__
 #define __pbd_debug_rt_alloc_h__
 
+#include "pbd/libpbd_visibility.h"
+
 extern "C" {
 
 /** Should be set to point to a function which returns non-0 if a malloc is
  *  allowed in the current situation, or 0 if not.
  */
-extern int (*pbd_alloc_allowed) ();
+LIBPBD_API extern int (*pbd_alloc_allowed) ();
 
 /** Call this to suspend malloc checking until a call to resume_rt_malloc_checks */
-extern void suspend_rt_malloc_checks ();
+LIBPBD_API extern void suspend_rt_malloc_checks ();
 
 /** Resume malloc checking after a suspension */	
-extern void resume_rt_malloc_checks ();
+LIBPBD_API extern void resume_rt_malloc_checks ();
 
 }
 

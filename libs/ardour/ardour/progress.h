@@ -22,10 +22,12 @@
 
 #include <list>
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
 /** A class to handle reporting of progress of something */
-class Progress
+class LIBARDOUR_API Progress
 {
 public:
 	Progress ();

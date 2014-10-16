@@ -19,6 +19,9 @@
 */
 
 #include <iostream>
+#include <vector>
+
+#include <glibmm/timer.h>
 
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
@@ -35,7 +38,7 @@ using namespace std;
 using namespace PBD;
 
 namespace Evoral {
-	template class EventRingBuffer<timestamp_t>;
+	template class EventRingBuffer<MIDI::timestamp_t>;
 }
 
 pthread_t AsyncMIDIPort::_process_thread;
@@ -47,9 +50,12 @@ AsyncMIDIPort::AsyncMIDIPort (string const & name, PortFlags flags)
 	, MIDI::Port (name, MIDI::Port::Flags (0))
 	, _currently_in_cycle (false)
 	, _last_write_timestamp (0)
+	, have_timer (false)
 	, output_fifo (512)
 	, input_fifo (1024)
+#ifndef PLATFORM_WINDOWS
 	, xthread (true)
+#endif
 {
 }
 
@@ -58,7 +64,14 @@ AsyncMIDIPort::~AsyncMIDIPort ()
 }
 
 void
-AsyncMIDIPort::flush_output_fifo (pframes_t nframes)
+AsyncMIDIPort::set_timer (boost::function<MIDI::framecnt_t (void)>& f)
+{
+	timer = f;
+	have_timer = true;
+}
+
+void
+AsyncMIDIPort::flush_output_fifo (MIDI::pframes_t nframes)
 {
 	RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0 } };
 	size_t written;
@@ -89,7 +102,7 @@ AsyncMIDIPort::flush_output_fifo (pframes_t nframes)
 }
 
 void
-AsyncMIDIPort::cycle_start (pframes_t nframes)
+AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 {
 	_currently_in_cycle = true;
 	MidiPort::cycle_start (nframes);
@@ -108,21 +121,31 @@ AsyncMIDIPort::cycle_start (pframes_t nframes)
 
 	if (ARDOUR::Port::receives_input()) {
 		MidiBuffer& mb (get_midi_buffer (nframes));
-		pframes_t when = AudioEngine::instance()->sample_time_at_cycle_start();
+		framecnt_t when;
+		
+		if (have_timer) {
+			when = timer ();
+		} else {
+			when = AudioEngine::instance()->sample_time_at_cycle_start();
+		}
 
 		for (MidiBuffer::iterator b = mb.begin(); b != mb.end(); ++b) {
+			if (!have_timer) {
+				when += (*b).time();
+			}
 			input_fifo.write (when, (Evoral::EventType) 0, (*b).size(), (*b).buffer());
 		}
-		
+
+#ifndef PLATFORM_WINDOWS
 		if (!mb.empty()) {
 			xthread.wakeup ();
 		}
+#endif
 	}
-
 }
 
 void
-AsyncMIDIPort::cycle_end (pframes_t nframes)
+AsyncMIDIPort::cycle_end (MIDI::pframes_t nframes)
 {
 	if (ARDOUR::Port::sends_output()) {
 		/* move any additional data from output FIFO into the port
@@ -161,12 +184,12 @@ AsyncMIDIPort::drain (int check_interval_usecs)
 		if (vec.len[0] + vec.len[1] >= output_fifo.bufsize() - 1) {
 			break;
 		}
-		usleep (check_interval_usecs);
+		Glib::usleep (check_interval_usecs);
 	}
 }
 
 int
-AsyncMIDIPort::write (const byte * msg, size_t msglen, timestamp_t timestamp)
+AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t timestamp)
 {
 	int ret = 0;
 
@@ -219,7 +242,7 @@ AsyncMIDIPort::write (const byte * msg, size_t msglen, timestamp_t timestamp)
 		}
 
 		if (timestamp >= _cycle_nframes) {
-			std::cerr << "attempting to write MIDI event of " << msglen << " bytes at time "
+			std::cerr << "attempting to write MIDI event of " << msglen << " MIDI::bytes at time "
 				  << timestamp << " of " << _cycle_nframes
 				  << " (this will not work - needs a code fix)"
 				  << std::endl;
@@ -268,9 +291,9 @@ AsyncMIDIPort::read (MIDI::byte *, size_t)
 	timestamp_t time;
 	Evoral::EventType type;
 	uint32_t size;
-	byte buffer[input_fifo.capacity()];
+	vector<MIDI::byte> buffer(input_fifo.capacity());
 
-	while (input_fifo.read (&time, &type, &size, buffer)) {
+	while (input_fifo.read (&time, &type, &size, &buffer[0])) {
 		_parser->set_timestamp (time);
 		for (uint32_t i = 0; i < size; ++i) {
 			_parser->scanner (buffer[i]);
@@ -281,7 +304,7 @@ AsyncMIDIPort::read (MIDI::byte *, size_t)
 }
 
 void
-AsyncMIDIPort::parse (framecnt_t)
+AsyncMIDIPort::parse (MIDI::framecnt_t)
 {
 	MIDI::byte buf[1];
 

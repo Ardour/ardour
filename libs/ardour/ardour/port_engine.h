@@ -26,6 +26,7 @@
 #include <stdint.h>
 
 #include "ardour/data_type.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
@@ -74,7 +75,7 @@ class PortManager;
  * documentation, on which this entire object is based.
  */
 
-class PortEngine {
+class LIBARDOUR_API PortEngine {
   public:
     PortEngine (PortManager& pm) : manager (pm) {}
     virtual ~PortEngine() {}

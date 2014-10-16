@@ -19,13 +19,14 @@
 #ifndef __libpbd_error_h__
 #define __libpbd_error_h__
 
+#include "pbd/libpbd_visibility.h"
 #include "transmitter.h"
 
 namespace PBD {
-	extern Transmitter error;
-	extern Transmitter info;
-	extern Transmitter warning;
-	extern Transmitter fatal;
+	LIBPBD_API extern Transmitter error;
+	LIBPBD_API extern Transmitter info;
+	LIBPBD_API extern Transmitter warning;
+	LIBPBD_API extern Transmitter fatal;
 }
 
 #endif  // __libpbd_error_h__

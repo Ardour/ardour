@@ -22,10 +22,12 @@
 
 #include "pbd/signals.h"
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 	class Session;
 
-class SessionHandleRef : public PBD::ScopedConnectionList
+class LIBARDOUR_API SessionHandleRef : public PBD::ScopedConnectionList
 {
   public:
 	SessionHandleRef (ARDOUR::Session& s);
@@ -37,7 +39,7 @@ class SessionHandleRef : public PBD::ScopedConnectionList
 	virtual void insanity_check ();
 };
 
-class SessionHandlePtr
+class LIBARDOUR_API SessionHandlePtr
 {
   public:
 	SessionHandlePtr (ARDOUR::Session* s);

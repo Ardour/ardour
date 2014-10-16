@@ -38,6 +38,7 @@
 #include "evoral/Range.hpp"
 
 #include "ardour/chan_count.h"
+#include "ardour/plugin_types.h"
 
 #include <map>
 
@@ -136,7 +137,7 @@ namespace ARDOUR {
 		FadeInAutomation,
 		FadeOutAutomation,
 		EnvelopeAutomation,
-		RecEnableAutomation
+		RecEnableAutomation,
 	};
 
 	enum AutoState {
@@ -340,6 +341,7 @@ namespace ARDOUR {
 	enum EditMode {
 		Slide,
 		Splice,
+		Ripple,
 		Lock
 	};
 
@@ -418,17 +420,6 @@ namespace ARDOUR {
 		MixerOrdered
 	};
 
-	enum CrossfadeModel {
-		FullCrossfade,
-		ShortCrossfade
-	};
-
-	enum CrossfadeChoice {
-		RegionFades,
-		ConstantPowerMinus3dB,
-		ConstantPowerMinus6dB,
-	};
-
 	enum ListenPosition {
 		AfterFaderListen,
 		PreFaderListen
@@ -467,14 +458,6 @@ namespace ARDOUR {
 
 		PeakDatum min;
 		PeakDatum max;
-	};
-
-	enum PluginType {
-		AudioUnit,
-		LADSPA,
-		LV2,
-		Windows_VST,
-		LXVST,
 	};
 
 	enum RunContext {
@@ -629,8 +612,6 @@ std::istream& operator>>(std::istream& o, ARDOUR::AFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::RemoteModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ListenPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::InsertMergePolicy& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeModel& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeChoice& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::SyncSource& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
@@ -639,6 +620,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::DenormalModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::PositionLockStyle& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::FadeShape& sf);
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::SampleFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::HeaderFormat& sf);
@@ -652,8 +634,6 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::AFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::RemoteModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ListenPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::InsertMergePolicy& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::CrossfadeModel& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::CrossfadeChoice& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::SyncSource& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleBehaviour& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleUnits& sf);
@@ -662,6 +642,7 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::DenormalModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformScale& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformShape& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PositionLockStyle& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::FadeShape& sf);
 
 static inline ARDOUR::framepos_t
 session_frame_to_track_frame (ARDOUR::framepos_t session_frame, double speed)

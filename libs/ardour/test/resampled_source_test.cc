@@ -1,4 +1,4 @@
-// this is included first to avoid SearchPath definition on windows
+// this is included first to avoid Searchpath definition on windows
 #include "test_common.h"
 
 #include "pbd/file_utils.h"
@@ -19,7 +19,7 @@ ResampledSourceTest::seekTest ()
 	std::string test_file_path;
 	const string test_filename = "test.wav";
 
-	CPPUNIT_ASSERT (find_file_in_search_path (test_search_path (), test_filename, test_file_path));
+	CPPUNIT_ASSERT (find_file (test_search_path (), test_filename, test_file_path));
 
 	boost::shared_ptr<SndFileImportableSource> s (new SndFileImportableSource (test_file_path));
 	ResampledImportableSource r (s, 48000, SrcBest);

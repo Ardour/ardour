@@ -26,21 +26,21 @@ namespace ARDOUR {
 
 typedef gint16 peak_datum;
 
-struct peak_data_t {
+struct LIBARDOUR_API peak_data_t {
     peak_datum min;
     peak_datum max;
 };
 
 const uint32_t frames_per_peak = 2048;
 
-class Sound : public EDL::Piece {
+class LIBARDOUR_API Sound : public EDL::Piece {
   public:
 	int peak (peak_data_t& pk, uint32_t start, uint32_t cnt);
 	int read_peaks (peak_data_t *, uint32_t npeaks, uint32_t start, uint32_t cnt);
 	int build_peak (uint32_t first_frame, uint32_t cnt);
 };
 
-class SoundPlaylist : public EDL::Playlist {
+class LIBARDOUR_API SoundPlaylist : public EDL::Playlist {
   public:
 	int read_peaks (peak_data_t *, uint32_t npeaks, uint32_t start, uint32_t cnt);
 };

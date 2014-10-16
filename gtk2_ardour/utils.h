@@ -23,12 +23,13 @@
 #include <string>
 #include <cmath>
 #include <vector>
+
 #include "ardour/types.h"
-#include <libgnomecanvasmm/line.h>
+
 #include <gdkmm/types.h>
 #include <gtkmm/menushell.h>
 
-#include "canvas.h"
+#include "canvas/types.h"
 
 namespace PBD {
         class Controllable;
@@ -42,6 +43,12 @@ namespace Gtk {
         class Adjustment;
 }
 
+namespace ArdourCanvas {
+	class Item;
+}
+
+namespace ARDOUR_UI_UTILS {
+
 extern sigc::signal<void>  DPIReset;
 
 gint   just_hide_it (GdkEventAny*, Gtk::Window*);
@@ -52,6 +59,7 @@ unsigned char* xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h);
 
 ArdourCanvas::Points* get_canvas_points (std::string who, uint32_t npoints);
 
+Pango::FontDescription sanitized_font (std::string const&);
 Pango::FontDescription get_font_for_style (std::string widgetname);
 
 uint32_t rgba_from_style (std::string, uint32_t, uint32_t, uint32_t, uint32_t, std::string = "fg", int = Gtk::STATE_NORMAL, bool = true);
@@ -60,9 +68,10 @@ bool rgba_p_from_style (std::string, float*, float*, float*, std::string = "fg",
 
 void decorate (Gtk::Window& w, Gdk::WMDecoration d);
 
-bool canvas_item_visible (ArdourCanvas::Item* item);
-
-void set_color (Gdk::Color&, int);
+void set_color_from_rgb (Gdk::Color&, uint32_t);
+void set_color_from_rgba (Gdk::Color&, uint32_t);
+uint32_t gdk_color_to_rgba (Gdk::Color const&);
+uint32_t contrasting_text_color (uint32_t c);
 
 bool relay_key_press (GdkEventKey* ev, Gtk::Window* win);
 bool forward_key_press (GdkEventKey* ev);
@@ -70,8 +79,9 @@ bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev);
 bool emulate_key_event (Gtk::Widget*, unsigned int);
 
 Glib::RefPtr<Gdk::Pixbuf> get_xpm (std::string);
-std::string get_icon_path (const char*);
-Glib::RefPtr<Gdk::Pixbuf> get_icon (const char*);
+std::vector<std::string> get_icon_sets ();
+std::string get_icon_path (const char*, std::string icon_set = std::string(), bool is_image = true);
+Glib::RefPtr<Gdk::Pixbuf> get_icon (const char*, std::string icon_set = std::string());
 static std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> > xpm_map;
 const char* const *get_xpm_data (std::string path);
 std::string longest (std::vector<std::string>&);
@@ -88,4 +98,5 @@ Gdk::Color unique_random_color (std::list<Gdk::Color> &);
 
 std::string rate_as_string (float r);
 
+} // namespace
 #endif /* __ardour_gtk_utils_h__ */

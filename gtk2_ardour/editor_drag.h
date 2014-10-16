@@ -27,7 +27,6 @@
 
 #include "ardour/types.h"
 
-#include "canvas.h"
 #include "editor_items.h"
 
 namespace ARDOUR {
@@ -38,18 +37,13 @@ namespace PBD {
 	class StatefulDiffCommand;
 }
 
-namespace Gnome {
-	namespace Canvas {
-		class CanvasNoteEvent;
-		class CanvasPatchChange;
-	}
-}
-
+class PatchChange;
 class Editor;
 class EditorCursor;
 class TimeAxisView;
 class MidiTimeAxisView;
 class Drag;
+class NoteBase;
 
 /** Class to manage current drags */
 class DragManager
@@ -68,6 +62,8 @@ public:
 	bool end_grab (GdkEvent *);
 	bool have_item (ArdourCanvas::Item *) const;
 
+        void mark_double_click ();
+
 	/** @return true if an end drag or abort is in progress */
 	bool ending () const {
 		return _ending;
@@ -77,12 +73,12 @@ public:
 		return !_drags.empty ();
 	}
 
-	/** @return current pointer x position in trackview coordinates */
+	/** @return current pointer x position in canvas coordinates */
 	double current_pointer_x () const {
 		return _current_pointer_x;
 	}
 
-	/** @return current pointer y position in trackview coordinates */
+	/** @return current pointer y position in canvas coordinates */
 	double current_pointer_y () const {
 		return _current_pointer_y;
 	}
@@ -96,8 +92,8 @@ private:
 	Editor* _editor;
 	std::list<Drag*> _drags;
 	bool _ending; ///< true if end_grab or abort is in progress, otherwise false
-	double _current_pointer_x; ///< trackview x of the current pointer
-	double _current_pointer_y; ///< trackview y of the current pointer
+	double _current_pointer_x; ///< canvas-coordinate space x of the current pointer
+	double _current_pointer_y; ///< canvas-coordinate space y of the current pointer
 	ARDOUR::framepos_t _current_pointer_frame; ///< frame that the pointer is now at
 	bool _old_follow_playhead; ///< state of Editor::follow_playhead() before the drags started
 };
@@ -106,7 +102,7 @@ private:
 class Drag
 {
 public:
-	Drag (Editor *, ArdourCanvas::Item *);
+        Drag (Editor *, ArdourCanvas::Item *, bool trackview_only = true);
 	virtual ~Drag () {}
 
 	void set_manager (DragManager* m) {
@@ -124,6 +120,9 @@ public:
 
 	ARDOUR::framepos_t adjusted_frame (ARDOUR::framepos_t, GdkEvent const *, bool snap = true) const;
 	ARDOUR::framepos_t adjusted_current_frame (GdkEvent const *, bool snap = true) const;
+
+        bool was_double_click() const { return _was_double_click; }
+        void set_double_click (bool yn) { _was_double_click = yn; }
 
 	/** Called to start a grab of an item.
 	 *  @param e Event that caused the grab to start.
@@ -212,6 +211,8 @@ protected:
 		return _last_pointer_frame;
 	}
 
+	double current_pointer_y () const;
+
 	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*);
 
 	void show_verbose_cursor_time (framepos_t);
@@ -228,10 +229,11 @@ protected:
 	bool _was_rolling; ///< true if the session was rolling before the drag started, otherwise false
 
 private:
-
+	bool _trackview_only; ///< true if pointer y value should always be relative to the top of the trackview group
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
+        bool _was_double_click; ///< true if drag initiated by a double click event
 	double _grab_x; ///< trackview x of the grab start position
-	double _grab_y; ///< trackview y of the grab start position
+	double _grab_y; ///< y of the grab start position, possibly adjusted if _trackview_only is true
 	double _last_pointer_x; ///< trackview x of the pointer last time a motion occurred
 	double _last_pointer_y; ///< trackview y of the pointer last time a motion occurred
 	ARDOUR::framepos_t _raw_grab_frame; ///< unsnapped frame that the mouse was at when start_grab was called, or 0
@@ -245,7 +247,7 @@ class RegionDrag;
 class DraggingView
 {
 public:
-	DraggingView (RegionView *, RegionDrag *);
+	DraggingView (RegionView *, RegionDrag *, TimeAxisView* original_tav);
 
 	RegionView* view; ///< the view
 	/** index into RegionDrag::_time_axis_views of the view that this region is currently being displayed on,
@@ -260,7 +262,9 @@ public:
 	double initial_y; ///< the initial y position of the view before any reparenting
 	framepos_t initial_position; ///< initial position of the region
 	framepos_t initial_end; ///< initial end position of the region
+	framepos_t anchored_fade_length; ///< fade_length when anchored during drag
 	boost::shared_ptr<ARDOUR::Playlist> initial_playlist;
+	TimeAxisView* initial_time_axis_view;
 };
 
 /** Abstract base class for drags that involve region(s) */
@@ -312,7 +316,7 @@ public:
 protected:
 
 	double compute_x_delta (GdkEvent const *, ARDOUR::framepos_t *);
-	bool y_movement_allowed (int, double) const;
+	virtual bool y_movement_allowed (int, double) const;
 
 	bool _brushing;
 	ARDOUR::framepos_t _last_frame_position; ///< last position of the thing being dragged
@@ -345,9 +349,11 @@ public:
 
 	void setup_pointer_frame_offset ();
 
-private:
+protected:
 	typedef std::set<boost::shared_ptr<ARDOUR::Playlist> > PlaylistSet;
+	void add_stateful_diff_commands_for_playlists (PlaylistSet const &);
 
+private:
 	void finished_no_copy (
 		bool const,
 		bool const,
@@ -374,9 +380,9 @@ private:
 		PlaylistSet& modified_playlists
 		);
 
-	void add_stateful_diff_commands_for_playlists (PlaylistSet const &);
 
 	void collect_new_region_view (RegionView *);
+	RouteTimeAxisView* create_destination_time_axis (boost::shared_ptr<ARDOUR::Region>, TimeAxisView* original);
 
 	bool _copy;
 	RegionView* _new_region_view;
@@ -405,6 +411,48 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
+};
+
+/** Region drag in ripple mode */
+
+class RegionRippleDrag : public RegionMoveDrag
+{
+public:
+	RegionRippleDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
+	~RegionRippleDrag () { delete exclude; }
+
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+protected:
+	bool y_movement_allowed (int delta_track, double delta_layer) const;
+
+private:
+	TimeAxisView *prev_tav;		// where regions were most recently dragged from
+	TimeAxisView *orig_tav;		// where drag started
+	framecnt_t prev_amount;
+	framepos_t prev_position;
+	framecnt_t selection_length;
+	bool allow_moves_across_tracks; // only if all selected regions are on one track
+	ARDOUR::RegionList *exclude;
+	void add_all_after_to_views (TimeAxisView *tav, framepos_t where, const RegionSelection &exclude, bool drag_in_progress);
+	void remove_unselected_from_views (framecnt_t amount, bool move_regions);
+
+};
+
+/** "Drag" to cut a region (action only on button release) */
+class RegionCutDrag : public Drag
+{
+    public:
+	RegionCutDrag (Editor*, ArdourCanvas::Item*, framepos_t);
+	~RegionCutDrag ();
+
+	void motion (GdkEvent*, bool);
+	void finished (GdkEvent*, bool);
+	void aborted (bool);
+
+    private:
+	EditorCursor* line;
 };
 
 /** Drags to create regions */
@@ -456,7 +504,7 @@ class NoteDrag : public Drag
 	int8_t total_dy () const;
 
 	MidiRegionView* _region;
-	Gnome::Canvas::CanvasNoteEvent* _primary;
+	NoteBase* _primary;
 	double _cumulative_dx;
 	double _cumulative_dy;
 	bool _was_selected;
@@ -479,7 +527,7 @@ private:
 	framecnt_t grid_frames (framepos_t) const;
 	
 	MidiRegionView* _region_view;
-	ArdourCanvas::SimpleRect* _drag_rect;
+	ArdourCanvas::Rectangle* _drag_rect;
 	framepos_t _note[2];
 };
 
@@ -487,7 +535,7 @@ private:
 class PatchChangeDrag : public Drag
 {
 public:
-	PatchChangeDrag (Editor *, ArdourCanvas::CanvasPatchChange *, MidiRegionView *);
+	PatchChangeDrag (Editor *, PatchChange *, MidiRegionView *);
 
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
@@ -501,7 +549,7 @@ public:
 
 private:
 	MidiRegionView* _region_view;
-	ArdourCanvas::CanvasPatchChange* _patch_change;
+	PatchChange* _patch_change;
 	double _cumulative_dx;
 };
 
@@ -571,6 +619,7 @@ private:
 	Operation _operation;
 	
 	bool _preserve_fade_anchor;
+	bool _jump_position_when_done;
 };
 
 /** Meter marker drag */
@@ -632,7 +681,7 @@ private:
 class CursorDrag : public Drag
 {
 public:
-	CursorDrag (Editor *, ArdourCanvas::Item *, bool);
+	CursorDrag (Editor *, EditorCursor&, bool);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -654,6 +703,7 @@ public:
 private:
 	void fake_locate (framepos_t);
 
+        EditorCursor& _cursor;
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
 	double _grab_zoom; ///< editor frames per unit when our grab started
 };
@@ -698,7 +748,7 @@ public:
 class MarkerDrag : public Drag
 {
 public:
-	MarkerDrag (Editor *, ArdourCanvas::Item *);
+        MarkerDrag (Editor *, ArdourCanvas::Item *);
 	~MarkerDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -941,6 +991,7 @@ class RangeMarkerBarDrag : public Drag
 {
 public:
 	enum Operation {
+		CreateSkipMarker,
 		CreateRangeMarker,
 		CreateTransportMarker,
 		CreateCDMarker
@@ -965,7 +1016,7 @@ private:
 	void update_item (ARDOUR::Location *);
 
 	Operation _operation;
-	ArdourCanvas::SimpleRect* _drag_rect;
+	ArdourCanvas::Rectangle* _drag_rect;
 	bool _copy;
 };
 

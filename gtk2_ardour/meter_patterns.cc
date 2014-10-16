@@ -31,6 +31,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -613,7 +614,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 	Pango::AttrFontDesc* font_attr;
 	Pango::FontDescription font;
 
-	font = Pango::FontDescription ("ArdourMono");
+	font = Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_SmallMonospaceFont());
 	double fixfontsize = 81920.0 / (double) ARDOUR::Config->get_font_scale();
 
 	font.set_weight (Pango::WEIGHT_NORMAL);
@@ -885,7 +886,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 				case DataType::MIDI:
 					align_center = false; // don't bleed into legend
 					fraction = (j->first) / 127.0;
-					pos = 1 + height - (gint) rintf (height * fraction);
+					pos = 1 + height - (gint) lrintf (height * fraction);
 					pos = min (pos, height);
 					cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 					if (tickleft) {

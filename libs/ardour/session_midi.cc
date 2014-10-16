@@ -22,8 +22,6 @@
 #include <cerrno>
 #include <cassert>
 #include <unistd.h>
-#include <fcntl.h>
-#include <poll.h>
 
 #include <boost/shared_ptr.hpp>
 
@@ -34,6 +32,7 @@
 
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
+#include "pbd/timersub.h"
 
 #include "timecode/time.h"
 
@@ -349,7 +348,7 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
  * @param t time to send.
  */
 int
-Session::send_full_time_code (framepos_t const t, pframes_t nframes)
+Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 {
 	/* This function could easily send at a given frame offset, but would
 	 * that be useful?  Does ardour do sub-block accurate locating? [DR] */
@@ -418,7 +417,7 @@ Session::send_full_time_code (framepos_t const t, pframes_t nframes)
 	msg[4] = 0x1;
 	msg[9] = 0xf7;
 
-	msg[5] = mtc_timecode_bits | timecode.hours;
+	msg[5] = mtc_timecode_bits | (timecode.hours % 24);
 	msg[6] = timecode.minutes;
 	msg[7] = timecode.seconds;
 	msg[8] = timecode.frames;
@@ -440,7 +439,7 @@ Session::send_full_time_code (framepos_t const t, pframes_t nframes)
  * earlier already this cycle by send_full_time_code)
  */
 int
-Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
+Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_frame, ARDOUR::pframes_t nframes)
 {
 	if (_engine.freewheeling() || !_send_qf_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
 		// cerr << "(MTC) Not sending MTC\n";
@@ -512,7 +511,7 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 		assert (msg_time < end_frame);
 
 		/* convert from session frames back to JACK frames using the transport speed */
-		pframes_t const out_stamp = (msg_time - start_frame) / _transport_speed;
+		ARDOUR::pframes_t const out_stamp = (msg_time - start_frame) / _transport_speed;
 		assert (out_stamp < nframes);
 
 		MidiBuffer& mb (_midi_ports->mtc_output_port()->get_midi_buffer(nframes));
@@ -598,6 +597,7 @@ Session::send_song_position_pointer (framepos_t)
 int
 Session::start_midi_thread ()
 {
+	if (midi_control_ui) { return 0; }
 	midi_control_ui = new MidiControlUI (*this);
 	midi_control_ui->run ();
 	return 0;
@@ -644,4 +644,28 @@ MIDI::Port*
 Session::mmc_input_port () const
 {
 	return _midi_ports->mmc_input_port ();
+}
+
+MIDI::Port*
+Session::scene_output_port () const
+{
+	return _midi_ports->scene_output_port ();
+}
+
+MIDI::Port*
+Session::scene_input_port () const
+{
+	return _midi_ports->scene_input_port ();
+}
+
+boost::shared_ptr<MidiPort>
+Session::scene_in () const
+{
+	return _midi_ports->scene_in ();
+}
+
+boost::shared_ptr<MidiPort>
+Session::scene_out () const
+{
+	return _midi_ports->scene_out ();
 }

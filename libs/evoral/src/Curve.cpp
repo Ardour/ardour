@@ -22,6 +22,7 @@
 #include <climits>
 #include <cfloat>
 #include <cmath>
+#include <vector>
 
 #include <glibmm/threads.h>
 
@@ -56,8 +57,8 @@ Curve::solve ()
 		   (www.korf.co.uk/spline.pdf) for more details.
 		*/
 
-		double x[npoints];
-		double y[npoints];
+		vector<double> x(npoints);
+		vector<double> y(npoints);
 		uint32_t i;
 		ControlList::EventList::const_iterator xx;
 
@@ -402,15 +403,13 @@ Curve::multipoint_eval (double x)
 		double tdelta = x - before->when;
 		double trange = after->when - before->when;
 
-		return before->value + (vdelta * (tdelta / trange));
-
-#if 0
-		double x2 = x * x;
-		ControlEvent* ev = *range.second;
-
-		return = ev->coeff[0] + (ev->coeff[1] * x) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x);
-#endif
-
+		if (_list.interpolation() == ControlList::Curved && after->coeff) {
+				ControlEvent* ev = after;
+				double x2 = x * x;
+				return ev->coeff[0] + (ev->coeff[1] * x) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x);
+		} else {
+			return before->value + (vdelta * (tdelta / trange));
+		}
 	}
 
 	/* x is a control point in the data */

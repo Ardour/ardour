@@ -286,6 +286,11 @@ def signal(f, n, v):
     print("""
 	boost::shared_ptr<Connection> _connect (slot_function_type f)
 	{
+#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+                if (_debug_connection) {
+                        PBD::stacktrace (std::cerr, 10);
+                }
+#endif
 		boost::shared_ptr<Connection> c (new Connection (this));
 		Glib::Threads::Mutex::Lock lm (_mutex);
 		_slots[c] = f;

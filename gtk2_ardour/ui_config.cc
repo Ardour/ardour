@@ -40,16 +40,23 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
+static const char* ui_config_file_name = "ui_config";
+static const char* default_ui_config_file_name = "default_ui_config";
+
 UIConfiguration::UIConfiguration ()
 	:
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,val) var (name,val),
 #define CANVAS_VARIABLE(var,name) var (name),
+#define CANVAS_STRING_VARIABLE(var,name) var (name),
+#define CANVAS_FONT_VARIABLE(var,name) var (name),
 #include "ui_config_vars.h"
 #include "canvas_vars.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_VARIABLE
+#undef  CANVAS_STRING_VARIABLE
+#undef  CANVAS_FONT_VARIABLE
 	_dirty (false)
 {
 	load_state();
@@ -59,25 +66,24 @@ UIConfiguration::~UIConfiguration ()
 {
 }
 
+void
+UIConfiguration::map_parameters (boost::function<void (std::string)>& functor)
+{
+#undef  UI_CONFIG_VARIABLE
+#define UI_CONFIG_VARIABLE(Type,var,Name,value) functor (Name);
+#include "ui_config_vars.h"
+#undef  UI_CONFIG_VARIABLE
+}
+
 int
 UIConfiguration::load_defaults ()
 {
 	int found = 0;
+        std::string rcfile;
 
-	std::string default_ui_rc_file;
-	std::string rcfile;
-
-	if (getenv ("ARDOUR_SAE")) {
-		rcfile = "ardour3_ui_sae.conf";
-	} else {
-		rcfile = "ardour3_ui_default.conf";
-	}
-
-	if (find_file_in_search_path (ardour_config_search_path(), rcfile, default_ui_rc_file) ) {
+	if (find_file (ardour_config_search_path(), default_ui_config_file_name, rcfile) ) {
 		XMLTree tree;
 		found = 1;
-
-		string rcfile = default_ui_rc_file;
 
 		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
 
@@ -102,13 +108,11 @@ UIConfiguration::load_state ()
 {
 	bool found = false;
 
-	std::string default_ui_rc_file;
+	std::string rcfile;
 
-	if ( find_file_in_search_path (ardour_config_search_path(), "ardour3_ui_default.conf", default_ui_rc_file)) {
+	if ( find_file (ardour_config_search_path(), default_ui_config_file_name, rcfile)) {
 		XMLTree tree;
 		found = true;
-
-		string rcfile = default_ui_rc_file;
 
 		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
 
@@ -123,13 +127,9 @@ UIConfiguration::load_state ()
 		}
 	}
 
-	std::string user_ui_rc_file;
-
-	if (find_file_in_search_path (ardour_config_search_path(), "ardour3_ui.conf", user_ui_rc_file)) {
+	if (find_file (ardour_config_search_path(), ui_config_file_name, rcfile)) {
 		XMLTree tree;
 		found = true;
-
-		string rcfile = user_ui_rc_file;
 
 		info << string_compose (_("Loading user ui configuration file %1"), rcfile) << endmsg;
 
@@ -160,7 +160,7 @@ UIConfiguration::save_state()
 	XMLTree tree;
 
 	std::string rcfile(user_config_directory());
-	rcfile = Glib::build_filename (rcfile, "ardour3_ui.conf");
+	rcfile = Glib::build_filename (rcfile, ui_config_file_name);
 
 	// this test seems bogus?
 	if (rcfile.length()) {
@@ -206,10 +206,14 @@ UIConfiguration::get_variables (std::string which_node)
 #undef  CANVAS_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,Name,value) if (node->name() == "UI") { var.add_to_node (*node); }
 #define CANVAS_VARIABLE(var,Name) if (node->name() == "Canvas") { var.add_to_node (*node); }
+#define CANVAS_STRING_VARIABLE(var,Name) if (node->name() == "Canvas") { var.add_to_node (*node); }
+#define CANVAS_FONT_VARIABLE(var,Name) if (node->name() == "Canvas") { var.add_to_node (*node); }
 #include "ui_config_vars.h"
 #include "canvas_vars.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_VARIABLE
+#undef  CANVAS_STRING_VARIABLE
+#undef  CANVAS_FONT_VARIABLE
 
 	return *node;
 }
@@ -253,32 +257,75 @@ UIConfiguration::set_variables (const XMLNode& node)
          if (var.set_from_node (node)) { \
 		 ParameterChanged (name); \
 		 }
+#define CANVAS_STRING_VARIABLE(var,name)	\
+         if (var.set_from_node (node)) { \
+		 ParameterChanged (name); \
+		 }
+#define CANVAS_FONT_VARIABLE(var,name)	\
+         if (var.set_from_node (node)) { \
+		 ParameterChanged (name); \
+		 }
 #include "ui_config_vars.h"
 #include "canvas_vars.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_VARIABLE
+#undef  CANVAS_STRING_VARIABLE
+#undef  CANVAS_FONT_VARIABLE
 }
 
 void
 UIConfiguration::pack_canvasvars ()
 {
 #undef  CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,name) canvas_colors.insert (std::pair<std::string,UIConfigVariable<uint32_t>* >(name,&var));
+#define CANVAS_VARIABLE(var,name) canvas_colors.insert (std::pair<std::string,ColorVariable<uint32_t>* >(name,&var));
+#define CANVAS_STRING_VARIABLE(var,name) 
+#define CANVAS_FONT_VARIABLE(var,name) 
 #include "canvas_vars.h"
 #undef  CANVAS_VARIABLE
+#undef  CANVAS_STRING_VARIABLE
+#undef  CANVAS_FONT_VARIABLE
 }
 
 uint32_t
 UIConfiguration::color_by_name (const std::string& name)
 {
-	map<std::string,UIConfigVariable<uint32_t>* >::iterator i = canvas_colors.find (name);
+	map<std::string,ColorVariable<uint32_t>* >::iterator i = canvas_colors.find (name);
 
 	if (i != canvas_colors.end()) {
 		return i->second->get();
 	}
+#if 0 // yet unsed experimental style postfix
+	/* Idea: use identical colors but different font/sizes
+	 * for variants of the same 'widget'.
+	 *
+	 * example:
+	 *  set_name("mute button");  // in route_ui.cc
+	 *  set_name("mute button small"); // in mixer_strip.cc
+	 *
+	 * ardour3_widget_list.rc:
+	 *  widget "*mute button" style:highest "small_button"
+	 *  widget "*mute button small" style:highest "very_small_text"
+	 *
+	 * both use color-schema of defined in
+	 *   BUTTON_VARS(MuteButton, "mute button")
+	 *
+	 * (in this particular example the widgets should be packed
+	 * vertically shinking the mixer strip ones are currently not)
+	 */
+	const size_t name_len = name.size();
+	const size_t name_sep = name.find(':');
+	for (i = canvas_colors.begin(); i != canvas_colors.end(), name_sep != string::npos; ++i) {
+		const size_t cmp_len = i->first.size();
+		const size_t cmp_sep = i->first.find(':');
+		if (cmp_len >= name_len || cmp_sep == string::npos) continue;
+		if (name.substr(name_sep) != i->first.substr(cmp_sep)) continue;
+		if (name.substr(0, cmp_sep) != i->first.substr(0, cmp_sep)) continue;
+		return i->second->get();
+	}
+#endif
 
 	// cerr << string_compose (_("Color %1 not found"), name) << endl;
-	return RGBA_TO_UINT (random()%256,random()%256,random()%256,0xff);
+	return RGBA_TO_UINT (g_random_int()%256,g_random_int()%256,g_random_int()%256,0xff);
 }
 
 void

@@ -1,5 +1,9 @@
 #include "SMFTest.hpp"
 
+#ifdef WIN32
+#include <io.h> // for R_OK
+#endif
+
 using namespace std;
 
 CPPUNIT_TEST_SUITE_REGISTRATION( SMFTest );

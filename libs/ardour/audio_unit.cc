@@ -28,12 +28,13 @@
 #include "pbd/xml++.h"
 #include "pbd/convert.h"
 #include "pbd/whitespace.h"
-#include "pbd/pathscanner.h"
+#include "pbd/file_utils.h"
 #include "pbd/locale_guard.h"
 
 #include <glibmm/threads.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
+#include <glib/gstdio.h>
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
@@ -2048,20 +2049,19 @@ AUPlugin::current_preset() const
 void
 AUPlugin::find_presets ()
 {
-	vector<string*>* preset_files;
-	PathScanner scanner;
+	vector<string> preset_files;
 
 	user_preset_map.clear ();
 
-	preset_files = scanner (preset_search_path, au_preset_filter, this, true, true, -1, true);
+	find_files_matching_filter (preset_files, preset_search_path, au_preset_filter, this, true, true, true);
 
-	if (!preset_files) {
+	if (preset_files.empty()) {
 		return;
 	}
 
-	for (vector<string*>::iterator x = preset_files->begin(); x != preset_files->end(); ++x) {
+	for (vector<string>::iterator x = preset_files.begin(); x != preset_files.end(); ++x) {
 
-		string path = *(*x);
+		string path = *x;
 		string preset_name;
 
 		/* make an initial guess at the preset name using the path */
@@ -2078,10 +2078,7 @@ AUPlugin::find_presets ()
 			user_preset_map[preset_name] = path;
 		}
 
-		delete *x;
 	}
-
-	delete preset_files;
 
 	/* now fill the vector<string> with the names we have */
 
@@ -2277,6 +2274,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		}
 
 		AUPluginInfo::get_names (temp, info->name, info->creator);
+		ARDOUR::PluginScanMessage(_("AU"), info->name, false);
 
 		info->type = ARDOUR::AudioUnit;
 		info->unique_id = stringify_descriptor (*info->descriptor);
@@ -2453,7 +2451,7 @@ AUPluginInfo::save_cached_info ()
 
 	if (!tree.write (path)) {
 		error << string_compose (_("could not save AU cache to %1"), path) << endmsg;
-		unlink (path.c_str());
+		g_unlink (path.c_str());
 	}
 }
 

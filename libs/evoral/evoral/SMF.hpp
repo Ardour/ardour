@@ -21,6 +21,10 @@
 #define EVORAL_SMF_HPP
 
 #include <cassert>
+
+#include <glibmm/threads.h>
+
+#include "evoral/visibility.h"
 #include "evoral/types.hpp"
 
 struct smf_struct;
@@ -35,7 +39,7 @@ namespace Evoral {
 /** Standard Midi File.
  * Currently only tempo-based time of a given PPQN is supported.
  */
-class SMF {
+class LIBEVORAL_API SMF {
 public:
 	class FileError : public std::exception {
 	public:
@@ -52,6 +56,7 @@ public:
 
 	static bool test(const std::string& path);
 	int  open(const std::string& path, int track=1) THROW_FILE_ERROR;
+	// XXX 19200 = 10 * Timecode::BBT_Time::ticks_per_beat
 	int  create(const std::string& path, int track=1, uint16_t ppqn=19200) THROW_FILE_ERROR;
 	void close() THROW_FILE_ERROR;
 
@@ -82,6 +87,7 @@ private:
 	smf_t*       _smf;
 	smf_track_t* _smf_track;
 	bool         _empty; ///< true iff file contains(non-empty) events
+	mutable Glib::Threads::Mutex _smf_lock;
 };
 
 }; /* namespace Evoral */

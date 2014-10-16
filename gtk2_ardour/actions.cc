@@ -36,7 +36,6 @@
 
 #include "gtkmm2ext/actions.h"
 
-#include "utils.h"
 #include "actions.h"
 #include "i18n.h"
 
@@ -72,11 +71,11 @@ ActionManager::init ()
 }
 
 void
-ActionManager::load_menus ()
+ActionManager::load_menus (const string& menus_file)
 {
 	std::string ui_file;
 
-	find_file_in_search_path (ardour_config_search_path(), "ardour.menus", ui_file);
+	find_file (ardour_config_search_path(), menus_file, ui_file);
 
 	bool loaded = false;
 
@@ -85,15 +84,15 @@ ActionManager::load_menus ()
 		info << string_compose (_("Loading menus from %1"), ui_file) << endmsg;
 		loaded = true;
 	} catch (Glib::MarkupError& err) {
-		error << string_compose (_("badly formatted UI definition file: %1"), err.what()) << endmsg;
-		cerr << string_compose (_("badly formatted UI definition file: %1"), err.what()) << endl;
+		error << string_compose (_("badly formatted menu definition file: %1"), err.what()) << endmsg;
+		cerr << string_compose (_("badly formatted menu definition file: %1"), err.what()) << endl;
 	} catch (...) {
 		error << string_compose (_("%1 menu definition file not found"), PROGRAM_NAME) << endmsg;
 	}
 
 	if (!loaded) {
-		cerr << string_compose (_("%1 will not work without a valid ardour.menus file"), PROGRAM_NAME) << endl;
-		error << string_compose (_("%1 will not work without a valid ardour.menus file"), PROGRAM_NAME) << endmsg;
+		cerr << string_compose (_("%1 will not work without a valid menu definition file"), PROGRAM_NAME) << endl;
+		error << string_compose (_("%1 will not work without a valid menu definition file"), PROGRAM_NAME) << endmsg;
 		exit(1);
 	}
 }

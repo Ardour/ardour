@@ -23,6 +23,7 @@
 #include <glibmm/threads.h>
 
 #include "ardour/chan_count.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
@@ -30,7 +31,7 @@ namespace ARDOUR {
 class ThreadBuffers;
 class BufferSet;
 
-class ProcessThread
+class LIBARDOUR_API ProcessThread
 {
 public:
 	ProcessThread ();

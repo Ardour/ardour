@@ -22,8 +22,9 @@
 #define _GNU_SOURCE
 #include <dlfcn.h>
 #include <stdio.h>
-#include <pthread.h>
 #include <stdlib.h>
+
+#include "pbd/pthread_utils.h"
 
 int (*pbd_alloc_allowed) () = 0;
 

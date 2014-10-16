@@ -52,7 +52,11 @@ MidiControlUI::MidiControlUI (Session& s)
 
 MidiControlUI::~MidiControlUI ()
 {
+	/* stop the thread */
+	quit ();
+	/* drop all ports as GIO::Sources */
 	clear_ports ();
+	/* we no longer exist */
 	_instance = 0;
 }
 
@@ -77,7 +81,9 @@ MidiControlUI::midi_input_handler (IOCondition ioc, AsyncMIDIPort* port)
 
 	if (ioc & IO_IN) {
 
+#ifndef PLATFORM_WINDOWS
 		CrossThreadChannel::drain (port->selectable());
+#endif
 
 		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", ((ARDOUR::Port*)port)->name()));
 		framepos_t now = _session.engine().sample_time();
@@ -114,6 +120,10 @@ MidiControlUI::reset_ports ()
 	
 	
 	if ((p = dynamic_cast<AsyncMIDIPort*> (_session.mmc_input_port()))) {
+		ports.push_back (p);
+	}
+
+	if ((p = dynamic_cast<AsyncMIDIPort*> (_session.scene_input_port()))) {
 		ports.push_back (p);
 	}
 	

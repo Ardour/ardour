@@ -20,11 +20,12 @@
 #ifndef __ardour_readable_h__
 #define __ardour_readable_h__
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
 
-class Readable {
+class LIBARDOUR_API Readable {
   public:
 	Readable () {}
 	virtual ~Readable() {}

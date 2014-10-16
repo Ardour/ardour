@@ -34,7 +34,7 @@ namespace AudioGrapher
 static void
 snprintf_bounded_null_filled (char* target, size_t target_size, char const * fmt, ...)
 {
-	char buf[target_size+1];
+	char *buf = (char*)alloca(target_size+1);
 	va_list ap;
 
 	va_start (ap, fmt);

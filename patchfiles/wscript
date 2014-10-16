@@ -10,7 +10,7 @@ def configure(conf):
 
 def build(bld):
     patchfiles = bld.path.ant_glob ('*.midnam')
-    bld.install_files (os.path.join(bld.env['DATADIR'], 'ardour3', 'patchfiles'), patchfiles)
+    bld.install_files (os.path.join(bld.env['DATADIR'], 'patchfiles'), patchfiles)
 
 def options(opt):
     pass

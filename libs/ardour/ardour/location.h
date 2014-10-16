@@ -34,11 +34,14 @@
 #include "pbd/statefuldestructible.h"
 
 #include "ardour/ardour.h"
+#include "ardour/scene_change.h"
 #include "ardour/session_handle.h"
 
 namespace ARDOUR {
 
-class Location : public SessionHandleRef, public PBD::StatefulDestructible
+class SceneChange;
+
+class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDestructible
 {
   public:
 	enum Flags {
@@ -48,7 +51,8 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 		IsHidden = 0x8,
 		IsCDMarker = 0x10,
 		IsRangeMarker = 0x20,
-		IsSessionRange = 0x40
+		IsSessionRange = 0x40,
+		IsSkip = 0x80,
 	};
 
 	Location (Session &);
@@ -81,6 +85,7 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 	void set_hidden (bool yn, void *src);
 	void set_cd (bool yn, void *src);
 	void set_is_range_marker (bool yn, void* src);
+        void set_skip (bool yn);
 
 	bool is_auto_punch () const { return _flags & IsAutoPunch; }
 	bool is_auto_loop () const { return _flags & IsAutoLoop; }
@@ -89,21 +94,40 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 	bool is_cd_marker () const { return _flags & IsCDMarker; }
 	bool is_session_range () const { return _flags & IsSessionRange; }
 	bool is_range_marker() const { return _flags & IsRangeMarker; }
+	bool is_skip() const { return _flags & IsSkip; }
 	bool matches (Flags f) const { return _flags & f; }
 
 	Flags flags () const { return _flags; }
 
-	PBD::Signal1<void,Location*> name_changed;
-	PBD::Signal1<void,Location*> end_changed;
-	PBD::Signal1<void,Location*> start_changed;
+	boost::shared_ptr<SceneChange> scene_change() const { return _scene_change; }
+	void set_scene_change (boost::shared_ptr<SceneChange>);
 
-	PBD::Signal1<void,Location*> LockChanged;
-	PBD::Signal2<void,Location*,void*> FlagsChanged;
-	PBD::Signal1<void,Location*> PositionLockStyleChanged;
+        /* these are static signals for objects that want to listen to all
+           locations at once.
+        */
+
+	static PBD::Signal1<void,Location*> name_changed;
+	static PBD::Signal1<void,Location*> end_changed;
+	static PBD::Signal1<void,Location*> start_changed;
+	static PBD::Signal1<void,Location*> flags_changed;
+        static PBD::Signal1<void,Location*> lock_changed;
+	static PBD::Signal1<void,Location*> position_lock_style_changed;
 
 	/* this is sent only when both start and end change at the same time */
-	PBD::Signal1<void,Location*> changed;
+	static PBD::Signal1<void,Location*> changed;
 
+        /* these are member signals for objects that care only about
+           changes to this object 
+        */
+
+	PBD::Signal0<void> NameChanged;
+	PBD::Signal0<void> EndChanged;
+	PBD::Signal0<void> StartChanged;
+	PBD::Signal0<void> Changed;
+	PBD::Signal0<void> FlagsChanged;
+	PBD::Signal0<void> LockChanged;
+	PBD::Signal0<void> PositionLockStyleChanged;
+        
 	/* CD Track / CD-Text info */
 
 	std::map<std::string, std::string> cd_info;
@@ -116,6 +140,8 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 	void set_position_lock_style (PositionLockStyle ps);
 	void recompute_frames_from_bbt ();
 
+	static PBD::Signal0<void> scene_changed;
+
   private:
 	std::string        _name;
 	framepos_t         _start;
@@ -125,13 +151,14 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 	Flags              _flags;
 	bool               _locked;
 	PositionLockStyle  _position_lock_style;
+	boost::shared_ptr<SceneChange> _scene_change;
 
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
 	void recompute_bbt_from_frames ();
 };
 
-class Locations : public SessionHandleRef, public PBD::StatefulDestructible
+class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDestructible
 {
   public:
 	typedef std::list<Location *> LocationList;
@@ -160,6 +187,8 @@ class Locations : public SessionHandleRef, public PBD::StatefulDestructible
 
 	int set_current (Location *, bool want_lock = true);
 	Location *current () const { return current_location; }
+
+	Location* mark_at (framepos_t, framecnt_t slop = 0) const;
 
         framepos_t first_mark_before (framepos_t, bool include_special_ranges = false);
 	framepos_t first_mark_after (framepos_t, bool include_special_ranges = false);
@@ -200,6 +229,7 @@ class Locations : public SessionHandleRef, public PBD::StatefulDestructible
 
 	int set_current_unlocked (Location *);
 	void location_changed (Location*);
+	void listen_to (Location*);
 };
 
 } // namespace ARDOUR

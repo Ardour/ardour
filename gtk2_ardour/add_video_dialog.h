@@ -22,6 +22,10 @@
 
 #include <string>
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <gtkmm.h>
 
 #include "ardour/types.h"
@@ -76,6 +80,10 @@ class AddVideoDialog : public ArdourDialog
 	Gtk::Notebook notebook;
 	Gtk::Button *ok_button;
 
+	Gtk::VBox server_index_box;
+	Gtk::VBox file_chooser_box;
+	Gtk::HBox browser_container;
+
 	/* Harvid Browser related */
 	class HarvidColumns : public Gtk::TreeModel::ColumnRecord
 	{
@@ -104,6 +112,9 @@ class AddVideoDialog : public ArdourDialog
 	HarvidColumns harvid_list_columns;
 	Glib::RefPtr<Gtk::ListStore> harvid_list;
 	Gtk::TreeView harvid_list_view;
+
+	bool show_advanced;
+	bool loaded_docroot;
 };
 
 #endif /* __gtk_ardour_add_video_dialog_h__ */

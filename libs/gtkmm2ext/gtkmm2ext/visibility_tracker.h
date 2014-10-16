@@ -22,13 +22,15 @@
 
 #include <gdk/gdkevents.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace GTK {
 	class Window;
 }
 
 namespace Gtkmm2ext {
 
-class VisibilityTracker : public virtual sigc::trackable {
+class LIBGTKMM2EXT_API VisibilityTracker : public virtual sigc::trackable {
   public:
     VisibilityTracker (Gtk::Window&);
     virtual ~VisibilityTracker() {}

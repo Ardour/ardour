@@ -17,8 +17,10 @@
 
 */
 
+#ifdef COMPILER_MSVC
+#include <ardourext/float_cast.h>
+#endif
 #include "ardour/pcm_utils.h"
-
 #include <cmath>
 
 using namespace std;

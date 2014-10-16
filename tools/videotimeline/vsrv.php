@@ -16,6 +16,14 @@ if (isset($_SERVER['PATH_INFO'])) {
 		case '/info':
 			$mode='info';
 			break;
+		case '/rc':
+		case '/rc/':
+			# TODO proper CSV encode (possible quotes in docroot)
+			# TODO support optional plain text version
+			echo '"'.$docroot.'",'.$_SERVER['SERVER_ADDR'].','.$_SERVER['SERVER_PORT'].',0,"/info /rc /status",""'."\n";
+			echo 'status: ok, online.';
+			exit;
+			break;
 		default:
 			break;
 	}
@@ -38,6 +46,9 @@ if (isset($_REQUEST['format'])) {
 		break;
 	case 'rgba':
 		$fmt='rgba';
+		break;
+	case 'bgra':
+		$fmt='bgra';
 		break;
 	case 'rgb':
 		$fmt='rgb';
@@ -91,6 +102,17 @@ else if (preg_match('@Video:.* ([0-9]+x[0-9]+),@m',$nfo, $m)) {
 }
 
 if ($mode=='info') {
+	if (isset($_REQUEST['format'])) {
+		switch ($_REQUEST['format']) {
+		case 'csv':
+			# protocol, width, height, aspect, fps, fps, duration
+			echo "1,0,0,$ar,$fr,$df\n";
+			exit;
+			break;
+		default:
+			break;
+		}
+	}
 	# Protocol Version number
 	# FPS
 	# duration (in frames)

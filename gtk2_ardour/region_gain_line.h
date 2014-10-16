@@ -22,7 +22,6 @@
 
 #include "ardour/ardour.h"
 
-#include <libgnomecanvasmm.h>
 
 #include "automation_line.h"
 
@@ -36,7 +35,7 @@ class AudioRegionView;
 class AudioRegionGainLine : public AutomationLine
 {
   public:
-	AudioRegionGainLine (const std::string & name, AudioRegionView&, ArdourCanvas::Group& parent, boost::shared_ptr<ARDOUR::AutomationList>);
+	AudioRegionGainLine (const std::string & name, AudioRegionView&, ArdourCanvas::Container& parent, boost::shared_ptr<ARDOUR::AutomationList>);
 
         void start_drag_single (ControlPoint*, double, float);
         void end_drag (bool with_push, uint32_t final_index);

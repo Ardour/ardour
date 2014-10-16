@@ -1,0 +1,5 @@
+#!/bin/sh
+. `dirname "$0"`/../build/headless/hardev_common_waf.sh
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+export ARDOUR_INSIDE_GDB=1
+exec gdb --args $TOP/$EXECUTABLE $@

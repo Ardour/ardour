@@ -20,16 +20,23 @@
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/route_group.h"
-#include "editor_group_tabs.h"
+
+#include "canvas/utils.h"
+
+#include "ardour_ui.h"
 #include "editor.h"
-#include "route_time_axis.h"
-#include "utils.h"
+#include "editor_group_tabs.h"
 #include "editor_route_groups.h"
 #include "editor_routes.h"
+#include "rgb_macros.h"
+#include "route_time_axis.h"
+#include "utils.h"
+
 #include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 EditorGroupTabs::EditorGroupTabs (Editor* e)
 	: EditorComponent (e)
@@ -83,13 +90,17 @@ void
 EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 {
 	double const arc_radius = get_width();
-
+	double r, g, b, a;
+	
 	if (tab.group && tab.group->is_active()) {
-		cairo_set_source_rgba (cr, tab.color.get_red_p (), tab.color.get_green_p (), tab.color.get_blue_p (), 1);
+		ArdourCanvas::color_to_rgba (tab.color, r, g, b, a);
 	} else {
-		cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
+		ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->get_canvasvar_InactiveGroupTab(), r, g, b, a);
 	}
 
+	a = 1.0;
+
+	cairo_set_source_rgba (cr, r, g, b, a);
 	cairo_move_to (cr, 0, tab.from + arc_radius);
 	cairo_arc (cr, get_width(), tab.from + arc_radius, arc_radius, M_PI, 3 * M_PI / 2);
 	cairo_line_to (cr, get_width(), tab.to);
@@ -103,7 +114,10 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 		cairo_text_extents_t ext;
 		cairo_text_extents (cr, tab.group->name().c_str(), &ext);
 
-		cairo_set_source_rgb (cr, 1, 1, 1);
+		ArdourCanvas::Color c = ArdourCanvas::contrasting_text_color (ArdourCanvas::rgba_to_color (r, g, b, a));
+		ArdourCanvas::color_to_rgba (c, r, g, b, a);
+
+		cairo_set_source_rgb (cr, r, g, b);
 		cairo_move_to (cr, get_width() - ext.height / 2, tab.from + (f.second + tab.to - tab.from) / 2);
 		cairo_save (cr);
 		cairo_rotate (cr, - M_PI / 2);

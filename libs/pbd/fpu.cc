@@ -16,7 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-
+#ifndef  COMPILER_MSVC
 #include "libpbd-config.h"
 
 #define _XOPEN_SOURCE 600
@@ -39,11 +39,14 @@ FPU::FPU ()
 
 	_flags = Flags (0);
 
+#if defined(__MINGW64__) // Vkamyshniy: under __MINGW64__ the assembler code below is not compiled
+	return;
+#endif
+
 #if !( (defined __x86_64__) || (defined __i386__) ) // !ARCH_X86
 	return;
 #else
 
-	
 #ifndef _LP64 //USE_X86_64_ASM
 	asm volatile (
 		"mov $1, %%eax\n"
@@ -105,9 +108,9 @@ FPU::FPU ()
 		*fxbuf = (char *) malloc (512);
 		assert (*fxbuf);
 #else
-		posix_memalign ((void **) &fxbuf, 16, sizeof (char *));
+		(void) posix_memalign ((void **) &fxbuf, 16, sizeof (char *));
 		assert (fxbuf);
-		posix_memalign ((void **) fxbuf, 16, 512);
+		(void) posix_memalign ((void **) fxbuf, 16, 512);
 		assert (*fxbuf);
 #endif			
 		
@@ -141,3 +144,7 @@ FPU::FPU ()
 FPU::~FPU ()
 {
 }
+
+#else  // COMPILER_MSVC
+	const char* pbd_fpu = "pbd/msvc/fpu.cc takes precedence over this file";
+#endif // COMPILER_MSVC

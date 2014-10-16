@@ -26,22 +26,24 @@
 
 #include <gtk/gtk.h>
 
+#include "gtkmm2ext/visibility.h"
+
 G_BEGIN_DECLS
 
 typedef struct _GtkApplicationMenuGroup GtkApplicationMenuGroup;
 
-int  gtk_application_init (void);
-void gtk_application_ready (void);
-void gtk_application_cleanup (void);
+LIBGTKMM2EXT_API int  gtk_application_init (void);
+LIBGTKMM2EXT_API void gtk_application_ready (void);
+LIBGTKMM2EXT_API void gtk_application_cleanup (void);
 
-void                      gtk_application_set_menu_bar       (GtkMenuShell    *menu_shell);
-GtkApplicationMenuGroup * gtk_application_add_app_menu_group (void);
-void                      gtk_application_add_app_menu_item   (GtkApplicationMenuGroup *group,
+LIBGTKMM2EXT_API void                      gtk_application_set_menu_bar       (GtkMenuShell    *menu_shell);
+LIBGTKMM2EXT_API GtkApplicationMenuGroup * gtk_application_add_app_menu_group (void);
+LIBGTKMM2EXT_API void                      gtk_application_add_app_menu_item   (GtkApplicationMenuGroup *group,
 							       GtkMenuItem     *menu_item);
 
 /* these are private but here until GtkApplication becomes a GtkObject with an interface */
 
-extern GList *_gtk_application_menu_groups;
+LIBGTKMM2EXT_LOCAL extern GList *_gtk_application_menu_groups;
 
 G_END_DECLS
 

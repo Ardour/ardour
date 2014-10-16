@@ -23,7 +23,9 @@
 
 #include "pbd/xml++.h"
 #include "pbd/error.h"
-#include "pbd/pathscanner.h"
+#include "pbd/file_utils.h"
+#include "pbd/convert.h"
+#include "pbd/stl_delete.h"
 
 #include "ardour/filesystem_paths.h"
 
@@ -221,7 +223,7 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 	/* strip count is mandatory */
 	if ((child = node.child ("Strips")) != 0) {
 		if ((prop = child->property ("value")) != 0) {
-			if ((_strip_cnt = atoi (prop->value())) == 0) {
+			if ((_strip_cnt = atoi (prop->value().c_str())) == 0) {
 				_strip_cnt = 8;
 			}
 		}
@@ -231,7 +233,7 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 
 	if ((child = node.child ("Extenders")) != 0) {
 		if ((prop = child->property ("value")) != 0) {
-			if ((_extenders = atoi (prop->value())) == 0) {
+			if ((_extenders = atoi (prop->value().c_str())) == 0) {
 				_extenders = 0;
 			}
 		}
@@ -441,7 +443,7 @@ static const char * const devinfo_env_variable_name = "ARDOUR_MCP_PATH";
 static const char* const devinfo_dir_name = "mcp";
 static const char* const devinfo_suffix = ".device";
 
-static SearchPath
+static Searchpath
 devinfo_search_path ()
 {
 	bool devinfo_path_defined = false;
@@ -451,14 +453,14 @@ devinfo_search_path ()
 		return spath_env;
 	}
 
-	SearchPath spath (ardour_data_search_path());
+	Searchpath spath (ardour_data_search_path());
 	spath.add_subdirectory_to_paths(devinfo_dir_name);
 
 	return spath;
 }
 
 static bool
-devinfo_filter (const string &str, void */*arg*/)
+devinfo_filter (const string &str, void* /*arg*/)
 {
 	return (str.length() > strlen(devinfo_suffix) &&
 		str.find (devinfo_suffix) == (str.length() - strlen (devinfo_suffix)));
@@ -469,30 +471,22 @@ DeviceInfo::reload_device_info ()
 {
 	DeviceInfo di;
 	vector<string> s;
-	vector<string *> *devinfos;
-	PathScanner scanner;
-	SearchPath spath (devinfo_search_path());
+	vector<string> devinfos;
+	Searchpath spath (devinfo_search_path());
 
-	devinfos = scanner (spath.to_string(), devinfo_filter, 0, false, true);
+	find_files_matching_filter (devinfos, spath, devinfo_filter, 0, false, true);
 	device_info.clear ();
 
-	if (!devinfos) {
+	if (devinfos.empty()) {
 		error << "No MCP device info files found using " << spath.to_string() << endmsg;
 		std::cerr << "No MCP device info files found using " << spath.to_string() << std::endl;
 		return;
 	}
 
-	if (devinfos->empty()) {
-		error << "No MCP device info files found using " << spath.to_string() << endmsg;
-		std::cerr << "No MCP device info files found using " << spath.to_string() << std::endl;
-		return;
-	}
-
-	for (vector<string*>::iterator i = devinfos->begin(); i != devinfos->end(); ++i) {
-		string fullpath = *(*i);
+	for (vector<string>::iterator i = devinfos.begin(); i != devinfos.end(); ++i) {
+		string fullpath = *i;
 
 		XMLTree tree;
-
 
 		if (!tree.read (fullpath.c_str())) {
 			continue;
@@ -507,8 +501,6 @@ DeviceInfo::reload_device_info ()
 			device_info[di.name()] = di;
 		}
 	}
-
-	delete devinfos;
 }
 
 std::ostream& operator<< (std::ostream& os, const Mackie::DeviceInfo& di)

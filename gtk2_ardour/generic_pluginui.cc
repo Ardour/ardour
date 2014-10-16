@@ -25,6 +25,7 @@
 #include <cerrno>
 #include <cmath>
 #include <string>
+#include <vector>
 
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
@@ -41,12 +42,9 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"
 
-#include <lrdf.h>
-
 #include "ardour_ui.h"
 #include "prompter.h"
 #include "plugin_ui.h"
-#include "utils.h"
 #include "gui_thread.h"
 #include "automation_controller.h"
 
@@ -311,9 +309,9 @@ GenericPluginUI::build ()
 	// are similar enough to be grouped together.
 	
 	string label, previous_label = "";
-	int numbers_in_labels[cui_controls_list.size()];
+	std::vector<int> numbers_in_labels(cui_controls_list.size());
 	
-	float similarity_scores[cui_controls_list.size()];
+	std::vector<float> similarity_scores(cui_controls_list.size());
 	float most_similar = 0.0, least_similar = 1.0;
 	
 	i = 0;
@@ -627,8 +625,8 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		Adjustment* adj = control_ui->controller->adjustment();
 		boost::shared_ptr<PluginInsert::PluginControl> pc = boost::dynamic_pointer_cast<PluginInsert::PluginControl> (control_ui->control);
 
-		adj->set_lower (pc->internal_to_interface (desc.lower));
-		adj->set_upper (pc->internal_to_interface (desc.upper));
+		adj->set_lower (desc.lower);
+		adj->set_upper (desc.upper);
 
 		adj->set_step_increment (desc.step);
 		adj->set_page_increment (desc.largestep);
@@ -637,7 +635,6 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 			control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox");
 			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
 			if (desc.midinote) {
-				printf("MIDI NOTE\n");
 				control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midinote_printer), control_ui));
 			} else {
 				control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
@@ -646,17 +643,14 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 			//sigc::slot<void,char*,uint32_t> pslot = sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::print_parameter), (uint32_t) port_index);
 
 			control_ui->controller->set_size_request (200, req.height);
-			control_ui->controller->set_name (X_("PluginSlider"));
-			control_ui->controller->set_style (BarController::LeftToRight);
-			control_ui->controller->set_use_parent (true);
-			control_ui->controller->set_logarithmic (desc.logarithmic);
+			control_ui->controller->set_name (X_("ProcessorControlSlider"));
 
 			control_ui->controller->StartGesture.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::start_touch), control_ui));
 			control_ui->controller->StopGesture.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::stop_touch), control_ui));
 
 		}
 
-		adj->set_value (pc->internal_to_interface (plugin->get_parameter (port_index)));
+		adj->set_value (plugin->get_parameter (port_index));
 
 		/* XXX memory leak: SliderController not destroyed by ControlUI
 		   destructor, and manage() reports object hierarchy
@@ -708,8 +702,8 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 				0xcccc00ff, 0xcccc00ff,
 				0xffaa00ff, 0xffaa00ff,
 				0xff0000ff,
-				ARDOUR_UI::config()->canvasvar_MeterBackgroundBot.get(),
-				ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get()
+				ARDOUR_UI::config()->get_canvasvar_MeterBackgroundBot(),
+				ARDOUR_UI::config()->get_canvasvar_MeterBackgroundTop()
 				);
 
 		info->min_unbound = desc.min_unbound;
@@ -798,8 +792,10 @@ GenericPluginUI::toggle_parameter_changed (ControlUI* cui)
 	if (!cui->ignore_change) {
 		if (val > 0.5) {
 			cui->button->set_active (true);
+			cui->button->set_name ("PluginEditorButton-active");
 		} else {
 			cui->button->set_active (false);
+			cui->button->set_name ("PluginEditorButton");
 		}
 	}
 }
@@ -860,7 +856,13 @@ void
 GenericPluginUI::control_port_toggled (ControlUI* cui)
 {
 	cui->ignore_change++;
-	insert->automation_control (cui->parameter())->set_value (cui->button->get_active());
+	const bool active = cui->button->get_active();
+	if (active) {
+		cui->button->set_name ("PluginEditorButton-active");
+	} else {
+		cui->button->set_name ("PluginEditorButton");
+	}
+	insert->automation_control (cui->parameter())->set_value (active);
 	cui->ignore_change--;
 }
 

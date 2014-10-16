@@ -52,7 +52,7 @@ class SMFSource;
 class Send;
 class Session;
 
-class MidiDiskstream : public Diskstream
+class LIBARDOUR_API MidiDiskstream : public Diskstream
 {
   public:
 	MidiDiskstream (Session &, const string& name, Diskstream::Flag f = Recordable);
@@ -76,6 +76,7 @@ class MidiDiskstream : public Diskstream
 	int use_copy_playlist ();
 
 	bool set_name (std::string const &);
+	bool set_write_source_name (const std::string& str);
 
 	/* stateful */
 	XMLNode& get_state(void);
@@ -173,6 +174,7 @@ class MidiDiskstream : public Diskstream
 	gint                         _frames_read_from_ringbuffer;
 	volatile gint                _frames_pending_write;
 	volatile gint                _num_captured_loops;
+	framepos_t                   _accumulated_capture_offset;
 
 	/** A buffer that we use to put newly-arrived MIDI data in for
 	    the GUI to read (so that it can update itself).

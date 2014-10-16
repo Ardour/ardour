@@ -698,33 +698,32 @@ Region::set_start (framepos_t pos)
 }
 
 void
-Region::trim_start (framepos_t new_position)
+Region::move_start (frameoffset_t distance)
 {
 	if (locked() || position_locked() || video_locked()) {
 		return;
 	}
 
 	framepos_t new_start;
-	frameoffset_t const start_shift = new_position - _position;
 
-	if (start_shift > 0) {
+	if (distance > 0) {
 
-		if (_start > max_framepos - start_shift) {
-			new_start = max_framepos;
+		if (_start > max_framepos - distance) {
+			new_start = max_framepos; // makes no sense
 		} else {
-			new_start = _start + start_shift;
+			new_start = _start + distance;
 		}
 
 		if (!verify_start (new_start)) {
 			return;
 		}
 
-	} else if (start_shift < 0) {
+	} else if (distance < 0) {
 
-		if (_start < -start_shift) {
+		if (_start < -distance) {
 			new_start = 0;
 		} else {
-			new_start = _start + start_shift;
+			new_start = _start + distance;
 		}
 
 	} else {
@@ -736,6 +735,7 @@ Region::trim_start (framepos_t new_position)
 	}
 
 	set_start_internal (new_start);
+
 	_whole_file = false;
 	first_edit ();
 

@@ -23,8 +23,6 @@
 #include <queue>
 
 #include "pbd/signals.h"
-
-#include "midi++/types.h"
 #include "midi++/parser.h"
 
 namespace MIDI {
@@ -36,7 +34,7 @@ class Port;
  * This remembers various useful information about the current 'state' of a
  * MIDI channel (eg current pitch bend value).
  */
-class Channel : public PBD::ScopedConnectionList {
+class LIBMIDIPP_API Channel : public PBD::ScopedConnectionList {
 
   public:
 	Channel (byte channel_number, Port &);
@@ -44,7 +42,7 @@ class Channel : public PBD::ScopedConnectionList {
 	Port &midi_port()           { return _port; }
 	byte channel()                  { return _channel_number; }
 	byte program()                  { return _program_number; }
-	byte bank()                     { return _bank_number; }
+	unsigned short bank()           { return _bank_number; }
 	byte pressure ()                { return _chanpress; }
 	byte poly_pressure (byte n)     { return _polypress[n]; }
 
@@ -119,7 +117,7 @@ class Channel : public PBD::ScopedConnectionList {
 
 	/* Current channel values */
 	byte               _channel_number;
-	byte               _bank_number;
+	unsigned short     _bank_number;
 	byte               _program_number;
 	byte               _rpn_msb;
 	byte               _rpn_lsb;

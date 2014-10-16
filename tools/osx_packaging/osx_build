@@ -109,6 +109,7 @@ ExportFormats=$Shared/export
 Templates=$Shared/templates
 PatchFiles=$Shared/patchfiles
 MackieControl=$Shared/mcp
+VFork=$Frameworks/vfork
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -144,6 +145,8 @@ mkdir -p $Templates
 mkdir -p $Frameworks/modules
 mkdir -p $Etc
 mkdir -p $MackieControl
+mkdir -p $PatchFiles
+mkdir -p $VFork
 
 # maybe set variables
 env=""
@@ -336,7 +339,9 @@ cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp*.dylib $Frameworks
 cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
 
 # Backends
-cp $BUILD_ROOT/libs/backends/*/lib*.dylib $Backends
+for backend in jack wavesaudio dummy; do
+    cp $BUILD_ROOT/libs/backends/$backend/lib*.dylib $Backends
+done
 
 # Export Formats/Presets
 for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do 
@@ -373,6 +378,14 @@ cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
 
 # Suil modules
 cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Frameworks
+
+# VST scanner app and wrapper script, if they exist
+cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $Frameworks/ || true
+
+# vfork wrapper
+mkdir -p $Frameworks/vfork
+cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $VFork
+
 
 while [ true ] ; do 
     missing=false
@@ -415,19 +428,21 @@ if test x$SAE != x ; then
     cp $BUILD_ROOT/gtk2_ardour/SAE-de-nokeypad.bindings  $Resources
     cp $BUILD_ROOT/gtk2_ardour/SAE-us-keypad.bindings  $Resources
     cp $BUILD_ROOT/gtk2_ardour/SAE-us-nokeypad.bindings  $Resources
-    cp $BUILD_ROOT/ardour_system_sae.rc $Resources/ardour_system.rc
-    echo cp $BUILD_ROOT/ardour_system_sae.rc $Resources/ardour_system.rc
     cp $BUILD_ROOT/instant.xml.sae $Resources/instant.xml
     echo cp $BUILD_ROOT/instant.xml.sae $Resources/instant.xml
 else
-    cp ../../ardour_system.rc $Resources/ardour_system.rc
+    cp ../../system_config $Resources/system_config
     cp ../../instant.xml $Resources/instant.xml
     echo cp ../../instant.xml $Resources/instant.xml
 fi
-cp ../../gtk2_ardour/ardour3_ui_default.conf $Resources
-cp ../../gtk2_ardour/ardour3_ui_default.conf $Resources/ardour3_ui.conf
-cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_light.rc $Resources
-cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_dark.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Resources
+cp $BUILD_ROOT/gtk2_ardour/dark_fonts.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/dark_styles.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/light_fonts.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/light_styles.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/ui_dark.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/ui_light.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/widgets.rc $Resources
 
 cp -r ../../gtk2_ardour/icons $Resources
 cp -r ../../gtk2_ardour/pixmaps $Resources
@@ -546,6 +561,7 @@ if test x$WITH_HARVID != x ; then
 	echo "installing video tools.."
 	HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
 	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
+	MULTIARCH=osx
 	echo "copying harvid and xjadeo ..."
 
 	rsync -Pa \
@@ -580,7 +596,7 @@ VOLNAME=$APPNAME-$release_version
 
 # TODO use mktemp
 export TMPDIR=`pwd`
-MNTPATH=`mktemp -d -t /ardourimg`
+MNTPATH=`mktemp -d -t ardourimg`
 TMPDMG=`mktemp -t ardour`
 ICNSTMP=`mktemp -t ardouricon`
 EXTRA_SPACE_MB=30
@@ -605,32 +621,41 @@ cp -vi ${DMGBACKGROUND} "${MNTPATH}/.background/dmgbg.png"
 
 echo "setting DMG background ..."
 
-echo '
-   tell application "Finder"
-     tell disk "'${VOLNAME}'"
-           open
-           set current view of container window to icon view
-           set toolbar visible of container window to false
-           set statusbar visible of container window to false
-           set the bounds of container window to {400, 200, 800, '${DMGWINBOTTOM}'}
-           set theViewOptions to the icon view options of container window
-           set arrangement of theViewOptions to not arranged
-           set icon size of theViewOptions to 64
-           set background picture of theViewOptions to file ".background:dmgbg.png"
-           make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
-           set position of item "'${APPDIR}'" of container window to {90, 100}
-           set position of item "Applications" of container window to {310, 100}
-           '${MIXBUSPOS}'
-           '${HARVIDPOS}'
-           '${XJADEOPOS}'
-           close
-           open
-           update without registering applications
-           delay 5
-           eject
-     end tell
-   end tell
-' | osascript
+if test $(sw_vers -productVersion | cut -d '.' -f 2) -lt 9; then
+	# OSX ..10.8.X
+	DISKNAME=${VOLNAME}
+else
+	# OSX 10.9.X and later
+	DISKNAME=`basename "${MNTPATH}"`
+fi
+
+osascript << EOF
+  tell application "Finder"
+    activate
+    tell disk "${DISKNAME}"
+      open
+      set current view of container window to icon view
+      set toolbar visible of container window to false
+      set statusbar visible of container window to false
+      set the bounds of container window to {400, 200, 800, ${DMGWINBOTTOM}}
+      set theViewOptions to the icon view options of container window
+      set arrangement of theViewOptions to not arranged
+      set icon size of theViewOptions to 64
+      set background picture of theViewOptions to file ".background:dmgbg.png"
+      make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
+      set position of item "${APPDIR}" of container window to {90, 100}
+      set position of item "Applications" of container window to {310, 100}
+      ${MIXBUSPOS}
+      ${HARVIDPOS}
+      ${XJADEOPOS}
+      close
+      open
+      update without registering applications
+      delay 5
+      eject
+    end tell
+  end tell
+EOF
 
 chmod -Rf go-w "${MNTPATH}"
 sync
@@ -649,10 +674,10 @@ rm -rf "$MNTPATH"
 echo "setting file icon ..."
 
 cp ${PRODUCT_PKG_DIR}/$Resources/appIcon.icns ${ICNSTMP}.icns
-/usr/bin/sips -i ${ICNSTMP}.icns
-/Developer/Tools/DeRez -only icns ${ICNSTMP}.icns > ${ICNSTMP}.rsrc
-/Developer/Tools/Rez -append ${ICNSTMP}.rsrc -o "$UC_DMG"
-/Developer/Tools/SetFile -a C "$UC_DMG"
+sips -i ${ICNSTMP}.icns
+DeRez -only icns ${ICNSTMP}.icns > ${ICNSTMP}.rsrc
+Rez -append ${ICNSTMP}.rsrc -o "$UC_DMG"
+SetFile -a C "$UC_DMG"
 
 rm ${ICNSTMP}.icns ${ICNSTMP}.rsrc
 

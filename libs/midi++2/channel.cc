@@ -25,7 +25,7 @@
 
 using namespace MIDI;
 
-Channel::Channel (byte channelnum, Port &p) 
+Channel::Channel (MIDI::byte channelnum, Port &p) 
 	: _port (p)
 {
 	_channel_number = channelnum;
@@ -115,7 +115,7 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 	   all changes *are* atomic.
 	*/
 
-	if (tb->controller_number <= 31) { /* unsigned: no test for >= 0 */
+	if (tb->controller_number < 32) { /* unsigned: no test for >= 0 */
 
 		/* if this controller is already known to use 14 bits,
 		   then treat this value as the MSB, and combine it 
@@ -128,7 +128,7 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 		cv = (unsigned short) _controller_val[tb->controller_number];
 
 		if (_controller_14bit[tb->controller_number]) {
-			cv = ((tb->value << 7) | (cv & 0x7f));
+			cv = ((tb->value & 0x7f) << 7) | (cv & 0x7f);
 		} else {
 			cv = tb->value;
 		}
@@ -138,7 +138,9 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 	} else if ((tb->controller_number >= 32 && 
 		    tb->controller_number <= 63)) {
 		   
-		cv = (unsigned short) _controller_val[tb->controller_number];
+		int cn = tb->controller_number - 32;
+
+		cv = (unsigned short) _controller_val[cn];
 
 		/* LSB for CC 0-31 arrived. 
 
@@ -151,7 +153,6 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 		   high 7.
 		*/
 
-		int cn = tb->controller_number - 32;
 		   
 		if (_controller_14bit[cn] == false) {
 			_controller_14bit[cn] = true;
@@ -160,8 +161,14 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 			cv = (cv & 0x3f80) | (tb->value & 0x7f);
 		}
 
-		_controller_val[tb->controller_number] = 
-			(controller_value_t) cv;
+		/* update the 14 bit value */
+		_controller_val[cn] = (controller_value_t) cv;
+
+		/* also store the "raw" 7 bit value in the incoming controller
+		   value store
+		*/
+		_controller_val[tb->controller_number] = (controller_value_t) tb->value;
+
 	} else {
 
 		/* controller can only take 7 bit values */
@@ -173,22 +180,21 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 	/* bank numbers are special, in that they have their own signal
 	 */
 
-	if (tb->controller_number == 0) {
-		_bank_number = (unsigned short) _controller_val[0];
+	if (tb->controller_number == 0 || tb->controller_number == 0x20) {
+		_bank_number = _controller_val[0];
 		_port.parser()->bank_change (*_port.parser(), _bank_number);
 		_port.parser()->channel_bank_change[_channel_number] (*_port.parser(), _bank_number);
 	}
-
 }
 
 void
-Channel::process_program_change (Parser & /*parser*/, byte val) 
+Channel::process_program_change (Parser & /*parser*/, MIDI::byte val) 
 {
 	_program_number = val;
 }
 
 void
-Channel::process_chanpress (Parser & /*parser*/, byte val) 
+Channel::process_chanpress (Parser & /*parser*/, MIDI::byte val) 
 {
 	_chanpress = val;
 }
@@ -215,7 +221,7 @@ Channel::process_reset (Parser & /*parser*/)
  * \return true if success
  */
 bool
-Channel::channel_msg (byte id, byte val1, byte val2, timestamp_t timestamp)
+Channel::channel_msg (MIDI::byte id, MIDI::byte val1, MIDI::byte val2, timestamp_t timestamp)
 {
 	unsigned char msg[3];
 	int len = 0;

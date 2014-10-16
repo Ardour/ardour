@@ -31,7 +31,7 @@ namespace ARDOUR {
 
 class MidiEngine;
 
-class MidiPort : public Port {
+class LIBARDOUR_API MidiPort : public Port {
    public:
 	~MidiPort();
 

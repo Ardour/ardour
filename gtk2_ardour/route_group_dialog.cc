@@ -17,18 +17,24 @@
 
 */
 
+#include <iostream>
+
+#include "ardour/route_group.h"
+#include "ardour/session.h"
+
 #include <gtkmm/table.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/messagedialog.h>
-#include "ardour/route_group.h"
-#include "ardour/session.h"
+
 #include "route_group_dialog.h"
 #include "group_tabs.h"
+#include "utils.h"
+
 #include "i18n.h"
-#include <iostream>
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace std;
 using namespace PBD;
 
@@ -82,9 +88,11 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	
 	main_vbox->pack_start (*top_vbox, false, false);
 
-	_name.set_text (_group->name ());
 	_active.set_active (_group->is_active ());
-	_color.set_color (GroupTabs::group_color (_group));
+
+	Gdk::Color c;
+	set_color_from_rgba (c, GroupTabs::group_color (_group));
+	_color.set_color (c);
 
 	VBox* options_box = manage (new VBox);
 	options_box->set_spacing (6);
@@ -92,8 +100,6 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	l = manage (new Label (_("<b>Sharing</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false ));
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true);
-
-	_name.signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &Dialog::response), RESPONSE_OK));
 
 	_gain.set_active (_group->is_gain());
 	_relative.set_active (_group->is_relative());
@@ -105,6 +111,18 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	_share_color.set_active (_group->is_color());
 	_share_monitoring.set_active (_group->is_monitoring());
 
+	if (_group->name ().empty()) {
+		_initial_name = "1";
+		while (!unique_name (_initial_name)) {
+			_initial_name = bump_name_number (_initial_name);
+		}
+		_name.set_text (_initial_name);
+		update();
+	} else {
+		_name.set_text (_initial_name);
+	}
+
+	_name.signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &Dialog::response), RESPONSE_OK));
 	_name.signal_changed().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_color.signal_color_set().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
@@ -172,14 +190,14 @@ RouteGroupDialog::do_run ()
 			return Gtk::RESPONSE_CANCEL;
 		}
 
-		if (unique_name ()) {
+		if (unique_name (_name.get_text())) {
 			/* not cancelled and the name is ok, so all is well */
 			return false;
 		}
 
 		_group->set_name (_initial_name);
 		MessageDialog msg (
-			_("A route group of this name already exists.  Please use a different name."),
+			_("The group name is not unique. Please use a different name."),
 			false,
 			Gtk::MESSAGE_ERROR,
 			Gtk::BUTTONS_OK,
@@ -212,7 +230,7 @@ RouteGroupDialog::update ()
 
 	_group->apply_changes (plist);
 	
-	GroupTabs::set_group_color (_group, _color.get_color ());
+	GroupTabs::set_group_color (_group, gdk_color_to_rgba (_color.get_color ()));
 }
 
 void
@@ -223,11 +241,12 @@ RouteGroupDialog::gain_toggled ()
 
 /** @return true if the current group's name is unique accross the session */
 bool
-RouteGroupDialog::unique_name () const
+RouteGroupDialog::unique_name (std::string const name) const
 {
+	if (name.empty()) return false; // do not allow empty name, empty means unset.
 	list<RouteGroup*> route_groups = _group->session().route_groups ();
 	list<RouteGroup*>::iterator i = route_groups.begin ();
-	while (i != route_groups.end() && ((*i)->name() != _name.get_text() || *i == _group)) {
+	while (i != route_groups.end() && ((*i)->name() != name || *i == _group)) {
 		++i;
 	}
 

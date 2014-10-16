@@ -17,12 +17,14 @@
 
 */
 
-#include <libgnomecanvasmm/item.h>
 #include "ardour/types.h"
-#include "canvas-noevent-text.h"
-#include "canvas.h"
+#include "canvas/canvas.h"
 
 class Editor;
+
+namespace ArdourCanvas {
+     class TrackingText;
+}
 
 class VerboseCursor
 {
@@ -32,24 +34,17 @@ public:
 	ArdourCanvas::Item* canvas_item () const;
 	bool visible () const;
 
-	void set_color (uint32_t);
+	void set (std::string const &);
+	void set_time (framepos_t);
+	void set_duration (framepos_t, framepos_t);
+	void set_offset (ArdourCanvas::Duple const&);
 
-	void set (std::string const &, double, double);
-	void set_text (std::string const &);
-	void set_position (double, double);
-	void set_time (framepos_t, double, double);
-	void set_duration (framepos_t, framepos_t, double, double);
-
-	void show (double xoffset = 0, double yoffset = 0);
+	void show ();
 	void hide ();
-
+	
 private:
-	double clamp_x (double);
-	double clamp_y (double);
+	Editor*                     _editor;
+	ArdourCanvas::TrackingText* _canvas_item;
 
-	Editor* _editor;
-	ArdourCanvas::NoEventText* _canvas_item;
-	bool _visible;
-	double _xoffset;
-	double _yoffset;
+	void color_handler ();
 };

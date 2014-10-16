@@ -22,7 +22,9 @@
 
 #include <exception>
 
-class failed_constructor : public std::exception {
+#include "pbd/libpbd_visibility.h"
+
+class LIBPBD_API failed_constructor : public std::exception {
   public:
 	virtual const char *what() const throw() { return "failed constructor"; }
 };

@@ -20,8 +20,9 @@
 #ifndef __IEC2PPMDSP_H
 #define	__IEC2PPMDSP_H
 
+#include "ardour/libardour_visibility.h"
 
-class Iec2ppmdsp
+class LIBARDOUR_API Iec2ppmdsp
 {
 public:
 

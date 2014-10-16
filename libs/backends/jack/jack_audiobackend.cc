@@ -50,14 +50,13 @@ using std::vector;
 #define GET_PRIVATE_JACK_POINTER(localvar)  jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(localvar,r) jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return r; }
 
-JACKAudioBackend::JACKAudioBackend (AudioEngine& e, boost::shared_ptr<JackConnection> jc)
-	: AudioBackend (e)
+JACKAudioBackend::JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, boost::shared_ptr<JackConnection> jc)
+	: AudioBackend (e, info)
 	, _jack_connection (jc)
 	, _running (false)
 	, _freewheeling (false)
 	, _target_sample_rate (48000)
 	, _target_buffer_size (1024)
-	, _target_sample_format (FormatFloat)
 	, _target_interleaved (false)
 	, _target_input_channels (0)
 	, _target_output_channels (0)
@@ -268,18 +267,6 @@ JACKAudioBackend::set_buffer_size (uint32_t nframes)
 }
 
 int
-JACKAudioBackend::set_sample_format (SampleFormat sf)
-{
-	/* as far as JACK clients are concerned, the hardware is always
-	 * floating point format.
-	 */
-	if (sf == FormatFloat) {
-		return 0;
-	}
-	return -1;
-}
-
-int
 JACKAudioBackend::set_interleaved (bool yn)
 {
 	/* as far as JACK clients are concerned, the hardware is always
@@ -395,12 +382,6 @@ JACKAudioBackend::buffer_size () const
 		}
 	}
 	return _target_buffer_size;
-}
-
-SampleFormat
-JACKAudioBackend::sample_format () const
-{
-	return FormatFloat;
 }
 
 bool
@@ -573,6 +554,7 @@ JACKAudioBackend::_start (bool for_latency_measurement)
 int
 JACKAudioBackend::stop ()
 {
+	_running = false; // no 'engine halted message'.
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 	
 	_jack_connection->close ();
@@ -768,9 +750,6 @@ JACKAudioBackend::jack_sync_callback (jack_transport_state_t state, jack_positio
 	bool tstate_valid = true;
 
 	switch (state) {
-	case JackTransportStopped:
-		tstate = TransportStopped;
-		break;
 	case JackTransportRolling:
 		tstate = TransportRolling;
 		break;
@@ -779,6 +758,9 @@ JACKAudioBackend::jack_sync_callback (jack_transport_state_t state, jack_positio
 		break;
 	case JackTransportStarting:
 		tstate = TransportStarting;
+		break;
+	case JackTransportStopped:
+		tstate = TransportStopped;
 		break;
 	default:
 		// ignore "unofficial" states like JackTransportNetStarting (jackd2)
@@ -1169,9 +1151,18 @@ JACKAudioBackend::speed_and_position (double& speed, framepos_t& position)
 		// don't adjust speed here, just leave it as it was
 		break;
 	default:
+		starting = true; // jack2: JackTransportNetStarting
 		std::cerr << "WARNING: Unknown JACK transport state: " << state << std::endl;
 	}
 
 	position = pos.frame;
 	return starting;
+}
+
+int
+JACKAudioBackend::reset_device ()
+{
+        /* XXX need to figure out what this means for JACK
+         */
+        return 0;
 }

@@ -44,6 +44,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using Gtkmm2ext::Keyboard;
 
@@ -75,6 +76,7 @@ Panner2d::Panner2d (boost::shared_ptr<PannerShell> p, int32_t h)
 	, height (h)
 	, last_width (0)
 	, have_elevation (false)
+	, _send_mode (false)
 {
 	panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
 
@@ -378,6 +380,15 @@ Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
 	return closest;
 }
 
+void
+Panner2d::set_send_drawing_mode (bool onoff)
+{
+	if (_send_mode != onoff) {
+		_send_mode = onoff;
+		queue_draw ();
+	}
+}
+
 bool
 Panner2d::on_motion_notify_event (GdkEventMotion *ev)
 {
@@ -404,7 +415,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 {
 	CartesianVector c;
 	cairo_t* cr;
-	bool small = (height <= large_size_threshold);
+	bool xsmall = (height <= large_size_threshold);
 	const double diameter = radius*2.0;
 
 	cr = gdk_cairo_create (get_window()->gobj());
@@ -412,10 +423,16 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	/* background */
 
 	cairo_rectangle (cr, event->area.x, event->area.y, event->area.width, event->area.height);
+
+	float r, g, b;
+	r = g = b = 0.1;
+	if (_send_mode) {
+		rgba_p_from_style("SendStripBase", &r, &g, &b, "fg");
+	}
 	if (!panner_shell->bypassed()) {
-		cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, 1.0);
+		cairo_set_source_rgba (cr, r, g, b, 1.0);
 	} else {
-		cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, 0.2);
+		cairo_set_source_rgba (cr, r, g, b , 0.2);
 	}
 	cairo_fill_preserve (cr);
 	cairo_clip (cr);
@@ -489,7 +506,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 		cairo_select_font_face (cr, "sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 
-		if (small) {
+		if (xsmall) {
 			arc_radius = 4.0;
 		} else {
 			cairo_set_font_size (cr, 10);
@@ -535,12 +552,12 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 					cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, 0.8);
 					cairo_stroke (cr);
 
-					if (!small && !signal->text.empty()) {
+					if (!xsmall && !signal->text.empty()) {
 						cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, .9);
 						/* the +/- adjustments are a hack to try to center the text in the circle
 						 * TODO use pango get_pixel_size() -- see mono_panner.cc
 						 */
-						if (small) {
+						if (xsmall) {
 							cairo_move_to (cr, c.x - 1, c.y + 1);
 						} else {
 							cairo_move_to (cr, c.x - 4, c.y + 4);
@@ -575,7 +592,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 				cairo_move_to (cr, c.x, c.y);
 				cairo_save (cr);
 				cairo_rotate (cr, -(sp.azi/360.0) * (2.0 * M_PI));
-				if (small) {
+				if (xsmall) {
 					cairo_scale (cr, 0.8, 0.8);
 				} else {
 					cairo_scale (cr, 1.2, 1.2);
@@ -593,7 +610,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 				cairo_fill (cr);
 				cairo_restore (cr);
 
-				if (!small) {
+				if (!xsmall) {
 					cairo_set_font_size (cr, 16);
 
 					/* move the text in just a bit */

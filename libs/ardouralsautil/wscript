@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+from waflib import Options
+import os
+import sys
+import re
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+path_prefix = 'libs/ardouralsautil/'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+
+def configure(conf):
+    autowaf.configure(conf)
+    if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw':
+        autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
+        autowaf.check_pkg(conf, 'dbus-1', uselib_store='DBUS', mandatory = False)
+
+def build(bld):
+    if re.search ("linux", sys.platform) != None:
+        if bld.is_defined('HAVE_ALSA'):
+            obj = bld(features = 'cxx cxxshlib')
+            obj.source = [
+                'devicelist.cc'
+            ]
+            obj.export_includes = ['.']
+            obj.includes = ['.']
+            obj.name     = 'ardouralsautil'
+            obj.target   = 'ardouralsautil'
+            obj.use      = 'libpbd'
+            obj.uselib   = [ 'ALSA' ]
+            obj.vnum     = '0.0.1'
+            obj.install_path = os.path.join(bld.env['LIBDIR'])
+
+        if bld.env['BUILD_ALSABACKEND'] and bld.is_defined('HAVE_ALSA') and bld.is_defined('HAVE_DBUS'):
+            obj = bld(features = 'c cprogram')
+            obj.source = [
+                'reserve.c',
+                'request_device.c'
+            ]
+            obj.includes = ['.']
+            obj.target   = 'ardour-request-device'
+            obj.uselib   = [ 'DBUS' ]
+            obj.install_path = os.path.join(bld.env['LIBDIR'])
+            obj.defines = [
+                    '_POSIX_SOURCE',
+                    '_XOPEN_SOURCE=500',
+                    'ARD_PROG_NAME="ardour-request-device"',
+                    'ARD_APPL_NAME="Ardour ALSA Backend"',
+            ]

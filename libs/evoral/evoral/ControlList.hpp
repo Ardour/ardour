@@ -21,10 +21,16 @@
 
 #include <cassert>
 #include <list>
+#include <stdint.h>
+
 #include <boost/pool/pool.hpp>
 #include <boost/pool/pool_alloc.hpp>
+
 #include <glibmm/threads.h>
+
 #include "pbd/signals.h"
+
+#include "evoral/visibility.h"
 #include "evoral/types.hpp"
 #include "evoral/Range.hpp"
 #include "evoral/Parameter.hpp"
@@ -35,7 +41,7 @@ class Curve;
 
 /** A single event (time-stamped value) for a control
  */
-class ControlEvent {
+class LIBEVORAL_API ControlEvent {
 public:
 	ControlEvent (double w, double v)
 		: when (w), value (v), coeff (0)
@@ -67,7 +73,7 @@ public:
 
 /** A list (sequence) of time-stamped values for a control
  */
-class ControlList
+class LIBEVORAL_API ControlList
 {
 public:
 	typedef std::list<ControlEvent*> EventList;
@@ -115,7 +121,9 @@ public:
 
 	virtual bool clamp_value (double& /*when*/, double& /*value*/) const { return true; }
 
-        virtual void add (double when, double value, bool with_guards=true);
+	virtual void add (double when, double value, bool with_guards=true);
+	virtual void editor_add (double when, double value);
+	
 	void fast_simple_add (double when, double value);
 
 	void erase_range (double start, double end);

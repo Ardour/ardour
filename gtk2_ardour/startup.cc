@@ -19,6 +19,7 @@
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
+#include "gtk2ardour-version.h"
 #endif
 
 #include <fstream>
@@ -55,6 +56,7 @@ using namespace Gdk;
 using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 ArdourStartup* ArdourStartup::the_startup = 0;
 

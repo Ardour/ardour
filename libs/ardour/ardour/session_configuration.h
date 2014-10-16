@@ -24,7 +24,7 @@
 
 namespace ARDOUR {
 
-class SessionConfiguration : public Configuration
+class LIBARDOUR_API SessionConfiguration : public Configuration
 {
 public:
 	SessionConfiguration ();
@@ -34,6 +34,9 @@ public:
 	XMLNode& get_state ();
 	XMLNode& get_variables ();
 	void set_variables (XMLNode const &);
+
+	bool load_state ();
+	bool save_state ();
 
 	/* define accessor methods */
 

@@ -117,7 +117,7 @@ PatchChangeDialog::PatchChangeDialog (
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (ok, RESPONSE_ACCEPT);
 	if (allow_delete) {
-		add_button (Stock::DELETE, RESPONSE_REJECT);
+		add_button (Gtk::StockID(GTK_STOCK_DELETE), RESPONSE_REJECT);
 	}
 	set_default_response (RESPONSE_ACCEPT);
 

@@ -18,6 +18,9 @@
 */
 
 #include <cmath>
+#include <algorithm>
+#include <string> 
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <cstdio>
@@ -49,6 +52,24 @@ capitalize (const string& str)
                 ret[0] = toupper (str[0]);
         }
         return ret;
+}
+
+string
+downcase (const string& str)
+{
+	string copy (str);
+	std::transform (copy.begin(), copy.end(), copy.begin(), ::tolower);
+	return copy;
+}
+
+const char*
+downcase (const char* str)
+{
+	char *copy = strdup (str);
+	for (char* p = copy; *p; ++p) {
+		*p = tolower (*p);
+	}
+	return copy;
 }
 
 string

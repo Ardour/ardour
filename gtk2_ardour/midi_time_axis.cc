@@ -19,8 +19,6 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <strings.h> // for ffs(3)
-
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -28,6 +26,7 @@
 #include <sigc++/bind.h>
 
 #include "pbd/error.h"
+#include "pbd/ffs.h"
 #include "pbd/stl_delete.h"
 #include "pbd/whitespace.h"
 #include "pbd/basename.h"
@@ -51,6 +50,7 @@
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 #include "ardour/playlist.h"
+#include "ardour/profile.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
 #include "ardour/route.h"
@@ -64,8 +64,6 @@
 #include "ardour_button.h"
 #include "automation_line.h"
 #include "automation_time_axis.h"
-#include "canvas-note-event.h"
-#include "canvas_impl.h"
 #include "editor.h"
 #include "enums.h"
 #include "ghostregion.h"
@@ -86,24 +84,25 @@
 #include "rgb_macros.h"
 #include "selection.h"
 #include "step_editor.h"
-#include "simplerect.h"
 #include "utils.h"
+#include "note_base.h"
 
 #include "ardour/midi_track.h"
 
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace Editing;
 
 // Minimum height at which a control is displayed
-static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 140;
+static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 160;
 static const uint32_t KEYBOARD_MIN_HEIGHT = 130;
 
-MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, Canvas& canvas)
+MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
 	: AxisView(sess) // virtually inherited
 	, RouteTimeAxisView(ed, sess, canvas)
 	, _ignore_signals(false)
@@ -163,14 +162,21 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	if (is_midi_track()) {
 		controls_ebox.set_name ("MidiTimeAxisViewControlsBaseUnselected");
+		time_axis_frame.set_name ("MidiTimeAxisViewControlsBaseUnselected");
 		_note_mode = midi_track()->note_mode();
 	} else { // MIDI bus (which doesn't exist yet..)
 		controls_ebox.set_name ("MidiBusControlsBaseUnselected");
+		time_axis_frame.set_name ("MidiBusControlsBaseUnselected");
 	}
 
 	/* if set_state above didn't create a gain automation child, we need to make one */
 	if (automation_child (GainAutomation) == 0) {
 		create_automation_child (GainAutomation, false);
+	}
+
+	/* if set_state above didn't create a mute automation child, we need to make one */
+	if (automation_child (MuteAutomation) == 0) {
+		create_automation_child (MuteAutomation, false);
 	}
 
 	if (_route->panner_shell()) {
@@ -206,17 +212,26 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		   label so that they can be reduced in height for stacked-view
 		   tracks.
 		*/
+
+		HSeparator* separator = manage (new HSeparator());
+		separator->set_name("TrackSeparator");
+		separator->set_size_request(-1, 1);
+		separator->show();
+
 		VBox* v = manage (new VBox);
 		HBox* h = manage (new HBox);
-		h->pack_start (*_range_scroomer);
-		h->pack_start (*_piano_roll_header);
-		v->pack_start (*h, false, false);
-		v->pack_start (*manage (new Label ("")), true, true);
+		h->pack_end (*_piano_roll_header);
+		h->pack_end (*_range_scroomer);
+		v->pack_start (*separator, false, false);
+		v->pack_start (*h, true, true);
 		v->show ();
 		h->show ();
-		controls_hbox.pack_start(*v, false, false);
+		top_hbox.remove(scroomer_placeholder);
+		time_axis_hbox.pack_end(*v, false, false, 0);
+		midi_scroomer_size_group->add_widget (*v);
 
 		controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
+		time_axis_frame.set_name ("MidiTrackControlsBaseUnselected");
 		controls_base_selected_name = "MidiTrackControlsBaseSelected";
 		controls_base_unselected_name = "MidiTrackControlsBaseUnselected";
 
@@ -276,42 +291,38 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	ARDOUR_UI::instance()->set_tip (_midnam_custom_device_mode_selector, _("External Device Mode"));
 
 	_midi_controls_box.set_homogeneous(false);
-	_midi_controls_box.set_border_width (10);
+	_midi_controls_box.set_border_width (2);
 
 	_channel_status_box.set_homogeneous (false);
-	_channel_status_box.set_spacing (6);
+	_channel_status_box.set_spacing (4);
 	
-	_channel_selector_button.set_label (_("Chns"));
-	ARDOUR_UI::instance()->set_tip (_channel_selector_button, _("Click to edit channel settings"));
+	ArdourButton *channel_selector_button = manage (new ArdourButton(_("Chns")));
+	channel_selector_button->set_name ("route button");
+	ARDOUR_UI::instance()->set_tip (channel_selector_button, _("Click to edit channel settings"));
 	
 	/* fixed sized labels to prevent silly nonsense (though obviously,
 	 * they cause their own too)
 	 */
-
-	_playback_channel_status.set_size_request (65, -1);
-	_capture_channel_status.set_size_request (60, -1);
+	set_size_request_to_display_given_text(_playback_channel_status, "Play: somemo", 2, 2); // TODO use _("Play: all/some")
+	set_size_request_to_display_given_text(_capture_channel_status, "Rec: somemo", 2, 2); // TODO use _("Rec: all/some")
 
 	_channel_status_box.pack_start (_playback_channel_status, false, false);
 	_channel_status_box.pack_start (_capture_channel_status, false, false);
-	_channel_status_box.pack_start (_channel_selector_button, false, false);
+	_channel_status_box.pack_end (*channel_selector_button, false, false);
 	_channel_status_box.show_all ();
 
-	_channel_selector_button.signal_clicked().connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_channel_selector));
+	channel_selector_button->signal_clicked.connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_channel_selector));
 	
 	_midi_controls_box.pack_start (_channel_status_box, false, false, 10);
 
 	if (!patch_manager.all_models().empty()) {
 
-		_midnam_model_selector.set_size_request(22, 30);
-		_midnam_model_selector.set_border_width(2);
 		_midnam_model_selector.show ();
-		_midi_controls_box.pack_start (_midnam_model_selector);
+		_midi_controls_box.pack_start (_midnam_model_selector, false, false, 2);
 
-		_midnam_custom_device_mode_selector.set_size_request(10, 30);
-		_midnam_custom_device_mode_selector.set_border_width(2);
 		_midnam_custom_device_mode_selector.show ();
 
-		_midi_controls_box.pack_start (_midnam_custom_device_mode_selector);
+		_midi_controls_box.pack_start (_midnam_custom_device_mode_selector, false, false, 2);
 	} 
 
 	model_changed();
@@ -328,7 +339,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	if (!color_mode.empty()) {
 		_color_mode = ColorMode (string_2_enum(color_mode, _color_mode));
 		if (_channel_selector && _color_mode == ChannelColors) {
-			_channel_selector->set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+			_channel_selector->set_channel_colors(NoteBase::midi_channel_colors);
 		}
 	}
 
@@ -525,7 +536,7 @@ MidiTimeAxisView::toggle_channel_selector ()
 		_channel_selector = new MidiChannelSelectorWindow (midi_track());
 
 		if (_color_mode == ChannelColors) {
-			_channel_selector->set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+			_channel_selector->set_channel_colors(NoteBase::midi_channel_colors);
 		} else {
 			_channel_selector->set_default_channel_color ();
 		}
@@ -599,7 +610,7 @@ MidiTimeAxisView::build_automation_action_menu (bool for_selection)
 
 	automation_items.push_back (SeparatorElem());
 	automation_items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &MidiTimeAxisView::update_gain_track_visibility)));
-	gain_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
+	gain_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&automation_items.back ());
 	gain_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) && 
 					  (gain_track && string_is_affirmative (gain_track->gui_property ("visible"))));
 
@@ -607,12 +618,12 @@ MidiTimeAxisView::build_automation_action_menu (bool for_selection)
 
 	if (!pan_tracks.empty()) {
 		automation_items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &MidiTimeAxisView::update_pan_track_visibility)));
-		pan_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
+		pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&automation_items.back ());
 		pan_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
 						 (!pan_tracks.empty() && string_is_affirmative (pan_tracks.front()->gui_property ("visible"))));
 
 		set<Evoral::Parameter> const & params = _route->pannable()->what_can_be_automated ();
-		for (set<Evoral::Parameter>::iterator p = params.begin(); p != params.end(); ++p) {
+		for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
 			_main_automation_menu_map[*p] = pan_automation_item;
 		}
 	}
@@ -699,7 +710,7 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 					}
 				}
 
-				CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
+				Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&chn_items.back());
 				_channel_command_menu_map[fully_qualified_param] = cmi;
 				cmi->set_active (visible);
 			}
@@ -731,7 +742,7 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 					}
 				}
 
-				CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&items.back());
+				Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&items.back());
 				_channel_command_menu_map[fully_qualified_param] = cmi;
 				cmi->set_active (visible);
 
@@ -773,7 +784,7 @@ MidiTimeAxisView::add_single_channel_controller_item(Menu_Helpers::MenuList& ctl
 				}
 			}
 
-			CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&ctl_items.back());
+			Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&ctl_items.back());
 			_controller_menu_map[fully_qualified_param] = cmi;
 			cmi->set_active (visible);
 
@@ -829,7 +840,7 @@ MidiTimeAxisView::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl_
 				}
 			}
 
-			CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
+			Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&chn_items.back());
 			_controller_menu_map[fully_qualified_param] = cmi;
 			cmi->set_active (visible);
 		}
@@ -1069,7 +1080,7 @@ MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay, bo
 		
 		if (_channel_selector) {
 			if (mode == ChannelColors) {
-				_channel_selector->set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+				_channel_selector->set_channel_colors(NoteBase::midi_channel_colors);
 			} else {
 				_channel_selector->set_default_channel_color();
 			}
@@ -1300,11 +1311,17 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 	}
 
 	boost::shared_ptr<AutomationTimeAxisView> track;
+	boost::shared_ptr<AutomationControl> control;
+
 
 	switch (param.type()) {
 
 	case GainAutomation:
 		create_gain_automation_child (param, show);
+		break;
+
+	case MuteAutomation:
+		create_mute_automation_child (param, show);
 		break;
 
 	case PluginAutomation:
@@ -1318,15 +1335,19 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 	case MidiSystemExclusiveAutomation:
 		/* These controllers are region "automation" - they are owned
 		 * by regions (and their MidiModels), not by the track. As a
-		 * result we do not create an AutomationList/Line for the track
-		 * ... except here we are doing something!! XXX 
+		 * result there is no AutomationList/Line for the track, but we create
+		 * a controller for the user to write immediate events, so the editor
+		 * can act as a control surface for the present MIDI controllers.
+		 *
+		 * TODO: Record manipulation of the controller to regions?
 		 */
 
+		control = _route->automation_control(param, true);
 		track.reset (new AutomationTimeAxisView (
 			             _session,
 			             _route,
-			             boost::shared_ptr<Automatable> (),
-			             boost::shared_ptr<AutomationControl> (),
+			             control ? _route : boost::shared_ptr<Automatable> (),
+			             control,
 			             param,
 			             _editor,
 			             *this,
@@ -1362,20 +1383,24 @@ MidiTimeAxisView::route_active_changed ()
 	if (is_track()) {
 		if (_route->active()) {
 			controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
+			time_axis_frame.set_name ("MidiTrackControlsBaseUnselected");
 			controls_base_selected_name = "MidiTrackControlsBaseSelected";
 			controls_base_unselected_name = "MidiTrackControlsBaseUnselected";
 		} else {
 			controls_ebox.set_name ("MidiTrackControlsBaseInactiveUnselected");
+			time_axis_frame.set_name ("MidiTrackControlsBaseInactiveUnselected");
 			controls_base_selected_name = "MidiTrackControlsBaseInactiveSelected";
 			controls_base_unselected_name = "MidiTrackControlsBaseInactiveUnselected";
 		}
 	} else {
 		if (_route->active()) {
 			controls_ebox.set_name ("BusControlsBaseUnselected");
+			time_axis_frame.set_name ("BusControlsBaseUnselected");
 			controls_base_selected_name = "BusControlsBaseSelected";
 			controls_base_unselected_name = "BusControlsBaseUnselected";
 		} else {
 			controls_ebox.set_name ("BusControlsBaseInactiveUnselected");
+			time_axis_frame.set_name ("BusControlsBaseInactiveUnselected");
 			controls_base_selected_name = "BusControlsBaseInactiveSelected";
 			controls_base_unselected_name = "BusControlsBaseInactiveUnselected";
 		}
@@ -1644,7 +1669,7 @@ MidiTimeAxisView::note_range_changed ()
 void
 MidiTimeAxisView::contents_height_changed ()
 {
-	_range_scroomer->set_size_request (-1, _view->child_height ());
+	_range_scroomer->queue_resize ();
 }
 
 void
@@ -1658,7 +1683,7 @@ MidiTimeAxisView::playback_channel_mode_changed ()
 		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Play"), _("some")));
 		break;
 	case ForceChannel:
-		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Play"), _("all"), ffs (midi_track()->get_playback_channel_mask())));
+		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Play"), _("all"), PBD::ffs (midi_track()->get_playback_channel_mask())));
 		break;
 	}
 }
@@ -1674,7 +1699,7 @@ MidiTimeAxisView::capture_channel_mode_changed ()
 		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Rec"), _("some")));
 		break;
 	case ForceChannel:
-		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Rec"), _("all"), ffs (midi_track()->get_capture_channel_mask())));
+		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Rec"), _("all"), PBD::ffs (midi_track()->get_capture_channel_mask())));
 		break;
 	}
 }

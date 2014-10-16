@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <glib.h>
 #include <stdint.h>
+
+#include "evoral/visibility.h"
 #include "evoral/MIDIEvent.hpp"
 
 namespace Evoral {
@@ -31,7 +33,11 @@ namespace Evoral {
  * Currently a note is defined as (on event, length, off event).
  */
 template<typename Time>
-class Note {
+#ifdef COMPILER_MSVC
+class LIBEVORAL_LOCAL Note {
+#else
+class LIBEVORAL_TEMPLATE_API Note {
+#endif
 public:
 	Note(uint8_t chan=0, Time time=0, Time len=0, uint8_t note=0, uint8_t vel=0x40);
 	Note(const Note<Time>& copy);
@@ -106,13 +112,17 @@ private:
 } // namespace Evoral
 
 template<typename Time>
-std::ostream& operator<<(std::ostream& o, const Evoral::Note<Time>& n) {
+/*LIBEVORAL_API*/ std::ostream& operator<<(std::ostream& o, const Evoral::Note<Time>& n) {
 	o << "Note #" << n.id() << ": pitch = " << (int) n.note()
 	  << " @ " << n.time() << " .. " << n.end_time()
 	  << " velocity " << (int) n.velocity()
 	  << " chn " << (int) n.channel();
 	return o;
 }
+
+#ifdef COMPILER_MSVC
+#include "../src/Note.impl"
+#endif
 
 #endif // EVORAL_NOTE_HPP
 

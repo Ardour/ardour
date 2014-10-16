@@ -23,6 +23,7 @@
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 #include "pbd/stacktrace.h"
+#include "pbd/pthread_utils.h"
 
 #include "ardour/debug.h"
 #include "ardour/session_event.h"
@@ -56,7 +57,7 @@ SessionEvent::operator new (size_t)
 {
 	CrossThreadPool* p = pool->per_thread_pool ();
 	SessionEvent* ev = static_cast<SessionEvent*> (p->alloc ());
-	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("%1 Allocating SessionEvent from %2 ev @ %3\n", pthread_self(), p->name(), ev));
+	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("%1 Allocating SessionEvent from %2 ev @ %3\n", pthread_name(), p->name(), ev));
 #ifndef NDEBUG
 	if (DEBUG::SessionEvents & PBD::debug_bits) {
 		stacktrace (cerr, 40);
@@ -74,7 +75,7 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 
 	DEBUG_TRACE (DEBUG::SessionEvents, string_compose (
 		             "%1 Deleting SessionEvent @ %2 ev thread pool = %3 ev pool = %4\n",
-		             pthread_self(), ev, p->name(), ev->own_pool->name()
+		             pthread_name(), ev, p->name(), ev->own_pool->name()
 		             ));
 
 #ifndef NDEBUG
@@ -124,7 +125,8 @@ SessionEventManager::dump_events () const
 {
 	cerr << "EVENT DUMP" << endl;
 	for (Events::const_iterator i = events.begin(); i != events.end(); ++i) {
-		cerr << "\tat " << (*i)->action_frame << ' ' << (*i)->type << " target = " << (*i)->target_frame << endl;
+
+		cerr << "\tat " << (*i)->action_frame << ' ' << enum_2_string ((*i)->type) << " target = " << (*i)->target_frame << endl;
 	}
 	cerr << "Next event: ";
 
@@ -132,12 +134,12 @@ SessionEventManager::dump_events () const
 		cerr << "none" << endl;
 	} else {
 		cerr << "at " << (*next_event)->action_frame << ' '
-		     << (*next_event)->type << " target = "
+		     << enum_2_string ((*next_event)->type) << " target = "
 		     << (*next_event)->target_frame << endl;
 	}
 	cerr << "Immediate events pending:\n";
 	for (Events::const_iterator i = immediate_events.begin(); i != immediate_events.end(); ++i) {
-		cerr << "\tat " << (*i)->action_frame << ' ' << (*i)->type << " target = " << (*i)->target_frame << endl;
+		cerr << "\tat " << (*i)->action_frame << ' ' << enum_2_string((*i)->type) << " target = " << (*i)->target_frame << endl;
 	}
 	cerr << "END EVENT_DUMP" << endl;
 }
@@ -243,7 +245,7 @@ SessionEventManager::_remove_event (SessionEvent* ev)
 			if (i == next_event) {
 				++next_event;
 			}
-			events.erase (i);
+			i = events.erase (i);
 			break;
 		}
 	}

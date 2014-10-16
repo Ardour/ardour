@@ -29,6 +29,13 @@
 #include "video_image_frame.h"
 #include "utils_videotl.h"
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-version.h"
+#endif
+
+#ifndef ARDOUR_CURL_TIMEOUT
+#define ARDOUR_CURL_TIMEOUT (60)
+#endif
 #include "i18n.h"
 
 using namespace Gtk;
@@ -151,19 +158,19 @@ VideoUtils::video_map_path (std::string server_docroot, std::string filepath)
 {
 	std::string rv = filepath;
 
+	/* strip docroot */
+	if (server_docroot.length() > 0) {
+		if (rv.compare(0, server_docroot.length(), server_docroot) == 0 ) {
+			rv = rv.substr(server_docroot.length());
+		}
+	}
+
 	/* replace all G_DIR_SEPARATOR with '/' */
 	size_t look_here = 0;
 	size_t found_here;
 	while((found_here = rv.find(G_DIR_SEPARATOR, look_here)) != string::npos) {
 		rv.replace(found_here, 1, "/");
 		look_here = found_here + 1;
-	}
-
-	/* strip docroot */
-	if (server_docroot.length() > 0) {
-		if (rv.compare(0, server_docroot.length(), server_docroot) == 0 ) {
-			rv = rv.substr(server_docroot.length());
-		}
 	}
 
 	CURL *curl;
@@ -325,7 +332,7 @@ extern "C" {
 		struct A3MemoryStruct chunk;
 		long int httpstatus;
 		if (status) *status = 0;
-		//usleep(500000); return NULL; // TEST & DEBUG
+		//Glib::usleep(500000); return NULL; // TEST & DEBUG
 		if (strncmp("http://", u, 7)) return NULL;
 
 		chunk.data=NULL;
@@ -337,7 +344,7 @@ extern "C" {
 
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
-		curl_easy_setopt(curl, CURLOPT_USERAGENT, ARDOUR_USER_AGENT);
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, PROGRAM_NAME VERSIONSTRING);
 		curl_easy_setopt(curl, CURLOPT_TIMEOUT, ARDOUR_CURL_TIMEOUT);
 		curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 #ifdef CURLERRORDEBUG

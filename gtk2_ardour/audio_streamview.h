@@ -27,7 +27,6 @@
 
 #include "ardour/location.h"
 #include "editing.h"
-#include "simplerect.h"
 #include "streamview.h"
 
 namespace Gdk {

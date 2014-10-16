@@ -426,6 +426,19 @@ Amp::GainControl::internal_to_user (double v) const
 	return accurate_coefficient_to_dB (v);
 }
 
+double
+Amp::GainControl::user_to_internal (double u) const
+{
+	return dB_to_coefficient (u);
+}
+
+std::string
+Amp::GainControl::get_user_string () const
+{
+	char theBuf[32]; sprintf( theBuf, "%3.1f dB", accurate_coefficient_to_dB (get_value()));
+	return std::string(theBuf);
+}
+
 /** Write gain automation for this cycle into the buffer previously passed in to
  *  set_gain_automation_buffer (if we are in automation playback mode and the
  *  transport is rolling).
@@ -435,7 +448,10 @@ Amp::setup_gain_automation (framepos_t start_frame, framepos_t end_frame, framec
 {
 	Glib::Threads::Mutex::Lock am (control_lock(), Glib::Threads::TRY_LOCK);
 
-	if (am.locked() && _session.transport_rolling() && _gain_control->automation_playback()) {
+	if (am.locked()
+	    && (_session.transport_rolling() || _session.bounce_processing())
+	    && _gain_control->automation_playback())
+	{
 		assert (_gain_automation_buffer);
 		_apply_gain_automation = _gain_control->list()->curve().rt_safe_get_vector (
 			start_frame, end_frame, _gain_automation_buffer, nframes);

@@ -23,6 +23,8 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include "pbd/signals.h"
+
+#include "evoral/visibility.h"
 #include "evoral/types.hpp"
 #include "evoral/Parameter.hpp"
 
@@ -38,7 +40,7 @@ class Transport;
  *  a list of values for automation.
  */
 
-class Control
+class LIBEVORAL_API Control
 {
 public:
 	Control(const Parameter& parameter, boost::shared_ptr<ControlList>);

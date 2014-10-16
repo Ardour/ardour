@@ -20,6 +20,7 @@
 #include <math.h>
 #include <samplerate.h>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 #ifndef __interpolation_h__
@@ -27,7 +28,7 @@
 
 namespace ARDOUR {
 
-class Interpolation {
+class LIBARDOUR_API Interpolation {
 protected:
 	double _speed;
 	double _target_speed;
@@ -57,12 +58,12 @@ public:
 	}
 };
 
-class LinearInterpolation : public Interpolation {
+class LIBARDOUR_API LinearInterpolation : public Interpolation {
 public:
 	framecnt_t interpolate (int channel, framecnt_t nframes, Sample* input, Sample* output);
 };
 
-class CubicInterpolation : public Interpolation {
+class LIBARDOUR_API CubicInterpolation : public Interpolation {
 public:
 	framecnt_t interpolate (int channel, framecnt_t nframes, Sample* input, Sample* output);
 };

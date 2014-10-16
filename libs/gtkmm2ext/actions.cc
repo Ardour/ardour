@@ -21,14 +21,20 @@
 #include <vector>
 #include <string>
 #include <list>
+#include <stack>
 #include <stdint.h>
+
+#include <boost/shared_ptr.hpp>
 
 #include <gtk/gtkaccelmap.h>
 #include <gtk/gtkuimanager.h>
 #include <gtk/gtkactiongroup.h>
 
+#include <gtkmm.h>
 #include <gtkmm/accelmap.h>
 #include <gtkmm/uimanager.h>
+
+#include <glibmm/miscutils.h>
 
 #include "pbd/error.h"
 
@@ -232,6 +238,125 @@ ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, ve
 }
 
 void
+ActionManager::enable_accelerators ()
+{
+	/* the C++ API for functions used here appears to be broken in
+	   gtkmm2.6, so we fall back to the C level.
+	*/
+
+	GList* list = gtk_ui_manager_get_action_groups (ui_manager->gobj());
+	GList* node;
+	GList* acts;
+	string ui_string = "<ui>";
+
+	/* get all actions, build a string describing them all as <accelerator
+	 * action="name"/>
+	 */
+
+	for (node = list; node; node = g_list_next (node)) {
+
+		GtkActionGroup* group = (GtkActionGroup*) node->data;
+
+		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
+			ui_string += "<accelerator action=\"";
+			
+			/* OK, this is pretty stupid ... there is the full
+			 * accel path returned by gtk_action_get_accel_path ()
+			 * but of course the UIManager doesn't use that, but
+			 * just a name, which is the last component of the
+			 * path. What a totally ridiculous design.
+			 */
+
+			string fullpath = gtk_action_get_accel_path ((GtkAction*) acts->data);
+
+			ui_string += Glib::path_get_basename (fullpath);
+			ui_string += "\"/>";
+		}
+	}
+
+	ui_string += "</ui>";
+
+	/* and load it */
+
+	ui_manager->add_ui_from_string (ui_string);
+}
+
+struct ActionState {
+	GtkAction* action;
+	bool       sensitive;
+	ActionState (GtkAction* a, bool s) : action (a), sensitive (s) {}
+};
+
+typedef std::vector<ActionState> ActionStates;
+
+static std::stack<boost::shared_ptr<ActionStates> > state_stack;
+
+static boost::shared_ptr<ActionStates>
+get_action_state ()
+{
+	boost::shared_ptr<ActionStates> state = boost::shared_ptr<ActionStates>(new ActionStates);
+	
+	/* the C++ API for functions used here appears to be broken in
+	   gtkmm2.6, so we fall back to the C level.
+	*/
+
+	GList* list = gtk_ui_manager_get_action_groups (ActionManager::ui_manager->gobj());
+	GList* node;
+	GList* acts;
+
+	for (node = list; node; node = g_list_next (node)) {
+
+		GtkActionGroup* group = (GtkActionGroup*) node->data;
+
+		/* first pass: collect them all */
+
+		typedef std::list<Glib::RefPtr<Gtk::Action> > action_list;
+		action_list the_acts;
+
+		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
+			GtkAction* action = (GtkAction*) acts->data;
+
+			state->push_back (ActionState (action, gtk_action_get_sensitive (action)));
+		}
+	}
+	
+	return state;
+}
+
+void
+ActionManager::push_action_state ()
+{
+	state_stack.push (get_action_state());
+}
+
+void
+ActionManager::pop_action_state ()
+{
+	if (state_stack.empty()) {
+		warning << string_compose (_("programming error: %1"), X_("ActionManager::pop_action_state called with empty stack")) << endmsg;
+		return;
+	}
+
+	boost::shared_ptr<ActionStates> as = state_stack.top ();
+	state_stack.pop ();
+	
+	for (ActionStates::iterator i = as->begin(); i != as->end(); ++i) {
+		gtk_action_set_sensitive ((*i).action, (*i).sensitive);
+	}
+}
+
+void
+ActionManager::disable_all_actions ()
+{
+	push_action_state ();
+	boost::shared_ptr<ActionStates> as = state_stack.top ();
+	
+	for (ActionStates::iterator i = as->begin(); i != as->end(); ++i) {
+		gtk_action_set_sensitive ((*i).action, false);
+	}
+}
+
+void
 ActionManager::add_action_group (RefPtr<ActionGroup> grp)
 {
 	ui_manager->insert_action_group (grp);
@@ -265,15 +390,15 @@ ActionManager::get_action (const char* path)
 		path++;
 	}
 
-	char copy[len+1];
-	strcpy (copy, path);
-	char* slash = strchr (copy, '/');
+	vector<char> copy(len+1);
+	strcpy (&copy[0], path);
+	char* slash = strchr (&copy[0], '/');
 	if (!slash) {
 		return RefPtr<Action> ();
 	}
 	*slash = '\0';
 
-	return get_action (copy, ++slash);
+	return get_action (&copy[0], ++slash);
 	
 }
 

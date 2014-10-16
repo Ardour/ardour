@@ -27,8 +27,6 @@
 #include <fcntl.h>
 #include <cstdlib>
 #include <ctime>
-#include <sys/stat.h>
-#include <sys/mman.h>
 
 #include "pbd/error.h"
 #include "pbd/xml++.h"
@@ -150,11 +148,18 @@ AudioDiskstream::free_working_buffers()
 void
 AudioDiskstream::non_realtime_input_change ()
 {
+	bool need_write_sources = false;
+
 	{
 		Glib::Threads::Mutex::Lock lm (state_lock);
 
 		if (input_change_pending.type == IOChange::NoChange) {
 			return;
+		}
+
+		boost::shared_ptr<ChannelList> cr = channels.reader();
+		if (!cr->empty() && !cr->front()->write_source) {
+			need_write_sources = true;
 		}
 
 		if (input_change_pending.type == IOChange::ConfigurationChanged) {
@@ -168,6 +173,8 @@ AudioDiskstream::non_realtime_input_change ()
 			} else if (_io->n_ports().n_audio() < _n_channels.n_audio()) {
 				remove_channel_from (c, _n_channels.n_audio() - _io->n_ports().n_audio());
 			}
+
+			need_write_sources = true;
 		}
 
 		if (input_change_pending.type & IOChange::ConnectionsChanged) {
@@ -181,9 +188,9 @@ AudioDiskstream::non_realtime_input_change ()
 		/* implicit unlock */
 	}
 
-	/* reset capture files */
-
-	reset_write_sources (false);
+	if (need_write_sources) {
+		reset_write_sources (false);
+	}
 
 	/* now refill channel buffers */
 
@@ -454,6 +461,8 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 
 		Evoral::OverlapType ot = Evoral::coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
 		calculate_record_range (ot, transport_frame, nframes, rec_nframes, rec_offset);
+
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: this time record %2 of %3 frames, offset %4\n", _name, rec_nframes, nframes, rec_offset));
 
 		if (rec_nframes && !was_recording) {
 			capture_captured = 0;
@@ -925,7 +934,7 @@ AudioDiskstream::internal_playback_seek (framecnt_t distance)
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	for (chan = c->begin(); chan != c->end(); ++chan) {
-		(*chan)->playback_buf->increment_read_ptr (std::llabs(distance));
+		(*chan)->playback_buf->increment_read_ptr (llabs(distance));
 	}
 
 	if (first_recordable_frame < max_framepos) {
@@ -1539,9 +1548,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 		}
 
 		_last_capture_sources.insert (_last_capture_sources.end(), srcs.begin(), srcs.end());
-
-		// cerr << _name << ": there are " << capture_info.size() << " capture_info records\n";
-
+		
 		_playlist->clear_changes ();
 		_playlist->set_capture_insertion_in_progress (true);
 		_playlist->freeze ();
@@ -1696,8 +1703,8 @@ AudioDiskstream::finish_capture (boost::shared_ptr<ChannelList> c)
 	   accessors, so that invalidation will not occur (both non-realtime).
 	*/
 
-	// cerr << "Finish capture, add new CI, " << ci->start << '+' << ci->frames << endl;
-
+	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("Finish capture, add new CI, %1 + %2\n", ci->start, ci->frames));
+	
 	capture_info.push_back (ci);
 	capture_captured = 0;
 
@@ -1791,7 +1798,7 @@ AudioDiskstream::get_state ()
 	LocaleGuard lg (X_("POSIX"));
 
 	boost::shared_ptr<ChannelList> c = channels.reader();
-	snprintf (buf, sizeof(buf), "%zd", c->size());
+	snprintf (buf, sizeof(buf), "%u", (unsigned int) c->size());
 	node.add_property ("channels", buf);
 
 	if (!capturing_sources.empty() && _session.get_record_enabled()) {
@@ -1910,7 +1917,7 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 
 	try {
 		if ((chan->write_source = _session.create_audio_source_for_session (
-			     n_channels().n_audio(), name(), n, destructive())) == 0) {
+			     n_channels().n_audio(), write_source_name(), n, destructive())) == 0) {
 			throw failed_constructor();
 		}
 	}
@@ -2453,6 +2460,9 @@ AudioDiskstream::ChannelInfo::~ChannelInfo ()
 bool
 AudioDiskstream::set_name (string const & name)
 {
+	if (_name == name) {
+		return true;
+	}
 	Diskstream::set_name (name);
 
 	/* get a new write source so that its name reflects the new diskstream name */
@@ -2465,5 +2475,26 @@ AudioDiskstream::set_name (string const & name)
 		use_new_write_source (n);
 	}
 
+	return true;
+}
+
+bool
+AudioDiskstream::set_write_source_name (const std::string& str) {
+	if (_write_source_name == str) {
+		return true;
+	}
+
+	Diskstream::set_write_source_name (str);
+
+	if (_write_source_name == name()) {
+		return true;
+	}
+	boost::shared_ptr<ChannelList> c = channels.reader();
+	ChannelList::iterator i;
+	int n = 0;
+
+	for (n = 0, i = c->begin(); i != c->end(); ++i, ++n) {
+		use_new_write_source (n);
+	}
 	return true;
 }

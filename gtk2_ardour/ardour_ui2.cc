@@ -64,6 +64,7 @@ using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace Glib;
+using namespace ARDOUR_UI_UTILS;
 
 int
 ARDOUR_UI::setup_windows ()
@@ -111,9 +112,9 @@ ARDOUR_UI::setup_windows ()
 	top_packer.pack_start (menu_bar_base, false, false);
 #endif
 
-	top_packer.pack_start (transport_frame, false, false);
+	editor->add_toplevel_menu (top_packer);
 
-	editor->add_toplevel_controls (top_packer);
+	editor->add_transport_frame (transport_frame);
 
 	setup_transport();
 
@@ -144,7 +145,7 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (feedback_alert_button, _("When active, there is a feedback loop."));
 	set_tip (primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	set_tip (secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
-	set_tip (editor_meter_peak_display, _("Reset Level Meter"));
+	set_tip (editor_meter_peak_display, _("Reset All Peak Indicators"));
 
 	synchronize_sync_source_and_video_pullup ();
 
@@ -222,7 +223,7 @@ ARDOUR_UI::setup_transport ()
 	transport_tearoff->set_name ("TransportBase");
 	transport_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &transport_tearoff->tearoff_window()), false);
 
-	if (Profile->get_sae()) {
+	if (Profile->get_sae() || Profile->get_mixbus()) {
 		transport_tearoff->set_can_be_torn_off (false);
 	}
 
@@ -271,8 +272,9 @@ ARDOUR_UI::setup_transport ()
 	roll_button.set_image (get_icon (X_("transport_play")));
 	stop_button.set_image (get_icon (X_("transport_stop")));
 	play_selection_button.set_image (get_icon (X_("transport_range")));
-	rec_button.set_image (get_icon (X_("transport_record")));
 	auto_loop_button.set_image (get_icon (X_("transport_loop")));
+
+	rec_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton));
 
 	midi_panic_button.set_image (get_icon (X_("midi_panic")));
 	/* the icon for this has an odd aspect ratio, so fatten up the button */
@@ -324,9 +326,11 @@ ARDOUR_UI::setup_transport ()
 	feedback_alert_button.set_name ("feedback alert");
 	feedback_alert_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::feedback_alert_press), false);
 
-	alert_box.pack_start (solo_alert_button, true, false);
-	alert_box.pack_start (auditioning_alert_button, true, false);
-	alert_box.pack_start (feedback_alert_button, true, false);
+	alert_box.set_homogeneous (true);
+	alert_box.set_spacing (2);
+	alert_box.pack_start (solo_alert_button, true, true);
+	alert_box.pack_start (auditioning_alert_button, true, true);
+	alert_box.pack_start (feedback_alert_button, true, true);
 
 	/* all transport buttons should be the same size vertically and
 	 * horizontally 
@@ -357,13 +361,18 @@ ARDOUR_UI::setup_transport ()
 	tbox2->set_spacing (2);
 	tbox->set_spacing (2);
 
-	tbox1->pack_start (midi_panic_button, false, false, 5);
-	tbox1->pack_start (click_button, false, false, 5);
+	if (!Profile->get_trx()) {
+		tbox1->pack_start (midi_panic_button, false, false, 5);
+		tbox1->pack_start (click_button, false, false, 5);
+	}
+
 	tbox1->pack_start (goto_start_button, false, false);
 	tbox1->pack_start (goto_end_button, false, false);
 	tbox1->pack_start (auto_loop_button, false, false);
 
-	tbox2->pack_start (play_selection_button, false, false);
+	if (!Profile->get_trx()) {
+		tbox2->pack_start (play_selection_button, false, false);
+	}
 	tbox2->pack_start (roll_button, false, false);
 	tbox2->pack_start (stop_button, false, false);
 	tbox2->pack_start (rec_button, false, false, 5);
@@ -382,20 +391,29 @@ ARDOUR_UI::setup_transport ()
 	HBox* clock_box = manage (new HBox);
 
 	clock_box->pack_start (*primary_clock, false, false);
-	if (!ARDOUR::Profile->get_small_screen()) {
+	if (!ARDOUR::Profile->get_small_screen() && !ARDOUR::Profile->get_trx()) {
 		clock_box->pack_start (*secondary_clock, false, false);
 	}
 	clock_box->set_spacing (3);
 
-	shuttle_box = new ShuttleControl;
+	shuttle_box = manage (new ShuttleControl);
 	shuttle_box->show ();
-
+	
 	VBox* transport_vbox = manage (new VBox);
 	transport_vbox->set_name ("TransportBase");
 	transport_vbox->set_border_width (0);
 	transport_vbox->set_spacing (3);
 	transport_vbox->pack_start (*tbox, true, true, 0);
-	transport_vbox->pack_start (*shuttle_box, false, false, 0);
+
+	if (!Profile->get_trx()) {
+		transport_vbox->pack_start (*shuttle_box, false, false, 0);
+	}
+
+	time_info_box = manage (new TimeInfoBox);
+
+	if (ARDOUR::Profile->get_trx()) {
+		transport_tearoff_hbox.pack_start (*time_info_box, false, false);
+	}
 
 	transport_tearoff_hbox.pack_start (*transport_vbox, false, false);
 
@@ -404,22 +422,34 @@ ARDOUR_UI::setup_transport ()
 	VBox* auto_box = manage (new VBox);
 	auto_box->set_homogeneous (true);
 	auto_box->set_spacing (2);
-	auto_box->pack_start (sync_button, false, false);
-	auto_box->pack_start (follow_edits_button, false, false);
-	auto_box->pack_start (auto_return_button, false, false);
+	auto_box->pack_start (sync_button, true, true);
+	if (!ARDOUR::Profile->get_trx()) {
+		auto_box->pack_start (follow_edits_button, true, true);
+		auto_box->pack_start (auto_return_button, true, true);
+	}
 
-	transport_tearoff_hbox.pack_start (*auto_box, false, false);
+	if (!ARDOUR::Profile->get_trx()) {
+		transport_tearoff_hbox.pack_start (*auto_box, false, false);
+	}
 	transport_tearoff_hbox.pack_start (*clock_box, true, true);
 
-	time_info_box = manage (new TimeInfoBox);
-	transport_tearoff_hbox.pack_start (*time_info_box, false, false);
+	if (ARDOUR::Profile->get_trx()) {
+		transport_tearoff_hbox.pack_start (*auto_box, false, false);
+	}
 
-        if (Profile->get_small_screen()) {
+	if (!ARDOUR::Profile->get_trx()) {
+		transport_tearoff_hbox.pack_start (*time_info_box, false, false);
+	}
+
+        if (ARDOUR::Profile->get_small_screen()) {
                 transport_tearoff_hbox.pack_start (_editor_transport_box, false, false);
         }
-	transport_tearoff_hbox.pack_start (alert_box, false, false);
-	transport_tearoff_hbox.pack_start (meter_box, false, false);
-	transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
+
+	if (!ARDOUR::Profile->get_trx()) {
+		transport_tearoff_hbox.pack_start (alert_box, false, false);
+		transport_tearoff_hbox.pack_start (meter_box, false, false);
+		transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
+	}
 
 	if (Profile->get_sae()) {
 		Image* img = manage (new Image ((::get_icon (X_("sae")))));
@@ -612,6 +642,18 @@ ARDOUR_UI::restore_editing_space ()
 	}
 }
 
+void
+ARDOUR_UI::show_ui_prefs ()
+{
+	RefPtr<Action> act = ActionManager::get_action (X_("Window"), X_("toggle-rc-options-editor"));
+	assert (act);
+
+	act->activate();
+
+	rc_option_editor->set_current_page (_("GUI"));
+}
+
+
 bool
 ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 {
@@ -630,7 +672,7 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 }
 
 void
-ARDOUR_UI::toggle_always_play_range ()
+ARDOUR_UI::toggle_follow_edits ()
 {
 	RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
 	assert (act);
@@ -638,7 +680,7 @@ ARDOUR_UI::toggle_always_play_range ()
 	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
 	assert (tact);
 
-	Config->set_always_play_range (tact->get_active ());
+	Config->set_follow_edits (tact->get_active ());
 }
 
 	

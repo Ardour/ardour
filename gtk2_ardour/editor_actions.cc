@@ -30,6 +30,9 @@
 #include "ardour/session.h"
 #include "ardour/types.h"
 
+#include "canvas/canvas.h"
+#include "canvas/pixbuf.h"
+
 #include "actions.h"
 #include "ardour_ui.h"
 #include "editing.h"
@@ -47,6 +50,7 @@ using namespace Gtk;
 using namespace Glib;
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Editing;
 
@@ -147,6 +151,11 @@ Editor::register_actions ()
 
 	ActionManager::register_action (editor_actions, "escape", _("Break drag or deselect all"), sigc::mem_fun (*this, &Editor::escape));
 
+	/* We don't bother registering "unlock" because it would be insensitive
+	   when required. Editor::unlock() must be invoked directly.
+	*/
+	ActionManager::register_action (editor_actions, "lock", _("Lock"), sigc::mem_fun (*this, &Editor::lock));
+
 	toggle_reg_sens (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	toggle_reg_sens (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Editor::editor_list_button_toggled));
 
@@ -182,11 +191,15 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "playhead-to-range-start", _("Playhead to Range Start"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_to_selection_start), playhead_cursor));
 	reg_sens (editor_actions, "playhead-to-range-end", _("Playhead to Range End"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_to_selection_end), playhead_cursor));
 
-	reg_sens (editor_actions, "select-all", _("Select All"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all), Selection::Set));
+	reg_sens (editor_actions, "select-all-objects", _("Select All Objects"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_objects), Selection::Set));
+	reg_sens (editor_actions, "select-all-tracks", _("Select All Tracks"), sigc::mem_fun(*this, &Editor::select_all_tracks));
 	reg_sens (editor_actions, "deselect-all", _("Deselect All"), sigc::mem_fun(*this, &Editor::deselect_all));
 	reg_sens (editor_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection));
+
 	reg_sens (editor_actions, "select-all-after-edit-cursor", _("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true));
+	reg_sens (editor_actions, "alternate-select-all-after-edit-cursor", _("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true));
 	reg_sens (editor_actions, "select-all-before-edit-cursor", _("Select All Before Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), false));
+	reg_sens (editor_actions, "alternate-select-all-before-edit-cursor", _("Select All Before Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), false));
 
 	reg_sens (editor_actions, "select-all-between-cursors", _("Select All Overlapping Edit Range"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_between), false));
 	reg_sens (editor_actions, "select-all-within-cursors", _("Select All Inside Edit Range"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_between), true));
@@ -227,8 +240,15 @@ Editor::register_actions ()
 	}
 
 	reg_sens (editor_actions, "jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
+	reg_sens (editor_actions, "alternate-jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
 	reg_sens (editor_actions, "jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
+	reg_sens (editor_actions, "alternate-jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
+
 	reg_sens (editor_actions, "add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
+	reg_sens (editor_actions, "alternate-add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
+
+	reg_sens (editor_actions, "remove-location-from-playhead", _("Remove Mark at Playhead"), sigc::mem_fun(*this, &Editor::remove_location_at_playhead_cursor));
+	reg_sens (editor_actions, "alternate-remove-location-from-playhead", _("Remove Mark at Playhead"), sigc::mem_fun(*this, &Editor::remove_location_at_playhead_cursor));
 
 	reg_sens (editor_actions, "nudge-next-forward", _("Nudge Next Later"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_forward), true, false));
 	reg_sens (editor_actions, "nudge-next-backward", _("Nudge Next Earlier"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_backward), true, false));
@@ -243,6 +263,8 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "zoom-to-session", _("Zoom to Session"), sigc::mem_fun(*this, &Editor::temporal_zoom_session));
 	reg_sens (editor_actions, "zoom-to-region", _("Zoom to Region"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_to_region), false));
 	reg_sens (editor_actions, "zoom-to-region-both-axes", _("Zoom to Region (Width and Height)"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_to_region), true));
+	reg_sens (editor_actions, "zoom-to-range", _("Zoom to Range"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), false));
+	reg_sens (editor_actions, "zoom-to-range-both-axes", _("Zoom to Range (Width and Height)"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), true));
 	reg_sens (editor_actions, "toggle-zoom", _("Toggle Zoom State"), sigc::mem_fun(*this, &Editor::swap_visual_state));
 
 	reg_sens (editor_actions, "expand-tracks", _("Expand Track Height"), sigc::bind (sigc::mem_fun (*this, &Editor::tav_zoom_step), false));
@@ -273,6 +295,8 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "playhead-to-edit", _("Playhead to Active Mark"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_align), true));
 	reg_sens (editor_actions, "edit-to-playhead", _("Active Mark to Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_align), false));
 
+	toggle_reg_sens (editor_actions, "toggle-skip-playback", _("Use Skip Ranges"), sigc::mem_fun(*this, &Editor::toggle_skip_playback));
+
 	reg_sens (editor_actions, "set-loop-from-edit-range", _("Set Loop from Edit Range"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_edit_range), false));
 	reg_sens (editor_actions, "set-punch-from-edit-range", _("Set Punch from Edit Range"), sigc::mem_fun(*this, &Editor::set_punch_from_edit_range));
 
@@ -289,7 +313,10 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "duplicate-range", _("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_range), false));
 
 	undo_action = reg_sens (editor_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun(*this, &Editor::undo), 1U));
+
 	redo_action = reg_sens (editor_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
+	redo_action = reg_sens (editor_actions, "alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
+	redo_action = reg_sens (editor_actions, "alternate-alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
 
 	reg_sens (editor_actions, "export-audio", _("Export Audio"), sigc::mem_fun(*this, &Editor::export_audio));
 	reg_sens (editor_actions, "export-range", _("Export Range"), sigc::mem_fun(*this, &Editor::export_range));
@@ -308,23 +335,32 @@ Editor::register_actions ()
 
 	reg_sens (editor_actions, "editor-cut", _("Cut"), sigc::mem_fun(*this, &Editor::cut));
 	reg_sens (editor_actions, "editor-delete", _("Delete"), sigc::mem_fun(*this, &Editor::delete_));
+	reg_sens (editor_actions, "alternate-editor-delete", _("Delete"), sigc::mem_fun(*this, &Editor::delete_));
 
 	reg_sens (editor_actions, "editor-copy", _("Copy"), sigc::mem_fun(*this, &Editor::copy));
 	reg_sens (editor_actions, "editor-paste", _("Paste"), sigc::mem_fun(*this, &Editor::keyboard_paste));
+
+	reg_sens (editor_actions, "editor-fade-range", _("Fade Range Selection"), sigc::mem_fun(*this, &Editor::fade_range));
 
 	reg_sens (editor_actions, "set-tempo-from-edit-range", _("Set Tempo from Edit Range = Bar"), sigc::mem_fun(*this, &Editor::use_range_as_bar));
 
 	toggle_reg_sens (editor_actions, "toggle-log-window", _("Log"),
 			sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::toggle_errors));
 
-	reg_sens (editor_actions, "tab-to-transient-forwards", _("Move Later to Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), true));
-	reg_sens (editor_actions, "tab-to-transient-backwards", _("Move Earlier to Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), false));
+	reg_sens (editor_actions, "alternate-tab-to-transient-forwards", _("Move to Next Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), true));
+	reg_sens (editor_actions, "alternate-tab-to-transient-backwards", _("Move to Previous Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), false));
+	reg_sens (editor_actions, "tab-to-transient-forwards", _("Move to Next Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), true));
+	reg_sens (editor_actions, "tab-to-transient-backwards", _("Move to Previous Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), false));
 
 	reg_sens (editor_actions, "crop", _("Crop"), sigc::mem_fun(*this, &Editor::crop_region_to_selection));
 
 	reg_sens (editor_actions, "start-range", _("Start Range"), sigc::mem_fun(*this, &Editor::keyboard_selection_begin));
 	reg_sens (editor_actions, "finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), false));
-	reg_sens (editor_actions, "finish-add-range", _("Finish Add Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), true));
+
+	reg_sens (editor_actions, "alt-start-range", _("Start Range"), sigc::mem_fun(*this, &Editor::keyboard_selection_begin));
+	reg_sens (editor_actions, "alt-finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), false));
+
+//	reg_sens (editor_actions, "finish-add-range", _("Finish Add Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), true));
 
 	reg_sens (
 		editor_actions,
@@ -371,7 +407,8 @@ Editor::register_actions ()
 	}
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
-	reg_sens (editor_actions, "fit-tracks", _("Fit Selected Tracks"), sigc::mem_fun(*this, &Editor::fit_selected_tracks));
+	act = reg_sens (editor_actions, "fit-tracks", _("Fit Selected Tracks"), sigc::mem_fun(*this, &Editor::fit_selected_tracks));
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "track-height-largest", _("Largest"), sigc::bind (
 				sigc::mem_fun(*this, &Editor::set_track_height), HeightLargest));
@@ -411,72 +448,72 @@ Editor::register_actions ()
 	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
 	smart_mode_button.set_related_action (smart_mode_action);
 	smart_mode_button.set_text (_("Smart"));
-	smart_mode_button.add_elements ( ArdourButton::FlatFace );
 	smart_mode_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Object Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
 	mouse_move_button.set_related_action (act);
 	mouse_move_button.set_image (::get_icon("tool_object"));
-	mouse_move_button.add_elements ( ArdourButton::FlatFace );
 	mouse_move_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));	
 	mouse_select_button.set_related_action (act);
 	mouse_select_button.set_image (::get_icon("tool_range"));
-	mouse_select_button.add_elements ( ArdourButton::FlatFace );
 	mouse_select_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseDraw));	
 	mouse_draw_button.set_related_action (act);
 	mouse_draw_button.set_image (::get_icon("midi_tool_pencil"));
-	mouse_draw_button.add_elements ( ArdourButton::FlatFace );
 	mouse_draw_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), sigc::bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));	
 	mouse_gain_button.set_related_action (act);
 	mouse_gain_button.set_image (::get_icon("tool_gain"));
-	mouse_gain_button.add_elements ( ArdourButton::FlatFace );
 	mouse_gain_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseZoom));	
-	mouse_zoom_button.set_related_action (act);
-	mouse_zoom_button.set_image (::get_icon("tool_zoom"));
-	mouse_zoom_button.add_elements ( ArdourButton::FlatFace );
-	mouse_zoom_button.set_name ("mouse mode button");
-
+	if(!Profile->get_mixbus()) {
+		act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseZoom));	
+		mouse_zoom_button.set_related_action (act);
+		mouse_zoom_button.set_image (::get_icon("tool_zoom"));
+		mouse_zoom_button.set_name ("mouse mode button");
+	}
+	
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));	
 	mouse_audition_button.set_related_action (act);
 	mouse_audition_button.set_image (::get_icon("tool_audition"));
-	mouse_audition_button.add_elements ( ArdourButton::FlatFace );
 	mouse_audition_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));	
 	mouse_timefx_button.set_related_action (act);
 	mouse_timefx_button.set_image (::get_icon("tool_stretch"));
-	mouse_timefx_button.add_elements ( ArdourButton::FlatFace );
 	mouse_timefx_button.set_name ("mouse mode button");
 
+	if(!Profile->get_mixbus()) {
+		act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseCut));
+		mouse_cut_button.set_related_action (act);
+		mouse_cut_button.set_image (::get_icon("tool_cut"));
+		mouse_cut_button.set_name ("mouse mode button");
+	}
+	
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), sigc::bind (sigc::mem_fun(*this, &Editor::step_mouse_mode), true));
 
 	act = ActionManager::register_toggle_action (mouse_mode_actions, "toggle-internal-edit", _("Edit MIDI"), sigc::mem_fun(*this, &Editor::toggle_internal_editing));
 	internal_edit_button.set_related_action (act);
 	internal_edit_button.set_image (::get_icon("tool_note"));
-	internal_edit_button.add_elements ( ArdourButton::FlatFace );
 	internal_edit_button.set_name ("mouse mode button");
 
 	RadioAction::Group edit_point_group;
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-playhead"), _("Playhead"), (sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
-	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-mouse"), _("Mouse"), (sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
-	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-selected-marker"), _("Marker"), (sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
+	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-mouse"), _("Mouse"), (sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtMouse)));
+	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-selected-marker"), _("Marker"), (sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtSelectedMarker)));
 
 	ActionManager::register_action (editor_actions, "cycle-edit-point", _("Change Edit Point"), sigc::bind (sigc::mem_fun (*this, &Editor::cycle_edit_point), false));
 	ActionManager::register_action (editor_actions, "cycle-edit-point-with-marker", _("Change Edit Point Including Marker"), sigc::bind (sigc::mem_fun (*this, &Editor::cycle_edit_point), true));
-	if (!Profile->get_sae()) {
-		ActionManager::register_action (editor_actions, "set-edit-splice", _("Splice"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Splice));
-	}
+
+//	ActionManager::register_action (editor_actions, "set-edit-splice", _("Splice"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Splice));
+	ActionManager::register_action (editor_actions, "set-edit-ripple", _("Ripple"), bind (mem_fun (*this, &Editor::set_edit_mode), Ripple));
 	ActionManager::register_action (editor_actions, "set-edit-slide", _("Slide"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Slide));
 	ActionManager::register_action (editor_actions, "set-edit-lock", _("Lock"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Lock));
-	ActionManager::register_action (editor_actions, "toggle-edit-mode", _("Toggle Edit Mode"), sigc::mem_fun (*this, &Editor::cycle_edit_mode));
+	ActionManager::register_action (editor_actions, "cycle-edit-mode", _("Cycle Edit Mode"), sigc::mem_fun (*this, &Editor::cycle_edit_mode));
 
 	ActionManager::register_action (editor_actions, X_("SnapTo"), _("Snap to"));
 	ActionManager::register_action (editor_actions, X_("SnapMode"), _("Snap Mode"));
@@ -560,12 +597,30 @@ Editor::register_actions ()
 	/* set defaults here */
 
 	no_ruler_shown_update = true;
-	ruler_meter_action->set_active (true);
-	ruler_tempo_action->set_active (true);
-	ruler_marker_action->set_active (true);
-	ruler_range_action->set_active (true);
-	ruler_loop_punch_action->set_active (true);
-	ruler_loop_punch_action->set_active (true);
+	
+	if (Profile->get_trx()) {
+		ruler_marker_action->set_active (true);
+		ruler_meter_action->set_active (false);
+		ruler_tempo_action->set_active (false);
+		ruler_range_action->set_active (false);
+		ruler_loop_punch_action->set_active (false);
+		ruler_loop_punch_action->set_active (false);
+		ruler_bbt_action->set_active (true);
+		ruler_cd_marker_action->set_active (false);
+		ruler_timecode_action->set_active (false);
+		ruler_minsec_action->set_active (true);
+	} else {	
+		ruler_marker_action->set_active (true);
+		ruler_meter_action->set_active (true);
+		ruler_tempo_action->set_active (true);
+		ruler_range_action->set_active (true);
+		ruler_loop_punch_action->set_active (true);
+		ruler_loop_punch_action->set_active (true);
+		ruler_bbt_action->set_active (false);
+		ruler_cd_marker_action->set_active (true);
+		ruler_timecode_action->set_active (true);
+		ruler_minsec_action->set_active (false);
+	}
 
 	ruler_video_action->set_active (false);
 	xjadeo_proc_action->set_active (false);
@@ -584,17 +639,6 @@ Editor::register_actions ()
 	xjadeo_letterbox_action->set_sensitive (false);
 	xjadeo_zoom_100->set_sensitive (false);
 
-	if (Profile->get_sae()) {
-		ruler_bbt_action->set_active (true);
-		ruler_cd_marker_action->set_active (false);
-		ruler_timecode_action->set_active (false);
-		ruler_minsec_action->set_active (true);
-	} else {
-		ruler_bbt_action->set_active (false);
-		ruler_cd_marker_action->set_active (true);
-		ruler_timecode_action->set_active (true);
-		ruler_minsec_action->set_active (false);
-	}
 	ruler_samples_action->set_active (false);
 	no_ruler_shown_update = false;
 
@@ -658,6 +702,10 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, X_("importFromSession"), _("Import From Session"), sigc::mem_fun(*this, &Editor::session_import_dialog));
 	ActionManager::write_sensitive_actions.push_back (act);
 
+
+	act = ActionManager::register_action (editor_actions, X_("bring-into-session"), _("Bring all media into session folder"), sigc::mem_fun(*this, &Editor::bring_all_sources_into_session));
+	ActionManager::write_sensitive_actions.push_back (act);
+
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleSummary"), _("Show Summary"), sigc::mem_fun (*this, &Editor::set_summary));
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleGroupTabs"), _("Show Group Tabs"), sigc::mem_fun (*this, &Editor::set_group_tabs));
@@ -691,11 +739,25 @@ Editor::load_bindings ()
 
 	std::string binding_file;
 
-	if (find_file_in_search_path (ardour_config_search_path(), "editor.bindings", binding_file)) {
+	if (find_file (ardour_config_search_path(), "editor.bindings", binding_file)) {
                 key_bindings.load (binding_file);
 		info << string_compose (_("Loaded editor bindings from %1"), binding_file) << endmsg;
         } else {
 		error << string_compose (_("Could not find editor.bindings in search path %1"), ardour_config_search_path().to_string()) << endmsg;
+	}
+}
+
+void
+Editor::toggle_skip_playback ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), "toggle-skip-playback");
+
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		bool s = Config->get_skip_playback ();
+		if (tact->get_active() != s) {
+			Config->set_skip_playback (tact->get_active());
+		}
 	}
 }
 
@@ -1597,17 +1659,17 @@ Editor::parameter_changed (std::string p)
 	ENSURE_GUI_THREAD (*this, &Editor::parameter_changed, p)
 
 	if (p == "auto-loop") {
-		update_loop_range_view (true);
+		update_loop_range_view ();
 	} else if (p == "punch-in") {
-		update_punch_range_view (true);
+		update_punch_range_view ();
 	} else if (p == "punch-out") {
-		update_punch_range_view (true);
+		update_punch_range_view ();
 	} else if (p == "timecode-format") {
 		update_just_timecode ();
 	} else if (p == "show-region-fades") {
 		update_region_fade_visibility ();
 	} else if (p == "edit-mode") {
-		edit_mode_selector.set_active_text (edit_mode_to_string (Config->get_edit_mode()));
+		edit_mode_selector.set_text (edit_mode_to_string (Config->get_edit_mode()));
 	} else if (p == "show-track-meters") {
 		toggle_meter_updating();
 	} else if (p == "show-summary") {
@@ -1647,7 +1709,9 @@ Editor::parameter_changed (std::string p)
 	} else if (p == "timecode-offset" || p == "timecode-offset-negative") {
 		update_just_timecode ();
 	} else if (p == "show-zoom-tools") {
-		_zoom_tearoff->set_visible (Config->get_show_zoom_tools(), true);
+		if (_zoom_tearoff) {
+			_zoom_tearoff->set_visible (Config->get_show_zoom_tools(), true);
+		}
 	} else if (p == "sound-midi-notes") {
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("sound-midi-notes"));
 
@@ -1673,13 +1737,23 @@ Editor::parameter_changed (std::string p)
 		} else {
 			Gtkmm2ext::disable_tooltips ();
 		}
+	} else if (p == "skip-playback") {
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-skip-playback"));
+
+		if (act) {
+			bool s = Config->get_skip_playback ();
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+			if (tact->get_active () != s) {
+				tact->set_active (s);
+			}
+		}
 	}
 }
 
 void
 Editor::reset_focus ()
 {
-	track_canvas->grab_focus();
+	_track_canvas->grab_focus();
 }
 
 void
@@ -1846,7 +1920,10 @@ Editor::register_region_actions ()
 		);
 
 	reg_sens (_region_actions, "set-fade-in-length", _("Set Fade In Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), true));
+	reg_sens (_region_actions, "alternate-set-fade-in-length", _("Set Fade In Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), true));
 	reg_sens (_region_actions, "set-fade-out-length", _("Set Fade Out Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), false));
+	reg_sens (_region_actions, "alternate-set-fade-out-length", _("Set Fade Out Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), false));
+
 	reg_sens (_region_actions, "set-tempo-from-region", _("Set Tempo from Region = Bar"), sigc::mem_fun (*this, &Editor::set_tempo_from_region));
 
 	reg_sens (
@@ -1890,7 +1967,11 @@ Editor::register_region_actions ()
 	reg_sens (_region_actions, "set-selection-from-region", _("Set Range Selection"), sigc::mem_fun (*this, &Editor::set_selection_from_region));
 
 	reg_sens (_region_actions, "nudge-forward", _("Nudge Later"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_forward), false, false));
+	reg_sens (_region_actions, "alternate-nudge-forward", _("Nudge Later"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_forward), false, false));
 	reg_sens (_region_actions, "nudge-backward", _("Nudge Earlier"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_backward), false, false));
+	reg_sens (_region_actions, "alternate-nudge-backward", _("Nudge Earlier"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_backward), false, false));
+
+	reg_sens (_region_actions, "sequence-regions", _("Sequence Regions"), sigc::mem_fun (*this, &Editor::sequence_regions));
 
 	reg_sens (
 		_region_actions,

@@ -29,7 +29,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <sys/stat.h>
-#include <sys/mman.h>
 
 #include <glibmm/threads.h>
 
@@ -253,8 +252,18 @@ Diskstream::set_capture_offset ()
 		return;
 	}
 
-	_capture_offset = _io->latency();
-        DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: using IO latency, capture offset set to %2\n", name(), _capture_offset));
+	switch (_alignment_style) {
+	case ExistingMaterial:
+		_capture_offset = _io->latency();
+		break;
+
+	case CaptureTime:
+	default:
+		_capture_offset = 0;
+		break;
+	}
+
+        DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: using IO latency, capture offset set to %2 with style = %3\n", name(), _capture_offset, enum_2_string (_alignment_style)));
 }
 
 
@@ -267,6 +276,7 @@ Diskstream::set_align_style (AlignStyle a, bool force)
 
 	if ((a != _alignment_style) || force) {
 		_alignment_style = a;
+		set_capture_offset ();
 		AlignmentStyleChanged ();
 	}
 }
@@ -281,17 +291,17 @@ Diskstream::set_align_choice (AlignChoice a, bool force)
 	if ((a != _alignment_choice) || force) {
 		_alignment_choice = a;
 
-                switch (_alignment_choice) {
-                case Automatic:
-                        set_align_style_from_io ();
-                        break;
-                case UseExistingMaterial:
-                        set_align_style (ExistingMaterial);
-                        break;
-                case UseCaptureTime:
-                        set_align_style (CaptureTime);
-                        break;
-                }
+		switch (_alignment_choice) {
+			case Automatic:
+				set_align_style_from_io ();
+				break;
+			case UseExistingMaterial:
+				set_align_style (ExistingMaterial);
+				break;
+			case UseCaptureTime:
+				set_align_style (CaptureTime);
+				break;
+		}
 	}
 }
 
@@ -438,7 +448,13 @@ Diskstream::set_name (const string& str)
 		playlist()->set_name (str);
 		SessionObject::set_name(str);
 	}
-        return true;
+	return true;
+}
+
+bool
+Diskstream::set_write_source_name (const std::string& str) {
+	_write_source_name = str;
+	return true;
 }
 
 XMLNode&
@@ -571,7 +587,7 @@ Diskstream::move_processor_automation (boost::weak_ptr<Processor> p, list< Evora
 
 	set<Evoral::Parameter> const a = processor->what_can_be_automated ();
 
-	for (set<Evoral::Parameter>::iterator i = a.begin (); i != a.end (); ++i) {
+	for (set<Evoral::Parameter>::const_iterator i = a.begin (); i != a.end (); ++i) {
 		boost::shared_ptr<AutomationList> al = processor->automation_control(*i)->alist();
 		XMLNode & before = al->get_state ();
 		bool const things_moved = al->move_ranges (movements);
@@ -594,27 +610,27 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
 	const int transport_rolling = 0x4;
 	const int track_rec_enabled = 0x2;
 	const int global_rec_enabled = 0x1;
-        const int fully_rec_enabled = (transport_rolling|track_rec_enabled|global_rec_enabled);
+	const int fully_rec_enabled = (transport_rolling|track_rec_enabled|global_rec_enabled);
 
 	/* merge together the 3 factors that affect record status, and compute
-	   what has changed.
-	*/
+	 * what has changed.
+	 */
 
 	rolling = _session.transport_speed() != 0.0f;
-	possibly_recording = (rolling << 2) | (record_enabled() << 1) | can_record;
+	possibly_recording = (rolling << 2) | ((int)record_enabled() << 1) | (int)can_record;
 	change = possibly_recording ^ last_possibly_recording;
 
 	if (possibly_recording == last_possibly_recording) {
 		return;
 	}
 
-        framecnt_t existing_material_offset = _session.worst_playback_latency();
+	const framecnt_t existing_material_offset = _session.worst_playback_latency();
 
-        if (possibly_recording == fully_rec_enabled) {
+	if (possibly_recording == fully_rec_enabled) {
 
-                if (last_possibly_recording == fully_rec_enabled) {
-                        return;
-                }
+		if (last_possibly_recording == fully_rec_enabled) {
+			return;
+		}
 
 		capture_start_frame = _session.transport_frame();
 		first_recordable_frame = capture_start_frame + _capture_offset;
@@ -637,32 +653,32 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
                                                                               first_recordable_frame));
                 }
 
-                prepare_record_status (capture_start_frame);
+		prepare_record_status (capture_start_frame);
 
-        } else {
+	} else {
 
-                if (last_possibly_recording == fully_rec_enabled) {
+		if (last_possibly_recording == fully_rec_enabled) {
 
-                        /* we were recording last time */
+			/* we were recording last time */
 
-                        if (change & transport_rolling) {
+			if (change & transport_rolling) {
 
-                                /* transport-change (stopped rolling): last_recordable_frame was set in ::prepare_to_stop(). We
-                                   had to set it there because we likely rolled past the stopping point to declick out,
-                                   and then backed up.
-                                 */
+				/* transport-change (stopped rolling): last_recordable_frame was set in ::prepare_to_stop(). We
+				 * had to set it there because we likely rolled past the stopping point to declick out,
+				 * and then backed up.
+				 */
 
-                        } else {
-                                /* punch out */
+			} else {
+				/* punch out */
 
-                                last_recordable_frame = _session.transport_frame() + _capture_offset;
+				last_recordable_frame = _session.transport_frame() + _capture_offset;
 
-                                if (_alignment_style == ExistingMaterial) {
-                                        last_recordable_frame += existing_material_offset;
-                                }
-                        }
-                }
-        }
+				if (_alignment_style == ExistingMaterial) {
+					last_recordable_frame += existing_material_offset;
+				}
+			}
+		}
+	}
 
 	last_possibly_recording = possibly_recording;
 }
@@ -723,9 +739,26 @@ Diskstream::calculate_record_range (Evoral::OverlapType ot, framepos_t transport
 }
 
 void
-Diskstream::prepare_to_stop (framepos_t pos)
+Diskstream::prepare_to_stop (framepos_t transport_frame, framepos_t audible_frame)
 {
-        last_recordable_frame = pos + _capture_offset;
+	switch (_alignment_style) {
+	case ExistingMaterial:
+		last_recordable_frame = transport_frame + _capture_offset;
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose("%1: prepare to stop sets last recordable frame to %2 + %3 = %4\n", _name, transport_frame, _capture_offset, last_recordable_frame));
+		break;
+
+	case CaptureTime:
+		last_recordable_frame = audible_frame; // note that capture_offset is zero
+		/* we may already have captured audio before the last_recordable_frame (audible frame),
+		   so deal with this.
+		*/
+		if (last_recordable_frame > capture_start_frame) {
+			capture_captured = min (capture_captured, last_recordable_frame - capture_start_frame);
+		}
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose("%1: prepare to stop sets last recordable frame to audible frame @ %2\n", _name, audible_frame));
+		break;
+	}
+
 }
 
 void

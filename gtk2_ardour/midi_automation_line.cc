@@ -29,12 +29,12 @@ using namespace std;
 MidiAutomationLine::MidiAutomationLine (
 	const std::string&                                      name,
 	TimeAxisView&                                           tav,
-	ArdourCanvas::Group&                                    group,
+	ArdourCanvas::Item&                                     parent,
 	boost::shared_ptr<ARDOUR::AutomationList>               list,
 	boost::shared_ptr<ARDOUR::MidiRegion>                   region,
 	Evoral::Parameter                                       parameter,
 	Evoral::TimeConverter<double, ARDOUR::framepos_t>*      converter)
-	: AutomationLine (name, tav, group, list, converter)
+	: AutomationLine (name, tav, parent, list, converter)
 	, _region (region)
 	, _parameter (parameter)
 {

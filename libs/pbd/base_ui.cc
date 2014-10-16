@@ -19,7 +19,11 @@
 
 #include <cstring>
 #include <stdint.h>
+#ifdef COMPILER_MSVC
+#include <io.h>      // Microsoft's nearest equivalent to <unistd.h>
+#else
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <cerrno>
 #include <cstring>
@@ -33,6 +37,8 @@
 
 #include "i18n.h"
 
+#include "pbd/debug.h"
+
 using namespace std;
 using namespace PBD;
 using namespace Glib;
@@ -42,13 +48,18 @@ BaseUI::RequestType BaseUI::CallSlot = BaseUI::new_request_type();
 BaseUI::RequestType BaseUI::Quit = BaseUI::new_request_type();
 
 BaseUI::BaseUI (const string& str)
-	: request_channel (true)
+	: m_context(MainContext::get_default())
 	, run_loop_thread (0)
 	, _name (str)
+#ifndef PLATFORM_WINDOWS
+	, request_channel (true)
+#endif
 {
 	base_ui_instance = this;
 
+#ifndef PLATFORM_WINDOWS
 	request_channel.ios()->connect (sigc::mem_fun (*this, &BaseUI::request_handler));
+#endif
 
 	/* derived class must set _ok */
 }
@@ -73,7 +84,7 @@ BaseUI::new_request_type ()
 void
 BaseUI::main_thread ()
 {
-	DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: event loop running in thread %2\n", name(), pthread_self()));
+	DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: event loop running in thread %2\n", name(), pthread_name()));
 	set_event_loop_for_thread (this);
 	thread_init ();
 	_main_loop->get_context()->signal_idle().connect (sigc::mem_fun (*this, &BaseUI::signal_running));
@@ -95,11 +106,9 @@ BaseUI::run ()
 	/* to be called by UI's that need/want their own distinct, self-created event loop thread.
 	*/
 
-	_main_loop = MainLoop::create (MainContext::create());
-	request_channel.ios()->attach (_main_loop->get_context());
-
-	/* glibmm hack - drop the refptr to the IOSource now before it can hurt */
-	request_channel.drop_ios ();
+	m_context = MainContext::create();
+	_main_loop = MainLoop::create (m_context);
+	attach_request_source ();
 
 	Glib::Threads::Mutex::Lock lm (_run_lock);
 	run_loop_thread = Glib::Threads::Thread::create (mem_fun (*this, &BaseUI::main_thread));
@@ -115,6 +124,24 @@ BaseUI::quit ()
 	}
 }
 
+#ifdef PLATFORM_WINDOWS
+gboolean
+BaseUI::_request_handler (gpointer data)
+{
+	BaseUI* ui = static_cast<BaseUI*>(data);
+	return ui->request_handler ();
+}
+
+bool
+BaseUI::request_handler ()
+{
+	DEBUG_TRACE (DEBUG::EventLoop, "BaseUI::request_handler\n");
+	handle_ui_requests ();
+	// keep calling indefinitely at the timeout interval
+	return true;
+}
+
+#else
 bool
 BaseUI::request_handler (Glib::IOCondition ioc)
 {
@@ -133,9 +160,39 @@ BaseUI::request_handler (Glib::IOCondition ioc)
 
 		/* handle requests */
 
+		DEBUG_TRACE (DEBUG::EventLoop, "BaseUI::request_handler\n");
 		handle_ui_requests ();
 	}
 
 	return true;
 }
-	
+#endif
+
+void
+BaseUI::signal_new_request ()
+{
+	DEBUG_TRACE (DEBUG::EventLoop, "BaseUI::signal_new_request\n");
+#ifdef PLATFORM_WINDOWS
+	// handled in timeout, how to signal...?
+#else
+	request_channel.wakeup ();
+#endif
+}
+
+/**
+ * This method relies on the caller having already set m_context
+ */
+void
+BaseUI::attach_request_source ()
+{
+	DEBUG_TRACE (DEBUG::EventLoop, "BaseUI::attach_request_source\n");
+#ifdef PLATFORM_WINDOWS
+	GSource* request_source = g_timeout_source_new(200);
+	g_source_set_callback (request_source, &BaseUI::_request_handler, this, NULL);
+	g_source_attach (request_source, m_context->gobj());
+#else
+	request_channel.ios()->attach (m_context);
+	/* glibmm hack - drop the refptr to the IOSource now before it can hurt */
+	request_channel.drop_ios ();
+#endif
+}

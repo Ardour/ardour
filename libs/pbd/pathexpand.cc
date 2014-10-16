@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2013 Paul Davis
+    Copyright (C) 2013-2014 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,18 +18,83 @@
 */
 
 #include <vector>
-#include <climits>
 #include <iostream>
+#include <climits>
+#include <cerrno>
+#include <cstdlib>
 
 #include <regex.h>
 
+#include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/pathexpand.h"
 #include "pbd/strsplit.h"
+#include "pbd/tokenizer.h"
 
 using std::string;
 using std::vector;
+
+#ifdef COMPILER_MINGW
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <glibmm.h>
+
+/****************************************************************
+ * Emulate POSIX realpath() using Win32 _fullpath() since realpath()
+ * is not available.
+ *
+ * Returns:
+ *    On Success: A pointer to the resolved (absolute) path
+ *    On Failure: 0 (NULL)
+ */
+
+static char* 
+realpath (const char *original_path, char resolved_path[_MAX_PATH+1])
+{
+	char *rpath = 0;
+	bool bIsSymLink = false; // We'll probably need to test the incoming path
+	                         // to find out if it points to a Windows shortcut
+	                         // (or a hard link) and set this appropriately.
+
+	if (bIsSymLink) {
+		// At the moment I'm not sure if Windows '_fullpath()' is directly
+		// equivalent to POSIX 'realpath()' - in as much as the latter will
+		// resolve the supplied path if it happens to point to a symbolic
+		// link ('_fullpath()' probably DOESN'T do this but I'm not really
+		// sure if Ardour needs such functionality anyway). Therefore we'll
+		// possibly need to add that functionality here at a later date.
+	} else {
+		char temp[(_MAX_PATH+1)*6]; // Allow for maximum length of a path in wchar characters
+		
+		// POSIX 'realpath()' requires that the buffer size is at
+		// least PATH_MAX+1, so assume that the user knew this !!
+
+		rpath = _fullpath (temp, Glib::locale_from_utf8 (original_path).c_str(), _MAX_PATH);
+
+		if (0 != rpath) {
+			snprintf (resolved_path, _MAX_PATH+1, "%s", Glib::locale_to_utf8 (temp).c_str());
+		}
+			
+	}
+	
+	return (rpath);
+}
+
+#endif  // COMPILER_MINGW
+
+string
+PBD::canonical_path (const std::string& path)
+{
+	char buf[PATH_MAX+1];
+
+	if (!realpath (path.c_str(), buf)) {
+		return path;
+	}
+
+	return string (buf);
+}
 
 string
 PBD::path_expand (string path)
@@ -97,13 +162,7 @@ PBD::path_expand (string path)
 
 	/* canonicalize */
 
-	char buf[PATH_MAX+1];
-
-	if (realpath (path.c_str(), buf)) {
-		return buf;
-	} else {
-		return string();
-	}
+	return canonical_path (path);
 }
 
 string
@@ -116,7 +175,7 @@ PBD::search_path_expand (string path)
 	vector<string> s;
 	vector<string> n;
 
-	split (path, s, ':');
+	split (path, s, G_SEARCHPATH_SEPARATOR);
 
 	for (vector<string>::iterator i = s.begin(); i != s.end(); ++i) {
 		string exp = path_expand (*i);
@@ -129,10 +188,36 @@ PBD::search_path_expand (string path)
 
 	for (vector<string>::iterator i = n.begin(); i != n.end(); ++i) {
 		if (!r.empty()) {
-			r += ':';
+			r += G_SEARCHPATH_SEPARATOR;
 		}
 		r += *i;
 	}
 
 	return r;
+}
+
+std::vector <std::string>
+PBD::parse_path(std::string path, bool check_if_exists)
+{
+	vector <std::string> pathlist;
+	vector <std::string> tmp;
+	PBD::tokenize (path, string(G_SEARCHPATH_SEPARATOR_S), std::back_inserter (tmp));
+
+	for(vector<std::string>::const_iterator i = tmp.begin(); i != tmp.end(); ++i) {
+		if ((*i).empty()) continue;
+		std::string dir;
+#ifndef PLATFORM_WINDOWS
+		if ((*i).substr(0,1) == "~") {
+			dir = Glib::build_filename(Glib::get_home_dir(), (*i).substr(1));
+		}
+		else
+#endif
+		{
+			dir = *i;
+		}
+		if (!check_if_exists || Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
+			pathlist.push_back(dir);
+		}
+	}
+  return pathlist;
 }

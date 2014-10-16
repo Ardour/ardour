@@ -30,7 +30,6 @@
 #include <gdkmm/color.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/fastmeter.h>
-#include <gtkmm2ext/barcontroller.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include "pbd/fastlog.h"
 #include "pbd/stacktrace.h"
@@ -54,6 +53,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -78,9 +78,9 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	_width = Wide;
 
 	if (horizontal) {
-		gain_slider = manage (new HSliderController (&gain_adjustment, fader_length, fader_girth, false));
+		gain_slider = manage (new HSliderController (&gain_adjustment, fader_length, fader_girth));
 	} else {
-		gain_slider = manage (new VSliderController (&gain_adjustment, fader_length, fader_girth, false));
+		gain_slider = manage (new VSliderController (&gain_adjustment, fader_length, fader_girth));
 	}
 
 	level_meter = new LevelMeterHBox(_session);
@@ -89,8 +89,9 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	meter_metric_area.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeterBase::level_meter_button_press));
 	meter_metric_area.add_events (Gdk::BUTTON_PRESS_MASK);
 
-	gain_slider->signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_press), false);
-	gain_slider->signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_release), false);
+	gain_slider->set_tweaks (PixFader::Tweaks(PixFader::NoButtonForward | PixFader::NoVerticalScroll));
+	gain_slider->StartGesture.connect (sigc::mem_fun (*this, &GainMeter::amp_start_touch));
+	gain_slider->StopGesture.connect (sigc::mem_fun (*this, &GainMeter::amp_stop_touch));
 	gain_slider->set_name ("GainFader");
 
 	gain_display.set_name ("MixerStripGainDisplay");
@@ -98,13 +99,14 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_display.signal_activate().connect (sigc::mem_fun (*this, &GainMeter::gain_activated));
 	gain_display.signal_focus_in_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
 	gain_display.signal_focus_out_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
-	gain_display.set_alignment(1.0);
+	gain_display.set_alignment(0.5);
 
 	peak_display.set_name ("MixerStripPeakDisplay");
 	set_size_request_to_display_given_text (peak_display, "-80.g", 2, 6); /* note the descender */
 	max_peak = minus_infinity();
-	peak_display.set_label (_("-inf"));
+	peak_display.set_text (_("-inf"));
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
+	peak_display.set_alignment(0.5);
 
 	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
@@ -136,15 +138,6 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &GainMeterBase::on_theme_changed));
 	ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), false));
 	DPIReset.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), true));
-	
-//	PBD::ScopedConnection _config_connection;
-//	Config->ParameterChanged.connect ( _config_connection, MISSING_INVALIDATOR, boost::bind(&GainMeterBase::set_flat_buttons, this, _1), gui_context() );
-}
-
-void
-GainMeterBase::set_flat_buttons ()
-{
-//	gain_slider->set_flat_buttons( ARDOUR_UI::config()->flat_buttons.get() );
 }
 
 GainMeterBase::~GainMeterBase ()
@@ -313,7 +306,15 @@ GainMeter::setup_meters (int len)
 {
 	switch (_width) {
 		case Wide:
-			hbox.set_homogeneous(true);
+			{
+				uint32_t meter_channels = 0;
+				if (_meter) {
+					meter_channels = _meter->input_streams().n_total();
+				} else if (_route) {
+					meter_channels = _route->shared_peak_meter()->input_streams().n_total();
+				}
+				hbox.set_homogeneous(meter_channels < 7 ? true : false);
+			}
 			break;
 		case Narrow:
 			hbox.set_homogeneous(false);
@@ -363,7 +364,7 @@ GainMeterBase::reset_peak_display ()
 	_meter->reset_max();
 	level_meter->clear_meters();
 	max_peak = -INFINITY;
-	peak_display.set_label (_("-inf"));
+	peak_display.set_text (_("-inf"));
 	peak_display.set_name ("MixerStripPeakDisplay");
 }
 
@@ -690,25 +691,16 @@ GainMeterBase::meter_point_clicked ()
 	}
 }
 
-bool
-GainMeterBase::gain_slider_button_press (GdkEventButton* ev)
+void
+GainMeterBase::amp_start_touch ()
 {
-	switch (ev->type) {
-	case GDK_BUTTON_PRESS:
-		_amp->gain_control()->start_touch (_amp->session().transport_frame());
-		break;
-	default:
-		return false;
-	}
-
-	return false;
+	_amp->gain_control()->start_touch (_amp->session().transport_frame());
 }
 
-bool
-GainMeterBase::gain_slider_button_release (GdkEventButton*)
+void
+GainMeterBase::amp_stop_touch ()
 {
 	_amp->gain_control()->stop_touch (false, _amp->session().transport_frame());
-	return false;
 }
 
 gint
@@ -862,10 +854,10 @@ GainMeterBase::update_meters()
 	if (mpeak > max_peak) {
 		max_peak = mpeak;
 		if (mpeak <= -200.0f) {
-			peak_display.set_label (_("-inf"));
+			peak_display.set_text (_("-inf"));
 		} else {
 			snprintf (buf, sizeof(buf), "%.1f", mpeak);
-			peak_display.set_label (buf);
+			peak_display.set_text (buf);
 		}
 	}
 	if (mpeak >= Config->get_meter_peak()) {
@@ -1020,6 +1012,7 @@ GainMeter::get_gm_width ()
 {
 	Gtk::Requisition sz;
 	int min_w = 0;
+	sz.width = 0;
 	meter_metric_area.size_request (sz);
 	min_w += sz.width;
 	level_meter->size_request (sz);
@@ -1061,6 +1054,13 @@ GainMeter::meter_ticks2_expose (GdkEventExpose *ev)
 		return meter_expose_ticks(ev, MeterPeak, _types, &meter_ticks2_area);
 	}
 	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks2_area);
+}
+
+void
+GainMeter::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
+{
+	gain_display.queue_draw();
+	peak_display.queue_draw();
 }
 
 boost::shared_ptr<PBD::Controllable>
@@ -1128,6 +1128,7 @@ GainMeter::meter_configuration_changed (ChanCount c)
 
 	setup_meters();
 	meter_clear_pattern_cache(4);
+	on_style_changed(Glib::RefPtr<Gtk::Style>());
 }
 
 void

@@ -1,0 +1,2 @@
+#!/bin/sh
+exec wine "`dirname "$0"`/ardour-vst-scanner.exe.so" "$@"

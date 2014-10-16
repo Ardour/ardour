@@ -36,7 +36,7 @@ class Session;
 class AudioSource;
 class Playlist;
 
-class SourceFactory {
+class LIBARDOUR_API SourceFactory {
   public:
 	static void init ();
 

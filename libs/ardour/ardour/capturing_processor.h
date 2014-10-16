@@ -24,7 +24,7 @@
 
 namespace ARDOUR {
 
-class CapturingProcessor : public Processor
+class LIBARDOUR_API CapturingProcessor : public Processor
 {
   public:
 	CapturingProcessor (Session & session);

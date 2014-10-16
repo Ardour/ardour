@@ -23,35 +23,21 @@
 #include <glibmm.h>
 
 #include "pbd/basename.h"
-#include "pbd/pathscanner.h"
+#include "pbd/file_utils.h"
+#include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
 
 #include "ardour/template_utils.h"
 #include "ardour/directory_names.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/search_paths.h"
 #include "ardour/io.h"
 
 using namespace std;
 using namespace PBD;
 
 namespace ARDOUR {
-
-SearchPath
-template_search_path ()
-{
-	SearchPath spath (ardour_data_search_path());
-	spath.add_subdirectory_to_paths(templates_dir_name);
-	return spath;
-}
-
-SearchPath
-route_template_search_path ()
-{
-	SearchPath spath (ardour_data_search_path());
-	spath.add_subdirectory_to_paths(route_templates_dir_name);
-	return spath;
-}
 
 std::string
 user_template_directory ()
@@ -66,7 +52,7 @@ user_route_template_directory ()
 }
 
 static bool
-template_filter (const string &str, void */*arg*/)
+template_filter (const string &str, void* /*arg*/)
 {
 	if (!Glib::file_test (str, Glib::FILE_TEST_IS_DIR)) {
 		return false;
@@ -76,7 +62,7 @@ template_filter (const string &str, void */*arg*/)
 }
 
 static bool
-route_template_filter (const string &str, void */*arg*/)
+route_template_filter (const string &str, void* /*arg*/)
 {
 	if (str.find (template_suffix) == str.length() - strlen (template_suffix)) {
 		return true;
@@ -95,21 +81,19 @@ session_template_dir_to_file (string const & dir)
 void
 find_session_templates (vector<TemplateInfo>& template_names)
 {
-	vector<string *> *templates;
-	PathScanner scanner;
-	SearchPath spath (template_search_path());
+	vector<string> templates;
 
-	templates = scanner (spath.to_string(), template_filter, 0, true, true);
+	find_paths_matching_filter (templates, template_search_path(), template_filter, 0, true, true);
 
-	if (!templates) {
-		cerr << "Found nothing along " << spath.to_string() << endl;
+	if (templates.empty()) {
+		cerr << "Found nothing along " << template_search_path().to_string() << endl;
 		return;
 	}
 
-	cerr << "Found " << templates->size() << " along " << spath.to_string() << endl;
+	cerr << "Found " << templates.size() << " along " << template_search_path().to_string() << endl;
 
-	for (vector<string*>::iterator i = templates->begin(); i != templates->end(); ++i) {
-		string file = session_template_dir_to_file (**i);
+	for (vector<string>::iterator i = templates.begin(); i != templates.end(); ++i) {
+		string file = session_template_dir_to_file (*i);
 
 		XMLTree tree;
 
@@ -119,30 +103,26 @@ find_session_templates (vector<TemplateInfo>& template_names)
 
 		TemplateInfo rti;
 
-		rti.name = basename_nosuffix (**i);
-		rti.path = **i;
+		rti.name = basename_nosuffix (*i);
+		rti.path = *i;
 
 		template_names.push_back (rti);
 	}
-
-	delete templates;
 }
 
 void
 find_route_templates (vector<TemplateInfo>& template_names)
 {
-	vector<string *> *templates;
-	PathScanner scanner;
-	SearchPath spath (route_template_search_path());
+	vector<string> templates;
 
-	templates = scanner (spath.to_string(), route_template_filter, 0, false, true);
+	find_files_matching_filter (templates, route_template_search_path(), route_template_filter, 0, false, true);
 
-	if (!templates) {
+	if (templates.empty()) {
 		return;
 	}
 
-	for (vector<string*>::iterator i = templates->begin(); i != templates->end(); ++i) {
-		string fullpath = *(*i);
+	for (vector<string>::iterator i = templates.begin(); i != templates.end(); ++i) {
+		string fullpath = *i;
 
 		XMLTree tree;
 
@@ -159,8 +139,6 @@ find_route_templates (vector<TemplateInfo>& template_names)
 
 		template_names.push_back (rti);
 	}
-
-	delete templates;
 }
 
 }

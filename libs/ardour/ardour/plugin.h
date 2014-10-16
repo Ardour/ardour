@@ -32,6 +32,7 @@
 #include "ardour/cycles.h"
 #include "ardour/latent.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/midi_state_tracker.h"
 
@@ -49,7 +50,7 @@ class Plugin;
 
 typedef boost::shared_ptr<Plugin> PluginPtr;
 
-class PluginInfo {
+class LIBARDOUR_API PluginInfo {
   public:
 	PluginInfo () { }
 	virtual ~PluginInfo () { }
@@ -87,7 +88,7 @@ class PluginInfo {
 typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
 typedef std::list<PluginInfoPtr> PluginInfoList;
 
-class Plugin : public PBD::StatefulDestructible, public Latent
+class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 {
   public:
 	Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&);

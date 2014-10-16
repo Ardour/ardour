@@ -19,6 +19,8 @@
 
 #include "ardour/rc_configuration.h"
 
+#include "canvas/canvas.h"
+
 #include "ardour_ui.h"
 #include "editor.h"
 #include "editing.h"
@@ -67,12 +69,13 @@ Editor::stop_updating_meters ()
 void
 Editor::toggle_meter_updating()
 {
+	DisplaySuspender ds;
 	if (Config->get_show_track_meters()) {
 		start_updating_meters ();
 	} else {
 		stop_updating_meters ();
 	}
 
-	track_canvas_allocate (track_canvas->get_allocation());
+	track_canvas_viewport_allocate (_track_canvas->get_allocation());
 }
 

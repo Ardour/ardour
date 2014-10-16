@@ -27,6 +27,9 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "ardour/libardour_visibility.h"
+#include "pbd/libpbd_visibility.h"
+
 class XMLTree;
 
 namespace ARDOUR {
@@ -35,7 +38,7 @@ class Session;
 class ElementImporter;
 
 /// Virtual interface class for element import handlers
-class ElementImportHandler
+class LIBARDOUR_API ElementImportHandler
 {
   public:
 	typedef boost::shared_ptr<ElementImporter> ElementPtr;

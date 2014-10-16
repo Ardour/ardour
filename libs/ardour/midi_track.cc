@@ -17,8 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <strings.h> // for ffs(3)
-
+#include "pbd/ffs.h"
 #include "pbd/enumwriter.h"
 #include "pbd/convert.h"
 #include "evoral/midi_util.h"
@@ -315,7 +314,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 	if (!lm.locked()) {
 		boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
 		framecnt_t playback_distance = diskstream->calculate_playback_distance(nframes);
-		if (can_internal_playback_seek(std::llabs(playback_distance))) {
+		if (can_internal_playback_seek(llabs(playback_distance))) {
 			/* TODO should declick, and/or note-off */
 			internal_playback_seek(playback_distance);
 		}
@@ -507,7 +506,7 @@ MidiTrack::filter_channels (BufferSet& bufs, ChannelMode mode, uint32_t mask)
 				}
 				break;
 			case ForceChannel:
-				ev.set_channel (ffs (mask) - 1);
+				ev.set_channel (PBD::ffs (mask) - 1);
 				++e;
 				break;
 			case AllChannels:
@@ -548,7 +547,7 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framep
 
 int
 MidiTrack::export_stuff (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framecnt_t /*nframes*/, 
-			 boost::shared_ptr<Processor> /*endpoint*/, bool /*include_endpoint*/, bool /*forexport*/)
+			 boost::shared_ptr<Processor> /*endpoint*/, bool /*include_endpoint*/, bool /*for_export*/, bool /*for_freeze*/)
 {
 	return -1;
 }
@@ -624,12 +623,30 @@ MidiTrack::write_immediate_event(size_t size, const uint8_t* buf)
 }
 
 void
+MidiTrack::set_parameter_automation_state (Evoral::Parameter param, AutoState state)
+{
+	switch (param.type()) {
+	case MidiCCAutomation:
+	case MidiPgmChangeAutomation:
+	case MidiPitchBenderAutomation:
+	case MidiChannelPressureAutomation:
+	case MidiSystemExclusiveAutomation:
+		/* The track control for MIDI parameters is for immediate events to act
+		   as a control surface, write/touch for them is not currently
+		   supported. */
+		return;
+	default:
+		Automatable::set_parameter_automation_state(param, state);
+	}
+}
+
+void
 MidiTrack::MidiControl::set_value(double val)
 {
 	bool valid = false;
-	if (std::isinf(val)) {
+	if (isinf(val)) {
 		cerr << "MIDIControl value is infinity" << endl;
-	} else if (std::isnan(val)) {
+	} else if (isnan(val)) {
 		cerr << "MIDIControl value is NaN" << endl;
 	} else if (val < _list->parameter().min()) {
 		cerr << "MIDIControl value is < " << _list->parameter().min() << endl;

@@ -32,7 +32,7 @@ namespace ARDOUR {
 
 class ThreadBuffers;
 
-class BufferManager
+class LIBARDOUR_API BufferManager
 {
 public:
 	static void init (uint32_t);
@@ -40,7 +40,7 @@ public:
 	static ThreadBuffers* get_thread_buffers ();
 	static void           put_thread_buffers (ThreadBuffers*);
 
-	static void ensure_buffers (ChanCount howmany = ChanCount::ZERO);
+	static void ensure_buffers (ChanCount howmany = ChanCount::ZERO, size_t custom = 0);
 
 private:
         static Glib::Threads::Mutex rb_mutex;

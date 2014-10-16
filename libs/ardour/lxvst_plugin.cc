@@ -27,14 +27,16 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-LXVSTPlugin::LXVSTPlugin (AudioEngine& e, Session& session, VSTHandle* h)
+LXVSTPlugin::LXVSTPlugin (AudioEngine& e, Session& session, VSTHandle* h, int unique_id)
 	: VSTPlugin (e, session, h)
 {
 	/* Instantiate the plugin and return a VSTState* */
 
+	Session::vst_current_loading_id = unique_id;
 	if ((_state = vstfx_instantiate (_handle, Session::vst_callback, this)) == 0) {
 		throw failed_constructor();
 	}
+	Session::vst_current_loading_id = 0;
 
 	set_plugin (_state->plugin);
 }
@@ -44,9 +46,12 @@ LXVSTPlugin::LXVSTPlugin (const LXVSTPlugin &other)
 {
 	_handle = other._handle;
 
+	Session::vst_current_loading_id = PBD::atoi(other.unique_id());
 	if ((_state = vstfx_instantiate (_handle, Session::vst_callback, this)) == 0) {
 		throw failed_constructor();
 	}
+	Session::vst_current_loading_id = 0;
+
 	_plugin = _state->plugin;
 
 	// Plugin::setup_controls ();
@@ -72,7 +77,7 @@ LXVSTPluginInfo::load (Session& session)
 				error << string_compose(_("LXVST: cannot load module from \"%1\""), path) << endmsg;
 			}
 			else {
-				plugin.reset (new LXVSTPlugin (session.engine(), session, handle));
+				plugin.reset (new LXVSTPlugin (session.engine(), session, handle, PBD::atoi(unique_id)));
 			}
 		}
 		else {

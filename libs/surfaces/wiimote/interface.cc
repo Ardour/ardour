@@ -29,7 +29,7 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-ControlProtocol*
+static ControlProtocol*
 new_wiimote_protocol (ControlProtocolDescriptor*, Session* s)
 {
 	WiimoteControlProtocol* wmcp = new WiimoteControlProtocol (*s);
@@ -37,13 +37,13 @@ new_wiimote_protocol (ControlProtocolDescriptor*, Session* s)
 	return wmcp;
 }
 
-void
+static void
 delete_wiimote_protocol (ControlProtocolDescriptor* /*descriptor*/, ControlProtocol* cp)
 {
 	delete cp;
 }
 
-bool
+static bool
 probe_wiimote_protocol (ControlProtocolDescriptor*)
 {
 	return WiimoteControlProtocol::probe ();
@@ -61,13 +61,5 @@ static ControlProtocolDescriptor wiimote_descriptor = {
 	destroy : delete_wiimote_protocol
 };
 
-
-extern "C" {
-
-ControlProtocolDescriptor*
-protocol_descriptor () {
-	return &wiimote_descriptor;
-}
-
-}
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &wiimote_descriptor; }
 

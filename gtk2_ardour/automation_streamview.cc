@@ -22,7 +22,10 @@
 
 #include <gtkmm.h>
 
-#include <gtkmm2ext/gtk_ui.h>
+#include "gtkmm2ext/gtk_ui.h"
+
+#include "pbd/compose.h"
+#include "canvas/debug.h"
 
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
@@ -31,16 +34,12 @@
 #include "region_view.h"
 #include "automation_region_view.h"
 #include "automation_time_axis.h"
-#include "canvas-simplerect.h"
 #include "region_selection.h"
 #include "selection.h"
 #include "public_editor.h"
 #include "ardour_ui.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
-#include "utils.h"
-#include "simplerect.h"
-#include "simpleline.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -49,13 +48,15 @@ using namespace Editing;
 
 AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
 	: StreamView (*dynamic_cast<RouteTimeAxisView*>(tv.get_parent()),
-		      new ArdourCanvas::Group(*tv.canvas_background()),
-		      new ArdourCanvas::Group(*tv.canvas_display()))
+		      tv.canvas_display())
 	, _automation_view(tv)
 	, _pending_automation_state (Off)
 {
-	//canvas_rect->property_fill_color_rgba() = stream_base_color;
-	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
+	CANVAS_DEBUG_NAME (_canvas_group, string_compose ("SV canvas group auto %1", tv.name()));
+	CANVAS_DEBUG_NAME (canvas_rect, string_compose ("SV canvas rectangle auto %1", tv.name()));
+
+	canvas_rect->set_fill (false);
+	canvas_rect->set_outline_color (RGBA_BLACK);
 }
 
 AutomationStreamView::~AutomationStreamView ()
@@ -64,11 +65,11 @@ AutomationStreamView::~AutomationStreamView ()
 
 
 RegionView*
-AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region, bool wfd, bool /*recording*/)
+AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region, bool wait_for_data, bool /*recording*/)
 {
 	assert (region);
 
-	if (wfd) {
+	if (wait_for_data) {
 		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
 		if (mr) {
 			mr->midi_source()->load_model();
@@ -98,7 +99,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 				arv->line()->set_list (list);
 			}
 			(*i)->set_valid (true);
-			(*i)->enable_display(wfd);
+			(*i)->enable_display (wait_for_data);
 			display_region(arv);
 
 			return 0;
@@ -108,20 +109,20 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 	region_view = new AutomationRegionView (
 		_canvas_group, _automation_view, region,
 		_automation_view.parameter (), list,
-		_samples_per_unit, region_color
+		_samples_per_pixel, region_color
 		);
 
-	region_view->init (region_color, false);
+	region_view->init (false);
 	region_views.push_front (region_view);
 
 	/* follow global waveform setting */
 
-	if (wfd) {
+	if (wait_for_data) {
 		region_view->enable_display(true);
-		//region_view->midi_region()->midi_source(0)->load_model();
+		// region_view->midi_region()->midi_source(0)->load_model();
 	}
 
-	display_region(region_view);
+	display_region (region_view);
 
 	/* catch regionview going away */
 	region->DropReferences.connect (*this, invalidator (*this), boost::bind (&AutomationStreamView::remove_region_view, this, boost::weak_ptr<Region>(region)), gui_context());
@@ -191,11 +192,11 @@ void
 AutomationStreamView::color_handler ()
 {
 	/*if (_trackview.is_midi_track()) {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
+		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->get_canvasvar_MidiTrackBase();
 	}
 
 	if (!_trackview.is_midi_track()) {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();;
+		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->get_canvasvar_MidiBusBase();;
 	}*/
 }
 

@@ -21,8 +21,8 @@
 #define __ardour_transcode_ffmpeg_h__
 
 #include <string>
+#include "ardour/system_exec.h"
 #include "ardour/types.h"
-#include "system_exec.h"
 
 
 /** @class TranscodeFfmpeg
@@ -122,13 +122,14 @@ class TranscodeFfmpeg : public sigc::trackable
 		void set_avoffset(double av_offset) { m_avoffset = av_offset; }
 		void set_leadinout(double lead_in, double lead_out) { m_lead_in = lead_in; m_lead_out = lead_out; }
 
+		void set_fps(double fps) { m_fps = fps; } // on export, used for rounding only.
 
 #if 1 /* tentative debug mode */
 		void   set_debug (bool onoff) { debug_enable = onoff; }
 #endif
 	protected:
 		std::string infile;
-		SystemExec  *ffcmd;
+		ARDOUR::SystemExec  *ffcmd;
 
 		bool probe ();
 

@@ -24,7 +24,6 @@
 #include "ardour/send.h"
 #include "ardour/rc_configuration.h"
 
-#include "utils.h"
 #include "send_ui.h"
 #include "io_selector.h"
 #include "ardour_ui.h"
@@ -55,7 +54,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 	_vbox.pack_start (_hbox, false, false, false);
 	_vbox.pack_start (_panners, false, false);
 
-	io = manage (new IOSelector (parent, session, s->output()));
+	io = Gtk::manage (new IOSelector (parent, session, s->output()));
 
 	pack_start (_vbox, false, false);
 

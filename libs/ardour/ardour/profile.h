@@ -23,15 +23,19 @@
 #include <boost/dynamic_bitset.hpp>
 #include <stdint.h>
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
-class RuntimeProfile {
+class LIBARDOUR_API RuntimeProfile {
 public:
 	enum Element {
 		SmallScreen,
 		SAE,
 		SinglePackage,
-		LastElement
+		Trx,
+		Mixbus,
+		LastElement,
 	};
 
     RuntimeProfile() { bits.resize (LastElement); }
@@ -43,6 +47,12 @@ public:
     void set_sae () { bits[SAE] = true; }
     bool get_sae () const { return bits[SAE]; }
 
+    bool get_trx() const { return bits[Trx]; }
+    void set_trx() { bits[Trx] = true; }
+
+    bool get_mixbus() const { return bits[Mixbus]; }
+    void set_mixbus() { bits[Mixbus] = true; }
+
     void set_single_package () { bits[SinglePackage] = true; }
     bool get_single_package () const { return bits[SinglePackage]; }
 
@@ -51,7 +61,7 @@ private:
 
 };
 
-extern RuntimeProfile* Profile;
+LIBARDOUR_API extern RuntimeProfile* Profile;
 
 }; // namespace ARDOUR
 

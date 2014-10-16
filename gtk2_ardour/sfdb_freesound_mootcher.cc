@@ -91,7 +91,7 @@ void Mootcher::ensureWorkingDir ()
 		}
 	}
 	basePath = p;
-#ifdef __WIN32__
+#ifdef PLATFORM_WINDOWS
 	std::string replace = "/";
 	size_t pos = basePath.find("\\");
 	while( pos != std::string::npos ){

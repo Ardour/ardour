@@ -32,6 +32,10 @@
 
 #include "pbd/cpus.h"
 
+#if defined(COMPILER_MSVC) && !defined(PTW32_VERSION)
+#include <ardourext/pthread.h>  // Gets us 'PTW32_VERSION'
+#endif
+
 uint32_t
 hardware_concurrency()
 {

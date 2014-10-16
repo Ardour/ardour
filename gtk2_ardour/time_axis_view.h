@@ -24,12 +24,14 @@
 #include <list>
 
 #include <gtkmm/box.h>
+#include <gtkmm/fixed.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/table.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
+#include <gtkmm/sizegroup.h>
 
 #include <gtkmm2ext/focus_entry.h>
 
@@ -40,11 +42,12 @@
 #include "ardour/region.h"
 #include "evoral/Parameter.hpp"
 
+#include "canvas/line.h"
+
 #include "prompter.h"
 #include "axis_view.h"
 #include "enums.h"
 #include "editing.h"
-#include "canvas.h"
 
 namespace ARDOUR {
 	class Session;
@@ -56,6 +59,12 @@ namespace ARDOUR {
 
 namespace Gtk {
 	class Menu;
+}
+
+namespace ArdourCanvas {
+	class Canvas;
+	class Container;
+	class Item;
 }
 
 class PublicEditor;
@@ -77,14 +86,13 @@ class ArdourDialog;
  */
 class TimeAxisView : public virtual AxisView
 {
-  private:
+	private:
 	enum NamePackingBits {
 		NameLabelPacked = 0x1,
 		NameEntryPacked = 0x2
 	};
 
-  public:
-
+	public:
 	TimeAxisView(ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
 
@@ -96,15 +104,14 @@ class TimeAxisView : public virtual AxisView
 	/** @return maximum allowable value of order */
 	static int max_order () { return _max_order; }
 
-        virtual void enter_internal_edit_mode () {}
-        virtual void leave_internal_edit_mode () {}
+	virtual void enter_internal_edit_mode () {}
+	virtual void leave_internal_edit_mode () {}
 
-	ArdourCanvas::Group* canvas_display () { return _canvas_display; }
-	ArdourCanvas::Group* canvas_background () { return _canvas_background; }
-	ArdourCanvas::Group* ghost_group () { return _ghost_group; }
+	ArdourCanvas::Container* canvas_display () { return _canvas_display; }
+	ArdourCanvas::Container* ghost_group () { return _ghost_group; }
 
 	/** @return effective height (taking children into account) in canvas units, or
-	    0 if this TimeAxisView has not yet been shown */
+		0 if this TimeAxisView has not yet been shown */
 	uint32_t effective_height () const { return _effective_height; }
 
 	/** @return y position, or -1 if hidden */
@@ -119,8 +126,6 @@ class TimeAxisView : public virtual AxisView
 
 	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	virtual void hide ();
-
-	void clip_to_viewport ();
 
 	bool touched (double top, double bot);
 
@@ -142,14 +147,15 @@ class TimeAxisView : public virtual AxisView
 
 	virtual void reset_visual_state ();
 
-	std::pair<TimeAxisView*, double> covers_y_position (double);
+	std::pair<TimeAxisView*, double> covers_y_position (double) const;
+	bool covered_by_y_range (double y0, double y1) const;
 
 	virtual void step_height (bool);
 
 	virtual ARDOUR::RouteGroup* route_group() const { return 0; }
 	virtual boost::shared_ptr<ARDOUR::Playlist> playlist() const { return boost::shared_ptr<ARDOUR::Playlist> (); }
 
-	virtual void set_samples_per_unit (double);
+	virtual void set_samples_per_pixel (double);
 	virtual void show_selection (TimeSelection&);
 	virtual void hide_selection ();
 	virtual void reshow_selection (TimeSelection&);
@@ -164,11 +170,13 @@ class TimeAxisView : public virtual AxisView
 	virtual void set_selected_regionviews (RegionSelection&) {}
 	virtual void set_selected_points (PointSelection&) {}
 
+	virtual void fade_range (TimeSelection&) {}
+
 	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (framepos_t /*pos*/, ARDOUR::RegionPoint, int32_t /*dir*/) {
 		return boost::shared_ptr<ARDOUR::Region> ();
 	}
 
-  	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
+	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
 
 	virtual void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable*>&);
 	virtual void get_inverted_selectables (Selection&, std::list<Selectable *>& results);
@@ -191,44 +199,53 @@ class TimeAxisView : public virtual AxisView
 	Children get_child_list ();
 
 	SelectionRect* get_selection_rect(uint32_t id);
-	
+
 	static uint32_t preset_height (Height);
 
-  protected:
+	protected:
+	static Glib::RefPtr<Gtk::SizeGroup> controls_meters_size_group;
+	static Glib::RefPtr<Gtk::SizeGroup> midi_scroomer_size_group;
+	static unsigned int name_width_px;
 	/* The Standard LHS Controls */
-	Gtk::HBox              controls_hbox;
 	Gtk::Table             controls_table;
+	Glib::RefPtr<Gtk::SizeGroup> controls_button_size_group;
 	Gtk::EventBox          controls_ebox;
 	Gtk::VBox              controls_vbox;
 	Gtk::VBox              time_axis_vbox;
+	Gtk::HBox              time_axis_hbox;
+	Gtk::Frame             time_axis_frame;
 	Gtk::HBox              name_hbox;
+	Gtk::HBox              top_hbox;
 	Gtk::Label             name_label;
-        bool                  _name_editing;
-        uint32_t               height;  /* in canvas units */
+	Gtk::Fixed             scroomer_placeholder;
+	bool                  _name_editing;
+	uint32_t               height;  /* in canvas units */
 	std::string            controls_base_unselected_name;
 	std::string            controls_base_selected_name;
 	Gtk::Menu*             display_menu; /* The standard LHS Track control popup-menus */
 	TimeAxisView*          parent;
-	ArdourCanvas::Group*   selection_group;
+	ArdourCanvas::Container*   selection_group;
+	ArdourCanvas::Container*  _ghost_group;
 	std::list<GhostRegion*> ghosts;
 	std::list<SelectionRect*> free_selection_rects;
 	std::list<SelectionRect*> used_selection_rects;
 	bool                  _hidden;
 	bool                   in_destructor;
 	Gtk::Menu*            _size_menu;
-	ArdourCanvas::Group*  _canvas_display;
+	ArdourCanvas::Line*       _canvas_separator;
+	ArdourCanvas::Container*  _canvas_display;
 	double                _y_position;
 	PublicEditor&         _editor;
 
-        virtual bool can_edit_name() const;
+	virtual bool can_edit_name() const;
 
 	bool name_entry_key_release (GdkEventKey *ev);
 	bool name_entry_key_press (GdkEventKey *ev);
 	bool name_entry_focus_out (GdkEventFocus *ev);
 
-        Gtk::Entry* name_entry;
-        void begin_name_edit ();
-        void end_name_edit (int);
+	Gtk::Entry* name_entry;
+	void begin_name_edit ();
+	void end_name_edit (int);
 
 	/* derived classes can override these */
 
@@ -276,24 +293,21 @@ class TimeAxisView : public virtual AxisView
 	void build_size_menu ();
 
 private:
-	ArdourCanvas::Group* _canvas_background;
- 	Gtk::VBox*            control_parent;
+	Gtk::VBox*            control_parent;
 	int                  _order;
 	uint32_t             _effective_height;
 	double               _resize_drag_start;
 	GdkCursor*           _preresize_cursor;
 	bool                 _have_preresize_cursor;
-	ArdourCanvas::Group* _ghost_group;
-        bool                  _ebox_release_can_act;
+	bool                  _ebox_release_can_act;
 
 	static uint32_t button_height;
 	static uint32_t extra_height;
 	static int const _max_order;
-	
+
 	void compute_heights ();
 	bool maybe_set_cursor (int y);
 
 }; /* class TimeAxisView */
 
 #endif /* __ardour_gtk_time_axis_h__ */
-

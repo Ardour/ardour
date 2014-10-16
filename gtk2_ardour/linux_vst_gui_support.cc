@@ -26,13 +26,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <jack/jack.h>
-#include <jack/thread.h>
 #include <libgen.h>
 
 #include <pthread.h>
 #include <signal.h>
 #include <glib.h>
+#include <glibmm/timer.h>
 
 #include "ardour/linux_vst_support.h"
 
@@ -43,6 +42,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 struct ERect{
     short top;
@@ -334,10 +334,11 @@ windows, that is if they don't manage their own UIs **/
 void* gui_event_loop (void* ptr)
 {
 	VSTState* vstfx;
-	int LXVST_sched_event_timer = 0;
-	int LXVST_sched_timer_interval = 50; //ms
+	int LXVST_sched_timer_interval = 40; //ms, 25fps
 	XEvent event;
+	uint64_t clock1, clock2;
 	
+	clock1 = g_get_monotonic_time();
 	/*The 'Forever' loop - runs the plugin UIs etc - based on the FST gui event loop*/
 	
 	while (!gui_quit)
@@ -377,16 +378,16 @@ void* gui_event_loop (void* ptr)
 
 		/*We don't want to use all the CPU.. */
 
-		usleep(1000);
+		Glib::usleep(1000);
 		
-		LXVST_sched_event_timer++;
-		
-		LXVST_sched_event_timer = LXVST_sched_event_timer & 0x00FFFFFF;
-
 		/*See if its time for us to do a scheduled event pass on all the plugins*/
 
-		if((LXVST_sched_timer_interval!=0) && (!(LXVST_sched_event_timer% LXVST_sched_timer_interval)))
+		clock2 = g_get_monotonic_time();
+		const int64_t elapsed_time_ms = (clock2 - clock1) / 1000;
+
+		if((LXVST_sched_timer_interval != 0) && elapsed_time_ms >= LXVST_sched_timer_interval)
 		{
+			//printf("elapsed %d ms ^= %.2f Hz\n", elapsed_time_ms, 1000.0/(double)elapsed_time_ms); // DEBUG
 			pthread_mutex_lock (&plugin_mutex);
 		    
 again:
@@ -461,6 +462,8 @@ again:
 				pthread_mutex_unlock (&vstfx->lock);
 			}
 			pthread_mutex_unlock (&plugin_mutex);
+
+			clock1 = g_get_monotonic_time();
 		}
 	}
 
@@ -706,7 +709,7 @@ vstfx_launch_editor (VSTState* vstfx)
 	/*QUIRK - some plugins need a slight delay after opening the editor before you can
 	ask the window size or they might return zero - specifically discoDSP */
 	
-	usleep(100000);
+	Glib::usleep(100000);
 	
 	/*Now we can find out how big the parent window should be (and try) to resize it*/
 	

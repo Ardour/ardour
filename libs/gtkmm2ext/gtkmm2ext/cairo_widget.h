@@ -21,12 +21,14 @@
 #define __gtk2_ardour_cairo_widget_h__
 
 #include <gtkmm/eventbox.h>
+
+#include "gtkmm2ext/visibility.h"
 #include "gtkmm2ext/widget_state.h"
 
 /** A parent class for widgets that are rendered using Cairo.
  */
 
-class CairoWidget : public Gtk::EventBox
+class LIBGTKMM2EXT_API CairoWidget : public Gtk::EventBox
 {
 public:
 	CairoWidget ();
@@ -37,7 +39,7 @@ public:
 	Gtkmm2ext::ActiveState active_state() const { return _active_state; }
 	Gtkmm2ext::VisualState visual_state() const { return _visual_state; }
 	
-	/* derived widgets can override these two to catch 
+	/* derived widgets can override these two to catch
 	   changes in active & visual state
 	*/
 	
@@ -65,17 +67,59 @@ public:
 
 	static void provide_background_for_cairo_widget (Gtk::Widget& w, const Gdk::Color& bg);
 
+	virtual void render (cairo_t *, cairo_rectangle_t*) = 0;
+
+	static void set_flat_buttons (bool yn);
+	static bool flat_buttons() { return _flat_buttons; }
+
+	static void set_source_rgb_a( cairo_t* cr, Gdk::Color, float a=1.0 );
+
+	/* set_focus_handler() will cause all button-press events on any
+	   CairoWidget to invoke this slot/functor/function/method/callback.
+	   
+	   We do this because in general, CairoWidgets do not grab
+	   keyboard focus, but a button press on them should
+	   clear focus from any active text entry.
+
+	   This is global to all CairoWidgets and derived types.
+
+	   However, derived types can override the behaviour by defining their
+	   own on_button_press_event() handler which returns true under all
+	   conditions (which will block this handler from being called). If 
+	   they wish to invoke any existing focus handler from their own
+	   button press handler, they can just use: focus_handler();
+	*/
+	static void set_focus_handler (sigc::slot<void>);
+
 protected:
 	/** Render the widget to the given Cairo context */
-	virtual void render (cairo_t *) = 0;
 	virtual bool on_expose_event (GdkEventExpose *);
 	void on_size_allocate (Gtk::Allocation &);
 	void on_state_changed (Gtk::StateType);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
+	bool on_button_press_event (GdkEventButton*);
 	Gdk::Color get_parent_bg ();
+	
+	/* this is an additional virtual "on_..." method. Glibmm does not
+	   provide a direct signal for name changes, so this acts as a proxy.
+	*/
+
+	virtual void on_name_changed () {};
 
 	Gtkmm2ext::ActiveState _active_state;
 	Gtkmm2ext::VisualState _visual_state;
 	bool                   _need_bg;
+
+	static bool	_flat_buttons;
+	bool		_grabbed;
+
+	static sigc::slot<void> focus_handler;
+
+  private:
+	Glib::SignalProxyProperty _name_proxy;
+	sigc::connection _parent_style_change;
+	Widget * _current_parent;
+	
 };
 
 #endif

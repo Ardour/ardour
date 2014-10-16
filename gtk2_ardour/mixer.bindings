@@ -14,8 +14,10 @@
      <Binding key="Primary-c" action="Mixer/copy-processors"/>
      <Binding key="Primary-v" action="Mixer/paste-processors"/>
      <Binding key="Delete" action="Mixer/delete-processors"/>
+     <Binding key="Backspace" action="Mixer/delete-processors"/>
      <Binding key="Return" action="Mixer/toggle-processors"/>
      <Binding key="Primary-a" action="Mixer/select-all-processors"/>
      <Binding key="Slash" action="Mixer/ab-plugins"/>
+     <Binding key="Escape" action="Mixer/select-none"/>
   </Press>
 </Bindings>

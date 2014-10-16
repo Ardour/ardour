@@ -45,7 +45,6 @@
 #include "ardour_ui.h"
 #include "audio_time_axis.h"
 #include "automation_line.h"
-#include "canvas_impl.h"
 #include "enums.h"
 #include "gui_thread.h"
 #include "automation_time_axis.h"
@@ -54,7 +53,6 @@
 #include "prompter.h"
 #include "public_editor.h"
 #include "audio_region_view.h"
-#include "simplerect.h"
 #include "audio_streamview.h"
 #include "utils.h"
 
@@ -62,11 +60,12 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Editing;
 
-AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, Canvas& canvas)
+AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
 	: AxisView(sess)
 	, RouteTimeAxisView(ed, sess, canvas)
 {
@@ -85,7 +84,7 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	RouteTimeAxisView::set_route (rt);
 
-	_view->apply_color (color (), StreamView::RegionColor);
+	_view->apply_color (gdk_color_to_rgba (color()), StreamView::RegionColor);
 
 	// Make sure things are sane...
 	assert(!is_track() || is_audio_track());
@@ -96,13 +95,20 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	if (is_audio_track()) {
 		controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
+		time_axis_frame.set_name ("AudioTrackControlsBaseUnselected");
 	} else { // bus
 		controls_ebox.set_name ("AudioBusControlsBaseUnselected");
+		time_axis_frame.set_name ("AudioBusControlsBaseUnselected");
 	}
 
 	/* if set_state above didn't create a gain automation child, we need to make one */
 	if (automation_child (GainAutomation) == 0) {
 		create_automation_child (GainAutomation, false);
+	}
+
+	/* if set_state above didn't create a mute automation child, we need to make one */
+	if (automation_child (MuteAutomation) == 0) {
+		create_automation_child (MuteAutomation, false);
 	}
 
 	if (_route->panner_shell()) {
@@ -203,6 +209,11 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 
 		/* handled elsewhere */
 
+	} else if (param.type() == MuteAutomation) {
+
+		create_mute_automation_child (param, show);
+		
+
 	} else {
 		error << "AudioTimeAxisView: unknown automation child " << EventTypeMap::instance().to_symbol(param) << endmsg;
 	}
@@ -275,6 +286,22 @@ AudioTimeAxisView::update_gain_track_visibility ()
 
 	if (showit != string_is_affirmative (gain_track->gui_property ("visible"))) {
 		gain_track->set_marked_for_display (showit);
+
+		/* now trigger a redisplay */
+
+		if (!no_redraw) {
+			 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+		}
+	}
+}
+
+void
+AudioTimeAxisView::update_mute_track_visibility ()
+{
+	bool const showit = mute_automation_item->get_active();
+
+	if (showit != string_is_affirmative (mute_track->gui_property ("visible"))) {
+		mute_track->set_marked_for_display (showit);
 
 		/* now trigger a redisplay */
 
@@ -384,8 +411,10 @@ AudioTimeAxisView::update_control_names ()
 
 	if (get_selected()) {
 		controls_ebox.set_name (controls_base_selected_name);
+		time_axis_frame.set_name (controls_base_selected_name);
 	} else {
 		controls_ebox.set_name (controls_base_unselected_name);
+		time_axis_frame.set_name (controls_base_unselected_name);
 	}
 }
 
@@ -399,20 +428,27 @@ AudioTimeAxisView::build_automation_action_menu (bool for_selection)
 	MenuList& automation_items = automation_action_menu->items ();
 
 	automation_items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &AudioTimeAxisView::update_gain_track_visibility)));
-	gain_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
+	gain_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&automation_items.back ());
 	gain_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) && 
 					  (gain_track && string_is_affirmative (gain_track->gui_property ("visible"))));
 
 	_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
 
+	automation_items.push_back (CheckMenuElem (_("Mute"), sigc::mem_fun (*this, &AudioTimeAxisView::update_mute_track_visibility)));
+	mute_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&automation_items.back ());
+	mute_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) && 
+					  (mute_track && string_is_affirmative (mute_track->gui_property ("visible"))));
+
+	_main_automation_menu_map[Evoral::Parameter(MuteAutomation)] = mute_automation_item;
+
 	if (!pan_tracks.empty()) {
 		automation_items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &AudioTimeAxisView::update_pan_track_visibility)));
-		pan_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
+		pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&automation_items.back ());
 		pan_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
 						 (!pan_tracks.empty() && string_is_affirmative (pan_tracks.front()->gui_property ("visible"))));
 
 		set<Evoral::Parameter> const & params = _route->pannable()->what_can_be_automated ();
-		for (set<Evoral::Parameter>::iterator p = params.begin(); p != params.end(); ++p) {
+		for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
 			_main_automation_menu_map[*p] = pan_automation_item;
 		}
 	}

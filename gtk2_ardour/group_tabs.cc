@@ -24,15 +24,18 @@
 
 #include "gui_thread.h"
 #include "route_group_dialog.h"
+#include "global_signals.h"
 #include "group_tabs.h"
 #include "keyboard.h"
 #include "i18n.h"
 #include "ardour_ui.h"
+#include "rgb_macros.h"
 #include "utils.h"
 
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using Gtkmm2ext::Keyboard;
 
 list<Gdk::Color> GroupTabs::_used_colors;
@@ -43,6 +46,7 @@ GroupTabs::GroupTabs ()
 	, _dragging_new_tab (0)
 {
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
+	ColorsChanged.connect (sigc::mem_fun (*this, &GroupTabs::queue_draw));	
 }
 
 GroupTabs::~GroupTabs ()
@@ -237,7 +241,7 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 }
 
 void
-GroupTabs::render (cairo_t* cr)
+GroupTabs::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	if (_dragging == 0) {
 		_tabs = compute_tabs ();
@@ -535,19 +539,30 @@ GroupTabs::remove_group (RouteGroup* g)
 
 /** Set the color of the tab of a route group */
 void
-GroupTabs::set_group_color (RouteGroup* group, Gdk::Color color)
+GroupTabs::set_group_color (RouteGroup* group, uint32_t color)
 {
 	assert (group);
+	uint32_t r, g, b, a;
+
+	UINT_TO_RGBA (color, &r, &g, &b, &a);
 
 	/* Hack to disallow black route groups; force a dark grey instead */
-	if (color.get_red() == 0 && color.get_green() == 0 && color.get_blue() == 0) {
-		color.set_grey_p (0.1);
+
+	if (r == 0 && g == 0 && b == 0) {
+		r = 25;
+		g = 25;
+		b = 25;
 	}
 	
 	GUIObjectState& gui_state = *ARDOUR_UI::instance()->gui_object_state;
 
 	char buf[64];
-	snprintf (buf, sizeof (buf), "%d:%d:%d", color.get_red(), color.get_green(), color.get_blue());
+	
+	/* for historical reasons the colors must be stored as 16 bit color
+	 * values. Ugh.
+	 */
+
+	snprintf (buf, sizeof (buf), "%d:%d:%d", (r<<8), (g<<8), (b<<8));
 	gui_state.set_property (group_gui_id (group), "color", buf);
 	
 	/* the group color change notification */
@@ -577,35 +592,35 @@ GroupTabs::group_gui_id (RouteGroup* group)
 }
 
 /** @return the color to use for a route group tab */
-Gdk::Color
+uint32_t
 GroupTabs::group_color (RouteGroup* group)
 {
 	assert (group);
 	
 	GUIObjectState& gui_state = *ARDOUR_UI::instance()->gui_object_state;
-
 	string const gui_id = group_gui_id (group);
-
 	bool empty;
 	string const color = gui_state.get_string (gui_id, "color", &empty);
+
 	if (empty) {
 		/* no color has yet been set, so use a random one */
-		Gdk::Color const color = unique_random_color (_used_colors);
-		set_group_color (group, color);
-		return color;
+		uint32_t c = gdk_color_to_rgba (unique_random_color (_used_colors));
+		set_group_color (group, c);
+		return c;
 	}
-
-	Gdk::Color c;
 
 	int r, g, b;
 
+	/* for historical reasons, colors are stored as 16 bit values.
+	 */
+
 	sscanf (color.c_str(), "%d:%d:%d", &r, &g, &b);
 
-	c.set_red (r);
-	c.set_green (g);
-	c.set_blue (b);
-	
-	return c;
+	r /= 256;
+	g /= 256;
+	b /= 256;
+
+	return RGBA_TO_UINT (r, g, b, 255);
 }
 
 void

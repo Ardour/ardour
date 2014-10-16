@@ -1,1 +1,0 @@
-./mpeg/mpegproperties.h

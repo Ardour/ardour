@@ -19,7 +19,7 @@
 */
 
 #ifdef HAVE_ALSA
-#include <alsa/asoundlib.h>
+#include "ardouralsautil/devicelist.h"
 #endif
 
 #ifdef __APPLE__
@@ -27,6 +27,11 @@
 #include <CoreFoundation/CFString.h>
 #include <sys/param.h>
 #include <mach-o/dyld.h>
+#endif
+
+#ifdef PLATFORM_WINDOWS
+#include <shobjidl.h>  //  Needed for
+#include <shlguid.h>   // 'IShellLink'
 #endif
 
 #ifdef HAVE_PORTAUDIO
@@ -105,7 +110,7 @@ get_none_string ()
 void
 ARDOUR::get_jack_audio_driver_names (vector<string>& audio_driver_names)
 {
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	audio_driver_names.push_back (portaudio_driver_name);
 #elif __APPLE__
 	audio_driver_names.push_back (coreaudio_driver_name);
@@ -271,60 +276,7 @@ void
 ARDOUR::get_jack_alsa_device_names (device_map_t& devices)
 {
 #ifdef HAVE_ALSA
-	snd_ctl_t *handle;
-	snd_ctl_card_info_t *info;
-	snd_pcm_info_t *pcminfo;
-	snd_ctl_card_info_alloca(&info);
-	snd_pcm_info_alloca(&pcminfo);
-	string devname;
-	int cardnum = -1;
-	int device = -1;
-
-	while (snd_card_next (&cardnum) >= 0 && cardnum >= 0) {
-
-		devname = "hw:";
-		devname += PBD::to_string (cardnum, std::dec);
-
-		if (snd_ctl_open (&handle, devname.c_str(), 0) >= 0 && snd_ctl_card_info (handle, info) >= 0) {
-
-			if (snd_ctl_card_info (handle, info) < 0) {
-				continue;
-			}
-			
-			string card_name = snd_ctl_card_info_get_name (info);
-
-			/* change devname to use ID, not number */
-
-			devname = "hw:";
-			devname += snd_ctl_card_info_get_id (info);
-
-			while (snd_ctl_pcm_next_device (handle, &device) >= 0 && device >= 0) {
-				
-				/* only detect duplex devices here. more
-				 * complex arrangements are beyond our scope
-				 */
-
-				snd_pcm_info_set_device (pcminfo, device);
-				snd_pcm_info_set_subdevice (pcminfo, 0);
-				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_CAPTURE);
-				
-				if (snd_ctl_pcm_info (handle, pcminfo) >= 0) {
-
-					snd_pcm_info_set_device (pcminfo, device);
-					snd_pcm_info_set_subdevice (pcminfo, 0);
-					snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_PLAYBACK);
-
-					if (snd_ctl_pcm_info (handle, pcminfo) >= 0) {
-						devname += ',';
-						devname += PBD::to_string (device, std::dec);
-						devices.insert (std::make_pair (card_name, devname));
-					}
-				}
-			}
-
-			snd_ctl_close(handle);
-		}
-	}
+	get_alsa_audio_device_names(devices);
 #else
 	/* silence a compiler unused variable warning */
 	(void) devices;
@@ -543,7 +495,7 @@ ARDOUR::get_jack_audio_driver_supports_setting_period_count (const string& drive
 bool
 ARDOUR::get_jack_server_application_names (std::vector<std::string>& server_names)
 {
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	server_names.push_back ("jackd.exe");
 #else
 	server_names.push_back ("jackd");
@@ -558,7 +510,7 @@ ARDOUR::set_path_env_for_jack_autostart (const vector<std::string>& dirs)
 #ifdef __APPLE__
 	// push it back into the environment so that auto-started JACK can find it.
 	// XXX why can't we just expect OS X users to have PATH set correctly? we can't ...
-	setenv ("PATH", SearchPath(dirs).to_string().c_str(), 1);
+	setenv ("PATH", Searchpath(dirs).to_string().c_str(), 1);
 #else
 	/* silence a compiler unused variable warning */
 	(void) dirs;
@@ -581,9 +533,63 @@ ARDOUR::get_jack_server_dir_paths (vector<std::string>& server_dir_paths)
 	server_dir_paths.push_back (Glib::path_get_dirname (execpath));
 #endif
 
-	SearchPath sp(string(g_getenv("PATH")));
+	Searchpath sp(string(g_getenv("PATH")));
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
+// N.B. The #define (immediately below) can be safely removed once we know that this code builds okay with mingw
+#ifdef COMPILER_MSVC
+	IShellLinkA  *pISL = NULL;    
+	IPersistFile *ppf  = NULL;
+
+	// Mixbus creates a Windows shortcut giving the location of its
+	// own (bundled) version of Jack. Let's see if that shortcut exists
+	if (SUCCEEDED (CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (void**)&pISL)))
+	{
+		if (SUCCEEDED (pISL->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf)))
+		{
+			char  target_path[MAX_PATH];
+			char  shortcut_pathA[MAX_PATH];
+			WCHAR shortcut_pathW[MAX_PATH];
+
+			// Our Windows installer should have created a shortcut to the Jack
+			// server so let's start by finding out what drive it got installed on
+			if (char *env_path = getenv ("windir"))
+			{
+				strcpy (shortcut_pathA, env_path);
+				shortcut_pathA[2] = '\0'; // Gives us just the drive letter and colon
+			}
+			else // Assume 'C:'
+				strcpy (shortcut_pathA, "C:");
+
+			strcat (shortcut_pathA, "\\Program Files (x86)\\Jack\\Start Jack.lnk");
+
+			MultiByteToWideChar (CP_ACP, MB_PRECOMPOSED, shortcut_pathA, -1, shortcut_pathW, MAX_PATH);
+
+			// If it did, load the shortcut into our persistent file
+			if (SUCCEEDED (ppf->Load(shortcut_pathW, 0)))
+			{
+				// Read the target information from the shortcut object
+				if (S_OK == (pISL->GetPath (target_path, MAX_PATH, NULL, SLGP_UNCPRIORITY)))
+				{
+					char *p = strrchr (target_path, '\\');
+
+					if (p)
+					{
+						*p = NULL;
+						sp.push_back (target_path);
+					}
+				}
+			}
+		}
+	}
+
+	if (ppf)
+		ppf->Release();
+
+	if (pISL)
+		pISL->Release();
+#endif
+
 	gchar *install_dir = g_win32_get_package_installation_directory_of_module (NULL);
 	if (install_dir) {
 		sp.push_back (install_dir);
@@ -610,8 +616,7 @@ ARDOUR::get_jack_server_paths (const vector<std::string>& server_dir_paths,
 		vector<std::string>& server_paths)
 {
 	for (vector<string>::const_iterator i = server_names.begin(); i != server_names.end(); ++i) {
-                Glib::PatternSpec ps (*i);
-		find_matching_files_in_directories (server_dir_paths, ps, server_paths);
+		find_files_matching_pattern (server_paths, server_dir_paths, *i);
 	}
 	return !server_paths.empty();
 }
@@ -692,7 +697,7 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 
 	args.push_back (options.server_path);
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	// must use sync mode on windows
 	args.push_back ("-S");
 
@@ -738,11 +743,9 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 		args.push_back ("-v");
 	}
 
-#ifndef WIN32
 	if (options.temporary) {
 		args.push_back ("-T");
 	}
-#endif
 
 	if (options.driver == alsa_driver_name) {
 		if (options.midi_driver == alsa_seq_midi_driver_name) {
@@ -891,11 +894,7 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 	ostringstream oss;
 
 	for (vector<string>::const_iterator i = args.begin(); i != args.end();) {
-#ifdef WIN32
-		oss << quote_string (*i);
-#else
 		oss << *i;
-#endif
 		if (++i != args.end()) oss << ' ';
 	}
 

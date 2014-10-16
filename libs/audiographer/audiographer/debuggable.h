@@ -7,11 +7,13 @@
 
 #include <iostream>
 
+#include "audiographer/visibility.h"
+
 namespace AudioGrapher
 {
 
 /// Compile time defined debug level
-enum DebugLevel
+enum LIBAUDIOGRAPHER_API DebugLevel
 {
 	DebugNone,     ///< Disabled
 	DebugObject,   ///< Object level stuff, ctors, initalizers etc.
@@ -36,19 +38,19 @@ enum DebugLevel
   * logical and (short-circuiting).
   */
 template<DebugLevel L = DEFAULT_DEBUG_LEVEL>
-class Debuggable
+class /*LIBAUDIOGRAPHER_API*/ Debuggable
 {
   protected:
 	Debuggable(std::ostream & debug_stream = std::cerr)
 		: stream (debug_stream) {}
 
 	bool debug_level (DebugLevel level) {
-		#ifdef NDEBUG
-		level = DEFAULT_DEBUG_LEVEL; /* stop pedantic gcc complaints about unused parameter */
+#ifndef NDEBUG
+		(void) level; /* stop pedantic gcc complaints about unused parameter */
 		return false;
-		#else
+#else
 		return L >= level;
-		#endif
+#endif
 	}
 	std::ostream & debug_stream() { return stream; }
 

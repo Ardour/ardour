@@ -28,16 +28,16 @@
 
 #include "ardour/types.h"
 
-#include <jack/types.h>
-
 #include "timecode/time.h"
+
+#include "control_protocol/visibility.h"
 
 namespace ARDOUR {
 	class Session;
 	class SessionEvent;
 }
 
-class BasicUI {
+class LIBCONTROLCP_API BasicUI {
   public:
 	BasicUI (ARDOUR::Session&);
 	virtual ~BasicUI ();

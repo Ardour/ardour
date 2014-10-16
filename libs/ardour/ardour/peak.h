@@ -21,6 +21,7 @@
 #define __ardour_peak_h__
 
 #include <cmath>
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
 

@@ -67,7 +67,7 @@ MixerActor::register_actions ()
 	myactions.register_action ("Mixer", "select-all-processors", _("Select All (visible) Processors"), sigc::mem_fun (*this, &MixerActor::select_all_processors));
 	myactions.register_action ("Mixer", "toggle-processors", _("Toggle Selected Processors"), sigc::mem_fun (*this, &MixerActor::toggle_processors));
 	myactions.register_action ("Mixer", "ab-plugins", _("Toggle Selected Plugins"), sigc::mem_fun (*this, &MixerActor::ab_plugins));
-
+	myactions.register_action ("Mixer", "select-none", _("Deselect all srips and processors"), sigc::mem_fun (*this, &MixerActor::select_none));
 
 	myactions.register_action ("Mixer", "scroll-left", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &MixerActor::scroll_left));
 	myactions.register_action ("Mixer", "scroll-right", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &MixerActor::scroll_right));
@@ -85,7 +85,7 @@ MixerActor::load_bindings ()
 
 	std::string binding_file;
 
-	if (find_file_in_search_path (ardour_config_search_path(), "mixer.bindings", binding_file)) {
+	if (find_file (ardour_config_search_path(), "mixer.bindings", binding_file)) {
                 bindings.load (binding_file);
 		info << string_compose (_("Loaded mixer bindings from %1"), binding_file) << endmsg;
         } else {
@@ -172,6 +172,7 @@ MixerActor::unity_gain_action ()
 {
 	set_route_targets_for_operation ();
 
+printf("setting gain to unity (?)");
 	BOOST_FOREACH(RouteUI* r, _route_targets) {
 		boost::shared_ptr<Route> rp = r->route();
 		if (rp) {
@@ -225,18 +226,6 @@ MixerActor::select_all_processors ()
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->select_all_processors ();
-		}
-	}
-}
-void
-MixerActor::delete_processors ()
-{
-	set_route_targets_for_operation ();
-
-	BOOST_FOREACH(RouteUI* r, _route_targets) {
-		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
-		if (ms) {
-			ms->delete_processors ();
 		}
 	}
 }

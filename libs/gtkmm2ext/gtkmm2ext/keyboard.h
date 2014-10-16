@@ -30,13 +30,15 @@
 
 #include "pbd/stateful.h"
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtk {
 	class Window;
 }
 
 namespace Gtkmm2ext {
 
-class Keyboard : public sigc::trackable, PBD::Stateful
+class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 {
   public:
 	Keyboard ();
@@ -153,6 +155,8 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	static void set_can_save_keybindings (bool yn);
 	static std::string current_binding_name () { return _current_binding_name; }
 	static std::map<std::string,std::string> binding_files;
+
+	int reset_bindings ();
 
 	struct AccelKeyLess {
 	    bool operator() (const Gtk::AccelKey a, const Gtk::AccelKey b) const {

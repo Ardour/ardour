@@ -34,7 +34,7 @@ namespace ARDOUR {
 /** A mapping from one set of channels to another
  * (e.g. how to 'connect' two BufferSets).
  */
-class ChanMapping {
+class LIBARDOUR_API ChanMapping {
 public:
 	ChanMapping() {}
 	ChanMapping(ARDOUR::ChanCount identity);

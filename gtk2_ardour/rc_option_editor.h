@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk_ardour_rc_option_editor_h__
+#define __gtk_ardour_rc_option_editor_h__
+
 #include "option_editor.h"
 #include "visibility_group.h"
 
@@ -54,3 +57,5 @@ private:
 
         PBD::ScopedConnection parameter_change_connection;
 };
+
+#endif /* __gtk_ardour_rc_option_editor_h__ */

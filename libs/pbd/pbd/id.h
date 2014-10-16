@@ -25,9 +25,11 @@
 
 #include <glibmm/threads.h>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-class ID {
+class LIBPBD_API ID {
   public:
 	ID ();
 	ID (std::string);
@@ -68,6 +70,7 @@ class ID {
 };
 
 }
-std::ostream& operator<< (std::ostream& ostr, const PBD::ID&);
+
+LIBPBD_API std::ostream& operator<< (std::ostream& ostr, const PBD::ID&);
 
 #endif /* __pbd_id_h__ */

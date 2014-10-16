@@ -53,6 +53,7 @@ Auditioner::Auditioner (Session& s)
 	, _synth_added (false)
 	, _synth_changed (false)
 	, _queue_panic (false)
+	, _import_position (0)
 {
 }
 
@@ -67,7 +68,7 @@ Auditioner::init ()
 		return -1;
 	}
 
-	_output->add_port ("Midiaudition", this, DataType::MIDI);
+	_output->add_port ("", this, DataType::MIDI);
 
 	lookup_synth();
 
@@ -95,6 +96,7 @@ Auditioner::lookup_synth ()
 				warning << _("Falling back to Reasonable Synth for Midi Audition") << endmsg;
 			} else {
 				warning << _("No synth for midi-audition found.") << endmsg;
+				Config->set_midi_audition_synth_uri(""); // Don't check again for Reasonable Synth (ie --no-lv2)
 			}
 		}
 		if (p) {
@@ -370,6 +372,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 			_synth_added = false;
 		}
 		midi_region.reset();
+		_import_position = 0;
 
 		/* copy it */
 		the_region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region));
@@ -399,13 +402,14 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		_midi_audition = true;
 		set_diskstream(_diskstream_midi);
 		the_region.reset();
+		_import_position = region->position();
 
 		/* copy it */
 		midi_region = (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (region)));
-		midi_region->set_position (0);
+		midi_region->set_position (_import_position);
 
 		_diskstream->playlist()->drop_regions ();
-		_diskstream->playlist()->add_region (midi_region, 0, 1);
+		_diskstream->playlist()->add_region (midi_region, _import_position, 1);
 		midi_diskstream()->reset_tracker();
 
 		ProcessorStreams ps;
@@ -457,7 +461,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 
 	if (_midi_audition) {
 		length = midi_region->length();
-		offset = midi_region->sync_offset (dir);
+		offset = _import_position + midi_region->sync_offset (dir);
 	} else {
 		length = the_region->length();
 		offset = the_region->sync_offset (dir);
@@ -527,7 +531,7 @@ Auditioner::play_audition (framecnt_t nframes)
 	}
 
 	if (!_seeking) {
-		AuditionProgress(current_frame, length); /* emit */
+		AuditionProgress(current_frame - _import_position, length); /* emit */
 	}
 
 	if (current_frame >= length) {

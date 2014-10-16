@@ -25,11 +25,13 @@
 #include <vector>
 #include <sigc++/signal.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtk {
 	class ToggleButton;
 };
 
-class GroupedButtons : public sigc::trackable
+class LIBGTKMM2EXT_API GroupedButtons : public sigc::trackable
 {
   public:
 	GroupedButtons (uint32_t nbuttons, uint32_t first_active);

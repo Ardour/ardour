@@ -33,6 +33,7 @@
 
 #include "pbd/semutils.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/audio_backend.h"
 #include "ardour/session_handle.h"
@@ -52,7 +53,7 @@ typedef boost::shared_ptr<GraphNode> node_ptr_t;
 typedef std::list< node_ptr_t > node_list_t;
 typedef std::set< node_ptr_t > node_set_t;
 
-class Graph : public SessionHandleRef
+class LIBARDOUR_API Graph : public SessionHandleRef
 {
 public:
 	Graph (Session & session);

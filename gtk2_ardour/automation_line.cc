@@ -17,6 +17,13 @@
 
 */
 
+#ifdef COMPILER_MSVC
+#include <float.h>
+/* isinf() & isnan() are C99 standards, which older MSVC doesn't provide */
+#define isinf(val) !((bool)_finite((double)val))
+#define isnan(val) (bool)_isnan((double)val)
+#endif
+
 #include <cmath>
 #include <climits>
 #include <vector>
@@ -32,17 +39,18 @@
 #include "ardour/automation_list.h"
 #include "ardour/dB.h"
 #include "ardour/debug.h"
+#include "ardour/tempo.h"
 
 #include "evoral/Curve.hpp"
 
-#include "simplerect.h"
+#include "canvas/debug.h"
+
 #include "automation_line.h"
 #include "control_point.h"
 #include "gui_thread.h"
 #include "rgb_macros.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
-#include "utils.h"
 #include "selection.h"
 #include "time_axis_view.h"
 #include "point_selection.h"
@@ -57,12 +65,11 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
-using namespace Gnome; // for Canvas
 
 /** @param converter A TimeConverter whose origin_b is the start time of the AutomationList in session frames.
  *  This will not be deleted by AutomationLine.
  */
-AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanvas::Group& parent,
+AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanvas::Item& parent,
                                 boost::shared_ptr<AutomationList> al,
                                 Evoral::TimeConverter<double, framepos_t>* converter)
 	: trackview (tv)
@@ -74,10 +81,8 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	, _maximum_time (max_framepos)
 {
 	if (converter) {
-		_time_converter = converter;
 		_our_time_converter = false;
 	} else {
-		_time_converter = new Evoral::IdentityConverter<double, framepos_t>;
 		_our_time_converter = true;
 	}
 	
@@ -91,15 +96,16 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	terminal_points_can_slide = true;
 	_height = 0;
 
-	group = new ArdourCanvas::Group (parent);
-	group->property_x() = 0.0;
-	group->property_y() = 0.0;
+	group = new ArdourCanvas::Container (&parent);
+	CANVAS_DEBUG_NAME (group, "region gain envelope group");
 
-	line = new ArdourCanvas::Line (*group);
-	line->property_width_pixels() = (guint)1;
+	line = new ArdourCanvas::PolyLine (group);
+	CANVAS_DEBUG_NAME (line, "region gain envelope line");
 	line->set_data ("line", this);
+	line->set_outline_width (2.0);
+	line->set_covers_threshold (4.0);
 
-	line->signal_event().connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
+	line->Event.connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
 
 	trackview.session()->register_with_memento_command_factory(alist->id(), this);
 
@@ -130,7 +136,7 @@ AutomationLine::event_handler (GdkEvent* event)
 }
 
 void
-AutomationLine::show ()
+AutomationLine::update_visibility ()
 {
 	if (_visible & Line) {
 		/* Only show the line there are some points, otherwise we may show an out-of-date line
@@ -142,30 +148,42 @@ AutomationLine::show ()
 		} else {
 			line->hide ();
 		}
+
+		if (_visible & ControlPoints) {
+			for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+				(*i)->show ();
+			}
+		} else if (_visible & SelectedControlPoints) {
+			for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+				if ((*i)->get_selected()) {
+					(*i)->show ();
+				} else {
+					(*i)->hide ();
+				}
+			}
+		} else {
+			for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+				(*i)->hide ();
+			}
+		}
+
 	} else {
-		line->hide();
+		line->hide ();
+		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+			(*i)->hide ();
+		}
 	}
 
-	if (_visible & ControlPoints) {
-		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			(*i)->set_visible (true);
-			(*i)->show ();
-		}
-	} else if (_visible & SelectedControlPoints) {
-		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			(*i)->set_visible ((*i)->get_selected());
-		}
-	} else {
-		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			(*i)->set_visible (false);
-		}
-	}
 }
 
 void
 AutomationLine::hide ()
 {
-	set_visibility (VisibleAspects (0));
+	/* leave control points setting unchanged, we are just hiding the
+	   overall line 
+	*/
+	
+	set_visibility (AutomationLine::VisibleAspects (_visible & ~Line));
 }
 
 double
@@ -204,7 +222,7 @@ void
 AutomationLine::set_line_color (uint32_t color)
 {
 	_line_color = color;
-	line->property_fill_color_rgba() = color;
+	line->set_outline_color (color);
 }
 
 void
@@ -247,7 +265,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	y = min (1.0, y);
 	y = _height - (y * _height);
 
-	double const x = trackview.editor().frame_to_unit_unrounded (_time_converter->to((*cp.model())->when) - _offset);
+	double const x = trackview.editor().sample_to_pixel_unrounded (_time_converter->to((*cp.model())->when) - _offset);
 
 	trackview.editor().session()->begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (
@@ -258,7 +276,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	reset_line_coords (cp);
 
 	if (line_points.size() > 1) {
-		line->property_points() = line_points;
+		line->set (line_points);
 	}
 
 	alist->freeze ();
@@ -278,8 +296,8 @@ void
 AutomationLine::reset_line_coords (ControlPoint& cp)
 {
 	if (cp.view_index() < line_points.size()) {
-		line_points[cp.view_index()].set_x (cp.get_x());
-		line_points[cp.view_index()].set_y (cp.get_y());
+		line_points[cp.view_index()].x = cp.get_x ();
+		line_points[cp.view_index()].y = cp.get_y ();
 	}
 }
 
@@ -500,11 +518,12 @@ AutomationLine::ContiguousControlPoints::ContiguousControlPoints (AutomationLine
 }
 
 void
-AutomationLine::ContiguousControlPoints::compute_x_bounds ()
+AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 {
 	uint32_t sz = size();
 
 	if (sz > 0 && sz < line.npoints()) {
+		const TempoMap& map (e.session()->tempo_map());
 
 		/* determine the limits on x-axis motion for this 
 		   contiguous range of control points
@@ -512,14 +531,30 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds ()
 
 		if (front()->view_index() > 0) {
 			before_x = line.nth (front()->view_index() - 1)->get_x();
+
+			const framepos_t pos = e.pixel_to_sample(before_x);
+			const Meter& meter = map.meter_at (pos);
+			const framecnt_t len = ceil (meter.frames_per_bar (map.tempo_at (pos), e.session()->frame_rate())
+					/ (Timecode::BBT_Time::ticks_per_beat * meter.divisions_per_bar()) );
+			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
+
+			before_x += one_tick_in_pixels;
 		}
 
 		/* if our last point has a point after it in the line,
 		   we have an "after" bound
 		*/
 
-		if (back()->view_index() < (line.npoints() - 2)) {
+		if (back()->view_index() < (line.npoints() - 1)) {
 			after_x = line.nth (back()->view_index() + 1)->get_x();
+
+			const framepos_t pos = e.pixel_to_sample(after_x);
+			const Meter& meter = map.meter_at (pos);
+			const framecnt_t len = ceil (meter.frames_per_bar (map.tempo_at (pos), e.session()->frame_rate())
+					/ (Timecode::BBT_Time::ticks_per_beat * meter.divisions_per_bar()));
+			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
+
+			after_x -= one_tick_in_pixels;
 		}
 	}
 }
@@ -623,7 +658,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		}
 
 		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
-			(*ccp)->compute_x_bounds ();
+			(*ccp)->compute_x_bounds (trackview.editor());
 		}
 	}	
 
@@ -678,7 +713,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		 */
 
 		if (line_points.size() > 1) {
-			line->property_points() = line_points;
+			line->set (line_points);
 		}
 	}
 	
@@ -737,10 +772,10 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 
 	/* if xval has not changed, set it directly from the model to avoid rounding errors */
 
-	if (view_x == trackview.editor().frame_to_unit_unrounded (_time_converter->to ((*cp.model())->when)) - _offset) {
+	if (view_x == trackview.editor().sample_to_pixel_unrounded (_time_converter->to ((*cp.model())->when)) - _offset) {
 		view_x = (*cp.model())->when - _offset;
 	} else {
-		view_x = trackview.editor().unit_to_frame (view_x);
+		view_x = trackview.editor().pixel_to_sample (view_x);
 		view_x = _time_converter->from (view_x + _offset);
 	}
 
@@ -758,7 +793,7 @@ AutomationLine::control_points_adjacent (double xval, uint32_t & before, uint32_
 	ControlPoint *acp = 0;
 	double unit_xval;
 
-	unit_xval = trackview.editor().frame_to_unit_unrounded (xval);
+	unit_xval = trackview.editor().sample_to_pixel_unrounded (xval);
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 
@@ -877,7 +912,7 @@ AutomationLine::set_selected_points (PointSelection const & points)
 
 void AutomationLine::set_colors ()
 {
-	set_line_color (ARDOUR_UI::config()->canvasvar_AutomationLine.get());
+	set_line_color (ARDOUR_UI::config()->get_canvasvar_AutomationLine());
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		(*i)->set_color ();
 	}
@@ -930,7 +965,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 		model_to_view_coord (tx, ty);
 
-		if (std::isnan (tx) || std::isnan (ty)) {
+		if (isnan (tx) || isnan (ty)) {
 			warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""),
 			                           _name) << endmsg;
 			continue;
@@ -944,7 +979,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		 * zoom and scroll into account).
 		 */
 			
-		tx = trackview.editor().frame_to_unit_unrounded (tx);
+		tx = trackview.editor().sample_to_pixel_unrounded (tx);
 		
 		/* convert from canonical view height (0..1.0) to actual
 		 * height coordinates (using X11's top-left rooted system)
@@ -973,7 +1008,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		/* reset the line coordinates given to the CanvasLine */
 
 		while (line_points.size() < vp) {
-			line_points.push_back (Art::Point (0,0));
+			line_points.push_back (ArdourCanvas::Duple (0,0));
 		}
 
 		while (line_points.size() > vp) {
@@ -981,15 +1016,13 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		}
 
 		for (uint32_t n = 0; n < vp; ++n) {
-			line_points[n].set_x (control_points[n]->get_x());
-			line_points[n].set_y (control_points[n]->get_y());
+			line_points[n].x = control_points[n]->get_x();
+			line_points[n].y = control_points[n]->get_y();
 		}
 
-		line->property_points() = line_points;
+		line->set (line_points);
 
-		if (_visible && alist->interpolation() != AutomationList::Discrete) {
-			line->show();
-		}
+		update_visibility ();
 	}
 
 	set_selected_points (trackview.editor().get_selection().points);
@@ -1057,22 +1090,34 @@ AutomationLine::set_list (boost::shared_ptr<ARDOUR::AutomationList> list)
 void
 AutomationLine::add_visibility (VisibleAspects va)
 {
+	VisibleAspects old = _visible;
+
 	_visible = VisibleAspects (_visible | va);
-	show ();
+
+	if (old != _visible) {
+		update_visibility ();
+	}
 }
 
 void
 AutomationLine::set_visibility (VisibleAspects va)
 {
-	_visible = va;
-	show ();
+	if (_visible != va) {
+		_visible = va;
+		update_visibility ();
+	}
 }
 
 void
 AutomationLine::remove_visibility (VisibleAspects va)
 {
+	VisibleAspects old = _visible;
+
 	_visible = VisibleAspects (_visible & ~va);
-	show ();
+
+	if (old != _visible) {
+		update_visibility ();
+	}
 }
 
 void
@@ -1208,9 +1253,8 @@ AutomationLine::add_visible_control_point (uint32_t view_index, uint32_t pi, dou
 
 	if (_visible & ControlPoints) {
 		control_points[view_index]->show ();
-		control_points[view_index]->set_visible (true);
 	} else {
-		control_points[view_index]->set_visible (false);
+		control_points[view_index]->hide ();
 	}
 }
 

@@ -21,17 +21,21 @@
 #ifndef AUDIOGRAPHER_BROADCAST_INFO_H
 #define AUDIOGRAPHER_BROADCAST_INFO_H
 
+#include <stdint.h>
+
 #include <string>
 #include <ctime>
 
 #include <sndfile.h>
+
+#include "audiographer/visibility.h"
 
 namespace AudioGrapher
 {
 
 class SndfileHandle;	
 
-class BroadcastInfo
+class LIBAUDIOGRAPHER_API BroadcastInfo
 {
   public:
 

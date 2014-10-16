@@ -21,16 +21,21 @@
 #define __gtk_ardour_time_axis_view_item_h__
 
 #include <string>
-
-#include <libgnomecanvasmm/pixbuf.h>
-
+#include <gdk/gdk.h>
+#include <gdkmm/color.h>
+#include <pangomm/fontdescription.h>
 #include "pbd/signals.h"
-
 #include "selectable.h"
-#include "simplerect.h"
-#include "canvas.h"
 
 class TimeAxisView;
+
+namespace ArdourCanvas {
+	class Pixbuf;
+	class Rectangle;
+	class Item;
+        class Container;
+ 	class Text;
+}
 
 using ARDOUR::framepos_t;
 using ARDOUR::framecnt_t;
@@ -66,20 +71,23 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	TimeAxisView& get_time_axis_view () const;
 	void set_name_text(const std::string&);
 	virtual void set_height(double h);
+	virtual double height() const { return _height; }
 	void set_y (double);
-	void set_color (Gdk::Color const &);
+	void set_color (uint32_t);
+	void set_name_text_color ();
+
+        uint32_t get_fill_color () const;
 
 	ArdourCanvas::Item* get_canvas_frame();
-	ArdourCanvas::Group* get_canvas_group();
+	ArdourCanvas::Item* get_canvas_group();
 	ArdourCanvas::Item* get_name_highlight();
-	ArdourCanvas::Pixbuf* get_name_pixbuf();
 
-	virtual void set_samples_per_unit(double spu);
+	virtual void set_samples_per_pixel (double);
 
-	double get_samples_per_unit();
+	double get_samples_per_pixel () const;
 
-	virtual void drag_start() { _dragging = true; }
-	virtual void drag_end() { _dragging = false; }
+	virtual void drag_start();
+	virtual void drag_end();
 	bool dragging() const { return _dragging; }
 
 	virtual void raise () { return; }
@@ -107,6 +115,20 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	static double NAME_Y_OFFSET;
 	static double NAME_HIGHLIGHT_SIZE;
 	static double NAME_HIGHLIGHT_THRESH;
+
+        /* if this is 1.0, we move the right boundary
+	   of the item frame so that it is 1 pixel
+	   after the end of the item. This gives nice
+	   effects when splitting items.
+	   
+	   if this is zero, the right edge coincides
+	   with the end of the item, and things don't
+	   look so nice. 
+	   
+	   this exists to allow easy debugging of the
+	   two scenarios.
+	*/
+	static const double RIGHT_EDGE_SHIFT;
 
 	/**
 	 * Emitted when this Group has been removed.
@@ -148,21 +170,21 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	};
 
   protected:
-	TimeAxisViewItem(const std::string &, ArdourCanvas::Group&, TimeAxisView&, double, Gdk::Color const &,
-			 framepos_t, framecnt_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
+	TimeAxisViewItem (const std::string &, ArdourCanvas::Item&, TimeAxisView&, double, uint32_t fill_color,
+			  framepos_t, framecnt_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
 
 	TimeAxisViewItem (const TimeAxisViewItem&);
 
-	void init (const std::string&, double, Gdk::Color const &, framepos_t, framepos_t, Visibility, bool, bool);
+        void init (ArdourCanvas::Item*, double, uint32_t, framepos_t, framepos_t, Visibility, bool, bool);
 
-	virtual void compute_colors (Gdk::Color const &);
+        virtual bool canvas_group_event (GdkEvent*);
+
 	virtual void set_colors();
 	virtual void set_frame_color();
+	virtual void set_frame_gradient ();
 	void set_trim_handle_colors();
 
 	virtual void reset_width_dependent_items (double);
-	void reset_name_width (double);
-	void update_name_pixbuf_visibility ();
 
 	static gint idle_remove_this_item(TimeAxisViewItem*, void*);
 
@@ -190,8 +212,8 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	/** indicates whether the min duration constraint is active */
 	bool min_duration_active;
 
-	/** samples per canvas unit */
-	double samples_per_unit;
+	/** frames per canvas pixel */
+	double samples_per_pixel;
 
 	/** should the item respond to events */
 	bool _sensitive;
@@ -208,37 +230,27 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	/** true if a small vestigial rect should be shown when the item gets very narrow */
 	bool show_vestigial;
 
-	uint32_t fill_opacity;
 	uint32_t fill_color;
-	uint32_t frame_color_r;
-	uint32_t frame_color_g;
-	uint32_t frame_color_b;
-	uint32_t selected_frame_color_r;
-	uint32_t selected_frame_color_g;
-	uint32_t selected_frame_color_b;
-	uint32_t label_color;
 
-	uint32_t handle_color_r;
-	uint32_t handle_color_g;
-	uint32_t handle_color_b;
-	uint32_t lock_handle_color_r;
-	uint32_t lock_handle_color_g;
-	uint32_t lock_handle_color_b;
+	virtual uint32_t fill_opacity() const;
+
 	uint32_t last_item_width;
-	int name_pixbuf_width;
+	int name_text_width;
 	bool wide_enough_for_name;
 	bool high_enough_for_name;
         bool rect_visible;
 
-	ArdourCanvas::Group*      group;
-	ArdourCanvas::SimpleRect* vestigial_frame;
-	ArdourCanvas::SimpleRect* frame;
-	ArdourCanvas::Pixbuf*     name_pixbuf;
-	ArdourCanvas::SimpleRect* name_highlight;
+	ArdourCanvas::Container*      group;
+	ArdourCanvas::Rectangle* vestigial_frame;
+	ArdourCanvas::Rectangle* frame;
+	ArdourCanvas::Text*      name_text;
+	ArdourCanvas::Rectangle* name_highlight;
 
 	/* with these two values, if frame_handle_start == 0 then frame_handle_end will also be 0 */
-	ArdourCanvas::SimpleRect* frame_handle_start; ///< `frame' (fade) handle for the start of the item, or 0
-	ArdourCanvas::SimpleRect* frame_handle_end; ///< `frame' (fade) handle for the end of the item, or 0
+	ArdourCanvas::Rectangle* frame_handle_start; ///< `frame' (fade) handle for the start of the item, or 0
+	ArdourCanvas::Rectangle* frame_handle_end; ///< `frame' (fade) handle for the end of the item, or 0
+
+        bool frame_handle_crossing (GdkEvent*, ArdourCanvas::Rectangle*);
 
 	double _height;
 	Visibility visibility;
@@ -247,8 +259,11 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	bool _dragging;
 
 private:
+        double _width;
 
 	void parameter_changed (std::string);
+        void manage_name_highlight ();
+        void manage_name_text ();
 
 }; /* class TimeAxisViewItem */
 

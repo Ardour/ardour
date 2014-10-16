@@ -24,20 +24,21 @@
 #include <set>
 #include <vector>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/xml++.h"
 
 class Command;
 
 namespace PBD {
 
-class PropertyList;
-class StatefulDiffCommand;	
+class LIBPBD_API PropertyList;
+class LIBPBD_API StatefulDiffCommand;	
 
 /** A unique identifier for a property of a Stateful object */
 typedef GQuark PropertyID;
 
 template<typename T>
-struct PropertyDescriptor {
+struct LIBPBD_TEMPLATE_API PropertyDescriptor {
 	PropertyDescriptor () : property_id (0) {}
 	PropertyDescriptor (PropertyID pid) : property_id (pid) {}
 	
@@ -46,16 +47,17 @@ struct PropertyDescriptor {
 };
 
 /** A list of IDs of Properties that have changed in some situation or other */
-class PropertyChange : public std::set<PropertyID>
+class LIBPBD_TEMPLATE_API PropertyChange : public std::set<PropertyID>
 {
 public:
-	PropertyChange() {}
+	LIBPBD_TEMPLATE_MEMBER_API PropertyChange() {}
+	LIBPBD_TEMPLATE_MEMBER_API ~PropertyChange() {}
 
 	template<typename T> PropertyChange(PropertyDescriptor<T> p);
 
-	PropertyChange(const PropertyChange& other) : std::set<PropertyID> (other) {}
+	LIBPBD_TEMPLATE_MEMBER_API PropertyChange(const PropertyChange& other) : std::set<PropertyID> (other) {}
 
-	PropertyChange operator=(const PropertyChange& other) {
+	LIBPBD_TEMPLATE_MEMBER_API PropertyChange operator=(const PropertyChange& other) {
 		clear ();
 		insert (other.begin (), other.end ());
 		return *this;
@@ -64,7 +66,7 @@ public:
 	template<typename T> PropertyChange operator=(PropertyDescriptor<T> p);
 	template<typename T> bool contains (PropertyDescriptor<T> p) const;
 
-	bool contains (const PropertyChange& other) const {
+	LIBPBD_TEMPLATE_MEMBER_API bool contains (const PropertyChange& other) const {
 		for (const_iterator x = other.begin (); x != other.end (); ++x) {
 			if (find (*x) != end ()) {
 				return true;
@@ -83,7 +85,7 @@ public:
  *    - to handle current state (when serializing Stateful objects)
  *    - to handle history since some operation was started (when making StatefulDiffCommands for undo)
  */
-class PropertyBase
+class LIBPBD_API PropertyBase
 {
 public:
 	PropertyBase (PropertyID pid)

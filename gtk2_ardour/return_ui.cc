@@ -23,7 +23,6 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/return.h"
 
-#include "utils.h"
 #include "return_ui.h"
 #include "io_selector.h"
 #include "ardour_ui.h"
@@ -49,7 +48,7 @@ ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session* s
 
 	_vbox.pack_start (_hbox, false, false, false);
 
-	io = manage (new IOSelector (parent, session, r->output()));
+	io = Gtk::manage (new IOSelector (parent, session, r->output()));
 
 	pack_start (_vbox, false, false);
 

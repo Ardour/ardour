@@ -23,7 +23,6 @@
 #include <string>
 #include <vector>
 #include <cmath>
-#include <jack/jack.h>
 
 #include <glibmm/threads.h>
 
@@ -40,6 +39,7 @@
 #include "ardour/latent.h"
 #include "ardour/port_set.h"
 #include "ardour/session_object.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
 #include "ardour/buffer_set.h"
@@ -64,7 +64,7 @@ class UserBundle;
  * An IO can contain ports of varying types, making routes/inserts/etc with
  * varied combinations of types (eg MIDI and audio) possible.
  */
-class IO : public SessionObject, public Latent
+class LIBARDOUR_API IO : public SessionObject, public Latent
 {
   public:
 	static const std::string state_node_name;

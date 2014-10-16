@@ -21,6 +21,10 @@
 #include "ardour/session.h"
 #include "ardour/types.h"
 
+#ifdef COMPILER_MSVC
+#pragma warning(disable:4305)
+#endif
+
 using namespace ARDOUR;
 
 const Sample Session::default_click_emphasis[] = {

@@ -20,6 +20,7 @@
 */
 
 #include "evoral/TimeConverter.hpp"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 #ifndef __ardour_beats_frames_converter_h__
@@ -33,7 +34,7 @@ class TempoMap;
  *  from some origin (supplied to the constructor in frames), and converts
  *  them to the opposite unit, taking tempo changes into account.
  */
-class BeatsFramesConverter : public Evoral::TimeConverter<double,framepos_t> {
+class LIBARDOUR_API BeatsFramesConverter : public Evoral::TimeConverter<double,framepos_t> {
 public:
 	BeatsFramesConverter (TempoMap& tempo_map, framepos_t origin)
 		: Evoral::TimeConverter<double, framepos_t> (origin)

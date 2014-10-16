@@ -26,17 +26,25 @@
 #include <gtkmm/button.h>
 #include <gtkmm/radiobutton.h>
 
+#include "canvas/canvas.h"
+
 #include "evoral/Curve.hpp"
 #include "ardour/session_handle.h"
 
 #include "ardour_dialog.h"
-#include "canvas.h"
 
 namespace ARDOUR
 {
 	class Session;
 	class AutomationList;
 	class Crossfade;
+}
+
+namespace ArdourCanvas {
+	class Rectangle;
+	class Line;
+	class Polygon;
+	class WaveView;
 }
 
 class CrossfadeEditor : public ArdourDialog
@@ -87,8 +95,8 @@ class CrossfadeEditor : public ArdourDialog
 	struct Point {
 	    ~Point();
 
-	    ArdourCanvas::SimpleRect* box;
-	    ArdourCanvas::Line* curve;
+	    ArdourCanvas::Rectangle* box;
+	    ArdourCanvas::PolyLine* curve;
 	    double x;
 	    double y;
 
@@ -103,11 +111,11 @@ class CrossfadeEditor : public ArdourDialog
 	    }
 	};
 
-	ArdourCanvas::SimpleRect*   toplevel;
-	ArdourCanvas::Canvas* canvas;
+	ArdourCanvas::Rectangle*   toplevel;
+	ArdourCanvas::GtkCanvas* canvas;
 
 	struct Half {
-	    ArdourCanvas::Line*     line;
+	    ArdourCanvas::PolyLine* line;
 	    ArdourCanvas::Polygon*  shading;
 	    std::list<Point*>       points;
 	    ARDOUR::AutomationList  normative_curve; /* 0 - 1.0, linear */

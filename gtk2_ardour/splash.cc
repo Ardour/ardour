@@ -48,7 +48,7 @@ Splash::Splash ()
 	
 	std::string splash_file;
 
-	if (!find_file_in_search_path (ardour_data_search_path(), "splash.png", splash_file)) {
+	if (!find_file (ardour_data_search_path(), "splash.png", splash_file)) {
                 cerr << "Cannot find splash screen image file\n";
 		throw failed_constructor();
 	}
@@ -109,6 +109,7 @@ Splash::pop_back_for (Gtk::Window& win)
 
            So for OS X, we just hide ourselves.
         */
+        (void) win;
         hide();
 #else
 	set_keep_above (false);
@@ -223,6 +224,8 @@ Splash::message (const string& msg)
 	str += Glib::Markup::escape_text (msg);
 	str += "</b>";
 
+        show ();
+
 	layout->set_markup (str);
 	Glib::RefPtr<Gdk::Window> win = darea.get_window();
 	
@@ -234,11 +237,6 @@ Splash::message (const string& msg)
 		} else {
 			darea.queue_draw ();
 		}
-
-                while (!expose_done) {
-                        if(gtk_main_iteration ()) return; // quit was called
-                }
-		gdk_display_flush (gdk_display_get_default());
 	}
 }
 

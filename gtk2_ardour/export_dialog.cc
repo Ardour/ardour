@@ -134,16 +134,12 @@ ExportDialog::init ()
 	cancel_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::close_dialog));
 	export_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::do_export));
 
+	file_notebook->soundcloud_export_selector = soundcloud_selector;
+
 	/* Done! */
 
 	show_all_children ();
 	progress_widget.hide_all();
-}
-
-void
-ExportDialog::expanded_changed ()
-{
-	set_resizable(advanced->get_expanded());
 }
 
 void
@@ -152,57 +148,21 @@ ExportDialog::init_gui ()
 	Gtk::Alignment * preset_align = Gtk::manage (new Gtk::Alignment());
 	preset_align->add (*preset_selector);
 	preset_align->set_padding (0, 12, 0, 0);
-	get_vbox()->pack_start (*preset_align, false, false, 0);
 
-	Gtk::VPaned * advanced_paned = Gtk::manage (new Gtk::VPaned());
+	Gtk::VBox * file_format_selector = Gtk::manage (new Gtk::VBox());
+	file_format_selector->set_homogeneous (false);
+	file_format_selector->pack_start (*preset_align, false, false, 0);
+	file_format_selector->pack_start (*file_notebook, false, false, 0);
+	file_format_selector->pack_start (*soundcloud_selector, false, false, 0);
 
-	Gtk::VBox* timespan_vbox = Gtk::manage (new Gtk::VBox());
-	timespan_vbox->set_spacing (12);
-	timespan_vbox->set_border_width (12);
+	export_notebook.append_page (*file_format_selector, _("File format"));
+	export_notebook.append_page (*timespan_selector, _("Time Span"));
+	export_notebook.append_page (*channel_selector, _("Channels"));
+	
+	get_vbox()->pack_start (export_notebook, true, true, 0);
+	get_vbox()->pack_end   (warning_widget, false, false, 0);
+	get_vbox()->pack_end   (progress_widget, false, false, 0);
 
-	Gtk::Alignment * timespan_align = Gtk::manage (new Gtk::Alignment());
-	timespan_label = Gtk::manage (new Gtk::Label (_("Time Span"), Gtk::ALIGN_LEFT));
-	timespan_align->add (*timespan_selector);
-	timespan_align->set_padding (0, 0, 18, 0);
-	timespan_vbox->pack_start (*timespan_label, false, false, 0);
-	timespan_vbox->pack_start (*timespan_align, true, true, 0);
-	advanced_paned->pack1(*timespan_vbox, true, false);
-
-	Gtk::VBox* channels_vbox = Gtk::manage (new Gtk::VBox());
-	channels_vbox->set_spacing (12);
-	channels_vbox->set_border_width (12);
-
-	Gtk::Alignment * channels_align = Gtk::manage (new Gtk::Alignment());
-	channels_label = Gtk::manage (new Gtk::Label (_("Channels"), Gtk::ALIGN_LEFT));
-	channels_align->add (*channel_selector);
-	channels_align->set_padding (0, 12, 18, 0);
-	channels_vbox->pack_start (*channels_label, false, false, 0);
-	channels_vbox->pack_start (*channels_align, true, true, 0);
-	advanced_paned->pack2(*channels_vbox, channel_selector_is_expandable(), false);
-
-	get_vbox()->pack_start (*file_notebook, false, false, 0);
-	get_vbox()->pack_start (warning_widget, false, false, 0);
-	get_vbox()->pack_start (progress_widget, false, false, 0);
-
-	advanced = Gtk::manage (new Gtk::Expander (_("Time span and channel options")));
-	advanced->property_expanded().signal_changed().connect(
-		sigc::mem_fun(*this, &ExportDialog::expanded_changed));
-	advanced->add (*advanced_paned);
-
-	if (channel_selector_is_expandable()) {
-		advanced_sizegroup = Gtk::SizeGroup::create(Gtk::SIZE_GROUP_VERTICAL);
-		advanced_sizegroup->add_widget(*timespan_selector);
-		advanced_sizegroup->add_widget(*channel_selector);
-	}
-
-	get_vbox()->pack_start (*advanced, true, true);
-
-	Pango::AttrList bold;
-	Pango::Attribute b = Pango::Attribute::create_attr_weight (Pango::WEIGHT_BOLD);
-	bold.insert (b);
-
-	timespan_label->set_attributes (bold);
-	channels_label->set_attributes (bold);
 }
 
 void
@@ -211,6 +171,7 @@ ExportDialog::init_components ()
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorMultiple (_session, profile_manager));
 	channel_selector.reset (new PortExportChannelSelector (_session, profile_manager));
+	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -301,10 +262,34 @@ ExportDialog::show_conflicting_files ()
 }
 
 void
+ExportDialog::soundcloud_upload_progress(double total, double now, std::string title)
+{
+	soundcloud_selector->do_progress_callback(total, now, title);
+
+}
+
+void
 ExportDialog::do_export ()
 {
 	try {
 		profile_manager->prepare_for_export ();
+		handler->soundcloud_username     = soundcloud_selector->username ();
+		handler->soundcloud_password     = soundcloud_selector->password ();
+		handler->soundcloud_make_public  = soundcloud_selector->make_public ();
+		handler->soundcloud_open_page    = soundcloud_selector->open_page ();
+		handler->soundcloud_downloadable = soundcloud_selector->downloadable ();
+
+		handler->SoundcloudProgress.connect_same_thread(
+				*this, 
+				boost::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3)
+				);
+#if 0
+		handler->SoundcloudProgress.connect(
+				*this, invalidator (*this),
+				boost::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3),
+				gui_context()
+				);
+#endif
 		handler->do_export ();
 		show_progress ();
 	} catch(std::exception & e) {
@@ -333,7 +318,7 @@ ExportDialog::show_progress ()
 		if (gtk_events_pending()) {
 			gtk_main_iteration ();
 		} else {
-			usleep (10000);
+			Glib::usleep (10000);
 		}
 	}
 
@@ -418,6 +403,7 @@ ExportRangeDialog::init_components ()
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorSingle (_session, profile_manager, range_id));
 	channel_selector.reset (new PortExportChannelSelector (_session, profile_manager));
+	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -431,6 +417,7 @@ ExportSelectionDialog::init_components ()
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorSingle (_session, profile_manager, X_("selection")));
 	channel_selector.reset (new PortExportChannelSelector (_session, profile_manager));
+	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -444,8 +431,7 @@ void
 ExportRegionDialog::init_gui ()
 {
 	ExportDialog::init_gui ();
-
-	channels_label->set_text (_("Source"));
+	export_notebook.set_tab_label_text(*export_notebook.get_nth_page(2), _("Source"));
 }
 
 void
@@ -456,6 +442,7 @@ ExportRegionDialog::init_components ()
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorSingle (_session, profile_manager, loc_id));
 	channel_selector.reset (new RegionExportChannelSelector (_session, profile_manager, region, track));
+	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -471,5 +458,6 @@ StemExportDialog::init_components ()
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorMultiple (_session, profile_manager));
 	channel_selector.reset (new TrackExportChannelSelector (_session, profile_manager));
+	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new ExportFileNotebook ());
 }

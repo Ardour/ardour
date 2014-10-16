@@ -716,7 +716,14 @@ timecode_to_sample(
 		   frame_rate() in the non-integer Timecode rate case.
 		*/
 
-		sample = (int64_t)rint((((timecode.hours * 60 * 60) + (timecode.minutes * 60) + timecode.seconds) * (rint(timecode.rate) * frames_per_timecode_frame)) + (timecode.frames * frames_per_timecode_frame));
+		sample = (int64_t) rint(
+				(
+				 ((timecode.hours * 60 * 60) + (timecode.minutes * 60) + timecode.seconds)
+				 *
+				 (rint(timecode.rate) * frames_per_timecode_frame)
+				)
+				+ (timecode.frames * frames_per_timecode_frame)
+			);
 	}
 
 	if (use_subframes) {
@@ -806,7 +813,7 @@ sample_to_timecode (
 		double timecode_frames_fraction;
 		int64_t timecode_frames_left;
 		const double frames_per_timecode_frame = sample_frame_rate / timecode_frames_per_second;
-		const int64_t frames_per_hour = (int64_t)(3600 * rint(timecode_frames_per_second) * frames_per_timecode_frame);
+		const int64_t frames_per_hour = (int64_t)(3600. * rint(timecode_frames_per_second) * frames_per_timecode_frame);
 
 		timecode.hours = offset_sample / frames_per_hour;
 
@@ -823,10 +830,10 @@ sample_to_timecode (
 			timecode.subframes = 0;
 		}
 
-		timecode.minutes = timecode_frames_left / ((int32_t) rint (timecode_frames_per_second) * 60);
-		timecode_frames_left = timecode_frames_left % ((int32_t) rint (timecode_frames_per_second) * 60);
-		timecode.seconds = timecode_frames_left / (int32_t) rint(timecode_frames_per_second);
-		timecode.frames = timecode_frames_left % (int32_t) rint(timecode_frames_per_second);
+		timecode.minutes = timecode_frames_left / ((int32_t) lrint (timecode_frames_per_second) * 60);
+		timecode_frames_left = timecode_frames_left % ((int32_t) lrint (timecode_frames_per_second) * 60);
+		timecode.seconds = timecode_frames_left / (int32_t) lrint(timecode_frames_per_second);
+		timecode.frames = timecode_frames_left % (int32_t) lrint(timecode_frames_per_second);
 	}
 
 	if (!use_subframes) {

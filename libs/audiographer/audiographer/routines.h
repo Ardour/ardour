@@ -5,11 +5,13 @@
 
 #include <cmath>
 
+#include "audiographer/visibility.h"
+
 namespace AudioGrapher
 {
 
 /// Allows overriding some routines with more efficient ones.
-class Routines
+class LIBAUDIOGRAPHER_API Routines
 {
   public:
 	typedef uint32_t uint_type;

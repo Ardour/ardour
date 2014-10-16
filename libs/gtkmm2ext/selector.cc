@@ -22,7 +22,8 @@
 #include <vector>
 #include <string>
 
-#include "pbd/pathscanner.h"
+#include <glibmm.h>
+#include <gdkmm.h>
 
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/selector.h"

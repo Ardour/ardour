@@ -22,6 +22,8 @@
 
 #include "pbd/search_path.h"
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
 	/**
@@ -29,27 +31,41 @@ namespace ARDOUR {
 	 * configuration files.
 	 * @post user_config_directory() exists
 	 */
-	std::string user_config_directory ();
+	LIBARDOUR_API std::string user_config_directory ();
+
+	/**
+	 * @return the path to the directory used to store user specific
+	 * caches (e.g. plugin indices, blacklist/whitelist)
+	 * it defaults to XDG_CACHE_HOME
+	 */
+	LIBARDOUR_API std::string user_cache_directory ();
+
 
 	/**
 	 * @return the path to the directory that contains the system wide ardour
 	 * modules.
 	 */
-	std::string ardour_dll_directory ();
+	LIBARDOUR_API std::string ardour_dll_directory ();
 
 	/**
 	 * @return the search path to be used when looking for per-system
 	 * configuration files. This may include user configuration files.
 	 */
-	PBD::SearchPath ardour_config_search_path ();
+	LIBARDOUR_API PBD::Searchpath ardour_config_search_path ();
 
 	/**
 	 * @return the search path to be used when looking for data files
 	 * that could be shared by systems (h/w and configuration independent
 	 * files, such as icons, XML files, etc)
 	 */
-	PBD::SearchPath ardour_data_search_path ();
+	LIBARDOUR_API PBD::Searchpath ardour_data_search_path ();
 
+#ifdef PLATFORM_WINDOWS
+	/**
+	 * @return our 'Windows' search path ( corresponds to <install_dir>/share/ardour3 )
+	 */
+	LIBARDOUR_API PBD::Searchpath windows_search_path ();
+#endif
 } // namespace ARDOUR
 
 #endif

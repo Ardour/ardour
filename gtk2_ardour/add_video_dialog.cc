@@ -33,7 +33,6 @@
 #include "ardour/session.h"
 #include "ardour_ui.h"
 
-#include "utils.h"
 #include "add_video_dialog.h"
 #include "utils_videotl.h"
 #include "i18n.h"
@@ -66,6 +65,8 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	, harvid_reset (_("Reload docroot"))
 	, harvid_list (ListStore::create(harvid_list_columns))
 	, harvid_list_view (harvid_list)
+	, show_advanced(false)
+	, loaded_docroot(false)
 {
 	set_session (s);
 	set_name ("AddVideoDialog");
@@ -77,43 +78,33 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	harvid_initialized = false;
 	std::string dstdir = video_dest_dir(_session->session_directory().video_path(), video_get_docroot(Config));
 
-	if (Config->get_video_advanced_setup()) {
+	/* Harvid Browser */
+	harvid_list_view.append_column("", pixBufRenderer);
+	harvid_list_view.append_column(_("Filename"), harvid_list_columns.filename);
 
-		/* Harvid Browser */
-		harvid_list_view.append_column("", pixBufRenderer);
-		harvid_list_view.append_column(_("Filename"), harvid_list_columns.filename);
+	harvid_list_view.get_column(0)->set_alignment(0.5);
+	harvid_list_view.get_column(0)->add_attribute(pixBufRenderer, "stock-id", harvid_list_columns.id);
+	harvid_list_view.get_column(1)->set_expand(true);
+	harvid_list_view.get_column(1)->set_sort_column(harvid_list_columns.filename);
+	harvid_list_view.set_enable_search(true);
+	harvid_list_view.set_search_column(1);
 
-		harvid_list_view.get_column(0)->set_alignment(0.5);
-		harvid_list_view.get_column(0)->add_attribute(pixBufRenderer, "stock-id", harvid_list_columns.id);
-		harvid_list_view.get_column(1)->set_expand(true);
-		harvid_list_view.get_column(1)->set_sort_column(harvid_list_columns.filename);
-		harvid_list_view.set_enable_search(true);
-		harvid_list_view.set_search_column(1);
+	harvid_list_view.get_selection()->set_mode (SELECTION_SINGLE);
 
-		harvid_list_view.get_selection()->set_mode (SELECTION_SINGLE);
+	harvid_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &AddVideoDialog::harvid_list_view_selected));
+	harvid_list_view.signal_row_activated().connect (sigc::mem_fun (*this, &AddVideoDialog::harvid_list_view_activated));
 
-		harvid_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &AddVideoDialog::harvid_list_view_selected));
-		harvid_list_view.signal_row_activated().connect (sigc::mem_fun (*this, &AddVideoDialog::harvid_list_view_activated));
+	Gtk::ScrolledWindow *scroll = manage(new ScrolledWindow);
+	scroll->add(harvid_list_view);
+	scroll->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
-		VBox* vbox = manage (new VBox);
-		Gtk::ScrolledWindow *scroll = manage(new ScrolledWindow);
-		scroll->add(harvid_list_view);
-		scroll->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	HBox* hbox = manage (new HBox);
+	harvid_path.set_alignment (0, 0.5);
+	hbox->pack_start (harvid_path, true, true);
+	hbox->pack_start (harvid_reset, false, false);
 
-		HBox* hbox = manage (new HBox);
-		harvid_path.set_alignment (0, 0.5);
-		hbox->pack_start (harvid_path, true, true);
-		hbox->pack_start (harvid_reset, false, false);
-
-		vbox->pack_start (*hbox, false, false);
-		vbox->pack_start (*scroll, true, true);
-
-		notebook.append_page (*vbox, _("VideoServerIndex"));
-	} else {
-		/* dummy entry */
-		VBox* vbox = manage (new VBox);
-		notebook.append_page (*vbox, _("VideoServerIndex"));
-	}
+	server_index_box.pack_start (*hbox, false, false);
+	server_index_box.pack_start (*scroll, true, true);
 
 	/* file chooser */
 	chooser.set_border_width (4);
@@ -135,13 +126,7 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	chooser.add_filter (matchall_filter);
 	chooser.set_select_multiple (false);
 
-	VBox* vboxfb = manage (new VBox);
-	vboxfb->pack_start (chooser, true, true, 0);
-
-	if (video_get_docroot(Config).size() > 0 &&
-			Config->get_video_advanced_setup()) {
-		notebook.append_page (*vboxfb, _("Browse Files"));
-	}
+	file_chooser_box.pack_start (chooser, true, true, 0);
 
 	/* Global Options*/
 	Gtk::Label* l;
@@ -184,7 +169,7 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	preview_image->set(imgbuf);
 	seek_slider.set_draw_value(false);
 
-	HBox* hbox = manage (new HBox);
+	hbox = manage (new HBox);
 	hbox->pack_start (*table, true, false);
 
 	Gtk::Alignment *al = manage(new Gtk::Alignment());
@@ -195,19 +180,15 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	previewpane->pack_start (*al, false, false);
 	previewpane->pack_start (*hbox, true, true, 6);
 
-	/* Overall layout */
+	/* Prepare Overall layout */
+
 	hbox = manage (new HBox);
-	if (Config->get_video_advanced_setup()) {
-		hbox->pack_start (notebook, true, true);
-	} else {
-		hbox->pack_start (*vboxfb, true, true);
-	}
+	hbox->pack_start (browser_container, true, true);
 	hbox->pack_start (*previewpane, false, false);
 
 	get_vbox()->set_spacing (4);
 	get_vbox()->pack_start (*hbox, true, true);
 	get_vbox()->pack_start (*options_box, false, false);
-
 
 	/* xjadeo checkbox */
 	if (ARDOUR_UI::instance()->video_timeline->found_xjadeo()
@@ -236,8 +217,6 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	notebook.signal_switch_page().connect (sigc::hide_return (sigc::hide (sigc::hide (sigc::mem_fun (*this, &AddVideoDialog::page_switch)))));
 	seek_slider.signal_value_changed().connect(sigc::mem_fun(*this, &AddVideoDialog::seek_preview));
 	harvid_reset.signal_clicked().connect (sigc::mem_fun (*this, &AddVideoDialog::harvid_load_docroot));
-
-	show_all_children ();
 }
 
 AddVideoDialog::~AddVideoDialog ()
@@ -247,6 +226,38 @@ AddVideoDialog::~AddVideoDialog ()
 void
 AddVideoDialog::on_show ()
 {
+	/* overall layout depending on get_video_advanced_setup() and docroot */
+	for (int i = notebook.get_n_pages(); i > 0 ; --i) {
+		notebook.remove_page(i);
+	}
+	if (server_index_box.get_parent()) {
+		server_index_box.get_parent()->remove(server_index_box);
+	}
+	if (file_chooser_box.get_parent()) {
+		file_chooser_box.get_parent()->remove(file_chooser_box);
+	}
+	if (notebook.get_parent()) {
+		notebook.get_parent()->remove(notebook);
+	}
+
+	if (Config->get_video_advanced_setup()) {
+		notebook.append_page (server_index_box, _("VideoServerIndex"));
+		if (video_get_docroot(Config).size() > 0) {
+			notebook.append_page (file_chooser_box, _("Browse Files"));
+		}
+		browser_container.pack_start (notebook, true, true);
+		show_advanced = true;
+		if (!loaded_docroot) {
+			harvid_load_docroot();
+		}
+	} else {
+		browser_container.pack_start (file_chooser_box, true, true);
+		show_advanced = false;
+		loaded_docroot = false;
+	}
+
+	show_all_children ();
+
 	Dialog::on_show ();
 }
 
@@ -259,7 +270,8 @@ static bool check_video_file_extension(std::string file)
 		".ogv"     , ".OGV"     ,
 		".mpg"     , ".MPG"     ,
 		".mpeg"    , ".MPEG"    ,
-		".mts"     , ".MTS"    ,
+		".mts"     , ".MTS"     ,
+		".mov"     , ".MOV"     ,
 		".mp4"     , ".MP4"     ,
 		".mkv"     , ".MKV"     ,
 		".vob"     , ".VOB"     ,
@@ -273,8 +285,8 @@ static bool check_video_file_extension(std::string file)
 		".dv"      , ".DV"      ,
 		".dirac"   , ".DIRAC"   ,
 		".webm"    , ".WEBM"    ,
-		".wmv"     , ".wmv"     ,
-		".ts"      , ".ts"      ,
+		".wmv"     , ".WMV"     ,
+		".ts"      , ".TS"      ,
 	};
 
 	for (size_t n = 0; n < sizeof(suffixes)/sizeof(suffixes[0]); ++n) {
@@ -296,7 +308,7 @@ std::string
 AddVideoDialog::file_name (bool &local_file)
 {
 	int n = notebook.get_current_page ();
-	if (n == 1 || ! Config->get_video_advanced_setup()) {
+	if (n == 1 || !show_advanced) {
 		local_file = true;
 		return chooser.get_filename();
 	} else {
@@ -316,6 +328,10 @@ AddVideoDialog::file_name (bool &local_file)
 			CURL *curl;
 			curl = curl_easy_init();
 			char *ue = curl_easy_unescape(curl, uri.c_str(), uri.length(), &plen);
+#ifdef PLATFORM_WINDOWS
+			char *tmp;
+			while (tmp = strchr(ue, '/')) *tmp = '\\';
+#endif
 			std::string path = video_get_docroot(Config) + ue;
 			if (!::access(path.c_str(), R_OK)) {
 				uri = path;
@@ -332,7 +348,7 @@ enum VtlImportOption
 AddVideoDialog::import_option ()
 {
 	int n = notebook.get_current_page ();
-	if (n == 0 && Config->get_video_advanced_setup()) { return VTL_IMPORT_NONE; }
+	if (n == 0 && show_advanced) { return VTL_IMPORT_NONE; }
 	return VTL_IMPORT_TRANSCODE;
 }
 
@@ -451,6 +467,7 @@ AddVideoDialog::harvid_list_view_activated (const Gtk::TreeModel::Path& path, Gt
 void
 AddVideoDialog::harvid_load_docroot() {
 	set_action_ok(false);
+	loaded_docroot = true;
 
 	std::string video_server_url = video_get_server_url(Config);
 	char url[2048];
@@ -463,7 +480,7 @@ AddVideoDialog::harvid_load_docroot() {
 
 bool
 AddVideoDialog::page_switch() {
-	if (notebook.get_current_page () == 1 || Config->get_video_advanced_setup()) {
+	if (notebook.get_current_page () == 1 || show_advanced) {
 		file_selection_changed();
 		return true;
 	}

@@ -20,12 +20,16 @@
 #ifndef __gtkmm2ext_idle_adjustment_h__
 #define __gtkmm2ext_idle_adjustment_h__
 
+#include <stdint.h>
 #include <sys/time.h>
+
 #include <gtkmm/adjustment.h>
+
+#include "gtkmm2ext/visibility.h"
 
 namespace Gtkmm2ext {
 
-class IdleAdjustment : public sigc::trackable
+class LIBGTKMM2EXT_API IdleAdjustment : public sigc::trackable
 {
   public:
 	IdleAdjustment (Gtk::Adjustment& adj);
@@ -35,7 +39,7 @@ class IdleAdjustment : public sigc::trackable
 
   private:
 	void underlying_adjustment_value_changed();
-	struct timeval last_vc;
+	int64_t last_vc;
 	gint timeout_handler();
 	bool timeout_queued;
 };

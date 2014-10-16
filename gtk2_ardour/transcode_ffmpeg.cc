@@ -30,6 +30,12 @@
 #include "transcode_ffmpeg.h"
 #include "utils_videotl.h"
 
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+#include <shlobj.h> // CSIDL_*
+#include "pbd/windows_special_dirs.h"
+#endif
+
 #include "i18n.h"
 
 using namespace PBD;
@@ -51,22 +57,68 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 	debug_enable = false;
 #endif
 
+#ifdef PLATFORM_WINDOWS
+	HKEY key;
+	DWORD size = PATH_MAX;
+	char tmp[PATH_MAX+1];
+	const char *program_files = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
+#endif
+
 	std::string ff_file_path;
-	if (find_file_in_search_path (SearchPath(Glib::getenv("PATH")), X_("ffmpeg_harvid"), ff_file_path)) { ffmpeg_exe = ff_file_path; }
+	if (find_file (Searchpath(Glib::getenv("PATH")), X_("ffmpeg_harvid"), ff_file_path)) {
+		ffmpeg_exe = ff_file_path;
+	}
+#ifdef PLATFORM_WINDOWS
+	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\harvid", 0, KEY_READ, &key))
+			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+			)
+	{
+		ffmpeg_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), X_("ffmpeg.exe"));
+		ffprobe_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), X_("ffprobe.exe"));
+	}
+	if (Glib::file_test(ffmpeg_exe, Glib::FILE_TEST_EXISTS)) {
+		;
+	}
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "ffmpeg.exe", 0), Glib::FILE_TEST_EXISTS)) {
+		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffmpeg.exe", 0);
+	}
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "ffmpeg", "ffmpeg.exe", 0), Glib::FILE_TEST_EXISTS)) {
+		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffmpeg.exe", 0);
+	}
+	/* generic fallbacks to try */
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffmpeg.exe"), Glib::FILE_TEST_EXISTS)) {
-		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
+		ffmpeg_exe = X_("C:\\Program Files\\harvid\\ffmpeg.exe");
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
+	} else {
+		ffmpeg_exe = X_("");
 	}
+#endif
 
-	if (find_file_in_search_path (SearchPath(Glib::getenv("PATH")), X_("ffprobe_harvid"), ff_file_path)) { ffprobe_exe = ff_file_path; }
+	if (find_file (Searchpath(Glib::getenv("PATH")), X_("ffprobe_harvid"), ff_file_path)) {
+		ffprobe_exe = ff_file_path;
+	}
+#ifdef PLATFORM_WINDOWS
+	if (Glib::file_test(ffprobe_exe, Glib::FILE_TEST_EXISTS)) {
+		;
+	}
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "ffprobe.exe", 0), Glib::FILE_TEST_EXISTS)) {
+		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffprobe.exe", 0);
+	}
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "ffmpeg", "ffprobe.exe", 0), Glib::FILE_TEST_EXISTS)) {
+		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffprobe.exe", 0);
+	}
+	/* generic fallbacks to try */
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffprobe.exe"), Glib::FILE_TEST_EXISTS)) {
-		ffprobe_exe = X_("C:\\Program Files\\ffmpeg\\ffprobe.exe");
+		ffprobe_exe = X_("C:\\Program Files\\harvid\\ffprobe.exe");
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\ffmpeg\\ffprobe.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffprobe_exe = X_("C:\\Program Files\\ffmpeg\\ffprobe.exe");
+	} else {
+		ffprobe_exe = X_("");
 	}
+#endif
 
 	if (ffmpeg_exe.empty() || ffprobe_exe.empty()) {
 		warning << string_compose(
@@ -112,7 +164,7 @@ TranscodeFfmpeg::probe ()
 	argp[4] = strdup("-show_streams");
 	argp[5] = strdup(infile.c_str());
 	argp[6] = 0;
-	ffcmd = new SystemExec(ffprobe_exe, argp);
+	ffcmd = new ARDOUR::SystemExec(ffprobe_exe, argp);
 	ffcmd->ReadStdout.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffprobeparse, this, _1 ,_2));
 	ffcmd->Terminated.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffexit, this));
 	if (ffcmd->start(1)) {
@@ -127,7 +179,7 @@ TranscodeFfmpeg::probe ()
 	 * SystemExec::Terminated is emitted and ffcmd set to NULL */
 	int timeout = 300; // 1.5 sec
 	while (ffcmd && --timeout > 0) {
-		usleep(5000);
+		Glib::usleep(5000);
 	}
 	if (timeout == 0 || ffoutput.empty()) {
 		return false;
@@ -196,7 +248,7 @@ TranscodeFfmpeg::probe ()
 									h * 3600.0
 								+ m * 60.0
 								+ s * 1.0
-								+ atoi(f) / pow(10, strlen(f))
+								+ atoi(f) / pow((double)10, (int)strlen(f))
 							));
 						}
 					} else if (key == X_("duration_ts") && m_fps == 0 && timebase !=0 ) {
@@ -348,6 +400,12 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 		argp[a++] = strdup("-metadata");
 		argp[a++] = format_metadata(it->first.c_str(), it->second.c_str());
 	}
+
+	if (m_fps > 0) {
+		m_lead_in  = rint (m_lead_in * m_fps) / m_fps;
+		m_lead_out = rint (m_lead_out * m_fps) / m_fps;
+	}
+
 	if (m_lead_in != 0 && m_lead_out != 0) {
 		std::ostringstream osstream;
 		argp[a++] = strdup("-vf");
@@ -401,7 +459,7 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 	}
 #endif
 
-	ffcmd = new SystemExec(ffmpeg_exe, argp);
+	ffcmd = new ARDOUR::SystemExec(ffmpeg_exe, argp);
 	ffcmd->ReadStdout.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffmpegparse_v, this, _1 ,_2));
 	ffcmd->Terminated.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffexit, this));
 	if (ffcmd->start(2)) {
@@ -449,7 +507,7 @@ TranscodeFfmpeg::extract_audio (std::string outfile, ARDOUR::framecnt_t /*sample
 	}
 #endif
 
-	ffcmd = new SystemExec(ffmpeg_exe, argp);
+	ffcmd = new ARDOUR::SystemExec(ffmpeg_exe, argp);
 	ffcmd->ReadStdout.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffmpegparse_a, this, _1 ,_2));
 	ffcmd->Terminated.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffexit, this));
 	if (ffcmd->start(2)) {
@@ -509,7 +567,7 @@ TranscodeFfmpeg::transcode (std::string outfile, const int outw, const int outh,
 	printf("\n");
 	}
 #endif
-	ffcmd = new SystemExec(ffmpeg_exe, argp);
+	ffcmd = new ARDOUR::SystemExec(ffmpeg_exe, argp);
 	ffcmd->ReadStdout.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffmpegparse_v, this, _1 ,_2));
 	ffcmd->Terminated.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffexit, this));
 	if (ffcmd->start(2)) {
@@ -524,7 +582,11 @@ TranscodeFfmpeg::cancel ()
 {
 	if (!ffcmd || !ffcmd->is_running()) { return;}
 	ffcmd->write_to_stdin("q");
+#ifdef PLATFORM_WINDOWS
+	Sleep(1000);
+#else
 	sleep (1);
+#endif
 	if (ffcmd) {
 	  ffcmd->terminate();
 	}
@@ -558,7 +620,7 @@ TranscodeFfmpeg::ffmpegparse_a (std::string d, size_t /* s */)
 		      h * 3600.0
 		    + m * 60.0
 		    + s * 1.0
-		    + atoi(f) / pow(10, strlen(f))
+		    + atoi(f) / pow((double)10, (int)strlen(f))
 		));
 		p = p * m_fps / 100.0;
 		if (p > m_duration ) { p = m_duration; }

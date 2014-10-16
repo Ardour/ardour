@@ -28,7 +28,7 @@ class AudioSource;
 class Readable;
 class Session;
 
-class TransientDetector : public AudioAnalyser
+class LIBARDOUR_API TransientDetector : public AudioAnalyser
 {
 public:
 	TransientDetector (float sample_rate);

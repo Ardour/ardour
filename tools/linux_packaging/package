@@ -9,6 +9,7 @@ BUILDTYPE=""
 SINGLE_ARCH="F"
 X86_BUNDLE_OK="F"
 X86_64_BUNDLE_OK="F"
+MAKESELF=""
 
 
 if [ $# -eq 0 ] ; then
@@ -36,6 +37,10 @@ while [ $# -gt 0 ] ; do
 		shift ;;
 	--public)
 		APPNAME=Ardour ;
+		shift ;;
+
+	--makeself)
+		MAKESELF=`which makeself`;
 		shift ;;
 
 	--singlearch) SINGLE_ARCH="T" ; shift ;;
@@ -155,8 +160,13 @@ cp install.sh ${PACKAGE}
 cp stage2.run ${PACKAGE}/.stage2.run
 cp README ${PACKAGE}
 
-echo "Creating tarball..."
-tar -cf ${PACKAGE}.tar ${PACKAGE}
+if test -n "$MAKESELF"; then
+	echo "Creating self-extracting installer"
+	$MAKESELF --nocomp ${PACKAGE}/ ${PACKAGE}.sh ${APPNAME} ./install.sh
+else
+	echo "Creating tarball..."
+	tar -cf ${PACKAGE}.tar ${PACKAGE}
+fi
 
 echo "Clean up"
 rm -rf ${PACKAGE}

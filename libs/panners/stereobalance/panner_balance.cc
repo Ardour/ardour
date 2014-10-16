@@ -71,7 +71,7 @@ static PanPluginDescriptor _descriptor = {
 	Pannerbalance::factory
 };
 
-extern "C" { PanPluginDescriptor* panner_descriptor () { return &_descriptor; } }
+extern "C" ARDOURPANNER_API PanPluginDescriptor* panner_descriptor () { return &_descriptor; } 
 
 Pannerbalance::Pannerbalance (boost::shared_ptr<Pannable> p)
 	: Panner (p)

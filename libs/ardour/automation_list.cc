@@ -137,26 +137,16 @@ AutomationList::create_curve_if_necessary()
 	}
 }
 
-bool
-AutomationList::operator== (const AutomationList& other)
-{
-	return _events == other._events;
-}
-
 AutomationList&
 AutomationList::operator= (const AutomationList& other)
 {
 	if (this != &other) {
 
-		_events.clear ();
 
-		for (const_iterator i = other._events.begin(); i != other._events.end(); ++i) {
-			_events.push_back (new Evoral::ControlEvent (**i));
-		}
-
-		_min_yval = other._min_yval;
-		_max_yval = other._max_yval;
-		_default_value = other._default_value;
+		ControlList::operator= (other);
+		_state = other._state;
+		_style = other._style;
+		_touching = other._touching;
 
 		mark_dirty ();
 		maybe_signal_changed ();
@@ -346,8 +336,6 @@ AutomationList::deserialize_events (const XMLNode& node)
 		fast_simple_add (x, y);
 	}
 
-	thin ();
-
 	if (!ok) {
 		clear ();
 		error << _("automation list: cannot load coordinates from XML, all points ignored") << endmsg;
@@ -410,9 +398,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 			fast_simple_add (x, y);
 		}
 
-		thin ();
-
-                thaw ();
+		thaw ();
 
 		return 0;
 	}

@@ -119,6 +119,9 @@ public:
 	std::string drag_text () const;
 	void set_visual_state (Gtkmm2ext::VisualState, bool);
 
+	bool is_selectable() const {return _selectable;}
+	void set_selectable(bool s) { _selectable = s; }
+	
 	enum Position {
 		PreFader,
 		Fader,
@@ -149,6 +152,7 @@ protected:
 	virtual void setup_visuals ();
 
 private:
+	bool _selectable;
 	void led_clicked();
 	void processor_active_changed ();
 	void processor_property_changed (const PBD::PropertyChange&);
@@ -269,6 +273,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 		ProcessorsPaste,
 		ProcessorsDelete,
 		ProcessorsSelectAll,
+		ProcessorsSelectNone,
 		ProcessorsToggleActive,
 		ProcessorsAB,
 	};
@@ -280,7 +285,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void set_width (Width);
 
-	void processor_operation (ProcessorOperation);
+	bool processor_operation (ProcessorOperation);
 
 	void select_all_processors ();
 	void deselect_all_processors ();

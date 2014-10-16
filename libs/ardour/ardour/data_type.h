@@ -24,6 +24,8 @@
 #include <stdint.h>
 #include <glib.h>
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
 /** A type of Data Ardour is capable of processing.
@@ -32,7 +34,7 @@ namespace ARDOUR {
  * other type representations, simple comparison between then, etc.  This code
  * is deliberately 'ugly' so other code doesn't have to be.
  */
-class DataType
+class LIBARDOUR_API DataType
 {
 public:
 	/** Numeric symbol for this DataType.

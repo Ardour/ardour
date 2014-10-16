@@ -19,6 +19,8 @@
 
 #include <iostream>
 
+#include <glibmm/timer.h>
+
 #include "pbd/compose.h"
 
 #include "ardour/automation_control.h"
@@ -134,7 +136,7 @@ void
 AutomationWatch::thread ()
 {
 	while (_run_thread) {
-		usleep ((useconds_t) floor (Config->get_automation_interval_msecs() * 1000));
+		Glib::usleep ((gulong) floor (Config->get_automation_interval_msecs() * 1000));
 		timer ();
 	}
 }

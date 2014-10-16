@@ -21,6 +21,8 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#include "i18n.h"
+
 #include <map>
 #include <cerrno>
 #include <sstream>
@@ -31,6 +33,8 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/stock.h>
+
+#include <glib/gstdio.h>
 #include <glibmm/fileutils.h>
 
 #include "pbd/convert.h"
@@ -60,14 +64,11 @@
 #include "prompter.h"
 #include "sfdb_ui.h"
 #include "editing.h"
-#include "utils.h"
 #include "gain_meter.h"
 #include "main_clock.h"
 #include "public_editor.h"
 
 #include "sfdb_freesound_mootcher.h"
-
-#include "i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -471,6 +472,23 @@ SoundFileBox::audition ()
 
 		r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
 	}
+
+	frameoffset_t audition_position = 0;
+	switch(_import_position) {
+		case ImportAtTimestamp:
+			audition_position = 0;
+			break;
+		case ImportAtPlayhead:
+			audition_position = _session->transport_frame();
+			break;
+		case ImportAtStart:
+			audition_position = _session->current_start_frame();
+			break;
+		case ImportAtEditPoint:
+			audition_position = PublicEditor::instance().get_preferred_edit_position ();
+			break;
+	}
+	r->set_position(audition_position);
 
 	_session->audition_region(r);
 }
@@ -1559,6 +1577,9 @@ SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& 
 bool
 SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths)
 {
+#ifdef PLATFORM_WINDOWS
+	return false;
+#else
 	std::string tmpdir(Glib::build_filename (s->session_directory().sound_path(), "linktest"));
 	bool ret = false;
 
@@ -1580,7 +1601,7 @@ SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths
 			goto out;
 		}
 
-		unlink (tmpc);
+		::g_unlink (tmpc);
 	}
 
 	ret = true;
@@ -1588,6 +1609,7 @@ SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths
   out:
 	rmdir (tmpdir.c_str());
 	return ret;
+#endif
 }
 
 SoundFileChooser::SoundFileChooser (string title, ARDOUR::Session* s)
@@ -1656,6 +1678,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	str.push_back (_("session start"));
 	set_popdown_strings (where_combo, str);
 	where_combo.set_active_text (str.front());
+	where_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::where_combo_changed));
 
 	Label* l = manage (new Label);
 	l->set_markup (_("<b>Add files as ...</b>"));
@@ -1847,6 +1870,12 @@ void
 SoundFileOmega::src_combo_changed()
 {
 	preview.set_src_quality(get_src_quality());
+}
+
+void
+SoundFileOmega::where_combo_changed()
+{
+	preview.set_import_position(get_position());
 }
 
 ImportDisposition

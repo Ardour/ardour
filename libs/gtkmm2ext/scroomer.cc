@@ -213,7 +213,7 @@ Scroomer::on_scroll_event (GdkEventScroll* ev)
 {
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
-		adj.set_value (adj.get_value() + adj.get_page_size() / 10.0);
+		adj.set_value (min (adj.get_value() + adj.get_page_size() / 10.0, adj.get_upper() - adj.get_page_size()));
 		break;
 	case GDK_SCROLL_DOWN:
 		adj.set_value (adj.get_value() - adj.get_page_size() / 10.0);
@@ -255,7 +255,7 @@ Scroomer::on_button_press_event (GdkEventButton* ev)
 		DoubleClicked();
 	}
 
-	return false;
+	return true;
 }
 
 bool

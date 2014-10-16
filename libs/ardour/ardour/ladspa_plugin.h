@@ -23,12 +23,11 @@
 #include <set>
 #include <vector>
 #include <string>
-#include <dlfcn.h>
 
+#include <glibmm/module.h>
 
 #include "pbd/stateful.h"
 
-#include <jack/types.h>
 #include "ardour/ladspa.h"
 #include "ardour/plugin.h"
 
@@ -36,10 +35,10 @@ namespace ARDOUR {
 class AudioEngine;
 class Session;
 
-class LadspaPlugin : public ARDOUR::Plugin
+class LIBARDOUR_API LadspaPlugin : public ARDOUR::Plugin
 {
   public:
-	LadspaPlugin (void *module, ARDOUR::AudioEngine&, ARDOUR::Session&, uint32_t index, framecnt_t sample_rate);
+	LadspaPlugin (std::string module_path, ARDOUR::AudioEngine&, ARDOUR::Session&, uint32_t index, framecnt_t sample_rate);
 	LadspaPlugin (const LadspaPlugin &);
 	~LadspaPlugin ();
 
@@ -122,7 +121,8 @@ class LadspaPlugin : public ARDOUR::Plugin
 	void connect_port (uint32_t port, float *ptr) { _descriptor->connect_port (_handle, port, ptr); }
 
   private:
-	void*                    _module;
+	std::string              _module_path;
+	Glib::Module*            _module;
 	const LADSPA_Descriptor* _descriptor;
 	LADSPA_Handle            _handle;
 	framecnt_t               _sample_rate;
@@ -134,7 +134,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 
 	void find_presets ();
 
-	void init (void *mod, uint32_t index, framecnt_t rate);
+	void init (std::string module_path, uint32_t index, framecnt_t rate);
 	void run_in_place (pframes_t nsamples);
 	void latency_compute_run ();
 	int set_state_2X (const XMLNode&, int version);
@@ -146,7 +146,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	void add_state (XMLNode *) const;
 };
 
-class LadspaPluginInfo : public PluginInfo {
+class LIBARDOUR_API LadspaPluginInfo : public PluginInfo {
   public:
 	LadspaPluginInfo ();
 	~LadspaPluginInfo () { };

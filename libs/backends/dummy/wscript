@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+import sys
+import re
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+DUMMYBACKEND_VERSION = '0.0.1'
+I18N_PACKAGE = 'dummy-backend'
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    autowaf.configure(conf)
+
+def build(bld):
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source = [
+            'dummy_audiobackend.cc',
+            ]
+    obj.includes = ['.']
+    obj.name     = 'dummy_audiobackend'
+    obj.target   = 'dummy_audiobackend'
+    obj.use      = 'libardour libpbd'
+    if (bld.env['build_target'] != 'mingw'):
+        obj.vnum     = DUMMYBACKEND_VERSION
+    obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
+    obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
+                   'ARDOURBACKEND_DLL_EXPORTS'
+                  ]

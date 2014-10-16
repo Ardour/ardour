@@ -22,12 +22,13 @@
 
 #include <boost/shared_ptr.hpp>
 #include <sndfile.h>
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/importable_source.h"
 
 namespace ARDOUR {
 
-class SndFileImportableSource : public ImportableSource {
+class LIBARDOUR_API SndFileImportableSource : public ImportableSource {
     public:
 	SndFileImportableSource (const std::string& path);
 	virtual ~SndFileImportableSource();

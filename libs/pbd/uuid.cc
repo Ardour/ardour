@@ -18,21 +18,19 @@
 
 */
 
+#include <boost/uuid/uuid_io.hpp>
 #include "pbd/uuid.h"
 
-using namespace PBD;
-
-UUID&
-UUID::operator= (std::string const & str)
+PBD::UUID&
+PBD::UUID::operator= (std::string const & str)
 {
-	uuid_parse (str.c_str(), id);
+        boost::uuids::string_generator gen;
+        *((boost::uuids::uuid*) this) = gen (str);
 	return *this;
 }
 
 std::string
-UUID::to_s () const
+PBD::UUID::to_s () const
 {
-	char buf[37];
-	uuid_unparse (id, buf);
-	return std::string (buf);
+        return boost::uuids::to_string (*this);
 }

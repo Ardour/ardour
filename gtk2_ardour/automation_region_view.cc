@@ -39,13 +39,13 @@
 
 #include "i18n.h"
 
-AutomationRegionView::AutomationRegionView (ArdourCanvas::Group*                      parent,
+AutomationRegionView::AutomationRegionView (ArdourCanvas::Container*                      parent,
 					    AutomationTimeAxisView&                   time_axis,
 					    boost::shared_ptr<ARDOUR::Region>         region,
 					    const Evoral::Parameter&                  param,
 					    boost::shared_ptr<ARDOUR::AutomationList> list,
 					    double                                    spu,
-					    Gdk::Color const &                        basic_color)
+					    uint32_t                                  basic_color)
 	: RegionView(parent, time_axis, region, spu, basic_color, true)
 	, _parameter(param)
 {
@@ -54,7 +54,7 @@ AutomationRegionView::AutomationRegionView (ArdourCanvas::Group*                
 		create_line(list);
 	}
 
-	group->signal_event().connect (sigc::mem_fun (this, &AutomationRegionView::canvas_event), false);
+	group->Event.connect (sigc::mem_fun (this, &AutomationRegionView::canvas_event));
 	group->raise_to_top();
 }
 
@@ -63,15 +63,13 @@ AutomationRegionView::~AutomationRegionView ()
 }
 
 void
-AutomationRegionView::init (Gdk::Color const & basic_color, bool /*wfd*/)
+AutomationRegionView::init (bool /*wfd*/)
 {
 	_enable_display = false;
 
-	RegionView::init(basic_color, false);
+	RegionView::init (false);
 
-	compute_colors (basic_color);
-
-	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
+	reset_width_dependent_items ((double) _region->length() / samples_per_pixel);
 
 	set_height (trackview.current_height());
 
@@ -116,17 +114,15 @@ AutomationRegionView::canvas_event (GdkEvent* ev)
 		double y = ev->button.y;
 
 		/* convert to item coordinates in the time axis view */
-		automation_view()->canvas_display()->w2i (x, y);
+		automation_view()->canvas_display()->canvas_to_item (x, y);
 
 		/* clamp y */
 		y = std::max (y, 0.0);
 		y = std::min (y, _height - NAME_HIGHLIGHT_SIZE);
 
 		/* guard points only if primary modifier is used */
-
 		bool with_guard_points = Gtkmm2ext::Keyboard::modifier_state_equals (ev->button.state, Gtkmm2ext::Keyboard::PrimaryModifier);
-
-		add_automation_event (ev, trackview.editor().pixel_to_frame (x) - _region->position() + _region->start(), y, with_guard_points);
+		add_automation_event (ev, trackview.editor().pixel_to_sample (x) - _region->position() + _region->start(), y, with_guard_points);
 	}
 
 	return false;

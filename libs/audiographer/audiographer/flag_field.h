@@ -7,12 +7,14 @@
 
 #include <boost/operators.hpp>
 
+#include "audiographer/visibility.h"
+
 namespace AudioGrapher {
 
 /** Flag field capable of holding 32 flags.
   * Easily grown in size to 64 flags by changing storage_type.
   */
-class FlagField
+class LIBAUDIOGRAPHER_API FlagField
   : public boost::less_than_comparable<FlagField>
   , boost::equivalent<FlagField>
   , boost::equality_comparable<FlagField>

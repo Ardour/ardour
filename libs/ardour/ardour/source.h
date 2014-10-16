@@ -36,7 +36,7 @@ namespace ARDOUR {
 
 class Session;
 
-class Source : public SessionObject
+class LIBARDOUR_API Source : public SessionObject
 {
   public:
 	enum Flag {

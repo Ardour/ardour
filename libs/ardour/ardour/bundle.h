@@ -40,7 +40,7 @@ class AudioEngine;
  *  `Channel' is a rather overloaded term but I can't think of a better
  *  one right now.
  */
-class Bundle : public PBD::ScopedConnectionList
+class LIBARDOUR_API Bundle : public PBD::ScopedConnectionList
 {
   public:
 
@@ -149,7 +149,7 @@ class Bundle : public PBD::ScopedConnectionList
 	Change _pending_change;
 };
 
-class BundleChannel
+class LIBARDOUR_API BundleChannel
 {
 public:
 	BundleChannel () : channel (-1) {}

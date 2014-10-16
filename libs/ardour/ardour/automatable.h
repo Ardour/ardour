@@ -26,6 +26,7 @@
 #include <boost/shared_ptr.hpp>
 #include "pbd/signals.h"
 #include "evoral/ControlSet.hpp"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 class XMLNode;
@@ -38,7 +39,7 @@ class AutomationControl;
 /* The inherited ControlSet is virtual because AutomatableSequence inherits
  * from this AND EvoralSequence, which is also a ControlSet
  */
-class Automatable : virtual public Evoral::ControlSet
+class LIBARDOUR_API Automatable : virtual public Evoral::ControlSet
 {
 public:
 	Automatable(Session&);

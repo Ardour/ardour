@@ -1,0 +1,366 @@
+#
+# This is the GTK style file for Ardour, originally by Paul Davis and others
+#
+# Color meta-ization originated by Sean Corbett (seanbutnotheard@gmail.com)
+#
+# Released under the terms of the GNU GPL v2:  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+#
+
+#@color fg #171717
+#@color bg #cccccc
+#@color text #171717
+#@color light_text_on_dark #CFCFC1
+#@color base #cccccc
+#@color fg_selected #EEF
+#@color bg_selected #58B
+#@color fg_tooltip #1F1F1F
+#@color bg_tooltip #FCF5B8
+
+#@color lightest #ffffff
+#@color darkest #000000
+#@color bright_indicator #F11
+#@color contrasting_indicator #9f3
+#@color somewhat_bright_indicator #CEF
+#@color not_so_bright_indicator #FC4
+#@color bright_color #729FCF
+
+#@color arm #F33
+#@color solo #A8F730
+#@color midi_channel_selector #005900
+#@color mute #FFFA87
+#@color mono #DEC
+#@color monitor #7596DE
+#@color control_text2 #8D2B1B
+#@color control_base #ffffff
+#@color control_text #D0D2D5
+#@color audio_track #aaaaaa
+#@color midi_track #aabbbb
+#@color audio_bus #888899
+
+#@color send_fg #30F7B0
+#@color send_bg #C4C4B8
+
+#@color processor_frame_selected #999999
+#@color processor_fader_bg #666666
+#@color processor_fader_frame #7F7F7F
+#@color processor_prefader #ffffff
+#@color processor_prefader_frame #7F0000
+#@color processor_postfader #1A4D1A
+#@color processor_postfader_frame #1B7F1B
+
+# Tweak the color scheme in one place :
+
+gtk_color_scheme = "@COLOR_SCHEME@"
+
+#alternate BG color: #5C5E61
+
+style "default" = "medium_text"
+{
+  #Original values for reference
+  GtkWidget::cursor_color =  @@COLPREFIX@_lightest
+  GtkButton::default_border = { 0, 0, 0, 0 }
+  GtkButton::default_outside_border = { 0, 0, 0, 0 }
+  GtkButton::button_relief = GTK_RELIEF_NONE
+  GtkTreeView::vertical-padding = 0
+  GtkTreeView::horizontal-padding = 0
+  GtkTreeView::even-row-color = shade(0.75,@@COLPREFIX@_base)
+  GtkTreeView::odd-row-color = darker(@@COLPREFIX@_base)
+  
+  GtkWidget           :: focus-line-pattern               = "\001\001"        #                              Dash pattern used to draw the focus indicator.
+  GtkWidget           :: focus-line-width                 = 1                 # [               1 ] ( >= 0 ) Width, in pixels, of the focus indicator line.
+  GtkWidget           :: focus-padding                    = 1                 # [               1 ] ( >= 0 ) Width, in pixels, between focus indicator and the widget box.
+  GtkWidget           :: interior-focus                   = 1                 # [               1 ] ( bool ) Draw the focus indicator inside widgets.
+  GtkWidget           :: scroll-arrow-hlength             = 16                # [              16 ] ( >= 1 ) Length of horizontal scroll arrows.
+  GtkWidget           :: scroll-arrow-vlength             = 16                # [              16 ] ( >= 1 ) Length of vertical scroll arrows.
+
+  GtkWidget           :: link-color                       = shade(1.25, @@COLPREFIX@_bright_color)
+  GtkWidget           :: visited-link-color               = @@COLPREFIX@_bright_color
+  
+#Window Properties
+  GtkDialog           :: action-area-border               = 4                 # [               5 ] ( >= 0 ) Width of border around the button area at the bottom of the dialog.
+  GtkDialog           :: button-spacing                   = 4                 # [               6 ] ( >= 0 ) Spacing between buttons.
+  GtkDialog           :: content-area-border              = 2                 # [               2 ] ( >= 0 ) Width of border around the main dialog area.
+  GtkDialog           :: content-area-spacing             = 0                 # [               0 ] ( >= 0 ) The default spacing used between elements of the content area of the dialog.
+  
+#Control Properties
+  GtkButton           :: child-displacement-x             = 1                 # [               0 ]          How far in x direction to move the button when its depressed.
+  GtkButton           :: child-displacement-y             = 1                 # [               0 ]          ... y
+  GtkButton           :: default-border                   = { 0, 0, 0, 0 }    #                              Extra space to add for CAN_DEFAULT buttons.
+  GtkButton           :: displace-focus                   = 0                 # [               0 ] ( bool ) Whether the child_displacement_x/child_displacement_y properties should also affect the focus rectangle.
+  GtkButton           :: image-spacing                    = 2                 # [               2 ] ( >= 0 ) Spacing in pixels between the image and label.
+
+  GtkCheckButton      :: indicator-size                   = 13                # [              13 ] ( >= 0 ) Size of check or radio indicator.
+  GtkCheckButton      :: indicator-spacing                = 2                 # [               2 ] ( >= 0 ) Spacing around check or radio indicator.
+  GtkCheckMenuItem    :: indicator-size                   = 13                # [              13 ] ( >= 0 ) Size of check or radio indicator.
+
+  GtkOptionMenu       :: indicator-size                   = { 6, 10 }         #                              Size of dropdown indicator.
+  GtkOptionMenu       :: indicator-spacing                = {	6, 5, 0, 0 }    #                              Spacing around indicator.
+
+  GtkComboBox         :: appears-as-list                  = 0                 # [               0 ] ( bool ) Whether dropdowns should look like lists rather than menus.
+  GtkComboBox         :: arrow-size                       = 13                # [              15 ] ( >= 0 ) Sets the minimum size of the arrow in the combo box.
+  GtkComboBox         :: shadow-type                      = GTK_SHADOW_NONE   # [ GTK_SHADOW_NONE ]          Which kind of shadow to draw around the combo box.
+
+  GtkPaned            :: handle-size                      = 4                 # [               5 ] ( >= 0 ) Width of handle.
+
+  GtkScale            :: activate-slider                  = 1                 # [               0 ] ( bool ) With this option set to TRUE, sliders will be drawn ACTIVE and with shadow IN while they are dragged.
+  GtkScale            :: slider-length                    = 23                # [              31 ] ( >= 0 ) Length of scale's slider.	
+  GtkScale            :: slider-width                     = 14                # [              14 ] ( >= 0 ) Width of scrollbar or scale thumb.
+  GtkScale            :: trough-side-details              = 1                 # [               0 ] ( bool ) When TRUE, the parts of the trough on the two sides of the slider are drawn with different details.
+
+  GtkScrollbar        :: activate-slider                  = 1                 # [               0 ] ( bool ) With this option set to TRUE, sliders will be drawn ACTIVE and with shadow IN while they are dragged.
+  GtkScrollbar        :: arrow-scaling                    = 0.4               # [             0.5 ] ( 0.1  ) The arrow size proportion relative to the scroll button size.
+  GtkScrollbar        :: fixed-slider-length              = 0                 # [               0 ] ( bool ) Don't change slider size, just lock it to the minimum length.
+  GtkScrollbar        :: min-slider-length                = 50                # [              21 ] ( >= 0 ) Minimum length of scrollbar slider.
+  GtkScrollbar        :: slider-width                     = 15                # [              14 ] ( >= 0 ) Width of scrollbar or scale thumb.    
+  GtkScrollbar        :: stepper-spacing                  = 0                 # [               0 ] ( >= 0 ) The spacing between the stepper buttons and thumb. Note that setting this value to anything > 0 will automatically set the trough-under-steppers style property to TRUE as well. Also, stepper-spacing won't have any effect if there are no steppers.
+  GtkScrollbar        :: trough-border                    = 0                 # [               1 ] ( >= 0 ) Spacing between thumb/steppers and outer trough bevel.
+  GtkScrollbar        :: trough-side-details              = 0                 # [               0 ] ( bool ) When TRUE, the parts of the trough on the two sides of the slider are drawn with different details.    
+  GtkScrollbar        :: trough-under-steppers            = 1                 # [               1 ] ( bool ) Whether to draw the trough across the full length of the range or to exclude the steppers and their spacing. Note that setting the "stepper-spacing" style property to any value > 0 will automatically enable trough-under-steppers too.
+
+  GtkScrollbar        :: has-backward-stepper             = 1                 # [               1 ] ( bool ) Display the standard backward arrow button.
+  GtkScrollbar        :: has-forward-stepper              = 1                 # [               1 ] ( bool ) Display the standard forward arrow button.
+  GtkScrollbar        :: has-secondary-backward-stepper   = 0                 # [               0 ] ( bool ) Display a second backward arrow button on the opposite end of the scrollbar.
+  GtkScrollbar        :: has-secondary-forward-stepper    = 0                 # [               0 ] ( bool ) Display a second forward arrow button on the opposite end of the scrollbar.
+
+  GtkHScrollbar       :: has-secondary-backward-stepper   = 0                 # [               0 ] ( bool ) Display a second backward arrow button on the opposite end of the scrollbar.
+  GtkHScrollbar       :: has-secondary-forward-stepper    = 0                 # [               0 ] ( bool ) Display a second forward arrow button on the opposite end of the scrollbar.
+  GtkVScrollbar       :: has-secondary-backward-stepper   = 0                 # [               0 ] ( bool ) Display a second backward arrow button on the opposite end of the scrollbar.
+  GtkVScrollbar       :: has-secondary-forward-stepper    = 0                 # [               0 ] ( bool ) Display a second forward arrow button on the opposite end of the scrollbar.
+
+#Menu Properties
+  GtkMenuBar          :: internal-padding                 = 1                 # [               1 ] ( >= 0 ) Amount of border space between the menubar shadow and the menu items.
+  GtkMenuBar          :: shadow-type                      = GTK_SHADOW_OUT    # [  GTK_SHADOW_OUT ]          Style of bevel around the menubar. 
+
+  GtkMenu             :: arrow-placement                  = GTK_ARROWS_BOTH   # [ GTK_ARROWS_BOTH ]          Indicates where scroll arrows should be placed.
+  GtkMenu             :: arrow-scaling                    = 0.5               # [             0.7 ] ( 0.1  ) Arbitrary constant to scale down the size of the scroll arrow.
+  GtkMenu             :: double-arrows                    = 1                 # [               1 ] ( bool ) When scrolling, always show both arrows.
+  GtkMenu             :: horizontal-offset                = -2                # [              -2 ]          When the menu is a submenu, position it this number of pixels offset horizontally.
+  GtkMenu             :: horizontal-padding               = 0                 # [               0 ] ( >= 0 ) Extra space at the left and right edges of the menu.
+  GtkMenu             :: vertical-offset                  = 0                 # [               0 ]          When the menu is a submenu, position it this number of pixels offset vertically.
+  GtkMenu             :: vertical-padding                 = 0                 # [               0 ] ( >= 0 ) Extra space at the top and bottom of the menu.
+
+  GtkMenuItem         :: arrow-scaling                    = 0.5               # [             0.8 ] ( 0.2  ) Amount of space used up by arrow, relative to the menu item's font size.
+  GtkMenuItem         :: arrow-spacing                    = 10                # [              10 ] ( >= 0 ) Space between label and arrow.
+  GtkMenuItem         :: horizontal-padding               = 3                 # [               3 ] ( >= 0 ) Padding to left and right of the menu item.
+  GtkMenuItem         :: selected-shadow-type             = GTK_SHADOW_NONE   # [ GTK_SHADOW_NONE ]          Shadow type when item is selected.
+  #GtkMenuItem         :: toggle-spacing                   = 4                 # [               5 ] ( >= 0 ) Space between icon and label.
+  GtkMenuItem         :: width-chars                      = 12                # [              12 ] ( >= 0 ) The minimum desired width of the menu item in characters.
+
+#Other Properties
+  GtkArrow            :: arrow-scaling                    = 0.5               # [             0.7 ] ( 0.1  ) Amount of space used up by arrow.
+
+  GtkNotebook         :: arrow-spacing                    = 0                 # [               0 ] ( >= 0 ) Spacing between the scroll arrows and the tabs.
+  GtkNotebook         :: tab-curvature                    = 1                 # [               1 ] ( >= 0 ) Size of tab curvature.
+  GtkNotebook         :: tab-overlap                      = 1                 # [               2 ]          Size of tab overlap area.
+
+  GtkTreeView         :: horizontal-separator             = 8                 # [               2 ] ( >= 0 ) Horizontal space between cells. Must be an even number.
+  GtkTreeView         :: vertical-separator               = 2                 # [               2 ] ( >= 0 ) Vertical space between cells. Must be an even number.
+
+  GtkEntry            :: honors-transparent-bg-hint       = 1                 # [               0 ] ( bool ) (Clearlooks) Without this, gecko will fill in the background of the entry.
+
+
+  #GtkToolbar::shadow_type = GTK_SHADOW_ETCHED_IN
+
+  #xthickness = 0
+  #ythickness = 0
+
+#Base Colors
+  bg[NORMAL]          = @@COLPREFIX@_bg
+  bg[PRELIGHT]        = shade(1.1, @@COLPREFIX@_bg)
+  bg[ACTIVE]          = shade(0.9, @@COLPREFIX@_bg)
+  bg[INSENSITIVE]     = @@COLPREFIX@_bg
+  bg[SELECTED]        = @@COLPREFIX@_bg_selected
+
+  fg[NORMAL]          = @@COLPREFIX@_fg
+  fg[PRELIGHT]        = @@COLPREFIX@_fg
+  fg[ACTIVE]          = shade(0.9, @@COLPREFIX@_fg)
+  fg[INSENSITIVE]     = shade(0.7, @@COLPREFIX@_bg)
+  fg[SELECTED]        = @@COLPREFIX@_fg_selected
+
+  base[NORMAL]        = @@COLPREFIX@_base
+  base[PRELIGHT]      = @@COLPREFIX@_base
+  base[INSENSITIVE]   = shade(1.0, @@COLPREFIX@_bg)
+  base[ACTIVE]        = shade(0.9, @@COLPREFIX@_bg_selected)
+  base[SELECTED]      = @@COLPREFIX@_bg_selected
+
+  text[NORMAL]        = @@COLPREFIX@_text
+  text[PRELIGHT]      = @@COLPREFIX@_text
+  text[ACTIVE]        = @@COLPREFIX@_fg_selected
+  text[INSENSITIVE]   = darker(darker (@@COLPREFIX@_bg))
+  text[SELECTED]      = @@COLPREFIX@_fg_selected
+
+#engine specific tweaks
+
+  engine "clearlooks" 
+  {
+    #style              = GLOSSY
+    #colorize_scrollbar = TRUE
+    menubarstyle       = 2 # 0 = flat, 1 = sunken, 2 = flat gradient
+    #toolbarstyle       = 0 # 0 = flat, 1 = enable effects
+  }
+}
+
+
+style "mixer_red_active_button" = "very_small_button"
+{
+	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
+
+ 	base[INSENSITIVE] = { 0.16, 0.16, 0.21 }
+ 	bg[INSENSITIVE] = { 0.16, 0.16, 0.21 }
+}
+
+
+style "track_controls_inactive" 
+{
+	bg[NORMAL] =      { 0.60, 0.60, 0.66 }
+	bg[ACTIVE] =      { 0.60, 0.60, 0.66 }
+	bg[INSENSITIVE] = { 0.60, 0.60, 0.66 }
+	bg[SELECTED] =    { 0.60, 0.60, 0.66 }
+	bg[PRELIGHT] =    { 0.60, 0.60, 0.66 }
+
+	fg[NORMAL] = { 0.7, 0.8, 0.2 }	
+}
+
+
+#
+# Track edit groups. These styles define
+# the colors that the "edit" button will
+# use as a track is moved from
+# track edit group to track edit group.
+# There are 8 edit groups. Edit group 0
+# is used for tracks that are not editable, 
+# so we leave its style to the default.
+#
+
+style "edit_group_0"
+
+{
+	bg[ACTIVE] = { 1.0, 0.65, 0.13 }
+	bg[NORMAL] = { 0.31, 0.31, 0.31 }
+	fg[NORMAL] = { 0.82, 0.91, 0.99 }
+	fg[ACTIVE] = { 0, 0, 0 }
+}
+
+style "edit_group_1" 
+{
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[SELECTED] = { 0, 0, 0 }
+	bg[NORMAL] = { 0.93, 0.34, 0.08 }
+	bg[PRELIGHT] = { 0.93, 0.34, 0.08 }
+	bg[SELECTED] = { 0.93, 0.34, 0.08 }
+}
+
+style "edit_group_2" 
+{
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[SELECTED] = { 0, 0, 0 }
+	bg[NORMAL] = { 0.93, 0.34, 0.08 }
+	bg[PRELIGHT] = { 0.93, 0.34, 0.08 }
+	bg[SELECTED] = { 0.93, 0.34, 0.08 }
+}
+
+style "edit_group_3" 
+{
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[SELECTED] = { 0, 0, 0 }
+	bg[NORMAL] = { 0.93, 0.34, 0.08 }
+	bg[PRELIGHT] = { 0.93, 0.34, 0.08 }
+	bg[SELECTED] = { 0.93, 0.34, 0.08 }
+}
+
+style "treeview_parent_node"
+{
+	# specifies *just* the color used for whole file rows when not selected
+	
+	fg[NORMAL] = { 0.0, 0.6, 0.85 }
+}
+
+style "treeview_display" = "small_bold_text"
+{
+	GtkWidget::focus-line-width = 0
+
+	# expander arrow border and DnD "icon" text
+	fg[NORMAL] = { 0.8, 0.8, 0.8 } 
+
+	bg[NORMAL] = { 0.8, 0.8, 0.8 }
+
+	# background with no rows or no selection, plus
+	# expander arrow core and DnD "icon" background
+	base[NORMAL] = { 0.20, 0.20, 0.25 }
+
+	# selected row bg when window does not have focus (including during DnD)
+	base[ACTIVE] = { 0.0, 0.75, 0.75 }    
+
+	# selected row bg when window has focus
+	base[SELECTED] = { 0, 0.75, 0.75 }
+
+	# row text when in normal state and not a parent
+	text[NORMAL] = { 0.20, 0.20, 0.20 }
+
+	# selected row text with window focus
+	text[SELECTED] = { 1.0, 1.0, 1.0 }  
+
+	# selected row text without window focus (including during DnD)
+	text[ACTIVE] = { 1.0, 1.0, 1.0 }  
+}
+
+style "main_canvas_area"
+{
+	bg[NORMAL] = { 0.30, 0.30, 0.34 }
+	bg[ACTIVE] = { 0.30, 0.30, 0.34 }
+	bg[INSENSITIVE] = { 0.30, 0.30, 0.34 }
+	bg[SELECTED] = { 0.30, 0.30, 0.34 }
+	bg[PRELIGHT] = { 0.30, 0.30, 0.34 }
+}
+
+style "track_controls_inactive" = "larger_text"
+{
+	bg[NORMAL] =      { 0.60, 0.60, 0.66 }
+	bg[ACTIVE] =      { 0.60, 0.60, 0.66 }
+	bg[INSENSITIVE] = { 0.60, 0.60, 0.66 }
+	bg[SELECTED] =    { 0.60, 0.60, 0.66 }
+	bg[PRELIGHT] =    { 0.60, 0.60, 0.66 }
+
+	fg[NORMAL] = { 0.7, 0.8, 0.2 }	
+}
+
+style "edit_controls_base_selected"
+{
+ 	bg[NORMAL] = { 0.32, 0.32, 0.54 }
+	bg[ACTIVE] = { 0.32, 0.32, 0.54 }
+	bg[INSENSITIVE] = { 0.32, 0.32, 0.54 }
+	bg[SELECTED] = { 0.32, 0.32, 0.54 }
+	bg[PRELIGHT] = { 0.32, 0.32, 0.54 }
+}
+
+style "automation_track_controls_base"
+{
+	bg[NORMAL] = { 0.22, 0.22, 0.29 }
+	bg[ACTIVE] = { 0.22, 0.22, 0.29 }
+	bg[INSENSITIVE] = { 0.22, 0.22, 0.29 }
+	bg[SELECTED] = { 0.22, 0.22, 0.29 }
+	bg[PRELIGHT] = { 0.22, 0.22, 0.29 }
+}
+
+
+style "inspector_processor_list" = "processor_list"
+{
+ 	base[SELECTED] = { 0.3, 0.3, 0.3 }
+}
+
+style "time_info_box" 
+{
+        bg[NORMAL] = { 0.149, 0.149, 0.149 }
+}
+
+style "status_bar_box" 
+{
+        bg[NORMAL] = { 0.149, 0.149, 0.149 }
+}
+
+##include light_fonts.rc
+##include light_styles.rc
+##include widgets.rc

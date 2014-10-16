@@ -20,20 +20,18 @@
 #ifndef __ardour_video_image_frame_h__
 #define __ardour_video_image_frame_h__
 
-#define ARDOUR_USER_AGENT (PROGRAM_NAME VERSIONSTRING)
-#define ARDOUR_CURL_TIMEOUT (60)
-
 #include <string>
 #include <glib.h>
 
-#include <libgnomecanvasmm/pixbuf.h>
 #include <sigc++/signal.h>
 #include <pthread.h>
 
 #include "ardour/ardour.h"
 #include "pbd/signals.h"
 
-#include "canvas.h"
+#include "canvas/container.h"
+#include "canvas/pixbuf.h"
+#include "canvas/image.h"
 
 namespace ARDOUR {
 	class TempoSection;
@@ -48,7 +46,7 @@ class PublicEditor;
 class VideoImageFrame : public sigc::trackable
 {
 	public:
-	VideoImageFrame (PublicEditor&, ArdourCanvas::Group&, int, int, std::string, std::string);
+	VideoImageFrame (PublicEditor&, ArdourCanvas::Container&, int, int, std::string, std::string);
 	virtual ~VideoImageFrame ();
 
 	void set_position (framepos_t);
@@ -68,9 +66,9 @@ class VideoImageFrame : public sigc::trackable
 	protected:
 
 	PublicEditor& editor;
-	ArdourCanvas::Group *_parent;
-	ArdourCanvas::Group *group;
-	ArdourCanvas::Pixbuf *img_pixbuf;
+	ArdourCanvas::Container *_parent;
+	ArdourCanvas::Image *image;
+	boost::shared_ptr<ArdourCanvas::Image::Data> img;
 
 	int clip_width;
 	int clip_height;
@@ -80,13 +78,15 @@ class VideoImageFrame : public sigc::trackable
 	std::string video_filename;
 
 	double        unit_position;
-	framepos_t   frame_position;
+	framepos_t   sample_position;
 	framepos_t   video_frame_number;
 
 	void reposition ();
 	void exposeimg ();
 
+	void fill_frame (const uint8_t r, const uint8_t g, const uint8_t b);
 	void draw_line ();
+	void draw_x ();
 	void cut_rightend ();
 
 

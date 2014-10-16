@@ -3,7 +3,9 @@
 
 #include <gtkmm/box.h>
 
-class CairoPacker 
+#include "gtkmm2ext/visibility.h"
+
+class LIBGTKMM2EXT_API CairoPacker 
 {
   public:
 	CairoPacker () {}
@@ -15,7 +17,7 @@ class CairoPacker
 	virtual void draw_background (Gtk::Widget&, GdkEventExpose*);
 };
 
-class CairoHPacker : public CairoPacker, public Gtk::HBox
+class LIBGTKMM2EXT_API CairoHPacker : public CairoPacker, public Gtk::HBox
 {
   public:
 	CairoHPacker ();
@@ -27,7 +29,7 @@ class CairoHPacker : public CairoPacker, public Gtk::HBox
         void on_realize ();
 };
 
-class CairoVPacker : public CairoPacker, public Gtk::VBox
+class LIBGTKMM2EXT_API CairoVPacker : public CairoPacker, public Gtk::VBox
 {
   public:
 	CairoVPacker ();

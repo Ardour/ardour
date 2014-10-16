@@ -35,6 +35,9 @@ public:
 	virtual int get_preferred_height ();
 	virtual int get_preferred_width ();
 
+	bool on_window_show (const std::string& title);
+	void on_window_hide();
+
 	virtual int package (Gtk::Window &);
 
 	bool non_gtk_gui () const { return true; }

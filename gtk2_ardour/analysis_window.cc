@@ -374,6 +374,7 @@ AnalysisWindow::analyze_data (Gtk::Button * /*button*/)
 
 		free(buf);
 		free(mixbuf);
+		free(gain);
 
 		track_list_ready = true;
 	} /* end lock */

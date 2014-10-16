@@ -17,10 +17,18 @@
 
 */
 
+#include <gtkmm.h>
 #include "ardour/vst_plugin.h"
 #include "ardour/vst_types.h"
 #include "vst_plugin_ui.h"
+
+#ifdef PLATFORM_WINDOWS
+#include <gdk/gdkwin32.h>
+#elif defined __APPLE__
+// TODO
+#else
 #include <gdk/gdkx.h>
+#endif
 
 VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost::shared_ptr<ARDOUR::VSTPlugin> plugin)
 	: PlugUIBase (insert)
@@ -39,7 +47,10 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost:
 	bypass_button.set_active (!insert->active ());
 
 	pack_start (*box, false, false);
+#ifdef GDK_WINDOWING_X11
 	pack_start (_socket, true, true);
+	_socket.set_border_width (0);
+#endif
 }
 
 VSTPluginUI::~VSTPluginUI ()
@@ -50,37 +61,60 @@ VSTPluginUI::~VSTPluginUI ()
 void
 VSTPluginUI::preset_selected ()
 {
+#ifdef GDK_WINDOWING_X11
 	_socket.grab_focus ();
+#endif
 	PlugUIBase::preset_selected ();
 }
 
 int
 VSTPluginUI::get_preferred_height ()
 {
-	return _vst->state()->height;
+	return _vst->state()->height + _vst->state()->voffset;
 }
 
 int
 VSTPluginUI::get_preferred_width ()
 {
-	return _vst->state()->width;
+	return _vst->state()->width + _vst->state()->hoffset;
 }
 
 int
 VSTPluginUI::package (Gtk::Window& win)
 {
+#ifdef GDK_WINDOWING_X11
 	/* Forward configure events to plugin window */
 	win.signal_configure_event().connect (sigc::mem_fun (*this, &VSTPluginUI::configure_handler), false);
 
 	/* This assumes that the window's owner understands the XEmbed protocol */
 	_socket.add_id (get_XID ());
+	_socket.set_size_request(
+			_vst->state()->width + _vst->state()->hoffset,
+			_vst->state()->height + _vst->state()->voffset);
+#endif
 	
 	return 0;
 }
 
 bool
+VSTPluginUI::on_window_show(const std::string& title)
+{
+	_vst->state()->gui_shown = 1;
+	return PlugUIBase::on_window_show(title);
+}
+
+void
+VSTPluginUI::on_window_hide()
+{
+	_vst->state()->gui_shown = 0;
+	PlugUIBase::on_window_hide();
+}
+
+
+bool
 VSTPluginUI::configure_handler (GdkEventConfigure*)
 {
+#ifdef GDK_WINDOWING_X11
 	XEvent event;
 	gint x, y;
 	GdkWindow* w;
@@ -114,6 +148,6 @@ VSTPluginUI::configure_handler (GdkEventConfigure*)
 	XSendEvent (GDK_WINDOW_XDISPLAY (w), GDK_WINDOW_XWINDOW (w), False, StructureNotifyMask, &event);
 	gdk_error_trap_pop ();
 
+#endif
 	return false;
 }
-

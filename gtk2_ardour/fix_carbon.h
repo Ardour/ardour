@@ -25,7 +25,11 @@
 /* an awful hack to stop Carbon #defines from messing with other code
  */
 
+#ifdef CARBON_FLAT_HEADERS
+#include "MacTypes.h"
+#else
 #include "/System/Library/Frameworks/CoreServices.framework/Headers/../Frameworks/CarbonCore.framework/Headers/MacTypes.h" 
+#endif
 #undef Style
 #undef Fixed
 #undef Yes

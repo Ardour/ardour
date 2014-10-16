@@ -37,7 +37,7 @@ class Session;
 class AudioRegion;
 class AudioPlaylist;
 
-class Auditioner : public Track
+class LIBARDOUR_API Auditioner : public Track
 {
   public:
 	Auditioner (Session&);
@@ -97,7 +97,7 @@ class Auditioner : public Track
 	boost::shared_ptr<Region> bounce_range (framepos_t, framepos_t, InterThreadInfo&, boost::shared_ptr<Processor>, bool)
 		{ return boost::shared_ptr<Region> (); }
 
-	int export_stuff (BufferSet&, framepos_t, framecnt_t, boost::shared_ptr<Processor>, bool, bool)
+	int export_stuff (BufferSet&, framepos_t, framecnt_t, boost::shared_ptr<Processor>, bool, bool, bool)
 		{ return -1; }
 
 	boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &)
@@ -136,6 +136,7 @@ class Auditioner : public Track
 	static void *_drop_ports (void *);
 	void actually_drop_ports ();
 	void output_changed (IOChange, void*);
+	frameoffset_t _import_position;
 };
 
 }; /* namespace ARDOUR */

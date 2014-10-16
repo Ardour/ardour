@@ -24,6 +24,8 @@
 #include <stdint.h>
 #include <boost/shared_ptr.hpp>
 
+#include "evoral/visibility.h"
+
 namespace Evoral {
 
 
@@ -36,7 +38,7 @@ namespace Evoral {
  * This class defines a < operator which is a strict weak ordering, so
  * Parameter may be stored in a std::set, used as a std::map key, etc.
  */
-class Parameter
+class LIBEVORAL_API Parameter
 {
 public:
 	Parameter(uint32_t type, uint8_t channel=0, uint32_t id=0)

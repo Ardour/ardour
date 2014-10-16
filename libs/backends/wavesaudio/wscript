@@ -1,0 +1,109 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+import sys
+import re
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+WAVESAUDIOBACKEND_VERSION = '0.0.1'
+I18N_PACKAGE = 'wavesaudio-backend'
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    if conf.options.dist_target == 'mingw':
+        autowaf.check_pkg(conf, 'portaudio-2.0', uselib_store='PORTAUDIO',
+                          atleast_version='19')
+    autowaf.configure(conf)
+
+def build(bld):
+
+    if bld.env['build_target'] == 'mingw':
+        obj = bld(features = 'cxx cxxshlib')
+    else:
+        obj = bld(features = 'c cxx cxxshlib')
+
+    if sys.platform == 'darwin':
+        if bld.env['build_target'] not in [ 'lion' ]:
+            obj.framework = 'CoreMidi'
+        else:
+            obj.framework = 'CoreMIDI'
+
+    obj.source = [
+            'waves_audiobackend.cc',
+            'waves_audiobackend.latency.cc',
+            'waves_audiobackend.midi.cc',
+            'waves_audiobackend.port_engine.cc',
+            'waves_dataport.cc',
+            'waves_audioport.cc',
+            'waves_midiport.cc',
+            'waves_midi_device_manager.cc',
+            'waves_midi_device.cc',
+            'waves_midi_event.cc',
+            'waves_midi_buffer.cc',
+            'wavesapi/refmanager/WCRefManager.cpp',
+            'wavesapi/devicemanager/WCMRAudioDeviceManager.cpp',
+            'wavesapi/devicemanager/WCMRNativeAudio.cpp',
+            'wavesapi/Threads/WCThreadSafe.cpp',
+            'portmidi/src/pm_common/pmutil.c',
+            'portmidi/src/pm_common/portmidi.c'
+            ]
+
+    if bld.env['build_target'] == 'mingw':
+        platform_dependent = [
+                        'wavesapi/MiscUtils/UMicroseconds.cpp',
+                        'wavesapi/devicemanager/WCMRPortAudioDeviceManager.cpp',
+                        'portmidi/src/pm_win/pmwin.c',
+                        'portmidi/src/pm_win/pmwinmm.c',
+                        'portmidi/src/porttime/ptwinmm.c'
+                        ]
+    else:
+            platform_dependent = [
+                'wavesapi/devicemanager/WCMRCoreAudioDeviceManager.cpp',
+                'portmidi/src/pm_mac/pmmac.c',
+                'portmidi/src/pm_mac/pmmacosxcm.c',
+                'portmidi/src/pm_mac/finddefault.c',
+                'portmidi/src/pm_mac/readbinaryplist.c',
+                'portmidi/src/porttime/ptmacosx_mach.c'
+            ]
+
+    obj.source.extend(platform_dependent)
+
+    obj.includes = ['.',
+           'wavesapi',
+           'wavesapi/refmanager',
+           'wavesapi/WavesPublicAPI',
+           'wavesapi/devicemanager',
+           'wavesapi/MiscUtils',
+           'wavesapi/Threads',
+           'portmidi',
+           'portmidi/src/pm_common'
+            ]
+
+    obj.cxxflags = [ '-fPIC' ]
+    obj.cflags   = [ '-fPIC', '-fms-extensions' ]
+    obj.name     = 'waves_audiobackend'
+    obj.target   = 'waves_audiobackend'
+    obj.use      = 'libardour libpbd'
+    if bld.env['build_target'] == 'mingw':
+        obj.uselib   = ['PORTAUDIO']
+    if (bld.env['build_target'] != 'mingw'):
+        obj.vnum     = WAVESAUDIOBACKEND_VERSION
+    obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
+
+    if bld.env['build_target']== 'mingw':
+        obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
+                'ARDOURBACKEND_DLL_EXPORTS'
+                ]
+    else:
+        obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
+                'ARDOURBACKEND_DLL_EXPORTS'
+                ]

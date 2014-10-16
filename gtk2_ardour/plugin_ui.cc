@@ -57,8 +57,6 @@
 #include "lv2_plugin_ui.h"
 #endif
 
-#include <lrdf.h>
-
 #include "ardour_window.h"
 #include "ardour_ui.h"
 #include "prompter.h"
@@ -75,6 +73,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -229,7 +228,7 @@ PluginUIWindow::create_windows_vst_editor(boost::shared_ptr<PluginInsert>)
 		      << endmsg;
 		throw failed_constructor ();
 	} else {
-		WindowsVSTPluginUI* vpu = new WindowsVSTPluginUI (insert, vp);
+		WindowsVSTPluginUI* vpu = new WindowsVSTPluginUI (insert, vp, GTK_WIDGET(this->gobj()));
 
 		_pluginui = vpu;
 		_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
@@ -449,7 +448,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	bypass_button.set_name ("plugin bypass button");
 	bypass_button.set_text (_("Bypass"));
 	bypass_button.set_active (!pi->active());
-	bypass_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::bypass_button_release));
+	bypass_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::bypass_button_release), false);
 	focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 
 	focus_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::focus_toggled));

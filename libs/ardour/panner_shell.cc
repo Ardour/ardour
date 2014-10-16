@@ -119,8 +119,8 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 
 	PannerInfo* pi = PannerManager::instance().select_panner (in, out, _user_selected_panner_uri);
 	if (!pi) {
-		cerr << "No panner found: check that panners are being discovered correctly during startup.\n";
-		assert (pi);
+		fatal << _("No panner found: check that panners are being discovered correctly during startup.") << endmsg;
+		/*NOTREACHED*/
 	}
 
 	DEBUG_TRACE (DEBUG::Panning, string_compose (_("select panner: %1\n"), pi->descriptor.name.c_str()));
@@ -232,6 +232,16 @@ PannerShell::set_state (const XMLNode& node, int version)
 									_is_send ? _pannable_internal : _pannable_route, _session.get_speakers ()));
 						_current_panner_uri = (*p)->descriptor.panner_uri;
 						_panner_gui_uri = (*p)->descriptor.gui_uri;
+
+						if (_is_send) {
+							if (!_panlinked) {
+								_pannable_internal->set_panner(_panner);
+							} else {
+								_force_reselect = true;
+							}
+						} else {
+							_pannable_route->set_panner(_panner);
+						}
 
 						if (_panner->set_state (**niter, version) == 0) {
 							return -1;

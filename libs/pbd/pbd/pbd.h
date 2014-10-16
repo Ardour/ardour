@@ -20,10 +20,12 @@
 #ifndef __libpbd_pbd_h__
 #define __libpbd_pbd_h__
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-	bool init ();
-	void cleanup ();
+	LIBPBD_API bool init ();
+	LIBPBD_API void cleanup ();
 
 } // namespace PBD
 

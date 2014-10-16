@@ -88,7 +88,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Sync"), new BoolOption (
 			    "videotimeline-pullup",
-			    _("Apply Pull-Up/Down to Video Timeline and Video Monitor (Unless in JACK-sync)."),
+			    _("Apply Pull-Up/Down to Video Timeline and Video Monitor (Unless using JACK-sync)."),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_videotimeline_pullup),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_videotimeline_pullup)
 			    ));
@@ -131,18 +131,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    ));
 
 	/* FADES */
-
-	ComboOption<CrossfadeChoice>* cfc = new ComboOption<CrossfadeChoice> (
-		"xfade-choice",
-		_("Default crossfade type"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_xfade_choice),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_xfade_choice)
-		);
-
-	cfc->add (ConstantPowerMinus3dB, _("Constant power (-3dB) crossfade"));
-	cfc->add (ConstantPowerMinus6dB, _("Linear (-6dB) crossfade"));
-
-	add_option (_("Fades"), cfc);
 
 	add_option (_("Fades"), new SpinOption<float> (
 		_("destructive-xfade-seconds"),
@@ -198,20 +186,57 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Media"), hf);
 
-	add_option (_("Media"), new OptionEditorHeading (_("File locations")));
+	add_option (_("Locations"), new OptionEditorHeading (_("File locations")));
 
         SearchPathOption* spo = new SearchPathOption ("audio-search-path", _("Search for audio files in:"),
 						      _session->path(),
                                                       sigc::mem_fun (*_session_config, &SessionConfiguration::get_audio_search_path),
                                                       sigc::mem_fun (*_session_config, &SessionConfiguration::set_audio_search_path));
-        add_option (_("Media"), spo);
+        add_option (_("Locations"), spo);
 
         spo = new SearchPathOption ("midi-search-path", _("Search for MIDI files in:"),
 				    _session->path(),
                                     sigc::mem_fun (*_session_config, &SessionConfiguration::get_midi_search_path),
                                     sigc::mem_fun (*_session_config, &SessionConfiguration::set_midi_search_path));
 
-        add_option (_("Media"), spo);
+        add_option (_("Locations"), spo);
+
+	/* File Naming  */
+
+	add_option (_("Filenames"), new OptionEditorHeading (_("File Naming")));
+
+	BoolOption *bo;
+
+	bo = new RouteDisplayBoolOption (
+			"track-name-number",
+			_("Prefix Track number"),
+			sigc::mem_fun (*_session_config, &SessionConfiguration::get_track_name_number),
+			sigc::mem_fun (*_session_config, &SessionConfiguration::set_track_name_number)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("Adds the current track number to the beginning of the recorded file name."));
+	add_option (_("Filenames"), bo);
+
+	bo = new BoolOption (
+			"track-name-take",
+			_("Prefix Take Name"),
+			sigc::mem_fun (*_session_config, &SessionConfiguration::get_track_name_take),
+			sigc::mem_fun (*_session_config, &SessionConfiguration::set_track_name_take)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("Adds the Take Name to the beginning of the recorded file name."));
+	add_option (_("Filenames"), bo);
+
+	_take_name = new EntryOption (
+		"take-name",
+		_("Take Name"),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_take_name),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_take_name)
+		);
+	_take_name->set_invalid_chars(".");
+	_take_name->set_sensitive(_session_config->get_track_name_take());
+
+	add_option (_("Filenames"), _take_name);
 
 	/* Monitoring */
 
@@ -228,50 +253,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*this, &SessionOptionEditor::get_use_monitor_section),
 			    sigc::mem_fun (*this, &SessionOptionEditor::set_use_monitor_section)
 			    ));
-
-        /* Misc */
-
-	add_option (_("Misc"), new OptionEditorHeading (_("MIDI Options")));
-
-        add_option (_("Misc"), new BoolOption (
-			    "midi-copy-is-fork",
-			    _("MIDI region copies are independent"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_midi_copy_is_fork),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_midi_copy_is_fork)
-			    ));
-
-	ComboOption<InsertMergePolicy>* li = new ComboOption<InsertMergePolicy> (
-		"insert-merge-policy",
-		_("Policy for handling overlapping notes\n on the same MIDI channel"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_insert_merge_policy),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_insert_merge_policy)
-		);
-
-        li->add (InsertMergeReject, _("never allow them"));
-        li->add (InsertMergeRelax, _("don't do anything in particular"));
-        li->add (InsertMergeReplace, _("replace any overlapped existing note"));
-        li->add (InsertMergeTruncateExisting, _("shorten the overlapped existing note"));
-        li->add (InsertMergeTruncateAddition, _("shorten the overlapping new note"));
-        li->add (InsertMergeExtend, _("replace both overlapping notes with a single note"));
-
-	add_option (_("Misc"), li);
-
-	add_option (_("Misc"), new OptionEditorHeading (_("Glue to bars and beats")));
-
-	add_option (_("Misc"), new BoolOption (
-			    "glue-new-markers-to-bars-and-beats",
-			    _("Glue new markers to bars and beats"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_glue_new_markers_to_bars_and_beats),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_markers_to_bars_and_beats)
-			    ));
-
-	add_option (_("Misc"), new BoolOption (
-			    "glue-new-regions-to-bars-and-beats",
-			    _("Glue new regions to bars and beats"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_glue_new_regions_to_bars_and_beats),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_regions_to_bars_and_beats)
-			    ));
-
+	/* Meterbridge */
 	add_option (_("Meterbridge"), new OptionEditorHeading (_("Route Display")));
 
 	add_option (_("Meterbridge"), new BoolOption (
@@ -334,6 +316,55 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_name_on_meterbridge)
 			    ));
 
+	/* Misc */
+
+	add_option (_("Misc"), new OptionEditorHeading (_("MIDI Options")));
+
+	add_option (_("Misc"), new BoolOption (
+				"midi-copy-is-fork",
+				_("MIDI region copies are independent"),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::get_midi_copy_is_fork),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::set_midi_copy_is_fork)
+				));
+
+	ComboOption<InsertMergePolicy>* li = new ComboOption<InsertMergePolicy> (
+			"insert-merge-policy",
+			_("Policy for handling overlapping notes\n on the same MIDI channel"),
+			sigc::mem_fun (*_session_config, &SessionConfiguration::get_insert_merge_policy),
+			sigc::mem_fun (*_session_config, &SessionConfiguration::set_insert_merge_policy)
+			);
+
+	li->add (InsertMergeReject, _("never allow them"));
+	li->add (InsertMergeRelax, _("don't do anything in particular"));
+	li->add (InsertMergeReplace, _("replace any overlapped existing note"));
+	li->add (InsertMergeTruncateExisting, _("shorten the overlapped existing note"));
+	li->add (InsertMergeTruncateAddition, _("shorten the overlapping new note"));
+	li->add (InsertMergeExtend, _("replace both overlapping notes with a single note"));
+
+	add_option (_("Misc"), li);
+
+	add_option (_("Misc"), new OptionEditorHeading (_("Glue to bars and beats")));
+
+	add_option (_("Misc"), new BoolOption (
+				"glue-new-markers-to-bars-and-beats",
+				_("Glue new markers to bars and beats"),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::get_glue_new_markers_to_bars_and_beats),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_markers_to_bars_and_beats)
+				));
+
+	add_option (_("Misc"), new BoolOption (
+				"glue-new-regions-to-bars-and-beats",
+				_("Glue new regions to bars and beats"),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::get_glue_new_regions_to_bars_and_beats),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_regions_to_bars_and_beats)
+				));
+
+	add_option (_("Misc"), new OptionEditorHeading (_("Defaults")));
+
+	Gtk::Button* btn = Gtk::manage (new Gtk::Button (_("Use these settings as defaults")));
+	btn->signal_clicked().connect (sigc::mem_fun (*this, &SessionOptionEditor::save_defaults));
+	add_option (_("Misc"), new FooOption (btn));
+
 }
 
 void
@@ -347,10 +378,13 @@ SessionOptionEditor::parameter_changed (std::string const & p)
 			_vpu->set_sensitive(true);
 		}
 	}
-	if (p == "timecode-format") {
+	else if (p == "timecode-format") {
 		/* update offset clocks */
 		parameter_changed("timecode-generator-offset");
 		parameter_changed("slave-timecode-offset");
+	}
+	else if (p == "track-name-take") {
+		_take_name->set_sensitive(_session_config->get_track_name_take());
 	}
 }
 
@@ -380,4 +414,10 @@ bool
 SessionOptionEditor::get_use_monitor_section ()
 {
 	return _session->monitor_out() != 0;
+}
+
+void
+SessionOptionEditor::save_defaults ()
+{
+	_session->save_default_options();
 }

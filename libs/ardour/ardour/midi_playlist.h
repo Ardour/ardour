@@ -32,12 +32,11 @@ namespace ARDOUR
 {
 
 class Session;
-class Region;
 class MidiRegion;
 class Source;
 template<typename T> class MidiRingBuffer;
 
-class MidiPlaylist : public ARDOUR::Playlist
+class LIBARDOUR_API MidiPlaylist : public ARDOUR::Playlist
 {
 public:
 	MidiPlaylist (Session&, const XMLNode&, bool hidden = false);

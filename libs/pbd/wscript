@@ -37,8 +37,6 @@ libpbd_sources = [
     'convert.cc',
     'controllable.cc',
     'controllable_descriptor.cc',
-    'clear_dir.cc',
-    'crossthread.cc',
     'cpus.cc',
     'debug.cc',
     'enumwriter.cc',
@@ -46,21 +44,25 @@ libpbd_sources = [
     'enums.cc',
     'epa.cc',
     'error.cc',
+    'ffs.cc',
     'file_manager.cc',
     'file_utils.cc',
     'fpu.cc',
+    'glib_semaphore.cc',
     'id.cc',
     'locale_guard.cc',
+    'localtime_r.cc',
     'malign.cc',
+    'md5.cc',
     'mountpoint.cc',
     'openuri.cc',
     'pathexpand.cc',
-    'pathscanner.cc',
     'pbd.cc',
     'pool.cc',
     'property_list.cc',
     'pthread_utils.cc',
     'receiver.cc',
+    'resource.cc',
     'search_path.cc',
     'semutils.cc',
     'shortpath.cc',
@@ -71,6 +73,7 @@ libpbd_sources = [
     'stateful.cc',
     'strreplace.cc',
     'strsplit.cc',
+    'system_exec.cc',
     'textreceiver.cc',
     'transmitter.cc',
     'undo.cc',
@@ -86,27 +89,30 @@ def options(opt):
 def configure(conf):
     conf.load('compiler_cxx')
     autowaf.build_version_files(path_prefix+'pbd/version.h', path_prefix+'version.cc',
-                    'libpbd', MAJOR, MINOR, MICRO)
+                    'libpbd', MAJOR, MINOR, MICRO, 'LIBPBD_API', 'pbd/libpbd_visibility.h')
     autowaf.configure(conf)
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
-    if sys.platform != 'darwin':
-        autowaf.check_pkg(conf, 'uuid', uselib_store='UUID')
 
     conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT',mandatory=False)
     conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO',mandatory=False)
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
     conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', cflags='-D_XOPEN_SOURCE=600', define_name='HAVE_POSIX_MEMALIGN', mandatory=False)
+    conf.check(function_name='localtime_r', header_name='time.h', define_name='HAVE_LOCALTIME_R',mandatory=False)
 
     conf.write_config_header('libpbd-config.h', remove=False)
 
     # Boost headers
     autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
     autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
-    # autowaf.check_header(conf, 'cxx', 'boost/uuid/uuid.hpp')
+    if Options.options.dist_target == 'mingw':
+        conf.check(compiler='cxx',
+                   lib='ole32',
+                   mandatory=True,
+                   uselib_store='OLE')
 
 def build(bld):
-    
+
     # Make signals_generated.h using signals.py
     bld(rule = 'python ${SRC} ${TGT}', source = 'pbd/signals.py', target = 'pbd/signals_generated.h')
 
@@ -114,13 +120,19 @@ def build(bld):
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         print('BUILD SHARED LIB')
         obj              = bld.shlib(features = 'cxx cxxshlib', source=libpbd_sources)
+        obj.defines = [ 'LIBPBD_DLL_EXPORTS=1' ]
     else:
         print('BUILD STATIC LIB')
         obj              = bld.stlib(features = 'cxx cxxstlib', source=libpbd_sources)
         obj.cxxflags     = [ '-fPIC' ]
+        obj.cflags     = [ '-fPIC' ]
+        obj.defines      = []
 
     if bld.is_defined('DEBUG_RT_ALLOC'):
         obj.source += 'debug_rt_alloc.c'
+
+    if bld.env['build_target'] != 'mingw':
+        obj.source += [ 'crossthread.cc' ]
 
     obj.export_includes = ['.']
     obj.includes     = ['.']
@@ -133,11 +145,15 @@ def build(bld):
             obj.source += [ 'cocoa_open_uri.mm' ]
         obj.uselib += ' OSX'
     obj.vnum         = LIBPBD_LIB_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-    obj.defines     = ['PACKAGE="' + I18N_PACKAGE + '"']
-    
+    obj.install_path = bld.env['LIBDIR']
+    obj.defines     += [ 'PACKAGE="' + I18N_PACKAGE + '"',
+                         ]
+
     if bld.env['build_target'] == 'x86_64':
         obj.defines += [ 'USE_X86_64_ASM' ]
+    if bld.env['build_target'] == 'mingw':
+        obj.source += [ 'windows_special_dirs.cc' ]
+        obj.uselib += ' OLE'
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Unit tests
@@ -145,6 +161,7 @@ def build(bld):
         testobj.source       = '''
                 test/testrunner.cc
                 test/xpath.cc
+                test/mutex_test.cc
                 test/scalar_properties.cc
                 test/signals_test.cc
                 test/convert_test.cc
@@ -156,9 +173,8 @@ def build(bld):
         testobj.uselib       = 'CPPUNIT XML SNDFILE'
         testobj.use          = 'libpbd'
         testobj.name         = 'libpbd-tests'
-        if sys.platform != 'darwin':
+        if sys.platform != 'darwin' and bld.env['build_target'] != 'mingw':
             testobj.linkflags    = ['-lrt']
-
 
 def shutdown():
     autowaf.shutdown()

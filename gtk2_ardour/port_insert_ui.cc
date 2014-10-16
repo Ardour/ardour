@@ -28,7 +28,6 @@
 #include "ardour/session.h"
 
 #include "port_insert_ui.h"
-#include "utils.h"
 #include "gui_thread.h"
 #include "i18n.h"
 

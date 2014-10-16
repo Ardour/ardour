@@ -129,6 +129,7 @@ class Route;
 class RouteGroup;
 class SMFSource;
 class Send;
+class SceneChanger;
 class SessionDirectory;
 class SessionMetadata;
 class SessionPlaylists;
@@ -141,7 +142,7 @@ class WindowsVSTPlugin;
 
 extern void setup_enum_writer ();
 
-class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
+class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
 {
   public:
 	enum RecordState {
@@ -195,10 +196,15 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::string peak_path (std::string) const;
 
 	std::string peak_path_from_audio_path (std::string) const;
+	bool audio_source_name_is_unique (const std::string& name, uint32_t chan);
+	std::string format_audio_source_name (const std::string& legalized_base, uint32_t nchan, uint32_t chan, bool destructive, bool take_required, uint32_t cnt, bool related_exists);
+	std::string new_audio_source_path_for_embedded (const std::string& existing_path);
 	std::string new_audio_source_path (const std::string&, uint32_t nchans, uint32_t chan, bool destructive, bool take_required);
 	std::string new_midi_source_path (const std::string&);
         RouteList new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name);
 	std::vector<std::string> get_paths_for_new_sources (bool allow_replacing, const std::string& import_file_path, uint32_t channels);
+
+	int bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,std::string)> callback);
 
 	void process (pframes_t nframes);
 
@@ -224,8 +230,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		return routes.reader ();
 	}
 
+	boost::shared_ptr<RouteList> get_tracks() const;
 	boost::shared_ptr<RouteList> get_routes_with_internal_returns() const;
-
 	boost::shared_ptr<RouteList> get_routes_with_regions_at (framepos_t const) const;
 
 	uint32_t nroutes() const { return routes.reader()->size(); }
@@ -236,7 +242,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		return _bundles.reader ();
 	}
 
-	struct RoutePublicOrderSorter {
+	struct LIBARDOUR_API RoutePublicOrderSorter {
 		bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
 
@@ -258,6 +264,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	bool route_name_unique (std::string) const;
 	bool route_name_internal (std::string) const;
+
+	uint32_t track_number_decimals () const {
+		return _track_number_decimals;
+	}
 
 	bool get_record_enabled() const {
 		return (record_status () >= Enabled);
@@ -396,13 +406,14 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int rename (const std::string&);
 	bool get_nsm_state () const { return _under_nsm_control; }
 	void set_nsm_state (bool state) { _under_nsm_control = state; }
+	bool save_default_options ();
 
 	PBD::Signal1<void,std::string> StateSaved;
 	PBD::Signal0<void> StateReady;
 	PBD::Signal0<void> SaveSession;
 
-	std::vector<std::string*>* possible_states() const;
-	static std::vector<std::string*>* possible_states (std::string path);
+	std::vector<std::string> possible_states() const;
+	static std::vector<std::string> possible_states (std::string path);
 
 	XMLNode& get_state();
 	int      set_state(const XMLNode& node, int version); // not idempotent
@@ -423,6 +434,23 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	};
 
 	StateOfTheState state_of_the_state() const { return _state_of_the_state; }
+
+	class StateProtector {
+		public:
+			StateProtector (Session* s) : _session (s) {
+				g_atomic_int_inc (&s->_suspend_save);
+			}
+			~StateProtector () {
+				if (g_atomic_int_dec_and_test (&_session->_suspend_save)) {
+					while (_session->_save_queued) {
+						_session->_save_queued = false;
+						_session->save_state ("");
+					}
+				}
+			}
+		private:
+			Session * _session;
+	};
 
 	void add_route_group (RouteGroup *);
 	void remove_route_group (RouteGroup&);
@@ -477,8 +505,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* Time */
 
 	framepos_t transport_frame () const {return _transport_frame; }
+	framepos_t record_location () const {return _last_record_location; }
 	framepos_t audible_frame () const;
 	framepos_t requested_return_frame() const { return _requested_return_frame; }
+	void set_requested_return_frame(framepos_t return_to);
 
 	enum PullupFormat {
 		pullup_Plus4Plus1,
@@ -605,7 +635,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	boost::shared_ptr<Region> write_one_track (AudioTrack&, framepos_t start, framepos_t end,
 						   bool overwrite, std::vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot,
-						   boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export);
+						   boost::shared_ptr<Processor> endpoint,
+							 bool include_endpoint, bool for_export, bool for_freeze);
 	int freeze_all (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */
@@ -739,6 +770,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* ranges */
 
 	void request_play_range (std::list<AudioRange>*, bool leave_rolling = false);
+	void request_cancel_play_range ();
 	bool get_play_range () const { return _play_range; }
 
 	void maybe_update_session_range (framepos_t, framepos_t);
@@ -752,6 +784,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void ensure_buffer_set (BufferSet& buffers, const ChanCount& howmany);
 
 	/* VST support */
+
+	static int  vst_current_loading_id;
+	static const char* vst_can_do_strings[];
+	static const int vst_can_do_string_count;
 
 	static intptr_t vst_callback (
 		AEffect* effect,
@@ -782,6 +818,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	bool exporting () const {
 		return _exporting;
+	}
+
+	bool bounce_processing() const {
+		return _bounce_processing_active;
 	}
 
 	/* this is a private enum, but setup_enum_writer() needs it,
@@ -827,8 +867,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void request_resume_timecode_transmission ();
 	bool timecode_transmission_suspended () const;
 
-	std::string source_search_path(DataType) const;
+	std::vector<std::string> source_search_path(DataType) const;
 	void ensure_search_path_includes (const std::string& path, DataType type);
+	void remove_dir_from_search_path (const std::string& path, DataType type);
 
 	std::list<std::string> unknown_processors () const;
 
@@ -862,28 +903,37 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	 */
         static PBD::Signal2<void,std::string,std::string> VersionMismatch;
 
+	SceneChanger* scene_changer() const { return _scene_changer; }
+
         boost::shared_ptr<Port> ltc_input_port() const;
         boost::shared_ptr<Port> ltc_output_port() const;
 
 	boost::shared_ptr<IO> ltc_input_io() { return _ltc_input; }
 	boost::shared_ptr<IO> ltc_output_io() { return _ltc_output; }
 
-    MIDI::Port* midi_input_port () const;
-    MIDI::Port* midi_output_port () const;
-    MIDI::Port* mmc_output_port () const;
-    MIDI::Port* mmc_input_port () const;
+	MIDI::Port* midi_input_port () const;
+	MIDI::Port* midi_output_port () const;
+	MIDI::Port* mmc_output_port () const;
+	MIDI::Port* mmc_input_port () const;
 
-    boost::shared_ptr<MidiPort> midi_clock_output_port () const;
-    boost::shared_ptr<MidiPort> midi_clock_input_port () const;
-    boost::shared_ptr<MidiPort> mtc_output_port () const;
-    boost::shared_ptr<MidiPort> mtc_input_port () const;
+	MIDI::Port* scene_input_port () const;
+	MIDI::Port* scene_output_port () const;
 
-    MIDI::MachineControl& mmc() { return *_mmc; }
+	boost::shared_ptr<MidiPort> scene_in () const;
+	boost::shared_ptr<MidiPort> scene_out () const;
+	
+	boost::shared_ptr<MidiPort> midi_clock_output_port () const;
+	boost::shared_ptr<MidiPort> midi_clock_input_port () const;
+	boost::shared_ptr<MidiPort> mtc_output_port () const;
+	boost::shared_ptr<MidiPort> mtc_input_port () const;
+    
+	MIDI::MachineControl& mmc() { return *_mmc; }
 
   protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
 	void set_frame_rate (framecnt_t nframes);
+        void reconnect_existing_routes (bool withLock, bool reconnect_master = true, bool reconnect_inputs = true, bool reconnect_outputs = true);
 
   protected:
 	friend class Route;
@@ -913,6 +963,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	mutable gint             processing_prohibited;
 	process_function_type    process_function;
 	process_function_type    last_process_function;
+	bool                    _bounce_processing_active;
 	bool                     waiting_for_sync_offset;
 	framecnt_t              _base_frame_rate;
 	framecnt_t              _current_frame_rate;  //this includes video pullup offset
@@ -967,12 +1018,14 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void process_without_events (pframes_t);
 	void process_with_events    (pframes_t);
 	void process_audition       (pframes_t);
-        int  process_export         (pframes_t);
+	int  process_export         (pframes_t);
 	int  process_export_fw      (pframes_t);
 
 	void block_processing() { g_atomic_int_set (&processing_prohibited, 1); }
 	void unblock_processing() { g_atomic_int_set (&processing_prohibited, 0); }
 	bool processing_blocked() const { return g_atomic_int_get (&processing_prohibited); }
+
+	static const framecnt_t bounce_chunk_size;
 
 	/* slave tracking */
 
@@ -1072,7 +1125,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool             state_was_pending;
 	StateOfTheState _state_of_the_state;
 
-	void     auto_save();
+	friend class    StateProtector;
+	gint            _suspend_save; /* atomic */
+	volatile bool   _save_queued;
+	Glib::Threads::Mutex save_state_lock;
+
 	int      load_options (const XMLNode&);
 	int      load_state (std::string snapshot_name);
 
@@ -1118,6 +1175,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void              locations_changed ();
 	void              locations_added (Location*);
 	void              handle_locations_changed (Locations::LocationList&);
+	void              sync_locations_to_skips (Locations::LocationList&);
 
 	PBD::ScopedConnectionList punch_connections;
 	void             auto_punch_start_changed (Location *);
@@ -1256,7 +1314,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	int           start_midi_thread ();
 
-	void set_play_loop (bool yn);
+	void set_play_loop (bool yn, double speed);
 	void unset_play_loop ();
 	void overwrite_some_buffers (Track *);
 	void flush_all_inserts ();
@@ -1265,7 +1323,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void start_locate (framepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
 	void force_locate (framepos_t frame, bool with_roll = false);
 	void set_track_speed (Track *, double speed);
-        void set_transport_speed (double speed, bool abort = false, bool clear_state = false, bool as_default = false);
+        void set_transport_speed (double speed, framepos_t destination_frame, bool abort = false, bool clear_state = false, bool as_default = false);
 	void stop_transport (bool abort = false, bool clear_state = false);
 	void start_transport ();
 	void realtime_stop (bool abort, bool clear_state);
@@ -1318,6 +1376,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	                         bool with_lock, bool connect_inputs = true,
 	                         ChanCount input_start = ChanCount (), ChanCount output_start = ChanCount ());
 	void midi_output_change_handler (IOChange change, void* /*src*/, boost::weak_ptr<Route> midi_track);
+
+	/* track numbering */
+
+	void reassign_track_numbers ();
+	uint32_t _track_number_decimals;
 
 	/* mixer stuff */
 
@@ -1601,17 +1664,21 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
         void reconnect_ltc_input ();
         void reconnect_ltc_output ();
 
-    /* persistent, non-track related MIDI ports */
-    MidiPortManager* _midi_ports;
-    MIDI::MachineControl* _mmc;
-
-    void setup_ltc ();
-    void setup_click ();
-    void setup_click_state (const XMLNode*);
-    void setup_bundles ();
-
-    static int get_session_info_from_path (XMLTree& state_tree, const std::string& xmlpath);
+	/* Scene Changing */
+	SceneChanger* _scene_changer;
+	
+	/* persistent, non-track related MIDI ports */
+	MidiPortManager* _midi_ports;
+	MIDI::MachineControl* _mmc;
+	
+	void setup_ltc ();
+	void setup_click ();
+	void setup_click_state (const XMLNode*);
+	void setup_bundles ();
+	
+	static int get_session_info_from_path (XMLTree& state_tree, const std::string& xmlpath);
 };
+
 
 } // namespace ARDOUR
 

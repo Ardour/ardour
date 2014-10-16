@@ -29,7 +29,7 @@
 #include "video_image_frame.h"
 #include "video_monitor.h"
 #include "pbd/signals.h"
-#include "canvas.h"
+#include "canvas/container.h"
 
 namespace ARDOUR {
 	class Session;
@@ -55,7 +55,7 @@ class PublicEditor;
 class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList, public PBD::StatefulDestructible
 {
 	public:
-	VideoTimeLine (PublicEditor*, ArdourCanvas::Group*, int);
+	VideoTimeLine (PublicEditor*, ArdourCanvas::Container*, int);
 	virtual ~VideoTimeLine ();
 
 	void set_session (ARDOUR::Session *s);
@@ -93,7 +93,7 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	void save_session ();
 	void close_session ();
 	void sync_session_state (); /* video-monitor does not actively report window/pos changes, query it */
-	float get_apv(); /* audio frames per video frame; */
+	float get_apv(); /* audio samples per video frame; */
 	ARDOUR::framecnt_t get_duration () { return video_duration;}
 	ARDOUR::frameoffset_t get_offset () { return video_offset;}
 	ARDOUR::frameoffset_t quantify_frames_to_apv (ARDOUR::frameoffset_t offset) { return rint(offset/get_apv())*get_apv(); }
@@ -102,17 +102,17 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	protected:
 
 	PublicEditor *editor;
-	ArdourCanvas::Group *videotl_bar_group;
+	ArdourCanvas::Container *videotl_group;
 	int bar_height;
 
 	std::string _xjadeo_bin;
 	void find_xjadeo ();
 
 
-	ARDOUR::frameoffset_t video_start_offset; /**< unit: audio-frames - video-file */
-	ARDOUR::frameoffset_t video_offset; /**< unit: audio-frames - session */
+	ARDOUR::frameoffset_t video_start_offset; /**< unit: audio-samples - video-file */
+	ARDOUR::frameoffset_t video_offset; /**< unit: audio-samples - session */
 	ARDOUR::frameoffset_t video_offset_p; /**< used for undo from editor_drag.cc */
-	framepos_t video_duration;     /**< unit: audio-frames */
+	framepos_t video_duration;     /**< unit: audio-samples */
 	std::string video_filename;
 	bool        local_file;
 	double      video_aspect_ratio;
@@ -122,6 +122,9 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 
 	std::string video_server_url;
 	std::string server_docroot;
+
+	void xjadeo_readversion (std::string d, size_t s);
+	std::string xjadeo_version;
 
 	typedef std::list<VideoImageFrame*> VideoFrames;
 	VideoFrames video_frames;

@@ -30,7 +30,7 @@ namespace ARDOUR {
     so that it can be used like a regular Controllable, bound to MIDI, OSC etc.
 */
 
-class ProxyControllable : public PBD::Controllable {
+class LIBARDOUR_API ProxyControllable : public PBD::Controllable {
 public:
 	ProxyControllable (const std::string& name, PBD::Controllable::Flag flags,
 			   boost::function1<bool,double> setter,
@@ -42,6 +42,15 @@ public:
 
         void set_value (double v) { if (_setter (v)) { Changed(); /* EMIT SIGNAL */ } }
         double get_value () const { return _getter (); }
+
+		double internal_to_user (double i) const { return accurate_coefficient_to_dB (i);}
+		double user_to_internal (double u) const { return dB_to_coefficient(u) ;}
+
+		std::string get_user_string () const
+		{
+			char theBuf[32]; sprintf( theBuf, "%3.1f dB", accurate_coefficient_to_dB (get_value()));
+			return std::string(theBuf);
+		}
 
 private:
 	boost::function1<bool,double> _setter;

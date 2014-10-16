@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <sigc++/bind.h>
+
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 
@@ -125,6 +126,9 @@ void
 Selection::clear_tracks ()
 {
 	if (!tracks.empty()) {
+		for (TrackViewList::iterator x = tracks.begin(); x != tracks.end(); ++x) {
+			(*x)->set_selected (false);
+		}
 		tracks.clear ();
 		if (!_no_tracks_changed) {
 			TracksChanged();
@@ -156,9 +160,6 @@ Selection::clear_regions ()
 	if (!regions.empty()) {
 		regions.clear_all ();
 		RegionsChanged();
-		if (Config->get_link_region_and_track_selection()) {
-			clear_tracks ();
-		}
 	}
 }
 
@@ -222,6 +223,7 @@ void
 Selection::toggle (boost::shared_ptr<Playlist> pl)
 {
 	clear_time();  //enforce object/range exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 	
 	PlaylistSelection::iterator i;
 
@@ -249,8 +251,10 @@ Selection::toggle (TimeAxisView* track)
 	TrackSelection::iterator i;
 
 	if ((i = find (tracks.begin(), tracks.end(), track)) == tracks.end()) {
+		track->set_selected (true);
 		tracks.push_back (track);
 	} else {
+		track->set_selected (false);
 		tracks.erase (i);
 	}
 
@@ -263,6 +267,7 @@ void
 Selection::toggle (const MidiNoteSelection& midi_note_list)
 {
 	clear_time();  //enforce object/range exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	for (MidiNoteSelection::const_iterator i = midi_note_list.begin(); i != midi_note_list.end(); ++i) {
 		toggle ((*i));
@@ -290,6 +295,7 @@ void
 Selection::toggle (RegionView* r)
 {
 	clear_time();  //enforce object/range exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 	
 	RegionSelection::iterator i;
 
@@ -306,6 +312,7 @@ void
 Selection::toggle (MidiRegionView* mrv)
 {
 	clear_time();   //enforce object/range exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	MidiRegionSelection::iterator i;
 
@@ -322,6 +329,7 @@ void
 Selection::toggle (vector<RegionView*>& r)
 {
 	clear_time();  //enforce object/range exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	RegionSelection::iterator i;
 
@@ -358,6 +366,7 @@ void
 Selection::add (boost::shared_ptr<Playlist> pl)
 {
 	clear_time();  //enforce object/range exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 	
 	if (find (playlists.begin(), playlists.end(), pl) == playlists.end()) {
 		pl->use ();
@@ -370,6 +379,7 @@ void
 Selection::add (const list<boost::shared_ptr<Playlist> >& pllist)
 {
 	clear_time();  //enforce object/range exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 	
 	bool changed = false;
 
@@ -389,9 +399,14 @@ Selection::add (const list<boost::shared_ptr<Playlist> >& pllist)
 void
 Selection::add (const TrackViewList& track_list)
 {
+	clear_objects();  //enforce object/range exclusivity
+
 	TrackViewList added = tracks.add (track_list);
 
 	if (!added.empty()) {
+		for (TrackViewList::iterator x = added.begin(); x != added.end(); ++x) {
+			(*x)->set_selected (true);
+		}
 		if (!_no_tracks_changed) {
 			TracksChanged ();
 		}
@@ -401,7 +416,10 @@ Selection::add (const TrackViewList& track_list)
 void
 Selection::add (TimeAxisView* track)
 {
+	clear_objects();  //enforce object/range exclusivity
+
 	TrackViewList tr;
+	track->set_selected (true);
 	tr.push_back (track);
 	add (tr);
 }
@@ -410,6 +428,7 @@ void
 Selection::add (const MidiNoteSelection& midi_list)
 {
 	clear_time();  //enforce object/range exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	const MidiNoteSelection::const_iterator b = midi_list.begin();
 	const MidiNoteSelection::const_iterator e = midi_list.end();
@@ -435,6 +454,7 @@ void
 Selection::add (vector<RegionView*>& v)
 {
 	clear_time();  //enforce object/range exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	/* XXX This method or the add (const RegionSelection&) needs to go
 	 */
@@ -444,9 +464,6 @@ Selection::add (vector<RegionView*>& v)
 	for (vector<RegionView*>::iterator i = v.begin(); i != v.end(); ++i) {
 		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
 			changed = regions.add ((*i));
-			if (Config->get_link_region_and_track_selection() && changed) {
-				add (&(*i)->get_time_axis_view());
-			}
 		}
 	}
 
@@ -459,6 +476,7 @@ void
 Selection::add (const RegionSelection& rs)
 {
 	clear_time();  //enforce object/range exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	/* XXX This method or the add (const vector<RegionView*>&) needs to go
 	 */
@@ -468,9 +486,6 @@ Selection::add (const RegionSelection& rs)
 	for (RegionSelection::const_iterator i = rs.begin(); i != rs.end(); ++i) {
 		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
 			changed = regions.add ((*i));
-			if (Config->get_link_region_and_track_selection() && changed) {
-				add (&(*i)->get_time_axis_view());
-			}
 		}
 	}
 
@@ -483,15 +498,13 @@ void
 Selection::add (RegionView* r)
 {
 	clear_time();  //enforce object/range exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	if (find (regions.begin(), regions.end(), r) == regions.end()) {
 		bool changed = regions.add (r);
-                if (Config->get_link_region_and_track_selection() && changed) {
-                        add (&r->get_time_axis_view());
-                }
-                if (changed) {
-                        RegionsChanged ();
-                }
+        if (changed) {
+            RegionsChanged ();
+        }
 	}
 }
 
@@ -499,15 +512,11 @@ void
 Selection::add (MidiRegionView* mrv)
 {
 	clear_time();  //enforce object/range exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	if (find (midi_regions.begin(), midi_regions.end(), mrv) == midi_regions.end()) {
 		midi_regions.push_back (mrv);
 		/* XXX should we do this? */
-#if 0
-		if (Config->get_link_region_and_track_selection()) {
-			add (&mrv->get_time_axis_view());
-		}
-#endif
 		MidiRegionsChanged ();
 	}
 }
@@ -571,6 +580,7 @@ void
 Selection::add (boost::shared_ptr<Evoral::ControlList> cl)
 {
 	clear_time();  //enforce object/range exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	boost::shared_ptr<ARDOUR::AutomationList> al
 		= boost::dynamic_pointer_cast<ARDOUR::AutomationList>(cl);
@@ -589,19 +599,11 @@ Selection::remove (TimeAxisView* track)
 {
 	list<TimeAxisView*>::iterator i;
 	if ((i = find (tracks.begin(), tracks.end(), track)) != tracks.end()) {
+		track->set_selected (false);
 		tracks.erase (i);
 		if (!_no_tracks_changed) {
 			TracksChanged();
 		}
-	}
-}
-
-void
-Selection::remove (ControlPoint* p)
-{
-	PointSelection::iterator i = find (points.begin(), points.end(), p);
-	if (i != points.end ()) {
-		points.erase (i);
 	}
 }
 
@@ -614,6 +616,7 @@ Selection::remove (const TrackViewList& track_list)
 
 		TrackViewList::iterator x = find (tracks.begin(), tracks.end(), *i);
 		if (x != tracks.end()) {
+			(*i)->set_selected (false);
 			tracks.erase (x);
 			changed = true;
 		}
@@ -623,6 +626,15 @@ Selection::remove (const TrackViewList& track_list)
 		if (!_no_tracks_changed) {
 			TracksChanged();
 		}
+	}
+}
+
+void
+Selection::remove (ControlPoint* p)
+{
+	PointSelection::iterator i = find (points.begin(), points.end(), p);
+	if (i != points.end ()) {
+		points.erase (i);
 	}
 }
 
@@ -695,10 +707,6 @@ Selection::remove (RegionView* r)
 	if (regions.remove (r)) {
 		RegionsChanged ();
 	}
-
-	if (Config->get_link_region_and_track_selection() && !regions.involves (r->get_time_axis_view())) {
-		remove (&r->get_time_axis_view());
-	}
 }
 
 void
@@ -710,13 +718,6 @@ Selection::remove (MidiRegionView* mrv)
 		midi_regions.erase (x);
 		MidiRegionsChanged ();
 	}
-
-#if 0
-	/* XXX fix this up ? */
-	if (Config->get_link_region_and_track_selection() && !regions.involves (r->get_time_axis_view())) {
-		remove (&r->get_time_axis_view());
-	}
-#endif
 }
 
 
@@ -755,6 +756,7 @@ Selection::remove (boost::shared_ptr<ARDOUR::AutomationList> ac)
 void
 Selection::set (TimeAxisView* track)
 {
+	clear_objects();  //enforce object/range exclusivity
 	clear_tracks ();
 	add (track);
 }
@@ -762,6 +764,7 @@ Selection::set (TimeAxisView* track)
 void
 Selection::set (const TrackViewList& track_list)
 {
+	clear_objects();  //enforce object/range exclusivity
 	clear_tracks ();
 	add (track_list);
 }
@@ -770,6 +773,7 @@ void
 Selection::set (const MidiNoteSelection& midi_list)
 {
 	clear_time ();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 	clear_objects ();
 	add (midi_list);
 }
@@ -778,6 +782,7 @@ void
 Selection::set (boost::shared_ptr<Playlist> playlist)
 {
 	clear_time ();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 	clear_objects ();
 	add (playlist);
 }
@@ -794,6 +799,7 @@ void
 Selection::set (const RegionSelection& rs)
 {
 	clear_time();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 	clear_objects();
 	regions = rs;
 	RegionsChanged(); /* EMIT SIGNAL */
@@ -803,44 +809,27 @@ void
 Selection::set (MidiRegionView* mrv)
 {
 	clear_time();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 	clear_objects ();
 	add (mrv);
 }
 
 void
-Selection::set (RegionView* r, bool also_clear_tracks)
+Selection::set (RegionView* r, bool /*also_clear_tracks*/)
 {
 	clear_time();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 	clear_objects ();
-	if (also_clear_tracks && !Config->get_link_region_and_track_selection()) {
-		/* clear_regions() will have done this if the link preference
-		 * is enabled
-		 */
-		clear_tracks ();
-	}
 	add (r);
 }
 
 void
 Selection::set (vector<RegionView*>& v)
 {
-	bool had_regions = !regions.empty();
-
 	clear_time();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 	clear_objects();
 
-	if (Config->get_link_region_and_track_selection()) {
-		if (had_regions) {
-			/* there were regions before, so we're changing the
-			 * region selection (likely), thus link region/track
-			 * selection. relevant tracks will get selected
-			 * as we ::add() below.
-			 */
-			clear_tracks ();
-			// make sure to deselect any automation selections
-			clear_points();
-		}
-	}
 	add (v);
 }
 
@@ -910,6 +899,7 @@ void
 Selection::set (boost::shared_ptr<Evoral::ControlList> ac)
 {
 	clear_time();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 	clear_objects();
 	
 	add (ac);
@@ -924,7 +914,7 @@ Selection::selected (Marker* m)
 bool
 Selection::selected (TimeAxisView* tv)
 {
-	return find (tracks.begin(), tracks.end(), tv) != tracks.end();
+	return tv->get_selected ();
 }
 
 bool
@@ -968,6 +958,7 @@ void
 Selection::toggle (ControlPoint* cp)
 {
 	clear_time();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	cp->set_selected (!cp->get_selected ());
 	PointSelection::iterator i = find (points.begin(), points.end(), cp);
@@ -984,6 +975,7 @@ void
 Selection::toggle (vector<ControlPoint*> const & cps)
 {
 	clear_time();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	for (vector<ControlPoint*>::const_iterator i = cps.begin(); i != cps.end(); ++i) {
 		toggle (*i);
@@ -994,6 +986,7 @@ void
 Selection::toggle (list<Selectable*> const & selectables)
 {
 	clear_time();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 	
 	RegionView* rv;
 	ControlPoint* cp;
@@ -1026,11 +1019,8 @@ void
 Selection::set (list<Selectable*> const & selectables)
 {
 	clear_time ();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 	clear_objects ();
-
-	if (Config->get_link_region_and_track_selection ()) {
-		clear_tracks ();
-	}
 
 	add (selectables);
 }
@@ -1039,6 +1029,7 @@ void
 Selection::add (PointSelection const & s)
 {
 	clear_time ();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	for (PointSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
 		points.push_back (*i);
@@ -1049,6 +1040,7 @@ void
 Selection::add (list<Selectable*> const & selectables)
 {
 	clear_time ();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	RegionView* rv;
 	ControlPoint* cp;
@@ -1090,6 +1082,7 @@ void
 Selection::add (ControlPoint* cp)
 {
 	clear_time ();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	cp->set_selected (true);
 	points.push_back (cp);
@@ -1100,6 +1093,7 @@ void
 Selection::add (vector<ControlPoint*> const & cps)
 {
 	clear_time ();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	for (vector<ControlPoint*>::const_iterator i = cps.begin(); i != cps.end(); ++i) {
 		(*i)->set_selected (true);
@@ -1112,6 +1106,7 @@ void
 Selection::set (ControlPoint* cp)
 {
 	clear_time ();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	if (cp->get_selected()) {
 		return;
@@ -1129,6 +1124,7 @@ void
 Selection::set (Marker* m)
 {
 	clear_time ();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 	markers.clear ();
 
 	add (m);
@@ -1161,6 +1157,7 @@ void
 Selection::add (Marker* m)
 {
 	clear_time ();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	if (find (markers.begin(), markers.end(), m) == markers.end()) {
 		markers.push_back (m);
@@ -1172,6 +1169,7 @@ void
 Selection::add (const list<Marker*>& m)
 {
 	clear_time ();  //enforce region/object exclusivity
+	clear_tracks();  //enforce object/track exclusivity
 
 	markers.insert (markers.end(), m.begin(), m.end());
 	markers.sort ();

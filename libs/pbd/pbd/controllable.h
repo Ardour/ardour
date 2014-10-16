@@ -24,16 +24,20 @@
 #include <set>
 #include <map>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/signals.h"
 #include <glibmm/threads.h>
 
 #include "pbd/statefuldestructible.h"
 
+using std::min;
+using std::max;
+
 class XMLNode;
 
 namespace PBD {
 
-class Controllable : public PBD::StatefulDestructible {
+class LIBPBD_API Controllable : public PBD::StatefulDestructible {
   public:
 	enum Flag {
 		Toggle = 0x1,
@@ -59,10 +63,24 @@ class Controllable : public PBD::StatefulDestructible {
 	 * but passed to the processor as a linear quantity.
 	 */
 
-	/** Set `internal' value */
+	/** Get and Set `internal' value */
 	virtual void set_value (double) = 0;
-	/** @return `internal' value */
 	virtual double get_value (void) const = 0;
+
+	/** Conversions between `internal', 'interface', and 'user' values */
+	virtual double internal_to_interface (double i) const {return  (i-lower())/(upper() - lower());}  //by default, the interface range is just a linear interpolation between lower and upper values
+	virtual double interface_to_internal (double i) const {return lower() + i*(upper() - lower());}
+	virtual double internal_to_user (double i) const {return i;}  //by default the internal value is the same as the user value
+	virtual double user_to_internal (double i) const {return i;}  //by default the internal value is the same as the user value
+
+	/** Get and Set `interface' value  (typically, percent of knob travel) */
+	virtual float get_interface() const { return (internal_to_interface(get_value())); }
+	virtual void set_interface (float percent) { percent = min( max(0.0f, percent), 1.0f);  set_value(interface_to_internal(percent)); }
+
+	/** Get and Set `user' value  ( dB or milliseconds, etc.  This MIGHT be the same as the internal value, but in a few cases it is not ) */
+	virtual float get_user() const { return (internal_to_user(get_value())); }
+	virtual void set_user (float user_v) { set_value(user_to_internal(user_v)); }
+	virtual std::string get_user_string() const { return std::string(); }
 
 	PBD::Signal0<void> LearningFinished;
 	static PBD::Signal3<void,PBD::Controllable*,int,int> CreateBinding;
@@ -88,6 +106,7 @@ class Controllable : public PBD::StatefulDestructible {
 
         virtual double lower() const { return 0.0; }
         virtual double upper() const { return 1.0; }
+        virtual double normal() const { return 0.0; }  //the default value
 
 	Flag flags() const { return _flags; }
 	void set_flags (Flag f);
@@ -97,6 +116,8 @@ class Controllable : public PBD::StatefulDestructible {
         static const std::string xml_node_name;
   private:
 	std::string _name;
+
+	std::string _units;
 
 	Flag        _flags;
 	bool        _touching;
@@ -113,7 +134,7 @@ class Controllable : public PBD::StatefulDestructible {
    a Controllable
 */
 
-class IgnorableControllable : public Controllable 
+class LIBPBD_API IgnorableControllable : public Controllable 
 {
   public: 
 	IgnorableControllable () : PBD::Controllable ("ignoreMe") {}

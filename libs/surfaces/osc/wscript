@@ -27,14 +27,15 @@ def build(bld):
             interface.cc
     '''
     obj.export_includes = ['.']
-    obj.cxxflags     = '-DPACKAGE="ardour_cp"'
+    obj.defines      = [ 'PACKAGE="ardour_osc"' ]
+    obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.includes     = ['.', './osc']
     obj.name         = 'libardour_osc'
     obj.target       = 'ardour_osc'
     obj.uselib       = ' LO '
     obj.use          = 'libardour libardour_cp libpbd'
     obj.vnum         = LIBARDOUR_OSC_LIB_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'surfaces')
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
 def shutdown():
     autowaf.shutdown()

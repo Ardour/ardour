@@ -17,6 +17,8 @@
 
 */
 
+#include <utility>
+
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 
@@ -25,6 +27,14 @@
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/gui_thread.h"
+
+#include "canvas/container.h"
+#include "canvas/rectangle.h"
+#include "canvas/debug.h"
+#include "canvas/text.h"
+#include "canvas/utils.h"
+
+#include "ardour/profile.h"
 
 #include "ardour_ui.h"
 /*
@@ -36,9 +46,7 @@
 #include "public_editor.h"
 #include "time_axis_view_item.h"
 #include "time_axis_view.h"
-#include "simplerect.h"
 #include "utils.h"
-#include "canvas_impl.h"
 #include "rgb_macros.h"
 
 #include "i18n.h"
@@ -48,12 +56,14 @@ using namespace Editing;
 using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace Gtkmm2ext;
 
 Pango::FontDescription TimeAxisViewItem::NAME_FONT;
 const double TimeAxisViewItem::NAME_X_OFFSET = 15.0;
-const double TimeAxisViewItem::GRAB_HANDLE_TOP = 6;
-const double TimeAxisViewItem::GRAB_HANDLE_WIDTH = 5;
+const double TimeAxisViewItem::GRAB_HANDLE_TOP = 0.0;
+const double TimeAxisViewItem::GRAB_HANDLE_WIDTH = 10.0;
+const double TimeAxisViewItem::RIGHT_EDGE_SHIFT = 1.0;
 
 int    TimeAxisViewItem::NAME_HEIGHT;
 double TimeAxisViewItem::NAME_Y_OFFSET;
@@ -63,7 +73,7 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
 void
 TimeAxisViewItem::set_constant_heights ()
 {
-        NAME_FONT = get_font_for_style (X_("TimeAxisViewItemName"));
+        NAME_FONT = Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_SmallFont());
 
         Gtk::Window win;
         Gtk::Label foo;
@@ -74,11 +84,25 @@ TimeAxisViewItem::set_constant_heights ()
         int height = 0;
 
         layout->set_font_description (NAME_FONT);
-        Gtkmm2ext::get_ink_pixel_size (layout, width, height);
+        get_pixel_size (layout, width, height);
+
+        layout = foo.create_pango_layout (X_("H")); /* just the ascender */
 
         NAME_HEIGHT = height;
-        NAME_Y_OFFSET = height + 3;
-        NAME_HIGHLIGHT_SIZE = height + 2;
+
+	/* Config->get_show_name_highlight) == true: 
+	        Y_OFFSET is measured from bottom of the time axis view item.
+	   Config->get_show_name_highlight) == false: 
+	        Y_OFFSET is measured from the top of the time axis view item.
+	*/
+
+	if (Config->get_show_name_highlight()) {
+		NAME_Y_OFFSET = height + 1;
+		NAME_HIGHLIGHT_SIZE = height + 2;
+	} else {
+		NAME_Y_OFFSET = 3;
+		NAME_HIGHLIGHT_SIZE = 0;
+	}
         NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 3;
 }
 
@@ -96,18 +120,19 @@ TimeAxisViewItem::set_constant_heights ()
  * @param automation true if this is an automation region view
  */
 TimeAxisViewItem::TimeAxisViewItem(
-	const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color,
+	const string & it_name, ArdourCanvas::Item& parent, TimeAxisView& tv, double spu, uint32_t base_color,
 	framepos_t start, framecnt_t duration, bool recording, bool automation, Visibility vis
 	)
 	: trackview (tv)
+	, frame_position (-1)
+	, item_name (it_name)
 	, _height (1.0)
 	, _recregion (recording)
 	, _automation (automation)
 	, _dragging (false)
+	, _width (0.0)
 {
-	group = new ArdourCanvas::Group (parent);
-
-	init (it_name, spu, base_color, start, duration, vis, true, true);
+	init (&parent, spu, base_color, start, duration, vis, true, true);
 }
 
 TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
@@ -115,46 +140,45 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	, Selectable (other)
 	, PBD::ScopedConnectionList()
 	, trackview (other.trackview)
+	, frame_position (-1)
+	, item_name (other.item_name)
+	, _height (1.0)
 	, _recregion (other._recregion)
 	, _automation (other._automation)
 	, _dragging (other._dragging)
+	, _width (0.0)
 {
-
-	Gdk::Color c;
-	int r,g,b,a;
-
-	UINT_TO_RGBA (other.fill_color, &r, &g, &b, &a);
-	c.set_rgb_p (r/255.0, g/255.0, b/255.0);
-
 	/* share the other's parent, but still create a new group */
 
-	Gnome::Canvas::Group* parent = other.group->property_parent();
-
-	group = new ArdourCanvas::Group (*parent);
-
+	ArdourCanvas::Item* parent = other.group->parent();
+	
 	_selected = other._selected;
-
-	init (other.item_name, other.samples_per_unit, c, other.frame_position,
+	
+	init (parent, other.samples_per_pixel, other.fill_color, other.frame_position,
 	      other.item_duration, other.visibility, other.wide_enough_for_name, other.high_enough_for_name);
 }
 
 void
-TimeAxisViewItem::init (
-	const string& it_name, double spu, Gdk::Color const & base_color, framepos_t start, framepos_t duration, Visibility vis, bool wide, bool high)
+TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_color, 
+			framepos_t start, framepos_t duration, Visibility vis, 
+			bool wide, bool high)
 {
-	item_name = it_name;
-	samples_per_unit = spu;
+	group = new ArdourCanvas::Container (parent);
+	CANVAS_DEBUG_NAME (group, string_compose ("TAVI group for %1", get_item_name()));
+	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
+
+	fill_color = base_color;
+	samples_per_pixel = fpp;
 	frame_position = start;
 	item_duration = duration;
 	name_connected = false;
-	fill_opacity = 60;
 	position_locked = false;
 	max_item_duration = ARDOUR::max_framepos;
 	min_item_duration = 0;
 	show_vestigial = true;
 	visibility = vis;
 	_sensitive = true;
-	name_pixbuf_width = 0;
+	name_text_width = 0;
 	last_item_width = 0;
 	wide_enough_for_name = wide;
 	high_enough_for_name = high;
@@ -164,54 +188,76 @@ TimeAxisViewItem::init (
 		warning << "Time Axis Item Duration == 0" << endl;
 	}
 
-	vestigial_frame = new ArdourCanvas::SimpleRect (*group, 0.0, 1.0, 2.0, trackview.current_height());
+	vestigial_frame = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, 1.0, 2.0, trackview.current_height()));
+	CANVAS_DEBUG_NAME (vestigial_frame, string_compose ("vestigial frame for %1", get_item_name()));
 	vestigial_frame->hide ();
-	vestigial_frame->property_outline_what() = 0xF;
-	vestigial_frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_VestigialFrame.get();
-	vestigial_frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_VestigialFrame.get();
+	vestigial_frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_VestigialFrame());
+	vestigial_frame->set_fill_color (ARDOUR_UI::config()->get_canvasvar_VestigialFrame());
 
 	if (visibility & ShowFrame) {
-		frame = new ArdourCanvas::SimpleRect (*group, 0.0, 1.0, trackview.editor().frame_to_pixel(duration), trackview.current_height());
+		frame = new ArdourCanvas::Rectangle (group, 
+						     ArdourCanvas::Rect (0.0, 0.0, 
+									 trackview.editor().sample_to_pixel(duration) + RIGHT_EDGE_SHIFT, 
+									 trackview.current_height() - 1.0));
 
-		frame->property_outline_pixels() = 1;
-		frame->property_outline_what() = 0xF;
+		CANVAS_DEBUG_NAME (frame, string_compose ("frame for %1", get_item_name()));
+
+		if (Config->get_show_name_highlight()) {
+			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
+		} else {
+			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM));
+		}
 
 		if (_recregion) {
-			frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
+			frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RecordingRect());
 		} else {
-			frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
+			frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame());
 		}
-
-		frame->property_outline_what() = 0x1|0x2|0x4|0x8;
 
 	} else {
+
 		frame = 0;
 	}
+	
+	if (Config->get_show_name_highlight() && (visibility & ShowNameHighlight)) {
 
-	if (visibility & ShowNameHighlight) {
+		double width;
+		double start;
 
 		if (visibility & FullWidthNameHighlight) {
-			name_highlight = new ArdourCanvas::SimpleRect (*group, 0.0, trackview.editor().frame_to_pixel(item_duration), trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, trackview.current_height());
+			start = 0.0;
+			width = trackview.editor().sample_to_pixel(item_duration) + RIGHT_EDGE_SHIFT;
 		} else {
-			name_highlight = new ArdourCanvas::SimpleRect (*group, 1.0, trackview.editor().frame_to_pixel(item_duration) - 1, trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, trackview.current_height());
+			start = 1.0;
+			width = trackview.editor().sample_to_pixel(item_duration) - 2.0 + RIGHT_EDGE_SHIFT;
 		}
 
+		name_highlight = new ArdourCanvas::Rectangle (group, 
+							      ArdourCanvas::Rect (start, 
+										  trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, 
+										  width - 2.0 + RIGHT_EDGE_SHIFT,
+										  trackview.current_height() - 1.0));
+		CANVAS_DEBUG_NAME (name_highlight, string_compose ("name highlight for %1", get_item_name()));
 		name_highlight->set_data ("timeaxisviewitem", this);
-                name_highlight->property_outline_what() = 0x4;
-                /* we should really use a canvas color property here */
-		name_highlight->property_outline_color_rgba() = RGBA_TO_UINT (0,0,0,255);
+                name_highlight->set_outline_what (ArdourCanvas::Rectangle::TOP);
+		name_highlight->set_outline_color (RGBA_TO_UINT (0,0,0,255));
 
 	} else {
 		name_highlight = 0;
 	}
 
 	if (visibility & ShowNameText) {
-		name_pixbuf = new ArdourCanvas::Pixbuf(*group);
-		name_pixbuf->property_x() = NAME_X_OFFSET;
-		name_pixbuf->property_y() = trackview.current_height() + 1 - NAME_Y_OFFSET;
-
+		name_text = new ArdourCanvas::Text (group);
+		CANVAS_DEBUG_NAME (name_text, string_compose ("name text for %1", get_item_name()));
+		if (Config->get_show_name_highlight()) {
+			name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, trackview.current_height() - NAME_Y_OFFSET));
+		} else {
+			name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, NAME_Y_OFFSET));
+		}
+		name_text->set_font_description (NAME_FONT);
+		name_text->set_ignore_events (true);
 	} else {
-		name_pixbuf = 0;
+		name_text = 0;
 	}
 
 	/* create our grab handles used for trimming/duration etc */
@@ -219,10 +265,17 @@ TimeAxisViewItem::init (
 		double top   = TimeAxisViewItem::GRAB_HANDLE_TOP;
 		double width = TimeAxisViewItem::GRAB_HANDLE_WIDTH;
 
-		frame_handle_start = new ArdourCanvas::SimpleRect (*group, 0.0, top, width, trackview.current_height());
-		frame_handle_start->property_outline_what() = 0x0;
-		frame_handle_end = new ArdourCanvas::SimpleRect (*group, 0.0, top, width, trackview.current_height());
-		frame_handle_end->property_outline_what() = 0x0;
+		frame_handle_start = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height()));
+		CANVAS_DEBUG_NAME (frame_handle_start, "TAVI frame handle start");
+		frame_handle_start->set_outline (false);
+		frame_handle_start->set_fill (false);
+		frame_handle_start->Event.connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisViewItem::frame_handle_crossing), frame_handle_start));
+
+		frame_handle_end = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height()));
+		CANVAS_DEBUG_NAME (frame_handle_end, "TAVI frame handle end");
+		frame_handle_end->set_outline (false);
+		frame_handle_end->set_fill (false);
+		frame_handle_end->Event.connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisViewItem::frame_handle_crossing), frame_handle_end));
 	} else {
 		frame_handle_start = frame_handle_end = 0;
 	}
@@ -233,11 +286,18 @@ TimeAxisViewItem::init (
 	set_position (start, this);
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&TimeAxisViewItem::parameter_changed, this, _1), gui_context ());
+	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &TimeAxisViewItem::parameter_changed));
 }
 
 TimeAxisViewItem::~TimeAxisViewItem()
 {
 	delete group;
+}
+
+bool
+TimeAxisViewItem::canvas_group_event (GdkEvent* /*ev*/)
+{
+	return false;
 }
 
 void
@@ -247,8 +307,8 @@ TimeAxisViewItem::hide_rect ()
         set_frame_color ();
 
         if (name_highlight) {
-                name_highlight->property_outline_what() = 0x0;
-                name_highlight->property_fill_color_rgba() = UINT_RGBA_CHANGE_A(fill_color,64);
+                name_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0));
+                name_highlight->set_fill_color (UINT_RGBA_CHANGE_A (fill_color, 64));
         }
 }
 
@@ -259,11 +319,10 @@ TimeAxisViewItem::show_rect ()
         set_frame_color ();
 
         if (name_highlight) {
-                name_highlight->property_outline_what() = 0x4;
-                name_highlight->property_fill_color_rgba() = fill_color;
+                name_highlight->set_outline_what (ArdourCanvas::Rectangle::TOP);
+                name_highlight->set_fill_color (fill_color);
         }
 }
-
 
 /**
  * Set the position of this item on the timeline.
@@ -282,27 +341,20 @@ TimeAxisViewItem::set_position(framepos_t pos, void* src, double* delta)
 
 	frame_position = pos;
 
-	/*  This sucks. The GnomeCanvas version I am using
-	    doesn't correctly implement gnome_canvas_group_set_arg(),
-	    so that simply setting the "x" arg of the group
-	    fails to move the group. Instead, we have to
-	    use gnome_canvas_item_move(), which does the right
-	    thing. I see that in GNOME CVS, the current (Sept 2001)
-	    version of GNOME Canvas rectifies this issue cleanly.
-	*/
-
-	double old_unit_pos;
-	double new_unit_pos = pos / samples_per_unit;
-
-	old_unit_pos = group->property_x();
-
-	if (new_unit_pos != old_unit_pos) {
-		group->move (new_unit_pos - old_unit_pos, 0.0);
-	}
+	double new_unit_pos = trackview.editor().sample_to_pixel (pos);
 
 	if (delta) {
-		(*delta) = new_unit_pos - old_unit_pos;
+		(*delta) = new_unit_pos - group->position().x;
+		if (*delta == 0.0) {
+			return true;
+		}
+	} else {
+		if (new_unit_pos == group->position().x) {
+			return true;
+		}
 	}
+
+	group->set_x_position (new_unit_pos);
 
 	PositionChanged (frame_position, src); /* EMIT_SIGNAL */
 
@@ -341,7 +393,7 @@ TimeAxisViewItem::set_duration (framecnt_t dur, void* src)
 
 	item_duration = dur;
 
-	reset_width_dependent_items (trackview.editor().frame_to_pixel (dur));
+	reset_width_dependent_items (trackview.editor().sample_to_pixel (dur));
 
 	DurationChanged (dur, src); /* EMIT_SIGNAL */
 	return true;
@@ -490,6 +542,21 @@ TimeAxisViewItem::set_selected(bool yn)
 	if (_selected != yn) {
 		Selectable::set_selected (yn);
 		set_frame_color ();
+		set_name_text_color ();
+
+		if (frame) {
+			if (!Config->get_show_name_highlight() && yn) {
+				frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM|ArdourCanvas::Rectangle::TOP));
+				frame->set_y1 (_height - 1.0);
+			} else {
+				if (Config->get_show_name_highlight()) {
+					frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
+				} else {
+					frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM));
+				}
+				frame->set_y1 (_height);
+			}
+		}
 	}
 }
 
@@ -510,15 +577,14 @@ TimeAxisViewItem::get_time_axis_view () const
 void
 TimeAxisViewItem::set_name_text(const string& new_name)
 {
-	if (!name_pixbuf) {
+	if (!name_text) {
 		return;
 	}
 
-	last_item_width = trackview.editor().frame_to_pixel(item_duration);
-	name_pixbuf_width = pixel_width (new_name, NAME_FONT) + 2;
-	name_pixbuf->property_pixbuf() = pixbuf_from_string(new_name, NAME_FONT, name_pixbuf_width, NAME_HEIGHT, Gdk::Color ("#000000"));
-}
+	name_text_width = pixel_width (new_name, NAME_FONT) + 2;
+	name_text->set (new_name);
 
+}
 
 /**
  * Set the height of this item.
@@ -530,49 +596,75 @@ TimeAxisViewItem::set_height (double height)
 {
         _height = height;
 
-	if (name_highlight) {
-		if (height < NAME_HIGHLIGHT_THRESH) {
-			name_highlight->hide ();
-			high_enough_for_name = false;
-
-		} else {
-			name_highlight->show();
-			high_enough_for_name = true;
-		}
-
-		if (height > NAME_HIGHLIGHT_SIZE) {
-			name_highlight->property_y1() = (double) height - 1 - NAME_HIGHLIGHT_SIZE;
-			name_highlight->property_y2() = (double) height - 1;
-		}
-		else {
-			/* it gets hidden now anyway */
-			name_highlight->property_y1() = (double) 1.0;
-			name_highlight->property_y2() = (double) height;
-		}
-	}
+	manage_name_highlight ();
 
 	if (visibility & ShowNameText) {
-		name_pixbuf->property_y() =  height + 1 - NAME_Y_OFFSET;
+		if (Config->get_show_name_highlight()) {
+			name_text->set_y_position (height - NAME_Y_OFFSET); 
+		} else {
+			name_text->set_y_position (NAME_Y_OFFSET); 
+		}
 	}
 
 	if (frame) {
-		frame->property_y2() = height - 1;
+		if (!Config->get_show_name_highlight() && _selected) {
+			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM|ArdourCanvas::Rectangle::TOP));
+			frame->set_y1 (_height - 1.0);
+		} else {
+			if (Config->get_show_name_highlight()) {
+				frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
+			} else {
+				frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM));
+			}
+			frame->set_y1 (_height);
+		}
+
 		if (frame_handle_start) {
-			frame_handle_start->property_y2() = height - 1;
-			frame_handle_end->property_y2() = height - 1;
+			frame_handle_start->set_y1 (height);
+			frame_handle_end->set_y1 (height);
 		}
 	}
 
-	vestigial_frame->property_y2() = height - 1;
+	vestigial_frame->set_y1 (height - 1.0);
 
-	update_name_pixbuf_visibility ();
 	set_colors ();
 }
 
 void
-TimeAxisViewItem::set_color (Gdk::Color const & base_color)
+TimeAxisViewItem::manage_name_highlight ()
 {
-	compute_colors (base_color);
+	if (!name_highlight) {
+		return;
+	}
+
+	if (_height < NAME_HIGHLIGHT_THRESH) {
+		high_enough_for_name = false;
+	} else {
+		high_enough_for_name = true;
+	}
+
+	if (_width < 2.0) {
+		wide_enough_for_name = false;
+	} else {
+		wide_enough_for_name = true;
+	}
+
+	if (name_highlight && wide_enough_for_name && high_enough_for_name) {
+
+		name_highlight->show();
+		name_highlight->set (ArdourCanvas::Rect (0.0, (double) _height - NAME_HIGHLIGHT_SIZE,  _width+RIGHT_EDGE_SHIFT, (double) _height - 1.0));
+			
+	} else {
+		name_highlight->hide();
+	}
+
+	manage_name_text ();
+}
+
+void
+TimeAxisViewItem::set_color (uint32_t base_color)
+{
+	fill_color = base_color;
 	set_colors ();
 }
 
@@ -582,7 +674,7 @@ TimeAxisViewItem::get_canvas_frame()
 	return frame;
 }
 
-ArdourCanvas::Group*
+ArdourCanvas::Item*
 TimeAxisViewItem::get_canvas_group()
 {
 	return group;
@@ -594,118 +686,101 @@ TimeAxisViewItem::get_name_highlight()
 	return name_highlight;
 }
 
-ArdourCanvas::Pixbuf*
-TimeAxisViewItem::get_name_pixbuf()
-{
-	return name_pixbuf;
-}
-
-/**
- * Calculate some contrasting color for displaying various parts of this item, based upon the base color.
- *
- * @param color the base color of the item
- */
-void
-TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
-{
-	unsigned char radius;
-	char minor_shift;
-
-	unsigned char r,g,b;
-
-	/* FILL: this is simple */
-	r = base_color.get_red()/256;
-	g = base_color.get_green()/256;
-	b = base_color.get_blue()/256;
-	fill_color = RGBA_TO_UINT(r,g,b,160);
-
-	/*  for minor colors:
-		if the overall saturation is strong, make the minor colors light.
-		if its weak, make them dark.
-
-   		we do this by moving an equal distance to the other side of the
-		central circle in the color wheel from where we started.
-	*/
-
-	radius = (unsigned char) rint (floor (sqrt (static_cast<double>(r*r + g*g + b+b))/3.0f));
-	minor_shift = 125 - radius;
-
-	/* LABEL: rotate around color wheel by 120 degrees anti-clockwise */
-
-	r = base_color.get_red()/256;
-	g = base_color.get_green()/256;
-	b = base_color.get_blue()/256;
-
-	if (r > b)
-	{
-		if (r > g)
-		{
-			/* red sector => green */
-			swap (r,g);
-		}
-		else
-		{
-			/* green sector => blue */
-			swap (g,b);
-		}
-	}
-	else
-	{
-		if (b > g)
-		{
-			/* blue sector => red */
-			swap (b,r);
-		}
-		else
-		{
-			/* green sector => blue */
-			swap (g,b);
-		}
-	}
-
-	r += minor_shift;
-	b += minor_shift;
-	g += minor_shift;
-
-	label_color = RGBA_TO_UINT(r,g,b,255);
-	r = (base_color.get_red()/256)   + 127;
-	g = (base_color.get_green()/256) + 127;
-	b = (base_color.get_blue()/256)  + 127;
-
-	label_color = RGBA_TO_UINT(r,g,b,255);
-
-	/* XXX can we do better than this ? */
-	/* We're trying;) */
-	/* NUKECOLORS */
-
-	//frame_color_r = 192;
-	//frame_color_g = 192;
-	//frame_color_b = 194;
-
-	//selected_frame_color_r = 182;
-	//selected_frame_color_g = 145;
-	//selected_frame_color_b = 168;
-
-	//handle_color_r = 25;
-	//handle_color_g = 0;
-	//handle_color_b = 255;
-	//lock_handle_color_r = 235;
-	//lock_handle_color_g = 16;
-	//lock_handle_color_b = 16;
-}
-
 /**
  * Convenience method to set the various canvas item colors
  */
 void
 TimeAxisViewItem::set_colors()
 {
-	set_frame_color();
+	set_frame_color ();
 
 	if (name_highlight) {
-		name_highlight->property_fill_color_rgba() = fill_color;
+                name_highlight->set_fill_color (fill_color);
 	}
+
+	set_name_text_color ();
 	set_trim_handle_colors();
+}
+
+void
+TimeAxisViewItem::set_name_text_color ()
+{
+	if (!name_text) {
+		return;
+	}
+	
+
+	uint32_t f;
+	
+	if (Config->get_show_name_highlight()) {
+		/* name text will always be on top of name highlight, which
+		   will always use our fill color.
+		*/
+		f = fill_color;
+	} else {
+		/* name text will be on top of the item, whose color
+		   may vary depending on various conditions.
+		*/
+		f = get_fill_color ();
+	}
+
+	name_text->set_color (ArdourCanvas::contrasting_text_color (f));
+}
+
+uint32_t
+TimeAxisViewItem::fill_opacity () const
+{
+	if (!rect_visible) {
+		/* if the frame/rect is marked as invisible, then the
+		 * fill should be transparent. simplest: set
+		 
+		 * alpha/opacity to zero.
+		 */
+		return 0;
+	}
+
+	if (_dragging) {
+		return 130;
+	}
+
+	uint32_t col = ARDOUR_UI::config()->get_canvasvar_FrameBase();
+	return UINT_RGBA_A (col);
+}
+
+uint32_t
+TimeAxisViewItem::get_fill_color () const
+{
+        uint32_t f;
+	uint32_t o;
+
+	o = fill_opacity ();
+
+	if (_selected) {
+
+                f = ARDOUR_UI::config()->get_canvasvar_SelectedFrameBase();
+
+		if (o == 0) {
+			/* some condition of this item has set fill opacity to
+			 * zero, but it has been selected, so use a mid-way
+			 * alpha value to make it reasonably visible.
+			 */
+			o = 130;
+		}
+		
+	} else {
+
+		if (_recregion) {
+			f = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
+		} else {
+			if ((!Config->get_show_name_highlight() || high_enough_for_name) && !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
+				f = ARDOUR_UI::config()->get_canvasvar_FrameBase();
+			} else {
+				f = fill_color;
+			}
+		}
+	}
+
+	return UINT_RGBA_CHANGE_A (f, o);
 }
 
 /**
@@ -714,61 +789,59 @@ TimeAxisViewItem::set_colors()
 void
 TimeAxisViewItem::set_frame_color()
 {
-        uint32_t f = 0;
-
 	if (!frame) {
 		return;
 	}
 
-	if (_selected) {
-
-                f = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
-
-		if (fill_opacity) {
-                        f = UINT_RGBA_CHANGE_A (f, fill_opacity);
-		}
-
-                if (!rect_visible) {
-                        f = UINT_RGBA_CHANGE_A (f, 0);
-                }
-
-	} else {
-
-		if (_recregion) {
-			f = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
-		} else {
-
-			if (high_enough_for_name && !Config->get_color_regions_using_track_color()) {
-				f = ARDOUR_UI::config()->canvasvar_FrameBase.get();
-			} else {
-				f = fill_color;
-			}
-
-			if (fill_opacity) {
-				f = UINT_RGBA_CHANGE_A (f, fill_opacity);
-			}
-
-                        if (!rect_visible) {
-                                f = UINT_RGBA_CHANGE_A (f, 0);
-                        }
-                }
-	}
-
-        frame->property_fill_color_rgba() = f;
+        frame->set_fill_color (get_fill_color());
+	set_frame_gradient ();
 
         if (!_recregion) {
+		uint32_t f;
+
                 if (_selected) {
-                        f = ARDOUR_UI::config()->canvasvar_SelectedTimeAxisFrame.get();
+                        f = ARDOUR_UI::config()->get_canvasvar_SelectedTimeAxisFrame();
                 } else {
-                        f = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
+                        f = ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame();
                 }
 
                 if (!rect_visible) {
+			/* make the frame outline be visible but rather transparent */
                         f = UINT_RGBA_CHANGE_A (f, 64);
                 }
 
-                frame->property_outline_color_rgba() = f;
+                frame->set_outline_color (f);
         }
+}
+
+void
+TimeAxisViewItem::set_frame_gradient ()
+{
+	if (ARDOUR_UI::config()->get_timeline_item_gradient_depth() == 0.0) {
+		frame->set_gradient (ArdourCanvas::Fill::StopList (), 0);
+		return;
+	}
+		
+	ArdourCanvas::Fill::StopList stops;
+	double r, g, b, a;
+	double h, s, v;
+	ArdourCanvas::Color f (get_fill_color());
+
+	/* need to get alpha value */
+	ArdourCanvas::color_to_rgba (f, r, g, b, a);
+	
+	stops.push_back (std::make_pair (0.0, f));
+	
+	/* now a darker version */
+	
+	ArdourCanvas::color_to_hsv (f, h, s, v);
+
+	v = min (1.0, v * (1.0 - ARDOUR_UI::config()->get_timeline_item_gradient_depth()));
+	
+	ArdourCanvas::Color darker = ArdourCanvas::hsv_to_color (h, s, v, a);
+	stops.push_back (std::make_pair (1.0, darker));
+	
+	frame->set_gradient (stops, true);
 }
 
 /**
@@ -777,51 +850,83 @@ TimeAxisViewItem::set_frame_color()
 void
 TimeAxisViewItem::set_trim_handle_colors()
 {
+#if 1
+	/* Leave them transparent for now */
+	if (frame_handle_start) {
+		frame_handle_start->set_fill_color (0x00000000);
+		frame_handle_end->set_fill_color (0x00000000);
+	}
+#else
 	if (frame_handle_start) {
 		if (position_locked) {
-			frame_handle_start->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TrimHandleLocked.get();
-			frame_handle_end->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_TrimHandleLocked.get();
+			frame_handle_start->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandleLocked());
+			frame_handle_end->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandleLocked());
 		} else {
-			frame_handle_start->property_fill_color_rgba() = RGBA_TO_UINT(1, 1, 1, 0); //ARDOUR_UI::config()->canvasvar_TrimHandle.get();
-			frame_handle_end->property_fill_color_rgba() = RGBA_TO_UINT(1, 1, 1, 0); //ARDOUR_UI::config()->canvasvar_TrimHandle.get();
+			frame_handle_start->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandle());
+			frame_handle_end->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandle());
 		}
 	}
+#endif
 }
 
-/** @return the samples per unit of this item */
-double
-TimeAxisViewItem::get_samples_per_unit()
+bool
+TimeAxisViewItem::frame_handle_crossing (GdkEvent* ev, ArdourCanvas::Rectangle* item)
 {
-	return samples_per_unit;
+	switch (ev->type) {
+	case GDK_LEAVE_NOTIFY:
+		/* always hide the handle whenever we leave, no matter what mode */
+		item->set_fill (false);
+		break;
+	case GDK_ENTER_NOTIFY:
+		if (trackview.editor().effective_mouse_mode() == Editing::MouseObject &&
+		    !trackview.editor().internal_editing()) {
+			/* never set this to be visible in internal
+			   edit mode. Note, however, that we do need to
+			   undo visibility (LEAVE_NOTIFY case above) no
+			   matter what the mode is.
+			*/
+			item->set_fill (true);
+		}
+		break;
+	default:
+		break;
+	}
+	return false;
 }
 
-/**
- * Set the samples per unit of this item.
- * This item is used to determine the relative visual size and position of this item
- * based upon its duration and start value.
+/** @return the frames per pixel */
+double
+TimeAxisViewItem::get_samples_per_pixel () const
+{
+	return samples_per_pixel;
+}
+
+/** Set the frames per pixel of this item.
+ *  This item is used to determine the relative visual size and position of this item
+ *  based upon its duration and start value.
  *
- * @param spu the new samples per unit value
+ *  @param fpp the new frames per pixel
  */
 void
-TimeAxisViewItem::set_samples_per_unit (double spu)
+TimeAxisViewItem::set_samples_per_pixel (double fpp)
 {
-	samples_per_unit = spu;
+	samples_per_pixel = fpp;
 	set_position (this->get_position(), this);
-	reset_width_dependent_items ((double)get_duration() / samples_per_unit);
+	reset_width_dependent_items ((double) get_duration() / samples_per_pixel);
 }
 
 void
 TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 {
+	_width = pixel_width;
+
+	manage_name_highlight ();
+	manage_name_text ();
 
 	if (pixel_width < 2.0) {
 
 		if (show_vestigial) {
 			vestigial_frame->show();
-		}
-
-		if (name_highlight) {
-			name_highlight->hide();
 		}
 
 		if (frame) {
@@ -833,30 +938,12 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			frame_handle_end->hide();
 		}
 
-		wide_enough_for_name = false;
-
 	} else {
 		vestigial_frame->hide();
 
-		if (name_highlight) {
-
-			if (_height < NAME_HIGHLIGHT_THRESH) {
-				name_highlight->hide();
-				high_enough_for_name = false;
-			} else {
-				name_highlight->show();
-				if (!get_item_name().empty()) {
-					reset_name_width (pixel_width);
-				}
-				high_enough_for_name = true;
-			}
-
-			name_highlight->property_x2() = pixel_width;
-		}
-
 		if (frame) {
 			frame->show();
-			frame->property_x2() = pixel_width;
+			frame->set_x1 (pixel_width + RIGHT_EDGE_SHIFT);
 		}
 
 		if (frame_handle_start) {
@@ -866,64 +953,49 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				 * the right-hand end of frame_handle_start and the left-hand
 				 * end of frame_handle_end, so disable the handles
 				 */
+
 				frame_handle_start->hide();
 				frame_handle_end->hide();
 			} else {
 				frame_handle_start->show();
-				frame_handle_end->property_x1() = pixel_width - (TimeAxisViewItem::GRAB_HANDLE_WIDTH);
-				frame_handle_end->property_x2() = pixel_width;
+				frame_handle_end->set_x0 (pixel_width + RIGHT_EDGE_SHIFT - (TimeAxisViewItem::GRAB_HANDLE_WIDTH));
+				frame_handle_end->set_x1 (pixel_width + RIGHT_EDGE_SHIFT);
 				frame_handle_end->show();
 			}
 		}
-
-		wide_enough_for_name = true;
 	}
-
-        update_name_pixbuf_visibility ();
 }
 
 void
-TimeAxisViewItem::reset_name_width (double /*pixel_width*/)
+TimeAxisViewItem::manage_name_text ()
 {
-	uint32_t it_width;
-	int pb_width;
-	bool pixbuf_holds_full_name;
+	int visible_name_width;
 
-	if (!name_pixbuf) {
+	if (!name_text) {
 		return;
 	}
 
-	it_width = trackview.editor().frame_to_pixel(item_duration);
-	pb_width = name_pixbuf_width;
-
-	pixbuf_holds_full_name = last_item_width > pb_width + NAME_X_OFFSET;
-	last_item_width = it_width;
-
-	if (pixbuf_holds_full_name && (it_width >= pb_width + NAME_X_OFFSET)) {
-		/*
-		  we've previously had the full name length showing
-		  and its still showing.
-		*/
+	if (!wide_enough_for_name || !high_enough_for_name) {
+		name_text->hide ();
 		return;
 	}
-
-	if (pb_width > it_width - NAME_X_OFFSET) {
-		pb_width = it_width - NAME_X_OFFSET;
+		
+	if (name_text->text().empty()) {
+		name_text->hide ();
 	}
 
-	if (it_width <= NAME_X_OFFSET) {
-		wide_enough_for_name = false;
+	visible_name_width = name_text_width;
+
+	if (visible_name_width > _width - NAME_X_OFFSET) {
+		visible_name_width = _width - NAME_X_OFFSET;
+	}
+
+	if (visible_name_width < 1) {
+		name_text->hide ();
 	} else {
-		wide_enough_for_name = true;
+		name_text->clamp_width (visible_name_width);
+		name_text->show ();
 	}
-
-	update_name_pixbuf_visibility ();
-
-	if (pb_width < 1) {
-		pb_width = 1;
-	}
-
-	name_pixbuf->property_pixbuf() = pixbuf_from_string(item_name, NAME_FONT, pb_width, NAME_HEIGHT, Gdk::Color ("#000000"));
 }
 
 /**
@@ -946,30 +1018,29 @@ TimeAxisViewItem::idle_remove_this_item(TimeAxisViewItem* item, void* src)
 void
 TimeAxisViewItem::set_y (double y)
 {
-	double const old = group->property_y ();
-	if (y != old) {
-		group->move (0, y - old);
-	}
-}
-
-void
-TimeAxisViewItem::update_name_pixbuf_visibility ()
-{
-	if (!name_pixbuf) {
-		return;
-	}
-
-	if (wide_enough_for_name && high_enough_for_name) {
-		name_pixbuf->show ();
-	} else {
-		name_pixbuf->hide ();
-	}
+	group->set_y_position (y);
 }
 
 void
 TimeAxisViewItem::parameter_changed (string p)
 {
 	if (p == "color-regions-using-track-color") {
-		set_frame_color ();
+		set_colors ();
+	} else if (p == "timeline-item-gradient-depth") {
+		set_frame_gradient ();
 	}
+}
+
+void
+TimeAxisViewItem::drag_start ()
+{
+	_dragging = true;
+	set_frame_color ();
+}
+
+void
+TimeAxisViewItem::drag_end ()
+{
+	_dragging = false;
+	set_frame_color ();
 }

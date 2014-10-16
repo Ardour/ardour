@@ -165,6 +165,7 @@ Locale=$Shared/locale
 MidiMaps=$Shared/midi_maps
 PatchFiles=$Shared/patchfiles
 MackieControl=$Shared/mcp
+VFork=$Libraries/vfork
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -205,6 +206,7 @@ mkdir -p $Panners
 mkdir -p $Backends
 mkdir -p $Templates
 mkdir -p $Shared/doc
+mkdir -p $VFork
 
 # maybe set variables
 ENVIRONMENT=environment
@@ -389,7 +391,9 @@ done
 cp $BUILD_ROOT/libs/panners/*/lib*.so* $Panners
 
 # Backends
-cp $BUILD_ROOT/libs/backends/*/lib*.so* $Backends
+for backend in jack wavesaudio ; do
+    cp $BUILD_ROOT/libs/backends/$backend/lib*.so* $Backends
+done
 
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.so* $Libraries
@@ -397,8 +401,20 @@ cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.so* $Libraries
 # Suil modules
 cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Libraries
 
+# VST scanner app (both LXVST as well as WIN-VST, 2in1)
+# (if build with wine: ardour-vst-scanner is a wrapper
+#  script for ardour-vst-scanner.exe.so, if VST is disabled
+#  neither binary nor script exists)
+cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $APPLIB || true
+
+# vfork wrapper
+cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $VFork
+
+# ALSA device reservation tool (if available)
+cp $BUILD_ROOT/libs/ardouralsautil/ardour-request-device $APPLIB/ || true
+
 OURLIBDIR=$BUILD_ROOT/libs
-OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/rubberband:$OURLIBDIR/soundtouch:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/sigc++2:$OURLIBDIR/glibmm2:$OURLIBDIR/gtkmm2/atk:$OURLIBDIR/gtkmm2/pango:$OURLIBDIR/gtkmm2/gdk:$OURLIBDIR/gtkmm2/gtk:$OURLIBDIR/libgnomecanvasmm:$OURLIBDIR/libsndfile:$OURLIBDIR/evoral:$OURLIBDIR/evoral/src/libsmf:$OURLIBDIR/audiographer:$OURLIBDIR/timecode:$OURLIBDIR/taglib:$OURLIBDIR/libltc:$OURLIBDIR/qm-dsp
+OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/rubberband:$OURLIBDIR/soundtouch:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/sigc++2:$OURLIBDIR/glibmm2:$OURLIBDIR/gtkmm2/atk:$OURLIBDIR/gtkmm2/pango:$OURLIBDIR/gtkmm2/gdk:$OURLIBDIR/gtkmm2/gtk:$OURLIBDIR/canvas:$OURLIBDIR/libsndfile:$OURLIBDIR/evoral:$OURLIBDIR/evoral/src/libsmf:$OURLIBDIR/audiographer:$OURLIBDIR/timecode:$OURLIBDIR/taglib:$OURLIBDIR/libltc:$OURLIBDIR/qm-dsp:$OURLIBDIR/ardouralsautil
 
 echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
@@ -457,6 +473,8 @@ while [ true ] ; do
 			if echo $dep | grep -qs 'libc\.' ; then continue; fi
 			# don't include libstdc++
 			if echo $dep | grep -qs libstdc++ ; then continue; fi
+                        # don't include libdbus
+			if echo $dep | grep -qs libdbus ; then continue; fi
 
 			base=`basename $dep`
 			if ! test -f $Libraries/$base; then
@@ -510,13 +528,19 @@ echo "Copying other stuff to $APPDIR  ..."
 #cp $BUILD_ROOT/gtk2_ardour/ergonomic-us.bindings	$Etc
 cp $BUILD_ROOT/gtk2_ardour/mnemonic-us.bindings  $Etc
 cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Etc
-cp ../../ardour_system.rc $Etc/ardour_system.rc
-cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_*.rc $Etc
+cp ../../system_config $Etc/system_config
+cp $BUILD_ROOT/gtk2_ardour/ui_light.rc $Etc
+cp $BUILD_ROOT/gtk2_ardour/ui_light.rc $Etc
+cp $BUILD_ROOT/gtk2_ardour/light_fonts.rc $Etc
+cp $BUILD_ROOT/gtk2_ardour/dark_fonts.rc $Etc
+cp $BUILD_ROOT/gtk2_ardour/light_styles.rc $Etc
+cp $BUILD_ROOT/gtk2_ardour/dark_styles.rc $Etc
+cp $BUILD_ROOT/gtk2_ardour/widgets.rc $Etc
+cp $BUILD_ROOT/gtk2_ardour/ui_default.conf $Etc
+cp $BUILD_ROOT/gtk2_ardour/ui_default.conf $Etc/ardour3_ui.conf
 
 # these are copied straight from the source tree
 
-cp ../../gtk2_ardour/ardour3_ui_default.conf $Etc/ardour3_ui_default.conf
-cp ../../gtk2_ardour/ardour3_ui_default.conf $Etc/ardour3_ui.conf
 cp ../../instant.xml $Etc/instant.xml
 cp ../../gtk2_ardour/step_editing.bindings $Etc
 cp ../../gtk2_ardour/mixer.bindings $Etc

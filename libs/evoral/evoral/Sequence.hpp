@@ -26,6 +26,8 @@
 #include <utility>
 #include <boost/shared_ptr.hpp>
 #include <glibmm/threads.h>
+
+#include "evoral/visibility.h"
 #include "evoral/types.hpp"
 #include "evoral/Note.hpp"
 #include "evoral/Parameter.hpp"
@@ -42,7 +44,7 @@ template<typename Time> class Event;
 
 /** An iterator over (the x axis of) a 2-d double coordinate space.
  */
-class ControlIterator {
+class /*LIBEVORAL_API*/ ControlIterator {
 public:
 	ControlIterator(boost::shared_ptr<const ControlList> al, double ax, double ay)
 		: list(al)
@@ -60,7 +62,7 @@ public:
  * notes (instead of just unassociated note on/off events) and controller data.
  * Controller data is represented as a list of time-stamped float values. */
 template<typename Time>
-class Sequence : virtual public ControlSet {
+class LIBEVORAL_API Sequence : virtual public ControlSet {
 public:
 	Sequence(const TypeMap& type_map);
 	Sequence(const Sequence<Time>& other);
@@ -179,7 +181,7 @@ public:
 	OverlapPitchResolution overlap_pitch_resolution() const { return _overlap_pitch_resolution; }
 	void set_overlap_pitch_resolution(OverlapPitchResolution opr);
 
-	void set_notes (const Sequence<Time>::Notes& n);
+	void set_notes (const typename Sequence<Time>::Notes& n);
 
 	typedef boost::shared_ptr< Event<Time> > SysExPtr;
 	typedef boost::shared_ptr<const Event<Time> > constSysExPtr;
@@ -214,7 +216,7 @@ private:
 public:
 
 	/** Read iterator */
-	class const_iterator {
+	class LIBEVORAL_API /* Added by JE - */ const_iterator {
 	public:
 		const_iterator();
 		const_iterator(const Sequence<Time>& seq, Time t, bool, std::set<Evoral::Parameter> const &);
@@ -269,9 +271,15 @@ public:
 
 	const const_iterator& end() const { return _end_iter; }
 
+	// CONST iterator implementations (x3)
 	typename Notes::const_iterator note_lower_bound (Time t) const;
 	typename PatchChanges::const_iterator patch_change_lower_bound (Time t) const;
 	typename SysExes::const_iterator sysex_lower_bound (Time t) const;
+
+	// NON-CONST iterator implementations (x3)
+	typename Notes::iterator note_lower_bound (Time t);
+	typename PatchChanges::iterator patch_change_lower_bound (Time t);
+	typename SysExes::iterator sysex_lower_bound (Time t);
 
 	bool control_to_midi_event(boost::shared_ptr< Event<Time> >& ev,
 	                           const ControlIterator&            iter) const;
@@ -354,7 +362,8 @@ private:
 
 } // namespace Evoral
 
-template<typename Time> std::ostream& operator<<(std::ostream& o, const Evoral::Sequence<Time>& s) { s.dump (o); return o; }
+template<typename Time> /*LIBEVORAL_API*/ std::ostream& operator<<(std::ostream& o, const Evoral::Sequence<Time>& s) { s.dump (o); return o; }
+
 
 #endif // EVORAL_SEQUENCE_HPP
 

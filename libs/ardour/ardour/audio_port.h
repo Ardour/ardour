@@ -26,7 +26,7 @@
 
 namespace ARDOUR {
 
-class AudioPort : public Port
+class LIBARDOUR_API AudioPort : public Port
 {
    public:
 	~AudioPort ();

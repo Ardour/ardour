@@ -21,12 +21,16 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#include <boost/algorithm/string.hpp>    
+
 #include <gtkmm/liststore.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/scale.h>
+
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/paths_dialog.h>
 
 #include "pbd/fpu.h"
 #include "pbd/cpus.h"
@@ -38,6 +42,9 @@
 #include "ardour/plugin_manager.h"
 #include "control_protocol/control_protocol.h"
 
+#include "canvas/wave_view.h"
+
+#include "ardour_ui.h"
 #include "ardour_window.h"
 #include "ardour_dialog.h"
 #include "gui_thread.h"
@@ -54,6 +61,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 
 class ClickOptions : public OptionEditorBox
 {
@@ -528,7 +536,7 @@ public:
 		_dpi_adjustment (50, 50, 250, 1, 10),
 		_dpi_slider (_dpi_adjustment)
 	{
-		_dpi_adjustment.set_value (floor (_rc_config->get_font_scale () / 1024));
+		_dpi_adjustment.set_value (floor ((double)(_rc_config->get_font_scale () / 1024)));
 
 		Label* l = manage (new Label (_("Font scaling:")));
 		l->set_name ("OptionsLabel");
@@ -547,7 +555,7 @@ public:
 	void parameter_changed (string const & p)
 	{
 		if (p == "font-scale") {
-			_dpi_adjustment.set_value (floor (_rc_config->get_font_scale() / 1024));
+			_dpi_adjustment.set_value (floor ((double)(_rc_config->get_font_scale() / 1024)));
 		}
 	}
 
@@ -568,6 +576,56 @@ private:
 	RCConfiguration* _rc_config;
 	Adjustment _dpi_adjustment;
 	HScale _dpi_slider;
+};
+
+class ClipLevelOptions : public OptionEditorBox
+{
+public:
+	ClipLevelOptions (RCConfiguration* c) 
+		: _rc_config (c)
+		, _clip_level_adjustment (-.5, -50.0, 0.0, 0.1, 1.0) /* units of dB */
+		, _clip_level_slider (_clip_level_adjustment)
+	{
+		_clip_level_adjustment.set_value (_rc_config->get_waveform_clip_level ());
+
+		Label* l = manage (new Label (_("Waveform Clip Level (dBFS):")));
+		l->set_name ("OptionsLabel");
+
+		_clip_level_slider.set_update_policy (UPDATE_DISCONTINUOUS);
+		HBox* h = manage (new HBox);
+		h->set_spacing (4);
+		h->pack_start (*l, false, false);
+		h->pack_start (_clip_level_slider, true, true);
+
+		_box->pack_start (*h, false, false);
+
+		_clip_level_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &ClipLevelOptions::clip_level_changed));
+	}
+
+	void parameter_changed (string const & p)
+	{
+		if (p == "waveform-clip-level") {
+			_clip_level_adjustment.set_value (_rc_config->get_waveform_clip_level());
+		}
+	}
+
+	void set_state_from_config ()
+	{
+		parameter_changed ("waveform-clip-level");
+	}
+
+private:
+
+	void clip_level_changed ()
+	{
+		_rc_config->set_waveform_clip_level (_clip_level_adjustment.get_value());
+		/* XXX: should be triggered from the parameter changed signal */
+		ArdourCanvas::WaveView::set_clip_level (_clip_level_adjustment.get_value());
+	}
+
+	RCConfiguration* _rc_config;
+	Adjustment _clip_level_adjustment;
+	HScale _clip_level_slider;
 };
 
 class BufferingOptions : public OptionEditorBox
@@ -737,17 +795,7 @@ private:
 			if (!was_enabled) {
 				ControlProtocolManager::instance().activate (*cpi);
 			} else {
-				Gtk::Window* win = r[_model.editor];
-				if (win) {
-					win->hide ();
-				}
-
 				ControlProtocolManager::instance().deactivate (*cpi);
-					
-				if (win) {
-					delete win;
-					r[_model.editor] = 0;
-				}
 			}
 		}
 
@@ -759,8 +807,8 @@ private:
 		}
 	}
 
-        void edit_clicked (GdkEventButton* ev)
-        {
+	void edit_clicked (GdkEventButton* ev)
+	{
 		if (ev->type != GDK_2BUTTON_PRESS) {
 			return;
 		}
@@ -770,26 +818,32 @@ private:
 		TreeModel::Row row;
 
 		row = *(_view.get_selection()->get_selected());
-
-		Window* win = row[_model.editor];
-		if (win && !win->is_visible()) {
-			win->present ();
-		} else {
-			cpi = row[_model.protocol_info];
-
-			if (cpi && cpi->protocol && cpi->protocol->has_editor ()) {
-				Box* box = (Box*) cpi->protocol->get_gui ();
-				if (box) {
-					string title = row[_model.name];
-					ArdourWindow* win = new ArdourWindow (_parent, title);
-					win->set_title ("Control Protocol Options");
-					win->add (*box);
-					box->show ();
-					win->present ();
-					row[_model.editor] = win;
-				}
-			}
+		if (!row[_model.enabled]) {
+			return;
 		}
+		cpi = row[_model.protocol_info];
+		if (!cpi || !cpi->protocol || !cpi->protocol->has_editor ()) {
+			return;
+		}
+		Box* box = (Box*) cpi->protocol->get_gui ();
+		if (!box) {
+			return;
+		}
+		if (box->get_parent()) {
+			static_cast<ArdourWindow*>(box->get_parent())->present();
+			return;
+		}
+		string title = row[_model.name];
+		/* once created, the window is managed by the surface itself (as ->get_parent())
+		 * Surface's tear_down_gui() is called on session close, when de-activating
+		 * or re-initializing a surface.
+		 * tear_down_gui() hides an deletes the Window if it exists.
+		 */
+		ArdourWindow* win = new ArdourWindow (_parent, title);
+		win->set_title ("Control Protocol Options");
+		win->add (*box);
+		box->show ();
+		win->present ();
 	}
 
         class ControlSurfacesModelColumns : public TreeModelColumnRecord
@@ -802,14 +856,12 @@ private:
 			add (enabled);
 			add (feedback);
 			add (protocol_info);
-			add (editor);
 		}
 
 		TreeModelColumn<string> name;
 		TreeModelColumn<bool> enabled;
 		TreeModelColumn<bool> feedback;
 		TreeModelColumn<ControlProtocolInfo*> protocol_info;
-	        TreeModelColumn<Gtk::Window*> editor;
 	};
 
 	Glib::RefPtr<ListStore> _store;
@@ -938,6 +990,175 @@ private:
 	CheckButton _video_advanced_setup_button;
 };
 
+class PluginOptions : public OptionEditorBox
+{
+public:
+	PluginOptions (RCConfiguration* c)
+		: _rc_config (c)
+		, _display_plugin_scan_progress (_("Always Display Plugin Scan Progress"))
+		, _discover_vst_on_start (_("Scan for new VST Plugins on Application Start"))
+		, _timeout_adjustment (0, 0, 3000, 50, 50)
+		, _timeout_slider (_timeout_adjustment)
+	{
+		Label *l;
+		std::stringstream ss;
+		Table* t = manage (new Table (2, 6));
+		t->set_spacings (4);
+		Button* b;
+		int n = 0;
+
+		ss << "<b>" << _("General") << "</b>";
+		l = manage (left_aligned_label (ss.str()));
+		l->set_use_markup (true);
+		t->attach (*manage (new Label ("")), 0, 3, n, n+1, FILL | EXPAND); ++n;
+		t->attach (*l, 0, 2, n, n+1, FILL | EXPAND); ++n;
+
+		b = manage (new Button (_("Scan for Plugins")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::refresh_clicked));
+		t->attach (*b, 0, 2, n, n+1, FILL); ++n;
+
+		t->attach (_display_plugin_scan_progress, 0, 2, n, n+1); ++n;
+		_display_plugin_scan_progress.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::display_plugin_scan_progress_toggled));
+		Gtkmm2ext::UI::instance()->set_tip (_display_plugin_scan_progress,
+					    _("<b>When enabled</b> a popup window showing plugin scan progress is displayed for indexing (cache load) and discovery (detect new plugins)"));
+
+		_timeout_slider.set_digits (0);
+		_timeout_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &PluginOptions::timeout_changed));
+
+		Gtkmm2ext::UI::instance()->set_tip(_timeout_slider,
+			 _("Specify the default timeout for plugin instantiation in 1/10 seconds. Plugins that require more time to load will be blacklisted. A value of 0 disables the timeout."));
+
+		l = manage (left_aligned_label (_("Scan Time Out [deciseconds]")));;
+		HBox* h = manage (new HBox);
+		h->set_spacing (4);
+		h->pack_start (*l, false, false);
+		h->pack_start (_timeout_slider, true, true);
+		t->attach (*h, 0, 2, n, n+1); ++n;
+
+		ss.str("");
+		ss << "<b>" << _("VST") << "</b>";
+		l = manage (left_aligned_label (ss.str()));
+		l->set_use_markup (true);
+		t->attach (*manage (new Label ("")), 0, 3, n, n+1, FILL | EXPAND); ++n;
+		t->attach (*l, 0, 2, n, n+1, FILL | EXPAND); ++n;
+
+		b = manage (new Button (_("Clear VST Cache")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_vst_cache_clicked));
+		t->attach (*b, 0, 1, n, n+1, FILL);
+
+		b = manage (new Button (_("Clear VST Blacklist")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_vst_blacklist_clicked));
+		t->attach (*b, 1, 2, n, n+1, FILL);
+		++n;
+
+		t->attach (_discover_vst_on_start, 0, 2, n, n+1); ++n;
+		_discover_vst_on_start.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::discover_vst_on_start_toggled));
+		Gtkmm2ext::UI::instance()->set_tip (_discover_vst_on_start,
+					    _("<b>When enabled</b> new VST plugins are searched, tested and added to the cache index on application start. When disabled new plugins will only be available after triggering a 'Scan' manually"));
+
+#ifdef LXVST_SUPPORT
+		t->attach (*manage (left_aligned_label (_("Linux VST Path:"))), 0, 1, n, n+1);
+		b = manage (new Button (_("Edit")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::edit_lxvst_path_clicked));
+		t->attach (*b, 1, 2, n, n+1, FILL); ++n;
+#endif
+
+#ifdef WINDOWS_VST_SUPPORT
+		t->attach (*manage (left_aligned_label (_("Windows VST Path:"))), 0, 1, n, n+1);
+		b = manage (new Button (_("Edit")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::edit_vst_path_clicked));
+		t->attach (*b, 1, 2, n, n+1, FILL); ++n;
+#endif
+
+		_box->pack_start (*t,true,true);
+	}
+
+	void parameter_changed (string const & p) {
+		if (p == "show-plugin-scan-window") {
+			bool const x = _rc_config->get_show_plugin_scan_window();
+			_display_plugin_scan_progress.set_active (x);
+		}
+		else if (p == "discover-vst-on-start") {
+			bool const x = _rc_config->get_discover_vst_on_start();
+			_discover_vst_on_start.set_active (x);
+		}
+		else if (p == "vst-scan-timeout") {
+			int const x = _rc_config->get_vst_scan_timeout();
+			_timeout_adjustment.set_value (x);
+		}
+	}
+
+	void set_state_from_config () {
+		parameter_changed ("show-plugin-scan-window");
+		parameter_changed ("discover-vst-on-start");
+		parameter_changed ("vst-scan-timeout");
+	}
+
+private:
+	RCConfiguration* _rc_config;
+	CheckButton _display_plugin_scan_progress;
+	CheckButton _discover_vst_on_start;
+	Adjustment _timeout_adjustment;
+	HScale _timeout_slider;
+
+	void display_plugin_scan_progress_toggled () {
+		bool const x = _display_plugin_scan_progress.get_active();
+		_rc_config->set_show_plugin_scan_window(x);
+	}
+
+	void discover_vst_on_start_toggled () {
+		bool const x = _discover_vst_on_start.get_active();
+		_rc_config->set_discover_vst_on_start(x);
+	}
+
+	void timeout_changed () {
+		int x = floor(_timeout_adjustment.get_value());
+		_rc_config->set_vst_scan_timeout(x);
+	}
+
+	void clear_vst_cache_clicked () {
+		PluginManager::instance().clear_vst_cache();
+	}
+
+	void clear_vst_blacklist_clicked () {
+		PluginManager::instance().clear_vst_blacklist();
+	}
+
+	void edit_vst_path_clicked () {
+		Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
+				_("Set Windows VST Search Path"),
+				_rc_config->get_plugin_path_vst(),
+				PluginManager::instance().get_default_windows_vst_path()
+				);
+		ResponseType r = (ResponseType) pd->run ();
+		pd->hide();
+		if (r == RESPONSE_ACCEPT) {
+			_rc_config->set_plugin_path_vst(pd->get_serialized_paths());
+		}
+		delete pd;
+	}
+
+	// todo consolidate with edit_vst_path_clicked..
+	void edit_lxvst_path_clicked () {
+		Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
+				_("Set Linux VST Search Path"),
+				_rc_config->get_plugin_path_lxvst(),
+				PluginManager::instance().get_default_lxvst_path()
+				);
+		ResponseType r = (ResponseType) pd->run ();
+		pd->hide();
+		if (r == RESPONSE_ACCEPT) {
+			_rc_config->set_plugin_path_lxvst(pd->get_serialized_paths());
+		}
+		delete pd;
+	}
+
+	void refresh_clicked () {
+		PluginManager::instance().refresh();
+	}
+};
+
+
 /** A class which allows control of visibility of some editor components usign
  *  a VisibilityGroup.  The caller should pass in a `dummy' VisibilityGroup
  *  which has the correct members, but with null widget pointers.  This
@@ -1003,7 +1224,7 @@ private:
 RCOptionEditor::RCOptionEditor ()
 	: OptionEditor (Config, string_compose (_("%1 Preferences"), PROGRAM_NAME))
         , _rc_config (Config)
-	, _mixer_strip_visibility ("mixer-strip-visibility")
+	, _mixer_strip_visibility ("mixer-element-visibility")
 {
 	/* MISC */
 
@@ -1135,6 +1356,17 @@ RCOptionEditor::RCOptionEditor ()
 							    PROGRAM_NAME));
 	add_option (_("Transport"), tsf);
 
+	tsf = new BoolOption (
+		     "loop-is-mode",
+		     _("Play loop is a transport mode"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_loop_is_mode),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_loop_is_mode)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
+					    (_("<b>When enabled</b> the loop button does not start playback but forces playback to always play the loop\n\n"
+					       "<b>When disabled</b> the loop button starts playing the loop, but stop then cancels loop playback")));
+	add_option (_("Transport"), tsf);
+	
 	tsf = new BoolOption (
 		     "create-xrun-marker",
 		     _("Create markers where xruns occur"),
@@ -1277,7 +1509,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	_ltc_send_continuously = new BoolOption (
 			    "ltc-send-continuously",
-			    _("send LTC while stopped"),
+			    _("Send LTC while stopped"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_send_continuously),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_send_continuously)
 			    );
@@ -1302,12 +1534,12 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* EDITOR */
 
-	add_option (_("Editor"),
+	add_option (S_("Editor"),
 	     new BoolOption (
-		     "link-region-and-track-selection",
-		     _("Link selection of regions and tracks"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_region_and_track_selection),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_region_and_track_selection)
+		     "draggable-playhead",
+		     _("Allow dragging of playhead"),
+		     sigc::mem_fun (*ARDOUR_UI::config(), &UIConfiguration::get_draggable_playhead),
+		     sigc::mem_fun (*ARDOUR_UI::config(), &UIConfiguration::set_draggable_playhead)
 		     ));
 
 	add_option (_("Editor"),
@@ -1333,6 +1565,25 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_editor_meter),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_editor_meter)
 		     ));
+
+	ComboOption<FadeShape>* fadeshape = new ComboOption<FadeShape> (
+			"default-fade-shape",
+			_("Default fade shape"),
+			sigc::mem_fun (*_rc_config,
+				&RCConfiguration::get_default_fade_shape),
+			sigc::mem_fun (*_rc_config,
+				&RCConfiguration::set_default_fade_shape)
+			);
+
+	fadeshape->add (FadeLinear,
+			_("Linear (for highly correlated material)"));
+	fadeshape->add (FadeConstantPower, _("Constant power"));
+	fadeshape->add (FadeSymmetric, _("Symmetric"));
+	fadeshape->add (FadeSlow, _("Slow"));
+	fadeshape->add (FadeFast, _("Fast"));
+
+	add_option (_("Editor"), fadeshape);
+
 
 	bco = new BoolComboOption (
 		     "use-overlap-equivalency",
@@ -1395,6 +1646,8 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"), wfsh);
 
+	add_option (_("Editor"), new ClipLevelOptions (_rc_config));
+
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "show-waveforms-while-recording",
@@ -1409,14 +1662,6 @@ RCOptionEditor::RCOptionEditor ()
 			    _("Show zoom toolbar"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_zoom_tools),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_zoom_tools)
-			    ));
-
-	add_option (_("Editor"),
-		    new BoolOption (
-			    "color-regions-using-track-color",
-			    _("Color regions using their track's color"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_color_regions_using_track_color),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_color_regions_using_track_color)
 			    ));
 
 	add_option (_("Editor"),
@@ -1473,7 +1718,9 @@ RCOptionEditor::RCOptionEditor ()
                 mm->add (HardwareMonitoring, _("via Audio Driver"));
         }
 
-	mm->add (SoftwareMonitoring, _("ardour"));
+	string prog (PROGRAM_NAME);
+	boost::algorithm::to_lower (prog);
+	mm->add (SoftwareMonitoring, string_compose (_("%1"), prog));
 	mm->add (ExternalMonitoring, _("audio hardware"));
 
 	add_option (_("Audio"), mm);
@@ -1573,6 +1820,8 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_new_plugins_active),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_new_plugins_active)
 		     ));
+
+	add_option (_("Audio"), new OptionEditorHeading (_("Regions")));
 
 	add_option (_("Audio"),
 	     new BoolOption (
@@ -1795,7 +2044,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("MIDI"),
 		    new BoolOption (
-			    "diplay-first-midi-bank-as-zero",
+			    "display-first-midi-bank-as-zero",
 			    _("Display first MIDI bank/program as 0"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_first_midi_bank_is_zero),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_first_midi_bank_is_zero)
@@ -1878,6 +2127,11 @@ RCOptionEditor::RCOptionEditor ()
 	/* VIDEO Timeline */
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
 
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+	/* Plugin options (currrently VST only) */
+	add_option (_("Plugins"), new PluginOptions (_rc_config));
+#endif
+
 	/* INTERFACE */
 
 	add_option (S_("Preferences|GUI"),
@@ -1896,6 +2150,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_tooltips)
 		     ));
 
+	add_option (S_("Preferences|GUI"),
+	     new BoolOption (
+		     "show-name-highlight",
+		     _("Use name highlight bars in region displays"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_name_highlight),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_name_highlight)
+		     ));
+
 #ifndef GTKOSX
 	/* font scaling does nothing with GDK/Quartz */
 	add_option (S_("Preferences|GUI"), new FontScalingOptions (_rc_config));
@@ -1904,19 +2166,35 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (S_("GUI"),
 		    new BoolOption (
 			    "super-rapid-clock-update",
-			    _("update transport clock display every 40ms instead of every 100ms"),
+			    _("update transport clock display at FPS instead of every 100ms"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_super_rapid_clock_update),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_super_rapid_clock_update)
 			    ));
 
+	/* Lock GUI timeout */
+
+	Gtk::Adjustment *lts = manage (new Gtk::Adjustment(0, 0, 1000, 1, 10));
+	HSliderOption *slts = new HSliderOption("lock-gui-after-seconds",
+						_("Lock timeout (seconds)"),
+						lts,
+						sigc::mem_fun (*ARDOUR_UI::config(), &UIConfiguration::get_lock_gui_after_seconds),
+						sigc::mem_fun (*ARDOUR_UI::config(), &UIConfiguration::set_lock_gui_after_seconds)
+			);
+	slts->scale().set_digits (0);
+	Gtkmm2ext::UI::instance()->set_tip
+		(slts->tip_widget(),
+		 _("Lock GUI after this many idle seconds (zero to never lock)"));
+	add_option (S_("Preferences|GUI"), slts);
+
 	/* The names of these controls must be the same as those given in MixerStrip
 	   for the actual widgets being controlled.
 	*/
+	_mixer_strip_visibility.add (0, X_("Input"), _("Input"));
 	_mixer_strip_visibility.add (0, X_("PhaseInvert"), _("Phase Invert"));
-	_mixer_strip_visibility.add (0, X_("SoloSafe"), _("Solo Safe"));
-	_mixer_strip_visibility.add (0, X_("SoloIsolated"), _("Solo Isolated"));
+	_mixer_strip_visibility.add (0, X_("RecMon"), _("Record & Monitor"));
+	_mixer_strip_visibility.add (0, X_("SoloIsoLock"), _("Solo Iso / Lock"));
+	_mixer_strip_visibility.add (0, X_("Output"), _("Output"));
 	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
-	_mixer_strip_visibility.add (0, X_("MeterPoint"), _("Meter Point"));
 	
 	add_option (
 		S_("Preferences|GUI"),
@@ -1936,7 +2214,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_narrow_ms)
 		     ));
 
-	add_option (S_("Preferences|GUI"), new OptionEditorHeading (_("Metering")));
+	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Metering")));
 
 	ComboOption<float>* mht = new ComboOption<float> (
 		"meter-hold",
@@ -1950,7 +2228,7 @@ RCOptionEditor::RCOptionEditor ()
 	mht->add (MeterHoldMedium, _("medium"));
 	mht->add (MeterHoldLong, _("long"));
 
-	add_option (S_("Preferences|GUI"), mht);
+	add_option (S_("Preferences|Metering"), mht);
 
 	ComboOption<float>* mfo = new ComboOption<float> (
 		"meter-falloff",
@@ -1969,7 +2247,7 @@ RCOptionEditor::RCOptionEditor ()
 	mfo->add (METER_FALLOFF_FASTER,   _("faster [46dB/sec]"));
 	mfo->add (METER_FALLOFF_FASTEST,  _("fastest [70dB/sec]"));
 
-	add_option (S_("Preferences|GUI"), mfo);
+	add_option (S_("Preferences|Metering"), mfo);
 
 	ComboOption<MeterLineUp>* mlu = new ComboOption<MeterLineUp> (
 		"meter-line-up-level",
@@ -1985,7 +2263,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-marks and color-knee point for dBFS scale DPM, set reference level for IEC1/Nordic, IEC2 PPM and VU meter."));
 
-	add_option (S_("Preferences|GUI"), mlu);
+	add_option (S_("Preferences|Metering"), mlu);
 
 	ComboOption<MeterLineUp>* mld = new ComboOption<MeterLineUp> (
 		"meter-line-up-din",
@@ -2001,7 +2279,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	Gtkmm2ext::UI::instance()->set_tip (mld->tip_widget(), _("Reference level for IEC1/DIN meter."));
 
-	add_option (S_("Preferences|GUI"), mld);
+	add_option (S_("Preferences|Metering"), mld);
 
 	ComboOption<VUMeterStandard>* mvu = new ComboOption<VUMeterStandard> (
 		"meter-vu-standard",
@@ -2015,7 +2293,7 @@ RCOptionEditor::RCOptionEditor ()
 	mvu->add (MeteringVUstandard, _("0VU = +4dBu (standard)"));
 	mvu->add (MeteringVUeight,    _("0VU = +8dBu"));
 
-	add_option (S_("Preferences|GUI"), mvu);
+	add_option (S_("Preferences|Metering"), mvu);
 
 	Gtk::Adjustment *mpk = manage (new Gtk::Adjustment(0, -10, 0, .1, .1));
 	HSliderOption *mpks = new HSliderOption("meter-peak",
@@ -2029,9 +2307,9 @@ RCOptionEditor::RCOptionEditor ()
 		(mpks->tip_widget(),
 		 _("Specify the audio signal level in dbFS at and above which the meter-peak indicator will flash red."));
 
-	add_option (S_("Preferences|GUI"), mpks);
+	add_option (S_("Preferences|Metering"), mpks);
 
-	add_option (S_("Preferences|GUI"),
+	add_option (S_("Preferences|Metering"),
 	     new BoolOption (
 		     "meter-style-led",
 		     _("LED meter style"),

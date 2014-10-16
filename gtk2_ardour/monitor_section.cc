@@ -27,6 +27,9 @@
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/motionfeedback.h"
 
+#include <gtkmm/menu.h>
+#include <gtkmm/menuitem.h>
+
 #include "ardour/monitor_processor.h"
 #include "ardour/route.h"
 
@@ -40,6 +43,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
@@ -59,6 +63,10 @@ MonitorSection::MonitorSection (Session* s)
         , dim_control (0)
         , solo_boost_control (0)
         , solo_cut_control (0)
+        , gain_display (0)
+        , dim_display (0)
+        , solo_boost_display (0)
+        , solo_cut_display (0)
         , solo_in_place_button (_("SiP"), ArdourButton::led_default_elements)
         , afl_button (_("AFL"), ArdourButton::led_default_elements)
 	, pfl_button (_("PFL"), ArdourButton::led_default_elements)
@@ -66,6 +74,9 @@ MonitorSection::MonitorSection (Session* s)
 	, solo_mute_override_button (ArdourButton::led_default_elements)
 	, _inhibit_solo_model_update (false)
 {
+
+	using namespace Menu_Helpers;
+
         Glib::RefPtr<Action> act;
 
         if (!monitor_actions) {
@@ -83,27 +94,27 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Rude Solo */
 
-	rude_solo_button.set_text (_("soloing"));
+	rude_solo_button.set_text (_("Soloing"));
 	rude_solo_button.set_name ("rude solo");
         rude_solo_button.show ();
 
-	rude_iso_button.set_text (_("isolated"));
+	rude_iso_button.set_text (_("Isolated"));
 	rude_iso_button.set_name ("rude isolate");
         rude_iso_button.show ();
 
-	rude_audition_button.set_text (_("auditioning"));
+	rude_audition_button.set_text (_("Auditioning"));
 	rude_audition_button.set_name ("rude audition");
         rude_audition_button.show ();
 
         ARDOUR_UI::Blink.connect (sigc::mem_fun (*this, &MonitorSection::do_blink));
 
-	rude_solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_solo));
+	rude_solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_solo), false);
         UI::instance()->set_tip (rude_solo_button, _("When active, something is soloed.\nClick to de-solo everything"));
 
-	rude_iso_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_isolate));
+	rude_iso_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_isolate), false);
         UI::instance()->set_tip (rude_iso_button, _("When active, something is solo-isolated.\nClick to de-isolate everything"));
 
-	rude_audition_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_audition));
+	rude_audition_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_audition), false);
         UI::instance()->set_tip (rude_audition_button, _("When active, auditioning is active.\nClick to stop the audition"));
 
 	solo_in_place_button.set_name ("monitor section solo model");
@@ -140,9 +151,19 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Solo Boost */
 
-        solo_boost_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.01, 0.1, true, 30, 30, true);
-	ARDOUR_UI::instance()->tooltips().set_tip (*solo_boost_control, _("Gain increase for soloed signals (0dB is normal)"));
+        solo_boost_control = new ArdourKnob ();
+		solo_boost_control->set_name("monitor knob");
+		solo_boost_control->set_size_request(40,40);
+		ARDOUR_UI::instance()->tooltips().set_tip (*solo_boost_control, _("Gain increase for soloed signals (0dB is normal)"));
 
+        solo_boost_display = new ArdourDisplay ();
+		solo_boost_display->set_name("monitor section cut");
+		solo_boost_display->set_size_request(80,20);
+		solo_boost_display->add_controllable_preset("0dB", 0.0);
+		solo_boost_display->add_controllable_preset("3 dB", 3.0);
+		solo_boost_display->add_controllable_preset("6 dB", 6.0);
+		solo_boost_display->add_controllable_preset("10 dB", 10.0);
+        
         HBox* solo_packer = manage (new HBox);
         solo_packer->set_spacing (6);
         solo_packer->show ();
@@ -150,44 +171,69 @@ MonitorSection::MonitorSection (Session* s)
         spin_label = manage (new Label (_("Solo Boost")));
         spin_packer = manage (new VBox);
         spin_packer->show ();
-        spin_packer->set_spacing (6);
-        spin_packer->pack_start (*solo_boost_control, false, false);
+        spin_packer->set_spacing (3);
         spin_packer->pack_start (*spin_label, false, false);
+        spin_packer->pack_start (*solo_boost_control, false, false);
+        spin_packer->pack_start (*solo_boost_display, false, false);
 
         solo_packer->pack_start (*spin_packer, true, false);
 
         /* Solo (SiP) cut */
 
-        solo_cut_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.1, 0.5, true, 30, 30, true);
-	ARDOUR_UI::instance()->tooltips().set_tip (*solo_cut_control, _("Gain reduction non-soloed signals\nA value above -inf dB causes \"solo-in-front\""));
+        solo_cut_control = new ArdourKnob ();
+        solo_cut_control->set_name ("monitor knob");
+        solo_cut_control->set_size_request (40,40);
+		ARDOUR_UI::instance()->tooltips().set_tip (*solo_cut_control, _("Gain reduction non-soloed signals\nA value above -inf dB causes \"solo-in-front\""));
 
+        solo_cut_display = new ArdourDisplay ();
+		solo_cut_display->set_name("monitor section cut");
+		solo_cut_display->set_size_request(80,20);
+		solo_cut_display->add_controllable_preset("0dB", 0.0);
+		solo_cut_display->add_controllable_preset("-6 dB", -6.0);
+		solo_cut_display->add_controllable_preset("-12 dB", -12.0);
+		solo_cut_display->add_controllable_preset("-20 dB", -20.0);
+		solo_cut_display->add_controllable_preset("OFF", -1200.0);
+       
         spin_label = manage (new Label (_("SiP Cut")));
         spin_packer = manage (new VBox);
         spin_packer->show ();
-        spin_packer->set_spacing (6);
-        spin_packer->pack_start (*solo_cut_control, false, false);
+        spin_packer->set_spacing (3);
         spin_packer->pack_start (*spin_label, false, false);
+        spin_packer->pack_start (*solo_cut_control, false, false);
+        spin_packer->pack_start (*solo_cut_display, false, false);
 
         solo_packer->pack_start (*spin_packer, true, false);
 
         /* Dim */
 
-        dim_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.01, 0.1, true, 30, 30, true);
-	ARDOUR_UI::instance()->tooltips().set_tip (*dim_control, _("Gain reduction to use when dimming monitor outputs"));
+        dim_control = new ArdourKnob ();
+        dim_control->set_name ("monitor knob");
+        dim_control->set_size_request (40,40);
+		ARDOUR_UI::instance()->tooltips().set_tip (*dim_control, _("Gain reduction to use when dimming monitor outputs"));
 
+        dim_display = new ArdourDisplay ();
+		dim_display->set_name("monitor section cut");
+		dim_display->set_size_request(80,20);
+		dim_display->add_controllable_preset("0dB", 0.0);
+		dim_display->add_controllable_preset("-3 dB", -3.0);
+		dim_display->add_controllable_preset("-6 dB", -6.0);
+		dim_display->add_controllable_preset("-12 dB", -12.0);
+		dim_display->add_controllable_preset("-20 dB", -20.0);
+        
         HBox* dim_packer = manage (new HBox);
         dim_packer->show ();
 
         spin_label = manage (new Label (_("Dim")));
         spin_packer = manage (new VBox);
         spin_packer->show ();
-        spin_packer->set_spacing (6);
-        spin_packer->pack_start (*dim_control, false, false);
+        spin_packer->set_spacing (3);
         spin_packer->pack_start (*spin_label, false, false);
+        spin_packer->pack_start (*dim_control, false, false);
+        spin_packer->pack_start (*dim_display, false, false);
 
         dim_packer->pack_start (*spin_packer, true, false);
 
-	exclusive_solo_button.set_text (_("excl. solo"));
+		exclusive_solo_button.set_text (_("Excl. Solo"));
         exclusive_solo_button.set_name (X_("monitor solo exclusive"));
         ARDOUR_UI::instance()->set_tip (&exclusive_solo_button, _("Exclusive solo means that only 1 solo is active at a time"));
 
@@ -196,7 +242,7 @@ MonitorSection::MonitorSection (Session* s)
 		exclusive_solo_button.set_related_action (act);
         }
 
-	solo_mute_override_button.set_text (_("solo » mute"));
+	solo_mute_override_button.set_text (_("Solo » Mute"));
         solo_mute_override_button.set_name (X_("monitor solo override"));
         ARDOUR_UI::instance()->set_tip (&solo_mute_override_button, _("If enabled, solo will override mute\n(a soloed & muted track or bus will be audible)"));
 
@@ -224,7 +270,7 @@ MonitorSection::MonitorSection (Session* s)
         upper_packer.pack_start (*solo_opt_box, false, false);
         upper_packer.pack_start (*solo_packer, false, false, 12);
 
-        cut_all_button.set_text (_("mute"));
+        cut_all_button.set_text (_("Mute"));
 	cut_all_button.set_name ("monitor section cut");
         cut_all_button.set_name (X_("monitor section cut"));
         cut_all_button.set_size_request (-1,50);
@@ -235,14 +281,14 @@ MonitorSection::MonitorSection (Session* s)
 		cut_all_button.set_related_action (act);
 	}
 
-	dim_all_button.set_text (_("dim"));
+	dim_all_button.set_text (_("Dim"));
 	dim_all_button.set_name ("monitor section dim");
         act = ActionManager::get_action (X_("Monitor"), X_("monitor-dim-all"));
         if (act) {
 		dim_all_button.set_related_action (act);
         }
 
-	mono_button.set_text (_("mono"));
+	mono_button.set_text (_("Mono"));
 	mono_button.set_name ("monitor section mono");
         act = ActionManager::get_action (X_("Monitor"), X_("monitor-mono"));
         if (act) {
@@ -261,14 +307,27 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Gain */
 
-        gain_control = new VolumeController (big_knob_pixbuf, boost::shared_ptr<Controllable>(), 1.0, 0.01, 0.1, true, 80, 80, false);
-
-        spin_label = manage (new Label (_("Monitor")));
-	spin_packer = manage (new VBox);
+        gain_control = new ArdourKnob ();
+		gain_control->set_name("monitor knob");
+		gain_control->set_size_request(80,80);
+        
+        gain_display = new ArdourDisplay ();
+		gain_display->set_name("monitor section cut");
+		gain_display->set_size_request(40,20);
+		gain_display->add_controllable_preset("0dB", 0.0);
+		gain_display->add_controllable_preset("-3 dB", -3.0);
+		gain_display->add_controllable_preset("-6 dB", -6.0);
+		gain_display->add_controllable_preset("-12 dB", -12.0);
+		gain_display->add_controllable_preset("-20 dB", -20.0);
+		gain_display->add_controllable_preset("-30 dB", -30.0);
+        
+		spin_label = manage (new Label (_("Monitor")));
+		spin_packer = manage (new VBox);
         spin_packer->show ();
-        spin_packer->set_spacing (6);
-        spin_packer->pack_start (*gain_control, false, false);
+        spin_packer->set_spacing (3);
         spin_packer->pack_start (*spin_label, false, false);
+        spin_packer->pack_start (*gain_control, false, false);
+        spin_packer->pack_start (*gain_display, false, false);
 
         lower_packer.pack_start (*spin_packer, true, true);
 
@@ -283,21 +342,27 @@ MonitorSection::MonitorSection (Session* s)
 	channel_size_group->add_widget (channel_table);
 
 	channel_table_header.resize (1, 5);
-        Label* l1 = manage (new Label (X_("out")));
+
+	Label* l1 = manage (new Label (X_("  ")));
 	l1->set_name (X_("MonitorSectionLabel"));
-        channel_table_header.attach (*l1, 0, 1, 0, 1, EXPAND|FILL);
-        l1 = manage (new Label (X_("mute")));
+	channel_table_header.attach (*l1, 0, 1, 0, 1, EXPAND|FILL);
+
+	l1 = manage (new Label (X_("Mute")));
 	l1->set_name (X_("MonitorSectionLabel"));
-        channel_table_header.attach (*l1, 1, 2, 0, 1, EXPAND|FILL);
-        l1 = manage (new Label (X_("dim")));
+	channel_table_header.attach (*l1, 1, 2, 0, 1, EXPAND|FILL);
+
+	l1 = manage (new Label (X_("Dim")));
 	l1->set_name (X_("MonitorSectionLabel"));
-        channel_table_header.attach (*l1, 2, 3, 0, 1, EXPAND|FILL);
-        l1 = manage (new Label (X_("solo")));
+	channel_table_header.attach (*l1, 2, 3, 0, 1, EXPAND|FILL);
+
+	l1 = manage (new Label (X_("Solo")));
 	l1->set_name (X_("MonitorSectionLabel"));
-        channel_table_header.attach (*l1, 3, 4, 0, 1, EXPAND|FILL);
-        l1 = manage (new Label (X_("inv")));
+	channel_table_header.attach (*l1, 3, 4, 0, 1, EXPAND|FILL);
+
+	l1 = manage (new Label (X_("Inv")));
 	l1->set_name (X_("MonitorSectionLabel"));
-        channel_table_header.attach (*l1, 4, 5, 0, 1, EXPAND|FILL);
+	channel_table_header.attach (*l1, 4, 5, 0, 1, EXPAND|FILL);
+
 	channel_table_header.show ();
 
 	table_hpacker.pack_start (channel_table, true, true);
@@ -316,8 +381,11 @@ MonitorSection::MonitorSection (Session* s)
         hpacker.pack_start (vpacker, true, true);
 
         gain_control->show_all ();
+        gain_display->show_all ();
         dim_control->show_all ();
+        dim_display->show_all();
         solo_boost_control->show_all ();
+        solo_boost_display->show_all();
 
         channel_table.show ();
         hpacker.show ();
@@ -350,8 +418,13 @@ MonitorSection::~MonitorSection ()
         _channel_buttons.clear ();
 
         delete gain_control;
+        delete gain_display;
         delete dim_control;
+        delete dim_display;
         delete solo_boost_control;
+        delete solo_boost_display;
+        delete solo_cut_control;
+        delete solo_cut_display;
         delete _tearoff;
 }
 
@@ -424,23 +497,18 @@ MonitorSection::set_session (Session* s)
 
 MonitorSection::ChannelButtonSet::ChannelButtonSet ()
 {
-	cut.set_diameter (3);
-	dim.set_diameter (3);
-	solo.set_diameter (3);
-	invert.set_diameter (3);
+	cut.set_name (X_("monitor section cut"));
+	dim.set_name (X_("monitor section dim"));
+	solo.set_name (X_("monitor section solo"));
+	invert.set_name (X_("monitor section invert"));
 
-        cut.set_name (X_("monitor section cut"));
-        dim.set_name (X_("monitor section dim"));
-        solo.set_name (X_("monitor section solo"));
-        invert.set_name (X_("monitor section invert"));
-
-        cut.unset_flags (Gtk::CAN_FOCUS);
-        dim.unset_flags (Gtk::CAN_FOCUS);
-        solo.unset_flags (Gtk::CAN_FOCUS);
-        invert.unset_flags (Gtk::CAN_FOCUS);
+	cut.unset_flags (Gtk::CAN_FOCUS);
+	dim.unset_flags (Gtk::CAN_FOCUS);
+	solo.unset_flags (Gtk::CAN_FOCUS);
+	invert.unset_flags (Gtk::CAN_FOCUS);
 }
 
-void
+	void
 MonitorSection::populate_buttons ()
 {
         if (!_monitor) {
@@ -1063,13 +1131,16 @@ MonitorSection::assign_controllables ()
         }
 
         if (_session) {
-		solo_cut_control->set_controllable (_session->solo_cut_control());
+			solo_cut_control->set_controllable (_session->solo_cut_control());
+			solo_cut_display->set_controllable (_session->solo_cut_control());
         } else {
-                solo_cut_control->set_controllable (none);
+            solo_cut_control->set_controllable (none);
+			solo_cut_display->set_controllable (none);
         }
 
         if (_route) {
                 gain_control->set_controllable (_route->gain_control());
+                gain_display->set_controllable (_route->gain_control());
         } else {
                 gain_control->set_controllable (none);
         }
@@ -1083,8 +1154,10 @@ MonitorSection::assign_controllables ()
                 mono_button.set_controllable (_monitor->mono_control());
                 mono_button.watch ();
 
-		dim_control->set_controllable (_monitor->dim_level_control ());
-		solo_boost_control->set_controllable (_monitor->solo_boost_control ());
+				dim_control->set_controllable (_monitor->dim_level_control ());
+				dim_display->set_controllable (_monitor->dim_level_control ());
+				solo_boost_control->set_controllable (_monitor->solo_boost_control ());
+				solo_boost_display->set_controllable (_monitor->solo_boost_control ());
 
         } else {
 
@@ -1093,7 +1166,9 @@ MonitorSection::assign_controllables ()
                 mono_button.set_controllable (none);
 
                 dim_control->set_controllable (none);
+                dim_display->set_controllable (none);
                 solo_boost_control->set_controllable (none);
+                solo_boost_display->set_controllable (none);
         }
 }
 

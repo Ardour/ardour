@@ -22,6 +22,8 @@
 #include "pbd/error.h"
 #include "ardour/cycle_timer.h"
 
+#include "ardour/libardour_visibility.h"
+
 #include "i18n.h"
 
 using namespace std;

@@ -20,6 +20,8 @@
 #ifndef __ardour_midi_track_h__
 #define __ardour_midi_track_h__
 
+#include "pbd/ffs.h"
+
 #include "ardour/track.h"
 #include "ardour/midi_ring_buffer.h"
 
@@ -33,7 +35,7 @@ class RouteGroup;
 class SMFSource;
 class Session;
 
-class MidiTrack : public Track
+class LIBARDOUR_API MidiTrack : public Track
 {
 public:
 	MidiTrack (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
@@ -70,7 +72,8 @@ public:
 	                  framecnt_t                   end_frame,
 	                  boost::shared_ptr<Processor> endpoint,
 	                  bool                         include_endpoint,
-	                  bool                         for_export);
+	                  bool                         for_export,
+	                  bool                         for_freeze);
 
 	int set_state (const XMLNode&, int version);
 
@@ -89,6 +92,8 @@ public:
 
 		MidiTrack* _route;
 	};
+
+	virtual void set_parameter_automation_state (Evoral::Parameter param, AutoState);
 
 	NoteMode note_mode() const { return _note_mode; }
 	void set_note_mode (NoteMode m);
@@ -183,7 +188,7 @@ private:
 /* if mode is ForceChannel, force mask to the lowest set channel or 1 if no
  * channels are set.
  */
-#define force_mask(mode,mask) (((mode) == ForceChannel) ? (((mask) ? (1<<(ffs((mask))-1)) : 1)) : mask)
+#define force_mask(mode,mask) (((mode) == ForceChannel) ? (((mask) ? (1<<(PBD::ffs((mask))-1)) : 1)) : mask)
 
 	void _set_playback_channel_mode(ChannelMode mode, uint16_t mask) {
 		mask = force_mask (mode, mask);

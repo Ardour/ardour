@@ -18,22 +18,32 @@
 
 */
 
-#include "plugin_eq_gui.h"
-#include "fft.h"
+#include <math.h>
+#include <iostream>
 
-#include "ardour_ui.h"
-#include "gui_thread.h"
-#include "ardour/audio_buffer.h"
-#include "ardour/data_type.h"
-#include "ardour/chan_mapping.h"
-#include "ardour/session.h"
+#ifdef COMPILER_MSVC
+#include <float.h>
+/* isinf() & isnan() are C99 standards, which older MSVC doesn't provide */
+#define ISINF(val) !((bool)_finite((double)val))
+#define ISNAN(val) (bool)_isnan((double)val)
+#else
+#define ISINF(val) std::isinf((val))
+#define ISNAN(val) std::isnan((val))
+#endif
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
 
-#include <iostream>
-#include <cmath>
+#include "ardour/audio_buffer.h"
+#include "ardour/data_type.h"
+#include "ardour/chan_mapping.h"
+#include "ardour/session.h"
+
+#include "plugin_eq_gui.h"
+#include "fft.h"
+#include "ardour_ui.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -765,13 +775,13 @@ PluginEqGui::plot_signal_amplitude_difference(Gtk::Widget *w, cairo_t *cr)
 		}
 		*/
 
-		if (std::isinf(power)) {
+		if (ISINF(power)) {
 			if (power < 0) {
 				power = _min_dB - 1.0;
 			} else {
 				power = _max_dB - 1.0;
 			}
-		} else if (std::isnan(power)) {
+		} else if (ISNAN(power)) {
 			power = _min_dB - 1.0;
 		}
 

@@ -43,6 +43,6 @@ BBT_Time::BBT_Time (double dbeats)
 	assert (dbeats >= 0);
 
         bars = 0;
-        beats = rint (floor (dbeats));
-        ticks = rint (floor (BBT_Time::ticks_per_beat * fmod (dbeats, 1.0)));
+        beats = lrint (floor (dbeats));
+        ticks = lrint (floor (BBT_Time::ticks_per_beat * fmod (dbeats, 1.0)));
 }

@@ -36,12 +36,15 @@ class EditorSummary : public CairoWidget, public EditorComponent, public ARDOUR:
 {
 public:
 	EditorSummary (Editor *);
+	~EditorSummary ();
 
 	void set_session (ARDOUR::Session *);
 	void set_overlays_dirty ();
+	void set_background_dirty ();
 	void routes_added (std::list<RouteTimeAxisView*> const &);
 
 private:
+	void on_size_allocate (Gtk::Allocation& alloc);
 
 	enum Position {
 		LEFT,
@@ -69,7 +72,7 @@ private:
         bool on_leave_notify_event (GdkEventCrossing*); 
 
 	void centre_on_click (GdkEventButton *);
-	void render (cairo_t *);
+	void render (cairo_t *, cairo_rectangle_t*);
 	void render_region (RegionView*, cairo_t*, double) const;
 	void get_editor (std::pair<double, double> *, std::pair<double, double> *) const;
 	void set_editor (double, double);
@@ -120,6 +123,9 @@ private:
 	Position _zoom_position;
 
 	bool _old_follow_playhead;
+	cairo_surface_t* _image;
+	void render_background_image ();
+	bool _background_dirty;
 
 	PBD::ScopedConnectionList position_connection;
 	PBD::ScopedConnection route_ctrl_id_connection;

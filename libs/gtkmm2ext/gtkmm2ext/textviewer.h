@@ -22,11 +22,13 @@
 #include <string>
 #include <gtkmm.h>
 
-#include <pbd/transmitter.h>
+#include "pbd/transmitter.h"
+
+#include "gtkmm2ext/visibility.h"
 
 namespace Gtkmm2ext {
 
-class TextViewer : public Gtk::Window, public Transmitter
+class LIBGTKMM2EXT_API TextViewer : public Gtk::Window, public Transmitter
 {
 	Gtk::TextView etext;
 	Gtk::VBox vbox1;
