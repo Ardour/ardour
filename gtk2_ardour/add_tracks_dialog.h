@@ -14,8 +14,8 @@
 #include "ardour/chan_count.h"
 
 namespace TrackFormat {
-    const std::string FormatMono = "MONO";
-    const std::string FormatStereo = "STEREO";
+    const std::string FormatMono = "Mono";
+    const std::string FormatStereo = "Stereo";
 }
 
 class AddTracksDialog : public WavesDialog {
