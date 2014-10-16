@@ -112,10 +112,6 @@ class NSM_Client;
 class LevelMeterHBox;
 class GUIObjectState;
 
-namespace Gtkmm2ext {
-	class TearOff;
-}
-
 namespace ARDOUR {
 	class ControlProtocolInfo;
 	class IO;
@@ -124,6 +120,10 @@ namespace ARDOUR {
 	class RouteGroup;
 	class Location;
 	class ProcessThread;
+}
+
+namespace Gtkmm2ext {
+	class TearOff;
 }
 
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
@@ -380,10 +380,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	std::list<MidiTracer*> _midi_tracer_windows;
 
-	/* Transport Control */
-
 	void detach_tearoff (Gtk::Box* parent, Gtk::Widget* contents);
 	void reattach_tearoff (Gtk::Box* parent, Gtk::Widget* contents, int32_t order);
+	void reattach_all_tearoffs ();
+
+	/* Transport Control */
 
 	Gtkmm2ext::TearOff*      transport_tearoff;
 	Gtk::Frame               transport_frame;

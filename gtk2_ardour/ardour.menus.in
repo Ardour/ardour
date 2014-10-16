@@ -337,6 +337,7 @@
       <menuitem action='ToggleMaximalEditor'/>
       <menuitem action='ToggleMaximalMixer'/>
       <menuitem action='KeepTearoffs'/>
+      <menuitem action='reattach-all-tearoffs'/>
 
       <separator/>
 

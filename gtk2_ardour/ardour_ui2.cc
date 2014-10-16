@@ -481,6 +481,12 @@ ARDOUR_UI::reattach_tearoff (Box* b, Widget* w, int32_t n)
 }
 
 void
+ARDOUR_UI::reattach_all_tearoffs ()
+{
+	if (transport_tearoff) transport_tearoff->put_it_back();
+}
+
+void
 ARDOUR_UI::soloing_changed (bool onoff)
 {
 	if (solo_alert_button.get_active() != onoff) {
