@@ -529,7 +529,7 @@ echo "Copying other stuff to $APPDIR  ..."
 cp $BUILD_ROOT/gtk2_ardour/mnemonic-us.bindings  $Etc
 cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Etc
 cp ../../system_config $Etc/system_config
-cp $BUILD_ROOT/gtk2_ardour/ui_light.rc $Etc
+cp $BUILD_ROOT/gtk2_ardour/ui_dark.rc $Etc
 cp $BUILD_ROOT/gtk2_ardour/ui_light.rc $Etc
 cp $BUILD_ROOT/gtk2_ardour/light_fonts.rc $Etc
 cp $BUILD_ROOT/gtk2_ardour/dark_fonts.rc $Etc
