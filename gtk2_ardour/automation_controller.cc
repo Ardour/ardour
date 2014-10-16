@@ -120,6 +120,7 @@ AutomationController::start_touch()
 void
 AutomationController::end_touch ()
 {
+	if (!_controllable->alist()) return;
 	if (_controllable->automation_state() == Touch) {
 
 		bool mark = false;

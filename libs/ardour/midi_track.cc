@@ -643,15 +643,17 @@ MidiTrack::set_parameter_automation_state (Evoral::Parameter param, AutoState st
 void
 MidiTrack::MidiControl::set_value(double val)
 {
+	const Evoral::Parameter &parameter = _list ? _list->parameter() : Control::parameter();
+
 	bool valid = false;
 	if (isinf(val)) {
 		cerr << "MIDIControl value is infinity" << endl;
 	} else if (isnan(val)) {
 		cerr << "MIDIControl value is NaN" << endl;
-	} else if (val < _list->parameter().min()) {
-		cerr << "MIDIControl value is < " << _list->parameter().min() << endl;
-	} else if (val > _list->parameter().max()) {
-		cerr << "MIDIControl value is > " << _list->parameter().max() << endl;
+	} else if (val < parameter.min()) {
+		cerr << "MIDIControl value is < " << parameter.min() << endl;
+	} else if (val > parameter.max()) {
+		cerr << "MIDIControl value is > " << parameter.max() << endl;
 	} else {
 		valid = true;
 	}
@@ -660,14 +662,14 @@ MidiTrack::MidiControl::set_value(double val)
 		return;
 	}
 
-	assert(val <= _list->parameter().max());
-	if ( ! automation_playback()) {
+	assert(val <= parameter.max());
+	if ( ! _list || ! automation_playback()) {
 		size_t size = 3;
-		uint8_t ev[3] = { _list->parameter().channel(), uint8_t (val), 0 };
-		switch(_list->parameter().type()) {
+		uint8_t ev[3] = { parameter.channel(), uint8_t (val), 0 };
+		switch(parameter.type()) {
 		case MidiCCAutomation:
 			ev[0] += MIDI_CMD_CONTROL;
-			ev[1] = _list->parameter().id();
+			ev[1] = parameter.id();
 			ev[2] = int(val);
 			break;
 
