@@ -2294,6 +2294,11 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
 void
 Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool reconnect_inputs, bool reconnect_outputs)
 {
+    // if we are deleting routes we will call this once at the end
+    if (_route_deletion_in_progress) {
+        return;
+    }
+    
     Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
     
 	if (withLock) {
@@ -2947,7 +2952,8 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		}
         
 		if (input_auto_connect || output_auto_connect) {
-			auto_connect_route (r, existing_inputs, existing_outputs, true, input_auto_connect);
+			// routes will be connected later
+            //auto_connect_route (r, existing_inputs, existing_outputs, true, input_auto_connect);
 		}
 
 		/* order keys are a GUI responsibility but we need to set up
@@ -3169,6 +3175,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
     /* try to cause everyone to drop their references
      * and unregister ports from the backend
      */
+    PBD::Unwinder<bool> uw_flag (_route_deletion_in_progress, true);
     for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
         
         (*iter)->drop_references ();

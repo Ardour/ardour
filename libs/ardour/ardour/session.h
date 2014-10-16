@@ -184,6 +184,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void clear_deletion_in_progress ();
 	bool deletion_in_progress() const { return _state_of_the_state & Deletion; }
     bool reconnection_in_progress() const { return _reconnecting_routes_in_progress; }
+    bool routes_deletion_in_progress() const { return _route_deletion_in_progress; }
 	PBD::Signal0<void> DirtyChanged;
 
 	const SessionDirectory& session_directory () const { return *(_session_dir.get()); }
@@ -1384,6 +1385,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
         void add_routes_inner (RouteList&, bool input_auto_connect, bool output_auto_connect);
         bool _adding_routes_in_progress;
     bool _reconnecting_routes_in_progress;
+    bool _route_deletion_in_progress;
 
 	uint32_t destructive_index;
 
