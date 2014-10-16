@@ -3406,6 +3406,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	}
 
     _add_tracks_dialog->setup();
+    _add_tracks_dialog->set_position (WIN_POS_CENTER);
     int r = _add_tracks_dialog->run();
     
 	switch (r) {
