@@ -693,7 +693,15 @@ AudioEngine::discover_backends ()
 AudioBackendInfo*
 AudioEngine::backend_discover (const string& path)
 {
+#ifdef PLATFORM_WINDOWS
+	// do not show popup dialog (e.g. missing libjack.dll)
+	// win7+ should use SetThreadErrorMode()
+	SetErrorMode(SEM_FAILCRITICALERRORS);
+#endif
 	Glib::Module module (path);
+#ifdef PLATFORM_WINDOWS
+	SetErrorMode(0); // reset to system default
+#endif
 	AudioBackendInfo* info;
 	AudioBackendInfo* (*dfunc)(void);
 	void* func = 0;
