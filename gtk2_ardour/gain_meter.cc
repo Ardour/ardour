@@ -1076,7 +1076,7 @@ GainMeterBase::get_controllable()
 bool
 GainMeterBase::level_meter_button_press (GdkEventButton* ev)
 {
-	return LevelMeterButtonPress (ev); /* EMIT SIGNAL */
+	return !!LevelMeterButtonPress (ev); /* EMIT SIGNAL */
 }
 
 void

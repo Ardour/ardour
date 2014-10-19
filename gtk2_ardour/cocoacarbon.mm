@@ -25,6 +25,9 @@
 #undef check
 #undef YES
 #undef NO
+#ifdef verify
+#undef verify
+#endif
 
 #include "ardour_ui.h"
 #include "actions.h"

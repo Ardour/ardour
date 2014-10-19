@@ -708,7 +708,7 @@ PortMatrix::io_from_bundle (boost::shared_ptr<Bundle> b) const
 bool
 PortMatrix::can_add_channels (boost::shared_ptr<Bundle> b) const
 {
-	return io_from_bundle (b);
+	return io_from_bundle (b) != 0;
 }
 
 void
@@ -731,7 +731,7 @@ PortMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 bool
 PortMatrix::can_remove_channels (boost::shared_ptr<Bundle> b) const
 {
-	return io_from_bundle (b);
+	return io_from_bundle (b) != 0;
 }
 
 void

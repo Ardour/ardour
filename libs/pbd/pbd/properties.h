@@ -443,7 +443,7 @@ public:
 	}
 
 	operator bool () const {
-		return _current;
+		return _current ? true : false;
 	}
 
 protected:

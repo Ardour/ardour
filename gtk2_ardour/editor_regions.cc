@@ -295,7 +295,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 	string str;
 	TreeModel::Row row;
 	Gdk::Color c;
-	bool missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source());
+	bool missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source()) != NULL;
 
 	if (!_show_automatic_regions && region->automatic()) {
 		return;
