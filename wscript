@@ -165,6 +165,15 @@ def set_compiler_flags (conf,opt):
     if opt.gprofile:
         debug_flags = [ '-pg' ]
 
+    # OSX
+    if platform == 'darwin':
+        if re.search ("^13[.]", version) != None:
+            conf.env['build_host'] = 'mavericks'
+        elif re.search ("^14[.]", version) != None:
+            conf.env['build_host'] = 'yosemite'
+        else:
+            conf.env['build_host'] = 'irrelevant'
+
     # Autodetect
     if opt.dist_target == 'auto':
         if platform == 'darwin':
@@ -181,8 +190,10 @@ def set_compiler_flags (conf,opt):
                 conf.env['build_target'] = 'lion'
             elif re.search ("^12[.]", version) != None:
                 conf.env['build_target'] = 'mountainlion'
+            elif re.search ("^13[.]", version) != None:
+                conf.env['build_target'] = 'mavericks'
             else:
-                conf.env['build_target'] = 'mavericks' # 13.0.0
+                conf.env['build_target'] = 'yosemite'
         else:
             match = re.search(
                     "(?P<cpu>i[0-6]86|x86_64|powerpc|ppc|ppc64|arm|s390x?)",
@@ -203,7 +214,7 @@ def set_compiler_flags (conf,opt):
         # 
         compiler_flags.append ('-U__STRICT_ANSI__')
 
-    if conf.options.cxx11 or conf.env['build_target'] == 'mavericks':
+    if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite' ]:
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
         if platform == "darwin":
@@ -288,8 +299,7 @@ def set_compiler_flags (conf,opt):
     # a single way to test if we're on OS X
     #
 
-    if conf.env['build_target'] in ['panther', 'tiger', 'leopard', 'snowleopard' ]:
-        conf.define ('IS_OSX', 1)
+    if conf.env['build_target'] in ['panther', 'tiger', 'leopard' ]:
         # force tiger or later, to avoid issues on PPC which defaults
         # back to 10.1 if we don't tell it otherwise.
 
@@ -297,17 +307,20 @@ def set_compiler_flags (conf,opt):
                 ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1040",
                  '-mmacosx-version-min=10.4'))
 
+    elif conf.env['build_target'] in [ 'snowleopard' ]:
+        compiler_flags.extend(
+                ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1060",
+                 '-mmacosx-version-min=10.6'))
+
     elif conf.env['build_target'] in [ 'lion', 'mountainlion' ]:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1070",
                  '-mmacosx-version-min=10.7'))
 
-    elif conf.env['build_target'] in [ 'mavericks' ]:
+    elif conf.env['build_target'] in [ 'mavericks', 'yosemite' ]:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
                  "-mmacosx-version-min=10.8"))
-    else:
-        conf.define ('IS_OSX', 0)
 
     #
     # save off CPU element in an env
