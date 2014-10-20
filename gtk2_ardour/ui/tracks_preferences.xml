@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title="Tracks Preferences" resizeable="false">
   <style name="generic_control"
-         winfont="Arial Bold 11"
-         macfont="Helvetica Bold 11"
+         winfont="Arial Bold 10"
+         macfont="Helvetica Bold 10"
          fgnormal="#c1c1c1"
          bgnormal="#6C6C6C"
          fgactive="#BFBFBF"
@@ -113,8 +113,8 @@
       <Button id="ok_button"
                   style="generic_button"
                   text="Ok"
-                  fgnormal="#212121"
-    			  bgnormal="#EbEbEb"
+                  fgnormal="#303030"
+    			  bgnormal="#CACAC5"
     			  fgactive="#909090"
     			  bgactive="#424242"
     			  borderwidth="1 1 1 1"
@@ -126,8 +126,8 @@
       <Button id="cancel_button"
                   style="generic_button"
                   text="Cancel"
-                  fgnormal="#212121"
-    			  bgnormal="#EbEbEb"
+                  fgnormal="#303030"
+    			  bgnormal="#CACAC5"
     			  fgactive="#909090"
     			  bgactive="#424242"
     			  borderwidth="1 1 1 1"
@@ -139,8 +139,8 @@
       <Button id="apply_button"
                   style="generic_button"
                   text="Apply"
-                  fgnormal="#212121"
-    			  bgnormal="#EbEbEb"
+                  fgnormal="#303030"
+    			  bgnormal="#CACAC5"
     			  fgactive="#909090"
     			  bgactive="#424242"
     			  borderwidth="1 1 1 1"
@@ -701,8 +701,8 @@
       <Button id = "browse_default_folder"
               style="generic_button"
               text="Browse"
-              fgnormal="#212121"
-    		  bgnormal="#EbEbEb"
+              fgnormal="#303030"
+    		  bgnormal="#CACAC5"
     		  fgactive="#909090"
     		  bgactive="#424242"
     		  borderwidth="1 1 1 1"
@@ -715,7 +715,7 @@
              style="generic_control"
              text=""
              x = "105"
-             y = "318"/>
+             y = "315"/>
       <dropdownitem title="Mono"/>
       <dropdownitem title="Stereo"/>
     </Layout>
