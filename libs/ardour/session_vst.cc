@@ -136,7 +136,7 @@ intptr_t Session::vst_callback (
 	case audioMasterWantMidi:
 		SHOW_CALLBACK ("amc: audioMasterWantMidi\n");
 		// <value> is a filter which is currently ignored
-		if (plug) {
+		if (plug && plug->get_info() != NULL) {
 			plug->get_info()->n_inputs.set_midi (1);
 		}
 		return 0;
