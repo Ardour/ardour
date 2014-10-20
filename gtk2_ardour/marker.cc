@@ -555,7 +555,7 @@ Marker::setup_name_display ()
                          */
                         _scene_change_text->set_position (ArdourCanvas::Duple (4.0, (_height / 2.0) - (name_height / 2.0)));
                         
-                        r.y0 = _scene_change_text->position().y - 2.0;
+                        r.y0 = _scene_change_text->position().y - 3.0;
                         r.y1 = r.y0 + name_height + 4.0;
                         
                         _scene_change_rect->set (r);
