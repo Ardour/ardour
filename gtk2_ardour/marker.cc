@@ -297,7 +297,7 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
 	, _left_label_limit (DBL_MAX)
 	, _right_label_limit (DBL_MAX)
 	, _label_offset (0)
-        , _have_scene_change (false)
+        , _have_scene_change (l ? l->scene_change() : false)
 {
 	unit_position = editor.sample_to_pixel (frame_position);
 
