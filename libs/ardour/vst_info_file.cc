@@ -227,6 +227,12 @@ vstfx_load_info_block(FILE* fp, VSTInfo *info)
 		info->wantMidi = 1;
 	}
 
+	if ((info->numParams) == 0) {
+		info->ParamNames = NULL;
+		info->ParamLabels = NULL;
+		return true;
+	}
+
 	if ((info->ParamNames = (char **) malloc(sizeof(char*)*info->numParams)) == 0) {
 		return false;
 	}
