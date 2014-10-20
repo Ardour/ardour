@@ -398,7 +398,7 @@ Editor::Editor ()
 	_edit_point = EditAtMouse;
 	_internal_editing = false;
 	current_canvas_cursor = 0;
-	_visible_track_count = 16;
+	_visible_track_count = -1;
 
 	samples_per_pixel = 2048; /* too early to use reset_zoom () */
 
@@ -3619,7 +3619,7 @@ Editor::set_visible_track_count (int32_t n)
 void
 Editor::override_visible_track_count ()
 {
-	_visible_track_count = -_visible_track_count;
+	_visible_track_count = -1;
 	visible_tracks_selector.set_text ( _("*") );
 }
 
