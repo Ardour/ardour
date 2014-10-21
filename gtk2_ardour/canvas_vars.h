@@ -180,7 +180,6 @@ CANVAS_VARIABLE(canvasvar_WaveForm, "waveform outline")
 CANVAS_VARIABLE(canvasvar_WaveFormClip, "clipped waveform")
 CANVAS_VARIABLE(canvasvar_WaveFormFill, "waveform fill")
 CANVAS_VARIABLE(canvasvar_ZeroLine, "zero line")
-CANVAS_VARIABLE(canvasvar_ZoomRect, "zoom rect")
 CANVAS_VARIABLE(canvasvar_MonitorSectionKnob, "monitor knob")
 
 CANVAS_VARIABLE(canvasvar_ButtonBorder, "border color")

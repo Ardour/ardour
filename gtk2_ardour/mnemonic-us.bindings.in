@@ -206,7 +206,7 @@ This mode provides many different operations on both regions and control points,
 
 ;; BOTTOM ROW
 
-@mmode|MouseMode/set-mouse-mode-zoom|z|zoom mode
+@mmode|Editor/zoom-to-range|z|zoom to selection
 @edit|Editor/undo|<@PRIMARY@>z|undo
 @edit|Editor/alternate-alternate-redo|<@PRIMARY@><@TERTIARY@>z|redo
 @vis|Editor/zoom-to-region|<@PRIMARY@><@SECONDARY@>z|zoom (x) to selected region(s)

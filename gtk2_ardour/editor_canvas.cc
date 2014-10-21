@@ -125,11 +125,6 @@ Editor::initialize_canvas ()
 	_trackview_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (_trackview_group, "Canvas TrackViews");
 	
-	// used to show zoom mode active zooming
-	zoom_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
-	zoom_rect->hide();
-	zoom_rect->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
-
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
 	rubberband_rect->hide();
@@ -924,9 +919,6 @@ Editor::color_handler()
 	transport_punchin_line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_PunchLine());
 	transport_punchout_line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_PunchLine());
 
-	zoom_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ZoomRect());
-	zoom_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_ZoomRect());
-
 	rubberband_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RubberBandRect());
 	rubberband_rect->set_fill_color ((guint32) ARDOUR_UI::config()->get_canvasvar_RubberBandRect());
 
@@ -954,21 +946,12 @@ Editor::horizontal_position () const
 bool
 Editor::track_canvas_key_press (GdkEventKey*)
 {
-	/* XXX: event does not report the modifier key pressed down, AFAICS, so use the Keyboard object instead */
-	if (mouse_mode == Editing::MouseZoom && Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
-		set_canvas_cursor (_cursors->zoom_out, true);
-	}
-
 	return false;
 }
 
 bool
 Editor::track_canvas_key_release (GdkEventKey*)
 {
-	if (mouse_mode == Editing::MouseZoom && !Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
-		set_canvas_cursor (_cursors->zoom_in, true);
-	}
-
 	return false;
 }
 
@@ -1127,14 +1110,6 @@ Editor::which_mode_cursor () const
 
 	case MouseGain:
 		mode_cursor = _cursors->cross_hair;
-		break;
-
-	case MouseZoom:
-		if (Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
-			mode_cursor = _cursors->zoom_out;
-		} else {
-			mode_cursor = _cursors->zoom_in;
-		}
 		break;
 
 	case MouseTimeFX:

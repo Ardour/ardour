@@ -180,7 +180,6 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM(MouseRange);
 	REGISTER_ENUM(MouseDraw);
 	REGISTER_ENUM(MouseTimeFX);
-	REGISTER_ENUM(MouseZoom);
 	REGISTER_ENUM(MouseAudition);
 	REGISTER_ENUM(MouseCut);
 	REGISTER (mouse_mode);

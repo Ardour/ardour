@@ -233,7 +233,6 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	}
 
 	if (ARDOUR::Profile->get_mixbus()) {
-		if ( m == MouseZoom) m = MouseObject;
 		if ( m == MouseCut) m = MouseObject;
 	}
 
@@ -258,10 +257,6 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 
 	case MouseGain:
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-gain"));
-		break;
-
-	case MouseZoom:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-zoom"));
 		break;
 
 	case MouseTimeFX:
@@ -292,7 +287,6 @@ Editor::mouse_mode_toggled (MouseMode m)
 	Glib::RefPtr<ToggleAction> tact;
 
 	if (ARDOUR::Profile->get_mixbus()) {
-		if ( m == MouseZoom) m = MouseObject;
 		if ( m == MouseCut)  m = MouseObject;
 	}
 
@@ -315,10 +309,6 @@ Editor::mouse_mode_toggled (MouseMode m)
 
 	case MouseGain:
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-gain"));
-		break;
-
-	case MouseZoom:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-zoom"));
 		break;
 
 	case MouseTimeFX:
@@ -404,11 +394,7 @@ Editor::step_mouse_mode (bool next)
 	switch (current_mouse_mode()) {
 	case MouseObject:
 		if (next) {
-			if (Profile->get_sae()) {
-				set_mouse_mode (MouseZoom);
-			} else {
-				set_mouse_mode (MouseRange);
-			}
+			set_mouse_mode (MouseRange);
 		} else {
 			set_mouse_mode (MouseTimeFX);
 		}
@@ -429,36 +415,16 @@ Editor::step_mouse_mode (bool next)
 		else set_mouse_mode (MouseRange);
 		break;
 
-	case MouseZoom:
-		if (next) {
-			if (Profile->get_sae()) {
-				set_mouse_mode (MouseTimeFX);
-			} else {
-				set_mouse_mode (MouseGain);
-			}
-		} else {
-			if (Profile->get_sae()) {
-				set_mouse_mode (MouseObject);
-			} else {
-				set_mouse_mode (MouseDraw);
-			}
-		}
-		break;
-
 	case MouseGain:
 		if (next) set_mouse_mode (MouseTimeFX);
-		else set_mouse_mode (MouseZoom);
+		else set_mouse_mode (MouseDraw);
 		break;
 
 	case MouseTimeFX:
 		if (next) {
 			set_mouse_mode (MouseAudition);
 		} else {
-			if (Profile->get_sae()) {
-				set_mouse_mode (MouseZoom);
-			} else {
-				set_mouse_mode (MouseGain);
-			}
+			set_mouse_mode (MouseGain);
 		}
 		break;
 
@@ -1095,14 +1061,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
-	case MouseZoom:
-		if (event->type == GDK_BUTTON_PRESS) {
-			_drags->set (new MouseZoomDrag (this, item), event);
-		}
-
-		return true;
-		break;
-
 	case MouseTimeFX:
 		if (internal_editing() && item_type == NoteItem ) {
 			/* drag notes if we're in internal edit mode */
@@ -1196,16 +1154,6 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case MouseRange:
 		/* relax till release */
-		return true;
-		break;
-
-
-	case MouseZoom:
-		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			temporal_zoom_to_frame (false, canvas_event_sample (event));
-		} else {
-			temporal_zoom_to_frame (true, canvas_event_sample(event));
-		}
 		return true;
 		break;
 
@@ -2296,18 +2244,6 @@ Editor::hide_marker (ArdourCanvas::Item* item, GdkEvent* /*event*/)
 	Location* location = find_location_from_marker (marker, is_start);
 	location->set_hidden (true, this);
 }
-
-
-void
-Editor::reposition_zoom_rect (framepos_t start, framepos_t end)
-{
-	double x1 = sample_to_pixel (start);
-	double x2 = sample_to_pixel (end);
-	double y2 = _full_canvas_height - 1.0;
-
-	zoom_rect->set (ArdourCanvas::Rect (x1, 1.0, x2, y2));
-}
-
 
 gint
 Editor::mouse_rename_region (ArdourCanvas::Item* /*item*/, GdkEvent* /*event*/)

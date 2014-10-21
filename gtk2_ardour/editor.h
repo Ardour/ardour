@@ -1439,7 +1439,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool canvas_feature_line_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*);
 	bool canvas_stream_view_event (GdkEvent* event,ArdourCanvas::Item*, RouteTimeAxisView*);
 	bool canvas_marker_event (GdkEvent* event,ArdourCanvas::Item*, Marker*);
-	bool canvas_zoom_rect_event (GdkEvent* event,ArdourCanvas::Item*);
 	bool canvas_tempo_marker_event (GdkEvent* event,ArdourCanvas::Item*, TempoMarker*);
 	bool canvas_meter_marker_event (GdkEvent* event,ArdourCanvas::Item*, MeterMarker*);
 	bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, AutomationTimeAxisView*);
@@ -1615,7 +1614,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourButton mouse_draw_button;
 	ArdourButton mouse_move_button;
 	ArdourButton mouse_gain_button;
-	ArdourButton mouse_zoom_button;
 	ArdourButton mouse_timefx_button;
 	ArdourButton mouse_audition_button;
 	ArdourButton mouse_cut_button;
@@ -1752,11 +1750,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void select_all_within (framepos_t, framepos_t, double, double, TrackViewList const &, Selection::Operation, bool);
 
 	ArdourCanvas::Rectangle   *rubberband_rect;
-
-	/* mouse zoom process */
-
-	ArdourCanvas::Rectangle   *zoom_rect;
-	void reposition_zoom_rect (framepos_t start, framepos_t end);
 
 	EditorRouteGroups* _route_groups;
 	EditorRoutes* _routes;

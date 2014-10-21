@@ -1086,12 +1086,6 @@ Editor::canvas_playhead_cursor_event (GdkEvent *event, ArdourCanvas::Item* item)
 }
 
 bool
-Editor::canvas_zoom_rect_event (GdkEvent *event, ArdourCanvas::Item* item)
-{
-	return typed_event (item, event, NoItem);
-}
-
-bool
 Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 {
 	if (!internal_editing()) {
