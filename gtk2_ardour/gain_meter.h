@@ -111,8 +111,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	Gtkmm2ext::SliderController *gain_slider;
 	Gtk::Adjustment              gain_adjustment;
 	Gtkmm2ext::FocusEntry        gain_display;
-	Gtkmm2ext::FocusEntry        peak_display;
-//	Gtk::Button                  peak_display;
+	ArdourButton                 peak_display;
 	Gtk::DrawingArea             meter_metric_area;
 	Gtk::DrawingArea             meter_ticks1_area;
 	Gtk::DrawingArea             meter_ticks2_area;

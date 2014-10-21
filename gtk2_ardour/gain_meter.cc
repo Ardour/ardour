@@ -101,12 +101,11 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_display.signal_focus_out_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
 	gain_display.set_alignment(0.5);
 
-	peak_display.set_name ("MixerStripPeakDisplay");
+	peak_display.set_name ("peak display");
 	set_size_request_to_display_given_text (peak_display, "-80.g", 2, 6); /* note the descender */
 	max_peak = minus_infinity();
 	peak_display.set_text (_("-inf"));
-	peak_display.unset_flags (Gtk::CAN_FOCUS);
-	peak_display.set_alignment(0.5);
+	peak_display.set_alignment (0.5, 0.5);
 
 	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
@@ -365,7 +364,7 @@ GainMeterBase::reset_peak_display ()
 	level_meter->clear_meters();
 	max_peak = -INFINITY;
 	peak_display.set_text (_("-inf"));
-	peak_display.set_name ("MixerStripPeakDisplay");
+	peak_display.set_active (false);
 }
 
 void
@@ -860,8 +859,9 @@ GainMeterBase::update_meters()
 			peak_display.set_text (buf);
 		}
 	}
+
 	if (mpeak >= Config->get_meter_peak()) {
-		peak_display.set_name ("MixerStripPeakDisplayPeak");
+		peak_display.set_active (true);
 	}
 }
 

@@ -235,6 +235,7 @@ BUTTON_VARS(MixerStripNameButton, "mixer strip name button")
 BUTTON_VARS(MidiInputButton, "midi input button")
 BUTTON_VARS(LockButton, "lock button")
 BUTTON_VARS(GenericButton, "generic button")
+BUTTON_VARS(PeakDisplayButton, "peak display")
 
 #define CLOCK_VARS(root,name) \
 	CANVAS_VARIABLE(canvasvar_ ## root ## Background, name ": background") \
