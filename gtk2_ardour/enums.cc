@@ -46,6 +46,7 @@ setup_gtk_ardour_enums ()
 	SnapMode snap_mode;
 	ZoomFocus zoom_focus;
 	ItemType item_type;
+	MouseMode mouse_mode;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -176,4 +177,15 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (ClockRulerItem);
 	REGISTER_ENUM (DropZoneItem);
 	REGISTER (item_type);
+
+	REGISTER_ENUM(MouseGain);
+	REGISTER_ENUM(MouseObject);
+	REGISTER_ENUM(MouseRange);
+	REGISTER_ENUM(MouseDraw);
+	REGISTER_ENUM(MouseTimeFX);
+	REGISTER_ENUM(MouseZoom);
+	REGISTER_ENUM(MouseAudition);
+	REGISTER_ENUM(MouseCut);
+	REGISTER (mouse_mode);
+
 }
