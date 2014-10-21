@@ -25,6 +25,8 @@ public:
     void setup();
     int count();
     ARDOUR::ChanCount input_channels ();
+    
+    bool on_key_press_event (GdkEventKey* ev);
         
 private:
 	WavesButton& _decrement_button;

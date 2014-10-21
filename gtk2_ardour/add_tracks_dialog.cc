@@ -140,3 +140,22 @@ AddTracksDialog::setup ()
     _tracks_format_dropdown.set_text(TrackFormat::FormatMono);
 }
 
+bool
+AddTracksDialog::on_key_press_event (GdkEventKey* ev)
+{
+    switch (ev->keyval)
+    {
+        case GDK_Return:
+            hide();
+            response (Gtk::RESPONSE_YES);
+            return true;
+        case GDK_Escape:
+            hide();
+            response (Gtk::RESPONSE_CANCEL);
+            return true;
+    }
+    
+    Gtk::Widget::on_key_press_event(ev);
+    
+    return true; // do not propagate event
+}
