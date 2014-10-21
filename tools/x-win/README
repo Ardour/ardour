@@ -1,0 +1,3 @@
+These scripts are intended to cross-compile and package ardour windows binaries.
+They go along with ardour-build-tools/win/x-mingw.sh
+Please see the build-tools repository for further information.
