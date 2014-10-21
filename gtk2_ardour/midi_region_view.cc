@@ -2601,6 +2601,15 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 			}
 		}
 
+		if (current_x < 0) {
+			// This works even with snapping because RegionView::snap_frame_to_frame()
+			// snaps forward if the snapped sample is before the beginning of the region
+			current_x = 0;
+		}
+		if (current_x > trackview.editor().sample_to_pixel(_region->length())) {
+			current_x = trackview.editor().sample_to_pixel(_region->length());
+		}
+
 		if (at_front) {
 			resize_rect->set_x0 (snap_to_pixel(current_x));
 			resize_rect->set_x1 (canvas_note->x1());
@@ -2673,6 +2682,13 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 			} else {
 				current_x = primary->x1() + delta_x;
 			}
+		}
+
+		if (current_x < 0) {
+			current_x = 0;
+		}
+		if (current_x > trackview.editor().sample_to_pixel(_region->length())) {
+			current_x = trackview.editor().sample_to_pixel(_region->length());
 		}
 
 		/* Convert that to a frame within the source */
@@ -3525,6 +3541,7 @@ MidiRegionView::create_ghost_note (double x, double y)
 	_ghost_note = new Note (*this, _note_group, g);
 	_ghost_note->set_ignore_events (true);
 	_ghost_note->set_outline_color (0x000000aa);
+	if (x < 0) { x = 0; }
 	update_ghost_note (x, y);
 	_ghost_note->show ();
 
