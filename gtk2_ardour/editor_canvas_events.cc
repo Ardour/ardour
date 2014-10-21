@@ -1163,7 +1163,7 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 
 	(void) window_event_sample (&event, &px, &py);
 
-	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
+	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py, false);
 	bool can_drop = false;
 	
 	if (tv.first != 0) {
