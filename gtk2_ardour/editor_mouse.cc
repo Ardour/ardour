@@ -2557,6 +2557,7 @@ Editor::set_internal_edit (bool yn)
 	}
 
 	reset_canvas_cursor ();
+	MouseModeChanged ();
 }
 
 /** Update _join_object_range_state which indicate whether we are over the top

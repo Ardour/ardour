@@ -414,6 +414,10 @@ MidiRegionView::leave_notify (GdkEventCrossing*)
 	trackview.editor().verbose_cursor()->hide ();
 	remove_ghost_note ();
 
+	if (trackview.editor().internal_editing()) {
+		Keyboard::magic_widget_drop_focus();
+	}
+
 	if (pre_enter_cursor) {
 		Editor* editor = dynamic_cast<Editor *> (&trackview.editor());
 		editor->set_canvas_cursor(pre_enter_cursor);
