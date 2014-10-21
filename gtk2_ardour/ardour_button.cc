@@ -151,6 +151,16 @@ ArdourButton::~ArdourButton()
 }
 
 void
+ArdourButton::set_layout_font (const Pango::FontDescription& fd)
+{
+	ensure_layout ();
+	if (_layout) {
+		_layout->set_font_description (fd);
+		queue_resize ();
+	}
+}
+
+void
 ArdourButton::set_text (const std::string& str)
 {
 	_text = str;
