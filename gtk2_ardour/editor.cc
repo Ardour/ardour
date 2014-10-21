@@ -4384,7 +4384,8 @@ void
 Editor::ensure_visual_change_idle_handler ()
 {
 	if (pending_visual_change.idle_handler_id < 0) {
-		pending_visual_change.idle_handler_id = g_idle_add (_idle_visual_changer, this);
+		// see comment in add_to_idle_resize above.
+		pending_visual_change.idle_handler_id = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE + 20, _idle_visual_changer, this, NULL);
 		pending_visual_change.being_handled = false;
 	}
 }
@@ -4844,7 +4845,11 @@ void
 Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 {
 	if (resize_idle_id < 0) {
-		resize_idle_id = g_idle_add (_idle_resize, this);
+		/* https://developer.gnome.org/glib/stable/glib-The-Main-Event-Loop.html#G-PRIORITY-HIGH-IDLE:CAPS
+		 * GTK+ uses G_PRIORITY_HIGH_IDLE + 10 for resizing operations, and G_PRIORITY_HIGH_IDLE + 20 for redrawing operations.
+		 * (This is done to ensure that any pending resizes are processed before any pending redraws, so that widgets are not redrawn twice unnecessarily.)
+		 */
+		resize_idle_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE + 10, _idle_resize, this, NULL);
 		_pending_resize_amount = 0;
 	}
 
