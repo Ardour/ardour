@@ -285,7 +285,7 @@
     <Option name="monitor solo exclusive: led active" value="ffa500ff"/>
     <Option name="monitor solo exclusive: text" value="c7c7d8ff"/>
     <Option name="monitor solo exclusive: text active" value="c8c8d9ff"/>
-    <Option name="peak display: fill" value="000000ff"/>
+    <Option name="peak display: fill" value="171717ff"/>
     <Option name="peak display: fill active" value="e21b1bff"/>
     <Option name="peak display: led" value="00000000"/>
     <Option name="peak display: led active" value="00000000"/>
