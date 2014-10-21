@@ -342,7 +342,10 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 
 	switch (ev->type) {
 	case GDK_SCROLL:
-		return scroll (&ev->scroll);
+		if (scroll (&ev->scroll)) {
+			return true;
+		}
+		break;
 
 	case GDK_KEY_PRESS:
 		return key_press (&ev->key);
