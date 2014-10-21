@@ -1264,7 +1264,7 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 			cursor = _cursors->fader;
 			break;
 		case GainLineItem:
-			cursor = _cursors->fader;
+			cursor = which_track_cursor ();
 			break;
 		case AutomationLineItem:
 			cursor = _cursors->cross_hair;
@@ -1315,6 +1315,24 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 			break;
 		case CrossfadeViewItem:
 			cursor = _cursors->cross_hair;
+			break;
+		default:
+			break;
+		}
+
+	} else if (mouse_mode == MouseGain) {
+		
+		/* ControlPointItem is not really specific to region gain mode
+		   but it is the same cursor so don't worry about this for now.
+		   The result is that we'll see the fader cursor if we enter
+		   non-region-gain-line control points while in MouseGain
+		   mode, even though we can't edit them in this mode.
+		*/
+
+		switch (type) {
+		case GainLineItem:
+		case ControlPointItem:
+			cursor = _cursors->fader;
 			break;
 		default:
 			break;
