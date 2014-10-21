@@ -251,6 +251,7 @@ MidiGhostRegion::update_range ()
 	}
 
 	double const h = std::max(1., floor (trackview.current_height() / double (mv->contents_note_range ())) -1);
+	double const s = trackview.current_height() / double (mv->contents_note_range ());
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
 		uint8_t const note_num = (*it)->event->note()->note();
@@ -259,7 +260,7 @@ MidiGhostRegion::update_range ()
 			(*it)->rect->hide();
 		} else {
 			(*it)->rect->show();
-			double const y = trackview.current_height() - (note_num + 1 - mv->lowest_note()) * h + 1;
+			double const y = trackview.current_height() - (note_num + 1 - mv->lowest_note()) * s;
 			(*it)->rect->set_y0 (y);
 			(*it)->rect->set_y1 (y + h);
 		}
