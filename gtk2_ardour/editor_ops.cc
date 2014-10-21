@@ -1640,14 +1640,14 @@ Editor::calc_extra_zoom_edges(framepos_t &start, framepos_t &end)
 	*/
 
 	GdkScreen* screen = gdk_screen_get_default ();
-	gint pixwidth = gdk_screen_get_width (screen);
-	gint mmwidth = gdk_screen_get_width_mm (screen);
-	double pix_per_mm = (double) pixwidth/ (double) mmwidth;
-	double one_centimeter_in_pixels = pix_per_mm * 10.0;
+	const gint pixwidth = gdk_screen_get_width (screen);
+	const gint mmwidth = gdk_screen_get_width_mm (screen);
+	const double pix_per_mm = (double) pixwidth/ (double) mmwidth;
+	const double one_centimeter_in_pixels = pix_per_mm * 10.0;
 
-	framepos_t range = end - start;
-	double new_fpp = (double) range / (double) _visible_canvas_width;
-	framepos_t extra_samples = (framepos_t) floor (one_centimeter_in_pixels * new_fpp);
+	const framepos_t range = end - start;
+	const framecnt_t new_fpp = (framecnt_t) ceil ((double) range / (double) _visible_canvas_width);
+	const framepos_t extra_samples = (framepos_t) floor (one_centimeter_in_pixels * new_fpp);
 
 	if (start > extra_samples) {
 		start -= extra_samples;
@@ -1661,7 +1661,6 @@ Editor::calc_extra_zoom_edges(framepos_t &start, framepos_t &end)
 		end = max_framepos;
 	}
 }
-
 
 void
 Editor::temporal_zoom_region (bool both_axes)
@@ -1693,7 +1692,7 @@ Editor::temporal_zoom_region (bool both_axes)
 		return;
 	}
 
-	calc_extra_zoom_edges(start, end);
+	calc_extra_zoom_edges (start, end);
 
 	/* if we're zooming on both axes we need to save track heights etc.
 	 */
@@ -1754,7 +1753,7 @@ Editor::temporal_zoom_selection (bool both_axes)
 			fit_selected_tracks();
 
 	} else {
-		temporal_zoom_region(both_axes);
+		temporal_zoom_region (both_axes);
 	}
 
 
@@ -1802,9 +1801,9 @@ Editor::temporal_zoom_by_frame (framepos_t start, framepos_t end)
 
 	framepos_t range = end - start;
 
-	double const new_fpp = (double) range / (double) _visible_canvas_width;
-
-	framepos_t new_page = (framepos_t) floor (_visible_canvas_width * new_fpp);
+	const framecnt_t new_fpp = (framecnt_t) ceil ((double) range / (double) _visible_canvas_width);
+	
+	framepos_t new_page = range;
 	framepos_t middle = (framepos_t) floor ((double) start + ((double) range / 2.0f));
 	framepos_t new_leftmost = (framepos_t) floor ((double) middle - ((double) new_page / 2.0f));
 
