@@ -62,10 +62,6 @@
 #include "ardour/interpolation.h"
 #include "ardour/route_graph.h"
 
-#ifdef HAVE_JACK_SESSION
-#include <jack/session.h>
-#endif
-
 
 class XMLTree;
 class XMLNode;

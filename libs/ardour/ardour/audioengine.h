@@ -44,10 +44,6 @@
 #include "ardour/chan_count.h"
 #include "ardour/port_manager.h"
 
-#ifdef HAVE_JACK_SESSION
-#include <jack/session.h>
-#endif
-
 class MTDM;
 
 namespace ARDOUR {
