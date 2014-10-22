@@ -54,6 +54,8 @@ public:
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
     void update_master_bus_selection();
 	static PBD::Signal1<void,MasterBusUI*> CatchDeletion;
+    
+    void master_bus_set_visible (bool set_visible);
 
 private:
 	static int __meter_width;
@@ -105,6 +107,8 @@ private:
 	WavesButton& _clear_solo_button;
 	WavesButton& _global_rec_button;
     Gtk::EventBox& _no_peak_display_box;
+    Gtk::HBox& _master_bus_hbox;
+    Gtk::HBox& _master_bus_empty_hbox;
     Gtk::Image& _master_bus_multi_out_mode_icon;
     Gtk::Container& _master_event_box;
     

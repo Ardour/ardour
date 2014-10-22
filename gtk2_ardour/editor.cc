@@ -1503,6 +1503,9 @@ Editor::set_session (Session *t)
         _master_bus_ui->init(_session);
     }
     
+    bool set_master_bus_visible = Config->get_output_auto_connect() & AutoConnectMaster;
+    _master_bus_ui->master_bus_set_visible ( set_master_bus_visible );
+    
     _set_session_in_progress = false;
 }
 
@@ -5722,6 +5725,8 @@ Editor::output_connection_mode_changed ()
     
     if (Config->get_output_auto_connect() & AutoConnectMaster) {
         
+        _master_bus_ui->master_bus_set_visible (true);
+        
         if (_session->master_out() && !axis_view_from_route(_session->master_out() ) ) {
 
             selection->block_tracks_changed(true);
@@ -5744,6 +5749,9 @@ Editor::output_connection_mode_changed ()
             selection->block_tracks_changed(false);
         }
     } else {
+        
+        _master_bus_ui->master_bus_set_visible (false);
+        
         TimeAxisView* tv = 0;
         if (_session->master_out() && (tv = axis_view_from_route(_session->master_out() ) ) ) {
             delete tv;

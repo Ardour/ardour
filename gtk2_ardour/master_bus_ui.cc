@@ -106,6 +106,8 @@ MasterBusUI::MasterBusUI (Session* sess, PublicEditor& ed)
 	, _clear_solo_button (get_waves_button ("clear_solo_button"))
 	, _global_rec_button (get_waves_button ("global_rec_button"))
     , _no_peak_display_box (get_event_box("no_peak_display_box") )
+    , _master_bus_hbox (get_h_box("master_bus_hbox") )
+    , _master_bus_empty_hbox (get_h_box("master_bus_empty_hbox"))
     , _master_bus_multi_out_mode_icon (get_image("master_bus_multi_out_mode_icon"))
     , _master_event_box (WavesUI::root () )
     , _selected(false)
@@ -209,6 +211,20 @@ void MasterBusUI::on_output_connection_mode_changed()
 
     // update MASTER MUTE
     route_mute_state_changed(NULL);
+}
+
+void
+MasterBusUI::master_bus_set_visible (bool set_visible)
+{
+    if ( set_visible )
+    {
+        _master_bus_hbox.show ();
+        _master_bus_empty_hbox.hide ();
+    } else
+    {
+        _master_bus_hbox.hide ();
+        _master_bus_empty_hbox.show ();
+    }
 }
 
 void
