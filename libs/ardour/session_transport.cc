@@ -865,6 +865,11 @@ Session::flush_all_inserts ()
 void
 Session::start_locate (framepos_t target_frame, bool with_roll, bool with_flush, bool with_loop, bool force)
 {
+	if (target_frame < 0) {
+		error << _("Locate called for negative sample position - ignored") << endmsg;
+		return;
+	}
+
 	if (synced_to_engine()) {
 
 		double sp;
@@ -1747,6 +1752,10 @@ Session::maybe_stop (framepos_t limit)
 void
 Session::send_mmc_locate (framepos_t t)
 {
+	if (t < 0) {
+		return;
+	}
+
 	if (!_engine.freewheeling()) {
 		Timecode::Time time;
 		timecode_time_subframes (t, time);
