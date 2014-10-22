@@ -207,7 +207,11 @@ MidiPort::flush_buffers (pframes_t nframes)
 			} else {
 				cerr << "drop flushed event on the floor, time " << ev.time()
 				     << " too early for " << _global_port_buffer_offset
-				     << " + " << _port_buffer_offset << endl;
+				     << " + " << _port_buffer_offset;
+				for (int xx = 0; xx < ev.size(); ++xx) {
+					cerr << ' ' << hex << (int) ev.buffer()[xx];
+				}
+				cerr << dec << endl;
 			}
 		}
 
