@@ -105,25 +105,25 @@ class NoteBase : public sigc::trackable
                 if (selected) {
                         if (vel < 64) {
                                 return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->get_canvasvar_SelectedMidiNoteColorBase(),
-					ARDOUR_UI::config()->get_canvasvar_SelectedMidiNoteColorMid(),
+					ARDOUR_UI::config()->get_SelectedMidiNoteColorBase(),
+					ARDOUR_UI::config()->get_SelectedMidiNoteColorMid(),
 					(vel / (double)63.0));
                         } else {
                                 return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->get_canvasvar_SelectedMidiNoteColorMid(),
-					ARDOUR_UI::config()->get_canvasvar_SelectedMidiNoteColorTop(),
+					ARDOUR_UI::config()->get_SelectedMidiNoteColorMid(),
+					ARDOUR_UI::config()->get_SelectedMidiNoteColorTop(),
 					((vel-64) / (double)63.0));
                         }
                 } else {
                         if (vel < 64) {
                                 return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->get_canvasvar_MidiNoteColorBase(),
-					ARDOUR_UI::config()->get_canvasvar_MidiNoteColorMid(),
+					ARDOUR_UI::config()->get_MidiNoteColorBase(),
+					ARDOUR_UI::config()->get_MidiNoteColorMid(),
 					(vel / (double)63.0));
                         } else {
                                 return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->get_canvasvar_MidiNoteColorMid(),
-					ARDOUR_UI::config()->get_canvasvar_MidiNoteColorTop(),
+					ARDOUR_UI::config()->get_MidiNoteColorMid(),
+					ARDOUR_UI::config()->get_MidiNoteColorTop(),
 					((vel-64) / (double)63.0));
                         }
                 }

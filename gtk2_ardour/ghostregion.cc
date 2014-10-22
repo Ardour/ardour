@@ -87,8 +87,8 @@ void
 GhostRegion::set_colors ()
 {
 	if (is_automation_ghost()) {
-		base_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GhostTrackBase());
-		base_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_GhostTrackBase());
+		base_rect->set_outline_color (ARDOUR_UI::config()->get_GhostTrackBase());
+		base_rect->set_fill_color (ARDOUR_UI::config()->get_GhostTrackBase());
 	}
 }
 
@@ -142,17 +142,17 @@ AudioGhostRegion::set_colors ()
 	guint fill_color;
 
 	if (is_automation_ghost()) {
-		fill_color = ARDOUR_UI::config()->get_canvasvar_GhostTrackWaveFill();
+		fill_color = ARDOUR_UI::config()->get_GhostTrackWaveFill();
 	}
 	else {
 		fill_color = source_track_color(200);
 	}
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
-		waves[n]->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GhostTrackWave());
+		waves[n]->set_outline_color (ARDOUR_UI::config()->get_GhostTrackWave());
 		waves[n]->set_fill_color (fill_color);
-		waves[n]->set_clip_color (ARDOUR_UI::config()->get_canvasvar_GhostTrackWaveClip());
-		waves[n]->set_zero_color (ARDOUR_UI::config()->get_canvasvar_GhostTrackZeroLine());
+		waves[n]->set_clip_color (ARDOUR_UI::config()->get_GhostTrackWaveClip());
+		waves[n]->set_zero_color (ARDOUR_UI::config()->get_GhostTrackZeroLine());
 	}
 }
 
@@ -237,7 +237,7 @@ MidiGhostRegion::set_colors()
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
 		(*it)->rect->set_fill_color (fill);
-		(*it)->rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GhostTrackMidiOutline());
+		(*it)->rect->set_outline_color (ARDOUR_UI::config()->get_GhostTrackMidiOutline());
 	}
 }
 
@@ -274,7 +274,7 @@ MidiGhostRegion::add_note (NoteBase* n)
 	events.push_back (event);
 
 	event->rect->set_fill_color (source_track_color(200));
-	event->rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GhostTrackMidiOutline());
+	event->rect->set_outline_color (ARDOUR_UI::config()->get_GhostTrackMidiOutline());
 
 	MidiStreamView* mv = midi_view();
 

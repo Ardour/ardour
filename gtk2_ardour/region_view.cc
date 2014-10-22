@@ -239,7 +239,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
                 return;
         }
 
-        uint32_t const color = ARDOUR_UI::config()->get_canvasvar_Silence();
+        uint32_t const color = ARDOUR_UI::config()->get_Silence();
 
 	for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
 
@@ -280,7 +280,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
         _silence_text = new ArdourCanvas::Text (group);
 	_silence_text->set_ignore_events (true);
         _silence_text->set_font_description (get_font_for_style (N_("SilenceText")));
-        _silence_text->set_color (ARDOUR_UI::config()->get_canvasvar_SilenceText());
+        _silence_text->set_color (ARDOUR_UI::config()->get_SilenceText());
 
         /* both positions are relative to the region start offset in source */
 
@@ -792,7 +792,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 	bool me = false;
 
 	/* the color that will be used to show parts of regions that will not be heard */
-	uint32_t const non_playing_color = ARDOUR_UI::config()->get_canvasvar_CoveredRegion ();
+	uint32_t const non_playing_color = ARDOUR_UI::config()->get_CoveredRegion ();
 
 	while (t < end) {
 

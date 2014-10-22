@@ -102,7 +102,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_display.set_alignment(0.5);
 
 	peak_display.set_name ("peak display");
-	peak_display.set_layout_font (ARDOUR_UI::config()->get_canvasvar_SmallFont());
+	peak_display.set_layout_font (ARDOUR_UI::config()->get_SmallFont());
 	max_peak = minus_infinity();
 	peak_display.set_text (_("-inf"));
 	peak_display.set_alignment (0.5, 0.5);

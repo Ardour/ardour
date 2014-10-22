@@ -331,7 +331,7 @@ Marker::setup_line ()
 		if (_track_canvas_line == 0) {
 
 			_track_canvas_line = new ArdourCanvas::Line (editor.get_hscroll_group());
-			_track_canvas_line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_EditPoint());
+			_track_canvas_line->set_outline_color (ARDOUR_UI::config()->get_EditPoint());
 			_track_canvas_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 		}
 
@@ -342,7 +342,7 @@ Marker::setup_line ()
 		_track_canvas_line->set_x1 (d.x);
 		_track_canvas_line->set_y0 (d.y);
 		_track_canvas_line->set_y1 (ArdourCanvas::COORD_MAX);
-		_track_canvas_line->set_outline_color (_selected ? ARDOUR_UI::config()->get_canvasvar_EditPoint() : _color);
+		_track_canvas_line->set_outline_color (_selected ? ARDOUR_UI::config()->get_EditPoint() : _color);
 		_track_canvas_line->raise_to_top ();
 		_track_canvas_line->show ();
 

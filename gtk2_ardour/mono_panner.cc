@@ -81,7 +81,7 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	if (!have_font) {
 		Pango::FontDescription font;
 		Pango::AttrFontDesc* font_attr;
-		font = Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_SmallBoldMonospaceFont());
+		font = Pango::FontDescription (ARDOUR_UI::config()->get_SmallBoldMonospaceFont());
 		font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 		panner_font_attributes.change(*font_attr);
 		delete font_attr;
@@ -488,12 +488,12 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
 void
 MonoPanner::set_colors ()
 {
-        colors.fill = ARDOUR_UI::config()->get_canvasvar_MonoPannerFill();
-        colors.outline = ARDOUR_UI::config()->get_canvasvar_MonoPannerOutline();
-        colors.text = ARDOUR_UI::config()->get_canvasvar_MonoPannerText();
-        colors.background = ARDOUR_UI::config()->get_canvasvar_MonoPannerBackground();
-        colors.pos_outline = ARDOUR_UI::config()->get_canvasvar_MonoPannerPositionOutline();
-        colors.pos_fill = ARDOUR_UI::config()->get_canvasvar_MonoPannerPositionFill();
+        colors.fill = ARDOUR_UI::config()->get_MonoPannerFill();
+        colors.outline = ARDOUR_UI::config()->get_MonoPannerOutline();
+        colors.text = ARDOUR_UI::config()->get_MonoPannerText();
+        colors.background = ARDOUR_UI::config()->get_MonoPannerBackground();
+        colors.pos_outline = ARDOUR_UI::config()->get_MonoPannerPositionOutline();
+        colors.pos_fill = ARDOUR_UI::config()->get_MonoPannerPositionFill();
 }
 
 void

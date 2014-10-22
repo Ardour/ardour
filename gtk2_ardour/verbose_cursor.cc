@@ -44,7 +44,7 @@ VerboseCursor::VerboseCursor (Editor* editor)
 {
 	_canvas_item = new ArdourCanvas::TrackingText (_editor->get_noscroll_group());
 	CANVAS_DEBUG_NAME (_canvas_item, "verbose canvas cursor");
-	_canvas_item->set_font_description (Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_LargerBoldFont()));
+	_canvas_item->set_font_description (Pango::FontDescription (ARDOUR_UI::config()->get_LargerBoldFont()));
 	color_handler ();
 
 	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &VerboseCursor::color_handler));
@@ -53,7 +53,7 @@ VerboseCursor::VerboseCursor (Editor* editor)
 void
 VerboseCursor::color_handler ()
 {
-	_canvas_item->set_color (ARDOUR_UI::config()->get_canvasvar_VerboseCanvasCursor());
+	_canvas_item->set_color (ARDOUR_UI::config()->get_VerboseCanvasCursor());
 }
 
 ArdourCanvas::Item *

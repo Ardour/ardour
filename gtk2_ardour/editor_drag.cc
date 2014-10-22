@@ -2583,7 +2583,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_marker = new MeterMarker (
 			*_editor,
 			*_editor->meter_group,
-			ARDOUR_UI::config()->get_canvasvar_MeterMarker(),
+			ARDOUR_UI::config()->get_MeterMarker(),
 			name,
 			*new MeterSection (_marker->meter())
 		);
@@ -2713,7 +2713,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_marker = new TempoMarker (
 			*_editor,
 			*_editor->tempo_group,
-			ARDOUR_UI::config()->get_canvasvar_TempoMarker(),
+			ARDOUR_UI::config()->get_TempoMarker(),
 			name,
 			*new TempoSection (_marker->tempo())
 			);
@@ -4445,8 +4445,8 @@ RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operat
 								      physical_screen_height (_editor->get_window())));
 	_drag_rect->hide ();
 
-	_drag_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RangeDragRect());
-	_drag_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RangeDragRect());
+	_drag_rect->set_fill_color (ARDOUR_UI::config()->get_RangeDragRect());
+	_drag_rect->set_outline_color (ARDOUR_UI::config()->get_RangeDragRect());
 }
 
 void

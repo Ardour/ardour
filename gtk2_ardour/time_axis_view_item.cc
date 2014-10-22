@@ -73,7 +73,7 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
 void
 TimeAxisViewItem::set_constant_heights ()
 {
-        NAME_FONT = Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_SmallFont());
+        NAME_FONT = Pango::FontDescription (ARDOUR_UI::config()->get_SmallFont());
 
         Gtk::Window win;
         Gtk::Label foo;
@@ -191,8 +191,8 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	vestigial_frame = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, 1.0, 2.0, trackview.current_height()));
 	CANVAS_DEBUG_NAME (vestigial_frame, string_compose ("vestigial frame for %1", get_item_name()));
 	vestigial_frame->hide ();
-	vestigial_frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_VestigialFrame());
-	vestigial_frame->set_fill_color (ARDOUR_UI::config()->get_canvasvar_VestigialFrame());
+	vestigial_frame->set_outline_color (ARDOUR_UI::config()->get_VestigialFrame());
+	vestigial_frame->set_fill_color (ARDOUR_UI::config()->get_VestigialFrame());
 
 	if (visibility & ShowFrame) {
 		frame = new ArdourCanvas::Rectangle (group, 
@@ -209,9 +209,9 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		}
 
 		if (_recregion) {
-			frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RecordingRect());
+			frame->set_outline_color (ARDOUR_UI::config()->get_RecordingRect());
 		} else {
-			frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame());
+			frame->set_outline_color (ARDOUR_UI::config()->get_TimeAxisFrame());
 		}
 
 	} else {
@@ -743,7 +743,7 @@ TimeAxisViewItem::fill_opacity () const
 		return 130;
 	}
 
-	uint32_t col = ARDOUR_UI::config()->get_canvasvar_FrameBase();
+	uint32_t col = ARDOUR_UI::config()->get_FrameBase();
 	return UINT_RGBA_A (col);
 }
 
@@ -757,7 +757,7 @@ TimeAxisViewItem::get_fill_color () const
 
 	if (_selected) {
 
-                f = ARDOUR_UI::config()->get_canvasvar_SelectedFrameBase();
+                f = ARDOUR_UI::config()->get_SelectedFrameBase();
 
 		if (o == 0) {
 			/* some condition of this item has set fill opacity to
@@ -770,10 +770,10 @@ TimeAxisViewItem::get_fill_color () const
 	} else {
 
 		if (_recregion) {
-			f = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
+			f = ARDOUR_UI::config()->get_RecordingRect();
 		} else {
 			if ((!Config->get_show_name_highlight() || high_enough_for_name) && !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
-				f = ARDOUR_UI::config()->get_canvasvar_FrameBase();
+				f = ARDOUR_UI::config()->get_FrameBase();
 			} else {
 				f = fill_color;
 			}
@@ -800,9 +800,9 @@ TimeAxisViewItem::set_frame_color()
 		uint32_t f;
 
                 if (_selected) {
-                        f = ARDOUR_UI::config()->get_canvasvar_SelectedTimeAxisFrame();
+                        f = ARDOUR_UI::config()->get_SelectedTimeAxisFrame();
                 } else {
-                        f = ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame();
+                        f = ARDOUR_UI::config()->get_TimeAxisFrame();
                 }
 
                 if (!rect_visible) {
@@ -859,11 +859,11 @@ TimeAxisViewItem::set_trim_handle_colors()
 #else
 	if (frame_handle_start) {
 		if (position_locked) {
-			frame_handle_start->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandleLocked());
-			frame_handle_end->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandleLocked());
+			frame_handle_start->set_fill_color (ARDOUR_UI::config()->get_TrimHandleLocked());
+			frame_handle_end->set_fill_color (ARDOUR_UI::config()->get_TrimHandleLocked());
 		} else {
-			frame_handle_start->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandle());
-			frame_handle_end->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandle());
+			frame_handle_start->set_fill_color (ARDOUR_UI::config()->get_TrimHandle());
+			frame_handle_end->set_fill_color (ARDOUR_UI::config()->get_TrimHandle());
 		}
 	}
 #endif

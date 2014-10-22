@@ -55,11 +55,11 @@ CanvasPatchChange::CanvasPatchChange(
 		parent,
 		height,
 		(active_channel
-		 ? ARDOUR_UI::config()->get_canvasvar_MidiPatchChangeOutline()
-		 : ARDOUR_UI::config()->get_canvasvar_MidiPatchChangeInactiveChannelOutline()),
+		 ? ARDOUR_UI::config()->get_MidiPatchChangeOutline()
+		 : ARDOUR_UI::config()->get_MidiPatchChangeInactiveChannelOutline()),
 		(active_channel
-		 ? ARDOUR_UI::config()->get_canvasvar_MidiPatchChangeFill()
-		 : ARDOUR_UI::config()->get_canvasvar_MidiPatchChangeInactiveChannelFill()),
+		 ? ARDOUR_UI::config()->get_MidiPatchChangeFill()
+		 : ARDOUR_UI::config()->get_MidiPatchChangeInactiveChannelFill()),
 		x,
 		y)
 	, _info (info)

@@ -702,8 +702,8 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 				0xcccc00ff, 0xcccc00ff,
 				0xffaa00ff, 0xffaa00ff,
 				0xff0000ff,
-				ARDOUR_UI::config()->get_canvasvar_MeterBackgroundBot(),
-				ARDOUR_UI::config()->get_canvasvar_MeterBackgroundTop()
+				ARDOUR_UI::config()->get_MeterBackgroundBot(),
+				ARDOUR_UI::config()->get_MeterBackgroundTop()
 				);
 
 		info->min_unbound = desc.min_unbound;

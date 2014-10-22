@@ -126,9 +126,9 @@ Editor::initialize_rulers ()
 	   but it seems hard.
 	*/
 #ifdef __APPLE__	
-	Pango::FontDescription font (ARDOUR_UI::config()->get_canvasvar_SmallerFont());
+	Pango::FontDescription font (ARDOUR_UI::config()->get_SmallerFont());
 #else
-	Pango::FontDescription font (ARDOUR_UI::config()->get_canvasvar_SmallFont());
+	Pango::FontDescription font (ARDOUR_UI::config()->get_SmallFont());
 #endif
 	_timecode_metric = new TimecodeMetric (this);
 	_bbt_metric = new BBTMetric (this);
