@@ -2807,8 +2807,14 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		}
 		
 		if (session_name[0] == G_DIR_SEPARATOR ||
+#ifdef PLATFORM_WINDOWS
+		    (session_name.length() > 3 && session_name[1] == ':' && session_name[2] == G_DIR_SEPARATOR)
+#else
 		    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == G_DIR_SEPARATOR) ||
-		    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == G_DIR_SEPARATOR)) {
+		    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == G_DIR_SEPARATOR)
+#endif
+			 )
+		{
 			
 			/* absolute path or cwd-relative path specified for session name: infer session folder
 			   from what was given.
