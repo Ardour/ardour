@@ -151,10 +151,18 @@ else
 	PGF=PROGRAMFILES
 fi
 
-cat > $NSISFILE << EOF
+if test -n "$QUICKZIP" ; then
+	cat > $NSISFILE << EOF
+SetCompressor zlib
+EOF
+else
+	cat > $NSISFILE << EOF
 SetCompressor /SOLID lzma
 SetCompressorDictSize 32
+EOF
+fi
 
+cat >> $NSISFILE << EOF
 !include MUI2.nsh
 Name "Ardour3"
 OutFile "${OUTFILE}"
@@ -237,7 +245,12 @@ EOF
 
 rm -f ${OUTFILE}
 echo " === OutFile: $OUTFILE"
+
+if test -n "$QUICKZIP" ; then
+echo " === Building Windows Installer (fast zip)"
+else
 echo " === Building Windows Installer (lzma compression takes ages)"
-makensis -V2 $NSISFILE
+fi
+time makensis -V2 $NSISFILE
 rm -rf $DESTDIR
 ls -lh "$OUTFILE"
