@@ -100,7 +100,7 @@ Splash::~Splash ()
 void
 Splash::pop_back_for (Gtk::Window& win)
 {
-#ifdef __APPLE__
+#if defined  __APPLE__ || defined PLATFORM_WINDOWS
         /* April 2013: window layering on OS X is a bit different to X Window. at present,
            the "restack()" functionality in GDK will only operate on windows in the same
            "level" (e.g. two normal top level windows, or two utility windows) and will not
@@ -108,6 +108,10 @@ Splash::pop_back_for (Gtk::Window& win)
            is not going to work.
 
            So for OS X, we just hide ourselves.
+
+					 Oct 2014: The Windows situation is similar, although it should be possible
+					 to play tricks with gdk's set_type_hint() or directly hack things using
+					 SetWindowLong() and UpdateLayeredWindow()
         */
         (void) win;
         hide();
@@ -121,7 +125,7 @@ void
 Splash::pop_front ()
 {
 
-#ifdef __APPLE__
+#if defined  __APPLE__ || defined PLATFORM_WINDOWS
         if (get_window()) {
                 show ();
         }
