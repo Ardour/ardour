@@ -2203,7 +2203,12 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	if (_session && (prop = node.property ("playhead"))) {
 		framepos_t pos;
 		sscanf (prop->value().c_str(), "%" PRIi64, &pos);
-		playhead_cursor->set_position (pos);
+		if (pos >= 0) {
+			playhead_cursor->set_position (pos);
+		} else {
+			warning << _("Playhead position stored with a negative value - ignored (use zero instead)") << endmsg;
+			playhead_cursor->set_position (0);
+		}
 	} else {
 		playhead_cursor->set_position (0);
 	}
