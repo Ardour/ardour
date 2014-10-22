@@ -107,7 +107,7 @@ class LIBMIDIPP_API MachineControl
 	byte send_device_id () const { return _send_device_id; }
 	void enable_send (bool);
 	bool send_enabled () const { return _enable_send; }
-	void send (MachineControlCommand const &);
+	void send (MachineControlCommand const &, timestamp_t when);
 
 	static bool is_mmc (byte *sysex_buf, size_t len);
 

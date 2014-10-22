@@ -651,7 +651,7 @@ MachineControl::enable_send (bool yn)
  *  @param c command.
  */
 void
-MachineControl::send (MachineControlCommand const & c)
+MachineControl::send (MachineControlCommand const & c, timestamp_t when)
 {
 	if (_output_port == 0 || !_enable_send) {
 		// cerr << "Not delivering MMC " << _mmc->port() << " - " << session_send_mmc << endl;
@@ -661,7 +661,7 @@ MachineControl::send (MachineControlCommand const & c)
 	MIDI::byte buffer[32];
 	MIDI::byte* b = c.fill_buffer (this, buffer);
 
-	if (_output_port->midimsg (buffer, b - buffer, 0)) {
+	if (_output_port->midimsg (buffer, b - buffer, when)) {
 		error << "MMC: cannot send command" << endmsg;
 	}
 }
