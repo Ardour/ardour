@@ -919,7 +919,12 @@ JACKAudioBackend::process_thread ()
         /* JACK doesn't do this for us when we use the wait API
          */
 
+#ifdef COMPILER_MINGW
+	_main_thread = GetCurrentThread();
+#else
 	_main_thread = pthread_self ();
+#endif
+
 
         AudioEngine::thread_init_callback (this);
 
