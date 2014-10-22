@@ -334,8 +334,8 @@ Session::post_engine_init ()
 	// send_full_time_code (0);
 	_engine.transport_locate (0);
 
-	_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
-	_mmc->send (MIDI::MachineControlCommand (Timecode::Time ()));
+	send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
+	send_immediate_mmc (MIDI::MachineControlCommand (Timecode::Time ()));
 
 	MIDI::Name::MidiPatchManager::instance().set_session (this);
 

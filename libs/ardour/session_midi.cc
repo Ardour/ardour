@@ -33,6 +33,7 @@
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/timersub.h"
+#include "pbd/stacktrace.h"
 
 #include "timecode/time.h"
 
@@ -425,7 +426,7 @@ Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 	// Send message at offset 0, sent time is for the start of this cycle
 	
 	MidiBuffer& mb (_midi_ports->mtc_output_port()->get_midi_buffer (nframes));
-	mb.push_back (0, sizeof (msg), msg);
+	mb.push_back (Port::port_offset(), sizeof (msg), msg);
 
 	_pframes_since_last_mtc = 0;
 	return 0;
@@ -551,6 +552,16 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
  OUTBOUND MMC STUFF
 **********************************************************************/
 
+void
+Session::send_immediate_mmc (MachineControlCommand c)
+{
+	if (AudioEngine::instance()->in_process_thread()) {
+		_mmc->send (c, Port::port_offset());
+	} else {
+		_mmc->send (c, 0);
+	}
+		
+}
 
 bool
 Session::mmc_step_timeout ()

@@ -1380,7 +1380,7 @@ Session::enable_record ()
 		if (g_atomic_int_compare_and_exchange (&_record_status, rs, Recording)) {
 
 			_last_record_location = _transport_frame;
-			_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordStrobe));
+			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordStrobe));
 
 			if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 				set_track_monitor_input_status (true);
@@ -1401,7 +1401,7 @@ Session::disable_record (bool rt_context, bool force)
 
 		if ((!Config->get_latched_record_enable () && !play_loop) || force) {
 			g_atomic_int_set (&_record_status, Disabled);
-			_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordExit));
+			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordExit));
 		} else {
 			if (rs == Recording) {
 				g_atomic_int_set (&_record_status, Enabled);
@@ -1455,7 +1455,7 @@ Session::maybe_enable_record ()
 			enable_record ();
 		}
 	} else {
-		_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordPause));
+		send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordPause));
 		RecordStateChanged (); /* EMIT SIGNAL */
 	}
 

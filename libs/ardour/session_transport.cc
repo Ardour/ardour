@@ -656,7 +656,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		_send_timecode_update = true;
 		
 		if (!dynamic_cast<MTC_Slave*>(_slave)) {
-			_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
+			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
 
 			/* This (::non_realtime_stop()) gets called by main
 			   process thread, which will lead to confusion
@@ -1371,7 +1371,7 @@ Session::start_transport ()
 		Timecode::Time time;
 		timecode_time_subframes (_transport_frame, time);
 		if (!dynamic_cast<MTC_Slave*>(_slave)) {
-			_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
+			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
 		}
 	}
 
@@ -1759,7 +1759,7 @@ Session::send_mmc_locate (framepos_t t)
 	if (!_engine.freewheeling()) {
 		Timecode::Time time;
 		timecode_time_subframes (t, time);
-		_mmc->send (MIDI::MachineControlCommand (time));
+		send_immediate_mmc (MIDI::MachineControlCommand (time));
 	}
 }
 

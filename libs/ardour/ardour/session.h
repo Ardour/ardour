@@ -48,6 +48,7 @@
 #include "evoral/types.hpp"
 
 #include "midi++/types.h"
+#include "midi++/mmc.h"
 
 #include "timecode/time.h"
 
@@ -1248,6 +1249,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	MidiTimeoutList midi_timeouts;
 	bool mmc_step_timeout ();
+	void send_immediate_mmc (MIDI::MachineControlCommand);
 
 	MIDI::byte mtc_msg[16];
 	MIDI::byte mtc_timecode_bits;   /* encoding of SMTPE type for MTC */
