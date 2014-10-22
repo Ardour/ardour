@@ -227,127 +227,177 @@
             </VBox>
           </HBox>
         </EventBox>
-        <EventBox bgnormal="#3E3E3E">
-          <HBox borderwidth="1"
-                spacing="1">
-            <iconbutton id="inspector_on_button"
-                        tooltip="Show/Hide Inspector"
-                        width="48" height="26"
-                        normalicon="inspector_on"
-                        activeicon="inspector_on_active"/>
-            <iconbutton id="mixer_on_button"
-                        tooltip="Show/Hide Mixer"
-                        width="48" height="26"
-                        normalicon="mixer_on"
-                        activeicon="mixer_on_active"/>
-            <iconbutton id="meter_bridge_on_button"
-                        tooltip="Show/Hide Meter Bridge"
-                        width="48" height="26"
-                        normalicon="meter_bridge_on"
-                        activeicon="meter_bridge_on_active"/>
-            <Layout width="54"
-                    height="26"
-                    bgnormal="#3E3E3E"/>
-            <iconbutton id="transport_start_button"
-                        tooltip="Rewind"
-                        width="34" height="26"
-                        normalicon="transport_start"
-                        activeicon="transport_start_active"/>
-            <iconbutton id="transport_end_button"
-                        tooltip="Forward"
-                        width="34" height="26"
-                        normalicon="transport_end"
-                        activeicon="transport_end_active"/>
-            <iconbutton id="transport_play_button"
-                        tooltip="Play"
-                        width="34" height="26"
-                        normalicon="transport_play"
-                        activeicon="transport_play_active"/>
-            <iconbutton id="transport_record_button"
-                        tooltip="Record"
-                        width="34" height="26"
-                        normalicon="transport_record"
-                        activeicon="transport_record_active"/>
-            <iconbutton id="transport_stop_button"
-                        tooltip="Stop"
-                        width="34" height="26"
-                        normalicon="transport_stop"
-                        activeicon="transport_stop_active"/>
-            <iconbutton id="transport_loop_button"
-                        tooltip="Loop"
-                        width="34" height="26"
-                        normalicon="transport_loop"
-                        activeicon="transport_loop_active"/>
-            <iconbutton id="lock_session_button"
-                        tooltip="Lock"
-                        width="34" height="26"
-                        normalicon="lock_session"
-                        activeicon="lock_session_active"/>
-            <Layout width="60"
-                    height="26"
-                    bgnormal="#3E3E3E"/>
-            <iconbutton id="tool_marker_button"
-                        tooltip="Range Select Tool"
-                        width="34" height="26"
-                        normalicon="tool_marker"
-                        activeicon="tool_marker_active"/>
-            <iconbutton id="tool_arrow_button"
-                        tooltip="Pointer Tool"
-                        width="34" height="26"
-                        normalicon="tool_arrow"
-                        activeicon="tool_arrow_active"/>
-            <iconbutton id="tool_cut_button"
-                        tooltip="Split Tool"
-                        width="34" height="26"
-                        normalicon="tool_cut"
-                        activeicon="tool_cut_active"/>
-            <iconbutton id="tool_zoom_button"
-                        tooltip="Zoom Tool"
-                        width="34" height="26"
-                        normalicon="tool_zoom"
-                        activeicon="tool_zoom_active"/>
-            <HBox box.pack="end" spacing ="1">
-              <Adjustment id="temporal_zoom_adjustment"
-                          minvalue="0"
-                          maxvalue="25"
-                          initialvalue="4"
-                          step="1"
-                          pageincrement="1"/>
-              <Adjustment id="vertical_zoom_adjustment"
-                          minvalue="1"
-                          maxvalue="40"
-                          initialvalue="2"
-                          step="1"
-                          pageincrement="1"/>
+        <HBox>
+          <Layout bgnormal="#FF0000"
+                  width="649"
+                  height="28">
+            <icon source="transport_bar_border.png"/>
+            <HBox borderwidth="1"
+                  spacing="1">
+              <iconbutton id="inspector_on_button"
+                          tooltip="Show/Hide Inspector"
+                          width="48"
+                          height="26"
+                          normalicon="inspector_on"
+                          activeicon="inspector_on_active"/>
+              <iconbutton id="mixer_on_button"
+                          tooltip="Show/Hide Mixer"
+                          width="48"
+                          height="26"
+                          normalicon="mixer_on"
+                          activeicon="mixer_on_active"/>
+              <iconbutton id="meter_bridge_on_button"
+                          tooltip="Show/Hide Meter Bridge"
+                          width="48"
+                          height="26"
+                          normalicon="meter_bridge_on"
+                          activeicon="meter_bridge_on_active"/>
+              <EventBox x="148"
+                        y="1"
+                        width="54"
+                        height="26">
+                <!-- Some may ask why it's enveloped in the EventBox? The answer would be: GTK alighns the horizontal size of ICON -->
+                <Icon source="transport_bar_bg.png"/>
+              </EventBox>
+              <iconbutton id="transport_start_button"
+                          tooltip="Rewind"
+                          width="34"
+                          height="26"
+                          normalicon="transport_start"
+                          activeicon="transport_start_active"/>
+              <iconbutton id="transport_end_button"
+                          tooltip="Forward"
+                          width="34"
+                          height="26"
+                          normalicon="transport_end"
+                          activeicon="transport_end_active"/>
+              <iconbutton id="transport_play_button"
+                          tooltip="Play"
+                          width="34"
+                          height="26"
+                          normalicon="transport_play"
+                          activeicon="transport_play_active"/>
+              <iconbutton id="transport_record_button"
+                          tooltip="Record"
+                          width="34"
+                          height="26"
+                          normalicon="transport_record"
+                          activeicon="transport_record_active"/>
+              <iconbutton id="transport_stop_button"
+                          tooltip="Stop"
+                          width="34"
+                          height="26"
+                          normalicon="transport_stop"
+                          activeicon="transport_stop_active"/>
+              <iconbutton id="transport_loop_button"
+                          tooltip="Loop"
+                          width="34"
+                          height="26"
+                          normalicon="transport_loop"
+                          activeicon="transport_loop_active"/>
+              <iconbutton id="lock_session_button"
+                          tooltip="Lock"
+                          width="34"
+                          height="26"
+                          normalicon="lock_session"
+                          activeicon="lock_session_active"/>
+              <EventBox width="60"
+                        height="26">
+                <!-- Some may ask why it's enveloped in the EventBox? The answer would be: GTK alighns the horizontal size of ICON -->
+                <Icon source="transport_bar_bg.png"/>
+              </EventBox>
+              <iconbutton id="tool_marker_button"
+                          tooltip="Range Select Tool"
+                          width="34"
+                          height="26"
+                          normalicon="tool_marker"
+                          activeicon="tool_marker_active"/>
+              <iconbutton id="tool_arrow_button"
+                          tooltip="Pointer Tool"
+                          width="34"
+                          height="26"
+                          normalicon="tool_arrow"
+                          activeicon="tool_arrow_active"/>
+              <iconbutton id="tool_cut_button"
+                          tooltip="Split Tool"
+                          width="34"
+                          height="26"
+                          normalicon="tool_cut"
+                          activeicon="tool_cut_active"/>
+              <iconbutton id="tool_zoom_button"
+                          tooltip="Zoom Tool"
+                          width="34"
+                          height="26"
+                          normalicon="tool_zoom"
+                          activeicon="tool_zoom_active"/>
+            </HBox>
+          </Layout>
+          <Layout bgnormal="#FF0000"
+                  height="28"
+                  box.fill="true"
+                  box.expand="true">
+            <icon source="transport_bar_border.png"/>
+            <icon source="transport_bar_bg.png"
+                  y="1"/>
+          </Layout>
+          <Layout bgnormal="#FF0000"
+                  width="249"
+                  height="28"
+                  box.pack="end">
+            <icon source="transport_bar_border.png"/>
+            <Adjustment id="temporal_zoom_adjustment"
+                        minvalue="0"
+                        maxvalue="25"
+                        initialvalue="4"
+                        step="1"
+                        pageincrement="1"/>
+            <Adjustment id="vertical_zoom_adjustment"
+                        minvalue="1"
+                        maxvalue="40"
+                        initialvalue="2"
+                        step="1"
+                        pageincrement="1"/>
+            <HBox borderwidth="1"
+                  spacing="1">
               <Fader id="vertical_zoom_fader"
-                     adjustment="vertical_zoom_adjustment"
-                     facesource="vertical_zoom_fader_face.png"
-                     handlesource="zoom_fader_handle.png"
-                     activehandlesource="zoom_fader_handle_active.png"
-                     minposx="20"
-                     minposy="13"
-                     maxposx="66"
-                     maxposy="13"/>
+                   adjustment="vertical_zoom_adjustment"
+                   facesource="vertical_zoom_fader_face.png"
+                   handlesource="zoom_fader_handle.png"
+                   activehandlesource="zoom_fader_handle_active.png"
+                   x="1"
+                   y="1"
+                   minposx="20"
+                   minposy="13"
+                   maxposx="66"
+                   maxposy="13"/>
               <Fader adjustment="temporal_zoom_adjustment"
                      facesource="horizontal_zoom_fader_face.png"
                      handlesource="zoom_fader_handle.png"
                      activehandlesource="zoom_fader_handle_active.png"
+                     x="76"
+                     y="1"
                      minposx="66"
                      minposy="13"
                      maxposx="20"
                      maxposy="13"/>
               <EventBox id="waves_zoom_control_home"
                         tooltip="Waveform Zoom"
-                        width="48" height="26"
+                        x="151"
+                        y="1"
+                        width="48"
+                        height="26"
                         bgnormal="#ffff00"/>
               <iconbutton id="media_button"
                           tooltip="Media Button"
-                          width="48" height="26"
+                          x="200"
+                          y="1"
+                          width="48"
+                          height="26"
                           normalicon="media_button"
                           activeicon="media_button_active"/>
             </HBox>
-          </HBox>
-        </EventBox>
+          </Layout>
+        </HBox>
       </VBox>
     </EventBox>
     <EventBox bgnormal="#000000" height="1"/>
