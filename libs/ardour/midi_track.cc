@@ -536,12 +536,12 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framep
 		 * the last argument ("stop on overflow in destination") so that we'll
 		 * ship the rest out next time.
 		 *
-		 * the (nframes-1) argument puts all these events at the last
+		 * the Port::port_offset() + (nframes-1) argument puts all these events at the last
 		 * possible position of the output buffer, so that we do not
-		 * violate monotonicity when writing.
+		 * violate monotonicity when writing. Port::port_offset() will
+		 * be non-zero if we're in a split process cycle.
 		 */
-
-		_immediate_events.read (buf, 0, 1, nframes-1, true);
+		_immediate_events.read (buf, 0, 1, Port::port_offset() + nframes - 1, true);
 	}
 }
 
@@ -619,7 +619,7 @@ MidiTrack::write_immediate_event(size_t size, const uint8_t* buf)
 		return false;
 	}
 	const uint32_t type = EventTypeMap::instance().midi_event_type(buf[0]);
-	return (_immediate_events.write(0, type, size, buf) == size);
+	return (_immediate_events.write (0, type, size, buf) == size);
 }
 
 void
