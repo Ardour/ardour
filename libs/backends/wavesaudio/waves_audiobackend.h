@@ -316,6 +316,7 @@ class WavesMidiPort;
     uint32_t _systemic_output_latency;
     bool _call_thread_init_callback;
     std::vector<pthread_t> _backend_threads;
+    pthread_t _main_thread;
     static const size_t __max_raw_midi_buffer_size;
 
     static const std::vector<std::string> __available_midi_options;

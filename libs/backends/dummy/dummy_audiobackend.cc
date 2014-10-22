@@ -516,6 +516,10 @@ DummyAudioBackend::join_process_threads ()
 bool
 DummyAudioBackend::in_process_thread ()
 {
+	if (pthread_equal (_main_thread, pthread_self()) != 0) {
+		return true;
+	}
+
 	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
 	{
 		if (pthread_equal (*i, pthread_self ()) != 0) {

@@ -862,6 +862,16 @@ JACKAudioBackend::join_process_threads ()
 bool
 JACKAudioBackend::in_process_thread ()
 {
+#ifdef COMPILER_MINGW
+	if (_main_thread == GetCurrentThread()) {
+		return true;
+	}
+#else // pthreads
+	if (pthread_equal (_main_thread, pthread_self()) != 0) {
+		return true;
+	}
+#endif
+
 	for (std::vector<jack_native_thread_t>::const_iterator i = _jack_threads.begin ();
 	     i != _jack_threads.end(); i++) {
 
@@ -908,6 +918,8 @@ JACKAudioBackend::process_thread ()
 {
         /* JACK doesn't do this for us when we use the wait API
          */
+
+	_main_thread = pthread_self ();
 
         AudioEngine::thread_init_callback (this);
 

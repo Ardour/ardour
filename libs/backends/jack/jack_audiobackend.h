@@ -209,6 +209,7 @@ class JACKAudioBackend : public AudioBackend {
     std::map<DataType,size_t> _raw_buffer_sizes;
 
     std::vector<jack_native_thread_t> _jack_threads;
+    jack_native_thread_t _main_thread;
 
     static int  _xrun_callback (void *arg);
     static void* _process_thread (void *arg);

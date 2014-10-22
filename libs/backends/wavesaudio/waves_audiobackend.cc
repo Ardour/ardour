@@ -721,6 +721,11 @@ WavesAudioBackend::_audio_device_callback (const float* input_buffer,
     // COMMENTED FREQUENT DBG LOGS */ std::cout << "WavesAudioBackend::_audio_device_callback ():" << _device->DeviceName () << std::endl;
     _sample_time_at_cycle_start = sample_time;
     _cycle_start_time_nanos = cycle_start_time_nanos;
+    
+    /* There is the possibility that the thread this runs in may change from
+     *  callback to callback, so do it every time.
+     */
+    _main_thread = pthread_self ();
 
     if (_buffer_size != nframes) {
         // COMMENTED DBG LOGS */ std::cout << "\tAudioEngine::thread_init_callback() buffer size and nframes are not equal: " << _buffer_size << "!=" << nframes << std::endl;
@@ -1099,13 +1104,16 @@ bool
 WavesAudioBackend::in_process_thread ()
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::in_process_thread ()" << std::endl;
-    for (std::vector<pthread_t>::const_iterator i = _backend_threads.begin ();
-        i != _backend_threads.end (); i++) {
-        if (pthread_equal (*i, pthread_self ()) != 0) {
-            return true;
-        }
-    }
-    return false;
+	if (pthread_equal (_main_thread, pthread_self()) != 0) {
+		return true;
+	}
+	for (std::vector<pthread_t>::const_iterator i = _backend_threads.begin ();
+	     i != _backend_threads.end (); i++) {
+		if (pthread_equal (*i, pthread_self ()) != 0) {
+			return true;
+		}
+	}
+	return false;
 }
 
 
