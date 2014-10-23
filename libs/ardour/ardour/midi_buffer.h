@@ -92,7 +92,7 @@ public:
 		}
 
 		inline TimeType * timeptr() {
-			return ((TimeType*)(buffer->_data + offset));
+			return reinterpret_cast<TimeType*>((uintptr_t)(buffer->_data + offset));
 		}
 
 		inline iterator_base<BufferType, EventType>& operator++() {

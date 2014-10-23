@@ -147,7 +147,7 @@ run(LV2_Handle handle, uint32_t n_samples)
 
   /* Process incoming MIDI events */
   if (self->midiin) {
-    LV2_Atom_Event const* ev = (LV2_Atom_Event const*)((&(self->midiin)->body) + 1); // lv2_atom_sequence_begin
+    LV2_Atom_Event const* ev = (LV2_Atom_Event const*)((uintptr_t)((&(self->midiin)->body) + 1)); // lv2_atom_sequence_begin
     while( // !lv2_atom_sequence_is_end
         (const uint8_t*)ev < ((const uint8_t*) &(self->midiin)->body + (self->midiin)->atom.size)
         )
@@ -166,7 +166,7 @@ run(LV2_Handle handle, uint32_t n_samples)
         }
       }
       ev = (LV2_Atom_Event const*) // lv2_atom_sequence_next()
-        ((const uint8_t*)ev + sizeof(LV2_Atom_Event) + ((ev->body.size + 7) & ~7));
+	      ((uintptr_t)((const uint8_t*)ev + sizeof(LV2_Atom_Event) + ((ev->body.size + 7) & ~7)));
     }
   }
 

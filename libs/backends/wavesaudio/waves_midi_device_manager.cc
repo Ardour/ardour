@@ -25,7 +25,7 @@
 #include "windows.h"
 #include "mmsystem.h"
 
-#else if defined(__APPLE__)
+#elif defined(__APPLE__)
 
 #include <CoreMIDI/MIDIServices.h>
 

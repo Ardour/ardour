@@ -237,7 +237,10 @@ AudioFileSource::old_peak_path (string audio_path)
 
 	char buf[32];
 #ifdef __APPLE__
-	snprintf (buf, sizeof (buf), "%u-%u-%d.peak", stat_mount.st_ino, stat_file.st_ino, _channel);
+	snprintf (buf, sizeof (buf), "%llu-%llu-%d.peak",
+			(unsigned long long)stat_mount.st_ino,
+			(unsigned long long)stat_file.st_ino,
+			_channel);
 #else
 	snprintf (buf, sizeof (buf), "%" PRId64 "-%" PRId64 "-%d.peak", (int64_t) stat_mount.st_ino, (int64_t) stat_file.st_ino, _channel);
 #endif

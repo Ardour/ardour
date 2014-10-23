@@ -3596,7 +3596,7 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 		if (icsd_docroot.empty()) {icsd_docroot = X_("/");}
 
 		GStatBuf sb;
-		if (!g_lstat (icsd_docroot.c_str(), &sb) == 0 || !S_ISDIR(sb.st_mode)) {
+		if (g_lstat (icsd_docroot.c_str(), &sb) != 0 || !S_ISDIR(sb.st_mode)) {
 			warning << _("Specified docroot is not an existing directory.") << endmsg;
 			continue;
 		}
