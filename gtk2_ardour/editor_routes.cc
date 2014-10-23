@@ -810,7 +810,7 @@ EditorRoutes::update_visibility ()
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 
-	DisplaySuspender ds ();
+	DisplaySuspender ds;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[_columns.tv];

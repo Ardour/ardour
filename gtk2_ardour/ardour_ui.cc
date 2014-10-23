@@ -3601,13 +3601,13 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 			continue;
 		}
 #ifndef PLATFORM_WINDOWS
-		if ( (!g_lstat (icsd_exec.c_str(), &sb) == 0)
+		if ( (g_lstat (icsd_exec.c_str(), &sb) != 0)
 		     || (sb.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) == 0 ) {
 			warning << _("Given Video Server is not an executable file.") << endmsg;
 			continue;
 		}
 #else
-		if ( (!g_lstat (icsd_exec.c_str(), &sb) == 0)
+		if ( (g_lstat (icsd_exec.c_str(), &sb) != 0)
 		     || (sb.st_mode & (S_IXUSR)) == 0 ) {
 			warning << _("Given Video Server is not an executable file.") << endmsg;
 			continue;

@@ -190,7 +190,7 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 	}
 
 	uint8_t* const write_loc = _data + _size;
-	*((TimeType*)write_loc) = time;
+	*(reinterpret_cast<TimeType*>((uintptr_t)write_loc)) = time;
 	memcpy(write_loc + stamp_size, data, size);
 
 	_size += stamp_size + size;
@@ -242,7 +242,7 @@ MidiBuffer::insert_event(const Evoral::MIDIEvent<TimeType>& ev)
 	}
 
 	uint8_t* const write_loc = _data + insert_offset;
-	*((TimeType*)write_loc) = t;
+	*(reinterpret_cast<TimeType*>((uintptr_t)write_loc)) = t;
 	memcpy(write_loc + stamp_size, ev.buffer(), ev.size());
 
 	_size += bytes_to_merge;
@@ -267,7 +267,7 @@ MidiBuffer::reserve(TimeType time, size_t size)
 
 	// write timestamp
 	uint8_t* write_loc = _data + _size;
-	*((TimeType*)write_loc) = time;
+	*(reinterpret_cast<TimeType*>((uintptr_t)write_loc)) = time;
 
 	// move write_loc to begin of MIDI buffer data to write to
 	write_loc += stamp_size;

@@ -57,8 +57,8 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		*/
 		this->peek (peekbuf, prefix_size);
 
-		ev_time = *((T*) peekbuf);
-		ev_size = *((uint32_t*)(peekbuf + sizeof(T) + sizeof (Evoral::EventType)));
+		ev_time = *(reinterpret_cast<T*>((uintptr_t)peekbuf));
+		ev_size = *(reinterpret_cast<uint32_t*>((uintptr_t)(peekbuf + sizeof(T) + sizeof (Evoral::EventType))));
 
 		if (ev_time >= end) {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 past end @ %2\n", ev_time, end));
@@ -148,13 +148,13 @@ MidiRingBuffer<T>::flush (framepos_t /*start*/, framepos_t end)
 		*/
 		assert (success);
 
-		ev_time = *((T*) peekbuf);
+		ev_time = *(reinterpret_cast<T*>((uintptr_t)peekbuf));
 		
 		if (ev_time >= end) {
 			break;
 		}
 
-		ev_size = *((uint32_t*)(peekbuf + sizeof(T) + sizeof (Evoral::EventType)));
+		ev_size = *(reinterpret_cast<uint32_t*>((uintptr_t)(peekbuf + sizeof(T) + sizeof (Evoral::EventType))));
 		this->increment_read_ptr (prefix_size);
 		this->increment_read_ptr (ev_size);
 	}

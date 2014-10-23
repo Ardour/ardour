@@ -55,7 +55,7 @@ class Port;
 class Session;
 class ProcessThread;
 class AudioBackend;
-class AudioBackendInfo;
+struct AudioBackendInfo;
 
 class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 {

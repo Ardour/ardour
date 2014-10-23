@@ -87,7 +87,7 @@ public:
 			int event_size = Evoral::midi_event_size(ev_start);
 			assert(event_size >= 0);
 			return EventType(EventTypeMap::instance().midi_event_type(*ev_start),
-					*((TimeType*)(buffer->_data + offset)),
+					*(reinterpret_cast<TimeType*>((uintptr_t)(buffer->_data + offset))),
 					event_size, ev_start);
 		}
 

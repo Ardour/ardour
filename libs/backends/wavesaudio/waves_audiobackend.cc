@@ -117,8 +117,8 @@ WavesAudioBackend::WavesAudioBackend (AudioEngine& e)
     , _sample_time_at_cycle_start (0)
     , _freewheeling (false)
     , _freewheel_thread_active (false)
-    , _audio_cycle_period_nanos (0)
     , _dsp_load_accumulator (0)
+    , _audio_cycle_period_nanos (0)
     , _dsp_load_history_length(0)
 {
 }
