@@ -62,6 +62,8 @@ def build(bld):
                    ]
     obj.use      = 'libardour libpbd ardouralsautil'
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
+    obj.cxxflags = [ '-fPIC' ]
+    obj.cflags   = [ '-fPIC' ]
 
     if (bld.env['build_target'] == 'mingw'):
         obj.uselib   = [ 'PORTAUDIO' ]
