@@ -677,7 +677,7 @@ piano_keyboard_new(void)
 	pk->enable_keyboard_cue = 0;
 	pk->octave = 4;
 	pk->note_being_pressed_using_mouse = -1;
-	memset((void *)pk->notes, 0, sizeof(struct Note) * NNOTES);
+	memset((void *)pk->notes, 0, sizeof(struct PKNote) * NNOTES);
 	pk->key_bindings = g_hash_table_new(g_str_hash, g_str_equal);
 	bind_keys_qwerty(pk);
 

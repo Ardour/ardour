@@ -40,7 +40,7 @@ typedef struct	_PianoKeyboardClass		PianoKeyboardClass;
 #define OCTAVE_MIN	-1
 #define OCTAVE_MAX	7
 
-struct Note {
+struct PKNote {
 	int			pressed;		/* 1 if key is in pressed down state. */
 	int			sustained;		/* 1 if note is sustained. */
 	int			x;			/* Distance between the left edge of the key
@@ -59,7 +59,7 @@ struct _PianoKeyboard
 	int			octave;
 	int			widget_margin;
 	int			note_being_pressed_using_mouse;
-	volatile struct Note 	notes[NNOTES];
+	volatile struct PKNote 	notes[NNOTES];
 	/* Table used to translate from PC keyboard character to MIDI note number. */
 	GHashTable		*key_bindings;
 };
