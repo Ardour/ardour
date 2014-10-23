@@ -1254,6 +1254,13 @@ WavesAudioBackend::__already_configured ()
     return false;
 }
 
+bool
+WavesAudioBackend::__available ()
+{
+    // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::__available ():" << std::endl;
+    return true;
+}
+
 
 void*
 WavesAudioBackend::private_handle () const
@@ -1298,6 +1305,7 @@ AudioBackendInfo WavesAudioBackend::__backend_info = {
     WavesAudioBackend::__deinstantiate,
     WavesAudioBackend::__waves_backend_factory,
     WavesAudioBackend::__already_configured,
+    WavesAudioBackend::__available,
 };
 
 

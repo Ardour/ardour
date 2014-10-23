@@ -335,6 +335,7 @@ class WavesMidiPort;
     static int __instantiate (const std::string& arg1, const std::string& arg2);
     static int __deinstantiate ();
     static bool __already_configured ();
+    static bool __available ();
 
     static void* __start_process_thread (void*);
     static uint64_t __get_time_nanos ();

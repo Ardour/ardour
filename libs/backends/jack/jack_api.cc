@@ -29,6 +29,7 @@ static boost::shared_ptr<AudioBackend> backend_factory (AudioEngine& ae);
 static int  instantiate (const std::string& arg1, const std::string& arg2);
 static int  deinstantiate ();
 static bool already_configured ();
+static bool available ();
 
 static ARDOUR::AudioBackendInfo _descriptor = {
 	"JACK",
@@ -36,6 +37,7 @@ static ARDOUR::AudioBackendInfo _descriptor = {
 	deinstantiate,
 	backend_factory,
 	already_configured,
+	available
 };
 
 static boost::shared_ptr<AudioBackend>
@@ -77,6 +79,12 @@ static bool
 already_configured ()
 {
 	return !JackConnection::in_control ();
+}
+
+static bool
+available ()
+{
+	return have_libjack() ? false : true;
 }
 
 extern "C" ARDOURBACKEND_API ARDOUR::AudioBackendInfo* descriptor() { return &_descriptor; }

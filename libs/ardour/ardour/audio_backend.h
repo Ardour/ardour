@@ -70,6 +70,14 @@ struct LIBARDOUR_API AudioBackendInfo {
      * not currently required, is still possible.
      */
     bool (*already_configured)();
+
+    /** Return true if the underlying mechanism/API can be
+     * used on the given system.
+     *
+     * If this function returns false, the backend is not
+     * listed in the engine dialog.
+     */
+    bool (*available)();
 };
 
 class LIBARDOUR_API AudioBackend : public PortEngine {
