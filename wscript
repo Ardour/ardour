@@ -217,6 +217,8 @@ def set_compiler_flags (conf,opt):
     if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite' ]:
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
+        c_flags.append('-Qunused-arguments')
+        cxx_flags.append('-Qunused-arguments')
         if platform == "darwin":
             cxx_flags.append('--stdlib=libstdc++')
             # Mavericks and later changed the syntax to be used when including Carbon headers,
