@@ -20,8 +20,7 @@
 #ifndef __ardour_jack_audiobackend_jack_session_h__
 #define __ardour_jack_audiobackend_jack_session_h__
 
-#include <jack/session.h>
-#include <jack/transport.h>
+#include "weak_libjack.h"
 
 #include "ardour/types.h"
 #include "ardour/session_handle.h"

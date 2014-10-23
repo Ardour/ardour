@@ -22,9 +22,6 @@
 
 #include <glibmm/miscutils.h>
 
-#include <jack/jack.h>
-#include <jack/transport.h>
-
 #include "pbd/localtime_r.h"
 
 #include "ardour/audioengine.h"

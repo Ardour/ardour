@@ -2,7 +2,7 @@
 #define __libardour_jack_connection_h__
 
 #include <string>
-#include <jack/jack.h>
+#include "weak_libjack.h"
 
 #include "pbd/signals.h"
 

@@ -29,8 +29,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <jack/jack.h>
-#include <jack/session.h>
+#include "weak_libjack.h"
 
 #include "ardour/audio_backend.h"
 

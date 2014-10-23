@@ -461,6 +461,8 @@ def options(opt):
                     help='Build a version suitable for distribution as a zero-cost binary')
     opt.add_option('--gprofile', action='store_true', default=False, dest='gprofile',
                     help='Compile for use with gprofile')
+    opt.add_option('--libjack', type='string', default="auto", dest='libjack_link',
+                    help='libjack link mode  [auto|link|weak]')
     opt.add_option('--internal-shared-libs', action='store_true', default=True, dest='internal_shared_libs',
                    help='Build internal libs as shared libraries')
     opt.add_option('--internal-static-libs', action='store_false', dest='internal_shared_libs',
@@ -838,6 +840,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
     write_config_text('FPU optimization',      opts.fpu_optimization)
     write_config_text('Freedesktop files',     opts.freedesktop)
+    write_config_text('Libjack linking',       conf.env['libjack_link'])
     write_config_text('LV2 UI embedding',      conf.is_defined('HAVE_SUIL'))
     write_config_text('LV2 support',           conf.is_defined('LV2_SUPPORT'))
     write_config_text('LXVST support',         conf.is_defined('LXVST_SUPPORT'))

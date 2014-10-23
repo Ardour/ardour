@@ -38,8 +38,6 @@
 #include <portaudio.h>
 #endif
 
-#include <jack/jack.h>
-
 #include <fstream>
 
 #include <boost/scoped_ptr.hpp>

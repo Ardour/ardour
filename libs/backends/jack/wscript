@@ -32,6 +32,17 @@ def configure(conf):
                           atleast_version='19')
     autowaf.configure(conf)
 
+    if Options.options.libjack_link == 'auto':
+        if Options.options.dist_target == 'mingw' or sys.platform == 'darwin':
+            conf.env['libjack_link'] = "weak"
+        else:
+            conf.env['libjack_link'] = "link"
+    elif Options.options.libjack_link == 'weak':
+        conf.env['libjack_link'] = "weak"
+    else:
+        conf.env['libjack_link'] = "link"
+
+
 def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = [ 
@@ -41,20 +52,27 @@ def build(bld):
             'jack_portengine.cc',
             'jack_utils.cc',
             'jack_session.cc',
+            'weak_libjack.c',
             ]
     obj.includes = ['.']
     obj.name     = 'jack_audiobackend'
     obj.target   = 'jack_audiobackend'
-    if (bld.env['build_target'] == 'mingw'):
-        obj.uselib   = [ 'JACK', 'PORTAUDIO' ]
-    else:
-        obj.uselib   = [ 'JACK' ]
-        obj.vnum     = JACKBACKEND_VERSION
-    obj.use      = 'libardour libpbd ardouralsautil'
-    obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"', 
                    'ARDOURBACKEND_DLL_EXPORTS'
                    ]
+    obj.use      = 'libardour libpbd ardouralsautil'
+    obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
+
+    if (bld.env['build_target'] == 'mingw'):
+        obj.uselib   = [ 'PORTAUDIO' ]
+    else:
+        obj.uselib   = [ ]
+        obj.vnum     = JACKBACKEND_VERSION
+
+    if bld.env['libjack_link'] == 'link':
+        obj.uselib   += [ 'JACK' ]
+    else:
+        obj.defines += [ 'USE_WEAK_JACK' ]
 
     #
     # device discovery code in the jack backend needs ALSA

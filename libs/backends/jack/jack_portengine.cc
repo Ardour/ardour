@@ -24,7 +24,6 @@
 
 #include "jack_audiobackend.h"
 #include "jack_connection.h"
-#include "jack/midiport.h"
 
 #include "ardour/port_manager.h"
 

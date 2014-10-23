@@ -27,9 +27,6 @@
 
 #include "pbd/error.h"
 
-#include "jack/jack.h"
-#include "jack/thread.h"
-
 #include "ardour/audioengine.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
