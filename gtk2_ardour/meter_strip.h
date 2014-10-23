@@ -146,7 +146,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void route_color_changed ();
 
 	bool _suspend_menu_callbacks;
-	bool level_meter_button_release (GdkEventButton* ev);
+	bool level_meter_button_press (GdkEventButton* ev);
 	void popup_level_meter_menu (GdkEventButton* ev);
 	void add_level_meter_type_item (Gtk::Menu_Helpers::MenuList&, Gtk::RadioMenuItem::Group&, std::string const &, ARDOUR::MeterType);
 

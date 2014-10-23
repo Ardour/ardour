@@ -141,7 +141,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	level_meter->clear_meters();
 	level_meter->set_type (_route->meter_type());
 	level_meter->setup_meters (220, meter_width, 6);
-	level_meter->ButtonRelease.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_release, this, _1));
+	level_meter->ButtonPress.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_press, this, _1));
 	level_meter->MeterTypeChanged.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::meter_type_changed, this, _1));
 
 	meter_align.set(0.5, 0.5, 0.0, 1.0);
@@ -779,7 +779,7 @@ MeterStrip::name_changed () {
 }
 
 bool
-MeterStrip::level_meter_button_release (GdkEventButton* ev)
+MeterStrip::level_meter_button_press (GdkEventButton* ev)
 {
 	if (ev->button == 3) {
 		if (_route && _route->shared_peak_meter()->input_streams ().n_audio() > 0) {
