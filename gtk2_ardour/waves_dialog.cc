@@ -107,9 +107,31 @@ WavesDialog::~WavesDialog ()
 	WM::Manager::instance().remove (_proxy);
 }
 
+void
+WavesDialog::on_esc_pressed ()
+{
+    
+}
+
+void
+WavesDialog::on_enter_pressed ()
+{
+    
+}
+
 bool
 WavesDialog::on_key_press_event (GdkEventKey* ev)
 {
+    switch (ev->keyval)
+    {
+        case GDK_Return:
+            on_enter_pressed ();
+            break;
+        case GDK_Escape:
+            on_esc_pressed ();
+            break;
+    }
+    
 	return relay_key_press (ev, this);
 }
 

@@ -55,6 +55,10 @@ class WavesDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr, public 
 	void on_unmap ();
 	void on_show ();
 
+  protected:
+    virtual void on_esc_pressed ();
+    virtual void on_enter_pressed ();
+
   private:
 
 	WM::ProxyTemporary* _proxy;
