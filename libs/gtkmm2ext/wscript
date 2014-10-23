@@ -39,6 +39,7 @@ gtkmm2ext_sources = [
         'cursors.cc',
         'debug.cc',
         'dndtreeview.cc',
+        'emscale.cc',
         'fastmeter.cc',
         'focus_entry.cc',
         'grouped_buttons.cc',
