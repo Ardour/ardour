@@ -26,8 +26,10 @@ public:
     int count();
     ARDOUR::ChanCount input_channels ();
     
-    bool on_key_press_event (GdkEventKey* ev);
-        
+protected:
+    void on_enter_pressed ();
+    void on_esc_pressed ();
+    
 private:
 	WavesButton& _decrement_button;
     WavesButton& _increment_button;
