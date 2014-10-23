@@ -844,6 +844,12 @@ GainMeterBase::gain_automation_state_changed ()
 	}
 }
 
+const ChanCount
+GainMeterBase::meter_channels() const
+{
+		if (_meter) { return _meter->input_streams(); }
+		else { return ChanCount(); }
+}
 void
 GainMeterBase::update_meters()
 {

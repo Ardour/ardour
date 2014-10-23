@@ -76,6 +76,8 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	void update_gain_sensitive ();
 	void update_meters ();
 
+	const ARDOUR::ChanCount meter_channels () const;
+
 	void effective_gain_display ();
 	void set_width (Width, int len=0);
 	void set_meter_strip_name (const char * name);

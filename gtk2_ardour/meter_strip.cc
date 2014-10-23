@@ -782,7 +782,9 @@ bool
 MeterStrip::level_meter_button_release (GdkEventButton* ev)
 {
 	if (ev->button == 3) {
-		popup_level_meter_menu (ev);
+		if (_route && _route->shared_peak_meter()->input_streams ().n_audio() > 0) {
+			popup_level_meter_menu (ev);
+		}
 		return true;
 	}
 

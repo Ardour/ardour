@@ -2190,6 +2190,12 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 	add_level_meter_item_point (items, group, _("Output"), MeterOutput);
 	add_level_meter_item_point (items, group, _("Custom"), MeterCustom);
 
+	if (gpm.meter_channels().n_audio() == 0) {
+		m->popup (ev->button, ev->time);
+		_suspend_menu_callbacks = false;
+		return;
+	}
+
 	RadioMenuItem::Group tgroup;
 	items.push_back (SeparatorElem());
 
