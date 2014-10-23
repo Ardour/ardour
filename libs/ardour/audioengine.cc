@@ -700,11 +700,14 @@ AudioEngine::backend_discover (const string& path)
 		error << Glib::Module::get_last_error() << endmsg;
 		return 0;
 	}
-
-	module.make_resident ();
 	
 	dfunc = (AudioBackendInfo* (*)(void))func;
 	info = dfunc();
+	if (!info->available()) {
+		return 0;
+	}
+
+	module.make_resident ();
 	
 	return info;
 }
