@@ -334,6 +334,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\emscale.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\fastmeter.cc"
 				>
 			</File>
@@ -529,6 +533,10 @@
 			</File>
 			<File
 				RelativePath="..\gtkmm2ext\doi.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtkmm2ext\emscale.h"
 				>
 			</File>
 			<File
