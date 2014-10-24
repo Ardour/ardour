@@ -9,7 +9,7 @@
  * see https://en.wikibooks.org/wiki/C_Programming/Preprocessor#X-Macros
  */
 
-#ifndef USE_WEAK_JACK
+#ifdef USE_WEAK_JACK
 
 /* <jack/jack.h> */
 JCFUN(1, int,            client_close, 0)

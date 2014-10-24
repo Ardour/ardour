@@ -84,15 +84,15 @@ static struct WeakJack {
 
 static int _status = -1;
 
-int have_libjack (void) {
-	return _status;
-}
-
 __attribute__((constructor))
+//__attribute__((constructor))
 static void init_weak_jack(void)
 {
 	void* lib;
 	int err = 0;
+#ifndef NDEBUG
+	fprintf(stderr, "*** WEAK-JACK: initializing\n");
+#endif
 
 	memset(&_j, 0, sizeof(_j));
 
@@ -111,6 +111,9 @@ static void init_weak_jack(void)
 	lib = lib_open("libjack.so.0");
 #endif
 	if (!lib) {
+#ifndef NDEBUG
+		fprintf(stderr, "*** WEAK-JACK: libjack was not found\n");
+#endif
 		_status = -2;
 		return;
 	}
@@ -135,6 +138,16 @@ static void init_weak_jack(void)
 		_j._client_open = NULL;
 	}
 	_status = err;
+#ifndef NDEBUG
+	fprintf(stderr, "*** WEAK-JACK: %s. (%d)\n", err ? "jack is not available" : "OK", _status);
+#endif
+}
+
+int have_libjack (void) {
+	if (_status == -1) {
+		init_weak_jack();
+	}
+	return _status;
 }
 
 /*******************************************************************************
