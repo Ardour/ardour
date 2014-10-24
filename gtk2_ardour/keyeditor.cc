@@ -55,8 +55,7 @@ KeyEditor::KeyEditor ()
 	, unbind_box (BUTTONBOX_END)
 
 {
-	can_bind = false;
-	last_state = 0;
+	last_keyval = 0;
 
 	model = TreeStore::create(columns);
 
@@ -182,15 +181,16 @@ KeyEditor::action_selected ()
 bool
 KeyEditor::on_key_press_event (GdkEventKey* ev)
 {
-	can_bind = true;
-	last_state = ev->state;
+	if (!ev->is_modifier) {
+		last_keyval = ev->keyval;
+	}
 	return false;
 }
 
 bool
 KeyEditor::on_key_release_event (GdkEventKey* ev)
 {
-	if (ARDOUR::Profile->get_sae() || !can_bind || ev->state != last_state) {
+	if (ARDOUR::Profile->get_sae() || last_keyval == 0) {
 		return false;
 	}
 
@@ -203,22 +203,22 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 			goto out;
 		}
 
-                Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (ev->keyval);
-
+		Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (ev->keyval);
 
 		bool result = AccelMap::change_entry (path,
-						      ev->keyval,
+						      last_keyval,
 						      ModifierType (Keyboard::RelevantModifierKeyMask & ev->state),
 						      true);
 
 		if (result) {
 			AccelKey key;
 			(*i)[columns.binding] = ActionManager::get_key_representation (path, key);
+			unbind_button.set_sensitive (true);
 		}
 	}
 
   out:
-	can_bind = false;
+    last_keyval = 0;
 	return true;
 }
 
