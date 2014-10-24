@@ -80,7 +80,7 @@ JPFUN(1, int,            transport_locate, (jack_client_t *c, jack_nframes_t f),
 JVFUN(1,                 transport_start, (jack_client_t *c), (c),)
 JVFUN(1,                 transport_stop, (jack_client_t *c), (c),)
 JPFUN(1, jack_nframes_t, get_current_transport_frame, (const jack_client_t *c), (c), 0)
-JXFUN(1, jack_transport_state_t, transport_query, (const jack_client_t *c, jack_position_t *p), (c,p), memset(p, 0, sizeof(jack_position_t)); return 0;)
+JXFUN(1, jack_transport_state_t, transport_query, (const jack_client_t *c, jack_position_t *p), (c,p), memset(p, 0, sizeof(jack_position_t)); return JackTransportStopped;)
 JPFUN(1, int,            set_sync_callback, (jack_client_t *c, JackSyncCallback p, void *a), (c,p,a), -1)
 JPFUN(1, int,            set_timebase_callback, (jack_client_t *c, int l, JackTimebaseCallback p, void *a), (c,l,p,a), -1)
 JCFUN(1, int,            release_timebase, 0)
