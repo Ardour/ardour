@@ -291,6 +291,10 @@
 				RelativePath="..\jack\jack_utils.cc"
 				>
 			</File>
+			<File
+				RelativePath="..\jack\weak_libjack.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -307,6 +311,10 @@
 			</File>
 			<File
 				RelativePath="..\jack\jack_utils.h"
+				>
+			</File>
+			<File
+				RelativePath="..\jack\weak_libjack.h"
 				>
 			</File>
 		</Filter>
