@@ -2,6 +2,10 @@
  *
  * (C) 2014 Robin Gareus <robin@gareus.org>
  *
+ * The wrapped jack API itself is
+ * (C) 2001 Paul Davis
+ * (C) 2004 Jack O'Quin
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
@@ -152,12 +156,14 @@ int have_libjack(void);
 /* var-args hack */
 #define jack_client_open1                   WJACK_client_open1
 #define jack_client_open2                   WJACK_client_open2
-#include <jack/types.h>
+
+#include <jack/types.h> // needed for jack_client_open abstraction
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
 jack_client_t * WJACK_client_open1 (
         const char *client_name,
         jack_options_t options, jack_status_t *status);
@@ -170,13 +176,13 @@ jack_client_t * WJACK_client_open2 (
 }
 #endif
 
-#else
+#else /* directly use JACK API */
 
 /* var-args hack */
 #define jack_client_open1                  jack_client_open
 #define jack_client_open2                  jack_client_open
 
-#endif // USE_WEAK_JACK
+#endif // end USE_WEAK_JACK
 
 #include <jack/jack.h>
 #include <jack/transport.h>

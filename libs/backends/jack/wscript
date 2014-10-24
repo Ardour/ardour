@@ -75,6 +75,7 @@ def build(bld):
         obj.uselib   += [ 'JACK' ]
     else:
         obj.defines += [ 'USE_WEAK_JACK' ]
+        obj.deps = [ 'weak_libjack.def' ]
 
     #
     # device discovery code in the jack backend needs ALSA
