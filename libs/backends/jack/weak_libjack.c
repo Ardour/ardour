@@ -85,7 +85,6 @@ static struct WeakJack {
 static int _status = -1;
 
 __attribute__((constructor))
-//__attribute__((constructor))
 static void init_weak_jack(void)
 {
 	void* lib;
