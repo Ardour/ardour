@@ -17,6 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <cairomm/context.h>
+
 #include "canvas/visibility.h"
 #include "canvas/types.h"
 
