@@ -194,9 +194,13 @@ static void init_weak_jack(void)
 		lib = lib_open("/usr/local/lib/libjack.dylib");
 	}
 #elif (defined PLATFORM_WINDOWS)
+# ifdef __x86_64__
+	lib = lib_open("libjack64.dll");
+# else
 	lib = lib_open("libjack.dll");
+# endif
 #else
-	lib = lib_open("libjack.so");
+	lib = lib_open("libjack.so.0");
 #endif
 	if (!lib) {
 		_status = -2;
