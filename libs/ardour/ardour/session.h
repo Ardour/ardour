@@ -1169,10 +1169,15 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void reset_rf_scale (framecnt_t frames_moved);
 
 	Locations*       _locations;
-	void              locations_changed ();
-	void              locations_added (Location*);
-	void              handle_locations_changed (Locations::LocationList&);
-	void              sync_locations_to_skips (Locations::LocationList&);
+	void              location_added (Location*);
+	void              location_removed (Location*);
+        void              locations_changed ();
+        void             _locations_changed (const Locations::LocationList&);
+
+        void              update_skips (Location*, bool consolidate);
+        Locations::LocationList consolidate_skips (Location*);
+	void              sync_locations_to_skips (const Locations::LocationList&);
+        PBD::ScopedConnectionList skip_connections;
 
 	PBD::ScopedConnectionList punch_connections;
 	void             auto_punch_start_changed (Location *);
@@ -1634,7 +1639,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	/** true if timecode transmission by the transport is suspended, otherwise false */
 	mutable gint _suspend_timecode_transmission;
 
-	void update_locations_after_tempo_map_change (Locations::LocationList &);
+	void update_locations_after_tempo_map_change (const Locations::LocationList &);
 
 	void start_time_changed (framepos_t);
 	void end_time_changed (framepos_t);

@@ -486,7 +486,7 @@ Editor::find_location_from_marker (Marker *marker, bool& is_start) const
 }
 
 void
-Editor::refresh_location_display_internal (Locations::LocationList& locations)
+Editor::refresh_location_display_internal (const Locations::LocationList& locations)
 {
 	/* invalidate all */
 
@@ -496,7 +496,7 @@ Editor::refresh_location_display_internal (Locations::LocationList& locations)
 
 	/* add new ones */
 
-	for (Locations::LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
+	for (Locations::LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 
 		LocationMarkerMap::iterator x;
 

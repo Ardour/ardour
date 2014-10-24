@@ -959,7 +959,7 @@ LocationUI::location_removed (Location* location)
 }
 
 void
-LocationUI::map_locations (Locations::LocationList& locations)
+LocationUI::map_locations (const Locations::LocationList& locations)
 {
 	Locations::LocationList::iterator i;
 	gint n;
@@ -968,9 +968,8 @@ LocationUI::map_locations (Locations::LocationList& locations)
 	LocationSortByStart cmp;
 
 	temp.sort (cmp);
-	locations = temp;
 
-	for (n = 0, i = locations.begin(); i != locations.end(); ++n, ++i) {
+	for (n = 0, i = temp.begin(); i != temp.end(); ++n, ++i) {
 
 		Location* location = *i;
 
@@ -1074,10 +1073,10 @@ LocationUI::set_session(ARDOUR::Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
-		_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::locations_changed, this, _1), gui_context());
-		_session->locations()->StateChanged.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::refresh_location_list, this), gui_context());
 		_session->locations()->added.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::location_added, this, _1), gui_context());
 		_session->locations()->removed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::location_removed, this, _1), gui_context());
+		_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::refresh_location_list, this), gui_context());
+
 		_clock_group->set_clock_mode (clock_mode_from_session_instant_xml ());
 	}
 
@@ -1085,17 +1084,6 @@ LocationUI::set_session(ARDOUR::Session* s)
 	punch_edit_row.set_session (s);
 
 	refresh_location_list ();
-}
-
-void
-LocationUI::locations_changed (Locations::Change c)
-{
-	/* removal is signalled by both a removed and a changed signal emission from Locations,
-	   so we don't need to refresh the list on a removal
-	*/
-	if (c != Locations::REMOVAL) {
-		refresh_location_list ();
-	}
 }
 
 void

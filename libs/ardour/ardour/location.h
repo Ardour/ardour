@@ -53,6 +53,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 		IsRangeMarker = 0x20,
 		IsSessionRange = 0x40,
 		IsSkip = 0x80,
+		IsSkipping = 0x100, /* skipping is active (or not) */
 	};
 
 	Location (Session &);
@@ -78,7 +79,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	int move_to (framepos_t pos);
 
 	const std::string& name() const { return _name; }
-	void set_name (const std::string &str) { _name = str; name_changed(this); }
+	void set_name (const std::string &str);
 
 	void set_auto_punch (bool yn, void *src);
 	void set_auto_loop (bool yn, void *src);
@@ -86,6 +87,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	void set_cd (bool yn, void *src);
 	void set_is_range_marker (bool yn, void* src);
         void set_skip (bool yn);
+        void set_skipping (bool yn);
 
 	bool is_auto_punch () const { return _flags & IsAutoPunch; }
 	bool is_auto_loop () const { return _flags & IsAutoLoop; }
@@ -95,6 +97,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	bool is_session_range () const { return _flags & IsSessionRange; }
 	bool is_range_marker() const { return _flags & IsRangeMarker; }
 	bool is_skip() const { return _flags & IsSkip; }
+	bool is_skipping() const { return (_flags & IsSkip) && (_flags & IsSkipping); }
 	bool matches (Flags f) const { return _flags & f; }
 
 	Flags flags () const { return _flags; }
@@ -197,28 +200,26 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 
 	void find_all_between (framepos_t start, framepos_t, LocationList&, Location::Flags);
 
-	enum Change {
-		ADDITION, ///< a location was added, but nothing else changed
-		REMOVAL, ///< a location was removed, but nothing else changed
-		OTHER ///< something more complicated happened
-	};
-
 	PBD::Signal1<void,Location*> current_changed;
-	/** something changed about the location list; the parameter gives some idea as to what */
-	PBD::Signal1<void,Change>    changed;
-	/** a location has been added to the end of the list */
+
+        /* Objects that care about individual addition and removal of Locations should connect to added/removed.
+           If an object additionally cares about potential mass clearance of Locations, they should connect to changed.
+        */
+
 	PBD::Signal1<void,Location*> added;
 	PBD::Signal1<void,Location*> removed;
-	PBD::Signal1<void,const PBD::PropertyChange&>    StateChanged;
+	PBD::Signal0<void> changed; /* emitted when any action that could have added/removed more than 1 location actually removed 1 or more */
 
-	template<class T> void apply (T& obj, void (T::*method)(LocationList&)) {
-		Glib::Threads::Mutex::Lock lm (lock);
-		(obj.*method)(locations);
-	}
-
-	template<class T1, class T2> void apply (T1& obj, void (T1::*method)(LocationList&, T2& arg), T2& arg) {
-		Glib::Threads::Mutex::Lock lm (lock);
-		(obj.*method)(locations, arg);
+	template<class T> void apply (T& obj, void (T::*method)(const LocationList&)) const {
+                /* We don't want to hold the lock while the given method runs, so take a copy
+                   of the list and pass that instead.
+                */
+                Locations::LocationList copy;
+                {
+                        Glib::Threads::Mutex::Lock lm (lock);
+                        copy = locations;
+                }
+		(obj.*method)(copy);
 	}
 
   private:

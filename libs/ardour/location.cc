@@ -161,6 +161,18 @@ Location::operator= (const Location& other)
 	return this;
 }
 
+/** Set location name
+ */
+
+void
+Location::set_name (const std::string& str)
+{ 
+        _name = str; 
+
+        name_changed (this); /* EMIT SIGNAL */
+        NameChanged  (); /* EMIT SIGNAL */
+}
+
 /** Set start position.
  *  @param s New start.
  *  @param force true to force setting, even if the given new start is after the current end.
@@ -282,6 +294,7 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 		if (allow_bbt_recompute) {
 			recompute_bbt_from_frames ();
 		}
+
 		end_changed(this); /* EMIT SIGNAL */
 		EndChanged(); /* EMIT SIGNAL */
 
@@ -296,22 +309,92 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 }
 
 int
-Location::set (framepos_t start, framepos_t end, bool allow_bbt_recompute)
+Location::set (framepos_t s, framepos_t e, bool allow_bbt_recompute)
 {
-	if (start < 0 || end < 0) {
+	if (s < 0 || e < 0) {
 		return -1;
 	}
 
 	/* check validity */
-	if (((is_auto_punch() || is_auto_loop()) && start >= end) || (!is_mark() && start > end)) {
+	if (((is_auto_punch() || is_auto_loop()) && s >= e) || (!is_mark() && s > e)) {
 		return -1;
 	}
 
-	/* now we know these values are ok, so force-set them */
-	int const s = set_start (start, true, allow_bbt_recompute);
-	int const e = set_end (end, true, allow_bbt_recompute);
+        bool start_change = false;
+        bool end_change = false;
 
-	return (s == 0 && e == 0) ? 0 : -1;
+	if (is_mark()) {
+
+		if (_start != s) {
+			_start = s;
+			_end = s;
+
+			if (allow_bbt_recompute) {
+				recompute_bbt_from_frames ();
+			}
+
+                        start_change = true;
+                        end_change = true;
+		}
+
+		assert (_start >= 0);
+		assert (_end >= 0);
+
+	} else {
+                
+                if (s != _start) {
+
+                        framepos_t const old = _start;
+                        _start = s;
+
+                        if (allow_bbt_recompute) {
+                                recompute_bbt_from_frames ();
+                        }
+
+                        start_change = true;
+                        
+                        if (is_session_range ()) {
+                                Session::StartTimeChanged (old); /* EMIT SIGNAL */
+                                AudioFileSource::set_header_position_offset (s);
+                        }
+                }
+                        
+                 
+                if (e != _end) {
+                        
+                        framepos_t const old = _end;
+                        _end = e;
+
+                        if (allow_bbt_recompute) {
+                                recompute_bbt_from_frames ();
+                        }
+                        
+                        end_change = true;
+
+                        if (is_session_range()) {
+                                Session::EndTimeChanged (old); /* EMIT SIGNAL */
+                        }
+                }
+
+                assert (_end >= 0);
+        }
+
+        if (start_change) {
+                start_changed(this); /* EMIT SIGNAL */
+                StartChanged(); /* EMIT SIGNAL */
+        }
+
+        if (end_change) {
+                end_changed(this); /* EMIT SIGNAL */
+                EndChanged(); /* EMIT SIGNAL */
+        }
+
+        if (start_change && end_change) {
+                changed (this);
+                Changed ();
+        }
+
+        return 0;
 }
 
 int
@@ -380,6 +463,17 @@ Location::set_skip (bool yn)
 {
         if (is_range_marker() && length() > 0) {
                 if (set_flag_internal (yn, IsSkip)) {
+                        flags_changed (this);
+                        FlagsChanged ();
+                }
+        }
+}
+
+void
+Location::set_skipping (bool yn)
+{
+        if (is_range_marker() && is_skip() && length() > 0) {
+                if (set_flag_internal (yn, IsSkipping)) {
                         flags_changed (this);
                         FlagsChanged ();
                 }
@@ -655,11 +749,6 @@ Locations::Locations (Session& s)
 	: SessionHandleRef (s)
 {
 	current_location = 0;
-
-	Location::changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
-	Location::start_changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
-	Location::end_changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
-	Location::flags_changed.connect_same_thread (*this, boost::bind (&Locations::location_changed, this, _1));
 }
 
 Locations::~Locations ()
@@ -758,7 +847,7 @@ Locations::clear ()
 		current_location = 0;
 	}
 
-	changed (OTHER); /* EMIT SIGNAL */
+	changed (); /* EMIT SIGNAL */
 	current_changed (0); /* EMIT SIGNAL */
 }
 
@@ -781,8 +870,8 @@ Locations::clear_markers ()
 			i = tmp;
 		}
 	}
-
-	changed (OTHER); /* EMIT SIGNAL */
+        
+	changed (); /* EMIT SIGNAL */
 }
 
 void
@@ -820,7 +909,7 @@ Locations::clear_ranges ()
 		current_location = 0;
 	}
 
-	changed (OTHER); /* EMIT SIGNAL */
+        changed ();
 	current_changed (0); /* EMIT SIGNAL */
 }
 
@@ -881,19 +970,11 @@ Locations::remove (Location *loc)
 	if (was_removed) {
 
 		removed (loc); /* EMIT SIGNAL */
-
+                
 		if (was_current) {
 			 current_changed (0); /* EMIT SIGNAL */
 		}
-
-		changed (REMOVAL); /* EMIT_SIGNAL */
 	}
-}
-
-void
-Locations::location_changed (Location* /*loc*/)
-{
-	changed (OTHER); /* EMIT SIGNAL */
 }
 
 XMLNode&
@@ -1005,7 +1086,7 @@ Locations::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	changed (OTHER); /* EMIT SIGNAL */
+	changed (); /* EMIT SIGNAL */
 
 	return 0;
 }

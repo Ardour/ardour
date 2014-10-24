@@ -202,8 +202,7 @@ class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	void location_removed (ARDOUR::Location *);
 	void location_added (ARDOUR::Location *);
-	void locations_changed (ARDOUR::Locations::Change);
-	void map_locations (ARDOUR::Locations::LocationList&);
+	void map_locations (const ARDOUR::Locations::LocationList&);
 
         ClockGroup* _clock_group;
 	AudioClock::Mode clock_mode_from_session_instant_xml () const;

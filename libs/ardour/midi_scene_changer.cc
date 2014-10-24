@@ -42,7 +42,7 @@ MIDISceneChanger::MIDISceneChanger (Session& s)
 	, last_delivered_bank (-1)
 	  
 {
-	_session.locations()->changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this, _1));
+	_session.locations()->changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
 	Location::scene_changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::gather, this));
 }
 
@@ -51,7 +51,7 @@ MIDISceneChanger::~MIDISceneChanger ()
 }
 
 void
-MIDISceneChanger::locations_changed (Locations::Change)
+MIDISceneChanger::locations_changed ()
 {
 	gather ();
 }

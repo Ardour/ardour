@@ -65,7 +65,7 @@ class MIDISceneChanger : public SceneChanger
 
 	void bank_change_input (MIDI::Parser&, unsigned short, int channel);
 	void program_change_input (MIDI::Parser&, MIDI::byte, int channel);
-	void locations_changed (Locations::Change);
+	void locations_changed ();
 
 	PBD::ScopedConnectionList incoming_connections;
 };

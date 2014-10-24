@@ -1235,9 +1235,9 @@ Session::set_auto_punch_location (Location* location)
 
 	punch_connections.drop_connections ();
 
-	location->start_changed.connect_same_thread (punch_connections, boost::bind (&Session::auto_punch_start_changed, this, _1));
-	location->end_changed.connect_same_thread (punch_connections, boost::bind (&Session::auto_punch_end_changed, this, _1));
-	location->changed.connect_same_thread (punch_connections, boost::bind (&Session::auto_punch_changed, this, _1));
+	location->StartChanged.connect_same_thread (punch_connections, boost::bind (&Session::auto_punch_start_changed, this, location));
+	location->EndChanged.connect_same_thread (punch_connections, boost::bind (&Session::auto_punch_end_changed, this, location));
+	location->Changed.connect_same_thread (punch_connections, boost::bind (&Session::auto_punch_changed, this, location));
 
 	location->set_auto_punch (true, this);
 
@@ -1277,9 +1277,9 @@ Session::set_auto_loop_location (Location* location)
 
 	loop_connections.drop_connections ();
 
-	location->start_changed.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, _1));
-	location->end_changed.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, _1));
-	location->changed.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, _1));
+	location->StartChanged.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
+	location->EndChanged.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
+	location->Changed.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
 
 	location->set_auto_loop (true, this);
 
@@ -1293,73 +1293,165 @@ Session::set_auto_loop_location (Location* location)
 }
 
 void
-Session::locations_added (Location *)
+Session::update_skips (Location* loc, bool consolidate)
 {
-	_locations->apply (*this, &Session::sync_locations_to_skips);
+        Locations::LocationList skips;
+
+        if (consolidate) {
+
+                skips = consolidate_skips (loc);
+
+        } else {
+                Locations::LocationList all_locations = _locations->list ();
+                
+                for (Locations::LocationList::iterator l = all_locations.begin(); l != all_locations.end(); ++l) {
+                        if ((*l)->is_skip ()) {
+                                skips.push_back (*l);
+                        }
+                }
+        }
+
+        sync_locations_to_skips (skips);
+}
+
+Locations::LocationList
+Session::consolidate_skips (Location* loc)
+{
+        Locations::LocationList all_locations = _locations->list ();
+        Locations::LocationList skips;
+
+        for (Locations::LocationList::iterator l = all_locations.begin(); l != all_locations.end(); ) {
+
+                if (!(*l)->is_skip ()) {
+                        ++l;
+                        continue;
+                }
+
+                /* don't test against self */
+
+                if (*l == loc) {
+                        ++l;
+                        continue;
+                }
+                        
+                switch (Evoral::coverage ((*l)->start(), (*l)->end(), loc->start(), loc->end())) {
+                case Evoral::OverlapInternal:
+                case Evoral::OverlapExternal:
+                case Evoral::OverlapStart:
+                case Evoral::OverlapEnd:
+                        /* adjust new location to cover existing one */
+                        loc->set_start (min (loc->start(), (*l)->start()));
+                        loc->set_end (max (loc->end(), (*l)->end()));
+                        /* we don't need this one any more */
+                        _locations->remove (*l);
+                        /* the location has been deleted, so remove reference to it in our local list */
+                        l = all_locations.erase (l);
+                        break;
+
+                case Evoral::OverlapNone:
+                        skips.push_back (*l);
+                        ++l;
+                        break;
+                }
+        }
+
+        /* add the new one, which now covers the maximal appropriate range based on overlaps with existing skips */
+
+        skips.push_back (loc);
+
+        return skips;
+}
+
+void
+Session::sync_locations_to_skips (const Locations::LocationList& locations)
+{
+	clear_events (SessionEvent::Skip);
+
+	for (Locations::LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
+                
+		Location* location = *i;
+                
+		if (location->is_skipping()) {
+			SessionEvent* ev = new SessionEvent (SessionEvent::Skip, SessionEvent::Add, location->start(), location->end(), 1.0);
+			queue_event (ev);
+		}
+	}
+}
+
+void
+Session::location_added (Location *location)
+{
+        if (location->is_auto_punch()) {
+                set_auto_punch_location (location);
+        }
+
+        if (location->is_auto_loop()) {
+                set_auto_loop_location (location);
+        }
+        
+        if (location->is_session_range()) {
+                /* no need for any signal handling or event setting with the session range,
+                   because we keep a direct reference to it and use its start/end directly.
+                */
+                _session_range_location = location;
+        }
+
+        if (location->is_skip()) {
+                /* listen for per-location signals that require us to update skip-locate events */
+
+                location->StartChanged.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, true));
+                location->EndChanged.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, true));
+                location->Changed.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, true));
+                location->FlagsChanged.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, false));
+
+                update_skips (location, true);
+        }
+
+	set_dirty ();
+}
+
+void
+Session::location_removed (Location *location)
+{
+        if (location->is_auto_loop()) {
+                set_auto_loop_location (0);
+        }
+        
+        if (location->is_auto_punch()) {
+                set_auto_punch_location (0);
+        }
+
+        if (location->is_session_range()) {
+                /* this is never supposed to happen */
+                error << _("programming error: session range removed!") << endl;
+        }
+
+        if (location->is_skip()) {
+                
+                update_skips (location, false);
+        }
+
 	set_dirty ();
 }
 
 void
 Session::locations_changed ()
 {
-	_locations->apply (*this, &Session::handle_locations_changed);
+        _locations->apply (*this, &Session::_locations_changed);
 }
 
 void
-Session::handle_locations_changed (Locations::LocationList& locations)
+Session::_locations_changed (const Locations::LocationList& locations)
 {
-	Locations::LocationList::iterator i;
-	Location* location;
-	bool set_loop = false;
-	bool set_punch = false;
+        /* There was some mass-change in the Locations object. 
 
-	for (i = locations.begin(); i != locations.end(); ++i) {
+           We might be re-adding a location here but it doesn't actually matter
+           for all the locations that the Session takes an interest in.
+        */
 
-		location =* i;
-
-		if (location->is_auto_punch()) {
-			set_auto_punch_location (location);
-			set_punch = true;
-		}
-		if (location->is_auto_loop()) {
-			set_auto_loop_location (location);
-			set_loop = true;
-		}
-
-		if (location->is_session_range()) {
-			_session_range_location = location;
-		}
-	}
-
-	sync_locations_to_skips (locations);
-
-	if (!set_loop) {
-		set_auto_loop_location (0);
-	}
-	if (!set_punch) {
-		set_auto_punch_location (0);
-	}
-
-	set_dirty();
-}
-
-void
-Session::sync_locations_to_skips (Locations::LocationList& locations)
-{
-	Locations::LocationList::iterator i;
-	Location* location;
-
-	clear_events (SessionEvent::Skip);
-
-	for (i = locations.begin(); i != locations.end(); ++i) {
-
-		location = *i;
-
-		if (location->is_skip()) {
-			SessionEvent* ev = new SessionEvent (SessionEvent::Skip, SessionEvent::Add, location->start(), location->end(), 1.0);
-			queue_event (ev);
-		}
-	}
+	for (Locations::LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
+                location_added (*i);
+        }
 }
 
 void
@@ -4025,9 +4117,9 @@ Session::tempo_map_changed (const PropertyChange&)
 }
 
 void
-Session::update_locations_after_tempo_map_change (Locations::LocationList& loc)
+Session::update_locations_after_tempo_map_change (const Locations::LocationList& loc)
 {
-	for (Locations::LocationList::iterator i = loc.begin(); i != loc.end(); ++i) {
+	for (Locations::LocationList::const_iterator i = loc.begin(); i != loc.end(); ++i) {
 		(*i)->recompute_frames_from_bbt ();
 	}
 }
