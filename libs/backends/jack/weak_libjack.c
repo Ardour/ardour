@@ -55,7 +55,7 @@ static void* lib_symbol(void* const lib, const char* const sym) {
 
 #ifdef COMPILER_MSVC
 typedef void * pvoid_t;
-#define MAPSYM(SYM, FAIL) _j._ ## SYM = lib_symbol(lib, "jack_" # SYM); \
+#define MAPSYM(SYM, FAIL) _j._ ## SYM = (func_t)lib_symbol(lib, "jack_" # SYM); \
 	if (!_j._ ## SYM) err |= FAIL;
 #else
 typedef void * __attribute__ ((__may_alias__)) pvoid_t;
@@ -186,7 +186,7 @@ jack_client_t * WJACK_client_open2 (const char *client_name, jack_options_t opti
 		return ((jack_client_t* (*)(const char *, jack_options_t, jack_status_t *, ...))(_j._client_open))(client_name, options, status, uuid);
 	} else {
 		WJACK_WARNING(client_open);
-		if (status) *status = 0;
+		if (status) *status = (jack_status_t)0;
 		return NULL;
 	}
 }
@@ -196,7 +196,7 @@ jack_client_t * WJACK_client_open1 (const char *client_name, jack_options_t opti
 		return ((jack_client_t* (*)(const char *, jack_options_t, jack_status_t *, ...))_j._client_open)(client_name, options, status);
 	} else {
 		WJACK_WARNING(client_open);
-		if (status) *status = 0;
+		if (status) *status = (jack_status_t)0;
 		return NULL;
 	}
 }
