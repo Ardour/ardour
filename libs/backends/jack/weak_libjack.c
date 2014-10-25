@@ -180,25 +180,16 @@ int have_libjack (void) {
  * (jack ringbuffer may be an exception for some apps)
  */
 
-/* expand ellipsis for jack-session */
-jack_client_t * WJACK_client_open2 (const char *client_name, jack_options_t options, jack_status_t *status, const char *uuid) {
-	if (_j._client_open) {
-		return ((jack_client_t* (*)(const char *, jack_options_t, jack_status_t *, ...))(_j._client_open))(client_name, options, status, uuid);
-	} else {
-		WJACK_WARNING(client_open);
-		if (status) *status = (jack_status_t)0;
-		return NULL;
-	}
+/* dedicated support for jack_client_open(,..) variable arg function macro */
+func_t WJACK_get_client_open(void) {
+	return _j._client_open;
 }
 
-jack_client_t * WJACK_client_open1 (const char *client_name, jack_options_t options, jack_status_t *status) {
-	if (_j._client_open) {
-		return ((jack_client_t* (*)(const char *, jack_options_t, jack_status_t *, ...))_j._client_open)(client_name, options, status);
-	} else {
-		WJACK_WARNING(client_open);
-		if (status) *status = (jack_status_t)0;
-		return NULL;
-	}
+/* callback to set status */
+jack_client_t * WJACK_no_client_open (const char *client_name, jack_options_t options, jack_status_t *status, ...) {
+	WJACK_WARNING(client_open);
+	if (status) { *status = JackFailure; }
+	return NULL;
 }
 
 /*******************************************************************************

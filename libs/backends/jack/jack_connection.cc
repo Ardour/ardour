@@ -74,7 +74,7 @@ JackConnection::JackConnection (const std::string& arg1, const std::string& arg2
         }
 
 	jack_status_t status;
-	jack_client_t* c = jack_client_open1 ("ardourprobe", JackNoStartServer, &status);
+	jack_client_t* c = jack_client_open ("ardourprobe", JackNoStartServer, &status);
 
 	if (status == 0) {
 		jack_client_close (c);
@@ -114,7 +114,7 @@ JackConnection::open ()
 	get_jack_server_dir_paths (dirs);
 	set_path_env_for_jack_autostart (dirs);
 
-	if ((_jack = jack_client_open2 (_client_name.c_str(), JackSessionID, &status, session_uuid.c_str())) == 0) {
+	if ((_jack = jack_client_open (_client_name.c_str(), JackSessionID, &status, session_uuid.c_str())) == 0) {
 		return -1;
 	}
 
