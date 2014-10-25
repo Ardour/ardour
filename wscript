@@ -156,12 +156,6 @@ def set_compiler_flags (conf,opt):
         cxx_flags.append('-fno-omit-frame-pointer')
         linker_flags.append('-fsanitize=address')
 
-    if is_clang and platform == "darwin":
-        # Silence warnings about the non-existing osx clang compiler flags
-        # -compatibility_version and -current_version.  These are Waf
-        # generated and not needed with clang
-        cxx_flags.append("-Qunused-arguments")
-        
     if opt.gprofile:
         debug_flags = [ '-pg' ]
 
@@ -217,8 +211,6 @@ def set_compiler_flags (conf,opt):
     if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite' ]:
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
-        c_flags.append('-Qunused-arguments')
-        cxx_flags.append('-Qunused-arguments')
         if platform == "darwin":
             cxx_flags.append('--stdlib=libstdc++')
             # Mavericks and later changed the syntax to be used when including Carbon headers,
@@ -227,6 +219,13 @@ def set_compiler_flags (conf,opt):
             linker_flags.append('--stdlib=libstdc++')
             # Prevents visibility issues in standard headers
             conf.define("_DARWIN_C_SOURCE", 1)
+
+    if (is_clang and platform == "darwin") or conf.env['build_host'] in ['mavericks', 'yosemite']:
+        # Silence warnings about the non-existing osx clang compiler flags
+        # -compatibility_version and -current_version.  These are Waf
+        # generated and not needed with clang
+        c_flags.append("-Qunused-arguments")
+        cxx_flags.append("-Qunused-arguments")
 
     if ((re.search ("i[0-9]86", cpu) != None) or (re.search ("x86_64", cpu) != None)) and conf.env['build_target'] != 'none':
 
