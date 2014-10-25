@@ -730,7 +730,9 @@ FastMeter::set (float lvl, float peak)
 
 	current_level = lvl;
 
-	if (current_level == old_level && current_peak == old_peak && (hold_state == 0 || peak != -1)) {
+	const float pixscale = (orientation == Vertical) ? pixheight : pixwidth;
+#define PIX(X) floor(pixscale * (X))
+	if (PIX(current_level) == PIX(old_level) && PIX(current_peak) == PIX(old_peak) && (hold_state == 0 || peak != -1)) {
 		return;
 	}
 
