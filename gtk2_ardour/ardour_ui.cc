@@ -1006,7 +1006,9 @@ If you still wish to quit, please use the\n\n\
 
 		second_connection.disconnect ();
 		point_one_second_connection.disconnect ();
+#ifndef PLATFORM_WINDOWS
 		point_zero_something_second_connection.disconnect();
+#endif
 		fps_connection.disconnect();
 	}
 
@@ -1159,6 +1161,9 @@ gint
 ARDOUR_UI::every_fps ()
 {
 	FPSUpdate(); /* EMIT_SIGNAL */
+#ifdef PLATFORM_WINDOWS
+	every_point_zero_something_seconds();
+#endif
 	return TRUE;
 }
 
@@ -1178,7 +1183,17 @@ ARDOUR_UI::set_fps_timeout_connection ()
 				* _session->frame_rate() / _session->nominal_frame_rate()
 				/ _session->timecode_frames_per_second()
 				);
+#ifdef PLATFORM_WINDOWS
+		// the smallest windows scheduler time-slice is ~15ms.
+		// periodic GUI timeouts shorter than that will cause
+		// WaitForSingleObject to spinlock (100% of one CPU Core)
+		// and gtk never enters idle mode.
+		// also changing timeBeginPeriod(1) does not affect that in
+		// any beneficial way, so we just limit the max rate for now.
+		interval = std::max(30u, interval); // at most ~33Hz.
+#else
 		interval = std::max(8u, interval); // at most 120Hz.
+#endif
 	}
 	fps_connection.disconnect();
 	fps_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_fps), interval);
