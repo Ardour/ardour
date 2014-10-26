@@ -56,7 +56,7 @@
 
 #include "i18n.h"
 
-#ifdef COMPILER_MSVC
+#ifdef PLATFORM_WINDOWS
 #include <fcntl.h> // Needed for '_fmode'
 #endif
 
@@ -167,7 +167,7 @@ int ardour_main (int argc, char *argv[])
 int main (int argc, char *argv[])
 #endif
 {
-#ifdef COMPILER_MSVC
+#ifdef PLATFORM_WINDOWS
 	// Essential!!  Make sure that any files used by Ardour
 	//              will be created or opened in BINARY mode!
 	_fmode = O_BINARY;
