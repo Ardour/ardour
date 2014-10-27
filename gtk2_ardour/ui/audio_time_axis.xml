@@ -40,12 +40,12 @@
           <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
         </HBox>
       </VBox>
-      <HBox width="80">
+      <HBox width="83">
         <!--<Igor! About the track name: height="5" below is the shift from TOP side of the space>-->
         <HBox width="5"/>
         <VBox id="name_label_home">
           <FocusEntry id="name_entry"
-                      width="80"
+                      width="83"
                       height="20"
                       fgnormal="#ffffff"
                       winfont ="Arial 10"
@@ -144,7 +144,7 @@
       </HBox>
       <VBox width="1"/>
       <VBox  id="gain_meter_home" width="7" />
-      <EventBox width="" bgnormal="#000000" bgactive="#000000"/>
+      <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
     </HBox>
     <EventBox id="lower_drop_indicator" visible="false" noshowall="true" height="2" bgnormal="#1CA3B3" bgactive="#1CA3B3"/>
     <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>

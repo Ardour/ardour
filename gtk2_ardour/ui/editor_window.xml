@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
                              
 <Window timebarheight="17"
-        rulerheight="26"
+        rulerheight="25"
         loopbarheight="26"
         skipbarheight="17"
         markerheight="18" >
@@ -559,7 +559,7 @@
                   <EventBox height="1"
                             bgnormal="#424242"/>
                   <EventBox height="1"
-                            bgnormal="#7B7B7B"/>
+                            bgnormal="#000000"/>
                   <EventBox id="master_bus_ui_home"/>
                 </VBox>
                 <EventBox width="1"
