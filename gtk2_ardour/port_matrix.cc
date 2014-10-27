@@ -610,6 +610,7 @@ PortMatrix::disassociate_all_on_channel (boost::weak_ptr<Bundle> bundle, uint32_
 void
 PortMatrix::setup_global_ports ()
 {
+	if (!_session || _session->deletion_in_progress()) return;
 	ENSURE_GUI_THREAD (*this, &PortMatrix::setup_global_ports)
 
 	for (int i = 0; i < 2; ++i) {
