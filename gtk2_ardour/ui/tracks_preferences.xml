@@ -715,7 +715,7 @@
              style="generic_control"
              text=""
              x = "105"
-             y = "317"/>
+             y = "315"/>
       <dropdownitem title="Mono"/>
       <dropdownitem title="Stereo"/>
     </Layout>
