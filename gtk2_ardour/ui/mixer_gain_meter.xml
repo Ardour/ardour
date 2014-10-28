@@ -27,7 +27,7 @@
         </HBox>
       </VBox>
       <VBox>
-        <HBox height="6"/>
+        <!--<HBox height="6"/>-->
         <Fader id="gain_slider"
                adjustment="gain_adjustment"
                facesource="slider_controller_fader.png"
@@ -37,9 +37,9 @@
                activehandlesource="slider_controller_fader_handle.png"
                touchcursor="fader_touch_cursor.png"
                minposx="10"
-               minposy="196"
+               minposy="199"
                maxposx="10"
-               maxposy="10"
+               maxposy="13"
                box.padding="2"/>
       </VBox>
     </HBox>
