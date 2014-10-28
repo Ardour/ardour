@@ -730,18 +730,8 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	Cairo::RefPtr<Cairo::Context> cairo_context = get_window()->create_cairo_context ();
 	render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), cairo_context);
 	return true;
-}
 
-/** @return Our Cairo context, or 0 if we don't have one */
-Cairo::RefPtr<Cairo::Context>
-GtkCanvas::context ()
-{
-	Glib::RefPtr<Gdk::Window> w = get_window ();
-	if (!w) {
-		return Cairo::RefPtr<Cairo::Context> ();
-	}
 
-	return w->create_cairo_context ();
 }
 
 /** Handler for GDK scroll events.

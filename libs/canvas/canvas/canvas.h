@@ -94,8 +94,6 @@ public:
 	void item_changed (Item *, boost::optional<Rect>);
 	void item_moved (Item *, boost::optional<Rect>);
 
-        virtual Cairo::RefPtr<Cairo::Context> context () = 0;
-
         Duple canvas_to_window (Duple const&, bool rounded = true) const;
         Duple window_to_canvas (Duple const&) const;
 
@@ -179,8 +177,6 @@ public:
 	void ungrab ();
 	void focus (Item *);
 	void unfocus (Item*);
-
-	Cairo::RefPtr<Cairo::Context> context ();
 
 	Rect visible_area () const;
 	Coord width() const;
