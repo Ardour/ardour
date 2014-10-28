@@ -720,6 +720,18 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 	
 }
 
+void
+GtkCanvas::on_size_allocate (Gtk::Allocation& a)
+{
+	EventBox::on_size_allocate (a);
+#ifdef USE_CAIRO_IMAGE_SURFACE
+	/* allocate an image surface as large as the canvas itself */
+
+	canvas_image.clear ();
+	canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, a.get_width(), a.get_height());
+#endif
+}
+
 /** Handler for GDK expose events.
  *  @param ev Event.
  *  @return true if the event was handled.
@@ -727,11 +739,49 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 bool
 GtkCanvas::on_expose_event (GdkEventExpose* ev)
 {
+#ifdef USE_CAIRO_IMAGE_SURFACE
+	if (!canvas_image) {
+		canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
+	}
+
+	{
+		/* scope for image_context */
+		Cairo::RefPtr<Cairo::Context> image_context = Cairo::Context::create (canvas_image);
+
+		/* clear expose area to transparent */
+
+		image_context->save ();
+		image_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		image_context->clip ();
+		image_context->set_operator (Cairo::OPERATOR_CLEAR);
+		image_context->paint ();
+		image_context->restore ();
+
+		/* render into image surface */
+
+		render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), image_context);
+
+		/* image surface is flushed when image_context goes out of scope */
+	}
+
+	/* now blit our private surface back to the GDK one */
+
+	Cairo::RefPtr<Cairo::Context> cairo_context = get_window()->create_cairo_context ();
+
+	cairo_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	cairo_context->clip ();
+	cairo_context->set_source (canvas_image, 0, 0);
+	cairo_context->set_operator (Cairo::OPERATOR_SOURCE);
+	cairo_context->paint ();
+
+#else
+
 	Cairo::RefPtr<Cairo::Context> cairo_context = get_window()->create_cairo_context ();
 	render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), cairo_context);
+
+#endif
+
 	return true;
-
-
 }
 
 /** Handler for GDK scroll events.

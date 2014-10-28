@@ -190,6 +190,7 @@ public:
 	void stop_tooltip_timeout ();
 
 protected:
+	void on_size_allocate (Gtk::Allocation&);
 	bool on_scroll_event (GdkEventScroll *);
 	bool on_expose_event (GdkEventExpose *);
 	bool on_button_press_event (GdkEventButton *);
@@ -209,6 +210,8 @@ protected:
 private:
 	void item_going_away (Item *, boost::optional<Rect>);
 	bool send_leave_event (Item const *, double, double) const;
+
+	Cairo::RefPtr<Cairo::Surface> canvas_image;
 
         /** Item currently chosen for event delivery based on pointer position */
         Item * _current_item;

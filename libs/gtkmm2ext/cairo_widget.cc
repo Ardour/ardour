@@ -64,17 +64,27 @@ CairoWidget::on_button_press_event (GdkEventButton*)
 bool
 CairoWidget::on_expose_event (GdkEventExpose *ev)
 {
-	cairo_t* cr = gdk_cairo_create (get_window ()->gobj());
-	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cairo_clip_preserve (cr);
+#ifdef USE_CAIRO_IMAGE_SURFACE
+
+	if (!image_surface) {
+		image_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
+	}
+
+	Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (image_surface);
+#else
+	Cairo::RefPtr<Cairo::Context> cr = get_window()->create_cairo_context ();
+#endif
+
+	cr->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	cr->clip_preserve ();
 
 	/* paint expose area the color of the parent window bg
 	*/
 	
 	Gdk::Color bg (get_parent_bg());
 	
-	cairo_set_source_rgb (cr, bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
-	cairo_fill (cr);
+	cr->set_source_rgb (bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
+	cr->fill ();
 
 	cairo_rectangle_t expose_area;
 	expose_area.x = ev->area.x;
@@ -82,9 +92,20 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 	expose_area.width = ev->area.width;
 	expose_area.height = ev->area.height;
 
-	render (cr, &expose_area);
+	render (cr->cobj(), &expose_area);
 
-	cairo_destroy (cr);
+#ifdef USE_CAIRO_IMAGE_SURFACE
+	image_surface->flush();
+	/* now blit our private surface back to the GDK one */
+
+	Cairo::RefPtr<Cairo::Context> cairo_context = get_window()->create_cairo_context ();
+
+	cairo_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	cairo_context->clip ();
+	cairo_context->set_source (image_surface, 0, 0);
+	cairo_context->set_operator (Cairo::OPERATOR_SOURCE);
+	cairo_context->paint ();
+#endif
 
 	return true;
 }
@@ -107,6 +128,10 @@ void
 CairoWidget::on_size_allocate (Gtk::Allocation& alloc)
 {
 	Gtk::EventBox::on_size_allocate (alloc);
+
+#ifdef USE_CAIRO_IMAGE_SURFACE
+	image_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, alloc.get_width(), alloc.get_height());
+#endif
 
 	set_dirty ();
 }
