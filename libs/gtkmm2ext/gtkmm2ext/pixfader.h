@@ -23,7 +23,7 @@
 #include <cmath>
 #include <stdint.h>
 
-#include <gtkmm/drawingarea.h>
+#include "gtkmm2ext/cairo_widget.h"
 #include <gtkmm/adjustment.h>
 #include <gdkmm.h>
 
@@ -31,7 +31,7 @@
 
 namespace Gtkmm2ext {
 
-class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
+class LIBGTKMM2EXT_API PixFader : public CairoWidget
 {
 	public:
 	PixFader (Gtk::Adjustment& adjustment, int orientation, int span, int girth);
@@ -57,7 +57,7 @@ class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 	void on_size_request (GtkRequisition*);
 	void on_size_allocate (Gtk::Allocation& alloc);
 
-	bool on_expose_event (GdkEventExpose*);
+	void render (cairo_t *, cairo_rectangle_t*);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 	bool on_motion_notify_event (GdkEventMotion*);

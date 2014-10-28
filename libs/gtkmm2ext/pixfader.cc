@@ -74,9 +74,9 @@ PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int
 	_adjustment.signal_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
 
 	if (_orien == VERT) {
-		DrawingArea::set_size_request(_girth, _span);
+		CairoWidget::set_size_request(_girth, _span);
 	} else {
-		DrawingArea::set_size_request(_span, _girth);
+		CairoWidget::set_size_request(_span, _girth);
 	}
 }
 
@@ -196,16 +196,9 @@ PixFader::create_patterns ()
 	cairo_surface_destroy (surface);
 }
 
-bool
-PixFader::on_expose_event (GdkEventExpose* ev)
+void
+PixFader::render (cairo_t *cr, cairo_rectangle_t* area)
 {
-	Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
-	cairo_t* cr = context->cobj();
-
-	// clip to expose area
-	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cairo_clip (cr);
-
 	if (!_pattern) {
 		create_patterns();
 	}
@@ -219,9 +212,9 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 		 */
 
 		CairoWidget::set_source_rgb_a (cr, get_style()->get_bg (get_state()), 1);
-		cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		cairo_rectangle (cr, area->x, area->y, area->width, area->height);
 		cairo_fill (cr);
-		return true;
+		return;
 	}
 
 	OnExpose();
@@ -294,21 +287,21 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 
 	/* draw the unity-position line if it's not at either end*/
 	if (!(_tweaks & NoShowUnityLine) && _unity_loc > CORNER_RADIUS) {
-		context->set_line_width (1);
-		context->set_line_cap (Cairo::LINE_CAP_ROUND);
+		cairo_set_line_width(cr, 1);
+		cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
 		Gdk::Color c = get_style()->get_fg (Gtk::STATE_ACTIVE);
-		context->set_source_rgba (c.get_red_p() * 1.5, c.get_green_p() * 1.5, c.get_blue_p() * 1.5, 0.85);
+		cairo_set_source_rgba (cr, c.get_red_p() * 1.5, c.get_green_p() * 1.5, c.get_blue_p() * 1.5, 0.85);
 		if (_orien == VERT) {
 			if (_unity_loc < h - CORNER_RADIUS) {
-				context->move_to (1.5, _unity_loc + CORNER_OFFSET + .5);
-				context->line_to (_girth - 1.5, _unity_loc + CORNER_OFFSET + .5);
-				context->stroke ();
+				cairo_move_to (cr, 1.5, _unity_loc + CORNER_OFFSET + .5);
+				cairo_line_to (cr, _girth - 1.5, _unity_loc + CORNER_OFFSET + .5);
+				cairo_stroke (cr);
 			}
 		} else {
 			if (_unity_loc < w - CORNER_RADIUS) {
-				context->move_to (_unity_loc - CORNER_OFFSET + .5, 1.5);
-				context->line_to (_unity_loc - CORNER_OFFSET + .5, _girth - 1.5);
-				context->stroke ();
+				cairo_move_to (cr, _unity_loc - CORNER_OFFSET + .5, 1.5);
+				cairo_line_to (cr, _unity_loc - CORNER_OFFSET + .5, _girth - 1.5);
+				cairo_stroke (cr);
 			}
 		}
 	}
@@ -340,8 +333,6 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	}
 
 	_last_drawn = ds;
-
-	return true;
 }
 
 void
@@ -359,7 +350,7 @@ PixFader::on_size_request (GtkRequisition* req)
 void
 PixFader::on_size_allocate (Gtk::Allocation& alloc)
 {
-	DrawingArea::on_size_allocate(alloc);
+	CairoWidget::on_size_allocate(alloc);
 
 	if (_orien == VERT) {
 		_girth = alloc.get_width ();
