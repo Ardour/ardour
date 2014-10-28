@@ -20,6 +20,7 @@
 #ifndef __gtk2_ardour_cairo_widget_h__
 #define __gtk2_ardour_cairo_widget_h__
 
+#include <cairomm/surface.h>
 #include <gtkmm/eventbox.h>
 
 #include "gtkmm2ext/visibility.h"
@@ -109,6 +110,7 @@ protected:
 	static sigc::slot<void> focus_handler;
 
   private:
+	Cairo::RefPtr<Cairo::Surface> image_surface;
 	Glib::SignalProxyProperty _name_proxy;
 };
 
