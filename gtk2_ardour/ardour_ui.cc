@@ -3140,6 +3140,8 @@ ARDOUR_UI::launch_chat ()
 {
 #ifdef __APPLE__
 	open_uri("http://webchat.freenode.net/?channels=ardour-osx");
+#elif defined PLATFORM_WINDOWS
+	open_uri("http://webchat.freenode.net/?channels=ardour-windows");
 #else
 	open_uri("http://webchat.freenode.net/?channels=ardour");
 #endif
