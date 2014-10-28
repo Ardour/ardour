@@ -40,7 +40,7 @@
           <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
         </HBox>
       </VBox>
-      <HBox width="83">
+      <HBox width="108">
         <!--<Igor! About the track name: height="5" below is the shift from TOP side of the space>-->
         <HBox width="5"/>
         <VBox id="name_label_home">
@@ -66,71 +66,41 @@
                  horzalignment="start"/>
         </VBox>
       </HBox>
-      <VBox>
-        <HBox>
-          <VBox width="26"/>
-          <iconbutton id="playlist_button"
-              width="21"
-              height="20"
-              normalicon="time_axis_playlist"
-              activeicon="time_axis_playlist"
-              _prelighticon="time_axis_playlist" ui.orphan="true"/>
-          <HBox width=""/>
-          <HBox>
-            <EventBox width="" bgnormal="#383838" bgactive="#424242"/>
-            <VBox>
-              <iconbutton id="rec_enable_button"
-                          width="40"
-                          height="20"
-                          normalicon="time_axis_record"
-                          activeicon="time_axis_record_active"
-                          _prelighticon="time_axis_record_prelight"
-                          tooltip="Record Enable"/>
-              <EventBox height="" bgnormal="#383838" bgactive="#424242"/>
-            </VBox>
-            <EventBox width="" bgnormal="#383838" bgactive="#424242"/>
-            <VBox>
-                <EventBox height="2" bgnormal="#383838" bgactive="#424242"/>
-              <iconbutton id="monitor_input_button"
-                          width="40"
-                          height="16"
-                          normalicon="time_axis_monitor_input"
-                          activeicon="time_axis_monitor_input_active"
-                          _prelighticon="time_axis_monitor_input_prelight"
-                          tooltip="Input Monitoring"/>
-              <EventBox height="" bgnormal="#383838" bgactive="#424242"/>
-            </VBox>
-            <EventBox width="" bgnormal="#383838" bgactive="#424242"/>
-          </HBox>
+      <VBox spacing="1">
+        <HBox spacing="1">
+          <iconbutton id="rec_enable_button"
+                      width="38"
+                      height="16"
+                      normalicon="time_axis_record"
+                      activeicon="time_axis_record_active"
+                      _prelighticon="time_axis_record_prelight"
+                      tooltip="Record Enable"/>
+            <iconbutton id="monitor_input_button"
+                        width="38"
+                        height="16"
+                        normalicon="time_axis_monitor_input"
+                        activeicon="time_axis_monitor_input_active"
+                        _prelighticon="time_axis_monitor_input_prelight"
+                        tooltip="Input Monitoring"/>
         </HBox>
-        <HBox>
-          <VBox width="26"/>
-          <EventBox width="" bgnormal="#383838" bgactive="#424242"/>
-          <VBox>
-              <iconbutton id="mute_button"
-                          width="40"
-                          height="16"
-                          normalicon="time_axis_mute"
-                          activeicon="time_axis_mute_active"
-                          implicitactiveicon="time_axis_mute_implicit"
-                          _prelighticon="time_axis_mute_prelight"
-                          tooltip="Mute"/>
+        <HBox spacing="1">
+            <iconbutton id="mute_button"
+                        width="38"
+                        height="16"
+                        normalicon="time_axis_mute"
+                        activeicon="time_axis_mute_active"
+                        implicitactiveicon="time_axis_mute_implicit"
+                        _prelighticon="time_axis_mute_prelight"
+                        tooltip="Mute"/>
+            <iconbutton id="solo_button"
+                        width="38"
+                        height="16"
+                        normalicon="time_axis_solo"
+                        activeicon="time_axis_solo_active"
+                        implicitactiveicon="time_axis_solo_safe"
+                        _prelighticon="time_axis_solo_prelight"
+                        tooltip="Solo"/>
             <EventBox height="" bgnormal="#383838" bgactive="#424242"/>
-          </VBox>
-          <EventBox width="" bgnormal="#383838" bgactive="#424242"/>
-          <VBox>
-              <iconbutton id="solo_button"
-                          width="40"
-                          height="16"
-                          normalicon="time_axis_solo"
-                          activeicon="time_axis_solo_active"
-                          implicitactiveicon="time_axis_solo_safe"
-                          _prelighticon="time_axis_solo_prelight"
-                          tooltip="Solo"/>
-            <Button id="master_mute_button" ui.orphan="true"/>
-            <EventBox height="" bgnormal="#383838" bgactive="#424242"/>
-          </VBox>
-          <EventBox width="" bgnormal="#383838" bgactive="#424242"/>
         </HBox>
       </VBox>
       <HBox visible="false" noshowall="true">
@@ -142,11 +112,17 @@
         <Button id="route_group_button"/>
         <Button id="automation_button"/>
       </HBox>
-      <VBox width="1"/>
+      <VBox width="4"/>
       <VBox  id="gain_meter_home" width="7" />
-      <EventBox width="1" bgnormal="#000000" bgactive="#000000"/>
     </HBox>
     <EventBox id="lower_drop_indicator" visible="false" noshowall="true" height="2" bgnormal="#1CA3B3" bgactive="#1CA3B3"/>
     <EventBox height="1" bgnormal="#000000" bgactive="#000000"/>
   </Vbox>
+  <iconbutton id="playlist_button"
+      width="21"
+      height="20"
+      normalicon="time_axis_playlist"
+      activeicon="time_axis_playlist"
+      _prelighticon="time_axis_playlist" ui.orphan="true"/>
+  <Button id="master_mute_button" ui.orphan="true"/>
 </RouteUI>

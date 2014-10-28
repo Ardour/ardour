@@ -2,7 +2,7 @@
                              
 <Window timebarheight="17"
         rulerheight="25"
-        loopbarheight="26"
+        loopbarheight="25"
         skipbarheight="17"
         markerheight="18" >
   <style name="topbar_dropdown"
@@ -572,7 +572,7 @@
                       table.rightattach="1"
                       table.topattach="1"
                       table.bottomattach="2"
-                      table.xfill="true"
+                      width="233"
                       table.yfill="true"
                       table.yexpand="true"
                       bgnormal="#3E3E3E">

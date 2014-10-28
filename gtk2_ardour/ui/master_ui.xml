@@ -21,11 +21,11 @@
                     bgnormal="#000000"
                     bgactive="#000000"/>
           <VBox width="6"/>
-          <Label text="MASTER BUS"
-                 winfont ="Arial 10"
-                 macfont ="Helvetica 10"
-                 fgnormal="#ffffff"
-                 fgactive="#ffffff"
+          <Label text="Master Bus"
+                 winfont ="Arial Bold 10"
+                 macfont ="Helvetica Bold 9"
+                 fgnormal="#AFAFAF"
+                 fgactive="#AFAFAF"
                  width="99"
                  height="17"
                  horzalignment="start"
@@ -50,7 +50,7 @@
               width="8"/>
       </EventBox>
     </HBox>
-    <EventBox height="2"
+    <EventBox height="1"
               bgnormal="#000000"
               bgactive="#000000"/>
   </VBox>
