@@ -179,14 +179,14 @@ int main (int argc, char *argv[])
 	} else {
         
 		if ( GetLastError() == ERROR_ALREADY_EXISTS ) {
-             cerr << "Named mutex to control application instances is alredy created" << std::endl;
+             cerr << "Named mutex to control application instances is already created" << std::endl;
 		}
 
 		DWORD res = WaitForSingleObject( appInstanceGuardMutex,
 										 0 );
 
 		if ( res == WAIT_ABANDONED ) {
-             cerr << "Named mutex to control application instances is was not released by previous instance, but the instance was terminted." << std::endl;
+             cerr << "Named mutex to control application instances was not released by previous instance, but the instance was terminted." << std::endl;
 		}
 
 		if ( res == WAIT_FAILED || res == WAIT_TIMEOUT ) {
