@@ -19,6 +19,8 @@
 
 /* Note: public Editor methods are documented in public_editor.h */
 
+#include "product_definition.h"
+
 #include <stdint.h>
 #include <unistd.h>
 #include <cstdlib>
@@ -4353,10 +4355,11 @@ Editor::set_samples_per_pixel (framecnt_t spp)
 	/* if the zoom level is greater than what you'd get trying to display 3
 	 * days of audio on a really big screen, then it's too big.
 	 */
-
+#if !UNLIMITED_TEMPORAL_ZOOM // TRACKS needs no limitations
 	if (spp * lots_of_pixels > three_days) {
 		return;
 	}
+#endif
 
 	samples_per_pixel = spp;
     update_horizontal_adjustment_limits();

@@ -21,5 +21,6 @@
 #define __ardour_gtk_product_definition_h__
 
 #define APPLICATION_NAME "Tracks Live"
+#define UNLIMITED_TEMPORAL_ZOOM 1
 
 #endif /* __ardour_gtk_product_definition_h__ */
