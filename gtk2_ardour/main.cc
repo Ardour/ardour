@@ -163,6 +163,41 @@ int ardour_main (int argc, char *argv[])
 int main (int argc, char *argv[])
 #endif
 {
+
+// prevent multiple application instances launch
+#if defined (WIN32)
+	
+	HANDLE appInstanceGuardMutex; 
+    appInstanceGuardMutex = CreateMutex( 
+        NULL,                        // default security descriptor
+        FALSE,                       // mutex not owned
+        TEXT("TracksLiveLaunchGuard"));  // object name
+
+    if (appInstanceGuardMutex == NULL) {
+        cerr << "Cannot create named mutex to control application instances. Error: " << GetLastError() << std::endl;
+		return 0;
+	} else {
+        
+		if ( GetLastError() == ERROR_ALREADY_EXISTS ) {
+             cerr << "Named mutex to control application instances is alredy created" << std::endl;
+		}
+
+		DWORD res = WaitForSingleObject( appInstanceGuardMutex,
+										 0 );
+
+		if ( res == WAIT_ABANDONED ) {
+             cerr << "Named mutex to control application instances is was not released by previous instance, but the instance was terminted." << std::endl;
+		}
+
+		if ( res == WAIT_FAILED || res == WAIT_TIMEOUT ) {
+             cerr << "Named mutex to control application instances cannot be acquired." << std::endl;
+			 CloseHandle(appInstanceGuardMutex);
+			 return 0;
+		}
+	}
+
+#endif
+
 #ifdef COMPILER_MSVC
 	// Essential!!  Make sure that any files used by Ardour
 	//              will be created or opened in BINARY mode!
@@ -225,6 +260,8 @@ int main (int argc, char *argv[])
         dlgReportParseError.set_title (_("An error was encountered while launching Ardour"));
 		dlgReportParseError.run ();
 #endif
+		ReleaseMutex(appInstanceGuardMutex);
+		CloseHandle(appInstanceGuardMutex);
 		exit (1);
 	}
 
@@ -240,6 +277,8 @@ int main (int argc, char *argv[])
 	     << endl;
 
 	if (just_version) {
+		ReleaseMutex(appInstanceGuardMutex);
+		CloseHandle(appInstanceGuardMutex);
 		exit (0);
 	}
 
@@ -258,10 +297,16 @@ int main (int argc, char *argv[])
 
 	if (!ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir)) {
 		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
+		
+		ReleaseMutex(appInstanceGuardMutex);
+		CloseHandle(appInstanceGuardMutex);
 		exit (1);
 	}
 
 	if (curvetest_file) {
+
+		ReleaseMutex(appInstanceGuardMutex);
+		CloseHandle(appInstanceGuardMutex);
 		return curvetest (curvetest_file);
 	}
 
@@ -275,6 +320,9 @@ int main (int argc, char *argv[])
 		ui = new ARDOUR_UI (&argc, &argv, localedir);
 	} catch (failed_constructor& err) {
 		error << string_compose (_("could not create %1 GUI"), PROGRAM_NAME) << endmsg;
+
+		ReleaseMutex(appInstanceGuardMutex);
+		CloseHandle(appInstanceGuardMutex);
 		exit (1);
 	}
 
@@ -286,6 +334,8 @@ int main (int argc, char *argv[])
 	ARDOUR::cleanup ();
 	pthread_cancel_all ();
 
+	ReleaseMutex(appInstanceGuardMutex);
+	CloseHandle(appInstanceGuardMutex);
 	return 0;
 }
 #if (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
