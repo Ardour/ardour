@@ -17,6 +17,8 @@
 
 */
 
+#include "product_definition.h"
+
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
 #endif
@@ -104,7 +106,6 @@ typedef uint64_t microseconds_t;
 #include "audio_clock.h"
 #include "big_clock_window.h"
 #include "bundle_manager.h"
-//VKPRefs:#include "engine_dialog.h"
 #include "gain_meter.h"
 #include "global_port_matrix.h"
 #include "gui_object.h"
@@ -163,7 +164,7 @@ sigc::signal<void>      ARDOUR_UI::CloseAllDialogs;
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
-	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
+	: Gtkmm2ext::UI (APPLICATION_NAME, argcp, argvp)
 	, gui_object_state (new GUIObjectState)
 	, primary_clock (new MainClock (X_("primary"), false, X_("transport"), true, true, true, false, false))
 	, secondary_clock (new MainClock (X_("secondary"), false, X_("secondary"), true, true, false, false, true))
