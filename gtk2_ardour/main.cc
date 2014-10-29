@@ -165,7 +165,7 @@ int main (int argc, char *argv[])
 {
 
 // prevent multiple application instances launch
-#if defined (WIN32)
+#if defined (PLATFORM_WINDOWS)
 	
 	HANDLE appInstanceGuardMutex; 
     appInstanceGuardMutex = CreateMutex( 
@@ -260,8 +260,11 @@ int main (int argc, char *argv[])
         dlgReportParseError.set_title (_("An error was encountered while launching Ardour"));
 		dlgReportParseError.run ();
 #endif
+
+#if defined (PLATFORM_WINDOWS)
 		ReleaseMutex(appInstanceGuardMutex);
 		CloseHandle(appInstanceGuardMutex);
+#endif
 		exit (1);
 	}
 
@@ -277,8 +280,10 @@ int main (int argc, char *argv[])
 	     << endl;
 
 	if (just_version) {
+#if defined (PLATFORM_WINDOWS)
 		ReleaseMutex(appInstanceGuardMutex);
 		CloseHandle(appInstanceGuardMutex);
+#endif
 		exit (0);
 	}
 
@@ -297,16 +302,18 @@ int main (int argc, char *argv[])
 
 	if (!ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir)) {
 		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
-		
+#if defined (PLATFORM_WINDOWS)
 		ReleaseMutex(appInstanceGuardMutex);
 		CloseHandle(appInstanceGuardMutex);
+#endif
 		exit (1);
 	}
 
 	if (curvetest_file) {
-
+#if defined (PLATFORM_WINDOWS)
 		ReleaseMutex(appInstanceGuardMutex);
 		CloseHandle(appInstanceGuardMutex);
+#endif
 		return curvetest (curvetest_file);
 	}
 
@@ -321,8 +328,10 @@ int main (int argc, char *argv[])
 	} catch (failed_constructor& err) {
 		error << string_compose (_("could not create %1 GUI"), PROGRAM_NAME) << endmsg;
 
+#if defined (PLATFORM_WINDOWS)
 		ReleaseMutex(appInstanceGuardMutex);
 		CloseHandle(appInstanceGuardMutex);
+#endif
 		exit (1);
 	}
 
@@ -334,8 +343,10 @@ int main (int argc, char *argv[])
 	ARDOUR::cleanup ();
 	pthread_cancel_all ();
 
-	ReleaseMutex(appInstanceGuardMutex);
-	CloseHandle(appInstanceGuardMutex);
+#if defined (PLATFORM_WINDOWS)
+		ReleaseMutex(appInstanceGuardMutex);
+		CloseHandle(appInstanceGuardMutex);
+#endif
 	return 0;
 }
 #if (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
