@@ -61,6 +61,26 @@ using namespace std;
 using Gtkmm2ext::Keyboard;
 using namespace ArdourMeter;
 
+
+static void
+reset_cursor_to_default (Gtk::Entry* widget)
+{
+	Glib::RefPtr<Gdk::Window> win = widget->get_text_window ();
+	if (win) {
+		/* C++ doesn't provide a pointer argument version of this
+		   (i.e. you cannot set to NULL to get the default/parent
+		   cursor)
+		*/
+		gdk_window_set_cursor (win->gobj(), 0);
+	}
+}
+
+static void
+reset_cursor_to_default_state (Gtk::StateType, Gtk::Entry* widget)
+{
+	reset_cursor_to_default (widget);
+}
+
 GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int fader_girth)
 	: gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0.0, 1.0, 0.01, 0.1)
 	, gain_automation_style_button ("")
@@ -105,8 +125,16 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	set_size_request_to_display_given_text (peak_display, "-80.g", 2, 6); /* note the descender */
 	max_peak = minus_infinity();
 	peak_display.set_text (_("-inf"));
-	peak_display.unset_flags (Gtk::CAN_FOCUS);
 	peak_display.set_alignment(0.5);
+	
+	/* stuff related to the fact that the peak display is not, in
+	   fact, supposed to be a text entry. 
+	*/
+	peak_display.set_events (peak_display.get_events() & ~(Gdk::EventMask (Gdk::LEAVE_NOTIFY_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::POINTER_MOTION_MASK)));
+	peak_display.signal_map().connect (sigc::bind (sigc::ptr_fun (reset_cursor_to_default), &peak_display));
+	peak_display.signal_state_changed().connect (sigc::bind (sigc::ptr_fun (reset_cursor_to_default_state), &peak_display));
+	peak_display.unset_flags (Gtk::CAN_FOCUS);
+	peak_display.set_editable (false);
 
 	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
