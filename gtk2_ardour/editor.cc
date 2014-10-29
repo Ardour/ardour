@@ -4386,7 +4386,7 @@ Editor::ensure_visual_change_idle_handler ()
 {
 	if (pending_visual_change.idle_handler_id < 0) {
 		// see comment in add_to_idle_resize above.
-		pending_visual_change.idle_handler_id = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE + 20, _idle_visual_changer, this, NULL);
+		pending_visual_change.idle_handler_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE + 10, _idle_visual_changer, this, NULL);
 		pending_visual_change.being_handled = false;
 	}
 }
