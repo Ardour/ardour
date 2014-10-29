@@ -262,6 +262,7 @@ Session::Session (AudioEngine &eng,
 	, routes (new RouteList)
 	, _adding_routes_in_progress (false)
     , _reconnecting_routes_in_progress (false)
+	, _route_deletion_in_progress (false)
 	, destructive_index (0)
 	, _track_number_decimals(1)
 	, solo_update_disabled (false)
