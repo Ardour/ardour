@@ -76,7 +76,9 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	, _master_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
 	, _existing_session_chooser_used (false)
 {
+#ifndef PLATFORM_WINDOWS
 	set_keep_above (true);
+#endif
 	set_position (WIN_POS_CENTER);
 	get_vbox()->set_spacing (6);
 
