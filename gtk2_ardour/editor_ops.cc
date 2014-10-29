@@ -1367,7 +1367,7 @@ Editor::scroll_tracks_up_line ()
 bool
 Editor::scroll_down_one_track ()
 {
-	TrackViewList::reverse_iterator next = track_views.rbegin();
+	TrackViewList::reverse_iterator next = track_views.rend();
 	std::pair<TimeAxisView*,double> res;
 	const double top_of_trackviews = vertical_adjustment.get_value();
 
@@ -1376,10 +1376,6 @@ Editor::scroll_down_one_track ()
 			continue;
 		}
 
-		next = t;
-		if (next != track_views.rbegin()) {
-			--next; // moves "next" towards the lower/later tracks since it is a reverse iterator
-		}
 
 		/* If this is the upper-most visible trackview, we want to display
 		   the one above it (next)
@@ -1390,11 +1386,12 @@ Editor::scroll_down_one_track ()
 		if (res.first) {
 			break;
 		}
+		next = t;
 	}
 
 	/* move to the track below the first one that covers the */
 	
-	if (next != track_views.rbegin()) {
+	if (next != track_views.rend()) {
 		ensure_time_axis_view_is_visible (**next, true);
 		return true;
 	}
