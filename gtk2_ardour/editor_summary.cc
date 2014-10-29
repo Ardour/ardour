@@ -73,7 +73,7 @@ EditorSummary::~EditorSummary ()
 void
 EditorSummary::on_size_allocate (Gtk::Allocation& alloc)
 {
-	Gtk::EventBox::on_size_allocate (alloc);
+	CairoWidget::on_size_allocate (alloc);
 	_background_dirty = true;
 	set_dirty ();
 }
