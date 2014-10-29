@@ -130,7 +130,7 @@
     <Option name="ruler text" value="e5e5e5ff"/>
     <Option name="selected crossfade editor line" value="00dbdbff"/>
     <Option name="selected crossfade editor wave" value="f9ea14a0"/>
-    <Option name="selected region base" value="596559ff"/>
+    <Option name="selected region base" value="585c61ff"/>
     <Option name="selected waveform fill" value="ffa500d9"/>
     <Option name="selected waveform outline" value="0f0f0fcc"/>
     <Option name="selection rect" value="e8f4d377"/>
@@ -175,7 +175,7 @@
     <Option name="verbose canvas cursor" value="fffd2ebc"/>
     <Option name="vestigial frame" value="0000000f"/>
     <Option name="video timeline bar" value="303030ff"/>
-    <Option name="region base" value="b1c9b1ff"/>
+    <Option name="region base" value="838890ff"/>
     <Option name="region area covered by another region" value="505050b0"/>
     <Option name="waveform outline" value="000000ff"/>
     <Option name="clipped waveform" value="ff0000e5"/>
