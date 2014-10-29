@@ -44,6 +44,7 @@ public:
 	void routes_added (std::list<RouteTimeAxisView*> const &);
 
 private:
+	void parameter_changed (std::string);
 	void on_size_allocate (Gtk::Allocation& alloc);
 
 	enum Position {

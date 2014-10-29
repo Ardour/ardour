@@ -21,6 +21,7 @@
 
 #include "canvas/debug.h"
 
+#include "ardour_ui.h"
 #include "time_axis_view.h"
 #include "streamview.h"
 #include "editor_summary.h"
@@ -60,11 +61,22 @@ EditorSummary::EditorSummary (Editor* e)
 {
 	add_events (Gdk::POINTER_MOTION_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 	set_flags (get_flags() | Gtk::CAN_FOCUS);
+
+	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &EditorSummary::parameter_changed));
 }
 
 EditorSummary::~EditorSummary ()
 {
 	cairo_surface_destroy (_image);
+}
+
+void
+EditorSummary::parameter_changed (string p)
+{
+
+	if (p == "color-regions-using-track-color") {
+		set_background_dirty ();
+	}
 }
 
 /** Handle a size allocation.
@@ -74,8 +86,7 @@ void
 EditorSummary::on_size_allocate (Gtk::Allocation& alloc)
 {
 	CairoWidget::on_size_allocate (alloc);
-	_background_dirty = true;
-	set_dirty ();
+	set_background_dirty ();
 }
 
 
@@ -1035,16 +1046,14 @@ EditorSummary::routes_added (list<RouteTimeAxisView*> const & r)
 		}
 	}
 
-	_background_dirty = true;
-	set_dirty ();
+	set_background_dirty ();
 }
 
 void
 EditorSummary::route_gui_changed (string c)
 {
 	if (c == "color") {
-		_background_dirty = true;
-		set_dirty ();
+		set_background_dirty ();
 	}
 }
 
