@@ -98,13 +98,14 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 			 * thick, it will precisely align with the corner
 			 * coordinates of the rectangle. So if the rectangle
 			 * has a left edge at 0 and a right edge at 10, then
-			 * the right edge must span -0.5..+0.5, the left edge
+			 * the left edge must span -0.5..+0.5, the right edge
 			 * must span 9.5..10.5 (i.e. the single full color
 			 * pixel is precisely aligned with 0 and 10
 			 * respectively).
 			 *
 			 * we have to shift left/up in all cases, which means
-			 * subtraction along both axes.
+			 * subtraction along both axes (i.e. edge at
+			 * N, outline must start at N-0.5). 
 			 *
 			 * see the cairo FAQ on single pixel lines to see why we do
 			 * the 0.5 pixel additions.
