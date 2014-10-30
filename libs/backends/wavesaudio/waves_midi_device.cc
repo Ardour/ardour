@@ -20,12 +20,11 @@
 #include <iostream>
 
 #include "pbd/error.h"
+#include "pbd/debug.h"
 #include "pbd/compose.h"
 
 #include "waves_midi_device.h"
 #include "waves_midi_event.h"
-
-#include "debug.h"
 
 // use non-zero latency because we want output to be timestapmed
 #define LATENCY 0

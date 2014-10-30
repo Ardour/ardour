@@ -38,7 +38,6 @@ def build(bld):
             obj.framework = 'CoreMIDI'
 
     obj.source = [
-            'debug.cc',
             'waves_audiobackend.cc',
             'waves_audiobackend.latency.cc',
             'waves_audiobackend.midi.cc',
