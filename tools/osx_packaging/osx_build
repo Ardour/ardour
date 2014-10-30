@@ -46,15 +46,15 @@ while [ $# -gt 0 ] ; do
 	          SAE= ; 
                   WITH_LADSPA=1; 
                   STRIP= ; 
-		  PRODUCT_PKG_DIR=Tracks;
-		  APPNAME=Tracks ;
+		  PRODUCT_PKG_DIR=TracksLive;
+		  APPNAME=TracksLive;
 		  shift ;;
-	--tracks) WITH_NLS= ; 
+	--trackslive) WITH_NLS= ; 
 	          SAE= ; 
                   WITH_LADSPA=; 
                   STRIP= ; 
-		  PRODUCT_PKG_DIR=Tracks;
-		  APPNAME=Tracks ;
+		  PRODUCT_PKG_DIR=TracksLive;
+		  APPNAME=TracksLive ;
 		  WITH_HARVID=
 		  shift ;;
 	--allinone) SAE= ; 
@@ -177,7 +177,7 @@ elif test x$MIXBUS != x ; then
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui.conf</string>"
     env="$env<key>ARDOUR3_UI_RC</key><string>ardour3_ui_dark.rc</string>"
 else
-    appname="Tracks"
+    appname="Tracks Live"
 fi
 
 #
@@ -217,7 +217,7 @@ chmod 775 $APPROOT/MacOS/Tracks
 MAIN_EXECUTABLE=Tracks.bin
 
 echo "Copying tracks executable ...."
-cp $BUILD_ROOT/gtk2_ardour/tracks-${major_version}.${minor_version}.${micro_version} $APPROOT/MacOS/$MAIN_EXECUTABLE
+cp $BUILD_ROOT/gtk2_ardour/trackslive-${major_version}.${minor_version}.${micro_version} $APPROOT/MacOS/$MAIN_EXECUTABLE
 if test x$SAE != x ; then
     # cp $BUILD_ROOT/gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
     cp  Ardour3-SAE.icns $Resources/appIcon.icns
@@ -429,7 +429,7 @@ echo "Copying other stuff to $APPDIR  ..."
 cp $BUILD_ROOT/gtk2_ardour/mnemonic-us.bindings  $Resources
 cp ../../gtk2_ardour/mixer.bindings $Resources
 cp ../../gtk2_ardour/step_editing.bindings $Resources
-cp $BUILD_ROOT/gtk2_ardour/tracks.menus $Resources
+cp $BUILD_ROOT/gtk2_ardour/trackslive.menus $Resources
 mkdir $Resources/ui
 cp ../../gtk2_ardour/ui/* $Resources/ui
 if test x$SAE != x ; then
