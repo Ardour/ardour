@@ -44,7 +44,7 @@ const char* const analysis_dir_name = X_("analysis");
 const char* const plugins_dir_name = X_("plugins");
 const char* const externals_dir_name = X_("externals");
 
-char config_dir_name[] = X_("Tracks");
+char config_dir_name[] = X_(PROGRAM_NAME);
 
 /* Use this to get a versioned config directory name 
    char config_dir_name[] = X_(PROGRAM_NAME PROGRAM_VERSION);
