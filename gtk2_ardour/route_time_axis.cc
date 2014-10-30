@@ -174,7 +174,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
     if (is_master_track() ) {
         // do not display number for master track
-        TimeAxisView::set_number_is_hidden(true);
+        _number_is_hidden = true;
     } else {
         enable_header_dnd ();
     }
@@ -250,6 +250,36 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 	_automation_tracks.clear ();
 
 	delete route_group_menu;
+}
+
+void
+RouteTimeAxisView::set_number_is_hidden (bool hidden)
+{
+    _number_is_hidden = hidden;
+}
+
+uint32_t
+RouteTimeAxisView::set_track_number (const uint32_t& number)
+{
+    uint32_t new_number = number;
+    
+    if (_number_is_hidden) {
+        number_label.set_text("");
+        return new_number;
+    }
+    
+    int amount_of_inputs = _route->n_inputs().get(DataType::AUDIO);
+    
+    // format track number string
+    std::stringstream number_label_text;
+    number_label_text << new_number++;
+    for (int i = 1; i < amount_of_inputs; ++i) {
+        number_label_text << "\n" << new_number++;
+    }
+    
+    number_label.set_text (string_compose (_("%1"), number_label_text.str() ) );
+    
+    return new_number;
 }
 
 void

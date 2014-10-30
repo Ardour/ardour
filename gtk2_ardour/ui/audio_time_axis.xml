@@ -26,13 +26,13 @@
               <VBox width="2" box.pack="end"/>
               <VBox box.pack="end">
                 <!--<Igor! height="4" below is the shift from TOP side of the space>-->
-                <HBox height="4"/>
+                <HBox height="1"/>
                 <Label id="number_label"
                        text="32"
                        fgnormal="#BAB9B9"
                        fgactive="#ffffff"
-                       winfont ="Arial Bold 14"
-                       macfont ="Helvetica Bold 14"/>
+                       winfont ="Arial Bold 10"
+                       macfont ="Helvetica Bold 10"/>
               </VBox>
             </HBox>
           </EventBox>

@@ -82,6 +82,9 @@ public:
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 
+    void set_number_is_hidden (bool);
+    uint32_t set_track_number (const uint32_t&);
+    
 	void show_selection (TimeSelection&);
 	void set_button_names ();
 

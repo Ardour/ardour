@@ -218,12 +218,6 @@ TimeAxisView::hide ()
 	Hiding ();
 }
 
-void
-TimeAxisView::set_number_is_hidden (bool hidden)
-{
-    _number_is_hidden = hidden;
-}
-
 /** Display this TimeAxisView as the nth component of the parent box, at y.
 *
 * @param y y position.
@@ -244,16 +238,11 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	}
 
 	_order = nth;
-    if (!_number_is_hidden) {
-        number_label.set_text (string_compose (_("%1"), _order));
-    } else {
-        number_label.set_text("");
-    }
+    number_label.set_text("");
 
 	if (_y_position != y) {
 		_canvas_display->set_y_position (y);
 		_y_position = y;
-
 	}
 
 	_canvas_display->raise_to_top ();

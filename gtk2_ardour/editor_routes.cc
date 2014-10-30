@@ -509,7 +509,7 @@ EditorRoutes::redisplay ()
 	   so we will use that to know where to put things.
 	*/
 	int n;
-
+    uint32_t number_label = 1;
 	for (n = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[_columns.tv];
 		boost::shared_ptr<Route> route = (*i)[_columns.route];
@@ -535,7 +535,14 @@ EditorRoutes::redisplay ()
 		} else {
 			tv->hide ();
 		}
-
+        
+        // track number depends of the amount inputs
+        RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tv);
+        if (rtv) {
+            // function will return the next available number
+            number_label = rtv->set_track_number(number_label);
+        }
+        
 		n++;
 	}
 
