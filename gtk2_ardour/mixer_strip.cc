@@ -1124,10 +1124,10 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, bool for_i
 
 	if (for_input) {
 		io_count = route->n_inputs().n_total();
-		tooltip << string_compose (_("<b>INPUT</b> to %1"), Glib::Markup::escape_text(route->name()));
+		tooltip << string_compose (_("<b>INPUT</b> to %1"), std::string (Glib::Markup::escape_text(route->name())));
 	} else {
 		io_count = route->n_outputs().n_total();
-		tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Glib::Markup::escape_text(route->name()));
+		tooltip << string_compose (_("<b>OUTPUT</b> from %1"), std::string (Glib::Markup::escape_text(route->name())));
 	}
 
 
