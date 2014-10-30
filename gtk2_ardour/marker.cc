@@ -60,6 +60,7 @@ PBD::Signal1<void,Marker*> Marker::CatchDeletion;
 const char * Marker::default_new_marker_prefix = N_("Marker ");
 
 static const double name_padding = 10.0;
+static const double handler_size = 5.0;
 
 RulerMarker::RulerMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanvas::Container& parent, double height, guint32 rgba, const std::string& text,
                           framepos_t start, framepos_t end)
@@ -91,6 +92,8 @@ RangeMarker::RangeMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanva
         : Marker (l, editor, parent, height, rgba, text, Range, start, true)
         , _end_frame (end)
         , _end_line (0)
+		, _start_handler (0)
+		, _end_handler (0)
 {
         assert (start < end);
 
@@ -125,6 +128,7 @@ void
 RangeMarker::use_color ()
 {
         Marker::use_color ();
+        _name_background->set_outline_what (ArdourCanvas::Rectangle::What (0));
 
         double dimen = _height * 2.0;
 
@@ -207,34 +211,58 @@ RangeMarker::_set_position (framepos_t start, framepos_t end)
 void
 RangeMarker::setup_line ()
 {
-        Marker::setup_line ();
+    Marker::setup_line ();
 
-        if (!_end_line) {
-                _end_line = new ArdourCanvas::Line (editor.get_hscroll_group());
-                _end_line->set_y1 (ArdourCanvas::COORD_MAX);
-        }
+    if (!_end_line) {
+		_end_line = new ArdourCanvas::Line (editor.get_hscroll_group());
+		_end_line->set_y1 (ArdourCanvas::COORD_MAX);
+    }
 
-        /* line at the end (the start line is handled by Marker */
+    /* line at the end (the start line is handled by Marker */
         
-        /* lines in a different canvas (scroll)group so we have to convert the position
-           into a different coordinate system.
-        */
+    /* lines in a different canvas (scroll)group so we have to convert the position
+        into a different coordinate system.
+    */
         
-        ArdourCanvas::Duple h = _name_background->item_to_canvas (ArdourCanvas::Duple (0.0, _height));
-        ArdourCanvas::Duple g = group->canvas_origin();
+    ArdourCanvas::Duple h = _name_background->item_to_canvas (ArdourCanvas::Duple (0.0, _height));
+    ArdourCanvas::Duple g = group->canvas_origin();
 
-       /* merge and adjust them */
+    /* merge and adjust them */
 
-       g.x += _name_background->x1();
-       g.y = h.y;
+    g.x += _name_background->x1();
+    g.y = h.y;
 
-       ArdourCanvas::Duple d = _end_line->canvas_to_item (g);
+    ArdourCanvas::Duple d = _end_line->canvas_to_item (g);
        
-       _end_line->set_y0 (d.y); /* bottom of marker, in the right coordinate system */
-       _end_line->set_x0 (d.x);
-       _end_line->set_x1 (d.x);
-       _end_line->set_outline_color (_color);
-       _end_line->show ();
+	_end_line->set_y0 (d.y - 2.0); /* bottom of marker, in the right coordinate system */
+	_end_line->set_x0 (d.x - 1.0);
+	_end_line->set_x1 (d.x - 1.0);
+	_end_line->set_outline_color (_color);
+	_end_line->show ();
+
+	ArdourCanvas::Color marker_color = ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 0.8);
+
+	if (!_start_handler) {
+		_start_handler = new ArdourCanvas::Rectangle (group);
+		_start_handler->set_fill_color (marker_color);
+		_start_handler->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::NOTHING));
+	}
+
+	_start_handler->set_x0 (0);
+	_start_handler->set_y0 (0);
+	_start_handler->set_x1 (handler_size);
+	_start_handler->set_y1 (handler_size);
+
+	if (!_end_handler) {
+		_end_handler = new ArdourCanvas::Rectangle (group);
+		_end_handler->set_fill_color (marker_color);
+		_end_handler->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::NOTHING));
+	}
+
+	_end_handler->set_x0 (_name_background->x1() - handler_size);
+	_end_handler->set_y0 (0);
+	_end_handler->set_x1 (_name_background->x1());
+	_end_handler->set_y1 (handler_size);
 }
 
 void
@@ -246,35 +274,34 @@ RangeMarker::bounds_changed ()
 void
 RangeMarker::canvas_height_set (double h) 
 {
-        if (_end_line) {
-                /* h is already in the right coordinate system since it is an absolute height */
-                _end_line->set_y1 (h);
-        }
+    if (_end_line) {
+        /* h is already in the right coordinate system since it is an absolute height */
+        _end_line->set_y1 (h);
+    }
 }
 
 void
 RangeMarker::setup_name_display ()
 {
-        /* No need to adjust name background size here, since it is always the same */
+    /* No need to adjust name background size here, since it is always the same */
 
 	if (_name.empty()) {
                 if (_name_item) {
                         _name_item->hide ();
                 }
 	} else {
-
-                if (!_name_item) {
-                        _name_item = new ArdourCanvas::Text (group);
-                        CANVAS_DEBUG_NAME (_name_item, string_compose ("Marker::_name_item for %1", _name));
-                        _name_item->set_font_description (name_font);
-                }
+        if (!_name_item) {
+			_name_item = new ArdourCanvas::Text (group);
+			CANVAS_DEBUG_NAME (_name_item, string_compose ("Marker::_name_item for %1", _name));
+			_name_item->set_font_description (name_font);
+        }
                 
 		_name_item->show ();
-                _name_item->set_x_position (_label_offset);
-                /* Limit text to width of background rect */
+        _name_item->set_x_position (_label_offset);
+        /* Limit text to width of background rect */
 		_name_item->clamp_width (_name_background->get().width());
 		_name_item->set (_name);
-        }
+    }
 }
 
 Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& parent, double height, guint32 rgba, const string& annotation,
@@ -466,7 +493,7 @@ Marker::setup_line ()
         
         ArdourCanvas::Duple d = _start_line->canvas_to_item (g);
 
-        _start_line->set_y0 (d.y); /* bottom of marker, in the right coordinate system */
+        _start_line->set_y0 (d.y - 2.0); /* bottom of marker, in the right coordinate system */
         _start_line->set_x0 (d.x);
         _start_line->set_x1 (d.x);
         _start_line->set_outline_color (_color);
@@ -628,16 +655,15 @@ Marker::use_color ()
 		_start_line->set_outline_color (_color);
 	}
 
-        if (_name_background) {
-                _name_background->set_fill (true);
-                _name_background->set_fill_color (_color);
-                /* white with 20% opacity */
-                _name_background->set_outline_color (ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 0.20));
+    if (_name_background) {
+        _name_background->set_fill (true);
+        _name_background->set_fill_color (_color);
+        /* white with 20% opacity */
+        _name_background->set_outline_color (ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 0.20));
                 
-                _name_background->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::TOP|
-                                                                                   ArdourCanvas::Rectangle::LEFT|
-                                                                                   ArdourCanvas::Rectangle::RIGHT));
-        }
+        _name_background->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::TOP|
+                                                                            ArdourCanvas::Rectangle::LEFT));
+    }
 }
 
 /** Set the number of pixels that are available for a label to the left of the centre of this marker */

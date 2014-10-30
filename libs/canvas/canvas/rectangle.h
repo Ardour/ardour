@@ -65,6 +65,7 @@ public:
 	void set_y1 (Coord);
 
 	enum What {
+		NOTHING = 0x0,
 		LEFT = 0x1,
 		RIGHT = 0x2,
 		TOP = 0x4,
