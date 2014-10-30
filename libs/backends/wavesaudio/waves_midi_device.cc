@@ -18,8 +18,14 @@
 */
 
 #include <iostream>
+
+#include "pbd/error.h"
+#include "pbd/compose.h"
+
 #include "waves_midi_device.h"
 #include "waves_midi_event.h"
+
+#include "debug.h"
 
 // use non-zero latency because we want output to be timestapmed
 #define LATENCY 0
@@ -44,113 +50,112 @@ WavesMidiDevice::WavesMidiDevice (const std::string& device_name)
 
 WavesMidiDevice::~WavesMidiDevice ()
 {
-    DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::~WavesMidiDevice ():" << name () << std::endl;
-    close ();
+        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::~WavesMidiDevice (): %1\n", name()));
+        close ();
 }
 
 void
 WavesMidiDevice::validate ()
 {
-    _pm_input_id = 
-    _pm_output_id = pmNoDevice;
-    int count = Pm_CountDevices ();
-
-    for (int i = 0; i < count; i++) {
-
-        const PmDeviceInfo* pm_device_info = Pm_GetDeviceInfo (i);
-
-        if (pm_device_info == NULL) {
-            continue;
+        _pm_input_id = _pm_output_id = pmNoDevice;
+        int count = Pm_CountDevices ();
+        
+        for (int i = 0; i < count; i++) {
+                
+                const PmDeviceInfo* pm_device_info = Pm_GetDeviceInfo (i);
+                
+                if (pm_device_info == NULL) {
+                        continue;
+                }
+                if (name () == pm_device_info->name) {
+                        if (pm_device_info->input){
+                                _pm_input_id = i;
+                        }
+                        if (pm_device_info->output){
+                                _pm_output_id = i;
+                        }
+                }
         }
-        if (name () == pm_device_info->name) {
-            if (pm_device_info->input){
-                _pm_input_id = i;
-            }
-            if (pm_device_info->output){
-                _pm_output_id = i;
-            }
-        }
-    }
 }
 
 int
 WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
 {
-    DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::open ():" << name () << std::endl;
-    
-    if (is_input () && !_input_pm_stream) {
-        if (pmNoError != Pm_OpenInput (&_input_pm_stream, 
-                                      _pm_input_id,
-                                      NULL,
-                                      1024,
-                                      time_proc,
-                                      time_info)) {
-                std::cerr << "WavesMidiDevice::open (): Pm_OpenInput () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
-                _input_pm_stream = NULL;
-                _pm_input_id = pmNoDevice;
-                return -1;
+        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::open (): %1", name ()));
+        
+        if (is_input () && !_input_pm_stream) {
+                if (pmNoError != Pm_OpenInput (&_input_pm_stream, 
+                                               _pm_input_id,
+                                               NULL,
+                                               1024,
+                                               time_proc,
+                                               time_info)) {
+                        std::cerr << "WavesMidiDevice::open (): Pm_OpenInput () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
+                        _input_pm_stream = NULL;
+                        _pm_input_id = pmNoDevice;
+                        return -1;
+                }
+                _input_queue = Pm_QueueCreate (QUEUE_LENGTH, sizeof (const WavesMidiEvent*));
+                if (NULL == _input_queue) {
+                        std::cerr << "WavesMidiDevice::open (): _input_queue = Pm_QueueCreate () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
+                        close ();
+                        return -1;
+                }
         }
-        _input_queue = Pm_QueueCreate (QUEUE_LENGTH, sizeof (const WavesMidiEvent*));
-        if (NULL == _input_queue) {
-            std::cerr << "WavesMidiDevice::open (): _input_queue = Pm_QueueCreate () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
-            close ();
-            return -1;
+        
+        if (is_output () && !_output_pm_stream) {
+                if (pmNoError != Pm_OpenOutput (&_output_pm_stream, 
+                                                _pm_output_id, 
+                                                NULL,
+                                                1024,
+                                                time_proc,
+                                                time_info,
+                                                LATENCY)) {
+                        std::cerr << "WavesMidiDevice::open (): Pm_OpenOutput () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
+                        _output_pm_stream = NULL;
+                        _pm_output_id = pmNoDevice;
+                        return -1;
+                }
+                _output_queue = Pm_QueueCreate (QUEUE_LENGTH, sizeof (const WavesMidiEvent*));
+                if (NULL == _output_queue) {
+                        std::cerr << "WavesMidiDevice::open (): _output_queue = Pm_QueueCreate () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
+                        close ();
+                        return -1;
+                }
         }
-    }
-
-    if (is_output () && !_output_pm_stream) {
-        if (pmNoError != Pm_OpenOutput (&_output_pm_stream, 
-                                       _pm_output_id, 
-                                       NULL,
-                                       1024,
-                                       time_proc,
-                                       time_info,
-                                       LATENCY)) {
-                std::cerr << "WavesMidiDevice::open (): Pm_OpenOutput () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
-                _output_pm_stream = NULL;
-                _pm_output_id = pmNoDevice;
-                return -1;
-        }
-        _output_queue = Pm_QueueCreate (QUEUE_LENGTH, sizeof (const WavesMidiEvent*));
-        if (NULL == _output_queue) {
-            std::cerr << "WavesMidiDevice::open (): _output_queue = Pm_QueueCreate () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
-            close ();
-            return -1;
-        }
-    }
-    return 0;
+        return 0;
 }
 
 
 void
 WavesMidiDevice::close ()
 {
-    DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::close ():" << name () << std::endl;
-    WavesMidiEvent *waves_midi_event;
-
-    if (_input_pm_stream) {
-        Pm_Close (_input_pm_stream);
-        while (1 == Pm_Dequeue (_input_queue, &waves_midi_event)) {
-            delete waves_midi_event; // XXX possible dup free in ~WavesMidiBuffer() (?)
+        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::close (): %1\n", name ()));
+        WavesMidiEvent *waves_midi_event;
+        
+        if (_input_pm_stream) {
+                Pm_Close (_input_pm_stream);
+                while (1 == Pm_Dequeue (_input_queue, &waves_midi_event)) {
+                        delete waves_midi_event; // XXX possible dup free in ~WavesMidiBuffer() (?)
+                }
+                
+                Pm_QueueDestroy (_input_queue);
+                _input_queue = NULL;
+                _input_pm_stream = NULL;
+                _pm_input_id = pmNoDevice;
         }
-
-        Pm_QueueDestroy (_input_queue);
-        _input_queue = NULL;
-        _input_pm_stream = NULL;
-        _pm_input_id = pmNoDevice;
-    }
-
-
-    if ( _output_pm_stream ) {
-        Pm_Close (_output_pm_stream);
-        while (1 == Pm_Dequeue (_output_queue, &waves_midi_event)) {
-            delete waves_midi_event; // XXX possible dup free in ~WavesMidiBuffer() (?)
+        
+        
+        if ( _output_pm_stream ) {
+                Pm_Close (_output_pm_stream);
+                while (1 == Pm_Dequeue (_output_queue, &waves_midi_event)) {
+                        delete waves_midi_event; // XXX possible dup free in ~WavesMidiBuffer() (?)
+                }
+                Pm_QueueDestroy (_output_queue);
+                _output_queue = NULL;
+                _output_pm_stream = NULL;
+                _pm_output_id = pmNoDevice;
         }
-        Pm_QueueDestroy (_output_queue);
-        _output_queue = NULL;
-        _output_pm_stream = NULL;
-        _pm_output_id = pmNoDevice;
-    }
 }
 
 void
@@ -167,21 +172,21 @@ WavesMidiDevice::read_midi ()
                 return;
         }
         
-        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): %1-[%2]\n", _pm_device_id, name()));
+        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): [%1]\n", name()));
 
         while (Pm_Poll (_input_pm_stream) > 0) {
                 PmEvent pm_event; // just one message at a time
                 int result = Pm_Read (_input_pm_stream, &pm_event, 1);
 
                 if (result < 0) {
-                        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("Pm_Read failed for (): %1-[%2]\n", _pm_device_id, name()));
+                        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("Pm_Read failed for (): [%1]\n", name()));
                         break;
                 }
 
-                DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): %1-[%2] evt-tm: %3\n", _pm_device_id, name(), pm_event.timestamp));
+                DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): [%1] evt-tm: %3\n", name(), pm_event.timestamp));
 
                 if (_incomplete_waves_midi_event == NULL ) {
-                        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): %1-[%2] new incomplete_waves_midi_event\n", _pm_device_id, name()));
+                        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): [%1] new incomplete_waves_midi_event\n", name()));
                         _incomplete_waves_midi_event = new WavesMidiEvent (pm_event.timestamp);
                 }
                 
@@ -189,17 +194,17 @@ WavesMidiDevice::read_midi ()
 
                 if (nested_pm_event) {
                         Pm_Enqueue (_input_queue, &nested_pm_event);
-                        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): %1-[%2] : Pm_Enqueue (_input_queue, nested_pm_event)\n", _pm_device_id, name()));
+                        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): [%1] : Pm_Enqueue (_input_queue, nested_pm_event)\n", name()));
                 }
                 
                 switch ( _incomplete_waves_midi_event->state ()) {
                 case WavesMidiEvent::BROKEN:
                         delete _incomplete_waves_midi_event;
                         _incomplete_waves_midi_event = NULL;
-                        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): %1-[%2] : case WavesMidiEvent::BROKEN:\n", _pm_device_id, name()));
+                        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): [%1] : case WavesMidiEvent::BROKEN:\n", name()));
                         break;
                 case WavesMidiEvent::COMPLETE:
-                        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): %1-[%2] : Pm_Enqueue (_input_queue, _incomplete_waves_midi_event); %3\n",  _pm_device_id, name (), _incomplete_waves_midi_event));
+                        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): [%1] : Pm_Enqueue (_input_queue, _incomplete_waves_midi_event); %3\n",  name (), _incomplete_waves_midi_event));
                         Pm_Enqueue (_input_queue, &_incomplete_waves_midi_event);
                         _incomplete_waves_midi_event = NULL;
                         break;
@@ -215,7 +220,7 @@ WavesMidiDevice::write_midi ()
         if (NULL == _output_pm_stream) {
                 return;
         }
-        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_write_midi (): %1-[%2]\n", _pm_device_id, name()));
+        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_write_midi (): [%1]\n", name()));
                                                             
         PmError err;
         WavesMidiEvent *waves_midi_event;
@@ -245,7 +250,7 @@ WavesMidiDevice::write_midi ()
 int
 WavesMidiDevice::enqueue_output_waves_midi_event (const WavesMidiEvent* waves_midi_event)
 {
-        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::enqueue_output_waves_midi_event () %1-[%2]\n", _pm_device_id, name));
+        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::enqueue_output_waves_midi_event () [%1]\n", name()));
         
         if (waves_midi_event == NULL) {
                 error << "WavesMidiDevice::put_event_to_callback (): 'waves_midi_event' is NULL!" << endmsg;
