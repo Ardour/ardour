@@ -17,8 +17,6 @@
 
 */
 
-#include "product_definition.h"
-
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
 #endif
@@ -164,7 +162,7 @@ sigc::signal<void>      ARDOUR_UI::CloseAllDialogs;
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
-	: Gtkmm2ext::UI (APPLICATION_NAME, argcp, argvp)
+    : Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
 	, gui_object_state (new GUIObjectState)
 	, primary_clock (new MainClock (X_("primary"), false, X_("transport"), true, true, true, false, false))
 	, secondary_clock (new MainClock (X_("secondary"), false, X_("secondary"), true, true, false, false, true))

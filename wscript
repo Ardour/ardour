@@ -48,7 +48,7 @@ V = MAJOR + '.' + MINOR + '.' + MICRO
 # because if it is, it breaks waf somehow.
 #
 VERSION = V.encode ('ascii', 'ignore')
-APPNAME = 'Tracks'
+APPNAME = 'Tracks Live'
 PROGRAM_VERSION = MAJOR.encode ('ascii', 'ignore')
 
 # Mandatory variables
@@ -398,7 +398,7 @@ def set_compiler_flags (conf,opt):
         # plan to change this sooner rather than later
         # statefile_suffix = '.tracks'
         statefile_suffix = '.ardour'
-        executable_name = 'tracks'
+        executable_name = 'trackslive'
 
     conf.env['INSTALL_DIRNAME'] = lwrcase_dirname
     conf.env['EXECUTABLE_NAME'] = executable_name
@@ -434,7 +434,7 @@ def options(opt):
     opt.load('compiler_c')
     opt.load('compiler_cxx')
     autowaf.set_options(opt, debug_by_default=True)
-    opt.add_option('--program-name', type='string', action='store', default='Tracks', dest='program_name',
+    opt.add_option('--program-name', type='string', action='store', default='Tracks Live', dest='program_name',
                     help='The user-visible name of the program being built')
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler flags')

@@ -8,6 +8,6 @@ export CPLUS_INCLUDE_PATH=$C_INCLUDE_PATH
 		./waf build -v
 	else
 		./waf clean 
-		if ./waf configure --program-name=Tracks --prefix="/" --bindir="/" --configdir="/share" --noconfirm --no-lv2 --dist-target=mingw ; then ./waf build -v; fi
+		if ./waf configure --program-name="Tracks Live" --prefix="/" --bindir="/" --configdir="/share" --noconfirm --no-lv2 --dist-target=mingw ; then ./waf build -v; fi
 	fi
 ) 2>&1 | tee $AD/buildlog.txt #"$AD/ardour-build-log.`date +%Y-%m-%d--%H.%M`.txt"

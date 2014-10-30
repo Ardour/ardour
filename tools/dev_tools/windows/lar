@@ -3,4 +3,8 @@ if [ "$ADWIN" == "" ] ; then
   exit 0
 fi
 
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo ""/C $ADWIN\\Tracks\\gtk2_ardour\\ardev.cmd $*""
+
 cmd "/C $ADWIN\\Tracks\\gtk2_ardour\\ardev.cmd $*" 2>&1 | tee $AD/arlog.txt
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
