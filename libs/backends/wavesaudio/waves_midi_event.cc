@@ -121,6 +121,7 @@ WavesMidiEvent *WavesMidiEvent::append_data (const PmEvent &midi_event)
                         * (PmMessage*)_data = 0; 
                         switch (message_size) {
                         case 1:
+                        case 2:
                         case 3:
                                 _size = message_size;
                                 DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ( "WavesMidiEvent::append_data (): size = %1\n", _size));
