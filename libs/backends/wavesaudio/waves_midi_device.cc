@@ -22,6 +22,7 @@
 #include "pbd/error.h"
 #include "pbd/debug.h"
 #include "pbd/compose.h"
+#include "pbd/stacktrace.h"
 
 #include "waves_midi_device.h"
 #include "waves_midi_event.h"
@@ -160,8 +161,8 @@ WavesMidiDevice::close ()
 void
 WavesMidiDevice::do_io ()
 {
-    read_midi ();
-    write_midi ();
+        read_midi ();
+        write_midi ();
 }
 
 void
@@ -171,9 +172,8 @@ WavesMidiDevice::read_midi ()
                 return;
         }
         
-        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): [%1]\n", name()));
-
         while (Pm_Poll (_input_pm_stream) > 0) {
+
                 PmEvent pm_event; // just one message at a time
                 int result = Pm_Read (_input_pm_stream, &pm_event, 1);
 
@@ -182,7 +182,7 @@ WavesMidiDevice::read_midi ()
                         break;
                 }
 
-                DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): [%1] evt-tm: %3\n", name(), pm_event.timestamp));
+                DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): [%1] evt-tm: %2\n", name(), pm_event.timestamp));
 
                 if (_incomplete_waves_midi_event == NULL ) {
                         DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): [%1] new incomplete_waves_midi_event\n", name()));
@@ -219,8 +219,7 @@ WavesMidiDevice::write_midi ()
         if (NULL == _output_pm_stream) {
                 return;
         }
-        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_write_midi (): [%1]\n", name()));
-                                                            
+
         PmError err;
         WavesMidiEvent *waves_midi_event;
         
