@@ -37,6 +37,23 @@ size_t DummyAudioBackend::_max_buffer_size = 8192;
 std::vector<std::string> DummyAudioBackend::_midi_options;
 std::vector<AudioBackend::DeviceStatus> DummyAudioBackend::_device_status;
 
+#ifdef PLATFORM_WINDOWS
+static double _win_pc_rate = 0; // usec per tick
+#endif
+
+static int64_t _x_get_monotonic_usec() {
+#ifdef PLATFORM_WINDOWS
+	if (_win_pc_rate > 0) {
+		LARGE_INTEGER Count;
+		// not very reliable, but the only realistic way for sub milli-seconds
+		if (QueryPerformanceCounter (&Count)) {
+			return (int64_t) (Count.QuadPart * _win_pc_rate);
+		}
+	}
+#endif
+	return g_get_monotonic_time();
+}
+
 DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	: AudioBackend (e, info)
 	, _running (false)
@@ -1122,7 +1139,7 @@ DummyAudioBackend::main_process_thread ()
 	manager.graph_order_callback();
 
 	uint64_t clock1, clock2;
-	clock1 = g_get_monotonic_time();
+	clock1 = _x_get_monotonic_usec();
 	while (_running) {
 
 		// re-set input buffers, generate on demand.
@@ -1149,10 +1166,10 @@ DummyAudioBackend::main_process_thread ()
 		}
 
 		if (!_freewheeling) {
-			clock2 = g_get_monotonic_time();
+			clock2 = _x_get_monotonic_usec();
 			const int64_t elapsed_time = clock2 - clock1;
 			const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
-			_dsp_load = elapsed_time / (float) nomial_time;
+			_dsp_load = _dsp_load + .05 * ((elapsed_time / (float) nomial_time) - _dsp_load) + 1e-12;
 			if (elapsed_time < nomial_time) {
 				Glib::usleep (nomial_time - elapsed_time);
 			} else {
@@ -1162,7 +1179,7 @@ DummyAudioBackend::main_process_thread ()
 			_dsp_load = 1.0f;
 			Glib::usleep (100); // don't hog cpu
 		}
-		clock1 = g_get_monotonic_time();
+		clock1 = _x_get_monotonic_usec();
 
 		bool connections_changed = false;
 		bool ports_changed = false;
@@ -1231,6 +1248,14 @@ static int
 instantiate (const std::string& arg1, const std::string& /* arg2 */)
 {
 	s_instance_name = arg1;
+#ifdef PLATFORM_WINDOWS
+	LARGE_INTEGER Frequency;
+	if (!QueryPerformanceFrequency(&Frequency) || Frequency.QuadPart < 1) {
+		_win_pc_rate = 0;
+	} else {
+		_win_pc_rate = 1000000.0 / Frequency.QuadPart;
+	}
+#endif
 	return 0;
 }
 
