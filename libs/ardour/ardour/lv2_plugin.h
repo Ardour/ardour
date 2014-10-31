@@ -30,6 +30,10 @@
 #include "ardour/worker.h"
 #include "pbd/ringbuffer.h"
 
+#ifndef PATH_MAX
+#define PATH_MAX 1024
+#endif
+
 typedef struct LV2_Evbuf_Impl LV2_Evbuf;
 
 namespace ARDOUR {
@@ -142,6 +146,13 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	Worker* worker() { return _worker; }
 
+	uint32_t     patch_count() const { return _patch_count; }
+	const char * patch_uri(const uint32_t p) const { if (p < _patch_count) return _patch_value_uri[p]; else return NULL; }
+	const char * patch_key(const uint32_t p) const { if (p < _patch_count) return _patch_value_key[p]; else return NULL; }
+	const char * patch_val(const uint32_t p) const { if (p < _patch_count) return _patch_value_cur[p]; else return NULL; }
+	bool         patch_set(const uint32_t p, const char * val);
+	PBD::Signal1<void,const uint32_t> PatchChanged;
+
 	int work(uint32_t size, const void* data);
 	int work_response(uint32_t size, const void* data);
 
@@ -152,6 +163,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		uint32_t atom_Path;
 		uint32_t atom_Sequence;
 		uint32_t atom_eventTransfer;
+		uint32_t atom_URID;
+		uint32_t atom_Blank;
 		uint32_t log_Error;
 		uint32_t log_Note;
 		uint32_t log_Warning;
@@ -164,6 +177,9 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		uint32_t time_beatsPerMinute;
 		uint32_t time_frame;
 		uint32_t time_speed;
+		uint32_t patch_Set;
+		uint32_t patch_property;
+		uint32_t patch_value;
 	};
 
 	static URIDs urids;
@@ -187,6 +203,13 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	double        _next_cycle_speed;  ///< Expected start frame of next run cycle
 	PBD::ID       _insert_id;
 
+	uint32_t      _patch_count;
+	char **       _patch_value_uri;
+	char **       _patch_value_key;
+	char          (*_patch_value_cur)[PATH_MAX]; ///< current value
+	char          (*_patch_value_set)[PATH_MAX]; ///< new value to set
+	Glib::Threads::Mutex _patch_set_lock;
+
 	friend const void* lv2plugin_get_port_value(const char* port_symbol,
 	                                            void*       user_data,
 	                                            uint32_t*   size,
@@ -200,7 +223,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		PORT_EVENT    = 1 << 4,  ///< Old event API event port
 		PORT_SEQUENCE = 1 << 5,  ///< New atom API event port
 		PORT_MIDI     = 1 << 6,  ///< Event port understands MIDI
-		PORT_POSITION = 1 << 7   ///< Event port understands position
+		PORT_POSITION = 1 << 7,  ///< Event port understands position
+		PORT_PATCHMSG = 1 << 8   ///< Event port supports patch:Message
 	} PortFlag;
 
 	typedef unsigned PortFlags;

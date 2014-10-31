@@ -41,6 +41,9 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"
+#ifdef LV2_SUPPORT
+#include "ardour/lv2_plugin.h"
+#endif
 
 #include "ardour_ui.h"
 #include "prompter.h"
@@ -304,6 +307,34 @@ GenericPluginUI::build ()
 			}
 		} 
 	}
+
+#ifdef LV2_SUPPORT
+	boost::shared_ptr<ARDOUR::LV2Plugin> lv2p = boost::dynamic_pointer_cast<LV2Plugin> (plugin);
+	if (lv2p) {
+		_fcb = (Gtk::FileChooserButton**) malloc(lv2p->patch_count() * sizeof(Gtk::FileChooserButton*));
+		for (uint32_t p = 0; p < lv2p->patch_count(); ++p) {
+			_fcb[p] = manage (new Gtk::FileChooserButton (Gtk::FILE_CHOOSER_ACTION_OPEN));
+			_fcb[p]->signal_file_set().connect (sigc::bind(sigc::mem_fun (*this, &GenericPluginUI::patch_set_file), p));
+			lv2p->PatchChanged.connect (*this, invalidator (*this), boost::bind (&GenericPluginUI::patch_changed, this, _1), gui_context());
+			// when user cancels file selection the FileChooserButton will display "None"
+			// TODO hack away around this..
+			if (lv2p->patch_val(p)) {
+				_fcb[p]->set_filename(lv2p->patch_val(p));
+			}
+			if (lv2p->patch_key(p)) {
+				_fcb[p]->set_title(lv2p->patch_key(p));
+				Gtk::Label* fcl = manage (new Label (lv2p->patch_key(p)));
+				button_table.attach (*fcl, 0, button_cols, button_row, button_row + 1, FILL|EXPAND, FILL);
+				++button_row;
+			} else {
+				_fcb[p]->set_title(_("LV2 Patch"));
+			}
+
+			button_table.attach (*_fcb[p], 0, button_cols, button_row, button_row + 1, FILL|EXPAND, FILL);
+			++button_row;
+		}
+	}
+#endif
 
 	// Iterate over the list of controls to find which adjacent controls
 	// are similar enough to be grouped together.
@@ -934,4 +965,20 @@ GenericPluginUI::output_update ()
 	}
 }
 
+#ifdef LV2_SUPPORT
 
+void
+GenericPluginUI::patch_set_file (uint32_t p)
+{
+	boost::shared_ptr<ARDOUR::LV2Plugin> lv2p = boost::dynamic_pointer_cast<LV2Plugin> (plugin);
+	lv2p->patch_set(p, _fcb[p]->get_filename ().c_str());
+}
+
+void
+GenericPluginUI::patch_changed (uint32_t p)
+{
+	boost::shared_ptr<ARDOUR::LV2Plugin> lv2p = boost::dynamic_pointer_cast<LV2Plugin> (plugin);
+	_fcb[p]->set_filename(lv2p->patch_val(p));
+}
+
+#endif

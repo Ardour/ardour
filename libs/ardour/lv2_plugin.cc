@@ -66,6 +66,7 @@
 #include "lv2/lv2plug.in/ns/ext/worker/worker.h"
 #include "lv2/lv2plug.in/ns/ext/resize-port/resize-port.h"
 #include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
+#include "lv2/lv2plug.in/ns/ext/patch/patch.h"
 #ifdef HAVE_NEW_LV2
 #include "lv2/lv2plug.in/ns/ext/buf-size/buf-size.h"
 #include "lv2/lv2plug.in/ns/ext/options/options.h"
@@ -94,6 +95,8 @@ LV2Plugin::URIDs LV2Plugin::urids = {
 	_uri_map.uri_to_id(LV2_ATOM__Path),
 	_uri_map.uri_to_id(LV2_ATOM__Sequence),
 	_uri_map.uri_to_id(LV2_ATOM__eventTransfer),
+	_uri_map.uri_to_id(LV2_ATOM__URID),
+	_uri_map.uri_to_id(LV2_ATOM__Blank),
 	_uri_map.uri_to_id(LV2_LOG__Error),
 	_uri_map.uri_to_id(LV2_LOG__Note),
 	_uri_map.uri_to_id(LV2_LOG__Warning),
@@ -105,7 +108,10 @@ LV2Plugin::URIDs LV2Plugin::urids = {
 	_uri_map.uri_to_id(LV2_TIME__beatsPerBar),
 	_uri_map.uri_to_id(LV2_TIME__beatsPerMinute),
 	_uri_map.uri_to_id(LV2_TIME__frame),
-	_uri_map.uri_to_id(LV2_TIME__speed)
+	_uri_map.uri_to_id(LV2_TIME__speed),
+	_uri_map.uri_to_id(LV2_PATCH__Set),
+	_uri_map.uri_to_id(LV2_PATCH__property),
+	_uri_map.uri_to_id(LV2_PATCH__value)
 };
 
 class LV2World : boost::noncopyable {
@@ -146,6 +152,8 @@ public:
 	LilvNode* ui_externalkx;
 	LilvNode* units_unit;
 	LilvNode* units_midiNote;
+	LilvNode* patch_writable;
+	LilvNode* patch_Message;
 
 private:
 	bool _bundle_checked;
@@ -254,6 +262,11 @@ LV2Plugin::LV2Plugin (AudioEngine& engine,
 	, _features(NULL)
 	, _worker(NULL)
 	, _insert_id("0")
+	, _patch_count(0)
+	, _patch_value_uri(NULL)
+	, _patch_value_key(NULL)
+	, _patch_value_cur(NULL)
+	, _patch_value_set(NULL)
 {
 	init(c_plugin, rate);
 }
@@ -265,6 +278,11 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 	, _features(NULL)
 	, _worker(NULL)
 	, _insert_id(other._insert_id)
+	, _patch_count(0)
+	, _patch_value_uri(NULL)
+	, _patch_value_key(NULL)
+	, _patch_value_cur(NULL)
+	, _patch_value_set(NULL)
 {
 	init(other._impl->plugin, other._sample_rate);
 
@@ -456,6 +474,9 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 				if (lilv_nodes_contains(atom_supports, _world.time_Position)) {
 					flags |= PORT_POSITION;
 				}
+				if (lilv_nodes_contains(atom_supports, _world.patch_Message)) {
+					flags |= PORT_PATCHMSG;
+				}
 			}
 			LilvNodes* min_size_v = lilv_port_get_value(_impl->plugin, port, _world.rsz_minimumSize);
 			LilvNode* min_size = min_size_v ? lilv_nodes_get_first(min_size_v) : NULL;
@@ -532,6 +553,25 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 
 	delete[] params;
 
+	/* scan supported patch:writable for this plugin.
+	 * Note: the first Atom-port (in every direction) that supports patch:Message will be used
+	 */
+	LilvNode* rdfs_label  = lilv_new_uri(_world.world, LILV_NS_RDFS "label");
+	LilvNodes* properties = lilv_world_find_nodes (_world.world, lilv_plugin_get_uri(plugin), _world.patch_writable, NULL);
+	LILV_FOREACH(nodes, p, properties) {
+		const LilvNode* property = lilv_nodes_get(properties, p);
+		LilvNode*       label    = lilv_nodes_get_first (lilv_world_find_nodes (_world.world, property, rdfs_label, NULL));
+
+		_patch_value_uri = (char**) realloc (_patch_value_uri, (_patch_count + 1) * sizeof(char**));
+		_patch_value_key = (char**) realloc (_patch_value_key, (_patch_count + 1) * sizeof(char**));
+		_patch_value_uri[_patch_count] = strdup(lilv_node_as_uri(property));
+		_patch_value_key[_patch_count] = strdup(lilv_node_as_string(property));
+		++_patch_count;
+	}
+	lilv_nodes_free(properties);
+	_patch_value_cur = (char(*)[PATH_MAX]) calloc(_patch_count, sizeof(char[PATH_MAX]));
+	_patch_value_set = (char(*)[PATH_MAX]) calloc(_patch_count, sizeof(char[PATH_MAX]));
+
 	LilvUIs* uis = lilv_plugin_get_uis(plugin);
 	if (lilv_uis_size(uis) > 0) {
 #ifdef HAVE_SUIL
@@ -596,6 +636,13 @@ LV2Plugin::~LV2Plugin ()
 	free(_features);
 	free(_make_path_feature.data);
 	free(_work_schedule_feature.data);
+
+	for (uint32_t pidx = 0; pidx < _patch_count; ++pidx) {
+		free(_patch_value_uri[pidx]);
+		free(_patch_value_key[pidx]);
+	}
+	free(_patch_value_cur);
+	free(_patch_value_set);
 
 	delete _to_ui;
 	delete _from_ui;
@@ -1556,6 +1603,48 @@ write_position(LV2_Atom_Forge*     forge,
 	                       (const uint8_t*)(atom + 1));
 }
 
+static bool
+write_patch_change(
+		LV2_Atom_Forge* forge,
+		LV2_Evbuf*      buf,
+		const char*     uri,
+		const char*     filename
+		)
+{
+	LV2_Atom_Forge_Frame frame;
+	uint8_t patch_buf[PATH_MAX];
+	lv2_atom_forge_set_buffer(forge, patch_buf, sizeof(patch_buf));
+
+#if 0 // new LV2
+	lv2_atom_forge_object(forge, &frame, 0, LV2Plugin::urids.patch_Set);
+	lv2_atom_forge_key(forge, LV2Plugin::urids.patch_property);
+	lv2_atom_forge_urid(forge, uri_map.uri_to_id(uri));
+	lv2_atom_forge_key(forge, LV2Plugin::urids.patch_value);
+	lv2_atom_forge_path(forge, filename, strlen(filename));
+#else
+	lv2_atom_forge_blank(forge, &frame, 1, LV2Plugin::urids.patch_Set);
+	lv2_atom_forge_property_head(forge, LV2Plugin::urids.patch_property, 0);
+	lv2_atom_forge_urid(forge, LV2Plugin::_uri_map.uri_to_id(uri));
+	lv2_atom_forge_property_head(forge, LV2Plugin::urids.patch_value, 0);
+	lv2_atom_forge_path(forge, filename, strlen(filename));
+#endif
+
+	LV2_Evbuf_Iterator end  = lv2_evbuf_end(buf);
+	const LV2_Atom* const atom = (const LV2_Atom*)patch_buf;
+	return lv2_evbuf_write(&end, 0, 0, atom->type, atom->size,
+	                       (const uint8_t*)(atom + 1));
+}
+
+bool
+LV2Plugin::patch_set (const uint32_t p, const char * val) {
+	if (p >= _patch_count) return false;
+	_patch_set_lock.lock();
+	strncpy(_patch_value_set[p], val, PATH_MAX);
+	_patch_value_set[p][PATH_MAX - 1] = 0;
+	_patch_set_lock.unlock();
+	return true;
+}
+
 int
 LV2Plugin::connect_and_run(BufferSet& bufs,
 	ChanMapping in_map, ChanMapping out_map,
@@ -1687,6 +1776,24 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				_ev_buffers[port_index] = scratch_bufs.get_lv2_midi(
 					(flags & PORT_INPUT), 0, (flags & PORT_EVENT));
 			}
+
+			/* queue patch messages */
+			if (flags & PORT_PATCHMSG) {
+				if (_patch_set_lock.trylock()) {
+					for (uint32_t pidx = 0; pidx < _patch_count; ++ pidx) {
+						if (strlen(_patch_value_set[pidx]) > 0
+								&& 0 != strcmp(_patch_value_cur[pidx], _patch_value_set[pidx])
+							 )
+						{
+							write_patch_change(&_impl->forge, _ev_buffers[port_index],
+									_patch_value_uri[pidx], _patch_value_set[pidx]);
+							strncpy(_patch_value_cur[pidx], _patch_value_set[pidx], PATH_MAX);
+						}
+					}
+					_patch_set_lock.unlock();
+				}
+			}
+
 			buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
 		} else {
 			continue;  // Control port, leave buffer alone
@@ -1759,8 +1866,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			}
 		}
 
+
 		// Write messages to UI
-		if (_to_ui && (flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
+		if ((_to_ui || _patch_count > 0) && (flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
 			LV2_Evbuf* buf = _ev_buffers[port_index];
 			for (LV2_Evbuf_Iterator i = lv2_evbuf_begin(buf);
 			     lv2_evbuf_is_valid(i);
@@ -1768,6 +1876,48 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				uint32_t frames, subframes, type, size;
 				uint8_t* data;
 				lv2_evbuf_get(i, &frames, &subframes, &type, &size, &data);
+
+				// intercept patch change messages
+				/* TODO this should eventually be done in the UI-thread
+				 * using a ringbuffer and no locks.
+				 * The current UI ringbuffer is unsuitable. It only exists
+				 * if a UI enabled and misses initial patch-set or changes.
+				 */
+				if (_patch_count > 0 && (flags & PORT_OUTPUT) && (flags & PORT_PATCHMSG)) {
+					// TODO reduce if() nesting below:
+					LV2_Atom* atom = (LV2_Atom*)(data - sizeof(LV2_Atom));
+					if (atom->type == LV2Plugin::urids.atom_Blank) {
+						LV2_Atom_Object* obj = (LV2_Atom_Object*)atom;
+						if (obj->body.otype == LV2Plugin::urids.patch_Set) {
+							const LV2_Atom* property = NULL;
+							lv2_atom_object_get (obj, LV2Plugin::urids.patch_property, &property, 0);
+							if (property->type == LV2Plugin::urids.atom_URID) {
+								for (uint32_t pidx = 0; pidx < _patch_count; ++ pidx) {
+								 if (((const LV2_Atom_URID*)property)->body != _uri_map.uri_to_id(_patch_value_uri[pidx])) {
+									 continue;
+								 }
+								 /* Get value. */
+								 const LV2_Atom* file_path = NULL;
+								 lv2_atom_object_get(obj, LV2Plugin::urids.patch_value, &file_path, 0);
+								 if (!file_path || file_path->type != LV2Plugin::urids.atom_Path) {
+									 continue;
+								 }
+								 // LV2_ATOM_BODY() casts away qualifiers, so do it explicitly:
+								 const char* uri = (const char*)((uint8_t const*)(file_path) + sizeof(LV2_Atom));
+								 _patch_set_lock.lock();
+								 strncpy(_patch_value_cur[pidx], uri, PATH_MAX);
+								 strncpy(_patch_value_set[pidx], uri, PATH_MAX);
+								 _patch_value_cur[pidx][PATH_MAX - 1] = 0;
+								 _patch_value_set[pidx][PATH_MAX - 1] = 0;
+								 _patch_set_lock.unlock();
+								 PatchChanged(pidx); // emit signal
+								}
+							}
+						}
+					}
+				}
+
+				if (!_to_ui) continue;
 				write_to_ui(port_index, urids.atom_eventTransfer,
 				            size + sizeof(LV2_Atom),
 				            data - sizeof(LV2_Atom));
@@ -1983,10 +2133,14 @@ LV2World::LV2World()
 	ui_externalkx      = lilv_new_uri(world, "http://kxstudio.sf.net/ns/lv2ext/external-ui#Widget");
 	units_unit         = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/units#unit");
 	units_midiNote     = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/units#midiNote");
+	patch_writable     = lilv_new_uri(world, LV2_PATCH__writable);
+	patch_Message      = lilv_new_uri(world, LV2_PATCH__Message);
 }
 
 LV2World::~LV2World()
 {
+	lilv_node_free(patch_Message);
+	lilv_node_free(patch_writable);
 	lilv_node_free(units_midiNote);
 	lilv_node_free(units_unit);
 	lilv_node_free(ui_externalkx);

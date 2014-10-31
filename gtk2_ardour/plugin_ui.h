@@ -278,6 +278,12 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void print_parameter (char *buf, uint32_t len, uint32_t param);
 	bool integer_printer (char* buf, Gtk::Adjustment &, ControlUI *);
 	bool midinote_printer(char* buf, Gtk::Adjustment &, ControlUI *);
+
+#ifdef LV2_SUPPORT
+	void patch_set_file (uint32_t patch_idx);
+	void patch_changed (uint32_t patch_idx);
+	Gtk::FileChooserButton **_fcb;
+#endif
 };
 
 class PluginUIWindow : public ArdourWindow
