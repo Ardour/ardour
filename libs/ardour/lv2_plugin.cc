@@ -1240,7 +1240,7 @@ LV2Plugin::write_to_ui(uint32_t       index,
 }
 
 void
-LV2Plugin::enable_ui_emmission()
+LV2Plugin::enable_ui_emission()
 {
 	if (!_to_ui) {
 		/* see note in LV2Plugin::write_from_ui() */

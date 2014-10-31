@@ -141,7 +141,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	                           uint32_t    format,
 	                           const void* buffer);
 
-	void enable_ui_emmission();
+	void enable_ui_emission();
 	void emit_to_ui(void* controller, UIMessageSink sink);
 
 	Worker* worker() { return _worker; }

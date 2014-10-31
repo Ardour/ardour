@@ -279,7 +279,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		: NS_UI "GtkUI";
 
 	if (_lv2->has_message_output()) {
-		_lv2->enable_ui_emmission();
+		_lv2->enable_ui_emission();
 	}
 
 	const LilvUI* ui = (const LilvUI*)_lv2->c_ui();
