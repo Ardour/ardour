@@ -88,53 +88,52 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 
 		setup_outline_context (context);
 		
+		/* the goal here is that if the border is 1 pixel
+		 * thick, it will precisely align with the corner
+		 * coordinates of the rectangle. So if the rectangle
+		 * has a left edge at 0 and a right edge at 10, then
+		 * the left edge must span -0.5..+0.5, the right edge
+		 * must span 9.5..10.5 (i.e. the single full color
+		 * pixel is precisely aligned with 0 and 10
+		 * respectively).
+		 *
+		 * we have to shift left/up in all cases, which means
+		 * subtraction along both axes (i.e. edge at
+		 * N, outline must start at N-0.5). 
+		 *
+		 * see the cairo FAQ on single pixel lines to see why we do
+		 * the 0.5 pixel additions.
+		 */
+
+		self = self.translate (Duple (-0.5, -0.5));
+
+		std::cerr << "Outline using " << self << " from " << _rect << std::endl;
+		
 		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
 			
-			context->rectangle (self.x0 + 0.5, self.y0 + 0.5, self.width() - 1.0, self.height() - 1.0);
+			context->rectangle (self.x0, self.y0, self.width(), self.height());
 
 		} else {
 
-			/* the goal here is that if the border is 1 pixel
-			 * thick, it will precisely align with the corner
-			 * coordinates of the rectangle. So if the rectangle
-			 * has a left edge at 0 and a right edge at 10, then
-			 * the left edge must span -0.5..+0.5, the right edge
-			 * must span 9.5..10.5 (i.e. the single full color
-			 * pixel is precisely aligned with 0 and 10
-			 * respectively).
-			 *
-			 * we have to shift left/up in all cases, which means
-			 * subtraction along both axes (i.e. edge at
-			 * N, outline must start at N-0.5). 
-			 *
-			 * see the cairo FAQ on single pixel lines to see why we do
-			 * the 0.5 pixel additions.
-			 */
-
 			if (_outline_what & LEFT) {
-				/* vertical line: move x-coordinate left by 0.5 pixels */
-				context->move_to (self.x0 - 0.5, self.y0);
-				context->line_to (self.x0 - 0.5, self.y1);
+				context->move_to (self.x0, self.y0);
+				context->line_to (self.x0, self.y1);
 			}
 			
 			if (_outline_what & TOP) {
-				/* horizontal line: move y-coordinate up by 0.5 pixels */
-				context->move_to (self.x0, self.y0 - 0.5);
-				context->line_to (self.x1, self.y0 - 0.5);
+				context->move_to (self.x0, self.y0);
+				context->line_to (self.x1, self.y0);
 			}
 
 			if (_outline_what & BOTTOM) {
-				/* horizontal line: move y-coordinate up by 0.5 pixels */
-				context->move_to (self.x0, self.y1 - 0.5);
-				context->line_to (self.x1, self.y1 - 0.5);
+				context->move_to (self.x0, self.y1);
+				context->line_to (self.x1, self.y1);
 			}
 			
 			if (_outline_what & RIGHT) {
-				/* vertical line: move x-coordinate left by 0.5 pixels */
-				context->move_to (self.x1 - 0.5, self.y0);
-				context->line_to (self.x1 - 0.5, self.y1);
+				context->move_to (self.x1, self.y0);
+				context->line_to (self.x1, self.y1);
 			}
-			
 		}
 		
 		context->stroke ();
@@ -146,12 +145,12 @@ Rectangle::compute_bounding_box () const
 {
 	if (!_rect.empty()) {
 		Rect r = _rect.fix ();
+
 		/* take into acount the 0.5 addition to the bounding
 		   box for the right and bottom edges, see ::render() above
 		*/
 
-		r.x1 += 1.0; // XXX this makes no sense but is necessary
-		r.y1 += 0.5;
+		r = r.expand (1.0);
 
 		_bounding_box = r;
 	}
