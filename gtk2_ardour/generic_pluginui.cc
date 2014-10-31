@@ -60,14 +60,17 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 
 GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrollable)
-	: PlugUIBase (pi),
-	  button_table (initial_button_rows, initial_button_cols),
-	  output_table (initial_output_rows, initial_output_cols),
-	  hAdjustment(0.0, 0.0, 0.0),
-	  vAdjustment(0.0, 0.0, 0.0),
-	  scroller_view(hAdjustment, vAdjustment),
-	  automation_menu (0),
-	  is_scrollable(scrollable)
+	: PlugUIBase (pi)
+	, button_table (initial_button_rows, initial_button_cols)
+	, output_table (initial_output_rows, initial_output_cols)
+	, hAdjustment(0.0, 0.0, 0.0)
+	, vAdjustment(0.0, 0.0, 0.0)
+	, scroller_view(hAdjustment, vAdjustment)
+	, automation_menu (0)
+	, is_scrollable(scrollable)
+#ifdef LV2_SUPPORT
+	, _fcb(0)
+#endif
 {
 	set_name ("PluginEditor");
 	set_border_width (10);
@@ -140,6 +143,9 @@ GenericPluginUI::~GenericPluginUI ()
 	if (output_controls.size() > 0) {
 		screen_update_connection.disconnect();
 	}
+#ifdef LV2_SUPPORT
+	free(_fcb);
+#endif
 }
 
 // Some functions for calculating the 'similarity' of two plugin
