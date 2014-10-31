@@ -44,6 +44,7 @@
 #include "actions.h"
 #include "prompter.h"
 #include "editor_drag.h"
+#include "floating_text_entry.h"
 
 #include "i18n.h"
 
@@ -1096,41 +1097,32 @@ Editor::rename_marker(Marker *marker)
 	if (!loc)
 	       return;
 
-	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range())
+	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range()) {
 		return;
+        }
 
-	ArdourPrompter dialog (true);
-	string txt;
+        FloatingTextEntry* flt = new FloatingTextEntry;
 
-	dialog.set_prompt (_("New Name:"));
+        flt->use_text.connect (sigc::bind (sigc::mem_fun (*this, &Editor::finish_rename_marker), marker));
+        flt->present ();
+}
 
-	if (loc->is_mark()) {
-		dialog.set_title (_("Rename Mark"));
-	} else {
-		dialog.set_title (_("Rename Range"));
-	}
+void
+Editor::finish_rename_marker (std::string txt, Marker* marker)
+{
 
-	dialog.set_name ("MarkRenameWindow");
-	dialog.set_size_request (250, -1);
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
+	Location* loc;
+	bool ignored;
 
-	dialog.add_button (_("Rename"), RESPONSE_ACCEPT);
-	dialog.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
-	dialog.set_initial_text (loc->name());
+	loc = find_location_from_marker (marker, ignored);
 
-	dialog.show ();
-
-	switch (dialog.run ()) {
-	case RESPONSE_ACCEPT:
-		break;
-	default:
+	if (!loc) {
 		return;
 	}
 
 	begin_reversible_command ( _("rename marker") );
 	XMLNode &before = _session->locations()->get_state();
 
-	dialog.get_result(txt);
 	loc->set_name (txt);
 	_session->set_dirty ();
 
