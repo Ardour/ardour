@@ -67,7 +67,7 @@
 
 #include "video_timeline.h"
 
-#include "about.h"
+#include "about_dialog.h"
 #include "ardour_button.h"
 #include "ardour_dialog.h"
 #include "ardour_window.h"

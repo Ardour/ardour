@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title="About" resizeable="False">
+  
+  <Layout width="787"
+          height="417">
+            
+      <VBox id="image_home"
+            x="0"
+            y="0"/>
+      
+      <Button id="about_button"
+              winfont ="Arial Bold 10"
+              macfont ="Helvetica Bold 10"
+              text="ABOUT"
+              fgnormal="#6D6E72"
+              bgnormal="#CACAC5"
+              fgactive="#EDECE8"
+              bgactive="#6D6E72"
+              borderwidth="0 0 0 0"
+              bordercolor="#6D6E72"
+              width="69"
+              height="22"
+              x="360"
+              y="325"/>
+  </Layout>
+  
+</Dialog>

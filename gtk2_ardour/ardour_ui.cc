@@ -96,7 +96,7 @@
 
 typedef uint64_t microseconds_t;
 
-#include "about.h"
+#include "about_dialog.h"
 #include "actions.h"
 #include "add_tracks_dialog.h"
 #include "ambiguous_file_dialog.h"

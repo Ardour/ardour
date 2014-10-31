@@ -17,21 +17,19 @@
 
 */
 
-#ifndef __ardour_gtk_about_h__
-#define __ardour_gtk_about_h__
+#ifndef __license_dialog_h__
+#define __license_dialog_h__
 
-#include "ardour_dialog.h"
-#include "ardour_button.h"
+#include "waves_dialog.h"
 
-class About : public ArdourDialog
+class LicenseDialog : public WavesDialog
 {
 public:
-    About();
-    ~About();
+    LicenseDialog();
+    ~LicenseDialog();
 
-private:
-    bool close_button_pressed (GdkEventButton*);
-    void on_response (int);
+protected:
+    void on_esc_pressed ();
 };
 
-#endif /* __ardour_gtk_about_h__ */
+#endif /* __license_dialog_h__ */

@@ -21,7 +21,8 @@
 #include "ardour/filesystem_paths.h"
 
 #include "i18n.h"
-#include "about.h"
+#include "about_dialog.h"
+#include "license_dialog.h"
 
 using namespace Gtk;
 using namespace Gdk;
@@ -30,40 +31,39 @@ using namespace ARDOUR;
 using namespace PBD;
 
 About::About ()
-	: ArdourDialog (_("About Tracks"))
+	: WavesDialog (_("about_dialog.xml"), true, false)
+    , _image_home ( get_v_box("image_home") )
+    , _about_button ( get_waves_button ("about_button") )
 {
 	set_modal (true);
 	set_resizable (false);
-        
-	get_vbox()->set_spacing (0);
-        
+    
 	string image_path;
-        
+    
 	if (find_file (ardour_data_search_path(), "splash.png", image_path)) {
 		Gtk::Image* image;
 		if ((image = manage (new Gtk::Image (image_path))) != 0) {
-			get_vbox()->pack_start (*image, false, false);
+			_image_home.pack_start (*image, false, false);
 		}
-	}
+    }
+   
+    _about_button.signal_clicked.connect (sigc::mem_fun (*this, &About::about_button_pressed));
     
-        add_button("CLOSE", RESPONSE_OK);
-        set_default_response(RESPONSE_OK);
 	show_all ();
 }
-void
-About::on_response (int response_id)
-{
-    ArdourDialog::on_response (response_id);
-    switch (response_id) {
-        case RESPONSE_OK:
-            hide ();
-            break;
-    }
-}
 
-bool About::close_button_pressed (GdkEventButton*)
+void
+About::on_esc_pressed ()
 {
     hide();
+}
+
+void
+About::about_button_pressed (WavesButton*)
+{
+    LicenseDialog license_dialog;
+    license_dialog.set_position (WIN_POS_CENTER);
+    license_dialog.run ();
 }
 
 About::~About ()

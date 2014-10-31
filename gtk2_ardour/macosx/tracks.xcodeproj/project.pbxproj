@@ -269,6 +269,10 @@
 		43279460194F0062003C9FEA /* tracks_preferences.xml in Resources */ = {isa = PBXBuildFile; fileRef = 43279430194F0062003C9FEA /* tracks_preferences.xml */; };
 		4327947F194F009E003C9FEA /* tracks.menus.in in Resources */ = {isa = PBXBuildFile; fileRef = 43279475194F009E003C9FEA /* tracks.menus.in */; };
 		43B351ED194F04E00038C140 /* step_editing.bindings in Resources */ = {isa = PBXBuildFile; fileRef = 43B351C0194F04E00038C140 /* step_editing.bindings */; };
+		954DCFBD1A0239DA00B7160E /* about_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 954DCFBC1A0239DA00B7160E /* about_dialog.cc */; };
+		954DCFC11A023AAB00B7160E /* about_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 954DCFBF1A023AAB00B7160E /* about_dialog.xml */; };
+		954DCFC21A023AAB00B7160E /* license_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 954DCFC01A023AAB00B7160E /* license_dialog.xml */; };
+		95A134DE1A0239080008E3D6 /* license_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95A134DD1A0239080008E3D6 /* license_dialog.cc */; };
 		CE1A907A199A37AE00ECA62B /* add_tracks_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE1A9079199A37AE00ECA62B /* add_tracks_dialog.cc */; };
 		CE1C6DCE19879F04006BDB03 /* compact_meter_bridge.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE1C6DCC19879F04006BDB03 /* compact_meter_bridge.cc */; };
 		CE1C6DCF19879F04006BDB03 /* compact_meter_strip.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE1C6DCD19879F04006BDB03 /* compact_meter_strip.cc */; };
@@ -281,7 +285,6 @@
 		CE294C6419CAD4E300D12768 /* meter_strip_gain_meter.xml in Resources */ = {isa = PBXBuildFile; fileRef = CE294C5C19CAD4E300D12768 /* meter_strip_gain_meter.xml */; };
 		CE294C6519CAD4E300D12768 /* mixer_bridge_view.xml in Resources */ = {isa = PBXBuildFile; fileRef = CE294C5D19CAD4E300D12768 /* mixer_bridge_view.xml */; };
 		CE294C6619CAD4E300D12768 /* time_info_box.xml in Resources */ = {isa = PBXBuildFile; fileRef = CE294C5E19CAD4E300D12768 /* time_info_box.xml */; };
-		CE294C7419CAD54500D12768 /* about.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE294C6A19CAD54500D12768 /* about.cc */; };
 		CE294C7519CAD54500D12768 /* marker_io_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE294C6B19CAD54500D12768 /* marker_io_dialog.cc */; };
 		CE294C7619CAD54500D12768 /* mixer_bridge_view.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE294C6C19CAD54500D12768 /* mixer_bridge_view.cc */; };
 		CE294C7719CAD54500D12768 /* open_file_dialog_nix.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE294C6D19CAD54500D12768 /* open_file_dialog_nix.cc */; };
@@ -859,7 +862,6 @@
 		43279475194F009E003C9FEA /* tracks.menus.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = tracks.menus.in; path = ../tracks.menus.in; sourceTree = SOURCE_ROOT; };
 		4397595019CADAFC00740098 /* canvas.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = canvas.xcodeproj; path = ../../libs/canvas/macosx/canvas/canvas.xcodeproj; sourceTree = "<group>"; };
 		4397599619CB06AC00740098 /* gtkmm2ext.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = gtkmm2ext.xcodeproj; path = ../../libs/gtkmm2ext/macosx/gtkmm2ext/gtkmm2ext.xcodeproj; sourceTree = "<group>"; };
-		43B350F0194F04E00038C140 /* about.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = about.h; path = ../about.h; sourceTree = SOURCE_ROOT; };
 		43B350F1194F04E00038C140 /* actions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = actions.h; path = ../actions.h; sourceTree = SOURCE_ROOT; };
 		43B350F2194F04E00038C140 /* add_route_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = add_route_dialog.h; path = ../add_route_dialog.h; sourceTree = SOURCE_ROOT; };
 		43B350F3194F04E00038C140 /* add_video_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = add_video_dialog.h; path = ../add_video_dialog.h; sourceTree = SOURCE_ROOT; };
@@ -1113,6 +1115,12 @@
 		43B351EE194F12FB0038C140 /* waves_audiobackend.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = waves_audiobackend.xcodeproj; path = ../../libs/backends/wavesaudio/macosx/waves_audiobackend.xcodeproj; sourceTree = "<group>"; };
 		43B351F4194F130C0038C140 /* libardour.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libardour.xcodeproj; path = ../../libs/ardour/macosx/libardour.xcodeproj; sourceTree = "<group>"; };
 		43B351FA194F131D0038C140 /* pbd.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = pbd.xcodeproj; path = ../../libs/pbd/macosx/pbd.xcodeproj; sourceTree = "<group>"; };
+		954DCFBC1A0239DA00B7160E /* about_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = about_dialog.cc; path = ../about_dialog.cc; sourceTree = "<group>"; };
+		954DCFBE1A0239EC00B7160E /* about_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = about_dialog.h; path = ../about_dialog.h; sourceTree = "<group>"; };
+		954DCFBF1A023AAB00B7160E /* about_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = about_dialog.xml; sourceTree = "<group>"; };
+		954DCFC01A023AAB00B7160E /* license_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = license_dialog.xml; sourceTree = "<group>"; };
+		95A134DD1A0239080008E3D6 /* license_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = license_dialog.cc; path = ../license_dialog.cc; sourceTree = "<group>"; };
+		95A134DF1A02391F0008E3D6 /* license_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = license_dialog.h; path = ../license_dialog.h; sourceTree = "<group>"; };
 		CE1A9079199A37AE00ECA62B /* add_tracks_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = add_tracks_dialog.cc; path = ../add_tracks_dialog.cc; sourceTree = "<group>"; };
 		CE1A907E199A37BF00ECA62B /* add_tracks_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = add_tracks_dialog.h; path = ../add_tracks_dialog.h; sourceTree = "<group>"; };
 		CE1C6DCC19879F04006BDB03 /* compact_meter_bridge.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = compact_meter_bridge.cc; path = ../compact_meter_bridge.cc; sourceTree = "<group>"; };
@@ -1129,7 +1137,6 @@
 		CE294C5C19CAD4E300D12768 /* meter_strip_gain_meter.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = meter_strip_gain_meter.xml; sourceTree = "<group>"; };
 		CE294C5D19CAD4E300D12768 /* mixer_bridge_view.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = mixer_bridge_view.xml; sourceTree = "<group>"; };
 		CE294C5E19CAD4E300D12768 /* time_info_box.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = time_info_box.xml; sourceTree = "<group>"; };
-		CE294C6A19CAD54500D12768 /* about.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = about.cc; path = ../about.cc; sourceTree = "<group>"; };
 		CE294C6B19CAD54500D12768 /* marker_io_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = marker_io_dialog.cc; path = ../marker_io_dialog.cc; sourceTree = "<group>"; };
 		CE294C6C19CAD54500D12768 /* mixer_bridge_view.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mixer_bridge_view.cc; path = ../mixer_bridge_view.cc; sourceTree = "<group>"; };
 		CE294C6D19CAD54500D12768 /* open_file_dialog_nix.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = open_file_dialog_nix.cc; path = ../open_file_dialog_nix.cc; sourceTree = "<group>"; };
@@ -1200,7 +1207,8 @@
 		43279040194EFF38003C9FEA /* source */ = {
 			isa = PBXGroup;
 			children = (
-				CE294C6A19CAD54500D12768 /* about.cc */,
+				954DCFBC1A0239DA00B7160E /* about_dialog.cc */,
+				95A134DD1A0239080008E3D6 /* license_dialog.cc */,
 				CE294C6B19CAD54500D12768 /* marker_io_dialog.cc */,
 				CE294C6C19CAD54500D12768 /* mixer_bridge_view.cc */,
 				CE294C6D19CAD54500D12768 /* open_file_dialog_nix.cc */,
@@ -1802,6 +1810,8 @@
 		43279429194F0062003C9FEA /* ui */ = {
 			isa = PBXGroup;
 			children = (
+				954DCFBF1A023AAB00B7160E /* about_dialog.xml */,
+				954DCFC01A023AAB00B7160E /* license_dialog.xml */,
 				CE294C5719CAD4E300D12768 /* add_tracks_dialog.xml */,
 				CE294C5819CAD4E300D12768 /* compact_meter_bridge.xml */,
 				CE294C5919CAD4E300D12768 /* compact_meter_strip.xml */,
@@ -1844,6 +1854,8 @@
 		43279480194F00CB003C9FEA /* headers */ = {
 			isa = PBXGroup;
 			children = (
+				954DCFBE1A0239EC00B7160E /* about_dialog.h */,
+				95A134DF1A02391F0008E3D6 /* license_dialog.h */,
 				CE294C7E19CAD58500D12768 /* ardour_dropdown.h */,
 				CE294C7F19CAD58500D12768 /* marker_io_dialog.h */,
 				CE294C8019CAD58500D12768 /* mixer_bridge_view.h */,
@@ -1860,7 +1872,6 @@
 				CEAFC777195445D90016ACF0 /* visibility.h */,
 				43B351D4194F04E00038C140 /* tracks_control_panel.h */,
 				43B351D5194F04E00038C140 /* tracks_control_panel.logic.h */,
-				43B350F0194F04E00038C140 /* about.h */,
 				43B350F1194F04E00038C140 /* actions.h */,
 				43B350F2194F04E00038C140 /* add_route_dialog.h */,
 				43B350F3194F04E00038C140 /* add_video_dialog.h */,
@@ -2322,6 +2333,7 @@
 				43279376194F003A003C9FEA /* media_button.png in Resources */,
 				43279377194F003A003C9FEA /* media_button_active.png in Resources */,
 				43279378194F003A003C9FEA /* media_button_prelight.png in Resources */,
+				954DCFC21A023AAB00B7160E /* license_dialog.xml in Resources */,
 				43279379194F003A003C9FEA /* meter_bridge_on.png in Resources */,
 				4327937A194F003A003C9FEA /* meter_bridge_on_active.png in Resources */,
 				4327937B194F003A003C9FEA /* meter_bridge_on_prelight.png in Resources */,
@@ -2390,6 +2402,7 @@
 				432793BA194F003A003C9FEA /* soloed-by-others.png in Resources */,
 				432793BB194F003A003C9FEA /* step-editing.png in Resources */,
 				432793BC194F003A003C9FEA /* strip_width.png in Resources */,
+				954DCFC11A023AAB00B7160E /* about_dialog.xml in Resources */,
 				432793BD194F003A003C9FEA /* systemlock.png in Resources */,
 				432793BE194F003A003C9FEA /* tav_exp.png in Resources */,
 				432793BF194F003A003C9FEA /* tav_shrink.png in Resources */,
@@ -2542,9 +2555,10 @@
 				CEB0A9F219583F96006D269A /* session_close_dialog.cc in Sources */,
 				CE1C6DCE19879F04006BDB03 /* compact_meter_bridge.cc in Sources */,
 				CE1C6DCF19879F04006BDB03 /* compact_meter_strip.cc in Sources */,
+				95A134DE1A0239080008E3D6 /* license_dialog.cc in Sources */,
 				CE1C6DE01987A924006BDB03 /* master_bus_ui.cc in Sources */,
+				954DCFBD1A0239DA00B7160E /* about_dialog.cc in Sources */,
 				CE1A907A199A37AE00ECA62B /* add_tracks_dialog.cc in Sources */,
-				CE294C7419CAD54500D12768 /* about.cc in Sources */,
 				CE294C7519CAD54500D12768 /* marker_io_dialog.cc in Sources */,
 				CE294C7619CAD54500D12768 /* mixer_bridge_view.cc in Sources */,
 				CE294C7719CAD54500D12768 /* open_file_dialog_nix.cc in Sources */,
