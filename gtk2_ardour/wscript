@@ -98,6 +98,7 @@ gtk2_ardour_sources = [
         'fft.cc',
         'fft_graph.cc',
         'fft_result.cc',
+        'floating_text_entry.cc',
         'sfdb_freesound_mootcher.cc',
         'gain_meter.cc',
         'generic_pluginui.cc',
