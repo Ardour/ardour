@@ -557,17 +557,24 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	 * Note: the first Atom-port (in every direction) that supports patch:Message will be used
 	 */
 	LilvNode* rdfs_label  = lilv_new_uri(_world.world, LILV_NS_RDFS "label");
+	LilvNode* rdfs_range  = lilv_new_uri(_world.world, LILV_NS_RDFS "range");
 	LilvNodes* properties = lilv_world_find_nodes (_world.world, lilv_plugin_get_uri(plugin), _world.patch_writable, NULL);
 	LILV_FOREACH(nodes, p, properties) {
 		const LilvNode* property = lilv_nodes_get(properties, p);
 		LilvNode*       label    = lilv_nodes_get_first (lilv_world_find_nodes (_world.world, property, rdfs_label, NULL));
+		LilvNode*       range    = lilv_nodes_get_first (lilv_world_find_nodes (_world.world, property, rdfs_range, NULL));
+		if (!range || _uri_map.uri_to_id(lilv_node_as_uri(range)) != LV2Plugin::urids.atom_Path) {
+			continue;
+		}
 
 		_patch_value_uri = (char**) realloc (_patch_value_uri, (_patch_count + 1) * sizeof(char**));
 		_patch_value_key = (char**) realloc (_patch_value_key, (_patch_count + 1) * sizeof(char**));
 		_patch_value_uri[_patch_count] = strdup(lilv_node_as_uri(property));
-		_patch_value_key[_patch_count] = strdup(lilv_node_as_string(property));
+		_patch_value_key[_patch_count] = strdup(lilv_node_as_string(label ? label : property));
 		++_patch_count;
 	}
+	lilv_node_free(rdfs_label);
+	lilv_node_free(rdfs_range);
 	lilv_nodes_free(properties);
 	_patch_value_cur = (char(*)[PATH_MAX]) calloc(_patch_count, sizeof(char[PATH_MAX]));
 	_patch_value_set = (char(*)[PATH_MAX]) calloc(_patch_count, sizeof(char[PATH_MAX]));
