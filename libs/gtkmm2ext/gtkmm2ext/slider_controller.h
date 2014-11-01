@@ -49,13 +49,21 @@ class LIBGTKMM2EXT_API SliderController : public Gtkmm2ext::PixFader
 
 	virtual ~SliderController () {}
 
-	Gtk::SpinButton& get_spin_button () { return spin; }
-	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { binding_proxy.set_controllable (c); }
+	Gtk::SpinButton& get_spin_button () { assert(_ctrl); return _spin; }
+	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { _binding_proxy.set_controllable (c); }
 
 	protected:
 	bool on_button_press_event (GdkEventButton *ev);
-	BindingProxy binding_proxy;
-	Gtk::SpinButton spin;
+	void ctrl_adjusted();
+	void spin_adjusted();
+
+	BindingProxy _binding_proxy;
+	boost::shared_ptr<PBD::Controllable> _ctrl;
+	Gtk::Adjustment *_ctrl_adj;
+	Gtk::Adjustment _spin_adj;
+	Gtk::SpinButton _spin;
+	bool _ctrl_ignore;
+	bool _spin_ignore;
 };
 
 class LIBGTKMM2EXT_API VSliderController : public SliderController

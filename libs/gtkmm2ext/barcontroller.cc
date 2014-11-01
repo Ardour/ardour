@@ -47,7 +47,6 @@ BarController::BarController (Gtk::Adjustment& adj,
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
 	set (.5, .5, 1.0, 1.0);
 	set_border_width (0);
-	_slider.set_controllable (mc);
 	_slider.set_tweaks (PixFader::NoShowUnityLine);
 
 	_slider.StartGesture.connect (sigc::mem_fun(*this, &BarController::passtrhu_gesture_start));
