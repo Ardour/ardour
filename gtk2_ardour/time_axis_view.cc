@@ -98,6 +98,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	, _order (0)
 	, _effective_height (0)
 	, _resize_drag_start (-1)
+	, _did_resize (false)
 	, _preresize_cursor (0)
 	, _have_preresize_cursor (false)
 	, _ebox_release_can_act (true)
@@ -418,15 +419,16 @@ TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
 		 * are pretending that the drag is taking place over the canvas
 		 * (which perhaps in the glorious future, when track headers
 		 * and the canvas are unified, will actually be true.)
-		*/
+		 */
 
 		_editor.maybe_autoscroll (false, true, true);
 
 		/* now schedule the actual TAV resize */
-                int32_t const delta = (int32_t) floor (ev->y_root - _resize_drag_start);
-                _editor.add_to_idle_resize (this, delta);
-                _resize_drag_start = ev->y_root;
-        } else {
+		int32_t const delta = (int32_t) floor (ev->y_root - _resize_drag_start);
+		_editor.add_to_idle_resize (this, delta);
+		_resize_drag_start = ev->y_root;
+		_did_resize = true;
+	} else {
 		/* not dragging but ... */
 		maybe_set_cursor (ev->y);
 	}
@@ -484,6 +486,11 @@ TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 		}
 		_editor.stop_canvas_autoscroll ();
 		_resize_drag_start = -1;
+		if (_did_resize) {
+			_did_resize = false;
+			// don't change selection
+			return true;
+		}
 	}
 
 	if (!_ebox_release_can_act) {

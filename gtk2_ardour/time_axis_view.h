@@ -297,9 +297,10 @@ private:
 	int                  _order;
 	uint32_t             _effective_height;
 	double               _resize_drag_start;
+	bool                 _did_resize;
 	GdkCursor*           _preresize_cursor;
 	bool                 _have_preresize_cursor;
-	bool                  _ebox_release_can_act;
+	bool                 _ebox_release_can_act;
 
 	static uint32_t button_height;
 	static uint32_t extra_height;
