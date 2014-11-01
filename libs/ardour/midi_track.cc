@@ -16,6 +16,18 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+#include <cmath>
+
+#ifdef COMPILER_MSVC
+#include <float.h>
+
+// 'std::isinf()' and 'std::isnan()' are not available in MSVC.
+#define isinf_local(val) !((bool)_finite((double)val))
+#define isnan_local(val) (bool)_isnan((double)val)
+#else
+#define isinf_local std::isinf
+#define isnan_local std::isnan
+#endif
 
 #include "pbd/ffs.h"
 #include "pbd/enumwriter.h"
@@ -647,9 +659,9 @@ MidiTrack::MidiControl::set_value(double val)
 	const Evoral::Parameter &parameter = _list ? _list->parameter() : Control::parameter();
 
 	bool valid = false;
-	if (isinf(val)) {
+	if (isinf_local(val)) {
 		cerr << "MIDIControl value is infinity" << endl;
-	} else if (isnan(val)) {
+	} else if (isnan_local(val)) {
 		cerr << "MIDIControl value is NaN" << endl;
 	} else if (val < parameter.min()) {
 		cerr << "MIDIControl value is < " << parameter.min() << endl;

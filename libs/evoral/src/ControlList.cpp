@@ -17,6 +17,16 @@
  */
 
 #include <cmath>
+
+#ifdef COMPILER_MSVC
+#include <float.h>
+
+// 'std::isnan()' is not available in MSVC.
+#define isnan_local(val) (bool)_isnan((double)val)
+#else
+#define isnan_local std::isnan
+#endif
+
 #include <cassert>
 #include <utility>
 #include <iostream>
@@ -837,8 +847,7 @@ ControlList::modify (iterator iter, double when, double val)
 
 		(*iter)->when = when;
 		(*iter)->value = val;
-
-		if (isnan (val)) {
+		if (isnan_local (val)) {
 			abort ();
 		}
 
