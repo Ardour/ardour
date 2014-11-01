@@ -262,7 +262,9 @@ GenericPluginUI::build ()
 				= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
 					insert->control(Evoral::Parameter(PluginAutomation, 0, i)));
 
-			if ((cui = build_control_ui (i, c)) == 0) {
+			Plugin::ParameterDescriptor desc;
+			plugin->get_parameter_descriptor(i, desc);
+			if ((cui = build_control_ui (desc, c, plugin->parameter_is_input(i))) == 0) {
 				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
 				continue;
 			}
@@ -560,13 +562,13 @@ GenericPluginUI::print_parameter (char *buf, uint32_t len, uint32_t param)
 }
 
 GenericPluginUI::ControlUI*
-GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<AutomationControl> mcontrol)
+GenericPluginUI::build_control_ui (const Plugin::ParameterDescriptor&   desc,
+                                   boost::shared_ptr<AutomationControl> mcontrol,
+                                   bool                                 is_input)
 {
 	ControlUI* control_ui = 0;
 
-	Plugin::ParameterDescriptor desc;
-
-	plugin->get_parameter_descriptor (port_index, desc);
+	const float value = mcontrol->get_value();
 
 	control_ui = manage (new ControlUI ());
 	control_ui->combo = 0;
@@ -575,16 +577,15 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 	control_ui->label.set_text (desc.label);
 	control_ui->label.set_alignment (0.0, 0.5);
 	control_ui->label.set_name ("PluginParameterLabel");
-	control_ui->port_index = port_index;
 
 	control_ui->set_spacing (5);
 
 	Gtk::Requisition req (control_ui->automate_button.size_request());
 
-	if (plugin->parameter_is_input(port_index)) {
+	if (is_input) {
 
 		/* See if there any named values for our input value */
-		control_ui->scale_points = plugin->get_scale_points (port_index);
+		control_ui->scale_points = desc.scale_points;
 
 		/* If this parameter is an integer, work out the number of distinct values
 		   it can take on (assuming that lower and upper values are allowed).
@@ -637,12 +638,12 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 			control_ui->pack_start (control_ui->automate_button, false, false);
 
 			control_ui->button->signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::control_port_toggled), control_ui));
-			control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui, (uint32_t) port_index));
+			control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui));
 
 			mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::toggle_parameter_changed, this, control_ui), gui_context());
 			mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
 
-			if (plugin->get_parameter (port_index) > 0.5){
+			if (value > 0.5){
 				control_ui->button->set_active(true);
 			}
 
@@ -683,7 +684,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 		}
 
-		adj->set_value (mcontrol->internal_to_interface(plugin->get_parameter (port_index)));
+		adj->set_value (mcontrol->internal_to_interface(value));
 
 		/* XXX memory leak: SliderController not destroyed by ControlUI
 		   destructor, and manage() reports object hierarchy
@@ -698,7 +699,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		}
 
 		control_ui->pack_start (control_ui->automate_button, false, false);
-		control_ui->automate_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui, (uint32_t) port_index));
+		control_ui->automate_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui));
 
 		automation_state_changed (control_ui);
 
@@ -707,7 +708,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 		input_controls.push_back (control_ui);
 
-	} else if (plugin->parameter_is_output (port_index)) {
+	} else if (!is_input) {
 
 		control_ui->display = manage (new EventBox);
 		control_ui->display->set_name ("ParameterValueDisplay");
@@ -724,7 +725,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		/* set up a meter */
 		/* TODO: only make a meter if the port is Hinted for it */
 
-		MeterInfo * info = new MeterInfo(port_index);
+		MeterInfo * info = new MeterInfo();
  		control_ui->meterinfo = info;
 
 		info->meter = new FastMeter (
@@ -787,7 +788,7 @@ GenericPluginUI::stop_touch (GenericPluginUI::ControlUI* cui)
 }
 
 void
-GenericPluginUI::astate_clicked (ControlUI* cui, uint32_t /*port*/)
+GenericPluginUI::astate_clicked (ControlUI* cui)
 {
 	using namespace Menu_Helpers;
 
@@ -937,7 +938,7 @@ void
 GenericPluginUI::output_update ()
 {
 	for (vector<ControlUI*>::iterator i = output_controls.begin(); i != output_controls.end(); ++i) {
-		float val = plugin->get_parameter ((*i)->port_index);
+		float val = (*i)->control->get_value();
 		char buf[32];
 		snprintf (buf, sizeof(buf), "%.2f", val);
 		(*i)->display_label->set_text (buf);

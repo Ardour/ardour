@@ -208,7 +208,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 		bool            max_unbound;
 		bool packed;
 
-		MeterInfo (int /*i*/) {
+		MeterInfo () {
 			meter = 0;
 			packed = false;
 			min = 1.0e10;
@@ -226,7 +226,6 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	/* FIXME: Unify with AutomationController */
 	struct ControlUI : public Gtk::HBox {
 
-		uint32_t port_index;
 		boost::shared_ptr<ARDOUR::AutomationControl> control;
 
 		Evoral::Parameter parameter() { return control->parameter(); }
@@ -262,14 +261,17 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void output_update();
 
 	void build ();
-	ControlUI* build_control_ui (guint32 port_index, boost::shared_ptr<ARDOUR::AutomationControl>);
+	ControlUI* build_control_ui (const ARDOUR::Plugin::ParameterDescriptor&   desc,
+	                             boost::shared_ptr<ARDOUR::AutomationControl> mcontrol,
+	                             bool                                         is_input);
+
 	void ui_parameter_changed (ControlUI* cui);
 	void toggle_parameter_changed (ControlUI* cui);
 	void update_control_display (ControlUI* cui);
 	void control_port_toggled (ControlUI* cui);
 	void control_combo_changed (ControlUI* cui);
 
-	void astate_clicked (ControlUI*, uint32_t parameter);
+	void astate_clicked (ControlUI*);
 	void automation_state_changed (ControlUI*);
 	void set_automation_state (ARDOUR::AutoState state, ControlUI* cui);
 	void start_touch (ControlUI*);

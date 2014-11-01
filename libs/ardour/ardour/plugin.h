@@ -95,6 +95,8 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	Plugin (const Plugin&);
 	virtual ~Plugin ();
 
+	typedef std::map<const std::string, const float> ScalePoints;
+
 	struct ParameterDescriptor {
 
 		ParameterDescriptor ()
@@ -131,6 +133,7 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 		bool midinote; ///< only used if integer_step is also true
 		uint32_t key; ///< for properties
 		Variant::Type datatype; ///< for properties
+		boost::shared_ptr<ScalePoints> scale_points;
 	};
 
 	XMLNode& get_state ();
@@ -169,8 +172,6 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool parameter_is_control(uint32_t) const = 0;
 	virtual bool parameter_is_input(uint32_t) const = 0;
 	virtual bool parameter_is_output(uint32_t) const = 0;
-
-	typedef std::map<const std::string, const float> ScalePoints;
 
 	virtual boost::shared_ptr<ScalePoints> get_scale_points(uint32_t /*port_index*/) const {
 		return boost::shared_ptr<ScalePoints>();

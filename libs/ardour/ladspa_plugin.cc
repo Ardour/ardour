@@ -522,6 +522,8 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 
 	desc.label = port_names()[which];
 
+	desc.scale_points = get_scale_points(which);
+
 	return 0;
 }
 

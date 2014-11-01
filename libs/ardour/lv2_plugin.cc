@@ -1562,6 +1562,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	}
 
 	desc.enumeration = lilv_port_has_property(_impl->plugin, port, _world.lv2_enumeration);
+	desc.scale_points = get_scale_points(which);
 
 	lilv_node_free(def);
 	lilv_node_free(min);
