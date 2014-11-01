@@ -39,11 +39,11 @@ using namespace Gtk;
 AutomationController::AutomationController(boost::shared_ptr<Automatable> printer, boost::shared_ptr<AutomationControl> ac, Adjustment* adj)
 	: BarController (*adj, ac)
 	, _ignore_change(false)
-        , _printer (printer)
+	, _printer (printer)
 	, _controllable(ac)
 	, _adjustment(adj)
 {
-        assert (_printer);
+	assert (_printer);
 
 	set_name (X_("ProcessorControlSlider"));
 
