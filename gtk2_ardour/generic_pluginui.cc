@@ -340,7 +340,9 @@ GenericPluginUI::build ()
 			          << " type " << d->datatype << std::endl;
 		}
 	}
-	plugin->announce_property_values();
+	if (!descs.empty()) {
+		plugin->announce_property_values();
+	}
 
 	// Iterate over the list of controls to find which adjacent controls
 	// are similar enough to be grouped together.
