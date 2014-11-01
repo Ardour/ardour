@@ -17,14 +17,17 @@
 
 */
 
+#include <cmath>
+
 #ifdef COMPILER_MSVC
 #include <float.h>
-/* isinf() & isnan() are C99 standards, which older MSVC doesn't provide */
-#define isinf(val) !((bool)_finite((double)val))
-#define isnan(val) (bool)_isnan((double)val)
+
+// 'std::isnan()' is not available in MSVC.
+#define isnan_local(val) (bool)_isnan((double)val)
+#else
+#define isnan_local std::isnan
 #endif
 
-#include <cmath>
 #include <climits>
 #include <vector>
 #include <fstream>
@@ -976,7 +979,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 		model_to_view_coord (tx, ty);
 
-		if (isnan (tx) || isnan (ty)) {
+		if (isnan_local (tx) || isnan_local (ty)) {
 			warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""),
 			                           _name) << endmsg;
 			continue;
