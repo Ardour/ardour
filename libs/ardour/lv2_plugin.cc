@@ -1370,7 +1370,11 @@ LV2Plugin::announce_property_values()
 	lv2_atom_forge_set_buffer(forge, buf, sizeof(buf));
 
 	// Serialize patch:Get message with no subject (implicitly plugin instance)
+#ifdef HAVE_LV2_1_10_0
 	lv2_atom_forge_object(forge, &frame, 1, LV2Plugin::urids.patch_Get);
+#else
+	lv2_atom_forge_blank(forge, &frame, 1, LV2Plugin::urids.patch_Get);
+#endif
 
 	// Write message to UI=>Plugin ring
 	const LV2_Atom* const atom = (const LV2_Atom*)buf;
