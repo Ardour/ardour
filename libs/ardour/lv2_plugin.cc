@@ -67,7 +67,7 @@
 #include "lv2/lv2plug.in/ns/ext/resize-port/resize-port.h"
 #include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
 #include "lv2/lv2plug.in/ns/ext/patch/patch.h"
-#ifdef HAVE_NEW_LV2
+#ifdef HAVE_LV2_1_2_0
 #include "lv2/lv2plug.in/ns/ext/buf-size/buf-size.h"
 #include "lv2/lv2plug.in/ns/ext/options/options.h"
 #endif
@@ -348,13 +348,13 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_features[6] = &_log_feature;
 
 	unsigned n_features = 7;
-#ifdef HAVE_NEW_LV2
+#ifdef HAVE_LV2_1_2_0
 	_features[n_features++] = &_def_state_feature;
 #endif
 
 	lv2_atom_forge_init(&_impl->forge, _uri_map.urid_map());
 
-#ifdef HAVE_NEW_LV2
+#ifdef HAVE_LV2_1_2_0
 	LV2_URID atom_Int = _uri_map.uri_to_id(LV2_ATOM__Int);
 	LV2_Options_Option options[] = {
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id(LV2_BUF_SIZE__minBlockLength),
