@@ -233,7 +233,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 		/* input */
 
 		Gtk::ComboBoxText*                      combo;
-		boost::shared_ptr<ARDOUR::Plugin::ScalePoints> scale_points;
+		boost::shared_ptr<ARDOUR::ScalePoints>  scale_points;
 		Gtk::ToggleButton*                      button;
 		boost::shared_ptr<AutomationController> controller;
 		Gtkmm2ext::ClickBox*                    clickbox;
@@ -261,7 +261,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void output_update();
 
 	void build ();
-	ControlUI* build_control_ui (const ARDOUR::Plugin::ParameterDescriptor&   desc,
+	ControlUI* build_control_ui (const ARDOUR::ParameterDescriptor&           desc,
 	                             boost::shared_ptr<ARDOUR::AutomationControl> mcontrol,
 	                             bool                                         is_input);
 
@@ -282,8 +282,8 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	bool integer_printer (char* buf, Gtk::Adjustment &, ControlUI *);
 	bool midinote_printer(char* buf, Gtk::Adjustment &, ControlUI *);
 
-	void set_property (const ARDOUR::Plugin::ParameterDescriptor& desc,
-	                   Gtk::FileChooserButton*                    widget);
+	void set_property (const ARDOUR::ParameterDescriptor& desc,
+	                   Gtk::FileChooserButton*            widget);
 	void property_changed (uint32_t key, const ARDOUR::Variant& value);
 
 	typedef std::map<uint32_t, Gtk::FileChooserButton*> PropertyControls;

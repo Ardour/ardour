@@ -1224,6 +1224,8 @@ static void
 forge_variant(LV2_Atom_Forge* forge, const Variant& value)
 {
 	switch (value.type()) {
+	case Variant::VOID:
+		break;
 	case Variant::BOOL:
 		lv2_atom_forge_bool(forge, value.get_bool());
 		break;
@@ -1285,6 +1287,9 @@ LV2Plugin::set_property(uint32_t key, const Variant& value)
 {
 	if (_patch_port_in_index == (uint32_t)-1) {
 		error << "LV2: set_property called with unset patch_port_in_index" << endmsg;
+		return;
+	} else if (value.type() == Variant::VOID) {
+		error << "LV2: set_property called with void value" << endmsg;
 		return;
 	}
 
@@ -2085,18 +2090,18 @@ LV2Plugin::print_parameter(uint32_t param, char* buf, uint32_t len) const
 	}
 }
 
-boost::shared_ptr<Plugin::ScalePoints>
+boost::shared_ptr<ScalePoints>
 LV2Plugin::get_scale_points(uint32_t port_index) const
 {
 	const LilvPort*  port   = lilv_plugin_get_port_by_index(_impl->plugin, port_index);
 	LilvScalePoints* points = lilv_port_get_scale_points(_impl->plugin, port);
 
-	boost::shared_ptr<Plugin::ScalePoints> ret;
+	boost::shared_ptr<ScalePoints> ret;
 	if (!points) {
 		return ret;
 	}
 
-	ret = boost::shared_ptr<Plugin::ScalePoints>(new ScalePoints());
+	ret = boost::shared_ptr<ScalePoints>(new ScalePoints());
 
 	LILV_FOREACH(scale_points, i, points) {
 		const LilvScalePoint* p     = lilv_scale_points_get(points, i);

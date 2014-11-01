@@ -262,7 +262,7 @@ GenericPluginUI::build ()
 				= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
 					insert->control(Evoral::Parameter(PluginAutomation, 0, i)));
 
-			Plugin::ParameterDescriptor desc;
+			ParameterDescriptor desc;
 			plugin->get_parameter_descriptor(i, desc);
 			if ((cui = build_control_ui (desc, c, plugin->parameter_is_input(i))) == 0) {
 				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
@@ -308,7 +308,7 @@ GenericPluginUI::build ()
 	}
 
 	// Add property controls (currently file chooser button for paths only)
-	typedef std::vector<Plugin::ParameterDescriptor> Descs;
+	typedef std::vector<ParameterDescriptor> Descs;
 	Descs descs;
 	plugin->get_supported_properties(descs);
 	for (Descs::const_iterator d = descs.begin(); d != descs.end(); ++d) {
@@ -514,7 +514,7 @@ GenericPluginUI::integer_printer (char buf[32], Adjustment &adj, ControlUI* cui)
 	float const v = adj.get_value ();
 	
 	if (cui->scale_points) {
-		Plugin::ScalePoints::const_iterator i = cui->scale_points->begin ();
+		ScalePoints::const_iterator i = cui->scale_points->begin ();
 		while (i != cui->scale_points->end() && i->second != v) {
 			++i;
 		}
@@ -535,7 +535,7 @@ GenericPluginUI::midinote_printer (char buf[32], Adjustment &adj, ControlUI* cui
 	float const v = adj.get_value ();
 
 	if (cui->scale_points) {
-		Plugin::ScalePoints::const_iterator i = cui->scale_points->begin ();
+		ScalePoints::const_iterator i = cui->scale_points->begin ();
 		while (i != cui->scale_points->end() && i->second != v) {
 			++i;
 		}
@@ -562,7 +562,7 @@ GenericPluginUI::print_parameter (char *buf, uint32_t len, uint32_t param)
 }
 
 GenericPluginUI::ControlUI*
-GenericPluginUI::build_control_ui (const Plugin::ParameterDescriptor&   desc,
+GenericPluginUI::build_control_ui (const ParameterDescriptor&           desc,
                                    boost::shared_ptr<AutomationControl> mcontrol,
                                    bool                                 is_input)
 {
@@ -601,7 +601,7 @@ GenericPluginUI::build_control_ui (const Plugin::ParameterDescriptor&   desc,
 
 			std::vector<std::string> labels;
 			for (
-				ARDOUR::Plugin::ScalePoints::const_iterator i = control_ui->scale_points->begin();
+				ARDOUR::ScalePoints::const_iterator i = control_ui->scale_points->begin();
 				i != control_ui->scale_points->end();
 				++i) {
 				
@@ -855,7 +855,7 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 	cui->ignore_change++;
 
 	if (cui->combo && cui->scale_points) {
-		for (ARDOUR::Plugin::ScalePoints::iterator it = cui->scale_points->begin(); it != cui->scale_points->end(); ++it) {
+		for (ARDOUR::ScalePoints::iterator it = cui->scale_points->begin(); it != cui->scale_points->end(); ++it) {
 			if (it->second == val) {
 				cui->combo->set_active_text(it->first);
 				break;
@@ -969,8 +969,8 @@ GenericPluginUI::output_update ()
 }
 
 void
-GenericPluginUI::set_property (const Plugin::ParameterDescriptor& desc,
-                               Gtk::FileChooserButton*            widget)
+GenericPluginUI::set_property (const ParameterDescriptor& desc,
+                               Gtk::FileChooserButton*    widget)
 {
 	plugin->set_property(desc.key, Variant(Variant::PATH, widget->get_filename()));
 }

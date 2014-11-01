@@ -240,7 +240,7 @@ PluginInsert::create_automatable_parameters ()
 
 	set<Evoral::Parameter> a = _plugins.front()->automatable ();
 
-	Plugin::ParameterDescriptor desc;
+	ParameterDescriptor desc;
 
 	for (set<Evoral::Parameter>::iterator i = a.begin(); i != a.end(); ++i) {
 		if (i->type() == PluginAutomation) {
@@ -1139,7 +1139,7 @@ PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 					float min_y = c->alist()->get_min_y ();
 					float max_y = c->alist()->get_max_y ();
 
-					Plugin::ParameterDescriptor desc;
+					ParameterDescriptor desc;
 					_plugins.front()->get_parameter_descriptor (port_id, desc);
 
 					if (min_y == FLT_MIN) {
@@ -1194,7 +1194,7 @@ PluginInsert::PluginControl::PluginControl (PluginInsert* p, const Evoral::Param
 	: AutomationControl (p->session(), param, list, p->describe_parameter(param))
 	, _plugin (p)
 {
-	Plugin::ParameterDescriptor desc;
+	ParameterDescriptor desc;
 	boost::shared_ptr<Plugin> plugin = p->plugin (0);
 	
 	alist()->reset_default (plugin->default_value (param.id()));

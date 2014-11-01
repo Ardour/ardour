@@ -34,6 +34,7 @@ class LIBARDOUR_API Variant
 {
 public:
 	enum Type {
+		VOID,    ///< Nothing
 		BOOL,    ///< Boolean
 		DOUBLE,  ///< C double (64-bit IEEE-754)
 		FLOAT,   ///< C float (32-bit IEEE-754)

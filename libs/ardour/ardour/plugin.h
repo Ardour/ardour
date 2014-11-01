@@ -32,6 +32,7 @@
 #include "ardour/latent.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/midi_state_tracker.h"
+#include "ardour/parameter_descriptor.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/types.h"
 #include "ardour/variant.h"
@@ -94,47 +95,6 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&);
 	Plugin (const Plugin&);
 	virtual ~Plugin ();
-
-	typedef std::map<const std::string, const float> ScalePoints;
-
-	struct ParameterDescriptor {
-
-		ParameterDescriptor ()
-			: integer_step(false)
-			, toggled (false)
-			, logarithmic (false)
-			, sr_dependent (false)
-			, lower (0)
-			, upper (0)
-			, step (0)
-			, smallstep (0)
-			, largestep (0)
-			, min_unbound (0)
-			, max_unbound (0)
-			, enumeration (false)
-			, midinote(false)
-		{}
-
-		/* essentially a union of LADSPA, VST and LV2 info */
-
-		bool integer_step;
-		bool toggled;
-		bool logarithmic;
-		bool sr_dependent;
-		std::string label;
-		float lower; ///< if this is a frequency, it will be in Hz (not a fraction of the sample rate)
-		float upper; ///< if this is a frequency, it will be in Hz (not a fraction of the sample rate)
-		float step;
-		float smallstep;
-		float largestep;
-		bool min_unbound;
-		bool max_unbound;
-		bool enumeration;
-		bool midinote; ///< only used if integer_step is also true
-		uint32_t key; ///< for properties
-		Variant::Type datatype; ///< for properties
-		boost::shared_ptr<ScalePoints> scale_points;
-	};
 
 	XMLNode& get_state ();
 	virtual int set_state (const XMLNode &, int version);

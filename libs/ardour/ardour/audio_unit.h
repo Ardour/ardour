@@ -48,7 +48,7 @@ namespace ARDOUR {
 class AudioEngine;
 class Session;
 
-struct LIBARDOUR_API AUParameterDescriptor : public Plugin::ParameterDescriptor {
+struct LIBARDOUR_API AUParameterDescriptor : public ParameterDescriptor {
 	// additional fields to make operations more efficient
 	AudioUnitParameterID id;
 	AudioUnitScope scope;

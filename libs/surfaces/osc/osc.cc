@@ -1004,7 +1004,7 @@ OSC::route_plugin_parameter (int rid, int piid, int par, float val)
                 return -1;
         }
 
-        Plugin::ParameterDescriptor pd;
+        ParameterDescriptor pd;
         pi->plugin()->get_parameter_descriptor (controlid,pd);
 
         if (val >= pd.lower && val < pd.upper) {
@@ -1051,7 +1051,7 @@ OSC::route_plugin_parameter_print (int rid, int piid, int par)
                 return -1;
         }
 
-        Plugin::ParameterDescriptor pd;
+        ParameterDescriptor pd;
 
         if (pi->plugin()->get_parameter_descriptor (controlid, pd) == 0) {
                 boost::shared_ptr<AutomationControl> c = pi->automation_control (Evoral::Parameter(PluginAutomation, 0, controlid));
