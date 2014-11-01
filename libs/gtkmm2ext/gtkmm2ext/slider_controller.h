@@ -45,7 +45,7 @@ namespace Gtkmm2ext {
 class LIBGTKMM2EXT_API SliderController : public Gtkmm2ext::PixFader
 {
 	public:
-	SliderController (Gtk::Adjustment* adj, int orientation, int, int);
+	SliderController (Gtk::Adjustment* adj, boost::shared_ptr<PBD::Controllable> mc, int orientation, int, int);
 
 	virtual ~SliderController () {}
 
@@ -61,13 +61,13 @@ class LIBGTKMM2EXT_API SliderController : public Gtkmm2ext::PixFader
 class LIBGTKMM2EXT_API VSliderController : public SliderController
 {
 	public:
-	VSliderController (Gtk::Adjustment *adj, int, int);
+	VSliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD::Controllable> mc, int, int);
 };
 
 class LIBGTKMM2EXT_API HSliderController : public SliderController
 {
 	public:
-	HSliderController (Gtk::Adjustment *adj, int, int);
+	HSliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD::Controllable> mc, int, int);
 };
 
 

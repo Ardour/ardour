@@ -22,13 +22,14 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/pixfader.h>
 #include <gtkmm2ext/slider_controller.h>
+#include "pbd/controllable.h"
 
 #include "i18n.h"
 
 using namespace Gtkmm2ext;
 using namespace PBD;
 
-SliderController::SliderController (Gtk::Adjustment *adj, int orientation, int fader_length, int fader_girth)
+SliderController::SliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD::Controllable> mc, int orientation, int fader_length, int fader_girth)
 	: PixFader (*adj, orientation, fader_length, fader_girth)
 	, spin (*adj, 0, 2)
 {			  
@@ -47,12 +48,12 @@ SliderController::on_button_press_event (GdkEventButton *ev)
 	return PixFader::on_button_press_event (ev);
 }
 
-VSliderController::VSliderController (Gtk::Adjustment *adj, int fader_length, int fader_girth)
-	: SliderController (adj, VERT, fader_length, fader_girth)
+VSliderController::VSliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD::Controllable> mc, int fader_length, int fader_girth)
+	: SliderController (adj, mc, VERT, fader_length, fader_girth)
 {
 }
 
-HSliderController::HSliderController (Gtk::Adjustment *adj, int fader_length, int fader_girth)
-	: SliderController (adj, HORIZ, fader_length, fader_girth)
+HSliderController::HSliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD::Controllable> mc, int fader_length, int fader_girth)
+	: SliderController (adj, mc, HORIZ, fader_length, fader_girth)
 {
 }

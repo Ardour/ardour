@@ -267,7 +267,7 @@ FaderOption::FaderOption (string const & i, string const & n, sigc::slot<gain_t>
 	, _get (g)
 	, _set (s)
 {
-	_db_slider = manage (new HSliderController (&_db_adjustment, 115, 18));
+	_db_slider = manage (new HSliderController (&_db_adjustment, boost::shared_ptr<PBD::Controllable>(), 115, 18));
 
 	_label.set_text (n + ":");
 	_label.set_alignment (0, 0.5);

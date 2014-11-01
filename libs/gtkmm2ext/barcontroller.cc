@@ -39,7 +39,7 @@ using namespace Gtkmm2ext;
 
 BarController::BarController (Gtk::Adjustment& adj,
 		boost::shared_ptr<PBD::Controllable> mc)
-	: _slider (&adj, 60, 16)
+	: _slider (&adj, mc, 60, 16)
 	, _switching (false)
 	, _switch_on_release (false)
 {
