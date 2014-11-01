@@ -30,10 +30,11 @@
 #include "ardour/chan_mapping.h"
 #include "ardour/cycles.h"
 #include "ardour/latent.h"
-#include "ardour/plugin_insert.h"
 #include "ardour/libardour_visibility.h"
-#include "ardour/types.h"
 #include "ardour/midi_state_tracker.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/types.h"
+#include "ardour/variant.h"
 
 #include <vector>
 #include <set>
@@ -128,6 +129,8 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 		bool max_unbound;
 		bool enumeration;
 		bool midinote; ///< only used if integer_step is also true
+		uint32_t key; ///< for properties
+		Variant::Type datatype; ///< for properties
 	};
 
 	XMLNode& get_state ();
@@ -266,6 +269,31 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 
 	void set_cycles (uint32_t c) { _cycles = c; }
 	cycles_t cycles() const { return _cycles; }
+
+	/** Get a descrption of all properties supported by this plugin.
+	 *
+	 * Properties are distinct from parameters in that they are potentially
+	 * dynamic, referred to by key, and do not correspond 1:1 with ports.
+	 *
+	 * For LV2 plugins, properties are implemented by sending/receiving set/get
+	 * messages to/from the plugin via event ports.
+	 */
+	virtual void get_supported_properties(std::vector<ParameterDescriptor>& descs) {}
+
+	/** Set a property from the UI.
+	 *
+	 * This is not UI-specific, but may only be used by one thread.  If the
+	 * Ardour UI is present, that is the UI thread, but otherwise, any thread
+	 * except the audio thread may call this function as long as it is not
+	 * called concurrently.
+	 */
+	virtual void set_property(uint32_t key, const Variant& value) {}
+
+	/** Emit PropertyChanged for all current property values. */
+	virtual void announce_property_values() {}
+
+	/** Emitted when a property is changed in the plugin. */
+	PBD::Signal2<void, uint32_t, Variant> PropertyChanged;
 
         PBD::Signal1<void,uint32_t> StartTouch;
         PBD::Signal1<void,uint32_t> EndTouch;

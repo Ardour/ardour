@@ -41,9 +41,6 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"
-#ifdef LV2_SUPPORT
-#include "ardour/lv2_plugin.h"
-#endif
 
 #include "ardour_ui.h"
 #include "prompter.h"
@@ -68,9 +65,6 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	, scroller_view(hAdjustment, vAdjustment)
 	, automation_menu (0)
 	, is_scrollable(scrollable)
-#ifdef LV2_SUPPORT
-	, _fcb(0)
-#endif
 {
 	set_name ("PluginEditor");
 	set_border_width (10);
@@ -143,9 +137,6 @@ GenericPluginUI::~GenericPluginUI ()
 	if (output_controls.size() > 0) {
 		screen_update_connection.disconnect();
 	}
-#ifdef LV2_SUPPORT
-	free(_fcb);
-#endif
 }
 
 // Some functions for calculating the 'similarity' of two plugin
@@ -314,33 +305,42 @@ GenericPluginUI::build ()
 		} 
 	}
 
-#ifdef LV2_SUPPORT
-	boost::shared_ptr<ARDOUR::LV2Plugin> lv2p = boost::dynamic_pointer_cast<LV2Plugin> (plugin);
-	if (lv2p) {
-		_fcb = (Gtk::FileChooserButton**) malloc(lv2p->patch_count() * sizeof(Gtk::FileChooserButton*));
-		for (uint32_t p = 0; p < lv2p->patch_count(); ++p) {
-			_fcb[p] = manage (new Gtk::FileChooserButton (Gtk::FILE_CHOOSER_ACTION_OPEN));
-			_fcb[p]->signal_file_set().connect (sigc::bind(sigc::mem_fun (*this, &GenericPluginUI::patch_set_file), p));
-			lv2p->PatchChanged.connect (*this, invalidator (*this), boost::bind (&GenericPluginUI::patch_changed, this, _1), gui_context());
-			// when user cancels file selection the FileChooserButton will display "None"
-			// TODO hack away around this..
-			if (lv2p->patch_val(p)) {
-				_fcb[p]->set_filename(lv2p->patch_val(p));
-			}
-			if (lv2p->patch_key(p)) {
-				_fcb[p]->set_title(lv2p->patch_key(p));
-				Gtk::Label* fcl = manage (new Label (lv2p->patch_key(p)));
-				button_table.attach (*fcl, 0, button_cols, button_row, button_row + 1, FILL|EXPAND, FILL);
-				++button_row;
-			} else {
-				_fcb[p]->set_title(_("LV2 Patch"));
-			}
-
-			button_table.attach (*_fcb[p], 0, button_cols, button_row, button_row + 1, FILL|EXPAND, FILL);
+	// Add property controls (currently file chooser button for paths only)
+	typedef std::vector<Plugin::ParameterDescriptor> Descs;
+	Descs descs;
+	plugin->get_supported_properties(descs);
+	for (Descs::const_iterator d = descs.begin(); d != descs.end(); ++d) {
+		if (d->datatype == Variant::PATH) {
+			// Create/add label
+			Gtk::Label* label = manage(new Label(d->label));
+			button_table.attach(*label,
+			                    0, button_cols, button_row, button_row + 1,
+			                    FILL|EXPAND, FILL);
 			++button_row;
+
+			// Create/add controller
+			Gtk::FileChooserButton* widget = manage(
+				new Gtk::FileChooserButton(Gtk::FILE_CHOOSER_ACTION_OPEN));
+			widget->set_title(d->label);
+			_property_controls.insert(std::make_pair(d->key, widget));
+			button_table.attach(*widget,
+			                    0, button_cols, button_row, button_row + 1,
+			                    FILL|EXPAND, FILL);
+			++button_row;
+
+			// Connect signals
+			widget->signal_file_set().connect(
+				sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::set_property), *d, widget));
+			plugin->PropertyChanged.connect(*this, invalidator(*this),
+			                                boost::bind(&GenericPluginUI::property_changed, this, _1, _2),
+			                                gui_context());
+		} else {
+			// TODO: widgets for other datatypes, use ControlUI?
+			std::cerr << "warning: unsupported property " << d->key
+			          << " type " << d->datatype << std::endl;
 		}
 	}
-#endif
+	plugin->announce_property_values();
 
 	// Iterate over the list of controls to find which adjacent controls
 	// are similar enough to be grouped together.
@@ -971,20 +971,20 @@ GenericPluginUI::output_update ()
 	}
 }
 
-#ifdef LV2_SUPPORT
-
 void
-GenericPluginUI::patch_set_file (uint32_t p)
+GenericPluginUI::set_property (const Plugin::ParameterDescriptor& desc,
+                               Gtk::FileChooserButton*            widget)
 {
-	boost::shared_ptr<ARDOUR::LV2Plugin> lv2p = boost::dynamic_pointer_cast<LV2Plugin> (plugin);
-	lv2p->patch_set(p, _fcb[p]->get_filename ().c_str());
+	plugin->set_property(desc.key, Variant(Variant::PATH, widget->get_filename()));
 }
 
 void
-GenericPluginUI::patch_changed (uint32_t p)
+GenericPluginUI::property_changed (uint32_t key, const Variant& value)
 {
-	boost::shared_ptr<ARDOUR::LV2Plugin> lv2p = boost::dynamic_pointer_cast<LV2Plugin> (plugin);
-	_fcb[p]->set_filename(lv2p->patch_val(p));
+	PropertyControls::iterator c = _property_controls.find(key);
+	if (c != _property_controls.end()) {
+		c->second->set_filename(value.get_path());
+	} else {
+		std::cerr << "warning: property change for property with no control" << std::endl;
+	}
 }
-
-#endif

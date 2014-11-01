@@ -47,6 +47,7 @@
 
 #include "ardour/types.h"
 #include "ardour/plugin.h"
+#include "ardour/variant.h"
 
 #include "automation_controller.h"
 #include "ardour_button.h"
@@ -279,11 +280,12 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	bool integer_printer (char* buf, Gtk::Adjustment &, ControlUI *);
 	bool midinote_printer(char* buf, Gtk::Adjustment &, ControlUI *);
 
-#ifdef LV2_SUPPORT
-	void patch_set_file (uint32_t patch_idx);
-	void patch_changed (uint32_t patch_idx);
-	Gtk::FileChooserButton **_fcb;
-#endif
+	void set_property (const ARDOUR::Plugin::ParameterDescriptor& desc,
+	                   Gtk::FileChooserButton*                    widget);
+	void property_changed (uint32_t key, const ARDOUR::Variant& value);
+
+	typedef std::map<uint32_t, Gtk::FileChooserButton*> PropertyControls;
+	PropertyControls _property_controls;
 };
 
 class PluginUIWindow : public ArdourWindow

@@ -78,6 +78,15 @@
 #include <suil/suil.h>
 #endif
 
+// Compatibility for lv2-1.0.0
+#ifndef LV2_ATOM_CONTENTS_CONST
+#define LV2_ATOM_CONTENTS_CONST(type, atom) \
+	((const void*)((const uint8_t*)(atom) + sizeof(type)))
+#endif
+#ifndef LV2_ATOM_BODY_CONST
+#define LV2_ATOM_BODY_CONST(atom) LV2_ATOM_CONTENTS_CONST(LV2_Atom, atom)
+#endif
+
 /** The number of MIDI buffers that will fit in a UI/worker comm buffer.
     This needs to be roughly the number of cycles the UI will get around to
     actually processing the traffic.  Lower values are flakier but save memory.
@@ -97,6 +106,7 @@ LV2Plugin::URIDs LV2Plugin::urids = {
 	_uri_map.uri_to_id(LV2_ATOM__eventTransfer),
 	_uri_map.uri_to_id(LV2_ATOM__URID),
 	_uri_map.uri_to_id(LV2_ATOM__Blank),
+	_uri_map.uri_to_id(LV2_ATOM__Object),
 	_uri_map.uri_to_id(LV2_LOG__Error),
 	_uri_map.uri_to_id(LV2_LOG__Note),
 	_uri_map.uri_to_id(LV2_LOG__Warning),
@@ -109,6 +119,7 @@ LV2Plugin::URIDs LV2Plugin::urids = {
 	_uri_map.uri_to_id(LV2_TIME__beatsPerMinute),
 	_uri_map.uri_to_id(LV2_TIME__frame),
 	_uri_map.uri_to_id(LV2_TIME__speed),
+	_uri_map.uri_to_id(LV2_PATCH__Get),
 	_uri_map.uri_to_id(LV2_PATCH__Set),
 	_uri_map.uri_to_id(LV2_PATCH__property),
 	_uri_map.uri_to_id(LV2_PATCH__value)
@@ -145,6 +156,8 @@ public:
 	LilvNode* lv2_toggled;
 	LilvNode* midi_MidiEvent;
 	LilvNode* rdfs_comment;
+	LilvNode* rdfs_label;
+	LilvNode* rdfs_range;
 	LilvNode* rsz_minimumSize;
 	LilvNode* time_Position;
 	LilvNode* ui_GtkUI;
@@ -250,6 +263,7 @@ struct LV2Plugin::Impl {
 	const LV2_Worker_Interface* work_iface;
 	LilvState*                  state;
 	LV2_Atom_Forge              forge;
+	LV2_Atom_Forge              ui_forge;
 };
 
 LV2Plugin::LV2Plugin (AudioEngine& engine,
@@ -262,11 +276,8 @@ LV2Plugin::LV2Plugin (AudioEngine& engine,
 	, _features(NULL)
 	, _worker(NULL)
 	, _insert_id("0")
-	, _patch_count(0)
-	, _patch_value_uri(NULL)
-	, _patch_value_key(NULL)
-	, _patch_value_cur(NULL)
-	, _patch_value_set(NULL)
+	, _patch_port_in_index((uint32_t)-1)
+	, _patch_port_out_index((uint32_t)-1)
 {
 	init(c_plugin, rate);
 }
@@ -278,11 +289,8 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 	, _features(NULL)
 	, _worker(NULL)
 	, _insert_id(other._insert_id)
-	, _patch_count(0)
-	, _patch_value_uri(NULL)
-	, _patch_value_key(NULL)
-	, _patch_value_cur(NULL)
-	, _patch_value_set(NULL)
+	, _patch_port_in_index((uint32_t)-1)
+	, _patch_port_out_index((uint32_t)-1)
 {
 	init(other._impl->plugin, other._sample_rate);
 
@@ -353,6 +361,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 #endif
 
 	lv2_atom_forge_init(&_impl->forge, _uri_map.urid_map());
+	lv2_atom_forge_init(&_impl->ui_forge, _uri_map.urid_map());
 
 #ifdef HAVE_LV2_1_2_0
 	LV2_URID atom_Int = _uri_map.uri_to_id(LV2_ATOM__Int);
@@ -476,6 +485,11 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 				}
 				if (lilv_nodes_contains(atom_supports, _world.patch_Message)) {
 					flags |= PORT_PATCHMSG;
+					if (flags & PORT_INPUT) {
+						_patch_port_in_index = i;
+					} else {
+						_patch_port_out_index = i;
+					}
 				}
 			}
 			LilvNodes* min_size_v = lilv_port_get_value(_impl->plugin, port, _world.rsz_minimumSize);
@@ -553,32 +567,6 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 
 	delete[] params;
 
-	/* scan supported patch:writable for this plugin.
-	 * Note: the first Atom-port (in every direction) that supports patch:Message will be used
-	 */
-	LilvNode* rdfs_label  = lilv_new_uri(_world.world, LILV_NS_RDFS "label");
-	LilvNode* rdfs_range  = lilv_new_uri(_world.world, LILV_NS_RDFS "range");
-	LilvNodes* properties = lilv_world_find_nodes (_world.world, lilv_plugin_get_uri(plugin), _world.patch_writable, NULL);
-	LILV_FOREACH(nodes, p, properties) {
-		const LilvNode* property = lilv_nodes_get(properties, p);
-		LilvNode*       label    = lilv_nodes_get_first (lilv_world_find_nodes (_world.world, property, rdfs_label, NULL));
-		LilvNode*       range    = lilv_nodes_get_first (lilv_world_find_nodes (_world.world, property, rdfs_range, NULL));
-		if (!range || _uri_map.uri_to_id(lilv_node_as_uri(range)) != LV2Plugin::urids.atom_Path) {
-			continue;
-		}
-
-		_patch_value_uri = (char**) realloc (_patch_value_uri, (_patch_count + 1) * sizeof(char**));
-		_patch_value_key = (char**) realloc (_patch_value_key, (_patch_count + 1) * sizeof(char**));
-		_patch_value_uri[_patch_count] = strdup(lilv_node_as_uri(property));
-		_patch_value_key[_patch_count] = strdup(lilv_node_as_string(label ? label : property));
-		++_patch_count;
-	}
-	lilv_node_free(rdfs_label);
-	lilv_node_free(rdfs_range);
-	lilv_nodes_free(properties);
-	_patch_value_cur = (char(*)[PATH_MAX]) calloc(_patch_count, sizeof(char[PATH_MAX]));
-	_patch_value_set = (char(*)[PATH_MAX]) calloc(_patch_count, sizeof(char[PATH_MAX]));
-
 	LilvUIs* uis = lilv_plugin_get_uis(plugin);
 	if (lilv_uis_size(uis) > 0) {
 #ifdef HAVE_SUIL
@@ -643,13 +631,6 @@ LV2Plugin::~LV2Plugin ()
 	free(_features);
 	free(_make_path_feature.data);
 	free(_work_schedule_feature.data);
-
-	for (uint32_t pidx = 0; pidx < _patch_count; ++pidx) {
-		free(_patch_value_uri[pidx]);
-		free(_patch_value_key[pidx]);
-	}
-	free(_patch_value_cur);
-	free(_patch_value_set);
 
 	delete _to_ui;
 	delete _from_ui;
@@ -1239,6 +1220,166 @@ LV2Plugin::write_to_ui(uint32_t       index,
 	return true;
 }
 
+static void
+forge_variant(LV2_Atom_Forge* forge, const Variant& value)
+{
+	switch (value.type()) {
+	case Variant::BOOL:
+		lv2_atom_forge_bool(forge, value.get_bool());
+		break;
+	case Variant::DOUBLE:
+		lv2_atom_forge_double(forge, value.get_double());
+		break;
+	case Variant::FLOAT:
+		lv2_atom_forge_float(forge, value.get_float());
+		break;
+	case Variant::INT:
+		lv2_atom_forge_int(forge, value.get_int());
+		break;
+	case Variant::LONG:
+		lv2_atom_forge_long(forge, value.get_long());
+		break;
+	case Variant::PATH:
+		lv2_atom_forge_path(
+			forge, value.get_path().c_str(), value.get_path().size());
+		break;
+	case Variant::STRING:
+		lv2_atom_forge_string(
+			forge, value.get_string().c_str(), value.get_string().size());
+		break;
+	case Variant::URI:
+		lv2_atom_forge_uri(
+			forge, value.get_uri().c_str(), value.get_uri().size());
+		break;
+	}
+}
+
+/** Get a variant type from a URI, return false iff no match found. */
+static bool
+uri_to_variant_type(const std::string& uri, Variant::Type& type)
+{
+	if (uri == LV2_ATOM__Bool) {
+		type = Variant::BOOL;
+	} else if (uri == LV2_ATOM__Double) {
+		type = Variant::DOUBLE;
+	} else if (uri == LV2_ATOM__Float) {
+		type = Variant::FLOAT;
+	} else if (uri == LV2_ATOM__Int) {
+		type = Variant::INT;
+	} else if (uri == LV2_ATOM__Long) {
+		type = Variant::LONG;
+	} else if (uri == LV2_ATOM__Path) {
+		type = Variant::PATH;
+	} else if (uri == LV2_ATOM__String) {
+		type = Variant::STRING;
+	} else if (uri == LV2_ATOM__URI) {
+		type = Variant::URI;
+	} else {
+		return false;
+	}
+	return true;
+}
+
+void
+LV2Plugin::set_property(uint32_t key, const Variant& value)
+{
+	if (_patch_port_in_index == (uint32_t)-1) {
+		error << "LV2: set_property called with unset patch_port_in_index" << endmsg;
+		return;
+	}
+
+	// Set up forge to write to temporary buffer on the stack
+	LV2_Atom_Forge*      forge = &_impl->ui_forge;
+	LV2_Atom_Forge_Frame frame;
+	uint8_t              buf[PATH_MAX];  // Ought to be enough for anyone...
+
+	lv2_atom_forge_set_buffer(forge, buf, sizeof(buf));
+
+	// Serialize patch:Set message to set property
+#ifdef HAVE_LV2_1_10_0
+	lv2_atom_forge_object(forge, &frame, 1, LV2Plugin::urids.patch_Set);
+	lv2_atom_forge_key(forge, LV2Plugin::urids.patch_property);
+	lv2_atom_forge_urid(forge, key);
+	lv2_atom_forge_key(forge, LV2Plugin::urids.patch_value);
+#else
+	lv2_atom_forge_blank(forge, &frame, 1, LV2Plugin::urids.patch_Set);
+	lv2_atom_forge_property_head(forge, LV2Plugin::urids.patch_property, 0);
+	lv2_atom_forge_urid(forge, key);
+	lv2_atom_forge_property_head(forge, LV2Plugin::urids.patch_value, 0);
+#endif
+
+	forge_variant(forge, value);
+
+	// Write message to UI=>Plugin ring
+	const LV2_Atom* const atom = (const LV2_Atom*)buf;
+	write_from_ui(_patch_port_in_index,
+	              LV2Plugin::urids.atom_eventTransfer,
+	              lv2_atom_total_size(atom),
+	              (const uint8_t*)atom);
+}
+
+void
+LV2Plugin::get_supported_properties(std::vector<ParameterDescriptor>& descs)
+{
+	LilvWorld*       lworld     = _world.world;
+	const LilvNode*  subject    = lilv_plugin_get_uri(_impl->plugin);
+	LilvNodes*       properties = lilv_world_find_nodes(
+		lworld, subject, _world.patch_writable, NULL);
+	LILV_FOREACH(nodes, p, properties) {
+		// Get label and range
+		const LilvNode* prop  = lilv_nodes_get(properties, p);
+		LilvNode*       label = lilv_world_get(lworld, prop, _world.rdfs_label, NULL);
+		LilvNode*       range = lilv_world_get(lworld, prop, _world.rdfs_range, NULL);
+
+		// Convert range to variant type (TODO: support for multiple range types)
+		Variant::Type datatype;
+		if (!uri_to_variant_type(lilv_node_as_uri(range), datatype)) {
+			error << string_compose(_("LV2: unknown variant datatype \"%1\""),
+			                        lilv_node_as_uri(range));
+			continue;
+		}
+
+		// Add description to result
+		ParameterDescriptor desc;
+		desc.key          = _uri_map.uri_to_id(lilv_node_as_uri(prop));
+		desc.label        = lilv_node_as_string(label);
+		desc.datatype     = datatype;
+		desc.toggled      = datatype == Variant::BOOL;
+		desc.integer_step = datatype == Variant::INT || datatype == Variant::LONG;
+		descs.push_back(desc);
+
+		lilv_node_free(label);
+		lilv_node_free(range);
+	}
+	lilv_nodes_free(properties);
+}
+
+void
+LV2Plugin::announce_property_values()
+{
+	if (_patch_port_in_index == (uint32_t)-1) {
+		error << "LV2: set_property called with unset patch_port_in_index" << endmsg;
+		return;
+	}
+
+	// Set up forge to write to temporary buffer on the stack
+	LV2_Atom_Forge*      forge = &_impl->ui_forge;
+	LV2_Atom_Forge_Frame frame;
+	uint8_t              buf[PATH_MAX];  // Ought to be enough for anyone...
+
+	lv2_atom_forge_set_buffer(forge, buf, sizeof(buf));
+
+	// Serialize patch:Get message with no subject (implicitly plugin instance)
+	lv2_atom_forge_object(forge, &frame, 1, LV2Plugin::urids.patch_Get);
+
+	// Write message to UI=>Plugin ring
+	const LV2_Atom* const atom = (const LV2_Atom*)buf;
+	write_from_ui(_patch_port_in_index,
+	              LV2Plugin::urids.atom_eventTransfer,
+	              lv2_atom_total_size(atom),
+	              (const uint8_t*)atom);
+}
+
 void
 LV2Plugin::enable_ui_emission()
 {
@@ -1587,6 +1728,24 @@ write_position(LV2_Atom_Forge*     forge,
 	uint8_t pos_buf[256];
 	lv2_atom_forge_set_buffer(forge, pos_buf, sizeof(pos_buf));
 	LV2_Atom_Forge_Frame frame;
+#ifdef HAVE_LV2_1_10_0
+	lv2_atom_forge_object(forge, &frame, 1, LV2Plugin::urids.time_Position);
+	lv2_atom_forge_key(forge, LV2Plugin::urids.time_frame);
+	lv2_atom_forge_long(forge, position);
+	lv2_atom_forge_key(forge, LV2Plugin::urids.time_speed);
+	lv2_atom_forge_float(forge, speed);
+	lv2_atom_forge_key(forge, LV2Plugin::urids.time_barBeat);
+	lv2_atom_forge_float(forge, bbt.beats - 1 +
+	                     (bbt.ticks / Timecode::BBT_Time::ticks_per_beat));
+	lv2_atom_forge_key(forge, LV2Plugin::urids.time_bar);
+	lv2_atom_forge_long(forge, bbt.bars - 1);
+	lv2_atom_forge_key(forge, LV2Plugin::urids.time_beatUnit);
+	lv2_atom_forge_int(forge, t.meter().note_divisor());
+	lv2_atom_forge_key(forge, LV2Plugin::urids.time_beatsPerBar);
+	lv2_atom_forge_float(forge, t.meter().divisions_per_bar());
+	lv2_atom_forge_key(forge, LV2Plugin::urids.time_beatsPerMinute);
+	lv2_atom_forge_float(forge, t.tempo().beats_per_minute());
+#else
 	lv2_atom_forge_blank(forge, &frame, 1, LV2Plugin::urids.time_Position);
 	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_frame, 0);
 	lv2_atom_forge_long(forge, position);
@@ -1603,53 +1762,12 @@ write_position(LV2_Atom_Forge*     forge,
 	lv2_atom_forge_float(forge, t.meter().divisions_per_bar());
 	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_beatsPerMinute, 0);
 	lv2_atom_forge_float(forge, t.tempo().beats_per_minute());
+#endif
 
 	LV2_Evbuf_Iterator    end  = lv2_evbuf_end(buf);
 	const LV2_Atom* const atom = (const LV2_Atom*)pos_buf;
 	return lv2_evbuf_write(&end, offset, 0, atom->type, atom->size,
 	                       (const uint8_t*)(atom + 1));
-}
-
-static bool
-write_patch_change(
-		LV2_Atom_Forge* forge,
-		LV2_Evbuf*      buf,
-		const char*     uri,
-		const char*     filename
-		)
-{
-	LV2_Atom_Forge_Frame frame;
-	uint8_t patch_buf[PATH_MAX];
-	lv2_atom_forge_set_buffer(forge, patch_buf, sizeof(patch_buf));
-
-#if 0 // new LV2
-	lv2_atom_forge_object(forge, &frame, 0, LV2Plugin::urids.patch_Set);
-	lv2_atom_forge_key(forge, LV2Plugin::urids.patch_property);
-	lv2_atom_forge_urid(forge, uri_map.uri_to_id(uri));
-	lv2_atom_forge_key(forge, LV2Plugin::urids.patch_value);
-	lv2_atom_forge_path(forge, filename, strlen(filename));
-#else
-	lv2_atom_forge_blank(forge, &frame, 1, LV2Plugin::urids.patch_Set);
-	lv2_atom_forge_property_head(forge, LV2Plugin::urids.patch_property, 0);
-	lv2_atom_forge_urid(forge, LV2Plugin::_uri_map.uri_to_id(uri));
-	lv2_atom_forge_property_head(forge, LV2Plugin::urids.patch_value, 0);
-	lv2_atom_forge_path(forge, filename, strlen(filename));
-#endif
-
-	LV2_Evbuf_Iterator end  = lv2_evbuf_end(buf);
-	const LV2_Atom* const atom = (const LV2_Atom*)patch_buf;
-	return lv2_evbuf_write(&end, 0, 0, atom->type, atom->size,
-	                       (const uint8_t*)(atom + 1));
-}
-
-bool
-LV2Plugin::patch_set (const uint32_t p, const char * val) {
-	if (p >= _patch_count) return false;
-	_patch_set_lock.lock();
-	strncpy(_patch_value_set[p], val, PATH_MAX);
-	_patch_value_set[p][PATH_MAX - 1] = 0;
-	_patch_set_lock.unlock();
-	return true;
 }
 
 int
@@ -1784,23 +1902,6 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					(flags & PORT_INPUT), 0, (flags & PORT_EVENT));
 			}
 
-			/* queue patch messages */
-			if (flags & PORT_PATCHMSG) {
-				if (_patch_set_lock.trylock()) {
-					for (uint32_t pidx = 0; pidx < _patch_count; ++ pidx) {
-						if (strlen(_patch_value_set[pidx]) > 0
-								&& 0 != strcmp(_patch_value_cur[pidx], _patch_value_set[pidx])
-							 )
-						{
-							write_patch_change(&_impl->forge, _ev_buffers[port_index],
-									_patch_value_uri[pidx], _patch_value_set[pidx]);
-							strncpy(_patch_value_cur[pidx], _patch_value_set[pidx], PATH_MAX);
-						}
-					}
-					_patch_set_lock.unlock();
-				}
-			}
-
 			buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
 		} else {
 			continue;  // Control port, leave buffer alone
@@ -1875,7 +1976,8 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 
 		// Write messages to UI
-		if ((_to_ui || _patch_count > 0) && (flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
+		if ((_to_ui || _patch_port_out_index != (uint32_t)-1) &&
+		    (flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
 			LV2_Evbuf* buf = _ev_buffers[port_index];
 			for (LV2_Evbuf_Iterator i = lv2_evbuf_begin(buf);
 			     lv2_evbuf_is_valid(i);
@@ -1884,42 +1986,32 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				uint8_t* data;
 				lv2_evbuf_get(i, &frames, &subframes, &type, &size, &data);
 
-				// intercept patch change messages
-				/* TODO this should eventually be done in the UI-thread
-				 * using a ringbuffer and no locks.
-				 * The current UI ringbuffer is unsuitable. It only exists
-				 * if a UI enabled and misses initial patch-set or changes.
-				 */
-				if (_patch_count > 0 && (flags & PORT_OUTPUT) && (flags & PORT_PATCHMSG)) {
-					// TODO reduce if() nesting below:
+				// Intercept patch change messages to emit PropertyChanged signal
+				if ((flags & PORT_PATCHMSG)) {
 					LV2_Atom* atom = (LV2_Atom*)(data - sizeof(LV2_Atom));
-					if (atom->type == LV2Plugin::urids.atom_Blank) {
+					if (atom->type == LV2Plugin::urids.atom_Blank ||
+					    atom->type == LV2Plugin::urids.atom_Object) {
 						LV2_Atom_Object* obj = (LV2_Atom_Object*)atom;
 						if (obj->body.otype == LV2Plugin::urids.patch_Set) {
 							const LV2_Atom* property = NULL;
-							lv2_atom_object_get (obj, LV2Plugin::urids.patch_property, &property, 0);
-							if (property->type == LV2Plugin::urids.atom_URID) {
-								for (uint32_t pidx = 0; pidx < _patch_count; ++ pidx) {
-								 if (((const LV2_Atom_URID*)property)->body != _uri_map.uri_to_id(_patch_value_uri[pidx])) {
-									 continue;
-								 }
-								 /* Get value. */
-								 const LV2_Atom* file_path = NULL;
-								 lv2_atom_object_get(obj, LV2Plugin::urids.patch_value, &file_path, 0);
-								 if (!file_path || file_path->type != LV2Plugin::urids.atom_Path) {
-									 continue;
-								 }
-								 // LV2_ATOM_BODY() casts away qualifiers, so do it explicitly:
-								 const char* uri = (const char*)((uint8_t const*)(file_path) + sizeof(LV2_Atom));
-								 _patch_set_lock.lock();
-								 strncpy(_patch_value_cur[pidx], uri, PATH_MAX);
-								 strncpy(_patch_value_set[pidx], uri, PATH_MAX);
-								 _patch_value_cur[pidx][PATH_MAX - 1] = 0;
-								 _patch_value_set[pidx][PATH_MAX - 1] = 0;
-								 _patch_set_lock.unlock();
-								 PatchChanged(pidx); // emit signal
-								}
+							const LV2_Atom* value    = NULL;
+							lv2_atom_object_get(obj,
+							                    LV2Plugin::urids.patch_property, &property,
+							                    LV2Plugin::urids.patch_value,    &value,
+							                    0);
+
+							if (!property || !value ||
+							    property->type != LV2Plugin::urids.atom_URID ||
+							    value->type != LV2Plugin::urids.atom_Path) {
+								std::cerr << "warning: patch:Set for unknown property" << std::endl;
+								continue;
 							}
+
+							const uint32_t prop_id = ((const LV2_Atom_URID*)property)->body;
+							const char*    path    = (const char*)LV2_ATOM_BODY_CONST(value);
+
+							// Emit PropertyChanged signal for UI
+							PropertyChanged(prop_id, Variant(Variant::PATH, path));
 						}
 					}
 				}
@@ -2133,6 +2225,8 @@ LV2World::LV2World()
 	lv2_freewheeling   = lilv_new_uri(world, LV2_CORE__freeWheeling);
 	midi_MidiEvent     = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
 	rdfs_comment       = lilv_new_uri(world, LILV_NS_RDFS "comment");
+	rdfs_label         = lilv_new_uri(world, LILV_NS_RDFS "label");
+	rdfs_range         = lilv_new_uri(world, LILV_NS_RDFS "range");
 	rsz_minimumSize    = lilv_new_uri(world, LV2_RESIZE_PORT__minimumSize);
 	time_Position      = lilv_new_uri(world, LV2_TIME__Position);
 	ui_GtkUI           = lilv_new_uri(world, LV2_UI__GtkUI);
@@ -2156,6 +2250,8 @@ LV2World::~LV2World()
 	lilv_node_free(time_Position);
 	lilv_node_free(rsz_minimumSize);
 	lilv_node_free(rdfs_comment);
+	lilv_node_free(rdfs_label);
+	lilv_node_free(rdfs_range);
 	lilv_node_free(midi_MidiEvent);
 	lilv_node_free(lv2_enumeration);
 	lilv_node_free(lv2_freewheeling);

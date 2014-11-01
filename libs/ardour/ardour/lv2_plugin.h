@@ -146,15 +146,12 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	Worker* worker() { return _worker; }
 
-	uint32_t     patch_count() const { return _patch_count; }
-	const char * patch_uri(const uint32_t p) const { if (p < _patch_count) return _patch_value_uri[p]; else return NULL; }
-	const char * patch_key(const uint32_t p) const { if (p < _patch_count) return _patch_value_key[p]; else return NULL; }
-	const char * patch_val(const uint32_t p) const { if (p < _patch_count) return _patch_value_cur[p]; else return NULL; }
-	bool         patch_set(const uint32_t p, const char * val);
-	PBD::Signal1<void,const uint32_t> PatchChanged;
-
 	int work(uint32_t size, const void* data);
 	int work_response(uint32_t size, const void* data);
+
+	void set_property(uint32_t key, const Variant& value);
+	void get_supported_properties(std::vector<ParameterDescriptor>& descs);
+	void announce_property_values();
 
 	static URIMap _uri_map;
 
@@ -165,6 +162,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		uint32_t atom_eventTransfer;
 		uint32_t atom_URID;
 		uint32_t atom_Blank;
+		uint32_t atom_Object;
 		uint32_t log_Error;
 		uint32_t log_Note;
 		uint32_t log_Warning;
@@ -177,6 +175,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		uint32_t time_beatsPerMinute;
 		uint32_t time_frame;
 		uint32_t time_speed;
+		uint32_t patch_Get;
 		uint32_t patch_Set;
 		uint32_t patch_property;
 		uint32_t patch_value;
@@ -202,13 +201,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	framepos_t    _next_cycle_start;  ///< Expected start frame of next run cycle
 	double        _next_cycle_speed;  ///< Expected start frame of next run cycle
 	PBD::ID       _insert_id;
-
-	uint32_t      _patch_count;
-	char **       _patch_value_uri;
-	char **       _patch_value_key;
-	char          (*_patch_value_cur)[PATH_MAX]; ///< current value
-	char          (*_patch_value_set)[PATH_MAX]; ///< new value to set
-	Glib::Threads::Mutex _patch_set_lock;
+	uint32_t      _patch_port_in_index;
+	uint32_t      _patch_port_out_index;
 
 	friend const void* lv2plugin_get_port_value(const char* port_symbol,
 	                                            void*       user_data,
