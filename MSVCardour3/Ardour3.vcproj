@@ -608,6 +608,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\floating_text_entry.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\gain_meter.cc"
 				>
 			</File>
@@ -1507,6 +1511,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\fix_carbon.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\floating_text_entry.h"
 				>
 			</File>
 			<File
