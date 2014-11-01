@@ -69,18 +69,19 @@ AutomationController::create(
 		const Evoral::Parameter& param,
 		boost::shared_ptr<AutomationControl> ac)
 {
+	double const lo = ac->internal_to_interface(param.min());
+	double const up = ac->internal_to_interface(param.max());
 	Gtk::Adjustment* adjustment = manage (
-		new Gtk::Adjustment (
-			param.normal(),
-			param.min(),
-			param.max(),
-			(param.max() - param.min()) / 100.0,
-			(param.max() - param.min()) / 10.0
-			)
-		);
+			new Gtk::Adjustment (
+				ac->internal_to_interface(param.normal()),
+				lo, up,
+				// TODO we should use explicit step-sizes if provided by Plugin::ParameterDescriptor
+				(up - lo) / 100, (up - lo) / 10
+				)
+			);
 
-        assert (ac);
-        assert(ac->parameter() == param);
+	assert (ac);
+	assert(ac->parameter() == param);
 	return boost::shared_ptr<AutomationController>(new AutomationController(printer, ac, adjustment));
 }
 
@@ -94,7 +95,7 @@ AutomationController::get_label (double& xpos)
 void
 AutomationController::display_effective_value()
 {
-	double const interface_value = _controllable->get_value();
+	double const interface_value = _controllable->internal_to_interface(_controllable->get_value());
 
 	if (_adjustment->get_value () != interface_value) {
 		_ignore_change = true;
@@ -107,7 +108,7 @@ void
 AutomationController::value_adjusted ()
 {
 	if (!_ignore_change) {
-		_controllable->set_value (_adjustment->get_value());
+		_controllable->set_value (_controllable->interface_to_internal(_adjustment->get_value()));
 	}
 }
 
