@@ -63,7 +63,7 @@ Pango::FontDescription TimeAxisViewItem::NAME_FONT;
 const double TimeAxisViewItem::NAME_X_OFFSET = 15.0;
 const double TimeAxisViewItem::GRAB_HANDLE_TOP = 0.0;
 const double TimeAxisViewItem::GRAB_HANDLE_WIDTH = 10.0;
-const double TimeAxisViewItem::RIGHT_EDGE_SHIFT = 1.0;
+const double TimeAxisViewItem::RIGHT_EDGE_SHIFT = 0.0; // TODO remove, fixed in 3.5-3406-g90872c2, but may need further work.
 
 int    TimeAxisViewItem::NAME_HEIGHT;
 double TimeAxisViewItem::NAME_Y_OFFSET;
@@ -547,6 +547,7 @@ TimeAxisViewItem::set_selected(bool yn)
 		if (frame) {
 			if (!Config->get_show_name_highlight() && yn) {
 				frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM|ArdourCanvas::Rectangle::TOP));
+				frame->set_y0 (1.0);
 				frame->set_y1 (_height - 1.0);
 			} else {
 				if (Config->get_show_name_highlight()) {
@@ -554,6 +555,7 @@ TimeAxisViewItem::set_selected(bool yn)
 				} else {
 					frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM));
 				}
+				frame->set_y0 (0.0);
 				frame->set_y1 (_height);
 			}
 		}
@@ -609,6 +611,7 @@ TimeAxisViewItem::set_height (double height)
 	if (frame) {
 		if (!Config->get_show_name_highlight() && _selected) {
 			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM|ArdourCanvas::Rectangle::TOP));
+			frame->set_y0 (1.0);
 			frame->set_y1 (_height - 1.0);
 		} else {
 			if (Config->get_show_name_highlight()) {
@@ -616,6 +619,7 @@ TimeAxisViewItem::set_height (double height)
 			} else {
 				frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM));
 			}
+			frame->set_y0 (0.0);
 			frame->set_y1 (_height);
 		}
 

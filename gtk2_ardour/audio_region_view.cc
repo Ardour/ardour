@@ -643,8 +643,8 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 	/* Put the fade out handle so that its right side is at the end-of-fade line;
 	 */
-	fade_out_handle->set_x0 (1 + handle_right - handle_size);
-	fade_out_handle->set_x1 (1 + handle_right);
+	fade_out_handle->set_x0 (handle_right - handle_size);
+	fade_out_handle->set_x1 (handle_right);
 	if (fade_out_trim_handle) {
 		fade_out_trim_handle->set_x0 (1 + trim_handle_right - handle_size);
 		fade_out_trim_handle->set_x1 (1 + trim_handle_right);
