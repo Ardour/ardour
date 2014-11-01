@@ -469,7 +469,7 @@ PixFader::on_scroll_event (GdkEventScroll* ev)
 
 	if (ev->state & Keyboard::GainFineScaleModifier) {
 		if (ev->state & Keyboard::GainExtraFineScaleModifier) {
-			scale = 0.01;
+			scale = 0.005;
 		} else {
 			scale = 0.05;
 		}
