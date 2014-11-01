@@ -1358,7 +1358,6 @@ void
 LV2Plugin::announce_property_values()
 {
 	if (_patch_port_in_index == (uint32_t)-1) {
-		error << "LV2: set_property called with unset patch_port_in_index" << endmsg;
 		return;
 	}
 
