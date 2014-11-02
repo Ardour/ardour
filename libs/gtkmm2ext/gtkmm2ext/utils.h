@@ -49,6 +49,8 @@ namespace Gtk {
 namespace Gtkmm2ext {
 	LIBGTKMM2EXT_API void init (const char*);
 
+        LIBGTKMM2EXT_API bool event_inside_widget_window (Gtk::Widget& widget, GdkEvent* ev);
+
 	LIBGTKMM2EXT_API std::string fit_to_pixels (const std::string&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
 	LIBGTKMM2EXT_API std::pair<std::string, double> fit_to_pixels (cairo_t *, std::string, double);
 	LIBGTKMM2EXT_API int pixel_width (const std::string& str, Pango::FontDescription& font);
