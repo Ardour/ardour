@@ -33,12 +33,19 @@ class FloatingTextEntry : public ArdourWindow
 
   private:
         Gtk::Entry entry;
+        bool entry_changed;
+
+        /* handlers for Entry events */
 
         bool key_press (GdkEventKey*);
+        void activated ();
+        bool button_press (GdkEventButton*);
+        void changed ();
+
+        /* handlers for window events */
+
         void on_realize ();
         void on_hide ();
-        void activated ();
-        
 };
 
 #endif // __ardour_window_h__
