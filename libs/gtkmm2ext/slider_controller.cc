@@ -35,6 +35,8 @@ SliderController::SliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD:
 	, _ctrl_adj (adj)
 	, _spin_adj (0, 0, 1.0, .1, .01)
 	, _spin (_spin_adj, 0, 2)
+	, _ctrl_ignore (false)
+	, _spin_ignore (false)
 {
 	if (mc) {
 		_spin_adj.set_lower (mc->lower ());
