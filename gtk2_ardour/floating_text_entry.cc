@@ -17,23 +17,35 @@
 
 */
 
+#include "pbd/stacktrace.h"
+
 #include "floating_text_entry.h"
 #include "gtkmm2ext/doi.h"
+#include "gtkmm2ext/utils.h"
 
 #include "i18n.h"
 
 FloatingTextEntry::FloatingTextEntry ()
 	: ArdourWindow ("")
+        , entry_changed (false)
 {
         set_name (X_("FloatingTextEntry"));
 	set_position (Gtk::WIN_POS_MOUSE);
         set_border_width (0);
         
         entry.show ();
+        entry.signal_changed().connect (sigc::mem_fun (*this, &FloatingTextEntry::changed));
         entry.signal_activate().connect (sigc::mem_fun (*this, &FloatingTextEntry::activated));
         entry.signal_key_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_press));
+        entry.signal_button_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::button_press));
 
         add (entry);
+}
+
+void
+FloatingTextEntry::changed ()
+{
+        entry_changed = true;
 }
 
 void
@@ -41,6 +53,25 @@ FloatingTextEntry::on_realize ()
 {
         ArdourWindow::on_realize ();
         get_window()->set_decorations (Gdk::WMDecoration (0));
+        entry.add_modal_grab ();
+}
+
+bool
+FloatingTextEntry::button_press (GdkEventButton* ev)
+{
+        if (Gtkmm2ext::event_inside_widget_window (*this, (GdkEvent*) ev)) {
+                return true;
+        }
+
+        /* Clicked outside widget window - edit is done */
+
+        if (entry_changed) {
+                use_text (entry.get_text ());
+        }
+        
+        delete_when_idle ( this);
+                
+        return false;
 }
 
 void
@@ -67,6 +98,8 @@ FloatingTextEntry::key_press (GdkEventKey* ev)
 void
 FloatingTextEntry::on_hide ()
 {
+        entry.remove_modal_grab ();
+
         /* No hide button is shown (no decoration on the window), 
            so being hidden is equivalent to the Escape key or any other 
            method of cancelling the edit.
