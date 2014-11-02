@@ -61,7 +61,7 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 	} else if (desc.integer_step) {
 		snprintf(buf, sizeof(buf), "%d", (int)v);
 	} else {
-		snprintf(buf, sizeof(buf), "%.2f", v);
+		snprintf(buf, sizeof(buf), "%.3f", v);
 	}
 	if (desc.unit == ARDOUR::ParameterDescriptor::DB) {
 		// TODO: Move proper dB printing from AutomationLine here
