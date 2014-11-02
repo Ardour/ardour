@@ -477,7 +477,6 @@ Marker::setup_line ()
 {
         if (_start_line == 0) {
                 _start_line = new ArdourCanvas::Line (editor.get_hscroll_group());
-                _start_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
                 _start_line->set_y1 (ArdourCanvas::COORD_MAX);
         }
 
