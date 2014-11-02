@@ -249,23 +249,26 @@ GenericPluginUI::build ()
 
 			/* Don't show latency control ports */
 
-			if (plugin->describe_parameter (Evoral::Parameter(PluginAutomation, 0, i)) == X_("latency")) {
+			const Evoral::Parameter param(PluginAutomation, 0, i);
+			if (plugin->describe_parameter (param) == X_("latency")) {
 				continue;
 			}
 
-			if (plugin->describe_parameter (Evoral::Parameter(PluginAutomation, 0, i)) == X_("hidden")) {
+			if (plugin->describe_parameter (param) == X_("hidden")) {
 				continue;
 			}
+
+			const float value = plugin->get_parameter(i);
 
 			ControlUI* cui;
 
 			boost::shared_ptr<ARDOUR::AutomationControl> c
 				= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
-					insert->control(Evoral::Parameter(PluginAutomation, 0, i)));
+					insert->control(param));
 
 			ParameterDescriptor desc;
 			plugin->get_parameter_descriptor(i, desc);
-			if ((cui = build_control_ui (desc, c, plugin->parameter_is_input(i))) == 0) {
+			if ((cui = build_control_ui (param, desc, c, value, plugin->parameter_is_input(i))) == 0) {
 				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
 				continue;
 			}
@@ -283,17 +286,18 @@ GenericPluginUI::build ()
 	const Plugin::PropertyDescriptors& descs = plugin->get_supported_properties();
 	for (Plugin::PropertyDescriptors::const_iterator d = descs.begin(); d != descs.end(); ++d) {
 		const ParameterDescriptor& desc = d->second;
+		const Evoral::Parameter    param(PluginPropertyAutomation, 0, desc.key);
 
 		boost::shared_ptr<ARDOUR::AutomationControl> c
 			= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
-				insert->control(Evoral::Parameter(PluginPropertyAutomation, 0, desc.key)));
+				insert->control(param));
 
 		if (!c) {
 			error << string_compose(_("Plugin Editor: no control for property %1"), desc.key) << endmsg;
 			continue;
 		}
 
-		ControlUI* cui = build_control_ui(desc, c, true);
+		ControlUI* cui = build_control_ui(param, desc, c, c->get_value(), true);
 		if (!cui) {
 			error << string_compose(_("Plugin Editor: could not build control element for property %1"),
 			                        desc.key) << endmsg;
@@ -450,8 +454,9 @@ GenericPluginUI::build ()
 	button_table.show_all ();
 }
 
-GenericPluginUI::ControlUI::ControlUI ()
-	: automate_button (X_("")) // force creation of a label
+GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
+	: param(p)
+	, automate_button (X_("")) // force creation of a label
 	, file_button(NULL)
 {
 	automate_button.set_name ("PluginAutomateButton");
@@ -531,16 +536,19 @@ GenericPluginUI::print_parameter (char *buf, uint32_t len, uint32_t param)
 	plugin->print_parameter (param, buf, len);
 }
 
+/** Build a ControlUI for a parameter/property.
+ * Note that mcontrol may be NULL for outputs.
+ */
 GenericPluginUI::ControlUI*
-GenericPluginUI::build_control_ui (const ParameterDescriptor&           desc,
+GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
+                                   const ParameterDescriptor&           desc,
                                    boost::shared_ptr<AutomationControl> mcontrol,
+                                   float                                value,
                                    bool                                 is_input)
 {
 	ControlUI* control_ui = 0;
 
-	const float value = mcontrol->get_value();
-
-	control_ui = manage (new ControlUI ());
+	control_ui = manage (new ControlUI (param));
 	control_ui->combo = 0;
 	control_ui->control = mcontrol;
 	control_ui->update_pending = false;
@@ -932,7 +940,7 @@ void
 GenericPluginUI::output_update ()
 {
 	for (vector<ControlUI*>::iterator i = output_controls.begin(); i != output_controls.end(); ++i) {
-		float val = (*i)->control->get_value();
+		float val = plugin->get_parameter ((*i)->parameter().id());
 		char buf[32];
 		snprintf (buf, sizeof(buf), "%.2f", val);
 		(*i)->display_label->set_text (buf);

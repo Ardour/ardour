@@ -226,9 +226,10 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	/* FIXME: Unify with AutomationController */
 	struct ControlUI : public Gtk::HBox {
 
-		boost::shared_ptr<ARDOUR::AutomationControl> control;
+		const Evoral::Parameter parameter() const { return param; }
 
-		Evoral::Parameter parameter() { return control->parameter(); }
+		Evoral::Parameter                            param;
+		boost::shared_ptr<ARDOUR::AutomationControl> control;
 
 		/* input */
 
@@ -252,7 +253,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 		Gtk::VBox*     vbox;
 		MeterInfo*     meterinfo;
 
-		ControlUI ();
+		ControlUI (const Evoral::Parameter& param);
 		~ControlUI ();
 	};
 
@@ -262,8 +263,10 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void output_update();
 
 	void build ();
-	ControlUI* build_control_ui (const ARDOUR::ParameterDescriptor&           desc,
+	ControlUI* build_control_ui (const Evoral::Parameter&                     param,
+	                             const ARDOUR::ParameterDescriptor&           desc,
 	                             boost::shared_ptr<ARDOUR::AutomationControl> mcontrol,
+	                             float                                        value,
 	                             bool                                         is_input);
 
 	void ui_parameter_changed (ControlUI* cui);
