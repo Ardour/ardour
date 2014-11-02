@@ -4429,8 +4429,8 @@ MarkerBarDrag::aborted (bool)
 
 RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i, false)
-        , _drag_rect (0)
         , _operation (o)
+        , _drag_rect (0)
         , _crect (0)
         , _copy (false)
 {
@@ -4586,8 +4586,8 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			_editor->commit_reversible_command ();
 			break;
 		    }
-                    
 
+                case CreateMarker:
 		case CreateTransportMarker:
                         break;
 
