@@ -65,12 +65,18 @@ FloatingTextEntry::button_press (GdkEventButton* ev)
 
         /* Clicked outside widget window - edit is done */
 
+        entry.remove_modal_grab ();
+
+        /* arrange re-propagation of the event once we go idle */
+
+        Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::ptr_fun (gtk_main_do_event), gdk_event_copy ((GdkEvent*) ev)), false));
+
         if (entry_changed) {
                 use_text (entry.get_text ());
         }
         
         delete_when_idle ( this);
-                
+
         return false;
 }
 
