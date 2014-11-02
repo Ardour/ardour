@@ -33,24 +33,34 @@ typedef std::map<const std::string, const float> ScalePoints;
  */
 struct ParameterDescriptor
 {
+	enum Unit {
+		NONE,       ///< No unit
+		DB,         ///< Decibels
+		MIDI_NOTE,  ///< MIDI note number
+	};
+
 	ParameterDescriptor(const Evoral::Parameter& parameter)
 		: key((uint32_t)-1)
 		, datatype(Variant::VOID)
 		, normal(parameter.normal())
 		, lower(parameter.min())
 		, upper(parameter.max())
-		, step(0)
-		, smallstep((upper - lower) / 100.0)
-		, largestep((upper - lower) / 10.0)
-		, integer_step(false)
+		, step((upper - lower) / 100.0f)
+		, smallstep((upper - lower) / 1000.0f)
+		, largestep((upper - lower) / 10.0f)
+		, integer_step(parameter.type() >= MidiCCAutomation &&
+		               parameter.type() <= MidiChannelPressureAutomation)
 		, toggled(parameter.toggled())
 		, logarithmic(false)
 		, sr_dependent(false)
 		, min_unbound(0)
 		, max_unbound(0)
 		, enumeration(false)
-		, midinote(false)
-	{}
+	{
+		if (parameter.type() == GainAutomation) {
+			unit = DB;
+		}
+	}
 
 	ParameterDescriptor()
 		: key((uint32_t)-1)
@@ -68,13 +78,33 @@ struct ParameterDescriptor
 		, min_unbound(0)
 		, max_unbound(0)
 		, enumeration(false)
-		, midinote(false)
 	{}
+
+	/// Set step, smallstep, and largestep, based on current description
+	void update_steps() {
+		if (unit == ParameterDescriptor::MIDI_NOTE) {
+			step      = smallstep = 1;  // semitone
+			largestep = 12;             // octave
+		} else {
+			const float delta = upper - lower;
+
+			step      = delta / 1000.0f;
+			smallstep = delta / 10000.0f;
+			largestep = delta / 10.0f;
+
+			if (integer_step) {
+				step      = rint(step);
+				largestep = rint(largestep);
+				// leave smallstep alone for fine tuning
+			}
+		}
+	}
 
 	std::string                    label;
 	boost::shared_ptr<ScalePoints> scale_points;
 	uint32_t                       key;  ///< for properties
 	Variant::Type                  datatype;  ///< for properties
+	Unit                           unit;
 	float                          normal;
 	float                          lower;  ///< for frequencies, this is in Hz (not a fraction of the sample rate)
 	float                          upper;  ///< for frequencies, this is in Hz (not a fraction of the sample rate)
@@ -88,7 +118,6 @@ struct ParameterDescriptor
 	bool                           min_unbound;
 	bool                           max_unbound;
 	bool                           enumeration;
-	bool                           midinote;  ///< only used if integer_step is also true
 };
 
 } // namespace ARDOUR

@@ -41,6 +41,7 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"
+#include "ardour/value_as_string.h"
 
 #include "ardour_ui.h"
 #include "prompter.h"
@@ -504,51 +505,23 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 	}
 }
 
-
 bool
 GenericPluginUI::integer_printer (char buf[32], Adjustment &adj, ControlUI* cui)
 {
-	float const v = adj.get_value ();
-	
-	if (cui->scale_points) {
-		ScalePoints::const_iterator i = cui->scale_points->begin ();
-		while (i != cui->scale_points->end() && i->second != v) {
-			++i;
-		}
-
-		if (i != cui->scale_points->end ()) {
-			snprintf (buf, 32, "%s", i->first.c_str());
-			return true;
-		}
-	}
-		
-	snprintf (buf, 32, "%.0f", v);
+	float const        v   = cui->control->interface_to_internal(adj.get_value ());
+	const std::string& str = ARDOUR::value_as_string(cui->control->desc(), Variant(v));
+	const size_t       len = str.copy(buf, 31);
+	buf[len] = '\0';
 	return true;
 }
 
 bool
 GenericPluginUI::midinote_printer (char buf[32], Adjustment &adj, ControlUI* cui)
 {
-	float const v = adj.get_value ();
-
-	if (cui->scale_points) {
-		ScalePoints::const_iterator i = cui->scale_points->begin ();
-		while (i != cui->scale_points->end() && i->second != v) {
-			++i;
-		}
-
-		if (i != cui->scale_points->end ()) {
-			snprintf (buf, 32, "%s", i->first.c_str());
-			return true;
-		}
-	}
-	if (v >= 0 && v <= 127) {
-		int mn = rint(v);
-		const char notename[12][3] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
-		snprintf (buf, 32, "%s %d", notename[mn%12], (mn/12)-2);
-	} else {
-		snprintf (buf, 32, "%.0f", v);
-	}
+	float const        v   = cui->control->interface_to_internal(adj.get_value ());
+	const std::string& str = ARDOUR::value_as_string(cui->control->desc(), Variant(v));
+	const size_t       len = str.copy(buf, 31);
+	buf[len] = '\0';
 	return true;
 }
 
@@ -687,9 +660,9 @@ GenericPluginUI::build_control_ui (const ParameterDescriptor&           desc,
 		Adjustment* adj = control_ui->controller->adjustment();
 
 		if (desc.integer_step) {
-			control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox");
+			control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox", desc.enumeration);
 			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
-			if (desc.midinote) {
+			if (desc.unit == ParameterDescriptor::MIDI_NOTE) {
 				control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midinote_printer), control_ui));
 			} else {
 				control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));

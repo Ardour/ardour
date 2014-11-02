@@ -58,6 +58,7 @@
 
 #include "ardour/event_type_map.h"
 #include "ardour/session.h"
+#include "ardour/value_as_string.h"
 
 #include "i18n.h"
 
@@ -73,6 +74,7 @@ AutomationLine::AutomationLine (const string&                              name,
                                 TimeAxisView&                              tv,
                                 ArdourCanvas::Item&                        parent,
                                 boost::shared_ptr<AutomationList>          al,
+                                const ParameterDescriptor&                 desc,
                                 Evoral::TimeConverter<double, framepos_t>* converter)
 	: trackview (tv)
 	, _name (name)
@@ -81,6 +83,7 @@ AutomationLine::AutomationLine (const string&                              name,
 	, _parent_group (parent)
 	, _offset (0)
 	, _maximum_time (max_framepos)
+	, _desc (desc)
 {
 	if (converter) {
 		_our_time_converter = false;
@@ -112,7 +115,8 @@ AutomationLine::AutomationLine (const string&                              name,
 	trackview.session()->register_with_memento_command_factory(alist->id(), this);
 
 	if (alist->parameter().type() == GainAutomation ||
-	    alist->parameter().type() == EnvelopeAutomation) {
+	    alist->parameter().type() == EnvelopeAutomation ||
+	    desc.unit == ParameterDescriptor::DB) {
 		set_uses_gain_mapping (true);
 	}
 
@@ -356,24 +360,20 @@ AutomationLine::get_verbose_cursor_relative_string (double original, double frac
 string
 AutomationLine::fraction_to_string (double fraction) const
 {
-	char buf[32];
-
 	if (_uses_gain_mapping) {
+		char buf[32];
 		if (fraction == 0.0) {
 			snprintf (buf, sizeof (buf), "-inf");
 		} else {
 			snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain_with_max (fraction, Config->get_max_gain())));
 		}
+		return buf;
 	} else {
 		view_to_model_coord_y (fraction);
-		if (EventTypeMap::instance().is_integer (alist->parameter())) {
-			snprintf (buf, sizeof (buf), "%d", (int)fraction);
-		} else {
-			snprintf (buf, sizeof (buf), "%.2f", fraction);
-		}
+		return ARDOUR::value_as_string (_desc, fraction);
 	}
 
-	return buf;
+	return ""; /*NOTREACHED*/
 }
 
 /**
@@ -406,11 +406,7 @@ AutomationLine::fraction_to_relative_string (double original, double fraction) c
 	} else {
 		view_to_model_coord_y (original);
 		view_to_model_coord_y (fraction);
-		if (EventTypeMap::instance().is_integer (alist->parameter())) {
-			snprintf (buf, sizeof (buf), "%d", (int)fraction - (int)original);
-		} else {
-			snprintf (buf, sizeof (buf), "%.2f", fraction - original);
-		}
+		return ARDOUR::value_as_string (_desc, fraction - original);
 	}
 
 	return buf;

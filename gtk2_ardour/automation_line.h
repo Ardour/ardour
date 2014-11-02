@@ -34,6 +34,7 @@
 #include "pbd/memento_command.h"
 
 #include "ardour/automation_list.h"
+#include "ardour/parameter_descriptor.h"
 #include "ardour/types.h"
 
 #include "canvas/types.h"
@@ -64,6 +65,7 @@ public:
 	                TimeAxisView&                                      tv,
 	                ArdourCanvas::Item&                                parent,
 	                boost::shared_ptr<ARDOUR::AutomationList>          al,
+	                const ARDOUR::ParameterDescriptor&                 desc,
 	                Evoral::TimeConverter<double, ARDOUR::framepos_t>* converter = 0);
 
 	virtual ~AutomationLine ();
@@ -233,6 +235,8 @@ private:
 
 	/** maximum time that a point on this line can be at, relative to the position of its region or start of its track */
 	ARDOUR::framecnt_t _maximum_time;
+
+	const ARDOUR::ParameterDescriptor _desc;
 
 	friend class AudioRegionGainLine;
 };

@@ -250,7 +250,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 				ARDOUR::EventTypeMap::instance().to_symbol(_parameter),
 				*this,
 				*_canvas_display,
-				_control->alist()
+				_control->alist(),
+				_control->desc()
 				)
 			);
 

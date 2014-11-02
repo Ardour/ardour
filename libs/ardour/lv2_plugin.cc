@@ -66,6 +66,7 @@
 #include "lv2/lv2plug.in/ns/ext/worker/worker.h"
 #include "lv2/lv2plug.in/ns/ext/resize-port/resize-port.h"
 #include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
+#include "lv2/lv2plug.in/ns/extensions/units/units.h"
 #include "lv2/lv2plug.in/ns/ext/patch/patch.h"
 #ifdef HAVE_LV2_1_2_0
 #include "lv2/lv2plug.in/ns/ext/buf-size/buf-size.h"
@@ -138,6 +139,7 @@ public:
 	LilvNode* ui_GtkUI;
 	LilvNode* ui_external;
 	LilvNode* ui_externalkx;
+	LilvNode* units_db;
 	LilvNode* units_unit;
 	LilvNode* units_midiNote;
 	LilvNode* patch_writable;
@@ -1312,10 +1314,10 @@ LV2Plugin::get_property_descriptor(uint32_t id) const
 }
 
 static void
-set_parameter_descriptor(LV2World&            world,
-                         ParameterDescriptor& desc,
-                         Variant::Type        datatype,
-                         const LilvNode*      subject)
+load_parameter_descriptor(LV2World&            world,
+                          ParameterDescriptor& desc,
+                          Variant::Type        datatype,
+                          const LilvNode*      subject)
 {
 	LilvWorld* lworld  = _world.world;
 	LilvNode*  label   = lilv_world_get(lworld, subject, _world.rdfs_label, NULL);
@@ -1337,6 +1339,12 @@ set_parameter_descriptor(LV2World&            world,
 	desc.datatype      = datatype;
 	desc.toggled      |= datatype == Variant::BOOL;
 	desc.integer_step |= datatype == Variant::INT || datatype == Variant::LONG;
+	if (lilv_world_ask(lworld, subject, _world.units_unit, _world.units_midiNote)) {
+		desc.unit = ParameterDescriptor::MIDI_NOTE;
+	} else if (lilv_world_ask(lworld, subject, _world.units_unit, _world.units_db)) {
+		desc.unit = ParameterDescriptor::DB;
+	}
+	desc.update_steps();
 }
 
 void
@@ -1368,7 +1376,7 @@ LV2Plugin::load_supported_properties(PropertyDescriptors& descs)
 		ParameterDescriptor desc;
 		desc.key      = _uri_map.uri_to_id(lilv_node_as_uri(prop));
 		desc.datatype = datatype;
-		set_parameter_descriptor(_world, desc, datatype, prop);
+		load_parameter_descriptor(_world, desc, datatype, prop);
 		descs.insert(std::make_pair(desc.key, desc));
 
 		lilv_node_free(range);
@@ -1560,6 +1568,8 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	lilv_port_get_range(_impl->plugin, port, &def, &min, &max);
 	portunits = lilv_port_get_value(_impl->plugin, port, _world.units_unit);
 
+	// TODO: Once we can rely on lilv 0.18.0 being present,
+	// load_parameter_descriptor() can be used for ports as well
 	desc.integer_step = lilv_port_has_property(_impl->plugin, port, _world.lv2_integer);
 	desc.toggled      = lilv_port_has_property(_impl->plugin, port, _world.lv2_toggled);
 	desc.logarithmic  = lilv_port_has_property(_impl->plugin, port, _world.ext_logarithmic);
@@ -1567,7 +1577,11 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	desc.label        = lilv_node_as_string(lilv_port_get_name(_impl->plugin, port));
 	desc.lower        = min ? lilv_node_as_float(min) : 0.0f;
 	desc.upper        = max ? lilv_node_as_float(max) : 1.0f;
-	desc.midinote     = lilv_nodes_contains(portunits, _world.units_midiNote);
+	if (lilv_nodes_contains(portunits, _world.units_midiNote)) {
+		desc.unit = ParameterDescriptor::MIDI_NOTE;
+	} else if (lilv_nodes_contains(portunits, _world.units_db)) {
+		desc.unit = ParameterDescriptor::DB;
+	}
 
 	if (desc.sr_dependent) {
 		desc.lower *= _session.frame_rate ();
@@ -1577,19 +1591,10 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	desc.min_unbound  = false; // TODO: LV2 extension required
 	desc.max_unbound  = false; // TODO: LV2 extension required
 
-	if (desc.integer_step) {
-		desc.step      = 1.0;
-		desc.smallstep = 0.1;
-		desc.largestep = 10.0;
-	} else {
-		const float delta = desc.upper - desc.lower;
-		desc.step      = delta / 1000.0f;
-		desc.smallstep = delta / 10000.0f;
-		desc.largestep = delta / 10.0f;
-	}
-
 	desc.enumeration = lilv_port_has_property(_impl->plugin, port, _world.lv2_enumeration);
 	desc.scale_points = get_scale_points(which);
+
+	desc.update_steps();
 
 	lilv_node_free(def);
 	lilv_node_free(min);
@@ -2274,8 +2279,9 @@ LV2World::LV2World()
 	ui_GtkUI           = lilv_new_uri(world, LV2_UI__GtkUI);
 	ui_external        = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
 	ui_externalkx      = lilv_new_uri(world, "http://kxstudio.sf.net/ns/lv2ext/external-ui#Widget");
-	units_unit         = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/units#unit");
-	units_midiNote     = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/units#midiNote");
+	units_unit         = lilv_new_uri(world, LV2_UNITS__unit);
+	units_midiNote     = lilv_new_uri(world, LV2_UNITS__midiNote);
+	units_db           = lilv_new_uri(world, LV2_UNITS__db);
 	patch_writable     = lilv_new_uri(world, LV2_PATCH__writable);
 	patch_Message      = lilv_new_uri(world, LV2_PATCH__Message);
 }
@@ -2285,6 +2291,7 @@ LV2World::~LV2World()
 	lilv_node_free(patch_Message);
 	lilv_node_free(patch_writable);
 	lilv_node_free(units_midiNote);
+	lilv_node_free(units_db);
 	lilv_node_free(units_unit);
 	lilv_node_free(ui_externalkx);
 	lilv_node_free(ui_external);
