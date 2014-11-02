@@ -30,6 +30,47 @@
 
 namespace ARDOUR {
 
+URIMap* URIMap::uri_map;
+
+void
+URIMap::URIDs::init(URIMap& uri_map)
+{
+	// Use string literals here instead of LV2 defines to avoid LV2 dependency
+	atom_Chunk          = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Chunk");
+	atom_Path           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Path");
+	atom_Sequence       = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Sequence");
+	atom_eventTransfer  = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#eventTransfer");
+	atom_URID           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#URID");
+	atom_Blank          = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Blank");
+	atom_Object         = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Object");
+	atom_Float          = uri_map.uri_to_id("http://lv2plug.in/ns/ext/atom#Float");
+	log_Error           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/log#Error");
+	log_Note            = uri_map.uri_to_id("http://lv2plug.in/ns/ext/log#Note");
+	log_Warning         = uri_map.uri_to_id("http://lv2plug.in/ns/ext/log#Warning");
+	midi_MidiEvent      = uri_map.uri_to_id("http://lv2plug.in/ns/ext/midi#MidiEvent");
+	time_Position       = uri_map.uri_to_id("http://lv2plug.in/ns/ext/time#Position");
+	time_bar            = uri_map.uri_to_id("http://lv2plug.in/ns/ext/time#bar");
+	time_barBeat        = uri_map.uri_to_id("http://lv2plug.in/ns/ext/time#barBeat");
+	time_beatUnit       = uri_map.uri_to_id("http://lv2plug.in/ns/ext/time#beatUnit");
+	time_beatsPerBar    = uri_map.uri_to_id("http://lv2plug.in/ns/ext/time#beatsPerBar");
+	time_beatsPerMinute = uri_map.uri_to_id("http://lv2plug.in/ns/ext/time#beatsPerMinute");
+	time_frame          = uri_map.uri_to_id("http://lv2plug.in/ns/ext/time#frame");
+	time_speed          = uri_map.uri_to_id("http://lv2plug.in/ns/ext/time#speed");
+	patch_Get           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#Get");
+	patch_Set           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#Set");
+	patch_property      = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#property");
+	patch_value         = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#value");
+}
+
+URIMap&
+URIMap::instance()
+{
+	if (!URIMap::uri_map) {
+		URIMap::uri_map = new URIMap();
+	}
+	return *URIMap::uri_map;
+}
+
 static uint32_t
 c_uri_map_uri_to_id(LV2_URI_Map_Callback_Data callback_data,
                     const char*               map,
@@ -62,7 +103,7 @@ c_urid_map(LV2_URID_Map_Handle handle,
 
 static const char*
 c_urid_unmap(LV2_URID_Unmap_Handle handle,
-           LV2_URID              urid)
+             LV2_URID              urid)
 {
 	URIMap* const me = (URIMap*)handle;
 	return me->id_to_uri(urid);
@@ -84,11 +125,15 @@ URIMap::URIMap()
 	_urid_unmap_feature_data.handle = this;
 	_urid_unmap_feature.URI         = LV2_URID_UNMAP_URI;
 	_urid_unmap_feature.data        = &_urid_unmap_feature_data;
+
+	urids.init(*this);
 }
 
 uint32_t
 URIMap::uri_to_id(const char* uri)
 {
+	Glib::Threads::Mutex::Lock lm (_lock);
+
 	const std::string urimm(uri);
 	const Map::const_iterator i = _map.find(urimm);
 	if (i != _map.end()) {
@@ -103,6 +148,8 @@ URIMap::uri_to_id(const char* uri)
 const char*
 URIMap::id_to_uri(const uint32_t id) const
 {
+	Glib::Threads::Mutex::Lock lm (_lock);
+
 	const Unmap::const_iterator i = _unmap.find(id);
 	return (i != _unmap.end()) ? i->second.c_str() : NULL;
 }

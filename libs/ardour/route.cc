@@ -3385,8 +3385,10 @@ Route::set_latency_compensation (framecnt_t longest_session_latency)
 }
 
 Route::SoloControllable::SoloControllable (std::string name, boost::shared_ptr<Route> r)
-	: AutomationControl (r->session(), Evoral::Parameter (SoloAutomation),
-			     boost::shared_ptr<AutomationList>(), name)
+	: AutomationControl (r->session(),
+	                     Evoral::Parameter (SoloAutomation),
+	                     ParameterDescriptor(Evoral::Parameter (SoloAutomation)),
+	                     boost::shared_ptr<AutomationList>(), name)
 	, _route (r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(SoloAutomation)));
@@ -3430,8 +3432,11 @@ Route::SoloControllable::get_value () const
 }
 
 Route::MuteControllable::MuteControllable (std::string name, boost::shared_ptr<Route> r)
-	: AutomationControl (r->session(), Evoral::Parameter (MuteAutomation),
-			     boost::shared_ptr<AutomationList>(), name)
+	: AutomationControl (r->session(),
+	                     Evoral::Parameter (MuteAutomation),
+	                     ParameterDescriptor (Evoral::Parameter (MuteAutomation)),
+	                     boost::shared_ptr<AutomationList>(),
+	                     name)
 	, _route (r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(MuteAutomation)));

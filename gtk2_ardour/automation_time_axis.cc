@@ -28,6 +28,7 @@
 
 #include "ardour/automation_control.h"
 #include "ardour/event_type_map.h"
+#include "ardour/parameter_types.h"
 #include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
@@ -103,7 +104,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	}
 
 	if (_automatable && _control) {
-		_controller = AutomationController::create (_automatable, _control->parameter(), _control);
+		_controller = AutomationController::create (_automatable, _control->parameter(), _control->desc(), _control);
 	}
 
 	automation_menu = 0;
@@ -559,7 +560,7 @@ AutomationTimeAxisView::build_display_menu ()
 	/* current interpolation state */
 	AutomationList::InterpolationStyle const s = _view ? _view->interpolation() : _control->list()->interpolation ();
 
-	if (EventTypeMap::instance().is_midi_parameter(_parameter)) {
+	if (ARDOUR::parameter_is_midi((AutomationType)_parameter.type())) {
 
 		Menu* auto_mode_menu = manage (new Menu);
 		auto_mode_menu->set_name ("ArdourContextMenu");
@@ -838,7 +839,7 @@ AutomationTimeAxisView::what_has_visible_automation (const boost::shared_ptr<Aut
 		
 		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (i->second);
 
-		if (ac) {
+		if (ac && ac->alist()) {
 			
 			const XMLNode* gui_node = ac->extra_xml ("GUI");
 			

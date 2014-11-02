@@ -23,7 +23,7 @@
 #include "evoral/midi_util.h"
 #include "midi++/event.h"
 #include "ardour/buffer.h"
-#include "ardour/event_type_map.h"
+#include "ardour/parameter_types.h"
 
 namespace ARDOUR {
 
@@ -77,7 +77,7 @@ public:
 			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType);
 			int event_size = Evoral::midi_event_size(ev_start);
 			assert(event_size >= 0);
-			return EventType(EventTypeMap::instance().midi_event_type(*ev_start),
+			return EventType(midi_parameter_type(*ev_start),
 					*((TimeType*)(buffer->_data + offset)),
 					event_size, ev_start);
 		}
@@ -86,7 +86,7 @@ public:
 			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType);
 			int event_size = Evoral::midi_event_size(ev_start);
 			assert(event_size >= 0);
-			return EventType(EventTypeMap::instance().midi_event_type(*ev_start),
+			return EventType(midi_parameter_type(*ev_start),
 					*(reinterpret_cast<TimeType*>((uintptr_t)(buffer->_data + offset))),
 					event_size, ev_start);
 		}

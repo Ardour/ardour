@@ -97,34 +97,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-URIMap LV2Plugin::_uri_map;
-
-LV2Plugin::URIDs LV2Plugin::urids = {
-	_uri_map.uri_to_id(LV2_ATOM__Chunk),
-	_uri_map.uri_to_id(LV2_ATOM__Path),
-	_uri_map.uri_to_id(LV2_ATOM__Sequence),
-	_uri_map.uri_to_id(LV2_ATOM__eventTransfer),
-	_uri_map.uri_to_id(LV2_ATOM__URID),
-	_uri_map.uri_to_id(LV2_ATOM__Blank),
-	_uri_map.uri_to_id(LV2_ATOM__Object),
-	_uri_map.uri_to_id(LV2_LOG__Error),
-	_uri_map.uri_to_id(LV2_LOG__Note),
-	_uri_map.uri_to_id(LV2_LOG__Warning),
-	_uri_map.uri_to_id(LV2_MIDI__MidiEvent),
-	_uri_map.uri_to_id(LV2_TIME__Position),
-	_uri_map.uri_to_id(LV2_TIME__bar),
-	_uri_map.uri_to_id(LV2_TIME__barBeat),
-	_uri_map.uri_to_id(LV2_TIME__beatUnit),
-	_uri_map.uri_to_id(LV2_TIME__beatsPerBar),
-	_uri_map.uri_to_id(LV2_TIME__beatsPerMinute),
-	_uri_map.uri_to_id(LV2_TIME__frame),
-	_uri_map.uri_to_id(LV2_TIME__speed),
-	_uri_map.uri_to_id(LV2_PATCH__Get),
-	_uri_map.uri_to_id(LV2_PATCH__Set),
-	_uri_map.uri_to_id(LV2_PATCH__property),
-	_uri_map.uri_to_id(LV2_PATCH__value)
-};
-
 class LV2World : boost::noncopyable {
 public:
 	LV2World ();
@@ -151,6 +123,9 @@ public:
 	LilvNode* lv2_freewheeling;
 	LilvNode* lv2_inPlaceBroken;
 	LilvNode* lv2_integer;
+	LilvNode* lv2_default;
+	LilvNode* lv2_minimum;
+	LilvNode* lv2_maximum;
 	LilvNode* lv2_reportsLatency;
 	LilvNode* lv2_sampleRate;
 	LilvNode* lv2_toggled;
@@ -220,11 +195,11 @@ log_vprintf(LV2_Log_Handle /*handle*/,
 {
 	char* str = NULL;
 	const int ret = g_vasprintf(&str, fmt, args);
-	if (type == LV2Plugin::urids.log_Error) {
+	if (type == URIMap::instance().urids.log_Error) {
 		error << str << endmsg;
-	} else if (type == LV2Plugin::urids.log_Warning) {
+	} else if (type == URIMap::instance().urids.log_Warning) {
 		warning << str << endmsg;
-	} else if (type == LV2Plugin::urids.log_Note) {
+	} else if (type == URIMap::instance().urids.log_Note) {
 		info << str << endmsg;
 	}
 	// TODO: Toggleable log:Trace message support
@@ -278,6 +253,7 @@ LV2Plugin::LV2Plugin (AudioEngine& engine,
 	, _insert_id("0")
 	, _patch_port_in_index((uint32_t)-1)
 	, _patch_port_out_index((uint32_t)-1)
+	, _uri_map(URIMap::instance())
 {
 	init(c_plugin, rate);
 }
@@ -291,6 +267,7 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 	, _insert_id(other._insert_id)
 	, _patch_port_in_index((uint32_t)-1)
 	, _patch_port_out_index((uint32_t)-1)
+	, _uri_map(URIMap::instance())
 {
 	init(other._impl->plugin, other._sample_rate);
 
@@ -613,6 +590,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		}
 	}
 
+	load_supported_properties(_property_descriptors);
 	allocate_atom_event_buffers();
 	latency_compute_run();
 }
@@ -1021,7 +999,7 @@ set_port_value(const char* port_symbol,
                uint32_t    type)
 {
 	LV2Plugin* self = (LV2Plugin*)user_data;
-	if (type != 0 && type != self->_uri_map.uri_to_id(LV2_ATOM__Float)) {
+	if (type != 0 && type != URIMap::instance().urids.atom_Float) {
 		return;  // TODO: Support non-float ports
 	}
 
@@ -1302,15 +1280,15 @@ LV2Plugin::set_property(uint32_t key, const Variant& value)
 
 	// Serialize patch:Set message to set property
 #ifdef HAVE_LV2_1_10_0
-	lv2_atom_forge_object(forge, &frame, 1, LV2Plugin::urids.patch_Set);
-	lv2_atom_forge_key(forge, LV2Plugin::urids.patch_property);
+	lv2_atom_forge_object(forge, &frame, 1, _uri_map.urids.patch_Set);
+	lv2_atom_forge_key(forge, _uri_map.urids.patch_property);
 	lv2_atom_forge_urid(forge, key);
-	lv2_atom_forge_key(forge, LV2Plugin::urids.patch_value);
+	lv2_atom_forge_key(forge, _uri_map.urids.patch_value);
 #else
-	lv2_atom_forge_blank(forge, &frame, 1, LV2Plugin::urids.patch_Set);
-	lv2_atom_forge_property_head(forge, LV2Plugin::urids.patch_property, 0);
+	lv2_atom_forge_blank(forge, &frame, 1, _uri_map.urids.patch_Set);
+	lv2_atom_forge_property_head(forge, _uri_map.urids.patch_property, 0);
 	lv2_atom_forge_urid(forge, key);
-	lv2_atom_forge_property_head(forge, LV2Plugin::urids.patch_value, 0);
+	lv2_atom_forge_property_head(forge, _uri_map.urids.patch_value, 0);
 #endif
 
 	forge_variant(forge, value);
@@ -1318,13 +1296,51 @@ LV2Plugin::set_property(uint32_t key, const Variant& value)
 	// Write message to UI=>Plugin ring
 	const LV2_Atom* const atom = (const LV2_Atom*)buf;
 	write_from_ui(_patch_port_in_index,
-	              LV2Plugin::urids.atom_eventTransfer,
+	              _uri_map.urids.atom_eventTransfer,
 	              lv2_atom_total_size(atom),
 	              (const uint8_t*)atom);
 }
 
+const ParameterDescriptor&
+LV2Plugin::get_property_descriptor(uint32_t id) const
+{
+	PropertyDescriptors::const_iterator p = _property_descriptors.find(id);
+	if (p != _property_descriptors.end()) {
+		return p->second;
+	}
+	return Plugin::get_property_descriptor(id);
+}
+
+static void
+set_parameter_descriptor(LV2World&            world,
+                         ParameterDescriptor& desc,
+                         Variant::Type        datatype,
+                         const LilvNode*      subject)
+{
+	LilvWorld* lworld  = _world.world;
+	LilvNode*  label   = lilv_world_get(lworld, subject, _world.rdfs_label, NULL);
+	LilvNode*  def     = lilv_world_get(lworld, subject, _world.lv2_default, NULL);
+	LilvNode*  minimum = lilv_world_get(lworld, subject, _world.lv2_minimum, NULL);
+	LilvNode*  maximum = lilv_world_get(lworld, subject, _world.lv2_maximum, NULL);
+	if (label) {
+		desc.label = lilv_node_as_string(label);
+	}
+	if (def && lilv_node_is_float(def)) {
+		desc.normal = lilv_node_as_float(def);
+	}
+	if (minimum && lilv_node_is_float(minimum)) {
+		desc.lower = lilv_node_as_float(minimum);
+	}
+	if (maximum && lilv_node_is_float(maximum)) {
+		desc.upper = lilv_node_as_float(maximum);
+	}
+	desc.datatype      = datatype;
+	desc.toggled      |= datatype == Variant::BOOL;
+	desc.integer_step |= datatype == Variant::INT || datatype == Variant::LONG;
+}
+
 void
-LV2Plugin::get_supported_properties(std::vector<ParameterDescriptor>& descs)
+LV2Plugin::load_supported_properties(PropertyDescriptors& descs)
 {
 	LilvWorld*       lworld     = _world.world;
 	const LilvNode*  subject    = lilv_plugin_get_uri(_impl->plugin);
@@ -1333,27 +1349,28 @@ LV2Plugin::get_supported_properties(std::vector<ParameterDescriptor>& descs)
 	LILV_FOREACH(nodes, p, properties) {
 		// Get label and range
 		const LilvNode* prop  = lilv_nodes_get(properties, p);
-		LilvNode*       label = lilv_world_get(lworld, prop, _world.rdfs_label, NULL);
 		LilvNode*       range = lilv_world_get(lworld, prop, _world.rdfs_range, NULL);
+		if (!range) {
+			warning << string_compose(_("LV2: property <%1> has no range datatype, ignoring"),
+			                          lilv_node_as_uri(prop)) << endmsg;
+			continue;
+		}
 
 		// Convert range to variant type (TODO: support for multiple range types)
 		Variant::Type datatype;
 		if (!uri_to_variant_type(lilv_node_as_uri(range), datatype)) {
-			error << string_compose(_("LV2: unknown variant datatype \"%1\""),
-			                        lilv_node_as_uri(range));
+			error << string_compose(_("LV2: property <%1> has unsupported datatype <%1>"),
+			                        lilv_node_as_uri(prop), lilv_node_as_uri(range)) << endmsg;
 			continue;
 		}
 
 		// Add description to result
 		ParameterDescriptor desc;
-		desc.key          = _uri_map.uri_to_id(lilv_node_as_uri(prop));
-		desc.label        = lilv_node_as_string(label);
-		desc.datatype     = datatype;
-		desc.toggled      = datatype == Variant::BOOL;
-		desc.integer_step = datatype == Variant::INT || datatype == Variant::LONG;
-		descs.push_back(desc);
+		desc.key      = _uri_map.uri_to_id(lilv_node_as_uri(prop));
+		desc.datatype = datatype;
+		set_parameter_descriptor(_world, desc, datatype, prop);
+		descs.insert(std::make_pair(desc.key, desc));
 
-		lilv_node_free(label);
 		lilv_node_free(range);
 	}
 	lilv_nodes_free(properties);
@@ -1375,15 +1392,15 @@ LV2Plugin::announce_property_values()
 
 	// Serialize patch:Get message with no subject (implicitly plugin instance)
 #ifdef HAVE_LV2_1_10_0
-	lv2_atom_forge_object(forge, &frame, 1, LV2Plugin::urids.patch_Get);
+	lv2_atom_forge_object(forge, &frame, 1, _uri_map.urids.patch_Get);
 #else
-	lv2_atom_forge_blank(forge, &frame, 1, LV2Plugin::urids.patch_Get);
+	lv2_atom_forge_blank(forge, &frame, 1, _uri_map.urids.patch_Get);
 #endif
 
 	// Write message to UI=>Plugin ring
 	const LV2_Atom* const atom = (const LV2_Atom*)buf;
 	write_from_ui(_patch_port_in_index,
-	              LV2Plugin::urids.atom_eventTransfer,
+	              _uri_map.urids.atom_eventTransfer,
 	              lv2_atom_total_size(atom),
 	              (const uint8_t*)atom);
 }
@@ -1532,6 +1549,11 @@ int
 LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) const
 {
 	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, which);
+	if (!port) {
+		error << string_compose("LV2: get descriptor of non-existent port %1", which)
+		      << endmsg;
+		return 1;
+	}
 
 	LilvNodes* portunits;
 	LilvNode *def, *min, *max;
@@ -1628,6 +1650,11 @@ LV2Plugin::automatable() const
 		}
 	}
 
+	for (PropertyDescriptors::const_iterator p = _property_descriptors.begin();
+	     p != _property_descriptors.end();
+	     ++p) {
+		ret.insert(ret.end(), Evoral::Parameter(PluginPropertyAutomation, 0, p->first));
+	}
 	return ret;
 }
 
@@ -1716,7 +1743,7 @@ LV2Plugin::allocate_atom_event_buffers()
 	_atom_ev_buffers = (LV2_Evbuf**) malloc((total_atom_buffers + 1) * sizeof(LV2_Evbuf*));
 	for (int i = 0; i < total_atom_buffers; ++i ) {
 		_atom_ev_buffers[i] = lv2_evbuf_new(minimumSize, LV2_EVBUF_ATOM,
-				LV2Plugin::urids.atom_Chunk, LV2Plugin::urids.atom_Sequence);
+				_uri_map.urids.atom_Chunk, _uri_map.urids.atom_Sequence);
 	}
 	_atom_ev_buffers[total_atom_buffers] = 0;
 	return;
@@ -1734,42 +1761,44 @@ write_position(LV2_Atom_Forge*     forge,
                framepos_t          position,
                framecnt_t          offset)
 {
+	const URIMap::URIDs& urids = URIMap::instance().urids;
+
 	uint8_t pos_buf[256];
 	lv2_atom_forge_set_buffer(forge, pos_buf, sizeof(pos_buf));
 	LV2_Atom_Forge_Frame frame;
 #ifdef HAVE_LV2_1_10_0
-	lv2_atom_forge_object(forge, &frame, 1, LV2Plugin::urids.time_Position);
-	lv2_atom_forge_key(forge, LV2Plugin::urids.time_frame);
+	lv2_atom_forge_object(forge, &frame, 1, urids.time_Position);
+	lv2_atom_forge_key(forge, urids.time_frame);
 	lv2_atom_forge_long(forge, position);
-	lv2_atom_forge_key(forge, LV2Plugin::urids.time_speed);
+	lv2_atom_forge_key(forge, urids.time_speed);
 	lv2_atom_forge_float(forge, speed);
-	lv2_atom_forge_key(forge, LV2Plugin::urids.time_barBeat);
+	lv2_atom_forge_key(forge, urids.time_barBeat);
 	lv2_atom_forge_float(forge, bbt.beats - 1 +
 	                     (bbt.ticks / Timecode::BBT_Time::ticks_per_beat));
-	lv2_atom_forge_key(forge, LV2Plugin::urids.time_bar);
+	lv2_atom_forge_key(forge, urids.time_bar);
 	lv2_atom_forge_long(forge, bbt.bars - 1);
-	lv2_atom_forge_key(forge, LV2Plugin::urids.time_beatUnit);
+	lv2_atom_forge_key(forge, urids.time_beatUnit);
 	lv2_atom_forge_int(forge, t.meter().note_divisor());
-	lv2_atom_forge_key(forge, LV2Plugin::urids.time_beatsPerBar);
+	lv2_atom_forge_key(forge, urids.time_beatsPerBar);
 	lv2_atom_forge_float(forge, t.meter().divisions_per_bar());
-	lv2_atom_forge_key(forge, LV2Plugin::urids.time_beatsPerMinute);
+	lv2_atom_forge_key(forge, urids.time_beatsPerMinute);
 	lv2_atom_forge_float(forge, t.tempo().beats_per_minute());
 #else
-	lv2_atom_forge_blank(forge, &frame, 1, LV2Plugin::urids.time_Position);
-	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_frame, 0);
+	lv2_atom_forge_blank(forge, &frame, 1, urids.time_Position);
+	lv2_atom_forge_property_head(forge, urids.time_frame, 0);
 	lv2_atom_forge_long(forge, position);
-	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_speed, 0);
+	lv2_atom_forge_property_head(forge, urids.time_speed, 0);
 	lv2_atom_forge_float(forge, speed);
-	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_barBeat, 0);
+	lv2_atom_forge_property_head(forge, urids.time_barBeat, 0);
 	lv2_atom_forge_float(forge, bbt.beats - 1 +
 	                     (bbt.ticks / Timecode::BBT_Time::ticks_per_beat));
-	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_bar, 0);
+	lv2_atom_forge_property_head(forge, urids.time_bar, 0);
 	lv2_atom_forge_long(forge, bbt.bars - 1);
-	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_beatUnit, 0);
+	lv2_atom_forge_property_head(forge, urids.time_beatUnit, 0);
 	lv2_atom_forge_int(forge, t.meter().note_divisor());
-	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_beatsPerBar, 0);
+	lv2_atom_forge_property_head(forge, urids.time_beatsPerBar, 0);
 	lv2_atom_forge_float(forge, t.meter().divisions_per_bar());
-	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_beatsPerMinute, 0);
+	lv2_atom_forge_property_head(forge, urids.time_beatsPerMinute, 0);
 	lv2_atom_forge_float(forge, t.tempo().beats_per_minute());
 #endif
 
@@ -1880,7 +1909,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					: m;
 
 				// Now merge MIDI and any transport events into the buffer
-				const uint32_t     type = LV2Plugin::urids.midi_MidiEvent;
+				const uint32_t     type = _uri_map.urids.midi_MidiEvent;
 				const framepos_t   tend = _session.transport_frame() + nframes;
 				++metric_i;
 				while (m != m_end || (metric_i != tmap.metrics_end() &&
@@ -1932,7 +1961,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				error << "Error reading from UI=>Plugin RingBuffer" << endmsg;
 				break;
 			}
-			if (msg.protocol == urids.atom_eventTransfer) {
+			if (msg.protocol == URIMap::instance().urids.atom_eventTransfer) {
 				LV2_Evbuf*            buf  = _ev_buffers[msg.index];
 				LV2_Evbuf_Iterator    i    = lv2_evbuf_end(buf);
 				const LV2_Atom* const atom = (const LV2_Atom*)&body[0];
@@ -1998,20 +2027,20 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				// Intercept patch change messages to emit PropertyChanged signal
 				if ((flags & PORT_PATCHMSG)) {
 					LV2_Atom* atom = (LV2_Atom*)(data - sizeof(LV2_Atom));
-					if (atom->type == LV2Plugin::urids.atom_Blank ||
-					    atom->type == LV2Plugin::urids.atom_Object) {
+					if (atom->type == _uri_map.urids.atom_Blank ||
+					    atom->type == _uri_map.urids.atom_Object) {
 						LV2_Atom_Object* obj = (LV2_Atom_Object*)atom;
-						if (obj->body.otype == LV2Plugin::urids.patch_Set) {
+						if (obj->body.otype == _uri_map.urids.patch_Set) {
 							const LV2_Atom* property = NULL;
 							const LV2_Atom* value    = NULL;
 							lv2_atom_object_get(obj,
-							                    LV2Plugin::urids.patch_property, &property,
-							                    LV2Plugin::urids.patch_value,    &value,
+							                    _uri_map.urids.patch_property, &property,
+							                    _uri_map.urids.patch_value,    &value,
 							                    0);
 
 							if (!property || !value ||
-							    property->type != LV2Plugin::urids.atom_URID ||
-							    value->type != LV2Plugin::urids.atom_Path) {
+							    property->type != _uri_map.urids.atom_URID ||
+							    value->type    != _uri_map.urids.atom_Path) {
 								std::cerr << "warning: patch:Set for unknown property" << std::endl;
 								continue;
 							}
@@ -2020,13 +2049,14 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 							const char*    path    = (const char*)LV2_ATOM_BODY_CONST(value);
 
 							// Emit PropertyChanged signal for UI
+							// TODO: This should emit the control's Changed signal
 							PropertyChanged(prop_id, Variant(Variant::PATH, path));
 						}
 					}
 				}
 
 				if (!_to_ui) continue;
-				write_to_ui(port_index, urids.atom_eventTransfer,
+				write_to_ui(port_index, URIMap::instance().urids.atom_eventTransfer,
 				            size + sizeof(LV2_Atom),
 				            data - sizeof(LV2_Atom));
 			}
@@ -2227,6 +2257,9 @@ LV2World::LV2World()
 	lv2_OutputPort     = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
 	lv2_inPlaceBroken  = lilv_new_uri(world, LV2_CORE__inPlaceBroken);
 	lv2_integer        = lilv_new_uri(world, LV2_CORE__integer);
+	lv2_default        = lilv_new_uri(world, LV2_CORE__default);
+	lv2_minimum        = lilv_new_uri(world, LV2_CORE__minimum);
+	lv2_maximum        = lilv_new_uri(world, LV2_CORE__maximum);
 	lv2_reportsLatency = lilv_new_uri(world, LV2_CORE__reportsLatency);
 	lv2_sampleRate     = lilv_new_uri(world, LV2_CORE__sampleRate);
 	lv2_toggled        = lilv_new_uri(world, LV2_CORE__toggled);

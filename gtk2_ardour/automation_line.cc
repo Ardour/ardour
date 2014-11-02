@@ -69,8 +69,10 @@ using namespace Editing;
 /** @param converter A TimeConverter whose origin_b is the start time of the AutomationList in session frames.
  *  This will not be deleted by AutomationLine.
  */
-AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanvas::Item& parent,
-                                boost::shared_ptr<AutomationList> al,
+AutomationLine::AutomationLine (const string&                              name,
+                                TimeAxisView&                              tv,
+                                ArdourCanvas::Item&                        parent,
+                                boost::shared_ptr<AutomationList>          al,
                                 Evoral::TimeConverter<double, framepos_t>* converter)
 	: trackview (tv)
 	, _name (name)
@@ -1160,7 +1162,7 @@ AutomationLine::view_to_model_coord (double& x, double& y) const
 void
 AutomationLine::view_to_model_coord_y (double& y) const
 {
-	/* TODO: This should be more generic ... */
+	/* TODO: This should be more generic (use ParameterDescriptor) */
 	if (alist->parameter().type() == GainAutomation ||
 	    alist->parameter().type() == EnvelopeAutomation) {
 		y = slider_position_to_gain_with_max (y, Config->get_max_gain());
@@ -1171,17 +1173,15 @@ AutomationLine::view_to_model_coord_y (double& y) const
 		y = 1.0 - y;
 	} else if (alist->parameter().type() == PanWidthAutomation) {
 		y = 2.0 * y - 1.0;
-	} else if (alist->parameter().type() == PluginAutomation) {
-		y = y * (double)(alist->get_max_y()- alist->get_min_y()) + alist->get_min_y();
 	} else {
-		y = rint (y * alist->parameter().max());
+		y = y * (double)(alist->get_max_y() - alist->get_min_y()) + alist->get_min_y();
 	}
 }
 
 void
 AutomationLine::model_to_view_coord (double& x, double& y) const
 {
-	/* TODO: This should be more generic ... */
+	/* TODO: This should be more generic (use ParameterDescriptor) */
 	if (alist->parameter().type() == GainAutomation ||
 	    alist->parameter().type() == EnvelopeAutomation) {
 		y = gain_to_slider_position_with_max (y, Config->get_max_gain());
@@ -1190,10 +1190,8 @@ AutomationLine::model_to_view_coord (double& x, double& y) const
 		y = 1.0 - y;
 	} else if (alist->parameter().type() == PanWidthAutomation) {
 		y = .5 + y * .5;
-	} else if (alist->parameter().type() == PluginAutomation) {
-		y = (y - alist->get_min_y()) / (double)(alist->get_max_y()- alist->get_min_y());
 	} else {
-		y = y / (double)alist->parameter().max(); /* ... like this */
+		y = (y - alist->get_min_y()) / (double)(alist->get_max_y() - alist->get_min_y());
 	}
 
 	x = _time_converter->to (x) - _offset;

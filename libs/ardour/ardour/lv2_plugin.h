@@ -146,42 +146,16 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	Worker* worker() { return _worker; }
 
+	URIMap&       uri_map()       { return _uri_map; }
+	const URIMap& uri_map() const { return _uri_map; }
+
 	int work(uint32_t size, const void* data);
 	int work_response(uint32_t size, const void* data);
 
-	void set_property(uint32_t key, const Variant& value);
-	void get_supported_properties(std::vector<ParameterDescriptor>& descs);
-	void announce_property_values();
-
-	static URIMap _uri_map;
-
-	struct URIDs {
-		uint32_t atom_Chunk;
-		uint32_t atom_Path;
-		uint32_t atom_Sequence;
-		uint32_t atom_eventTransfer;
-		uint32_t atom_URID;
-		uint32_t atom_Blank;
-		uint32_t atom_Object;
-		uint32_t log_Error;
-		uint32_t log_Note;
-		uint32_t log_Warning;
-		uint32_t midi_MidiEvent;
-		uint32_t time_Position;
-		uint32_t time_bar;
-		uint32_t time_barBeat;
-		uint32_t time_beatUnit;
-		uint32_t time_beatsPerBar;
-		uint32_t time_beatsPerMinute;
-		uint32_t time_frame;
-		uint32_t time_speed;
-		uint32_t patch_Get;
-		uint32_t patch_Set;
-		uint32_t patch_property;
-		uint32_t patch_value;
-	};
-
-	static URIDs urids;
+	void                       set_property(uint32_t key, const Variant& value);
+	const PropertyDescriptors& get_supported_properties() const { return _property_descriptors; }
+	const ParameterDescriptor& get_property_descriptor(uint32_t id) const;
+	void                       announce_property_values();
 
   private:
 	struct Impl;
@@ -203,6 +177,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	PBD::ID       _insert_id;
 	uint32_t      _patch_port_in_index;
 	uint32_t      _patch_port_out_index;
+	URIMap&       _uri_map;
 
 	friend const void* lv2plugin_get_port_value(const char* port_symbol,
 	                                            void*       user_data,
@@ -226,6 +201,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	std::vector<PortFlags>         _port_flags;
 	std::vector<size_t>            _port_minimumSize;
 	std::map<std::string,uint32_t> _port_indices;
+
+	PropertyDescriptors _property_descriptors;
 
 	/// Message send to/from UI via ports
 	struct UIMessage {
@@ -282,6 +259,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	void init (const void* c_plugin, framecnt_t rate);
 	void allocate_atom_event_buffers ();
 	void run (pframes_t nsamples);
+
+	void load_supported_properties(PropertyDescriptors& descs);
 
 	void latency_compute_run ();
 	std::string do_save_preset (std::string);

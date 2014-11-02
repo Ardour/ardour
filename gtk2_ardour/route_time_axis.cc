@@ -2103,7 +2103,7 @@ RouteTimeAxisView::add_automation_child (Evoral::Parameter param, boost::shared_
 		request_redraw ();
 	}
 
-	if (!EventTypeMap::instance().is_midi_parameter(param)) {
+	if (!ARDOUR::parameter_is_midi((AutomationType)param.type())) {
 		/* MIDI-related parameters are always in the menu, there's no
 		   reason to rebuild the menu just because we added a automation
 		   lane for one of them. But if we add a non-MIDI automation

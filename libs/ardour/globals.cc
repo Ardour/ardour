@@ -85,6 +85,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/buffer_manager.h"
 #include "ardour/control_protocol_manager.h"
+#include "ardour/event_type_map.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_region.h"
 #include "ardour/midiport_manager.h"
@@ -100,6 +101,7 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/session_event.h"
 #include "ardour/source_factory.h"
+#include "ardour/uri_map.h"
 
 #include "audiographer/routines.h"
 
@@ -319,8 +321,10 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	SourceFactory::init ();
 	Analyser::init ();
 
-	/* singleton - first object is "it" */
+	/* singletons - first object is "it" */
 	(void) PluginManager::instance();
+	(void) URIMap::instance();
+	(void) EventTypeMap::instance();
 
         ProcessThread::init ();
 	/* the + 4 is a bit of a handwave. i don't actually know
@@ -330,24 +334,6 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
         BufferManager::init (hardware_concurrency() + 4); 
 
         PannerManager::instance().discover_panners();
-
-	// Initialize parameter metadata
-	EventTypeMap::instance().new_parameter(NullAutomation);
-	EventTypeMap::instance().new_parameter(GainAutomation);
-	EventTypeMap::instance().new_parameter(PanAzimuthAutomation);
-	EventTypeMap::instance().new_parameter(PanElevationAutomation);
-	EventTypeMap::instance().new_parameter(PanWidthAutomation);
-	EventTypeMap::instance().new_parameter(PluginAutomation);
-	EventTypeMap::instance().new_parameter(SoloAutomation);
-	EventTypeMap::instance().new_parameter(MuteAutomation);
-	EventTypeMap::instance().new_parameter(MidiCCAutomation);
-	EventTypeMap::instance().new_parameter(MidiPgmChangeAutomation);
-	EventTypeMap::instance().new_parameter(MidiPitchBenderAutomation);
-	EventTypeMap::instance().new_parameter(MidiChannelPressureAutomation);
-	EventTypeMap::instance().new_parameter(FadeInAutomation);
-	EventTypeMap::instance().new_parameter(FadeOutAutomation);
-	EventTypeMap::instance().new_parameter(EnvelopeAutomation);
-	EventTypeMap::instance().new_parameter(MidiCCAutomation);
 
 	ARDOUR::AudioEngine::create ();
 

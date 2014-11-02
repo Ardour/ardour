@@ -241,6 +241,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 		bool                                    update_pending;
 		char                                    ignore_change;
 		Gtk::Button                             automate_button;
+		Gtk::FileChooserButton*                 file_button;
 
 		/* output */
 

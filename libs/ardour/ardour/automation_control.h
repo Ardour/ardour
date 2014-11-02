@@ -29,6 +29,7 @@
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/automation_list.h"
+#include "ardour/parameter_descriptor.h"
 
 namespace ARDOUR {
 
@@ -42,11 +43,12 @@ class LIBARDOUR_API AutomationControl : public PBD::Controllable, public Evoral:
 {
 public:
 	AutomationControl(ARDOUR::Session&,
-			  const Evoral::Parameter& parameter,
-			  boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
-			  const std::string& name="");
+	                  const Evoral::Parameter&                  parameter,
+	                  const ParameterDescriptor&                desc,
+	                  boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
+	                  const std::string&                        name="");
 
-        ~AutomationControl ();
+	~AutomationControl ();
 
 	boost::shared_ptr<AutomationList> alist() const {
 		return boost::dynamic_pointer_cast<AutomationList>(_list);
@@ -78,16 +80,20 @@ public:
 	void set_value (double);
 	double get_value () const;
 
-	double lower() const { return parameter().min(); }
-	double upper() const { return parameter().max(); }
-	double normal() const { return parameter().normal(); }
-	bool toggled() const { return parameter().toggled(); }
+	double lower()   const { return _desc.lower; }
+	double upper()   const { return _desc.upper; }
+	double normal()  const { return _desc.normal; }
+	bool   toggled() const { return _desc.toggled; }
+
+	const ParameterDescriptor& desc() const { return _desc; }
 
 	const ARDOUR::Session& session() const { return _session; }
 
 protected:
 
 	ARDOUR::Session& _session;
+
+	const ParameterDescriptor _desc;
 };
 
 

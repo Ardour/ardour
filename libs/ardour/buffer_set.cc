@@ -34,6 +34,7 @@
 #include "ardour/midi_buffer.h"
 #include "ardour/port.h"
 #include "ardour/port_set.h"
+#include "ardour/uri_map.h"
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
 #include "lv2_evbuf.h"
@@ -192,8 +193,8 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 			_lv2_buffers.push_back(
 				std::make_pair(false, lv2_evbuf_new(buffer_capacity,
 				                                    LV2_EVBUF_EVENT,
-				                                    LV2Plugin::urids.atom_Chunk,
-				                                    LV2Plugin::urids.atom_Sequence)));
+				                                    URIMap::instance().urids.atom_Chunk,
+				                                    URIMap::instance().urids.atom_Sequence)));
 		}
 	}
 #endif
@@ -267,8 +268,8 @@ BufferSet::ensure_lv2_bufsize(bool input, size_t i, size_t buffer_capacity)
 		std::make_pair(false, lv2_evbuf_new(
 					buffer_capacity,
 					LV2_EVBUF_EVENT,
-					LV2Plugin::urids.atom_Chunk,
-					LV2Plugin::urids.atom_Sequence));
+					URIMap::instance().urids.atom_Chunk,
+					URIMap::instance().urids.atom_Sequence));
 }
 
 LV2_Evbuf*
@@ -297,7 +298,7 @@ BufferSet::forward_lv2_midi(LV2_Evbuf* buf, size_t i, bool purge_ardour_buffer)
 		uint32_t frames, subframes, type, size;
 		uint8_t* data;
 		lv2_evbuf_get(i, &frames, &subframes, &type, &size, &data);
-		if (type == LV2Plugin::urids.midi_MidiEvent) {
+		if (type == URIMap::instance().urids.midi_MidiEvent) {
 			mbuf.push_back(frames, size, data);
 		}
 	}
@@ -326,7 +327,7 @@ BufferSet::flush_lv2_midi(bool input, size_t i)
 			DEBUG_TRACE (PBD::DEBUG::LV2, string_compose ("\tByte[%1] = %2\n", x, (int) data[x]));
 		}
 #endif
-		if (type == LV2Plugin::urids.midi_MidiEvent) {
+		if (type == URIMap::instance().urids.midi_MidiEvent) {
 			// TODO: Make Ardour event buffers generic so plugins can communicate
 			mbuf.push_back(frames, size, data);
 		}

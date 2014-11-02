@@ -22,6 +22,7 @@
 
 #include "evoral/Sequence.hpp"
 #include "ardour/automatable.h"
+#include "ardour/event_type_map.h"
 
 namespace ARDOUR {
 

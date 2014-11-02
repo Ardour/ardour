@@ -46,9 +46,10 @@ namespace ARDOUR {
 class AutomationController : public Gtkmm2ext::BarController {
 public:
 	static boost::shared_ptr<AutomationController> create(
-			boost::shared_ptr<ARDOUR::Automatable> parent,
-			const Evoral::Parameter& param,
-			boost::shared_ptr<ARDOUR::AutomationControl> ac);
+		boost::shared_ptr<ARDOUR::Automatable>       parent,
+		const Evoral::Parameter&                     param,
+		const ARDOUR::ParameterDescriptor&           desc,
+		boost::shared_ptr<ARDOUR::AutomationControl> ac);
 
 	~AutomationController();
 
@@ -62,7 +63,9 @@ public:
 	void stop_updating ();
 
 private:
-	AutomationController (boost::shared_ptr<ARDOUR::Automatable> printer, boost::shared_ptr<ARDOUR::AutomationControl> ac, Gtk::Adjustment* adj);
+	AutomationController (boost::shared_ptr<ARDOUR::Automatable>       printer,
+	                      boost::shared_ptr<ARDOUR::AutomationControl> ac,
+	                      Gtk::Adjustment*                             adj);
 	std::string get_label (double&);
 
 	void start_touch();

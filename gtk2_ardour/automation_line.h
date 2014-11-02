@@ -60,9 +60,12 @@ public:
 		SelectedControlPoints = 0x4
 	};
 	
-	AutomationLine (const std::string& name, TimeAxisView&, ArdourCanvas::Item&,
-	                boost::shared_ptr<ARDOUR::AutomationList>,
+	AutomationLine (const std::string&                                 name,
+	                TimeAxisView&                                      tv,
+	                ArdourCanvas::Item&                                parent,
+	                boost::shared_ptr<ARDOUR::AutomationList>          al,
 	                Evoral::TimeConverter<double, ARDOUR::framepos_t>* converter = 0);
+
 	virtual ~AutomationLine ();
 
 	void queue_reset ();

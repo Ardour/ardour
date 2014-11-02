@@ -37,10 +37,10 @@
 #include "evoral/Control.hpp"
 #include "evoral/SMF.hpp"
 
-#include "ardour/event_type_map.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_state_tracker.h"
+#include "ardour/parameter_types.h"
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
 #include "ardour/debug.h"
@@ -263,7 +263,7 @@ SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination,
 			continue;
 		}
 
-		ev_type = EventTypeMap::instance().midi_event_type(ev_buffer[0]);
+		ev_type = midi_parameter_type(ev_buffer[0]);
 
 		DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked delta %1, time %2, buf[0] %3, type %4\n",
 								  ev_delta_t, time, ev_buffer[0], ev_type));
@@ -361,7 +361,7 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source,
 		time -= position;
 			
 		ev.set(buf, size, time);
-		ev.set_event_type(EventTypeMap::instance().midi_event_type(ev.buffer()[0]));
+		ev.set_event_type(midi_parameter_type(ev.buffer()[0]));
 		ev.set_id(Evoral::next_event_id());
 
 		if (!(ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex())) {
@@ -645,7 +645,7 @@ SMFSource::load_model (bool lock, bool force_reload)
 				if (!have_event_id) {
 					event_id = Evoral::next_event_id();
 				}
-				uint32_t event_type = EventTypeMap::instance().midi_event_type(buf[0]);
+				uint32_t event_type = midi_parameter_type(buf[0]);
 				double   event_time = time / (double) ppqn();
 #ifndef NDEBUG
 				std::string ss;

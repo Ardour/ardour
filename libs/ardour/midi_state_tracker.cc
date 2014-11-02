@@ -25,9 +25,9 @@
 #include "evoral/EventSink.hpp"
 
 #include "ardour/debug.h"
-#include "ardour/event_type_map.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_state_tracker.h"
+#include "ardour/parameter_types.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -162,7 +162,7 @@ MidiStateTracker::resolve_notes (Evoral::EventSink<framepos_t> &dst, framepos_t 
 				/* note that we do not care about failure from
 				   write() ... should we warn someone ?
 				*/
-				dst.write (time, EventTypeMap::instance().midi_event_type (buf[0]), 3, buf);
+				dst.write (time, midi_parameter_type (buf[0]), 3, buf);
 				_active_notes[note + 128 * channel]--;
 				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: EVS-resolved note %2/%3 at %4\n", 
 										       this, (int) note, (int) channel, time));

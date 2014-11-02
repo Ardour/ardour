@@ -21,6 +21,7 @@
 #define __ardour_parameter_descriptor_h__
 
 #include "ardour/variant.h"
+#include "evoral/Parameter.hpp"
 
 namespace ARDOUR {
 
@@ -32,9 +33,29 @@ typedef std::map<const std::string, const float> ScalePoints;
  */
 struct ParameterDescriptor
 {
+	ParameterDescriptor(const Evoral::Parameter& parameter)
+		: key((uint32_t)-1)
+		, datatype(Variant::VOID)
+		, normal(parameter.normal())
+		, lower(parameter.min())
+		, upper(parameter.max())
+		, step(0)
+		, smallstep((upper - lower) / 100.0)
+		, largestep((upper - lower) / 10.0)
+		, integer_step(false)
+		, toggled(parameter.toggled())
+		, logarithmic(false)
+		, sr_dependent(false)
+		, min_unbound(0)
+		, max_unbound(0)
+		, enumeration(false)
+		, midinote(false)
+	{}
+
 	ParameterDescriptor()
 		: key((uint32_t)-1)
 		, datatype(Variant::VOID)
+		, normal(0)
 		, lower(0)
 		, upper(0)
 		, step(0)
@@ -54,6 +75,7 @@ struct ParameterDescriptor
 	boost::shared_ptr<ScalePoints> scale_points;
 	uint32_t                       key;  ///< for properties
 	Variant::Type                  datatype;  ///< for properties
+	float                          normal;
 	float                          lower;  ///< for frequencies, this is in Hz (not a fraction of the sample rate)
 	float                          upper;  ///< for frequencies, this is in Hz (not a fraction of the sample rate)
 	float                          step;

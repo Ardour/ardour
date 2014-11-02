@@ -29,14 +29,15 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-AutomationControl::AutomationControl(
-		ARDOUR::Session& session,
-		const Evoral::Parameter& parameter,
-		boost::shared_ptr<ARDOUR::AutomationList> list,
-		const string& name)
+AutomationControl::AutomationControl(ARDOUR::Session&                          session,
+                                     const Evoral::Parameter&                  parameter,
+                                     const ParameterDescriptor&                desc,
+                                     boost::shared_ptr<ARDOUR::AutomationList> list,
+                                     const string&                             name)
 	: Controllable (name.empty() ? EventTypeMap::instance().to_symbol(parameter) : name)
 	, Evoral::Control(parameter, list)
 	, _session(session)
+	, _desc(desc)
 {
 }
 

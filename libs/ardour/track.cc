@@ -178,7 +178,11 @@ Track::freeze_state() const
 }
 
 Track::RecEnableControl::RecEnableControl (boost::shared_ptr<Track> t)
-	: AutomationControl (t->session(), RecEnableAutomation, boost::shared_ptr<AutomationList>(), X_("recenable"))
+	: AutomationControl (t->session(),
+	                     RecEnableAutomation,
+	                     ParameterDescriptor(Evoral::Parameter(RecEnableAutomation)),
+	                     boost::shared_ptr<AutomationList>(),
+	                     X_("recenable"))
 	, track (t)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(RecEnableAutomation)));

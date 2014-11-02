@@ -84,7 +84,8 @@ template<typename Time>
 struct EventsSortByTimeAndType {
     bool operator() (Evoral::Event<Time>* a, Evoral::Event<Time>* b) {
 	    if (a->time() == b->time()) {
-		    if (EventTypeMap::instance().type_is_midi (a->event_type()) && EventTypeMap::instance().type_is_midi (b->event_type())) {
+		    if (parameter_is_midi ((AutomationType)a->event_type()) &&
+		        parameter_is_midi ((AutomationType)b->event_type())) {
 			    /* negate return value since we must return whether
 			     * or not a should sort before b, not b before a
 			     */

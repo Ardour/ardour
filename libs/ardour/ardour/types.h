@@ -127,6 +127,7 @@ namespace ARDOUR {
 		PanFrontBackAutomation,
 		PanLFEAutomation,
 		PluginAutomation,
+		PluginPropertyAutomation,
 		SoloAutomation,
 		MuteAutomation,
 		MidiCCAutomation,

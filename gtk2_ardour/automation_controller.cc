@@ -36,7 +36,9 @@
 using namespace ARDOUR;
 using namespace Gtk;
 
-AutomationController::AutomationController(boost::shared_ptr<Automatable> printer, boost::shared_ptr<AutomationControl> ac, Adjustment* adj)
+AutomationController::AutomationController(boost::shared_ptr<Automatable>       printer,
+                                           boost::shared_ptr<AutomationControl> ac,
+                                           Adjustment*                          adj)
 	: BarController (*adj, ac)
 	, _ignore_change(false)
 	, _printer (printer)
@@ -64,21 +66,27 @@ AutomationController::~AutomationController()
 }
 
 boost::shared_ptr<AutomationController>
-AutomationController::create(
-		boost::shared_ptr<Automatable> printer,
-		const Evoral::Parameter& param,
-		boost::shared_ptr<AutomationControl> ac)
+AutomationController::create(boost::shared_ptr<Automatable>       printer,
+                             const Evoral::Parameter&             param,
+                             const ParameterDescriptor&           desc,
+                             boost::shared_ptr<AutomationControl> ac)
 {
-	double const lo = ac->internal_to_interface(param.min());
-	double const up = ac->internal_to_interface(param.max());
+	const double lo        = ac->internal_to_interface(desc.lower);
+	const double up        = ac->internal_to_interface(desc.upper);
+	const double normal    = ac->internal_to_interface(desc.normal);
+	double       smallstep = desc.smallstep;
+	double       largestep = desc.largestep;
+	if (smallstep == 0.0) {
+		smallstep = (up - lo) / 100;
+	}
+	if (largestep == 0.0) {
+		largestep = (up - lo) / 10;
+	}
+	smallstep = ac->internal_to_interface(smallstep);
+	largestep = ac->internal_to_interface(largestep);
+
 	Gtk::Adjustment* adjustment = manage (
-			new Gtk::Adjustment (
-				ac->internal_to_interface(param.normal()),
-				lo, up,
-				// TODO we should use explicit step-sizes if provided by Plugin::ParameterDescriptor
-				(up - lo) / 100, (up - lo) / 10
-				)
-			);
+		new Gtk::Adjustment (normal, lo, up, smallstep, largestep));
 
 	assert (ac);
 	assert(ac->parameter() == param);

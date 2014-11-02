@@ -84,7 +84,7 @@ public:
 	struct MidiControl : public AutomationControl {
 		MidiControl(MidiTrack* route, const Evoral::Parameter& param,
 			    boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>())
-			: AutomationControl (route->session(), param, al)
+			: AutomationControl (route->session(), param, ParameterDescriptor(param), al)
 			, _route (route)
 		{}
 

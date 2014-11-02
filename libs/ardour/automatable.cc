@@ -31,8 +31,10 @@
 #include "ardour/midi_track.h"
 #include "ardour/pan_controllable.h"
 #include "ardour/pannable.h"
+#include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"
+#include "ardour/uri_map.h"
 
 #include "i18n.h"
 
@@ -146,9 +148,9 @@ Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
 	}
 
 	ControlSet::add_control (ac);
-	_can_automate_list.insert (param);
 
 	if (al) {
+		_can_automate_list.insert (param);
 		automation_list_automation_state_changed (param, al->automation_state ()); // sync everything up
 	}
 }
@@ -170,6 +172,8 @@ Automatable::describe_parameter (Evoral::Parameter param)
 		return string_compose("Bender [%1]", int(param.channel()) + 1);
 	} else if (param.type() == MidiChannelPressureAutomation) {
 		return string_compose("Pressure [%1]", int(param.channel()) + 1);
+	} else if (param.type() == PluginPropertyAutomation) {
+		return string_compose("Property %1", URIMap::instance().id_to_uri(param.id()));
 	} else {
 		return EventTypeMap::instance().to_symbol(param);
 	}
@@ -251,7 +255,7 @@ Automatable::get_automation_xml_state ()
 
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 		boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(li->second->list());
-		if (!l->empty()) {
+		if (l && !l->empty()) {
 			node->add_child_nocopy (l->get_state ());
 		}
 	}
@@ -394,6 +398,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 {
 	boost::shared_ptr<AutomationList> list(new AutomationList(param));
 	Evoral::Control* control = NULL;
+	ParameterDescriptor desc(param);
 	if (param.type() >= MidiCCAutomation && param.type() <= MidiChannelPressureAutomation) {
 		MidiTrack* mt = dynamic_cast<MidiTrack*>(this);
 		if (mt) {
@@ -405,9 +410,23 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == PluginAutomation) {
 		PluginInsert* pi = dynamic_cast<PluginInsert*>(this);
 		if (pi) {
-			control = new PluginInsert::PluginControl(pi, param);
+			pi->plugin(0)->get_parameter_descriptor(param.id(), desc);
+			control = new PluginInsert::PluginControl(pi, param, desc);
 		} else {
 			warning << "PluginAutomation for non-Plugin" << endl;
+		}
+	} else if (param.type() == PluginPropertyAutomation) {
+		PluginInsert* pi = dynamic_cast<PluginInsert*>(this);
+		if (pi) {
+			desc = pi->plugin(0)->get_property_descriptor(param.id());
+			if (desc.datatype != Variant::VOID) {
+				if (!Variant::type_is_numeric(desc.datatype)) {
+					list.reset();  // Can't automate non-numeric data yet
+				}
+				control = new PluginInsert::PluginPropertyControl(pi, param, desc, list);
+			}
+		} else {
+			warning << "PluginPropertyAutomation for non-Plugin" << endl;
 		}
 	} else if (param.type() == GainAutomation) {
 		Amp* amp = dynamic_cast<Amp*>(this);
@@ -426,7 +445,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	}
 
 	if (!control) {
-		control = new AutomationControl(_a_session, param);
+		control = new AutomationControl(_a_session, param, desc);
 	}
 
 	control->set_list(list);

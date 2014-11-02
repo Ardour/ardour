@@ -239,9 +239,9 @@ GenericPluginUI::build ()
 	frame->add (*box);
 	hpacker.pack_start(*frame, true, true);
 
-	/* find all ports. build control elements for all appropriate control ports */
-	std::vector<ControlUI *> cui_controls_list;
+	std::vector<ControlUI *> control_uis;
 
+	// Build a ControlUI for each control port
 	for (i = 0; i < plugin->parameter_count(); ++i) {
 
 		if (plugin->parameter_is_control (i)) {
@@ -274,76 +274,72 @@ GenericPluginUI::build ()
 				ARDOUR_UI::instance()->set_tip(cui, param_docs.c_str());
 			}
 
-			if (cui->controller || cui->clickbox || cui->combo) {
-				// Get all of the controls into a list, so that
-				// we can lay them out a bit more nicely later.
-				cui_controls_list.push_back(cui);
-			} else if (cui->button) {
-
-				if (!is_scrollable && button_row == button_rows) {
-					button_row = 0;
-					if (++button_col == button_cols) {
-						button_cols += 2;
-						button_table.resize (button_rows, button_cols);
-					}
-				}
-
-				button_table.attach (*cui, button_col, button_col + 1, button_row, button_row+1,
-						     FILL|EXPAND, FILL);
-				button_row++;
-
-			} else if (cui->display) {
-
-				output_table.attach (*cui, output_col, output_col + 1, output_row, output_row+1,
-						     FILL|EXPAND, FILL);
-
- 				// TODO: The meters should be divided into multiple rows
-
-				if (++output_col == output_cols) {
-					output_cols ++;
-					output_table.resize (output_rows, output_cols);
-				}
-			}
-		} 
+			control_uis.push_back(cui);
+		}
 	}
 
-	// Add property controls (currently file chooser button for paths only)
-	typedef std::vector<ParameterDescriptor> Descs;
-	Descs descs;
-	plugin->get_supported_properties(descs);
-	for (Descs::const_iterator d = descs.begin(); d != descs.end(); ++d) {
-		if (d->datatype == Variant::PATH) {
-			// Create/add label
-			Gtk::Label* label = manage(new Label(d->label));
-			button_table.attach(*label,
-			                    0, button_cols, button_row, button_row + 1,
-			                    FILL|EXPAND, FILL);
-			++button_row;
+	// Build a ControlUI for each property
+	const Plugin::PropertyDescriptors& descs = plugin->get_supported_properties();
+	for (Plugin::PropertyDescriptors::const_iterator d = descs.begin(); d != descs.end(); ++d) {
+		const ParameterDescriptor& desc = d->second;
 
-			// Create/add controller
-			Gtk::FileChooserButton* widget = manage(
-				new Gtk::FileChooserButton(Gtk::FILE_CHOOSER_ACTION_OPEN));
-			widget->set_title(d->label);
-			_property_controls.insert(std::make_pair(d->key, widget));
-			button_table.attach(*widget,
-			                    0, button_cols, button_row, button_row + 1,
-			                    FILL|EXPAND, FILL);
-			++button_row;
+		boost::shared_ptr<ARDOUR::AutomationControl> c
+			= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
+				insert->control(Evoral::Parameter(PluginPropertyAutomation, 0, desc.key)));
 
-			// Connect signals
-			widget->signal_file_set().connect(
-				sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::set_property), *d, widget));
-			plugin->PropertyChanged.connect(*this, invalidator(*this),
-			                                boost::bind(&GenericPluginUI::property_changed, this, _1, _2),
-			                                gui_context());
-		} else {
-			// TODO: widgets for other datatypes, use ControlUI?
-			std::cerr << "warning: unsupported property " << d->key
-			          << " type " << d->datatype << std::endl;
+		if (!c) {
+			error << string_compose(_("Plugin Editor: no control for property %1"), desc.key) << endmsg;
+			continue;
 		}
+
+		ControlUI* cui = build_control_ui(desc, c, true);
+		if (!cui) {
+			error << string_compose(_("Plugin Editor: could not build control element for property %1"),
+			                        desc.key) << endmsg;
+			continue;
+		}
+
+		control_uis.push_back(cui);
 	}
 	if (!descs.empty()) {
 		plugin->announce_property_values();
+	}
+
+	// Add special controls to UI, and build list of normal controls to be layed out later
+	std::vector<ControlUI *> cui_controls_list;
+	for (i = 0; i < control_uis.size(); ++i) {
+		ControlUI* cui = control_uis[i];
+
+		if (cui->controller || cui->clickbox || cui->combo) {
+			// Get all of the controls into a list, so that
+			// we can lay them out a bit more nicely later.
+			cui_controls_list.push_back(cui);
+		} else if (cui->button || cui->file_button) {
+
+			if (!is_scrollable && button_row == button_rows) {
+				button_row = 0;
+				if (++button_col == button_cols) {
+					button_cols += 2;
+					button_table.resize (button_rows, button_cols);
+				}
+			}
+
+			button_table.attach (*cui, button_col, button_col + 1, button_row, button_row+1,
+			                     FILL|EXPAND, FILL);
+			button_row++;
+
+		} else if (cui->display) {
+
+			output_table.attach (*cui, output_col, output_col + 1, output_row, output_row+1,
+			                     FILL|EXPAND, FILL);
+
+			// TODO: The meters should be divided into multiple rows
+
+			if (++output_col == output_cols) {
+				output_cols ++;
+				output_table.resize (output_rows, output_cols);
+			}
+		}
 	}
 
 	// Iterate over the list of controls to find which adjacent controls
@@ -455,6 +451,7 @@ GenericPluginUI::build ()
 
 GenericPluginUI::ControlUI::ControlUI ()
 	: automate_button (X_("")) // force creation of a label
+	, file_button(NULL)
 {
 	automate_button.set_name ("PluginAutomateButton");
 	ARDOUR_UI::instance()->set_tip (automate_button, _("Automation control"));
@@ -652,10 +649,35 @@ GenericPluginUI::build_control_ui (const ParameterDescriptor&           desc,
 			return control_ui;
 		}
 
+		if (desc.datatype == Variant::PATH) {
+
+			/* Build a file selector button */
+
+			// Create/add controller
+			control_ui->file_button = manage(new Gtk::FileChooserButton(Gtk::FILE_CHOOSER_ACTION_OPEN));
+			control_ui->file_button->set_title(desc.label);
+
+			control_ui->pack_start (control_ui->label, true, true);
+			control_ui->pack_start (*control_ui->file_button, true, true);
+
+			// Connect signals (TODO: do this via the Control)
+			control_ui->file_button->signal_file_set().connect(
+				sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::set_property),
+				           desc, control_ui->file_button));
+			plugin->PropertyChanged.connect(*this, invalidator(*this),
+			                                boost::bind(&GenericPluginUI::property_changed, this, _1, _2),
+			                                gui_context());
+
+			_property_controls.insert(std::make_pair(desc.key, control_ui->file_button));
+			control_ui->file_button = control_ui->file_button;
+
+			return control_ui;
+		}
+
 		/* create the controller */
 
 		if (mcontrol) {
-			control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), mcontrol);
+			control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), desc, mcontrol);
 		}
 
 		/* XXX this code is not right yet, because it doesn't handle
@@ -663,7 +685,6 @@ GenericPluginUI::build_control_ui (const ParameterDescriptor&           desc,
 		*/
 
 		Adjustment* adj = control_ui->controller->adjustment();
-		boost::shared_ptr<PluginInsert::PluginControl> pc = boost::dynamic_pointer_cast<PluginInsert::PluginControl> (control_ui->control);
 
 		if (desc.integer_step) {
 			control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox");

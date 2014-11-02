@@ -29,11 +29,15 @@
 
 namespace ARDOUR {
 
+class URIMap;
+
 /** This is the interface Ardour provides to Evoral about what
  * parameter and event types/ranges/names etc. to use.
  */
 class LIBARDOUR_API EventTypeMap : public Evoral::TypeMap {
 public:
+	static EventTypeMap& instance();
+
 	bool     type_is_midi(uint32_t type) const;
 	uint8_t  parameter_midi_type(const Evoral::Parameter& param) const;
 	uint32_t midi_event_type(uint8_t status) const;
@@ -46,10 +50,14 @@ public:
 
 	bool                 is_midi_parameter(const Evoral::Parameter& param);
 
-	static EventTypeMap& instance() { return event_type_map; }
+	URIMap& uri_map() { return _uri_map; }
 
 private:
-	static EventTypeMap event_type_map;
+	EventTypeMap(URIMap& uri_map) : _uri_map(uri_map) {}
+
+	URIMap& _uri_map;
+
+	static EventTypeMap* event_type_map;
 };
 
 } // namespace ARDOUR

@@ -256,7 +256,17 @@ PluginInsert::create_automatable_parameters ()
 			param.set_range (desc.lower, desc.upper, _plugins.front()->default_value(i->id()), desc.toggled);
 			can_automate (param);
 			boost::shared_ptr<AutomationList> list(new AutomationList(param));
-			add_control (boost::shared_ptr<AutomationControl> (new PluginControl(this, param, list)));
+			add_control (boost::shared_ptr<AutomationControl> (new PluginControl(this, param, desc, list)));
+		} else if (i->type() == PluginPropertyAutomation) {
+			Evoral::Parameter param(*i);
+			const ParameterDescriptor& desc = _plugins.front()->get_property_descriptor(param.id());
+			if (desc.datatype != Variant::VOID) {
+				boost::shared_ptr<AutomationList> list;
+				if (Variant::type_is_numeric(desc.datatype)) {
+					list = boost::shared_ptr<AutomationList>(new AutomationList(param));
+				}
+				add_control (boost::shared_ptr<AutomationControl> (new PluginPropertyControl(this, param, desc, list)));
+			}
 		}
 	}
 }
@@ -368,7 +378,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 			boost::shared_ptr<AutomationControl> c
 				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
 
-			if (c->parameter().type() == PluginAutomation && c->automation_playback()) {
+			if (c->list() && c->automation_playback()) {
 				bool valid;
 
 				const float val = c->list()->rt_safe_eval (now, valid);
@@ -1167,11 +1177,15 @@ PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 string
 PluginInsert::describe_parameter (Evoral::Parameter param)
 {
-	if (param.type() != PluginAutomation) {
-		return Automatable::describe_parameter(param);
+	if (param.type() == PluginAutomation) {
+		return _plugins[0]->describe_parameter (param);
+	} else if (param.type() == PluginPropertyAutomation) {
+		boost::shared_ptr<AutomationControl> c(automation_control(param));
+		if (c && !c->desc().label.empty()) {
+			return c->desc().label;
+		}
 	}
-
-	return _plugins[0]->describe_parameter (param);
+	return Automatable::describe_parameter(param);
 }
 
 ARDOUR::framecnt_t
@@ -1190,19 +1204,16 @@ PluginInsert::type ()
        return plugin()->get_info()->type;
 }
 
-PluginInsert::PluginControl::PluginControl (PluginInsert* p, const Evoral::Parameter &param, boost::shared_ptr<AutomationList> list)
-	: AutomationControl (p->session(), param, list, p->describe_parameter(param))
+PluginInsert::PluginControl::PluginControl (PluginInsert*                     p,
+                                            const Evoral::Parameter&          param,
+                                            const ParameterDescriptor&        desc,
+                                            boost::shared_ptr<AutomationList> list)
+	: AutomationControl (p->session(), param, desc, list, p->describe_parameter(param))
 	, _plugin (p)
 {
-	ParameterDescriptor desc;
-	boost::shared_ptr<Plugin> plugin = p->plugin (0);
-	
-	alist()->reset_default (plugin->default_value (param.id()));
-
-	plugin->get_parameter_descriptor (param.id(), desc);
-	_logarithmic = desc.logarithmic;
-	_sr_dependent = desc.sr_dependent;
-	_toggled = desc.toggled;
+	if (alist()) {
+		alist()->reset_default (desc.normal);
+	}
 
 	if (desc.toggled) {
 		set_flags(Controllable::Toggle);
@@ -1232,7 +1243,7 @@ PluginInsert::PluginControl::internal_to_interface (double val) const
 {
 	val = Controllable::internal_to_interface(val);
 	
-	if (_logarithmic) {
+	if (_desc.logarithmic) {
 		if (val > 0) {
 			val = pow (val, 1/1.5);
 		} else {
@@ -1246,9 +1257,9 @@ PluginInsert::PluginControl::internal_to_interface (double val) const
 double
 PluginInsert::PluginControl::interface_to_internal (double val) const
 {
-	if (_logarithmic) {
+	if (_desc.logarithmic) {
 		if (val <= 0) {
-			val= 0;
+			val = 0;
 		} else {
 			val = pow (val, 1.5);
 		}
@@ -1277,6 +1288,62 @@ PluginInsert::PluginControl::get_value () const
 {
 	/* FIXME: probably should be taking out some lock here.. */
 	return _plugin->get_parameter (_list->parameter());
+}
+
+PluginInsert::PluginPropertyControl::PluginPropertyControl (PluginInsert*                     p,
+                                                            const Evoral::Parameter&          param,
+                                                            const ParameterDescriptor&        desc,
+                                                            boost::shared_ptr<AutomationList> list)
+	: AutomationControl (p->session(), param, desc, list)
+	, _plugin (p)
+{
+	if (alist()) {
+		alist()->set_yrange (desc.lower, desc.upper);
+		alist()->reset_default (desc.normal);
+	}
+
+	if (desc.toggled) {
+		set_flags(Controllable::Toggle);
+	}
+}
+
+void
+PluginInsert::PluginPropertyControl::set_value (double user_val)
+{
+	/* Old numeric set_value(), coerce to appropriate datatype if possible.
+	   This is lossy, but better than nothing until Ardour's automation system
+	   can handle various datatypes all the way down. */
+	const Variant value(_desc.datatype, user_val);
+	if (value.type() == Variant::VOID) {
+		error << "set_value(double) called for non-numeric property" << endmsg;
+		return;
+	}
+
+	for (Plugins::iterator i = _plugin->_plugins.begin(); i != _plugin->_plugins.end(); ++i) {
+		(*i)->set_property(_list->parameter().id(), value);
+	}
+
+	_value = value;
+	AutomationControl::set_value(user_val);
+}
+
+XMLNode&
+PluginInsert::PluginPropertyControl::get_state ()
+{
+	stringstream ss;
+
+	XMLNode& node (AutomationControl::get_state());
+	ss << parameter().id();
+	node.add_property (X_("property"), ss.str());
+	node.remove_property (X_("value"));
+
+	return node;
+}
+
+double
+PluginInsert::PluginPropertyControl::get_value () const
+{
+	return _value.to_double();
 }
 
 boost::shared_ptr<Plugin>

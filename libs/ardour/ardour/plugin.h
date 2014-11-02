@@ -231,6 +231,8 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	void set_cycles (uint32_t c) { _cycles = c; }
 	cycles_t cycles() const { return _cycles; }
 
+	typedef std::map<uint32_t, ParameterDescriptor> PropertyDescriptors;
+
 	/** Get a descrption of all properties supported by this plugin.
 	 *
 	 * Properties are distinct from parameters in that they are potentially
@@ -239,7 +241,15 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	 * For LV2 plugins, properties are implemented by sending/receiving set/get
 	 * messages to/from the plugin via event ports.
 	 */
-	virtual void get_supported_properties(std::vector<ParameterDescriptor>& descs) {}
+	virtual const PropertyDescriptors& get_supported_properties() const {
+		static const PropertyDescriptors nothing;
+		return nothing;
+	}
+
+	virtual const ParameterDescriptor& get_property_descriptor(uint32_t id) const {
+		static const ParameterDescriptor nothing;
+		return nothing;
+	}
 
 	/** Set a property from the UI.
 	 *

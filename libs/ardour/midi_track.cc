@@ -30,6 +30,7 @@
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_port.h"
 #include "ardour/midi_track.h"
+#include "ardour/parameter_types.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
 #include "ardour/session.h"
@@ -618,7 +619,7 @@ MidiTrack::write_immediate_event(size_t size, const uint8_t* buf)
 		cerr << "WARNING: Ignoring illegal immediate MIDI event" << endl;
 		return false;
 	}
-	const uint32_t type = EventTypeMap::instance().midi_event_type(buf[0]);
+	const uint32_t type = midi_parameter_type(buf[0]);
 	return (_immediate_events.write (0, type, size, buf) == size);
 }
 

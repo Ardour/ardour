@@ -79,7 +79,7 @@ public:
 	struct GainControl : public AutomationControl {
 		GainControl (std::string name, Session& session, Amp* a, const Evoral::Parameter &param,
 				boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>() )
-			: AutomationControl (session, param, al, name)
+			: AutomationControl (session, param, ParameterDescriptor(param), al, name)
 			, _amp (a) {
 			set_flags (Controllable::Flag (flags() | Controllable::GainLike));
 			alist()->reset_default (1.0);

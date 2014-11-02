@@ -18,9 +18,12 @@
 
 */
 
+#include <ctype.h>
 #include <cstdio>
 #include "ardour/types.h"
 #include "ardour/event_type_map.h"
+#include "ardour/parameter_types.h"
+#include "ardour/uri_map.h"
 #include "evoral/Parameter.hpp"
 #include "evoral/midi_events.h"
 #include "evoral/MIDIParameters.hpp"
@@ -31,44 +34,58 @@ using namespace std;
 
 namespace ARDOUR {
 
-EventTypeMap EventTypeMap::event_type_map;
+EventTypeMap* EventTypeMap::event_type_map;
+
+EventTypeMap&
+EventTypeMap::instance()
+{
+	if (!EventTypeMap::event_type_map) {
+		EventTypeMap::event_type_map = new EventTypeMap(URIMap::instance());
+
+		// Initialize parameter metadata
+		EventTypeMap::event_type_map->new_parameter(NullAutomation);
+		EventTypeMap::event_type_map->new_parameter(GainAutomation);
+		EventTypeMap::event_type_map->new_parameter(PanAzimuthAutomation);
+		EventTypeMap::event_type_map->new_parameter(PanElevationAutomation);
+		EventTypeMap::event_type_map->new_parameter(PanWidthAutomation);
+		EventTypeMap::event_type_map->new_parameter(PluginAutomation);
+		EventTypeMap::event_type_map->new_parameter(PluginPropertyAutomation);
+		EventTypeMap::event_type_map->new_parameter(SoloAutomation);
+		EventTypeMap::event_type_map->new_parameter(MuteAutomation);
+		EventTypeMap::event_type_map->new_parameter(MidiCCAutomation);
+		EventTypeMap::event_type_map->new_parameter(MidiPgmChangeAutomation);
+		EventTypeMap::event_type_map->new_parameter(MidiPitchBenderAutomation);
+		EventTypeMap::event_type_map->new_parameter(MidiChannelPressureAutomation);
+		EventTypeMap::event_type_map->new_parameter(FadeInAutomation);
+		EventTypeMap::event_type_map->new_parameter(FadeOutAutomation);
+		EventTypeMap::event_type_map->new_parameter(EnvelopeAutomation);
+		EventTypeMap::event_type_map->new_parameter(MidiCCAutomation);
+	}
+	return *EventTypeMap::event_type_map;
+}
 
 bool
 EventTypeMap::type_is_midi(uint32_t type) const
 {
-	return (type >= MidiCCAutomation) && (type <= MidiChannelPressureAutomation);
+	return ARDOUR::parameter_is_midi((AutomationType)type);
 }
 
 bool
 EventTypeMap::is_midi_parameter(const Evoral::Parameter& param)
 {
-		return type_is_midi(param.type());
+	return type_is_midi(param.type());
 }
 
 uint8_t
 EventTypeMap::parameter_midi_type(const Evoral::Parameter& param) const
 {
-	switch (param.type()) {
-	case MidiCCAutomation:              return MIDI_CMD_CONTROL; break;
-	case MidiPgmChangeAutomation:       return MIDI_CMD_PGM_CHANGE; break;
-	case MidiChannelPressureAutomation: return MIDI_CMD_CHANNEL_PRESSURE; break;
-	case MidiPitchBenderAutomation:     return MIDI_CMD_BENDER; break;
-	case MidiSystemExclusiveAutomation: return MIDI_CMD_COMMON_SYSEX; break;
-	default: return 0;
-	}
+	return ARDOUR::parameter_midi_type((AutomationType)param.type());
 }
 
 uint32_t
 EventTypeMap::midi_event_type(uint8_t status) const
 {
-	switch (status & 0xF0) {
-	case MIDI_CMD_CONTROL:          return MidiCCAutomation; break;
-	case MIDI_CMD_PGM_CHANGE:       return MidiPgmChangeAutomation; break;
-	case MIDI_CMD_CHANNEL_PRESSURE: return MidiChannelPressureAutomation; break;
-	case MIDI_CMD_BENDER:           return MidiPitchBenderAutomation; break;
-	case MIDI_CMD_COMMON_SYSEX:     return MidiSystemExclusiveAutomation; break;
-	default: return 0;
-	}
+	return (uint32_t)ARDOUR::midi_parameter_type(status);
 }
 
 bool
@@ -182,6 +199,8 @@ EventTypeMap::new_parameter(uint32_t type, uint8_t channel, uint32_t id) const
 		Evoral::MIDI::bender_range(min, max, normal); break;
 	case MidiSystemExclusiveAutomation:
 		return p;
+	case PluginPropertyAutomation:
+		return p;
 	}
 
 	p.set_range(type, min, max, normal, false);
@@ -220,6 +239,14 @@ EventTypeMap::new_parameter(const string& str) const
 	} else if (str.length() > 10 && str.substr(0, 10) == "parameter-") {
 		p_type = PluginAutomation;
 		p_id = atoi(str.c_str()+10);
+	} else if (str.length() > 9 && str.substr(0, 9) == "property-") {
+		p_type = PluginPropertyAutomation;
+		const char* name = str.c_str() + 9;
+		if (isdigit(str.c_str()[0])) {
+			p_id = atoi(name);
+		} else {
+			p_id = _uri_map.uri_to_id(name);
+		}
 	} else if (str.length() > 7 && str.substr(0, 7) == "midicc-") {
 		p_type = MidiCCAutomation;
 		uint32_t channel = 0;
@@ -286,6 +313,13 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		return "envelope";
 	} else if (t == PluginAutomation) {
 		return string_compose("parameter-%1", param.id());
+	} else if (t == PluginPropertyAutomation) {
+		const char* uri = _uri_map.id_to_uri(param.id());
+		if (uri) {
+			return string_compose("property-%1", uri);
+		} else {
+			return string_compose("property-%1", param.id());
+		}
 	} else if (t == MidiCCAutomation) {
 		return string_compose("midicc-%1-%2", int(param.channel()), param.id());
 	} else if (t == MidiPgmChangeAutomation) {

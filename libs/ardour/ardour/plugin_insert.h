@@ -28,6 +28,7 @@
 #include "ardour/ardour.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
+#include "ardour/parameter_descriptor.h"
 #include "ardour/processor.h"
 #include "ardour/automation_control.h"
 
@@ -81,10 +82,13 @@ class LIBARDOUR_API PluginInsert : public Processor
 	void realtime_locate ();
 	void monitoring_changed ();
 
+	/** A control that manipulates a plugin parameter (control port). */
 	struct PluginControl : public AutomationControl
 	{
-		PluginControl (PluginInsert* p, const Evoral::Parameter &param,
-				boost::shared_ptr<AutomationList> list = boost::shared_ptr<AutomationList>());
+		PluginControl (PluginInsert*                     p,
+		               const Evoral::Parameter&          param,
+		               const ParameterDescriptor&        desc,
+		               boost::shared_ptr<AutomationList> list=boost::shared_ptr<AutomationList>());
 
 		void set_value (double val);
 		double get_value (void) const;
@@ -95,9 +99,24 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	private:
 		PluginInsert* _plugin;
-		bool _logarithmic;
-		bool _sr_dependent;
-		bool _toggled;
+	};
+
+	/** A control that manipulates a plugin property (message). */
+	struct PluginPropertyControl : public AutomationControl
+	{
+		PluginPropertyControl (PluginInsert*                     p,
+		                       const Evoral::Parameter&          param,
+		                       const ParameterDescriptor&        desc,
+		                       boost::shared_ptr<AutomationList> list=boost::shared_ptr<AutomationList>());
+
+		void set_value (const Variant& val);
+		void set_value (double val);
+		double get_value (void) const;
+		XMLNode& get_state();
+
+	private:
+		PluginInsert* _plugin;
+		Variant       _value;
 	};
 
 	boost::shared_ptr<Plugin> plugin(uint32_t num=0) const {

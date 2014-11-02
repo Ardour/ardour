@@ -1,0 +1,66 @@
+/*
+    Copyright (C) 2014 Paul Davis
+    Author: David Robillard
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
+#ifndef __ardour_parameter_types_h__
+#define __ardour_parameter_types_h__
+
+#include <stdint.h>
+
+#include "ardour/types.h"
+#include "evoral/midi_events.h"
+
+namespace ARDOUR {
+
+inline uint8_t
+parameter_midi_type(AutomationType type)
+{
+	switch (type) {
+	case MidiCCAutomation:              return MIDI_CMD_CONTROL;          break;
+	case MidiPgmChangeAutomation:       return MIDI_CMD_PGM_CHANGE;       break;
+	case MidiChannelPressureAutomation: return MIDI_CMD_CHANNEL_PRESSURE; break;
+	case MidiPitchBenderAutomation:     return MIDI_CMD_BENDER;           break;
+	case MidiSystemExclusiveAutomation: return MIDI_CMD_COMMON_SYSEX;     break;
+	default: return 0;
+	}
+}
+
+inline AutomationType
+midi_parameter_type(uint8_t status)
+{
+	switch (status & 0xF0) {
+	case MIDI_CMD_CONTROL:          return MidiCCAutomation;              break;
+	case MIDI_CMD_PGM_CHANGE:       return MidiPgmChangeAutomation;       break;
+	case MIDI_CMD_CHANNEL_PRESSURE: return MidiChannelPressureAutomation; break;
+	case MIDI_CMD_BENDER:           return MidiPitchBenderAutomation;     break;
+	case MIDI_CMD_COMMON_SYSEX:     return MidiSystemExclusiveAutomation; break;
+	default: return NullAutomation;
+	}
+}
+
+inline bool
+parameter_is_midi(AutomationType type)
+{
+	return (type >= MidiCCAutomation) && (type <= MidiChannelPressureAutomation);
+}
+
+}  // namespace ARDOUR
+
+#endif /* __ardour_parameter_types_h__ */
+

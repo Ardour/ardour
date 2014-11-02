@@ -21,7 +21,9 @@
 #define __ardour_variant_h__
 
 #include <stdint.h>
+#include <limits.h>
 
+#include <algorithm>
 #include <stdexcept>
 
 #include "ardour/libardour_visibility.h"
@@ -45,16 +47,61 @@ public:
 		URI      ///< URI string
 	};
 
-	explicit Variant(bool value)   : _type(BOOL)   { _bool   = value; }
-	explicit Variant(double value) : _type(DOUBLE) { _double = value; }
-	explicit Variant(float value)  : _type(FLOAT)  { _float  = value; }
-	explicit Variant(int value)    : _type(INT)    { _int    = value; }
-	explicit Variant(long value)   : _type(LONG)   { _long   = value; }
+	explicit Variant()              : _type(VOID)   { _long   = 0;     }
+	explicit Variant(bool    value) : _type(BOOL)   { _bool   = value; }
+	explicit Variant(double  value) : _type(DOUBLE) { _double = value; }
+	explicit Variant(float   value) : _type(FLOAT)  { _float  = value; }
+	explicit Variant(int32_t value) : _type(INT)    { _int    = value; }
+	explicit Variant(int64_t value) : _type(LONG)   { _long   = value; }
 
+	/** Make a variant of a specific string type (string types only) */
 	Variant(Type type, const std::string& value)
 		: _type(type)
 		, _string(value)
 	{}
+
+	/** Make a numeric variant from a double (numeric types only).
+	 *
+	 * If conversion is impossible, the variant will have type VOID.
+	 */
+	Variant(Type type, double value)
+		: _type(type)
+	{
+		switch (type) {
+		case BOOL:
+			_bool = value != 0.0;
+			break;
+		case DOUBLE:
+			_double = (double)value;
+			break;
+		case FLOAT:
+			_float = (float)value;
+			break;
+		case INT:
+			_int = (int32_t)lrint(std::max((double)INT32_MIN,
+			                               std::min(value, (double)INT32_MAX)));
+			break;
+		case LONG:
+			_long = (int64_t)lrint(std::max((double)INT64_MIN,
+			                                std::min(value, (double)INT64_MAX)));
+			break;
+		default:
+			_type = VOID;
+			_long = 0;
+		}
+	}
+
+	/** Convert a numeric variant to a double. */
+	double to_double() const {
+		switch (_type) {
+		case BOOL:   return _bool;
+		case DOUBLE: return _double;
+		case FLOAT:  return _float;
+		case INT:    return _int;
+		case LONG:   return _long;
+		default:     return 0.0;
+		}
+	}
 
 	bool   get_bool()   const { ensure_type(BOOL);   return _bool;   }
 	double get_double() const { ensure_type(DOUBLE); return _double; }
@@ -67,6 +114,15 @@ public:
 	const std::string& get_uri()    const { ensure_type(URI);    return _string; }
 
 	Type type() const { return _type; }
+
+	static bool type_is_numeric(Type type) {
+		switch (type) {
+		case BOOL: case DOUBLE: case FLOAT: case INT: case LONG:
+			return true;
+		default:
+			return false;
+		}
+	}
 
 private:
 	static const char* type_name(const Type type) {

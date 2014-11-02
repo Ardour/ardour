@@ -137,6 +137,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (PanElevationAutomation);
 	REGISTER_ENUM (PanWidthAutomation);
 	REGISTER_ENUM (PluginAutomation);
+	REGISTER_ENUM (PluginPropertyAutomation);
 	REGISTER_ENUM (SoloAutomation);
 	REGISTER_ENUM (MuteAutomation);
 	REGISTER_ENUM (MidiCCAutomation);
