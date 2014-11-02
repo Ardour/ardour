@@ -3132,6 +3132,7 @@ FadeOutDrag::aborted (bool)
 	}
 }
 
+sigc::connection MarkerDrag::timeout_connection;
 
 MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
@@ -3384,23 +3385,38 @@ MarkerDrag::motion (GdkEvent*, bool)
 
 }
 
+static bool 
+timeout_set_skipping (Location* loc, bool yn)
+{
+        loc->set_skipping (yn);
+        return false;
+}
+
 void
 MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
                 
 		if (was_double_click()) {
-			_editor->rename_marker (_marker);
+			timeout_connection.disconnect ();
+                        _editor->rename_marker (_marker);
 			return;
 		}
 
 		/* just a single click */
 
+		Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
+
                 Location* loc = _marker->location ();
+
                 if (loc) {
                         if (loc->is_skip()) {
                                 /* skip range - click toggles active skip status */
-                                loc->set_skipping (!loc->is_skipping());
+
+                                Glib::RefPtr<Gtk::Settings> settings (Gtk::Settings::get_default());
+
+                                timeout_connection = Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (timeout_set_skipping), loc, !loc->is_skipping()), 
+                                                                                     settings->property_gtk_double_click_time() + 10);
                                 return;
                         } else if (loc->is_auto_loop()) {
                                 /* click on loop marker: locate */
@@ -3413,7 +3429,6 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		   off the selection process
 		*/
 
-		Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
 
 		switch (op) {
 		case Selection::Set:
@@ -3474,6 +3489,7 @@ MarkerDrag::aborted (bool)
 {
 	/* XXX: TODO */
 }
+
 
 ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i),

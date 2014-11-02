@@ -782,6 +782,10 @@ private:
 
         typedef std::list<CopiedLocationMarkerInfo> CopiedLocationInfo;
         CopiedLocationInfo _copied_locations;
+
+        static sigc::connection timeout_connection;
+
+        void single_click (GdkEvent*, bool);
 };
 
 /** Control point drag */
