@@ -56,6 +56,8 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 			// Odd, invalid range, just print the number
 			snprintf(buf, sizeof(buf), "%.0f", v);
 		}
+	} else if (!desc.print_fmt.empty()) {
+		snprintf(buf, sizeof(buf), desc.print_fmt.c_str(), v);
 	} else if (desc.integer_step) {
 		snprintf(buf, sizeof(buf), "%d", (int)v);
 	} else {

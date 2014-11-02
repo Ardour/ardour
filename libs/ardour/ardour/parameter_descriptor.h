@@ -101,6 +101,7 @@ struct ParameterDescriptor
 	}
 
 	std::string                    label;
+	std::string                    print_fmt;  ///< format string for pretty printing
 	boost::shared_ptr<ScalePoints> scale_points;
 	uint32_t                       key;  ///< for properties
 	Variant::Type                  datatype;  ///< for properties

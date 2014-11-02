@@ -141,6 +141,7 @@ public:
 	LilvNode* ui_externalkx;
 	LilvNode* units_db;
 	LilvNode* units_unit;
+	LilvNode* units_render;
 	LilvNode* units_midiNote;
 	LilvNode* patch_writable;
 	LilvNode* patch_Message;
@@ -1314,6 +1315,23 @@ LV2Plugin::get_property_descriptor(uint32_t id) const
 }
 
 static void
+load_parameter_descriptor_units(LilvWorld* lworld, ParameterDescriptor& desc, const LilvNodes* units)
+{
+	if (lilv_nodes_contains(units, _world.units_midiNote)) {
+		desc.unit = ParameterDescriptor::MIDI_NOTE;
+	} else if (lilv_nodes_contains(units, _world.units_db)) {
+		desc.unit = ParameterDescriptor::DB;
+	} else if (lilv_nodes_size(units) > 0) {
+		const LilvNode* unit = lilv_nodes_get_first(units);
+		LilvNode* render = lilv_world_get(lworld, unit, _world.units_render, NULL);
+		if (render) {
+			desc.print_fmt = lilv_node_as_string(render);
+			lilv_node_free(render);
+		}
+	}
+}
+
+static void
 load_parameter_descriptor(LV2World&            world,
                           ParameterDescriptor& desc,
                           Variant::Type        datatype,
@@ -1324,6 +1342,7 @@ load_parameter_descriptor(LV2World&            world,
 	LilvNode*  def     = lilv_world_get(lworld, subject, _world.lv2_default, NULL);
 	LilvNode*  minimum = lilv_world_get(lworld, subject, _world.lv2_minimum, NULL);
 	LilvNode*  maximum = lilv_world_get(lworld, subject, _world.lv2_maximum, NULL);
+	LilvNodes* units   = lilv_world_find_nodes(lworld, subject, _world.units_unit, NULL);
 	if (label) {
 		desc.label = lilv_node_as_string(label);
 	}
@@ -1336,15 +1355,17 @@ load_parameter_descriptor(LV2World&            world,
 	if (maximum && lilv_node_is_float(maximum)) {
 		desc.upper = lilv_node_as_float(maximum);
 	}
+	load_parameter_descriptor_units(lworld, desc, units);
 	desc.datatype      = datatype;
 	desc.toggled      |= datatype == Variant::BOOL;
 	desc.integer_step |= datatype == Variant::INT || datatype == Variant::LONG;
-	if (lilv_world_ask(lworld, subject, _world.units_unit, _world.units_midiNote)) {
-		desc.unit = ParameterDescriptor::MIDI_NOTE;
-	} else if (lilv_world_ask(lworld, subject, _world.units_unit, _world.units_db)) {
-		desc.unit = ParameterDescriptor::DB;
-	}
 	desc.update_steps();
+
+	lilv_nodes_free(units);
+	lilv_node_free(label);
+	lilv_node_free(def);
+	lilv_node_free(minimum);
+	lilv_node_free(maximum);
 }
 
 void
@@ -1577,11 +1598,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	desc.label        = lilv_node_as_string(lilv_port_get_name(_impl->plugin, port));
 	desc.lower        = min ? lilv_node_as_float(min) : 0.0f;
 	desc.upper        = max ? lilv_node_as_float(max) : 1.0f;
-	if (lilv_nodes_contains(portunits, _world.units_midiNote)) {
-		desc.unit = ParameterDescriptor::MIDI_NOTE;
-	} else if (lilv_nodes_contains(portunits, _world.units_db)) {
-		desc.unit = ParameterDescriptor::DB;
-	}
+	load_parameter_descriptor_units(_world.world, desc, portunits);
 
 	if (desc.sr_dependent) {
 		desc.lower *= _session.frame_rate ();
@@ -2280,6 +2297,7 @@ LV2World::LV2World()
 	ui_external        = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
 	ui_externalkx      = lilv_new_uri(world, "http://kxstudio.sf.net/ns/lv2ext/external-ui#Widget");
 	units_unit         = lilv_new_uri(world, LV2_UNITS__unit);
+	units_render       = lilv_new_uri(world, LV2_UNITS__render);
 	units_midiNote     = lilv_new_uri(world, LV2_UNITS__midiNote);
 	units_db           = lilv_new_uri(world, LV2_UNITS__db);
 	patch_writable     = lilv_new_uri(world, LV2_PATCH__writable);
@@ -2293,6 +2311,7 @@ LV2World::~LV2World()
 	lilv_node_free(units_midiNote);
 	lilv_node_free(units_db);
 	lilv_node_free(units_unit);
+	lilv_node_free(units_render);
 	lilv_node_free(ui_externalkx);
 	lilv_node_free(ui_external);
 	lilv_node_free(ui_GtkUI);
