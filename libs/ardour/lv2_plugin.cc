@@ -79,13 +79,22 @@
 #include <suil/suil.h>
 #endif
 
-// Compatibility for lv2-1.0.0
+// Compatibility for old LV2
 #ifndef LV2_ATOM_CONTENTS_CONST
 #define LV2_ATOM_CONTENTS_CONST(type, atom) \
 	((const void*)((const uint8_t*)(atom) + sizeof(type)))
 #endif
 #ifndef LV2_ATOM_BODY_CONST
 #define LV2_ATOM_BODY_CONST(atom) LV2_ATOM_CONTENTS_CONST(LV2_Atom, atom)
+#endif
+#ifndef LV2_PATCH__property
+#define LV2_PATCH__property LV2_PATCH_PREFIX "property"
+#endif
+#ifndef LV2_PATCH__value
+#define LV2_PATCH__value LV2_PATCH_PREFIX "value"
+#endif
+#ifndef LV2_PATCH__writable
+#define LV2_PATCH__writable LV2_PATCH_PREFIX "writable"
 #endif
 
 /** The number of MIDI buffers that will fit in a UI/worker comm buffer.
@@ -956,11 +965,17 @@ LV2Plugin::add_state(XMLNode* root) const
 	}
 }
 
-static inline const LilvNode*
+// TODO: Once we can rely on lilv 0.16.0, lilv_world_get can replace this
+static LilvNode*
 get_value(LilvWorld* world, const LilvNode* subject, const LilvNode* predicate)
 {
 	LilvNodes* vs = lilv_world_find_nodes(world, subject, predicate, NULL);
-	return vs ? lilv_nodes_get_first(vs) : NULL;
+	if (vs) {
+		LilvNode* node = lilv_node_duplicate(lilv_nodes_get_first(vs));
+		lilv_nodes_free(vs);
+		return node;
+	}
+	return NULL;
 }
 
 void
@@ -974,12 +989,13 @@ LV2Plugin::find_presets()
 	LILV_FOREACH(nodes, i, presets) {
 		const LilvNode* preset = lilv_nodes_get(presets, i);
 		lilv_world_load_resource(_world.world, preset);
-		const LilvNode* name = get_value(_world.world, preset, rdfs_label);
+		LilvNode* name = get_value(_world.world, preset, rdfs_label);
 		if (name) {
 			_presets.insert(std::make_pair(lilv_node_as_string(preset),
 			                               Plugin::PresetRecord(
 				                               lilv_node_as_string(preset),
 				                               lilv_node_as_string(name))));
+			lilv_node_free(name);
 		} else {
 			warning << string_compose(
 			    _("Plugin \"%1\" preset \"%2\" is missing a label\n"),
@@ -1323,7 +1339,7 @@ load_parameter_descriptor_units(LilvWorld* lworld, ParameterDescriptor& desc, co
 		desc.unit = ParameterDescriptor::DB;
 	} else if (lilv_nodes_size(units) > 0) {
 		const LilvNode* unit = lilv_nodes_get_first(units);
-		LilvNode* render = lilv_world_get(lworld, unit, _world.units_render, NULL);
+		LilvNode* render = get_value(lworld, unit, _world.units_render);
 		if (render) {
 			desc.print_fmt = lilv_node_as_string(render);
 			lilv_node_free(render);
@@ -1338,10 +1354,10 @@ load_parameter_descriptor(LV2World&            world,
                           const LilvNode*      subject)
 {
 	LilvWorld* lworld  = _world.world;
-	LilvNode*  label   = lilv_world_get(lworld, subject, _world.rdfs_label, NULL);
-	LilvNode*  def     = lilv_world_get(lworld, subject, _world.lv2_default, NULL);
-	LilvNode*  minimum = lilv_world_get(lworld, subject, _world.lv2_minimum, NULL);
-	LilvNode*  maximum = lilv_world_get(lworld, subject, _world.lv2_maximum, NULL);
+	LilvNode*  label   = get_value(lworld, subject, _world.rdfs_label);
+	LilvNode*  def     = get_value(lworld, subject, _world.lv2_default);
+	LilvNode*  minimum = get_value(lworld, subject, _world.lv2_minimum);
+	LilvNode*  maximum = get_value(lworld, subject, _world.lv2_maximum);
 	LilvNodes* units   = lilv_world_find_nodes(lworld, subject, _world.units_unit, NULL);
 	if (label) {
 		desc.label = lilv_node_as_string(label);
@@ -1378,7 +1394,7 @@ LV2Plugin::load_supported_properties(PropertyDescriptors& descs)
 	LILV_FOREACH(nodes, p, properties) {
 		// Get label and range
 		const LilvNode* prop  = lilv_nodes_get(properties, p);
-		LilvNode*       range = lilv_world_get(lworld, prop, _world.rdfs_range, NULL);
+		LilvNode*       range = get_value(lworld, prop, _world.rdfs_range);
 		if (!range) {
 			warning << string_compose(_("LV2: property <%1> has no range datatype, ignoring"),
 			                          lilv_node_as_uri(prop)) << endmsg;
