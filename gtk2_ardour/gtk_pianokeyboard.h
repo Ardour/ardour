@@ -59,6 +59,8 @@ struct _PianoKeyboard
 	int			octave;
 	int			widget_margin;
 	int			note_being_pressed_using_mouse;
+	int         last_key;
+	gboolean    monophonic;
 	volatile struct PKNote 	notes[NNOTES];
 	/* Table used to translate from PC keyboard character to MIDI note number. */
 	GHashTable		*key_bindings;
@@ -76,6 +78,7 @@ void		piano_keyboard_sustain_release	(PianoKeyboard *pk);
 void		piano_keyboard_set_note_on	(PianoKeyboard *pk, int note);
 void		piano_keyboard_set_note_off	(PianoKeyboard *pk, int note);
 void		piano_keyboard_set_keyboard_cue	(PianoKeyboard *pk, int enabled);
+void		piano_keyboard_set_monophonic (PianoKeyboard *pk, gboolean monophonic);
 void		piano_keyboard_set_octave (PianoKeyboard *pk, int octave);
 gboolean	piano_keyboard_set_keyboard_layout (PianoKeyboard *pk, const char *layout);
 

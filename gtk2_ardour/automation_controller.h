@@ -71,6 +71,9 @@ private:
 	void start_touch();
 	void end_touch();
 
+	void run_note_select_dialog();
+	bool on_button_release(GdkEventButton* ev);
+
 	void value_changed();
 
 	bool                                         _ignore_change;

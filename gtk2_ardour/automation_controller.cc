@@ -30,6 +30,7 @@
 #include "ardour_ui.h"
 #include "automation_controller.h"
 #include "gui_thread.h"
+#include "note_select_dialog.h"
 
 #include "i18n.h"
 
@@ -51,6 +52,9 @@ AutomationController::AutomationController(boost::shared_ptr<Automatable>       
 
 	StartGesture.connect (sigc::mem_fun(*this, &AutomationController::start_touch));
 	StopGesture.connect (sigc::mem_fun(*this, &AutomationController::end_touch));
+
+	signal_button_release_event().connect(
+		sigc::mem_fun(*this, &AutomationController::on_button_release));
 
 	_adjustment->signal_value_changed().connect (
 			sigc::mem_fun(*this, &AutomationController::value_adjusted));
@@ -142,6 +146,32 @@ AutomationController::end_touch ()
 
 		_controllable->stop_touch (mark, when);
 	}
+}
+
+void
+AutomationController::run_note_select_dialog()
+{
+	NoteSelectDialog* dialog = new NoteSelectDialog();
+	if (dialog->run() == Gtk::RESPONSE_ACCEPT) {
+		_controllable->set_value(dialog->note_number());
+	}
+	delete dialog;
+}
+
+bool
+AutomationController::on_button_release(GdkEventButton* ev)
+{
+	using namespace Gtk::Menu_Helpers;
+
+	if (ev->button == 3 && _controllable->desc().unit == ARDOUR::ParameterDescriptor::MIDI_NOTE) {
+		Gtk::Menu* menu  = manage(new Menu());
+		MenuList&  items = menu->items();
+		items.push_back(MenuElem(_("Select Note..."),
+		                         sigc::mem_fun(*this, &AutomationController::run_note_select_dialog)));
+		menu->popup(1, ev->time);
+		return true;
+	}
+	return false;
 }
 
 void

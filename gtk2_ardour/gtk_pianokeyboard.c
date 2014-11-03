@@ -155,6 +155,13 @@ press_key(PianoKeyboard *pk, int key)
 	else
 		pk->notes[key].sustained = 0;
 
+	if (pk->monophonic && pk->last_key != key) {
+		pk->notes[pk->last_key].pressed   = 0;
+		pk->notes[pk->last_key].sustained = 0;
+		queue_note_draw(pk, pk->last_key);
+	}
+	pk->last_key = key;
+
 	pk->notes[key].pressed = 1;
 
 	g_signal_emit_by_name(GTK_WIDGET(pk), "note-on", key);
@@ -677,6 +684,8 @@ piano_keyboard_new(void)
 	pk->enable_keyboard_cue = 0;
 	pk->octave = 4;
 	pk->note_being_pressed_using_mouse = -1;
+	pk->last_key = 0;
+	pk->monophonic = FALSE;
 	memset((void *)pk->notes, 0, sizeof(struct PKNote) * NNOTES);
 	pk->key_bindings = g_hash_table_new(g_str_hash, g_str_equal);
 	bind_keys_qwerty(pk);
@@ -688,6 +697,12 @@ void
 piano_keyboard_set_keyboard_cue(PianoKeyboard *pk, int enabled)
 {
 	pk->enable_keyboard_cue = enabled;
+}
+
+void
+piano_keyboard_set_monophonic(PianoKeyboard *pk, gboolean monophonic)
+{
+	pk->monophonic = monophonic;
 }
 
 void
