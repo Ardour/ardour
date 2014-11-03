@@ -240,13 +240,12 @@ PluginInsert::create_automatable_parameters ()
 
 	set<Evoral::Parameter> a = _plugins.front()->automatable ();
 
-	ParameterDescriptor desc;
-
 	for (set<Evoral::Parameter>::iterator i = a.begin(); i != a.end(); ++i) {
 		if (i->type() == PluginAutomation) {
 
 			Evoral::Parameter param(*i);
 
+			ParameterDescriptor desc;
 			_plugins.front()->get_parameter_descriptor(i->id(), desc);
 
 			/* the Parameter belonging to the actual plugin doesn't have its range set
