@@ -150,12 +150,34 @@ AutomationController::end_touch ()
 	}
 }
 
+static double
+midi_note_to_hz(int note)
+{
+	const double tuning = 440.0;
+	return tuning * pow(2, (note - 69.0) / 12.0);
+}
+
+static double
+clamp(double val, double min, double max)
+{
+	if (val < min) {
+		return min;
+	} else if (val > max) {
+		return max;
+	}
+	return val;
+}
+
 void
 AutomationController::run_note_select_dialog()
 {
-	NoteSelectDialog* dialog = new NoteSelectDialog();
+	const ARDOUR::ParameterDescriptor& desc   = _controllable->desc();
+	NoteSelectDialog*                  dialog = new NoteSelectDialog();
 	if (dialog->run() == Gtk::RESPONSE_ACCEPT) {
-		_controllable->set_value(dialog->note_number());
+		const double value = ((_controllable->desc().unit == ARDOUR::ParameterDescriptor::HZ)
+		                      ? midi_note_to_hz(dialog->note_number())
+		                      : dialog->note_number());
+		_controllable->set_value(clamp(value, desc.lower, desc.upper));
 	}
 	delete dialog;
 }
@@ -163,17 +185,22 @@ AutomationController::run_note_select_dialog()
 void
 AutomationController::set_freq_beats(double beats)
 {
-	const ARDOUR::Session& session = _controllable->session();
-	const ARDOUR::Tempo&   tempo   = session.tempo_map().tempo_at(0);
-	const double           bpm     = tempo.beats_per_minute();
-	const double           bps     = bpm / 60.0;
-	_controllable->set_value(bps / beats);
+	const ARDOUR::ParameterDescriptor& desc    = _controllable->desc();
+	const ARDOUR::Session&             session = _controllable->session();
+	const framepos_t                   pos     = session.transport_frame();
+	const ARDOUR::Tempo&               tempo   = session.tempo_map().tempo_at(pos);
+	const double                       bpm     = tempo.beats_per_minute();
+	const double                       bps     = bpm / 60.0;
+	const double                       freq    = bps / beats;
+	_controllable->set_value(clamp(freq, desc.lower, desc.upper));
 }
 
 void
 AutomationController::set_ratio(double ratio)
 {
-	_controllable->set_value(_controllable->get_value() * ratio);
+	const ARDOUR::ParameterDescriptor& desc  = _controllable->desc();
+	const double                       value = _controllable->get_value() * ratio;
+	_controllable->set_value(clamp(value, desc.lower, desc.upper));
 }
 
 bool
@@ -185,14 +212,15 @@ AutomationController::on_button_release(GdkEventButton* ev)
 		return false;
 	}
 
-	if (_controllable->desc().unit == ARDOUR::ParameterDescriptor::MIDI_NOTE) {
+	const ARDOUR::ParameterDescriptor& desc = _controllable->desc();
+	if (desc.unit == ARDOUR::ParameterDescriptor::MIDI_NOTE) {
 		Gtk::Menu* menu  = manage(new Menu());
 		MenuList&  items = menu->items();
 		items.push_back(MenuElem(_("Select Note..."),
 		                         sigc::mem_fun(*this, &AutomationController::run_note_select_dialog)));
 		menu->popup(1, ev->time);
 		return true;
-	} else if (_controllable->desc().unit == ARDOUR::ParameterDescriptor::HZ) {
+	} else if (desc.unit == ARDOUR::ParameterDescriptor::HZ) {
 		Gtk::Menu* menu  = manage(new Menu());
 		MenuList&  items = menu->items();
 		items.push_back(MenuElem(_("Halve"),
@@ -201,10 +229,18 @@ AutomationController::on_button_release(GdkEventButton* ev)
 		items.push_back(MenuElem(_("Double"),
 		                         sigc::bind(sigc::mem_fun(*this, &AutomationController::set_ratio),
 		                                    2.0)));
-		for (double beats = 1.0; beats <= 16; ++beats) {
-			items.push_back(MenuElem(string_compose(_("Set to %1 beat(s)"), (int)beats),
-			                         sigc::bind(sigc::mem_fun(*this, &AutomationController::set_freq_beats),
-			                                    beats)));
+		const bool is_audible = desc.upper > 40.0;
+		const bool is_low     = desc.lower < 1.0;
+		if (is_audible) {
+			items.push_back(MenuElem(_("Select Note..."),
+			                         sigc::mem_fun(*this, &AutomationController::run_note_select_dialog)));
+		}
+		if (is_low) {
+			for (double beats = 1.0; beats <= 16; ++beats) {
+				items.push_back(MenuElem(string_compose(_("Set to %1 beat(s)"), (int)beats),
+				                         sigc::bind(sigc::mem_fun(*this, &AutomationController::set_freq_beats),
+				                                    beats)));
+			}
 		}
 		menu->popup(1, ev->time);
 		return true;
