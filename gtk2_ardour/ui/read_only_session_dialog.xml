@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title="Read-only Session" resizeable="False">
+  
+  <style name="generic_control"
+  winfont ="Arial Bold 10"
+  macfont ="Helvetica Bold 10"
+  fgnormal="#FFFFFF"
+  bgnormal="#6a6a6a"
+  fgactive="#FFFFFF"
+  bgactive="#303030"
+  fghover="#CCCCCC"
+  bghover="#898989"
+  horzalignment="start"/>
+  
+  <Layout width="350"
+          height="135"
+          style="generic_control">
+      <VBox width="350"
+            x="0"
+            y="20">
+          <Label style="generic_control"
+                 horzalignment="center"
+                 text="This session has been opened in read-only mode.\n"/>
+          
+          <Label style="generic_control"
+                 horzalignment="center"
+                 text="You will not be able to record or save."/>
+      </VBox>
+      <Button id="ok_button"
+              style="generic_control"
+              text="OK"
+              fgnormal="#6D6E72"
+              bgnormal="#CACAC5"
+              fgactive="#EDECE8"
+              bgactive="#6D6E72"
+              borderwidth="0 0 0 0"
+              bordercolor="#6D6E72"
+              width="69"
+              height="22"
+              x="255"
+              y="100"/>
+  </Layout>
+  
+</Dialog>
