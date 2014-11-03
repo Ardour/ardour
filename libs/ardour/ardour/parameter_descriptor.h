@@ -37,6 +37,7 @@ struct ParameterDescriptor
 		NONE,       ///< No unit
 		DB,         ///< Decibels
 		MIDI_NOTE,  ///< MIDI note number
+		HZ,         ///< Frequency in Hertz
 	};
 
 	ParameterDescriptor(const Evoral::Parameter& parameter)

@@ -72,6 +72,8 @@ private:
 	void end_touch();
 
 	void run_note_select_dialog();
+	void set_ratio(double ratio);
+	void set_freq_beats(double beats);
 	bool on_button_release(GdkEventButton* ev);
 
 	void value_changed();

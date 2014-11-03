@@ -21,11 +21,13 @@
 #include <iomanip>
 #include <cmath>
 
+#include "pbd/compose.h"
 #include "pbd/error.h"
 
 #include "ardour/automatable.h"
 #include "ardour/automation_control.h"
 #include "ardour/session.h"
+#include "ardour/tempo.h"
 
 #include "ardour_ui.h"
 #include "automation_controller.h"
@@ -158,19 +160,56 @@ AutomationController::run_note_select_dialog()
 	delete dialog;
 }
 
+void
+AutomationController::set_freq_beats(double beats)
+{
+	const ARDOUR::Session& session = _controllable->session();
+	const ARDOUR::Tempo&   tempo   = session.tempo_map().tempo_at(0);
+	const double           bpm     = tempo.beats_per_minute();
+	const double           bps     = bpm / 60.0;
+	_controllable->set_value(bps / beats);
+}
+
+void
+AutomationController::set_ratio(double ratio)
+{
+	_controllable->set_value(_controllable->get_value() * ratio);
+}
+
 bool
 AutomationController::on_button_release(GdkEventButton* ev)
 {
 	using namespace Gtk::Menu_Helpers;
 
-	if (ev->button == 3 && _controllable->desc().unit == ARDOUR::ParameterDescriptor::MIDI_NOTE) {
+	if (ev->button != 3) {
+		return false;
+	}
+
+	if (_controllable->desc().unit == ARDOUR::ParameterDescriptor::MIDI_NOTE) {
 		Gtk::Menu* menu  = manage(new Menu());
 		MenuList&  items = menu->items();
 		items.push_back(MenuElem(_("Select Note..."),
 		                         sigc::mem_fun(*this, &AutomationController::run_note_select_dialog)));
 		menu->popup(1, ev->time);
 		return true;
+	} else if (_controllable->desc().unit == ARDOUR::ParameterDescriptor::HZ) {
+		Gtk::Menu* menu  = manage(new Menu());
+		MenuList&  items = menu->items();
+		items.push_back(MenuElem(_("Halve"),
+		                         sigc::bind(sigc::mem_fun(*this, &AutomationController::set_ratio),
+		                                    0.5)));
+		items.push_back(MenuElem(_("Double"),
+		                         sigc::bind(sigc::mem_fun(*this, &AutomationController::set_ratio),
+		                                    2.0)));
+		for (double beats = 1.0; beats <= 16; ++beats) {
+			items.push_back(MenuElem(string_compose(_("Set to %1 beat(s)"), (int)beats),
+			                         sigc::bind(sigc::mem_fun(*this, &AutomationController::set_freq_beats),
+			                                    beats)));
+		}
+		menu->popup(1, ev->time);
+		return true;
 	}
+
 	return false;
 }
 

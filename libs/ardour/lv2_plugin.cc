@@ -148,6 +148,7 @@ public:
 	LilvNode* ui_GtkUI;
 	LilvNode* ui_external;
 	LilvNode* ui_externalkx;
+	LilvNode* units_hz;
 	LilvNode* units_db;
 	LilvNode* units_unit;
 	LilvNode* units_render;
@@ -1337,6 +1338,8 @@ load_parameter_descriptor_units(LilvWorld* lworld, ParameterDescriptor& desc, co
 		desc.unit = ParameterDescriptor::MIDI_NOTE;
 	} else if (lilv_nodes_contains(units, _world.units_db)) {
 		desc.unit = ParameterDescriptor::DB;
+	} else if (lilv_nodes_contains(units, _world.units_hz)) {
+		desc.unit = ParameterDescriptor::HZ;
 	} else if (lilv_nodes_size(units) > 0) {
 		const LilvNode* unit = lilv_nodes_get_first(units);
 		LilvNode* render = get_value(lworld, unit, _world.units_render);
@@ -2314,6 +2317,7 @@ LV2World::LV2World()
 	ui_externalkx      = lilv_new_uri(world, "http://kxstudio.sf.net/ns/lv2ext/external-ui#Widget");
 	units_unit         = lilv_new_uri(world, LV2_UNITS__unit);
 	units_render       = lilv_new_uri(world, LV2_UNITS__render);
+	units_hz           = lilv_new_uri(world, LV2_UNITS__hz);
 	units_midiNote     = lilv_new_uri(world, LV2_UNITS__midiNote);
 	units_db           = lilv_new_uri(world, LV2_UNITS__db);
 	patch_writable     = lilv_new_uri(world, LV2_PATCH__writable);
@@ -2324,6 +2328,7 @@ LV2World::~LV2World()
 {
 	lilv_node_free(patch_Message);
 	lilv_node_free(patch_writable);
+	lilv_node_free(units_hz);
 	lilv_node_free(units_midiNote);
 	lilv_node_free(units_db);
 	lilv_node_free(units_unit);

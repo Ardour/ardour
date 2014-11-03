@@ -547,7 +547,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void set_silent (bool yn);
 	bool silent () { return _silent; }
 
-	TempoMap& tempo_map() { return *_tempo_map; }
+	TempoMap&       tempo_map()       { return *_tempo_map; }
+	const TempoMap& tempo_map() const { return *_tempo_map; }
 
 	/* region info  */
 
