@@ -215,6 +215,7 @@ RangeMarker::setup_line ()
 
     if (!_end_line) {
 		_end_line = new ArdourCanvas::Line (editor.get_hscroll_group());
+                _end_line->set_ignore_events (true);
 		_end_line->set_y1 (ArdourCanvas::COORD_MAX);
     }
 
@@ -477,6 +478,7 @@ Marker::setup_line ()
 {
         if (_start_line == 0) {
                 _start_line = new ArdourCanvas::Line (editor.get_hscroll_group());
+                _start_line->set_ignore_events (true);
                 _start_line->set_y1 (ArdourCanvas::COORD_MAX);
         }
 
