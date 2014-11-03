@@ -1506,9 +1506,9 @@ LV2Plugin::work_response(uint32_t size, const void* data)
 }
 
 void
-LV2Plugin::set_insert_info(const PluginInsert* insert)
+LV2Plugin::set_insert_id(PBD::ID id)
 {
-	_insert_id = insert->id();
+	_insert_id = id;
 }
 
 int

@@ -1376,7 +1376,7 @@ PluginInsert::collect_signal_for_analysis (framecnt_t nframes)
 void
 PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 {
-	plugin->set_insert_info (this);
+	plugin->set_insert_id (this->id());
 	
 	if (_plugins.empty()) {
                 /* first (and probably only) plugin instance - connect to relevant signals 

@@ -30,6 +30,7 @@
 #include "ardour/data_type.h"
 #include "ardour/delivery.h"
 #include "ardour/plugin.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/region_factory.h"
 #include "ardour/route.h"
 #include "ardour/session.h"

@@ -119,7 +119,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	boost::shared_ptr<ScalePoints>
 	get_scale_points(uint32_t port_index) const;
 
-	void set_insert_info(const PluginInsert* insert);
+	void set_insert_id(PBD::ID id);
 
 	int      set_state (const XMLNode& node, int version);
 	bool     save_preset (std::string uri);

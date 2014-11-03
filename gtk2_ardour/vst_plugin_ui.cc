@@ -20,6 +20,7 @@
 #include <gtkmm.h>
 #include "ardour/vst_plugin.h"
 #include "ardour/vst_types.h"
+#include "ardour/plugin_insert.h"
 #include "vst_plugin_ui.h"
 
 #ifdef PLATFORM_WINDOWS

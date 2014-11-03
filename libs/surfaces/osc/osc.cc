@@ -44,6 +44,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/panner.h"
 #include "ardour/plugin.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/send.h"
 
 #include "osc.h"

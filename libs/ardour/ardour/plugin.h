@@ -26,6 +26,7 @@
 #include "pbd/statefuldestructible.h"
 #include "pbd/controllable.h"
 
+#include "ardour/buffer_set.h"
 #include "ardour/chan_count.h"
 #include "ardour/chan_mapping.h"
 #include "ardour/cycles.h"
@@ -33,7 +34,6 @@
 #include "ardour/libardour_visibility.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/parameter_descriptor.h"
-#include "ardour/plugin_insert.h"
 #include "ardour/types.h"
 #include "ardour/variant.h"
 
@@ -46,7 +46,7 @@ namespace ARDOUR {
 class AudioEngine;
 class Session;
 class BufferSet;
-
+class PluginInsert;
 class Plugin;
 
 typedef boost::shared_ptr<Plugin> PluginPtr;
@@ -99,7 +99,7 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	XMLNode& get_state ();
 	virtual int set_state (const XMLNode &, int version);
 
-	virtual void set_insert_info (const PluginInsert*) {}
+	virtual void set_insert_id (PBD::ID id) {}
 
 	virtual std::string unique_id() const = 0;
 	virtual const char * label() const = 0;
@@ -272,7 +272,6 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 protected:
 
 	friend class PluginInsert;
-	friend struct PluginInsert::PluginControl;
 
 	virtual void set_parameter (uint32_t which, float val);
 

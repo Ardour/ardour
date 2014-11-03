@@ -26,6 +26,7 @@
 #include "ardour/midi_patch_manager.h"
 #include "ardour/processor.h"
 #include "ardour/plugin.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/rc_configuration.h"
 
 #include "i18n.h"
