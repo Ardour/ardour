@@ -79,12 +79,28 @@ public:
 								 ArdourCanvas::Rectangle::BOTTOM));
 	}
 
-private:
+  protected:
+	void render_self (Rect const &, Cairo::RefPtr<Cairo::Context>, Rect) const;
+	Rect get_self_for_render () const;
+
+  private:
 	/** Our rectangle; note that x0 may not always be less than x1
 	 *  and likewise with y0 and y1.
 	 */
 	Rect _rect;
 	What _outline_what;
+};
+
+class TimeRectangle : public Rectangle 
+{
+    public:
+	TimeRectangle (Canvas* c) : Rectangle (c) {}
+	TimeRectangle (Canvas* c, Rect const & r) : Rectangle (c, r) {}
+	TimeRectangle (Item* i) : Rectangle (i) {}
+	TimeRectangle (Item* i, Rect const & r) : Rectangle (i, r) {}
+	
+	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
+	void compute_bounding_box () const;
 };
 
 }

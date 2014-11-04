@@ -56,15 +56,21 @@ Rectangle::Rectangle (Item* parent, Rect const & rect)
 {
 }
 
-void
-Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+Rect
+Rectangle::get_self_for_render () const
 {
 	/* In general, a Rectangle will have a _position of (0,0) within its
 	   parent, and its extent is actually defined by _rect. But in the
 	   unusual case that _position is set to something other than (0,0),
 	   we should take that into account when rendering.
 	*/
-	Rect self = item_to_window (_rect.translate (_position));
+
+	return item_to_window (_rect.translate (_position));
+}
+
+void
+Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context, Rect self) const
+{
 	boost::optional<Rect> r = self.intersection (area);
 
 	if (!r) {
@@ -105,10 +111,8 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 		 * the 0.5 pixel additions.
 		 */
 
-		self = self.translate (Duple (-0.5, -0.5));
+		self = self.translate (Duple (0.5, 0.5));
 
-		std::cerr << "Outline using " << self << " from " << _rect << std::endl;
-		
 		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
 			
 			context->rectangle (self.x0, self.y0, self.width(), self.height());
@@ -138,6 +142,12 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 		
 		context->stroke ();
 	}
+}
+
+void
+Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	render_self (area, context, get_self_for_render ());
 }
 
 void
@@ -238,3 +248,36 @@ Rectangle::set_outline_what (What what)
 	}
 }
 
+
+/*-------------------*/
+
+void
+TimeRectangle::compute_bounding_box () const
+{
+	Rectangle::compute_bounding_box ();
+	assert (_bounding_box);
+
+	Rect r = _bounding_box.get ();
+
+	/* This is a TimeRectangle, so its right edge is drawn 1 pixel beyond
+	 * (larger x-axis coordinates) than a normal Rectangle.
+	 */
+	
+	r.x1 += 1.0; /* this should be using safe_add() */
+	
+	_bounding_box = r;
+}
+
+void 
+TimeRectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	Rect self = get_self_for_render ();
+
+
+	/* This is a TimeRectangle, so its right edge is drawn 1 pixel beyond
+	 * (larger x-axis coordinates) than a normal Rectangle.
+	 */
+
+	self.x1 += 1.0; /* this should be using safe_add() */
+	render_self (area, context, self);
+}
