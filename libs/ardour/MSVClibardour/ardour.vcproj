@@ -1838,6 +1838,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\parameter_descriptor.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\parameter_types.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\pcm_utils.h"
 				>
 			</File>
@@ -2199,6 +2207,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\utils.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\value_as_string.h"
 				>
 			</File>
 			<File
