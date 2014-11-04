@@ -45,6 +45,7 @@
 #include "ardour/utils.h"
 #include "pbd/memento_command.h"
 
+#include "file_sample_rate_mismatch_dialog.h"
 #include "ardour_ui.h"
 #include "editor.h"
 #include "sfdb_ui.h"
@@ -576,27 +577,19 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 					goto out;
 				}
 			} else {
-				choices.push_back (_("Cancel"));
-				choices.push_back (_("Embed it anyway"));
-
-				Gtkmm2ext::Choice rate_choice (
-					_("Sample rate"),
-					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
-					choices, false
-					);
-
-				int resx = rate_choice.run ();
-
-				switch (resx) {
-				case 0: /* don't import */
-					ret = -1;
-					goto out;
-				case 1: /* do it */
-					break;
-				default:
-					ret = -2;
-					goto out;
-				}
+                
+                FileSampleRateMismatchDialog fsrm_dialog(path);
+                switch ( fsrm_dialog.run () ) {
+                    case Gtk::RESPONSE_CANCEL: /* don't import */
+                        ret = -1;
+                        goto out;
+                        
+                    case Gtk::RESPONSE_ACCEPT: /* do it */
+                        break;
+                    default:
+                        ret = -2;
+                        goto out;
+                }
 			}
 		}
 
