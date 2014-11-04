@@ -20,7 +20,10 @@ static unsigned int idle_id = 0;
 
 #endif
 
+#ifndef COMPILER_MSVC
 extern char * strdup (const char *);
+#endif
+
 #include <glib.h>
 #include "fst.h"
 
