@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title="Sample rate mismatch" resizeable="False">
+  
+  <style name="generic_control"
+  winfont ="Arial Bold 12"
+  macfont ="Helvetica Bold 12"
+  fgnormal="#BFBFBF"
+  bgnormal="#6C6C6C"
+  fgactive="#BFBFBF"
+  bgactive="#454545"
+  fghover="#CCCCCC"
+  bghover="#898989"/>
+  
+  <Layout width="420"
+          height="125"
+          bgnormal="#EDECE8">
+      <VBox width="420"
+            x="0"
+            y="20">
+          <Label id="info_label_1"
+                 style="generic_control"
+                 fgnormal="#6D6E72"
+                 horzalignment="center"/>
+          <Label id="info_label_2"
+                 style="generic_control"
+                 fgnormal="#6D6E72"
+                 horzalignment="center"/>
+          <Label id="info_label_3"
+                 style="generic_control"
+                 fgnormal="#6D6E72"
+                 horzalignment="center"/>
+          <Label id="info_label_4"
+                 style="generic_control"
+                 fgnormal="#6D6E72"
+                 horzalignment="center"/>
+          <Label id="info_label_5"
+                 style="generic_control"
+                 fgnormal="#6D6E72"
+                 horzalignment="center"/>
+      </VBox>
+      
+      <Button id="cancel_button"
+              style="generic_control"
+              text="Cancel"
+              fgnormal="#6D6E72"
+              bgnormal="#CACAC5"
+              fgactive="#EDECE8"
+              bgactive="#6D6E72"
+              borderwidth="0 0 0 0"
+              bordercolor="#6D6E72"
+              width="80"
+              height="22"
+              x="240"
+              y="95"/>
+              
+      <Button id="accept_button"
+              style="generic_control"
+              text="Accept"
+              fgnormal="#6D6E72"
+              bgnormal="#CACAC5"
+              fgactive="#EDECE8"
+              bgactive="#6D6E72"
+              borderwidth="0 0 0 0"
+              bordercolor="#6D6E72"
+              width="80"
+              height="22"
+              x="330"
+              y="95"/>
+  </Layout>
+  
+</Dialog>

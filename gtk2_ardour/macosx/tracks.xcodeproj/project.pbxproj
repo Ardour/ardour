@@ -274,6 +274,8 @@
 		954DCFC21A023AAB00B7160E /* license_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 954DCFC01A023AAB00B7160E /* license_dialog.xml */; };
 		954DCFDC1A07A07600B7160E /* read_only_session_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 954DCFDB1A07A07600B7160E /* read_only_session_dialog.cc */; };
 		954DCFDE1A07A14E00B7160E /* read_only_session_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 954DCFDD1A07A14E00B7160E /* read_only_session_dialog.xml */; };
+		954DCFE11A07C70400B7160E /* sample_rate_mismatch_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 954DCFE01A07C70400B7160E /* sample_rate_mismatch_dialog.cc */; };
+		954DCFE51A07D1C800B7160E /* sample_rate_mismatch_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 954DCFE41A07D1C800B7160E /* sample_rate_mismatch_dialog.xml */; };
 		95A134DE1A0239080008E3D6 /* license_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95A134DD1A0239080008E3D6 /* license_dialog.cc */; };
 		CE1A907A199A37AE00ECA62B /* add_tracks_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE1A9079199A37AE00ECA62B /* add_tracks_dialog.cc */; };
 		CE1C6DCE19879F04006BDB03 /* compact_meter_bridge.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE1C6DCC19879F04006BDB03 /* compact_meter_bridge.cc */; };
@@ -1124,6 +1126,9 @@
 		954DCFD71A07A06300B7160E /* read_only_session_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = read_only_session_dialog.h; path = ../read_only_session_dialog.h; sourceTree = "<group>"; };
 		954DCFDB1A07A07600B7160E /* read_only_session_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = read_only_session_dialog.cc; path = ../read_only_session_dialog.cc; sourceTree = "<group>"; };
 		954DCFDD1A07A14E00B7160E /* read_only_session_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = read_only_session_dialog.xml; sourceTree = "<group>"; };
+		954DCFDF1A07C6F200B7160E /* sample_rate_mismatch_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sample_rate_mismatch_dialog.h; path = ../sample_rate_mismatch_dialog.h; sourceTree = "<group>"; };
+		954DCFE01A07C70400B7160E /* sample_rate_mismatch_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sample_rate_mismatch_dialog.cc; path = ../sample_rate_mismatch_dialog.cc; sourceTree = "<group>"; };
+		954DCFE41A07D1C800B7160E /* sample_rate_mismatch_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = sample_rate_mismatch_dialog.xml; sourceTree = "<group>"; };
 		95A134DD1A0239080008E3D6 /* license_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = license_dialog.cc; path = ../license_dialog.cc; sourceTree = "<group>"; };
 		95A134DF1A02391F0008E3D6 /* license_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = license_dialog.h; path = ../license_dialog.h; sourceTree = "<group>"; };
 		CE1A9079199A37AE00ECA62B /* add_tracks_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = add_tracks_dialog.cc; path = ../add_tracks_dialog.cc; sourceTree = "<group>"; };
@@ -1212,6 +1217,7 @@
 		43279040194EFF38003C9FEA /* source */ = {
 			isa = PBXGroup;
 			children = (
+				954DCFE01A07C70400B7160E /* sample_rate_mismatch_dialog.cc */,
 				954DCFDB1A07A07600B7160E /* read_only_session_dialog.cc */,
 				954DCFBC1A0239DA00B7160E /* about_dialog.cc */,
 				95A134DD1A0239080008E3D6 /* license_dialog.cc */,
@@ -1816,6 +1822,7 @@
 		43279429194F0062003C9FEA /* ui */ = {
 			isa = PBXGroup;
 			children = (
+				954DCFE41A07D1C800B7160E /* sample_rate_mismatch_dialog.xml */,
 				954DCFDD1A07A14E00B7160E /* read_only_session_dialog.xml */,
 				954DCFBF1A023AAB00B7160E /* about_dialog.xml */,
 				954DCFC01A023AAB00B7160E /* license_dialog.xml */,
@@ -1861,6 +1868,7 @@
 		43279480194F00CB003C9FEA /* headers */ = {
 			isa = PBXGroup;
 			children = (
+				954DCFDF1A07C6F200B7160E /* sample_rate_mismatch_dialog.h */,
 				954DCFD71A07A06300B7160E /* read_only_session_dialog.h */,
 				954DCFBE1A0239EC00B7160E /* about_dialog.h */,
 				95A134DF1A02391F0008E3D6 /* license_dialog.h */,
@@ -2275,6 +2283,7 @@
 				43279334194F003A003C9FEA /* application-x-ardour_22px.png in Resources */,
 				43279335194F003A003C9FEA /* application-x-ardour_32px.png in Resources */,
 				43279336194F003A003C9FEA /* application-x-ardour_48px.png in Resources */,
+				954DCFE51A07D1C800B7160E /* sample_rate_mismatch_dialog.xml in Resources */,
 				43279337194F003A003C9FEA /* ardour-app-icon_osx.png in Resources */,
 				43279338194F003A003C9FEA /* ardour-app-icon_osx_mask.png in Resources */,
 				43279339194F003A003C9FEA /* ardour_icon_16px.png in Resources */,
@@ -2578,6 +2587,7 @@
 				CE294C7B19CAD54500D12768 /* waves_dropdown.cc in Sources */,
 				CE294C7C19CAD54500D12768 /* waves_grid.cc in Sources */,
 				CE294C7D19CAD54500D12768 /* waves_zoom_control.cc in Sources */,
+				954DCFE11A07C70400B7160E /* sample_rate_mismatch_dialog.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
