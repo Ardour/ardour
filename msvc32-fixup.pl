@@ -8,6 +8,11 @@ $major = 3;
 $minor = 0;
 $micro = 0;
 $interface_age = 0;
+$scanner_app_version = "2.00.0";
+$scanner_major = 2;
+$scanner_minor = 0;
+$scanner_micro = 0;
+$scanner_interface_age = 0;
 $binary_age = 3000;
 $current_minus_age = 0;
 $exec_prefix = "lib";
@@ -32,6 +37,11 @@ sub process_file
 	    s/\@MSVC_MIXBUS_MINOR\@/$minor/g;
 	    s/\@MSVC_MIXBUS_MICRO\@/$micro/g;
 	    s/\@MSVC_MIXBUS_INTERFACE_AGE\@/$interface_age/g;
+	    s/\@MSVC_SCANNER_APP_VERSION@/$scanner_app_version/g;
+	    s/\@MSVC_SCANNER_APP_MAJOR\@/$scanner_major/g;
+	    s/\@MSVC_SCANNER_APP_MINOR\@/$scanner_minor/g;
+	    s/\@MSVC_SCANNER_APP_MICRO\@/$scanner_micro/g;
+	    s/\@MSVC_SCANNER_APP_INTERFACE_AGE\@/$scanner_interface_age/g;
 	    s/\@LT_CURRENT_MINUS_AGE@/$current_minus_age/g;
 	    s/\@VERSION@/$msvc_mixbus_version/g;
 	    s/\@DLL_SUFFIX\@/$dll_suffix/g;
@@ -65,5 +75,6 @@ my $command=join(' ',@ARGV);
 if ($command eq -buildall) {
 	process_file ("MSVCardour3/MSVCMixbus3.vsprops");
 	process_file ("MSVCMixbus3/MSVCMixbus3.vsprops");
+	process_file ("MSVCvst_scan/vst_scan.rc");
 	process_file ("icons/win32/msvc_resources.rc");
 }
