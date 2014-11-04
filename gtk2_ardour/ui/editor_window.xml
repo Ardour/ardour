@@ -31,7 +31,7 @@
          fgnormal="#ffffff"
          fgactive="#ffffff"
          fghover="#ffffff"
-         winfont ="Arial 8"
+         winfont ="Arial bold 9"
          macfont ="Helvetica 10"/>
   <VBox id="vpacker">
     <Adjustment id="vertical_adjustment"
