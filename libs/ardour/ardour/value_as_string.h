@@ -63,7 +63,7 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 	} else {
 		snprintf(buf, sizeof(buf), "%.3f", v);
 	}
-	if (desc.unit == ARDOUR::ParameterDescriptor::DB) {
+	if (desc.print_fmt.empty() && desc.unit == ARDOUR::ParameterDescriptor::DB) {
 		// TODO: Move proper dB printing from AutomationLine here
 		return std::string(buf) + " dB";
 	}

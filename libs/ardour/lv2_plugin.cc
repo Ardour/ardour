@@ -1340,7 +1340,8 @@ load_parameter_descriptor_units(LilvWorld* lworld, ParameterDescriptor& desc, co
 		desc.unit = ParameterDescriptor::DB;
 	} else if (lilv_nodes_contains(units, _world.units_hz)) {
 		desc.unit = ParameterDescriptor::HZ;
-	} else if (lilv_nodes_size(units) > 0) {
+	}
+	if (lilv_nodes_size(units) > 0) {
 		const LilvNode* unit = lilv_nodes_get_first(units);
 		LilvNode* render = get_value(lworld, unit, _world.units_render);
 		if (render) {
