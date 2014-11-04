@@ -113,7 +113,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 		compute_heights ();
 	}
 
-	_canvas_display = new ArdourCanvas::Container (ed.get_trackview_group (), ArdourCanvas::Duple (1.0, 0.0));
+	_canvas_display = new ArdourCanvas::Container (ed.get_trackview_group (), ArdourCanvas::Duple (0.0, 0.0));
 	CANVAS_DEBUG_NAME (_canvas_display, "main for TAV");
 	_canvas_display->hide(); // reveal as needed
 
