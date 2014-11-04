@@ -100,7 +100,7 @@
                         implicitactiveicon="time_axis_solo_safe"
                         _prelighticon="time_axis_solo_prelight"
                         tooltip="Solo"/>
-            <EventBox height="" bgnormal="#383838" bgactive="#424242"/>
+            
         </HBox>
       </VBox>
       <HBox visible="false" noshowall="true">

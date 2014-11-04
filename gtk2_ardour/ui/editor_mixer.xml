@@ -178,13 +178,11 @@
               visible="false"/>
         <VBox>
           <HBox>
-            <EventBox width=""
-                      bgnormal="#383838"/>s
+            
             <VBox id="track_buttons_home"
                   visible="true"
                   noshowall="true">
-              <EventBox height=""
-                        bgnormal="#000000"/>s
+              
               <HBox>
                 <iconbutton id="rec_enable_button"
                             width="49"
@@ -194,8 +192,7 @@
                             _prelighticon="inspector_record_prelight"
                             visible="false"
                             noshowall="true"/>
-                <EventBox width=""
-                          bgnormal="#000000"/>s
+                
                 <iconbutton id="monitor_input_button"
                             width="47"
                             height="21"
@@ -205,8 +202,7 @@
                             visible="false"
                             noshowall="true"/>
               </HBox>
-              <EventBox height=""
-                        bgnormal="#000000"/>s
+              
               <HBox>
                 <iconbutton id="mute_button"
                             width="49"
@@ -217,8 +213,7 @@
                             _prelighticon="inspector_mute_prelight"
                             visible="false"
                             noshowall="true"/>
-                <EventBox width=""
-                          bgnormal="#000000"/>s
+                
                 <iconbutton id="solo_button"
                             width="47"
                             height="21"
@@ -229,11 +224,9 @@
                             visible="false"
                             noshowall="true"/>
               </HBox>
-              <EventBox height=""
-                        bgnormal="#000000"/>s
+              
             </VBox>
-            <EventBox width=""
-                      bgnormal="#383838"/>s
+            
 
           </HBox>
           <iconbutton id="master_mute_button"
