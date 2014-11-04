@@ -828,6 +828,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\note_select_dialog.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\nsm.cc"
 				>
 			</File>
@@ -1755,6 +1759,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\note_player.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\note_select_dialog.h"
 				>
 			</File>
 			<File
