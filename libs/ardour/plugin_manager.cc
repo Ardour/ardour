@@ -124,7 +124,15 @@ PluginManager::PluginManager ()
 #endif
 	if (!PBD::find_file (vstsp,
 #ifdef PLATFORM_WINDOWS
+    #ifdef DEBUGGABLE_SCANNER_APP
+        #if defined(DEBUG) || defined(_DEBUG)
+				"ardour-vst-scannerD.exe"
+        #else
+				"ardour-vst-scannerRDC.exe"
+        #endif
+    #else
 				"ardour-vst-scanner.exe"
+    #endif
 #else
 				"ardour-vst-scanner"
 #endif
