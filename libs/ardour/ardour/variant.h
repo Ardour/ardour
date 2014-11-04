@@ -29,6 +29,10 @@
 #include "ardour/libardour_visibility.h"
 #include "pbd/compose.h"
 
+#ifdef COMPILER_MSVC
+#undef VOID
+#endif
+
 namespace ARDOUR {
 
 /** A value with dynamic type (tagged union). */
