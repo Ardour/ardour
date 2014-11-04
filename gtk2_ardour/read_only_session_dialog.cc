@@ -17,11 +17,7 @@
 
 */
 
-#include "pbd/file_utils.h"
-#include "ardour/filesystem_paths.h"
-
 #include "i18n.h"
-#include "about_dialog.h"
 #include "read_only_session_dialog.h"
 
 using namespace Gtk;
