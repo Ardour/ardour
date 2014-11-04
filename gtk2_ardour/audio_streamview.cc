@@ -262,7 +262,7 @@ AudioStreamView::setup_rec_box ()
 				break;
 			}
 
-			ArdourCanvas::Rectangle * rec_rect = new ArdourCanvas::Rectangle (_canvas_group);
+			ArdourCanvas::Rectangle * rec_rect = new ArdourCanvas::TimeRectangle (_canvas_group);
 			rec_rect->set_x0 (xstart);
 			rec_rect->set_y0 (0);
 			rec_rect->set_x1 (xend);

@@ -46,7 +46,7 @@ GhostRegion::GhostRegion (ArdourCanvas::Container* parent, TimeAxisView& tv, Tim
 	CANVAS_DEBUG_NAME (group, "ghost region");
 	group->set_position (ArdourCanvas::Duple (initial_pos, 0));
 
-	base_rect = new ArdourCanvas::Rectangle (group);
+	base_rect = new ArdourCanvas::TimeRectangle (group);
 	CANVAS_DEBUG_NAME (base_rect, "ghost region rect");
 	base_rect->set_x0 (0);
 	base_rect->set_y0 (0.0);

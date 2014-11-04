@@ -243,7 +243,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 
 	for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
 
-		ArdourCanvas::Rectangle* cr = new ArdourCanvas::Rectangle (group);
+		ArdourCanvas::Rectangle* cr = new ArdourCanvas::TimeRectangle (group);
 		cr->set_ignore_events (true);
 		_silent_frames.push_back (cr);
 
@@ -808,7 +808,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 
 		/* start off any new rect, if required */
 		if (cr == 0 || me != new_me) {
-			cr = new ArdourCanvas::Rectangle (group);
+			cr = new ArdourCanvas::TimeRectangle (group);
 			_coverage_frames.push_back (cr);
 			cr->set_x0 (trackview.editor().sample_to_pixel (t - position));
 			cr->set_y0 (1);

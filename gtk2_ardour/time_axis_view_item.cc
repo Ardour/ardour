@@ -188,14 +188,14 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		warning << "Time Axis Item Duration == 0" << endl;
 	}
 
-	vestigial_frame = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, 1.0, 2.0, trackview.current_height()));
+	vestigial_frame = new ArdourCanvas::TimeRectangle (group, ArdourCanvas::Rect (0.0, 1.0, 2.0, trackview.current_height()));
 	CANVAS_DEBUG_NAME (vestigial_frame, string_compose ("vestigial frame for %1", get_item_name()));
 	vestigial_frame->hide ();
 	vestigial_frame->set_outline_color (ARDOUR_UI::config()->get_VestigialFrame());
 	vestigial_frame->set_fill_color (ARDOUR_UI::config()->get_VestigialFrame());
 
 	if (visibility & ShowFrame) {
-		frame = new ArdourCanvas::Rectangle (group, 
+		frame = new ArdourCanvas::TimeRectangle (group, 
 						     ArdourCanvas::Rect (0.0, 0.0, 
 									 trackview.editor().sample_to_pixel(duration) + RIGHT_EDGE_SHIFT, 
 									 trackview.current_height() - 1.0));

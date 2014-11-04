@@ -1018,7 +1018,7 @@ TimeAxisView::get_selection_rect (uint32_t id)
 
 		rect = new SelectionRect;
 
-		rect->rect = new ArdourCanvas::Rectangle (selection_group);
+		rect->rect = new ArdourCanvas::TimeRectangle (selection_group);
 		CANVAS_DEBUG_NAME (rect->rect, "selection rect");
 		rect->rect->set_outline (false);
 		rect->rect->set_fill_color (ARDOUR_UI::config()->get_SelectionRect());

@@ -248,7 +248,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 	group->name = string_compose ("Marker::group for %1", annotation);
 #endif	
 
-	_name_background = new ArdourCanvas::Rectangle (group);
+	_name_background = new ArdourCanvas::TimeRectangle (group);
 #ifdef CANVAS_DEBUG
 	_name_background->name = string_compose ("Marker::_name_background for %1", annotation);
 #endif	

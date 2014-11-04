@@ -255,17 +255,18 @@ void
 TimeRectangle::compute_bounding_box () const
 {
 	Rectangle::compute_bounding_box ();
-	assert (_bounding_box);
 
-	Rect r = _bounding_box.get ();
-
-	/* This is a TimeRectangle, so its right edge is drawn 1 pixel beyond
-	 * (larger x-axis coordinates) than a normal Rectangle.
-	 */
-	
-	r.x1 += 1.0; /* this should be using safe_add() */
-	
-	_bounding_box = r;
+	if (_bounding_box) {
+		Rect r = _bounding_box.get ();
+		
+		/* This is a TimeRectangle, so its right edge is drawn 1 pixel beyond
+		 * (larger x-axis coordinates) than a normal Rectangle.
+		 */
+		
+		r.x1 += 1.0; /* this should be using safe_add() */
+		
+		_bounding_box = r;
+	}
 }
 
 void 
