@@ -1101,7 +1101,7 @@ Editor::rename_marker(Marker *marker)
 		return;
         }
 
-        FloatingTextEntry* flt = new FloatingTextEntry;
+        FloatingTextEntry* flt = new FloatingTextEntry (loc->name());
 
         flt->use_text.connect (sigc::bind (sigc::mem_fun (*this, &Editor::finish_rename_marker), marker));
         flt->present ();
