@@ -43,6 +43,13 @@ class MIDISceneChanger : public SceneChanger
 	void set_recording (bool);
 	void locate (framepos_t);
 
+        /** Signal emitted whenever any relevant MIDI input is detected.
+         */
+        PBD::Signal0<void> MIDIInputActivity;
+        /** Signal emitted whenever any relevant MIDI output is sent.
+         */
+        PBD::Signal0<void> MIDIOutputActivity;
+
     private:
 	typedef std::multimap<framepos_t,boost::shared_ptr<MIDISceneChange> > Scenes;
 
@@ -51,13 +58,13 @@ class MIDISceneChanger : public SceneChanger
 	Glib::Threads::RWLock scene_lock;
 	Scenes scenes;
 	bool _recording;
-	framepos_t last_bank_message_time;
+	bool have_seen_bank_changes;
 	framepos_t last_program_message_time;
 	unsigned short current_bank;
 	int last_delivered_program;
 	int last_delivered_bank;
 
-	void gather ();
+	void gather (const Locations::LocationList&);
 	bool recording () const;
 	void jump_to (int bank, int program);
 	void rt_deliver (MidiBuffer&, framepos_t, boost::shared_ptr<MIDISceneChange>);

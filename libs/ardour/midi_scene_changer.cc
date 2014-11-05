@@ -36,14 +36,19 @@ using namespace ARDOUR;
 MIDISceneChanger::MIDISceneChanger (Session& s)
 	: SceneChanger (s)
 	, _recording (true)
-	, last_bank_message_time (-1)
+	, have_seen_bank_changes (false)
 	, last_program_message_time (-1)
 	, last_delivered_program (-1)
 	, last_delivered_bank (-1)
 	  
 {
+        /* catch any add/remove/clear etc. for all Locations */
 	_session.locations()->changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
-	Location::scene_changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::gather, this));
+	_session.locations()->added.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
+	_session.locations()->removed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
+
+        /* catch class-based signal that notifies of us changes in the scene change state of any Location */
+	Location::scene_changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
 }
 
 MIDISceneChanger::~MIDISceneChanger ()
@@ -53,7 +58,7 @@ MIDISceneChanger::~MIDISceneChanger ()
 void
 MIDISceneChanger::locations_changed ()
 {
-	gather ();
+	_session.locations()->apply (*this, &MIDISceneChanger::gather);
 }
 
 /** Use the session's list of locations to collect all patch changes.
@@ -61,9 +66,8 @@ MIDISceneChanger::locations_changed ()
  * This is called whenever the locations change in anyway.
  */
 void
-MIDISceneChanger::gather ()
+MIDISceneChanger::gather (const Locations::LocationList& locations)
 {
-	const Locations::LocationList& locations (_session.locations()->list());
 	boost::shared_ptr<SceneChange> sc;
 
 	Glib::Threads::RWLock::WriterLock lm (scene_lock);
@@ -75,8 +79,13 @@ MIDISceneChanger::gather ()
 		if ((sc = (*l)->scene_change()) != 0) {
 
 			boost::shared_ptr<MIDISceneChange> msc = boost::dynamic_pointer_cast<MIDISceneChange> (sc);
-			
+
 			if (msc) {
+
+                                if (msc->bank() >= 0) {
+                                        have_seen_bank_changes = true;
+                                }
+			
 				scenes.insert (std::make_pair ((*l)->start(), msc));
 			}
 		}
@@ -88,6 +97,8 @@ MIDISceneChanger::rt_deliver (MidiBuffer& mbuf, framepos_t when, boost::shared_p
 {
 	uint8_t buf[4];
 	size_t cnt;
+
+        MIDIOutputActivity (); /* EMIT SIGNAL */
 
 	if ((cnt = msc->get_bank_msb_message (buf, sizeof (buf))) > 0) {
 		mbuf.push_back (when, cnt, buf);
@@ -117,6 +128,8 @@ MIDISceneChanger::non_rt_deliver (boost::shared_ptr<MIDISceneChange> msc)
 	   non-RT/process context. Using zero means "deliver them as early as
 	   possible" (practically speaking, in the next process callback).
 	*/
+        
+        MIDIOutputActivity (); /* EMIT SIGNAL */
 
 	if ((cnt = msc->get_bank_msb_message (buf, sizeof (buf))) > 0) {
 		aport->write (buf, cnt, 0);
@@ -243,13 +256,12 @@ MIDISceneChanger::recording() const
 }
 
 void
-MIDISceneChanger::bank_change_input (MIDI::Parser& parser, unsigned short, int)
+  MIDISceneChanger::bank_change_input (MIDI::Parser& /*parser*/, unsigned short, int)
 {
-	if (!recording()) {
-		return;
-	}
-
-	last_bank_message_time = parser.get_timestamp ();
+	if (recording()) {
+                have_seen_bank_changes = true;
+        }
+        MIDIInputActivity (); /* EMIT SIGNAL */
 }
 
 void
@@ -260,6 +272,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 	last_program_message_time = time;
 
 	if (!recording()) {
+                MIDIInputActivity (); /* EMIT SIGNAL */
 		jump_to (input_port->channel (channel)->bank(), program);
 		return;
 	}
@@ -287,7 +300,13 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 		new_mark = true;
 	}
 
-	unsigned short bank = input_port->channel (channel)->bank();
+        unsigned short bank;
+
+        if (have_seen_bank_changes) {
+                bank = input_port->channel (channel)->bank();
+        } else {
+                bank = -1;
+        }
 
 	MIDISceneChange* msc =new MIDISceneChange (channel, bank, program & 0x7f);
 
@@ -300,6 +319,8 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 	if (new_mark) {
 		locations->add (loc);
 	}
+
+        MIDIInputActivity (); /* EMIT SIGNAL */
 }
 
 void
