@@ -58,7 +58,7 @@ class MIDISceneChanger : public SceneChanger
 	Glib::Threads::RWLock scene_lock;
 	Scenes scenes;
 	bool _recording;
-	framepos_t last_bank_message_time;
+	bool have_seen_bank_changes;
 	framepos_t last_program_message_time;
 	unsigned short current_bank;
 	int last_delivered_program;

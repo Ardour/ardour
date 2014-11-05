@@ -36,7 +36,7 @@ using namespace ARDOUR;
 MIDISceneChanger::MIDISceneChanger (Session& s)
 	: SceneChanger (s)
 	, _recording (true)
-	, last_bank_message_time (-1)
+	, have_seen_bank_changes (false)
 	, last_program_message_time (-1)
 	, last_delivered_program (-1)
 	, last_delivered_bank (-1)
@@ -79,8 +79,13 @@ MIDISceneChanger::gather (const Locations::LocationList& locations)
 		if ((sc = (*l)->scene_change()) != 0) {
 
 			boost::shared_ptr<MIDISceneChange> msc = boost::dynamic_pointer_cast<MIDISceneChange> (sc);
-			
+
 			if (msc) {
+
+                                if (msc->bank() >= 0) {
+                                        have_seen_bank_changes = true;
+                                }
+			
 				scenes.insert (std::make_pair ((*l)->start(), msc));
 			}
 		}
@@ -251,10 +256,10 @@ MIDISceneChanger::recording() const
 }
 
 void
-MIDISceneChanger::bank_change_input (MIDI::Parser& parser, unsigned short, int)
+  MIDISceneChanger::bank_change_input (MIDI::Parser& /*parser*/, unsigned short, int)
 {
 	if (recording()) {
-                last_bank_message_time = parser.get_timestamp ();
+                have_seen_bank_changes = true;
         }
         MIDIInputActivity (); /* EMIT SIGNAL */
 }
@@ -295,7 +300,13 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 		new_mark = true;
 	}
 
-	unsigned short bank = input_port->channel (channel)->bank();
+        unsigned short bank;
+
+        if (have_seen_bank_changes) {
+                bank = input_port->channel (channel)->bank();
+        } else {
+                bank = -1;
+        }
 
 	MIDISceneChange* msc =new MIDISceneChange (channel, bank, program & 0x7f);
 
