@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <CompactMeterbridge bgnormal="#353535">
-  <HBox>
-    <VBox width="11"/>
-    <VBox>
-      <icon source="meter_bridge_level_scale.png" box.padding="8"/>
-    </VBox>
-    <VBox width="9"/>
-    <ScrolledWindow hscroll="always"
-                    vscroll="never"
-                    box.expand="true"
-                    box.fill="true">
-      <EventBox bgnormal="#353535">
-        <VBox>
-          <Hbox height="8"/>
-          <Hbox id="compact_meter_strips_home" spacing="3"/>
-        </VBox>
-      </EventBox>        
-    </ScrolledWindow>
-  </HBox>
+  <VBox>
+    <HBox>
+      <VBox width="11"/>
+      <VBox>
+        <icon source="meter_bridge_level_scale.png" box.padding="8"/>
+      </VBox>
+      <VBox width="9"/>
+      <ScrolledWindow hscroll="always"
+                      vscroll="never"
+                      box.expand="true"
+                      box.fill="true">
+        <EventBox bgnormal="#353535">
+          <VBox>
+            <Hbox height="8"/>
+            <Hbox id="compact_meter_strips_home"
+                  spacing="3"/>
+          </VBox>
+        </EventBox>
+      </ScrolledWindow>
+    </HBox>
+    <EventBox bgnormal="#000000"
+              height="2"/>
+  </VBox>
 </CompactMeterbridge>
