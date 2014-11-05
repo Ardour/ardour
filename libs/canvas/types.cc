@@ -102,6 +102,24 @@ Rect::expand (Distance amount) const
 	return r;
 }
 
+Rect
+Rect::shrink (Distance amount) const
+{
+	/* This isn't the equivalent of expand (-distance) because
+	   of the peculiarities of safe_add() with negative values.
+	   Maybe.
+	*/
+
+	Rect r;
+
+	r.x0 = safe_add (x0, amount);
+	r.y0 = safe_add (y0, amount);
+	r.x1 = x1 - amount;
+	r.y1 = y1 - amount;
+
+	return r;
+}
+
 bool
 Rect::contains (Duple point) const
 {

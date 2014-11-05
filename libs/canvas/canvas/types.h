@@ -94,6 +94,7 @@ struct LIBCANVAS_API Rect
 	Rect extend (Rect const &) const;
 	Rect translate (Duple) const;
 	Rect expand (Distance) const;
+	Rect shrink (Distance) const;
 	bool contains (Duple) const;
 	Rect fix () const;
 	bool empty() const { return (x0 == x1 && y0 == y1); }
