@@ -65,19 +65,16 @@ public:
 	void set_y1 (Coord);
 
 	enum What {
+		NOTHING = 0x0,
 		LEFT = 0x1,
 		RIGHT = 0x2,
 		TOP = 0x4,
-		BOTTOM = 0x8
+		BOTTOM = 0x8,
+		ALL = LEFT|RIGHT|TOP|BOTTOM,
 	};
 
 	void set_outline_what (What);
-	void set_outline_all () {
-		set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::TOP|
-								 ArdourCanvas::Rectangle::LEFT|
-								 ArdourCanvas::Rectangle::RIGHT|
-								 ArdourCanvas::Rectangle::BOTTOM));
-	}
+	void set_outline_all () { set_outline_what (ArdourCanvas::Rectangle::ALL); }
 
   protected:
 	void render_self (Rect const &, Cairo::RefPtr<Cairo::Context>, Rect) const;
