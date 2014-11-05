@@ -173,11 +173,6 @@ RangeMarker::use_color ()
         if (_end_line) {
                 _end_line->set_outline_color (_color);
         }
-
-        if (_name_item) {
-                /* black text */
-                _name_item->set_color (ArdourCanvas::rgba_to_color (0.0, 0.0, 0.0, 1.0));
-        }
 }
 
 void
@@ -241,7 +236,7 @@ RangeMarker::setup_line ()
 	_end_line->set_outline_color (_color);
 	_end_line->show ();
 
-	ArdourCanvas::Color marker_color = ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 0.8);
+	ArdourCanvas::Color marker_color = ARDOUR_UI::config()->get_canvasvar_LocationHandle();
 
 	if (!_start_handler) {
 		_start_handler = new ArdourCanvas::Rectangle (group);
@@ -291,18 +286,18 @@ RangeMarker::setup_name_display ()
                         _name_item->hide ();
                 }
 	} else {
-        if (!_name_item) {
+                if (!_name_item) {
 			_name_item = new ArdourCanvas::Text (group);
 			CANVAS_DEBUG_NAME (_name_item, string_compose ("Marker::_name_item for %1", _name));
 			_name_item->set_font_description (name_font);
-        }
+                }
                 
 		_name_item->show ();
-        _name_item->set_x_position (_label_offset);
-        /* Limit text to width of background rect */
+                _name_item->set_x_position (_label_offset);
+                /* Limit text to width of background rect */
 		_name_item->clamp_width (_name_background->get().width());
 		_name_item->set (_name);
-    }
+        }
 }
 
 Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& parent, double height, guint32 rgba, const string& annotation,
@@ -431,6 +426,19 @@ Marker::canvas_height_set (double h)
 }
 
 void
+Marker::set_selected (bool yn)
+{
+        /* only show selection status for non-skip (range) markers */
+        if (_location && !_location->is_skip()) {
+                if (yn) {
+                        set_color (ARDOUR_UI::config()->get_canvasvar_LocationSelected());
+                } else {
+                        reset_color ();
+                }
+        }
+}
+
+void
 Marker::set_color (ArdourCanvas::Color c)
 {
         _color = c;
@@ -548,8 +556,7 @@ Marker::setup_name_display ()
                         _name_item = new ArdourCanvas::Text (group);
                         CANVAS_DEBUG_NAME (_name_item, string_compose ("Marker::_name_item for %1", _name));
                         _name_item->set_font_description (name_font);
-                        /* white with 95% opacity */
-                        _name_item->set_color (ArdourCanvas::rgba_to_color (1.0,1.0,1.0,0.95));
+                        _name_item->set_color (ArdourCanvas::contrasting_text_color (_color));
                 }
 
                 if (_have_scene_change) {
@@ -571,19 +578,16 @@ Marker::setup_name_display ()
                                 _label_offset += r.x1;
                         }
                         
-                        /* white with 95% opacity */
-                        _scene_change_rect->set_outline_color (ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 0.95));
                         _scene_change_rect->set_fill (false);
                         
                         _scene_change_text->set_font_description (name_font);
-                        _scene_change_text->set_color (ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 0.95));
                         _scene_change_text->set (X_("MIDI"));
                         
-                        /* 4 pixels left margin, place it in the vertical middle.
+                        /* 4 pixels left margin, place it in the vertical middle, plus or minus
                          */
-                        _scene_change_text->set_position (ArdourCanvas::Duple (4.0, (_height / 2.0) - (name_height / 2.0)));
+                        _scene_change_text->set_position (ArdourCanvas::Duple (4.0, (_height / 2.0) - (name_height / 2.0) - 1.0));
                         
-                        r.y0 = _scene_change_text->position().y - 3.0;
+                        r.y0 = _scene_change_text->position().y - 2.0;
                         r.y1 = r.y0 + name_height + 4.0;
                         
                         _scene_change_rect->set (r);
@@ -655,16 +659,27 @@ Marker::use_color ()
 	if (_start_line) {
 		_start_line->set_outline_color (_color);
 	}
+        
+        if (_name_background) {
+                _name_background->set_fill (true);
+                _name_background->set_fill_color (_color);
+                /* white with 20% opacity */
+                _name_background->set_outline_color (ARDOUR_UI::config()->get_canvasvar_LocationOutline());
+                _name_background->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::TOP|
+                                                                                   ArdourCanvas::Rectangle::LEFT));
+        }
 
-    if (_name_background) {
-        _name_background->set_fill (true);
-        _name_background->set_fill_color (_color);
-        /* white with 20% opacity */
-        _name_background->set_outline_color (ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 0.20));
-                
-        _name_background->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::TOP|
-                                                                            ArdourCanvas::Rectangle::LEFT));
-    }
+        ArdourCanvas::Color contrast = ArdourCanvas::contrasting_text_color (_color);
+
+        if (_name_item) {
+                _name_item->set_color (contrast);
+        }
+        if (_scene_change_rect) {
+                _scene_change_rect->set_outline_color (contrast);
+        }
+        if (_scene_change_text) {
+                _scene_change_text->set_color (contrast);
+        }
 }
 
 /** Set the number of pixels that are available for a label to the left of the centre of this marker */

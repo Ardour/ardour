@@ -369,6 +369,15 @@ Editor::LocationMarkers::canvas_height_set (double h)
 }
 
 void
+Editor::LocationMarkers::set_selected (bool s)
+{
+	start->set_selected (s);
+	if (end) {
+		end->set_selected (s);
+	}
+}
+
+void
 Editor::mouse_add_new_marker (framepos_t where, bool is_cd, bool is_xrun)
 {
 	string markername, markerprefix;
@@ -1217,7 +1226,6 @@ Editor::marker_selection_changed ()
 		return;
 	}
 
-#if 0
 	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
 		i->second->set_selected (false);
 	}
@@ -1225,8 +1233,6 @@ Editor::marker_selection_changed ()
 	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
 		(*x)->set_selected (true);
 	}
-#endif
-
 }
 
 struct SortLocationsByPosition {

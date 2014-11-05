@@ -585,9 +585,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		bool    valid;
 
 		LocationMarkers () : start(0), end(0), valid (true) {}
-
+                
 		~LocationMarkers ();
 
+                void set_selected (bool);
 		void canvas_height_set (double);
 	};
 

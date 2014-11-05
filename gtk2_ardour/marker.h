@@ -72,6 +72,7 @@ class Marker : public sigc::trackable
 
 	void set_name (const std::string&);
 
+        void set_selected (bool yn);
         void set_color (ArdourCanvas::Color);
         void reset_color ();
         
