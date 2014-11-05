@@ -25,6 +25,7 @@
 #include <ctime>
 #include <list>
 
+#include "pbd/convert.h"
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
@@ -36,8 +37,6 @@
 #include "ardour/tempo.h"
 
 #include "i18n.h"
-
-#define SUFFIX_MAX 32
 
 using namespace std;
 using namespace ARDOUR;
@@ -783,33 +782,55 @@ int
 Locations::next_available_name(string& result,string base)
 {
 	LocationList::iterator i;
-	Location* location;
-	string temp;
 	string::size_type l;
 	int suffix;
 	char buf[32];
-	bool available[SUFFIX_MAX+1];
+        std::map<uint32_t,bool> taken;
+        uint32_t n;
 
 	result = base;
-	for (int k=1; k<SUFFIX_MAX; k++) {
-		available[k] = true;
-	}
-	l = base.length();
-	for (i = locations.begin(); i != locations.end(); ++i) {
-		location =* i;
-		temp = location->name();
-		if (l && !temp.find(base,0)) {
-			suffix = atoi(temp.substr(l,3).c_str());
-			if (suffix) available[suffix] = false;
-		}
-	}
-	for (int k=1; k<=SUFFIX_MAX; k++) {
-		if (available[k]) {
-			snprintf (buf, 31, "%d", k);
-			result += buf;
-			return 1;
-		}
-	}
+        l = base.length();
+
+        if (!base.empty()) {
+                
+                /* find all existing names that match "base", and store
+                   the numeric part of them (if any) in the map "taken"
+                */
+
+                for (i = locations.begin(); i != locations.end(); ++i) {
+
+                        const string& temp ((*i)->name());
+                        
+                        if (!temp.find (base,0)) {
+
+                                if ((suffix = atoi (temp.substr(l,3))) != 0) {
+                                        taken.insert (make_pair (suffix,true));
+                                }
+                        }
+                }
+        }
+
+        /* Now search for an un-used suffix to add to "base". This
+           will find "holes" in the numbering sequence when a location
+           was deleted.
+
+           This must start at 1, both for human-numbering reasons
+           and also because the call to atoi() above would return 
+           zero if there is no recognizable numeric suffix, causing
+           "base 0" not to be inserted into the "taken" map.
+        */
+
+        n = 1; 
+
+        while (n < UINT32_MAX) {
+                if (taken.find (n) == taken.end()) {
+                        snprintf (buf, sizeof(buf), "%d", n);
+                        result += buf;
+                        return 1;
+                }
+                ++n;
+        }
+                
 	return 0;
 }
 
