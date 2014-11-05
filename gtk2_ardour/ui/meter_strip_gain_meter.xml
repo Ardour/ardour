@@ -6,14 +6,15 @@
           maxvalue="1"/>
   <VBox>
     <Button id="peak_display_button"
-            width="37" height="13"
-            bgnormal="#B1B1B1"
-            bgactive="#D83838"
-            fgnormal="#000000"
-            fgactive="#000000"
-            bghover="#C47474"
-            bordercolor="#FFFFFF33"
-            borderwidth="1 1 0 0"/>
+            width="38"
+            height="13"
+            winfont="Arial Bold 9"
+            macfont="Helvetica Bold 9"
+            bgnormal="#262626"
+            bgactive="#FE0E0E"
+            fgnormal="#afafaf"
+            fgactive="#afafaf"
+            bghover="#C47474"/>
     <HBox height="10"/>
     <HBox spacing="7" width="32">
       <VBox id="level_meter_home"
