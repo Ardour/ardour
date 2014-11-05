@@ -253,35 +253,49 @@ ArdourCanvas::distance_to_segment_squared (Duple const & p, Duple const & p1, Du
 	return ((dpqx * dpqx) + (dpqy * dpqy));
 }
 
+// Inverse of sRGB "gamma" function.
+static inline double 
+inv_gam_sRGB (double c) 
+{
+        if (c <= 0.04045) {
+                return c/12.92;
+        } else {
+                return pow(((c+0.055)/(1.055)),2.4);
+        }
+}
+
+// sRGB "gamma" function
+static inline int 
+gam_sRGB(double v) 
+{
+        if (v <= 0.0031308) {
+                v *= 12.92;
+        } else {
+                v = 1.055 * pow (v, 1.0 / 2.4) - 0.055;
+        }
+        return int (v*255+.5);
+}
+
+static double 
+luminance (uint32_t c)
+{
+        // sRGB luminance(Y) values
+        const double rY = 0.212655;
+        const double gY = 0.715158;
+        const double bY = 0.072187;
+
+        double r, g, b, a;
+
+        ArdourCanvas::color_to_rgba (c, r, g, b, a);
+        
+        return (gam_sRGB (rY*inv_gam_sRGB(r) + gY*inv_gam_sRGB(g) + bY*inv_gam_sRGB(b))) / 255.0;
+}    
+
 uint32_t
 ArdourCanvas::contrasting_text_color (uint32_t c)
 {
-	double r, g, b, a;
-	ArdourCanvas::color_to_rgba (c, r, g, b, a);
+        static const uint32_t white = ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 1.0);
+        static const uint32_t black = ArdourCanvas::rgba_to_color (0.0, 0.0, 0.0, 1.0);
 
-	const double black_r = 0.0;
-	const double black_g = 0.0;
-	const double black_b = 0.0;
-
-	const double white_r = 1.0;
-	const double white_g = 1.0;
-	const double white_b = 1.0;
-
-	/* Use W3C contrast guideline calculation */
-
-	double white_contrast = (max (r, white_r) - min (r, white_r)) +
-		(max (g, white_g) - min (g, white_g)) + 
-		(max (b, white_b) - min (b, white_b));
-
-	double black_contrast = (max (r, black_r) - min (r, black_r)) +
-		(max (g, black_g) - min (g, black_g)) + 
-		(max (b, black_b) - min (b, black_b));
-
-	if (white_contrast > black_contrast) {		
-		/* use white */
-		return ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 1.0);
-	} else {
-		/* use black */
-		return ArdourCanvas::rgba_to_color (0.0, 0.0, 0.0, 1.0);
-	}
+	return (luminance (c) < 0.50) ? white : black;
 }
