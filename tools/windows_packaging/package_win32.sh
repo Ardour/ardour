@@ -103,7 +103,7 @@ vamp-sdk-2.dll
 cd $BASE || exit 1
 
 PRODUCT_NAME_DIR="tracks"
-PRODUCT_EXECUTABLE_NAME="tracks.exe"
+PRODUCT_EXECUTABLE_NAME="trackslive.exe"
 
 if ! test -f $BUILD_CACHE_FILE; then
 	echo "ERROR: $APPNAME is not configured and built yet..."
@@ -137,7 +137,7 @@ echo "Deleting import libs ..."
 rm $PACKAGE_DIR/lib/*dll.a || exit 1
 
 # delete sh script that was copied over
-rm $PACKAGE_DIR/${PRODUCT_NAME_DIR} || exit 1
+rm $PACKAGE_DIR/${PRODUCT_EXECUTABLE_NAME%.*} || exit 1
 
 if test x$WITH_TESTS != x ; then
 	echo "Copying tests and test data to $PACKAGE_DIR ..."
