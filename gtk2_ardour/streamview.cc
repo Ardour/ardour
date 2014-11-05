@@ -71,9 +71,8 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Container* canvas_g
 
 	canvas_rect = new ArdourCanvas::Rectangle (_canvas_group);
 	CANVAS_DEBUG_NAME (canvas_rect, string_compose ("SV canvas rectangle %1", _trackview.name()));
-	canvas_rect->set (ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, tv.current_height () -1));
-	canvas_rect->set_outline_what (ArdourCanvas::Rectangle::BOTTOM); // bottom separator
-	canvas_rect->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
+	canvas_rect->set (ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, tv.current_height ()));
+	canvas_rect->set_outline_what (ArdourCanvas::Rectangle::What (0));
 	canvas_rect->set_fill (true);
 	canvas_rect->Event.connect (sigc::bind (sigc::mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event), canvas_rect, &_trackview));
 
@@ -115,16 +114,17 @@ int
 StreamView::set_height (double h)
 {
 	/* limit the values to something sane-ish */
+
 	if (h < 10.0 || h > 1000.0) {
 		return -1;
 	}
 
-	if (canvas_rect->y1() == h /* -1 */) {
+	if (canvas_rect->y1() == h) {
 		return 0;
 	}
 
 	height = h;
-	canvas_rect->set_y1 (height /* -1 */); // share the separator with outline
+	canvas_rect->set_y1 (height);
 	update_contents_height ();
 
 	return 0;
