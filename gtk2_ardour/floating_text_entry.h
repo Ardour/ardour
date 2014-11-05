@@ -27,7 +27,7 @@
 class FloatingTextEntry : public ArdourWindow
 {
   public:
-        FloatingTextEntry ();
+        FloatingTextEntry (const std::string& initial_contents);
 
         sigc::signal1<void,std::string> use_text;
 

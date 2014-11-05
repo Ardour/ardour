@@ -25,14 +25,18 @@
 
 #include "i18n.h"
 
-FloatingTextEntry::FloatingTextEntry ()
+FloatingTextEntry::FloatingTextEntry (const std::string& initial_contents)
 	: ArdourWindow ("")
         , entry_changed (false)
 {
         set_name (X_("FloatingTextEntry"));
 	set_position (Gtk::WIN_POS_MOUSE);
         set_border_width (0);
-        
+
+        if (!initial_contents.empty()) {
+                entry.set_text (initial_contents);
+        }
+
         entry.show ();
         entry.signal_changed().connect (sigc::mem_fun (*this, &FloatingTextEntry::changed));
         entry.signal_activate().connect (sigc::mem_fun (*this, &FloatingTextEntry::activated));
