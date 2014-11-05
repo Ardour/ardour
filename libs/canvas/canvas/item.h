@@ -291,14 +291,14 @@ protected:
 	void add_child_bounding_boxes() const;
 	void render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 
+	Duple scroll_offset() const;
+	Duple position_offset() const;
+
 private:
 	void init ();
 
 	std::string _tooltip;
 	bool _ignore_events;
-
-	Duple scroll_offset() const;
-	Duple position_offset() const;
 
 	void find_scroll_parent ();
 };
