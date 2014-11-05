@@ -98,20 +98,13 @@ Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 		 * thick, it will precisely align with the corner
 		 * coordinates of the rectangle. So if the rectangle
 		 * has a left edge at 0 and a right edge at 10, then
-		 * the left edge must span -0.5..+0.5, the right edge
-		 * must span 9.5..10.5 (i.e. the single full color
-		 * pixel is precisely aligned with 0 and 10
-		 * respectively).
-		 *
-		 * we have to shift left/up in all cases, which means
-		 * subtraction along both axes (i.e. edge at
-		 * N, outline must start at N-0.5). 
-		 *
-		 * see the cairo FAQ on single pixel lines to see why we do
-		 * the 0.5 pixel additions.
+		 * the left edge must span 0..1, the right edge
+		 * must span 9..10 because the first and final pixels
+		 * to be colored are actually "at" 0.5 and 9.5 (midway
+		 * between the integer coordinates.
 		 */
 
-		self = self.translate (Duple (0.5, 0.5));
+		self = self.shrink (0.5);
 
 		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
 			
@@ -155,13 +148,6 @@ Rectangle::compute_bounding_box () const
 {
 	if (!_rect.empty()) {
 		Rect r = _rect.fix ();
-
-		/* take into acount the 0.5 addition to the bounding
-		   box for the right and bottom edges, see ::render() above
-		*/
-
-		r = r.expand (1.0);
-
 		_bounding_box = r;
 	}
 
@@ -273,8 +259,7 @@ void
 TimeRectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	Rect self = get_self_for_render ();
-
-
+	
 	/* This is a TimeRectangle, so its right edge is drawn 1 pixel beyond
 	 * (larger x-axis coordinates) than a normal Rectangle.
 	 */
