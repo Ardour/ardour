@@ -169,12 +169,6 @@ int ardour_main (int argc, char *argv[])
 int main (int argc, char *argv[])
 #endif
 {
-#ifdef PLATFORM_WINDOWS
-	// Essential!!  Make sure that any files used by Ardour
-	//              will be created or opened in BINARY mode!
-	_fmode = O_BINARY;
-#endif
-
 	fixup_bundle_environment (argc, argv, &localedir);
 
 	load_custom_fonts(); /* needs to happen before any gtk and pango init calls */

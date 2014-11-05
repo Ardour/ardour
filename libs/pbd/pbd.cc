@@ -20,6 +20,10 @@
 #include <iostream>
 #include <cstdlib>
 
+#ifdef PLATFORM_WINDOWS
+#include <fcntl.h>
+#endif
+
 #include <giomm.h>
 
 #include <glibmm/thread.h>
@@ -45,6 +49,12 @@ PBD::init ()
 	if (libpbd_initialized) {
 		return true;
 	}
+
+#ifdef PLATFORM_WINDOWS
+	// Essential!!  Make sure that any files used by Ardour
+	//              will be created or opened in BINARY mode!
+	_fmode = O_BINARY;
+#endif
 
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
