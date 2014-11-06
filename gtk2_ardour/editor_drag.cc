@@ -3248,38 +3248,6 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		_editor->selection->add (_marker);
 		break;
 	}
-
-	/* Set up copies for us to manipulate during the drag 
-	 */
-
-	for (MarkerSelection::iterator i = _editor->selection->markers.begin(); i != _editor->selection->markers.end(); ++i) {
-
-		Location* l = (*i)->location();
-
-		if (!l) {
-			continue;
-		}
-
-		if (l->is_mark()) {
-			_copied_locations.push_back (CopiedLocationMarkerInfo (l, *i));
-		} else {
-			/* range: check that the other end of the range isn't
-			   already there.
-			*/
-			CopiedLocationInfo::iterator x;
-			for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
-				if (*(*x).location == *l) {
-					break;
-				}
-			}
-			if (x == _copied_locations.end()) {
-				_copied_locations.push_back (CopiedLocationMarkerInfo (l, *i));
-			} else {
-				(*x).markers.push_back (*i);
-			}
-		}
-			
-	}
 }
 
 void
@@ -3289,6 +3257,40 @@ MarkerDrag::motion (GdkEvent*, bool)
 	Location *real_location;
 	Location *copy_location = 0;
 
+	/* Set up copies for us to manipulate during the drag 
+	 */
+
+        if (_copied_locations.empty()) {
+                for (MarkerSelection::iterator i = _editor->selection->markers.begin(); i != _editor->selection->markers.end(); ++i) {
+                        
+                        Location* l = (*i)->location();
+                        
+                        if (!l) {
+                                continue;
+                        }
+                        
+                        if (l->is_mark()) {
+                                _copied_locations.push_back (CopiedLocationMarkerInfo (l, *i));
+                        } else {
+                                /* range: check that the other end of the range isn't
+                                   already there.
+                                */
+                                CopiedLocationInfo::iterator x;
+                                for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
+                                        if (*(*x).location == *l) {
+                                                break;
+                                        }
+                                }
+                                if (x == _copied_locations.end()) {
+                                        _copied_locations.push_back (CopiedLocationMarkerInfo (l, *i));
+                                } else {
+                                        (*x).markers.push_back (*i);
+                                }
+                        }
+                        
+                        (*i)->the_item().raise_to_top ();
+                }
+        }
 
 	CopiedLocationInfo::iterator x;
 
