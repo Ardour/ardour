@@ -4428,7 +4428,7 @@ MarkerBarDrag::motion (GdkEvent*, bool /*first_move*/)
 void
 MarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-        if (!movement_occurred) {
+        if (!movement_occurred && was_double_click()) {
                 framepos_t where = _drags->current_pointer_frame();
                 _editor->snap_to_with_modifier (where, event);
                 _editor->mouse_add_new_marker (where);
