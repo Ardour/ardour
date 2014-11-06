@@ -1119,18 +1119,18 @@ Editor::rename_marker(Marker *marker)
 void
 Editor::finish_rename_marker (std::string txt, Marker* marker)
 {
-
 	Location* loc;
 	bool ignored;
 
 	loc = find_location_from_marker (marker, ignored);
 
-	if (!loc) {
+	if (!loc || txt.empty()) {
 		return;
 	}
 
 	begin_reversible_command ( _("rename marker") );
 	XMLNode &before = _session->locations()->get_state();
+
 
 	loc->set_name (txt);
 	_session->set_dirty ();
