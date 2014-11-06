@@ -35,6 +35,7 @@
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"
+#include "canvas/utils.h"
 
 #include "ardour/profile.h"
 
@@ -113,13 +114,14 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 		compute_heights ();
 	}
 
-	_canvas_display = new ArdourCanvas::Container (ed.get_trackview_group (), ArdourCanvas::Duple (0.0, 0.0));
+	_canvas_display = new ArdourCanvas::Container (ed.get_trackview_group ());
 	CANVAS_DEBUG_NAME (_canvas_display, "main for TAV");
 	_canvas_display->hide(); // reveal as needed
 
-	_canvas_separator = new ArdourCanvas::Line(ed.get_trackview_group ());
+	_canvas_separator = new ArdourCanvas::Line(_canvas_display);
 	CANVAS_DEBUG_NAME (_canvas_separator, "separator for TAV");
-	_canvas_separator->set_outline_color(RGBA_TO_UINT (0, 0, 0, 255));
+	_canvas_separator->set (ArdourCanvas::Duple(0.0, 0.0), ArdourCanvas::Duple(ArdourCanvas::COORD_MAX, 0.0));
+	_canvas_separator->set_outline_color(ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
 	_canvas_separator->set_outline_width(1.0);
 	_canvas_separator->hide();
 
@@ -241,9 +243,6 @@ TimeAxisView::~TimeAxisView()
 	delete _canvas_display;
 	_canvas_display = 0;
 
-	delete _canvas_separator;
-	_canvas_separator = 0;
-
 	delete display_menu;
 	display_menu = 0;
 
@@ -303,17 +302,13 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	_order = nth;
 
 	if (_y_position != y) {
-		_canvas_separator->set (ArdourCanvas::Duple(0, y), ArdourCanvas::Duple(ArdourCanvas::COORD_MAX, y));
-		_canvas_display->set_y_position (y + 1);
+		_canvas_display->set_y_position (y);
 		_y_position = y;
 	}
 
 	_canvas_display->raise_to_top ();
 	_canvas_display->show ();
-
-	_canvas_separator->raise_to_top ();
-	_canvas_separator->show ();
-
+	
 	_hidden = false;
 
 	_effective_height = current_height ();
@@ -328,6 +323,12 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 			(*i)->hide ();
 		}
 	}
+
+	/* put separator at the bottom of this time axis view */
+
+	_canvas_separator->set (ArdourCanvas::Duple(0, height), ArdourCanvas::Duple(ArdourCanvas::COORD_MAX, height));
+	_canvas_separator->lower_to_bottom ();
+	_canvas_separator->show ();
 
 	return _effective_height;
 }
