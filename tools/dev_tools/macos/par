@@ -1,2 +1,2 @@
 cd $AD/tracks/tools/osx_packaging
-./osx_build --public
+./osx_build --trackslive
