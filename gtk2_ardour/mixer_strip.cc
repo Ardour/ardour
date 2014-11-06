@@ -1149,7 +1149,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, bool for_i
 				if (io_connection_count == 0) {
 					tooltip << endl << Glib::Markup::escape_text(port->name().substr(port->name().find("/") + 1)) << " -> " << Glib::Markup::escape_text(connection_name);
 				} else {
-					tooltip << ", " << Glib::Markup::escape_text(connection_name);
+					tooltip << ", " << std::string (Glib::Markup::escape_text(connection_name));
 				}
 
 				if (connection_name.find("ardour:") == 0) {
