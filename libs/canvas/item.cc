@@ -892,7 +892,9 @@ Item::raise_child_to_top (Item* i)
 
 	_items.remove (i);
 	_items.push_back (i);
+
 	invalidate_lut ();
+        redraw ();
 }
 
 void
@@ -911,6 +913,7 @@ Item::raise_child (Item* i, int levels)
 
 	_items.insert (j, i);
 	invalidate_lut ();
+        redraw ();
 }
 
 void
@@ -924,6 +927,7 @@ Item::lower_child_to_bottom (Item* i)
 	_items.remove (i);
 	_items.push_front (i);
 	invalidate_lut ();
+        redraw ();
 }
 
 void
