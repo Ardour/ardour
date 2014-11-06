@@ -49,6 +49,7 @@ static int64_t _x_get_monotonic_usec() {
 		if (QueryPerformanceCounter (&Count)) {
 			return (int64_t) (Count.QuadPart * _win_pc_rate);
 		}
+		return -1;
 	}
 #endif
 	return g_get_monotonic_time();
@@ -1167,9 +1168,21 @@ DummyAudioBackend::main_process_thread ()
 
 		if (!_freewheeling) {
 			clock2 = _x_get_monotonic_usec();
+#ifdef PLATFORM_WINDOWS
+			// querying the performance counter can fail occasionally
+			if (clock1 < 0 || clock2 < 0) {
+				clock2 = clock1 = 0;
+			}
+#endif
 			const int64_t elapsed_time = clock2 - clock1;
 			const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
-			_dsp_load = _dsp_load + .05 * ((elapsed_time / (float) nomial_time) - _dsp_load) + 1e-12;
+#ifdef PLATFORM_WINDOWS
+			if (clock1 >= 0 && clock2 >= 0)
+#endif
+			{ // low pass filter
+				_dsp_load = _dsp_load + .05 * ((elapsed_time / (float) nomial_time) - _dsp_load) + 1e-12;
+			}
+
 			if (elapsed_time < nomial_time) {
 				Glib::usleep (nomial_time - elapsed_time);
 			} else {
