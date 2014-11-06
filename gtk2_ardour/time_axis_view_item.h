@@ -243,6 +243,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	ArdourCanvas::Container*      group;
 	ArdourCanvas::Rectangle* vestigial_frame;
 	ArdourCanvas::Rectangle* frame;
+	ArdourCanvas::Rectangle* selection_frame;
 	ArdourCanvas::Text*      name_text;
 	ArdourCanvas::Rectangle* name_highlight;
 

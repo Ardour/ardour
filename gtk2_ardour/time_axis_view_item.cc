@@ -126,6 +126,7 @@ TimeAxisViewItem::TimeAxisViewItem(
 	: trackview (tv)
 	, frame_position (-1)
 	, item_name (it_name)
+	, selection_frame (0)
 	, _height (1.0)
 	, _recregion (recording)
 	, _automation (automation)
@@ -142,6 +143,7 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	, trackview (other.trackview)
 	, frame_position (-1)
 	, item_name (other.item_name)
+	, selection_frame (0)
 	, _height (1.0)
 	, _recregion (other._recregion)
 	, _automation (other._automation)
@@ -188,7 +190,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		warning << "Time Axis Item Duration == 0" << endl;
 	}
 
-	vestigial_frame = new ArdourCanvas::TimeRectangle (group, ArdourCanvas::Rect (0.0, 1.0, 2.0, trackview.current_height()));
+	vestigial_frame = new ArdourCanvas::TimeRectangle (group, ArdourCanvas::Rect (0.0, 0.0, 2.0, trackview.current_height()));
 	CANVAS_DEBUG_NAME (vestigial_frame, string_compose ("vestigial frame for %1", get_item_name()));
 	vestigial_frame->hide ();
 	vestigial_frame->set_outline_color (ARDOUR_UI::config()->get_VestigialFrame());
@@ -198,37 +200,27 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		frame = new ArdourCanvas::TimeRectangle (group, 
 						     ArdourCanvas::Rect (0.0, 0.0, 
 									 trackview.editor().sample_to_pixel(duration) + RIGHT_EDGE_SHIFT, 
-									 trackview.current_height() - 1.0));
+									 trackview.current_height()));
+		
+		frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
 
 		CANVAS_DEBUG_NAME (frame, string_compose ("frame for %1", get_item_name()));
-
-		if (Config->get_show_name_highlight()) {
-			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
-		} else {
-			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM));
-		}
 
 		if (_recregion) {
 			frame->set_outline_color (ARDOUR_UI::config()->get_RecordingRect());
 		} else {
 			frame->set_outline_color (ARDOUR_UI::config()->get_TimeAxisFrame());
 		}
-
-	} else {
-
-		frame = 0;
 	}
 	
 	if (Config->get_show_name_highlight() && (visibility & ShowNameHighlight)) {
 
 		double width;
-		double start;
+		double start = 1.0;
 
 		if (visibility & FullWidthNameHighlight) {
-			start = 0.0;
 			width = trackview.editor().sample_to_pixel(item_duration) + RIGHT_EDGE_SHIFT;
 		} else {
-			start = 1.0;
 			width = trackview.editor().sample_to_pixel(item_duration) - 2.0 + RIGHT_EDGE_SHIFT;
 		}
 
@@ -539,25 +531,26 @@ TimeAxisViewItem::get_item_name() const
 void
 TimeAxisViewItem::set_selected(bool yn)
 {
-	if (_selected != yn) {
-		Selectable::set_selected (yn);
-		set_frame_color ();
-		set_name_text_color ();
+	if (_selected == yn) {
+		return;
+	}
+	
+	Selectable::set_selected (yn);
+	set_frame_color ();
+	set_name_text_color ();
 
-		if (frame) {
-			if (!Config->get_show_name_highlight() && yn) {
-				frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM|ArdourCanvas::Rectangle::TOP));
-				frame->set_y0 (1.0);
-				frame->set_y1 (_height - 1.0);
-			} else {
-				if (Config->get_show_name_highlight()) {
-					frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
-				} else {
-					frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM));
-				}
-				frame->set_y0 (0.0);
-				frame->set_y1 (_height);
-			}
+	if (_selected && frame) {
+		if (!selection_frame) {
+			selection_frame = new ArdourCanvas::TimeRectangle (group);
+			selection_frame->set_fill (false);
+			selection_frame->set_outline_color (ARDOUR_UI::config()->get_SelectedTimeAxisFrame());
+			selection_frame->set_ignore_events (true);
+		}
+		selection_frame->set (frame->get().shrink (1.0));
+		selection_frame->show ();
+	} else {
+		if (selection_frame) {
+			selection_frame->hide ();
 		}
 	}
 }
@@ -609,27 +602,22 @@ TimeAxisViewItem::set_height (double height)
 	}
 
 	if (frame) {
-		if (!Config->get_show_name_highlight() && _selected) {
-			frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM|ArdourCanvas::Rectangle::TOP));
-			frame->set_y0 (1.0);
-			frame->set_y1 (_height - 1.0);
-		} else {
-			if (Config->get_show_name_highlight()) {
-				frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
-			} else {
-				frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::BOTTOM));
-			}
-			frame->set_y0 (0.0);
-			frame->set_y1 (_height);
-		}
+		
+		frame->set_y0 (1.0);
+		frame->set_y1 (height);
 
 		if (frame_handle_start) {
 			frame_handle_start->set_y1 (height);
 			frame_handle_end->set_y1 (height);
 		}
+
+		if (selection_frame) {
+			selection_frame->set (frame->get().shrink (1.0));
+		}
 	}
 
-	vestigial_frame->set_y1 (height - 1.0);
+	vestigial_frame->set_y0 (1.0);
+	vestigial_frame->set_y1 (height);
 
 	set_colors ();
 }
@@ -656,7 +644,7 @@ TimeAxisViewItem::manage_name_highlight ()
 	if (name_highlight && wide_enough_for_name && high_enough_for_name) {
 
 		name_highlight->show();
-		name_highlight->set (ArdourCanvas::Rect (0.0, (double) _height - NAME_HIGHLIGHT_SIZE,  _width+RIGHT_EDGE_SHIFT, (double) _height - 1.0));
+		name_highlight->set (ArdourCanvas::Rect (1.0, (double) _height - NAME_HIGHLIGHT_SIZE,  _width+RIGHT_EDGE_SHIFT, (double) _height - 1.0));
 			
 	} else {
 		name_highlight->hide();
@@ -801,13 +789,7 @@ TimeAxisViewItem::set_frame_color()
 	set_frame_gradient ();
 
         if (!_recregion) {
-		uint32_t f;
-
-                if (_selected) {
-                        f = ARDOUR_UI::config()->get_SelectedTimeAxisFrame();
-                } else {
-                        f = ARDOUR_UI::config()->get_TimeAxisFrame();
-                }
+		uint32_t f = ARDOUR_UI::config()->get_TimeAxisFrame();
 
                 if (!rect_visible) {
 			/* make the frame outline be visible but rather transparent */
@@ -948,6 +930,10 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 		if (frame) {
 			frame->show();
 			frame->set_x1 (pixel_width + RIGHT_EDGE_SHIFT);
+
+			if (selection_frame) {
+				selection_frame->set (frame->get().shrink (1.0));
+			}
 		}
 
 		if (frame_handle_start) {
