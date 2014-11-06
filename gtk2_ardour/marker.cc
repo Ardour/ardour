@@ -415,6 +415,7 @@ Marker::bounds_changed ()
         /* handler can only be invoked if _location was non-null */
 
         set_position (_location->start ());
+        group->raise_to_top ();
 }
 
 void
