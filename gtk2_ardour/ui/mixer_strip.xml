@@ -14,14 +14,14 @@
               <HBox>
                 <iconbutton id="rec_enable_button"
                             width="28"
-                            height="20"
+                            height="21"
                             normalicon="mixer_record"
                             activeicon="mixer_record_active"
                             _prelighticon="mixer_record_prelight"/>
                 
                 <iconbutton id="monitor_input_button"
-                            width="28"
-                            height="20"
+                            width="30"
+                            height="21"
                             normalicon="mixer_monitor_input"
                             activeicon="mixer_monitor_input_active"
                             _prelighticon="mixer_monitor_input_prelight"/>
@@ -30,15 +30,15 @@
               <HBox>
                 <iconbutton id="mute_button"
                             width="28"
-                            height="20"
+                            height="21"
                             normalicon="mixer_mute"
                             activeicon="mixer_mute_active"
                             implicitactiveicon="mixer_mute_implicit"
                             _prelighticon="mixer_mute_prelight"/>
                 
                 <iconbutton id="solo_button"
-                            width="28"
-                            height="20"
+                            width="30"
+                            height="21"
                             normalicon="mixer_solo"
                             activeicon="mixer_solo_active"
                             implicitactiveicon="mixer_solo_safe"

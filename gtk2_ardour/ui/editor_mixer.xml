@@ -185,8 +185,8 @@
               
               <HBox>
                 <iconbutton id="rec_enable_button"
-                            width="47"
-                            height="20"
+                            width="49"
+                            height="21"
                             normalicon="inspector_record"
                             activeicon="inspector_record_active"
                             _prelighticon="inspector_record_prelight"
@@ -195,7 +195,7 @@
                 
                 <iconbutton id="monitor_input_button"
                             width="47"
-                            height="20"
+                            height="21"
                             normalicon="inspector_monitor_input"
                             activeicon="inspector_monitor_input_active"
                             _prelighticon="inspector_monitor_input_prelight"
@@ -205,8 +205,8 @@
               
               <HBox>
                 <iconbutton id="mute_button"
-                            width="47"
-                            height="20"
+                            width="49"
+                            height="21"
                             normalicon="inspector_mute"
                             activeicon="inspector_mute_active"
                             implicitactiveicon="inspector_mute_implicit"
@@ -216,7 +216,7 @@
                 
                 <iconbutton id="solo_button"
                             width="47"
-                            height="20"
+                            height="21"
                             normalicon="inspector_solo"
                             activeicon="inspector_solo_active"
                             implicitactiveicon="inspector_solo_safe"

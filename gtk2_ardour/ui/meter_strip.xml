@@ -12,29 +12,29 @@
             <VBox>
               <HBox>
                 <iconbutton id="rec_enable_button"
-                            width="18"
-                            height="12"
+                            width="19"
+                            height="13"
                             normalicon="meter_strip_record"
                             activeicon="meter_strip_record_active"
                             _prelighticon="meter_strip_record_prelight"/>
                 <iconbutton id="monitor_input_button"
-                            width="18"
-                            height="12"
+                            width="19"
+                            height="13"
                             normalicon="meter_strip_monitor_input"
                             activeicon="meter_strip_monitor_input_active"
                             _prelighticon="meter_strip_monitor_input_prelight"/>
               </HBox>
               <HBox>
                 <iconbutton id="mute_button"
-                            width="18"
-                            height="12"
+                            width="19"
+                            height="13"
                             normalicon="meter_strip_mute"
                             activeicon="meter_strip_mute_active"
                             implicitactiveicon="meter_strip_mute_implicit"
                             _prelighticon="mixer_mute_prelight"/>
                 <iconbutton id="solo_button"
-                            width="18"
-                            height="12"
+                            width="19"
+                            height="13"
                             normalicon="meter_strip_solo"
                             activeicon="meter_strip_solo_active"
                             implicitactiveicon="meter_strip_solo_safe"
