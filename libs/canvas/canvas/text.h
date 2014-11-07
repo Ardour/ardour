@@ -38,8 +38,10 @@ public:
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
 
+        ArdourCanvas::Color color () const { return _color; }
+	void set_color (ArdourCanvas::Color);
+
 	void set (std::string const &);
-	void set_color (uint32_t);
 	void set_font_description (Pango::FontDescription);
 	void set_alignment (Pango::Alignment);
 
@@ -51,16 +53,17 @@ public:
 	std::string text() const { return _text; }
 
 private:
-	std::string      _text;
-	uint32_t         _color;
+	std::string             _text;
+        ArdourCanvas::Color     _color;
 	Pango::FontDescription* _font_description;
-	Pango::Alignment _alignment;
+	Pango::Alignment        _alignment;
         mutable Cairo::RefPtr<Cairo::ImageSurface> _image;
-        mutable Duple _origin;
-        mutable double _width;
-        mutable double _height;
-        mutable bool _need_redraw;
-        double _clamped_width;
+        mutable Duple          _origin;
+        mutable double         _width;
+        mutable double         _height;
+        mutable bool           _need_redraw;
+        mutable double         _width_correction;
+        double                 _clamped_width;
 
         void redraw (Cairo::RefPtr<Cairo::Context>) const;
         void redraw (Glib::RefPtr<Pango::Context>) const;
