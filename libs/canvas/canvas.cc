@@ -748,13 +748,18 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 		/* scope for image_context */
 		Cairo::RefPtr<Cairo::Context> image_context = Cairo::Context::create (canvas_image);
 
-		/* clear expose area to transparent */
+		/* clear expose area */
 
 		image_context->save ();
 		image_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 		image_context->clip ();
-		image_context->set_operator (Cairo::OPERATOR_CLEAR);
-		image_context->paint ();
+		image_context->set_operator (Cairo::OPERATOR_SOURCE);
+		// TODO get canvas backround see CairoWidget::get_parent_bg
+		// also subscribe to parent's signal_style_changed()
+		// ..until new canvas color-theme API is in place, hardcode some values.
+		image_context->set_source_rgba (84./255., 85./255., 93./255., 1.0);
+		image_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		image_context->fill ();
 		image_context->restore ();
 
 		/* render into image surface */
