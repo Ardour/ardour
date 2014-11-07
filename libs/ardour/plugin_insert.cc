@@ -259,7 +259,7 @@ PluginInsert::create_automatable_parameters ()
 		} else if (i->type() == PluginPropertyAutomation) {
 			Evoral::Parameter param(*i);
 			const ParameterDescriptor& desc = _plugins.front()->get_property_descriptor(param.id());
-			if (desc.datatype != Variant::VOID) {
+			if (desc.datatype != Variant::NOTHING) {
 				boost::shared_ptr<AutomationList> list;
 				if (Variant::type_is_numeric(desc.datatype)) {
 					list = boost::shared_ptr<AutomationList>(new AutomationList(param));
@@ -1313,7 +1313,7 @@ PluginInsert::PluginPropertyControl::set_value (double user_val)
 	   This is lossy, but better than nothing until Ardour's automation system
 	   can handle various datatypes all the way down. */
 	const Variant value(_desc.datatype, user_val);
-	if (value.type() == Variant::VOID) {
+	if (value.type() == Variant::NOTHING) {
 		error << "set_value(double) called for non-numeric property" << endmsg;
 		return;
 	}

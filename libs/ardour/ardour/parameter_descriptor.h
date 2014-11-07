@@ -42,7 +42,7 @@ struct ParameterDescriptor
 
 	ParameterDescriptor(const Evoral::Parameter& parameter)
 		: key((uint32_t)-1)
-		, datatype(Variant::VOID)
+		, datatype(Variant::NOTHING)
 		, unit(NONE)
 		, normal(parameter.normal())
 		, lower(parameter.min())
@@ -66,7 +66,7 @@ struct ParameterDescriptor
 
 	ParameterDescriptor()
 		: key((uint32_t)-1)
-		, datatype(Variant::VOID)
+		, datatype(Variant::NOTHING)
 		, unit(NONE)
 		, normal(0)
 		, lower(0)

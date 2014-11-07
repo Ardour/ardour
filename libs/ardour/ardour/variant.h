@@ -29,10 +29,6 @@
 #include "ardour/libardour_visibility.h"
 #include "pbd/compose.h"
 
-#ifdef PLATFORM_WINDOWS
-#undef VOID
-#endif
-
 namespace ARDOUR {
 
 /** A value with dynamic type (tagged union). */
@@ -40,7 +36,7 @@ class LIBARDOUR_API Variant
 {
 public:
 	enum Type {
-		VOID,    ///< Nothing
+		NOTHING, ///< Nothing (void)
 		BOOL,    ///< Boolean
 		DOUBLE,  ///< C double (64-bit IEEE-754)
 		FLOAT,   ///< C float (32-bit IEEE-754)
@@ -51,12 +47,12 @@ public:
 		URI      ///< URI string
 	};
 
-	explicit Variant()              : _type(VOID)   { _long   = 0;     }
-	explicit Variant(bool    value) : _type(BOOL)   { _bool   = value; }
-	explicit Variant(double  value) : _type(DOUBLE) { _double = value; }
-	explicit Variant(float   value) : _type(FLOAT)  { _float  = value; }
-	explicit Variant(int32_t value) : _type(INT)    { _int    = value; }
-	explicit Variant(int64_t value) : _type(LONG)   { _long   = value; }
+	explicit Variant()              : _type(NOTHING) { _long   = 0;     }
+	explicit Variant(bool    value) : _type(BOOL)    { _bool   = value; }
+	explicit Variant(double  value) : _type(DOUBLE)  { _double = value; }
+	explicit Variant(float   value) : _type(FLOAT)   { _float  = value; }
+	explicit Variant(int32_t value) : _type(INT)     { _int    = value; }
+	explicit Variant(int64_t value) : _type(LONG)    { _long   = value; }
 
 	/** Make a variant of a specific string type (string types only) */
 	Variant(Type type, const std::string& value)
@@ -66,7 +62,7 @@ public:
 
 	/** Make a numeric variant from a double (numeric types only).
 	 *
-	 * If conversion is impossible, the variant will have type VOID.
+	 * If conversion is impossible, the variant will have type NOTHING.
 	 */
 	Variant(Type type, double value)
 		: _type(type)
@@ -90,7 +86,7 @@ public:
 			                                std::min(value, (double)INT64_MAX)));
 			break;
 		default:
-			_type = VOID;
+			_type = NOTHING;
 			_long = 0;
 		}
 	}

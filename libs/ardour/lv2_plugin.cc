@@ -1222,7 +1222,7 @@ static void
 forge_variant(LV2_Atom_Forge* forge, const Variant& value)
 {
 	switch (value.type()) {
-	case Variant::VOID:
+	case Variant::NOTHING:
 		break;
 	case Variant::BOOL:
 		lv2_atom_forge_bool(forge, value.get_bool());
@@ -1286,7 +1286,7 @@ LV2Plugin::set_property(uint32_t key, const Variant& value)
 	if (_patch_port_in_index == (uint32_t)-1) {
 		error << "LV2: set_property called with unset patch_port_in_index" << endmsg;
 		return;
-	} else if (value.type() == Variant::VOID) {
+	} else if (value.type() == Variant::NOTHING) {
 		error << "LV2: set_property called with void value" << endmsg;
 		return;
 	}

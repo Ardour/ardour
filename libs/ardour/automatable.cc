@@ -420,7 +420,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 		PluginInsert* pi = dynamic_cast<PluginInsert*>(this);
 		if (pi) {
 			desc = pi->plugin(0)->get_property_descriptor(param.id());
-			if (desc.datatype != Variant::VOID) {
+			if (desc.datatype != Variant::NOTHING) {
 				if (!Variant::type_is_numeric(desc.datatype)) {
 					list.reset();  // Can't automate non-numeric data yet
 				}
