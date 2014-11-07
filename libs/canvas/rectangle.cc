@@ -104,32 +104,31 @@ Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 		 * between the integer coordinates.
 		 */
 
-		self = self.shrink (0.5);
-
 		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
 			
+			self = self.shrink (0.5);
 			context->rectangle (self.x0, self.y0, self.width(), self.height());
 
 		} else {
 
 			if (_outline_what & LEFT) {
-				context->move_to (self.x0, self.y0);
-				context->line_to (self.x0, self.y1);
+				context->move_to (self.x0+0.5, self.y0);
+				context->line_to (self.x0+0.5, self.y1);
 			}
 			
 			if (_outline_what & TOP) {
-				context->move_to (self.x0, self.y0);
-				context->line_to (self.x1, self.y0);
+				context->move_to (self.x0, self.y0+0.5);
+				context->line_to (self.x1, self.y0+0.5);
 			}
 
 			if (_outline_what & BOTTOM) {
-				context->move_to (self.x0, self.y1);
-				context->line_to (self.x1, self.y1);
+				context->move_to (self.x0, self.y1-0.5);
+				context->line_to (self.x1, self.y1-0.5);
 			}
 			
 			if (_outline_what & RIGHT) {
-				context->move_to (self.x1, self.y0);
-				context->line_to (self.x1, self.y1);
+				context->move_to (self.x1-0.5, self.y0);
+				context->line_to (self.x1-0.5, self.y1);
 			}
 		}
 		
