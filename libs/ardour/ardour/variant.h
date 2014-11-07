@@ -29,7 +29,7 @@
 #include "ardour/libardour_visibility.h"
 #include "pbd/compose.h"
 
-#ifdef COMPILER_MSVC
+#ifdef PLATFORM_WINDOWS
 #undef VOID
 #endif
 
