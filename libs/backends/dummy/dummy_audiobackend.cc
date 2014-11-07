@@ -1167,17 +1167,24 @@ DummyAudioBackend::main_process_thread ()
 		}
 
 		if (!_freewheeling) {
+			const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
 			clock2 = _x_get_monotonic_usec();
 #ifdef PLATFORM_WINDOWS
-			// querying the performance counter can fail occasionally
-			if (clock1 < 0 || clock2 < 0) {
+			bool win_timers_ok = true;
+			/* querying the performance counter can fail occasionally (-1).
+			 * Also on some multi-core systems, timers are CPU specific and not
+			 * synchronized. We assume they differ more than a few milliseconds
+			 * (4 * nominal cycle time) and simply ignore cases where the
+			 * execution switches cores.
+			 */
+			if (clock1 < 0 || clock2 < 0 || (clock1 > clock2) || (clock2 - clock1) > 4 * nomial_time) {
 				clock2 = clock1 = 0;
+				win_timers_ok = false;
 			}
 #endif
 			const int64_t elapsed_time = clock2 - clock1;
-			const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
 #ifdef PLATFORM_WINDOWS
-			if (clock1 >= 0 && clock2 >= 0)
+			if (win_timers_ok)
 #endif
 			{ // low pass filter
 				_dsp_load = _dsp_load + .05 * ((elapsed_time / (float) nomial_time) - _dsp_load) + 1e-12;
@@ -1192,6 +1199,8 @@ DummyAudioBackend::main_process_thread ()
 			_dsp_load = 1.0f;
 			Glib::usleep (100); // don't hog cpu
 		}
+
+		/* beginning of netx cycle */
 		clock1 = _x_get_monotonic_usec();
 
 		bool connections_changed = false;
