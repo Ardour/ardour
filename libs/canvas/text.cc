@@ -170,7 +170,10 @@ Text::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 void
 Text::clamp_width (double w)
 {
+        begin_change ();
 	_clamped_width = w;
+        _bounding_box_dirty = true;
+        end_change ();
 }
 
 void
