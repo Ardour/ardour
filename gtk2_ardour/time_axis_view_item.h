@@ -116,20 +116,6 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	static double NAME_HIGHLIGHT_SIZE;
 	static double NAME_HIGHLIGHT_THRESH;
 
-        /* if this is 1.0, we move the right boundary
-	   of the item frame so that it is 1 pixel
-	   after the end of the item. This gives nice
-	   effects when splitting items.
-	   
-	   if this is zero, the right edge coincides
-	   with the end of the item, and things don't
-	   look so nice. 
-	   
-	   this exists to allow easy debugging of the
-	   two scenarios.
-	*/
-	static const double RIGHT_EDGE_SHIFT;
-
 	/**
 	 * Emitted when this Group has been removed.
 	 * This is different to the CatchDeletion signal in that this signal

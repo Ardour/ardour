@@ -632,14 +632,15 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 	width = std::max ((framecnt_t) 64, width);
 
-	double const pwidth = rint(trackview.editor().sample_to_pixel (width));
 
+	double const pwidth = rint(trackview.editor().sample_to_pixel (width));
+	
 	/* the right edge should be right on the region frame is the pixel
 	 * width is zero. Hence the additional + 1.0 at the end.
 	 */
 
-	double const handle_right = rint(trackview.editor().sample_to_pixel (_region->length()) + TimeAxisViewItem::RIGHT_EDGE_SHIFT - pwidth);
-	double const trim_handle_right = rint(trackview.editor().sample_to_pixel (_region->length()) + TimeAxisViewItem::RIGHT_EDGE_SHIFT);
+	double const handle_right = rint(trackview.editor().sample_to_pixel (_region->length()) - pwidth);
+	double const trim_handle_right = rint(trackview.editor().sample_to_pixel (_region->length()));
 
 	/* Put the fade out handle so that its right side is at the end-of-fade line;
 	 */
@@ -668,10 +669,10 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 	double effective_height;
 
-	if (_height >= NAME_HIGHLIGHT_THRESH) {
-		effective_height = _height - NAME_HIGHLIGHT_SIZE;
-	} else {
-		effective_height = _height;
+	effective_height = _height - 1.0;
+
+	if (Config->get_show_name_highlight() && effective_height >= NAME_HIGHLIGHT_THRESH) {
+		effective_height -= NAME_HIGHLIGHT_SIZE;
 	}
 
 	/* points *MUST* be in anti-clockwise order */
@@ -683,10 +684,10 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 	double length = list->length();
 
 	points.assign (list->size(), Duple());
-
+	
 	for (x = list->begin(), pi = 0; x != list->end(); ++x, ++pi) {
-		points[pi].x = 1.0 + _pixel_width - pwidth + (pwidth * ((*x)->when/length));
-		points[pi].y = effective_height - ((*x)->value * effective_height);
+		points[pi].x = _pixel_width - pwidth + (pwidth * ((*x)->when/length));
+		points[pi].y = 1.0 + effective_height - ((*x)->value * effective_height);
 	}
 
 	/* draw the line */
@@ -746,8 +747,6 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 		start_xfade_rect->set_outline_color (ARDOUR_UI::config()->get_CrossfadeLine());
 		start_xfade_rect->set_fill (false);
 		start_xfade_rect->set_outline (false);
-		start_xfade_rect->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::RIGHT));
-		start_xfade_rect->set_outline_width (0.5);
 		start_xfade_rect->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_start_xfade_event), start_xfade_rect, this));
 		start_xfade_rect->set_data ("regionview", this);
 	}
@@ -773,7 +772,7 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 		for (Points::size_type i = 0, pci = 0; i < npoints; ++i, ++pci) {
 			ArdourCanvas::Duple &p (ipoints[pci]);
 			/* leave x-axis alone but invert with respect to y-axis */
-			p.y = effective_height - points[pci].y;
+			p.y = 1.0 + effective_height - points[pci].y;
 		}
 
 	} else {
@@ -792,8 +791,8 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 
 		for (x = inverse->begin(), pi = 0; x != inverse->end(); ++x, ++pi) {
 			ArdourCanvas::Duple& p (ipoints[pi]);
-			p.x = 1.0 + (rect_width * ((*x)->when/length));
-			p.y = effective_height - ((*x)->value * effective_height);
+			p.x = (rect_width * ((*x)->when/length));
+			p.y = 1.0 + effective_height - ((*x)->value * effective_height);
 		}
 	}
 
@@ -838,13 +837,11 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 		end_xfade_rect->set_outline_color (ARDOUR_UI::config()->get_CrossfadeLine());
 		end_xfade_rect->set_fill (false);
 		end_xfade_rect->set_outline (false);
-		end_xfade_rect->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT));
-		end_xfade_rect->set_outline_width (0.5);
 		end_xfade_rect->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_end_xfade_event), end_xfade_rect, this));
 		end_xfade_rect->set_data ("regionview", this);
 	}
 
-	end_xfade_rect->set (ArdourCanvas::Rect (rect_edge, 0.0, rect_edge + rect_width + TimeAxisViewItem::RIGHT_EDGE_SHIFT, effective_height));
+	end_xfade_rect->set (ArdourCanvas::Rect (rect_edge, 0.0, rect_edge + rect_width, effective_height));
 
 	/* fade in line */
 
@@ -888,8 +885,8 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 
 		for (x = inverse->begin(), i = 0, pi = 0; x != inverse->end(); ++x, ++pi, ++i) {
 			ArdourCanvas::Duple& p (ipoints[pi]);
-			p.x = 1.0 + (rect_width * ((*x)->when/length)) + rend;
-			p.y = effective_height - ((*x)->value * effective_height);
+			p.x = (rect_width * ((*x)->when/length)) + rend;
+			p.y = 1.0 + effective_height - ((*x)->value * effective_height);
 		}
 	}
 

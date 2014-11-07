@@ -56,7 +56,6 @@ AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
 	CANVAS_DEBUG_NAME (canvas_rect, string_compose ("SV canvas rectangle auto %1", tv.name()));
 
 	canvas_rect->set_fill (false);
-	canvas_rect->set_outline_color (RGBA_BLACK);
 }
 
 AutomationStreamView::~AutomationStreamView ()

@@ -63,7 +63,6 @@ Pango::FontDescription TimeAxisViewItem::NAME_FONT;
 const double TimeAxisViewItem::NAME_X_OFFSET = 15.0;
 const double TimeAxisViewItem::GRAB_HANDLE_TOP = 0.0;
 const double TimeAxisViewItem::GRAB_HANDLE_WIDTH = 10.0;
-const double TimeAxisViewItem::RIGHT_EDGE_SHIFT = 0.0; // TODO remove, fixed in 3.5-3406-g90872c2, but may need further work.
 
 int    TimeAxisViewItem::NAME_HEIGHT;
 double TimeAxisViewItem::NAME_Y_OFFSET;
@@ -194,7 +193,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	if (visibility & ShowFrame) {
 		frame = new ArdourCanvas::TimeRectangle (group, 
 						     ArdourCanvas::Rect (0.0, 0.0, 
-									 trackview.editor().sample_to_pixel(duration) + RIGHT_EDGE_SHIFT, 
+									 trackview.editor().sample_to_pixel(duration), 
 									 trackview.current_height()));
 		
 		frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
@@ -214,15 +213,15 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		double start = 1.0;
 
 		if (visibility & FullWidthNameHighlight) {
-			width = trackview.editor().sample_to_pixel(item_duration) + RIGHT_EDGE_SHIFT;
+			width = trackview.editor().sample_to_pixel(item_duration);
 		} else {
-			width = trackview.editor().sample_to_pixel(item_duration) - 2.0 + RIGHT_EDGE_SHIFT;
+			width = trackview.editor().sample_to_pixel(item_duration) - 2.0;
 		}
 
 		name_highlight = new ArdourCanvas::Rectangle (group, 
 							      ArdourCanvas::Rect (start, 
 										  trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, 
-										  width - 2.0 + RIGHT_EDGE_SHIFT,
+										  width - 2.0,
 										  trackview.current_height() - 1.0));
 		CANVAS_DEBUG_NAME (name_highlight, string_compose ("name highlight for %1", get_item_name()));
 		name_highlight->set_data ("timeaxisviewitem", this);
@@ -641,7 +640,7 @@ TimeAxisViewItem::manage_name_highlight ()
 	if (name_highlight && wide_enough_for_name && high_enough_for_name) {
 
 		name_highlight->show();
-		name_highlight->set (ArdourCanvas::Rect (1.0, (double) _height - NAME_HIGHLIGHT_SIZE,  _width+RIGHT_EDGE_SHIFT, (double) _height - 1.0));
+		name_highlight->set (ArdourCanvas::Rect (1.0, (double) _height - NAME_HIGHLIGHT_SIZE,  _width, (double) _height - 1.0));
 			
 	} else {
 		name_highlight->hide();
@@ -915,6 +914,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				CANVAS_DEBUG_NAME (vestigial_frame, string_compose ("vestigial frame for %1", get_item_name()));
 				vestigial_frame->set_outline_color (ARDOUR_UI::config()->get_VestigialFrame());
 				vestigial_frame->set_fill_color (ARDOUR_UI::config()->get_VestigialFrame());
+				vestigial_frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
 			}
 
 			vestigial_frame->show();
@@ -936,7 +936,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 
 		if (frame) {
 			frame->show();
-			frame->set_x1 (pixel_width + RIGHT_EDGE_SHIFT);
+			frame->set_x1 (pixel_width);
 
 			if (selection_frame) {
 				selection_frame->set (frame->get().shrink (1.0));
@@ -955,8 +955,8 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				frame_handle_end->hide();
 			} else {
 				frame_handle_start->show();
-				frame_handle_end->set_x0 (pixel_width + RIGHT_EDGE_SHIFT - (TimeAxisViewItem::GRAB_HANDLE_WIDTH));
-				frame_handle_end->set_x1 (pixel_width + RIGHT_EDGE_SHIFT);
+				frame_handle_end->set_x0 (pixel_width - (TimeAxisViewItem::GRAB_HANDLE_WIDTH));
+				frame_handle_end->set_x1 (pixel_width);
 				frame_handle_end->show();
 			}
 		}
