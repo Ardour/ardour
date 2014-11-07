@@ -49,9 +49,9 @@ GhostRegion::GhostRegion (ArdourCanvas::Container* parent, TimeAxisView& tv, Tim
 	base_rect = new ArdourCanvas::TimeRectangle (group);
 	CANVAS_DEBUG_NAME (base_rect, "ghost region rect");
 	base_rect->set_x0 (0);
-	base_rect->set_y0 (0.0);
-	base_rect->set_y1 (trackview.current_height() - 1.0);
-	base_rect->set_outline_what (ArdourCanvas::Rectangle::What (0));
+	base_rect->set_y0 (1.0);
+	base_rect->set_y1 (trackview.current_height());
+	base_rect->set_outline (false);
 
 	if (!is_automation_ghost()) {
 		base_rect->hide();
@@ -87,7 +87,6 @@ void
 GhostRegion::set_colors ()
 {
 	if (is_automation_ghost()) {
-		base_rect->set_outline_color (ARDOUR_UI::config()->get_GhostTrackBase());
 		base_rect->set_fill_color (ARDOUR_UI::config()->get_GhostTrackBase());
 	}
 }
