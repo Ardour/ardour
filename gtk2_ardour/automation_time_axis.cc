@@ -120,8 +120,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	CANVAS_DEBUG_NAME (_base_rect, string_compose ("base rect for %1", _name));
 	_base_rect->set_x1 (ArdourCanvas::COORD_MAX);
-	_base_rect->set_outline_color (ARDOUR_UI::config()->get_AutomationTrackOutline());
-	_base_rect->set_outline_what (ArdourCanvas::Rectangle::BOTTOM); // bottom separator
+	_base_rect->set_outline (false);
 	_base_rect->set_fill_color (ARDOUR_UI::config()->get_AutomationTrackFill());
 	_base_rect->set_data ("trackview", this);
 	_base_rect->Event.connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_automation_track_event), _base_rect, this));
