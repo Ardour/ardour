@@ -893,10 +893,10 @@ void TracksControlPanel::display_general_preferences ()
 	ARDOUR::WaveformShape shape = Config->get_waveform_shape ();
 	switch (shape) {
 	case Traditional:
-		_waveform_shape_dropdown.set_selected_item (0);
+		_waveform_shape_dropdown.set_current_item (0);
 		break;
 	case Rectified:
-		_waveform_shape_dropdown.set_selected_item (1);
+		_waveform_shape_dropdown.set_current_item (1);
 		break;
 	default:
 		dbg_msg ("TracksControlPanel::display_general_preferences ():\nUnexpected WaveFormShape !");
@@ -914,7 +914,7 @@ void TracksControlPanel::display_general_preferences ()
 	} else if (peak_hold_time <= (MeterHoldLong + 0.1)) {
 		selected_item = 3;
 	} 
-	_peak_hold_time_dropdown.set_selected_item (selected_item);
+	_peak_hold_time_dropdown.set_current_item (selected_item);
 
 	float meter_falloff = Config->get_meter_falloff ();
 	selected_item = 0;
@@ -938,7 +938,7 @@ void TracksControlPanel::display_general_preferences ()
 	} else if (meter_falloff <= (METER_FALLOFF_FASTEST + 0.1)) {
 		selected_item = 8;
 	} 
-	_dpm_fall_off_dropdown.set_selected_item (selected_item);
+	_dpm_fall_off_dropdown.set_current_item (selected_item);
 
 
 	long period = Config->get_audio_capture_buffer_seconds ();
@@ -959,7 +959,7 @@ void TracksControlPanel::display_general_preferences ()
 	} else if ((period <= 60.1)) {
 		selected_item = 6;
 	}
-	_recording_seconds_dropdown.set_selected_item (selected_item);
+	_recording_seconds_dropdown.set_current_item (selected_item);
 	
 	period = Config->get_audio_playback_buffer_seconds ();
 	selected_item = 0;
@@ -979,7 +979,7 @@ void TracksControlPanel::display_general_preferences ()
 	} else if ((period <= 60.1)) {
 		selected_item = 6;
 	}
-	_playback_seconds_dropdown.set_selected_item (selected_item);
+	_playback_seconds_dropdown.set_current_item (selected_item);
 
 	_obey_mmc_commands_button.set_active_state (Config->get_mmc_control () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	_send_mmc_commands_button.set_active_state (Config->get_send_mmc () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
@@ -995,7 +995,7 @@ void TracksControlPanel::display_general_preferences ()
 
 void TracksControlPanel::save_general_preferences ()
 {
-	int selected_item = _waveform_shape_dropdown.get_selected_item ();
+	int selected_item = _waveform_shape_dropdown.get_current_item ();
 	switch (selected_item) {
 	case 0:
 		Config->set_waveform_shape (Traditional);
@@ -1008,7 +1008,7 @@ void TracksControlPanel::save_general_preferences ()
 		break;
 	}
 
-	selected_item = _peak_hold_time_dropdown.get_selected_item ();
+	selected_item = _peak_hold_time_dropdown.get_current_item ();
 	switch (selected_item) {
 	case 0:
 		Config->set_meter_hold (MeterHoldOff);
@@ -1027,7 +1027,7 @@ void TracksControlPanel::save_general_preferences ()
 		break;
 	}
 
-	selected_item = _dpm_fall_off_dropdown.get_selected_item ();
+	selected_item = _dpm_fall_off_dropdown.get_current_item ();
 	switch (selected_item) {
 	case 0:
 		Config->set_meter_falloff (METER_FALLOFF_OFF);

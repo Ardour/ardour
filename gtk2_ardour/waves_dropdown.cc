@@ -21,7 +21,7 @@
 
 WavesDropdown::WavesDropdown (const std::string& title)
   : WavesIconButton (title)
-  , _selected_item_number (-1)
+  , _current_item_number (-1)
 {
 	signal_button_press_event().connect (sigc::mem_fun(*this, &WavesDropdown::_on_mouse_pressed));
 	_menu.signal_hide ().connect (sigc::bind (sigc::mem_fun (*this, &CairoWidget::set_active), false));
@@ -38,26 +38,40 @@ WavesDropdown::clear_items ()
 }
 
 void
-WavesDropdown::set_selected_item (int selected_item_number)
+WavesDropdown::set_current_item (int current_item_number)
 {
 	Gtk::Menu_Helpers::MenuList& items = _menu.items ();
 
-	if ((selected_item_number < 0) || (selected_item_number >= items.size ())) {
+	if ((current_item_number < 0) || (current_item_number >= items.size ())) {
 		return;
 	}
 
-	if (selected_item_number == _selected_item_number) {
+	if (current_item_number == _current_item_number) {
 		return;
 	}
-
+    
     Gtk::Menu_Helpers::MenuList::iterator i = items.begin();
-    std::advance (i, selected_item_number);
-	Gtk::RadioMenuItem* radio_menu_item = dynamic_cast <Gtk::RadioMenuItem*> (&(*i));
+    std::advance (i, current_item_number);
+    
+    Gtk::RadioMenuItem* radio_menu_item = dynamic_cast <Gtk::RadioMenuItem*> (&(*i));
 	if (radio_menu_item) {
-		radio_menu_item->set_active (true);
+        
+        Gtk::Menu_Helpers::MenuList::iterator prev_current_item = items.begin();
+        std::advance (prev_current_item, _current_item_number);
+        Gtk::RadioMenuItem* radio_menu_item;
+        if (radio_menu_item = dynamic_cast <Gtk::RadioMenuItem*> (&(*prev_current_item)) ) {
+            radio_menu_item->set_active (false);
+        }
+		
+        radio_menu_item->set_active (true);
 	}
-
-	_on_menu_item (selected_item_number, (*i).get_data ("waves_dropdown_item_cookie"));
+    
+    Gtk::CheckMenuItem* check_menu_item = dynamic_cast <Gtk::CheckMenuItem*> (&(*i));
+    if (check_menu_item) {
+        check_menu_item->set_active (true);
+    }
+    
+	_on_menu_item (current_item_number, (*i).get_data ("waves_dropdown_item_cookie"));
 }
 
 Gtk::MenuItem&
@@ -127,11 +141,11 @@ WavesDropdown::add_check_menu_item (const std::string& item, void* cookie)
 void
 WavesDropdown::_on_menu_item (int item_number, void* cookie)
 {
-	_selected_item_number = item_number;
+	_current_item_number = item_number;
 
     Gtk::Menu_Helpers::MenuList& items = _menu.items ();
     Gtk::Menu_Helpers::MenuList::iterator i = items.begin();
-    std::advance (i, _selected_item_number);
+    std::advance (i, _current_item_number);
     set_text ((*i).get_label());
 	selected_item_changed (this, cookie);
 }

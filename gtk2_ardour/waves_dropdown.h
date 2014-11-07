@@ -32,9 +32,9 @@ class WavesDropdown : public WavesIconButton
     virtual ~WavesDropdown ();
     Gtk::Menu& get_menu () { return _menu; }
     void clear_items ();
-	int get_selected_item () { return _selected_item_number; }
+	int get_current_item () { return _current_item_number; }
 
-	void set_selected_item (int selected_item_number);
+	void set_current_item (int current_item_number);
 
     Gtk::MenuItem& add_menu_item (const std::string& item, void* cookie = 0);
     Gtk::RadioMenuItem& add_radio_menu_item (const std::string& item, void* cookie = 0);
@@ -45,7 +45,7 @@ class WavesDropdown : public WavesIconButton
 
   private:
     Gtk::Menu _menu;
-	int _selected_item_number;
+	int _current_item_number;
     void _on_menu_item (int item_number, void* cookie);
     void _on_popup_menu_position (int& x, int& y, bool& push_in);
     bool _on_mouse_pressed (GdkEventButton*);
