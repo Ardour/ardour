@@ -28,6 +28,7 @@
 #include "canvas/item.h"
 #include "canvas/types.h"
 #include "canvas/utils.h"
+#include "canvas/colors.h"
 
 using namespace std;
 using namespace ArdourCanvas;

@@ -34,6 +34,7 @@
 #include "canvas/wave_view.h"
 #include "canvas/utils.h"
 #include "canvas/canvas.h"
+#include "canvas/colors.h"
 
 #include <gdkmm/general.h>
 

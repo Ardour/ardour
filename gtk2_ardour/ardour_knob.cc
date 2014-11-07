@@ -38,6 +38,7 @@
 #include "ardour_ui.h"
 #include "global_signals.h"
 
+#include "canvas/colors.h"
 #include "canvas/utils.h"
 
 #include "i18n.h"

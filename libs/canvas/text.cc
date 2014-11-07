@@ -27,6 +27,7 @@
 #include "canvas/text.h"
 #include "canvas/canvas.h"
 #include "canvas/utils.h"
+#include "canvas/colors.h"
 
 using namespace std;
 using namespace ArdourCanvas;

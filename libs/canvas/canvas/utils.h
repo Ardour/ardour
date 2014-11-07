@@ -24,12 +24,6 @@
 
 namespace ArdourCanvas {
 
-	extern LIBCANVAS_API void color_to_hsv (Color color, double& h, double& s, double& v);
-	extern LIBCANVAS_API Color hsv_to_color (double h, double s, double v, double a);
-
-	extern LIBCANVAS_API void color_to_rgba (Color, double& r, double& g, double& b, double& a);
-	extern LIBCANVAS_API Color rgba_to_color (double r, double g, double b, double a);
-
 	extern LIBCANVAS_API void set_source_rgba (Cairo::RefPtr<Cairo::Context>, Color);
 	extern LIBCANVAS_API void set_source_rgb_a (Cairo::RefPtr<Cairo::Context>, Color, float alpha);  //override the color's alpha
 
@@ -37,7 +31,5 @@ namespace ArdourCanvas {
 	extern LIBCANVAS_API void set_source_rgb_a (cairo_t*, Color, float alpha);  //override the color's alpha
 
 	Distance LIBCANVAS_API distance_to_segment_squared (Duple const & p, Duple const & p1, Duple const & p2, double& t, Duple& at);
-
-        uint32_t LIBCANVAS_API contrasting_text_color (uint32_t c);
 }
 

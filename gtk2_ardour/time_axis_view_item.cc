@@ -32,7 +32,7 @@
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"
 #include "canvas/text.h"
-#include "canvas/utils.h"
+#include "canvas/colors.h"
 
 #include "ardour/profile.h"
 

@@ -21,7 +21,7 @@
 
 #include "ardour/route_group.h"
 
-#include "canvas/utils.h"
+#include "canvas/colors.h"
 
 #include "ardour_ui.h"
 #include "editor.h"

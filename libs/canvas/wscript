@@ -32,6 +32,7 @@ canvas_sources = [
         'arrow.cc',
         'canvas.cc',
         'circle.cc',
+        'colors.cc',
         'container.cc',
         'curve.cc',
         'debug.cc',

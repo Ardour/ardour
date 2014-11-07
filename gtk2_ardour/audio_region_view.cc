@@ -46,6 +46,7 @@
 #include "canvas/xfade_curve.h"
 #include "canvas/debug.h"
 #include "canvas/utils.h"
+#include "canvas/colors.h"
 
 #include "streamview.h"
 #include "audio_region_view.h"
