@@ -185,16 +185,11 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	wide_enough_for_name = wide;
 	high_enough_for_name = high;
         rect_visible = true;
+	vestigial_frame = 0;
 
 	if (duration == 0) {
 		warning << "Time Axis Item Duration == 0" << endl;
 	}
-
-	vestigial_frame = new ArdourCanvas::TimeRectangle (group, ArdourCanvas::Rect (0.0, 0.0, 2.0, trackview.current_height()));
-	CANVAS_DEBUG_NAME (vestigial_frame, string_compose ("vestigial frame for %1", get_item_name()));
-	vestigial_frame->hide ();
-	vestigial_frame->set_outline_color (ARDOUR_UI::config()->get_VestigialFrame());
-	vestigial_frame->set_fill_color (ARDOUR_UI::config()->get_VestigialFrame());
 
 	if (visibility & ShowFrame) {
 		frame = new ArdourCanvas::TimeRectangle (group, 
@@ -616,8 +611,10 @@ TimeAxisViewItem::set_height (double height)
 		}
 	}
 
-	vestigial_frame->set_y0 (1.0);
-	vestigial_frame->set_y1 (height);
+	if (vestigial_frame) {
+		vestigial_frame->set_y0 (1.0);
+		vestigial_frame->set_y1 (height);
+	}
 
 	set_colors ();
 }
@@ -912,6 +909,14 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 	if (pixel_width < 2.0) {
 
 		if (show_vestigial) {
+
+			if (!vestigial_frame) {
+				vestigial_frame = new ArdourCanvas::TimeRectangle (group, ArdourCanvas::Rect (0.0, 0.0, 2.0, trackview.current_height()));
+				CANVAS_DEBUG_NAME (vestigial_frame, string_compose ("vestigial frame for %1", get_item_name()));
+				vestigial_frame->set_outline_color (ARDOUR_UI::config()->get_VestigialFrame());
+				vestigial_frame->set_fill_color (ARDOUR_UI::config()->get_VestigialFrame());
+			}
+
 			vestigial_frame->show();
 		}
 
@@ -925,7 +930,9 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 		}
 
 	} else {
-		vestigial_frame->hide();
+		if (vestigial_frame) {
+			vestigial_frame->hide();
+		}
 
 		if (frame) {
 			frame->show();
