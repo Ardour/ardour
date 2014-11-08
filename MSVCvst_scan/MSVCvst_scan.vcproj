@@ -181,7 +181,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy /Y &quot;$(Release32TestSuiteFolder)\$(ProjectName).exe&quot; &quot;$(Release32TargetFolder)\$(ProjectName).exe&quot;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(Release32TestSuiteFolder)\$(ProjectName).exe&quot; &quot;$(Release32TargetFolder)\$(ProjectName).exe&quot;&#x0D;&#x0A;cd .&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
