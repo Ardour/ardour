@@ -25,7 +25,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+
+#ifndef COMPILER_MSVC
 #include <stdbool.h>
+#endif
+
 #include <assert.h>
 
 #ifndef BUFFER_SIZE_SAMPLES

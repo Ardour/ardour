@@ -17,6 +17,7 @@ $binary_age = 3000;
 $current_minus_age = 0;
 $exec_prefix = "lib";
 $dll_suffix = "32";
+$lib_ext = ".dll";
 
 sub process_file
 {
@@ -45,6 +46,7 @@ sub process_file
 	    s/\@LT_CURRENT_MINUS_AGE@/$current_minus_age/g;
 	    s/\@VERSION@/$msvc_mixbus_version/g;
 	    s/\@DLL_SUFFIX\@/$dll_suffix/g;
+	    s/\@LIB_EXT\@/$lib_ext/g;
 	    s/\@GETTEXT_PACKAGE\@/$gettext_package/g;
 	    s/\@PERL_PATH@/$perl_path/g;
 	    s/\@PackagerFolderLocal@/$packager_folder_local/g;
@@ -70,6 +72,8 @@ sub process_file
 	    print OUTPUT;
 	}
 }
+
+process_file ("libs/plugins/reasonablesynth.lv2/manifest.ttl");
 
 my $command=join(' ',@ARGV);
 if ($command eq -buildall) {
