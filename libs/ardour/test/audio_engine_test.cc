@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <glibmm/timer.h>
+
 #include "ardour/audioengine.h"
 #include "ardour/audio_backend.h"
 #include "ardour/search_paths.h"
@@ -34,6 +36,8 @@ AudioEngineTest::test_backends ()
 		i != backends.end(); ++i) {
 		print_audio_backend_info(*i);
 	}
+
+	AudioEngine::destroy ();
 }
 
 void
@@ -41,13 +45,19 @@ AudioEngineTest::test_start ()
 {
 	AudioEngine* engine = AudioEngine::create ();
 
-	CPPUNIT_ASSERT_NO_THROW (engine->set_default_backend ());
+	CPPUNIT_ASSERT (AudioEngine::instance ());
+
+	boost::shared_ptr<AudioBackend> backend = engine->set_default_backend ();
+
+	CPPUNIT_ASSERT (backend);
 
 	init_post_engine ();
 
 	CPPUNIT_ASSERT (engine->start () == 0);
 
-	// sleep
-	// stop
-	// destroy
+	Glib::usleep(2000);
+
+	CPPUNIT_ASSERT (engine->stop () == 0);
+
+	AudioEngine::destroy ();
 }
