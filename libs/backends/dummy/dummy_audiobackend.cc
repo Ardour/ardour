@@ -1436,7 +1436,16 @@ bool DummyPort::is_physically_connected () const
 
 void DummyPort::setup_random_number_generator ()
 {
+#ifdef PLATFORM_WINDOWS
+	LARGE_INTEGER Count;
+	if (QueryPerformanceCounter (&Count)) {
+		_rseed = Count.QuadPart % UINT_MAX;
+	} else
+#endif
+	{
 	_rseed = g_get_monotonic_time() % UINT_MAX;
+	}
+	_rseed = (_rseed + (uint64_t)this) % UINT_MAX;
 }
 
 inline uint32_t
