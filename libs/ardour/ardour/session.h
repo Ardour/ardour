@@ -944,14 +944,15 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::shared_ptr<MidiPort> mtc_input_port () const;
     
 	MIDI::MachineControl& mmc() { return *_mmc; }
-
+    
+    void reconnect_midi_scene_ports (bool);
+    
   protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
 	void set_frame_rate (framecnt_t nframes);
     void reconnect_existing_routes (bool withLock, bool reconnect_master = true, bool reconnect_inputs = true, bool reconnect_outputs = true);
-    
-  protected:
+
 	friend class Route;
 	void schedule_curve_reallocation ();
 	void update_latency_compensation (bool force = false);

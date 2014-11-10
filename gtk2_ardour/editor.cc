@@ -529,10 +529,17 @@ Editor::Editor ()
     EngineStateController::instance()->OutputConnectionModeChanged.connect (*this, invalidator (*this),  boost::bind (&Editor::output_connection_mode_changed, this), gui_context() );
 
         /* Connect to relevant signal so that we will be notified of port registration changes */
-	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_registration_connection, invalidator (*this), boost::bind (&Editor::port_registration_handler, this), gui_context());
+	ARDOUR::EngineStateController::instance()->PortRegistrationChanged.connect (port_state_connection_list, invalidator (*this), boost::bind (&Editor::port_registration_handler, this), gui_context());
 
-        /* Connect to relevant signal so that we will be notified of port connection changes */
-	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection_connection, invalidator (*this), boost::bind (&Editor::port_connection_handler, this, _1, _2, _3, _4, _5), gui_context());
+        /* Connect to relevant signal so that we will be notified of midi port connection changes */
+	ARDOUR::EngineStateController::instance()->MIDIInputConnectionChanged.connect (port_state_connection_list, invalidator (*this), boost::bind (&Editor::midi_input_connection_changed, this, _1, _2), gui_context());
+    ARDOUR::EngineStateController::instance()->MIDIOutputConnectionChanged.connect (port_state_connection_list, invalidator (*this), boost::bind (&Editor::midi_output_connection_changed, this, _1, _2), gui_context());
+    
+    ARDOUR::EngineStateController::instance()->MIDIInputConfigChanged.connect (port_state_connection_list, invalidator (*this), boost::bind (&Editor::midi_input_configuration_changed, this), gui_context());
+    ARDOUR::EngineStateController::instance()->MIDIOutputConfigChanged.connect (port_state_connection_list, invalidator (*this), boost::bind (&Editor::midi_output_configuration_changed, this), gui_context());
+    
+    _midi_input_dropdown.selected_item_changed.connect (mem_fun(*this, &Editor::midi_input_chosen ));
+    _midi_output_dropdown.selected_item_changed.connect (mem_fun(*this, &Editor::midi_output_chosen ));
     
 	editor_regions_selection_changed_connection = selection->RegionsChanged.connect (sigc::mem_fun(*this, &Editor::region_selection_changed));
 
@@ -805,7 +812,7 @@ Editor::Editor ()
 	/* grab current parameter state */
 	boost::function<void (string)> pc (boost::bind (&Editor::ui_parameter_changed, this, _1));
 	ARDOUR_UI::config()->map_parameters (pc);
-
+    
 	setup_fade_images ();
 
 	instant_save ();
@@ -1403,22 +1410,18 @@ Editor::set_session (Session *t)
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	set_state (*node, Stateful::loading_state_version);
 
-        /* signal connections related to MIDI/scene change */
+    /* listen for incoming scene change messages so we can indicate relevant MIDI activity in the GUI */
+    
+    MIDISceneChanger* msc = dynamic_cast<MIDISceneChanger*> (_session->scene_changer());
 
-	_midi_input_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &Editor::midi_input_chosen));
-	_midi_output_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &Editor::midi_output_chosen));
+    if (msc) {
+        msc->MIDIInputActivity.connect (_session_connections, invalidator (*this), boost::bind (&Editor::marker_midi_input_activity, this), gui_context());
+        msc->MIDIOutputActivity.connect (_session_connections, invalidator (*this), boost::bind (&Editor::marker_midi_output_activity, this), gui_context());
+    }
 
-        /* listen for incoming scene change messages so we can indicate relevant MIDI activity in the GUI */
-        
-        MIDISceneChanger* msc = dynamic_cast<MIDISceneChanger*> (_session->scene_changer());
-
-        if (msc) {
-                msc->MIDIInputActivity.connect (_session_connections, invalidator (*this), boost::bind (&Editor::marker_midi_input_activity, this), gui_context());
-                msc->MIDIOutputActivity.connect (_session_connections, invalidator (*this), boost::bind (&Editor::marker_midi_output_activity, this), gui_context());
-        }
-
-        reset_marker_midi_images (false);
-        reset_marker_midi_images (true);
+    _session->reconnect_midi_scene_ports (true);
+    _session->reconnect_midi_scene_ports (false);
+    update_midi_dropdowns ();
 
 	/* catch up with the playhead */
 
@@ -5881,15 +5884,100 @@ Editor::global_rec_clicked (WavesButton*)
     _session->set_record_enabled (rl, !all_tracks_are_record_armed);
     _global_rec_button.set_active(!all_tracks_are_record_armed);
 }
+
+void
+Editor::midi_input_connection_changed (const std::vector<std::string>& ports, bool connected)
+{
+    if (!_session) {
+        return;
+    }
+    
+    if (ports.empty() ) {
+        _session->reconnect_midi_scene_ports(true);
+    } else {
         
+        std::vector<std::string>::const_iterator iter = ports.begin();
+        for (; iter != ports.end(); ++iter) {
+            if (connected ) {
+                _session->scene_in()->connect(*iter);
+            }
+            
+            if (!connected ) {
+                _session->scene_in()->disconnect(*iter);
+            }
+        }
+    }
+    
+    reset_marker_midi_images (true);
+}
+
+void
+Editor::midi_output_connection_changed (const std::vector<std::string>& ports, bool connected)
+{
+    if (!_session) {
+        return;
+    }
+    
+    if (ports.empty() ) {
+        _session->reconnect_midi_scene_ports(false);
+    } else {
+    
+        std::vector<std::string>::const_iterator iter = ports.begin();
+        for (; iter != ports.end(); ++iter) {
+
+            if (connected ) {
+                _session->scene_out()->connect(*iter);
+            }
+            
+            if (!connected ) {
+                _session->scene_out()->disconnect(*iter);
+            }
+        }
+    }
+
+    reset_marker_midi_images (false);
+}
+
+void
+Editor::midi_input_configuration_changed ()
+{
+    if (!_session) {
+        return;
+    }
+    
+    _session->reconnect_midi_scene_ports (true);
+    update_midi_dropdowns ();
+}
+
+void
+Editor::midi_output_configuration_changed ()
+{
+    if (!_session) {
+        return;
+    }
+    
+    _session->reconnect_midi_scene_ports (false);
+    update_midi_dropdowns ();
+}
+
+void
+Editor::update_midi_dropdowns ()
+{
+    populate_midi_inout_dropdowns ();
+    reset_marker_midi_images (true);
+    reset_marker_midi_images (false);
+}
+
 void
 Editor::port_registration_handler ()
 {
-        if (!_session) {
-                return;
-        }
+    if (!_session) {
+            return;
+    }
 
-        populate_midi_inout_dropdowns ();
+    _session->reconnect_midi_scene_ports (true);
+    _session->reconnect_midi_scene_ports (false);
+    update_midi_dropdowns ();
 }
 
 void
@@ -5898,12 +5986,4 @@ Editor::port_connection_handler (boost::weak_ptr<Port> wa, std::string, boost::w
         if (!_session) {
                 return;
         }
-
-        /* we could investigate the types of ports involved in this connection/disconnection,
-           but since this really doesn't cost a lot (hide/show of various images, no redraw)
-           the benefit of doing so doesn't seem that great.
-        */
-
-        reset_marker_midi_images (true);
-        reset_marker_midi_images (false);
 }

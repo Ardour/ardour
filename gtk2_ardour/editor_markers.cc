@@ -1328,7 +1328,8 @@ Editor::find_marker_from_location_id (PBD::ID const & id, bool is_start) const
 void
 Editor::marker_midi_input_activity ()
 {
-        if (!midi_marker_input_activity_image.is_visible ()) {
+        if (!midi_marker_input_activity_image.is_visible () &&
+             midi_marker_input_enabled_image.is_visible () ) {
                 midi_marker_input_disabled_image.hide ();
                 midi_marker_input_enabled_image.hide ();
                 midi_marker_input_activity_image.show ();
@@ -1340,7 +1341,8 @@ Editor::marker_midi_input_activity ()
 void
 Editor::marker_midi_output_activity ()
 {
-        if (!midi_marker_output_activity_image.is_visible ()) {
+        if (!midi_marker_output_activity_image.is_visible () &&
+             midi_marker_output_enabled_image.is_visible () ) {
                 midi_marker_output_disabled_image.hide ();
                 midi_marker_output_enabled_image.hide ();
                 midi_marker_output_activity_image.show ();
@@ -1384,32 +1386,32 @@ Editor::reset_marker_midi_images (bool input)
 void
 Editor::midi_input_chosen (WavesDropdown* dropdown, int el_number)
 {
-    void* data = dropdown->get_item_associated_data(el_number);
+    char* full_name_of_chosen_port = (char*)dropdown->get_item_associated_data(el_number);
     
-    if (!_session) {
-            return;
-    }
-    
-    _session->scene_in()->disconnect_all ();
-    
-    if (data) {
-        _session->scene_in()->connect ((char*) data);
+    if (full_name_of_chosen_port) {
+        Gtk::MenuItem* item = dropdown->get_item(el_number);
+        Gtk::CheckMenuItem* check_item  = dynamic_cast<Gtk::CheckMenuItem*>(item);
+        
+        if (check_item) {
+            bool active = check_item->get_active();
+            EngineStateController::instance()->set_physical_midi_input_connection_state((char*) full_name_of_chosen_port, active);
+        }
     }
 }
 
 void
 Editor::midi_output_chosen (WavesDropdown* dropdown, int el_number)
 {
-    void* data = dropdown->get_item_associated_data(el_number);
+    char* full_name_of_chosen_port = (char*)dropdown->get_item_associated_data(el_number);
     
-    if (!_session) {
-            return;
-    }
-    
-    _session->scene_out()->disconnect_all ();
-    
-    if (data) {
-        _session->scene_out()->connect ((char *) data);
+    if (full_name_of_chosen_port) {
+        Gtk::MenuItem* item = dropdown->get_item(el_number);
+        Gtk::CheckMenuItem* check_item  = dynamic_cast<Gtk::CheckMenuItem*>(item);
+        
+        if (check_item) {
+            bool active = check_item->get_active();
+            EngineStateController::instance()->set_physical_midi_output_connection_state((char*) full_name_of_chosen_port, active);
+        }
     }
 }
 
@@ -1423,11 +1425,11 @@ Editor::populate_midi_inout_dropdowns  ()
 void
 Editor::populate_midi_inout_dropdown  (bool playback)
 {
-        using namespace ARDOUR;
+    using namespace ARDOUR;
         
 	WavesDropdown* dropdown = playback ? &_midi_output_dropdown : &_midi_input_dropdown;
         
-	std::vector<EngineStateController::PortState> midi_states;
+	std::vector<EngineStateController::MidiPortState> midi_states;
 	static const char* midi_port_name_prefix = "system_midi:";
 	const char* midi_type_suffix;
 	bool have_first = false;
@@ -1442,11 +1444,7 @@ Editor::populate_midi_inout_dropdown  (bool playback)
 
 	dropdown->clear_items ();
 
-	/* add a "none" entry */
-
-	dropdown->add_radio_menu_item (_("None"), 0);
-
-	std::vector<EngineStateController::PortState>::const_iterator state_iter;
+	std::vector<EngineStateController::MidiPortState>::const_iterator state_iter;
 
 	for (state_iter = midi_states.begin(); state_iter != midi_states.end(); ++state_iter) {
 
@@ -1458,8 +1456,12 @@ Editor::populate_midi_inout_dropdown  (bool playback)
 		ARDOUR::remove_pattern_from_string(device_name, midi_type_suffix, device_name);
 
 		if (state_iter->active) {
-			dropdown->add_radio_menu_item (device_name, strdup (state_iter->name.c_str()));
-			if (!have_first) {
+            
+            Gtk::CheckMenuItem& new_item = dropdown->add_check_menu_item (device_name, strdup (state_iter->name.c_str()));
+            new_item.set_active(state_iter->connected);
+            
+            
+            if (!have_first) {
 				dropdown->set_text (device_name);
 				have_first = true;
 			}

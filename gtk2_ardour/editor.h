@@ -2148,11 +2148,18 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void bring_in_callback (Gtk::Label*, uint32_t n, uint32_t total, std::string name);
 	void update_bring_in_message (Gtk::Label* label, uint32_t n, uint32_t total, std::string name);
 	void bring_all_sources_into_session ();
+    
+    void midi_input_connection_changed (const std::vector<std::string>&, bool);
+    void midi_output_connection_changed (const std::vector<std::string>&, bool);
+    
+    void midi_input_configuration_changed ();
+    void midi_output_configuration_changed ();
+    void update_midi_dropdowns ();
 
-        void port_registration_handler ();
-        void port_connection_handler (boost::weak_ptr<ARDOUR::Port> wa, std::string, boost::weak_ptr<ARDOUR::Port> wb, std::string, bool connected);
-        PBD::ScopedConnection port_registration_connection;
-        PBD::ScopedConnection port_connection_connection;
+    void port_registration_handler ();
+    void port_connection_handler (boost::weak_ptr<ARDOUR::Port> wa, std::string, boost::weak_ptr<ARDOUR::Port> wb, std::string, bool connected);
+    
+    PBD::ScopedConnectionList port_state_connection_list;
 
         /* members and methods associated with MIDI + markers */
 

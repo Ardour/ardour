@@ -244,6 +244,11 @@
 		432859E71A10F415006C3E03 /* midi_scene_changer.h in Headers */ = {isa = PBXBuildFile; fileRef = 432859E31A10F415006C3E03 /* midi_scene_changer.h */; };
 		432859E81A10F415006C3E03 /* mididm.h in Headers */ = {isa = PBXBuildFile; fileRef = 432859E41A10F415006C3E03 /* mididm.h */; };
 		432859E91A10F415006C3E03 /* soundcloud_upload.h in Headers */ = {isa = PBXBuildFile; fileRef = 432859E51A10F415006C3E03 /* soundcloud_upload.h */; };
+		432859F31A10F436006C3E03 /* midi_scene_change.cc in Sources */ = {isa = PBXBuildFile; fileRef = 432859EE1A10F436006C3E03 /* midi_scene_change.cc */; };
+		432859F41A10F436006C3E03 /* midi_scene_changer.cc in Sources */ = {isa = PBXBuildFile; fileRef = 432859EF1A10F436006C3E03 /* midi_scene_changer.cc */; };
+		432859F51A10F436006C3E03 /* mididm.cc in Sources */ = {isa = PBXBuildFile; fileRef = 432859F01A10F436006C3E03 /* mididm.cc */; };
+		432859F61A10F436006C3E03 /* scene_change.cc in Sources */ = {isa = PBXBuildFile; fileRef = 432859F11A10F436006C3E03 /* scene_change.cc */; };
+		432859F71A10F436006C3E03 /* soundcloud_upload.cc in Sources */ = {isa = PBXBuildFile; fileRef = 432859F21A10F436006C3E03 /* soundcloud_upload.cc */; };
 		43AA8383194EEB2600A67B56 /* amp.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA82AE194EEB2600A67B56 /* amp.cc */; };
 		43AA8384194EEB2600A67B56 /* analyser.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA82AF194EEB2600A67B56 /* analyser.cc */; };
 		43AA8385194EEB2600A67B56 /* async_midi_port.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA82B0194EEB2600A67B56 /* async_midi_port.cc */; };
@@ -991,6 +996,12 @@
 		432859E31A10F415006C3E03 /* midi_scene_changer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = midi_scene_changer.h; path = ../ardour/midi_scene_changer.h; sourceTree = "<group>"; };
 		432859E41A10F415006C3E03 /* mididm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mididm.h; path = ../ardour/mididm.h; sourceTree = "<group>"; };
 		432859E51A10F415006C3E03 /* soundcloud_upload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = soundcloud_upload.h; path = ../ardour/soundcloud_upload.h; sourceTree = "<group>"; };
+		432859EB1A10F436006C3E03 /* libardour.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = libardour.xcodeproj; sourceTree = "<group>"; };
+		432859EE1A10F436006C3E03 /* midi_scene_change.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = midi_scene_change.cc; path = ../midi_scene_change.cc; sourceTree = "<group>"; };
+		432859EF1A10F436006C3E03 /* midi_scene_changer.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = midi_scene_changer.cc; path = ../midi_scene_changer.cc; sourceTree = "<group>"; };
+		432859F01A10F436006C3E03 /* mididm.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mididm.cc; path = ../mididm.cc; sourceTree = "<group>"; };
+		432859F11A10F436006C3E03 /* scene_change.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scene_change.cc; path = ../scene_change.cc; sourceTree = "<group>"; };
+		432859F21A10F436006C3E03 /* soundcloud_upload.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = soundcloud_upload.cc; path = ../soundcloud_upload.cc; sourceTree = "<group>"; };
 		43AA82A9194EEAAF00A67B56 /* liblibardour.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblibardour.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		43AA82AE194EEB2600A67B56 /* amp.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = amp.cc; path = ../amp.cc; sourceTree = SOURCE_ROOT; };
 		43AA82AF194EEB2600A67B56 /* analyser.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = analyser.cc; path = ../analyser.cc; sourceTree = SOURCE_ROOT; };
@@ -1788,6 +1799,19 @@
 			path = vestige;
 			sourceTree = "<group>";
 		};
+		432859EA1A10F436006C3E03 /* macosx */ = {
+			isa = PBXGroup;
+			children = (
+				432859EB1A10F436006C3E03 /* libardour.xcodeproj */,
+			);
+			name = macosx;
+			sourceTree = "<group>";
+		};
+		432859EC1A10F436006C3E03 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
 		43AA8295194EEA6F00A67B56 = {
 			isa = PBXGroup;
 			children = (
@@ -1810,6 +1834,12 @@
 		43AA82AD194EEACB00A67B56 /* source */ = {
 			isa = PBXGroup;
 			children = (
+				432859EA1A10F436006C3E03 /* macosx */,
+				432859EE1A10F436006C3E03 /* midi_scene_change.cc */,
+				432859EF1A10F436006C3E03 /* midi_scene_changer.cc */,
+				432859F01A10F436006C3E03 /* mididm.cc */,
+				432859F11A10F436006C3E03 /* scene_change.cc */,
+				432859F21A10F436006C3E03 /* soundcloud_upload.cc */,
 				43AA82AE194EEB2600A67B56 /* amp.cc */,
 				43AA82AF194EEB2600A67B56 /* analyser.cc */,
 				43AA82B0194EEB2600A67B56 /* async_midi_port.cc */,
@@ -3060,6 +3090,12 @@
 			mainGroup = 43AA8295194EEA6F00A67B56;
 			productRefGroup = 43AA829F194EEA6F00A67B56 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 432859EC1A10F436006C3E03 /* Products */;
+					ProjectRef = 432859EB1A10F436006C3E03 /* libardour.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				43AA82A8194EEAAF00A67B56 /* libardour */,
@@ -3140,9 +3176,11 @@
 				43AA83C4194EEB2600A67B56 /* export_multiplication.cc in Sources */,
 				43AA83C5194EEB2600A67B56 /* export_preset.cc in Sources */,
 				43AA83C6194EEB2600A67B56 /* export_profile_manager.cc in Sources */,
+				432859F71A10F436006C3E03 /* soundcloud_upload.cc in Sources */,
 				43AA83C7194EEB2600A67B56 /* export_status.cc in Sources */,
 				43AA83C8194EEB2600A67B56 /* export_timespan.cc in Sources */,
 				43AA83C9194EEB2600A67B56 /* file_source.cc in Sources */,
+				432859F31A10F436006C3E03 /* midi_scene_change.cc in Sources */,
 				43AA83CA194EEB2600A67B56 /* filename_extensions.cc in Sources */,
 				43AA83CB194EEB2600A67B56 /* filesystem_paths.cc in Sources */,
 				43AA83CC194EEB2600A67B56 /* filter.cc in Sources */,
@@ -3259,6 +3297,7 @@
 				43AA843B194EEB2600A67B56 /* source_factory.cc in Sources */,
 				43AA843C194EEB2600A67B56 /* source.cc in Sources */,
 				43AA843D194EEB2600A67B56 /* speakers.cc in Sources */,
+				432859F61A10F436006C3E03 /* scene_change.cc in Sources */,
 				43AA843E194EEB2600A67B56 /* srcfilesource.cc in Sources */,
 				43AA843F194EEB2600A67B56 /* sse_functions_64bit.s in Sources */,
 				43AA8440194EEB2600A67B56 /* sse_functions_xmm.cc in Sources */,
@@ -3288,6 +3327,7 @@
 				43AA84B9194EEB5F00A67B56 /* audio_engine_test.cc in Sources */,
 				43AA84BB194EEB5F00A67B56 /* audio_region_read_test.cc in Sources */,
 				43AA84BD194EEB5F00A67B56 /* audio_region_test.cc in Sources */,
+				432859F51A10F436006C3E03 /* mididm.cc in Sources */,
 				43AA84BF194EEB5F00A67B56 /* automation_list_property_test.cc in Sources */,
 				43AA84C1194EEB5F00A67B56 /* bbt_test.cc in Sources */,
 				43AA84C3194EEB5F00A67B56 /* combine_regions_test.cc in Sources */,
@@ -3308,6 +3348,7 @@
 				43AA84DF194EEB5F00A67B56 /* plugins_test.cc in Sources */,
 				43AA84E1194EEB5F00A67B56 /* load_session.cc in Sources */,
 				43AA84E2194EEB5F00A67B56 /* lots_of_regions.cc in Sources */,
+				432859F41A10F436006C3E03 /* midi_scene_changer.cc in Sources */,
 				43AA84E3194EEB5F00A67B56 /* runpc.cc in Sources */,
 				43AA84E4194EEB5F00A67B56 /* region_naming_test.cc in Sources */,
 				43AA84E6194EEB5F00A67B56 /* resampled_source_test.cc in Sources */,

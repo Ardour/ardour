@@ -45,6 +45,28 @@ public:
     };
     
     typedef std::list<PortState> PortStateList;
+
+    struct MidiPortState
+    {
+        std::string name;
+        bool active;
+        bool available;
+        bool connected;
+        
+        MidiPortState(const std::string& name):
+        name(name),
+        active(false),
+        available(false),
+        connected(false)
+        {}
+        
+        bool operator==(const MidiPortState& rhs)
+        {
+            return name == rhs.name;
+        }
+    };
+    
+    typedef std::list<MidiPortState> MidiPortStateList;
     
     static EngineStateController* instance();
     
@@ -94,14 +116,20 @@ public:
     bool                get_physical_audio_output_state(const std::string&);
     
     // get all enabled midi input/output states
-    void                get_physical_midi_input_states (std::vector<PortState>&);
-    void                get_physical_midi_output_states (std::vector<PortState>&);
+    void                get_physical_midi_input_states (std::vector<MidiPortState>&);
+    void                get_physical_midi_output_states (std::vector<MidiPortState>&);
     
-    // set/get the state for input or output
+    // set/get the state for MIDI input or output
     void                set_physical_midi_input_state(const std::string&, bool);
     void                set_physical_midi_output_state(const std::string&, bool);
-    bool                get_physical_midi_input_state(const std::string&);
-    bool                get_physical_midi_output_state(const std::string&);
+    bool                get_physical_midi_input_state(const std::string&, bool&);
+    bool                get_physical_midi_output_state(const std::string&, bool&);
+    
+    // set the state for MIDI input or output connection
+    void                set_physical_midi_input_connection_state(const std::string&, bool);
+    void                set_physical_midi_output_connection_state(const std::string&, bool);
+    void                set_all_midi_inputs_disconnected();
+    void                set_all_midi_outputs_disconnected();
     
     bool                is_setup_required() const {return ARDOUR::AudioEngine::instance()->setup_required (); }
     
@@ -150,6 +178,8 @@ public:
     /* this signals are emitted if the MIDI i/o channel configuration changes */
     PBD::Signal0<void> MIDIInputConfigChanged;
     PBD::Signal0<void> MIDIOutputConfigChanged;
+    PBD::Signal2<void, const std::vector<std::string>&, bool> MIDIInputConnectionChanged;
+    PBD::Signal2<void, const std::vector<std::string>&, bool> MIDIOutputConnectionChanged;
     
     /* this signal is emitted if new ports are registered or unregistered */
     PBD::Signal0<void> PortRegistrationChanged;
@@ -217,28 +247,6 @@ private:
     
     typedef boost::shared_ptr<State> StatePtr;
     typedef std::list<StatePtr> StateList;
-    
-    // MIDI device data structures
-    
-    struct MidiPortState
-    {
-        std::string name;
-        bool active;
-        bool available;
-        
-        MidiPortState(const std::string& name):
-        name(name),
-        active(false),
-        available(false)
-        {}
-        
-        bool operator==(const MidiPortState& rhs)
-        {
-            return name == rhs.name;
-        }
-    };
-    
-    typedef std::list<MidiPortState> MidiPortStateList;
     
     // state control methods////////////////
     void _deserialize_and_load_engine_states();
