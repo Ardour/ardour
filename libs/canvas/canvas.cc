@@ -32,6 +32,7 @@
 #include "pbd/stacktrace.h"
 
 #include "canvas/canvas.h"
+#include "canvas/colors.h"
 #include "canvas/debug.h"
 #include "canvas/line.h"
 #include "canvas/scroll_group.h"
