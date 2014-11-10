@@ -930,6 +930,10 @@ Editor::color_handler()
 	location_punch_color = ARDOUR_UI::config()->get_LocationPunch();
 
 	refresh_location_display ();
+
+        /* redraw the whole thing */
+        _track_canvas->queue_draw ();
+        
 /*
 	redisplay_tempo (true);
 
