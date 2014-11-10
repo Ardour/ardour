@@ -1018,6 +1018,10 @@ Editor::color_handler()
 	rubberband_rect->set_fill_color ((guint32) ARDOUR_UI::config()->get_canvasvar_RubberBandRect());
 
 	refresh_location_display ();
+
+        /* redraw the whole thing */
+        _track_canvas->queue_draw ();
+        
 /*
 	redisplay_tempo (true);
 
