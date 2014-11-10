@@ -18,6 +18,7 @@
 */
 
 CANVAS_VARIABLE(canvasvar_ActiveCrossfade, "active crossfade")
+CANVAS_VARIABLE(canvasvar_ArrangeBase, "arrange base")
 CANVAS_VARIABLE(canvasvar_AudioBusBase, "audio bus base")
 CANVAS_VARIABLE(canvasvar_AudioMasterBusBase, "audio master bus base")
 CANVAS_VARIABLE(canvasvar_AudioTrackBase, "audio track base")
