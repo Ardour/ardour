@@ -15,6 +15,7 @@
   </UI>
   <Canvas>
     <Option name="active crossfade" value="20b2af2e"/>
+    <Option name="arrange base" value="595959ff"/>
     <Option name="audio bus base" value="73829968"/>
     <Option name="audio master bus base" value="00000000"/>
     <Option name="audio track base" value="9daac468"/>
