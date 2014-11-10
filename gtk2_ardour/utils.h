@@ -97,6 +97,7 @@ std::string escape_angled_brackets (std::string const &);
 Gdk::Color unique_random_color (std::list<Gdk::Color> &);
 
 std::string rate_as_string (float r);
+ARDOUR::framecnt_t string_as_rate (const std::string& string_sr);
 
 std::string track_number_to_string (int64_t tracknumber, std::string sep = "", std::string postfix = "");
 

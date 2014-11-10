@@ -73,17 +73,17 @@
     void on_control_panel_button(WavesButton*);
     ARDOUR::TracksAutoNamingRule _tracks_naming_rule;
 
-	void on_engine_dropdown_item_clicked (WavesDropdown*, void*);
-	void on_device_dropdown_item_clicked (WavesDropdown*, void*);
+	void on_engine_dropdown_item_clicked (WavesDropdown*, int);
+	void on_device_dropdown_item_clicked (WavesDropdown*, int);
 	void device_changed ();
 	void buffer_size_changed ();
-	void on_buffer_size_dropdown_item_clicked (WavesDropdown*, void*);
-	void on_sample_rate_dropdown_item_clicked (WavesDropdown*, void*);
+	void on_buffer_size_dropdown_item_clicked (WavesDropdown*, int);
+	void on_sample_rate_dropdown_item_clicked (WavesDropdown*, int);
     void engine_running ();
     void engine_stopped ();
-	void on_file_type_dropdown_item_clicked (WavesDropdown*, void*);
-    void on_bit_depth_dropdown_item_clicked (WavesDropdown*, void*);
-    void on_frame_rate_item_clicked (WavesDropdown*, void*);
+	void on_file_type_dropdown_item_clicked (WavesDropdown*, int);
+    void on_bit_depth_dropdown_item_clicked (WavesDropdown*, int);
+    void on_frame_rate_item_clicked (WavesDropdown*, int);
 
 	void populate_engine_dropdown ();
 	void populate_device_dropdown ();

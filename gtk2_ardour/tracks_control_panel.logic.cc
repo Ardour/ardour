@@ -1075,7 +1075,7 @@ void TracksControlPanel::save_general_preferences ()
 }
 
 
-void TracksControlPanel::on_engine_dropdown_item_clicked (WavesDropdown*, void*)
+void TracksControlPanel::on_engine_dropdown_item_clicked (WavesDropdown*, int)
 {
 	if (_ignore_changes) {
 		return;
@@ -1094,7 +1094,7 @@ void TracksControlPanel::on_engine_dropdown_item_clicked (WavesDropdown*, void*)
 }
 
 void
-TracksControlPanel::on_device_dropdown_item_clicked (WavesDropdown*, void*)
+TracksControlPanel::on_device_dropdown_item_clicked (WavesDropdown*, int)
 {
 	if (_ignore_changes) {
 		return;
@@ -1218,7 +1218,7 @@ TracksControlPanel::on_all_outputs_off_button(WavesButton*)
 }
 
 void
-TracksControlPanel::on_file_type_dropdown_item_clicked (WavesDropdown*, void*)
+TracksControlPanel::on_file_type_dropdown_item_clicked (WavesDropdown*, int)
 { 
     if (_ignore_changes) {
 		return;
@@ -1232,7 +1232,7 @@ TracksControlPanel::on_file_type_dropdown_item_clicked (WavesDropdown*, void*)
 }
 
 void
-TracksControlPanel::on_bit_depth_dropdown_item_clicked (WavesDropdown*, void*)
+TracksControlPanel::on_bit_depth_dropdown_item_clicked (WavesDropdown*, int)
 {
     if (_ignore_changes) {
 		return;
@@ -1246,7 +1246,7 @@ TracksControlPanel::on_bit_depth_dropdown_item_clicked (WavesDropdown*, void*)
 }
 
 void
-TracksControlPanel::on_frame_rate_item_clicked (WavesDropdown*, void*)
+TracksControlPanel::on_frame_rate_item_clicked (WavesDropdown*, int)
 {
     if (_ignore_changes) {
 		return;
@@ -1260,7 +1260,7 @@ TracksControlPanel::on_frame_rate_item_clicked (WavesDropdown*, void*)
 }
 
 void 
-TracksControlPanel::on_buffer_size_dropdown_item_clicked (WavesDropdown*, void*)
+TracksControlPanel::on_buffer_size_dropdown_item_clicked (WavesDropdown*, int)
 {
 	if (_ignore_changes) {
 		return;
@@ -1285,7 +1285,7 @@ TracksControlPanel::on_buffer_size_dropdown_item_clicked (WavesDropdown*, void*)
 }
 
 void
-TracksControlPanel::on_sample_rate_dropdown_item_clicked (WavesDropdown*, void*)
+TracksControlPanel::on_sample_rate_dropdown_item_clicked (WavesDropdown*, int)
 {
 	if (_ignore_changes) {
 		return;
@@ -1761,38 +1761,11 @@ TracksControlPanel::get_sample_rate () const
 {
     const std::string sample_rate = _sample_rate_dropdown.get_text ();
     
-    if ( "44.1 kHz" == sample_rate )
-    {
-        return 44100;
-    } else if ( "48 kHz" == sample_rate )
-    {
-        return 48000;
-    } else if ( "88.2 kHz" == sample_rate )
-    {
-        return 88200;
-    } else if ( "96 kHz" == sample_rate )
-    {
-        return 96000;
-    } else if ( "172.4 kHz" == sample_rate )
-    {
-        return 172400;
-    } else if ( "192 kHz" == sample_rate )
-    {
-        return 192000;
-    }
-    
-    float r = atof (sample_rate);
-	    
-    /* the std::string may have been translated with an abbreviation for
-	* thousands, so use a crude heuristic to fix this.
-	*/
-	if (r < 1000.0) {
-		r *= 1000.0;
-	}
-	return r;
+    return ARDOUR_UI_UTILS::string_as_rate (sample_rate);
 }
 
-pframes_t TracksControlPanel::get_buffer_size() const
+pframes_t
+TracksControlPanel::get_buffer_size() const
 {
     std::string bs_text = _buffer_size_dropdown.get_text ();
     pframes_t samples = atoi (bs_text); /* will ignore trailing text */

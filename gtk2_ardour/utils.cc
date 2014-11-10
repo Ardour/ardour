@@ -980,6 +980,40 @@ ARDOUR_UI_UTILS::rate_as_string (float r)
 	return buf;
 }
 
+framecnt_t
+ARDOUR_UI_UTILS::string_as_rate (const std::string& string_sr)
+{
+    if ( "44.1 kHz" == string_sr )
+    {
+        return 44100;
+    } else if ( "48 kHz" == string_sr )
+    {
+        return 48000;
+    } else if ( "88.2 kHz" == string_sr )
+    {
+        return 88200;
+    } else if ( "96 kHz" == string_sr )
+    {
+        return 96000;
+    } else if ( "172.4 kHz" == string_sr )
+    {
+        return 172400;
+    } else if ( "192 kHz" == string_sr )
+    {
+        return 192000;
+    }
+    
+    float r = atof (string_sr);
+    
+    /* the std::string may have been translated with an abbreviation for
+     * thousands, so use a crude heuristic to fix this.
+     */
+    if (r < 1000.0) {
+        r *= 1000.0;
+    }
+    return r;
+}
+
 
 string
 ARDOUR_UI_UTILS::track_number_to_string (

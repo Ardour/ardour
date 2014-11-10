@@ -27,23 +27,27 @@ using namespace ArdourCanvas::XMLUI;
 class WavesDropdown : public WavesIconButton
 {
   public:
-
+    
     WavesDropdown (const std::string& title = "");
     virtual ~WavesDropdown ();
     Gtk::Menu& get_menu () { return _menu; }
     void clear_items ();
+    
 	int get_current_item () { return _current_item_number; }
-
 	void set_current_item (int current_item_number);
-
+    
+    void* get_item_associated_data (int);
+    Gtk::MenuItem* get_item (int);
+    
     Gtk::MenuItem& add_menu_item (const std::string& item, void* cookie = 0);
     Gtk::RadioMenuItem& add_radio_menu_item (const std::string& item, void* cookie = 0);
     Gtk::CheckMenuItem& add_check_menu_item (const std::string& item, void* cookie = 0);
 
     
-    sigc::signal2<void, WavesDropdown*, void*> selected_item_changed;
+    sigc::signal2<void, WavesDropdown*, int> selected_item_changed;
 
   private:
+    static char* menu_item_data_key;
     Gtk::Menu _menu;
 	int _current_item_number;
     void _on_menu_item (int item_number, void* cookie);

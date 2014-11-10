@@ -1382,31 +1382,35 @@ Editor::reset_marker_midi_images (bool input)
 /* MIDI/scene change Markers */
 
 void
-Editor::midi_input_chosen (WavesDropdown*, void* full_name_of_chosen_port)
+Editor::midi_input_chosen (WavesDropdown* dropdown, int el_number)
 {
-        if (!_session) {
-                return;
-        }
-        
-        _session->scene_in()->disconnect_all ();
-        
-        if (full_name_of_chosen_port != 0) {
-                _session->scene_in()->connect ((char*) full_name_of_chosen_port);
-        }
+    void* data = dropdown->get_item_associated_data(el_number);
+    
+    if (!_session) {
+            return;
+    }
+    
+    _session->scene_in()->disconnect_all ();
+    
+    if (data) {
+        _session->scene_in()->connect ((char*) data);
+    }
 }
 
 void
-Editor::midi_output_chosen (WavesDropdown*, void* full_name_of_chosen_port)
+Editor::midi_output_chosen (WavesDropdown* dropdown, int el_number)
 {
-        if (!_session) {
-                return;
-        }
-        
-        _session->scene_out()->disconnect_all ();
-        
-        if (full_name_of_chosen_port != 0) {
-                _session->scene_out()->connect ((char *) full_name_of_chosen_port);
-        }
+    void* data = dropdown->get_item_associated_data(el_number);
+    
+    if (!_session) {
+            return;
+    }
+    
+    _session->scene_out()->disconnect_all ();
+    
+    if (data) {
+        _session->scene_out()->connect ((char *) data);
+    }
 }
 
 void

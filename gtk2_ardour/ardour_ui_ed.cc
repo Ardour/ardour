@@ -179,9 +179,13 @@ ARDOUR_UI::populate_timecode_source_dropdown ()
 }
 
 void
-ARDOUR_UI::on_display_format_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie)
+ARDOUR_UI::on_display_format_dropdown_item_clicked (WavesDropdown* dropdown, int el_number)
 {
-    string format = *((string*)my_cookie);
+    void* data = dropdown->get_item_associated_data(el_number);
+    assert(data);
+    
+    string format = *(string*)data;
+    
     AudioClock::Mode mode;
     
     if( format == "Timecode" )
@@ -198,9 +202,12 @@ ARDOUR_UI::on_display_format_dropdown_item_clicked (WavesDropdown* from_which, v
 }
 
 void
-ARDOUR_UI::on_timecode_source_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie)
+ARDOUR_UI::on_timecode_source_dropdown_item_clicked (WavesDropdown* dropdown, int el_number)
 {
-    string timecode_source = *((string*)my_cookie);
+    void* data = dropdown->get_item_associated_data(el_number);
+    assert(data);
+    
+    string timecode_source = *(string*)data;
     
     if ( timecode_source == "Intermal" )
     {
@@ -315,9 +322,12 @@ ARDOUR_UI::sample_rate_changed()
 }
 
 void
-ARDOUR_UI::on_sample_rate_dropdown_item_clicked (WavesDropdown* from_which, void* my_cookie)
+ARDOUR_UI::on_sample_rate_dropdown_item_clicked (WavesDropdown* dropdown, int el_number)
 {
-    float sample_rate = *((float*)my_cookie);
+    void* data = dropdown->get_item_associated_data(el_number);
+    assert(data);
+    
+    framecnt_t sample_rate = *(float*)data;
     
     if (EngineStateController::instance()->set_new_sample_rate_in_controller( sample_rate ) )
     {

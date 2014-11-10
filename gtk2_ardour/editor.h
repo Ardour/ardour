@@ -2158,8 +2158,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
         WavesDropdown& _midi_input_dropdown;
         WavesDropdown& _midi_output_dropdown;
-	void midi_input_chosen (WavesDropdown*, void*);
-	void midi_output_chosen (WavesDropdown*, void*);
+	void midi_input_chosen (WavesDropdown*, int);
+	void midi_output_chosen (WavesDropdown*, int);
 	void populate_midi_inout_dropdowns ();
 	void populate_midi_inout_dropdown (bool playback);
 
