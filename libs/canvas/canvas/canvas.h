@@ -87,6 +87,9 @@ public:
 		return &_root;
 	}
 
+        void set_background_color (ArdourCanvas::Color);
+        ArdourCanvas::Color background_color() const { return _bg_color; }
+
 	/** Called when an item is being destroyed */
 	virtual void item_going_away (Item *, boost::optional<Rect>) {}
 	void item_shown_or_hidden (Item *);
@@ -152,13 +155,12 @@ public:
 	static void set_tooltip_timeout (uint32_t msecs);
 	
 protected:
-	void queue_draw_item_area (Item *, Rect);
-	
-	/** our root item */
-	Root _root;
+	Root  _root;
+        Color _bg_color;
 
 	static uint32_t tooltip_timeout_msecs;
 
+	void queue_draw_item_area (Item *, Rect);
         virtual void pick_current_item (int state) = 0;
         virtual void pick_current_item (Duple const &, int state) = 0;
 

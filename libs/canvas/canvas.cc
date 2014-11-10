@@ -35,6 +35,7 @@
 #include "canvas/debug.h"
 #include "canvas/line.h"
 #include "canvas/scroll_group.h"
+#include "canvas/utils.h"
 
 using namespace std;
 using namespace ArdourCanvas;
@@ -44,6 +45,7 @@ uint32_t Canvas::tooltip_timeout_msecs = 750;
 /** Construct a new Canvas */
 Canvas::Canvas ()
 	: _root (this)
+        , _bg_color (rgba_to_color (0, 1.0, 0.0, 1.0))
 {
 	set_epoch ();
 }
@@ -338,6 +340,18 @@ void
 Canvas::set_tooltip_timeout (uint32_t msecs)
 {
 	tooltip_timeout_msecs = msecs;
+}
+
+void
+Canvas::set_background_color (Color c)
+{
+        _bg_color = c;
+
+        boost::optional<Rect> r = _root.bounding_box();
+
+        if (r) {
+                request_redraw (_root.item_to_window (r.get()));
+        }
 }
 
 void
@@ -743,47 +757,35 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	if (!canvas_image) {
 		canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
 	}
+        Cairo::RefPtr<Cairo::Context> draw_context = Cairo::Context::create (canvas_image);
+	Cairo::RefPtr<Cairo::Context> window_context = get_window()->create_cairo_context ();
+#else 
+	Cairo::RefPtr<Cairo::Context> draw_context = get_window()->create_cairo_context ();
+#endif
 
-	{
-		/* scope for image_context */
-		Cairo::RefPtr<Cairo::Context> image_context = Cairo::Context::create (canvas_image);
+        /* draw background color */
+        
+        draw_context->save ();
+        draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+        draw_context->clip ();
+        draw_context->set_operator (Cairo::OPERATOR_SOURCE);
+        set_source_rgba (draw_context, _bg_color);
+        draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+        draw_context->fill ();
+        draw_context->restore ();
+        
+        /* render canvas */
+        
+        render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
 
-		/* clear expose area */
-
-		image_context->save ();
-		image_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-		image_context->clip ();
-		image_context->set_operator (Cairo::OPERATOR_SOURCE);
-		// TODO get canvas backround see CairoWidget::get_parent_bg
-		// also subscribe to parent's signal_style_changed()
-		// ..until new canvas color-theme API is in place, hardcode some values.
-		image_context->set_source_rgba (84./255., 85./255., 93./255., 1.0);
-		image_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-		image_context->fill ();
-		image_context->restore ();
-
-		/* render into image surface */
-
-		render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), image_context);
-
-		/* image surface is flushed when image_context goes out of scope */
-	}
-
+#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_GTK_CANVAS
 	/* now blit our private surface back to the GDK one */
 
-	Cairo::RefPtr<Cairo::Context> cairo_context = get_window()->create_cairo_context ();
-
-	cairo_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cairo_context->clip ();
-	cairo_context->set_source (canvas_image, 0, 0);
-	cairo_context->set_operator (Cairo::OPERATOR_SOURCE);
-	cairo_context->paint ();
-
-#else
-
-	Cairo::RefPtr<Cairo::Context> cairo_context = get_window()->create_cairo_context ();
-	render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), cairo_context);
-
+	window_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	window_context->clip ();
+	window_context->set_source (canvas_image, 0, 0);
+	window_context->set_operator (Cairo::OPERATOR_SOURCE);
+	window_context->paint ();
 #endif
 
 	return true;
