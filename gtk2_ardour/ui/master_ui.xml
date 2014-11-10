@@ -11,6 +11,9 @@
     <HBox height="17">
       <HBox id="master_bus_hbox"
             noshowall="true">
+          <EventBox width="1"
+                    bgnormal="#494949"
+                    bgactive="#494949"/>
           <EventBox width="29"
                     bgnormal="#424242"
                     bgactive="#F48E16"/>
@@ -23,10 +26,10 @@
           <VBox width="6"/>
           <Label text="Master Bus"
                  winfont ="Arial Bold 10"
-                 macfont ="Helvetica Bold 9"
+                 macfont ="Helvetica Bold 10"
                  fgnormal="#AFAFAF"
                  fgactive="#AFAFAF"
-                 width="99"
+                 width="98"
                  height="17"
                  horzalignment="start"
                  vertalignment="center"/>
