@@ -240,6 +240,10 @@
 		432654CC194EF73D00BEFB46 /* vumeterdsp.h in Headers */ = {isa = PBXBuildFile; fileRef = 432653E3194EF73C00BEFB46 /* vumeterdsp.h */; };
 		432654CD194EF73D00BEFB46 /* windows_vst_plugin.h in Headers */ = {isa = PBXBuildFile; fileRef = 432653E4194EF73C00BEFB46 /* windows_vst_plugin.h */; };
 		432654CE194EF73D00BEFB46 /* worker.h in Headers */ = {isa = PBXBuildFile; fileRef = 432653E5194EF73C00BEFB46 /* worker.h */; };
+		432859E61A10F415006C3E03 /* midi_scene_change.h in Headers */ = {isa = PBXBuildFile; fileRef = 432859E21A10F415006C3E03 /* midi_scene_change.h */; };
+		432859E71A10F415006C3E03 /* midi_scene_changer.h in Headers */ = {isa = PBXBuildFile; fileRef = 432859E31A10F415006C3E03 /* midi_scene_changer.h */; };
+		432859E81A10F415006C3E03 /* mididm.h in Headers */ = {isa = PBXBuildFile; fileRef = 432859E41A10F415006C3E03 /* mididm.h */; };
+		432859E91A10F415006C3E03 /* soundcloud_upload.h in Headers */ = {isa = PBXBuildFile; fileRef = 432859E51A10F415006C3E03 /* soundcloud_upload.h */; };
 		43AA8383194EEB2600A67B56 /* amp.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA82AE194EEB2600A67B56 /* amp.cc */; };
 		43AA8384194EEB2600A67B56 /* analyser.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA82AF194EEB2600A67B56 /* analyser.cc */; };
 		43AA8385194EEB2600A67B56 /* async_midi_port.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43AA82B0194EEB2600A67B56 /* async_midi_port.cc */; };
@@ -983,6 +987,10 @@
 		432653E3194EF73C00BEFB46 /* vumeterdsp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vumeterdsp.h; sourceTree = "<group>"; };
 		432653E4194EF73C00BEFB46 /* windows_vst_plugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = windows_vst_plugin.h; sourceTree = "<group>"; };
 		432653E5194EF73C00BEFB46 /* worker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = worker.h; sourceTree = "<group>"; };
+		432859E21A10F415006C3E03 /* midi_scene_change.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = midi_scene_change.h; path = ../ardour/midi_scene_change.h; sourceTree = "<group>"; };
+		432859E31A10F415006C3E03 /* midi_scene_changer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = midi_scene_changer.h; path = ../ardour/midi_scene_changer.h; sourceTree = "<group>"; };
+		432859E41A10F415006C3E03 /* mididm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mididm.h; path = ../ardour/mididm.h; sourceTree = "<group>"; };
+		432859E51A10F415006C3E03 /* soundcloud_upload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = soundcloud_upload.h; path = ../ardour/soundcloud_upload.h; sourceTree = "<group>"; };
 		43AA82A9194EEAAF00A67B56 /* liblibardour.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblibardour.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		43AA82AE194EEB2600A67B56 /* amp.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = amp.cc; path = ../amp.cc; sourceTree = SOURCE_ROOT; };
 		43AA82AF194EEB2600A67B56 /* analyser.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = analyser.cc; path = ../analyser.cc; sourceTree = SOURCE_ROOT; };
@@ -2238,6 +2246,10 @@
 		43AA84F3194EEB6F00A67B56 /* headers */ = {
 			isa = PBXGroup;
 			children = (
+				432859E21A10F415006C3E03 /* midi_scene_change.h */,
+				432859E31A10F415006C3E03 /* midi_scene_changer.h */,
+				432859E41A10F415006C3E03 /* mididm.h */,
+				432859E51A10F415006C3E03 /* soundcloud_upload.h */,
 				43AA86CD194EEC1400A67B56 /* gettext.h */,
 				43AA86CE194EEC1400A67B56 /* lv2_evbuf.h */,
 				43AA86CF194EEC1400A67B56 /* rdff.h */,
@@ -2617,9 +2629,11 @@
 				43AA862D194EEB8B00A67B56 /* iec1ppmdsp.h in Headers */,
 				43AA862E194EEB8B00A67B56 /* iec2ppmdsp.h in Headers */,
 				43AA862F194EEB8B00A67B56 /* import_status.h in Headers */,
+				432859E61A10F415006C3E03 /* midi_scene_change.h in Headers */,
 				43AA8630194EEB8B00A67B56 /* importable_source.h in Headers */,
 				43AA8631194EEB8B00A67B56 /* instrument_info.h in Headers */,
 				43AA8632194EEB8B00A67B56 /* internal_return.h in Headers */,
+				432859E81A10F415006C3E03 /* mididm.h in Headers */,
 				43AA8633194EEB8B00A67B56 /* internal_send.h in Headers */,
 				43AA8634194EEB8B00A67B56 /* interpolation.h in Headers */,
 				43AA8635194EEB8B00A67B56 /* interthread_info.h in Headers */,
@@ -2665,6 +2679,7 @@
 				43AA865D194EEB8B00A67B56 /* onset_detector.h in Headers */,
 				43AA865E194EEB8B00A67B56 /* operations.h in Headers */,
 				43AA865F194EEB8B00A67B56 /* pan_controllable.h in Headers */,
+				432859E71A10F415006C3E03 /* midi_scene_changer.h in Headers */,
 				43AA8660194EEB8B00A67B56 /* pannable.h in Headers */,
 				43AA8661194EEB8B00A67B56 /* panner_manager.h in Headers */,
 				43AA8662194EEB8B00A67B56 /* panner_shell.h in Headers */,
@@ -2956,6 +2971,7 @@
 				4326549E194EF73D00BEFB46 /* session_handle.h in Headers */,
 				4326549F194EF73D00BEFB46 /* session_metadata.h in Headers */,
 				432654A0194EF73D00BEFB46 /* session_object.h in Headers */,
+				432859E91A10F415006C3E03 /* soundcloud_upload.h in Headers */,
 				432654A1194EF73D00BEFB46 /* session_playlist.h in Headers */,
 				432654A2194EF73D00BEFB46 /* session_playlists.h in Headers */,
 				432654A3194EF73D00BEFB46 /* session_route.h in Headers */,
