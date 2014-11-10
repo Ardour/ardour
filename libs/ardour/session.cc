@@ -2903,6 +2903,9 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 
     update_route_record_state ();
     
+    // reconnect all routes
+    reconnect_existing_routes(true);
+    
 	RouteAdded (new_routes); /* EMIT SIGNAL */
     long end_time = get_time_measurement();
     std::cout << "*-*-*-*-* time: " << end_time - start_time << std::endl;
@@ -2920,7 +2923,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		_order_hint = 0;
 	}
 
-        count_existing_track_channels (existing_inputs, existing_outputs);
+    count_existing_track_channels (existing_inputs, existing_outputs);
 
 	{
 		RCUWriter<RouteList> writer (routes);
