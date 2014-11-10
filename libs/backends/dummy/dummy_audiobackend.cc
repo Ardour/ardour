@@ -1139,7 +1139,7 @@ DummyAudioBackend::main_process_thread ()
 	manager.registration_callback();
 	manager.graph_order_callback();
 
-	uint64_t clock1, clock2;
+	int64_t clock1, clock2;
 	clock1 = _x_get_monotonic_usec();
 	while (_running) {
 
