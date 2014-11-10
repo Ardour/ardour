@@ -67,6 +67,7 @@
         </VBox>
       </HBox>
       <VBox spacing="1">
+        <HBox height="1"/>
         <HBox spacing="1">
           <iconbutton id="rec_enable_button"
                       width="38"
