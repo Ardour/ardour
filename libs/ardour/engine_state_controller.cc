@@ -1272,6 +1272,8 @@ EngineStateController::get_physical_midi_output_states (std::vector<MidiPortStat
 void
 EngineStateController::_on_session_loaded ()
 {
+    AudioEngine::instance()->reconnect_session_routes(true, true);
+    
 	if (_session && _desired_sample_rate && set_new_sample_rate_in_controller(_desired_sample_rate) )
 	{
 		push_current_state_to_backend(false);

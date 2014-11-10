@@ -429,8 +429,6 @@ Session::Session (AudioEngine &eng,
                 throw failed_constructor ();
             }
         }
-    } else {
-        reconnect_existing_routes(true);
     }
     
     _is_new = false;
@@ -2903,9 +2901,6 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 
     update_route_record_state ();
     
-    // reconnect all routes
-    reconnect_existing_routes(true);
-    
 	RouteAdded (new_routes); /* EMIT SIGNAL */
     long end_time = get_time_measurement();
     std::cout << "*-*-*-*-* time: " << end_time - start_time << std::endl;
@@ -3197,7 +3192,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 	 */
     long reconnect_start_time = get_time_measurement();
     if (ARDOUR::Profile->get_trx () ) {
-        reconnect_existing_routes(true, false);
+        reconnect_existing_routes(true, true);
     } else {
         resort_routes ();
     }
@@ -3319,7 +3314,7 @@ Session::remove_route (boost::shared_ptr<Route> route)
      * Wave Tracks: reconnect routes
 	 */
     if (ARDOUR::Profile->get_trx () ) {
-        reconnect_existing_routes(true, false);
+        reconnect_existing_routes(true, true);
     } else {
         resort_routes ();
     }
@@ -5947,7 +5942,7 @@ Session::notify_remote_id_change ()
      * TODO: move it to GUI
      */
     if (ARDOUR::Profile->get_trx () ) {
-        reconnect_existing_routes(true, false);
+        reconnect_existing_routes(true, true);
     }
 }
 
