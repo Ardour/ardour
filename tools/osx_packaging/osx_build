@@ -8,8 +8,9 @@ BUILD_ROOT=../../build
 
 # where harvid and xjadeo binaries are cached
 if test -z "$CACHEDIR" -o ! -d "$CACHEDIR"; then
-	CACHEDIR=`pwd`
+	CACHEDIR=/var/tmp
 fi
+mkdir -p "$CACHEDIR"
 
 SAE=
 MIXBUS=
