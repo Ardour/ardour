@@ -663,7 +663,13 @@ Marker::use_color ()
         
         if (_name_background) {
                 _name_background->set_fill (true);
-                _name_background->set_fill_color (_color);
+
+                if (_have_scene_change && _location && !_location->scene_change()->color_out_of_bounds()) {
+                        _name_background->set_fill_color (_location->scene_change()->color());
+                } else {
+                        _name_background->set_fill_color (_color);
+                }
+
                 /* white with 20% opacity */
                 _name_background->set_outline_color (ARDOUR_UI::config()->get_canvasvar_LocationOutline());
                 _name_background->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::TOP|
