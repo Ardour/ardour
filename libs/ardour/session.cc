@@ -2085,7 +2085,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
   failed:
 	if (!new_routes.empty()) {
 		StateProtector sp (this);
-		add_routes (new_routes, true, true, true);
+		add_routes (new_routes, false, false, true);
 
 		if (instrument) {
 			for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
@@ -2323,6 +2323,10 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
         for (; rIter != existing_routes.end(); ++rIter) {
             
             if (*rIter == _master_out || *rIter == _monitor_out ) {
+                continue;
+            }
+            
+            if (*rIter == _master_track && !reconnect_master ) {
                 continue;
             }
             
@@ -2581,7 +2585,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
   failed:
 	if (!new_routes.empty()) {
 		StateProtector sp (this);
-		add_routes (new_routes, true, true, true);
+		add_routes (new_routes, false, false, true);
 	}
 
 	return ret;
@@ -2749,7 +2753,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
   failure:
 	if (!ret.empty()) {
 		StateProtector sp (this);
-		add_routes (ret, false, true, true); // autoconnect outputs only
+		add_routes (ret, false, false, true); // autoconnect outputs only
 	}
 
 	return ret;
@@ -2866,7 +2870,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
   out:
 	if (!ret.empty()) {
 		StateProtector sp (this);
-		add_routes (ret, true, true, true);
+		add_routes (ret, false, false, true);
 		IO::enable_connecting ();
 	}
 
@@ -2979,8 +2983,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		}
         
 		if (input_auto_connect || output_auto_connect) {
-			// routes will be connected later
-            //auto_connect_route (r, existing_inputs, existing_outputs, true, input_auto_connect);
+            auto_connect_route (r, existing_inputs, existing_outputs, true, input_auto_connect);
 		}
 
 		/* order keys are a GUI responsibility but we need to set up
@@ -3192,7 +3195,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 	 */
     long reconnect_start_time = get_time_measurement();
     if (ARDOUR::Profile->get_trx () ) {
-        reconnect_existing_routes(true, true);
+        reconnect_existing_routes(true, false);
     } else {
         resort_routes ();
     }
@@ -3314,7 +3317,7 @@ Session::remove_route (boost::shared_ptr<Route> route)
      * Wave Tracks: reconnect routes
 	 */
     if (ARDOUR::Profile->get_trx () ) {
-        reconnect_existing_routes(true, true);
+        reconnect_existing_routes(true, false);
     } else {
         resort_routes ();
     }
@@ -5938,8 +5941,8 @@ Session::notify_remote_id_change ()
 		break;
 	}
     
-    /* Waves Tracks: for Waves Tracks session it's required to reconnect their IOs if track order has been changed in GUI
-     * TODO: move it to GUI
+    /* Waves Tracks: for Waves Tracks session it's required to reconnect their IOs
+     * if track order has been changed by user
      */
     if (ARDOUR::Profile->get_trx () ) {
         reconnect_existing_routes(true, true);
