@@ -140,3 +140,11 @@ MIDISceneChange::set_state (const XMLNode& node, int /* version-ignored */)
 
 	return 0;
 }
+
+bool
+MIDISceneChange::operator==(const MIDISceneChange& other) const
+{
+        return _program == other._program &&
+                _bank == other._bank &&
+                _channel == other._channel;
+}
