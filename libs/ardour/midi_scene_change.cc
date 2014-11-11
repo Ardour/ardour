@@ -28,11 +28,13 @@
 using namespace PBD;
 using namespace ARDOUR;
 
+const uint32_t MIDISceneChange::out_of_bound_color = 0x00000000; /* note: zero alpha means invisible, which acts as out-of-bound signal */
+
 MIDISceneChange::MIDISceneChange (int c, int b, int p)
 	: _bank (b)
 	, _program (p)
 	, _channel (c & 0xf)
-        , _color (0x00000000) /* note: zero alpha means invisible, which acts as out-of-bound signal */
+        , _color (out_of_bound_color)
 {
 	if (_bank > 16384) {
 		_bank = -1;
@@ -47,6 +49,7 @@ MIDISceneChange::MIDISceneChange (const XMLNode& node, int version)
 	: _bank (-1)
 	, _program (-1)
 	, _channel (-1)
+        , _color (out_of_bound_color)
 {
 	set_state (node, version);
 }
@@ -111,6 +114,8 @@ MIDISceneChange::get_state ()
 	node->add_property (X_("bank"), buf);
 	snprintf (buf, sizeof (buf), "%d", (int) _channel);
 	node->add_property (X_("channel"), buf);
+	snprintf (buf, sizeof (buf), "%u", _color);
+	node->add_property (X_("color"), buf);
 
 	return *node;
 }
@@ -138,6 +143,12 @@ MIDISceneChange::set_state (const XMLNode& node, int /* version-ignored */)
 		return -1;
 	}
 	_channel = atoi (prop->value());
+
+	if ((prop = node.property (X_("color"))) != 0) {
+                _color = atoi (prop->value());
+        } else {
+                _color = out_of_bound_color;
+        }
 
 	return 0;
 }

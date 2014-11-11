@@ -57,6 +57,7 @@ class MIDISceneChange : public SceneChange
 
         uint32_t color() const;
         void set_color (uint32_t);
+        static const uint32_t out_of_bound_color;
         PBD::Signal0<void> ColorChanged;
 
   private:
