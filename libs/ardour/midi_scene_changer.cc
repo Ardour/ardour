@@ -310,6 +310,19 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 
 	MIDISceneChange* msc =new MIDISceneChange (channel, bank, program & 0x7f);
 
+        /* check for identical scene change so we can re-use color, if any */
+
+        Locations::LocationList copy (locations->list());
+
+        for (Locations::LocationList::const_iterator l = copy.begin(); l != copy.end(); ++l) {
+                boost::shared_ptr<MIDISceneChange> m = boost::dynamic_pointer_cast<MIDISceneChange>((*l)->scene_change());
+
+                if (m && (*m.get()) == *msc) {
+                        msc->set_color (m->color ());
+                        break;
+                }
+        }
+
 	loc->set_scene_change (boost::shared_ptr<MIDISceneChange> (msc));
 	
 	/* this will generate a "changed" signal to be emitted by locations,
