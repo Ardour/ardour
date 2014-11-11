@@ -117,7 +117,7 @@ if [ x$PRINT_SYSDEPS != x ] ; then
 # print system dependencies
 #
 
-    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Plugins/*.so ; do 
+for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Plugins/*.so ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
@@ -377,15 +377,26 @@ done
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
 
-# Suil modules
-cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Frameworks
+# Suil modules (new dir 'build-stack')
+if test -d $GTKSTACK_ROOT/lib/suil-0/ ; then
+    cp $GTKSTACK_ROOT/lib/suil-0/lib* $Frameworks
+fi
+
+# Suil modules (old dir 'build-ardour-stack')
+if test -d $ARDOURSTACK_ROOT/lib/suil-0/ ; then
+    cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Frameworks
+fi
 
 # VST scanner app and wrapper script, if they exist
-cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $Frameworks/ || true
+if test -d $BUILD_ROOT/libs/fst ; then
+    cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $Frameworks/ || true
+fi
 
 # vfork wrapper
-mkdir -p $Frameworks/vfork
-cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $VFork
+if test -f $BUILD_ROOT/libs/vfork/ardour-exec-wrapper ; then
+    mkdir -p $Frameworks/vfork
+    cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $VFork
+fi
 
 
 while [ true ] ; do 
