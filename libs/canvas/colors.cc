@@ -77,7 +77,12 @@ ArdourCanvas::color_to_hsv (Color color, double& h, double& s, double& v)
 	} else {
 		s = delta / cmax;
 	}
+}
 
+ArdourCanvas::Color
+ArdourCanvas::hsv_to_color (const HSV& hsv, double a)
+{
+	return hsv_to_color (hsv.h, hsv.s, hsv.v, a);
 }
 
 ArdourCanvas::Color
@@ -191,3 +196,186 @@ ArdourCanvas::contrasting_text_color (uint32_t c)
 
 	return (luminance (c) < 0.50) ? white : black;
 }
+
+HSV::HSV ()
+	: h (1.0)
+	, s (1.0)
+	, v (1.0)
+{
+}
+
+HSV::HSV (double hh, double ss, double vv)
+	: h (hh)
+	, s (ss)
+	, v (vv)
+{
+}
+
+HSV::HSV (Color c)
+{
+	color_to_hsv (c, h, s, v);
+}
+
+void
+HSV::clamp ()
+{
+	s = min (s, 1.0);
+	v = min (v, 1.0);
+	h = min (255.0, h);
+}
+
+HSV
+HSV::operator+ (const HSV& operand) const
+{
+	HSV hsv;
+	hsv.h = h + operand.h;
+	hsv.s = s + operand.s;
+	hsv.v = v + operand.v;
+	hsv.clamp();
+	return hsv;
+}
+
+HSV
+HSV::operator- (const HSV& operand) const
+{
+	HSV hsv;
+	hsv.h = h - operand.h;
+	hsv.s = s - operand.s;
+	hsv.v = v - operand.v;
+	hsv.clamp();
+	return hsv;
+}
+
+HSV
+HSV::operator* (double d) const
+{
+	HSV hsv;
+	hsv.h = h * d;
+	hsv.s = s * d;
+	hsv.v = v * d;
+	hsv.clamp();
+	return hsv;
+}
+
+HSV
+HSV::shade (double factor) const
+{
+	HSV hsv (*this);
+	
+	/* algorithm derived from a google palette website
+	   and analysis of their color palettes.
+
+	   basic rule: to make a color darker, increase its saturation 
+	   until it reaches 88%, but then additionally reduce value/lightness 
+	   by a larger amount.
+
+	   invert rule to make a color lighter.
+	*/
+
+	if (factor > 1.0) {
+		if (s < 88) {
+			hsv.v *= 1.0/(factor/10.0);
+		} else {
+			hsv.s *= factor;
+		}
+	} else {
+		if (s < 88) {
+			hsv.v *= 1.0/factor;
+		} else {
+			hsv.s *= factor;
+		}
+	}
+
+	hsv.clamp();
+
+	return hsv;
+}
+
+HSV
+HSV::mix (const HSV& other, double amount) const
+{
+	HSV hsv;
+
+	hsv.h = h + (amount * (other.h - h));
+	hsv.v = v + (amount * (other.s - s));
+	hsv.s = s + (amount * (other.v - v));
+
+	hsv.clamp();
+
+	return hsv;
+}
+
+void
+HSV::print (std::ostream& o) const
+{
+	if (!is_gray()) {
+		o << "hsv " << h << '|' << s << '|' << v;
+	} else {
+		o << "hsv gray";
+	}
+}
+
+HSVA::HSVA ()
+	: a (1.0) 
+{
+}
+
+HSVA::HSVA (double hh, double ss, double vv, double aa)
+	: HSV (hh, ss, vv)
+	, a (aa) 
+{
+}
+
+HSVA::HSVA (Color c)
+{
+	color_to_hsv (c, h, s, v);
+	a = c & 0xff;
+}
+
+void
+HSVA::clamp ()
+{
+	HSV::clamp ();
+	a = min (1.0, a);
+}
+
+HSVA
+HSVA::operator+ (const HSVA& operand) const
+{
+	HSVA hsv;
+	hsv.h = h + operand.h;
+	hsv.s = s + operand.s;
+	hsv.v = v + operand.v;
+	hsv.a = a + operand.a;
+	return hsv;
+}
+
+HSVA
+HSVA::operator- (const HSVA& operand) const
+{
+	HSVA hsv;
+	hsv.h = h - operand.h;
+	hsv.s = s - operand.s;
+	hsv.a = a - operand.a;
+	return hsv;
+}
+
+void
+HSVA::print (std::ostream& o) const
+{
+	if (!is_gray()) {
+		o << "hsva " << h << '|' << s << '|' << v << '|' << a;
+	} else {
+		o << "hsva gray";
+	}
+}
+
+
+ArdourCanvas::Color
+ArdourCanvas::hsva_to_color (const HSVA& hsva)
+{
+	return hsv_to_color (hsva.h, hsva.s, hsva.v, hsva.a);
+}
+
+std::ostream& operator<<(std::ostream& o, const ArdourCanvas::HSV& hsv) { hsv.print (o); return o; }
+std::ostream& operator<<(std::ostream& o, const ArdourCanvas::HSVA& hsva) { hsva.print (o); return o; }
