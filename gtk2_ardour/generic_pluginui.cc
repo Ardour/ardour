@@ -76,7 +76,9 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	HBox* constraint_hbox = manage (new HBox);
 	HBox* smaller_hbox = manage (new HBox);
+	HBox* automation_hbox = manage (new HBox);
 	smaller_hbox->set_spacing (4);
+	automation_hbox->set_spacing (4);
 	Label* combo_label = manage (new Label (_("<span size=\"large\">Presets</span>")));
 	combo_label->set_use_markup (true);
 
@@ -91,6 +93,20 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	smaller_hbox->pack_start (save_button, false, false);
 	smaller_hbox->pack_start (delete_button, false, false);
 	smaller_hbox->pack_start (bypass_button, false, true);
+	
+	automation_manual_all_button.set_label(_("Manual All"));
+	automation_play_all_button.set_label(_("Play All"));
+	automation_write_all_button.set_label(_("Write All"));
+	automation_touch_all_button.set_label(_("Touch All"));
+	
+	Gtk::Alignment *al = Gtk::manage(new Gtk::Alignment());
+    al->set_size_request(6, 2);
+    automation_hbox->pack_start(*al, false, true);
+    
+	automation_hbox->pack_start (automation_manual_all_button, false, false);
+	automation_hbox->pack_start (automation_play_all_button, false, false);
+	automation_hbox->pack_start (automation_write_all_button, false, false);
+	automation_hbox->pack_start (automation_touch_all_button, false, false);
 
 	constraint_hbox->set_spacing (5);
 	constraint_hbox->set_homogeneous (false);
@@ -103,6 +119,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	}
 
 	v1_box->pack_start (*smaller_hbox, false, true);
+	v1_box->pack_start (*automation_hbox, false, true);
 	v2_box->pack_start (focus_button, false, true);
 
 	main_contents.pack_start (settings_box, false, false);
@@ -309,6 +326,12 @@ GenericPluginUI::build ()
 	if (!descs.empty()) {
 		plugin->announce_property_values();
 	}
+	
+	// Connect automation *_all buttons
+	automation_manual_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_manual_all, this, control_uis));
+	automation_play_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_play_all, this, control_uis));
+    automation_write_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_write_all, this, control_uis));
+    automation_touch_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_touch_all, this, control_uis));
 
 	// Add special controls to UI, and build list of normal controls to be layed out later
 	std::vector<ControlUI *> cui_controls_list;
@@ -812,6 +835,42 @@ GenericPluginUI::astate_clicked (ControlUI* cui)
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Touch, cui)));
 
 	automation_menu->popup (1, gtk_get_current_event_time());
+}
+
+void 
+GenericPluginUI::automation_manual_all(std::vector<ControlUI *>& controls)
+{
+    for (std::vector<ControlUI *>::iterator control_it = controls.begin(); control_it != controls.end(); ++control_it)
+    {
+        set_automation_state((AutoState) ARDOUR::Off, (*control_it));
+    }
+}
+
+void 
+GenericPluginUI::automation_play_all(std::vector<ControlUI *>& controls)
+{
+    for (std::vector<ControlUI *>::iterator control_it = controls.begin(); control_it != controls.end(); ++control_it)
+    {
+        set_automation_state((AutoState) Play, (*control_it));
+    }
+}
+
+void 
+GenericPluginUI::automation_write_all(std::vector<ControlUI *>& controls)
+{
+    for (std::vector<ControlUI *>::iterator control_it = controls.begin(); control_it != controls.end(); ++control_it)
+    {
+        set_automation_state((AutoState) Write, (*control_it));
+    }
+}
+
+void 
+GenericPluginUI::automation_touch_all(std::vector<ControlUI *>& controls)
+{
+    for (std::vector<ControlUI *>::iterator control_it = controls.begin(); control_it != controls.end(); ++control_it)
+    {
+        set_automation_state((AutoState) Touch, (*control_it));
+    }
 }
 
 void
