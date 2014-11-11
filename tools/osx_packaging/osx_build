@@ -199,8 +199,8 @@ cp Info.plist $APPROOT
 cp -R Resources $APPROOT
 
 # ..and clean up
-rm Info.plist
-rm -rf Resources
+rm -f Info.plist
+rm -f Resources/InfoPlist.strings
 
 #
 # if we build a bundle without jack, then
