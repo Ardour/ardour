@@ -766,14 +766,10 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 
         /* draw background color */
         
-        draw_context->save ();
         draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-        draw_context->clip ();
-        draw_context->set_operator (Cairo::OPERATOR_SOURCE);
+        draw_context->clip_preserve ();
         set_source_rgba (draw_context, _bg_color);
-        draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
         draw_context->fill ();
-        draw_context->restore ();
         
         /* render canvas */
         
