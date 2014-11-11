@@ -28,13 +28,10 @@
 using namespace PBD;
 using namespace ARDOUR;
 
-const uint32_t MIDISceneChange::out_of_bound_color = 0x00000000; /* note: zero alpha means invisible, which acts as out-of-bound signal */
-
 MIDISceneChange::MIDISceneChange (int c, int b, int p)
 	: _bank (b)
 	, _program (p)
 	, _channel (c & 0xf)
-        , _color (out_of_bound_color)
 {
 	if (_bank > 16384) {
 		_bank = -1;
@@ -49,7 +46,6 @@ MIDISceneChange::MIDISceneChange (const XMLNode& node, int version)
 	: _bank (-1)
 	, _program (-1)
 	, _channel (-1)
-        , _color (out_of_bound_color)
 {
 	set_state (node, version);
 }
@@ -159,17 +155,4 @@ MIDISceneChange::operator==(const MIDISceneChange& other) const
         return _program == other._program &&
                 _bank == other._bank &&
                 _channel == other._channel;
-}
-
-void
-MIDISceneChange::set_color (uint32_t c) 
-{
-        _color = c;
-        ColorChanged (); /* EMIT SIGNAL */
-}
-
-uint32_t
-MIDISceneChange::color() const
-{
-        return _color;
 }

@@ -55,16 +55,10 @@ class MIDISceneChange : public SceneChange
 
         bool operator==(const MIDISceneChange& other) const;
 
-        uint32_t color() const;
-        void set_color (uint32_t);
-        static const uint32_t out_of_bound_color;
-        PBD::Signal0<void> ColorChanged;
-
   private:
 	int _bank;
 	int _program;
 	uint8_t _channel;
-        uint32_t _color;
 };
 
 } /* namespace */

@@ -25,6 +25,7 @@ using namespace PBD;
 using namespace ARDOUR;
 
 std::string SceneChange::xml_node_name = X_("SceneChange");
+const uint32_t SceneChange::out_of_bound_color = 0x00000000; /* note: zero alpha means invisible, which acts as out-of-bound signal */
 
 boost::shared_ptr<SceneChange>
 SceneChange::factory (const XMLNode& node, int version)
@@ -36,4 +37,22 @@ SceneChange::factory (const XMLNode& node, int version)
 	}
 
 	return boost::shared_ptr<SceneChange>();
+}
+
+SceneChange::SceneChange ()
+        : _color (out_of_bound_color)
+{
+}
+
+void
+SceneChange::set_color (uint32_t c) 
+{
+        _color = c;
+        ColorChanged (); /* EMIT SIGNAL */
+}
+
+uint32_t
+SceneChange::color() const
+{
+        return _color;
 }

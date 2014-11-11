@@ -30,11 +30,23 @@ namespace ARDOUR
 class SceneChange : public PBD::Stateful
 {
   public:
-        SceneChange () {};
+        SceneChange ();
         virtual ~SceneChange () {};
 
 	static boost::shared_ptr<SceneChange> factory (const XMLNode&, int version);
 	static std::string xml_node_name;
+
+        uint32_t color() const;
+        void set_color (uint32_t);
+        bool color_out_of_bounds() const { return _color == out_of_bound_color; }
+        static const uint32_t out_of_bound_color;
+        
+        PBD::Signal0<void> ColorChanged;
+
+    protected:
+        /* derived classes are responsible for serializing & deserializing this value */
+        uint32_t _color;
+
 };
 
 } /* namespace */
