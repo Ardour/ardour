@@ -171,6 +171,7 @@ void
 Editor::draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 		       ARDOUR::TempoMap::BBTPointList::const_iterator& end)
 {
+#if defined(SUPPORT_SHOW_MEASURES)
 	if (_session == 0 || _show_measures == false || distance (begin, end) == 0) {
 		return;
 	}
@@ -180,6 +181,7 @@ Editor::draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	}
 	
 	tempo_lines->draw (begin, end);
+#endif
 }
 
 void
