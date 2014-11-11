@@ -198,6 +198,10 @@ sed -e "s?@APPNAME@?$appname?" \
 cp Info.plist $APPROOT
 cp -R Resources $APPROOT
 
+# ..and clean up
+rm Info.plist
+rm -rf Resources
+
 #
 # if we build a bundle without jack, then
 # make the Ardour3 executable a helper
