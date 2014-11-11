@@ -297,6 +297,7 @@ private:
 	double               _resize_drag_start;
 	GdkCursor*           _preresize_cursor;
 	bool                 _have_preresize_cursor;
+    bool                 _try_to_change_height;
 
 	static uint32_t button_height;
 	static uint32_t extra_height;

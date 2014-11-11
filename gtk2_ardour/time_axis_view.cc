@@ -97,6 +97,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess,
 	, _resize_drag_start (-1)
 	, _preresize_cursor (0)
 	, _have_preresize_cursor (false)
+    , _try_to_change_height(false)
 	, _ebox_release_can_act (true)
 	, controls_event_box (ui.root ())//ui.get_container ("controls_event_box"))
 	, time_axis_box (ui.root ())
@@ -312,7 +313,12 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 bool
 TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 {
+    /* we try to change height of the box */
+    if(_have_preresize_cursor)
+        _try_to_change_height=true;
+    
 	if ((event->button == 1 && event->type == GDK_2BUTTON_PRESS) || Keyboard::is_edit_event (event)) {
+    
 		/* see if it is inside the name label */
 		if (name_label.is_ancestor (controls_event_box)) {
 			int nlx;
@@ -353,7 +359,6 @@ bool
 TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
 {
 	if (_resize_drag_start >= 0) {
-        
 		/* (ab)use the DragManager to do autoscrolling - basically we
 		 * are pretending that the drag is taking place over the canvas
 		 * (which perhaps in the glorious future, when track headers
@@ -378,10 +383,12 @@ TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
 bool
 TimeAxisView::controls_ebox_leave (GdkEventCrossing*)
 {
-	if (_have_preresize_cursor) {
+    /* if we leaving box without pressed button (don't try to change height) */
+	if (_have_preresize_cursor && !_try_to_change_height) {
 		gdk_window_set_cursor (controls_event_box.get_window()->gobj(), _preresize_cursor);
 		_have_preresize_cursor = false;
 	}
+ 
 	return true;
 }
 
@@ -391,9 +398,9 @@ TimeAxisView::maybe_set_cursor (int y)
 	/* XXX no Gtkmm Gdk::Window::get_cursor() */
 	Glib::RefPtr<Gdk::Window> win = controls_event_box.get_window();
 
-	if (y > (gint) floor (controls_event_box.get_height() * 0.75)) {
+	if (y > (gint) floor (controls_event_box.get_height() - 7 )) {
 
-		/* y-coordinate in lower 25% */
+		/* y-coordinate in lower - 7 pixels */
 
 		if (!_have_preresize_cursor) {
 			_preresize_cursor = gdk_window_get_cursor (win->gobj());
@@ -421,6 +428,7 @@ TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 			gdk_window_set_cursor (controls_event_box.get_window()->gobj(), _preresize_cursor);
 			_preresize_cursor = 0;
 			_have_preresize_cursor = false;
+            _try_to_change_height=false;
 		}
 		_editor.stop_canvas_autoscroll ();
 		_resize_drag_start = -1;
