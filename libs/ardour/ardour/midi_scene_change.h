@@ -22,6 +22,8 @@
 
 #include "evoral/PatchChange.hpp"
 
+#include "pbd/signals.h"
+
 #include "ardour/scene_change.h"
 
 namespace ARDOUR
@@ -53,10 +55,15 @@ class MIDISceneChange : public SceneChange
 
         bool operator==(const MIDISceneChange& other) const;
 
+        uint32_t color() const;
+        void set_color (uint32_t);
+        PBD::Signal0<void> ColorChanged;
+
   private:
 	int _bank;
 	int _program;
 	uint8_t _channel;
+        uint32_t _color;
 };
 
 } /* namespace */
