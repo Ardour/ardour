@@ -676,7 +676,12 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
 			if ((timecode.subframes % timecode_mark_modulo) == 0) {
 				if (timecode.subframes == 0) {
 					mark.style = ArdourCanvas::Ruler::Mark::Major;
-					snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+                    if (timecode.hours) {
+                        snprintf (buf, sizeof(buf), "%s%u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds);
+                    } else {
+                        snprintf (buf, sizeof(buf), "%s%u:%02u", timecode.negative ? "-" : "", timecode.minutes, timecode.seconds);
+                    }
+                    
 				} else {
 					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					snprintf (buf, sizeof(buf), ".%02u", timecode.subframes);
@@ -711,7 +716,11 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
 					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					mark.position = pos;
 				}
-				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+                if (timecode.hours) {
+                    snprintf (buf, sizeof(buf), "%s%u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds);
+                } else {
+                    snprintf (buf, sizeof(buf), "%s%u:%02u", timecode.negative ? "-" : "", timecode.minutes, timecode.seconds);
+                }
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				mark.style = ArdourCanvas::Ruler::Mark::Micro;
@@ -738,7 +747,11 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
 				} else {
 					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 				}
-				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+                if (timecode.hours) {
+                    snprintf (buf, sizeof(buf), "%s%u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds);
+                } else {
+                    snprintf (buf, sizeof(buf), "%s%u:%02u", timecode.negative ? "-" : "", timecode.minutes, timecode.seconds);
+                }
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				mark.style = ArdourCanvas::Ruler::Mark::Micro;
@@ -761,7 +774,11 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
 			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.hours % timecode_mark_modulo) == 0) {
 				mark.style = ArdourCanvas::Ruler::Mark::Major;
-				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+                if (timecode.hours) {
+                    snprintf (buf, sizeof(buf), "%s%u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds);
+                } else {
+                    snprintf (buf, sizeof(buf), "%s%u:%02u", timecode.negative ? "-" : "", timecode.minutes, timecode.seconds);
+                }
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				mark.style = ArdourCanvas::Ruler::Mark::Micro;
@@ -788,7 +805,11 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
 					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 				}
 				mark.position = pos;
-				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+                if (timecode.hours) {
+                    snprintf (buf, sizeof(buf), "%s%u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds);
+                } else {
+                    snprintf (buf, sizeof(buf), "%s%u:%02u", timecode.negative ? "-" : "", timecode.minutes, timecode.seconds);
+                }
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				mark.style = ArdourCanvas::Ruler::Mark::Micro;
