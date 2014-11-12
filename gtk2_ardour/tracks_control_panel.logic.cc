@@ -43,6 +43,8 @@
 #include "time.h"
 
 #include "open_file_dialog_proxy.h"
+#include "yes_no_dialog.h"
+#include "ok_dialog.h"
 
 using namespace ARDOUR;
 using namespace Gtk;
@@ -1099,29 +1101,27 @@ TracksControlPanel::on_device_dropdown_item_clicked (WavesDropdown*, int)
 	if (_ignore_changes) {
 		return;
 	}
-
+    
     std::string device_name = _device_dropdown.get_text ();
     
-    std::string message = _("Would you like to switch to ") + device_name;
+    std::string message = _("Would you like to switch to ") + device_name + "?";
 
-    MessageDialog msg (message,
-                        false,
-                        Gtk::MESSAGE_WARNING,
-                        Gtk::BUTTONS_YES_NO,
-                        true);
-        
-    msg.set_position (Gtk::WIN_POS_MOUSE);
-    msg.set_keep_above(true);
+    this->set_keep_above (false);
+    YesNoDialog yes_no_dialog ("", message);
+    
+    yes_no_dialog.set_position (Gtk::WIN_POS_MOUSE);
 
-    switch (msg.run()) {
+    switch (yes_no_dialog.run()) {
         case RESPONSE_NO:
             // set _ignore_changes flag to ignore changes in combo-box callbacks
             PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
                 
             _device_dropdown.set_text (EngineStateController::instance()->get_current_device_name());
+            this->set_keep_above (true);
             return;
     } 
 
+    this->set_keep_above (true);
 	device_changed ();
 }
 
@@ -1575,15 +1575,12 @@ TracksControlPanel::on_device_list_update (bool current_device_disconnected)
     if (current_device_disconnected) {
         std::string message = _("Audio device has been removed");
         
-        MessageDialog msg (message,
-                           false,
-                           Gtk::MESSAGE_WARNING,
-                           Gtk::BUTTONS_OK,
-                           true);
+        this->set_keep_above (false);
+        OkDialog ok_dialog ("", message);
         
-        msg.set_position (Gtk::WIN_POS_MOUSE);
-        msg.set_keep_above(true);
-        msg.run();
+        ok_dialog.set_position (Gtk::WIN_POS_MOUSE);
+        ok_dialog.run();
+        this->set_keep_above (true);
         
         return;
     }
