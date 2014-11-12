@@ -2238,6 +2238,7 @@ AUPluginInfo::au_get_crashlog (std::string &msg)
 	}
 	std::ifstream ifs(fn.c_str());
 	msg.assign ((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+	au_remove_crashlog ();
 	return true;
 }
 
