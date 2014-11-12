@@ -212,6 +212,27 @@
           </VBox>
         </HBox>
       </ScrolledWindow>
+      
+      <Dropdown style="generic_dropdown"
+                id="mtc_in"
+                text="MTC IN"
+                x="21"
+                y="290"
+                width="126"
+                height="20"
+                normalicon="preference_device_dropdown"
+                activeicon="preference_device_dropdown_active"
+                _prelighticon="preference_device_dropdown_prelight"
+                inactiveicon="preference_device_dropdown_inactive">
+                <HBox>
+                  <VBox width="10"/>
+                        <Label style="generic_control"
+                               horzalignment="start"
+                               width="93"/>
+                </HBox>
+          <DropdownMenu style="generic_dropdown_menu"/>
+      </Dropdown>
+      
     </Layout>
     <Layout id="audio_settings_tab"
             bgnormal="#303030"
