@@ -83,7 +83,7 @@
       </menu>	   
       <separator/>
       <menuitem action='editor-delete'/>
-      <menuitem action='editor-crop'/>
+      <menuitem action='crop'/>
       <menuitem action='split-region'/>
       <separator/>
 #ifndef GTKOSX
@@ -134,6 +134,9 @@
       <menuitem action='show-editor-mixer'/>
     </menu>
     <menu action = 'WindowMenu'>
+#ifdef GTKOSX
+      <menuitem action='MainWindow'/>
+#endif
       <menuitem action='toggle-tracks-control-panel'/>
       <menuitem action='toggle-mixer'/>
       <menuitem action='toggle-meterbridge'/>
