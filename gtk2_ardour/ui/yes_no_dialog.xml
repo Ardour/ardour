@@ -17,16 +17,17 @@
         height="120"
         bgnormal="#EDECE8">
         <VBox x="0"
-            y="10"
-            width="350">
+              y="0"
+              width="350">
             <Label id="info_label"
-            style="generic_control"
-            text=""/>
+                   height="90"
+                   style="generic_control"
+                   text=""/>
         </VBox>
         
         <Button id="yes_button"
         style="generic_control"
-        text="YES"
+        text="Yes"
         fgnormal="#6D6E72"
         bgnormal="#CACAC5"
         fgactive="#EDECE8"
@@ -36,11 +37,11 @@
         width="80"
         height="22"
         x="170"
-        y="93"/>
+        y="88"/>
         
         <Button id="no_button"
         style="generic_control"
-        text="NO"
+        text="No"
         fgnormal="#6D6E72"
         bgnormal="#CACAC5"
         fgactive="#EDECE8"
@@ -50,7 +51,7 @@
         width="80"
         height="22"
         x="260"
-        y="93"/>
+        y="88"/>
         
     </Layout>
     

@@ -29,7 +29,7 @@ using namespace Pango;
 
 namespace  {
     const size_t button_left_padding = 10;
-    const size_t button_bottom_padding = 10;
+    const size_t button_bottom_padding = 15;
     const size_t font_size = 12;
     const size_t label_top_padding = 10;
     const size_t between_button_padding = 5;
@@ -60,7 +60,7 @@ namespace  {
         
         if ( current_lines_number > max_lines_number )
         {
-            return current_window_height + (current_lines_number - max_lines_number) * font_size;
+            return current_window_height + (current_lines_number - max_lines_number + 1) * font_size;
         } else
             return current_window_height;
     }
@@ -79,6 +79,7 @@ YesNoDialog::YesNoDialog (std::string window_title, std::string info_lines)
 {
 	set_modal (true);
 	set_resizable (false);
+    this->set_keep_above (true);
     
     _info_label.set_text( info_lines );
     this->set_title(window_title);
@@ -106,6 +107,8 @@ YesNoDialog::YesNoDialog (std::string window_title, std::string info_lines)
         guint button_width, button_height;
         button_width = _yes_button.get_allocation().get_width();
         button_height = _yes_button.get_allocation().get_height();
+
+        _info_label.set_size_request( layout_width, new_window_height - button_height - button_bottom_padding);
         
         _layout.put( _no_button, layout_width - button_width - button_left_padding, new_window_height - button_height - button_bottom_padding);
         _layout.put( _yes_button, layout_width - 2*button_width - button_left_padding - between_button_padding, new_window_height - button_height - button_bottom_padding);

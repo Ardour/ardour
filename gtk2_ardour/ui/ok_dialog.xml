@@ -17,17 +17,18 @@
           height="120"
           bgnormal="#EDECE8">
       <VBox x="0"
-            y="10"
+            y="0"
             width="350">
           <Label id="info_label"
                  style="generic_control"
                  vertalignment="center"
-                 text=""/>
+                 text=""
+                 height="90"/>
       </VBox>
       
    <Button id="ok_button"
            style="generic_control"
-           text="OK"
+           text="Ok"
            fgnormal="#6D6E72"
            bgnormal="#CACAC5"
            fgactive="#EDECE8"
@@ -37,7 +38,7 @@
            width="80"
            height="22"
            x="260"
-           y="93"/>
+           y="88"/>
           
   </Layout>
   
