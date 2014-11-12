@@ -154,7 +154,9 @@ ARDOUR_UI::populate_timecode_source_dropdown ()
     timecode_source.clear();
     timecode_source.push_back("Internal");
     timecode_source.push_back("MTC");
-    timecode_source.push_back("LTC");
+    
+    // GZ: Is Not available in current Waves TracksLive version
+    //timecode_source.push_back("LTC");
         
     for(int i = 0; i < timecode_source.size(); ++i)
     {
@@ -170,10 +172,14 @@ ARDOUR_UI::populate_timecode_source_dropdown ()
     {
         if ( Config->get_sync_source() == MTC )
             _timecode_source_dropdown->set_text (timecode_source[1]);//"MTC"
+        
+        // GZ: LTC is not available in current version of Waves TracksLive
+        /*
         else
             _timecode_source_dropdown->set_text (timecode_source[2]);//"LTC"
-    } else
-    {
+         */
+        
+    } else {
         _timecode_source_dropdown->set_text (timecode_source[0]);//Internal
     }
 }
@@ -216,11 +222,13 @@ ARDOUR_UI::on_timecode_source_dropdown_item_clicked (WavesDropdown* dropdown, in
     {
         Config->set_sync_source (MTC);
         _session->config.set_external_sync (true);
-    } else if ( timecode_source == "LTC" )
+    }
+    // GZ: LTC is not available in current version of Waves TracksLive
+    /* else if ( timecode_source == "LTC" )
     {
         Config->set_sync_source (LTC);
         _session->config.set_external_sync (true);        
-    }
+    } */
 }
 
 void
