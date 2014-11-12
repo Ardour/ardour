@@ -231,7 +231,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	if (theArdourUI == 0) {
 		theArdourUI = this;
 	}
-
+    
 	ui_config = new UIConfiguration();
 
 	ui_config->ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
@@ -320,6 +320,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	ARDOUR::GUIIdle.connect (forever_connections, MISSING_INVALIDATOR, boost::bind(&ARDOUR_UI::gui_idle_handler, this), gui_context());
 
+    // initialize engine state controller
+    EngineStateController::instance();
+    
     EngineStateController::instance()->SampleRateChanged.connect_same_thread (update_connections_to_toolbar_buttons, boost::bind (&ARDOUR_UI::update_sample_rate_dropdown, this) );
     EngineStateController::instance()->EngineRunning.connect_same_thread (update_connections_to_toolbar_buttons, boost::bind (&ARDOUR_UI::update_sample_rate_dropdown, this) );
     
@@ -400,9 +403,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	_process_thread->init ();
 
     // start the engine:
-    // initialize engin state controller
-    EngineStateController::instance();
-    
     // attach to the engine signals
 	attach_to_engine ();
     
