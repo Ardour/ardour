@@ -326,12 +326,6 @@ GenericPluginUI::build ()
 	if (!descs.empty()) {
 		plugin->announce_property_values();
 	}
-	
-	// Connect automation *_all buttons
-	automation_manual_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_manual_all, this, control_uis));
-	automation_play_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_play_all, this, control_uis));
-    automation_write_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_write_all, this, control_uis));
-    automation_touch_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_touch_all, this, control_uis));
 
 	// Add special controls to UI, and build list of normal controls to be layed out later
 	std::vector<ControlUI *> cui_controls_list;
@@ -475,6 +469,12 @@ GenericPluginUI::build ()
 
 	output_table.show_all ();
 	button_table.show_all ();
+	
+	// Connect automation *_all buttons
+	automation_manual_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_manual_all, this, control_uis));
+	automation_play_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_play_all, this, control_uis));
+    automation_write_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_write_all, this, control_uis));
+    automation_touch_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_touch_all, this, control_uis));
 }
 
 GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
@@ -842,7 +842,8 @@ GenericPluginUI::automation_manual_all(std::vector<ControlUI *>& controls)
 {
     for (std::vector<ControlUI *>::iterator control_it = controls.begin(); control_it != controls.end(); ++control_it)
     {
-        set_automation_state((AutoState) ARDOUR::Off, (*control_it));
+        if ((*control_it)->controller || (*control_it)->button)
+            set_automation_state((AutoState) ARDOUR::Off, (*control_it));
     }
 }
 
@@ -851,7 +852,8 @@ GenericPluginUI::automation_play_all(std::vector<ControlUI *>& controls)
 {
     for (std::vector<ControlUI *>::iterator control_it = controls.begin(); control_it != controls.end(); ++control_it)
     {
-        set_automation_state((AutoState) Play, (*control_it));
+        if ((*control_it)->controller || (*control_it)->button)
+            set_automation_state((AutoState) Play, (*control_it));
     }
 }
 
@@ -860,7 +862,8 @@ GenericPluginUI::automation_write_all(std::vector<ControlUI *>& controls)
 {
     for (std::vector<ControlUI *>::iterator control_it = controls.begin(); control_it != controls.end(); ++control_it)
     {
-        set_automation_state((AutoState) Write, (*control_it));
+        if ((*control_it)->controller || (*control_it)->button)
+            set_automation_state((AutoState) Write, (*control_it));
     }
 }
 
@@ -869,7 +872,8 @@ GenericPluginUI::automation_touch_all(std::vector<ControlUI *>& controls)
 {
     for (std::vector<ControlUI *>::iterator control_it = controls.begin(); control_it != controls.end(); ++control_it)
     {
-        set_automation_state((AutoState) Touch, (*control_it));
+        if ((*control_it)->controller || (*control_it)->button)
+            set_automation_state((AutoState) Touch, (*control_it));
     }
 }
 
