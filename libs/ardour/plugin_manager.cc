@@ -243,7 +243,7 @@ PluginManager::refresh (bool cache_only)
 
 #ifdef AUDIOUNIT_SUPPORT
 	BootMessage (_("Scanning AU Plugins"));
-	au_refresh ();
+	au_refresh (cache_only);
 #endif
 
 	BootMessage (_("Plugin Scan Complete..."));
@@ -604,11 +604,23 @@ PluginManager::lv2_refresh ()
 
 #ifdef AUDIOUNIT_SUPPORT
 void
-PluginManager::au_refresh ()
+PluginManager::au_refresh (bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, "AU: refresh\n");
+	if (cache_only && !Config->get_discover_audio_units ()) {
+		return;
+	}
 	delete _au_plugin_info;
+
+	// disable automatic scan in case we crash
+	Config->set_discover_audio_units (false);
+	Config->save_state();
+
 	_au_plugin_info = AUPluginInfo::discover();
+
+	// successful scan re-enabled automatic discovery
+	Config->set_discover_audio_units (true);
+	Config->save_state();
 }
 
 #endif
@@ -1050,9 +1062,9 @@ ARDOUR::PluginInfoList&
 PluginManager::au_plugin_info ()
 {
 #ifdef AUDIOUNIT_SUPPORT
-	assert(_au_plugin_info);
-	return *_au_plugin_info;
-#else
-	return _empty_plugin_info;
+	if (_au_plugin_info) {
+		return *_au_plugin_info;
+	}
 #endif
+	return _empty_plugin_info;
 }
