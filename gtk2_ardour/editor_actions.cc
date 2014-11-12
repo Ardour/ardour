@@ -332,7 +332,6 @@ Editor::register_actions ()
 	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "crop", _("Crop"), sigc::mem_fun(*this, &Editor::crop_region_to_selection));
-	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
 
 	reg_sens (editor_actions, "editor-cut", _("Cut"), sigc::mem_fun(*this, &Editor::cut));
 	reg_sens (editor_actions, "editor-delete", _("Delete"), sigc::mem_fun(*this, &Editor::delete_));
