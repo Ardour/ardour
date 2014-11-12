@@ -331,7 +331,7 @@ Editor::register_actions ()
 	act = reg_sens (editor_actions, "separate-from-loop", _("Separate Using Loop Range"), sigc::mem_fun(*this, &Editor::separate_region_from_loop));
 	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
 
-	act = reg_sens (editor_actions, "editor-crop", _("Crop"), sigc::mem_fun(*this, &Editor::crop_region_to_selection));
+	act = reg_sens (editor_actions, "crop", _("Crop"), sigc::mem_fun(*this, &Editor::crop_region_to_selection));
 	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
 
 	reg_sens (editor_actions, "editor-cut", _("Cut"), sigc::mem_fun(*this, &Editor::cut));
@@ -352,8 +352,6 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "alternate-tab-to-transient-forwards", _("Move Later to Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), true));
 	reg_sens (editor_actions, "tab-to-transient-backwards", _("Move Earlier to Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), false));
 	reg_sens (editor_actions, "alternate-tab-to-transient-backwards", _("Move Earlier to Transient"), sigc::bind (sigc::mem_fun(*this, &Editor::tab_to_transient), false));
-
-	reg_sens (editor_actions, "crop", _("Crop"), sigc::mem_fun(*this, &Editor::crop_region_to_selection));
 
 	reg_sens (editor_actions, "start-range", _("Start Range"), sigc::mem_fun(*this, &Editor::keyboard_selection_begin));
 	reg_sens (editor_actions, "finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), false));
