@@ -99,7 +99,12 @@ ARDOUR_UI::setup_windows ()
 	setup_transport();
 
 	build_menu_bar ();
-
+    
+    //
+    // Set initial sensitivity of the actions
+    //
+    ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
+    
 	setup_tooltips ();
 
 	return 0;
