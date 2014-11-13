@@ -116,12 +116,17 @@ PluginManager::PluginManager ()
 	string lrdf_path;
 
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
+	// source-tree (ardev, etc)
 	PBD::Searchpath vstsp(Glib::build_filename(ARDOUR::ardour_dll_directory(), "fst"));
+
 #ifdef PLATFORM_WINDOWS
+	// on windows the .exe needs to be in the same folder with libardour.dll
 	vstsp += Glib::build_filename(g_win32_get_package_installation_directory_of_module (0), "bin");
 #else
-	vstsp += Glib::getenv("PATH");
+	// on Unices additional internal-use binaries are deployed to $libdir
+	vstsp += ARDOUR::ardour_dll_directory();
 #endif
+
 	if (!PBD::find_file (vstsp,
 #ifdef PLATFORM_WINDOWS
     #ifdef DEBUGGABLE_SCANNER_APP

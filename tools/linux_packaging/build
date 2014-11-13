@@ -418,7 +418,7 @@ fi
 
 # vfork wrapper
 if test -f $BUILD_ROOT/libs/vfork/ardour-exec-wrapper ; then
-    cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $VFork
+    cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $APPLIB
 fi
 
 # ALSA device reservation tool (if available)
