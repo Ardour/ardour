@@ -57,9 +57,18 @@ static void* lib_symbol(void* const lib, const char* const sym) {
 typedef void * pvoid_t;
 #define MAPSYM(SYM, FAIL) _j._ ## SYM = (func_t)lib_symbol(lib, "jack_" # SYM); \
 	if (!_j._ ## SYM) err |= FAIL;
+#elif defined NDEBUG
+typedef void * __attribute__ ((__may_alias__)) pvoid_t;
+#define MAPSYM(SYM, FAIL) *(pvoid_t *)(&_j._ ## SYM) = lib_symbol(lib, "jack_" # SYM); \
+	if (!_j._ ## SYM) err |= FAIL;
 #else
 typedef void * __attribute__ ((__may_alias__)) pvoid_t;
 #define MAPSYM(SYM, FAIL) *(pvoid_t *)(&_j._ ## SYM) = lib_symbol(lib, "jack_" # SYM); \
+	if (!_j._ ## SYM) { \
+		if (FAIL) { \
+			fprintf(stderr, "*** WEAK-JACK: required symbol 'jack_%s' was not found\n", "" # SYM); \
+		} \
+		err |= FAIL; \
 	if (!_j._ ## SYM) err |= FAIL;
 #endif
 
