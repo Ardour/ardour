@@ -48,7 +48,7 @@ V = MAJOR + '.' + MINOR + '.' + MICRO
 # because if it is, it breaks waf somehow.
 #
 VERSION = V.encode ('ascii', 'ignore')
-APPNAME = 'Tracks Live'
+APPNAME = 'TracksLive'
 PROGRAM_VERSION = MAJOR.encode ('ascii', 'ignore')
 
 # Mandatory variables
