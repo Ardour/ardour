@@ -118,4 +118,17 @@ JPFUN(0, int,            client_kill_thread, (jack_client_t* c, jack_native_thre
 JPFUN(1, int,            client_create_thread, \
 		(jack_client_t* c, jack_native_thread_t *t, int p, int r, void *(*f)(void*), void *a), (c,t,p,r,f,a), 0)
 
+#if 0
+/* <jack/metadata.h> */
+JPFUN(0, int,            set_property, (jack_client_t* c, jack_uuid_t s, const char* k, const char* v, const char* t), (c,s,k,v,t), -1)
+JXFUN(0, int,            get_property, (jack_uuid_t s, const char* k, char** v, char** t), (s,k,v,t), if (v) *v=NULL; if (t) *t=NULL; return -1;)
+JVFUN(0,                 free_description, (jack_description_t* d, int f), (d,f),)
+JXFUN(0, int,            get_properties, (jack_uuid_t s, jack_description_t* d), (s,d), if (d) {d->properties = NULL; d->property_cnt = 0;} return -1;)
+JXFUN(0, int,            get_all_properties, (jack_description_t** d), (d), if (d) *d=NULL; return -1;)
+JPFUN(0, int,            remove_property, (jack_client_t* c, jack_uuid_t s, const char* k), (c,s,k), -1)
+JPFUN(0, int,            remove_properties, (jack_client_t* c, jack_uuid_t s), (c,s), -1)
+JPFUN(0, int,            remove_all_properties, (jack_client_t* c), (c), -1)
+		(jack_client_t* c, jack_native_thread_t *t, int p, int r, void *(*f)(void*), void *a), (c,t,p,r,f,a), 0)
+#endif
+
 #endif // end USE_WEAK_JACK
