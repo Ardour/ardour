@@ -391,7 +391,7 @@ done
 cp $BUILD_ROOT/libs/panners/*/lib*.so* $Panners
 
 # Backends
-for backend in jack wavesaudio ; do
+for backend in jack alsa dummy wavesaudio ; do
     cp $BUILD_ROOT/libs/backends/$backend/lib*.so* $Backends
 done
 
