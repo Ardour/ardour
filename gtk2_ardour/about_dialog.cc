@@ -68,9 +68,12 @@ About::init_credits ()
     time_t now = time(0);
     // convert now to tm struct for UTC
     tm *timeinfo = gmtime(&now);
-    string year =  to_string(timeinfo->tm_year + 1900);
     
-    string text="Version : " + revision + "\nCopyright 2001-" + year + " Paul Devis\nWaves Audio Ltd. 2013-" + year;
+    stringstream ss;
+    ss << timeinfo->tm_year + 1900;
+    string str_year = ss.str();
+    
+    string text="Version : " + revision + "\nCopyright 2001-" + str_year + " Paul Devis\nWaves Audio Ltd. 2013-" + str_year;
     _credits.set_text (text);
 }
 
