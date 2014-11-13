@@ -44,7 +44,7 @@ def configure(conf):
 
 
 def build(bld):
-    obj = bld(features = 'cxx cxxshlib')
+    obj = bld(features = 'c cxx cxxshlib')
     obj.source = [ 
             'jack_api.cc',
             'jack_connection.cc',
