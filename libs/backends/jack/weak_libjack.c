@@ -69,7 +69,7 @@ typedef void * __attribute__ ((__may_alias__)) pvoid_t;
 			fprintf(stderr, "*** WEAK-JACK: required symbol 'jack_%s' was not found\n", "" # SYM); \
 		} \
 		err |= FAIL; \
-	if (!_j._ ## SYM) err |= FAIL;
+	}
 #endif
 
 typedef void (* func_t) (void);
