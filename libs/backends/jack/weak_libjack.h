@@ -154,7 +154,7 @@ int have_libjack(void);
 
 #define jack_client_open                    WJACK_client_client_openXXX
 
-if 0
+#if 0
 /* <jack/metadata.h> */
 #define jack_set_property                   WJACK_set_property
 #define jack_get_property                   WJACK_get_property
