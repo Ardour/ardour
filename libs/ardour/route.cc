@@ -3730,7 +3730,7 @@ Route::set_active (bool yn, void* src)
 void
 Route::meter ()
 {
-	Glib::Threads::RWLock::ReaderLock rm (_processor_lock, Glib::Threads::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
 
 	assert (_meter);
 
