@@ -194,7 +194,6 @@ EngineStateController::_deserialize_and_load_engine_states()
                         }
                         input_state.name = prop->value();
                         
-                        
                         if ((prop = input_state_node->property ("active")) == 0) {
                             continue;
                         }
@@ -267,7 +266,7 @@ EngineStateController::_deserialize_and_load_engine_states()
 
 void
 EngineStateController::_deserialize_and_load_midi_port_states()
-{
+{  
     XMLNode* audio_midi_settings_root = ARDOUR::Config->extra_xml ("AudioMidiSettings");
     
     if (!audio_midi_settings_root) {
@@ -316,6 +315,11 @@ EngineStateController::_deserialize_and_load_midi_port_states()
                 }
                 input_state.connected = string_is_affirmative (prop->value ());
                 
+                if ((prop = input_state_node->property ("mtc-in")) == 0) {
+                    continue;
+                }
+                input_state.mtc_in = string_is_affirmative (prop->value ());
+                
                 _midi_inputs.push_back(input_state);
             }
             
@@ -349,6 +353,11 @@ EngineStateController::_deserialize_and_load_midi_port_states()
                     continue;
                 }
                 output_state.connected = string_is_affirmative (prop->value ());
+                
+                if ((prop = output_state_node->property ("mtc-in")) == 0) {
+                    continue;
+                }
+                output_state.mtc_in = string_is_affirmative (prop->value ());
                 
                 _midi_outputs.push_back(output_state);
             }
@@ -446,6 +455,7 @@ EngineStateController::_serialize_midi_port_states(XMLNode* audio_midi_settings_
         midi_input_node->add_property ("name", midi_input_state_iter->name);
         midi_input_node->add_property ("active", midi_input_state_iter->active ? "yes" : "no");
         midi_input_node->add_property ("connected", midi_input_state_iter->connected ? "yes" : "no");
+        midi_input_node->add_property ("mtc-in", midi_input_state_iter->mtc_in ? "yes" : "no");
         midi_input_states_node->add_child_nocopy(*midi_input_node);
     }
     midi_states_node->add_child_nocopy(*midi_input_states_node);
@@ -456,7 +466,8 @@ EngineStateController::_serialize_midi_port_states(XMLNode* audio_midi_settings_
         XMLNode* midi_output_node = new XMLNode("output" );
         midi_output_node->add_property ("name", midi_output_state_iter->name);
         midi_output_node->add_property ("active", midi_output_state_iter->active ? "yes" : "no");
-        midi_output_node->add_property ("connected", midi_input_state_iter->connected ? "yes" : "no");
+        midi_output_node->add_property ("connected", midi_output_state_iter->connected ? "yes" : "no");
+        midi_output_node->add_property ("mtc-in", midi_output_state_iter->mtc_in ? "yes" : "no");
         midi_output_states_node->add_child_nocopy(*midi_output_node);
     }
     midi_states_node->add_child_nocopy(*midi_output_states_node);
@@ -1168,6 +1179,22 @@ EngineStateController::set_all_midi_outputs_disconnected()
 
 
 void
+EngineStateController::set_mtc_input(const std::string& port_name)
+{
+    MidiPortStateList::iterator iter = _midi_inputs.begin();
+    for (; iter != _midi_inputs.end(); ++iter) {
+        iter->mtc_in = false;
+        
+        if (iter->name == port_name) {
+            iter->mtc_in = true;
+        }
+    }
+
+    MTCInputChanged(port_name);
+}
+
+
+void
 EngineStateController::set_state_to_all_inputs(bool state)
 {
     bool something_changed = false;
@@ -1245,7 +1272,9 @@ EngineStateController::get_physical_midi_input_states (std::vector<MidiPortState
         if (iter->available) {
             MidiPortState state(iter->name);
             state.active = iter->active;
+            state.available = true;
             state.connected = iter->connected;
+            state.mtc_in = iter->mtc_in;
             channel_states.push_back(state);
         }
     }    
@@ -1262,7 +1291,9 @@ EngineStateController::get_physical_midi_output_states (std::vector<MidiPortStat
         if (iter->available) {
             MidiPortState state(iter->name);
             state.active = iter->active;
+            state.available = true;
             state.connected = iter->connected;
+            state.mtc_in = iter->mtc_in;
             channel_states.push_back(state);
         }
     }
@@ -1272,9 +1303,14 @@ EngineStateController::get_physical_midi_output_states (std::vector<MidiPortStat
 void
 EngineStateController::_on_session_loaded ()
 {
-    AudioEngine::instance()->reconnect_session_routes(true, true);
+    if (!_session) {
+        return;
+    }
     
-	if (_session && _desired_sample_rate && set_new_sample_rate_in_controller(_desired_sample_rate) )
+    AudioEngine::instance()->reconnect_session_routes(true, true);
+    _session->reconnect_mtc_ports ();
+	
+    if (_session && _desired_sample_rate && set_new_sample_rate_in_controller(_desired_sample_rate) )
 	{
 		push_current_state_to_backend(false);
         SampleRateChanged(); // emit a signal

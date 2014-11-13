@@ -79,6 +79,7 @@
 	void buffer_size_changed ();
 	void on_buffer_size_dropdown_item_clicked (WavesDropdown*, int);
 	void on_sample_rate_dropdown_item_clicked (WavesDropdown*, int);
+    void on_mtc_input_chosen (WavesDropdown*, int);
     void engine_running ();
     void engine_stopped ();
 	void on_file_type_dropdown_item_clicked (WavesDropdown*, int);
@@ -89,6 +90,7 @@
 	void populate_device_dropdown ();
 	void populate_sample_rate_dropdown ();
 	void populate_buffer_size_dropdown ();
+    void populate_mtc_in_dropdown ();
 	void populate_output_mode ();
     void populate_input_channels();
     void populate_output_channels();
@@ -112,6 +114,7 @@
     void on_audio_output_configuration_changed ();
     void on_midi_input_configuration_changed ();
     void on_midi_output_configuration_changed ();
+    void on_mtc_input_changed (const std::string&);
     void on_device_error ();
 
 	// Merged ARDOUR's preferences

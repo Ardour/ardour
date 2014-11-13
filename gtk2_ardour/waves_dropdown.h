@@ -38,6 +38,7 @@ class WavesDropdown : public WavesIconButton
     
     void* get_item_associated_data (int);
     Gtk::MenuItem* get_item (int);
+    Gtk::MenuItem* get_item (const std::string&);
     
     Gtk::MenuItem& add_menu_item (const std::string& item, void* cookie = 0);
     Gtk::RadioMenuItem& add_radio_menu_item (const std::string& item, void* cookie = 0);

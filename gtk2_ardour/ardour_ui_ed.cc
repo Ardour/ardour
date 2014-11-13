@@ -182,6 +182,26 @@ ARDOUR_UI::populate_timecode_source_dropdown ()
     } else {
         _timecode_source_dropdown->set_text (timecode_source[0]);//Internal
     }
+    
+    update_timecode_source_dropdown_items();
+}
+
+void
+ARDOUR_UI::update_timecode_source_dropdown_items()
+{
+    if (!_session) {
+        return;
+    }
+    
+    Gtk::MenuItem* mtc_item = _timecode_source_dropdown->get_item ("MTC");
+    
+    if (mtc_item) {
+        if (_session->mtc_input_port()->connected() ) {
+            mtc_item->set_sensitive(true);
+        } else {
+            mtc_item->set_sensitive(false);
+        }
+    }
 }
 
 void
@@ -215,7 +235,7 @@ ARDOUR_UI::on_timecode_source_dropdown_item_clicked (WavesDropdown* dropdown, in
     
     string timecode_source = *(string*)data;
     
-    if ( timecode_source == "Intermal" )
+    if ( timecode_source == "Internal" )
     {
         _session->config.set_external_sync (false);
     } else if ( timecode_source == "MTC" )

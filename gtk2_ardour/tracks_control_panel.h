@@ -84,6 +84,7 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
 	WavesDropdown& _device_dropdown;
 	WavesDropdown& _sample_rate_dropdown;
 	WavesDropdown& _buffer_size_dropdown;
+    WavesDropdown& _mtc_in_dropdown;
 	WavesDropdown& _file_type_dropdown;
 	WavesDropdown& _bit_depth_dropdown;
 	WavesDropdown& _frame_rate_dropdown;

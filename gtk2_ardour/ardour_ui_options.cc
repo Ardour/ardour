@@ -326,6 +326,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
 		}
 
+        populate_timecode_source_dropdown ();
 	} else if (p == "always-play-range") {
 
 		ActionManager::map_some_state ("Transport", "ToggleFollowEdits", &RCConfiguration::get_follow_edits);

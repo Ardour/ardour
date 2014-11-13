@@ -341,6 +341,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	/* Step Editing status changed */
 	PBD::Signal1<void,bool> StepEditStatusChange;
 
+    /* MTC state signals */
+    PBD::Signal0<void> MTCInputPortChanged;
+    
 	void queue_event (SessionEvent*);
 
 	void request_roll_at_and_return (framepos_t start, framepos_t return_to);
@@ -946,6 +949,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	MIDI::MachineControl& mmc() { return *_mmc; }
     
     void reconnect_midi_scene_ports (bool);
+    void reconnect_mtc_ports();
     
   protected:
 	friend class AudioEngine;

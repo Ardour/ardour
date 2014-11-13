@@ -43,6 +43,10 @@ void*
 WavesDropdown::get_item_associated_data(int item_number)
 {
     Gtk::Menu_Helpers::MenuList& items = _menu.items ();
+    if (item_number >= items.size() ) {
+        return NULL;
+    }
+    
     Gtk::Menu_Helpers::MenuList::iterator i = items.begin();
     std::advance (i, item_number);
     
@@ -53,11 +57,30 @@ Gtk::MenuItem*
 WavesDropdown::get_item (int item_number)
 {
     Gtk::Menu_Helpers::MenuList& items = _menu.items ();
+    if (item_number >= items.size() ) {
+        return NULL;
+    }
+    
     Gtk::Menu_Helpers::MenuList::iterator i = items.begin();
     std::advance (i, item_number);
     
     return &(*i);
 }
+
+Gtk::MenuItem*
+WavesDropdown::get_item (const std::string& text_label)
+{
+    Gtk::Menu_Helpers::MenuList& items = _menu.items ();
+    Gtk::Menu_Helpers::MenuList::iterator i = items.begin();
+    for (; i != items.end(); ++i) {
+        if (i->get_label() == text_label) {
+            return &(*i);
+        }
+    }
+    
+    return NULL;
+}
+
 
 void
 WavesDropdown::set_current_item (int current_item_number)

@@ -2491,6 +2491,31 @@ Session::reconnect_midi_scene_ports(bool inputs)
 }
 
 
+void
+Session::reconnect_mtc_ports()
+{
+    _midi_ports->mtc_input_port()->disconnect_all ();
+    
+    std::vector<EngineStateController::MidiPortState> midi_port_states;
+    EngineStateController::instance()->get_physical_midi_input_states (midi_port_states);
+    
+    std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
+    
+    for (; state_iter != midi_port_states.end(); ++state_iter) {
+        if (state_iter->active && state_iter->available && state_iter->mtc_in) {
+            _midi_ports->mtc_input_port()->connect (state_iter->name);
+        }
+    }
+    
+    if (!_midi_ports->mtc_input_port()->connected() &&
+        config.get_external_sync () ) {
+        config.set_external_sync (false);
+    }
+    
+    MTCInputPortChanged(); //emit signal
+}
+
+
 /** Caller must not hold process lock
  *  @param name_template string to use for the start of the name, or "" to use "Audio".
  */

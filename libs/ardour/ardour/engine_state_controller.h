@@ -52,12 +52,14 @@ public:
         bool active;
         bool available;
         bool connected;
+        bool mtc_in;
         
         MidiPortState(const std::string& name):
         name(name),
         active(false),
         available(false),
-        connected(false)
+        connected(false),
+        mtc_in(false)
         {}
         
         bool operator==(const MidiPortState& rhs)
@@ -131,6 +133,9 @@ public:
     void                set_all_midi_inputs_disconnected();
     void                set_all_midi_outputs_disconnected();
     
+    // set the state for MIDI TimeCode connection
+    void                set_mtc_input(const std::string&);
+    
     bool                is_setup_required() const {return ARDOUR::AudioEngine::instance()->setup_required (); }
     
     // set parameters inside the controller,
@@ -180,6 +185,9 @@ public:
     PBD::Signal0<void> MIDIOutputConfigChanged;
     PBD::Signal2<void, const std::vector<std::string>&, bool> MIDIInputConnectionChanged;
     PBD::Signal2<void, const std::vector<std::string>&, bool> MIDIOutputConnectionChanged;
+    
+    /* this signals are emitted if the MTC i/o channel configuration changes */
+    PBD::Signal1<void, const std::string&> MTCInputChanged;
     
     /* this signal is emitted if new ports are registered or unregistered */
     PBD::Signal0<void> PortRegistrationChanged;

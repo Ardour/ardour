@@ -163,6 +163,8 @@ ARDOUR_UI::set_session (Session *s)
 	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());
     
+    _session->MTCInputPortChanged.connect(_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_timecode_source_dropdown_items, this), gui_context ());
+    
     /* Clocks are on by default after we are connected to a session, so show that here.
 	*/
 

@@ -120,6 +120,7 @@ TracksControlPanel::init ()
     EngineStateController::instance()->OutputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_audio_output_configuration_changed, this), gui_context());
     EngineStateController::instance()->MIDIInputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_midi_input_configuration_changed, this), gui_context());
     EngineStateController::instance()->MIDIOutputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_midi_output_configuration_changed, this), gui_context());
+    EngineStateController::instance()->MTCInputChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_mtc_input_changed, this, _1), gui_context());
     EngineStateController::instance()->DeviceError.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_device_error, this), gui_context());
 
     /* Global configuration parameters update */
@@ -129,6 +130,7 @@ TracksControlPanel::init ()
     _device_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_device_dropdown_item_clicked));
 	_sample_rate_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_sample_rate_dropdown_item_clicked));
 	_buffer_size_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_buffer_size_dropdown_item_clicked));
+    _mtc_in_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_mtc_input_chosen));
     
     /* Session configuration parameters update */
 	_file_type_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_file_type_dropdown_item_clicked));
@@ -148,6 +150,8 @@ TracksControlPanel::init ()
 	populate_engine_dropdown ();
 	populate_device_dropdown ();
 
+    populate_mtc_in_dropdown ();
+    
 	populate_output_mode ();
 
     populate_file_type_dropdown ();
@@ -687,6 +691,44 @@ TracksControlPanel::populate_buffer_size_dropdown()
 			_buffer_size_dropdown.set_text(active_bs);
 		}
 	}
+}
+
+void
+TracksControlPanel::populate_mtc_in_dropdown()
+{
+    std::vector<EngineStateController::MidiPortState> midi_states;
+    static const char* midi_port_name_prefix = "system_midi:";
+    const char* midi_type_suffix;
+    bool have_first = false;
+    
+    EngineStateController::instance()->get_physical_midi_input_states(midi_states);
+    midi_type_suffix = X_(" capture");
+    
+    _mtc_in_dropdown.clear_items ();
+    
+    Gtk::MenuItem& off_item = _mtc_in_dropdown.add_menu_item ("Off", 0);
+    
+    std::vector<EngineStateController::MidiPortState>::const_iterator state_iter;
+    for (state_iter = midi_states.begin(); state_iter != midi_states.end(); ++state_iter) {
+        
+        // strip the device name from input port name
+        std::string device_name;
+        ARDOUR::remove_pattern_from_string(state_iter->name, midi_port_name_prefix, device_name);
+        ARDOUR::remove_pattern_from_string(device_name, midi_type_suffix, device_name);
+        
+        if (state_iter->active) {
+            Gtk::MenuItem& new_item = _mtc_in_dropdown.add_menu_item (device_name, strdup(state_iter->name.c_str()) );
+            
+            if (!have_first && state_iter->mtc_in) {
+                _mtc_in_dropdown.set_text (new_item.get_label() );
+                have_first = true;
+            }
+        }
+    }
+    
+    if (!have_first) {
+        _mtc_in_dropdown.set_text (off_item.get_label() );
+    }
 }
 
 void
@@ -1311,6 +1353,20 @@ TracksControlPanel::on_sample_rate_dropdown_item_clicked (WavesDropdown*, int)
 
 
 void
+TracksControlPanel::on_mtc_input_chosen (WavesDropdown* dropdown, int el_number)
+{
+    char* full_name_of_chosen_port = (char*)dropdown->get_item_associated_data(el_number);
+    
+    if (full_name_of_chosen_port) {
+        EngineStateController::instance()->set_mtc_input((char*) full_name_of_chosen_port);
+    } else {
+        EngineStateController::instance()->set_mtc_input("");
+    }
+
+}
+
+
+void
 TracksControlPanel::engine_running ()
 {
 	populate_buffer_size_dropdown();
@@ -1553,6 +1609,7 @@ void TracksControlPanel::on_port_registration_update()
     populate_input_channels();
     populate_output_channels();
     populate_midi_ports();
+    populate_mtc_in_dropdown();
 }
 
 
@@ -1712,6 +1769,13 @@ TracksControlPanel::on_midi_input_configuration_changed ()
             }
         }
     }
+    
+    populate_mtc_in_dropdown();
+
+    ARDOUR::Session* session = ARDOUR_UI::instance()->the_session();
+    if (session) {
+        session->reconnect_mtc_ports ();
+    }
 }
 
 
@@ -1736,6 +1800,25 @@ TracksControlPanel::on_midi_output_configuration_changed ()
             }
         }
     }
+}
+
+
+void
+TracksControlPanel::on_mtc_input_changed (const std::string&)
+{
+    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
+    
+    if(!ardour_ui)
+    {
+        return;
+    }
+    
+    ARDOUR::Session* session = ardour_ui->the_session();
+    if (!session) {
+        return;
+    }
+    
+    session->reconnect_mtc_ports ();
 }
 
 

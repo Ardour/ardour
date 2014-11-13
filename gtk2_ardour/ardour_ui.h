@@ -252,6 +252,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     WavesDropdown* _timecode_source_dropdown;
     void on_timecode_source_dropdown_item_clicked (WavesDropdown*, int);
     void populate_timecode_source_dropdown ();
+    void update_timecode_source_dropdown_items ();
     
     void update_bit_depth_button ();
     void update_sample_rate_dropdown ();
