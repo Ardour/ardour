@@ -584,8 +584,8 @@ TracksControlPanel::populate_engine_dropdown()
     EngineStateController::instance()->available_backends(backends);
 
 	if (backends.empty()) {
-		MessageDialog msg (string_compose (_("No audio/MIDI backends detected. %1 cannot run\n\n(This is a build/packaging/system error. It should never happen.)"), PROGRAM_NAME));
-		msg.run ();
+		OkDialog ok_dialog ("", string_compose (_("No audio/MIDI backends detected. %1 cannot run\n(This is a build/packaging/system error.\nIt should never happen.)"), PROGRAM_NAME));
+		ok_dialog.run ();
 		throw failed_constructor ();
 	}
 	for (std::vector<const AudioBackendInfo*>::const_iterator b = backends.begin(); b != backends.end(); ++b) {
@@ -1351,15 +1351,11 @@ TracksControlPanel::on_device_error ()
 {
     std::string message = _("Device cannot operate properly. Switched to None device.");
     
-    MessageDialog msg (message,
-                       false,
-                       Gtk::MESSAGE_WARNING,
-                       Gtk::BUTTONS_OK,
-                       true);
+    OkDialog ok_dialog ("", message);
     
-    msg.set_position (Gtk::WIN_POS_MOUSE);
-    msg.set_keep_above (true);
-    msg.run ();
+    ok_dialog.set_position (Gtk::WIN_POS_MOUSE);
+    ok_dialog.set_keep_above (true);
+    ok_dialog.run ();
 }
 
 void
