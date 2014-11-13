@@ -191,6 +191,9 @@ int have_libjack (void) {
 
 /* dedicated support for jack_client_open(,..) variable arg function macro */
 func_t WJACK_get_client_open(void) {
+	if (_status == -1) {
+		init_weak_jack();
+	}
 	return _j._client_open;
 }
 
