@@ -7,7 +7,23 @@
       <VBox id="image_home"
             x="0"
             y="0"/>
-      
+  
+      <VBox x="293"
+            y="270"
+            width="200"
+            height="60">
+            <Label id="credits"
+                   width="200"
+                   height="60"
+                   text="-"
+                   justify="center"
+                   horzalignment="center"
+                   vertalignment="center"
+                   winfont ="Arial Bold 10"
+                   macfont ="Helvetica Bold 10"
+                   fgnormal="#FFFFFF"/>
+      </VBox>
+  
       <Button id="about_button"
               winfont ="Arial Bold 10"
               macfont ="Helvetica Bold 10"

@@ -35,9 +35,11 @@ protected:
 private:
     void close_button_pressed (WavesButton*);
     void about_button_pressed (WavesButton*);
+    void init_credits ();
     
     Gtk::VBox& _image_home;
     WavesButton& _about_button;
+    Gtk::Label& _credits;
 };
 
 #endif /* __about_dialog_h__ */

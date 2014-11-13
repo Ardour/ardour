@@ -19,6 +19,7 @@
 
 #include "pbd/file_utils.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/revision.h"
 
 #include "i18n.h"
 #include "about_dialog.h"
@@ -34,6 +35,7 @@ About::About ()
 	: WavesDialog (_("about_dialog.xml"), true, false)
     , _image_home ( get_v_box("image_home") )
     , _about_button ( get_waves_button ("about_button") )
+    , _credits ( get_label("credits") )
 {
 	set_modal (true);
 	set_resizable (false);
@@ -47,9 +49,29 @@ About::About ()
 		}
     }
    
+    init_credits ();
     _about_button.signal_clicked.connect (sigc::mem_fun (*this, &About::about_button_pressed));
     
 	show_all ();
+}
+
+void
+About::init_credits ()
+{
+    // Get version
+    string revision = ARDOUR::revision;
+    int pos = revision.rfind("-");
+    revision.erase (pos, revision.size() - pos);
+    
+    // Get current year
+    // current date/time based on current system
+    time_t now = time(0);
+    // convert now to tm struct for UTC
+    tm *timeinfo = gmtime(&now);
+    string year =  to_string(timeinfo->tm_year + 1900);
+    
+    string text="Version : " + revision + "\nCopyright 2001-" + year + " Paul Devis\nWaves Audio Ltd. 2013-" + year;
+    _credits.set_text (text);
 }
 
 void
