@@ -775,7 +775,7 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
         
         render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
 
-#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_GTK_CANVAS
+#ifdef USE_CAIRO_IMAGE_SURFACE
 	/* now blit our private surface back to the GDK one */
 
 	window_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
