@@ -284,7 +284,7 @@ MachineControl::process_mmc_message (Parser &, MIDI::byte *msg, size_t len)
 	cerr << endl;
 #endif
 
-	if (msg[1] != 0x7f && msg[1] != _receive_device_id) {
+	if (_receive_device_id != 0x7f && msg[1] != 0x7f && msg[1] != _receive_device_id) {
 		return;
 	}
 
