@@ -60,6 +60,7 @@ AutomationRegionView::AutomationRegionView (ArdourCanvas::Container*            
 
 AutomationRegionView::~AutomationRegionView ()
 {
+	RegionViewGoingAway (this); /* EMIT_SIGNAL */
 }
 
 void
