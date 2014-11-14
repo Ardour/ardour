@@ -136,13 +136,13 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	/** a button which, when clicked, opens the latency GUI */
 	Gtk::Button latency_button;
 	/** a button which sets all controls' automation setting to Manual */
-	Gtk::Button automation_manual_all_button;
+	ArdourButton automation_manual_all_button;
 	/** a button which sets all controls' automation setting to Play */
-	Gtk::Button automation_play_all_button;
+	ArdourButton automation_play_all_button;
     /** a button which sets all controls' automation setting to Write */
-	Gtk::Button automation_write_all_button;
+	ArdourButton automation_write_all_button;
 	/** a button which sets all controls' automation setting to Touch */
-	Gtk::Button automation_touch_all_button;
+	ArdourButton automation_touch_all_button;
 	
 	void set_latency_label ();
 
@@ -288,10 +288,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void set_automation_state (ARDOUR::AutoState state, ControlUI* cui);
 	void start_touch (ControlUI*);
 	void stop_touch (ControlUI*);
-	void automation_manual_all(std::vector<ControlUI*>&);
-	void automation_play_all(std::vector<ControlUI*>&);
-	void automation_write_all(std::vector<ControlUI*>&);
-	void automation_touch_all(std::vector<ControlUI*>&);
+	void set_all_automation (ARDOUR::AutoState state);
 
 	/* XXX: remove */
 	void print_parameter (char *buf, uint32_t len, uint32_t param);

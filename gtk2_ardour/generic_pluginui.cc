@@ -78,7 +78,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	HBox* smaller_hbox = manage (new HBox);
 	HBox* automation_hbox = manage (new HBox);
 	smaller_hbox->set_spacing (4);
-	automation_hbox->set_spacing (4);
+	automation_hbox->set_spacing (6);
 	Label* combo_label = manage (new Label (_("<span size=\"large\">Presets</span>")));
 	combo_label->set_use_markup (true);
 
@@ -94,15 +94,18 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	smaller_hbox->pack_start (delete_button, false, false);
 	smaller_hbox->pack_start (bypass_button, false, true);
 	
-	automation_manual_all_button.set_label(_("Manual All"));
-	automation_play_all_button.set_label(_("Play All"));
-	automation_write_all_button.set_label(_("Write All"));
-	automation_touch_all_button.set_label(_("Touch All"));
+	automation_manual_all_button.set_text(_("Manual"));
+	automation_manual_all_button.set_name (X_("generic button"));
+	automation_play_all_button.set_text(_("Play"));
+	automation_play_all_button.set_name (X_("generic button"));
+	automation_write_all_button.set_text(_("Write"));
+	automation_write_all_button.set_name (X_("generic button"));
+	automation_touch_all_button.set_text(_("Touch"));
+	automation_touch_all_button.set_name (X_("generic button"));
 	
-	Gtk::Alignment *al = Gtk::manage(new Gtk::Alignment());
-    al->set_size_request(6, 2);
-    automation_hbox->pack_start(*al, false, true);
-    
+	Label* l = manage (new Label (_("All Automation")));
+	l->set_alignment (1.0, 0.5);
+	automation_hbox->pack_start (*l, true, true);
 	automation_hbox->pack_start (automation_manual_all_button, false, false);
 	automation_hbox->pack_start (automation_play_all_button, false, false);
 	automation_hbox->pack_start (automation_write_all_button, false, false);
@@ -118,6 +121,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 		pack_end (description_expander, false, false);
 	}
 
+	v1_box->set_spacing (6);
 	v1_box->pack_start (*smaller_hbox, false, true);
 	v1_box->pack_start (*automation_hbox, false, true);
 	v2_box->pack_start (focus_button, false, true);
@@ -470,11 +474,10 @@ GenericPluginUI::build ()
 	output_table.show_all ();
 	button_table.show_all ();
 	
-	// Connect automation *_all buttons
-	automation_manual_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_manual_all, this, control_uis));
-	automation_play_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_play_all, this, control_uis));
-    automation_write_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_write_all, this, control_uis));
-    automation_touch_all_button.signal_clicked().connect(boost::bind(&GenericPluginUI::automation_touch_all, this, control_uis));
+	automation_manual_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Off));
+	automation_play_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Play));
+	automation_write_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Write));
+	automation_touch_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Touch));
 }
 
 GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
@@ -838,43 +841,13 @@ GenericPluginUI::astate_clicked (ControlUI* cui)
 }
 
 void 
-GenericPluginUI::automation_manual_all(std::vector<ControlUI *>& controls)
+GenericPluginUI::set_all_automation (AutoState as)
 {
-    for (std::vector<ControlUI *>::iterator control_it = controls.begin(); control_it != controls.end(); ++control_it)
-    {
-        if ((*control_it)->controller || (*control_it)->button)
-            set_automation_state((AutoState) ARDOUR::Off, (*control_it));
-    }
-}
-
-void 
-GenericPluginUI::automation_play_all(std::vector<ControlUI *>& controls)
-{
-    for (std::vector<ControlUI *>::iterator control_it = controls.begin(); control_it != controls.end(); ++control_it)
-    {
-        if ((*control_it)->controller || (*control_it)->button)
-            set_automation_state((AutoState) Play, (*control_it));
-    }
-}
-
-void 
-GenericPluginUI::automation_write_all(std::vector<ControlUI *>& controls)
-{
-    for (std::vector<ControlUI *>::iterator control_it = controls.begin(); control_it != controls.end(); ++control_it)
-    {
-        if ((*control_it)->controller || (*control_it)->button)
-            set_automation_state((AutoState) Write, (*control_it));
-    }
-}
-
-void 
-GenericPluginUI::automation_touch_all(std::vector<ControlUI *>& controls)
-{
-    for (std::vector<ControlUI *>::iterator control_it = controls.begin(); control_it != controls.end(); ++control_it)
-    {
-        if ((*control_it)->controller || (*control_it)->button)
-            set_automation_state((AutoState) Touch, (*control_it));
-    }
+	for (vector<ControlUI*>::iterator i = input_controls.begin(); i != input_controls.end(); ++i) {
+		if ((*i)->controller || (*i)->button) {
+			set_automation_state (as, (*i));
+		}
+	}
 }
 
 void
