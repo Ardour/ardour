@@ -905,7 +905,7 @@ Sequence<Time>::append(const Event<Time>& event, event_id_t evid)
 
 	const MIDIEvent<Time>& ev = (const MIDIEvent<Time>&)event;
 
-	assert(_notes.empty() || ev.time() >= (*_notes.rbegin())->time());
+	assert(_notes.empty() || musical_time_greater_or_equal_to(ev.time(), (*_notes.rbegin())->time()));
 	assert(_writing);
 
 	if (!midi_event_is_valid(ev.buffer(), ev.size())) {
@@ -1052,7 +1052,7 @@ Sequence<Time>::append_note_off_unlocked (NotePtr note)
 
 		NotePtr nn = *n;
 		if (note->note() == nn->note() && nn->channel() == note->channel()) {
-			assert(note->time() >= nn->time());
+			assert(musical_time_greater_or_equal_to(note->time(), nn->time()));
 
 			nn->set_length (note->time() - nn->time());
 			nn->set_off_velocity (note->velocity());
@@ -1215,7 +1215,7 @@ Sequence<Time>::note_lower_bound (Time t) const
 {
 	NotePtr search_note(new Note<Time>(0, t, 0, 0, 0));
 	typename Sequence<Time>::Notes::const_iterator i = _notes.lower_bound(search_note);
-	assert(i == _notes.end() || (*i)->time() >= t);
+	assert(i == _notes.end() || musical_time_greater_or_equal_to((*i)->time(), t));
 	return i;
 }
 
@@ -1237,7 +1237,7 @@ Sequence<Time>::sysex_lower_bound (Time t) const
 {
 	SysExPtr search (new Event<Time> (0, t));
 	typename Sequence<Time>::SysExes::const_iterator i = _sysexes.lower_bound (search);
-	assert (i == _sysexes.end() || (*i)->time() >= t);
+	assert (i == _sysexes.end() || musical_time_greater_or_equal_to((*i)->time(), t));
 	return i;
 }
 
@@ -1250,7 +1250,7 @@ Sequence<Time>::note_lower_bound (Time t)
 {
 	NotePtr search_note(new Note<Time>(0, t, 0, 0, 0));
 	typename Sequence<Time>::Notes::iterator i = _notes.lower_bound(search_note);
-	assert(i == _notes.end() || (*i)->time() >= t);
+	assert(i == _notes.end() || musical_time_greater_or_equal_to((*i)->time(), t));
 	return i;
 }
 
@@ -1272,7 +1272,7 @@ Sequence<Time>::sysex_lower_bound (Time t)
 {
 	SysExPtr search (new Event<Time> (0, t));
 	typename Sequence<Time>::SysExes::iterator i = _sysexes.lower_bound (search);
-	assert (i == _sysexes.end() || (*i)->time() >= t);
+	assert (i == _sysexes.end() || musical_time_greater_or_equal_to((*i)->time(), t));
 	return i;
 }
 
