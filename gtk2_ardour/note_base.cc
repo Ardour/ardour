@@ -262,8 +262,8 @@ NoteBase::event_handler (GdkEvent* ev)
 
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
-		set_mouse_fractions (ev);
 		_region.note_entered (this);
+		set_mouse_fractions (ev);
 		break;
 
 	case GDK_LEAVE_NOTIFY:

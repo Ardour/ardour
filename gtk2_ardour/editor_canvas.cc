@@ -1348,7 +1348,7 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 	}
 
 	if (cursor) {
-		set_canvas_cursor (cursor, false);
+		set_canvas_cursor (cursor, true);
 	}
 }
 

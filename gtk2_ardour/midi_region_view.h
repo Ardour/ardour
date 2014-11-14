@@ -473,6 +473,7 @@ private:
 
 	Gdk::Cursor* pre_enter_cursor;
 	Gdk::Cursor* pre_press_cursor;
+	Gdk::Cursor* pre_note_enter_cursor;
 
 	NotePlayer* _note_player;
 

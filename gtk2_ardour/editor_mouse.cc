@@ -1813,6 +1813,8 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	bool is_start;
 	bool ret = true;
 
+	reset_canvas_cursor ();
+
 	switch (item_type) {
 	case ControlPointItem:
 		_verbose_cursor->hide (); 
