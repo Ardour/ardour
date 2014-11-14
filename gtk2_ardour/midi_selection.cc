@@ -17,29 +17,19 @@
 
 */
 
-#include "gtkmm2ext/gui_thread.h"
-#include "midi_region_view.h"
 #include "midi_selection.h"
-#include "region_view.h"
 
 MidiRegionSelection::MidiRegionSelection ()
-{
-	RegionView::RegionViewGoingAway.connect (_death_connection, MISSING_INVALIDATOR, boost::bind (&MidiRegionSelection::remove_it, this, _1), gui_context());
-}
+	: RegionSelection ()
+{}
 
-/** Copy constructor.
- *  @param other MidiRegionSelection to copy.
- */
 MidiRegionSelection::MidiRegionSelection (MidiRegionSelection const & other)
-	: std::list<MidiRegionView*> (other)
-{
-	RegionView::RegionViewGoingAway.connect (_death_connection, MISSING_INVALIDATOR, boost::bind (&MidiRegionSelection::remove_it, this, _1), gui_context());
-}
+	: RegionSelection (other)
+{}
 
-
-void
-MidiRegionSelection::remove_it (RegionView* rv)
+MidiRegionSelection&
+MidiRegionSelection::operator= (const MidiRegionSelection& other)
 {
-	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
-	remove (mrv);
+	RegionSelection::operator=(other);
+	return *this;
 }

@@ -225,7 +225,9 @@ RegionView::~RegionView ()
 bool
 RegionView::canvas_group_event (GdkEvent* event)
 {
-	return trackview.editor().canvas_region_view_event (event, group, this);
+	if (!in_destructor) {
+		return trackview.editor().canvas_region_view_event (event, group, this);
+	}
 }
 
 void

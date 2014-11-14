@@ -1967,7 +1967,10 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 		MidiRegionSelection::iterator next;
 		next = r;
 		++next;
-		(*r)->begin_resizing (at_front);
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
+		if (mrv) {
+			mrv->begin_resizing (at_front);
+		}
 		r = next;
 	}
 }
@@ -1979,7 +1982,10 @@ NoteResizeDrag::motion (GdkEvent* /*event*/, bool /*first_move*/)
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
 		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
 		assert (nb);
-		(*r)->update_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative);
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
+		if (mrv) {
+			mrv->update_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative);
+		}
 	}
 }
 
@@ -1990,7 +1996,10 @@ NoteResizeDrag::finished (GdkEvent*, bool /*movement_occurred*/)
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
 		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
 		assert (nb);
-		(*r)->commit_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative);
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
+		if (mrv) {
+			mrv->commit_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative);
+		}
 	}
 }
 
@@ -1999,7 +2008,10 @@ NoteResizeDrag::aborted (bool)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
-		(*r)->abort_resizing ();
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
+		if (mrv) {
+			mrv->abort_resizing ();
+		}
 	}
 }
 
