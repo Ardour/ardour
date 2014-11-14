@@ -5280,12 +5280,10 @@ void
 NoteCreateDrag::motion (GdkEvent* event, bool)
 {
 	_note[1] = max ((framepos_t)0, adjusted_current_frame (event) - _region_view->region()->position ());
-	double const x = _editor->sample_to_pixel (_note[1]);
-	if (_note[1] > _note[0]) {
-		_drag_rect->set_x1 (x);
-	} else {
-		_drag_rect->set_x0 (x);
-	}
+	double const x0 = _editor->sample_to_pixel (_note[0]);
+	double const x1 = _editor->sample_to_pixel (_note[1]);
+	_drag_rect->set_x0 (std::min(x0, x1));
+	_drag_rect->set_x1 (std::max(x0, x1));
 }
 
 void
