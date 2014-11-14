@@ -3520,7 +3520,8 @@ MidiRegionView::update_ghost_note (double x, double y)
 	/* note that this sets the time of the ghost note in beats relative to
 	   the start of the source; that is how all note times are stored.
 	*/
-	_ghost_note->note()->set_time (absolute_frames_to_source_beats (f + _region->position ()));
+	_ghost_note->note()->set_time (
+		std::max(0.0, absolute_frames_to_source_beats (f + _region->position ())));
 	_ghost_note->note()->set_length (length);
 	_ghost_note->note()->set_note (midi_stream_view()->y_to_note (y));
 	_ghost_note->note()->set_channel (mtv->get_channel_for_add ());
