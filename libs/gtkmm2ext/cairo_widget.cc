@@ -66,7 +66,12 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 #endif
 
 	cr->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+    
+#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_CAIRO_WIDGET
 	cr->clip_preserve ();
+#else
+	cr->clip ();
+#endif
 
 	/* paint expose area the color of the parent window bg
 	*/
