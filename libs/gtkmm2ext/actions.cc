@@ -490,7 +490,7 @@ ActionManager::set_toggleaction_state (string n, bool s)
 
 	if (last_slash == 0) {
 		fatal << string_compose ("programmer error: %1 %2", "illegal toggle action name", name) << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		return;
 	}
 

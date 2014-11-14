@@ -704,7 +704,7 @@ Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
 
 	if ((marker = static_cast<Marker*> (item.get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	if (entered_marker == marker) {
@@ -791,7 +791,7 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 	Marker * marker;
 	if ((marker = reinterpret_cast<Marker *> (item->get_data("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	bool is_start;
@@ -976,7 +976,7 @@ Editor::marker_menu_hide ()
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	Location* l;
@@ -994,7 +994,7 @@ Editor::marker_menu_select_using_range ()
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	Location* l;
@@ -1012,7 +1012,7 @@ Editor::marker_menu_select_all_selectables_using_range ()
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	Location* l;
@@ -1031,7 +1031,7 @@ Editor::marker_menu_separate_regions_using_location ()
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	Location* l;
@@ -1050,7 +1050,7 @@ Editor::marker_menu_play_from ()
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	Location* l;
@@ -1080,7 +1080,7 @@ Editor::marker_menu_set_playhead ()
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	Location* l;
@@ -1111,7 +1111,7 @@ Editor::marker_menu_range_to_next ()
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	Location* l;
@@ -1141,7 +1141,7 @@ Editor::marker_menu_set_from_playhead ()
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	Location* l;
@@ -1169,7 +1169,7 @@ Editor::marker_menu_set_from_selection (bool /*force_regions*/)
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	Location* l;
@@ -1200,7 +1200,7 @@ Editor::marker_menu_play_range ()
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	Location* l;
@@ -1225,7 +1225,7 @@ Editor::marker_menu_loop_range ()
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	Location* l;
@@ -1276,7 +1276,7 @@ Editor::dynamic_cast_marker_object (void* p, MeterMarker** m, TempoMarker** t) c
 	Marker* marker = reinterpret_cast<Marker*> (p);
 	if (!marker) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	*m = dynamic_cast<MeterMarker*> (marker);
@@ -1320,7 +1320,7 @@ Editor::toggle_marker_menu_lock ()
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	Location* loc;
@@ -1346,7 +1346,7 @@ Editor::marker_menu_rename ()
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 
@@ -1540,7 +1540,7 @@ Editor::toggle_marker_menu_glue ()
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	Location* loc;

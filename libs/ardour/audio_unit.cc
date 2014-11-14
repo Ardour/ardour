@@ -19,6 +19,7 @@
 */
 
 #include <sstream>
+#include <fstream>
 #include <errno.h>
 #include <string.h>
 #include <math.h>
@@ -71,6 +72,7 @@ AUPluginInfo::CachedInfoMap AUPluginInfo::cached_info;
 static string preset_search_path = "/Library/Audio/Presets:/Network/Library/Audio/Presets";
 static string preset_suffix = ".aupreset";
 static bool preset_search_path_initialized = false;
+FILE * AUPluginInfo::_crashlog_fd = NULL;
 
 static OSStatus
 _render_callback(void *userData,
@@ -2156,6 +2158,8 @@ AUPluginInfo::discover ()
 	if (!Glib::file_test (au_cache_path(), Glib::FILE_TEST_EXISTS)) {
 		ARDOUR::BootMessage (_("Discovering AudioUnit plugins (could take some time ...)"));
 	}
+	// create crash log file
+	au_start_crashlog ();
 
 	PluginInfoList* plugs = new PluginInfoList;
 
@@ -2163,6 +2167,9 @@ AUPluginInfo::discover ()
 	discover_music (*plugs);
 	discover_generators (*plugs);
 	discover_instruments (*plugs);
+
+	// all fine if we get here
+	au_remove_crashlog ();
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("AU: discovered %1 plugins\n", plugs->size()));
 
@@ -2221,16 +2228,78 @@ AUPluginInfo::discover_instruments (PluginInfoList& plugs)
 	discover_by_description (plugs, desc);
 }
 
+
+bool
+AUPluginInfo::au_get_crashlog (std::string &msg)
+{
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_crashlog.txt");
+	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		return false;
+	}
+	std::ifstream ifs(fn.c_str());
+	msg.assign ((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+	au_remove_crashlog ();
+	return true;
+}
+
+void
+AUPluginInfo::au_start_crashlog ()
+{
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_crashlog.txt");
+	assert(!_crashlog_fd);
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("Creating AU Log: %1\n", fn));
+	if (!(_crashlog_fd = fopen(fn.c_str(), "w"))) {
+		PBD::error << "Cannot create AU error-log\n";
+	}
+}
+
+void
+AUPluginInfo::au_remove_crashlog ()
+{
+	if (_crashlog_fd) {
+		::fclose(_crashlog_fd);
+		_crashlog_fd = NULL;
+	}
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_crashlog.txt");
+	::g_unlink(fn.c_str());
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("Remove AU Log: %1\n", fn));
+}
+
+
+void
+AUPluginInfo::au_crashlog (std::string msg)
+{
+	assert(_crashlog_fd);
+	fprintf(_crashlog_fd, "AU: %s\n", msg.c_str());
+	::fflush(_crashlog_fd);
+}
+
 void
 AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescription& desc)
 {
 	Component comp = 0;
+	au_crashlog(string_compose("Start AU discovery for Type: %1", (int)desc.componentType));
 
 	comp = FindNextComponent (NULL, &desc);
 
 	while (comp != NULL) {
 		CAComponentDescription temp;
 		GetComponentInfo (comp, &temp, NULL, NULL, NULL);
+
+		{
+			CFStringRef compTypeString = UTCreateStringForOSType(temp.componentType);
+			CFStringRef compSubTypeString = UTCreateStringForOSType(temp.componentSubType);
+			CFStringRef compManufacturerString = UTCreateStringForOSType(temp.componentManufacturer);
+			CFStringRef itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"),
+					compTypeString, compManufacturerString, compSubTypeString);
+			au_crashlog(string_compose("Scanning ID: %1", CFStringRefToStdString(itemName)));
+			if (compTypeString != NULL)
+				CFRelease(compTypeString);
+			if (compSubTypeString != NULL)
+				CFRelease(compSubTypeString);
+			if (compManufacturerString != NULL)
+				CFRelease(compManufacturerString);
+		}
 
 		AUPluginInfoPtr info (new AUPluginInfo
 				      (boost::shared_ptr<CAComponentDescription> (new CAComponentDescription(temp))));
@@ -2275,6 +2344,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 		AUPluginInfo::get_names (temp, info->name, info->creator);
 		ARDOUR::PluginScanMessage(_("AU"), info->name, false);
+		au_crashlog(string_compose("Plugin: %1", info->name));
 
 		info->type = ARDOUR::AudioUnit;
 		info->unique_id = stringify_descriptor (*info->descriptor);
@@ -2327,8 +2397,10 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			error << string_compose (_("Cannot get I/O configuration info for AU %1"), info->name) << endmsg;
 		}
 
+		au_crashlog("Success.");
 		comp = FindNextComponent (comp, &desc);
 	}
+	au_crashlog(string_compose("End AU discovery for Type: %1", (int)desc.componentType));
 }
 
 bool

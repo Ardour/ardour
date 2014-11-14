@@ -243,6 +243,7 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
 	bool reconfigurable_io() const { return true; }
 
 	static PluginInfoList* discover ();
+	static bool au_get_crashlog (std::string &msg);
 	static void get_names (CAComponentDescription&, std::string& name, std::string& maker);
 	static std::string stringify_descriptor (const CAComponentDescription&);
 
@@ -251,6 +252,11 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
   private:
 	boost::shared_ptr<CAComponentDescription> descriptor;
 	UInt32 version;
+	static FILE * _crashlog_fd;
+
+	static void au_start_crashlog (void);
+	static void au_remove_crashlog (void);
+	static void au_crashlog (std::string);
 
 	static void discover_music (PluginInfoList&);
 	static void discover_fx (PluginInfoList&);

@@ -1967,7 +1967,10 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 		MidiRegionSelection::iterator next;
 		next = r;
 		++next;
-		(*r)->begin_resizing (at_front);
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
+		if (mrv) {
+			mrv->begin_resizing (at_front);
+		}
 		r = next;
 	}
 }
@@ -1979,7 +1982,10 @@ NoteResizeDrag::motion (GdkEvent* /*event*/, bool /*first_move*/)
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
 		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
 		assert (nb);
-		(*r)->update_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative);
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
+		if (mrv) {
+			mrv->update_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative);
+		}
 	}
 }
 
@@ -1990,7 +1996,10 @@ NoteResizeDrag::finished (GdkEvent*, bool /*movement_occurred*/)
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
 		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
 		assert (nb);
-		(*r)->commit_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative);
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
+		if (mrv) {
+			mrv->commit_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative);
+		}
 	}
 }
 
@@ -1999,7 +2008,10 @@ NoteResizeDrag::aborted (bool)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
-		(*r)->abort_resizing ();
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
+		if (mrv) {
+			mrv->abort_resizing ();
+		}
 	}
 }
 
@@ -5268,12 +5280,10 @@ void
 NoteCreateDrag::motion (GdkEvent* event, bool)
 {
 	_note[1] = max ((framepos_t)0, adjusted_current_frame (event) - _region_view->region()->position ());
-	double const x = _editor->sample_to_pixel (_note[1]);
-	if (_note[1] > _note[0]) {
-		_drag_rect->set_x1 (x);
-	} else {
-		_drag_rect->set_x0 (x);
-	}
+	double const x0 = _editor->sample_to_pixel (_note[0]);
+	double const x1 = _editor->sample_to_pixel (_note[1]);
+	_drag_rect->set_x0 (std::min(x0, x1));
+	_drag_rect->set_x1 (std::max(x0, x1));
 }
 
 void

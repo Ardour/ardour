@@ -1199,7 +1199,7 @@ ControlList::unlocked_eval (double x) const
 		return multipoint_eval (x);
 	}
 
-	/*NOTREACHED*/ /* stupid gcc */
+	abort(); /*NOTREACHED*/ /* stupid gcc */
 	return _default_value;
 }
 

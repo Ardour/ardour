@@ -1002,7 +1002,7 @@ Selection::toggle (list<Selectable*> const & selectables)
 			fatal << _("programming error: ")
 			      << X_("unknown selectable type passed to Selection::toggle()")
 			      << endmsg;
-			/*NOTREACHED*/
+			abort(); /*NOTREACHED*/
 		}
 	}
 
@@ -1056,7 +1056,7 @@ Selection::add (list<Selectable*> const & selectables)
 			fatal << _("programming error: ")
 			      << X_("unknown selectable type passed to Selection::add()")
 			      << endmsg;
-			/*NOTREACHED*/
+			abort(); /*NOTREACHED*/
 		}
 	}
 

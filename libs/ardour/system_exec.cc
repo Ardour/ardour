@@ -35,7 +35,10 @@ static char *vfork_exec_wrapper_path() {
 #else
 	std::string vfork_exec_wrapper;
 	if (!PBD::find_file (
-				PBD::Searchpath(Glib::build_filename(ARDOUR::ardour_dll_directory(), "vfork")),
+				PBD::Searchpath(
+					ARDOUR::ardour_dll_directory() // deployed
+					+ G_SEARCHPATH_SEPARATOR_S + Glib::build_filename(ARDOUR::ardour_dll_directory(), "vfork") // src, build (ardev, etc)
+					),
 				"ardour-exec-wrapper", vfork_exec_wrapper)) {
 		PBD::fatal << "vfork exec wrapper 'ardour-exec-wrapper' was not found in $PATH." << endmsg;
 		/* not reached */

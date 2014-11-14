@@ -1169,7 +1169,7 @@ Session::process_event (SessionEvent* ev)
 
 	default:
 	  fatal << string_compose(_("Programming error: illegal event type in process_event (%1)"), ev->type) << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		break;
 	};
 

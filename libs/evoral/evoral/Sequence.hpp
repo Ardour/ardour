@@ -136,7 +136,6 @@ public:
 		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
 		                       const boost::shared_ptr< const Note<Time> > b) const {
 			return musical_time_greater_than (a->time(), b->time());
-			return a->time() > b->time();
 		}
 	};
 

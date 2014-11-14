@@ -646,7 +646,7 @@ Editor::build_region_boundary_cache ()
 		break;
 	default:
 		fatal << string_compose (_("build_region_boundary_cache called with snap_type = %1"), _snap_type) << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		return;
 	}
 
@@ -4000,8 +4000,10 @@ void
 Editor::cut_copy_midi (CutCopyOp op)
 {
 	for (MidiRegionSelection::iterator i = selection->midi_regions.begin(); i != selection->midi_regions.end(); ++i) {
-		MidiRegionView* mrv = *i;
-		mrv->cut_copy_clear (op);
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
+		if (mrv) {
+			mrv->cut_copy_clear (op);
+		}
 	}
 }
 

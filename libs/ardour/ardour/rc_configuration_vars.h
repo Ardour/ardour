@@ -211,6 +211,7 @@ CONFIG_VARIABLE (bool, use_lxvst, "use-lxvst", true)
 CONFIG_VARIABLE (bool, show_plugin_scan_window, "show-plugin-scan-window", false)
 CONFIG_VARIABLE (bool, discover_vst_on_start, "discover-vst-on-start", false)
 CONFIG_VARIABLE (int, vst_scan_timeout, "vst-scan-timeout", 600) /* deciseconds, per plugin, <= 0 no timeout */
+CONFIG_VARIABLE (bool, discover_audio_units, "discover-audio-units", false)
 
 /* custom user plugin paths */
 CONFIG_VARIABLE (std::string, plugin_path_vst, "plugin-path-vst", "@default@")

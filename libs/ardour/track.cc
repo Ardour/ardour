@@ -951,7 +951,7 @@ Track::monitoring_state () const
 		}
 	}
 
-	/* NOTREACHED */
+	abort(); /* NOTREACHED */
 	return MonitoringSilence;
 }
 

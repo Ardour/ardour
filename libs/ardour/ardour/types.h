@@ -267,8 +267,7 @@ namespace ARDOUR {
 				return seconds != 0;
 			}
 
-			/* NOTREACHED */
-			assert (false);
+			abort(); /* NOTREACHED */
 			return false;
 		}
 	};

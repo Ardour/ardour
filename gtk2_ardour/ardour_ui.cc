@@ -88,6 +88,9 @@
 #ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
 #endif
+#ifdef AUDIOUNIT_SUPPORT
+#include "ardour/audio_unit.h"
+#endif
 
 #include "timecode/time.h"
 
@@ -483,6 +486,14 @@ ARDOUR_UI::post_engine ()
 {
 	/* Things to be done once (and once ONLY) after we have a backend running in the AudioEngine
 	 */
+#ifdef AUDIOUNIT_SUPPORT
+	std::string au_msg;
+	if (AUPluginInfo::au_get_crashlog(au_msg)) {
+		popup_error(_("Audio Unit Plugin Scan Failed. Automatic AU scanning has been disabled. Please see the log window for further details."));
+		error << _("Audio Unit Plugin Scan Failed:") << endmsg;
+		info << au_msg << endmsg;
+	}
+#endif
 
 	ARDOUR::init_post_engine ();
 	

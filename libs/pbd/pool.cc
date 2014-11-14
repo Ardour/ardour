@@ -70,7 +70,7 @@ Pool::alloc ()
 
 	if (free_list.read (&ptr, 1) < 1) {
 		fatal << "CRITICAL: " << _name << " POOL OUT OF MEMORY - RECOMPILE WITH LARGER SIZE!!" << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		return 0;
 	} else {
 		return ptr;
@@ -184,7 +184,7 @@ PerThreadPool::per_thread_pool ()
 	CrossThreadPool* p = _key.get();
 	if (!p) {
 		fatal << "programming error: no per-thread pool \"" << _name << "\" for thread " << pthread_name() << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 	return p;
 }

@@ -3730,7 +3730,7 @@ Route::set_active (bool yn, void* src)
 void
 Route::meter ()
 {
-	Glib::Threads::RWLock::ReaderLock rm (_processor_lock, Glib::Threads::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
 
 	assert (_meter);
 
@@ -3785,7 +3785,7 @@ Route::get_control (const Evoral::Parameter& param)
 
 		/* maybe one of our processors does or ... */
 
-		Glib::Threads::RWLock::ReaderLock rm (_processor_lock, Glib::Threads::TRY_LOCK);
+		Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			if ((c = boost::dynamic_pointer_cast<AutomationControl>((*i)->control (param))) != 0) {
 				break;

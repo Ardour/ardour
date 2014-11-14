@@ -202,7 +202,7 @@ Butler::dequeue_request (Request::Type& r)
 		return false;
 	} else {
 		fatal << _("Error reading from butler request pipe") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 #else
 	r = (Request::Type) m_request_state.get();
@@ -242,7 +242,7 @@ Butler::thread_work ()
 
 					case Request::Quit:
 						return 0;
-						/*NOTREACHED*/
+						abort(); /*NOTREACHED*/
 						break;
 
 					default:

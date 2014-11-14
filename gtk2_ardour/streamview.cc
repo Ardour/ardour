@@ -431,7 +431,7 @@ StreamView::update_rec_box ()
 
 		default:
 			fatal << string_compose (_("programming error: %1"), "illegal track mode") << endmsg;
-			/*NOTREACHED*/
+			abort(); /*NOTREACHED*/
 			return;
 		}
 
@@ -575,7 +575,7 @@ StreamView::child_height () const
 		return height / (_layers * 2 + 1);
 	}
 	
-	/* NOTREACHED */
+	abort(); /* NOTREACHED */
 	return height;
 }
 

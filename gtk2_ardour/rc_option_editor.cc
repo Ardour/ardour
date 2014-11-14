@@ -996,7 +996,8 @@ public:
 	PluginOptions (RCConfiguration* c)
 		: _rc_config (c)
 		, _display_plugin_scan_progress (_("Always Display Plugin Scan Progress"))
-		, _discover_vst_on_start (_("Scan for new VST Plugins on Application Start"))
+		, _discover_vst_on_start (_("Scan for [new] VST Plugins on Application Start"))
+		, _discover_au_on_start (_("Scan for AudioUnit Plugins on Application Start"))
 		, _timeout_adjustment (0, 0, 3000, 50, 50)
 		, _timeout_slider (_timeout_adjustment)
 	{
@@ -1022,6 +1023,7 @@ public:
 		Gtkmm2ext::UI::instance()->set_tip (_display_plugin_scan_progress,
 					    _("<b>When enabled</b> a popup window showing plugin scan progress is displayed for indexing (cache load) and discovery (detect new plugins)"));
 
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
 		_timeout_slider.set_digits (0);
 		_timeout_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &PluginOptions::timeout_changed));
 
@@ -1069,6 +1071,14 @@ public:
 		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::edit_vst_path_clicked));
 		t->attach (*b, 1, 2, n, n+1, FILL); ++n;
 #endif
+#endif // any VST
+
+#ifdef AUDIOUNIT_SUPPORT
+		t->attach (_discover_au_on_start, 0, 2, n, n+1); ++n;
+		_discover_au_on_start.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::discover_au_on_start_toggled));
+		Gtkmm2ext::UI::instance()->set_tip (_discover_au_on_start,
+					    _("<b>When enabled</b> Audio Unit Plugins are discovered on application start. When disabled AU plugins will only be available after triggering a 'Scan' manually. The first successful scan will enable AU auto-scan, Any crash during plugin discovery will disable it."));
+#endif
 
 		_box->pack_start (*t,true,true);
 	}
@@ -1086,18 +1096,24 @@ public:
 			int const x = _rc_config->get_vst_scan_timeout();
 			_timeout_adjustment.set_value (x);
 		}
+		else if (p == "discover-audio-units") {
+			bool const x = _rc_config->get_discover_audio_units();
+			_discover_au_on_start.set_active (x);
+		}
 	}
 
 	void set_state_from_config () {
 		parameter_changed ("show-plugin-scan-window");
 		parameter_changed ("discover-vst-on-start");
 		parameter_changed ("vst-scan-timeout");
+		parameter_changed ("discover-audio-units");
 	}
 
 private:
 	RCConfiguration* _rc_config;
 	CheckButton _display_plugin_scan_progress;
 	CheckButton _discover_vst_on_start;
+	CheckButton _discover_au_on_start;
 	Adjustment _timeout_adjustment;
 	HScale _timeout_slider;
 
@@ -1109,6 +1125,11 @@ private:
 	void discover_vst_on_start_toggled () {
 		bool const x = _discover_vst_on_start.get_active();
 		_rc_config->set_discover_vst_on_start(x);
+	}
+
+	void discover_au_on_start_toggled () {
+		bool const x = _discover_au_on_start.get_active();
+		_rc_config->set_discover_audio_units(x);
 	}
 
 	void timeout_changed () {
@@ -2127,7 +2148,7 @@ RCOptionEditor::RCOptionEditor ()
 	/* VIDEO Timeline */
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
 	/* Plugin options (currrently VST only) */
 	add_option (_("Plugins"), new PluginOptions (_rc_config));
 #endif

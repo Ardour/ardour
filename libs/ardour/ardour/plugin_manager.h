@@ -127,7 +127,7 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	void add_lxvst_presets ();
 	void add_presets (std::string domain);
 
-	void au_refresh ();
+	void au_refresh (bool cache_only = false);
 
 	void lv2_refresh ();
 

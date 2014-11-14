@@ -195,11 +195,11 @@ MidiModel::NoteDiffCommand::change (const NotePtr note, Property prop,
 
 	case StartTime:
 		fatal << "MidiModel::DiffCommand::change() with integer argument called for start time" << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		break;
 	case Length:
 		fatal << "MidiModel::DiffCommand::change() with integer argument called for length" << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		break;
 	}
 
@@ -627,7 +627,7 @@ MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 		change.property = (Property) string_2_enum (prop->value(), change.property);
 	} else {
 		fatal << "!!!" << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	if ((prop = xml_change->property ("id")) == 0) {
@@ -648,7 +648,7 @@ MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 		}
 	} else {
 		fatal << "!!!" << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	if ((prop = xml_change->property ("new")) != 0) {
@@ -662,7 +662,7 @@ MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 		}
 	} else {
 		fatal << "!!!" << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	/* we must point at the instance of the note that is actually in the model.
@@ -899,7 +899,7 @@ MidiModel::SysExDiffCommand::unmarshal_change (XMLNode *xml_change)
 		change.property = (Property) string_2_enum (prop->value(), change.property);
 	} else {
 		fatal << "!!!" << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	if ((prop = xml_change->property ("id")) == 0) {
@@ -914,7 +914,7 @@ MidiModel::SysExDiffCommand::unmarshal_change (XMLNode *xml_change)
 		old_str >> change.old_time;
 	} else {
 		fatal << "!!!" << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	if ((prop = xml_change->property ("new")) != 0) {
@@ -922,7 +922,7 @@ MidiModel::SysExDiffCommand::unmarshal_change (XMLNode *xml_change)
 		new_str >> change.new_time;
 	} else {
 		fatal << "!!!" << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	/* we must point at the instance of the sysex that is actually in the model.
@@ -1728,7 +1728,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 				return -1; /* do not add the new note */
 				break;
 			default:
-				/*NOTREACHED*/
+				abort(); /*NOTREACHED*/
 				/* stupid gcc */
 				break;
 			}
@@ -1764,7 +1764,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 				note_length = min (note_length, (*i)->end_time() - note->time());
 				break;
 			default:
-				/*NOTREACHED*/
+				abort(); /*NOTREACHED*/
 				/* stupid gcc */
 				break;
 			}
@@ -1783,7 +1783,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 				/* cannot add in this case */
 				return -1;
 			default:
-				/*NOTREACHED*/
+				abort(); /*NOTREACHED*/
 				/* stupid gcc */
 				break;
 			}
@@ -1801,14 +1801,14 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 				to_be_deleted.insert (*i);
 				break;
 			default:
-				/*NOTREACHED*/
+				abort(); /*NOTREACHED*/
 				/* stupid gcc */
 				break;
 			}
 			break;
 
 		default:
-			/*NOTREACHED*/
+			abort(); /*NOTREACHED*/
 			/* stupid gcc */
 			break;
 		}

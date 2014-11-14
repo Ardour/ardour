@@ -81,7 +81,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 		theGtkUI = this;
 	} else {
 		fatal << "duplicate UI requested" << endmsg;
-		/* NOTREACHED */
+		abort(); /* NOTREACHED */
 	}
 
 	/* the GUI event loop runs in the main thread of the app,

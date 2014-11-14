@@ -1312,7 +1312,7 @@ TimeAxisView::preset_height (Height h)
 		return button_height + extra_height;
 	}
 
-	/* NOTREACHED */
+	abort(); /* NOTREACHED */
 	return 0;
 }
 

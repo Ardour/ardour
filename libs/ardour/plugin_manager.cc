@@ -116,12 +116,17 @@ PluginManager::PluginManager ()
 	string lrdf_path;
 
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT
+	// source-tree (ardev, etc)
 	PBD::Searchpath vstsp(Glib::build_filename(ARDOUR::ardour_dll_directory(), "fst"));
+
 #ifdef PLATFORM_WINDOWS
+	// on windows the .exe needs to be in the same folder with libardour.dll
 	vstsp += Glib::build_filename(g_win32_get_package_installation_directory_of_module (0), "bin");
 #else
-	vstsp += Glib::getenv("PATH");
+	// on Unices additional internal-use binaries are deployed to $libdir
+	vstsp += ARDOUR::ardour_dll_directory();
 #endif
+
 	if (!PBD::find_file (vstsp,
 #ifdef PLATFORM_WINDOWS
     #ifdef DEBUGGABLE_SCANNER_APP
@@ -243,7 +248,7 @@ PluginManager::refresh (bool cache_only)
 
 #ifdef AUDIOUNIT_SUPPORT
 	BootMessage (_("Scanning AU Plugins"));
-	au_refresh ();
+	au_refresh (cache_only);
 #endif
 
 	BootMessage (_("Plugin Scan Complete..."));
@@ -604,11 +609,23 @@ PluginManager::lv2_refresh ()
 
 #ifdef AUDIOUNIT_SUPPORT
 void
-PluginManager::au_refresh ()
+PluginManager::au_refresh (bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, "AU: refresh\n");
+	if (cache_only && !Config->get_discover_audio_units ()) {
+		return;
+	}
 	delete _au_plugin_info;
+
+	// disable automatic scan in case we crash
+	Config->set_discover_audio_units (false);
+	Config->save_state();
+
 	_au_plugin_info = AUPluginInfo::discover();
+
+	// successful scan re-enabled automatic discovery
+	Config->set_discover_audio_units (true);
+	Config->save_state();
 }
 
 #endif
@@ -1050,9 +1067,9 @@ ARDOUR::PluginInfoList&
 PluginManager::au_plugin_info ()
 {
 #ifdef AUDIOUNIT_SUPPORT
-	assert(_au_plugin_info);
-	return *_au_plugin_info;
-#else
-	return _empty_plugin_info;
+	if (_au_plugin_info) {
+		return *_au_plugin_info;
+	}
 #endif
+	return _empty_plugin_info;
 }

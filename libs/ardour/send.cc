@@ -65,7 +65,7 @@ Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_b
 		return string_compose (_("send %1"), (bitslot = s.next_send_id ()) + 1);
 	default:
 		fatal << string_compose (_("programming error: send created using role %1"), enum_2_string (r)) << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		return string();
 	}
 	

@@ -1139,7 +1139,7 @@ PortMatrix::get_association (PortMatrixNode node) const
 
 	}
 
-	/* NOTREACHED */
+	abort(); /* NOTREACHED */
 	return PortMatrixNode::NOT_ASSOCIATED;
 }
 

@@ -38,7 +38,7 @@ TimeSelection::operator[] (uint32_t which)
 		}
 	}
 	fatal << string_compose (_("programming error: request for non-existent audio range (%1)!"), which) << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return *(new AudioRange(0,0,0)); /* keep the compiler happy; never called */
 }
 

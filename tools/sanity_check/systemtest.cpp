@@ -169,6 +169,7 @@ int system_user_in_group(const char *name) {
   gid = get_group_by_name(name);
   if (0==gid) {
     fprintf(stderr, "No %s group found\n", name);
+    free(list);
     return 0;
   }
   

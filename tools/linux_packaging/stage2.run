@@ -101,6 +101,7 @@ SystemInstall ()
 ########################################################################
 #                                 Main
 ########################################################################
+umask 0022
 
 # If you double click a script, some systems don't get the PWD correct.
 # Force it to be correct
@@ -158,6 +159,8 @@ if [ "$(id -u)" != "0" ]; then
 			exit 1
 		fi
 		exit
+	else
+		sudo -k # make sudo forget about cached credentials
 	fi
 
 	if ! sudo date;

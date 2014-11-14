@@ -2015,7 +2015,7 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 		      << string_compose (X_("processor automation curve for %1:%2/%3/%4 not registered with track!"),
                                          processor->name(), what.type(), (int) what.channel(), what.id() )
 		      << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		return;
 	}
 
@@ -2481,7 +2481,7 @@ RouteTimeAxisView::add_underlay (StreamView* v, bool /*update_xml*/)
 	if (find(_underlay_streams.begin(), _underlay_streams.end(), v) == _underlay_streams.end()) {
 		if (find(other._underlay_mirrors.begin(), other._underlay_mirrors.end(), this) != other._underlay_mirrors.end()) {
 			fatal << _("programming error: underlay reference pointer pairs are inconsistent!") << endmsg;
-			/*NOTREACHED*/
+			abort(); /*NOTREACHED*/
 		}
 
 		_underlay_streams.push_back(v);
@@ -2518,7 +2518,7 @@ RouteTimeAxisView::remove_underlay (StreamView* v)
 
 		if (gm == other._underlay_mirrors.end()) {
 			fatal << _("programming error: underlay reference pointer pairs are inconsistent!") << endmsg;
-			/*NOTREACHED*/
+			abort(); /*NOTREACHED*/
 		}
 
 		v->foreach_regionview(sigc::mem_fun(*this, &RouteTimeAxisView::remove_ghost));

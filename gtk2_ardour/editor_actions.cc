@@ -1081,7 +1081,7 @@ Editor::snap_type_action (SnapType type)
 		break;
 	default:
 		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible snap-to type", (int) type) << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	act = ActionManager::get_action (X_("Snap"), action);
@@ -1477,7 +1477,7 @@ Editor::snap_mode_action (SnapMode mode)
 		break;
 	default:
 		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible snap mode type", (int) mode) << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	act = ActionManager::get_action (X_("Editor"), action);
@@ -1541,7 +1541,7 @@ Editor::edit_point_action (EditPoint ep)
 		break;
 	default:
 		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible edit point type", (int) ep) << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	act = ActionManager::get_action (X_("Editor"), action);
@@ -1599,7 +1599,7 @@ Editor::zoom_focus_action (ZoomFocus focus)
 		break;
 	default:
 		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible focus type", (int) focus) << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	act = ActionManager::get_action (X_("Zoom"), action);

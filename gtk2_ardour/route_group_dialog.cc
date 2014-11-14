@@ -207,7 +207,7 @@ RouteGroupDialog::do_run ()
 		msg.run ();
 	}
 
-	/* NOTREACHED */
+	abort(); /* NOTREACHED */
 	return false;
 }
 

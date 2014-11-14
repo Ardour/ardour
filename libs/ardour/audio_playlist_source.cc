@@ -169,7 +169,7 @@ framecnt_t
 AudioPlaylistSource::write_unlocked (Sample *, framecnt_t)
 {
 	fatal << string_compose (_("programming error: %1"), "AudioPlaylistSource::write() called - should be impossible") << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return 0;
 }
 

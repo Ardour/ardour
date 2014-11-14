@@ -346,7 +346,7 @@ AddRouteDialog::mode ()
 	} else {
 		fatal << string_compose (X_("programming error: unknown track mode in add route dialog combo = %1"), str)
 		      << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 	/* keep gcc happy */
 	return ARDOUR::Normal;

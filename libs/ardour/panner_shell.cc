@@ -120,7 +120,7 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 	PannerInfo* pi = PannerManager::instance().select_panner (in, out, _user_selected_panner_uri);
 	if (!pi) {
 		fatal << _("No panner found: check that panners are being discovered correctly during startup.") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	DEBUG_TRACE (DEBUG::Panning, string_compose (_("select panner: %1\n"), pi->descriptor.name.c_str()));

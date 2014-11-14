@@ -142,7 +142,7 @@ MidiPlaylistSource::write_unlocked (MidiRingBuffer<framepos_t>&,
                                     framecnt_t)
 {
 	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::write_unlocked() called - should be impossible") << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return 0;
 }
 
@@ -150,14 +150,14 @@ void
 MidiPlaylistSource::append_event_unlocked_beats(const Evoral::Event<Evoral::MusicalTime>& /*ev*/)
 {
 	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::append_event_unlocked_beats() called - should be impossible") << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 }
 
 void
 MidiPlaylistSource::append_event_unlocked_frames(const Evoral::Event<framepos_t>& /* ev */, framepos_t /*source_start*/)
 {
 	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::append_event_unlocked_frames() called - should be impossible") << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 }
 
 void

@@ -154,6 +154,19 @@ int have_libjack(void);
 
 #define jack_client_open                    WJACK_client_client_openXXX
 
+#if 0
+/* <jack/metadata.h> */
+#define jack_set_property                   WJACK_set_property
+#define jack_get_property                   WJACK_get_property
+#define jack_free_description               WJACK_free_description
+#define jack_get_properties                 WJACK_get_properties
+#define jack_get_all_properties             WJACK_get_all_properties
+#define jack_remove_property                WJACK_remove_property
+#define jack_remove_properties              WJACK_remove_properties
+#define jack_remove_all_properties          WJACK_remove_all_properties
+#define jack_set_property_change_callback   WJACK_set_property_change_callback
+#endif
+
 #endif // end USE_WEAK_JACK
 
 #include <jack/jack.h>
@@ -162,6 +175,9 @@ int have_libjack(void);
 #include <jack/midiport.h>
 #include <jack/session.h>
 #include <jack/thread.h>
+#if 0
+#include <jack/metadata.h>
+#endif
 
 #ifdef USE_WEAK_JACK
 

@@ -20,6 +20,7 @@
 #ifndef __gtk2_ardour_note_select_dialog_h__
 #define __gtk2_ardour_note_select_dialog_h__
 
+#include <stdint.h>
 #include "ardour_dialog.h"
 #include "gtk_pianokeyboard.h"
 

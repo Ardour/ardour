@@ -391,7 +391,7 @@ done
 cp $BUILD_ROOT/libs/panners/*/lib*.so* $Panners
 
 # Backends
-for backend in jack wavesaudio ; do
+for backend in jack alsa dummy wavesaudio ; do
     cp $BUILD_ROOT/libs/backends/$backend/lib*.so* $Backends
 done
 
@@ -418,7 +418,7 @@ fi
 
 # vfork wrapper
 if test -f $BUILD_ROOT/libs/vfork/ardour-exec-wrapper ; then
-    cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $VFork
+    cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $APPLIB
 fi
 
 # ALSA device reservation tool (if available)
