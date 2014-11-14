@@ -373,6 +373,10 @@ def set_compiler_flags (conf,opt):
         compiler_flags.extend(('-arch', 'i386'))
         linker_flags.extend(('-arch', 'i386'))
 
+    if opt.ppc:
+        compiler_flags.extend(('-arch', 'ppc'))
+        linker_flags.extend(('-arch', 'ppc'))
+
     #
     # warnings flags
     #
@@ -502,6 +506,8 @@ def options(opt):
     # help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
     opt.add_option('--generic', action='store_true', default=False, dest='generic',
                     help='Compile with -arch i386 (OS X ONLY)')
+    opt.add_option('--ppc', action='store_true', default=False, dest='ppc',
+                    help='Compile with -arch ppc (OS X ONLY)')
     opt.add_option('--versioned', action='store_true', default=False, dest='versioned',
                     help='Add revision information to executable name inside the build directory')
     opt.add_option('--windows-vst', action='store_true', default=False, dest='windows_vst',
@@ -856,7 +862,8 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Translation',           opts.nls)
 #    write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
-    write_config_text('Generic x86 CPU',       opts.generic)
+    write_config_text('Mac i386 Architecture', opts.generic)
+    write_config_text('Mac ppc Architecture',  opts.ppc)
     write_config_text('Waves Backend',         opts.build_wavesbackend)
     write_config_text('Windows VST support',   opts.windows_vst)
     write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))
