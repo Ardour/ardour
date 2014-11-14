@@ -719,12 +719,10 @@ uint32_t
 TimeAxisViewItem::fill_opacity () const
 {
 	if (!rect_visible) {
-		/* if the frame/rect is marked as invisible, then the
-		 * fill should be transparent. simplest: set
-		 
-		 * alpha/opacity to zero.
-		 */
-		return 0;
+		/* if the frame/rect is marked as "invisible", then the
+		   fill should be translucent.parent.
+		*/
+		return 64;
 	}
 
 	if (_dragging) {
@@ -781,19 +779,19 @@ TimeAxisViewItem::set_frame_color()
 		return;
 	}
 
-        frame->set_fill_color (get_fill_color());
+	frame->set_fill_color (get_fill_color());
 	set_frame_gradient ();
 
-        if (!_recregion) {
+	if (!_recregion) {
 		uint32_t f = ARDOUR_UI::config()->get_TimeAxisFrame();
 
-                if (!rect_visible) {
+		if (!rect_visible) {
 			/* make the frame outline be visible but rather transparent */
-                        f = UINT_RGBA_CHANGE_A (f, 64);
-                }
+			f = UINT_RGBA_CHANGE_A (f, 64);
+		}
 
-                frame->set_outline_color (f);
-        }
+		frame->set_outline_color (f);
+	}
 }
 
 void

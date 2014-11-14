@@ -3221,7 +3221,7 @@ MidiRegionView::set_frame_color()
 	}
 
 	if (!rect_visible) {
-		f = UINT_RGBA_CHANGE_A (f, 0);
+		f = UINT_RGBA_CHANGE_A (f, 80);
 	}
 
 	frame->set_fill_color (f);
