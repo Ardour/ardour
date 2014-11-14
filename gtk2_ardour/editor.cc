@@ -2631,7 +2631,7 @@ Editor::timecode_snap_to_internal (framepos_t& start, int32_t direction, bool /*
 		break;
 	default:
 		fatal << "Editor::smpte_snap_to_internal() called with non-timecode snap type!" << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 }
 

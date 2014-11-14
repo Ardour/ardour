@@ -314,14 +314,14 @@ Editor::do_import (vector<string> paths, ImportDisposition disposition, ImportMo
 				continue;
 			case 0:
 				fatal << "Updating existing sources should be disabled!" << endmsg;
-				/* NOTREACHED*/
+				abort(); /* NOTREACHED*/
 				break;
 			case 1:
 				replace = false;
 				break;
 			default:
 				fatal << "Illegal return " << check <<  " from check_whether_and_how_to_import()!" << endmsg;
-				/* NOTREACHED*/
+				abort(); /* NOTREACHED*/
 			}
 
 			/* have to reset this for every file we handle */

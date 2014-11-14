@@ -2380,7 +2380,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 				/* generate a new name by adding a number to the end of the template name */
 				if (!find_route_name (route_name.c_str(), ++number, name, sizeof(name), true)) {
 					fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
-					/*NOTREACHED*/
+					abort(); /*NOTREACHED*/
 				}
 			}
 
@@ -4041,7 +4041,7 @@ Session::available_capture_duration ()
 		fatal << string_compose (_("programming error: %1"),
 					 X_("illegal native file data format"))
 		      << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	double scale = 4096.0 / sample_bytes_on_disk;

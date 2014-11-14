@@ -429,7 +429,7 @@ ARDOUR::string_to_edit_mode (string str)
 		return Lock;
 	}
 	fatal << string_compose (_("programming error: unknown edit mode string \"%1\""), str) << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return Slide;
 }
 
@@ -468,7 +468,7 @@ ARDOUR::string_to_sync_source (string str)
 	}
 
 	fatal << string_compose (_("programming error: unknown sync source string \"%1\""), str) << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return Engine;
 }
 
@@ -577,7 +577,7 @@ ARDOUR::string_to_auto_state (std::string str)
 	}
 
 	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoState string: ", str) << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return Touch;
 }
 
@@ -601,7 +601,7 @@ ARDOUR::auto_state_to_string (AutoState as)
 	}
 
 	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoState type: ", as) << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return "";
 }
 
@@ -615,7 +615,7 @@ ARDOUR::string_to_auto_style (std::string str)
 	}
 
 	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoStyle string: ", str) << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return Trim;
 }
 
@@ -634,7 +634,7 @@ ARDOUR::auto_style_to_string (AutoStyle as)
 	}
 
 	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoStyle type: ", as) << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return "";
 }
 
@@ -669,7 +669,7 @@ ARDOUR::native_header_format_extension (HeaderFormat hf, const DataType& type)
         }
 
         fatal << string_compose (_("programming error: unknown native header format: %1"), hf);
-        /*NOTREACHED*/
+        abort(); /*NOTREACHED*/
         return ".wav";
 }
 

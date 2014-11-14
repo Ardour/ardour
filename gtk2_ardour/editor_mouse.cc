@@ -1332,12 +1332,12 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			
 			if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
 				fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
-				/*NOTREACHED*/
+				abort(); /*NOTREACHED*/
 			}
 			
 			if ((tempo_marker = dynamic_cast<TempoMarker*> (marker)) == 0) {
 				fatal << _("programming error: marker for tempo is not a tempo marker!") << endmsg;
-				/*NOTREACHED*/
+				abort(); /*NOTREACHED*/
 			}
 			
 			edit_tempo_marker (*tempo_marker);
@@ -1350,12 +1350,12 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			
 			if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
 				fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
-				/*NOTREACHED*/
+				abort(); /*NOTREACHED*/
 			}
 			
 			if ((meter_marker = dynamic_cast<MeterMarker*> (marker)) == 0) {
 				fatal << _("programming error: marker for meter is not a meter marker!") << endmsg;
-				/*NOTREACHED*/
+				abort(); /*NOTREACHED*/
 			}
 			edit_meter_marker (*meter_marker);
 			break;
@@ -1999,7 +1999,7 @@ Editor::can_remove_control_point (ArdourCanvas::Item* item)
 
 	if ((control_point = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"))) == 0) {
 		fatal << _("programming error: control point canvas item has no control point object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	AutomationLine& line = control_point->line ();
@@ -2024,7 +2024,7 @@ Editor::remove_control_point (ArdourCanvas::Item* item)
 
 	if ((control_point = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"))) == 0) {
 		fatal << _("programming error: control point canvas item has no control point object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	control_point->line().remove_point (*control_point);
@@ -2037,7 +2037,7 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 
 	if (p == 0) {
 		fatal << _("programming error: control point canvas item has no control point object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	ControlPointDialog d (p);
@@ -2242,7 +2242,7 @@ Editor::hide_marker (ArdourCanvas::Item* item, GdkEvent* /*event*/)
 
 	if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	Location* location = find_location_from_marker (marker, is_start);

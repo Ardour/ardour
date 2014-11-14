@@ -591,7 +591,7 @@ Bundle::type_channel_to_overall (DataType t, uint32_t c) const
 		++o;
 	}
 
-	/* NOTREACHED */
+	abort(); /* NOTREACHED */
 	return -1;
 }
 

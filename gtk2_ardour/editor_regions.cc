@@ -1560,7 +1560,7 @@ EditorRegions::sort_type_action (Editing::RegionListSortType t) const
 		break;
 	default:
 		fatal << string_compose (_("programming error: %1: %2"), "EditorRegions: impossible sort type", (int) t) << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	RefPtr<Action> act = ActionManager::get_action (X_("RegionList"), action);

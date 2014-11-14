@@ -152,7 +152,7 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 
 	default:
 		fatal << string_compose (_("programming error: %1"), X_("unsupported audio header format requested")) << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		break;
 
 	}
@@ -459,7 +459,7 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, framecnt_t cnt)
 
 	if (_info.channels != 1) {
 		fatal << string_compose (_("programming error: %1 %2"), X_("SndFileSource::write called on non-mono file"), _path) << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		return 0;
 	}
 

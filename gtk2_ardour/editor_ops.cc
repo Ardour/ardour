@@ -646,7 +646,7 @@ Editor::build_region_boundary_cache ()
 		break;
 	default:
 		fatal << string_compose (_("build_region_boundary_cache called with snap_type = %1"), _snap_type) << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		return;
 	}
 

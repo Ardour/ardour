@@ -273,7 +273,7 @@ RhythmFerret::get_note_onset_function ()
 	fatal << string_compose (_("programming error: %1 (%2)"), X_("illegal note onset function string"), txt)
 	      << endmsg;
 
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return -1;
 }
 

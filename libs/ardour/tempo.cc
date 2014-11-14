@@ -677,7 +677,7 @@ TempoMap::first_meter () const
 	}
 
 	fatal << _("programming error: no tempo section in tempo map!") << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return *m;
 }
 
@@ -693,7 +693,7 @@ TempoMap::first_tempo () const
 	}
 
 	fatal << _("programming error: no tempo section in tempo map!") << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return *t;
 }
 
@@ -807,7 +807,7 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 				rmeter = ms;
 			} else {
 				fatal << _("programming error: unhandled MetricSection type") << endmsg;
-				/*NOTREACHED*/
+				abort(); /*NOTREACHED*/
 			}
 		}
 	}
@@ -1489,8 +1489,7 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 		break;
 	}
 
-	/* NOTREACHED */
-	assert (false);
+	abort(); /* NOTREACHED */
 	return 0;
 }
 
@@ -1532,6 +1531,7 @@ TempoMap::tempo_section_at (framepos_t frame) const
 
 	if (prev == 0) {
 		fatal << endmsg;
+		abort(); /*NOTREACHED*/
 	}
 
 	return *prev;
@@ -1785,7 +1785,7 @@ TempoMap::insert_time (framepos_t where, framecnt_t amount)
 				// cerr << "NEW METER, frame = " << (*i)->frame() << " start = " << (*i)->start() <<endl;
 			} else {
 				fatal << _("programming error: unhandled MetricSection type") << endmsg;
-				/*NOTREACHED*/
+				abort(); /*NOTREACHED*/
 			}
 			
 			prev = (*i);

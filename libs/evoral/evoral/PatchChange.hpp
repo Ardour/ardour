@@ -147,8 +147,7 @@ public:
 		case 2:
 			return _program_change;
 		default:
-			abort ();
-			/*NOTREACHED*/
+			abort(); /*NOTREACHED*/
 			return _program_change;
 		}
 	}

@@ -1346,8 +1346,7 @@ Sequence<Time>::get_notes_by_pitch (Notes& n, NoteOperator op, uint8_t val, int 
 
 		default:
 			//fatal << string_compose (_("programming error: %1 %2", X_("get_notes_by_pitch() called with illegal operator"), op)) << endmsg;
-			abort ();
-			/* NOTREACHED*/
+			abort(); /* NOTREACHED*/
 		}
 	}
 }
@@ -1392,8 +1391,7 @@ Sequence<Time>::get_notes_by_velocity (Notes& n, NoteOperator op, uint8_t val, i
 			break;
 		default:
 			// fatal << string_compose (_("programming error: %1 %2", X_("get_notes_by_velocity() called with illegal operator"), op)) << endmsg;
-			abort ();
-			/* NOTREACHED*/
+			abort(); /* NOTREACHED*/
 
 		}
 	}

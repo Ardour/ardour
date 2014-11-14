@@ -708,7 +708,7 @@ ARDOUR_UI_UTILS::get_icon_path (const char* cname, string icon_set, bool is_imag
 	
 		if (!find_file (def, name, data_file_path)) {
 			fatal << string_compose (_("cannot find icon image for %1 using %2"), name, spath.to_string()) << endmsg;
-			/*NOTREACHED*/
+			abort(); /*NOTREACHED*/
 		}
 	}
 

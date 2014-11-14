@@ -271,12 +271,12 @@ Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 
 	if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	if ((tempo_marker = dynamic_cast<TempoMarker*> (marker)) == 0) {
 		fatal << _("programming error: marker for tempo is not a tempo marker!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	if (tempo_marker->tempo().movable()) {
@@ -375,12 +375,12 @@ Editor::remove_meter_marker (ArdourCanvas::Item* item)
 
 	if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: meter marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	if ((meter_marker = dynamic_cast<MeterMarker*> (marker)) == 0) {
 		fatal << _("programming error: marker for meter is not a meter marker!") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	if (meter_marker->meter().movable()) {

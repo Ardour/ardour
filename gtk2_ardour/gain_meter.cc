@@ -610,7 +610,7 @@ next_meter_point (MeterPoint mp)
 		break;
 	}
 
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return MeterInput;
 }
 

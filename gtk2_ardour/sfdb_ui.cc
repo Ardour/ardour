@@ -113,7 +113,7 @@ importmode2string (ImportMode mode)
 	case ImportAsTapeTrack:
 		return _("as new tape tracks");
 	}
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return _("as new tracks");
 }
 
@@ -1891,7 +1891,7 @@ SoundFileOmega::get_channel_disposition () const
 
 	if (x == disposition_map.end()) {
 		fatal << string_compose (_("programming error: %1 (%2)"), "unknown string for import disposition", str) << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	return x->second;

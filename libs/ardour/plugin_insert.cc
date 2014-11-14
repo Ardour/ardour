@@ -600,7 +600,7 @@ PluginInsert::default_parameter_value (const Evoral::Parameter& param)
 	if (_plugins.empty()) {
 		fatal << _("programming error: ") << X_("PluginInsert::default_parameter_value() called with no plugin")
 		      << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	return _plugins[0]->default_value (param.id());
@@ -646,7 +646,7 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 	fatal << string_compose (_("programming error: %1"),
 			  X_("unknown plugin type in PluginInsert::plugin_factory"))
 	      << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return boost::shared_ptr<Plugin> ((Plugin*) 0);
 }
 

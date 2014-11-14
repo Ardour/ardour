@@ -66,7 +66,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 	} else {
 		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
 		      << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	if (ret) {
@@ -108,7 +108,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 	} else {
 		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
 		      << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		return boost::shared_ptr<Region>();
 	}
 
@@ -149,7 +149,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, c
 	} else {
 		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
 		      << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		return boost::shared_ptr<Region>();
 	}
 
@@ -191,7 +191,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 	} else {
 		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
 		      << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	if (ret) {

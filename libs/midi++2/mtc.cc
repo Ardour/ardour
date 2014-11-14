@@ -285,7 +285,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 		break;
 
 	default:
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		break;
 
 	} 

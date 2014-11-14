@@ -148,7 +148,7 @@ LatencyGUI::change_latency_from_button (int dir)
 	} else {
 		fatal << string_compose (_("programming error: %1 (%2)"), X_("illegal string in latency GUI units combo"), unitstr)
 		      << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 	}
 
 	if (dir > 0) {

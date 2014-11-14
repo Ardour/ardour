@@ -38,7 +38,7 @@ get_mhz()
 
 	if ((f = fopen("/proc/cpuinfo", "r")) == 0) {
 		fatal << _("CycleTimer::get_mhz(): can't open /proc/cpuinfo") << endmsg;
-		/*NOTREACHED*/
+		abort(); /*NOTREACHED*/
 		return 0.0f;
 	}
 
@@ -50,7 +50,7 @@ get_mhz()
 
 		if (fgets (buf, sizeof(buf), f) == 0) {
 			fatal << _("CycleTimer::get_mhz(): cannot locate cpu MHz in /proc/cpuinfo") << endmsg;
-			/*NOTREACHED*/
+			abort(); /*NOTREACHED*/
 			return 0.0f;
 		}
 
@@ -73,7 +73,7 @@ get_mhz()
 	}
 
 	fatal << _("cannot locate cpu MHz in /proc/cpuinfo") << endmsg;
-	/*NOTREACHED*/
+	abort(); /*NOTREACHED*/
 	return 0.0f;
 }
 

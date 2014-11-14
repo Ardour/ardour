@@ -148,7 +148,7 @@ Delivery::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 			}
 		} else {
 			fatal << "programming error: this should never be reached" << endmsg;
-			/*NOTREACHED*/
+			abort(); /*NOTREACHED*/
 		}
 
 
@@ -169,7 +169,7 @@ Delivery::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 			}
 		} else {
 			fatal << "programming error: this should never be reached" << endmsg;
-			/*NOTREACHED*/
+			abort(); /*NOTREACHED*/
 		}
 
 	} else {
@@ -210,7 +210,7 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 			if (_input->n_ports() != in) {
 				if (_input->n_ports() != ChanCount::ZERO) {
 					fatal << _name << " programming error: configure_io called with " << in << " and " << out << " with " << _input->n_ports() << " input ports" << endmsg;
-					/*NOTREACHED*/
+					abort(); /*NOTREACHED*/
 				} else {
 					/* I/O not yet configured */
 				}
