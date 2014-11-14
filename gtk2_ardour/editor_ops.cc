@@ -4003,11 +4003,12 @@ Editor::cut_copy_midi (CutCopyOp op)
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
 		if (mrv) {
 			mrv->cut_copy_clear (op);
+
+			/* XXX: not ideal, as there may be more than one track involved in the selection */
+			_last_cut_copy_source_track = &mrv->get_time_axis_view();
 		}
 	}
 }
-
-
 
 struct lt_playlist {
     bool operator () (const PlaylistState& a, const PlaylistState& b) {
@@ -4372,6 +4373,9 @@ Editor::paste_internal (framepos_t position, float times)
 	if (_edit_point == Editing::EditAtMouse && entered_track) {
 		/* With the mouse edit point, paste onto the track under the mouse */
 		ts.push_back (entered_track);
+	} else if (_edit_point == Editing::EditAtMouse && entered_regionview) {
+		/* With the mouse edit point, paste onto the track of the region under the mouse */
+		ts.push_back (&entered_regionview->get_time_axis_view());
 	} else if (!selection->tracks.empty()) {
 		/* Otherwise, if there are some selected tracks, paste to them */
 		ts = selection->tracks.filter_to_unique_playlists ();
@@ -4387,21 +4391,18 @@ Editor::paste_internal (framepos_t position, float times)
 
 		/* undo/redo is handled by individual tracks/regions */
 
-		for (nth = 0, i = ts.begin(); i != ts.end(); ++i, ++nth) {
+		RegionSelection rs;
+		RegionSelection::iterator r;
+		MidiNoteSelection::iterator cb;
 
-			RegionSelection rs;
-			RegionSelection::iterator r;
-			MidiNoteSelection::iterator cb;
+		get_regions_at (rs, position, ts);
 
-			get_regions_at (rs, position, ts);
-
-			for (cb = cut_buffer->midi_notes.begin(), r = rs.begin();
-			     cb != cut_buffer->midi_notes.end() && r != rs.end(); ++r) {
-				MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
-				if (mrv) {
-					mrv->paste (position, times, **cb);
-					++cb;
-				}
+		for (cb = cut_buffer->midi_notes.begin(), r = rs.begin();
+		     cb != cut_buffer->midi_notes.end() && r != rs.end(); ++r) {
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
+			if (mrv) {
+				mrv->paste (position, times, **cb);
+				++cb;
 			}
 		}
 

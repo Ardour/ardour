@@ -366,9 +366,13 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 		return r;
 
 	case GDK_ENTER_NOTIFY:
+		// set entered_regionview (among other things)
+		trackview.editor().canvas_region_view_event (ev, group, this);
 		return enter_notify (&ev->crossing);
 
 	case GDK_LEAVE_NOTIFY:
+		// reset entered_regionview (among other things)
+		trackview.editor().canvas_region_view_event (ev, group, this);
 		return leave_notify (&ev->crossing);
 
 	case GDK_MOTION_NOTIFY:
@@ -3323,27 +3327,20 @@ MidiRegionView::paste (framepos_t pos, float times, const MidiCutBuffer& mcb)
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("MIDI paste @ %1 times %2\n", pos, times));
-
 	trackview.session()->begin_reversible_command (_("paste"));
 
 	start_note_diff_command (_("paste"));
 
-	Evoral::MusicalTime beat_delta;
-	Evoral::MusicalTime paste_pos_beats;
-	Evoral::MusicalTime duration;
-	Evoral::MusicalTime end_point = 0;
+	const Evoral::MusicalTime pos_beats  = absolute_frames_to_source_beats (pos);
+	const Evoral::MusicalTime first_time = (*mcb.notes().begin())->time();
+	const Evoral::MusicalTime last_time  = (*mcb.notes().rbegin())->end_time();
+	Evoral::MusicalTime       end_point  = 0;
 
-	duration = (*mcb.notes().rbegin())->end_time() - (*mcb.notes().begin())->time();
-	paste_pos_beats = absolute_frames_to_source_beats (pos);
-	beat_delta = (*mcb.notes().begin())->time() - paste_pos_beats;
-	paste_pos_beats = 0;
-
-	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste data spans from %1 to %2 (%3) ; paste pos beats = %4 (based on %5 - %6 ; beat delta = %7\n",
-	                                               (*mcb.notes().begin())->time(),
-	                                               (*mcb.notes().rbegin())->end_time(),
-	                                               duration, pos, _region->position(),
-	                                               paste_pos_beats, beat_delta));
+	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste data spans from %1 to %2 (%3) ; paste pos beats = %4 (based on %5 - %6)\n",
+	                                               first_time,
+	                                               last_time,
+	                                               last_time - first_time, pos, _region->position(),
+	                                               pos_beats));
 
 	clear_selection ();
 
@@ -3352,15 +3349,13 @@ MidiRegionView::paste (framepos_t pos, float times, const MidiCutBuffer& mcb)
 		for (Notes::const_iterator i = mcb.notes().begin(); i != mcb.notes().end(); ++i) {
 
 			boost::shared_ptr<NoteType> copied_note (new NoteType (*((*i).get())));
-			copied_note->set_time (paste_pos_beats + copied_note->time() - beat_delta);
+			copied_note->set_time (pos_beats + copied_note->time() - first_time);
 
 			/* make all newly added notes selected */
 
 			note_diff_add_note (copied_note, true);
 			end_point = copied_note->end_time();
 		}
-
-		paste_pos_beats += duration;
 	}
 
 	/* if we pasted past the current end of the region, extend the region */
