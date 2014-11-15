@@ -389,10 +389,22 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
                name().c_str(), ev.id(), ev.time(), ev.size());
 	       for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
 
-	if (ev.time() < _last_ev_time_beats) {
-		warning << string_compose(_("Skipping event with unordered time %1"), ev.time())
-		        << endmsg;
-		return;
+	double time = ev.time();
+	if (time < _last_ev_time_beats) {
+		const double difference = _last_ev_time_beats - time;
+		if (difference / (double)ppqn() < 1.0) {
+			/* Close enough.  This problem occurs because Sequence is not
+			   actually ordered due to fuzzy time comparison.  I'm pretty sure
+			   this is inherently a bad idea which causes problems all over the
+			   place, but tolerate it here for now anyway. */
+			time = _last_ev_time_beats;
+		} else {
+			/* Out of order by more than a tick. */
+			warning << string_compose(_("Skipping event with unordered beat time %1 < %2 (off by %3 beats, %4 ticks)"),
+			                          ev.time(), _last_ev_time_beats, difference, difference / (double)ppqn())
+			        << endmsg;
+			return;
+		}
 	}
 
 	Evoral::event_id_t event_id;
@@ -407,13 +419,13 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 		_model->append (ev, event_id);
 	}
 
-	_length_beats = max(_length_beats, ev.time());
+	_length_beats = max(_length_beats, time);
 
-	const double delta_time_beats   = ev.time() - _last_ev_time_beats;
+	const double delta_time_beats   = time - _last_ev_time_beats;
 	const uint32_t delta_time_ticks = (uint32_t)lrint(delta_time_beats * (double)ppqn());
 
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
-	_last_ev_time_beats = ev.time();
+	_last_ev_time_beats = time;
 	_flags = Source::Flag (_flags & ~Empty);
 }
 
@@ -430,7 +442,8 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 	// for (size_t i=0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");
 
 	if (ev.time() < _last_ev_time_frames) {
-		warning << string_compose(_("Skipping event with unordered time %1"), ev.time())
+		warning << string_compose(_("Skipping event with unordered frame time %1 < %2"),
+		                          ev.time(), _last_ev_time_frames)
 		        << endmsg;
 		return;
 	}
