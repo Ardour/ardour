@@ -3970,7 +3970,7 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		if ((mtv = dynamic_cast<MidiTimeAxisView*>(_editor->clicked_axisview)) != 0) {
 			/* MIDI track */
-			if (_editor->selection->empty()) {
+			if (_editor->selection->empty() && _editor->mouse_mode == MouseDraw) {
 				/* nothing selected */
 				add_midi_region (mtv);
 				do_deselect = false;
