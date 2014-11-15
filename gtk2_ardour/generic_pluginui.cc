@@ -300,6 +300,7 @@ GenericPluginUI::build ()
 			}
 
 			control_uis.push_back(cui);
+			input_controls_with_automation.push_back (cui);
 		}
 	}
 
@@ -735,6 +736,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
 
 		input_controls.push_back (control_ui);
+		input_controls_with_automation.push_back (control_ui);
 
 	} else if (!is_input) {
 
@@ -843,7 +845,7 @@ GenericPluginUI::astate_clicked (ControlUI* cui)
 void 
 GenericPluginUI::set_all_automation (AutoState as)
 {
-	for (vector<ControlUI*>::iterator i = input_controls.begin(); i != input_controls.end(); ++i) {
+	for (vector<ControlUI*>::iterator i = input_controls_with_automation.begin(); i != input_controls_with_automation.end(); ++i) {
 		if ((*i)->controller || (*i)->button) {
 			set_automation_state (as, (*i));
 		}
