@@ -266,6 +266,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	};
 
 	std::vector<ControlUI*>   input_controls;
+	std::vector<ControlUI*>   input_controls_with_automation;
 	std::vector<ControlUI*>   output_controls;
 	sigc::connection screen_update_connection;
 	void output_update();
