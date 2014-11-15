@@ -1534,7 +1534,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 }
 
 bool
-RouteTimeAxisView::paste (framepos_t pos, float times, Selection& selection, size_t nth)
+RouteTimeAxisView::paste (framepos_t pos, unsigned paste_count, float times, Selection& selection, size_t nth)
 {
 	if (!is_track()) {
 		return false;
@@ -1555,6 +1555,11 @@ RouteTimeAxisView::paste (framepos_t pos, float times, Selection& selection, siz
 		pos = session_frame_to_track_frame (pos, track()->speed());
                 DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("modified paste to %1\n", pos));
 	}
+
+	/* add multi-paste offset if applicable */
+	std::pair<framepos_t, framepos_t> extent   = (*p)->get_extent();
+	const framecnt_t                  duration = extent.second - extent.first;
+	pos += _editor.get_paste_offset(pos, paste_count, duration);
 
 	pl->clear_changes ();
 	if (Config->get_edit_mode() == Ripple) {

@@ -165,7 +165,7 @@ class TimeAxisView : public virtual AxisView
 	/* editing operations */
 
 	virtual void cut_copy_clear (Selection&, Editing::CutCopyOp) {}
-	virtual bool paste (ARDOUR::framepos_t, float /*times*/, Selection&, size_t /*nth*/) { return false; }
+	virtual bool paste (ARDOUR::framepos_t, unsigned /*paste_count*/, float /*times*/, Selection&, size_t /*nth*/) { return false; }
 
 	virtual void set_selected_regionviews (RegionSelection&) {}
 	virtual void set_selected_points (PointSelection&) {}

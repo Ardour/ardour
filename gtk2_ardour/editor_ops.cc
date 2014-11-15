@@ -4364,6 +4364,15 @@ Editor::paste_internal (framepos_t position, float times)
                 DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("preferred edit position is %1\n", position));
 	}
 
+	if (position == last_paste_pos) {
+		/* repeated paste in the same position */
+		++paste_count;
+	} else {
+		/* paste in new location, reset repeated paste state */
+		paste_count = 0;
+		last_paste_pos = position;
+	}
+
 	TrackViewList ts;
 	TrackViewList::iterator i;
 	size_t nth;
@@ -4401,7 +4410,7 @@ Editor::paste_internal (framepos_t position, float times)
 		     cb != cut_buffer->midi_notes.end() && r != rs.end(); ++r) {
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
 			if (mrv) {
-				mrv->paste (position, times, **cb);
+				mrv->paste (position, paste_count, times, **cb);
 				++cb;
 			}
 		}
@@ -4413,7 +4422,7 @@ Editor::paste_internal (framepos_t position, float times)
 		begin_reversible_command (Operations::paste);
 
 		for (nth = 0, i = ts.begin(); i != ts.end(); ++i, ++nth) {
-			(*i)->paste (position, times, *cut_buffer, nth);
+			(*i)->paste (position, paste_count, times, *cut_buffer, nth);
 		}
 
 		commit_reversible_command ();

@@ -312,6 +312,8 @@ Editor::Editor ()
 	clicked_control_point = 0;
 	last_update_frame = 0;
         pre_press_cursor = 0;
+	last_paste_pos = 0;
+	paste_count = 0;
 	_drags = new DragManager (this);
 	lock_dialog = 0;
 	ruler_dialog = 0;
@@ -3854,6 +3856,31 @@ PlaylistSelector&
 Editor::playlist_selector () const
 {
 	return *_playlist_selector;
+}
+
+framecnt_t
+Editor::get_paste_offset (framepos_t pos, unsigned paste_count, framecnt_t duration)
+{
+	if (paste_count == 0) {
+		/* don't bother calculating an offset that will be zero anyway */
+		return 0;
+	}
+
+	/* calculate basic unsnapped multi-paste offset */
+	framecnt_t offset = paste_count * duration;
+
+	bool   success    = true;
+	double snap_beats = get_grid_type_as_beats(success, pos);
+	if (success) {
+		/* we're snapped to something musical, round duration up */
+		BeatsFramesConverter      conv(_session->tempo_map(), pos);
+		const Evoral::MusicalTime dur_beats      = conv.from(duration);
+		const framecnt_t          snap_dur_beats = ceil(dur_beats / snap_beats) * snap_beats;
+
+		offset = paste_count * conv.to(snap_dur_beats);
+	}
+
+	return offset;
 }
 
 Evoral::MusicalTime

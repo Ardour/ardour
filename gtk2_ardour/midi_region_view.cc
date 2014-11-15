@@ -3321,25 +3321,37 @@ MidiRegionView::selection_as_cut_buffer () const
 
 /** This method handles undo */
 void
-MidiRegionView::paste (framepos_t pos, float times, const MidiCutBuffer& mcb)
+MidiRegionView::paste (framepos_t pos, unsigned paste_count, float times, const MidiCutBuffer& mcb)
 {
 	if (mcb.empty()) {
 		return;
 	}
 
+	PublicEditor& editor = trackview.editor ();
+
 	trackview.session()->begin_reversible_command (_("paste"));
 
 	start_note_diff_command (_("paste"));
 
-	const Evoral::MusicalTime pos_beats  = absolute_frames_to_source_beats (pos);
-	const Evoral::MusicalTime first_time = (*mcb.notes().begin())->time();
-	const Evoral::MusicalTime last_time  = (*mcb.notes().rbegin())->end_time();
-	Evoral::MusicalTime       end_point  = 0;
+	/* get snap duration, default to 1 beat if not snapped to anything musical */
+	bool   success    = true;
+	double snap_beats = editor.get_grid_type_as_beats(success, pos);
+	if (!success) {
+		snap_beats = 1.0;
+	}
+
+	const Evoral::MusicalTime first_time    = (*mcb.notes().begin())->time();
+	const Evoral::MusicalTime last_time     = (*mcb.notes().rbegin())->end_time();
+	const Evoral::MusicalTime duration      = last_time - first_time;
+	const Evoral::MusicalTime snap_duration = ceil(duration / snap_beats) * snap_beats;
+	const Evoral::MusicalTime paste_offset  = paste_count * snap_duration;
+	const Evoral::MusicalTime pos_beats     = absolute_frames_to_source_beats(pos) + paste_offset;
+	Evoral::MusicalTime       end_point     = 0;
 
 	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste data spans from %1 to %2 (%3) ; paste pos beats = %4 (based on %5 - %6)\n",
 	                                               first_time,
 	                                               last_time,
-	                                               last_time - first_time, pos, _region->position(),
+	                                               duration, pos, _region->position(),
 	                                               pos_beats));
 
 	clear_selection ();

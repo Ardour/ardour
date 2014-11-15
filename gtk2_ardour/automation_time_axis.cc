@@ -637,7 +637,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
  *  @param nth Index of the AutomationList within the selection to paste from.
  */
 bool
-AutomationTimeAxisView::paste (framepos_t pos, float times, Selection& selection, size_t nth)
+AutomationTimeAxisView::paste (framepos_t pos, unsigned paste_count, float times, Selection& selection, size_t nth)
 {
 	boost::shared_ptr<AutomationLine> line;
 
@@ -651,11 +651,11 @@ AutomationTimeAxisView::paste (framepos_t pos, float times, Selection& selection
 		return false;
 	}
 
-	return paste_one (*line, pos, times, selection, nth);
+	return paste_one (*line, pos, paste_count, times, selection, nth);
 }
 
 bool
-AutomationTimeAxisView::paste_one (AutomationLine& line, framepos_t pos, float times, Selection& selection, size_t nth)
+AutomationTimeAxisView::paste_one (AutomationLine& line, framepos_t pos, unsigned paste_count, float times, Selection& selection, size_t nth)
 {
 	AutomationSelection::iterator p;
 	boost::shared_ptr<AutomationList> alist(line.the_list());
@@ -670,6 +670,9 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, framepos_t pos, float t
 	if (p == selection.lines.end()) {
 		return false;
 	}
+
+	/* add multi-paste offset if applicable */
+	pos += _editor.get_paste_offset(pos, paste_count, (*p)->length());
 
 	double const model_pos = line.time_converter().from (pos - line.time_converter().origin_b ());
 

@@ -112,7 +112,7 @@ public:
 	void resolve_note(uint8_t note_num, double end_time);
 
 	void cut_copy_clear (Editing::CutCopyOp);
-	void paste (framepos_t pos, float times, const MidiCutBuffer&);
+	void paste (framepos_t pos, unsigned paste_count, float times, const MidiCutBuffer&);
 
 	void add_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr patch, const std::string& displaytext, bool);
 

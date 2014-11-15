@@ -313,6 +313,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 
 	framecnt_t get_nudge_distance (framepos_t pos, framecnt_t& next);
+	framecnt_t get_paste_offset (framepos_t pos, unsigned paste_count, framecnt_t duration);
 	Evoral::MusicalTime get_grid_type_as_beats (bool& success, framepos_t position);
 
 	void nudge_forward (bool next, bool force_playhead);
@@ -1108,6 +1109,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         void load_bindings ();
         Gtkmm2ext::ActionMap editor_action_map;
         Gtkmm2ext::Bindings  key_bindings;
+
+	/* CUT/COPY/PASTE */
+
+	framepos_t last_paste_pos;
+	unsigned   paste_count;
 
 	void cut_copy (Editing::CutCopyOp);
 	bool can_cut_copy () const;
