@@ -1065,12 +1065,12 @@ Editor::control_scroll (float fraction)
 		_dragging_playhead = true;
 	}
 
-	if ((fraction < 0.0f) && (*_control_scroll_target < (framepos_t) fabs(step))) {
+	if ((fraction < 0.0f) && (*_control_scroll_target <= (framepos_t) fabs(step))) {
 		*_control_scroll_target = 0;
 	} else if ((fraction > 0.0f) && (max_framepos - *_control_scroll_target < step)) {
 		*_control_scroll_target = max_framepos - (current_page_samples()*2); // allow room for slop in where the PH is on the screen
 	} else {
-		*_control_scroll_target += (framepos_t) floor (step);
+		*_control_scroll_target += (framepos_t) trunc (step);
 	}
 
 	/* move visuals, we'll catch up with it later */
