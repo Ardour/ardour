@@ -1619,7 +1619,7 @@ ControlList::clear (double start, double end)
 
 /** @param pos Position in model coordinates */
 bool
-ControlList::paste (ControlList& alist, double pos, float /*times*/)
+ControlList::paste (const ControlList& alist, double pos, float /*times*/)
 {
 	if (alist._events.empty()) {
 		return false;
@@ -1634,7 +1634,7 @@ ControlList::paste (ControlList& alist, double pos, float /*times*/)
 
 		where = upper_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
-		for (iterator i = alist.begin();i != alist.end(); ++i) {
+		for (const_iterator i = alist.begin();i != alist.end(); ++i) {
 			_events.insert (where, new ControlEvent( (*i)->when+pos,( *i)->value));
 			end = (*i)->when + pos;
 		}

@@ -139,7 +139,7 @@ public:
 	boost::shared_ptr<ControlList> copy (double, double);
 	void clear (double, double);
 
-	bool paste (ControlList&, double position, float times);
+	bool paste (const ControlList&, double position, float times);
 
 	void set_yrange (double min, double max) {
 		_min_yval = min;
