@@ -103,11 +103,20 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 
 		/* XXX: icky dcast to Editor */
 		e.drags()->set (new EditorRubberbandSelectDrag (dynamic_cast<Editor*> (&e), group), ev);
+		e.drags()->start_grab (ev);
+		return true;
+
+	} else if (ev->type == GDK_MOTION_NOTIFY && e.drags()->active()) {
+		/* we probably shouldn't have to handle this here, but... */
+		e.drags()->motion_handler(ev, false);
+		return true;
 
 	} else if (ev->type == GDK_BUTTON_RELEASE) {
-
-		if (trackview.editor().drags()->active() && trackview.editor().drags()->end_grab (ev)) {
+		if (e.drags()->end_grab (ev)) {
 			return true;
+		} else if (e.current_mouse_mode() != Editing::MouseObject &&
+		           e.current_mouse_mode() == Editing::MouseDraw) {
+			return false;
 		}
 
 		double x = ev->button.x;
@@ -122,7 +131,8 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 
 		/* guard points only if primary modifier is used */
 		bool with_guard_points = Gtkmm2ext::Keyboard::modifier_state_equals (ev->button.state, Gtkmm2ext::Keyboard::PrimaryModifier);
-		add_automation_event (ev, trackview.editor().pixel_to_sample (x) - _region->position() + _region->start(), y, with_guard_points);
+		add_automation_event (ev, e.pixel_to_sample (x) - _region->position() + _region->start(), y, with_guard_points);
+		return true;
 	}
 
 	return false;
