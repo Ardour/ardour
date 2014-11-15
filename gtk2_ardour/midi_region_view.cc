@@ -35,6 +35,7 @@
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
+#include "ardour/operations.h"
 #include "ardour/session.h"
 
 #include "evoral/Parameter.hpp"
@@ -3333,7 +3334,7 @@ MidiRegionView::paste (framepos_t pos, unsigned paste_count, float times, const 
 
 	PublicEditor& editor = trackview.editor ();
 
-	trackview.session()->begin_reversible_command (_("paste"));
+	trackview.session()->begin_reversible_command (Operations::paste);
 
 	start_note_diff_command (_("paste"));
 
