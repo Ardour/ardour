@@ -97,6 +97,10 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 bool
 AutomationRegionView::canvas_group_event (GdkEvent* ev)
 {
+	if (in_destructor) {
+		return false;
+	}
+
 	PublicEditor& e = trackview.editor ();
 
 	if (ev->type == GDK_BUTTON_PRESS && e.current_mouse_mode() == Editing::MouseObject) {

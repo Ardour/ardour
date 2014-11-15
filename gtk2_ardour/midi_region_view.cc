@@ -312,6 +312,10 @@ MidiRegionView::connect_to_diskstream ()
 bool
 MidiRegionView::canvas_group_event(GdkEvent* ev)
 {
+	if (in_destructor) {
+		return false;
+	}
+
 	bool r;
 
 	switch (ev->type) {
