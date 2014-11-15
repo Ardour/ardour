@@ -185,7 +185,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 	MidiModel::NoteDiffCommand::Property prop (MidiModel::NoteDiffCommand::NoteNumber);
 	bool apply = false;
 	bool was_selected = false;
-	char* opname;
+	char const * opname;
 
 	if (!view.get_path_at_pos (ev->x, ev->y, path, col, cellx, celly)) {
 		return false;
@@ -587,7 +587,7 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 	bool   apply = false;
 	int    idelta = 0;
 	double fdelta = 0;
-	char*  opname;
+	char const * opname;
 	switch (edit_column) {
 	case 0: // start
 		break;
