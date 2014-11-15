@@ -54,7 +54,6 @@ AutomationRegionView::AutomationRegionView (ArdourCanvas::Container*            
 		create_line(list);
 	}
 
-	group->Event.connect (sigc::mem_fun (this, &AutomationRegionView::canvas_event));
 	group->raise_to_top();
 }
 
@@ -96,7 +95,7 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 }
 
 bool
-AutomationRegionView::canvas_event (GdkEvent* ev)
+AutomationRegionView::canvas_group_event (GdkEvent* ev)
 {
 	PublicEditor& e = trackview.editor ();
 

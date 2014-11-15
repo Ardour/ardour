@@ -39,6 +39,7 @@
 #include "ardour/automation_list.h"
 #include "ardour/dB.h"
 #include "ardour/debug.h"
+#include "ardour/parameter_types.h"
 #include "ardour/tempo.h"
 
 #include "evoral/Curve.hpp"
@@ -1171,6 +1172,9 @@ AutomationLine::view_to_model_coord_y (double& y) const
 		y = 2.0 * y - 1.0;
 	} else {
 		y = y * (double)(alist->get_max_y() - alist->get_min_y()) + alist->get_min_y();
+		if (ARDOUR::parameter_is_midi((ARDOUR::AutomationType)alist->parameter().type())) {
+			y = round(y);
+		}
 	}
 }
 
