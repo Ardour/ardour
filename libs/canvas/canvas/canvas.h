@@ -195,6 +195,8 @@ protected:
 	void on_size_allocate (Gtk::Allocation&);
 	bool on_scroll_event (GdkEventScroll *);
 	bool on_expose_event (GdkEventExpose *);
+	bool on_key_press_event (GdkEventKey *);
+	bool on_key_release_event (GdkEventKey *);
 	bool on_button_press_event (GdkEventButton *);
 	bool on_button_release_event (GdkEventButton* event);
 	bool on_motion_notify_event (GdkEventMotion *);

@@ -374,7 +374,8 @@ GtkCanvas::GtkCanvas ()
 {
 	/* these are the events we want to know about */
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK |
-		    Gdk::SCROLL_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
+		    Gdk::SCROLL_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK |
+		    Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 }
 
 void
@@ -812,6 +813,28 @@ GtkCanvas::on_scroll_event (GdkEventScroll* ev)
 
 	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas scroll @ %1, %2 => %3\n", ev->x, ev->y, where));
 	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
+}
+
+/** Handler for GDK key press events.
+ *  @param ev Event.
+ *  @return true if the event was handled.
+ */
+bool
+GtkCanvas::on_key_press_event (GdkEventKey* ev)
+{
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, "canvas key press\n");
+	return deliver_event (reinterpret_cast<GdkEvent*>(ev));
+}
+
+/** Handler for GDK key release events.
+ *  @param ev Event.
+ *  @return true if the event was handled.
+ */
+bool
+GtkCanvas::on_key_release_event (GdkEventKey* ev)
+{
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, "canvas key release\n");
+	return deliver_event (reinterpret_cast<GdkEvent*>(ev));
 }
 
 /** Handler for GDK button press events.
