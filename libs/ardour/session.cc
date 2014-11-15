@@ -3734,7 +3734,7 @@ Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t cha
 	return s;
 }
 
-/** Return a unique name based on \a owner_name for a new internal MIDI source */
+/** Return a unique name based on `base` for a new internal MIDI source */
 string
 Session::new_midi_source_path (const string& base)
 {

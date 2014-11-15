@@ -19,6 +19,7 @@
 
 #include <inttypes.h>
 
+#include "pbd/basename.h"
 #include "pbd/error.h"
 
 #include "ardour/audioregion.h"
@@ -58,7 +59,17 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 	} else if ((mr = boost::dynamic_pointer_cast<const MidiRegion>(region)) != 0) {
 
 		if (mr->session().config.get_midi_copy_is_fork()) {
-			ret = mr->clone ();
+			/* What we really want to do here is what Editor::fork_region()
+			   does via Session::create_midi_source_by_stealing_name(), but we
+			   don't have a Track.  We'll just live with the skipped number,
+			   and store the ancestral name of sources so multiple clones
+			   generates reasonable names that don't have too many suffixes. */
+			const std::string ancestor_name = mr->sources().front()->ancestor_name();
+			const std::string base          = PBD::basename_nosuffix(ancestor_name);
+
+			boost::shared_ptr<MidiSource> source = mr->session().create_midi_source_for_session(base);
+			source->set_ancestor_name(mr->sources().front()->name());
+			ret = mr->clone(source);
 		} else {
 			ret = boost::shared_ptr<Region> (new MidiRegion (mr, 0));
 		}

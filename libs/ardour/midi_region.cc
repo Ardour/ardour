@@ -133,6 +133,7 @@ MidiRegion::clone (string path) const
 	boost::shared_ptr<MidiSource> newsrc;
 
 	/* caller must check for pre-existing file */
+	assert (!path.empty());
 	assert (!Glib::file_test (path, Glib::FILE_TEST_EXISTS));
 	newsrc = boost::dynamic_pointer_cast<MidiSource>(
 		SourceFactory::createWritable(DataType::MIDI, _session,

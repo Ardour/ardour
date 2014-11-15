@@ -109,6 +109,9 @@ class LIBARDOUR_API Source : public SessionObject
 	bool used() const { return use_count() > 0; }
 	uint32_t level() const { return _level; }
 
+	std::string ancestor_name() { return _ancestor_name.empty() ? name() : _ancestor_name; }
+	void set_ancestor_name(const std::string& name) { _ancestor_name = name; }
+
   protected:
 	DataType            _type;
 	Flag                _flags;
@@ -119,6 +122,7 @@ class LIBARDOUR_API Source : public SessionObject
         mutable Glib::Threads::Mutex _analysis_lock;
 	gint                _use_count; /* atomic */
 	uint32_t            _level; /* how deeply nested is this source w.r.t a disk file */
+	std::string         _ancestor_name;
 
   private:
 	void fix_writable_flags ();
