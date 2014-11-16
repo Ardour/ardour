@@ -3959,7 +3959,7 @@ Editor::cut_copy_points (CutCopyOp op)
 		for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
 			boost::shared_ptr<AutomationList> al = (*i)->line().the_list();
 			AutomationList::const_iterator j = (*i)->model ();
-			lists[al].copy->add ((*j)->when, (*j)->value);
+			lists[al].copy->fast_simple_add ((*j)->when, (*j)->value);
 		}
 
 		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
