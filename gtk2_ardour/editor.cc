@@ -3887,16 +3887,10 @@ Editor::get_paste_offset (framepos_t pos, unsigned paste_count, framecnt_t durat
 	/* calculate basic unsnapped multi-paste offset */
 	framecnt_t offset = paste_count * duration;
 
-	bool   success    = true;
-	double snap_beats = get_grid_type_as_beats(success, pos);
-	if (success) {
-		/* we're snapped to something musical, round duration up */
-		BeatsFramesConverter      conv(_session->tempo_map(), pos);
-		const Evoral::MusicalTime dur_beats      = conv.from(duration);
-		const framecnt_t          snap_dur_beats = ceil(dur_beats / snap_beats) * snap_beats;
-
-		offset = paste_count * conv.to(snap_dur_beats);
-	}
+	/* snap offset so pos + offset is aligned to the grid */
+	framepos_t offset_pos = pos + offset;
+	snap_to(offset_pos, RoundUpMaybe);
+	offset = offset_pos - pos;
 
 	return offset;
 }

@@ -64,7 +64,11 @@ class AutomationStreamView : public StreamView
 	void set_selected_points (PointSelection &);
 
 	std::list<boost::shared_ptr<AutomationLine> > get_lines () const;
-	boost::shared_ptr<AutomationLine> paste_line (ARDOUR::framepos_t);
+
+	bool paste (framepos_t                                pos,
+	            unsigned                                  paste_count,
+	            float                                     times,
+	            boost::shared_ptr<ARDOUR::AutomationList> list);
 
   private:
 	void setup_rec_box ();

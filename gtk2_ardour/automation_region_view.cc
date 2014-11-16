@@ -192,6 +192,34 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 	view->session()->set_dirty ();
 }
 
+bool
+AutomationRegionView::paste (framepos_t                                      pos,
+                             unsigned                                        paste_count,
+                             float                                           times,
+                             boost::shared_ptr<const ARDOUR::AutomationList> slist)
+{
+	AutomationTimeAxisView* const             view    = automation_view();
+	boost::shared_ptr<ARDOUR::AutomationList> my_list = _line->the_list();
+
+	if (view->session()->transport_rolling() && my_list->automation_write()) {
+		/* do not paste if this control is in write mode and we're rolling */
+		return false;
+	}
+
+	/* add multi-paste offset if applicable */
+	pos += view->editor().get_paste_offset(
+		pos, paste_count, _line->time_converter().to(slist->length()));
+
+	const double model_pos = _line->time_converter().from(pos - _line->time_converter().origin_b());
+
+	XMLNode& before = my_list->get_state();
+	my_list->paste(*slist, model_pos, times);
+	view->session()->add_command(
+		new MementoCommand<ARDOUR::AutomationList>(*my_list.get(), &before, &my_list->get_state()));
+
+	return true;
+}
+
 void
 AutomationRegionView::set_height (double h)
 {

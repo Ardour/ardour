@@ -27,6 +27,20 @@ namespace ARDOUR {
 	class Playlist;
 }
 
-struct PlaylistSelection : std::list<boost::shared_ptr<ARDOUR::Playlist> > {};
+struct PlaylistSelection : std::list<boost::shared_ptr<ARDOUR::Playlist> > {
+public:
+	const_iterator
+	get_nth(ARDOUR::DataType type, size_t nth) const {
+		size_t count = 0;
+		for (const_iterator l = begin(); l != end(); ++l) {
+			if ((*l)->data_type() == type) {
+				if (count++ == nth) {
+					return l;
+				}
+			}
+		}
+		return end();
+	}
+};
 
 #endif /* __ardour_gtk_playlist_selection_h__ */

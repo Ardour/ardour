@@ -16,8 +16,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <cmath>
 #include <cassert>
+#include <cmath>
+#include <list>
 #include <utility>
 
 #include <gtkmm.h>
@@ -314,16 +315,16 @@ struct RegionPositionSorter {
 };
 
 
-/** @param pos Position, in session frames.
- *  @return AutomationLine to paste to for that position, or 0 if there is none appropriate.
- */
-boost::shared_ptr<AutomationLine>
-AutomationStreamView::paste_line (framepos_t pos)
+bool
+AutomationStreamView::paste (framepos_t                                pos,
+                             unsigned                                  paste_count,
+                             float                                     times,
+                             boost::shared_ptr<ARDOUR::AutomationList> alist)
 {
 	/* XXX: not sure how best to pick this; for now, just use the last region which starts before pos */
 
 	if (region_views.empty()) {
-		return boost::shared_ptr<AutomationLine> ();
+		return false;
 	}
 
 	region_views.sort (RegionPositionSorter ());
@@ -345,7 +346,5 @@ AutomationStreamView::paste_line (framepos_t pos)
 	}
 
 	AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*prev);
-	assert (arv);
-
-	return arv->line ();
+	return arv ? arv->paste(pos, paste_count, times, alist) : false;
 }

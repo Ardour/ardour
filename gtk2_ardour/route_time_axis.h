@@ -70,6 +70,7 @@ class AutomationLine;
 class ProcessorAutomationLine;
 class TimeSelection;
 class RouteGroupMenu;
+class ItemCounts;
 
 class RouteTimeAxisView : public RouteUI, public TimeAxisView
 {
@@ -99,7 +100,7 @@ public:
 
 	/* Editing operations */
 	void cut_copy_clear (Selection&, Editing::CutCopyOp);
-	bool paste (ARDOUR::framepos_t, unsigned paste_count, float times, Selection&, size_t nth);
+	bool paste (ARDOUR::framepos_t, unsigned paste_count, float times, const Selection&, ItemCounts&);
 	RegionView* combine_regions ();
 	void uncombine_regions ();
 	void uncombine_region (RegionView*);
@@ -125,7 +126,7 @@ public:
 	virtual void create_automation_child (const Evoral::Parameter& param, bool show) = 0;
 
 	typedef std::map<Evoral::Parameter, boost::shared_ptr<AutomationTimeAxisView> > AutomationTracks;
-	AutomationTracks automation_tracks() { return _automation_tracks; }
+	const AutomationTracks& automation_tracks() const { return _automation_tracks; }
 
 	boost::shared_ptr<AutomationTimeAxisView> automation_child(Evoral::Parameter param);
 	virtual Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);

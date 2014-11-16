@@ -63,6 +63,7 @@
 #include "automation_time_axis.h"
 #include "enums.h"
 #include "gui_thread.h"
+#include "item_counts.h"
 #include "keyboard.h"
 #include "playlist_selector.h"
 #include "point_selection.h"
@@ -1534,20 +1535,20 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 }
 
 bool
-RouteTimeAxisView::paste (framepos_t pos, unsigned paste_count, float times, Selection& selection, size_t nth)
+RouteTimeAxisView::paste (framepos_t pos, unsigned paste_count, float times, const Selection& selection, ItemCounts& counts)
 {
 	if (!is_track()) {
 		return false;
 	}
 
-	boost::shared_ptr<Playlist> pl = playlist ();
-	PlaylistSelection::iterator p;
-
-	for (p = selection.playlists.begin(); p != selection.playlists.end() && nth; ++p, --nth) {}
+	boost::shared_ptr<Playlist>       pl   = playlist ();
+	const ARDOUR::DataType            type = pl->data_type();
+	PlaylistSelection::const_iterator p    = selection.playlists.get_nth(type, counts.n_playlists(type));
 
 	if (p == selection.playlists.end()) {
 		return false;
 	}
+	counts.increase_n_playlists(type);
 
         DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("paste to %1\n", pos));
 

@@ -22,10 +22,23 @@
 
 #include <list>
 
-namespace ARDOUR {
-	class AutomationList;
-}
+#include "ardour/automation_list.h"
+#include "evoral/Parameter.hpp"
 
-class AutomationSelection : public std::list<boost::shared_ptr<ARDOUR::AutomationList> > {};
+class AutomationSelection : public std::list<boost::shared_ptr<ARDOUR::AutomationList> > {
+public:
+	const_iterator
+	get_nth(const Evoral::Parameter& param, size_t nth) const {
+		size_t count = 0;
+		for (const_iterator l = begin(); l != end(); ++l) {
+			if ((*l)->parameter() == param) {
+				if (count++ == nth) {
+					return l;
+				}
+			}
+		}
+		return end();
+	}
+};
 
 #endif /* __ardour_gtk_automation_selection_h__ */

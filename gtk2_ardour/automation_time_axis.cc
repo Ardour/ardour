@@ -48,6 +48,7 @@
 #include "point_selection.h"
 #include "control_point.h"
 #include "utils.h"
+#include "item_counts.h"
 
 #include "i18n.h"
 
@@ -630,51 +631,43 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
 	_session->set_dirty ();
 }
 
-/** Paste a selection.
- *  @param pos Position to paste to (session frames).
- *  @param times Number of times to paste.
- *  @param selection Selection to paste.
- *  @param nth Index of the AutomationList within the selection to paste from.
- */
 bool
-AutomationTimeAxisView::paste (framepos_t pos, unsigned paste_count, float times, Selection& selection, size_t nth)
+AutomationTimeAxisView::paste (framepos_t pos, unsigned paste_count, float times, const Selection& selection, ItemCounts& counts)
 {
-	boost::shared_ptr<AutomationLine> line;
-
 	if (_line) {
-		line = _line;
+		return paste_one (pos, paste_count, times, selection, counts);
 	} else if (_view) {
-		line = _view->paste_line (pos);
+		AutomationSelection::const_iterator l = selection.lines.get_nth(_parameter, counts.n_lines(_parameter));
+		if (l != selection.lines.end() && _view->paste (pos, paste_count, times, *l)) {
+			counts.increase_n_lines(_parameter);
+			return true;
+		}
 	}
 
-	if (!line) {
-		return false;
-	}
-
-	return paste_one (*line, pos, paste_count, times, selection, nth);
+	return false;
 }
 
 bool
-AutomationTimeAxisView::paste_one (AutomationLine& line, framepos_t pos, unsigned paste_count, float times, Selection& selection, size_t nth)
+AutomationTimeAxisView::paste_one (framepos_t pos, unsigned paste_count, float times, const Selection& selection, ItemCounts& counts)
 {
-	AutomationSelection::iterator p;
-	boost::shared_ptr<AutomationList> alist(line.the_list());
+	boost::shared_ptr<AutomationList> alist(_line->the_list());
 
 	if (_session->transport_rolling() && alist->automation_write()) {
 		/* do not paste if this control is in write mode and we're rolling */
 		return false;
 	}
 
-	for (p = selection.lines.begin(); p != selection.lines.end() && nth; ++p, --nth) {}
-
+	/* Get appropriate list from selection. */
+	AutomationSelection::const_iterator p = selection.lines.get_nth(_parameter, counts.n_lines(_parameter));
 	if (p == selection.lines.end()) {
 		return false;
 	}
+	counts.increase_n_lines(_parameter);
 
 	/* add multi-paste offset if applicable */
 	pos += _editor.get_paste_offset(pos, paste_count, (*p)->length());
 
-	double const model_pos = line.time_converter().from (pos - line.time_converter().origin_b ());
+	double const model_pos = _line->time_converter().from (pos - _line->time_converter().origin_b ());
 
 	XMLNode &before = alist->get_state();
 	alist->paste (**p, model_pos, times);

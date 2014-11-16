@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <string>
+#include <limits>
 #include <map>
 #include <set>
 
@@ -63,6 +64,7 @@
 #include "audio_region_view.h"
 #include "audio_streamview.h"
 #include "audio_time_axis.h"
+#include "automation_region_view.h"
 #include "automation_time_axis.h"
 #include "control_point.h"
 #include "debug.h"
@@ -75,6 +77,7 @@
 #include "gui_thread.h"
 #include "insert_time_dialog.h"
 #include "interthread_progress_window.h"
+#include "item_counts.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
 #include "mixer_strip.h"
@@ -3843,26 +3846,8 @@ Editor::cut_copy (CutCopyOp op)
 
 	bool did_edit = false;
 
-	if (!selection->points.empty()) {
-		begin_reversible_command (opname + _(" points"));
-		did_edit = true;
-		cut_copy_points (op);
-		if (op == Cut || op == Delete) {
-			selection->clear_points ();
-		}
-	} else if (!selection->regions.empty() || !selection->points.empty()) {
-
-		string thing_name;
-
-		if (selection->regions.empty()) {
-			thing_name = _("points");
-		} else if (selection->points.empty()) {
-			thing_name = _("regions");
-		} else {
-			thing_name = _("objects");
-		}
-	
-		begin_reversible_command (opname + ' ' + thing_name);
+	if (!selection->regions.empty() || !selection->points.empty()) {
+		begin_reversible_command (opname + ' ' + _("objects"));
 		did_edit = true;
 
 		if (!selection->regions.empty()) {
@@ -3889,7 +3874,7 @@ Editor::cut_copy (CutCopyOp op)
 			selection->set (start, end);
 		}
 	} else if (!selection->time.empty()) {
-		begin_reversible_command (opname + _(" range"));
+		begin_reversible_command (opname + ' ' + _("range"));
 
 		did_edit = true;
 		cut_copy_ranges (op);
@@ -3912,10 +3897,11 @@ Editor::cut_copy (CutCopyOp op)
 }
 
 struct AutomationRecord {
-	AutomationRecord () : state (0) {}
-	AutomationRecord (XMLNode* s) : state (s) {}
+	AutomationRecord () : state (0) , line(NULL) {}
+	AutomationRecord (XMLNode* s, const AutomationLine* l) : state (s) , line (l) {}
 	
 	XMLNode* state; ///< state before any operation
+	const AutomationLine* line; ///< line this came from
 	boost::shared_ptr<Evoral::ControlList> copy; ///< copied events for the cut buffer
 };
 
@@ -3938,12 +3924,13 @@ Editor::cut_copy_points (CutCopyOp op)
 
 	/* Go through all selected points, making an AutomationRecord for each distinct AutomationList */
 	for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
-		boost::shared_ptr<AutomationList> al = (*i)->line().the_list();
+		const AutomationLine&                   line = (*i)->line();
+		const boost::shared_ptr<AutomationList> al   = line.the_list();
 		if (lists.find (al) == lists.end ()) {
 			/* We haven't seen this list yet, so make a record for it.  This includes
 			   taking a copy of its current state, in case this is needed for undo later.
 			*/
-			lists[al] = AutomationRecord (&al->get_state ());
+			lists[al] = AutomationRecord (&al->get_state (), &line);
 		}
 	}
 
@@ -3951,8 +3938,12 @@ Editor::cut_copy_points (CutCopyOp op)
 		/* This operation will involve putting things in the cut buffer, so create an empty
 		   ControlList for each of our source lists to put the cut buffer data in.
 		*/
+		framepos_t start = std::numeric_limits<framepos_t>::max();
 		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
 			i->second.copy = i->first->create (i->first->parameter ());
+
+			/* Calculate earliest start position of any point in selection. */
+			start = std::min(start, i->second.line->session_position(i->first->begin()));
 		}
 
 		/* Add all selected points to the relevant copy ControlLists */
@@ -3962,11 +3953,18 @@ Editor::cut_copy_points (CutCopyOp op)
 			lists[al].copy->fast_simple_add ((*j)->when, (*j)->value);
 		}
 
+		/* Snap start time backwards, so copy/paste is snap aligned. */
+		snap_to(start, RoundDownMaybe);
+
 		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
-			/* Correct this copy list so that it starts at time 0 */
-			double const start = i->second.copy->front()->when;
+			/* Correct this copy list so that it is relative to the earliest
+			   start time, so relative ordering between points is preserved
+			   when copying from several lists. */
+			const AutomationLine* line        = i->second.line;
+			const double          line_offset = line->time_converter().from(start);
+
 			for (AutomationList::iterator j = i->second.copy->begin(); j != i->second.copy->end(); ++j) {
-				(*j)->when -= start;
+				(*j)->when -= line_offset;
 			}
 
 			/* And add it to the cut buffer */
@@ -4352,14 +4350,8 @@ Editor::paste_internal (framepos_t position, float times)
 {
         DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("apparent paste position is %1\n", position));
 
-	if (internal_editing()) {
-		if (cut_buffer->midi_notes.empty()) {
-			return;
-		}
-	} else {
-		if (cut_buffer->empty()) {
-			return;
-		}
+	if (cut_buffer->empty(internal_editing())) {
+		return;
 	}
 
 	if (position == max_framepos) {
@@ -4376,27 +4368,64 @@ Editor::paste_internal (framepos_t position, float times)
 		last_paste_pos = position;
 	}
 
-	TrackViewList ts;
-	TrackViewList::iterator i;
-	size_t nth;
-
 	/* get everything in the correct order */
 
-	if (_edit_point == Editing::EditAtMouse && entered_track) {
-		/* With the mouse edit point, paste onto the track under the mouse */
-		ts.push_back (entered_track);
-	} else if (_edit_point == Editing::EditAtMouse && entered_regionview) {
-		/* With the mouse edit point, paste onto the track of the region under the mouse */
-		ts.push_back (&entered_regionview->get_time_axis_view());
-	} else if (!selection->tracks.empty()) {
-		/* Otherwise, if there are some selected tracks, paste to them */
+	TrackViewList ts;
+	if (!selection->tracks.empty()) {
+		/* If there is a track selection, paste into exactly those tracks and
+		   only those tracks.  This allows the user to be explicit and override
+		   the below "do the reasonable thing" logic. */
 		ts = selection->tracks.filter_to_unique_playlists ();
 		sort_track_selection (ts);
-	} else if (_last_cut_copy_source_track) {
-		/* Otherwise paste to the track that the cut/copy came from;
-		   see discussion in mantis #3333.
-		*/
-		ts.push_back (_last_cut_copy_source_track);
+	} else {
+		/* Figure out which track to base the paste at. */
+		TimeAxisView* base_track;
+		if (_edit_point == Editing::EditAtMouse && entered_track) {
+			/* With the mouse edit point, paste onto the track under the mouse. */
+			base_track = entered_track;
+		} else if (_edit_point == Editing::EditAtMouse && entered_regionview) {
+			/* With the mouse edit point, paste onto the track of the region under the mouse. */
+			base_track = &entered_regionview->get_time_axis_view();
+		} else if (_last_cut_copy_source_track) {
+			/* Paste to the track that the cut/copy came from (see mantis #333). */
+			base_track = _last_cut_copy_source_track;
+		}
+
+		/* Walk up to parent if necessary, so base track is a route. */
+		while (base_track->get_parent()) {
+			base_track = base_track->get_parent();
+		}
+
+		/* Add base track and all tracks below it.  The paste logic will select
+		   the appropriate object types from the cut buffer in relative order. */
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			if ((*i)->order() >= base_track->order()) {
+				ts.push_back(*i);
+			}
+		}
+
+		/* Sort tracks so the nth track of type T will pick the nth object of type T. */
+		sort_track_selection (ts);
+
+		/* Add automation children of each track in order, for pasting several lines. */
+		for (TrackViewList::iterator i = ts.begin(); i != ts.end();) {
+			/* Add any automation children for pasting several lines */
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*i++);
+			if (!rtv) {
+				continue;
+			}
+
+			typedef RouteTimeAxisView::AutomationTracks ATracks;
+			const ATracks& atracks = rtv->automation_tracks();
+			for (ATracks::const_iterator a = atracks.begin(); a != atracks.end(); ++a) {
+				i = ts.insert(i, a->second.get());
+				++i;
+			}
+		}
+
+		/* We now have a list of trackviews starting at base_track, including
+		   automation children, in the order shown in the editor, e.g. R1,
+		   R1.A1, R1.A2, R2, R2.A1, ... */
 	}
 
 	if (internal_editing ()) {
@@ -4424,8 +4453,9 @@ Editor::paste_internal (framepos_t position, float times)
 
 		begin_reversible_command (Operations::paste);
 
-		for (nth = 0, i = ts.begin(); i != ts.end(); ++i, ++nth) {
-			(*i)->paste (position, paste_count, times, *cut_buffer, nth);
+		ItemCounts counts;
+		for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
+			(*i)->paste (position, paste_count, times, *cut_buffer, counts);
 		}
 
 		commit_reversible_command ();

@@ -78,6 +78,7 @@ class RegionView;
 class GhostRegion;
 class StreamView;
 class ArdourDialog;
+class ItemCounts;
 
 /** Abstract base class for time-axis views (horizontal editor 'strips')
  *
@@ -165,7 +166,20 @@ class TimeAxisView : public virtual AxisView
 	/* editing operations */
 
 	virtual void cut_copy_clear (Selection&, Editing::CutCopyOp) {}
-	virtual bool paste (ARDOUR::framepos_t, unsigned /*paste_count*/, float /*times*/, Selection&, size_t /*nth*/) { return false; }
+
+	/** Paste a selection.
+	 *  @param pos Position to paste to (session frames).
+	 *  @param paste_count Number of pastes to the same location previously (multi-paste).
+	 *  @param times Number of times to paste.
+	 *  @param selection Selection to paste.
+	 *  @param counts Count of consumed selection items (used to find the
+	 *  correct item to paste here, then updated for the next pastee).
+	 */
+	virtual bool paste (ARDOUR::framepos_t pos,
+	                    unsigned           paste_count,
+	                    float              times,
+	                    const Selection&   selection,
+	                    ItemCounts&        counts) { return false; }
 
 	virtual void set_selected_regionviews (RegionSelection&) {}
 	virtual void set_selected_points (PointSelection&) {}

@@ -951,7 +951,7 @@ Selection::empty (bool internal_selection)
 	   as a cut buffer.
 	*/
 
-	return object_level_empty && midi_notes.empty();
+	return object_level_empty && midi_notes.empty() && points.empty();
 }
 
 void

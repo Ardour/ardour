@@ -49,6 +49,11 @@ public:
 
 	void init (bool wfd);
 
+	bool paste (framepos_t                                      pos,
+	            unsigned                                        paste_count,
+	            float                                           times,
+	            boost::shared_ptr<const ARDOUR::AutomationList> slist);
+
 	inline AutomationTimeAxisView* automation_view() const
 		{ return dynamic_cast<AutomationTimeAxisView*>(&trackview); }
 
