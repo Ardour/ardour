@@ -4221,9 +4221,9 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		if (first_move) {
 			grab = adjusted_current_frame (event, false);
 			if (grab < pending_position) {
-				_editor->snap_to (grab, RoundDownAlways);
+				_editor->snap_to (grab, RoundDownMaybe);
 			}  else {
-				_editor->snap_to (grab, RoundUpAlways);
+				_editor->snap_to (grab, RoundUpMaybe);
 			}
 		}
 

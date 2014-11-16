@@ -2588,7 +2588,10 @@ Editor::timecode_snap_to_internal (framepos_t& start, RoundMode direction, bool 
 
 	switch (_snap_type) {
 	case SnapToTimecodeFrame:
-		if (((direction == 0) && (fmod((double)start, (double)_session->frames_per_timecode_frame()) > (_session->frames_per_timecode_frame() / 2))) || (direction > 0)) {
+		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
+		    fmod((double)start, (double)_session->frames_per_timecode_frame()) == 0) {
+			/* start is already on a whole timecode frame, do nothing */
+		} else if (((direction == 0) && (fmod((double)start, (double)_session->frames_per_timecode_frame()) > (_session->frames_per_timecode_frame() / 2))) || (direction > 0)) {
 			start = (framepos_t) (ceil ((double) start / _session->frames_per_timecode_frame()) * _session->frames_per_timecode_frame());
 		} else {
 			start = (framepos_t) (floor ((double) start / _session->frames_per_timecode_frame()) *  _session->frames_per_timecode_frame());
@@ -2601,7 +2604,10 @@ Editor::timecode_snap_to_internal (framepos_t& start, RoundMode direction, bool 
 		} else {
 			start -= _session->config.get_timecode_offset ();
 		}
-		if (((direction == 0) && (start % one_timecode_second > one_timecode_second / 2)) || direction > 0) {
+		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
+		    (start % one_timecode_second == 0)) {
+			/* start is already on a whole second, do nothing */
+		} else if (((direction == 0) && (start % one_timecode_second > one_timecode_second / 2)) || direction > 0) {
 			start = (framepos_t) ceil ((double) start / one_timecode_second) * one_timecode_second;
 		} else {
 			start = (framepos_t) floor ((double) start / one_timecode_second) * one_timecode_second;
@@ -2620,7 +2626,10 @@ Editor::timecode_snap_to_internal (framepos_t& start, RoundMode direction, bool 
 		} else {
 			start -= _session->config.get_timecode_offset ();
 		}
-		if (((direction == 0) && (start % one_timecode_minute > one_timecode_minute / 2)) || direction > 0) {
+		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
+		    (start % one_timecode_minute == 0)) {
+			/* start is already on a whole minute, do nothing */
+		} else if (((direction == 0) && (start % one_timecode_minute > one_timecode_minute / 2)) || direction > 0) {
 			start = (framepos_t) ceil ((double) start / one_timecode_minute) * one_timecode_minute;
 		} else {
 			start = (framepos_t) floor ((double) start / one_timecode_minute) * one_timecode_minute;
@@ -2653,7 +2662,10 @@ Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark)
 		return timecode_snap_to_internal (start, direction, for_mark);
 
 	case SnapToCDFrame:
-		if (((direction == 0) && (start % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
+		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
+		    start % (one_second/75) == 0) {
+			/* start is already on a whole CD frame, do nothing */
+		} else if (((direction == 0) && (start % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
 			start = (framepos_t) ceil ((double) start / (one_second / 75)) * (one_second / 75);
 		} else {
 			start = (framepos_t) floor ((double) start / (one_second / 75)) * (one_second / 75);
@@ -2661,7 +2673,10 @@ Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark)
 		break;
 
 	case SnapToSeconds:
-		if (((direction == 0) && (start % one_second > one_second / 2)) || (direction > 0)) {
+		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
+		    start % one_second == 0) {
+			/* start is already on a whole second, do nothing */
+		} else if (((direction == 0) && (start % one_second > one_second / 2)) || (direction > 0)) {
 			start = (framepos_t) ceil ((double) start / one_second) * one_second;
 		} else {
 			start = (framepos_t) floor ((double) start / one_second) * one_second;
@@ -2669,7 +2684,10 @@ Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark)
 		break;
 
 	case SnapToMinutes:
-		if (((direction == 0) && (start % one_minute > one_minute / 2)) || (direction > 0)) {
+		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
+		    start % one_minute == 0) {
+			/* start is already on a whole minute, do nothing */
+		} else if (((direction == 0) && (start % one_minute > one_minute / 2)) || (direction > 0)) {
 			start = (framepos_t) ceil ((double) start / one_minute) * one_minute;
 		} else {
 			start = (framepos_t) floor ((double) start / one_minute) * one_minute;

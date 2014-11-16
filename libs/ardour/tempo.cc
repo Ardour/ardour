@@ -1254,11 +1254,14 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 
 	if (dir > 0) {
 
-		/* round to next (even if we're on a subdivision */
+		/* round to next (or same iff dir == RoundUpMaybe) */
 
 		uint32_t mod = the_beat.ticks % ticks_one_subdivisions_worth;
 
-		if (mod == 0) {
+		if (mod == 0 && dir == RoundUpMaybe) {
+			/* right on the subdivision, which is fine, so do nothing */
+
+		} else if (mod == 0) {
 			/* right on the subdivision, so the difference is just the subdivision ticks */
 			the_beat.ticks += ticks_one_subdivisions_worth;
 
@@ -1278,11 +1281,14 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 
 	} else if (dir < 0) {
 
-		/* round to previous (even if we're on a subdivision) */
+		/* round to previous (or same iff dir == RoundDownMaybe) */
 
 		uint32_t mod = the_beat.ticks % ticks_one_subdivisions_worth;
 
-		if (mod == 0) {
+		if (mod == 0 && dir == RoundDownMaybe) {
+			/* right on the subdivision, which is fine, so do nothing */
+
+		} else if (mod == 0) {
 			/* right on the subdivision, so the difference is just the subdivision ticks */
 			difference = ticks_one_subdivisions_worth;
 		} else {
@@ -1382,6 +1388,9 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 			}
 
 			if ((*fi).is_bar() && (*fi).frame == frame) {
+				if (dir == RoundDownMaybe) {
+					return frame;
+				}
 				--fi;
 			}
 
@@ -1400,6 +1409,9 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 			/* find bar following 'frame' */
 
 			if ((*fi).is_bar() && (*fi).frame == frame) {
+				if (dir == RoundUpMaybe) {
+					return frame;
+				}
 				++fi;
 			}
 
@@ -1454,7 +1466,7 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 				return 0;
 			}
 
-			if ((*fi).frame >= frame) {
+			if ((*fi).frame > frame || ((*fi).frame == frame && dir == RoundDownAlways)) {
 				DEBUG_TRACE (DEBUG::SnapBBT, "requested frame is on beat, step back\n");
 				--fi;
 			}
@@ -1462,7 +1474,7 @@ TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 								     (*fi).bar, (*fi).beat, (*fi).frame));
 			return (*fi).frame;
 		} else if (dir > 0) {
-			if ((*fi).frame <= frame) {
+			if ((*fi).frame < frame || ((*fi).frame == frame && dir == RoundUpAlways)) {
 				DEBUG_TRACE (DEBUG::SnapBBT, "requested frame is on beat, step forward\n");
 				++fi;
 			}
