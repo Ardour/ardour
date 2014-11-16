@@ -289,7 +289,7 @@ MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
 	: ArdourDialog (_("New Meter"))
 {
 	Timecode::BBT_Time when;
-	frame = map.round_to_bar(frame,0);
+	frame = map.round_to_bar(frame, RoundNearest);
 	Meter meter (map.meter_at(frame));
 
 	map.bbt_time (frame, when);

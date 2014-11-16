@@ -2764,7 +2764,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	motion (event, false);
 
 	TempoMap& map (_editor->session()->tempo_map());
-	framepos_t beat_time = map.round_to_beat (last_pointer_frame(), 0);
+	framepos_t beat_time = map.round_to_beat (last_pointer_frame(), RoundNearest);
 	Timecode::BBT_Time when;
 
 	map.bbt_time (beat_time, when);
@@ -3401,7 +3401,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 				} else 	if (new_start < copy_location->end()) {
 					copy_location->set_start (new_start);
 				} else if (newframe > 0) {
-					_editor->snap_to (next, 1, true);
+					_editor->snap_to (next, RoundUpAlways, true);
 					copy_location->set_end (next);
 					copy_location->set_start (newframe);
 				}
@@ -3414,7 +3414,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 				} else if (new_end > copy_location->start()) {
 					copy_location->set_end (new_end);
 				} else if (newframe > 0) {
-					_editor->snap_to (next, -1, true);
+					_editor->snap_to (next, RoundDownAlways, true);
 					copy_location->set_start (next);
 					copy_location->set_end (newframe);
 				}
@@ -4221,9 +4221,9 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		if (first_move) {
 			grab = adjusted_current_frame (event, false);
 			if (grab < pending_position) {
-				_editor->snap_to (grab, -1);
+				_editor->snap_to (grab, RoundDownAlways);
 			}  else {
-				_editor->snap_to (grab, 1);
+				_editor->snap_to (grab, RoundUpAlways);
 			}
 		}
 

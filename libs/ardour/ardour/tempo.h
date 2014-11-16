@@ -297,10 +297,9 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void replace_tempo (const TempoSection&, const Tempo&, const Timecode::BBT_Time& where);
 	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where);
 
-	framepos_t round_to_bar  (framepos_t frame, int dir);
-	framepos_t round_to_beat (framepos_t frame, int dir);
-	framepos_t round_to_beat_subdivision (framepos_t fr, int sub_num, int dir);
-	framepos_t round_to_tick (framepos_t frame, int dir);
+	framepos_t round_to_bar  (framepos_t frame, RoundMode dir);
+	framepos_t round_to_beat (framepos_t frame, RoundMode dir);
+	framepos_t round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir);
 
 	void set_length (framepos_t frames);
 
@@ -355,7 +354,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	BBTPointList::const_iterator bbt_before_or_at (const Timecode::BBT_Time&);
 	BBTPointList::const_iterator bbt_after_or_at (framepos_t);
 	
-	framepos_t round_to_type (framepos_t fr, int dir, BBTPointType);
+	framepos_t round_to_type (framepos_t fr, RoundMode dir, BBTPointType);
 	void bbt_time (framepos_t, Timecode::BBT_Time&, const BBTPointList::const_iterator&);
 	framecnt_t bbt_duration_at_unlocked (const Timecode::BBT_Time& when, const Timecode::BBT_Time& bbt, int dir);
 	

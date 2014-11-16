@@ -1587,7 +1587,7 @@ MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit)
 	real_editor->begin_reversible_command (Operations::create_region);
 	playlist()->clear_changes ();
 
-	real_editor->snap_to (pos, 0);
+	real_editor->snap_to (pos, RoundNearest);
 
 	boost::shared_ptr<Source> src = _session->create_midi_source_by_stealing_name (view()->trackview().track());
 	PropertyList plist;

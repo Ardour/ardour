@@ -6463,7 +6463,7 @@ Editor::playhead_forward_to_grid ()
 	framepos_t pos = playhead_cursor->current_frame ();
 	if (pos < max_framepos - 1) {
 		pos += 2;
-		snap_to_internal (pos, 1, false);
+		snap_to_internal (pos, RoundUpAlways, false);
 		_session->request_locate (pos);
 	}
 }
@@ -6479,7 +6479,7 @@ Editor::playhead_backward_to_grid ()
 	framepos_t pos = playhead_cursor->current_frame ();
 	if (pos > 2) {
 		pos -= 2;
-		snap_to_internal (pos, -1, false);
+		snap_to_internal (pos, RoundDownAlways, false);
 		_session->request_locate (pos);
 	}
 }

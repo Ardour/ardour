@@ -2553,7 +2553,7 @@ Editor::trackview_by_y_position (double y, bool trackview_relative_offset) const
  *  @param event Event to get current key modifier information from, or 0.
  */
 void
-Editor::snap_to_with_modifier (framepos_t& start, GdkEvent const * event, int32_t direction, bool for_mark)
+Editor::snap_to_with_modifier (framepos_t& start, GdkEvent const * event, RoundMode direction, bool for_mark)
 {
 	if (!_session || !event) {
 		return;
@@ -2571,7 +2571,7 @@ Editor::snap_to_with_modifier (framepos_t& start, GdkEvent const * event, int32_
 }
 
 void
-Editor::snap_to (framepos_t& start, int32_t direction, bool for_mark)
+Editor::snap_to (framepos_t& start, RoundMode direction, bool for_mark)
 {
 	if (!_session || _snap_mode == SnapOff) {
 		return;
@@ -2581,7 +2581,7 @@ Editor::snap_to (framepos_t& start, int32_t direction, bool for_mark)
 }
 
 void
-Editor::timecode_snap_to_internal (framepos_t& start, int32_t direction, bool /*for_mark*/)
+Editor::timecode_snap_to_internal (framepos_t& start, RoundMode direction, bool /*for_mark*/)
 {
 	const framepos_t one_timecode_second = (framepos_t)(rint(_session->timecode_frames_per_second()) * _session->frames_per_timecode_frame());
 	framepos_t one_timecode_minute = (framepos_t)(rint(_session->timecode_frames_per_second()) * _session->frames_per_timecode_frame() * 60);
@@ -2638,7 +2638,7 @@ Editor::timecode_snap_to_internal (framepos_t& start, int32_t direction, bool /*
 }
 
 void
-Editor::snap_to_internal (framepos_t& start, int32_t direction, bool for_mark)
+Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark)
 {
 	const framepos_t one_second = _session->frame_rate();
 	const framepos_t one_minute = _session->frame_rate() * 60;

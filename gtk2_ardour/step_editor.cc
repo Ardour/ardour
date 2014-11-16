@@ -398,7 +398,7 @@ StepEditor::step_edit_bar_sync ()
         }
 
         framepos_t fpos = step_edit_region_view->region_beats_to_absolute_frames (step_edit_beat_pos);
-        fpos = _session->tempo_map().round_to_bar (fpos, 1);
+        fpos = _session->tempo_map().round_to_bar (fpos, RoundUpAlways);
         step_edit_beat_pos = ceil (step_edit_region_view->region_frames_to_region_beats (fpos - step_edit_region->position()));
         step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }

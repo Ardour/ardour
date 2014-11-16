@@ -963,12 +963,12 @@ RegionView::snap_frame_to_frame (frameoffset_t x) const
 
 	/* try a snap in either direction */
 	framepos_t frame = session_frame;
-	editor.snap_to (frame, 0);
+	editor.snap_to (frame, RoundNearest);
 
 	/* if we went off the beginning of the region, snap forwards */
 	if (frame < _region->position ()) {
 		frame = session_frame;
-		editor.snap_to (frame, 1);
+		editor.snap_to (frame, RoundUpAlways);
 	}
 
 	/* back to region relative */

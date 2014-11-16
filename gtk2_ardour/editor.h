@@ -412,9 +412,19 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtkmm2ext::TearOff* mouse_mode_tearoff () const { return _mouse_mode_tearoff; }
 	Gtkmm2ext::TearOff* tools_tearoff () const { return _tools_tearoff; }
 
-	void snap_to (framepos_t& first, int32_t direction = 0, bool for_mark = false);
-	void snap_to_with_modifier (framepos_t& first, GdkEvent const *, int32_t direction = 0, bool for_mark = false);
-	void snap_to (framepos_t& first, framepos_t& last, int32_t direction = 0, bool for_mark = false);
+	void snap_to (framepos_t&       first,
+	              ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
+	              bool              for_mark  = false);
+
+	void snap_to_with_modifier (framepos_t&       first,
+	                            GdkEvent const *  ev,
+	                            ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
+	                            bool              for_mark  = false);
+
+	void snap_to (framepos_t&       first,
+	              framepos_t&       last,
+	              ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
+	              bool              for_mark  = false);
 
 	void begin_reversible_command (std::string cmd_name);
 	void begin_reversible_command (GQuark);
@@ -2018,8 +2028,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void select_next_route ();
 	void select_prev_route ();
 
-	void snap_to_internal (framepos_t& first, int32_t direction = 0, bool for_mark = false);
-	void timecode_snap_to_internal (framepos_t& first, int32_t direction = 0, bool for_mark = false);
+	void snap_to_internal (framepos_t&       first,
+	                       ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
+	                       bool              for_mark  = false);
+
+	void timecode_snap_to_internal (framepos_t&       first,
+	                                ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
+	                                bool              for_mark  = false);
 
 	RhythmFerret* rhythm_ferret;
 

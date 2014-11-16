@@ -216,6 +216,12 @@ namespace ARDOUR {
 		TrackColor
 	};
 
+	enum RoundMode {
+		RoundDownAlways = -1,  ///< Always round down, even if on a division
+		RoundNearest    = 0,   ///< Round to nearest
+		RoundUpAlways   = 1    ///< Always round up, even if on a division
+	};
+
 	class AnyTime {
 	public:
 		enum Type {

@@ -1223,19 +1223,19 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 }
 
 framepos_t
-TempoMap::round_to_bar (framepos_t fr, int dir)
+TempoMap::round_to_bar (framepos_t fr, RoundMode dir)
 {
 	return round_to_type (fr, dir, Bar);
 }
 
 framepos_t
-TempoMap::round_to_beat (framepos_t fr, int dir)
+TempoMap::round_to_beat (framepos_t fr, RoundMode dir)
 {
 	return round_to_type (fr, dir, Beat);
 }
 
 framepos_t
-TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, int dir)
+TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 {
 	require_map_to (fr);
 
@@ -1354,7 +1354,7 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, int dir)
 }
 
 framepos_t
-TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
+TempoMap::round_to_type (framepos_t frame, RoundMode dir, BBTPointType type)
 {
 	require_map_to (frame);
 

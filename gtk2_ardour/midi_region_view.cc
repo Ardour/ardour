@@ -3087,7 +3087,7 @@ MidiRegionView::nudge_notes (bool forward)
 			next_pos -= 1;
 		}
 
-		trackview.editor().snap_to (next_pos, (forward ? 1 : -1), false);
+		trackview.editor().snap_to (next_pos, (forward ? RoundUpAlways : RoundDownAlways), false);
 		distance = ref_point - next_pos;
 	}
 

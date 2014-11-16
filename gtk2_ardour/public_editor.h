@@ -141,7 +141,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void set_snap_threshold (double t) = 0;
 
 	/** Snap a value according to the current snap setting. */
-	virtual void snap_to (framepos_t& first, int32_t direction = 0, bool for_mark = false) = 0;
+	virtual void snap_to (framepos_t&       first,
+	                      ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
+	                      bool              for_mark  = false) = 0;
 
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.
@@ -411,7 +413,10 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual ARDOUR::Location* find_location_from_marker (Marker *, bool &) const = 0;
 	virtual Marker* find_marker_from_location_id (PBD::ID const &, bool) const = 0;
 
-	virtual void snap_to_with_modifier (framepos_t &, GdkEvent const *, int32_t direction = 0, bool for_mark = false) = 0;
+	virtual void snap_to_with_modifier (framepos_t &      first,
+	                                    GdkEvent const *  ev,
+	                                    ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
+	                                    bool              for_mark  = false) = 0;
 
 	virtual void get_regions_at (RegionSelection &, framepos_t where, TrackViewList const &) const = 0;
 	virtual RegionSelection get_regions_from_selection_and_mouse (framepos_t) = 0;
