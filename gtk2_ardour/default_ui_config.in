@@ -34,8 +34,8 @@
     <Option name="edit point" value="0000ffff"/>
     <Option name="entered automation line" value="dd6363ff"/>
     <Option name="control point fill" value="ffffff66"/>
-    <Option name="control point outline" value="ff0000ee"/>
-    <Option name="control point selected" value="55ccccff"/>
+    <Option name="control point outline" value="55ccccff"/>
+    <Option name="control point selected" value="ff0000ee"/>
     <Option name="entered gain line" value="dd6363ff"/>
     <Option name="entered marker" value="dd6363ff"/>
     <Option name="frame handle" value="7c00ff96"/>
