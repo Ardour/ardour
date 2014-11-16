@@ -477,7 +477,7 @@ ControlList::editor_add (double when, double value)
 }
 
 void
-ControlList::add (double when, double value, bool with_guards)
+ControlList::add (double when, double value, bool with_guards, bool with_default)
 {
 	/* this is for making changes from some kind of user interface or
 	   control surface (GUI, MIDI, OSC etc)
@@ -494,7 +494,7 @@ ControlList::add (double when, double value, bool with_guards)
 		ControlEvent cp (when, 0.0f);
 		iterator insertion_point;
 
-		if (_events.empty()) {
+		if (_events.empty() && with_default) {
 			
 			/* as long as the point we're adding is not at zero,
 			 * add an "anchor" point there.

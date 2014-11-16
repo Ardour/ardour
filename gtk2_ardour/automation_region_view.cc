@@ -176,7 +176,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 	view->session()->begin_reversible_command (_("add automation event"));
 	XMLNode& before = _line->the_list()->get_state();
 
-	_line->the_list()->add (when_d, y, with_guard_points);
+	_line->the_list()->add (when_d, y, with_guard_points, false);
 
 	XMLNode& after = _line->the_list()->get_state();
 
