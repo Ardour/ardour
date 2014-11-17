@@ -92,7 +92,9 @@ ARDOUR_UI::create_editor ()
                 _sample_rate_dropdown = &editor->get_waves_dropdown("sample_rate_dropdown");
                 _display_format_dropdown = &editor->get_waves_dropdown("display_format_dropdown");
                 _timecode_source_dropdown = &editor->get_waves_dropdown("timecode_selector_dropdown");
-                
+                _mtc_idle_icon = &editor->get_image("mtc_idle_icon");
+                _mtc_sync_icon = &editor->get_image("mtc_sync_icon");
+        
                 _tracks_button = &editor->get_waves_button("tracks_button");
 	}
 
@@ -202,6 +204,20 @@ ARDOUR_UI::update_timecode_source_dropdown_items()
             mtc_item->set_sensitive(false);
         }
     }
+}
+
+void
+ARDOUR_UI::set_mtc_indicator_active (bool set_active)
+{
+    _mtc_sync_icon->set_visible (set_active);
+    _mtc_idle_icon->set_visible (!set_active);
+}
+
+void
+ARDOUR_UI::hide_mtc_indicator ()
+{
+    _mtc_sync_icon->set_visible (false);
+    _mtc_idle_icon->set_visible (false);
 }
 
 void

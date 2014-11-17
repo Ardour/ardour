@@ -140,6 +140,23 @@
                       box.expand="true">
               <HBox>
                 <icon source="infobar_left.png"/>
+                <Layout width="80">
+                    <icon source="infobar_center.png"
+                          box.fill="true"
+                          box.expand="false"/>
+                    <icon id="mtc_idle_icon"
+                          source="mtc_idle.png"
+                          x="3"
+                          y="4"
+                          visible="false"
+                          noshowall="true"/>
+                    <icon id="mtc_sync_icon"
+                          source="mtc_sync.png"
+                          x="3"
+                          y="4"
+                          visible="false"
+                          noshowall="true"/>
+                </Layout>
                 <icon source="infobar_center.png"
                       box.fill="true"
                       box.expand="true"/>
