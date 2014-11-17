@@ -144,6 +144,7 @@ typedef uint64_t microseconds_t;
 #include "i18n.h"
 
 #include "open_file_dialog_proxy.h"
+#include "ok_dialog.h"
 
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
@@ -2944,21 +2945,11 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 
 	catch (...) {
 
-		MessageDialog msg (string_compose(
-			                   _("Session \"%1 (snapshot %2)\" did not load successfully"),
-			                   path, snap_name),
-		                   true,
-		                   Gtk::MESSAGE_INFO,
-		                   BUTTONS_OK);
-
-		msg.set_keep_above (true);
-		msg.set_title (_("Loading Error"));
-		msg.set_position (Gtk::WIN_POS_CENTER);
-		pop_back_splash (msg);
-		msg.present ();
-		(void) msg.run ();
-		msg.hide ();
-
+        OkDialog ok_dialog ("Loading Error", string_compose(_("Session \"%1 (snapshot %2)\"\ndid not load successfully"), path, snap_name));
+        ok_dialog.set_position (Gtk::WIN_POS_CENTER);
+		pop_back_splash (ok_dialog);
+		ok_dialog.run ();
+        
 		goto out;
 	}
 
