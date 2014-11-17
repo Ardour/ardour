@@ -906,6 +906,12 @@ AutomationLine::set_selected_points (PointSelection const & points)
 		(*i)->set_selected (true);
 	}
 
+	if (points.empty()) {
+		remove_visibility (SelectedControlPoints);
+	} else {
+		add_visibility (SelectedControlPoints);
+	}
+
 	set_colors ();
 }
 
