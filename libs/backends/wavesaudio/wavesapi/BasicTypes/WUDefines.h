@@ -63,7 +63,7 @@
     #define WIN_ONLY(__Something_only_for_windows__)
     #define MAC_ONLY(__Something_only_for_mac__) __Something_only_for_mac__
     
-    #if defined(i386) || defined(__i386) || defined(__i386__)
+    #if defined(i386) || defined(__i386) || defined(__i386__) || defined (__ppc__)
         #define kNumArchBits 32
     #endif
     #if defined(__x86_64) || defined(__x86_64__)
