@@ -2280,7 +2280,7 @@ ARDOUR_UI::map_transport_state ()
 void
 ARDOUR_UI::update_clocks ()
 {
-	if (!editor || !editor->dragging_playhead()) {
+	if (editor && !editor->dragging_playhead()) {
 		Clock (_session->audible_frame(), false, editor->get_preferred_edit_position()); /* EMIT_SIGNAL */
 	}
 }
