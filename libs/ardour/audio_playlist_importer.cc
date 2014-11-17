@@ -222,6 +222,7 @@ AudioPlaylistImporter::_move ()
 		XMLProperty* out = (*it)->property("out");
 		if (!in || !out) {
 			error << string_compose (X_("AudioPlaylistImporter (%1): did not find the \"in\" or \"out\" property from a crossfade"), name) << endmsg;
+			continue; // or fatal?
 		}
 
 		handler.update_region_id (in);
