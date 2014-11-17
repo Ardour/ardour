@@ -33,7 +33,6 @@ CairoWidget::CairoWidget ()
 	, _visual_state (Gtkmm2ext::NoVisualState)
 	, _need_bg (true)
 	, _name_proxy (this, X_("name"))
-	, _current_event_expose (0)
 {
 	_name_proxy.connect (sigc::mem_fun (*this, &CairoWidget::on_name_changed));
 }
@@ -52,62 +51,65 @@ CairoWidget::on_button_press_event (GdkEventButton*)
 bool
 CairoWidget::on_expose_event (GdkEventExpose *ev)
 {
-        _current_event_expose = ev;
-
-#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_CAIRO_WIDGET
-
-	if (!image_surface) {
-		image_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
-	}
-
-	Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (image_surface);
-#else
-	Cairo::RefPtr<Cairo::Context> cr = get_window()->create_cairo_context ();
-#endif
-
-	cr->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-    
-#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_CAIRO_WIDGET
-	cr->clip_preserve ();
-#else
-	cr->clip ();
-#endif
-
-	/* paint expose area the color of the parent window bg
-	*/
-	
-        if (get_visible_window ()) {
-                Gdk::Color bg (get_parent_bg());
-                cr->set_source_rgb (bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
-                cr->fill ();
-        }
-
 	cairo_rectangle_t expose_area;
-	expose_area.x = ev->area.x;
-	expose_area.y = ev->area.y;
 	expose_area.width = ev->area.width;
 	expose_area.height = ev->area.height;
 
+#ifdef USE_CAIRO_IMAGE_SURFACE
+	Cairo::RefPtr<Cairo::Context> cr;
+    if (get_visible_window ()) {
+		expose_area.x = 0;
+		expose_area.y = 0;
+		if (!_image_surface) {
+			_image_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
+		}
+		cr = Cairo::Context::create (_image_surface);
+    } else {
+		expose_area.x = ev->area.x;
+		expose_area.y = ev->area.y;
+		cr = get_window()->create_cairo_context ();
+	}
+#else
+	expose_area.x = ev->area.x;
+	expose_area.y = ev->area.y;
+	Cairo::RefPtr<Cairo::Context> cr = get_window()->create_cairo_context ();
+#endif
+
+	cr->rectangle (expose_area.x, ev->area.y, expose_area.width, expose_area.height);
+	cr->clip ();
+
+	/* paint expose area the color of the parent window bg
+	*/
+
+    if (get_visible_window ()) {
+        Gdk::Color bg (get_parent_bg());
+		cr->rectangle (expose_area.x, ev->area.y, expose_area.width, expose_area.height);
+        cr->set_source_rgb (bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
+        cr->fill ();
+    }
+
 	render (cr->cobj(), &expose_area);
 
-        Gtk::Widget* child = get_child ();
-        
-        if (child) {
-                propagate_expose (*child, ev);
-        }
-        
-#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_CAIRO_WIDGET
-	image_surface->flush();
-	/* now blit our private surface back to the GDK one */
+#ifdef USE_CAIRO_IMAGE_SURFACE
+	if(get_visible_window ()) {
+		_image_surface->flush();
+		/* now blit our private surface back to the GDK one */
 
-	Cairo::RefPtr<Cairo::Context> cairo_context = get_window()->create_cairo_context ();
+		Cairo::RefPtr<Cairo::Context> cairo_context = get_window()->create_cairo_context ();
 
-	cairo_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cairo_context->clip ();
-	cairo_context->set_source (image_surface, 0, 0);
-	cairo_context->set_operator (Cairo::OPERATOR_SOURCE);
-	cairo_context->paint ();
+		cairo_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		cairo_context->clip ();
+		cairo_context->set_source (_image_surface, ev->area.x, ev->area.y);
+		cairo_context->set_operator (Cairo::OPERATOR_OVER);
+		cairo_context->paint ();
+	}
 #endif
+
+    Gtk::Widget* child = get_child ();
+        
+    if (child) {
+		propagate_expose (*child, ev);
+    }
 
 	return true;
 }
@@ -131,8 +133,8 @@ CairoWidget::on_size_allocate (Gtk::Allocation& alloc)
 {
 	Gtk::EventBox::on_size_allocate (alloc);
 
-#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_CAIRO_WIDGET
-	image_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, alloc.get_width(), alloc.get_height());
+#ifdef USE_CAIRO_IMAGE_SURFACE
+	_image_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, alloc.get_width(), alloc.get_height());
 #endif
 
 	set_dirty ();

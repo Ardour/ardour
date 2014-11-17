@@ -105,12 +105,13 @@ protected:
 	Gtkmm2ext::ActiveState _active_state;
 	Gtkmm2ext::VisualState _visual_state;
 	bool                   _need_bg;
-    GdkEventExpose*        _current_event_expose; // Valid only when on_expose_event
 
 	static sigc::slot<void> focus_handler;
 
   private:
-	Cairo::RefPtr<Cairo::Surface> image_surface;
+#ifdef USE_CAIRO_IMAGE_SURFACE
+	Cairo::RefPtr<Cairo::Surface> _image_surface;
+#endif
 	Glib::SignalProxyProperty _name_proxy;
 };
 

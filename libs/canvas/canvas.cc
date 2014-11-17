@@ -723,7 +723,7 @@ void
 GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 {
 	EventBox::on_size_allocate (a);
-#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_GTK_CANVAS
+#ifdef USE_CAIRO_IMAGE_SURFACE
 	/* allocate an image surface as large as the canvas itself */
 	canvas_image.clear ();
 	canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, a.get_width(), a.get_height());
@@ -737,7 +737,7 @@ GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 bool
 GtkCanvas::on_expose_event (GdkEventExpose* ev)
 {
-#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_GTK_CANVAS
+#ifdef USE_CAIRO_IMAGE_SURFACE
 	if (!canvas_image) {
 		canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
 	}
@@ -764,7 +764,7 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
         
         render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
 
-#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_GTK_CANVAS
+#ifdef USE_CAIRO_IMAGE_SURFACE
 	/* now blit our private surface back to the GDK one */
 
 	window_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
