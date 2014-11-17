@@ -12,9 +12,9 @@
   <Canvas>
     <Option name="active crossfade" value="ffffff79"/>
     <Option name="arrange base" value="595959ff"/>
-    <Option name="audio bus base" value="73829900"/>
-    <Option name="audio master bus base" value="00000000"/>
-    <Option name="audio track base" value="9daac4ff"/>
+    <Option name="audio bus base" value="676767ff"/>
+    <Option name="audio master bus base" value="676767ff"/>
+    <Option name="audio track base" value="676767ff"/>
     <Option name="automation line" value="90FF3Cff"/>
     <Option name="automation track fill" value="575757f5"/>
     <Option name="automation track outline" value="575757ff"/>
