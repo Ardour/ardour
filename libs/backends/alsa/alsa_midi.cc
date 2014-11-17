@@ -186,6 +186,7 @@ AlsaMidiIn::recv_event (pframes_t &time, uint8_t *data, size_t &size)
 		if (vector.len[0] > 0) {
 			memcpy ((uint8_t*)&h, vector.buf[0], vector.len[0]);
 		}
+		assert(vector.buf[1] || vector.len[0] == sizeof(MidiEventHeader));
 		memcpy (((uint8_t*)&h) + vector.len[0], vector.buf[1], sizeof(MidiEventHeader) - vector.len[0]);
 	}
 
