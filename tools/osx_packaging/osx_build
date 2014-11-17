@@ -46,7 +46,6 @@ while [ $# -gt 0 ] ; do
 	--public) WITH_NLS= ; 
 	          SAE= ; 
                   WITH_LADSPA=1; 
-                  STRIP= ; 
 		  PRODUCT_PKG_DIR=Ardour;
 		  APPNAME=Ardour ;
 		  shift ;;
@@ -83,6 +82,17 @@ else
     info_string="$release_version built on `hostname` by `whoami` on `date`"
 fi
 echo "Info string is $info_string"
+
+if [ x$DEBUG = xT ]; then
+	STRIP=
+	echo "Debug build, strip disabled"
+else
+	if test x$STRIP != x ; then
+		echo "No debug build, strip enabled"
+	else
+		echo "No debug build, but strip disabled."
+	fi
+fi
 
 # setup directory structure
 
@@ -222,9 +232,6 @@ else
     cp  Ardour3.icns $Resources/appIcon.icns
 fi
 cp  typeArdour.icns $Resources/
-if test x$STRIP != x ; then
-    strip $APPROOT/MacOS/Ardour3
-fi
 
 # copy locale files
 if test x$WITH_NLS != x ; then
@@ -407,6 +414,11 @@ while [ true ] ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
+
+	if test x$STRIP != x ; then
+		strip -u -r -arch all $file &>/dev/null
+	fi
+
 	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
 	# echo -n "."
 	for dep in $deps ; do
@@ -605,7 +617,12 @@ echo "Building DMG ..."
 
 # UC_DMG=$APPNAME-${release_version}-UC.dmg
 # FINAL_DMG=$APPNAME-${release_version}.dmg
-UC_DMG=$APPNAME-$release_version.dmg
+
+if [ x$DEBUG = xT ]; then
+	UC_DMG=$APPNAME-$release_version-dbg.dmg
+else
+	UC_DMG=$APPNAME-$release_version.dmg
+fi
 VOLNAME=$APPNAME-$release_version
 
 # TODO use mktemp
