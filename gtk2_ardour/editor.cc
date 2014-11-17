@@ -4288,7 +4288,9 @@ Editor::undo_visual_state ()
 
 	redo_visual_stack.push_back (current_visual_state (vs ? vs->gui_state != 0 : false));
 
-	use_visual_state (*vs);
+	if (vs) {
+		use_visual_state (*vs);
+	}
 }
 
 void
@@ -4301,9 +4303,13 @@ Editor::redo_visual_state ()
 	VisualState* vs = redo_visual_stack.back();
 	redo_visual_stack.pop_back();
 
-	undo_visual_stack.push_back (current_visual_state (vs ? vs->gui_state != 0 : false));
+	// can 'vs' really be 0? Is there a place that puts NULL pointers onto the stack?
+	// why do we check here?
+	undo_visual_stack.push_back (current_visual_state (vs ? (vs->gui_state != 0) : false));
 
-	use_visual_state (*vs);
+	if (vs) {
+		use_visual_state (*vs);
+	}
 }
 
 void
