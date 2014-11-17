@@ -473,6 +473,7 @@ EditorRouteGroups::groups_changed ()
 void
 EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange&)
 {
+	assert(group);
 	_in_row_change = true;
 
 	Gtk::TreeModel::Children children = _model->children();

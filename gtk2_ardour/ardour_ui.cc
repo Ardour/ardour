@@ -4029,6 +4029,8 @@ ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin, bool can_ca
 		scan_dlg->get_vbox()->pack_start (*scan_tbox, PACK_SHRINK, 4);
 	}
 
+	assert(scan_dlg && scan_tbox && cancel_button);
+
 	if (type == X_("closeme")) {
 		scan_dlg->hide();
 	} else {

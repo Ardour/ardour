@@ -765,6 +765,8 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 		}
 	}
 
+	assert(meter);
+
 	for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		TempoSection* ts;
 
@@ -773,6 +775,8 @@ TempoMap::recompute_map (bool reassign_tempo_bbt, framepos_t end)
 			break;
 		}
 	}
+
+	assert(tempo);
 
 	/* assumes that the first meter & tempo are at frame zero */
 	current_frame = 0;
@@ -1840,6 +1844,7 @@ TempoMap::framepos_plus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 	   tempo       -> the Tempo for "pos"
 	   next_tempo  -> first tempo after "pos", possibly metrics.end()
 	*/
+	assert(tempo);
 
 	DEBUG_TRACE (DEBUG::TempoMath,
 	             string_compose ("frame %1 plus %2 beats, start with tempo = %3 @ %4\n",
@@ -1941,6 +1946,7 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 		}
 	}
 
+	assert(tempo);
 	DEBUG_TRACE (DEBUG::TempoMath,
 	             string_compose ("frame %1 minus %2 beats, start with tempo = %3 @ %4 prev at beg? %5\n",
 	                             pos, beats, *((const Tempo*)tempo), tempo->frame(),
@@ -2169,7 +2175,6 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 	   tempo -> the Tempo for "pos"
 	   next_tempo -> the next tempo after "pos", possibly metrics.end()
 	*/
-
 	assert (tempo);
 
 	DEBUG_TRACE (DEBUG::TempoMath,
