@@ -35,6 +35,18 @@ public:
 	MidiRegionSelection& operator= (const MidiRegionSelection&);
 };
 
-struct MidiNoteSelection   : std::list<MidiCutBuffer*> {};
+struct MidiNoteSelection : std::list<MidiCutBuffer*> {
+public:
+	const_iterator
+	get_nth(size_t nth) const {
+		size_t count = 0;
+		for (const_iterator m = begin(); m != end(); ++m) {
+			if (count++ == nth) {
+				return m;
+			}
+		}
+		return end();
+	}
+};
 
 #endif /* __ardour_gtk_midi_selection_h__ */

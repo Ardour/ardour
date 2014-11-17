@@ -49,11 +49,13 @@
 
 #include "automation_region_view.h"
 #include "automation_time_axis.h"
+#include "control_point.h"
 #include "debug.h"
 #include "editor.h"
 #include "editor_drag.h"
 #include "ghostregion.h"
 #include "gui_thread.h"
+#include "item_counts.h"
 #include "keyboard.h"
 #include "midi_channel_dialog.h"
 #include "midi_cut_buffer.h"
@@ -2287,8 +2289,18 @@ MidiRegionView::note_deselected(NoteBase* ev)
 }
 
 void
-MidiRegionView::update_drag_selection(double x0, double x1, double y0, double y1, bool extend)
+MidiRegionView::update_drag_selection(framepos_t start, framepos_t end, double gy0, double gy1, bool extend)
 {
+	PublicEditor& editor = trackview.editor();
+
+	// Convert to local coordinates
+	const framepos_t p  = _region->position();
+	const double     y  = midi_view()->y_position();
+	const double     x0 = editor.sample_to_pixel(max((framepos_t)0, start - p));
+	const double     x1 = editor.sample_to_pixel(max((framepos_t)0, end - p));
+	const double     y0 = max(0.0, gy0 - y);
+	const double     y1 = max(0.0, gy1 - y);
+
 	// TODO: Make this faster by storing the last updated selection rect, and only
 	// adjusting things that are in the area that appears/disappeared.
 	// We probably need a tree to be able to find events in O(log(n)) time.
@@ -2303,6 +2315,24 @@ MidiRegionView::update_drag_selection(double x0, double x1, double y0, double y1
 			// Rectangles do not intersect
 			remove_from_selection (*i);
 		}
+	}
+
+	typedef RouteTimeAxisView::AutomationTracks ATracks;
+	typedef std::list<Selectable*>              Selectables;
+
+	/* Add control points to selection. */
+	const ATracks& atracks = midi_view()->automation_tracks();
+	Selectables    selectables;
+	editor.get_selection().clear_points();
+	for (ATracks::const_iterator a = atracks.begin(); a != atracks.end(); ++a) {
+		a->second->get_selectables(start, end, gy0, gy1, selectables);
+		for (Selectables::const_iterator s = selectables.begin(); s != selectables.end(); ++s) {
+			ControlPoint* cp = dynamic_cast<ControlPoint*>(*s);
+			if (cp) {
+				editor.get_selection().add(cp);
+			}
+		}
+		a->second->set_selected_points(editor.get_selection().points);
 	}
 }
 
@@ -3325,16 +3355,42 @@ MidiRegionView::selection_as_cut_buffer () const
 }
 
 /** This method handles undo */
+bool
+MidiRegionView::paste (framepos_t pos, unsigned paste_count, float times, const ::Selection& selection, ItemCounts& counts)
+{
+	// Get our set of notes from the selection
+	MidiNoteSelection::const_iterator m = selection.midi_notes.get_nth(counts.n_notes());
+	if (m == selection.midi_notes.end()) {
+		return false;
+	}
+	counts.increase_n_notes();
+
+	trackview.session()->begin_reversible_command (Operations::paste);
+
+	// Paste notes
+	paste_internal(pos, paste_count, times, **m);
+
+	// Paste control points to automation children
+	typedef RouteTimeAxisView::AutomationTracks ATracks;
+	const ATracks& atracks = midi_view()->automation_tracks();
+	for (ATracks::const_iterator a = atracks.begin(); a != atracks.end(); ++a) {
+		a->second->paste(pos, paste_count, times, selection, counts);
+	}
+
+	trackview.session()->commit_reversible_command ();
+
+	return true;
+}
+
+/** This method handles undo */
 void
-MidiRegionView::paste (framepos_t pos, unsigned paste_count, float times, const MidiCutBuffer& mcb)
+MidiRegionView::paste_internal (framepos_t pos, unsigned paste_count, float times, const MidiCutBuffer& mcb)
 {
 	if (mcb.empty()) {
 		return;
 	}
 
 	PublicEditor& editor = trackview.editor ();
-
-	trackview.session()->begin_reversible_command (Operations::paste);
 
 	start_note_diff_command (_("paste"));
 
@@ -3390,8 +3446,6 @@ MidiRegionView::paste (framepos_t pos, unsigned paste_count, float times, const 
 	}
 
 	apply_diff (true);
-
-	trackview.session()->commit_reversible_command ();
 }
 
 struct EventNoteTimeEarlyFirstComparator {

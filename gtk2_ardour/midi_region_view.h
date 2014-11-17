@@ -60,6 +60,7 @@ class MidiListEditor;
 class EditNoteDialog;
 class NotePlayer;
 class PatchChange;
+class ItemCounts;
 
 class MidiRegionView : public RegionView
 {
@@ -112,7 +113,8 @@ public:
 	void resolve_note(uint8_t note_num, double end_time);
 
 	void cut_copy_clear (Editing::CutCopyOp);
-	void paste (framepos_t pos, unsigned paste_count, float times, const MidiCutBuffer&);
+	bool paste (framepos_t pos, unsigned paste_count, float times, const ::Selection& selection, ItemCounts& counts);
+	void paste_internal (framepos_t pos, unsigned paste_count, float times, const MidiCutBuffer&);
 
 	void add_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr patch, const std::string& displaytext, bool);
 
@@ -366,7 +368,7 @@ private:
 	               ARDOUR::MidiModel::TimeType end_delta);
 
 	void clear_selection_except (NoteBase* ev, bool signal = true);
-	void update_drag_selection (double last_x, double x, double last_y, double y, bool extend);
+	void update_drag_selection (framepos_t start, framepos_t end, double y0, double y1, bool extend);
 	void update_vertical_drag_selection (double last_y, double y, bool extend);
 
 	void add_to_selection (NoteBase*);

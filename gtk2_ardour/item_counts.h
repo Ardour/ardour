@@ -35,9 +35,12 @@
 class ItemCounts
 {
 public:
+	ItemCounts() : _notes(0) {}
+
 	size_t n_playlists(ARDOUR::DataType t) const { return get_n(t, _playlists); }
 	size_t n_regions(ARDOUR::DataType t)   const { return get_n(t, _regions); }
 	size_t n_lines(Evoral::Parameter t)    const { return get_n(t, _lines); }
+	size_t n_notes()                       const { return _notes; }
 
 	void increase_n_playlists(ARDOUR::DataType t, size_t delta=1) {
 		increase_n(t, _playlists, delta);
@@ -50,6 +53,8 @@ public:
 	void increase_n_lines(Evoral::Parameter t, size_t delta=1) {
 		increase_n(t, _lines, delta);
 	}
+
+	void increase_n_notes(size_t delta=1) { _notes += delta; }
 
 private:
 	template<typename Key>
@@ -73,6 +78,7 @@ private:
 	std::map<ARDOUR::DataType,  size_t> _playlists;
 	std::map<ARDOUR::DataType,  size_t> _regions;
 	std::map<Evoral::Parameter, size_t> _lines;
+	size_t                              _notes;
 };
 
 #endif /* __ardour_item_counts_h__ */

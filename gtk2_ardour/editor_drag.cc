@@ -5139,21 +5139,9 @@ MidiRubberbandSelectDrag::MidiRubberbandSelectDrag (Editor* e, MidiRegionView* r
 void
 MidiRubberbandSelectDrag::select_things (int button_state, framepos_t x1, framepos_t x2, double y1, double y2, bool /*drag_in_progress*/)
 {
-	framepos_t const p = _region_view->region()->position ();
-	double const y = _region_view->midi_view()->y_position ();
-
-	x1 = max ((framepos_t) 0, x1 - p);
-	x2 = max ((framepos_t) 0, x2 - p);
-	y1 = max (0.0, y1 - y);
-	y2 = max (0.0, y2 - y);
-	
 	_region_view->update_drag_selection (
-		_editor->sample_to_pixel (x1),
-		_editor->sample_to_pixel (x2),
-		y1,
-		y2,
-		Keyboard::modifier_state_contains (button_state, Keyboard::TertiaryModifier)
-		);
+		x1, x2, y1, y2,
+		Keyboard::modifier_state_contains (button_state, Keyboard::TertiaryModifier));
 }
 
 void

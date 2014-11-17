@@ -4009,6 +4009,13 @@ Editor::cut_copy_midi (CutCopyOp op)
 			_last_cut_copy_source_track = &mrv->get_time_axis_view();
 		}
 	}
+
+	if (!selection->points.empty()) {
+		cut_copy_points (op);
+		if (op == Cut || op == Delete) {
+			selection->clear_points ();
+		}
+	}
 }
 
 struct lt_playlist {
@@ -4433,17 +4440,13 @@ Editor::paste_internal (framepos_t position, float times)
 		/* undo/redo is handled by individual tracks/regions */
 
 		RegionSelection rs;
-		RegionSelection::iterator r;
-		MidiNoteSelection::iterator cb;
-
 		get_regions_at (rs, position, ts);
 
-		for (cb = cut_buffer->midi_notes.begin(), r = rs.begin();
-		     cb != cut_buffer->midi_notes.end() && r != rs.end(); ++r) {
+		ItemCounts counts;
+		for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
 			if (mrv) {
-				mrv->paste (position, paste_count, times, **cb);
-				++cb;
+				mrv->paste (position, paste_count, times, *cut_buffer, counts);
 			}
 		}
 
