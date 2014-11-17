@@ -273,14 +273,14 @@ Fader::on_button_press_event (GdkEventButton* ev)
 		get_window()->set_cursor (*_touch_cursor);
 	}
 
-	double hx;
-	double hy;
-	get_handle_position (hx, hy);
+	_grab_start_mouse_x = ev->x;
+	_grab_start_mouse_y = ev->y;
+	get_handle_position (_grab_start_handle_x, _grab_start_handle_y);
 
 	double hw = _handle_pixbuf->get_width();
 	double hh = _handle_pixbuf->get_height();
 
-	if ((ev->x < (hx - hw/2)) || (ev->x > (hx + hw/2)) || (ev->y < (hy - hh/2)) || (ev->y > (hy + hh/2))) {
+	if ((ev->x < (_grab_start_handle_x - hw/2)) || (ev->x > (_grab_start_handle_x + hw/2)) || (ev->y < (_grab_start_handle_y - hh/2)) || (ev->y > (_grab_start_handle_y + hh/2))) {
 		return false;
 	}
     
@@ -288,17 +288,11 @@ Fader::on_button_press_event (GdkEventButton* ev)
 	double ev_pos_y;
 		
 	get_closest_point_on_line(_min_pos_x, _min_pos_y,
-								_max_pos_x, _max_pos_y, 
-								ev->x, ev->y,
-								ev_pos_x, ev_pos_y );
-	_grab_loc_x = ev_pos_x;
-	_grab_loc_y = ev_pos_y;
-
+							  _max_pos_x, _max_pos_y, 
+							  ev->x, ev->y,
+							  ev_pos_x, ev_pos_y );
 	add_modal_grab ();
 	
-	_grab_start_x = _grab_loc_x = ev_pos_x;
-	_grab_start_y = _grab_loc_y = ev_pos_y;
-
 	_grab_window = ev->window;
 	_dragging = true;
 	
@@ -384,18 +378,15 @@ Fader::on_motion_notify_event (GdkEventMotion* ev)
 		double ev_pos_x;
 		double ev_pos_y;
 		
-		get_closest_point_on_line(_min_pos_x, _min_pos_y,
-								  _max_pos_x, _max_pos_y, 
-								  ev->x, ev->y,
-								  ev_pos_x, ev_pos_y );
-
-		_grab_loc_x = ev_pos_x;
-		_grab_loc_y = ev_pos_y;
-
 		if (ev->window != _grab_window) {
 			_grab_window = ev->window;
 			return true;
 		}
+
+		get_closest_point_on_line(_min_pos_x, _min_pos_y,
+								  _max_pos_x, _max_pos_y, 
+								  _grab_start_handle_x + (ev->x - _grab_start_mouse_x), _grab_start_handle_y + (ev->y - _grab_start_mouse_y),
+								  ev_pos_x, ev_pos_y );
 		
 		double const fract = sqrt((ev_pos_x - _min_pos_x) * (ev_pos_x - _min_pos_x) +
 								  (ev_pos_y - _min_pos_y) * (ev_pos_y - _min_pos_y)) /

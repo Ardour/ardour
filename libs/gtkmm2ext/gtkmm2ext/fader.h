@@ -90,10 +90,10 @@ class LIBGTKMM2EXT_API Fader : public CairoWidget
 	GdkWindow* _grab_window;
 	Gdk::Cursor *_touch_cursor;
 
-	double _grab_loc_x;
-	double _grab_loc_y;
-	double _grab_start_x;
-	double _grab_start_y;
+	double _grab_start_mouse_x;
+	double _grab_start_mouse_y;
+	double _grab_start_handle_x;
+	double _grab_start_handle_y;
 	double _last_drawn_x;
 	double _last_drawn_y;
 	bool _dragging;
