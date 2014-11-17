@@ -1303,7 +1303,9 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 		 * since it will have been set visible by default.
 		 */
 
-		if (existing->second->set_marked_for_display (show) && !no_redraw) {
+		existing->second->set_marked_for_display (show);
+
+		if (!no_redraw) {
 			request_redraw ();
 		}
 

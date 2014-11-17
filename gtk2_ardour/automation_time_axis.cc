@@ -23,6 +23,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include "pbd/error.h"
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
 
@@ -876,15 +877,17 @@ AutomationTimeAxisView::lines () const
 string
 AutomationTimeAxisView::state_id() const
 {
-	if (_control) {
+	if (_automatable != _route && _control) {
 		return string_compose ("automation %1", _control->id().to_s());
-	} else {
-		assert (_parameter);
+	} else if (_parameter) {
 		return string_compose ("automation %1 %2/%3/%4", 
 				       _route->id(), 
 				       _parameter.type(),
 				       _parameter.id(),
 				       (int) _parameter.channel());
+	} else {
+		error << "Automation time axis has no state ID" << endmsg;
+		return "";
 	}
 }
 

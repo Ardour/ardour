@@ -123,13 +123,17 @@ class AutomationTimeAxisView : public TimeAxisView {
 	static void what_has_visible_automation (const boost::shared_ptr<ARDOUR::Automatable>& automatable, std::set<Evoral::Parameter>& visible);
 
   protected:
+	/* Note that for MIDI controller "automation" (in regions), all of these
+	   may be set.  In this case, _automatable is likely _route so the
+	   controller will send immediate events out the route's MIDI port. */
+
 	/** parent route */
 	boost::shared_ptr<ARDOUR::Route> _route;
-	/** control; 0 if we are editing region-based automation */
+	/** control */
 	boost::shared_ptr<ARDOUR::AutomationControl> _control;
-	/** control owner; may be _route, or 0 if we are editing region-based automation */
+	/** control owner; may be _route, something else (e.g. a pan control), or NULL */
 	boost::shared_ptr<ARDOUR::Automatable> _automatable;
-	/** controller owner; 0 if we are editing region-based automation */
+	/** controller owner */
 	boost::shared_ptr<AutomationController> _controller;
 	Evoral::Parameter _parameter;
 
