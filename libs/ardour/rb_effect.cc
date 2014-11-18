@@ -72,7 +72,6 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	}
 
 	SourceList nsrcs;
-	framecnt_t done;
 	int ret = -1;
 	const framecnt_t bufsize = 256;
 	gain_t* gain_buffer = 0;
@@ -80,8 +79,6 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	char suffix[32];
 	string new_name;
 	string::size_type at;
-	framepos_t pos = 0;
-	framecnt_t avail = 0;
 	boost::shared_ptr<AudioRegion> result;
 
 	cerr << "RBEffect: source region: position = " << region->position()
@@ -184,6 +181,10 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	/* create new sources */
 
+	framepos_t pos   = 0;
+	framecnt_t avail = 0;
+	framecnt_t done  = 0;
+
 	if (make_new_sources (region, nsrcs, suffix)) {
 		goto out;
 	}
@@ -200,10 +201,6 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	   subject to timefx.  */
 
 	/* study first, process afterwards. */
-
-	pos = 0;
-	avail = 0;
-	done = 0;
 
 	try {
 		while (pos < read_duration && !tsr.cancel) {
