@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GainSlider meterwidth="5"
+<GainSlider meterwidth="10"
             thinmeterwidth="5">
   <Adjustment id="gain_adjustment"
           minvalue="0"
@@ -18,9 +18,8 @@
     <HBox height="10"/>
     <HBox spacing="7" width="32">
       <VBox id="level_meter_home"
-            width="21"
-            height="81"/>
-      <icon source="meter_strip_meter_scale.png"/>
+            width="25"
+            height="215"/>
     </HBox>
     <HBox height="10"/>
   </VBox>

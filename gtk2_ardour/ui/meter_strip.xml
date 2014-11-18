@@ -11,34 +11,34 @@
           <EventBox bgnormal="#383838" bgactive="#424242">
             <VBox>
               <HBox>
-                <iconbutton id="rec_enable_button"
+                <Icon id="rec_enable_indicator_on"
+                            source="rec_enable_indicator_on.png"
+                            visible="false"
+                            noshowall="true"/>
+                
+                <Icon id="rec_enable_indicator_off"
+                            source="rec_enable_indicator_off.png"
+                            visible="false"
+                            noshowall="true"/>
+                
+                <Button id="rec_enable_button"
                             width="19"
                             height="13"
-                            normalicon="meter_strip_record"
-                            activeicon="meter_strip_record_active"
-                            _prelighticon="meter_strip_record_prelight"/>
-                <iconbutton id="monitor_input_button"
+                            ui.orphan="true"/>
+                <Button id="monitor_input_button"
                             width="19"
                             height="13"
-                            normalicon="meter_strip_monitor_input"
-                            activeicon="meter_strip_monitor_input_active"
-                            _prelighticon="meter_strip_monitor_input_prelight"/>
+                            ui.orphan="true"/>
               </HBox>
               <HBox>
-                <iconbutton id="mute_button"
+                <Button id="mute_button"
                             width="19"
                             height="13"
-                            normalicon="meter_strip_mute"
-                            activeicon="meter_strip_mute_active"
-                            implicitactiveicon="meter_strip_mute_implicit"
-                            _prelighticon="mixer_mute_prelight"/>
-                <iconbutton id="solo_button"
+                            ui.orphan="true"/>
+                <Button id="solo_button"
                             width="19"
                             height="13"
-                            normalicon="meter_strip_solo"
-                            activeicon="meter_strip_solo_active"
-                            implicitactiveicon="meter_strip_solo_safe"
-                            _prelighticon="meter_strip_solo_prelight"/>
+                            ui.orphan="true"/>
               </HBox>
               
               <EventBox id="name_label_home">

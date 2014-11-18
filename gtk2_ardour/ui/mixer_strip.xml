@@ -117,4 +117,13 @@
   <Label id="input_info_label" ui.orphan="true"/>
   <Label id="output_info_label" ui.orphan="true"/>
   <VBox id="info_panel_home" ui.orphan="true"/>
+  <Icon id="rec_enable_indicator_on"
+        source="rec_enable_indicator_on.png"
+        visible="false"
+        noshowall="true"/>
+  
+  <Icon id="rec_enable_indicator_off"
+        source="rec_enable_indicator_off.png"
+        visible="false"
+        noshowall="true"/>
 </RouteUI>

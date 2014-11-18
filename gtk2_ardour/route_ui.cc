@@ -85,6 +85,8 @@ RouteUI::RouteUI (ARDOUR::Session* sess, const std::string& layout_script_file)
 	, rec_enable_button (get_waves_button ("rec_enable_button"))
 	, show_sends_button (get_waves_button ("show_sends_button"))
 	, monitor_input_button (get_waves_button ("monitor_input_button"))
+    , rec_enable_indicator_on (get_image("rec_enable_indicator_on"))
+    , rec_enable_indicator_off (get_image("rec_enable_indicator_off"))
 	, _dnd_operation_in_progress (false)
     , _dnd_operation_enabled (false)
 {
@@ -1238,6 +1240,28 @@ RouteUI::update_rec_display ()
 
 
 	check_rec_enable_sensitivity ();
+ 
+    update_rec_enable_indicator();
+   
+}
+
+void
+RouteUI::update_rec_enable_indicator()
+{
+    if (_route && _route->record_enabled ())
+    {
+        //switch-on rec_enable_indicator
+        rec_enable_indicator_on.show();
+        rec_enable_indicator_off.hide();
+    }
+    else
+    {
+        //switch-off rec_enable_indicator
+        rec_enable_indicator_on.hide();
+        rec_enable_indicator_off.show();
+    }
+
+     //rec_enable_indicator.set_state ((_route && _route->record_enabled ()) ? Gtk::STATE_ACTIVE : Gtk::STATE_NORMAL);
 }
 
 void

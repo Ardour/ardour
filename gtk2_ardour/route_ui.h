@@ -136,6 +136,12 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	WavesButton& rec_enable_button; /* audio tracks */
 	WavesButton& show_sends_button; /* busses */
 	WavesButton& monitor_input_button;
+    
+    /* this indicator used just in meterBridge */
+    Gtk::Image& rec_enable_indicator_on;
+    Gtk::Image& rec_enable_indicator_off;
+
+    
 
 	Glib::RefPtr<Gdk::Pixbuf> solo_safe_pixbuf;
 
@@ -241,6 +247,7 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	void disconnect_output ();
 
 	virtual void update_rec_display ();
+    void update_rec_enable_indicator(); 
 	void update_mute_display ();
 
 	void update_solo_display ();
