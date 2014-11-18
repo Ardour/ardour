@@ -694,6 +694,9 @@ ARDOUR_UI_UTILS::get_icon_path (const char* cname, string icon_set, bool is_imag
 		spath.add_subdirectory_to_paths (icon_set);
 		
 		find_file (spath, name, data_file_path);
+	} else {
+		spath.add_subdirectory_to_paths ("icons");
+		find_file (spath, name, data_file_path);
 	}
 	
 	if (is_image && data_file_path.empty()) {
