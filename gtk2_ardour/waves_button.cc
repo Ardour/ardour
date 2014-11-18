@@ -325,7 +325,7 @@ WavesButton::on_size_request (Gtk::Requisition* req)
 bool
 WavesButton::on_button_press_event (GdkEventButton *ev)
 {
-        focus_handler ();
+    focus_handler ();
 
 	if (ev->type == GDK_2BUTTON_PRESS) {
 		signal_double_clicked (this);
@@ -348,19 +348,21 @@ WavesButton::on_button_press_event (GdkEventButton *ev)
 bool
 WavesButton::on_button_release_event (GdkEventButton *)
 {
-	_pushed = false;
-	queue_draw ();
-	if (_hovering) {
-		signal_clicked (this);
-		if (_toggleable) {
-			set_active_state (active_state () == Gtkmm2ext::ExplicitActive ? Gtkmm2ext::Off : Gtkmm2ext::ExplicitActive);
-		}
-		
-		if (_act_on_release) {
-			if (_action) {
-				_action->activate ();
-				return true;
-			}
+	if (_pushed) {
+        _pushed = false;
+        queue_draw ();
+        if (_hovering) {
+            signal_clicked (this);
+            if (_toggleable) {
+                set_active_state (active_state () == Gtkmm2ext::ExplicitActive ? Gtkmm2ext::Off : Gtkmm2ext::ExplicitActive);
+            }
+
+            if (_act_on_release) {
+                if (_action) {
+                    _action->activate ();
+                    return true;
+                }
+            }
 		}
 	}
 
