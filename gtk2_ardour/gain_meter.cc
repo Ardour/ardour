@@ -68,7 +68,7 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	, WavesUI (layout_script_file, *this)
     , gain_slider (get_fader ("gain_slider"))
 	, gain_adjustment (get_adjustment ("gain_adjustment"))
-	, gain_display_home (get_event_box ("gain_display_home"))
+	, gain_display_entry (get_entry ("gain_display_entry"))
 	, gain_display_button (get_waves_button ("gain_display_button"))
 	, peak_display_button (get_waves_button ("peak_display_button"))
 	, level_meter_home (get_box ("level_meter_home"))
@@ -76,6 +76,7 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
     , _data_type (DataType::AUDIO)
 	, _meter_width (xml_property (*xml_tree ()->root (), "meterwidth", 5))
 	, _thin_meter_width (xml_property (*xml_tree ()->root (), "thinmeterwidth", 5))
+    , _gain_slider_double_clicked (false)
 {
 	using namespace Menu_Helpers;
 	//gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0.0, 1.0, 0.01, 0.1)
@@ -94,22 +95,20 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	level_meter.ButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&GainMeter::level_meter_button_press, this, _1));
 
 	gain_slider.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_press), false);
-	gain_slider.signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_release), false);
+	gain_slider.signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_release), true);
 
-	gain_display_entry.set_name ("MixerStripGainDisplay");
 	gain_display_entry.signal_activate().connect (sigc::mem_fun (*this, &GainMeter::gain_activated));
-	gain_display_entry.signal_focus_in_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
-	gain_display_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
-	gain_display_entry.set_alignment(1.0);
-	gain_display_home.add(gain_display_entry);
-
-	gain_display_button.signal_clicked.connect (sigc::mem_fun (*this, &GainMeter::gain_display_button_clicked));
+	gain_display_entry.signal_focus_in_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focus_in), false);
+	gain_display_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focus_out), false);
+	gain_display_entry.signal_key_press_event ().connect (sigc::mem_fun(*this, &GainMeter::gain_key_press), false);
+    gain_display_entry.signal_button_press_event ().connect (sigc::mem_fun(*this, &GainMeter::gain_display_entry_press), false);
+	
+    gain_display_button.unset_flags (Gtk::CAN_FOCUS);
+    gain_display_button.signal_button_press_event ().connect (sigc::mem_fun(*this, &GainMeter::gain_display_button_press), false);
 
 	max_peak = minus_infinity();
 	peak_display_button.set_text (_("-inf"));
 	peak_display_button.unset_flags (Gtk::CAN_FOCUS);
-
-	gain_display_button.unset_flags (Gtk::CAN_FOCUS);
 
 	gain_astyle_menu.items().push_back (MenuElem (_("Trim")));
 	gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
@@ -117,10 +116,8 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	gain_astate_menu.set_name ("ArdourContextMenu");
 	gain_astyle_menu.set_name ("ArdourContextMenu");
 
-	gain_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &GainMeter::gain_adjusted));
-	peak_display_button.signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::peak_button_release), false);
-	gain_display_entry.signal_key_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_key_press), false);
-    gain_display_entry.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_button_press), false);
+	gain_adjustment.signal_value_changed ().connect (sigc::mem_fun(*this, &GainMeter::gain_adjusted));    
+	peak_display_button.signal_button_release_event ().connect (sigc::mem_fun(*this, &GainMeter::peak_button_release), false);
 
 	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &GainMeter::reset_peak_display));
 	ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &GainMeter::reset_route_peak_display));
@@ -130,15 +127,6 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &GainMeter::on_theme_changed));
 	ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeter::color_handler), false));
 	DPIReset.connect (sigc::bind(sigc::mem_fun (*this, &GainMeter::color_handler), true));
-
-	//gain_display_home.hide();
-	//gain_display_button.show();
-}
-
-void
-GainMeter::set_flat_buttons ()
-{
-//	gain_slider->set_flat_buttons( ARDOUR_UI::config()->flat_buttons.get() );
 }
 
 GainMeter::~GainMeter ()
@@ -290,23 +278,43 @@ GainMeter::set_type (MeterType t)
 bool
 GainMeter::gain_key_press (GdkEventKey* ev)
 {
-	if (key_is_legal_for_numeric_entry (ev->keyval)) {
-		/* drop through to normal handling */
-		return false;
-	}
 	/* illegal key for gain entry */
-	return true;
+    switch (ev->keyval) {
+        case GDK_Escape:
+            show_gain();
+            gain_display_entry.hide();
+            gain_display_button.show();
+            return true;
+        default:
+            break;
+	}
+
+	return !key_is_legal_for_numeric_entry (ev->keyval);
 }
 
 bool
-GainMeter::gain_button_press (GdkEventButton* ev)
+GainMeter::gain_display_button_press (GdkEventButton* ev)
 {
-    gain_display_entry.grab_focus ();
+	switch (ev->type) {
+        case GDK_BUTTON_PRESS:
+            if (Keyboard::modifier_state_contains (ev->state, Keyboard::Level4Modifier)) {
+                _amp->set_gain (dB_to_coefficient(0.0), this);
+            }
+            break;
+        case GDK_2BUTTON_PRESS:
+            start_gain_level_editing();
+            break;
+        default:
+            break;
+    }
     
-    if (ev->button == 3)
-        return true;
-    
-    return false;
+    return true;
+}
+
+bool
+GainMeter::gain_display_entry_press (GdkEventButton* ev)
+{
+    return ev->button == 3;
 }
 
 bool
@@ -375,7 +383,7 @@ GainMeter::popup_meter_menu (GdkEventButton *ev)
 }
 
 bool
-GainMeter::gain_focused (GdkEventFocus* ev)
+GainMeter::gain_focus_in (GdkEventFocus* ev)
 {
 	if (ev->in) {
 		gain_display_entry.select_region (0, -1);
@@ -385,12 +393,19 @@ GainMeter::gain_focused (GdkEventFocus* ev)
 	return false;
 }
 
+bool
+GainMeter::gain_focus_out (GdkEventFocus* ev)
+{
+    gain_activated ();
+	return false;
+}
+
+
 
 void
-GainMeter::gain_display_button_clicked (WavesButton* button)
+GainMeter::start_gain_level_editing ()
 {
 	gain_display_button.hide();
-	gain_display_home.show();
 	gain_display_entry.show();
 	gain_display_entry.grab_focus();
 }
@@ -435,7 +450,7 @@ GainMeter::gain_activated ()
 			}
 		}
 	}
-	gain_display_home.hide();
+	gain_display_entry.hide();
 	gain_display_button.show();
 }
 
@@ -665,20 +680,34 @@ bool
 GainMeter::gain_slider_button_press (GdkEventButton* ev)
 {
 	switch (ev->type) {
-	case GDK_BUTTON_PRESS:
-		_amp->gain_control()->start_touch (_amp->session().transport_frame());
-		break;
-	default:
-		return false;
+        case GDK_BUTTON_PRESS:
+            if (Keyboard::modifier_state_contains (ev->state, Keyboard::Level4Modifier)) {
+                _amp->set_gain (dB_to_coefficient(0.0), this);
+                return true;
+            }
+            _amp->gain_control()->start_touch (_amp->session().transport_frame());
+            break;
+        case GDK_2BUTTON_PRESS:
+            if (ev->state == 0) {
+                _gain_slider_double_clicked = true;
+            }
+            return false;
+        default:
+            return false;
 	}
 
 	return false;
 }
 
 bool
-GainMeter::gain_slider_button_release (GdkEventButton*)
+GainMeter::gain_slider_button_release (GdkEventButton* ev)
 {
+    std::cout << "GainMeter::gain_slider_button_release () " << ev->type << std::endl;
 	_amp->gain_control()->stop_touch (false, _amp->session().transport_frame());
+    if (_gain_slider_double_clicked) {
+        start_gain_level_editing ();
+        _gain_slider_double_clicked = false;
+    }
 	return false;
 }
 

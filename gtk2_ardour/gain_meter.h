@@ -82,8 +82,6 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
 	void set_width (Width, int len=0);
 	void set_fader_name (const char * name);
 
-	void set_flat_buttons ();
-
 	virtual void setup_meters ();
 	virtual void set_type (ARDOUR::MeterType);
 
@@ -107,7 +105,6 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
   protected:
 
 	friend class MixerStrip;
-//	friend class MeterStrip;
 	friend class RouteTimeAxisView;
 	boost::shared_ptr<ARDOUR::Route> _route;
 	boost::shared_ptr<ARDOUR::PeakMeter> _meter;
@@ -120,8 +117,7 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
 
 	Gtkmm2ext::Fader&      gain_slider;
 	Gtk::Adjustment&       gain_adjustment;
-	Gtk::EventBox&         gain_display_home;
-	Gtkmm2ext::FocusEntry  gain_display_entry;
+    Gtk::Entry&            gain_display_entry;
 	WavesButton&           gain_display_button;
 	WavesButton&           peak_display_button;
 	Gtk::Box&              level_meter_home;
@@ -145,8 +141,9 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
 
 	void show_gain ();
 	void gain_activated ();
-	bool gain_focused (GdkEventFocus*);
-	void gain_display_button_clicked (WavesButton* button);
+	bool gain_focus_in (GdkEventFocus*);
+	bool gain_focus_out (GdkEventFocus*);
+	void start_gain_level_editing ();
 
 	float max_peak;
 
@@ -162,7 +159,8 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
 
 	bool peak_button_release (GdkEventButton*);
 	bool gain_key_press (GdkEventKey*);
-    bool gain_button_press (GdkEventButton*);
+    bool gain_display_button_press (GdkEventButton*);
+    bool gain_display_entry_press (GdkEventButton*);
 
 	Gtk::Menu* meter_menu;
 	void popup_meter_menu (GdkEventButton*);
@@ -201,6 +199,7 @@ private:
 
 	int _meter_width;
 	int _thin_meter_width;
+    bool _gain_slider_double_clicked;
 };
 
 #endif /* __ardour_gtk_gain_meter_h__ */

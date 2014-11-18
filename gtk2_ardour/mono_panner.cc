@@ -164,37 +164,21 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
 		return false;
 	}
 
-	if (ev->type == GDK_2BUTTON_PRESS) {
-		int width = get_width();
+	if (ev->type == GDK_BUTTON_PRESS) {
+        if (Keyboard::modifier_state_contains (ev->state, Keyboard::Level4Modifier)) {
+            position_control->set_value (0.5);
+            _dragging = false;
+            _tooltip.target_stop_drag ();
+        } else {
+            if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
+                /* handled by button release */
+                return true;
+            }
 
-		if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
-			/* handled by button release */
-			return true;
-		}
-
-
-		if (ev->x <= width/3) {
-			/* left side dbl click */
-			position_control->set_value (0);
-		} else if (ev->x > 2*width/3) {
-			position_control->set_value (1.0);
-		} else {
-			position_control->set_value (0.5);
-		}
-
-		_dragging = false;
-		_tooltip.target_stop_drag ();
-
-	} else if (ev->type == GDK_BUTTON_PRESS) {
-
-		if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
-			/* handled by button release */
-			return true;
-		}
-
-		_dragging = true;
-		_tooltip.target_start_drag ();
-		StartGesture ();
+            _dragging = true;
+            _tooltip.target_start_drag ();
+            StartGesture ();
+        }
 	}
 
 	return true;
