@@ -22,8 +22,6 @@
 /** VSTFX - An engine based on FST for handling linuxVST plugins **/
 /******************************************************************/
 
-/** EDITOR tab stops at 4 **/
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <libgen.h>
