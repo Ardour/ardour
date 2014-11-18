@@ -757,7 +757,7 @@ Session::follow_slave_silently (pframes_t nframes, float slave_speed)
 		   for now.
 		*/
 
-		bool need_butler;
+		bool need_butler = false;
 
 		silent_process_routes (nframes, need_butler);
 
