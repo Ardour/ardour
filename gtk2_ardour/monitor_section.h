@@ -43,7 +43,6 @@ class MonitorSection : public RouteUI
 	~MonitorSection ();
 
 	void set_session (ARDOUR::Session*);
-	static void setup_knob_images ();
 
 	Gtkmm2ext::TearOff& tearoff() const { return *_tearoff; }
 
@@ -94,9 +93,6 @@ class MonitorSection : public RouteUI
 
 	static Glib::RefPtr<Gtk::ActionGroup> monitor_actions;
 	void register_actions ();
-
-	static Glib::RefPtr<Gdk::Pixbuf> big_knob_pixbuf;
-	static Glib::RefPtr<Gdk::Pixbuf> little_knob_pixbuf;
 
 	void cut_channel (uint32_t);
 	void dim_channel (uint32_t);

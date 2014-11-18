@@ -50,8 +50,6 @@ using namespace PBD;
 using namespace std;
 
 Glib::RefPtr<ActionGroup> MonitorSection::monitor_actions;
-Glib::RefPtr<Gdk::Pixbuf> MonitorSection::big_knob_pixbuf;
-Glib::RefPtr<Gdk::Pixbuf> MonitorSection::little_knob_pixbuf;
 
 MonitorSection::MonitorSection (Session* s)
 	: AxisView (s)
@@ -869,45 +867,6 @@ MonitorSection::solo_use_pfl ()
 			}
 		}
 	}
-}
-
-void
-MonitorSection::setup_knob_images ()
-{
-
-	try {
-		uint32_t c = ARDOUR_UI::config()->color_by_name ("monitor knob");
-		char buf[16];
-		snprintf (buf, 16, "#%x", (c >> 8));
-		MotionFeedback::set_lamp_color (buf);
-		big_knob_pixbuf = MotionFeedback::render_pixbuf (80);
-
-	}  catch (...) {
-
-		error << "No usable large knob image" << endmsg;
-		throw failed_constructor ();
-	}
-
-	if (!big_knob_pixbuf) {
-		error << "No usable large knob image" << endmsg;
-		throw failed_constructor ();
-	}
-
-	try {
-
-		little_knob_pixbuf = MotionFeedback::render_pixbuf (30);
-
-	}  catch (...) {
-
-		error << "No usable small knob image" << endmsg;
-		throw failed_constructor ();
-	}
-
-	if (!little_knob_pixbuf) {
-		error << "No usable small knob image" << endmsg;
-		throw failed_constructor ();
-	}
-
 }
 
 void

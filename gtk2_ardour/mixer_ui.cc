@@ -246,8 +246,6 @@ Mixer_UI::Mixer_UI ()
 
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 
-        MonitorSection::setup_knob_images ();
-
 #ifndef DEFER_PLUGIN_SELECTOR_LOAD
 	_plugin_selector = new PluginSelector (PluginManager::instance ());
 #endif
