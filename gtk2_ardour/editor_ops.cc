@@ -241,12 +241,35 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 		EditorThaw(); /* Emit Signal */
 	}
 
-	if (ARDOUR::Profile->get_mixbus()) {
-		//IFF we were working on selected regions, try to reinstate the other region selections that existed before the freeze/thaw.
-		_ignore_follow_edits = true;  //a split will change the region selection in mysterious ways;  its not practical or wanted to follow this edit
-		if( working_on_selection ) {
+	if (working_on_selection) {
+		// IFF we were working on selected regions, try to reinstate the other region selections that existed before the freeze/thaw.
+
+		_ignore_follow_edits = true;  // a split will change the region selection in mysterious ways;  it's not practical or wanted to follow this edit
+		RegionSelectionAfterSplit rsas = Config->get_region_selection_after_split();
+		/* There are three classes of regions that we might want selected after
+		   splitting selected regions:
+		    - regions selected before the split operation, and unaffected by it
+		    - newly-created regions before the split
+		    - newly-created regions after the split
+		 */
+
+		if (rsas & Existing) {
+			// region selections that existed before the split.
 			selection->add ( pre_selected_regions );
-			selection->add (latest_regionviews);  //these are the new regions created after the split
+		}
+
+		for (RegionSelection::iterator ri = latest_regionviews.begin(); ri != latest_regionviews.end(); ri++) {
+			if ((*ri)->region()->position() < where) {
+				// new regions created before the split
+				if (rsas & NewlyCreatedLeft) {
+					selection->add (*ri);
+				}
+			} else {
+				// new regions created after the split
+				if (rsas & NewlyCreatedRight) {
+					selection->add (*ri);
+				}
+			}
 		}
 		_ignore_follow_edits = false;
 	} else {
