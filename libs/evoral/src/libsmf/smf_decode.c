@@ -285,7 +285,7 @@ smf_event_decode_metadata(const smf_event_t *event)
 			goto error;
 	}
 
-	assert (off < BUFFER_SIZE);
+	assert (off <= BUFFER_SIZE);
 	return (buf);
 
 error:
@@ -343,7 +343,7 @@ smf_event_decode_system_realtime(const smf_event_t *event)
 			return (NULL);
 	}
 
-	assert (off < BUFFER_SIZE);
+	assert (off <= BUFFER_SIZE);
 	return (buf);
 }
 
@@ -375,7 +375,7 @@ smf_event_decode_sysex(const smf_event_t *event)
 	} else {
 		off += snprintf(buf + off, BUFFER_SIZE - off, "SysEx, manufacturer 0x%x", manufacturer);
 
-		assert (off < BUFFER_SIZE);
+		assert (off <= BUFFER_SIZE);
 		return (buf);
 	}
 
@@ -491,7 +491,7 @@ smf_event_decode_system_common(const smf_event_t *event)
 			return (NULL);
 	}
 
-	assert (off < BUFFER_SIZE);
+	assert (off <= BUFFER_SIZE);
 	return (buf);
 }
 
@@ -640,7 +640,7 @@ smf_decode(const smf_t *smf)
 	else
 		off += snprintf(buf + off, BUFFER_SIZE - off, "; division: %d FPS, %d resolution", smf->frames_per_second, smf->resolution);
 
-	assert (off < BUFFER_SIZE);
+	assert (off <= BUFFER_SIZE);
 	return (buf);
 }
 
