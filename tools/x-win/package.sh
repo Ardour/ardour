@@ -115,6 +115,9 @@ cp -r $PREFIX/etc/ardour3/* $DESTDIR/share/ardour3/
 cp COPYING $DESTDIR/share/
 cp gtk2_ardour/icons/ardour.ico $DESTDIR/share/
 
+# replace default cursor with square version (sans hotspot file)
+cp gtk2_ardour/icons/cursor_square/*.png $DESTDIR/share/icons/
+
 # clean build-dir after depoyment
 ./waf uninstall
 echo " === complete"
