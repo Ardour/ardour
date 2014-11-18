@@ -1399,7 +1399,6 @@ AlsaAudioBackend::main_process_thread ()
 	_processed_samples = 0;
 
 	uint64_t clock1, clock2;
-	clock1 = g_get_monotonic_time();
 	_pcmi->pcm_start ();
 	int no_proc_errors = 0;
 	const int bailout = 2 * _samplerate / _samples_per_period;
