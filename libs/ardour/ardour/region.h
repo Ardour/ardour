@@ -388,7 +388,7 @@ class LIBARDOUR_API Region
 	bool verify_start (framepos_t);
 	bool verify_start_and_length (framepos_t, framecnt_t&);
 	bool verify_start_mutable (framepos_t&_start);
-	bool verify_length (framecnt_t);
+	bool verify_length (framecnt_t&);
 
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;

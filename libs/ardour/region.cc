@@ -1515,7 +1515,7 @@ Region::source_length(uint32_t n) const
 }
 
 bool
-Region::verify_length (framecnt_t len)
+Region::verify_length (framecnt_t& len)
 {
 	if (source() && (source()->destructive() || source()->length_mutable())) {
 		return true;
