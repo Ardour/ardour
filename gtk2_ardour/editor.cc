@@ -2104,12 +2104,11 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 	bool changed = (_edit_point != ep);
 
 	_edit_point = ep;
-	string str = edit_point_strings[(int)ep];
-
 	if (Profile->get_mixbus())
 		if (ep == EditAtSelectedMarker)
 			ep = EditAtPlayhead;
-	
+
+	string str = edit_point_strings[(int)ep];
 	if (str != edit_point_selector.get_text ()) {
 		edit_point_selector.set_text (str);
 	}
