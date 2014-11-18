@@ -439,8 +439,8 @@ ExportHandler::export_cd_marker_file (ExportTimespanPtr timespan, ExportFormatSp
 
 		/* Start actual marker stuff */
 
-		framepos_t last_end_time = timespan->get_start(), last_start_time = timespan->get_start();
-		status.track_position = last_start_time - timespan->get_start();
+		framepos_t last_end_time = timespan->get_start();
+		status.track_position = 0;
 
 		for (i = temp.begin(); i != temp.end(); ++i) {
 
@@ -471,20 +471,17 @@ ExportHandler::export_cd_marker_file (ExportTimespanPtr timespan, ExportFormatSp
 				if (nexti != temp.end()) {
 					status.track_duration = (*nexti)->start() - last_end_time;
 
-					last_start_time = (*i)->start();
 					last_end_time = (*nexti)->start();
 				} else {
 					// this was the last marker, use timespan end
 					status.track_duration = timespan->get_end() - last_end_time;
 
-					last_start_time = (*i)->start();
 					last_end_time = timespan->get_end();
 				}
 			} else {
 				// range
 				status.track_duration = (*i)->end() - last_end_time;
 
-				last_start_time = (*i)->start();
 				last_end_time = (*i)->end();
 			}
 
