@@ -1243,7 +1243,6 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 	BBTPointList::const_iterator i = bbt_before_or_at (fr);
 	BBT_Time the_beat;
 	uint32_t ticks_one_subdivisions_worth;
-	uint32_t difference;
 
 	bbt_time (fr, the_beat, i);
 
@@ -1283,20 +1282,12 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, RoundMode dir)
 
 		/* round to previous (or same iff dir == RoundDownMaybe) */
 
-		uint32_t mod = the_beat.ticks % ticks_one_subdivisions_worth;
+		uint32_t difference = the_beat.ticks % ticks_one_subdivisions_worth;
 
-		if (mod == 0 && dir == RoundDownMaybe) {
-			/* right on the subdivision, which is fine, so do nothing */
-
-		} else if (mod == 0) {
-			/* right on the subdivision, so the difference is just the subdivision ticks */
+		if (difference == 0 && dir == RoundDownAlways) {
+			/* right on the subdivision, but force-rounding down,
+			   so the difference is just the subdivision ticks */
 			difference = ticks_one_subdivisions_worth;
-		} else {
-			/* not on subdivision, compute distance to previous subdivision, which
-			   is just the modulus.
-			*/
-
-			difference = mod;
 		}
 
 		if (the_beat.ticks < difference) {
