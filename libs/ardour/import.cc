@@ -234,6 +234,7 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 	const framecnt_t nframes = ResampledImportableSource::blocksize;
 	boost::shared_ptr<AudioFileSource> afs;
 	uint32_t channels = source->channels();
+	assert(channels > 0);
 
 	boost::scoped_array<float> data(new float[nframes * channels]);
 	vector<boost::shared_array<Sample> > channel_data;
