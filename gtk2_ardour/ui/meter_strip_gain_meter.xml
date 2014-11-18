@@ -23,7 +23,7 @@
     </HBox>
     <HBox height="10"/>
   </VBox>
-  <EventBox id="gain_display_home"
+  <Entry id="gain_display_entry"
             width="57"
             height="16"
             noshowall="true"

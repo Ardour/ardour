@@ -27,7 +27,7 @@
             bghover="#C47474"
             bordercolor="#C9C9C9"
             borderwidth="1 1 0 0"/>
-    <EventBox id="gain_display_home"/>
+    <Entry id="gain_display_entry"/>
     <Button id="gain_display_button"
             x="0" y="0"
             width="97" height="18"

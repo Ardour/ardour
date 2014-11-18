@@ -43,11 +43,18 @@
                box.padding="2"/>
       </VBox>
     </HBox>
-    <EventBox id="gain_display_home"
-              width="58"
-              height="18"
-              noshowall="true"
-              visible="false"/>
+    <Entry id="gain_display_entry"
+           width="58"
+           height="18"
+           winfont="Arial Bold 9"
+           macfont="Helvetica Bold 9"
+           horzalignment="end"
+           noshowall="true"
+           visible="false"
+           cssname="EditorTrackNameDisplay"
+           textcolornormal="#ffffff"
+           textcoloractive="#ffffff"
+           textcolorselected="#ffffff"/>
     <Button id="gain_display_button"
             width="58"
             height="18"
