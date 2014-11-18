@@ -643,7 +643,7 @@ SndFileSource::setup_broadcast_info (framepos_t /*when*/, struct tm& now, time_t
 		return -1;
         }
 
-	if (!(_flags & Broadcast)) {
+	if (!(_flags & Broadcast) || !_broadcast_info) {
 		return 0;
 	}
 
