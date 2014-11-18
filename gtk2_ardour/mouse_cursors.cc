@@ -135,6 +135,7 @@ MouseCursors::set_cursor_set (const std::string& name)
 	using namespace Gdk;
 
 	drop_all ();
+	Gtkmm2ext::CursorInfo::drop_cursor_info();
 	_cursor_set = name;
 
 	std::string hotspot_info_path = get_icon_path ("hotspots", _cursor_set, false);
