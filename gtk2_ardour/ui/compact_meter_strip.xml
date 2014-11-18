@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <CompactMeterStrip bgnormal="#353535"
-                   meterwidth="5"
-                   thinmeterwidth="2">
+                   meterwidth="10"
+                   thinmeterwidth="4">
   <VBox spacing="6">
     <EventBox bgnormal="#303030">
     <Hbox id="level_meter_home"
