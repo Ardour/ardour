@@ -30,120 +30,120 @@
 #include "route_ui.h"
 
 namespace Gtkmm2ext {
-        class TearOff;
-        class MotionFeedback;
+	class TearOff;
+	class MotionFeedback;
 }
 
 class VolumeController;
 
 class MonitorSection : public RouteUI
 {
-  public:
-        MonitorSection (ARDOUR::Session*);
-        ~MonitorSection ();
+	public:
+	MonitorSection (ARDOUR::Session*);
+	~MonitorSection ();
 
-        void set_session (ARDOUR::Session*);
-        static void setup_knob_images ();
+	void set_session (ARDOUR::Session*);
+	static void setup_knob_images ();
 
-        Gtkmm2ext::TearOff& tearoff() const { return *_tearoff; }
+	Gtkmm2ext::TearOff& tearoff() const { return *_tearoff; }
 
 	std::string state_id() const;
 
-  private:
-        Gtk::VBox vpacker;
-        Gtk::HBox hpacker;
-        Gtk::VBox upper_packer;
-        Gtk::VBox lower_packer;
-        Gtkmm2ext::TearOff* _tearoff;
+	private:
+	Gtk::VBox vpacker;
+	Gtk::HBox hpacker;
+	Gtk::VBox upper_packer;
+	Gtk::VBox lower_packer;
+	Gtkmm2ext::TearOff* _tearoff;
 
 	Gtk::HBox  channel_table_packer;
 	Gtk::HBox  table_hpacker;
-        Gtk::Table channel_table;
-        Gtk::Table channel_table_header;
+	Gtk::Table channel_table;
+	Gtk::Table channel_table_header;
 	Gtk::ScrolledWindow channel_table_scroller;
 	Gtk::Viewport channel_table_viewport;
 	Glib::RefPtr<Gtk::SizeGroup> channel_size_group;
 
-        struct ChannelButtonSet {
-            ArdourButton cut;
-            ArdourButton dim;
-            ArdourButton solo;
-            ArdourButton invert;
+	struct ChannelButtonSet {
+		ArdourButton cut;
+		ArdourButton dim;
+		ArdourButton solo;
+		ArdourButton invert;
 
-            ChannelButtonSet ();
-        };
+		ChannelButtonSet ();
+	};
 
-        typedef std::vector<ChannelButtonSet*> ChannelButtons;
-        ChannelButtons _channel_buttons;
+	typedef std::vector<ChannelButtonSet*> ChannelButtons;
+	ChannelButtons _channel_buttons;
 
-        ArdourKnob* gain_control;
-        ArdourKnob* dim_control;
-        ArdourKnob* solo_boost_control;
-        ArdourKnob* solo_cut_control;
+	ArdourKnob* gain_control;
+	ArdourKnob* dim_control;
+	ArdourKnob* solo_boost_control;
+	ArdourKnob* solo_cut_control;
 
-		ArdourDisplay*  gain_display;
-		ArdourDisplay*  dim_display;
-		ArdourDisplay*  solo_boost_display;
-		ArdourDisplay*  solo_cut_display;
-		
-        void populate_buttons ();
-        void map_state ();
+	ArdourDisplay*  gain_display;
+	ArdourDisplay*  dim_display;
+	ArdourDisplay*  solo_boost_display;
+	ArdourDisplay*  solo_cut_display;
 
-        boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor;
-        boost::shared_ptr<ARDOUR::Route> _route;
+	void populate_buttons ();
+	void map_state ();
+
+	boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor;
+	boost::shared_ptr<ARDOUR::Route> _route;
 
 	static Glib::RefPtr<Gtk::ActionGroup> monitor_actions;
-        void register_actions ();
+	void register_actions ();
 
-        static Glib::RefPtr<Gdk::Pixbuf> big_knob_pixbuf;
-        static Glib::RefPtr<Gdk::Pixbuf> little_knob_pixbuf;
+	static Glib::RefPtr<Gdk::Pixbuf> big_knob_pixbuf;
+	static Glib::RefPtr<Gdk::Pixbuf> little_knob_pixbuf;
 
-        void cut_channel (uint32_t);
-        void dim_channel (uint32_t);
-        void solo_channel (uint32_t);
-        void invert_channel (uint32_t);
-        void dim_all ();
-        void cut_all ();
-        void mono ();
-        void toggle_exclusive_solo ();
+	void cut_channel (uint32_t);
+	void dim_channel (uint32_t);
+	void solo_channel (uint32_t);
+	void invert_channel (uint32_t);
+	void dim_all ();
+	void cut_all ();
+	void mono ();
+	void toggle_exclusive_solo ();
 	void set_button_names () {}
-        void toggle_mute_overrides_solo ();
-        void dim_level_changed ();
-        void solo_boost_changed ();
-        void gain_value_changed ();
+	void toggle_mute_overrides_solo ();
+	void dim_level_changed ();
+	void solo_boost_changed ();
+	void gain_value_changed ();
 
-        ArdourButton solo_in_place_button;
-        ArdourButton afl_button;
-        ArdourButton pfl_button;
-        Gtk::HBox        solo_model_box;
+	ArdourButton solo_in_place_button;
+	ArdourButton afl_button;
+	ArdourButton pfl_button;
+	Gtk::HBox        solo_model_box;
 
-        void solo_use_in_place ();
-        void solo_use_afl ();
-        void solo_use_pfl ();
+	void solo_use_in_place ();
+	void solo_use_afl ();
+	void solo_use_pfl ();
 
-        ArdourButton cut_all_button;
-        ArdourButton dim_all_button;
-        ArdourButton mono_button;
-        ArdourButton rude_solo_button;
-        ArdourButton rude_iso_button;
-        ArdourButton rude_audition_button;
-        ArdourButton exclusive_solo_button;
-        ArdourButton solo_mute_override_button;
+	ArdourButton cut_all_button;
+	ArdourButton dim_all_button;
+	ArdourButton mono_button;
+	ArdourButton rude_solo_button;
+	ArdourButton rude_iso_button;
+	ArdourButton rude_audition_button;
+	ArdourButton exclusive_solo_button;
+	ArdourButton solo_mute_override_button;
 
-        void do_blink (bool);
-        void solo_blink (bool);
-        void audition_blink (bool);
-        bool cancel_solo (GdkEventButton*);
-        bool cancel_isolate (GdkEventButton*);
-        bool cancel_audition (GdkEventButton*);
-        void update_solo_model ();
-        void parameter_changed (std::string);
-        void isolated_changed ();
+	void do_blink (bool);
+	void solo_blink (bool);
+	void audition_blink (bool);
+	bool cancel_solo (GdkEventButton*);
+	bool cancel_isolate (GdkEventButton*);
+	bool cancel_audition (GdkEventButton*);
+	void update_solo_model ();
+	void parameter_changed (std::string);
+	void isolated_changed ();
 
-        PBD::ScopedConnection config_connection;
-        PBD::ScopedConnectionList control_connections;
+	PBD::ScopedConnection config_connection;
+	PBD::ScopedConnectionList control_connections;
 
 	bool _inhibit_solo_model_update;
-	
-        void assign_controllables ();
+
+	void assign_controllables ();
 };
