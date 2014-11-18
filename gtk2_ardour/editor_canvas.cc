@@ -322,7 +322,7 @@ Editor::track_canvas_viewport_size_allocated ()
 void
 Editor::reset_controls_layout_width ()
 {
-	GtkRequisition req;
+	GtkRequisition req = { 0, 0 };
 	gint w;
 
 	edit_controls_vbox.size_request (req);

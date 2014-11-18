@@ -103,7 +103,7 @@ BigClockWindow::on_size_allocate (Gtk::Allocation& alloc)
 void
 BigClockWindow::reset_aspect_ratio ()
 {
-	Gtk::Requisition req;
+	Gtk::Requisition req = { 0, 0 };
 
 	clock.size_request (req);
 

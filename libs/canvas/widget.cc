@@ -91,7 +91,7 @@ Widget::compute_bounding_box () const
 {
 	std::cerr << "cbbox for widget\n";
 
-	GtkRequisition req;
+	GtkRequisition req = { 0, 0 };
 	Gtk::Allocation alloc;
 
 	_widget.size_request (req);
