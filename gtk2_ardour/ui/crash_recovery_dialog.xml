@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title=""
+    resizeable="False"
+    winfont ="Arial Bold 12"
+    macfont ="Helvetica Bold 12"
+    fgnormal="#6D6E72">
+    
+    <style name="generic_control"
+    winfont ="Arial Bold 12"
+    macfont ="Helvetica Bold 12"
+    fgnormal="#6D6E72"
+    horzalignment="center"
+    justify="center"/>
+    
+    <Layout id="layout"
+        width="350"
+        height="140"
+        bgnormal="#EDECE8">
+        <VBox x="0"
+              y="10"
+              width="350">
+            <Label id="info_label"
+                   height="90"
+                   style="generic_control"
+                   text=""/>
+        </VBox>
+        
+        <Button id="ignore_button"
+        style="generic_control"
+        text="Ignore crash data"
+        fgnormal="#6D6E72"
+        bgnormal="#CACAC5"
+        fgactive="#EDECE8"
+        bgactive="#6D6E72"
+        borderwidth="0 0 0 0"
+        bordercolor="#6D6E72"
+        width="120"
+        height="22"
+        x="90"
+        y="108"/>
+        
+        <Button id="recover_button"
+        style="generic_control"
+        text="Recover from crash"
+        fgnormal="#6D6E72"
+        bgnormal="#CACAC5"
+        fgactive="#EDECE8"
+        bgactive="#6D6E72"
+        borderwidth="0 0 0 0"
+        bordercolor="#6D6E72"
+        width="120"
+        height="22"
+        x="220"
+        y="108"/>
+        
+    </Layout>
+    
+</Dialog>

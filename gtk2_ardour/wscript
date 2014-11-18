@@ -70,6 +70,7 @@ gtk2_ardour_sources = [
         'configinfo.cc',
         'control_point.cc',
         'control_point_dialog.cc',
+        'crash_recovery_dialog.cc',
         'curvetest.cc',
         'debug.cc',
         'device_connection_control.cc',

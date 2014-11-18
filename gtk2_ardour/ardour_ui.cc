@@ -145,6 +145,7 @@ typedef uint64_t microseconds_t;
 
 #include "open_file_dialog_proxy.h"
 #include "ok_dialog.h"
+#include "crash_recovery_dialog.h"
 
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
@@ -3990,30 +3991,9 @@ ARDOUR_UI::session_dialog (std::string msg)
 int
 ARDOUR_UI::pending_state_dialog ()
 {
-	HBox* hbox = manage (new HBox());
-	Image* image = manage (new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG));
-	ArdourDialog dialog (_("Crash Recovery"), true);
-	Label  message (string_compose (_("\
-This session appears to have been in the\n\
-middle of recording when %1 or\n\
-the computer was shutdown.\n\
-\n\
-%1 can recover any captured audio for\n\
-you, or it can ignore it. Please decide\n\
-what you would like to do.\n"), PROGRAM_NAME));
-	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
-	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
-	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
-	dialog.get_vbox()->pack_start(*hbox, PACK_EXPAND_PADDING, 6);
-	dialog.add_button (_("Ignore crash data"), RESPONSE_REJECT);
-	dialog.add_button (_("Recover from crash"), RESPONSE_ACCEPT);
-	dialog.set_default_response (RESPONSE_ACCEPT);
-	dialog.set_position (WIN_POS_CENTER);
-	message.show();
-	image->show();
-	hbox->show();
-
-	switch (dialog.run ()) {
+    CrashRecoveryDialog crash_recovery_dialog;
+    
+	switch (crash_recovery_dialog.run ()) {
 	case RESPONSE_ACCEPT:
 		return 1;
 	default:
