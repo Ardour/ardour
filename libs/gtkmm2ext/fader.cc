@@ -262,7 +262,7 @@ Fader::on_button_press_event (GdkEventButton* ev)
 	}
     
 	if (ev->type != GDK_BUTTON_PRESS) {
-		return true;
+        return false;
 	}
 
 	if (ev->button != 1 && ev->button != 2) {
