@@ -353,6 +353,17 @@ namespace ARDOUR {
 		Lock
 	};
 
+	enum RegionSelectionAfterSplit {
+		None = 0,
+		NewlyCreatedLeft = 1,  // bit 0
+		NewlyCreatedRight = 2, // bit 1
+		NewlyCreatedBoth = 3,
+		Existing = 4,          // bit 2
+		ExistingNewlyCreatedLeft = 5,
+		ExistingNewlyCreatedRight = 6,
+		ExistingNewlyCreatedBoth = 7
+	};
+
 	enum RegionPoint {
 		Start,
 		End,
@@ -629,6 +640,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::PositionLockStyle& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::FadeShape& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::RegionSelectionAfterSplit& sf);
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::SampleFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::HeaderFormat& sf);
@@ -651,6 +663,7 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformScale& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformShape& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PositionLockStyle& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::FadeShape& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::RegionSelectionAfterSplit& sf);
 
 static inline ARDOUR::framepos_t
 session_frame_to_track_frame (ARDOUR::framepos_t session_frame, double speed)

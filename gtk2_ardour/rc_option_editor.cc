@@ -1719,6 +1719,25 @@ RCOptionEditor::RCOptionEditor ()
 		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_autoscroll_editor)
 		    ));
 
+	ComboOption<RegionSelectionAfterSplit> *rsas = new ComboOption<RegionSelectionAfterSplit> (
+		    "region-selection-after-split",
+		    _("After splitting selected regions, select"),
+		    sigc::mem_fun (*_rc_config, &RCConfiguration::get_region_selection_after_split),
+		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_region_selection_after_split));
+
+	// TODO: decide which of these modes are really useful
+	rsas->add(None, _("no regions"));
+	// rsas->add(NewlyCreatedLeft, _("newly-created regions before the split"));
+	// rsas->add(NewlyCreatedRight, _("newly-created regions after the split"));
+	rsas->add(NewlyCreatedBoth, _("newly-created regions"));
+	// rsas->add(Existing, _("unmodified regions in the existing selection"));
+	// rsas->add(ExistingNewlyCreatedLeft, _("existing selection and newly-created regions before the split"));
+	// rsas->add(ExistingNewlyCreatedRight, _("existing selection and newly-created regions after the split"));
+	rsas->add(ExistingNewlyCreatedBoth, _("existing selection and newly-created regions"));
+
+	add_option (_("Editor"), rsas);
+
+
 	/* AUDIO */
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Buffering")));

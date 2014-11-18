@@ -88,6 +88,7 @@ setup_enum_writer ()
 	TimecodeFormat _Session_TimecodeFormat;
 	Session::PullupFormat _Session_PullupFormat;
 	FadeShape _FadeShape;
+	RegionSelectionAfterSplit _RegionSelectionAfterSplit;
 	IOChange _IOChange;
 	AutomationType _AutomationType;
 	AutoState _AutoState;
@@ -459,6 +460,16 @@ setup_enum_writer ()
 	REGISTER_ENUM (FadeConstantPower);
 	REGISTER_ENUM (FadeSymmetric);
 	REGISTER (_FadeShape);
+
+	REGISTER_ENUM(None);
+	REGISTER_ENUM(NewlyCreatedLeft);
+	REGISTER_ENUM(NewlyCreatedRight);
+	REGISTER_ENUM(NewlyCreatedBoth);
+	REGISTER_ENUM(Existing);
+	REGISTER_ENUM(ExistingNewlyCreatedLeft);
+	REGISTER_ENUM(ExistingNewlyCreatedRight);
+	REGISTER_ENUM(ExistingNewlyCreatedBoth);
+	REGISTER (_RegionSelectionAfterSplit);
 
 	REGISTER_CLASS_ENUM (Diskstream, Recordable);
 	REGISTER_CLASS_ENUM (Diskstream, Hidden);
@@ -918,6 +929,7 @@ std::ostream& operator<<(std::ostream& o, const Evoral::OverlapType& var)
 	std::string s = enum_2_string (var);
 	return o << s;
 }
+
 std::istream& operator>>(std::istream& o, FadeShape& var)
 {
 	std::string s;
@@ -927,6 +939,20 @@ std::istream& operator>>(std::istream& o, FadeShape& var)
 }
 
 std::ostream& operator<<(std::ostream& o, const FadeShape& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
+std::istream& operator>>(std::istream& o, RegionSelectionAfterSplit& var)
+{
+	std::string s;
+	o >> s;
+	var = (RegionSelectionAfterSplit) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const RegionSelectionAfterSplit& var)
 {
 	std::string s = enum_2_string (var);
 	return o << s;
