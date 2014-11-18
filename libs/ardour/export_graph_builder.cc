@@ -514,7 +514,9 @@ ExportGraphBuilder::ChannelConfig::ChannelConfig (ExportGraphBuilder & parent, F
 	// Make the chunk size divisible by the channel count
 	int chan_count = new_config.channel_config->get_n_chans();
 	max_frames_out = 8192;
-	max_frames_out -= max_frames_out % chan_count;
+	if (chan_count > 0) {
+		max_frames_out -= max_frames_out % chan_count;
+	}
 	chunker.reset (new Chunker<Sample> (max_frames_out));
 	interleaver->add_output(chunker);
 
