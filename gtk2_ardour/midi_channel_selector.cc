@@ -44,14 +44,11 @@ using namespace Gtk;
 using namespace ARDOUR;
 
 MidiChannelSelector::MidiChannelSelector(int n_rows, int n_columns, int start_row, int start_column)
-	: Table(n_rows, n_columns, true)
+	: Table(std::max(4, std::max(n_rows,    start_row    + 4)),
+	        std::max(4, std::max(n_columns, start_column + 4)),
+	        true)
 	, _recursion_counter(0)
 {
-	n_rows    = std::max(4, n_rows);
-	n_rows    = std::max(4, start_row + 4);
-	n_columns = std::max(4, n_columns);
-	n_columns = std::max(4, start_column + 4);
-
 	property_column_spacing() = 0;
 	property_row_spacing() = 0;
 
