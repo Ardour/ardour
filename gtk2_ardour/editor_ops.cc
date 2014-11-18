@@ -1533,7 +1533,7 @@ Editor::temporal_zoom (framecnt_t fpp)
 	// would be 4147200000 samples, so 2592000 samples per pixel.
 
 	nfpp = min (fpp, (framecnt_t) 2592000);
-	nfpp = max ((framecnt_t) 1, fpp);
+	nfpp = max ((framecnt_t) 1, nfpp);
 
 	new_page_size = (framepos_t) floor (_visible_canvas_width * nfpp);
 	half_page_size = new_page_size / 2;
