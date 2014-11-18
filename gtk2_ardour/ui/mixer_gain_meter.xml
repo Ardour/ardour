@@ -18,7 +18,7 @@
             borderwidth="0 0 0 0"/>
     <HBox>
       <VBox>
-        <HBox height="18"/>
+        <HBox height="15"/>
         <HBox spacing="4" width="32">
           <VBox id="level_meter_home"
                 width="18"
