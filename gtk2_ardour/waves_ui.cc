@@ -705,6 +705,23 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		}
 	}
 
+	Gtk::Entry* entry = dynamic_cast<Gtk::Entry*> (&widget);
+	if (entry) {
+		property = xml_property (definition, "horzalignment", styles, "center");
+		std::transform(property.begin(), property.end(), property.begin(), ::tolower);
+		Gtk::AlignmentEnum xalign = Gtk::ALIGN_CENTER;
+		if (property == "start") {
+			xalign = Gtk::ALIGN_START;
+		} else if (property == "end") {
+			xalign = Gtk::ALIGN_END;
+		} else if (property == "center") {
+			xalign = Gtk::ALIGN_CENTER;
+		} else {
+			dbg_msg ("Invalid horizontal alignment for Gtk::Entry !");
+		}
+        entry->set_alignment (xalign);
+    }
+    
 	Gtk::Label* label = dynamic_cast<Gtk::Label*> (&widget);
 	if (label) {
 		property = xml_property (definition, "justify", styles, "left");
