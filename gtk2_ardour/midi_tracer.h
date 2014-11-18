@@ -46,7 +46,6 @@ class MidiTracer : public ArdourWindow
 	~MidiTracer();
 
   private:
-	MIDI::Parser* parser;
 	Gtk::TextView text;
 	Gtk::ScrolledWindow scroller;
 	Gtk::Adjustment line_count_adjustment;
@@ -57,7 +56,6 @@ class MidiTracer : public ArdourWindow
 	
 	bool autoscroll;
 	bool show_hex;
-	bool collect;
 	bool show_delta_time;
 
 	/** Incremented when an update is requested, decremented when one is handled; hence

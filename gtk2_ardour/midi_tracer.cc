@@ -43,13 +43,11 @@ using namespace Glib;
 
 MidiTracer::MidiTracer ()
 	: ArdourWindow (_("MIDI Tracer"))
-	, parser (0)
 	, line_count_adjustment (200, 1, 2000, 1, 10)
 	, line_count_spinner (line_count_adjustment)
 	, line_count_label (_("Line history: "))
 	, autoscroll (true)
 	, show_hex (true)
-	, collect (true)
 	, show_delta_time (false)
 	, _update_queued (0)
 	, fifo (1024)
