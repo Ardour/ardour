@@ -1924,8 +1924,10 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 
 	if (x_fraction > 0.0 && x_fraction < 0.25) {
 		cursor = _editor->cursors()->left_side_trim;
+		at_front = true;
 	} else  {
 		cursor = _editor->cursors()->right_side_trim;
+		at_front = false;
 	}
 
 	Drag::start_grab (event, cursor);
@@ -1934,14 +1936,6 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 
 	double const region_start = region->get_position_pixels();
 	double const middle_point = region_start + cnote->x0() + (cnote->x1() - cnote->x0()) / 2.0L;
-
-	if (grab_x() <= middle_point) {
-		cursor = _editor->cursors()->left_side_trim;
-		at_front = true;
-	} else {
-		cursor = _editor->cursors()->right_side_trim;
-		at_front = false;
-	}
 
 	_item->grab ();
 
