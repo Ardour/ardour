@@ -405,6 +405,8 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 	// If you want to append more to the line, uncomment this first
 	// bufsize -= s;
 
+	assert(s <= buffer_size); // clang dead-assignment
+
 	fifo.write (&buf, 1);
 
 	if (g_atomic_int_get (const_cast<gint*> (&_update_queued)) == 0) {
