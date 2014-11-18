@@ -1098,7 +1098,6 @@ int
 IO::set_ports (const string& str)
 {
 	vector<string> ports;
-	int i;
 	int n;
 	uint32_t nports;
 
@@ -1115,14 +1114,10 @@ IO::set_ports (const string& str)
 		}
 	}
 
-	string::size_type start, end, ostart;
-
-	ostart = 0;
-	start = 0;
-	end = 0;
-	i = 0;
-
-	while ((start = str.find_first_of ('{', ostart)) != string::npos) {
+	string::size_type start  = 0;
+	string::size_type end    = 0;
+	string::size_type ostart = 0;
+	for (int i = 0; (start = str.find_first_of ('{', ostart)) != string::npos; ++i) {
 		start += 1;
 
 		if ((end = str.find_first_of ('}', start)) == string::npos) {
@@ -1143,7 +1138,6 @@ IO::set_ports (const string& str)
 		}
 
 		ostart = end+1;
-		i++;
 	}
 
 	return 0;
