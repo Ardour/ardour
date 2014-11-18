@@ -702,7 +702,6 @@ GainMeter::gain_slider_button_press (GdkEventButton* ev)
 bool
 GainMeter::gain_slider_button_release (GdkEventButton* ev)
 {
-    std::cout << "GainMeter::gain_slider_button_release () " << ev->type << std::endl;
 	_amp->gain_control()->stop_touch (false, _amp->session().transport_frame());
     if (_gain_slider_double_clicked) {
         start_gain_level_editing ();
