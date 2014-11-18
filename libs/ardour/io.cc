@@ -854,6 +854,7 @@ IO::get_port_counts (const XMLNode& node, int version, ChanCount& n, boost::shar
 	for (iter = node.children().begin(); iter != node.children().end(); ++iter) {
 
 		if ((*iter)->name() == X_("Bundle")) {
+			prop = (*iter)->property ("name");
 			if ((c = find_possible_bundle (prop->value())) != 0) {
 				n = ChanCount::max (n, c->nchannels());
 				return 0;
