@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <libgen.h>
+#include <assert.h>
 
 #include <pthread.h>
 #include <signal.h>
@@ -771,6 +772,10 @@ vstfx_event_loop_remove_plugin (VSTState* vstfx)
 			}
 		}
 	}
+
+	// if this function is called, there must be
+	// at least one plugin in the linked list
+	assert(vstfx_first);
 
 	if (vstfx_first == vstfx) {
 		vstfx_first = vstfx_first->next;
