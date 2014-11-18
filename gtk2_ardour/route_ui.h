@@ -145,9 +145,6 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 
 	Glib::RefPtr<Gdk::Pixbuf> solo_safe_pixbuf;
 
-//    WavesButton& solo_safe_led;
-//    WavesButton& solo_isolated_led;
-
 	Gtk::Label monitor_input_button_label;
 
 	void send_blink (bool);
