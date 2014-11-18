@@ -296,7 +296,6 @@ ARDOUR_UI_UTILS::rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t
 				a = rc->fg[GTK_STATE_ACTIVE].red / 257;
 			}
 		} else if (attr == "bg") {
-			r = g = b = 0;
 			r = rc->bg[state].red / 257;
 			g = rc->bg[state].green / 257;
 			b = rc->bg[state].blue / 257;

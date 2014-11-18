@@ -572,9 +572,6 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double size, double progress_
 	xc = (xorigin + (size / 2.0)) * (1.0/scale_factor);
 	yc = (yorigin + (size / 2.0)) * (1.0/scale_factor);
 
-	start_angle = 0.0;
-	end_angle = 0.0;
-	value_angle = 0.0;
 	value = (phase * 1.0) / (65 - 1);
 
 	start_angle = ((180 - 65) * G_PI) / 180;

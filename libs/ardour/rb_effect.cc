@@ -209,8 +209,6 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 			for (uint32_t i = 0; i < channels; ++i) {
 
-				this_read = 0;
-
 				framepos_t this_time;
 				this_time = min(bufsize, read_duration - pos);
 
@@ -251,7 +249,6 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 			for (uint32_t i = 0; i < channels; ++i) {
 
-				this_read = 0;
 				framepos_t this_time;
 				this_time = min(bufsize, read_duration - pos);
 
