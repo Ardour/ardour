@@ -4386,7 +4386,7 @@ Editor::paste_internal (framepos_t position, float times)
 		sort_track_selection (ts);
 	} else {
 		/* Figure out which track to base the paste at. */
-		TimeAxisView* base_track;
+		TimeAxisView* base_track = NULL;
 		if (_edit_point == Editing::EditAtMouse && entered_track) {
 			/* With the mouse edit point, paste onto the track under the mouse. */
 			base_track = entered_track;
@@ -4396,6 +4396,9 @@ Editor::paste_internal (framepos_t position, float times)
 		} else if (_last_cut_copy_source_track) {
 			/* Paste to the track that the cut/copy came from (see mantis #333). */
 			base_track = _last_cut_copy_source_track;
+		} else {
+			/* This is "impossible" since we've copied... well, do nothing. */
+			return;
 		}
 
 		/* Walk up to parent if necessary, so base track is a route. */
