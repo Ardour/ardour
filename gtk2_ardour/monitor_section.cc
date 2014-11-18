@@ -1068,6 +1068,14 @@ MonitorSection::cancel_audition (GdkEventButton*)
 	return true;
 }
 
+#define SYNCHRONIZE_TOGGLE_ACTION(action, value) \
+	if (action) { \
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(action); \
+		if (tact && tact->get_active() != value) { \
+			tact->set_active(value); \
+		} \
+	}
+
 void
 MonitorSection::parameter_changed (std::string name)
 {
@@ -1075,6 +1083,14 @@ MonitorSection::parameter_changed (std::string name)
 		update_solo_model ();
 	} else if (name == "listen-position") {
 		update_solo_model ();
+	} else if (name == "solo-mute-override") {
+		SYNCHRONIZE_TOGGLE_ACTION(
+				ActionManager::get_action (X_("Monitor"), "toggle-mute-overrides-solo"),
+				Config->get_solo_mute_override ())
+	} else if (name == "exclusive-solo") {
+		SYNCHRONIZE_TOGGLE_ACTION(
+				ActionManager::get_action (X_("Monitor"), "toggle-exclusive-solo"),
+				Config->get_exclusive_solo ())
 	}
 }
 
