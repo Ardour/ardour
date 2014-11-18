@@ -324,11 +324,9 @@ AudioEngine::process_callback (pframes_t nframes)
 	*/
 
 	if (_freewheeling && !Freewheel.empty()) {
-                Freewheel (nframes);
+		Freewheel (nframes);
 	} else {
-		if (_session) {
-			_session->process (nframes);
-		}
+		_session->process (nframes);
 	}
 
 	if (_freewheeling) {
