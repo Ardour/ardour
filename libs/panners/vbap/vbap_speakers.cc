@@ -559,6 +559,11 @@ VBAPSpeakers::choose_speaker_pairs (){
 	}
 
 	/* sort loudspeakers according their aximuth angle */
+#ifdef __clang_analyzer__
+	// sort_2D_lss() assigns values to all of sorted_speakers
+	// "uninitialized value"
+	memset(sorted_speakers, 0, sizeof(*sorted_speakers));
+#endif
 	sort_2D_lss (sorted_speakers);
 
 	/* adjacent loudspeakers are the loudspeaker pairs to be used.*/
@@ -626,13 +631,14 @@ VBAPSpeakers::sort_2D_lss (int* sorted_speakers)
 	vector<Speaker> tmp = _speakers;
 	vector<Speaker>::iterator s;
 	azimuth_sorter sorter;
-	int n;
+	unsigned int n;
 
 	sort (tmp.begin(), tmp.end(), sorter);
 
 	for (n = 0, s = tmp.begin(); s != tmp.end(); ++s, ++n) {
 		sorted_speakers[n] = (*s).id;
 	}
+	assert(n == _speakers.size ());
 }
 
 int

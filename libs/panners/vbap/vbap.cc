@@ -162,6 +162,8 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 	int i,j,k;
 	double small_g;
 	double big_sm_g, gtmp[3];
+	const int dimension = _speakers->dimension();
+	assert(dimension == 2 || dimension == 3);
 
 	spherical_to_cartesian (azi, ele, 1.0, cartdir[0], cartdir[1], cartdir[2]);  
 	big_sm_g = -100000.0;
@@ -173,12 +175,12 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 
 		small_g = 10000000.0;
 
-		for (j = 0; j < _speakers->dimension(); j++) {
+		for (j = 0; j < dimension; j++) {
 
 			gtmp[j] = 0.0;
 
-			for (k = 0; k < _speakers->dimension(); k++) {
-				gtmp[j] += cartdir[k] * _speakers->matrix(i)[j*_speakers->dimension()+k]; 
+			for (k = 0; k < dimension; k++) {
+				gtmp[j] += cartdir[k] * _speakers->matrix(i)[j * dimension + k];
 			}
 
 			if (gtmp[j] < small_g) {
