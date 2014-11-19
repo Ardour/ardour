@@ -663,14 +663,14 @@ ArdourButton::set_colors ()
 	}
 	std::string name = get_name();
 
-	fill_active_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill active", name));
-	fill_inactive_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill", name));
+	fill_active_color = ARDOUR_UI::config()->color (string_compose ("%1: fill active", name));
+	fill_inactive_color = ARDOUR_UI::config()->color (string_compose ("%1: fill", name));
 
-	text_active_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: text active", name));
-	text_inactive_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: text", name));
+	text_active_color = ARDOUR_UI::config()->color (string_compose ("%1: text active", name));
+	text_inactive_color = ARDOUR_UI::config()->color (string_compose ("%1: text", name));
 
-	led_active_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led active", name));
-	led_inactive_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led", name));
+	led_active_color = ARDOUR_UI::config()->color (string_compose ("%1: led active", name));
+	led_inactive_color = ARDOUR_UI::config()->color (string_compose ("%1: led", name));
 }
 
 /**

@@ -853,9 +853,9 @@ void
 MonitorSection::solo_use_pfl ()
 {
 	/* this is driven by a toggle on a radio group, and so is invoked twice,
-		 once for the item that became inactive and once for the one that became
-		 active.
-		 */
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Solo"), X_("solo-use-pfl"));
 	if (act) {

@@ -398,7 +398,7 @@ ThemeManager::setup_theme ()
 
 	color_list->clear();
 
-	for (std::map<std::string,ColorVariable<uint32_t> *>::iterator i = ARDOUR_UI::config()->canvas_colors.begin(); i != ARDOUR_UI::config()->canvas_colors.end(); i++) {
+	for (std::map<std::string,ColorVariable<uint32_t> *>::iterator i = ARDOUR_UI::config()->configurable_colors.begin(); i != ARDOUR_UI::config()->configurable_colors.end(); i++) {
 
 
 		ColorVariable<uint32_t>* var = i->second;

@@ -37,6 +37,8 @@
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 
+#include "canvas/colors.h"
+
 #include "ardour_ui.h"
 #include "global_signals.h"
 #include "stereo_panner.h"
@@ -668,7 +670,8 @@ void
 StereoPanner::set_colors ()
 {
 	colors[Normal].fill = ARDOUR_UI::config()->get_StereoPannerFill();
-	colors[Normal].outline = ARDOUR_UI::config()->get_StereoPannerOutline();
+	// colors[Normal].outline = ARDOUR_UI::config()->get_StereoPannerOutline();
+	colors[Normal].outline = ArdourCanvas::HSV (colors[Normal].fill).outline().color ();
 	colors[Normal].text = ARDOUR_UI::config()->get_StereoPannerText();
 	colors[Normal].background = ARDOUR_UI::config()->get_StereoPannerBackground();
 	colors[Normal].rule = ARDOUR_UI::config()->get_StereoPannerRule();

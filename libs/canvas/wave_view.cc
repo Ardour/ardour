@@ -683,7 +683,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 		color_to_hsv (_fill_color, h, s, v);
 		/* change v towards white */
 		v *= 1.0 - gradient_depth();
-		Color center = hsv_to_color (h, s, v, a);
+		Color center = hsva_to_color (h, s, v, a);
 		color_to_rgba (center, r, g, b, a);
 
 		gradient->add_color_stop_rgba (stops[0], r, g, b, a);

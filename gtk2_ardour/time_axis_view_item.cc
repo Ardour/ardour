@@ -818,7 +818,7 @@ TimeAxisViewItem::set_frame_gradient ()
 
 	v = min (1.0, v * (1.0 - ARDOUR_UI::config()->get_timeline_item_gradient_depth()));
 	
-	ArdourCanvas::Color darker = ArdourCanvas::hsv_to_color (h, s, v, a);
+	ArdourCanvas::Color darker = ArdourCanvas::hsva_to_color (h, s, v, a);
 	stops.push_back (std::make_pair (1.0, darker));
 	
 	frame->set_gradient (stops, true);

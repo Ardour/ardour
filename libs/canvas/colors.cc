@@ -21,6 +21,7 @@
 #include <stdint.h>
 
 #include "canvas/colors.h"
+#include "canvas/colorspace.h"
 
 using namespace std;
 using namespace ArdourCanvas;
@@ -31,7 +32,14 @@ using std::min;
 void
 ArdourCanvas::color_to_hsv (Color color, double& h, double& s, double& v)
 {
-	double r, g, b, a;
+	double a;
+	color_to_hsva (color, h, s, v, a);
+}
+
+void
+ArdourCanvas::color_to_hsva (Color color, double& h, double& s, double& v, double& a)
+{
+	double r, g, b;
 	double cmax;
 	double cmin;
 	double delta;
@@ -57,7 +65,8 @@ ArdourCanvas::color_to_hsv (Color color, double& h, double& s, double& v)
 	if (cmax == 0) {
 		// r = g = b == 0 ... v is undefined, s = 0
 		s = 0.0;  
-		h = -1.0;
+		h = 0.0;
+		return;
 	}
 
 	if (delta != 0.0) {	
@@ -70,6 +79,13 @@ ArdourCanvas::color_to_hsv (Color color, double& h, double& s, double& v)
 		}
 		
 		h *= 60.0;
+		
+		if (h < 0.0) {
+			/* negative values are legal but confusing, because
+			   they alias positive values.
+			*/
+			h = 360 + h;
+		}
 	}
 
 	if (delta == 0 || cmax == 0) {
@@ -80,23 +96,16 @@ ArdourCanvas::color_to_hsv (Color color, double& h, double& s, double& v)
 }
 
 ArdourCanvas::Color
-ArdourCanvas::hsv_to_color (const HSV& hsv, double a)
-{
-	return hsv_to_color (hsv.h, hsv.s, hsv.v, a);
-}
-
-ArdourCanvas::Color
-ArdourCanvas::hsv_to_color (double h, double s, double v, double a)
+ArdourCanvas::hsva_to_color (double h, double s, double v, double a)
 {
 	s = min (1.0, max (0.0, s));
 	v = min (1.0, max (0.0, v));
 
 	if (s == 0) {
-		// achromatic (grey)
 		return rgba_to_color (v, v, v, a);
 	}
 
-	h = min (360.0, max (0.0, h));
+	h = fmod (h + 360.0, 360.0);
 
 	double c = v * s;
         double x = c * (1.0 - fabs(fmod(h / 60.0, 2) - 1.0));
@@ -197,31 +206,50 @@ ArdourCanvas::contrasting_text_color (uint32_t c)
 	return (luminance (c) < 0.50) ? white : black;
 }
 
+
+
 HSV::HSV ()
-	: h (1.0)
+	: h (0.0)
 	, s (1.0)
 	, v (1.0)
+	, a (1.0) 
 {
 }
 
-HSV::HSV (double hh, double ss, double vv)
+HSV::HSV (double hh, double ss, double vv, double aa)
 	: h (hh)
 	, s (ss)
 	, v (vv)
+	, a (aa) 
 {
+	if (h < 0.0) {
+		/* normalize negative hue values into positive range */
+		h = 360.0 + h;
+	}
 }
 
 HSV::HSV (Color c)
 {
-	color_to_hsv (c, h, s, v);
+	color_to_hsva (c, h, s, v, a);
+}
+
+bool
+HSV::is_gray () const
+{
+	return s == 0;
 }
 
 void
 HSV::clamp ()
 {
-	s = min (s, 1.0);
-	v = min (v, 1.0);
-	h = min (255.0, h);
+	h = fmod (h, 360.0);
+	if (h < 0.0) {
+		/* normalize negative hue values into positive range */
+		h = 360.0 + h;
+	}
+	s = min (1.0, s);
+	v = min (1.0, v);
+	a = min (1.0, a);
 }
 
 HSV
@@ -231,7 +259,8 @@ HSV::operator+ (const HSV& operand) const
 	hsv.h = h + operand.h;
 	hsv.s = s + operand.s;
 	hsv.v = v + operand.v;
-	hsv.clamp();
+	hsv.a = a + operand.a;
+	hsv.clamp ();
 	return hsv;
 }
 
@@ -241,20 +270,37 @@ HSV::operator- (const HSV& operand) const
 	HSV hsv;
 	hsv.h = h - operand.h;
 	hsv.s = s - operand.s;
-	hsv.v = v - operand.v;
-	hsv.clamp();
+	hsv.v = s - operand.v;
+	hsv.a = a - operand.a;
+	hsv.clamp ();
 	return hsv;
 }
 
-HSV
-HSV::operator* (double d) const
+HSV&
+HSV::operator=(Color c)
 {
-	HSV hsv;
-	hsv.h = h * d;
-	hsv.s = s * d;
-	hsv.v = v * d;
-	hsv.clamp();
-	return hsv;
+	color_to_hsva (c, h, s, v, a);
+	clamp ();
+	return *this;
+}
+
+HSV&
+HSV::operator=(const std::string& str)
+{
+	uint32_t c;
+	c = strtol (str.c_str(), 0, 16);
+	color_to_hsva (c, h, s, v, a);
+	clamp ();
+	return *this;
+}
+
+bool
+HSV::operator== (const HSV& other)
+{
+	return h == other.h &&
+		s == other.s &&
+		v == other.v &&
+		a == other.a;
 }
 
 HSV
@@ -274,21 +320,31 @@ HSV::shade (double factor) const
 
 	if (factor > 1.0) {
 		if (s < 88) {
-			hsv.v *= 1.0/(factor/10.0);
-		} else {
-			hsv.s *= factor;
-		}
+			hsv.v += (hsv.v * (factor * 10.0));
+		} 
+		hsv.s *= factor;
 	} else {
 		if (s < 88) {
-			hsv.v *= 1.0/factor;
-		} else {
-			hsv.s *= factor;
-		}
+			hsv.v -= (hsv.v * (factor * 10.0));
+		} 
+		hsv.s *= factor;
 	}
 
 	hsv.clamp();
 
 	return hsv;
+}
+
+HSV
+HSV::outline () const
+{
+	if (luminance (color()) < 0.50) {
+		/* light color, darker outline: black with 15% opacity */
+		return HSV (0.0, 0.0, 0.0, 0.15);
+	} else {
+		/* dark color, lighter outline: white with 15% opacity */
+		return HSV (0.0, 0.0, 1.0, 0.15);
+	}
 }
 
 HSV
@@ -305,77 +361,104 @@ HSV::mix (const HSV& other, double amount) const
 	return hsv;
 }
 
+HSV
+HSV::delta (const HSV& other) const
+{
+	HSV d;
+	d.h = h - other.h;
+	d.s = s - other.s;
+	d.v = v - other.v;
+	/* do not clamp - we are returning a delta */
+	return d;
+}
+
+double
+HSV::distance (const HSV& other) const
+{
+	/* Use CIE94 definition for now */
+
+	double sL, sA, sB;
+	double oL, oA, oB;
+	double r, g, b, a;
+	Color c; 
+
+	c = hsva_to_color (h, s, v, a);
+	color_to_rgba (c, r, g, b, a);
+	Rgb2Lab (&sL, &sA, &sB, r, g, b);
+
+	c = hsva_to_color (other.h, other.s, other.v, other.a);
+	color_to_rgba (c, r, g, b, a);
+	Rgb2Lab (&oL, &oA, &oB, r, g, b);
+
+	// Weighting factors depending on the application (1 = default)
+
+	const double whtL = 1.0;
+	const double whtC = 1.0;
+	const double whtH = 1.0;  
+
+	const double xC1 = sqrt ((sA * sA) + (sB * oB));
+	const double xC2 = sqrt ((oA * oA) + (oB * oB));
+	double xDL = oL - sL;
+	double xDC = xC2 - xC1;
+	const double xDE = sqrt (((sL - oL) * (sL - oL))
+				 + ((sA - oA) * (sA - oA))
+				 + ((sB - oB) * (sB - oB)));
+	
+	double xDH;
+
+	if (sqrt (xDE) > (sqrt (abs (xDL)) + sqrt (abs (xDC)))) {
+		xDH = sqrt ((xDE * xDE) - (xDL * xDL) - (xDC * xDC));
+	} else {
+		xDH = 0;
+	}
+
+	const double xSC = 1 + (0.045 * xC1);
+	const double xSH = 1 + (0.015 * xC1);
+
+	xDL /= whtL;
+	xDC /= whtC * xSC;
+	xDH /= whtH * xSH;
+	
+	return sqrt ((xDL * xDL) + (xDC * xDC) + (xDH * xDH));
+}
+
+HSV
+HSV::opposite () const
+{
+	HSV hsv (*this);
+	hsv.h = fmod (h + 180.0, 360.0);
+	return hsv;
+}
+
+HSV
+HSV::bw_text () const
+{
+	return HSV (contrasting_text_color (color()));
+}
+
+HSV
+HSV::text () const
+{
+	return opposite ();
+}
+
+HSV
+HSV::selected () const
+{
+	/* XXX hack */
+	return HSV (Color (0xff0000));
+}
+
+
 void
 HSV::print (std::ostream& o) const
 {
 	if (!is_gray()) {
-		o << "hsv " << h << '|' << s << '|' << v;
+		o << '(' << s << ',' << v << ',' << a << ')';
 	} else {
-		o << "hsv gray";
+		o << "gray(" << v << ')';
 	}
 }
 
-HSVA::HSVA ()
-	: a (1.0) 
-{
-}
-
-HSVA::HSVA (double hh, double ss, double vv, double aa)
-	: HSV (hh, ss, vv)
-	, a (aa) 
-{
-}
-
-HSVA::HSVA (Color c)
-{
-	color_to_hsv (c, h, s, v);
-	a = c & 0xff;
-}
-
-void
-HSVA::clamp ()
-{
-	HSV::clamp ();
-	a = min (1.0, a);
-}
-
-HSVA
-HSVA::operator+ (const HSVA& operand) const
-{
-	HSVA hsv;
-	hsv.h = h + operand.h;
-	hsv.s = s + operand.s;
-	hsv.v = v + operand.v;
-	hsv.a = a + operand.a;
-	return hsv;
-}
-
-HSVA
-HSVA::operator- (const HSVA& operand) const
-{
-	HSVA hsv;
-	hsv.h = h - operand.h;
-	hsv.s = s - operand.s;
-	hsv.a = a - operand.a;
-	return hsv;
-}
-
-void
-HSVA::print (std::ostream& o) const
-{
-	if (!is_gray()) {
-		o << "hsva " << h << '|' << s << '|' << v << '|' << a;
-	} else {
-		o << "hsva gray";
-	}
-}
-
-
-ArdourCanvas::Color
-ArdourCanvas::hsva_to_color (const HSVA& hsva)
-{
-	return hsv_to_color (hsva.h, hsva.s, hsva.v, hsva.a);
-}
 
 std::ostream& operator<<(std::ostream& o, const ArdourCanvas::HSV& hsv) { hsv.print (o); return o; }
-std::ostream& operator<<(std::ostream& o, const ArdourCanvas::HSVA& hsva) { hsva.print (o); return o; }

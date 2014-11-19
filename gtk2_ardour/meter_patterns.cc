@@ -328,7 +328,7 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 	cairo_fill (cr);
 
 	height = min(max_pattern_metric_size, height);
-	uint32_t peakcolor = ARDOUR_UI::config()->color_by_name ("meterbridge peaklabel");
+	uint32_t peakcolor = ARDOUR_UI::config()->color ("meterbridge peaklabel");
 
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
 
@@ -650,7 +650,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 	cairo_set_line_width (cr, 1.0);
 
 	height = min(max_pattern_metric_size, height);
-	uint32_t peakcolor = ARDOUR_UI::config()->color_by_name ("meterbridge peaklabel");
+	uint32_t peakcolor = ARDOUR_UI::config()->color ("meterbridge peaklabel");
 	Gdk::Color c; // default text color
 
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {

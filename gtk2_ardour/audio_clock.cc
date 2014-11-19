@@ -223,15 +223,15 @@ AudioClock::set_colors ()
 	uint32_t cursor_color;
 
 	if (active_state()) {
-		bg_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 active: background", get_name()));
-		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 active: text", get_name()));
-		editing_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 active: edited text", get_name()));
-		cursor_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1 active: cursor", get_name()));
+		bg_color = ARDOUR_UI::config()->color (string_compose ("%1 active: background", get_name()));
+		text_color = ARDOUR_UI::config()->color (string_compose ("%1 active: text", get_name()));
+		editing_color = ARDOUR_UI::config()->color (string_compose ("%1 active: edited text", get_name()));
+		cursor_color = ARDOUR_UI::config()->color (string_compose ("%1 active: cursor", get_name()));
 	} else {
-		bg_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: background", get_name()));
-		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: text", get_name()));
-		editing_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: edited text", get_name()));
-		cursor_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: cursor", get_name()));
+		bg_color = ARDOUR_UI::config()->color (string_compose ("%1: background", get_name()));
+		text_color = ARDOUR_UI::config()->color (string_compose ("%1: text", get_name()));
+		editing_color = ARDOUR_UI::config()->color (string_compose ("%1: edited text", get_name()));
+		cursor_color = ARDOUR_UI::config()->color (string_compose ("%1: cursor", get_name()));
 	}
 
 	/* store for bg and cursor in render() */

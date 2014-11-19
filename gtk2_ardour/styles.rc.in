@@ -22,12 +22,6 @@ style "default_button" = "small_text"
 {
 }
 
-style "mouse_mode_button" = "default_button"
-{
-	bg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
-	fg[ACTIVE] = @@COLPREFIX@_darkest
-}
-
 style "gain_fader"
 {
 	bg[NORMAL] = shade (0.7, @@COLPREFIX@_bg)
@@ -37,10 +31,6 @@ style "gain_fader"
 	fg[INSENSITIVE] = shade(1.4, @@COLPREFIX@_bg)
 	fg[NORMAL] = shade(1.4, @@COLPREFIX@_bg)
 	fg[ACTIVE] = shade(1.4, @@COLPREFIX@_bg)
-}
-
-style "track_rec_enable_button" = "small_button"
-{
 }
 
 style "default_menu" = "medium_text"
@@ -111,104 +101,9 @@ style "processor" = "small_text"
 {
 }
 
-style "mixer_invert_button" = "small_button"
-{
-	bg[ACTIVE] = @@COLPREFIX@_not_so_bright_indicator
-	fg[ACTIVE] = @@COLPREFIX@_darkest
-}
-
-style "monitor_mono_button" = "small_button"
-{
-	bg[NORMAL] = mix(0.1,@@COLPREFIX@_mono,@@COLPREFIX@_bg)
-	bg[ACTIVE] = @@COLPREFIX@_mono
-	fg[ACTIVE] = @@COLPREFIX@_darkest
-}
-
-style "monitor_invert_button" = "small_button"
-{
-	bg[NORMAL] = mix(0.1,@@COLPREFIX@_not_so_bright_indicator,@@COLPREFIX@_bg)
-	bg[ACTIVE] = @@COLPREFIX@_not_so_bright_indicator
-	fg[ACTIVE] = @@COLPREFIX@_darkest
-}
-
-style "monitor_mute_button" = "small_button"
-{
-	bg[NORMAL] = mix(0.1,@@COLPREFIX@_mute,@@COLPREFIX@_bg)
-	bg[ACTIVE] = @@COLPREFIX@_mute
-	fg[ACTIVE] = @@COLPREFIX@_darkest
-}
-
-style "monitor_dim_button" = "small_button"
-{
-	bg[NORMAL] = mix(0.1,lighter(@@COLPREFIX@_mute),@@COLPREFIX@_bg)
-	bg[ACTIVE] = lighter(@@COLPREFIX@_mute)
-	fg[ACTIVE] = @@COLPREFIX@_darkest
-}
-
-style "monitor_iso_button" = "small_button"
-{
-	bg[NORMAL] = mix(0.1,@@COLPREFIX@_somewhat_bright_indicator,@@COLPREFIX@_bg)
-	bg[ACTIVE] = @@COLPREFIX@_somewhat_bright_indicator
-	fg[ACTIVE] = @@COLPREFIX@_darkest
-}
-
 style "ruler_label" = "small_bold_text"
 {
 	fg[NORMAL] = @@COLPREFIX@_light_text_on_dark
-}
-
-style "transport_button"
-{
-	bg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
-	fg[ACTIVE] = @@COLPREFIX@_darkest
-}
-
-style "transport_button_active"
-{
-	bg[NORMAL] = @@COLPREFIX@_contrasting_indicator
-	bg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
-	bg[SELECTED] = @@COLPREFIX@_contrasting_indicator
-	bg[PRELIGHT] = @@COLPREFIX@_contrasting_indicator
-
-	fg[NORMAL] = @@COLPREFIX@_darkest
-	fg[PRELIGHT] = @@COLPREFIX@_darkest
-	fg[SELECTED] = @@COLPREFIX@_darkest
-	fg[ACTIVE] = @@COLPREFIX@_darkest
-}
-
-style "transport_button_alternate_two"
-{
-	fg[SELECTED] = @@COLPREFIX@_darkest
-	fg[ACTIVE] =   @@COLPREFIX@_darkest
-	fg[PRELIGHT] = @@COLPREFIX@_darkest
-	fg[NORMAL] = @@COLPREFIX@_darkest
-
-	bg[NORMAL] =   shade(0.2,@@COLPREFIX@_bright_indicator)
-	bg[ACTIVE] =   shade(0.2,@@COLPREFIX@_bright_indicator)
-	bg[SELECTED] =   shade(0.2,@@COLPREFIX@_bright_indicator)
-	bg[PRELIGHT] =   shade(0.2,@@COLPREFIX@_bright_indicator)
-}
-
-style "transport_rec_button"
-{
-	fg[ACTIVE] = @@COLPREFIX@_darkest
-	bg[ACTIVE] = darker(@@COLPREFIX@_arm)
-}
-
-style "transport_rec_button_active"
-{
-	bg[ACTIVE] = darker(@@COLPREFIX@_arm)
-	bg[NORMAL] = darker(@@COLPREFIX@_arm)
-	bg[SELECTED] = darker(@@COLPREFIX@_arm)
-	bg[PRELIGHT] = darker(@@COLPREFIX@_arm)
-}
-
-style "transport_rec_button_alternate"
-{
-	bg[PRELIGHT] = @@COLPREFIX@_arm
-	bg[NORMAL] = @@COLPREFIX@_arm
-	bg[SELECTED] = @@COLPREFIX@_arm
-	bg[ACTIVE] = @@COLPREFIX@_arm
 }
 
 style "midi_channel_selector_button"

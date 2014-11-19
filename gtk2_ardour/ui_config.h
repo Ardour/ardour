@@ -28,6 +28,8 @@
 #include "pbd/xml++.h"
 #include "ardour/configuration_variable.h"
 
+#include "canvas/colors.h"
+
 #include "utils.h"
 
 /* This is very similar to ARDOUR::ConfigVariable but expects numeric values to
@@ -81,7 +83,9 @@ class UIConfiguration : public PBD::Stateful
 	UIConfiguration();
 	~UIConfiguration();
 
-	std::map<std::string,ColorVariable<uint32_t> *> canvas_colors;
+	static UIConfiguration* instance() { return _instance; }
+
+	std::map<std::string,ColorVariable<uint32_t> *> configurable_colors;
 
 	bool dirty () const;
 	void set_dirty ();
@@ -95,8 +99,11 @@ class UIConfiguration : public PBD::Stateful
 	XMLNode& get_variables (std::string);
 	void set_variables (const XMLNode&);
 	void pack_canvasvars ();
+	void reset_derived_colors ();
 
-	uint32_t color_by_name (const std::string&);
+	ArdourCanvas::Color base_color_by_name (const std::string&) const;
+	ArdourCanvas::Color color (const std::string&) const;
+	ArdourCanvas::HSV  color_hsv (const std::string&) const;
 
         sigc::signal<void,std::string> ParameterChanged;
 	void map_parameters (boost::function<void (std::string)>&);
@@ -107,11 +114,7 @@ class UIConfiguration : public PBD::Stateful
 	bool set_##var (Type val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
 #include "ui_config_vars.h"
 #undef  UI_CONFIG_VARIABLE
-#undef CANVAS_VARIABLE
 #undef CANVAS_STRING_VARIABLE
-#define CANVAS_VARIABLE(var,name) \
-	uint32_t get_##var () const { return var.get(); } \
-	bool set_##var (uint32_t val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
 #define CANVAS_STRING_VARIABLE(var,name) \
 	std::string get_##var () const { return var.get(); }			\
 	bool set_##var (const std::string& val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
@@ -119,11 +122,42 @@ class UIConfiguration : public PBD::Stateful
 	Pango::FontDescription get_##var () const { return ARDOUR_UI_UTILS::sanitized_font (var.get()); } \
 	bool set_##var (const std::string& val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
 #include "canvas_vars.h"
-#undef  CANVAS_VARIABLE
 #undef CANVAS_STRING_VARIABLE
 #undef CANVAS_FONT_VARIABLE
 
+#undef CANVAS_BASE_COLOR
+#define CANVAS_BASE_COLOR(var,name,val) \
+	ArdourCanvas::Color get_##var() const { return var.get(); } \
+	bool set_##var (ArdourCanvas::Color v) { bool ret = var.set (v); if (ret) { ParameterChanged (#var); } return ret;  } \
+	bool set_##var(const ArdourCanvas::HSV& v) const { return set_##var (v.color()); }
+#include "base_colors.h"
+#undef CANVAS_BASE_COLOR
+
+#undef CANVAS_COLOR
+#define CANVAS_COLOR(var,name,base,modifier) ArdourCanvas::Color get_##var() const { return var.get().color(); }
+#include "colors.h"
+#undef CANVAS_COLOR
+
   private:
+
+	struct RelativeHSV {
+		RelativeHSV (const std::string& b, const ArdourCanvas::HSV& mod) 
+			: base_color (b)
+			, modifier (mod)
+			, quantized_hue (-1.0) {}
+		std::string base_color;
+		ArdourCanvas::HSV modifier;
+		double quantized_hue;
+
+		ArdourCanvas::HSV get() const;
+        };
+
+	/* these are loaded from serialized state (e.g. XML) */
+	std::map<std::string,RelativeHSV> relative_colors;
+	/* these are computed during color_compute()*/
+	std::map<std::string,ArdourCanvas::HSV> actual_colors;
+	/* these map from the name/key of relative colors to the color/value of actual colors */
+	std::map<std::string,std::string> color_aliases;
 
 	/* declare variables */
 
@@ -132,17 +166,34 @@ class UIConfiguration : public PBD::Stateful
 #include "ui_config_vars.h"
 #undef UI_CONFIG_VARIABLE
 
-#undef CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,name) ColorVariable<uint32_t> var;
 #define CANVAS_STRING_VARIABLE(var,name) ARDOUR::ConfigVariable<std::string> var;
 #define CANVAS_FONT_VARIABLE(var,name) ARDOUR::ConfigVariable<std::string> var;
 #include "canvas_vars.h"
-#undef  CANVAS_VARIABLE
 #undef CANVAS_STRING_VARIABLE
 #undef CANVAS_FONT_VARIABLE
 
+	/* declare base color variables (these are modifiable by the user) */
+
+#undef CANVAS_BASE_COLOR
+#define CANVAS_BASE_COLOR(var,name,val) ColorVariable<uint32_t> var;
+#include "base_colors.h"
+#undef CANVAS_BASE_COLOR
+
+	/* declare relative color variables (not directly modifiable) */
+
+#undef CANVAS_COLOR
+#define CANVAS_COLOR(var,name,base,modifier) RelativeHSV var;
+#include "colors.h"
+#undef CANVAS_COLOR
+
 	XMLNode& state ();
 	bool _dirty;
+	static UIConfiguration* _instance;
+
+	void color_compute ();
+	void print_relative_def (std::string camelcase, std::string name, ArdourCanvas::Color c);
+	void color_theme_changed ();
+	void original_colors ();
 };
 
 #endif /* __ardour_ui_configuration_h__ */
