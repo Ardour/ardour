@@ -233,8 +233,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		theArdourUI = this;
 	}
 
-	ui_config = new UIConfiguration();
-
 	ui_config->ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	ui_config->map_parameters (pc);
@@ -397,6 +395,12 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
 
 	attach_to_engine ();
+}
+
+void
+ARDOUR_UI::create_configuration ()
+{
+	ui_config = new UIConfiguration();
 }
 
 GlobalPortMatrixWindow*

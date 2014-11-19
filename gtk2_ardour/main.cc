@@ -277,6 +277,7 @@ int main (int argc, char *argv[])
 #endif
 
 	try {
+		ARDOUR_UI::create_configuration ();
 		ui = new ARDOUR_UI (&argc, &argv, localedir);
 	} catch (failed_constructor& err) {
 		error << string_compose (_("could not create %1 GUI"), PROGRAM_NAME) << endmsg;
