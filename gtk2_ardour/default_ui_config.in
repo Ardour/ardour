@@ -14,6 +14,20 @@
     <Option name="draggable-playhead" value="1"/>
   </UI>
   <Canvas>
+
+    <Option name="colorA" value="0xff0000ff"/>
+    <Option name="colorAlight" value="0xff00e6ff"/>
+    <Option name="colorAB" value="0xff4d00ff"/>
+    <Option name="colorABlight" value="0xff9900ff"/>
+    <Option name="colorB" value="0xffe600ff"/>
+    <Option name="colorC" value="0x00ff1aff"/>
+    <Option name="colorClight" value="0x80ff00ff"/>
+    <Option name="colorCD" value="0x00ffb3ff"/>
+    <Option name="colorD" value="0x00ffffff"/>
+    <Option name="colorDdark" value="0x001affff"/>
+    <Option name="colorDlight" value="0x00b3ffff"/>
+    <Option name="colorDA" value="0x8000ffff"/>
+
     <Option name="small font" value="@FONT_SMALL@"/>
     <Option name="smaller font" value="@FONT_SMALLER@"/>
     <Option name="normal font" value="@FONT_NORMAL@"/>
