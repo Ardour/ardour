@@ -63,6 +63,12 @@ using namespace std;
 using Gtkmm2ext::Keyboard;
 using namespace ArdourMeter;
 
+#if defined(__APPLE__)
+#define ALT_OPTION (Keyboard::Level4Modifier)
+#elif defined(PLATFORM_WINDOWS)
+#define ALT_OPTION (Keyboard::SecondaryModifier)
+#endif
+
 GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	: Gtk::VBox ()
 	, WavesUI (layout_script_file, *this)
@@ -297,7 +303,7 @@ GainMeter::gain_display_button_press (GdkEventButton* ev)
 {
 	switch (ev->type) {
         case GDK_BUTTON_PRESS:
-            if (Keyboard::modifier_state_contains (ev->state, Keyboard::Level4Modifier)) {
+            if (Keyboard::modifier_state_contains (ev->state, ALT_OPTION)) {
                 _amp->set_gain (dB_to_coefficient(0.0), this);
             }
             break;
@@ -681,7 +687,7 @@ GainMeter::gain_slider_button_press (GdkEventButton* ev)
 {
 	switch (ev->type) {
         case GDK_BUTTON_PRESS:
-            if (Keyboard::modifier_state_contains (ev->state, Keyboard::Level4Modifier)) {
+            if (Keyboard::modifier_state_contains (ev->state, ALT_OPTION)) {
                 _amp->set_gain (dB_to_coefficient(0.0), this);
                 return true;
             }
