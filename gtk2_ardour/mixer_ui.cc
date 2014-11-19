@@ -676,6 +676,7 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 					
 					vector<MixerStrip*> tmp;
 					bool accumulate = false;
+					bool found_another = false;
 					
 					tmp.push_back (strip);
 
@@ -694,6 +695,7 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 							/* hit selected strip. if currently accumulating others,
 							   we're done. if not accumulating others, start doing so.
 							*/
+							found_another = true;
 							if (accumulate) {
 								/* done */
 								break;
@@ -707,9 +709,12 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 						}
 					}
 
-					for (vector<MixerStrip*>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
-						_selection.add (*i);
-					}
+					if (found_another) {
+						for (vector<MixerStrip*>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
+							_selection.add (*i);
+						}
+					} else
+						_selection.set (strip);  //user wants to start a range selection, but there aren't any others selected yet
 				}
 
 			} else {
