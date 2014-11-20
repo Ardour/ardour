@@ -180,14 +180,8 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 
 	XMLNode& after = _line->the_list()->get_state();
 
-	/* XXX: hack! */
-	boost::shared_ptr<ARDOUR::MidiRegion> mr = boost::dynamic_pointer_cast<ARDOUR::MidiRegion> (_region);
-	assert (mr);
-
 	view->session()->commit_reversible_command (
-		new MementoCommand<ARDOUR::AutomationList> (new ARDOUR::MidiAutomationListBinder (mr->midi_source(), _parameter), &before, &after)
-		);
-
+		new MementoCommand<ARDOUR::AutomationList> (_line->memento_command_binder(), &before, &after));
 
 	view->session()->set_dirty ();
 }
@@ -215,7 +209,7 @@ AutomationRegionView::paste (framepos_t                                      pos
 	XMLNode& before = my_list->get_state();
 	my_list->paste(*slist, model_pos, times);
 	view->session()->add_command(
-		new MementoCommand<ARDOUR::AutomationList>(*my_list.get(), &before, &my_list->get_state()));
+		new MementoCommand<ARDOUR::AutomationList>(_line->memento_command_binder(), &before, &my_list->get_state()));
 
 	return true;
 }
