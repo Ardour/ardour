@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cmath>
 #include <stdint.h>
+#include <cfloat>
 
 #include "canvas/colors.h"
 #include "canvas/colorspace.h"
@@ -365,9 +366,16 @@ HSV
 HSV::delta (const HSV& other) const
 {
 	HSV d;
-	d.h = h - other.h;
-	d.s = s - other.s;
-	d.v = v - other.v;
+
+	if (is_gray() && other.is_gray()) {
+		d.h = 0.0;
+		d.s = 0.0;
+		d.v = v - other.v;
+	} else {
+		d.h = h - other.h;
+		d.s = s - other.s;
+		d.v = v - other.v;
+	}
 	/* do not clamp - we are returning a delta */
 	return d;
 }
@@ -375,6 +383,28 @@ HSV::delta (const HSV& other) const
 double
 HSV::distance (const HSV& other) const
 {
+	if (is_gray() && other.is_gray()) {
+		/* human color perception of achromatics generates about 450
+		   distinct colors. By contrast, CIE94 could give a maximal
+		   perceptual distance of sqrt ((360^2) + 1 + 1) = 360. The 450 
+		   are not evenly spread (Webers Law), so lets use 360 as an
+		   approximation of the number of distinct achromatics.
+		   
+		   So, scale up the achromatic difference to give about
+		   a maximal distance between v = 1.0 and v = 0.0 of 360.
+		   
+		   A difference of about 0.0055 will generate a return value of
+		   2, which is roughly the limit of human perceptual
+		   discrimination for chromatics.
+		*/
+		return fabs (360.0 * (v - other.v));
+	}
+
+	if (is_gray() != other.is_gray()) {
+		/* no comparison possible */
+		return DBL_MAX;
+	}
+
 	/* Use CIE94 definition for now */
 
 	double sL, sA, sB;
@@ -454,7 +484,7 @@ void
 HSV::print (std::ostream& o) const
 {
 	if (!is_gray()) {
-		o << '(' << s << ',' << v << ',' << a << ')';
+		o << '(' << h << ',' << s << ',' << v << ',' << a << ')';
 	} else {
 		o << "gray(" << v << ')';
 	}
