@@ -85,7 +85,7 @@ class UIConfiguration : public PBD::Stateful
 
 	static UIConfiguration* instance() { return _instance; }
 
-	std::map<std::string,ColorVariable<uint32_t> *> configurable_colors;
+	std::map<std::string,ColorVariable<ArdourCanvas::Color> *> configurable_colors;
 
 	bool dirty () const;
 	void set_dirty ();
@@ -175,7 +175,7 @@ class UIConfiguration : public PBD::Stateful
 	/* declare base color variables (these are modifiable by the user) */
 
 #undef CANVAS_BASE_COLOR
-#define CANVAS_BASE_COLOR(var,name,val) ColorVariable<uint32_t> var;
+#define CANVAS_BASE_COLOR(var,name,val) ColorVariable<ArdourCanvas::Color> var;
 #include "base_colors.h"
 #undef CANVAS_BASE_COLOR
 
@@ -193,7 +193,8 @@ class UIConfiguration : public PBD::Stateful
 	void color_compute ();
 	void print_relative_def (std::string camelcase, std::string name, ArdourCanvas::Color c);
 	void color_theme_changed ();
-	void original_colors ();
+	void regenerate_relative_definitions ();
+	ArdourCanvas::Color quantized (ArdourCanvas::Color);
 };
 
 #endif /* __ardour_ui_configuration_h__ */

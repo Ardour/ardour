@@ -47,9 +47,7 @@ static const char* ui_config_file_name = "ui_config";
 static const char* default_ui_config_file_name = "default_ui_config";
 UIConfiguration* UIConfiguration::_instance = 0;
 
-static std::map<std::string,HSV> full_palette;
 static const double hue_cnt = 18.0;
-
 
 UIConfiguration::UIConfiguration ()
 	:
@@ -69,7 +67,7 @@ UIConfiguration::UIConfiguration ()
 	*/
 
 #undef CANVAS_BASE_COLOR
-#define CANVAS_BASE_COLOR(var,name,val) var (name,val),
+#define CANVAS_BASE_COLOR(var,name,val) var (name,quantized (val)),
 #include "base_colors.h"
 #undef CANVAS_BASE_COLOR
 
@@ -96,26 +94,9 @@ UIConfiguration::UIConfiguration ()
 #include "colors.h"
 #undef CANVAS_COLOR
 
-	/* load up full palette with opposites */
-
-	map<string,ColorVariable<uint32_t>*>::iterator f;
-
-	for (f = configurable_colors.begin(); f != configurable_colors.end(); ++f) {
-		/* first the base tone */
-		full_palette.insert (make_pair (f->first, HSV (f->second->get())));
-		/* now its opposite */
-		// full_palette.insert (make_pair (f->first + " opposite", HSV (f->second->get()) + HSV(180.0, 0, 0)));
-	}
-
-	/* now quantize the hues */
-
-	for (map<string,HSV>::iterator fp = full_palette.begin(); fp != full_palette.end(); ++fp) {
-		fp->second.h = hue_cnt * (round (fp->second.h/hue_cnt));
-	}
-
 	load_state();
 
-	// original_colors ();
+	// regenerate_relative_definitions ();
 
 	color_compute ();
 
@@ -126,9 +107,86 @@ UIConfiguration::~UIConfiguration ()
 {
 }
 
-void 
-UIConfiguration::original_colors ()
+Color
+UIConfiguration::quantized (Color c)
 {
+	HSV hsv (c);
+	hsv.h = hue_cnt * (round (hsv.h/hue_cnt));
+	return hsv.color ();
+}
+
+void
+UIConfiguration::print_relative_def (string camelcase, string name, Color c)
+{
+	HSV variable (c);
+	HSV closest;
+	double shortest_distance = DBL_MAX;
+	string closest_name;
+
+	map<string,ColorVariable<Color>*>::iterator f;
+	std::map<std::string,HSV> palette;
+
+	for (f = configurable_colors.begin(); f != configurable_colors.end(); ++f) {
+		palette.insert (make_pair (f->first, HSV (f->second->get())));
+	}
+
+	for (map<string,HSV>::iterator f = palette.begin(); f != palette.end(); ++f) {
+		
+		double d;
+		HSV fixed (f->second);
+		
+		if (fixed.is_gray() || variable.is_gray()) {
+			/* at least one is achromatic; HSV::distance() will do
+			 * the right thing
+			 */
+			d = fixed.distance (variable);
+		} else {
+			/* chromatic: compare ONLY hue because our task is
+			   to pick the HUE closest and then compute
+			   a modifier. We want to keep the number of 
+			   hues low, and by computing perceptual distance 
+			   we end up finding colors that are to each
+			   other without necessarily be close in hue.
+			*/
+			d = fabs (variable.h - fixed.h);
+		}
+
+		if (d < shortest_distance) {
+			closest = fixed;
+			closest_name = f->first;
+			shortest_distance = d;
+		}
+	}
+	
+	/* we now know the closest color of the fixed colors to 
+	   this variable color. Compute the HSV diff and
+	   use it to redefine the variable color in terms of the
+	   fixed one.
+	*/
+	
+	HSV delta = variable.delta (closest);
+
+	/* quantize hue delta so we don't end up with many subtle hues caused
+	 * by original color choices
+	 */
+
+	delta.h = hue_cnt * (round (delta.h/hue_cnt));
+
+	cerr << "CANVAS_COLOR(" << camelcase << ",\"" << name << "\", \"" << closest_name <<  "\", HSV(" 
+	     << delta.h << ',' << delta.s << ',' << delta.v << ',' << variable.a << ")) /*" 
+	     << shortest_distance << " */" << endl;
+}
+
+void 
+UIConfiguration::regenerate_relative_definitions ()
+{
+	/* this takes the color definitions from around ardour 3.5.3600,
+	   quantizes their hues, then prints out macros to be used
+	   when defining these colors relative to the current
+	   base palette. It doesn't need to be called unless
+	   we change the base palette defaults.
+	*/
+	
 	map<string,HSV> c;
         c.insert (make_pair ("active crossfade", HSV (0x20b2af2e)));
         c.insert (make_pair ("arrange base", HSV (0x595959ff)));
@@ -803,43 +861,6 @@ UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 	return 0;
 }
 
-void
-UIConfiguration::print_relative_def (string camelcase, string name, Color c)
-{
-	HSV variable (c);
-	HSV closest;
-	double shortest_distance = DBL_MAX;
-	string closest_name;
-
-	for (map<string,HSV>::iterator f = full_palette.begin(); f != full_palette.end(); ++f) {
-		
-		double d;
-		HSV fixed (f->second);
-		
-		// d = variable.distance (fixed);
-
-		d = fabs (variable.h - fixed.h);
-
-		if (d < shortest_distance) {
-			closest = fixed;
-			closest_name = f->first;
-			shortest_distance = d;
-		}
-	}
-	
-	/* we now know the closest color of the fixed colors to 
-	   this variable color. Compute the HSV diff and
-	   use it to redefine the variable color in terms of the
-	   fixed one.
-	*/
-	
-	HSV delta = variable.delta (closest);
-
-	cerr << "CANVAS_COLOR(" << camelcase << ",\"" << name << "\", \"" << closest_name <<  "\", HSV(" 
-	     << delta.h << ',' << delta.s << ',' << delta.v << ',' << variable.a << ")) /*" 
-	     << shortest_distance << " */" << endl;
-}
-
 
 void
 UIConfiguration::set_variables (const XMLNode& node)
@@ -888,21 +909,10 @@ UIConfiguration::dirty () const
 ArdourCanvas::Color
 UIConfiguration::base_color_by_name (const std::string& name) const
 {
-	map<std::string,ColorVariable<uint32_t>* >::const_iterator i = configurable_colors.find (name);
+	map<std::string,ColorVariable<Color>* >::const_iterator i = configurable_colors.find (name);
 
 	if (i != configurable_colors.end()) {
 		return i->second->get();
-	}
-
-	string::size_type opp;
-
-	if ((opp = name.find (X_(" opposite"))) != string::npos) {
-		string base = name.substr (0, opp);
-		i = configurable_colors.find (base);
-		if (i != configurable_colors.end()) {
-			HSV hsv (i->second->get());
-			return hsv.opposite().color ();
-		}
 	}
 
 #if 0 // yet unsed experimental style postfix
@@ -985,7 +995,7 @@ UIConfiguration::color_compute ()
 {
 	using namespace ArdourCanvas;
 
-	map<std::string,ColorVariable<uint32_t>* >::iterator f;
+	map<std::string,ColorVariable<Color>* >::iterator f;
 	map<std::string,HSV*>::iterator v;
 
 	/* now compute distances */
@@ -996,29 +1006,6 @@ UIConfiguration::color_compute ()
 	
 	color_aliases.clear ();
 	
-	/* First quantize the hues.
-
-	   This ought to use a perceptual model such as CIE94 or CIEDE2000 that
-	   takes into account non-uniformity in human wavelength
-	   discrimination.
-
-	   For now (November 2014) simply divide the hue space (360 degrees)
-	   into small pieces.
-	 */
-
-	/* quantize all current relative color definitions */
-
-	for (current_color = relative_colors.begin(); current_color != relative_colors.end(); ++current_color) {
-
-		HSV hsv (current_color->second.get());
-		
-		if (hsv.is_gray ()) {
-			continue;
-		}
-
-		current_color->second.quantized_hue = hue_cnt * (round (hsv.h/hue_cnt));
-	}
-
 	actual_colors.clear ();
 
 	for (current_color = relative_colors.begin(); current_color != relative_colors.end(); ++current_color) {
@@ -1051,6 +1038,9 @@ UIConfiguration::color_compute ()
 			 */
 
 			string alias = string_compose ("color %1", actual_colors.size() + 1);
+			//cerr << alias << " == " << current_color->second.base_color 
+			// << " [ " << HSV (base_color_by_name (current_color->second.base_color)) << "] + " 
+			// << current_color->second.modifier << endl;
 			actual_colors.insert (make_pair (alias, current_color->second.get()));
 			color_aliases.insert (make_pair (current_color->first, alias));
 
