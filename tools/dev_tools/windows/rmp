@@ -1,5 +1,5 @@
 path_to_preferences="$HOME/AppData/Local/Tracks Live"
-if [ -d "$HOME/AppData/Local/Tracks Live/" ] ; then
+if [ -d "$path_to_preferences" ] ; then
 	# delete Preferences
 	rm -rf "$path_to_preferences"
 else
