@@ -1,8 +1,7 @@
-path_to_preferences=/C/Users/Daw/AppData/Local/'Tracks Live'
-if [ -d /C/Users/Daw/AppData/Local/'Tracks Live'/ ] ; then
+path_to_preferences="$HOME/AppData/Local/Tracks Live"
+if [ -d "$HOME/AppData/Local/Tracks Live/" ] ; then
 	# delete Preferences
-	echo "Folder:" $path_to_preferences "was deleted"
-	rm -rf /C/Users/Daw/AppData/Local/'Tracks Live'/
+	rm -rf "$path_to_preferences"
 else
-	echo "Folder:" $path_to_preferences "wasn't found"  
+	echo "Folder: '$path_to_preferences' could not be found!"  
 fi
