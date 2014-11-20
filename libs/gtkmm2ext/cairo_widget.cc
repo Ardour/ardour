@@ -75,7 +75,7 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 	Cairo::RefPtr<Cairo::Context> cr = get_window()->create_cairo_context ();
 #endif
 
-	cr->rectangle (expose_area.x, ev->area.y, expose_area.width, expose_area.height);
+	cr->rectangle (expose_area.x, expose_area.y, expose_area.width, expose_area.height);
 	cr->clip ();
 
 	/* paint expose area the color of the parent window bg
@@ -83,7 +83,7 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 
     if (get_visible_window ()) {
         Gdk::Color bg (get_parent_bg());
-		cr->rectangle (expose_area.x, ev->area.y, expose_area.width, expose_area.height);
+		cr->rectangle (expose_area.x, expose_area.y, expose_area.width, expose_area.height);
         cr->set_source_rgb (bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
         cr->fill ();
     }
