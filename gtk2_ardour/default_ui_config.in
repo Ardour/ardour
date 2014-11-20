@@ -96,7 +96,7 @@
     <Option name="meterbridge label: fill start" value="444444ff"/>
     <Option name="meterbridge label: fill end" value="333333ff"/>
     <Option name="meterbridge label: text" value="c7c7d8ff"/>
-    <Option name="meter marker" value="f2425bff"/>
+    <Option name="meter marker" value="f2425b00"/>
     <Option name="midi bus base" value="00000000"/>
     <Option name="midi frame base" value="393d3766"/>
     <Option name="midi note inactive channel" value="00000000"/>
@@ -133,8 +133,8 @@
     <Option name="recorded waveform fill" value="ffffffff"/>
     <Option name="recorded waveform outline" value="ffffffff"/>
     <Option name="rubber band rect" value="c6c6c659"/>
-    <Option name="ruler base" value="424242ff"/>
-    <Option name="ruler text" value="e5e5e5ff"/>
+    <Option name="ruler base" value="575757ff"/>
+    <Option name="ruler text" value="b4b4b4ff"/>
     <Option name="selected crossfade editor line" value="00dbdbff"/>
     <Option name="selected crossfade editor wave" value="f9ea14a0"/>
     <Option name="selected region base" value="5F5E5FFF"/>
@@ -165,7 +165,7 @@
     <Option name="stereo panner inverted text" value="ffffffff"/>
     <Option name="stereo panner inverted bg" value="383838ff"/>
     <Option name="tempo bar" value="575757ff"/>
-    <Option name="tempo marker" value="f2425bff"/>
+    <Option name="tempo marker" value="f2425b00"/>
     <Option name="time axis frame" value="000000ff"/>
     <Option name="selected time axis frame" value="000000ff"/>
     <Option name="time stretch fill" value="e2b5b596"/>
