@@ -1934,9 +1934,6 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 
 	region = &cnote->region_view();
 
-	double const region_start = region->get_position_pixels();
-	double const middle_point = region_start + cnote->x0() + (cnote->x1() - cnote->x0()) / 2.0L;
-
 	_item->grab ();
 
 	if (event->motion.state & Keyboard::PrimaryModifier) {
