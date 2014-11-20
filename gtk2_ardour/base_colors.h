@@ -23,6 +23,9 @@
    for all colors here. The alpha component is not used.
 */
 
+/* purely aesthetic color definitions */
+
+
 CANVAS_BASE_COLOR(colorA,"colorA", 0xff0000ff) /* red */
 CANVAS_BASE_COLOR(colorAlight,"colorAlight", 0xff00e6ff) /* pink */
 
@@ -49,6 +52,12 @@ CANVAS_BASE_COLOR(colorDlight,"colorDlight", 0x00b3ffff) /* lightest blue */
 /* purple */
 CANVAS_BASE_COLOR(colorDA,"colorDA", 0x8000ffff) /* purple */
 
+/* achromatics */
+
+CANVAS_BASE_COLOR(colorDarkGray,"colorDarkGray", 0x171717ff) /* darkest gray/black */
+CANVAS_BASE_COLOR(colorMidGray,"colorMidGray", 0x222222ff) /* midtone */
+CANVAS_BASE_COLOR(colorLightGray,"colorLightGray", 0x7f7f7fff) /* light gray */
+CANVAS_BASE_COLOR(colorLightest,"colorLightest", 0xffffffff) /* white */
 
 
 
