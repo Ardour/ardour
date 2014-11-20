@@ -19,12 +19,17 @@
 #include <cassert>
 #include <iostream>
 
+#include "pbd/compose.h"
+#include "pbd/debug.h"
+
 #include "ardour/midi_port.h"
 #include "ardour/data_type.h"
 #include "ardour/audioengine.h"
+#include "ardour/debug.h"
 
-using namespace ARDOUR;
 using namespace std;
+using namespace ARDOUR;
+using namespace PBD;
 
 #define port_engine AudioEngine::instance()->port_engine()
 
@@ -196,6 +201,21 @@ MidiPort::flush_buffers (pframes_t nframes)
 			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev (*i, false);
 
 			// event times are in frames, relative to cycle start
+
+#ifndef NDEBUG
+	if (DEBUG::MidiIO & PBD::debug_bits) {
+		DEBUG_STR_DECL(a);
+		DEBUG_STR_APPEND(a, string_compose ("MidiPort %1 pop event    @ %2 sz %3 ", this, ev.time(), ev.size()));
+		for (size_t i=0; i < ev.size(); ++i) {
+			DEBUG_STR_APPEND(a,hex);
+			DEBUG_STR_APPEND(a,"0x");
+			DEBUG_STR_APPEND(a,(int)(ev.buffer()[i]));
+			DEBUG_STR_APPEND(a,' ');
+		}
+		DEBUG_STR_APPEND(a,'\n');
+		DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
+	}
+#endif
 
 			assert (ev.time() < (nframes + _global_port_buffer_offset + _port_buffer_offset));
 
