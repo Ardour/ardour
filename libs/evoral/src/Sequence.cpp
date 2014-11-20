@@ -61,10 +61,13 @@ namespace Evoral {
 template<typename Time>
 Sequence<Time>::const_iterator::const_iterator()
 	: _seq(NULL)
+	, _event(boost::shared_ptr< Event<Time> >(new Event<Time>()))
+	, _active_patch_change_message (0)
+	, _type(NIL)
 	, _is_end(true)
 	, _control_iter(_control_iters.end())
+	, _force_discrete(false)
 {
-	_event = boost::shared_ptr< Event<Time> >(new Event<Time>());
 }
 
 /** @param force_discrete true to force ControlLists to use discrete evaluation, otherwise false to get them to use their configured mode */
@@ -125,7 +128,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: control: %1\n", seq._type_map.to_symbol(i->first)));
 		double x, y;
 		bool ret;
-		if (_force_discrete) {
+		if (_force_discrete || i->second->list()->interpolation() == ControlList::Discrete) {
 			ret = i->second->list()->rt_safe_earliest_event_discrete_unlocked (t, x, y, true);
 		} else {
 			ret = i->second->list()->rt_safe_earliest_event_unlocked(t, x, y, true);
@@ -290,12 +293,10 @@ Sequence<Time>::const_iterator::operator++()
 		// Increment current controller iterator
 		if (_force_discrete || _control_iter->list->interpolation() == ControlList::Discrete) {
 			ret = _control_iter->list->rt_safe_earliest_event_discrete_unlocked (
-				_control_iter->x, x, y, false
-			                                                                     );
+				_control_iter->x, x, y, false);
 		} else {
 			ret = _control_iter->list->rt_safe_earliest_event_linear_unlocked (
-				_control_iter->x + time_between_interpolated_controller_outputs, x, y, false
-			                                                                   );
+				_control_iter->x + time_between_interpolated_controller_outputs, x, y, false);
 		}
 		assert(!ret || x > _control_iter->x);
 		if (ret) {

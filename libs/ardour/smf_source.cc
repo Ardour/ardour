@@ -701,6 +701,7 @@ SMFSource::load_model (bool lock, bool force_reload)
 
 	_model->end_write (Evoral::Sequence<Evoral::MusicalTime>::ResolveStuckNotes, _length_beats);
 	_model->set_edited (false);
+	invalidate();
 
 	free(buf);
 }
@@ -724,6 +725,8 @@ SMFSource::flush_midi ()
 	Evoral::SMF::end_write ();
 	/* data in the file means its no longer removable */
 	mark_nonremovable ();
+
+	invalidate();
 }
 
 void

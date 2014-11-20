@@ -140,6 +140,11 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	virtual void load_model(bool lock=true, bool force_reload=false) = 0;
 	virtual void destroy_model() = 0;
 
+	/** This must be called with the source lock held whenever the
+	 *  source/model contents have been changed (reset iterators/cache/etc).
+	 */
+	void invalidate();
+
 	void set_note_mode(NoteMode mode);
 
 	boost::shared_ptr<MidiModel> model() { return _model; }
@@ -186,7 +191,11 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;
 
-	mutable double _length_beats;
+	mutable Evoral::Sequence<Evoral::MusicalTime>::const_iterator _model_iter;
+	mutable bool                                                  _model_iter_valid;
+
+	mutable double     _length_beats;
+	mutable framepos_t _last_read_end;
 
 	/** The total duration of the current capture. */
 	framepos_t _capture_length;
