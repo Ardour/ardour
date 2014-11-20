@@ -47,16 +47,6 @@ MidiStateTracker::reset ()
 }
 
 void
-MidiStateTracker::track_note_onoffs (const Evoral::MIDIEvent<MidiBuffer::TimeType>& event)
-{
-	if (event.is_note_on()) {
-		add (event.note(), event.channel());
-	} else if (event.is_note_off()){
-		remove (event.note(), event.channel());
-	}
-}
-
-void
 MidiStateTracker::add (uint8_t note, uint8_t chn)
 {
 	if (_active_notes[note+128 * chn] == 0) {
@@ -96,21 +86,8 @@ MidiStateTracker::remove (uint8_t note, uint8_t chn)
 void
 MidiStateTracker::track (const MidiBuffer::iterator &from, const MidiBuffer::iterator &to)
 {
-	// DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 track notes\n", this));
-
 	for (MidiBuffer::iterator i = from; i != to; ++i) {
-		const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
-
-		/* catch AllNotesOff message and turn off all notes
-		 */
-		
-		if (ev.type() == MIDI_CTL_ALL_NOTES_OFF) {
-			cerr << "State tracker sees ALL_NOTES_OFF, silenceing " << sizeof (_active_notes) << endl;
-			memset (_active_notes, 0, sizeof (_active_notes));
-			_on = 0;
-		} else {
-			track_note_onoffs (ev);
-		}
+		track(*i);
 	}
 }
 

@@ -25,8 +25,11 @@
 
 #include "ardour/ardour.h"
 #include "ardour/playlist.h"
-#include "ardour/midi_state_tracker.h"
 #include "evoral/Parameter.hpp"
+
+namespace Evoral {
+template<typename Time> class EventSink;
+}
 
 namespace ARDOUR
 {
@@ -34,6 +37,8 @@ namespace ARDOUR
 class Session;
 class MidiRegion;
 class Source;
+class MidiStateTracker;
+
 template<typename T> class MidiRingBuffer;
 
 class LIBARDOUR_API MidiPlaylist : public ARDOUR::Playlist

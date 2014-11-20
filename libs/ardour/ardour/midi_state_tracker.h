@@ -52,9 +52,24 @@ public:
 		return _active_notes[(channel*128)+note] > 0;
 	}
 
-private:
-	void track_note_onoffs(const Evoral::MIDIEvent<MidiBuffer::TimeType>& event);
+	template<typename Time>
+	void track (const Evoral::Event<Time>& ev) {
+		const uint8_t type = ev.buffer()[0] & 0xF0;
+		const uint8_t chan = ev.buffer()[0] & 0x0F;
+		switch (type) {
+		case MIDI_CTL_ALL_NOTES_OFF:
+			reset();
+			break;
+		case MIDI_CMD_NOTE_ON:
+			add(ev.buffer()[1], chan);
+			break;
+		case MIDI_CMD_NOTE_OFF:
+			remove(ev.buffer()[1], chan);
+			break;
+		}
+	}
 
+private:
 	uint8_t  _active_notes[128*16];
 	uint16_t _on;
 };

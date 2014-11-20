@@ -25,7 +25,6 @@
 
 #include "ardour/port.h"
 #include "ardour/midi_buffer.h"
-#include "ardour/midi_state_tracker.h"
 
 namespace ARDOUR {
 

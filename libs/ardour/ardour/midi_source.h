@@ -53,32 +53,29 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 * \param newsrc MidiSource to which data will be written. Should be a
 	 *        new, empty source. If it already has contents, the results are
 	 *        undefined. Source must be writable.
-	 *
 	 * \param begin time of earliest event that can be written.
 	 * \param end time of latest event that can be written.
-	 *
-	 * Returns zero on success, non-zero if the write failed for any
-	 * reason.
-	 *
+	 * \return zero on success, non-zero if the write failed for any reason.
 	 */
 	int write_to (boost::shared_ptr<MidiSource> newsrc,
-		      Evoral::MusicalTime begin = Evoral::MinMusicalTime,
-		      Evoral::MusicalTime end = Evoral::MaxMusicalTime);
+	              Evoral::MusicalTime           begin = Evoral::MinMusicalTime,
+	              Evoral::MusicalTime           end   = Evoral::MaxMusicalTime);
 
 	/** Read the data in a given time range from the MIDI source.
 	 * All time stamps in parameters are in audio frames (even if the source has tempo time).
-	 * \param dst Ring buffer where read events are written
-	 * \param source_start Start position of the SOURCE in this read context
-	 * \param start Start of range to be read
-	 * \param cnt Length of range to be read (in audio frames)
-	 * \param tracker an optional pointer to MidiStateTracker object, for note on/off tracking
+	 * \param dst Ring buffer where read events are written.
+	 * \param source_start Start position of the SOURCE in this read context.
+	 * \param start Start of range to be read.
+	 * \param cnt Length of range to be read (in audio frames).
+	 * \param tracker an optional pointer to MidiStateTracker object, for note on/off tracking.
+	 * \param filtered Parameters whose MIDI messages will not be returned.
 	 */
-	virtual framecnt_t midi_read (Evoral::EventSink<framepos_t>& dst,
-	                              framepos_t                     source_start,
-	                              framepos_t                     start,
-	                              framecnt_t                     cnt,
-	                              MidiStateTracker*              tracker,
-	                              std::set<Evoral::Parameter> const &) const;
+	virtual framecnt_t midi_read (Evoral::EventSink<framepos_t>&     dst,
+	                              framepos_t                         source_start,
+	                              framepos_t                         start,
+	                              framecnt_t                         cnt,
+	                              MidiStateTracker*                  tracker,
+	                              const std::set<Evoral::Parameter>& filtered) const;
 
 	/** Write data from a MidiRingBuffer to this source.
 	 *  @param source Source to read from.
