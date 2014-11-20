@@ -275,6 +275,14 @@ public:
 	/** Convert a timestamp in absolute frames to beats measured from source start*/
 	double absolute_frames_to_source_beats(framepos_t) const;
 
+	ARDOUR::BeatsFramesConverter const & region_relative_time_converter () const {
+		return _region_relative_time_converter;
+	}
+
+	ARDOUR::BeatsFramesConverter const & source_relative_time_converter () const {
+		return _source_relative_time_converter;
+	}
+
 	void goto_previous_note (bool add_to_selection);
 	void goto_next_note (bool add_to_selection);
 	void change_note_lengths (bool, bool, Evoral::MusicalTime beats, bool start, bool end);
@@ -379,26 +387,28 @@ private:
 
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
-
-	typedef std::list<NoteBase*> Events;
+	
+	typedef std::list<NoteBase*>                          Events;
 	typedef std::vector< boost::shared_ptr<PatchChange> > PatchChanges;
-	typedef std::vector< boost::shared_ptr<SysEx> > SysExes;
+	typedef std::vector< boost::shared_ptr<SysEx> >       SysExes;
+
+	ARDOUR::BeatsFramesConverter _region_relative_time_converter;
+	ARDOUR::BeatsFramesConverter _source_relative_time_converter;
 
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
 	Events                               _events;
 	PatchChanges                         _patch_changes;
 	SysExes                              _sys_exes;
 	Note**                               _active_notes;
-	ArdourCanvas::Container*                 _note_group;
+	ArdourCanvas::Container*             _note_group;
 	ARDOUR::MidiModel::NoteDiffCommand*  _note_diff_command;
 	Note*                                _ghost_note;
 	double                               _last_ghost_x;
 	double                               _last_ghost_y;
-	ArdourCanvas::Rectangle*            _step_edit_cursor;
+	ArdourCanvas::Rectangle*             _step_edit_cursor;
 	Evoral::MusicalTime                  _step_edit_cursor_width;
 	Evoral::MusicalTime                  _step_edit_cursor_position;
-	NoteBase*	                     _channel_selection_scoped_note;
-
+	NoteBase*                            _channel_selection_scoped_note;
 
 	/** A group used to temporarily reparent _note_group to during start trims, so
 	 *  that the notes don't move with the parent region view.

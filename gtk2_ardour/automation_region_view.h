@@ -54,6 +54,14 @@ public:
 	            float                                           times,
 	            boost::shared_ptr<const ARDOUR::AutomationList> slist);
 
+	ARDOUR::BeatsFramesConverter const & region_relative_time_converter () const {
+		return _region_relative_time_converter;
+	}
+
+	ARDOUR::BeatsFramesConverter const & source_relative_time_converter () const {
+		return _source_relative_time_converter;
+	}
+
 	inline AutomationTimeAxisView* automation_view() const
 		{ return dynamic_cast<AutomationTimeAxisView*>(&trackview); }
 
@@ -75,6 +83,8 @@ protected:
 	void exited();
 
 private:
+	ARDOUR::BeatsFramesConverter      _region_relative_time_converter;
+	ARDOUR::BeatsFramesConverter      _source_relative_time_converter;
 	Evoral::Parameter                 _parameter;
 	boost::shared_ptr<AutomationLine> _line;
 };

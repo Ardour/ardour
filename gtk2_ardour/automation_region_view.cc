@@ -39,14 +39,16 @@
 
 #include "i18n.h"
 
-AutomationRegionView::AutomationRegionView (ArdourCanvas::Container*                      parent,
-					    AutomationTimeAxisView&                   time_axis,
-					    boost::shared_ptr<ARDOUR::Region>         region,
-					    const Evoral::Parameter&                  param,
-					    boost::shared_ptr<ARDOUR::AutomationList> list,
-					    double                                    spu,
-					    uint32_t                                  basic_color)
+AutomationRegionView::AutomationRegionView (ArdourCanvas::Container*                  parent,
+                                            AutomationTimeAxisView&                   time_axis,
+                                            boost::shared_ptr<ARDOUR::Region>         region,
+                                            const Evoral::Parameter&                  param,
+                                            boost::shared_ptr<ARDOUR::AutomationList> list,
+                                            double                                    spu,
+                                            uint32_t                                  basic_color)
 	: RegionView(parent, time_axis, region, spu, basic_color, true)
+	, _region_relative_time_converter(region->session().tempo_map(), region->position())
+	, _source_relative_time_converter(region->session().tempo_map(), region->position() - region->start())
 	, _parameter(param)
 {
 	if (list) {
@@ -250,6 +252,15 @@ void
 AutomationRegionView::region_resized (const PBD::PropertyChange& what_changed)
 {
 	RegionView::region_resized (what_changed);
+
+	if (what_changed.contains (ARDOUR::Properties::position)) {
+		_region_relative_time_converter.set_origin_b(_region->position());
+	}
+
+	if (what_changed.contains (ARDOUR::Properties::start) ||
+	    what_changed.contains (ARDOUR::Properties::position)) {
+		_source_relative_time_converter.set_origin_b (_region->position() - _region->start());
+	}
 
 	if (!_line) {
 		return;

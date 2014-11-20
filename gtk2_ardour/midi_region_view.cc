@@ -91,11 +91,16 @@ PBD::Signal1<void, MidiRegionView *> MidiRegionView::SelectionCleared;
 
 #define MIDI_BP_ZERO ((Config->get_first_midi_bank_is_zero())?0:1)
 
-MidiRegionView::MidiRegionView (ArdourCanvas::Container *parent, RouteTimeAxisView &tv,
-                                boost::shared_ptr<MidiRegion> r, double spu, uint32_t basic_color)
+MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
+                                RouteTimeAxisView&            tv,
+                                boost::shared_ptr<MidiRegion> r,
+                                double                        spu,
+                                uint32_t                      basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, _current_range_min(0)
 	, _current_range_max(0)
+	, _region_relative_time_converter(r->session().tempo_map(), r->position())
+	, _source_relative_time_converter(r->session().tempo_map(), r->position() - r->start())
 	, _active_notes(0)
 	, _note_group (new ArdourCanvas::Container (group))
 	, _note_diff_command (0)
@@ -128,12 +133,17 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container *parent, RouteTimeAxisVi
 	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
 }
 
-MidiRegionView::MidiRegionView (ArdourCanvas::Container *parent, RouteTimeAxisView &tv,
-                                boost::shared_ptr<MidiRegion> r, double spu, uint32_t basic_color,
-                                TimeAxisViewItem::Visibility visibility)
+MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
+                                RouteTimeAxisView&            tv,
+                                boost::shared_ptr<MidiRegion> r,
+                                double                        spu,
+                                uint32_t                      basic_color,
+                                TimeAxisViewItem::Visibility  visibility)
 	: RegionView (parent, tv, r, spu, basic_color, false, visibility)
 	, _current_range_min(0)
 	, _current_range_max(0)
+	, _region_relative_time_converter(r->session().tempo_map(), r->position())
+	, _source_relative_time_converter(r->session().tempo_map(), r->position() - r->start())
 	, _active_notes(0)
 	, _note_group (new ArdourCanvas::Container (parent))
 	, _note_diff_command (0)
@@ -181,6 +191,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, RegionView (other)
 	, _current_range_min(0)
 	, _current_range_max(0)
+	, _region_relative_time_converter(other.region_relative_time_converter())
+	, _source_relative_time_converter(other.source_relative_time_converter())
 	, _active_notes(0)
 	, _note_group (new ArdourCanvas::Container (get_canvas_group()))
 	, _note_diff_command (0)
@@ -210,6 +222,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	: RegionView (other, boost::shared_ptr<Region> (region))
 	, _current_range_min(0)
 	, _current_range_max(0)
+	, _region_relative_time_converter(other.region_relative_time_converter())
+	, _source_relative_time_converter(other.source_relative_time_converter())
 	, _active_notes(0)
 	, _note_group (new ArdourCanvas::Container (get_canvas_group()))
 	, _note_diff_command (0)
@@ -1353,10 +1367,16 @@ MidiRegionView::region_resized (const PropertyChange& what_changed)
 	RegionView::region_resized(what_changed);
 
 	if (what_changed.contains (ARDOUR::Properties::position)) {
+		_region_relative_time_converter.set_origin_b(_region->position());
 		set_duration(_region->length(), 0);
 		if (_enable_display) {
 			redisplay_model();
 		}
+	}
+
+	if (what_changed.contains (ARDOUR::Properties::start) ||
+	    what_changed.contains (ARDOUR::Properties::position)) {
+		_source_relative_time_converter.set_origin_b (_region->position() - _region->start());
 	}
 }
 

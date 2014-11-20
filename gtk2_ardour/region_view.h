@@ -97,14 +97,6 @@ class RegionView : public TimeAxisViewItem
 
 	static PBD::Signal1<void,RegionView*> RegionViewGoingAway;
 
-	ARDOUR::BeatsFramesConverter const & region_relative_time_converter () const {
-		return _region_relative_time_converter;
-	}
-
-	ARDOUR::BeatsFramesConverter const & source_relative_time_converter () const {
-		return _source_relative_time_converter;
-	}
-
 	/** Called when a front trim is about to begin */
 	virtual void trim_front_starting () {}
 
@@ -192,9 +184,6 @@ class RegionView : public TimeAxisViewItem
         /** a text item to display strip silence statistics
          */
         ArdourCanvas::Text* _silence_text;
-
-	ARDOUR::BeatsFramesConverter _region_relative_time_converter;
-	ARDOUR::BeatsFramesConverter _source_relative_time_converter;
 };
 
 #endif /* __gtk_ardour_region_view_h__ */

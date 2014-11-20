@@ -65,12 +65,12 @@ static const int32_t sync_mark_width = 9;
 
 PBD::Signal1<void,RegionView*> RegionView::RegionViewGoingAway;
 
-RegionView::RegionView (ArdourCanvas::Container*              parent,
+RegionView::RegionView (ArdourCanvas::Container*          parent,
                         TimeAxisView&                     tv,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                            spu,
                         uint32_t                          basic_color,
-			bool                              automation)
+                        bool                              automation)
 	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), false, automation,
 			    (automation ? TimeAxisViewItem::ShowFrame :
 			     TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
@@ -85,9 +85,7 @@ RegionView::RegionView (ArdourCanvas::Container*              parent,
 	, _pixel_width(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
-        , _silence_text (0)
-	, _region_relative_time_converter(r->session().tempo_map(), r->position())
-	, _source_relative_time_converter(r->session().tempo_map(), r->position() - r->start())
+	, _silence_text (0)
 {
 	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RegionView::remove_ghost, this, _1), gui_context());
 }
@@ -95,9 +93,7 @@ RegionView::RegionView (ArdourCanvas::Container*              parent,
 RegionView::RegionView (const RegionView& other)
 	: sigc::trackable(other)
 	, TimeAxisViewItem (other)
-        , _silence_text (0)
-	, _region_relative_time_converter(other.region_relative_time_converter())
-	, _source_relative_time_converter(other.source_relative_time_converter())
+	, _silence_text (0)
 {
 	/* derived concrete type will call init () */
 
@@ -112,9 +108,7 @@ RegionView::RegionView (const RegionView& other)
 RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other_region)
 	: sigc::trackable(other)
 	, TimeAxisViewItem (other)
-        , _silence_text (0)
-	, _region_relative_time_converter(other_region->session().tempo_map(), other_region->position())
-	, _source_relative_time_converter(other_region->session().tempo_map(), other_region->position() - other_region->start())
+	, _silence_text (0)
 {
 	/* this is a pseudo-copy constructor used when dragging regions
 	   around on the canvas.
@@ -130,13 +124,13 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RegionView::remove_ghost, this, _1), gui_context());
 }
 
-RegionView::RegionView (ArdourCanvas::Container*         parent,
-                        TimeAxisView&                tv,
+RegionView::RegionView (ArdourCanvas::Container*          parent,
+                        TimeAxisView&                     tv,
                         boost::shared_ptr<ARDOUR::Region> r,
-                        double                       spu,
-                        uint32_t                     basic_color,
-			bool                         recording,
-                        TimeAxisViewItem::Visibility visibility)
+                        double                            spu,
+                        uint32_t                          basic_color,
+                        bool                              recording,
+                        TimeAxisViewItem::Visibility      visibility)
 	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), recording, false, visibility)
 	, _region (r)
 	, sync_mark(0)
@@ -148,9 +142,7 @@ RegionView::RegionView (ArdourCanvas::Container*         parent,
 	, _pixel_width(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
-        , _silence_text (0)
-	, _region_relative_time_converter(r->session().tempo_map(), r->position())
-	, _source_relative_time_converter(r->session().tempo_map(), r->position() - r->start())
+	, _silence_text (0)
 {
 }
 
@@ -417,11 +409,6 @@ RegionView::region_resized (const PropertyChange& what_changed)
 
 	if (what_changed.contains (ARDOUR::Properties::position)) {
 		set_position (_region->position(), 0);
-		_region_relative_time_converter.set_origin_b (_region->position());
-	}
-
-	if (what_changed.contains (ARDOUR::Properties::start) || what_changed.contains (ARDOUR::Properties::position)) {
-		_source_relative_time_converter.set_origin_b (_region->position() - _region->start());
 	}
 
 	PropertyChange s_and_l;
