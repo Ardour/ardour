@@ -242,7 +242,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
     number_label.set_text("");
 
 	if (_y_position != y) {
-		_canvas_display->set_y_position (y);
+		_canvas_display->set_y_position (y-1);
 		_y_position = y;
 	}
 
