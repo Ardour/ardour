@@ -55,7 +55,7 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 	expose_area.width = ev->area.width;
 	expose_area.height = ev->area.height;
 
-#ifdef USE_CAIRO_IMAGE_SURFACE
+#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_CAIRO_WIDGET
 	Cairo::RefPtr<Cairo::Context> cr;
     if (get_visible_window ()) {
 		expose_area.x = 0;
@@ -90,7 +90,7 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 
 	render (cr->cobj(), &expose_area);
 
-#ifdef USE_CAIRO_IMAGE_SURFACE
+#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_CAIRO_WIDGET
 	if(get_visible_window ()) {
 		_image_surface->flush();
 		/* now blit our private surface back to the GDK one */
@@ -133,7 +133,7 @@ CairoWidget::on_size_allocate (Gtk::Allocation& alloc)
 {
 	Gtk::EventBox::on_size_allocate (alloc);
 
-#ifdef USE_CAIRO_IMAGE_SURFACE
+#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_CAIRO_WIDGET
 	_image_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, alloc.get_width(), alloc.get_height());
 #endif
 

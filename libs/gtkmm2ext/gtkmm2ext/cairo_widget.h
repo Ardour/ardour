@@ -109,7 +109,7 @@ protected:
 	static sigc::slot<void> focus_handler;
 
   private:
-#ifdef USE_CAIRO_IMAGE_SURFACE
+#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_CANVAS
 	Cairo::RefPtr<Cairo::Surface> _image_surface;
 #endif
 	Glib::SignalProxyProperty _name_proxy;
