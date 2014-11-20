@@ -1,8 +1,7 @@
-path_to_preferences=$HOME/Library/Preferences/'Tracks Live'
-if [ -d $HOME/Library/Preferences/'Tracks Live' ] ; then
+path_to_preferences="$HOME/Library/Preferences/Tracks Live"
+if [ -d "$path_to_preferences" ] ; then
 	#delete Preferences
-	echo Folder: $path_to_preferences was deleted
-	rm -rf $HOME/Library/Preferences/'Tracks Live'
+	rm -rf "$path_to_preferences"
 else
-	echo Folder: $path_to_preferences wasn’t found
+	echo “Folder: $path_to_preferences could not be found!”
 fi
