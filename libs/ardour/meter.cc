@@ -87,9 +87,9 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 	// Meter MIDI in to the first n_midi peaks
 	for (uint32_t i = 0; i < n_midi; ++i, ++n) {
 		float val = 0.0f;
-		MidiBuffer& buf (bufs.get_midi(i));
+		const MidiBuffer& buf (bufs.get_midi(i));
 		
-		for (MidiBuffer::iterator e = buf.begin(); e != buf.end(); ++e) {
+		for (MidiBuffer::const_iterator e = buf.begin(); e != buf.end(); ++e) {
 			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
 			if (ev.is_note_on()) {
 				const float this_vel = ev.buffer()[2] / 127.0;

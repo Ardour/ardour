@@ -264,7 +264,7 @@ Plugin::connect_and_run (BufferSet& bufs,
 
 		/* Track notes that we are sending to the plugin */
 
-		MidiBuffer& b = bufs.get_midi (0);
+		const MidiBuffer& b = bufs.get_midi (0);
 
 		_tracker.track (b.begin(), b.end());
 

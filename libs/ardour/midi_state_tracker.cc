@@ -84,9 +84,9 @@ MidiStateTracker::remove (uint8_t note, uint8_t chn)
 }
 
 void
-MidiStateTracker::track (const MidiBuffer::iterator &from, const MidiBuffer::iterator &to)
+MidiStateTracker::track (const MidiBuffer::const_iterator &from, const MidiBuffer::const_iterator &to)
 {
-	for (MidiBuffer::iterator i = from; i != to; ++i) {
+	for (MidiBuffer::const_iterator i = from; i != to; ++i) {
 		track(*i);
 	}
 }
