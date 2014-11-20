@@ -56,9 +56,7 @@ PBD::Signal1<void,MidiSource*> MidiSource::MidiSourceCreated;
 MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	: Source(s, DataType::MIDI, name, flags)
 	, _writing(false)
-	, _model_iter_valid(false)
 	, _length_beats(0.0)
-	, _last_read_end(0)
 	, _capture_length(0)
 	, _capture_loop_length(0)
 {
@@ -67,9 +65,7 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 MidiSource::MidiSource (Session& s, const XMLNode& node)
 	: Source(s, node)
 	, _writing(false)
-	, _model_iter_valid(false)
 	, _length_beats(0.0)
-	, _last_read_end(0)
 	, _capture_length(0)
 	, _capture_loop_length(0)
 {
@@ -183,13 +179,6 @@ MidiSource::update_length (framecnt_t)
 	// You're not the boss of me!
 }
 
-void
-MidiSource::invalidate ()
-{
-	_model_iter_valid = false;
-	_model_iter.invalidate();
-}
-
 /** @param filtered A set of parameters whose MIDI messages will not be returned */
 framecnt_t
 MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_start,
@@ -205,26 +194,11 @@ MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_sta
 							  source_start, start, cnt, tracker, name()));
 
 	if (_model) {
-		Evoral::Sequence<double>::const_iterator& i = _model_iter;
-
-		// If the cached iterator is invalid, search for the first event past start
-		if (_last_read_end == 0 || start != _last_read_end || !_model_iter_valid) {
-			DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("*** %1 search for relevant iterator for %1 / %2\n", _name, source_start, start));
-			for (i = _model->begin(0, false, filtered); i != _model->end(); ++i) {
-				if (converter.to(i->time()) >= start) {
-					DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("***\tstop iterator search @ %1\n", i->time()));
-					break;
-				}
-			}
-			_model_iter_valid = true;
-		} else {
-			DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("*** %1 use cachediterator for %1 / %2\n", _name, source_start, start));
-		}
-
-		_last_read_end = start + cnt;
-
 		// Read events up to end
-		for (; i != _model->end(); ++i) {
+		const double start_beats = converter.from(start);
+		for (Evoral::Sequence<double>::const_iterator i = _model->begin(start_beats, false, filtered);
+		     i != _model->end();
+		     ++i) {
 			const framecnt_t time_frames = converter.to(i->time());
 			if (time_frames < start + cnt) {
 				/* convert event times to session frames by adding on the source start position in session frames */
@@ -265,9 +239,7 @@ MidiSource::midi_write (MidiRingBuffer<framepos_t>& source,
 
 	const framecnt_t ret = write_unlocked (source, source_start, cnt);
 
-	if (cnt == max_framecnt) {
-		_last_read_end = 0;
-	} else {
+	if (cnt != max_framecnt) {
 		_capture_length += cnt;
 	}
 

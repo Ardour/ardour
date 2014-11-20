@@ -414,20 +414,13 @@ MidiRegion::model_automation_state_changed (Evoral::Parameter const & p)
 	/* Update our filtered parameters list after a change to a parameter's AutoState */
 
 	boost::shared_ptr<AutomationControl> ac = model()->automation_control (p);
-	assert (ac);
-
-	if (ac->alist()->automation_state() == Play) {
+	if (!ac || ac->alist()->automation_state() == Play) {
+		/* It should be "impossible" for ac to be NULL, but if it is, don't
+		   filter the parameter so events aren't lost. */
 		_filtered_parameters.erase (p);
 	} else {
 		_filtered_parameters.insert (p);
 	}
-
-	/* the source will have an iterator into the model, and that iterator will have been set up
-	   for a given set of filtered_parameters, so now that we've changed that list we must invalidate
-	   the iterator.
-	*/
-	Glib::Threads::Mutex::Lock lm (midi_source(0)->mutex());
-	midi_source(0)->invalidate ();
 }
 
 /** This is called when a trim drag has resulted in a -ve _start time for this region.

@@ -1630,7 +1630,6 @@ MidiModel::edit_lock()
 	assert (ms);
 
 	Glib::Threads::Mutex::Lock* source_lock = new Glib::Threads::Mutex::Lock (ms->mutex());
-	ms->invalidate(); // Release cached iterator's read lock on model
 	return WriteLock(new WriteLockImpl(source_lock, _lock, _control_lock));
 }
 
@@ -1853,10 +1852,6 @@ void
 MidiModel::set_midi_source (boost::shared_ptr<MidiSource> s)
 {
 	boost::shared_ptr<MidiSource> old = _midi_source.lock ();
-
-	if (old) {
-		old->invalidate ();
-	}
 
 	_midi_source_connections.drop_connections ();
 

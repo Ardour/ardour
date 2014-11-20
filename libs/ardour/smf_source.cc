@@ -702,8 +702,6 @@ SMFSource::load_model (bool lock, bool force_reload)
 	_model->end_write (Evoral::Sequence<Evoral::MusicalTime>::ResolveStuckNotes, _length_beats);
 	_model->set_edited (false);
 
-	_model_iter = _model->begin();
-
 	free(buf);
 }
 
