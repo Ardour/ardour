@@ -32,24 +32,16 @@ SampleRateMismatchDialog::SampleRateMismatchDialog (ARDOUR::framecnt_t desired, 
 	: WavesDialog (_("sample_rate_mismatch_dialog.xml"), true, false)
     , _cancel_button ( get_waves_button ("cancel_button") )
     , _accept_button ( get_waves_button ("accept_button") )
-    , _info_label_1 ( get_label("info_label_1") )
-    , _info_label_2 ( get_label("info_label_2") )
-    , _info_label_3 ( get_label("info_label_3") )
-    , _info_label_4 ( get_label("info_label_4") )
-    , _info_label_5 ( get_label("info_label_5") )
+    , _info_label ( get_label("info_label") )
 {
 	set_modal (true);
 	set_resizable (false);
     
     _cancel_button.signal_clicked.connect (sigc::mem_fun (*this, &SampleRateMismatchDialog::cancel_button_pressed));
     _accept_button.signal_clicked.connect (sigc::mem_fun (*this, &SampleRateMismatchDialog::accept_button_pressed));
+
+    _info_label.set_text (string_compose ( _("This session was created with a sample rate of %1 Hz, but\n%2 is currently running at %3 Hz. If you load this session,\ndevice will be switched to the session sample rate value.\nIf an attemp to switch the device is unsuccessful\naudio may be played at the wrong sample rate."), desired, program_name, actual) );
     
-    _info_label_1.set_text (string_compose ( _("This session was created with a sample rate of %1 Hz, but "), desired) );
-    _info_label_2.set_text (string_compose ( _("%1 is currently running at %2 Hz. If you load this session, "), program_name, actual) );
-    _info_label_3.set_text ( _("device will be switched to the session sample rate value.") );
-    _info_label_4.set_text ( _("If an attemp to switch the device is unsuccessful") );
-    _info_label_5.set_text ( _("audio may be played at the wrong sample rate.") );
-             
     show_all ();
 }
 

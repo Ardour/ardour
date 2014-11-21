@@ -41,11 +41,7 @@ private:
     
     WavesButton& _cancel_button;
     WavesButton& _accept_button;
-    Gtk::Label& _info_label_1;
-    Gtk::Label& _info_label_2;
-    Gtk::Label& _info_label_3;
-    Gtk::Label& _info_label_4;
-    Gtk::Label& _info_label_5;
+    Gtk::Label& _info_label;
 };
 
 #endif /* __sample_rate_mismatch_dialog_h__ */
