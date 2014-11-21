@@ -359,7 +359,9 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	framecnt_t bbt_duration_at_unlocked (const Timecode::BBT_Time& when, const Timecode::BBT_Time& bbt, int dir);
 	
 	const MeterSection& first_meter() const;
+	MeterSection&       first_meter();
 	const TempoSection& first_tempo() const;
+	TempoSection&       first_tempo();
 	
 	void do_insert (MetricSection* section);
 };

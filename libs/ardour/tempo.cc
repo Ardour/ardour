@@ -475,7 +475,7 @@ TempoMap::do_insert (MetricSection* section)
 void
 TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const BBT_Time& where)
 {
-	const TempoSection& first (first_tempo());
+	TempoSection& first (first_tempo());
 
 	if (ts.start() != first.start()) {
 		remove_tempo (ts, false);
@@ -484,7 +484,7 @@ TempoMap::replace_tempo (const TempoSection& ts, const Tempo& tempo, const BBT_T
 		{
 			Glib::Threads::RWLock::WriterLock lm (lock);
 			/* cannot move the first tempo section */
-			*((Tempo*)&first) = tempo;
+			*static_cast<Tempo*>(&first) = tempo;
 			recompute_map (false);
 		}
 	}
@@ -545,7 +545,7 @@ TempoMap::add_tempo (const Tempo& tempo, BBT_Time where)
 void
 TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_Time& where)
 {
-	const MeterSection& first (first_meter());
+	MeterSection& first (first_meter());
 
 	if (ms.start() != first.start()) {
 		remove_meter (ms, false);
@@ -554,7 +554,7 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 		{
 			Glib::Threads::RWLock::WriterLock lm (lock);
 			/* cannot move the first meter section */
-			*((Meter*)&first) = meter;
+			*static_cast<Meter*>(&first) = meter;
 			recompute_map (true);
 		}
 	}
@@ -681,6 +681,22 @@ TempoMap::first_meter () const
 	return *m;
 }
 
+MeterSection&
+TempoMap::first_meter ()
+{
+	MeterSection *m = 0;
+
+	for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
+		if ((m = dynamic_cast<MeterSection *> (*i)) != 0) {
+			return *m;
+		}
+	}
+
+	fatal << _("programming error: no tempo section in tempo map!") << endmsg;
+	abort(); /*NOTREACHED*/
+	return *m;
+}
+
 const TempoSection&
 TempoMap::first_tempo () const
 {
@@ -688,6 +704,22 @@ TempoMap::first_tempo () const
 
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		if ((t = dynamic_cast<const TempoSection *> (*i)) != 0) {
+			return *t;
+		}
+	}
+
+	fatal << _("programming error: no tempo section in tempo map!") << endmsg;
+	abort(); /*NOTREACHED*/
+	return *t;
+}
+
+TempoSection&
+TempoMap::first_tempo ()
+{
+	TempoSection *t = 0;
+
+	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
+		if ((t = dynamic_cast<TempoSection *> (*i)) != 0) {
 			return *t;
 		}
 	}
