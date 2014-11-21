@@ -545,12 +545,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 					event_y = ev->y;
 					group->canvas_to_item (event_x, event_y);
 
-					bool success;
-					Evoral::MusicalTime beats = editor.get_grid_type_as_beats (success, editor.pixel_to_sample (event_x));
-
-					if (!success) {
-						beats = 1;
-					}
+					Evoral::MusicalTime beats = get_grid_beats(editor.pixel_to_sample(event_x));
 
 					/* Shorten the length by 1 tick so that we can add a new note at the next
 					   grid snap without it overlapping this one.
@@ -564,12 +559,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 			}
 		case MouseDraw:
 			{
-				bool success;
-				Evoral::MusicalTime beats = editor.get_grid_type_as_beats (success, editor.pixel_to_sample (event_x));
-
-				if (!success) {
-					beats = 1;
-				}
+				Evoral::MusicalTime beats = get_grid_beats(editor.pixel_to_sample(event_x));
 
 				/* Shorten the length by 1 tick so that we can add a new note at the next
 				   grid snap without it overlapping this one.
@@ -3068,13 +3058,7 @@ MidiRegionView::change_note_lengths (bool fine, bool shorter, Evoral::MusicalTim
 			delta = 1.0/128.0;
 		} else {
 			/* grab the current grid distance */
-			bool success;
-			delta = trackview.editor().get_grid_type_as_beats (success, _region->position());
-			if (!success) {
-				/* XXX cannot get grid type as beats ... should always be possible ... FIX ME */
-				error << string_compose (_("programming error: %1"), "Grid type not available as beats - TO BE FIXED") << endmsg;
-				return;
-			}
+			delta = get_grid_beats(_region->position());
 		}
 	}
 
@@ -3414,13 +3398,7 @@ MidiRegionView::paste_internal (framepos_t pos, unsigned paste_count, float time
 
 	start_note_diff_command (_("paste"));
 
-	/* get snap duration, default to 1 beat if not snapped to anything musical */
-	bool   success    = true;
-	double snap_beats = editor.get_grid_type_as_beats(success, pos);
-	if (!success) {
-		snap_beats = 1.0;
-	}
-
+	const Evoral::MusicalTime snap_beats    = get_grid_beats(pos);
 	const Evoral::MusicalTime first_time    = (*mcb.notes().begin())->time();
 	const Evoral::MusicalTime last_time     = (*mcb.notes().rbegin())->end_time();
 	const Evoral::MusicalTime duration      = last_time - first_time;
@@ -3601,12 +3579,7 @@ MidiRegionView::update_ghost_note (double x, double y)
 	/* use region_frames... because we are converting a delta within the region
 	*/
 	 
-	bool success;
-	double length = editor.get_grid_type_as_beats (success, unsnapped_frame);
-
-	if (!success) {
-		length = 1;
-	}
+	const Evoral::MusicalTime length = get_grid_beats(unsnapped_frame);
 
 	/* note that this sets the time of the ghost note in beats relative to
 	   the start of the source; that is how all note times are stored.
@@ -3939,13 +3912,8 @@ MidiRegionView::snap_frame_to_grid_underneath (framepos_t p, framecnt_t& grid_fr
 {
 	PublicEditor& editor = trackview.editor ();
 	
-	bool success;
-	Evoral::MusicalTime grid_beats = editor.get_grid_type_as_beats (success, p);
+	const Evoral::MusicalTime grid_beats = get_grid_beats(p);
 
-	if (!success) {
-		grid_beats = 1;
-	}
-	
 	grid_frames = region_beats_to_region_frames (grid_beats);
 
 	/* Hack so that we always snap to the note that we are over, instead of snapping
@@ -3993,3 +3961,15 @@ MidiRegionView::get_selected_channels () const
 	return rtav->midi_track()->get_playback_channel_mask();
 }
 
+
+Evoral::MusicalTime
+MidiRegionView::get_grid_beats(framepos_t pos) const
+{
+	PublicEditor&       editor  = trackview.editor();
+	bool                success = false;
+	Evoral::MusicalTime beats   = editor.get_grid_type_as_beats(success, pos);
+	if (!success) {
+		beats = 1;
+	}
+	return beats;
+}

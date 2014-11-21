@@ -474,6 +474,9 @@ private:
 	void connect_to_diskstream ();
 	void data_recorded (boost::weak_ptr<ARDOUR::MidiSource>);
 
+	/** Get grid type as beats, or default to 1 if not snapped to beats. */
+	Evoral::MusicalTime get_grid_beats(framepos_t pos) const;
+
 	void remove_ghost_note ();
 	void mouse_mode_changed ();
 	double _last_event_x;
