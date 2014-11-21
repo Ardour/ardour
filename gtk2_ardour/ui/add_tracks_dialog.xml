@@ -27,13 +27,14 @@
               y="44"
               width="110"
               height="21"
-              normalicon="added_track_format_dropdown"
+              normalicon="added_track_format_dropdown_active"
               activeicon="added_track_format_dropdown_active"
               _prelighticon="added_track_format_dropdown_prelight"
               inactiveicon="added_track_format_dropdown_inactive">
       <HBox>
         <VBox width="10"/>
         <Label style="generic_control"
+               fgnormal="#EDECE8"
                horzalignment="center"
                width="93"/>
       </HBox>
@@ -57,16 +58,16 @@
             x="75"
             y="44"
             width="25"
-            height="22"/>
+            height="21"/>
 
     <Entry  style="generic_control"
             id="tracks_counter_entry"
             text="1"
             justify="center"
             x="5"
-            y="44"
+            y="43"
             width="70"
-            height="22"/>
+            height="23"/>
 
     <Button style="generic_button"
             id="increment_button"
@@ -82,7 +83,7 @@
             x="101"
             y="44"
             width="25"
-            height="22"/>
+            height="21"/>
 
     <Button style="generic_button"
             id="cancel_button"
@@ -98,7 +99,7 @@
             x="250"
             y="44"
             width="69"
-            height="22"/>
+            height="21"/>
 
     <Button style="generic_button"
             id="ok_button"
@@ -114,6 +115,6 @@
             x="322"
             y="44"
             width="69"
-            height="22"/>
+            height="21"/>
   </Layout>
 </Dialog>
