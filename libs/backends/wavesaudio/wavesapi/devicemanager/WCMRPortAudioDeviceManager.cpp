@@ -28,7 +28,7 @@ using namespace wvNS;
 ///< Supported Sample rates                                                                                                  
 static const double gAllSampleRates[] =
 	{
-		44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0 -1 /* negative terminated  list */
+		44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0, -1 /* negative terminated  list */
 	};
 
 
@@ -1720,7 +1720,7 @@ WTErr WCMRPortAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & d
     
 	if (m_CurrentDevice && deviceName == m_CurrentDevice->DeviceName() )
 	{
-		sampleRates.assign(m_CurrentDevice->SamplingRates().begin(), m_CurrentDevice->SamplingRates().end() );
+		sampleRates=m_CurrentDevice->SamplingRates();
 		return retVal;
 	}
 
@@ -1729,7 +1729,7 @@ WTErr WCMRPortAudioDeviceManager::getDeviceSampleRatesImpl(const std::string & d
     
 	if (eNoErr == retVal)
 	{
-		sampleRates.assign(devInfo.m_AvailableSampleRates.begin(), devInfo.m_AvailableSampleRates.end() );
+		sampleRates=devInfo.m_AvailableSampleRates;
 	}
 	else
 	{
@@ -1749,13 +1749,13 @@ WTErr WCMRPortAudioDeviceManager::getDeviceBufferSizesImpl(const std::string & d
 	//first check if the request has been made for None device
 	if (deviceName == m_NoneDevice->DeviceName() )
 	{
-		buffers.assign(m_NoneDevice->BufferSizes().begin(), m_NoneDevice->BufferSizes().end() );
+		buffers=m_NoneDevice->BufferSizes();
 		return retVal;
 	}
 	
 	if (m_CurrentDevice && deviceName == m_CurrentDevice->DeviceName() )
 	{
-		buffers.assign(m_CurrentDevice->BufferSizes().begin(), m_CurrentDevice->BufferSizes().end() );
+		buffers=m_CurrentDevice->BufferSizes();
 		return retVal;
 	}
 
