@@ -47,7 +47,7 @@ static const char* ui_config_file_name = "ui_config";
 static const char* default_ui_config_file_name = "default_ui_config";
 UIConfiguration* UIConfiguration::_instance = 0;
 
-static const double hue_cnt = 18.0;
+static const double hue_width = 18.0;
 
 UIConfiguration::UIConfiguration ()
 	:
@@ -111,7 +111,7 @@ Color
 UIConfiguration::quantized (Color c)
 {
 	HSV hsv (c);
-	hsv.h = hue_cnt * (round (hsv.h/hue_cnt));
+	hsv.h = hue_width * (round (hsv.h/hue_width));
 	return hsv.color ();
 }
 
@@ -170,7 +170,7 @@ UIConfiguration::print_relative_def (string camelcase, string name, Color c)
 	 * by original color choices
 	 */
 
-	delta.h = hue_cnt * (round (delta.h/hue_cnt));
+	delta.h = hue_width * (round (delta.h/hue_width));
 
 	cerr << "CANVAS_COLOR(" << camelcase << ",\"" << name << "\", \"" << closest_name <<  "\", HSV(" 
 	     << delta.h << ',' << delta.s << ',' << delta.v << ',' << variable.a << ")) /*" 
@@ -652,9 +652,7 @@ UIConfiguration::regenerate_relative_definitions ()
         c.insert (make_pair ("lock button: text active", HSV (0xc8c8d9ff)));
 
 	for (map<string,HSV>::iterator fp = c.begin(); fp != c.end(); ++fp) {
-		const double hue_cnt = 18.0;
-
-		fp->second.h = hue_cnt * (round (fp->second.h/hue_cnt));
+		fp->second.h = hue_width * (round (fp->second.h/hue_width));
 	}
 
 #undef CANVAS_COLOR
