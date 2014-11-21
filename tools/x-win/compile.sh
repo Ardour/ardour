@@ -70,4 +70,4 @@ LDFLAGS="-L${PREFIX}/lib" ./waf configure \
 	--also-include=${PREFIX}/include \
 	$ARDOURCFG \
 	--prefix=${PREFIX}
-./waf
+./waf ${CONCURRENCY}
