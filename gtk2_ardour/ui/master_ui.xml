@@ -8,7 +8,7 @@
     <EventBox height="1"
               bgnormal="#494949"
               bgactive="#494949"/>
-    <HBox height="17">
+    <HBox height="29">
       <HBox id="master_bus_hbox"
             noshowall="true">
           <EventBox width="1"
@@ -39,7 +39,7 @@
             noshowall="true"/>
       <iconbutton id="master_mute_button"
                   width="83"
-                  height="17"
+                  height="29"
                   normalicon="master_mute"
                   activeicon="master_mute_active"
                   _prelighticon="master_mute_prelight"
