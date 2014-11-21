@@ -1,57 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title="Sample rate mismatch" resizeable="False">
-  
-  <style name="generic_control"
-  winfont ="Arial Bold 12"
-  macfont ="Helvetica Bold 12"
-  fgnormal="#BFBFBF"
-  bgnormal="#6C6C6C"
-  fgactive="#BFBFBF"
-  bgactive="#454545"
-  fghover="#CCCCCC"
-  bghover="#898989"/>
-  
-  <Layout width="420"
-          height="140"
-          bgnormal="#EDECE8">
-      <VBox width="420"
-            x="0"
-            y="0">
-          <Label id="info_label"
-                 style="generic_control"
-                 fgnormal="#6D6E72"
-                 height="100"
-                 horzalignment="center"
-                 justify="center"/>
-      </VBox>
-      
-      <Button id="cancel_button"
-              style="generic_control"
-              text="Cancel"
-              fgnormal="#6D6E72"
-              bgnormal="#CACAC5"
-              fgactive="#EDECE8"
-              bgactive="#6D6E72"
-              borderwidth="0 0 0 0"
-              bordercolor="#6D6E72"
-              width="80"
-              height="22"
-              x="240"
-              y="110"/>
-              
-      <Button id="accept_button"
-              style="generic_control"
-              text="Accept"
-              fgnormal="#6D6E72"
-              bgnormal="#CACAC5"
-              fgactive="#EDECE8"
-              bgactive="#6D6E72"
-              borderwidth="0 0 0 0"
-              bordercolor="#6D6E72"
-              width="80"
-              height="22"
-              x="330"
-              y="110"/>
-  </Layout>
-  
+    
+    <style name="generic_control"
+    winfont ="Arial Bold 12"
+    macfont ="Helvetica Bold 12"
+    fgnormal="#BFBFBF"
+    bgnormal="#6C6C6C"
+    fgactive="#BFBFBF"
+    bgactive="#454545"
+    fghover="#CCCCCC"
+    bghover="#898989"/>
+    
+    <EventBox bgnormal="#EDECE8">
+        <VBox width="450"
+            borderwidth="10"
+            spacing="10">
+            <Label id="info_label"
+            style="generic_control"
+            fgnormal="#6D6E72"
+            horzalignment="center"
+            justify="center"/>
+            <HBox spacing="10">
+                <Button id="accept_button"
+                style="generic_control"
+                box.pack="end"
+                text="Accept"
+                fgnormal="#6D6E72"
+                bgnormal="#CACAC5"
+                fgactive="#EDECE8"
+                bgactive="#6D6E72"
+                borderwidth="0 0 0 0"
+                bordercolor="#6D6E72"
+                width="80"
+                height="22"
+                x="330"
+                y="110"/>
+                <Button id="cancel_button"
+                style="generic_control"
+                box.pack="end"
+                text="Cancel"
+                fgnormal="#6D6E72"
+                bgnormal="#CACAC5"
+                fgactive="#EDECE8"
+                bgactive="#6D6E72"
+                borderwidth="0 0 0 0"
+                bordercolor="#6D6E72"
+                width="80"
+                height="22"
+                x="240"
+                y="110"/>
+            </HBox>
+        </VBox>
+    </EventBox>
+    
 </Dialog>
