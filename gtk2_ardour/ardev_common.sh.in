@@ -18,7 +18,8 @@ export ARDOUR_MIDIMAPS_PATH=$TOP/midi_maps:.
 export ARDOUR_MCP_PATH=$TOP/mcp:.
 export ARDOUR_EXPORT_FORMATS_PATH=$TOP/export:.
 export ARDOUR_BACKEND_PATH=$libs/backends/jack:$libs/backends/wavesaudio:$libs/backends/dummy:$libs/backends/alsa
-export ARDOUR_TEST_PATH=$libs/ardour/test/data
+export ARDOUR_TEST_PATH=$TOP/libs/ardour/test/data
+export PBD_TEST_PATH=$TOP/libs/pbd/test
 
 #
 # even though we set the above variables, ardour requires that these 
