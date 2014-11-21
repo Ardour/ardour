@@ -330,9 +330,9 @@ ARDOUR_UI::get_sample_rate () const
     } else if ( "96 kHz" == sample_rate )
     {
         return 96000;
-    } else if ( "172.4 kHz" == sample_rate )
+    } else if ( "176.4 kHz" == sample_rate )
     {
-        return 172400;
+        return 176400;
     } else if ( "192 kHz" == sample_rate )
     {
         return 192000;
