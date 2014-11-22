@@ -23,7 +23,7 @@
 namespace Evoral {
 
 const double      MusicalTime::PPQN = 1920.0;
-const MusicalTime MaxMusicalTime    = Evoral::MusicalTime(DBL_MIN);
-const MusicalTime MinMusicalTime    = Evoral::MusicalTime(DBL_MAX);
+const MusicalTime MaxMusicalTime    = Evoral::MusicalTime(DBL_MAX);
+const MusicalTime MinMusicalTime    = Evoral::MusicalTime(DBL_MIN);
 
 }
