@@ -88,6 +88,7 @@ def build(bld):
             src/SMF.cpp
             src/Sequence.cpp
             src/debug.cpp
+            src/types.cpp
     '''
 
     # Library

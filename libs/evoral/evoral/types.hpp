@@ -41,6 +41,8 @@ typedef int32_t event_id_t;
 /** Musical time: beats relative to some defined origin */
 class LIBEVORAL_API MusicalTime {
 public:
+	static const double PPQN;
+
 	MusicalTime() : _time(0.0) {}
 
 	/** Create from a real number of beats. */
@@ -53,7 +55,7 @@ public:
 
 	/** Create from ticks at the standard PPQN. */
 	static MusicalTime ticks(uint32_t ticks) {
-		return MusicalTime(ticks / _ppqn);
+		return MusicalTime(ticks / PPQN);
 	}
 
 	/** Create from ticks at a given rate.
@@ -84,17 +86,17 @@ public:
 
 	inline bool operator==(const MusicalTime& b) const {
 		/* Acceptable tolerance is 1 tick. */
-		return fabs(_time - b._time) <= (1.0/_ppqn);
+		return fabs(_time - b._time) <= (1.0 / PPQN);
 	}
 
 	inline bool operator==(double t) const {
 		/* Acceptable tolerance is 1 tick. */
-		return fabs(_time - t) <= (1.0/_ppqn);
+		return fabs(_time - t) <= (1.0 / PPQN);
 	}
 
 	inline bool operator==(int beats) const {
 		/* Acceptable tolerance is 1 tick. */
-		return fabs(_time - beats) <= (1.0/_ppqn);
+		return fabs(_time - beats) <= (1.0 / PPQN);
 	}
 
 	inline bool operator!=(const MusicalTime& b) const {
@@ -103,7 +105,7 @@ public:
 
 	inline bool operator<(const MusicalTime& b) const {
 		/* Acceptable tolerance is 1 tick. */
-		if (fabs(_time - b._time) <= (1.0/_ppqn)) {
+		if (fabs(_time - b._time) <= (1.0 / PPQN)) {
 			return false;  /* Effectively identical. */
 		} else {
 			return _time < b._time;
@@ -116,7 +118,7 @@ public:
 
 	inline bool operator>(const MusicalTime& b) const {
 		/* Acceptable tolerance is 1 tick. */
-		if (fabs(_time - b._time) <= (1.0/_ppqn)) {
+		if (fabs(_time - b._time) <= (1.0 / PPQN)) {
 			return false;  /* Effectively identical. */
 		} else {
 			return _time > b._time;
@@ -125,7 +127,7 @@ public:
 
 	inline bool operator>=(const MusicalTime& b) const {
 		/* Acceptable tolerance is 1 tick. */
-		if (fabs(_time - b._time) <= (1.0/_ppqn)) {
+		if (fabs(_time - b._time) <= (1.0 / PPQN)) {
 			return true;  /* Effectively identical. */
 		} else {
 			return _time >= b._time;
@@ -160,23 +162,21 @@ public:
 	}
 
 	double   to_double()              const { return _time; }
-	uint64_t to_ticks()               const { return lrint(_time * _ppqn); }
+	uint64_t to_ticks()               const { return lrint(_time * PPQN); }
 	uint64_t to_ticks(uint32_t ppqn)  const { return lrint(_time * ppqn); }
 
 	operator bool() const { return _time != 0; }
 
 	static MusicalTime min()  { return MusicalTime(DBL_MIN); }
 	static MusicalTime max()  { return MusicalTime(DBL_MAX); }
-	static MusicalTime tick() { return MusicalTime(1.0 / _ppqn); }
+	static MusicalTime tick() { return MusicalTime(1.0 / PPQN); }
 
 private:
-	static const double _ppqn = 1920.0;  /* TODO: Make configurable. */
-
 	double _time;
 };
 
-const MusicalTime MaxMusicalTime = Evoral::MusicalTime::max();
-const MusicalTime MinMusicalTime = Evoral::MusicalTime::min();
+extern const MusicalTime MaxMusicalTime;
+extern const MusicalTime MinMusicalTime;
 
 /** Type of an event (opaque, mapped by application) */
 typedef uint32_t EventType;

@@ -24,6 +24,7 @@
 #include "evoral/Curve.hpp"
 
 #include "pbd/compose.h"
+#include "pbd/debug.h"
 
 using namespace std;
 using namespace PBD;

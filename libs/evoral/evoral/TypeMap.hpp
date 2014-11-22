@@ -19,8 +19,11 @@
 #ifndef EVORAL_TYPE_MAP_HPP
 #define EVORAL_TYPE_MAP_HPP
 
+#include <stdint.h>
+
+#include <string>
+
 #include "evoral/visibility.h"
-#include "evoral/types.hpp"
 
 namespace Evoral {
 
