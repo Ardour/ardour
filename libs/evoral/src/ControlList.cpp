@@ -1423,9 +1423,10 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 			/* Move left of cache to this point
 			 * (Optimize for immediate call this cycle within range) */
 			_search_cache.left = x;
-			//++_search_cache.range.first;
-			assert(x >= start);
 			return true;
+		} else if (next->when < start || (!inclusive && next->when == start)) {
+			/* "Next" is before the start, no points left. */
+			return false;
 		}
 
 		if (fabs(first->value - next->value) <= 1) {
@@ -1435,8 +1436,6 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 				/* Move left of cache to this point
 				 * (Optimize for immediate call this cycle within range) */
 				_search_cache.left = x;
-				//++_search_cache.range.first;
-				assert(inclusive ? x >= start : x > start);
 				return true;
 			} else {
 				return false;
