@@ -2748,24 +2748,24 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		current_x = snap_pixel_to_sample (current_x) + _region->start ();
 
 		/* and then to beats */
-		current_x = region_frames_to_region_beats (current_x);
+		const Evoral::MusicalTime x_beats = region_frames_to_region_beats (current_x);
 
-		if (at_front && current_x < canvas_note->note()->end_time()) {
-			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, current_x);
+		if (at_front && x_beats < canvas_note->note()->end_time()) {
+			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, x_beats);
 
-			double len = canvas_note->note()->time() - current_x;
+			Evoral::MusicalTime len = canvas_note->note()->time() - x_beats;
 			len += canvas_note->note()->length();
 
-			if (len > 0) {
+			if (len) {
 				/* XXX convert to beats */
 				note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
 			}
 		}
 
 		if (!at_front) {
-			double len = current_x - canvas_note->note()->time();
+			const Evoral::MusicalTime len = x_beats - canvas_note->note()->time();
 
-			if (len > 0) {
+			if (len) {
 				/* XXX convert to beats */
 				note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
 			}
