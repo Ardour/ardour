@@ -43,7 +43,7 @@ template<typename T> class MidiRingBuffer;
 class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_shared_from_this<MidiSource>
 {
   public:
-	typedef double TimeType;
+	typedef Evoral::MusicalTime TimeType;
 
 	MidiSource (Session& session, std::string name, Source::Flag flags = Source::Flag(0));
 	MidiSource (Session& session, const XMLNode&);
@@ -120,7 +120,7 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 */
 	virtual void mark_midi_streaming_write_completed (
 		Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption stuck_option,
-		Evoral::MusicalTime                                    when = 0);
+		Evoral::MusicalTime                                    when = Evoral::MusicalTime());
 
 	virtual void session_saved();
 
@@ -134,8 +134,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 
 	bool length_mutable() const { return true; }
 
-	void set_length_beats(double l) { _length_beats = l; }
-	double length_beats() const { return _length_beats; }
+	void     set_length_beats(TimeType l) { _length_beats = l; }
+	TimeType length_beats() const         { return _length_beats; }
 
 	virtual void load_model(bool lock=true, bool force_reload=false) = 0;
 	virtual void destroy_model() = 0;
@@ -194,8 +194,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	mutable Evoral::Sequence<Evoral::MusicalTime>::const_iterator _model_iter;
 	mutable bool                                                  _model_iter_valid;
 
-	mutable double     _length_beats;
-	mutable framepos_t _last_read_end;
+	mutable Evoral::MusicalTime _length_beats;
+	mutable framepos_t          _last_read_end;
 
 	/** The total duration of the current capture. */
 	framepos_t _capture_length;

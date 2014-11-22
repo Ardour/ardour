@@ -129,9 +129,9 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		double x, y;
 		bool ret;
 		if (_force_discrete || i->second->list()->interpolation() == ControlList::Discrete) {
-			ret = i->second->list()->rt_safe_earliest_event_discrete_unlocked (t, x, y, true);
+			ret = i->second->list()->rt_safe_earliest_event_discrete_unlocked (t.to_double(), x, y, true);
 		} else {
-			ret = i->second->list()->rt_safe_earliest_event_unlocked(t, x, y, true);
+			ret = i->second->list()->rt_safe_earliest_event_unlocked(t.to_double(), x, y, true);
 		}
 		if (!ret) {
 			DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: CC %1 (size %2) has no events past %3\n",
@@ -188,10 +188,10 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	}
 
 	if (_control_iter != _control_iters.end()
-	    && earliest_control.list && earliest_control.x >= t
-	    && (earliest_control.x < earliest_t || _type == NIL)) {
+	    && earliest_control.list && earliest_control.x >= t.to_double()
+	    && (earliest_control.x < earliest_t.to_double() || _type == NIL)) {
 		_type = CONTROL;
-		earliest_t = earliest_control.x;
+		earliest_t = Time(earliest_control.x);
 	}
 
 	switch (_type) {
@@ -357,9 +357,9 @@ Sequence<Time>::const_iterator::operator++()
 
 	// Use the next earliest controller iff it's earlier than the note event
 	if (_control_iter != _control_iters.end() && _control_iter->x != DBL_MAX) {
-		if (_type == NIL || _control_iter->x < earliest_t) {
+		if (_type == NIL || _control_iter->x < earliest_t.to_double()) {
 			_type = CONTROL;
-			earliest_t = _control_iter->x;
+			earliest_t = Time(_control_iter->x);
 		}
 	}
 
@@ -470,7 +470,7 @@ Sequence<Time>::Sequence(const TypeMap& type_map)
 	, _overlap_pitch_resolution (FirstOnFirstOff)
 	, _writing(false)
 	, _type_map(type_map)
-	, _end_iter(*this, DBL_MAX, false, std::set<Evoral::Parameter> ())
+	, _end_iter(*this, std::numeric_limits<Time>::max(), false, std::set<Evoral::Parameter> ())
 	, _percussive(false)
 	, _lowest_note(127)
 	, _highest_note(0)
@@ -492,7 +492,7 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
 	, _overlap_pitch_resolution (other._overlap_pitch_resolution)
 	, _writing(false)
 	, _type_map(other._type_map)
-	, _end_iter(*this, DBL_MAX, false, std::set<Evoral::Parameter> ())
+	, _end_iter(*this, std::numeric_limits<Time>::max(), false, std::set<Evoral::Parameter> ())
 	, _percussive(other._percussive)
 	, _lowest_note(other._lowest_note)
 	, _highest_note(other._highest_note)
@@ -537,7 +537,7 @@ Sequence<Time>::control_to_midi_event(
 
 	// initialize the event pointer with a new event, if necessary
 	if (!ev) {
-		ev = boost::shared_ptr< Event<Time> >(new Event<Time>(event_type, 0, 3, NULL, true));
+		ev = boost::shared_ptr< Event<Time> >(new Event<Time>(event_type, Time(), 3, NULL, true));
 	}
 
 	uint8_t midi_type = _type_map.parameter_midi_type(iter.list->parameter());
@@ -549,7 +549,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list->parameter().id() <= INT8_MAX);
 		assert(iter.y <= INT8_MAX);
 
-		ev->set_time(iter.x);
+		ev->set_time(Time(iter.x));
 		ev->realloc(3);
 		ev->buffer()[0] = MIDI_CMD_CONTROL + iter.list->parameter().channel();
 		ev->buffer()[1] = (uint8_t)iter.list->parameter().id();
@@ -561,7 +561,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list->parameter().channel() < 16);
 		assert(iter.y <= INT8_MAX);
 
-		ev->set_time(iter.x);
+		ev->set_time(Time(iter.x));
 		ev->realloc(2);
 		ev->buffer()[0] = MIDI_CMD_PGM_CHANGE + iter.list->parameter().channel();
 		ev->buffer()[1] = (uint8_t)iter.y;
@@ -572,7 +572,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list->parameter().channel() < 16);
 		assert(iter.y < (1<<14));
 
-		ev->set_time(iter.x);
+		ev->set_time(Time(iter.x));
 		ev->realloc(3);
 		ev->buffer()[0] = MIDI_CMD_BENDER + iter.list->parameter().channel();
 		ev->buffer()[1] = uint16_t(iter.y) & 0x7F; // LSB
@@ -584,7 +584,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list->parameter().channel() < 16);
 		assert(iter.y <= INT8_MAX);
 
-		ev->set_time(iter.x);
+		ev->set_time(Time(iter.x));
 		ev->realloc(2);
 		ev->buffer()[0] = MIDI_CMD_CHANNEL_PRESSURE + iter.list->parameter().channel();
 		ev->buffer()[1] = (uint8_t)iter.y;
@@ -653,7 +653,7 @@ Sequence<Time>::end_write (StuckNoteOption option, Time when)
 			typename Notes::iterator next = n;
 			++next;
 
-			if ((*n)->length() == 0) {
+			if (!(*n)->length()) {
 				switch (option) {
 				case Relax:
 					break;
@@ -737,7 +737,7 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 
 	typename Sequence<Time>::Notes::iterator i;
 		
-	for (i = note_lower_bound(note->time()); i != _notes.end() && musical_time_equal ((*i)->time(), note->time()); ++i) {
+	for (i = note_lower_bound(note->time()); i != _notes.end() && (*i)->time() == note->time(); ++i) {
 
 		if (*i == note) {
 
@@ -832,7 +832,7 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 			 * so the search_note has all other properties unset.
 			 */
 			
-			NotePtr search_note (new Note<Time>(0, 0, 0, note->note(), 0));
+			NotePtr search_note (new Note<Time>(0, Time(), Time(), note->note(), 0));
 
 			for (j = p.lower_bound (search_note); j != p.end() && (*j)->note() == note->note(); ++j) {
 				
@@ -861,7 +861,7 @@ Sequence<Time>::remove_patch_change_unlocked (const constPatchChangePtr p)
 {
 	typename Sequence<Time>::PatchChanges::iterator i = patch_change_lower_bound (p->time ());
 
-	while (i != _patch_changes.end() && (musical_time_equal ((*i)->time(), p->time()))) {
+	while (i != _patch_changes.end() && ((*i)->time() == p->time())) {
 
 		typename Sequence<Time>::PatchChanges::iterator tmp = i;
 		++tmp;
@@ -906,7 +906,7 @@ Sequence<Time>::append(const Event<Time>& event, event_id_t evid)
 
 	const MIDIEvent<Time>& ev = (const MIDIEvent<Time>&)event;
 
-	assert(_notes.empty() || musical_time_greater_or_equal_to(ev.time(), (*_notes.rbegin())->time()));
+	assert(_notes.empty() || ev.time() >= (*_notes.rbegin())->time());
 	assert(_writing);
 
 	if (!midi_event_is_valid(ev.buffer(), ev.size())) {
@@ -915,10 +915,10 @@ Sequence<Time>::append(const Event<Time>& event, event_id_t evid)
 	}
 
 	if (ev.is_note_on()) {
-		NotePtr note(new Note<Time>(ev.channel(), ev.time(), 0, ev.note(), ev.velocity()));
+		NotePtr note(new Note<Time>(ev.channel(), ev.time(), Time(), ev.note(), ev.velocity()));
 		append_note_on_unlocked (note, evid);
 	} else if (ev.is_note_off()) {
-		NotePtr note(new Note<Time>(ev.channel(), ev.time(), 0, ev.note(), ev.velocity()));
+		NotePtr note(new Note<Time>(ev.channel(), ev.time(), Time(), ev.note(), ev.velocity()));
 		/* XXX note: event ID is discarded because we merge the on+off events into
 		   a single note object
 		*/
@@ -1053,7 +1053,7 @@ Sequence<Time>::append_note_off_unlocked (NotePtr note)
 
 		NotePtr nn = *n;
 		if (note->note() == nn->note() && nn->channel() == note->channel()) {
-			assert(musical_time_greater_or_equal_to(note->time(), nn->time()));
+			assert(note->time() >= nn->time());
 
 			nn->set_length (note->time() - nn->time());
 			nn->set_off_velocity (note->velocity());
@@ -1080,7 +1080,7 @@ Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, doubl
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 %2 @ %3 = %4 # controls: %5\n",
 	                                              this, _type_map.to_symbol(param), time, value, _controls.size()));
 	boost::shared_ptr<Control> c = control(param, true);
-	c->list()->add (time, value);
+	c->list()->add (time.to_double(), value);
 	/* XXX control events should use IDs */
 }
 
@@ -1148,7 +1148,7 @@ bool
 Sequence<Time>::contains_unlocked (const NotePtr& note) const
 {
 	const Pitches& p (pitches (note->channel()));
-	NotePtr search_note(new Note<Time>(0, 0, 0, note->note()));
+	NotePtr search_note(new Note<Time>(0, Time(), Time(), note->note()));
 
 	for (typename Pitches::const_iterator i = p.lower_bound (search_note);
 	     i != p.end() && (*i)->note() == note->note(); ++i) {
@@ -1177,7 +1177,7 @@ Sequence<Time>::overlaps_unlocked (const NotePtr& note, const NotePtr& without) 
 	Time ea  = note->end_time();
 
 	const Pitches& p (pitches (note->channel()));
-	NotePtr search_note(new Note<Time>(0, 0, 0, note->note()));
+	NotePtr search_note(new Note<Time>(0, Time(), Time(), note->note()));
 
 	for (typename Pitches::const_iterator i = p.lower_bound (search_note);
 	     i != p.end() && (*i)->note() == note->note(); ++i) {
@@ -1214,9 +1214,9 @@ template<typename Time>
 typename Sequence<Time>::Notes::const_iterator
 Sequence<Time>::note_lower_bound (Time t) const
 {
-	NotePtr search_note(new Note<Time>(0, t, 0, 0, 0));
+	NotePtr search_note(new Note<Time>(0, t, Time(), 0, 0));
 	typename Sequence<Time>::Notes::const_iterator i = _notes.lower_bound(search_note);
-	assert(i == _notes.end() || musical_time_greater_or_equal_to((*i)->time(), t));
+	assert(i == _notes.end() || (*i)->time() >= t);
 	return i;
 }
 
@@ -1227,7 +1227,7 @@ Sequence<Time>::patch_change_lower_bound (Time t) const
 {
 	PatchChangePtr search (new PatchChange<Time> (t, 0, 0, 0));
 	typename Sequence<Time>::PatchChanges::const_iterator i = _patch_changes.lower_bound (search);
-	assert (i == _patch_changes.end() || musical_time_greater_or_equal_to ((*i)->time(), t));
+	assert (i == _patch_changes.end() || (*i)->time() >= t);
 	return i;
 }
 
@@ -1238,7 +1238,7 @@ Sequence<Time>::sysex_lower_bound (Time t) const
 {
 	SysExPtr search (new Event<Time> (0, t));
 	typename Sequence<Time>::SysExes::const_iterator i = _sysexes.lower_bound (search);
-	assert (i == _sysexes.end() || musical_time_greater_or_equal_to((*i)->time(), t));
+	assert (i == _sysexes.end() || (*i)->time() >= t);
 	return i;
 }
 
@@ -1249,9 +1249,9 @@ template<typename Time>
 typename Sequence<Time>::Notes::iterator
 Sequence<Time>::note_lower_bound (Time t)
 {
-	NotePtr search_note(new Note<Time>(0, t, 0, 0, 0));
+	NotePtr search_note(new Note<Time>(0, t, Time(), 0, 0));
 	typename Sequence<Time>::Notes::iterator i = _notes.lower_bound(search_note);
-	assert(i == _notes.end() || musical_time_greater_or_equal_to((*i)->time(), t));
+	assert(i == _notes.end() || (*i)->time() >= t);
 	return i;
 }
 
@@ -1262,7 +1262,7 @@ Sequence<Time>::patch_change_lower_bound (Time t)
 {
 	PatchChangePtr search (new PatchChange<Time> (t, 0, 0, 0));
 	typename Sequence<Time>::PatchChanges::iterator i = _patch_changes.lower_bound (search);
-	assert (i == _patch_changes.end() || musical_time_greater_or_equal_to ((*i)->time(), t));
+	assert (i == _patch_changes.end() || (*i)->time() >= t);
 	return i;
 }
 
@@ -1273,7 +1273,7 @@ Sequence<Time>::sysex_lower_bound (Time t)
 {
 	SysExPtr search (new Event<Time> (0, t));
 	typename Sequence<Time>::SysExes::iterator i = _sysexes.lower_bound (search);
-	assert (i == _sysexes.end() || musical_time_greater_or_equal_to((*i)->time(), t));
+	assert (i == _sysexes.end() || (*i)->time() >= t);
 	return i;
 }
 
@@ -1311,7 +1311,7 @@ Sequence<Time>::get_notes_by_pitch (Notes& n, NoteOperator op, uint8_t val, int 
 		}
 
 		const Pitches& p (pitches (c));
-		NotePtr search_note(new Note<Time>(0, 0, 0, val, 0));
+		NotePtr search_note(new Note<Time>(0, Time(), Time(), val, 0));
 		typename Pitches::const_iterator i;
 		switch (op) {
 		case PitchEqual:

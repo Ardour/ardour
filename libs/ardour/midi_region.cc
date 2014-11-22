@@ -28,6 +28,8 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#include "evoral/types.hpp"
+
 #include "pbd/xml++.h"
 #include "pbd/basename.h"
 
@@ -78,7 +80,7 @@ MidiRegion::register_properties ()
 /* Basic MidiRegion constructor (many channels) */
 MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
-	, _start_beats (Properties::start_beats, 0)
+	, _start_beats (Properties::start_beats, Evoral::MusicalTime())
 	, _length_beats (Properties::length_beats, midi_source(0)->length_beats())
 {
 	register_properties ();
@@ -92,7 +94,7 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	: Region (other)
 	, _start_beats (Properties::start_beats, other->_start_beats)
-	, _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
+	, _length_beats (Properties::length_beats, Evoral::MusicalTime())
 {
 	update_length_beats ();
 	register_properties ();
@@ -105,14 +107,14 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 /** Create a new MidiRegion that is part of an existing one */
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset)
 	: Region (other, offset)
-	, _start_beats (Properties::start_beats, (Evoral::MusicalTime) 0)
-	, _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
+	, _start_beats (Properties::start_beats, Evoral::MusicalTime())
+	, _length_beats (Properties::length_beats, Evoral::MusicalTime())
 {
 	BeatsFramesConverter bfc (_session.tempo_map(), _position);
 	Evoral::MusicalTime const offset_beats = bfc.from (offset);
 
-	_start_beats = other->_start_beats + offset_beats;
-	_length_beats = other->_length_beats - offset_beats;
+	_start_beats  = other->_start_beats.val() + offset_beats;
+	_length_beats = other->_length_beats.val() - offset_beats;
 
 	register_properties ();
 
@@ -216,7 +218,7 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 	/* zero length regions don't exist - so if _length_beats is zero, this object
 	   is under construction.
 	*/
-	if (_length_beats) {
+	if (_length_beats.val() == Evoral::MusicalTime()) {
 		/* leave _length_beats alone, and change _length to reflect the state of things
 		   at the new position (tempo map may dictate a different number of frames
 		*/
@@ -440,7 +442,7 @@ MidiRegion::fix_negative_start ()
 
 	model()->insert_silence_at_start (c.from (-_start));
 	_start = 0;
-	_start_beats = 0;
+	_start_beats = Evoral::MusicalTime();
 }
 
 /** Transpose the notes in this region by a given number of semitones */

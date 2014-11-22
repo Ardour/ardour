@@ -23,6 +23,8 @@
 
 #include <vector>
 
+#include "evoral/types.hpp"
+
 #include "ardour/ardour.h"
 #include "ardour/region.h"
 

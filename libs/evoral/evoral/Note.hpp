@@ -39,16 +39,16 @@ class LIBEVORAL_LOCAL Note {
 class LIBEVORAL_TEMPLATE_API Note {
 #endif
 public:
-	Note(uint8_t chan=0, Time time=0, Time len=0, uint8_t note=0, uint8_t vel=0x40);
+	Note(uint8_t chan=0, Time time=Time(), Time len=Time(), uint8_t note=0, uint8_t vel=0x40);
 	Note(const Note<Time>& copy);
 	~Note();
 
 	const Note<Time>& operator=(const Note<Time>& copy);
 
 	inline bool operator==(const Note<Time>& other) {
-		return musical_time_equal (time(), other.time()) &&
+		return time() == other.time() &&
 			note() == other.note() &&
-			musical_time_equal (length(), other.length()) &&
+			length() == other.length() &&
 			velocity() == other.velocity() &&
 			off_velocity() == other.off_velocity() &&
 			channel()  == other.channel();
@@ -109,8 +109,6 @@ private:
 	MIDIEvent<Time> _off_event;
 };
 
-} // namespace Evoral
-
 template<typename Time>
 /*LIBEVORAL_API*/ std::ostream& operator<<(std::ostream& o, const Evoral::Note<Time>& n) {
 	o << "Note #" << n.id() << ": pitch = " << (int) n.note()
@@ -119,6 +117,8 @@ template<typename Time>
 	  << " chn " << (int) n.channel();
 	return o;
 }
+
+} // namespace Evoral
 
 #ifdef COMPILER_MSVC
 #include "../src/Note.impl"

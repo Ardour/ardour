@@ -58,6 +58,8 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
                        double position,
                        std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>& seqs)
 {
+	/* TODO: Rewrite this to be precise with fixed point? */
+
 	/* Calculate offset from start of model to next closest quantize step,
 	   to quantize relative to actual session beats (etc.) rather than from the
 	   start of the model.
@@ -77,8 +79,8 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 		 */
 		for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = (*s).begin(); i != (*s).end(); ++i) {
 
-			double new_start = round (((*i)->time() - offset) / _start_grid) * _start_grid + offset;
-			double new_end = round (((*i)->end_time() - offset) / _end_grid) * _end_grid + offset;
+			double new_start = round (((*i)->time().to_double() - offset) / _start_grid) * _start_grid + offset;
+			double new_end = round (((*i)->end_time().to_double() - offset) / _end_grid) * _end_grid + offset;
 
 			if (_swing > 0.0 && !even) {
 
@@ -104,18 +106,18 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 
 			}
 
-			double delta = new_start - (*i)->time();
+			double delta = new_start - (*i)->time().to_double();
 
 			if (fabs (delta) >= _threshold) {
 				if (_snap_start) {
 					delta *= _strength;
 					cmd->change ((*i), MidiModel::NoteDiffCommand::StartTime,
-						     (*i)->time() + delta);
+					             (*i)->time().to_double() + delta);
 				}
 			}
 
 			if (_snap_end) {
-				delta = new_end - (*i)->end_time();
+				delta = new_end - (*i)->end_time().to_double();
 
 				if (fabs (delta) >= _threshold) {
 					double new_dur = new_end - new_start;

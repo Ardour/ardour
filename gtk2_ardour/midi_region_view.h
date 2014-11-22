@@ -110,7 +110,7 @@ public:
 	GhostRegion* add_ghost (TimeAxisView&);
 
 	void add_note(const boost::shared_ptr<NoteType> note, bool visible);
-	void resolve_note(uint8_t note_num, double end_time);
+	void resolve_note(uint8_t note_num, Evoral::MusicalTime end_time);
 
 	void cut_copy_clear (Editing::CutCopyOp);
 	bool paste (framepos_t pos, unsigned paste_count, float times, const ::Selection& selection, ItemCounts& counts);
@@ -124,7 +124,7 @@ public:
 	 * @key a reference to an instance of MIDI::Name::PatchPrimaryKey whose fields will
 	 *        will be set according to the result of the lookup
 	 */
-	void get_patch_key_at (double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const;
+	void get_patch_key_at (Evoral::MusicalTime time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const;
 
 	/** Convert a given PatchChange into a PatchPrimaryKey
 	 */
@@ -258,22 +258,22 @@ public:
 	framepos_t snap_pixel_to_sample(double x);
 
 	/** Convert a timestamp in beats into frames (both relative to region position) */
-	framepos_t region_beats_to_region_frames(double beats) const;
+	framepos_t region_beats_to_region_frames(Evoral::MusicalTime beats) const;
 	/** Convert a timestamp in beats into absolute frames */
-	framepos_t region_beats_to_absolute_frames(double beats) const {
+	framepos_t region_beats_to_absolute_frames(Evoral::MusicalTime beats) const {
 		return _region->position() + region_beats_to_region_frames (beats);
 	}
 	/** Convert a timestamp in frames to beats (both relative to region position) */
-	double region_frames_to_region_beats(framepos_t) const;
+	Evoral::MusicalTime region_frames_to_region_beats(framepos_t) const;
 
 	/** Convert a timestamp in beats measured from source start into absolute frames */
-	framepos_t source_beats_to_absolute_frames(double beats) const;
+	framepos_t source_beats_to_absolute_frames(Evoral::MusicalTime beats) const;
 	/** Convert a timestamp in beats measured from source start into region-relative frames */
-	framepos_t source_beats_to_region_frames(double beats) const {
+	framepos_t source_beats_to_region_frames(Evoral::MusicalTime beats) const {
 		return source_beats_to_absolute_frames (beats) - _region->position();
 	}
 	/** Convert a timestamp in absolute frames to beats measured from source start*/
-	double absolute_frames_to_source_beats(framepos_t) const;
+	Evoral::MusicalTime absolute_frames_to_source_beats(framepos_t) const;
 
 	ARDOUR::BeatsFramesConverter const & region_relative_time_converter () const {
 		return _region_relative_time_converter;
@@ -309,7 +309,13 @@ public:
 	void trim_front_starting ();
 	void trim_front_ending ();
 
-	void create_note_at (framepos_t, double, double, bool);
+	/** Add a note to the model, and the view, at a canvas (click) coordinate.
+	 * \param t time in frames relative to the position of the region
+	 * \param y vertical position in pixels
+	 * \param length duration of the note in beats
+	 * \param snap_t true to snap t to the grid, otherwise false.
+	 */
+	void create_note_at (framepos_t t, double y, Evoral::MusicalTime length, bool snap_t);
 
 	void clear_selection (bool signal = true) { clear_selection_except (0, signal); }
 

@@ -20,6 +20,8 @@
 */
 
 #include "evoral/TimeConverter.hpp"
+#include "evoral/types.hpp"
+
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
@@ -34,15 +36,35 @@ class TempoMap;
  *  from some origin (supplied to the constructor in frames), and converts
  *  them to the opposite unit, taking tempo changes into account.
  */
-class LIBARDOUR_API BeatsFramesConverter : public Evoral::TimeConverter<double,framepos_t> {
+class LIBARDOUR_API BeatsFramesConverter
+	: public Evoral::TimeConverter<Evoral::MusicalTime,framepos_t> {
 public:
 	BeatsFramesConverter (TempoMap& tempo_map, framepos_t origin)
+		: Evoral::TimeConverter<Evoral::MusicalTime, framepos_t> (origin)
+		, _tempo_map(tempo_map)
+	{}
+
+	framepos_t          to (Evoral::MusicalTime beats) const;
+	Evoral::MusicalTime from (framepos_t frames) const;
+
+private:
+	TempoMap& _tempo_map;
+};
+
+/** Converter between beats and frames.  Takes distances in beats or frames
+ *  from some origin (supplied to the constructor in frames), and converts
+ *  them to the opposite unit, taking tempo changes into account.
+ */
+class LIBARDOUR_API DoubleBeatsFramesConverter
+	: public Evoral::TimeConverter<double,framepos_t> {
+public:
+	DoubleBeatsFramesConverter (TempoMap& tempo_map, framepos_t origin)
 		: Evoral::TimeConverter<double, framepos_t> (origin)
 		, _tempo_map(tempo_map)
 	{}
 
-	framepos_t to (double beats)        const;
-	double     from (framepos_t frames) const;
+	framepos_t          to (double beats) const;
+	double from (framepos_t frames) const;
 
 private:
 	TempoMap& _tempo_map;

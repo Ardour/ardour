@@ -24,6 +24,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
+#include "evoral/types.hpp"
 #include "pbd/controllable.h"
 #include "evoral/Control.hpp"
 

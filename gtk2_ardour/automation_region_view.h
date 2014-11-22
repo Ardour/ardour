@@ -54,11 +54,11 @@ public:
 	            float                                           times,
 	            boost::shared_ptr<const ARDOUR::AutomationList> slist);
 
-	ARDOUR::BeatsFramesConverter const & region_relative_time_converter () const {
+	ARDOUR::DoubleBeatsFramesConverter const & region_relative_time_converter () const {
 		return _region_relative_time_converter;
 	}
 
-	ARDOUR::BeatsFramesConverter const & source_relative_time_converter () const {
+	ARDOUR::DoubleBeatsFramesConverter const & source_relative_time_converter () const {
 		return _source_relative_time_converter;
 	}
 
@@ -83,10 +83,10 @@ protected:
 	void exited();
 
 private:
-	ARDOUR::BeatsFramesConverter      _region_relative_time_converter;
-	ARDOUR::BeatsFramesConverter      _source_relative_time_converter;
-	Evoral::Parameter                 _parameter;
-	boost::shared_ptr<AutomationLine> _line;
+	ARDOUR::DoubleBeatsFramesConverter _region_relative_time_converter;
+	ARDOUR::DoubleBeatsFramesConverter _source_relative_time_converter;
+	Evoral::Parameter                  _parameter;
+	boost::shared_ptr<AutomationLine>  _line;
 };
 
 #endif /* __gtk_ardour_automation_region_view_h__ */

@@ -3901,64 +3901,64 @@ Editor::get_grid_type_as_beats (bool& success, framepos_t position)
 
 	switch (_snap_type) {
 	case SnapToBeat:
-		return 1.0;
+		return Evoral::MusicalTime(1.0);
 		break;
 
 	case SnapToBeatDiv128:
-		return 1.0/128.0;
+		return Evoral::MusicalTime(1.0/128.0);
 		break;
 	case SnapToBeatDiv64:
-		return 1.0/64.0;
+		return Evoral::MusicalTime(1.0/64.0);
 		break;
 	case SnapToBeatDiv32:
-		return 1.0/32.0;
+		return Evoral::MusicalTime(1.0/32.0);
 		break;
 	case SnapToBeatDiv28:
-		return 1.0/28.0;
+		return Evoral::MusicalTime(1.0/28.0);
 		break;
 	case SnapToBeatDiv24:
-		return 1.0/24.0;
+		return Evoral::MusicalTime(1.0/24.0);
 		break;
 	case SnapToBeatDiv20:
-		return 1.0/20.0;
+		return Evoral::MusicalTime(1.0/20.0);
 		break;
 	case SnapToBeatDiv16:
-		return 1.0/16.0;
+		return Evoral::MusicalTime(1.0/16.0);
 		break;
 	case SnapToBeatDiv14:
-		return 1.0/14.0;
+		return Evoral::MusicalTime(1.0/14.0);
 		break;
 	case SnapToBeatDiv12:
-		return 1.0/12.0;
+		return Evoral::MusicalTime(1.0/12.0);
 		break;
 	case SnapToBeatDiv10:
-		return 1.0/10.0;
+		return Evoral::MusicalTime(1.0/10.0);
 		break;
 	case SnapToBeatDiv8:
-		return 1.0/8.0;
+		return Evoral::MusicalTime(1.0/8.0);
 		break;
 	case SnapToBeatDiv7:
-		return 1.0/7.0;
+		return Evoral::MusicalTime(1.0/7.0);
 		break;
 	case SnapToBeatDiv6:
-		return 1.0/6.0;
+		return Evoral::MusicalTime(1.0/6.0);
 		break;
 	case SnapToBeatDiv5:
-		return 1.0/5.0;
+		return Evoral::MusicalTime(1.0/5.0);
 		break;
 	case SnapToBeatDiv4:
-		return 1.0/4.0;
+		return Evoral::MusicalTime(1.0/4.0);
 		break;
 	case SnapToBeatDiv3:
-		return 1.0/3.0;
+		return Evoral::MusicalTime(1.0/3.0);
 		break;
 	case SnapToBeatDiv2:
-		return 1.0/2.0;
+		return Evoral::MusicalTime(1.0/2.0);
 		break;
 
 	case SnapToBar:
 		if (_session) {
-			return _session->tempo_map().meter_at (position).divisions_per_bar();
+			return Evoral::MusicalTime(_session->tempo_map().meter_at (position).divisions_per_bar());
 		}
 		break;
 
@@ -3977,7 +3977,7 @@ Editor::get_grid_type_as_beats (bool& success, framepos_t position)
 		break;
 	}
 
-	return 0.0;
+	return Evoral::MusicalTime();
 }
 
 framecnt_t

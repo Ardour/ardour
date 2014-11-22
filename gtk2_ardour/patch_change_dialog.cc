@@ -143,7 +143,7 @@ PatchChangeDialog::instrument_info_changed ()
 Evoral::PatchChange<Evoral::MusicalTime>
 PatchChangeDialog::patch () const
 {
-	Evoral::MusicalTime t = 0;
+	Evoral::MusicalTime t = Evoral::MusicalTime();
 
 	if (_time_converter) {
 		t = _time_converter->from (_time.current_time ());

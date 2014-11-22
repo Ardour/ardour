@@ -927,7 +927,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 			/* set length in beats to entire capture length */
 
 			BeatsFramesConverter converter (_session.tempo_map(), capture_info.front()->start);
-			const double total_capture_beats = converter.from (total_capture);
+			const Evoral::MusicalTime total_capture_beats = converter.from (total_capture);
 			_write_source->set_length_beats (total_capture_beats);
 
 			/* flush to disk: this step differs from the audio path,

@@ -41,7 +41,7 @@ StepEditor::StepEditor (PublicEditor& e, boost::shared_ptr<MidiTrack> t, MidiTim
 	step_edit_insert_position = 0;
         _step_edit_triplet_countdown = 0;
         _step_edit_within_chord = 0;
-        _step_edit_chord_duration = 0.0;
+        _step_edit_chord_duration = Evoral::MusicalTime();
         step_edit_region_view = 0;
 
         _track->PlaylistChanged.connect (*this, invalidator (*this),
@@ -60,11 +60,11 @@ StepEditor::start_step_editing ()
 {
         _step_edit_triplet_countdown = 0;
         _step_edit_within_chord = 0;
-        _step_edit_chord_duration = 0.0;
+        _step_edit_chord_duration = Evoral::MusicalTime();
         step_edit_region.reset ();
         step_edit_region_view = 0;
         last_added_pitch = -1;
-        last_added_end = 0;
+        last_added_end = Evoral::MusicalTime();
 
         resync_step_edit_position ();
         prepare_step_edit_region ();
@@ -198,7 +198,7 @@ StepEditor::check_step_edit ()
 		incoming.read_contents (size, buf);
 
 		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON) {
-                        step_add_note (buf[0] & 0xf, buf[1], buf[2], 0.0);
+			step_add_note (buf[0] & 0xf, buf[1], buf[2], Evoral::MusicalTime());
 		}
 	}
 }
@@ -233,7 +233,7 @@ StepEditor::move_step_edit_beat_pos (Evoral::MusicalTime beats)
                 if (-beats < step_edit_beat_pos) {
                         step_edit_beat_pos += beats; // its negative, remember
                 } else {
-                        step_edit_beat_pos = 0;
+                        step_edit_beat_pos = Evoral::MusicalTime();
                 }
         }
         step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
@@ -292,8 +292,8 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
                    up by 1 tick from where the last note ended
                 */
 
-                at += 1.0/Timecode::BBT_Time::ticks_per_beat;
-                len -= 1.0/Timecode::BBT_Time::ticks_per_beat;
+	        at  += Evoral::MusicalTime::ticks(1);
+	        len -= Evoral::MusicalTime::ticks(1);
         }
 
         step_edit_region_view->step_add_note (channel, pitch, velocity, at, len);
@@ -313,7 +313,7 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
                 step_edit_beat_pos += beat_duration;
                 step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
         } else {
-                step_edit_beat_pos += 1.0/Timecode::BBT_Time::ticks_per_beat; // tiny, but no longer overlapping
+                step_edit_beat_pos += Evoral::MusicalTime::ticks(1); // tiny, but no longer overlapping
                 _step_edit_chord_duration = max (_step_edit_chord_duration, beat_duration);
         }
 
@@ -384,7 +384,7 @@ StepEditor::step_edit_rest (Evoral::MusicalTime beats)
 void
 StepEditor::step_edit_beat_sync ()
 {
-        step_edit_beat_pos = ceil (step_edit_beat_pos);
+        step_edit_beat_pos = step_edit_beat_pos.round_up_to_beat();
         step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 
@@ -399,7 +399,7 @@ StepEditor::step_edit_bar_sync ()
 
         framepos_t fpos = step_edit_region_view->region_beats_to_absolute_frames (step_edit_beat_pos);
         fpos = _session->tempo_map().round_to_bar (fpos, RoundUpAlways);
-        step_edit_beat_pos = ceil (step_edit_region_view->region_frames_to_region_beats (fpos - step_edit_region->position()));
+        step_edit_beat_pos = step_edit_region_view->region_frames_to_region_beats (fpos - step_edit_region->position()).round_up_to_beat();
         step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 
@@ -425,7 +425,7 @@ StepEditor::region_removed (boost::weak_ptr<Region> wr)
                 step_edit_region.reset();
                 step_edit_region_view = 0;
                 // force a recompute of the insert position
-                step_edit_beat_pos = -1.0;
+                step_edit_beat_pos = Evoral::MusicalTime(-1);
         }
 }
 

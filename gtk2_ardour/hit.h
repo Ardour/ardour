@@ -30,7 +30,7 @@ namespace ArdourCanvas {
 class Hit : public NoteBase
 {
 public:
-	typedef Evoral::Note<double> NoteType;
+	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
 
 	Hit (MidiRegionView&                   region,
 	     ArdourCanvas::Item*               parent,

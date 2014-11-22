@@ -389,10 +389,11 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 				}
 
 				smfs->append_event_unlocked_beats(
-					Evoral::Event<double>(0,
-					                      (double)t / (double)source->ppqn(),
-					                      size,
-					                      buf));
+					Evoral::Event<Evoral::MusicalTime>(
+						0,
+						Evoral::MusicalTime::ticks_at_rate(t, source->ppqn()),
+						size,
+						buf));
 
 				if (status.progress < 0.99) {
 					status.progress += 0.01;
@@ -403,10 +404,10 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 
 				/* we wrote something */
 
-				const framepos_t pos = 0;
-				const double length_beats = ceil(t / (double)source->ppqn());
-				BeatsFramesConverter converter(smfs->session().tempo_map(), pos);
-				smfs->update_length(pos + converter.to(length_beats));
+				const framepos_t          pos = 0;
+				const Evoral::MusicalTime length_beats = Evoral::MusicalTime::ticks_at_rate(t, source->ppqn());
+				BeatsFramesConverter      converter(smfs->session().tempo_map(), pos);
+				smfs->update_length(pos + converter.to(length_beats.round_up_to_beat()));
 				smfs->mark_streaming_write_completed ();
 
 				if (status.cancel) {

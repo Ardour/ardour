@@ -193,7 +193,7 @@ EditNoteDialog::done (int r)
 		}
 	}
 
-	double const t = _region_view->source_relative_time_converter().from (_time_clock.current_time ());
+	Evoral::MusicalTime const t = _region_view->source_relative_time_converter().from (_time_clock.current_time ());
 
 	if (!_time_all.get_sensitive() || _time_all.get_active ()) {
 		for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
@@ -204,7 +204,7 @@ EditNoteDialog::done (int r)
 		}
 	}
 
-	double const d = _region_view->region_relative_time_converter().from (_length_clock.current_duration ());
+	Evoral::MusicalTime const d = _region_view->region_relative_time_converter().from (_length_clock.current_duration ());
 
 	if (!_length_all.get_sensitive() || _length_all.get_active ()) {
 		for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {

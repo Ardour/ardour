@@ -5,6 +5,7 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(SequenceTest);
 
 using namespace std;
+using namespace Evoral;
 
 void
 SequenceTest::createTest ()
@@ -75,7 +76,7 @@ SequenceTest::iteratorSeekTest ()
 	}
 
 	bool on = true;
-	for (Sequence<Time>::const_iterator i = seq->begin(600); i != seq->end(); ++i) {
+	for (Sequence<Time>::const_iterator i = seq->begin(Evoral::MusicalTime(600)); i != seq->end(); ++i) {
 		if (on) {
 			CPPUNIT_ASSERT(((const MIDIEvent<Time>&)*i).is_note_on());
 			CPPUNIT_ASSERT_EQUAL(i->time(), Time((num_notes + 6) * 100));
@@ -136,7 +137,7 @@ SequenceTest::controlInterpolationTest ()
 		sink.write(i->time(), i->event_type(), i->size(), i->buffer());
 	}
 	CPPUNIT_ASSERT(sink.events.size() == 128 * 2 - 1);
-	Time    last_time  = 0;
+	Time    last_time(0);
 	int16_t last_value = -1;
 	bool    ascending  = true;
 	for (CCTestSink<Time>::Events::const_iterator i = sink.events.begin();

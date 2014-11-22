@@ -550,7 +550,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 					/* Shorten the length by 1 tick so that we can add a new note at the next
 					   grid snap without it overlapping this one.
 					*/
-					beats -= 1.0 / Timecode::BBT_Time::ticks_per_beat;
+					beats -= Evoral::MusicalTime::tick();
 
 					create_note_at (editor.pixel_to_sample (event_x), event_y, beats, true);
 				}
@@ -564,7 +564,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 				/* Shorten the length by 1 tick so that we can add a new note at the next
 				   grid snap without it overlapping this one.
 				*/
-				beats -= 1.0 / Timecode::BBT_Time::ticks_per_beat;
+				beats -= Evoral::MusicalTime::tick();
 				
 				create_note_at (editor.pixel_to_sample (event_x), event_y, beats, true);
 
@@ -728,7 +728,7 @@ MidiRegionView::key_press (GdkEventKey* ev)
 		bool shorter = Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier);
 		bool fine = Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
 
-		change_note_lengths (fine, shorter, 0.0, start, end);
+		change_note_lengths (fine, shorter, Evoral::MusicalTime(), start, end);
 
 		return true;
 
@@ -909,7 +909,7 @@ MidiRegionView::show_list_editor ()
  * \param snap_t true to snap t to the grid, otherwise false.
  */
 void
-MidiRegionView::create_note_at (framepos_t t, double y, double length, bool snap_t)
+MidiRegionView::create_note_at (framepos_t t, double y, Evoral::MusicalTime length, bool snap_t)
 {
 	if (length < 2 * DBL_EPSILON) {
 		return;
@@ -1521,7 +1521,7 @@ MidiRegionView::end_write()
 /** Resolve an active MIDI note (while recording).
  */
 void
-MidiRegionView::resolve_note(uint8_t note, double end_time)
+MidiRegionView::resolve_note(uint8_t note, Evoral::MusicalTime end_time)
 {
 	if (midi_view()->note_mode() != Sustained) {
 		return;
@@ -1660,7 +1660,7 @@ MidiRegionView::update_note (Note* ev, bool update_ghost_regions)
 
 	ev->set_y1 (y0 + std::max(1., floor(midi_stream_view()->note_height()) - 1));
 
-	if (note->length() == 0) {
+	if (!note->length()) {
 		if (_active_notes && note->note() < 128) {
 			// If this note is already active there's a stuck note,
 			// finish the old note rectangle
@@ -1862,7 +1862,7 @@ patch_applies (const ARDOUR::MidiModel::constPatchChangePtr pc, double time, uin
 }
 	
 void 
-MidiRegionView::get_patch_key_at (double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const
+MidiRegionView::get_patch_key_at (Evoral::MusicalTime time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const
 {
 	// The earliest event not before time
 	MidiModel::PatchChanges::iterator i = _model->patch_change_lower_bound (time);
@@ -2260,7 +2260,7 @@ MidiRegionView::note_selected (NoteBase* ev, bool add, bool extend)
 		/* find end of latest note selected, select all between that and the start of "ev" */
 
 		Evoral::MusicalTime earliest = Evoral::MaxMusicalTime;
-		Evoral::MusicalTime latest = 0;
+		Evoral::MusicalTime latest   = Evoral::MusicalTime();
 
 		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 			if ((*i)->note()->end_time() > latest) {
@@ -2421,7 +2421,7 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 	}
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		if (Evoral::musical_time_equal ((*i)->note()->time(), earliest)) {
+		if ((*i)->note()->time() == earliest) {
 			to_play.push_back ((*i)->note());
 		}
 		(*i)->move_event(dx, dy);
@@ -2548,7 +2548,7 @@ MidiRegionView::get_end_position_pixels()
 }
 
 framepos_t
-MidiRegionView::source_beats_to_absolute_frames(double beats) const
+MidiRegionView::source_beats_to_absolute_frames(Evoral::MusicalTime beats) const
 {
 	/* the time converter will return the frame corresponding to `beats'
 	   relative to the start of the source. The start of the source
@@ -2558,7 +2558,7 @@ MidiRegionView::source_beats_to_absolute_frames(double beats) const
 	return  source_start +  _source_relative_time_converter.to (beats);
 }
 
-double
+Evoral::MusicalTime
 MidiRegionView::absolute_frames_to_source_beats(framepos_t frames) const
 {
 	/* the `frames' argument needs to be converted into a frame count
@@ -2570,12 +2570,12 @@ MidiRegionView::absolute_frames_to_source_beats(framepos_t frames) const
 }
 
 framepos_t
-MidiRegionView::region_beats_to_region_frames(double beats) const
+MidiRegionView::region_beats_to_region_frames(Evoral::MusicalTime beats) const
 {
 	return _region_relative_time_converter.to(beats);
 }
 
-double
+Evoral::MusicalTime
 MidiRegionView::region_frames_to_region_beats(framepos_t frames) const
 {
 	return _region_relative_time_converter.from(frames);
@@ -2827,8 +2827,8 @@ MidiRegionView::trim_note (NoteBase* event, Evoral::MusicalTime front_delta, Evo
 {
 	bool change_start = false;
 	bool change_length = false;
-	Evoral::MusicalTime new_start = 0;
-	Evoral::MusicalTime new_length = 0;
+	Evoral::MusicalTime new_start;
+	Evoral::MusicalTime new_length;
 
 	/* NOTE: the semantics of the two delta arguments are slightly subtle:
 
@@ -2843,7 +2843,7 @@ MidiRegionView::trim_note (NoteBase* event, Evoral::MusicalTime front_delta, Evo
 		if (front_delta < 0) {
 
 			if (event->note()->time() < -front_delta) {
-				new_start = 0;
+				new_start = Evoral::MusicalTime();
 			} else {
 				new_start = event->note()->time() + front_delta; // moves earlier
 			}
@@ -2924,7 +2924,7 @@ MidiRegionView::change_note_time (NoteBase* event, Evoral::MusicalTime delta, bo
 	if (relative) {
 		if (delta < 0.0) {
 			if (event->note()->time() < -delta) {
-				new_time = 0;
+				new_time = Evoral::MusicalTime();
 			} else {
 				new_time = event->note()->time() + delta;
 			}
@@ -3053,9 +3053,9 @@ MidiRegionView::transpose (bool up, bool fine, bool allow_smush)
 void
 MidiRegionView::change_note_lengths (bool fine, bool shorter, Evoral::MusicalTime delta, bool start, bool end)
 {
-	if (delta == 0.0) {
+	if (!delta) {
 		if (fine) {
-			delta = 1.0/128.0;
+			delta = Evoral::MusicalTime(1.0/128.0);
 		} else {
 			/* grab the current grid distance */
 			delta = get_grid_beats(_region->position());
@@ -3074,7 +3074,9 @@ MidiRegionView::change_note_lengths (bool fine, bool shorter, Evoral::MusicalTim
 
 		/* note the negation of the delta for start */
 
-		trim_note (*i, (start ? -delta : 0), (end ? delta : 0));
+		trim_note (*i,
+		           (start ? -delta : Evoral::MusicalTime()),
+		           (end   ? delta  : Evoral::MusicalTime()));
 		i = next;
 	}
 
@@ -3402,10 +3404,10 @@ MidiRegionView::paste_internal (framepos_t pos, unsigned paste_count, float time
 	const Evoral::MusicalTime first_time    = (*mcb.notes().begin())->time();
 	const Evoral::MusicalTime last_time     = (*mcb.notes().rbegin())->end_time();
 	const Evoral::MusicalTime duration      = last_time - first_time;
-	const Evoral::MusicalTime snap_duration = ceil(duration / snap_beats) * snap_beats;
-	const Evoral::MusicalTime paste_offset  = paste_count * snap_duration;
+	const Evoral::MusicalTime snap_duration = duration.snap_to(snap_beats);
+	const Evoral::MusicalTime paste_offset  = snap_duration * paste_count;
 	const Evoral::MusicalTime pos_beats     = absolute_frames_to_source_beats(pos) + paste_offset;
-	Evoral::MusicalTime       end_point     = 0;
+	Evoral::MusicalTime       end_point     = Evoral::MusicalTime();
 
 	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste data spans from %1 to %2 (%3) ; paste pos beats = %4 (based on %5 - %6)\n",
 	                                               first_time,
@@ -3585,7 +3587,8 @@ MidiRegionView::update_ghost_note (double x, double y)
 	   the start of the source; that is how all note times are stored.
 	*/
 	_ghost_note->note()->set_time (
-		std::max(0.0, absolute_frames_to_source_beats (f + _region->position ())));
+		std::max(Evoral::MusicalTime(),
+		         absolute_frames_to_source_beats (f + _region->position ())));
 	_ghost_note->note()->set_length (length);
 	_ghost_note->note()->set_note (midi_stream_view()->y_to_note (y));
 	_ghost_note->note()->set_channel (mtv->get_channel_for_add ());
@@ -3786,7 +3789,7 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 
 		if (ev.type() == MIDI_CMD_NOTE_ON) {
 			boost::shared_ptr<NoteType> note (
-				new NoteType (ev.channel(), time_beats, 0, ev.note(), ev.velocity()));
+				new NoteType (ev.channel(), time_beats, Evoral::MusicalTime(), ev.note(), ev.velocity()));
 
 			add_note (note, true);
 
@@ -3969,7 +3972,7 @@ MidiRegionView::get_grid_beats(framepos_t pos) const
 	bool                success = false;
 	Evoral::MusicalTime beats   = editor.get_grid_type_as_beats(success, pos);
 	if (!success) {
-		beats = 1;
+		beats = Evoral::MusicalTime(1);
 	}
 	return beats;
 }

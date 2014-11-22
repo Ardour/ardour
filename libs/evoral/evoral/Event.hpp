@@ -48,7 +48,7 @@ template<typename Time>
 class LIBEVORAL_API Event {
 public:
 #ifdef EVORAL_EVENT_ALLOC
-	Event (EventType type=0, Time time=0, uint32_t size=0, uint8_t* buf=NULL, bool alloc=false);
+	Event (EventType type=0, Time time=Time(), uint32_t size=0, uint8_t* buf=NULL, bool alloc=false);
 
 	/** Copy \a copy.
 	 *
@@ -114,11 +114,11 @@ public:
 	}
 
 	inline void clear() {
-		_type = 0;
-		_original_time = 0;
-		_nominal_time = 0;
-		_size = 0;
-		_buf  = NULL;
+		_type          = 0;
+		_original_time = Time();
+		_nominal_time  = Time();
+		_size          = 0;
+		_buf           = NULL;
 	}
 
 #else
@@ -154,9 +154,6 @@ protected:
 #endif
 };
 
-} // namespace Evoral
-
-
 template<typename Time>
 /*LIBEVORAL_API*/ std::ostream& operator<<(std::ostream& o, const Evoral::Event<Time>& ev) {
 	o << "Event #" << ev.id() << " type = " << ev.event_type() << " @ " << ev.time();
@@ -168,6 +165,7 @@ template<typename Time>
 	return o;
 }
 
+} // namespace Evoral
 
 #endif // EVORAL_EVENT_HPP
 

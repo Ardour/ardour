@@ -116,16 +116,11 @@ public:
 		struct NoteChange {
 			NoteDiffCommand::Property property;
 			NotePtr note;
-		        uint32_t note_id; 
-		    
-			union {
-				uint8_t  old_value;
-				TimeType old_time;
-			};
-			union {
-				uint8_t  new_value;
-				TimeType new_time;
-			};
+			uint32_t note_id;
+			uint8_t  old_value;  // or...
+			TimeType old_time;   // this
+			uint8_t  new_value;  // or...
+			TimeType new_time;   // this
 		};
 
 		typedef std::list<NoteChange> ChangeList;
@@ -209,16 +204,16 @@ public:
 		struct Change {
 			PatchChangePtr patch;
 			Property       property;
-		        gint           patch_id;
+			gint           patch_id;
+			TimeType       old_time;
 			union {
-				TimeType   old_time;
 				uint8_t    old_channel;
 				int        old_bank;
 				uint8_t    old_program;
 			};
+			TimeType       new_time;
 			union {
 				uint8_t    new_channel;
-				TimeType   new_time;
 				uint8_t    new_program;
 				int        new_bank;
 			};
@@ -310,8 +305,6 @@ private:
 };
 
 } /* namespace ARDOUR */
-
-/* This is a very long comment and stuff oh my god it's so long what are we going to do oh no oh no*/
 
 #endif /* __ardour_midi_model_h__ */
 

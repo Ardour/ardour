@@ -226,13 +226,13 @@ MidiModel::NoteDiffCommand::change (const NotePtr note, Property prop,
 		break;
 
 	case StartTime:
-		if (Evoral::musical_time_equal (note->time(), new_time)) {
+		if (note->time() == new_time) {
 			return;
 		}
 		change.old_time = note->time();
 		break;
 	case Length:
-		if (Evoral::musical_time_equal (note->length(), new_time)) {
+		if (note->length() == new_time) {
 			return;
 		}
 		change.old_time = note->length();
@@ -556,7 +556,7 @@ MidiModel::NoteDiffCommand::unmarshal_note (XMLNode *xml_note)
 		time_str >> time;
 	} else {
 		warning << "note information missing time" << endmsg;
-		time = 0;
+		time = MidiModel::TimeType();
 	}
 
 	if ((prop = xml_note->property("length")) != 0) {
@@ -564,7 +564,7 @@ MidiModel::NoteDiffCommand::unmarshal_note (XMLNode *xml_note)
 		length_str >> length;
 	} else {
 		warning << "note information missing length" << endmsg;
-		length = 1;
+		length = MidiModel::TimeType(1);
 	}
 
 	if ((prop = xml_note->property("velocity")) != 0) {
@@ -1253,7 +1253,7 @@ MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 {
 	XMLProperty* prop;
 	Evoral::event_id_t id = 0;
-	Evoral::MusicalTime time = 0;
+	Evoral::MusicalTime time = Evoral::MusicalTime();
 	int channel = 0;
 	int program = 0;
 	int bank = 0;
@@ -1439,7 +1439,7 @@ MidiModel::write_to (boost::shared_ptr<MidiSource> source)
 	source->drop_model();
 	source->mark_streaming_midi_write_started (note_mode());
 
-	for (Evoral::Sequence<TimeType>::const_iterator i = begin(0, true); i != end(); ++i) {
+	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
 		source->append_event_unlocked_beats(*i);
 	}
 
@@ -1469,7 +1469,7 @@ MidiModel::sync_to_source ()
 
 	ms->mark_streaming_midi_write_started (note_mode());
 
-	for (Evoral::Sequence<TimeType>::const_iterator i = begin(0, true); i != end(); ++i) {
+	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
 		ms->append_event_unlocked_beats(*i);
 	}
 
@@ -1503,7 +1503,7 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource> source, Evoral::Music
 	source->drop_model();
 	source->mark_streaming_midi_write_started (note_mode());
 
-	for (Evoral::Sequence<TimeType>::const_iterator i = begin(0, true); i != end(); ++i) {
+	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
 		const Evoral::Event<Evoral::MusicalTime>& ev (*i);
 
 		if (ev.time() >= begin_time && ev.time() < end_time) {
@@ -1662,7 +1662,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 	TimeType ea  = note->end_time();
 
 	const Pitches& p (pitches (note->channel()));
-	NotePtr search_note(new Note<TimeType>(0, 0, 0, note->note()));
+	NotePtr search_note(new Note<TimeType>(0, TimeType(), TimeType(), note->note()));
 	set<NotePtr> to_be_deleted;
 	bool set_note_length = false;
 	bool set_note_time = false;
@@ -1979,7 +1979,7 @@ MidiModel::insert_silence_at_start (TimeType t)
 	for (Controls::iterator i = controls().begin(); i != controls().end(); ++i) {
 		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (i->second);
 		XMLNode& before = ac->alist()->get_state ();
-		i->second->list()->shift (0, t);
+		i->second->list()->shift (0, t.to_double());
 		XMLNode& after = ac->alist()->get_state ();
 		s->session().add_command (new MementoCommand<AutomationList> (new MidiAutomationListBinder (s, i->first), &before, &after));
 	}

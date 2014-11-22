@@ -29,27 +29,25 @@ SMFTest::takeFiveTest ()
 	smf.seek_to_start();
 
 	uint64_t time = 0; /* in SMF ticks */
-	Evoral::Event<double> ev;
-
-	const double frames_per_beat = 100.0;
+	Evoral::Event<Evoral::MusicalTime> ev;
 
 	uint32_t delta_t = 0;
 	uint32_t size    = 0;
 	uint8_t* buf     = NULL;
 	int ret;
 	while ((ret = smf.read_event(&delta_t, &size, &buf)) >= 0) {
-		ev.set(buf, size, 0.0);
+		ev.set(buf, size, Evoral::MusicalTime());
 		time += delta_t;
 
 		if (ret > 0) { // didn't skip (meta) event
 			//cerr << "read smf event type " << hex << int(buf[0]) << endl;
-			// make ev.time absolute time in frames
-			ev.set_time(time * frames_per_beat / (double)smf.ppqn());
+			ev.set_time(Evoral::MusicalTime::ticks_at_rate(time, smf.ppqn()));
 			ev.set_event_type(type_map->midi_event_type(buf[0]));
 			seq->append(ev, next_event_id ());
 		}
 	}
 
-	seq->end_write (Sequence<Time>::Relax, false);
+	seq->end_write (Sequence<Time>::Relax,
+	                Evoral::MusicalTime::ticks_at_rate(time, smf.ppqn()));
 	CPPUNIT_ASSERT(!seq->empty());
 }

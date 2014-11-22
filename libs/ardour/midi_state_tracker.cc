@@ -173,7 +173,7 @@ MidiStateTracker::resolve_notes (MidiSource& src, Evoral::MusicalTime time)
 										       this, (int) note, (int) channel, time));
 				_active_notes[note + 128 * channel]--;
 				/* don't stack events up at the same time */
-				time += 1.0/128.0;
+				time += Evoral::MusicalTime::tick();
 			}
 		}
 	}

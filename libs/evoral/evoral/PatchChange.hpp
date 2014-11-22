@@ -120,7 +120,7 @@ public:
 	uint8_t channel () const { return _program_change.buffer()[0] & 0xf; }
 
 	inline bool operator< (const PatchChange<Time>& o) const {
-		if (!musical_time_equal (time(), o.time())) {
+		if (time() != o.time()) {
 			return time() < o.time();
 		}
 
@@ -132,7 +132,7 @@ public:
 	}
 
 	inline bool operator== (const PatchChange<Time>& o) const {
-		return (musical_time_equal (time(), o.time()) && program() == o.program() && bank() == o.bank());
+		return (time() == o.time() && program() == o.program() && bank() == o.bank());
 	}
 
 	/** The PatchChange is made up of messages() MIDI messages; this method returns them by index.

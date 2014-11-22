@@ -225,7 +225,7 @@ SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination,
 
 	BeatsFramesConverter converter(_session.tempo_map(), source_start);
 
-	const uint64_t start_ticks = (uint64_t)(converter.from(start) * ppqn());
+	const uint64_t start_ticks = converter.from(start).to_ticks();
 	DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: start in ticks %1\n", start_ticks));
 
 	if (_smf_last_read_end == 0 || start != _smf_last_read_end) {
@@ -273,7 +273,7 @@ SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination,
 		/* Note that we add on the source start time (in session frames) here so that ev_frame_time
 		   is in session frames.
 		*/
-		const framepos_t ev_frame_time = converter.to(time / (double)ppqn()) + source_start;
+		const framepos_t ev_frame_time = converter.to(Evoral::MusicalTime::ticks_at_rate(time, ppqn())) + source_start;
 
 		if (ev_frame_time < start + duration) {
 			destination.write (ev_frame_time, ev_type, ev_size, ev_buffer);
@@ -377,9 +377,9 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source,
 	return cnt;
 }
 
-/** Append an event with a timestamp in beats (double) */
+/** Append an event with a timestamp in beats */
 void
-SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
+SMFSource::append_event_unlocked_beats (const Evoral::Event<Evoral::MusicalTime>& ev)
 {
 	if (!_writing || ev.size() == 0)  {
 		return;
@@ -389,10 +389,10 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
                name().c_str(), ev.id(), ev.time(), ev.size());
 	       for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
 
-	double time = ev.time();
+	Evoral::MusicalTime time = ev.time();
 	if (time < _last_ev_time_beats) {
-		const double difference = _last_ev_time_beats - time;
-		if (difference / (double)ppqn() < 1.0) {
+		const Evoral::MusicalTime difference = _last_ev_time_beats - time;
+		if (difference.to_double() / (double)ppqn() < 1.0) {
 			/* Close enough.  This problem occurs because Sequence is not
 			   actually ordered due to fuzzy time comparison.  I'm pretty sure
 			   this is inherently a bad idea which causes problems all over the
@@ -401,7 +401,7 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 		} else {
 			/* Out of order by more than a tick. */
 			warning << string_compose(_("Skipping event with unordered beat time %1 < %2 (off by %3 beats, %4 ticks)"),
-			                          ev.time(), _last_ev_time_beats, difference, difference / (double)ppqn())
+			                          ev.time(), _last_ev_time_beats, difference, difference.to_double() / (double)ppqn())
 			        << endmsg;
 			return;
 		}
@@ -421,8 +421,8 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 
 	_length_beats = max(_length_beats, time);
 
-	const double delta_time_beats   = time - _last_ev_time_beats;
-	const uint32_t delta_time_ticks = (uint32_t)lrint(delta_time_beats * (double)ppqn());
+	const Evoral::MusicalTime delta_time_beats = time - _last_ev_time_beats;
+	const uint32_t            delta_time_ticks = delta_time_beats.to_ticks(ppqn());
 
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_beats = time;
@@ -448,9 +448,9 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 		return;
 	}
 
-	BeatsFramesConverter converter(_session.tempo_map(), position);
-	const double ev_time_beats = converter.from(ev.time());
-	Evoral::event_id_t event_id;
+	BeatsFramesConverter      converter(_session.tempo_map(), position);
+	const Evoral::MusicalTime ev_time_beats = converter.from(ev.time());
+	Evoral::event_id_t        event_id;
 
 	if (ev.id() < 0) {
 		event_id  = Evoral::next_event_id();
@@ -459,10 +459,10 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 	}
 
 	if (_model) {
-		const Evoral::Event<double> beat_ev (ev.event_type(),
-		                                     ev_time_beats,
-		                                     ev.size(),
-		                                     const_cast<uint8_t*>(ev.buffer()));
+		const Evoral::Event<Evoral::MusicalTime> beat_ev (ev.event_type(),
+		                                                  ev_time_beats,
+		                                                  ev.size(),
+		                                                  const_cast<uint8_t*>(ev.buffer()));
 		_model->append (beat_ev, event_id);
 	}
 
@@ -470,7 +470,7 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 
 	const Evoral::MusicalTime last_time_beats  = converter.from (_last_ev_time_frames);
 	const Evoral::MusicalTime delta_time_beats = ev_time_beats - last_time_beats;
-	const uint32_t            delta_time_ticks = (uint32_t)(lrint(delta_time_beats * (double)ppqn()));
+	const uint32_t            delta_time_ticks = delta_time_beats.to_ticks(ppqn());
 
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_frames = ev.time();
@@ -516,7 +516,7 @@ SMFSource::mark_streaming_midi_write_started (NoteMode mode)
 
 	MidiSource::mark_streaming_midi_write_started (mode);
 	Evoral::SMF::begin_write ();
-	_last_ev_time_beats = 0.0;
+	_last_ev_time_beats  = Evoral::MusicalTime();
 	_last_ev_time_frames = 0;
 }
 
@@ -586,8 +586,8 @@ SMFSource::safe_midi_file_extension (const string& file)
 }
 
 static bool compare_eventlist (
-		const std::pair< Evoral::Event<double>*, gint >& a,
-		const std::pair< Evoral::Event<double>*, gint >& b) {
+	const std::pair< Evoral::Event<Evoral::MusicalTime>*, gint >& a,
+	const std::pair< Evoral::Event<Evoral::MusicalTime>*, gint >& b) {
 	return ( a.first->time() < b.first->time() );
 }
 
@@ -620,7 +620,7 @@ SMFSource::load_model (bool lock, bool force_reload)
 	Evoral::SMF::seek_to_start();
 
 	uint64_t time = 0; /* in SMF ticks */
-	Evoral::Event<double> ev;
+	Evoral::Event<Evoral::MusicalTime> ev;
 
 	uint32_t scratch_size = 0; // keep track of scratch and minimize reallocs
 
@@ -632,7 +632,7 @@ SMFSource::load_model (bool lock, bool force_reload)
 	bool have_event_id;
 
 	// TODO simplify event allocation
-	std::list< std::pair< Evoral::Event<double>*, gint > > eventlist;
+	std::list< std::pair< Evoral::Event<Evoral::MusicalTime>*, gint > > eventlist;
 
 	for (unsigned i = 1; i <= num_tracks(); ++i) {
 		if (seek_to_track(i)) continue;
@@ -658,8 +658,8 @@ SMFSource::load_model (bool lock, bool force_reload)
 				if (!have_event_id) {
 					event_id = Evoral::next_event_id();
 				}
-				uint32_t event_type = midi_parameter_type(buf[0]);
-				double   event_time = time / (double) ppqn();
+				const uint32_t            event_type = midi_parameter_type(buf[0]);
+				const Evoral::MusicalTime event_time = Evoral::MusicalTime::ticks_at_rate(time, ppqn());
 #ifndef NDEBUG
 				std::string ss;
 
@@ -674,7 +674,7 @@ SMFSource::load_model (bool lock, bool force_reload)
 #endif
 
 				eventlist.push_back(make_pair (
-							new Evoral::Event<double> (
+							new Evoral::Event<Evoral::MusicalTime> (
 								event_type, event_time,
 								size, buf, true)
 							, event_id));
@@ -693,7 +693,7 @@ SMFSource::load_model (bool lock, bool force_reload)
 
 	eventlist.sort(compare_eventlist);
 
-	std::list< std::pair< Evoral::Event<double>*, gint > >::iterator it;
+	std::list< std::pair< Evoral::Event<Evoral::MusicalTime>*, gint > >::iterator it;
 	for (it=eventlist.begin(); it!=eventlist.end(); ++it) {
 		_model->append (*it->first, it->second);
 		delete it->first;

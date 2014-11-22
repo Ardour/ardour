@@ -27,14 +27,15 @@
 
 #include <glibmm/threads.h>
 
+#include "evoral/ControlList.hpp"
+#include "evoral/Parameter.hpp"
+
 #include "pbd/undo.h"
 #include "pbd/xml++.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/properties.h"
 
 #include "ardour/ardour.h"
-
-#include "evoral/ControlList.hpp"
 
 namespace ARDOUR {
 

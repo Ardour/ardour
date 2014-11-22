@@ -105,7 +105,7 @@ public:
 		ResolveStuckNotes
 	};
 
-	void end_write (StuckNoteOption, Time when = 0);
+	void end_write (StuckNoteOption, Time when = Time());
 
 	void append(const Event<Time>& ev, Evoral::event_id_t evid);
 
@@ -127,7 +127,7 @@ public:
 	struct EarlierNoteComparator {
 		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
 		                       const boost::shared_ptr< const Note<Time> > b) const {
-			return musical_time_less_than (a->time(), b->time());
+			return a->time() < b->time();
 		}
 	};
 
@@ -135,7 +135,7 @@ public:
 		typedef const Note<Time>* value_type;
 		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
 		                       const boost::shared_ptr< const Note<Time> > b) const {
-			return musical_time_greater_than (a->time(), b->time());
+			return a->time() > b->time();
 		}
 	};
 
@@ -143,7 +143,7 @@ public:
 		typedef const Note<Time>* value_type;
 		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
 		                       const boost::shared_ptr< const Note<Time> > b) const {
-			return musical_time_greater_than (a->end_time(), b->end_time());
+			return a->end_time() > b->end_time();
 		}
 	};
 
@@ -187,7 +187,7 @@ public:
 
 	struct EarlierSysExComparator {
 		inline bool operator() (constSysExPtr a, constSysExPtr b) const {
-			return musical_time_less_than (a->time(), b->time());
+			return a->time() < b->time();
 		}
 	};
 
@@ -200,7 +200,7 @@ public:
 
 	struct EarlierPatchChangeComparator {
 		inline bool operator() (constPatchChangePtr a, constPatchChangePtr b) const {
-			return musical_time_less_than (a->time(), b->time());
+			return a->time() < b->time();
 		}
 	};
 
@@ -262,7 +262,7 @@ public:
 	};
 
 	const_iterator begin (
-		Time t = 0,
+		Time t = Time(),
 		bool force_discrete = false,
 		std::set<Evoral::Parameter> const & f = std::set<Evoral::Parameter> ()) const {
 		return const_iterator (*this, t, force_discrete, f);

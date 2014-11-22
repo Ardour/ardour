@@ -25,11 +25,11 @@ FrameposPlusBeatsTest::singleTempoTest ()
 	map.add_tempo (tempo, BBT_Time (1, 1, 0));
 
 	/* Add 1 beat to beat 3 of the first bar */
-	framepos_t r = map.framepos_plus_beats (frames_per_beat * 2, 1);
+	framepos_t r = map.framepos_plus_beats (frames_per_beat * 2, Evoral::MusicalTime(1));
 	CPPUNIT_ASSERT_EQUAL (framepos_t (frames_per_beat * 3), r);
 
 	/* Add 4 beats to a -ve frame of 1 beat before zero */
-	r = map.framepos_plus_beats (-frames_per_beat * 1, 4);
+	r = map.framepos_plus_beats (-frames_per_beat * 1, Evoral::MusicalTime(4));
 	CPPUNIT_ASSERT_EQUAL (framepos_t (frames_per_beat * 3), r);
 }
 
@@ -69,15 +69,15 @@ FrameposPlusBeatsTest::doubleTempoTest ()
 	/* Now some tests */
 
 	/* Add 1 beat to 1|2 */
-	framepos_t r = map.framepos_plus_beats (24e3, 1);
+	framepos_t r = map.framepos_plus_beats (24e3, Evoral::MusicalTime(1));
 	CPPUNIT_ASSERT_EQUAL (framepos_t (48e3), r);
 
 	/* Add 2 beats to 3|4 (over the tempo change) */
-	r = map.framepos_plus_beats (264e3, 2);
+	r = map.framepos_plus_beats (264e3, Evoral::MusicalTime(2));
 	CPPUNIT_ASSERT_EQUAL (framepos_t (264e3 + 24e3 + 12e3), r);
 
 	/* Add 2.5 beats to 3|3|960 (over the tempo change) */
-	r = map.framepos_plus_beats (264e3 - 12e3, 2.5);
+	r = map.framepos_plus_beats (264e3 - 12e3, Evoral::MusicalTime(2.5));
 	CPPUNIT_ASSERT_EQUAL (framepos_t (264e3 + 24e3 + 12e3), r);
 }
 
@@ -123,15 +123,15 @@ FrameposPlusBeatsTest::doubleTempoWithMeterTest ()
 	/* Now some tests */
 
 	/* Add 1 beat to 1|2 */
-	framepos_t r = map.framepos_plus_beats (24e3, 1);
+	framepos_t r = map.framepos_plus_beats (24e3, Evoral::MusicalTime(1));
 	CPPUNIT_ASSERT_EQUAL (framepos_t (48e3), r);
 
 	/* Add 2 beats to 3|4 (over the tempo change) */
-	r = map.framepos_plus_beats (264e3, 2);
+	r = map.framepos_plus_beats (264e3, Evoral::MusicalTime(2));
 	CPPUNIT_ASSERT_EQUAL (framepos_t (264e3 + 24e3 + 12e3), r);
 
 	/* Add 2.5 beats to 3|3|960 (over the tempo change) */
-	r = map.framepos_plus_beats (264e3 - 12e3, 2.5);
+	r = map.framepos_plus_beats (264e3 - 12e3, Evoral::MusicalTime(2.5));
 	CPPUNIT_ASSERT_EQUAL (framepos_t (264e3 + 24e3 + 12e3), r);
 }
 

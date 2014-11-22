@@ -39,8 +39,8 @@ Note<Time>::Note(uint8_t chan, Time t, Time l, uint8_t n, uint8_t v)
 	_off_event.buffer()[1] = n;
 	_off_event.buffer()[2] = 0x40;
 
-	assert(musical_time_equal (time(),t));
-	assert(musical_time_equal (length(), l));
+	assert(time() == t);
+	assert(length() == l);
 	assert(note() == n);
 	assert(velocity() == v);
 	assert(_on_event.channel() == _off_event.channel());
@@ -67,9 +67,9 @@ Note<Time>::Note(const Note<Time>& copy)
 	  memcpy(_off_event_buffer, copy._off_event_buffer, 3);
 	*/
 	
-	assert(musical_time_equal (time(),copy.time()));
-	assert(musical_time_equal (end_time(), copy.end_time()));
-	assert(musical_time_equal (length(), copy.length()));
+	assert(time() == copy.time());
+	assert(end_time() == copy.end_time());
+	assert(length() == copy.length());
 	assert(note() == copy.note());
 	assert(velocity() == copy.velocity());
 	assert(_on_event.channel() == _off_event.channel());
@@ -95,9 +95,9 @@ Note<Time>::operator=(const Note<Time>& other)
 	_on_event = other._on_event;
 	_off_event = other._off_event;
 
-	assert(musical_time_equal (time(),other.time()));
-	assert(musical_time_equal (end_time(), other.end_time()));
-	assert(musical_time_equal (length(), other.length()));
+	assert(time() == other.time());
+	assert(end_time() == other.end_time());
+	assert(length() == other.length());
 	assert(note() == other.note());
 	assert(velocity() == other.velocity());
 	assert(_on_event.channel() == _off_event.channel());

@@ -56,7 +56,8 @@ public:
 
 	void mark_streaming_midi_write_started (NoteMode mode);
 	void mark_streaming_write_completed ();
-	void mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption, Evoral::MusicalTime when = 0);
+	void mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption,
+	                                          Evoral::MusicalTime when = Evoral::MusicalTime());
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
@@ -88,8 +89,8 @@ public:
 	                           framepos_t                  position,
 	                           framecnt_t                  cnt);
 
-	double    _last_ev_time_beats;
-	framepos_t _last_ev_time_frames;
+	Evoral::MusicalTime _last_ev_time_beats;
+	framepos_t          _last_ev_time_frames;
 	/** end time (start + duration) of last call to read_unlocked */
 	mutable framepos_t _smf_last_read_end;
 	/** time (in SMF ticks, 1 tick per _ppqn) of the last event read by read_unlocked */

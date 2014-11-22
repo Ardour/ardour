@@ -153,13 +153,13 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 bool
 MidiSource::empty () const
 {
-	return _length_beats == 0;
+	return !_length_beats;
 }
 
 framecnt_t
 MidiSource::length (framepos_t pos) const
 {
-	if (_length_beats == 0) {
+	if (!_length_beats) {
 		return 0;
 	}
 
@@ -198,7 +198,7 @@ MidiSource::midi_read (Evoral::EventSink<framepos_t>&     dst,
 
 	if (_model) {
 		// Find appropriate model iterator
-		Evoral::Sequence<double>::const_iterator& i = _model_iter;
+		Evoral::Sequence<Evoral::MusicalTime>::const_iterator& i = _model_iter;
 		if (_last_read_end == 0 || start != _last_read_end || !_model_iter_valid) {
 			// Cached iterator is invalid, search for the first event past start
 			i                 = _model->begin(converter.from(start), false, filtered);

@@ -526,13 +526,13 @@ StepEntry::on_key_release_event (GdkEventKey* ev)
 void
 StepEntry::rest_event_handler ()
 {
-	se->step_edit_rest (0.0);
+	se->step_edit_rest (Evoral::MusicalTime());
 }
 
 Evoral::MusicalTime
 StepEntry::note_length ()
 {
-        Evoral::MusicalTime base_time = 4.0 / (Evoral::MusicalTime) length_divisor_adjustment.get_value();
+        double base_time = 4.0 / (double) length_divisor_adjustment.get_value();
 
         RefPtr<Action> act = myactions.find_action ("StepEditing/toggle-triplet");
         RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
@@ -549,7 +549,7 @@ StepEntry::note_length ()
                 base_time *= 1 + ((dots - 1.0)/dots);
         }
 
-        return base_time;
+        return Evoral::MusicalTime(base_time);
 }
 
 uint8_t
@@ -795,7 +795,7 @@ StepEntry::insert_rest ()
 void
 StepEntry::insert_grid_rest ()
 {
-	se->step_edit_rest (0.0);
+	se->step_edit_rest (Evoral::MusicalTime());
 }
 
 void

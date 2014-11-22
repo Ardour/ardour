@@ -39,7 +39,7 @@ public:
 		};
 	}
 
-	bool is_integer (const Evoral::Parameter& /*param*/) const { return true; }
+	bool is_integer (const Parameter& /*param*/) const { return true; }
 
 	Parameter new_parameter(uint32_t type, uint8_t channel, uint32_t id) const {
 		Parameter p(type, channel, id);
@@ -119,7 +119,7 @@ class SequenceTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
-	typedef double Time;
+	typedef MusicalTime Time;
 	typedef std::vector< boost::shared_ptr< Note<Time> > > Notes;
 
 	void setUp () {
@@ -129,8 +129,9 @@ public:
 		assert(seq);
 
 		for (int i = 0; i < 12; i++) {
-			test_notes.push_back(boost::shared_ptr<Note<Time> >
-					(new Note<Time>(0, i * 100, 100, 64 + i, 64)));
+			test_notes.push_back(
+				boost::shared_ptr<Note<Time> >(
+					new Note<Time>(0, MusicalTime(i * 100), MusicalTime(100), 64 + i, 64)));
 		}
 	}
 
