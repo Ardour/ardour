@@ -90,8 +90,11 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
                                                1024,
                                                time_proc,
                                                time_info)) {
-                        std::cerr << "WavesMidiDevice::open (): Pm_OpenInput () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
-                        _input_pm_stream = NULL;
+                        char* err_msg = new char[256];
+						Pm_GetHostErrorText(err_msg, 256);
+						std::cerr << "WavesMidiDevice::open (): Pm_OpenInput () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
+						std::cerr << "Error: " << err_msg << std::endl;
+						_input_pm_stream = NULL;
                         _pm_input_id = pmNoDevice;
                         return -1;
                 }
@@ -111,7 +114,10 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
                                                 time_proc,
                                                 time_info,
                                                 LATENCY)) {
-                        std::cerr << "WavesMidiDevice::open (): Pm_OpenOutput () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
+                        char* err_msg = new char[256];
+						Pm_GetHostErrorText(err_msg, 256);
+						std::cerr << "WavesMidiDevice::open (): Pm_OpenOutput () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
+						std::cerr << "Error: " << err_msg << std::endl;
                         _output_pm_stream = NULL;
                         _pm_output_id = pmNoDevice;
                         return -1;
@@ -204,7 +210,14 @@ WavesMidiDevice::read_midi ()
                         break;
                 case WavesMidiEvent::COMPLETE:
                         DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::_read_midi (): [%1] : Pm_Enqueue (_input_queue, _incomplete_waves_midi_event); %3\n",  name (), _incomplete_waves_midi_event));
-                        Pm_Enqueue (_input_queue, &_incomplete_waves_midi_event);
+
+						if (pmNoError != Pm_Enqueue (_input_queue, &_incomplete_waves_midi_event) ) {
+							char* err_msg = new char[256];
+							Pm_GetHostErrorText(err_msg, 256);
+							std::cerr << "WavesMidiDevice::read_midi (): Pm_Enqueue () failed for [" << name () <<  "]!" << std::endl;
+							std::cerr << "Error: " << err_msg << std::endl;
+						}
+
                         _incomplete_waves_midi_event = NULL;
                         break;
                 default:
