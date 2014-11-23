@@ -81,12 +81,12 @@ def build(bld):
             src/ControlSet.cpp
             src/Curve.cpp
             src/Event.cpp
-            src/IdentityConverter.cpp
             src/midi_util.cpp
             src/MIDIEvent.cpp
             src/Note.cpp
             src/SMF.cpp
             src/Sequence.cpp
+            src/TimeConverter.cpp
             src/debug.cpp
             src/types.cpp
     '''

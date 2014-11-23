@@ -17,15 +17,21 @@
  */
 
 #include <stdint.h>
+
 #include "evoral/TimeConverter.hpp"
+#include "evoral/types.hpp"
 
 typedef int64_t framepos_t; /* MUST match libs/ardour/ardour/types.h */
 
 namespace Evoral {
 
 template<typename A, typename B>
+TimeConverter<A,B>::~TimeConverter()
+{}
+
+template<typename A, typename B>
 B
-IdentityConverter<A,B>::to(A a)   const
+IdentityConverter<A,B>::to(A a) const
 {
 	return static_cast<B>(a);
 }
@@ -39,5 +45,6 @@ IdentityConverter<A,B>::from(B b) const
 
 template class IdentityConverter<double, framepos_t>;
 template class TimeConverter<double, framepos_t>;
+template class TimeConverter<Evoral::MusicalTime, framepos_t>;
 
 } // namespace Evoral

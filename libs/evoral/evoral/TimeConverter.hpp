@@ -39,7 +39,7 @@ class LIBEVORAL_TEMPLATE_API TimeConverter {
 public:
 	TimeConverter () : _origin_b (0) {}
 	TimeConverter (B ob) : _origin_b (ob) {}
-	virtual ~TimeConverter() {}
+	virtual ~TimeConverter();
 
 	/** Convert A time to B time (A to B) */
 	virtual B to(A a) const = 0;
