@@ -178,7 +178,7 @@ vst_search_path ()
 	if (ERROR_SUCCESS == RegOpenKeyExA (HKEY_CURRENT_USER, "Software\\VST", 0, KEY_READ, &hKey)) {
 		// Look for the user's VST Registry entry
 		if (ERROR_SUCCESS == RegQueryValueExA (hKey, "VSTPluginsPath", 0, &dwType, (LPBYTE)tmp, &dwSize))
-			p = g_build_filename (Glib::locale_to_utf8(tmp).c_str(), 0);
+			p = g_build_filename (Glib::locale_to_utf8(tmp).c_str(), NULL);
 
 		RegCloseKey (hKey);
 	}
@@ -188,7 +188,7 @@ vst_search_path ()
 		{
 			// Look for a global VST Registry entry
 			if (ERROR_SUCCESS == RegQueryValueExA (hKey, "VSTPluginsPath", 0, &dwType, (LPBYTE)tmp, &dwSize))
-				p = g_build_filename (Glib::locale_to_utf8(tmp).c_str(), 0);
+				p = g_build_filename (Glib::locale_to_utf8(tmp).c_str(), NULL);
 
 			RegCloseKey (hKey);
 		}
@@ -200,11 +200,11 @@ vst_search_path ()
 
 		if (pProgFilesX86) {
 			// Look for a VST folder under C:\Program Files (x86)
-			if (pVSTx86 = g_build_filename (pProgFilesX86, "Steinberg", "VSTPlugins", 0))
+			if (pVSTx86 = g_build_filename (pProgFilesX86, "Steinberg", "VSTPlugins", NULL))
 			{
 				if (Glib::file_test (pVSTx86, Glib::FILE_TEST_EXISTS))
 					if (Glib::file_test (pVSTx86, Glib::FILE_TEST_IS_DIR))
-						p = g_build_filename (pVSTx86, 0);
+						p = g_build_filename (pVSTx86, NULL);
 
 				g_free (pVSTx86);
 			}
@@ -218,10 +218,10 @@ vst_search_path ()
 			char *pProgFiles = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
 
 			if (pProgFiles) {
-				if (pVST = g_build_filename (pProgFiles, "Steinberg", "VSTPlugins", 0)) {
+				if (pVST = g_build_filename (pProgFiles, "Steinberg", "VSTPlugins", NULL)) {
 					if (Glib::file_test (pVST, Glib::FILE_TEST_EXISTS))
 						if (Glib::file_test (pVST, Glib::FILE_TEST_IS_DIR))
-							p = g_build_filename (pVST, 0);
+							p = g_build_filename (pVST, NULL);
 
 					g_free (pVST);
 				}
@@ -235,23 +235,23 @@ vst_search_path ()
 		// If all else failed, assume the plugins are under "My Documents"
 		user_home = (char*) g_get_user_special_dir (G_USER_DIRECTORY_DOCUMENTS);
 		if (user_home) {
-			p = g_build_filename (user_home, "Plugins", "VST", 0);
+			p = g_build_filename (user_home, "Plugins", "VST", NULL);
 		} else {
-			user_home = g_build_filename(g_get_home_dir(), "My Documents", 0);
+			user_home = g_build_filename(g_get_home_dir(), "My Documents", NULL);
 			if (user_home)
-				p = g_build_filename (user_home, "Plugins", "VST", 0);
+				p = g_build_filename (user_home, "Plugins", "VST", NULL);
 		}
 	} else {
 		// Concatenate the registry path with the user's personal path
 		user_home = (char*) g_get_user_special_dir (G_USER_DIRECTORY_DOCUMENTS);
 
 		if (user_home) {
-			p = g_build_path (";", p, g_build_filename(user_home, "Plugins", "VST", 0), 0);
+			p = g_build_path (";", p, g_build_filename(user_home, "Plugins", "VST", NULL), NULL);
 		} else {
-			user_home = g_build_filename(g_get_home_dir(), "My Documents", 0);
+			user_home = g_build_filename(g_get_home_dir(), "My Documents", NULL);
 
 			if (user_home) {
-				p = g_build_path (";", p, g_build_filename (user_home, "Plugins", "VST", 0), 0);
+				p = g_build_path (";", p, g_build_filename (user_home, "Plugins", "VST", NULL), NULL);
 			}
 		}
 	}
