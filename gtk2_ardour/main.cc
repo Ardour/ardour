@@ -129,6 +129,7 @@ Click OK to exit %1."), PROGRAM_NAME, AudioEngine::instance()->current_backend_n
 	return false; /* do not call again */
 }
 
+#ifndef PLATFORM_WINDOWS
 static void
 sigpipe_handler (int /*signal*/)
 {
@@ -143,6 +144,7 @@ sigpipe_handler (int /*signal*/)
 		done_the_backend_thing =  true;
 	}
 }
+#endif
 
 #if (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
 /*

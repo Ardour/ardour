@@ -200,7 +200,7 @@ vst_search_path ()
 
 		if (pProgFilesX86) {
 			// Look for a VST folder under C:\Program Files (x86)
-			if (pVSTx86 = g_build_filename (pProgFilesX86, "Steinberg", "VSTPlugins", NULL))
+			if ((pVSTx86 = g_build_filename (pProgFilesX86, "Steinberg", "VSTPlugins", NULL)))
 			{
 				if (Glib::file_test (pVSTx86, Glib::FILE_TEST_EXISTS))
 					if (Glib::file_test (pVSTx86, Glib::FILE_TEST_IS_DIR))
@@ -218,7 +218,7 @@ vst_search_path ()
 			char *pProgFiles = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
 
 			if (pProgFiles) {
-				if (pVST = g_build_filename (pProgFiles, "Steinberg", "VSTPlugins", NULL)) {
+				if ((pVST = g_build_filename (pProgFiles, "Steinberg", "VSTPlugins", NULL))) {
 					if (Glib::file_test (pVST, Glib::FILE_TEST_EXISTS))
 						if (Glib::file_test (pVST, Glib::FILE_TEST_IS_DIR))
 							p = g_build_filename (pVST, NULL);

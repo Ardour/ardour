@@ -40,7 +40,9 @@ public:
 	}
 
 private:
+#ifndef PLATFORM_WINDOWS
 	static char * _vfork_exec_wrapper;
+#endif
 
 }; /* end class */
 

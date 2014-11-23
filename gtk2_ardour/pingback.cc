@@ -42,6 +42,7 @@
 using std::string;
 using namespace ARDOUR;
 
+#ifndef PLATFORM_WINDOWS // no pingback for windows, so far
 static size_t
 curl_write_data (char *bufptr, size_t size, size_t nitems, void *ptr)
 {
@@ -61,6 +62,7 @@ curl_write_data (char *bufptr, size_t size, size_t nitems, void *ptr)
 
         return size * nitems;
 }
+#endif
 
 struct ping_call {
     std::string version;
