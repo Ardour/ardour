@@ -2881,6 +2881,12 @@ CursorDrag::finished (GdkEvent* event, bool /*movement_occurred*/)
 	Session* s = _editor->session ();
 
 	if (s) {
+
+                if (was_double_click()) {
+                        s->request_transport_speed (1.0);
+                        return;
+                } 
+
 		_editor->_pending_locate_request = true;
 		s->request_locate (_editor->playhead_cursor->current_frame (), (_stop ? false : _was_rolling));
 		s->request_resume_timecode_transmission ();
