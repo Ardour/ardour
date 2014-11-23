@@ -73,17 +73,24 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
 			)
 	{
-		ffmpeg_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), X_("ffmpeg.exe"));
-		ffprobe_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), X_("ffprobe.exe"));
+		ffmpeg_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), X_("ffmpeg.exe"), NULL);
+		ffprobe_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), X_("ffprobe.exe"), NULL);
+	}
+	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\harvid", 0, KEY_READ | KEY_WOW64_32KEY, &key))
+			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+			)
+	{
+		ffmpeg_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), X_("ffmpeg.exe"), NULL);
+		ffprobe_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), X_("ffprobe.exe"), NULL);
 	}
 	if (Glib::file_test(ffmpeg_exe, Glib::FILE_TEST_EXISTS)) {
 		;
 	}
-	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "ffmpeg.exe", 0), Glib::FILE_TEST_EXISTS)) {
-		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffmpeg.exe", 0);
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "ffmpeg.exe", NULL), Glib::FILE_TEST_EXISTS)) {
+		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffmpeg.exe", NULL);
 	}
-	else if (program_files && Glib::file_test(g_build_filename(program_files, "ffmpeg", "ffmpeg.exe", 0), Glib::FILE_TEST_EXISTS)) {
-		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffmpeg.exe", 0);
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "ffmpeg", "ffmpeg.exe", NULL), Glib::FILE_TEST_EXISTS)) {
+		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffmpeg.exe", NULL);
 	}
 	/* generic fallbacks to try */
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffmpeg.exe"), Glib::FILE_TEST_EXISTS)) {
@@ -103,11 +110,11 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 	if (Glib::file_test(ffprobe_exe, Glib::FILE_TEST_EXISTS)) {
 		;
 	}
-	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "ffprobe.exe", 0), Glib::FILE_TEST_EXISTS)) {
-		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffprobe.exe", 0);
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "ffprobe.exe", NULL), Glib::FILE_TEST_EXISTS)) {
+		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffprobe.exe", NULL);
 	}
-	else if (program_files && Glib::file_test(g_build_filename(program_files, "ffmpeg", "ffprobe.exe", 0), Glib::FILE_TEST_EXISTS)) {
-		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffprobe.exe", 0);
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "ffmpeg", "ffprobe.exe", NULL), Glib::FILE_TEST_EXISTS)) {
+		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffprobe.exe", NULL);
 	}
 	/* generic fallbacks to try */
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffprobe.exe"), Glib::FILE_TEST_EXISTS)) {

@@ -109,11 +109,17 @@ VideoServerDialog::VideoServerDialog (Session* s)
 			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
 			)
 	{
-		path_entry.set_text(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "harvid.exe", 0));
+		path_entry.set_text(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "harvid.exe", NULL));
 	}
-	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "harvid.exe", 0), Glib::FILE_TEST_EXISTS))
+	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\harvid", 0, KEY_READ | KEY_WOW64_32KEY, &key))
+			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+			)
 	{
-		path_entry.set_text(g_build_filename(program_files, "harvid", "harvid.exe", 0));
+		path_entry.set_text(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "harvid.exe", NULL));
+	}
+	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "harvid.exe", NULL), Glib::FILE_TEST_EXISTS))
+	{
+		path_entry.set_text(g_build_filename(program_files, "harvid", "harvid.exe", NULL));
 	}
 #endif
 	/* generic fallbacks to try */
