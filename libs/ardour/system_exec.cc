@@ -27,9 +27,7 @@
 
 using namespace ARDOUR;
 
-#ifndef PLATFORM_WINDOWS
 char * SystemExec::_vfork_exec_wrapper = NULL;
-#endif
 
 static char *vfork_exec_wrapper_path() {
 #ifdef PLATFORM_WINDOWS

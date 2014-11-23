@@ -95,7 +95,7 @@ mountpoint (string path)
 }
 
 #elif defined(PLATFORM_WINDOWS)
-
+#include <assert.h>
 string
 mountpoint (string path)
 {
