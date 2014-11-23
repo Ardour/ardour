@@ -55,7 +55,10 @@ using namespace std;
 using namespace PBD;
 
 static void * interposer_thread (void *arg);
+
+#ifndef PLATFORM_WINDOWS /* POSIX Process only */
 static void close_fd (int& fd) { if (fd >= 0) ::close (fd); fd = -1; }
+#endif
 
 #if (!defined PLATFORM_WINDOWS && defined NO_VFORK)
 /*
