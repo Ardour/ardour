@@ -73,7 +73,7 @@ public:
 	void set_value (float val);
 	
 	virtual void start_touch (double when);
-	virtual void stop_touch (double when, bool mark);
+	virtual void stop_touch (bool mark, double when);
 
   protected:
 	boost::shared_ptr<ARDOUR::AutomationControl> normal_ac;
