@@ -81,9 +81,10 @@ MidiControlUI::midi_input_handler (IOCondition ioc, AsyncMIDIPort* port)
 
 	if (ioc & IO_IN) {
 
-#ifndef PLATFORM_WINDOWS
-		CrossThreadChannel::drain (port->selectable());
-#endif
+		AsyncMIDIPort* asp = dynamic_cast<AsyncMIDIPort*> (port);
+		if (asp) {
+			asp->clear ();
+		}
 
 		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", ((ARDOUR::Port*)port)->name()));
 		framepos_t now = _session.engine().sample_time();
@@ -131,12 +132,11 @@ MidiControlUI::reset_ports ()
 		return;
 	}
 	
-	int fd;
 	for (vector<AsyncMIDIPort*>::const_iterator pi = ports.begin(); pi != ports.end(); ++pi) {
 
-		if ((fd = (*pi)->selectable ()) >= 0) {
-			Glib::RefPtr<IOSource> psrc = IOSource::create (fd, IO_IN|IO_HUP|IO_ERR);
-			
+		Glib::RefPtr<IOSource> psrc = (*pi)->ios();
+
+		if (psrc) {
 			psrc->connect (sigc::bind (sigc::mem_fun (this, &MidiControlUI::midi_input_handler), *pi));
 			psrc->attach (_main_loop->get_context());
 			
