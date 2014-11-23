@@ -196,7 +196,7 @@ template<typename T>
 struct /*LIBEVORAL_API*/ Range {
 	Range (T f, T t) : from (f), to (t) {}
 	T from; ///< start of the range
-	T to;   ///< end of the range
+	T to;   ///< end of the range (inclusive: to lies inside the range)
 };
 
 template<typename T>	
@@ -297,28 +297,33 @@ RangeList<T> subtract (Range<T> range, RangeList<T> sub)
 
 			switch (coverage (j->from, j->to, i->from, i->to)) {
 			case OverlapNone:
-				/* The thing we're subtracting does not overlap this bit of the result,
+				/* The thing we're subtracting (*i) does not overlap this bit of the result (*j),
 				   so pass it through.
 				*/
 				new_result.add (*j);
 				break;
 			case OverlapInternal:
-				/* Internal overlap of the thing we're subtracting from this bit of the result,
-				   so we might end up with two bits left over.
+				/* Internal overlap of the thing we're subtracting (*i) from this bit of the result,
+				   so we should end up with two bits of (*j) left over, from the start of (*j) to
+				   the start of (*i), and from the end of (*i) to the end of (*j).
 				*/
-				if (j->from < (i->from - 1)) {
-					new_result.add (Range<T> (j->from, i->from - 1));
-				}
-				if (j->to != i->to) {
-					new_result.add (Range<T> (i->to, j->to));
-				}
+				assert (j->from < i->from);
+				assert (j->to > i->to);
+				new_result.add (Range<T> (j->from, i->from - 1));
+				new_result.add (Range<T> (i->to + 1, j->to));
 				break;
 			case OverlapStart:
-				/* The bit we're subtracting overlaps the start of the bit of the result */
-				new_result.add (Range<T> (i->to, j->to - 1));
+				/* The bit we're subtracting (*i) overlaps the start of the bit of the result (*j),
+				 * so we keep only the part of of (*j) from after the end of (*i)
+				 */
+				assert (i->to < j->to);
+				new_result.add (Range<T> (i->to + 1, j->to));
 				break;
 			case OverlapEnd:
-				/* The bit we're subtracting overlaps the end of the bit of the result */
+				/* The bit we're subtracting (*i) overlaps the end of the bit of the result (*j),
+				 * so we keep only the part of of (*j) from before the start of (*i)
+				 */
+				assert (j->from < i->from);
 				new_result.add (Range<T> (j->from, i->from - 1));
 				break;
 			case OverlapExternal:
