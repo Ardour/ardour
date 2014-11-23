@@ -1742,11 +1742,11 @@ Editor::set_minsec_ruler_scale (framepos_t lower, framepos_t upper)
                 minsec_ruler_scale = minsec_show_hours;
 		minsec_mark_modulo = 2;
         } else {
-
-                /* not possible if framepos_t is a 32 bit quantity */
-
                 minsec_mark_interval = 4 * 60 * 60 * fr; /* show 4 hrs */
+                minsec_ruler_scale = minsec_show_hours;
+                minsec_mark_modulo = 4;
         }
+
 	minsec_nmarks = 2 + (range / minsec_mark_interval);
 }
 
