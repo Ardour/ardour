@@ -41,6 +41,7 @@
 #include "pbd/convert.h"
 
 #include "ardour/automation_control.h"
+#include "ardour/async_midi_port.h"
 #include "ardour/dB.h"
 #include "ardour/debug.h"
 #include "ardour/location.h"
@@ -727,11 +728,28 @@ MackieControlProtocol::create_surfaces ()
 			session->BundleRemoved (_output_bundle);
 		}
 
-		int fd;
 		MIDI::Port& input_port (surface->port().input_port());
+		AsyncMIDIPort* asp = dynamic_cast<AsyncMIDIPort*> (&input_port);
+		Glib::RefPtr<IOSource> psrc;
+		
+		if (asp) {
 
-		if ((fd = input_port.selectable ()) >= 0) {
-			Glib::RefPtr<IOSource> psrc = IOSource::create (fd, IO_IN|IO_HUP|IO_ERR);
+			/* async MIDI port */
+
+			psrc = asp->ios();
+
+		} else {
+
+			/* ipMIDI port, no IOSource method at this time */
+
+			int fd;
+
+			if ((fd = input_port.selectable ()) >= 0) {
+				psrc = IOSource::create (fd, IO_IN|IO_HUP|IO_ERR);
+			}
+		}
+		
+		if (psrc) {
 
 			psrc->connect (sigc::bind (sigc::mem_fun (this, &MackieControlProtocol::midi_input_handler), &input_port));
 			psrc->attach (main_loop()->get_context());
@@ -740,6 +758,16 @@ MackieControlProtocol::create_surfaces ()
 
 			port_sources.push_back (psrc->gobj());
 			g_source_ref (psrc->gobj());
+
+		} else {
+
+			if (n == 0) {
+				error << string_compose (_("Could not create IOSource for Mackie Control surface, MIDI port was called %1"),
+							 input_port.name());
+			} else {
+				error << string_compose (_("Could not create IOSource for Mackie Control extender #%1, MIDI port was called %2"),
+							 n+1, input_port.name());
+			}
 		}
 	}
 
@@ -1285,9 +1313,10 @@ MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 		*/
 
 		if (!_device_info.uses_ipmidi()) {
-#ifndef PLATFORM_WINDOWS
-			CrossThreadChannel::drain (port->selectable());
-#endif
+			AsyncMIDIPort* asp = dynamic_cast<AsyncMIDIPort*>(port);
+			if (asp) {
+				asp->clear ();
+			}
 		}
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("data available on %1\n", port->name()));
