@@ -1856,7 +1856,7 @@ MidiRegionView::patch_change_to_patch_key (MidiModel::PatchChangePtr p)
 
 /// Return true iff @p pc applies to the given time on the given channel.
 static bool
-patch_applies (const ARDOUR::MidiModel::constPatchChangePtr pc, double time, uint8_t channel)
+patch_applies (const ARDOUR::MidiModel::constPatchChangePtr pc, Evoral::MusicalTime time, uint8_t channel)
 {
 	return pc->time() <= time && pc->channel() == channel;
 }
@@ -2672,30 +2672,23 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		if (!cursor_set) {
-			double beats;
-
-			beats = snap_pixel_to_sample (current_x);
-			beats = region_frames_to_region_beats (beats);
-
-			double len;
+			const double        snapped_x = snap_pixel_to_sample (current_x);
+			Evoral::MusicalTime beats     = region_frames_to_region_beats (snapped_x);
+			Evoral::MusicalTime len       = Evoral::MusicalTime();
 
 			if (at_front) {
 				if (beats < canvas_note->note()->end_time()) {
 					len = canvas_note->note()->time() - beats;
 					len += canvas_note->note()->length();
-				} else {
-					len = 0;
 				}
 			} else {
 				if (beats >= canvas_note->note()->time()) {
 					len = beats - canvas_note->note()->time();
-				} else {
-					len = 0;
 				}
 			}
 
 			char buf[16];
-			snprintf (buf, sizeof (buf), "%.3g beats", len);
+			snprintf (buf, sizeof (buf), "%.3g beats", len.to_double());
 			show_verbose_cursor (buf, 0, 0);
 
 			cursor_set = true;
@@ -2756,8 +2749,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 			Evoral::MusicalTime len = canvas_note->note()->time() - x_beats;
 			len += canvas_note->note()->length();
 
-			if (len) {
-				/* XXX convert to beats */
+			if (!!len) {
 				note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
 			}
 		}
@@ -2765,7 +2757,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		if (!at_front) {
 			const Evoral::MusicalTime len = x_beats - canvas_note->note()->time();
 
-			if (len) {
+			if (!!len) {
 				/* XXX convert to beats */
 				note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
 			}
@@ -2839,7 +2831,7 @@ MidiRegionView::trim_note (NoteBase* event, Evoral::MusicalTime front_delta, Evo
 	   if negative - move the end of the note earlier in time (shortening it)
 	*/
 
-	if (front_delta) {
+	if (!!front_delta) {
 		if (front_delta < 0) {
 
 			if (event->note()->time() < -front_delta) {
@@ -2871,7 +2863,7 @@ MidiRegionView::trim_note (NoteBase* event, Evoral::MusicalTime front_delta, Evo
 
 	}
 
-	if (end_delta) {
+	if (!!end_delta) {
 		bool can_change = true;
 		if (end_delta < 0) {
 			if (event->note()->length() < -end_delta) {

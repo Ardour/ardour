@@ -126,12 +126,33 @@ public:
 	}
 
 	inline bool operator>=(const MusicalTime& b) const {
+		return operator==(b) || operator>(b);
+	}
+
+	inline bool operator<(double b) const {
 		/* Acceptable tolerance is 1 tick. */
-		if (fabs(_time - b._time) <= (1.0 / PPQN)) {
-			return true;  /* Effectively identical. */
+		if (fabs(_time - b) <= (1.0 / PPQN)) {
+			return false;  /* Effectively identical. */
 		} else {
-			return _time >= b._time;
+			return _time < b;
 		}
+	}
+
+	inline bool operator<=(double b) const {
+		return operator==(b) || operator<(b);
+	}
+
+	inline bool operator>(double b) const {
+		/* Acceptable tolerance is 1 tick. */
+		if (fabs(_time - b) <= (1.0 / PPQN)) {
+			return false;  /* Effectively identical. */
+		} else {
+			return _time > b;
+		}
+	}
+
+	inline bool operator>=(double b) const {
+		return operator==(b) || operator>(b);
 	}
 
 	MusicalTime operator+(const MusicalTime& b) const {
@@ -140,6 +161,14 @@ public:
 
 	MusicalTime operator-(const MusicalTime& b) const {
 		return MusicalTime(_time - b._time);
+	}
+
+	MusicalTime operator+(double d) const {
+		return MusicalTime(_time + d);
+	}
+
+	MusicalTime operator-(double d) const {
+		return MusicalTime(_time - d);
 	}
 
 	MusicalTime operator-() const {
@@ -165,7 +194,10 @@ public:
 	uint64_t to_ticks()               const { return lrint(_time * PPQN); }
 	uint64_t to_ticks(uint32_t ppqn)  const { return lrint(_time * ppqn); }
 
-	operator bool() const { return _time != 0; }
+	uint32_t get_beats() const { return floor(_time); }
+	uint32_t get_ticks() const { return (uint32_t)lrint(fmod(_time, 1.0) * PPQN); }
+
+	bool operator!() const { return _time == 0; }
 
 	static MusicalTime min()  { return MusicalTime(DBL_MIN); }
 	static MusicalTime max()  { return MusicalTime(DBL_MAX); }

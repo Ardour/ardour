@@ -1885,7 +1885,7 @@ TempoMap::framepos_plus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 	             string_compose ("frame %1 plus %2 beats, start with tempo = %3 @ %4\n",
 	                             pos, beats, *((const Tempo*)tempo), tempo->frame()));
 
-	while (beats) {
+	while (!!beats) {
 
 		/* Distance to the end of this section in frames */
 		framecnt_t distance_frames = (next_tempo == metrics.end() ? max_framepos : ((*next_tempo)->frame() - pos));
@@ -1994,7 +1994,7 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 	   prev_tempo  -> the first metric before "pos", possibly metrics.rend()
 	*/
 
-	while (beats) {
+	while (!!beats) {
 		
 		/* Distance to the start of this section in frames */
 		framecnt_t distance_frames = (pos - tempo->frame());
@@ -2011,7 +2011,7 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 		/* Update */
 
 		beats -= sub;
-		pos -= sub * tempo->frames_per_beat (_frame_rate);
+		pos -= sub.to_double() * tempo->frames_per_beat (_frame_rate);
 
 		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tnow at %1, %2 beats left, prev at end ? %3\n", pos, beats,
 							       (prev_tempo == metrics.rend())));
@@ -2036,7 +2036,7 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 				}
 			}
 		} else {
-			pos -= llrint (beats * tempo->frames_per_beat (_frame_rate));
+			pos -= llrint (beats.to_double() * tempo->frames_per_beat (_frame_rate));
 			beats = Evoral::MusicalTime();
 		}
 	}

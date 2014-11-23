@@ -116,8 +116,8 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 	int test_channel = (*_events.begin())->note()->channel ();
 	int test_pitch = (*_events.begin())->note()->note ();
 	int test_velocity = (*_events.begin())->note()->velocity ();
-	double test_time = (*_events.begin())->note()->time ();
-	double test_length = (*_events.begin())->note()->length ();
+	Evoral::MusicalTime test_time = (*_events.begin())->note()->time ();
+	Evoral::MusicalTime test_length = (*_events.begin())->note()->length ();
 	
 	for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 		if ((*i)->note()->channel() != test_channel) {

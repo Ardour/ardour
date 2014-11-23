@@ -5279,10 +5279,11 @@ NoteCreateDrag::finished (GdkEvent*, bool had_movement)
 	Evoral::MusicalTime const one_tick = Evoral::MusicalTime::ticks(1);
 	
 	if (_editor->snap_mode() == SnapNormal && length < g) {
-		length = g - one_tick;
+		length = g;
 	}
 
-	Evoral::MusicalTime const length_beats = max (one_tick, _region_view->region_frames_to_region_beats (length));
+	Evoral::MusicalTime length_beats = max (
+		one_tick, _region_view->region_frames_to_region_beats (length) - one_tick);
 
 	_region_view->create_note_at (start, _drag_rect->y0(), length_beats, false);
 }

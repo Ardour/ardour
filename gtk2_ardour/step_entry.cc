@@ -555,7 +555,7 @@ StepEntry::note_length ()
 uint8_t
 StepEntry::note_velocity () const
 {
-        return (Evoral::MusicalTime) velocity_adjustment.get_value();
+	return velocity_adjustment.get_value();
 }
 
 uint8_t
