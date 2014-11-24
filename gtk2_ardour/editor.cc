@@ -250,6 +250,7 @@ Editor::Editor ()
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 	, timebar_height (xml_property (*xml_tree ()->root (), "timebarheight", 17.0))
 	, ruler_height (xml_property (*xml_tree ()->root (), "rulerheight", 26.0))
+	, ruler_divide_height (xml_property (*xml_tree ()->root (), "rulerdivideheight", 13.0))
 	, marker_height (xml_property (*xml_tree ()->root (), "markerheight", 18))
 	, skipbar_height (xml_property (*xml_tree ()->root (), "skipbarheight", 17))
 	  /* time display buttons */

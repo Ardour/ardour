@@ -200,8 +200,8 @@ Editor::initialize_canvas ()
 	range_bar_drag_rect->set_outline (false);
 	range_bar_drag_rect->hide ();
 
-        /* drag bar for ruler is double height because it spans loop bar and the ruler */
-	transport_bar_drag_rect = new ArdourCanvas::Rectangle (ruler_group, ArdourCanvas::Rect (0.0, 0.0, 100, ruler_height));
+	transport_bar_drag_rect = new ArdourCanvas::Rectangle (ruler_group, ArdourCanvas::Rect (0.0, 0.0, 100, 
+                                                                                                ruler_height - ruler_divide_height));
 	CANVAS_DEBUG_NAME (transport_bar_drag_rect, "transport drag");
 	transport_bar_drag_rect->set_outline (false);
 	transport_bar_drag_rect->hide ();
