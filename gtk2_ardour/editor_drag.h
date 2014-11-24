@@ -211,6 +211,7 @@ protected:
 		return _last_pointer_frame;
 	}
 
+	double current_pointer_x () const;
 	double current_pointer_y () const;
 
 	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*);
