@@ -118,6 +118,4 @@ template<typename T> /*LIBPBD_API*/ Glib::Threads::Mutex PBD::thing_with_backtra
 
 } // namespace PBD
 
-// JE - !!!!#include "../pbd/stacktrace.impl"
-
 #endif /* __libpbd_stacktrace_h__ */
