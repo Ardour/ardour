@@ -44,7 +44,7 @@
 
 #include "open_file_dialog_proxy.h"
 #include "yes_no_dialog.h"
-#include "ok_dialog.h"
+#include "waves_message_dialog.h"
 
 using namespace ARDOUR;
 using namespace Gtk;
@@ -588,8 +588,8 @@ TracksControlPanel::populate_engine_dropdown()
     EngineStateController::instance()->available_backends(backends);
 
 	if (backends.empty()) {
-		OkDialog ok_dialog ("", string_compose (_("No audio/MIDI backends detected. %1 cannot run\n(This is a build/packaging/system error.\nIt should never happen.)"), PROGRAM_NAME));
-		ok_dialog.run ();
+		WavesMessageDialog message_dialog ("", string_compose (_("No audio/MIDI backends detected. %1 cannot run\n(This is a build/packaging/system error.\nIt should never happen.)"), PROGRAM_NAME));
+		message_dialog.run ();
 		throw failed_constructor ();
 	}
 	for (std::vector<const AudioBackendInfo*>::const_iterator b = backends.begin(); b != backends.end(); ++b) {
@@ -1148,8 +1148,11 @@ TracksControlPanel::on_device_dropdown_item_clicked (WavesDropdown*, int)
     
     std::string message = _("Would you like to switch to ") + device_name + "?";
 
-    this->set_keep_above (false);
-    YesNoDialog yes_no_dialog ("", message);
+    set_keep_above (false);
+    WavesMessageDialog yes_no_dialog ("", 
+									  message,
+									  WavesMessageDialog::BUTTON_YES |
+									  WavesMessageDialog::BUTTON_NO);
     
     yes_no_dialog.set_position (Gtk::WIN_POS_MOUSE);
 
@@ -1159,11 +1162,14 @@ TracksControlPanel::on_device_dropdown_item_clicked (WavesDropdown*, int)
             PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
                 
             _device_dropdown.set_text (EngineStateController::instance()->get_current_device_name());
-            this->set_keep_above (true);
+            set_keep_above (true);
             return;
+				break;
+		default:
+			break;
     } 
 
-    this->set_keep_above (true);
+    set_keep_above (true);
 	device_changed ();
 }
 
@@ -1405,13 +1411,11 @@ TracksControlPanel::on_a_settings_tab_button_clicked (WavesButton* clicked_butto
 void
 TracksControlPanel::on_device_error ()
 {
-    std::string message = _("Device cannot operate properly. Switched to None device.");
+    WavesMessageDialog message_dialog ("", _("Device cannot operate properly. Switched to None device."));
     
-    OkDialog ok_dialog ("", message);
-    
-    ok_dialog.set_position (Gtk::WIN_POS_MOUSE);
-    ok_dialog.set_keep_above (true);
-    ok_dialog.run ();
+    message_dialog.set_position (Gtk::WIN_POS_MOUSE);
+    message_dialog.set_keep_above (true);
+    message_dialog.run ();
 }
 
 void
@@ -1628,12 +1632,12 @@ TracksControlPanel::on_device_list_update (bool current_device_disconnected)
     if (current_device_disconnected) {
         std::string message = _("Audio device has been removed");
         
-        this->set_keep_above (false);
-        OkDialog ok_dialog ("", message);
+        set_keep_above (false);
+        WavesMessageDialog message_dialog ("", message);
         
-        ok_dialog.set_position (Gtk::WIN_POS_MOUSE);
-        ok_dialog.run();
-        this->set_keep_above (true);
+        message_dialog.set_position (Gtk::WIN_POS_MOUSE);
+        message_dialog.run();
+        set_keep_above (true);
         
         return;
     }

@@ -98,7 +98,6 @@ typedef uint64_t microseconds_t;
 
 #include "about_dialog.h"
 #include "read_only_session_dialog.h"
-#include "sample_rate_mismatch_dialog.h"
 #include "actions.h"
 #include "add_tracks_dialog.h"
 #include "ambiguous_file_dialog.h"
@@ -144,7 +143,7 @@ typedef uint64_t microseconds_t;
 #include "i18n.h"
 
 #include "open_file_dialog_proxy.h"
-#include "ok_dialog.h"
+#include "waves_message_dialog.h"
 #include "crash_recovery_dialog.h"
 
 using namespace ARDOUR;
@@ -2946,10 +2945,10 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 
 	catch (...) {
 
-        OkDialog ok_dialog ("Loading Error", string_compose(_("Session \"%1 (snapshot %2)\"\ndid not load successfully"), path, snap_name));
-        ok_dialog.set_position (Gtk::WIN_POS_CENTER);
-		pop_back_splash (ok_dialog);
-		ok_dialog.run ();
+        WavesMessageDialog message_dialog ("Loading Error", string_compose(_("Session \"%1 (snapshot %2)\"\ndid not load successfully"), path, snap_name));
+        message_dialog.set_position (Gtk::WIN_POS_CENTER);
+		pop_back_splash (message_dialog);
+		message_dialog.run ();
         
 		goto out;
 	}
@@ -3991,9 +3990,21 @@ ARDOUR_UI::session_dialog (std::string msg)
 int
 ARDOUR_UI::pending_state_dialog ()
 {
-    CrashRecoveryDialog crash_recovery_dialog;
+    WavesMessageDialog message_dialog ("crash_recovery_dialog.xml",
+									   _("Crash Recovery"), 
+									   string_compose (_(
+"This session appears to have been in the\n\
+middle of recording when %1 or\n\
+the computer was shutdown.\n\
+\n\
+%1 can recover any captured audio for\n\
+you, or it can ignore it. Please decide\n\
+what you would like to do.\n"), PROGRAM_NAME),
+									  WavesMessageDialog::BUTTON_ACCEPT |
+									  WavesMessageDialog::BUTTON_NO);
     
-	switch (crash_recovery_dialog.run ()) {
+	switch (message_dialog.run ()) {
+	case WavesDialog::RESPONSE_DEFAULT:
 	case RESPONSE_ACCEPT:
 		return 1;
 	default:
@@ -4005,16 +4016,22 @@ int
 ARDOUR_UI::sr_mismatch_dialog (framecnt_t desired, framecnt_t actual)
 {
  	
-    SampleRateMismatchDialog srm_dialog(desired, PROGRAM_NAME, actual);
+     WavesMessageDialog message_dialog (_("Sample Rate Mismatch"),
+										string_compose (_("\
+This session was created with a sample rate of %1 Hz, but\n\
+%2 is currently running at %3 Hz. If you load this session,\n\
+device will be switched to the session sample rate value. \n\
+If an attemp to switch the device is unsuccessful\n\
+audio may be played at the wrong sample rate.\n"),
+														desired,
+														PROGRAM_NAME,
+														actual),
+										WavesMessageDialog::BUTTON_ACCEPT|WavesMessageDialog::BUTTON_CANCEL);
+    message_dialog.set_position (WIN_POS_CENTER);
     
-	switch ( srm_dialog.run () ) {
-	case RESPONSE_ACCEPT:
-		return 0;
-	default:
-                break;
-	}
-
-        return 1;
+	int result = message_dialog.run ();
+	
+	return (result == Gtk::RESPONSE_ACCEPT || result == WavesDialog::RESPONSE_DEFAULT) ? 0 : 1;
 }
 
 int

@@ -42,7 +42,7 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
-WavesDialog::WavesDialog (std::string layout_script_file, bool modal, bool use_seperator)
+WavesDialog::WavesDialog (const std::string& layout_script_file, bool modal, bool use_seperator)
 	: Gtk::Dialog ("", modal, use_seperator)
 	, WavesUI (layout_script_file, *get_vbox())
 	, _proxy (0)
@@ -107,53 +107,17 @@ WavesDialog::~WavesDialog ()
 	WM::Manager::instance().remove (_proxy);
 }
 
-void
-WavesDialog::on_esc_pressed ()
-{
-    
-}
-
-void
-WavesDialog::on_enter_pressed ()
-{
-    
-}
-
 bool
 WavesDialog::on_key_press_event (GdkEventKey* ev)
 {
     switch (ev->keyval)
     {
         case GDK_Return:
-            on_enter_pressed ();
-            break;
-        case GDK_Escape:
-            on_esc_pressed ();
-            break;
+            response (WavesDialog::RESPONSE_DEFAULT);
+            return true;
     }
     
-	return relay_key_press (ev, this);
-}
-
-bool
-WavesDialog::on_enter_notify_event (GdkEventCrossing *ev)
-{
-	Keyboard::the_keyboard().enter_window (ev, this);
-	return Dialog::on_enter_notify_event (ev);
-}
-
-bool
-WavesDialog::on_leave_notify_event (GdkEventCrossing *ev)
-{
-	Keyboard::the_keyboard().leave_window (ev, this);
-	return Dialog::on_leave_notify_event (ev);
-}
-
-void
-WavesDialog::on_unmap ()
-{
-	Keyboard::the_keyboard().leave_window (0, this);
-	Dialog::on_unmap ();
+	return Gtk::Dialog::on_key_press_event (ev);
 }
 
 void

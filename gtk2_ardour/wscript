@@ -28,6 +28,7 @@ path_prefix = 'gtk2_ardour/'
 
 gtk2_ardour_sources = [
         'mixer_bridge_view.cc',
+        'waves_message_dialog.cc',
         'waves_dropdown.cc',
         'waves_zoom_control.cc',
         'waves_ui.cc',
@@ -118,7 +119,6 @@ gtk2_ardour_sources = [
         'fft_graph.cc',
         'fft_result.cc',
         'floating_text_entry.cc',
-        'sample_rate_mismatch_dialog.cc',
         'sfdb_freesound_mootcher.cc',
         'gain_meter.cc',
         'generic_pluginui.cc',
@@ -177,7 +177,6 @@ gtk2_ardour_sources = [
         'note_player.cc',
         'nsm.cc',
         'nsmclient.cc',
-        'ok_dialog.cc',
         'option_editor.cc',
         'opts.cc',
         'panner2d.cc',

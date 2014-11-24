@@ -45,19 +45,18 @@ class WavesDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr, public 
 {
   public:
 
-	WavesDialog (std::string layout_script, bool modal = false, bool use_separator = false);
-	~WavesDialog();
+	WavesDialog (const std::string& layout_script_file, bool modal = false, bool use_separator = false);
+	virtual ~WavesDialog();
 
-	bool on_enter_notify_event (GdkEventCrossing*);
-	bool on_leave_notify_event (GdkEventCrossing*);
 	bool on_delete_event (GdkEventAny*);
 	bool on_key_press_event (GdkEventKey*);
-	void on_unmap ();
 	void on_show ();
+	enum {
+		// We need one smaller then smallest Gtk::RESPONSE_*
+		RESPONSE_DEFAULT = -1000
+	};
 
   protected:
-    virtual void on_esc_pressed ();
-    virtual void on_enter_pressed ();
 
   private:
 
