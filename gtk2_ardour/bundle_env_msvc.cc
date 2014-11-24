@@ -475,9 +475,12 @@ fixup_bundle_environment (int argc, char* argv[], const char** localedir)
 	}
 
 	fixup_fonts_config();
-	fixup_pango_config();
 	fixup_clearlooks_config();
 	fixup_pixbuf_loaders_config();
+
+#ifdef DLL_PANGO_MODULES
+	fixup_pango_config();
+#endif
 }
 
 
