@@ -224,8 +224,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
         , _sample_rate_dropdown (0)
         , splash (0)
 {
+	show_splash ();
 	Gtkmm2ext::init(localedir);
-
 
 	_numpad_locate_happening = false;
 

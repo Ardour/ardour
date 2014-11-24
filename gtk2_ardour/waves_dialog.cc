@@ -124,14 +124,7 @@ void
 WavesDialog::on_show ()
 {
 	Dialog::on_show ();
-
-	// never allow the splash screen to obscure any dialog
-	Splash* spl = Splash::instance();
-
-	if (spl && spl->is_visible()) {
-		spl->pop_back_for (*this);
-        _splash_pushed = true;
-	}
+	ARDOUR_UI::instance ()->hide_splash ();
 }
 
 
