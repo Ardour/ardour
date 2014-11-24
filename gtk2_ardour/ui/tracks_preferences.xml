@@ -898,7 +898,7 @@
             <SpinButton id="inbound_mmc_device_spinbutton"
                         width="50"
                         min="0"
-                        max="128"
+                        max="127"
                         step="1"
                         page="10"/>
           </HBox>
@@ -909,7 +909,7 @@
             <SpinButton id="outbound_mmc_device_spinbutton"
                         width="50"
                         min="0"
-                        max="128"
+                        max="127"
                         step="1"
                         page="10"/>
           </HBox>
