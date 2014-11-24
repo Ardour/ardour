@@ -754,6 +754,12 @@ VideoTimeLine::find_xjadeo () {
 	{
 		_xjadeo_bin = std::string(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "xjadeo.exe", 0));
 	}
+	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\xjadeo", 0, KEY_READ | KEY_WOW64_32KEY, &key))
+			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+			)
+	{
+		_xjadeo_bin = std::string(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "xjadeo.exe", 0));
+	}
 	else if (program_files && Glib::file_test(g_build_filename(program_files, "xjadeo", "xjadeo.exe", 0), Glib::FILE_TEST_EXISTS))
 	{
 		_xjadeo_bin = std::string(g_build_filename(program_files, "xjadeo", "xjadeo.exe", 0));
