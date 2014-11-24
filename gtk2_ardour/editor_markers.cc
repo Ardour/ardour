@@ -108,8 +108,8 @@ Editor::add_new_location_internal (Location* location)
 
 	} else if (location->is_auto_loop()) {
 
-		// no name shown ; actual marker is twice the height of the bar on which we drag, so that 
-                // it covers the ruler as well.
+		// no name shown ; actual marker is some portion of the height of the bar on which we drag,
+                // so that it only appears in the upper part of the bar (ruler).
 		lam->start = new RulerMarker (location, *this, *ruler_group, ruler_height - ruler_divide_height, 
                                               ARDOUR_UI::instance()->config()->get_canvasvar_LoopRangeMarkerInactive(),
                                               "", location->start(), location->end());
