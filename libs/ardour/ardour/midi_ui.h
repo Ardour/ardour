@@ -59,8 +59,6 @@ class LIBARDOUR_API MidiControlUI : public AbstractUI<MidiUIRequest>
 	void do_request (MidiUIRequest*);
 
   private:
-	typedef std::list<GSource*> PortSources;
-	PortSources port_sources;
 	ARDOUR::Session& _session;
 
 	bool midi_input_handler (Glib::IOCondition, AsyncMIDIPort*);
