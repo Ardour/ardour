@@ -36,6 +36,7 @@
 #include "canvas/rectangle.h"
 #include "canvas/utils.h"
 
+#include "ardour_ui.h"
 #include "editor.h"
 #include "marker.h"
 #include "selection.h"
@@ -109,7 +110,8 @@ Editor::add_new_location_internal (Location* location)
 
 		// no name shown ; actual marker is twice the height of the bar on which we drag, so that 
                 // it covers the ruler as well.
-		lam->start = new RulerMarker (location, *this, *ruler_group, ruler_height - ruler_divide_height, ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 0.4),
+		lam->start = new RulerMarker (location, *this, *ruler_group, ruler_height - ruler_divide_height, 
+                                              ARDOUR_UI::instance()->config()->get_canvasvar_LoopRangeMarkerInactive(),
                                               "", location->start(), location->end());
                 lam->end = 0;
 		group = ruler_group;
@@ -1169,6 +1171,7 @@ Editor::update_loop_range_view ()
 	}
 
 	Location* tll = transport_loop_location();
+        LocationMarkers* lam = find_location_markers (tll);
 
 	if (_session->get_play_loop() && tll) {
 
@@ -1179,8 +1182,17 @@ Editor::update_loop_range_view ()
 		transport_loop_range_rect->set_x1 (x2);
                 
 		transport_loop_range_rect->show();
+
+                if (lam) {
+                        lam->start->set_color (ARDOUR_UI::instance()->config()->get_canvasvar_LoopRangeMarkerActive());
+                }
+
 	} else {
 		transport_loop_range_rect->hide();
+
+                if (lam) {
+                        lam->start->set_color (ARDOUR_UI::instance()->config()->get_canvasvar_LoopRangeMarkerInactive());
+                }
 	}
 }
 

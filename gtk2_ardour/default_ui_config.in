@@ -57,6 +57,8 @@
     <Option name="location selected" value="1d9b9b60"/>
     <Option name="location outline" value="ffffff33"/>
     <Option name="location handle" value="ffffffcc"/>
+    <Option name="loop range marker: active" value="3453aecc"/>
+    <Option name="loop range marker: inactive" value="ae5334cc"/>
     <Option name="marker bar" value="575757ff"/>
     <Option name="marker bar separator" value="ffffff15"/>
     <Option name="marker drag line" value="004f00f9"/>
