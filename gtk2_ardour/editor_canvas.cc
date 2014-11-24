@@ -180,11 +180,6 @@ Editor::initialize_canvas ()
 
         /* bars (background rectangles for each kind of marker/ruler */
 
-	punch_loop_bar = new ArdourCanvas::Rectangle (ruler_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, ruler_height));
-	CANVAS_DEBUG_NAME (punch_loop_bar, "punch/loop Bar");
-        /* not outlined, so that there is no gap between it and the ruler in the same group */
-	punch_loop_bar->set_outline (false);
-
 	skip_bar = new ArdourCanvas::Rectangle (skip_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, skipbar_height));
 	CANVAS_DEBUG_NAME (skip_bar, "skip Bar");
 	skip_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
@@ -206,7 +201,7 @@ Editor::initialize_canvas ()
 	range_bar_drag_rect->hide ();
 
         /* drag bar for ruler is double height because it spans loop bar and the ruler */
-	transport_bar_drag_rect = new ArdourCanvas::Rectangle (ruler_group, ArdourCanvas::Rect (0.0, 0.0, 100, ruler_height + loopbar_height));
+	transport_bar_drag_rect = new ArdourCanvas::Rectangle (ruler_group, ArdourCanvas::Rect (0.0, 0.0, 100, ruler_height));
 	CANVAS_DEBUG_NAME (transport_bar_drag_rect, "transport drag");
 	transport_bar_drag_rect->set_outline (false);
 	transport_bar_drag_rect->hide ();
@@ -258,7 +253,6 @@ Editor::initialize_canvas ()
 	cd_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_cd_marker_bar_event), cd_marker_bar));
 	videotl_group->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_videotl_bar_event), videotl_group));
 	range_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
-	punch_loop_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_punch_loop_bar_event), punch_loop_bar));
 	skip_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_skip_bar_event), skip_bar));
 
 	playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event);
@@ -983,9 +977,6 @@ Editor::color_handler()
 
 	range_marker_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RangeMarkerBar());
 	range_marker_bar->set_outline_color (ARDOUR_UI::config()->get_canvasvar_MarkerBarSeparator());
-
-        /* same color as rulers */
-        punch_loop_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RulerBase());
 
         skip_bar->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SkipBar());
 	skip_bar->set_outline_color (ARDOUR_UI::config()->get_canvasvar_MarkerBarSeparator());

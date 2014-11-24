@@ -137,7 +137,7 @@ Editor::initialize_rulers ()
 	_samples_metric = new SamplesMetric (this);
 	
         /* initial choice metric isn't important, but we have to supply one */
-	clock_ruler = new ArdourCanvas::Ruler (ruler_group, *_minsec_metric, ArdourCanvas::Rect (0, loopbar_height, ArdourCanvas::COORD_MAX, loopbar_height + ruler_height));
+	clock_ruler = new ArdourCanvas::Ruler (ruler_group, *_minsec_metric, ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, ruler_height));
 	clock_ruler->set_font_description (font);
 	CANVAS_DEBUG_NAME (clock_ruler, "clock ruler");
         clock_ruler->set_outline (false);

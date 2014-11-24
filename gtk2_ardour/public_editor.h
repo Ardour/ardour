@@ -359,7 +359,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual bool canvas_meter_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_range_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
-	virtual bool canvas_punch_loop_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_skip_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 

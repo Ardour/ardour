@@ -109,7 +109,7 @@ Editor::add_new_location_internal (Location* location)
 
 		// no name shown ; actual marker is twice the height of the bar on which we drag, so that 
                 // it covers the ruler as well.
-		lam->start = new RulerMarker (location, *this, *ruler_group, loopbar_height + ruler_height, ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 0.4),
+		lam->start = new RulerMarker (location, *this, *ruler_group, ruler_height, ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 0.4),
                                               "", location->start(), location->end());
                 lam->end = 0;
 		group = ruler_group;

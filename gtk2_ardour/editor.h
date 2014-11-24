@@ -876,7 +876,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	const double timebar_height;
 	const double ruler_height;
-	const double loopbar_height;
 	const double marker_height;
 	const double skipbar_height;
 
@@ -886,7 +885,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Rectangle* meter_bar;
 	ArdourCanvas::Rectangle* marker_bar;
 	ArdourCanvas::Rectangle* range_marker_bar;
-	ArdourCanvas::Rectangle* punch_loop_bar;
 	ArdourCanvas::Rectangle* skip_bar;
 	ArdourCanvas::Rectangle* cd_marker_bar;
 
@@ -1453,7 +1451,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool canvas_meter_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_range_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
-	bool canvas_punch_loop_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_skip_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_cd_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 
