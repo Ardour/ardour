@@ -284,5 +284,8 @@ Rectangle::vertical_fraction (double y) const
                 return 0;
         }
 
-        return (i.y - bbox.y0) / bbox.height();
+        /* convert to fit Cairo origin model (origin at upper left)
+         */
+
+        return 1.0 - ((i.y - bbox.y0) / bbox.height());
 }
