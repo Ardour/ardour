@@ -195,9 +195,6 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 
 		break;
 
-	case PunchLoopBarItem:
-		break;
-
 	case SkipBarItem:
 		break;
 

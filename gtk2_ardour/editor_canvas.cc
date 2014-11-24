@@ -1432,7 +1432,6 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 	case RangeMarkerBarItem:
 	case CdMarkerBarItem:
 	case VideoBarItem:
-	case PunchLoopBarItem:
 	case DropZoneItem:
     case SelectionItem:
 		cursor = which_grabber_cursor();

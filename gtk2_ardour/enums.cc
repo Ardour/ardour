@@ -144,7 +144,6 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (RangeMarkerBarItem);
 	REGISTER_ENUM (CdMarkerBarItem);
 	REGISTER_ENUM (VideoBarItem);
-	REGISTER_ENUM (PunchLoopBarItem);
 	REGISTER_ENUM (SkipBarItem);
 	REGISTER_ENUM (SelectionItem);
 	REGISTER_ENUM (ControlPointItem);

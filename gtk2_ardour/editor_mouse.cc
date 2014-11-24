@@ -676,11 +676,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                 return true;
                 break;
 
-	case PunchLoopBarItem:
-                _drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateLoopMarker), event);
-		return true;
-		break;
-
 	case ClockRulerItem:
                 /* XXX this is not really a CursorDrag .. a new Drag object is needed */
                 _drags->set (new CursorDrag (this, *playhead_cursor, false), event);
@@ -1307,7 +1302,6 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		case RangeMarkerBarItem:
                 case SkipBarItem:
 		case CdMarkerBarItem:
-		case PunchLoopBarItem:
 		case StreamItem:
 		case TimecodeRulerItem:
 		case SamplesRulerItem:
@@ -1524,7 +1518,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 
 			case MarkerBarItem:
-			case PunchLoopBarItem:
 			case SkipBarItem:
 			case RangeMarkerBarItem:
 			case CdMarkerBarItem:
