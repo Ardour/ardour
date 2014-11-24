@@ -1059,6 +1059,7 @@ ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
     
 	switch (result) {
             // button "SAVE" was pressed
+		case WavesDialog::RESPONSE_DEFAULT:
         case RESPONSE_YES: // save and get out of here
             return 1;
             // button "DON'T SAVE" was pressed

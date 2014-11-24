@@ -1157,16 +1157,13 @@ TracksControlPanel::on_device_dropdown_item_clicked (WavesDropdown*, int)
     yes_no_dialog.set_position (Gtk::WIN_POS_MOUSE);
 
     switch (yes_no_dialog.run()) {
-        case RESPONSE_NO:
+	case Gtk::RESPONSE_NO:
             // set _ignore_changes flag to ignore changes in combo-box callbacks
             PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
                 
             _device_dropdown.set_text (EngineStateController::instance()->get_current_device_name());
             set_keep_above (true);
             return;
-				break;
-		default:
-			break;
     } 
 
     set_keep_above (true);
