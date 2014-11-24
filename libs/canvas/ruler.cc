@@ -209,6 +209,13 @@ Ruler::set_divide_height (double h)
 }
 
 void
+Ruler::set_divide_colors (Color t, Color b)
+{
+        _divider_color_bottom = b;
+        _divider_color_top = t;
+}
+
+void
 Ruler::set_metric (const Metric& m)
 {
         _metric = &m;
