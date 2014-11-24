@@ -1578,6 +1578,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\item_counts.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\keyboard.h"
 				>
 			</File>
