@@ -676,8 +676,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                 return true;
                 break;
 
-	case ClockRulerItem:
-                if (clock_ruler->vertical_fraction (((GdkEventButton*)event)->y) > 0.5) {
+	case ClockRulerItem: {
+                ArdourCanvas::Duple i;
+                gdk_event_get_coords (event, &i.x, &i.y);
+                i = clock_ruler->canvas_to_item (i);
+                if (i.y < ruler_divide_height) {
                         /* top half: create/edit loop range */
                         _drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateLoopMarker), event);
                 } else {
@@ -685,7 +688,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                         _drags->set (new CursorDrag (this, *playhead_cursor, false), event);
                 }
 		return true;
-		break;
+        }       break;
 
 	case RangeMarkerBarItem:
 	case CdMarkerBarItem:
