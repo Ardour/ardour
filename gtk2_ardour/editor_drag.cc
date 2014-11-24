@@ -339,6 +339,12 @@ Drag::adjusted_current_frame (GdkEvent const * event, bool snap) const
 }
 
 double
+Drag::current_pointer_x() const
+{
+        return _drags->current_pointer_x ();
+}
+
+double
 Drag::current_pointer_y () const
 {
 	if (!_trackview_only) {
@@ -353,7 +359,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 {
 	/* check to see if we have moved in any way that matters since the last motion event */
 	if (_move_threshold_passed &&
-	    (!x_movement_matters() || _last_pointer_frame == adjusted_current_frame (event)) &&
+	    (!x_movement_matters() || _last_pointer_x == current_pointer_x ()) &&
 	    (!y_movement_matters() || _last_pointer_y == current_pointer_y ()) ) {
 		return false;
 	}
@@ -2604,6 +2610,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	framepos_t const pf = adjusted_current_frame (event);
+
 	_marker->set_position (pf);
 	show_verbose_cursor_time (pf);
 }
