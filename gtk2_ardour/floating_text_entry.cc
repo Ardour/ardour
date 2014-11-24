@@ -18,6 +18,8 @@
 */
 
 #include "pbd/stacktrace.h"
+#include "public_editor.h"
+
 
 #include "floating_text_entry.h"
 #include "gtkmm2ext/doi.h"
@@ -26,95 +28,106 @@
 #include "i18n.h"
 
 FloatingTextEntry::FloatingTextEntry (const std::string& initial_contents)
-	: ArdourWindow ("")
+	: Gtk::Window (Gtk::WINDOW_POPUP)
         , entry_changed (false)
 {
-        set_name (X_("FloatingTextEntry"));
+    set_name (X_("FloatingTextEntry"));
 	set_position (Gtk::WIN_POS_MOUSE);
-        set_border_width (0);
+    set_border_width (0);
 
-        if (!initial_contents.empty()) {
-                entry.set_text (initial_contents);
-        }
+    if (!initial_contents.empty()) {
+        entry.set_text (initial_contents);
+    }
 
-        entry.show ();
-        entry.signal_changed().connect (sigc::mem_fun (*this, &FloatingTextEntry::changed));
-        entry.signal_activate().connect (sigc::mem_fun (*this, &FloatingTextEntry::activated));
-        entry.signal_key_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_press));
-        entry.signal_button_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::button_press));
+    entry.show ();
+    entry.signal_changed().connect (sigc::mem_fun (*this, &FloatingTextEntry::changed));
+    entry.signal_activate().connect (sigc::mem_fun (*this, &FloatingTextEntry::activated));
+    entry.signal_key_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_press));
+    entry.signal_button_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::button_press));
+	PublicEditor::instance ().signal_focus_out_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::entry_focus_out));
 
-        add (entry);
+    add (entry);
 }
 
 void
 FloatingTextEntry::changed ()
 {
-        entry_changed = true;
+    entry_changed = true;
 }
 
 void
 FloatingTextEntry::on_realize ()
 {
-        ArdourWindow::on_realize ();
-        get_window()->set_decorations (Gdk::WMDecoration (0));
-        entry.add_modal_grab ();
+    Gtk::Window::on_realize ();
+    get_window()->set_decorations (Gdk::WMDecoration (0));
+    entry.add_modal_grab ();
+}
+
+bool
+FloatingTextEntry::entry_focus_out (GdkEventFocus* ev)
+{
+    entry.remove_modal_grab ();
+    if (entry_changed) {
+        use_text (entry.get_text ());
+    }
+        
+    delete_when_idle ( this);
+    return false;
 }
 
 bool
 FloatingTextEntry::button_press (GdkEventButton* ev)
 {
-        if (Gtkmm2ext::event_inside_widget_window (*this, (GdkEvent*) ev)) {
-                return true;
-        }
+    if (Gtkmm2ext::event_inside_widget_window (*this, (GdkEvent*) ev)) {
+        return true;
+    }
 
-        /* Clicked outside widget window - edit is done */
+    /* Clicked outside widget window - edit is done */
+    entry.remove_modal_grab ();
 
-        entry.remove_modal_grab ();
+    /* arrange re-propagation of the event once we go idle */
+    Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::ptr_fun (gtk_main_do_event), gdk_event_copy ((GdkEvent*) ev)), false));
 
-        /* arrange re-propagation of the event once we go idle */
-
-        Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::ptr_fun (gtk_main_do_event), gdk_event_copy ((GdkEvent*) ev)), false));
-
-        if (entry_changed) {
-                use_text (entry.get_text ());
-        }
+    if (entry_changed) {
+        use_text (entry.get_text ());
+    }
         
-        delete_when_idle ( this);
+    delete_when_idle ( this);
 
-        return false;
+    return false;
 }
 
 void
 FloatingTextEntry::activated ()
 {
-        use_text (entry.get_text()); // EMIT SIGNAL
-        delete_when_idle (this);
+    use_text (entry.get_text()); // EMIT SIGNAL
+    delete_when_idle (this);
 }
 
 bool
 FloatingTextEntry::key_press (GdkEventKey* ev)
 {
-        switch (ev->keyval) {
-        case GDK_Escape:
-                delete_when_idle (this);
-                return true;
-                break;
-        default:
-                break;
-        }
-        return false;
+    switch (ev->keyval) {
+    case GDK_Escape:
+        delete_when_idle (this);
+        return true;
+        break;
+    default:
+        break;
+    }
+    return false;
 }
 
 void
 FloatingTextEntry::on_hide ()
 {
-        entry.remove_modal_grab ();
+    entry.remove_modal_grab ();
 
-        /* No hide button is shown (no decoration on the window), 
-           so being hidden is equivalent to the Escape key or any other 
-           method of cancelling the edit.
-        */
+    /* No hide button is shown (no decoration on the window), 
+        so being hidden is equivalent to the Escape key or any other 
+        method of cancelling the edit.
+    */
 
-        delete_when_idle (this);
-        ArdourWindow::on_hide ();
+    delete_when_idle (this);
+    Gtk::Window::on_hide ();
 }
