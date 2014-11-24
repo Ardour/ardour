@@ -135,6 +135,8 @@
     <Option name="rubber band rect" value="c6c6c659"/>
     <Option name="ruler base" value="575757ff"/>
     <Option name="ruler text" value="9C9C9Cff"/>
+    <Option name="ruler divider top" value="00ff00ff"/>
+    <Option name="ruler divider bottom" value="ff0000ff"/>
     <Option name="selected crossfade editor line" value="00dbdbff"/>
     <Option name="selected crossfade editor wave" value="f9ea14a0"/>
     <Option name="selected region base" value="5F5E5FFF"/>

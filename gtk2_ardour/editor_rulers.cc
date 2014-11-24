@@ -145,6 +145,8 @@ Editor::initialize_rulers ()
 
         if (ruler_divide_height >= 0) {
                 clock_ruler->set_divide_height (ruler_divide_height);
+                clock_ruler->set_divide_colors (ARDOUR_UI::config()->get_canvasvar_RulerDividerTop(),
+                                                ARDOUR_UI::config()->get_canvasvar_RulerDividerBottom());
         }
 
         ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun (*this, &Editor::update_ruler_visibility));
