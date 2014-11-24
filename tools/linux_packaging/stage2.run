@@ -14,6 +14,7 @@ PGM_NAME="Ardour"
 PGM_VENDOR="Ardour"
 PGM_EXEC_FILE="ardour3"
 
+THE_SHELL="/bin/sh"
 INSTALL_DEST_BASE="/opt"
 USER_BIN_DIR="/usr/local/bin"
 
@@ -144,7 +145,7 @@ if [ "$(id -u)" != "0" ]; then
 		echo "Please enter root password below"
 		echo ""
 
-		if ! su -c "./.stage2.run";
+		if ! su -s $THE_SHELL -c "./.stage2.run";
 		then
 			echo ""
 			echo "!!! ERROR !!!"
@@ -153,7 +154,7 @@ if [ "$(id -u)" != "0" ]; then
 			echo "running as root AND an attempt to use su failed."
 			echo ""
 			echo "Please correct this by installing and configuring sudo or running"
-			echo "the installer as root (su -c)."
+			echo "the installer as root (su -s /bin/sh -c)."
 			echo ""
 			read -p "Press ENTER to exit installer:" BLAH
 			exit 1
@@ -170,7 +171,7 @@ if [ "$(id -u)" != "0" ]; then
 		echo "Please enter root password below"
 		echo ""
 
-		if ! su -c "./.stage2.run";
+		if ! su -s $THE_SHELL -c "./.stage2.run";
 		then
 			echo ""
 			echo "!!! ERROR !!!"
@@ -179,7 +180,7 @@ if [ "$(id -u)" != "0" ]; then
 			echo "running as root AND an attempt to use both sudo and su failed."
 			echo ""
 			echo "Please correct this by installing and configuring sudo or running"
-			echo "the installer as root (su -c)."
+			echo "the installer as root (su -s /bin/sh -c)."
 			echo ""
 			read -p "Press ENTER to exit installer:" BLAH
 			exit 1
@@ -187,12 +188,12 @@ if [ "$(id -u)" != "0" ]; then
 		exit
 	fi
 	SUPER="sudo"
-	
+
 	# The quoting reqired for the su sanityCheck method does not work when used without
 	# su. Using sh -c in the normal case gets around that, but is a bit of a hack.
 	NORM_USER="sh -c"
 else
-	NORM_USER="su -l $USER_NAME -c" 
+	NORM_USER="su -l $USER_NAME -s $THE_SHELL -c"
 fi
 
 ############################
