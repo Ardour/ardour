@@ -135,18 +135,11 @@
     <menu action = 'WindowMenu'>
 #ifdef GTKOSX
       <menuitem action='MainWindow'/>
+#endif
       <menuitem action='Minimize'/>
       <menuitem action='Zoom'/>
-#endif
-
-
-
-
-
-
-
-
     </menu>
+
     <menu name='Help' action='Help'>
 #ifndef GTKOSX
       <menuitem action='toggle-about'/>

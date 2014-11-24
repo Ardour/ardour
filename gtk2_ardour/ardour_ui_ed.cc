@@ -505,11 +505,11 @@ ARDOUR_UI::install_actions ()
 #ifdef __APPLE__
 	act = ActionManager::register_action (main_actions, X_("MainWindow"), _("Main Window"),  sigc::mem_fun(*this, &ARDOUR_UI::goto_editor_window));
     ActionManager::session_sensitive_actions.push_back (act);
+#endif
     act = ActionManager::register_action (main_actions, X_("Minimize"), _("Minimize"),  sigc::mem_fun(*this, &ARDOUR_UI::minimize_window));
     ActionManager::session_sensitive_actions.push_back (act);
     act = ActionManager::register_action (main_actions, X_("Zoom"), _("Zoom"),  sigc::mem_fun(*this, &ARDOUR_UI::maximize_window));
     ActionManager::session_sensitive_actions.push_back (act);
-#endif
     
 	ActionManager::register_action (main_actions, X_("LockSession"), _("Lock this session"),  sigc::mem_fun(*this, &ARDOUR_UI::on_lock_button_pressed));
 	ActionManager::register_action (main_actions, X_("ToggleMultiOutMode"), "Multi Out", sigc::mem_fun(*this, &ARDOUR_UI::toggle_multi_out_mode));
