@@ -241,6 +241,27 @@ round(double x)
 	return (floor(x));
 }
 
+//***************************************************************
+//
+//	trunc()
+//
+// Emulates trunc() using floor() and ceil().
+//
+//	Returns:
+//
+//    On Success: The largest integer whose magnitude is less
+//                than or equal to 'x' (regardless of sign).
+//    On Failure: None
+//
+LIBPBD_API double PBD_APICALLTYPE
+trunc(double x)
+{
+	if (x < 0)
+		return (ceil(x));
+
+	return (floor(x));
+}
+
 namespace PBD {
 
 //***************************************************************
