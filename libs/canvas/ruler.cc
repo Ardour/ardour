@@ -36,6 +36,7 @@ Ruler::Ruler (Canvas* c, const Metric& m)
 	, _metric (&m)
 	, _lower (0)
 	, _upper (0)
+        , _divide_height (-1.0)
 	, _need_marks (true)
 {
 }
@@ -45,6 +46,7 @@ Ruler::Ruler (Canvas* c, const Metric& m, Rect const& r)
 	, _metric (&m)
 	, _lower (0)
 	, _upper (0)
+        , _divide_height (-1.0)
 	, _need_marks (true)
 {
 }
@@ -54,6 +56,7 @@ Ruler::Ruler (Item* parent, const Metric& m)
 	, _metric (&m)
 	, _lower (0)
 	, _upper (0)
+        , _divide_height (-1.0)
 	, _need_marks (true)
 {
 }
@@ -63,6 +66,7 @@ Ruler::Ruler (Item* parent, const Metric& m, Rect const& r)
 	, _metric (&m)
 	, _lower (0)
 	, _upper (0)
+        , _divide_height (-1.0)
 	, _need_marks (true)
 {
 }
@@ -178,7 +182,30 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 		}
 	}
 
+        if (_divide_height >= 0.0) {
+                
+                cr->set_line_width (1.0);
+
+                set_source_rgba (cr, _divider_color_top);
+                cr->move_to (self.x0, self.y0 + _divide_height+0.5);
+                cr->line_to (self.x1, self.y0 + _divide_height+0.5);
+                cr->stroke ();
+
+                set_source_rgba (cr, _divider_color_bottom);
+                cr->move_to (self.x0, self.y0 + _divide_height+1.5);
+                cr->line_to (self.x1, self.y0 + _divide_height+1.5);
+                cr->stroke ();
+
+
+        }
+
 	/* done! */
+}
+
+void
+Ruler::set_divide_height (double h)
+{
+        _divide_height = h;
 }
 
 void
