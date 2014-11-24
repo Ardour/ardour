@@ -143,6 +143,10 @@ Editor::initialize_rulers ()
         clock_ruler->set_outline (false);
         clock_ruler->raise_to_top ();
 
+        if (ruler_divide_height >= 0) {
+                clock_ruler->set_divide_height (ruler_divide_height);
+        }
+
         ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun (*this, &Editor::update_ruler_visibility));
 
 	minsec_nmarks = 0;
