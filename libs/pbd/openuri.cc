@@ -28,11 +28,14 @@
 #include "pbd/epa.h"
 #include "pbd/openuri.h"
 
+#ifdef __APPLE__
+	extern bool cocoa_open_url (const char*);
+#endif
+
 bool
 PBD::open_uri (const char* uri)
 {
 #ifdef __APPLE__
-	extern bool cocoa_open_url (const char*);
 	return cocoa_open_url (uri);
 #else
 	EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
