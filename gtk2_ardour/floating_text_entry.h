@@ -21,10 +21,9 @@
 #define __floating_text_entry_h__
 
 #include <gtkmm/entry.h>
+#include <gtkmm/Window.h>
 
-#include "ardour_window.h"
-
-class FloatingTextEntry : public ArdourWindow
+class FloatingTextEntry : public Gtk::Window
 {
   public:
         FloatingTextEntry (const std::string& initial_contents);
@@ -36,7 +35,7 @@ class FloatingTextEntry : public ArdourWindow
         bool entry_changed;
 
         /* handlers for Entry events */
-
+		bool entry_focus_out (GdkEventFocus*);
         bool key_press (GdkEventKey*);
         void activated ();
         bool button_press (GdkEventButton*);
