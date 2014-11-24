@@ -677,8 +677,13 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                 break;
 
 	case ClockRulerItem:
-                /* XXX this is not really a CursorDrag .. a new Drag object is needed */
-                _drags->set (new CursorDrag (this, *playhead_cursor, false), event);
+                if (clock_ruler->vertical_fraction (((GdkEventButton*)event)->y) > 0.5) {
+                        /* top half: create/edit loop range */
+                        _drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateLoopMarker), event);
+                } else {
+                        /* lower half: drag/set playhead */
+                        _drags->set (new CursorDrag (this, *playhead_cursor, false), event);
+                }
 		return true;
 		break;
 
