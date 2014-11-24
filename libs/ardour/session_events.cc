@@ -115,7 +115,7 @@ SessionEventManager::replace_event (SessionEvent::Type type, framepos_t frame, f
 void
 SessionEventManager::clear_events (SessionEvent::Type type)
 {
-	SessionEvent* ev = new SessionEvent (type, SessionEvent::Clear, 0, 0, 0);
+	SessionEvent* ev = new SessionEvent (type, SessionEvent::Clear, SessionEvent::Immediate, 0, 0);
 	queue_event (ev);
 }
 
@@ -168,7 +168,7 @@ SessionEventManager::merge_event (SessionEvent* ev)
 
 	/* try to handle immediate events right here */
 
-	if (ev->action_frame == 0) {
+	if (ev->action_frame == SessionEvent::Immediate) {
 		process_event (ev);
 		return;
 	}

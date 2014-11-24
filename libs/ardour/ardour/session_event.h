@@ -141,7 +141,7 @@ public:
 	void* operator new (size_t);
 	void  operator delete (void *ptr, size_t /*size*/);
 
-	static const framepos_t Immediate = 0;
+	static const framepos_t Immediate = -1;
 
 	static void create_per_thread_pool (const std::string& n, uint32_t nitems);
 	static void init_event_pool ();
