@@ -64,6 +64,17 @@ public:
 	void set_x1 (Coord);
 	void set_y1 (Coord);
 
+        /** return @param y as a floating point fraction of the overall
+         *  height of the rectangle. @param y is in canvas coordinate space.
+         * 
+         *  A value of zero indicates that y is at the bottom of the
+         *  rectangle; a value of 1 indicates that y is at the top.
+         *
+         *  Will return zero if there is no bounding box or if y
+         *  is outside the bounding box.
+         */
+        double vertical_fraction (double y) const;
+
 	enum What {
 		NOTHING = 0x0,
 		LEFT = 0x1,

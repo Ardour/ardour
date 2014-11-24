@@ -266,3 +266,23 @@ Rectangle::set_outline_what (What what)
 		end_visual_change ();
 	}
 }
+
+double
+Rectangle::vertical_fraction (double y) const
+{
+        /* y is in canvas coordinates */
+
+        Duple i (canvas_to_item (Duple (0, y)));
+        boost::optional<Rect> r = bounding_box();
+        if (!r) {
+                return 0; /* not really correct, but what else can we do? */
+        }
+
+        Rect bbox (r.get());
+
+        if (i.y < bbox.y0 || i.y >= bbox.y1) {
+                return 0;
+        }
+
+        return (i.y - bbox.y0) / bbox.height();
+}
