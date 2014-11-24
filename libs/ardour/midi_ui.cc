@@ -97,21 +97,11 @@ MidiControlUI::midi_input_handler (IOCondition ioc, AsyncMIDIPort* port)
 void
 MidiControlUI::clear_ports ()
 {
-	for (PortSources::iterator i = port_sources.begin(); i != port_sources.end(); ++i) {
-		g_source_destroy (*i);
-		g_source_unref (*i);
-	}
-
-	port_sources.clear ();
 }
 
 void
 MidiControlUI::reset_ports ()
 {
-	if (!port_sources.empty()) {
-		return;
-	}
-	
 	vector<AsyncMIDIPort*> ports;
 	AsyncMIDIPort* p;
 	
@@ -139,11 +129,6 @@ MidiControlUI::reset_ports ()
 		if (psrc) {
 			psrc->connect (sigc::bind (sigc::mem_fun (this, &MidiControlUI::midi_input_handler), *pi));
 			psrc->attach (_main_loop->get_context());
-			
-			// glibmm hack: for now, store only the GSource*
-			
-			port_sources.push_back (psrc->gobj());
-			g_source_ref (psrc->gobj());
 		}
 	}
 }

@@ -255,7 +255,6 @@ class MackieControlProtocol
 	};
 
 	typedef std::map<Mackie::Button::ID,ButtonHandlers> ButtonMap;
-	typedef std::list<GSource*> PortSources;
 
 	static MackieControlProtocol* _instance;
 	
@@ -284,7 +283,6 @@ class MackieControlProtocol
 	ViewMode                 _view_mode;
 	int                      _current_selected_track;
 	int                      _modifier_state;
-	PortSources               port_sources;
 	ButtonMap                 button_map;
 	int16_t                  _ipmidi_base;
 	bool                      needs_ipmidi_restart;

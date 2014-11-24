@@ -753,11 +753,6 @@ MackieControlProtocol::create_surfaces ()
 
 			psrc->connect (sigc::bind (sigc::mem_fun (this, &MackieControlProtocol::midi_input_handler), &input_port));
 			psrc->attach (main_loop()->get_context());
-			
-			// glibmm hack: for now, store only the GSource*
-
-			port_sources.push_back (psrc->gobj());
-			g_source_ref (psrc->gobj());
 
 		} else {
 
@@ -1334,13 +1329,6 @@ MackieControlProtocol::clear_ports ()
 		_input_bundle->remove_channels ();
 		_output_bundle->remove_channels ();
 	}
-
-	for (PortSources::iterator i = port_sources.begin(); i != port_sources.end(); ++i) {
-		g_source_destroy (*i);
-		g_source_unref (*i);
-	}
-
-	port_sources.clear ();
 }
 
 void
