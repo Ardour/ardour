@@ -447,13 +447,9 @@ def options(opt):
     opt.add_option ('--trx', action='store_true', default=False, dest='trx_build',
                     help='Whether to build for TRX')
     opt.add_option('--arch', type='string', action='store', dest='arch',
-                    help='Architecture-specific compiler flags')
-    opt.add_option('--with-dummy', action='store_true', default=False, dest='build_dummy',
-                   help='Build the dummy backend (no audio/MIDI I/O, useful for profiling)')
-    opt.add_option('--with-alsabackend', action='store_true', default=False, dest='build_alsabackend',
-                   help='Build the ALSA backend')
-    opt.add_option('--with-wavesbackend', action='store_true', default=False, dest='build_wavesbackend',
-                   help='Build the Waves/Portaudio backend')
+                    help='Architecture-specific compiler FLAGS')
+    opt.add_option('--with-backends', type='string', action='store', default='jack', dest='with_backends',
+                    help='Specify which backend modules are to be included(jack,alsa,wavesaudio,dummy)')
     opt.add_option('--backtrace', action='store_true', default=True, dest='backtrace',
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
@@ -803,12 +799,17 @@ def configure(conf):
         conf.env['DEBUG_DENORMAL_EXCEPTION'] = True
     if opts.build_tests:
         autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=True)
-    if opts.build_alsabackend:
-        conf.env['BUILD_ALSABACKEND'] = True
-    if opts.build_dummy:
-        conf.env['BUILD_DUMMYBACKEND'] = True
-    if opts.build_wavesbackend:
-        conf.env['BUILD_WAVESBACKEND'] = True
+
+    backends = opts.with_backends.split(',')
+    if not backends:
+        print("Must configure and build at least one backend")
+        sys.exit(1)
+
+    conf.env['BACKENDS'] = backends
+    conf.env['BUILD_JACKBACKEND'] = any('jack' in b for b in backends)
+    conf.env['BUILD_ALSABACKEND'] = any('alsa' in b for b in backends)
+    conf.env['BUILD_DUMMYBACKEND'] = any('dummy' in b for b in backends)
+    conf.env['BUILD_WAVESBACKEND'] = any('wavesaudio' in b for b in backends)
 
     set_compiler_flags (conf, Options.options)
 
@@ -846,7 +847,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Use External Libraries', conf.is_defined('USE_EXTERNAL_LIBS'))
     write_config_text('Library exports hidden', conf.is_defined('EXPORT_VISIBILITY_HIDDEN'))
 
-    write_config_text('ALSA Backend',          opts.build_alsabackend)
+    write_config_text('ALSA Backend',          conf.env['BUILD_ALSABACKEND'])
     write_config_text('ALSA DBus Reservation', conf.is_defined('HAVE_DBUS'))
     write_config_text('Architecture flags',    opts.arch)
     write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))
@@ -856,12 +857,13 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('CoreAudio',             conf.is_defined('HAVE_COREAUDIO'))
     write_config_text('Debug RT allocations',  conf.is_defined('DEBUG_RT_ALLOC'))
     write_config_text('Debug Symbols',         conf.is_defined('debug_symbols') or conf.env['DEBUG'])
-    write_config_text('Dummy backend',         opts.build_dummy)
+    write_config_text('Dummy backend',         conf.env['BUILD_DUMMYBACKEND'])
     write_config_text('Process thread timing', conf.is_defined('PT_TIMING'))
     write_config_text('Denormal exceptions',   conf.is_defined('DEBUG_DENORMAL_EXCEPTION'))
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
     write_config_text('FPU optimization',      opts.fpu_optimization)
     write_config_text('Freedesktop files',     opts.freedesktop)
+    write_config_text('JACK Backend',          conf.env['BUILD_JACKBACKEND'])
     write_config_text('Libjack linking',       conf.env['libjack_link'])
     write_config_text('LV2 UI embedding',      conf.is_defined('HAVE_SUIL'))
     write_config_text('LV2 support',           conf.is_defined('LV2_SUPPORT'))
@@ -876,7 +878,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Mac i386 Architecture', opts.generic)
     write_config_text('Mac ppc Architecture',  opts.ppc)
-    write_config_text('Waves Backend',         opts.build_wavesbackend)
+    write_config_text('Waves Backend',         conf.env['BUILD_WAVESBACKEND'])
     write_config_text('Windows VST support',   opts.windows_vst)
     write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))
     write_config_text('Windows key',           opts.windows_key)
