@@ -181,6 +181,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="copy /Y &quot;..\src\Note.cpp&quot; &quot;..\src\Note.impl&quot;&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -283,10 +284,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\IdentityConverter.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\midi_util.cpp"
 				>
 			</File>
@@ -300,6 +297,14 @@
 			</File>
 			<File
 				RelativePath="..\src\SMF.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\TimeConverter.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\types.cpp"
 				>
 			</File>
 			<Filter

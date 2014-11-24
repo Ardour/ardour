@@ -39,9 +39,9 @@ namespace Evoral {
 typedef int32_t event_id_t;
 
 /** Musical time: beats relative to some defined origin */
-class LIBEVORAL_API MusicalTime {
+class /*LIBEVORAL_API*/ MusicalTime {
 public:
-	static const double PPQN;
+	LIBEVORAL_API static const double PPQN;
 
 	MusicalTime() : _time(0.0) {}
 
@@ -207,8 +207,8 @@ private:
 	double _time;
 };
 
-extern const MusicalTime MaxMusicalTime;
-extern const MusicalTime MinMusicalTime;
+extern LIBEVORAL_API const MusicalTime MaxMusicalTime;
+extern LIBEVORAL_API const MusicalTime MinMusicalTime;
 
 /** Type of an event (opaque, mapped by application) */
 typedef uint32_t EventType;

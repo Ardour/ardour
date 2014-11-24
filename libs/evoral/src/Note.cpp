@@ -19,7 +19,9 @@
 #include <iostream>
 #include <limits>
 #include <glib.h>
+#ifndef COMPILER_MSVC
 #include "evoral/Note.hpp"
+#endif
 
 namespace Evoral {
 
