@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
                              
 <Window timebarheight="17"
-        rulerheight="38"
-        rulerdivideheight="19"
+        rulerheight="33"
+        rulerdivideheight="16"
         skipbarheight="17"
         markerheight="18" >
   <style name="topbar_dropdown"
