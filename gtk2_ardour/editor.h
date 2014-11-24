@@ -998,6 +998,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::VBox&          edit_controls_vbox;
 	Gtk::HBox           edit_controls_hbox;
 
+    void vertical_zoom_step_in ();
+    void vertical_zoom_step_out ();
 	void control_vertical_zoom_in_all ();
 	void control_vertical_zoom_out_all ();
 	void control_vertical_zoom_in_selected ();

@@ -969,6 +969,20 @@ Editor::instant_save ()
 }
 
 void
+Editor::vertical_zoom_step_in ()
+{
+    _vertical_zoom_adjustment.set_value(_vertical_zoom_adjustment.get_value()+1);
+
+}
+
+void
+Editor::vertical_zoom_step_out ()
+{
+     _vertical_zoom_adjustment.set_value(_vertical_zoom_adjustment.get_value()-1);
+}
+
+
+void
 Editor::control_vertical_zoom_in_all ()
 {
 	tav_zoom_smooth (false, true);

@@ -90,8 +90,10 @@ This mode provides many different operations on both regions and control points,
 
 ;; punctuation
 
-@vis|Editor/temporal-zoom-in|equal|zoom in
-@vis|Editor/temporal-zoom-out|minus|zoom out
+@vis|Editor/temporal-zoom-in|equal|horizontal zoom in
+@vis|Editor/temporal-zoom-out|minus|horizontal zoom out
+@vis|Editor/vertical-zoom-in|<@PRIMARY@>equal|vertical zoom in
+@vis|Editor/vertical-zoom-out|<@PRIMARY@>minus|vertical zoom out
 @eep|Editor/edit-cursor-to-previous-region-sync|apostrophe|EP to prev region sync
 @eep|Editor/edit-cursor-to-next-region-sync|semicolon|EP to next region sync
 @eep|Editor/cycle-edit-point|grave|next EP w/o marker
@@ -142,7 +144,9 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/export-region|<@PRIMARY@><@LEVEL4@>e|export selected region(s)
 @sess|Main/ExportSession|<@LEVEL4@>e|export session
 @select|Editor/select-all-after-edit-cursor|<@PRIMARY@><@TERTIARY@>e|select all after EP
-@vis|Editor/show-editor-mixer|<@TERTIARY@>e|toggle editor window mixer
+@vis|Editor/show-editor-mixer|i|toggle editor window mixer
+@vis|Common/toggle-mixer|m|toggle mixer
+@vis|Common/toggle-meterbridge|b|toggle meterBridge
 @wvis|Common/goto-editor|<@WINDOW@>e|toggle editor window
 @mmode|MouseMode/set-mouse-mode-range|r|range mode
 @edit|Editor/redo|<@PRIMARY@>r|redo
@@ -220,8 +224,7 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/set-region-sync-position|v|set region sync point
 @edit|Editor/editor-paste|<@PRIMARY@>v|paste
 @-group|Editor/brush-at-mouse|<@PRIMARY@>b|some text
-@trans|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable 
-@wvis|Window/toggle-big-clock|<@WINDOW@>b|toggle big clock
+@trans|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable
 @rop|Region/normalize-region|n|normalize
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
 @sess|Main/New|<@PRIMARY@>n|open a new session

@@ -14,6 +14,8 @@
   
   <menubar name='Main' action='MainMenu'>
     <menu name='Session' action='Session'>
+      <menuitem action='toggle-tracks-control-panel'/>
+      <separator/>
       <menuitem action='New'/>
       <menuitem action='Open'/>
       <menuitem action='Recent'/>
@@ -66,7 +68,7 @@
       <separator/>
       <menuitem action='ToggleAutoPlay'/>
       <menuitem action='ToggleAutoReturn'/>
-      <menuitem action='toggle-follow-playhead'/>
+
       <separator/>
     </menu>
 
@@ -99,54 +101,51 @@
     </menu>
 
     <menu name='View' action = 'View'>
-      <menuitem action='KeepTearoffs'/>
+      <menuitem action='show-editor-mixer'/>
+      <menuitem action='toggle-mixer'/>
+      <menuitem action='toggle-meterbridge'/>
+      <menuitem action='toggle-big-clock'/>
+      <menu action="RulerMenu">
+        <menuitem action="toggle-marker-ruler"/>
+        <menuitem action="toggle-skip-ruler"/>
+      </menu>
 
       <separator/>
-
       <menu action="PrimaryClockMenu">
         <menuitem action="primary-clock-timecode"/>
         <menuitem action="primary-clock-minsec"/>
         <menuitem action="primary-clock-samples"/>
       </menu>
 
+
+
       <separator/>
 
       <menu action="ZoomMenu">
+        <menuitem action='vertical-zoom-in'/>
+        <menuitem action='vertical-zoom-out'/>
         <menuitem action='temporal-zoom-in'/>
         <menuitem action='temporal-zoom-out'/>
       </menu>
-      <menu name='ZoomFocus' action='ZoomFocus'>
-        <menuitem action='zoom-focus-left'/>
-        <menuitem action='zoom-focus-right'/>
-        <menuitem action='zoom-focus-center'/>
-        <menuitem action='zoom-focus-playhead'/>
-        <menuitem action='zoom-focus-mouse'/>
-        <menuitem action='zoom-focus-edit'/>
-        <menuitem action='cycle-zoom-focus'/>
-      </menu>
+      <menuitem action='toggle-follow-playhead'/>
 
-      <menu action="RulerMenu">
-        <menuitem action="toggle-minsec-ruler"/>
-        <menuitem action="toggle-samples-ruler"/>
-        <separator/>
-        <menuitem action="toggle-marker-ruler"/>
-      </menu>
-      <menuitem action='show-editor-mixer'/>
+
+
     </menu>
     <menu action = 'WindowMenu'>
 #ifdef GTKOSX
       <menuitem action='MainWindow'/>
+      <menuitem action='Minimize'/>
+      <menuitem action='Zoom'/>
 #endif
-      <menuitem action='toggle-tracks-control-panel'/>
-      <menuitem action='toggle-mixer'/>
-      <menuitem action='toggle-meterbridge'/>
-      <menuitem action='toggle-editor-mixer'/>
-      <separator/>
-      <menuitem action='toggle-audio-connection-manager'/>
-      <menuitem action='toggle-midi-connection-manager'/>
-      <menuitem action='toggle-locations'/>
-      <menuitem action='toggle-key-editor'/>
-      <menuitem action='toggle-big-clock'/>
+
+
+
+
+
+
+
+
     </menu>
     <menu name='Help' action='Help'>
 #ifndef GTKOSX

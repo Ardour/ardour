@@ -120,11 +120,11 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("MoveActiveMarkMenu"), _("Active Mark"));
 	ActionManager::register_action (editor_menu_actions, X_("MovePlayHeadMenu"), _("Playhead"));
 	ActionManager::register_action (editor_menu_actions, X_("PlayMenu"), _("Play"));
-	ActionManager::register_action (editor_menu_actions, X_("PrimaryClockMenu"), _("Primary Clock"));
+	ActionManager::register_action (editor_menu_actions, X_("PrimaryClockMenu"), _("Clock"));
 	ActionManager::register_action (editor_menu_actions, X_("Pullup"), _("Pullup / Pulldown"));
 	ActionManager::register_action (editor_menu_actions, X_("RegionEditOps"), _("Region operations"));
 	ActionManager::register_action (editor_menu_actions, X_("RegionGainMenu"), _("Gain"));
-	ActionManager::register_action (editor_menu_actions, X_("RulerMenu"), _("Rulers"));
+	ActionManager::register_action (editor_menu_actions, X_("RulerMenu"), _("Global Tracks"));
 	ActionManager::register_action (editor_menu_actions, X_("SavedViewMenu"), _("Views"));
 	ActionManager::register_action (editor_menu_actions, X_("ScrollMenu"), _("Scroll"));
 	ActionManager::register_action (editor_menu_actions, X_("SecondaryClockMenu"), _("Secondary Clock"));
@@ -156,7 +156,7 @@ Editor::register_actions ()
 	*/
 	ActionManager::register_action (editor_actions, "lock", _("Lock"), sigc::mem_fun (*this, &Editor::lock));
 
-	toggle_reg_sens (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Editor::editor_mixer_button_toggled));
+	toggle_reg_sens (editor_actions, "show-editor-mixer", _("Inspector"), sigc::mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	toggle_reg_sens (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Editor::editor_list_button_toggled));
 
 	reg_sens (editor_actions, "playhead-to-next-region-boundary", _("Playhead to Next Region Boundary"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_to_next_region_boundary), true ));
@@ -259,8 +259,8 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "playhead-forward-to-grid", _("Playhead To Next Grid"), sigc::mem_fun(*this, &Editor::playhead_forward_to_grid));
 	reg_sens (editor_actions, "playhead-backward-to-grid", _("Playhead To Previous Grid"), sigc::mem_fun(*this, &Editor::playhead_backward_to_grid));
 
-	reg_sens (editor_actions, "temporal-zoom-out", _("Zoom Out"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), true));
-	reg_sens (editor_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), false));
+	reg_sens (editor_actions, "temporal-zoom-out", _("Zoom Out Horizontal"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), true));
+	reg_sens (editor_actions, "temporal-zoom-in", _("Zoom In Horizontal"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), false));
 	reg_sens (editor_actions, "zoom-to-session", _("Zoom to Session"), sigc::mem_fun(*this, &Editor::temporal_zoom_session));
 	reg_sens (editor_actions, "zoom-to-region", _("Zoom to Region"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_to_region), false));
 	reg_sens (editor_actions, "zoom-to-region-both-axes", _("Zoom to Region (Width and Height)"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_to_region), true));
@@ -269,7 +269,10 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "toggle-zoom", _("Toggle Zoom State"), sigc::mem_fun(*this, &Editor::swap_visual_state));
 
 	reg_sens (editor_actions, "expand-tracks", _("Expand Track Height"), sigc::bind (sigc::mem_fun (*this, &Editor::tav_zoom_step), false));
-	reg_sens (editor_actions, "shrink-tracks", _("Shrink Track Height"), sigc::bind (sigc::mem_fun (*this, &Editor::tav_zoom_step), true));
+    reg_sens (editor_actions, "shrink-tracks", _("Shrink Track Height"), sigc::bind (sigc::mem_fun (*this, &Editor::tav_zoom_step), true));
+	
+    reg_sens (editor_actions, "vertical-zoom-in", _("Zoom In Vertical "), sigc::mem_fun (*this, &Editor::vertical_zoom_step_in));
+    reg_sens (editor_actions, "vertical-zoom-out", _("Zoom Out Vertical "), sigc::mem_fun (*this, &Editor::vertical_zoom_step_out ));
 
 	act = reg_sens (editor_actions, "move-selected-tracks-up", _("Move Selected Tracks Up"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), true));
 	ActionManager::track_selection_sensitive_actions.push_back (act);

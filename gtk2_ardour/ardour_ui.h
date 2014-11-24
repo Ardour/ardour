@@ -385,6 +385,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     bool                _mixer_on_top;
     bool first_time_engine_run;
 
+    void minimize_window();
+    void maximize_window();
 	void goto_editor_window ();
 	void goto_mixer_window ();
 	void toggle_mixer_window ();

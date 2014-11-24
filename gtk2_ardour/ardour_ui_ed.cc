@@ -505,6 +505,10 @@ ARDOUR_UI::install_actions ()
 #ifdef __APPLE__
 	act = ActionManager::register_action (main_actions, X_("MainWindow"), _("Main Window"),  sigc::mem_fun(*this, &ARDOUR_UI::goto_editor_window));
     ActionManager::session_sensitive_actions.push_back (act);
+    act = ActionManager::register_action (main_actions, X_("Minimize"), _("Minimize"),  sigc::mem_fun(*this, &ARDOUR_UI::minimize_window));
+    ActionManager::session_sensitive_actions.push_back (act);
+    act = ActionManager::register_action (main_actions, X_("Zoom"), _("Zoom"),  sigc::mem_fun(*this, &ARDOUR_UI::maximize_window));
+    ActionManager::session_sensitive_actions.push_back (act);
 #endif
     
 	ActionManager::register_action (main_actions, X_("LockSession"), _("Lock this session"),  sigc::mem_fun(*this, &ARDOUR_UI::on_lock_button_pressed));
@@ -568,7 +572,7 @@ ARDOUR_UI::install_actions ()
 
 	ActionManager::register_toggle_action (common_actions, X_("toggle-mixer"), S_("Window|Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_mixer_window));
 	ActionManager::register_action (common_actions, X_("toggle-editor-mixer"), _("Toggle Editor+Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_editor_mixer));
-	ActionManager::register_toggle_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meterbridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
+	ActionManager::register_toggle_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meter Bridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
 
 	act = ActionManager::register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -721,11 +725,11 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (transport_actions, X_("primary-clock-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Timecode));
+	act = ActionManager::register_action (transport_actions, X_("primary-clock-timecode"), _("Time code"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Timecode));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("primary-clock-bbt"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::BBT));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("primary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::MinSec));
+	act = ActionManager::register_action (transport_actions, X_("primary-clock-minsec"), _("Time"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::MinSec));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("primary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Frames));
 	ActionManager::session_sensitive_actions.push_back (act);

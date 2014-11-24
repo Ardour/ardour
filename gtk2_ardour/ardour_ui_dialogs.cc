@@ -330,6 +330,21 @@ _hide_splash (gpointer arg)
 }
 
 void
+ARDOUR_UI::minimize_window ()
+{
+    if (editor)
+        editor->iconify();
+}
+
+void
+ARDOUR_UI::maximize_window ()
+{
+    if (editor)
+        editor->maximize();
+}
+
+
+void
 ARDOUR_UI::goto_editor_window ()
 {
 	if (splash && splash->is_visible()) {
