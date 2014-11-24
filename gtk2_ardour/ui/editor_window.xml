@@ -2,7 +2,7 @@
                              
 <Window timebarheight="17"
         rulerheight="38"
-        loopbarheight="25"
+        rulerdivideheight="19"
         skipbarheight="17"
         markerheight="18" >
   <style name="topbar_dropdown"
