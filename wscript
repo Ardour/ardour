@@ -388,6 +388,8 @@ def set_compiler_flags (conf,opt):
     cxx_flags.append('-Woverloaded-virtual')
     if not is_clang:
         cxx_flags.append('-Wno-unused-local-typedefs')
+    if is_clang:
+        cxx_flags.append('-Wno-mismatched-tags')
 
     #
     # more boilerplate
