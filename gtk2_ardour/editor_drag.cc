@@ -411,22 +411,23 @@ Drag::abort ()
 }
 
 void
-Drag::show_verbose_cursor_time (framepos_t frame)
+Drag::show_verbose_cursor_time (framepos_t frame) const
 {
 	_editor->verbose_cursor()->set_time (frame);
 	_editor->verbose_cursor()->show ();
 }
 
 void
-Drag::show_verbose_cursor_duration (framepos_t start, framepos_t end, double /*xoffset*/)
+Drag::show_verbose_cursor_duration (framepos_t start, framepos_t end, double /*xoffset*/) const
 {
 	_editor->verbose_cursor()->set_duration (start, end);
 	_editor->verbose_cursor()->show ();
 }
 
 void
-Drag::show_verbose_cursor_text (string const & text)
+Drag::show_verbose_cursor_text (string const & text, Duple offset) const
 {
+        _editor->verbose_cursor()->set_offset (offset);
 	_editor->verbose_cursor()->set (text);
 	_editor->verbose_cursor()->show ();
 }
@@ -2789,6 +2790,7 @@ CursorDrag::CursorDrag (Editor* e, EditorCursor& c, bool s)
 	: Drag (e, &c.track_canvas_item(), false)
 	, _cursor (c)
 	, _stop (s)
+        , _vertical_only (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New CursorDrag\n");
 }
@@ -2870,10 +2872,25 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 void
 CursorDrag::motion (GdkEvent* event, bool)
 {
-	framepos_t const adjusted_frame = adjusted_current_frame (event);
-	if (adjusted_frame != last_pointer_frame()) {
-		fake_locate (adjusted_frame);
-	}
+        double x, y;
+        gdk_event_get_coords (event, &x, &y);
+        
+        cerr << "M on " << _item->name << ' ' << _item->whatami() << endl;
+
+        if (_item->covers (Duple (x, y))) {
+                /* still inside item bbox */
+
+                framepos_t const adjusted_frame = adjusted_current_frame (event);
+                if (adjusted_frame != last_pointer_frame()) {
+                        fake_locate (adjusted_frame);
+                }
+                cerr << "no vertical drag " << Duple (x,y) << " inside ruler\n";
+                return;
+        }
+
+        /* vertical drag */
+        
+        cerr << "can vertically drag " << Duple (x,y) << " outside ruler\n";
 }
 
 void
@@ -3206,14 +3223,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
                         type = Move;
                 }
 
-                switch (type) {
-                case TrimLeft:
-                case Move:
-                        show_verbose_cursor_time (location->start());
-                case TrimRight:
-                default:
-                        show_verbose_cursor_time (location->end());
-                }
+                show_drag_text (location);
         }
 
 	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
@@ -3389,16 +3399,36 @@ MarkerDrag::motion (GdkEvent*, bool)
 
 	assert (!_copied_locations.empty());
 
-        switch (type) {
-        case Move:
-        case TrimLeft:
-                show_verbose_cursor_time (copy_location->start());
-                break;
-        case TrimRight:
-                show_verbose_cursor_time (copy_location->end());
-        }
-
+        show_drag_text (copy_location);
 }
+
+void
+MarkerDrag::show_drag_text (Location* location) const
+{
+        if (location->is_auto_loop()) {
+                show_verbose_cursor_text (string_compose (_("Loop Range\nStart: %1\nEnd: %2\nLength: %3"), 
+                                                          _editor->verbose_cursor()->format_time (location->start()), 
+                                                          _editor->verbose_cursor()->format_time (location->end()),
+                                                          _editor->verbose_cursor()->format_duration (location->start(), location->end())),
+                                          Duple (15, 15));
+        } else if (location->is_skip()) {
+                show_verbose_cursor_text (string_compose (_("Skip Range\nStart: %1\nEnd: %2\nLength: %3"), 
+                                                          _editor->verbose_cursor()->format_time (location->start()), 
+                                                          _editor->verbose_cursor()->format_time (location->end()),
+                                                          _editor->verbose_cursor()->format_duration (location->start(), location->end())),
+                                          Duple (15, 15));
+        } else {
+                switch (type) {
+                case Move:
+                case TrimLeft:
+                        show_verbose_cursor_time (location->start());
+                        break;
+                case TrimRight:
+                        show_verbose_cursor_time (location->end());
+                }
+        }
+}
+
 
 static bool 
 timeout_set_skipping (Location* loc, bool yn)

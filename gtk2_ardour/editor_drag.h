@@ -216,9 +216,9 @@ protected:
 
 	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*);
 
-	void show_verbose_cursor_time (framepos_t);
-	void show_verbose_cursor_duration (framepos_t, framepos_t, double xoffset = 0);
-	void show_verbose_cursor_text (std::string const &);
+	void show_verbose_cursor_time (framepos_t) const;
+	void show_verbose_cursor_duration (framepos_t, framepos_t, double xoffset = 0) const;
+	void show_verbose_cursor_text (std::string const &, ArdourCanvas::Duple offset = ArdourCanvas::Duple(0,0)) const;
 
 	Editor* _editor; ///< our editor
 	DragManager* _drags;
@@ -707,6 +707,7 @@ private:
         EditorCursor& _cursor;
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
 	double _grab_zoom; ///< editor frames per unit when our grab started
+        bool _vertical_only;
 };
 
 /** Region fade-in drag */
@@ -783,6 +784,8 @@ private:
 
         typedef std::list<CopiedLocationMarkerInfo> CopiedLocationInfo;
         CopiedLocationInfo _copied_locations;
+        
+        void show_drag_text (ARDOUR::Location*) const;
 
         static sigc::connection timeout_connection;
 };
