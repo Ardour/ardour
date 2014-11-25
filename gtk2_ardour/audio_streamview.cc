@@ -260,6 +260,11 @@ AudioStreamView::setup_rec_box ()
 				*/
 				fill_color = UINT_RGBA_CHANGE_A (fill_color, 120);
 				break;
+			default:
+				fatal << string_compose (_("programming error: %1: %2"),
+						"AudioStreamView: impossible track mode",
+						(int) _trackview.audio_track()->mode()) << endmsg;
+				abort(); /*NOTREACHED*/
 			}
 
 			ArdourCanvas::Rectangle * rec_rect = new ArdourCanvas::TimeRectangle (_canvas_group);
