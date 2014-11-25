@@ -673,7 +673,8 @@ Marker::use_color ()
                 /* white with 20% opacity */
                 _name_background->set_outline_color (ARDOUR_UI::config()->get_canvasvar_LocationOutline());
                 _name_background->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::TOP|
-                                                                                   ArdourCanvas::Rectangle::LEFT));
+                                                                                   ArdourCanvas::Rectangle::LEFT|
+                                                                                   ArdourCanvas::Rectangle::RIGHT));
         }
 
         ArdourCanvas::Color contrast = ArdourCanvas::contrasting_text_color (_color);
