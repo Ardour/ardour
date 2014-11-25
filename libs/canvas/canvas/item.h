@@ -86,6 +86,10 @@ public:
 	 */
 	virtual void add_items_at_point (Duple /*point*/, std::vector<Item const *>& items) const;
 
+        /** Return true if the item covers @param point, false otherwise.
+         * 
+         * The point is in window coordinates 
+         */
         virtual bool covers (Duple const &) const;
 
 	/** Update _bounding_box and _bounding_box_dirty */
