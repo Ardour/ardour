@@ -128,17 +128,23 @@ TrackingText::show_and_track (bool tx, bool ty)
 void
 TrackingText::set_x_offset (double o)
 {
+        begin_change ();
 	offset.x = o;
+        end_change ();
 }
 
 void
 TrackingText::set_y_offset (double o)
 {
+        begin_change ();
 	offset.y = o;
+        end_change ();
 }
 
 void
 TrackingText::set_offset (Duple const & d)
 {
+        begin_change ();
 	offset = d;
+        end_change ();
 }
