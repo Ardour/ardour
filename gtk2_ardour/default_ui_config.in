@@ -57,8 +57,8 @@
     <Option name="location selected" value="1d9b9b60"/>
     <Option name="location outline" value="ffffff33"/>
     <Option name="location handle" value="ffffffcc"/>
-    <Option name="loop range marker: active" value="3453aecc"/>
-    <Option name="loop range marker: inactive" value="ae5334cc"/>
+    <Option name="loop range marker: active" value="1d9b9b60"/>
+    <Option name="loop range marker: inactive" value="acacac60"/>
     <Option name="marker bar" value="575757ff"/>
     <Option name="marker bar separator" value="ffffff15"/>
     <Option name="marker drag line" value="004f00f9"/>
@@ -136,9 +136,9 @@
     <Option name="recorded waveform outline" value="ffffffff"/>
     <Option name="rubber band rect" value="c6c6c659"/>
     <Option name="ruler base" value="575757ff"/>
-    <Option name="ruler text" value="9C9C9Cff"/>
-    <Option name="ruler divider top" value="00ff00ff"/>
-    <Option name="ruler divider bottom" value="ff0000ff"/>
+    <Option name="ruler text" value="b9b9b9ff"/>
+    <Option name="ruler divider top" value="808080ff"/>
+    <Option name="ruler divider bottom" value="606060ff"/>
     <Option name="selected crossfade editor line" value="00dbdbff"/>
     <Option name="selected crossfade editor wave" value="f9ea14a0"/>
     <Option name="selected region base" value="5F5E5FFF"/>
