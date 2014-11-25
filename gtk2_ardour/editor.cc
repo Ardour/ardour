@@ -4355,6 +4355,8 @@ Editor::use_visual_state (VisualState& vs)
 void
 Editor::set_samples_per_pixel (framecnt_t spp)
 {
+	std::cout << "Editor::set_samples_per_pixel ( " << spp << ")" << std::endl;
+
 	if (spp < 1) {
 		return;
 	}
