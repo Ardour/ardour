@@ -88,8 +88,8 @@ class LIBPBD_API CrossThreadChannel {
 	*/
 	Glib::RefPtr<Glib::IOSource> ios();
 
+    void drop_ios ();
   private:
-	void drop_ios ();
 	Glib::RefPtr<Glib::IOSource> _ios; // lazily constructed
 
 #ifndef PLATFORM_WINDOWS

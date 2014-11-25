@@ -34,7 +34,6 @@ using namespace Glib;
 
 CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 {
-	_ios = 0;
 	fds[0] = -1;
 	fds[1] = -1;
 
@@ -83,7 +82,7 @@ RefPtr<IOSource>
 CrossThreadChannel::ios () 
 {
 	if (!_ios) {
-		_ios.reset (IOSource::create (fds[0], IOCondition(IO_IN|IO_PRI|IO_ERR|IO_HUP|IO_NVAL)));
+		_ios = IOSource::create (fds[0], IOCondition(IO_IN|IO_PRI|IO_ERR|IO_HUP|IO_NVAL));
 	}
 	return _ios;
 }
@@ -97,9 +96,8 @@ CrossThreadChannel::drop_ios ()
 void
 CrossThreadChannel::drain ()
 {
-	/* drain selectable fd */
 	char buf[64];
-	while (::read (fd, buf, sizeof (buf)) > 0) {};
+	while (::read (fds[0], buf, sizeof (buf)) > 0) {};
 }
 
 int
