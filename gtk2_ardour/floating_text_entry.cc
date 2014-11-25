@@ -44,7 +44,7 @@ FloatingTextEntry::FloatingTextEntry (const std::string& initial_contents)
     entry.signal_activate().connect (sigc::mem_fun (*this, &FloatingTextEntry::activated));
     entry.signal_key_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_press));
     entry.signal_button_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::button_press));
-	PublicEditor::instance ().signal_focus_out_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::entry_focus_out));
+    //PublicEditor::instance ().signal_focus_out_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::entry_focus_out));
 
     add (entry);
 }
