@@ -21,7 +21,7 @@
 #define __floating_text_entry_h__
 
 #include <gtkmm/entry.h>
-#include <gtkmm/Window.h>
+#include <gtkmm/window.h>
 
 class FloatingTextEntry : public Gtk::Window
 {
