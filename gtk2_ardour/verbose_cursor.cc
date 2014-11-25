@@ -44,7 +44,7 @@ VerboseCursor::VerboseCursor (Editor* editor)
 {
 	_canvas_item = new ArdourCanvas::TrackingText (_editor->get_noscroll_group());
 	CANVAS_DEBUG_NAME (_canvas_item, "verbose canvas cursor");
-	_canvas_item->set_font_description (Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_NormalFont()));
+	_canvas_item->set_font_description (Pango::FontDescription (ARDOUR_UI::config()->get_canvasvar_NormalBoldFont()));
 	color_handler ();
 
 	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &VerboseCursor::color_handler));
@@ -95,12 +95,19 @@ VerboseCursor::set_offset (ArdourCanvas::Duple const & d)
 void
 VerboseCursor::set_time (framepos_t frame)
 {
+	_canvas_item->set (format_time (frame));
+        
+}
+
+string
+VerboseCursor::format_time (framepos_t frame)
+{
 	char buf[128];
 	Timecode::Time timecode;
 	Timecode::BBT_Time bbt;
 
 	if (_editor->_session == 0) {
-		return;
+		return string();
 	}
 
 	/* Take clock mode from the primary clock */
@@ -127,11 +134,17 @@ VerboseCursor::set_time (framepos_t frame)
 		break;
 	}
 
-	_canvas_item->set (buf);
+        return buf;
 }
 
 void
 VerboseCursor::set_duration (framepos_t start, framepos_t end)
+{
+        _canvas_item->set (format_duration (start, end));
+}
+
+string
+VerboseCursor::format_duration (framepos_t start, framepos_t end)
 {
 	char buf[128];
 	Timecode::Time timecode;
@@ -141,7 +154,7 @@ VerboseCursor::set_duration (framepos_t start, framepos_t end)
 	Meter meter_at_start (_editor->_session->tempo_map().meter_at(start));
 
 	if (_editor->_session == 0) {
-		return;
+		return string();
 	}
 
 	AudioClock::Mode m = ARDOUR_UI::instance()->primary_clock->mode ();
@@ -197,7 +210,7 @@ VerboseCursor::set_duration (framepos_t start, framepos_t end)
 		break;
 	}
 
-	_canvas_item->set (buf);
+        return buf;
 }
 
 bool

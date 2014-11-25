@@ -41,6 +41,9 @@ public:
 
 	void show ();
 	void hide ();
+
+        std::string format_time (framepos_t);
+        std::string format_duration (framepos_t, framepos_t);
 	
 private:
 	Editor*                     _editor;
