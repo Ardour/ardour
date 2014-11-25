@@ -110,7 +110,7 @@ Editor::add_new_location_internal (Location* location)
 
 		// no name shown ; actual marker is some portion of the height of the bar on which we drag,
                 // so that it only appears in the upper part of the bar (ruler).
-		lam->start = new RulerMarker (location, *this, *ruler_group, ruler_height - ruler_divide_height, 
+		lam->start = new RulerMarker (location, *this, *ruler_group, ruler_height, 
                                               ARDOUR_UI::instance()->config()->get_canvasvar_LoopRangeMarkerInactive(),
                                               "", location->start(), location->end());
                 lam->end = 0;
