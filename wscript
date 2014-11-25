@@ -148,7 +148,7 @@ def set_compiler_flags (conf,opt):
     version = u[2]
 
     # waf adds -O0 -g itself. thanks waf!
-    is_clang = conf.env['CXX'][0].endswith('clang++')
+    is_clang = 'clang++' in conf.env['CXX'][0]
     
     if conf.options.asan:
         conf.check_cxx(cxxflags=["-fsanitize=address", "-fno-omit-frame-pointer"], linkflags=["-fsanitize=address"])
