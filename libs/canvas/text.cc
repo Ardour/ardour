@@ -77,7 +77,7 @@ Text::set (string const & text)
 }
 
 void
-Text::redraw (Cairo::RefPtr<Cairo::Context> context) const
+Text::_redraw (Cairo::RefPtr<Cairo::Context> context) const
 {
 	if (_text.empty()) {
 		return;
@@ -85,22 +85,22 @@ Text::redraw (Cairo::RefPtr<Cairo::Context> context) const
 
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 
-	_redraw (layout);
+	__redraw (layout);
 }
 
 void
-Text::redraw (Glib::RefPtr<Pango::Context> context) const
+Text::_redraw (Glib::RefPtr<Pango::Context> context) const
 {
 	if (_text.empty()) {
 		return;
 	}
 
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
-	_redraw (layout);
+	__redraw (layout);
 }
 
 void
-Text::_redraw (Glib::RefPtr<Pango::Layout> layout) const
+Text::__redraw (Glib::RefPtr<Pango::Layout> layout) const
 {
 	layout->set_text (_text);
 
@@ -158,7 +158,7 @@ Text::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	}
 
 	if (_need_redraw) {
-		redraw (context);
+		_redraw (context);
 	}
 	
 	Rect intersection (i.get());
@@ -189,7 +189,7 @@ Text::compute_bounding_box () const
 	if (_bounding_box_dirty) {
 		if (_need_redraw || !_image) {
 			Glib::RefPtr<Pango::Context> context = Glib::wrap (gdk_pango_context_get()); // context now owns C object and will free it
-			redraw (context);
+			_redraw (context);
 		}
 		_bounding_box = Rect (0, 0, min (_clamped_width, (double) _image->get_width()), _image->get_height());
 		_bounding_box_dirty = false;
