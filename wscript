@@ -394,7 +394,7 @@ int main() { return 0; }''',
 
     c_flags.extend(('-Wstrict-prototypes', '-Wmissing-prototypes'))
     cxx_flags.append('-Woverloaded-virtual')
-    if not is_clang:
+    if (not is_clang and not platform == "darwin"):
         cxx_flags.append('-Wno-unused-local-typedefs')
     if is_clang:
         cxx_flags.append('-Wno-mismatched-tags')
