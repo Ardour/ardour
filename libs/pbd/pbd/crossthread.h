@@ -28,6 +28,11 @@
 
 #include "pbd/libpbd_visibility.h"
 
+#ifdef PLATFORM_WINDOWS
+#include <Windows.h>
+#endif // PLATFORM_WINDOWS
+
+
 /** A simple abstraction of a mechanism of signalling one thread from another.
  * The signaller calls ::wakeup() to tell the signalled thread to check for
  * work to be done. 
@@ -57,13 +62,13 @@ class LIBPBD_API CrossThreadChannel {
 	 * because there is no way to know which byte value will be used
 	 * for ::wakeup()
 	 */
-        int deliver (char msg);
+     int deliver (char msg);
 
 	/** if using ::deliver() to wakeup the listening thread, then
 	 * the listener should call ::receive() to fetch the message
 	 * type from the channel.
 	 */
-        int receive (char& msg);
+     int receive (char& msg);
 
 	/** empty the channel of all requests.
 	 * Typically this is done as soon as input 
@@ -73,14 +78,6 @@ class LIBPBD_API CrossThreadChannel {
 	 * in the channel will not be important.
 	 */
 	void drain ();
-	static void drain (int fd);
-
-	/** File descriptor that can be used with poll/select to
-	 * detect when wakeup() has been called on this channel.
-	 * It be marked as readable/input-ready when this condition
-	 * is true. It has already been marked non-blocking.
-	 */
-	int selectable() const { return fds[0]; }
 
 	/* glibmm 2.22 and earlier has a terrifying bug that will
 	   cause crashes whenever a Source is removed from
@@ -90,16 +87,20 @@ class LIBPBD_API CrossThreadChannel {
 	   but in the meantime, we need a hack to get around the issue.
 	*/
 	Glib::RefPtr<Glib::IOSource> ios();
-	void drop_ios ();
-
-	/** returns true if the CrossThreadChannel was
-	 * correctly constructed.
-	 */
-	bool ok() const { return fds[0] >= 0 && fds[1] >= 0; }
 
   private:
-	Glib::RefPtr<Glib::IOSource>* _ios; // lazily constructed
+	void drop_ios ();
+	Glib::RefPtr<Glib::IOSource> _ios; // lazily constructed
+
+#ifndef PLATFORM_WINDOWS
 	int fds[2]; // current implementation uses a pipe/fifo
+#else
+	SOCKET _send_socket;
+	SOCKET _receive_socket;
+	GIOChannel* _p_recv_channel;
+	struct sockaddr_in _recv_address;
+#endif
+
 };
 
 #endif /* __pbd__crossthread_h__ */

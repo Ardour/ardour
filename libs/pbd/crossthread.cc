@@ -17,6 +17,8 @@
 
 */
 
+#ifndef PLATFORM_WINDOWS
+
 #include <cstdlib>
 #include <cerrno>
 #include <cstring>
@@ -81,26 +83,19 @@ RefPtr<IOSource>
 CrossThreadChannel::ios () 
 {
 	if (!_ios) {
-		_ios = new RefPtr<IOSource> (IOSource::create (fds[0], IOCondition(IO_IN|IO_PRI|IO_ERR|IO_HUP|IO_NVAL)));
+		_ios.reset (IOSource::create (fds[0], IOCondition(IO_IN|IO_PRI|IO_ERR|IO_HUP|IO_NVAL)));
 	}
-	return *_ios;
+	return _ios;
 }
 
 void
 CrossThreadChannel::drop_ios ()
 {
-	delete _ios;
-	_ios = 0;
+	_ios.clear ();
 }
 
 void
 CrossThreadChannel::drain ()
-{
-	drain (fds[0]);
-}
-
-void
-CrossThreadChannel::drain (int fd)
 {
 	/* drain selectable fd */
 	char buf[64];
@@ -118,3 +113,5 @@ CrossThreadChannel::receive (char& msg)
 {
         return ::read (fds[0], &msg, 1);
 }
+
+#endif
