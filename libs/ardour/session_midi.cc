@@ -128,29 +128,15 @@ Session::mmc_record_pause (MIDI::MachineControl &/*mmc*/)
 void
 Session::mmc_record_strobe (MIDI::MachineControl &/*mmc*/)
 {
-	if (!Config->get_mmc_control() || (_step_editors > 0)) {
-		return;
-	}
+        /* Look at Ardour code if you want an implementation
+           that supports the MMC specification semantics for
+           RecordStrobe. Here (Tracks Live), there is no 
+           concept of punch, so we just treat RecordStrobe
+           like RecordPause
+        */
 
-	/* record strobe does an implicit "Play" command */
-
-	if (_transport_speed != 1.0) {
-
-		/* start_transport() will move from Enabled->Recording, so we
-		   don't need to do anything here except enable recording.
-		   its not the same as maybe_enable_record() though, because
-		   that *can* switch to Recording, which we do not want.
-		*/
-
-		save_state ("", true);
-		g_atomic_int_set (&_record_status, Enabled);
-		RecordStateChanged (); /* EMIT SIGNAL */
-
-		request_transport_speed (1.0);
-
-	} else {
-
-		enable_record ();
+	if (Config->get_mmc_control ()) {
+		maybe_enable_record();
 	}
 }
 
