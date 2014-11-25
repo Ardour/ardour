@@ -27,11 +27,9 @@
 
 namespace ARDOUR {
 
-class Session;
-
 class LIBARDOUR_API Quantize : public MidiOperator {
 public:
-	Quantize (ARDOUR::Session&, bool snap_start, bool snap_end,
+	Quantize (bool snap_start, bool snap_end,
 			double start_grid, double end_grid,
 			float strength, float swing, float threshold);
 	~Quantize ();
@@ -42,7 +40,6 @@ public:
 	std::string name() const { return std::string ("quantize"); }
 
 private:
-	ARDOUR::Session& session;
 	bool   _snap_start;
 	bool   _snap_end;
 	double _start_grid;

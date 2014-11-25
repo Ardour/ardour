@@ -424,7 +424,6 @@ NameChannelDialog::NameChannelDialog ()
 NameChannelDialog::NameChannelDialog (boost::shared_ptr<Bundle> b, uint32_t c)
 	: ArdourDialog (_("Rename Channel")),
 	  _bundle (b),
-	  _channel (c),
 	  _adding (false)
 {
 	_name.set_text (b->channel_name (c));

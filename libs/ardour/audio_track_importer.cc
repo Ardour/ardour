@@ -40,8 +40,7 @@ using namespace ARDOUR;
 /*** AudioTrackImportHandler ***/
 
 AudioTrackImportHandler::AudioTrackImportHandler (XMLTree const & source, Session & session, AudioPlaylistImportHandler & pl_handler) :
-  ElementImportHandler (source, session),
-  pl_handler (pl_handler)
+  ElementImportHandler (source, session)
 {
 	XMLNode const * root = source.root();
 	XMLNode const * routes;

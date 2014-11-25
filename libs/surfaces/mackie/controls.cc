@@ -118,7 +118,7 @@ void
 Control::stop_touch (double when, bool mark)
 {
 	if (normal_ac) {
-		return normal_ac->stop_touch (when, mark);
+		return normal_ac->stop_touch (mark, when);
 	}
 }
 	

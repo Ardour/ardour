@@ -47,7 +47,6 @@ public:
 private:	
 	bool event_handler (GdkEvent* ev);
 
-	MidiRegionView& _region;
 	ArdourCanvas::Flag* _flag;
 };
 

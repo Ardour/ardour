@@ -221,7 +221,6 @@ class LIBPBD_API SystemExec
 		void init ();
 		pthread_mutex_t write_lock;
 
-		int fdin; ///< file-descriptor for writing to child's STDIN. This variable is identical to pin[1] but also used as status check if the stdin pipe is open: <0 means closed.
 		int pok[2];
 		int pin[2];
 		int pout[2];

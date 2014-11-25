@@ -68,8 +68,6 @@ uint32_t RouteUI::_max_invert_buttons = 3;
 PBD::Signal1<void, boost::shared_ptr<Route> > RouteUI::BusSendDisplayChanged;
 boost::weak_ptr<Route> RouteUI::_showing_sends_to;
 
-static const int _button_vpad = 2;
-
 RouteUI::RouteUI (ARDOUR::Session* sess)
 	: AxisView(sess)
 	, mute_menu(0)

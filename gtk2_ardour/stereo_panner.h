@@ -66,7 +66,6 @@ class StereoPanner : public PannerInterface
         boost::shared_ptr<PBD::Controllable> width_control;
         PBD::ScopedConnectionList panvalue_connections;
         PBD::ScopedConnectionList panshell_connections;
-        bool dragging;
         bool dragging_position;
         bool dragging_left;
         bool dragging_right;

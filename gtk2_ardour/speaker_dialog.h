@@ -48,7 +48,6 @@ private:
 	Gtk::SpinButton  azimuth_spinner;
 	Gtk::Button      add_speaker_button;
 	Gtk::Button      remove_speaker_button;
-	int32_t          selected_speaker;
 	int              width;         ///< width of the circle
 	int              height;        ///< height of the circle
 	int              x_origin;      ///< x origin of our stuff within the drawing area

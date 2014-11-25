@@ -3388,8 +3388,6 @@ MidiRegionView::paste_internal (framepos_t pos, unsigned paste_count, float time
 		return;
 	}
 
-	PublicEditor& editor = trackview.editor ();
-
 	start_note_diff_command (_("paste"));
 
 	const Evoral::MusicalTime snap_beats    = get_grid_beats(pos);

@@ -50,7 +50,6 @@ private:
 	Gtk::CheckButton _route_active;
 	Gtk::CheckButton _share_color;
 	Gtk::CheckButton _share_monitoring;
-	Gtk::Button* _ok;
 	Gtk::ColorButton _color;
 
 	void gain_toggled ();

@@ -507,7 +507,6 @@ class LIBARDOUR_API Engine_Slave : public Slave
 
   private:
         AudioEngine& engine;
-	double speed;
 	bool _starting;
 };
 

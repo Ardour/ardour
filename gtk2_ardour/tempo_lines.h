@@ -37,7 +37,6 @@ public:
 
 private:
 	ArdourCanvas::LineSet lines;
-	double                _height;
 };
 
 #endif /* __ardour_tempo_lines_h__ */

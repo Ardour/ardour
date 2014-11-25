@@ -31,7 +31,6 @@ Curve::Curve (Canvas* c)
 	: PolyItem (c)
 	, n_samples (0)
 	, points_per_segment (16)
-	, curve_type (CatmullRomCentripetal)
 	, curve_fill (None)
 {
 }
@@ -40,7 +39,6 @@ Curve::Curve (Item* parent)
 	: PolyItem (parent)
 	, n_samples (0)
 	, points_per_segment (16)
-	, curve_type (CatmullRomCentripetal)
 	, curve_fill (None)
 {
 }

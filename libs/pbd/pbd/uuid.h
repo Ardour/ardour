@@ -41,14 +41,6 @@ class LIBPBD_API UUID : public boost::uuids::uuid {
             : boost::uuids::uuid(u)
     {}
 
-    operator boost::uuids::uuid() {
-            return static_cast<boost::uuids::uuid&>(*this);
-    }
-
-    operator boost::uuids::uuid() const {
-            return static_cast<boost::uuids::uuid const&>(*this);
-    }
-
     UUID& operator= (std::string const & str);
     std::string to_s () const;
 

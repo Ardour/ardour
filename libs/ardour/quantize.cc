@@ -35,11 +35,10 @@ using namespace ARDOUR;
  * 0.25 = quantize to beats/4, etc.
  */
 
-Quantize::Quantize (Session& s, bool snap_start, bool snap_end,
+Quantize::Quantize (bool snap_start, bool snap_end,
 		    double start_grid, double end_grid,
 		    float strength, float swing, float threshold)
-	: session (s)
-	, _snap_start (snap_start)
+	: _snap_start (snap_start)
 	, _snap_end (snap_end)
 	, _start_grid(start_grid)
 	, _end_grid(end_grid)

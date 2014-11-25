@@ -67,8 +67,7 @@ class ClickOptions : public OptionEditorBox
 {
 public:
 	ClickOptions (RCConfiguration* c, Gtk::Window* p)
-		: _rc_config (c),
-		  _parent (p)
+		: _rc_config (c)
 	{
 		Table* t = manage (new Table (2, 3));
 		t->set_spacings (4);
@@ -154,7 +153,6 @@ private:
 	}
 
 	RCConfiguration* _rc_config;
-	Gtk::Window* _parent;
 	Entry _click_path_entry;
 	Entry _click_emphasis_path_entry;
 };

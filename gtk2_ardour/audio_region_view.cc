@@ -72,7 +72,6 @@ using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
 
-static const int32_t sync_mark_width = 9;
 static double const handle_size = 10; /* height of fade handles */
 
 AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,

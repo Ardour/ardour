@@ -108,7 +108,6 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	, _parent (parent)
 	, _processor (p)
 	, _width (w)
-	, _visual_state (Gtk::STATE_NORMAL)
 	, _input_icon(true)
 	, _output_icon(false)
 {

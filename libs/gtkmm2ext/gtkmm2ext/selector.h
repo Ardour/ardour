@@ -96,8 +96,6 @@ public:
 	void *refill_arg;
 	gint selected_row;
 	gint selected_column;
-	gint chosen_row;
-	gint chosen_column;
 
 	void refill ();
 	void chosen ();

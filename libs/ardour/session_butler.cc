@@ -34,20 +34,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-/* XXX put this in the right place */
-
-static inline uint32_t next_power_of_two (uint32_t n)
-{
-	--n;
-	n |= n >> 16;
-	n |= n >> 8;
-	n |= n >> 4;
-	n |= n >> 2;
-	n |= n >> 1;
-	++n;
-	return n;
-}
-
 /*---------------------------------------------------------------------------
  BUTLER THREAD
  ---------------------------------------------------------------------------*/

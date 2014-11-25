@@ -40,9 +40,6 @@ class LIBARDOUR_API AudioTrackImportHandler : public ElementImportHandler
 	AudioTrackImportHandler (XMLTree const & source, Session & session, AudioPlaylistImportHandler & pl_handler);
 	virtual ~AudioTrackImportHandler () {}
 	virtual std::string get_info () const;
-
-  private:
-	AudioPlaylistImportHandler & pl_handler;
 };
 
 

@@ -105,8 +105,6 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	bool          _capture_end;
 	framepos_t     capture_start_frame;
 	framepos_t     file_pos; // unit is frames
-	framecnt_t     xfade_out_count;
-	framecnt_t     xfade_in_count;
 	Sample*        xfade_buf;
 
 	framecnt_t crossfade (Sample* data, framecnt_t cnt, int dir);

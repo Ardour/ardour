@@ -129,8 +129,6 @@ class LIBPBD_API PerThreadPool
   private:
         Glib::Threads::Private<CrossThreadPool> _key;
 	std::string _name;
-	unsigned long _item_size;
-	unsigned long _nitems;
 
 	/** mutex to protect either changes to the _trash variable, or writes to the RingBuffer */
         Glib::Threads::Mutex _trash_mutex;

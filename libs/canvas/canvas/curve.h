@@ -54,7 +54,6 @@ class LIBCANVAS_API Curve : public PolyItem, public InterpolatedCurve
     Points samples;
     Points::size_type n_samples;
     uint32_t points_per_segment;
-    InterpolatedCurve::SplineType curve_type;
     CurveFill curve_fill;
 
     void interpolate ();

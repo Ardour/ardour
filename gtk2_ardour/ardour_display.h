@@ -53,10 +53,6 @@ class ArdourDisplay : public ArdourButton
 
   private:
 	Gtk::Menu      _menu;
-
-	bool _hovering;
-	bool _grabbed;
-	float _grabbed_y;
 };
 
 #endif /* __gtk2_ardour_ardour_menu_h__ */

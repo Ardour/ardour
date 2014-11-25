@@ -829,8 +829,6 @@ private:
 	AutomationLine* _line;
 	double _fixed_grab_x;
 	double _fixed_grab_y;
-	uint32_t _before;
-	uint32_t _after;
 	double _cumulative_y_drag;
 };
 
@@ -978,9 +976,7 @@ public:
 private:
 	Operation _operation;
 	bool _add;
-	bool _extend;
 	int _original_pointer_time_axis;
-	int _last_pointer_time_axis;
 	std::list<TimeAxisView*> _added_time_axes;
 	bool _time_selection_at_start;
         framepos_t start_at_start;

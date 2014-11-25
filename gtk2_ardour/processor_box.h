@@ -163,7 +163,6 @@ private:
 	ProcessorBox* _parent;
 	boost::shared_ptr<ARDOUR::Processor> _processor;
 	Width _width;
-	Gtk::StateType _visual_state;
 	PBD::ScopedConnection active_connection;
 	PBD::ScopedConnection name_connection;
 	PBD::ScopedConnection config_connection;

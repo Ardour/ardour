@@ -131,7 +131,6 @@ private:
 	void setup ();
 
 	boost::shared_ptr<ARDOUR::Bundle> _bundle;
-	uint32_t _channel;
 	Gtk::Entry _name;
 	bool _adding;
 };

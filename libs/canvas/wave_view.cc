@@ -177,12 +177,6 @@ WaveView::set_samples_per_pixel (double samples_per_pixel)
 }
 
 static inline double
-image_to_window (double wave_origin, double image_start)
-{
-	return wave_origin + image_start;
-}
-
-static inline double
 window_to_image (double wave_origin, double image_start)
 {
 	return image_start - wave_origin;

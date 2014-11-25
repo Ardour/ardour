@@ -31,7 +31,6 @@ SysEx::SysEx (
 	double          height,
 	double          x,
 	double          y)
-	: _region (region)
 {
 	_flag = new ArdourCanvas::Flag (
 		parent,

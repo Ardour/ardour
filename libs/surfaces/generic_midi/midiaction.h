@@ -55,7 +55,6 @@ class MIDIAction : public MIDIInvokable
 	int set_state (const XMLNode&, int version);
 
   private:
-        Gtk::Action* _action;
 	void execute ();
 };
 

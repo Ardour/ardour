@@ -97,7 +97,6 @@ private:
     Cairo::Format            _format;
     int                      _width;
     int                      _height;
-    int                      _data;
     mutable boost::shared_ptr<Data>  _current;
     boost::shared_ptr<Data>  _pending;
     mutable bool             _need_render;

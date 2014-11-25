@@ -80,8 +80,6 @@ MixerStrip* MixerStrip::_entered_mixer_strip;
 
 PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
 
-static const int _button_vpad = 4;
-
 MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	: AxisView(sess)
 	, RouteUI (sess)
