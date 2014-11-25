@@ -386,7 +386,7 @@ def set_compiler_flags (conf,opt):
 
     c_flags.extend(('-Wstrict-prototypes', '-Wmissing-prototypes'))
     cxx_flags.append('-Woverloaded-virtual')
-    if (not is_clang and not platform == "darwin"):
+    if not is_clang:
         cxx_flags.append('-Wno-unused-local-typedefs')
 
     #
