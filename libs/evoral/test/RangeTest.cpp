@@ -145,3 +145,67 @@ RangeTest::subtractTest5 ()
 	CPPUNIT_ASSERT_EQUAL (7, i->from);
 	CPPUNIT_ASSERT_EQUAL (8, i->to);
 }
+
+/* Test coverage() with all possible types of overlap.
+ */
+
+void
+RangeTest::coverageTest ()
+{
+
+	// b starts before a
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 1, 1), Evoral::OverlapNone);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 1, 2), Evoral::OverlapNone);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 1, 3), Evoral::OverlapStart);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 1, 5), Evoral::OverlapStart);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 1, 7), Evoral::OverlapExternal);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 1, 9), Evoral::OverlapExternal);
+
+	// b starts at a
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 3, 3), Evoral::OverlapStart);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 3, 5), Evoral::OverlapStart);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 3, 7), Evoral::OverlapExternal);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 3, 9), Evoral::OverlapExternal);
+
+	// b starts inside a
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 4, 4), Evoral::OverlapInternal);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 4, 6), Evoral::OverlapInternal);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 4, 7), Evoral::OverlapEnd);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 4, 8), Evoral::OverlapEnd);
+
+	// b starts at end of a
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 7, 7), Evoral::OverlapEnd);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 7, 9), Evoral::OverlapEnd);
+
+	// b starts after end of a
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 8, 8), Evoral::OverlapNone);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 8, 9), Evoral::OverlapNone);
+
+	// zero-length range a
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 3, 2, 4), Evoral::OverlapExternal);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 3, 1, 2), Evoral::OverlapNone);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 3, 3, 3), Evoral::OverlapExternal);
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 3, 8, 9), Evoral::OverlapNone);
+
+	// negative length range a
+	// XXX these are debatable - should we just consider start & end to be
+	// swapped if end < start?
+	CPPUNIT_ASSERT_EQUAL (coverage(4, 3, 1, 2), Evoral::OverlapNone);
+	CPPUNIT_ASSERT_EQUAL (coverage(4, 3, 2, 3), Evoral::OverlapNone);
+	CPPUNIT_ASSERT_EQUAL (coverage(4, 3, 2, 4), Evoral::OverlapNone);
+	CPPUNIT_ASSERT_EQUAL (coverage(4, 3, 3, 3), Evoral::OverlapNone);
+	CPPUNIT_ASSERT_EQUAL (coverage(4, 3, 8, 9), Evoral::OverlapNone);
+
+	// negative length range b
+	// b starts before a
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 1, 0), Evoral::OverlapNone);
+	// b starts at a
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 3, 2), Evoral::OverlapNone);
+	// b starts inside a
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 4, 3), Evoral::OverlapNone);
+	// b starts at end of a
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 7, 5), Evoral::OverlapNone);
+	// b starts after end of a
+	CPPUNIT_ASSERT_EQUAL (coverage(3, 7, 8, 7), Evoral::OverlapNone);
+
+}

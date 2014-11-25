@@ -10,6 +10,7 @@ class RangeTest : public CppUnit::TestFixture
 	CPPUNIT_TEST (subtractTest3);
 	CPPUNIT_TEST (subtractTest4);
 	CPPUNIT_TEST (subtractTest5);
+	CPPUNIT_TEST (coverageTest);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
@@ -19,6 +20,7 @@ public:
 	void subtractTest3 ();
 	void subtractTest4 ();
 	void subtractTest5 ();
+	void coverageTest ();
 };
 
 	
