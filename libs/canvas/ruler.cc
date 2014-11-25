@@ -158,13 +158,17 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 		
 		switch (m->style) {
 		case Mark::Major:
-			cr->rel_line_to (0, -height);
+                        if (_divide_height >= 0) {
+                                cr->rel_line_to (0, -_divide_height);
+                        } else {
+                                cr->rel_line_to (0, -height);
+                        }
 			break;
 		case Mark::Minor:
-			cr->rel_line_to (0, -height/2.0);
+			cr->rel_line_to (0, -height/4.0);
 			break;
 		case Mark::Micro:
-			cr->rel_line_to (0, -height/4.0);
+			cr->rel_line_to (0, -height/16.0);
 			break;
 		}
 		cr->stroke ();
@@ -177,7 +181,11 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 			layout->set_text (m->label);
 			logical = layout->get_pixel_logical_extents ();
 			
-			cr->move_to (pos.x + 2.0, self.y0 + logical.get_y());
+                        if (_divide_height >= 0) {
+                                cr->move_to (pos.x + 2.0, self.y0 + _divide_height + logical.get_y() + 2.0); /* 2 pixel padding below divider */
+                        } else {
+                                cr->move_to (pos.x + 2.0, self.y0 + logical.get_y());
+                        }
 			layout->show_in_cairo_context (cr);
 		}
 	}
