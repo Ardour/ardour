@@ -79,25 +79,21 @@ class LIBPBD_API CrossThreadChannel {
 	 */
 	void drain ();
 
-	/* glibmm 2.22 and earlier has a terrifying bug that will
-	   cause crashes whenever a Source is removed from
-	   a MainContext (including the destruction of the MainContext),
-	   because the Source is destroyed "out from under the nose of" 
-	   the RefPtr. I (Paul) have fixed this (https://bugzilla.gnome.org/show_bug.cgi?id=561885)
-	   but in the meantime, we need a hack to get around the issue.
-	*/
-	Glib::RefPtr<Glib::IOSource> ios();
+        void set_receive_handler (sigc::slot<bool,Glib::IOCondition> s);
+        void attach (Glib::RefPtr<Glib::MainContext>);
 
-    void drop_ios ();
   private:
-	Glib::RefPtr<Glib::IOSource> _ios; // lazily constructed
+        friend gboolean cross_thread_channel_call_receive_slot (GIOChannel*, GIOCondition condition, void *data);
+
+	GIOChannel* receive_channel;
+        GSource*    receive_source;
+        sigc::slot<bool,Glib::IOCondition> receive_slot;
 
 #ifndef PLATFORM_WINDOWS
 	int fds[2]; // current implementation uses a pipe/fifo
 #else
 	SOCKET _send_socket;
 	SOCKET _receive_socket;
-	GIOChannel* _p_recv_channel;
 	struct sockaddr_in _recv_address;
 #endif
 

@@ -17,31 +17,11 @@
 
 */
 
-#ifdef PLATFORM_WINDOWS
-
-#include <cstdlib>
-#include <cerrno>
-#include <cstring>
-#include <fcntl.h>
-#include <unistd.h>
-
-#include <csignal> // or signal.h if C code
-
-#include <winsock2.h>
-#include <ws2tcpip.h>
-
-#include "pbd/error.h"
-#include "pbd/crossthread.h"
-
-using namespace std;
-using namespace PBD;
-using namespace Glib;
-
 CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	: _ios()
 	, _send_socket()
 	, _receive_socket()
-	, _p_recv_channel(0)
+	, receive_channel(0)
 {
 	WSADATA	wsaData;
 
@@ -107,14 +87,14 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	}
 	
 	// construct IOChannel
-	_p_recv_channel = g_io_channel_win32_new_socket((gint)_receive_socket);
+	receive_channel = g_io_channel_win32_new_socket((gint)_receive_socket);
 	
 	int flags = G_IO_FLAG_APPEND;
 	if (non_blocking) {
 		flags |= G_IO_FLAG_NONBLOCK;
 	}
 	
-	GIOStatus g_status = g_io_channel_set_flags(_p_recv_channel, (GIOFlags)flags,
+	GIOStatus g_status = g_io_channel_set_flags(receive_channel, (GIOFlags)flags,
                            NULL);
 
 	if (G_IO_STATUS_NORMAL != g_status ) {
@@ -127,7 +107,7 @@ CrossThreadChannel::~CrossThreadChannel ()
 {
 	/* glibmm hack */
 	drop_ios ();
-	delete _p_recv_channel;
+	delete receive_channel;
 	closesocket(_send_socket);
 	closesocket(_receive_socket);
 	WSACleanup();
@@ -142,22 +122,6 @@ CrossThreadChannel::wakeup ()
 	sendto(_send_socket, &c, sizeof(c), 0, (SOCKADDR*)&_recv_address, sizeof(_recv_address) );
 }
 
-RefPtr<IOSource>
-CrossThreadChannel::ios () 
-{
-	if (!_ios) {
-		_ios = IOSource::create (wrap(_p_recv_channel), IOCondition(IO_IN|IO_PRI|IO_ERR|IO_HUP|IO_NVAL));
-	}
-
-	return _ios;
-}
-
-void
-CrossThreadChannel::drop_ios ()
-{
-	_ios.reset ();
-}
-
 void
 CrossThreadChannel::drain ()
 {
@@ -166,7 +130,7 @@ CrossThreadChannel::drain ()
 	gchar* buffer;
 	gsize read = 0;
 
-	g_io_channel_read_to_end (_p_recv_channel, &buffer, &read, &g_error);
+	g_io_channel_read_to_end (receive_channel, &buffer, &read, &g_error);
 	g_free(buffer);
 }
 
@@ -192,7 +156,7 @@ CrossThreadChannel::receive (char& msg)
 	GError *g_error = 0;
 	
 	// fetch the message from the channel.
-	GIOStatus g_status = g_io_channel_read_chars (_p_recv_channel, &msg, sizeof(msg), &read, &g_error);
+	GIOStatus g_status = g_io_channel_read_chars (receive_channel, &msg, sizeof(msg), &read, &g_error);
 
 	if (G_IO_STATUS_NORMAL != g_status) {
 		read = -1;
@@ -200,5 +164,3 @@ CrossThreadChannel::receive (char& msg)
 
 	return read;
 }
-
-#endif
