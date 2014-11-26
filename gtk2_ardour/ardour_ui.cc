@@ -97,7 +97,6 @@
 typedef uint64_t microseconds_t;
 
 #include "about_dialog.h"
-#include "read_only_session_dialog.h"
 #include "actions.h"
 #include "add_tracks_dialog.h"
 #include "ambiguous_file_dialog.h"
@@ -2966,10 +2965,12 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
     
 	if (!new_session->writable()) {
         
-        ReadOnlySessionDialog ros_dialog;
-        ros_dialog.run ();
-        ros_dialog.set_keep_above (true);
-        ros_dialog.set_position (Gtk::WIN_POS_CENTER);
+        WavesMessageDialog read_only_session_dialog ("",
+                                                     "This session has been opened in read-only mode.\nYou will not be able to record or save.",
+                                                     WavesMessageDialog::BUTTON_OK);
+        read_only_session_dialog.run ();
+        read_only_session_dialog.set_keep_above (true);
+        read_only_session_dialog.set_position (Gtk::WIN_POS_CENTER);
 	}
 
 	/* Now the session been created, add the transport controls */
