@@ -669,6 +669,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case MarkerBarItem:
                 _drags->set (new MarkerBarDrag (this, item), event);
+                return true;
                 break;
 
         case SkipBarItem:
@@ -740,6 +741,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		eff = MouseObject;
 	}
 
+        cerr << "item type " << enum_2_string (item_type) << endl;
+
 	switch (eff) {
 	case MouseRange:
 		switch (item_type) {
@@ -806,10 +809,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				return true;
 			}
 			break;
-
-                case MarkerBarItem:
-                        /* do nothing */
-                        break;
 
 		default:
 			if (!internal_editing()) {
