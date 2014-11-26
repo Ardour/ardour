@@ -201,7 +201,7 @@ Editor::initialize_canvas ()
 	range_bar_drag_rect->hide ();
 
 	transport_bar_drag_rect = new ArdourCanvas::Rectangle (ruler_group, ArdourCanvas::Rect (0.0, 0.0, 100, 
-                                                                                                ruler_height - ruler_divide_height));
+                                                                                                ruler_height - ruler_divide_height - 2.0));
 	CANVAS_DEBUG_NAME (transport_bar_drag_rect, "transport drag");
 	transport_bar_drag_rect->set_outline (false);
 	transport_bar_drag_rect->hide ();
