@@ -807,6 +807,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 			break;
 
+                case MarkerBarItem:
+                        /* do nothing */
+                        break;
+
 		default:
 			if (!internal_editing()) {
 				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
