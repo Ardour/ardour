@@ -820,10 +820,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void restore_ruler_visibility ();
 
 	enum MinsecRulerScale {
+		minsec_show_msecs,
 		minsec_show_seconds,
 		minsec_show_minutes,
 		minsec_show_hours,
-		minsec_show_frames
+		minsec_show_many_hours
 	};
 
 	MinsecRulerScale minsec_ruler_scale;
@@ -838,7 +839,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		timecode_show_frames,
 		timecode_show_seconds,
 		timecode_show_minutes,
-		timecode_show_hours
+		timecode_show_hours,
+		timecode_show_many_hours
 	};
 
 	TimecodeRulerScale timecode_ruler_scale;
@@ -851,7 +853,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_samples_ruler_scale (framepos_t, framepos_t);
 
 	enum BBTRulerScale {
-		bbt_over,
+		bbt_show_many,
 		bbt_show_64,
 		bbt_show_16,
 		bbt_show_4,
