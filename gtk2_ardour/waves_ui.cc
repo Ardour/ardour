@@ -145,7 +145,9 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 		child = manage (new Gtk::HBox);
 	} else if (widget_type == "EVENTBOX") {
 		child = manage (new Gtk::EventBox);
-	} else if (widget_type == "HPANED") {
+	} else if (widget_type=="PROGRESSBAR") {
+        child = manage (new Gtk::ProgressBar);
+    }else if (widget_type == "HPANED") {
 		child = manage (new Gtk::HPaned);
 	} else if (widget_type == "VPANED") {
 		child = manage (new Gtk::VPaned);
@@ -1202,6 +1204,17 @@ WavesUI::get_fader (const char* id)
 	Gtkmm2ext::Fader* child = dynamic_cast<Gtkmm2ext::Fader*> (get_object(id));
 	if (child == NULL ) {
 		dbg_msg (std::string("Gtkmm2ext::Fader ") + id + " not found in " + _scrip_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+
+Gtk::ProgressBar&
+WavesUI::get_progressbar (const char* id)
+{
+    Gtk::ProgressBar* child = dynamic_cast<Gtk::ProgressBar*> (get_object(id));
+    if (child == NULL ) {
+		dbg_msg (std::string("Gtk::ProgressBar ") + id + " not found in " + _scrip_file_name + "!");
 		abort ();
 	}
 	return *child;

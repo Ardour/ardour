@@ -78,6 +78,7 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	Gtkmm2ext::Fader& get_fader (const char* id);
 	const XMLTree* xml_tree () { return _xml_tree; }
 	Gtk::Container& root () { return _root_container; }
+    Gtk::ProgressBar& get_progressbar (const char* id);
 
   protected:
 	void set_attributes (Gtk::Widget& widget, const XMLNode& definition, const XMLNodeMap& styles);
