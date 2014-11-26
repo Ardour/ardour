@@ -62,13 +62,15 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 
 	/* clears async request communication channel */
 	void clear () {
-		xthread.drain ();
+		_xthread.drain ();
 	}
+
+        CrossThreadChannel& xthread() {
+                return _xthread;
+        }
+
 	/* Not selectable; use ios() */
 	int selectable() const { return -1; }
-	Glib::RefPtr<Glib::IOSource> ios() {
-		return xthread.ios();
-	}
 	void set_timer (boost::function<framecnt_t (void)>&);
 
 	static void set_process_thread (pthread_t);
@@ -81,10 +83,9 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 	bool                    have_timer;
 	boost::function<framecnt_t (void)> timer;
 	RingBuffer< Evoral::Event<double> > output_fifo;
-    Evoral::EventRingBuffer<MIDI::timestamp_t> input_fifo;
-    Glib::Threads::Mutex output_fifo_lock;
-	CrossThreadChannel xthread;
-
+        Evoral::EventRingBuffer<MIDI::timestamp_t> input_fifo;
+        Glib::Threads::Mutex output_fifo_lock;
+	CrossThreadChannel _xthread;
 
 	int create_port ();
 

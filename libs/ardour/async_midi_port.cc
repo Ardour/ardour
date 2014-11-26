@@ -53,7 +53,7 @@ AsyncMIDIPort::AsyncMIDIPort (string const & name, PortFlags flags)
 	, have_timer (false)
 	, output_fifo (512)
 	, input_fifo (1024)
-	, xthread (true)
+	, _xthread (true)
 {
 }
 
@@ -135,7 +135,7 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 		}
 
 		if (!mb.empty()) {
-			xthread.wakeup ();
+			_xthread.wakeup ();
 		}
 	}
 }
