@@ -1572,13 +1572,11 @@ Editor::set_minsec_ruler_scale (framepos_t lower, framepos_t upper)
 		minsec_ruler_scale = minsec_show_msecs;
 		minsec_mark_modulo = 10;
                 minsec_nmarks = 2 + (range / minsec_mark_interval);
-                std::cerr << "show every 10 msecs, int = " << minsec_mark_interval << "\n";
 	} else if (range <= (fr / 2)) { /* 0-0.5 second */
 		minsec_mark_interval = fr / 100;  /* show 1/100 seconds */
 		minsec_ruler_scale = minsec_show_msecs;
 		minsec_mark_modulo = 100;
                 minsec_nmarks = 2 + (range / minsec_mark_interval);
-                std::cerr << "show every 100 msecs, int = " << minsec_mark_interval << "\n";
 	} else if (range <= fr) { /* 0-1 second */
 		minsec_mark_interval = fr / 10;  /* show 1/10 seconds */
 		minsec_ruler_scale = minsec_show_msecs;
