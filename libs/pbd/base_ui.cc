@@ -58,7 +58,7 @@ BaseUI::BaseUI (const string& str)
 	base_ui_instance = this;
 
 #ifndef PLATFORM_WINDOWS
-	request_channel.ios()->connect (sigc::mem_fun (*this, &BaseUI::request_handler));
+	request_channel.set_receive_handler (sigc::mem_fun (*this, &BaseUI::request_handler));
 #endif
 
 	/* derived class must set _ok */
@@ -191,8 +191,6 @@ BaseUI::attach_request_source ()
 	g_source_set_callback (request_source, &BaseUI::_request_handler, this, NULL);
 	g_source_attach (request_source, m_context->gobj());
 #else
-	request_channel.ios()->attach (m_context);
-	/* glibmm hack - drop the refptr to the IOSource now before it can hurt */
-	request_channel.drop_ios ();
+        request_channel.attach (m_context);
 #endif
 }
