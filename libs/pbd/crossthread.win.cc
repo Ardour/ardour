@@ -18,10 +18,12 @@
 */
 
 CrossThreadChannel::CrossThreadChannel (bool non_blocking)
-	: _ios()
-	, _send_socket()
-	, _receive_socket()
-	, receive_channel(0)
+	: receive_channel (0) 
+	, receive_source (0)
+	, receive_slot ()
+	, send_socket()
+	, receive_socket()
+	, recv_address()
 {
 	WSADATA	wsaData;
 
@@ -34,11 +36,11 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	struct sockaddr_in send_address;
 
 	// Create Send Socket
-    _send_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    send_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     send_address.sin_family = AF_INET;
     send_address.sin_addr.s_addr = INADDR_ANY;
     send_address.sin_port = htons(0);
-    int status = bind(_send_socket, (SOCKADDR*)&send_address,   
+    int status = bind(send_socket, (SOCKADDR*)&send_address,   
                   sizeof(send_address));
 
 	if (status != 0) {
@@ -50,18 +52,18 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	u_long mode = (u_long)non_blocking;
 	int otp_result = 0;
 	
-	otp_result = ioctlsocket(_send_socket, FIONBIO, &mode);
+	otp_result = ioctlsocket(send_socket, FIONBIO, &mode);
 	if (otp_result != NO_ERROR) {
 		std::cerr << "CrossThreadChannel::CrossThreadChannel() Send socket cannot be set to non blocking mode with error: " << WSAGetLastError() << std::endl;
 	}
 
 	// Create Receive Socket, this socket will be set to unblockable mode by IO channel
-    _receive_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    _recv_address.sin_family = AF_INET;
-    _recv_address.sin_addr.s_addr = inet_addr("127.0.0.1");
-    _recv_address.sin_port = htons(0);
-    status = bind(_receive_socket, (SOCKADDR*)&_recv_address, 
-                    sizeof(_recv_address));
+    receive_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    recv_address.sin_family = AF_INET;
+    recv_address.sin_addr.s_addr = inet_addr("127.0.0.1");
+    recv_address.sin_port = htons(0);
+    status = bind(receive_socket, (SOCKADDR*)&recv_address, 
+                    sizeof(recv_address));
     
 	if (status != 0) {
 		std::cerr << "CrossThreadChannel::CrossThreadChannel() Receive socket binding failed with error: " << WSAGetLastError() << std::endl;
@@ -72,14 +74,14 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	mode = (u_long)non_blocking;
 	otp_result = 0;
 	
-	otp_result = ioctlsocket(_receive_socket, FIONBIO, &mode);
+	otp_result = ioctlsocket(receive_socket, FIONBIO, &mode);
 	if (otp_result != NO_ERROR) {
 		std::cerr << "CrossThreadChannel::CrossThreadChannel() Receive socket cannot be set to non blocking mode with error: " << WSAGetLastError() << std::endl;
 	}
 
 	// get assigned port number for Receive Socket
-	int recv_addr_len = sizeof(_recv_address);
-    status = getsockname(_receive_socket, (SOCKADDR*)&_recv_address, &recv_addr_len);
+	int recv_addr_len = sizeof(recv_address);
+    status = getsockname(receive_socket, (SOCKADDR*)&recv_address, &recv_addr_len);
     
 	if (status != 0) {
 		std::cerr << "CrossThreadChannel::CrossThreadChannel() Setting receive socket address to local failed with error: " << WSAGetLastError() << std::endl;
@@ -87,7 +89,7 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	}
 	
 	// construct IOChannel
-	receive_channel = g_io_channel_win32_new_socket((gint)_receive_socket);
+	receive_channel = g_io_channel_win32_new_socket((gint)receive_socket);
 	
 	int flags = G_IO_FLAG_APPEND;
 	if (non_blocking) {
@@ -106,10 +108,13 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 CrossThreadChannel::~CrossThreadChannel ()
 {
 	/* glibmm hack */
-	drop_ios ();
-	delete receive_channel;
-	closesocket(_send_socket);
-	closesocket(_receive_socket);
+
+	if (receive_channel) {
+		g_io_channel_unref (receive_channel);
+    }
+
+	closesocket(send_socket);
+	closesocket(receive_socket);
 	WSACleanup();
 }
 
@@ -119,7 +124,7 @@ CrossThreadChannel::wakeup ()
 	char c = 0;
 
 	// write one byte to wake up a thread which is listening our IOS	
-	sendto(_send_socket, &c, sizeof(c), 0, (SOCKADDR*)&_recv_address, sizeof(_recv_address) );
+	sendto(send_socket, &c, sizeof(c), 0, (SOCKADDR*)&recv_address, sizeof(recv_address) );
 }
 
 void
@@ -140,7 +145,7 @@ CrossThreadChannel::deliver (char msg)
 {
 
 	// write one particular byte to wake up the thread which is listening our IOS
-	int status = sendto(_send_socket, &msg, sizeof(msg), 0, (SOCKADDR*)&_recv_address, sizeof(_recv_address) );
+	int status = sendto(send_socket, &msg, sizeof(msg), 0, (SOCKADDR*)&recv_address, sizeof(recv_address) );
 
 	if (SOCKET_ERROR  == status) {
 		return -1;

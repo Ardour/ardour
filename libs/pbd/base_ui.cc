@@ -51,12 +51,16 @@ BaseUI::BaseUI (const string& str)
 	: m_context(MainContext::get_default())
 	, run_loop_thread (0)
 	, _name (str)
+#ifndef PLATFORM_WINDOWS
 	, request_channel (true)
+#endif
 {
 	base_ui_instance = this;
 
-	request_channel.set_receive_handler (sigc::mem_fun (*this, &BaseUI::request_handler));
-        
+#ifndef PLATFORM_WINDOWS
+	request_channel.ios()->connect (sigc::mem_fun (*this, &BaseUI::request_handler));
+#endif
+
 	/* derived class must set _ok */
 }
 
@@ -168,7 +172,11 @@ void
 BaseUI::signal_new_request ()
 {
 	DEBUG_TRACE (DEBUG::EventLoop, "BaseUI::signal_new_request\n");
+#ifdef PLATFORM_WINDOWS
+	// handled in timeout, how to signal...?
+#else
 	request_channel.wakeup ();
+#endif
 }
 
 /**
@@ -178,5 +186,13 @@ void
 BaseUI::attach_request_source ()
 {
 	DEBUG_TRACE (DEBUG::EventLoop, "BaseUI::attach_request_source\n");
-        request_channel.attach (m_context);
+#ifdef PLATFORM_WINDOWS
+	GSource* request_source = g_timeout_source_new(200);
+	g_source_set_callback (request_source, &BaseUI::_request_handler, this, NULL);
+	g_source_attach (request_source, m_context->gobj());
+#else
+	request_channel.ios()->attach (m_context);
+	/* glibmm hack - drop the refptr to the IOSource now before it can hurt */
+	request_channel.drop_ios ();
+#endif
 }

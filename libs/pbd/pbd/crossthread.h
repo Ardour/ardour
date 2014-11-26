@@ -79,22 +79,23 @@ class LIBPBD_API CrossThreadChannel {
 	 */
 	void drain ();
 
-        void set_receive_handler (sigc::slot<bool,Glib::IOCondition> s);
-        void attach (Glib::RefPtr<Glib::MainContext>);
+    void set_receive_handler (sigc::slot<bool,Glib::IOCondition> s);
+    void attach (Glib::RefPtr<Glib::MainContext>);
 
-  private:
-        friend gboolean cross_thread_channel_call_receive_slot (GIOChannel*, GIOCondition condition, void *data);
+private:
+	friend gboolean cross_thread_channel_call_receive_slot (GIOChannel*, GIOCondition condition, void *data);
 
 	GIOChannel* receive_channel;
-        GSource*    receive_source;
-        sigc::slot<bool,Glib::IOCondition> receive_slot;
+    GSource*    receive_source;
+    sigc::slot<bool,Glib::IOCondition> receive_slot;
 
 #ifndef PLATFORM_WINDOWS
 	int fds[2]; // current implementation uses a pipe/fifo
 #else
-	SOCKET _send_socket;
-	SOCKET _receive_socket;
-	struct sockaddr_in _recv_address;
+
+	SOCKET send_socket;
+	SOCKET receive_socket;
+	struct sockaddr_in recv_address;
 #endif
 
 };
