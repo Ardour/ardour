@@ -38,7 +38,7 @@ class Splash : public Gtk::Window
 
 	static Splash* instance() { return the_splash; }
 
-        void display ();
+    void display ();
 	void pop_back_for (Gtk::Window&);
 	void pop_front ();
 
