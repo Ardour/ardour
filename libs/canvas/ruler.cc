@@ -195,13 +195,13 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
                 cr->set_line_width (1.0);
 
                 set_source_rgba (cr, _divider_color_top);
-                cr->move_to (self.x0, self.y0 + _divide_height+0.5);
-                cr->line_to (self.x1, self.y0 + _divide_height+0.5);
+                cr->move_to (self.x0, self.y0 + _divide_height-1.0+0.5);
+                cr->line_to (self.x1, self.y0 + _divide_height-1.0+0.5);
                 cr->stroke ();
 
                 set_source_rgba (cr, _divider_color_bottom);
-                cr->move_to (self.x0, self.y0 + _divide_height+1.5);
-                cr->line_to (self.x1, self.y0 + _divide_height+1.5);
+                cr->move_to (self.x0, self.y0 + _divide_height+0.5);
+                cr->line_to (self.x1, self.y0 + _divide_height+0.5);
                 cr->stroke ();
 
 
