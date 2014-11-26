@@ -292,6 +292,13 @@ class MackieControlProtocol
         XMLNode*                 _surfaces_state;
         int                      _surfaces_version;
 
+        struct ipMIDIHandler {
+                MackieControlProtocol* mcp;
+                MIDI::Port* port;
+        };
+        friend struct ipMIDIHandler; /* is this necessary */
+        friend gboolean ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data);
+
 	int create_surfaces ();
 	bool periodic();
 	void build_gui ();

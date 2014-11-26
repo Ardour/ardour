@@ -656,6 +656,13 @@ MackieControlProtocol::set_device (const string& device_name)
 	return 0;
 }
 
+gboolean 
+ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data)
+{
+        MackieControlProtocol::ipMIDIHandler* ipm = static_cast<MackieControlProtocol::ipMIDIHandler*>(data);
+        return ipm->mcp->midi_input_handler (Glib::IOCondition (condition), ipm->port);
+}
+
 int
 MackieControlProtocol::create_surfaces ()
 {
@@ -730,13 +737,13 @@ MackieControlProtocol::create_surfaces ()
 
 		MIDI::Port& input_port (surface->port().input_port());
 		AsyncMIDIPort* asp = dynamic_cast<AsyncMIDIPort*> (&input_port);
-		Glib::RefPtr<IOSource> psrc;
-		
+
 		if (asp) {
 
 			/* async MIDI port */
 
-			psrc = asp->ios();
+			asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &MackieControlProtocol::midi_input_handler), &input_port));
+			asp->xthread().attach (main_loop()->get_context());
 
 		} else {
 
@@ -745,23 +752,25 @@ MackieControlProtocol::create_surfaces ()
 			int fd;
 
 			if ((fd = input_port.selectable ()) >= 0) {
-				psrc = IOSource::create (fd, IO_IN|IO_HUP|IO_ERR);
-			}
-		}
-		
-		if (psrc) {
 
-			psrc->connect (sigc::bind (sigc::mem_fun (this, &MackieControlProtocol::midi_input_handler), &input_port));
-			psrc->attach (main_loop()->get_context());
+                                GIOChannel* ioc = g_io_channel_unix_new (fd);
+                                GSource* gsrc = g_io_create_watch (ioc, GIOCondition (G_IO_IN|G_IO_HUP|G_IO_ERR));
+                                
+                                /* hack up an object so that in the callback from the event loop
+                                   we have both the MackieControlProtocol and the input port.
+                                   
+                                   If we were using C++ for this stuff we wouldn't need this
+                                   but a nasty, not-fixable bug in the binding between C 
+                                   and C++ makes it necessary to avoid C++ for the IO
+                                   callback setup.
+                                */
 
-		} else {
+                                ipMIDIHandler* ipm = new ipMIDIHandler (); /* we will leak this sizeof(pointer)*2 sized object */
+                                ipm->mcp = this;
+                                ipm->port = &input_port;
 
-			if (n == 0) {
-				error << string_compose (_("Could not create IOSource for Mackie Control surface, MIDI port was called %1"),
-							 input_port.name());
-			} else {
-				error << string_compose (_("Could not create IOSource for Mackie Control extender #%1, MIDI port was called %2"),
-							 n+1, input_port.name());
+                                g_source_set_callback (gsrc, (GSourceFunc) ipmidi_input_handler, ipm, NULL);
+                                g_source_attach (gsrc, main_loop()->get_context()->gobj());
 			}
 		}
 	}
