@@ -409,15 +409,15 @@ HSV::distance (const HSV& other) const
 
 	double sL, sA, sB;
 	double oL, oA, oB;
-	double r, g, b, a;
+	double r, g, b, alpha;  // Careful, "a" is a field of this
 	Color c; 
 
 	c = hsva_to_color (h, s, v, a);
-	color_to_rgba (c, r, g, b, a);
+	color_to_rgba (c, r, g, b, alpha);
 	Rgb2Lab (&sL, &sA, &sB, r, g, b);
 
 	c = hsva_to_color (other.h, other.s, other.v, other.a);
-	color_to_rgba (c, r, g, b, a);
+	color_to_rgba (c, r, g, b, alpha);
 	Rgb2Lab (&oL, &oA, &oB, r, g, b);
 
 	// Weighting factors depending on the application (1 = default)
