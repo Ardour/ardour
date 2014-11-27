@@ -233,7 +233,7 @@ MidiDeviceConnectionControl& TracksControlPanel::add_midi_device_control(const s
 namespace  {
     // Strings which are shown to user in the Preference panel
     const std::string string_CAF = "Caf";
-    const std::string string_BWav = "BWav";
+    const std::string string_BWav = "Wave";
     const std::string string_Aiff = "Aiff";
     const std::string string_Wav64 = "Wave64";
 
