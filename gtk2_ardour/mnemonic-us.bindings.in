@@ -166,6 +166,7 @@ This mode provides many different operations on both regions and control points,
 @mmode|MouseMode/set-mouse-mode-object|o|object mode
 @sess|Main/Open|<@PRIMARY@>o|open an existing session
 @sess|Main/Recent|<@PRIMARY@><@TERTIARY@>o|open a recent session
+@sess|Window/toggle-tracks-control-panel|<@PRIMARY@>comma|open preferences dialog
 @wvis|Window/toggle-session-options-editor|<@WINDOW@>o|toggle preferences dialog
 @rop|Region/naturalize-region|<@SECONDARY@>o|move to original position
 @trans|Editor/set-playhead|p|set playhead position

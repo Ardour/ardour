@@ -14,26 +14,26 @@
   
   <menubar name='Main' action='MainMenu'>
     <menu name='Session' action='Session'>
-      <menuitem action='toggle-tracks-control-panel'/>
-      <separator/>
       <menuitem action='New'/>
       <menuitem action='Open'/>
-      <menuitem action='Recent'/>
-      <menuitem action='Close'/>
-      <separator/>
       <menuitem action='Save'/>
       <menuitem action='SaveAs'/>
+      <menuitem action='Close'/>
+      <menuitem action='Recent'/>
       <separator/>
-      <menuitem action='toggle-session-lock-dialog'/>
+      <menuitem action='toggle-tracks-control-panel'/>
       <separator/>
+
+
       <menuitem action='addExistingAudioFiles'/>
       <menu name='Export' action='Export'>
         <menuitem action='ExportAudio'/>
         <menuitem action='StemExport'/>
       </menu>
+      <separator/>
       <menu name='Cleanup' action='Cleanup'>
         <menuitem action='CleanupUnused'/>
-        <menuitem action='FlushWastebasket'/>
+        <menuitem action='ShowUnused'/>
       </menu>
 #ifdef GTKOSX
       <menuitem action='toggle-about'/>
@@ -48,26 +48,18 @@
     
     <menu name='Transport' action='Transport'>
       <menuitem action='ToggleRoll'/>
-      <menu action="PlayMenu">
-        <menuitem action='main-menu-play-selected-regions'/>
-        <menuitem action='play-edit-range'/>
-        <menuitem action='PlaySelection'/>
-        <menuitem action='PlayPreroll'/>
-        <menuitem action='play-from-edit-point-and-return'/>
-        <menuitem action='Loop'/>
-      </menu>
       <menuitem action='Record'/>
-
       <menu action="MovePlayHeadMenu">
         <menuitem action='jump-forward-to-mark'/>
         <menuitem action='jump-backward-to-mark'/>
         <menuitem action='GotoStart'/>
         <menuitem action='GotoEnd'/>
       </menu>
-
       <separator/>
-      <menuitem action='ToggleAutoPlay'/>
-      <menuitem action='ToggleAutoReturn'/>
+      <menu action="PlayMenu">
+
+      </menu>
+
 
       <separator/>
     </menu>
@@ -75,22 +67,19 @@
     <menu name='Edit' action='Edit'>
       <menuitem action='undo'/>
       <menuitem action='redo'/>
-      <menuitem action='editor-cut'/>
       <menuitem action='editor-copy'/>
       <menuitem action='editor-paste'/>
-      <separator/>       
+      <menuitem action='editor-cut'/>
+      <menuitem action='editor-delete'/>
+      <menuitem action='split-region'/>
       <menu action="SelectMenu">	   
         <menuitem action='deselect-all'/>
         <menuitem action='invert-selection'/>
       </menu>	   
       <separator/>
-      <menuitem action='editor-delete'/>
-      <menuitem action='crop'/>
-      <menuitem action='split-region'/>
+      <menuitem action='toggle-session-lock-dialog'/>
       <separator/>
-#ifndef GTKOSX
-      <separator/>
-#endif
+      <menuitem action='toggle-key-editor'/>
     </menu>         
 
     <menu action='TrackMenu'>
@@ -140,12 +129,7 @@
       <menuitem action='Zoom'/>
     </menu>
 
-    <menu name='Help' action='Help'>
-#ifndef GTKOSX
-      <menuitem action='toggle-about'/>
-#endif
-      <menuitem action='Manual'/>
-    </menu>
+
   </menubar>
 
   <popup action="RulerMenuPopup">

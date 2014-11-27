@@ -456,12 +456,13 @@ ARDOUR_UI::install_actions ()
 
 	/* menus + submenus that need action items */
 
-	ActionManager::register_action (main_menu_actions, X_("Session"), _("Session"));
-	act = ActionManager::register_action (main_menu_actions, X_("Cleanup"), _("Clean-up"));
-	ActionManager::write_sensitive_actions.push_back (act);
+	ActionManager::register_action (main_menu_actions, X_("Session"), _("File"));
+	act = ActionManager::register_action (main_actions, X_("Cleanup"), _("CleanUp"));
+	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_action (main_menu_actions, X_("Sync"), _("Sync"));
 	ActionManager::register_action (main_menu_actions, X_("TransportOptions"), _("Options"));
-	ActionManager::register_action (main_menu_actions, X_("WindowMenu"), _("Window"));
+	act=ActionManager::register_action (main_menu_actions, X_("WindowMenu"), _("Window"));
+    ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_action (main_menu_actions, X_("Help"), _("Help"));
  	ActionManager::register_action (main_menu_actions, X_("KeyMouseActions"), _("Misc. Shortcuts"));
 	ActionManager::register_action (main_menu_actions, X_("AudioFileFormat"), _("Audio File Format"));
@@ -476,20 +477,19 @@ ARDOUR_UI::install_actions ()
 
 	/* the real actions */
 
-	act = ActionManager::register_action (main_actions, X_("New"), _("New..."),  hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::get_session_parameters), false, true, "")));
 
-	ActionManager::register_action (main_actions, X_("Open"), _("Open..."),  sigc::mem_fun(*this, &ARDOUR_UI::open_session));
-	ActionManager::register_action (main_actions, X_("Recent"), _("Recent..."),  sigc::mem_fun(*this, &ARDOUR_UI::open_recent_session));
+	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::get_session_parameters), false, true, "")));
+
+	ActionManager::register_action (main_actions, X_("Open"), _("Open"),  sigc::mem_fun(*this, &ARDOUR_UI::open_session));
+	ActionManager::register_action (main_actions, X_("Recent"), _("Recent Sessions"),  sigc::mem_fun(*this, &ARDOUR_UI::open_recent_session));
 	act = ActionManager::register_action (main_actions, X_("Close"), _("Close"),  sigc::mem_fun(*this, &ARDOUR_UI::close_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track"),
 					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_route), (Gtk::Window*) 0));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::write_sensitive_actions.push_back (act);
+	//ActionManager::session_sensitive_actions.push_back (act);
+	//ActionManager::write_sensitive_actions.push_back (act);
 
-    act = ActionManager::register_action (main_actions, X_("DeleteSelectedTracks"), _("Delete selected tracks"), sigc::mem_fun(*this, &ARDOUR_UI::delete_selected_tracks));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
     
 	act = ActionManager::register_action (main_actions, X_("OpenVideo"), _("Open Video"),
 					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_video), (Gtk::Window*) 0));
@@ -504,12 +504,12 @@ ARDOUR_UI::install_actions ()
 
 #ifdef __APPLE__
 	act = ActionManager::register_action (main_actions, X_("MainWindow"), _("Main Window"),  sigc::mem_fun(*this, &ARDOUR_UI::goto_editor_window));
-    ActionManager::session_sensitive_actions.push_back (act);
+    //ActionManager::session_sensitive_actions.push_back (act);
 #endif
     act = ActionManager::register_action (main_actions, X_("Minimize"), _("Minimize"),  sigc::mem_fun(*this, &ARDOUR_UI::minimize_window));
-    ActionManager::session_sensitive_actions.push_back (act);
+    //ActionManager::session_sensitive_actions.push_back (act);
     act = ActionManager::register_action (main_actions, X_("Zoom"), _("Zoom"),  sigc::mem_fun(*this, &ARDOUR_UI::maximize_window));
-    ActionManager::session_sensitive_actions.push_back (act);
+    //ActionManager::session_sensitive_actions.push_back (act);
     
 	ActionManager::register_action (main_actions, X_("LockSession"), _("Lock this session"),  sigc::mem_fun(*this, &ARDOUR_UI::on_lock_button_pressed));
 	ActionManager::register_action (main_actions, X_("ToggleMultiOutMode"), "Multi Out", sigc::mem_fun(*this, &ARDOUR_UI::toggle_multi_out_mode));
@@ -519,7 +519,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("SaveAs"), _("Save As..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), true));
+	act = ActionManager::register_action (main_actions, X_("SaveAs"), _("Save As.."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
@@ -539,17 +539,20 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("ImportMetadata"), _("Import Metadata..."),  sigc::mem_fun(*this, &ARDOUR_UI::import_metadata));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("ExportAudio"), _("Export To Audio File(s)..."),  sigc::mem_fun (*editor, &PublicEditor::export_audio));
-	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (main_actions, X_("ExportAudio"), _("Mixdown"),  sigc::mem_fun (*editor, &PublicEditor::export_audio));
+	//ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("StemExport"), _("Stem export..."),  sigc::mem_fun (*editor, &PublicEditor::stem_export));
-	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (main_actions, X_("StemExport"), _("Stem Export"),  sigc::mem_fun (*editor, &PublicEditor::stem_export));
+	//ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("Export"), _("Export"));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("CleanupUnused"), _("Clean-up Unused Sources..."),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
-	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (main_actions, X_("CleanupUnused"), _("Delete Unused Sources"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
+	//ActionManager::session_sensitive_actions.push_back (act);
+    act = ActionManager::register_action (main_actions, X_("ShowUnused"), _("Show Unused"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::open_dead_folder));
+    //ActionManager::session_sensitive_actions.push_back (act);
+    
 	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("FlushWastebasket"), _("Flush Wastebasket"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::flush_trash));
@@ -591,7 +594,8 @@ ARDOUR_UI::install_actions ()
 
 	/* do-nothing action for the "transport" menu bar item */
 
-	ActionManager::register_action (transport_actions, X_("Transport"), _("Transport"));
+	act=ActionManager::register_action (transport_actions, X_("Transport"), _("Transport"));
+    ActionManager::session_sensitive_actions.push_back (act);
 
 	/* these two are not used by key bindings, instead use ToggleRoll for that. these two do show up in
 	   menus and via button proxies.
@@ -604,9 +608,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (transport_actions, X_("ToggleRoll"), _("Start/Stop"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_roll), false, false));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("ToggleRoll"), _("Playback Start/Stop"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_roll), false, false));
+	//ActionManager::session_sensitive_actions.push_back (act);
+	//ActionManager::transport_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("alternate-ToggleRoll"), _("Start/Stop"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_roll), false, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
@@ -641,7 +645,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (transport_actions, X_("Record"), _("Enable Record"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_record), false));
+	act = ActionManager::register_action (transport_actions, X_("Record"), _("Record"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_record), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("record-roll"), _("Start Recording"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_record), true));
@@ -673,13 +677,13 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (transport_actions, X_("GotoZero"), _("Goto Zero"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_zero));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("GotoStart"), _("Goto Start"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_start));
+	act = ActionManager::register_action (transport_actions, X_("GotoStart"), _("Jump to Session Start"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_start));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("alternate-GotoStart"), _("Goto Start"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_start));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("GotoEnd"), _("Goto End"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_end));
+	act = ActionManager::register_action (transport_actions, X_("GotoEnd"), _("Jump to Session End"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_end));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("GotoWallClock"), _("Goto Wall Clock"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_wallclock));

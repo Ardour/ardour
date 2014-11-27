@@ -91,7 +91,8 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("AlignMenu"), _("Align"));
 	ActionManager::register_action (editor_menu_actions, X_("Autoconnect"), _("Autoconnect"));
 	ActionManager::register_action (editor_menu_actions, X_("Crossfades"), _("Crossfades"));
-	ActionManager::register_action (editor_menu_actions, X_("Edit"), _("Edit"));
+	act=ActionManager::register_action (editor_menu_actions, X_("Edit"), _("Edit"));
+    ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_action (editor_menu_actions, X_("EditCursorMovementOptions"), _("Move Selected Marker"));
 	ActionManager::register_action (editor_menu_actions, X_("EditSelectRangeOptions"), _("Select Range Operations"));
 	ActionManager::register_action (editor_menu_actions, X_("EditSelectRegionOptions"), _("Select Regions"));
@@ -119,7 +120,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("Monitoring"), _("Monitoring"));
 	ActionManager::register_action (editor_menu_actions, X_("MoveActiveMarkMenu"), _("Active Mark"));
 	ActionManager::register_action (editor_menu_actions, X_("MovePlayHeadMenu"), _("Playhead"));
-	ActionManager::register_action (editor_menu_actions, X_("PlayMenu"), _("Play"));
+	ActionManager::register_action (editor_menu_actions, X_("PlayMenu"), _("Playhead Mode"));
 	ActionManager::register_action (editor_menu_actions, X_("PrimaryClockMenu"), _("Clock"));
 	ActionManager::register_action (editor_menu_actions, X_("Pullup"), _("Pullup / Pulldown"));
 	ActionManager::register_action (editor_menu_actions, X_("RegionEditOps"), _("Region operations"));
@@ -139,9 +140,11 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("TempoMenu"), _("Tempo"));
 	ActionManager::register_action (editor_menu_actions, X_("Timecode"), _("Timecode fps"));
 	ActionManager::register_action (editor_menu_actions, X_("TrackHeightMenu"), _("Height"));
-	ActionManager::register_action (editor_menu_actions, X_("TrackMenu"), _("Track"));
+	act=ActionManager::register_action (editor_menu_actions, X_("TrackMenu"), _("Track"));
+    ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_action (editor_menu_actions, X_("Tools"), _("Tools"));
-	ActionManager::register_action (editor_menu_actions, X_("View"), _("View"));
+	act=ActionManager::register_action (editor_menu_actions, X_("View"), _("View"));
+    ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_action (editor_menu_actions, X_("ZoomFocus"), _("Zoom Focus"));
 	ActionManager::register_action (editor_menu_actions, X_("ZoomMenu"), _("Zoom"));
 
@@ -193,7 +196,7 @@ Editor::register_actions ()
 
 	reg_sens (editor_actions, "select-all-objects", _("Select All Objects"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_objects), Selection::Set));
 	reg_sens (editor_actions, "select-all-tracks", _("Select All Tracks"), sigc::mem_fun(*this, &Editor::select_all_tracks));
-	reg_sens (editor_actions, "deselect-all", _("Deselect All"), sigc::mem_fun(*this, &Editor::deselect_all));
+	reg_sens (editor_actions, "deselect-all", _("Select All/Deselect All"), sigc::mem_fun(*this, &Editor::deselect_all));
 	reg_sens (editor_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection));
 
 	reg_sens (editor_actions, "select-all-after-edit-cursor", _("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true));
@@ -239,9 +242,9 @@ Editor::register_actions ()
 		reg_sens (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), i - 1));
 	}
 
-	reg_sens (editor_actions, "jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
-	reg_sens (editor_actions, "alternate-jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
-	reg_sens (editor_actions, "jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
+	reg_sens (editor_actions, "jump-forward-to-mark", _("Jump to Next Marker"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
+	reg_sens (editor_actions, "alternate-jump-forward-to-mark", _("Jump to Next Marker"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
+	reg_sens (editor_actions, "jump-backward-to-mark", _("Jump to Previous Marker"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
 	reg_sens (editor_actions, "alternate-jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
 
 	act = reg_sens (editor_actions, "add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
@@ -274,9 +277,11 @@ Editor::register_actions ()
     reg_sens (editor_actions, "vertical-zoom-in", _("Zoom In Vertical "), sigc::mem_fun (*this, &Editor::vertical_zoom_step_in));
     reg_sens (editor_actions, "vertical-zoom-out", _("Zoom Out Vertical "), sigc::mem_fun (*this, &Editor::vertical_zoom_step_out ));
 
-	act = reg_sens (editor_actions, "move-selected-tracks-up", _("Move Selected Tracks Up"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), true));
+    act = reg_sens (editor_actions, "DeleteSelectedTracks", _("Delete Selected"), sigc::mem_fun(ARDOUR_UI::instance(), &ARDOUR_UI::delete_selected_tracks));
+    ActionManager::track_selection_sensitive_actions.push_back (act);
+	act = reg_sens (editor_actions, "move-selected-tracks-up", _("Move Up"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), true));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
-	act = reg_sens (editor_actions, "move-selected-tracks-down", _("Move Selected Tracks Down"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), false));
+	act = reg_sens (editor_actions, "move-selected-tracks-down", _("Move Down"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), false));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "scroll-tracks-up", _("Scroll Tracks Up"), sigc::mem_fun(*this, &Editor::scroll_tracks_up));
@@ -316,7 +321,7 @@ Editor::register_actions ()
 
 	reg_sens (editor_actions, "duplicate-range", _("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_range), false));
 
-	undo_action = reg_sens (editor_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun(*this, &Editor::undo), 1U));
+	undo_action = reg_sens (editor_actions, "undo", _("Undo"), sigc::bind (sigc::mem_fun(*this, &Editor::undo), 1U));
 
 	redo_action = reg_sens (editor_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
 	redo_action = reg_sens (editor_actions, "alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));

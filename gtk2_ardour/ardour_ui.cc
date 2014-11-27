@@ -195,14 +195,14 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, editor_meter_peak_display()
 	, speaker_config_window (X_("speaker-config"), _("Speaker Configuration"))
 	, theme_manager (X_("theme-manager"), _("Theme Manager"))
-	, key_editor (X_("key-editor"), _("Key Bindings"))
+	, key_editor (X_("key-editor"), _("Key Command Editor"))
 	, rc_option_editor (X_("rc-options-editor"), _("Preferences"))
 	, about (X_("about"), _("About"))
 	, location_ui (X_("locations"), _("Locations"))
 	, route_params (X_("inspector"), _("Tracks and Busses"))
-	, tracks_control_panel (X_("tracks-control-panel"), _("PREFERENCES"))
+	, tracks_control_panel (X_("tracks-control-panel"), _("Preferences"))
         , _add_tracks_dialog(new AddTracksDialog())	
-	, session_lock_dialog (X_("session-lock-dialog"), _("SESSION LOCK"))
+	, session_lock_dialog (X_("session-lock-dialog"), _("System Lock"))
         , session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
 	, add_video_dialog (X_("add-video"), _("Add Tracks/Busses"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
@@ -3317,6 +3317,24 @@ Clean-up will move all unused files to a \"dead\" location."));
 
 	checker.hide();
 	display_cleanup_results (rep, _("Cleaned Files"), false);
+}
+
+void
+ARDOUR_UI::open_dead_folder ()
+{
+    const string dead_directory = _session->session_directory().dead_path();
+
+#if defined (PLATFORM_WINDOWS)
+    ShellExecute (NULL, "open", dead_directory, NULL, NULL, SW_SHOW);
+#elif defined (__APPLE__)
+    std::string command = "open \"" + dead_directory + "\"";
+    system (command.c_str ());
+#else
+    
+    /* nix */
+    /* XXX what to do here ? */
+    
+#endif
 }
 
 void
