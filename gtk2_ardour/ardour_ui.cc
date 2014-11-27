@@ -3325,7 +3325,7 @@ ARDOUR_UI::open_dead_folder ()
     const string dead_directory = _session->session_directory().dead_path();
 
 #if defined (PLATFORM_WINDOWS)
-    ShellExecute (NULL, "open", dead_directory, NULL, NULL, SW_SHOW);
+   ShellExecute (NULL, "open", dead_directory.c_str(), NULL, NULL, SW_SHOW);
 #elif defined (__APPLE__)
     std::string command = "open \"" + dead_directory + "\"";
     system (command.c_str ());
