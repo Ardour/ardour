@@ -2872,25 +2872,10 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 void
 CursorDrag::motion (GdkEvent* event, bool)
 {
-        double x, y;
-        gdk_event_get_coords (event, &x, &y);
-        
-        cerr << "M on " << _item->name << ' ' << _item->whatami() << endl;
-
-        if (_item->covers (Duple (x, y))) {
-                /* still inside item bbox */
-
-                framepos_t const adjusted_frame = adjusted_current_frame (event);
-                if (adjusted_frame != last_pointer_frame()) {
-                        fake_locate (adjusted_frame);
-                }
-                cerr << "no vertical drag " << Duple (x,y) << " inside ruler\n";
-                return;
+        framepos_t const adjusted_frame = adjusted_current_frame (event);
+        if (adjusted_frame != last_pointer_frame()) {
+                fake_locate (adjusted_frame);
         }
-
-        /* vertical drag */
-        
-        cerr << "can vertically drag " << Duple (x,y) << " outside ruler\n";
 }
 
 void
