@@ -69,7 +69,6 @@ class LIBGTKMM2EXT_API BarController : public Gtk::Alignment
 	gint switch_to_bar ();
 	gint switch_to_spinner ();
 
-	bool _grabbed;
 	bool _switching;
 	bool _switch_on_release;
 

@@ -54,5 +54,4 @@ class EditorCursor {
 	Editor&               _editor;
 	ArdourCanvas::Arrow*  _track_canvas_item;
 	framepos_t            _current_frame;
-	double		      _length;
 };

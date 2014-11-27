@@ -34,7 +34,6 @@ using namespace Gtk;
 EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*))
 	: _editor (ed)
 	, _track_canvas_item (new ArdourCanvas::Arrow (_editor.get_hscroll_group()))
-	, _length (1.0)
 {
 	CANVAS_DEBUG_NAME (_track_canvas_item, "track canvas editor cursor");
 
@@ -55,7 +54,6 @@ EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,Ardour
 EditorCursor::EditorCursor (Editor& ed)
 	: _editor (ed)
 	, _track_canvas_item (new ArdourCanvas::Arrow (_editor.get_hscroll_group()))
-	, _length (1.0)
 {
 	CANVAS_DEBUG_NAME (_track_canvas_item, "track canvas cursor");
 
