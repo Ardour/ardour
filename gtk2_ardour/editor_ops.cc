@@ -1886,8 +1886,7 @@ Editor::temporal_zoom_by_slider ()
 {
 	double value = _temporal_zoom_adjustment.get_value();
     int64_t spp = (int64_t)(pow (2.0f, (int)value) + 0.001);
-    set_zoom_focus ( ZoomFocusLeft);
-	std::cout << "Editor::temporal_zoom_by_slider (): fader = " << value << "; spp = " << spp << std::endl;
+    set_zoom_focus (ZoomFocusPlayhead);
 	temporal_zoom (spp);
 }
 
