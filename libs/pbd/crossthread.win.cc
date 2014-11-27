@@ -38,7 +38,7 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	// Create Send Socket
     send_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     send_address.sin_family = AF_INET;
-    send_address.sin_addr.s_addr = INADDR_ANY;
+    send_address.sin_addr.s_addr = inet_addr("127.0.0.1");
     send_address.sin_port = htons(0);
     int status = bind(send_socket, (SOCKADDR*)&send_address,   
                   sizeof(send_address));
@@ -70,14 +70,7 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
         return;
 	}
 
-	// make the socket non-blockable if required
-	mode = (u_long)non_blocking;
-	otp_result = 0;
-	
-	otp_result = ioctlsocket(receive_socket, FIONBIO, &mode);
-	if (otp_result != NO_ERROR) {
-		std::cerr << "CrossThreadChannel::CrossThreadChannel() Receive socket cannot be set to non blocking mode with error: " << WSAGetLastError() << std::endl;
-	}
+	// recieve socket will be made non-blocking by GSource which will use it
 
 	// get assigned port number for Receive Socket
 	int recv_addr_len = sizeof(recv_address);
@@ -91,18 +84,15 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	// construct IOChannel
 	receive_channel = g_io_channel_win32_new_socket((gint)receive_socket);
 	
-	int flags = G_IO_FLAG_APPEND;
-	if (non_blocking) {
-		flags |= G_IO_FLAG_NONBLOCK;
-	}
-	
-	GIOStatus g_status = g_io_channel_set_flags(receive_channel, (GIOFlags)flags,
-                           NULL);
-
+	// set binary data type
+	GIOStatus g_status = g_io_channel_set_encoding (receive_channel, NULL, NULL);
 	if (G_IO_STATUS_NORMAL != g_status ) {
-		std::cerr << "CrossThreadChannel::CrossThreadChannel() Cannot set IOChannel flags " << std::endl;
-        return;
+		std::cerr << "CrossThreadChannel::CrossThreadChannel() Cannot set flag for IOChannel. " << g_status << std::endl;
+		return;
 	}
+
+	// disable channel buffering
+	g_io_channel_set_buffered (receive_channel, false);
 }
 
 CrossThreadChannel::~CrossThreadChannel ()
@@ -132,11 +122,28 @@ CrossThreadChannel::drain ()
 {
 	/* flush the buffer - empty the channel from all requests */
 	GError *g_error = 0;
-	gchar* buffer;
+	gchar buffer[512];
 	gsize read = 0;
 
-	g_io_channel_read_to_end (receive_channel, &buffer, &read, &g_error);
-	g_free(buffer);
+	while (1) {
+		GIOStatus g_status = g_io_channel_read_chars (receive_channel, buffer, sizeof(buffer), &read, &g_error);
+
+		if (G_IO_STATUS_AGAIN == g_status) {
+			break;
+		}
+
+		if (G_IO_STATUS_NORMAL != g_status) {
+			std::cerr << "CrossThreadChannel::CrossThreadChannel() Cannot drain from read buffer! " << g_status << std::endl;
+			
+			if (g_error) {
+				std::cerr << "Error is Domain: " << g_error->domain << " Code: " << g_error->code << std::endl;
+				g_clear_error(&g_error);
+			} else {
+				std::cerr << "No error provided\n";
+			}
+			break;
+		}
+	}
 }
 
 
