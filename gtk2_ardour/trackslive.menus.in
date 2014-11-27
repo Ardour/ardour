@@ -40,8 +40,6 @@
 #endif
 #ifndef GTKOSX
       <separator/>
-      <menuitem action='toggle-session-lock-dialog'/>
-      <separator/>
       <menuitem action='Quit'/>
 #endif
     </menu>
