@@ -154,9 +154,10 @@ EventTypeMap::new_parameter(uint32_t type, uint8_t channel, uint32_t id) const
 {
 	Evoral::Parameter p(type, channel, id);
 
-	double min    = 0.0f;
-	double max    = 1.0f;
-	double normal = 0.0f;
+	double min     = 0.0f;
+	double max     = 1.0f;
+	double normal  = 0.0f;
+	bool   toggled = false;
 
 	switch((AutomationType)type) {
 	case NullAutomation:
@@ -178,6 +179,7 @@ EventTypeMap::new_parameter(uint32_t type, uint8_t channel, uint32_t id) const
                 break;
 	case RecEnableAutomation:
 		/* default 0.0 - 1.0 is fine */
+		toggled = true;
 		break;
 	case PluginAutomation:
 	case FadeInAutomation:
@@ -190,6 +192,7 @@ EventTypeMap::new_parameter(uint32_t type, uint8_t channel, uint32_t id) const
 	case MuteAutomation:
 		max = 1.0f;
 		normal = 0.0f;
+		toggled = true;
 		break;
 	case MidiCCAutomation:
 	case MidiPgmChangeAutomation:
@@ -203,7 +206,7 @@ EventTypeMap::new_parameter(uint32_t type, uint8_t channel, uint32_t id) const
 		return p;
 	}
 
-	p.set_range(type, min, max, normal, false);
+	p.set_range(type, min, max, normal, toggled);
 	return p;
 }
 
