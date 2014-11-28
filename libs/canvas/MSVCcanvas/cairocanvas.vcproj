@@ -243,6 +243,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\colorspace.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\container.cc"
 				>
 			</File>
@@ -374,6 +378,10 @@
 			</File>
 			<File
 				RelativePath="..\canvas\colors.h"
+				>
+			</File>
+			<File
+				RelativePath="..\canvas\colorspace.h"
 				>
 			</File>
 			<File
