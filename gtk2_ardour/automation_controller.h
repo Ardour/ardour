@@ -43,7 +43,7 @@ namespace ARDOUR {
 }
 
 /** A BarController which displays the value and allows control of an AutomationControl */
-class AutomationController : public Gtkmm2ext::BarController {
+class AutomationController : public Gtk::Alignment {
 public:
 	static boost::shared_ptr<AutomationController> create(
 		boost::shared_ptr<ARDOUR::Automatable>       parent,
@@ -55,12 +55,18 @@ public:
 
 	boost::shared_ptr<ARDOUR::AutomationControl> controllable() { return _controllable; }
 
+	void disable_vertical_scroll();
+
 	Gtk::Adjustment* adjustment() { return _adjustment; }
+	Gtk::Widget*     widget()     { return _widget; }
 
 	void display_effective_value();
 	void value_adjusted();
 
 	void stop_updating ();
+
+	sigc::signal<void> StartGesture;
+	sigc::signal<void> StopGesture;
 
 private:
 	AutomationController (boost::shared_ptr<ARDOUR::Automatable>       printer,
@@ -70,6 +76,7 @@ private:
 
 	void start_touch();
 	void end_touch();
+	void toggled();
 
 	void run_note_select_dialog();
 	void set_ratio(double ratio);
@@ -78,12 +85,13 @@ private:
 
 	void value_changed();
 
-	bool                                         _ignore_change;
+	Gtk::Widget*                                 _widget;
 	boost::shared_ptr<ARDOUR::Automatable>       _printer;
 	boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
 	Gtk::Adjustment*                             _adjustment;
 	sigc::connection                             _screen_update_connection;
 	PBD::ScopedConnection                        _changed_connection;
+	bool                                         _ignore_change;
 };
 
 

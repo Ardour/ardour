@@ -219,7 +219,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	hide_button.show ();
 
 	if (_controller) {
-		_controller.get()->set_tweaks (PixFader::Tweaks(_controller.get()->tweaks() | PixFader::NoVerticalScroll));
+		_controller->disable_vertical_scroll ();
 		controls_table.attach (*_controller.get(), 2, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	}
 

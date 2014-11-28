@@ -29,6 +29,7 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
+#include "ardour_button.h"
 #include "ardour_ui.h"
 #include "automation_controller.h"
 #include "gui_thread.h"
@@ -42,29 +43,53 @@ using namespace Gtk;
 AutomationController::AutomationController(boost::shared_ptr<Automatable>       printer,
                                            boost::shared_ptr<AutomationControl> ac,
                                            Adjustment*                          adj)
-	: BarController (*adj, ac)
-	, _ignore_change(false)
+	: _widget(NULL)
 	, _printer (printer)
 	, _controllable(ac)
 	, _adjustment(adj)
+	, _ignore_change(false)
 {
 	assert (_printer);
 
-	set_name (X_("ProcessorControlSlider"));
+	if (ac->toggled()) {
+		ArdourButton* but = manage(new ArdourButton());
 
-	StartGesture.connect (sigc::mem_fun(*this, &AutomationController::start_touch));
-	StopGesture.connect (sigc::mem_fun(*this, &AutomationController::end_touch));
+		// Apply styles for special types
+		if (ac->parameter().type() == MuteAutomation) {
+			but->set_name("mute button");
+		} else if (ac->parameter().type() == SoloAutomation) {
+			but->set_name("solo button");
+		} else {
+			but->set_name("generic button");
+		}
+		but->signal_clicked.connect(
+			sigc::mem_fun(*this, &AutomationController::toggled));
 
-	signal_button_release_event().connect(
-		sigc::mem_fun(*this, &AutomationController::on_button_release));
+		_widget = but;
+	} else {
+		Gtkmm2ext::BarController* bar = manage(new Gtkmm2ext::BarController(*adj, ac));
 
-	_adjustment->signal_value_changed().connect (
-			sigc::mem_fun(*this, &AutomationController::value_adjusted));
+		bar->set_name(X_("ProcessorControlSlider"));
+		bar->StartGesture.connect(
+			sigc::mem_fun(*this, &AutomationController::start_touch));
+		bar->StopGesture.connect(
+			sigc::mem_fun(*this, &AutomationController::end_touch));
+		bar->signal_button_release_event().connect(
+			sigc::mem_fun(*this, &AutomationController::on_button_release));
+
+		_widget = bar;
+	}
+
+	_adjustment->signal_value_changed().connect(
+		sigc::mem_fun(*this, &AutomationController::value_adjusted));
 
 	_screen_update_connection = ARDOUR_UI::RapidScreenUpdate.connect (
 			sigc::mem_fun (*this, &AutomationController::display_effective_value));
 
 	ac->Changed.connect (_changed_connection, invalidator (*this), boost::bind (&AutomationController::value_changed, this), gui_context());
+
+	add(*_widget);
+	show_all();
 }
 
 AutomationController::~AutomationController()
@@ -123,6 +148,13 @@ AutomationController::value_adjusted ()
 {
 	if (!_ignore_change) {
 		_controllable->set_value (_controllable->interface_to_internal(_adjustment->get_value()));
+	} else {
+		/* A bar controller will automatically follow the adjustment, but for a
+		   button we have to do it manually. */
+		ArdourButton* but = dynamic_cast<ArdourButton*>(_widget);
+		if (but) {
+			but->set_active(_adjustment->get_value() >= 0.5);
+		}
 	}
 }
 
@@ -130,12 +162,12 @@ void
 AutomationController::start_touch()
 {
 	_controllable->start_touch (_controllable->session().transport_frame());
+	StartGesture.emit();  /* EMIT SIGNAL */
 }
 
 void
 AutomationController::end_touch ()
 {
-	if (!_controllable->alist()) return;
 	if (_controllable->automation_state() == Touch) {
 
 		bool mark = false;
@@ -147,6 +179,23 @@ AutomationController::end_touch ()
 		}
 
 		_controllable->stop_touch (mark, when);
+	}
+	StopGesture.emit();  /* EMIT SIGNAL */
+}
+
+void
+AutomationController::toggled ()
+{
+	ArdourButton* but = dynamic_cast<ArdourButton*>(_widget);
+	if (but) {
+		const bool was_active = _controllable->get_value() >= 0.5;
+		if (was_active) {
+			_adjustment->set_value(0.0);
+			but->set_active(false);
+		} else {
+			_adjustment->set_value(1.0);
+			but->set_active(true);
+		}
 	}
 }
 
@@ -260,4 +309,15 @@ void
 AutomationController::stop_updating ()
 {
 	_screen_update_connection.disconnect ();
+}
+
+void
+AutomationController::disable_vertical_scroll ()
+{
+	Gtkmm2ext::BarController* bar = dynamic_cast<Gtkmm2ext::BarController*>(_widget);
+	if (bar) {
+		bar->set_tweaks (
+			Gtkmm2ext::PixFader::Tweaks(bar->tweaks() |
+			                            Gtkmm2ext::PixFader::NoVerticalScroll));
+	}
 }
