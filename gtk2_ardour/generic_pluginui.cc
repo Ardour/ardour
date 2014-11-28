@@ -708,9 +708,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			control_ui->controller->set_size_request (200, req.height);
 			control_ui->controller->set_name (X_("ProcessorControlSlider"));
 
-			control_ui->controller->StartGesture.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::start_touch), control_ui));
-			control_ui->controller->StopGesture.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::stop_touch), control_ui));
-
 		}
 
 		adj->set_value (mcontrol->internal_to_interface(value));
@@ -803,18 +800,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 	}
 
 	return control_ui;
-}
-
-void
-GenericPluginUI::start_touch (GenericPluginUI::ControlUI* cui)
-{
-	cui->control->start_touch (cui->control->session().transport_frame());
-}
-
-void
-GenericPluginUI::stop_touch (GenericPluginUI::ControlUI* cui)
-{
-	cui->control->stop_touch (false, cui->control->session().transport_frame());
 }
 
 void

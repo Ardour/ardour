@@ -287,8 +287,6 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void astate_clicked (ControlUI*);
 	void automation_state_changed (ControlUI*);
 	void set_automation_state (ARDOUR::AutoState state, ControlUI* cui);
-	void start_touch (ControlUI*);
-	void stop_touch (ControlUI*);
 	void set_all_automation (ARDOUR::AutoState state);
 
 	/* XXX: remove */
