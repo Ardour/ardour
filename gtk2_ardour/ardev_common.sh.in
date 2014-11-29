@@ -1,4 +1,4 @@
-TOP=`dirname "$0"`/..
+[ -z $TOP ] && "ardev_common.sh: TOP var must be set" && exit 1
 
 #export G_DEBUG=fatal_criticals
 

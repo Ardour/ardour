@@ -2,7 +2,10 @@
 #
 # Run libardour test suite.
 #
-. test-env.sh
+
+TOP=`dirname "$0"`/../..
+. $TOP/build/gtk2_ardour/ardev_common_waf.sh
+ARDOUR_LIBS_DIR=$TOP/build/libs/ardour
 
 if [ "$1" == "--single" ] || [ "$2" == "--single" ]; then
         if [ "$1" == "--single" ]; then
@@ -12,7 +15,7 @@ if [ "$1" == "--single" ] || [ "$2" == "--single" ]; then
 	else
                 TESTS='test_*'
         fi
-	for test_program in `find libs/ardour -name "$TESTS" -type f -perm /u+x`;
+	for test_program in `find $ARDOUR_LIBS_DIR -name "$TESTS" -type f -perm /u+x`;
 	do
 		echo "Running $test_program..."
                 if [ "$1" == "--debug" ]; then
@@ -25,11 +28,11 @@ if [ "$1" == "--single" ] || [ "$2" == "--single" ]; then
 	done
 else
         if [ "$1" == "--debug" ]; then
-                gdb ./libs/ardour/run-tests
+                gdb $ARDOUR_LIBS_DIR/run-tests
         elif [ "$1" == "--valgrind" ]; then
-                valgrind ./libs/ardour/run-tests
+                valgrind $ARDOUR_LIBS_DIR/run-tests
         else
-                ./libs/ardour/run-tests $*
+                $ARDOUR_LIBS_DIR/run-tests $*
         fi
 fi
 

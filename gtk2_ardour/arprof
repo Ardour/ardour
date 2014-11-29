@@ -7,7 +7,8 @@
 # see http://valgrind.org/docs/manual/cl-manual.html and
 # http://log.fundamental-code.com/2013/09/07/profiling-realtime-code
 
-. `dirname "$0"`/../build/gtk2_ardour/ardev_common_waf.sh
+TOP=`dirname "$0"`/..
+. $TOP/build/gtk2_ardour/ardev_common_waf.sh
 LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
 
