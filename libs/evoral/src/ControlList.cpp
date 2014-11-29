@@ -64,6 +64,7 @@ ControlList::ControlList (const Parameter& id)
 	_default_value = id.normal();
 	_lookup_cache.left = -1;
 	_lookup_cache.range.first = _events.end();
+	_lookup_cache.range.second = _events.end();
 	_search_cache.left = -1;
 	_search_cache.first = _events.end();
 	_sort_pending = false;
@@ -85,6 +86,7 @@ ControlList::ControlList (const ControlList& other)
 	_max_yval = other._max_yval;
 	_default_value = other._default_value;
 	_lookup_cache.range.first = _events.end();
+	_lookup_cache.range.second = _events.end();
 	_search_cache.first = _events.end();
 	_sort_pending = false;
 	new_write_pass = true;
@@ -109,6 +111,7 @@ ControlList::ControlList (const ControlList& other, double start, double end)
 	_max_yval = other._max_yval;
 	_default_value = other._default_value;
 	_lookup_cache.range.first = _events.end();
+	_lookup_cache.range.second = _events.end();
 	_search_cache.first = _events.end();
 	_sort_pending = false;
 
@@ -935,7 +938,10 @@ void
 ControlList::mark_dirty () const
 {
 	_lookup_cache.left = -1;
+	_lookup_cache.range.first = _events.end();
+	_lookup_cache.range.second = _events.end();
 	_search_cache.left = -1;
+	_search_cache.first = _events.end();
 
 	if (_curve) {
 		_curve->mark_dirty();
@@ -1283,7 +1289,10 @@ ControlList::build_search_cache_if_necessary (double start) const
 {
 	/* Only do the range lookup if x is in a different range than last time
 	 * this was called (or if the search cache has been marked "dirty" (left<0) */
-	if (!_events.empty() && ((_search_cache.left < 0) || (_search_cache.left > start))) {
+	if (_events.empty()) {
+		_search_cache.first = _events.end();
+		_search_cache.left = 0;
+	} else if ((_search_cache.left < 0) || (_search_cache.left > start)) {
 
 		const ControlEvent start_point (start, 0);
 
