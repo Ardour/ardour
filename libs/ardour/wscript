@@ -435,6 +435,7 @@ def build(bld):
         else:
             testcommon.use.extend(['libltc', 'librubberband'])
         testcommon.defines      = [
+            'PACKAGE="libardour3test"',
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
             'LOCALEDIR="' + os.path.join(
