@@ -54,7 +54,7 @@ double ControlList::_thinning_factor = 20.0;
 
 ControlList::ControlList (const Parameter& id)
 	: _parameter(id)
-	, _interpolation(Linear)
+	, _interpolation(id.toggled() ? Discrete : Linear)
 	, _curve(0)
 {
 	_frozen = 0;

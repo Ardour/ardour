@@ -1212,6 +1212,9 @@ PluginInsert::PluginControl::PluginControl (PluginInsert*                     p,
 {
 	if (alist()) {
 		alist()->reset_default (desc.normal);
+		if (desc.toggled) {
+			list->set_interpolation(Evoral::ControlList::Discrete);
+		}
 	}
 
 	if (desc.toggled) {
