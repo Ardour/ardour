@@ -145,7 +145,7 @@ LadspaPlugin::init (string module_path, uint32_t index, framecnt_t rate)
 				continue;
 			}
 
-			_shadow_data[i] = default_value (i);
+			_shadow_data[i] = _default_value (i);
 		}
 	}
 
@@ -173,7 +173,7 @@ LadspaPlugin::unique_id() const
 }
 
 float
-LadspaPlugin::default_value (uint32_t port)
+LadspaPlugin::_default_value (uint32_t port) const
 {
 	const LADSPA_PortRangeHint *prh = port_range_hints();
 	float ret = 0.0f;
@@ -513,6 +513,17 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 		desc.step = delta / 1000.0f;
 		desc.smallstep = delta / 10000.0f;
 		desc.largestep = delta/10.0f;
+	}
+
+
+	if (LADSPA_IS_HINT_HAS_DEFAULT (prh.HintDescriptor)) {
+		desc.normal = _default_value(which);
+	} else {
+		/* if there is no explicit hint for the default
+		 * value, use lower bound. This is not great but
+		 * better than just assuming '0' which may be out-of range.
+		 */
+		desc.normal = desc.lower;
 	}
 
 	desc.toggled = LADSPA_IS_HINT_TOGGLED (prh.HintDescriptor);

@@ -49,7 +49,7 @@ class LIBARDOUR_API LadspaPlugin : public ARDOUR::Plugin
 	const char* name() const            { return _descriptor->Name; }
 	const char* maker() const           { return _descriptor->Maker; }
 	uint32_t    parameter_count() const { return _descriptor->PortCount; }
-	float       default_value (uint32_t port);
+	float       default_value (uint32_t port) { return _default_value (port); }
 	framecnt_t  signal_latency() const;
 	void        set_parameter (uint32_t port, float val);
 	float       get_parameter (uint32_t port) const;
@@ -121,6 +121,7 @@ class LIBARDOUR_API LadspaPlugin : public ARDOUR::Plugin
 	void connect_port (uint32_t port, float *ptr) { _descriptor->connect_port (_handle, port, ptr); }
 
   private:
+	float                    _default_value (uint32_t port) const;
 	std::string              _module_path;
 	Glib::Module*            _module;
 	const LADSPA_Descriptor* _descriptor;
