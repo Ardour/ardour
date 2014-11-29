@@ -232,6 +232,22 @@ LIBPBD_API int clear_directory (const std::string& dir, size_t* size = 0,
  */
 LIBPBD_API void remove_directory (const std::string& dir);
 
+/**
+ * Create a temporary writable directory in which to create
+ * temporary files. The directory will be created under the
+ * top level "domain" directory.
+ *
+ * For instance tmp_writable_directory ("pbd", "foo") on POSIX
+ * systems may return a path to a new directory something like
+ * to /tmp/pbd/foo-1423
+ *
+ * @param domain The top level directory
+ * @param prefix A prefix to use when creating subdirectory name
+ *
+ * @return new temporary directory
+ */
+LIBPBD_API std::string tmp_writable_directory (const char* domain, const std::string& prefix);
+
 } // namespace PBD
 
 #endif
