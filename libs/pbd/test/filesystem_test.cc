@@ -1,5 +1,8 @@
 #include "filesystem_test.h"
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #include <unistd.h>
 #include <stdlib.h>
 
@@ -19,7 +22,9 @@ void
 FilesystemTest::testPathIsWithin ()
 {
 #ifndef PLATFORM_WINDOWS
-	system ("rm -r foo");
+	string output_path = test_output_directory ("testPathIsWithin");
+	CPPUNIT_ASSERT (g_chdir (output_path.c_str()) == 0);
+
 	CPPUNIT_ASSERT (g_mkdir_with_parents ("foo/bar/baz", 0755) == 0);
 
 	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar/baz", "foo/bar/baz"));
