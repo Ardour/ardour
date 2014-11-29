@@ -468,16 +468,18 @@ PortManager::reestablish_ports ()
 int
 PortManager::reconnect_ports ()
 {
-	boost::shared_ptr<Ports> p = ports.reader ();
+    // GZ: Do not reconnect ports for Waves Tracks here
+#if 0
+    boost::shared_ptr<Ports> p = ports.reader ();
 
-	/* re-establish connections */
+    /* re-establish connections */
 
-	DEBUG_TRACE (DEBUG::Ports, string_compose ("reconnect %1 ports\n", p->size()));
+    DEBUG_TRACE (DEBUG::Ports, string_compose ("reconnect %1 ports\n", p->size()));
 
-	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		i->second->reconnect ();
-	}
-
+    for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+        i->second->reconnect ();
+    }
+#endif
 	return 0;
 }
 
