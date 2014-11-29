@@ -1616,6 +1616,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	desc.logarithmic  = lilv_port_has_property(_impl->plugin, port, _world.ext_logarithmic);
 	desc.sr_dependent = lilv_port_has_property(_impl->plugin, port, _world.lv2_sampleRate);
 	desc.label        = lilv_node_as_string(lilv_port_get_name(_impl->plugin, port));
+	desc.normal       = def ? lilv_node_as_float(def) : 0.0f;
 	desc.lower        = min ? lilv_node_as_float(min) : 0.0f;
 	desc.upper        = max ? lilv_node_as_float(max) : 1.0f;
 	load_parameter_descriptor_units(_world.world, desc, portunits);
