@@ -162,12 +162,15 @@ AutomationController::value_adjusted ()
 {
 	if (!_ignore_change) {
 		_controllable->set_value (_controllable->interface_to_internal(_adjustment->get_value()));
-	} else {
-		/* A bar controller will automatically follow the adjustment, but for a
-		   button we have to do it manually. */
-		ArdourButton* but = dynamic_cast<ArdourButton*>(_widget);
-		if (but) {
-			but->set_active(_adjustment->get_value() >= 0.5);
+	}
+
+	/* A bar controller will automatically follow the adjustment, but for a
+	   button we have to do it manually. */
+	ArdourButton* but = dynamic_cast<ArdourButton*>(_widget);
+	if (but) {
+		const bool active = _adjustment->get_value() >= 0.5;
+		if (but->get_active() != active) {
+			but->set_active(active);
 		}
 	}
 }
@@ -202,6 +205,7 @@ AutomationController::toggled ()
 {
 	ArdourButton* but = dynamic_cast<ArdourButton*>(_widget);
 	if (but) {
+		start_touch();
 		const bool was_active = _controllable->get_value() >= 0.5;
 		if (was_active) {
 			_adjustment->set_value(0.0);
@@ -210,6 +214,7 @@ AutomationController::toggled ()
 			_adjustment->set_value(1.0);
 			but->set_active(true);
 		}
+		end_touch();
 	}
 }
 
