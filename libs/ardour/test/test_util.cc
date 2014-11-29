@@ -24,6 +24,7 @@
 
 #include "pbd/xml++.h"
 #include "pbd/textreceiver.h"
+#include "pbd/file_utils.h"
 
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
@@ -177,18 +178,7 @@ test_search_path ()
 std::string
 new_test_output_dir (std::string prefix)
 {
-	std::string tmp_dir = Glib::build_filename (g_get_tmp_dir(), "ardour_test");
-	std::string dir_name;
-	std::string new_test_dir;
-	do {
-		ostringstream oss;
-		oss << prefix;
-		oss << g_random_int ();
-		dir_name = oss.str();
-		new_test_dir = Glib::build_filename (tmp_dir, dir_name);
-		if (Glib::file_test (new_test_dir, Glib::FILE_TEST_EXISTS)) continue;
-	} while (g_mkdir_with_parents (new_test_dir.c_str(), 0755) != 0);
-	return new_test_dir;
+	return PBD::tmp_writable_directory (PACKAGE, prefix);
 }
 
 int
