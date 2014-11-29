@@ -1,17 +1,14 @@
 #!/bin/sh
-srcdir=`pwd`
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$srcdir/../../build/libs/evoral:$srcdir/../../build/libs/pbd
-if [ ! -f './test/testdata/TakeFive.mid' ]; then
-    echo "This script must be run from within the libs/evoral directory";
-    exit 1;
-fi
+SCRIPTPATH=$( cd $(dirname $0) ; pwd -P )
+TOP="$SCRIPTPATH/../.."
+LIBS_DIR="$TOP/build/libs"
 
-# Make symlink to TakeFive.mid in build directory
-cd ../../build/libs/evoral
-mkdir -p ./test/testdata
-ln -fs $srcdir/test/testdata/TakeFive.mid \
-	./test/testdata/TakeFive.mid
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIBS_DIR/evoral:$LIBS_DIR/pbd
+
+export EVORAL_TEST_PATH="$SCRIPTPATH/test/testdata"
+
+cd $LIBS_DIR/evoral
 
 lcov -q -d ./src -z
 ./run-tests
