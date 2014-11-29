@@ -6017,8 +6017,9 @@ Session::ltc_output_port () const
 void
 Session::reconnect_ltc_input ()
 {
+    // GZ: Waves Tracks - ltc is disabled for this version
 	if (_ltc_input) {
-
+#if 0
 		string src = Config->get_ltc_source_port();
 
 		_ltc_input->disconnect (this);
@@ -6026,14 +6027,15 @@ Session::reconnect_ltc_input ()
 		if (src != _("None") && !src.empty())  {
 			_ltc_input->nth (0)->connect (src);
 		}
+#endif
 	}
 }
 
 void
 Session::reconnect_ltc_output ()
 {
+    // GZ: Waves Tracks - ltc is disabled for this version
 	if (_ltc_output) {
-
 #if 0
 		string src = Config->get_ltc_sink_port();
 
