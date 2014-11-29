@@ -47,6 +47,30 @@ PolyLine::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	}
 }
 
+void
+PolyLine::set_steps (Points const & points, bool stepped)
+{
+	if (!stepped) {
+		PolyItem::set(points);
+		return;
+	}
+
+	Points copy;
+	for (Points::const_iterator p = points.begin(); p != points.end();) {
+		Points::const_iterator next = p;
+		++next;
+
+		copy.push_back(*p);
+		if (next != points.end() && next->x != p->x) {
+			copy.push_back(Duple(next->x, p->y));
+		}
+
+		p = next;
+	}
+
+	PolyItem::set(copy);
+}
+
 bool
 PolyLine::covers (Duple const & point) const
 {

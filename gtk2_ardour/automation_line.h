@@ -224,6 +224,7 @@ private:
 	 */
 	ARDOUR::framecnt_t _offset;
 
+	bool is_stepped() const;
 	void update_visibility ();
 	void reset_line_coords (ControlPoint&);
 	void add_visible_control_point (uint32_t, uint32_t, double, double, ARDOUR::AutomationList::iterator, uint32_t);

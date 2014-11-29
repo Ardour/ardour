@@ -142,6 +142,13 @@ AutomationLine::event_handler (GdkEvent* event)
 	return PublicEditor::instance().canvas_line_event (event, line, this);
 }
 
+bool
+AutomationLine::is_stepped() const
+{
+	return (_desc.toggled ||
+	        (alist && alist->interpolation() == AutomationList::Discrete));
+}
+
 void
 AutomationLine::update_visibility ()
 {
@@ -150,7 +157,7 @@ AutomationLine::update_visibility ()
 		   when automation points have been removed (the line will still follow the shape of the
 		   old points).
 		*/
-		if (alist->interpolation() != AutomationList::Discrete && control_points.size() >= 2) {
+		if (control_points.size() >= 2) {
 			line->show();
 		} else {
 			line->hide ();
@@ -200,11 +207,6 @@ AutomationLine::hide ()
 double
 AutomationLine::control_point_box_size ()
 {
-	if (alist->interpolation() == AutomationList::Discrete) {
-		return max((_height*4.0) / (double)(alist->parameter().max() - alist->parameter().min()),
-		           4.0);
-	}
-
 	if (_height > TimeAxisView::preset_height (HeightLarger)) {
 		return 8.0;
 	} else if (_height > (guint32) TimeAxisView::preset_height (HeightNormal)) {
@@ -287,7 +289,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	reset_line_coords (cp);
 
 	if (line_points.size() > 1) {
-		line->set (line_points);
+		line->set_steps (line_points, is_stepped());
 	}
 
 	alist->freeze ();
@@ -716,7 +718,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		 */
 
 		if (line_points.size() > 1) {
-			line->set (line_points);
+			line->set_steps (line_points, is_stepped());
 		}
 	}
 	
@@ -1029,7 +1031,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 			line_points[n].y = control_points[n]->get_y();
 		}
 
-		line->set (line_points);
+		line->set_steps (line_points, is_stepped());
 
 		update_visibility ();
 	}
@@ -1132,17 +1134,13 @@ AutomationLine::remove_visibility (VisibleAspects va)
 void
 AutomationLine::track_entered()
 {
-	if (alist->interpolation() != AutomationList::Discrete) {
-		add_visibility (ControlPoints);
-	}
+	add_visibility (ControlPoints);
 }
 
 void
 AutomationLine::track_exited()
 {
-	if (alist->interpolation() != AutomationList::Discrete) {
-		remove_visibility (ControlPoints);
-	}
+	remove_visibility (ControlPoints);
 }
 
 XMLNode &
@@ -1182,7 +1180,7 @@ AutomationLine::view_to_model_coord_y (double& y) const
 		y = 2.0 * y - 1.0;
 	} else {
 		y = y * (double)(alist->get_max_y() - alist->get_min_y()) + alist->get_min_y();
-		if (ARDOUR::parameter_is_midi((ARDOUR::AutomationType)alist->parameter().type())) {
+		if (_desc.toggled || _desc.integer_step) {
 			y = round(y);
 		}
 	}
@@ -1211,11 +1209,8 @@ AutomationLine::model_to_view_coord (double& x, double& y) const
 void
 AutomationLine::interpolation_changed (AutomationList::InterpolationStyle style)
 {
-	if (style == AutomationList::Discrete) {
-		set_visibility (ControlPoints);
-		line->hide();
-	} else {
-		set_visibility (Line);
+	if (line_points.size() > 1) {
+		line->set_steps(line_points, is_stepped());
 	}
 }
 

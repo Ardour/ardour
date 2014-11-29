@@ -33,6 +33,8 @@ class LIBCANVAS_API PolyLine : public PolyItem
 	PolyLine (Item*);
 	
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
+
+	virtual void set_steps (Points const &, bool stepped);
 	
         bool covers (Duple const &) const;
 	/**
