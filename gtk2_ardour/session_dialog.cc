@@ -24,6 +24,7 @@
 #include "session_dialog.h"
 #include "utils.h"
 #include "i18n.h"
+#include "dbg_msg.h"
 
 using namespace std;
 using namespace Gtk;
@@ -32,9 +33,6 @@ using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
-
-#define dbg_msg(a) MessageDialog (a, PROGRAM_NAME).run();
-
 
 SessionDialog::SessionDialog (WM::Proxy<TracksControlPanel>& system_configuration_dialog, 
 							  bool require_new,

@@ -19,6 +19,7 @@
 #include "waves_button.h"
 
 #include <gtkmm/filechooser.h>
+#include "dbg_msg.h"
 
 #include "i18n.h"
 
@@ -28,8 +29,6 @@ using namespace Gdk;
 using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
-
-#define dbg_msg(a) MessageDialog (a, PROGRAM_NAME).run();
 
 
 SessionCloseDialog::SessionCloseDialog ()

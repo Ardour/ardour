@@ -53,6 +53,7 @@
 #include "gui_thread.h" 
 
 #include "open_file_dialog_proxy.h"
+#include "dbg_msg.h"
 
 using namespace std;
 using namespace Gtk;
@@ -60,8 +61,6 @@ using namespace Gdk;
 using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
-
-#define dbg_msg(a) MessageDialog (a, PROGRAM_NAME).run();
 
 static string poor_mans_glob (string path)
 {

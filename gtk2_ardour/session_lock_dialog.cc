@@ -30,6 +30,7 @@
 
 #include "session_lock_dialog.h"
 #include "i18n.h"
+#include "dbg_msg.h"
 
 using namespace std;
 using namespace Gtk;
@@ -37,9 +38,6 @@ using namespace Gdk;
 using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
-
-#define dbg_msg(a) MessageDialog (a, PROGRAM_NAME).run();
-
 
 SessionLockDialog::SessionLockDialog ()
 	: WavesDialog (_("session_lock_dialog.xml"), true, false)

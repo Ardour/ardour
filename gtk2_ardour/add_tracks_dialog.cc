@@ -16,6 +16,7 @@
 #include "utils.h"
 #include "pbd/unwind.h"
 #include <gtkmm2ext/utils.h>
+#include "dbg_msg.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -24,9 +25,6 @@ using namespace Gdk;
 using namespace Glib;
 using namespace PBD;
 using namespace Gtkmm2ext;
-
-#define dbg_msg(a) MessageDialog (a, PROGRAM_NAME).run();
-
 
 AddTracksDialog::AddTracksDialog ()
 : WavesDialog (_("add_tracks_dialog.xml"), true, false)

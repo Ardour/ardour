@@ -45,6 +45,7 @@
 #include "open_file_dialog_proxy.h"
 #include "yes_no_dialog.h"
 #include "waves_message_dialog.h"
+#include "dbg_msg.h"
 
 using namespace ARDOUR;
 using namespace Gtk;
@@ -52,8 +53,6 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace Glib;
 using namespace Timecode;
-
-#define dbg_msg(a) MessageDialog (a, PROGRAM_NAME).run();
 
 namespace {
 
