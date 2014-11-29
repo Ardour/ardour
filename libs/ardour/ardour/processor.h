@@ -35,6 +35,7 @@
 #include "ardour/automatable.h"
 
 class XMLNode;
+class ProcessorWindowProxy;
 
 namespace ARDOUR {
 
@@ -114,6 +115,9 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	void  set_ui (void*);
 	void* get_ui () const { return _ui_pointer; }
 
+	ProcessorWindowProxy * window_proxy () const { return _window_proxy; }
+	void set_window_proxy (ProcessorWindowProxy* wp);
+
         void set_owner (SessionObject*);
         SessionObject* owner() const;
 
@@ -129,6 +133,7 @@ protected:
 	bool      _display_to_user;
 	bool      _pre_fader; ///< true if this processor is currently placed before the Amp, otherwise false
 	void*     _ui_pointer;
+	ProcessorWindowProxy *_window_proxy;
         SessionObject* _owner;
 };
 

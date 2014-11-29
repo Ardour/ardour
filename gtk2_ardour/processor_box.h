@@ -91,9 +91,6 @@ class ProcessorWindowProxy : public WM::ProxyBase
     void toggle();
     void set_custom_ui_mode(bool use_custom) { want_custom = use_custom; }
 
-    bool marked;
-    bool valid () const;
-
     void set_state (const XMLNode&);
     XMLNode& get_state () const;
 
@@ -442,8 +439,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void route_property_changed (const PBD::PropertyChange&);
 	std::string generate_processor_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);
 
-        typedef std::list<ProcessorWindowProxy*> ProcessorWindowProxies;
-        ProcessorWindowProxies _processor_window_info;
+        //typedef std::list<ProcessorWindowProxy*> ProcessorWindowProxies;
+        //ProcessorWindowProxies _processor_window_info;
 
         ProcessorWindowProxy* find_window_proxy (boost::shared_ptr<ARDOUR::Processor>) const;
 

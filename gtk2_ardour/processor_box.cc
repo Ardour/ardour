@@ -1272,17 +1272,8 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 ProcessorWindowProxy* 
 ProcessorBox::find_window_proxy (boost::shared_ptr<Processor> processor) const
 {
-	for (list<ProcessorWindowProxy*>::const_iterator i = _processor_window_info.begin(); i != _processor_window_info.end(); ++i) {
-		boost::shared_ptr<Processor> p = (*i)->processor().lock();
-
-		if (p && p == processor) {
-			return (*i);
-		}
-	}
-
-	return 0;
+	return  processor->window_proxy();
 }
-
 
 
 bool
@@ -1611,56 +1602,7 @@ ProcessorBox::redisplay_processors ()
 					       &_visible_prefader_processors, &fader_seen));
 
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::add_processor_to_display));
-
-	for (ProcessorWindowProxies::iterator i = _processor_window_info.begin(); i != _processor_window_info.end(); ++i) {
-		(*i)->marked = false;
-	}
-
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::maybe_add_processor_to_ui_list));
-
-	/* trim dead wood from the processor window proxy list */
-
-	ProcessorWindowProxies::iterator i = _processor_window_info.begin();
-	while (i != _processor_window_info.end()) {
-		ProcessorWindowProxies::iterator j = i;
-		++j;
-
-		if (!(*i)->valid()) {
-
-			WM::Manager::instance().remove (*i);
-			delete *i;
-			_processor_window_info.erase (i);
-			
-		} else if (!(*i)->marked) {
-
-			/* this processor is no longer part of this processor
-			 * box.
-			 *
-			 * that could be because it was deleted or it could be
-			 * because the route being displayed in the parent
-			 * strip changed.
-			 *
-			 * The latter only happens with the editor mixer strip.
-			 */
-
-			if (is_editor_mixer_strip()) {
-				
-				/* editor mixer strip .. DO NOTHING
-				 *
-				 * note: the processor window stays visible if
-				 * it is already visible
-				 */
-			} else {
-				(*i)->hide ();
-				WM::Manager::instance().remove (*i);
-				delete *i;
-				_processor_window_info.erase (i);
-			} 
-		} 
-
-		i = j;
-	}
-
 	setup_entry_positions ();
 }
 
@@ -1674,24 +1616,14 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 	if (!p) {
 		return;
 	}
-
-	ProcessorWindowProxies::iterator i = _processor_window_info.begin ();
-	while (i != _processor_window_info.end()) {
-
-		boost::shared_ptr<Processor> t = (*i)->processor().lock ();
-
-		if (p == t) {
-			/* this processor is already on the list; done */
-			(*i)->marked = true;
-			return;
-		}
-
-		++i;
+	if (p->window_proxy()) {
+		return;
 	}
 
 	/* not on the list; add it */
 
 	string loc;
+#if 0 // is this still needed? Why?
 	if (_parent_strip) {
 		if (_parent_strip->mixer_owned()) {
 			loc = X_("M");
@@ -1701,6 +1633,9 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 	} else {
 		loc = X_("P");
 	}
+#else
+	loc = X_("P");
+#endif
 
 	ProcessorWindowProxy* wp = new ProcessorWindowProxy (
 		string_compose ("%1-%2-%3", loc, _route->id(), p->id()),
@@ -1713,19 +1648,13 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 		wp->set_state (*ui_xml);
 	}
 	
-	wp->marked = true;
-
-        /* if the processor already has an existing UI,
-           note that so that we don't recreate it
-        */
-
         void* existing_ui = p->get_ui ();
 
         if (existing_ui) {
                 wp->use_window (*(reinterpret_cast<Gtk::Window*>(existing_ui)));
         }
 
-	_processor_window_info.push_back (wp);
+	p->set_window_proxy (wp);
 	WM::Manager::instance().register_window (wp);
 }
 
@@ -2841,16 +2770,10 @@ ProcessorBox::generate_processor_title (boost::shared_ptr<PluginInsert> pi)
 Window *
 ProcessorBox::get_processor_ui (boost::shared_ptr<Processor> p) const
 {
-	list<ProcessorWindowProxy*>::const_iterator i = _processor_window_info.begin ();
-	while (i != _processor_window_info.end()) {
-		boost::shared_ptr<Processor> t = (*i)->processor().lock ();
-		if (t && t == p) {
-			return (*i)->get ();
-		}
-
-		++i;
+	ProcessorWindowProxy* wp = p->window_proxy();
+	if (wp) {
+		return wp->get ();
 	}
-
 	return 0;
 }
 
@@ -2861,24 +2784,9 @@ ProcessorBox::get_processor_ui (boost::shared_ptr<Processor> p) const
 void
 ProcessorBox::set_processor_ui (boost::shared_ptr<Processor> p, Gtk::Window* w)
 {
- 	list<ProcessorWindowProxy*>::iterator i = _processor_window_info.begin ();
-
+	assert (p->window_proxy());
 	p->set_ui (w);
-
-	while (i != _processor_window_info.end()) {
-		boost::shared_ptr<Processor> t = (*i)->processor().lock ();
-		if (t && t == p) {
-			(*i)->use_window (*w);
-			return;
-		}
-
-		++i;
-	}
-
-	/* we shouldn't get here, because the ProcessorUIList should always contain
-	   an entry for each processor.
-	*/
-	assert (false);
+	p->window_proxy()->use_window (*w);
 }
 
 void
@@ -2953,12 +2861,10 @@ ProcessorBox::is_editor_mixer_strip() const
 
 ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* box, boost::weak_ptr<Processor> processor)
 	: WM::ProxyBase (name, string())
-	, marked (false)
 	, _processor_box (box)
 	, _processor (processor)
 	, is_custom (false)
 	, want_custom (false)
-	, _valid (true)
 {
 	boost::shared_ptr<Processor> p = _processor.lock ();
 	if (!p) {
@@ -2981,7 +2887,7 @@ ProcessorWindowProxy::processor_going_away ()
 {
 	delete _window;
 	_window = 0;
-	_valid = false;
+	WM::Manager::instance().remove (this);
 	/* should be no real reason to do this, since the object that would
 	   send DropReferences is about to be deleted, but lets do it anyway.
 	*/
@@ -2993,12 +2899,6 @@ ProcessorWindowProxy::session_handle()
 {
 	/* we don't care */
 	return 0;
-}
-
-bool
-ProcessorWindowProxy::valid() const
-{
-	return _valid;
 }
 
 XMLNode&
