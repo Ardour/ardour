@@ -122,6 +122,7 @@ public:
 	void   view_to_model_coord (double& x, double& y) const;
 	void   view_to_model_coord_y (double &) const;
 	void   model_to_view_coord (double& x, double& y) const;
+	void   model_to_view_coord_y (double &) const;
 
 	void set_list(boost::shared_ptr<ARDOUR::AutomationList> list);
 	boost::shared_ptr<ARDOUR::AutomationList> the_list() const { return alist; }

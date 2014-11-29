@@ -3392,6 +3392,7 @@ Route::SoloControllable::SoloControllable (std::string name, boost::shared_ptr<R
 	, _route (r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(SoloAutomation)));
+	gl->set_interpolation(Evoral::ControlList::Discrete);
 	set_list (gl);
 }
 
@@ -3440,6 +3441,7 @@ Route::MuteControllable::MuteControllable (std::string name, boost::shared_ptr<R
 	, _route (r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(MuteAutomation)));
+	gl->set_interpolation(Evoral::ControlList::Discrete);
 	set_list (gl);
 }
 
@@ -3448,15 +3450,22 @@ Route::MuteControllable::set_value (double val)
 {
 	bool bval = ((val >= 0.5f) ? true: false);
 
-	boost::shared_ptr<RouteList> rl (new RouteList);
+	// boost::shared_ptr<RouteList> rl (new RouteList);
 
 	boost::shared_ptr<Route> r = _route.lock ();
 	if (!r) {
 		return;
 	}
 
-	rl->push_back (r);
-	_session.set_mute (rl, bval);
+	/* I don't know why this apparently "should" be done via the RT event
+	   system, but doing so causes a ton of annoying errors... */
+	// rl->push_back (r);
+	// _session.set_mute (rl, bval);
+
+	/* ... but this seems to work. */
+	r->set_mute (bval, this);
+
+	AutomationControl::set_value(bval);
 }
 
 double

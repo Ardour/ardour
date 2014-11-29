@@ -350,6 +350,16 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 		return dret;
 	}
 
+	if (_mute_control->list() && _mute_control->automation_playback()) {
+		bool        valid = false;
+		const float mute  = _mute_control->list()->rt_safe_eval(transport_frame, valid);
+		if (mute >= 0.5 && !muted()) {
+			_mute_control->set_value(1.0);  // mute
+		} else if (mute < 0.5 && muted()) {
+			_mute_control->set_value(0.0);  // unmute
+		}
+	}
+
 	_silent = false;
 	_amp->apply_gain_automation(false);
 

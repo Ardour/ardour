@@ -1187,7 +1187,7 @@ AutomationLine::view_to_model_coord_y (double& y) const
 }
 
 void
-AutomationLine::model_to_view_coord (double& x, double& y) const
+AutomationLine::model_to_view_coord_y (double& y) const
 {
 	/* TODO: This should be more generic (use ParameterDescriptor) */
 	if (alist->parameter().type() == GainAutomation ||
@@ -1201,7 +1201,12 @@ AutomationLine::model_to_view_coord (double& x, double& y) const
 	} else {
 		y = (y - alist->get_min_y()) / (double)(alist->get_max_y() - alist->get_min_y());
 	}
+}
 
+void
+AutomationLine::model_to_view_coord (double& x, double& y) const
+{
+	model_to_view_coord_y (y);
 	x = _time_converter->to (x) - _offset;
 }
 
