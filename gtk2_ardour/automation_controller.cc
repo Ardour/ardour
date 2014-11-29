@@ -40,6 +40,27 @@
 using namespace ARDOUR;
 using namespace Gtk;
 
+AutomationBarController::AutomationBarController (
+		boost::shared_ptr<Automatable>       printer,
+		boost::shared_ptr<AutomationControl> ac,
+		Adjustment*                          adj)
+	: Gtkmm2ext::BarController(*adj, ac)
+	, _printer(printer)
+	, _controllable(ac)
+{
+}
+
+std::string
+AutomationBarController::get_label (double& xpos)
+{
+        xpos = 0.5;
+        return _printer->value_as_string (_controllable);
+}
+
+AutomationBarController::~AutomationBarController()
+{
+}
+
 AutomationController::AutomationController(boost::shared_ptr<Automatable>       printer,
                                            boost::shared_ptr<AutomationControl> ac,
                                            Adjustment*                          adj)
@@ -67,7 +88,7 @@ AutomationController::AutomationController(boost::shared_ptr<Automatable>       
 
 		_widget = but;
 	} else {
-		Gtkmm2ext::BarController* bar = manage(new Gtkmm2ext::BarController(*adj, ac));
+		AutomationBarController* bar = manage(new AutomationBarController(_printer, ac, adj));
 
 		bar->set_name(X_("ProcessorControlSlider"));
 		bar->StartGesture.connect(
@@ -122,13 +143,6 @@ AutomationController::create(boost::shared_ptr<Automatable>       printer,
 	assert (ac);
 	assert(ac->parameter() == param);
 	return boost::shared_ptr<AutomationController>(new AutomationController(printer, ac, adjustment));
-}
-
-std::string
-AutomationController::get_label (double& xpos)
-{
-        xpos = 0.5;
-        return _printer->value_as_string (_controllable);
 }
 
 void
@@ -314,7 +328,7 @@ AutomationController::stop_updating ()
 void
 AutomationController::disable_vertical_scroll ()
 {
-	Gtkmm2ext::BarController* bar = dynamic_cast<Gtkmm2ext::BarController*>(_widget);
+	AutomationBarController* bar = dynamic_cast<AutomationBarController*>(_widget);
 	if (bar) {
 		bar->set_tweaks (
 			Gtkmm2ext::PixFader::Tweaks(bar->tweaks() |

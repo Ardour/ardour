@@ -42,6 +42,18 @@ namespace ARDOUR {
 	class Automatable;
 }
 
+class AutomationBarController : public Gtkmm2ext::BarController {
+public:
+	AutomationBarController(boost::shared_ptr<ARDOUR::Automatable>       printer,
+	                        boost::shared_ptr<ARDOUR::AutomationControl> ac,
+	                        Gtk::Adjustment*                             adj);
+	~AutomationBarController();
+private:
+	std::string get_label (double&);
+	boost::shared_ptr<ARDOUR::Automatable>       _printer;
+	boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
+};
+
 /** A BarController which displays the value and allows control of an AutomationControl */
 class AutomationController : public Gtk::Alignment {
 public:
@@ -72,7 +84,6 @@ private:
 	AutomationController (boost::shared_ptr<ARDOUR::Automatable>       printer,
 	                      boost::shared_ptr<ARDOUR::AutomationControl> ac,
 	                      Gtk::Adjustment*                             adj);
-	std::string get_label (double&);
 
 	void start_touch();
 	void end_touch();
