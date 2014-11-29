@@ -145,6 +145,7 @@ def build(bld):
         obj.target       = 'run-tests'
         obj.name         = 'libevoral-tests'
         obj.install_path = ''
+        obj.defines      = ['PACKAGE="libevoraltest"']
         if bld.env['TEST_COVERAGE']:
             obj.linkflags      = '-lgcov'
             obj.cflags         = [ '-fprofile-arcs',  '-ftest-coverage' ]
