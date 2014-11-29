@@ -431,6 +431,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 					_adjustment.set_value (_default_value);
 				} else if (ev->state & Keyboard::GainFineScaleModifier) {
 					_adjustment.set_value (_adjustment.get_lower());
+#if 0 // ignore clicks
 				} else if (ev_pos == slider_pos) {
 					; // click on current position, no move.
 				} else if ((_orien == VERT && ev_pos < slider_pos) || (_orien == HORIZ && ev_pos > slider_pos)) {
@@ -438,6 +439,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 					_adjustment.set_value (_adjustment.get_value() + _adjustment.get_step_increment());
 				} else {
 					_adjustment.set_value (_adjustment.get_value() - _adjustment.get_step_increment());
+#endif
 				}
 			}
 			return true;
