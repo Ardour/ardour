@@ -304,6 +304,22 @@ protected:
 
 	bool _ignore_set_layer_display;
 
+protected:
+	void update_gain_track_visibility ();
+	void update_mute_track_visibility ();
+	void update_pan_track_visibility ();
+
+	/** Ensure that we have the appropriate automation lanes for panners.
+	 *
+	 *  @param show true to show any new views that we create, otherwise false.
+	 */
+	void ensure_pan_views (bool show = true);
+
+	Gtk::CheckMenuItem* gain_automation_item;
+	Gtk::CheckMenuItem* mute_automation_item;
+	std::list<boost::shared_ptr<AutomationTimeAxisView> > pan_tracks;
+	Gtk::CheckMenuItem* pan_automation_item;
+
 private:
 
 	void remove_child (boost::shared_ptr<TimeAxisView>);

@@ -45,6 +45,8 @@
 #include "ardour/amp.h"
 #include "ardour/meter.h"
 #include "ardour/event_type_map.h"
+#include "ardour/pannable.h"
+#include "ardour/panner.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
 #include "ardour/route_group.h"
@@ -108,6 +110,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, color_mode_menu (0)
 	, gm (sess, true, 75, 14)
 	, _ignore_set_layer_display (false)
+	, gain_automation_item(NULL)
+	, mute_automation_item(NULL)
+	, pan_automation_item(NULL)
 {
 	number_label.set_name("tracknumber label");
 	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
@@ -505,6 +510,38 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 		items.push_back (SeparatorElem ());
 		items.push_back (MenuElem (_("Processor automation"), subplugin_menu));
 		items.back().set_sensitive (!for_selection || _editor.get_selection().tracks.size() == 1);;
+	}
+
+	/* Add any route automation */
+
+	if (gain_track) {
+		items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &RouteTimeAxisView::update_gain_track_visibility)));
+		gain_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		gain_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) && 
+		                                  (gain_track && string_is_affirmative (gain_track->gui_property ("visible"))));
+
+		_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
+	}
+
+	if (mute_track) {
+		items.push_back (CheckMenuElem (_("Mute"), sigc::mem_fun (*this, &RouteTimeAxisView::update_mute_track_visibility)));
+		mute_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		mute_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) && 
+		                                  (mute_track && string_is_affirmative (mute_track->gui_property ("visible"))));
+
+		_main_automation_menu_map[Evoral::Parameter(MuteAutomation)] = mute_automation_item;
+	}
+
+	if (!pan_tracks.empty()) {
+		items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &RouteTimeAxisView::update_pan_track_visibility)));
+		pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		pan_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
+						 (!pan_tracks.empty() && string_is_affirmative (pan_tracks.front()->gui_property ("visible"))));
+
+		set<Evoral::Parameter> const & params = _route->pannable()->what_can_be_automated ();
+		for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
+			_main_automation_menu_map[*p] = pan_automation_item;
+		}
 	}
 }
 
@@ -1836,6 +1873,110 @@ RouteTimeAxisView::automation_track_hidden (Evoral::Parameter param)
 
 	if (_route && !no_redraw) {
 		request_redraw ();
+	}
+}
+
+void
+RouteTimeAxisView::update_gain_track_visibility ()
+{
+	bool const showit = gain_automation_item->get_active();
+
+	if (showit != string_is_affirmative (gain_track->gui_property ("visible"))) {
+		gain_track->set_marked_for_display (showit);
+
+		/* now trigger a redisplay */
+
+		if (!no_redraw) {
+			 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+		}
+	}
+}
+
+void
+RouteTimeAxisView::update_mute_track_visibility ()
+{
+	bool const showit = mute_automation_item->get_active();
+
+	if (showit != string_is_affirmative (mute_track->gui_property ("visible"))) {
+		mute_track->set_marked_for_display (showit);
+
+		/* now trigger a redisplay */
+
+		if (!no_redraw) {
+			 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+		}
+	}
+}
+
+void
+RouteTimeAxisView::update_pan_track_visibility ()
+{
+	bool const showit = pan_automation_item->get_active();
+	bool changed = false;
+
+	for (list<boost::shared_ptr<AutomationTimeAxisView> >::iterator i = pan_tracks.begin(); i != pan_tracks.end(); ++i) {
+		if ((*i)->set_marked_for_display (showit)) {
+			changed = true;
+		}
+	}
+
+	if (changed) {
+		_route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+	}
+}
+
+void
+RouteTimeAxisView::ensure_pan_views (bool show)
+{
+	bool changed = false;
+	for (list<boost::shared_ptr<AutomationTimeAxisView> >::iterator i = pan_tracks.begin(); i != pan_tracks.end(); ++i) {
+		changed = true;
+		(*i)->set_marked_for_display (false);
+	}
+	if (changed) {
+		_route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+	}
+	pan_tracks.clear();
+
+	if (!_route->panner()) {
+		return;
+	}
+
+	set<Evoral::Parameter> params = _route->panner()->what_can_be_automated();
+	set<Evoral::Parameter>::iterator p;
+
+	for (p = params.begin(); p != params.end(); ++p) {
+		boost::shared_ptr<ARDOUR::AutomationControl> pan_control = _route->pannable()->automation_control(*p);
+
+		if (pan_control->parameter().type() == NullAutomation) {
+			error << "Pan control has NULL automation type!" << endmsg;
+			continue;
+		}
+
+		if (automation_child (pan_control->parameter ()).get () == 0) {
+
+			/* we don't already have an AutomationTimeAxisView for this parameter */
+
+			std::string const name = _route->panner()->describe_parameter (pan_control->parameter ());
+
+			boost::shared_ptr<AutomationTimeAxisView> t (
+					new AutomationTimeAxisView (_session,
+						_route,
+						_route->pannable(),
+						pan_control,
+						pan_control->parameter (),
+						_editor,
+						*this,
+						false,
+						parent_canvas,
+						name)
+					);
+
+			pan_tracks.push_back (t);
+			add_automation_child (*p, t, show);
+		} else {
+			pan_tracks.push_back (automation_child (pan_control->parameter ()));
+		}
 	}
 }
 
