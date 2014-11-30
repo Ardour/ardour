@@ -92,6 +92,24 @@ MidiStateTracker::track (const MidiBuffer::const_iterator &from, const MidiBuffe
 }
 
 void
+MidiStateTracker::track (const uint8_t* evbuf)
+{
+	const uint8_t type = evbuf[0] & 0xF0;
+	const uint8_t chan = evbuf[0] & 0x0F;
+	switch (type) {
+	case MIDI_CTL_ALL_NOTES_OFF:
+		reset();
+		break;
+	case MIDI_CMD_NOTE_ON:
+		add(evbuf[1], chan);
+		break;
+	case MIDI_CMD_NOTE_OFF:
+		remove(evbuf[1], chan);
+		break;
+	}
+}
+
+void
 MidiStateTracker::resolve_notes (MidiBuffer &dst, framepos_t time)
 {
 	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 MB-resolve notes @ %2 on = %3\n", this, time, _on));

@@ -114,13 +114,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 #endif
 
 		if (success) {
-
-			if (is_note_on(write_loc[0]) ) {
-				_tracker.add (write_loc[1], write_loc[0] & 0xf);
-			} else if (is_note_off(write_loc[0])) {
-				_tracker.remove (write_loc[1], write_loc[0] & 0xf);
-			}
-
+			_tracker.track(write_loc);
 			++count;
 		} else {
 			cerr << "WARNING: error reading event contents from MIDI ring" << endl;

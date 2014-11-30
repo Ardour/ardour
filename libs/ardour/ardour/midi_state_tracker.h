@@ -39,6 +39,7 @@ public:
 	MidiStateTracker();
 
 	void track (const MidiBuffer::const_iterator& from, const MidiBuffer::const_iterator& to);
+	void track (const uint8_t* evbuf);
 	void add (uint8_t note, uint8_t chn);
 	void remove (uint8_t note, uint8_t chn);
 	void resolve_notes (MidiBuffer& buffer, framepos_t time);
@@ -54,19 +55,7 @@ public:
 
 	template<typename Time>
 	void track (const Evoral::Event<Time>& ev) {
-		const uint8_t type = ev.buffer()[0] & 0xF0;
-		const uint8_t chan = ev.buffer()[0] & 0x0F;
-		switch (type) {
-		case MIDI_CTL_ALL_NOTES_OFF:
-			reset();
-			break;
-		case MIDI_CMD_NOTE_ON:
-			add(ev.buffer()[1], chan);
-			break;
-		case MIDI_CMD_NOTE_OFF:
-			remove(ev.buffer()[1], chan);
-			break;
-		}
+		track (ev.buffer());
 	}
 
 private:

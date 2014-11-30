@@ -57,25 +57,7 @@ public:
 	void flush (framepos_t start, framepos_t end);
 
 	void reset_tracker ();
-        void loop_resolve (MidiBuffer& dst, framepos_t);
-
-protected:
-	inline bool is_channel_event(uint8_t event_type_byte) {
-		// mask out channel information
-		event_type_byte &= 0xF0;
-		// midi channel events range from 0x80 to 0xE0
-		return (0x80 <= event_type_byte) && (event_type_byte <= 0xE0);
-	}
-
-	inline bool is_note_on(uint8_t event_type_byte) {
-		// mask out channel information
-		return (event_type_byte & 0xF0) == MIDI_CMD_NOTE_ON;
-	}
-
-	inline bool is_note_off(uint8_t event_type_byte) {
-		// mask out channel information
-		return (event_type_byte & 0xF0) == MIDI_CMD_NOTE_OFF;
-	}
+	void loop_resolve (MidiBuffer& dst, framepos_t);
 
 private:
 	MidiStateTracker _tracker;
