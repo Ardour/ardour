@@ -531,7 +531,7 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 
 		if (ev->state & Keyboard::GainFineScaleModifier) {
 			if (ev->state & Keyboard::GainExtraFineScaleModifier) {
-				scale = 0.05;
+				scale = 0.005;
 			} else {
 				scale = 0.1;
 			}
