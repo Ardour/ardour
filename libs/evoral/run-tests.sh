@@ -7,11 +7,12 @@ if [ ! -f './test/testdata/TakeFive.mid' ]; then
     exit 1;
 fi
 
-# Make symlink to TakeFive.mid in build directory
-cd ../../build/libs/evoral
-mkdir -p ./test/testdata
-ln -fs $srcdir/test/testdata/TakeFive.mid \
-	./test/testdata/TakeFive.mid
+SCRIPTPATH=$( cd $(dirname $0) ; pwd -P )
+TOP="$SCRIPTPATH/../.."
+
+export EVORAL_TEST_PATH="$SCRIPTPATH/test/testdata"
+echo "Setting EVORAL_TEST_PATH=$EVORAL_TEST_PATH"
+cd $TOP/build/libs/evoral
 
 lcov -q -d ./src -z
 ./run-tests

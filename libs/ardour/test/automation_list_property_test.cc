@@ -24,7 +24,6 @@
 #include "ardour/automation_list.h"
 #include "automation_list_property_test.h"
 #include "test_util.h"
-#include "test_common.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION (AutomationListPropertyTest);
 

@@ -1,8 +1,9 @@
 #include "SMFTest.hpp"
 
-#ifdef WIN32
-#include <io.h> // for R_OK
-#endif
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
+#include "pbd/file_utils.h"
 
 using namespace std;
 
@@ -12,17 +13,32 @@ void
 SMFTest::createNewFileTest ()
 {
 	TestSMF smf;
-	smf.create("NewFile.mid");
+
+	string output_dir_path = PBD::tmp_writable_directory (PACKAGE, "createNewFileTest");
+	string new_file_path = Glib::build_filename (output_dir_path, "NewFile.mid");
+	smf.create(new_file_path);
 	smf.close();
-	CPPUNIT_ASSERT(access("NewFile.mid", R_OK) == 0);
-	unlink(smf.path().c_str());
+	CPPUNIT_ASSERT(Glib::file_test (new_file_path, Glib::FILE_TEST_IS_REGULAR));
+}
+
+PBD::Searchpath
+test_search_path ()
+{
+#ifdef PLATFORM_WINDOWS
+	string wsp(g_win32_get_package_installation_directory_of_module(NULL));
+	return Glib::build_filename (wsp,  "evoral_testdata");
+#else
+	return Glib::getenv("EVORAL_TEST_PATH");
+#endif
 }
 
 void
 SMFTest::takeFiveTest ()
 {
 	TestSMF smf;
-	smf.open("./test/testdata/TakeFive.mid");
+	string testdata_path;
+	CPPUNIT_ASSERT (find_file (test_search_path (), "TakeFive.mid", testdata_path));
+	smf.open(testdata_path);
 	CPPUNIT_ASSERT(!smf.is_empty());
 
 	seq->start_write();

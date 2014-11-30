@@ -1,5 +1,4 @@
-// this is included first to avoid Searchpath definition on windows
-#include "test_common.h"
+#include "test_util.h"
 
 #include "pbd/file_utils.h"
 #include "ardour/resampled_source.h"
