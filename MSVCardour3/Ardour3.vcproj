@@ -24,6 +24,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Prepare configuration file(s)"
+				CommandLine="cd ..&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -96,6 +98,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Debug32TestSuiteFolder)\..\share\ardour3&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -108,6 +111,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Prepare configuration file(s)"
+				CommandLine="cd ..&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -177,7 +182,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy /Y &quot;$(Release32TestSuiteFolder)\$(ProjectName).exe&quot; &quot;$(Release32TargetFolder)\$(ProjectName).exe&quot;&#x0D;&#x0A;cd .&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(Release32TestSuiteFolder)\$(ProjectName).exe&quot; &quot;$(Release32TargetFolder)\$(ProjectName).exe&quot;&#x0D;&#x0A;cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(PackagerFolderLocal)\..\share\ardour3&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Release32TestSuiteFolder)\..\share\ardour3&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -190,6 +195,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Prepare configuration file(s)"
+				CommandLine="cd ..&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -260,6 +267,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Release32TestSuiteFolder)\..\share\ardour3&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>

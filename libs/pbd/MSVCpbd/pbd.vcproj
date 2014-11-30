@@ -24,6 +24,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Use existing configuration file(s)"
+				CommandLine="cd ."
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -103,6 +105,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Use existing configuration file(s)"
+				CommandLine="cd ."
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -182,7 +186,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="python &quot;../../../libs/pbd/pbd/signals.py&quot; &quot;../../../libs/pbd/pbd/signals_generated.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\ptw32\pthread.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\ptw32\pthread.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\sys\targetsxs.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\sys\targetsxs.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\sys\time.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\sys\time.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\float_cast.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\float_cast.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\libcharset.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\libcharset.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\localcharset.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\localcharset.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\misc.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\misc.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\pthread.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\pthread.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\sched.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\sched.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\semaphore.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\semaphore.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\unistd.h.input&quot; &quot;$(GenericIncludeFolder)\unistd.h&quot;&#x0D;&#x0A;"
+				Description="Prepare configuration file(s)"
+				CommandLine="python &quot;../../../libs/pbd/pbd/signals.py&quot; &quot;../../../libs/pbd/pbd/signals_generated.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\ptw32\pthread.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\ptw32\pthread.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\sys\targetsxs.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\sys\targetsxs.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\sys\time.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\sys\time.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\float_cast.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\float_cast.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\libcharset.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\libcharset.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\localcharset.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\localcharset.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\misc.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\misc.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\pthread.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\pthread.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\sched.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\sched.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\semaphore.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\semaphore.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\unistd.h.input&quot; &quot;$(GenericIncludeFolder)\unistd.h&quot;&#x0D;&#x0A;cd ..\..\..&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"

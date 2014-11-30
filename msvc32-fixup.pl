@@ -18,6 +18,15 @@ $current_minus_age = 0;
 $exec_prefix = "lib";
 $dll_suffix = "32";
 $lib_ext = ".dll";
+$monospace = "ArdourMono";
+$font_small = 9;
+$font_smaller = 8;
+$font_normal = 10;
+$font_big = 14;
+$font_large = 18;
+$font_larger = 24;
+$font_huger = 34;
+$font_massive = 60;
 
 sub process_file
 {
@@ -47,6 +56,15 @@ sub process_file
 	    s/\@VERSION@/$msvc_mixbus_version/g;
 	    s/\@DLL_SUFFIX\@/$dll_suffix/g;
 	    s/\@LIB_EXT\@/$lib_ext/g;
+	    s/\@MONOSPACE\@/$monospace/g;
+	    s/\@FONT_SMALL\@/$font_small/g;
+	    s/\@FONT_SMALLER\@/$font_smaller/g;
+	    s/\@FONT_NORMAL\@/$font_normal/g;
+	    s/\@FONT_BIG\@/$font_big/g;
+	    s/\@FONT_LARGE\@/$font_large/g;
+	    s/\@FONT_LARGER\@/$font_larger/g;
+	    s/\@FONT_HUGER\@/$font_huger/g;
+	    s/\@FONT_MASSIVE\@/$font_massive/g;
 	    s/\@GETTEXT_PACKAGE\@/$gettext_package/g;
 	    s/\@PERL_PATH@/$perl_path/g;
 	    s/\@PackagerFolderLocal@/$packager_folder_local/g;
@@ -74,6 +92,7 @@ sub process_file
 }
 
 process_file ("libs/plugins/reasonablesynth.lv2/manifest.ttl");
+process_file ("gtk2_ardour/default_ui_config");
 
 my $command=join(' ',@ARGV);
 if ($command eq -buildall) {
