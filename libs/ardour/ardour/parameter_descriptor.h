@@ -47,9 +47,9 @@ struct ParameterDescriptor
 		, normal(parameter.normal())
 		, lower(parameter.min())
 		, upper(parameter.max())
-		, step((upper - lower) / 100.0f)
-		, smallstep((upper - lower) / 1000.0f)
-		, largestep((upper - lower) / 10.0f)
+		, step(0)
+		, smallstep(0)
+		, largestep(0)
 		, integer_step(parameter.type() >= MidiCCAutomation &&
 		               parameter.type() <= MidiChannelPressureAutomation)
 		, toggled(parameter.toggled())
@@ -62,6 +62,7 @@ struct ParameterDescriptor
 		if (parameter.type() == GainAutomation) {
 			unit = DB;
 		}
+		update_steps();
 	}
 
 	ParameterDescriptor()
@@ -83,24 +84,27 @@ struct ParameterDescriptor
 		, enumeration(false)
 	{}
 
-	/// Set step, smallstep, and largestep, based on current description
+	/* Set step, smallstep, and largestep, based on current description */
 	void update_steps() {
 		if (unit == ParameterDescriptor::MIDI_NOTE) {
 			step      = smallstep = 1;  // semitone
 			largestep = 12;             // octave
-		} else {
+		} else if (integer_step) {
 			const float delta = upper - lower;
 
-			step      = delta / 1000.0f;
 			smallstep = delta / 10000.0f;
-			largestep = delta / 10.0f;
+			step      = delta / 1000.0f;
+			largestep = delta / 40.0f;
 
-			if (integer_step) {
-				step      = rint(step);
-				largestep = rint(largestep);
-				// leave smallstep alone for fine tuning
-			}
+			smallstep = std::max(1.0, rint(smallstep));
+			step      = std::max(1.0, rint(step));
+			largestep = std::max(1.0, rint(largestep));
 		}
+		/* else: leave all others as default '0'
+		 * in that case the UI (eg. AutomationController::create)
+		 * uses internal_to_interface() to map the value
+		 * to an appropriate interface range
+		 */
 	}
 
 	std::string                    label;
