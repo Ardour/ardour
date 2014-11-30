@@ -484,10 +484,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\EventRingBuffer.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\evoral\EventSink.hpp"
 				>
 			</File>

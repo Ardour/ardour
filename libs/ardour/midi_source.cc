@@ -34,6 +34,8 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/basename.h"
 
+#include "evoral/EventSink.hpp"
+
 #include "ardour/debug.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_state_tracker.h"

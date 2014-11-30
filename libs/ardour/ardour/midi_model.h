@@ -30,7 +30,6 @@
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/midi_buffer.h"
-#include "ardour/midi_ring_buffer.h"
 #include "ardour/automatable_sequence.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"

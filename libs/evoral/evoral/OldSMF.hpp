@@ -24,8 +24,6 @@
 namespace Evoral {
 
 template<typename Time> class Event;
-template<typename Time> class EventRingBuffer;
-
 
 /** Standard Midi File (Type 0)
  */

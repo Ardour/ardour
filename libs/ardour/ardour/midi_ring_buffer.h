@@ -22,8 +22,7 @@
 #include <iostream>
 #include <algorithm>
 
-#include "evoral/EventRingBuffer.hpp"
-
+#include "ardour/event_ring_buffer.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/midi_state_tracker.h"
@@ -41,12 +40,10 @@ class MidiBuffer;
  * [timestamp][type][size][size bytes of raw MIDI][timestamp][type][size](etc...)
  */
 template<typename T>
-class /*LIBARDOUR_API*/ MidiRingBuffer : public Evoral::EventRingBuffer<T> {
+class /*LIBARDOUR_API*/ MidiRingBuffer : public EventRingBuffer<T> {
 public:
-	/** @param size Size in bytes.
-	 */
-	MidiRingBuffer(size_t size)
-		: Evoral::EventRingBuffer<T>(size) {}
+	/** @param size Size in bytes. */
+	MidiRingBuffer(size_t size) : EventRingBuffer<T>(size) {}
 
 	inline bool read_prefix(T* time, Evoral::EventType* type, uint32_t* size);
 	inline bool read_contents(uint32_t size, uint8_t* buf);

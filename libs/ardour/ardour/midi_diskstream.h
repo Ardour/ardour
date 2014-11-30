@@ -36,8 +36,8 @@
 
 #include "ardour/ardour.h"
 #include "ardour/diskstream.h"
+#include "ardour/midi_buffer.h"
 #include "ardour/midi_playlist.h"
-#include "ardour/midi_ring_buffer.h"
 #include "ardour/utils.h"
 
 struct tm;
@@ -48,6 +48,7 @@ class IO;
 class MidiEngine;
 class MidiPort;
 class MidiRingbuffer;
+class MidiSource;
 class SMFSource;
 class Send;
 class Session;

@@ -31,6 +31,7 @@
 #include "ardour/midi_model.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
+#include "ardour/midi_state_tracker.h"
 #include "ardour/types.h"
 
 #include "i18n.h"

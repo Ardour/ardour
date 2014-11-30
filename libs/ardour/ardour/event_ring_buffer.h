@@ -1,34 +1,34 @@
-/* This file is part of Evoral.
- * Copyright (C) 2008 David Robillard <http://drobilla.net>
- *
- * Evoral is free software; you can redistribute it and/or modify it under the
- * terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
- * version.
- *
- * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
- */
+/*
+    Copyright (C) 2006-2014 Paul Davis
+    Author: David Robillard
 
-#ifndef EVORAL_EVENT_RING_BUFFER_HPP
-#define EVORAL_EVENT_RING_BUFFER_HPP
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+#ifndef __ardour_event_ring_buffer_h__
+#define __ardour_event_ring_buffer_h__
+
+#include <algorithm>
 #include <iostream>
 
 #include "pbd/ringbufferNPT.h"
 
-#include "evoral/visibility.h"
 #include "evoral/EventSink.hpp"
 #include "evoral/types.hpp"
 
-using namespace std;
-
-namespace Evoral {
+namespace ARDOUR {
 
 /** A RingBuffer of events (generic time-stamped binary "blobs").
  *
@@ -40,7 +40,8 @@ namespace Evoral {
  * possible interpretation of uint8_t.
  */
 template<typename Time>
-class /*LIBEVORAL_API*/ EventRingBuffer : public PBD::RingBufferNPT<uint8_t>, public Evoral::EventSink<Time> {
+class EventRingBuffer : public PBD::RingBufferNPT<uint8_t>
+                      , public Evoral::EventSink<Time> {
 public:
 
 	/** @param capacity Ringbuffer capacity in bytes.
@@ -60,8 +61,8 @@ public:
 	 */
 	inline bool peek (uint8_t*, size_t size);
 
-	inline uint32_t write(Time  time, EventType  type, uint32_t  size, const uint8_t* buf);
-	inline bool     read (Time* time, EventType* type, uint32_t* size,       uint8_t* buf);
+	inline uint32_t write(Time  time, Evoral::EventType  type, uint32_t  size, const uint8_t* buf);
+	inline bool     read (Time* time, Evoral::EventType* type, uint32_t* size,       uint8_t* buf);
 };
 
 template<typename Time>
@@ -77,7 +78,7 @@ EventRingBuffer<Time>::peek (uint8_t* buf, size_t size)
 	}
 
 	if (vec.len[0] > 0) {
-		memcpy (buf, vec.buf[0], min (vec.len[0], size));
+		memcpy (buf, vec.buf[0], std::min (vec.len[0], size));
 	}
 
 	if (vec.len[0] < size) {
@@ -91,13 +92,13 @@ EventRingBuffer<Time>::peek (uint8_t* buf, size_t size)
 
 template<typename Time>
 inline bool
-EventRingBuffer<Time>::read(Time* time, EventType* type, uint32_t* size, uint8_t* buf)
+EventRingBuffer<Time>::read(Time* time, Evoral::EventType* type, uint32_t* size, uint8_t* buf)
 {
 	if (PBD::RingBufferNPT<uint8_t>::read ((uint8_t*)time, sizeof (Time)) != sizeof (Time)) {
 		return false;
 	}
 
-	if (PBD::RingBufferNPT<uint8_t>::read ((uint8_t*)type, sizeof(EventType)) != sizeof (EventType)) {
+	if (PBD::RingBufferNPT<uint8_t>::read ((uint8_t*)type, sizeof(Evoral::EventType)) != sizeof (Evoral::EventType)) {
 		return false;
 	}
 
@@ -112,24 +113,21 @@ EventRingBuffer<Time>::read(Time* time, EventType* type, uint32_t* size, uint8_t
 	return true;
 }
 
-
 template<typename Time>
 inline uint32_t
-EventRingBuffer<Time>::write(Time time, EventType type, uint32_t size, const uint8_t* buf)
+EventRingBuffer<Time>::write(Time time, Evoral::EventType type, uint32_t size, const uint8_t* buf)
 {
-	if (!buf || write_space() < (sizeof(Time) + sizeof(EventType) + sizeof(uint32_t) + size)) {
+	if (!buf || write_space() < (sizeof(Time) + sizeof(Evoral::EventType) + sizeof(uint32_t) + size)) {
 		return 0;
 	} else {
 		PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&time, sizeof(Time));
-		PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&type, sizeof(EventType));
+		PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&type, sizeof(Evoral::EventType));
 		PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&size, sizeof(uint32_t));
 		PBD::RingBufferNPT<uint8_t>::write (buf, size);
 		return size;
 	}
 }
 
+} // namespace ARDOUR
 
-} // namespace Evoral
-
-#endif // EVORAL_EVENT_RING_BUFFER_HPP
-
+#endif // __ardour_event_ring_buffer_h__

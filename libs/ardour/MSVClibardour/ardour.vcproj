@@ -1522,6 +1522,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\event_ring_buffer.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\event_type_map.h"
 				>
 			</File>
