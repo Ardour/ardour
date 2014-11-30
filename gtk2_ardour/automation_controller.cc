@@ -129,13 +129,16 @@ AutomationController::create(boost::shared_ptr<Automatable>       printer,
 	double       smallstep = desc.smallstep;
 	double       largestep = desc.largestep;
 	if (smallstep == 0.0) {
-		smallstep = (up - lo) / 100;
+		smallstep = up / 1000.;
+	} else {
+		smallstep = ac->internal_to_interface(desc.lower + smallstep);
 	}
+
 	if (largestep == 0.0) {
-		largestep = (up - lo) / 10;
+		largestep = up / 40.;
+	} else {
+		largestep = ac->internal_to_interface(desc.lower + largestep);
 	}
-	smallstep = ac->internal_to_interface(smallstep);
-	largestep = ac->internal_to_interface(largestep);
 
 	Gtk::Adjustment* adjustment = manage (
 		new Gtk::Adjustment (normal, lo, up, smallstep, largestep));
