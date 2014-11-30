@@ -29,6 +29,13 @@ RangeTest::coalesceTest ()
 void
 RangeTest::subtractTest1 ()
 {
+
+/*         01234567890
+ * fred:   |---------|
+ * jim:      |-|  ||
+ * sheila: ||   ||  ||
+ */
+
 	Range<int> fred (0, 10);
 
 	RangeList<int> jim;
@@ -45,11 +52,11 @@ RangeTest::subtractTest1 ()
 	CPPUNIT_ASSERT_EQUAL (1, i->to);
 
 	++i;
-	CPPUNIT_ASSERT_EQUAL (4, i->from);
+	CPPUNIT_ASSERT_EQUAL (5, i->from);
 	CPPUNIT_ASSERT_EQUAL (6, i->to);
 
 	++i;
-	CPPUNIT_ASSERT_EQUAL (8, i->from);
+	CPPUNIT_ASSERT_EQUAL (9, i->from);
 	CPPUNIT_ASSERT_EQUAL (10, i->to);
 }
 
@@ -93,6 +100,13 @@ RangeTest::subtractTest3 ()
 void
 RangeTest::subtractTest4 ()
 {
+/*         01234567890
+ * fred:   |---------|
+ * jim:      |-|  ||
+ *                 ||
+ * sheila: ||   ||   |
+ */
+
 	Range<int> fred (0, 10);
 
 	RangeList<int> jim;
@@ -110,11 +124,11 @@ RangeTest::subtractTest4 ()
 	CPPUNIT_ASSERT_EQUAL (1, i->to);
 
 	++i;
-	CPPUNIT_ASSERT_EQUAL (4, i->from);
+	CPPUNIT_ASSERT_EQUAL (5, i->from);
 	CPPUNIT_ASSERT_EQUAL (6, i->to);
 
 	++i;
-	CPPUNIT_ASSERT_EQUAL (9, i->from);
+	CPPUNIT_ASSERT_EQUAL (10, i->from);
 	CPPUNIT_ASSERT_EQUAL (10, i->to);
 }
 
@@ -125,6 +139,12 @@ RangeTest::subtractTest4 ()
 void
 RangeTest::subtractTest5 ()
 {
+/*         01234567890123
+ * fred:    |----------|
+ * jim:    |---| || |------...
+ * sheila:i     |  |
+ */
+
 	Range<int> fred (1, 12);
 
 	RangeList<int> jim;
@@ -138,11 +158,11 @@ RangeTest::subtractTest5 ()
 	CPPUNIT_ASSERT_EQUAL (size_t (2), s.size ());
 
 	RangeList<int>::List::iterator i = s.begin ();
-	CPPUNIT_ASSERT_EQUAL (4, i->from);
+	CPPUNIT_ASSERT_EQUAL (5, i->from);
 	CPPUNIT_ASSERT_EQUAL (5, i->to);
 
 	++i;
-	CPPUNIT_ASSERT_EQUAL (7, i->from);
+	CPPUNIT_ASSERT_EQUAL (8, i->from);
 	CPPUNIT_ASSERT_EQUAL (8, i->to);
 }
 
