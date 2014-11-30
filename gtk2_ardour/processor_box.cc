@@ -521,14 +521,30 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 		box.add (_slider);
 		_slider.show ();
 
-		double const lo = c->internal_to_interface(c->lower ());
-		double const up = c->internal_to_interface(c->upper ());
-		
+		const ARDOUR::ParameterDescriptor& desc = c->desc();
+		double const lo = c->internal_to_interface(desc.lower);
+		double const up = c->internal_to_interface(desc.upper);
+		double const normal = c->internal_to_interface(desc.normal);
+		double smallstep = desc.smallstep;
+		double largestep = desc.largestep;
+
+		if (smallstep == 0.0) {
+			smallstep = up / 1000.;
+		} else {
+			smallstep = c->internal_to_interface(desc.lower + smallstep);
+		}
+
+		if (largestep == 0.0) {
+			largestep = up / 40.;
+		} else {
+			largestep = c->internal_to_interface(desc.lower + largestep);
+		}
+
 		_adjustment.set_lower (lo);
 		_adjustment.set_upper (up);
-		_adjustment.set_step_increment ((up - lo) / 100);
-		_adjustment.set_page_increment ((up - lo) / 10);
-		_slider.set_default_value (c->internal_to_interface(c->normal ()));
+		_adjustment.set_step_increment (smallstep);
+		_adjustment.set_page_increment (largestep);
+		_slider.set_default_value (normal);
 		
 		_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
 		c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
