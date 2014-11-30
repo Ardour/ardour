@@ -41,8 +41,8 @@ SliderController::SliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD:
 	if (mc) {
 		_spin_adj.set_lower (mc->lower ());
 		_spin_adj.set_upper (mc->upper ());
-		_spin_adj.set_step_increment((mc->upper () -  mc->lower ()) / 100);
-		_spin_adj.set_page_increment((mc->upper () -  mc->lower ()) / 10);
+		_spin_adj.set_step_increment(_ctrl->interface_to_internal(adj->get_step_increment()) - mc->lower ());
+		_spin_adj.set_page_increment(_ctrl->interface_to_internal(adj->get_page_increment()) - mc->lower ());
 
 		adj->signal_value_changed().connect (sigc::mem_fun(*this, &SliderController::ctrl_adjusted));
 		_spin_adj.signal_value_changed().connect (sigc::mem_fun(*this, &SliderController::spin_adjusted));

@@ -473,10 +473,10 @@ PixFader::on_scroll_event (GdkEventScroll* ev)
 		if (ev->state & Keyboard::GainExtraFineScaleModifier) {
 			scale = 0.005;
 		} else {
-			scale = 0.05;
+			scale = 0.1;
 		}
 	} else {
-		scale = 0.25;
+		scale = 1.0;
 	}
 
 	if (_orien == VERT) {
