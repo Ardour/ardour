@@ -2035,6 +2035,10 @@ Route::state(bool full_state)
 	node->add_child_nocopy (_mute_control->get_state ());
 	node->add_child_nocopy (_mute_master->get_state ());
 
+	if (full_state) {
+		node->add_child_nocopy (Automatable::get_automation_xml_state ());
+	}
+
 	XMLNode* remote_control_node = new XMLNode (X_("RemoteControl"));
 	snprintf (buf, sizeof (buf), "%d", _remote_control_id);
 	remote_control_node->add_property (X_("id"), buf);
@@ -2305,6 +2309,9 @@ Route::set_state (const XMLNode& node, int version)
 
 		} else if (child->name() == X_("MuteMaster")) {
 			_mute_master->set_state (*child, version);
+
+		} else if (child->name() == Automatable::xml_node_name) {
+			set_automation_xml_state (*child, Evoral::Parameter(NullAutomation));
 		}
 	}
 
