@@ -55,7 +55,7 @@ class Session;
 class LIBARDOUR_API MidiDiskstream : public Diskstream
 {
   public:
-	MidiDiskstream (Session &, const string& name, Diskstream::Flag f = Recordable);
+	MidiDiskstream (Session &, const std::string& name, Diskstream::Flag f = Recordable);
 	MidiDiskstream (Session &, const XMLNode&);
 	~MidiDiskstream();
 
@@ -147,7 +147,7 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 
 	int use_new_write_source (uint32_t n=0);
 
-	int find_and_use_playlist (const string&);
+	int find_and_use_playlist (const std::string&);
 
 	void allocate_temporary_buffers ();
 

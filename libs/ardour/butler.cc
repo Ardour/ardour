@@ -466,7 +466,7 @@ Butler::empty_pool_trash ()
 void
 Butler::drop_references ()
 {
-	cerr << "Butler drops pool trash\n";
+	std::cerr << "Butler drops pool trash\n";
 	SessionEvent::pool->set_trash (0);
 }
 

@@ -28,9 +28,9 @@ class NoteBase;
 class EditNoteDialog : public ArdourDialog
 {
 public:
-        EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n);
+	EditNoteDialog (MidiRegionView* rv, std::set<NoteBase*> n);
 
-        void done (int);
+	void done (int);
     
   private:
 	MidiRegionView* _region_view;

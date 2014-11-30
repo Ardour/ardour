@@ -34,13 +34,13 @@ class PatchChange
 {
 public:
 	PatchChange(
-		MidiRegionView& region,
-		ArdourCanvas::Container* parent,
-		const string&   text,
-		double          height,
-		double          x,
-		double          y,
-		ARDOUR::InstrumentInfo& info,
+		MidiRegionView&                   region,
+		ArdourCanvas::Container*          parent,
+		const std::string&                text,
+		double                            height,
+		double                            x,
+		double                            y,
+		ARDOUR::InstrumentInfo&           info,
 		ARDOUR::MidiModel::PatchChangePtr patch
 		);
 

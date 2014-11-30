@@ -451,7 +451,7 @@ PortManager::reestablish_ports ()
 	for (i = p->begin(); i != p->end(); ++i) {
 		if (i->second->reestablish ()) {
 			error << string_compose (_("Re-establising port %1 failed"), i->second->name()) << endmsg;
-			cerr << string_compose (_("Re-establising port %1 failed"), i->second->name()) << endl;
+			std::cerr << string_compose (_("Re-establising port %1 failed"), i->second->name()) << std::endl;
 			break;
 		}
 	}

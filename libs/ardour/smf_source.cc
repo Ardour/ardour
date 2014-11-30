@@ -51,6 +51,7 @@ using namespace ARDOUR;
 using namespace Glib;
 using namespace PBD;
 using namespace Evoral;
+using namespace std;
 
 /** Constructor used for new internal-to-session files.  File cannot exist. */
 SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)

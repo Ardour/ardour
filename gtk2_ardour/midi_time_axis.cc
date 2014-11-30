@@ -97,6 +97,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace Editing;
+using namespace std;
 
 // Minimum height at which a control is displayed
 static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 160;

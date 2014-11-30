@@ -85,6 +85,7 @@
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
+using namespace std;
 using Gtkmm2ext::Keyboard;
 
 PBD::Signal1<void, MidiRegionView *> MidiRegionView::SelectionCleared;

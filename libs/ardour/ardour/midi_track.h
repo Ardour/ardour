@@ -38,7 +38,7 @@ class Session;
 class LIBARDOUR_API MidiTrack : public Track
 {
 public:
-	MidiTrack (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
+	MidiTrack (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
 	~MidiTrack ();
 
 	int init ();
