@@ -103,8 +103,8 @@ WavesDropdown::set_current_item (int current_item_number)
         
         Gtk::Menu_Helpers::MenuList::iterator prev_current_item = items.begin();
         std::advance (prev_current_item, _current_item_number);
-        Gtk::RadioMenuItem* radio_menu_item;
-        if (radio_menu_item = dynamic_cast <Gtk::RadioMenuItem*> (&(*prev_current_item)) ) {
+        Gtk::RadioMenuItem* radio_menu_item = dynamic_cast <Gtk::RadioMenuItem*> (&(*prev_current_item));
+        if (radio_menu_item) {
             radio_menu_item->set_active (false);
         }
 		
