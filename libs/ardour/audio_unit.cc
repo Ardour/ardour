@@ -619,11 +619,9 @@ AUPlugin::discover_parameters ()
 			d.logarithmic = (info.flags & kAudioUnitParameterFlag_DisplayLogarithmic);
 			d.unit = info.unit;
 
-			d.step = 1.0;
-			d.smallstep = 0.1;
-			d.largestep = 10.0;
 			d.min_unbound = 0; // lower is bound
 			d.max_unbound = 0; // upper is bound
+			d.update_steps();
 
 			descriptors.push_back (d);
 

@@ -504,18 +504,6 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 		desc.upper = 4; /* completely arbitrary */
 	}
 
-	if (LADSPA_IS_HINT_INTEGER (prh.HintDescriptor)) {
-		desc.step = 1.0;
-		desc.smallstep = 0.1;
-		desc.largestep = 10.0;
-	} else {
-		float delta = desc.upper - desc.lower;
-		desc.step = delta / 1000.0f;
-		desc.smallstep = delta / 10000.0f;
-		desc.largestep = delta/10.0f;
-	}
-
-
 	if (LADSPA_IS_HINT_HAS_DEFAULT (prh.HintDescriptor)) {
 		desc.normal = _default_value(which);
 	} else {
@@ -534,6 +522,7 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 	desc.label = port_names()[which];
 
 	desc.scale_points = get_scale_points(which);
+	desc.update_steps();
 
 	return 0;
 }
