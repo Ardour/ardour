@@ -532,8 +532,8 @@ Editor::Editor ()
 	ARDOUR::EngineStateController::instance()->PortRegistrationChanged.connect (port_state_connection_list, invalidator (*this), boost::bind (&Editor::port_registration_handler, this), gui_context());
 
         /* Connect to relevant signal so that we will be notified of midi port connection changes */
-	ARDOUR::EngineStateController::instance()->MIDIInputConnectionChanged.connect (port_state_connection_list, invalidator (*this), boost::bind (&Editor::midi_input_connection_changed, this, _1, _2), gui_context());
-    ARDOUR::EngineStateController::instance()->MIDIOutputConnectionChanged.connect (port_state_connection_list, invalidator (*this), boost::bind (&Editor::midi_output_connection_changed, this, _1, _2), gui_context());
+	ARDOUR::EngineStateController::instance()->MIDISceneInputConnectionChanged.connect (port_state_connection_list, invalidator (*this), boost::bind (&Editor::midi_input_connection_changed, this, _1, _2), gui_context());
+    ARDOUR::EngineStateController::instance()->MIDISceneOutputConnectionChanged.connect (port_state_connection_list, invalidator (*this), boost::bind (&Editor::midi_output_connection_changed, this, _1, _2), gui_context());
     
     ARDOUR::EngineStateController::instance()->MIDIInputConfigChanged.connect (port_state_connection_list, invalidator (*this), boost::bind (&Editor::midi_input_configuration_changed, this), gui_context());
     ARDOUR::EngineStateController::instance()->MIDIOutputConfigChanged.connect (port_state_connection_list, invalidator (*this), boost::bind (&Editor::midi_output_configuration_changed, this), gui_context());

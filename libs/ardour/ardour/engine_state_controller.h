@@ -51,14 +51,14 @@ public:
         std::string name;
         bool active;
         bool available;
-        bool connected;
+        bool scene_connected;
         bool mtc_in;
         
         MidiPortState(const std::string& name):
         name(name),
         active(false),
         available(false),
-        connected(false),
+        scene_connected(false),
         mtc_in(false)
         {}
         
@@ -127,11 +127,11 @@ public:
     bool                get_physical_midi_input_state(const std::string&, bool&);
     bool                get_physical_midi_output_state(const std::string&, bool&);
     
-    // set the state for MIDI input or output connection
-    void                set_physical_midi_input_connection_state(const std::string&, bool);
-    void                set_physical_midi_output_connection_state(const std::string&, bool);
-    void                set_all_midi_inputs_disconnected();
-    void                set_all_midi_outputs_disconnected();
+    // set the state for MIDI scene input or output connection
+    void                set_physical_midi_scene_in_connection_state(const std::string&, bool);
+    void                set_physical_midi_scenen_out_connection_state(const std::string&, bool);
+    void                set_all_midi_scene_inputs_disconnected();
+    void                set_all_midi_scene_outputs_disconnected();
     
     // set the state for MIDI TimeCode connection
     void                set_mtc_input(const std::string&);
@@ -183,8 +183,8 @@ public:
     /* this signals are emitted if the MIDI i/o channel configuration changes */
     PBD::Signal0<void> MIDIInputConfigChanged;
     PBD::Signal0<void> MIDIOutputConfigChanged;
-    PBD::Signal2<void, const std::vector<std::string>&, bool> MIDIInputConnectionChanged;
-    PBD::Signal2<void, const std::vector<std::string>&, bool> MIDIOutputConnectionChanged;
+    PBD::Signal2<void, const std::vector<std::string>&, bool> MIDISceneInputConnectionChanged;
+    PBD::Signal2<void, const std::vector<std::string>&, bool> MIDISceneOutputConnectionChanged;
     
     /* this signals are emitted if the MTC i/o channel configuration changes */
     PBD::Signal1<void, const std::string&> MTCInputChanged;

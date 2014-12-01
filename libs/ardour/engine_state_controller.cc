@@ -310,10 +310,10 @@ EngineStateController::_deserialize_and_load_midi_port_states()
                 }
                 input_state.active = string_is_affirmative (prop->value ());
                 
-                if ((prop = input_state_node->property ("connected")) == 0) {
+                if ((prop = input_state_node->property ("scene-connected")) == 0) {
                     continue;
                 }
-                input_state.connected = string_is_affirmative (prop->value ());
+                input_state.scene_connected = string_is_affirmative (prop->value ());
                 
                 if ((prop = input_state_node->property ("mtc-in")) == 0) {
                     continue;
@@ -349,10 +349,10 @@ EngineStateController::_deserialize_and_load_midi_port_states()
                 }
                 output_state.active = string_is_affirmative (prop->value ());
                 
-                if ((prop = output_state_node->property ("connected")) == 0) {
+                if ((prop = output_state_node->property ("scene-connected")) == 0) {
                     continue;
                 }
-                output_state.connected = string_is_affirmative (prop->value ());
+                output_state.scene_connected = string_is_affirmative (prop->value ());
                 
                 if ((prop = output_state_node->property ("mtc-in")) == 0) {
                     continue;
@@ -454,7 +454,7 @@ EngineStateController::_serialize_midi_port_states(XMLNode* audio_midi_settings_
         XMLNode* midi_input_node = new XMLNode("input" );
         midi_input_node->add_property ("name", midi_input_state_iter->name);
         midi_input_node->add_property ("active", midi_input_state_iter->active ? "yes" : "no");
-        midi_input_node->add_property ("connected", midi_input_state_iter->connected ? "yes" : "no");
+        midi_input_node->add_property ("scene_connected", midi_input_state_iter->scene_connected ? "yes" : "no");
         midi_input_node->add_property ("mtc-in", midi_input_state_iter->mtc_in ? "yes" : "no");
         midi_input_states_node->add_child_nocopy(*midi_input_node);
     }
@@ -466,7 +466,7 @@ EngineStateController::_serialize_midi_port_states(XMLNode* audio_midi_settings_
         XMLNode* midi_output_node = new XMLNode("output" );
         midi_output_node->add_property ("name", midi_output_state_iter->name);
         midi_output_node->add_property ("active", midi_output_state_iter->active ? "yes" : "no");
-        midi_output_node->add_property ("connected", midi_output_state_iter->connected ? "yes" : "no");
+        midi_output_node->add_property ("scene_connected", midi_output_state_iter->scene_connected ? "yes" : "no");
         midi_output_node->add_property ("mtc-in", midi_output_state_iter->mtc_in ? "yes" : "no");
         midi_output_states_node->add_child_nocopy(*midi_output_node);
     }
@@ -1091,7 +1091,7 @@ EngineStateController::set_physical_midi_output_state(const std::string& port_na
 
 
 bool
-EngineStateController::get_physical_midi_input_state(const std::string& port_name, bool& connected) {
+EngineStateController::get_physical_midi_input_state(const std::string& port_name, bool& scene_connected) {
     
     bool state = false;
     
@@ -1100,7 +1100,7 @@ EngineStateController::get_physical_midi_input_state(const std::string& port_nam
     
     if (found_state_iter != _midi_inputs.end() && found_state_iter->available) {
         state = found_state_iter->active;
-        connected = found_state_iter->connected;
+        scene_connected = found_state_iter->scene_connected;
     }
     
     return state;
@@ -1108,7 +1108,7 @@ EngineStateController::get_physical_midi_input_state(const std::string& port_nam
 
 
 bool
-EngineStateController::get_physical_midi_output_state(const std::string& port_name, bool& connected) {
+EngineStateController::get_physical_midi_output_state(const std::string& port_name, bool& scene_connected) {
     
     bool state = false;
     
@@ -1117,7 +1117,7 @@ EngineStateController::get_physical_midi_output_state(const std::string& port_na
     
     if (found_state_iter != _midi_outputs.end() && found_state_iter->available) {
         state = found_state_iter->active;
-        connected = found_state_iter->connected;
+        scene_connected = found_state_iter->scene_connected;
     }
     
     return state;
@@ -1125,62 +1125,62 @@ EngineStateController::get_physical_midi_output_state(const std::string& port_na
 
 
 void
-EngineStateController::set_physical_midi_input_connection_state(const std::string& port_name, bool state) {
+EngineStateController::set_physical_midi_scene_in_connection_state(const std::string& port_name, bool state) {
     
     MidiPortStateList::iterator found_state_iter;
     found_state_iter = std::find(_midi_inputs.begin(), _midi_inputs.end(), MidiPortState(port_name) );
     
     if (found_state_iter != _midi_inputs.end() && found_state_iter->available && found_state_iter->active ) {
-        found_state_iter->connected = state;
+        found_state_iter->scene_connected = state;
         
         std::vector<std::string> ports;
         ports.push_back(port_name);
-        MIDIInputConnectionChanged(ports, state);
+        MIDISceneInputConnectionChanged(ports, state);
     }
 
 }
 
 
 void
-EngineStateController::set_physical_midi_output_connection_state(const std::string& port_name, bool state) {
+EngineStateController::set_physical_midi_scenen_out_connection_state(const std::string& port_name, bool state) {
    
     MidiPortStateList::iterator found_state_iter;
     found_state_iter = std::find(_midi_outputs.begin(), _midi_outputs.end(), MidiPortState(port_name) );
     
     if (found_state_iter != _midi_outputs.end() && found_state_iter->available && found_state_iter->active ) {
-        found_state_iter->connected = state;
+        found_state_iter->scene_connected = state;
         
         std::vector<std::string> ports;
         ports.push_back(port_name);
-        MIDIOutputConnectionChanged(ports, state);
+        MIDISceneOutputConnectionChanged(ports, state);
     }
 
 }
 
 
 void
-EngineStateController::set_all_midi_inputs_disconnected()
+EngineStateController::set_all_midi_scene_inputs_disconnected()
 {
     MidiPortStateList::iterator iter = _midi_inputs.begin();
     for (; iter != _midi_inputs.end(); ++iter) {
-        iter->connected = false;
+        iter->scene_connected = false;
     }
 
     std::vector<std::string> ports;
-    MIDIInputConnectionChanged(ports, false);
+    MIDISceneInputConnectionChanged(ports, false);
 }
 
 
 void
-EngineStateController::set_all_midi_outputs_disconnected()
+EngineStateController::set_all_midi_scene_outputs_disconnected()
 {
     MidiPortStateList::iterator iter = _midi_outputs.begin();
     for (; iter != _midi_outputs.end(); ++iter) {
-        iter->connected = false;
+        iter->scene_connected = false;
     }
     
     std::vector<std::string> ports;
-    MIDIOutputConnectionChanged(ports, false);
+    MIDISceneOutputConnectionChanged(ports, false);
 }
 
 
@@ -1283,7 +1283,7 @@ EngineStateController::get_physical_midi_input_states (std::vector<MidiPortState
             MidiPortState state(iter->name);
             state.active = iter->active;
             state.available = true;
-            state.connected = iter->connected;
+            state.scene_connected = iter->scene_connected;
             state.mtc_in = iter->mtc_in;
             channel_states.push_back(state);
         }
@@ -1302,7 +1302,7 @@ EngineStateController::get_physical_midi_output_states (std::vector<MidiPortStat
             MidiPortState state(iter->name);
             state.active = iter->active;
             state.available = true;
-            state.connected = iter->connected;
+            state.scene_connected = iter->scene_connected;
             state.mtc_in = iter->mtc_in;
             channel_states.push_back(state);
         }

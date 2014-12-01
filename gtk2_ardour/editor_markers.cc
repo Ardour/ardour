@@ -1406,7 +1406,7 @@ Editor::midi_input_chosen (WavesDropdown* dropdown, int el_number)
         
         if (check_item) {
             bool active = check_item->get_active();
-            EngineStateController::instance()->set_physical_midi_input_connection_state((char*) full_name_of_chosen_port, active);
+            EngineStateController::instance()->set_physical_midi_scene_in_connection_state((char*) full_name_of_chosen_port, active);
         }
     }
 }
@@ -1422,7 +1422,7 @@ Editor::midi_output_chosen (WavesDropdown* dropdown, int el_number)
         
         if (check_item) {
             bool active = check_item->get_active();
-            EngineStateController::instance()->set_physical_midi_output_connection_state((char*) full_name_of_chosen_port, active);
+            EngineStateController::instance()->set_physical_midi_scenen_out_connection_state((char*) full_name_of_chosen_port, active);
         }
     }
 }
@@ -1470,7 +1470,7 @@ Editor::populate_midi_inout_dropdown  (bool playback)
 		if (state_iter->active) {
             
             Gtk::CheckMenuItem& new_item = dropdown->add_check_menu_item (device_name, strdup (state_iter->name.c_str()));
-            new_item.set_active(state_iter->connected);
+            new_item.set_active(state_iter->scene_connected);
             
             
             if (!have_first) {
