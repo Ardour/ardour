@@ -482,6 +482,74 @@ ControlList::editor_add (double when, double value)
 }
 
 void
+ControlList::maybe_add_insert_guard (double when)
+{
+	if (most_recent_insert_iterator != _events.end()) {
+		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 erase from existing iterator (@end ? %3)\n",
+		                                                 this, (most_recent_insert_iterator == _events.end())));
+
+		if ((*most_recent_insert_iterator)->when - when > 64) {
+			/* Next control point is some distance from where our new point is
+			   going to go, so add a new point to avoid changing the shape of
+			   the line too much.  The insert iterator needs to point to the
+			   new control point so that our insert will happen correctly. */
+			most_recent_insert_iterator = _events.insert (
+				most_recent_insert_iterator,
+				new ControlEvent (when + 1, (*most_recent_insert_iterator)->value));
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added insert guard point @ %2 = %3\n",
+			                                                 this, when+1,
+			                                                 (*most_recent_insert_iterator)->value));
+		}
+	}
+}
+
+/** If we would just be adding to a straight line, move the previous point instead. */
+bool
+ControlList::maybe_insert_straight_line (double when, double value)
+{
+	if (_events.empty()) {
+		return false;
+	}
+
+	if (_events.back()->value == value) {
+		// Point b at the final point, which we know exists
+		EventList::iterator b = _events.end();
+		--b;
+		if (b == _events.begin()) {
+			return false;  // No previous point
+		}
+
+		// Check the previous point's value
+		--b;
+		if ((*b)->value == value) {
+			/* At least two points with the exact same value (straight
+			   line), just move the final point to the new time. */
+			_events.back()->when = when;
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("final value of %1 moved to %2\n", value, when));
+			return true;
+		}
+	}
+	return false;
+}
+
+ControlList::iterator
+ControlList::erase_from_iterator_to (iterator iter, double when)
+{
+	while (iter != _events.end()) {
+		if ((*iter)->when < when) {
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 erase existing @ %2\n", this, (*iter)));
+			delete *iter;
+			iter = _events.erase (iter);
+			continue;
+		} else if ((*iter)->when >= when) {
+			break;
+		}
+		++iter;
+	}
+	return iter;
+}
+
+void
 ControlList::add (double when, double value, bool with_guards, bool with_default)
 {
 	/* this is for making changes from some kind of user interface or
@@ -516,44 +584,11 @@ ControlList::add (double when, double value, bool with_guards, bool with_default
 
 		} else if (most_recent_insert_iterator == _events.end() || when > (*most_recent_insert_iterator)->when) {
 			
-			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 %2 erase from existing iterator (@end ? %3)\n", 
-									 this, (_in_write_pass  ? "DO" : "DON'T"),
-									 (most_recent_insert_iterator == _events.end())));
-			
 			if (_in_write_pass) {
-				while (most_recent_insert_iterator != _events.end()) {
-					if ((*most_recent_insert_iterator)->when < when) {
-						if (_in_write_pass) {
-							DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 erase existing @ %2\n", this, (*most_recent_insert_iterator)));
-							delete *most_recent_insert_iterator;
-							most_recent_insert_iterator = _events.erase (most_recent_insert_iterator);
-							continue;
-						}
-					} else if ((*most_recent_insert_iterator)->when >= when) {
-						break;
-					}
-					++most_recent_insert_iterator;
+				most_recent_insert_iterator = erase_from_iterator_to(most_recent_insert_iterator, when);
+				if (with_guards) {
+					maybe_add_insert_guard (when);
 				}
-
-				if (with_guards && most_recent_insert_iterator != _events.end()) {
-					if ((*most_recent_insert_iterator)->when - when > 64) {
-						/* next control point is some
-						 * distance from where our new
-						 * point is going to go - add a
-						 * new point to avoid changing
-						 * the shape of the line too
-						 * much. the insert iterator needs
-						 * to point to the new control
-						 * point so that our insert
-						 * will happen correctly.
-						 */
-						most_recent_insert_iterator = _events.insert (most_recent_insert_iterator, 
-											      new ControlEvent (when+1, (*most_recent_insert_iterator)->value));
-						DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added post-erase guard point @ %2 = %3\n",
-												 this, when+1,
-												 (*most_recent_insert_iterator)->value));
-					}
-				}	 
 
 			} else {
 				
@@ -582,31 +617,7 @@ ControlList::add (double when, double value, bool with_guards, bool with_default
 		if (most_recent_insert_iterator == _events.end()) {
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 appending new point at end\n", this));
 			
-			bool done = false;
-
-			/* check if would just be adding to a straight line,
-			 * and don't add another point if so
-			 */
-
-			if (!_events.empty()) { // avoid O(N) _events.size() here
-				if (_events.back()->value == value) {
-					EventList::iterator b = _events.end();
-					--b; // final point, which we know exists
-					if (b != _events.begin()) { // step back again, but check first that it is legal
-						--b; // penultimate-point
-						if ((*b)->value == value) {
-							/* there are at least two points with the exact same value ...
-							 * straight line - just move the final
-							 * point to the new time
-							 */
-							_events.back()->when = when;
-							done = true;
-							DEBUG_TRACE (DEBUG::ControlList, string_compose ("final value of %1 moved to %2\n", value, when));
-						}
-					}
-				}
-			}
-
+			const bool done = maybe_insert_straight_line (when, value);
 			if (!done) {
 				_events.push_back (new ControlEvent (when, value));
 				DEBUG_TRACE (DEBUG::ControlList, string_compose ("\tactually appended, size now %1\n", _events.size()));
@@ -644,55 +655,10 @@ ControlList::add (double when, double value, bool with_guards, bool with_default
 		} else {
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert new point at %2 at iterator at %3\n", this, when, (*most_recent_insert_iterator)->when));
 			
-			bool done = false;
-			
-			/* check if would just be adding to a straight line,
-			 * and don't add another point if so
-			 */
-
-			if (most_recent_insert_iterator != _events.begin()) {
-				EventList::iterator b = most_recent_insert_iterator;
-				--b; // prior point, which we know exists
-				if ((*b)->value == value) { // same value as the point we plan to insert
-					if (b != _events.begin()) { // step back again, which may not be possible
-						EventList::iterator bb = b;
-						--bb; // next-to-prior-point
-						if ((*bb)->value == value) {
-							/* straight line - just move the prior
-							 * point to the new time
-							 */
-							(*b)->when = when;
-							
-							if (!_in_write_pass) {
-								most_recent_insert_iterator = b;
-							}
-
-							DEBUG_TRACE (DEBUG::ControlList, string_compose ("final value of %1 moved to %2\n", value, when));
-							done = true;
-						}
-					}
-				}
+			const bool done = maybe_insert_straight_line (when, value);
+			if (with_guards) {
+				maybe_add_insert_guard(when);
 			}
-
-			if (with_guards && most_recent_insert_iterator != _events.end()) {
-				if ((*most_recent_insert_iterator)->when - when > 64) {
-					/* next control point is some
-					 * distance from where our new
-					 * point is going to go - add a
-					 * new point to avoid changing
-					 * the shape of the line too
-					 * much. the insert iterator needs
-					 * to point to the new control
-					 * point so that our insert
-					 * will happen correctly.
-					 */
-					most_recent_insert_iterator = _events.insert (most_recent_insert_iterator, 
-										      new ControlEvent (when+1, (*most_recent_insert_iterator)->value));
-					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added insert-post-erase guard point @ %2 = %3\n",
-											 this, when+1,
-											 (*most_recent_insert_iterator)->value));
-				}
-			}	 
 
 			if (!done) {
 				EventList::iterator x = _events.insert (most_recent_insert_iterator, new ControlEvent (when, value));

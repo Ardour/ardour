@@ -286,6 +286,10 @@ protected:
 	boost::shared_ptr<ControlList> cut_copy_clear (double, double, int op);
 	bool erase_range_internal (double start, double end, EventList &);
 
+	void     maybe_add_insert_guard (double when);
+	iterator erase_from_iterator_to (iterator iter, double when);
+	bool     maybe_insert_straight_line (double when, double value);
+
 	virtual void maybe_signal_changed ();
 
 	void _x_scale (double factor);
