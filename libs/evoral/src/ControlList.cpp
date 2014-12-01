@@ -453,10 +453,6 @@ ControlList::editor_add (double when, double value)
 	/* this is for making changes from a graphical line editor
 	*/
 
-	if (!clamp_value (when, value)) {
-		return;
-	}
-
 	if (_events.empty()) {
 		
 		/* as long as the point we're adding is not at zero,
@@ -486,10 +482,6 @@ ControlList::add (double when, double value, bool with_guards, bool with_default
 	/* this is for making changes from some kind of user interface or
 	   control surface (GUI, MIDI, OSC etc)
 	*/
-
-	if (!clamp_value (when, value)) {
-		return;
-	}
 
 	DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 add %2 at %3 w/erase = %4 (new ? %6) at end ? %5\n", 
 							 this, value, when, _in_write_pass, (most_recent_insert_iterator == _events.end()), new_write_pass));
