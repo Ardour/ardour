@@ -1,6 +1,7 @@
 #include "MidnamTest.hpp"
 
 #include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
 
 #include "pbd/xml++.h"
 #include "pbd/file_utils.h"
@@ -8,16 +9,33 @@
 #include "midi++/midnam_patch.h"
 
 using namespace std;
+using namespace PBD;
 using namespace MIDI::Name;
 
 CPPUNIT_TEST_SUITE_REGISTRATION( MidnamTest );
 
-static string const prefix = "../../../patchfiles/";
+PBD::Searchpath
+test_search_path ()
+{
+#ifdef PLATFORM_WINDOWS
+	std::vector<std::string> path_tok;
+	path_tok.push_back (g_win32_get_package_installation_directory_of_module(NULL));
+	path_tok.push_back ("share");
+	path_tok.push_back ("ardour3");
+	path_tok.push_back ("patchfiles");
+	return Glib::build_filename (path_tok);
+#else
+	return Glib::getenv("MIDIPP_TEST_PATH");
+#endif
+}
 
 void
 MidnamTest::protools_patchfile_test()
 {
-    XMLTree xmldoc(prefix + "Roland_SC-88_Pro.midnam");
+    std::string test_file_path;
+
+    CPPUNIT_ASSERT(find_file (test_search_path (), "Roland_SC-88_Pro.midnam", test_file_path));
+    XMLTree xmldoc(test_file_path);
     boost::shared_ptr<XMLSharedNodeList> result = xmldoc.find(
             "//MIDINameDocument");
     CPPUNIT_ASSERT(result->size() == 1);
@@ -25,7 +43,7 @@ MidnamTest::protools_patchfile_test()
     result = xmldoc.find("//ChannelNameSet");
     CPPUNIT_ASSERT(result->size() == 2);
 
-    MIDINameDocument doc(prefix + "Roland_SC-88_Pro.midnam");
+    MIDINameDocument doc(test_file_path);
     CPPUNIT_ASSERT(doc.all_models().size() == 1);
     CPPUNIT_ASSERT(doc.author().find("Mark of the Unicorn") == 0);
 
@@ -82,7 +100,10 @@ MidnamTest::protools_patchfile_test()
 void
 MidnamTest::yamaha_PSRS900_patchfile_test()
 {
-    XMLTree xmldoc(prefix + "Yamaha_PSR-S900.midnam");
+    std::string test_file_path;
+
+    CPPUNIT_ASSERT(find_file (test_search_path (), "Yamaha_PSR-S900.midnam", test_file_path));
+    XMLTree xmldoc(test_file_path);
     boost::shared_ptr<XMLSharedNodeList> result = xmldoc.find(
             "//MIDINameDocument");
     CPPUNIT_ASSERT(result->size() == 1);
@@ -90,7 +111,7 @@ MidnamTest::yamaha_PSRS900_patchfile_test()
     result = xmldoc.find("//ChannelNameSet");
     CPPUNIT_ASSERT(result->size() == 3);
 
-    MIDINameDocument doc(prefix + "Yamaha_PSR-S900.midnam");
+    MIDINameDocument doc(test_file_path);
     CPPUNIT_ASSERT(doc.all_models().size() == 1);
     CPPUNIT_ASSERT(doc.author().find("Hans Baier") == 0);
 
@@ -153,14 +174,13 @@ MidnamTest::yamaha_PSRS900_patchfile_test()
 void 
 MidnamTest::load_all_midnams_test ()
 {
-    assert (Glib::file_test (prefix, Glib::FILE_TEST_IS_DIR));
-
-    Glib::PatternSpec pattern(string("*.midnam"));
     vector<std::string> result;
 
-    PBD::find_files_matching_pattern (result, prefix, pattern);
+    PBD::find_files_matching_pattern (result, test_search_path (), "*.midnam");
 
-    cout << "Loading " << result.size() << " MIDI patches from " << prefix << endl;
+    CPPUNIT_ASSERT(!result.empty());
+
+    cout << "Loading " << result.size() << " MIDI patches from " << test_search_path ().to_string () << endl;
 
     for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
         cout << "Processing file " << *i << endl;
