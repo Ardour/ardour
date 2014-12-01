@@ -1089,11 +1089,6 @@ AutomationLine::clear ()
 }
 
 void
-AutomationLine::change_model (AutomationList::iterator /*i*/, double /*x*/, double /*y*/)
-{
-}
-
-void
 AutomationLine::set_list (boost::shared_ptr<ARDOUR::AutomationList> list)
 {
 	alist = list;

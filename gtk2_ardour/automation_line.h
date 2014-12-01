@@ -206,8 +206,6 @@ private:
 	void sync_model_with_view_points (std::list<ControlPoint*>);
 	void start_drag_common (double, float);
 
-	virtual void change_model (ARDOUR::AutomationList::iterator, double x, double y);
-
 	void reset_callback (const Evoral::ControlList&);
 	void list_changed ();
 
