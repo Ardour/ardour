@@ -20,8 +20,38 @@
 #define EVORAL_RANGE_HPP
 
 #include <list>
-
+#include <assert.h>
+#include <iostream>
 #include "evoral/visibility.h"
+
+
+
+/*
+
+a:   |---|
+b starts before:
+  |-|      
+  |--|     
+  |----|   
+  |------|  
+  |--------|
+a:   |---|
+b starts equal:
+     |-|     
+     |---|   
+     |----|  
+a:   |---|
+b starts inside:
+      |-|    
+      |--|   
+      |---|  
+a:   |---|
+b starts at end:
+         |--|
+a:   |---|
+b starts after:
+          |-|
+*/
 
 namespace Evoral {
 
@@ -42,27 +72,94 @@ template<typename T>
 	   of A and B for each OverlapType.
 
 	   Notes:
-	      Internal: the start points cannot coincide
+	      Internal: the start and end points cannot coincide
 	      External: the start and end points can coincide
 	      Start: end points can coincide
 	      End: start points can coincide
 
-	   XXX Logically, Internal should disallow end
-	   point equality.
+	   Internal disallows start and end point equality, and thus implies
+	   that there are two disjoint portions of A which do not overlap B.
 	*/
 
+	// assert(sa <= ea); // seems we are sometimes called with 0-length ranges
+	if (sa > ea) {
+		std::cerr << "a - start after end: " << sa << ", " << ea << std::endl;
+		return OverlapNone;
+	}
+
+	// assert(sb <= eb);
+	if (sb > eb) {
+		std::cerr << "b - start after end: " << sb << ", " << eb << std::endl;
+		return OverlapNone;
+	}
+
+	if (sb < sa) {
+		if (eb < sa) {
+			return OverlapNone;
+		} else if (eb == sa) {
+			return OverlapStart;
+		} else {
+			if (eb < ea) {
+				return OverlapStart;
+			} else if (eb == ea) {
+				return OverlapExternal;
+			} else {
+				return OverlapExternal;
+			}
+		}
+	} else if (sb == sa) {
+		if (eb < ea) {
+			return OverlapStart;
+		} else if (eb == ea) {
+			return OverlapExternal;
+		} else { // eb > ea
+			return OverlapExternal;
+		}
+	} else { // sb > sa
+		if (eb < ea) {
+			return OverlapInternal;
+		} else if (eb == ea) {
+			return OverlapEnd;
+		} else { // eb > ea
+			if (sb < ea) {
+				return OverlapEnd;
+			} else if (sb == ea) {
+				return OverlapEnd;
+			} else {
+				return OverlapNone;
+			}
+		}
+	}
+
+
+	std::cerr << "unknown overlap type!" << sa << ", " << ea << "; " << sb << ", " << eb << std::endl;
+	// assert(!"unknown overlap type!");
+	return OverlapNone;
+
+#if 0
 	/*
 	     |--------------------|   A
 	          |------|            B
 	        |-----------------|   B
 
-
              "B is internal to A"
-
 	*/
 
-	if ((sb > sa) && (eb <= ea)) {
+	if ((sb > sa) && (eb < ea)) {
 		return OverlapInternal;
+	}
+
+	/*
+	     |--------------------|    A
+	   --------------------------  B
+	     |-----------------------  B
+	    ----------------------|    B
+             |--------------------|    B
+
+           "B overlaps all of A"
+	*/
+	if ((sb <= sa) && (eb >= ea)) {
+		return OverlapExternal;
 	}
 
 	/*
@@ -72,10 +169,9 @@ template<typename T>
 	   --|                        B
 
 	     "B overlaps the start of A"
-
 	*/
 
-	if ((eb >= sa) && (eb <= ea)) {
+	if ((sb <= sa) && (eb >= sa) && (eb <= ea)) {
 		return OverlapStart;
 	}
 	/*
@@ -85,26 +181,14 @@ template<typename T>
                                    |- B
 
             "B overlaps the end of A"
-
 	*/
-	if ((sb > sa) && (sb <= ea)) {
+	if ((sb > sa) && (sb < ea) && (eb >= ea)) {
 		return OverlapEnd;
 	}
-	/*
-	     |--------------------|     A
-	   --------------------------  B
-	     |-----------------------  B
-	    ----------------------|    B
-             |--------------------|    B
 
-
-           "B overlaps all of A"
-	*/
-	if ((sa >= sb) && (sa <= eb) && (ea <= eb)) {
-		return OverlapExternal;
-	}
-
+	// assert(eb < sa || sb > ea);
 	return OverlapNone;
+#endif
 }
 
 /** Type to describe a time range */
