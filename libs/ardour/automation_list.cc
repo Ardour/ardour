@@ -25,6 +25,7 @@
 #include <algorithm>
 #include "ardour/automation_list.h"
 #include "ardour/event_type_map.h"
+#include "ardour/parameter_descriptor.h"
 #include "evoral/Curve.hpp"
 #include "pbd/stacktrace.h"
 #include "pbd/enumwriter.h"
@@ -47,8 +48,21 @@ static void dumpit (const AutomationList& al, string prefix = "")
 	cerr << "\n";
 }
 #endif
-AutomationList::AutomationList (Evoral::Parameter id)
-	: ControlList(id)
+AutomationList::AutomationList (const Evoral::Parameter& id, const Evoral::ParameterDescriptor& desc)
+	: ControlList(id, desc)
+{
+	_state = Off;
+	_style = Absolute;
+	g_atomic_int_set (&_touching, 0);
+
+	create_curve_if_necessary();
+
+	assert(_parameter.type() != NullAutomation);
+	AutomationListCreated(this);
+}
+
+AutomationList::AutomationList (const Evoral::Parameter& id)
+	: ControlList(id, ARDOUR::ParameterDescriptor(id))
 {
 	_state = Off;
 	_style = Absolute;
@@ -91,7 +105,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
  * in or below the AutomationList node.  It is used if @param id is non-null.
  */
 AutomationList::AutomationList (const XMLNode& node, Evoral::Parameter id)
-	: ControlList(id)
+	: ControlList(id, ARDOUR::ParameterDescriptor(id))
 {
 	g_atomic_int_set (&_touching, 0);
 	_state = Off;
@@ -114,9 +128,10 @@ AutomationList::~AutomationList()
 }
 
 boost::shared_ptr<Evoral::ControlList>
-AutomationList::create(Evoral::Parameter id)
+AutomationList::create(const Evoral::Parameter&           id,
+                       const Evoral::ParameterDescriptor& desc)
 {
-	return boost::shared_ptr<Evoral::ControlList>(new AutomationList(id));
+	return boost::shared_ptr<Evoral::ControlList>(new AutomationList(id, desc));
 }
 
 void
@@ -414,7 +429,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 	}
 
 	if ((prop = node.property (X_("automation-id"))) != 0){
-		_parameter = EventTypeMap::instance().new_parameter(prop->value());
+		_parameter = EventTypeMap::instance().from_symbol(prop->value());
 	} else {
 		warning << "Legacy session: automation list has no automation-id property." << endmsg;
 	}

@@ -64,13 +64,15 @@ private:
 class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Evoral::ControlList
 {
   public:
-	AutomationList (Evoral::Parameter id);
+	AutomationList (const Evoral::Parameter& id, const Evoral::ParameterDescriptor& desc);
+	AutomationList (const Evoral::Parameter& id);
 	AutomationList (const XMLNode&, Evoral::Parameter id);
 	AutomationList (const AutomationList&);
 	AutomationList (const AutomationList&, double start, double end);
 	~AutomationList();
 
-	virtual boost::shared_ptr<Evoral::ControlList> create(Evoral::Parameter id);
+	virtual boost::shared_ptr<ControlList> create(const Evoral::Parameter&           id,
+	                                              const Evoral::ParameterDescriptor& desc);
 
 	AutomationList& operator= (const AutomationList&);
 

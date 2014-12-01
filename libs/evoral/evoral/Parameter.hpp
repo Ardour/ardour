@@ -28,7 +28,6 @@
 
 namespace Evoral {
 
-
 /** ID of a [play|record|automate]able parameter.
  *
  * A parameter is defined by (type, id, channel).  Type is an integer which
@@ -41,11 +40,9 @@ namespace Evoral {
 class LIBEVORAL_API Parameter
 {
 public:
-	Parameter(uint32_t type, uint8_t channel=0, uint32_t id=0)
+	inline Parameter(uint32_t type, uint8_t channel=0, uint32_t id=0)
 		: _type(type), _id(id), _channel(channel)
 	{}
-
-	virtual ~Parameter() {}
 
 	inline uint32_t type()    const { return _type; }
 	inline uint8_t  channel() const { return _channel; }
@@ -78,51 +75,11 @@ public:
 
 	inline operator bool() const { return (_type != 0); }
 
-	/** Not used in indentity/comparison */
-	struct Metadata {
-		Metadata(double low=0.0, double high=1.0, double mid=0.0, bool tog=false)
-			: min(low), max(high), normal(mid), toggled(tog)
-		{}
-		double min;
-		double max;
-		double normal;
-		bool   toggled;
-	};
-
-	inline static void set_range(uint32_t type, double min, double max, double normal, bool toggled) {
-		_type_metadata[type] = Metadata(min, max, normal, toggled);
-	}
-
-	inline void set_range(double min, double max, double normal, bool toggled) {
-		_metadata = boost::shared_ptr<Metadata>(new Metadata(min, max, normal, toggled));
-	}
-
-	inline Metadata& metadata() const {
-		if (_metadata)
-			return *_metadata.get();
-		else
-			return _type_metadata[_type];
-	}
-
-	inline double min()     const { return metadata().min; }
-	inline double max()     const { return metadata().max; }
-	inline double normal()  const { return metadata().normal; }
-	inline double toggled() const { return metadata().toggled; }
-
-protected:
-	// Default copy constructor is ok
-
-	// ID (used in comparison)
+private:
 	uint32_t _type;
 	uint32_t _id;
 	uint8_t  _channel;
-
-	boost::shared_ptr<Metadata> _metadata;
-
-	typedef std::map<uint32_t, Metadata> TypeMetadata;
-	static TypeMetadata _type_metadata;
 };
-
 
 } // namespace Evoral
 

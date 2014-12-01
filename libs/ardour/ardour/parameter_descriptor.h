@@ -21,7 +21,9 @@
 #define __ardour_parameter_descriptor_h__
 
 #include "ardour/variant.h"
+
 #include "evoral/Parameter.hpp"
+#include "evoral/ParameterDescriptor.hpp"
 
 namespace ARDOUR {
 
@@ -31,7 +33,7 @@ typedef std::map<const std::string, const float> ScalePoints;
  *
  * Essentially a union of LADSPA, VST and LV2 info.
  */
-struct ParameterDescriptor
+struct ParameterDescriptor : public Evoral::ParameterDescriptor
 {
 	enum Unit {
 		NONE,       ///< No unit
@@ -40,72 +42,12 @@ struct ParameterDescriptor
 		HZ,         ///< Frequency in Hertz
 	};
 
-	ParameterDescriptor(const Evoral::Parameter& parameter)
-		: key((uint32_t)-1)
-		, datatype(Variant::NOTHING)
-		, unit(NONE)
-		, normal(parameter.normal())
-		, lower(parameter.min())
-		, upper(parameter.max())
-		, step(0)
-		, smallstep(0)
-		, largestep(0)
-		, integer_step(parameter.type() >= MidiCCAutomation &&
-		               parameter.type() <= MidiChannelPressureAutomation)
-		, toggled(parameter.toggled())
-		, logarithmic(false)
-		, sr_dependent(false)
-		, min_unbound(0)
-		, max_unbound(0)
-		, enumeration(false)
-	{
-		if (parameter.type() == GainAutomation) {
-			unit = DB;
-		}
-		update_steps();
-	}
+	ParameterDescriptor(const Evoral::Parameter& parameter);
 
-	ParameterDescriptor()
-		: key((uint32_t)-1)
-		, datatype(Variant::NOTHING)
-		, unit(NONE)
-		, normal(0)
-		, lower(0)
-		, upper(0)
-		, step(0)
-		, smallstep(0)
-		, largestep(0)
-		, integer_step(false)
-		, toggled(false)
-		, logarithmic(false)
-		, sr_dependent(false)
-		, min_unbound(0)
-		, max_unbound(0)
-		, enumeration(false)
-	{}
+	ParameterDescriptor();
 
-	/* Set step, smallstep, and largestep, based on current description */
-	void update_steps() {
-		if (unit == ParameterDescriptor::MIDI_NOTE) {
-			step      = smallstep = 1;  // semitone
-			largestep = 12;             // octave
-		} else if (integer_step) {
-			const float delta = upper - lower;
-
-			smallstep = delta / 10000.0f;
-			step      = delta / 1000.0f;
-			largestep = delta / 40.0f;
-
-			smallstep = std::max(1.0, rint(smallstep));
-			step      = std::max(1.0, rint(step));
-			largestep = std::max(1.0, rint(largestep));
-		}
-		/* else: leave all others as default '0'
-		 * in that case the UI (eg. AutomationController::create)
-		 * uses internal_to_interface() to map the value
-		 * to an appropriate interface range
-		 */
-	}
+	/** Set step, smallstep, and largestep, based on current description. */
+	void update_steps();
 
 	std::string                    label;
 	std::string                    print_fmt;  ///< format string for pretty printing
@@ -113,14 +55,10 @@ struct ParameterDescriptor
 	uint32_t                       key;  ///< for properties
 	Variant::Type                  datatype;  ///< for properties
 	Unit                           unit;
-	float                          normal;
-	float                          lower;  ///< for frequencies, this is in Hz (not a fraction of the sample rate)
-	float                          upper;  ///< for frequencies, this is in Hz (not a fraction of the sample rate)
 	float                          step;
 	float                          smallstep;
 	float                          largestep;
 	bool                           integer_step;
-	bool                           toggled;
 	bool                           logarithmic;
 	bool                           sr_dependent;
 	bool                           min_unbound;

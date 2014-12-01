@@ -22,14 +22,16 @@
 
 #include "evoral/Control.hpp"
 #include "evoral/ControlList.hpp"
+#include "evoral/ParameterDescriptor.hpp"
+#include "evoral/TypeMap.hpp"
 
 namespace Evoral {
 
-Parameter::TypeMetadata Parameter::_type_metadata;
-
-Control::Control(const Parameter& parameter, boost::shared_ptr<ControlList> list)
+Control::Control(const Parameter&               parameter,
+                 const ParameterDescriptor&     desc,
+                 boost::shared_ptr<ControlList> list)
 	: _parameter(parameter)
-	, _user_value(list ? list->default_value() : parameter.normal())
+	, _user_value(list ? list->default_value() : desc.normal)
 {
 	set_list (list);
 }

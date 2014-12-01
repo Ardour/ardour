@@ -30,13 +30,13 @@
 #include "evoral/visibility.h"
 #include "evoral/types.hpp"
 #include "evoral/Note.hpp"
-#include "evoral/Parameter.hpp"
 #include "evoral/ControlSet.hpp"
 #include "evoral/ControlList.hpp"
 #include "evoral/PatchChange.hpp"
 
 namespace Evoral {
 
+class Parameter;
 class TypeMap;
 template<typename Time> class EventSink;
 template<typename Time> class Note;
@@ -108,6 +108,8 @@ public:
 	void end_write (StuckNoteOption, Time when = Time());
 
 	void append(const Event<Time>& ev, Evoral::event_id_t evid);
+
+	const TypeMap& type_map() const { return _type_map; }
 
 	inline size_t n_notes() const { return _notes.size(); }
 	inline bool   empty()   const { return _notes.empty() && _sysexes.empty() && _patch_changes.empty() && ControlSet::controls_empty(); }

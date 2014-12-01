@@ -28,6 +28,7 @@
 namespace Evoral {
 
 class Parameter;
+class ParameterDescriptor;
 
 /** The applications passes one of these which provide the implementation
  * with required information about event types in an opaque, type neutral way
@@ -50,11 +51,8 @@ public:
 	 */
 	virtual uint32_t midi_event_type(uint8_t status) const = 0;
 
-	/** Return true iff parameter should be locked to integer boundaries */
-	virtual bool is_integer(const Evoral::Parameter& param) const = 0;
-
-	/** Create a parameter with the given type ID */
-	virtual Parameter new_parameter(uint32_t type, uint8_t channel, uint32_t id) const = 0;
+	/** Return the description of a parameter. */
+	virtual const ParameterDescriptor& descriptor(const Parameter& param) const = 0;
 
 	virtual std::string to_symbol(const Parameter& param) const = 0;
 };

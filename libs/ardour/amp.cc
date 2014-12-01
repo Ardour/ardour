@@ -46,7 +46,6 @@ Amp::Amp (Session& s)
 	, _gain_automation_buffer(0)
 {
 	Evoral::Parameter p (GainAutomation);
-	p.set_range (0, max_gain_coefficient, 1, false);
 	boost::shared_ptr<AutomationList> gl (new AutomationList (p));
 	_gain_control = boost::shared_ptr<GainControl> (new GainControl (X_("gaincontrol"), s, this, p, gl));
 	_gain_control->set_flags (Controllable::GainLike);

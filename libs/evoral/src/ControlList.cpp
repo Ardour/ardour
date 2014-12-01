@@ -28,10 +28,14 @@
 #endif
 
 #include <cassert>
-#include <utility>
+#include <cmath>
 #include <iostream>
+#include <utility>
+
 #include "evoral/ControlList.hpp"
 #include "evoral/Curve.hpp"
+#include "evoral/ParameterDescriptor.hpp"
+#include "evoral/TypeMap.hpp"
 
 #include "pbd/compose.h"
 #include "pbd/debug.h"
@@ -46,16 +50,17 @@ inline bool event_time_less_than (ControlEvent* a, ControlEvent* b)
 	return a->when < b->when;
 }
 
-ControlList::ControlList (const Parameter& id)
+ControlList::ControlList (const Parameter& id, const ParameterDescriptor& desc)
 	: _parameter(id)
-	, _interpolation(id.toggled() ? Discrete : Linear)
+	, _desc(desc)
 	, _curve(0)
 {
+	_interpolation = desc.toggled ? Discrete : Linear;
 	_frozen = 0;
 	_changed_when_thawed = false;
-	_min_yval = id.min();
-	_max_yval = id.max();
-	_default_value = id.normal();
+	_min_yval = desc.lower;
+	_max_yval = desc.upper;
+	_default_value = desc.normal;
 	_lookup_cache.left = -1;
 	_lookup_cache.range.first = _events.end();
 	_lookup_cache.range.second = _events.end();
@@ -71,6 +76,7 @@ ControlList::ControlList (const Parameter& id)
 
 ControlList::ControlList (const ControlList& other)
 	: _parameter(other._parameter)
+	, _desc(other._desc)
 	, _interpolation(other._interpolation)
 	, _curve(0)
 {
@@ -96,6 +102,7 @@ ControlList::ControlList (const ControlList& other)
 
 ControlList::ControlList (const ControlList& other, double start, double end)
 	: _parameter(other._parameter)
+	, _desc(other._desc)
 	, _interpolation(other._interpolation)
 	, _curve(0)
 {
@@ -136,9 +143,9 @@ ControlList::~ControlList()
 }
 
 boost::shared_ptr<ControlList>
-ControlList::create(Parameter id)
+ControlList::create(const Parameter& id, const ParameterDescriptor& desc)
 {
-	return boost::shared_ptr<ControlList>(new ControlList(id));
+	return boost::shared_ptr<ControlList>(new ControlList(id, desc));
 }
 
 bool
@@ -1503,7 +1510,7 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 boost::shared_ptr<ControlList>
 ControlList::cut_copy_clear (double start, double end, int op)
 {
-	boost::shared_ptr<ControlList> nal = create (_parameter);
+	boost::shared_ptr<ControlList> nal = create (_parameter, _desc);
 	iterator s, e;
 	ControlEvent cp (start, 0.0);
 

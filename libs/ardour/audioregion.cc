@@ -40,11 +40,13 @@
 #include "ardour/session.h"
 #include "ardour/dB.h"
 #include "ardour/debug.h"
+#include "ardour/event_type_map.h"
 #include "ardour/playlist.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/region_factory.h"
 #include "ardour/runtime_functions.h"
 #include "ardour/transient_detector.h"
+#include "ardour/parameter_descriptor.h"
 #include "ardour/progress.h"
 
 #include "i18n.h"
@@ -1011,9 +1013,10 @@ AudioRegion::set_fade_in (boost::shared_ptr<AutomationList> f)
 void
 AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 {
-	boost::shared_ptr<Evoral::ControlList> c1 (new Evoral::ControlList (FadeInAutomation));
-	boost::shared_ptr<Evoral::ControlList> c2 (new Evoral::ControlList (FadeInAutomation));
-	boost::shared_ptr<Evoral::ControlList> c3 (new Evoral::ControlList (FadeInAutomation));
+	const ARDOUR::ParameterDescriptor desc(FadeInAutomation);
+	boost::shared_ptr<Evoral::ControlList> c1 (new Evoral::ControlList (FadeInAutomation, desc));
+	boost::shared_ptr<Evoral::ControlList> c2 (new Evoral::ControlList (FadeInAutomation, desc));
+	boost::shared_ptr<Evoral::ControlList> c3 (new Evoral::ControlList (FadeInAutomation, desc));
 
 	_fade_in->freeze ();
 	_fade_in->clear ();
@@ -1093,8 +1096,9 @@ AudioRegion::set_fade_out (boost::shared_ptr<AutomationList> f)
 void
 AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 {
-	boost::shared_ptr<Evoral::ControlList> c1 (new Evoral::ControlList (FadeOutAutomation));
-	boost::shared_ptr<Evoral::ControlList> c2 (new Evoral::ControlList (FadeOutAutomation));
+	const ARDOUR::ParameterDescriptor desc(FadeOutAutomation);
+	boost::shared_ptr<Evoral::ControlList> c1 (new Evoral::ControlList (FadeOutAutomation, desc));
+	boost::shared_ptr<Evoral::ControlList> c2 (new Evoral::ControlList (FadeOutAutomation, desc));
 
 	_fade_out->freeze ();
 	_fade_out->clear ();

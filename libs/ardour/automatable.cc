@@ -212,7 +212,7 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 			const XMLProperty* id_prop = (*niter)->property("automation-id");
 
 			Evoral::Parameter param = (id_prop
-					? EventTypeMap::instance().new_parameter(id_prop->value())
+					? EventTypeMap::instance().from_symbol(id_prop->value())
 					: legacy_param);
 
 			if (param.type() == NullAutomation) {
@@ -399,14 +399,15 @@ Automatable::transport_stopped (framepos_t now)
 boost::shared_ptr<Evoral::Control>
 Automatable::control_factory(const Evoral::Parameter& param)
 {
-	boost::shared_ptr<AutomationList> list(new AutomationList(param));
-	Evoral::Control* control = NULL;
-	ParameterDescriptor desc(param);
+	Evoral::Control*                  control   = NULL;
+	bool                              make_list = true;
+	ParameterDescriptor               desc(param);
+	boost::shared_ptr<AutomationList> list;
 	if (param.type() >= MidiCCAutomation && param.type() <= MidiChannelPressureAutomation) {
 		MidiTrack* mt = dynamic_cast<MidiTrack*>(this);
 		if (mt) {
 			control = new MidiTrack::MidiControl(mt, param);
-			list.reset();  // No list, this is region "automation"
+			make_list = false;  // No list, this is region "automation"
 		} else {
 			warning << "MidiCCAutomation for non-MidiTrack" << endl;
 		}
@@ -424,7 +425,9 @@ Automatable::control_factory(const Evoral::Parameter& param)
 			desc = pi->plugin(0)->get_property_descriptor(param.id());
 			if (desc.datatype != Variant::NOTHING) {
 				if (!Variant::type_is_numeric(desc.datatype)) {
-					list.reset();  // Can't automate non-numeric data yet
+					make_list = false;  // Can't automate non-numeric data yet
+				} else {
+					list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc));
 				}
 				control = new PluginInsert::PluginPropertyControl(pi, param, desc, list);
 			}
@@ -447,11 +450,14 @@ Automatable::control_factory(const Evoral::Parameter& param)
 		}
 	}
 
-	if (!control) {
-		control = new AutomationControl(_a_session, param, desc);
+	if (make_list && !list) {
+		list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc));
 	}
 
-	control->set_list(list);
+	if (!control) {
+		control = new AutomationControl(_a_session, param, desc, list);
+	}
+
 	return boost::shared_ptr<Evoral::Control>(control);
 }
 

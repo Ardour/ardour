@@ -248,13 +248,8 @@ PluginInsert::create_automatable_parameters ()
 			ParameterDescriptor desc;
 			_plugins.front()->get_parameter_descriptor(i->id(), desc);
 
-			/* the Parameter belonging to the actual plugin doesn't have its range set
-			   but we want the Controllable related to this Parameter to have those limits.
-			*/
-
-			param.set_range (desc.lower, desc.upper, _plugins.front()->default_value(i->id()), desc.toggled);
 			can_automate (param);
-			boost::shared_ptr<AutomationList> list(new AutomationList(param));
+			boost::shared_ptr<AutomationList> list(new AutomationList(param, desc));
 			add_control (boost::shared_ptr<AutomationControl> (new PluginControl(this, param, desc, list)));
 		} else if (i->type() == PluginPropertyAutomation) {
 			Evoral::Parameter param(*i);
@@ -262,7 +257,7 @@ PluginInsert::create_automatable_parameters ()
 			if (desc.datatype != Variant::NOTHING) {
 				boost::shared_ptr<AutomationList> list;
 				if (Variant::type_is_numeric(desc.datatype)) {
-					list = boost::shared_ptr<AutomationList>(new AutomationList(param));
+					list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc));
 				}
 				add_control (boost::shared_ptr<AutomationControl> (new PluginPropertyControl(this, param, desc, list)));
 			}

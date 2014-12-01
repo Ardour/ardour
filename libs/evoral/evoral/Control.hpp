@@ -26,11 +26,14 @@
 
 #include "evoral/visibility.h"
 #include "evoral/Parameter.hpp"
+#include "evoral/ParameterDescriptor.hpp"
 
 namespace Evoral {
 
 class ControlList;
+class ParameterDescriptor;
 class Transport;
+class TypeMap;
 
 /** Base class representing some kind of (automatable) control; a fader's gain,
  *  for example, or a compressor plugin's threshold.
@@ -38,11 +41,13 @@ class Transport;
  *  The class knows the Evoral::Parameter that it is controlling, and has
  *  a list of values for automation.
  */
-
 class LIBEVORAL_API Control
 {
 public:
-	Control(const Parameter& parameter, boost::shared_ptr<ControlList>);
+	Control(const Parameter&               parameter,
+	        const ParameterDescriptor&     desc,
+	        boost::shared_ptr<ControlList> list);
+
 	virtual ~Control() {}
 
         virtual void   set_double (double val, double frame=0, bool to_list=false);

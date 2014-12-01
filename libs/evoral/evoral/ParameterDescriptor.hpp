@@ -1,0 +1,42 @@
+/* This file is part of Evoral.
+ * Copyright (C) 2000-2014 Paul Davis
+ * Author: David Robillard
+ *
+ * Evoral is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any later
+ * version.
+ *
+ * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+#ifndef EVORAL_PARAMETER_DESCRIPTOR_HPP
+#define EVORAL_PARAMETER_DESCRIPTOR_HPP
+
+namespace Evoral {
+
+/** Description of the value range of a parameter or control. */
+struct ParameterDescriptor
+{
+	ParameterDescriptor()
+		: normal(0.0)
+		, lower(0.0)
+		, upper(0.0)
+		, toggled(false)
+	{}
+
+	float normal;   ///< Default value
+	float lower;    ///< Minimum value (in Hz, for frequencies)
+	float upper;    ///< Maximum value (in Hz, for frequencies)
+	bool  toggled;  ///< True iff parameter is boolean
+};
+
+} // namespace Evoral
+
+#endif // EVORAL_PARAMETER_DESCRIPTOR_HPP

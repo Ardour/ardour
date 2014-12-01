@@ -45,7 +45,7 @@ MidiAutomationListBinder::MidiAutomationListBinder (XMLNode* node, Session::Sour
 	assert (i != sources.end());
 	_source = boost::dynamic_pointer_cast<MidiSource> (i->second);
 
-	_parameter = EventTypeMap::instance().new_parameter (parameter->value());
+	_parameter = EventTypeMap::instance().from_symbol (parameter->value());
 }
 
 AutomationList*

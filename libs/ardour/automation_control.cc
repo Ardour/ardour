@@ -35,7 +35,7 @@ AutomationControl::AutomationControl(ARDOUR::Session&                          s
                                      boost::shared_ptr<ARDOUR::AutomationList> list,
                                      const string&                             name)
 	: Controllable (name.empty() ? EventTypeMap::instance().to_symbol(parameter) : name)
-	, Evoral::Control(parameter, list)
+	, Evoral::Control(parameter, desc, list)
 	, _session(session)
 	, _desc(desc)
 {

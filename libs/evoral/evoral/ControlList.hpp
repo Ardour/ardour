@@ -34,10 +34,12 @@
 #include "evoral/types.hpp"
 #include "evoral/Range.hpp"
 #include "evoral/Parameter.hpp"
+#include "evoral/ParameterDescriptor.hpp"
 
 namespace Evoral {
 
 class Curve;
+class TypeMap;
 
 /** A single event (time-stamped value) for a control
  */
@@ -82,12 +84,12 @@ public:
 	typedef EventList::const_iterator const_iterator;
 	typedef EventList::const_reverse_iterator const_reverse_iterator;
 
-	ControlList (const Parameter& id);
+	ControlList (const Parameter& id, const ParameterDescriptor& desc);
 	ControlList (const ControlList&);
 	ControlList (const ControlList&, double start, double end);
 	virtual ~ControlList();
 
-	virtual boost::shared_ptr<ControlList> create(Parameter id);
+	virtual boost::shared_ptr<ControlList> create(const Parameter& id, const ParameterDescriptor& desc);
 
         void dump (std::ostream&);
 
@@ -101,6 +103,9 @@ public:
 
 	const Parameter& parameter() const                 { return _parameter; }
 	void             set_parameter(const Parameter& p) { _parameter = p; }
+
+	const ParameterDescriptor& descriptor() const                           { return _desc; }
+	void                       set_descriptor(const ParameterDescriptor& d) { _desc = d; }
 
 	EventList::size_type size() const { return _events.size(); }
         double length() const { 		
@@ -218,7 +223,7 @@ public:
 	};
 
 	const EventList& events() const { return _events; }
-	double default_value() const { return _parameter.normal(); }
+	double default_value() const { return _default_value; }
 
 	// FIXME: const violations for Curve
 	Glib::Threads::Mutex& lock()         const { return _lock; }
@@ -288,10 +293,12 @@ protected:
 	mutable LookupCache   _lookup_cache;
 	mutable SearchCache   _search_cache;
 
+	mutable Glib::Threads::Mutex _lock;
+
 	Parameter             _parameter;
+	ParameterDescriptor   _desc;
 	InterpolationStyle    _interpolation;
 	EventList             _events;
-	mutable Glib::Threads::Mutex   _lock;
 	int8_t                _frozen;
 	bool                  _changed_when_thawed;
 	double                _min_yval;

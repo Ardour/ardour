@@ -25,6 +25,7 @@
 #include "ardour/parameter_types.h"
 #include "ardour/uri_map.h"
 #include "evoral/Parameter.hpp"
+#include "evoral/ParameterDescriptor.hpp"
 #include "evoral/midi_events.h"
 #include "pbd/error.h"
 #include "pbd/compose.h"
@@ -40,25 +41,6 @@ EventTypeMap::instance()
 {
 	if (!EventTypeMap::event_type_map) {
 		EventTypeMap::event_type_map = new EventTypeMap(URIMap::instance());
-
-		// Initialize parameter metadata
-		EventTypeMap::event_type_map->new_parameter(NullAutomation);
-		EventTypeMap::event_type_map->new_parameter(GainAutomation);
-		EventTypeMap::event_type_map->new_parameter(PanAzimuthAutomation);
-		EventTypeMap::event_type_map->new_parameter(PanElevationAutomation);
-		EventTypeMap::event_type_map->new_parameter(PanWidthAutomation);
-		EventTypeMap::event_type_map->new_parameter(PluginAutomation);
-		EventTypeMap::event_type_map->new_parameter(PluginPropertyAutomation);
-		EventTypeMap::event_type_map->new_parameter(SoloAutomation);
-		EventTypeMap::event_type_map->new_parameter(MuteAutomation);
-		EventTypeMap::event_type_map->new_parameter(MidiCCAutomation);
-		EventTypeMap::event_type_map->new_parameter(MidiPgmChangeAutomation);
-		EventTypeMap::event_type_map->new_parameter(MidiPitchBenderAutomation);
-		EventTypeMap::event_type_map->new_parameter(MidiChannelPressureAutomation);
-		EventTypeMap::event_type_map->new_parameter(FadeInAutomation);
-		EventTypeMap::event_type_map->new_parameter(FadeOutAutomation);
-		EventTypeMap::event_type_map->new_parameter(EnvelopeAutomation);
-		EventTypeMap::event_type_map->new_parameter(MidiCCAutomation);
 	}
 	return *EventTypeMap::event_type_map;
 }
@@ -67,12 +49,6 @@ bool
 EventTypeMap::type_is_midi(uint32_t type) const
 {
 	return ARDOUR::parameter_is_midi((AutomationType)type);
-}
-
-bool
-EventTypeMap::is_midi_parameter(const Evoral::Parameter& param)
-{
-	return type_is_midi(param.type());
 }
 
 uint8_t
@@ -85,13 +61,6 @@ uint32_t
 EventTypeMap::midi_event_type(uint8_t status) const
 {
 	return (uint32_t)ARDOUR::midi_parameter_type(status);
-}
-
-bool
-EventTypeMap::is_integer(const Evoral::Parameter& param) const
-{
-	return (   param.type() >= MidiCCAutomation
-			&& param.type() <= MidiChannelPressureAutomation);
 }
 
 Evoral::ControlList::InterpolationStyle
@@ -147,75 +116,8 @@ EventTypeMap::interpolation_of(const Evoral::Parameter& param)
 	return Evoral::ControlList::Linear; // Not reached, suppress warnings
 }
 
-
 Evoral::Parameter
-EventTypeMap::new_parameter(uint32_t type, uint8_t channel, uint32_t id) const
-{
-	Evoral::Parameter p(type, channel, id);
-
-	double min     = 0.0f;
-	double max     = 1.0f;
-	double normal  = 0.0f;
-	bool   toggled = false;
-
-	switch((AutomationType)type) {
-	case NullAutomation:
-	case GainAutomation:
-		max = 2.0f;
-		normal = 1.0f;
-		break;
-	case PanAzimuthAutomation:
-		normal = 0.5f; // there really is no normal but this works for stereo, sort of
-                break;
-	case PanWidthAutomation:
-                min = -1.0;
-                max = 1.0;
-		normal = 0.0f;
-                break;
-        case PanElevationAutomation:
-        case PanFrontBackAutomation:
-        case PanLFEAutomation:
-                break;
-	case RecEnableAutomation:
-		/* default 0.0 - 1.0 is fine */
-		toggled = true;
-		break;
-	case PluginAutomation:
-	case FadeInAutomation:
-	case FadeOutAutomation:
-	case EnvelopeAutomation:
-		max = 2.0f;
-		normal = 1.0f;
-		break;
-	case SoloAutomation:
-	case MuteAutomation:
-		max = 1.0f;
-		normal = 0.0f;
-		toggled = true;
-		break;
-	case MidiCCAutomation:
-	case MidiPgmChangeAutomation:
-	case MidiChannelPressureAutomation:
-		min = 0.0;
-		normal = 0.0;
-		max = 127.0;
-		break;
-	case MidiPitchBenderAutomation:
-		min = 0.0;
-		normal = 8192.0;
-		max = 16383.0;
-	case MidiSystemExclusiveAutomation:
-		return p;
-	case PluginPropertyAutomation:
-		return p;
-	}
-
-	p.set_range(type, min, max, normal, toggled);
-	return p;
-}
-
-Evoral::Parameter
-EventTypeMap::new_parameter(const string& str) const
+EventTypeMap::from_symbol(const string& str) const
 {
 	AutomationType p_type    = NullAutomation;
 	uint8_t        p_channel = 0;
@@ -285,7 +187,7 @@ EventTypeMap::new_parameter(const string& str) const
 		PBD::warning << "Unknown Parameter '" << str << "'" << endmsg;
 	}
 	
-	return new_parameter(p_type, p_channel, p_id);
+	return Evoral::Parameter(p_type, p_channel, p_id);
 }
 
 /** Unique string representation, suitable as an XML property value.
@@ -339,6 +241,22 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		PBD::warning << "Uninitialized Parameter symbol() called." << endmsg;
 		return "";
 	}
+}
+
+const Evoral::ParameterDescriptor&
+EventTypeMap::descriptor(const Evoral::Parameter& param) const
+{
+	static const Evoral::ParameterDescriptor nil;
+
+	Descriptors::const_iterator d = _descriptors.find(param);
+	return (d != _descriptors.end()) ? d->second : nil;
+}
+
+void
+EventTypeMap::set_descriptor(const Evoral::Parameter&           param,
+                             const Evoral::ParameterDescriptor& desc)
+{
+	_descriptors.insert(std::make_pair(param, desc));
 }
 
 } // namespace ARDOUR

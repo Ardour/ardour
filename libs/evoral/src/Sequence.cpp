@@ -35,6 +35,7 @@
 #include "evoral/ControlList.hpp"
 #include "evoral/ControlSet.hpp"
 #include "evoral/EventSink.hpp"
+#include "evoral/ParameterDescriptor.hpp"
 #include "evoral/Sequence.hpp"
 #include "evoral/TypeMap.hpp"
 #include "evoral/midi_util.h"
@@ -140,9 +141,10 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 
 		assert(x >= 0);
 
-		if (y < i->first.min() || y > i->first.max()) {
+		const ParameterDescriptor& desc = seq.type_map().descriptor(i->first);
+		if (y < desc.lower || y > desc.upper) {
 			cerr << "ERROR: Controller value " << y
-			     << " out of range [" << i->first.min() << "," << i->first.max()
+			     << " out of range [" << desc.lower << "," << desc.upper
 			     << "], event ignored" << endl;
 			continue;
 		}

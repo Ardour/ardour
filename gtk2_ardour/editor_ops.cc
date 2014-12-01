@@ -3941,7 +3941,7 @@ Editor::cut_copy_points (CutCopyOp op)
 		*/
 		framepos_t start = std::numeric_limits<framepos_t>::max();
 		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
-			i->second.copy = i->first->create (i->first->parameter ());
+			i->second.copy = i->first->create (i->first->parameter (), i->first->descriptor());
 
 			/* Calculate earliest start position of any point in selection. */
 			start = std::min(start, i->second.line->session_position(i->first->begin()));

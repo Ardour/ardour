@@ -37,6 +37,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
+#include "ardour/event_type_map.h"
 #include "ardour/meter.h"
 #include "ardour/midi_diskstream.h"
 #include "ardour/midi_playlist.h"
@@ -657,16 +658,17 @@ void
 MidiTrack::MidiControl::set_value(double val)
 {
 	const Evoral::Parameter &parameter = _list ? _list->parameter() : Control::parameter();
+	const Evoral::ParameterDescriptor &desc = EventTypeMap::instance().descriptor(parameter);
 
 	bool valid = false;
 	if (isinf_local(val)) {
 		cerr << "MIDIControl value is infinity" << endl;
 	} else if (isnan_local(val)) {
 		cerr << "MIDIControl value is NaN" << endl;
-	} else if (val < parameter.min()) {
-		cerr << "MIDIControl value is < " << parameter.min() << endl;
-	} else if (val > parameter.max()) {
-		cerr << "MIDIControl value is > " << parameter.max() << endl;
+	} else if (val < desc.lower) {
+		cerr << "MIDIControl value is < " << desc.lower << endl;
+	} else if (val > desc.upper) {
+		cerr << "MIDIControl value is > " << desc.upper << endl;
 	} else {
 		valid = true;
 	}
@@ -675,7 +677,7 @@ MidiTrack::MidiControl::set_value(double val)
 		return;
 	}
 
-	assert(val <= parameter.max());
+	assert(val <= desc.upper);
 	if ( ! _list || ! automation_playback()) {
 		size_t size = 3;
 		uint8_t ev[3] = { parameter.channel(), uint8_t (val), 0 };

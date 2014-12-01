@@ -39,14 +39,6 @@ public:
 		};
 	}
 
-	bool is_integer (const Parameter& /*param*/) const { return true; }
-
-	Parameter new_parameter(uint32_t type, uint8_t channel, uint32_t id) const {
-		Parameter p(type, channel, id);
-		p.set_range(type, 0.0f, 1.0f, 0.0f);
-		return p;
-	}
-
 	std::string to_symbol(const Parameter& /*param*/) const { return "control"; }
 };
 

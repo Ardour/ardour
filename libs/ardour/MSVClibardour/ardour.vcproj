@@ -764,6 +764,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\parameter_descriptor.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\pcm_utils.cc"
 				>
 			</File>

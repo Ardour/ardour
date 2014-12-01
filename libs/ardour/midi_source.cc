@@ -123,7 +123,7 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 				error << _("Missing parameter property on InterpolationStyle") << endmsg;
 				return -1;
 			}
-			Evoral::Parameter p = EventTypeMap::instance().new_parameter (prop->value());
+			Evoral::Parameter p = EventTypeMap::instance().from_symbol (prop->value());
 
 			if ((prop = (*i)->property (X_("style"))) == 0) {
 				error << _("Missing style property on InterpolationStyle") << endmsg;
@@ -138,7 +138,7 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 				error << _("Missing parameter property on AutomationState") << endmsg;
 				return -1;
 			}
-			Evoral::Parameter p = EventTypeMap::instance().new_parameter (prop->value());
+			Evoral::Parameter p = EventTypeMap::instance().from_symbol (prop->value());
 
 			if ((prop = (*i)->property (X_("state"))) == 0) {
 				error << _("Missing state property on AutomationState") << endmsg;

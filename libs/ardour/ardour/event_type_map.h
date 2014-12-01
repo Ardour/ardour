@@ -21,9 +21,12 @@
 #ifndef __ardour_event_type_map_h__
 #define __ardour_event_type_map_h__
 
+#include <map>
 #include <string>
+
 #include "evoral/TypeMap.hpp"
 #include "evoral/ControlList.hpp"
+#include "evoral/ParameterDescriptor.hpp"
 
 #include "ardour/libardour_visibility.h"
 
@@ -43,19 +46,23 @@ public:
 	uint32_t midi_event_type(uint8_t status) const;
 	Evoral::ControlList::InterpolationStyle interpolation_of(const Evoral::Parameter& param);
 
-	bool                 is_integer(const Evoral::Parameter& param) const;
-	Evoral::Parameter    new_parameter(uint32_t type, uint8_t channel=0, uint32_t id=0) const;
-	Evoral::Parameter    new_parameter(const std::string& str) const;
-	std::string          to_symbol(const Evoral::Parameter& param) const;
+	Evoral::Parameter from_symbol(const std::string& str) const;
+	std::string       to_symbol(const Evoral::Parameter& param) const;
 
-	bool                 is_midi_parameter(const Evoral::Parameter& param);
+	const Evoral::ParameterDescriptor& descriptor(const Evoral::Parameter& param) const;
+
+	void set_descriptor(const Evoral::Parameter&           param,
+	                    const Evoral::ParameterDescriptor& desc);
 
 	URIMap& uri_map() { return _uri_map; }
 
 private:
+	typedef std::map<Evoral::Parameter, Evoral::ParameterDescriptor> Descriptors;
+
 	EventTypeMap(URIMap& uri_map) : _uri_map(uri_map) {}
 
-	URIMap& _uri_map;
+	URIMap&     _uri_map;
+	Descriptors _descriptors;
 
 	static EventTypeMap* event_type_map;
 };
