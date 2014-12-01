@@ -43,7 +43,7 @@ BUILD_DIR=$BASE/build
 BUILD_CACHE_FILE=$BUILD_DIR/c4che/_cache.py
 TOOLS_DIR=$BASE/tools/windows_packaging
 
-APPNAME=`grep -m 1 '^APPNAME' $BASE/wscript | awk '{print $3}' | sed "s/'//g"`
+APPNAME=Ardour
 
 # These are only relevant after a build
 if test -f $BUILD_CACHE_FILE
