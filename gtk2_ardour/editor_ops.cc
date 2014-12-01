@@ -2703,6 +2703,7 @@ static void
 add_if_covered (RegionView* rv, const AudioRange* ar, RegionSelection* rs)
 {
 	switch (rv->region()->coverage (ar->start, ar->end - 1)) {
+	// n.b. -1 because AudioRange::end is one past the end, but coverage expects inclusive ranges
 	case Evoral::OverlapNone:
 		break;
 	default:
