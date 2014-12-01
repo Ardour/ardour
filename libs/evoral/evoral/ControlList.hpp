@@ -131,7 +131,20 @@ public:
 	bool move_ranges (std::list< RangeMove<double> > const &);
 	void modify (iterator, double, double);
 
-        void thin ();
+	/** Thin the number of events in this list.
+	 *
+	 * The thinning factor has no units but corresponds to the area of a
+	 * triangle computed between three points in the list.  If the area is
+	 * large, it indicates significant non-linearity between the points.
+	 *
+	 * During automation recording we thin the recorded points using this
+	 * value.  If a point is sufficiently co-linear with its neighbours (as
+	 * defined by the area of the triangle formed by three of them), we will
+	 * not include it in the list.  The larger the value, the more points are
+	 * excluded, so this effectively measures the amount of thinning to be
+	 * done.
+	 */
+	void thin (double thinning_factor);
 
 	boost::shared_ptr<ControlList> cut (double, double);
 	boost::shared_ptr<ControlList> copy (double, double);
@@ -245,7 +258,7 @@ public:
 	virtual bool writing() const { return false; }
 	virtual bool touch_enabled() const { return false; }
         void start_write_pass (double time);
-	void write_pass_finished (double when);
+        void write_pass_finished (double when, double thinning_factor=0.0);
         void set_in_write_pass (bool, bool add_point = false, double when = 0.0);
         bool in_write_pass () const;
 
@@ -253,9 +266,6 @@ public:
 	mutable PBD::Signal0<void> Dirty;
 	/** Emitted when our interpolation style changes */
 	PBD::Signal1<void, InterpolationStyle> InterpolationChanged;
-
-        static void set_thinning_factor (double d);
-        static double thinning_factor() { return _thinning_factor; }
 
 	bool operator!= (ControlList const &) const;
 
@@ -290,8 +300,6 @@ protected:
 	bool                  _sort_pending;
 
 	Curve* _curve;
-
-        static double _thinning_factor;
 
   private:
     iterator   most_recent_insert_iterator;

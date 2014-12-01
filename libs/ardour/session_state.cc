@@ -3503,8 +3503,6 @@ Session::config_changed (std::string p, bool ours)
 		last_timecode_valid = false;
 	} else if (p == "playback-buffer-seconds") {
 		AudioSource::allocate_working_buffers (frame_rate());
-	} else if (p == "automation-thinning-factor") {
-		Evoral::ControlList::set_thinning_factor (Config->get_automation_thinning_factor());
 	} else if (p == "ltc-source-port") {
 		reconnect_ltc_input ();
 	} else if (p == "ltc-sink-port") {

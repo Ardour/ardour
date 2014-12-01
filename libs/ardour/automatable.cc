@@ -365,32 +365,34 @@ void
 Automatable::transport_stopped (framepos_t now)
 {
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
+		boost::shared_ptr<AutomationControl> c =
+			boost::dynamic_pointer_cast<AutomationControl>(li->second);
+		if (!c) {
+			continue;
+		}
 
-		boost::shared_ptr<AutomationControl> c
-				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
-                if (c) {
-                        boost::shared_ptr<AutomationList> l
-				= boost::dynamic_pointer_cast<AutomationList>(c->list());
+		boost::shared_ptr<AutomationList> l =
+			boost::dynamic_pointer_cast<AutomationList>(c->list());
+		if (!l) {
+			continue;
+		}
 
-                        if (l) {
-				/* Stop any active touch gesture just before we mark the write pass
-				   as finished.  If we don't do this, the transport can end up stopped with
-				   an AutomationList thinking that a touch is still in progress and,
-				   when the transport is re-started, a touch will magically
-				   be happening without it ever have being started in the usual way.
-				*/
-				l->stop_touch (true, now);
-                                l->write_pass_finished (now);
+		/* Stop any active touch gesture just before we mark the write pass
+		   as finished.  If we don't do this, the transport can end up stopped with
+		   an AutomationList thinking that a touch is still in progress and,
+		   when the transport is re-started, a touch will magically
+		   be happening without it ever have being started in the usual way.
+		*/
+		l->stop_touch (true, now);
+		l->write_pass_finished (now, Config->get_automation_thinning_factor());
 
-                                if (l->automation_playback()) {
-                                        c->set_value(c->list()->eval(now));
-                                }
+		if (l->automation_playback()) {
+			c->set_value(c->list()->eval(now));
+		}
 
-                                if (l->automation_state() == Write) {
-                                        l->set_automation_state (Touch);
-                                }
-                        }
-                }
+		if (l->automation_state() == Write) {
+			l->set_automation_state (Touch);
+		}
 	}
 }
 

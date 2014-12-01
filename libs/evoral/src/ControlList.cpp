@@ -36,22 +36,6 @@ inline bool event_time_less_than (ControlEvent* a, ControlEvent* b)
 	return a->when < b->when;
 }
 
-/* this has no units but corresponds to the area of a rectangle
-   computed between three points in the list. If the area is
-   large, it indicates significant non-linearity between the
-   points. 
-
-   during automation recording we thin the recorded points
-   using this value. if a point is sufficiently co-linear 
-   with its neighbours (as defined by the area of the rectangle
-   formed by three of them), we will not include it in the
-   ControlList. a smaller value will exclude less points,
-   a larger value will exclude more points, so it effectively
-   measures the amount of thinning to be done.
-*/
-
-double ControlList::_thinning_factor = 20.0; 
-
 ControlList::ControlList (const Parameter& id)
 	: _parameter(id)
 	, _interpolation(id.toggled() ? Discrete : Linear)
@@ -258,8 +242,12 @@ struct ControlEventTimeComparator {
 };
 
 void
-ControlList::thin ()
+ControlList::thin (double thinning_factor)
 {
+	if (thinning_factor == 0.0) {
+		return;
+	}
+
 	bool changed = false;
 
 	{
@@ -287,7 +275,7 @@ ControlList::thin ()
 						    (prev->when * (cur->value - prevprev->value)) + 
 						    (cur->when * (prevprev->value - prev->value)));
 				
-				if (area < _thinning_factor) {
+				if (area < thinning_factor) {
 					iterator tmp = pprev;
 					
 					/* pprev will change to current
@@ -364,12 +352,12 @@ ControlList::start_write_pass (double when)
 }
 
 void
-ControlList::write_pass_finished (double /*when*/)
+ControlList::write_pass_finished (double /*when*/, double thinning_factor)
 {
 	DEBUG_TRACE (DEBUG::ControlList, "write pass finished\n");
 
 	if (did_write_during_pass) {
-		thin ();
+		thin (thinning_factor);
 		did_write_during_pass = false;
 	}
 	new_write_pass = true;
@@ -1736,12 +1724,6 @@ ControlList::set_interpolation (InterpolationStyle s)
 
 	_interpolation = s;
 	InterpolationChanged (s); /* EMIT SIGNAL */
-}
-
-void
-ControlList::set_thinning_factor (double v)
-{
-	_thinning_factor = v;
 }
 
 bool
