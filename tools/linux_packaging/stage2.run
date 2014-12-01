@@ -14,7 +14,13 @@ PGM_NAME="Ardour"
 PGM_VENDOR="Ardour"
 PGM_EXEC_FILE="ardour3"
 
-INSTALL_DEST_BASE="/opt"
+if test -z "$INSTALL_DEST_BASE"; then
+	INSTALL_DEST_BASE="/opt"
+	CALL_MKDIR=1
+else
+	CALL_MKDIR=
+fi
+
 USER_BIN_DIR="/usr/local/bin"
 
 PGM_NAME_LOWER=$(echo $PGM_NAME | tr '[:upper:]' '[:lower:]')
@@ -113,21 +119,6 @@ echo "Welcome to the ${PGM_NAME} installer"
 echo ""
 echo "${PGM_NAME} will be installed for user ${USER_NAME} in ${INSTALL_DEST_BASE}"
 echo ""
-
-###############################
-# Check for install destination
-###############################
-
-if [ ! -d ${INSTALL_DEST_BASE} ];
-then
-	echo ""
-	echo "!!! ERROR !!! - Installation location ${INSTALL_DEST_BASE} does not exist!"
-	echo "Installation will not complete."
-	echo ""
-	read -p "Press ENTER to exit installer:" BLAH
-	exit 1
-fi
-
 #############################
 # Check for root privileges
 #############################
@@ -194,6 +185,25 @@ if [ "$(id -u)" != "0" ]; then
 else
 	NORM_USER="su -l $USER_NAME -c" 
 fi
+
+###############################
+# Check for install destination
+###############################
+
+if test -n "$CALL_MKDIR"; then
+	${SUPER} mkdir -p "$INSTALL_DEST_BASE"
+fi
+
+if [ ! -d ${INSTALL_DEST_BASE} ];
+then
+	echo ""
+	echo "!!! ERROR !!! - Installation location ${INSTALL_DEST_BASE} does not exist!"
+	echo "Installation will not complete."
+	echo ""
+	read -p "Press ENTER to exit installer:" BLAH
+	exit 1
+fi
+
 
 ############################
 # Determine processor type
