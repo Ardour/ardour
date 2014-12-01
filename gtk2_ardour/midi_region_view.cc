@@ -39,7 +39,6 @@
 #include "ardour/session.h"
 
 #include "evoral/Parameter.hpp"
-#include "evoral/MIDIParameters.hpp"
 #include "evoral/MIDIEvent.hpp"
 #include "evoral/Control.hpp"
 #include "evoral/midi_util.h"

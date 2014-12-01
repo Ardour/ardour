@@ -1,5 +1,4 @@
 #include "SequenceTest.hpp"
-#include "evoral/MIDIParameters.hpp"
 #include <cassert>
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SequenceTest);
@@ -103,11 +102,12 @@ SequenceTest::controlInterpolationTest ()
 	static const uint64_t delay   = 1000;
 	static const uint32_t cc_type = 1;
 
-	boost::shared_ptr<Control> c = seq->control(MIDI::ContinuousController(cc_type, 1, 1), true);
+	boost::shared_ptr<Control> c = seq->control(Parameter(cc_type, 1, 1), true);
 	CPPUNIT_ASSERT(c);
 
-	double min, max, normal;
-	MIDI::controller_range(min, max, normal);
+	double min = 0.0;
+	double max = 127.0;
+	double normal = 0.0;
 
 	// Make a ramp like /\ from min to max and back to min
 	c->set_double(min, 0, true);

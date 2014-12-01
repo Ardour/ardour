@@ -35,7 +35,6 @@
 #include "evoral/ControlList.hpp"
 #include "evoral/ControlSet.hpp"
 #include "evoral/EventSink.hpp"
-#include "evoral/MIDIParameters.hpp"
 #include "evoral/Sequence.hpp"
 #include "evoral/TypeMap.hpp"
 #include "evoral/midi_util.h"
@@ -936,20 +935,20 @@ Sequence<Time>::append(const Event<Time>& event, event_id_t evid)
 		}
 	} else if (ev.is_cc()) {
 		append_control_unlocked(
-			Evoral::MIDI::ContinuousController(ev.event_type(), ev.channel(), ev.cc_number()),
+			Parameter(ev.event_type(), ev.channel(), ev.cc_number()),
 			ev.time(), ev.cc_value(), evid);
 	} else if (ev.is_pgm_change()) {
 		/* write a patch change with this program change and any previously set-up bank number */
 		append_patch_change_unlocked (PatchChange<Time> (ev.time(), ev.channel(), ev.pgm_number(), _bank[ev.channel()]), evid);
 	} else if (ev.is_pitch_bender()) {
 		append_control_unlocked(
-			Evoral::MIDI::PitchBender(ev.event_type(), ev.channel()),
+			Parameter(ev.event_type(), ev.channel()),
 			ev.time(), double ((0x7F & ev.pitch_bender_msb()) << 7
 			                   | (0x7F & ev.pitch_bender_lsb())),
 			evid);
 	} else if (ev.is_channel_pressure()) {
 		append_control_unlocked(
-			Evoral::MIDI::ChannelPressure(ev.event_type(), ev.channel()),
+			Parameter(ev.event_type(), ev.channel()),
 			ev.time(), ev.channel_pressure(), evid);
 	} else if (!_type_map.type_is_midi(ev.event_type())) {
 		printf("WARNING: Sequence: Unknown event type %X: ", ev.event_type());

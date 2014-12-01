@@ -26,7 +26,6 @@
 #include "ardour/uri_map.h"
 #include "evoral/Parameter.hpp"
 #include "evoral/midi_events.h"
-#include "evoral/MIDIParameters.hpp"
 #include "pbd/error.h"
 #include "pbd/compose.h"
 
@@ -197,9 +196,14 @@ EventTypeMap::new_parameter(uint32_t type, uint8_t channel, uint32_t id) const
 	case MidiCCAutomation:
 	case MidiPgmChangeAutomation:
 	case MidiChannelPressureAutomation:
-		Evoral::MIDI::controller_range(min, max, normal); break;
+		min = 0.0;
+		normal = 0.0;
+		max = 127.0;
+		break;
 	case MidiPitchBenderAutomation:
-		Evoral::MIDI::bender_range(min, max, normal); break;
+		min = 0.0;
+		normal = 8192.0;
+		max = 16383.0;
 	case MidiSystemExclusiveAutomation:
 		return p;
 	case PluginPropertyAutomation:

@@ -500,10 +500,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\MIDIParameters.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\evoral\Note.hpp"
 				>
 			</File>
