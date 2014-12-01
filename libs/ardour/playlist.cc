@@ -3222,6 +3222,7 @@ restart:
 				continue;
 			}
 
+			// XXX i->from can be > i->to - is this right? coverage() will return OverlapNone in this case
 			if (Evoral::coverage (i->from, i->to, j->from, j->to) != Evoral::OverlapNone) {
 				i->from = min (i->from, j->from);
 				i->to = max (i->to, j->to);

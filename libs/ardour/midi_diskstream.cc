@@ -365,6 +365,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 
 	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && _session.config.get_punch_in())) {
 		Evoral::OverlapType ot = Evoral::coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
+		// XXX should this be transport_frame + nframes - 1 ? coverage() expects its parameter ranges to include their end points
 
 		calculate_record_range(ot, transport_frame, nframes, rec_nframes, rec_offset);
 		/* For audio: not writing frames to the capture ringbuffer offsets

@@ -700,16 +700,16 @@ Diskstream::calculate_record_range (Evoral::OverlapType ot, framepos_t transport
 
 	case Evoral::OverlapInternal:
 		/*     ----------    recrange
-		         |---|       transrange
-		*/
+		 *       |---|       transrange
+		 */
 		rec_nframes = nframes;
 		rec_offset = 0;
 		break;
 
 	case Evoral::OverlapStart:
 		/*    |--------|    recrange
-	        -----|          transrange
-		*/
+		 *  -----|          transrange
+		 */
 		rec_nframes = transport_frame + nframes - first_recordable_frame;
 		if (rec_nframes) {
 			rec_offset = first_recordable_frame - transport_frame;
@@ -718,16 +718,16 @@ Diskstream::calculate_record_range (Evoral::OverlapType ot, framepos_t transport
 
 	case Evoral::OverlapEnd:
 		/*    |--------|    recrange
-		         |--------  transrange
-		*/
+		 *       |--------  transrange
+		 */
 		rec_nframes = last_recordable_frame - transport_frame;
 		rec_offset = 0;
 		break;
 
 	case Evoral::OverlapExternal:
 		/*    |--------|    recrange
-		    --------------  transrange
-		*/
+		 *  --------------  transrange
+		 */
 		rec_nframes = last_recordable_frame - first_recordable_frame;
 		rec_offset = first_recordable_frame - transport_frame;
 		break;

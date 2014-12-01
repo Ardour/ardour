@@ -460,6 +460,8 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 	if (record_enabled()) {
 
 		Evoral::OverlapType ot = Evoral::coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
+		// XXX should this be transport_frame + nframes - 1 ? coverage() expects its parameter ranges to include their end points
+		// XXX also, first_recordable_frame & last_recordable_frame may both be == max_framepos: coverage() will return OverlapNone in that case. Is thak OK?
 		calculate_record_range (ot, transport_frame, nframes, rec_nframes, rec_offset);
 
 		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: this time record %2 of %3 frames, offset %4\n", _name, rec_nframes, nframes, rec_offset));
