@@ -138,13 +138,11 @@ MidnamTest::yamaha_PSRS900_patchfile_test()
                 for(PatchNameList::const_iterator p = list.begin(); p != list.end(); ++p) {
 
                 if (ns == string("GM+XG")) {
-                    cerr << "got Patch with name " << (*p)->name() << " bank " << (*p)->bank_number() << " program " << (int)(*p)->program_number() << endl;
                     uint8_t msb = (((*p)->bank_number()) >> 7) & 0x7f;
                     CPPUNIT_ASSERT( msb == 0 || msb == 64);
                 }
 
                 if (ns == string("GM2")) {
-                    cerr << "got Patch with name " << (*p)->name() << " bank " << (*p)->bank_number() << " program " << (int)(*p)->program_number() << endl;
                     CPPUNIT_ASSERT((*p)->bank_number() >= (uint16_t(120) << 7));
                 }
                 }
@@ -175,9 +173,6 @@ MidnamTest::load_all_midnams_test ()
         result = xmldoc.find("//MasterDeviceNames");
         CPPUNIT_ASSERT(result->size() == 1);
 
-        result = xmldoc.find("//ChannelNameSet");
-        CPPUNIT_ASSERT(result->size() >= 1);
-
         result = xmldoc.find("//PatchBank");
         //int banks = result->size();
 
@@ -189,7 +184,6 @@ MidnamTest::load_all_midnams_test ()
                     document->master_device_names_by_model().begin();
 
         string modename = device->second->custom_device_mode_names().front();
-        cerr << "modename:" << modename << endl;
         boost::shared_ptr<CustomDeviceMode> mode = device->second->custom_device_mode_by_name(modename);
         CPPUNIT_ASSERT_EQUAL(deviceModeName, mode->name());
 
