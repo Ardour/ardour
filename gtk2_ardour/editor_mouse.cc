@@ -758,6 +758,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				} 
 			} else {
 				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
+					cerr << "extend selection\n";
 					_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionExtend), event);
 				} else {
 					_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
@@ -776,6 +777,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		default:
 			if (!internal_editing()) {
 				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
+					cerr << "extend selection 2\n";
 					_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionExtend), event);
 				} else {
 					_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);

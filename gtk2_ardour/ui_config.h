@@ -138,6 +138,11 @@ class UIConfiguration : public PBD::Stateful
 #include "colors.h"
 #undef CANVAS_COLOR
 
+#undef COLOR_ALIAS
+#define COLOR_ALIAS(var,name,alias) ArdourCanvas::Color get_##var() const { return color (alias); }
+#include "color_aliases.h"
+#undef COLOR_ALIAS
+
   private:
 
 	struct RelativeHSV {

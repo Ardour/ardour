@@ -75,7 +75,6 @@ UIConfiguration::UIConfiguration ()
 #define CANVAS_COLOR(var,name,base,modifier) var (base,modifier),
 #include "colors.h"
 #undef CANVAS_COLOR
-
 	_dirty (false)
 {
 	_instance = this;
@@ -89,16 +88,15 @@ UIConfiguration::UIConfiguration ()
 #include "base_colors.h"
 #undef CANVAS_BASE_COLOR
 
-#undef CANVAS_COLOR
-#define CANVAS_COLOR(var,name,base,modifier) relative_colors.insert (make_pair (name,var));
-#include "colors.h"
+#undef COLOR_ALIAS
+#define COLOR_ALIAS(var,name,alias) color_aliases.insert (make_pair (name,alias));
+#include "color_aliases.h"
 #undef CANVAS_COLOR
 
 	load_state();
 
 	// regenerate_relative_definitions ();
-
-	color_compute ();
+	// color_compute ();
 
 	ARDOUR_UI_UTILS::ColorsChanged.connect (boost::bind (&UIConfiguration::color_theme_changed, this));
 }
@@ -1036,11 +1034,12 @@ UIConfiguration::color_compute ()
 			 */
 
 			string alias = string_compose ("color %1", actual_colors.size() + 1);
-			//cerr << alias << " == " << current_color->second.base_color 
-			// << " [ " << HSV (base_color_by_name (current_color->second.base_color)) << "] + " 
-			// << current_color->second.modifier << endl;
+			cerr << "CANVAS_COLOR(\"" << alias << "\", \"" << current_color->second.base_color 
+			     << "\"," << current_color->second.modifier
+			     << ")\n";
 			actual_colors.insert (make_pair (alias, current_color->second.get()));
 			color_aliases.insert (make_pair (current_color->first, alias));
+			cerr << "COLOR_ALIAS(\"" << current_color->first << "\",\"" << alias << "\")\n";
 
 		} else {
 
@@ -1049,6 +1048,7 @@ UIConfiguration::color_compute ()
 			 */
 			
 			color_aliases.insert (make_pair (current_color->first, possible_match->first));
+			cerr << "COLOR_ALIAS(\"" << current_color->first << "\",\"" << possible_match->first << "\")\n";
 		}
 	}
 
