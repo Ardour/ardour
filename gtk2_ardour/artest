@@ -1,5 +1,9 @@
 #!/bin/sh
-. `dirname "$0"`/../build/gtk2_ardour/ardev_common_waf.sh
+
+REL_TOP=`dirname "$0"`/..
+TOP=`realpath $REL_TOP`
+
+. $TOP/build/gtk2_ardour/ardev_common_waf.sh
 
 LIBS_DIR=$TOP/build/libs
 
@@ -9,7 +13,9 @@ run_tests () {
   echo "Running tests for $1..."
   echo "-------------------------------------------"
   echo ""
-  $2 $LIBS_DIR/$1/run-tests
+  cd $LIBS_DIR/$1
+  $2 ./run-tests
+  cd -
   echo ""
 }
 

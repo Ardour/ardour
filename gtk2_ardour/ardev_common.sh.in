@@ -1,4 +1,6 @@
-TOP=`dirname "$0"`/..
+if [ -z "$TOP" ]; then
+    TOP=`dirname "$0"`/..
+fi
 
 #export G_DEBUG=fatal_criticals
 
