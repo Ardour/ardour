@@ -318,12 +318,21 @@ ARDOUR_UI::parameter_changed (std::string p)
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (true);
+            
+            // Internal timecode source is used - hide MTC indicator
+            hide_mtc_indicator();
+            
 		} else {
 			// NO NEED TO HAVE IT: sync_button.set_text (sync_source_to_string (Config->get_sync_source(), true));
 			/* XXX need to make auto-play is off as well as insensitive */
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
+            
+            if (MTC == Config->get_sync_source() ) {
+                // show MTC indicator, but in non lit mode
+                set_mtc_indicator_active(false);
+            }
 		}
 
         populate_timecode_source_dropdown ();
