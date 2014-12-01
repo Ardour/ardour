@@ -540,7 +540,9 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 		double const delta = ev_pos - _grab_loc;
 		_grab_loc = ev_pos;
 
-		double fract = (delta / _span);
+		const double off  = FADER_RESERVE + ((_orien == VERT) ? CORNER_OFFSET : 0);
+		const double span = _span - off;
+		double fract = (delta / span);
 
 		fract = min (1.0, fract);
 		fract = max (-1.0, fract);
@@ -572,9 +574,13 @@ PixFader::display_span ()
 	float fract = (_adjustment.get_value () - _adjustment.get_lower()) / ((_adjustment.get_upper() - _adjustment.get_lower()));
 	int ds;
 	if (_orien == VERT) {
-		ds = (int)rint (_span * (1.0 - fract));
+		const double off  = FADER_RESERVE + CORNER_OFFSET;
+		const double span = _span - off;
+		ds = (int)rint (span * (1.0 - fract));
 	} else {
-		ds = (int)rint (_span * fract);
+		const double off  = FADER_RESERVE;
+		const double span = _span - off;
+		ds = (int)rint (span * fract + off);
 	}
 
 	return ds;
@@ -584,9 +590,11 @@ void
 PixFader::update_unity_position ()
 {
 	if (_orien == VERT) {
-		_unity_loc = (int) rint (_span * (1 - ((_default_value - _adjustment.get_lower()) / (_adjustment.get_upper() - _adjustment.get_lower())))) - 1;
+		const double span = _span - FADER_RESERVE - CORNER_OFFSET;
+		_unity_loc = (int) rint (span * (1 - ((_default_value - _adjustment.get_lower()) / (_adjustment.get_upper() - _adjustment.get_lower())))) - 1;
 	} else {
-		_unity_loc = (int) rint ((_default_value - _adjustment.get_lower()) * _span / (_adjustment.get_upper() - _adjustment.get_lower()));
+		const double span = _span - FADER_RESERVE;
+		_unity_loc = (int) rint (FADER_RESERVE + (_default_value - _adjustment.get_lower()) * span / (_adjustment.get_upper() - _adjustment.get_lower()));
 	}
 
 	queue_draw ();
@@ -619,7 +627,9 @@ PixFader::on_leave_notify_event (GdkEventCrossing*)
 void
 PixFader::set_adjustment_from_event (GdkEventButton* ev)
 {
-	double fract = (_orien == VERT) ? (1.0 - (ev->y / _span)) : (ev->x / _span);
+	const double off  = FADER_RESERVE + ((_orien == VERT) ? CORNER_OFFSET : 0);
+	const double span = _span - off;
+	double fract = (_orien == VERT) ? (1.0 - ((ev->y - off) / span)) : ((ev->x - off) / span);
 
 	fract = min (1.0, fract);
 	fract = max (0.0, fract);
