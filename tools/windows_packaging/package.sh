@@ -40,6 +40,8 @@ if test x$WITH_TESTS != x ; then
 	cp $BUILD_DIR/libs/pbd/run-tests.exe $PACKAGE_DIR/pbd-run-tests.exe
 	cp -r $BASE/libs/pbd/test $PACKAGE_DIR/pbd_testdata
 
+	cp $BUILD_DIR/libs/midi++2/run-tests.exe $PACKAGE_DIR/midipp-run-tests.exe
+
 	cp $BUILD_DIR/libs/evoral/run-tests.exe $PACKAGE_DIR/evoral-run-tests.exe
 	mkdir -p $PACKAGE_DIR/test/testdata
 	cp -r $BASE/libs/evoral/test/testdata/TakeFive.mid $PACKAGE_DIR/test/testdata
