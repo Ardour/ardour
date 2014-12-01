@@ -1772,11 +1772,6 @@ TracksControlPanel::on_midi_input_configuration_changed ()
     }
     
     populate_mtc_in_dropdown();
-
-    ARDOUR::Session* session = ARDOUR_UI::instance()->the_session();
-    if (session) {
-        session->reconnect_mtc_ports ();
-    }
 }
 
 
@@ -1807,19 +1802,7 @@ TracksControlPanel::on_midi_output_configuration_changed ()
 void
 TracksControlPanel::on_mtc_input_changed (const std::string&)
 {
-    ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
-    
-    if(!ardour_ui)
-    {
-        return;
-    }
-    
-    ARDOUR::Session* session = ardour_ui->the_session();
-    if (!session) {
-        return;
-    }
-    
-    session->reconnect_mtc_ports ();
+    // add actions here
 }
 
 

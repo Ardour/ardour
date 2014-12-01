@@ -5983,16 +5983,16 @@ Editor::port_registration_handler ()
     if (!_session) {
             return;
     }
-
-    _session->reconnect_midi_scene_ports (true);
-    _session->reconnect_midi_scene_ports (false);
+    
     update_midi_dropdowns ();
 }
 
 void
 Editor::port_connection_handler (boost::weak_ptr<Port> wa, std::string, boost::weak_ptr<Port> wb, std::string, bool connected)
 {
-        if (!_session) {
-                return;
-        }
+    if (!_session) {
+            return;
+    }
+    
+    // add actions here
 }

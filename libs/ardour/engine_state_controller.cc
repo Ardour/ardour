@@ -1056,11 +1056,16 @@ EngineStateController::set_physical_midi_input_state(const std::string& port_nam
     MidiPortStateList::iterator found_state_iter;
     found_state_iter = std::find(_midi_inputs.begin(), _midi_inputs.end(), MidiPortState(port_name) );
     
-    if (found_state_iter != _midi_inputs.end() && found_state_iter->available &&found_state_iter->active != state ) {
+    if (found_state_iter != _midi_inputs.end() && found_state_iter->available && found_state_iter->active != state ) {
         found_state_iter->active = state;
         
-        // ***************************
-        // add actions here
+        if (_session) {
+            // reconnect MTC inputs as well
+            if (found_state_iter->mtc_in) {
+                _session->reconnect_mtc_ports ();
+            }
+            _session->reconnect_mmc_ports(true);
+        }
         
         MIDIInputConfigChanged();
     }
@@ -1076,8 +1081,9 @@ EngineStateController::set_physical_midi_output_state(const std::string& port_na
     if (found_state_iter != _midi_outputs.end() && found_state_iter->available && found_state_iter->active != state ) {
         found_state_iter->active = state;
         
-        // ***************************
-        // add actions here
+        if (_session) {
+            _session->reconnect_mmc_ports(false);
+        }
         
         MIDIOutputConfigChanged();
     }
@@ -1159,9 +1165,9 @@ EngineStateController::set_all_midi_inputs_disconnected()
     for (; iter != _midi_inputs.end(); ++iter) {
         iter->connected = false;
     }
-    
+
     std::vector<std::string> ports;
-    MIDIOutputConnectionChanged(ports, false);
+    MIDIInputConnectionChanged(ports, false);
 }
 
 
@@ -1187,9 +1193,13 @@ EngineStateController::set_mtc_input(const std::string& port_name)
         
         if (iter->name == port_name) {
             iter->mtc_in = true;
+            
+            if (_session) {
+                _session->reconnect_mtc_ports ();
+            }
         }
     }
-
+    
     MTCInputChanged(port_name);
 }
 
@@ -1309,6 +1319,8 @@ EngineStateController::_on_session_loaded ()
     
     AudioEngine::instance()->reconnect_session_routes(true, true);
     _session->reconnect_mtc_ports ();
+    _session->reconnect_mmc_ports (true);
+    _session->reconnect_mmc_ports (false);
 	
     if (_session && _desired_sample_rate && set_new_sample_rate_in_controller(_desired_sample_rate) )
 	{
@@ -1639,6 +1651,17 @@ void
 EngineStateController::_on_ports_registration_update ()
 {
     _update_device_channels_state();
+    
+    // update MIDI connections
+    if (_session) {
+        _session->reconnect_midi_scene_ports (true);
+        _session->reconnect_midi_scene_ports (false);
+        
+        _session->reconnect_mtc_ports ();
+        
+        _session->reconnect_mmc_ports (true);
+        _session->reconnect_mmc_ports (false);
+    }
     
     PortRegistrationChanged(); // emit a signal
 }

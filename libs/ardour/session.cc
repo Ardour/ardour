@@ -2459,34 +2459,42 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
 void
 Session::reconnect_midi_scene_ports(bool inputs)
 {
-    if (inputs) {
-        scene_in()->disconnect_all ();
+    if (inputs ) {
         
-        std::vector<EngineStateController::MidiPortState> midi_port_states;
-        EngineStateController::instance()->get_physical_midi_input_states (midi_port_states);
-        
-        std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
-        
-        for (; state_iter != midi_port_states.end(); ++state_iter) {
-            if (state_iter->active && state_iter->available && state_iter->connected) {
-                scene_in()->connect (state_iter->name);
+        boost::shared_ptr<MidiPort> scene_in_ptr = scene_in();
+        if (scene_in_ptr) {
+            scene_in_ptr->disconnect_all ();
+            
+            std::vector<EngineStateController::MidiPortState> midi_port_states;
+            EngineStateController::instance()->get_physical_midi_input_states (midi_port_states);
+            
+            std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
+            
+            for (; state_iter != midi_port_states.end(); ++state_iter) {
+                if (state_iter->active && state_iter->available && state_iter->connected) {
+                    scene_in_ptr->connect (state_iter->name);
+                }
             }
         }
 
     } else {
-        scene_out()->disconnect_all ();
+        
+        boost::shared_ptr<MidiPort> scene_out_ptr = scene_out();
+        
+        if (scene_out_ptr ) {
+            scene_out_ptr->disconnect_all ();
 
-        std::vector<EngineStateController::MidiPortState> midi_port_states;
-        EngineStateController::instance()->get_physical_midi_output_states (midi_port_states);
-        
-        std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
-        
-        for (; state_iter != midi_port_states.end(); ++state_iter) {
-            if (state_iter->active && state_iter->available && state_iter->connected) {
-                scene_out()->connect (state_iter->name);
+            std::vector<EngineStateController::MidiPortState> midi_port_states;
+            EngineStateController::instance()->get_physical_midi_output_states (midi_port_states);
+            
+            std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
+            
+            for (; state_iter != midi_port_states.end(); ++state_iter) {
+                if (state_iter->active && state_iter->available && state_iter->connected) {
+                    scene_out_ptr->connect (state_iter->name);
+                }
             }
         }
-
     }
 }
 
@@ -2494,25 +2502,65 @@ Session::reconnect_midi_scene_ports(bool inputs)
 void
 Session::reconnect_mtc_ports()
 {
-    _midi_ports->mtc_input_port()->disconnect_all ();
+    boost::shared_ptr<MidiPort> mtc_in_ptr = _midi_ports->mtc_input_port();
     
-    std::vector<EngineStateController::MidiPortState> midi_port_states;
-    EngineStateController::instance()->get_physical_midi_input_states (midi_port_states);
-    
-    std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
-    
-    for (; state_iter != midi_port_states.end(); ++state_iter) {
-        if (state_iter->active && state_iter->available && state_iter->mtc_in) {
-            _midi_ports->mtc_input_port()->connect (state_iter->name);
+    if (mtc_in_ptr) {
+        mtc_in_ptr->disconnect_all ();
+        
+        std::vector<EngineStateController::MidiPortState> midi_port_states;
+        EngineStateController::instance()->get_physical_midi_input_states (midi_port_states);
+        
+        std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
+        
+        for (; state_iter != midi_port_states.end(); ++state_iter) {
+            if (state_iter->active && state_iter->available && state_iter->mtc_in) {
+                mtc_in_ptr->connect (state_iter->name);
+            }
+        }
+        
+        if (!_midi_ports->mtc_input_port()->connected() &&
+            config.get_external_sync () ) {
+            config.set_external_sync (false);
+        }
+        
+        MTCInputPortChanged(); //emit signal
+    }
+}
+
+
+void
+Session::reconnect_mmc_ports(bool inputs)
+{
+    if (inputs ) { // get all enabled midi input ports
+        
+        boost::shared_ptr<MidiPort> mmc_in_ptr = _midi_ports->mmc_in();
+        if (mmc_in_ptr) {
+            mmc_in_ptr->disconnect_all ();
+            std::vector<std::string> enabled_midi_inputs;
+            EngineStateController::instance()->get_physical_midi_inputs (enabled_midi_inputs);
+            
+            std::vector<std::string>::iterator port_iter = enabled_midi_inputs.begin();
+            
+            for (; port_iter != enabled_midi_inputs.end(); ++port_iter) {
+                mmc_in_ptr->connect (*port_iter);
+            }
+
+        }
+    } else { // get all enabled midi output ports
+        
+        boost::shared_ptr<MidiPort> mmc_out_ptr = _midi_ports->mmc_out();
+        if (mmc_out_ptr ) {
+            mmc_out_ptr->disconnect_all ();
+            std::vector<std::string> enabled_midi_outputs;
+            EngineStateController::instance()->get_physical_midi_outputs (enabled_midi_outputs);
+            
+            std::vector<std::string>::iterator port_iter = enabled_midi_outputs.begin();
+            
+            for (; port_iter != enabled_midi_outputs.end(); ++port_iter) {
+                mmc_out_ptr->connect (*port_iter);
+            }
         }
     }
-    
-    if (!_midi_ports->mtc_input_port()->connected() &&
-        config.get_external_sync () ) {
-        config.set_external_sync (false);
-    }
-    
-    MTCInputPortChanged(); //emit signal
 }
 
 
