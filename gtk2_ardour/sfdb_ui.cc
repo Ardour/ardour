@@ -51,6 +51,7 @@
 #include "ardour/auditioner.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiofilesource.h"
+#include "ardour/midi_region.h"
 #include "ardour/smf_source.h"
 #include "ardour/region_factory.h"
 #include "ardour/source_factory.h"

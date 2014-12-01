@@ -24,6 +24,7 @@
 
 #include "ardour/async_midi_port.h"
 #include "ardour/event_type_map.h"
+#include "ardour/midi_buffer.h"
 #include "ardour/midi_port.h"
 #include "ardour/midi_scene_change.h"
 #include "ardour/midi_scene_changer.h"

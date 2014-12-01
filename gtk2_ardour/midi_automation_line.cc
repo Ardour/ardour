@@ -18,7 +18,10 @@
 */
 
 #include "ardour/midi_automation_list_binder.h"
+#include "ardour/midi_region.h"
+
 #include "midi++/midnam_patch.h"
+
 #include "midi_automation_line.h"
 #include "midi_time_axis.h"
 

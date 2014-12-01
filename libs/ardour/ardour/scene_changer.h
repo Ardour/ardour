@@ -25,7 +25,6 @@
 #include "pbd/signals.h"
 
 #include "ardour/location.h"
-#include "ardour/midi_scene_change.h"
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
 

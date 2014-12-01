@@ -1487,3 +1487,9 @@ MidiDiskstream::reset_tracker ()
 		mp->clear_note_trackers ();
 	}
 }
+
+boost::shared_ptr<MidiPlaylist>
+MidiDiskstream::midi_playlist ()
+{
+	return boost::dynamic_pointer_cast<MidiPlaylist>(_playlist);
+}

@@ -37,7 +37,6 @@
 #include "ardour/ardour.h"
 #include "ardour/diskstream.h"
 #include "ardour/midi_buffer.h"
-#include "ardour/midi_playlist.h"
 #include "ardour/utils.h"
 
 struct tm;
@@ -46,12 +45,15 @@ namespace ARDOUR {
 
 class IO;
 class MidiEngine;
+class MidiPlaylist;
 class MidiPort;
 class MidiRingbuffer;
 class MidiSource;
 class SMFSource;
 class Send;
 class Session;
+
+template<typename T> class MidiRingBuffer;
 
 class LIBARDOUR_API MidiDiskstream : public Diskstream
 {
@@ -70,7 +72,7 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 	
 	void reset_tracker ();
 
-	boost::shared_ptr<MidiPlaylist> midi_playlist () { return boost::dynamic_pointer_cast<MidiPlaylist>(_playlist); }
+	boost::shared_ptr<MidiPlaylist> midi_playlist ();
 
 	int use_playlist (boost::shared_ptr<Playlist>);
 	int use_new_playlist ();

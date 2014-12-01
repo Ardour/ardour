@@ -18,7 +18,6 @@
 */
 
 #include <gtkmm/spinbutton.h>
-#include "ardour/midi_model.h"
 #include "ardour_dialog.h"
 #include "audio_clock.h"
 

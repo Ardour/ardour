@@ -21,8 +21,9 @@
 #define __gtk_ardour_note_base_h__
 
 #include <boost/shared_ptr.hpp>
+
 #include "canvas/types.h"
-#include "ardour/midi_model.h"
+#include "evoral/types.hpp"
 
 #include "rgb_macros.h"
 #include "ardour_ui.h"
@@ -54,7 +55,7 @@ namespace ArdourCanvas {
 class NoteBase : public sigc::trackable
 {
   public:
-	typedef Evoral::Note<ARDOUR::MidiModel::TimeType> NoteType;
+	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
 
 	NoteBase (MidiRegionView& region, bool, const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>());
 	virtual ~NoteBase ();

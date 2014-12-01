@@ -27,6 +27,8 @@
 namespace ARDOUR
 {
 
+class MIDISceneChange;
+
 class MIDISceneChanger : public SceneChanger
 {
     public:

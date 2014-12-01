@@ -21,13 +21,15 @@
 
 #include "gtkmm2ext/keyboard.h"
 
+#include "evoral/Note.hpp"
+
 #include "canvas/text.h"
 
 #include "note_base.h"
-#include "midi_region_view.h"
 #include "public_editor.h"
 #include "editing_syms.h"
 #include "keyboard.h"
+#include "midi_region_view.h"
 
 using namespace std;
 using namespace Gtkmm2ext;

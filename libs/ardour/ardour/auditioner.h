@@ -25,17 +25,16 @@
 #include <glibmm/threads.h>
 
 #include "ardour/ardour.h"
-#include "ardour/audio_track.h"
-#include "ardour/midi_region.h"
-
-#include "ardour/audio_diskstream.h"
-#include "ardour/midi_diskstream.h"
+#include "ardour/track.h"
 
 namespace ARDOUR {
 
 class Session;
+class AudioDiskstream;
 class AudioRegion;
 class AudioPlaylist;
+class MidiDiskstream;
+class MidiRegion;
 
 class LIBARDOUR_API Auditioner : public Track
 {
@@ -103,12 +102,8 @@ class LIBARDOUR_API Auditioner : public Track
 	boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &)
 		{ return boost::shared_ptr<Diskstream> (); }
 
-	boost::shared_ptr<AudioDiskstream> audio_diskstream() const
-		{ return boost::dynamic_pointer_cast<AudioDiskstream> (_diskstream); }
-
-	boost::shared_ptr<MidiDiskstream> midi_diskstream() const
-		{ return boost::dynamic_pointer_cast<MidiDiskstream> (_diskstream); }
-
+	boost::shared_ptr<AudioDiskstream> audio_diskstream() const;
+	boost::shared_ptr<MidiDiskstream> midi_diskstream() const;
 
   private:
 	boost::shared_ptr<AudioRegion> the_region;

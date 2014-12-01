@@ -24,10 +24,10 @@
 #include "midi++/parser.h"
 
 #include "ardour/port.h"
-#include "ardour/midi_buffer.h"
 
 namespace ARDOUR {
 
+class MidiBuffer;
 class MidiEngine;
 
 class LIBARDOUR_API MidiPort : public Port {
@@ -51,9 +51,7 @@ class LIBARDOUR_API MidiPort : public Port {
 	bool input_active() const { return _input_active; }
 	void set_input_active (bool yn);
 
-	Buffer& get_buffer (pframes_t nframes) {
-		return get_midi_buffer (nframes);
-	}
+	Buffer& get_buffer (pframes_t nframes);
 
 	MidiBuffer& get_midi_buffer (pframes_t nframes);
 
@@ -85,7 +83,7 @@ class LIBARDOUR_API MidiPort : public Port {
 
         MIDI::Parser _self_parser;
 
-	void resolve_notes (void* buffer, MidiBuffer::TimeType when);
+	void resolve_notes (void* buffer, framepos_t when);
 };
 
 } // namespace ARDOUR

@@ -22,10 +22,11 @@
 #include "pbd/compose.h"
 #include "pbd/debug.h"
 
-#include "ardour/midi_port.h"
-#include "ardour/data_type.h"
 #include "ardour/audioengine.h"
+#include "ardour/data_type.h"
 #include "ardour/debug.h"
+#include "ardour/midi_buffer.h"
+#include "ardour/midi_port.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -78,6 +79,12 @@ MidiPort::cycle_start (pframes_t nframes)
 			}
 		}
 	}
+}
+
+Buffer&
+MidiPort::get_buffer (pframes_t nframes)
+{
+	return get_midi_buffer (nframes);
 }
 
 MidiBuffer &

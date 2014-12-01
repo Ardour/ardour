@@ -17,8 +17,11 @@
 
 */
 
-#include "ardour/midi_region.h"
 #include "automation_line.h"
+
+namespace ARDOUR {
+	class MidiRegion;
+}
 
 /** Stub class so that lines for MIDI AutomationRegionViews can use the correct
  *  MementoCommandBinder.

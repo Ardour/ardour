@@ -24,7 +24,6 @@
 #include "canvas/debug.h"
 
 #include "note.h"
-#include "midi_region_view.h"
 #include "public_editor.h"
 
 using namespace ARDOUR;

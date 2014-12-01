@@ -21,7 +21,7 @@
 using namespace ARDOUR;
 
 MidiCutBuffer::MidiCutBuffer (Session* s)
-	: AutomatableSequence<MidiModel::TimeType> (*s)
+	: AutomatableSequence<Evoral::MusicalTime> (*s)
 	, _origin (0)
 {
 

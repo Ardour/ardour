@@ -28,7 +28,6 @@
 #include "midi++/midnam_patch.h"
 
 #include "ardour_ui.h"
-#include "midi_region_view.h"
 #include "canvas_patch_change.h"
 #include "editor.h"
 #include "editor_drag.h"

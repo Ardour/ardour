@@ -22,8 +22,6 @@
 #include "canvas/polygon.h"
 #include "canvas/debug.h"
 
-#include "midi_region_view.h"
-#include "public_editor.h"
 #include "hit.h"
 
 using namespace ARDOUR;

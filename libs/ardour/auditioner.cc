@@ -22,13 +22,16 @@
 #include "pbd/error.h"
 
 #include "ardour/amp.h"
-#include "ardour/audioregion.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/audio_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioplaylist.h"
+#include "ardour/audioregion.h"
 #include "ardour/auditioner.h"
-#include "ardour/audio_port.h"
 #include "ardour/data_type.h"
 #include "ardour/delivery.h"
+#include "ardour/midi_diskstream.h"
+#include "ardour/midi_region.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/region_factory.h"
@@ -603,4 +606,16 @@ MonitorState
 Auditioner::monitoring_state () const
 {
 	return MonitoringDisk;
+}
+
+boost::shared_ptr<AudioDiskstream>
+Auditioner::audio_diskstream() const
+{
+	return boost::dynamic_pointer_cast<AudioDiskstream> (_diskstream);
+}
+
+boost::shared_ptr<MidiDiskstream>
+Auditioner::midi_diskstream() const
+{
+	return boost::dynamic_pointer_cast<MidiDiskstream> (_diskstream);
 }

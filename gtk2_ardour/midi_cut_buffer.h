@@ -19,16 +19,18 @@
 #ifndef __gtk_ardour_midi_cut_buffer_h__
 #define __gtk_ardour_midi_cut_buffer_h__
 
-#include "ardour/midi_model.h"
+#include "evoral/types.hpp"
+
+#include "ardour/automatable_sequence.h"
 
 namespace ARDOUR {
 	class Session;
 }
 
-class MidiCutBuffer : public ARDOUR::AutomatableSequence<ARDOUR::MidiModel::TimeType>
+class MidiCutBuffer : public ARDOUR::AutomatableSequence<Evoral::MusicalTime>
 {
   public:
-	typedef ARDOUR::MidiModel::TimeType TimeType;
+	typedef Evoral::MusicalTime TimeType;
 
 	MidiCutBuffer (ARDOUR::Session*);
 	~MidiCutBuffer();
