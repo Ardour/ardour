@@ -272,7 +272,13 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 	last_program_message_time = time;
 
 	if (!recording()) {
-                MIDIInputActivity (); /* EMIT SIGNAL */
+        MIDIInputActivity (); /* EMIT SIGNAL */
+        
+        int bank = -1;
+        if (have_seen_bank_changes) {
+            bank = input_port->channel (channel)->bank();
+        }
+        
 		jump_to (input_port->channel (channel)->bank(), program);
 		return;
 	}
@@ -300,12 +306,9 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 		new_mark = true;
 	}
 
-        unsigned short bank;
-
+        int bank = -1;
         if (have_seen_bank_changes) {
-                bank = input_port->channel (channel)->bank();
-        } else {
-                bank = -1;
+            bank = input_port->channel (channel)->bank();
         }
 
 	MIDISceneChange* msc =new MIDISceneChange (channel, bank, program & 0x7f);
