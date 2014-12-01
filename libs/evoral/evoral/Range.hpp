@@ -26,38 +26,11 @@
 
 
 
-/*
-
-a:   |---|
-b starts before:
-  |-|      
-  |--|     
-  |----|   
-  |------|  
-  |--------|
-a:   |---|
-b starts equal:
-     |-|     
-     |---|   
-     |----|  
-a:   |---|
-b starts inside:
-      |-|    
-      |--|   
-      |---|  
-a:   |---|
-b starts at end:
-         |--|
-a:   |---|
-b starts after:
-          |-|
-*/
-
 namespace Evoral {
 
 enum /*LIBEVORAL_API*/ OverlapType {
 	OverlapNone,      // no overlap
-	OverlapInternal,  // the overlap is 100% with the object
+	OverlapInternal,  // the overlap is 100% within the object
 	OverlapStart,     // overlap covers start, but ends within
 	OverlapEnd,       // overlap begins within and covers end
 	OverlapExternal   // overlap extends to (at least) begin+end
@@ -66,39 +39,61 @@ enum /*LIBEVORAL_API*/ OverlapType {
 template<typename T>
 /*LIBEVORAL_API*/ OverlapType coverage (T sa, T ea, T sb, T eb) {
 	/* OverlapType returned reflects how the second (B)
-	   range overlaps the first (A).
+	 * range overlaps the first (A).
+	 *
+	 * The diagram shows the OverlapType of each possible relative
+	 * placement of A and B.
+	 *
+	 * Notes:
+	 *    Internal: the start and end points cannot coincide
+	 *    External: the start and end points can coincide
+	 *    Start: end points can coincide
+	 *    End: start points can coincide
+	 *
+	 * Internal disallows start and end point equality, and thus implies
+	 * that there are two disjoint portions of A which do not overlap B.
+	 *
+	 * A:    |---|
+	 * B starts before A
+	 * B: |-|          None
+	 * B: |--|         Start
+	 * B: |----|       Start
+	 * B: |------|     External
+	 * B: |--------|   External
+	 * B starts equal to A
+	 * B:    |-|       Start
+	 * B:    |---|     External
+	 * B:    |----|    External
+	 * B starts inside A
+	 * B:     |-|      Internal
+	 * B:     |--|     End
+	 * B:     |---|    End
+	 * B starts at end of A
+	 * B:        |--|  End
+	 * B starts after A
+	 * B:         |-|  None
+	 * A:    |---|
+	 */
 
-	   The diagrams show various relative placements
-	   of A and B for each OverlapType.
 
-	   Notes:
-	      Internal: the start and end points cannot coincide
-	      External: the start and end points can coincide
-	      Start: end points can coincide
-	      End: start points can coincide
-
-	   Internal disallows start and end point equality, and thus implies
-	   that there are two disjoint portions of A which do not overlap B.
-	*/
-
-	// assert(sa <= ea); // seems we are sometimes called with 0-length ranges
 	if (sa > ea) {
+		// seems we are sometimes called with negative length ranges
 		std::cerr << "a - start after end: " << sa << ", " << ea << std::endl;
 		return OverlapNone;
 	}
 
-	// assert(sb <= eb);
 	if (sb > eb) {
+		// seems we are sometimes called with negative length ranges
 		std::cerr << "b - start after end: " << sb << ", " << eb << std::endl;
 		return OverlapNone;
 	}
 
-	if (sb < sa) {
+	if (sb < sa) {  // B starts before A
 		if (eb < sa) {
 			return OverlapNone;
 		} else if (eb == sa) {
 			return OverlapStart;
-		} else {
+		} else { // eb > sa
 			if (eb < ea) {
 				return OverlapStart;
 			} else if (eb == ea) {
@@ -107,7 +102,7 @@ template<typename T>
 				return OverlapExternal;
 			}
 		}
-	} else if (sb == sa) {
+	} else if (sb == sa) { // B starts equal to A
 		if (eb < ea) {
 			return OverlapStart;
 		} else if (eb == ea) {
@@ -121,74 +116,19 @@ template<typename T>
 		} else if (eb == ea) {
 			return OverlapEnd;
 		} else { // eb > ea
-			if (sb < ea) {
+			if (sb < ea) { // B starts inside A
 				return OverlapEnd;
-			} else if (sb == ea) {
+			} else if (sb == ea) { // B starts at end of A
 				return OverlapEnd;
-			} else {
+			} else { // sb > ea, B starts after A
 				return OverlapNone;
 			}
 		}
 	}
 
-
 	std::cerr << "unknown overlap type!" << sa << ", " << ea << "; " << sb << ", " << eb << std::endl;
-	// assert(!"unknown overlap type!");
+	assert(!"unknown overlap type!");
 	return OverlapNone;
-
-#if 0
-	/*
-	     |--------------------|   A
-	          |------|            B
-	        |-----------------|   B
-
-             "B is internal to A"
-	*/
-
-	if ((sb > sa) && (eb < ea)) {
-		return OverlapInternal;
-	}
-
-	/*
-	     |--------------------|    A
-	   --------------------------  B
-	     |-----------------------  B
-	    ----------------------|    B
-             |--------------------|    B
-
-           "B overlaps all of A"
-	*/
-	if ((sb <= sa) && (eb >= ea)) {
-		return OverlapExternal;
-	}
-
-	/*
-	     |--------------------|   A
-	   ----|                      B
-           -----------------------|   B
-	   --|                        B
-
-	     "B overlaps the start of A"
-	*/
-
-	if ((sb <= sa) && (eb >= sa) && (eb <= ea)) {
-		return OverlapStart;
-	}
-	/*
-	     |---------------------|  A
-                   |----------------- B
-	     |----------------------- B
-                                   |- B
-
-            "B overlaps the end of A"
-	*/
-	if ((sb > sa) && (sb < ea) && (eb >= ea)) {
-		return OverlapEnd;
-	}
-
-	// assert(eb < sa || sb > ea);
-	return OverlapNone;
-#endif
 }
 
 /** Type to describe a time range */
