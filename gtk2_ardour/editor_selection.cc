@@ -944,24 +944,11 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* /*ev*/, StreamView*
  Otherwise return false
 */
 bool
-Editor::non_master_track_selected ()
+Editor::track_selected ()
 {
-    if( selection->tracks.empty() )
-        return false;
-    
-    if( selection->tracks.size() >=2 )
+    if( !selection->tracks.empty() )
         return true;
     
-    TimeAxisView* tv = selection->tracks.front();
-    RouteTimeAxisView* rtv = dynamic_cast <RouteTimeAxisView*> (tv);
-    if (rtv) {
-        AudioTrack* atr = dynamic_cast <AudioTrack*> (rtv->route().get() );
-        if (atr && _session && atr->is_master_track() )
-            return false;
-        else
-            return true;
-    }
-
     return false;
 }
 
@@ -970,26 +957,6 @@ Editor::track_selection_changed ()
 {
     if (!selection->tracks.empty() ) {
         set_selected_mixer_strip (*(selection->tracks.front()));
-        // the commented out implementation shows master bus in the inspector
-        // when master track is selected. Requirements chenged for this case
-        /*
-        bool master_bus_set = false;
-        TimeAxisView* tv = selection->tracks.front();
-        RouteTimeAxisView* rtv = dynamic_cast <RouteTimeAxisView*> (tv);
-        if (rtv) {
-            AudioTrack* atr = dynamic_cast <AudioTrack*> (rtv->route().get() );
-            if (atr && _session && atr->is_master_track() ) {
-                TimeAxisView* master_bus_tv = axis_view_from_route (_session->master_out() );
-                if (master_bus_tv) {
-                    set_selected_mixer_strip (*master_bus_tv);
-                    master_bus_set = true;
-                }
-            }
-        }
-        
-        if (!master_bus_set) {
-            set_selected_mixer_strip(*tv);
-        }*/
         
     } else {
 
@@ -1024,6 +991,7 @@ Editor::track_selection_changed ()
         }
     }
 
+    bool master_track_selected = false;
 	RouteNotificationListPtr routes (new RouteNotificationList);
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
@@ -1048,14 +1016,27 @@ Editor::track_selection_changed ()
 			RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*i);
 			if (rtav) {
 				routes->push_back (rtav->route());
+                
+                boost::shared_ptr<AudioTrack> atr = boost::dynamic_pointer_cast<AudioTrack> (rtav->route());
+                if (atr && atr->is_master_track() ) {
+                    master_track_selected = true;
+                }
 			}
 		}
 	}
 
-	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, non_master_track_selected());
-
+    // check if we should enable track selectin sensitive actions
+	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, track_selected() );
+    
+    // check if we should disable actions forbiden when only master track is selected
+    if( master_track_selected &&
+        track_selected() &&
+        selection->tracks.size() < 2 ) {
+        
+        ActionManager::set_sensitive (ActionManager::actions_forbiden_for_master_track, false);
+    }
+    
 	/* notify control protocols */
-	
 	ControlProtocol::TrackSelectionChanged (routes);
 }
 

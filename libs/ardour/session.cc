@@ -384,11 +384,6 @@ Session::Session (AudioEngine &eng,
 	_engine.reset_timebase ();
 
 	EngineStateController::instance()->set_session(this);
-
-    // Waves Tracks: always create master track
-    if ( ARDOUR::Profile->get_trx () ) {
-        create_master_track();
-    }
     
     /* Waves Tracks: fill session with tracks basing on the amount of inputs.
      * each available input must have corresponding track when session starts.
@@ -429,6 +424,11 @@ Session::Session (AudioEngine &eng,
                 throw failed_constructor ();
             }
         }
+    }
+    
+    // Waves Tracks: always create master track at the end
+    if ( ARDOUR::Profile->get_trx () ) {
+        create_master_track();
     }
     
     _is_new = false;
@@ -2326,35 +2326,28 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
                 continue;
             }
             
-            if (*rIter == _master_track && !reconnect_master ) {
-                continue;
-            }
-            
             if (reconnectIputs) {
                 (*rIter)->input()->disconnect (this); //GZ: check this; could be heavy
                 
-                if (*rIter != _master_track) { // do not connect master to phys inputs ever
-                    for (uint32_t route_input_n = 0; route_input_n < (*rIter)->n_inputs().get(DataType::AUDIO); ++route_input_n) {
+                for (uint32_t route_input_n = 0; route_input_n < (*rIter)->n_inputs().get(DataType::AUDIO); ++route_input_n) {
+                    
+                    if (Config->get_input_auto_connect() & AutoConnectPhysical) {
                         
-                        if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-                            
-                            if ( input_n == physinputs.size() ) {
-                                break;
-                            }
-                            
-                            string port = physinputs[input_n];
-                        
-                            if (port.empty() ) {
-                                error << "Physical Input number "<< input_n << " is unavailable and cannot be connected" << endmsg;
-                            }
-                            
-                            //GZ: check this; could be heavy
-                            (*rIter)->input()->connect ((*rIter)->input()->ports().port(DataType::AUDIO, route_input_n), port, this);
-                            ++input_n;
+                        if ( input_n == physinputs.size() ) {
+                            break;
                         }
+                        
+                        string port = physinputs[input_n];
+                    
+                        if (port.empty() ) {
+                            error << "Physical Input number "<< input_n << " is unavailable and cannot be connected" << endmsg;
+                        }
+                        
+                        //GZ: check this; could be heavy
+                        (*rIter)->input()->connect ((*rIter)->input()->ports().port(DataType::AUDIO, route_input_n), port, this);
+                        ++input_n;
                     }
                 }
-
             }
             
             if (reconnectOutputs) {
@@ -2385,16 +2378,10 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
                         error << error << "Master bus is not available" << endmsg;
                         break;
                     }
-                    
-                    if (!_master_track) {
-                        error << error << "Master track is not available" << endmsg;
-                        break;
-                    }
                 }
                 
                 for (uint32_t route_output_n = 0; route_output_n < (*rIter)->n_outputs().get(DataType::AUDIO); ++route_output_n) {
-                    if ((Config->get_output_auto_connect() & AutoConnectPhysical) &&
-                        *rIter != _master_track ) {
+                    if ((Config->get_output_auto_connect() & AutoConnectPhysical) ) {
                         
                         if ( output_n == physoutputs.size() ) {
                             break;
@@ -2427,17 +2414,6 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
                         //GZ: check this; could be heavy
                         (*rIter)->output()->connect ((*rIter)->output()->ports().port(DataType::AUDIO, route_output_n), port, this);
                             
-                            // connect to master track
-                        if (*rIter != _master_track) { // do not connect Master Track to itself
-                            port = _master_track->input()->ports().port(DataType::AUDIO, route_output_n)->name();
-                            
-                            if (port.empty() ) {
-                                error << "MasterTrack Input number "<< route_output_n << " is unavailable and cannot be connected" << endmsg;
-                            }
-                            
-                            //GZ: check this; could be heavy
-                            (*rIter)->output()->connect ((*rIter)->output()->ports().port(DataType::AUDIO, route_output_n), port, this);
-                        }
                     }
                 }
             }
@@ -2678,8 +2654,8 @@ Session::create_master_track ()
         return true;
     }
     
+    // master track I/O is stereo
     uint32_t input_channels = _master_out->n_inputs().get(DataType::AUDIO);
-    // use the same amount of autputs because master track will be connected to master bus
     uint32_t output_channels = input_channels;
     
     std::string track_name = "Master Track";
@@ -2688,7 +2664,7 @@ Session::create_master_track ()
     boost::shared_ptr<AudioTrack> track;
         
     try {
-        track.reset (new AudioTrack (*this, track_name, Route::MasterTrack, Normal));
+        track.reset (new AudioTrack (*this, track_name, Route::MasterTrack, Normal) );
         
         if (track->init ()) {
             return false;

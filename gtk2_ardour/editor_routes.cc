@@ -29,7 +29,6 @@
 
 #include "ardour/debug.h"
 #include "ardour/route.h"
-#include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/session.h"
 
@@ -1474,17 +1473,7 @@ EditorRoutes::move_selected_tracks (bool up)
 		++leading;
 
 		while (leading != view_routes.end()) {
-            
-            //skip master track if it's in scope
-            bool master_track_in_scope = false;
-            AudioTrack* atr_l = dynamic_cast<AudioTrack*>(leading->second.get() );
-            AudioTrack* atr_t = dynamic_cast<AudioTrack*>(trailing->second.get() );
-            
-            if ((atr_l && atr_l->is_master_track() ) || (atr_t && atr_t->is_master_track() ) ) {
-                master_track_in_scope = true;
-            }
-            
-			if (_editor->selection->selected (leading->first) && !master_track_in_scope ) {
+			if (_editor->selection->selected (leading->first)) {
 				view_routes.insert (trailing, ViewRoute (leading->first, leading->second));
 				leading = view_routes.erase (leading);
 			} else {
@@ -1509,16 +1498,7 @@ EditorRoutes::move_selected_tracks (bool up)
 
 		while (1) {
             
-            //skip master track if it's in scope
-            bool master_track_in_scope = false;
-            AudioTrack* atr_l = dynamic_cast<AudioTrack*>(leading->second.get() );
-            AudioTrack* atr_t = dynamic_cast<AudioTrack*>(trailing->second.get() );
-            
-            if ((atr_l && atr_l->is_master_track() ) || (atr_t && atr_t->is_master_track() ) ) {
-                master_track_in_scope = true;
-            }
-            
-			if (_editor->selection->selected (leading->first) && !master_track_in_scope ) {
+			if (_editor->selection->selected (leading->first)) {
 				list<ViewRoute>::iterator tmp;
 
 				/* need to insert *after* trailing, not *before* it,
@@ -1610,18 +1590,13 @@ EditorRoutes::move_selected_tracks_relatively (const PBD::ID& source_track_id, c
         
         // selected tracks: add to the move list but if it's not a target
         if (selection.selected(tv) &&
-            route->id() != target_track_id &&
-            !rtv->is_master_track() ) {
+            route->id() != target_track_id ) {
             routes_to_move.push_back(route);
             continue;
         }
         
-        // master track should always be the first
-        if (rtv->is_master_track() ) {
-            routes.push_front(route);
-        } else {
-            routes.push_back (route);
-        }
+        // other tracks
+        routes.push_back (route);
 	}
     
     RouteList::iterator insert_position;

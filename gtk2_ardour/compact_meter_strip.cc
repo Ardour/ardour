@@ -133,7 +133,7 @@ CompactMeterStrip::update_tooltip ()
     boost::shared_ptr<AudioTrack> t;
     t = boost::dynamic_pointer_cast<AudioTrack>( _route );
     
-    if( t!=NULL && t->is_master_track () )
+    if( t != NULL && t->is_master_track () )
     {
         this->set_tooltip_text (_route->name () + "\n" + record_status);
     } else
