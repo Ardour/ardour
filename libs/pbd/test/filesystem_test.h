@@ -10,6 +10,7 @@ class FilesystemTest : public CppUnit::TestFixture
 	CPPUNIT_TEST (testFindFilesMatchingPattern);
 	CPPUNIT_TEST (testClearDirectory);
 	CPPUNIT_TEST (testRemoveDirectory);
+	CPPUNIT_TEST (testCanonicalPath);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
@@ -19,5 +20,6 @@ public:
 	void testFindFilesMatchingPattern ();
 	void testClearDirectory ();
 	void testRemoveDirectory ();
+	void testCanonicalPath ();
 };
 

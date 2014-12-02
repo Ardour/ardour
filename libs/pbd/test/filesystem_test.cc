@@ -10,6 +10,7 @@
 #include <glibmm/fileutils.h>
 
 #include "pbd/file_utils.h"
+#include "pbd/pathexpand.h"
 
 #include "test_common.h"
 
@@ -23,6 +24,8 @@ FilesystemTest::testPathIsWithin ()
 {
 #ifndef PLATFORM_WINDOWS
 	string output_path = test_output_directory ("testPathIsWithin");
+	string orig_path = Glib::get_current_dir ();
+
 	CPPUNIT_ASSERT (g_chdir (output_path.c_str()) == 0);
 
 	CPPUNIT_ASSERT (g_mkdir_with_parents ("foo/bar/baz", 0755) == 0);
@@ -45,6 +48,7 @@ FilesystemTest::testPathIsWithin ()
 	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar", "foo/bar"));
 
 	CPPUNIT_ASSERT (PBD::path_is_within ("foo/jim/baz", "frobozz") == false);
+	CPPUNIT_ASSERT (g_chdir (orig_path.c_str()) == 0);
 #endif
 }
 
@@ -204,4 +208,34 @@ FilesystemTest::testRemoveDirectory ()
 	PBD::get_paths (files_in_output_dir, output_dir_path, false, true);
 
 	CPPUNIT_ASSERT (files_in_output_dir.size () == 0);
+}
+
+void
+FilesystemTest::testCanonicalPath ()
+{
+#ifndef PLATFORM_WINDOWS
+	string top_dir = test_output_directory ("testCanonicalPath");
+	string orig_path = Glib::get_current_dir ();
+
+	CPPUNIT_ASSERT (g_chdir (top_dir.c_str()) == 0);
+
+	string pwd = Glib::get_current_dir ();
+
+	CPPUNIT_ASSERT (!pwd.empty());
+	CPPUNIT_ASSERT (pwd == top_dir);
+
+	CPPUNIT_ASSERT (g_mkdir ("gtk2_ardour", 0755) == 0);
+	CPPUNIT_ASSERT (g_mkdir_with_parents ("libs/pbd/test", 0755) == 0);
+
+	const char* relative_path = "./gtk2_ardour/../libs/pbd/test";
+	string canonical_path = PBD::canonical_path (relative_path);
+	// no expansion expected in this case
+	string expanded_path = PBD::path_expand (relative_path);
+	string expected_path = top_dir + string("/libs/pbd/test");
+
+	CPPUNIT_ASSERT (canonical_path == expected_path);
+	CPPUNIT_ASSERT (expanded_path == expected_path);
+
+	CPPUNIT_ASSERT (g_chdir (orig_path.c_str()) == 0);
+#endif
 }
