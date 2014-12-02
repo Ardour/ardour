@@ -5,12 +5,12 @@
 #include <cppunit/TestRunner.h>
 #include <cppunit/BriefTestProgressListener.h>
 
-#include <glibmm.h>
+#include "pbd/pbd.h"
 
 int
 main()
 {
-	Glib::thread_init();
+	if (!PBD::init ()) return 1;
 
 	CppUnit::TestResult testresult;
 
