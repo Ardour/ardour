@@ -1,14 +1,14 @@
 #!/bin/sh
-srcdir=`pwd`
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$srcdir/../../build/libs/midi++:$srcdir/../../build/libs/pbd:$srcdir/../../build/libs/evoral:$srcdir/../../build/libs/timecode
-if [ ! -d '../../patchfiles' ]; then
-    echo "This script must be run from within the libs/midi++ directory";
-    exit 1;
-fi
+SCRIPTPATH=$( cd $(dirname $0) ; pwd -P )
+TOP="$SCRIPTPATH/../.."
+LIBS_DIR="$TOP/build/libs"
 
-# Make symlink to TakeFive.mid in build directory
-cd ../../build/libs/midi++2
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIBS_DIR/midi++:$LIBS_DIR/pbd:$LIBS_DIR/evoral:$LIBS_DIR/timecode
+
+export MIDIPP_TEST_PATH=$TOP/patchfiles
+
+cd $LIBS_DIR/midi++2
 if [ "$1" == "debug" ]; then 
 	gdb ./run-tests
 else
