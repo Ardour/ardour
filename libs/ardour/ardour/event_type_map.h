@@ -49,7 +49,7 @@ public:
 	Evoral::Parameter from_symbol(const std::string& str) const;
 	std::string       to_symbol(const Evoral::Parameter& param) const;
 
-	const Evoral::ParameterDescriptor& descriptor(const Evoral::Parameter& param) const;
+	Evoral::ParameterDescriptor descriptor(const Evoral::Parameter& param) const;
 
 	void set_descriptor(const Evoral::Parameter&           param,
 	                    const Evoral::ParameterDescriptor& desc);

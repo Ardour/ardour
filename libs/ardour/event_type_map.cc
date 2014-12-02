@@ -22,6 +22,7 @@
 #include <cstdio>
 #include "ardour/types.h"
 #include "ardour/event_type_map.h"
+#include "ardour/parameter_descriptor.h"
 #include "ardour/parameter_types.h"
 #include "ardour/uri_map.h"
 #include "evoral/Parameter.hpp"
@@ -243,13 +244,17 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 	}
 }
 
-const Evoral::ParameterDescriptor&
+Evoral::ParameterDescriptor
 EventTypeMap::descriptor(const Evoral::Parameter& param) const
 {
-	static const Evoral::ParameterDescriptor nil;
-
+	// Found an existing (perhaps custom) descriptor
 	Descriptors::const_iterator d = _descriptors.find(param);
-	return (d != _descriptors.end()) ? d->second : nil;
+	if (d != _descriptors.end()) {
+		return d->second;
+	}
+
+	// Add default descriptor and return that
+	return ARDOUR::ParameterDescriptor(param);
 }
 
 void

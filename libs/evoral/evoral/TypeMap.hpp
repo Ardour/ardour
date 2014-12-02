@@ -52,7 +52,7 @@ public:
 	virtual uint32_t midi_event_type(uint8_t status) const = 0;
 
 	/** Return the description of a parameter. */
-	virtual const ParameterDescriptor& descriptor(const Parameter& param) const = 0;
+	virtual ParameterDescriptor descriptor(const Parameter& param) const = 0;
 
 	virtual std::string to_symbol(const Parameter& param) const = 0;
 };
