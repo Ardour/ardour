@@ -545,6 +545,7 @@ Editor::Editor ()
 
 	selection->PointsChanged.connect (sigc::mem_fun(*this, &Editor::point_selection_changed));
 	selection->MarkersChanged.connect (sigc::mem_fun(*this, &Editor::marker_selection_changed));
+	selection->MarkersChanged.connect (sigc::bind (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::update_marker_inspector), &selection->markers));	
 
 	vertical_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &Editor::tie_vertical_scrolling), true);
     horizontal_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &Editor::tie_horizontal_scrolling), true);
@@ -4355,8 +4356,6 @@ Editor::use_visual_state (VisualState& vs)
 void
 Editor::set_samples_per_pixel (framecnt_t spp)
 {
-	std::cout << "Editor::set_samples_per_pixel ( " << spp << ")" << std::endl;
-
 	if (spp < 1) {
 		return;
 	}

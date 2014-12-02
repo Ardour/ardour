@@ -74,7 +74,7 @@
 #include "editing.h"
 #include "session_lock_dialog.h"
 #include "tracks_control_panel.h"
-//#include "meterbridge.h"
+#include "marker_inspector_dialog.h"
 #include "ui_config.h"
 #include "enums.h"
 #include "visibility_group.h"
@@ -97,6 +97,7 @@
 
 #include "timecode/time.h"
 #include "time.h"
+#include "selection.h"
 
 class VideoTimeLine;
 class ArdourKeyboard;
@@ -355,7 +356,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     PBD::Signal0<void> lock_button_was_pressed;
     
     bool session_auto_save_is_allowed() const;
-    
+    void update_marker_inspector (MarkerSelection*);
+
   protected:
 	friend class PublicEditor;
 
@@ -663,6 +665,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         WM::Proxy<RouteParams_UI> route_params;
         WM::Proxy<TracksControlPanel> tracks_control_panel;
         WM::Proxy<SessionLockDialog> session_lock_dialog;
+        WM::Proxy<MarkerInspectorDialog> marker_inspector_dialog;
     
         /* Windows/Dialogs that require a creator method */
 

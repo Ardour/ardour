@@ -201,9 +201,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, location_ui (X_("locations"), _("Locations"))
 	, route_params (X_("inspector"), _("Tracks and Busses"))
 	, tracks_control_panel (X_("tracks-control-panel"), _("Preferences"))
-        , _add_tracks_dialog(new AddTracksDialog())	
+    , _add_tracks_dialog(new AddTracksDialog())	
 	, session_lock_dialog (X_("session-lock-dialog"), _("System Lock"))
-        , session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
+	, marker_inspector_dialog (X_("marker-inspector-dialog"), _("Marker Insector"))
+    , session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
 	, add_video_dialog (X_("add-video"), _("Add Tracks/Busses"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
 	, big_clock_window (X_("big-clock"), _("Big Clock"), boost::bind (&ARDOUR_UI::create_big_clock_window, this))
@@ -383,6 +384,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&route_params);
 	WM::Manager::instance().register_window (&tracks_control_panel);
 	WM::Manager::instance().register_window (&session_lock_dialog);
+	WM::Manager::instance().register_window (&marker_inspector_dialog);
 	WM::Manager::instance().register_window (&bundle_manager);
 	WM::Manager::instance().register_window (&location_ui);
 	WM::Manager::instance().register_window (&big_clock_window);
@@ -2701,7 +2703,6 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		
 		if (should_be_new || session_name.empty()) {
 			/* need the dialog to get info from user */
-
 			switch (session_dialog.run()) {
 			case RESPONSE_ACCEPT:
 				break;

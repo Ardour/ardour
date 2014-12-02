@@ -957,3 +957,16 @@ ARDOUR_UI::focus_on_clock ()
 	}
 }
 
+void
+ARDOUR_UI::update_marker_inspector (MarkerSelection* markers)
+{
+	if (_session && _session->deletion_in_progress()) {
+		return;
+	}
+	
+	if(markers && !markers->empty()) {
+		marker_inspector_dialog->set_marker (markers->back ());
+	} else {
+		marker_inspector_dialog->set_marker (0);
+	}
+}

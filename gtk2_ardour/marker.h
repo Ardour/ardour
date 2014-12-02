@@ -24,6 +24,8 @@
 #include <glib.h>
 
 #include <sigc++/signal.h>
+#include <cairomm/cairomm.h>
+#include <pangomm.h>
 
 #include "ardour/ardour.h"
 #include "pbd/signals.h"
@@ -34,6 +36,13 @@
 namespace ARDOUR {
 	class TempoSection;
 	class MeterSection;
+	class Location;
+}
+
+namespace ArdourCanvas
+{
+	class Container;
+	class Item;
 }
 
 class PublicEditor;
@@ -65,10 +74,12 @@ class Marker : public sigc::trackable
 	static PBD::Signal1<void,Marker*> CatchDeletion;
 
 	ArdourCanvas::Item& the_item() const;
-        ARDOUR::Location* location() const { return _location; }
+    ARDOUR::Location* location() const { return _location; }
 
-        virtual void canvas_height_set (double);
-        void set_has_scene_change (bool);
+    virtual void canvas_height_set (double);
+    void set_has_scene_change (bool);
+	bool has_scene_change () const { return _have_scene_change; }
+
 
 	void set_name (const std::string&);
 
