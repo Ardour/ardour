@@ -1080,7 +1080,18 @@ Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, doubl
 {
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 %2 @ %3 = %4 # controls: %5\n",
 	                                              this, _type_map.to_symbol(param), time, value, _controls.size()));
-	boost::shared_ptr<Control> c = control(param, true);
+	boost::shared_ptr<Control> c;
+	Controls::iterator         i = _controls.find(param);
+	if (i != _controls.end()) {
+		c = i->second;
+	} else {
+		/* Create a new control list with discrete interpolation by default, to
+		   play back recorded data exactly. */
+		c = control_factory(param);
+		c->list()->set_interpolation(ControlList::Discrete);
+		add_control(c);
+	}
+
 	c->list()->add (time.to_double(), value);
 	/* XXX control events should use IDs */
 }
