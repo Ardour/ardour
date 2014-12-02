@@ -92,6 +92,7 @@
       <menuitem action='toggle-mixer'/>
       <menuitem action='toggle-meterbridge'/>
       <menuitem action='toggle-big-clock'/>
+      <menuitem action='toggle-marker-inspector-dialog'/>
       <menu action="RulerMenu">
         <menuitem action="toggle-marker-ruler"/>
         <menuitem action="toggle-skip-ruler"/>
