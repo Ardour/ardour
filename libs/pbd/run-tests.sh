@@ -1,24 +1,21 @@
 #!/bin/bash
 
-if [ ! -f './id.cc' ]; then
-    echo "This script must be run from within the libs/pbd directory";
-    exit 1;
-fi
+SCRIPTPATH=$( cd $(dirname $0) ; pwd -P )
+TOP="$SCRIPTPATH/../.."
+LIBS_DIR="$TOP/build/libs"
 
-srcdir=`pwd`
-cd ../../build
-export PBD_TEST_PATH=$srcdir/test
+export LD_LIBRARY_PATH=$LIBS_DIR/audiographer:$LIBS_DIR/vamp-sdk:$LIBS_DIR/surfaces:$LIBS_DIR/surfaces/control_protocol:$LIBS_DIR/ardour:$LIBS_DIR/midi++2:$LIBS_DIR/pbd:$LIBS_DIR/rubberband:$LIBS_DIR/soundtouch:$LIBS_DIR/gtkmm2ext:$LIBS_DIR/sigc++2:$LIBS_DIR/glibmm2:$LIBS_DIR/gtkmm2/atk:$LIBS_DIR/gtkmm2/pango:$LIBS_DIR/gtkmm2/gdk:$LIBS_DIR/gtkmm2/gtk:$LIBS_DIR/libgnomecanvasmm:$LIBS_DIR/libsndfile:$LIBS_DIR/appleutility:$LIBS_DIR/cairomm:$LIBS_DIR/taglib:$LIBS_DIR/evoral:$LIBS_DIR/evoral/src/libsmf:$LD_LIBRARY_PATH
 
-libs='libs'
+export PBD_TEST_PATH=$TOP/libs/pbd/test
 
-export LD_LIBRARY_PATH=$libs/audiographer:$libs/vamp-sdk:$libs/surfaces:$libs/surfaces/control_protocol:$libs/ardour:$libs/midi++2:$libs/pbd:$libs/rubberband:$libs/soundtouch:$libs/gtkmm2ext:$libs/sigc++2:$libs/glibmm2:$libs/gtkmm2/atk:$libs/gtkmm2/pango:$libs/gtkmm2/gdk:$libs/gtkmm2/gtk:$libs/libgnomecanvasmm:$libs/libsndfile:$libs/appleutility:$libs/cairomm:$libs/taglib:$libs/evoral:$libs/evoral/src/libsmf:$LD_LIBRARY_PATH
+cd $LIBS_DIR/pbd
 
 if [ "$1" == "--debug" ]
 then
-        gdb ./libs/pbd/run-tests
+        gdb ./run-tests
 elif [ "$1" == "--valgrind" ]
 then
-        valgrind --tool="memcheck" ./libs/pbd/run-tests
+        valgrind --tool="memcheck" ./run-tests
 else
-        ./libs/pbd/run-tests
+        ./run-tests
 fi
