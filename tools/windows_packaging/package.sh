@@ -43,8 +43,8 @@ if test x$WITH_TESTS != x ; then
 	cp $BUILD_DIR/libs/midi++2/run-tests.exe $PACKAGE_DIR/midipp-run-tests.exe
 
 	cp $BUILD_DIR/libs/evoral/run-tests.exe $PACKAGE_DIR/evoral-run-tests.exe
-	mkdir -p $PACKAGE_DIR/test/testdata
-	cp -r $BASE/libs/evoral/test/testdata/TakeFive.mid $PACKAGE_DIR/test/testdata
+	mkdir -p $PACKAGE_DIR/evoral_testdata
+	cp -r $BASE/libs/evoral/test/testdata/* $PACKAGE_DIR/evoral_testdata
 
 	cp -r $BASE/libs/ardour/test/data $PACKAGE_DIR/ardour_testdata
 fi
