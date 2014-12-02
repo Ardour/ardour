@@ -261,7 +261,7 @@ struct ControlEventTimeComparator {
 void
 ControlList::thin (double thinning_factor)
 {
-	if (thinning_factor == 0.0) {
+	if (thinning_factor == 0.0 || _desc.toggled) {
 		return;
 	}
 
@@ -485,9 +485,6 @@ void
 ControlList::maybe_add_insert_guard (double when)
 {
 	if (most_recent_insert_iterator != _events.end()) {
-		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 erase from existing iterator (@end ? %3)\n",
-		                                                 this, (most_recent_insert_iterator == _events.end())));
-
 		if ((*most_recent_insert_iterator)->when - when > 64) {
 			/* Next control point is some distance from where our new point is
 			   going to go, so add a new point to avoid changing the shape of
@@ -537,7 +534,7 @@ ControlList::erase_from_iterator_to (iterator iter, double when)
 {
 	while (iter != _events.end()) {
 		if ((*iter)->when < when) {
-			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 erase existing @ %2\n", this, (*iter)));
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 erase existing @ %2\n", this, (*iter)->when));
 			delete *iter;
 			iter = _events.erase (iter);
 			continue;
@@ -556,8 +553,10 @@ ControlList::add (double when, double value, bool with_guards, bool with_default
 	   control surface (GUI, MIDI, OSC etc)
 	*/
 
-	DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 add %2 at %3 w/erase = %4 (new ? %6) at end ? %5\n", 
-							 this, value, when, _in_write_pass, (most_recent_insert_iterator == _events.end()), new_write_pass));
+	DEBUG_TRACE (DEBUG::ControlList,
+	             string_compose ("@%1 add %2 at %3 guards = %4 write pass = %5 (new? %6) at end? %7\n",
+	                             this, value, when, with_guards, _in_write_pass, new_write_pass,
+	                             (most_recent_insert_iterator == _events.end())));
 	{
 		Glib::Threads::Mutex::Lock lm (_lock);
 		ControlEvent cp (when, 0.0f);
@@ -565,9 +564,7 @@ ControlList::add (double when, double value, bool with_guards, bool with_default
 
 		if (_events.empty() && with_default) {
 			
-			/* as long as the point we're adding is not at zero,
-			 * add an "anchor" point there.
-			 */
+			/* empty: add an "anchor" point if the point we're adding past time 0 */
 
 			if (when >= 1) {
 				_events.insert (_events.end(), new ControlEvent (0, _default_value));
@@ -577,42 +574,43 @@ ControlList::add (double when, double value, bool with_guards, bool with_default
 
 		if (_in_write_pass && new_write_pass) {
 
+			/* first write in a write pass: add guard point if requested */
+
 			if (with_guards) {
 				add_guard_point (insert_position);
 				did_write_during_pass = true;
-			}
-
-		} else if (most_recent_insert_iterator == _events.end() || when > (*most_recent_insert_iterator)->when) {
-			
-			if (_in_write_pass) {
-				most_recent_insert_iterator = erase_from_iterator_to(most_recent_insert_iterator, when);
-				if (with_guards) {
-					maybe_add_insert_guard (when);
-				}
-
 			} else {
-				
-				/* not in a write pass: figure out the iterator we should insert in front of */
-
-				DEBUG_TRACE (DEBUG::ControlList, string_compose ("compute MRI for position %1\n", when));
-				ControlEvent cp (when, 0.0f);
+				/* not adding a guard, but we need to set iterator appropriately */
+				const ControlEvent cp (when, 0.0);
 				most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 			}
+			new_write_pass = false;
 
-		} else {
+		} else if (_in_write_pass &&
+		           (most_recent_insert_iterator == _events.end() || when > (*most_recent_insert_iterator)->when)) {
 
-			/* not in a write pass, adding a point within existing
-			 * data: figure out the iterator we should insert in
-			 * front of 
-			 */
-			
+			/* in write pass: erase from most recent insert to now */
+
+			if (most_recent_insert_iterator != _events.end()) {
+				/* advance to avoid deleting the last inserted point itself. */
+				++most_recent_insert_iterator;
+			}
+
+			most_recent_insert_iterator = erase_from_iterator_to(most_recent_insert_iterator, when);
+			if (with_guards) {
+				maybe_add_insert_guard (when);
+			}
+
+		} else if (!_in_write_pass) {
+				
+			/* not in a write pass: figure out the iterator we should insert in front of */
+
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("compute(b) MRI for position %1\n", when));
 			ControlEvent cp (when, 0.0f);
 			most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 		}
 
-		/* OK, now we're really ready to add a new point
-		 */
+		/* OK, now we're really ready to add a new point */
 
 		if (most_recent_insert_iterator == _events.end()) {
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 appending new point at end\n", this));
@@ -623,10 +621,8 @@ ControlList::add (double when, double value, bool with_guards, bool with_default
 				DEBUG_TRACE (DEBUG::ControlList, string_compose ("\tactually appended, size now %1\n", _events.size()));
 			}
 
-			if (!_in_write_pass) {
-				most_recent_insert_iterator = _events.end();
-				--most_recent_insert_iterator;
-			}
+			most_recent_insert_iterator = _events.end();
+			--most_recent_insert_iterator;
 
 		} else if ((*most_recent_insert_iterator)->when == when) {
 
@@ -644,7 +640,7 @@ ControlList::add (double when, double value, bool with_guards, bool with_default
 				 * next addition, so make sure we know that.
 				 */
 
-				if (_in_write_pass && _events.back()->when == when) {
+				if (_events.back()->when == when) {
 					most_recent_insert_iterator = _events.end();
 				}
 
@@ -663,10 +659,7 @@ ControlList::add (double when, double value, bool with_guards, bool with_default
 			if (!done) {
 				EventList::iterator x = _events.insert (most_recent_insert_iterator, new ControlEvent (when, value));
 				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 inserted new value before MRI, size now %2\n", this, _events.size()));
-
-				if (!_in_write_pass) {
-					most_recent_insert_iterator = x;
-				}
+				most_recent_insert_iterator = x;
 			}
 		}
 

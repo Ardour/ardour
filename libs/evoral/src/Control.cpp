@@ -59,7 +59,7 @@ Control::set_double (double value, double frame, bool to_list)
 	   values and add them to the list, so we we don't need to bother.
 	*/
 
-	if (to_list && !_list->in_write_pass()) {
+	if (to_list && (!_list->in_write_pass() || _list->descriptor().toggled)) {
 		_list->add (frame, value, false);
 	}
 }

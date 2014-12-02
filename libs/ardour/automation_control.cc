@@ -80,6 +80,9 @@ AutomationControl::set_automation_state (AutoState as)
 	if (_list && as != alist()->automation_state()) {
 
 		alist()->set_automation_state (as);
+		if (_desc.toggled) {
+			return;  // No watch for boolean automation
+		}
 
 		if (as == Write) {
 			AutomationWatch::instance().add_automation_watch (shared_from_this());
@@ -113,7 +116,9 @@ AutomationControl::start_touch(double when)
 	if (!touching()) {
 		if (alist()->automation_state() == Touch) {
 			alist()->start_touch (when);
-			AutomationWatch::instance().add_automation_watch (shared_from_this());
+			if (!_desc.toggled) {
+				AutomationWatch::instance().add_automation_watch (shared_from_this());
+			}
 		}
 		set_touching (true);
 	}
@@ -127,7 +132,9 @@ AutomationControl::stop_touch(bool mark, double when)
 		set_touching (false);
 		if (alist()->automation_state() == Touch) {
 			alist()->stop_touch (mark, when);
-			AutomationWatch::instance().remove_automation_watch (shared_from_this());
+			if (!_desc.toggled) {
+				AutomationWatch::instance().remove_automation_watch (shared_from_this());
+			}
 		}
 	}
 }

@@ -208,16 +208,22 @@ AutomationController::toggled ()
 {
 	ArdourButton* but = dynamic_cast<ArdourButton*>(_widget);
 	if (but) {
-		start_touch();
+		if (_controllable->session().transport_rolling()) {
+			if (_controllable->automation_state() == Touch) {
+				_controllable->set_automation_state(Write);
+			}
+			if (_controllable->list()) {
+				_controllable->list()->set_in_write_pass(true, false, _controllable->session().audible_frame());
+			}
+		}
 		const bool was_active = _controllable->get_value() >= 0.5;
-		if (was_active) {
+		if (was_active && but->get_active()) {
 			_adjustment->set_value(0.0);
 			but->set_active(false);
-		} else {
+		} else if (!was_active && !but->get_active()) {
 			_adjustment->set_value(1.0);
 			but->set_active(true);
 		}
-		end_touch();
 	}
 }
 
