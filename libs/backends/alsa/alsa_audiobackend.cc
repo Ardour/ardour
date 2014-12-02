@@ -1432,7 +1432,7 @@ AlsaAudioBackend::main_process_thread ()
 				}
 				_pcmi->capt_done (_samples_per_period);
 
-				/* de-queue midi*/
+				/* de-queue incoming midi*/
 				i = 0;
 				for (std::vector<AlsaPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
 					assert (_rmidi_in.size() > i);
@@ -1459,12 +1459,11 @@ AlsaAudioBackend::main_process_thread ()
 					return 0;
 				}
 
-				i = 0;
-				for (std::vector<AlsaPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
+				for (std::vector<AlsaPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
 					static_cast<AlsaMidiPort*>(*it)->next_period();
 				}
 
-				/* queue midi */
+				/* queue outgoing midi */
 				i = 0;
 				for (std::vector<AlsaPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
 					assert (_rmidi_out.size() > i);
@@ -1504,17 +1503,42 @@ AlsaAudioBackend::main_process_thread ()
 			}
 		} else {
 			// Freewheelin'
+
+			// zero audio input buffers
 			for (std::vector<AlsaPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 				memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 			}
-			for (std::vector<AlsaPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+
+			clock1 = g_get_monotonic_time();
+			uint32_t i = 0;
+			for (std::vector<AlsaPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
 				static_cast<AlsaMidiBuffer*>((*it)->get_buffer(0))->clear ();
+				AlsaMidiIn *rm = _rmidi_in.at(i);
+				void *bptr = (*it)->get_buffer(0);
+				midi_clear(bptr); // zero midi buffer
+
+				// TODO add an API call for this.
+				pframes_t time;
+				uint8_t data[64]; // match MaxAlsaEventSize in alsa_rawmidi.cc
+				size_t size = sizeof(data);
+				while (rm->recv_event (time, data, size)) {
+					; // discard midi-data from HW.
+				}
+				rm->sync_time (clock1);
 			}
 
 			if (engine.process_callback (_samples_per_period)) {
 				_pcmi->pcm_stop ();
+				_active = false;
 				return 0;
 			}
+
+			// drop all outgoing MIDI messages
+			for (std::vector<AlsaPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+					void *bptr = (*it)->get_buffer(0);
+					midi_clear(bptr);
+			}
+
 			_dsp_load = 1.0;
 			Glib::usleep (100); // don't hog cpu
 		}
