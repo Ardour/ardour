@@ -27,6 +27,7 @@
 #include "pbd/xml++.h"
 #include "pbd/file_utils.h"
 #include "pbd/error.h"
+#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/rgb_macros.h"
 
@@ -71,10 +72,6 @@ UIConfiguration::UIConfiguration ()
 #include "base_colors.h"
 #undef CANVAS_BASE_COLOR
 
-#undef CANVAS_COLOR
-#define CANVAS_COLOR(var,name,base,modifier) var (base,modifier),
-#include "colors.h"
-#undef CANVAS_COLOR
 	_dirty (false)
 {
 	_instance = this;
@@ -88,6 +85,11 @@ UIConfiguration::UIConfiguration ()
 #include "base_colors.h"
 #undef CANVAS_BASE_COLOR
 
+#undef CANVAS_COLOR
+#define CANVAS_COLOR(var,name,base,modifier) relative_colors.insert (make_pair (name, RelativeHSV (base,modifier)));
+#include "colors.h"
+#undef CANVAS_COLOR
+	
 #undef COLOR_ALIAS
 #define COLOR_ALIAS(var,name,alias) color_aliases.insert (make_pair (name,alias));
 #include "color_aliases.h"
@@ -662,6 +664,8 @@ UIConfiguration::regenerate_relative_definitions ()
 void
 UIConfiguration::color_theme_changed ()
 {
+	return;
+	
 	map<std::string,RelativeHSV>::iterator current_color;
 
 	/* we need to reset the quantized hues before we start, because
@@ -941,7 +945,7 @@ UIConfiguration::base_color_by_name (const std::string& name) const
 	}
 #endif
 
-	cerr << string_compose (_("Color %1 not found"), name) << endl;
+	cerr << string_compose (_("Base Color %1 not found"), name) << endl;
 	return RGBA_TO_UINT (g_random_int()%256,g_random_int()%256,g_random_int()%256,0xff);
 }
 
@@ -951,14 +955,14 @@ UIConfiguration::color (const std::string& name) const
 	map<string,string>::const_iterator e = color_aliases.find (name);
 
 	if (e != color_aliases.end ()) {
-		map<string,HSV>::const_iterator ac = actual_colors.find (e->second);
-		if (ac != actual_colors.end()) {
-			return ac->second;
+		map<string,RelativeHSV>::const_iterator rc = relative_colors.find (e->second);
+		if (rc != relative_colors.end()) {
+			return rc->second.get();
 		}
-	} 
+	}
 
 	cerr << string_compose (_("Color %1 not found"), name) << endl;
-
+	
 	return rgba_to_color ((g_random_int()%256)/255.0,
 			      (g_random_int()%256)/255.0,
 			      (g_random_int()%256)/255.0,
@@ -1001,7 +1005,6 @@ UIConfiguration::color_compute ()
 	map<std::string,RelativeHSV>::iterator current_color;
 	
 	color_aliases.clear ();
-	
 	actual_colors.clear ();
 
 	for (current_color = relative_colors.begin(); current_color != relative_colors.end(); ++current_color) {

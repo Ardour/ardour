@@ -133,13 +133,8 @@ class UIConfiguration : public PBD::Stateful
 #include "base_colors.h"
 #undef CANVAS_BASE_COLOR
 
-#undef CANVAS_COLOR
-#define CANVAS_COLOR(var,name,base,modifier) ArdourCanvas::Color get_##var() const { return var.get().color(); }
-#include "colors.h"
-#undef CANVAS_COLOR
-
 #undef COLOR_ALIAS
-#define COLOR_ALIAS(var,name,alias) ArdourCanvas::Color get_##var() const { return color (alias); }
+#define COLOR_ALIAS(var,name,alias) ArdourCanvas::Color get_##var() const { return color (name); }
 #include "color_aliases.h"
 #undef COLOR_ALIAS
 
@@ -183,13 +178,6 @@ class UIConfiguration : public PBD::Stateful
 #define CANVAS_BASE_COLOR(var,name,val) ColorVariable<ArdourCanvas::Color> var;
 #include "base_colors.h"
 #undef CANVAS_BASE_COLOR
-
-	/* declare relative color variables (not directly modifiable) */
-
-#undef CANVAS_COLOR
-#define CANVAS_COLOR(var,name,base,modifier) RelativeHSV var;
-#include "colors.h"
-#undef CANVAS_COLOR
 
 	XMLNode& state ();
 	bool _dirty;
