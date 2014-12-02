@@ -35,7 +35,7 @@ WavesDataPort::WavesDataPort (const std::string& inport_name, PortFlags inflags)
 
 WavesDataPort::~WavesDataPort ()
 {
-    disconnect_all ();
+    _disconnect_all ();
 }
 
 
@@ -115,8 +115,7 @@ void WavesDataPort::_disconnect (WavesDataPort *port, bool api_call)
         port->_disconnect (this, false);
     }
 
-	if (is_input() && _connections.empty())
-	{
+	if (is_input() && _connections.empty())	{
 		_wipe_buffer();
 	}
 }
@@ -124,12 +123,20 @@ void WavesDataPort::_disconnect (WavesDataPort *port, bool api_call)
 
 void WavesDataPort::disconnect_all ()
 {
+    _disconnect_all ();
+    
+	if (is_input())	{
+		_wipe_buffer();
+	}
+}
+
+void WavesDataPort::_disconnect_all ()
+{
     while (!_connections.empty ()) {
         _connections.back ()->_disconnect (this, false);
         _connections.pop_back ();
     }
 }
-
 
 bool WavesDataPort::is_physically_connected () const
 {
