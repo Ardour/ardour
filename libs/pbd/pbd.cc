@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <string>
 
 #ifdef PLATFORM_WINDOWS
 #include <fcntl.h>
@@ -43,6 +44,19 @@ static bool libpbd_initialized = false;
 
 }
 
+void
+set_debug_options_from_env ()
+{
+	bool set;
+	std::string options;
+
+	options = Glib::getenv ("PBD_DEBUG", set);
+	if (set) {
+		std::cerr << "PBD_DEBUG=" << options << std::endl;
+		PBD::parse_debug_options (options.c_str());
+	}
+}
+
 bool
 PBD::init ()
 {
@@ -65,6 +79,8 @@ PBD::init ()
 	PBD::ID::init ();
 
 	setup_libpbd_enums ();
+
+	set_debug_options_from_env ();
 
 	libpbd_initialized = true;
 	return true;
