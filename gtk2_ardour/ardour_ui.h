@@ -97,8 +97,8 @@
 
 #include "timecode/time.h"
 #include "time.h"
-#include "selection.h"
 
+struct MarkerSelection;
 class VideoTimeLine;
 class ArdourKeyboard;
 class AudioClock;

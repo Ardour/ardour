@@ -144,6 +144,7 @@ typedef uint64_t microseconds_t;
 #include "open_file_dialog_proxy.h"
 #include "waves_message_dialog.h"
 #include "crash_recovery_dialog.h"
+#include "selection.h"
 
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
