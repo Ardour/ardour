@@ -23,6 +23,7 @@
 #include <iostream>
 #include <vector>
 #include <stdint.h>
+#include <algorithm>
 #include <boost/optional.hpp>
 
 #include <cairomm/refptr.h>
@@ -42,6 +43,17 @@ typedef uint32_t Color;
 
 extern LIBCANVAS_API Coord const COORD_MAX;
 
+inline Coord
+canvas_safe_add (Coord a, Coord b)
+{
+	if (((COORD_MAX - a) <= b) || ((COORD_MAX - b) <= a)) {
+		return COORD_MAX;
+	}
+
+	return a + b;
+}
+
+
 struct LIBCANVAS_API Duple
 {
 	Duple ()
@@ -57,16 +69,31 @@ struct LIBCANVAS_API Duple
 	Coord x;
 	Coord y;
 
-	Duple translate (Duple) const;
+	Duple translate (const Duple& t) const throw() {
+		return Duple (canvas_safe_add (x, t.x), canvas_safe_add (y, t.y));
+	}
+
+	Duple operator- () const throw () {
+		return Duple (-x, -y);
+	}
+	Duple operator+ (Duple const & o) const throw () {
+		return Duple (canvas_safe_add (x, o.x), canvas_safe_add (y, o.y));
+	}
+	bool operator== (Duple const & o) const throw () {
+		return x == o.x && y == o.y;
+	}
+	bool operator!= (Duple const & o) const throw () {
+		return x != o.x || y != o.y;
+	}
+	Duple operator- (Duple const & o) const throw () {
+		return Duple (x - o.x, y - o.y);
+	}
+	Duple operator/ (double b) const throw () {
+		return Duple (x / b, y / b);
+	}
 };
 
 
-extern LIBCANVAS_API Duple operator- (Duple const &);
-extern LIBCANVAS_API Duple operator+ (Duple const &, Duple const &);
-extern LIBCANVAS_API bool operator== (Duple const &, Duple const &);
-extern LIBCANVAS_API bool operator!= (Duple const &, Duple const &);
-extern LIBCANVAS_API Duple operator- (Duple const &, Duple const &);
-extern LIBCANVAS_API Duple operator/ (Duple const &, double);
 extern LIBCANVAS_API std::ostream & operator<< (std::ostream &, Duple const &);
 
 struct LIBCANVAS_API Rect
@@ -90,25 +117,64 @@ struct LIBCANVAS_API Rect
 	Coord x1;
 	Coord y1;
 
-	boost::optional<Rect> intersection (Rect const &) const;
-	Rect extend (Rect const &) const;
-	Rect translate (Duple) const;
-	Rect expand (Distance) const;
-	Rect shrink (Distance) const;
-	bool contains (Duple) const;
-	Rect fix () const;
-	bool empty() const { return (x0 == x1 && y0 == y1); }
+	boost::optional<Rect> intersection (Rect const & o) const throw () {
+		Rect i (std::max (x0, o.x0), std::max (y0, o.y0),
+			std::min (x1, o.x1), std::min (y1, o.y1));
+		
+		if (i.x0 > i.x1 || i.y0 > i.y1) {
+			return boost::optional<Rect> ();
+		}
+		
+		return boost::optional<Rect> (i);
+	}
+		
+	Rect extend (Rect const & o) const throw () {
+		return Rect (std::min (x0, o.x0), std::min (y0, o.y0),
+			     std::max (x1, o.x1), std::max (y1, o.y1));
+	}
+	Rect translate (Duple const& t) const throw () {
+		return Rect (canvas_safe_add (x0, t.x), canvas_safe_add (y0, t.y),
+			     canvas_safe_add (x1, t.x),canvas_safe_add (y1, t.y));
+	}
+	Rect expand (Distance amount) const throw () {
+		return Rect (x0 - amount, y0 - amount,
+			     canvas_safe_add (x1, amount),
+			     canvas_safe_add (y1, amount));
+	}
 
-	Distance width () const {
+	Rect shrink (Distance amount) const throw () {
+		/* This isn't the equivalent of expand (-distance) because
+		   of the peculiarities of canvas_safe_add() with negative values.
+		   Maybe.
+		*/
+		return Rect (canvas_safe_add (x0, amount), canvas_safe_add (y0, amount),
+			     x1 - amount, y1 - amount);
+	}
+		
+	bool contains (Duple const & point) const throw () {
+		return point.x >= x0 && point.x <= x1 && point.y >= y0 && point.y <= y1;
+	}
+	Rect fix () const throw () {
+		return Rect (std::min (x0, x1), std::min (y0, y1),
+			     std::max (x0, x1), std::max (y0, y1));
+	}
+		
+	bool empty() const throw () { return (x0 == x1 && y0 == y1); }
+
+	Distance width () const  throw () {
 		return x1 - x0;
 	}
 
-	Distance height () const {
+	Distance height () const throw () {
 		return y1 - y0;
 	}
+	bool operator!= (Rect const & o) const throw () {
+		return x0 != o.x0 ||
+			x1 != o.x1 ||
+			y0 != o.y0 ||
+			y1 != o.y1;
+	}
 };
-
-extern LIBCANVAS_API bool operator!= (Rect const &, Rect const &);
 
 extern LIBCANVAS_API std::ostream & operator<< (std::ostream &, Rect const &);
 
