@@ -28,6 +28,8 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#include "pbd/compose.h"
+#include "pbd/debug.h"
 #include "pbd/pathexpand.h"
 #include "pbd/strsplit.h"
 #include "pbd/tokenizer.h"
@@ -89,9 +91,14 @@ PBD::canonical_path (const std::string& path)
 {
 	char buf[PATH_MAX+1];
 
-	if (!realpath (path.c_str(), buf)) {
+	if (realpath (path.c_str(), buf) == NULL) {
+		DEBUG_TRACE (DEBUG::FileUtils,
+				string_compose("PBD::canonical_path: Unable to resolve %1: %2\n", path, g_strerror(errno)));
 		return path;
 	}
+
+	DEBUG_TRACE (DEBUG::FileUtils,
+			string_compose("PBD::canonical_path %1 resolved to: %2\n", path, string(buf)));
 
 	return string (buf);
 }
