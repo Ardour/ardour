@@ -33,7 +33,7 @@ typedef std::map<const std::string, const float> ScalePoints;
  *
  * Essentially a union of LADSPA, VST and LV2 info.
  */
-struct ParameterDescriptor : public Evoral::ParameterDescriptor
+struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 {
 	enum Unit {
 		NONE,       ///< No unit
