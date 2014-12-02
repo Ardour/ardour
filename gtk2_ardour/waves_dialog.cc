@@ -90,7 +90,7 @@ WavesDialog::WavesDialog (const std::string& layout_script_file, bool modal, boo
 	set_title(title);
 	
 	bool resizeable = xml_property (*root, "resizeable", false);
-	property_allow_grow().set_value(resizeable);
+	set_resizable(resizeable);
 
 	set_position (Gtk::WIN_POS_MOUSE);
 }
@@ -105,6 +105,13 @@ WavesDialog::~WavesDialog ()
             }
     }
 	WM::Manager::instance().remove (_proxy);
+}
+
+void
+WavesDialog::on_realize ()
+{
+	Gtk::Dialog::on_realize();
+	get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_TITLE));
 }
 
 bool
