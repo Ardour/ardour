@@ -657,23 +657,38 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 
 	property = xml_property (definition, "state", styles, "");
 	if (!property.empty ()) {
-		Gtk::StateType state = Gtk::STATE_NORMAL; 
-		if (property == "normal") {
-			state = Gtk::STATE_NORMAL;
-		} else if (property == "active") {
-			state = Gtk::STATE_ACTIVE;
-		} else if (property == "prelight") {
-			state = Gtk::STATE_PRELIGHT;
-		} else if (property == "selected") {
-			state = Gtk::STATE_SELECTED;
-		} else if (property == "insensitive") {
-			state = Gtk::STATE_INSENSITIVE;
-		} else if (property == "disabled") {
-			state = Gtk::STATE_INSENSITIVE;
+		CairoWidget* cairo_widget = dynamic_cast<CairoWidget*> (&widget);
+		if (cairo_widget) {
+			Gtkmm2ext::ActiveState state = Gtkmm2ext::Off;
+			if (property == "normal") {
+				state = Gtkmm2ext::Off;
+			} else if (property == "active") {
+				state = Gtkmm2ext::ExplicitActive;
+			} else if (property == "impliciactive") {
+				state = Gtkmm2ext::ImplicitActive;
+			} else {
+				dbg_msg ("Invalid state for CairoWidget !");
+			}
+			cairo_widget->set_active_state (state);
 		} else {
-			dbg_msg ("Invalid state for Gtk::Widget !");
+			Gtk::StateType state = Gtk::STATE_NORMAL; 
+			if (property == "normal") {
+				state = Gtk::STATE_NORMAL;
+			} else if (property == "active") {
+				state = Gtk::STATE_ACTIVE;
+			} else if (property == "prelight") {
+				state = Gtk::STATE_PRELIGHT;
+			} else if (property == "selected") {
+				state = Gtk::STATE_SELECTED;
+			} else if (property == "insensitive") {
+				state = Gtk::STATE_INSENSITIVE;
+			} else if (property == "disabled") {
+				state = Gtk::STATE_INSENSITIVE;
+			} else {
+				dbg_msg ("Invalid state for Gtk::Widget !");
+			}
+			widget.set_state (state);
 		}
-		widget.set_state (state);
 	}
 
 #if defined (PLATFORM_WINDOWS)
@@ -814,7 +829,6 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 	if (button) {
 		button->set_border_width (xml_property (definition, "borderwidth", styles, "0").c_str());
 		button->set_border_color (xml_property (definition, "bordercolor", styles, "#000000").c_str());
-		button->set_active (xml_property (definition, "active", styles, false));
 		button->set_toggleable (xml_property (definition, "toggleable", styles, false));
 	}
 

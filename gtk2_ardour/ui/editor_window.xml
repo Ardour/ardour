@@ -236,7 +236,7 @@
                           width="79" height="25"
                           normalicon="mode_stereo_out"
                           activeicon="mode_stereo_out_active"
-                          active="true"/>
+                          state="active"/>
               <iconbutton id="mode_multi_out_button"
                           tooltip="Multi Out Mode"
                           width="79" height="25"
