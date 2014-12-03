@@ -144,8 +144,9 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	void set_position_lock_style (PositionLockStyle ps);
 	void recompute_frames_from_bbt ();
 
-	static PBD::Signal0<void> scene_changed;
-
+	static PBD::Signal0<void> scene_changed; /* for use by backend scene change management, class level */
+        PBD::Signal0<void> SceneChangeChanged;   /* for use by objects interested in this object */
+        
   private:
 	std::string        _name;
 	framepos_t         _start;

@@ -759,9 +759,12 @@ Location::unlock ()
 void
 Location::set_scene_change (boost::shared_ptr<SceneChange>  sc)
 {
-	_scene_change = sc;
-
-	scene_changed (); /* EMIT SIGNAL */
+        if (_scene_change != sc) {
+                _scene_change = sc;
+                
+                scene_changed (); /* EMIT SIGNAL */
+                SceneChangeChanged (); /* EMIT SIGNAL */
+        }
 }
 
 /*---------------------------------------------------------------------- */
