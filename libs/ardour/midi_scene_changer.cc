@@ -96,6 +96,10 @@ MIDISceneChanger::gather (const Locations::LocationList& locations)
 void
 MIDISceneChanger::rt_deliver (MidiBuffer& mbuf, framepos_t when, boost::shared_ptr<MIDISceneChange> msc)
 {
+        if (!msc->active()) {
+                return;
+        }
+
 	uint8_t buf[4];
 	size_t cnt;
 
@@ -121,6 +125,10 @@ MIDISceneChanger::rt_deliver (MidiBuffer& mbuf, framepos_t when, boost::shared_p
 void
 MIDISceneChanger::non_rt_deliver (boost::shared_ptr<MIDISceneChange> msc)
 {
+        if (!msc->active()) {
+                return;
+        }
+
 	uint8_t buf[4];
 	size_t cnt;
 	boost::shared_ptr<AsyncMIDIPort> aport = boost::dynamic_pointer_cast<AsyncMIDIPort>(output_port);
