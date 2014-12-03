@@ -41,6 +41,7 @@ SceneChange::factory (const XMLNode& node, int version)
 
 SceneChange::SceneChange ()
         : _color (out_of_bound_color)
+        , _active (true)
 {
 }
 
@@ -55,4 +56,13 @@ uint32_t
 SceneChange::color() const
 {
         return _color;
+}
+
+void
+SceneChange::set_active (bool yn)
+{
+        if (_active != yn) {
+                _active = yn;
+                ActiveChanged (); /* EMIT SIGNAL */
+        }
 }
