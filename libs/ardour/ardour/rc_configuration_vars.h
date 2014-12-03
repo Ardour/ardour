@@ -194,7 +194,11 @@ CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)
 CONFIG_VARIABLE (bool, name_new_markers, "name-new-markers", false)
 CONFIG_VARIABLE (bool, rubberbanding_snaps_to_grid, "rubberbanding-snaps-to-grid", true)
 CONFIG_VARIABLE (long, font_scale, "font-scale", 81920)
-CONFIG_VARIABLE (std::string, default_session_parent_dir, "default-session-parent-dir", Glib::get_home_dir())
+#ifdef __APPLE__
+CONFIG_VARIABLE (std::string, default_session_parent_dir, "default-session-parent-dir", Glib::get_home_dir()+"/Music")
+#else
+CONFIG_VARIABLE (std::string, default_session_parent_dir, "default-session-parent-dir", Glib::get_home_dir()+"\Documents\\")
+#endif
 CONFIG_VARIABLE (bool, show_waveforms, "show-waveforms", true)
 CONFIG_VARIABLE (bool, show_waveforms_while_recording, "show-waveforms-while-recording", true)
 CONFIG_VARIABLE (WaveformScale, waveform_scale, "waveform-scale", Linear)
